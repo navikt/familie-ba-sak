@@ -265,7 +265,7 @@ object TilkjentYtelseUtils {
         )
     }
 
-    private fun PersonResultat.tilTidslinjeMedRettTilProsentForPerson(fødselsdato: LocalDate, personType: PersonType): Tidslinje<BigDecimal, Måned> {
+    internal fun PersonResultat.tilTidslinjeMedRettTilProsentForPerson(fødselsdato: LocalDate, personType: PersonType): Tidslinje<BigDecimal, Måned> {
         val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår(fødselsdato)
 
         return tidslinjer.kombiner { it.mapTilProsentEllerNull(personType) }.slåSammenLike().filtrerIkkeNull()

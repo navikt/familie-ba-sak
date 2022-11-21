@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils.beregnTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndeler
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils.tilTidslinjeMedRettTilProsentForPerson
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -32,6 +33,9 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.lagDødsfall
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -337,6 +341,84 @@ internal class TilkjentYtelseUtilsTest {
 
         assertEquals(YearMonth.of(2019, 8), andeler[1].stønadTom)
         assertEquals(YearMonth.of(2019, 10), andeler[2].stønadFom)
+    }
+
+    @Test
+    fun `Skal lage riktig tidslinje med rett til prosent for person med start og stopp av delt bosted`() {
+        val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(9))
+        val søker = lagPerson(type = PersonType.SØKER)
+        val vilkårsvurdering = lagVilkårsvurdering(barn = listOf(barn), søker = søker)
+
+        val personResultat = PersonResultat(
+            vilkårsvurdering = vilkårsvurdering,
+            aktør = barn.aktør
+        )
+
+        val generellVilkårFom = LocalDate.now().minusYears(3)
+        val borMedSøkerVilkårFom = LocalDate.now().minusYears(2)
+        val borMedSøkerVilkårTom = LocalDate.now()
+        val startPåYtelse = generellVilkårFom.plusMonths(1).toYearMonth()
+        val rettTilDeltFom = borMedSøkerVilkårFom.plusMonths(1).toYearMonth()
+        val rettTilDeltTom = borMedSøkerVilkårTom.toYearMonth()
+        val månedFørFylte18År = barn.fødselsdato.plusYears(18).forrigeMåned()
+
+        val vilkårResulater = Vilkår.hentVilkårFor(PersonType.BARN).mapNotNull {
+            if (it == Vilkår.BOR_MED_SØKER) null
+            else lagVilkårResultat(
+                personResultat = personResultat,
+                fom = generellVilkårFom,
+                tom = null,
+                resultat = Resultat.OPPFYLT,
+                vilkårType = it
+            )
+        }.toSet()
+
+        val borMedSøkerVilkår = listOf(
+            lagVilkårResultat(
+                personResultat = personResultat,
+                fom = generellVilkårFom,
+                tom = borMedSøkerVilkårFom.minusMonths(1).sisteDagIMåned(),
+                resultat = Resultat.OPPFYLT,
+                vilkårType = Vilkår.BOR_MED_SØKER
+            ),
+            lagVilkårResultat(
+                personResultat = personResultat,
+                fom = borMedSøkerVilkårFom.førsteDagIInneværendeMåned(),
+                tom = borMedSøkerVilkårTom.sisteDagIMåned(),
+                resultat = Resultat.OPPFYLT,
+                vilkårType = Vilkår.BOR_MED_SØKER,
+                utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED)
+            ),
+            lagVilkårResultat(
+                personResultat = personResultat,
+                fom = borMedSøkerVilkårTom.plusMonths(1).førsteDagIInneværendeMåned(),
+                tom = null,
+                resultat = Resultat.OPPFYLT,
+                vilkårType = Vilkår.BOR_MED_SØKER
+            )
+        )
+
+        personResultat.setSortedVilkårResultater(vilkårResulater + borMedSøkerVilkår)
+
+        val tidslinje = personResultat.tilTidslinjeMedRettTilProsentForPerson(fødselsdato = barn.fødselsdato, personType = barn.type)
+
+        val perioder = tidslinje.perioder().toList()
+
+        assertEquals(3, perioder.size)
+
+        val periode1 = perioder[0]
+        val periode2 = perioder[1]
+        val periode3 = perioder[2]
+
+        assertProsentPeriode(forventetFom = startPåYtelse, forventetTom = rettTilDeltFom.minusMonths(1), forventetProsent = BigDecimal(100), faktisk = periode1)
+        assertProsentPeriode(forventetFom = rettTilDeltFom, forventetTom = rettTilDeltTom, forventetProsent = BigDecimal(50), faktisk = periode2)
+        assertProsentPeriode(forventetFom = rettTilDeltTom.plusMonths(1), forventetTom = månedFørFylte18År, forventetProsent = BigDecimal(100), faktisk = periode3)
+    }
+
+    private fun assertProsentPeriode(forventetFom: YearMonth, forventetTom: YearMonth, forventetProsent: BigDecimal, faktisk: Periode<BigDecimal, Måned>) {
+        assertEquals(forventetFom, faktisk.fraOgMed.tilYearMonth())
+        assertEquals(forventetTom, faktisk.tilOgMed.tilYearMonth())
+        assertEquals(forventetProsent, faktisk.innhold)
     }
 
     private fun oppdaterBosattIRiketMedBack2BackPerioder(
