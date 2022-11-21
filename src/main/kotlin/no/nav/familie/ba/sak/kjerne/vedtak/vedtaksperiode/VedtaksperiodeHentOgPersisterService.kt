@@ -19,10 +19,8 @@ class VedtaksperiodeHentOgPersisterService(
                 frontendFeilmelding = "Fant ikke vedtaksperiode"
             )
 
-    fun lagre(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser): VedtaksperiodeMedBegrunnelser {
-        validerVedtaksperiodeMedBegrunnelser(vedtaksperiodeMedBegrunnelser)
-        return vedtaksperiodeRepository.save(vedtaksperiodeMedBegrunnelser)
-    }
+    fun lagre(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser) =
+        lagre(listOf(vedtaksperiodeMedBegrunnelser)).first()
 
     fun lagre(vedtaksperiodeMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>): List<VedtaksperiodeMedBegrunnelser> {
         vedtaksperiodeMedBegrunnelser.forEach { validerVedtaksperiodeMedBegrunnelser(it) }
