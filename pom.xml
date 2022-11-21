@@ -34,7 +34,7 @@
         <token-validation-spring.version>2.1.6</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
         <springdoc.version>1.6.12</springdoc.version>
-        <sentry.version>6.7.0</sentry.version>
+        <sentry.version>6.7.1</sentry.version>
 
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
         <okhttp3.version>4.9.0</okhttp3.version>
@@ -44,7 +44,7 @@
         <medeia-validator-jackson.version>1.1.1</medeia-validator-jackson.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
         <postgresql.version>42.4.1</postgresql.version>
-        <testcontainers.postgresql.version>1.17.5</testcontainers.postgresql.version>
+        <testcontainers.postgresql.version>1.17.6</testcontainers.postgresql.version>
         <unleash.version>6.1.0</unleash.version>
         <maven.model.version>3.8.6</maven.model.version>
         <jackson.module.kotlin.version>2.14.0</jackson.module.kotlin.version>
