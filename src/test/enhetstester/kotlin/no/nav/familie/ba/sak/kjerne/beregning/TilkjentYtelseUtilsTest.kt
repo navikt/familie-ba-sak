@@ -363,14 +363,17 @@ internal class TilkjentYtelseUtilsTest {
         val månedFørFylte18År = barn.fødselsdato.plusYears(18).forrigeMåned()
 
         val vilkårResulater = Vilkår.hentVilkårFor(PersonType.BARN).mapNotNull {
-            if (it == Vilkår.BOR_MED_SØKER) null
-            else lagVilkårResultat(
-                personResultat = personResultat,
-                fom = generellVilkårFom,
-                tom = null,
-                resultat = Resultat.OPPFYLT,
-                vilkårType = it
-            )
+            if (it == Vilkår.BOR_MED_SØKER) {
+                null
+            } else {
+                lagVilkårResultat(
+                    personResultat = personResultat,
+                    fom = generellVilkårFom,
+                    tom = null,
+                    resultat = Resultat.OPPFYLT,
+                    vilkårType = it
+                )
+            }
         }.toSet()
 
         val borMedSøkerVilkår = listOf(
