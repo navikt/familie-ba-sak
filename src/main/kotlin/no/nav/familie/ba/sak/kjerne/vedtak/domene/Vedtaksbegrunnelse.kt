@@ -27,6 +27,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilBrevTekst
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.RestVedtaksbegrunnelse
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
+import java.time.YearMonth
 import javax.persistence.Column
 import javax.persistence.Entity
 import javax.persistence.EntityListeners
@@ -144,7 +145,8 @@ data class EØSBegrunnelseData(
     val antallBarn: Int,
     val maalform: String,
     val sokersAktivitet: SøkersAktivitet,
-    val sokersAktivitetsland: String?
+    val sokersAktivitetsland: String?,
+    val tom: YearMonth?
 ) : BegrunnelseMedData {
     override val type: Begrunnelsetype = Begrunnelsetype.EØS_BEGRUNNELSE
 }

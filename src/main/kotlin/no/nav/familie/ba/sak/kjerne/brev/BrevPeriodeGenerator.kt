@@ -85,7 +85,8 @@ class BrevPeriodeGenerator(
                     antallBarn = kompetanse.personer.size,
                     maalform = brevMålform.tilSanityFormat(),
                     sokersAktivitet = kompetanse.søkersAktivitet,
-                    sokersAktivitetsland = kompetanse.søkersAktivitetsland?.navn
+                    sokersAktivitetsland = kompetanse.søkersAktivitetsland?.navn,
+                    tom = kompetanse.tom
                 )
             }
         }
