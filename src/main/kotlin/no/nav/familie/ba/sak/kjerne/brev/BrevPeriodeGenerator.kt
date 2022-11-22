@@ -162,7 +162,6 @@ class BrevPeriodeGenerator(
             Vedtaksperiodetype.OPPHØR -> emptyList()
             Vedtaksperiodetype.AVSLAG -> emptyList()
             Vedtaksperiodetype.FORTSATT_INNVILGET -> barnMedUtbetaling + barnMedNullutbetaling
-            Vedtaksperiodetype.TREKK_I_LØPENDE_UTBETALING -> emptyList()
             Vedtaksperiodetype.ENDRET_UTBETALING -> throw Feil("Endret utbetaling skal ikke benyttes lenger.")
         }
 
@@ -200,7 +199,6 @@ class BrevPeriodeGenerator(
         Vedtaksperiodetype.OPPHØR -> minimertVedtaksperiode.fom!!.tilDagMånedÅr()
         Vedtaksperiodetype.AVSLAG -> if (minimertVedtaksperiode.fom != null) minimertVedtaksperiode.fom.tilDagMånedÅr() else ""
         Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING -> minimertVedtaksperiode.fom!!.tilDagMånedÅr()
-        Vedtaksperiodetype.TREKK_I_LØPENDE_UTBETALING -> "" // TODO
     }
 
     private fun hentPeriodetype(
@@ -219,7 +217,6 @@ class BrevPeriodeGenerator(
             Vedtaksperiodetype.AVSLAG -> if (fom != null) BrevPeriodeType.AVSLAG_INSTITUSJON else BrevPeriodeType.AVSLAG_UTEN_PERIODE_INSTITUSJON
             Vedtaksperiodetype.OPPHØR -> BrevPeriodeType.OPPHOR_INSTITUSJON
             Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING -> BrevPeriodeType.INNVILGELSE_INSTITUSJON
-            Vedtaksperiodetype.TREKK_I_LØPENDE_UTBETALING -> BrevPeriodeType.TREKK_I_LOEPENDE_UTBETALING
         }
     } else {
         when (minimertVedtaksperiode.type) {
@@ -234,7 +231,6 @@ class BrevPeriodeGenerator(
             Vedtaksperiodetype.AVSLAG -> if (fom != null) BrevPeriodeType.AVSLAG else BrevPeriodeType.AVSLAG_UTEN_PERIODE
             Vedtaksperiodetype.OPPHØR -> BrevPeriodeType.OPPHOR
             Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING -> BrevPeriodeType.INNVILGELSE
-            Vedtaksperiodetype.TREKK_I_LØPENDE_UTBETALING -> BrevPeriodeType.TREKK_I_LOEPENDE_UTBETALING
         }
     }
 

@@ -25,8 +25,7 @@ enum class BrevPeriodeType(val apiNavn: String) {
     OPPHOR_INSTITUSJON("opphorInstitusjon"),
     AVSLAG_INSTITUSJON("avslagInstitusjon"),
     AVSLAG_UTEN_PERIODE_INSTITUSJON("avslagUtenPeriodeInstitusjon"),
-    FORTSATT_INNVILGET_INSTITUSJON("fortsattInnvilgetInstitusjon"),
-    TREKK_I_LOEPENDE_UTBETALING("trekkILoependeUtbetaling")
+    FORTSATT_INNVILGET_INSTITUSJON("fortsattInnvilgetInstitusjon")
 }
 
 enum class EndretUtbetalingBrevPeriodeType(val apiNavn: String) {
