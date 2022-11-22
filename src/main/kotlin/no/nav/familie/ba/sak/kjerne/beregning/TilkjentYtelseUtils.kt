@@ -276,7 +276,7 @@ object TilkjentYtelseUtils {
         return tidslinjer.kombiner { it.mapTilProsentEllerNull(personType) }.slåSammenLike().filtrerIkkeNull()
     }
 
-    private fun Iterable<VilkårResultat>.mapTilProsentEllerNull(personType: PersonType): BigDecimal? {
+    internal fun Iterable<VilkårResultat>.mapTilProsentEllerNull(personType: PersonType): BigDecimal? {
         return if (alleVilkårErOppfylt(personType)) {
             if (any { it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) }) BigDecimal(50) else BigDecimal(100)
         } else {

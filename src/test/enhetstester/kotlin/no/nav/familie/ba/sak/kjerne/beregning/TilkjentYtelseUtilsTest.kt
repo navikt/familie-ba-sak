@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils.beregnTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils.mapTilProsentEllerNull
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndeler
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils.tilTidslinjeMedRettTilProsentForPerson
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
@@ -422,6 +423,88 @@ internal class TilkjentYtelseUtilsTest {
         assertEquals(forventetFom, faktisk.fraOgMed.tilYearMonth())
         assertEquals(forventetTom, faktisk.tilOgMed.tilYearMonth())
         assertEquals(forventetProsent, faktisk.innhold)
+    }
+
+    @Test
+    fun `Skal returnere 50% hvis vilkårsvurderingen har delt bosted i perioden`() {
+        val barn = lagPerson(type = PersonType.BARN)
+        val personResultat = PersonResultat(vilkårsvurdering = lagVilkårsvurdering(barn = listOf(barn), søker = lagPerson(type = PersonType.SØKER)), aktør = barn.aktør)
+        val vilkårResultater = Vilkår.hentVilkårFor(PersonType.BARN).map {
+            lagVilkårResultat(
+                vilkårType = it,
+                fom = LocalDate.now().minusMonths(5),
+                tom = null,
+                resultat = Resultat.OPPFYLT,
+                utdypendeVilkårsvurderinger = if (it == Vilkår.BOR_MED_SØKER) listOf(UtdypendeVilkårsvurdering.DELT_BOSTED) else emptyList(),
+                personResultat = personResultat
+            )
+        }
+
+        val prosent = vilkårResultater.mapTilProsentEllerNull(PersonType.BARN)
+
+        assertEquals(BigDecimal(50), prosent)
+    }
+
+    @Test
+    fun `Skal returnere 100% hvis vilkårsvurderingen ikke har delt bosted i perioden`() {
+        val barn = lagPerson(type = PersonType.BARN)
+        val personResultat = PersonResultat(vilkårsvurdering = lagVilkårsvurdering(barn = listOf(barn), søker = lagPerson(type = PersonType.SØKER)), aktør = barn.aktør)
+        val vilkårResultater = Vilkår.hentVilkårFor(PersonType.BARN).map {
+            lagVilkårResultat(
+                vilkårType = it,
+                fom = LocalDate.now().minusMonths(5),
+                tom = null,
+                resultat = Resultat.OPPFYLT,
+                utdypendeVilkårsvurderinger = emptyList(),
+                personResultat = personResultat
+            )
+        }
+
+        val prosent = vilkårResultater.mapTilProsentEllerNull(PersonType.BARN)
+
+        assertEquals(BigDecimal(100), prosent)
+    }
+
+    @Test
+    fun `Skal returnere null hvis ikke alle vilkår for barn er oppfylt`() {
+        val barn = lagPerson(type = PersonType.BARN)
+        val personResultat = PersonResultat(vilkårsvurdering = lagVilkårsvurdering(barn = listOf(barn), søker = lagPerson(type = PersonType.SØKER)), aktør = barn.aktør)
+        val vilkårResultater = Vilkår.hentVilkårFor(PersonType.BARN).mapNotNull {
+            if (it == Vilkår.LOVLIG_OPPHOLD) null
+            else lagVilkårResultat(
+                vilkårType = it,
+                fom = LocalDate.now().minusMonths(5),
+                tom = null,
+                resultat = Resultat.OPPFYLT,
+                utdypendeVilkårsvurderinger = if (it == Vilkår.BOR_MED_SØKER) listOf(UtdypendeVilkårsvurdering.DELT_BOSTED) else emptyList(),
+                personResultat = personResultat
+            )
+        }
+
+        val prosent = vilkårResultater.mapTilProsentEllerNull(PersonType.BARN)
+
+        assertEquals(null, prosent)
+    }
+
+    @Test
+    fun `Skal returnere null hvis ikke alle vilkår for søker er oppfylt`() {
+        val søker = lagPerson(type = PersonType.SØKER)
+        val personResultat = PersonResultat(vilkårsvurdering = lagVilkårsvurdering(barn = listOf(lagPerson(type = PersonType.BARN)), søker = søker), aktør = søker.aktør)
+        val vilkårResultater = Vilkår.hentVilkårFor(PersonType.SØKER).mapNotNull {
+            if (it == Vilkår.LOVLIG_OPPHOLD) null
+            else lagVilkårResultat(
+                vilkårType = it,
+                fom = LocalDate.now().minusMonths(5),
+                tom = null,
+                resultat = Resultat.OPPFYLT,
+                utdypendeVilkårsvurderinger = emptyList(),
+                personResultat = personResultat
+            )
+        }
+
+        val prosent = vilkårResultater.mapTilProsentEllerNull(PersonType.SØKER)
+
+        assertEquals(null, prosent)
     }
 
     private fun oppdaterBosattIRiketMedBack2BackPerioder(
