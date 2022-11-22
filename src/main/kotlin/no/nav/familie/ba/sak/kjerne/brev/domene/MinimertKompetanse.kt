@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.SøkersAktivitet
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
+import java.time.YearMonth
 
 data class MinimertKompetanse(
     val søkersAktivitet: SøkersAktivitet,
@@ -17,15 +18,14 @@ data class MinimertKompetanse(
     val annenForeldersAktivitetslandNavn: LandNavn?,
     val barnetsBostedslandNavn: LandNavn,
     val resultat: KompetanseResultat,
-    val personer: List<MinimertRestPerson>
+    val personer: List<MinimertRestPerson>,
+    val tom: YearMonth?
 )
 
 fun Kompetanse.tilMinimertKompetanse(
     personopplysningGrunnlag: PersonopplysningGrunnlag,
     landkoderISO2: Map<String, String>
 ): MinimertKompetanse {
-    this.validerFelterErSatt()
-
     val barnetsBostedslandNavn = this.barnetsBostedsland!!.tilLandNavn(landkoderISO2)
     val annenForeldersAktivitetslandNavn = this.annenForeldersAktivitetsland?.tilLandNavn(landkoderISO2)
     val sokersAktivitetslandNavn = this.søkersAktivitetsland?.tilLandNavn(landkoderISO2)
@@ -45,7 +45,8 @@ fun Kompetanse.tilMinimertKompetanse(
                 fødselsdato = fødselsdato,
                 type = PersonType.BARN
             )
-        }
+        },
+        tom = this.tom
     )
 }
 

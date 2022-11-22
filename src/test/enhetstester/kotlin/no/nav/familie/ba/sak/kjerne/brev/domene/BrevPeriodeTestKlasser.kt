@@ -80,7 +80,8 @@ data class BrevPeriodeTestKompetanse(
             barnetsBostedslandNavn = LandNavn(this.barnetsBostedsland),
             resultat = this.resultat,
             personer = personer.filter { it.kompetanseIder?.contains(this.id) == true }.map { it.tilMinimertPerson() },
-            søkersAktivitetsland = this.søkersAktivitetsland?.let { LandNavn(this.søkersAktivitetsland) }
+            søkersAktivitetsland = this.søkersAktivitetsland?.let { LandNavn(this.søkersAktivitetsland) },
+            tom = null
         )
     }
 }
