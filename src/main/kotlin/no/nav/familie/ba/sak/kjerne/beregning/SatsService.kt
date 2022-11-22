@@ -16,8 +16,11 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilMånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerSenereEnn
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerTidligereEnn
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjær
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -155,5 +158,9 @@ fun satstypeTidslinje(satsType: SatsType, maxSatsGyldigFraOgMed: YearMonth = Sat
 fun lagOrdinærTidslinje(barn: Person): Tidslinje<Int, Måned> {
     val orbaTidslinje = satstypeTidslinje(SatsType.ORBA)
     val tilleggOrbaTidslinje = satstypeTidslinje(SatsType.TILLEGG_ORBA).filtrerMed(erUnder6ÅrTidslinje(barn))
-    return orbaTidslinje.kombinerMed(tilleggOrbaTidslinje) { orba, tillegg -> tillegg ?: orba }
+    return orbaTidslinje
+        .kombinerMed(tilleggOrbaTidslinje) { orba, tillegg -> tillegg ?: orba }
+        .klippBortPerioderFørBarnetBleFødt(fødselsdato = barn.fødselsdato)
 }
+
+private fun Tidslinje<Int, Måned>.klippBortPerioderFørBarnetBleFødt(fødselsdato: LocalDate) = this.beskjær(fraOgMed = fødselsdato.tilMånedTidspunkt(), tilOgMed = MånedTidspunkt.uendeligLengeTil(fødselsdato.toYearMonth()))

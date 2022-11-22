@@ -214,7 +214,7 @@ class SatsServiceTest {
 
         Assertions.assertEquals(6, ordinærePerioder.size)
 
-        assertPeriode(TestKrPeriode(beløp = 970, fom = null, tom = "2019-02"), ordinærePerioder[0])
+        assertPeriode(TestKrPeriode(beløp = 970, fom = "2017-04", tom = "2019-02"), ordinærePerioder[0])
         assertPeriode(TestKrPeriode(beløp = 1054, fom = "2019-03", tom = "2020-08"), ordinærePerioder[1])
         assertPeriode(TestKrPeriode(beløp = 1354, fom = "2020-09", tom = "2021-08"), ordinærePerioder[2])
         assertPeriode(TestKrPeriode(beløp = 1654, fom = "2021-09", tom = "2021-12"), ordinærePerioder[3])
