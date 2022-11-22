@@ -18,7 +18,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseData
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.EØSBegrunnelseData
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.FritekstBegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.TrekkILøpendeUtbetaling
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -26,7 +25,6 @@ import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -147,13 +145,6 @@ class VedtaksperiodeMedBegrunnelserController(
             skalOverstyreFortsattInnvilget = restPutGenererFortsattInnvilgetVedtaksperioder.skalGenererePerioderForFortsattInnvilget
         )
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = vedtak.behandling.id)))
-    }
-
-    @PostMapping("/legg-til-loepende-utbetaling")
-    fun leggTilTrekkILøpendeUtbetaling(
-        @RequestBody trekkILøpendeUtbetaling: TrekkILøpendeUtbetaling
-    ) {
-        vedtaksperiodeService.leggTilTrekkILøpendeUtbetaling(trekkILøpendeUtbetaling)
     }
 
     private inline fun <reified T> konverterTilEnumverdi(it: String): T? where T : Enum<T> =

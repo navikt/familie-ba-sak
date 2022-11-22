@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene
+package no.nav.familie.ba.sak.kjerne.vedtak.trekkILøpendeUtbetaling
 
 import java.time.LocalDate
 

@@ -50,7 +50,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilVedtaksbegrunnelseFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeMedBegrunnelser.UtbetalingsperiodeMedBegrunnelserService
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.TrekkILøpendeUtbetaling
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -634,12 +633,6 @@ class VedtaksperiodeService(
                 it
             }
         }.toList()
-    }
-
-    fun leggTilTrekkILøpendeUtbetaling(trekkILøpendeUtbetaling: TrekkILøpendeUtbetaling) {
-        val vedtak = vedtakRepository.findByBehandlingAndAktiv(trekkILøpendeUtbetaling.behandlingId)
-        val v = VedtaksperiodeMedBegrunnelser(type = Vedtaksperiodetype.TREKK_I_LØPENDE_UTBETALING, vedtak = vedtak)
-        vedtaksperiodeHentOgPersisterService.lagre(v)
     }
 
     companion object {
