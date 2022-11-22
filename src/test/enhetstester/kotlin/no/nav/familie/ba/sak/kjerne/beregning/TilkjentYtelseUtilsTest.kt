@@ -470,15 +470,18 @@ internal class TilkjentYtelseUtilsTest {
         val barn = lagPerson(type = PersonType.BARN)
         val personResultat = PersonResultat(vilkårsvurdering = lagVilkårsvurdering(barn = listOf(barn), søker = lagPerson(type = PersonType.SØKER)), aktør = barn.aktør)
         val vilkårResultater = Vilkår.hentVilkårFor(PersonType.BARN).mapNotNull {
-            if (it == Vilkår.LOVLIG_OPPHOLD) null
-            else lagVilkårResultat(
-                vilkårType = it,
-                fom = LocalDate.now().minusMonths(5),
-                tom = null,
-                resultat = Resultat.OPPFYLT,
-                utdypendeVilkårsvurderinger = if (it == Vilkår.BOR_MED_SØKER) listOf(UtdypendeVilkårsvurdering.DELT_BOSTED) else emptyList(),
-                personResultat = personResultat
-            )
+            if (it == Vilkår.LOVLIG_OPPHOLD) {
+                null
+            } else {
+                lagVilkårResultat(
+                    vilkårType = it,
+                    fom = LocalDate.now().minusMonths(5),
+                    tom = null,
+                    resultat = Resultat.OPPFYLT,
+                    utdypendeVilkårsvurderinger = if (it == Vilkår.BOR_MED_SØKER) listOf(UtdypendeVilkårsvurdering.DELT_BOSTED) else emptyList(),
+                    personResultat = personResultat
+                )
+            }
         }
 
         val prosent = vilkårResultater.mapTilProsentEllerNull(PersonType.BARN)
@@ -491,15 +494,18 @@ internal class TilkjentYtelseUtilsTest {
         val søker = lagPerson(type = PersonType.SØKER)
         val personResultat = PersonResultat(vilkårsvurdering = lagVilkårsvurdering(barn = listOf(lagPerson(type = PersonType.BARN)), søker = søker), aktør = søker.aktør)
         val vilkårResultater = Vilkår.hentVilkårFor(PersonType.SØKER).mapNotNull {
-            if (it == Vilkår.LOVLIG_OPPHOLD) null
-            else lagVilkårResultat(
-                vilkårType = it,
-                fom = LocalDate.now().minusMonths(5),
-                tom = null,
-                resultat = Resultat.OPPFYLT,
-                utdypendeVilkårsvurderinger = emptyList(),
-                personResultat = personResultat
-            )
+            if (it == Vilkår.LOVLIG_OPPHOLD) {
+                null
+            } else {
+                lagVilkårResultat(
+                    vilkårType = it,
+                    fom = LocalDate.now().minusMonths(5),
+                    tom = null,
+                    resultat = Resultat.OPPFYLT,
+                    utdypendeVilkårsvurderinger = emptyList(),
+                    personResultat = personResultat
+                )
+            }
         }
 
         val prosent = vilkårResultater.mapTilProsentEllerNull(PersonType.SØKER)
