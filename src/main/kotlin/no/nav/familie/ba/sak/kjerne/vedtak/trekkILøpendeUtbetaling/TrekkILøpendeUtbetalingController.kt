@@ -21,7 +21,7 @@ class TrekkILøpendeUtbetalingController(
 
     @PostMapping("/")
     fun leggTilTrekkILøpendeUtbetaling(
-        @RequestBody trekkILøpendeUtbetaling: TrekkILøpendeUtbetaling
+        @RequestBody trekkILøpendeUtbetaling: RestTrekkILøpendeUtbetaling
     ) {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
