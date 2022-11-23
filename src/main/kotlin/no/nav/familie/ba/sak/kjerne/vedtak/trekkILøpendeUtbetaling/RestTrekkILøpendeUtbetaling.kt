@@ -1,10 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.trekkILøpendeUtbetaling
 
-import java.time.LocalDate
+import java.time.YearMonth
 
 data class RestTrekkILøpendeUtbetaling(
     val behandlingId: Long,
-    val fom: LocalDate,
-    val tom: LocalDate,
+    val fom: YearMonth?,
+    val tom: YearMonth?,
     val sum: Int
 )
