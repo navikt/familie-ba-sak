@@ -19,7 +19,7 @@ import java.time.LocalDateTime
 @TaskStepBeskrivelse(
     taskStepType = KonsistensavstemMotOppdragAvsluttTask.TASK_STEP_TYPE,
     beskrivelse = "Avslutt Konsistensavstemming mot oppdrag",
-    maxAntallFeil = 3
+    maxAntallFeil = 10 // 2.5 time bør være nok tid for å att alle datataskene har kjørt
 )
 class KonsistensavstemMotOppdragAvsluttTask(
     val avstemmingService: AvstemmingService,
