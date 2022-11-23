@@ -54,6 +54,7 @@ import org.assertj.core.api.Assertions.tuple
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -838,6 +839,54 @@ class MigreringServiceTest(
         }
         assertThatThrownBy { s.migrer(ident) }
             .extracting("feiltype").isNotEqualTo(MigreringsfeilType.HISTORISK_IDENT_REGNET_SOM_EKSTRA_BARN_I_INFOTRYGD)
+    }
+
+    @Test
+    fun `Skal hente kjøredate hvis man har kjøredato eller så kastes kan ikke migrerere exception`() {
+        val service = MigreringService(
+            behandlingRepository = mockk(),
+            behandlingService = mockk(),
+            env = mockk(),
+            fagsakService = mockk(),
+            infotrygdBarnetrygdClient = mockk(),
+            personidentService = mockk(),
+            stegService = mockk(),
+            taskRepository = mockk(),
+            tilkjentYtelseRepository = mockk(),
+            totrinnskontrollService = mockk(),
+            vedtakService = mockk(),
+            vilkårService = mockk(),
+            vilkårsvurderingService = mockk(),
+            migreringRestClient = mockk(relaxed = true),
+            mockk(),
+            mockk()
+        )
+        assertThat(service.infotrygdKjøredato(YearMonth.now())).isEqualTo(LocalDate.of(2022, 11, 17))
+        assertThat(service.infotrygdKjøredato(YearMonth.of(2023, 9))).isEqualTo(LocalDate.of(2023, 9, 18))
+        assertThrows<KanIkkeMigrereException> { service.infotrygdKjøredato(YearMonth.now().plusYears(2)) }
+    }
+
+    @Test
+    fun `Hvis denne testen feiler og man fortsatt migrererer, så må man ha ny kjøreplan, hvis man er ferdig med migrering, så kan man rydde opp kode`() {
+        val service = MigreringService(
+            behandlingRepository = mockk(),
+            behandlingService = mockk(),
+            env = mockk(),
+            fagsakService = mockk(),
+            infotrygdBarnetrygdClient = mockk(),
+            personidentService = mockk(),
+            stegService = mockk(),
+            taskRepository = mockk(),
+            tilkjentYtelseRepository = mockk(),
+            totrinnskontrollService = mockk(),
+            vedtakService = mockk(),
+            vilkårService = mockk(),
+            vilkårsvurderingService = mockk(),
+            migreringRestClient = mockk(relaxed = true),
+            mockk(),
+            mockk()
+        )
+        service.infotrygdKjøredato(YearMonth.now().plusMonths(1))
     }
 
     private fun opprettSakMedBeløp(vararg beløp: Double) = Sak(
