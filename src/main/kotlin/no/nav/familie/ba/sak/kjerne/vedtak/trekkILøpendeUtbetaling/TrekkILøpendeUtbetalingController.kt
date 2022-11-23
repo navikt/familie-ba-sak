@@ -19,7 +19,7 @@ class TrekkILøpendeUtbetalingController(
     private val service: TrekkILøpendeUtbetalingService
 ) {
 
-    @PostMapping("/")
+    @PostMapping
     fun leggTilTrekkILøpendeUtbetaling(
         @RequestBody trekkILøpendeUtbetaling: RestTrekkILøpendeUtbetaling
     ) {
@@ -30,7 +30,7 @@ class TrekkILøpendeUtbetalingController(
         service.leggTilTrekkILøpendeUtbetaling(trekkILøpendeUtbetaling)
     }
 
-    @GetMapping("/")
+    @GetMapping
     fun hentTrekkILøpendeUtbetalinger() {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,

@@ -17,6 +17,7 @@ import javax.persistence.Table
 @Entity(name = "TrekkILøpendeUtbetaling")
 @Table(name = "TREKK_I_LOEPENDE_UTBETALING")
 data class TrekkILøpendeUtbetaling(
+    @Column(name = "fk_behandling_id", updatable = false, nullable = false)
     val behandlingId: Long,
     @Column(name = "fom", columnDefinition = "DATE")
     @Convert(converter = YearMonthConverter::class)
