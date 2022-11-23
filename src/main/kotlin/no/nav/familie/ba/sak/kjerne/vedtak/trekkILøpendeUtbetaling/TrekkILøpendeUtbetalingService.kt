@@ -25,19 +25,13 @@ class TrekkILøpendeUtbetalingService(
     }
 
     fun fjernTrekkILøpendeUtbetaling(trekkILøpendeUtbetaling: RestTrekkILøpendeUtbetaling) {
-        repository.delete(
-            TrekkILøpendeUtbetaling(
-                behandlingId = trekkILøpendeUtbetaling.behandlingId,
-                fom = trekkILøpendeUtbetaling.fom,
-                tom = trekkILøpendeUtbetaling.tom,
-                feilutbetaltBeløp = trekkILøpendeUtbetaling.feilutbetaltBeløp
-            )
-        )
+        repository.deleteById(trekkILøpendeUtbetaling.id)
         loggService.loggTrekkILøpendeUtbetalingFjernet(behandlingId = trekkILøpendeUtbetaling.behandlingId)
     }
 
     fun hentTrekkILøpendeUtbetalinger() = repository.findAll().map {
         RestTrekkILøpendeUtbetaling(
+            id = it.id,
             behandlingId = it.behandlingId,
             fom = it.fom,
             tom = it.tom,
