@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.tilRestBehandlingStegTilstand
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestFødselshendelsefiltreringResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestKompetanse
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestKorrigertEtterbetaling
+import no.nav.familie.ba.sak.ekstern.restDomene.tilRestKorrigertVedtak
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonerMedAndeler
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestSettPåVent
@@ -34,6 +35,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.korrigertetterbetaling.KorrigertEtterbetalingService
+import no.nav.familie.ba.sak.kjerne.korrigertvedtak.KorrigertVedtakService
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.TilbakekrevingRepository
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
@@ -63,7 +65,8 @@ class UtvidetBehandlingService(
     private val valutakursRepository: ValutakursRepository,
     private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository,
     private val korrigertEtterbetalingService: KorrigertEtterbetalingService,
-    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
+    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
+    private val korrigertVedtakService: KorrigertVedtakService
 ) {
     fun lagRestUtvidetBehandling(behandlingId: Long): RestUtvidetBehandling {
         val behandling = behandlingRepository.finnBehandling(behandlingId)
@@ -143,7 +146,9 @@ class UtvidetBehandlingService(
             utenlandskePeriodebeløp = utenlandskePeriodebeløp.map { it.tilRestUtenlandskPeriodebeløp() },
             verge = behandling.verge?.let { VergeInfo(it.ident) },
             korrigertEtterbetaling = korrigertEtterbetalingService.finnAktivtKorrigeringPåBehandling(behandlingId)
-                ?.tilRestKorrigertEtterbetaling()
+                ?.tilRestKorrigertEtterbetaling(),
+            korrigertVedtak = korrigertVedtakService.finnAktivtKorrigertVedtakPåBehandling(behandlingId)
+                ?.tilRestKorrigertVedtak()
         )
     }
 
