@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.fraOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.innholdsresultatForTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.innholdForTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.tidslinjeFraTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.tilVerdi
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Dag
@@ -35,7 +35,7 @@ fun <I, R> Tidslinje<I, Dag>.tilMåned(mapper: (List<I?>) -> R?): Tidslinje<R, M
 
     return (fraOgMed..tilOgMed).tidslinjeFraTidspunkt { måned ->
         val dagerIMåned = måned.tilFørsteDagIMåneden()..måned.tilSisteDagIMåneden()
-        val innholdAlleDager = dagerIMåned.map { dag -> innholdsresultatForTidspunkt(dag).innhold }
+        val innholdAlleDager = dagerIMåned.map { dag -> innholdForTidspunkt(dag).innhold }
         mapper(innholdAlleDager).tilVerdi()
     }
 }
@@ -53,7 +53,7 @@ fun <I> Tidslinje<I, Dag>.tilMånedFraSisteDagIMåneden(): Tidslinje<I, Måned> 
     }
 
     return (fraOgMed..tilOgMed).tidslinjeFraTidspunkt { måned ->
-        innholdsresultatForTidspunkt(måned.tilSisteDagIMåneden())
+        innholdForTidspunkt(måned.tilSisteDagIMåneden())
     }
 }
 
@@ -76,8 +76,8 @@ fun <I, R> Tidslinje<I, Dag>.tilMånedFraMånedsskifteIkkeNull(
         TomTidslinje()
     } else {
         (fraOgMed.tilForrigeMåned()..tilOgMed.tilNesteMåned()).tidslinjeFraTidspunkt { måned ->
-            val innholdSisteDagForrigeMåned = innholdsresultatForTidspunkt(måned.forrige().tilSisteDagIMåneden())
-            val innholdFørsteDagDenneMåned = innholdsresultatForTidspunkt(måned.tilFørsteDagIMåneden())
+            val innholdSisteDagForrigeMåned = innholdForTidspunkt(måned.forrige().tilSisteDagIMåneden())
+            val innholdFørsteDagDenneMåned = innholdForTidspunkt(måned.tilFørsteDagIMåneden())
 
             innholdSisteDagForrigeMåned
                 .mapVerdi { s -> innholdFørsteDagDenneMåned.mapVerdi { mapper(s, it) } }.tilVerdi()

@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.finnHøyesteKategori
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjer
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.innholdsresultatForTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.innholdForTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 
@@ -89,7 +89,7 @@ fun utledLøpendeKategori(
 
     val etBarnHarMinstEnLøpendeEØSPeriode = barnasTidslinjer
         .values
-        .map { it.egetRegelverkResultatTidslinje.innholdsresultatForTidspunkt(nå) }
+        .map { it.egetRegelverkResultatTidslinje.innholdForTidspunkt(nå) }
         .any { it.innhold?.regelverk == Regelverk.EØS_FORORDNINGEN }
 
     return if (etBarnHarMinstEnLøpendeEØSPeriode) {

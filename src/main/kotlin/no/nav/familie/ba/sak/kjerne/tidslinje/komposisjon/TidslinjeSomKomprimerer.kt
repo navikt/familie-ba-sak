@@ -9,4 +9,4 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom
  * Benytter tidslinjeFraTidspunkt, som bygger sammenslåtte perioder som default
  */
 fun <I, T : Tidsenhet> Tidslinje<I, T>.slåSammenLike(): Tidslinje<I, T> =
-    tidsrom().tidslinjeFraTidspunkt { tidspunkt -> innholdsresultatForTidspunkt(tidspunkt) }
+    tidsrom().tidslinjeFraTidspunkt { tidspunkt -> innholdForTidspunkt(tidspunkt) }
