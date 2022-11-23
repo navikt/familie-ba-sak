@@ -45,7 +45,7 @@ fun Standardbegrunnelse.triggesForPeriode(
     val aktuellePersoner = minimertePersoner
         .filter { person -> triggesAv.personTyper.contains(person.type) }
         .filter { person ->
-            if (this.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET) {
+            if (this.vedtakBegrunnelseType.erInnvilget()) {
                 aktørIderMedUtbetaling.contains(person.aktørId) || person.type == PersonType.SØKER
             } else {
                 true
@@ -205,9 +205,15 @@ fun VedtakBegrunnelseType.periodeErOppyltForYtelseType(
     ytelserGjeldeneForSøkerForrigeMåned: List<YtelseType>
 ): Boolean {
     return when (this) {
-        VedtakBegrunnelseType.INNVILGET -> ytelseTyperForPeriode.contains(ytelseType)
-        VedtakBegrunnelseType.REDUKSJON -> !ytelseTyperForPeriode.contains(ytelseType) &&
+        VedtakBegrunnelseType.INNVILGET, VedtakBegrunnelseType.INSTITUSJON_INNVILGET -> ytelseTyperForPeriode.contains(
+            ytelseType
+        )
+
+        VedtakBegrunnelseType.REDUKSJON, VedtakBegrunnelseType.INSTITUSJON_REDUKSJON -> !ytelseTyperForPeriode.contains(
+            ytelseType
+        ) &&
             ytelseOppfyltForrigeMåned(ytelseType, ytelserGjeldeneForSøkerForrigeMåned)
+
         else -> false
     }
 }
