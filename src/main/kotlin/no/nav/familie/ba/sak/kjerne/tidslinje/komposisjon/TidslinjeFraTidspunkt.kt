@@ -88,3 +88,6 @@ private fun <I, T : Tidsenhet> Periode<I, T>.utvidMed(tidspunktMedInnholdsresult
 
 private fun <I, T : Tidsenhet> TidspunktMedInnholdsresultat<I, T>.tilPeriode() =
     Periode(this.tidspunkt.somFraOgMed(), this.tidspunkt.somTilOgMed(), this.innhold)
+
+private fun <T> Collection<T>.replaceLast(replacement: T) =
+    this.take(this.size - 1) + replacement
