@@ -14,7 +14,7 @@ class TrekkILøpendeUtbetalingService(
                 behandlingId = trekkILøpendeUtbetaling.behandlingId,
                 fom = trekkILøpendeUtbetaling.fom,
                 tom = trekkILøpendeUtbetaling.tom,
-                sum = trekkILøpendeUtbetaling.sum
+                feilutbetaltBeløp = trekkILøpendeUtbetaling.feilutbetaltBeløp
             )
         )
     }
@@ -24,7 +24,7 @@ class TrekkILøpendeUtbetalingService(
             behandlingId = it.behandlingId,
             fom = it.fom,
             tom = it.tom,
-            sum = it.sum
+            feilutbetaltBeløp = it.feilutbetaltBeløp
         )
     }
 }

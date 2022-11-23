@@ -24,7 +24,8 @@ data class TrekkILøpendeUtbetaling(
     @Column(name = "tom", columnDefinition = "DATE")
     @Convert(converter = YearMonthConverter::class)
     val tom: YearMonth?,
-    val sum: Int
+    @Column(name = "feilutbetalt_beloep", nullable = false)
+    val feilutbetaltBeløp: Int
 ) {
 
     @Id

@@ -6,5 +6,5 @@ data class RestTrekkILøpendeUtbetaling(
     val behandlingId: Long,
     val fom: YearMonth?,
     val tom: YearMonth?,
-    val sum: Int
+    val feilutbetaltBeløp: Int
 )
