@@ -29,7 +29,8 @@ data class VedtakEndring(
                     klage = erKlage,
                     klageInstitusjon = erKlage,
                     feilutbetaling = erFeilutbetalingPåBehandling,
-                    etterbetalingInstitusjon = etterbetalingInstitusjon
+                    etterbetalingInstitusjon = etterbetalingInstitusjon,
+                    korrigertVedtak = vedtakFellesfelter.korrigertVedtakData
                 ),
                 flettefelter = FlettefelterForDokumentImpl(
                     navn = vedtakFellesfelter.søkerNavn,
@@ -55,6 +56,7 @@ data class EndringVedtakData(
         val hjemmeltekst: Hjemmeltekst,
         val klage: Boolean,
         val klageInstitusjon: Boolean,
-        val etterbetalingInstitusjon: EtterbetalingInstitusjon?
+        val etterbetalingInstitusjon: EtterbetalingInstitusjon?,
+        val korrigertVedtak: KorrigertVedtakData?
     )
 }
