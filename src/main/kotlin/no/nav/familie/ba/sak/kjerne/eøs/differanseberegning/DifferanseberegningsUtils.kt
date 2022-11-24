@@ -5,6 +5,8 @@ import no.nav.familie.ba.sak.common.multipliser
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.mapIkkeNull
 import java.math.BigDecimal
@@ -66,3 +68,11 @@ private fun AndelTilkjentYtelse.utenDifferanseberegning(): AndelTilkjentYtelse {
 
 fun <T : Tidsenhet> Tidslinje<AndelTilkjentYtelse, T>.utenDifferanseberegning() =
     mapIkkeNull { it.utenDifferanseberegning() }
+
+fun Tidslinje<AndelTilkjentYtelse, Måned>.oppdaterDifferanseberegning(
+    differanseberegnetBeløpTidslinje: Tidslinje<Int, Måned>
+): Tidslinje<AndelTilkjentYtelse, Måned> {
+    return this.kombinerMed(differanseberegnetBeløpTidslinje) { andel, differanseberegning ->
+        andel.oppdaterDifferanseberegning(differanseberegning?.toBigDecimal())
+    }
+}

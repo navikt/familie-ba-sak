@@ -16,7 +16,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.join
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.joinIkkeNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerKunVerdiMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullOgIkkeTom
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.outerJoin
@@ -135,14 +134,6 @@ fun Tidslinje<AndelTilkjentYtelse, Måned>.fordelForholdsmessigPåBarnasAndeler(
         }
 
     return barnasAndeler.kombinerKunVerdiMed(ytelsePerBarnTidslinje) { _, ytelsePerBarn -> ytelsePerBarn }
-}
-
-fun Tidslinje<AndelTilkjentYtelse, Måned>.oppdaterDifferanseberegning(
-    differanseberegnetBeløpTidslinje: Tidslinje<Int, Måned>
-): Tidslinje<AndelTilkjentYtelse, Måned> {
-    return this.kombinerMed(differanseberegnetBeløpTidslinje) { andel, differanseberegning ->
-        andel.oppdaterDifferanseberegning(differanseberegning?.toBigDecimal())
-    }
 }
 
 fun Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>>.tilUnderskuddPåDifferanseberegningen() =
