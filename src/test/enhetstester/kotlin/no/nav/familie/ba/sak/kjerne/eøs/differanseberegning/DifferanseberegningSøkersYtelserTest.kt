@@ -148,6 +148,30 @@ class DifferanseberegningSøkersYtelserTest {
     }
 
     @Test
+    fun `Søkers andel som har differanseberegning, men underskuddet reduseres, skal få oppdatert differanseberegningen`() {
+        val søker = tilfeldigPerson(personType = PersonType.SØKER)
+        val barn1 = barn født 13.jan(2017)
+        val behandling = lagBehandling()
+
+        // Satsene er ikke riktige, men enklere å jobbe med
+        // 1 PLN = 2 kr
+        val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling) der
+            (barn1 har 1000.kr og 900.PLN i ORDINÆR_BARNETRYGD fom mai(2017) tom jul(2024)) og
+            (søker har 1000.kr minus 1000.kr i UTVIDET_BARNETRYGD fom jun(2017) tom jul(2021)) og
+            (søker har 600.kr minus 400.kr i SMÅBARNSTILLEGG fom aug(2018) tom des(2019))
+
+        val nyeAndeler =
+            tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(listOf(barn1))
+
+        val forventet = lagInitiellTilkjentYtelse(behandling) der
+            (barn1 har 1000.kr og 900.PLN i ORDINÆR_BARNETRYGD fom mai(2017) tom jul(2024)) og
+            (søker har 1000.kr minus 400.PLN i UTVIDET_BARNETRYGD fom jun(2017) tom jul(2021)) og
+            (søker har 600.kr i SMÅBARNSTILLEGG fom aug(2018) tom des(2019))
+
+        assertEqualsUnordered(forventet.andelerTilkjentYtelse, nyeAndeler)
+    }
+
+    @Test
     fun `Skal tåle perioder der underskuddet på differanseberegning er større enn alle tilkjente ytelser`() {
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = barn født 13.jan(2019)

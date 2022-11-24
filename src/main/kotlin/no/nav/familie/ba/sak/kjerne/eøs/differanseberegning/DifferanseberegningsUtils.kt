@@ -4,6 +4,9 @@ import no.nav.familie.ba.sak.common.del
 import no.nav.familie.ba.sak.common.multipliser
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
+import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidsenhet
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.mapIkkeNull
 import java.math.BigDecimal
 
 fun Intervall.konverterBeløpTilMånedlig(beløp: BigDecimal): BigDecimal =
@@ -60,3 +63,6 @@ private fun AndelTilkjentYtelse.utenDifferanseberegning(): AndelTilkjentYtelse {
         differanseberegnetPeriodebeløp = null
     )
 }
+
+fun <T : Tidsenhet> Tidslinje<AndelTilkjentYtelse, T>.utenDifferanseberegning() =
+    mapIkkeNull { it.utenDifferanseberegning() }

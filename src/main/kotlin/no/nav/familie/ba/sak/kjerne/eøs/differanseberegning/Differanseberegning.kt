@@ -64,8 +64,13 @@ fun beregnDifferanse(
 fun Collection<AndelTilkjentYtelse>.differanseberegnSøkersYtelser(
     barna: List<Person>
 ): List<AndelTilkjentYtelse> {
+    // Ta bort eventuell eksisterende differanseberegning, slik at kalkulertUtbetalingsbeløp er nasjonal sats
     val utvidetBarnetrygdTidslinje = this.tilTidslinjeForSøkersYtelse(YtelseType.UTVIDET_BARNETRYGD)
+        .utenDifferanseberegning()
+
     val småbarnstilleggTidslinje = this.tilTidslinjeForSøkersYtelse(YtelseType.SMÅBARNSTILLEGG)
+        .utenDifferanseberegning()
+
     val barnasAndelerTidslinjer = this.tilSeparateTidslinjerForBarna()
 
     // Lag tidslinjer for hvert barn som inneholder underskuddet fra differanseberegningen på ordinær barnetrygd.
