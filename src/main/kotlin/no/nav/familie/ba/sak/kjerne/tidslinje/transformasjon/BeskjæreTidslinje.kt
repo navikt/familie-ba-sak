@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.fraOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.innholdsresultatForTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.innholdForTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.tidslinjeFraTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidspunkt
@@ -68,5 +68,5 @@ fun <I, T : Tidsenhet> Tidslinje<I, T>.beskjær(fraOgMed: Tidspunkt<T>, tilOgMed
         else -> minOf(tilOgMed()!!, tilOgMed)
     }
 
-    return (fom..tom).tidslinjeFraTidspunkt { tidspunkt -> innholdsresultatForTidspunkt(tidspunkt) }
+    return (fom..tom).tidslinjeFraTidspunkt { tidspunkt -> innholdForTidspunkt(tidspunkt) }
 }
