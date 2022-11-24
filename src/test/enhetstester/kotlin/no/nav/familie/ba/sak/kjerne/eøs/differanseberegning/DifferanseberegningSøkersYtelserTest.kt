@@ -23,6 +23,8 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jul
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jun
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.mai
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.okt
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.sep
 import org.junit.jupiter.api.Test
 
 class DifferanseberegningSøkersYtelserTest {
@@ -119,5 +121,55 @@ class DifferanseberegningSøkersYtelserTest {
             .differanseberegnSøkersYtelser(emptyList())
 
         assertEqualsUnordered(emptyList(), nyeAndeler)
+    }
+
+    @Test
+    fun `Søkers andel som har hatt differanseberegning, men ikke skal ha det lenger, skal fjerne differanseberegningen`() {
+        val søker = tilfeldigPerson(personType = PersonType.SØKER)
+        val barn1 = barn født 13.jan(2017)
+        val behandling = lagBehandling()
+
+        val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling) der
+            (søker har 1054.kr og 30.PLN i UTVIDET_BARNETRYGD fom jun(2018) tom jul(2024)) og
+            (søker har 660.kr og 40.PLN i SMÅBARNSTILLEGG fom aug(2018) tom des(2019)) og
+            (søker har 660.kr i SMÅBARNSTILLEGG fom jul(2020) tom mai(2023)) og
+            (barn1 har 1054.kr i ORDINÆR_BARNETRYGD fom aug(2019) tom jul(2024))
+
+        val nyeAndeler =
+            tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(listOf(barn1))
+
+        val forventet = lagInitiellTilkjentYtelse(behandling) der
+            (barn1 har 1054.kr i ORDINÆR_BARNETRYGD fom aug(2019) tom jul(2024)) og
+            (søker har 1054.kr i UTVIDET_BARNETRYGD fom jun(2018) tom jul(2024)) og
+            (søker har 660.kr i SMÅBARNSTILLEGG fom aug(2018) tom des(2019)) og
+            (søker har 660.kr i SMÅBARNSTILLEGG fom jul(2020) tom mai(2023))
+
+        assertEqualsUnordered(forventet.andelerTilkjentYtelse, nyeAndeler)
+    }
+
+    @Test
+    fun `Skal tåle perioder der underskuddet på differanseberegning er større enn alle tilkjente ytelser`() {
+        val søker = tilfeldigPerson(personType = PersonType.SØKER)
+        val barn1 = barn født 13.jan(2019)
+        val behandling = lagBehandling()
+
+        val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling) der
+            (barn1 har 1054.kr og 1500.PLN i ORDINÆR_BARNETRYGD fom aug(2019) tom jul(2020)) og
+            (barn1 har 1054.kr i ORDINÆR_BARNETRYGD fom aug(2020) tom jul(2025)) og
+            (søker har 1054.kr i UTVIDET_BARNETRYGD fom sep(2019) tom jul(2024)) og
+            (søker har 660.kr i SMÅBARNSTILLEGG fom okt(2019) tom des(2021))
+
+        val nyeAndeler =
+            tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(listOf(barn1))
+
+        val forventet = lagInitiellTilkjentYtelse(behandling) der
+            (barn1 har 1054.kr og 1500.PLN i ORDINÆR_BARNETRYGD fom aug(2019) tom jul(2020)) og
+            (barn1 har 1054.kr i ORDINÆR_BARNETRYGD fom aug(2020) tom jul(2025)) og
+            (søker har 1054.kr minus 1054.kr i UTVIDET_BARNETRYGD fom sep(2019) tom jul(2020)) og
+            (søker har 1054.kr i UTVIDET_BARNETRYGD fom aug(2020) tom jul(2024)) og
+            (søker har 660.kr minus 660.kr i SMÅBARNSTILLEGG fom okt(2019) tom jul(2020)) og
+            (søker har 660.kr i SMÅBARNSTILLEGG fom aug(2020) tom des(2021))
+
+        assertEqualsUnordered(forventet.andelerTilkjentYtelse, nyeAndeler)
     }
 }

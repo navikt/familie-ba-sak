@@ -136,11 +136,7 @@ fun Tidslinje<AndelTilkjentYtelse, Måned>.oppdaterDifferanseberegning(
     differanseberegnetBeløpTidslinje: Tidslinje<Int, Måned>
 ): Tidslinje<AndelTilkjentYtelse, Måned> {
     return this.kombinerMed(differanseberegnetBeløpTidslinje) { andel, differanseberegning ->
-        when {
-            andel != null && differanseberegning != null && differanseberegning > 0 ->
-                andel.oppdaterDifferanseberegning(differanseberegning.toBigDecimal())
-            else -> andel
-        }
+        andel.oppdaterDifferanseberegning(differanseberegning?.toBigDecimal())
     }
 }
 
