@@ -41,5 +41,6 @@ data class RestUtvidetBehandling(
     val valutakurser: List<RestValutakurs>,
     val utenlandskePeriodebeløp: List<RestUtenlandskPeriodebeløp>,
     val verge: VergeInfo?,
-    val korrigertEtterbetaling: RestKorrigertEtterbetaling?
+    val korrigertEtterbetaling: RestKorrigertEtterbetaling?,
+    val korrigertVedtak: RestKorrigertVedtak?
 )

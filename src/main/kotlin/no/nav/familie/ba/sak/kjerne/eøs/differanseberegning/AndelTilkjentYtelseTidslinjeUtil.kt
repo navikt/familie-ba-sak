@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MAX_MÅNED
 import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MIN_MÅNED
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -50,3 +51,15 @@ fun AndelTilkjentYtelse.medPeriode(fraOgMed: YearMonth?, tilOgMed: YearMonth?) =
         stønadFom = fraOgMed ?: MIN_MÅNED,
         stønadTom = tilOgMed ?: MAX_MÅNED
     ).also { versjon = this.versjon }
+
+/**
+ * Ivaretar fom og tom, slik at eventuelle splitter blir med videre.
+ */
+fun Iterable<AndelTilkjentYtelse>.tilTidslinjeForSøkersYtelse(ytelseType: YtelseType) = this
+    .filter { it.erSøkersAndel() }
+    .filter { it.type == ytelseType }
+    .let {
+        tidslinje {
+            it.map { Periode(it.stønadFom.tilTidspunkt(), it.stønadTom.tilTidspunkt(), it) }
+        }
+    }
