@@ -26,7 +26,8 @@ data class OpphørMedEndring(
                     hjemmeltekst = vedtakFellesfelter.hjemmeltekst,
                     feilutbetaling = erFeilutbetalingPåBehandling,
                     etterbetaling = etterbetaling,
-                    etterbetalingInstitusjon = etterbetalingInstitusjon
+                    etterbetalingInstitusjon = etterbetalingInstitusjon,
+                    korrigertVedtak = vedtakFellesfelter.korrigertVedtakData
                 ),
                 flettefelter = FlettefelterForDokumentImpl(
                     navn = vedtakFellesfelter.søkerNavn,
@@ -49,6 +50,7 @@ data class OpphørMedEndringData(
         val feilutbetaling: Boolean,
         val hjemmeltekst: Hjemmeltekst,
         val etterbetaling: Etterbetaling?,
-        val etterbetalingInstitusjon: EtterbetalingInstitusjon?
+        val etterbetalingInstitusjon: EtterbetalingInstitusjon?,
+        val korrigertVedtak: KorrigertVedtakData?
     )
 }
