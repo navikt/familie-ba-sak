@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje
 
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.Innholdsresultat
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.Innhold
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.innholdsresultatForTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.innholdForTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.tidslinjeFraTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.apr
@@ -37,7 +37,7 @@ class TidslinjeFraTidspunktTest {
     @Test
     fun `skal gjenskape underliggende tidslinje dersom innholdet returneres uendret `() {
         val resultat = tidslinje.tidsrom().tidslinjeFraTidspunkt { tidspunkt ->
-            tidslinje.innholdsresultatForTidspunkt(tidspunkt)
+            tidslinje.innholdForTidspunkt(tidspunkt)
         }
 
         assertEquals(tidslinje, resultat)
@@ -46,7 +46,7 @@ class TidslinjeFraTidspunktTest {
     @Test
     fun `skal skape sammenhengende tidslinje i samme tidsrom hvis alt innhold er identisk`() {
         val resultat = tidslinje.tidsrom().tidslinjeFraTidspunkt { tidspunkt ->
-            Innholdsresultat("A")
+            Innhold("A")
         }
 
         val forventet = tidslinje { listOf(Periode(mar(2018), apr(2021), "A")) }
@@ -57,7 +57,7 @@ class TidslinjeFraTidspunktTest {
     @Test
     fun `skal skape tom tidslinje dersom alt innhold mangler`() {
         val resultat = tidslinje.tidsrom().tidslinjeFraTidspunkt { tidspunkt ->
-            Innholdsresultat.utenInnhold<String>()
+            Innhold.utenInnhold<String>()
         }
 
         assertEquals(TomTidslinje<String, Måned>(), resultat)

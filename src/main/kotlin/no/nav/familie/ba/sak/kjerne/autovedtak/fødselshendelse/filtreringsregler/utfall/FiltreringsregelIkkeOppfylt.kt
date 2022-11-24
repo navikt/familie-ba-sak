@@ -24,6 +24,10 @@ enum class FiltreringsregelIkkeOppfylt(val beskrivelse: String, private val filt
     LØPER_ALLEREDE_FOR_ANNEN_FORELDER(
         "Annen mottaker har barnetrygd for barnet",
         Filtreringsregel.LØPER_IKKE_BARNETRYGD_FOR_BARNET
+    ),
+    MOR_HAR_LØPENDE_EØS_BARNETRYGD(
+        "Mor har EØS-barnetrygd",
+        Filtreringsregel.MOR_HAR_IKKE_LØPENDE_EØS_BARNETRYGD
     );
 
     override fun hentBeskrivelse(): String {
