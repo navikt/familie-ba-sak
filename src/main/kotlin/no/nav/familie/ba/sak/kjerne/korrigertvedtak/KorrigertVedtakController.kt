@@ -34,7 +34,7 @@ class KorrigertVedtakController(
         @PathVariable behandlingId: Long,
         @RequestBody korrigerVedtakRequest: KorrigerVedtakRequest
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
-        if (featureToggleService.isEnabled(FeatureToggleConfig.SKAL_KUNNE_KORRIGERE_VEDTAK, false)) {
+        if (!featureToggleService.isEnabled(FeatureToggleConfig.SKAL_KUNNE_KORRIGERE_VEDTAK, false)) {
             throw Feil(
                 message = "Togglen familie-ba-sak.kunne-korrigere-vedtak er ikke slått på, og det er ikke mulig å korrigere vedtak",
                 frontendFeilmelding = "Korrigering av vedtak er ikke støttet ennå"
