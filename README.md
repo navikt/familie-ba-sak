@@ -55,7 +55,7 @@ CREATE DATABASE "familie-ba-sak";
 
 Legg til databasen i Intellij: 
 1. Trykk på database på høyre side og "+" -> data source -> postgreSQL
-2. Fyll inn user=postgres, passord=test og database=familie-ba-sak
+2. Fyll inn port=5432, user=postgres, passord=test og database=familie-ba-sak
 
 OBS: Pass på at du ikke kjører postgres lokalt på samme port (5432)
 
