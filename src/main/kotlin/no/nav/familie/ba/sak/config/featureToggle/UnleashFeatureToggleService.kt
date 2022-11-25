@@ -20,8 +20,8 @@ class UnleashFeatureToggleService(unleash: FeatureToggleConfig.Unleash) : Featur
                 .unleashAPI(unleash.uri)
                 .unleashContextProvider(lagUnleashContextProvider())
                 .build(),
-            FeatureToggleConfig.ByClusterStrategy(unleash.cluster),
-            FeatureToggleConfig.ByAnsvarligSaksbehandler(),
+            ByClusterStrategy(unleash.cluster),
+            ByAnsvarligSaksbehandler(),
             GradualRolloutRandomStrategy()
         )
         this.unleash = unleash

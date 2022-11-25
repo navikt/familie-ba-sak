@@ -1,9 +1,7 @@
 package no.nav.familie.ba.sak.config
 
-import io.getunleash.strategy.Strategy
 import no.nav.familie.ba.sak.config.featureToggle.DummyFeatureToggleService
 import no.nav.familie.ba.sak.config.featureToggle.UnleashFeatureToggleService
-import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.slf4j.LoggerFactory
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.ConstructorBinding
@@ -37,27 +35,6 @@ class FeatureToggleConfig(
         }
 
     private fun lagUnleashFeatureToggleService(): FeatureToggleService = UnleashFeatureToggleService(unleash)
-
-    class ByClusterStrategy(private val clusterName: String) : Strategy {
-
-        override fun isEnabled(parameters: MutableMap<String, String>): Boolean {
-            if (parameters.isEmpty()) return false
-            return parameters["cluster"]?.contains(clusterName) ?: false
-        }
-
-        override fun getName(): String = "byCluster"
-    }
-
-    class ByAnsvarligSaksbehandler : Strategy {
-
-        override fun isEnabled(parameters: MutableMap<String, String>): Boolean {
-            if (parameters.isEmpty()) return false
-
-            return parameters["saksbehandler"]?.contains(SikkerhetContext.hentSaksbehandlerEpost()) ?: false
-        }
-
-        override fun getName(): String = "byAnsvarligSaksbehandler"
-    }
 
     private fun lagDummyFeatureToggleService(): FeatureToggleService = DummyFeatureToggleService(unleash)
 
