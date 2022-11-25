@@ -164,16 +164,6 @@ class ClientMocks {
 
     @Bean
     @Primary
-    fun mockFeatureToggleService(): FeatureToggleService {
-        val mockFeatureToggleService = mockk<FeatureToggleService>(relaxed = true)
-
-        clearFeatureToggleMocks(mockFeatureToggleService)
-
-        return mockFeatureToggleService
-    }
-
-    @Bean
-    @Primary
     fun mockEnvService(): EnvService {
         val mockEnvService = mockk<EnvService>(relaxed = true)
 
