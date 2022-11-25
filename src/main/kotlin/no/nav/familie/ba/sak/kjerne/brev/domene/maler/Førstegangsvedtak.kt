@@ -24,7 +24,8 @@ data class Førstegangsvedtak(
                     ),
                     etterbetaling = etterbetaling,
                     hjemmeltekst = vedtakFellesfelter.hjemmeltekst,
-                    etterbetalingInstitusjon = etterbetalingInstitusjon
+                    etterbetalingInstitusjon = etterbetalingInstitusjon,
+                    korrigertVedtak = vedtakFellesfelter.korrigertVedtakData
                 ),
                 flettefelter = FlettefelterForDokumentImpl(
                     navn = vedtakFellesfelter.søkerNavn,
@@ -47,6 +48,7 @@ data class FørstegangsvedtakData(
         val signaturVedtak: SignaturVedtak,
         val etterbetaling: Etterbetaling?,
         val hjemmeltekst: Hjemmeltekst,
-        val etterbetalingInstitusjon: EtterbetalingInstitusjon?
+        val etterbetalingInstitusjon: EtterbetalingInstitusjon?,
+        val korrigertVedtak: KorrigertVedtakData?
     )
 }

@@ -219,20 +219,15 @@ internal class BeregnAndelerTilkjentYtelseForBarnaTest {
 
         val forventedeAndeler = listOf(
             barn får alt av 1054 i feb(2020)..aug(2020),
-            barn får alt av 1354 i sep(2020)..mai(2021),
-            barn får alt av 1354 i jun(2021)..aug(2021),
+            barn får alt av 1354 i sep(2020)..aug(2021),
             barn får alt av 1654 i sep(2021)..nov(2021)
         )
 
         assertEquals(forventedeAndeler, vurdering.beregnAndelerTilkjentYtelseForBarna())
     }
 
-    /**
-     * Litt overraskende tester
-     */
-
     @Test
-    fun `vilkårsvurdering ett barn som dør`() {
+    fun `vilkårsvurdering ett barn som dør før fylte 18`() {
         val søker = søker født 19.nov(1995)
         val barn = barn født 14.des(2019) død 9.des(2024)
 
@@ -241,18 +236,44 @@ internal class BeregnAndelerTilkjentYtelseForBarnaTest {
             (BOSATT_I_RIKET oppfylt 26.jan(2020)..uendelig) og
             (LOVLIG_OPPHOLD oppfylt 26.jan(2020)..uendelig) der
             barn har
-            (UNDER_18_ÅR oppfylt barn.under18år()) og
-            (GIFT_PARTNERSKAP oppfylt 26.jan(2020)..uendelig) og
-            (BOR_MED_SØKER oppfylt 26.jan(2020)..uendelig) og
+            (UNDER_18_ÅR oppfylt 14.des(2019)..9.des(2024)) og
+            (GIFT_PARTNERSKAP oppfylt 26.jan(2020)..9.des(2024)) og
+            (BOR_MED_SØKER oppfylt 26.jan(2020)..9.des(2024)) og
+            (BOSATT_I_RIKET oppfylt 26.jan(2020)..9.des(2024)) og
+            (LOVLIG_OPPHOLD oppfylt 26.jan(2020)..9.des(2024))
+
+        val forventedeAndeler = listOf(
+            barn får alt av 1054 i feb(2020)..aug(2020),
+            barn får alt av 1354 i sep(2020)..aug(2021),
+            barn får alt av 1654 i sep(2021)..des(2021),
+            barn får alt av 1676 i jan(2022)..des(2024)
+        )
+
+        assertEquals(forventedeAndeler, vurdering.beregnAndelerTilkjentYtelseForBarna())
+    }
+
+    @Test
+    fun `vilkårsvurdering ett barn som dør samme måned som fylte 18`() {
+        val søker = søker født 19.nov(1995)
+        val barn = barn født 14.des(2019) død 9.des(2037)
+
+        val vurdering = vilkårsvurdering der
+            søker har
             (BOSATT_I_RIKET oppfylt 26.jan(2020)..uendelig) og
-            (LOVLIG_OPPHOLD oppfylt 26.jan(2020)..uendelig)
+            (LOVLIG_OPPHOLD oppfylt 26.jan(2020)..uendelig) der
+            barn har
+            (UNDER_18_ÅR oppfylt 14.des(2019)..9.des(2037)) og
+            (GIFT_PARTNERSKAP oppfylt 26.jan(2020)..9.des(2037)) og
+            (BOR_MED_SØKER oppfylt 26.jan(2020)..9.des(2037)) og
+            (BOSATT_I_RIKET oppfylt 26.jan(2020)..9.des(2037)) og
+            (LOVLIG_OPPHOLD oppfylt 26.jan(2020)..9.des(2037))
 
         val forventedeAndeler = listOf(
             barn får alt av 1054 i feb(2020)..aug(2020),
             barn får alt av 1354 i sep(2020)..aug(2021),
             barn får alt av 1654 i sep(2021)..des(2021),
             barn får alt av 1676 i jan(2022)..nov(2025),
-            barn får alt av 1054 i des(2025)..des(2037)
+            barn får alt av 1054 i des(2025)..nov(2037)
         )
 
         assertEquals(forventedeAndeler, vurdering.beregnAndelerTilkjentYtelseForBarna())
@@ -262,11 +283,11 @@ internal class BeregnAndelerTilkjentYtelseForBarnaTest {
 internal fun <T : Tidsenhet> VilkårsvurderingBuilder<T>.beregnAndelerTilkjentYtelseForBarna(): List<BeregnetAndel> =
     TilkjentYtelseUtils.beregnAndelerTilkjentYtelseForBarna(
         this.byggPersonopplysningGrunnlag(),
-        this.byggVilkårsvurdering()
+        this.byggVilkårsvurdering().personResultater
     )
 
 internal fun <T : Tidsenhet> VilkårsvurderingBuilder.PersonResultatBuilder<T>.beregnAndelerTilkjentYtelseForBarna(): List<BeregnetAndel> =
     TilkjentYtelseUtils.beregnAndelerTilkjentYtelseForBarna(
         this.byggPersonopplysningGrunnlag(),
-        this.byggVilkårsvurdering()
+        this.byggVilkårsvurdering().personResultater
     )

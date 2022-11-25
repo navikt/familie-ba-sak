@@ -2,8 +2,8 @@ package no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon
 
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.fraOgMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.Innholdsresultat
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.innholdsresultatForTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.Innhold
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.innholdForTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom.rangeTo
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilOgMed
@@ -77,7 +77,7 @@ internal class MapTidslinjeTest {
                 .plus(sep(2020)..feb(2021))
                 .plus(nov(2021)..mai(2022))
             ).forEach {
-            assertEquals(Innholdsresultat.utenInnhold<String>(), faktisk.innholdsresultatForTidspunkt(it))
+            assertEquals(Innhold.utenInnhold<String>(), faktisk.innholdForTidspunkt(it))
         }
     }
 }

@@ -22,13 +22,12 @@
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <spring.cloud.version>3.1.5</spring.cloud.version>
-        <spring.vault.version>2.3.2</spring.vault.version>
         <prosessering.version>1.20221110194901_e9e0d90</prosessering.version>
         <felles.version>1.20221101085322_cc4d556</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20220609214258_f30c3ce</eksterne-kontrakter-bisys.version>
         <felles-kontrakter.version>2.0_20221114152515_c93fbad</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20220216121145_5a268ac</familie.kontrakter.saksstatistikk>
-        <familie.kontrakter.stønadsstatistikk>2.0_20221104085928_75706ae</familie.kontrakter.stønadsstatistikk>
+        <familie.kontrakter.stønadsstatistikk>2.0_20221123134052_8bdd6c8</familie.kontrakter.stønadsstatistikk>
         <familie.kontrakter.skatteetaten>2.0_20210920094114_9c74239</familie.kontrakter.skatteetaten>
         <mockk.version>1.13.2</mockk.version>
         <token-validation-spring.version>2.1.6</token-validation-spring.version>
@@ -43,9 +42,9 @@
 
         <medeia-validator-jackson.version>1.1.1</medeia-validator-jackson.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
-        <postgresql.version>42.4.1</postgresql.version>
+        <postgresql.version>42.4.3</postgresql.version>
         <testcontainers.postgresql.version>1.17.6</testcontainers.postgresql.version>
-        <unleash.version>6.1.0</unleash.version>
+        <unleash.version>7.0.0</unleash.version>
         <maven.model.version>3.8.6</maven.model.version>
         <jackson.module.kotlin.version>2.14.1</jackson.module.kotlin.version>
         <token-validation-test-support.version>2.0.5</token-validation-test-support.version>
@@ -138,11 +137,6 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.vault</groupId>
-            <artifactId>spring-vault-core</artifactId>
-            <version>${spring.vault.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.cloud</groupId>

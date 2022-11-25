@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.Utils.storForbokstavIHvertOrd
+import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
@@ -24,6 +25,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Førstegangsvedtak
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Hjemmeltekst
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.KorreksjonVedtaksbrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.KorreksjonVedtaksbrevData
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.KorrigertVedtakData
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.OpphørMedEndring
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Opphørt
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.SignaturVedtak
@@ -35,6 +37,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.korrigertetterbetaling.KorrigertEtterbetalingService
+import no.nav.familie.ba.sak.kjerne.korrigertvedtak.KorrigertVedtakService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
@@ -54,7 +57,8 @@ class BrevService(
     private val sanityService: SanityService,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val korrigertEtterbetalingService: KorrigertEtterbetalingService,
-    private val organisasjonService: OrganisasjonService
+    private val organisasjonService: OrganisasjonService,
+    private val korrigertVedtakService: KorrigertVedtakService
 ) {
 
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
@@ -223,11 +227,13 @@ class BrevService(
         val brevperioder = brevPerioderData.sorted().mapNotNull {
             it.tilBrevPeriodeGenerator().genererBrevPeriode()
         }
+        val korrigertVedtak = korrigertVedtakService.finnAktivtKorrigertVedtakPåBehandling(vedtak.behandling.id)
 
         val hjemler = hentHjemler(
             behandlingId = vedtak.behandling.id,
             minimerteVedtaksperioder = brevPerioderData.map { it.minimertVedtaksperiode },
-            målform = brevPerioderData.first().brevMålform
+            målform = brevPerioderData.first().brevMålform,
+            vedtakKorrigertHjemmelSkalMedIBrev = korrigertVedtak != null
         )
 
         val organisasjonsnummer = vedtak.behandling.fagsak.institusjon?.orgNummer
@@ -242,14 +248,16 @@ class BrevService(
             søkerFødselsnummer = grunnlagOgSignaturData.grunnlag.søker.aktør.aktivFødselsnummer(),
             perioder = brevperioder,
             organisasjonsnummer = organisasjonsnummer,
-            gjelder = if (organisasjonsnummer != null) grunnlagOgSignaturData.grunnlag.søker.navn else null
+            gjelder = if (organisasjonsnummer != null) grunnlagOgSignaturData.grunnlag.søker.navn else null,
+            korrigertVedtakData = korrigertVedtak?.let { KorrigertVedtakData(datoKorrigertVedtak = it.vedtaksdato.tilDagMånedÅr()) }
         )
     }
 
     private fun hentHjemler(
         behandlingId: Long,
         minimerteVedtaksperioder: List<MinimertVedtaksperiode>,
-        målform: Målform
+        målform: Målform,
+        vedtakKorrigertHjemmelSkalMedIBrev: Boolean = false
     ): String {
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandlingId)
             ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
@@ -261,7 +269,8 @@ class BrevService(
             minimerteVedtaksperioder = minimerteVedtaksperioder,
             sanityBegrunnelser = sanityService.hentSanityBegrunnelser(),
             opplysningspliktHjemlerSkalMedIBrev = opplysningspliktHjemlerSkalMedIBrev,
-            målform = målform
+            målform = målform,
+            vedtakKorrigertHjemmelSkalMedIBrev = vedtakKorrigertHjemmelSkalMedIBrev
         )
     }
 

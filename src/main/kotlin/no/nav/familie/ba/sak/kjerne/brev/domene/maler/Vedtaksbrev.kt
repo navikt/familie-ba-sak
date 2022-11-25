@@ -43,5 +43,6 @@ data class VedtakFellesfelter(
     val søkerFødselsnummer: String,
     val perioder: List<BrevPeriode>,
     val organisasjonsnummer: String? = null,
-    val gjelder: String? = null
+    val gjelder: String? = null,
+    val korrigertVedtakData: KorrigertVedtakData? = null
 )

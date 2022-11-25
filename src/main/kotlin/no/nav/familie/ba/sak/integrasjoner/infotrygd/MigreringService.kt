@@ -285,13 +285,20 @@ class MigreringService(
             kastOgTellMigreringsFeil(MigreringsfeilType.ÅPEN_SAK_INFOTRYGD)
         }
 
-        val ikkeOpphørteSaker = ferdigBehandledeSaker.sortedByDescending { it.iverksattdato }
+        var ikkeOpphørteSaker = ferdigBehandledeSaker.sortedByDescending { it.iverksattdato }
             .filter {
                 it.stønad != null && (it.stønad!!.opphørsgrunn == "0" || it.stønad!!.opphørsgrunn.isNullOrEmpty())
             }
 
         if (ikkeOpphørteSaker.size > 1) {
-            kastOgTellMigreringsFeil(MigreringsfeilType.FLERE_LØPENDE_SAKER_INFOTRYGD)
+            ikkeOpphørteSaker = ikkeOpphørteSaker.filter {
+                it.stønad!!.opphørtFom != null && it.stønad!!.opphørtFom == "000000"
+            }
+            if (ikkeOpphørteSaker.size > 1) {
+                kastOgTellMigreringsFeil(MigreringsfeilType.FLERE_LØPENDE_SAKER_INFOTRYGD)
+            }
+            logger.info("Filtrerte bort saker med opphørtFom satt men med opphørsgrunn 0")
+            secureLog.info("Filtrerte bort saker med opphørtFom satt men med opphørsgrunn 0 for ident=$personIdent")
         }
 
         if (ikkeOpphørteSaker.isEmpty()) {
@@ -418,10 +425,10 @@ class MigreringService(
         }
     }
 
-    private fun infotrygdKjøredato(yearMonth: YearMonth): LocalDate {
-        yearMonth.run {
-            if (this.year == 2021 || this.year == 2022) {
-                return when (this.month) {
+    fun infotrygdKjøredato(yearMonth: YearMonth): LocalDate {
+        when (yearMonth.year) {
+            2022 ->
+                return when (yearMonth.month) {
                     JANUARY -> 18
                     FEBRUARY -> 15
                     MARCH -> 18
@@ -434,6 +441,22 @@ class MigreringService(
                     OCTOBER -> 18
                     NOVEMBER -> 17
                     DECEMBER -> 5
+                }.run { yearMonth.atDay(this) }
+
+            2023 -> {
+                return when (yearMonth.month) {
+                    JANUARY -> 18
+                    FEBRUARY -> 15
+                    MARCH -> 20
+                    APRIL -> 17
+                    MAY -> 15
+                    JUNE -> 19
+                    JULY -> 18
+                    AUGUST -> 18
+                    SEPTEMBER -> 18
+                    OCTOBER -> 18
+                    NOVEMBER -> 17
+                    DECEMBER -> 4
                 }.run { yearMonth.atDay(this) }
             }
         }

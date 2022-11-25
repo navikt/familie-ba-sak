@@ -38,6 +38,8 @@ fun <T : Tidsenhet> Iterable<Tidslinje<*, T>>.tidsrom(): Collection<Tidspunkt<T>
     else -> (fraOgMed()!!..tilOgMed()!!).toList()
 }
 
+fun <T : Tidsenhet> tidsrom(vararg tidslinjer: Tidslinje<*, T>) = tidslinjer.toList().tidsrom()
+
 private fun <T : Tidsenhet> Iterable<Tidspunkt<T>>.størsteEllerNull() =
     this.reduceOrNull { acc, neste -> størsteAv(acc, neste) }
 

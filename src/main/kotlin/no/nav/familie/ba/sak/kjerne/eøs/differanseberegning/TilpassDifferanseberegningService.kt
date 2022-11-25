@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseEndretAbonnent
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
@@ -11,6 +13,8 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEndringAbonne
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -19,7 +23,9 @@ import org.springframework.transaction.annotation.Transactional
 class TilpassDifferanseberegningEtterTilkjentYtelseService(
     private val valutakursRepository: PeriodeOgBarnSkjemaRepository<Valutakurs>,
     private val utenlandskPeriodebeløpRepository: PeriodeOgBarnSkjemaRepository<UtenlandskPeriodebeløp>,
-    private val tilkjentYtelseRepository: TilkjentYtelseRepository
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
+    private val persongrunnlagService: PersongrunnlagService,
+    private val featureToggleService: FeatureToggleService
 ) : TilkjentYtelseEndretAbonnent {
 
     @Transactional
@@ -27,12 +33,13 @@ class TilpassDifferanseberegningEtterTilkjentYtelseService(
         val behandlingId = BehandlingId(tilkjentYtelse.behandling.id)
         val valutakurser = valutakursRepository.finnFraBehandlingId(behandlingId.id)
         val utenlandskePeriodebeløp = utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId.id)
+        val barna = persongrunnlagService.hentBarna(behandlingId.id)
 
         val oppdaterteAndeler = beregnDifferanse(
             tilkjentYtelse.andelerTilkjentYtelse,
             utenlandskePeriodebeløp,
             valutakurser
-        )
+        ).differanseberegnSøkersYtelser(barna, featureToggleService)
 
         tilkjentYtelseRepository.oppdaterTilkjentYtelse(tilkjentYtelse, oppdaterteAndeler)
     }
@@ -41,7 +48,9 @@ class TilpassDifferanseberegningEtterTilkjentYtelseService(
 @Service
 class TilpassDifferanseberegningEtterUtenlandskPeriodebeløpService(
     private val valutakursRepository: PeriodeOgBarnSkjemaRepository<Valutakurs>,
-    private val tilkjentYtelseRepository: TilkjentYtelseRepository
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
+    private val persongrunnlagService: PersongrunnlagService,
+    private val featureToggleService: FeatureToggleService
 ) : PeriodeOgBarnSkjemaEndringAbonnent<UtenlandskPeriodebeløp> {
     @Transactional
     override fun skjemaerEndret(
@@ -50,12 +59,13 @@ class TilpassDifferanseberegningEtterUtenlandskPeriodebeløpService(
     ) {
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandlingOptional(behandlingId.id) ?: return
         val valutakurser = valutakursRepository.finnFraBehandlingId(behandlingId.id)
+        val barna = persongrunnlagService.hentBarna(behandlingId.id)
 
         val oppdaterteAndeler = beregnDifferanse(
             tilkjentYtelse.andelerTilkjentYtelse,
             utenlandskePeriodebeløp,
             valutakurser
-        )
+        ).differanseberegnSøkersYtelser(barna, featureToggleService)
 
         tilkjentYtelseRepository.oppdaterTilkjentYtelse(tilkjentYtelse, oppdaterteAndeler)
     }
@@ -64,19 +74,22 @@ class TilpassDifferanseberegningEtterUtenlandskPeriodebeløpService(
 @Service
 class TilpassDifferanseberegningEtterValutakursService(
     private val utenlandskPeriodebeløpRepository: PeriodeOgBarnSkjemaRepository<UtenlandskPeriodebeløp>,
-    private val tilkjentYtelseRepository: TilkjentYtelseRepository
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
+    private val persongrunnlagService: PersongrunnlagService,
+    private val featureToggleService: FeatureToggleService
 ) : PeriodeOgBarnSkjemaEndringAbonnent<Valutakurs> {
 
     @Transactional
     override fun skjemaerEndret(behandlingId: BehandlingId, valutakurser: Collection<Valutakurs>) {
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandlingOptional(behandlingId.id) ?: return
         val utenlandskePeriodebeløp = utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId.id)
+        val barna = persongrunnlagService.hentBarna(behandlingId.id)
 
         val oppdaterteAndeler = beregnDifferanse(
             tilkjentYtelse.andelerTilkjentYtelse,
             utenlandskePeriodebeløp,
             valutakurser
-        )
+        ).differanseberegnSøkersYtelser(barna, featureToggleService)
 
         tilkjentYtelseRepository.oppdaterTilkjentYtelse(tilkjentYtelse, oppdaterteAndeler)
     }
@@ -130,4 +143,16 @@ internal fun Iterable<AndelTilkjentYtelse>.sjekkForDuplikater() {
             throwable
         )
     }
+}
+
+@Deprecated(
+    "Brukes for å kjøre funksjonaliteten bak funksjonsbryter. " +
+        "Skal fjernes når det er stabilt. Bruk i stedet <differanseberegnSøkersYtelser(barna)> direkte"
+)
+internal fun Collection<AndelTilkjentYtelse>.differanseberegnSøkersYtelser(
+    barna: List<Person>,
+    featureToggleService: FeatureToggleService
+) = when (featureToggleService.isEnabled(FeatureToggleConfig.KAN_DIFFERANSEBEREGNE_SØKERS_YTELSER, false)) {
+    true -> this.differanseberegnSøkersYtelser(barna)
+    false -> this
 }
