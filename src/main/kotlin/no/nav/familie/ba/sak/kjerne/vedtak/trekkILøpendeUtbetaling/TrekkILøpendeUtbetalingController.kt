@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
@@ -22,16 +23,16 @@ class TrekkILøpendeUtbetalingController(
     private val tilgangService: TilgangService,
     private val service: TrekkILøpendeUtbetalingService
 ) {
-
-    @PostMapping
+    @PostMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
     fun leggTilTrekkILøpendeUtbetaling(
         @RequestBody trekkILøpendeUtbetaling: RestTrekkILøpendeUtbetaling
-    ) {
+    ):
+        ResponseEntity<Ressurs<Long>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
             handling = "legg til trekk i løpende utbetaling"
         )
-        service.leggTilTrekkILøpendeUtbetaling(trekkILøpendeUtbetaling)
+        return ResponseEntity(Ressurs.success(service.leggTilTrekkILøpendeUtbetaling(trekkILøpendeUtbetaling)), HttpStatus.CREATED)
     }
 
     @DeleteMapping

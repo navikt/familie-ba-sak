@@ -12,8 +12,8 @@ class TrekkILøpendeUtbetalingService(
     @Autowired
     private val loggService: LoggService
 ) {
-    fun leggTilTrekkILøpendeUtbetaling(trekkILøpendeUtbetaling: RestTrekkILøpendeUtbetaling) {
-        repository.save(
+    fun leggTilTrekkILøpendeUtbetaling(trekkILøpendeUtbetaling: RestTrekkILøpendeUtbetaling): Long {
+        val lagret = repository.save(
             TrekkILøpendeUtbetaling(
                 behandlingId = trekkILøpendeUtbetaling.identifikator.behandlingId,
                 fom = trekkILøpendeUtbetaling.periode.fom,
@@ -22,6 +22,7 @@ class TrekkILøpendeUtbetalingService(
             )
         )
         loggService.loggTrekkILøpendeUtbetalingLagtTil(behandlingId = trekkILøpendeUtbetaling.identifikator.behandlingId)
+        return lagret.id
     }
 
     fun fjernTrekkILøpendeUtbetaling(identifikator: TrekkILøpendeBehandlingRestIdentifikator) {
