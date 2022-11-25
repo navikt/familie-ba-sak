@@ -16,8 +16,8 @@ class TrekkILøpendeUtbetalingService(
         repository.save(
             TrekkILøpendeUtbetaling(
                 behandlingId = trekkILøpendeUtbetaling.behandlingId,
-                fom = trekkILøpendeUtbetaling.fom,
-                tom = trekkILøpendeUtbetaling.tom,
+                fom = trekkILøpendeUtbetaling.periode.fom,
+                tom = trekkILøpendeUtbetaling.periode.tom,
                 feilutbetaltBeløp = trekkILøpendeUtbetaling.feilutbetaltBeløp
             )
         )
@@ -33,8 +33,10 @@ class TrekkILøpendeUtbetalingService(
         RestTrekkILøpendeUtbetaling(
             id = it.id,
             behandlingId = it.behandlingId,
-            fom = it.fom,
-            tom = it.tom,
+            RestPeriode(
+                fom = it.fom,
+                tom = it.tom
+            ),
             feilutbetaltBeløp = it.feilutbetaltBeløp
         )
     }

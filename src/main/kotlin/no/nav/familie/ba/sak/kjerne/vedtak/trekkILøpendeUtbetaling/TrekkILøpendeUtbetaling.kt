@@ -21,7 +21,7 @@ data class TrekkILøpendeUtbetaling(
     val behandlingId: Long,
     @Column(name = "fom", columnDefinition = "DATE")
     @Convert(converter = YearMonthConverter::class)
-    val fom: YearMonth?,
+    val fom: YearMonth,
     @Column(name = "tom", columnDefinition = "DATE")
     @Convert(converter = YearMonthConverter::class)
     val tom: YearMonth?,

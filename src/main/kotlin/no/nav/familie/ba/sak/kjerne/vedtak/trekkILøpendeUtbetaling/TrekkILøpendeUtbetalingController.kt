@@ -2,7 +2,10 @@ package no.nav.familie.ba.sak.kjerne.vedtak.trekkILøpendeUtbetaling
 
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
+import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -42,12 +45,12 @@ class TrekkILøpendeUtbetalingController(
         service.fjernTrekkILøpendeUtbetaling(trekkILøpendeUtbetaling)
     }
 
-    @GetMapping
-    fun hentTrekkILøpendeUtbetalinger() {
+    @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun hentTrekkILøpendeUtbetalinger(): ResponseEntity<Ressurs<List<RestTrekkILøpendeUtbetaling>>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
             handling = "hente trekk i løpende utbetalinger"
         )
-        service.hentTrekkILøpendeUtbetalinger()
+        return ResponseEntity.ok(Ressurs.success(service.hentTrekkILøpendeUtbetalinger()))
     }
 }
