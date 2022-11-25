@@ -22,7 +22,6 @@
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <spring.cloud.version>3.1.5</spring.cloud.version>
-        <spring.vault.version>2.3.2</spring.vault.version>
         <prosessering.version>1.20221110194901_e9e0d90</prosessering.version>
         <felles.version>1.20221101085322_cc4d556</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20220609214258_f30c3ce</eksterne-kontrakter-bisys.version>
@@ -138,11 +137,6 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.vault</groupId>
-            <artifactId>spring-vault-core</artifactId>
-            <version>${spring.vault.version}</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.cloud</groupId>
