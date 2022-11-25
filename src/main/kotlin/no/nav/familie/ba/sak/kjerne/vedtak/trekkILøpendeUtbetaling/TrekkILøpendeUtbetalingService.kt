@@ -15,24 +15,26 @@ class TrekkILøpendeUtbetalingService(
     fun leggTilTrekkILøpendeUtbetaling(trekkILøpendeUtbetaling: RestTrekkILøpendeUtbetaling) {
         repository.save(
             TrekkILøpendeUtbetaling(
-                behandlingId = trekkILøpendeUtbetaling.behandlingId,
+                behandlingId = trekkILøpendeUtbetaling.identifikator.behandlingId,
                 fom = trekkILøpendeUtbetaling.periode.fom,
                 tom = trekkILøpendeUtbetaling.periode.tom,
                 feilutbetaltBeløp = trekkILøpendeUtbetaling.feilutbetaltBeløp
             )
         )
-        loggService.loggTrekkILøpendeUtbetalingLagtTil(behandlingId = trekkILøpendeUtbetaling.behandlingId)
+        loggService.loggTrekkILøpendeUtbetalingLagtTil(behandlingId = trekkILøpendeUtbetaling.identifikator.behandlingId)
     }
 
-    fun fjernTrekkILøpendeUtbetaling(trekkILøpendeUtbetaling: RestTrekkILøpendeUtbetaling) {
-        repository.deleteById(trekkILøpendeUtbetaling.id)
-        loggService.loggTrekkILøpendeUtbetalingFjernet(behandlingId = trekkILøpendeUtbetaling.behandlingId)
+    fun fjernTrekkILøpendeUtbetaling(identifikator: TrekkILøpendeBehandlingRestIdentifikator) {
+        repository.deleteById(identifikator.id)
+        loggService.loggTrekkILøpendeUtbetalingFjernet(behandlingId = identifikator.behandlingId)
     }
 
     fun hentTrekkILøpendeUtbetalinger() = repository.findAll().map {
         RestTrekkILøpendeUtbetaling(
-            id = it.id,
-            behandlingId = it.behandlingId,
+            identifikator = TrekkILøpendeBehandlingRestIdentifikator(
+                id = it.id,
+                behandlingId = it.behandlingId
+            ),
             RestPeriode(
                 fom = it.fom,
                 tom = it.tom

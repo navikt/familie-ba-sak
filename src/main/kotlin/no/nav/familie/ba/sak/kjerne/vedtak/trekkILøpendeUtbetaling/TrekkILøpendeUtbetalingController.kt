@@ -36,13 +36,13 @@ class TrekkILøpendeUtbetalingController(
 
     @DeleteMapping
     fun fjernTrekkILøpendeUtbetaling(
-        @RequestBody trekkILøpendeUtbetaling: RestTrekkILøpendeUtbetaling
+        @RequestBody identifikator: TrekkILøpendeBehandlingRestIdentifikator
     ) {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
             handling = "Fjerner trekk i løpende utbetaling"
         )
-        service.fjernTrekkILøpendeUtbetaling(trekkILøpendeUtbetaling)
+        service.fjernTrekkILøpendeUtbetaling(identifikator)
     }
 
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
