@@ -418,10 +418,10 @@ class MigreringService(
         }
     }
 
-    private fun infotrygdKjøredato(yearMonth: YearMonth): LocalDate {
-        yearMonth.run {
-            if (this.year == 2021 || this.year == 2022) {
-                return when (this.month) {
+    fun infotrygdKjøredato(yearMonth: YearMonth): LocalDate {
+        when (yearMonth.year) {
+            2022 ->
+                return when (yearMonth.month) {
                     JANUARY -> 18
                     FEBRUARY -> 15
                     MARCH -> 18
@@ -434,6 +434,22 @@ class MigreringService(
                     OCTOBER -> 18
                     NOVEMBER -> 17
                     DECEMBER -> 5
+                }.run { yearMonth.atDay(this) }
+
+            2023 -> {
+                return when (yearMonth.month) {
+                    JANUARY -> 18
+                    FEBRUARY -> 15
+                    MARCH -> 20
+                    APRIL -> 17
+                    MAY -> 15
+                    JUNE -> 19
+                    JULY -> 18
+                    AUGUST -> 18
+                    SEPTEMBER -> 18
+                    OCTOBER -> 18
+                    NOVEMBER -> 17
+                    DECEMBER -> 4
                 }.run { yearMonth.atDay(this) }
             }
         }

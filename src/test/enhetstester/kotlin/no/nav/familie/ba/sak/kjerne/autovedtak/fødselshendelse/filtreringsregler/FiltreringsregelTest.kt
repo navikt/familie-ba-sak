@@ -65,6 +65,31 @@ internal class FiltreringsregelTest {
     }
 
     @Test
+    fun `Regelevaluering skal gi resultat IKKE_OPPFYLT når mor har løpende EØS-barnetrygd`() {
+        val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(aktør = gyldigAktørId)
+        val barnet = tilfeldigPerson(LocalDate.now()).copy(aktør = gyldigAktørId)
+        val restenAvBarna: List<PersonInfo> = listOf()
+
+        val evalueringer = evaluerFiltreringsregler(
+            FiltreringsreglerFakta(
+                mor = mor,
+                morMottarLøpendeUtvidet = false,
+                barnaFraHendelse = listOf(barnet),
+                restenAvBarna = restenAvBarna,
+                morLever = true,
+                barnaLever = true,
+                morHarVerge = false,
+                erFagsakenMigrertEtterBarnFødt = false,
+                løperBarnetrygdForBarnetPåAnnenForelder = false,
+                morMottarEøsBarnetrygd = true
+            )
+        )
+
+        assertThat(evalueringer.erOppfylt()).isFalse
+        assertEnesteRegelMedResultatNei(evalueringer, Filtreringsregel.MOR_HAR_IKKE_LØPENDE_EØS_BARNETRYGD)
+    }
+
+    @Test
     fun `Regelevaluering skal resultere i NEI når mor er under 18 år`() {
         val mor = tilfeldigPerson(LocalDate.now().minusYears(17)).copy(aktør = gyldigAktørId)
         val barnet = tilfeldigPerson(LocalDate.now()).copy(aktør = gyldigAktørId)
@@ -553,6 +578,7 @@ internal class FiltreringsregelTest {
             Filtreringsregel.MOR_ER_OVER_18_ÅR,
             Filtreringsregel.MOR_HAR_IKKE_VERGE,
             Filtreringsregel.MOR_MOTTAR_IKKE_LØPENDE_UTVIDET,
+            Filtreringsregel.MOR_HAR_IKKE_LØPENDE_EØS_BARNETRYGD,
             Filtreringsregel.FAGSAK_IKKE_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT,
             Filtreringsregel.LØPER_IKKE_BARNETRYGD_FOR_BARNET
         )
