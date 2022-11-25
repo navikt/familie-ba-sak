@@ -237,6 +237,7 @@ fun ManueltBrevRequest.tilBrev(hentLandkoder: (() -> Map<String, String>)) = whe
     Brevmal.FORLENGET_SVARTIDSBREV,
     Brevmal.FORLENGET_SVARTIDSBREV_INSTITUSJON ->
         ForlengetSvartidsbrev(
+            mal = brevmal,
             navn = this.mottakerNavn,
             fodselsnummer = this.vedrørende?.fødselsnummer ?: mottakerIdent,
             enhetNavn = this.enhetNavn(),
