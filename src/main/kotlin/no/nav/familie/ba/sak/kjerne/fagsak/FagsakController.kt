@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestHentFagsakForPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.RestHentFagsakerForPerson
 import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSøkParam
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
@@ -121,6 +122,28 @@ class FagsakController(
         val fagsakDeltagere = fagsakService.hentFagsakDeltager(søkParam.personIdent)
         return ResponseEntity.ok().body(Ressurs.success(fagsakDeltagere))
     }
+
+    @PostMapping(path = ["/sok/fagsaker-hvor-person-er-deltaker"])
+    fun søkFagsakerHvorPersonErSøkerEllerMottarOrdinærBarnetrygd(@RequestBody request: RestSøkFagsakRequest): ResponseEntity<Ressurs<List<RestFagsakIdOgTilknyttetAktør>>> {
+        tilgangService.validerTilgangTilPersoner(
+            personIdenter = listOf(request.personIdent),
+            event = AuditLoggerEvent.ACCESS
+        )
+
+        val aktør = personidentService.hentAktør(request.personIdent)
+
+        val fagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær = fagsakService.finnAlleFagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær(aktør)
+
+        val fagsakIdOgTilknyttetAktør = fagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær.map { RestFagsakIdOgTilknyttetAktør(aktør = it.aktør, fagsakId = it.id) }
+
+        return ResponseEntity.ok().body(Ressurs.success(fagsakIdOgTilknyttetAktør))
+    }
+
+    data class RestSøkFagsakRequest(val personIdent: String)
+    data class RestFagsakIdOgTilknyttetAktør(
+        val aktør: Aktør,
+        val fagsakId: Long
+    )
 
     @PostMapping(path = ["/sok/fagsakdeltagere"])
     fun oppgiFagsakdeltagere(@RequestBody restSøkParam: RestSøkParam): ResponseEntity<Ressurs<List<RestFagsakDeltager>>> {
