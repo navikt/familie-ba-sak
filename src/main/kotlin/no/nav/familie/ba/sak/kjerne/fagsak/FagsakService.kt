@@ -119,7 +119,7 @@ class FagsakService(
         }
 
         return if (eksisterendeFagsak == null) {
-            val nyFagsak = lagre(Fagsak(aktør = aktør, type = type))
+            val nyFagsak = Fagsak(aktør = aktør, type = type)
             if (fraAutomatiskBehandling) {
                 antallFagsakerOpprettetFraAutomatisk.increment()
             } else {
@@ -131,10 +131,9 @@ class FagsakService(
                     .apply {
                         nyFagsak.institusjon = this
                     }
-                fagsakRepository.saveAndFlush(nyFagsak)
             }
             skyggesakService.opprettSkyggesak(nyFagsak)
-            nyFagsak
+            lagre(nyFagsak)
         } else eksisterendeFagsak
     }
 
