@@ -110,7 +110,7 @@ class FagsakService(
     ): Fagsak {
         val aktør = personidentService.hentOgLagreAktør(personIdent, true)
 
-        var fagsak = when (type) {
+        val eksisterendeFagsak = when (type) {
             FagsakType.INSTITUSJON -> {
                 if (institusjon?.orgNummer == null) throw FunksjonellFeil("Mangler påkrevd variabel orgnummer for institusjon")
                 fagsakRepository.finnFagsakForInstitusjonOgOrgnummer(aktør, institusjon.orgNummer)
@@ -118,8 +118,8 @@ class FagsakService(
             else -> fagsakRepository.finnFagsakForAktør(aktør, type)
         }
 
-        if (fagsak == null) {
-            fagsak = lagre(Fagsak(aktør = aktør, type = type))
+        return if (eksisterendeFagsak == null) {
+            val nyFagsak = lagre(Fagsak(aktør = aktør, type = type))
             if (fraAutomatiskBehandling) {
                 antallFagsakerOpprettetFraAutomatisk.increment()
             } else {
@@ -129,14 +129,13 @@ class FagsakService(
             if (type == FagsakType.INSTITUSJON) {
                 institusjonService.hentEllerOpprettInstitusjon(institusjon?.orgNummer!!, institusjon.tssEksternId)
                     .apply {
-                        fagsak.institusjon = this
+                        nyFagsak.institusjon = this
                     }
-                fagsakRepository.saveAndFlush(fagsak)
+                fagsakRepository.saveAndFlush(nyFagsak)
             }
-
-            skyggesakService.opprettSkyggesak(fagsak)
-        }
-        return fagsak
+            skyggesakService.opprettSkyggesak(nyFagsak)
+            nyFagsak
+        } else eksisterendeFagsak
     }
 
     fun hentFagsakerPåPerson(aktør: Aktør): List<Fagsak> {
