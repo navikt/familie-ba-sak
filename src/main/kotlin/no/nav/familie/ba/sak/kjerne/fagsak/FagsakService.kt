@@ -134,7 +134,9 @@ class FagsakService(
             }
             skyggesakService.opprettSkyggesak(nyFagsak)
             lagre(nyFagsak)
-        } else eksisterendeFagsak
+        } else {
+            eksisterendeFagsak
+        }
     }
 
     fun hentFagsakerPåPerson(aktør: Aktør): List<Fagsak> {
