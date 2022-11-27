@@ -299,7 +299,7 @@ class FagsakService(
         return fagsakRepository.finnFagsakForAktør(aktør, fagsakType)
     }
 
-    fun hentAlleFagsakerPåPerson(aktør: Aktør): List<Fagsak> {
+    fun hentAlleFagsakerForAktør(aktør: Aktør): List<Fagsak> {
         return fagsakRepository.finnFagsakerForAktør(aktør)
     }
 
@@ -501,7 +501,7 @@ class FagsakService(
     }
 
     fun finnAlleFagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær(aktør: Aktør): List<Fagsak> {
-        val alleLøpendeFagsakerPåAktør = hentAlleFagsakerPåPerson(aktør).filter { it.status == FagsakStatus.LØPENDE }
+        val alleLøpendeFagsakerPåAktør = hentAlleFagsakerForAktør(aktør).filter { it.status == FagsakStatus.LØPENDE }
 
         val fagsakerHvorAktørHarLøpendeOrdinærBarnetrygd = finnAlleFagsakerHvorAktørHarLøpendeOrdinærBarnetrygd(aktør)
 
