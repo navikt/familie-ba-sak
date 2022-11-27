@@ -168,11 +168,6 @@ spring:
     hibernate:
       ddl-auto: none
 
-  cloud:
-    vault:
-      database:
-        role: postgres
-
 
 SANITY_DATASET: "ba-test"
 
