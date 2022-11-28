@@ -132,8 +132,9 @@ class FagsakService(
                         nyFagsak.institusjon = this
                     }
             }
-            skyggesakService.opprettSkyggesak(nyFagsak)
-            lagre(nyFagsak)
+            val nyOgLagretFagsak = lagre(nyFagsak)
+            skyggesakService.opprettSkyggesak(nyOgLagretFagsak)
+            nyOgLagretFagsak
         } else {
             eksisterendeFagsak
         }
