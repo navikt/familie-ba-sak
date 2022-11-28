@@ -24,7 +24,7 @@ class TrekkILøpendeUtbetalingController(
     private val tilgangService: TilgangService,
     private val service: TrekkILøpendeUtbetalingService
 ) {
-    @PostMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
+    @PostMapping(produces = [MediaType.APPLICATION_JSON_VALUE], consumes = [MediaType.APPLICATION_JSON_VALUE])
     fun leggTilTrekkILøpendeUtbetaling(
         @RequestBody trekkILøpendeUtbetaling: RestTrekkILøpendeUtbetaling
     ):
@@ -36,7 +36,7 @@ class TrekkILøpendeUtbetalingController(
         return ResponseEntity(Ressurs.success(service.leggTilTrekkILøpendeUtbetaling(trekkILøpendeUtbetaling)), HttpStatus.CREATED)
     }
 
-    @PutMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
+    @PutMapping(produces = [MediaType.APPLICATION_JSON_VALUE], consumes = [MediaType.APPLICATION_JSON_VALUE])
     fun oppdaterTrekkILøpendeUtbetaling(
         @RequestBody trekkILøpendeUtbetaling: RestTrekkILøpendeUtbetaling
     ): ResponseEntity<Ressurs<RestTrekkILøpendeUtbetaling>> {
@@ -47,7 +47,7 @@ class TrekkILøpendeUtbetalingController(
         return ResponseEntity(Ressurs.success(service.oppdaterTrekkILøpendeUtbetaling(trekkILøpendeUtbetaling)), HttpStatus.OK)
     }
 
-    @DeleteMapping
+    @DeleteMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
     fun fjernTrekkILøpendeUtbetaling(
         @RequestBody identifikator: TrekkILøpendeBehandlingRestIdentifikator
     ) {
