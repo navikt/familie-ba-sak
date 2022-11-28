@@ -142,7 +142,7 @@ class ClientMocks {
         }
 
         every {
-            mockPersonopplysningerService.hentLandkodeUtenlandskBostedsadresse(any())
+            mockPersonopplysningerService.hentLandkodeAlpha2UtenlandskBostedsadresse(any())
         } returns "NO"
 
         val ukjentId = "43125678910"
@@ -160,16 +160,6 @@ class ClientMocks {
         } throws IntegrasjonException("feil id")
 
         return mockPersonopplysningerService
-    }
-
-    @Bean
-    @Primary
-    fun mockFeatureToggleService(): FeatureToggleService {
-        val mockFeatureToggleService = mockk<FeatureToggleService>(relaxed = true)
-
-        clearFeatureToggleMocks(mockFeatureToggleService)
-
-        return mockFeatureToggleService
     }
 
     @Bean
@@ -288,7 +278,7 @@ class ClientMocks {
             } returns VergeResponse(false)
 
             every {
-                mockPersonopplysningerService.hentLandkodeUtenlandskBostedsadresse(any())
+                mockPersonopplysningerService.hentLandkodeAlpha2UtenlandskBostedsadresse(any())
             } returns "NO"
 
             val idSlotForHentPersoninfo = slot<Aktør>()
@@ -423,6 +413,7 @@ class ClientMocks {
                             )
                         )
                     )
+
                     mockBarnAutomatiskBehandlingFnr -> personInfo.getValue(id)
                     mockBarnAutomatiskBehandling2Fnr -> personInfo.getValue(id)
                     mockSøkerAutomatiskBehandlingFnr -> personInfo.getValue(id)

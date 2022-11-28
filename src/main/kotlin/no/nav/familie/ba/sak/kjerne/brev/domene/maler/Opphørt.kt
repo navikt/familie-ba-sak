@@ -22,7 +22,8 @@ data class Opphørt(
                         beslutter = vedtakFellesfelter.beslutter
                     ),
                     hjemmeltekst = vedtakFellesfelter.hjemmeltekst,
-                    feilutbetaling = erFeilutbetalingPåBehandling
+                    feilutbetaling = erFeilutbetalingPåBehandling,
+                    korrigertVedtak = vedtakFellesfelter.korrigertVedtakData
                 ),
                 flettefelter = FlettefelterForDokumentImpl(
                     navn = vedtakFellesfelter.søkerNavn,
@@ -44,6 +45,7 @@ data class OpphørtData(
     data class Delmaler(
         val signaturVedtak: SignaturVedtak,
         val feilutbetaling: Boolean,
-        val hjemmeltekst: Hjemmeltekst
+        val hjemmeltekst: Hjemmeltekst,
+        val korrigertVedtak: KorrigertVedtakData?
     )
 }

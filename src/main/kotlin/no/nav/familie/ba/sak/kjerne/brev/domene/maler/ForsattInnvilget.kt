@@ -20,7 +20,8 @@ data class ForsattInnvilget(
                         saksbehandler = vedtakFellesfelter.saksbehandler,
                         beslutter = vedtakFellesfelter.beslutter
                     ),
-                    hjemmeltekst = vedtakFellesfelter.hjemmeltekst
+                    hjemmeltekst = vedtakFellesfelter.hjemmeltekst,
+                    korrigertVedtak = vedtakFellesfelter.korrigertVedtakData
                 ),
                 flettefelter = FlettefelterForDokumentImpl(
                     navn = vedtakFellesfelter.søkerNavn,
@@ -41,6 +42,7 @@ data class ForsattInnvilgetData(
 
     data class Delmaler(
         val signaturVedtak: SignaturVedtak,
-        val hjemmeltekst: Hjemmeltekst
+        val hjemmeltekst: Hjemmeltekst,
+        val korrigertVedtak: KorrigertVedtakData?
     )
 }

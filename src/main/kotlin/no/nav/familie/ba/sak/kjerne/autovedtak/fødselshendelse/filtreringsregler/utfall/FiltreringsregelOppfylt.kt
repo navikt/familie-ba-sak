@@ -27,6 +27,10 @@ enum class FiltreringsregelOppfylt(val beskrivelse: String, private val filtreri
     LØPER_IKKE_BARNETRYGD_FOR_BARNET(
         "Det løper ikke barnetrygd for barnet på annen forelder",
         Filtreringsregel.LØPER_IKKE_BARNETRYGD_FOR_BARNET
+    ),
+    MOR_HAR_IKKE_LØPENDE_EØS_BARNETRYGD(
+        "Mor har ikke løpende EØS-barnetrygd",
+        Filtreringsregel.MOR_HAR_IKKE_LØPENDE_EØS_BARNETRYGD
     );
 
     override fun hentBeskrivelse(): String {

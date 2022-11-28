@@ -16,6 +16,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.utbetalingsoppdrag
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
@@ -37,7 +40,8 @@ class ØkonomiService(
     private val utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator,
     private val behandlingService: BehandlingService,
     private val featureToggleService: FeatureToggleService,
-    private val tilkjentYtelseValideringService: TilkjentYtelseValideringService
+    private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository
 
 ) {
     private val sammeOppdragSendtKonflikt = Metrics.counter("familie.ba.sak.samme.oppdrag.sendt.konflikt")
@@ -61,7 +65,7 @@ class ØkonomiService(
     }
 
     private fun iverksettOppdrag(utbetalingsoppdrag: Utbetalingsoppdrag, behandlingId: Long) {
-        if (utbetalingsoppdrag.utbetalingsperiode.isEmpty()) {
+        if (!utbetalingsoppdrag.skalIverksettesMotOppdrag()) {
             UtbetalingsoppdragService.logger.warn(
                 "Iverksetter ikke noe mot oppdrag. " +
                     "Ingen utbetalingsperioder for behandlingId=$behandlingId"
@@ -83,13 +87,12 @@ class ØkonomiService(
         }
     }
 
-    fun hentStatus(oppdragId: OppdragId, behandlingId: Long): OppdragStatus {
-        val andelerTilkjentYtelse = beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandlingId)
-        if (andelerTilkjentYtelse.any { it.erAndelSomSkalSendesTilOppdrag() }) {
-            return økonomiKlient.hentStatus(oppdragId)
+    fun hentStatus(oppdragId: OppdragId, behandlingId: Long): OppdragStatus =
+        if (tilkjentYtelseRepository.findByBehandling(behandlingId).skalIverksettesMotOppdrag()) {
+            økonomiKlient.hentStatus(oppdragId)
+        } else {
+            OppdragStatus.KVITTERT_OK
         }
-        return OppdragStatus.KVITTERT_OK // sendte ikke data til økonomi
-    }
 
     @Transactional
     fun genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
@@ -220,6 +223,11 @@ class ØkonomiService(
         val logger = LoggerFactory.getLogger(ØkonomiService::class.java)
     }
 }
+
+private fun Utbetalingsoppdrag.skalIverksettesMotOppdrag(): Boolean = utbetalingsperiode.isNotEmpty()
+
+private fun TilkjentYtelse.skalIverksettesMotOppdrag(): Boolean =
+    this.utbetalingsoppdrag()?.skalIverksettesMotOppdrag() ?: false
 
 fun Utbetalingsoppdrag.harLøpendeUtbetaling() =
     this.utbetalingsperiode.any {

@@ -82,8 +82,10 @@ class SaksstatistikkService(
             behandlingType = behandling.type.name,
             behandlingStatus = behandling.status.name,
             behandlingKategori = when (behandling.underkategori) { // Gjøres pga. tilpasning til DVH-modell
-                BehandlingUnderkategori.ORDINÆR, BehandlingUnderkategori.UTVIDET, BehandlingUnderkategori.INSTITUSJON ->
+                BehandlingUnderkategori.ORDINÆR, BehandlingUnderkategori.UTVIDET ->
                     behandling.underkategori.name
+
+                BehandlingUnderkategori.INSTITUSJON -> BehandlingUnderkategori.ORDINÆR.name // Institusjon er ordinær og ligger under behandlingUnderkategori i saksstatiskk-kontrakt
             },
             behandlingUnderkategori = when (behandling.fagsak.type) { // <-'
                 NORMAL -> null
@@ -166,7 +168,7 @@ class SaksstatistikkService(
         return if (person.bostedsadresser.isNotEmpty()) {
             "NO"
         } else {
-            personopplysningerService.hentLandkodeUtenlandskBostedsadresse(
+            personopplysningerService.hentLandkodeAlpha2UtenlandskBostedsadresse(
                 person.aktør
             )
         }
@@ -178,7 +180,9 @@ class SaksstatistikkService(
         return if (personInfo.bostedsadresser.isNotEmpty()) {
             "NO"
         } else {
-            personopplysningerService.hentLandkodeUtenlandskBostedsadresse(aktør)
+            personopplysningerService.hentLandkodeAlpha2UtenlandskBostedsadresse(
+                aktør
+            )
         }
     }
 

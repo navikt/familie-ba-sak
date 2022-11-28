@@ -1,12 +1,7 @@
 package no.nav.familie.ba.sak.config
 
-import io.getunleash.DefaultUnleash
-import io.getunleash.UnleashContext
-import io.getunleash.UnleashContextProvider
-import io.getunleash.strategy.GradualRolloutRandomStrategy
-import io.getunleash.strategy.Strategy
-import io.getunleash.util.UnleashConfig
-import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ba.sak.config.featureToggle.DummyFeatureToggleService
+import no.nav.familie.ba.sak.config.featureToggle.UnleashFeatureToggleService
 import org.slf4j.LoggerFactory
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.ConstructorBinding
@@ -39,67 +34,12 @@ class FeatureToggleConfig(
             lagDummyFeatureToggleService()
         }
 
-    private fun lagUnleashFeatureToggleService(): FeatureToggleService {
-        val defaultUnleash = DefaultUnleash(
-            UnleashConfig.builder()
-                .appName(unleash.applicationName)
-                .unleashAPI(unleash.uri)
-                .unleashContextProvider(lagUnleashContextProvider())
-                .build(),
-            ByClusterStrategy(unleash.cluster),
-            ByAnsvarligSaksbehandler(),
-            GradualRolloutRandomStrategy()
-        )
+    private fun lagUnleashFeatureToggleService(): FeatureToggleService = UnleashFeatureToggleService(unleash)
 
-        return object : FeatureToggleService {
-            override fun isEnabled(toggleId: String, defaultValue: Boolean): Boolean {
-                return defaultUnleash.isEnabled(toggleId, defaultValue)
-            }
-        }
-    }
-
-    private fun lagUnleashContextProvider(): UnleashContextProvider {
-        return UnleashContextProvider {
-            UnleashContext.builder()
-                .appName(unleash.applicationName)
-                .build()
-        }
-    }
-
-    class ByClusterStrategy(private val clusterName: String) : Strategy {
-
-        override fun isEnabled(parameters: MutableMap<String, String>): Boolean {
-            if (parameters.isEmpty()) return false
-            return parameters["cluster"]?.contains(clusterName) ?: false
-        }
-
-        override fun getName(): String = "byCluster"
-    }
-
-    class ByAnsvarligSaksbehandler : Strategy {
-
-        override fun isEnabled(parameters: MutableMap<String, String>): Boolean {
-            if (parameters.isEmpty()) return false
-
-            return parameters["saksbehandler"]?.contains(SikkerhetContext.hentSaksbehandlerEpost()) ?: false
-        }
-
-        override fun getName(): String = "byAnsvarligSaksbehandler"
-    }
-
-    private fun lagDummyFeatureToggleService(): FeatureToggleService {
-        return object : FeatureToggleService {
-            override fun isEnabled(toggleId: String, defaultValue: Boolean): Boolean {
-                if (unleash.cluster == "lokalutvikling") {
-                    return false
-                }
-
-                return defaultValue
-            }
-        }
-    }
+    private fun lagDummyFeatureToggleService(): FeatureToggleService = DummyFeatureToggleService(unleash)
 
     companion object {
+        const val KAN_DIFFERANSEBEREGNE_SØKERS_YTELSER = "familie-ba-sak.differanseberegn-sokers-ytelser"
         const val KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV = "familie-ba-sak.behandling.korreksjon-vedtaksbrev"
         const val SKATTEETATEN_API_EKTE_DATA = "familie-ba-sak.skatteetaten-api-ekte-data-i-respons"
         const val IKKE_STOPP_MIGRERINGSBEHANDLING = "familie-ba-sak.ikke.stopp.migeringsbehandling"
@@ -110,7 +50,9 @@ class FeatureToggleConfig(
             "familie-ba-sak.endringer.validering.migeringsbehandling"
         const val NY_MÅTE_Å_GENERERE_ANDELER_TILKJENT_YTELSE = "familie-ba-sak.behandling.generer-andeler-med-ny-metode"
         const val NY_MÅTE_Å_SPLITTE_VEDTAKSPERIODER = "familie-ba-sak.behandling.ny-metode-for-splitt-vedtaksperioder"
-        const val SJEKK_OM_UTVIDET_ER_ENDRET_BEHANDLINGSRESULTAT = "familie-ba-sak.behandling.behandlingsresultat-utvidet-endret"
+        const val SJEKK_OM_UTVIDET_ER_ENDRET_BEHANDLINGSRESULTAT =
+            "familie-ba-sak.behandling.behandlingsresultat-utvidet-endret"
+        const val NY_MÅTE_Å_GENERERE_ATY_BARNA = "familie-ba-sak.behandling.ny-metode-generer-aty-barna"
 
         const val KAN_BEHANDLE_UTVIDET_EØS_SEKUNDÆRLAND = "familie-ba-sak.behandling.utvidet-eos-sekunderland"
 
@@ -119,6 +61,8 @@ class FeatureToggleConfig(
             "familie-ba-sak.generer.utbetalingsoppdrag.ny.validering"
         const val KAN_MIGRERE_EØS_PRIMÆRLAND_ORDINÆR = "familie-ba-sak.migrer.or-eu"
         const val KAN_MIGRERE_EØS_PRIMÆRLAND_UTVIDET = "familie-ba-sak.migrer.ut-eu"
+
+        const val SKAL_KUNNE_KORRIGERE_VEDTAK = "familie-ba-sak.kunne-korrigere-vedtak"
 
         private val logger = LoggerFactory.getLogger(FeatureToggleConfig::class.java)
     }

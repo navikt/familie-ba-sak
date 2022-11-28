@@ -21,11 +21,6 @@ spec:
   prometheus:
     enabled: true
     path: /internal/prometheus
-  vault:
-    enabled: true
-    paths:
-      - kvPath: /serviceuser/data/dev/srvfamilie-ba-sak
-        mountPath: /var/run/secrets/srvfamilie-ba-sak
   replicas:
     min: 2
     max: 4

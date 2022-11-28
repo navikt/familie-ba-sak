@@ -52,10 +52,6 @@ BA_SAK_CLIENT_ID må settes til `AZURE_APP_CLIENT_ID` og CLIENT_SECRET til`AZURE
 
 Se `.deploy/nais/azure-ad-app-lokal.yaml` dersom du ønsker å deploye `azuread-familie-ba-sak-lokal`
 
-Dersom man vil gjøre autentiserte kall mot andre tjenester, må man også legge til scope for den aktuelle tjenesten i
-miljøveriablene. Det kan hentes
-fra [Vault](https://vault.adeo.no/ui/vault/secrets/kv%2Fpreprod%2Ffss/show/familie-ba-sak/default).
-
 Til slutt skal miljøvariablene se slik ut:
 
 DevLauncher/DevLauncherPostgres
@@ -64,7 +60,12 @@ DevLauncher/DevLauncherPostgres
 * CLIENT_SECRET=`AZURE_APP_CLIENT_SECRET` (fra `azuread-familie-ba-sak-lokal`)
 
 DevLauncherPostgresPreprod:
-krever at man henter azuread fra en pod til familie-ba-sak. Som rulleres oftere enn azuread-familie-ba-sak-lokal
+Trenger i utgangspunktet ikke å sette miljøvariabler manuelt. De hentes automatisk fra Nais.
+Krever at man er logget på naisdevice og gcloud.
+Husk å sette `BA_SAK_SCOPE=api://dev-gcp.teamfamilie.familie-ba-sak/.default` i `.env`-filen frontend.
+
+Alternativt kan du starte med flagget '--manuellMiljø', og manuelt setje miljøvariablane.
+Det krever at man henter azuread fra en pod til familie-ba-sak. Som rulleres oftere enn azuread-familie-ba-sak-lokal
 `kubectl -n teamfamilie exec -c familie-ba-sak -it familie-ba-sak-byttmegmedpodid -- env | grep AZURE_APP_CLIENT`
 
 * BA_SAK_CLIENT_ID=`AZURE_APP_CLIENT_ID` (fra `familie-ba-sak`)

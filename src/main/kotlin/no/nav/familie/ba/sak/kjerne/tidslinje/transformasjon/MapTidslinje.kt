@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon
 
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.Innholdsresultat
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.innholdsresultatForTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.Innhold
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.innholdForTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.tidslinjeFraTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom
@@ -13,10 +13,10 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom
  */
 fun <I, T : Tidsenhet, R> Tidslinje<I, T>.map(mapper: (I?) -> R?): Tidslinje<R, T> =
     tidsrom().tidslinjeFraTidspunkt { tidspunkt ->
-        val innholdsresultat = this.innholdsresultatForTidspunkt(tidspunkt)
+        val innholdsresultat = this.innholdForTidspunkt(tidspunkt)
         when (innholdsresultat.harInnhold) {
-            false -> Innholdsresultat.utenInnhold()
-            else -> Innholdsresultat<R>(mapper(innholdsresultat.innhold))
+            false -> Innhold.utenInnhold()
+            else -> Innhold<R>(mapper(innholdsresultat.innhold))
         }
     }
 
@@ -26,9 +26,9 @@ fun <I, T : Tidsenhet, R> Tidslinje<I, T>.map(mapper: (I?) -> R?): Tidslinje<R, 
  */
 fun <I, T : Tidsenhet, R> Tidslinje<I, T>.mapIkkeNull(mapper: (I) -> R?): Tidslinje<R, T> =
     tidsrom().tidslinjeFraTidspunkt { tidspunkt ->
-        val innholdsresultat = this.innholdsresultatForTidspunkt(tidspunkt)
+        val innholdsresultat = this.innholdForTidspunkt(tidspunkt)
         when (innholdsresultat.harInnhold) {
-            false, (innholdsresultat.innhold == null) -> Innholdsresultat.utenInnhold()
-            else -> Innholdsresultat<R>(mapper(innholdsresultat.innhold!!))
+            false, (innholdsresultat.innhold == null) -> Innhold.utenInnhold()
+            else -> Innhold<R>(mapper(innholdsresultat.innhold!!))
         }
     }

@@ -142,6 +142,6 @@ fun Iterable<Utbetalingsperiode>.sumUtbetaling(): Int {
     }
 
     return (tidslinje.tidsrom()).fold(0) { sum, tidspunkt ->
-        sum + (tidslinje.innholdForTidspunkt(tidspunkt) ?: 0)
+        sum + (tidslinje.innholdForTidspunkt(tidspunkt).innhold ?: 0)
     }
 }

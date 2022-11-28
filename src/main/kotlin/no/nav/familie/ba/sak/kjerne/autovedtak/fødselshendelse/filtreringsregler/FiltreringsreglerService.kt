@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregle
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -100,6 +101,7 @@ class FiltreringsreglerService(
         val fakta = FiltreringsreglerFakta(
             mor = personopplysningGrunnlag.søker,
             morMottarLøpendeUtvidet = behandling.underkategori == BehandlingUnderkategori.UTVIDET,
+            morMottarEøsBarnetrygd = behandling.kategori == BehandlingKategori.EØS,
             barnaFraHendelse = barnaFraHendelse,
             restenAvBarna = finnRestenAvBarnasPersonInfo(morsAktørId, barnaFraHendelse),
             morLever = !personopplysningGrunnlag.søker.erDød(),

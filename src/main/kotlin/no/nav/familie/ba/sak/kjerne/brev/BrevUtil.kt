@@ -244,7 +244,8 @@ fun hentHjemmeltekst(
     minimerteVedtaksperioder: List<MinimertVedtaksperiode>,
     sanityBegrunnelser: List<SanityBegrunnelse>,
     opplysningspliktHjemlerSkalMedIBrev: Boolean = false,
-    målform: Målform
+    målform: Målform,
+    vedtakKorrigertHjemmelSkalMedIBrev: Boolean = false
 ): String {
     val sanityStandardbegrunnelser = minimerteVedtaksperioder.flatMap { vedtaksperiode ->
         vedtaksperiode.begrunnelser.mapNotNull { begrunnelse ->
@@ -266,14 +267,18 @@ fun hentHjemmeltekst(
             finnesVedtaksperiodeMedFritekst = minimerteVedtaksperioder.flatMap { it.fritekster }.isNotEmpty()
         )
 
+    val forvaltningsloverHjemler = hentForvaltningsloverHjemler(vedtakKorrigertHjemmelSkalMedIBrev)
+
     val alleHjemlerForBegrunnelser = hentAlleTyperHjemler(
-        hjemlerSeparasjonsavtaleStorbritannia = sanityEøsBegrunnelser.flatMap { it.hjemlerSeperasjonsavtalenStorbritannina }.distinct(),
+        hjemlerSeparasjonsavtaleStorbritannia = sanityEøsBegrunnelser.flatMap { it.hjemlerSeperasjonsavtalenStorbritannina }
+            .distinct(),
         ordinæreHjemler = ordinæreHjemler.distinct(),
         hjemlerFraFolketrygdloven = (sanityStandardbegrunnelser.flatMap { it.hjemlerFolketrygdloven } + sanityEøsBegrunnelser.flatMap { it.hjemlerFolketrygdloven })
             .distinct(),
         hjemlerEØSForordningen883 = sanityEøsBegrunnelser.flatMap { it.hjemlerEØSForordningen883 }.distinct(),
         hjemlerEØSForordningen987 = sanityEøsBegrunnelser.flatMap { it.hjemlerEØSForordningen987 }.distinct(),
-        målform = målform
+        målform = målform,
+        hjemlerFraForvaltningsloven = forvaltningsloverHjemler
     )
 
     return slåSammenHjemlerAvUlikeTyper(alleHjemlerForBegrunnelser)
@@ -301,7 +306,8 @@ private fun hentAlleTyperHjemler(
     hjemlerFraFolketrygdloven: List<String>,
     hjemlerEØSForordningen883: List<String>,
     hjemlerEØSForordningen987: List<String>,
-    målform: Målform
+    målform: Målform,
+    hjemlerFraForvaltningsloven: List<String>
 ): List<String> {
     val alleHjemlerForBegrunnelser = mutableListOf<String>()
 
@@ -356,6 +362,18 @@ private fun hentAlleTyperHjemler(
     if (hjemlerEØSForordningen987.isNotEmpty()) {
         alleHjemlerForBegrunnelser.add("EØS-forordning 987/2009 artikkel ${Utils.slåSammen(hjemlerEØSForordningen987)}")
     }
+    if (hjemlerFraForvaltningsloven.isNotEmpty()) {
+        alleHjemlerForBegrunnelser.add(
+            "${
+            when (målform) {
+                Målform.NB -> "forvaltningsloven"
+                Målform.NN -> "forvaltningslova"
+            }
+            } ${
+            hjemlerTilHjemmeltekst(hjemler = hjemlerFraForvaltningsloven, lovForHjemmel = "forvaltningsloven")
+            }"
+        )
+    }
     return alleHjemlerForBegrunnelser
 }
 
@@ -383,3 +401,7 @@ fun hentVirkningstidspunkt(opphørsperioder: List<Opphørsperiode>, behandlingId
         ?.tilMånedÅr()
         ?: throw Feil("Fant ikke opphørdato ved generering av dødsfallbrev på behandling $behandlingId")
     )
+
+fun hentForvaltningsloverHjemler(vedtakKorrigertHjemmelSkalMedIBrev: Boolean): List<String> {
+    return if (vedtakKorrigertHjemmelSkalMedIBrev) listOf("35") else emptyList()
+}
