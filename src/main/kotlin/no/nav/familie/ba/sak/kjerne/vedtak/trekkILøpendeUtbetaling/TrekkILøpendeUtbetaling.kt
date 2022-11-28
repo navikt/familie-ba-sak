@@ -26,8 +26,7 @@ data class TrekkILøpendeUtbetaling(
     @Convert(converter = YearMonthConverter::class)
     val tom: YearMonth?,
     @Column(name = "feilutbetalt_beloep", nullable = false)
-    val feilutbetaltBeløp: Int
-) {
+    val feilutbetaltBeløp: Int,
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "trekk_i_loepende_utbetaling_seq_generator")
@@ -37,4 +36,4 @@ data class TrekkILøpendeUtbetaling(
         allocationSize = 50
     )
     val id: Long = 0
-}
+)

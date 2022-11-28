@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.trekkILøpendeUtbetaling
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -45,12 +46,17 @@ class TrekkILøpendeUtbetalingService(
             feilutbetaltBeløp = it.feilutbetaltBeløp
         )
 
-    fun oppdaterTrekkILøpendeUtbetaling(trekkILøpendeUtbetaling: RestTrekkILøpendeUtbetaling) = repository.save(
-        TrekkILøpendeUtbetaling(
-            behandlingId = trekkILøpendeUtbetaling.identifikator.behandlingId,
-            fom = trekkILøpendeUtbetaling.periode.fom,
-            tom = trekkILøpendeUtbetaling.periode.tom,
-            feilutbetaltBeløp = trekkILøpendeUtbetaling.feilutbetaltBeløp
-        )
-    ).let { tilRest(it) }
+    fun oppdaterTrekkILøpendeUtbetaling(trekkILøpendeUtbetaling: RestTrekkILøpendeUtbetaling) =
+        repository.findById(trekkILøpendeUtbetaling.identifikator.id)
+            .map {
+                it.copy(
+                    id = trekkILøpendeUtbetaling.identifikator.id,
+                    fom = trekkILøpendeUtbetaling.periode.fom,
+                    tom = trekkILøpendeUtbetaling.periode.tom,
+                    feilutbetaltBeløp = trekkILøpendeUtbetaling.feilutbetaltBeløp
+                )
+            }
+            .map { repository.save(it) }
+            .map { tilRest(it) }
+            .orElseThrow { Feil("Finner ikke trekk i løpende utbetaling") }
 }
