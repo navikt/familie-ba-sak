@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser
 
+import no.nav.familie.ba.sak.kjerne.brev.domene.ISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -55,8 +56,8 @@ data class RestSanityEØSBegrunnelse(
 }
 
 data class SanityEØSBegrunnelse(
-    val apiNavn: String,
-    val navnISystem: String,
+    override val apiNavn: String,
+    override val navnISystem: String,
     val annenForeldersAktivitet: List<AnnenForeldersAktivitet>,
     val barnetsBostedsland: List<BarnetsBostedsland>,
     val kompetanseResultat: List<KompetanseResultat>,
@@ -66,7 +67,7 @@ data class SanityEØSBegrunnelse(
     val hjemlerEØSForordningen987: List<String>,
     val hjemlerSeperasjonsavtalenStorbritannina: List<String>,
     val vilkår: List<Vilkår>,
-)
+) : ISanityBegrunnelse
 
 fun List<SanityEØSBegrunnelse>.finnBegrunnelse(eøsBegrunnelse: EØSStandardbegrunnelse): SanityEØSBegrunnelse? =
     this.find { it.apiNavn == eøsBegrunnelse.sanityApiNavn }

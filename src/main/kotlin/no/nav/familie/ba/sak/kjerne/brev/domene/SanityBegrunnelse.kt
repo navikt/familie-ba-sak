@@ -15,9 +15,14 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+interface ISanityBegrunnelse {
+    val apiNavn: String?
+    val navnISystem: String
+}
+
 data class SanityBegrunnelse(
-    val apiNavn: String?,
-    val navnISystem: String,
+    override val apiNavn: String?,
+    override val navnISystem: String,
     val vilkaar: List<SanityVilkår>? = null,
     val rolle: List<VilkårRolle> = emptyList(),
     val lovligOppholdTriggere: List<VilkårTrigger>? = null,
@@ -31,7 +36,7 @@ data class SanityBegrunnelse(
     val endretUtbetalingsperiodeDeltBostedUtbetalingTrigger: EndretUtbetalingsperiodeDeltBostedTriggere? = null,
     val endretUtbetalingsperiodeTriggere: List<EndretUtbetalingsperiodeTrigger>? = null,
     val utvidetBarnetrygdTriggere: List<UtvidetBarnetrygdTrigger>? = null
-)
+) : ISanityBegrunnelse
 
 data class RestSanityBegrunnelse(
     val apiNavn: String?,
@@ -79,7 +84,11 @@ data class RestSanityBegrunnelse(
             hjemler = hjemler ?: emptyList(),
             hjemlerFolketrygdloven = hjemlerFolketrygdloven ?: emptyList(),
             endretUtbetalingsperiodeDeltBostedUtbetalingTrigger =
-            if (endretUtbetalingsperiodeDeltBostedUtbetalingTrigger != null) finnEnumverdi(endretUtbetalingsperiodeDeltBostedUtbetalingTrigger, EndretUtbetalingsperiodeDeltBostedTriggere.values(), apiNavn) else null,
+            if (endretUtbetalingsperiodeDeltBostedUtbetalingTrigger != null) finnEnumverdi(
+                endretUtbetalingsperiodeDeltBostedUtbetalingTrigger,
+                EndretUtbetalingsperiodeDeltBostedTriggere.values(),
+                apiNavn
+            ) else null,
             endretUtbetalingsperiodeTriggere = endretUtbetalingsperiodeTriggere?.mapNotNull {
                 finnEnumverdi(it, EndretUtbetalingsperiodeTrigger.values(), apiNavn)
             },
@@ -194,7 +203,8 @@ fun SanityBegrunnelse.tilTriggesAv(): TriggesAv {
         valgbar = !this.inneholderØvrigTrigger(ØvrigTrigger.ALLTID_AUTOMATISK),
         etterEndretUtbetaling = this.endretUtbetalingsperiodeTriggere
             ?.contains(EndretUtbetalingsperiodeTrigger.ETTER_ENDRET_UTBETALINGSPERIODE) ?: false,
-        endretUtbetalingSkalUtbetales = this.endretUtbetalingsperiodeDeltBostedUtbetalingTrigger ?: EndretUtbetalingsperiodeDeltBostedTriggere.UTBETALING_IKKE_RELEVANT,
+        endretUtbetalingSkalUtbetales = this.endretUtbetalingsperiodeDeltBostedUtbetalingTrigger
+            ?: EndretUtbetalingsperiodeDeltBostedTriggere.UTBETALING_IKKE_RELEVANT,
         endringsaarsaker = this.endringsaarsaker?.toSet() ?: emptySet(),
         småbarnstillegg = this.inneholderUtvidetBarnetrygdTrigger(UtvidetBarnetrygdTrigger.SMÅBARNSTILLEGG),
         gjelderFørstePeriode = this.inneholderØvrigTrigger(ØvrigTrigger.GJELDER_FØRSTE_PERIODE),

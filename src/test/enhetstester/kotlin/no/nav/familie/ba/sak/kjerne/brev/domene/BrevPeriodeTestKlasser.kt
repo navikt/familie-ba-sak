@@ -25,7 +25,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseData
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.EØSBegrunnelseData
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
@@ -257,6 +257,6 @@ data class BrevBegrunnelseGrunnlagConfig(
 ) {
     fun tilBrevBegrunnelseGrunnlag(sanityBegrunnelser: List<SanityBegrunnelse>) = BegrunnelseMedTriggere(
         standardbegrunnelse = this.standardbegrunnelse,
-        triggesAv = this.standardbegrunnelse.tilSanityBegrunnelse(sanityBegrunnelser)!!.tilTriggesAv()
+        triggesAv = this.standardbegrunnelse.tilISanityBegrunnelse(sanityBegrunnelser)!!.tilTriggesAv()
     )
 }

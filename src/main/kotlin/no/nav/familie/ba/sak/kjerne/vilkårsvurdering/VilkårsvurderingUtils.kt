@@ -21,8 +21,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSiv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityEØSBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -371,7 +370,7 @@ fun vedtakBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(
     sanityBegrunnelser: List<SanityBegrunnelse>,
     vedtakBegrunnelse: Standardbegrunnelse
 ): List<RestVedtakBegrunnelseTilknyttetVilkår> {
-    val sanityBegrunnelse = vedtakBegrunnelse.tilSanityBegrunnelse(sanityBegrunnelser) ?: return emptyList()
+    val sanityBegrunnelse = vedtakBegrunnelse.tilISanityBegrunnelse(sanityBegrunnelser) ?: return emptyList()
 
     val triggesAv = sanityBegrunnelse.tilTriggesAv()
     val visningsnavn = sanityBegrunnelse.navnISystem
@@ -399,7 +398,7 @@ fun eøsBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(
     sanityEØSBegrunnelser: List<SanityEØSBegrunnelse>,
     vedtakBegrunnelse: EØSStandardbegrunnelse
 ): List<RestVedtakBegrunnelseTilknyttetVilkår> {
-    val eøsSanityBegrunnelse = vedtakBegrunnelse.tilSanityEØSBegrunnelse(sanityEØSBegrunnelser) ?: return emptyList()
+    val eøsSanityBegrunnelse = vedtakBegrunnelse.tilISanityBegrunnelse(sanityEØSBegrunnelser) ?: return emptyList()
 
     return if (eøsSanityBegrunnelse.vilkår.isEmpty()) {
         listOf(

@@ -34,7 +34,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.tilMinimertVedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.tilMinimertePersoner
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.endretUtbetalingsperiodeBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.landkodeTilBarnetsBostedsland
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.triggesForPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
@@ -360,7 +360,7 @@ private fun velgRedusertBegrunnelser(
     ytelserForrigePeriode: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
 ): List<Standardbegrunnelse> {
     val redusertBegrunnelser = tillateBegrunnelserForVedtakstype.filter {
-        it.tilSanityBegrunnelse(sanityBegrunnelser)?.tilTriggesAv()?.gjelderFraInnvilgelsestidspunkt ?: false
+        it.tilISanityBegrunnelse(sanityBegrunnelser)?.tilTriggesAv()?.gjelderFraInnvilgelsestidspunkt ?: false
     }
     if (minimertVedtaksperiode.utbetalingsperioder.any { it.utbetaltPerMnd > 0 }) {
         val utbetalingsbegrunnelser = velgUtbetalingsbegrunnelser(
@@ -395,7 +395,7 @@ private fun velgUtbetalingsbegrunnelser(
     val standardbegrunnelser: MutableSet<Standardbegrunnelse> =
         tillateBegrunnelserForVedtakstype
             .filter { it.vedtakBegrunnelseType != VedtakBegrunnelseType.FORTSATT_INNVILGET }
-            .filter { it.tilSanityBegrunnelse(sanityBegrunnelser)?.tilTriggesAv()?.valgbar ?: false }
+            .filter { it.tilISanityBegrunnelse(sanityBegrunnelser)?.tilTriggesAv()?.valgbar ?: false }
             .fold(mutableSetOf()) { acc, standardBegrunnelse ->
                 if (standardBegrunnelse.triggesForPeriode(
                         minimertVedtaksperiode = minimertVedtaksperiode,
