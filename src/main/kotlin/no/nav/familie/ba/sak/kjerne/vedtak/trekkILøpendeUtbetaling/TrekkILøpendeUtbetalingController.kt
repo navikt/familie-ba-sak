@@ -11,6 +11,7 @@ import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -33,6 +34,17 @@ class TrekkILøpendeUtbetalingController(
             handling = "legg til trekk i løpende utbetaling"
         )
         return ResponseEntity(Ressurs.success(service.leggTilTrekkILøpendeUtbetaling(trekkILøpendeUtbetaling)), HttpStatus.CREATED)
+    }
+
+    @PutMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun oppdaterTrekkILøpendeUtbetaling(
+        @RequestBody trekkILøpendeUtbetaling: RestTrekkILøpendeUtbetaling
+    ): ResponseEntity<Ressurs<RestTrekkILøpendeUtbetaling>> {
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.VEILEDER,
+            handling = "oppdater trekk i løpende utbetaling"
+        )
+        return ResponseEntity(Ressurs.success(service.oppdaterTrekkILøpendeUtbetaling(trekkILøpendeUtbetaling)), HttpStatus.OK)
     }
 
     @DeleteMapping
