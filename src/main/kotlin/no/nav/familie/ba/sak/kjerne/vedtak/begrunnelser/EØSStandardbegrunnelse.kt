@@ -1,5 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser
 
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.NullablePeriode
+import no.nav.familie.ba.sak.kjerne.brev.domene.BrevBegrunnelseGrunnlagMedPersoner
+import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.eøs.EØSBegrunnelseMedTriggere
 
 enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
@@ -250,6 +254,14 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
     ;
 
     override val kanDelesOpp: Boolean = false
+
+    override fun delOpp(
+        restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
+        triggesAv: TriggesAv,
+        periode: NullablePeriode
+    ): List<BrevBegrunnelseGrunnlagMedPersoner> {
+        throw Feil("Begrunnelse $this kan ikke deles opp.")
+    }
 
     override fun enumnavnTilString(): String = this.name
 

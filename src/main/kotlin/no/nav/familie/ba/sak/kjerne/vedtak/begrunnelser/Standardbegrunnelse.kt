@@ -19,6 +19,12 @@ interface IVedtakBegrunnelse {
     val vedtakBegrunnelseType: VedtakBegrunnelseType
     val kanDelesOpp: Boolean
 
+    fun delOpp(
+        restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
+        triggesAv: TriggesAv,
+        periode: NullablePeriode
+    ): List<BrevBegrunnelseGrunnlagMedPersoner>
+
     fun enumnavnTilString(): String
 }
 
@@ -1359,44 +1365,44 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
 
     override fun enumnavnTilString(): String =
         this.name
-}
 
-fun Standardbegrunnelse.delOpp(
-    restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
-    triggesAv: TriggesAv,
-    periode: NullablePeriode
-): List<BrevBegrunnelseGrunnlagMedPersoner> {
-    if (!this.kanDelesOpp) {
-        throw Feil("Begrunnelse $this kan ikke deles opp.")
-    }
-    return when (this) {
-        Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_ENDRET_UTBETALING -> {
-            val deltBostedEndringsperioder = this.hentRelevanteEndringsperioderForBegrunnelse(
-                minimerteRestEndredeAndeler = restBehandlingsgrunnlagForBrev.minimerteEndredeUtbetalingAndeler,
-                vedtaksperiode = periode
-            )
-                .filter { it.årsak == Årsak.DELT_BOSTED }
-                .filter { endringsperiode ->
-                    endringsperiodeGjelderBarn(
-                        personerPåBehandling = restBehandlingsgrunnlagForBrev.personerPåBehandling,
-                        personIdentFraEndringsperiode = endringsperiode.personIdent
+    override fun delOpp(
+        restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
+        triggesAv: TriggesAv,
+        periode: NullablePeriode
+    ): List<BrevBegrunnelseGrunnlagMedPersoner> {
+        if (!this.kanDelesOpp) {
+            throw Feil("Begrunnelse $this kan ikke deles opp.")
+        }
+        return when (this) {
+            Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_ENDRET_UTBETALING -> {
+                val deltBostedEndringsperioder = this.hentRelevanteEndringsperioderForBegrunnelse(
+                    minimerteRestEndredeAndeler = restBehandlingsgrunnlagForBrev.minimerteEndredeUtbetalingAndeler,
+                    vedtaksperiode = periode
+                )
+                    .filter { it.årsak == Årsak.DELT_BOSTED }
+                    .filter { endringsperiode ->
+                        endringsperiodeGjelderBarn(
+                            personerPåBehandling = restBehandlingsgrunnlagForBrev.personerPåBehandling,
+                            personIdentFraEndringsperiode = endringsperiode.personIdent
+                        )
+                    }
+                val deltBostedEndringsperioderGruppertPåAvtaledato =
+                    deltBostedEndringsperioder.groupBy { it.avtaletidspunktDeltBosted }
+
+                deltBostedEndringsperioderGruppertPåAvtaledato.map {
+                    BrevBegrunnelseGrunnlagMedPersoner(
+                        standardbegrunnelse = this,
+                        vedtakBegrunnelseType = this.vedtakBegrunnelseType,
+                        triggesAv = triggesAv,
+                        personIdenter = it.value.map { endringsperiode -> endringsperiode.personIdent },
+                        avtaletidspunktDeltBosted = it.key
                     )
                 }
-            val deltBostedEndringsperioderGruppertPåAvtaledato =
-                deltBostedEndringsperioder.groupBy { it.avtaletidspunktDeltBosted }
-
-            deltBostedEndringsperioderGruppertPåAvtaledato.map {
-                BrevBegrunnelseGrunnlagMedPersoner(
-                    standardbegrunnelse = this,
-                    vedtakBegrunnelseType = this.vedtakBegrunnelseType,
-                    triggesAv = triggesAv,
-                    personIdenter = it.value.map { endringsperiode -> endringsperiode.personIdent },
-                    avtaletidspunktDeltBosted = it.key
-                )
             }
-        }
 
-        else -> throw Feil("Oppdeling av begrunnelse $this er ikke støttet.")
+            else -> throw Feil("Oppdeling av begrunnelse $this er ikke støttet.")
+        }
     }
 }
 

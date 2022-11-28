@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivit
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.SøkersAktivitet
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hentMånedOgÅrForBegrunnelse
@@ -258,7 +259,7 @@ enum class SøkersRettTilUtvidet {
     }
 }
 
-fun Standardbegrunnelse.hentRelevanteEndringsperioderForBegrunnelse(
+fun IVedtakBegrunnelse.hentRelevanteEndringsperioderForBegrunnelse(
     minimerteRestEndredeAndeler: List<MinimertRestEndretAndel>,
     vedtaksperiode: NullablePeriode
 ) = when (this.vedtakBegrunnelseType) {
