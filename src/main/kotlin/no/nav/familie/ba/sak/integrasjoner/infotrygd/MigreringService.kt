@@ -285,13 +285,20 @@ class MigreringService(
             kastOgTellMigreringsFeil(MigreringsfeilType.ÅPEN_SAK_INFOTRYGD)
         }
 
-        val ikkeOpphørteSaker = ferdigBehandledeSaker.sortedByDescending { it.iverksattdato }
+        var ikkeOpphørteSaker = ferdigBehandledeSaker.sortedByDescending { it.iverksattdato }
             .filter {
                 it.stønad != null && (it.stønad!!.opphørsgrunn == "0" || it.stønad!!.opphørsgrunn.isNullOrEmpty())
             }
 
         if (ikkeOpphørteSaker.size > 1) {
-            kastOgTellMigreringsFeil(MigreringsfeilType.FLERE_LØPENDE_SAKER_INFOTRYGD)
+            ikkeOpphørteSaker = ikkeOpphørteSaker.filter {
+                it.stønad!!.opphørtFom != null && it.stønad!!.opphørtFom == "000000"
+            }
+            if (ikkeOpphørteSaker.size > 1) {
+                kastOgTellMigreringsFeil(MigreringsfeilType.FLERE_LØPENDE_SAKER_INFOTRYGD)
+            }
+            logger.info("Filtrerte bort saker med opphørtFom satt men med opphørsgrunn 0")
+            secureLog.info("Filtrerte bort saker med opphørtFom satt men med opphørsgrunn 0 for ident=$personIdent")
         }
 
         if (ikkeOpphørteSaker.isEmpty()) {

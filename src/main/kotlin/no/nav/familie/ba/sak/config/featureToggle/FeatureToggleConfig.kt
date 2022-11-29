@@ -1,12 +1,7 @@
 package no.nav.familie.ba.sak.config
 
-import io.getunleash.DefaultUnleash
-import io.getunleash.UnleashContext
-import io.getunleash.UnleashContextProvider
-import io.getunleash.strategy.GradualRolloutRandomStrategy
-import io.getunleash.strategy.Strategy
-import io.getunleash.util.UnleashConfig
-import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ba.sak.config.featureToggle.DummyFeatureToggleService
+import no.nav.familie.ba.sak.config.featureToggle.UnleashFeatureToggleService
 import org.slf4j.LoggerFactory
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.ConstructorBinding
@@ -39,65 +34,9 @@ class FeatureToggleConfig(
             lagDummyFeatureToggleService()
         }
 
-    private fun lagUnleashFeatureToggleService(): FeatureToggleService {
-        val defaultUnleash = DefaultUnleash(
-            UnleashConfig.builder()
-                .appName(unleash.applicationName)
-                .unleashAPI(unleash.uri)
-                .unleashContextProvider(lagUnleashContextProvider())
-                .build(),
-            ByClusterStrategy(unleash.cluster),
-            ByAnsvarligSaksbehandler(),
-            GradualRolloutRandomStrategy()
-        )
+    private fun lagUnleashFeatureToggleService(): FeatureToggleService = UnleashFeatureToggleService(unleash)
 
-        return object : FeatureToggleService {
-            override fun isEnabled(toggleId: String, defaultValue: Boolean): Boolean {
-                return defaultUnleash.isEnabled(toggleId, defaultValue)
-            }
-        }
-    }
-
-    private fun lagUnleashContextProvider(): UnleashContextProvider {
-        return UnleashContextProvider {
-            UnleashContext.builder()
-                .appName(unleash.applicationName)
-                .build()
-        }
-    }
-
-    class ByClusterStrategy(private val clusterName: String) : Strategy {
-
-        override fun isEnabled(parameters: MutableMap<String, String>): Boolean {
-            if (parameters.isEmpty()) return false
-            return parameters["cluster"]?.contains(clusterName) ?: false
-        }
-
-        override fun getName(): String = "byCluster"
-    }
-
-    class ByAnsvarligSaksbehandler : Strategy {
-
-        override fun isEnabled(parameters: MutableMap<String, String>): Boolean {
-            if (parameters.isEmpty()) return false
-
-            return parameters["saksbehandler"]?.contains(SikkerhetContext.hentSaksbehandlerEpost()) ?: false
-        }
-
-        override fun getName(): String = "byAnsvarligSaksbehandler"
-    }
-
-    private fun lagDummyFeatureToggleService(): FeatureToggleService {
-        return object : FeatureToggleService {
-            override fun isEnabled(toggleId: String, defaultValue: Boolean): Boolean {
-                if (unleash.cluster == "lokalutvikling") {
-                    return false
-                }
-
-                return defaultValue
-            }
-        }
-    }
+    private fun lagDummyFeatureToggleService(): FeatureToggleService = DummyFeatureToggleService(unleash)
 
     companion object {
         const val KAN_DIFFERANSEBEREGNE_SØKERS_YTELSER = "familie-ba-sak.differanseberegn-sokers-ytelser"
@@ -122,6 +61,8 @@ class FeatureToggleConfig(
             "familie-ba-sak.generer.utbetalingsoppdrag.ny.validering"
         const val KAN_MIGRERE_EØS_PRIMÆRLAND_ORDINÆR = "familie-ba-sak.migrer.or-eu"
         const val KAN_MIGRERE_EØS_PRIMÆRLAND_UTVIDET = "familie-ba-sak.migrer.ut-eu"
+
+        const val SKAL_KUNNE_KORRIGERE_VEDTAK = "familie-ba-sak.kunne-korrigere-vedtak"
 
         private val logger = LoggerFactory.getLogger(FeatureToggleConfig::class.java)
     }

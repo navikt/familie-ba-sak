@@ -52,10 +52,6 @@ BA_SAK_CLIENT_ID må settes til `AZURE_APP_CLIENT_ID` og CLIENT_SECRET til`AZURE
 
 Se `.deploy/nais/azure-ad-app-lokal.yaml` dersom du ønsker å deploye `azuread-familie-ba-sak-lokal`
 
-Dersom man vil gjøre autentiserte kall mot andre tjenester, må man også legge til scope for den aktuelle tjenesten i
-miljøveriablene. Det kan hentes
-fra [Vault](https://vault.adeo.no/ui/vault/secrets/kv%2Fpreprod%2Ffss/show/familie-ba-sak/default).
-
 Til slutt skal miljøvariablene se slik ut:
 
 DevLauncher/DevLauncherPostgres

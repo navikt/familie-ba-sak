@@ -58,3 +58,12 @@ data class AutoUnderskrift(
         flettefelt(enhet)
     )
 }
+
+data class KorrigertVedtakData(
+    val datoKorrigertVedtak: Flettefelt
+) {
+
+    constructor(datoKorrigertVedtak: String) : this(
+        flettefelt(datoKorrigertVedtak)
+    )
+}

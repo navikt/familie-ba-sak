@@ -1,5 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.korrigertvedtak
 
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
@@ -22,7 +25,8 @@ import org.springframework.web.bind.annotation.RestController
 class KorrigertVedtakController(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val korrigertVedtakService: KorrigertVedtakService,
-    private val utvidetBehandlingService: UtvidetBehandlingService
+    private val utvidetBehandlingService: UtvidetBehandlingService,
+    private val featureToggleService: FeatureToggleService
 ) {
 
     @PostMapping(path = ["/behandling/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -30,12 +34,19 @@ class KorrigertVedtakController(
         @PathVariable behandlingId: Long,
         @RequestBody korrigerVedtakRequest: KorrigerVedtakRequest
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
-        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
-        val korrigertVedtak = korrigerVedtakRequest.tilKorrigerVedtak(behandling)
+        if (!featureToggleService.isEnabled(FeatureToggleConfig.SKAL_KUNNE_KORRIGERE_VEDTAK, false)) {
+            throw Feil(
+                message = "Togglen familie-ba-sak.kunne-korrigere-vedtak er ikke slått på, og det er ikke mulig å korrigere vedtak",
+                frontendFeilmelding = "Korrigering av vedtak er ikke støttet ennå"
+            )
+        } else {
+            val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+            val korrigertVedtak = korrigerVedtakRequest.tilKorrigerVedtak(behandling)
 
-        korrigertVedtakService.lagreKorrigertVedtak(korrigertVedtak)
+            korrigertVedtakService.lagreKorrigertVedtak(korrigertVedtak)
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId)))
+            return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId)))
+        }
     }
 
     @PatchMapping(path = ["/behandling/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
