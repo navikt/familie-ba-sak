@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.omregning
 
-rimport no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -43,7 +43,7 @@ class AutobrevOpphørSmåbarnstilleggService(
         } else {
             logger.info(
                 "For fagsak $fagsakId ble verken yngste barn 3 år forrige måned eller har overgangsstønad som utløper denne måneden. " +
-                        "Avbryter sending av autobrev for opphør av småbarnstillegg."
+                    "Avbryter sending av autobrev for opphør av småbarnstillegg."
             )
             return
         }
