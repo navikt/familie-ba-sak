@@ -16,7 +16,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.join
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.joinIkkeNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerKunVerdiMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullOgIkkeTom
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.outerJoin
@@ -64,8 +63,13 @@ fun beregnDifferanse(
 fun Collection<AndelTilkjentYtelse>.differanseberegnSøkersYtelser(
     barna: List<Person>
 ): List<AndelTilkjentYtelse> {
+    // Ta bort eventuell eksisterende differanseberegning, slik at kalkulertUtbetalingsbeløp er nasjonal sats
     val utvidetBarnetrygdTidslinje = this.tilTidslinjeForSøkersYtelse(YtelseType.UTVIDET_BARNETRYGD)
+        .utenDifferanseberegning()
+
     val småbarnstilleggTidslinje = this.tilTidslinjeForSøkersYtelse(YtelseType.SMÅBARNSTILLEGG)
+        .utenDifferanseberegning()
+
     val barnasAndelerTidslinjer = this.tilSeparateTidslinjerForBarna()
 
     // Lag tidslinjer for hvert barn som inneholder underskuddet fra differanseberegningen på ordinær barnetrygd.
@@ -130,18 +134,6 @@ fun Tidslinje<AndelTilkjentYtelse, Måned>.fordelForholdsmessigPåBarnasAndeler(
         }
 
     return barnasAndeler.kombinerKunVerdiMed(ytelsePerBarnTidslinje) { _, ytelsePerBarn -> ytelsePerBarn }
-}
-
-fun Tidslinje<AndelTilkjentYtelse, Måned>.oppdaterDifferanseberegning(
-    differanseberegnetBeløpTidslinje: Tidslinje<Int, Måned>
-): Tidslinje<AndelTilkjentYtelse, Måned> {
-    return this.kombinerMed(differanseberegnetBeløpTidslinje) { andel, differanseberegning ->
-        when {
-            andel != null && differanseberegning != null && differanseberegning > 0 ->
-                andel.oppdaterDifferanseberegning(differanseberegning.toBigDecimal())
-            else -> andel
-        }
-    }
 }
 
 fun Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>>.tilUnderskuddPåDifferanseberegningen() =
