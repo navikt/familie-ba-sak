@@ -5,11 +5,14 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.simulering.domene.SimuleringsPeriode
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottaker
 import no.nav.familie.ba.sak.kjerne.simulering.vedtakSimuleringMottakereTilRestSimulering
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.Tilbakekreving
 import no.nav.familie.kontrakter.felles.tilbakekreving.Faktainfo
+import no.nav.familie.kontrakter.felles.tilbakekreving.Institusjon
 import no.nav.familie.kontrakter.felles.tilbakekreving.Periode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import no.nav.familie.kontrakter.felles.tilbakekreving.Varsel
@@ -34,7 +37,8 @@ fun validerVerdierPåRestTilbakekreving(restTilbakekreving: RestTilbakekreving?,
 fun slåsammenNærliggendeFeilutbtalingPerioder(simuleringsPerioder: List<SimuleringsPeriode>): List<Periode> {
     val perioder: MutableList<Periode> = mutableListOf()
 
-    val sortedSimuleringsPerioder = simuleringsPerioder.sortedBy { it.fom }.filter { it.feilutbetaling != BigDecimal.ZERO }
+    val sortedSimuleringsPerioder =
+        simuleringsPerioder.sortedBy { it.fom }.filter { it.feilutbetaling != BigDecimal.ZERO }
     var aktuellFom: LocalDate = sortedSimuleringsPerioder.first().fom
     var aktuellTom: LocalDate = sortedSimuleringsPerioder.first().tom
 
@@ -73,3 +77,14 @@ fun hentFaktainfoForTilbakekreving(behandling: Behandling, tilbakekreving: Tilba
         tilbakekrevingsvalg = tilbakekreving.valg,
         konsekvensForYtelser = emptySet()
     )
+
+fun hentTilbakekrevingInstitusjon(fagsak: Fagsak): Institusjon? {
+    var institusjon: Institusjon? = null
+    if (fagsak.type == FagsakType.INSTITUSJON) {
+        requireNotNull(
+            fagsak.institusjon
+        ) { "Fagsaktype er institusjon, men institusjon finnes ikke på fagsak: ${fagsak.id}" }
+        institusjon = Institusjon(organisasjonsnummer = fagsak.institusjon!!.orgNummer)
+    }
+    return institusjon
+}
