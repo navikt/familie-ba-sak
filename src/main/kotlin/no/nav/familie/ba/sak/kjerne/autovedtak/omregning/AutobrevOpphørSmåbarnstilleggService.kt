@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.omregning
 
-import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.toYearMonth
+rimport no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -35,19 +34,18 @@ class AutobrevOpphørSmåbarnstilleggService(
         val listePeriodeOvergangsstønadGrunnlag: List<PeriodeOvergangsstønadGrunnlag> =
             periodeOvergangsstønadGrunnlagRepository.findByBehandlingId(behandlingId = behandling.id)
 
-        val yngsteBarnFylteTreÅrForrigeMåned =
-            yngsteBarnFylteTreÅrForrigeMåned(personopplysningGrunnlag = personopplysningGrunnlag)
-
-        val overgangstønadOpphørteForrigeMåned =
-            overgangstønadOpphørteForrigeMåned(listePeriodeOvergangsstønadGrunnlag = listePeriodeOvergangsstønadGrunnlag)
-
         val behandlingsårsak = BehandlingÅrsak.OMREGNING_SMÅBARNSTILLEGG
-        val standardbegrunnelse = if (yngsteBarnFylteTreÅrForrigeMåned) {
+
+        val standardbegrunnelse = if (yngsteBarnFylteTreÅrForrigeMåned(personopplysningGrunnlag = personopplysningGrunnlag)) {
             Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_BARN_UNDER_TRE_ÅR
-        } else if (overgangstønadOpphørteForrigeMåned) {
+        } else if (overgangstønadOpphørteForrigeMåned(listePeriodeOvergangsstønadGrunnlag = listePeriodeOvergangsstønadGrunnlag)) {
             Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD
         } else {
-            throw Feil("Finner ikke begrunnelse for Omregning småbarnstillegg")
+            logger.info(
+                "For fagsak $fagsakId ble verken yngste barn 3 år forrige måned eller har overgangsstønad som utløper denne måneden. " +
+                        "Avbryter sending av autobrev for opphør av småbarnstillegg."
+            )
+            return
         }
 
         if (!autovedtakBrevService.skalAutobrevBehandlingOpprettes(
@@ -56,14 +54,6 @@ class AutobrevOpphørSmåbarnstilleggService(
                 standardbegrunnelser = listOf(standardbegrunnelse)
             )
         ) {
-            return
-        }
-
-        if (!yngsteBarnFylteTreÅrForrigeMåned && !overgangstønadOpphørteForrigeMåned) {
-            logger.info(
-                "For fagsak $fagsakId ble verken yngste barn 3 år forrige måned eller har overgangsstønad som utløper denne måneden. " +
-                    "Avbryter sending av autobrev for opphør av småbarnstillegg."
-            )
             return
         }
 
