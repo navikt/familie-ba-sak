@@ -5,17 +5,12 @@ on:
 
 env:
   IMAGE: ghcr.io/navikt/familie-ba-sak:${{ github.sha }}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  avslutt-andre-workflows-samme-branch:
-    name: Avslutt andre workflows på samme branch
-    runs-on: ubuntu-latest
-    permissions:
-      actions: write
-    steps:
-      - name: Cancel Previous Runs
-        uses: styfle/cancel-workflow-action@0.11.0
-        with:
-          access_token: ${{ github.token }}
   ktlint:
     name: Ktlint
     runs-on: ubuntu-latest
