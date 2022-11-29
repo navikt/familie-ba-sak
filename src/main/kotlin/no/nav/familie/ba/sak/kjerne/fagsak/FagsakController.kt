@@ -122,6 +122,28 @@ class FagsakController(
         return ResponseEntity.ok().body(Ressurs.success(fagsakDeltagere))
     }
 
+    @PostMapping(path = ["/sok/fagsaker-hvor-person-er-deltaker"])
+    fun søkFagsakerHvorPersonErSøkerEllerMottarOrdinærBarnetrygd(@RequestBody request: RestSøkFagsakRequest): ResponseEntity<Ressurs<List<RestFagsakIdOgTilknyttetAktørId>>> {
+        tilgangService.validerTilgangTilPersoner(
+            personIdenter = listOf(request.personIdent),
+            event = AuditLoggerEvent.ACCESS
+        )
+
+        val aktør = personidentService.hentAktør(request.personIdent)
+
+        val fagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær = fagsakService.finnAlleFagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær(aktør)
+
+        val fagsakIdOgTilknyttetAktørId = fagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær.map { RestFagsakIdOgTilknyttetAktørId(aktørId = it.aktør.aktørId, fagsakId = it.id) }
+
+        return ResponseEntity.ok().body(Ressurs.success(fagsakIdOgTilknyttetAktørId))
+    }
+
+    data class RestSøkFagsakRequest(val personIdent: String)
+    data class RestFagsakIdOgTilknyttetAktørId(
+        val aktørId: String,
+        val fagsakId: Long
+    )
+
     @PostMapping(path = ["/sok/fagsakdeltagere"])
     fun oppgiFagsakdeltagere(@RequestBody restSøkParam: RestSøkParam): ResponseEntity<Ressurs<List<RestFagsakDeltager>>> {
         return Result.runCatching {
