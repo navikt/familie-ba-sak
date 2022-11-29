@@ -5,7 +5,7 @@ on:
 
 env:
   IMAGE: ghcr.io/navikt/familie-ba-sak:${{ github.sha }}
-
+# temp
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
