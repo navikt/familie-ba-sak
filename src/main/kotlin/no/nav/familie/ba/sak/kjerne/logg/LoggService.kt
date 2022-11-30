@@ -482,6 +482,30 @@ class LoggService(
         )
     }
 
+    fun loggTrekkILøpendeUtbetalingLagtTil(behandlingId: Long) =
+        lagre(
+            Logg(
+                behandlingId = behandlingId,
+                type = LoggType.TREKK_I_LØPENDE_UTBETALING_LAGT_TIL,
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
+                    rolleConfig,
+                    BehandlerRolle.SAKSBEHANDLER
+                )
+            )
+        )
+
+    fun loggTrekkILøpendeUtbetalingFjernet(behandlingId: Long) =
+        lagre(
+            Logg(
+                behandlingId = behandlingId,
+                type = LoggType.TREKK_I_LØPENDE_UTBETALING_FJERNET,
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
+                    rolleConfig,
+                    BehandlerRolle.SAKSBEHANDLER
+                )
+            )
+        )
+
     fun lagre(logg: Logg): Logg {
         metrikkPerLoggType[logg.type]?.increment()
 

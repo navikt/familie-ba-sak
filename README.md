@@ -29,13 +29,36 @@ under `Edit Configurations -> VM Options`
 
 Postgres-databasen kan settes opp slik:
 
+1. Lag en dockercontainer: 
 ```
 docker run --name familie-ba-sak-postgres -e POSTGRES_PASSWORD=test -d -p 5432:5432 postgres
-docker ps (finn container id)
+```
+2. List opp alle containerne og finn container id for container med name = familie-ba-sak-postgres: 
+
+```
+docker ps
+```
+3. Kjør docker container: 
+```
 docker exec -it <container_id> bash
+```
+
+4. Åpne postgres som brukeren "postgres":
+```
 psql -U postgres
+```
+
+5. Lag en database med navn "familie-ba-sak": 
+```
 CREATE DATABASE "familie-ba-sak";
 ```
+
+Legg til databasen i Intellij: 
+1. Trykk på database på høyre side og "+" -> data source -> postgreSQL
+2. Fyll inn port=5432, user=postgres, passord=test og database=familie-ba-sak
+
+OBS: Pass på at du ikke kjører postgres lokalt på samme port (5432)
+
 
 ### Autentisering
 

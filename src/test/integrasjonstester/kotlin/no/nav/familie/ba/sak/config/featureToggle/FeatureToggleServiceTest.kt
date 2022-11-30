@@ -1,5 +1,7 @@
-package no.nav.familie.ba.sak.config
+package no.nav.familie.ba.sak.config.featureToggle
 
+import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
