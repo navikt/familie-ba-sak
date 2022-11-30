@@ -466,7 +466,7 @@ class FagsakServiceTest(
     }
 
     @Test
-    fun `Skal hente to fagsaker hvis søker både mottar barnetrygd og blir mottatt barnetrygd for`() {
+    fun `Skal hente to fagsaker hvis aktør er søker i en sak og blir mottatt barnetrygd for i en annen`() {
         val person = lagPerson(type = PersonType.BARN)
         personidentService.hentOgLagreAktørIder(listOf(person.aktør.aktivFødselsnummer()), lagre = true)
 
@@ -494,6 +494,43 @@ class FagsakServiceTest(
         assertEquals(2, fagsakerMedSøkerSomDeltaker.size)
         assertEquals(fagsakHvorPersonErSøker, fagsakerMedSøkerSomDeltaker.first())
         assertEquals(fagsakHvorPersonErBarn, fagsakerMedSøkerSomDeltaker.last())
+    }
+
+    @Test
+    fun `Skal ikke hente fagsak hvis barn kun har løpende andeler i en gammel behandling som senere er opphørt`() {
+        val person = lagPerson(type = PersonType.BARN)
+        personidentService.hentOgLagreAktørIder(listOf(person.aktør.aktivFødselsnummer()), lagre = true)
+
+        val fagsakHvorPersonErBarn = opprettFagsakForPersonMedStatus(randomFnr(), FagsakStatus.LØPENDE)
+        opprettFagsakForPersonMedStatus(personIdent = randomFnr(), fagsakStatus = FagsakStatus.LØPENDE) // Lager en ekstre fagsak for å teste at denne ikke kommer med
+
+        val gamlePerioder = listOf(
+            PeriodeForAktør(
+                fom = YearMonth.now().minusMonths(10),
+                tom = YearMonth.now().minusMonths(3),
+                aktør = person.aktør
+            ),
+            PeriodeForAktør(
+                fom = YearMonth.now().minusMonths(2),
+                tom = YearMonth.now().plusMonths(6),
+                aktør = person.aktør
+            )
+        )
+
+        val nyePerioder = listOf(
+            PeriodeForAktør(
+                fom = YearMonth.now().minusMonths(10),
+                tom = YearMonth.now().minusMonths(3),
+                aktør = person.aktør
+            )
+        )
+
+        opprettAndelerOgBehandling(fagsak = fagsakHvorPersonErBarn, barnasIdenter = listOf(person.aktør.aktivFødselsnummer()), perioderTilAndeler = gamlePerioder) // gammel behandling
+        opprettAndelerOgBehandling(fagsak = fagsakHvorPersonErBarn, barnasIdenter = listOf(person.aktør.aktivFødselsnummer()), perioderTilAndeler = nyePerioder) // ny behandling
+
+        val fagsakerMedSøkerSomDeltaker = fagsakService.finnAlleFagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær(person.aktør)
+
+        assertEquals(0, fagsakerMedSøkerSomDeltaker.size)
     }
 
     private data class PeriodeForAktør(
