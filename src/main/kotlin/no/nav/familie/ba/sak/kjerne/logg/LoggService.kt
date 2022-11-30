@@ -4,6 +4,7 @@ import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.tilKortString
+import no.nav.familie.ba.sak.common.tilddMMyyyy
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
@@ -454,7 +455,7 @@ class LoggService(
     ) {
         val tekst = if (korrigertVedtak.aktiv) {
             """
-            Vedtaksdato: ${korrigertVedtak.vedtaksdato}
+            Vedtaksdato: ${korrigertVedtak.vedtaksdato.tilddMMyyyy()}
             Begrunnelse: ${korrigertVedtak.begrunnelse ?: "Ingen begrunnelse"}
             """.trimIndent()
         } else {
