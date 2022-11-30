@@ -1,16 +1,22 @@
 package no.nav.familie.ba.sak.config.featureToggle
 
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.config.featureToggle.miljø.Profil
+import no.nav.familie.ba.sak.config.featureToggle.miljø.erAktiv
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.env.Environment
 
 @Configuration
-class FeatureToggleInitializer(val featureToggleProperties: FeatureToggleProperties) {
+class FeatureToggleInitializer(
+    private val featureToggleProperties: FeatureToggleProperties,
+    private val environment: Environment
+) {
 
     @Bean
     fun featureToggle(): FeatureToggleService =
-        if (featureToggleProperties.enabled) {
+        if (featureToggleProperties.enabled || environment.erAktiv(Profil.DevPostgresPreprod)) {
             UnleashFeatureToggleService(featureToggleProperties.unleash)
         } else {
             logger.warn(
