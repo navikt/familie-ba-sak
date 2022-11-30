@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.sikkerhet
 
+import no.nav.familie.ba.sak.config.featureToggle.miljø.Profil
+import no.nav.familie.ba.sak.config.featureToggle.miljø.erAktiv
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -26,11 +28,7 @@ class RolletilgangDatabaseTestController(
 
     @PostMapping(path = ["test-behandlinger"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun opprettBehandling(@RequestBody nyBehandling: NyBehandling): ResponseEntity<Ressurs<Behandling>> {
-        if (environment.activeProfiles.any {
-            listOf("prod", "preprod")
-                .contains(it.trim(' '))
-        }
-        ) {
+        if (environment.erAktiv(Profil.Prod) || environment.erAktiv(Profil.Preprod)) {
             error("Controller feilaktig aktivert i miljø")
         }
 

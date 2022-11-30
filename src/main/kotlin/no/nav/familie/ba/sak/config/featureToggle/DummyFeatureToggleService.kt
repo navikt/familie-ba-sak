@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 
 class DummyFeatureToggleService(
-    private val unleash: FeatureToggleConfig.Unleash
+    private val unleash: FeatureToggleProperties.Unleash
 ) : FeatureToggleService {
 
     private val overstyrteBrytere = mapOf(
@@ -13,9 +13,9 @@ class DummyFeatureToggleService(
 
     override fun isEnabled(toggleId: String, defaultValue: Boolean): Boolean {
         if (unleash.cluster == "lokalutvikling") {
-            return false
+            return true
         }
 
-        return overstyrteBrytere.getOrDefault(toggleId, false)
+        return overstyrteBrytere.getOrDefault(toggleId, true)
     }
 }

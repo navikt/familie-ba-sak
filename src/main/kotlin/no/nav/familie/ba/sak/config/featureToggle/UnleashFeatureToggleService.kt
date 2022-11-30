@@ -5,13 +5,12 @@ import io.getunleash.UnleashContext
 import io.getunleash.UnleashContextProvider
 import io.getunleash.strategy.GradualRolloutRandomStrategy
 import io.getunleash.util.UnleashConfig
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 
-class UnleashFeatureToggleService(unleash: FeatureToggleConfig.Unleash) : FeatureToggleService {
+class UnleashFeatureToggleService(unleash: FeatureToggleProperties.Unleash) : FeatureToggleService {
 
     private val defaultUnleash: DefaultUnleash
-    private val unleash: FeatureToggleConfig.Unleash
+    private val unleash: FeatureToggleProperties.Unleash
 
     init {
         defaultUnleash = DefaultUnleash(
