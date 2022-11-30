@@ -534,5 +534,7 @@ class FagsakServiceTest(
 
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelse)
         tilkjentYtelseRepository.save(tilkjentYtelse)
+
+        behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.id, status = BehandlingStatus.AVSLUTTET)
     }
 }
