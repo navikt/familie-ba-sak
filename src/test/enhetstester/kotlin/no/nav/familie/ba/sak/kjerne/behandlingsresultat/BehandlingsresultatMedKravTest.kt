@@ -35,8 +35,7 @@ class BehandlingsresultatMedKravTest {
                     resultater = setOf(YtelsePersonResultat.INNVILGET),
                     ytelseSlutt = defaultYtelseSluttForLøpende
                 )
-            ),
-            false
+            )
         )
 
         assertEquals(Behandlingsresultat.INNVILGET, behandlingsresultat)
@@ -60,8 +59,7 @@ class BehandlingsresultatMedKravTest {
                     resultater = setOf(YtelsePersonResultat.INNVILGET),
                     ytelseSlutt = defaultYtelseSluttForLøpende
                 )
-            ),
-            false
+            )
         )
 
         assertEquals(Behandlingsresultat.INNVILGET, behandlingsresultat)
@@ -85,8 +83,7 @@ class BehandlingsresultatMedKravTest {
                     resultater = setOf(YtelsePersonResultat.INNVILGET),
                     ytelseSlutt = defaultYtelseSluttForLøpende
                 )
-            ),
-            false
+            )
         )
 
         assertEquals(Behandlingsresultat.INNVILGET, behandlingsresultat)
@@ -110,8 +107,7 @@ class BehandlingsresultatMedKravTest {
                     resultater = setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.OPPHØRT),
                     ytelseSlutt = inneværendeMåned()
                 )
-            ),
-            false
+            )
         )
 
         assertEquals(Behandlingsresultat.INNVILGET_OG_OPPHØRT, behandlingsresultat)
@@ -135,8 +131,7 @@ class BehandlingsresultatMedKravTest {
                     resultater = setOf(YtelsePersonResultat.OPPHØRT),
                     ytelseSlutt = inneværendeMåned()
                 )
-            ),
-            false
+            )
         )
         assertEquals(Behandlingsresultat.INNVILGET_OG_ENDRET, behandlingsresultat)
     }
@@ -159,8 +154,7 @@ class BehandlingsresultatMedKravTest {
                     resultater = setOf(YtelsePersonResultat.OPPHØRT),
                     ytelseSlutt = inneværendeMåned().minusMonths(1)
                 )
-            ),
-            false
+            )
         )
         assertEquals(Behandlingsresultat.INNVILGET_ENDRET_OG_OPPHØRT, behandlingsresultat)
     }
@@ -183,8 +177,7 @@ class BehandlingsresultatMedKravTest {
                     resultater = setOf(YtelsePersonResultat.ENDRET_UTEN_UTBETALING, YtelsePersonResultat.OPPHØRT),
                     ytelseSlutt = inneværendeMåned()
                 )
-            ),
-            false
+            )
         )
 
         assertEquals(Behandlingsresultat.INNVILGET_ENDRET_OG_OPPHØRT, behandlingsresultat)
@@ -202,8 +195,7 @@ class BehandlingsresultatMedKravTest {
                     resultater = setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.AVSLÅTT),
                     ytelseSlutt = defaultYtelseSluttForLøpende
                 )
-            ),
-            false
+            )
         )
 
         assertEquals(Behandlingsresultat.DELVIS_INNVILGET, behandlingsresultat)
@@ -227,8 +219,7 @@ class BehandlingsresultatMedKravTest {
                     resultater = setOf(YtelsePersonResultat.INNVILGET, YtelsePersonResultat.AVSLÅTT),
                     ytelseSlutt = defaultYtelseSluttForLøpende
                 )
-            ),
-            false
+            )
         )
 
         assertEquals(Behandlingsresultat.DELVIS_INNVILGET, behandlingsresultat)
@@ -252,8 +243,7 @@ class BehandlingsresultatMedKravTest {
                     resultater = setOf(YtelsePersonResultat.AVSLÅTT),
                     ytelseSlutt = defaultYtelseSluttForAvslått
                 )
-            ),
-            false
+            )
         )
 
         assertEquals(Behandlingsresultat.DELVIS_INNVILGET_OG_OPPHØRT, behandlingsresultat)
@@ -285,8 +275,7 @@ class BehandlingsresultatMedKravTest {
                     ),
                     ytelseSlutt = inneværendeMåned()
                 )
-            ),
-            false
+            )
         )
 
         assertEquals(Behandlingsresultat.DELVIS_INNVILGET_OG_OPPHØRT, behandlingsresultat)
@@ -310,8 +299,7 @@ class BehandlingsresultatMedKravTest {
                     resultater = setOf(YtelsePersonResultat.OPPHØRT),
                     ytelseSlutt = inneværendeMåned()
                 )
-            ),
-            false
+            )
         )
         assertEquals(Behandlingsresultat.DELVIS_INNVILGET_OG_ENDRET, behandlingsresultat)
     }
@@ -338,8 +326,7 @@ class BehandlingsresultatMedKravTest {
                     resultater = setOf(YtelsePersonResultat.ENDRET_UTEN_UTBETALING, YtelsePersonResultat.OPPHØRT),
                     ytelseSlutt = inneværendeMåned()
                 )
-            ),
-            false
+            )
         )
 
         assertEquals(Behandlingsresultat.DELVIS_INNVILGET_ENDRET_OG_OPPHØRT, behandlingsresultat)
@@ -366,8 +353,7 @@ class BehandlingsresultatMedKravTest {
                     resultater = setOf(YtelsePersonResultat.OPPHØRT),
                     ytelseSlutt = inneværendeMåned()
                 )
-            ),
-            false
+            )
         )
 
         assertEquals(Behandlingsresultat.DELVIS_INNVILGET_OG_OPPHØRT, behandlingsresultat)
@@ -385,8 +371,7 @@ class BehandlingsresultatMedKravTest {
                     resultater = setOf(YtelsePersonResultat.AVSLÅTT),
                     ytelseSlutt = defaultYtelseSluttForAvslått
                 )
-            ),
-            false
+            )
         )
         assertEquals(Behandlingsresultat.AVSLÅTT, behandlingsresultat)
     }
@@ -409,8 +394,7 @@ class BehandlingsresultatMedKravTest {
                     resultater = setOf(YtelsePersonResultat.AVSLÅTT),
                     ytelseSlutt = defaultYtelseSluttForAvslått
                 )
-            ),
-            false
+            )
         )
         assertEquals(Behandlingsresultat.AVSLÅTT, behandlingsresultat)
     }
@@ -433,8 +417,7 @@ class BehandlingsresultatMedKravTest {
                     resultater = setOf(YtelsePersonResultat.AVSLÅTT),
                     ytelseSlutt = defaultYtelseSluttForAvslått
                 )
-            ),
-            false
+            )
         )
         assertEquals(Behandlingsresultat.AVSLÅTT_OG_OPPHØRT, behandlingsresultat)
     }
@@ -457,8 +440,7 @@ class BehandlingsresultatMedKravTest {
                     resultater = setOf(YtelsePersonResultat.AVSLÅTT),
                     ytelseSlutt = defaultYtelseSluttForAvslått
                 )
-            ),
-            false
+            )
         )
         assertEquals(Behandlingsresultat.AVSLÅTT_OG_ENDRET, behandlingsresultat)
     }
@@ -481,8 +463,7 @@ class BehandlingsresultatMedKravTest {
                     resultater = setOf(YtelsePersonResultat.AVSLÅTT),
                     ytelseSlutt = defaultYtelseSluttForAvslått
                 )
-            ),
-            false
+            )
         )
         assertEquals(Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT, behandlingsresultat)
     }
@@ -498,8 +479,7 @@ class BehandlingsresultatMedKravTest {
                     resultater = setOf(),
                     ytelseSlutt = inneværendeMåned()
                 )
-            ),
-            false
+            )
         )
         assertEquals(Behandlingsresultat.FORTSATT_INNVILGET, behandlingsresultat)
     }
