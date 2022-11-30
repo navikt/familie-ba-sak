@@ -1,9 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeMedBegrunnelser
 
 import hentPerioderMedUtbetaling
-import hentPerioderMedUtbetalingDeprecated
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
@@ -15,12 +12,10 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.identifiserReduksjonsperioderFraSistIverksatteBehandling
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.oppdaterUtbetalingsperioderMedReduksjonFraForrigeBehandling
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilFørskjøvetVilkårResultatTidslinjeMap
 import org.springframework.stereotype.Service
 
 @Service
 class UtbetalingsperiodeMedBegrunnelserService(
-    private val featureToggleService: FeatureToggleService,
     private val persongrunnlagService: PersongrunnlagService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val kompetanseRepository: KompetanseRepository,
@@ -37,23 +32,13 @@ class UtbetalingsperiodeMedBegrunnelserService(
         val vilkårsvurdering =
             vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId = vedtak.behandling.id)
 
-        val utbetalingsperioder = if (featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_SPLITTE_VEDTAKSPERIODER)) {
-            val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = vedtak.behandling.id)
-            hentPerioderMedUtbetaling(
-                andelerTilkjentYtelse = andelerTilkjentYtelse,
-                vedtak = vedtak,
-                personResultater = vilkårsvurdering.personResultater,
-                personerIPersongrunnlag = personopplysningGrunnlag.personer.toList()
-            )
-        } else {
-            val forskjøvetVilkårResultatTidslinjeMap =
-                vilkårsvurdering.personResultater.tilFørskjøvetVilkårResultatTidslinjeMap()
-            hentPerioderMedUtbetalingDeprecated(
-                andelerTilkjentYtelse = andelerTilkjentYtelse,
-                vedtak = vedtak,
-                forskjøvetVilkårResultatTidslinjeMap = forskjøvetVilkårResultatTidslinjeMap
-            )
-        }
+        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = vedtak.behandling.id)
+        val utbetalingsperioder = hentPerioderMedUtbetaling(
+            andelerTilkjentYtelse = andelerTilkjentYtelse,
+            vedtak = vedtak,
+            personResultater = vilkårsvurdering.personResultater,
+            personerIPersongrunnlag = personopplysningGrunnlag.personer.toList()
+        )
 
         val perioderMedReduksjonFraSistIverksatteBehandling =
             hentReduksjonsperioderFraInnvilgelsesTidspunkt(
