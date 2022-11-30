@@ -13,9 +13,9 @@ class DummyFeatureToggleService(
 
     override fun isEnabled(toggleId: String, defaultValue: Boolean): Boolean {
         if (unleash.cluster == "lokalutvikling") {
-            return false
+            return true
         }
 
-        return overstyrteBrytere.getOrDefault(toggleId, false)
+        return overstyrteBrytere.getOrDefault(toggleId, true)
     }
 }
