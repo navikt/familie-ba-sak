@@ -7,7 +7,7 @@ env:
   IMAGE: ghcr.io/navikt/familie-ba-sak:${{ github.sha }}
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref_name }}
   cancel-in-progress: true
 
 jobs:
