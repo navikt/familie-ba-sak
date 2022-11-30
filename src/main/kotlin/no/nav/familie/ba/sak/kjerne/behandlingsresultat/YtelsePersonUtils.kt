@@ -22,7 +22,7 @@ object YtelsePersonUtils {
      * @param [uregistrerteBarn] Barn det er søkt for som ikke er folkeregistrert
      * @return Personer populert med utfall (resultater) etter denne behandlingen
      */
-    fun utledYtelsePersonerMedResultat(
+    internal fun utledYtelsePersonerMedResultat(
         behandlingsresultatPersoner: List<BehandlingsresultatPerson>,
         uregistrerteBarn: List<MinimertUregistrertBarn> = emptyList(),
         inneværendeMåned: YearMonth = YearMonth.now()
@@ -179,7 +179,7 @@ object YtelsePersonUtils {
         }
     }
 
-    fun erAndelMedEndretBeløp(
+    internal fun erAndelMedEndretBeløp(
         forrigeAndeler: List<BehandlingsresultatAndelTilkjentYtelse>,
         andeler: List<BehandlingsresultatAndelTilkjentYtelse>
     ): Boolean =

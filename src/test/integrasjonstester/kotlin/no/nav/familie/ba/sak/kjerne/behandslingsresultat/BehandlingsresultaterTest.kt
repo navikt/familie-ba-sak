@@ -47,8 +47,7 @@ class BehandlingsresultaterTest {
 
             val behandlingsresultat =
                 BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
-                    ytelsePersonerMedResultat,
-                    false
+                    ytelsePersonerMedResultat
                 )
 
             if (behandlingsresultatPersonTestConfig.forventetResultat != behandlingsresultat) {

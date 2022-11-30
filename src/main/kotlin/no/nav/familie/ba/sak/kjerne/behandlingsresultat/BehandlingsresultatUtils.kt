@@ -24,7 +24,7 @@ object BehandlingsresultatUtils {
             message = "Kombiansjonen av behandlingsresultatene $behandlingsresultater er ikke støttet i løsningen."
         )
 
-    fun utledBehandlingsresultatDataForPerson(
+    internal fun utledBehandlingsresultatDataForPerson(
         person: Person,
         personerFremstiltKravFor: List<Aktør>,
         andelerFraForrigeTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
@@ -66,9 +66,9 @@ object BehandlingsresultatUtils {
         )
     }
 
-    fun utledBehandlingsresultatBasertPåYtelsePersoner(
+    internal fun utledBehandlingsresultatBasertPåYtelsePersoner(
         ytelsePersoner: List<YtelsePerson>,
-        erUtvidaBarnetrygdEndra: Boolean
+        sjekkOmUtvidaBarnetrygdErEndra: Boolean = true
     ): Behandlingsresultat {
         validerYtelsePersoner(ytelsePersoner)
 
@@ -93,8 +93,13 @@ object BehandlingsresultatUtils {
         }
 
         val opphørSomFørerTilEndring =
-            altOpphører && !opphørPåSammeTid && !erKunFremstilKravIDenneBehandling && !kunFortsattOpphørt
-        if (opphørSomFørerTilEndring || erUtvidaBarnetrygdEndra) {
+            (
+                altOpphører || erUtvidaBarnetrygdEndra(
+                    ytelsePersoner,
+                    sjekkOmUtvidaBarnetrygdErEndra
+                )
+                ) && !opphørPåSammeTid && !erKunFremstilKravIDenneBehandling && !kunFortsattOpphørt
+        if (opphørSomFørerTilEndring) {
             samledeResultater.add(YtelsePersonResultat.ENDRET_UTBETALING)
         }
 
@@ -103,6 +108,25 @@ object BehandlingsresultatUtils {
         }
 
         return finnBehandlingsresultat(samledeResultater)
+    }
+
+    private fun erUtvidaBarnetrygdEndra(
+        ytelsePersoner: List<YtelsePerson>,
+        sjekkOmUtvidaBarnetrygdErEndra: Boolean
+    ): Boolean {
+        if (!sjekkOmUtvidaBarnetrygdErEndra) {
+            return false
+        }
+        val utvidaBarnetrygd = ytelsePersoner
+            .filter { it.ytelseType == YtelseType.UTVIDET_BARNETRYGD }
+
+        return if (utvidaBarnetrygd.isEmpty()) {
+            false
+        } else {
+            utvidaBarnetrygd.all {
+                it.resultater == setOf(YtelsePersonResultat.OPPHØRT)
+            }
+        }
     }
 
     private fun finnBehandlingsresultat(samledeResultater: MutableSet<YtelsePersonResultat>): Behandlingsresultat =
@@ -215,7 +239,7 @@ fun hentUtbetalingstidslinjeForSøker(andeler: List<AndelTilkjentYtelseMedEndret
     )
 }
 
-fun Set<YtelsePersonResultat>.matcherAltOgHarEndretResultat(andreElementer: Set<YtelsePersonResultat>): Boolean {
+private fun Set<YtelsePersonResultat>.matcherAltOgHarEndretResultat(andreElementer: Set<YtelsePersonResultat>): Boolean {
     val endretResultat = this.singleOrNull {
         it == YtelsePersonResultat.ENDRET_UTBETALING ||
             it == YtelsePersonResultat.ENDRET_UTEN_UTBETALING
@@ -223,12 +247,12 @@ fun Set<YtelsePersonResultat>.matcherAltOgHarEndretResultat(andreElementer: Set<
     return this == setOf(endretResultat) + andreElementer
 }
 
-fun Set<YtelsePersonResultat>.matcherAltOgHarOpphørtResultat(andreElementer: Set<YtelsePersonResultat>): Boolean {
+private fun Set<YtelsePersonResultat>.matcherAltOgHarOpphørtResultat(andreElementer: Set<YtelsePersonResultat>): Boolean {
     val opphørtResultat = this.intersect(setOf(YtelsePersonResultat.OPPHØRT, YtelsePersonResultat.FORTSATT_OPPHØRT))
     return if (opphørtResultat.isEmpty()) false else this == andreElementer + opphørtResultat
 }
 
-fun Set<YtelsePersonResultat>.matcherAltOgHarBådeEndretOgOpphørtResultat(andreElementer: Set<YtelsePersonResultat>): Boolean {
+private fun Set<YtelsePersonResultat>.matcherAltOgHarBådeEndretOgOpphørtResultat(andreElementer: Set<YtelsePersonResultat>): Boolean {
     val endretResultat = this.singleOrNull {
         it == YtelsePersonResultat.ENDRET_UTBETALING ||
             it == YtelsePersonResultat.ENDRET_UTEN_UTBETALING
