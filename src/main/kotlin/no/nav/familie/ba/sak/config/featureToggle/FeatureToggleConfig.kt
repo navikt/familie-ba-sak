@@ -1,43 +1,6 @@
 package no.nav.familie.ba.sak.config
 
-import no.nav.familie.ba.sak.config.featureToggle.DummyFeatureToggleService
-import no.nav.familie.ba.sak.config.featureToggle.UnleashFeatureToggleService
-import org.slf4j.LoggerFactory
-import org.springframework.boot.context.properties.ConfigurationProperties
-import org.springframework.boot.context.properties.ConstructorBinding
-import org.springframework.context.annotation.Bean
-import java.net.URI
-
-@ConfigurationProperties("funksjonsbrytere")
-@ConstructorBinding
-class FeatureToggleConfig(
-    private val enabled: Boolean,
-    val unleash: Unleash
-) {
-
-    @ConstructorBinding
-    data class Unleash(
-        val uri: URI,
-        val cluster: String,
-        val applicationName: String
-    )
-
-    @Bean
-    fun featureToggle(): FeatureToggleService =
-        if (enabled) {
-            lagUnleashFeatureToggleService()
-        } else {
-            logger.warn(
-                "Funksjonsbryter-funksjonalitet er skrudd AV. " +
-                    "Gir standardoppførsel for alle funksjonsbrytere, dvs 'false'"
-            )
-            lagDummyFeatureToggleService()
-        }
-
-    private fun lagUnleashFeatureToggleService(): FeatureToggleService = UnleashFeatureToggleService(unleash)
-
-    private fun lagDummyFeatureToggleService(): FeatureToggleService = DummyFeatureToggleService(unleash)
-
+class FeatureToggleConfig {
     companion object {
         const val KAN_DIFFERANSEBEREGNE_SØKERS_YTELSER = "familie-ba-sak.differanseberegn-sokers-ytelser"
         const val KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV = "familie-ba-sak.behandling.korreksjon-vedtaksbrev"
@@ -65,8 +28,6 @@ class FeatureToggleConfig(
         const val SKAL_KUNNE_KORRIGERE_VEDTAK = "familie-ba-sak.kunne-korrigere-vedtak"
 
         const val TREKK_I_LØPENDE_UTBETALING = "familie-ba-sak.trekk-i-loepende-utbetaling"
-
-        private val logger = LoggerFactory.getLogger(FeatureToggleConfig::class.java)
     }
 }
 
