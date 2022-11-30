@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.config
 
 import io.mockk.mockk
 import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleInitializer
+import no.nav.familie.ba.sak.config.featureToggle.miljø.Profil
+import no.nav.familie.ba.sak.config.featureToggle.miljø.erAktiv
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
@@ -17,7 +19,7 @@ class FeatureToggleMockConfig(
     @Bean
     @Primary
     fun mockFeatureToggleService(): FeatureToggleService {
-        if (environment.activeProfiles.any { it == "integrasjonstest" }) {
+        if (environment.erAktiv(Profil.Integrasjonstest)) {
             val mockFeatureToggleService = mockk<FeatureToggleService>(relaxed = true)
 
             ClientMocks.clearFeatureToggleMocks(mockFeatureToggleService)
