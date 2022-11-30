@@ -1,11 +1,12 @@
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.config.ApplicationConfig
+import no.nav.familie.ba.sak.config.featureToggle.miljø.Profil
 import org.springframework.boot.builder.SpringApplicationBuilder
 import java.io.BufferedReader
 import java.io.InputStreamReader
 
 fun main(args: Array<String>) {
-    System.setProperty("spring.profiles.active", "dev-postgres-preprod")
+    System.setProperty("spring.profiles.active", Profil.DevPostgresPreprod.navn)
     val springBuilder = SpringApplicationBuilder(ApplicationConfig::class.java).profiles(
         "mock-brev-klient",
         "mock-økonomi",

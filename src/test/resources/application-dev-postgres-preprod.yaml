@@ -146,7 +146,6 @@ sentry.logging.enabled: false
 funksjonsbrytere:
   enabled: false
   unleash:
-    uri: http://dummy/api/
     cluster: localhost
     applicationName: familie-ba-sak
   kafka:
