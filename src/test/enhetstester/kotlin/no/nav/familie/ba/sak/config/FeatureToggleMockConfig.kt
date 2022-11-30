@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.config
 
 import io.mockk.mockk
+import no.nav.familie.ba.sak.config.featureToggle.FeatureToggleInitializer
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
@@ -9,7 +10,7 @@ import org.springframework.core.env.Environment
 
 @TestConfiguration
 class FeatureToggleMockConfig(
-    @Autowired val featureToggleConfig: FeatureToggleConfig,
+    @Autowired val featureToggleInitializer: FeatureToggleInitializer,
     @Autowired private val environment: Environment
 ) {
 
@@ -23,6 +24,6 @@ class FeatureToggleMockConfig(
 
             return mockFeatureToggleService
         }
-        return featureToggleConfig.featureToggle()
+        return featureToggleInitializer.featureToggle()
     }
 }

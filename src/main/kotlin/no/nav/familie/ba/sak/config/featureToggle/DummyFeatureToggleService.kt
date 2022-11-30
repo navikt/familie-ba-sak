@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 
 class DummyFeatureToggleService(
-    private val unleash: FeatureToggleConfig.Unleash
+    private val unleash: FeatureToggleProperties.Unleash
 ) : FeatureToggleService {
 
     private val overstyrteBrytere = mapOf(
