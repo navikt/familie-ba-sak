@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.integrasjoner.skyggesak.SkyggesakService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
@@ -64,7 +65,8 @@ class FagsakService(
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val tilbakekrevingsbehandlingService: TilbakekrevingsbehandlingService,
     private val institusjonService: InstitusjonService,
-    private val organisasjonService: OrganisasjonService
+    private val organisasjonService: OrganisasjonService,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService
 ) {
 
     private val antallFagsakerOpprettetFraManuell =
@@ -498,9 +500,9 @@ class FagsakService(
             .map { it.behandlingId }.toSet()
             .map { behandlingRepository.finnBehandling(it) }
 
-        val fagsakerHvorAktørHarLøpendeOrdinærBarnetrygd = behandlingerMedLøpendeAndeler.map { it.fagsak }.toSet()
+        val behandlingerSomErSisteIverksattePåFagsak = behandlingerMedLøpendeAndeler.filter { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(it.fagsak.id) == it }
 
-        return fagsakerHvorAktørHarLøpendeOrdinærBarnetrygd.toList()
+        return behandlingerSomErSisteIverksattePåFagsak.map { it.fagsak }
     }
 
     fun finnAlleFagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær(aktør: Aktør): List<Fagsak> {
