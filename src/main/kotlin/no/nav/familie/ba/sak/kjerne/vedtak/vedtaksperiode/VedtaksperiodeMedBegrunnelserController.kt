@@ -101,7 +101,7 @@ class VedtaksperiodeMedBegrunnelserController(
     }
 
     @GetMapping("/brevbegrunnelser/{vedtaksperiodeId}")
-    fun genererBrevBegrunnelserForPeriode(@PathVariable vedtaksperiodeId: Long): ResponseEntity<Ressurs<List<String>>> {
+    fun genererBrevBegrunnelserForPeriode(@PathVariable vedtaksperiodeId: Long): ResponseEntity<Ressurs<Set<String>>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
             handling = "hente genererte begrunnelser"
@@ -116,7 +116,7 @@ class VedtaksperiodeMedBegrunnelserController(
             }
         }
 
-        return ResponseEntity.ok(Ressurs.Companion.success(begrunnelser))
+        return ResponseEntity.ok(Ressurs.Companion.success(begrunnelser.toSet()))
     }
 
     /*
