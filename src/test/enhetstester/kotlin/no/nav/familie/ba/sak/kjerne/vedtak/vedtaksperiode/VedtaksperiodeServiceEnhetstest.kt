@@ -39,7 +39,6 @@ class VedtaksperiodeServiceEnhetstest {
         søknadGrunnlagService = mockk(relaxed = true),
         endretUtbetalingAndelRepository = mockk(),
         endringstidspunktService = endringstidspunktService,
-        featureToggleService = mockk(),
         utbetalingsperiodeMedBegrunnelserService = mockk(relaxed = true),
         kompetanseRepository = mockk(),
         andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService

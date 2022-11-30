@@ -33,11 +33,6 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 class PersonResultatTest {
-    private val mars2020 = YearMonth.of(2020, 3)
-    private val april2020 = YearMonth.of(2020, 4)
-    private val mai2020 = YearMonth.of(2020, 5)
-    private val juni2020 = YearMonth.of(2020, 6)
-    private val juli2020 = YearMonth.of(2020, 7)
 
     @Test
     fun `Skal lage riktig splitt når bor med søker går fra delt bosted til fullt`() {
