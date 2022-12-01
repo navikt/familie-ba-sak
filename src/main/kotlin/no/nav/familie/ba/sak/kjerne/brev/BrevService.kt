@@ -82,7 +82,8 @@ class BrevService(
                 vedtakFellesfelter = vedtakFellesfelter,
                 etterbetaling = hentEtterbetaling(vedtak),
                 erKlage = vedtak.behandling.erKlage(),
-                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = vedtak.behandling.id)
+                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = vedtak.behandling.id),
+                informasjonOmAarligKontroll = vedtaksperiodeService.skalHaÅrligKontroll(vedtak)
             )
 
             Brevmal.VEDTAK_ENDRING_INSTITUSJON -> VedtakEndring(
@@ -90,7 +91,8 @@ class BrevService(
                 vedtakFellesfelter = vedtakFellesfelter,
                 etterbetalingInstitusjon = hentEtterbetalingInstitusjon(vedtak),
                 erKlage = vedtak.behandling.erKlage(),
-                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = vedtak.behandling.id)
+                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = vedtak.behandling.id),
+                informasjonOmAarligKontroll = vedtaksperiodeService.skalHaÅrligKontroll(vedtak)
             )
 
             Brevmal.VEDTAK_OPPHØRT -> Opphørt(
