@@ -62,6 +62,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDate
+import java.time.Month
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 
@@ -861,8 +862,8 @@ class MigreringServiceTest(
             mockk(),
             mockk()
         )
-        assertThat(service.infotrygdKjøredato(YearMonth.now())).isEqualTo(LocalDate.of(2022, 11, 17))
-        assertThat(service.infotrygdKjøredato(YearMonth.of(2023, 9))).isEqualTo(LocalDate.of(2023, 9, 18))
+        assertThat(service.infotrygdKjøredato(YearMonth.of(2022, Month.NOVEMBER))).isEqualTo(LocalDate.of(2022, Month.NOVEMBER, 17))
+        assertThat(service.infotrygdKjøredato(YearMonth.of(2023, Month.SEPTEMBER))).isEqualTo(LocalDate.of(2023, Month.SEPTEMBER, 18))
         assertThrows<KanIkkeMigrereException> { service.infotrygdKjøredato(YearMonth.now().plusYears(2)) }
     }
 
