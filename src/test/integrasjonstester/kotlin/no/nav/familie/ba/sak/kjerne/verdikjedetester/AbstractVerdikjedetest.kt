@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import no.nav.familie.ba.sak.WebSpringAuthTestRunner
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.MockserverKlient
+import org.junit.jupiter.api.Tag
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContextInitializer
 import org.springframework.context.ConfigurableApplicationContext
@@ -52,6 +53,7 @@ class VerdikjedetesterPropertyOverrideContextInitializer :
     "mock-task-service"
 )
 @ContextConfiguration(initializers = [VerdikjedetesterPropertyOverrideContextInitializer::class])
+@Tag("verdikjedetest")
 abstract class AbstractVerdikjedetest : WebSpringAuthTestRunner() {
 
     @Autowired
