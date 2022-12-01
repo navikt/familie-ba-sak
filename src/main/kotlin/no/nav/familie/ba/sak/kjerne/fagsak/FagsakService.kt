@@ -490,9 +490,9 @@ class FagsakService(
         }
     }
 
-    fun finnAlleFagsakerHvorAktørHarLøpendeOrdinærBarnetrygd(aktør: Aktør): List<Fagsak> {
+    fun finnAlleFagsakerHvorAktørHarLøpendeYtelseAvType(aktør: Aktør, ytelseTyper: List<YtelseType>): List<Fagsak> {
         val ordinæreAndelerPåAktør = andelerTilkjentYtelseRepository.finnAndelerTilkjentYtelseForAktør(aktør = aktør)
-            .filter { it.type == YtelseType.ORDINÆR_BARNETRYGD }
+            .filter { it.type in ytelseTyper }
 
         val løpendeAndeler = ordinæreAndelerPåAktør.filter { it.erLøpende() }
 
@@ -508,7 +508,7 @@ class FagsakService(
     fun finnAlleFagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær(aktør: Aktør): List<Fagsak> {
         val alleLøpendeFagsakerPåAktør = hentAlleFagsakerForAktør(aktør).filter { it.status == FagsakStatus.LØPENDE }
 
-        val fagsakerHvorAktørHarLøpendeOrdinærBarnetrygd = finnAlleFagsakerHvorAktørHarLøpendeOrdinærBarnetrygd(aktør)
+        val fagsakerHvorAktørHarLøpendeOrdinærBarnetrygd = finnAlleFagsakerHvorAktørHarLøpendeYtelseAvType(aktør = aktør, ytelseTyper = listOf(YtelseType.ORDINÆR_BARNETRYGD))
 
         return (alleLøpendeFagsakerPåAktør + fagsakerHvorAktørHarLøpendeOrdinærBarnetrygd).distinct()
     }
