@@ -8,13 +8,18 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVedtak
+import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.beregning.EndringstidspunktService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -26,13 +31,14 @@ class VedtaksperiodeServiceEnhetstest {
     private val persongrunnlagService: PersongrunnlagService = mockk()
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService = mockk()
     private val endringstidspunktService: EndringstidspunktService = mockk()
+    private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService = mockk()
 
     private val VedtaksperiodeService = VedtaksperiodeService(
         behandlingRepository = behandlingRepository,
         personidentService = mockk(),
         persongrunnlagService = persongrunnlagService,
         andelTilkjentYtelseRepository = mockk(),
-        vedtaksperiodeHentOgPersisterService = mockk(),
+        vedtaksperiodeHentOgPersisterService = vedtaksperiodeHentOgPersisterService,
         vedtakRepository = mockk(),
         vilkårsvurderingRepository = mockk(relaxed = true),
         sanityService = mockk(),
@@ -104,5 +110,30 @@ class VedtaksperiodeServiceEnhetstest {
             .hasFieldOrPropertyWithValue("tom", senesteOpphørTomDato)
         assertThat(returnerteVedtaksperioderNårOverstyrtEndringstidspunktErFørFørsteOpphør)
             .isEqualTo(returnerteVedtaksperioderNårOverstyrtEndringstidspunktErFørsteOpphørFom)
+    }
+
+    @Test
+    fun `nasjonal skal ikke ha årlig kontroll`() {
+        val behandling = lagBehandling(behandlingKategori = BehandlingKategori.NASJONAL)
+        val vedtak = Vedtak(behandling = behandling)
+        assertFalse { VedtaksperiodeService.skalHaÅrligKontroll(vedtak) }
+    }
+
+    @Test
+    fun `EØS uten periode uten tom skal ikke ha årlig kontroll`() {
+        val vedtak = Vedtak(behandling = lagBehandling(behandlingKategori = BehandlingKategori.EØS))
+        every { vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(any()) } returns listOf(
+            lagVedtaksperiodeMedBegrunnelser(vedtak = vedtak, tom = LocalDate.now())
+        )
+        assertFalse { VedtaksperiodeService.skalHaÅrligKontroll(vedtak) }
+    }
+
+    @Test
+    fun `EØS med periode uten tom skal ha årlig kontroll`() {
+        val vedtak = Vedtak(behandling = lagBehandling(behandlingKategori = BehandlingKategori.EØS))
+        every { vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(any()) } returns listOf(
+            lagVedtaksperiodeMedBegrunnelser(vedtak = vedtak, tom = null)
+        )
+        assertTrue { VedtaksperiodeService.skalHaÅrligKontroll(vedtak) }
     }
 }

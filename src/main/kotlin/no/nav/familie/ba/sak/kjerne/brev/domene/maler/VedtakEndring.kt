@@ -13,7 +13,8 @@ data class VedtakEndring(
         etterbetaling: Etterbetaling? = null,
         erFeilutbetalingPåBehandling: Boolean,
         erKlage: Boolean,
-        etterbetalingInstitusjon: EtterbetalingInstitusjon? = null
+        etterbetalingInstitusjon: EtterbetalingInstitusjon? = null,
+        informasjonOmAarligKontroll: Boolean
     ) :
         this(
             mal = mal,
@@ -30,7 +31,8 @@ data class VedtakEndring(
                     klageInstitusjon = erKlage,
                     feilutbetaling = erFeilutbetalingPåBehandling,
                     etterbetalingInstitusjon = etterbetalingInstitusjon,
-                    korrigertVedtak = vedtakFellesfelter.korrigertVedtakData
+                    korrigertVedtak = vedtakFellesfelter.korrigertVedtakData,
+                    informasjonOmAarligKontroll = informasjonOmAarligKontroll
                 ),
                 flettefelter = FlettefelterForDokumentImpl(
                     navn = vedtakFellesfelter.søkerNavn,
@@ -57,6 +59,7 @@ data class EndringVedtakData(
         val klage: Boolean,
         val klageInstitusjon: Boolean,
         val etterbetalingInstitusjon: EtterbetalingInstitusjon?,
-        val korrigertVedtak: KorrigertVedtakData?
+        val korrigertVedtak: KorrigertVedtakData?,
+        val informasjonOmAarligKontroll: Boolean
     )
 }

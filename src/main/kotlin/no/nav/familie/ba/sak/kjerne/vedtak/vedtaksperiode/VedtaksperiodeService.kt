@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedFritekst
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
@@ -634,6 +635,9 @@ class VedtaksperiodeService(
             }
         }.toList()
     }
+
+    fun skalHaÅrligKontroll(vedtak: Vedtak) = vedtak.behandling.kategori == BehandlingKategori.EØS &&
+        hentPersisterteVedtaksperioder(vedtak).any { it.tom == null }
 
     companion object {
 
