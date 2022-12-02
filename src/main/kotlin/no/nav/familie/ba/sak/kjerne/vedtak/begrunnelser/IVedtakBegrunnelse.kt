@@ -1,25 +1,15 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser
 
-import com.fasterxml.jackson.annotation.JsonSubTypes
-import com.fasterxml.jackson.annotation.JsonTypeInfo
+import com.fasterxml.jackson.core.JsonParser
+import com.fasterxml.jackson.databind.DeserializationContext
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer
+import com.fasterxml.jackson.databind.node.ArrayNode
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevBegrunnelseGrunnlagMedPersoner
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "vedtakBegrunnelseType")
-@JsonSubTypes(
-    JsonSubTypes.Type(value = Standardbegrunnelse::class, name = "INNVILGET"),
-    JsonSubTypes.Type(value = Standardbegrunnelse::class, name = "REDUKSJON"),
-    JsonSubTypes.Type(value = Standardbegrunnelse::class, name = "AVSLAG"),
-    JsonSubTypes.Type(value = Standardbegrunnelse::class, name = "OPPHØR"),
-    JsonSubTypes.Type(value = Standardbegrunnelse::class, name = "FORTSATT_INNVILGET"),
-    JsonSubTypes.Type(value = Standardbegrunnelse::class, name = "ENDRET_UTBETALING"),
-    JsonSubTypes.Type(value = Standardbegrunnelse::class, name = "ETTER_ENDRET_UTBETALING"),
-    JsonSubTypes.Type(value = EØSStandardbegrunnelse::class, name = "EØS_INNVILGET"),
-    JsonSubTypes.Type(value = EØSStandardbegrunnelse::class, name = "EØS_AVSLAG"),
-    JsonSubTypes.Type(value = EØSStandardbegrunnelse::class, name = "EØS_OPPHØR"),
-)
-interface IVedtakBegrunnelse {
+sealed interface IVedtakBegrunnelse {
 
     val sanityApiNavn: String
     val vedtakBegrunnelseType: VedtakBegrunnelseType
@@ -32,4 +22,24 @@ interface IVedtakBegrunnelse {
     ): List<BrevBegrunnelseGrunnlagMedPersoner>
 
     fun enumnavnTilString(): String
+}
+
+class IVedtakBegrunnelseDeserializer : StdDeserializer<List<IVedtakBegrunnelse>>(List::class.java) {
+    override fun deserialize(jsonParser: JsonParser?, p1: DeserializationContext?): List<IVedtakBegrunnelse> {
+        val node: ArrayNode = jsonParser!!.codec.readTree(jsonParser)
+        return node
+            .map { it.get(0).asText() }
+            .map { tilEnum(it) }
+    }
+
+    private fun tilEnum(somTekst: String): IVedtakBegrunnelse {
+        val splittet = somTekst.split('$')
+        val type = splittet.get(0)
+        val enumNavn = splittet.get(1)
+        return when (type) {
+            EØSStandardbegrunnelse::class.simpleName -> EØSStandardbegrunnelse.valueOf(enumNavn)
+            Standardbegrunnelse::class.simpleName -> Standardbegrunnelse.valueOf(enumNavn)
+            else -> throw Feil("Fikk en begrunnelse med ugyldig type: hverken EØSStandardbegrunnelse eller Standardbegrunnelse:$somTekst")
+        }
+    }
 }
