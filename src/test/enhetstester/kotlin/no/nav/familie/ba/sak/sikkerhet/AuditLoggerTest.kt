@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.sikkerhet
 import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.read.ListAppender
+import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.util.BrukerContextUtil
 import no.nav.familie.log.mdc.MDCConstants
 import org.assertj.core.api.Assertions.assertThat
