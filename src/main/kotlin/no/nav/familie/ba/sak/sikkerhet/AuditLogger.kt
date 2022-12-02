@@ -1,6 +1,5 @@
-package no.nav.familie.ba.sak.config
+package no.nav.familie.ba.sak.sikkerhet
 
-import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.log.mdc.MDCConstants
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC

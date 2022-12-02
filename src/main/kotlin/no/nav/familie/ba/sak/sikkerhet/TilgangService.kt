@@ -1,11 +1,7 @@
 package no.nav.familie.ba.sak.sikkerhet
 
 import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
-import no.nav.familie.ba.sak.config.AuditLogger
-import no.nav.familie.ba.sak.config.AuditLoggerEvent
-import no.nav.familie.ba.sak.config.CustomKeyValue
 import no.nav.familie.ba.sak.config.RolleConfig
-import no.nav.familie.ba.sak.config.Sporingsdata
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService

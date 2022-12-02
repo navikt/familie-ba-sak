@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.config
+package no.nav.familie.ba.sak.sikkerhet
 
 import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
