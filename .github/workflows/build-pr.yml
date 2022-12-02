@@ -51,7 +51,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mvn -B --no-transfer-progress verify --settings .m2/maven-settings.xml --file pom.xml -DexcludedGroups=verdikjedetest
-          # mvn -B --no-transfer-progress verify sonar:sonar --settings .m2/maven-settings.xml --file pom.xml -DexcludedGroups=verdikjedetest
   verdikjedetesterFeatureToggleOff:
     name: Verdikjedetester m/ feature toggles slått av
     runs-on: ubuntu-latest
