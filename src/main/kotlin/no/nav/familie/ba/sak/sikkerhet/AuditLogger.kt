@@ -1,6 +1,6 @@
-package no.nav.familie.ba.sak.config
+package no.nav.familie.ba.sak.sikkerhet
 
-import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.log.mdc.MDCConstants
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
@@ -22,13 +22,6 @@ data class Sporingsdata(
     val custom2: CustomKeyValue? = null,
     val custom3: CustomKeyValue? = null
 )
-
-enum class AuditLoggerEvent(val type: String) {
-    CREATE("create"),
-    UPDATE("update"),
-    DELETE("delete"),
-    ACCESS("access")
-}
 
 data class CustomKeyValue(val key: String, val value: String)
 
