@@ -8,8 +8,10 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevBegrunnelseGrunnlagMedPersoner
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
+import javax.persistence.AttributeConverter
+import javax.persistence.Converter
 
-sealed interface IVedtakBegrunnelse {
+interface IVedtakBegrunnelse {
 
     val sanityApiNavn: String
     val vedtakBegrunnelseType: VedtakBegrunnelseType
@@ -42,4 +44,22 @@ class IVedtakBegrunnelseDeserializer : StdDeserializer<List<IVedtakBegrunnelse>>
             else -> throw Feil("Fikk en begrunnelse med ugyldig type: hverken EØSStandardbegrunnelse eller Standardbegrunnelse:$somTekst")
         }
     }
+}
+
+@Converter
+class IVedtakBegrunnelseListConverter :
+    AttributeConverter<List<IVedtakBegrunnelse>, String> {
+
+    override fun convertToDatabaseColumn(vedtakbegrunnelser: List<IVedtakBegrunnelse>) =
+        vedtakbegrunnelser.joinToString(";")
+
+    override fun convertToEntityAttribute(string: String?): List<IVedtakBegrunnelse> =
+        if (string.isNullOrBlank()) emptyList() else string.split(";").map { fraEnumNavnTilEnumVerdi(it) }
+
+    fun fraEnumNavnTilEnumVerdi(string: String): IVedtakBegrunnelse =
+        if (Standardbegrunnelse.values().map { it.name }.contains(string)) {
+            Standardbegrunnelse.valueOf(string)
+        } else {
+            EØSStandardbegrunnelse.valueOf(string)
+        }
 }

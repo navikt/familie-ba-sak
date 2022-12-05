@@ -2,16 +2,12 @@ package no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.NullablePeriode
-import no.nav.familie.ba.sak.common.Utils.konverterEnumsTilString
-import no.nav.familie.ba.sak.common.Utils.konverterStringTilEnums
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevBegrunnelseGrunnlagMedPersoner
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.hentRelevanteEndringsperioderForBegrunnelse
-import javax.persistence.AttributeConverter
-import javax.persistence.Converter
 
 val hjemlerTilhørendeFritekst = setOf(2, 4, 11)
 
@@ -1395,17 +1391,6 @@ private fun endringsperiodeGjelderBarn(
     personerPåBehandling: List<MinimertRestPerson>,
     personIdentFraEndringsperiode: String
 ) = personerPåBehandling.find { person -> person.personIdent == personIdentFraEndringsperiode }?.type == PersonType.BARN
-
-@Converter
-class StandardbegrunnelseListConverter :
-    AttributeConverter<List<Standardbegrunnelse>, String> {
-
-    override fun convertToDatabaseColumn(standardbegrunnelser: List<Standardbegrunnelse>) =
-        konverterEnumsTilString(standardbegrunnelser)
-
-    override fun convertToEntityAttribute(string: String?): List<Standardbegrunnelse> =
-        konverterStringTilEnums(string)
-}
 
 val endretUtbetalingsperiodeBegrunnelser: List<Standardbegrunnelse> = listOf(
     Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_INGEN_UTBETALING_NY,
