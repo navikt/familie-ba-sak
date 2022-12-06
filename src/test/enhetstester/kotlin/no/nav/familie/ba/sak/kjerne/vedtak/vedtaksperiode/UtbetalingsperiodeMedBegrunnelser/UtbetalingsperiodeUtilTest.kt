@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeMedBegrunnelser
 
+import hentPerioderMedUtbetaling
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
