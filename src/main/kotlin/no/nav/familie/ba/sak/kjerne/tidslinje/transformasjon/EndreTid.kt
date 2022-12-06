@@ -41,23 +41,6 @@ fun <I, R> Tidslinje<I, Dag>.tilMåned(mapper: (List<I?>) -> R?): Tidslinje<R, M
 }
 
 /**
- * Extension-metode for å konvertere fra Dag-tidslinje til Måned-tidslinje
- * Innholdet hentes fra innholdet siste dag i måneden
- */
-fun <I> Tidslinje<I, Dag>.tilMånedFraSisteDagIMåneden(): Tidslinje<I, Måned> {
-    val fraOgMed = fraOgMed()?.tilInneværendeMåned()
-    val tilOgMed = tilOgMed()?.tilInneværendeMåned()
-
-    if (fraOgMed == null || tilOgMed == null) {
-        return TomTidslinje()
-    }
-
-    return (fraOgMed..tilOgMed).tidslinjeFraTidspunkt { måned ->
-        innholdForTidspunkt(måned.tilSisteDagIMåneden())
-    }
-}
-
-/**
  * Extention-metode som konverterer en dag-basert tidslinje til en måned-basert tidslinje.
  * <mapper>-funksjonen tar inn verdiene fra de to dagene før og etter månedsskiftet,
  * det vil si verdiene fra siste dag i forrige måned og første dag i inneværemde måned.
