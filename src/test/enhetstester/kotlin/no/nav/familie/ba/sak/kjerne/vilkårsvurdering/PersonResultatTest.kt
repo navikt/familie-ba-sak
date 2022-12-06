@@ -30,6 +30,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilTidslinjeForSpli
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.Month
 import java.time.YearMonth
 
 class PersonResultatTest {
@@ -191,7 +192,7 @@ class PersonResultatTest {
 
     @Test
     fun `Skal kutte UNDER_18 tidslinjen måneden før 18-årsdag`() {
-        val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(18))
+        val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2022, Month.DECEMBER, 1).minusYears(18))
 
         val under18VilkårResultat = listOf(
             lagVilkårResultat(
@@ -220,7 +221,7 @@ class PersonResultatTest {
             under18PerioderFørBeskjæring.first().fraOgMed.tilYearMonth()
         )
         Assertions.assertEquals(
-            barn.fødselsdato.plusYears(18).toYearMonth(),
+            YearMonth.of(2022, Month.NOVEMBER),
             under18PerioderFørBeskjæring.first().tilOgMed.tilYearMonth()
         )
 

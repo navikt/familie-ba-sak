@@ -8,7 +8,6 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.isSameOrBefore
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.MigreringResponseDto
@@ -317,21 +316,11 @@ class MigreringService(
                 BehandlingUnderkategori.UTVIDET
             }
 
-            (
-                sak.valg == "OR" && sak.undervalg == "EU" && featureToggleService.isEnabled(
-                    FeatureToggleConfig.KAN_MIGRERE_EØS_PRIMÆRLAND_ORDINÆR,
-                    false
-                )
-                ) -> {
+            (sak.valg == "OR" && sak.undervalg == "EU") -> {
                 BehandlingUnderkategori.ORDINÆR
             }
 
-            (
-                sak.valg == "UT" && sak.undervalg == "EU" && featureToggleService.isEnabled(
-                    FeatureToggleConfig.KAN_MIGRERE_EØS_PRIMÆRLAND_UTVIDET,
-                    false
-                )
-                ) -> {
+            (sak.valg == "UT" && sak.undervalg == "EU") -> {
                 BehandlingUnderkategori.UTVIDET
             }
 

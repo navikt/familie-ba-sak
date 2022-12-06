@@ -21,8 +21,6 @@ class FeatureToggleConfig {
         const val KAN_GENERERE_UTBETALINGSOPPDRAG_NY = "familie-ba-sak.generer.utbetalingsoppdrag.ny"
         const val KAN_GENERERE_UTBETALINGSOPPDRAG_NY_VALIDERING =
             "familie-ba-sak.generer.utbetalingsoppdrag.ny.validering"
-        const val KAN_MIGRERE_EØS_PRIMÆRLAND_ORDINÆR = "familie-ba-sak.migrer.or-eu"
-        const val KAN_MIGRERE_EØS_PRIMÆRLAND_UTVIDET = "familie-ba-sak.migrer.ut-eu"
 
         const val SKAL_KUNNE_KORRIGERE_VEDTAK = "familie-ba-sak.kunne-korrigere-vedtak"
 
