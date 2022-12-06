@@ -263,7 +263,7 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         throw Feil("Begrunnelse $this kan ikke deles opp.")
     }
 
-    override fun enumnavnTilString(): String = this.name
+    override fun enumnavnTilString(): String = EØSStandardbegrunnelse::class.simpleName + "$" + this.name
 
     fun tilEØSBegrunnelseMedTriggere(sanityEØSBegrunnelser: List<SanityEØSBegrunnelse>): EØSBegrunnelseMedTriggere? {
         val sanityEØSBegrunnelse = sanityEØSBegrunnelser.finnBegrunnelse(this) ?: return null

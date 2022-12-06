@@ -30,19 +30,19 @@ class IVedtakBegrunnelseDeserializer : StdDeserializer<List<IVedtakBegrunnelse>>
     override fun deserialize(jsonParser: JsonParser?, p1: DeserializationContext?): List<IVedtakBegrunnelse> {
         val node: ArrayNode = jsonParser!!.codec.readTree(jsonParser)
         return node
-            .map { it.get(0).asText() }
-            .map { tilEnum(it) }
+            .map { it.asText() }
+            .map { it.fraEnumNavnTilEnumVerdi() }
     }
+}
 
-    private fun tilEnum(somTekst: String): IVedtakBegrunnelse {
-        val splittet = somTekst.split('$')
-        val type = splittet.get(0)
-        val enumNavn = splittet.get(1)
-        return when (type) {
-            EØSStandardbegrunnelse::class.simpleName -> EØSStandardbegrunnelse.valueOf(enumNavn)
-            Standardbegrunnelse::class.simpleName -> Standardbegrunnelse.valueOf(enumNavn)
-            else -> throw Feil("Fikk en begrunnelse med ugyldig type: hverken EØSStandardbegrunnelse eller Standardbegrunnelse:$somTekst")
-        }
+private fun String.fraEnumNavnTilEnumVerdi(): IVedtakBegrunnelse {
+    val splittet = split('$')
+    val type = splittet.get(0)
+    val enumNavn = splittet.get(1)
+    return when (type) {
+        EØSStandardbegrunnelse::class.simpleName -> EØSStandardbegrunnelse.valueOf(enumNavn)
+        Standardbegrunnelse::class.simpleName -> Standardbegrunnelse.valueOf(enumNavn)
+        else -> throw Feil("Fikk en begrunnelse med ugyldig type: hverken EØSStandardbegrunnelse eller Standardbegrunnelse: $this")
     }
 }
 
@@ -51,15 +51,8 @@ class IVedtakBegrunnelseListConverter :
     AttributeConverter<List<IVedtakBegrunnelse>, String> {
 
     override fun convertToDatabaseColumn(vedtakbegrunnelser: List<IVedtakBegrunnelse>) =
-        vedtakbegrunnelser.joinToString(";")
+        vedtakbegrunnelser.map { it.enumnavnTilString() }.joinToString(";")
 
     override fun convertToEntityAttribute(string: String?): List<IVedtakBegrunnelse> =
-        if (string.isNullOrBlank()) emptyList() else string.split(";").map { fraEnumNavnTilEnumVerdi(it) }
-
-    fun fraEnumNavnTilEnumVerdi(string: String): IVedtakBegrunnelse =
-        if (Standardbegrunnelse.values().map { it.name }.contains(string)) {
-            Standardbegrunnelse.valueOf(string)
-        } else {
-            EØSStandardbegrunnelse.valueOf(string)
-        }
+        if (string.isNullOrBlank()) emptyList() else string.split(";").map { it.fraEnumNavnTilEnumVerdi() }
 }

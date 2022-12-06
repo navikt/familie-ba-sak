@@ -378,7 +378,7 @@ fun vedtakBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(
     return if (triggesAv.vilkår.isEmpty()) {
         listOf(
             RestVedtakBegrunnelseTilknyttetVilkår(
-                id = vedtakBegrunnelse,
+                id = vedtakBegrunnelse.enumnavnTilString(),
                 navn = visningsnavn,
                 vilkår = null
             )
@@ -386,7 +386,7 @@ fun vedtakBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(
     } else {
         triggesAv.vilkår.map {
             RestVedtakBegrunnelseTilknyttetVilkår(
-                id = vedtakBegrunnelse,
+                id = vedtakBegrunnelse.enumnavnTilString(),
                 navn = visningsnavn,
                 vilkår = it
             )
@@ -403,7 +403,7 @@ fun eøsBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(
     return if (eøsSanityBegrunnelse.vilkår.isEmpty()) {
         listOf(
             RestVedtakBegrunnelseTilknyttetVilkår(
-                id = vedtakBegrunnelse,
+                id = vedtakBegrunnelse.enumnavnTilString(),
                 navn = eøsSanityBegrunnelse.navnISystem,
                 vilkår = null
             )
@@ -411,7 +411,7 @@ fun eøsBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(
     } else {
         eøsSanityBegrunnelse.vilkår.map {
             RestVedtakBegrunnelseTilknyttetVilkår(
-                id = vedtakBegrunnelse,
+                id = vedtakBegrunnelse.enumnavnTilString(),
                 navn = eøsSanityBegrunnelse.navnISystem,
                 vilkår = it
             )

@@ -1345,7 +1345,7 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
     override val kanDelesOpp: Boolean = false
 
     override fun enumnavnTilString(): String =
-        this.name
+        Standardbegrunnelse::class.simpleName + "$" + this.name
 
     override fun delOpp(
         restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
