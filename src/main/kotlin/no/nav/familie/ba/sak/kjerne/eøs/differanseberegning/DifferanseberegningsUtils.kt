@@ -85,9 +85,9 @@ fun <T : Tidsenhet> Tidslinje<AndelTilkjentYtelse, T>.utenDifferanseberegning() 
     }.mapIkkeNull { it.utenDifferanseberegning() }
 
 fun Tidslinje<AndelTilkjentYtelse, Måned>.oppdaterDifferanseberegning(
-    differanseberegnetBeløpTidslinje: Tidslinje<BigDecimal, Måned>
+    utenlandskBeløpINorskeKronerTidslinje: Tidslinje<BigDecimal, Måned>
 ): Tidslinje<AndelTilkjentYtelse, Måned> {
-    return this.kombinerMed(differanseberegnetBeløpTidslinje) { andel, differanseberegning ->
-        andel.oppdaterDifferanseberegning(differanseberegning)
+    return this.kombinerMed(utenlandskBeløpINorskeKronerTidslinje) { andel, utenlandskBeløpINorskeKroner ->
+        andel.oppdaterDifferanseberegning(utenlandskBeløpINorskeKroner)
     }
 }
