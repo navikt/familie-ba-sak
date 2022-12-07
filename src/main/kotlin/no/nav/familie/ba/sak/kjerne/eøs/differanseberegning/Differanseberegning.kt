@@ -22,6 +22,9 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.outerJoin
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.mapIkkeNull
+import java.math.BigDecimal
+import java.math.MathContext
+import java.math.RoundingMode
 
 /**
  * ADVARSEL: Muterer TilkjentYtelse
@@ -87,7 +90,7 @@ fun Collection<AndelTilkjentYtelse>.differanseberegnSøkersYtelser(
     val reduksjonUtvidetBarnetrygdTidslinje = minsteAvHver(
         barnasDelAvUtvidetBarnetrygdTidslinjer,
         barnasUnderskuddPåDifferanseberegningTidslinjer
-    ).sum()
+    ).sum().rundAvTilHeltall()
 
     // Til slutt oppdaterer vi differanseberegningen på utvidet barnetrygd med reduksjonen
     val differanseberegnetUtvidetBarnetrygdTidslinje =
@@ -96,7 +99,7 @@ fun Collection<AndelTilkjentYtelse>.differanseberegnSøkersYtelser(
     // For hvert barn finner vi ut hvor mye underskudd som gjenstår etter at delen av utvidet barnetrygd er trukket fra
     val barnasGjenståendeUnderskuddTidslinjer = barnasUnderskuddPåDifferanseberegningTidslinjer
         .minus(barnasDelAvUtvidetBarnetrygdTidslinjer)
-        .filtrerHverKunVerdi { it > 0 }
+        .filtrerHverKunVerdi { it > BigDecimal.ZERO }
 
     // For hvert barn kombiner andel-tidslinjen med 3-års-tidslinjen. Resultatet er andelene når barna er inntil 3 år
     val barnasAndelerInntil3ÅrTidslinjer = barnasAndelerTidslinjer.kunAndelerTilOgMed3År(barna)
@@ -111,7 +114,7 @@ fun Collection<AndelTilkjentYtelse>.differanseberegnSøkersYtelser(
     val reduksjonSmåbarnstilleggTidslinje = minsteAvHver(
         barnasDelAvSmåbarnstilleggetTidslinjer,
         barnasGjenståendeUnderskuddTidslinjer
-    ).sum()
+    ).sum().rundAvTilHeltall()
 
     // Til slutt oppdaterer vi differanseberegningen på småbarnstillegget med reduksjonen
     val differanseberegnetSmåbarnstilleggTidslinje =
@@ -124,13 +127,13 @@ fun Collection<AndelTilkjentYtelse>.differanseberegnSøkersYtelser(
 
 fun Tidslinje<AndelTilkjentYtelse, Måned>.fordelForholdsmessigPåBarnasAndeler(
     barnasAndeler: Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>>
-): Map<Aktør, Tidslinje<Int, Måned>> {
+): Map<Aktør, Tidslinje<BigDecimal, Måned>> {
     val antallAktørerMedYtelseTidslinje =
         barnasAndeler.values.kombinerUtenNullOgIkkeTom { it.count() }
 
     val ytelsePerBarnTidslinje =
         this.kombinerUtenNullMed(antallAktørerMedYtelseTidslinje) { andel, antall ->
-            andel.kalkulertUtbetalingsbeløp / antall
+            andel.kalkulertUtbetalingsbeløp.toBigDecimal().divide(antall.toBigDecimal(), MathContext.DECIMAL32)
         }
 
     return barnasAndeler.kombinerKunVerdiMed(ytelsePerBarnTidslinje) { _, ytelsePerBarn -> ytelsePerBarn }
@@ -142,6 +145,7 @@ fun Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>>.tilUnderskuddPåDifferan
             .mapIkkeNull { innhold -> innhold.differanseberegnetPeriodebeløp }
             .mapIkkeNull { maxOf(-it, 0) }
             .filtrer { it != null && it > 0 }
+            .mapIkkeNull { it.toBigDecimal() }
     }
 
 fun Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>>.kunAndelerTilOgMed3År(barna: List<Person>):
@@ -157,8 +161,8 @@ fun <K, I : Comparable<I>, T : Tidsenhet> minsteAvHver(
     bTidslinjer: Map<K, Tidslinje<I, T>>
 ) = aTidslinjer.joinIkkeNull(bTidslinjer) { a, b -> minOf(a, b) }
 
-fun <K, T : Tidsenhet> Map<K, Tidslinje<Int, T>>.minus(
-    bTidslinjer: Map<K, Tidslinje<Int, T>>
+fun <K, T : Tidsenhet> Map<K, Tidslinje<BigDecimal, T>>.minus(
+    bTidslinjer: Map<K, Tidslinje<BigDecimal, T>>
 ) = this.join(bTidslinjer) { a, b ->
     when {
         a != null && b != null -> a - b
@@ -170,5 +174,8 @@ fun <K, I, T : Tidsenhet> Map<K, Tidslinje<I, T>>.filtrerHverKunVerdi(
     filter: (I) -> Boolean
 ) = mapValues { (_, tidslinje) -> tidslinje.filtrer { if (it != null) filter(it) else false } }
 
-fun Map<Aktør, Tidslinje<Int, Måned>>.sum() =
-    values.kombinerUtenNullOgIkkeTom { it.sum() }
+fun <T : Tidsenhet> Map<Aktør, Tidslinje<BigDecimal, T>>.sum() =
+    values.kombinerUtenNullOgIkkeTom { it.reduce { sum, verdi -> sum.plus(verdi) } }
+
+fun <T : Tidsenhet> Tidslinje<BigDecimal, T>.rundAvTilHeltall() =
+    this.mapIkkeNull { it.setScale(0, RoundingMode.HALF_UP) }
