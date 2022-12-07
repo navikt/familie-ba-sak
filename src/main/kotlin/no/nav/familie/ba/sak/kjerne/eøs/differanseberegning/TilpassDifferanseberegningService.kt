@@ -104,7 +104,7 @@ class TilpassDifferanseberegningSøkersYtelserService(
     private val featureToggleService: FeatureToggleService
 ) : BarnasDifferanseberegningEndretAbonnent {
     override fun barnasDifferanseberegningEndret(tilkjentYtelse: TilkjentYtelse) {
-        if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_DIFFERANSEBEREGNE_SØKERS_YTELSER, false)) {
+        if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_UTVIDET_EØS_SEKUNDÆRLAND, false)) {
             val oppdaterteAndeler = tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(
                 persongrunnlagService.hentBarna(tilkjentYtelse.behandling.id),
                 kompetanseRepository.finnFraBehandlingId(tilkjentYtelse.behandling.id)
