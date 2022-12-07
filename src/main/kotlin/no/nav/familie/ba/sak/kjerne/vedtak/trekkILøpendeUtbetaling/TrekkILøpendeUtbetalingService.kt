@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.trekkILøpendeUtbetaling
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 
 @Service
@@ -31,7 +32,7 @@ class TrekkILøpendeUtbetalingService(
         loggService.loggTrekkILøpendeUtbetalingFjernet(behandlingId = identifikator.behandlingId)
     }
 
-    fun hentTrekkILøpendeUtbetalinger() = repository.findAll().map { tilRest(it) }
+    fun hentTrekkILøpendeUtbetalinger() = repository.findAll(Sort.by(Sort.Direction.ASC, "opprettetTidspunkt")).map{tilRest(it)}
 
     private fun tilRest(it: TrekkILøpendeUtbetaling) =
         RestTrekkILøpendeUtbetaling(
