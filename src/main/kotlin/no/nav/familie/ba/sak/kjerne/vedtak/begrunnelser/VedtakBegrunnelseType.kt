@@ -20,6 +20,7 @@ enum class VedtakBegrunnelseType(val sorteringsrekkefølge: Int) {
     EØS_OPPHØR(4),
     INSTITUSJON_OPPHØR(4),
     FORTSATT_INNVILGET(5),
+    EØS_FORTSATT_INNVILGET(5),
     INSTITUSJON_FORTSATT_INNVILGET(5),
     ENDRET_UTBETALING(7),
     ETTER_ENDRET_UTBETALING(6);
