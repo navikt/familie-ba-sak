@@ -216,6 +216,14 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
         override val sanityApiNavn = "opphorUgyldigKontonummerEos"
     },
+    OPPHOR_ETT_BARN_DØD_EØS {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
+        override val sanityApiNavn = "opphorEttBarnDodEos"
+    },
+    OPPHOR_FLERE_BARN_DØDE_EØS {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
+        override val sanityApiNavn = "opphorFlereBarnErDodeEos"
+    },
     AVSLAG_EØS_IKKE_EØS_BORGER {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
         override val sanityApiNavn = "avslagEosIkkeEosBorger"
