@@ -312,7 +312,7 @@ fun List<AndelTilkjentYtelse>?.hentTidslinje() =
         } ?: emptyList()
     )
 
-fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.tilTidslinjerPerPerson(): Map<Pair<Aktør, YtelseType>, AndelTilkjentYtelseTidslinje> =
+fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.tilTidslinjerPerPersonOgType(): Map<Pair<Aktør, YtelseType>, AndelTilkjentYtelseTidslinje> =
     groupBy { Pair(it.aktør, it.type) }.mapValues { (_, andelerTilkjentYtelsePåPerson) ->
         AndelTilkjentYtelseTidslinje(
             andelerTilkjentYtelsePåPerson

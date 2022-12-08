@@ -1,26 +1,16 @@
 package no.nav.familie.ba.sak.common
 
+import no.nav.familie.ba.sak.config.featureToggle.miljø.Profil
+import no.nav.familie.ba.sak.config.featureToggle.miljø.erAktiv
 import org.springframework.core.env.Environment
 import org.springframework.stereotype.Service
 
 @Service
 class EnvService(private val environment: Environment) {
 
-    fun erProd(): Boolean {
-        return environment.activeProfiles.any {
-            it == "prod"
-        }
-    }
+    fun erProd() = environment.erAktiv(Profil.Prod)
 
-    fun erPreprod(): Boolean {
-        return environment.activeProfiles.any {
-            it == "preprod"
-        }
-    }
+    fun erPreprod() = environment.erAktiv(Profil.Preprod)
 
-    fun erDev(): Boolean {
-        return environment.activeProfiles.any {
-            it == "dev" || it == "postgres"
-        }
-    }
+    fun erDev() = environment.erAktiv(Profil.Dev) || environment.erAktiv(Profil.Postgres)
 }

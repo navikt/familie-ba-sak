@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
+import no.nav.familie.ba.sak.common.erUnder6ÅrTidslinje
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.nesteMåned
@@ -9,9 +10,17 @@ import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.Sats
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt.Companion.tilTidspunktEllerSenereEnn
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.MånedTidspunkt.Companion.tilTidspunktEllerTidligereEnn
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilMånedTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerSenereEnn
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerTidligereEnn
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjær
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -131,9 +140,10 @@ fun fomErPåSatsendring(fom: LocalDate?): Boolean =
         .finnSatsendring(fom?.førsteDagIInneværendeMåned() ?: TIDENES_MORGEN)
         .isNotEmpty()
 
-fun satstypeTidslinje(satsType: SatsType) = tidslinje {
+fun satstypeTidslinje(satsType: SatsType, maxSatsGyldigFraOgMed: YearMonth = SatsService.tilleggEndringJanuar2022) = tidslinje {
     SatsService.hentAllesatser()
         .filter { it.type == satsType }
+        .filter { it.gyldigFom.toYearMonth() <= maxSatsGyldigFraOgMed }
         .map {
             val fom = if (it.gyldigFom == LocalDate.MIN) null else it.gyldigFom.toYearMonth()
             val tom = if (it.gyldigTom == LocalDate.MAX) null else it.gyldigTom.toYearMonth()
@@ -144,3 +154,13 @@ fun satstypeTidslinje(satsType: SatsType) = tidslinje {
             )
         }
 }
+
+fun lagOrdinærTidslinje(barn: Person): Tidslinje<Int, Måned> {
+    val orbaTidslinje = satstypeTidslinje(SatsType.ORBA)
+    val tilleggOrbaTidslinje = satstypeTidslinje(SatsType.TILLEGG_ORBA).filtrerMed(erUnder6ÅrTidslinje(barn))
+    return orbaTidslinje
+        .kombinerMed(tilleggOrbaTidslinje) { orba, tillegg -> tillegg ?: orba }
+        .klippBortPerioderFørBarnetBleFødt(fødselsdato = barn.fødselsdato)
+}
+
+private fun Tidslinje<Int, Måned>.klippBortPerioderFørBarnetBleFødt(fødselsdato: LocalDate) = this.beskjær(fraOgMed = fødselsdato.tilMånedTidspunkt(), tilOgMed = MånedTidspunkt.uendeligLengeTil(fødselsdato.toYearMonth()))

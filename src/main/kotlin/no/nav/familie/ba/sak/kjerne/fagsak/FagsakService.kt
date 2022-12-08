@@ -17,12 +17,15 @@ import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.integrasjoner.skyggesak.SkyggesakService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.kjerne.institusjon.InstitusjonService
@@ -48,6 +51,7 @@ import java.time.Period
 class FagsakService(
     private val fagsakRepository: FagsakRepository,
     private val personRepository: PersonRepository,
+    private val andelerTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val personidentService: PersonidentService,
     private val behandlingRepository: BehandlingRepository,
     private val behandlingstemaService: BehandlingstemaService,
@@ -61,7 +65,8 @@ class FagsakService(
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val tilbakekrevingsbehandlingService: TilbakekrevingsbehandlingService,
     private val institusjonService: InstitusjonService,
-    private val organisasjonService: OrganisasjonService
+    private val organisasjonService: OrganisasjonService,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService
 ) {
 
     private val antallFagsakerOpprettetFraManuell =
@@ -107,7 +112,7 @@ class FagsakService(
     ): Fagsak {
         val aktør = personidentService.hentOgLagreAktør(personIdent, true)
 
-        var fagsak = when (type) {
+        val eksisterendeFagsak = when (type) {
             FagsakType.INSTITUSJON -> {
                 if (institusjon?.orgNummer == null) throw FunksjonellFeil("Mangler påkrevd variabel orgnummer for institusjon")
                 fagsakRepository.finnFagsakForInstitusjonOgOrgnummer(aktør, institusjon.orgNummer)
@@ -115,8 +120,8 @@ class FagsakService(
             else -> fagsakRepository.finnFagsakForAktør(aktør, type)
         }
 
-        if (fagsak == null) {
-            fagsak = lagre(Fagsak(aktør = aktør, type = type))
+        return if (eksisterendeFagsak == null) {
+            val nyFagsak = Fagsak(aktør = aktør, type = type)
             if (fraAutomatiskBehandling) {
                 antallFagsakerOpprettetFraAutomatisk.increment()
             } else {
@@ -126,14 +131,15 @@ class FagsakService(
             if (type == FagsakType.INSTITUSJON) {
                 institusjonService.hentEllerOpprettInstitusjon(institusjon?.orgNummer!!, institusjon.tssEksternId)
                     .apply {
-                        fagsak.institusjon = this
+                        nyFagsak.institusjon = this
                     }
-                fagsakRepository.saveAndFlush(fagsak)
             }
-
-            skyggesakService.opprettSkyggesak(fagsak)
+            val nyOgLagretFagsak = lagre(nyFagsak)
+            skyggesakService.opprettSkyggesak(nyOgLagretFagsak)
+            nyOgLagretFagsak
+        } else {
+            eksisterendeFagsak
         }
-        return fagsak
     }
 
     fun hentFagsakerPåPerson(aktør: Aktør): List<Fagsak> {
@@ -151,14 +157,14 @@ class FagsakService(
         return fagsakRepository.save(fagsak).also { saksstatistikkEventPublisher.publiserSaksstatistikk(it.id) }
     }
 
-    fun oppdaterStatus(fagsak: Fagsak, nyStatus: FagsakStatus) {
+    fun oppdaterStatus(fagsak: Fagsak, nyStatus: FagsakStatus): Fagsak {
         logger.info(
             "${SikkerhetContext.hentSaksbehandlerNavn()} endrer status på fagsak ${fagsak.id} fra ${fagsak.status}" +
                 " til $nyStatus"
         )
         fagsak.status = nyStatus
 
-        lagre(fagsak)
+        return lagre(fagsak)
     }
 
     fun hentMinimalFagsakForPerson(
@@ -296,6 +302,10 @@ class FagsakService(
 
     fun hentFagsakPåPerson(aktør: Aktør, fagsakType: FagsakType = FagsakType.NORMAL): Fagsak? {
         return fagsakRepository.finnFagsakForAktør(aktør, fagsakType)
+    }
+
+    fun hentAlleFagsakerForAktør(aktør: Aktør): List<Fagsak> {
+        return fagsakRepository.finnFagsakerForAktør(aktør)
     }
 
     fun hentLøpendeFagsaker(): List<Fagsak> {
@@ -478,6 +488,29 @@ class FagsakService(
         } else {
             null
         }
+    }
+
+    fun finnAlleFagsakerHvorAktørHarLøpendeYtelseAvType(aktør: Aktør, ytelseTyper: List<YtelseType>): List<Fagsak> {
+        val ordinæreAndelerPåAktør = andelerTilkjentYtelseRepository.finnAndelerTilkjentYtelseForAktør(aktør = aktør)
+            .filter { it.type in ytelseTyper }
+
+        val løpendeAndeler = ordinæreAndelerPåAktør.filter { it.erLøpende() }
+
+        val behandlingerMedLøpendeAndeler = løpendeAndeler
+            .map { it.behandlingId }.toSet()
+            .map { behandlingRepository.finnBehandling(it) }
+
+        val behandlingerSomErSisteIverksattePåFagsak = behandlingerMedLøpendeAndeler.filter { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(it.fagsak.id) == it }
+
+        return behandlingerSomErSisteIverksattePåFagsak.map { it.fagsak }
+    }
+
+    fun finnAlleFagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær(aktør: Aktør): List<Fagsak> {
+        val alleLøpendeFagsakerPåAktør = hentAlleFagsakerForAktør(aktør).filter { it.status == FagsakStatus.LØPENDE }
+
+        val fagsakerHvorAktørHarLøpendeOrdinærBarnetrygd = finnAlleFagsakerHvorAktørHarLøpendeYtelseAvType(aktør = aktør, ytelseTyper = listOf(YtelseType.ORDINÆR_BARNETRYGD))
+
+        return (alleLøpendeFagsakerPåAktør + fagsakerHvorAktørHarLøpendeOrdinærBarnetrygd).distinct()
     }
 
     fun oppgiFagsakdeltagere(aktør: Aktør, barnasAktørId: List<Aktør>): List<RestFagsakDeltager> {

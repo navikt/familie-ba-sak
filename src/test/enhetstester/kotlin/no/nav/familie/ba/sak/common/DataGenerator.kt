@@ -242,7 +242,7 @@ fun lagAndelTilkjentYtelse(
     tilkjentYtelse: TilkjentYtelse? = null,
     prosent: BigDecimal = BigDecimal(100),
     endretUtbetalingAndeler: List<EndretUtbetalingAndel> = emptyList(),
-    kildeBehandlingId: Long = behandling.id
+    kildeBehandlingId: Long? = behandling.id
 ): AndelTilkjentYtelse {
     return AndelTilkjentYtelse(
         aktør = aktør,
@@ -322,8 +322,8 @@ fun lagAndelTilkjentYtelseUtvidet(
     )
 }
 
-fun lagInitiellTilkjentYtelse(behandling: Behandling = lagBehandling()): TilkjentYtelse {
-    return TilkjentYtelse(behandling = behandling, opprettetDato = LocalDate.now(), endretDato = LocalDate.now())
+fun lagInitiellTilkjentYtelse(behandling: Behandling = lagBehandling(), utbetalingsoppdrag: String? = null): TilkjentYtelse {
+    return TilkjentYtelse(behandling = behandling, opprettetDato = LocalDate.now(), endretDato = LocalDate.now(), utbetalingsoppdrag = utbetalingsoppdrag)
 }
 
 fun lagTestPersonopplysningGrunnlag(

@@ -31,6 +31,10 @@ import no.nav.familie.eksterne.kontrakter.UnderkategoriV2
 import no.nav.familie.eksterne.kontrakter.UtbetalingsDetaljDVHV2
 import no.nav.familie.eksterne.kontrakter.UtbetalingsperiodeDVHV2
 import no.nav.familie.eksterne.kontrakter.VedtakDVHV2
+import no.nav.familie.eksterne.kontrakter.YtelseType.MANUELL_VURDERING
+import no.nav.familie.eksterne.kontrakter.YtelseType.ORDINÆR_BARNETRYGD
+import no.nav.familie.eksterne.kontrakter.YtelseType.SMÅBARNSTILLEGG
+import no.nav.familie.eksterne.kontrakter.YtelseType.UTVIDET_BARNETRYGD
 import no.nav.fpsak.tidsserie.LocalDateInterval
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import org.slf4j.LoggerFactory
@@ -73,8 +77,9 @@ class StønadsstatistikkService(
             ensligForsørger = utledEnsligForsørger(behandlingId), // TODO implementere støtte for dette
             kategoriV2 = KategoriV2.valueOf(behandling.kategori.name),
             underkategoriV2 = when (behandling.underkategori) {
-                BehandlingUnderkategori.ORDINÆR -> UnderkategoriV2.valueOf(behandling.underkategori.name)
-                BehandlingUnderkategori.UTVIDET -> UnderkategoriV2.valueOf(behandling.underkategori.name)
+                BehandlingUnderkategori.ORDINÆR -> UnderkategoriV2.ORDINÆR
+                BehandlingUnderkategori.UTVIDET -> UnderkategoriV2.UTVIDET
+                BehandlingUnderkategori.INSTITUSJON -> UnderkategoriV2.ORDINÆR // Institusjon er ordinær og ligger under fagsakType på stønadsstatistikk
             },
             behandlingTypeV2 = BehandlingTypeV2.valueOf(behandling.type.name),
             utbetalingsperioderV2 = hentUtbetalingsperioderV2(behandlingId),
@@ -175,6 +180,12 @@ class StønadsstatistikkService(
                         andel.prosent.intValueExact()
                     ),
                     klassekode = andel.type.klassifisering,
+                    ytelseType = when (andel.type) {
+                        YtelseType.ORDINÆR_BARNETRYGD -> ORDINÆR_BARNETRYGD
+                        YtelseType.UTVIDET_BARNETRYGD -> UTVIDET_BARNETRYGD
+                        YtelseType.SMÅBARNSTILLEGG -> SMÅBARNSTILLEGG
+                        YtelseType.MANUELL_VURDERING -> MANUELL_VURDERING
+                    },
                     utbetaltPrMnd = andel.kalkulertUtbetalingsbeløp,
                     delytelseId = behandling.fagsak.id.toString() + andel.periodeOffset
                 )
@@ -205,7 +216,7 @@ class StønadsstatistikkService(
     } else if (personopplysningerService.hentPersoninfoEnkel(person.aktør).bostedsadresser.isNotEmpty()) {
         "NO"
     } else {
-        val landKode = personopplysningerService.hentLandkodeUtenlandskBostedsadresse(person.aktør)
+        val landKode = personopplysningerService.hentLandkodeAlpha2UtenlandskBostedsadresse(person.aktør)
 
         if (landKode == PersonopplysningerService.UKJENT_LANDKODE) {
             logger.info("Sender landkode ukjent til DVH")

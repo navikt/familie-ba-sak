@@ -58,11 +58,12 @@ class SaksstatistikkService(
             BehandlingÅrsak.SØKNAD -> {
                 behandlingSøknadsinfoService.hentSøknadMottattDato(behandlingId) ?: behandling.opprettetTidspunkt
             }
+
             else -> behandling.opprettetTidspunkt
         }
 
         val behandlendeEnhetsKode =
-            arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId).behandlendeEnhetId
+            arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId).behandlendeEnhetId
         val ansvarligEnhetKode = arbeidsfordelingService.hentArbeidsfordelingsenhet(behandling).enhetId
 
         val aktivtVedtak = vedtakService.hentAktivForBehandling(behandlingId)
@@ -81,8 +82,10 @@ class SaksstatistikkService(
             behandlingType = behandling.type.name,
             behandlingStatus = behandling.status.name,
             behandlingKategori = when (behandling.underkategori) { // Gjøres pga. tilpasning til DVH-modell
-                BehandlingUnderkategori.ORDINÆR -> behandling.underkategori.name
-                BehandlingUnderkategori.UTVIDET -> behandling.underkategori.name
+                BehandlingUnderkategori.ORDINÆR, BehandlingUnderkategori.UTVIDET ->
+                    behandling.underkategori.name
+
+                BehandlingUnderkategori.INSTITUSJON -> BehandlingUnderkategori.ORDINÆR.name // Institusjon er ordinær og ligger under behandlingUnderkategori i saksstatiskk-kontrakt
             },
             behandlingUnderkategori = when (behandling.fagsak.type) { // <-'
                 NORMAL -> null
@@ -165,7 +168,7 @@ class SaksstatistikkService(
         return if (person.bostedsadresser.isNotEmpty()) {
             "NO"
         } else {
-            personopplysningerService.hentLandkodeUtenlandskBostedsadresse(
+            personopplysningerService.hentLandkodeAlpha2UtenlandskBostedsadresse(
                 person.aktør
             )
         }
@@ -177,7 +180,9 @@ class SaksstatistikkService(
         return if (personInfo.bostedsadresser.isNotEmpty()) {
             "NO"
         } else {
-            personopplysningerService.hentLandkodeUtenlandskBostedsadresse(aktør)
+            personopplysningerService.hentLandkodeAlpha2UtenlandskBostedsadresse(
+                aktør
+            )
         }
     }
 

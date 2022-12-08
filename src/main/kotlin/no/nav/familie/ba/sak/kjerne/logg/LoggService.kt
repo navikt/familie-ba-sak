@@ -4,6 +4,7 @@ import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.tilKortString
+import no.nav.familie.ba.sak.common.tilddMMyyyy
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
@@ -15,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.korrigertetterbetaling.KorrigertEtterbetaling
+import no.nav.familie.ba.sak.kjerne.korrigertvedtak.KorrigertVedtak
 import no.nav.familie.ba.sak.kjerne.personident.Identkonverterer
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -446,6 +448,63 @@ class LoggService(
             )
         )
     }
+
+    fun opprettKorrigertVedtakLogg(
+        behandling: Behandling,
+        korrigertVedtak: KorrigertVedtak
+    ) {
+        val tekst = if (korrigertVedtak.aktiv) {
+            """
+            Vedtaksdato: ${korrigertVedtak.vedtaksdato.tilddMMyyyy()}
+            Begrunnelse: ${korrigertVedtak.begrunnelse ?: "Ingen begrunnelse"}
+            """.trimIndent()
+        } else {
+            ""
+        }
+
+        val tittel = if (korrigertVedtak.aktiv) {
+            "Vedtaket er korrigert etter § 35"
+        } else {
+            "Korrigering av vedtaket etter § 35 er fjernet"
+        }
+
+        lagre(
+            Logg(
+                behandlingId = behandling.id,
+                type = LoggType.KORRIGERT_VEDTAK,
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
+                    rolleConfig,
+                    BehandlerRolle.SAKSBEHANDLER
+                ),
+                tittel = tittel,
+                tekst = tekst
+            )
+        )
+    }
+
+    fun loggTrekkILøpendeUtbetalingLagtTil(behandlingId: Long) =
+        lagre(
+            Logg(
+                behandlingId = behandlingId,
+                type = LoggType.TREKK_I_LØPENDE_UTBETALING_LAGT_TIL,
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
+                    rolleConfig,
+                    BehandlerRolle.SAKSBEHANDLER
+                )
+            )
+        )
+
+    fun loggTrekkILøpendeUtbetalingFjernet(behandlingId: Long) =
+        lagre(
+            Logg(
+                behandlingId = behandlingId,
+                type = LoggType.TREKK_I_LØPENDE_UTBETALING_FJERNET,
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
+                    rolleConfig,
+                    BehandlerRolle.SAKSBEHANDLER
+                )
+            )
+        )
 
     fun lagre(logg: Logg): Logg {
         metrikkPerLoggType[logg.type]?.increment()

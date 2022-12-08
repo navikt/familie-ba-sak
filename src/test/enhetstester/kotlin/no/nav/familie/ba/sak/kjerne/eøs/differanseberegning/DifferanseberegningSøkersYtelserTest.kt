@@ -1,0 +1,199 @@
+package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
+
+import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
+import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.ORDINÆR_BARNETRYGD
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.SMÅBARNSTILLEGG
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.UTVIDET_BARNETRYGD
+import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
+import no.nav.familie.ba.sak.kjerne.eøs.util.barn
+import no.nav.familie.ba.sak.kjerne.eøs.util.der
+import no.nav.familie.ba.sak.kjerne.eøs.util.fom
+import no.nav.familie.ba.sak.kjerne.eøs.util.født
+import no.nav.familie.ba.sak.kjerne.eøs.util.har
+import no.nav.familie.ba.sak.kjerne.eøs.util.i
+import no.nav.familie.ba.sak.kjerne.eøs.util.minus
+import no.nav.familie.ba.sak.kjerne.eøs.util.og
+import no.nav.familie.ba.sak.kjerne.eøs.util.tom
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.aug
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.des
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.jul
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.jun
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.mai
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.okt
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.sep
+import org.junit.jupiter.api.Test
+
+class DifferanseberegningSøkersYtelserTest {
+
+    private val Int.kr get() = this
+    private val Int.PLN get() = this * 2
+
+    @Test
+    fun `skal håndtere to barn og utvidet barnetrygd og småbarnstillegg, der det ene barnet har underskudd etter differanseberegning`() {
+        val søker = tilfeldigPerson(personType = PersonType.SØKER)
+        val barn1 = barn født 13.jan(2017)
+        val barn2 = barn født 15.jun(2020)
+        val behandling = lagBehandling()
+
+        val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling) der
+            (søker har 1054.kr i UTVIDET_BARNETRYGD fom jun(2018) tom jul(2024)) og
+            (søker har 660.kr i SMÅBARNSTILLEGG fom aug(2018) tom des(2019)) og
+            (søker har 660.kr i SMÅBARNSTILLEGG fom jul(2020) tom mai(2023)) og
+            (barn1 har 1054.kr og 1250.PLN i ORDINÆR_BARNETRYGD fom aug(2019) tom jul(2022)) og
+            (barn1 har 1054.kr og 1325.PLN i ORDINÆR_BARNETRYGD fom aug(2022) tom jul(2024)) og
+            (barn2 har 1054.kr i ORDINÆR_BARNETRYGD fom jul(2020) tom mai(2038))
+
+        val nyeAndeler =
+            tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(listOf(barn1, barn2))
+
+        val forventet = lagInitiellTilkjentYtelse(behandling) der
+            (barn1 har 1054.kr og 1250.PLN i ORDINÆR_BARNETRYGD fom aug(2019) tom jul(2022)) og
+            (barn1 har 1054.kr og 1325.PLN i ORDINÆR_BARNETRYGD fom aug(2022) tom jul(2024)) og
+            (barn2 har 1054.kr i ORDINÆR_BARNETRYGD fom jul(2020) tom mai(2038)) og
+            (søker har 1054.kr i UTVIDET_BARNETRYGD fom jun(2018) tom jul(2019)) og
+            (søker har 1054.kr minus 1054.kr i UTVIDET_BARNETRYGD fom aug(2019) tom jun(2020)) og
+            (søker har 1054.kr minus 527.kr i UTVIDET_BARNETRYGD fom jul(2020) tom jul(2024)) og
+            (søker har 660.kr i SMÅBARNSTILLEGG fom aug(2018) tom jul(2019)) og
+            (søker har 660.kr minus 392.kr i SMÅBARNSTILLEGG fom aug(2019) tom des(2019)) og
+            (søker har 660.kr i SMÅBARNSTILLEGG fom jul(2020) tom mai(2023))
+
+        assertEqualsUnordered(forventet.andelerTilkjentYtelse, nyeAndeler)
+    }
+
+    @Test
+    fun `differanseberegnet ordinær barnetrygd uten at søker har ytelser, skal gi uendrete andeler for barne`() {
+        val barn1 = barn født 13.jan(2017)
+        val barn2 = barn født 15.jun(2020)
+        val behandling = lagBehandling()
+
+        val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling) der
+            (barn1 har 1054.kr og 1250.PLN i ORDINÆR_BARNETRYGD fom aug(2019) tom jul(2022)) og
+            (barn1 har 1054.kr og 1325.PLN i ORDINÆR_BARNETRYGD fom aug(2022) tom jul(2024)) og
+            (barn2 har 1054.kr i ORDINÆR_BARNETRYGD fom jul(2020) tom mai(2038))
+
+        val nyeAndeler =
+            tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(listOf(barn1, barn2))
+
+        val forventet = lagInitiellTilkjentYtelse(behandling) der
+            (barn1 har 1054.kr og 1250.PLN i ORDINÆR_BARNETRYGD fom aug(2019) tom jul(2022)) og
+            (barn1 har 1054.kr og 1325.PLN i ORDINÆR_BARNETRYGD fom aug(2022) tom jul(2024)) og
+            (barn2 har 1054.kr i ORDINÆR_BARNETRYGD fom jul(2020) tom mai(2038))
+
+        assertEqualsUnordered(forventet.andelerTilkjentYtelse, nyeAndeler)
+    }
+
+    @Test
+    fun `Ingen differranseberegning skal gi uendrete andeler`() {
+        val søker = tilfeldigPerson(personType = PersonType.SØKER)
+        val barn1 = barn født 13.jan(2017)
+        val barn2 = barn født 15.jun(2020)
+        val behandling = lagBehandling()
+
+        val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling) der
+            (søker har 1054.kr i UTVIDET_BARNETRYGD fom jun(2018) tom jul(2024)) og
+            (søker har 660.kr i SMÅBARNSTILLEGG fom aug(2018) tom des(2019)) og
+            (søker har 660.kr i SMÅBARNSTILLEGG fom jul(2020) tom mai(2023)) og
+            (barn1 har 1054.kr i ORDINÆR_BARNETRYGD fom aug(2019) tom jul(2024)) og
+            (barn2 har 1054.kr i ORDINÆR_BARNETRYGD fom jul(2020) tom mai(2038))
+
+        val nyeAndeler =
+            tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(listOf(barn1, barn2))
+
+        val forventet = lagInitiellTilkjentYtelse(behandling) der
+            (søker har 1054.kr i UTVIDET_BARNETRYGD fom jun(2018) tom jul(2024)) og
+            (søker har 660.kr i SMÅBARNSTILLEGG fom aug(2018) tom des(2019)) og
+            (søker har 660.kr i SMÅBARNSTILLEGG fom jul(2020) tom mai(2023)) og
+            (barn1 har 1054.kr i ORDINÆR_BARNETRYGD fom aug(2019) tom jul(2024)) og
+            (barn2 har 1054.kr i ORDINÆR_BARNETRYGD fom jul(2020) tom mai(2038))
+
+        assertEqualsUnordered(forventet.andelerTilkjentYtelse, nyeAndeler)
+    }
+
+    @Test
+    fun `Tom tilkjent ytelse og ingen barn skal ikke gi feil`() {
+        val tilkjentYtelse = lagInitiellTilkjentYtelse()
+
+        val nyeAndeler = tilkjentYtelse.andelerTilkjentYtelse
+            .differanseberegnSøkersYtelser(emptyList())
+
+        assertEqualsUnordered(emptyList(), nyeAndeler)
+    }
+
+    @Test
+    fun `Søkers andel som har hatt differanseberegning, men ikke skal ha det lenger, skal fjerne differanseberegningen`() {
+        val søker = tilfeldigPerson(personType = PersonType.SØKER)
+        val barn1 = barn født 13.jan(2017)
+        val behandling = lagBehandling()
+
+        val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling) der
+            (søker har 1054.kr og 30.PLN i UTVIDET_BARNETRYGD fom jun(2018) tom jul(2024)) og
+            (søker har 660.kr og 40.PLN i SMÅBARNSTILLEGG fom aug(2018) tom des(2019)) og
+            (søker har 660.kr i SMÅBARNSTILLEGG fom jul(2020) tom mai(2023)) og
+            (barn1 har 1054.kr i ORDINÆR_BARNETRYGD fom aug(2019) tom jul(2024))
+
+        val nyeAndeler =
+            tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(listOf(barn1))
+
+        val forventet = lagInitiellTilkjentYtelse(behandling) der
+            (barn1 har 1054.kr i ORDINÆR_BARNETRYGD fom aug(2019) tom jul(2024)) og
+            (søker har 1054.kr i UTVIDET_BARNETRYGD fom jun(2018) tom jul(2024)) og
+            (søker har 660.kr i SMÅBARNSTILLEGG fom aug(2018) tom des(2019)) og
+            (søker har 660.kr i SMÅBARNSTILLEGG fom jul(2020) tom mai(2023))
+
+        assertEqualsUnordered(forventet.andelerTilkjentYtelse, nyeAndeler)
+    }
+
+    @Test
+    fun `Søkers andel som har differanseberegning, men underskuddet reduseres, skal få oppdatert differanseberegningen`() {
+        val søker = tilfeldigPerson(personType = PersonType.SØKER)
+        val barn1 = barn født 13.jan(2017)
+        val behandling = lagBehandling()
+
+        // Satsene er ikke riktige, men enklere å jobbe med
+        // 1 PLN = 2 kr
+        val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling) der
+            (barn1 har 1000.kr og 900.PLN i ORDINÆR_BARNETRYGD fom mai(2017) tom jul(2024)) og
+            (søker har 1000.kr minus 1000.kr i UTVIDET_BARNETRYGD fom jun(2017) tom jul(2021)) og
+            (søker har 600.kr minus 400.kr i SMÅBARNSTILLEGG fom aug(2018) tom des(2019))
+
+        val nyeAndeler =
+            tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(listOf(barn1))
+
+        val forventet = lagInitiellTilkjentYtelse(behandling) der
+            (barn1 har 1000.kr og 900.PLN i ORDINÆR_BARNETRYGD fom mai(2017) tom jul(2024)) og
+            (søker har 1000.kr minus 400.PLN i UTVIDET_BARNETRYGD fom jun(2017) tom jul(2021)) og
+            (søker har 600.kr i SMÅBARNSTILLEGG fom aug(2018) tom des(2019))
+
+        assertEqualsUnordered(forventet.andelerTilkjentYtelse, nyeAndeler)
+    }
+
+    @Test
+    fun `Skal tåle perioder der underskuddet på differanseberegning er større enn alle tilkjente ytelser`() {
+        val søker = tilfeldigPerson(personType = PersonType.SØKER)
+        val barn1 = barn født 13.jan(2019)
+        val behandling = lagBehandling()
+
+        val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling) der
+            (barn1 har 1054.kr og 1500.PLN i ORDINÆR_BARNETRYGD fom aug(2019) tom jul(2020)) og
+            (barn1 har 1054.kr i ORDINÆR_BARNETRYGD fom aug(2020) tom jul(2025)) og
+            (søker har 1054.kr i UTVIDET_BARNETRYGD fom sep(2019) tom jul(2024)) og
+            (søker har 660.kr i SMÅBARNSTILLEGG fom okt(2019) tom des(2021))
+
+        val nyeAndeler =
+            tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(listOf(barn1))
+
+        val forventet = lagInitiellTilkjentYtelse(behandling) der
+            (barn1 har 1054.kr og 1500.PLN i ORDINÆR_BARNETRYGD fom aug(2019) tom jul(2020)) og
+            (barn1 har 1054.kr i ORDINÆR_BARNETRYGD fom aug(2020) tom jul(2025)) og
+            (søker har 1054.kr minus 1054.kr i UTVIDET_BARNETRYGD fom sep(2019) tom jul(2020)) og
+            (søker har 1054.kr i UTVIDET_BARNETRYGD fom aug(2020) tom jul(2024)) og
+            (søker har 660.kr minus 660.kr i SMÅBARNSTILLEGG fom okt(2019) tom jul(2020)) og
+            (søker har 660.kr i SMÅBARNSTILLEGG fom aug(2020) tom des(2021))
+
+        assertEqualsUnordered(forventet.andelerTilkjentYtelse, nyeAndeler)
+    }
+}

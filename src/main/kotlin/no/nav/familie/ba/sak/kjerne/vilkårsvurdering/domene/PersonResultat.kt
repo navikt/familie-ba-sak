@@ -8,16 +8,16 @@ import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.slåSammenLike
-import no.nav.familie.ba.sak.kjerne.tidslinje.tid.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærEtter
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.forskyv
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.tilMånedFraSisteDagIMåneden
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.tilMånedFraMånedsskifteIkkeNull
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat.Companion.VilkårResultatComparator
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
@@ -153,52 +153,55 @@ class PersonResultat(
     fun harEksplisittAvslag() = vilkårResultater.any { it.erEksplisittAvslagPåSøknad == true }
 }
 
-fun Set<PersonResultat>.tilFørskjøvetVilkårResultatTidslinjeMap(): Map<Aktør, Tidslinje<List<VilkårResultat>, Måned>> =
-    this.associate { personResultat ->
-        val vilkårResultaterForAktørMap = personResultat.vilkårResultater
-            .groupByTo(mutableMapOf()) { it.vilkårType }
-            .mapValues { if (it.key != Vilkår.BOR_MED_SØKER) it.value else it.value.fjernAvslagUtenPeriodeHvisDetFinsAndreVilkårResultat() }
-
-        val vilkårResultaterKombinert = vilkårResultaterForAktørMap
-            .tilVilkårResultatTidslinjer()
-            .kombiner { alleVilkårOppfyltEllerNull(it) }
-            .filtrerIkkeNull()
-
-        val vilkårResultaterForMåned = vilkårResultaterKombinert
-            .tilMånedFraSisteDagIMåneden()
-            .filtrer { it != null && it.toList().isNotEmpty() }
-            .forskyv(1)
-
-        val vilkårResultaterBeskåret = vilkårResultaterForMåned
-            .beskjærPå18årVilkåretOmDetFinnes(vilkårResultaterForAktørMap[Vilkår.UNDER_18_ÅR])
-            .filtrerIkkeNull()
-            .slåSammenLike()
-
-        Pair(
-            personResultat.aktør,
-            vilkårResultaterBeskåret
-        )
+fun Set<PersonResultat>.tilTidslinjeForSplitt(personerIPersongrunnlag: List<Person>): Tidslinje<List<VilkårResultat>, Måned> {
+    val tidslinjerPerPerson = this.map { personResultat ->
+        val person = personerIPersongrunnlag.find { it.aktør == personResultat.aktør } ?: throw Feil("Finner ikke person med aktørId=${personResultat.aktør.aktørId} i persongrunnlaget ved generering av tidslinje for splitt")
+        personResultat.tilTidslinjeForSplittForPerson(fødselsdato = person.fødselsdato, personType = person.type)
     }
 
-private fun MutableList<VilkårResultat>.fjernAvslagUtenPeriodeHvisDetFinsAndreVilkårResultat(): List<VilkårResultat> =
-    if (this.any { !it.erAvslagUtenPeriode() }) this.filterNot { it.erAvslagUtenPeriode() } else this
-
-private fun Tidslinje<List<VilkårResultat>, Måned>.beskjærPå18årVilkåretOmDetFinnes(
-    under18VilkårResultater: List<VilkårResultat>?
-) = if (under18VilkårResultater == null) {
-    this
-} else {
-    val fødselsdag = under18VilkårResultater
-        .minOf { it.periodeFom ?: throw Feil("Under 18 år vilkår resultat uten fra og med dato") }
-    val erUnder18ÅrVilkårTidslinje = erUnder18ÅrVilkårTidslinje(fødselsdag)
-    beskjærEtter(erUnder18ÅrVilkårTidslinje)
+    return tidslinjerPerPerson.kombiner { it.filterNotNull().flatten() }.filtrerIkkeNull().slåSammenLike()
 }
 
-private fun Map<Vilkår, List<VilkårResultat>>.tilVilkårResultatTidslinjer() =
-    this.map { (_, vilkårResultater) -> VilkårResultatTidslinje(vilkårResultater) }
+fun PersonResultat.tilTidslinjeForSplittForPerson(fødselsdato: LocalDate, personType: PersonType): Tidslinje<List<VilkårResultat>, Måned> {
+    val tidslinjer = this.vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår(fødselsdato)
 
-private fun alleVilkårOppfyltEllerNull(vilkårResultater: Iterable<VilkårResultat?>): List<VilkårResultat>? {
-    return if (vilkårResultater.alleVilkårErOppfylt()) vilkårResultater.filterNotNull() else null
+    return tidslinjer.kombiner { alleVilkårOppfyltEllerNull(vilkårResultater = it, personType = personType) }.filtrerIkkeNull().slåSammenLike()
 }
 
-private fun Iterable<VilkårResultat?>.alleVilkårErOppfylt() = all { it?.resultat == Resultat.OPPFYLT }
+/**
+ * Extention-funksjon som tar inn et sett med vilkårResultater og returnerer en forskjøvet måned-basert tidslinje for hvert vilkår
+ * Se readme-fil for utdypende forklaring av logikken for hvert vilkår
+ * */
+fun Set<VilkårResultat>.tilForskjøvetTidslinjerForHvertOppfylteVilkår(fødselsdato: LocalDate): List<Tidslinje<VilkårResultat, Måned>> {
+    return this.groupBy { it.vilkårType }.map { (vilkår, vilkårResultater) ->
+        val tidslinje = vilkårResultater.filter { it.erOppfylt() }.tilTidslinje()
+            .tilMånedFraMånedsskifteIkkeNull { innholdSisteDagForrigeMåned, innholdFørsteDagDenneMåned ->
+                when {
+                    !innholdSisteDagForrigeMåned.erOppfylt() || !innholdFørsteDagDenneMåned.erOppfylt() -> null
+                    vilkår == Vilkår.BOR_MED_SØKER && innholdFørsteDagDenneMåned.erDeltBosted() -> innholdSisteDagForrigeMåned
+                    else -> innholdFørsteDagDenneMåned
+                }
+            }
+
+        if (vilkår == Vilkår.UNDER_18_ÅR) tidslinje.beskjærPå18År(fødselsdato) else tidslinje
+    }
+}
+
+fun Tidslinje<VilkårResultat, Måned>.beskjærPå18År(fødselsdato: LocalDate): Tidslinje<VilkårResultat, Måned> {
+    val under18Tidslinje = erUnder18ÅrVilkårTidslinje(fødselsdato)
+    return this.beskjærEtter(under18Tidslinje)
+}
+
+private fun VilkårResultat.erDeltBosted() =
+    this.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) || this.utdypendeVilkårsvurderinger.contains(
+        UtdypendeVilkårsvurdering.DELT_BOSTED_SKAL_IKKE_DELES
+    )
+
+private fun alleVilkårOppfyltEllerNull(vilkårResultater: Iterable<VilkårResultat>, personType: PersonType): List<VilkårResultat>? {
+    return if (vilkårResultater.alleVilkårErOppfylt(personType)) vilkårResultater.filterNotNull() else null
+}
+
+fun Iterable<VilkårResultat>.alleVilkårErOppfylt(personType: PersonType): Boolean {
+    val alleVilkårForPersonType = Vilkår.hentVilkårFor(personType)
+    return this.map { it.vilkårType }.containsAll(alleVilkårForPersonType) && this.all { it.resultat == Resultat.OPPFYLT }
+}

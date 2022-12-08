@@ -6,8 +6,6 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
@@ -23,7 +21,6 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingstype
 import no.nav.familie.kontrakter.felles.tilbakekreving.FeilutbetaltePerioderDto
 import no.nav.familie.kontrakter.felles.tilbakekreving.ForhåndsvisVarselbrevRequest
-import no.nav.familie.kontrakter.felles.tilbakekreving.Institusjon
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettManueltTilbakekrevingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
@@ -99,8 +96,8 @@ class TilbakekrevingService(
             )
 
         val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId)
-        val arbeidsfordeling = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId)
-        val institusjon = hentInstitusjon(vedtak.behandling.fagsak)
+        val arbeidsfordeling = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId)
+        val institusjon = hentTilbakekrevingInstitusjon(vedtak.behandling.fagsak)
         val verge = hentVerge(vedtak.behandling.verge?.ident)
 
         return tilbakekrevingKlient.hentForhåndsvisningVarselbrev(
@@ -135,7 +132,7 @@ class TilbakekrevingService(
     fun lagOpprettTilbakekrevingRequest(behandling: Behandling): OpprettTilbakekrevingRequest {
         val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandling.id)
 
-        val enhet = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandling.id)
+        val enhet = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandling.id)
 
         val aktivtVedtak = vedtakRepository.findByBehandlingAndAktivOptional(behandling.id)
             ?: throw Feil("Fant ikke aktivt vedtak på behandling ${behandling.id}")
@@ -150,11 +147,12 @@ class TilbakekrevingService(
         val tilbakekreving = tilbakekrevingRepository.findByBehandlingId(behandling.id)
             ?: throw Feil("Fant ikke tilbakekreving på behandling ${behandling.id}")
 
-        val institusjon = hentInstitusjon(behandling.fagsak)
+        val institusjon = hentTilbakekrevingInstitusjon(behandling.fagsak)
         val verge = hentVerge(behandling.verge?.ident)
 
         return OpprettTilbakekrevingRequest(
             fagsystem = Fagsystem.BA,
+            regelverk = behandling.kategori.tilRegelverk(),
             ytelsestype = Ytelsestype.BARNETRYGD,
             eksternFagsakId = behandling.fagsak.id.toString(),
             personIdent = personopplysningGrunnlag.søker.aktør.aktivFødselsnummer(),
@@ -203,17 +201,6 @@ class TilbakekrevingService(
                 frontendFeilmelding = "Av tekniske årsaker så kan ikke behandling opprettes. Kontakt brukerstøtte for å rapportere feilen."
             )
         }
-    }
-
-    private fun hentInstitusjon(fagsak: Fagsak): Institusjon? {
-        var institusjon: Institusjon? = null
-        if (fagsak.type == FagsakType.INSTITUSJON) {
-            requireNotNull(
-                fagsak.institusjon
-            ) { "Fagsaktype er institusjon, men institusjon finnes ikke på fagsak: ${fagsak.id}" }
-            institusjon = Institusjon(organisasjonsnummer = fagsak.institusjon!!.orgNummer)
-        }
-        return institusjon
     }
 
     private fun hentVerge(vergeIdent: String?): Verge? {

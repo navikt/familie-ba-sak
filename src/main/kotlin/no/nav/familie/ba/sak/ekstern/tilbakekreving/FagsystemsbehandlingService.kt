@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
+import no.nav.familie.ba.sak.kjerne.tilbakekreving.hentTilbakekrevingInstitusjon
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.statistikk.producer.KafkaProducer
 import no.nav.familie.kontrakter.felles.tilbakekreving.Faktainfo
@@ -47,7 +48,7 @@ class FagsystemsbehandlingService(
     ): HentFagsystemsbehandlingRespons {
         val behandlingId = behandling.id
         val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandlingId)
-        val arbeidsfordeling = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandlingId)
+        val arbeidsfordeling = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId)
         val aktivVedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId)
 
         val faktainfo = Faktainfo(
@@ -60,12 +61,14 @@ class FagsystemsbehandlingService(
             eksternFagsakId = request.eksternFagsakId,
             eksternId = request.eksternId,
             ytelsestype = request.ytelsestype,
+            regelverk = behandling.kategori.tilRegelverk(),
             personIdent = behandling.fagsak.aktør.aktivFødselsnummer(),
             språkkode = persongrunnlag.søker.målform.tilSpråkkode(),
             enhetId = arbeidsfordeling.behandlendeEnhetId,
             enhetsnavn = arbeidsfordeling.behandlendeEnhetNavn,
             revurderingsvedtaksdato = aktivVedtak.vedtaksdato!!.toLocalDate(),
-            faktainfo = faktainfo
+            faktainfo = faktainfo,
+            institusjon = hentTilbakekrevingInstitusjon(behandling.fagsak)
         )
 
         return HentFagsystemsbehandlingRespons(hentFagsystemsbehandling = hentFagsystemsbehandling)

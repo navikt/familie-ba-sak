@@ -16,6 +16,7 @@ enum class Filtreringsregel(val vurder: FiltreringsreglerFakta.() -> Evaluering)
     MOR_ER_OVER_18_ÅR(vurder = { morErOver18år(this) }),
     MOR_HAR_IKKE_VERGE(vurder = { morHarIkkeVerge(this) }),
     MOR_MOTTAR_IKKE_LØPENDE_UTVIDET(vurder = { morMottarIkkeLøpendeUtvidet(this) }),
+    MOR_HAR_IKKE_LØPENDE_EØS_BARNETRYGD(vurder = { morHarIkkeLøpendeEøsBarnetrygd(this) }),
     FAGSAK_IKKE_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT(vurder = { fagsakIkkeMigrertEtterBarnBleFødt(this) }),
     LØPER_IKKE_BARNETRYGD_FOR_BARNET(vurder = { løperIkkeBarnetrygdPåAnnenForelder(this) });
 }
@@ -108,6 +109,17 @@ fun morMottarIkkeLøpendeUtvidet(fakta: FiltreringsreglerFakta): Evaluering =
     } else {
         Evaluering.ikkeOppfylt(
             FiltreringsregelIkkeOppfylt.MOR_MOTTAR_LØPENDE_UTVIDET
+        )
+    }
+
+fun morHarIkkeLøpendeEøsBarnetrygd(fakta: FiltreringsreglerFakta): Evaluering =
+    if (!fakta.morMottarEøsBarnetrygd) {
+        Evaluering.oppfylt(
+            FiltreringsregelOppfylt.MOR_HAR_IKKE_LØPENDE_EØS_BARNETRYGD
+        )
+    } else {
+        Evaluering.ikkeOppfylt(
+            FiltreringsregelIkkeOppfylt.MOR_HAR_LØPENDE_EØS_BARNETRYGD
         )
     }
 

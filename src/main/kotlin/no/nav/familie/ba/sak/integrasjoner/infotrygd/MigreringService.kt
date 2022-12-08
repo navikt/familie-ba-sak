@@ -4,10 +4,10 @@ import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.commons.foedselsnummer.FoedselsNr
 import no.nav.familie.ba.sak.common.EnvService
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.isSameOrBefore
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.MigreringResponseDto
@@ -190,6 +190,7 @@ class MigreringService(
             when (underkategori) {
                 BehandlingUnderkategori.ORDINÆR -> migrertCounter.increment()
                 BehandlingUnderkategori.UTVIDET -> migrertUtvidetCounter.increment()
+                BehandlingUnderkategori.INSTITUSJON -> throw Feil("Migrering av institusjon er ikke støttet")
             }
             val migreringResponseDto = MigreringResponseDto(
                 fagsakId = behandlingEtterVilkårsvurdering.fagsak.id,
@@ -283,13 +284,20 @@ class MigreringService(
             kastOgTellMigreringsFeil(MigreringsfeilType.ÅPEN_SAK_INFOTRYGD)
         }
 
-        val ikkeOpphørteSaker = ferdigBehandledeSaker.sortedByDescending { it.iverksattdato }
+        var ikkeOpphørteSaker = ferdigBehandledeSaker.sortedByDescending { it.iverksattdato }
             .filter {
                 it.stønad != null && (it.stønad!!.opphørsgrunn == "0" || it.stønad!!.opphørsgrunn.isNullOrEmpty())
             }
 
         if (ikkeOpphørteSaker.size > 1) {
-            kastOgTellMigreringsFeil(MigreringsfeilType.FLERE_LØPENDE_SAKER_INFOTRYGD)
+            ikkeOpphørteSaker = ikkeOpphørteSaker.filter {
+                it.stønad!!.opphørtFom != null && it.stønad!!.opphørtFom == "000000"
+            }
+            if (ikkeOpphørteSaker.size > 1) {
+                kastOgTellMigreringsFeil(MigreringsfeilType.FLERE_LØPENDE_SAKER_INFOTRYGD)
+            }
+            logger.info("Filtrerte bort saker med opphørtFom satt men med opphørsgrunn 0")
+            secureLog.info("Filtrerte bort saker med opphørtFom satt men med opphørsgrunn 0 for ident=$personIdent")
         }
 
         if (ikkeOpphørteSaker.isEmpty()) {
@@ -308,21 +316,11 @@ class MigreringService(
                 BehandlingUnderkategori.UTVIDET
             }
 
-            (
-                sak.valg == "OR" && sak.undervalg == "EU" && featureToggleService.isEnabled(
-                    FeatureToggleConfig.KAN_MIGRERE_EØS_PRIMÆRLAND_ORDINÆR,
-                    false
-                )
-                ) -> {
+            (sak.valg == "OR" && sak.undervalg == "EU") -> {
                 BehandlingUnderkategori.ORDINÆR
             }
 
-            (
-                sak.valg == "UT" && sak.undervalg == "EU" && featureToggleService.isEnabled(
-                    FeatureToggleConfig.KAN_MIGRERE_EØS_PRIMÆRLAND_UTVIDET,
-                    false
-                )
-                ) -> {
+            (sak.valg == "UT" && sak.undervalg == "EU") -> {
                 BehandlingUnderkategori.UTVIDET
             }
 
@@ -416,10 +414,10 @@ class MigreringService(
         }
     }
 
-    private fun infotrygdKjøredato(yearMonth: YearMonth): LocalDate {
-        yearMonth.run {
-            if (this.year == 2021 || this.year == 2022) {
-                return when (this.month) {
+    fun infotrygdKjøredato(yearMonth: YearMonth): LocalDate {
+        when (yearMonth.year) {
+            2022 ->
+                return when (yearMonth.month) {
                     JANUARY -> 18
                     FEBRUARY -> 15
                     MARCH -> 18
@@ -432,6 +430,22 @@ class MigreringService(
                     OCTOBER -> 18
                     NOVEMBER -> 17
                     DECEMBER -> 5
+                }.run { yearMonth.atDay(this) }
+
+            2023 -> {
+                return when (yearMonth.month) {
+                    JANUARY -> 18
+                    FEBRUARY -> 15
+                    MARCH -> 20
+                    APRIL -> 17
+                    MAY -> 15
+                    JUNE -> 19
+                    JULY -> 18
+                    AUGUST -> 18
+                    SEPTEMBER -> 18
+                    OCTOBER -> 18
+                    NOVEMBER -> 17
+                    DECEMBER -> 4
                 }.run { yearMonth.atDay(this) }
             }
         }

@@ -93,15 +93,17 @@ data class Kompetanse(
         )
 
     fun validerFelterErSatt() {
-        if (søkersAktivitet == null ||
-            annenForeldersAktivitet == null ||
-            barnetsBostedsland == null ||
-            resultat == null ||
-            barnAktører.isEmpty()
+        if (erFelterSatt()
         ) {
             throw Feil("Kompetanse mangler verdier")
         }
     }
+
+    fun erFelterSatt() = søkersAktivitet == null ||
+        annenForeldersAktivitet == null ||
+        barnetsBostedsland == null ||
+        resultat == null ||
+        barnAktører.isEmpty()
 
     companion object {
         val NULL = Kompetanse(null, null, emptySet())

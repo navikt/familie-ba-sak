@@ -146,7 +146,6 @@ sentry.logging.enabled: false
 funksjonsbrytere:
   enabled: false
   unleash:
-    uri: http://dummy/api/
     cluster: localhost
     applicationName: familie-ba-sak
   kafka:
@@ -167,11 +166,6 @@ spring:
         format_sql=false
     hibernate:
       ddl-auto: none
-
-  cloud:
-    vault:
-      database:
-        role: postgres
 
 
 SANITY_DATASET: "ba-test"

@@ -61,7 +61,7 @@ class BrevPeriodeGenerator(
             }
 
         val identerIBegrunnelene = begrunnelseGrunnlagMedPersoner
-            .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.INNVILGET }
+            .filter { it.vedtakBegrunnelseType.erInnvilget() }
             .flatMap { it.personIdenter }
 
         return byggBrevPeriode(

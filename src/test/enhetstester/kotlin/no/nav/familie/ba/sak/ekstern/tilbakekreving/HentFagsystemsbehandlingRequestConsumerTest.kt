@@ -83,7 +83,7 @@ internal class HentFagsystemsbehandlingRequestConsumerTest {
             tilfeldigPerson(personType = PersonType.BARN),
             tilfeldigPerson(personType = PersonType.SØKER)
         )
-        every { arbeidsfordelingService.hentAbeidsfordelingPåBehandling(any()) } returns ArbeidsfordelingPåBehandling(
+        every { arbeidsfordelingService.hentArbeidsfordelingPåBehandling(any()) } returns ArbeidsfordelingPåBehandling(
             behandlendeEnhetId = "4820",
             behandlendeEnhetNavn = "Nav",
             behandlingId = behandling.id

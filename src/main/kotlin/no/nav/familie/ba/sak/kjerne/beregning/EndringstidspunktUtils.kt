@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.fraOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.outerJoin
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonthEllerNull
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.fpsak.tidsserie.StandardCombinators
@@ -78,7 +79,7 @@ fun Iterable<Kompetanse>.finnFørsteEndringstidspunkt(forrigeKompetansePerioder:
             else -> null
         }
     }.values
-        .mapNotNull { it.filtrerIkkeNull().fraOgMed().tilYearMonthEllerNull() }
+        .mapNotNull { it.filtrerIkkeNull().fraOgMed()?.tilYearMonthEllerNull() }
         .minOfOrNull { it } ?: TIDENES_ENDE.toYearMonth()
 }
 

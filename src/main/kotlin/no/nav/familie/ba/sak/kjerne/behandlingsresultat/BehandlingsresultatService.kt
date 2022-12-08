@@ -3,12 +3,14 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.convertDataClassToJson
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.BehandlingUnderkategoriDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
-import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
@@ -29,13 +31,13 @@ class BehandlingsresultatService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val søknadGrunnlagService: SøknadGrunnlagService,
     private val personidentService: PersonidentService,
-    private val beregningService: BeregningService,
     private val persongrunnlagService: PersongrunnlagService,
     private val vilkårsvurderingService: VilkårsvurderingService,
-    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
+    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
+    private val featureToggleService: FeatureToggleService
 ) {
 
-    fun utledBehandlingsresultat(behandlingId: Long): Behandlingsresultat {
+    internal fun utledBehandlingsresultat(behandlingId: Long): Behandlingsresultat {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
         val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling)
 
@@ -72,6 +74,7 @@ class BehandlingsresultatService(
                     vilkårsvurdering.personResultater
                         .flatMap { personResultat -> personResultat.vilkårResultater }
                         .any { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
+
                 PersonType.BARN -> true
                 PersonType.ANNENPART -> false
             }
@@ -110,13 +113,26 @@ class BehandlingsresultatService(
                 .also { it.ytelsePersoner = ytelsePersonerMedResultat.writeValueAsString() }
         }
 
-        val behandlingsresultat =
-            BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(ytelsePersonerMedResultat)
-        secureLogger.info("Resultater fra vilkårsvurdering på behandling $behandling: $ytelsePersonerMedResultat")
-        logger.info("Resultat fra vilkårsvurdering på behandling $behandling: $behandlingsresultat")
-
-        return behandlingsresultat
+        return utledBehandlingsresultat(
+            ytelsePersonerMedResultat,
+            andelerMedEndringer,
+            forrigeAndelerMedEndringer,
+            behandling
+        )
     }
+
+    internal fun utledBehandlingsresultat(
+        ytelsePersonerMedResultat: List<YtelsePerson>,
+        andelerMedEndringer: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        forrigeAndelerMedEndringer: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        behandling: Behandling
+    ) =
+        BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
+            ytelsePersoner = ytelsePersonerMedResultat,
+            sjekkOmUtvidaBarnetrygdErEndra = featureToggleService.isEnabled(FeatureToggleConfig.SJEKK_OM_UTVIDET_ER_ENDRET_BEHANDLINGSRESULTAT)
+        )
+            .also { secureLogger.info("Resultater fra vilkårsvurdering på behandling $behandling: $ytelsePersonerMedResultat") }
+            .also { logger.info("Resultat fra vilkårsvurdering på behandling $behandling: $it") }
 
     private fun validerYtelsePersoner(behandling: Behandling, ytelsePersoner: List<YtelsePerson>) {
         when (behandling.fagsak.type) {
@@ -134,6 +150,7 @@ class BehandlingsresultatService(
                     )
                 }
             }
+
             FagsakType.INSTITUSJON -> {
                 val ytelseType = ytelsePersoner.single().ytelseType
                 if (ytelseType != YtelseType.ORDINÆR_BARNETRYGD) {
@@ -142,6 +159,7 @@ class BehandlingsresultatService(
                     )
                 }
             }
+
             FagsakType.BARN_ENSLIG_MINDREÅRIG -> {
                 ytelsePersoner.single()
             }
@@ -161,6 +179,7 @@ class BehandlingsresultatService(
         val utvidetBarnetrygdSøker = søknadDTO?.let {
             when (it.underkategori) {
                 BehandlingUnderkategoriDTO.UTVIDET -> listOf(behandling.fagsak.aktør)
+                BehandlingUnderkategoriDTO.INSTITUSJON -> emptyList()
                 BehandlingUnderkategoriDTO.ORDINÆR -> emptyList()
             }
         } ?: emptyList()

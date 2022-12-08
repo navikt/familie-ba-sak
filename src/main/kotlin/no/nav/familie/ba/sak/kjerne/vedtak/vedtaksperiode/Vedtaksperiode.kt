@@ -27,7 +27,10 @@ enum class Vedtaksperiodetype(val tillatteBegrunnelsestyper: List<VedtakBegrunne
             VedtakBegrunnelseType.REDUKSJON,
             VedtakBegrunnelseType.FORTSATT_INNVILGET,
             VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING,
-            VedtakBegrunnelseType.ENDRET_UTBETALING
+            VedtakBegrunnelseType.ENDRET_UTBETALING,
+            VedtakBegrunnelseType.INSTITUSJON_INNVILGET,
+            VedtakBegrunnelseType.INSTITUSJON_REDUKSJON,
+            VedtakBegrunnelseType.INSTITUSJON_FORTSATT_INNVILGET
         )
     ),
 
@@ -48,12 +51,31 @@ enum class Vedtaksperiodetype(val tillatteBegrunnelsestyper: List<VedtakBegrunne
             VedtakBegrunnelseType.REDUKSJON,
             VedtakBegrunnelseType.INNVILGET,
             VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING,
-            VedtakBegrunnelseType.ENDRET_UTBETALING
+            VedtakBegrunnelseType.ENDRET_UTBETALING,
+            VedtakBegrunnelseType.INSTITUSJON_REDUKSJON,
+            VedtakBegrunnelseType.INSTITUSJON_INNVILGET
         )
     ),
-    OPPHØR(listOf(VedtakBegrunnelseType.OPPHØR, VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING)),
-    AVSLAG(listOf(VedtakBegrunnelseType.AVSLAG, VedtakBegrunnelseType.EØS_AVSLAG)),
-    FORTSATT_INNVILGET(listOf(VedtakBegrunnelseType.FORTSATT_INNVILGET)),
+    OPPHØR(
+        listOf(
+            VedtakBegrunnelseType.OPPHØR,
+            VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING,
+            VedtakBegrunnelseType.INSTITUSJON_OPPHØR
+        )
+    ),
+    AVSLAG(
+        listOf(
+            VedtakBegrunnelseType.AVSLAG, 
+            VedtakBegrunnelseType.EØS_AVSLAG,
+            VedtakBegrunnelseType.INSTITUSJON_AVSLAG
+        )
+    ),
+    FORTSATT_INNVILGET(
+        listOf(
+            VedtakBegrunnelseType.FORTSATT_INNVILGET,
+            VedtakBegrunnelseType.INSTITUSJON_FORTSATT_INNVILGET
+        )
+    ),
 
     @Deprecated("Legacy")
     ENDRET_UTBETALING(emptyList())

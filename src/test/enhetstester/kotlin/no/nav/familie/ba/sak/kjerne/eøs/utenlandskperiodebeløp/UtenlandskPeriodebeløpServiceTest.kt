@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.util.UtenlandskPeriodebeløpBuilder
 import no.nav.familie.ba.sak.kjerne.eøs.util.mockPeriodeBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilLocalDate
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.KompetanseBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -86,7 +87,8 @@ internal class UtenlandskPeriodebeløpServiceTest {
 
         utenlandskPeriodebeløpService.slettUtenlandskPeriodebeløp(lagretUtenlandskPeriodebeløp.id)
 
-        val faktiskUtenlandskPeriodebeløp = utenlandskPeriodebeløpService.hentUtenlandskePeriodebeløp(behandlingId).single()
+        val faktiskUtenlandskPeriodebeløp =
+            utenlandskPeriodebeløpService.hentUtenlandskePeriodebeløp(behandlingId).single()
 
         assertEquals("SE", faktiskUtenlandskPeriodebeløp.utbetalingsland)
         assertNull(faktiskUtenlandskPeriodebeløp.beløp)
@@ -110,7 +112,9 @@ internal class UtenlandskPeriodebeløpServiceTest {
             .lagreTil(utenlandskPeriodebeløpRepository).single()
 
         // Oppdaterer UtenlandskPeriodeBeløp med identisk innhold, men med lukket tom for andre mnd.
-        val oppdatertUtenlandskPeriodebeløp = UtenlandskPeriodebeløpBuilder(jan(2020)).medBeløp("44", "EUR", "SE", barn1).medIntervall(Intervall.UKENTLIG).bygg().first()
+        val oppdatertUtenlandskPeriodebeløp =
+            UtenlandskPeriodebeløpBuilder(jan(2020)).medBeløp("44", "EUR", "SE", barn1).medIntervall(Intervall.UKENTLIG)
+                .bygg().first()
         utenlandskPeriodebeløpService.oppdaterUtenlandskPeriodebeløp(behandlingId, oppdatertUtenlandskPeriodebeløp)
 
         // Forventer en liste på 2 elementer hvor det første dekker 2 mnd og det andre dekker fra mnd 3 og til uendelig (null). Det siste elementet skal ha beløp, valutakode og intervall satt til null, mens utbetalingsland skal være "SE".

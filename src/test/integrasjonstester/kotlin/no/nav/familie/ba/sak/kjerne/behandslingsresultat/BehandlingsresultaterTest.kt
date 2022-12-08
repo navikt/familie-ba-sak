@@ -46,7 +46,9 @@ class BehandlingsresultaterTest {
                 )
 
             val behandlingsresultat =
-                BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(ytelsePersonerMedResultat)
+                BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
+                    ytelsePersonerMedResultat
+                )
 
             if (behandlingsresultatPersonTestConfig.forventetResultat != behandlingsresultat) {
                 testReporter.publishEntry(

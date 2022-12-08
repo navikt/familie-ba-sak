@@ -67,8 +67,8 @@ class BehandlingstemaService(
                     if (it.behandlingstema != lagretUnderkategori.tilOppgaveBehandlingTema().value || it.behandlingstype != lagretBehandling.kategori.tilOppgavebehandlingType().value) {
                         it.copy(
                             behandlingstema = when (lagretUnderkategori) {
-                                BehandlingUnderkategori.ORDINÆR -> lagretUnderkategori.tilOppgaveBehandlingTema().value
-                                BehandlingUnderkategori.UTVIDET -> lagretUnderkategori.tilOppgaveBehandlingTema().value
+                                BehandlingUnderkategori.ORDINÆR, BehandlingUnderkategori.UTVIDET, BehandlingUnderkategori.INSTITUSJON ->
+                                    behandling.underkategori.tilOppgaveBehandlingTema().value
                             },
                             behandlingstype = lagretBehandling.kategori.tilOppgavebehandlingType().value
                         )

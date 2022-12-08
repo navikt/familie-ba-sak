@@ -54,6 +54,7 @@ import org.assertj.core.api.Assertions.tuple
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -61,6 +62,7 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDate
+import java.time.Month
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 
@@ -840,6 +842,118 @@ class MigreringServiceTest(
             .extracting("feiltype").isNotEqualTo(MigreringsfeilType.HISTORISK_IDENT_REGNET_SOM_EKSTRA_BARN_I_INFOTRYGD)
     }
 
+    @Test
+    fun `Skal hente kjøredate hvis man har kjøredato eller så kastes kan ikke migrerere exception`() {
+        val service = MigreringService(
+            behandlingRepository = mockk(),
+            behandlingService = mockk(),
+            env = mockk(),
+            fagsakService = mockk(),
+            infotrygdBarnetrygdClient = mockk(),
+            personidentService = mockk(),
+            stegService = mockk(),
+            taskRepository = mockk(),
+            tilkjentYtelseRepository = mockk(),
+            totrinnskontrollService = mockk(),
+            vedtakService = mockk(),
+            vilkårService = mockk(),
+            vilkårsvurderingService = mockk(),
+            migreringRestClient = mockk(relaxed = true),
+            mockk(),
+            mockk()
+        )
+        assertThat(service.infotrygdKjøredato(YearMonth.of(2022, Month.NOVEMBER))).isEqualTo(LocalDate.of(2022, Month.NOVEMBER, 17))
+        assertThat(service.infotrygdKjøredato(YearMonth.of(2023, Month.SEPTEMBER))).isEqualTo(LocalDate.of(2023, Month.SEPTEMBER, 18))
+        assertThrows<KanIkkeMigrereException> { service.infotrygdKjøredato(YearMonth.now().plusYears(2)) }
+    }
+
+    @Test
+    fun `Hvis denne testen feiler og man fortsatt migrererer, så må man ha ny kjøreplan, hvis man er ferdig med migrering, så kan man rydde opp kode`() {
+        val service = MigreringService(
+            behandlingRepository = mockk(),
+            behandlingService = mockk(),
+            env = mockk(),
+            fagsakService = mockk(),
+            infotrygdBarnetrygdClient = mockk(),
+            personidentService = mockk(),
+            stegService = mockk(),
+            taskRepository = mockk(),
+            tilkjentYtelseRepository = mockk(),
+            totrinnskontrollService = mockk(),
+            vedtakService = mockk(),
+            vilkårService = mockk(),
+            vilkårsvurderingService = mockk(),
+            migreringRestClient = mockk(relaxed = true),
+            mockk(),
+            mockk()
+        )
+        service.infotrygdKjøredato(YearMonth.now().plusMonths(1))
+    }
+
+    @Test
+    fun `Skal stoppe migrering hvis flere åpnse saker`() {
+        val åpenSak = opprettSakMedBeløp(SAK_BELØP_2_BARN_1_UNDER_6)
+        val åpenSak2 = opprettSakMedBeløp(SAK_BELØP_2_BARN_1_UNDER_6_UTVIDET)
+        every {
+            infotrygdBarnetrygdClient.hentSaker(any(), any())
+        } returns InfotrygdSøkResponse(listOf(åpenSak, åpenSak2), emptyList())
+
+        val e = assertThrows<KanIkkeMigrereException> { migreringService.migrer(ClientMocks.søkerFnr[0]) }
+        assertThat(e.feiltype).isEqualTo(MigreringsfeilType.FLERE_LØPENDE_SAKER_INFOTRYGD)
+    }
+
+    @Test
+    fun `Skal filtrere bort saker hvor opphørgrunn er satt til feil status 0 i infotrygd men opphørsfom er satt, slik at saken likevel lar seg migrere `() {
+        val åpenSak = opprettSakMedBeløp(SAK_BELØP_2_BARN_1_UNDER_6)
+        val modifisertStønad =
+            opprettSakMedBeløp(SAK_BELØP_2_BARN_1_UNDER_6_UTVIDET).stønad!!.copy(opphørtFom = "092020")
+        val sakMedStønadMedOpphørsgrunnLøpendeMenLikevelOpphørt =
+            opprettSakMedBeløp(SAK_BELØP_2_BARN_1_UNDER_6_UTVIDET).copy(stønad = modifisertStønad)
+
+        every {
+            infotrygdBarnetrygdClient.hentSaker(any(), any())
+        } returns InfotrygdSøkResponse(
+            listOf(åpenSak, sakMedStønadMedOpphørsgrunnLøpendeMenLikevelOpphørt),
+            emptyList()
+        )
+
+        val migreringResponseDto = migreringService.migrer(ClientMocks.søkerFnr[0])
+
+        taskRepository.findAll().also { tasks ->
+            val task = tasks.find { it.type == IverksettMotOppdragTask.TASK_STEP_TYPE }!!
+            iverksettMotOppdragTask.doTask(task)
+            iverksettMotOppdragTask.onCompletion(task)
+        }
+        taskRepository.findAll().also { tasks ->
+            val task = tasks.find { it.type == SendVedtakTilInfotrygdTask.TASK_STEP_TYPE }!!
+            sendVedtakTilInfotrygdTask.doTask(task)
+            sendVedtakTilInfotrygdTask.onCompletion(task)
+        }
+        taskRepository.findAll().also { tasks ->
+            val task = tasks.find { it.type == StatusFraOppdragTask.TASK_STEP_TYPE }!!
+            statusFraOppdragTask.doTask(task)
+            statusFraOppdragTask.onCompletion(task)
+        }
+        taskRepository.findAll().also { tasks ->
+            var task = tasks.find { it.type == FerdigstillBehandlingTask.TASK_STEP_TYPE }!!
+            ferdigstillBehandlingTask.doTask(task)
+            ferdigstillBehandlingTask.onCompletion(task)
+
+            val now = LocalDate.now()
+            val forventetUtbetalingFom: LocalDate =
+                if (infotrygdKjøredato().isAfter(now)) now.førsteDagIInneværendeMåned() else now.førsteDagINesteMåned()
+
+            assertThat(migreringResponseDto.virkningFom).isEqualTo(forventetUtbetalingFom.toYearMonth())
+
+            task = tasks.find { it.type == PubliserVedtakV2Task.TASK_STEP_TYPE }!!
+            publiserVedtakV2Task.doTask(task)
+            publiserVedtakV2Task.onCompletion(task)
+
+            val vedtakDVHV2 = MockKafkaProducer.sendteMeldinger.values.last() as VedtakDVHV2
+            assertThat(vedtakDVHV2.utbetalingsperioderV2.first().stønadFom).isEqualTo(forventetUtbetalingFom)
+        }
+    }
+
     private fun opprettSakMedBeløp(vararg beløp: Double) = Sak(
         stønad = Stønad(
             barn = listOf(
@@ -856,7 +970,8 @@ class MigreringServiceTest(
                     typeUtbetaling = "J"
                 )
             },
-            opphørsgrunn = "0"
+            opphørsgrunn = "0",
+            opphørtFom = "000000"
         ),
         status = "FB",
         valg = "OR",
@@ -879,7 +994,8 @@ class MigreringServiceTest(
                     typeUtbetaling = "J"
                 )
             },
-            opphørsgrunn = "0"
+            opphørsgrunn = "0",
+            opphørtFom = "000000"
         ),
         status = "FB",
         valg = "UT",

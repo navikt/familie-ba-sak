@@ -9,6 +9,8 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurderin
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
@@ -25,6 +27,7 @@ import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScena
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.defaultBostedsadresseHistorikk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.ba.sak.task.OpprettTaskService
@@ -361,6 +364,71 @@ class FødselshendelseHenleggelseTest(
     }
 
     @Test
+    fun `Skal henlegge fødselshendelse på grunn av at mor mottar EØS-barnetrygd (filtreringsregel)`() {
+        val scenario = mockServerKlient().lagScenario(
+            RestScenario(
+                søker = RestScenarioPerson(
+                    fødselsdato = now().minusYears(26).førsteDagINesteMåned().plusDays(6).toString(),
+                    fornavn = "Mor",
+                    etternavn = "Søker"
+                ),
+                barna = listOf(
+                    RestScenarioPerson(
+                        fødselsdato = now().minusMonths(2).toString(),
+                        fornavn = "Barn",
+                        etternavn = "Barnesen"
+                    ),
+                    RestScenarioPerson(
+                        fødselsdato = now().minusYears(2).toString(),
+                        fornavn = "Barn2",
+                        etternavn = "Barnesen"
+                    )
+                )
+            )
+        )
+
+        val behandling = kjørStegprosessForFGB(
+            tilSteg = StegType.BEHANDLING_AVSLUTTET,
+            søkerFnr = scenario.søker.ident!!,
+            barnasIdenter = listOf(scenario.barna.last().ident!!),
+            fagsakService = fagsakService,
+            vedtakService = vedtakService,
+            persongrunnlagService = persongrunnlagService,
+            vilkårsvurderingService = vilkårsvurderingService,
+            stegService = stegService,
+            vedtaksperiodeService = vedtaksperiodeService,
+            behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR
+        )
+
+        oppdaterRegelverkTilEøs(behandling)
+
+        val revurdering = behandleFødselshendelse(
+            nyBehandlingHendelse = NyBehandlingHendelse(
+                morsIdent = scenario.søker.ident,
+                barnasIdenter = listOf(scenario.barna.first().ident!!)
+            ),
+            behandleFødselshendelseTask = behandleFødselshendelseTask,
+            fagsakService = fagsakService,
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            personidentService = personidentService,
+            vedtakService = vedtakService,
+            stegService = stegService
+        )
+
+        assertEquals(BehandlingKategori.EØS, revurdering?.kategori)
+        assertEquals(Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE, revurdering?.resultat)
+        assertEquals(StegType.BEHANDLING_AVSLUTTET, revurdering?.steg)
+
+        verify(exactly = 1) {
+            opprettTaskService.opprettOppgaveTask(
+                behandlingId = revurdering!!.id,
+                oppgavetype = Oppgavetype.VurderLivshendelse,
+                beskrivelse = "Fødselshendelse: Mor har EØS-barnetrygd"
+            )
+        }
+    }
+
+    @Test
     fun `Skal sende tredjelandsborgere fra Ukraina til manuel oppfølging (midlertidig regel for ukrainakonflikten)`() {
         val fødselsdato = "1993-01-12"
         val barnFødselsdato = LocalDate.now()
@@ -416,6 +484,18 @@ class FødselshendelseHenleggelseTest(
                 oppgavetype = Oppgavetype.VurderLivshendelse,
                 beskrivelse = "Fødselshendelse: ${VilkårKanskjeOppfyltÅrsak.LOVLIG_OPPHOLD_MÅ_VURDERE_LENGDEN_PÅ_OPPHOLDSTILLATELSEN.beskrivelse}"
             )
+        }
+    }
+
+    private fun oppdaterRegelverkTilEøs(behandling: Behandling) {
+        vilkårsvurderingService.hentAktivForBehandling(behandling.id)!!.apply {
+            personResultater.first { !it.erSøkersResultater() }.apply {
+                vilkårResultater.forEach {
+                    it.vurderesEtter = Regelverk.EØS_FORORDNINGEN
+                    it.periodeFom = now().minusMonths(1)
+                }
+            }
+            vilkårsvurderingService.oppdater(this)
         }
     }
 }

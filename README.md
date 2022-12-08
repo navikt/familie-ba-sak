@@ -29,13 +29,36 @@ under `Edit Configurations -> VM Options`
 
 Postgres-databasen kan settes opp slik:
 
+1. Lag en dockercontainer: 
 ```
 docker run --name familie-ba-sak-postgres -e POSTGRES_PASSWORD=test -d -p 5432:5432 postgres
-docker ps (finn container id)
+```
+2. List opp alle containerne og finn container id for container med name = familie-ba-sak-postgres: 
+
+```
+docker ps
+```
+3. Kjør docker container: 
+```
 docker exec -it <container_id> bash
+```
+
+4. Åpne postgres som brukeren "postgres":
+```
 psql -U postgres
+```
+
+5. Lag en database med navn "familie-ba-sak": 
+```
 CREATE DATABASE "familie-ba-sak";
 ```
+
+Legg til databasen i Intellij: 
+1. Trykk på database på høyre side og "+" -> data source -> postgreSQL
+2. Fyll inn port=5432, user=postgres, passord=test og database=familie-ba-sak
+
+OBS: Pass på at du ikke kjører postgres lokalt på samme port (5432)
+
 
 ### Autentisering
 
@@ -52,10 +75,6 @@ BA_SAK_CLIENT_ID må settes til `AZURE_APP_CLIENT_ID` og CLIENT_SECRET til`AZURE
 
 Se `.deploy/nais/azure-ad-app-lokal.yaml` dersom du ønsker å deploye `azuread-familie-ba-sak-lokal`
 
-Dersom man vil gjøre autentiserte kall mot andre tjenester, må man også legge til scope for den aktuelle tjenesten i
-miljøveriablene. Det kan hentes
-fra [Vault](https://vault.adeo.no/ui/vault/secrets/kv%2Fpreprod%2Ffss/show/familie-ba-sak/default).
-
 Til slutt skal miljøvariablene se slik ut:
 
 DevLauncher/DevLauncherPostgres
@@ -64,7 +83,12 @@ DevLauncher/DevLauncherPostgres
 * CLIENT_SECRET=`AZURE_APP_CLIENT_SECRET` (fra `azuread-familie-ba-sak-lokal`)
 
 DevLauncherPostgresPreprod:
-krever at man henter azuread fra en pod til familie-ba-sak. Som rulleres oftere enn azuread-familie-ba-sak-lokal
+Trenger i utgangspunktet ikke å sette miljøvariabler manuelt. De hentes automatisk fra Nais.
+Krever at man er logget på naisdevice og gcloud.
+Husk å sette `BA_SAK_SCOPE=api://dev-gcp.teamfamilie.familie-ba-sak/.default` i `.env`-filen frontend.
+
+Alternativt kan du starte med flagget '--manuellMiljø', og manuelt setje miljøvariablane.
+Det krever at man henter azuread fra en pod til familie-ba-sak. Som rulleres oftere enn azuread-familie-ba-sak-lokal
 `kubectl -n teamfamilie exec -c familie-ba-sak -it familie-ba-sak-byttmegmedpodid -- env | grep AZURE_APP_CLIENT`
 
 * BA_SAK_CLIENT_ID=`AZURE_APP_CLIENT_ID` (fra `familie-ba-sak`)

@@ -275,6 +275,7 @@ fun hentGyldigeEØSBegrunnelserForPeriode(
                     resultatFraKompetanse = kompetanse.resultat!!
                 )
             }
+
             VedtakBegrunnelseType.EØS_OPPHØR -> kompetanserSomStopperRettFørPeriode.any { kompetanse ->
                 kompetanse.validerFelterErSatt()
                 begrunnelse.erGyldigForKompetanseMedData(
@@ -318,6 +319,7 @@ fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
     return when (minimertVedtaksperiode.type) {
         Vedtaksperiodetype.FORTSATT_INNVILGET,
         Vedtaksperiodetype.AVSLAG -> tillateBegrunnelserForVedtakstype
+
         Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING -> velgRedusertBegrunnelser(
             tillateBegrunnelserForVedtakstype,
             sanityBegrunnelser,
@@ -330,6 +332,7 @@ fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
             ytelserForSøkerForrigeMåned,
             ytelserForrigePerioder
         )
+
         else -> {
             velgUtbetalingsbegrunnelser(
                 tillateBegrunnelserForVedtakstype,
@@ -394,7 +397,7 @@ private fun velgUtbetalingsbegrunnelser(
 ): List<Standardbegrunnelse> {
     val standardbegrunnelser: MutableSet<Standardbegrunnelse> =
         tillateBegrunnelserForVedtakstype
-            .filter { it.vedtakBegrunnelseType != VedtakBegrunnelseType.FORTSATT_INNVILGET }
+            .filter { !it.vedtakBegrunnelseType.erFortsattInnvilget() }
             .filter { it.tilISanityBegrunnelse(sanityBegrunnelser)?.tilTriggesAv()?.valgbar ?: false }
             .fold(mutableSetOf()) { acc, standardBegrunnelse ->
                 if (standardBegrunnelse.triggesForPeriode(
@@ -420,8 +423,7 @@ private fun velgUtbetalingsbegrunnelser(
             standardbegrunnelser.isEmpty()
 
     return if (fantIngenbegrunnelserOgSkalDerforBrukeFortsattInnvilget) {
-        tillateBegrunnelserForVedtakstype
-            .filter { it.vedtakBegrunnelseType == VedtakBegrunnelseType.FORTSATT_INNVILGET }
+        tillateBegrunnelserForVedtakstype.filter { it.vedtakBegrunnelseType.erFortsattInnvilget() }
     } else {
         standardbegrunnelser.toList()
     }

@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForUtbetalingsoppdragFactory
 import no.nav.familie.ba.sak.integrasjoner.økonomi.pakkInnForUtbetaling
@@ -148,7 +149,7 @@ class BeregningService(
 
         return behandling.resultat == Behandlingsresultat.INNVILGET_OG_OPPHØRT &&
             when (behandling.underkategori) {
-                BehandlingUnderkategori.ORDINÆR -> true
+                BehandlingUnderkategori.ORDINÆR, BehandlingUnderkategori.INSTITUSJON -> true
                 BehandlingUnderkategori.UTVIDET -> false
             } &&
             behandling.erSøknad() &&
@@ -182,7 +183,8 @@ class BeregningService(
                 vilkårsvurdering = vilkårsvurdering,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 behandling = behandling,
-                endretUtbetalingAndeler = endreteUtbetalingAndeler
+                endretUtbetalingAndeler = endreteUtbetalingAndeler,
+                skalBrukeNyMåteÅGenerereAndelerForBarna = featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_GENERERE_ATY_BARNA)
             ) { søkerAktør ->
                 småbarnstilleggService.hentOgLagrePerioderMedFullOvergangsstønad(
                     søkerAktør = søkerAktør,

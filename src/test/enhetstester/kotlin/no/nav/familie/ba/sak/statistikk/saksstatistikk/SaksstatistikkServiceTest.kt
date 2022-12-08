@@ -134,7 +134,7 @@ internal class SaksstatistikkServiceTest(
     fun init() {
         MockKAnnotations.init()
 
-        every { arbeidsfordelingService.hentAbeidsfordelingPåBehandling(any()) } returns ArbeidsfordelingPåBehandling(
+        every { arbeidsfordelingService.hentArbeidsfordelingPåBehandling(any()) } returns ArbeidsfordelingPåBehandling(
             behandlendeEnhetId = "4820",
             behandlendeEnhetNavn = "Nav",
             behandlingId = 1
@@ -379,7 +379,7 @@ internal class SaksstatistikkServiceTest(
                 1
             )
         )
-        every { personopplysningerService.hentLandkodeUtenlandskBostedsadresse(tilAktør("12345678910")) } returns "SE"
+        every { personopplysningerService.hentLandkodeAlpha2UtenlandskBostedsadresse(tilAktør("12345678910")) } returns "SE"
 
         every { behandlingHentOgPersisterService.hentAktivForFagsak(any()) } returns null
 
@@ -400,7 +400,7 @@ internal class SaksstatistikkServiceTest(
             Fagsak(status = FagsakStatus.OPPRETTET, aktør = randomAktørId)
         }
         every { personidentService.hentAktør(any()) } returns randomAktørId
-        every { personopplysningerService.hentLandkodeUtenlandskBostedsadresse(any()) } returns "SE"
+        every { personopplysningerService.hentLandkodeAlpha2UtenlandskBostedsadresse(any()) } returns "SE"
 
         every { persongrunnlagService.hentAktiv(any()) } returns lagTestPersonopplysningGrunnlag(
             1,
@@ -491,14 +491,18 @@ internal class SaksstatistikkServiceTest(
                     "/schema/behandling-schema.json"
                 )
             } catch (e: Exception) {
-                throw IllegalStateException("Skjema til saksstatistikk validerer ikke etter endringer blant enum-verdier. Sjekk feilmelding og oppdater enten enum til å passe skjema eller skjema til å passe enum.", e)
+                throw IllegalStateException(
+                    "Skjema til saksstatistikk validerer ikke etter endringer blant enum-verdier. Sjekk feilmelding og oppdater enten enum til å passe skjema eller skjema til å passe enum.",
+                    e
+                )
             }
         }
     }
 
     @Test
     fun `Enum-verdier brukt i sakDvh skal validere mot json schema`() {
-        val deltagere = PersonType.values().map { personType -> AktørDVH(randomAktør().aktørId.toLong(), personType.name) }
+        val deltagere =
+            PersonType.values().map { personType -> AktørDVH(randomAktør().aktørId.toLong(), personType.name) }
 
         FagsakStatus.values().forEach {
             val sakDvh = SakDVH(
@@ -520,7 +524,10 @@ internal class SaksstatistikkServiceTest(
                     "/schema/sak-schema.json"
                 )
             } catch (e: Exception) {
-                throw IllegalStateException("Skjema til saksstatistikk validerer ikke etter endringer blant enum-verdier. Sjekk feilmelding og oppdater enten enum til å passe skjema eller skjema til å passe enum.", e)
+                throw IllegalStateException(
+                    "Skjema til saksstatistikk validerer ikke etter endringer blant enum-verdier. Sjekk feilmelding og oppdater enten enum til å passe skjema eller skjema til å passe enum.",
+                    e
+                )
             }
         }
     }

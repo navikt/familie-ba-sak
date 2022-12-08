@@ -4,18 +4,20 @@ import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import java.time.LocalDate
 
 data class ForlengetSvartidsbrev(
-    override val mal: Brevmal = Brevmal.FORLENGET_SVARTIDSBREV,
+    override val mal: Brevmal,
     override val data: ForlengetSvartidsbrevData
 ) : Brev {
     constructor(
         navn: String,
         fodselsnummer: String,
         enhetNavn: String,
+        mal: Brevmal,
         årsaker: List<String>,
         antallUkerSvarfrist: Int,
-        organisasjonsnummer: String?,
-        gjelder: String?
+        organisasjonsnummer: String? = null,
+        gjelder: String? = null
     ) : this(
+        mal = mal,
         data = ForlengetSvartidsbrevData(
             delmalData = ForlengetSvartidsbrevData.DelmalData(signatur = SignaturDelmal(enhet = enhetNavn)),
             flettefelter = ForlengetSvartidsbrevData.Flettefelter(

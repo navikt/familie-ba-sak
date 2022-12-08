@@ -77,7 +77,7 @@ fun ManueltBrevRequest.byggMottakerdata(
         persongrunnlagService.hentPersonerPåBehandling(listOf(ident), behandling).singleOrNull()
             ?: error("Fant flere eller ingen personer med angitt personident på behandling $behandling")
     }
-    val enhet = arbeidsfordelingService.hentAbeidsfordelingPåBehandling(behandling.id).run {
+    val enhet = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandling.id).run {
         Enhet(enhetId = behandlendeEnhetId, enhetNavn = behandlendeEnhetNavn)
     }
     return when {
@@ -89,6 +89,7 @@ fun ManueltBrevRequest.byggMottakerdata(
                     override val navn = hentPerson(fødselsnummer).navn
                 }
             )
+
         else -> hentPerson(mottakerIdent).let { mottakerPerson ->
             this.copy(
                 enhet = enhet,
@@ -130,6 +131,7 @@ fun ManueltBrevRequest.tilBrev(hentLandkoder: (() -> Map<String, String>)) = whe
                 )
             )
         )
+
     Brevmal.INNHENTE_OPPLYSNINGER,
     Brevmal.INNHENTE_OPPLYSNINGER_INSTITUSJON ->
         InnhenteOpplysningerBrev(
@@ -145,6 +147,7 @@ fun ManueltBrevRequest.tilBrev(hentLandkoder: (() -> Map<String, String>)) = whe
                 )
             )
         )
+
     Brevmal.HENLEGGE_TRUKKET_SØKNAD ->
         HenleggeTrukketSøknadBrev(
             data = HenleggeTrukketSøknadData(
@@ -155,6 +158,7 @@ fun ManueltBrevRequest.tilBrev(hentLandkoder: (() -> Map<String, String>)) = whe
                 )
             )
         )
+
     Brevmal.VARSEL_OM_REVURDERING ->
         VarselbrevMedÅrsaker(
             mal = Brevmal.VARSEL_OM_REVURDERING,
@@ -163,6 +167,18 @@ fun ManueltBrevRequest.tilBrev(hentLandkoder: (() -> Map<String, String>)) = whe
             varselÅrsaker = this.multiselectVerdier,
             enhet = this.enhetNavn()
         )
+
+    Brevmal.VARSEL_OM_REVURDERING_INSTITUSJON ->
+        VarselbrevMedÅrsaker(
+            mal = Brevmal.VARSEL_OM_REVURDERING_INSTITUSJON,
+            navn = this.mottakerNavn,
+            fødselsnummer = this.vedrørende?.fødselsnummer ?: mottakerIdent,
+            varselÅrsaker = this.multiselectVerdier,
+            enhet = this.enhetNavn(),
+            organisasjonsnummer = mottakerIdent,
+            gjelder = this.vedrørende?.navn
+        )
+
     Brevmal.VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14 ->
         VarselOmRevurderingDeltBostedParagraf14Brev(
             data = VarselOmRevurderingDeltBostedParagraf14Data(
@@ -174,6 +190,7 @@ fun ManueltBrevRequest.tilBrev(hentLandkoder: (() -> Map<String, String>)) = whe
                 )
             )
         )
+
     Brevmal.VARSEL_OM_REVURDERING_SAMBOER ->
         if (this.datoAvtale == null) {
             throw FunksjonellFeil(
@@ -220,11 +237,15 @@ fun ManueltBrevRequest.tilBrev(hentLandkoder: (() -> Map<String, String>)) = whe
     Brevmal.FORLENGET_SVARTIDSBREV,
     Brevmal.FORLENGET_SVARTIDSBREV_INSTITUSJON ->
         ForlengetSvartidsbrev(
+            mal = brevmal,
             navn = this.mottakerNavn,
             fodselsnummer = this.vedrørende?.fødselsnummer ?: mottakerIdent,
             enhetNavn = this.enhetNavn(),
             årsaker = this.multiselectVerdier,
-            antallUkerSvarfrist = this.antallUkerSvarfrist ?: throw Feil(message = "Antall uker svarfrist er ikke satt", frontendFeilmelding = "Antall uker svarfrist er ikke satt"),
+            antallUkerSvarfrist = this.antallUkerSvarfrist ?: throw Feil(
+                message = "Antall uker svarfrist er ikke satt",
+                frontendFeilmelding = "Antall uker svarfrist er ikke satt"
+            ),
             organisasjonsnummer = if (erTilInstitusjon) mottakerIdent else null,
             gjelder = this.vedrørende?.navn
         )
@@ -236,6 +257,7 @@ fun ManueltBrevRequest.tilBrev(hentLandkoder: (() -> Map<String, String>)) = whe
             enhet = this.enhetNavn(),
             mal = Brevmal.INFORMASJONSBREV_FØDSEL_MINDREÅRIG
         )
+
     Brevmal.INFORMASJONSBREV_FØDSEL_UMYNDIG,
     Brevmal.INFORMASJONSBREV_FØDSEL_VERGEMÅL ->
         EnkeltInformasjonsbrev(
@@ -244,6 +266,7 @@ fun ManueltBrevRequest.tilBrev(hentLandkoder: (() -> Map<String, String>)) = whe
             enhet = this.enhetNavn(),
             mal = Brevmal.INFORMASJONSBREV_FØDSEL_VERGEMÅL
         )
+
     Brevmal.INFORMASJONSBREV_FØDSEL_GENERELL ->
         EnkeltInformasjonsbrev(
             navn = this.mottakerNavn,
@@ -251,6 +274,7 @@ fun ManueltBrevRequest.tilBrev(hentLandkoder: (() -> Map<String, String>)) = whe
             enhet = this.enhetNavn(),
             mal = Brevmal.INFORMASJONSBREV_FØDSEL_GENERELL
         )
+
     Brevmal.INFORMASJONSBREV_KAN_SØKE ->
         InformasjonsbrevKanSøke(
             navn = this.mottakerNavn,
@@ -258,6 +282,7 @@ fun ManueltBrevRequest.tilBrev(hentLandkoder: (() -> Map<String, String>)) = whe
             enhet = this.enhetNavn(),
             dokumentliste = this.multiselectVerdier
         )
+
     Brevmal.VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED ->
         VarselbrevMedÅrsakerOgBarn(
             mal = Brevmal.VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED,

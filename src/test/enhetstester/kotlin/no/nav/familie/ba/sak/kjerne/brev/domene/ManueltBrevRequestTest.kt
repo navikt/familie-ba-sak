@@ -47,7 +47,7 @@ class ManueltBrevRequestTest {
         assertThat(brev::class).isEqualTo(ForlengetSvartidsbrev::class)
         brev as ForlengetSvartidsbrev
 
-        assertThat(brev.mal).isEqualTo(Brevmal.FORLENGET_SVARTIDSBREV)
+        assertThat(brev.mal).isEqualTo(Brevmal.FORLENGET_SVARTIDSBREV_INSTITUSJON)
 
         assertThat(brev.data.flettefelter.antallUkerSvarfrist!!.single()).isEqualTo("3")
         assertThat(brev.data.flettefelter.aarsakerSvartidsbrev!!).isEqualTo(årsaker)
@@ -117,7 +117,6 @@ class ManueltBrevRequestTest {
 
         assertThat(brev.data.flettefelter.mottakerlandSed!!.single()).isEqualTo("Sverige")
         assertThat(brev.data.flettefelter.dokumentliste!!.isEmpty()).isFalse
-        println(brev.data.flettefelter.dokumentliste)
         assertThat(brev.data.flettefelter.dokumentliste).containsAll(dokumentliste)
     }
 
