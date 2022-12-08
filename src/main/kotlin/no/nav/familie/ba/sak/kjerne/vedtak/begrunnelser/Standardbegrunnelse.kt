@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser
 
+import com.fasterxml.jackson.annotation.JsonValue
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevBegrunnelseGrunnlagMedPersoner
@@ -1344,6 +1345,7 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
 
     override val kanDelesOpp: Boolean = false
 
+    @JsonValue
     override fun enumnavnTilString(): String =
         Standardbegrunnelse::class.simpleName + "$" + this.name
 

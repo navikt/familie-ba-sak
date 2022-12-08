@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser
 
+import com.fasterxml.jackson.annotation.JsonValue
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevBegrunnelseGrunnlagMedPersoner
@@ -263,6 +264,7 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         throw Feil("Begrunnelse $this kan ikke deles opp.")
     }
 
+    @JsonValue
     override fun enumnavnTilString(): String = EØSStandardbegrunnelse::class.simpleName + "$" + this.name
 
     fun tilEØSBegrunnelseMedTriggere(sanityEØSBegrunnelser: List<SanityEØSBegrunnelse>): EØSBegrunnelseMedTriggere? {
