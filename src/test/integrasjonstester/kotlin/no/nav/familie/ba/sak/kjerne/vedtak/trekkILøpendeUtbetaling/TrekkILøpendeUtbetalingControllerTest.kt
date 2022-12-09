@@ -39,9 +39,12 @@ class TrekkILøpendeUtbetalingControllerTest(
         )
 
         val lagret = controller.leggTilTrekkILøpendeUtbetaling(trekk)
-            .also { Assertions.assertThat(it.statusCode).isEqualTo(HttpStatus.CREATED) }
+            .also { Assertions.assertThat(it.statusCode).isEqualTo(HttpStatus.OK) }
+            .also { Assertions.assertThat(it.body?.data?.trekkILøpendeUtbetaling?.size).isGreaterThan(0) }
 
-        controller.hentTrekkILøpendeUtbetalinger()
+        val id = lagret.body!!.data!!.trekkILøpendeUtbetaling!![0].identifikator.id
+
+        controller.hentTrekkILøpendeUtbetalinger(behandlingId = behandling.id)
             .also { Assertions.assertThat(it.statusCode).isEqualTo(HttpStatus.OK) }
             .also { Assertions.assertThat(it.body?.data?.get(0)?.identifikator?.id).isGreaterThan(0) }
             .also { Assertions.assertThat(it.body?.data?.get(0)?.periode?.tom).isNotNull() }
@@ -49,7 +52,7 @@ class TrekkILøpendeUtbetalingControllerTest(
         controller.oppdaterTrekkILøpendeUtbetaling(
             RestTrekkILøpendeUtbetaling(
                 identifikator = TrekkILøpendeBehandlingRestIdentifikator(
-                    id = lagret.body!!.data!!,
+                    id = id,
                     behandlingId = behandling.id
                 ),
                 periode = RestPeriode(
@@ -58,21 +61,38 @@ class TrekkILøpendeUtbetalingControllerTest(
                 ),
                 feilutbetaltBeløp = 1
             )
-        )
+            )
             .also { Assertions.assertThat(it.statusCode).isEqualTo(HttpStatus.OK) }
+            .also { Assertions.assertThat(it.body?.data?.trekkILøpendeUtbetaling?.get(0)?.periode?.tom).isNull() }
 
-        controller.hentTrekkILøpendeUtbetalinger()
+        controller.hentTrekkILøpendeUtbetalinger(behandlingId = behandling.id)
             .also { Assertions.assertThat(it.statusCode).isEqualTo(HttpStatus.OK) }
             .also { Assertions.assertThat(it.body?.data?.get(0)?.periode?.tom).isNull() }
 
+        controller.oppdaterTrekkILøpendeUtbetaling(
+            RestTrekkILøpendeUtbetaling(
+                identifikator = TrekkILøpendeBehandlingRestIdentifikator(
+                    id = id,
+                    behandlingId = behandling.id
+                ),
+                periode = RestPeriode(
+                    fom = YearMonth.of(2020, Month.JANUARY),
+                    tom = null
+                ),
+                feilutbetaltBeløp = 2
+            )
+        )
+            .also { Assertions.assertThat(it.statusCode).isEqualTo(HttpStatus.OK) }
+            .also { Assertions.assertThat(it.body?.data?.trekkILøpendeUtbetaling?.get(0)?.periode?.tom).isNull() }
+
         controller.fjernTrekkILøpendeUtbetaling(
             TrekkILøpendeBehandlingRestIdentifikator(
-                id = lagret.body!!.data!!,
+                id = id,
                 behandlingId = behandling.id
             )
         )
 
-        controller.hentTrekkILøpendeUtbetalinger()
+        controller.hentTrekkILøpendeUtbetalinger(behandlingId = behandling.id)
             .also { Assertions.assertThat(it.statusCode).isEqualTo(HttpStatus.OK) }
             .also { Assertions.assertThat(it.body?.data).isEmpty() }
     }
