@@ -384,7 +384,25 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
     FORTSATT_INNVILGET_TILLEGSTEKST_UK_FULL_UTBETALING {
         override val sanityApiNavn = "fortsattInnvilgetTilleggstekstUkFullUtbetaling"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
-    };
+    },
+    REDUKSJON_BARN_DØD_EØS {
+        override val sanityApiNavn = "reduksjonBarnDoedEos"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_REDUKSJON
+    },
+    REDUKSJON_SØKER_BER_OM_OPPHØR_EØS {
+        override val sanityApiNavn = "reduksjonSokerBerOmOpphoer"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_REDUKSJON
+    },
+    REDUKSJON_BARN_BOR_IKKE_I_EØS {
+        override val sanityApiNavn = "reduksjonBarnBorIkkeIEosLand"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_REDUKSJON
+    },
+    REDUKSJON_IKKE_ANSVAR_FOR_BARN {
+        override val sanityApiNavn = "reduksjonIkkeAnsvarForBarn"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_REDUKSJON
+    },
+
+    ;
 
     override val kanDelesOpp: Boolean = false
 

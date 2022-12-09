@@ -13,6 +13,7 @@ enum class VedtakBegrunnelseType(val sorteringsrekkefølge: Int) {
     INSTITUSJON_INNVILGET(2),
     REDUKSJON(1),
     INSTITUSJON_REDUKSJON(1),
+    EØS_REDUKSJON(1),
     AVSLAG(3),
     EØS_AVSLAG(3),
     INSTITUSJON_AVSLAG(3),

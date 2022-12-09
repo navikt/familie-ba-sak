@@ -280,7 +280,8 @@ class VedtaksperiodeUtilTest {
             listOf(
                 EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_STANDARD,
                 EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_UK_STANDARD,
-                EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_UK_OG_UTLAND_STANDARD
+                EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_UK_OG_UTLAND_STANDARD,
+                EØSStandardbegrunnelse.FORTSATT_INNVILGET_PRIMÆRLAND_STANDARD
             )
 
         val gyldigeEØSBegrunnelserForPeriode = hentGyldigeEØSBegrunnelserForPeriode(
