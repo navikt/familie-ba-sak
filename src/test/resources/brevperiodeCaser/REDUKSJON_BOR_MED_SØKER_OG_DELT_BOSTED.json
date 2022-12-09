@@ -5,10 +5,10 @@
   "vedtaksperiodetype": "UTBETALING",
   "begrunnelser": [
     {
-      "standardbegrunnelse": "REDUKSJON_FLYTTET_BARN"
+      "standardbegrunnelse": "Standardbegrunnelse$REDUKSJON_FLYTTET_BARN"
     },
     {
-      "standardbegrunnelse": "REDUKSJON_DELT_BARNETRYGD_ANNEN_FORELDER_SØKT"
+      "standardbegrunnelse": "Standardbegrunnelse$REDUKSJON_DELT_BARNETRYGD_ANNEN_FORELDER_SØKT"
     }
   ],
   "fritekster": [],

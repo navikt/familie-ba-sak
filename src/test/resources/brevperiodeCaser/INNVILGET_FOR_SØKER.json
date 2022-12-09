@@ -5,7 +5,7 @@
   "vedtaksperiodetype": "UTBETALING",
   "begrunnelser": [
     {
-      "standardbegrunnelse": "INNVILGET_TREDJELANDSBORGER_LOVLIG_OPPHOLD_FOR_BOSATT_I_NORGE"
+      "standardbegrunnelse": "Standardbegrunnelse$INNVILGET_TREDJELANDSBORGER_LOVLIG_OPPHOLD_FOR_BOSATT_I_NORGE"
     }
   ],
   "fritekster": [],

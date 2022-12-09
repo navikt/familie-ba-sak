@@ -5,7 +5,7 @@
   "vedtaksperiodetype": "UTBETALING",
   "begrunnelser": [],
   "eøsBegrunnelser": [
-    "INNVILGET_PRIMÆRLAND_STANDARD"
+    "EØSStandardbegrunnelse$INNVILGET_PRIMÆRLAND_STANDARD"
   ],
   "kompetanser": [
     {

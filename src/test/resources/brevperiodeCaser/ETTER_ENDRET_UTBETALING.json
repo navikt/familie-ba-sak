@@ -5,7 +5,7 @@
   "vedtaksperiodetype": "UTBETALING",
   "begrunnelser": [
     {
-      "standardbegrunnelse": "ETTER_ENDRET_UTBETALING_HAR_AVTALE_DELT_BOSTED"
+      "standardbegrunnelse": "Standardbegrunnelse$ETTER_ENDRET_UTBETALING_HAR_AVTALE_DELT_BOSTED"
     }
   ],
   "fritekster": [],

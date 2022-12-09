@@ -157,7 +157,9 @@ fun fullførBehandlingFraVilkårsvurderingAlleVilkårOppfylt(
     familieBaSakKlient.oppdaterVedtaksperiodeMedStandardbegrunnelser(
         vedtaksperiodeId = utvidetVedtaksperiodeMedBegrunnelser.id,
         restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
-            standardbegrunnelser = utvidetVedtaksperiodeMedBegrunnelser.gyldigeBegrunnelser.map { it }
+            standardbegrunnelser = utvidetVedtaksperiodeMedBegrunnelser.gyldigeBegrunnelser.map {
+                it.substringAfter("Standardbegrunnelse$", "")
+            }.filter(String::isNotEmpty)
         )
     )
     val restUtvidetBehandlingEtterSendTilBeslutter =

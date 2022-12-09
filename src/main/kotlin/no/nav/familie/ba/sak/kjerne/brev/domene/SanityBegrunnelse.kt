@@ -84,11 +84,15 @@ data class RestSanityBegrunnelse(
             hjemler = hjemler ?: emptyList(),
             hjemlerFolketrygdloven = hjemlerFolketrygdloven ?: emptyList(),
             endretUtbetalingsperiodeDeltBostedUtbetalingTrigger =
-            if (endretUtbetalingsperiodeDeltBostedUtbetalingTrigger != null) finnEnumverdi(
-                endretUtbetalingsperiodeDeltBostedUtbetalingTrigger,
-                EndretUtbetalingsperiodeDeltBostedTriggere.values(),
-                apiNavn
-            ) else null,
+            if (endretUtbetalingsperiodeDeltBostedUtbetalingTrigger != null) {
+                finnEnumverdi(
+                    endretUtbetalingsperiodeDeltBostedUtbetalingTrigger,
+                    EndretUtbetalingsperiodeDeltBostedTriggere.values(),
+                    apiNavn
+                )
+            } else {
+                null
+            },
             endretUtbetalingsperiodeTriggere = endretUtbetalingsperiodeTriggere?.mapNotNull {
                 finnEnumverdi(it, EndretUtbetalingsperiodeTrigger.values(), apiNavn)
             },

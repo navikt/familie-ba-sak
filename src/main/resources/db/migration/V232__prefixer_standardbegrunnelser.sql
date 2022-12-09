@@ -1,0 +1,1 @@
+--UPDATE vedtaksbegrunnelse SET vedtak_begrunnelse_spesifikasjon = concat('Standardbegrunnelse$', vedtak_begrunnelse_spesifikasjon);

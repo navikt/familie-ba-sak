@@ -65,7 +65,7 @@ enum class Vedtaksperiodetype(val tillatteBegrunnelsestyper: List<VedtakBegrunne
     ),
     AVSLAG(
         listOf(
-            VedtakBegrunnelseType.AVSLAG, 
+            VedtakBegrunnelseType.AVSLAG,
             VedtakBegrunnelseType.EØS_AVSLAG,
             VedtakBegrunnelseType.INSTITUSJON_AVSLAG
         )

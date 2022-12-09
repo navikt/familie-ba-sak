@@ -5,7 +5,7 @@
   "vedtaksperiodetype": "UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING",
   "begrunnelser": [
     {
-      "standardbegrunnelse": "REDUKSJON_FORELDRENE_BODDE_SAMMEN"
+      "standardbegrunnelse": "Standardbegrunnelse$REDUKSJON_FORELDRENE_BODDE_SAMMEN"
     }
   ],
   "fritekster": [],

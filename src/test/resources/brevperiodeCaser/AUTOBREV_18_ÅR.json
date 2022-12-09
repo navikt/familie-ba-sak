@@ -5,7 +5,7 @@
   "vedtaksperiodetype": "FORTSATT_INNVILGET",
   "begrunnelser": [
     {
-      "standardbegrunnelse": "REDUKSJON_UNDER_18_ÅR_AUTOVEDTAK"
+      "standardbegrunnelse": "Standardbegrunnelse$REDUKSJON_UNDER_18_ÅR_AUTOVEDTAK"
     }
   ],
   "fritekster": [],
