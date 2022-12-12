@@ -37,8 +37,8 @@ class IVedtakBegrunnelseDeserializer : StdDeserializer<List<IVedtakBegrunnelse>>
 
 private fun String.fraEnumNavnTilEnumVerdi(): IVedtakBegrunnelse {
     val splittet = split('$')
-    val type = splittet.get(0)
-    val enumNavn = splittet.get(1)
+    val type = splittet[0]
+    val enumNavn = splittet[1]
     return when (type) {
         EØSStandardbegrunnelse::class.simpleName -> EØSStandardbegrunnelse.valueOf(enumNavn)
         Standardbegrunnelse::class.simpleName -> Standardbegrunnelse.valueOf(enumNavn)
@@ -51,7 +51,7 @@ class IVedtakBegrunnelseListConverter :
     AttributeConverter<List<IVedtakBegrunnelse>, String> {
 
     override fun convertToDatabaseColumn(vedtakbegrunnelser: List<IVedtakBegrunnelse>) =
-        vedtakbegrunnelser.map { it.enumnavnTilString() }.joinToString(";")
+        vedtakbegrunnelser.joinToString(";") { it.enumnavnTilString() }
 
     override fun convertToEntityAttribute(string: String?): List<IVedtakBegrunnelse> =
         if (string.isNullOrBlank()) emptyList() else string.split(";").map { it.fraEnumNavnTilEnumVerdi() }
