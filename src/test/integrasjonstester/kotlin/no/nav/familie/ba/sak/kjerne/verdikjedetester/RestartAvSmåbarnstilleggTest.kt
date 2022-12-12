@@ -330,7 +330,9 @@ class RestartAvSmåbarnstilleggTest(
         familieBaSakKlient().oppdaterVedtaksperiodeMedStandardbegrunnelser(
             vedtaksperiodeId = utvidetVedtaksperiodeMedBegrunnelser.id,
             restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
-                standardbegrunnelser = utvidetVedtaksperiodeMedBegrunnelser.gyldigeBegrunnelser.map { it.toString() }
+                standardbegrunnelser = utvidetVedtaksperiodeMedBegrunnelser.gyldigeBegrunnelser.map {
+                    it.substringAfter("Standardbegrunnelse$", "")
+                }.filter(String::isNotEmpty)
             )
         )
         if (skalBegrunneSmåbarnstillegg) {
