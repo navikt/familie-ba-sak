@@ -1,9 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.trekkILøpendeUtbetaling
 
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 
 @Service
@@ -32,7 +30,8 @@ class TrekkILøpendeUtbetalingService(
         loggService.loggTrekkILøpendeUtbetalingFjernet(behandlingId = identifikator.behandlingId)
     }
 
-    fun hentTrekkILøpendeUtbetalinger() = repository.findAll(Sort.by(Sort.Direction.ASC, "opprettetTidspunkt")).map{tilRest(it)}
+    fun hentTrekkILøpendeUtbetalinger(behandlingId: Long) =
+        repository.finnTrekkILøpendeUtbetalingForBehandling(behandlingId = behandlingId).map { tilRest(it) }.takeIf { it.isNotEmpty() }
 
     private fun tilRest(it: TrekkILøpendeUtbetaling) =
         RestTrekkILøpendeUtbetaling(
@@ -47,17 +46,13 @@ class TrekkILøpendeUtbetalingService(
             feilutbetaltBeløp = it.feilutbetaltBeløp
         )
 
-    fun oppdaterTrekkILøpendeUtbetaling(trekkILøpendeUtbetaling: RestTrekkILøpendeUtbetaling) =
-        repository.findById(trekkILøpendeUtbetaling.identifikator.id)
-            .map {
-                it.copy(
-                    id = trekkILøpendeUtbetaling.identifikator.id,
-                    fom = trekkILøpendeUtbetaling.periode.fom,
-                    tom = trekkILøpendeUtbetaling.periode.tom,
-                    feilutbetaltBeløp = trekkILøpendeUtbetaling.feilutbetaltBeløp
-                )
-            }
-            .map { repository.save(it) }
-            .map { tilRest(it) }
-            .orElseThrow { Feil("Finner ikke trekk i løpende utbetaling") }
+    fun oppdaterTrekkILøpendeUtbetaling(trekkILøpendeUtbetaling: RestTrekkILøpendeUtbetaling) {
+        val periode = repository.findById(trekkILøpendeUtbetaling.identifikator.id).get()
+
+        periode.fom = trekkILøpendeUtbetaling.periode.fom
+        periode.tom = trekkILøpendeUtbetaling.periode.tom
+        periode.feilutbetaltBeløp = trekkILøpendeUtbetaling.feilutbetaltBeløp
+
+        repository.save(periode)
+    }
 }
