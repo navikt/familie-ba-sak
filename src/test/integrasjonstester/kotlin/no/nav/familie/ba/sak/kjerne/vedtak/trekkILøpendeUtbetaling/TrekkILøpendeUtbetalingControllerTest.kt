@@ -10,12 +10,11 @@ import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.http.HttpStatus
+import java.time.LocalDate
 import java.time.Month
-import java.time.YearMonth
 
 class TrekkILøpendeUtbetalingControllerTest(
-    @Autowired val controller: TrekkILøpendeUtbetalingController,
+    @Autowired val service: TrekkILøpendeUtbetalingService,
     @Autowired val aktørIdRepository: AktørIdRepository,
     @Autowired val fagsakRepository: FagsakRepository,
     @Autowired val behandlingRepository: BehandlingRepository
@@ -32,68 +31,64 @@ class TrekkILøpendeUtbetalingControllerTest(
                 behandlingId = behandling.id
             ),
             periode = RestPeriode(
-                fom = YearMonth.of(2020, Month.JANUARY),
-                tom = YearMonth.of(2021, Month.MAY)
+                fom = LocalDate.of(2020, Month.JANUARY, 1),
+                tom = LocalDate.of(2021, Month.MAY, 31)
             ),
             feilutbetaltBeløp = 1234
         )
 
-        val lagret = controller.leggTilTrekkILøpendeUtbetaling(trekk)
-            .also { Assertions.assertThat(it.statusCode).isEqualTo(HttpStatus.OK) }
-            .also { Assertions.assertThat(it.body?.data?.trekkILøpendeUtbetaling?.size).isGreaterThan(0) }
+        val id = service.leggTilTrekkILøpendeUtbetaling(trekk)
 
-        val id = lagret.body!!.data!!.trekkILøpendeUtbetaling!![0].identifikator.id
+        service.hentTrekkILøpendeUtbetalinger(behandlingId = behandling.id)
+            .also {Assertions.assertThat(it?.get(0)?.identifikator?.id).isEqualTo(id) }
+            .also { Assertions.assertThat(it?.get(0)?.periode?.fom).isNotNull() }
+            .also { Assertions.assertThat(it?.get(0)?.periode?.tom).isNotNull() }
 
-        controller.hentTrekkILøpendeUtbetalinger(behandlingId = behandling.id)
-            .also { Assertions.assertThat(it.statusCode).isEqualTo(HttpStatus.OK) }
-            .also { Assertions.assertThat(it.body?.data?.get(0)?.identifikator?.id).isGreaterThan(0) }
-            .also { Assertions.assertThat(it.body?.data?.get(0)?.periode?.tom).isNotNull() }
-
-        controller.oppdaterTrekkILøpendeUtbetaling(
+        service.oppdaterTrekkILøpendeUtbetaling(
             RestTrekkILøpendeUtbetaling(
                 identifikator = TrekkILøpendeBehandlingRestIdentifikator(
                     id = id,
                     behandlingId = behandling.id
                 ),
                 periode = RestPeriode(
-                    fom = YearMonth.of(2020, Month.JANUARY),
-                    tom = null
+                    fom = LocalDate.of(2020, Month.JANUARY, 1),
+                    tom = LocalDate.of(2020, Month.MAY, 31),
                 ),
                 feilutbetaltBeløp = 1
             )
-            )
-            .also { Assertions.assertThat(it.statusCode).isEqualTo(HttpStatus.OK) }
-            .also { Assertions.assertThat(it.body?.data?.trekkILøpendeUtbetaling?.get(0)?.periode?.tom).isNull() }
-
-        controller.hentTrekkILøpendeUtbetalinger(behandlingId = behandling.id)
-            .also { Assertions.assertThat(it.statusCode).isEqualTo(HttpStatus.OK) }
-            .also { Assertions.assertThat(it.body?.data?.get(0)?.periode?.tom).isNull() }
-
-        controller.oppdaterTrekkILøpendeUtbetaling(
-            RestTrekkILøpendeUtbetaling(
-                identifikator = TrekkILøpendeBehandlingRestIdentifikator(
-                    id = id,
-                    behandlingId = behandling.id
-                ),
-                periode = RestPeriode(
-                    fom = YearMonth.of(2020, Month.JANUARY),
-                    tom = null
-                ),
-                feilutbetaltBeløp = 2
-            )
         )
-            .also { Assertions.assertThat(it.statusCode).isEqualTo(HttpStatus.OK) }
-            .also { Assertions.assertThat(it.body?.data?.trekkILøpendeUtbetaling?.get(0)?.periode?.tom).isNull() }
 
-        controller.fjernTrekkILøpendeUtbetaling(
+        service.hentTrekkILøpendeUtbetalinger(behandlingId = behandling.id)
+            .also { Assertions.assertThat(it?.get(0)?.identifikator?.id).isEqualTo(id) }
+            .also { Assertions.assertThat(it?.get(0)?.periode?.tom).isEqualTo("2020-05-31") }
+
+        val trekk2 = RestTrekkILøpendeUtbetaling(
+            identifikator = TrekkILøpendeBehandlingRestIdentifikator(
+                id = 0,
+                behandlingId = behandling.id
+            ),
+            periode = RestPeriode(
+                fom = LocalDate.of(2019, Month.DECEMBER, 1),
+                tom = LocalDate.of(2019, Month.DECEMBER, 31)
+            ),
+            feilutbetaltBeløp = 100
+        )
+
+        val id2 = service.leggTilTrekkILøpendeUtbetaling(trekk2)
+
+        service.hentTrekkILøpendeUtbetalinger(behandlingId = behandling.id)
+            .also { Assertions.assertThat(it?.size).isEqualTo(2) }
+            .also { Assertions.assertThat(it?.get(0)?.identifikator?.id).isEqualTo(id2) }
+
+        service.fjernTrekkILøpendeUtbetaling(
             TrekkILøpendeBehandlingRestIdentifikator(
                 id = id,
                 behandlingId = behandling.id
             )
         )
 
-        controller.hentTrekkILøpendeUtbetalinger(behandlingId = behandling.id)
-            .also { Assertions.assertThat(it.statusCode).isEqualTo(HttpStatus.OK) }
-            .also { Assertions.assertThat(it.body?.data).isEmpty() }
+        service.hentTrekkILøpendeUtbetalinger(behandlingId = behandling.id)
+            .also { Assertions.assertThat(it?.size).isEqualTo(1) }
+            .also { Assertions.assertThat(it?.get(0)?.identifikator?.id).isEqualTo(id2) }
     }
 }
