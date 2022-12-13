@@ -1,11 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.trekkILøpendeUtbetaling
 
 import no.nav.familie.ba.sak.common.BaseEntitet
-import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
-import java.time.YearMonth
+import java.time.LocalDate
 import javax.persistence.Column
-import javax.persistence.Convert
 import javax.persistence.Entity
 import javax.persistence.EntityListeners
 import javax.persistence.GeneratedValue
@@ -21,11 +19,9 @@ data class TrekkILøpendeUtbetaling(
     @Column(name = "fk_behandling_id", updatable = false, nullable = false)
     val behandlingId: Long,
     @Column(name = "fom", columnDefinition = "DATE")
-    @Convert(converter = YearMonthConverter::class)
-    var fom: YearMonth,
+    var fom: LocalDate,
     @Column(name = "tom", columnDefinition = "DATE")
-    @Convert(converter = YearMonthConverter::class)
-    var tom: YearMonth?,
+    var tom: LocalDate,
     @Column(name = "feilutbetalt_beloep", nullable = false)
     var feilutbetaltBeløp: Int,
 
