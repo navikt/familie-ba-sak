@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingTilBehandlingsresultatService
+import no.nav.familie.ba.sak.kjerne.steg.VilkårsvurderingDTO
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -31,7 +32,8 @@ class AutovedtakService(
         aktør: Aktør,
         behandlingType: BehandlingType,
         behandlingÅrsak: BehandlingÅrsak,
-        fagsakId: Long
+        fagsakId: Long,
+        brukAlternativAtyMetodeForBarna: Boolean = false
     ): Behandling {
         val nyBehandling = stegService.håndterNyBehandling(
             NyBehandling(
@@ -43,7 +45,10 @@ class AutovedtakService(
             )
         )
 
-        val behandlingEtterBehandlingsresultat = stegService.håndterVilkårsvurdering(nyBehandling)
+        val behandlingEtterBehandlingsresultat = stegService.håndterVilkårsvurdering(
+            nyBehandling,
+            VilkårsvurderingDTO(brukAlternativAtyMetodeForBarna)
+        )
         return behandlingEtterBehandlingsresultat
     }
 

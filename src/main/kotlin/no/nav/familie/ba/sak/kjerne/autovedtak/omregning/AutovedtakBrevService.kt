@@ -28,7 +28,8 @@ data class AutovedtakBrevBehandlingsdata(
     val aktør: Aktør,
     val behandlingsårsak: BehandlingÅrsak,
     val standardbegrunnelse: Standardbegrunnelse,
-    val fagsakId: Long
+    val fagsakId: Long,
+    val brukAlternativAtyBarnaMetode: Boolean = false
 )
 
 @Service
@@ -51,7 +52,8 @@ class AutovedtakBrevService(
                 aktør = behandlingsdata.aktør,
                 behandlingType = BehandlingType.REVURDERING,
                 behandlingÅrsak = behandlingsdata.behandlingsårsak,
-                fagsakId = behandlingsdata.fagsakId
+                fagsakId = behandlingsdata.fagsakId,
+                brukAlternativAtyMetodeForBarna = behandlingsdata.brukAlternativAtyBarnaMetode
             )
 
         vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(

@@ -85,7 +85,8 @@ class Autobrev6og18ÅrService(
                 standardbegrunnelse = AutobrevUtils.hentGjeldendeVedtakbegrunnelseReduksjonForAlder(
                     autobrev6og18ÅrDTO.alder
                 ),
-                fagsakId = behandling.fagsak.id
+                fagsakId = behandling.fagsak.id,
+                brukAlternativAtyBarnaMetode = autobrev6og18ÅrDTO.brukAlternativAtyMetodeForBarna
             )
         )
     }

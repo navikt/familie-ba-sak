@@ -220,12 +220,15 @@ class StegService(
     }
 
     @Transactional
-    fun håndterVilkårsvurdering(behandling: Behandling): Behandling {
+    fun håndterVilkårsvurdering(
+        behandling: Behandling,
+        data: VilkårsvurderingDTO = VilkårsvurderingDTO()
+    ): Behandling {
         val behandlingSteg: VilkårsvurderingSteg =
             hentBehandlingSteg(StegType.VILKÅRSVURDERING) as VilkårsvurderingSteg
 
         val behandlingEtterVilkårsvurdering = håndterSteg(behandling, behandlingSteg) {
-            behandlingSteg.utførStegOgAngiNeste(behandling, "")
+            behandlingSteg.utførStegOgAngiNeste(behandling, data)
         }
 
         return if (behandlingEtterVilkårsvurdering.skalBehandlesAutomatisk) {

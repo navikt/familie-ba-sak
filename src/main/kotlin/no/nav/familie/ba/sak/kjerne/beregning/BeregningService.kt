@@ -160,7 +160,8 @@ class BeregningService(
     fun oppdaterBehandlingMedBeregning(
         behandling: Behandling,
         personopplysningGrunnlag: PersonopplysningGrunnlag,
-        nyEndretUtbetalingAndel: EndretUtbetalingAndel? = null
+        nyEndretUtbetalingAndel: EndretUtbetalingAndel? = null,
+        skalBrukeNyMåteÅGenerereAndelerForBarna: Boolean? = null
     ): TilkjentYtelse {
         val endreteUtbetalingAndeler = andelerTilkjentYtelseOgEndreteUtbetalingerService
             .finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandling.id).filter {
@@ -184,7 +185,8 @@ class BeregningService(
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 behandling = behandling,
                 endretUtbetalingAndeler = endreteUtbetalingAndeler,
-                skalBrukeNyMåteÅGenerereAndelerForBarna = featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_GENERERE_ATY_BARNA)
+                skalBrukeNyMåteÅGenerereAndelerForBarna = skalBrukeNyMåteÅGenerereAndelerForBarna
+                    ?: featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_GENERERE_ATY_BARNA)
             ) { søkerAktør ->
                 småbarnstilleggService.hentOgLagrePerioderMedFullOvergangsstønad(
                     søkerAktør = søkerAktør,

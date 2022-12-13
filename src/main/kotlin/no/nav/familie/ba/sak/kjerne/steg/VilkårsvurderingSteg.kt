@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.NY_MÅTE_Å_GENERERE_ATY_BARNA
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
@@ -31,7 +32,7 @@ class VilkårsvurderingSteg(
     private val tilpassKompetanserTilRegelverkService: TilpassKompetanserTilRegelverkService,
     private val featureToggleService: FeatureToggleService,
     private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService
-) : BehandlingSteg<String> {
+) : BehandlingSteg<VilkårsvurderingDTO> {
 
     override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
         val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandling.id)
@@ -55,7 +56,7 @@ class VilkårsvurderingSteg(
     @Transactional
     override fun utførStegOgAngiNeste(
         behandling: Behandling,
-        data: String
+        data: VilkårsvurderingDTO
     ): StegType {
         val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandling.id)
 
@@ -93,7 +94,13 @@ class VilkårsvurderingSteg(
         }
 
         tilbakestillBehandlingService.tilbakestillDataTilVilkårsvurderingssteg(behandling)
-        beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
+        beregningService.oppdaterBehandlingMedBeregning(
+            behandling = behandling,
+            personopplysningGrunnlag = personopplysningGrunnlag,
+            skalBrukeNyMåteÅGenerereAndelerForBarna = featureToggleService.isEnabled(NY_MÅTE_Å_GENERERE_ATY_BARNA).xor(
+                data.brukAlternativAtyMetodeForBarna
+            )
+        )
 
         tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(BehandlingId(behandling.id))
 
@@ -108,3 +115,7 @@ class VilkårsvurderingSteg(
         return StegType.VILKÅRSVURDERING
     }
 }
+
+data class VilkårsvurderingDTO(
+    val brukAlternativAtyMetodeForBarna: Boolean = false
+)

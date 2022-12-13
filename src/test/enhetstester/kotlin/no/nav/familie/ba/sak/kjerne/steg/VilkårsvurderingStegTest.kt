@@ -1,9 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
+import io.mockk.Ordering
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import io.mockk.verify
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagPersonResultat
@@ -11,6 +13,7 @@ import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -77,7 +80,7 @@ class VilkårsvurderingStegTest {
             barnasIdenter = listOf(barnIdent)
         )
         every { tilbakestillBehandlingService.tilbakestillDataTilVilkårsvurderingssteg(behandling) } returns Unit
-        every { beregningService.oppdaterBehandlingMedBeregning(any(), any()) } returns lagInitiellTilkjentYtelse(
+        every { beregningService.oppdaterBehandlingMedBeregning(any(), any(), any(), any()) } returns lagInitiellTilkjentYtelse(
             behandling
         )
 
@@ -111,7 +114,38 @@ class VilkårsvurderingStegTest {
         vikårsvurdering.personResultater = setOf(søkerPersonResultat, barnPersonResultat)
         every { vilkårService.hentVilkårsvurderingThrows(behandling.id) } returns vikårsvurdering
 
-        assertDoesNotThrow { vilkårsvurderingSteg.utførStegOgAngiNeste(behandling, "") }
+        assertDoesNotThrow { vilkårsvurderingSteg.utførStegOgAngiNeste(behandling, VilkårsvurderingDTO()) }
+    }
+
+    @Test
+    fun `skal bruke metode bestemt av toggle for beregning av barnas aty`() {
+        every {
+            featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_GENERERE_ATY_BARNA)
+        } returns true andThen false
+
+        vilkårsvurderingSteg.utførStegOgAngiNeste(behandling, VilkårsvurderingDTO())
+        vilkårsvurderingSteg.utførStegOgAngiNeste(behandling, VilkårsvurderingDTO())
+
+        verify(ordering = Ordering.ORDERED) {
+            beregningService.oppdaterBehandlingMedBeregning(any(), any(), any(), skalBrukeNyMåteÅGenerereAndelerForBarna = true)
+            beregningService.oppdaterBehandlingMedBeregning(any(), any(), any(), skalBrukeNyMåteÅGenerereAndelerForBarna = false)
+        }
+    }
+
+    @Test
+    fun `skal bruke motsatt verdi av toggle ved beregning dersom brukAlternativAtyMetodeForBarna er satt til true`() {
+        every {
+            featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_GENERERE_ATY_BARNA)
+        } returns true andThen false
+
+        val data = VilkårsvurderingDTO(brukAlternativAtyMetodeForBarna = true)
+        vilkårsvurderingSteg.utførStegOgAngiNeste(behandling, data)
+        vilkårsvurderingSteg.utførStegOgAngiNeste(behandling, data)
+
+        verify(ordering = Ordering.ORDERED) {
+            beregningService.oppdaterBehandlingMedBeregning(any(), any(), any(), skalBrukeNyMåteÅGenerereAndelerForBarna = false)
+            beregningService.oppdaterBehandlingMedBeregning(any(), any(), any(), skalBrukeNyMåteÅGenerereAndelerForBarna = true)
+        }
     }
 
     @Test
