@@ -6,8 +6,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.tilMinimertUregisrertBarn
 import no.nav.familie.ba.sak.kjerne.beregning.Beløpsdifferanse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
@@ -21,7 +19,6 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
@@ -75,18 +72,7 @@ class BrevPeriodeService(
             søknadGrunnlagService.hentAktiv(behandlingId = behandlingId.id)?.hentUregistrerteBarn()
                 ?: emptyList()
 
-        val forrigeBehandlingSomErIverksatt = behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(
-            behandlingHentOgPersisterService.hent(behandlingId.id)
-        )
-
-        val kompetanser =
-            if (forrigeBehandlingSomErIverksatt?.kategori == BehandlingKategori.EØS && forrigeBehandlingSomErIverksatt.opprettetÅrsak == BehandlingÅrsak.MIGRERING) {
-                // filtrerer bort kompetanser for migreringer av primærlandsaker
-                kompetanseService.hentKompetanser(behandlingId = behandlingId)
-                    .filter { it.resultat == KompetanseResultat.NORGE_ER_PRIMÆRLAND && !it.erFelterSatt() }
-            } else {
-                kompetanseService.hentKompetanser(behandlingId = behandlingId)
-            }
+        val kompetanser = kompetanseService.hentKompetanser(behandlingId = behandlingId)
 
         val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
         val sanityEØSBegrunnelser = sanityService.hentSanityEØSBegrunnelser()
