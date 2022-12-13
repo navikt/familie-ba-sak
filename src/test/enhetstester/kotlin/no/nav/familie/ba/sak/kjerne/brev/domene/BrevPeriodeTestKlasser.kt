@@ -27,7 +27,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseData
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.EØSBegrunnelseData
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.EØSBegrunnelseDataMedKompetanse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.SøkersRettTilUtvidet
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
@@ -123,7 +123,8 @@ data class BrevPeriodeTestPerson(
                         periodeTom = null,
                         resultat = Resultat.OPPFYLT,
                         utdypendeVilkårsvurderinger = emptyList(),
-                        erEksplisittAvslagPåSøknad = false
+                        erEksplisittAvslagPåSøknad = false,
+                        standardbegrunnelser = emptyList()
                     )
                 }
 }
@@ -226,7 +227,7 @@ data class EØSBegrunnelseTestConfig(
     val sokersAktivitet: SøkersAktivitet,
     val sokersAktivitetsland: String?
 ) : TestBegrunnelse {
-    fun tilEØSBegrunnelseData(): EØSBegrunnelseData = EØSBegrunnelseData(
+    fun tilEØSBegrunnelseData(): EØSBegrunnelseDataMedKompetanse = EØSBegrunnelseDataMedKompetanse(
         apiNavn = this.apiNavn,
         annenForeldersAktivitet = this.annenForeldersAktivitet,
         annenForeldersAktivitetsland = this.annenForeldersAktivitetsland,

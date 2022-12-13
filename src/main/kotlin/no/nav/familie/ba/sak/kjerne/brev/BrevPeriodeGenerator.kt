@@ -23,6 +23,8 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.EØSBegrunnelseData
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.EØSBegrunnelseDataMedKompetanse
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.EØSBegrunnelseDataUtenKompetanse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.FritekstBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilBrevBegrunnelse
@@ -75,19 +77,46 @@ class BrevPeriodeGenerator(
         eøsBegrunnelserMedKompetanser.flatMap { begrunnelseMedData ->
             val begrunnelse = begrunnelseMedData.begrunnelse
 
-            begrunnelseMedData.kompetanser.map { kompetanse ->
-                EØSBegrunnelseData(
-                    vedtakBegrunnelseType = begrunnelse.vedtakBegrunnelseType,
-                    apiNavn = begrunnelse.sanityApiNavn,
-                    annenForeldersAktivitet = kompetanse.annenForeldersAktivitet,
-                    annenForeldersAktivitetsland = kompetanse.annenForeldersAktivitetslandNavn?.navn,
-                    barnetsBostedsland = kompetanse.barnetsBostedslandNavn.navn,
-                    barnasFodselsdatoer = Utils.slåSammen(kompetanse.personer.map { it.fødselsdato.tilKortString() }),
-                    antallBarn = kompetanse.personer.size,
-                    maalform = brevMålform.tilSanityFormat(),
-                    sokersAktivitet = kompetanse.søkersAktivitet,
-                    sokersAktivitetsland = kompetanse.søkersAktivitetsland?.navn
+            if (begrunnelseMedData.kompetanser.isEmpty() && begrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.EØS_AVSLAG) {
+                val minimertePersonResultater =
+                    restBehandlingsgrunnlagForBrev.minimertePersonResultater.filter { personResultat ->
+                        personResultat.minimerteVilkårResultater.any {
+                            it.erEksplisittAvslagPåSøknad == true && it.periodeFom == minimertVedtaksperiode.fom && it.standardbegrunnelser.contains(
+                                begrunnelse
+                            )
+                        }
+                    }
+
+                val barnPåBehandling =
+                    restBehandlingsgrunnlagForBrev.personerPåBehandling.filter { it.type == PersonType.BARN }
+
+                val barnIBegrunnelse =
+                    barnPåBehandling.filter { barn -> minimertePersonResultater.any { personResultat -> personResultat.personIdent == barn.personIdent } }
+
+                listOf(
+                    EØSBegrunnelseDataUtenKompetanse(
+                        vedtakBegrunnelseType = begrunnelse.vedtakBegrunnelseType,
+                        apiNavn = begrunnelse.sanityApiNavn,
+                        barnasFodselsdatoer = if (barnIBegrunnelse.isNotEmpty()) barnIBegrunnelse.tilBarnasFødselsdatoer() else barnPåBehandling.tilBarnasFødselsdatoer(),
+                        antallBarn = if (barnIBegrunnelse.isNotEmpty()) barnIBegrunnelse.size else barnPåBehandling.size,
+                        maalform = brevMålform.tilSanityFormat()
+                    )
                 )
+            } else {
+                begrunnelseMedData.kompetanser.map { kompetanse ->
+                    EØSBegrunnelseDataMedKompetanse(
+                        vedtakBegrunnelseType = begrunnelse.vedtakBegrunnelseType,
+                        apiNavn = begrunnelse.sanityApiNavn,
+                        annenForeldersAktivitet = kompetanse.annenForeldersAktivitet,
+                        annenForeldersAktivitetsland = kompetanse.annenForeldersAktivitetslandNavn?.navn,
+                        barnetsBostedsland = kompetanse.barnetsBostedslandNavn.navn,
+                        barnasFodselsdatoer = Utils.slåSammen(kompetanse.personer.map { it.fødselsdato.tilKortString() }),
+                        antallBarn = kompetanse.personer.size,
+                        maalform = brevMålform.tilSanityFormat(),
+                        sokersAktivitet = kompetanse.søkersAktivitet,
+                        sokersAktivitetsland = kompetanse.søkersAktivitetsland?.navn
+                    )
+                }
             }
         }
 

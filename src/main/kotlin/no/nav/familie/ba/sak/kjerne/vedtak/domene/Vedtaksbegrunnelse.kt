@@ -134,7 +134,9 @@ data class FritekstBegrunnelse(
     override val type: Begrunnelsetype = Begrunnelsetype.FRITEKST
 }
 
-data class EØSBegrunnelseData(
+sealed class EØSBegrunnelseData : BegrunnelseMedData
+
+data class EØSBegrunnelseDataMedKompetanse(
     override val vedtakBegrunnelseType: VedtakBegrunnelseType,
     override val apiNavn: String,
 
@@ -146,7 +148,18 @@ data class EØSBegrunnelseData(
     val maalform: String,
     val sokersAktivitet: SøkersAktivitet,
     val sokersAktivitetsland: String?
-) : BegrunnelseMedData {
+) : EØSBegrunnelseData() {
+    override val type: Begrunnelsetype = Begrunnelsetype.EØS_BEGRUNNELSE
+}
+
+data class EØSBegrunnelseDataUtenKompetanse(
+    override val vedtakBegrunnelseType: VedtakBegrunnelseType,
+    override val apiNavn: String,
+
+    val barnasFodselsdatoer: String,
+    val antallBarn: Int,
+    val maalform: String
+) : EØSBegrunnelseData() {
     override val type: Begrunnelsetype = Begrunnelsetype.EØS_BEGRUNNELSE
 }
 

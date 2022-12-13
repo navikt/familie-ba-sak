@@ -16,7 +16,8 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseData
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.EØSBegrunnelseData
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.EØSBegrunnelseDataMedKompetanse
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.EØSBegrunnelseDataUtenKompetanse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.FritekstBegrunnelse
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -55,8 +56,12 @@ class VedtaksperiodeMedBegrunnelserController(
             handling = OPPDATERE_BEGRUNNELSER_HANDLING
         )
 
-        val standardbegrunnelser = restPutVedtaksperiodeMedStandardbegrunnelser.standardbegrunnelser.mapNotNull { konverterTilEnumverdi<Standardbegrunnelse>(it) }
-        val eøsStandardbegrunnelser = restPutVedtaksperiodeMedStandardbegrunnelser.standardbegrunnelser.mapNotNull { konverterTilEnumverdi<EØSStandardbegrunnelse>(it) }
+        val standardbegrunnelser = restPutVedtaksperiodeMedStandardbegrunnelser.standardbegrunnelser.mapNotNull {
+            konverterTilEnumverdi<Standardbegrunnelse>(it)
+        }
+        val eøsStandardbegrunnelser = restPutVedtaksperiodeMedStandardbegrunnelser.standardbegrunnelser.mapNotNull {
+            konverterTilEnumverdi<EØSStandardbegrunnelse>(it)
+        }
 
         val vedtak = vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
             vedtaksperiodeId = vedtaksperiodeId,
@@ -111,7 +116,8 @@ class VedtaksperiodeMedBegrunnelserController(
             when (it) {
                 is FritekstBegrunnelse -> it.fritekst
                 is BegrunnelseData -> brevKlient.hentBegrunnelsestekst(it)
-                is EØSBegrunnelseData -> brevKlient.hentBegrunnelsestekst(it)
+                is EØSBegrunnelseDataMedKompetanse -> brevKlient.hentBegrunnelsestekst(it)
+                is EØSBegrunnelseDataUtenKompetanse -> brevKlient.hentBegrunnelsestekst(it)
                 else -> throw Feil("Ukjent begrunnelsestype")
             }
         }
