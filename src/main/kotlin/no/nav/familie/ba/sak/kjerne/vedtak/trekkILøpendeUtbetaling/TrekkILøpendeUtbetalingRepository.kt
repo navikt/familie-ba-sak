@@ -5,6 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 
 interface TrekkILøpendeUtbetalingRepository : JpaRepository<TrekkILøpendeUtbetaling, Long>{
-    @Query(value = "SELECT t FROM TrekkILøpendeUtbetaling t WHERE t.behandlingId = :behandlingId ORDER BY t.opprettetTidspunkt ASC")
+    @Query(value = "SELECT t FROM TrekkILøpendeUtbetaling t WHERE t.behandlingId = :behandlingId ORDER BY t.fom ASC")
     fun finnTrekkILøpendeUtbetalingForBehandling(behandlingId: Long): List<TrekkILøpendeUtbetaling>
 }
