@@ -22,7 +22,11 @@
           "periodeTom": null,
           "resultat": "IKKE_OPPFYLT",
           "utdypendeVilkårsvurderinger": [],
-          "erEksplisittAvslagPåSøknad": true
+          "erEksplisittAvslagPåSøknad": true,
+          "standardbegrunnelser": [
+            "Standardbegrunnelse$AVSLAG_IKKE_FLYTTET_FRA_EKTEFELLE",
+            "Standardbegrunnelse$AVSLAG_FORELDRENE_BOR_SAMMEN"
+          ]
         }
       ],
       "andreVurderinger": [],
@@ -39,7 +43,8 @@
           "periodeTom": null,
           "resultat": "IKKE_OPPFYLT",
           "utdypendeVilkårsvurderinger": [],
-          "erEksplisittAvslagPåSøknad": true
+          "erEksplisittAvslagPåSøknad": true,
+          "standardbegrunnelser": []
         }
       ],
       "andreVurderinger": [],

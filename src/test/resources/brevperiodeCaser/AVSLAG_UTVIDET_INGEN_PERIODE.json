@@ -52,7 +52,10 @@
           "periodeTom": null,
           "resultat": "IKKE_OPPFYLT",
           "utdypendeVilkårsvurderinger": [],
-          "erEksplisittAvslagPåSøknad": true
+          "erEksplisittAvslagPåSøknad": true,
+          "standardbegrunnelser": [
+            "Standardbegrunnelse$AVSLAG_IKKE_MEKLINGSATTEST"
+          ]
         }
       ],
       "andreVurderinger": [],

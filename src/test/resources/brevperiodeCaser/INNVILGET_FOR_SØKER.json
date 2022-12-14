@@ -21,7 +21,8 @@
           "periodeTom": null,
           "resultat": "OPPFYLT",
           "utdypendeVilkårsvurderinger": [],
-          "erEksplisittAvslagPåSøknad": false
+          "erEksplisittAvslagPåSøknad": false,
+          "standardbegrunnelser": []
         },
         {
           "vilkårType": "LOVLIG_OPPHOLD",
@@ -29,7 +30,8 @@
           "periodeTom": null,
           "resultat": "OPPFYLT",
           "utdypendeVilkårsvurderinger": [],
-          "erEksplisittAvslagPåSøknad": false
+          "erEksplisittAvslagPåSøknad": false,
+          "standardbegrunnelser": []
         }
       ]
     },

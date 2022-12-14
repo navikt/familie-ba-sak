@@ -74,7 +74,8 @@
           "utdypendeVilkårsvurderinger": [
             "VURDERING_ANNET_GRUNNLAG"
           ],
-          "erEksplisittAvslagPåSøknad": false
+          "erEksplisittAvslagPåSøknad": false,
+          "standardbegrunnelser": []
         }
       ],
       "andreVurderinger": [],

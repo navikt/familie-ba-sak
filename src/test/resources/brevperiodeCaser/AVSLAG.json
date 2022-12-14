@@ -21,7 +21,10 @@
           "periodeFom": "2021-01-01",
           "periodeTom": null,
           "utdypendeVilkårsvurderinger": [],
-          "erEksplisittAvslagPåSøknad": true
+          "erEksplisittAvslagPåSøknad": true,
+          "standardbegrunnelser": [
+            "Standardbegrunnelse$AVSLAG_BOR_HOS_SØKER"
+          ]
         }
       ],
       "andreVurderinger": [],

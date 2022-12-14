@@ -21,7 +21,8 @@
           "periodeFom": "2003-12-10",
           "periodeTom": "2021-12-10",
           "utdypendeVilkårsvurderinger": [],
-          "erEksplisittAvslagPåSøknad": false
+          "erEksplisittAvslagPåSøknad": false,
+          "standardbegrunnelser": []
         }
       ],
       "andreVurderinger": [],

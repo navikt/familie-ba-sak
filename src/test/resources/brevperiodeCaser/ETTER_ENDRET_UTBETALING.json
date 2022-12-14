@@ -24,7 +24,8 @@
           "utdypendeVilkårsvurderinger": [
             "DELT_BOSTED"
           ],
-          "erEksplisittAvslagPåSøknad": false
+          "erEksplisittAvslagPåSøknad": false,
+          "standardbegrunnelser": []
         }
       ],
       "andreVurderinger": [],

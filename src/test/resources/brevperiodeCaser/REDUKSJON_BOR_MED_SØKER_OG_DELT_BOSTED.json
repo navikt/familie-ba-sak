@@ -19,7 +19,8 @@
           "periodeTom": null,
           "resultat": "OPPFYLT",
           "utdypendeVilkårsvurderinger": [],
-          "erEksplisittAvslagPåSøknad": false
+          "erEksplisittAvslagPåSøknad": false,
+          "standardbegrunnelser": []
         }
       ],
       "andreVurderinger": [],
@@ -58,7 +59,8 @@
           "periodeTom": "2021-10-10",
           "resultat": "OPPFYLT",
           "utdypendeVilkårsvurderinger": [],
-          "erEksplisittAvslagPåSøknad": false
+          "erEksplisittAvslagPåSøknad": false,
+          "standardbegrunnelser": []
         }
       ],
       "andreVurderinger": [],
@@ -75,7 +77,8 @@
           "periodeTom": "2021-10-12",
           "resultat": "OPPFYLT",
           "utdypendeVilkårsvurderinger": [],
-          "erEksplisittAvslagPåSøknad": false
+          "erEksplisittAvslagPåSøknad": false,
+          "standardbegrunnelser": []
         },
         {
           "vilkårType": "BOR_MED_SØKER",
@@ -85,7 +88,8 @@
           "utdypendeVilkårsvurderinger": [
             "DELT_BOSTED"
           ],
-          "erEksplisittAvslagPåSøknad": false
+          "erEksplisittAvslagPåSøknad": false,
+          "standardbegrunnelser": []
         }
       ],
       "andreVurderinger": [],

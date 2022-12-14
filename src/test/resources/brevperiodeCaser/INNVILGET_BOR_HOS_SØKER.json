@@ -21,7 +21,8 @@
           "periodeFom": "2021-08-01",
           "periodeTom": null,
           "utdypendeVilkårsvurderinger": [],
-          "erEksplisittAvslagPåSøknad": false
+          "erEksplisittAvslagPåSøknad": false,
+          "standardbegrunnelser": []
         }
       ],
       "andreVurderinger": [],

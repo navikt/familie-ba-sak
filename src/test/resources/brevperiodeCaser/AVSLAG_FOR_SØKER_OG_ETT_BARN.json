@@ -18,7 +18,10 @@
           "periodeTom": null,
           "resultat": "IKKE_OPPFYLT",
           "utdypendeVilkårsvurderinger": [],
-          "erEksplisittAvslagPåSøknad": true
+          "erEksplisittAvslagPåSøknad": true,
+          "standardbegrunnelser": [
+            "Standardbegrunnelse$AVSLAG_BOSATT_I_RIKET"
+          ]
         }
       ],
       "andreVurderinger": [],

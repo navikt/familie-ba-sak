@@ -24,7 +24,8 @@
           "utdypendeVilkårsvurderinger": [
             "DELT_BOSTED"
           ],
-          "erEksplisittAvslagPåSøknad": false
+          "erEksplisittAvslagPåSøknad": false,
+          "standardbegrunnelser": []
         }
       ],
       "andreVurderinger": [],
@@ -60,7 +61,8 @@
           "utdypendeVilkårsvurderinger": [
             "DELT_BOSTED"
           ],
-          "erEksplisittAvslagPåSøknad": false
+          "erEksplisittAvslagPåSøknad": false,
+          "standardbegrunnelser": []
         }
       ],
       "andreVurderinger": [],
