@@ -14,10 +14,10 @@ import no.nav.familie.ba.sak.kjerne.brev.BrevPeriodeService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseData
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.EØSBegrunnelseDataMedKompetanse
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.EØSBegrunnelseDataUtenKompetanse
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.EØSBegrunnelseData
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.FritekstBegrunnelse
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -57,15 +57,15 @@ class VedtaksperiodeMedBegrunnelserController(
         )
 
         val standardbegrunnelser = restPutVedtaksperiodeMedStandardbegrunnelser.standardbegrunnelser.mapNotNull {
-            konverterTilEnumverdi<Standardbegrunnelse>(it)
+            IVedtakBegrunnelse.konverterTilEnumVerdi(it)
         }
-        val eøsStandardbegrunnelser = restPutVedtaksperiodeMedStandardbegrunnelser.standardbegrunnelser.mapNotNull {
-            konverterTilEnumverdi<EØSStandardbegrunnelse>(it)
-        }
+
+        val nasjonalebegrunnelser = standardbegrunnelser.filterIsInstance<Standardbegrunnelse>()
+        val eøsStandardbegrunnelser = standardbegrunnelser.filterIsInstance<EØSStandardbegrunnelse>()
 
         val vedtak = vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
             vedtaksperiodeId = vedtaksperiodeId,
-            standardbegrunnelserFraFrontend = standardbegrunnelser,
+            standardbegrunnelserFraFrontend = nasjonalebegrunnelser,
             eøsStandardbegrunnelserFraFrontend = eøsStandardbegrunnelser
         )
 
@@ -116,8 +116,7 @@ class VedtaksperiodeMedBegrunnelserController(
             when (it) {
                 is FritekstBegrunnelse -> it.fritekst
                 is BegrunnelseData -> brevKlient.hentBegrunnelsestekst(it)
-                is EØSBegrunnelseDataMedKompetanse -> brevKlient.hentBegrunnelsestekst(it)
-                is EØSBegrunnelseDataUtenKompetanse -> brevKlient.hentBegrunnelsestekst(it)
+                is EØSBegrunnelseData -> brevKlient.hentBegrunnelsestekst(it)
                 else -> throw Feil("Ukjent begrunnelsestype")
             }
         }
@@ -152,9 +151,6 @@ class VedtaksperiodeMedBegrunnelserController(
         )
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = vedtak.behandling.id)))
     }
-
-    private inline fun <reified T> konverterTilEnumverdi(it: String): T? where T : Enum<T> =
-        enumValues<T>().find { enum -> enum.name == it }
 
     companion object {
         const val OPPDATERE_BEGRUNNELSER_HANDLING = "oppdatere vedtaksperiode med begrunnelser"

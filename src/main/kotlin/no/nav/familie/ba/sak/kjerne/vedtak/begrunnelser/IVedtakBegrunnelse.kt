@@ -24,6 +24,19 @@ interface IVedtakBegrunnelse {
     ): List<BrevBegrunnelseGrunnlagMedPersoner>
 
     fun enumnavnTilString(): String
+
+    companion object {
+        fun konverterTilEnumVerdi(string: String): IVedtakBegrunnelse {
+            val splittet = string.split('$')
+            val type = splittet[0]
+            val enumNavn = splittet[1]
+            return when (type) {
+                EØSStandardbegrunnelse::class.simpleName -> EØSStandardbegrunnelse.valueOf(enumNavn)
+                Standardbegrunnelse::class.simpleName -> Standardbegrunnelse.valueOf(enumNavn)
+                else -> throw Feil("Fikk en begrunnelse med ugyldig type: hverken EØSStandardbegrunnelse eller Standardbegrunnelse: $this")
+            }
+        }
+    }
 }
 
 class IVedtakBegrunnelseDeserializer : StdDeserializer<List<IVedtakBegrunnelse>>(List::class.java) {
@@ -31,18 +44,7 @@ class IVedtakBegrunnelseDeserializer : StdDeserializer<List<IVedtakBegrunnelse>>
         val node: ArrayNode = jsonParser!!.codec.readTree(jsonParser)
         return node
             .map { it.asText() }
-            .map { it.fraEnumNavnTilEnumVerdi() }
-    }
-}
-
-private fun String.fraEnumNavnTilEnumVerdi(): IVedtakBegrunnelse {
-    val splittet = split('$')
-    val type = splittet[0]
-    val enumNavn = splittet[1]
-    return when (type) {
-        EØSStandardbegrunnelse::class.simpleName -> EØSStandardbegrunnelse.valueOf(enumNavn)
-        Standardbegrunnelse::class.simpleName -> Standardbegrunnelse.valueOf(enumNavn)
-        else -> throw Feil("Fikk en begrunnelse med ugyldig type: hverken EØSStandardbegrunnelse eller Standardbegrunnelse: $this")
+            .map { IVedtakBegrunnelse.konverterTilEnumVerdi(it) }
     }
 }
 
@@ -54,5 +56,6 @@ class IVedtakBegrunnelseListConverter :
         vedtakbegrunnelser.joinToString(";") { it.enumnavnTilString() }
 
     override fun convertToEntityAttribute(string: String?): List<IVedtakBegrunnelse> =
-        if (string.isNullOrBlank()) emptyList() else string.split(";").map { it.fraEnumNavnTilEnumVerdi() }
+        if (string.isNullOrBlank()) emptyList() else string.split(";")
+            .map { IVedtakBegrunnelse.konverterTilEnumVerdi(it) }
 }
