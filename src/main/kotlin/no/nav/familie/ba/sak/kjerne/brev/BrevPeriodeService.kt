@@ -72,7 +72,15 @@ class BrevPeriodeService(
             søknadGrunnlagService.hentAktiv(behandlingId = behandlingId.id)?.hentUregistrerteBarn()
                 ?: emptyList()
 
-        val kompetanser = kompetanseService.hentKompetanser(behandlingId = behandlingId).filter { it.erFelterSatt() }
+        val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksattFraBehandlingsId(behandlingId = behandlingId.id)
+        val inneværendeBehandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId.id)
+
+        val kompetanser = kompetanseService.hentKompetanser(behandlingId = behandlingId)
+            .filter {
+                if (forrigeBehandling?.erEøsMigrering() == true && inneværendeBehandling.skalBehandlesAutomatisk) {
+                    it.erFelterSatt()
+                } else true
+            }
 
         val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
         val sanityEØSBegrunnelser = sanityService.hentSanityEØSBegrunnelser()
@@ -92,7 +100,7 @@ class BrevPeriodeService(
                 andelerTilkjentYtelse = andelerMedEndringer,
                 uregistrerteBarn = uregistrerteBarn,
                 skalLogge = skalLogge,
-                kompetanser = kompetanser,
+                kompetanser = kompetanser.toList(),
                 sanityBegrunnelser = sanityBegrunnelser,
                 sanityEØSBegrunnelser = sanityEØSBegrunnelser
             )
