@@ -56,6 +56,10 @@ class IVedtakBegrunnelseListConverter :
         vedtakbegrunnelser.joinToString(";") { it.enumnavnTilString() }
 
     override fun convertToEntityAttribute(string: String?): List<IVedtakBegrunnelse> =
-        if (string.isNullOrBlank()) emptyList() else string.split(";")
-            .map { IVedtakBegrunnelse.konverterTilEnumVerdi(it) }
+        if (string.isNullOrBlank()) {
+            emptyList()
+        } else {
+            string.split(";")
+                .map { IVedtakBegrunnelse.konverterTilEnumVerdi(it) }
+        }
 }
