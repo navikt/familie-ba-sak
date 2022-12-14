@@ -79,7 +79,9 @@ class BrevPeriodeService(
             .filter {
                 if (forrigeBehandling?.erEøsMigrering() == true && inneværendeBehandling.skalBehandlesAutomatisk) {
                     it.erFelterSatt()
-                } else true
+                } else {
+                    true
+                }
             }
 
         val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
