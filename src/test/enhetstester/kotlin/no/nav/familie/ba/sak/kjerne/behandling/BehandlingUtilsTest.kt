@@ -319,11 +319,12 @@ class BehandlingUtilsTest {
     }
 
     @Test
-    fun `skal få NASJONAL kategori ved opprettelse av migreringsbehandling med helmanuell migrering`() {
+    fun `skal bruke overstyrt kategori ved opprettelse av migreringsbehandling med helmanuell migrering`() {
+        val overstyrtKategori = BehandlingKategori.EØS
         assertEquals(
-            BehandlingKategori.NASJONAL,
+            overstyrtKategori,
             bestemKategoriVedOpprettelse(
-                overstyrtKategori = null,
+                overstyrtKategori = overstyrtKategori,
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 behandlingÅrsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
                 kategoriFraLøpendeBehandling = BehandlingKategori.NASJONAL // default verdi
