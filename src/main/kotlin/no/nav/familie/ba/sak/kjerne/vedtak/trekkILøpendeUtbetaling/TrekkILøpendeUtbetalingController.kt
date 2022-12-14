@@ -60,15 +60,15 @@ class TrekkILøpendeUtbetalingController(
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
 
-    @DeleteMapping(path = ["behandling/{behandlingId}"], consumes = [MediaType.APPLICATION_JSON_VALUE])
+    @DeleteMapping(path = ["/{id}"])
     fun fjernTrekkILøpendeUtbetaling(
-        behandlingId: Long,
-        @RequestBody id: Long
+        @PathVariable id: Long
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
             handling = "Fjerner trekk i løpende utbetaling"
         )
+        val behandlingId = service.hentTrekkILøpendeUtbetaling(id = id).behandlingId
         service.fjernTrekkILøpendeUtbetaling(id = id, behandlingId = behandlingId)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))

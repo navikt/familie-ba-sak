@@ -31,6 +31,8 @@ class TrekkILøpendeUtbetalingService(
         loggService.loggTrekkILøpendeUtbetalingFjernet(behandlingId = behandlingId)
     }
 
+    fun hentTrekkILøpendeUtbetaling(id: Long) = repository.findById(id).orElseThrow { throw Feil("Finner ikke feilutbetalt valuta periode med id=$id") }
+
     fun hentTrekkILøpendeUtbetalinger(behandlingId: Long) =
         repository.finnTrekkILøpendeUtbetalingForBehandling(behandlingId = behandlingId).map { tilRest(it) }.takeIf { it.isNotEmpty() }
 
