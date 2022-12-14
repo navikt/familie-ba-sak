@@ -28,8 +28,9 @@ class TrekkILøpendeUtbetalingController(
     private val service: TrekkILøpendeUtbetalingService,
     private val utvidetBehandlingService: UtvidetBehandlingService
 ) {
-    @PostMapping(produces = [MediaType.APPLICATION_JSON_VALUE], consumes = [MediaType.APPLICATION_JSON_VALUE])
+    @PostMapping(path = ["behandling/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE], consumes = [MediaType.APPLICATION_JSON_VALUE])
     fun leggTilTrekkILøpendeUtbetaling(
+        @PathVariable behandlingId: Long,
         @RequestBody trekkILøpendeUtbetaling: RestTrekkILøpendeUtbetaling
     ):
         ResponseEntity<Ressurs<RestUtvidetBehandling>> {
@@ -38,14 +39,15 @@ class TrekkILøpendeUtbetalingController(
             handling = "legg til trekk i løpende utbetaling"
         )
 
-        service.leggTilTrekkILøpendeUtbetaling(trekkILøpendeUtbetaling)
+        service.leggTilTrekkILøpendeUtbetaling(trekkILøpendeUtbetaling = trekkILøpendeUtbetaling, behandlingId = behandlingId)
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = trekkILøpendeUtbetaling.identifikator.behandlingId)))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
 
-    @PutMapping(produces = [MediaType.APPLICATION_JSON_VALUE], consumes = [MediaType.APPLICATION_JSON_VALUE])
+    @PutMapping(path = ["behandling/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE], consumes = [MediaType.APPLICATION_JSON_VALUE])
     @Transactional
     fun oppdaterTrekkILøpendeUtbetaling(
+        @PathVariable behandlingId: Long,
         @RequestBody trekkILøpendeUtbetaling: RestTrekkILøpendeUtbetaling
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
@@ -55,20 +57,21 @@ class TrekkILøpendeUtbetalingController(
 
         service.oppdaterTrekkILøpendeUtbetaling(trekkILøpendeUtbetaling)
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = trekkILøpendeUtbetaling.identifikator.behandlingId)))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
 
-    @DeleteMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
+    @DeleteMapping(path = ["behandling/{behandlingId}"], consumes = [MediaType.APPLICATION_JSON_VALUE])
     fun fjernTrekkILøpendeUtbetaling(
-        @RequestBody identifikator: TrekkILøpendeBehandlingRestIdentifikator
+        behandlingId: Long,
+        @RequestBody id: Long
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
             handling = "Fjerner trekk i løpende utbetaling"
         )
-        service.fjernTrekkILøpendeUtbetaling(identifikator)
+        service.fjernTrekkILøpendeUtbetaling(id = id, behandlingId = behandlingId)
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = identifikator.behandlingId)))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
 
     @GetMapping(path = ["behandling/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
