@@ -72,7 +72,7 @@ class BrevPeriodeService(
             søknadGrunnlagService.hentAktiv(behandlingId = behandlingId.id)?.hentUregistrerteBarn()
                 ?: emptyList()
 
-        val kompetanser = kompetanseService.hentKompetanser(behandlingId = behandlingId)
+        val kompetanser = kompetanseService.hentKompetanser(behandlingId = behandlingId).filter { it.erFelterSatt() }
 
         val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
         val sanityEØSBegrunnelser = sanityService.hentSanityEØSBegrunnelser()
@@ -92,7 +92,7 @@ class BrevPeriodeService(
                 andelerTilkjentYtelse = andelerMedEndringer,
                 uregistrerteBarn = uregistrerteBarn,
                 skalLogge = skalLogge,
-                kompetanser = kompetanser.toList(),
+                kompetanser = kompetanser,
                 sanityBegrunnelser = sanityBegrunnelser,
                 sanityEØSBegrunnelser = sanityEØSBegrunnelser
             )
