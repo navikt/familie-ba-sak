@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.trekkILøpendeUtbetaling
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -47,7 +48,7 @@ class TrekkILøpendeUtbetalingService(
         )
 
     fun oppdaterTrekkILøpendeUtbetaling(trekkILøpendeUtbetaling: RestTrekkILøpendeUtbetaling) {
-        val periode = repository.findById(trekkILøpendeUtbetaling.identifikator.id).get()
+        val periode = repository.findById(trekkILøpendeUtbetaling.identifikator.id).orElseThrow { Feil("Finner ikke feilutbetalt valuta med id=${trekkILøpendeUtbetaling.identifikator.id}") }
 
         periode.fom = trekkILøpendeUtbetaling.periode.fom
         periode.tom = trekkILøpendeUtbetaling.periode.tom
