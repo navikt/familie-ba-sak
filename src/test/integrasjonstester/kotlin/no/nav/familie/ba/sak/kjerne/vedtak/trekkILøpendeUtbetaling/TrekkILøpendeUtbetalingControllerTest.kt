@@ -40,7 +40,7 @@ class TrekkILøpendeUtbetalingControllerTest(
         val id = service.leggTilTrekkILøpendeUtbetaling(trekk)
 
         service.hentTrekkILøpendeUtbetalinger(behandlingId = behandling.id)
-            .also {Assertions.assertThat(it?.get(0)?.identifikator?.id).isEqualTo(id) }
+            .also { Assertions.assertThat(it?.get(0)?.identifikator?.id).isEqualTo(id) }
             .also { Assertions.assertThat(it?.get(0)?.periode?.fom).isNotNull() }
             .also { Assertions.assertThat(it?.get(0)?.periode?.tom).isNotNull() }
 
@@ -52,7 +52,7 @@ class TrekkILøpendeUtbetalingControllerTest(
                 ),
                 periode = RestPeriode(
                     fom = LocalDate.of(2020, Month.JANUARY, 1),
-                    tom = LocalDate.of(2020, Month.MAY, 31),
+                    tom = LocalDate.of(2020, Month.MAY, 31)
                 ),
                 feilutbetaltBeløp = 1
             )

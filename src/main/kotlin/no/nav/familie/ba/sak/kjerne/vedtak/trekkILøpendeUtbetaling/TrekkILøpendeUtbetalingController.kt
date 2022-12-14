@@ -71,9 +71,8 @@ class TrekkILøpendeUtbetalingController(
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = identifikator.behandlingId)))
     }
 
-    @GetMapping(path = ["behandling/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE] )
+    @GetMapping(path = ["behandling/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentTrekkILøpendeUtbetalinger(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<List<RestTrekkILøpendeUtbetaling>?>> {
-
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
             handling = "hente trekk i løpende utbetalinger"
