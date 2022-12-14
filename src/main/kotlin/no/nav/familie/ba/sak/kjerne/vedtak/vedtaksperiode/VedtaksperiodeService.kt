@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
+import no.nav.familie.ba.sak.common.erSenereEnnInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
@@ -635,7 +636,7 @@ class VedtaksperiodeService(
     }
 
     fun skalHaÅrligKontroll(vedtak: Vedtak) = vedtak.behandling.kategori == BehandlingKategori.EØS &&
-        hentPersisterteVedtaksperioder(vedtak).any { it.tom == null }
+        hentPersisterteVedtaksperioder(vedtak).any { it.tom?.erSenereEnnInneværendeMåned() != false }
 
     companion object {
 
