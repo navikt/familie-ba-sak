@@ -4,12 +4,10 @@
   "tom": null,
   "vedtaksperiodetype": "AVSLAG",
   "begrunnelser": [
-    {
-      "standardbegrunnelse": "Standardbegrunnelse$AVSLAG_BOR_HOS_SØKER"
-    }
+    "Standardbegrunnelse$AVSLAG_BOR_HOS_SØKER"
   ],
   "fritekster": [],
-   "uregistrerteBarn": [],
+  "uregistrerteBarn": [],
   "erFørsteVedtaksperiodePåFagsak": false,
   "brevMålform": "NB",
   "personerPåBehandling": [

@@ -4,9 +4,7 @@
   "tom": "2021-12-31",
   "vedtaksperiodetype": "UTBETALING",
   "begrunnelser": [
-    {
-      "standardbegrunnelse": "Standardbegrunnelse$INNVILGET_BOR_HOS_SØKER"
-    }
+    "Standardbegrunnelse$INNVILGET_BOR_HOS_SØKER"
   ],
   "fritekster": [],
   "uregistrerteBarn": [],

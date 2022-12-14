@@ -4,12 +4,8 @@
   "tom": "2021-12-31",
   "vedtaksperiodetype": "UTBETALING",
   "begrunnelser": [
-    {
-      "standardbegrunnelse": "Standardbegrunnelse$REDUKSJON_FLYTTET_BARN"
-    },
-    {
-      "standardbegrunnelse": "Standardbegrunnelse$REDUKSJON_DELT_BARNETRYGD_ANNEN_FORELDER_SØKT"
-    }
+    "Standardbegrunnelse$REDUKSJON_FLYTTET_BARN",
+    "Standardbegrunnelse$REDUKSJON_DELT_BARNETRYGD_ANNEN_FORELDER_SØKT"
   ],
   "fritekster": [],
   "personerPåBehandling": [
@@ -104,7 +100,7 @@
       ]
     }
   ],
-   "uregistrerteBarn": [],
+  "uregistrerteBarn": [],
   "erFørsteVedtaksperiodePåFagsak": false,
   "brevMålform": "NB",
   "forventetOutput": {

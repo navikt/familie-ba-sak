@@ -4,9 +4,7 @@
   "tom": null,
   "vedtaksperiodetype": "FORTSATT_INNVILGET",
   "begrunnelser": [
-    {
-      "standardbegrunnelse": "Standardbegrunnelse$REDUKSJON_UNDER_18_ÅR_AUTOVEDTAK"
-    }
+    "Standardbegrunnelse$REDUKSJON_UNDER_18_ÅR_AUTOVEDTAK"
   ],
   "fritekster": [],
   "uregistrerteBarn": [],

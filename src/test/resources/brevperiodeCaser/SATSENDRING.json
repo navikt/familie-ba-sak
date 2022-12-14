@@ -4,9 +4,7 @@
   "tom": "2020-12-31",
   "vedtaksperiodetype": "UTBETALING",
   "begrunnelser": [
-    {
-      "standardbegrunnelse": "Standardbegrunnelse$INNVILGET_SATSENDRING"
-    }
+    "Standardbegrunnelse$INNVILGET_SATSENDRING"
   ],
   "fritekster": [],
   "uregistrerteBarn": [],

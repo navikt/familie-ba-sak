@@ -4,9 +4,7 @@
   "tom": "2020-02-29",
   "vedtaksperiodetype": "UTBETALING",
   "begrunnelser": [
-    {
-      "standardbegrunnelse": "Standardbegrunnelse$ETTER_ENDRET_UTBETALING_HAR_AVTALE_DELT_BOSTED"
-    }
+    "Standardbegrunnelse$ETTER_ENDRET_UTBETALING_HAR_AVTALE_DELT_BOSTED"
   ],
   "fritekster": [],
   "utvidetScenario": "IKKE_UTVIDET_YTELSE",
@@ -70,21 +68,25 @@
       "type": "SØKER",
       "overstyrteVilkårresultater": [],
       "andreVurderinger": [],
-      "endredeUtbetalinger": [{
-        "periode": {
-          "fom": "2019-06",
-          "tom": "2019-06"
-        },
-        "årsak": "DELT_BOSTED",
-        "søknadstidspunkt": "2021-01-31",
-        "avtaletidspunktDeltBosted": "2021-04-02"
-      }],
-      "utbetalinger": [{
-        "ytelseType": "UTVIDET_BARNETRYGD",
-        "utbetaltPerMnd": 527,
-        "erPåvirketAvEndring": false,
-        "prosent": 50
-      }]
+      "endredeUtbetalinger": [
+        {
+          "periode": {
+            "fom": "2019-06",
+            "tom": "2019-06"
+          },
+          "årsak": "DELT_BOSTED",
+          "søknadstidspunkt": "2021-01-31",
+          "avtaletidspunktDeltBosted": "2021-04-02"
+        }
+      ],
+      "utbetalinger": [
+        {
+          "ytelseType": "UTVIDET_BARNETRYGD",
+          "utbetaltPerMnd": 527,
+          "erPåvirketAvEndring": false,
+          "prosent": 50
+        }
+      ]
     }
   ],
   "forventetOutput": {

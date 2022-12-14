@@ -4,9 +4,7 @@
   "tom": "2021-12-31",
   "vedtaksperiodetype": "UTBETALING",
   "begrunnelser": [
-    {
-      "standardbegrunnelse": "Standardbegrunnelse$ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_ENDRET_UTBETALING"
-    }
+    "Standardbegrunnelse$ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_ENDRET_UTBETALING"
   ],
   "fritekster": [],
   "utvidetScenario": "IKKE_UTVIDET_YTELSE",

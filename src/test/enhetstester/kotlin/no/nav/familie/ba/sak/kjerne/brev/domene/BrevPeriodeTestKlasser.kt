@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.brev.domene.BegrunnelseMedTriggere
 import no.nav.familie.ba.sak.kjerne.brev.domene.LandNavn
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertAnnenVurdering
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertKompetanse
@@ -15,8 +14,6 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestEndretAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestPersonResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertVilkårResultat
-import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
-import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
@@ -25,7 +22,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseData
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.EØSBegrunnelseDataMedKompetanse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
@@ -41,7 +37,7 @@ data class BrevPeriodeTestConfig(
     val fom: LocalDate?,
     val tom: LocalDate?,
     val vedtaksperiodetype: Vedtaksperiodetype,
-    val begrunnelser: List<BrevBegrunnelseGrunnlagConfig>,
+    val begrunnelser: List<Standardbegrunnelse>,
     val eøsBegrunnelser: List<EØSStandardbegrunnelse>?,
     val fritekster: List<String>,
 
@@ -252,12 +248,3 @@ data class BrevPeriodeOutput(
     val begrunnelser: List<TestBegrunnelse>,
     val type: String
 )
-
-data class BrevBegrunnelseGrunnlagConfig(
-    val standardbegrunnelse: Standardbegrunnelse
-) {
-    fun tilBrevBegrunnelseGrunnlag(sanityBegrunnelser: List<SanityBegrunnelse>) = BegrunnelseMedTriggere(
-        standardbegrunnelse = this.standardbegrunnelse,
-        triggesAv = this.standardbegrunnelse.tilISanityBegrunnelse(sanityBegrunnelser)!!.tilTriggesAv()
-    )
-}

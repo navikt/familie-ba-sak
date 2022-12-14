@@ -4,12 +4,8 @@
   "tom": null,
   "vedtaksperiodetype": "UTBETALING",
   "begrunnelser": [
-    {
-      "standardbegrunnelse": "Standardbegrunnelse$INNVILGET_BOR_HOS_SØKER"
-    },
-    {
-      "standardbegrunnelse": "Standardbegrunnelse$REDUKSJON_FLYTTET_BARN"
-    }
+    "Standardbegrunnelse$INNVILGET_BOR_HOS_SØKER",
+    "Standardbegrunnelse$REDUKSJON_FLYTTET_BARN"
   ],
   "fritekster": [],
   "uregistrerteBarn": [],

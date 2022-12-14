@@ -4,9 +4,7 @@
   "tom": "2021-12-31",
   "vedtaksperiodetype": "UTBETALING",
   "begrunnelser": [
-    {
-      "standardbegrunnelse": "Standardbegrunnelse$ETTER_ENDRET_UTBETALING_ETTERBETALING"
-    }
+    "Standardbegrunnelse$ETTER_ENDRET_UTBETALING_ETTERBETALING"
   ],
   "fritekster": [],
   "uregistrerteBarn": [],

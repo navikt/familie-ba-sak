@@ -4,9 +4,7 @@
   "tom": null,
   "vedtaksperiodetype": "OPPHØR",
   "begrunnelser": [
-    {
-      "standardbegrunnelse": "Standardbegrunnelse$OPPHØR_BARN_FLYTTET_FRA_SØKER"
-    }
+    "Standardbegrunnelse$OPPHØR_BARN_FLYTTET_FRA_SØKER"
   ],
   "fritekster": [],
   "uregistrerteBarn": [],

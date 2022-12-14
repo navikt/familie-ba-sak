@@ -4,12 +4,8 @@
   "tom": null,
   "vedtaksperiodetype": "AVSLAG",
   "begrunnelser": [
-    {
-      "standardbegrunnelse": "Standardbegrunnelse$AVSLAG_IKKE_FLYTTET_FRA_EKTEFELLE"
-    },
-    {
-      "standardbegrunnelse": "Standardbegrunnelse$AVSLAG_FORELDRENE_BOR_SAMMEN"
-    }
+    "Standardbegrunnelse$AVSLAG_IKKE_FLYTTET_FRA_EKTEFELLE",
+    "Standardbegrunnelse$AVSLAG_FORELDRENE_BOR_SAMMEN"
   ],
   "fritekster": [],
   "uregistrerteBarn": [],

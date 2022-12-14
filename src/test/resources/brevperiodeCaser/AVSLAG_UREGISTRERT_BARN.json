@@ -4,9 +4,7 @@
   "tom": null,
   "vedtaksperiodetype": "AVSLAG",
   "begrunnelser": [
-    {
-      "standardbegrunnelse": "Standardbegrunnelse$AVSLAG_UREGISTRERT_BARN"
-    }
+    "Standardbegrunnelse$AVSLAG_UREGISTRERT_BARN"
   ],
   "fritekster": [
     "Du har fått avslag fordi barnet ikke er registrert på samme adresse som deg og barnet ikke har fått norsk fødselsnummer ennå."
@@ -38,7 +36,7 @@
       "utbetalinger": []
     }
   ],
-   "uregistrerteBarn": [
+  "uregistrerteBarn": [
     {
       "personIdent": "",
       "navn": "Barn Barnesen",

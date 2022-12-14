@@ -4,9 +4,7 @@
   "tom": null,
   "vedtaksperiodetype": "UTBETALING",
   "begrunnelser": [
-    {
-      "standardbegrunnelse": "Standardbegrunnelse$REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK"
-    }
+    "Standardbegrunnelse$REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK"
   ],
   "fritekster": [],
   "uregistrerteBarn": [],
