@@ -35,22 +35,23 @@ class TrekkILøpendeUtbetalingControllerTest(
         val id = service.leggTilTrekkILøpendeUtbetaling(trekkILøpendeUtbetaling = trekk, behandlingId = behandling.id)
 
         service.hentTrekkILøpendeUtbetalinger(behandlingId = behandling.id)
-            .also { Assertions.assertThat(it?.get(0)?.id).isEqualTo(id) }
-            .also { Assertions.assertThat(it?.get(0)?.fom).isNotNull() }
-            .also { Assertions.assertThat(it?.get(0)?.tom).isNotNull() }
+            .also { Assertions.assertThat(it[0].id).isEqualTo(id) }
+            .also { Assertions.assertThat(it[0].fom).isNotNull() }
+            .also { Assertions.assertThat(it[0].tom).isNotNull() }
 
         service.oppdaterTrekkILøpendeUtbetaling(
-            RestTrekkILøpendeUtbetaling(
+            trekkILøpendeUtbetaling = RestTrekkILøpendeUtbetaling(
                 id = id,
                 fom = LocalDate.of(2020, Month.JANUARY, 1),
                 tom = LocalDate.of(2020, Month.MAY, 31),
                 feilutbetaltBeløp = 1
-            )
+            ),
+            id = id
         )
 
         service.hentTrekkILøpendeUtbetalinger(behandlingId = behandling.id)
-            .also { Assertions.assertThat(it?.get(0)?.id).isEqualTo(id) }
-            .also { Assertions.assertThat(it?.get(0)?.tom).isEqualTo("2020-05-31") }
+            .also { Assertions.assertThat(it.get(0).id).isEqualTo(id) }
+            .also { Assertions.assertThat(it.get(0).tom).isEqualTo("2020-05-31") }
 
         val trekk2 = RestTrekkILøpendeUtbetaling(
             id = 0,
@@ -62,13 +63,13 @@ class TrekkILøpendeUtbetalingControllerTest(
         val id2 = service.leggTilTrekkILøpendeUtbetaling(trekkILøpendeUtbetaling = trekk2, behandlingId = behandling.id)
 
         service.hentTrekkILøpendeUtbetalinger(behandlingId = behandling.id)
-            .also { Assertions.assertThat(it?.size).isEqualTo(2) }
-            .also { Assertions.assertThat(it?.get(0)?.id).isEqualTo(id2) }
+            .also { Assertions.assertThat(it.size).isEqualTo(2) }
+            .also { Assertions.assertThat(it.get(0).id).isEqualTo(id2) }
 
         service.fjernTrekkILøpendeUtbetaling(id = id, behandlingId = behandling.id)
 
         service.hentTrekkILøpendeUtbetalinger(behandlingId = behandling.id)
-            .also { Assertions.assertThat(it?.size).isEqualTo(1) }
-            .also { Assertions.assertThat(it?.get(0)?.id).isEqualTo(id2) }
+            .also { Assertions.assertThat(it.size).isEqualTo(1) }
+            .also { Assertions.assertThat(it[0].id).isEqualTo(id2) }
     }
 }
