@@ -264,10 +264,11 @@ fun hentGyldigeEØSBegrunnelserForPeriode(
     kompetanserSomStopperRettFørPeriode: List<Kompetanse>,
     minimertVedtaksperiode: MinimertVedtaksperiode
 ) = EØSStandardbegrunnelse.values()
+    // Vurderere å filtrere her
     .mapNotNull { it.tilEØSBegrunnelseMedTriggere(sanityEØSBegrunnelser) }
     .filter { begrunnelse ->
         when (begrunnelse.eøsBegrunnelse.vedtakBegrunnelseType) {
-            VedtakBegrunnelseType.EØS_INNVILGET -> kompetanserIPeriode.any { kompetanse ->
+            VedtakBegrunnelseType.EØS_INNVILGET, VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET -> kompetanserIPeriode.any { kompetanse ->
                 kompetanse.validerFelterErSatt()
                 begrunnelse.erGyldigForKompetanseMedData(
                     annenForeldersAktivitetFraKompetanse = kompetanse.annenForeldersAktivitet!!,
@@ -276,7 +277,7 @@ fun hentGyldigeEØSBegrunnelserForPeriode(
                 )
             }
 
-            VedtakBegrunnelseType.EØS_OPPHØR -> kompetanserSomStopperRettFørPeriode.any { kompetanse ->
+            VedtakBegrunnelseType.EØS_OPPHØR, VedtakBegrunnelseType.EØS_REDUKSJON -> kompetanserSomStopperRettFørPeriode.any { kompetanse ->
                 kompetanse.validerFelterErSatt()
                 begrunnelse.erGyldigForKompetanseMedData(
                     annenForeldersAktivitetFraKompetanse = kompetanse.annenForeldersAktivitet!!,
