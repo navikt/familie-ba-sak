@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class TrekkILøpendeUtbetalingService(
@@ -44,6 +45,7 @@ class TrekkILøpendeUtbetalingService(
             feilutbetaltBeløp = it.feilutbetaltBeløp
         )
 
+    @Transactional
     fun oppdaterTrekkILøpendeUtbetaling(trekkILøpendeUtbetaling: RestTrekkILøpendeUtbetaling) {
         val periode = trekkILøpendeUtbetalingRepository.findById(trekkILøpendeUtbetaling.id).orElseThrow { Feil("Finner ikke feilutbetalt valuta med id=${trekkILøpendeUtbetaling.id}") }
 

@@ -8,7 +8,6 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
-import org.springframework.transaction.annotation.Transactional
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -45,7 +44,6 @@ class TrekkILøpendeUtbetalingController(
     }
 
     @PutMapping(path = ["behandling/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE], consumes = [MediaType.APPLICATION_JSON_VALUE])
-    @Transactional
     fun oppdaterTrekkILøpendeUtbetaling(
         @PathVariable behandlingId: Long,
         @RequestBody trekkILøpendeUtbetaling: RestTrekkILøpendeUtbetaling
