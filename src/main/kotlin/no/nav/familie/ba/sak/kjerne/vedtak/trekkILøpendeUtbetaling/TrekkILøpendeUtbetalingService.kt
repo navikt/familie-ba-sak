@@ -35,7 +35,7 @@ class TrekkILøpendeUtbetalingService(
     fun hentTrekkILøpendeUtbetaling(id: Long) = trekkILøpendeUtbetalingRepository.findById(id).orElseThrow { throw Feil("Finner ikke feilutbetalt valuta periode med id=$id") }
 
     fun hentTrekkILøpendeUtbetalinger(behandlingId: Long) =
-        trekkILøpendeUtbetalingRepository.finnTrekkILøpendeUtbetalingForBehandling(behandlingId = behandlingId).map { tilRest(it) }.takeIf { it.isNotEmpty() }
+        trekkILøpendeUtbetalingRepository.finnTrekkILøpendeUtbetalingForBehandling(behandlingId = behandlingId).map { tilRest(it) }
 
     private fun tilRest(it: TrekkILøpendeUtbetaling) =
         RestTrekkILøpendeUtbetaling(
