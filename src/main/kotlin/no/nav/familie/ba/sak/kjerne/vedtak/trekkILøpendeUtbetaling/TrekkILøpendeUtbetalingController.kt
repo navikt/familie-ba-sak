@@ -43,9 +43,10 @@ class TrekkILøpendeUtbetalingController(
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
 
-    @PutMapping(path = ["behandling/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE], consumes = [MediaType.APPLICATION_JSON_VALUE])
+    @PutMapping(path = ["behandling/{behandlingId}/periode{id}"], produces = [MediaType.APPLICATION_JSON_VALUE], consumes = [MediaType.APPLICATION_JSON_VALUE])
     fun oppdaterTrekkILøpendeUtbetaling(
         @PathVariable behandlingId: Long,
+        @PathVariable id: Long,
         @RequestBody trekkILøpendeUtbetaling: RestTrekkILøpendeUtbetaling
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
@@ -53,20 +54,20 @@ class TrekkILøpendeUtbetalingController(
             handling = "oppdater trekk i løpende utbetaling"
         )
 
-        trekkILøpendeUtbetalingService.oppdaterTrekkILøpendeUtbetaling(trekkILøpendeUtbetaling)
+        trekkILøpendeUtbetalingService.oppdaterTrekkILøpendeUtbetaling(trekkILøpendeUtbetaling = trekkILøpendeUtbetaling, id = id)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
 
-    @DeleteMapping(path = ["/{id}"])
+    @DeleteMapping(path = ["behandling/{behandlingId}/periode/{id}"])
     fun fjernTrekkILøpendeUtbetaling(
+        @PathVariable behandlingId: Long,
         @PathVariable id: Long
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
             handling = "Fjerner trekk i løpende utbetaling"
         )
-        val behandlingId = trekkILøpendeUtbetalingService.hentTrekkILøpendeUtbetaling(id = id).behandlingId
         trekkILøpendeUtbetalingService.fjernTrekkILøpendeUtbetaling(id = id, behandlingId = behandlingId)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))

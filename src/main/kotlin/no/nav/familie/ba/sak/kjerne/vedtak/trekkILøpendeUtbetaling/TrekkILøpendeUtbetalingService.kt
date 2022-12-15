@@ -32,8 +32,6 @@ class TrekkILøpendeUtbetalingService(
         loggService.loggTrekkILøpendeUtbetalingFjernet(behandlingId = behandlingId)
     }
 
-    fun hentTrekkILøpendeUtbetaling(id: Long) = trekkILøpendeUtbetalingRepository.findById(id).orElseThrow { throw Feil("Finner ikke feilutbetalt valuta periode med id=$id") }
-
     fun hentTrekkILøpendeUtbetalinger(behandlingId: Long) =
         trekkILøpendeUtbetalingRepository.finnTrekkILøpendeUtbetalingForBehandling(behandlingId = behandlingId).map { tilRest(it) }
 
@@ -46,8 +44,8 @@ class TrekkILøpendeUtbetalingService(
         )
 
     @Transactional
-    fun oppdaterTrekkILøpendeUtbetaling(trekkILøpendeUtbetaling: RestTrekkILøpendeUtbetaling) {
-        val periode = trekkILøpendeUtbetalingRepository.findById(trekkILøpendeUtbetaling.id).orElseThrow { Feil("Finner ikke feilutbetalt valuta med id=${trekkILøpendeUtbetaling.id}") }
+    fun oppdaterTrekkILøpendeUtbetaling(trekkILøpendeUtbetaling: RestTrekkILøpendeUtbetaling, id: Long) {
+        val periode = trekkILøpendeUtbetalingRepository.findById(id).orElseThrow { Feil("Finner ikke feilutbetalt valuta med id=${trekkILøpendeUtbetaling.id}") }
 
         periode.fom = trekkILøpendeUtbetaling.fom
         periode.tom = trekkILøpendeUtbetaling.tom
