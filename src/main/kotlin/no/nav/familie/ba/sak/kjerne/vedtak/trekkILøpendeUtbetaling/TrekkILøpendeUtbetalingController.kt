@@ -43,7 +43,7 @@ class TrekkILøpendeUtbetalingController(
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
 
-    @PutMapping(path = ["behandling/{behandlingId}/periode{id}"], produces = [MediaType.APPLICATION_JSON_VALUE], consumes = [MediaType.APPLICATION_JSON_VALUE])
+    @PutMapping(path = ["behandling/{behandlingId}/periode/{id}"], produces = [MediaType.APPLICATION_JSON_VALUE], consumes = [MediaType.APPLICATION_JSON_VALUE])
     fun oppdaterTrekkILøpendeUtbetaling(
         @PathVariable behandlingId: Long,
         @PathVariable id: Long,
