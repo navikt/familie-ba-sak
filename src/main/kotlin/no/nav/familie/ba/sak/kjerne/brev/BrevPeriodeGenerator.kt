@@ -87,19 +87,21 @@ class BrevPeriodeGenerator(
                         }
                     }
 
+                val personerIBegrunnelse =
+                    restBehandlingsgrunnlagForBrev.personerPåBehandling.filter { person -> minimertePersonResultater.any { personResultat -> personResultat.personIdent == person.personIdent } }
                 val barnPåBehandling =
                     restBehandlingsgrunnlagForBrev.personerPåBehandling.filter { it.type == PersonType.BARN }
-
-                val barnIBegrunnelse =
-                    barnPåBehandling.filter { barn -> minimertePersonResultater.any { personResultat -> personResultat.personIdent == barn.personIdent } }
+                val barnIBegrunnelse = personerIBegrunnelse.filter { it.type == PersonType.BARN }
+                val gjelderSøker = personerIBegrunnelse.any { it.type == PersonType.SØKER }
 
                 listOf(
                     EØSBegrunnelseDataUtenKompetanse(
                         vedtakBegrunnelseType = begrunnelse.vedtakBegrunnelseType,
                         apiNavn = begrunnelse.sanityApiNavn,
-                        barnasFodselsdatoer = if (barnIBegrunnelse.isNotEmpty()) barnIBegrunnelse.tilBarnasFødselsdatoer() else barnPåBehandling.tilBarnasFødselsdatoer(),
-                        antallBarn = if (barnIBegrunnelse.isNotEmpty()) barnIBegrunnelse.size else barnPåBehandling.size,
-                        maalform = brevMålform.tilSanityFormat()
+                        barnasFodselsdatoer = if (gjelderSøker) barnPåBehandling.tilBarnasFødselsdatoer() else barnIBegrunnelse.tilBarnasFødselsdatoer(),
+                        antallBarn = if (gjelderSøker) barnPåBehandling.size else barnIBegrunnelse.size,
+                        maalform = brevMålform.tilSanityFormat(),
+                        gjelderSoker = gjelderSøker
                     )
                 )
             } else {

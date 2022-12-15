@@ -143,11 +143,11 @@ data class EØSBegrunnelseDataMedKompetanse(
     val annenForeldersAktivitet: AnnenForeldersAktivitet,
     val annenForeldersAktivitetsland: String?,
     val barnetsBostedsland: String,
+    val sokersAktivitet: SøkersAktivitet,
+    val sokersAktivitetsland: String?,
     val barnasFodselsdatoer: String,
     val antallBarn: Int,
-    val maalform: String,
-    val sokersAktivitet: SøkersAktivitet,
-    val sokersAktivitetsland: String?
+    val maalform: String
 ) : EØSBegrunnelseData() {
     override val type: Begrunnelsetype = Begrunnelsetype.EØS_BEGRUNNELSE
 }
@@ -158,7 +158,8 @@ data class EØSBegrunnelseDataUtenKompetanse(
 
     val barnasFodselsdatoer: String,
     val antallBarn: Int,
-    val maalform: String
+    val maalform: String,
+    val gjelderSoker: Boolean
 ) : EØSBegrunnelseData() {
     override val type: Begrunnelsetype = Begrunnelsetype.EØS_BEGRUNNELSE
 }
