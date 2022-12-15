@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.RestController
 @Validated
 class TrekkILøpendeUtbetalingController(
     private val tilgangService: TilgangService,
-    private val service: TrekkILøpendeUtbetalingService,
+    private val trekkILøpendeUtbetalingService: TrekkILøpendeUtbetalingService,
     private val utvidetBehandlingService: UtvidetBehandlingService
 ) {
     @PostMapping(path = ["behandling/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE], consumes = [MediaType.APPLICATION_JSON_VALUE])
@@ -39,7 +39,7 @@ class TrekkILøpendeUtbetalingController(
             handling = "legg til trekk i løpende utbetaling"
         )
 
-        service.leggTilTrekkILøpendeUtbetaling(trekkILøpendeUtbetaling = trekkILøpendeUtbetaling, behandlingId = behandlingId)
+        trekkILøpendeUtbetalingService.leggTilTrekkILøpendeUtbetaling(trekkILøpendeUtbetaling = trekkILøpendeUtbetaling, behandlingId = behandlingId)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
@@ -55,7 +55,7 @@ class TrekkILøpendeUtbetalingController(
             handling = "oppdater trekk i løpende utbetaling"
         )
 
-        service.oppdaterTrekkILøpendeUtbetaling(trekkILøpendeUtbetaling)
+        trekkILøpendeUtbetalingService.oppdaterTrekkILøpendeUtbetaling(trekkILøpendeUtbetaling)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
@@ -68,8 +68,8 @@ class TrekkILøpendeUtbetalingController(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
             handling = "Fjerner trekk i løpende utbetaling"
         )
-        val behandlingId = service.hentTrekkILøpendeUtbetaling(id = id).behandlingId
-        service.fjernTrekkILøpendeUtbetaling(id = id, behandlingId = behandlingId)
+        val behandlingId = trekkILøpendeUtbetalingService.hentTrekkILøpendeUtbetaling(id = id).behandlingId
+        trekkILøpendeUtbetalingService.fjernTrekkILøpendeUtbetaling(id = id, behandlingId = behandlingId)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
@@ -80,6 +80,6 @@ class TrekkILøpendeUtbetalingController(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
             handling = "hente trekk i løpende utbetalinger"
         )
-        return ResponseEntity.ok(Ressurs.success(service.hentTrekkILøpendeUtbetalinger(behandlingId = behandlingId)))
+        return ResponseEntity.ok(Ressurs.success(trekkILøpendeUtbetalingService.hentTrekkILøpendeUtbetalinger(behandlingId = behandlingId)))
     }
 }
