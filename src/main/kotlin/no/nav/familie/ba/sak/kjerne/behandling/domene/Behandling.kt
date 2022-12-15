@@ -268,7 +268,7 @@ data class Behandling(
 
     fun erManuellMigrering() = erManuellMigreringForEndreMigreringsdato() || erHelmanuellMigrering()
 
-    fun erEøsMigrering() = opprettetÅrsak == BehandlingÅrsak.MIGRERING && kategori == BehandlingKategori.EØS
+    fun erAutomatiskEøsMigrering() = erMigrering() && opprettetÅrsak == BehandlingÅrsak.MIGRERING && kategori == BehandlingKategori.EØS
 
     fun erTekniskEndring() = opprettetÅrsak == BehandlingÅrsak.TEKNISK_ENDRING
 

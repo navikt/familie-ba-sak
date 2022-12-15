@@ -77,7 +77,7 @@ class BrevPeriodeService(
 
         val kompetanser = kompetanseService.hentKompetanser(behandlingId = behandlingId)
             .filter {
-                if (forrigeBehandling?.erEøsMigrering() == true && inneværendeBehandling.skalBehandlesAutomatisk) {
+                if (forrigeBehandling?.erAutomatiskEøsMigrering() == true && inneværendeBehandling.skalBehandlesAutomatisk) {
                     it.erFelterSatt()
                 } else {
                     true
