@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.vedtak.trekkILøpendeUtbetaling
+package no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
@@ -7,17 +7,17 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-class TrekkILøpendeUtbetalingService(
+class FeilutbetaltValutaService(
     @Autowired
-    private val trekkILøpendeUtbetalingRepository: TrekkILøpendeUtbetalingRepository,
+    private val feilutbetaltValutaRepository: FeilutbetaltValutaRepository,
 
     @Autowired
     private val loggService: LoggService
 ) {
     @Transactional
     fun leggTilFeilutbetaltValutaPeriode(feilutbetaltValuta: RestFeilutbetaltValuta, behandlingId: Long): Long {
-        val lagret = trekkILøpendeUtbetalingRepository.save(
-            TrekkILøpendeUtbetaling(
+        val lagret = feilutbetaltValutaRepository.save(
+            FeilutbetaltValuta(
                 behandlingId = behandlingId,
                 fom = feilutbetaltValuta.fom,
                 tom = feilutbetaltValuta.tom,
@@ -30,14 +30,14 @@ class TrekkILøpendeUtbetalingService(
 
     @Transactional
     fun fjernFeilutbetaltValutaPeriode(id: Long, behandlingId: Long) {
-        trekkILøpendeUtbetalingRepository.deleteById(id)
+        feilutbetaltValutaRepository.deleteById(id)
         loggService.loggFeilutbetaltValutaFjernet(behandlingId = behandlingId)
     }
 
     fun hentFeilutbetaltValutaPerioder(behandlingId: Long) =
-        trekkILøpendeUtbetalingRepository.finnFeilutbetaltValutaForBehandling(behandlingId = behandlingId).map { tilRest(it) }
+        feilutbetaltValutaRepository.finnFeilutbetaltValutaForBehandling(behandlingId = behandlingId).map { tilRest(it) }
 
-    private fun tilRest(it: TrekkILøpendeUtbetaling) =
+    private fun tilRest(it: FeilutbetaltValuta) =
         RestFeilutbetaltValuta(
             id = it.id,
             fom = it.fom,
@@ -47,12 +47,12 @@ class TrekkILøpendeUtbetalingService(
 
     @Transactional
     fun oppdaterFeilutbetaltValutaPeriode(feilutbetaltValuta: RestFeilutbetaltValuta, id: Long) {
-        val periode = trekkILøpendeUtbetalingRepository.findById(id).orElseThrow { Feil("Finner ikke feilutbetalt valuta med id=${feilutbetaltValuta.id}") }
+        val periode = feilutbetaltValutaRepository.findById(id).orElseThrow { Feil("Finner ikke feilutbetalt valuta med id=${feilutbetaltValuta.id}") }
 
         periode.fom = feilutbetaltValuta.fom
         periode.tom = feilutbetaltValuta.tom
         periode.feilutbetaltBeløp = feilutbetaltValuta.feilutbetaltBeløp
 
-        trekkILøpendeUtbetalingRepository.save(periode)
+        feilutbetaltValutaRepository.save(periode)
     }
 }

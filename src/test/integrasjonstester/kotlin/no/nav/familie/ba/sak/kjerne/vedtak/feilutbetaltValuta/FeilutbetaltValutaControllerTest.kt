@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.vedtak.trekkILøpendeUtbetaling
+package no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta
 
 import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagBehandling
@@ -13,8 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 import java.time.Month
 
-class TrekkILøpendeUtbetalingControllerTest(
-    @Autowired val service: TrekkILøpendeUtbetalingService,
+class FeilutbetaltValutaControllerTest(
+    @Autowired val service: FeilutbetaltValutaService,
     @Autowired val aktørIdRepository: AktørIdRepository,
     @Autowired val fagsakRepository: FagsakRepository,
     @Autowired val behandlingRepository: BehandlingRepository

@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.vedtak.trekkILøpendeUtbetaling
+package no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta
 
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
@@ -22,9 +22,9 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api/feilutbetalt-valuta")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class TrekkILøpendeUtbetalingController(
+class FeilutbetaltValutaController(
     private val tilgangService: TilgangService,
-    private val feilutbetaltValutaService: TrekkILøpendeUtbetalingService,
+    private val feilutbetaltValutaService: FeilutbetaltValutaService,
     private val utvidetBehandlingService: UtvidetBehandlingService
 ) {
     @PostMapping(path = ["behandling/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE], consumes = [MediaType.APPLICATION_JSON_VALUE])
