@@ -39,7 +39,6 @@ import no.nav.familie.ba.sak.kjerne.korrigertvedtak.KorrigertVedtakService
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.TilbakekrevingRepository
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
-import no.nav.familie.ba.sak.kjerne.vedtak.trekkILøpendeUtbetaling.TrekkILøpendeUtbetalingService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilRestUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -67,8 +66,7 @@ class UtvidetBehandlingService(
     private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository,
     private val korrigertEtterbetalingService: KorrigertEtterbetalingService,
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
-    private val korrigertVedtakService: KorrigertVedtakService,
-    private val trekkILøpendeUtbetalingService: TrekkILøpendeUtbetalingService
+    private val korrigertVedtakService: KorrigertVedtakService
 ) {
     fun lagRestUtvidetBehandling(behandlingId: Long): RestUtvidetBehandling {
         val behandling = behandlingRepository.finnBehandling(behandlingId)
@@ -101,8 +99,6 @@ class UtvidetBehandlingService(
 
         val endreteUtbetalingerMedAndeler = andelerTilkjentYtelseOgEndreteUtbetalingerService
             .finnEndreteUtbetalingerMedAndelerIHenholdTilVilkårsvurdering(behandlingId)
-
-        val trekkILøpendeUtbetaling = trekkILøpendeUtbetalingService.hentTrekkILøpendeUtbetalinger(behandlingId)
 
         return RestUtvidetBehandling(
             behandlingId = behandling.id,
@@ -152,8 +148,7 @@ class UtvidetBehandlingService(
             korrigertEtterbetaling = korrigertEtterbetalingService.finnAktivtKorrigeringPåBehandling(behandlingId)
                 ?.tilRestKorrigertEtterbetaling(),
             korrigertVedtak = korrigertVedtakService.finnAktivtKorrigertVedtakPåBehandling(behandlingId)
-                ?.tilRestKorrigertVedtak(),
-            trekkILøpendeUtbetaling = trekkILøpendeUtbetaling
+                ?.tilRestKorrigertVedtak()
         )
     }
 
