@@ -68,7 +68,7 @@ class UtvidetBehandlingService(
     private val korrigertEtterbetalingService: KorrigertEtterbetalingService,
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     private val korrigertVedtakService: KorrigertVedtakService,
-    private val trekkILøpendeUtbetalingService: TrekkILøpendeUtbetalingService
+    private val feilutbetaltValutaService: TrekkILøpendeUtbetalingService
 ) {
     fun lagRestUtvidetBehandling(behandlingId: Long): RestUtvidetBehandling {
         val behandling = behandlingRepository.finnBehandling(behandlingId)
@@ -102,7 +102,7 @@ class UtvidetBehandlingService(
         val endreteUtbetalingerMedAndeler = andelerTilkjentYtelseOgEndreteUtbetalingerService
             .finnEndreteUtbetalingerMedAndelerIHenholdTilVilkårsvurdering(behandlingId)
 
-        val trekkILøpendeUtbetaling = trekkILøpendeUtbetalingService.hentTrekkILøpendeUtbetalinger(behandlingId)
+        val feilutbetaltValuta = feilutbetaltValutaService.hentFeilutbetaltValutaPerioder(behandlingId)
 
         return RestUtvidetBehandling(
             behandlingId = behandling.id,
@@ -153,7 +153,7 @@ class UtvidetBehandlingService(
                 ?.tilRestKorrigertEtterbetaling(),
             korrigertVedtak = korrigertVedtakService.finnAktivtKorrigertVedtakPåBehandling(behandlingId)
                 ?.tilRestKorrigertVedtak(),
-            trekkILøpendeUtbetaling = trekkILøpendeUtbetaling
+            feilutbetaltValuta = feilutbetaltValuta
         )
     }
 
