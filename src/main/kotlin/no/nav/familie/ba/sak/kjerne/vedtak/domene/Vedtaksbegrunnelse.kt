@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivit
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.SøkersAktivitet
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hentMånedOgÅrForBegrunnelse
@@ -133,19 +134,33 @@ data class FritekstBegrunnelse(
     override val type: Begrunnelsetype = Begrunnelsetype.FRITEKST
 }
 
-data class EØSBegrunnelseData(
+sealed class EØSBegrunnelseData : BegrunnelseMedData
+
+data class EØSBegrunnelseDataMedKompetanse(
     override val vedtakBegrunnelseType: VedtakBegrunnelseType,
     override val apiNavn: String,
 
     val annenForeldersAktivitet: AnnenForeldersAktivitet,
     val annenForeldersAktivitetsland: String?,
     val barnetsBostedsland: String,
+    val sokersAktivitet: SøkersAktivitet,
+    val sokersAktivitetsland: String?,
+    val barnasFodselsdatoer: String,
+    val antallBarn: Int,
+    val maalform: String
+) : EØSBegrunnelseData() {
+    override val type: Begrunnelsetype = Begrunnelsetype.EØS_BEGRUNNELSE
+}
+
+data class EØSBegrunnelseDataUtenKompetanse(
+    override val vedtakBegrunnelseType: VedtakBegrunnelseType,
+    override val apiNavn: String,
+
     val barnasFodselsdatoer: String,
     val antallBarn: Int,
     val maalform: String,
-    val sokersAktivitet: SøkersAktivitet,
-    val sokersAktivitetsland: String?
-) : BegrunnelseMedData {
+    val gjelderSoker: Boolean
+) : EØSBegrunnelseData() {
     override val type: Begrunnelsetype = Begrunnelsetype.EØS_BEGRUNNELSE
 }
 
@@ -258,7 +273,7 @@ enum class SøkersRettTilUtvidet {
     }
 }
 
-fun Standardbegrunnelse.hentRelevanteEndringsperioderForBegrunnelse(
+fun IVedtakBegrunnelse.hentRelevanteEndringsperioderForBegrunnelse(
     minimerteRestEndredeAndeler: List<MinimertRestEndretAndel>,
     vedtaksperiode: NullablePeriode
 ) = when (this.vedtakBegrunnelseType) {

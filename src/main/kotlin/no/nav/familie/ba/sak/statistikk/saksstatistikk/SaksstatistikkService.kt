@@ -207,7 +207,7 @@ class SaksstatistikkService(
                             fom = vedtaksperiode.fom,
                             tom = vedtaksperiode.tom,
                             type = it.standardbegrunnelse.vedtakBegrunnelseType.name,
-                            vedtakBegrunnelse = it.standardbegrunnelse.name
+                            vedtakBegrunnelse = it.standardbegrunnelse.enumnavnTilString()
                         )
                     }
             }

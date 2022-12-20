@@ -239,7 +239,7 @@ class BehandleSmåbarnstilleggTest(
             vedtaksperiodeId = vedtaksperiodeId.id,
             restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
                 standardbegrunnelser = listOf(
-                    Standardbegrunnelse.INNVILGET_BOR_HOS_SØKER.name
+                    Standardbegrunnelse.INNVILGET_BOR_HOS_SØKER.enumnavnTilString()
                 )
             )
         )

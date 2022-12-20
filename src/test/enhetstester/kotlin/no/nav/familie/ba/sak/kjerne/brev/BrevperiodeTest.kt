@@ -9,11 +9,16 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ba.sak.common.Utils.formaterBeløp
 import no.nav.familie.ba.sak.integrasjoner.sanity.hentBegrunnelser
 import no.nav.familie.ba.sak.integrasjoner.sanity.hentEØSBegrunnelser
+import no.nav.familie.ba.sak.kjerne.brev.domene.BegrunnelseMedTriggere
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
+import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.eøs.EØSBegrunnelseMedTriggere
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
+import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.finnBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.FritekstBegrunnelse
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.junit.jupiter.api.Test
@@ -188,4 +193,10 @@ class BrevperiodeTest {
         }
         return feil
     }
+
+    private fun Standardbegrunnelse.tilBrevBegrunnelseGrunnlag(sanityBegrunnelser: List<SanityBegrunnelse>) =
+        BegrunnelseMedTriggere(
+            standardbegrunnelse = this,
+            triggesAv = this.tilISanityBegrunnelse(sanityBegrunnelser)!!.tilTriggesAv()
+        )
 }

@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.fomErPåSatsendring
+import no.nav.familie.ba.sak.kjerne.brev.domene.ISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertEndretAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestPersonResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
@@ -40,7 +41,7 @@ fun Standardbegrunnelse.triggesForPeriode(
     ytelserForSøkerForrigeMåned: List<YtelseType>,
     ytelserForrigePeriode: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
 ): Boolean {
-    val triggesAv = this.tilSanityBegrunnelse(sanityBegrunnelser)?.tilTriggesAv() ?: return false
+    val triggesAv = this.tilISanityBegrunnelse(sanityBegrunnelser)?.tilTriggesAv() ?: return false
 
     val aktuellePersoner = minimertePersoner
         .filter { person -> triggesAv.personTyper.contains(person.type) }
@@ -157,24 +158,12 @@ private fun erEtterEndretPeriodeAvSammeÅrsak(
 
 private val logger = LoggerFactory.getLogger(Standardbegrunnelse::class.java)
 
-fun Standardbegrunnelse.tilSanityBegrunnelse(
-    sanityBegrunnelser: List<SanityBegrunnelse>
-): SanityBegrunnelse? {
-    val sanityBegrunnelse = sanityBegrunnelser.find { it.apiNavn == this.sanityApiNavn }
-    if (sanityBegrunnelse == null) {
-        logger.warn("Finner ikke begrunnelse med apinavn '${this.sanityApiNavn}' på '${this.name}' i Sanity")
+fun <T : ISanityBegrunnelse> IVedtakBegrunnelse.tilISanityBegrunnelse(sanityBegrunnelser: List<T>): T? {
+    val funnetBegrunnelse = sanityBegrunnelser.find { it.apiNavn == this.sanityApiNavn }
+    if (funnetBegrunnelse == null) {
+        logger.warn("Finner ikke begrunnelse med apinavn '${this.sanityApiNavn}' på '${this.enumnavnTilString()}' i Sanity")
     }
-    return sanityBegrunnelse
-}
-
-fun EØSStandardbegrunnelse.tilSanityEØSBegrunnelse(
-    eøsSanityBegrunnelser: List<SanityEØSBegrunnelse>
-): SanityEØSBegrunnelse? {
-    val sanityBegrunnelse = eøsSanityBegrunnelser.find { it.apiNavn == this.sanityApiNavn }
-    if (sanityBegrunnelse == null) {
-        logger.warn("Finner ikke begrunnelse med apinavn '${this.sanityApiNavn}' på '${this.name}' i Sanity")
-    }
-    return sanityBegrunnelse
+    return funnetBegrunnelse
 }
 
 fun List<LocalDate>.tilBrevTekst(): String = Utils.slåSammen(this.sorted().map { it.tilKortString() })

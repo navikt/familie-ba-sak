@@ -9,7 +9,8 @@ data class ForsattInnvilget(
 
     constructor(
         mal: Brevmal = Brevmal.VEDTAK_FORTSATT_INNVILGET,
-        vedtakFellesfelter: VedtakFellesfelter
+        vedtakFellesfelter: VedtakFellesfelter,
+        informasjonOmAarligKontroll: Boolean = false
     ) :
         this(
             mal = mal,
@@ -21,7 +22,8 @@ data class ForsattInnvilget(
                         beslutter = vedtakFellesfelter.beslutter
                     ),
                     hjemmeltekst = vedtakFellesfelter.hjemmeltekst,
-                    korrigertVedtak = vedtakFellesfelter.korrigertVedtakData
+                    korrigertVedtak = vedtakFellesfelter.korrigertVedtakData,
+                    informasjonOmAarligKontroll = informasjonOmAarligKontroll
                 ),
                 flettefelter = FlettefelterForDokumentImpl(
                     navn = vedtakFellesfelter.søkerNavn,
@@ -43,6 +45,7 @@ data class ForsattInnvilgetData(
     data class Delmaler(
         val signaturVedtak: SignaturVedtak,
         val hjemmeltekst: Hjemmeltekst,
-        val korrigertVedtak: KorrigertVedtakData?
+        val korrigertVedtak: KorrigertVedtakData?,
+        val informasjonOmAarligKontroll: Boolean
     )
 }
