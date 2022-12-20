@@ -4,9 +4,7 @@
   "tom": null,
   "vedtaksperiodetype": "AVSLAG",
   "begrunnelser": [
-    {
-      "standardbegrunnelse": "AVSLAG_IKKE_MEKLINGSATTEST"
-    }
+    "Standardbegrunnelse$AVSLAG_IKKE_MEKLINGSATTEST"
   ],
   "fritekster": [],
   "personerPåBehandling": [
@@ -54,7 +52,10 @@
           "periodeTom": null,
           "resultat": "IKKE_OPPFYLT",
           "utdypendeVilkårsvurderinger": [],
-          "erEksplisittAvslagPåSøknad": true
+          "erEksplisittAvslagPåSøknad": true,
+          "standardbegrunnelser": [
+            "Standardbegrunnelse$AVSLAG_IKKE_MEKLINGSATTEST"
+          ]
         }
       ],
       "andreVurderinger": [],
@@ -62,7 +63,7 @@
       "utbetalinger": []
     }
   ],
-   "uregistrerteBarn": [],
+  "uregistrerteBarn": [],
   "erFørsteVedtaksperiodePåFagsak": false,
   "brevMålform": "NB",
   "forventetOutput": {

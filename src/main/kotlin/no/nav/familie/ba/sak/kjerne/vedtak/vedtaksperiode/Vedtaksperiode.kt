@@ -63,7 +63,13 @@ enum class Vedtaksperiodetype(val tillatteBegrunnelsestyper: List<VedtakBegrunne
             VedtakBegrunnelseType.INSTITUSJON_OPPHØR
         )
     ),
-    AVSLAG(listOf(VedtakBegrunnelseType.AVSLAG, VedtakBegrunnelseType.INSTITUSJON_AVSLAG)),
+    AVSLAG(
+        listOf(
+            VedtakBegrunnelseType.AVSLAG,
+            VedtakBegrunnelseType.EØS_AVSLAG,
+            VedtakBegrunnelseType.INSTITUSJON_AVSLAG
+        )
+    ),
     FORTSATT_INNVILGET(
         listOf(
             VedtakBegrunnelseType.FORTSATT_INNVILGET,

@@ -35,7 +35,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hjemlerTilhørendeFritekst
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Opphørsperiode
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 
@@ -249,7 +249,7 @@ fun hentHjemmeltekst(
 ): String {
     val sanityStandardbegrunnelser = minimerteVedtaksperioder.flatMap { vedtaksperiode ->
         vedtaksperiode.begrunnelser.mapNotNull { begrunnelse ->
-            begrunnelse.standardbegrunnelse.tilSanityBegrunnelse(sanityBegrunnelser)
+            begrunnelse.standardbegrunnelse.tilISanityBegrunnelse(sanityBegrunnelser)
         }
     }
 

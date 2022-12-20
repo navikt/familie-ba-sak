@@ -1,26 +1,14 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser
 
+import com.fasterxml.jackson.annotation.JsonValue
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.NullablePeriode
-import no.nav.familie.ba.sak.common.Utils.konverterEnumsTilString
-import no.nav.familie.ba.sak.common.Utils.konverterStringTilEnums
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevBegrunnelseGrunnlagMedPersoner
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.hentRelevanteEndringsperioderForBegrunnelse
-import javax.persistence.AttributeConverter
-import javax.persistence.Converter
-
-interface IVedtakBegrunnelse {
-
-    val sanityApiNavn: String
-    val vedtakBegrunnelseType: VedtakBegrunnelseType
-    val kanDelesOpp: Boolean
-
-    fun enumnavnTilString(): String
-}
 
 val hjemlerTilhørendeFritekst = setOf(2, 4, 11)
 
@@ -1457,46 +1445,47 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
 
     override val kanDelesOpp: Boolean = false
 
+    @JsonValue
     override fun enumnavnTilString(): String =
-        this.name
-}
+        Standardbegrunnelse::class.simpleName + "$" + this.name
 
-fun Standardbegrunnelse.delOpp(
-    restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
-    triggesAv: TriggesAv,
-    periode: NullablePeriode
-): List<BrevBegrunnelseGrunnlagMedPersoner> {
-    if (!this.kanDelesOpp) {
-        throw Feil("Begrunnelse $this kan ikke deles opp.")
-    }
-    return when (this) {
-        Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_ENDRET_UTBETALING -> {
-            val deltBostedEndringsperioder = this.hentRelevanteEndringsperioderForBegrunnelse(
-                minimerteRestEndredeAndeler = restBehandlingsgrunnlagForBrev.minimerteEndredeUtbetalingAndeler,
-                vedtaksperiode = periode
-            )
-                .filter { it.årsak == Årsak.DELT_BOSTED }
-                .filter { endringsperiode ->
-                    endringsperiodeGjelderBarn(
-                        personerPåBehandling = restBehandlingsgrunnlagForBrev.personerPåBehandling,
-                        personIdentFraEndringsperiode = endringsperiode.personIdent
+    override fun delOpp(
+        restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
+        triggesAv: TriggesAv,
+        periode: NullablePeriode
+    ): List<BrevBegrunnelseGrunnlagMedPersoner> {
+        if (!this.kanDelesOpp) {
+            throw Feil("Begrunnelse $this kan ikke deles opp.")
+        }
+        return when (this) {
+            Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_ENDRET_UTBETALING -> {
+                val deltBostedEndringsperioder = this.hentRelevanteEndringsperioderForBegrunnelse(
+                    minimerteRestEndredeAndeler = restBehandlingsgrunnlagForBrev.minimerteEndredeUtbetalingAndeler,
+                    vedtaksperiode = periode
+                )
+                    .filter { it.årsak == Årsak.DELT_BOSTED }
+                    .filter { endringsperiode ->
+                        endringsperiodeGjelderBarn(
+                            personerPåBehandling = restBehandlingsgrunnlagForBrev.personerPåBehandling,
+                            personIdentFraEndringsperiode = endringsperiode.personIdent
+                        )
+                    }
+                val deltBostedEndringsperioderGruppertPåAvtaledato =
+                    deltBostedEndringsperioder.groupBy { it.avtaletidspunktDeltBosted }
+
+                deltBostedEndringsperioderGruppertPåAvtaledato.map {
+                    BrevBegrunnelseGrunnlagMedPersoner(
+                        standardbegrunnelse = this,
+                        vedtakBegrunnelseType = this.vedtakBegrunnelseType,
+                        triggesAv = triggesAv,
+                        personIdenter = it.value.map { endringsperiode -> endringsperiode.personIdent },
+                        avtaletidspunktDeltBosted = it.key
                     )
                 }
-            val deltBostedEndringsperioderGruppertPåAvtaledato =
-                deltBostedEndringsperioder.groupBy { it.avtaletidspunktDeltBosted }
-
-            deltBostedEndringsperioderGruppertPåAvtaledato.map {
-                BrevBegrunnelseGrunnlagMedPersoner(
-                    standardbegrunnelse = this,
-                    vedtakBegrunnelseType = this.vedtakBegrunnelseType,
-                    triggesAv = triggesAv,
-                    personIdenter = it.value.map { endringsperiode -> endringsperiode.personIdent },
-                    avtaletidspunktDeltBosted = it.key
-                )
             }
-        }
 
-        else -> throw Feil("Oppdeling av begrunnelse $this er ikke støttet.")
+            else -> throw Feil("Oppdeling av begrunnelse $this er ikke støttet.")
+        }
     }
 }
 
@@ -1504,17 +1493,6 @@ private fun endringsperiodeGjelderBarn(
     personerPåBehandling: List<MinimertRestPerson>,
     personIdentFraEndringsperiode: String
 ) = personerPåBehandling.find { person -> person.personIdent == personIdentFraEndringsperiode }?.type == PersonType.BARN
-
-@Converter
-class StandardbegrunnelseListConverter :
-    AttributeConverter<List<Standardbegrunnelse>, String> {
-
-    override fun convertToDatabaseColumn(standardbegrunnelser: List<Standardbegrunnelse>) =
-        konverterEnumsTilString(standardbegrunnelser)
-
-    override fun convertToEntityAttribute(string: String?): List<Standardbegrunnelse> =
-        konverterStringTilEnums(string)
-}
 
 val endretUtbetalingsperiodeBegrunnelser: List<Standardbegrunnelse> = listOf(
     Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_INGEN_UTBETALING_NY,
