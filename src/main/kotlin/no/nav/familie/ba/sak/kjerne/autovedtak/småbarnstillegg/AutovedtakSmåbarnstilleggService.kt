@@ -114,12 +114,12 @@ class AutovedtakSmåbarnstilleggService(
         } catch (e: VedtaksperiodefinnerSmåbarnstilleggFeil) {
             logger.warn(e.message, e)
 
-            behandlingService.oppdaterStatusPåBehandling(
+            val behandlingSomSkalManueltBehandles = behandlingService.oppdaterStatusPåBehandling(
                 behandlingEtterBehandlingsresultat.id,
                 BehandlingStatus.UTREDES
             )
             return kanIkkeBehandleAutomatisk(
-                behandling = behandlingEtterBehandlingsresultat,
+                behandling = behandlingSomSkalManueltBehandles,
                 metric = antallVedtakOmOvergangsstønadTilManuellBehandling[TilManuellBehandlingÅrsak.KLARER_IKKE_BEGRUNNE]!!,
                 meldingIOppgave = "Småbarnstillegg: klarer ikke bestemme vedtaksperiode som skal begrunnes, må behandles manuelt"
             )
