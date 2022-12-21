@@ -125,14 +125,16 @@ class BrevPeriodeGenerator(
     fun hentEøsBegrunnelserMedKompetanser(): List<EØSBegrunnelseMedKompetanser> =
         minimertVedtaksperiode.eøsBegrunnelser.map { eøsBegrunnelseMedTriggere ->
             val kompetanser = when (eøsBegrunnelseMedTriggere.eøsBegrunnelse.vedtakBegrunnelseType) {
-                VedtakBegrunnelseType.EØS_INNVILGET -> hentKompetanserForEØSBegrunnelse(
+                VedtakBegrunnelseType.EØS_INNVILGET, VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET -> hentKompetanserForEØSBegrunnelse(
                     eøsBegrunnelseMedTriggere,
                     minimerteKompetanserForPeriode
                 )
-                VedtakBegrunnelseType.EØS_OPPHØR -> hentKompetanserForEØSBegrunnelse(
+
+                VedtakBegrunnelseType.EØS_OPPHØR, VedtakBegrunnelseType.EØS_REDUKSJON -> hentKompetanserForEØSBegrunnelse(
                     eøsBegrunnelseMedTriggere,
                     minimerteKompetanserSomStopperRettFørPeriode
                 )
+
                 else -> emptyList()
             }
             EØSBegrunnelseMedKompetanser(
@@ -197,6 +199,7 @@ class BrevPeriodeGenerator(
         val barnIPeriode: List<MinimertRestPerson> = when (minimertVedtaksperiode.type) {
             Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING,
             Vedtaksperiodetype.UTBETALING -> finnBarnIUtbetalingPeriode(identerIBegrunnelene)
+
             Vedtaksperiodetype.OPPHØR -> emptyList()
             Vedtaksperiodetype.AVSLAG -> emptyList()
             Vedtaksperiodetype.FORTSATT_INNVILGET -> barnMedUtbetaling + barnMedNullutbetaling
@@ -232,6 +235,7 @@ class BrevPeriodeGenerator(
             minimertVedtaksperiode.fom,
             minimertVedtaksperiode.begrunnelser.map { it.standardbegrunnelse }
         ) ?: "Du får:"
+
         Vedtaksperiodetype.UTBETALING -> minimertVedtaksperiode.fom!!.tilDagMånedÅr()
         Vedtaksperiodetype.ENDRET_UTBETALING -> throw Feil("Endret utbetaling skal ikke benyttes lenger.")
         Vedtaksperiodetype.OPPHØR -> minimertVedtaksperiode.fom!!.tilDagMånedÅr()
