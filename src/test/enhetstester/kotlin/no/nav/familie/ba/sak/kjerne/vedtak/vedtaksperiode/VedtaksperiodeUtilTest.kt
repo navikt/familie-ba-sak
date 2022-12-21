@@ -287,7 +287,7 @@ class VedtaksperiodeUtilTest {
             sanityEØSBegrunnelser = sanityEØSBegrunnelser,
             kompetanserIPeriode = kompetanserIPeriode,
             kompetanserSomStopperRettFørPeriode = emptyList(),
-            minimertVedtaksperiode = lagUtvidetVedtaksperiodeMedBegrunnelser().tilMinimertVedtaksperiode()
+            minimertVedtaksperiode = lagUtvidetVedtaksperiodeMedBegrunnelser(type = Vedtaksperiodetype.UTBETALING).tilMinimertVedtaksperiode()
         )
         Assertions.assertTrue(
             forventedeBegrunnelser.all {
@@ -322,7 +322,7 @@ class VedtaksperiodeUtilTest {
             sanityEØSBegrunnelser = sanityEØSBegrunnelser,
             kompetanserIPeriode = kompetanserIPeriode,
             kompetanserSomStopperRettFørPeriode = emptyList(),
-            minimertVedtaksperiode = lagUtvidetVedtaksperiodeMedBegrunnelser().tilMinimertVedtaksperiode()
+            minimertVedtaksperiode = lagUtvidetVedtaksperiodeMedBegrunnelser(type = Vedtaksperiodetype.UTBETALING).tilMinimertVedtaksperiode()
         )
 
         Assertions.assertTrue(
