@@ -1,10 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.trekkILøpendeUtbetaling
 
-import no.nav.familie.ba.sak.common.YearMonthConverter
+import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
-import java.time.YearMonth
+import java.time.LocalDate
 import javax.persistence.Column
-import javax.persistence.Convert
 import javax.persistence.Entity
 import javax.persistence.EntityListeners
 import javax.persistence.GeneratedValue
@@ -20,13 +19,11 @@ data class TrekkILøpendeUtbetaling(
     @Column(name = "fk_behandling_id", updatable = false, nullable = false)
     val behandlingId: Long,
     @Column(name = "fom", columnDefinition = "DATE")
-    @Convert(converter = YearMonthConverter::class)
-    val fom: YearMonth,
+    var fom: LocalDate,
     @Column(name = "tom", columnDefinition = "DATE")
-    @Convert(converter = YearMonthConverter::class)
-    val tom: YearMonth?,
+    var tom: LocalDate,
     @Column(name = "feilutbetalt_beloep", nullable = false)
-    val feilutbetaltBeløp: Int,
+    var feilutbetaltBeløp: Int,
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "trekk_i_loepende_utbetaling_seq_generator")
@@ -36,4 +33,4 @@ data class TrekkILøpendeUtbetaling(
         allocationSize = 50
     )
     val id: Long = 0
-)
+) : BaseEntitet()
