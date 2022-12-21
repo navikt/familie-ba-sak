@@ -5,9 +5,7 @@
   "tom": null,
   "vedtaksperiodetype": "UTBETALING",
   "begrunnelser": [
-    {
-      "standardbegrunnelse": "REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD"
-    }
+    "Standardbegrunnelse$REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD"
   ],
   "fritekster": [],
   "uregistrerteBarn": [],
@@ -41,7 +39,8 @@
           "utdypendeVilkårsvurderinger": [
             "DELT_BOSTED"
           ],
-          "erEksplisittAvslagPåSøknad": false
+          "erEksplisittAvslagPåSøknad": false,
+          "standardbegrunnelser": []
         }
       ],
       "andreVurderinger": [],
@@ -67,7 +66,8 @@
           "periodeFom": "2020-08-10",
           "periodeTom": null,
           "utdypendeVilkårsvurderinger": [],
-          "erEksplisittAvslagPåSøknad": false
+          "erEksplisittAvslagPåSøknad": false,
+          "standardbegrunnelser": []
         }
       ],
       "andreVurderinger": [],

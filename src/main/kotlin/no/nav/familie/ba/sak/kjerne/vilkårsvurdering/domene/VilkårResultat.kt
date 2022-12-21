@@ -8,8 +8,8 @@ import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.StandardbegrunnelseListConverter
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelseListConverter
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
 import java.time.Period
@@ -83,8 +83,8 @@ class VilkårResultat(
     var regelOutput: String? = null,
 
     @Column(name = "vedtak_begrunnelse_spesifikasjoner")
-    @Convert(converter = StandardbegrunnelseListConverter::class)
-    var standardbegrunnelser: List<Standardbegrunnelse> = emptyList(),
+    @Convert(converter = IVedtakBegrunnelseListConverter::class)
+    var standardbegrunnelser: List<IVedtakBegrunnelse> = emptyList(),
 
     @Enumerated(EnumType.STRING)
     @Column(name = "vurderes_etter")

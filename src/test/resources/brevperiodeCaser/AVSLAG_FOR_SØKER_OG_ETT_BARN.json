@@ -4,9 +4,7 @@
   "tom": null,
   "vedtaksperiodetype": "AVSLAG",
   "begrunnelser": [
-    {
-      "standardbegrunnelse": "AVSLAG_BOSATT_I_RIKET"
-    }
+    "Standardbegrunnelse$AVSLAG_BOSATT_I_RIKET"
   ],
   "fritekster": [],
   "personerPåBehandling": [
@@ -20,7 +18,10 @@
           "periodeTom": null,
           "resultat": "IKKE_OPPFYLT",
           "utdypendeVilkårsvurderinger": [],
-          "erEksplisittAvslagPåSøknad": true
+          "erEksplisittAvslagPåSøknad": true,
+          "standardbegrunnelser": [
+            "Standardbegrunnelse$AVSLAG_BOSATT_I_RIKET"
+          ]
         }
       ],
       "andreVurderinger": [],
@@ -37,7 +38,10 @@
           "periodeTom": null,
           "resultat": "IKKE_OPPFYLT",
           "utdypendeVilkårsvurderinger": [],
-          "erEksplisittAvslagPåSøknad": true
+          "erEksplisittAvslagPåSøknad": true,
+          "standardbegrunnelser": [
+            "Standardbegrunnelse$AVSLAG_BOSATT_I_RIKET"
+          ]
         }
       ],
       "andreVurderinger": [],
@@ -69,7 +73,7 @@
       "utbetalinger": []
     }
   ],
-   "uregistrerteBarn": [],
+  "uregistrerteBarn": [],
   "erFørsteVedtaksperiodePåFagsak": false,
   "brevMålform": "NB",
   "forventetOutput": {

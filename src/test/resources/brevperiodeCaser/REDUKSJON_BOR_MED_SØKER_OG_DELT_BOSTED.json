@@ -4,12 +4,8 @@
   "tom": "2021-12-31",
   "vedtaksperiodetype": "UTBETALING",
   "begrunnelser": [
-    {
-      "standardbegrunnelse": "REDUKSJON_FLYTTET_BARN"
-    },
-    {
-      "standardbegrunnelse": "REDUKSJON_DELT_BARNETRYGD_ANNEN_FORELDER_SØKT"
-    }
+    "Standardbegrunnelse$REDUKSJON_FLYTTET_BARN",
+    "Standardbegrunnelse$REDUKSJON_DELT_BARNETRYGD_ANNEN_FORELDER_SØKT"
   ],
   "fritekster": [],
   "personerPåBehandling": [
@@ -23,7 +19,8 @@
           "periodeTom": null,
           "resultat": "OPPFYLT",
           "utdypendeVilkårsvurderinger": [],
-          "erEksplisittAvslagPåSøknad": false
+          "erEksplisittAvslagPåSøknad": false,
+          "standardbegrunnelser": []
         }
       ],
       "andreVurderinger": [],
@@ -62,7 +59,8 @@
           "periodeTom": "2021-10-10",
           "resultat": "OPPFYLT",
           "utdypendeVilkårsvurderinger": [],
-          "erEksplisittAvslagPåSøknad": false
+          "erEksplisittAvslagPåSøknad": false,
+          "standardbegrunnelser": []
         }
       ],
       "andreVurderinger": [],
@@ -79,7 +77,8 @@
           "periodeTom": "2021-10-12",
           "resultat": "OPPFYLT",
           "utdypendeVilkårsvurderinger": [],
-          "erEksplisittAvslagPåSøknad": false
+          "erEksplisittAvslagPåSøknad": false,
+          "standardbegrunnelser": []
         },
         {
           "vilkårType": "BOR_MED_SØKER",
@@ -89,7 +88,8 @@
           "utdypendeVilkårsvurderinger": [
             "DELT_BOSTED"
           ],
-          "erEksplisittAvslagPåSøknad": false
+          "erEksplisittAvslagPåSøknad": false,
+          "standardbegrunnelser": []
         }
       ],
       "andreVurderinger": [],
@@ -104,7 +104,7 @@
       ]
     }
   ],
-   "uregistrerteBarn": [],
+  "uregistrerteBarn": [],
   "erFørsteVedtaksperiodePåFagsak": false,
   "brevMålform": "NB",
   "forventetOutput": {

@@ -3,14 +3,13 @@ package no.nav.familie.ba.sak.kjerne.brev.domene
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.kjerne.brev.hentPersonidenterGjeldendeForBegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.delOpp
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 
 data class BegrunnelseMedTriggere(
-    val standardbegrunnelse: Standardbegrunnelse,
+    val standardbegrunnelse: IVedtakBegrunnelse,
     val triggesAv: TriggesAv
 ) {
     fun tilBrevBegrunnelseGrunnlagMedPersoner(
@@ -73,10 +72,10 @@ data class BegrunnelseMedTriggere(
 fun Vedtaksbegrunnelse.tilBegrunnelseMedTriggere(
     sanityBegrunnelser: List<SanityBegrunnelse>
 ): BegrunnelseMedTriggere {
+    val sanityBegrunnelse = sanityBegrunnelser.firstOrNull { it.apiNavn == this.standardbegrunnelse.sanityApiNavn } ?: throw Feil("Finner ikke sanityBegrunnelse med apiNavn=${this.standardbegrunnelse.sanityApiNavn}")
     return BegrunnelseMedTriggere(
         standardbegrunnelse = this.standardbegrunnelse,
-        triggesAv = sanityBegrunnelser
-            .firstOrNull { it.apiNavn == this.standardbegrunnelse.sanityApiNavn }!!
+        triggesAv = sanityBegrunnelse
             .tilTriggesAv()
     )
 }

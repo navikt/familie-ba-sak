@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -71,5 +71,5 @@ data class BegrunnelseDataForLogging(
 ) : TestBegrunnelse
 
 data class BrevBegrunnelseGrunnlagForLogging(
-    val standardbegrunnelse: Standardbegrunnelse
+    val standardbegrunnelse: IVedtakBegrunnelse
 )

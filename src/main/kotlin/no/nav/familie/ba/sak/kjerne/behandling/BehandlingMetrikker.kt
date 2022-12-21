@@ -16,7 +16,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.EØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.finnBegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeHentOgPersisterService
 import org.slf4j.LoggerFactory
@@ -87,7 +87,7 @@ class BehandlingMetrikker(
         }
 
         antallGangerBruktStandardbegrunnelse = Standardbegrunnelse.values().associateWith {
-            val tittel = it.tilSanityBegrunnelse(sanityBegrunnelser)?.navnISystem ?: it.name
+            val tittel = it.tilISanityBegrunnelse(sanityBegrunnelser)?.navnISystem ?: it.name
 
             Metrics.counter(
                 "brevbegrunnelse",
