@@ -8,7 +8,7 @@ fun KlagebehandlingDto.brukVedtaksdatoFraKlageinstansHvisOversendt(): Klagebehan
     val erOversendtTilKlageinstans = resultat == BehandlingResultat.IKKE_MEDHOLD
     val vedtaksdato = if (erOversendtTilKlageinstans) {
         klageinstansResultat
-            .singleOrNull { klageinnstansResultat -> klageinnstansResultat.type == BehandlingEventType.KLAGEBEHANDLING_AVSLUTTET }
+            .singleOrNull { klageinstansResultat -> klageinstansResultat.type == BehandlingEventType.KLAGEBEHANDLING_AVSLUTTET }
             ?.mottattEllerAvsluttetTidspunkt
     } else {
         vedtaksdato
