@@ -9,6 +9,8 @@ import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
@@ -32,6 +34,7 @@ class VedtaksperiodeServiceEnhetstest {
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService = mockk()
     private val endringstidspunktService: EndringstidspunktService = mockk()
     private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService = mockk()
+    private val featureToggleService: FeatureToggleService = mockk()
 
     private val vedtaksperiodeService = VedtaksperiodeService(
         behandlingRepository = behandlingRepository,
@@ -47,7 +50,8 @@ class VedtaksperiodeServiceEnhetstest {
         endringstidspunktService = endringstidspunktService,
         utbetalingsperiodeMedBegrunnelserService = mockk(relaxed = true),
         kompetanseRepository = mockk(),
-        andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService
+        andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
+        featureToggleService = featureToggleService
     )
 
     private val person = lagPerson()
@@ -82,6 +86,7 @@ class VedtaksperiodeServiceEnhetstest {
         every {
             andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.id)
         } returns listOf(ytelseOpphørtFørEndringstidspunkt)
+        every { featureToggleService.isEnabled(FeatureToggleConfig.EØS_INFORMASJON_OM_ÅRLIG_KONTROLL, any()) } returns true
     }
 
     @Test
@@ -143,5 +148,18 @@ class VedtaksperiodeServiceEnhetstest {
             lagVedtaksperiodeMedBegrunnelser(vedtak = vedtak, tom = null)
         )
         assertTrue { vedtaksperiodeService.skalHaÅrligKontroll(vedtak) }
+    }
+
+    @Test
+    fun `EØS skal ikke ha årlig kontroll når feature toggle er skrudd av`() {
+        every {
+            featureToggleService.isEnabled(FeatureToggleConfig.EØS_INFORMASJON_OM_ÅRLIG_KONTROLL, any())
+        } returns false
+
+        val vedtak = Vedtak(behandling = lagBehandling(behandlingKategori = BehandlingKategori.EØS))
+        every { vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(any()) } returns listOf(
+            lagVedtaksperiodeMedBegrunnelser(vedtak = vedtak, tom = null)
+        )
+        assertFalse { vedtaksperiodeService.skalHaÅrligKontroll(vedtak) }
     }
 }
