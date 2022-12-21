@@ -72,10 +72,10 @@ data class BegrunnelseMedTriggere(
 fun Vedtaksbegrunnelse.tilBegrunnelseMedTriggere(
     sanityBegrunnelser: List<SanityBegrunnelse>
 ): BegrunnelseMedTriggere {
+    val sanityBegrunnelse = sanityBegrunnelser.firstOrNull { it.apiNavn == this.standardbegrunnelse.sanityApiNavn } ?: throw Feil("Finner ikke sanityBegrunnelse med apiNavn=${this.standardbegrunnelse.sanityApiNavn}")
     return BegrunnelseMedTriggere(
         standardbegrunnelse = this.standardbegrunnelse,
-        triggesAv = sanityBegrunnelser
-            .firstOrNull { it.apiNavn == this.standardbegrunnelse.sanityApiNavn }!!
+        triggesAv = sanityBegrunnelse
             .tilTriggesAv()
     )
 }
