@@ -1,7 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser
 
+import no.nav.familie.ba.sak.kjerne.brev.domene.ISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 
 enum class BarnetsBostedsland {
     NORGE,
@@ -23,7 +25,8 @@ data class RestSanityEØSBegrunnelse(
     val hjemlerFolketrygdloven: List<String>?,
     val hjemlerEOSForordningen883: List<String>?,
     val hjemlerEOSForordningen987: List<String>?,
-    val hjemlerSeperasjonsavtalenStorbritannina: List<String>?
+    val hjemlerSeperasjonsavtalenStorbritannina: List<String>?,
+    val eosVilkaar: List<String>? = null
 ) {
     fun tilSanityEØSBegrunnelse(): SanityEØSBegrunnelse? {
         if (apiNavn == null || navnISystem == null) return null
@@ -43,7 +46,8 @@ data class RestSanityEØSBegrunnelse(
             hjemlerFolketrygdloven = hjemlerFolketrygdloven ?: emptyList(),
             hjemlerEØSForordningen883 = hjemlerEOSForordningen883 ?: emptyList(),
             hjemlerEØSForordningen987 = hjemlerEOSForordningen987 ?: emptyList(),
-            hjemlerSeperasjonsavtalenStorbritannina = hjemlerSeperasjonsavtalenStorbritannina ?: emptyList()
+            hjemlerSeperasjonsavtalenStorbritannina = hjemlerSeperasjonsavtalenStorbritannina ?: emptyList(),
+            vilkår = eosVilkaar?.mapNotNull { konverterTilEnumverdi<Vilkår>(it) } ?: emptyList()
         )
     }
 
@@ -52,8 +56,8 @@ data class RestSanityEØSBegrunnelse(
 }
 
 data class SanityEØSBegrunnelse(
-    val apiNavn: String,
-    val navnISystem: String,
+    override val apiNavn: String,
+    override val navnISystem: String,
     val annenForeldersAktivitet: List<AnnenForeldersAktivitet>,
     val barnetsBostedsland: List<BarnetsBostedsland>,
     val kompetanseResultat: List<KompetanseResultat>,
@@ -61,8 +65,9 @@ data class SanityEØSBegrunnelse(
     val hjemlerFolketrygdloven: List<String>,
     val hjemlerEØSForordningen883: List<String>,
     val hjemlerEØSForordningen987: List<String>,
-    val hjemlerSeperasjonsavtalenStorbritannina: List<String>
-)
+    val hjemlerSeperasjonsavtalenStorbritannina: List<String>,
+    val vilkår: List<Vilkår>
+) : ISanityBegrunnelse
 
 fun List<SanityEØSBegrunnelse>.finnBegrunnelse(eøsBegrunnelse: EØSStandardbegrunnelse): SanityEØSBegrunnelse? =
     this.find { it.apiNavn == eøsBegrunnelse.sanityApiNavn }

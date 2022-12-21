@@ -4,12 +4,8 @@
   "tom": null,
   "vedtaksperiodetype": "UTBETALING",
   "begrunnelser": [
-    {
-      "standardbegrunnelse": "INNVILGET_BOR_HOS_SØKER"
-    },
-    {
-      "standardbegrunnelse": "REDUKSJON_FLYTTET_BARN"
-    }
+    "Standardbegrunnelse$INNVILGET_BOR_HOS_SØKER",
+    "Standardbegrunnelse$REDUKSJON_FLYTTET_BARN"
   ],
   "fritekster": [],
   "uregistrerteBarn": [],
@@ -26,7 +22,8 @@
           "periodeFom": "2021-08-01",
           "periodeTom": null,
           "utdypendeVilkårsvurderinger": [],
-          "erEksplisittAvslagPåSøknad": false
+          "erEksplisittAvslagPåSøknad": false,
+          "standardbegrunnelser": []
         }
       ],
       "andreVurderinger": [],
@@ -50,7 +47,8 @@
           "periodeFom": "2020-01-20",
           "periodeTom": "2021-08-01",
           "utdypendeVilkårsvurderinger": [],
-          "erEksplisittAvslagPåSøknad": false
+          "erEksplisittAvslagPåSøknad": false,
+          "standardbegrunnelser": []
         }
       ],
       "andreVurderinger": [],

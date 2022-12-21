@@ -157,7 +157,7 @@ fun fullførBehandlingFraVilkårsvurderingAlleVilkårOppfylt(
     familieBaSakKlient.oppdaterVedtaksperiodeMedStandardbegrunnelser(
         vedtaksperiodeId = utvidetVedtaksperiodeMedBegrunnelser.id,
         restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
-            standardbegrunnelser = utvidetVedtaksperiodeMedBegrunnelser.gyldigeBegrunnelser.map { it }
+            standardbegrunnelser = utvidetVedtaksperiodeMedBegrunnelser.gyldigeBegrunnelser.filter(String::isNotEmpty)
         )
     )
     val restUtvidetBehandlingEtterSendTilBeslutter =
@@ -190,7 +190,11 @@ fun fullførBehandlingFraVilkårsvurderingAlleVilkårOppfylt(
     )
 }
 
-fun settAlleVilkårTilOppfylt(restUtvidetBehandling: RestUtvidetBehandling, barnFødselsdato: LocalDate, familieBaSakKlient: FamilieBaSakKlient) {
+fun settAlleVilkårTilOppfylt(
+    restUtvidetBehandling: RestUtvidetBehandling,
+    barnFødselsdato: LocalDate,
+    familieBaSakKlient: FamilieBaSakKlient
+) {
     restUtvidetBehandling.personResultater.forEach { restPersonResultat ->
         restPersonResultat.vilkårResultater.filter { it.resultat == Resultat.IKKE_VURDERT }.forEach {
             familieBaSakKlient.putVilkår(

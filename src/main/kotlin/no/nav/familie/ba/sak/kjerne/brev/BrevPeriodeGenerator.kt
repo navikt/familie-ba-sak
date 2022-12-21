@@ -18,10 +18,13 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
 import no.nav.familie.ba.sak.kjerne.brev.domene.totaltUtbetalt
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.EØSBegrunnelseData
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.EØSBegrunnelseDataMedKompetanse
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.EØSBegrunnelseDataUtenKompetanse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.FritekstBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilBrevBegrunnelse
@@ -74,27 +77,62 @@ class BrevPeriodeGenerator(
         eøsBegrunnelserMedKompetanser.flatMap { begrunnelseMedData ->
             val begrunnelse = begrunnelseMedData.begrunnelse
 
-            begrunnelseMedData.kompetanser.map { kompetanse ->
-                EØSBegrunnelseData(
-                    vedtakBegrunnelseType = begrunnelse.vedtakBegrunnelseType,
-                    apiNavn = begrunnelse.sanityApiNavn,
-                    annenForeldersAktivitet = kompetanse.annenForeldersAktivitet,
-                    annenForeldersAktivitetsland = kompetanse.annenForeldersAktivitetslandNavn?.navn,
-                    barnetsBostedsland = kompetanse.barnetsBostedslandNavn.navn,
-                    barnasFodselsdatoer = Utils.slåSammen(kompetanse.personer.map { it.fødselsdato.tilKortString() }),
-                    antallBarn = kompetanse.personer.size,
-                    maalform = brevMålform.tilSanityFormat(),
-                    sokersAktivitet = kompetanse.søkersAktivitet,
-                    sokersAktivitetsland = kompetanse.søkersAktivitetsland?.navn
+            if (begrunnelseMedData.kompetanser.isEmpty() && begrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.EØS_AVSLAG) {
+                val minimertePersonResultater =
+                    restBehandlingsgrunnlagForBrev.minimertePersonResultater.filter { personResultat ->
+                        personResultat.minimerteVilkårResultater.any {
+                            it.erEksplisittAvslagPåSøknad == true && it.periodeFom == minimertVedtaksperiode.fom && it.standardbegrunnelser.contains(
+                                begrunnelse
+                            )
+                        }
+                    }
+
+                val personerIBegrunnelse =
+                    restBehandlingsgrunnlagForBrev.personerPåBehandling.filter { person -> minimertePersonResultater.any { personResultat -> personResultat.personIdent == person.personIdent } }
+                val barnPåBehandling =
+                    restBehandlingsgrunnlagForBrev.personerPåBehandling.filter { it.type == PersonType.BARN }
+                val barnIBegrunnelse = personerIBegrunnelse.filter { it.type == PersonType.BARN }
+                val gjelderSøker = personerIBegrunnelse.any { it.type == PersonType.SØKER }
+
+                listOf(
+                    EØSBegrunnelseDataUtenKompetanse(
+                        vedtakBegrunnelseType = begrunnelse.vedtakBegrunnelseType,
+                        apiNavn = begrunnelse.sanityApiNavn,
+                        barnasFodselsdatoer = if (gjelderSøker) barnPåBehandling.tilBarnasFødselsdatoer() else barnIBegrunnelse.tilBarnasFødselsdatoer(),
+                        antallBarn = if (gjelderSøker) barnPåBehandling.size else barnIBegrunnelse.size,
+                        maalform = brevMålform.tilSanityFormat(),
+                        gjelderSoker = gjelderSøker
+                    )
                 )
+            } else {
+                begrunnelseMedData.kompetanser.map { kompetanse ->
+                    EØSBegrunnelseDataMedKompetanse(
+                        vedtakBegrunnelseType = begrunnelse.vedtakBegrunnelseType,
+                        apiNavn = begrunnelse.sanityApiNavn,
+                        annenForeldersAktivitet = kompetanse.annenForeldersAktivitet,
+                        annenForeldersAktivitetsland = kompetanse.annenForeldersAktivitetslandNavn?.navn,
+                        barnetsBostedsland = kompetanse.barnetsBostedslandNavn.navn,
+                        barnasFodselsdatoer = Utils.slåSammen(kompetanse.personer.map { it.fødselsdato.tilKortString() }),
+                        antallBarn = kompetanse.personer.size,
+                        maalform = brevMålform.tilSanityFormat(),
+                        sokersAktivitet = kompetanse.søkersAktivitet,
+                        sokersAktivitetsland = kompetanse.søkersAktivitetsland?.navn
+                    )
+                }
             }
         }
 
     fun hentEøsBegrunnelserMedKompetanser(): List<EØSBegrunnelseMedKompetanser> =
         minimertVedtaksperiode.eøsBegrunnelser.map { eøsBegrunnelseMedTriggere ->
             val kompetanser = when (eøsBegrunnelseMedTriggere.eøsBegrunnelse.vedtakBegrunnelseType) {
-                VedtakBegrunnelseType.EØS_INNVILGET -> hentKompetanserForEØSBegrunnelse(eøsBegrunnelseMedTriggere, minimerteKompetanserForPeriode)
-                VedtakBegrunnelseType.EØS_OPPHØR -> hentKompetanserForEØSBegrunnelse(eøsBegrunnelseMedTriggere, minimerteKompetanserSomStopperRettFørPeriode)
+                VedtakBegrunnelseType.EØS_INNVILGET -> hentKompetanserForEØSBegrunnelse(
+                    eøsBegrunnelseMedTriggere,
+                    minimerteKompetanserForPeriode
+                )
+                VedtakBegrunnelseType.EØS_OPPHØR -> hentKompetanserForEØSBegrunnelse(
+                    eøsBegrunnelseMedTriggere,
+                    minimerteKompetanserSomStopperRettFørPeriode
+                )
                 else -> emptyList()
             }
             EØSBegrunnelseMedKompetanser(
@@ -251,7 +289,7 @@ class BrevPeriodeGenerator(
     private fun hentFomtekstFortsattInnvilget(
         målform: Målform,
         fom: LocalDate?,
-        begrunnelser: List<Standardbegrunnelse>
+        begrunnelser: List<IVedtakBegrunnelse>
     ): String? {
         val erAutobrev = begrunnelser.any {
             it == Standardbegrunnelse.REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK ||

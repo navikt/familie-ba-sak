@@ -4,9 +4,7 @@
   "tom": "2022-02-28",
   "vedtaksperiodetype": "UTBETALING",
   "begrunnelser": [
-    {
-      "standardbegrunnelse": "INNVILGET_TREDJELANDSBORGER_LOVLIG_OPPHOLD_FOR_BOSATT_I_NORGE"
-    }
+    "Standardbegrunnelse$INNVILGET_TREDJELANDSBORGER_LOVLIG_OPPHOLD_FOR_BOSATT_I_NORGE"
   ],
   "fritekster": [],
   "personerPåBehandling": [
@@ -20,7 +18,8 @@
           "periodeTom": null,
           "resultat": "OPPFYLT",
           "utdypendeVilkårsvurderinger": [],
-          "erEksplisittAvslagPåSøknad": false
+          "erEksplisittAvslagPåSøknad": false,
+          "standardbegrunnelser": []
         }
       ],
       "andreVurderinger": [],
@@ -82,7 +81,8 @@
           "periodeTom": null,
           "resultat": "OPPFYLT",
           "utdypendeVilkårsvurderinger": [],
-          "erEksplisittAvslagPåSøknad": false
+          "erEksplisittAvslagPåSøknad": false,
+          "standardbegrunnelser": []
         }
       ],
       "andreVurderinger": [],
@@ -90,7 +90,7 @@
       "utbetalinger": []
     }
   ],
-   "uregistrerteBarn": [],
+  "uregistrerteBarn": [],
   "erFørsteVedtaksperiodePåFagsak": false,
   "brevMålform": "NB",
   "forventetOutput": {

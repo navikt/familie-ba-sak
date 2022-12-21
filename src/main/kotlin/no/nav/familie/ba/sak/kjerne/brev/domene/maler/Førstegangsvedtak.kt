@@ -11,7 +11,8 @@ data class Førstegangsvedtak(
         mal: Brevmal = Brevmal.VEDTAK_FØRSTEGANGSVEDTAK,
         vedtakFellesfelter: VedtakFellesfelter,
         etterbetaling: Etterbetaling? = null,
-        etterbetalingInstitusjon: EtterbetalingInstitusjon? = null
+        etterbetalingInstitusjon: EtterbetalingInstitusjon? = null,
+        informasjonOmAarligKontroll: Boolean = false
     ) :
         this(
             mal = mal,
@@ -25,7 +26,8 @@ data class Førstegangsvedtak(
                     etterbetaling = etterbetaling,
                     hjemmeltekst = vedtakFellesfelter.hjemmeltekst,
                     etterbetalingInstitusjon = etterbetalingInstitusjon,
-                    korrigertVedtak = vedtakFellesfelter.korrigertVedtakData
+                    korrigertVedtak = vedtakFellesfelter.korrigertVedtakData,
+                    informasjonOmAarligKontroll = informasjonOmAarligKontroll
                 ),
                 flettefelter = FlettefelterForDokumentImpl(
                     navn = vedtakFellesfelter.søkerNavn,
@@ -49,6 +51,7 @@ data class FørstegangsvedtakData(
         val etterbetaling: Etterbetaling?,
         val hjemmeltekst: Hjemmeltekst,
         val etterbetalingInstitusjon: EtterbetalingInstitusjon?,
-        val korrigertVedtak: KorrigertVedtakData?
+        val korrigertVedtak: KorrigertVedtakData?,
+        val informasjonOmAarligKontroll: Boolean
     )
 }

@@ -4,9 +4,7 @@
   "tom": null,
   "vedtaksperiodetype": "AVSLAG",
   "begrunnelser": [
-    {
-      "standardbegrunnelse": "AVSLAG_UREGISTRERT_BARN"
-    }
+    "Standardbegrunnelse$AVSLAG_UREGISTRERT_BARN"
   ],
   "fritekster": [
     "Du har fått avslag fordi barnet ikke er registrert på samme adresse som deg og barnet ikke har fått norsk fødselsnummer ennå."
@@ -22,7 +20,8 @@
           "periodeTom": null,
           "resultat": "OPPFYLT",
           "utdypendeVilkårsvurderinger": [],
-          "erEksplisittAvslagPåSøknad": false
+          "erEksplisittAvslagPåSøknad": false,
+          "standardbegrunnelser": []
         },
         {
           "vilkårType": "LOVLIG_OPPHOLD",
@@ -30,7 +29,8 @@
           "periodeTom": null,
           "resultat": "OPPFYLT",
           "utdypendeVilkårsvurderinger": [],
-          "erEksplisittAvslagPåSøknad": false
+          "erEksplisittAvslagPåSøknad": false,
+          "standardbegrunnelser": []
         }
       ],
       "andreVurderinger": [],
@@ -38,7 +38,7 @@
       "utbetalinger": []
     }
   ],
-   "uregistrerteBarn": [
+  "uregistrerteBarn": [
     {
       "personIdent": "",
       "navn": "Barn Barnesen",

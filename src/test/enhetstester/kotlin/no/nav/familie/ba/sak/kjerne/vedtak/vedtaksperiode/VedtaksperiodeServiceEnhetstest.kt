@@ -33,7 +33,7 @@ class VedtaksperiodeServiceEnhetstest {
     private val endringstidspunktService: EndringstidspunktService = mockk()
     private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService = mockk()
 
-    private val VedtaksperiodeService = VedtaksperiodeService(
+    private val vedtaksperiodeService = VedtaksperiodeService(
         behandlingRepository = behandlingRepository,
         personidentService = mockk(),
         persongrunnlagService = persongrunnlagService,
@@ -86,7 +86,7 @@ class VedtaksperiodeServiceEnhetstest {
 
     @Test
     fun `genererVedtaksperioderMedBegrunnelser skal slå sammen opphørsperioder fra og med endringstidspunkt`() {
-        val returnerteVedtaksperioderNårUtledetEndringstidspunktErLikSisteOpphørFom = VedtaksperiodeService
+        val returnerteVedtaksperioderNårUtledetEndringstidspunktErLikSisteOpphørFom = vedtaksperiodeService
             .genererVedtaksperioderMedBegrunnelser(vedtak)
             .filter { it.type == Vedtaksperiodetype.OPPHØR }
 
@@ -95,10 +95,10 @@ class VedtaksperiodeServiceEnhetstest {
         val senesteOpphørTomDato =
             returnerteVedtaksperioderNårUtledetEndringstidspunktErLikSisteOpphørFom.sortedBy { it.tom ?: TIDENES_ENDE }.last().tom
 
-        val returnerteVedtaksperioderNårOverstyrtEndringstidspunktErFørsteOpphørFom = VedtaksperiodeService
+        val returnerteVedtaksperioderNårOverstyrtEndringstidspunktErFørsteOpphørFom = vedtaksperiodeService
             .genererVedtaksperioderMedBegrunnelser(vedtak, manueltOverstyrtEndringstidspunkt = førsteOpphørFomDato)
             .filter { it.type == Vedtaksperiodetype.OPPHØR }
-        val returnerteVedtaksperioderNårOverstyrtEndringstidspunktErFørFørsteOpphør = VedtaksperiodeService
+        val returnerteVedtaksperioderNårOverstyrtEndringstidspunktErFørFørsteOpphør = vedtaksperiodeService
             .genererVedtaksperioderMedBegrunnelser(vedtak, manueltOverstyrtEndringstidspunkt = førsteOpphørFomDato.minusMonths(1))
             .filter { it.type == Vedtaksperiodetype.OPPHØR }
 
@@ -115,16 +115,25 @@ class VedtaksperiodeServiceEnhetstest {
     fun `nasjonal skal ikke ha årlig kontroll`() {
         val behandling = lagBehandling(behandlingKategori = BehandlingKategori.NASJONAL)
         val vedtak = Vedtak(behandling = behandling)
-        assertFalse { VedtaksperiodeService.skalHaÅrligKontroll(vedtak) }
+        assertFalse { vedtaksperiodeService.skalHaÅrligKontroll(vedtak) }
     }
 
     @Test
-    fun `EØS uten periode uten tom skal ikke ha årlig kontroll`() {
+    fun `EØS med periode med utløpt tom skal ikke ha årlig kontroll`() {
         val vedtak = Vedtak(behandling = lagBehandling(behandlingKategori = BehandlingKategori.EØS))
         every { vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(any()) } returns listOf(
             lagVedtaksperiodeMedBegrunnelser(vedtak = vedtak, tom = LocalDate.now())
         )
-        assertFalse { VedtaksperiodeService.skalHaÅrligKontroll(vedtak) }
+        assertFalse { vedtaksperiodeService.skalHaÅrligKontroll(vedtak) }
+    }
+
+    @Test
+    fun `EØS med periode med løpende tom skal ha årlig kontroll`() {
+        val vedtak = Vedtak(behandling = lagBehandling(behandlingKategori = BehandlingKategori.EØS))
+        every { vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(any()) } returns listOf(
+            lagVedtaksperiodeMedBegrunnelser(vedtak = vedtak, tom = LocalDate.now().plusMonths(1))
+        )
+        assertTrue { vedtaksperiodeService.skalHaÅrligKontroll(vedtak) }
     }
 
     @Test
@@ -133,6 +142,6 @@ class VedtaksperiodeServiceEnhetstest {
         every { vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(any()) } returns listOf(
             lagVedtaksperiodeMedBegrunnelser(vedtak = vedtak, tom = null)
         )
-        assertTrue { VedtaksperiodeService.skalHaÅrligKontroll(vedtak) }
+        assertTrue { vedtaksperiodeService.skalHaÅrligKontroll(vedtak) }
     }
 }
