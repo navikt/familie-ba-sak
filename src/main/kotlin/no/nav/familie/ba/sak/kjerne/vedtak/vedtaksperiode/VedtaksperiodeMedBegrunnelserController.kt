@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.brev.BrevPeriodeService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.BegrunnelseData
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.EØSBegrunnelseData
@@ -55,12 +56,16 @@ class VedtaksperiodeMedBegrunnelserController(
             handling = OPPDATERE_BEGRUNNELSER_HANDLING
         )
 
-        val standardbegrunnelser = restPutVedtaksperiodeMedStandardbegrunnelser.standardbegrunnelser.mapNotNull { konverterTilEnumverdi<Standardbegrunnelse>(it) }
-        val eøsStandardbegrunnelser = restPutVedtaksperiodeMedStandardbegrunnelser.standardbegrunnelser.mapNotNull { konverterTilEnumverdi<EØSStandardbegrunnelse>(it) }
+        val standardbegrunnelser = restPutVedtaksperiodeMedStandardbegrunnelser.standardbegrunnelser.mapNotNull {
+            IVedtakBegrunnelse.konverterTilEnumVerdi(it)
+        }
+
+        val nasjonalebegrunnelser = standardbegrunnelser.filterIsInstance<Standardbegrunnelse>()
+        val eøsStandardbegrunnelser = standardbegrunnelser.filterIsInstance<EØSStandardbegrunnelse>()
 
         val vedtak = vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
             vedtaksperiodeId = vedtaksperiodeId,
-            standardbegrunnelserFraFrontend = standardbegrunnelser,
+            standardbegrunnelserFraFrontend = nasjonalebegrunnelser,
             eøsStandardbegrunnelserFraFrontend = eøsStandardbegrunnelser
         )
 
@@ -146,9 +151,6 @@ class VedtaksperiodeMedBegrunnelserController(
         )
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = vedtak.behandling.id)))
     }
-
-    private inline fun <reified T> konverterTilEnumverdi(it: String): T? where T : Enum<T> =
-        enumValues<T>().find { enum -> enum.name == it }
 
     companion object {
         const val OPPDATERE_BEGRUNNELSER_HANDLING = "oppdatere vedtaksperiode med begrunnelser"

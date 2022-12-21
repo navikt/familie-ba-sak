@@ -45,7 +45,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.EØSBegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilVedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
@@ -115,7 +115,7 @@ class VedtaksperiodeService(
 
         vedtaksperiodeMedBegrunnelser.settBegrunnelser(
             standardbegrunnelserFraFrontend.mapNotNull {
-                val triggesAv = it.tilSanityBegrunnelse(sanityBegrunnelser)?.tilTriggesAv()
+                val triggesAv = it.tilISanityBegrunnelse(sanityBegrunnelser)?.tilTriggesAv()
                     ?: return@mapNotNull null
 
                 if (triggesAv.satsendring) {
@@ -569,6 +569,9 @@ class VedtaksperiodeService(
             val standardbegrunnelser =
                 vilkårResultater.map { it.standardbegrunnelser }.flatten().toSet().toList()
 
+            val nasjonaleStandardbegrunnelser = standardbegrunnelser.filterIsInstance<Standardbegrunnelse>()
+            val eøsStandardbegrunnelser = standardbegrunnelser.filterIsInstance<EØSStandardbegrunnelse>()
+
             VedtaksperiodeMedBegrunnelser(
                 vedtak = vedtak,
                 fom = fellesPeriode.fom,
@@ -577,10 +580,18 @@ class VedtaksperiodeService(
             )
                 .apply {
                     begrunnelser.addAll(
-                        standardbegrunnelser.map { begrunnelse ->
+                        nasjonaleStandardbegrunnelser.map { begrunnelse ->
                             Vedtaksbegrunnelse(
                                 vedtaksperiodeMedBegrunnelser = this,
                                 standardbegrunnelse = begrunnelse
+                            )
+                        }
+                    )
+                    eøsBegrunnelser.addAll(
+                        eøsStandardbegrunnelser.map { begrunnelse ->
+                            EØSBegrunnelse(
+                                vedtaksperiodeMedBegrunnelser = this,
+                                begrunnelse = begrunnelse
                             )
                         }
                     )

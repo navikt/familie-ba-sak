@@ -4,9 +4,7 @@
   "tom": null,
   "vedtaksperiodetype": "FORTSATT_INNVILGET",
   "begrunnelser": [
-    {
-      "standardbegrunnelse": "REDUKSJON_UNDER_18_ÅR_AUTOVEDTAK"
-    }
+    "Standardbegrunnelse$REDUKSJON_UNDER_18_ÅR_AUTOVEDTAK"
   ],
   "fritekster": [],
   "uregistrerteBarn": [],
@@ -23,7 +21,8 @@
           "periodeFom": "2003-12-10",
           "periodeTom": "2021-12-10",
           "utdypendeVilkårsvurderinger": [],
-          "erEksplisittAvslagPåSøknad": false
+          "erEksplisittAvslagPåSøknad": false,
+          "standardbegrunnelser": []
         }
       ],
       "andreVurderinger": [],

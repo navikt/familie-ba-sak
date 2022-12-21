@@ -12,8 +12,8 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestEndretAndel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.StandardbegrunnelseListConverter
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelseListConverter
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -82,8 +82,8 @@ data class EndretUtbetalingAndel(
     val andelTilkjentYtelser: MutableList<AndelTilkjentYtelse> = mutableListOf(),
 
     @Column(name = "vedtak_begrunnelse_spesifikasjoner")
-    @Convert(converter = StandardbegrunnelseListConverter::class)
-    var standardbegrunnelser: List<Standardbegrunnelse> = emptyList()
+    @Convert(converter = IVedtakBegrunnelseListConverter::class)
+    var standardbegrunnelser: List<IVedtakBegrunnelse> = emptyList()
 ) : BaseEntitet() {
 
     fun overlapperMed(periode: MånedPeriode) = periode.overlapperHeltEllerDelvisMed(this.periode)

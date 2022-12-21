@@ -5,7 +5,7 @@
   "vedtaksperiodetype": "OPPHØR",
   "begrunnelser": [],
   "eøsBegrunnelser": [
-    "OPPHØR_EØS_STANDARD"
+    "EØSStandardbegrunnelse$OPPHØR_EØS_STANDARD"
   ],
   "kompetanserSomStopperRettFørPeriode": [
     {
