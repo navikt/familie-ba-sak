@@ -102,7 +102,7 @@ class UtvidetBehandlingService(
         val endreteUtbetalingerMedAndeler = andelerTilkjentYtelseOgEndreteUtbetalingerService
             .finnEndreteUtbetalingerMedAndelerIHenholdTilVilkårsvurdering(behandlingId)
 
-        val trekkILøpendeUtbetaling = feilutbetaltValutaService.hentFeilutbetaltValutaPerioder(behandlingId)
+        val feilutbetaltValuta = feilutbetaltValutaService.hentFeilutbetaltValutaPerioder(behandlingId)
 
         return RestUtvidetBehandling(
             behandlingId = behandling.id,
@@ -153,7 +153,7 @@ class UtvidetBehandlingService(
                 ?.tilRestKorrigertEtterbetaling(),
             korrigertVedtak = korrigertVedtakService.finnAktivtKorrigertVedtakPåBehandling(behandlingId)
                 ?.tilRestKorrigertVedtak(),
-            trekkILøpendeUtbetaling = trekkILøpendeUtbetaling
+            feilutbetaltValuta = feilutbetaltValuta
         )
     }
 

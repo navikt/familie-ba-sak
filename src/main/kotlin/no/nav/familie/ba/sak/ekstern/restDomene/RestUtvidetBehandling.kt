@@ -44,5 +44,5 @@ data class RestUtvidetBehandling(
     val verge: VergeInfo?,
     val korrigertEtterbetaling: RestKorrigertEtterbetaling?,
     val korrigertVedtak: RestKorrigertVedtak?,
-    val trekkILøpendeUtbetaling: List<RestFeilutbetaltValuta>
+    val feilutbetaltValuta: List<RestFeilutbetaltValuta>
 )
