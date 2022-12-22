@@ -32,14 +32,14 @@ class TrekkILøpendeUtbetalingControllerTest(
             feilutbetaltBeløp = 1234
         )
 
-        val id = service.leggTilTrekkILøpendeUtbetaling(trekkILøpendeUtbetaling = trekk, behandlingId = behandling.id)
+        val id = service.leggTilFeilutbetaltValutaPeriode(trekkILøpendeUtbetaling = trekk, behandlingId = behandling.id)
 
-        service.hentTrekkILøpendeUtbetalinger(behandlingId = behandling.id)
+        service.hentFeilutbetaltValutaPerioder(behandlingId = behandling.id)
             .also { Assertions.assertThat(it[0].id).isEqualTo(id) }
             .also { Assertions.assertThat(it[0].fom).isNotNull() }
             .also { Assertions.assertThat(it[0].tom).isNotNull() }
 
-        service.oppdaterTrekkILøpendeUtbetaling(
+        service.oppdatertFeilutbetaltValutaPeriode(
             trekkILøpendeUtbetaling = RestTrekkILøpendeUtbetaling(
                 id = id,
                 fom = LocalDate.of(2020, Month.JANUARY, 1),
@@ -49,7 +49,7 @@ class TrekkILøpendeUtbetalingControllerTest(
             id = id
         )
 
-        service.hentTrekkILøpendeUtbetalinger(behandlingId = behandling.id)
+        service.hentFeilutbetaltValutaPerioder(behandlingId = behandling.id)
             .also { Assertions.assertThat(it.get(0).id).isEqualTo(id) }
             .also { Assertions.assertThat(it.get(0).tom).isEqualTo("2020-05-31") }
 
@@ -60,15 +60,15 @@ class TrekkILøpendeUtbetalingControllerTest(
             feilutbetaltBeløp = 100
         )
 
-        val id2 = service.leggTilTrekkILøpendeUtbetaling(trekkILøpendeUtbetaling = trekk2, behandlingId = behandling.id)
+        val id2 = service.leggTilFeilutbetaltValutaPeriode(trekkILøpendeUtbetaling = trekk2, behandlingId = behandling.id)
 
-        service.hentTrekkILøpendeUtbetalinger(behandlingId = behandling.id)
+        service.hentFeilutbetaltValutaPerioder(behandlingId = behandling.id)
             .also { Assertions.assertThat(it.size).isEqualTo(2) }
             .also { Assertions.assertThat(it.get(0).id).isEqualTo(id2) }
 
-        service.fjernTrekkILøpendeUtbetaling(id = id, behandlingId = behandling.id)
+        service.fjernFeilutbetaltValutaPeriode(id = id, behandlingId = behandling.id)
 
-        service.hentTrekkILøpendeUtbetalinger(behandlingId = behandling.id)
+        service.hentFeilutbetaltValutaPerioder(behandlingId = behandling.id)
             .also { Assertions.assertThat(it.size).isEqualTo(1) }
             .also { Assertions.assertThat(it[0].id).isEqualTo(id2) }
     }

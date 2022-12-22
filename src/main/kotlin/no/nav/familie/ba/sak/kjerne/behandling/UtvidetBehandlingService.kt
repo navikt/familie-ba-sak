@@ -102,7 +102,7 @@ class UtvidetBehandlingService(
         val endreteUtbetalingerMedAndeler = andelerTilkjentYtelseOgEndreteUtbetalingerService
             .finnEndreteUtbetalingerMedAndelerIHenholdTilVilkårsvurdering(behandlingId)
 
-        val trekkILøpendeUtbetaling = trekkILøpendeUtbetalingService.hentTrekkILøpendeUtbetalinger(behandlingId)
+        val trekkILøpendeUtbetaling = trekkILøpendeUtbetalingService.hentFeilutbetaltValutaPerioder(behandlingId)
 
         return RestUtvidetBehandling(
             behandlingId = behandling.id,

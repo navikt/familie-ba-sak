@@ -38,7 +38,7 @@ class TrekkILøpendeUtbetalingController(
             handling = "legg til trekk i løpende utbetaling"
         )
 
-        trekkILøpendeUtbetalingService.leggTilTrekkILøpendeUtbetaling(trekkILøpendeUtbetaling = trekkILøpendeUtbetaling, behandlingId = behandlingId)
+        trekkILøpendeUtbetalingService.leggTilFeilutbetaltValutaPeriode(trekkILøpendeUtbetaling = trekkILøpendeUtbetaling, behandlingId = behandlingId)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
@@ -54,7 +54,7 @@ class TrekkILøpendeUtbetalingController(
             handling = "oppdater trekk i løpende utbetaling"
         )
 
-        trekkILøpendeUtbetalingService.oppdaterTrekkILøpendeUtbetaling(trekkILøpendeUtbetaling = trekkILøpendeUtbetaling, id = id)
+        trekkILøpendeUtbetalingService.oppdatertFeilutbetaltValutaPeriode(trekkILøpendeUtbetaling = trekkILøpendeUtbetaling, id = id)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
@@ -68,7 +68,7 @@ class TrekkILøpendeUtbetalingController(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
             handling = "Fjerner trekk i løpende utbetaling"
         )
-        trekkILøpendeUtbetalingService.fjernTrekkILøpendeUtbetaling(id = id, behandlingId = behandlingId)
+        trekkILøpendeUtbetalingService.fjernFeilutbetaltValutaPeriode(id = id, behandlingId = behandlingId)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
@@ -79,6 +79,6 @@ class TrekkILøpendeUtbetalingController(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
             handling = "hente trekk i løpende utbetalinger"
         )
-        return ResponseEntity.ok(Ressurs.success(trekkILøpendeUtbetalingService.hentTrekkILøpendeUtbetalinger(behandlingId = behandlingId)))
+        return ResponseEntity.ok(Ressurs.success(trekkILøpendeUtbetalingService.hentFeilutbetaltValutaPerioder(behandlingId = behandlingId)))
     }
 }
