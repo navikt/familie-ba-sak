@@ -24,14 +24,14 @@ class TrekkILøpendeUtbetalingService(
                 feilutbetaltBeløp = feilutbetaltValuta.feilutbetaltBeløp
             )
         )
-        loggService.loggTrekkILøpendeUtbetalingLagtTil(behandlingId = behandlingId)
+        loggService.loggFeilutbetaltValutaPeriodeLagtTil(behandlingId = behandlingId)
         return lagret.id
     }
 
     @Transactional
     fun fjernFeilutbetaltValutaPeriode(id: Long, behandlingId: Long) {
         trekkILøpendeUtbetalingRepository.deleteById(id)
-        loggService.loggTrekkILøpendeUtbetalingFjernet(behandlingId = behandlingId)
+        loggService.loggFeilutbetaltValutaPeriodeFjernet(behandlingId = behandlingId)
     }
 
     fun hentFeilutbetaltValutaPerioder(behandlingId: Long) =

@@ -482,7 +482,7 @@ class LoggService(
         )
     }
 
-    fun loggTrekkILøpendeUtbetalingLagtTil(behandlingId: Long) =
+    fun loggFeilutbetaltValutaPeriodeLagtTil(behandlingId: Long) =
         lagre(
             Logg(
                 behandlingId = behandlingId,
@@ -494,7 +494,7 @@ class LoggService(
             )
         )
 
-    fun loggTrekkILøpendeUtbetalingFjernet(behandlingId: Long) =
+    fun loggFeilutbetaltValutaPeriodeFjernet(behandlingId: Long) =
         lagre(
             Logg(
                 behandlingId = behandlingId,
