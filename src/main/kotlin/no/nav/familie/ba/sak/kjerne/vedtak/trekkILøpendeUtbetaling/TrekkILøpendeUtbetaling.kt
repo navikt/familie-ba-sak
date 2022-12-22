@@ -13,8 +13,8 @@ import javax.persistence.SequenceGenerator
 import javax.persistence.Table
 
 @EntityListeners(RollestyringMotDatabase::class)
-@Entity(name = "TrekkILøpendeUtbetaling")
-@Table(name = "TREKK_I_LOEPENDE_UTBETALING")
+@Entity(name = "FeilutbetaltValuta")
+@Table(name = "FEILUTBETALT_VALUTA")
 data class TrekkILøpendeUtbetaling(
     @Column(name = "fk_behandling_id", updatable = false, nullable = false)
     val behandlingId: Long,
@@ -26,10 +26,10 @@ data class TrekkILøpendeUtbetaling(
     var feilutbetaltBeløp: Int,
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "trekk_i_loepende_utbetaling_seq_generator")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "feilutbetalt_valuta_seq_generator")
     @SequenceGenerator(
-        name = "trekk_i_loepende_utbetaling_seq_generator",
-        sequenceName = "trekk_i_loepende_utbetaling_seq",
+        name = "feilutbetalt_valuta_seq_generator",
+        sequenceName = "feilutbetalt_valuta_seq",
         allocationSize = 50
     )
     val id: Long = 0
