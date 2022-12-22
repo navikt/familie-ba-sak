@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.vedtak.trekkILøpendeUtbetaling
+package no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta
 
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService

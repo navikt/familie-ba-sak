@@ -39,7 +39,7 @@ import no.nav.familie.ba.sak.kjerne.korrigertvedtak.KorrigertVedtakService
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.TilbakekrevingRepository
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
-import no.nav.familie.ba.sak.kjerne.vedtak.trekkILøpendeUtbetaling.FeilutbetaltValutaService
+import no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta.FeilutbetaltValutaService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilRestUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
