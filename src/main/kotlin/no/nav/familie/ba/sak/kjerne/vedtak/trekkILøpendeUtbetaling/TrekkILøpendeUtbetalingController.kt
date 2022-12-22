@@ -38,7 +38,7 @@ class TrekkILøpendeUtbetalingController(
             handling = "legg til trekk i løpende utbetaling"
         )
 
-        trekkILøpendeUtbetalingService.leggTilFeilutbetaltValutaPeriode(trekkILøpendeUtbetaling = trekkILøpendeUtbetaling, behandlingId = behandlingId)
+        trekkILøpendeUtbetalingService.leggTilFeilutbetaltValutaPeriode(feilutbetaltValuta = trekkILøpendeUtbetaling, behandlingId = behandlingId)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
@@ -54,7 +54,7 @@ class TrekkILøpendeUtbetalingController(
             handling = "oppdater trekk i løpende utbetaling"
         )
 
-        trekkILøpendeUtbetalingService.oppdatertFeilutbetaltValutaPeriode(trekkILøpendeUtbetaling = trekkILøpendeUtbetaling, id = id)
+        trekkILøpendeUtbetalingService.oppdatertFeilutbetaltValutaPeriode(feilutbetaltValuta = trekkILøpendeUtbetaling, id = id)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }

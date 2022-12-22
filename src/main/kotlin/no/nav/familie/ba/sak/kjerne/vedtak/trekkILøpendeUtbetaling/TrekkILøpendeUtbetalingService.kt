@@ -15,13 +15,13 @@ class TrekkILøpendeUtbetalingService(
     private val loggService: LoggService
 ) {
     @Transactional
-    fun leggTilFeilutbetaltValutaPeriode(trekkILøpendeUtbetaling: RestTrekkILøpendeUtbetaling, behandlingId: Long): Long {
+    fun leggTilFeilutbetaltValutaPeriode(feilutbetaltValuta: RestTrekkILøpendeUtbetaling, behandlingId: Long): Long {
         val lagret = trekkILøpendeUtbetalingRepository.save(
             TrekkILøpendeUtbetaling(
                 behandlingId = behandlingId,
-                fom = trekkILøpendeUtbetaling.fom,
-                tom = trekkILøpendeUtbetaling.tom,
-                feilutbetaltBeløp = trekkILøpendeUtbetaling.feilutbetaltBeløp
+                fom = feilutbetaltValuta.fom,
+                tom = feilutbetaltValuta.tom,
+                feilutbetaltBeløp = feilutbetaltValuta.feilutbetaltBeløp
             )
         )
         loggService.loggTrekkILøpendeUtbetalingLagtTil(behandlingId = behandlingId)
@@ -46,11 +46,11 @@ class TrekkILøpendeUtbetalingService(
         )
 
     @Transactional
-    fun oppdatertFeilutbetaltValutaPeriode(trekkILøpendeUtbetaling: RestTrekkILøpendeUtbetaling, id: Long) {
-        val periode = trekkILøpendeUtbetalingRepository.findById(id).orElseThrow { Feil("Finner ikke feilutbetalt valuta med id=${trekkILøpendeUtbetaling.id}") }
+    fun oppdatertFeilutbetaltValutaPeriode(feilutbetaltValuta: RestTrekkILøpendeUtbetaling, id: Long) {
+        val periode = trekkILøpendeUtbetalingRepository.findById(id).orElseThrow { Feil("Finner ikke feilutbetalt valuta med id=${feilutbetaltValuta.id}") }
 
-        periode.fom = trekkILøpendeUtbetaling.fom
-        periode.tom = trekkILøpendeUtbetaling.tom
-        periode.feilutbetaltBeløp = trekkILøpendeUtbetaling.feilutbetaltBeløp
+        periode.fom = feilutbetaltValuta.fom
+        periode.tom = feilutbetaltValuta.tom
+        periode.feilutbetaltBeløp = feilutbetaltValuta.feilutbetaltBeløp
     }
 }

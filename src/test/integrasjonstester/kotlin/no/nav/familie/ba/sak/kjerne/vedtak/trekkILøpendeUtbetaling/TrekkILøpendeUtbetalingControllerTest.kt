@@ -32,7 +32,7 @@ class TrekkILøpendeUtbetalingControllerTest(
             feilutbetaltBeløp = 1234
         )
 
-        val id = service.leggTilFeilutbetaltValutaPeriode(trekkILøpendeUtbetaling = trekk, behandlingId = behandling.id)
+        val id = service.leggTilFeilutbetaltValutaPeriode(feilutbetaltValuta = trekk, behandlingId = behandling.id)
 
         service.hentFeilutbetaltValutaPerioder(behandlingId = behandling.id)
             .also { Assertions.assertThat(it[0].id).isEqualTo(id) }
@@ -40,7 +40,7 @@ class TrekkILøpendeUtbetalingControllerTest(
             .also { Assertions.assertThat(it[0].tom).isNotNull() }
 
         service.oppdatertFeilutbetaltValutaPeriode(
-            trekkILøpendeUtbetaling = RestTrekkILøpendeUtbetaling(
+            feilutbetaltValuta = RestTrekkILøpendeUtbetaling(
                 id = id,
                 fom = LocalDate.of(2020, Month.JANUARY, 1),
                 tom = LocalDate.of(2020, Month.MAY, 31),
@@ -60,7 +60,7 @@ class TrekkILøpendeUtbetalingControllerTest(
             feilutbetaltBeløp = 100
         )
 
-        val id2 = service.leggTilFeilutbetaltValutaPeriode(trekkILøpendeUtbetaling = trekk2, behandlingId = behandling.id)
+        val id2 = service.leggTilFeilutbetaltValutaPeriode(feilutbetaltValuta = trekk2, behandlingId = behandling.id)
 
         service.hentFeilutbetaltValutaPerioder(behandlingId = behandling.id)
             .also { Assertions.assertThat(it.size).isEqualTo(2) }
