@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/api/trekk-i-loepende-utbetaling")
+@RequestMapping("/api/feilutbetalt-valuta")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class TrekkILøpendeUtbetalingController(
@@ -28,45 +28,45 @@ class TrekkILøpendeUtbetalingController(
     private val utvidetBehandlingService: UtvidetBehandlingService
 ) {
     @PostMapping(path = ["behandling/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE], consumes = [MediaType.APPLICATION_JSON_VALUE])
-    fun leggTilTrekkILøpendeUtbetaling(
+    fun leggTilFeilutbetaltValutaPeriode(
         @PathVariable behandlingId: Long,
-        @RequestBody trekkILøpendeUtbetaling: RestTrekkILøpendeUtbetaling
+        @RequestBody feilutbetaltValuta: RestTrekkILøpendeUtbetaling
     ):
         ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
-            handling = "legg til trekk i løpende utbetaling"
+            handling = "legg til periode med feilutbetalt valuta"
         )
 
-        trekkILøpendeUtbetalingService.leggTilFeilutbetaltValutaPeriode(feilutbetaltValuta = trekkILøpendeUtbetaling, behandlingId = behandlingId)
+        trekkILøpendeUtbetalingService.leggTilFeilutbetaltValutaPeriode(feilutbetaltValuta = feilutbetaltValuta, behandlingId = behandlingId)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
 
     @PutMapping(path = ["behandling/{behandlingId}/periode/{id}"], produces = [MediaType.APPLICATION_JSON_VALUE], consumes = [MediaType.APPLICATION_JSON_VALUE])
-    fun oppdaterTrekkILøpendeUtbetaling(
+    fun oppdaterFeilutbetaltValutaPeriode(
         @PathVariable behandlingId: Long,
         @PathVariable id: Long,
-        @RequestBody trekkILøpendeUtbetaling: RestTrekkILøpendeUtbetaling
+        @RequestBody feilutbetaltValuta: RestTrekkILøpendeUtbetaling
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
-            handling = "oppdater trekk i løpende utbetaling"
+            handling = "oppdater periode med feilutbetalt valuta"
         )
 
-        trekkILøpendeUtbetalingService.oppdatertFeilutbetaltValutaPeriode(feilutbetaltValuta = trekkILøpendeUtbetaling, id = id)
+        trekkILøpendeUtbetalingService.oppdatertFeilutbetaltValutaPeriode(feilutbetaltValuta = feilutbetaltValuta, id = id)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
 
     @DeleteMapping(path = ["behandling/{behandlingId}/periode/{id}"])
-    fun fjernTrekkILøpendeUtbetaling(
+    fun fjernFeilutbetaltValutaPeriode(
         @PathVariable behandlingId: Long,
         @PathVariable id: Long
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
-            handling = "Fjerner trekk i løpende utbetaling"
+            handling = "Fjerner periode med feilutbetalt valuta"
         )
         trekkILøpendeUtbetalingService.fjernFeilutbetaltValutaPeriode(id = id, behandlingId = behandlingId)
 
@@ -74,10 +74,10 @@ class TrekkILøpendeUtbetalingController(
     }
 
     @GetMapping(path = ["behandling/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun hentTrekkILøpendeUtbetalinger(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<List<RestTrekkILøpendeUtbetaling>?>> {
+    fun hentFeilutbetaltValutaPerioder(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<List<RestTrekkILøpendeUtbetaling>?>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
-            handling = "hente trekk i løpende utbetalinger"
+            handling = "hente feilutbetalt valuta for behandling"
         )
         return ResponseEntity.ok(Ressurs.success(trekkILøpendeUtbetalingService.hentFeilutbetaltValutaPerioder(behandlingId = behandlingId)))
     }
