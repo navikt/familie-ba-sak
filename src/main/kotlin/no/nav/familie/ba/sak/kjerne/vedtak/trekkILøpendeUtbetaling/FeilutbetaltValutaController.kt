@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api/feilutbetalt-valuta")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class TrekkILøpendeUtbetalingController(
+class FeilutbetaltValutaController(
     private val tilgangService: TilgangService,
     private val feilutbetaltValutaService: FeilutbetaltValutaService,
     private val utvidetBehandlingService: UtvidetBehandlingService
