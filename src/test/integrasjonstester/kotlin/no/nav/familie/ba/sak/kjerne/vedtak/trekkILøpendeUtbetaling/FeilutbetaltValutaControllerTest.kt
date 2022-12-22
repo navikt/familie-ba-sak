@@ -14,7 +14,7 @@ import java.time.LocalDate
 import java.time.Month
 
 class FeilutbetaltValutaControllerTest(
-    @Autowired val service: TrekkILøpendeUtbetalingService,
+    @Autowired val service: FeilutbetaltValutaService,
     @Autowired val aktørIdRepository: AktørIdRepository,
     @Autowired val fagsakRepository: FagsakRepository,
     @Autowired val behandlingRepository: BehandlingRepository

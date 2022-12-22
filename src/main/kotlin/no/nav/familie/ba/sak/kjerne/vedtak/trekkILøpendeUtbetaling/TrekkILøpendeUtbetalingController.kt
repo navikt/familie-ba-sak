@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RestController
 @Validated
 class TrekkILøpendeUtbetalingController(
     private val tilgangService: TilgangService,
-    private val trekkILøpendeUtbetalingService: TrekkILøpendeUtbetalingService,
+    private val feilutbetaltValutaService: FeilutbetaltValutaService,
     private val utvidetBehandlingService: UtvidetBehandlingService
 ) {
     @PostMapping(path = ["behandling/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE], consumes = [MediaType.APPLICATION_JSON_VALUE])
@@ -38,7 +38,7 @@ class TrekkILøpendeUtbetalingController(
             handling = "legg til periode med feilutbetalt valuta"
         )
 
-        trekkILøpendeUtbetalingService.leggTilFeilutbetaltValutaPeriode(feilutbetaltValuta = feilutbetaltValuta, behandlingId = behandlingId)
+        feilutbetaltValutaService.leggTilFeilutbetaltValutaPeriode(feilutbetaltValuta = feilutbetaltValuta, behandlingId = behandlingId)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
@@ -54,7 +54,7 @@ class TrekkILøpendeUtbetalingController(
             handling = "oppdater periode med feilutbetalt valuta"
         )
 
-        trekkILøpendeUtbetalingService.oppdatertFeilutbetaltValutaPeriode(feilutbetaltValuta = feilutbetaltValuta, id = id)
+        feilutbetaltValutaService.oppdatertFeilutbetaltValutaPeriode(feilutbetaltValuta = feilutbetaltValuta, id = id)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
@@ -68,7 +68,7 @@ class TrekkILøpendeUtbetalingController(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
             handling = "Fjerner periode med feilutbetalt valuta"
         )
-        trekkILøpendeUtbetalingService.fjernFeilutbetaltValutaPeriode(id = id, behandlingId = behandlingId)
+        feilutbetaltValutaService.fjernFeilutbetaltValutaPeriode(id = id, behandlingId = behandlingId)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
@@ -79,6 +79,6 @@ class TrekkILøpendeUtbetalingController(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
             handling = "hente feilutbetalt valuta for behandling"
         )
-        return ResponseEntity.ok(Ressurs.success(trekkILøpendeUtbetalingService.hentFeilutbetaltValutaPerioder(behandlingId = behandlingId)))
+        return ResponseEntity.ok(Ressurs.success(feilutbetaltValutaService.hentFeilutbetaltValutaPerioder(behandlingId = behandlingId)))
     }
 }

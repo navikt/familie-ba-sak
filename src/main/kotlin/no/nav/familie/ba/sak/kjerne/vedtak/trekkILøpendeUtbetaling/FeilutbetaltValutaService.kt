@@ -7,16 +7,16 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
-class TrekkILøpendeUtbetalingService(
+class FeilutbetaltValutaService(
     @Autowired
-    private val trekkILøpendeUtbetalingRepository: TrekkILøpendeUtbetalingRepository,
+    private val feilutbetaltValutaRepository: FeilutbetaltValutaRepository,
 
     @Autowired
     private val loggService: LoggService
 ) {
     @Transactional
     fun leggTilFeilutbetaltValutaPeriode(feilutbetaltValuta: RestFeilutbetaltValuta, behandlingId: Long): Long {
-        val lagret = trekkILøpendeUtbetalingRepository.save(
+        val lagret = feilutbetaltValutaRepository.save(
             FeilutbetaltValuta(
                 behandlingId = behandlingId,
                 fom = feilutbetaltValuta.fom,
@@ -30,12 +30,12 @@ class TrekkILøpendeUtbetalingService(
 
     @Transactional
     fun fjernFeilutbetaltValutaPeriode(id: Long, behandlingId: Long) {
-        trekkILøpendeUtbetalingRepository.deleteById(id)
+        feilutbetaltValutaRepository.deleteById(id)
         loggService.loggFeilutbetaltValutaPeriodeFjernet(behandlingId = behandlingId)
     }
 
     fun hentFeilutbetaltValutaPerioder(behandlingId: Long) =
-        trekkILøpendeUtbetalingRepository.finnFeilutbetaltValutaForBehandling(behandlingId = behandlingId).map { tilRest(it) }
+        feilutbetaltValutaRepository.finnFeilutbetaltValutaForBehandling(behandlingId = behandlingId).map { tilRest(it) }
 
     private fun tilRest(it: FeilutbetaltValuta) =
         RestFeilutbetaltValuta(
@@ -47,7 +47,7 @@ class TrekkILøpendeUtbetalingService(
 
     @Transactional
     fun oppdatertFeilutbetaltValutaPeriode(feilutbetaltValuta: RestFeilutbetaltValuta, id: Long) {
-        val periode = trekkILøpendeUtbetalingRepository.findById(id).orElseThrow { Feil("Finner ikke feilutbetalt valuta med id=${feilutbetaltValuta.id}") }
+        val periode = feilutbetaltValutaRepository.findById(id).orElseThrow { Feil("Finner ikke feilutbetalt valuta med id=${feilutbetaltValuta.id}") }
 
         periode.fom = feilutbetaltValuta.fom
         periode.tom = feilutbetaltValuta.tom
