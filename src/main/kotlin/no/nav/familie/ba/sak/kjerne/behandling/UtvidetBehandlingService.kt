@@ -153,7 +153,8 @@ class UtvidetBehandlingService(
                 ?.tilRestKorrigertEtterbetaling(),
             korrigertVedtak = korrigertVedtakService.finnAktivtKorrigertVedtakPåBehandling(behandlingId)
                 ?.tilRestKorrigertVedtak(),
-            feilutbetaltValuta = feilutbetaltValuta
+            feilutbetaltValuta = feilutbetaltValuta,
+            trekkILøpendeUtbetaling = feilutbetaltValuta
         )
     }
 
