@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.vedtak.trekkILøpendeUtbetaling
+package no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta
 
 import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagBehandling
@@ -13,8 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 import java.time.Month
 
-class TrekkILøpendeUtbetalingControllerTest(
-    @Autowired val service: TrekkILøpendeUtbetalingService,
+class FeilutbetaltValutaControllerTest(
+    @Autowired val feilutbetaltValutaService: FeilutbetaltValutaService,
     @Autowired val aktørIdRepository: AktørIdRepository,
     @Autowired val fagsakRepository: FagsakRepository,
     @Autowired val behandlingRepository: BehandlingRepository
@@ -25,22 +25,22 @@ class TrekkILøpendeUtbetalingControllerTest(
         val fagsak =
             defaultFagsak(aktør = randomAktør().also { aktørIdRepository.save(it) }).let { fagsakRepository.save(it) }
         val behandling = lagBehandling(fagsak = fagsak).let { behandlingRepository.save(it) }
-        val trekk = RestTrekkILøpendeUtbetaling(
+        val feilutbetaltValuta = RestFeilutbetaltValuta(
             id = 0,
             fom = LocalDate.of(2020, Month.JANUARY, 1),
             tom = LocalDate.of(2021, Month.MAY, 31),
             feilutbetaltBeløp = 1234
         )
 
-        val id = service.leggTilTrekkILøpendeUtbetaling(trekkILøpendeUtbetaling = trekk, behandlingId = behandling.id)
+        val id = feilutbetaltValutaService.leggTilFeilutbetaltValutaPeriode(feilutbetaltValuta = feilutbetaltValuta, behandlingId = behandling.id)
 
-        service.hentTrekkILøpendeUtbetalinger(behandlingId = behandling.id)
+        feilutbetaltValutaService.hentFeilutbetaltValutaPerioder(behandlingId = behandling.id)
             .also { Assertions.assertThat(it[0].id).isEqualTo(id) }
             .also { Assertions.assertThat(it[0].fom).isNotNull() }
             .also { Assertions.assertThat(it[0].tom).isNotNull() }
 
-        service.oppdaterTrekkILøpendeUtbetaling(
-            trekkILøpendeUtbetaling = RestTrekkILøpendeUtbetaling(
+        feilutbetaltValutaService.oppdatertFeilutbetaltValutaPeriode(
+            feilutbetaltValuta = RestFeilutbetaltValuta(
                 id = id,
                 fom = LocalDate.of(2020, Month.JANUARY, 1),
                 tom = LocalDate.of(2020, Month.MAY, 31),
@@ -49,26 +49,26 @@ class TrekkILøpendeUtbetalingControllerTest(
             id = id
         )
 
-        service.hentTrekkILøpendeUtbetalinger(behandlingId = behandling.id)
+        feilutbetaltValutaService.hentFeilutbetaltValutaPerioder(behandlingId = behandling.id)
             .also { Assertions.assertThat(it.get(0).id).isEqualTo(id) }
             .also { Assertions.assertThat(it.get(0).tom).isEqualTo("2020-05-31") }
 
-        val trekk2 = RestTrekkILøpendeUtbetaling(
+        val feilutbetaltValuta2 = RestFeilutbetaltValuta(
             id = 0,
             fom = LocalDate.of(2019, Month.DECEMBER, 1),
             tom = LocalDate.of(2019, Month.DECEMBER, 31),
             feilutbetaltBeløp = 100
         )
 
-        val id2 = service.leggTilTrekkILøpendeUtbetaling(trekkILøpendeUtbetaling = trekk2, behandlingId = behandling.id)
+        val id2 = feilutbetaltValutaService.leggTilFeilutbetaltValutaPeriode(feilutbetaltValuta = feilutbetaltValuta2, behandlingId = behandling.id)
 
-        service.hentTrekkILøpendeUtbetalinger(behandlingId = behandling.id)
+        feilutbetaltValutaService.hentFeilutbetaltValutaPerioder(behandlingId = behandling.id)
             .also { Assertions.assertThat(it.size).isEqualTo(2) }
             .also { Assertions.assertThat(it.get(0).id).isEqualTo(id2) }
 
-        service.fjernTrekkILøpendeUtbetaling(id = id, behandlingId = behandling.id)
+        feilutbetaltValutaService.fjernFeilutbetaltValutaPeriode(id = id, behandlingId = behandling.id)
 
-        service.hentTrekkILøpendeUtbetalinger(behandlingId = behandling.id)
+        feilutbetaltValutaService.hentFeilutbetaltValutaPerioder(behandlingId = behandling.id)
             .also { Assertions.assertThat(it.size).isEqualTo(1) }
             .also { Assertions.assertThat(it[0].id).isEqualTo(id2) }
     }
