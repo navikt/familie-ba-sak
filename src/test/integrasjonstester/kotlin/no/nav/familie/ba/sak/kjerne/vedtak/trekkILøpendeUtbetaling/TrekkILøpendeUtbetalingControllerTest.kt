@@ -25,7 +25,7 @@ class TrekkILøpendeUtbetalingControllerTest(
         val fagsak =
             defaultFagsak(aktør = randomAktør().also { aktørIdRepository.save(it) }).let { fagsakRepository.save(it) }
         val behandling = lagBehandling(fagsak = fagsak).let { behandlingRepository.save(it) }
-        val trekk = RestTrekkILøpendeUtbetaling(
+        val trekk = RestFeilutbetaltValuta(
             id = 0,
             fom = LocalDate.of(2020, Month.JANUARY, 1),
             tom = LocalDate.of(2021, Month.MAY, 31),
@@ -40,7 +40,7 @@ class TrekkILøpendeUtbetalingControllerTest(
             .also { Assertions.assertThat(it[0].tom).isNotNull() }
 
         service.oppdatertFeilutbetaltValutaPeriode(
-            feilutbetaltValuta = RestTrekkILøpendeUtbetaling(
+            feilutbetaltValuta = RestFeilutbetaltValuta(
                 id = id,
                 fom = LocalDate.of(2020, Month.JANUARY, 1),
                 tom = LocalDate.of(2020, Month.MAY, 31),
@@ -53,7 +53,7 @@ class TrekkILøpendeUtbetalingControllerTest(
             .also { Assertions.assertThat(it.get(0).id).isEqualTo(id) }
             .also { Assertions.assertThat(it.get(0).tom).isEqualTo("2020-05-31") }
 
-        val trekk2 = RestTrekkILøpendeUtbetaling(
+        val trekk2 = RestFeilutbetaltValuta(
             id = 0,
             fom = LocalDate.of(2019, Month.DECEMBER, 1),
             tom = LocalDate.of(2019, Month.DECEMBER, 31),

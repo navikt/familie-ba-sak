@@ -15,7 +15,7 @@ class TrekkILøpendeUtbetalingService(
     private val loggService: LoggService
 ) {
     @Transactional
-    fun leggTilFeilutbetaltValutaPeriode(feilutbetaltValuta: RestTrekkILøpendeUtbetaling, behandlingId: Long): Long {
+    fun leggTilFeilutbetaltValutaPeriode(feilutbetaltValuta: RestFeilutbetaltValuta, behandlingId: Long): Long {
         val lagret = trekkILøpendeUtbetalingRepository.save(
             TrekkILøpendeUtbetaling(
                 behandlingId = behandlingId,
@@ -38,7 +38,7 @@ class TrekkILøpendeUtbetalingService(
         trekkILøpendeUtbetalingRepository.finnFeilutbetaltValutaForBehandling(behandlingId = behandlingId).map { tilRest(it) }
 
     private fun tilRest(it: TrekkILøpendeUtbetaling) =
-        RestTrekkILøpendeUtbetaling(
+        RestFeilutbetaltValuta(
             id = it.id,
             fom = it.fom,
             tom = it.tom,
@@ -46,7 +46,7 @@ class TrekkILøpendeUtbetalingService(
         )
 
     @Transactional
-    fun oppdatertFeilutbetaltValutaPeriode(feilutbetaltValuta: RestTrekkILøpendeUtbetaling, id: Long) {
+    fun oppdatertFeilutbetaltValutaPeriode(feilutbetaltValuta: RestFeilutbetaltValuta, id: Long) {
         val periode = trekkILøpendeUtbetalingRepository.findById(id).orElseThrow { Feil("Finner ikke feilutbetalt valuta med id=${feilutbetaltValuta.id}") }
 
         periode.fom = feilutbetaltValuta.fom

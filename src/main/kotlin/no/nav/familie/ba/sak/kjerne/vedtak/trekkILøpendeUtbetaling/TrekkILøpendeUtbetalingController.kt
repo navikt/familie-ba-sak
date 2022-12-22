@@ -30,7 +30,7 @@ class TrekkILøpendeUtbetalingController(
     @PostMapping(path = ["behandling/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE], consumes = [MediaType.APPLICATION_JSON_VALUE])
     fun leggTilFeilutbetaltValutaPeriode(
         @PathVariable behandlingId: Long,
-        @RequestBody feilutbetaltValuta: RestTrekkILøpendeUtbetaling
+        @RequestBody feilutbetaltValuta: RestFeilutbetaltValuta
     ):
         ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
@@ -47,7 +47,7 @@ class TrekkILøpendeUtbetalingController(
     fun oppdaterFeilutbetaltValutaPeriode(
         @PathVariable behandlingId: Long,
         @PathVariable id: Long,
-        @RequestBody feilutbetaltValuta: RestTrekkILøpendeUtbetaling
+        @RequestBody feilutbetaltValuta: RestFeilutbetaltValuta
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
@@ -74,7 +74,7 @@ class TrekkILøpendeUtbetalingController(
     }
 
     @GetMapping(path = ["behandling/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun hentFeilutbetaltValutaPerioder(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<List<RestTrekkILøpendeUtbetaling>?>> {
+    fun hentFeilutbetaltValutaPerioder(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<List<RestFeilutbetaltValuta>?>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
             handling = "hente feilutbetalt valuta for behandling"
