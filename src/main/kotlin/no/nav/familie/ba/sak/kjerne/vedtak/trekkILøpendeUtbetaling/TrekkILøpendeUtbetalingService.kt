@@ -35,7 +35,7 @@ class TrekkILøpendeUtbetalingService(
     }
 
     fun hentFeilutbetaltValutaPerioder(behandlingId: Long) =
-        trekkILøpendeUtbetalingRepository.finnTrekkILøpendeUtbetalingForBehandling(behandlingId = behandlingId).map { tilRest(it) }
+        trekkILøpendeUtbetalingRepository.finnFeilutbetaltValutaForBehandling(behandlingId = behandlingId).map { tilRest(it) }
 
     private fun tilRest(it: TrekkILøpendeUtbetaling) =
         RestTrekkILøpendeUtbetaling(
