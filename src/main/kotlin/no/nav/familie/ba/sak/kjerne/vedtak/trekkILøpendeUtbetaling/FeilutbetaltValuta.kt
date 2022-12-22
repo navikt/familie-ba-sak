@@ -15,7 +15,7 @@ import javax.persistence.Table
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "FeilutbetaltValuta")
 @Table(name = "FEILUTBETALT_VALUTA")
-data class TrekkILøpendeUtbetaling(
+data class FeilutbetaltValuta(
     @Column(name = "fk_behandling_id", updatable = false, nullable = false)
     val behandlingId: Long,
     @Column(name = "fom", columnDefinition = "DATE")

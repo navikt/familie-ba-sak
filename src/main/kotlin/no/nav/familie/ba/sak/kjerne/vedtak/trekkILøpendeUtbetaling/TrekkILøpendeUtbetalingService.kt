@@ -17,7 +17,7 @@ class TrekkILøpendeUtbetalingService(
     @Transactional
     fun leggTilFeilutbetaltValutaPeriode(feilutbetaltValuta: RestFeilutbetaltValuta, behandlingId: Long): Long {
         val lagret = trekkILøpendeUtbetalingRepository.save(
-            TrekkILøpendeUtbetaling(
+            FeilutbetaltValuta(
                 behandlingId = behandlingId,
                 fom = feilutbetaltValuta.fom,
                 tom = feilutbetaltValuta.tom,
@@ -37,7 +37,7 @@ class TrekkILøpendeUtbetalingService(
     fun hentFeilutbetaltValutaPerioder(behandlingId: Long) =
         trekkILøpendeUtbetalingRepository.finnFeilutbetaltValutaForBehandling(behandlingId = behandlingId).map { tilRest(it) }
 
-    private fun tilRest(it: TrekkILøpendeUtbetaling) =
+    private fun tilRest(it: FeilutbetaltValuta) =
         RestFeilutbetaltValuta(
             id = it.id,
             fom = it.fom,

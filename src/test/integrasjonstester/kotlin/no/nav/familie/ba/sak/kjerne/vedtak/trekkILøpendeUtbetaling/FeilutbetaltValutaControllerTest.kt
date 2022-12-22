@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 import java.time.Month
 
-class TrekkILøpendeUtbetalingControllerTest(
+class FeilutbetaltValutaControllerTest(
     @Autowired val service: TrekkILøpendeUtbetalingService,
     @Autowired val aktørIdRepository: AktørIdRepository,
     @Autowired val fagsakRepository: FagsakRepository,
