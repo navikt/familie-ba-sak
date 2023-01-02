@@ -63,6 +63,8 @@ spec:
           cluster: dev-gcp
         - application: familie-ba-migrering
           cluster: dev-gcp
+        - application: familie-klage
+          cluster: dev-gcp
         - application: familie-ba-statistikk
           cluster: dev-fss
         - application: bidrag-grunnlag-feature
@@ -86,6 +88,8 @@ spec:
         - application: familie-tilbake
           cluster: dev-gcp
         - application: familie-ba-migrering
+          cluster: dev-gcp
+        - application: familie-klage
           cluster: dev-gcp
         - application: familie-oppdrag
           cluster: dev-fss
