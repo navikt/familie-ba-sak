@@ -173,18 +173,18 @@ class VedtaksperiodeServiceEnhetstest {
         val vedtak = Vedtak(behandling = lagBehandling(behandlingKategori = BehandlingKategori.EØS))
         val perioder = listOf(
             LocalDate.now() to LocalDate.now().plusYears(1),
-            LocalDate.now().plusYears(2) to LocalDate.now().plusYears(3),
+            LocalDate.now().plusYears(2) to LocalDate.now().plusYears(3)
         )
         assertThat(vedtaksperiodeService.beskrivPerioderMedFeilutbetaltValuta(vedtak)).isNull()
 
         every {
             feilutbetaltValutaRepository.finnFeilutbetaltValutaForBehandling(vedtak.behandling.id)
         } returns perioder.map {
-            FeilutbetaltValuta(1L, fom = it.first,  tom = it.second, 200)
+            FeilutbetaltValuta(1L, fom = it.first, tom = it.second, 200)
         }
         val periodebeskrivelser = vedtaksperiodeService.beskrivPerioderMedFeilutbetaltValuta(vedtak)
 
-        perioder.forEach{ periode ->
+        perioder.forEach { periode ->
             assertThat(periodebeskrivelser!!.find { it.contains("${periode.first.year}") })
                 .contains("Fra", "til", "${periode.second.year}", "er det utbetalt 200 kroner for mye")
         }
