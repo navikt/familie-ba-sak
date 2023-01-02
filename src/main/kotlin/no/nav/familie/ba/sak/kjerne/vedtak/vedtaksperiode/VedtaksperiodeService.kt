@@ -37,7 +37,8 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAnde
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform.*
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform.NB
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform.NN
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
