@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakBehandlingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -36,6 +37,7 @@ class AutovedtakSmåbarnstilleggService(
     private val fagsakService: FagsakService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val vedtakService: VedtakService,
+    private val behandlingService: BehandlingService,
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val småbarnstilleggService: SmåbarnstilleggService,
     private val taskService: TaskService,
@@ -111,8 +113,13 @@ class AutovedtakSmåbarnstilleggService(
             begrunnAutovedtakForSmåbarnstillegg(behandlingEtterBehandlingsresultat)
         } catch (e: VedtaksperiodefinnerSmåbarnstilleggFeil) {
             logger.warn(e.message, e)
+
+            val behandlingSomSkalManueltBehandles = behandlingService.oppdaterStatusPåBehandling(
+                behandlingEtterBehandlingsresultat.id,
+                BehandlingStatus.UTREDES
+            )
             return kanIkkeBehandleAutomatisk(
-                behandling = behandlingEtterBehandlingsresultat,
+                behandling = behandlingSomSkalManueltBehandles,
                 metric = antallVedtakOmOvergangsstønadTilManuellBehandling[TilManuellBehandlingÅrsak.KLARER_IKKE_BEGRUNNE]!!,
                 meldingIOppgave = "Småbarnstillegg: klarer ikke bestemme vedtaksperiode som skal begrunnes, må behandles manuelt"
             )

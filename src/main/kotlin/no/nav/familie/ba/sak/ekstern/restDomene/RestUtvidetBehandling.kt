@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta.RestFeilutbetaltValuta
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -42,5 +43,7 @@ data class RestUtvidetBehandling(
     val utenlandskePeriodebeløp: List<RestUtenlandskPeriodebeløp>,
     val verge: VergeInfo?,
     val korrigertEtterbetaling: RestKorrigertEtterbetaling?,
-    val korrigertVedtak: RestKorrigertVedtak?
+    val korrigertVedtak: RestKorrigertVedtak?,
+    val feilutbetaltValuta: List<RestFeilutbetaltValuta>,
+    val trekkILøpendeUtbetaling: List<RestFeilutbetaltValuta>
 )
