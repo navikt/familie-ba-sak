@@ -75,7 +75,7 @@ class BeregningServiceTest {
     private val personopplysningGrunnlagRepository = mockk<PersonopplysningGrunnlagRepository>()
     private val endretUtbetalingAndelRepository = mockk<EndretUtbetalingAndelRepository>()
     private val småbarnstilleggService = mockk<SmåbarnstilleggService>()
-    private val featureToggleService = mockk<FeatureToggleService>()
+    private val featureToggleService = mockk<FeatureToggleService>(relaxed = true)
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService = AndelerTilkjentYtelseOgEndreteUtbetalingerService(
         andelTilkjentYtelseRepository,
         endretUtbetalingAndelRepository,
@@ -498,7 +498,20 @@ class BeregningServiceTest {
         val tilleggFom = SatsService.hentDatoForSatsendring(satstype = SatsType.TILLEGG_ORBA, oppdatertBeløp = 1354)
 
         val søkerVilkår = Vilkår.hentVilkårFor(PersonType.SØKER)
-        val vilkårResultaterSøker = søkerVilkår.map { lagVilkårResultat(vilkårType = it, periodeFom = periode1Fom, periodeTom = periode1Tom) } + søkerVilkår.map { lagVilkårResultat(vilkårType = it, periodeFom = periode2Fom, periodeTom = periode2Tom, resultat = Resultat.IKKE_OPPFYLT) } + søkerVilkår.map { lagVilkårResultat(vilkårType = it, periodeFom = periode3Fom, periodeTom = periode3Tom) }
+        val vilkårResultaterSøker = søkerVilkår.map {
+            lagVilkårResultat(
+                vilkårType = it,
+                periodeFom = periode1Fom,
+                periodeTom = periode1Tom
+            )
+        } + søkerVilkår.map {
+            lagVilkårResultat(
+                vilkårType = it,
+                periodeFom = periode2Fom,
+                periodeTom = periode2Tom,
+                resultat = Resultat.IKKE_OPPFYLT
+            )
+        } + søkerVilkår.map { lagVilkårResultat(vilkårType = it, periodeFom = periode3Fom, periodeTom = periode3Tom) }
 
         val personResultatSøker = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
@@ -925,7 +938,15 @@ class BeregningServiceTest {
 
         val vilkårForBarn = Vilkår.hentVilkårFor(PersonType.BARN)
         val vilkårResultaterBarn =
-            vilkårForBarn.lagVilkårResultaterForPerson(fom = førstePeriodeFomForBarnet, tom = førstePeriodeTomForBarnet, erDeltBosted = deltBostedForFørstePeriode) + vilkårForBarn.lagVilkårResultaterForPerson(fom = andrePeriodeFomForBarnet, tom = andrePeriodeTomForBarnet, erDeltBosted = deltBostedForAndrePeriode)
+            vilkårForBarn.lagVilkårResultaterForPerson(
+                fom = førstePeriodeFomForBarnet,
+                tom = førstePeriodeTomForBarnet,
+                erDeltBosted = deltBostedForFørstePeriode
+            ) + vilkårForBarn.lagVilkårResultaterForPerson(
+                fom = andrePeriodeFomForBarnet,
+                tom = andrePeriodeTomForBarnet,
+                erDeltBosted = deltBostedForAndrePeriode
+            )
 
         personResultatBarn.setSortedVilkårResultater(vilkårResultaterBarn.toSet())
         vilkårsvurdering.personResultater = setOf(personResultatSøker, personResultatBarn)
@@ -989,7 +1010,7 @@ class BeregningServiceTest {
             )
         }
 
-        val sisteAndel = if (skalLageSplitt)andelerTilkjentYtelse[3] else andelerTilkjentYtelse[2]
+        val sisteAndel = if (skalLageSplitt) andelerTilkjentYtelse[3] else andelerTilkjentYtelse[2]
         // Siste periode (fra siste satsendring til slutt av endre godkjente perioderesultat for barnet)
         Assertions.assertEquals(andreSatsendringFom.toYearMonth(), sisteAndel.stønadFom)
         Assertions.assertEquals(andrePeriodeTomForBarnet.toYearMonth(), sisteAndel.stønadTom)
@@ -999,7 +1020,11 @@ class BeregningServiceTest {
         )
     }
 
-    private fun Set<Vilkår>.lagVilkårResultaterForPerson(fom: LocalDate, tom: LocalDate, erDeltBosted: Boolean): List<VilkårResultat> =
+    private fun Set<Vilkår>.lagVilkårResultaterForPerson(
+        fom: LocalDate,
+        tom: LocalDate,
+        erDeltBosted: Boolean
+    ): List<VilkårResultat> =
         this.map {
             lagVilkårResultat(
                 vilkårType = it,
