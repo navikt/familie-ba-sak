@@ -4,9 +4,7 @@ import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.erUnder6ÅrTidslinje
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.nesteMåned
-import no.nav.familie.ba.sak.common.sisteDagIForrigeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.Sats
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
@@ -91,43 +89,6 @@ object SatsService {
         val fraOgMed: YearMonth,
         val tilOgMed: YearMonth
     )
-
-    fun hentPeriodeTil6år(seksårsdag: LocalDate, oppfyltFom: LocalDate, oppfyltTom: LocalDate): Periode? =
-        when {
-            oppfyltFom.toYearMonth().isSameOrAfter(seksårsdag.toYearMonth()) -> {
-                null
-            }
-            else -> {
-                Periode(
-                    oppfyltFom,
-                    minOf(oppfyltTom, seksårsdag.sisteDagIForrigeMåned())
-                )
-            }
-        }
-
-    private fun hentPeriodeFraOgMed6år(
-        seksårsdag: LocalDate,
-        oppfyltFom: LocalDate,
-        oppfyltTom: LocalDate
-    ): Periode? =
-        when {
-            oppfyltTom.toYearMonth().isBefore(seksårsdag.toYearMonth()) -> {
-                null
-            }
-            else -> {
-                Periode(maxOf(oppfyltFom, seksårsdag.førsteDagIInneværendeMåned()), oppfyltTom)
-            }
-        }
-
-    /**
-     * Denne splitter perioden basert på seksårsalderen til barnet.
-     * F.eks. hvis barnet fyller 6 år 10.10.2020 og perioden er 01.01.2020 - 31.13.2020
-     * får vi 2 nye perioder:
-     * 01.01.2020 - 30.09.2020
-     * 01.10.2020 - 31.12.2020
-     */
-    fun splittPeriodePå6Årsdag(seksårsdag: LocalDate, fom: LocalDate, tom: LocalDate): Pair<Periode?, Periode?> =
-        Pair(hentPeriodeTil6år(seksårsdag, fom, tom), hentPeriodeFraOgMed6år(seksårsdag, fom, tom))
 
     fun hentDatoForSatsendring(
         satstype: SatsType,
