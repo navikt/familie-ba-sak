@@ -210,13 +210,19 @@ internal class DokumentServiceEnhetstest {
             assertThat(personResultat.andreVurderinger).extracting("type")
                 .containsExactly(AnnenVurderingType.OPPLYSNINGSPLIKT)
             verify(exactly = 0) {
-                vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(behandling, any())
+                vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(behandling, any(), null)
             }
 
             // Scenario uten eksisterende vilkårsvurdering
             personResultat.setAndreVurderinger(emptySet()) // nullstiller andreVurderinger
             every { vilkårsvurderingService.hentAktivForBehandling(any()) } returns null
-            every { vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(any(), any()) } returns
+            every {
+                vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
+                    any(),
+                    any(),
+                    null
+                )
+            } returns
                 vilkårsvurdering
 
             sendBrev(brevmal, behandling)
@@ -224,7 +230,7 @@ internal class DokumentServiceEnhetstest {
             assertThat(personResultat.andreVurderinger).extracting("type")
                 .containsExactly(AnnenVurderingType.OPPLYSNINGSPLIKT)
             verify(exactly = 1) {
-                vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(behandling, any())
+                vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(behandling, any(), null)
             }
         }
     }

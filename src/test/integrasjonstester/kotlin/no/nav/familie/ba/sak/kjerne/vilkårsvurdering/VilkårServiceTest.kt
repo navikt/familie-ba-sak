@@ -687,7 +687,7 @@ class VilkårServiceTest(
             barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true)
         )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
-        vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(behandling, false)
+        vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(behandling, false, null)
         val exception = assertThrows<RuntimeException> {
             vilkårService.postVilkår(
                 behandling.id,
@@ -727,7 +727,7 @@ class VilkårServiceTest(
         )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
         val vilkårsvurdering =
-            vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(behandling, false)
+            vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(behandling, false, null)
         assertEquals(
             1,
             vilkårsvurdering.personResultater.find { it.erSøkersResultater() }?.vilkårResultater?.filter { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }?.size
@@ -851,7 +851,7 @@ class VilkårServiceTest(
             barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true)
         )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
-        vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(behandling, false)
+        vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(behandling, false, null)
 
         val exception = assertThrows<RuntimeException> {
             vilkårService.deleteVilkår(
