@@ -44,7 +44,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
-import java.time.LocalDateTime.now
 
 @ExtendWith(MockKExtension::class)
 class OppgaveServiceTest {
