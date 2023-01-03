@@ -93,7 +93,6 @@ class BeregningServiceTest {
             behandlingRepository = behandlingRepository,
             personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
             småbarnstilleggService = småbarnstilleggService,
-            featureToggleService = featureToggleService,
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService
         )
 

@@ -10,10 +10,8 @@ class FeatureToggleConfig {
         const val KAN_MANUELT_MIGRERE_ANNET_ENN_DELT_BOSTED = "familie-ba-sak.manuell-migrering-ikke-delt-bosted"
         const val ENDRINGER_I_VALIDERING_FOR_MIGRERINGSBEHANDLING =
             "familie-ba-sak.endringer.validering.migeringsbehandling"
-        const val NY_MÅTE_Å_GENERERE_ANDELER_TILKJENT_YTELSE = "familie-ba-sak.behandling.generer-andeler-med-ny-metode"
         const val SJEKK_OM_UTVIDET_ER_ENDRET_BEHANDLINGSRESULTAT =
             "familie-ba-sak.behandling.behandlingsresultat-utvidet-endret"
-        const val NY_MÅTE_Å_GENERERE_ATY_BARNA = "familie-ba-sak.behandling.ny-metode-generer-aty-barna"
 
         const val KAN_BEHANDLE_UTVIDET_EØS_SEKUNDÆRLAND = "familie-ba-sak.behandling.utvidet-eos-sekunderland"
 
