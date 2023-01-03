@@ -16,7 +16,9 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.task.OpprettTaskService.Companion.RETRY_BACKOFF_5000MS
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.Fagsystem
+import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
 import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
@@ -102,6 +104,22 @@ class IntegrasjonClient(
         ) {
             postForEntity(uri, mapOf("ident" to ident))
         }
+    }
+
+    @Cacheable("behandlendeEnhetForPersonMedRelasjon", cacheManager = "shortCache")
+    fun hentBehandlendeEnhetForPersonIdentMedRelasjoner(ident: String): Arbeidsfordelingsenhet {
+        val uri = UriComponentsBuilder
+            .fromUri(integrasjonUri)
+            .pathSegment("arbeidsfordeling", "enhet", Tema.KON.name, "med-relasjoner")
+            .build().toUri()
+
+        return kallEksternTjenesteRessurs<List<Arbeidsfordelingsenhet>>(
+            tjeneste = "arbeidsfordeling",
+            uri = uri,
+            formål = "Hent strengeste behandlende enhet for person og alle relasjoner til personen"
+        ) {
+            postForEntity(uri, PersonIdent(ident))
+        }.single()
     }
 
     @Retryable(

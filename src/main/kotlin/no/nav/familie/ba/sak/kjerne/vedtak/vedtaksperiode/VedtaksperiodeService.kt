@@ -5,10 +5,13 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
+import no.nav.familie.ba.sak.common.erSenereEnnInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestGenererVedtaksperioderForOverstyrtEndringstidspunkt
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedFritekster
@@ -44,7 +47,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.EØSBegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilVedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
@@ -75,7 +78,8 @@ class VedtaksperiodeService(
     private val endringstidspunktService: EndringstidspunktService,
     private val utbetalingsperiodeMedBegrunnelserService: UtbetalingsperiodeMedBegrunnelserService,
     private val kompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse>,
-    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
+    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
+    private val featureToggleService: FeatureToggleService
 ) {
     fun oppdaterVedtaksperiodeMedFritekster(
         vedtaksperiodeId: Long,
@@ -114,7 +118,7 @@ class VedtaksperiodeService(
 
         vedtaksperiodeMedBegrunnelser.settBegrunnelser(
             standardbegrunnelserFraFrontend.mapNotNull {
-                val triggesAv = it.tilSanityBegrunnelse(sanityBegrunnelser)?.tilTriggesAv()
+                val triggesAv = it.tilISanityBegrunnelse(sanityBegrunnelser)?.tilTriggesAv()
                     ?: return@mapNotNull null
 
                 if (triggesAv.satsendring) {
@@ -568,6 +572,9 @@ class VedtaksperiodeService(
             val standardbegrunnelser =
                 vilkårResultater.map { it.standardbegrunnelser }.flatten().toSet().toList()
 
+            val nasjonaleStandardbegrunnelser = standardbegrunnelser.filterIsInstance<Standardbegrunnelse>()
+            val eøsStandardbegrunnelser = standardbegrunnelser.filterIsInstance<EØSStandardbegrunnelse>()
+
             VedtaksperiodeMedBegrunnelser(
                 vedtak = vedtak,
                 fom = fellesPeriode.fom,
@@ -576,10 +583,18 @@ class VedtaksperiodeService(
             )
                 .apply {
                     begrunnelser.addAll(
-                        standardbegrunnelser.map { begrunnelse ->
+                        nasjonaleStandardbegrunnelser.map { begrunnelse ->
                             Vedtaksbegrunnelse(
                                 vedtaksperiodeMedBegrunnelser = this,
                                 standardbegrunnelse = begrunnelse
+                            )
+                        }
+                    )
+                    eøsBegrunnelser.addAll(
+                        eøsStandardbegrunnelser.map { begrunnelse ->
+                            EØSBegrunnelse(
+                                vedtaksperiodeMedBegrunnelser = this,
+                                begrunnelse = begrunnelse
                             )
                         }
                     )
@@ -634,8 +649,13 @@ class VedtaksperiodeService(
         }.toList()
     }
 
-    fun skalHaÅrligKontroll(vedtak: Vedtak) = vedtak.behandling.kategori == BehandlingKategori.EØS &&
-        hentPersisterteVedtaksperioder(vedtak).any { it.tom == null }
+    fun skalHaÅrligKontroll(vedtak: Vedtak): Boolean {
+        if (!featureToggleService.isEnabled(FeatureToggleConfig.EØS_INFORMASJON_OM_ÅRLIG_KONTROLL, false)) {
+            return false
+        }
+        return vedtak.behandling.kategori == BehandlingKategori.EØS &&
+            hentPersisterteVedtaksperioder(vedtak).any { it.tom?.erSenereEnnInneværendeMåned() != false }
+    }
 
     companion object {
 

@@ -1,5 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser
 
+import com.fasterxml.jackson.annotation.JsonValue
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.NullablePeriode
+import no.nav.familie.ba.sak.kjerne.brev.domene.BrevBegrunnelseGrunnlagMedPersoner
+import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.eøs.EØSBegrunnelseMedTriggere
 
 enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
@@ -210,12 +215,207 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
     OPPHOR_UGYLDIG_KONTONUMMER_EØS {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
         override val sanityApiNavn = "opphorUgyldigKontonummerEos"
+    },
+    OPPHOR_ETT_BARN_DØD_EØS {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
+        override val sanityApiNavn = "opphorEttBarnDodEos"
+    },
+    OPPHOR_FLERE_BARN_DØDE_EØS {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
+        override val sanityApiNavn = "opphorFlereBarnErDodeEos"
+    },
+    AVSLAG_EØS_IKKE_EØS_BORGER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
+        override val sanityApiNavn = "avslagEosIkkeEosBorger"
+    },
+    AVSLAG_EØS_IKKE_BOSATT_I_EØS_LAND {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
+        override val sanityApiNavn = "avslagEosIkkeBosattIEosLand"
+    },
+    AVSLAG_EØS_JOBBER_IKKE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
+        override val sanityApiNavn = "avslagEosJobberIkke"
+    },
+    AVSLAG_EØS_UTSENDT_ARBEIDSTAKER_FRA_ANNET_EØS_LAND {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
+        override val sanityApiNavn = "avslagEosUtsendtArbeidstakerFraAnnetEosLand"
+    },
+    AVSLAG_EØS_ARBEIDER_MER_ENN_25_PROSENT_I_ANNET_EØS_LAND {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
+        override val sanityApiNavn = "avslagEosArbeiderMerEnn25ProsentIAnnetEosLand"
+    },
+    AVSLAG_EØS_KUN_KORTE_USAMMENHENGENDE_ARBEIDSPERIODER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
+        override val sanityApiNavn = "avslagEosKunKorteUsammenhengendeArbeidsperioder"
+    },
+    AVSLAG_EØS_IKKE_PENGER_FRA_NAV_SOM_ERSTATTER_LØNN {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
+        override val sanityApiNavn = "avslagEosIkkePengerFraNavSomErstatterLoenn"
+    },
+    AVSLAG_EØS_SEPARASJONSAVTALEN_GJELDER_IKKE {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
+        override val sanityApiNavn = "avslagEosSeparasjonsavtalenGjelderIkke"
+    },
+    AVSLAG_EØS_IKKE_LOVLIG_OPPHOLD_SOM_EØS_BORGER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
+        override val sanityApiNavn = "avslagEosIkkeLovligOppholdSomEosBorger"
+    },
+    AVSLAG_EØS_IKKE_OPPHOLDSRETT_SOM_FAMILIEMEDLEM_AV_EØS_BORGER {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
+        override val sanityApiNavn = "avslagEosIkkeOppholdsrettSomFamiliemedlemAvEosBorger"
+    },
+    AVSLAG_EØS_IKKE_STUDENT {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
+        override val sanityApiNavn = "avslagEosIkkeStudent"
+    },
+    AVSLAG_EØS_IKKE_ANSVAR_FOR_BARN {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
+        override val sanityApiNavn = "avslagEosIkkeAnsvarForBarn"
+    },
+    AVSLAG_EØS_VURDERING_IKKE_ANSVAR_FOR_BARN {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
+        override val sanityApiNavn = "avslagEosVurderingIkkeAnsvarForBarn"
+    },
+    FORTSATT_INNVILGET_PRIMÆRLAND_STANDARD {
+        override val sanityApiNavn = "fortsattInnvilgetPrimaerlandStandard"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
+    },
+    FORTSATT_INNVILGET_PRIMÆRLAND_ALENEANSVAR {
+        override val sanityApiNavn = "fortsattInnvilgetPrimaerlandAleneansvar"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
+    },
+    FORTSATT_INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE {
+        override val sanityApiNavn = "fortsattInnvilgetPrimaerlandBeggeForeldreBosattINorge"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
+    },
+    FORTSATT_INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_JOBBER_I_NORGE {
+        override val sanityApiNavn = "fortsattInnvilgetPrimaerlandBeggeForeldreJobberINorge"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
+    },
+    FORTSATT_INNVILGET_PRIMÆRLAND_UK_STANDARD {
+        override val sanityApiNavn = "fortsattInnvilgetPrimaerlandUkStandard"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
+    },
+    FORTSATT_INNVILGET_PRIMÆRLAND_UK_ALENEANSVAR {
+        override val sanityApiNavn = "fortsattInnvilgetPrimaerlandUkAleneansvar"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
+    },
+    FORTSATT_INNVILGET_PRIMÆRLAND_UK_OG_UTLAND_STANDARD {
+        override val sanityApiNavn = "fortsattInnvilgetPrimaerlandUkOgUtlandStandard"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
+    },
+    FORTSATT_INNVILGET_PRIMÆRLAND_BARNET_BOR_I_NORGE {
+        override val sanityApiNavn = "fortsattInnvilgetPrimaerlandBarnetBorINorge"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
+    },
+    FORTSATT_INNVILGET_PRIMÆRLAND_SÆRKULLSBARN_ANDRE_BARN_OVERTATT_ANSVAR {
+        override val sanityApiNavn = "fortsattInnvilgetPrimaerlandSaerkullsbarnAndreBarn"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
+    },
+    FORTSATT_INNVILGET_PRIMÆRLAND_TO_ARBEIDSLAND_NORGE_UTBETALER {
+        override val sanityApiNavn = "fortsattInnvilgetPrimaerlandToArbeidslandNorgeUtbetaler"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
+    },
+    FORTSATT_INNVILGET_PRIMÆRLAND_TO_ARBEIDSLAND_ANNET_LAND_UTBETALER {
+        override val sanityApiNavn = "fortsattInnvilgetPrimaerlandToArbeidslandAnnetLandUtbetaler"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
+    },
+
+    FORTSATT_INNVILGET_PRIMÆRLAND_UK_TO_ARBEIDSLAND_NORGE_UTBETALER {
+        override val sanityApiNavn = "fortsattInnvilgetPrimaerlandUkToArbeidslandNorgeUtbetaler"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
+    },
+    FORTSATT_INNVILGET_PRIMÆRLAND_UK_TO_ARBEIDSLAND_ANNET_LAND_UTBETALER {
+        override val sanityApiNavn = "fortsattInnvilgetPrimaerlandUkToArbeidslandAnnetLandUtbetaler"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
+    },
+    FORTSATT_INNVILGET_TILLEGGSBEGRUNNELSE_UTBETALING_TIL_ANNEN_FORELDER {
+        override val sanityApiNavn = "fortsattInnvilgetTilleggsbegrunnelseUtbetalingTilAnnenForelder"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
+    },
+    FORTSETT_INNVILGET_PRIMÆRLAND_TILLEGGSTEKST_VEDTAK_FØR_SED {
+        override val sanityApiNavn = "fortsattInnvilgetTilleggsbegrunnelseVedtakForSed"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
+    },
+    FORTSETT_INNVILGET_SEKUNDÆRLAND_STANDARD {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
+        override val sanityApiNavn = "fortsattInnvilgetSekundaerlandStandard"
+    },
+    FORTSETT_INNVILGET_TILLEGGSTEKST_NULLUTBETALING {
+        override val sanityApiNavn = "fortsattInnvilgetTilleggstekstNullutbetaling"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
+    },
+    FORTSETT_INNVILGET_SEKUNDÆRLAND_ALENEANSVAR {
+        override val sanityApiNavn = "fortsattInnvilgetSekundaerlandAleneansvar"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
+    },
+    FORTSETT_INNVILGET_SEKUNDÆRLAND_UK_STANDARD {
+        override val sanityApiNavn = "fortsattInnvilgetSekundaerlandUkStandard"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
+    },
+    FORTSETT_INNVILGET_SEKUNDÆRLAND_UK_ALENEANSVAR {
+        override val sanityApiNavn = "fortsattInnvilgetSekundaerlandUkAleneansvar"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
+    },
+    FORTSETT_INNVILGET_SEKUNDÆRLAND_UK_OG_UTLAND_STANDARD {
+        override val sanityApiNavn = "fortsattInnvilgetSekundaerlandUkOgUtland"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
+    },
+    FORTSETT_INNVILGET_SEKUNDÆRLAND_TO_ARBEIDSLAND_NORGE_UTBETALER {
+        override val sanityApiNavn = "fortsattInnvilgetSekundaerlandToArbeidslandNorgeUtbetaler"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
+    },
+    FORTSETT_INNVILGET_SEKUNDÆRLAND_UK_TO_ARBEIDSLAND_NORGE_UTBETALER {
+        override val sanityApiNavn = "fortsattInnvilgetSekundaerlandUkToArbeidslandNorgeUtbetaler"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
+    },
+    FORTSATT_INNVILGET_SEKUNDÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE {
+        override val sanityApiNavn = "fortsattInnvilgetSekundaerlandBeggeForeldreBosattINorge"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
+    },
+    FORTSATT_INNVILGET_TILLEGGSTEKST_SEKUNDÆR_FULL_UTBETALING {
+        override val sanityApiNavn = "fortsattInnvilgetTilleggstekstSekundaerFullUtbetaling"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
+    },
+    FORTSATT_INNVILGET_TILLEGGSTEKST_SEKUNDÆR_IKKE_FÅTT_SVAR_PÅ_SED {
+        override val sanityApiNavn = "fortsattInnvilgetTilleggsteksterSekundaerIkkeFaattSvarPaaSed"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
+    },
+    FORTSATT_INNVILGET_TILLEGSTEKST_UK_FULL_UTBETALING {
+        override val sanityApiNavn = "fortsattInnvilgetTilleggstekstUkFullUtbetaling"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
+    },
+    REDUKSJON_BARN_DØD_EØS {
+        override val sanityApiNavn = "reduksjonBarnDoedEos"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_REDUKSJON
+    },
+    REDUKSJON_SØKER_BER_OM_OPPHØR_EØS {
+        override val sanityApiNavn = "reduksjonSokerBerOmOpphoer"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_REDUKSJON
+    },
+    REDUKSJON_BARN_BOR_IKKE_I_EØS {
+        override val sanityApiNavn = "reduksjonBarnBorIkkeIEosLand"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_REDUKSJON
+    },
+    REDUKSJON_IKKE_ANSVAR_FOR_BARN {
+        override val sanityApiNavn = "reduksjonIkkeAnsvarForBarn"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_REDUKSJON
     }
+
     ;
 
     override val kanDelesOpp: Boolean = false
 
-    override fun enumnavnTilString(): String = this.name
+    override fun delOpp(
+        restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
+        triggesAv: TriggesAv,
+        periode: NullablePeriode
+    ): List<BrevBegrunnelseGrunnlagMedPersoner> {
+        throw Feil("Begrunnelse $this kan ikke deles opp.")
+    }
+
+    @JsonValue
+    override fun enumnavnTilString(): String = EØSStandardbegrunnelse::class.simpleName + "$" + this.name
 
     fun tilEØSBegrunnelseMedTriggere(sanityEØSBegrunnelser: List<SanityEØSBegrunnelse>): EØSBegrunnelseMedTriggere? {
         val sanityEØSBegrunnelse = sanityEØSBegrunnelser.finnBegrunnelse(this) ?: return null

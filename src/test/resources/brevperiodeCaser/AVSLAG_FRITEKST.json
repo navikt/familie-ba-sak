@@ -31,7 +31,8 @@
           "periodeFom": "1993-08-10",
           "periodeTom": null,
           "utdypendeVilkårsvurderinger": [],
-          "erEksplisittAvslagPåSøknad": false
+          "erEksplisittAvslagPåSøknad": false,
+          "standardbegrunnelser": []
         }
       ],
       "andreVurderinger": [],

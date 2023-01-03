@@ -85,6 +85,7 @@ class PersongrunnlagService(
             ?: throw Feil("Finner ikke personopplysningsgrunnlag på behandling $behandlingId")
     }
 
+    @Transactional
     fun oppdaterRegisteropplysninger(behandlingId: Long): PersonopplysningGrunnlag {
         val nåværendeGrunnlag = hentAktivThrows(behandlingId)
         val behandling = behandlingRepository.finnBehandling(behandlingId)
@@ -143,6 +144,7 @@ class PersongrunnlagService(
     /**
      * Registrerer barn valgt i søknad og barn fra forrige behandling
      */
+    @Transactional
     fun registrerBarnFraSøknad(
         søknadDTO: SøknadDTO,
         behandling: Behandling,
