@@ -1,17 +1,12 @@
 package no.nav.familie.ba.sak.kjerne.beregning.domene
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
-import no.nav.fpsak.tidsserie.LocalDateInterval.TIDENES_BEGYNNELSE
-import no.nav.fpsak.tidsserie.LocalDateInterval.TIDENES_ENDE
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.fpsak.tidsserie.StandardCombinators
@@ -63,10 +58,6 @@ data class PeriodeVilkår(
     val periodeTom: LocalDate?
 )
 
-fun Vilkårsvurdering.personResultaterTilPeriodeResultater(brukMåned: Boolean): Set<PeriodeResultat> {
-    return this.personResultater.flatMap { it.tilPeriodeResultater(brukMåned) }.toSet()
-}
-
 private fun kombinerVerdier(
     lhs: LocalDateTimeline<List<VilkårResultat>>,
     rhs: LocalDateTimeline<VilkårResultat>
@@ -91,39 +82,4 @@ fun lagTidslinjeMedOverlappendePerioder(tidslinjer: List<LocalDateTimeline<Vilk�
         LocalDateTimeline(listOf(LocalDateSegment(førsteSegment.fom, førsteSegment.tom, listOf(førsteSegment.value))))
     val resterende = tidslinjer.drop(1)
     return resterende.fold(initiellSammenlagt) { sammenlagt, neste -> (kombinerVerdier(sammenlagt, neste)) }
-}
-
-fun PersonResultat.tilPeriodeResultater(brukMåned: Boolean, inkluderUtvidet: Boolean = false): List<PeriodeResultat> {
-    val tidslinjer = this.vilkårResultater
-        .filter { it.vilkårType !== Vilkår.UTVIDET_BARNETRYGD || inkluderUtvidet }
-        .filter { !it.erAvslagUtenPeriode() }
-        .map { vilkårResultat ->
-            LocalDateTimeline(
-                listOf(
-                    LocalDateSegment(
-                        if (brukMåned) vilkårResultat.periodeFom?.withDayOfMonth(1) else vilkårResultat.periodeFom,
-                        if (brukMåned) vilkårResultat.periodeTom?.sisteDagIMåned() else vilkårResultat.periodeTom,
-                        vilkårResultat
-                    )
-                )
-            )
-        }
-    val kombinertTidslinje = lagTidslinjeMedOverlappendePerioder(tidslinjer)
-    return kombinertTidslinje.toSegments().map { segment ->
-        PeriodeResultat(
-            aktør = aktør,
-            periodeFom = if (segment.fom == TIDENES_BEGYNNELSE) null else segment.fom,
-            periodeTom = if (segment.tom == TIDENES_ENDE) null else segment.tom,
-            vilkårResultater = segment.value.map {
-                PeriodeVilkår(
-                    vilkårType = it.vilkårType,
-                    resultat = it.resultat,
-                    begrunnelse = it.begrunnelse,
-                    utdypendeVilkårsvurderinger = it.utdypendeVilkårsvurderinger,
-                    periodeFom = if (brukMåned) it.periodeFom?.withDayOfMonth(1) else it.periodeFom,
-                    periodeTom = if (brukMåned) it.periodeTom?.sisteDagIMåned() else it.periodeTom
-                )
-            }.toSet()
-        )
-    }
 }

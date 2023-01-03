@@ -141,52 +141,6 @@ object TilkjentYtelseUtils {
         barnasAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
     ): Boolean = utvidetAndeler.isNotEmpty() && barnasAndeler.isNotEmpty()
 
-    @Deprecated("Skal ikke brukes lenger, kan slettes når ny funksjonalitet bak toggle er godt nok testet")
-    internal fun beregnAndelerTilkjentYtelseForBarnaDeprecated(
-        personopplysningGrunnlag: PersonopplysningGrunnlag,
-        vilkårsvurdering: Vilkårsvurdering
-    ): List<BeregnetAndel> {
-        val identBarnMap = personopplysningGrunnlag.barna.associateBy { it.aktør.aktørId }
-
-        val (innvilgetPeriodeResultatSøker, innvilgedePeriodeResultatBarna) = vilkårsvurdering.hentInnvilgedePerioder(
-            personopplysningGrunnlag
-        )
-
-        val relevanteSøkerPerioder = innvilgetPeriodeResultatSøker
-            .filter { søkerPeriode -> innvilgedePeriodeResultatBarna.any { søkerPeriode.overlapper(it) } }
-
-        return innvilgedePeriodeResultatBarna
-            .flatMap { periodeResultatBarn: PeriodeResultat ->
-                relevanteSøkerPerioder
-                    .filter { it.overlapper(periodeResultatBarn) }
-                    .flatMap { overlappendePerioderesultatSøker ->
-                        val person = identBarnMap[periodeResultatBarn.aktør.aktørId]
-                            ?: error("Finner ikke barn på map over barna i behandlingen")
-                        val beløpsperioder =
-                            beregnBeløpsperioder(
-                                overlappendePerioderesultatSøker = overlappendePerioderesultatSøker,
-                                periodeResultatBarn = periodeResultatBarn,
-                                innvilgedePeriodeResultatBarna = innvilgedePeriodeResultatBarna,
-                                innvilgetPeriodeResultatSøker = innvilgetPeriodeResultatSøker,
-                                person = person
-                            )
-                        beløpsperioder.map { beløpsperiode ->
-                            val prosent =
-                                if (periodeResultatBarn.erDeltBostedSomSkalDeles()) BigDecimal(50) else BigDecimal(100)
-                            val nasjonaltPeriodebeløp = beløpsperiode.sats.avrundetHeltallAvProsent(prosent)
-                            BeregnetAndel(
-                                person = person,
-                                stønadFom = beløpsperiode.fraOgMed,
-                                stønadTom = beløpsperiode.tilOgMed,
-                                beløp = nasjonaltPeriodebeløp,
-                                sats = beløpsperiode.sats,
-                                prosent = prosent
-                            )
-                        }
-                    }
-            }
-    }
-
     internal fun beregnAndelerTilkjentYtelseForBarna(
         personopplysningGrunnlag: PersonopplysningGrunnlag,
         personResultater: Set<PersonResultat>
