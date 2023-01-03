@@ -14,6 +14,11 @@ class FeilutbetaltValutaService(
     @Autowired
     private val loggService: LoggService
 ) {
+
+    private fun finnFeilutbetaltValutaThrows(id: Long): FeilutbetaltValuta {
+        return feilutbetaltValutaRepository.finnFeilutbetaltValuta(id) ?: throw Feil("Finner ikke feilutbetalt valuta med id=$id")
+    }
+
     @Transactional
     fun leggTilFeilutbetaltValutaPeriode(feilutbetaltValuta: RestFeilutbetaltValuta, behandlingId: Long): Long {
         val lagret = feilutbetaltValutaRepository.save(
@@ -30,9 +35,11 @@ class FeilutbetaltValutaService(
 
     @Transactional
     fun fjernFeilutbetaltValutaPeriode(id: Long, behandlingId: Long) {
-        val feilutbetaltValuta = feilutbetaltValutaRepository.findById(id)
+        loggService.loggFeilutbetaltValutaPeriodeFjernet(
+            behandlingId = behandlingId,
+            feilutbetaltValuta = finnFeilutbetaltValutaThrows(id)
+        )
         feilutbetaltValutaRepository.deleteById(id)
-        loggService.loggFeilutbetaltValutaPeriodeFjernet(behandlingId = behandlingId, feilutbetaltValuta = feilutbetaltValuta.get())
     }
 
     fun hentFeilutbetaltValutaPerioder(behandlingId: Long) =
