@@ -186,7 +186,7 @@ class VedtaksperiodeServiceEnhetstest {
 
         perioder.forEach { periode ->
             assertThat(periodebeskrivelser!!.find { it.contains("${periode.first.year}") })
-                .contains("Fra", "til", "${periode.second.year}", "er det utbetalt 200 kroner for mye")
+                .contains("Fra", "til", "${periode.second.year}", "er det utbetalt 200 kroner for mye.")
         }
     }
 }

@@ -669,7 +669,7 @@ class VedtaksperiodeService(
 
         return feilutbetaltValutaRepository.finnFeilutbetaltValutaForBehandling(vedtak.behandling.id).map {
             val (fom, tom) = it.fom.tilDagMånedÅr() to it.tom.tilDagMånedÅr()
-            "$fra $fom til $tom er det utbetalt ${it.feilutbetaltBeløp} kroner for $mye"
+            "$fra $fom til $tom er det utbetalt ${it.feilutbetaltBeløp} kroner for $mye."
         }.toSet().takeIf { it.isNotEmpty() }
     }
 
