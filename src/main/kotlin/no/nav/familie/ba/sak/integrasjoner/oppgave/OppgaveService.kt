@@ -38,7 +38,6 @@ class OppgaveService(
     private val opprettTaskService: OpprettTaskService,
     private val loggService: LoggService
 ) {
-
     private val antallOppgaveTyper: MutableMap<Oppgavetype, Counter> = mutableMapOf()
 
     fun opprettOppgave(
@@ -220,6 +219,21 @@ class OppgaveService(
                 }
             }
         }
+    }
+
+    fun hentFristerForÅpneUtvidetBarnetrygdBehandlinger(): String {
+        val åpneUtvidetBarnetrygdBehandlinger = behandlingRepository.finnÅpneBehandlinger(opprettetFør = LocalDateTime.now())
+            .filter { it.underkategori == BehandlingUnderkategori.UTVIDET }
+
+        val behandlingsfrister = åpneUtvidetBarnetrygdBehandlinger.map { behandling ->
+            val behandleSakOppgave =
+                oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(Oppgavetype.BehandleSak, behandling)?.let {
+                    hentOppgave(it.gsakId.toLong())
+                }
+            "${behandling.id}\t ${behandleSakOppgave?.id}\t ${behandleSakOppgave?.fristFerdigstillelse}\n"
+        }.reduce { akkumulertString, behandlingsfrist -> akkumulertString + behandlingsfrist }
+
+        return "behandling\t oppgave\t frist\n" + behandlingsfrister
     }
 
     fun settFristÅpneOppgaverPåBehandlingTil(behandlingId: Long, nyFrist: LocalDate) {
