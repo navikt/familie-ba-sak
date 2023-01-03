@@ -44,6 +44,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import java.time.LocalDate
+import java.time.LocalDateTime.now
 
 @ExtendWith(MockKExtension::class)
 class OppgaveServiceTest {
@@ -193,6 +194,25 @@ class OppgaveServiceTest {
         assertEquals(OPPGAVE_ID.toLong(), fordelOppgaveSlot.captured)
         assertEquals(OPPGAVE_ID.toLong(), finnOppgaveSlot.captured)
         verify(exactly = 1) { integrasjonClient.fordelOppgave(any(), null) }
+    }
+
+    @Test
+    fun `hent oppgavefrister for åpne utvidtet barnetrygd behandlinger`() {
+        every { behandlingRepository.finnÅpneBehandlinger(any()) } returns listOf(
+            lagTestBehandling().copy(underkategori = BehandlingUnderkategori.UTVIDET, id = 1002602L),
+            lagTestBehandling().copy(underkategori = BehandlingUnderkategori.UTVIDET, id = 1002602L),
+            lagTestBehandling().copy(underkategori = BehandlingUnderkategori.ORDINÆR, id = 1002602L)
+        )
+        every { oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(any(), any()) } returns lagTestOppgave()
+
+        every { integrasjonClient.finnOppgaveMedId(any()) } returns Oppgave(id = 10018798L, fristFerdigstillelse = "21.01.23")
+
+        assertEquals(
+            "behandlingId   oppgaveId                         frist\n" +
+                "     1002602    10018798                      21.01.23\n" +
+                "     1002602    10018798                      21.01.23",
+            oppgaveService.hentFristerForÅpneUtvidetBarnetrygdBehandlinger()
+        )
     }
 
     private fun lagTestBehandling(aktørId: String = "1234567891000"): Behandling {

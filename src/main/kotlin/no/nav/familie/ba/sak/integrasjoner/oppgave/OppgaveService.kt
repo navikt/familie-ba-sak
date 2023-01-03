@@ -230,10 +230,10 @@ class OppgaveService(
                 oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(Oppgavetype.BehandleSak, behandling)?.let {
                     hentOppgave(it.gsakId.toLong())
                 }
-            "${behandling.id}\t ${behandleSakOppgave?.id}\t ${behandleSakOppgave?.fristFerdigstillelse}\n"
-        }.reduce { akkumulertString, behandlingsfrist -> akkumulertString + behandlingsfrist }
+            String.format("%12d%12s%30s", behandling.id, "${behandleSakOppgave?.id}", "${behandleSakOppgave?.fristFerdigstillelse}")
+        }.reduce { akkumulertString, behandlingsfrist -> akkumulertString + "\n" + behandlingsfrist }
 
-        return "behandling\t oppgave\t frist\n" + behandlingsfrister
+        return String.format("%12s%12s%30s", "behandlingId", "oppgaveId", "frist") + "\n" + behandlingsfrister
     }
 
     fun settFristÅpneOppgaverPåBehandlingTil(behandlingId: Long, nyFrist: LocalDate) {
