@@ -32,7 +32,7 @@
         <mockk.version>1.13.3</mockk.version>
         <token-validation-spring.version>2.1.6</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
-        <springdoc.version>1.6.13</springdoc.version>
+        <springdoc.version>1.6.14</springdoc.version>
         <sentry.version>6.9.1</sentry.version>
 
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
@@ -45,7 +45,7 @@
         <postgresql.version>42.4.3</postgresql.version>
         <testcontainers.postgresql.version>1.17.6</testcontainers.postgresql.version>
         <unleash.version>7.0.0</unleash.version>
-        <maven.model.version>3.8.6</maven.model.version>
+        <maven.model.version>3.8.7</maven.model.version>
         <jackson.module.kotlin.version>2.14.1</jackson.module.kotlin.version>
         <token-validation-test-support.version>2.0.5</token-validation-test-support.version>
         <fpsak-tidslinje.version>2.6.5</fpsak-tidslinje.version>
