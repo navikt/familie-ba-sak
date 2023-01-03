@@ -58,7 +58,6 @@ object TilkjentYtelseUtils {
         personopplysningGrunnlag: PersonopplysningGrunnlag,
         behandling: Behandling,
         endretUtbetalingAndeler: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse> = emptyList(),
-        skalBrukeNyMåteÅGenerereAndelerForBarna: Boolean = true,
         hentPerioderMedFullOvergangsstønad: (aktør: Aktør) -> List<InternPeriodeOvergangsstønad> = { _ -> emptyList() }
     ): TilkjentYtelse {
         val tilkjentYtelse = TilkjentYtelse(
@@ -69,32 +68,24 @@ object TilkjentYtelseUtils {
 
         val (endretUtbetalingAndelerSøker, endretUtbetalingAndelerBarna) = endretUtbetalingAndeler.partition { it.person?.type == PersonType.SØKER }
 
-        val andelerTilkjentYtelseBarnaUtenEndringer = (
-            if (skalBrukeNyMåteÅGenerereAndelerForBarna) {
-                beregnAndelerTilkjentYtelseForBarna(
-                    personopplysningGrunnlag = personopplysningGrunnlag,
-                    personResultater = vilkårsvurdering.personResultater
-                )
-            } else {
-                beregnAndelerTilkjentYtelseForBarnaDeprecated(
-                    personopplysningGrunnlag = personopplysningGrunnlag,
-                    vilkårsvurdering = vilkårsvurdering
+        val andelerTilkjentYtelseBarnaUtenEndringer = beregnAndelerTilkjentYtelseForBarna(
+            personopplysningGrunnlag = personopplysningGrunnlag,
+            personResultater = vilkårsvurdering.personResultater
+        )
+            .map {
+                AndelTilkjentYtelse(
+                    behandlingId = vilkårsvurdering.behandling.id,
+                    tilkjentYtelse = tilkjentYtelse,
+                    aktør = it.person.aktør,
+                    stønadFom = it.stønadFom,
+                    stønadTom = it.stønadTom,
+                    kalkulertUtbetalingsbeløp = it.beløp,
+                    nasjonaltPeriodebeløp = it.beløp,
+                    type = finnYtelseType(behandling.underkategori, it.person.type),
+                    sats = it.sats,
+                    prosent = it.prosent
                 )
             }
-            ).map {
-            AndelTilkjentYtelse(
-                behandlingId = vilkårsvurdering.behandling.id,
-                tilkjentYtelse = tilkjentYtelse,
-                aktør = it.person.aktør,
-                stønadFom = it.stønadFom,
-                stønadTom = it.stønadTom,
-                kalkulertUtbetalingsbeløp = it.beløp,
-                nasjonaltPeriodebeløp = it.beløp,
-                type = finnYtelseType(behandling.underkategori, it.person.type),
-                sats = it.sats,
-                prosent = it.prosent
-            )
-        }
 
         val barnasAndelerInkludertEtterbetaling3ÅrEndringer = oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
             andelTilkjentYtelserUtenEndringer = andelerTilkjentYtelseBarnaUtenEndringer,

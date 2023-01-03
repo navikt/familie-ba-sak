@@ -12,7 +12,6 @@ class FeatureToggleConfig {
             "familie-ba-sak.endringer.validering.migeringsbehandling"
         const val SJEKK_OM_UTVIDET_ER_ENDRET_BEHANDLINGSRESULTAT =
             "familie-ba-sak.behandling.behandlingsresultat-utvidet-endret"
-        const val NY_MÅTE_Å_GENERERE_ATY_BARNA = "familie-ba-sak.behandling.ny-metode-generer-aty-barna"
 
         const val KAN_BEHANDLE_UTVIDET_EØS_SEKUNDÆRLAND = "familie-ba-sak.behandling.utvidet-eos-sekunderland"
 
