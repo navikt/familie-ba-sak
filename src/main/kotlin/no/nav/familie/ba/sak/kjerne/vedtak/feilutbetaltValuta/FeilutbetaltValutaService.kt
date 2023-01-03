@@ -24,14 +24,15 @@ class FeilutbetaltValutaService(
                 feilutbetaltBeløp = feilutbetaltValuta.feilutbetaltBeløp
             )
         )
-        loggService.loggFeilutbetaltValutaPeriodeLagtTil(behandlingId = behandlingId)
+        loggService.loggFeilutbetaltValutaPeriodeLagtTil(behandlingId = behandlingId, feilutbetaltValuta = lagret)
         return lagret.id
     }
 
     @Transactional
     fun fjernFeilutbetaltValutaPeriode(id: Long, behandlingId: Long) {
+        val feilutbetaltValuta = feilutbetaltValutaRepository.findById(id)
         feilutbetaltValutaRepository.deleteById(id)
-        loggService.loggFeilutbetaltValutaPeriodeFjernet(behandlingId = behandlingId)
+        loggService.loggFeilutbetaltValutaPeriodeFjernet(behandlingId = behandlingId, feilutbetaltValuta = feilutbetaltValuta.get())
     }
 
     fun hentFeilutbetaltValutaPerioder(behandlingId: Long) =
