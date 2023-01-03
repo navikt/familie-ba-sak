@@ -2,10 +2,6 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene
 
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.beregning.domene.PeriodeResultat
-import no.nav.familie.ba.sak.kjerne.beregning.domene.personResultaterTilPeriodeResultater
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import javax.persistence.CascadeType
 import javax.persistence.Column
@@ -55,26 +51,6 @@ data class Vilkårsvurdering(
 
     override fun toString(): String {
         return "Vilkårsvurdering(id=$id, behandling=${behandling.id})"
-    }
-
-    fun hentInnvilgedePerioder(personopplysningGrunnlag: PersonopplysningGrunnlag): Pair<List<PeriodeResultat>, List<PeriodeResultat>> {
-        val periodeResultater = this.personResultaterTilPeriodeResultater(false)
-
-        val identBarnMap = personopplysningGrunnlag.barna
-            .associateBy { it.aktør }
-
-        val innvilgetPeriodeResultatSøker = periodeResultater.filter {
-            it.aktør == personopplysningGrunnlag.søker.aktør && it.allePåkrevdeVilkårErOppfylt(
-                PersonType.SØKER
-            )
-        }
-        val innvilgedePeriodeResultatBarna = periodeResultater.filter {
-            identBarnMap.containsKey(it.aktør) && it.allePåkrevdeVilkårErOppfylt(
-                PersonType.BARN
-            )
-        }
-
-        return Pair(innvilgetPeriodeResultatSøker, innvilgedePeriodeResultatBarna)
     }
 
     fun kopier(inkluderAndreVurderinger: Boolean = false): Vilkårsvurdering {
