@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.vedtak.trekkILøpendeUtbetaling
+package no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta
 
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
@@ -13,9 +13,9 @@ import javax.persistence.SequenceGenerator
 import javax.persistence.Table
 
 @EntityListeners(RollestyringMotDatabase::class)
-@Entity(name = "TrekkILøpendeUtbetaling")
-@Table(name = "TREKK_I_LOEPENDE_UTBETALING")
-data class TrekkILøpendeUtbetaling(
+@Entity(name = "FeilutbetaltValuta")
+@Table(name = "FEILUTBETALT_VALUTA")
+data class FeilutbetaltValuta(
     @Column(name = "fk_behandling_id", updatable = false, nullable = false)
     val behandlingId: Long,
     @Column(name = "fom", columnDefinition = "DATE")
@@ -26,10 +26,10 @@ data class TrekkILøpendeUtbetaling(
     var feilutbetaltBeløp: Int,
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "trekk_i_loepende_utbetaling_seq_generator")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "feilutbetalt_valuta_seq_generator")
     @SequenceGenerator(
-        name = "trekk_i_loepende_utbetaling_seq_generator",
-        sequenceName = "trekk_i_loepende_utbetaling_seq",
+        name = "feilutbetalt_valuta_seq_generator",
+        sequenceName = "feilutbetalt_valuta_seq",
         allocationSize = 50
     )
     val id: Long = 0
