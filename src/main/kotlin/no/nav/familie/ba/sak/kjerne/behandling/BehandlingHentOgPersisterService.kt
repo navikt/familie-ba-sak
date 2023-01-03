@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -26,12 +27,20 @@ class BehandlingHentOgPersisterService(
         return behandlingRepository.findByFagsakAndAktiv(fagsakId)
     }
 
+    fun erAktivBehandlingPåFagsak(fagsakId: Long): Boolean {
+        return hentAktivForFagsak(fagsakId) != null
+    }
+
     fun hentAktivOgÅpenForFagsak(fagsakId: Long): Behandling? {
         return behandlingRepository.findByFagsakAndAktivAndOpen(fagsakId)
     }
 
+    fun erÅpenBehandlingPåFagsak(fagsakId: Long): Boolean {
+        return hentAktivOgÅpenForFagsak(fagsakId) != null
+    }
+
     fun hent(behandlingId: Long): Behandling {
-        return behandlingRepository.finnBehandling(behandlingId)
+        return behandlingRepository.finnBehandlingNullable(behandlingId) ?: throw Feil("Finner ikke behandling med id $behandlingId")
     }
 
     /**
