@@ -61,7 +61,8 @@ internal class DokumentServiceEnhetstest {
             settPåVentService = mockk(relaxed = true),
             utgåendeJournalføringService = utgåendeJournalføringService,
             fagsakRepository = fagsakRepository,
-            organisasjonService = organisasjonService
+            organisasjonService = organisasjonService,
+            behandlingHentOgPersisterService = mockk(relaxed = true)
         )
     )
 
