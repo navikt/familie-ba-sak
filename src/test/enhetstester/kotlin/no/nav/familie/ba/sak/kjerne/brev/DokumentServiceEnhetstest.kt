@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpost
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.JournalføringRepository
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.brev.DokumentService.Companion.alleredeDistribuertMelding
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
@@ -44,11 +45,11 @@ internal class DokumentServiceEnhetstest {
     val journalføringRepository = mockk<JournalføringRepository>(relaxed = true)
     val fagsakRepository = mockk<FagsakRepository>(relaxed = true)
     val organisasjonService = mockk<OrganisasjonService>(relaxed = true)
+    val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>(relaxed = true)
 
     private val dokumentService: DokumentService = spyk(
         DokumentService(
             integrasjonClient = integrasjonClient,
-
             loggService = mockk(relaxed = true),
             persongrunnlagService = mockk(relaxed = true),
             journalføringRepository = journalføringRepository,
@@ -61,7 +62,8 @@ internal class DokumentServiceEnhetstest {
             settPåVentService = mockk(relaxed = true),
             utgåendeJournalføringService = utgåendeJournalføringService,
             fagsakRepository = fagsakRepository,
-            organisasjonService = organisasjonService
+            organisasjonService = organisasjonService,
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService
         )
     )
 
@@ -191,7 +193,86 @@ internal class DokumentServiceEnhetstest {
     }
 
     @Test
-    fun `sendManueltBrev skal legge til opplysningspliktvilkåret, om så ved å initiere vilkårsvurdering først`() {
+    fun `sendManueltBrev skal legge til opplysningspliktvilkåret når gjeldende og forrige vilkårsvurdering mangler`() {
+        val brevSomFørerTilOpplysningsplikt = Brevmal.values().filter { it.førerTilOpplysningsplikt() }
+
+        brevSomFørerTilOpplysningsplikt.forEach { brevmal ->
+            val behandling = lagBehandling()
+            val vilkårsvurdering = lagVilkårsvurdering(lagPerson().aktør, behandling, Resultat.IKKE_VURDERT)
+            val personResultat = vilkårsvurdering.personResultater.find { it.erSøkersResultater() }!!
+
+            // Scenario uten eksisterende vilkårsvurdering
+            every { vilkårsvurderingService.hentAktivForBehandling(any()) } returns null
+            every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling) } returns null
+            every {
+                vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
+                    any(),
+                    any(),
+                    null
+                )
+            } returns
+                vilkårsvurdering
+
+            every { journalføringRepository.save(any()) } returns
+                DbJournalpost(behandling = behandling, journalpostId = "id")
+
+            sendBrev(brevmal, behandling)
+
+            assertThat(personResultat.andreVurderinger).extracting("type")
+                .containsExactly(AnnenVurderingType.OPPLYSNINGSPLIKT)
+            verify(exactly = 1) {
+                behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
+            }
+            verify(exactly = 1) {
+                vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(behandling, any(), null)
+            }
+        }
+    }
+
+    @Test
+    fun `sendManueltBrev skal legge til opplysningspliktvilkåret når gjeldende vilkårsvurdering mangler, men forrige finnes`() {
+        val brevSomFørerTilOpplysningsplikt = Brevmal.values().filter { it.førerTilOpplysningsplikt() }
+
+        brevSomFørerTilOpplysningsplikt.forEach { brevmal ->
+            val behandling = lagBehandling()
+            val forrigeVedtatteBehandling = lagBehandling()
+            val vilkårsvurdering = lagVilkårsvurdering(lagPerson().aktør, behandling, Resultat.IKKE_VURDERT)
+            val personResultat = vilkårsvurdering.personResultater.find { it.erSøkersResultater() }!!
+
+            // Scenario uten eksisterende vilkårsvurdering
+            every { vilkårsvurderingService.hentAktivForBehandling(any()) } returns null
+            every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling) } returns forrigeVedtatteBehandling
+            every {
+                vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
+                    any(),
+                    any(),
+                    forrigeVedtatteBehandling
+                )
+            } returns
+                vilkårsvurdering
+
+            every { journalføringRepository.save(any()) } returns
+                DbJournalpost(behandling = behandling, journalpostId = "id")
+
+            sendBrev(brevmal, behandling)
+
+            assertThat(personResultat.andreVurderinger).extracting("type")
+                .containsExactly(AnnenVurderingType.OPPLYSNINGSPLIKT)
+            verify(exactly = 1) {
+                behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
+            }
+            verify(exactly = 1) {
+                vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
+                    behandling,
+                    any(),
+                    forrigeVedtatteBehandling
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `sendManueltBrev skal legge til opplysningspliktvilkåret når vilkårsvurderingen finnes`() {
         val brevSomFørerTilOpplysningsplikt = Brevmal.values().filter { it.førerTilOpplysningsplikt() }
 
         brevSomFørerTilOpplysningsplikt.forEach { brevmal ->
@@ -209,21 +290,7 @@ internal class DokumentServiceEnhetstest {
             assertThat(personResultat.andreVurderinger).extracting("type")
                 .containsExactly(AnnenVurderingType.OPPLYSNINGSPLIKT)
             verify(exactly = 0) {
-                vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(behandling, any())
-            }
-
-            // Scenario uten eksisterende vilkårsvurdering
-            personResultat.setAndreVurderinger(emptySet()) // nullstiller andreVurderinger
-            every { vilkårsvurderingService.hentAktivForBehandling(any()) } returns null
-            every { vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(any(), any()) } returns
-                vilkårsvurdering
-
-            sendBrev(brevmal, behandling)
-
-            assertThat(personResultat.andreVurderinger).extracting("type")
-                .containsExactly(AnnenVurderingType.OPPLYSNINGSPLIKT)
-            verify(exactly = 1) {
-                vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(behandling, any())
+                vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(behandling, any(), null)
             }
         }
     }
