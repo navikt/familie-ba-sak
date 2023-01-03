@@ -34,7 +34,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.tilMinimertVedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.tilMinimertePersoner
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.endretUtbetalingsperiodeBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.landkodeTilBarnetsBostedsland
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilSanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.triggesForPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
@@ -218,7 +218,8 @@ fun hentGyldigeBegrunnelserForPeriode(
         hentGyldigeEØSBegrunnelserForPeriode(
             sanityEØSBegrunnelser = sanityEØSBegrunnelser,
             kompetanserIPeriode = kompetanserIPeriode,
-            kompetanserSomStopperRettFørPeriode = kompetanserSomStopperRettFørPeriode
+            kompetanserSomStopperRettFørPeriode = kompetanserSomStopperRettFørPeriode,
+            minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode()
         )
 
     return standardbegrunnelser + eøsBegrunnelser
@@ -260,12 +261,14 @@ fun hentGyldigeStandardbegrunnelserForVedtaksperiode(
 fun hentGyldigeEØSBegrunnelserForPeriode(
     sanityEØSBegrunnelser: List<SanityEØSBegrunnelse>,
     kompetanserIPeriode: List<Kompetanse>,
-    kompetanserSomStopperRettFørPeriode: List<Kompetanse>
+    kompetanserSomStopperRettFørPeriode: List<Kompetanse>,
+    minimertVedtaksperiode: MinimertVedtaksperiode
 ) = EØSStandardbegrunnelse.values()
+    .filter { minimertVedtaksperiode.type.tillatteBegrunnelsestyper.contains(it.vedtakBegrunnelseType) }
     .mapNotNull { it.tilEØSBegrunnelseMedTriggere(sanityEØSBegrunnelser) }
     .filter { begrunnelse ->
         when (begrunnelse.eøsBegrunnelse.vedtakBegrunnelseType) {
-            VedtakBegrunnelseType.EØS_INNVILGET -> kompetanserIPeriode.any { kompetanse ->
+            VedtakBegrunnelseType.EØS_INNVILGET, VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET -> kompetanserIPeriode.any { kompetanse ->
                 kompetanse.validerFelterErSatt()
                 begrunnelse.erGyldigForKompetanseMedData(
                     annenForeldersAktivitetFraKompetanse = kompetanse.annenForeldersAktivitet!!,
@@ -274,7 +277,7 @@ fun hentGyldigeEØSBegrunnelserForPeriode(
                 )
             }
 
-            VedtakBegrunnelseType.EØS_OPPHØR -> kompetanserSomStopperRettFørPeriode.any { kompetanse ->
+            VedtakBegrunnelseType.EØS_OPPHØR, VedtakBegrunnelseType.EØS_REDUKSJON -> kompetanserSomStopperRettFørPeriode.any { kompetanse ->
                 kompetanse.validerFelterErSatt()
                 begrunnelse.erGyldigForKompetanseMedData(
                     annenForeldersAktivitetFraKompetanse = kompetanse.annenForeldersAktivitet!!,
@@ -282,6 +285,10 @@ fun hentGyldigeEØSBegrunnelserForPeriode(
                     resultatFraKompetanse = kompetanse.resultat!!
                 )
             }
+
+            VedtakBegrunnelseType.EØS_AVSLAG -> minimertVedtaksperiode.type.tillatteBegrunnelsestyper.contains(
+                VedtakBegrunnelseType.EØS_AVSLAG
+            )
 
             else -> false
         }
@@ -359,7 +366,7 @@ private fun velgRedusertBegrunnelser(
     ytelserForrigePeriode: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
 ): List<Standardbegrunnelse> {
     val redusertBegrunnelser = tillateBegrunnelserForVedtakstype.filter {
-        it.tilSanityBegrunnelse(sanityBegrunnelser)?.tilTriggesAv()?.gjelderFraInnvilgelsestidspunkt ?: false
+        it.tilISanityBegrunnelse(sanityBegrunnelser)?.tilTriggesAv()?.gjelderFraInnvilgelsestidspunkt ?: false
     }
     if (minimertVedtaksperiode.utbetalingsperioder.any { it.utbetaltPerMnd > 0 }) {
         val utbetalingsbegrunnelser = velgUtbetalingsbegrunnelser(
@@ -394,7 +401,7 @@ private fun velgUtbetalingsbegrunnelser(
     val standardbegrunnelser: MutableSet<Standardbegrunnelse> =
         tillateBegrunnelserForVedtakstype
             .filter { !it.vedtakBegrunnelseType.erFortsattInnvilget() }
-            .filter { it.tilSanityBegrunnelse(sanityBegrunnelser)?.tilTriggesAv()?.valgbar ?: false }
+            .filter { it.tilISanityBegrunnelse(sanityBegrunnelser)?.tilTriggesAv()?.valgbar ?: false }
             .fold(mutableSetOf()) { acc, standardBegrunnelse ->
                 if (standardBegrunnelse.triggesForPeriode(
                         minimertVedtaksperiode = minimertVedtaksperiode,

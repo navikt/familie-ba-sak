@@ -69,7 +69,8 @@ class BrevService(
         return when (brevmal) {
             Brevmal.VEDTAK_FØRSTEGANGSVEDTAK -> Førstegangsvedtak(
                 vedtakFellesfelter = vedtakFellesfelter,
-                etterbetaling = hentEtterbetaling(vedtak)
+                etterbetaling = hentEtterbetaling(vedtak),
+                informasjonOmAarligKontroll = vedtaksperiodeService.skalHaÅrligKontroll(vedtak)
             )
 
             Brevmal.VEDTAK_FØRSTEGANGSVEDTAK_INSTITUSJON -> Førstegangsvedtak(
@@ -125,7 +126,10 @@ class BrevService(
                 vedtakFellesfelter = vedtakFellesfelter
             )
 
-            Brevmal.VEDTAK_FORTSATT_INNVILGET -> ForsattInnvilget(vedtakFellesfelter = vedtakFellesfelter)
+            Brevmal.VEDTAK_FORTSATT_INNVILGET -> ForsattInnvilget(
+                vedtakFellesfelter = vedtakFellesfelter,
+                informasjonOmAarligKontroll = vedtaksperiodeService.skalHaÅrligKontroll(vedtak)
+            )
             Brevmal.VEDTAK_FORTSATT_INNVILGET_INSTITUSJON -> ForsattInnvilget(
                 mal = Brevmal.VEDTAK_FORTSATT_INNVILGET_INSTITUSJON,
                 vedtakFellesfelter = vedtakFellesfelter

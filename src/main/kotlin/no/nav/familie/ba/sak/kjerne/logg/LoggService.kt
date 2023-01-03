@@ -482,11 +482,11 @@ class LoggService(
         )
     }
 
-    fun loggTrekkILøpendeUtbetalingLagtTil(behandlingId: Long) =
+    fun loggFeilutbetaltValutaPeriodeLagtTil(behandlingId: Long) =
         lagre(
             Logg(
                 behandlingId = behandlingId,
-                type = LoggType.TREKK_I_LØPENDE_UTBETALING_LAGT_TIL,
+                type = LoggType.FEILUTBETALT_VALUTA_LAGT_TIL,
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                     rolleConfig,
                     BehandlerRolle.SAKSBEHANDLER
@@ -494,11 +494,11 @@ class LoggService(
             )
         )
 
-    fun loggTrekkILøpendeUtbetalingFjernet(behandlingId: Long) =
+    fun loggFeilutbetaltValutaPeriodeFjernet(behandlingId: Long) =
         lagre(
             Logg(
                 behandlingId = behandlingId,
-                type = LoggType.TREKK_I_LØPENDE_UTBETALING_FJERNET,
+                type = LoggType.FEILUTBETALT_VALUTA_FJERNET,
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                     rolleConfig,
                     BehandlerRolle.SAKSBEHANDLER
