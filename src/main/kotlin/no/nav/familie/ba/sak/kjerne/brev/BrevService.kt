@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Dødsfall
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.DødsfallData
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Etterbetaling
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.EtterbetalingInstitusjon
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.FeilutbetaltValuta
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.ForsattInnvilget
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Førstegangsvedtak
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Hjemmeltekst
@@ -84,7 +85,10 @@ class BrevService(
                 etterbetaling = hentEtterbetaling(vedtak),
                 erKlage = vedtak.behandling.erKlage(),
                 erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = vedtak.behandling.id),
-                informasjonOmAarligKontroll = vedtaksperiodeService.skalHaÅrligKontroll(vedtak)
+                informasjonOmAarligKontroll = vedtaksperiodeService.skalHaÅrligKontroll(vedtak),
+                feilutbetaltValuta = vedtaksperiodeService.beskrivPerioderMedFeilutbetaltValuta(vedtak)?.let {
+                    FeilutbetaltValuta(perioderMedForMyeUtbetalt = it)
+                }
             )
 
             Brevmal.VEDTAK_ENDRING_INSTITUSJON -> VedtakEndring(
