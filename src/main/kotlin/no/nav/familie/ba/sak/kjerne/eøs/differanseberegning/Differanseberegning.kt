@@ -14,7 +14,6 @@ import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerHverKunVerdi
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerKunVerdiMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullMed
@@ -25,7 +24,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.matematikk.minus
 import no.nav.familie.ba.sak.kjerne.tidslinje.matematikk.rundAvTilHeltall
 import no.nav.familie.ba.sak.kjerne.tidslinje.matematikk.sum
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.mapIkkeNull
 import java.math.BigDecimal
 import java.math.MathContext
 
@@ -189,12 +187,3 @@ fun Tidslinje<AndelTilkjentYtelse, Måned>.fordelBeløpPåBarnaMedAndeler(
 
     return barnasAndeler.kombinerKunVerdiMed(ytelsePerBarnTidslinje) { _, ytelsePerBarn -> ytelsePerBarn }
 }
-
-fun Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>>.tilUnderskuddPåDifferanseberegningen() =
-    mapValues { (_, tidslinje) ->
-        tidslinje
-            .mapIkkeNull { innhold -> innhold.differanseberegnetPeriodebeløp }
-            .mapIkkeNull { maxOf(-it, 0) }
-            .filtrer { it != null && it > 0 }
-            .mapIkkeNull { it.toBigDecimal() }
-    }
