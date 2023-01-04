@@ -66,13 +66,28 @@ private fun AndelTilkjentYtelse.utenDifferanseberegning(): AndelTilkjentYtelse {
     )
 }
 
+/**
+ * Gjør et forsøk på fjerne differanseberegning på andelen, samtidig som tidligere, funksjonelle splitter bevares
+ * Det kan være en funksjonell grunn til at en splitt finnes, selv om nabo-andelene ellers like, f.eks
+ * endring i overgangsstønad, som ikke fører til endring i småbarnstillegget. Splitten er nødvendig for riktige vedtaksperioder
+ * Splitten opprettholdes når fom og tom er satt på andelen og er forskjellig fra fom og tom på nabo-andelen. Det vil gjelde søkers ytelser
+ * Ved å sette fom og tom til <null> på alle andeler som har differanseberegning, vil naboer slås sammen hvis de ellers er like
+ * Det er en potensiell bug her: Det er en mulighet for at en funksjonell splitt i andeler
+ * sammenfaller med splitt pga differanseberegning, og blir fjernet
+ * Det beste hadde vært om andelene IKKE inneholdt splitter av denne typen, men at ekstra splitter ble utledet der de trengs
+ */
 fun <T : Tidsenhet> Tidslinje<AndelTilkjentYtelse, T>.utenDifferanseberegning() =
-    mapIkkeNull { it.utenDifferanseberegning() }
+    mapIkkeNull {
+        when {
+            it.differanseberegnetPeriodebeløp != null -> it.medPeriode(null, null)
+            else -> it
+        }
+    }.mapIkkeNull { it.utenDifferanseberegning() }
 
 fun Tidslinje<AndelTilkjentYtelse, Måned>.oppdaterDifferanseberegning(
-    differanseberegnetBeløpTidslinje: Tidslinje<Int, Måned>
+    utenlandskBeløpINorskeKronerTidslinje: Tidslinje<BigDecimal, Måned>
 ): Tidslinje<AndelTilkjentYtelse, Måned> {
-    return this.kombinerMed(differanseberegnetBeløpTidslinje) { andel, differanseberegning ->
-        andel.oppdaterDifferanseberegning(differanseberegning?.toBigDecimal())
+    return this.kombinerMed(utenlandskBeløpINorskeKronerTidslinje) { andel, utenlandskBeløpINorskeKroner ->
+        andel.oppdaterDifferanseberegning(utenlandskBeløpINorskeKroner)
     }
 }
