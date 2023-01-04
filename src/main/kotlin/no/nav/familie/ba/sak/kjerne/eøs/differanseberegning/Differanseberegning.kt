@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 
 import minsteAvHver
-import no.nav.familie.ba.sak.common.erTilogMed3ÅrTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.tilKronerPerValutaenhet
@@ -17,7 +16,6 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerHverKunVerdi
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.joinIkkeNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerKunVerdiMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullOgIkkeTom
@@ -200,11 +198,3 @@ fun Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>>.tilUnderskuddPåDifferan
             .filtrer { it != null && it > 0 }
             .mapIkkeNull { it.toBigDecimal() }
     }
-
-fun Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>>.kunAndelerTilOgMed3År(barna: List<Person>):
-    Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>> {
-    val barnasErInntil3ÅrTidslinjer = barna.associate { it.aktør to erTilogMed3ÅrTidslinje(it.fødselsdato) }
-
-    // For hvert barn kombiner andel-tidslinjen med 3-års-tidslinjen. Resultatet er andelene når barna er inntil 3 år
-    return this.joinIkkeNull(barnasErInntil3ÅrTidslinjer) { andel, _ -> andel }
-}
