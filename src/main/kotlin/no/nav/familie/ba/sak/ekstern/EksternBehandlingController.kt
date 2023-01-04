@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.ekstern.klage
+package no.nav.familie.ba.sak.ekstern
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
@@ -22,12 +22,12 @@ import org.springframework.web.bind.annotation.RestController
     produces = [MediaType.APPLICATION_JSON_VALUE]
 )
 @ProtectedWithClaims(issuer = "azuread")
-class KlageController(
+class EksternBehandlingController(
     private val tilgangService: TilgangService,
-    private val klageService: KlageService
+    private val klageService: EksternBehandlingService
 ) {
 
-    @GetMapping("kan-opprette-revurdering-klage/{fagsakId}")
+    @GetMapping("kan-opprette-revurdering/{fagsakId}")
     fun kanOppretteRevurdering(@PathVariable fagsakId: Long): Ressurs<KanOppretteRevurderingResponse> {
         tilgangService.validerTilgangTilHandlingOgFagsak(
             fagsakId = fagsakId,
