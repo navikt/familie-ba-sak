@@ -226,14 +226,18 @@ class OppgaveService(
             .filter { it.underkategori == BehandlingUnderkategori.UTVIDET }
 
         val behandlingsfrister = åpneUtvidetBarnetrygdBehandlinger.map { behandling ->
-            val behandleSakOppgave =
+            val behandleSakOppgave = try {
                 oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(Oppgavetype.BehandleSak, behandling)?.let {
                     hentOppgave(it.gsakId.toLong())
                 }
-            String.format("%12d%12s%30s", behandling.id, "${behandleSakOppgave?.id}", "${behandleSakOppgave?.fristFerdigstillelse}")
-        }.reduce { akkumulertString, behandlingsfrist -> akkumulertString + "\n" + behandlingsfrist }
+            } catch (e: Exception) {
+                secureLogger.warn("Klarte ikke hente BehandleSak-oppgaven for behandling ${behandling.id}", e)
+                null
+            }
+            "${behandling.id};${behandleSakOppgave?.id};${behandleSakOppgave?.fristFerdigstillelse}\n"
+        }.reduce { csvString, behandlingsfrist -> csvString + behandlingsfrist }
 
-        return String.format("%12s%12s%30s", "behandlingId", "oppgaveId", "frist") + "\n" + behandlingsfrister
+        return "behandlingId;oppgaveId;frist\n" + behandlingsfrister
     }
 
     fun settFristÅpneOppgaverPåBehandlingTil(behandlingId: Long, nyFrist: LocalDate) {

@@ -207,9 +207,9 @@ class OppgaveServiceTest {
         every { integrasjonClient.finnOppgaveMedId(any()) } returns Oppgave(id = 10018798L, fristFerdigstillelse = "21.01.23")
 
         assertEquals(
-            "behandlingId   oppgaveId                         frist\n" +
-                "     1002602    10018798                      21.01.23\n" +
-                "     1002602    10018798                      21.01.23",
+            "behandlingId;oppgaveId;frist\n" +
+                "1002602;10018798;21.01.23\n" +
+                "1002602;10018798;21.01.23\n",
             oppgaveService.hentFristerForÅpneUtvidetBarnetrygdBehandlinger()
         )
     }
