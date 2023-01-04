@@ -30,10 +30,10 @@
         <familie.kontrakter.stønadsstatistikk>2.0_20221123134052_8bdd6c8</familie.kontrakter.stønadsstatistikk>
         <familie.kontrakter.skatteetaten>2.0_20210920094114_9c74239</familie.kontrakter.skatteetaten>
         <mockk.version>1.13.3</mockk.version>
-        <token-validation-spring.version>2.1.6</token-validation-spring.version>
+        <token-validation-spring.version>2.1.9</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
         <springdoc.version>1.6.14</springdoc.version>
-        <sentry.version>6.9.1</sentry.version>
+        <sentry.version>6.11.0</sentry.version>
 
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
         <okhttp3.version>4.9.0</okhttp3.version>
@@ -424,8 +424,7 @@
                             <phase>verify</phase>
                             <configuration>
                                 <target name="ktlint">
-                                    <java taskname="ktlint" dir="${basedir}" fork="true" failonerror="true"
-                                          classpathref="maven.plugin.classpath" classname="com.pinterest.ktlint.Main">
+                                    <java taskname="ktlint" dir="${basedir}" fork="true" failonerror="true" classpathref="maven.plugin.classpath" classname="com.pinterest.ktlint.Main">
                                         <arg value="src/**/*.kt"/>
                                     </java>
                                 </target>
@@ -438,8 +437,7 @@
                             <id>ktlint-format</id>
                             <configuration>
                                 <target name="ktlint">
-                                    <java taskname="ktlint" dir="${basedir}" fork="true" failonerror="true"
-                                          classpathref="maven.plugin.classpath" classname="com.pinterest.ktlint.Main">
+                                    <java taskname="ktlint" dir="${basedir}" fork="true" failonerror="true" classpathref="maven.plugin.classpath" classname="com.pinterest.ktlint.Main">
                                         <arg value="-F"/>
                                         <arg value="src/**/*.kt"/>
                                         <!-- Trenger dette for å kjøre ktlint med java 17 -->
