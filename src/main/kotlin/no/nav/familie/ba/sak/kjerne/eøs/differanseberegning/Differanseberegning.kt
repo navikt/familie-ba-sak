@@ -15,19 +15,20 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.join
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.joinIkkeNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerKunVerdiMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullOgIkkeTom
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.leftJoin
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.outerJoin
+import no.nav.familie.ba.sak.kjerne.tidslinje.matematikk.minus
+import no.nav.familie.ba.sak.kjerne.tidslinje.matematikk.rundAvTilHeltall
+import no.nav.familie.ba.sak.kjerne.tidslinje.matematikk.sum
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.mapIkkeNull
 import java.math.BigDecimal
 import java.math.MathContext
-import java.math.RoundingMode
 
 /**
  * ADVARSEL: Muterer TilkjentYtelse
@@ -212,21 +213,6 @@ fun <K, I : Comparable<I>, T : Tidsenhet> minsteAvHver(
     bTidslinjer: Map<K, Tidslinje<I, T>>
 ) = aTidslinjer.joinIkkeNull(bTidslinjer) { a, b -> minOf(a, b) }
 
-fun <K, T : Tidsenhet> Map<K, Tidslinje<BigDecimal, T>>.minus(
-    bTidslinjer: Map<K, Tidslinje<BigDecimal, T>>
-) = this.join(bTidslinjer) { a, b ->
-    when {
-        a != null && b != null -> a - b
-        else -> a
-    }
-}
-
 fun <K, I, T : Tidsenhet> Map<K, Tidslinje<I, T>>.filtrerHverKunVerdi(
     filter: (I) -> Boolean
 ) = mapValues { (_, tidslinje) -> tidslinje.filtrer { if (it != null) filter(it) else false } }
-
-fun <T : Tidsenhet> Map<Aktør, Tidslinje<BigDecimal, T>>.sum() =
-    values.kombinerUtenNullOgIkkeTom { it.reduce { sum, verdi -> sum.plus(verdi) } }
-
-fun <T : Tidsenhet> Tidslinje<BigDecimal, T>.rundAvTilHeltall() =
-    this.mapIkkeNull { it.setScale(0, RoundingMode.HALF_UP) }
