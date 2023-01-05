@@ -7,6 +7,8 @@ metadata:
     team: teamfamilie
   annotations:
     nginx.ingress.kubernetes.io/proxy-next-upstream-tries: '1'
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "180"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "180"
 
 spec:
   envFrom:
