@@ -222,8 +222,7 @@ class OppgaveService(
     }
 
     fun hentFristerForÅpneUtvidetBarnetrygdBehandlinger(): String {
-        val åpneUtvidetBarnetrygdBehandlinger = behandlingRepository.finnÅpneBehandlinger(opprettetFør = LocalDateTime.now())
-            .filter { it.underkategori == BehandlingUnderkategori.UTVIDET }
+        val åpneUtvidetBarnetrygdBehandlinger = behandlingRepository.finnÅpneUtvidetBarnetrygdBehandlinger()
 
         val behandlingsfrister = åpneUtvidetBarnetrygdBehandlinger.map { behandling ->
             val behandleSakOppgave = try {
