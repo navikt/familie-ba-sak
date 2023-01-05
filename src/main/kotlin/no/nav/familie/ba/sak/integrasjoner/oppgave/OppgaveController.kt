@@ -153,4 +153,11 @@ class OppgaveController(
 
         return ResponseEntity.ok(Ressurs.success(fagsakId, "Oppgaven $oppgaveId er lukket"))
     }
+
+    @PostMapping("/hent-frister-for-apne-utvidet-barnetrygd-behandlinger")
+    fun hentFristerForÅpneUtvidetBarnetrygdBehandlinger(): ResponseEntity<Ressurs<String>> {
+        val behandleSakOppgaveFrister = oppgaveService.hentFristerForÅpneUtvidetBarnetrygdBehandlinger()
+
+        return ResponseEntity.ok(Ressurs.success(behandleSakOppgaveFrister))
+    }
 }
