@@ -197,10 +197,9 @@ class OppgaveServiceTest {
 
     @Test
     fun `hent oppgavefrister for åpne utvidtet barnetrygd behandlinger`() {
-        every { behandlingRepository.finnÅpneBehandlinger(any()) } returns listOf(
+        every { behandlingRepository.finnÅpneUtvidetBarnetrygdBehandlinger() } returns listOf(
             lagTestBehandling().copy(underkategori = BehandlingUnderkategori.UTVIDET, id = 1002602L),
-            lagTestBehandling().copy(underkategori = BehandlingUnderkategori.UTVIDET, id = 1002602L),
-            lagTestBehandling().copy(underkategori = BehandlingUnderkategori.ORDINÆR, id = 1002602L)
+            lagTestBehandling().copy(underkategori = BehandlingUnderkategori.UTVIDET, id = 1002602L)
         )
         every { oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(any(), any()) } returns lagTestOppgave()
 
