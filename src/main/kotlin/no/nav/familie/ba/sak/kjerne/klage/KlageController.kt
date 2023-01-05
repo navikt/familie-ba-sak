@@ -29,19 +29,19 @@ class KlageController(
             fagsakId = fagsakId,
             event = AuditLoggerEvent.CREATE,
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "Vis og lagre vedtaksbrev"
+            handling = "Opprett klagebehandling"
         )
         klageService.opprettKlage(fagsakId, opprettKlageDto)
         return Ressurs.success(fagsakId)
     }
 
-    @GetMapping("/{fagsakId}/hent-klager")
+    @GetMapping("/{fagsakId}/hent-klagebehandlinger")
     fun hentKlagebehandlinger(@PathVariable fagsakId: Long): Ressurs<List<KlagebehandlingDto>> {
         tilgangService.validerTilgangTilHandlingOgFagsak(
             fagsakId = fagsakId,
             event = AuditLoggerEvent.CREATE,
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "Vis og lagre vedtaksbrev"
+            handling = "Hent klagebehandlinger på fagsak"
         )
         return Ressurs.success(klageService.hentKlagebehandlingerPåFagsak(fagsakId))
     }
