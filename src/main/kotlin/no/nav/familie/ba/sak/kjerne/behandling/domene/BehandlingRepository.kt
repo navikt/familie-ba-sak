@@ -132,6 +132,10 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
     @Query("SELECT b FROM Behandling b JOIN b.fagsak f WHERE b.opprettetTidspunkt < :opprettetFør AND b.status <> 'AVSLUTTET' AND f.arkivert = false")
     fun finnÅpneBehandlinger(opprettetFør: LocalDateTime): List<Behandling>
 
+    @Lock(LockModeType.NONE)
+    @Query("SELECT b FROM Behandling b JOIN b.fagsak f WHERE b.status <> 'AVSLUTTET' AND b.underkategori = 'UTVIDET' AND f.arkivert = false")
+    fun finnÅpneUtvidetBarnetrygdBehandlinger(): List<Behandling>
+
     @Query("SELECT DISTINCT aty.behandlingId FROM AndelTilkjentYtelse aty WHERE aty.behandlingId in :iverksatteLøpende AND aty.sats = :gammelSats AND aty.kalkulertUtbetalingsbeløp > 0 AND aty.stønadTom >= :månedÅrForEndring")
     fun finnBehandlingerForSatsendring(
         iverksatteLøpende: List<Long>,

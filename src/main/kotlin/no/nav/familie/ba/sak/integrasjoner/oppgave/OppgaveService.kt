@@ -222,8 +222,7 @@ class OppgaveService(
     }
 
     fun hentFristerForÅpneUtvidetBarnetrygdBehandlinger(): String {
-        val åpneUtvidetBarnetrygdBehandlinger = behandlingRepository.finnÅpneBehandlinger(opprettetFør = LocalDateTime.now())
-            .filter { it.underkategori == BehandlingUnderkategori.UTVIDET }
+        val åpneUtvidetBarnetrygdBehandlinger = behandlingRepository.finnÅpneUtvidetBarnetrygdBehandlinger()
 
         val behandlingsfrister = åpneUtvidetBarnetrygdBehandlinger.map { behandling ->
             val behandleSakOppgave = try {
@@ -237,7 +236,7 @@ class OppgaveService(
             "${behandling.id};${behandleSakOppgave?.id};${behandleSakOppgave?.fristFerdigstillelse}\n"
         }.reduce { csvString, behandlingsfrist -> csvString + behandlingsfrist }
 
-        return "behandlingId;oppgaveId;frist\n" + behandlingsfrister
+        return "behandlingId;oppgaveId;frist\n$behandlingsfrister"
     }
 
     fun settFristÅpneOppgaverPåBehandlingTil(behandlingId: Long, nyFrist: LocalDate) {
