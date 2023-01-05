@@ -116,11 +116,11 @@ class MigreringService(
 
             if (løpendeInfotrygdsak.type == "I") {
                 secureLog.info("Løpendesak er av type institusjon for $personIdent")
-                kastOgTellMigreringsFeil(MigreringsfeilType.INSTITUSJON)
+                kastOgTellMigreringsFeil(MigreringsfeilType.ENSLIG_MINDREÅRIG)
             }
             if (personIdent in barnasIdenter) {
                 secureLog.info("Migrering: $personIdent er lik barn registert på stønad=${løpendeInfotrygdsak.stønad?.id}")
-                kastOgTellMigreringsFeil(MigreringsfeilType.INSTITUSJON)
+                kastOgTellMigreringsFeil(MigreringsfeilType.ENSLIG_MINDREÅRIG)
             }
 
             // Vi ønsker at steg'ene selv lagrer aktører. De blir cachet i appen så det blir ikke gjort nytt kall mot PDL
@@ -152,7 +152,10 @@ class MigreringService(
                         fagsakId = fagsak.id
                     )
                 )
-            }.getOrElse { kastOgTellMigreringsFeil(MigreringsfeilType.KAN_IKKE_OPPRETTE_BEHANDLING, it.message, it) }
+            }.getOrElse {
+                secureLog.info("Kan ikke opprette behandling ${it.message}", it)
+                kastOgTellMigreringsFeil(MigreringsfeilType.KAN_IKKE_OPPRETTE_BEHANDLING)
+            }
 
             val migreringsdato = virkningsdatoFra(infotrygdKjøredato(YearMonth.now()))
 
@@ -219,7 +222,9 @@ class MigreringService(
             return migreringResponseDto
         } catch (e: Exception) {
             if (e is KanIkkeMigrereException) throw e
-            kastOgTellMigreringsFeil(MigreringsfeilType.UKJENT, e.message, e)
+
+            secureLog.info("Ukjent feil ved migrering ${e.message}", e)
+            kastOgTellMigreringsFeil(MigreringsfeilType.UKJENT)
         }
     }
 
@@ -352,10 +357,7 @@ class MigreringService(
             }
 
             else -> {
-                kastOgTellMigreringsFeil(
-                    MigreringsfeilType.UGYLDIG_ANTALL_DELYTELSER_I_INFOTRYGD,
-                    "Fant ugylding antall delytelser ${sak.stønad!!.delytelse.filter { it.tom == null }.size}"
-                )
+                kastOgTellMigreringsFeil(MigreringsfeilType.UGYLDIG_ANTALL_DELYTELSER_I_INFOTRYGD)
             }
         }
     }
@@ -371,10 +373,8 @@ class MigreringService(
         }
 
         if (barnUnder18.isEmpty()) {
-            kastOgTellMigreringsFeil(
-                MigreringsfeilType.INGEN_BARN_MED_LØPENDE_STØNAD_I_INFOTRYGD,
-                "Fant ingen barn med løpende stønad på sak ${løpendeSak.saksblokk} ${løpendeSak.saksnr} på bruker i Infotrygd."
-            )
+            secureLog.info("Fant ingen barn med løpende stønad på sak ${løpendeSak.saksblokk} ${løpendeSak.saksnr} på bruker i Infotrygd.")
+            kastOgTellMigreringsFeil(MigreringsfeilType.INGEN_BARN_MED_LØPENDE_STØNAD_I_INFOTRYGD)
         } else if (barnUnder18.distinct().size != løpendeSak.stønad!!.antallBarn) {
             secureLog.info(
                 "${MigreringsfeilType.OPPGITT_ANTALL_BARN_ULIKT_ANTALL_BARNIDENTER.beskrivelse}: " +
@@ -407,7 +407,7 @@ class MigreringService(
                 else -> {
                     kastOgTellMigreringsFeil(
                         MigreringsfeilType.IKKE_GYLDIG_KJØREDATO,
-                        "Migrering er midlertidig deaktivert frem til ${kjøredato.plusDays(2)} da det kolliderer med Infotrygds kjøredato"
+                        "Kjøring pågår. Vent med migrering til etter ${kjøredato.plusDays(2)}"
                     )
                 }
             }.minusMonths(1)
@@ -511,19 +511,14 @@ class MigreringService(
                     "$førsteAndelerTilkjentYtelse"
             )
             secureLog.info("Beløp fra infotrygd sammsvarer ikke med beløp fra ba-sak for ${infotrygdSak.valg} ${infotrygdSak.undervalg} fnr=$fnr baSak=$førsteUtbetalingsbeløp infotrygd=$beløpFraInfotrygd")
-            kastOgTellMigreringsFeil(
-                beløpfeilType,
-                beløpfeilType.beskrivelse +
-                    "($førsteUtbetalingsbeløp(ba-sak) ≠ $beløpFraInfotrygd(infotrygd))"
-            )
+            kastOgTellMigreringsFeil(beløpfeilType)
         }
     }
 
     private fun iverksett(behandling: Behandling) {
         totrinnskontrollService.opprettAutomatiskTotrinnskontroll(behandling)
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id) ?: kastOgTellMigreringsFeil(
-            MigreringsfeilType.IVERKSETT_BEHANDLING_UTEN_VEDTAK,
-            "${MigreringsfeilType.IVERKSETT_BEHANDLING_UTEN_VEDTAK.beskrivelse} ${behandling.id}"
+            MigreringsfeilType.IVERKSETT_BEHANDLING_UTEN_VEDTAK
         )
         if (env.erPreprod()) {
             vedtak.vedtaksdato = LocalDate.of(2022, 1, 1).atStartOfDay()
@@ -541,34 +536,34 @@ private val List<AndelTilkjentYtelse>.personidenter: List<String>
     }
 
 enum class MigreringsfeilType(val beskrivelse: String) {
-    AKTIV_BEHANDLING("Det finnes allerede en aktiv behandling på personen som ikke er migrering"),
-    ALLEREDE_MIGRERT("Personen er allerede migrert"),
-    BEREGNET_BELØP_FOR_UTBETALING_ULIKT_BELØP_FRA_INFOTRYGD("Beregnet beløp var ulikt beløp fra Infotrygd"),
-    BEREGNET_DELT_BOSTED_BELØP_ULIKT_BELØP_FRA_INFOTRYGD("Beløp beregnet for delt bosted var ulikt beløp fra Infotrygd"),
-    DIFF_BARN_INFOTRYGD_OG_BA_SAK("Antall barn på tilkjent ytelse samsvarer ikke med antall barn på stønaden fra infotrygd"),
-    FAGSAK_AVSLUTTET_UTEN_MIGRERING("Personen er allerede migrert"),
-    FLERE_LØPENDE_SAKER_INFOTRYGD("Fant mer enn én aktiv sak på bruker i infotrygd"),
-    HISTORISK_IDENT_REGNET_SOM_EKSTRA_BARN_I_INFOTRYGD("Listen med barn fra Infotrygd har identer tilhørende samme barn"),
-    IDENT_IKKE_LENGER_AKTIV("Ident ikke lenger aktiv"),
-    IDENT_BARN_IKKE_LENGER_AKTIV("Ident barn ikke lenger aktiv"),
-    IKKE_GYLDIG_KJØREDATO("Ikke gyldig kjøredato"),
-    IKKE_STØTTET_SAKSTYPE("Ikke støttet sakstype. Kan migrere Ordinære(OS, MD, EU) og Utvidet(EF, MD, EU)"),
-    INGEN_BARN_MED_LØPENDE_STØNAD_I_INFOTRYGD("Fant ingen barn med løpende stønad på sak"),
-    INGEN_LØPENDE_SAK_INFOTRYGD("Personen har ikke løpende sak i infotrygd"),
-    INSTITUSJON("Midlertidig ignoerert fordi det er en institusjon"),
-    IVERKSETT_BEHANDLING_UTEN_VEDTAK("Fant ikke aktivt vedtak på behandling"),
-    KAN_IKKE_OPPRETTE_BEHANDLING("Kan ikke opprette behandling"),
-    KUN_ETT_MIGRERINGFORSØK_PER_DAG("Migrering allerede påbegynt i dag. Vent minst en dag før man prøver igjen"),
-    MANGLER_ANDEL_TILKJENT_YTELSE("Fant ingen andeler tilkjent ytelse på behandlingen"),
-    MANGLER_VILKÅRSVURDERING("Fant ikke vilkårsvurdering."),
-    MIGRERING_ALLEREDE_PÅBEGYNT("Migrering allerede påbegynt"),
-    OPPGITT_ANTALL_BARN_ULIKT_ANTALL_BARNIDENTER("Antall barnidenter samsvarer ikke med stønad.antallBarn"),
-    SMÅBARNSTILLEGG_BA_SAK_IKKE_INFOTRYGD("Uoverensstemmelse angående småbarnstillegg"),
-    SMÅBARNSTILLEGG_INFOTRYGD_IKKE_BA_SAK("Uoverensstemmelse angående småbarnstillegg"),
-    UGYLDIG_ANTALL_DELYTELSER_I_INFOTRYGD("Kan kun migrere ordinære saker med nøyaktig ett utbetalingsbeløp"),
-    UKJENT("Ukjent migreringsfeil"),
-    ÅPEN_SAK_INFOTRYGD("Bruker har åpen behandling i Infotrygd"),
-    DELYTELSE_OG_ANTALLBARN_NULL("Infotrygdsak mangler delytelse og antall barn er 0") // Disse kan man nok la være å migrere
+    AKTIV_BEHANDLING("Personen har en behandling i BA-sak"),
+    ALLEREDE_MIGRERT("Saken er migrert"),
+    BEREGNET_BELØP_FOR_UTBETALING_ULIKT_BELØP_FRA_INFOTRYGD("Saken løper med feil beløp i Infotrygd. Må rettes i Infotrygd før migrering."),
+    BEREGNET_DELT_BOSTED_BELØP_ULIKT_BELØP_FRA_INFOTRYGD("Saken løper med feil beløp i Infotrygd. Må rettes i Infotrygd før migrering."),
+    DIFF_BARN_INFOTRYGD_OG_BA_SAK("Antall barn er ulikt i BA-sak og Infotrygd. Kontroller hvilke barn som skal ha barnetrygd. Dersom saken ligger riktig i Infotrygd, kan den migreres manuelt. Er det feil i Infotrygd må det vurderes om saken kan rettes i Infotrygd før migrering. Hvis den ikke kan rettes i Infotrygd, meld saken i Porten. Velg \"Meld sak om Infotrygd\""),
+    FAGSAK_AVSLUTTET_UTEN_MIGRERING("Saken er migrert"),
+    FLERE_LØPENDE_SAKER_INFOTRYGD("Personen har en åpen behandling i Infotrygd som må lukkes før migrering."),
+    HISTORISK_IDENT_REGNET_SOM_EKSTRA_BARN_I_INFOTRYGD("Saken kan ikke migreres. Meld saken i Porten. Velg '\"Meld sak om Infotrygd\"."),
+    IDENT_IKKE_LENGER_AKTIV("Saken kan ikke migreres. Meld saken i Porten. Velg \"Meld sak om Infotrygd\"."),
+    IDENT_BARN_IKKE_LENGER_AKTIV("Saken kan ikke migreres. Meld saken i Porten. "),
+    IKKE_GYLDIG_KJØREDATO("Kjøring pågår. Vent med migrering til etter kjøring."),
+    IKKE_STØTTET_SAKSTYPE("Denne saken må migreres manuelt."),
+    INGEN_BARN_MED_LØPENDE_STØNAD_I_INFOTRYGD("Ingen barn med stønad i Infotrygd. Saken kan ikke migreres. Meld saken i Porten. Velg \"Meld sak om Infotrygd\"."),
+    INGEN_LØPENDE_SAK_INFOTRYGD("Saken kan ikke migreres. Meld saken i Porten Velg \"Meld sak om Infotrygd\"."),
+    ENSLIG_MINDREÅRIG("Saken kan ikke migreres. Må behandles i Infotrygd"),
+    IVERKSETT_BEHANDLING_UTEN_VEDTAK("Saken kan ikke migreres. Meld saken i Porten, velg \"Meld sak om Barnetrygd\"."),
+    KAN_IKKE_OPPRETTE_BEHANDLING("Saken kan ikke migreres. Meld saken i Porten. Velg \"Meld sak om Infotrygd\"."),
+    KUN_ETT_MIGRERINGFORSØK_PER_DAG("Migrering allerede påbegynt. Vent minst en dag før du prøver igjen."),
+    MANGLER_ANDEL_TILKJENT_YTELSE("Saken må migreres manuelt"),
+    MANGLER_VILKÅRSVURDERING("Saken må migreres manuelt"),
+    MIGRERING_ALLEREDE_PÅBEGYNT("Saken har allerede en påbegynt manuell migrering. Denne må ferdigbehandles eller henlegges."),
+    OPPGITT_ANTALL_BARN_ULIKT_ANTALL_BARNIDENTER("Saken må migreres manuelt"),
+    SMÅBARNSTILLEGG_BA_SAK_IKKE_INFOTRYGD("Småbarnstillegg må rettes i Infotrygd før migrering."),
+    SMÅBARNSTILLEGG_INFOTRYGD_IKKE_BA_SAK("Småbarnstillegg må rettes i Infotrygd før migrering."),
+    UGYLDIG_ANTALL_DELYTELSER_I_INFOTRYGD("Saken kan ikke migreres. Meld saken i Porten. Velg \"Meld sak om Infotrygd\"."),
+    UKJENT("Saken kan ikke migreres. Meld saken i Porten. Velg \"Meld sak om Infotrygd\"."),
+    ÅPEN_SAK_INFOTRYGD("Personen har en åpen behandling i Infotrygd som må lukkes før migrering"),
+    DELYTELSE_OG_ANTALLBARN_NULL("Saken trenger ikke å migreres da den ikke har aktiv ytelse med barn i Infotrygd") // Disse kan man nok la være å migrere
 }
 
 open class KanIkkeMigrereException(
