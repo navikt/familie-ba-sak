@@ -27,10 +27,6 @@ class BehandlingHentOgPersisterService(
         return behandlingRepository.findByFagsakAndAktiv(fagsakId)
     }
 
-    fun erAktivBehandlingPåFagsak(fagsakId: Long): Boolean {
-        return hentAktivForFagsak(fagsakId) != null
-    }
-
     fun hentAktivOgÅpenForFagsak(fagsakId: Long): Behandling? {
         return behandlingRepository.findByFagsakAndAktivAndOpen(fagsakId)
     }

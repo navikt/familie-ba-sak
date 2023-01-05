@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -12,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.klage.dto.OpprettKlageDto
+import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingKlient
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -38,7 +38,7 @@ class KlageService(
     private val klageClient: KlageClient,
     private val integrasjonClient: IntegrasjonClient,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    private val behandlingService: BehandlingService,
+    private val stegService: StegService,
     private val vedtakService: VedtakService,
     private val tilbakekrevingKlient: TilbakekrevingKlient
 
@@ -123,10 +123,9 @@ class KlageService(
             barnasIdenter = emptyList(),
 
             fagsakId = forrigeBehandling.fagsak.id
-
         )
 
-        val revurdering = behandlingService.opprettBehandling(nyBehandling)
+        val revurdering = stegService.håndterNyBehandling(nyBehandling)
         OpprettRevurderingResponse(Opprettet(revurdering.id.toString()))
     } catch (e: Exception) {
         logger.error("Feilet opprettelse av revurdering for fagsak=${fagsak.id}, se secure logg for detaljer")
@@ -139,7 +138,10 @@ class KlageService(
         if (erÅpenBehandlingPåFagsak) {
             return KanIkkeOppretteRevurdering(Årsak.ÅPEN_BEHANDLING)
         }
-        if (!behandlingHentOgPersisterService.erAktivBehandlingPåFagsak(fagsak.id)) {
+
+        val finnesVedtattBehanldingPåFagsak =
+            behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsak.id) != null
+        if (!finnesVedtattBehanldingPåFagsak) {
             return KanIkkeOppretteRevurdering(Årsak.INGEN_BEHANDLING)
         }
         return KanOppretteRevurdering
