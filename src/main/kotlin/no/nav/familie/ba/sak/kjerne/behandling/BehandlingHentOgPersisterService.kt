@@ -105,6 +105,9 @@ class BehandlingHentOgPersisterService(
         return behandlingRepository.finnBehandlinger(fagsakId)
     }
 
+    fun hentFerdigstilteBehandlinger(fagsakId: Long): List<Behandling> =
+        hentBehandlinger(fagsakId).filter { it.erVedtatt() }
+
     fun hentAktivtFødselsnummerForBehandlinger(behandlingIder: List<Long>): Map<Long, String> =
         behandlingRepository.finnAktivtFødselsnummerForBehandlinger(behandlingIder).associate { it.first to it.second }
 

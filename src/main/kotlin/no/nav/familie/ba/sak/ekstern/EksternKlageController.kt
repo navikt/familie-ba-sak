@@ -2,10 +2,12 @@ package no.nav.familie.ba.sak.ekstern
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
+import no.nav.familie.ba.sak.kjerne.klage.KlageService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.klage.FagsystemVedtak
 import no.nav.familie.kontrakter.felles.klage.KanOppretteRevurderingResponse
 import no.nav.familie.kontrakter.felles.klage.OpprettRevurderingResponse
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -16,22 +18,23 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
+// Kalles av familie-klage
 @RestController
 @RequestMapping(
     path = ["/api/klage/"],
     produces = [MediaType.APPLICATION_JSON_VALUE]
 )
 @ProtectedWithClaims(issuer = "azuread")
-class EksternBehandlingController(
+class EksternKlageController(
     private val tilgangService: TilgangService,
-    private val klageService: EksternBehandlingService
+    private val klageService: KlageService
 ) {
 
-    @GetMapping("kan-opprette-revurdering/{fagsakId}")
-    fun kanOppretteRevurdering(@PathVariable fagsakId: Long): Ressurs<KanOppretteRevurderingResponse> {
+    @GetMapping("fagsaker/{fagsakId}/kan-opprette-revurdering")
+    fun kanOppretteRevurderingKlage(@PathVariable fagsakId: Long): Ressurs<KanOppretteRevurderingResponse> {
         tilgangService.validerTilgangTilHandlingOgFagsak(
             fagsakId = fagsakId,
-            handling = "Kan opprette revurdering fra klage på fagsak=$fagsakId",
+            handling = "Valider vi kan opprette revurdering med årsak klage på fagsak=$fagsakId",
             event = AuditLoggerEvent.CREATE,
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER
         )
@@ -43,11 +46,11 @@ class EksternBehandlingController(
         return Ressurs.success(klageService.kanOppretteRevurdering(fagsakId))
     }
 
-    @PostMapping("opprett-revurdering-klage/{fagsakId}")
+    @PostMapping("fagsaker/{fagsakId}/opprett-revurdering/")
     fun opprettRevurderingKlage(@PathVariable fagsakId: Long): Ressurs<OpprettRevurderingResponse> {
         tilgangService.validerTilgangTilHandlingOgFagsak(
             fagsakId = fagsakId,
-            handling = "Opprett revurdering fra klage på fagsak=$fagsakId",
+            handling = "Opprett revurdering med årask klage på fagsak=$fagsakId",
             event = AuditLoggerEvent.CREATE,
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER
         )
@@ -55,7 +58,25 @@ class EksternBehandlingController(
         if (!SikkerhetContext.kallKommerFraKlage()) {
             throw Feil("Kallet utføres ikke av en autorisert klient")
         }
+        return Ressurs.success(
+            klageService.validerOgOpprettRevurderingKlage(
+                fagsakId
+            )
+        )
+    }
 
-        return Ressurs.success(klageService.opprettRevurderingKlage(fagsakId))
+    @GetMapping("fagsaker/{fagsakId}/vedtak")
+    @ProtectedWithClaims(issuer = "azuread")
+    fun hentVedtak(@PathVariable fagsakId: Long): Ressurs<List<FagsystemVedtak>> {
+        if (!SikkerhetContext.erMaskinTilMaskinToken()) {
+            tilgangService.validerTilgangTilHandlingOgFagsak(
+                fagsakId = fagsakId,
+                handling = "Kan hente vedtak på fagsak=$fagsakId",
+                event = AuditLoggerEvent.ACCESS,
+                minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER
+            )
+        }
+
+        return Ressurs.success(klageService.hentFagsystemVedtak(fagsakId))
     }
 }
