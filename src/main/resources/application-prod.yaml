@@ -165,6 +165,8 @@ FAMILIE_TILBAKE_API_URL_SCOPE: api://prod-gcp.teamfamilie.familie-tilbake/.defau
 
 FAMILIE_EF_SAK_API_URL_SCOPE: api://prod-gcp.teamfamilie.familie-ef-sak/.default
 
+FAMILIE_KLAGE_SCOPE: api://prod-gcp.teamfamilie.familie-klage/.default
+
 FAMILIE_INTEGRASJONER_API_URL: https://familie-integrasjoner.prod-fss-pub.nais.io/api
 FAMILIE_INTEGRASJONER_SCOPE: api://prod-fss.teamfamilie.familie-integrasjoner/.default
 

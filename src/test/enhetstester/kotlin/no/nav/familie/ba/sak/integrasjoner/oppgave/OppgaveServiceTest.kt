@@ -195,6 +195,24 @@ class OppgaveServiceTest {
         verify(exactly = 1) { integrasjonClient.fordelOppgave(any(), null) }
     }
 
+    @Test
+    fun `hent oppgavefrister for åpne utvidtet barnetrygd behandlinger`() {
+        every { behandlingRepository.finnÅpneUtvidetBarnetrygdBehandlinger() } returns listOf(
+            lagTestBehandling().copy(underkategori = BehandlingUnderkategori.UTVIDET, id = 1002602L),
+            lagTestBehandling().copy(underkategori = BehandlingUnderkategori.UTVIDET, id = 1002602L)
+        )
+        every { oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(any(), any()) } returns lagTestOppgave()
+
+        every { integrasjonClient.finnOppgaveMedId(any()) } returns Oppgave(id = 10018798L, fristFerdigstillelse = "21.01.23")
+
+        assertEquals(
+            "behandlingId;oppgaveId;frist\n" +
+                "1002602;10018798;21.01.23\n" +
+                "1002602;10018798;21.01.23\n",
+            oppgaveService.hentFristerForÅpneUtvidetBarnetrygdBehandlinger()
+        )
+    }
+
     private fun lagTestBehandling(aktørId: String = "1234567891000"): Behandling {
         return Behandling(
             fagsak = Fagsak(id = FAGSAK_ID, aktør = Aktør(aktørId)),

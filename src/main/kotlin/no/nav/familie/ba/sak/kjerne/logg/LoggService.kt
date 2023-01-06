@@ -19,6 +19,7 @@ import no.nav.familie.ba.sak.kjerne.korrigertetterbetaling.KorrigertEtterbetalin
 import no.nav.familie.ba.sak.kjerne.korrigertvedtak.KorrigertVedtak
 import no.nav.familie.ba.sak.kjerne.personident.Identkonverterer
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
+import no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta.FeilutbetaltValuta
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.Fødselsnummer
 import org.springframework.stereotype.Service
@@ -482,27 +483,35 @@ class LoggService(
         )
     }
 
-    fun loggTrekkILøpendeUtbetalingLagtTil(behandlingId: Long) =
+    fun loggFeilutbetaltValutaPeriodeLagtTil(behandlingId: Long, feilutbetaltValuta: FeilutbetaltValuta) =
         lagre(
             Logg(
                 behandlingId = behandlingId,
-                type = LoggType.TREKK_I_LØPENDE_UTBETALING_LAGT_TIL,
+                type = LoggType.FEILUTBETALT_VALUTA_LAGT_TIL,
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                     rolleConfig,
                     BehandlerRolle.SAKSBEHANDLER
-                )
+                ),
+                tekst = """
+                Periode: ${feilutbetaltValuta.fom.tilKortString()} - ${feilutbetaltValuta.tom.tilKortString()}
+                Beløp: ${feilutbetaltValuta.feilutbetaltBeløp} kr
+                """.trimIndent()
             )
         )
 
-    fun loggTrekkILøpendeUtbetalingFjernet(behandlingId: Long) =
+    fun loggFeilutbetaltValutaPeriodeFjernet(behandlingId: Long, feilutbetaltValuta: FeilutbetaltValuta) =
         lagre(
             Logg(
                 behandlingId = behandlingId,
-                type = LoggType.TREKK_I_LØPENDE_UTBETALING_FJERNET,
+                type = LoggType.FEILUTBETALT_VALUTA_FJERNET,
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                     rolleConfig,
                     BehandlerRolle.SAKSBEHANDLER
-                )
+                ),
+                tekst = """
+                Periode: ${feilutbetaltValuta.fom.tilKortString()} - ${feilutbetaltValuta.tom.tilKortString()}
+                Beløp: ${feilutbetaltValuta.feilutbetaltBeløp} kr
+                """.trimIndent()
             )
         )
 

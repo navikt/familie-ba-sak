@@ -9,6 +9,8 @@ import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
@@ -17,6 +19,8 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndr
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
+import no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta.FeilutbetaltValuta
+import no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta.FeilutbetaltValutaRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -32,6 +36,8 @@ class VedtaksperiodeServiceEnhetstest {
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService = mockk()
     private val endringstidspunktService: EndringstidspunktService = mockk()
     private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService = mockk()
+    private val featureToggleService: FeatureToggleService = mockk()
+    private val feilutbetaltValutaRepository: FeilutbetaltValutaRepository = mockk()
 
     private val vedtaksperiodeService = VedtaksperiodeService(
         behandlingRepository = behandlingRepository,
@@ -47,7 +53,9 @@ class VedtaksperiodeServiceEnhetstest {
         endringstidspunktService = endringstidspunktService,
         utbetalingsperiodeMedBegrunnelserService = mockk(relaxed = true),
         kompetanseRepository = mockk(),
-        andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService
+        andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
+        featureToggleService = featureToggleService,
+        feilutbetaltValutaRepository = feilutbetaltValutaRepository
     )
 
     private val person = lagPerson()
@@ -82,6 +90,8 @@ class VedtaksperiodeServiceEnhetstest {
         every {
             andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.id)
         } returns listOf(ytelseOpphørtFørEndringstidspunkt)
+        every { featureToggleService.isEnabled(FeatureToggleConfig.EØS_INFORMASJON_OM_ÅRLIG_KONTROLL, any()) } returns true
+        every { feilutbetaltValutaRepository.finnFeilutbetaltValutaForBehandling(any()) } returns emptyList()
     }
 
     @Test
@@ -143,5 +153,40 @@ class VedtaksperiodeServiceEnhetstest {
             lagVedtaksperiodeMedBegrunnelser(vedtak = vedtak, tom = null)
         )
         assertTrue { vedtaksperiodeService.skalHaÅrligKontroll(vedtak) }
+    }
+
+    @Test
+    fun `EØS skal ikke ha årlig kontroll når feature toggle er skrudd av`() {
+        every {
+            featureToggleService.isEnabled(FeatureToggleConfig.EØS_INFORMASJON_OM_ÅRLIG_KONTROLL, any())
+        } returns false
+
+        val vedtak = Vedtak(behandling = lagBehandling(behandlingKategori = BehandlingKategori.EØS))
+        every { vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(any()) } returns listOf(
+            lagVedtaksperiodeMedBegrunnelser(vedtak = vedtak, tom = null)
+        )
+        assertFalse { vedtaksperiodeService.skalHaÅrligKontroll(vedtak) }
+    }
+
+    @Test
+    fun `skal beskrive perioder med for mye utbetalt for behandling med feilutbetalt valuta`() {
+        val vedtak = Vedtak(behandling = lagBehandling(behandlingKategori = BehandlingKategori.EØS))
+        val perioder = listOf(
+            LocalDate.now() to LocalDate.now().plusYears(1),
+            LocalDate.now().plusYears(2) to LocalDate.now().plusYears(3)
+        )
+        assertThat(vedtaksperiodeService.beskrivPerioderMedFeilutbetaltValuta(vedtak)).isNull()
+
+        every {
+            feilutbetaltValutaRepository.finnFeilutbetaltValutaForBehandling(vedtak.behandling.id)
+        } returns perioder.map {
+            FeilutbetaltValuta(1L, fom = it.first, tom = it.second, 200)
+        }
+        val periodebeskrivelser = vedtaksperiodeService.beskrivPerioderMedFeilutbetaltValuta(vedtak)
+
+        perioder.forEach { periode ->
+            assertThat(periodebeskrivelser!!.find { it.contains("${periode.first.year}") })
+                .contains("Fra", "til", "${periode.second.year}", "er det utbetalt 200 kroner for mye.")
+        }
     }
 }

@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.util
 
+import no.nav.familie.ba.sak.common.erUnder18ÅrVilkårTidslinje
 import no.nav.familie.ba.sak.common.erUnder6ÅrTidslinje
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -20,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærEtter
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.tilCharTidslinje
 import java.math.BigDecimal
@@ -44,16 +46,32 @@ class TilkjentYtelseBuilder(
 
     fun medSmåbarn(
         s: String,
+        nasjonalt: (Int) -> Int? = { null },
+        differanse: (Int) -> Int? = { null },
         kalkulert: (Int) -> Int = { it }
-    ) = medYtelse(s = s, type = YtelseType.SMÅBARNSTILLEGG, kalkulert = kalkulert) {
+    ) = medYtelse(
+        s = s,
+        type = YtelseType.SMÅBARNSTILLEGG,
+        kalkulert = kalkulert,
+        differanse = differanse,
+        nasjonalt = nasjonalt
+    ) {
         satstypeTidslinje(SatsType.SMA)
     }
         .also { gjeldendePersoner.single { it.type == PersonType.SØKER } }
 
     fun medUtvidet(
         s: String,
+        nasjonalt: (Int) -> Int? = { null },
+        differanse: (Int) -> Int? = { null },
         kalkulert: (Int) -> Int = { it }
-    ) = medYtelse(s = s, type = YtelseType.UTVIDET_BARNETRYGD, kalkulert = kalkulert) {
+    ) = medYtelse(
+        s = s,
+        type = YtelseType.UTVIDET_BARNETRYGD,
+        kalkulert = kalkulert,
+        nasjonalt = nasjonalt,
+        differanse = differanse
+    ) {
         satstypeTidslinje(SatsType.ORBA)
     }
         .also { gjeldendePersoner.single { it.type == PersonType.SØKER } }
@@ -107,9 +125,16 @@ class TilkjentYtelseBuilder(
                         )
                     }
 
-                andelTilkjentYtelseTidslinje.kombinerUtenNullMed(satsTidslinje(person)) { aty, sats ->
+                val begrensetAndelTilkjentYtelseTidslinje = when (type) {
+                    YtelseType.ORDINÆR_BARNETRYGD -> andelTilkjentYtelseTidslinje.beskjærEtter(
+                        erUnder18ÅrVilkårTidslinje(person.fødselsdato)
+                    )
+                    else -> andelTilkjentYtelseTidslinje
+                }
+
+                begrensetAndelTilkjentYtelseTidslinje.kombinerUtenNullMed(satsTidslinje(person)) { aty, sats ->
                     aty.copy(
-                        sats = sats,
+                        sats = nasjonalt(sats) ?: kalkulert(sats),
                         kalkulertUtbetalingsbeløp = kalkulert(sats),
                         nasjonaltPeriodebeløp = nasjonalt(sats) ?: kalkulert(sats),
                         differanseberegnetPeriodebeløp = differanse(sats)

@@ -112,6 +112,23 @@ class TilgangService(
     }
 
     /**
+     * Sjekk om saksbehandler har tilgang til å gjøre bestemt handling og om saksbehandler kan behandle fagsak
+     * @param fagsakId id til fagsak det skal sjekkes tilgang til
+     * @param event operasjon som skal gjøres med identene
+     * @param minimumBehandlerRolle den laveste rolle som kreves for den angitte handlingen
+     * @param handling kort beskrivelse for handlingen.
+     */
+    fun validerTilgangTilHandlingOgFagsak(
+        fagsakId: Long,
+        event: AuditLoggerEvent,
+        minimumBehandlerRolle: BehandlerRolle,
+        handling: String
+    ) {
+        verifiserHarTilgangTilHandling(minimumBehandlerRolle, handling)
+        validerTilgangTilFagsak(fagsakId, event)
+    }
+
+    /**
      * Sjekker cache om tilgangen finnes siden tidligere, hvis ikke hentes verdiet med [hentVerdi]
      * Resultatet caches sammen med identen for saksbehandleren på gitt [cacheName]
      * @param cacheName navnet på cachen
