@@ -12,7 +12,7 @@ no.nav.security.jwt:
     registration:
       familie-klage-onbehalfof:
         resource-url: ${FAMILIE_KLAGE_URL}
-        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
+        token-endpoint-url: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
         grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
         scope: ${FAMILIE_KLAGE_SCOPE}
         authentication:
