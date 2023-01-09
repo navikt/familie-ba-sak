@@ -150,11 +150,11 @@ class KlageService(
     fun hentFagsystemVedtak(fagsakId: Long): List<FagsystemVedtak> {
         val fagsak = fagsakService.hentPåFagsakId(fagsakId)
         val behandlinger = behandlingHentOgPersisterService.hentFerdigstilteBehandlinger(fagsak.id)
-        val ferdigstilteKsBehandlinger = behandlinger.map { it.tilFagsystemVedtak() }
+        val ferdigstilteBaBehandlinger = behandlinger.map { it.tilFagsystemVedtak() }
 
         val vedtakTilbakekreving = tilbakekrevingKlient.hentTilbakekrevingsvedtak(fagsakId)
 
-        return ferdigstilteKsBehandlinger + vedtakTilbakekreving
+        return ferdigstilteBaBehandlinger + vedtakTilbakekreving
     }
 
     private fun Behandling.tilFagsystemVedtak(): FagsystemVedtak {
