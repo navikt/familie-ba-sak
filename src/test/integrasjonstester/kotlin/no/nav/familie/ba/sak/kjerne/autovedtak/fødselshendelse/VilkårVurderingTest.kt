@@ -110,7 +110,7 @@ class VilkårVurderingTest(
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
         val vilkårsvurdering =
-            vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(behandling, false)
+            vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(behandling, false, null)
 
         val forventetAntallVurderteVilkår =
             Vilkår.hentVilkårFor(PersonType.BARN).size +

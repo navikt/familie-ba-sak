@@ -112,7 +112,7 @@ class VilkårsvurderingForNyBehandlingService(
     fun initierVilkårsvurderingForBehandling(
         behandling: Behandling,
         bekreftEndringerViaFrontend: Boolean,
-        forrigeBehandlingSomErVedtatt: Behandling? = null
+        forrigeBehandlingSomErVedtatt: Behandling?
     ): Vilkårsvurdering {
         val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandling.id)
 

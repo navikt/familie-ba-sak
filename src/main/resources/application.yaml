@@ -7,6 +7,19 @@ server:
   port: 8089
   shutdown: graceful
 
+no.nav.security.jwt:
+  client:
+    registration:
+      familie-klage-onbehalfof:
+        resource-url: ${FAMILIE_KLAGE_URL}
+        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
+        grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
+        scope: ${FAMILIE_KLAGE_SCOPE}
+        authentication:
+          client-id: ${AZURE_APP_CLIENT_ID}
+          client-secret: ${AZURE_APP_CLIENT_SECRET}
+          client-auth-method: client_secret_basic
+
 spring:
   lifecycle:
     timeout-per-shutdown-phase: 20s
@@ -102,6 +115,9 @@ prosessering:
 FAMILIE_EF_SAK_API_URL_SCOPE: api://dev-gcp.teamfamilie.familie-ef-sak/.default
 FAMILIE_EF_SAK_API_URL: http://familie-ef-sak/api
 
+FAMILIE_KLAGE_SCOPE: api://dev-gcp.teamfamilie.familie-klage/.default
+FAMILIE_KLAGE_URL: http://familie-klage
+
 PDL_SCOPE: api://dev-fss.pdl.pdl-api/.default
 SANITY_DATASET: "ba-brev"
 
@@ -121,3 +137,5 @@ SANITY_FAMILIE_API_URL: https://xsrv1mh6.apicdn.sanity.io/v2021-06-07/data/query
 FAMILIE_BA_MIGRERING_API_URL: http://familie-ba-migrering/api
 ECB_API_URL: https://sdw-wsrest.ecb.europa.eu/service/data/EXR/
 CRON_FAGSAKSTATUS_SCHEDULER: "0 0 7 1 * *"
+
+AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token

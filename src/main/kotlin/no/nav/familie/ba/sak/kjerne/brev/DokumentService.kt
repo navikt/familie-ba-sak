@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpost
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpostType
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.JournalføringRepository
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
@@ -63,7 +64,8 @@ class DokumentService(
     private val settPåVentService: SettPåVentService,
     private val utgåendeJournalføringService: UtgåendeJournalføringService,
     private val fagsakRepository: FagsakRepository,
-    private val organisasjonService: OrganisasjonService
+    private val organisasjonService: OrganisasjonService,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService
 ) {
 
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
@@ -253,7 +255,12 @@ class DokumentService(
 
     private fun leggTilOpplysningspliktIVilkårsvurdering(behandling: Behandling) {
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandling.id)
-            ?: vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(behandling, false)
+            ?: vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
+                behandling = behandling,
+                bekreftEndringerViaFrontend = false,
+                forrigeBehandlingSomErVedtatt = behandlingHentOgPersisterService
+                    .hentForrigeBehandlingSomErVedtatt(behandling)
+            )
         vilkårsvurdering.personResultater.single { it.erSøkersResultater() }
             .leggTilBlankAnnenVurdering(AnnenVurderingType.OPPLYSNINGSPLIKT)
     }
