@@ -115,8 +115,8 @@ prosessering:
 FAMILIE_EF_SAK_API_URL_SCOPE: api://dev-gcp.teamfamilie.familie-ef-sak/.default
 FAMILIE_EF_SAK_API_URL: http://familie-ef-sak/api
 
-FAMILIE_KLAGE_SCOPE: api://dev-gcp.teamfamilie.familie-klage/.default
 FAMILIE_KLAGE_URL: http://familie-klage
+FAMILIE_KLAGE_SCOPE: api://${DEPLOY_ENV}-gcp.teamfamilie.familie-klage/.default
 
 PDL_SCOPE: api://dev-fss.pdl.pdl-api/.default
 SANITY_DATASET: "ba-brev"
@@ -139,3 +139,5 @@ ECB_API_URL: https://sdw-wsrest.ecb.europa.eu/service/data/EXR/
 CRON_FAGSAKSTATUS_SCHEDULER: "0 0 7 1 * *"
 
 AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
+
+DEPLOY_ENV: prod
