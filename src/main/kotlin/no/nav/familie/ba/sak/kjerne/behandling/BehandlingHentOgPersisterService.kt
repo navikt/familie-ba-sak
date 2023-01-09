@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -30,8 +31,12 @@ class BehandlingHentOgPersisterService(
         return behandlingRepository.findByFagsakAndAktivAndOpen(fagsakId)
     }
 
+    fun erÅpenBehandlingPåFagsak(fagsakId: Long): Boolean {
+        return hentAktivOgÅpenForFagsak(fagsakId) != null
+    }
+
     fun hent(behandlingId: Long): Behandling {
-        return behandlingRepository.finnBehandling(behandlingId)
+        return behandlingRepository.finnBehandlingNullable(behandlingId) ?: throw Feil("Finner ikke behandling med id $behandlingId")
     }
 
     /**
@@ -95,6 +100,9 @@ class BehandlingHentOgPersisterService(
     fun hentBehandlinger(fagsakId: Long): List<Behandling> {
         return behandlingRepository.finnBehandlinger(fagsakId)
     }
+
+    fun hentFerdigstilteBehandlinger(fagsakId: Long): List<Behandling> =
+        hentBehandlinger(fagsakId).filter { it.erVedtatt() }
 
     fun hentAktivtFødselsnummerForBehandlinger(behandlingIder: List<Long>): Map<Long, String> =
         behandlingRepository.finnAktivtFødselsnummerForBehandlinger(behandlingIder).associate { it.first to it.second }
