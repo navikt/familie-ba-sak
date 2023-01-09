@@ -138,6 +138,4 @@ FAMILIE_BA_MIGRERING_API_URL: http://familie-ba-migrering/api
 ECB_API_URL: https://sdw-wsrest.ecb.europa.eu/service/data/EXR/
 CRON_FAGSAKSTATUS_SCHEDULER: "0 0 7 1 * *"
 
-AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
-
 DEPLOY_ENV: prod
