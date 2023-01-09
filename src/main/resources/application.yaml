@@ -12,7 +12,7 @@ no.nav.security.jwt:
     registration:
       familie-klage-onbehalfof:
         resource-url: ${FAMILIE_KLAGE_URL}
-        token-endpoint-url: ${AZUREAD_TOKEN_ENDPOINT_URL}
+        token-endpoint-url: ${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}
         grant-type: urn:ietf:params:oauth:grant-type:jwt-bearer
         scope: ${FAMILIE_KLAGE_SCOPE}
         authentication:
@@ -137,7 +137,5 @@ SANITY_FAMILIE_API_URL: https://xsrv1mh6.apicdn.sanity.io/v2021-06-07/data/query
 FAMILIE_BA_MIGRERING_API_URL: http://familie-ba-migrering/api
 ECB_API_URL: https://sdw-wsrest.ecb.europa.eu/service/data/EXR/
 CRON_FAGSAKSTATUS_SCHEDULER: "0 0 7 1 * *"
-
-AZUREAD_TOKEN_ENDPOINT_URL: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
 
 DEPLOY_ENV: prod
