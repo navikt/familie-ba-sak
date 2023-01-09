@@ -139,9 +139,9 @@ class KlageService(
             return KanIkkeOppretteRevurdering(Årsak.ÅPEN_BEHANDLING)
         }
 
-        val finnesVedtattBehanldingPåFagsak =
+        val finnesVedtattBehandlingPåFagsak =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsak.id) != null
-        if (!finnesVedtattBehanldingPåFagsak) {
+        if (!finnesVedtattBehandlingPåFagsak) {
             return KanIkkeOppretteRevurdering(Årsak.INGEN_BEHANDLING)
         }
         return KanOppretteRevurdering
