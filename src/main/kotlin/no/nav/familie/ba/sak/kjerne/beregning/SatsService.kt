@@ -100,20 +100,21 @@ fun fomErPåSatsendring(fom: LocalDate?): Boolean =
         .finnSatsendring(fom?.førsteDagIInneværendeMåned() ?: TIDENES_MORGEN)
         .isNotEmpty()
 
-fun satstypeTidslinje(satsType: SatsType, maxSatsGyldigFraOgMed: YearMonth = SatsService.tilleggEndringJanuar2022) = tidslinje {
-    SatsService.hentAllesatser()
-        .filter { it.type == satsType }
-        .filter { it.gyldigFom.toYearMonth() <= maxSatsGyldigFraOgMed }
-        .map {
-            val fom = if (it.gyldigFom == LocalDate.MIN) null else it.gyldigFom.toYearMonth()
-            val tom = if (it.gyldigTom == LocalDate.MAX) null else it.gyldigTom.toYearMonth()
-            no.nav.familie.ba.sak.kjerne.tidslinje.Periode(
-                fraOgMed = fom.tilTidspunktEllerTidligereEnn(tom),
-                tilOgMed = tom.tilTidspunktEllerSenereEnn(fom),
-                it.beløp
-            )
-        }
-}
+fun satstypeTidslinje(satsType: SatsType, maxSatsGyldigFraOgMed: YearMonth = SatsService.tilleggEndringJanuar2022) =
+    tidslinje {
+        SatsService.hentAllesatser()
+            .filter { it.type == satsType }
+            .filter { it.gyldigFom.toYearMonth() <= maxSatsGyldigFraOgMed }
+            .map {
+                val fom = if (it.gyldigFom == LocalDate.MIN) null else it.gyldigFom.toYearMonth()
+                val tom = if (it.gyldigTom == LocalDate.MAX) null else it.gyldigTom.toYearMonth()
+                no.nav.familie.ba.sak.kjerne.tidslinje.Periode(
+                    fraOgMed = fom.tilTidspunktEllerTidligereEnn(tom),
+                    tilOgMed = tom.tilTidspunktEllerSenereEnn(fom),
+                    it.beløp
+                )
+            }
+    }
 
 fun lagOrdinærTidslinje(barn: Person): Tidslinje<Int, Måned> {
     val orbaTidslinje = satstypeTidslinje(SatsType.ORBA)
@@ -123,4 +124,7 @@ fun lagOrdinærTidslinje(barn: Person): Tidslinje<Int, Måned> {
         .klippBortPerioderFørBarnetBleFødt(fødselsdato = barn.fødselsdato)
 }
 
-private fun Tidslinje<Int, Måned>.klippBortPerioderFørBarnetBleFødt(fødselsdato: LocalDate) = this.beskjær(fraOgMed = fødselsdato.tilMånedTidspunkt(), tilOgMed = MånedTidspunkt.uendeligLengeTil(fødselsdato.toYearMonth()))
+private fun Tidslinje<Int, Måned>.klippBortPerioderFørBarnetBleFødt(fødselsdato: LocalDate) = this.beskjær(
+    fraOgMed = fødselsdato.tilMånedTidspunkt(),
+    tilOgMed = MånedTidspunkt.uendeligLengeTil(fødselsdato.toYearMonth())
+)

@@ -157,8 +157,12 @@ object TilkjentYtelseValidering {
         }
         if (barnMedUtbetalingsikkerhetFeil.isNotEmpty()) {
             throw UtbetalingsikkerhetFeil(
-                melding = "Vi finner utbetalinger som overstiger 100% på hvert av barna: ${barnMedUtbetalingsikkerhetFeil.map { it.fødselsdato }.tilBrevTekst()}",
-                frontendFeilmelding = "Du kan ikke godkjenne dette vedtaket fordi det vil betales ut mer enn 100% for barn født ${barnMedUtbetalingsikkerhetFeil.map { it.fødselsdato }.tilBrevTekst()}. Reduksjonsvedtak til annen person må være sendt til godkjenning før du kan gå videre."
+                melding = "Vi finner utbetalinger som overstiger 100% på hvert av barna: ${
+                barnMedUtbetalingsikkerhetFeil.map { it.fødselsdato }.tilBrevTekst()
+                }",
+                frontendFeilmelding = "Du kan ikke godkjenne dette vedtaket fordi det vil betales ut mer enn 100% for barn født ${
+                barnMedUtbetalingsikkerhetFeil.map { it.fødselsdato }.tilBrevTekst()
+                }. Reduksjonsvedtak til annen person må være sendt til godkjenning før du kan gå videre."
             )
         }
     }
