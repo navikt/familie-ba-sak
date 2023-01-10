@@ -100,17 +100,14 @@ class TilpassDifferanseberegningEtterValutakursService(
 class TilpassDifferanseberegningSøkersYtelserService(
     private val persongrunnlagService: PersongrunnlagService,
     private val kompetanseRepository: KompetanseRepository,
-    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
-    private val featureToggleService: FeatureToggleService
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository
 ) : BarnasDifferanseberegningEndretAbonnent {
     override fun barnasDifferanseberegningEndret(tilkjentYtelse: TilkjentYtelse) {
-        if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_UTVIDET_EØS_SEKUNDÆRLAND, false)) {
-            val oppdaterteAndeler = tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(
-                persongrunnlagService.hentBarna(tilkjentYtelse.behandling.id),
-                kompetanseRepository.finnFraBehandlingId(tilkjentYtelse.behandling.id)
-            )
-            tilkjentYtelseRepository.oppdaterTilkjentYtelse(tilkjentYtelse, oppdaterteAndeler)
-        }
+        val oppdaterteAndeler = tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(
+            persongrunnlagService.hentBarna(tilkjentYtelse.behandling.id),
+            kompetanseRepository.finnFraBehandlingId(tilkjentYtelse.behandling.id)
+        )
+        tilkjentYtelseRepository.oppdaterTilkjentYtelse(tilkjentYtelse, oppdaterteAndeler)
     }
 }
 

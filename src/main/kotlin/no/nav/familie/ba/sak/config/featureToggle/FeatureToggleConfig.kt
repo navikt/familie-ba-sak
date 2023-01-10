@@ -11,8 +11,6 @@ class FeatureToggleConfig {
         const val SJEKK_OM_UTVIDET_ER_ENDRET_BEHANDLINGSRESULTAT =
             "familie-ba-sak.behandling.behandlingsresultat-utvidet-endret"
 
-        const val KAN_BEHANDLE_UTVIDET_EØS_SEKUNDÆRLAND = "familie-ba-sak.behandling.utvidet-eos-sekunderland"
-
         const val KAN_GENERERE_UTBETALINGSOPPDRAG_NY = "familie-ba-sak.generer.utbetalingsoppdrag.ny"
         const val KAN_GENERERE_UTBETALINGSOPPDRAG_NY_VALIDERING =
             "familie-ba-sak.generer.utbetalingsoppdrag.ny.validering"
