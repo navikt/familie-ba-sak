@@ -8,8 +8,6 @@ class FeatureToggleConfig {
         const val TEKNISK_ENDRING = "familie-ba-sak.behandling.teknisk-endring"
         const val ENDRINGER_I_VALIDERING_FOR_MIGRERINGSBEHANDLING =
             "familie-ba-sak.endringer.validering.migeringsbehandling"
-        const val SJEKK_OM_UTVIDET_ER_ENDRET_BEHANDLINGSRESULTAT =
-            "familie-ba-sak.behandling.behandlingsresultat-utvidet-endret"
 
         const val KAN_GENERERE_UTBETALINGSOPPDRAG_NY = "familie-ba-sak.generer.utbetalingsoppdrag.ny"
 
