@@ -174,23 +174,12 @@ class ØkonomiService(
 
         return utbetalingsoppdrag.also {
             if (skalValideres) {
-                if (featureToggleService.isEnabled(
-                        FeatureToggleConfig.KAN_GENERERE_UTBETALINGSOPPDRAG_NY_VALIDERING,
-                        false
-                    )
-                ) {
-                    it.valider(
-                        behandlingsresultat = vedtak.behandling.resultat,
-                        behandlingskategori = vedtak.behandling.kategori,
-                        andelerTilkjentYtelse = beregningService.hentAndelerTilkjentYtelseForBehandling(vedtak.behandling.id),
-                        erEndreMigreringsdatoBehandling = vedtak.behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO
-                    )
-                } else {
-                    it.valider(
-                        behandlingsresultat = vedtak.behandling.resultat,
-                        erEndreMigreringsdatoBehandling = vedtak.behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO
-                    )
-                }
+                it.valider(
+                    behandlingsresultat = vedtak.behandling.resultat,
+                    behandlingskategori = vedtak.behandling.kategori,
+                    andelerTilkjentYtelse = beregningService.hentAndelerTilkjentYtelseForBehandling(vedtak.behandling.id),
+                    erEndreMigreringsdatoBehandling = vedtak.behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO
+                )
             }
         }
     }
