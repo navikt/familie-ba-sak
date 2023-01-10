@@ -52,4 +52,44 @@ class SatsServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
         Assertions.assertEquals(970, sats.sats)
     }
+
+    @Test
+    fun `Skal hente ut riktig sats for utvidet barnetrygd i starten av 2019`() {
+        val dato = LocalDate.of(2019, 1, 1)
+        val sats =
+            SatsService.hentGyldigSatsFor(SatsType.UTVIDET_BARNETRYGD, YearMonth.from(dato), YearMonth.from(dato))
+                .first()
+
+        Assertions.assertEquals(970, sats.sats)
+    }
+
+    @Test
+    fun `Skal hente ut riktig sats for utvidet barnetrygd 2019-02-28`() {
+        val dato = LocalDate.of(2019, 2, 28)
+        val sats =
+            SatsService.hentGyldigSatsFor(SatsType.UTVIDET_BARNETRYGD, YearMonth.from(dato), YearMonth.from(dato))
+                .single()
+
+        Assertions.assertEquals(970, sats.sats)
+    }
+
+    @Test
+    fun `Skal hente ut riktig sats for utvidet barnetrygd 2019-03-01`() {
+        val dato = LocalDate.of(2019, 3, 1)
+        val sats =
+            SatsService.hentGyldigSatsFor(SatsType.UTVIDET_BARNETRYGD, YearMonth.from(dato), YearMonth.from(dato))
+                .single()
+
+        Assertions.assertEquals(1054, sats.sats)
+    }
+
+    @Test
+    fun `Skal hente ut riktig sats for utvidet barnetrygd 2023-28-02`() {
+        val dato = LocalDate.of(2023, 2, 28)
+        val sats =
+            SatsService.hentGyldigSatsFor(SatsType.UTVIDET_BARNETRYGD, YearMonth.from(dato), YearMonth.from(dato))
+                .single()
+
+        Assertions.assertEquals(1054, sats.sats)
+    }
 }

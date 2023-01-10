@@ -32,7 +32,9 @@ object SatsService {
         Sats(SatsType.TILLEGG_ORBA, 1354, LocalDate.of(2020, 9, 1), LocalDate.of(2021, 8, 31)),
         Sats(SatsType.TILLEGG_ORBA, 1654, LocalDate.of(2021, 9, 1), LocalDate.of(2021, 12, 31)),
         Sats(SatsType.TILLEGG_ORBA, 1676, LocalDate.of(2022, 1, 1), LocalDate.MAX),
-        Sats(SatsType.FINN_SVAL, 1054, LocalDate.MIN, LocalDate.of(2014, 3, 31))
+        Sats(SatsType.FINN_SVAL, 1054, LocalDate.MIN, LocalDate.of(2014, 3, 31)),
+        Sats(SatsType.UTVIDET_BARNETRYGD, 1054, LocalDate.of(2019, 3, 1), LocalDate.MAX),
+        Sats(SatsType.UTVIDET_BARNETRYGD, 970, LocalDate.MIN, LocalDate.of(2019, 2, 28))
     )
 
     val tilleggEndringJanuar2022 = YearMonth.of(2022, 1)
@@ -44,7 +46,7 @@ object SatsService {
 
     val sisteUtvidetSatsTilTester: Sats =
         satser.find {
-            it.type == SatsType.ORBA && it.gyldigTom == LocalDate.MAX
+            it.type == SatsType.UTVIDET_BARNETRYGD && it.gyldigTom == LocalDate.MAX
         }!!
 
     val sisteSmåbarnstilleggSatsTilTester: Sats =
