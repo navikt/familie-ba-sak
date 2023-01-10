@@ -6,7 +6,6 @@ class FeatureToggleConfig {
         const val IKKE_STOPP_MIGRERINGSBEHANDLING = "familie-ba-sak.ikke.stopp.migeringsbehandling"
         const val TEKNISK_VEDLIKEHOLD_HENLEGGELSE = "familie-ba-sak.teknisk-vedlikehold-henleggelse.tilgangsstyring"
         const val TEKNISK_ENDRING = "familie-ba-sak.behandling.teknisk-endring"
-        const val KAN_MANUELT_MIGRERE_ANNET_ENN_DELT_BOSTED = "familie-ba-sak.manuell-migrering-ikke-delt-bosted"
         const val ENDRINGER_I_VALIDERING_FOR_MIGRERINGSBEHANDLING =
             "familie-ba-sak.endringer.validering.migeringsbehandling"
         const val SJEKK_OM_UTVIDET_ER_ENDRET_BEHANDLINGSRESULTAT =

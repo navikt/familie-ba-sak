@@ -69,29 +69,6 @@ class VilkårsvurderingSteg(
             )
         }
 
-        // midlertidig validering for helmanuell migrering
-        if (behandling.erHelmanuellMigrering() && !featureToggleService.isEnabled(
-                FeatureToggleConfig.KAN_MANUELT_MIGRERE_ANNET_ENN_DELT_BOSTED
-            )
-        ) {
-            val vilkårsvurdering = vilkårService.hentVilkårsvurderingThrows(behandling.id)
-            val finnesDeltBosted = vilkårsvurdering.personResultater.any {
-                it.vilkårResultater.filter { vilkårResultat -> vilkårResultat.vilkårType == Vilkår.BOR_MED_SØKER }
-                    .any { borMedSøker ->
-                        borMedSøker.utdypendeVilkårsvurderinger
-                            .contains(UtdypendeVilkårsvurdering.DELT_BOSTED)
-                    }
-            }
-            if (!finnesDeltBosted) {
-                throw FunksjonellFeil(
-                    melding = "Behandling ${behandling.id} kan ikke fortsettes uten delt bosted i vilkårsvurdering " +
-                        "for minst ett av barna",
-                    frontendFeilmelding = "Det må legges inn delt bosted i vilkårsvurderingen for minst ett av barna " +
-                        "før du kan fortsette behandlingen"
-                )
-            }
-        }
-
         tilbakestillBehandlingService.tilbakestillDataTilVilkårsvurderingssteg(behandling)
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
