@@ -1,95 +1,74 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
-import org.junit.jupiter.api.Assertions
+import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType.ORBA
+import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType.SMA
+import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType.TILLEGG_ORBA
+import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType.UTVIDET_BARNETRYGD
+import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MAX_MÅNED
+import no.nav.familie.ba.sak.kjerne.eøs.util.tilTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.ogSenere
+import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.ogTidligere
+import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.plus
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom.rangeTo
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.aug
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.des
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.feb
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.mar
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.sep
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
-import java.time.YearMonth
 
 class SatsServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
     @Test
-    fun `Skal hente ut riktig sats for ordinær barnetrygd i 2020`() {
-        val dato = LocalDate.of(2020, 1, 1)
-        val sats = SatsService.hentGyldigSatsFor(SatsType.ORBA, YearMonth.from(dato), YearMonth.from(dato)).first()
+    fun `Skal gi riktig sats for ordinær barnetrygd, 6 til 18 år`() {
+        val forventet =
+            feb(2019).ogTidligere().tilTidslinje { 970 } +
+                (mar(2019)..feb(2023)).tilTidslinje { 1054 } +
+                mar(2023).ogSenere().tilTidslinje { 1083 }
 
-        Assertions.assertEquals(1054, sats.sats)
+        val faktisk = satstypeTidslinje(ORBA, MAX_MÅNED)
+
+        assertEquals(forventet, faktisk)
     }
 
     @Test
-    fun `Skal hente ut riktig sats for tillegg til barnetrygd i september 2020`() {
-        val dato = LocalDate.of(2020, 9, 1)
-        val sats =
-            SatsService.hentGyldigSatsFor(SatsType.TILLEGG_ORBA, YearMonth.from(dato), YearMonth.from(dato)).first()
+    fun `Skal gi riktig sats for tillegg ordinær barnetrygd, 0 til 6 år`() {
+        val forventet =
+            feb(2019).ogTidligere().tilTidslinje { 970 } +
+                (mar(2019)..aug(2020)).tilTidslinje { 1054 } +
+                (sep(2020)..aug(2021)).tilTidslinje { 1354 } +
+                (sep(2021)..des(2021)).tilTidslinje { 1654 } +
+                (jan(2022)..feb(2023)).tilTidslinje { 1676 } +
+                mar(2023).ogSenere().tilTidslinje { 1723 }
 
-        Assertions.assertEquals(1354, sats.sats)
+        val faktisk = satstypeTidslinje(TILLEGG_ORBA, MAX_MÅNED)
+
+        assertEquals(forventet, faktisk)
     }
 
     @Test
-    fun `Skal hente ut sats for ordinær barnetrygd ved tillegg før september 2020`() {
-        val dato = LocalDate.of(2020, 1, 1)
-        val sats =
-            SatsService.hentGyldigSatsFor(SatsType.TILLEGG_ORBA, YearMonth.from(dato), YearMonth.from(dato)).first()
-        val satsOrdinær =
-            SatsService.hentGyldigSatsFor(SatsType.ORBA, YearMonth.from(dato), YearMonth.from(dato)).first()
+    fun `Skal gi riktig sats for småbarnstillegg`() {
+        val forventet =
+            feb(2023).ogTidligere().tilTidslinje { 660 } +
+                mar(2023).ogSenere().tilTidslinje { 678 }
 
-        Assertions.assertEquals(satsOrdinær.sats, sats.sats)
+        val faktisk = satstypeTidslinje(SMA, MAX_MÅNED)
+
+        assertEquals(forventet, faktisk)
     }
 
     @Test
-    fun `Skal hente ut riktig sats for småbarnstillegg`() {
-        val dato = LocalDate.of(2020, 1, 1)
-        val sats = SatsService.hentGyldigSatsFor(SatsType.SMA, YearMonth.from(dato), YearMonth.from(dato)).first()
+    fun `Skal gi riktig sats for utvidet barnetrygd`() {
+        val forventet =
+            feb(2019).ogTidligere().tilTidslinje { 970 } +
+                (mar(2019)..feb(2023)).tilTidslinje { 1054 } +
+                mar(2023).ogSenere().tilTidslinje { 2489 }
 
-        Assertions.assertEquals(660, sats.sats)
-    }
+        val faktisk = satstypeTidslinje(UTVIDET_BARNETRYGD, MAX_MÅNED)
 
-    @Test
-    fun `Skal hente ut riktig sats for ordinær barnetrygd i 2018`() {
-        val dato = LocalDate.of(2018, 1, 1)
-        val sats = SatsService.hentGyldigSatsFor(SatsType.ORBA, YearMonth.from(dato), YearMonth.from(dato)).first()
-
-        Assertions.assertEquals(970, sats.sats)
-    }
-
-    @Test
-    fun `Skal hente ut riktig sats for utvidet barnetrygd i starten av 2019`() {
-        val dato = LocalDate.of(2019, 1, 1)
-        val sats =
-            SatsService.hentGyldigSatsFor(SatsType.UTVIDET_BARNETRYGD, YearMonth.from(dato), YearMonth.from(dato))
-                .first()
-
-        Assertions.assertEquals(970, sats.sats)
-    }
-
-    @Test
-    fun `Skal hente ut riktig sats for utvidet barnetrygd 2019-02-28`() {
-        val dato = LocalDate.of(2019, 2, 28)
-        val sats =
-            SatsService.hentGyldigSatsFor(SatsType.UTVIDET_BARNETRYGD, YearMonth.from(dato), YearMonth.from(dato))
-                .single()
-
-        Assertions.assertEquals(970, sats.sats)
-    }
-
-    @Test
-    fun `Skal hente ut riktig sats for utvidet barnetrygd 2019-03-01`() {
-        val dato = LocalDate.of(2019, 3, 1)
-        val sats =
-            SatsService.hentGyldigSatsFor(SatsType.UTVIDET_BARNETRYGD, YearMonth.from(dato), YearMonth.from(dato))
-                .single()
-
-        Assertions.assertEquals(1054, sats.sats)
-    }
-
-    @Test
-    fun `Skal hente ut riktig sats for utvidet barnetrygd 2023-28-02`() {
-        val dato = LocalDate.of(2023, 2, 28)
-        val sats =
-            SatsService.hentGyldigSatsFor(SatsType.UTVIDET_BARNETRYGD, YearMonth.from(dato), YearMonth.from(dato))
-                .single()
-
-        Assertions.assertEquals(1054, sats.sats)
+        assertEquals(forventet, faktisk)
     }
 }
