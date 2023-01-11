@@ -72,21 +72,21 @@ data class UtvidetBarnetrygdGenerator(
         segment: LocalDateSegment<List<PeriodeData>>,
         søkerAktør: Aktør
     ): List<AndelTilkjentYtelseMedEndreteUtbetalinger> {
-        val ordinæreSatserForPeriode = SatsService.hentGyldigSatsFor(
-            satstype = SatsType.ORBA,
+        val utvideteSatserForPeriode = SatsService.hentGyldigSatsFor(
+            satstype = SatsType.UTVIDET_BARNETRYGD,
             stønadFraOgMed = segment.fom.toYearMonth(),
             stønadTilOgMed = segment.tom.toYearMonth()
         )
 
-        if (ordinæreSatserForPeriode.isEmpty()) {
-            error("Finner ikke sats for periode fom=${segment.fom}, tom=${segment.tom}")
+        if (utvideteSatserForPeriode.isEmpty()) {
+            error("Finner ikke utvidet sats for periode fom=${segment.fom}, tom=${segment.tom}")
         }
 
         val prosentForPeriode =
             segment.value.maxByOrNull { data -> data.prosent }?.prosent
                 ?: error("Finner ikke prosent for periode fom=${segment.fom}, tom=${segment.tom}")
 
-        return ordinæreSatserForPeriode.map { satsperiode ->
+        return utvideteSatserForPeriode.map { satsperiode ->
             val nasjonaltPeriodebeløp = satsperiode.sats.avrundetHeltallAvProsent(prosentForPeriode)
             val andelTilkjentYtelse = AndelTilkjentYtelse(
                 behandlingId = behandlingId,

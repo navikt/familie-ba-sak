@@ -139,7 +139,8 @@ class VilkårResultat(
             regelOutput = regelOutput,
             erEksplisittAvslagPåSøknad = erEksplisittAvslagPåSøknad,
             vurderesEtter = vurderesEtter,
-            utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger
+            utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger,
+            standardbegrunnelser = standardbegrunnelser
         )
     }
 

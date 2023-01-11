@@ -7,6 +7,8 @@ metadata:
     team: teamfamilie
   annotations:
     nginx.ingress.kubernetes.io/proxy-next-upstream-tries: '1'
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "180"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "180"
 
 spec:
   envFrom:
@@ -60,6 +62,8 @@ spec:
         - application: familie-ba-skatteetaten-api
           cluster: prod-gcp
         - application: familie-ba-migrering
+          cluster: prod-gcp
+        - application: familie-klage
           cluster: prod-gcp
         - application: familie-ba-statistikk
           cluster: prod-fss

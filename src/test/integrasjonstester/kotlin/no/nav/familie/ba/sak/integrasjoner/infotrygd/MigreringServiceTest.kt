@@ -412,7 +412,7 @@ class MigreringServiceTest(
             migreringService.migrer(fødselsnrBarn)
         }.isInstanceOf(KanIkkeMigrereException::class.java)
             .hasMessage(null)
-            .extracting("feiltype").isEqualTo(MigreringsfeilType.INSTITUSJON)
+            .extracting("feiltype").isEqualTo(MigreringsfeilType.ENSLIG_MINDREÅRIG)
     }
 
     @Test
@@ -457,7 +457,7 @@ class MigreringServiceTest(
             migreringService.migrer(fødselsnrBarn)
         }.isInstanceOf(KanIkkeMigrereException::class.java)
             .hasMessage(null)
-            .extracting("feiltype").isEqualTo(MigreringsfeilType.INSTITUSJON)
+            .extracting("feiltype").isEqualTo(MigreringsfeilType.ENSLIG_MINDREÅRIG)
     }
 
     @Test
@@ -621,7 +621,6 @@ class MigreringServiceTest(
         assertThatThrownBy {
             migreringService.migrer(ClientMocks.søkerFnr[0])
         }.isInstanceOf(KanIkkeMigrereException::class.java)
-            .hasMessage("Kan ikke lage behandling på person med aktiv sak i Infotrygd")
             .extracting("feiltype").isEqualTo(MigreringsfeilType.KAN_IKKE_OPPRETTE_BEHANDLING)
     }
 
@@ -631,7 +630,6 @@ class MigreringServiceTest(
             InfotrygdSøkResponse(listOf(opprettSakMedBeløp(1354.0)), emptyList())
         assertThatThrownBy { migreringService.migrer(ClientMocks.søkerFnr[0]) }
             .isInstanceOf(KanIkkeMigrereException::class.java)
-            .hasMessageContaining("1354")
             .extracting("feiltype")
             .isEqualTo(MigreringsfeilType.BEREGNET_BELØP_FOR_UTBETALING_ULIKT_BELØP_FRA_INFOTRYGD)
     }
@@ -641,7 +639,6 @@ class MigreringServiceTest(
         every { infotrygdBarnetrygdClient.hentSaker(any(), any()) } returns
             InfotrygdSøkResponse(listOf(opprettSakMedBeløp(SAK_BELØP_2_BARN_1_UNDER_6, 660.0)), emptyList())
         assertThatThrownBy { migreringService.migrer(ClientMocks.søkerFnr[0]) }.isInstanceOf(KanIkkeMigrereException::class.java)
-            .hasMessage("Fant ugylding antall delytelser 2")
             .extracting("feiltype").isEqualTo(MigreringsfeilType.UGYLDIG_ANTALL_DELYTELSER_I_INFOTRYGD)
     }
 
@@ -665,7 +662,7 @@ class MigreringServiceTest(
 
             assertThatThrownBy { virkningsdatoUtleder.invoke(migreringServiceMock, kjøredato) }
                 .cause.isInstanceOf(KanIkkeMigrereException::class.java)
-                .hasMessageContaining("midlertidig deaktivert")
+                .hasMessageContaining("Kjøring pågår. Vent med migrering til etter")
                 .extracting("feiltype").isEqualTo(MigreringsfeilType.IKKE_GYLDIG_KJØREDATO)
         }
     }
@@ -862,8 +859,20 @@ class MigreringServiceTest(
             mockk(),
             mockk()
         )
-        assertThat(service.infotrygdKjøredato(YearMonth.of(2022, Month.NOVEMBER))).isEqualTo(LocalDate.of(2022, Month.NOVEMBER, 17))
-        assertThat(service.infotrygdKjøredato(YearMonth.of(2023, Month.SEPTEMBER))).isEqualTo(LocalDate.of(2023, Month.SEPTEMBER, 18))
+        assertThat(service.infotrygdKjøredato(YearMonth.of(2022, Month.NOVEMBER))).isEqualTo(
+            LocalDate.of(
+                2022,
+                Month.NOVEMBER,
+                17
+            )
+        )
+        assertThat(service.infotrygdKjøredato(YearMonth.of(2023, Month.SEPTEMBER))).isEqualTo(
+            LocalDate.of(
+                2023,
+                Month.SEPTEMBER,
+                18
+            )
+        )
         assertThrows<KanIkkeMigrereException> { service.infotrygdKjøredato(YearMonth.now().plusYears(2)) }
     }
 

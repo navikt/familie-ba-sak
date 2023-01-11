@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.klage
 
 import no.nav.familie.ba.sak.common.kallEksternTjenesteRessurs
+import no.nav.familie.ba.sak.common.kallEksternTjenesteUtenRespons
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.klage.Fagsystem
 import no.nav.familie.kontrakter.felles.klage.KlagebehandlingDto
@@ -23,7 +24,7 @@ class KlageClient(
             .pathSegment("api/ekstern/behandling/opprett")
             .build().toUri()
 
-        return kallEksternTjenesteRessurs(
+        return kallEksternTjenesteUtenRespons<Unit>(
             tjeneste = "klage",
             uri = uri,
             formål = "Opprett klagebehandling"
