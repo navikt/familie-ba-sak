@@ -24,7 +24,7 @@ internal class YtelseSatsMapperTest {
     fun `Test standardmapping`() {
         assertEquals(SatsType.ORBA, YtelseSatsMapper.map(YtelseType.ORDINÆR_BARNETRYGD))
         assertEquals(SatsType.SMA, YtelseSatsMapper.map(YtelseType.SMÅBARNSTILLEGG))
-        assertEquals(SatsType.ORBA, YtelseSatsMapper.map(YtelseType.UTVIDET_BARNETRYGD))
+        assertEquals(SatsType.UTVIDET_BARNETRYGD, YtelseSatsMapper.map(YtelseType.UTVIDET_BARNETRYGD))
         assertNull(YtelseSatsMapper.map(YtelseType.MANUELL_VURDERING))
     }
 }

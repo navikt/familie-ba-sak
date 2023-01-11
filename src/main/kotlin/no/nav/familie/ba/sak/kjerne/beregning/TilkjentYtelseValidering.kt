@@ -157,8 +157,12 @@ object TilkjentYtelseValidering {
         }
         if (barnMedUtbetalingsikkerhetFeil.isNotEmpty()) {
             throw UtbetalingsikkerhetFeil(
-                melding = "Vi finner utbetalinger som overstiger 100% på hvert av barna: ${barnMedUtbetalingsikkerhetFeil.map { it.fødselsdato }.tilBrevTekst()}",
-                frontendFeilmelding = "Du kan ikke godkjenne dette vedtaket fordi det vil betales ut mer enn 100% for barn født ${barnMedUtbetalingsikkerhetFeil.map { it.fødselsdato }.tilBrevTekst()}. Reduksjonsvedtak til annen person må være sendt til godkjenning før du kan gå videre."
+                melding = "Vi finner utbetalinger som overstiger 100% på hvert av barna: ${
+                barnMedUtbetalingsikkerhetFeil.map { it.fødselsdato }.tilBrevTekst()
+                }",
+                frontendFeilmelding = "Du kan ikke godkjenne dette vedtaket fordi det vil betales ut mer enn 100% for barn født ${
+                barnMedUtbetalingsikkerhetFeil.map { it.fødselsdato }.tilBrevTekst()
+                }. Reduksjonsvedtak til annen person må være sendt til godkjenning før du kan gå videre."
             )
         }
     }
@@ -167,14 +171,14 @@ object TilkjentYtelseValidering {
         val satser = SatsService.hentAllesatser()
         val småbarnsTillegg = satser.filter { it.type == SatsType.SMA }
         val ordinærMedTillegg = satser.filter { it.type == SatsType.TILLEGG_ORBA }
-        val ordinær = satser.filter { it.type == SatsType.ORBA }
-        if (småbarnsTillegg.isEmpty() || ordinærMedTillegg.isEmpty() || ordinær.isEmpty()) error("Fant ikke satser ved validering")
+        val utvidet = satser.filter { it.type == SatsType.UTVIDET_BARNETRYGD }
+        if (småbarnsTillegg.isEmpty() || ordinærMedTillegg.isEmpty() || utvidet.isEmpty()) error("Fant ikke satser ved validering")
         val maksSmåbarnstillegg = småbarnsTillegg.maxByOrNull { it.beløp }!!.beløp
         val maksOrdinærMedTillegg = ordinærMedTillegg.maxByOrNull { it.beløp }!!.beløp
-        val maksOrdinær = ordinær.maxByOrNull { it.beløp }!!.beløp
+        val maksUtvidet = utvidet.maxBy { it.beløp }.beløp
         return when (personType) {
             PersonType.BARN -> maksOrdinærMedTillegg
-            PersonType.SØKER -> maksOrdinær + maksSmåbarnstillegg
+            PersonType.SØKER -> maksUtvidet + maksSmåbarnstillegg
             else -> throw Feil("Ikke støtte for å utbetale til persontype ${personType.name}")
         }
     }

@@ -72,7 +72,7 @@ class TilkjentYtelseBuilder(
         nasjonalt = nasjonalt,
         differanse = differanse
     ) {
-        satstypeTidslinje(SatsType.ORBA)
+        satstypeTidslinje(SatsType.UTVIDET_BARNETRYGD)
     }
         .also { gjeldendePersoner.single { it.type == PersonType.SØKER } }
 
