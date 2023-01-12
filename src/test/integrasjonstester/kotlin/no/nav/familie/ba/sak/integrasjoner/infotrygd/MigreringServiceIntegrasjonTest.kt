@@ -8,15 +8,12 @@ import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
-import no.nav.familie.ba.sak.common.randomAktør
-import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.AbstractMockkSpringRunner
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.pdl.PdlRestClient
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.IdentInformasjon
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
@@ -24,7 +21,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.gjelderAlltidFraBarnetsFødselsdato
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext.SYSTEM_FORKORTELSE
@@ -62,7 +58,6 @@ import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import java.time.LocalDate
-import java.time.Month
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 
@@ -84,7 +79,7 @@ import java.time.format.DateTimeFormatter
     "mock-rest-template-config"
 )
 @Tag("integration")
-class MigreringServiceTest(
+class MigreringServiceIntegrasjonTest(
     @Autowired
     private val databaseCleanupService: DatabaseCleanupService,
 
@@ -129,8 +124,6 @@ class MigreringServiceTest(
 
 ) : AbstractMockkSpringRunner() {
 
-    lateinit var migreringServiceMock: MigreringService
-
     @BeforeEach
     fun init() {
         MockKafkaProducer.sendteMeldinger.clear()
@@ -153,24 +146,6 @@ class MigreringServiceTest(
         val envServiceMock = mockk<EnvService>()
         every { envServiceMock.erPreprod() } returns false
         every { envServiceMock.erDev() } returns false
-        migreringServiceMock = MigreringService(
-            mockk(),
-            mockk(),
-            env = envServiceMock,
-            mockk(),
-            mockk(),
-            mockk(),
-            mockk(),
-            mockk(),
-            mockk(),
-            mockk(),
-            mockk(),
-            mockk(),
-            mockk(),
-            mockk(relaxed = true),
-            mockk(),
-            mockk()
-        ) // => env.erDev() = env.erE2E() = false
     }
 
     @Test
@@ -652,53 +627,6 @@ class MigreringServiceTest(
     }
 
     @Test
-    fun `migrering skal feile på, og dagen etter, kjøredato i Infotrygd`() {
-        val virkningsdatoUtleder =
-            MigreringService::class.java.getDeclaredMethod("virkningsdatoFra", LocalDate::class.java)
-        virkningsdatoUtleder.trySetAccessible()
-
-        listOf<Long>(0, 1).forEach { antallDagerEtterKjøredato ->
-            val kjøredato = LocalDate.now().minusDays(antallDagerEtterKjøredato)
-
-            assertThatThrownBy { virkningsdatoUtleder.invoke(migreringServiceMock, kjøredato) }
-                .cause.isInstanceOf(KanIkkeMigrereException::class.java)
-                .hasMessageContaining("Kjøring pågår. Vent med migrering til etter")
-                .extracting("feiltype").isEqualTo(MigreringsfeilType.IKKE_GYLDIG_KJØREDATO)
-        }
-    }
-
-    @Test
-    fun `virkningsdatoFra skal returnere første dag i inneværende måned - minus en måned - når den kalles før kjøredato i Infotrygd`() {
-        val virkningsdatoFra = MigreringService::class.java.getDeclaredMethod("virkningsdatoFra", LocalDate::class.java)
-        virkningsdatoFra.trySetAccessible()
-
-        LocalDate.now().run {
-            val kjøredato = this.plusDays(1)
-            assertThat(virkningsdatoFra.invoke(migreringServiceMock, kjøredato)).isEqualTo(
-                this.førsteDagIInneværendeMåned().minusMonths(1)
-            )
-        }
-    }
-
-    @Test
-    fun `virkningsdatoFra skal returnere første dag i inneværende måned, 2 dager eller mer etter kjøredato i Infotrygd`() {
-        val virkningsdatoFra = MigreringService::class.java.getDeclaredMethod("virkningsdatoFra", LocalDate::class.java)
-        virkningsdatoFra.trySetAccessible()
-
-        LocalDate.now().run {
-            listOf<Long>(2, 3).forEach { antallDagerEtterKjøredato ->
-                val kjøredato = this.minusDays(antallDagerEtterKjøredato)
-                assertThat(
-                    virkningsdatoFra.invoke(
-                        migreringServiceMock,
-                        kjøredato
-                    )
-                ).isEqualTo(this.førsteDagIInneværendeMåned())
-            }
-        }
-    }
-
-    @Test
     fun `fagsak og saksstatistikk mellomlagring skal rulles tilbake når migrering feiler`() {
         every { infotrygdBarnetrygdClient.hentSaker(any(), any()) } returns
             InfotrygdSøkResponse(listOf(opprettSakMedBeløp(SAK_BELØP_2_BARN_1_UNDER_6)), emptyList())
@@ -751,152 +679,6 @@ class MigreringServiceTest(
             .containsOnly(BehandlingType.MIGRERING_FRA_INFOTRYGD.name)
         assertThat(behandlingDvhMeldinger).extracting("saksbehandler", "beslutter")
             .containsOnly(tuple(SYSTEM_FORKORTELSE, SYSTEM_FORKORTELSE), tuple(null, null))
-    }
-
-    @Test
-    fun `migrering skal feile med IDENT_IKKE_LENGER_AKTIV når input har ident som er historisk i PDL`() {
-        val mockkPersonidentService = mockk<PersonidentService>()
-        val s = MigreringService(
-            mockk(),
-            mockk(),
-            mockk(),
-            mockk(),
-            mockk(),
-            mockkPersonidentService,
-            mockk(),
-            mockk(),
-            mockk(),
-            mockk(),
-            mockk(),
-            mockk(),
-            mockk(),
-            mockk(relaxed = true),
-            mockk(),
-            mockk()
-        )
-
-        val aktivFnr = randomFnr()
-        val historiskFnr = randomFnr()
-
-        every { mockkPersonidentService.hentIdenter(historiskFnr, true) } returns listOf(
-            IdentInformasjon(aktivFnr, false, "FOLKEREGISTERIDENT"),
-            IdentInformasjon(historiskFnr, true, "FOLKEREGISTERIDENT"),
-            IdentInformasjon("112244", false, "AKTOERID")
-        )
-
-        assertThatThrownBy {
-            s.migrer(historiskFnr)
-        }.isInstanceOf(KanIkkeMigrereException::class.java)
-            .hasMessage(null)
-            .extracting("feiltype").isEqualTo(MigreringsfeilType.IDENT_IKKE_LENGER_AKTIV)
-    }
-
-    @Test
-    fun `migrering skal feile med HISTORISK_IDENT_REGNET_SOM_EKSTRA_BARN_I_INFOTRYGD hvis PersonidentService returnerer samme aktørId `() {
-        val mockkPersonidentService = mockk<PersonidentService>()
-        val s = MigreringService(
-            behandlingRepository = mockk(),
-            behandlingService = mockk(),
-            env = mockk(),
-            fagsakService = mockk(),
-            infotrygdBarnetrygdClient = infotrygdBarnetrygdClient,
-            personidentService = mockkPersonidentService,
-            stegService = mockk(),
-            taskRepository = mockk(),
-            tilkjentYtelseRepository = mockk(),
-            totrinnskontrollService = mockk(),
-            vedtakService = mockk(),
-            vilkårService = mockk(),
-            vilkårsvurderingService = mockk(),
-            migreringRestClient = mockk(relaxed = true),
-            mockk(),
-            mockk()
-        )
-
-        val ident = randomFnr()
-        every { mockkPersonidentService.hentIdenter(any(), true) } answers {
-            listOf(IdentInformasjon(firstArg(), false, "FOLKEREGISTERIDENT"))
-        }
-        every {
-            infotrygdBarnetrygdClient.hentSaker(any(), any())
-        } returns InfotrygdSøkResponse(listOf(opprettSakMedBeløp(SAK_BELØP_2_BARN_1_UNDER_6)), emptyList())
-
-        every { mockkPersonidentService.hentOgLagreAktørIder(any(), false) } answers { callOriginal() }
-
-        every { mockkPersonidentService.hentOgLagreAktør(any(), false) } returns
-            Aktør(randomAktør().aktørId, personidenter = mutableSetOf())
-
-        assertThatThrownBy {
-            s.migrer(ident)
-        }.isInstanceOf(KanIkkeMigrereException::class.java)
-            .extracting("feiltype").isEqualTo(MigreringsfeilType.HISTORISK_IDENT_REGNET_SOM_EKSTRA_BARN_I_INFOTRYGD)
-
-        // Verifiserer at feiltypen ikke er den samme når vi endrer til unike aktørId'er for barna
-        every { mockkPersonidentService.hentOgLagreAktør(any(), false) } answers {
-            Aktør(randomAktør().aktørId, personidenter = mutableSetOf())
-        }
-        assertThatThrownBy { s.migrer(ident) }
-            .extracting("feiltype").isNotEqualTo(MigreringsfeilType.HISTORISK_IDENT_REGNET_SOM_EKSTRA_BARN_I_INFOTRYGD)
-    }
-
-    @Test
-    fun `Skal hente kjøredate hvis man har kjøredato eller så kastes kan ikke migrerere exception`() {
-        val service = MigreringService(
-            behandlingRepository = mockk(),
-            behandlingService = mockk(),
-            env = mockk(),
-            fagsakService = mockk(),
-            infotrygdBarnetrygdClient = mockk(),
-            personidentService = mockk(),
-            stegService = mockk(),
-            taskRepository = mockk(),
-            tilkjentYtelseRepository = mockk(),
-            totrinnskontrollService = mockk(),
-            vedtakService = mockk(),
-            vilkårService = mockk(),
-            vilkårsvurderingService = mockk(),
-            migreringRestClient = mockk(relaxed = true),
-            mockk(),
-            mockk()
-        )
-        assertThat(service.infotrygdKjøredato(YearMonth.of(2022, Month.NOVEMBER))).isEqualTo(
-            LocalDate.of(
-                2022,
-                Month.NOVEMBER,
-                17
-            )
-        )
-        assertThat(service.infotrygdKjøredato(YearMonth.of(2023, Month.SEPTEMBER))).isEqualTo(
-            LocalDate.of(
-                2023,
-                Month.SEPTEMBER,
-                18
-            )
-        )
-        assertThrows<KanIkkeMigrereException> { service.infotrygdKjøredato(YearMonth.now().plusYears(2)) }
-    }
-
-    @Test
-    fun `Hvis denne testen feiler og man fortsatt migrererer, så må man ha ny kjøreplan, hvis man er ferdig med migrering, så kan man rydde opp kode`() {
-        val service = MigreringService(
-            behandlingRepository = mockk(),
-            behandlingService = mockk(),
-            env = mockk(),
-            fagsakService = mockk(),
-            infotrygdBarnetrygdClient = mockk(),
-            personidentService = mockk(),
-            stegService = mockk(),
-            taskRepository = mockk(),
-            tilkjentYtelseRepository = mockk(),
-            totrinnskontrollService = mockk(),
-            vedtakService = mockk(),
-            vilkårService = mockk(),
-            vilkårsvurderingService = mockk(),
-            migreringRestClient = mockk(relaxed = true),
-            mockk(),
-            mockk()
-        )
-        service.infotrygdKjøredato(YearMonth.now().plusMonths(1))
     }
 
     @Test
