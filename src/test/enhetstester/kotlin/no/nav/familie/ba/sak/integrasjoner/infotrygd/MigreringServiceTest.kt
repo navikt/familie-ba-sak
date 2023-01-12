@@ -28,19 +28,23 @@ import java.time.YearMonth
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class MigreringServiceTest() {
     lateinit var migreringServiceMock: MigreringService
+    lateinit var mockPersonidentService: PersonidentService
+    lateinit var mockPersongrunnlagService: PersongrunnlagService
 
     @BeforeEach
     fun init() {
         val envServiceMock = mockk<EnvService>()
         every { envServiceMock.erPreprod() } returns false
         every { envServiceMock.erDev() } returns false
+        mockPersonidentService = mockk(relaxed = true)
+        mockPersongrunnlagService = mockk()
         migreringServiceMock = MigreringService(
             mockk(),
             mockk(),
             env = envServiceMock,
             mockk(),
             mockk(),
-            mockk(),
+            mockPersonidentService,
             mockk(),
             mockk(),
             mockk(),
@@ -51,7 +55,7 @@ class MigreringServiceTest() {
             mockk(relaxed = true),
             mockk(),
             mockk(),
-            mockk()
+            mockPersongrunnlagService
         ) // => env.erDev() = env.erE2E() = false
     }
 
@@ -104,38 +108,17 @@ class MigreringServiceTest() {
 
     @Test
     fun `migrering skal feile med IDENT_IKKE_LENGER_AKTIV når input har ident som er historisk i PDL`() {
-        val mockkPersonidentService = mockk<PersonidentService>()
-        val s = MigreringService(
-            mockk(),
-            mockk(),
-            mockk(),
-            mockk(),
-            mockk(),
-            mockkPersonidentService,
-            mockk(),
-            mockk(),
-            mockk(),
-            mockk(),
-            mockk(),
-            mockk(),
-            mockk(),
-            mockk(relaxed = true),
-            mockk(),
-            mockk(),
-            mockk()
-        )
-
         val aktivFnr = randomFnr()
         val historiskFnr = randomFnr()
 
-        every { mockkPersonidentService.hentIdenter(historiskFnr, true) } returns listOf(
+        every { mockPersonidentService.hentIdenter(historiskFnr, true) } returns listOf(
             IdentInformasjon(aktivFnr, false, "FOLKEREGISTERIDENT"),
             IdentInformasjon(historiskFnr, true, "FOLKEREGISTERIDENT"),
             IdentInformasjon("112244", false, "AKTOERID")
         )
 
         assertThatThrownBy {
-            s.migrer(historiskFnr)
+            migreringServiceMock.migrer(historiskFnr)
         }.isInstanceOf(KanIkkeMigrereException::class.java)
             .hasMessage(null)
             .extracting("feiltype").isEqualTo(MigreringsfeilType.IDENT_IKKE_LENGER_AKTIV)
@@ -143,90 +126,30 @@ class MigreringServiceTest() {
 
     @Test
     fun `Skal hente kjøredate hvis man har kjøredato eller så kastes kan ikke migrerere exception`() {
-        val service = MigreringService(
-            behandlingRepository = mockk(),
-            behandlingService = mockk(),
-            env = mockk(),
-            fagsakService = mockk(),
-            infotrygdBarnetrygdClient = mockk(),
-            personidentService = mockk(),
-            stegService = mockk(),
-            taskRepository = mockk(),
-            tilkjentYtelseRepository = mockk(),
-            totrinnskontrollService = mockk(),
-            vedtakService = mockk(),
-            vilkårService = mockk(),
-            vilkårsvurderingService = mockk(),
-            migreringRestClient = mockk(relaxed = true),
-            mockk(),
-            mockk(),
-            mockk()
-        )
-        assertThat(service.infotrygdKjøredato(YearMonth.of(2022, Month.NOVEMBER))).isEqualTo(
+        assertThat(migreringServiceMock.infotrygdKjøredato(YearMonth.of(2022, Month.NOVEMBER))).isEqualTo(
             LocalDate.of(
                 2022,
                 Month.NOVEMBER,
                 17
             )
         )
-        assertThat(service.infotrygdKjøredato(YearMonth.of(2023, Month.SEPTEMBER))).isEqualTo(
+        assertThat(migreringServiceMock.infotrygdKjøredato(YearMonth.of(2023, Month.SEPTEMBER))).isEqualTo(
             LocalDate.of(
                 2023,
                 Month.SEPTEMBER,
                 18
             )
         )
-        assertThrows<KanIkkeMigrereException> { service.infotrygdKjøredato(YearMonth.now().plusYears(2)) }
+        assertThrows<KanIkkeMigrereException> { migreringServiceMock.infotrygdKjøredato(YearMonth.now().plusYears(2)) }
     }
 
     @Test
     fun `Hvis denne testen feiler og man fortsatt migrererer, så må man ha ny kjøreplan, hvis man er ferdig med migrering, så kan man rydde opp kode`() {
-        val service = MigreringService(
-            behandlingRepository = mockk(),
-            behandlingService = mockk(),
-            env = mockk(),
-            fagsakService = mockk(),
-            infotrygdBarnetrygdClient = mockk(),
-            personidentService = mockk(),
-            stegService = mockk(),
-            taskRepository = mockk(),
-            tilkjentYtelseRepository = mockk(),
-            totrinnskontrollService = mockk(),
-            vedtakService = mockk(),
-            vilkårService = mockk(),
-            vilkårsvurderingService = mockk(),
-            migreringRestClient = mockk(relaxed = true),
-            mockk(),
-            mockk(),
-            mockk()
-        )
-        service.infotrygdKjøredato(YearMonth.now().plusMonths(1))
+        migreringServiceMock.infotrygdKjøredato(YearMonth.now().plusMonths(1))
     }
 
     @Test
     fun `sammenlingBarnInfotrygdMedBarnBAsak - ikke kast feil hvis saken i infotrygd har barn med historisk ident, mens saken i ba-sak har barn med den aktive identen`() {
-        val mockPersongrunnlagService = mockk<PersongrunnlagService>()
-        val mockPersonidentService = mockk<PersonidentService>()
-        val service = MigreringService(
-            behandlingRepository = mockk(),
-            behandlingService = mockk(),
-            env = mockk(),
-            fagsakService = mockk(),
-            infotrygdBarnetrygdClient = mockk(),
-            personidentService = mockPersonidentService,
-            stegService = mockk(),
-            taskRepository = mockk(),
-            tilkjentYtelseRepository = mockk(),
-            totrinnskontrollService = mockk(),
-            vedtakService = mockk(),
-            vilkårService = mockk(),
-            vilkårsvurderingService = mockk(),
-            migreringRestClient = mockk(relaxed = true),
-            kompetanseService = mockk(),
-            featureToggleService = mockk(),
-            persongrunnlagService = mockPersongrunnlagService
-        )
-
         val behandling = lagBehandling()
 
         val barnetsAktiveIdent = fødselsnummerGenerator.foedselsnummer(LocalDate.now().minusDays(1000)).asString
@@ -251,33 +174,11 @@ class MigreringServiceTest() {
             IdentInformasjon(barnetsAktiveIdent, false, "FOLKEREGISTERIDENT")
         )
 
-        service.sammenlingBarnInfotrygdMedBarnBAsak(behandling, listOf(barnetsHistoriskeIdent), "123")
+        migreringServiceMock.sammenlingBarnInfotrygdMedBarnBAsak(behandling, listOf(barnetsHistoriskeIdent), "123")
     }
 
     @Test
     fun `sammenlingBarnInfotrygdMedBarnBAsak - ikke kast feil hvis saken i infotrygd har 1 av 2 barn med historisk ident, mens saken i ba-sak har barn med den aktive identen`() {
-        val mockPersongrunnlagService = mockk<PersongrunnlagService>()
-        val mockPersonidentService = mockk<PersonidentService>()
-        val service = MigreringService(
-            behandlingRepository = mockk(),
-            behandlingService = mockk(),
-            env = mockk(),
-            fagsakService = mockk(),
-            infotrygdBarnetrygdClient = mockk(),
-            personidentService = mockPersonidentService,
-            stegService = mockk(),
-            taskRepository = mockk(),
-            tilkjentYtelseRepository = mockk(),
-            totrinnskontrollService = mockk(),
-            vedtakService = mockk(),
-            vilkårService = mockk(),
-            vilkårsvurderingService = mockk(),
-            migreringRestClient = mockk(relaxed = true),
-            kompetanseService = mockk(),
-            featureToggleService = mockk(),
-            persongrunnlagService = mockPersongrunnlagService
-        )
-
         val behandling = lagBehandling()
         val barn1AktivIdent = fødselsnummerGenerator.foedselsnummer(LocalDate.now().minusDays(1000)).asString
         val barn2AktivIdent = fødselsnummerGenerator.foedselsnummer(LocalDate.now().minusDays(1000)).asString
@@ -308,7 +209,7 @@ class MigreringServiceTest() {
             IdentInformasjon(barn2AktivIdent, false, "FOLKEREGISTERIDENT")
         )
 
-        service.sammenlingBarnInfotrygdMedBarnBAsak(
+        migreringServiceMock.sammenlingBarnInfotrygdMedBarnBAsak(
             behandling,
             listOf(barn1AktivIdent, barn2historiskIdent),
             "123"
@@ -317,28 +218,6 @@ class MigreringServiceTest() {
 
     @Test
     fun `sammenlingBarnInfotrygdMedBarnBAsak - kast DIFF_BARN_INFOTRYGD_OG_BA_SAK hvis saken i infotrygd har en historisk ident, mens saken i ba-sak har en aktiv ident som ikke tilhører den historiske identen`() {
-        val mockPersongrunnlagService = mockk<PersongrunnlagService>()
-        val mockPersonidentService = mockk<PersonidentService>()
-        val service = MigreringService(
-            behandlingRepository = mockk(),
-            behandlingService = mockk(),
-            env = mockk(),
-            fagsakService = mockk(),
-            infotrygdBarnetrygdClient = mockk(),
-            personidentService = mockPersonidentService,
-            stegService = mockk(),
-            taskRepository = mockk(),
-            tilkjentYtelseRepository = mockk(),
-            totrinnskontrollService = mockk(),
-            vedtakService = mockk(),
-            vilkårService = mockk(),
-            vilkårsvurderingService = mockk(),
-            migreringRestClient = mockk(relaxed = true),
-            kompetanseService = mockk(),
-            featureToggleService = mockk(),
-            persongrunnlagService = mockPersongrunnlagService
-        )
-
         val behandling = lagBehandling()
 
         val barnetsAktiveIdent = fødselsnummerGenerator.foedselsnummer(LocalDate.now().minusDays(1000)).asString
@@ -363,7 +242,7 @@ class MigreringServiceTest() {
 
         assertThat(
             assertThrows<KanIkkeMigrereException> {
-                service.sammenlingBarnInfotrygdMedBarnBAsak(
+                migreringServiceMock.sammenlingBarnInfotrygdMedBarnBAsak(
                     behandling,
                     listOf(barnetsHistoriskeIdent),
                     "123"
