@@ -364,7 +364,7 @@ class StegServiceTest(
             behandlingEtterTilbakekrevingSteg,
             "1234"
         )
-        assertEquals(StegType.FERDIGSTILLE_BEHANDLING, behandlingEtterBesultterSteg.steg)
+        assertEquals(StegType.IVERKSETT_MOT_OPPDRAG, behandlingEtterBesultterSteg.steg)
         assertTrue {
             behandlingEtterBesultterSteg.behandlingStegTilstand.any {
                 it.behandlingSteg == StegType.SEND_TIL_BESLUTTER &&

@@ -90,7 +90,6 @@ class BeslutteVedtak(
                 StegType.IVERKSETT_MOT_OPPDRAG -> {
                     opprettTaskIverksettMotOppdrag(behandling, vedtak)
                 }
-
                 StegType.JOURNALFØR_VEDTAKSBREV -> {
                     if (!behandling.erBehandlingMedVedtaksbrevutsending()) {
                         throw Feil("Prøvde å opprette vedtaksbrev for behandling som ikke skal sende ut vedtaksbrev.")
@@ -98,15 +97,13 @@ class BeslutteVedtak(
 
                     opprettJournalførVedtaksbrevTask(behandling, vedtak)
                 }
-
                 StegType.FERDIGSTILLE_BEHANDLING -> {
-                    if (behandling.type == BehandlingType.TEKNISK_ENDRING || behandling.erManuellMigreringForEndreMigreringsdato()) {
+                    if (behandling.type == BehandlingType.TEKNISK_ENDRING) {
                         opprettFerdigstillBehandlingTask(behandling)
                     } else {
                         throw Feil("Neste steg 'ferdigstille behandling' er ikke implementert på 'beslutte vedtak'-steg")
                     }
                 }
-
                 else -> throw Feil("Neste steg '$nesteSteg' er ikke implementert på 'beslutte vedtak'-steg")
             }
             nesteSteg

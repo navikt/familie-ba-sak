@@ -131,6 +131,13 @@ class BehandlingsresultatSteg(
                     "Ta kontakt med Team familie om du er uenig i resultatet."
             )
         }
+
+        if (behandlingMedOppdatertBehandlingsresultat.erManuellMigreringForEndreMigreringsdato() && behandlingMedOppdatertBehandlingsresultat.resultat == Behandlingsresultat.FORTSATT_INNVILGET) {
+            throw FunksjonellFeil(
+                "Fortsatt innvilget er et ugyldig behandlingsresultat når du skal endre migreringsdato. " +
+                    "Henlegg behandlingen. Når du starter en ny endre migreringsdato behandling, må du velge en dato som er tidligere enn gjeldene dato for migrering."
+            )
+        }
     }
 
     private fun settBehandlingsresultat(behandling: Behandling, resultat: Behandlingsresultat): Behandling {

@@ -51,6 +51,8 @@ class BehandlingStegTest {
             StegType.VURDER_TILBAKEKREVING,
             StegType.SEND_TIL_BESLUTTER,
             StegType.BESLUTTE_VEDTAK,
+            StegType.IVERKSETT_MOT_OPPDRAG,
+            StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
             StegType.FERDIGSTILLE_BEHANDLING,
             StegType.BEHANDLING_AVSLUTTET
         ).forEach {
