@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType.ORBA
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType.SMA
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType.TILLEGG_ORBA
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType.UTVIDET_BARNETRYGD
-import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MAX_MÅNED
 import no.nav.familie.ba.sak.kjerne.eøs.util.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.ogSenere
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.ogTidligere
@@ -29,7 +28,7 @@ class SatsServiceIntegrationTest : AbstractSpringIntegrationTest() {
                 (mar(2019)..feb(2023)).tilTidslinje { 1054 } +
                 mar(2023).ogSenere().tilTidslinje { 1083 }
 
-        val faktisk = satstypeTidslinje(ORBA, MAX_MÅNED)
+        val faktisk = satstypeTidslinje(ORBA)
 
         assertEquals(forventet, faktisk)
     }
@@ -44,7 +43,7 @@ class SatsServiceIntegrationTest : AbstractSpringIntegrationTest() {
                 (jan(2022)..feb(2023)).tilTidslinje { 1676 } +
                 mar(2023).ogSenere().tilTidslinje { 1723 }
 
-        val faktisk = satstypeTidslinje(TILLEGG_ORBA, MAX_MÅNED)
+        val faktisk = satstypeTidslinje(TILLEGG_ORBA)
 
         assertEquals(forventet, faktisk)
     }
@@ -55,7 +54,7 @@ class SatsServiceIntegrationTest : AbstractSpringIntegrationTest() {
             feb(2023).ogTidligere().tilTidslinje { 660 } +
                 mar(2023).ogSenere().tilTidslinje { 678 }
 
-        val faktisk = satstypeTidslinje(SMA, MAX_MÅNED)
+        val faktisk = satstypeTidslinje(SMA)
 
         assertEquals(forventet, faktisk)
     }
@@ -67,7 +66,7 @@ class SatsServiceIntegrationTest : AbstractSpringIntegrationTest() {
                 (mar(2019)..feb(2023)).tilTidslinje { 1054 } +
                 mar(2023).ogSenere().tilTidslinje { 2489 }
 
-        val faktisk = satstypeTidslinje(UTVIDET_BARNETRYGD, MAX_MÅNED)
+        val faktisk = satstypeTidslinje(UTVIDET_BARNETRYGD)
 
         assertEquals(forventet, faktisk)
     }

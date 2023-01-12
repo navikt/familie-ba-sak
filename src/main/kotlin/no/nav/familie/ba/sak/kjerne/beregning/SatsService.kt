@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.Sats
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
@@ -20,6 +21,10 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companio
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjær
 import java.time.LocalDate
 import java.time.YearMonth
+
+object SatsTidspunkt {
+    val senesteSatsTidspunkt: LocalDate = LocalDate.MAX
+}
 
 object SatsService {
 
@@ -44,8 +49,6 @@ object SatsService {
         Sats(SatsType.UTVIDET_BARNETRYGD, 1054, LocalDate.of(2019, 3, 1), LocalDate.of(2023, 2, 28)),
         Sats(SatsType.UTVIDET_BARNETRYGD, 2489, LocalDate.of(2023, 3, 1), LocalDate.MAX)
     )
-
-    val tilleggEndringJanuar2022 = YearMonth.of(2022, 1)
 
     val tilleggOrdinærSatsTilTester: Sats =
         satser.findLast {
@@ -72,7 +75,7 @@ object SatsService {
             it.type == SatsType.TILLEGG_ORBA && it.gyldigFom.toYearMonth() <= LocalDate.now().nesteMåned()
         }!!
 
-    fun finnSatsendring(startDato: LocalDate): List<Sats> = satser
+    fun finnSatsendring(startDato: LocalDate): List<Sats> = hentAllesatser()
         .filter { it.gyldigFom == startDato }
         .filter { it.gyldigFom != LocalDate.MIN }
 
@@ -89,9 +92,19 @@ object SatsService {
             .filter { it.fraOgMed <= it.tilOgMed }
     }
 
+    /**
+     * SatsService.senesteSatsTidspunkt brukes for å mocke inn et tidspunkt som ligger tidligere enn gjeldende satser
+     * alle satser som er gyldige fra etter dette tidspunktet vil filtreres bort
+     * gyldigTom vil settes til LocalDate.MAX for det som nå blir siste gyldige sats, dvs varer uendelig
+     */
     internal fun hentAllesatser() = satser
+        .filter { it.gyldigFom <= SatsTidspunkt.senesteSatsTidspunkt }
+        .map {
+            val overstyrtTom = if (SatsTidspunkt.senesteSatsTidspunkt < it.gyldigTom) LocalDate.MAX else it.gyldigTom
+            it.copy(gyldigTom = overstyrtTom)
+        }
 
-    private fun finnAlleSatserFor(type: SatsType): List<Sats> = satser.filter { it.type == type }
+    internal fun finnAlleSatserFor(type: SatsType): List<Sats> = hentAllesatser().filter { it.type == type }
 
     data class SatsPeriode(
         val sats: Int,
@@ -102,7 +115,7 @@ object SatsService {
     fun hentDatoForSatsendring(
         satstype: SatsType,
         oppdatertBeløp: Int
-    ): LocalDate? = satser.find { it.type == satstype && it.beløp == oppdatertBeløp }?.gyldigFom
+    ): LocalDate? = hentAllesatser().find { it.type == satstype && it.beløp == oppdatertBeløp }?.gyldigFom
 }
 
 fun fomErPåSatsendring(fom: LocalDate?): Boolean =
@@ -110,15 +123,13 @@ fun fomErPåSatsendring(fom: LocalDate?): Boolean =
         .finnSatsendring(fom?.førsteDagIInneværendeMåned() ?: TIDENES_MORGEN)
         .isNotEmpty()
 
-fun satstypeTidslinje(satsType: SatsType, maxSatsGyldigFraOgMed: YearMonth = SatsService.tilleggEndringJanuar2022) =
+fun satstypeTidslinje(satsType: SatsType) =
     tidslinje {
-        SatsService.hentAllesatser()
-            .filter { it.type == satsType }
-            .filter { it.gyldigFom.toYearMonth() <= maxSatsGyldigFraOgMed }
+        SatsService.finnAlleSatserFor(satsType)
             .map {
                 val fom = if (it.gyldigFom == LocalDate.MIN) null else it.gyldigFom.toYearMonth()
                 val tom = if (it.gyldigTom == LocalDate.MAX) null else it.gyldigTom.toYearMonth()
-                no.nav.familie.ba.sak.kjerne.tidslinje.Periode(
+                Periode(
                     fraOgMed = fom.tilTidspunktEllerTidligereEnn(tom),
                     tilOgMed = tom.tilTidspunktEllerSenereEnn(fom),
                     it.beløp
