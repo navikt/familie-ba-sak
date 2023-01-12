@@ -201,7 +201,8 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
                 else -> throw IllegalStateException("StegType ${utførendeStegType.displayName()} ugyldig ved migrering")
             }
         }
-        BehandlingÅrsak.ENDRE_MIGRERINGSDATO, BehandlingÅrsak.HELMANUELL_MIGRERING -> {
+
+        BehandlingÅrsak.HELMANUELL_MIGRERING -> {
             when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
@@ -215,10 +216,28 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
                 BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
                 else -> throw IllegalStateException(
                     "StegType ${utførendeStegType.displayName()} " +
+                        "er ugyldig ved manuell migreringsbehandling"
+                )
+            }
+        }
+
+        BehandlingÅrsak.ENDRE_MIGRERINGSDATO -> {
+            when (utførendeStegType) {
+                REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
+                VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
+                BEHANDLINGSRESULTAT -> VURDER_TILBAKEKREVING
+                VURDER_TILBAKEKREVING -> SEND_TIL_BESLUTTER
+                SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
+                BESLUTTE_VEDTAK -> FERDIGSTILLE_BEHANDLING
+                FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
+                BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
+                else -> throw IllegalStateException(
+                    "StegType ${utførendeStegType.displayName()} " +
                         "er ugyldig ved migreringsbehandling med endre migreringsdato"
                 )
             }
         }
+
         BehandlingÅrsak.TEKNISK_ENDRING -> {
             when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
@@ -234,6 +253,7 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
                 else -> throw IllegalStateException("StegType ${utførendeStegType.displayName()} ugyldig ved teknisk endring")
             }
         }
+
         BehandlingÅrsak.FØDSELSHENDELSE -> {
             when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> FILTRERING_FØDSELSHENDELSER
@@ -249,6 +269,7 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
                 else -> throw IllegalStateException("Stegtype ${utførendeStegType.displayName()} er ikke implementert for fødselshendelser")
             }
         }
+
         BehandlingÅrsak.SØKNAD -> {
             when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> {
@@ -258,6 +279,7 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
                         REGISTRERE_INSTITUSJON_OG_VERGE
                     }
                 }
+
                 REGISTRERE_INSTITUSJON_OG_VERGE -> REGISTRERE_SØKNAD
                 REGISTRERE_SØKNAD -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
@@ -275,6 +297,7 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
                 else -> throw IllegalStateException("Stegtype ${utførendeStegType.displayName()} er ikke implementert for behandling med årsak $behandlingÅrsak og type $behandlingType.")
             }
         }
+
         BehandlingÅrsak.SMÅBARNSTILLEGG -> {
             when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
@@ -284,6 +307,7 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
                         VURDER_TILBAKEKREVING
                     } else if (behandling.skalBehandlesAutomatisk && behandling.status == BehandlingStatus.IVERKSETTER_VEDTAK) IVERKSETT_MOT_OPPDRAG else VURDER_TILBAKEKREVING
                 }
+
                 VURDER_TILBAKEKREVING -> SEND_TIL_BESLUTTER
                 SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
                 BESLUTTE_VEDTAK -> hentNesteStegTypeBasertPåBehandlingsresultat(behandling.resultat)
@@ -297,6 +321,7 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
                 else -> throw IllegalStateException("Stegtype ${utførendeStegType.displayName()} er ikke implementert for småbarnstillegg")
             }
         }
+
         BehandlingÅrsak.SATSENDRING -> {
             when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
@@ -306,6 +331,7 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
                 } else {
                     throw Feil("Resultat ${behandling.resultat} er ikke støttet etter behandlingsresultat for satsendringsbehandling.")
                 }
+
                 IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
                 VENTE_PÅ_STATUS_FRA_ØKONOMI -> FERDIGSTILLE_BEHANDLING
                 FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
@@ -313,6 +339,7 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
                 else -> throw IllegalStateException("Stegtype ${utførendeStegType.displayName()} er ikke implementert for behandling med årsak $behandlingÅrsak og type $behandlingType.")
             }
         }
+
         else -> {
             when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
