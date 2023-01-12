@@ -139,6 +139,7 @@ class OppgaveService(
             if (oppgave.status != FERDIGSTILT) {
                 copyOppgave(oppgave)?.also { patchOppgave(it) }
             } else {
+                logger.warn("Kan ikke patch'e ferdigstilt oppgave ${oppgave.id}, for behandling ${behandling.id}.")
                 dbOppgave.erFerdigstilt = true
                 oppgaveRepository.saveAndFlush(dbOppgave)
             }
