@@ -1004,7 +1004,10 @@ internal class UtvidetBarnetrygdTest {
         val andelEtterSatsendring = utvidetAndeler[0]
         val andelFørSatsendring = utvidetAndeler[1]
 
-        val datoForSatsendring = SatsService.hentDatoForSatsendring(satstype = SatsType.ORBA, oppdatertBeløp = 1054)
+        val datoForSatsendring = SatsService.hentDatoForSatsendring(
+            satstype = SatsType.UTVIDET_BARNETRYGD,
+            oppdatertBeløp = 1054
+        )
 
         assertEquals(970, andelFørSatsendring.sats)
         assertEquals(datoForSatsendring?.minusDays(1)?.toYearMonth(), andelFørSatsendring.stønadTom)
