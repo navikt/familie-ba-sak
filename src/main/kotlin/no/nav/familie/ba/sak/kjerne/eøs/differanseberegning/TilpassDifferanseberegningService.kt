@@ -1,7 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseEndretAbonnent
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
@@ -100,17 +98,14 @@ class TilpassDifferanseberegningEtterValutakursService(
 class TilpassDifferanseberegningSøkersYtelserService(
     private val persongrunnlagService: PersongrunnlagService,
     private val kompetanseRepository: KompetanseRepository,
-    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
-    private val featureToggleService: FeatureToggleService
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository
 ) : BarnasDifferanseberegningEndretAbonnent {
     override fun barnasDifferanseberegningEndret(tilkjentYtelse: TilkjentYtelse) {
-        if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_BEHANDLE_UTVIDET_EØS_SEKUNDÆRLAND, false)) {
-            val oppdaterteAndeler = tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(
-                persongrunnlagService.hentBarna(tilkjentYtelse.behandling.id),
-                kompetanseRepository.finnFraBehandlingId(tilkjentYtelse.behandling.id)
-            )
-            tilkjentYtelseRepository.oppdaterTilkjentYtelse(tilkjentYtelse, oppdaterteAndeler)
-        }
+        val oppdaterteAndeler = tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(
+            persongrunnlagService.hentBarna(tilkjentYtelse.behandling.id),
+            kompetanseRepository.finnFraBehandlingId(tilkjentYtelse.behandling.id)
+        )
+        tilkjentYtelseRepository.oppdaterTilkjentYtelse(tilkjentYtelse, oppdaterteAndeler)
     }
 }
 

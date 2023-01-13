@@ -67,8 +67,7 @@ object BehandlingsresultatUtils {
     }
 
     internal fun utledBehandlingsresultatBasertPåYtelsePersoner(
-        ytelsePersoner: List<YtelsePerson>,
-        sjekkOmUtvidaBarnetrygdErEndra: Boolean = true
+        ytelsePersoner: List<YtelsePerson>
     ): Behandlingsresultat {
         validerYtelsePersoner(ytelsePersoner)
 
@@ -95,8 +94,7 @@ object BehandlingsresultatUtils {
         val opphørSomFørerTilEndring =
             (
                 altOpphører || erUtvidaBarnetrygdEndra(
-                    ytelsePersoner,
-                    sjekkOmUtvidaBarnetrygdErEndra
+                    ytelsePersoner
                 )
                 ) && !opphørPåSammeTid && !erKunFremstilKravIDenneBehandling && !kunFortsattOpphørt
         if (opphørSomFørerTilEndring) {
@@ -111,12 +109,8 @@ object BehandlingsresultatUtils {
     }
 
     private fun erUtvidaBarnetrygdEndra(
-        ytelsePersoner: List<YtelsePerson>,
-        sjekkOmUtvidaBarnetrygdErEndra: Boolean
+        ytelsePersoner: List<YtelsePerson>
     ): Boolean {
-        if (!sjekkOmUtvidaBarnetrygdErEndra) {
-            return false
-        }
         val utvidaBarnetrygd = ytelsePersoner
             .filter { it.ytelseType == YtelseType.UTVIDET_BARNETRYGD }
 

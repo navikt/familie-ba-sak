@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.convertDataClassToJson
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.BehandlingUnderkategoriDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
@@ -128,8 +127,7 @@ class BehandlingsresultatService(
         behandling: Behandling
     ) =
         BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(
-            ytelsePersoner = ytelsePersonerMedResultat,
-            sjekkOmUtvidaBarnetrygdErEndra = featureToggleService.isEnabled(FeatureToggleConfig.SJEKK_OM_UTVIDET_ER_ENDRET_BEHANDLINGSRESULTAT)
+            ytelsePersoner = ytelsePersonerMedResultat
         )
             .also { secureLogger.info("Resultater fra vilkårsvurdering på behandling $behandling: $ytelsePersonerMedResultat") }
             .also { logger.info("Resultat fra vilkårsvurdering på behandling $behandling: $it") }
