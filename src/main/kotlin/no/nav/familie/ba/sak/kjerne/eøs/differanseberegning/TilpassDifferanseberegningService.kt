@@ -102,8 +102,8 @@ class TilpassDifferanseberegningSøkersYtelserService(
 ) : BarnasDifferanseberegningEndretAbonnent {
     override fun barnasDifferanseberegningEndret(tilkjentYtelse: TilkjentYtelse) {
         val oppdaterteAndeler = tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(
-            persongrunnlagService.hentBarna(tilkjentYtelse.behandling.id),
-            kompetanseRepository.finnFraBehandlingId(tilkjentYtelse.behandling.id)
+            barna = persongrunnlagService.hentBarna(tilkjentYtelse.behandling.id),
+            kompetanser = kompetanseRepository.finnFraBehandlingId(tilkjentYtelse.behandling.id)
         )
         tilkjentYtelseRepository.oppdaterTilkjentYtelse(tilkjentYtelse, oppdaterteAndeler)
     }
