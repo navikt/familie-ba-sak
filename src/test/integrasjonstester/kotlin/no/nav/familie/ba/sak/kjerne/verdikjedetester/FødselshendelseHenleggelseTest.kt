@@ -13,9 +13,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
-import no.nav.familie.ba.sak.kjerne.beregning.SatsService
-import no.nav.familie.ba.sak.kjerne.beregning.SatsService.sisteUtvidetSatsTilTester
-import no.nav.familie.ba.sak.kjerne.beregning.SatsService.tilleggOrdinærSatsNesteMånedTilTester
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -31,6 +28,9 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.ba.sak.task.OpprettTaskService
+import no.nav.familie.ba.sak.util.sisteTilleggOrdinærSats
+import no.nav.familie.ba.sak.util.sisteUtvidetSatsTilTester
+import no.nav.familie.ba.sak.util.tilleggOrdinærSatsNesteMånedTilTester
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
@@ -68,7 +68,7 @@ class FødselshendelseHenleggelseTest(
                     infotrygdSaker = InfotrygdSøkResponse(
                         bruker = listOf(
                             lagInfotrygdSak(
-                                SatsService.sisteTilleggOrdinærSats.beløp.toDouble(),
+                                sisteTilleggOrdinærSats(),
                                 listOf("1234"),
                                 "OR",
                                 "OS"
@@ -331,7 +331,7 @@ class FødselshendelseHenleggelseTest(
 
         assertEquals(BehandlingUnderkategori.UTVIDET, behandling.underkategori)
         assertEquals(
-            tilleggOrdinærSatsNesteMånedTilTester.beløp + sisteUtvidetSatsTilTester.beløp,
+            tilleggOrdinærSatsNesteMånedTilTester().beløp + sisteUtvidetSatsTilTester(),
             hentNåværendeEllerNesteMånedsUtbetaling(
                 behandling = utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)
             )

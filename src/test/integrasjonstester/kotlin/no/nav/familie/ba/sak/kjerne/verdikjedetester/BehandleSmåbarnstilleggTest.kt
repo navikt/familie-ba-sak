@@ -29,9 +29,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.beregning.SatsService.sisteSmåbarnstilleggSatsTilTester
-import no.nav.familie.ba.sak.kjerne.beregning.SatsService.sisteUtvidetSatsTilTester
-import no.nav.familie.ba.sak.kjerne.beregning.SatsService.tilleggOrdinærSatsTilTester
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -52,6 +49,9 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.task.OpprettTaskService
+import no.nav.familie.ba.sak.util.sisteSmåbarnstilleggSatsTilTester
+import no.nav.familie.ba.sak.util.sisteUtvidetSatsTilTester
+import no.nav.familie.ba.sak.util.tilleggOrdinærSatsTilTester
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
 import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadResponse
@@ -189,7 +189,7 @@ class BehandleSmåbarnstilleggTest(
             )
 
         assertEquals(
-            tilleggOrdinærSatsTilTester.beløp + sisteUtvidetSatsTilTester.beløp + sisteSmåbarnstilleggSatsTilTester.beløp,
+            tilleggOrdinærSatsTilTester() + sisteUtvidetSatsTilTester() + sisteSmåbarnstilleggSatsTilTester(),
             hentNåværendeEllerNesteMånedsUtbetaling(
                 behandling = restUtvidetBehandlingEtterBehandlingsResultat.data!!
             )

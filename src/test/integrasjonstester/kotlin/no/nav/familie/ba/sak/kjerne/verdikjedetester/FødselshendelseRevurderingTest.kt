@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
-import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -15,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
+import no.nav.familie.ba.sak.util.tilleggOrdinærSatsNesteMånedTilTester
 import no.nav.familie.kontrakter.felles.getDataOrThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -112,7 +112,7 @@ class FødselshendelseRevurderingTest(
         assertUtbetalingsperiode(
             nesteMånedUtbetalingsperiode,
             2,
-            SatsService.tilleggOrdinærSatsNesteMånedTilTester.beløp * 2
+            tilleggOrdinærSatsNesteMånedTilTester().beløp * 2
         )
     }
 }

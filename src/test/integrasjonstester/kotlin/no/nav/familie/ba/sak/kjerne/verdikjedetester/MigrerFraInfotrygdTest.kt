@@ -8,13 +8,13 @@ import no.nav.familie.ba.sak.integrasjoner.infotrygd.MigreringsfeilType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
-import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
+import no.nav.familie.ba.sak.util.sisteTilleggOrdinærSats
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Disabled
@@ -60,7 +60,7 @@ class MigrerFraInfotrygdTest(
                     infotrygdSaker = InfotrygdSøkResponse(
                         bruker = listOf(
                             lagInfotrygdSak(
-                                SatsService.sisteTilleggOrdinærSats.beløp.toDouble(),
+                                sisteTilleggOrdinærSats(),
                                 barnPåInfotrygdSøknadScenario.barna.map { it.ident.toString() },
                                 "OR",
                                 "OS"

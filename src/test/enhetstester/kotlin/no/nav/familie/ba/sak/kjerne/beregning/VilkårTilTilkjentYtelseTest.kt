@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvu
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.ba.sak.util.sisteSmåbarnstilleggSatsTilTester
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvFileSource
@@ -120,7 +121,7 @@ class VilkårTilTilkjentYtelseTest {
                 .medAndelTilkjentYtelse(søker, søkerAndel1Beløp, søkerAndel1Periode, søkerAndel1Type)
                 .medAndelTilkjentYtelse(
                     søker,
-                    SatsService.sisteSmåbarnstilleggSatsTilTester.beløp,
+                    sisteSmåbarnstilleggSatsTilTester(),
                     småbarnstilleggPeriode,
                     YtelseType.SMÅBARNSTILLEGG.name
                 )

@@ -14,8 +14,6 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
-import no.nav.familie.ba.sak.kjerne.beregning.SatsService.sisteUtvidetSatsTilTester
-import no.nav.familie.ba.sak.kjerne.beregning.SatsService.tilleggOrdinærSatsTilTester
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
@@ -26,6 +24,8 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
+import no.nav.familie.ba.sak.util.sisteUtvidetSatsTilTester
+import no.nav.familie.ba.sak.util.tilleggOrdinærSatsTilTester
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -129,7 +129,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
             )
 
         assertEquals(
-            tilleggOrdinærSatsTilTester.beløp,
+            tilleggOrdinærSatsTilTester(),
             hentNåværendeEllerNesteMånedsUtbetaling(
                 behandling = restUtvidetBehandlingEtterBehandlingsresultat.data!!
             )
@@ -308,7 +308,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
             )
 
         assertEquals(
-            tilleggOrdinærSatsTilTester.beløp + sisteUtvidetSatsTilTester.beløp,
+            tilleggOrdinærSatsTilTester() + sisteUtvidetSatsTilTester(),
             hentNåværendeEllerNesteMånedsUtbetaling(
                 behandling = restUtvidetBehandlingEtterBehandlingsresultat.data!!
             )
