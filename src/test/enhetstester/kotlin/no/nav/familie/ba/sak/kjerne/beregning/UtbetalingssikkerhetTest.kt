@@ -121,14 +121,14 @@ class UtbetalingssikkerhetTest {
                     inneværendeMåned().minusYears(1),
                     inneværendeMåned().minusMonths(6),
                     YtelseType.ORDINÆR_BARNETRYGD,
-                    1054,
+                    SatsService.finnSisteSatsFor(SatsType.ORBA).beløp,
                     person = person
                 ),
                 lagAndelTilkjentYtelse(
                     inneværendeMåned().minusYears(1),
                     inneværendeMåned().minusMonths(6),
                     YtelseType.UTVIDET_BARNETRYGD,
-                    1500,
+                    SatsService.finnSisteSatsFor(SatsType.UTVIDET_BARNETRYGD).beløp + 1,
                     person = person
                 )
             )
@@ -348,8 +348,12 @@ class UtbetalingssikkerhetTest {
 
     @Test
     fun `Korrekt maksbeløp gis for persontype`() {
-        assertEquals(1054 + 660, TilkjentYtelseValidering.maksBeløp(personType = PersonType.SØKER))
-        assertEquals(1676, TilkjentYtelseValidering.maksBeløp(personType = PersonType.BARN))
+        val søkersSatser = SatsService.finnSisteSatsFor(SatsType.UTVIDET_BARNETRYGD).beløp +
+            SatsService.finnSisteSatsFor(SatsType.SMA).beløp
+        val tilleggOrdinærBarnetrygd = SatsService.finnSisteSatsFor(SatsType.TILLEGG_ORBA).beløp
+
+        assertEquals(søkersSatser, TilkjentYtelseValidering.maksBeløp(personType = PersonType.SØKER))
+        assertEquals(tilleggOrdinærBarnetrygd, TilkjentYtelseValidering.maksBeløp(personType = PersonType.BARN))
         assertThrows<Feil> { TilkjentYtelseValidering.maksBeløp(personType = PersonType.ANNENPART) }
     }
 

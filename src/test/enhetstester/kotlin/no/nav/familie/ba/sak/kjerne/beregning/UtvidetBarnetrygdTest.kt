@@ -997,12 +997,12 @@ internal class UtvidetBarnetrygdTest {
         ).lagUtvidetBarnetrygdAndeler(
             utvidetVilkår = listOf(utvidetVilkår),
             andelerBarna = barnasAndeler
-        )
+        ).sortedBy { it.stønadFom }
 
         assertEquals(2, utvidetAndeler.size)
 
-        val andelEtterSatsendring = utvidetAndeler[0]
-        val andelFørSatsendring = utvidetAndeler[1]
+        val andelFørSatsendring = utvidetAndeler[0]
+        val andelEtterSatsendring = utvidetAndeler[1]
 
         val datoForSatsendring = SatsService.hentDatoForSatsendring(
             satstype = SatsType.UTVIDET_BARNETRYGD,
