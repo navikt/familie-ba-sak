@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.beregning
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.erUnder6ÅrTidslinje
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.Sats
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
@@ -50,30 +49,9 @@ object SatsService {
         Sats(SatsType.UTVIDET_BARNETRYGD, 2489, LocalDate.of(2023, 3, 1), LocalDate.MAX)
     )
 
-    val tilleggOrdinærSatsTilTester: Sats =
-        satser.findLast {
-            it.type == SatsType.TILLEGG_ORBA && it.gyldigFom <= LocalDate.now().plusDays(1)
-        }!!
-
-    val sisteUtvidetSatsTilTester: Sats =
-        satser.find {
-            it.type == SatsType.UTVIDET_BARNETRYGD && it.gyldigTom == LocalDate.MAX
-        }!!
-
-    val sisteSmåbarnstilleggSatsTilTester: Sats =
-        satser.find {
-            it.type == SatsType.SMA && it.gyldigTom == LocalDate.MAX
-        }!!
-
-    val sisteTilleggOrdinærSats: Sats =
-        satser.find {
-            it.type == SatsType.TILLEGG_ORBA && it.gyldigTom == LocalDate.MAX
-        }!!
-
-    val tilleggOrdinærSatsNesteMånedTilTester: Sats =
-        satser.findLast {
-            it.type == SatsType.TILLEGG_ORBA && it.gyldigFom.toYearMonth() <= LocalDate.now().nesteMåned()
-        }!!
+    fun finnSisteSatsFor(satstype: SatsType) = finnAlleSatserFor(satstype).find {
+        it.gyldigTom == LocalDate.MAX
+    }!!
 
     fun finnSatsendring(startDato: LocalDate): List<Sats> = hentAllesatser()
         .filter { it.gyldigFom == startDato }
@@ -104,7 +82,7 @@ object SatsService {
             it.copy(gyldigTom = overstyrtTom)
         }
 
-    internal fun finnAlleSatserFor(type: SatsType): List<Sats> = hentAllesatser().filter { it.type == type }
+    fun finnAlleSatserFor(type: SatsType): List<Sats> = hentAllesatser().filter { it.type == type }
 
     data class SatsPeriode(
         val sats: Int,
