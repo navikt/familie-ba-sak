@@ -65,8 +65,9 @@ internal class BeregnAndelerTilkjentYtelseForBarnaTest {
             barn får alt av 1054 i mar(2019)..aug(2020),
             barn får alt av 1354 i sep(2020)..aug(2021),
             barn får alt av 1654 i sep(2021)..des(2021),
-            barn får alt av 1676 i jan(2022)..okt(2023),
-            barn får alt av 1054 i nov(2023)..okt(2035)
+            barn får alt av 1676 i jan(2022)..feb(2023),
+            barn får alt av 1723 i mar(2023)..okt(2023),
+            barn får alt av 1083 i nov(2023)..okt(2035)
         )
 
         assertEquals(forventedeAndeler, vurdering.beregnAndelerTilkjentYtelseForBarna())
@@ -94,11 +95,13 @@ internal class BeregnAndelerTilkjentYtelseForBarnaTest {
             barn1 får alt av 1054 i mar(2019)..aug(2020),
             barn1 får alt av 1354 i sep(2020)..aug(2021),
             barn1 får alt av 1654 i sep(2021)..des(2021),
-            barn1 får alt av 1676 i jan(2022)..okt(2023),
-            barn1 får alt av 1054 i nov(2023)..okt(2035),
+            barn1 får alt av 1676 i jan(2022)..feb(2023),
+            barn1 får alt av 1723 i mar(2023)..okt(2023),
+            barn1 får alt av 1083 i nov(2023)..okt(2035),
             // barn 2
             barn2 får alt av 970 i jun(2013)..feb(2019),
-            barn2 får alt av 1054 i mar(2019)..apr(2031)
+            barn2 får alt av 1054 i mar(2019)..feb(2023),
+            barn2 får alt av 1083 i mar(2023)..apr(2031)
         )
 
         assertEquals(forventedeAndeler, vurdering.beregnAndelerTilkjentYtelseForBarna())
@@ -189,8 +192,9 @@ internal class BeregnAndelerTilkjentYtelseForBarnaTest {
             barn får halvparten av 1354 i sep(2020)..aug(2021),
             barn får halvparten av 1654 i sep(2021)..des(2021),
             barn får halvparten av 1676 i jan(2022)..feb(2022),
-            barn får alt av 1676 i mar(2022)..nov(2025),
-            barn får alt av 1054 i des(2025)..nov(2037)
+            barn får alt av 1676 i mar(2022)..feb(2023),
+            barn får alt av 1723 i mar(2023)..nov(2025),
+            barn får alt av 1083 i des(2025)..nov(2037)
         )
 
         assertEquals(forventedeAndeler, vurdering.beregnAndelerTilkjentYtelseForBarna())
@@ -246,7 +250,8 @@ internal class BeregnAndelerTilkjentYtelseForBarnaTest {
             barn får alt av 1054 i feb(2020)..aug(2020),
             barn får alt av 1354 i sep(2020)..aug(2021),
             barn får alt av 1654 i sep(2021)..des(2021),
-            barn får alt av 1676 i jan(2022)..des(2024)
+            barn får alt av 1676 i jan(2022)..feb(2023),
+            barn får alt av 1723 i mar(2023)..des(2024)
         )
 
         assertEquals(forventedeAndeler, vurdering.beregnAndelerTilkjentYtelseForBarna())
@@ -272,8 +277,9 @@ internal class BeregnAndelerTilkjentYtelseForBarnaTest {
             barn får alt av 1054 i feb(2020)..aug(2020),
             barn får alt av 1354 i sep(2020)..aug(2021),
             barn får alt av 1654 i sep(2021)..des(2021),
-            barn får alt av 1676 i jan(2022)..nov(2025),
-            barn får alt av 1054 i des(2025)..nov(2037)
+            barn får alt av 1676 i jan(2022)..feb(2023),
+            barn får alt av 1723 i mar(2023)..nov(2025),
+            barn får alt av 1083 i des(2025)..nov(2037)
         )
 
         assertEquals(forventedeAndeler, vurdering.beregnAndelerTilkjentYtelseForBarna())
