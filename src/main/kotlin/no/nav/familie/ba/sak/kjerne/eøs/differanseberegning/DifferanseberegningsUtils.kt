@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.multipliser
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidsenhet
@@ -91,3 +92,19 @@ fun Tidslinje<AndelTilkjentYtelse, Måned>.oppdaterDifferanseberegning(
         andel.oppdaterDifferanseberegning(utenlandskBeløpINorskeKroner)
     }
 }
+
+/**
+ * Konverterer negativt differanseberegnet periodebeløp på andelene til underskudd som positiv BigDecimal
+ * Altså:
+ * AndelTilkjentYtelse{ differanseberegnetPeriodebeløp: -700 } => BigDecimal{ 700 }
+ * AndelTilkjentYtelse{ differanseberegnetPeriodebeløp: 200 } => null
+ * AndelTilkjentYtelse{ differanseberegnetPeriodebeløp: null } => null
+ */
+fun <K, T : Tidsenhet> Map<K, Tidslinje<AndelTilkjentYtelse, T>>.tilUnderskuddPåDifferanseberegningen(): Map<K, Tidslinje<BigDecimal, T>> =
+    mapValues { (_, tidslinje) ->
+        tidslinje
+            .mapIkkeNull { innhold -> innhold.differanseberegnetPeriodebeløp }
+            .mapIkkeNull { maxOf(-it, 0) }
+            .filtrer { it != null && it > 0 }
+            .mapIkkeNull { it.toBigDecimal() }
+    }

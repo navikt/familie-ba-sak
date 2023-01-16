@@ -22,6 +22,7 @@ import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
+import no.nav.familie.kontrakter.felles.oppgave.StatusEnum.FERDIGSTILT
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -135,7 +136,13 @@ class OppgaveService(
     fun patchOppgaverForBehandling(behandling: Behandling, copyOppgave: (oppgave: Oppgave) -> Oppgave?) {
         hentOppgaverSomIkkeErFerdigstilt(behandling).forEach { dbOppgave ->
             val oppgave = hentOppgave(dbOppgave.gsakId.toLong())
-            copyOppgave(oppgave)?.also { patchOppgave(it) }
+            if (oppgave.status != FERDIGSTILT) {
+                copyOppgave(oppgave)?.also { patchOppgave(it) }
+            } else {
+                logger.warn("Kan ikke patch'e ferdigstilt oppgave ${oppgave.id}, for behandling ${behandling.id}.")
+                dbOppgave.erFerdigstilt = true
+                oppgaveRepository.saveAndFlush(dbOppgave)
+            }
         }
     }
 

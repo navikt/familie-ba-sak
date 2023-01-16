@@ -45,3 +45,10 @@ fun <I, T : Tidsenhet> Tidslinje<I, T>.filtrerMed(boolskTidslinje: Tidslinje<Boo
         }
     }.beskjærEtter(this)
 }
+
+/**
+ * Extension-metode for å filtrere innholdet i en map av tidslinjer
+ */
+fun <K, I, T : Tidsenhet> Map<K, Tidslinje<I, T>>.filtrerHverKunVerdi(
+    filter: (I) -> Boolean
+) = mapValues { (_, tidslinje) -> tidslinje.filtrer { if (it != null) filter(it) else false } }

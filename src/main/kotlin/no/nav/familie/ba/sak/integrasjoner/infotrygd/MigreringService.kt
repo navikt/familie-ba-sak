@@ -29,6 +29,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
@@ -80,7 +81,8 @@ class MigreringService(
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val migreringRestClient: MigreringRestClient,
     private val kompetanseService: KompetanseService,
-    private val featureToggleService: FeatureToggleService
+    private val featureToggleService: FeatureToggleService,
+    private val persongrunnlagService: PersongrunnlagService
 ) {
 
     private val logger = LoggerFactory.getLogger(MigreringService::class.java)
@@ -105,12 +107,6 @@ class MigreringService(
             secureLog.info("Migrering: fant løpende sak for $personIdent sak=${løpendeInfotrygdsak.id} stønad=${løpendeInfotrygdsak.stønad?.id}")
 
             val barnasIdenter = finnBarnMedLøpendeStønad(løpendeInfotrygdsak)
-            barnasIdenter.forEach {
-                if (erIdentHistorisk(it)) {
-                    secureLog.warn("barnets ident $it er historisk, og kan ikke brukes til å migrere$personIdent")
-                    kastOgTellMigreringsFeil(MigreringsfeilType.IDENT_BARN_IKKE_LENGER_AKTIV)
-                }
-            }
 
             secureLog.info("barnasIdenter=$barnasIdenter")
 
@@ -188,6 +184,8 @@ class MigreringService(
                 }
             }
 
+            sammenlingBarnInfotrygdMedBarnBAsak(behandling, barnasIdenter, personIdent)
+
             iverksett(behandlingEtterVilkårsvurdering)
 
             when (underkategori) {
@@ -225,6 +223,28 @@ class MigreringService(
 
             secureLog.info("Ukjent feil ved migrering ${e.message}", e)
             kastOgTellMigreringsFeil(MigreringsfeilType.UKJENT)
+        }
+    }
+
+    fun sammenlingBarnInfotrygdMedBarnBAsak(
+        behandling: Behandling,
+        barnasIdenterInfotrygd: List<String>,
+        søkersIdent: String
+    ) {
+        val barna = persongrunnlagService.hentBarna(behandling).map { it.aktør.aktivFødselsnummer() }
+
+        barnasIdenterInfotrygd.forEach { identFraInfotrygd ->
+            if (erIdentHistorisk(identFraInfotrygd)) {
+                val alleIdenterTilPerson = personidentService.hentIdenter(identFraInfotrygd, false)
+                    .filter { it.gruppe == "FOLKEREGISTERIDENT" }.map { it.ident }
+
+                if (!alleIdenterTilPerson.any { barna.contains(it) }) {
+                    secureLog.warn("Migrering stoppes fordi liste med barn fra saken i infotrygd ikke stemmer med ba-sak.  basak=$barna , barnasIdenterInfotrygd=$barnasIdenterInfotrygd, identSomManglerIInfotrygd=$alleIdenterTilPerson")
+                    kastOgTellMigreringsFeil(MigreringsfeilType.DIFF_BARN_INFOTRYGD_OG_BA_SAK)
+                }
+
+                secureLog.info("Barnets ident i infotrygd $identFraInfotrygd er historisk og får ny aktiv ident $alleIdenterTilPerson i ba-sak")
+            }
         }
     }
 

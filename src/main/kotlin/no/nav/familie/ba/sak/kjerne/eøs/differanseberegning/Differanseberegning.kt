@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 
-import no.nav.familie.ba.sak.common.erTilogMed3ÅrTidslinje
+import minsteAvHver
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.tilKronerPerValutaenhet
@@ -14,20 +14,18 @@ import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.join
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.joinIkkeNull
+import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerHverKunVerdi
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerKunVerdiMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullOgIkkeTom
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.leftJoin
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.outerJoin
+import no.nav.familie.ba.sak.kjerne.tidslinje.matematikk.minus
+import no.nav.familie.ba.sak.kjerne.tidslinje.matematikk.rundAvTilHeltall
+import no.nav.familie.ba.sak.kjerne.tidslinje.matematikk.sum
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidsenhet
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.mapIkkeNull
 import java.math.BigDecimal
 import java.math.MathContext
-import java.math.RoundingMode
 
 /**
  * ADVARSEL: Muterer TilkjentYtelse
@@ -189,44 +187,3 @@ fun Tidslinje<AndelTilkjentYtelse, Måned>.fordelBeløpPåBarnaMedAndeler(
 
     return barnasAndeler.kombinerKunVerdiMed(ytelsePerBarnTidslinje) { _, ytelsePerBarn -> ytelsePerBarn }
 }
-
-fun Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>>.tilUnderskuddPåDifferanseberegningen() =
-    mapValues { (_, tidslinje) ->
-        tidslinje
-            .mapIkkeNull { innhold -> innhold.differanseberegnetPeriodebeløp }
-            .mapIkkeNull { maxOf(-it, 0) }
-            .filtrer { it != null && it > 0 }
-            .mapIkkeNull { it.toBigDecimal() }
-    }
-
-fun Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>>.kunAndelerTilOgMed3År(barna: List<Person>):
-    Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>> {
-    val barnasErInntil3ÅrTidslinjer = barna.associate { it.aktør to erTilogMed3ÅrTidslinje(it.fødselsdato) }
-
-    // For hvert barn kombiner andel-tidslinjen med 3-års-tidslinjen. Resultatet er andelene når barna er inntil 3 år
-    return this.joinIkkeNull(barnasErInntil3ÅrTidslinjer) { andel, _ -> andel }
-}
-
-fun <K, I : Comparable<I>, T : Tidsenhet> minsteAvHver(
-    aTidslinjer: Map<K, Tidslinje<I, T>>,
-    bTidslinjer: Map<K, Tidslinje<I, T>>
-) = aTidslinjer.joinIkkeNull(bTidslinjer) { a, b -> minOf(a, b) }
-
-fun <K, T : Tidsenhet> Map<K, Tidslinje<BigDecimal, T>>.minus(
-    bTidslinjer: Map<K, Tidslinje<BigDecimal, T>>
-) = this.join(bTidslinjer) { a, b ->
-    when {
-        a != null && b != null -> a - b
-        else -> a
-    }
-}
-
-fun <K, I, T : Tidsenhet> Map<K, Tidslinje<I, T>>.filtrerHverKunVerdi(
-    filter: (I) -> Boolean
-) = mapValues { (_, tidslinje) -> tidslinje.filtrer { if (it != null) filter(it) else false } }
-
-fun <T : Tidsenhet> Map<Aktør, Tidslinje<BigDecimal, T>>.sum() =
-    values.kombinerUtenNullOgIkkeTom { it.reduce { sum, verdi -> sum.plus(verdi) } }
-
-fun <T : Tidsenhet> Tidslinje<BigDecimal, T>.rundAvTilHeltall() =
-    this.mapIkkeNull { it.setScale(0, RoundingMode.HALF_UP) }
