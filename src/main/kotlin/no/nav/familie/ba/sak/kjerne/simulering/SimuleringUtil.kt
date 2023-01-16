@@ -17,7 +17,8 @@ fun filterBortUrelevanteVedtakSimuleringPosteringer(
     it.copy(
         økonomiSimuleringPostering = it.økonomiSimuleringPostering.filter { postering ->
             postering.posteringType == PosteringType.FEILUTBETALING ||
-                postering.posteringType == PosteringType.YTELSE
+                postering.posteringType == PosteringType.YTELSE ||
+                postering.posteringType == PosteringType.JUSTERING
         }
     )
 }
@@ -135,7 +136,7 @@ fun hentEtterbetalingIPeriode(
         periode.filter { it.posteringType == PosteringType.YTELSE && it.forfallsdato <= tidSimuleringHentet }
             .sumOf { it.beløp }
     val sumJusteringer =
-        periode.filter { it.posteringType == PosteringType.JUSTERING && it.forfallsdato <= tidSimuleringHentet }
+        periode.filter { it.posteringType == PosteringType.JUSTERING && it.beløp > BigDecimal.ZERO && it.forfallsdato <= tidSimuleringHentet }
             .sumOf { it.beløp }
     return when {
         periodeHarPositivFeilutbetaling ->

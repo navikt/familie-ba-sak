@@ -1,17 +1,35 @@
 package no.nav.familie.ba.sak.kjerne.simulering
 
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.mockk.mockk
+import no.nav.familie.ba.sak.common.defaultFagsak
+import no.nav.familie.ba.sak.common.nesteBehandlingId
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.behandling.domene.initStatus
+import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
+import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottaker
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringPostering
+import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
+import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.simulering.BetalingType
+import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import no.nav.familie.kontrakter.felles.simulering.FagOmrådeKode
 import no.nav.familie.kontrakter.felles.simulering.MottakerType
 import no.nav.familie.kontrakter.felles.simulering.PosteringType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import java.io.File
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
@@ -232,6 +250,29 @@ class SimuleringUtilTest {
     }
 
     @Test
+    fun `ytelse med manuelle posteringer på trekk av 305 over 3 mnd`() {
+
+        val fil = File("./src/test/resources/kjerne.simulering/simulering_med_justering.json")
+
+        val ytelseMedManuellePosteringer =
+            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .configure(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true)
+                .readValue<DetaljertSimuleringResultat>(fil)
+
+        val vedtakSimuleringMottakere = ytelseMedManuellePosteringer.simuleringMottaker.map {
+            it.tilBehandlingSimuleringMottaker(
+                lagBehandling()
+            )
+        }
+
+        val simuleringsperioder = vedtakSimuleringMottakereTilSimuleringPerioder(vedtakSimuleringMottakere)
+        val oppsummering = vedtakSimuleringMottakereTilRestSimulering(vedtakSimuleringMottakere)
+
+        // assertThat(simuleringsperioder[0].resultat).isEqualTo(0.toBigDecimal())
+        assertThat(oppsummering.etterbetaling).isEqualTo(0.toBigDecimal())
+    }
+
+    @Test
     fun `ytelse på 2000 korrigert til 3000`() {
         val øktYtelseFra2_000Til3_000 = listOf(
             mockVedtakSimuleringPostering(
@@ -395,3 +436,28 @@ class SimuleringUtilTest {
         assertThat(oppsummering.etterbetaling).isEqualTo(20_068.toBigDecimal()) // 1 686 hvis revurderingen ble gjort nov 2021, ikke "i dag"
     }
 }
+
+fun lagBehandling(
+    fagsak: Fagsak = defaultFagsak(),
+    behandlingKategori: BehandlingKategori = BehandlingKategori.NASJONAL,
+    behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+    årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD,
+    skalBehandlesAutomatisk: Boolean = false,
+    førsteSteg: StegType = FØRSTE_STEG,
+    resultat: Behandlingsresultat = Behandlingsresultat.IKKE_VURDERT,
+    underkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
+    status: BehandlingStatus = initStatus()
+) =
+    Behandling(
+        id = nesteBehandlingId(),
+        fagsak = fagsak,
+        skalBehandlesAutomatisk = skalBehandlesAutomatisk,
+        type = behandlingType,
+        kategori = behandlingKategori,
+        underkategori = underkategori,
+        opprettetÅrsak = årsak,
+        resultat = resultat,
+        status = status
+    ).also {
+        it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, førsteSteg))
+    }
