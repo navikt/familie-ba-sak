@@ -7,16 +7,77 @@ import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
+import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.fpsak.tidsserie.StandardCombinators
 
 object BehandlingsresultatUtils {
+
+    private enum class EndringIUtbetalingFraForrigeBehandling(val resultat: Behandlingsresultat) {
+        INGEN_ENDRING_I_PERIODE(Behandlingsresultat.FORTSATT_INNVILGET),
+        INNVILGET_PERIODE(Behandlingsresultat.INNVILGET),
+        AVSLÅTT_PERIODE(Behandlingsresultat.AVSLÅTT)
+    }
+
+    internal fun utledResultatPåSøknadfghjk(
+        personerFremstiltKravFor: List<Aktør>,
+        andelerIDenneBehandlingen: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        andelerIForrigeBehandling: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        vilkårsvurdering: Vilkårsvurdering
+    ): List<Behandlingsresultat> {
+        return personerFremstiltKravFor.flatMap { aktørFremstiltKravFor ->
+            val erEksplisittAvslagPåPerson = vilkårsvurdering.finnesEksplisittAvslagPåPerson(aktørFremstiltKravFor)
+            val resultaterFraTilkjentYtelse = utledResultatForPersonForTilkjentYtelse(
+                aktørFremstiltKravFor = aktørFremstiltKravFor,
+                andelerIDenneBehandlingen = andelerIDenneBehandlingen,
+                andelerIForrigeBehandling = andelerIForrigeBehandling
+            )
+            when (erEksplisittAvslagPåPerson) {
+                true -> resultaterFraTilkjentYtelse.plus(Behandlingsresultat.AVSLÅTT)
+                false -> resultaterFraTilkjentYtelse
+            }.distinct()
+        }
+    }
+
+    private fun Vilkårsvurdering.finnesEksplisittAvslagPåPerson(aktørFremstiltKravFor: Aktør): Boolean {
+        val vilkårResultaterForPerson = this.personResultater.find { it.aktør == aktørFremstiltKravFor }?.vilkårResultater ?: throw Feil("Finner ikke personresultat for person det er fremstilt krav for")
+        return vilkårResultaterForPerson.any { it.erEksplisittAvslagPåSøknad == true }
+    }
+
+    private fun utledResultatForPersonForTilkjentYtelse(aktørFremstiltKravFor: Aktør, andelerIDenneBehandlingen: List<AndelTilkjentYtelseMedEndreteUtbetalinger>, andelerIForrigeBehandling: List<AndelTilkjentYtelseMedEndreteUtbetalinger>): List<Behandlingsresultat> {
+        val andelerNå = andelerIDenneBehandlingen.filter { it.aktør == aktørFremstiltKravFor && (it.type == YtelseType.UTVIDET_BARNETRYGD || it.type == YtelseType.ORDINÆR_BARNETRYGD) }
+        val andelerForrige = andelerIForrigeBehandling.filter { it.aktør == aktørFremstiltKravFor && (it.type == YtelseType.UTVIDET_BARNETRYGD || it.type == YtelseType.ORDINÆR_BARNETRYGD) }
+
+        val nåværendeTidslinje = AndelTilkjentYtelseTidslinje(andelerNå)
+        val forrigeTidslinje = AndelTilkjentYtelseTidslinje(andelerForrige)
+
+        val periodeResultatTidslinje = nåværendeTidslinje.kombinerMed(forrigeTidslinje) { nåværende, forrige ->
+            when {
+                nåværende == null -> null
+                nåværende.kalkulertUtbetalingsbeløp > 0 && forrige?.kalkulertUtbetalingsbeløp != nåværende.kalkulertUtbetalingsbeløp -> EndringIUtbetalingFraForrigeBehandling.INNVILGET_PERIODE
+                nåværende.kalkulertUtbetalingsbeløp == 0 && forrige?.kalkulertUtbetalingsbeløp != nåværende.kalkulertUtbetalingsbeløp -> when (nåværende.endreteUtbetalinger.single().årsak) {
+                    Årsak.DELT_BOSTED -> EndringIUtbetalingFraForrigeBehandling.INNVILGET_PERIODE
+                    Årsak.ETTERBETALING_3ÅR, Årsak.ENDRE_MOTTAKER, Årsak.ALLEREDE_UTBETALT -> EndringIUtbetalingFraForrigeBehandling.AVSLÅTT_PERIODE
+                    null -> null
+                }
+                else -> EndringIUtbetalingFraForrigeBehandling.INGEN_ENDRING_I_PERIODE
+            }
+        }
+
+        val periodeResultater = periodeResultatTidslinje.perioder().mapNotNull { it.innhold }
+
+        return if (periodeResultater.all { it == EndringIUtbetalingFraForrigeBehandling.INGEN_ENDRING_I_PERIODE }) listOf(Behandlingsresultat.FORTSATT_INNVILGET)
+        else periodeResultater.filter { it != EndringIUtbetalingFraForrigeBehandling.INGEN_ENDRING_I_PERIODE }.map { it.resultat }.distinct()
+    }
 
     private fun ikkeStøttetFeil(behandlingsresultater: MutableSet<YtelsePersonResultat>) =
         Feil(
