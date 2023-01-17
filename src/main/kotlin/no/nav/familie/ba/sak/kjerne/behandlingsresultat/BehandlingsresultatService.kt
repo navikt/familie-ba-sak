@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -20,7 +21,9 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -36,6 +39,121 @@ class BehandlingsresultatService(
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     private val featureToggleService: FeatureToggleService
 ) {
+
+    fun utledBehandlingsresultat(behandling: Behandling, forrigeBehandling: Behandling?) {
+        // 1 SØKNAD
+        val søknadsresultat = if (behandling.opprettetÅrsak == BehandlingÅrsak.SØKNAD || behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
+            utledResultatPåSøknad(behandling = behandling)
+        } else emptyList()
+
+        // 2 ENDRINGER
+        val endringResultat = if (forrigeBehandling != null) erEndringerPåBehandlingIForholdTilForrige() else emptyList()
+
+        // 3 OPPHØR
+        val opphørResultat = erOpphørPåBehandling()
+
+        // KOMBINER
+        val behandlingsresultat = kombinerResultater(
+            søknadsresultat = søknadsresultat,
+            endretResultat = endringResultat,
+            opphørResultat = opphørResultat
+        )
+
+        // VALIDERING
+        validerBehandlingsresultat()
+    }
+
+    // Innvilget, avslått, fortsatt innvilget, (delvis innvilget)
+    private fun utledResultatPåSøknad(behandling: Behandling): List<Behandlingsresultat> {
+        // Henter relevante ting
+        val forrigeAndeler = emptyList<AndelTilkjentYtelseMedEndreteUtbetalinger>()
+        val nåværendeAndeler = emptyList<AndelTilkjentYtelseMedEndreteUtbetalinger>()
+        val nåværendePersonResultater = emptyList<PersonResultat>()
+
+        // Finner personer det er søkt for
+        val personerFremstiltKravFor = finnPersonerFremstiltKravFor()
+
+        // Gjør utledningen
+        return utledResultatPåSøknadUtil(forrigeAndelerPrPerson = forrigeAndeler.groupBy { it.aktør }, nåværendeAndelerPrPerson = nåværendeAndeler.groupBy { it.aktør }, nåværendePersonResultater = nåværendePersonResultater, personerFremstiltKravFor = personerFremstiltKravFor)
+    }
+
+    private fun finnPersonerFremstiltKravFor(): List<Aktør> {
+        // hvis søknad: alle personer det er krysset av for og evt søker hvis det er krysset av for utvidet
+        // hvis fødselshendelse: barnet/barna som er født
+        // hva gjør vi med uregistrerte barn??
+        return emptyList()
+    }
+
+    private fun utledResultatPåSøknadUtil(
+        forrigeAndelerPrPerson: Map<Aktør, List<AndelTilkjentYtelseMedEndreteUtbetalinger>>,
+        nåværendeAndelerPrPerson: Map<Aktør, List<AndelTilkjentYtelseMedEndreteUtbetalinger>>,
+        nåværendePersonResultater: List<PersonResultat>,
+        personerFremstiltKravFor: List<Aktør>
+    ): List<Behandlingsresultat> {
+        val resultaterFraAndeler = personerFremstiltKravFor.flatMap {
+            utledSøknadResultatFraAndelerTilkjentYtelseForPerson(forrigeAndelerPrPerson.getOrDefault(it, emptyList()), nåværendeAndelerPrPerson.getOrDefault(it, emptyList()))
+        }
+
+        val erEksplisittAvslagPåMinstEnPerson = nåværendePersonResultater.any { it.vilkårResultater.erEksplisittAvslagPåPerson() }
+
+        val resultater = if (erEksplisittAvslagPåMinstEnPerson) resultaterFraAndeler.plus(Behandlingsresultat.AVSLÅTT).distinct() else resultaterFraAndeler.distinct()
+
+        // kombinere resultatene til et behandlignsresultat
+        // hvis ingenting av det over (ikke innvilget eller avslag) -> fortsatt innvilget
+        return emptyList()
+    }
+
+    private fun utledSøknadResultatFraAndelerTilkjentYtelseForPerson(
+        forrigeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        nåværendeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
+    ): List<Behandlingsresultat> {
+        // hvis nåværende = null -> ikke bry oss
+        // hvis nåværende > 0 og ikke lik forrige -> innvilget
+        // hvis nåværende = 0 og ikke lik forrige -> er det pga differanseberegning eller delt bosted endring? -> innvilget, er det pga etterbetaling 3 år osv -> avslått
+        return emptyList()
+    }
+
+    private fun Set<VilkårResultat>.erEksplisittAvslagPåPerson(): Boolean {
+        // sjekk om vilkårresultater inneholder eksplisitt avslag på et vilkår
+        return this.any { it.erEksplisittAvslagPåSøknad == true }
+    }
+
+    // Endring
+    private fun erEndringerPåBehandlingIForholdTilForrige(): List<Behandlingsresultat> {
+        return if (erEndringIBeløp() || erEndringerIkkeIBeløp()) listOf(Behandlingsresultat.ENDRET_UTBETALING)
+        else emptyList()
+    }
+
+    private fun erEndringIBeløp(): Boolean {
+        // Hvis revurdering eller ikke søkt for personen: alle endringer i beløp
+        // Hvis søkt for personen: alle endringer fra beløp til null (dobbeltsjekk med Eivind)
+        return false
+    }
+
+    private fun erEndringerIkkeIBeløp(): Boolean {
+        // Finn endringer i "overlappende perioder" fra forrige og nåværende behandling:
+        // - Vilkårsvurdering (splitt, utdypende vv, regelverk)
+        // - Kompetanseskjema
+        // - Endringsperioder (trenger vi å se på prosent, barn og årsak?)
+        return false
+    }
+
+    // Opphørt, fortsatt opphørt
+    private fun erOpphørPåBehandling(): List<Behandlingsresultat> {
+        // Hvis det er opphørt og ikke opphørt i forrige behandling -> opphørt
+        // Hvis opphørt tidligere i denne behandlingen enn i forrige -> opphørt
+        // Hvis opphørt på samme dato som i forrige behandling -> fortsatt opphørt
+        return emptyList()
+    }
+
+    private fun kombinerResultater(søknadsresultat: List<Behandlingsresultat>, endretResultat: List<Behandlingsresultat>, opphørResultat: List<Behandlingsresultat>): List<Behandlingsresultat> {
+        // hvis fortsatt opphørt & noe annet -> ikke ta med fortsatt opphørt i resultatet
+        // hvis fortsatt innvilget + fortsatt opphørt -> hva blir resultatet??
+        return emptyList()
+    }
+
+    private fun validerBehandlingsresultat() {
+    }
 
     internal fun utledBehandlingsresultat(behandlingId: Long): Behandlingsresultat {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
