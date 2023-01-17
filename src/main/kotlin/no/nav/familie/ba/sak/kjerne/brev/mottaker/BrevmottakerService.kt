@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class BrevmottakerService(
     @Autowired
-    private val brevmottakerRepository: BrevmottakerRepository,
+    private val brevmottakerRepository: BrevmottakerRepository
 ) {
 
     @Transactional

@@ -30,7 +30,7 @@ data class Brevmottaker(
     @Column(name = "type", nullable = false)
     var type: MottakerType,
 
-    @Column(name = "navn",  nullable = false, length = 70)
+    @Column(name = "navn", nullable = false, length = 70)
     var navn: String,
 
     @Column(name = "adresselinje_1", nullable = false, length = 40)
@@ -46,7 +46,7 @@ data class Brevmottaker(
     var poststed: String,
 
     @Column(name = "landkode", nullable = false, length = 2)
-    var landkode: String,
+    var landkode: String
 ) : BaseEntitet() {
 
     override fun equals(other: Any?): Boolean {
@@ -62,15 +62,15 @@ data class Brevmottaker(
     @Override
     override fun toString(): String {
         return this::class.simpleName + "(" +
-                "id = $id, " +
-                "behandlingId = $behandlingId, " +
-                "type = $type, " +
-                "navn = $navn, " +
-                "adresselinje1 = $adresselinje1, " +
-                "adresselinje2 = $adresselinje2, " +
-                "postnummer = $postnummer, " +
-                "poststed = $poststed, " +
-                "landkode = $landkode)"
+            "id = $id, " +
+            "behandlingId = $behandlingId, " +
+            "type = $type, " +
+            "navn = $navn, " +
+            "adresselinje1 = $adresselinje1, " +
+            "adresselinje2 = $adresselinje2, " +
+            "postnummer = $postnummer, " +
+            "poststed = $poststed, " +
+            "landkode = $landkode)"
     }
 }
 
