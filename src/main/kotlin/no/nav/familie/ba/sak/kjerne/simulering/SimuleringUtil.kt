@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.kjerne.simulering.domene.RestSimulering
 import no.nav.familie.ba.sak.kjerne.simulering.domene.SimuleringsPeriode
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottaker
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringPostering
+import no.nav.familie.kontrakter.felles.simulering.FagOmrådeKode
 import no.nav.familie.kontrakter.felles.simulering.PosteringType
 import no.nav.familie.kontrakter.felles.simulering.SimuleringMottaker
 import no.nav.familie.kontrakter.felles.simulering.SimulertPostering
@@ -76,6 +77,7 @@ fun vedtakSimuleringMottakereTilSimuleringPerioder(
             nyttBeløp = hentNyttBeløpIPeriode(posteringListe),
             tidligereUtbetalt = hentTidligereUtbetaltIPeriode(posteringListe),
             resultat = hentResultatIPeriode(posteringListe),
+            justering = hentManuellePosteringerIPeriode(posteringListe),
             feilutbetaling = hentPositivFeilbetalingIPeriode(posteringListe),
             etterbetaling = hentEtterbetalingIPeriode(posteringListe, tidSimuleringHentet)
         )
@@ -87,7 +89,9 @@ fun hentNyttBeløpIPeriode(periode: List<ØkonomiSimuleringPostering>): BigDecim
         postering.posteringType == PosteringType.YTELSE && postering.beløp > BigDecimal.ZERO
     }.sumOf { it.beløp }
     val feilutbetaling = hentFeilbetalingIPeriode(periode)
-    return if (feilutbetaling > BigDecimal.ZERO) sumPositiveYtelser - feilutbetaling else sumPositiveYtelser
+    return if (feilutbetaling > BigDecimal.ZERO) sumPositiveYtelser - feilutbetaling else sumPositiveYtelser - hentManuellePosteringerIPeriode(
+        periode
+    )
 }
 
 fun hentFeilbetalingIPeriode(periode: List<ØkonomiSimuleringPostering>) =
@@ -106,14 +110,16 @@ fun hentTidligereUtbetaltIPeriode(periode: List<ØkonomiSimuleringPostering>): B
         (postering.posteringType == PosteringType.YTELSE && postering.beløp < BigDecimal.ZERO)
     }.sumOf { it.beløp }
     val feilutbetaling = hentFeilbetalingIPeriode(periode)
-    return if (feilutbetaling < BigDecimal.ZERO) -(sumNegativeYtelser - feilutbetaling) else -sumNegativeYtelser
+    return if (feilutbetaling < BigDecimal.ZERO) -(sumNegativeYtelser - feilutbetaling) else -sumNegativeYtelser - hentManuellePosteringerIPeriode(
+        periode
+    )
 }
 
 fun hentManuellePosteringerIPeriode(periode: List<ØkonomiSimuleringPostering>): BigDecimal {
     val sumManuellePosteringer = periode.filter { postering ->
-        (postering.posteringType == PosteringType.JUSTERING && postering.beløp < BigDecimal.ZERO)
+        (postering.posteringType == PosteringType.YTELSE && postering.fagOmrådeKode == FagOmrådeKode.BARNETRYGD_INFOTRYGD_MANUELT && postering.beløp > BigDecimal.ZERO)
     }.sumOf { it.beløp }
-    return if (sumManuellePosteringer > BigDecimal.ZERO) BigDecimal.ZERO else sumManuellePosteringer
+    return if (sumManuellePosteringer > BigDecimal.ZERO) sumManuellePosteringer else BigDecimal.ZERO
 }
 
 fun hentResultatIPeriode(periode: List<ØkonomiSimuleringPostering>): BigDecimal {
@@ -122,7 +128,9 @@ fun hentResultatIPeriode(periode: List<ØkonomiSimuleringPostering>): BigDecimal
     return if (feilutbetaling > BigDecimal.ZERO) {
         -feilutbetaling
     } else {
-        hentNyttBeløpIPeriode(periode) - hentTidligereUtbetaltIPeriode(periode) - hentManuellePosteringerIPeriode(periode)
+        hentNyttBeløpIPeriode(periode) - hentTidligereUtbetaltIPeriode(periode) - hentManuellePosteringerIPeriode(
+            periode
+        )
     }
 }
 
@@ -135,18 +143,14 @@ fun hentEtterbetalingIPeriode(
     val sumYtelser =
         periode.filter { it.posteringType == PosteringType.YTELSE && it.forfallsdato <= tidSimuleringHentet }
             .sumOf { it.beløp }
-    val sumJusteringer =
-        periode.filter { it.posteringType == PosteringType.JUSTERING && it.beløp > BigDecimal.ZERO && it.forfallsdato <= tidSimuleringHentet }
-            .sumOf { it.beløp }
+    val sumJusteringer = hentManuellePosteringerIPeriode(periode)
     return when {
         periodeHarPositivFeilutbetaling ->
             BigDecimal.ZERO
+
         else ->
-            if (sumYtelser < BigDecimal.ZERO) {
-                BigDecimal.ZERO
-            } else {
-                sumYtelser - sumJusteringer
-            }
+
+            sumYtelser - sumJusteringer
     }
 }
 

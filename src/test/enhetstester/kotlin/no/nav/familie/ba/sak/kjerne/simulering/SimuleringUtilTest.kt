@@ -50,7 +50,7 @@ class SimuleringUtilTest {
         fagOmrådeKode: FagOmrådeKode = FagOmrådeKode.BARNETRYGD,
         fom: LocalDate = LocalDate.now().minusMonths(1),
         tom: LocalDate = LocalDate.now().minusMonths(1),
-        betalingType: BetalingType = BetalingType.DEBIT,
+        betalingType: BetalingType = if (beløp >= 0) BetalingType.DEBIT else BetalingType.KREDIT,
         posteringType: PosteringType = PosteringType.YTELSE,
         forfallsdato: LocalDate = LocalDate.now().minusMonths(1),
         utenInntrekk: Boolean = false
@@ -311,6 +311,103 @@ class SimuleringUtilTest {
         assertThat(simuleringsperioder[0].tidligereUtbetalt).isEqualTo(2_000.toBigDecimal())
         assertThat(simuleringsperioder[0].nyttBeløp).isEqualTo(3_000.toBigDecimal())
         assertThat(simuleringsperioder[0].resultat).isEqualTo(1_000.toBigDecimal())
+        assertThat(simuleringsperioder[0].feilutbetaling).isEqualTo(0.toBigDecimal())
+        assertThat(oppsummering.etterbetaling).isEqualTo(0.toBigDecimal())
+    }
+
+    @Test
+    fun `ytelse med manuellt trekk av valutajustering`() {
+        val YtelsefraBA = listOf(
+            mockVedtakSimuleringPostering(
+                beløp = 305,
+                posteringType = PosteringType.YTELSE,
+            ),
+            mockVedtakSimuleringPostering(
+                beløp = -198,
+                posteringType = PosteringType.JUSTERING,
+                fagOmrådeKode = FagOmrådeKode.BARNETRYGD
+            ),
+            mockVedtakSimuleringPostering(
+                beløp = 305,
+                posteringType = PosteringType.JUSTERING,
+                fagOmrådeKode = FagOmrådeKode.BARNETRYGD_INFOTRYGD
+            ), // Reduser feilutbetaling
+            mockVedtakSimuleringPostering(
+                beløp = -305,
+                posteringType = PosteringType.YTELSE,
+                fagOmrådeKode = FagOmrådeKode.BARNETRYGD_INFOTRYGD
+            ),
+            mockVedtakSimuleringPostering(
+                beløp = -107,
+                posteringType = PosteringType.JUSTERING,
+                fagOmrådeKode = FagOmrådeKode.BARNETRYGD_INFOTRYGD_MANUELT
+            ),
+            mockVedtakSimuleringPostering(
+                beløp = 165,
+                posteringType = PosteringType.YTELSE,
+                fagOmrådeKode = FagOmrådeKode.BARNETRYGD_INFOTRYGD_MANUELT
+            )
+        )
+
+        val økonomiSimuleringMottakere =
+            listOf(mockØkonomiSimuleringMottaker(økonomiSimuleringPostering = YtelsefraBA))
+        val simuleringsperioder = vedtakSimuleringMottakereTilSimuleringPerioder(økonomiSimuleringMottakere)
+        val oppsummering = vedtakSimuleringMottakereTilRestSimulering(økonomiSimuleringMottakere)
+
+        assertThat(simuleringsperioder.size).isEqualTo(1)
+        assertThat(simuleringsperioder[0].tidligereUtbetalt).isEqualTo(305.toBigDecimal())
+        assertThat(simuleringsperioder[0].nyttBeløp).isEqualTo(470.toBigDecimal())
+        assertThat(simuleringsperioder[0].resultat).isEqualTo(165.toBigDecimal())
+        assertThat(simuleringsperioder[0].justering).isEqualTo(0.toBigDecimal())
+        assertThat(simuleringsperioder[0].feilutbetaling).isEqualTo(0.toBigDecimal())
+        assertThat(oppsummering.etterbetaling).isEqualTo(0.toBigDecimal())
+    }
+
+    @Test
+    fun `ytelse med manuellt trekk av valutajustering 2`() {
+        val YtelsefraBA = listOf(
+            mockVedtakSimuleringPostering(
+                beløp = 305,
+                posteringType = PosteringType.YTELSE,
+                fagOmrådeKode = FagOmrådeKode.BARNETRYGD
+            ),
+            mockVedtakSimuleringPostering(
+                beløp = -153,
+                posteringType = PosteringType.JUSTERING,
+                fagOmrådeKode = FagOmrådeKode.BARNETRYGD
+            ),
+            mockVedtakSimuleringPostering(
+                beløp = 306,
+                posteringType = PosteringType.JUSTERING,
+                fagOmrådeKode = FagOmrådeKode.BARNETRYGD_INFOTRYGD
+            ), // Reduser feilutbetaling
+            mockVedtakSimuleringPostering(
+                beløp = -305,
+                posteringType = PosteringType.YTELSE,
+                fagOmrådeKode = FagOmrådeKode.BARNETRYGD_INFOTRYGD
+            ),
+            mockVedtakSimuleringPostering(
+                beløp = -153,
+                posteringType = PosteringType.JUSTERING,
+                fagOmrådeKode = FagOmrådeKode.BARNETRYGD_INFOTRYGD_MANUELT
+            ),
+            mockVedtakSimuleringPostering(
+                beløp = 305,
+                posteringType = PosteringType.YTELSE,
+                fagOmrådeKode = FagOmrådeKode.BARNETRYGD_INFOTRYGD_MANUELT
+            )
+        )
+
+        val økonomiSimuleringMottakere =
+            listOf(mockØkonomiSimuleringMottaker(økonomiSimuleringPostering = YtelsefraBA))
+        val simuleringsperioder = vedtakSimuleringMottakereTilSimuleringPerioder(økonomiSimuleringMottakere)
+        val oppsummering = vedtakSimuleringMottakereTilRestSimulering(økonomiSimuleringMottakere)
+
+        assertThat(simuleringsperioder.size).isEqualTo(1)
+        assertThat(simuleringsperioder[0].tidligereUtbetalt).isEqualTo(305.toBigDecimal())
+        assertThat(simuleringsperioder[0].nyttBeløp).isEqualTo(610.toBigDecimal())
+        assertThat(simuleringsperioder[0].resultat).isEqualTo(305.toBigDecimal())
+        assertThat(simuleringsperioder[0].justering).isEqualTo(0.toBigDecimal())
         assertThat(simuleringsperioder[0].feilutbetaling).isEqualTo(0.toBigDecimal())
         assertThat(oppsummering.etterbetaling).isEqualTo(0.toBigDecimal())
     }

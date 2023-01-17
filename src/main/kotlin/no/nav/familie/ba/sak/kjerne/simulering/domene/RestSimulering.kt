@@ -21,6 +21,7 @@ data class SimuleringsPeriode(
     val forfallsdato: LocalDate,
     val nyttBeløp: BigDecimal,
     val tidligereUtbetalt: BigDecimal,
+    val justering: BigDecimal,
     val resultat: BigDecimal,
     val feilutbetaling: BigDecimal,
     val etterbetaling: BigDecimal
