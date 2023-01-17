@@ -1,10 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
-import io.mockk.mockk
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelseMedEndreteUtbetalinger
+import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.nesteMåned
@@ -287,7 +287,7 @@ class SmåbarnstilleggUtilsTest {
         val påvirkerFagsak = vedtakOmOvergangsstønadPåvirkerFagsak(
             småbarnstilleggBarnetrygdGenerator = SmåbarnstilleggBarnetrygdGenerator(
                 behandlingId = 1L,
-                tilkjentYtelse = mockk()
+                tilkjentYtelse = lagInitiellTilkjentYtelse()
             ),
             nyePerioderMedFullOvergangsstønad = listOf(
                 InternPeriodeOvergangsstønad(
@@ -330,7 +330,7 @@ class SmåbarnstilleggUtilsTest {
         val påvirkerFagsak = vedtakOmOvergangsstønadPåvirkerFagsak(
             småbarnstilleggBarnetrygdGenerator = SmåbarnstilleggBarnetrygdGenerator(
                 behandlingId = 1L,
-                tilkjentYtelse = mockk()
+                tilkjentYtelse = lagInitiellTilkjentYtelse()
             ),
             nyePerioderMedFullOvergangsstønad = listOf(
                 InternPeriodeOvergangsstønad(
@@ -376,7 +376,7 @@ class SmåbarnstilleggUtilsTest {
         val påvirkerFagsak = vedtakOmOvergangsstønadPåvirkerFagsak(
             småbarnstilleggBarnetrygdGenerator = SmåbarnstilleggBarnetrygdGenerator(
                 behandlingId = 1L,
-                tilkjentYtelse = mockk()
+                tilkjentYtelse = lagInitiellTilkjentYtelse()
             ),
             nyePerioderMedFullOvergangsstønad = listOf(
                 InternPeriodeOvergangsstønad(
@@ -441,7 +441,7 @@ class SmåbarnstilleggUtilsTest {
         val påvirkerFagsak = vedtakOmOvergangsstønadPåvirkerFagsak(
             småbarnstilleggBarnetrygdGenerator = SmåbarnstilleggBarnetrygdGenerator(
                 behandlingId = 1L,
-                tilkjentYtelse = mockk()
+                tilkjentYtelse = lagInitiellTilkjentYtelse()
             ),
             nyePerioderMedFullOvergangsstønad = listOf(
                 InternPeriodeOvergangsstønad(
@@ -492,7 +492,7 @@ class SmåbarnstilleggUtilsTest {
         val påvirkerFagsak = vedtakOmOvergangsstønadPåvirkerFagsak(
             småbarnstilleggBarnetrygdGenerator = SmåbarnstilleggBarnetrygdGenerator(
                 behandlingId = 1L,
-                tilkjentYtelse = mockk()
+                tilkjentYtelse = lagInitiellTilkjentYtelse()
             ),
             nyePerioderMedFullOvergangsstønad = listOf(
                 InternPeriodeOvergangsstønad(
