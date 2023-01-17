@@ -5,6 +5,8 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.Periode
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
+import no.nav.familie.ba.sak.common.erBack2BackIMånedsskifte
 import no.nav.familie.ba.sak.common.erDagenFør
 import no.nav.familie.ba.sak.common.erMellom
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
@@ -22,7 +24,6 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.beregning.finnTilOgMedDato
 import no.nav.familie.ba.sak.kjerne.beregning.hentGyldigEtterbetalingFom
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
@@ -33,6 +34,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 
@@ -370,5 +372,26 @@ fun validerBarnasVilkår(barna: List<Person>, vilkårsvurdering: Vilkårsvurderi
 
     if (listeAvFeil.isNotEmpty()) {
         throw Feil(listeAvFeil.joinToString(separator = "\n"))
+    }
+}
+
+fun finnTilOgMedDato(
+    tilOgMed: LocalDate?,
+    vilkårResultater: List<VilkårResultat>
+): LocalDate {
+    // LocalDateTimeline krasjer i isTimelineOutsideInterval funksjonen dersom vi sender med TIDENES_ENDE,
+    // så bruker tidenes ende minus én dag.
+    if (tilOgMed == null) return TIDENES_ENDE.minusDays(1)
+    val skalVidereføresEnMndEkstra = vilkårResultater.any { vilkårResultat ->
+        erBack2BackIMånedsskifte(
+            tilOgMed = tilOgMed,
+            fraOgMed = vilkårResultat.periodeFom
+        )
+    }
+
+    return if (skalVidereføresEnMndEkstra) {
+        tilOgMed.plusMonths(1).sisteDagIMåned()
+    } else {
+        tilOgMed.sisteDagIMåned()
     }
 }
