@@ -18,7 +18,7 @@ internal class BrevmottakerControllerTest(
     @Autowired private val brevmottakerService: BrevmottakerService,
     @Autowired private val aktørIdRepository: AktørIdRepository,
     @Autowired private val fagsakRepository: FagsakRepository,
-    @Autowired private val behandlingRepository: BehandlingRepository,
+    @Autowired private val behandlingRepository: BehandlingRepository
 ) : AbstractSpringIntegrationTest() {
 
     val brevmottakerController = BrevmottakerController(
