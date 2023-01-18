@@ -404,10 +404,10 @@ class SimuleringUtilTest {
         val oppsummering = vedtakSimuleringMottakereTilRestSimulering(økonomiSimuleringMottakere)
 
         assertThat(simuleringsperioder.size).isEqualTo(1)
-        assertThat(simuleringsperioder[0].tidligereUtbetalt).isEqualTo(305.toBigDecimal())
-        assertThat(simuleringsperioder[0].nyttBeløp).isEqualTo(610.toBigDecimal())
-        assertThat(simuleringsperioder[0].resultat).isEqualTo(305.toBigDecimal())
-        assertThat(simuleringsperioder[0].justering).isEqualTo(0.toBigDecimal())
+        assertThat(simuleringsperioder[0].nyttBeløp).isEqualTo(305.toBigDecimal())
+        assertThat(simuleringsperioder[0].justering).isEqualTo(305.toBigDecimal())
+        assertThat(simuleringsperioder[0].tidligereUtbetalt).isEqualTo(0.toBigDecimal())
+        assertThat(simuleringsperioder[0].resultat).isEqualTo(0.toBigDecimal())
         assertThat(simuleringsperioder[0].feilutbetaling).isEqualTo(0.toBigDecimal())
         assertThat(oppsummering.etterbetaling).isEqualTo(0.toBigDecimal())
     }
