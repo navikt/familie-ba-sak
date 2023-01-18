@@ -124,3 +124,22 @@ fun Tidslinje<AndelTilkjentYtelseForTidslinje, Måned>.tilAndelerTilkjentYtelse(
                 stønadTom = it.tilOgMed.tilYearMonth()
             )
         }
+
+/**
+ * Lager tidslinje med AndelTilkjentYtelseForTidslinje-objekter, som derfor er "trygg" mtp DB-endringer
+ * Ivaretar fom og tom i objektene, slik at ellers like andeler ikke blir slått sammen
+ */
+fun Iterable<AndelTilkjentYtelse>.tilTryggTidslinjeForSøkersYtelse(ytelseType: YtelseType) = this
+    .filter { it.erSøkersAndel() }
+    .filter { it.type == ytelseType }
+    .let {
+        tidslinje {
+            it.map {
+                Periode(
+                    it.stønadFom.tilTidspunkt(),
+                    it.stønadTom.tilTidspunkt(),
+                    it.tilpassTilTidslinjeOgBevarFomOgTom()
+                )
+            }
+        }
+    }

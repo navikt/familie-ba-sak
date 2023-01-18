@@ -166,3 +166,9 @@ fun <A, B, C, R, T : Tidsenhet> Tidslinje<A, T>.kombinerMedKunVerdi(
         else -> Innhold.utenInnhold()
     }
 }
+
+fun <V, H, T : Tidsenhet> Tidslinje<V, T>.harOverlappMed(tidslinje: Tidslinje<H, T>) =
+    this.kombinerUtenNullMed(tidslinje) { v, h -> true }.erIkkeTom()
+
+fun <V, H, T : Tidsenhet> Tidslinje<V, T>.harIkkeOverlappMed(tidslinje: Tidslinje<H, T>) =
+    !this.harOverlappMed(tidslinje)
