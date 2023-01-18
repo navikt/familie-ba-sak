@@ -35,8 +35,8 @@ class BehandlingsresultatService(
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     private val featureToggleService: FeatureToggleService
 ) {
-
-    internal fun utledBehandlingsresultat(behandlingId: Long): Behandlingsresultat {
+    @Deprecated("Skal erstattes av ny metode")
+    internal fun utledBehandlingsresultatGammel(behandlingId: Long): Behandlingsresultat {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
         val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling)
 
@@ -112,7 +112,7 @@ class BehandlingsresultatService(
                 .also { it.ytelsePersoner = ytelsePersonerMedResultat.writeValueAsString() }
         }
 
-        return utledBehandlingsresultat(
+        return utledBehandlingsresultatGammel(
             ytelsePersonerMedResultat,
             andelerMedEndringer,
             forrigeAndelerMedEndringer,
@@ -120,7 +120,7 @@ class BehandlingsresultatService(
         )
     }
 
-    internal fun utledBehandlingsresultat(
+    internal fun utledBehandlingsresultatGammel(
         ytelsePersonerMedResultat: List<YtelsePerson>,
         andelerMedEndringer: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
         forrigeAndelerMedEndringer: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,

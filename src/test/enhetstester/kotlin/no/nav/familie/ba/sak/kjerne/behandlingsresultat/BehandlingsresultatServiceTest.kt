@@ -65,7 +65,7 @@ internal class BehandlingsresultatServiceTest {
                 prosent = BigDecimal(50)
             )
         )
-        val behandlingsresultat = service.utledBehandlingsresultat(
+        val behandlingsresultat = service.utledBehandlingsresultatGammel(
             ytelsePersonerMedResultat = listOf(ytelsePersonSøker, ytelsePersonBarn),
             andelerMedEndringer = listOf(andelMedEndring),
             forrigeAndelerMedEndringer = listOf(forrigeAndelMedEndring),
@@ -112,7 +112,7 @@ internal class BehandlingsresultatServiceTest {
             )
         )
 
-        val behandlingsresultat = service.utledBehandlingsresultat(
+        val behandlingsresultat = service.utledBehandlingsresultatGammel(
             ytelsePersonerMedResultat = listOf(ytelsePersonSøker, ytelsePersonBarn),
             andelerMedEndringer = listOf(andelMedEndring),
             forrigeAndelerMedEndringer = listOf(forrigeAndelMedEndring),
@@ -149,7 +149,7 @@ internal class BehandlingsresultatServiceTest {
             )
         )
 
-        val behandlingsresultat = service.utledBehandlingsresultat(
+        val behandlingsresultat = service.utledBehandlingsresultatGammel(
             ytelsePersonerMedResultat = listOf(ytelsePersonSøker, ytelsePersonBarn),
             andelerMedEndringer = listOf(andelMedEndring),
             forrigeAndelerMedEndringer = listOf(),
@@ -186,7 +186,7 @@ internal class BehandlingsresultatServiceTest {
             )
         )
 
-        val behandlingsresultat = service.utledBehandlingsresultat(
+        val behandlingsresultat = service.utledBehandlingsresultatGammel(
             ytelsePersonerMedResultat = listOf(ytelsePersonSøker, ytelsePersonBarn),
             andelerMedEndringer = listOf(),
             forrigeAndelerMedEndringer = listOf(forrigeAndelMedEndring),
