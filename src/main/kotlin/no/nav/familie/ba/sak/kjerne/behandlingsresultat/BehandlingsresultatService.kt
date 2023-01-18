@@ -40,9 +40,14 @@ class BehandlingsresultatService(
     private val featureToggleService: FeatureToggleService
 ) {
 
-    fun utledBehandlingsresultat(behandling: Behandling, forrigeBehandling: Behandling?) {
+    fun utledBehandlingsresultat(behandling: Behandling, forrigeBehandling: Behandling?): Behandlingsresultat {
+        // nåværendeAndeler, forrigeAndeler, nåværendeVilkårsvurdering, forrigeVilkårsvurdering,
+        // forrigeKompetanser, nåværendeKompetanser,
+        // nåværendeEndringsperioder, forrigeEndringsperioder,
+        // personerDetErSøktFor
+
         // 1 SØKNAD
-        val søknadsresultat = if (behandling.opprettetÅrsak == BehandlingÅrsak.SØKNAD || behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
+        val søknadsresultat = if (behandling.opprettetÅrsak == BehandlingÅrsak.SØKNAD || behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE || behandling.erManuellMigrering()) {
             utledResultatPåSøknad(behandling = behandling)
         } else emptyList()
 
@@ -61,6 +66,8 @@ class BehandlingsresultatService(
 
         // VALIDERING
         validerBehandlingsresultat()
+
+        return behandlingsresultat
     }
 
     // Innvilget, avslått, fortsatt innvilget, (delvis innvilget)
@@ -73,6 +80,9 @@ class BehandlingsresultatService(
         // Finner personer det er søkt for
         val personerFremstiltKravFor = finnPersonerFremstiltKravFor()
 
+        // hva gjør vi med uregistrerte barn?? -> eksplisitt avslag
+        // hva gjør vi når bruker søker for seg selv (ved å legge inn eget personnummer?) -> eksplisitt avslag
+
         // Gjør utledningen
         return utledResultatPåSøknadUtil(forrigeAndelerPrPerson = forrigeAndeler.groupBy { it.aktør }, nåværendeAndelerPrPerson = nåværendeAndeler.groupBy { it.aktør }, nåværendePersonResultater = nåværendePersonResultater, personerFremstiltKravFor = personerFremstiltKravFor)
     }
@@ -80,7 +90,6 @@ class BehandlingsresultatService(
     private fun finnPersonerFremstiltKravFor(): List<Aktør> {
         // hvis søknad: alle personer det er krysset av for og evt søker hvis det er krysset av for utvidet
         // hvis fødselshendelse: barnet/barna som er født
-        // hva gjør vi med uregistrerte barn??
         return emptyList()
     }
 
@@ -94,12 +103,13 @@ class BehandlingsresultatService(
             utledSøknadResultatFraAndelerTilkjentYtelseForPerson(forrigeAndelerPrPerson.getOrDefault(it, emptyList()), nåværendeAndelerPrPerson.getOrDefault(it, emptyList()))
         }
 
-        val erEksplisittAvslagPåMinstEnPerson = nåværendePersonResultater.any { it.vilkårResultater.erEksplisittAvslagPåPerson() }
+        val erEksplisittAvslagPåMinstEnPerson = nåværendePersonResultater.any { it.vilkårResultater.erEksplisittAvslagPåPerson() } // ta kun hensyn til personer fremstilt krav for
 
         val resultater = if (erEksplisittAvslagPåMinstEnPerson) resultaterFraAndeler.plus(Behandlingsresultat.AVSLÅTT).distinct() else resultaterFraAndeler.distinct()
 
-        // kombinere resultatene til et behandlignsresultat
-        // hvis ingenting av det over (ikke innvilget eller avslag) -> fortsatt innvilget
+        // kombinere resultatene til et behandlingsresultat (skal vi kombinere innvilget og avslått til delvis innvilget?)
+        // hvis kun "ingen relevante endringer" på alle perioder & løper fortsatt for minst ett barn som det er søkt for -> fortsatt innvilget
+        // Alternativ til linjen over: hvis kun "Ingen relevante endringer" -> Ingen endringer
         return emptyList()
     }
 
@@ -107,9 +117,10 @@ class BehandlingsresultatService(
         forrigeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
         nåværendeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
     ): List<Behandlingsresultat> {
-        // hvis nåværende = null -> ikke bry oss
         // hvis nåværende > 0 og ikke lik forrige -> innvilget
-        // hvis nåværende = 0 og ikke lik forrige -> er det pga differanseberegning eller delt bosted endring? -> innvilget, er det pga etterbetaling 3 år osv -> avslått
+        // hvis nåværende = 0 og forrige != 0 -> er det pga differanseberegning eller delt bosted endring? -> innvilget, er det pga etterbetaling 3 år osv -> avslått
+        // hvis nåværende = forrige -> ingen relevant endring
+        // hvis nåværende = null, og forrige != null -> ingen relevant endring
         return emptyList()
     }
 
@@ -118,23 +129,25 @@ class BehandlingsresultatService(
         return this.any { it.erEksplisittAvslagPåSøknad == true }
     }
 
-    // Endring
+    // Endring - KUN INTERESSERT I ENDRINGER FØR OPPHØRSTIDSPUNKT
+    // Hvis ingen endringer -> Ingen endring
     private fun erEndringerPåBehandlingIForholdTilForrige(): List<Behandlingsresultat> {
-        return if (erEndringIBeløp() || erEndringerIkkeIBeløp()) listOf(Behandlingsresultat.ENDRET_UTBETALING)
+        return if (erEndringIBeløp()) listOf(Behandlingsresultat.ENDRET_UTBETALING)
+        else if (erEndringerIkkeIBeløp()) listOf(Behandlingsresultat.ENDRET_UTEN_UTBETALING)
         else emptyList()
     }
 
     private fun erEndringIBeløp(): Boolean {
-        // Hvis revurdering eller ikke søkt for personen: alle endringer i beløp
-        // Hvis søkt for personen: alle endringer fra beløp til null (dobbeltsjekk med Eivind)
+        // Hvis ikke søkt for personen: alle endringer i beløp
+        // Hvis søkt for personen: alle endringer fra beløp > 0 til null eller 0 kr
         return false
     }
 
     private fun erEndringerIkkeIBeløp(): Boolean {
         // Finn endringer i "overlappende perioder" fra forrige og nåværende behandling:
         // - Vilkårsvurdering (splitt, utdypende vv, regelverk)
-        // - Kompetanseskjema
-        // - Endringsperioder (trenger vi å se på prosent, barn og årsak?)
+        // - Kompetanseskjema (alt innhold)
+        // - Endringsperioder (ikke se på barn eller prosent)
         return false
     }
 
@@ -143,13 +156,24 @@ class BehandlingsresultatService(
         // Hvis det er opphørt og ikke opphørt i forrige behandling -> opphørt
         // Hvis opphørt tidligere i denne behandlingen enn i forrige -> opphørt
         // Hvis opphørt på samme dato som i forrige behandling -> fortsatt opphørt
+        // Hvis ikke opphør i denne behandlingen -> ikke opphørt
         return emptyList()
     }
 
-    private fun kombinerResultater(søknadsresultat: List<Behandlingsresultat>, endretResultat: List<Behandlingsresultat>, opphørResultat: List<Behandlingsresultat>): List<Behandlingsresultat> {
+    private fun kombinerResultater(søknadsresultat: List<Behandlingsresultat>, endretResultat: List<Behandlingsresultat>, opphørResultat: List<Behandlingsresultat>): Behandlingsresultat {
         // hvis fortsatt opphørt & noe annet -> ikke ta med fortsatt opphørt i resultatet
-        // hvis fortsatt innvilget + fortsatt opphørt -> hva blir resultatet??
-        return emptyList()
+        // Ingen endring + ingen endring + ingen opphør = fortsatt innvilget
+        // Ingen endring + ingen endring + fortsatt opphørt = fortsatt opphørt
+        // Ingen endring + ingen endring + opphørt = opphørt
+        // Innvilget + ingen endring + opphørt = innvilget og opphørt
+        // [Innvilget, avslått] + ingen endring + fortsatt opphørt = delvis innvilget
+        // RV: [] + endret + fortsatt opphørt = endret
+        // [Innvilget, avslått] + endret + opphørt = Delvis innvilget, endret og opphørt
+
+        // Ikke normal flyt:
+        // - Fortsatt opphørt i kombinasjon med noe annet enn "ingen endring" -> fjern fortsatt opphørt fra resultatet
+        // - Innvilget + avslått = delvis innvilget
+        return Behandlingsresultat.FORTSATT_INNVILGET
     }
 
     private fun validerBehandlingsresultat() {
@@ -228,7 +252,7 @@ class BehandlingsresultatService(
 
         vilkårsvurdering.let {
             vilkårsvurderingService.oppdater(vilkårsvurdering)
-                .also { it.ytelsePersoner = ytelsePersonerMedResultat.writeValueAsString() }
+                .also { it.ytelsePersoner = ytelsePersonerMedResultat.writeValueAsString() } // Hva gjør vi med denne?
         }
 
         return utledBehandlingsresultat(
