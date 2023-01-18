@@ -251,7 +251,6 @@ class SimuleringUtilTest {
 
     @Test
     fun `ytelse med manuelle posteringer på trekk av 305 over 3 mnd`() {
-
         val fil = File("./src/test/resources/kjerne.simulering/simulering_med_justering.json")
 
         val ytelseMedManuellePosteringer =
@@ -320,7 +319,7 @@ class SimuleringUtilTest {
         val YtelsefraBA = listOf(
             mockVedtakSimuleringPostering(
                 beløp = 305,
-                posteringType = PosteringType.YTELSE,
+                posteringType = PosteringType.YTELSE
             ),
             mockVedtakSimuleringPostering(
                 beløp = -198,
