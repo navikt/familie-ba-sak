@@ -35,6 +35,11 @@ class BehandlingsresultatService(
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     private val featureToggleService: FeatureToggleService
 ) {
+
+    internal fun utledBehandlingsresultat(): Behandlingsresultat {
+        return Behandlingsresultat.FORTSATT_INNVILGET
+    }
+
     @Deprecated("Skal erstattes av ny metode")
     internal fun utledBehandlingsresultatGammel(behandlingId: Long): Behandlingsresultat {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)

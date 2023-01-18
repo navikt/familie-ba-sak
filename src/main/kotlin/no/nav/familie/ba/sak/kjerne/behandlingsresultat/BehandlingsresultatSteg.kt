@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -76,7 +77,11 @@ class BehandlingsresultatSteg(
             if (behandling.erMigrering() && behandling.skalBehandlesAutomatisk) {
                 settBehandlingsresultat(behandling, Behandlingsresultat.INNVILGET)
             } else {
-                val resultat = behandlingsresultatService.utledBehandlingsresultatGammel(behandlingId = behandling.id)
+                val resultat = if (featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_BEREGNE_BEHANDLINGSRESULTAT)) {
+                    behandlingsresultatService.utledBehandlingsresultat()
+                } else {
+                    behandlingsresultatService.utledBehandlingsresultatGammel(behandlingId = behandling.id)
+                }
                 behandlingService.oppdaterBehandlingsresultat(
                     behandlingId = behandling.id,
                     resultat = resultat
