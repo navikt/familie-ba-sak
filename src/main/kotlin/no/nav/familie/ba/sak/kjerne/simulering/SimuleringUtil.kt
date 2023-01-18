@@ -89,9 +89,13 @@ fun hentNyttBeløpIPeriode(periode: List<ØkonomiSimuleringPostering>): BigDecim
         postering.posteringType == PosteringType.YTELSE && postering.beløp > BigDecimal.ZERO
     }.sumOf { it.beløp }
     val feilutbetaling = hentFeilbetalingIPeriode(periode)
-    return if (feilutbetaling > BigDecimal.ZERO) sumPositiveYtelser - feilutbetaling else sumPositiveYtelser - hentManuellePosteringerIPeriode(
-        periode
-    )
+    return if (feilutbetaling > BigDecimal.ZERO) {
+        sumPositiveYtelser - feilutbetaling
+    } else {
+        sumPositiveYtelser - hentManuellePosteringerIPeriode(
+            periode
+        )
+    }
 }
 
 fun hentFeilbetalingIPeriode(periode: List<ØkonomiSimuleringPostering>) =
@@ -110,9 +114,13 @@ fun hentTidligereUtbetaltIPeriode(periode: List<ØkonomiSimuleringPostering>): B
         (postering.posteringType == PosteringType.YTELSE && postering.beløp < BigDecimal.ZERO)
     }.sumOf { it.beløp }
     val feilutbetaling = hentFeilbetalingIPeriode(periode)
-    return if (feilutbetaling < BigDecimal.ZERO) -(sumNegativeYtelser - feilutbetaling) else -sumNegativeYtelser - hentManuellePosteringerIPeriode(
-        periode
-    )
+    return if (feilutbetaling < BigDecimal.ZERO) {
+        -(sumNegativeYtelser - feilutbetaling)
+    } else {
+        -sumNegativeYtelser - hentManuellePosteringerIPeriode(
+            periode
+        )
+    }
 }
 
 fun hentManuellePosteringerIPeriode(periode: List<ØkonomiSimuleringPostering>): BigDecimal {
