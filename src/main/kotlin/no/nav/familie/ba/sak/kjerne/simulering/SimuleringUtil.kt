@@ -90,11 +90,7 @@ fun vedtakSimuleringMottakereTilSimuleringPerioder(
             },
             manuellPostering = hentManuellPosteringIPeriode(posteringListe),
             feilutbetaling = hentPositivFeilbetalingIPeriode(posteringListe),
-            etterbetaling = if (erManuelPosteringTogglePå) {
-                hentEtterbetalingIPeriode(posteringListe, tidSimuleringHentet)
-            } else {
-                hentEtterbetalingIPeriodeGammel(posteringListe, tidSimuleringHentet)
-            }
+            etterbetaling = hentEtterbetalingIPeriode(posteringListe, tidSimuleringHentet)
         )
     }
 }
@@ -172,29 +168,6 @@ fun hentResultatIPeriode(periode: List<ØkonomiSimuleringPostering>): BigDecimal
     }
 }
 
-@Deprecated("Skal bruke hentEtterbetalingIPeriode når manuelle posteringer er tester ferdig")
-fun hentEtterbetalingIPeriodeGammel(
-    periode: List<ØkonomiSimuleringPostering>,
-    tidSimuleringHentet: LocalDate?
-): BigDecimal {
-    val periodeHarPositivFeilutbetaling =
-        periode.any { it.posteringType == PosteringType.FEILUTBETALING && it.beløp > BigDecimal.ZERO }
-    val sumYtelser =
-        periode.filter { it.posteringType == PosteringType.YTELSE && it.forfallsdato <= tidSimuleringHentet }
-            .sumOf { it.beløp }
-    return when {
-        periodeHarPositivFeilutbetaling ->
-            BigDecimal.ZERO
-
-        else ->
-            if (sumYtelser < BigDecimal.ZERO) {
-                BigDecimal.ZERO
-            } else {
-                sumYtelser
-            }
-    }
-}
-
 fun hentEtterbetalingIPeriode(
     periode: List<ØkonomiSimuleringPostering>,
     tidSimuleringHentet: LocalDate?
@@ -202,16 +175,17 @@ fun hentEtterbetalingIPeriode(
     val periodeHarPositivFeilutbetaling =
         periode.any { it.posteringType == PosteringType.FEILUTBETALING && it.beløp > BigDecimal.ZERO }
     val sumYtelser =
-        periode.filter { it.posteringType == PosteringType.YTELSE && it.forfallsdato <= tidSimuleringHentet }
+        periode.filter {
+            it.posteringType == PosteringType.YTELSE &&
+                it.fagOmrådeKode != FagOmrådeKode.BARNETRYGD_INFOTRYGD_MANUELT &&
+                it.forfallsdato <= tidSimuleringHentet
+        }
             .sumOf { it.beløp }
-    val sumManuellePosteringer = hentManuellPosteringIPeriode(periode)
-    return when {
-        periodeHarPositivFeilutbetaling ->
-            BigDecimal.ZERO
 
-        else ->
-
-            sumYtelser - sumManuellePosteringer
+    return if (periodeHarPositivFeilutbetaling) {
+        BigDecimal.ZERO
+    } else {
+        sumYtelser
     }
 }
 

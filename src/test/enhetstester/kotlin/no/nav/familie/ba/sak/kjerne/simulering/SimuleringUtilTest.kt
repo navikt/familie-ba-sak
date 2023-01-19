@@ -330,7 +330,7 @@ class SimuleringUtilTest {
                 beløp = 305,
                 posteringType = PosteringType.JUSTERING,
                 fagOmrådeKode = FagOmrådeKode.BARNETRYGD_INFOTRYGD
-            ), // Reduser feilutbetaling
+            ),
             mockVedtakSimuleringPostering(
                 beløp = -305,
                 posteringType = PosteringType.YTELSE,
