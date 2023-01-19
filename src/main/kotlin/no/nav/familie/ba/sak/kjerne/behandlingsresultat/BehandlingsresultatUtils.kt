@@ -65,11 +65,13 @@ object BehandlingsresultatUtils {
             val forrigeBeløp = forrige?.kalkulertUtbetalingsbeløp ?: 0
 
             if (erSøktForPerson) {
+                // Hvis det er søkt for person vil vi kun ha med endringer som går fra beløp > 0 til 0/null
                 when {
                     forrigeBeløp > 0 && nåværendeBeløp == 0 -> true
                     else -> false
                 }
             } else {
+                // Hvis det ikke er søkt for person vil vi ha med alle endringer i beløp
                 when {
                     forrigeBeløp != nåværendeBeløp -> true
                     else -> false
