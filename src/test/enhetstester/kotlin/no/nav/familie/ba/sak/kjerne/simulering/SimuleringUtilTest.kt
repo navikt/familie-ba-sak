@@ -267,7 +267,7 @@ class SimuleringUtilTest {
         val simuleringsperioder = vedtakSimuleringMottakereTilSimuleringPerioder(vedtakSimuleringMottakere)
         val oppsummering = vedtakSimuleringMottakereTilRestSimulering(vedtakSimuleringMottakere)
 
-        // assertThat(simuleringsperioder[0].resultat).isEqualTo(0.toBigDecimal())
+        assertThat(simuleringsperioder[0].resultat).isEqualTo(0.toBigDecimal())
         assertThat(oppsummering.etterbetaling).isEqualTo(0.toBigDecimal())
     }
 
