@@ -34,7 +34,6 @@ object BehandlingsresultatUtils {
     internal fun erEndringIBeløp(
         nåværendeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
         forrigeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
-        opphørstidspunkt: YearMonth,
         personerFremstiltKravFor: List<Aktør>
     ): Boolean {
         val allePersonerMedAndeler = (nåværendeAndeler.map { it.aktør } + forrigeAndeler.map { it.aktør }).distinct()
@@ -43,7 +42,7 @@ object BehandlingsresultatUtils {
             erEndringIBeløpForPerson(
                 nåværendeAndeler = nåværendeAndeler.filter { it.aktør == aktør },
                 forrigeAndeler = forrigeAndeler.filter { it.aktør == aktør },
-                opphørstidspunkt = opphørstidspunkt,
+                opphørstidspunkt = nåværendeAndeler.maxOf { it.stønadTom },
                 erSøktForPerson = personerFremstiltKravFor.contains(aktør)
             )
         }

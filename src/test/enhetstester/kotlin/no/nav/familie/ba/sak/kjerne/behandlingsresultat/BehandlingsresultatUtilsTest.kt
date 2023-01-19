@@ -52,7 +52,6 @@ class BehandlingsresultatUtilsTest {
         val erEndringIBeløp = BehandlingsresultatUtils.erEndringIBeløp(
             nåværendeAndeler = nåværendeAndeler,
             forrigeAndeler = forrigeAndeler,
-            opphørstidspunkt = mai22,
             personerFremstiltKravFor = listOf()
         )
 
@@ -96,7 +95,6 @@ class BehandlingsresultatUtilsTest {
         val erEndringIBeløp = BehandlingsresultatUtils.erEndringIBeløp(
             nåværendeAndeler = nåværendeAndeler,
             forrigeAndeler = forrigeAndeler,
-            opphørstidspunkt = aug22,
             personerFremstiltKravFor = listOf(barn1Aktør)
         )
 
@@ -146,7 +144,6 @@ class BehandlingsresultatUtilsTest {
         val erEndringIBeløp = BehandlingsresultatUtils.erEndringIBeløp(
             nåværendeAndeler = nåværendeAndeler,
             forrigeAndeler = forrigeAndeler,
-            opphørstidspunkt = aug22,
             personerFremstiltKravFor = listOf(barn1Aktør)
         )
 
@@ -190,7 +187,6 @@ class BehandlingsresultatUtilsTest {
         val erEndringIBeløp = BehandlingsresultatUtils.erEndringIBeløp(
             nåværendeAndeler = nåværendeAndeler,
             forrigeAndeler = forrigeAndeler,
-            opphørstidspunkt = des22,
             personerFremstiltKravFor = listOf()
         )
 
@@ -234,7 +230,6 @@ class BehandlingsresultatUtilsTest {
         val erEndringIBeløp = BehandlingsresultatUtils.erEndringIBeløp(
             nåværendeAndeler = nåværendeAndeler,
             forrigeAndeler = forrigeAndeler,
-            opphørstidspunkt = des22,
             personerFremstiltKravFor = listOf(barn1Aktør)
         )
 
@@ -284,7 +279,6 @@ class BehandlingsresultatUtilsTest {
         val erEndringIBeløp = BehandlingsresultatUtils.erEndringIBeløp(
             nåværendeAndeler = nåværendeAndeler,
             forrigeAndeler = forrigeAndeler,
-            opphørstidspunkt = aug22,
             personerFremstiltKravFor = listOf()
         )
 
