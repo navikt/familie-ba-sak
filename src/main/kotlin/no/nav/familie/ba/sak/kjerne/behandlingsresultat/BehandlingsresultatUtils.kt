@@ -43,7 +43,7 @@ object BehandlingsresultatUtils {
                 nåværendeAndeler = nåværendeAndeler.filter { it.aktør == aktør },
                 forrigeAndeler = forrigeAndeler.filter { it.aktør == aktør },
                 opphørstidspunkt = nåværendeAndeler.maxOf { it.stønadTom },
-                erSøktForPerson = personerFremstiltKravFor.contains(aktør)
+                erFremstiltKravForPerson = personerFremstiltKravFor.contains(aktør)
             )
         }
 
@@ -55,7 +55,7 @@ object BehandlingsresultatUtils {
         nåværendeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
         forrigeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
         opphørstidspunkt: YearMonth,
-        erSøktForPerson: Boolean
+        erFremstiltKravForPerson: Boolean
     ): Boolean {
         val nåværendeTidslinje = AndelTilkjentYtelseTidslinje(nåværendeAndeler)
         val forrigeTidslinje = AndelTilkjentYtelseTidslinje(forrigeAndeler)
@@ -64,7 +64,7 @@ object BehandlingsresultatUtils {
             val nåværendeBeløp = nåværende?.kalkulertUtbetalingsbeløp ?: 0
             val forrigeBeløp = forrige?.kalkulertUtbetalingsbeløp ?: 0
 
-            if (erSøktForPerson) {
+            if (erFremstiltKravForPerson) {
                 // Hvis det er søkt for person vil vi kun ha med endringer som går fra beløp > 0 til 0/null
                 when {
                     forrigeBeløp > 0 && nåværendeBeløp == 0 -> true
