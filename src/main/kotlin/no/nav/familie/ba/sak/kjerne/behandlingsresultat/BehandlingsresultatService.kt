@@ -42,7 +42,7 @@ class BehandlingsresultatService(
     }
 
     internal fun finnPersonerFremstiltKravFor(behandling: Behandling, søknadDTO: SøknadDTO?, forrigeBehandling: Behandling?): List<Aktør> {
-        return if (behandling.opprettetÅrsak == BehandlingÅrsak.SØKNAD || behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
+        val personerFremstiltKravFor = if (behandling.opprettetÅrsak == BehandlingÅrsak.SØKNAD || behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
             // alle barna som er krysset av på søknad
             val barnFraSøknad = søknadDTO?.barnaMedOpplysninger
                 ?.filter { it.erFolkeregistrert && it.inkludertISøknaden }
@@ -64,6 +64,8 @@ class BehandlingsresultatService(
 
             nåværendePersonopplysningsgrunnlag.personer.map { it.aktør }
         } else emptyList()
+
+        return personerFremstiltKravFor.distinct()
     }
 
     @Deprecated("Skal erstattes av ny metode")
