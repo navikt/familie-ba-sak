@@ -123,10 +123,10 @@ fun hentTidligereUtbetaltIPeriode(periode: List<ØkonomiSimuleringPostering>): B
 }
 
 fun hentManuellePosteringerIPeriode(periode: List<ØkonomiSimuleringPostering>): BigDecimal {
-    val sumManuellePosteringer = periode.filter { postering ->
-        (postering.posteringType == PosteringType.YTELSE && postering.fagOmrådeKode == FagOmrådeKode.BARNETRYGD_INFOTRYGD_MANUELT && postering.beløp > BigDecimal.ZERO)
+    return periode.filter { postering ->
+        postering.posteringType == PosteringType.YTELSE &&
+            postering.fagOmrådeKode == FagOmrådeKode.BARNETRYGD_INFOTRYGD_MANUELT
     }.sumOf { it.beløp }
-    return if (sumManuellePosteringer > BigDecimal.ZERO) sumManuellePosteringer else BigDecimal.ZERO
 }
 
 fun hentResultatIPeriode(periode: List<ØkonomiSimuleringPostering>): BigDecimal {
