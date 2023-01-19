@@ -150,14 +150,14 @@ fun hentEtterbetalingIPeriode(
     val sumYtelser =
         periode.filter { it.posteringType == PosteringType.YTELSE && it.forfallsdato <= tidSimuleringHentet }
             .sumOf { it.beløp }
-    val sumJusteringer = hentManuellePosteringerIPeriode(periode)
+    val sumManuellePosteringer = hentManuellePosteringerIPeriode(periode)
     return when {
         periodeHarPositivFeilutbetaling ->
             BigDecimal.ZERO
 
         else ->
 
-            sumYtelser - sumJusteringer
+            sumYtelser - sumManuellePosteringer
     }
 }
 
