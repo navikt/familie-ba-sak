@@ -80,15 +80,21 @@ fun vedtakSimuleringMottakereTilSimuleringPerioder(
             nyttBeløp = hentNyttBeløpIPeriode(posteringListe),
             tidligereUtbetalt = if (erManuelPosteringTogglePå) {
                 hentTidligereUtbetaltIPeriode(posteringListe)
-            } else hentTidligereUtbetaltIPeriodeGammel(posteringListe),
+            } else {
+                hentTidligereUtbetaltIPeriodeGammel(posteringListe)
+            },
             resultat = if (erManuelPosteringTogglePå) {
                 hentResultatIPeriode(posteringListe)
-            } else hentResultatIPeriodeGammel(posteringListe),
+            } else {
+                hentResultatIPeriodeGammel(posteringListe)
+            },
             manuellPostering = hentManuellPosteringIPeriode(posteringListe),
             feilutbetaling = hentPositivFeilbetalingIPeriode(posteringListe),
             etterbetaling = if (erManuelPosteringTogglePå) {
                 hentEtterbetalingIPeriode(posteringListe, tidSimuleringHentet)
-            } else hentEtterbetalingIPeriodeGammel(posteringListe, tidSimuleringHentet)
+            } else {
+                hentEtterbetalingIPeriodeGammel(posteringListe, tidSimuleringHentet)
+            }
         )
     }
 }
