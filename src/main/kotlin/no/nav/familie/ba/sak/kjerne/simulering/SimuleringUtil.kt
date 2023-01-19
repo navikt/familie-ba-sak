@@ -133,17 +133,18 @@ fun hentTidligereUtbetaltIPeriode(periode: List<ØkonomiSimuleringPostering>): B
     return if (feilutbetaling < BigDecimal.ZERO) {
         -(sumNegativeYtelser - feilutbetaling)
     } else {
-        -sumNegativeYtelser - hentManuellPosteringIPeriode(
+        -sumNegativeYtelser + hentManuellPosteringIPeriode(
             periode
         )
     }
 }
 
 fun hentManuellPosteringIPeriode(periode: List<ØkonomiSimuleringPostering>): BigDecimal {
-    return periode.filter { postering ->
+    val sumManuellePosteringer = periode.filter { postering ->
         postering.posteringType == PosteringType.YTELSE &&
             postering.fagOmrådeKode == FagOmrådeKode.BARNETRYGD_INFOTRYGD_MANUELT
     }.sumOf { it.beløp }
+    return -sumManuellePosteringer
 }
 
 @Deprecated("Skal bruke hentResultatIPeriode når manuelle posteringer er tester ferdig")
@@ -162,9 +163,9 @@ fun hentResultatIPeriode(periode: List<ØkonomiSimuleringPostering>): BigDecimal
     return if (feilutbetaling > BigDecimal.ZERO) {
         -feilutbetaling
     } else {
-        hentNyttBeløpIPeriode(periode) - hentTidligereUtbetaltIPeriode(periode) - hentManuellPosteringIPeriode(
-            periode
-        )
+        hentNyttBeløpIPeriode(periode) +
+            hentManuellPosteringIPeriode(periode) -
+            hentTidligereUtbetaltIPeriode(periode)
     }
 }
 

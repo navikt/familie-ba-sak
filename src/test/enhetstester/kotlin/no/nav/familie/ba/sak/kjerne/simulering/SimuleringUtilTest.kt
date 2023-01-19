@@ -355,7 +355,7 @@ class SimuleringUtilTest {
 
         assertThat(simuleringsperioder.size).isEqualTo(1)
         assertThat(simuleringsperioder[0].nyttBeløp).isEqualTo(305.toBigDecimal())
-        assertThat(simuleringsperioder[0].manuellPostering).isEqualTo(165.toBigDecimal())
+        assertThat(simuleringsperioder[0].manuellPostering).isEqualTo((-165).toBigDecimal())
         assertThat(simuleringsperioder[0].tidligereUtbetalt).isEqualTo(140.toBigDecimal())
         assertThat(simuleringsperioder[0].resultat).isEqualTo(0.toBigDecimal())
         assertThat(simuleringsperioder[0].feilutbetaling).isEqualTo(0.toBigDecimal())
@@ -404,7 +404,7 @@ class SimuleringUtilTest {
 
         assertThat(simuleringsperioder.size).isEqualTo(1)
         assertThat(simuleringsperioder[0].nyttBeløp).isEqualTo(305.toBigDecimal())
-        assertThat(simuleringsperioder[0].manuellPostering).isEqualTo(305.toBigDecimal())
+        assertThat(simuleringsperioder[0].manuellPostering).isEqualTo((-305).toBigDecimal())
         assertThat(simuleringsperioder[0].tidligereUtbetalt).isEqualTo(0.toBigDecimal())
         assertThat(simuleringsperioder[0].resultat).isEqualTo(0.toBigDecimal())
         assertThat(simuleringsperioder[0].feilutbetaling).isEqualTo(0.toBigDecimal())
