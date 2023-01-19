@@ -18,8 +18,7 @@ fun filterBortUrelevanteVedtakSimuleringPosteringer(
     it.copy(
         økonomiSimuleringPostering = it.økonomiSimuleringPostering.filter { postering ->
             postering.posteringType == PosteringType.FEILUTBETALING ||
-                postering.posteringType == PosteringType.YTELSE ||
-                postering.posteringType == PosteringType.JUSTERING
+                postering.posteringType == PosteringType.YTELSE
         }
     )
 }
