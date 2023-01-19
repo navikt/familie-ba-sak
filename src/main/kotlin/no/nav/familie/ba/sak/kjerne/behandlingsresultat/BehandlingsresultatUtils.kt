@@ -12,11 +12,27 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.fpsak.tidsserie.StandardCombinators
 
 object BehandlingsresultatUtils {
+
+    internal fun utledResultatPåSøknad(
+        forrigeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        nåværendeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        nåværendePersonResultater: Set<PersonResultat>,
+        personerFremstiltKravFor: List<Aktør>
+    ): List<Søknadsresultat> {
+        return listOf(Søknadsresultat.INGEN_RELEVANTE_ENDRINGER)
+    }
+
+    internal enum class Søknadsresultat {
+        INNVILGET,
+        AVSLÅTT,
+        INGEN_RELEVANTE_ENDRINGER
+    }
 
     private fun ikkeStøttetFeil(behandlingsresultater: MutableSet<YtelsePersonResultat>) =
         Feil(

@@ -36,8 +36,27 @@ class BehandlingsresultatService(
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     private val featureToggleService: FeatureToggleService
 ) {
+    internal fun utledBehandlingsresultat(behandlingId: Long): Behandlingsresultat {
+        val nåværendeAndeler = andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
+        val forrigeAndeler = if (forrigeBehandling != null) andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(forrigeBehandling.id) else emptyList()
+        val nåværendeVilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId)
+        val søknadGrunnlag = søknadGrunnlagService.hentAktiv(behandlingId = behandlingId)
 
-    internal fun utledBehandlingsresultat(): Behandlingsresultat {
+        val personerFremstiltKravFor = finnPersonerFremstiltKravFor(
+            behandling = behandling,
+            søknadDTO = søknadGrunnlag?.hentSøknadDto(),
+            forrigeBehandling = forrigeBehandling
+        )
+
+        val resultatPåSøknad = BehandlingsresultatUtils.utledResultatPåSøknad(
+            forrigeAndeler = forrigeAndeler,
+            nåværendeAndeler = nåværendeAndeler,
+            nåværendePersonResultater = nåværendeVilkårsvurdering?.personResultater ?: throw Feil("Finner ingen personer på vilkårsvurdering"),
+            personerFremstiltKravFor = personerFremstiltKravFor
+        )
+
         return Behandlingsresultat.FORTSATT_INNVILGET
     }
 
