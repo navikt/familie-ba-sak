@@ -2,12 +2,15 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -19,6 +22,274 @@ class BehandlingsresultatUtilsTest {
     val søker = tilfeldigPerson()
 
     private val barn1Aktør = randomAktør()
+
+    val jan22 = YearMonth.of(2022, 1)
+    val mai22 = YearMonth.of(2022, 5)
+    val aug22 = YearMonth.of(2022, 8)
+    val des22 = YearMonth.of(2022, 12)
+
+    @Test
+    fun `Skal returnere false dersom eneste endring er opphør`() {
+        val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
+
+        val forrigeAndeler = listOf(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                fom = jan22,
+                tom = aug22,
+                beløp = 1054,
+                aktør = barn1Aktør
+            )
+        )
+        val nåværendeAndeler = listOf(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                fom = jan22,
+                tom = mai22,
+                beløp = 1054,
+                aktør = barn1Aktør
+            )
+        )
+
+        val erEndringIBeløp = BehandlingsresultatUtils.erEndringIBeløp(
+            nåværendeAndeler = nåværendeAndeler,
+            forrigeAndeler = forrigeAndeler,
+            opphørstidspunkt = mai22,
+            personerFremstiltKravFor = listOf()
+        )
+
+        assertEquals(false, erEndringIBeløp)
+    }
+
+    @Test
+    fun `Skal returnere true når beløp i periode har gått fra større enn 0 til null og det er søkt for person`() {
+        val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
+        val barn2Aktør = lagPerson(type = PersonType.BARN).aktør
+
+        val forrigeAndeler = listOf(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                fom = jan22,
+                tom = aug22,
+                beløp = 1054,
+                aktør = barn1Aktør
+            ),
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                fom = jan22,
+                tom = aug22,
+                beløp = 1054,
+                aktør = barn2Aktør
+            )
+        )
+        val nåværendeAndeler = listOf(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                fom = jan22,
+                tom = mai22,
+                beløp = 1054,
+                aktør = barn1Aktør
+            ),
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                fom = jan22,
+                tom = aug22,
+                beløp = 1054,
+                aktør = barn2Aktør
+            )
+        )
+
+        val erEndringIBeløp = BehandlingsresultatUtils.erEndringIBeløp(
+            nåværendeAndeler = nåværendeAndeler,
+            forrigeAndeler = forrigeAndeler,
+            opphørstidspunkt = aug22,
+            personerFremstiltKravFor = listOf(barn1Aktør)
+        )
+
+        assertEquals(true, erEndringIBeløp)
+    }
+
+    @Test
+    fun `Skal returnere false når beløp i periode har gått fra større enn 0 til at annet tall større enn 0 og det er søkt for person`() {
+        val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
+        val barn2Aktør = lagPerson(type = PersonType.BARN).aktør
+
+        val forrigeAndeler = listOf(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                fom = jan22,
+                tom = aug22,
+                beløp = 1054,
+                aktør = barn1Aktør
+            ),
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                fom = jan22,
+                tom = aug22,
+                beløp = 1054,
+                aktør = barn2Aktør
+            )
+        )
+        val nåværendeAndeler = listOf(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                fom = jan22,
+                tom = mai22,
+                beløp = 1054,
+                aktør = barn1Aktør
+            ),
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                fom = mai22.plusMonths(1),
+                tom = aug22,
+                beløp = 527,
+                aktør = barn1Aktør
+            ),
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                fom = jan22,
+                tom = aug22,
+                beløp = 1054,
+                aktør = barn2Aktør
+            )
+        )
+
+        val erEndringIBeløp = BehandlingsresultatUtils.erEndringIBeløp(
+            nåværendeAndeler = nåværendeAndeler,
+            forrigeAndeler = forrigeAndeler,
+            opphørstidspunkt = aug22,
+            personerFremstiltKravFor = listOf(barn1Aktør)
+        )
+
+        assertEquals(false, erEndringIBeløp)
+    }
+
+    @Test
+    fun `Skal returnere true når beløp i periode har gått fra null til et tall større enn 0 og det ikke er søkt for person`() {
+        val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
+        val barn2Aktør = lagPerson(type = PersonType.BARN).aktør
+
+        val forrigeAndeler = listOf(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                fom = jan22,
+                tom = aug22,
+                beløp = 1054,
+                aktør = barn1Aktør
+            ),
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                fom = jan22,
+                tom = aug22,
+                beløp = 1054,
+                aktør = barn2Aktør
+            )
+        )
+        val nåværendeAndeler = listOf(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                fom = jan22,
+                tom = des22,
+                beløp = 1054,
+                aktør = barn1Aktør
+            ),
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                fom = jan22,
+                tom = aug22,
+                beløp = 1054,
+                aktør = barn2Aktør
+            )
+        )
+
+        val erEndringIBeløp = BehandlingsresultatUtils.erEndringIBeløp(
+            nåværendeAndeler = nåværendeAndeler,
+            forrigeAndeler = forrigeAndeler,
+            opphørstidspunkt = des22,
+            personerFremstiltKravFor = listOf()
+        )
+
+        assertEquals(true, erEndringIBeløp)
+    }
+
+    @Test
+    fun `Skal returnere false når beløp i periode har gått fra null til et tall større enn 0 og det er søkt for person`() {
+        val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
+        val barn2Aktør = lagPerson(type = PersonType.BARN).aktør
+
+        val forrigeAndeler = listOf(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                fom = jan22,
+                tom = aug22,
+                beløp = 1054,
+                aktør = barn1Aktør
+            ),
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                fom = jan22,
+                tom = aug22,
+                beløp = 1054,
+                aktør = barn2Aktør
+            )
+        )
+        val nåværendeAndeler = listOf(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                fom = jan22,
+                tom = des22,
+                beløp = 1054,
+                aktør = barn1Aktør
+            ),
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                fom = jan22,
+                tom = aug22,
+                beløp = 1054,
+                aktør = barn2Aktør
+            )
+        )
+
+        val erEndringIBeløp = BehandlingsresultatUtils.erEndringIBeløp(
+            nåværendeAndeler = nåværendeAndeler,
+            forrigeAndeler = forrigeAndeler,
+            opphørstidspunkt = des22,
+            personerFremstiltKravFor = listOf(barn1Aktør)
+        )
+
+        assertEquals(false, erEndringIBeløp)
+    }
+
+    @Test
+    fun `Skal returnere true når beløp i periode har gått fra større enn 0 til at annet tall større enn 0 og det ikke er søkt for person`() {
+        val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
+        val barn2Aktør = lagPerson(type = PersonType.BARN).aktør
+
+        val forrigeAndeler = listOf(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                fom = jan22,
+                tom = aug22,
+                beløp = 1054,
+                aktør = barn1Aktør
+            ),
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                fom = jan22,
+                tom = aug22,
+                beløp = 1054,
+                aktør = barn2Aktør
+            )
+        )
+        val nåværendeAndeler = listOf(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                fom = jan22,
+                tom = mai22,
+                beløp = 1054,
+                aktør = barn1Aktør
+            ),
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                fom = mai22.plusMonths(1),
+                tom = aug22,
+                beløp = 527,
+                aktør = barn1Aktør
+            ),
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                fom = jan22,
+                tom = aug22,
+                beløp = 1054,
+                aktør = barn2Aktør
+            )
+        )
+
+        val erEndringIBeløp = BehandlingsresultatUtils.erEndringIBeløp(
+            nåværendeAndeler = nåværendeAndeler,
+            forrigeAndeler = forrigeAndeler,
+            opphørstidspunkt = aug22,
+            personerFremstiltKravFor = listOf()
+        )
+
+        assertEquals(true, erEndringIBeløp)
+    }
 
     @Test
     fun `Skal kaste feil dersom det finnes uvurderte ytelsepersoner`() {
@@ -159,19 +430,19 @@ class BehandlingsresultatUtilsTest {
             BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(personer)
         )
     }
-}
 
-private fun lagYtelsePerson(
-    resultat: YtelsePersonResultat,
-    ytelseSlutt: YearMonth? = YearMonth.now().minusMonths(2)
-): YtelsePerson {
-    val ytelseType = YtelseType.ORDINÆR_BARNETRYGD
-    val kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE, KravOpprinnelse.INNEVÆRENDE)
-    return YtelsePerson(
-        aktør = randomAktør(),
-        ytelseType = ytelseType,
-        kravOpprinnelse = kravOpprinnelse,
-        resultater = setOf(resultat),
-        ytelseSlutt = ytelseSlutt
-    )
+    private fun lagYtelsePerson(
+        resultat: YtelsePersonResultat,
+        ytelseSlutt: YearMonth? = YearMonth.now().minusMonths(2)
+    ): YtelsePerson {
+        val ytelseType = YtelseType.ORDINÆR_BARNETRYGD
+        val kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE, KravOpprinnelse.INNEVÆRENDE)
+        return YtelsePerson(
+            aktør = randomAktør(),
+            ytelseType = ytelseType,
+            kravOpprinnelse = kravOpprinnelse,
+            resultater = setOf(resultat),
+            ytelseSlutt = ytelseSlutt
+        )
+    }
 }
