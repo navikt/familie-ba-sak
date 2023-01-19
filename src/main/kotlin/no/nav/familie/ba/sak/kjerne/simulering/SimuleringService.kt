@@ -106,7 +106,10 @@ class SimuleringService(
                 behandling.status == BehandlingStatus.AVSLUTTET
 
         val simulering = hentSimuleringPåBehandling(behandlingId)
-        val restSimulering = vedtakSimuleringMottakereTilRestSimulering(simulering)
+        val restSimulering = vedtakSimuleringMottakereTilRestSimulering(
+            simulering,
+            featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ)
+        )
 
         return if (!behandlingErFerdigBesluttet && simuleringErUtdatert(restSimulering)) {
             oppdaterSimuleringPåBehandling(behandling)
@@ -150,10 +153,16 @@ class SimuleringService(
     }
 
     fun hentEtterbetaling(økonomiSimuleringMottakere: List<ØkonomiSimuleringMottaker>): BigDecimal {
-        return vedtakSimuleringMottakereTilRestSimulering(økonomiSimuleringMottakere).etterbetaling
+        return vedtakSimuleringMottakereTilRestSimulering(
+            økonomiSimuleringMottakere,
+            featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ)
+        ).etterbetaling
     }
 
     fun hentFeilutbetaling(økonomiSimuleringMottakere: List<ØkonomiSimuleringMottaker>): BigDecimal {
-        return vedtakSimuleringMottakereTilRestSimulering(økonomiSimuleringMottakere).feilutbetaling
+        return vedtakSimuleringMottakereTilRestSimulering(
+            økonomiSimuleringMottakere,
+            featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ)
+        ).feilutbetaling
     }
 }

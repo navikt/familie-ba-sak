@@ -144,7 +144,7 @@ class SimuleringUtilTest {
     fun `Total etterbetaling skal bli summen av ytelsene i periode med negativ feilutbetaling`() {
         val økonomiSimuleringMottaker =
             mockØkonomiSimuleringMottaker(økonomiSimuleringPostering = økonomiSimuleringPosteringerMedNegativFeilutbetaling)
-        val restSimulering = vedtakSimuleringMottakereTilRestSimulering(listOf(økonomiSimuleringMottaker))
+        val restSimulering = vedtakSimuleringMottakereTilRestSimulering(listOf(økonomiSimuleringMottaker), false)
 
         Assertions.assertEquals(BigDecimal.valueOf(500), restSimulering.etterbetaling)
     }
@@ -153,7 +153,7 @@ class SimuleringUtilTest {
     fun `Total feilutbetaling skal bli 0 i periode med negativ feilutbetaling`() {
         val økonomiSimuleringMottaker =
             mockØkonomiSimuleringMottaker(økonomiSimuleringPostering = økonomiSimuleringPosteringerMedNegativFeilutbetaling)
-        val restSimulering = vedtakSimuleringMottakereTilRestSimulering(listOf(økonomiSimuleringMottaker))
+        val restSimulering = vedtakSimuleringMottakereTilRestSimulering(listOf(økonomiSimuleringMottaker), false)
 
         Assertions.assertEquals(BigDecimal.valueOf(0), restSimulering.feilutbetaling)
     }
@@ -169,7 +169,7 @@ class SimuleringUtilTest {
 
         val økonomiSimuleringMottaker =
             mockØkonomiSimuleringMottaker(økonomiSimuleringPostering = økonomiSimuleringPosteringerMedPositivFeilutbetaling)
-        val restSimulering = vedtakSimuleringMottakereTilRestSimulering(listOf(økonomiSimuleringMottaker))
+        val restSimulering = vedtakSimuleringMottakereTilRestSimulering(listOf(økonomiSimuleringMottaker), false)
 
         Assertions.assertEquals(BigDecimal.valueOf(0), restSimulering.etterbetaling)
         Assertions.assertEquals(BigDecimal.valueOf(500), restSimulering.feilutbetaling)
@@ -238,8 +238,8 @@ class SimuleringUtilTest {
 
         val økonomiSimuleringMottakere =
             listOf(mockØkonomiSimuleringMottaker(økonomiSimuleringPostering = redusertYtelseTil2_000))
-        val simuleringsperioder = vedtakSimuleringMottakereTilSimuleringPerioder(økonomiSimuleringMottakere)
-        val oppsummering = vedtakSimuleringMottakereTilRestSimulering(økonomiSimuleringMottakere)
+        val simuleringsperioder = vedtakSimuleringMottakereTilSimuleringPerioder(økonomiSimuleringMottakere, false)
+        val oppsummering = vedtakSimuleringMottakereTilRestSimulering(økonomiSimuleringMottakere, false)
 
         assertThat(simuleringsperioder.size).isEqualTo(1)
         assertThat(simuleringsperioder[0].tidligereUtbetalt).isEqualTo(10_000.toBigDecimal())
@@ -264,8 +264,8 @@ class SimuleringUtilTest {
             )
         }
 
-        val simuleringsperioder = vedtakSimuleringMottakereTilSimuleringPerioder(vedtakSimuleringMottakere)
-        val oppsummering = vedtakSimuleringMottakereTilRestSimulering(vedtakSimuleringMottakere)
+        val simuleringsperioder = vedtakSimuleringMottakereTilSimuleringPerioder(vedtakSimuleringMottakere, false)
+        val oppsummering = vedtakSimuleringMottakereTilRestSimulering(vedtakSimuleringMottakere, false)
 
         assertThat(simuleringsperioder[0].resultat).isEqualTo(0.toBigDecimal())
         assertThat(oppsummering.etterbetaling).isEqualTo(0.toBigDecimal())
@@ -303,8 +303,8 @@ class SimuleringUtilTest {
 
         val økonomiSimuleringMottakere =
             listOf(mockØkonomiSimuleringMottaker(økonomiSimuleringPostering = øktYtelseFra2_000Til3_000))
-        val simuleringsperioder = vedtakSimuleringMottakereTilSimuleringPerioder(økonomiSimuleringMottakere)
-        val oppsummering = vedtakSimuleringMottakereTilRestSimulering(økonomiSimuleringMottakere)
+        val simuleringsperioder = vedtakSimuleringMottakereTilSimuleringPerioder(økonomiSimuleringMottakere, false)
+        val oppsummering = vedtakSimuleringMottakereTilRestSimulering(økonomiSimuleringMottakere, false)
 
         assertThat(simuleringsperioder.size).isEqualTo(1)
         assertThat(simuleringsperioder[0].tidligereUtbetalt).isEqualTo(2_000.toBigDecimal())
@@ -350,12 +350,12 @@ class SimuleringUtilTest {
 
         val økonomiSimuleringMottakere =
             listOf(mockØkonomiSimuleringMottaker(økonomiSimuleringPostering = YtelsefraBA))
-        val simuleringsperioder = vedtakSimuleringMottakereTilSimuleringPerioder(økonomiSimuleringMottakere)
-        val oppsummering = vedtakSimuleringMottakereTilRestSimulering(økonomiSimuleringMottakere)
+        val simuleringsperioder = vedtakSimuleringMottakereTilSimuleringPerioder(økonomiSimuleringMottakere, false)
+        val oppsummering = vedtakSimuleringMottakereTilRestSimulering(økonomiSimuleringMottakere, false)
 
         assertThat(simuleringsperioder.size).isEqualTo(1)
         assertThat(simuleringsperioder[0].nyttBeløp).isEqualTo(305.toBigDecimal())
-        assertThat(simuleringsperioder[0].justering).isEqualTo(165.toBigDecimal())
+        assertThat(simuleringsperioder[0].manuellPostering).isEqualTo(165.toBigDecimal())
         assertThat(simuleringsperioder[0].tidligereUtbetalt).isEqualTo(140.toBigDecimal())
         assertThat(simuleringsperioder[0].resultat).isEqualTo(0.toBigDecimal())
         assertThat(simuleringsperioder[0].feilutbetaling).isEqualTo(0.toBigDecimal())
@@ -399,12 +399,12 @@ class SimuleringUtilTest {
 
         val økonomiSimuleringMottakere =
             listOf(mockØkonomiSimuleringMottaker(økonomiSimuleringPostering = YtelsefraBA))
-        val simuleringsperioder = vedtakSimuleringMottakereTilSimuleringPerioder(økonomiSimuleringMottakere)
-        val oppsummering = vedtakSimuleringMottakereTilRestSimulering(økonomiSimuleringMottakere)
+        val simuleringsperioder = vedtakSimuleringMottakereTilSimuleringPerioder(økonomiSimuleringMottakere, false)
+        val oppsummering = vedtakSimuleringMottakereTilRestSimulering(økonomiSimuleringMottakere, false)
 
         assertThat(simuleringsperioder.size).isEqualTo(1)
         assertThat(simuleringsperioder[0].nyttBeløp).isEqualTo(305.toBigDecimal())
-        assertThat(simuleringsperioder[0].justering).isEqualTo(305.toBigDecimal())
+        assertThat(simuleringsperioder[0].manuellPostering).isEqualTo(305.toBigDecimal())
         assertThat(simuleringsperioder[0].tidligereUtbetalt).isEqualTo(0.toBigDecimal())
         assertThat(simuleringsperioder[0].resultat).isEqualTo(0.toBigDecimal())
         assertThat(simuleringsperioder[0].feilutbetaling).isEqualTo(0.toBigDecimal())
@@ -443,8 +443,8 @@ class SimuleringUtilTest {
 
         val økonomiSimuleringMottakere =
             listOf(mockØkonomiSimuleringMottaker(økonomiSimuleringPostering = øktYtelseFra3_000Til12_000))
-        val simuleringsperioder = vedtakSimuleringMottakereTilSimuleringPerioder(økonomiSimuleringMottakere)
-        val oppsummering = vedtakSimuleringMottakereTilRestSimulering(økonomiSimuleringMottakere)
+        val simuleringsperioder = vedtakSimuleringMottakereTilSimuleringPerioder(økonomiSimuleringMottakere, false)
+        val oppsummering = vedtakSimuleringMottakereTilRestSimulering(økonomiSimuleringMottakere, false)
 
         assertThat(simuleringsperioder.size).isEqualTo(1)
         assertThat(simuleringsperioder[0].tidligereUtbetalt).isEqualTo(3_000.toBigDecimal())
@@ -470,7 +470,7 @@ class SimuleringUtilTest {
 
         val økonomiSimuleringMottakere =
             listOf(mockØkonomiSimuleringMottaker(økonomiSimuleringPostering = førstegangsbehandling_18_nov))
-        val oppsummering = vedtakSimuleringMottakereTilRestSimulering(økonomiSimuleringMottakere)
+        val oppsummering = vedtakSimuleringMottakereTilRestSimulering(økonomiSimuleringMottakere, false)
 
         assertThat(oppsummering.feilutbetaling).isEqualTo(0.toBigDecimal())
         assertThat(oppsummering.etterbetaling).isEqualTo(160_629.toBigDecimal())
@@ -495,7 +495,7 @@ class SimuleringUtilTest {
 
         val økonomiSimuleringMottakere =
             listOf(mockØkonomiSimuleringMottaker(økonomiSimuleringPostering = revurering_22_nov))
-        val oppsummering = vedtakSimuleringMottakereTilRestSimulering(økonomiSimuleringMottakere)
+        val oppsummering = vedtakSimuleringMottakereTilRestSimulering(økonomiSimuleringMottakere, false)
 
         assertThat(oppsummering.feilutbetaling).isEqualTo(3_752.toBigDecimal())
         assertThat(oppsummering.etterbetaling).isEqualTo(0.toBigDecimal())
@@ -520,8 +520,8 @@ class SimuleringUtilTest {
 
         val økonomiSimuleringMottakere =
             listOf(mockØkonomiSimuleringMottaker(økonomiSimuleringPostering = revurdering_23_nov))
-        val simuleringsperioder = vedtakSimuleringMottakereTilSimuleringPerioder(økonomiSimuleringMottakere)
-        val oppsummering = vedtakSimuleringMottakereTilRestSimulering(økonomiSimuleringMottakere)
+        val simuleringsperioder = vedtakSimuleringMottakereTilSimuleringPerioder(økonomiSimuleringMottakere, false)
+        val oppsummering = vedtakSimuleringMottakereTilRestSimulering(økonomiSimuleringMottakere, false)
 
         (3..6).forEach {
             assertThat(simuleringsperioder[it].tidligereUtbetalt).isEqualTo(17_257.toBigDecimal())

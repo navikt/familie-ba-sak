@@ -14,6 +14,7 @@ class FeatureToggleConfig {
 
         const val TREKK_I_LØPENDE_UTBETALING = "familie-ba-sak.trekk-i-loepende-utbetaling"
         const val EØS_INFORMASJON_OM_ÅRLIG_KONTROLL = "familie-ba-sak.eos-informasjon-om-aarlig-kontroll"
+        const val ER_MANUEL_POSTERING_TOGGLE_PÅ = "familie-ba-sak.manuellPostering"
     }
 }
 
