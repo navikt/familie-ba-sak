@@ -76,7 +76,10 @@ class VurderTilbakekrevingSteg(
 
     private fun finnesPerioderMedEtterbetalingStørreEnnMaksBeløp(behandlinId: Long): Boolean {
         val simuleringMottaker = simuleringService.hentSimuleringPåBehandling(behandlinId)
-        val simuleringPerioder = vedtakSimuleringMottakereTilSimuleringPerioder(simuleringMottaker)
+        val simuleringPerioder = vedtakSimuleringMottakereTilSimuleringPerioder(
+            simuleringMottaker,
+            featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ)
+        )
         return simuleringPerioder.any { it.etterbetaling > BigDecimal(HELMANUELL_MIGRERING_MAKS_ETTERBETALING) }
     }
 
