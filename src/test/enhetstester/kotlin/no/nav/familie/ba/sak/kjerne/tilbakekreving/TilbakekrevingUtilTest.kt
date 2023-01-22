@@ -119,6 +119,7 @@ class TilbakekrevingUtilTest {
         tom = tom,
         feilutbetaling = feilUtbetaling,
         forfallsdato = LocalDate.now(),
+        manuellPostering = BigDecimal.ZERO,
         nyttBeløp = BigDecimal.ZERO,
         tidligereUtbetalt = BigDecimal.ZERO,
         resultat = BigDecimal.ZERO,

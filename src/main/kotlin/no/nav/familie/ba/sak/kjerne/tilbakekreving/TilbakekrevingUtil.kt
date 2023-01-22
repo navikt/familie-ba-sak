@@ -53,13 +53,25 @@ fun slåsammenNærliggendeFeilutbtalingPerioder(simuleringsPerioder: List<Simule
     return perioder
 }
 
-fun hentTilbakekrevingsperioderISimulering(simulering: List<ØkonomiSimuleringMottaker>): List<Periode> =
-    slåsammenNærliggendeFeilutbtalingPerioder(vedtakSimuleringMottakereTilRestSimulering(simulering).perioder)
+fun hentTilbakekrevingsperioderISimulering(
+    simulering: List<ØkonomiSimuleringMottaker>,
+    erManuelPosteringTogglePå: Boolean
+): List<Periode> =
+    slåsammenNærliggendeFeilutbtalingPerioder(
+        vedtakSimuleringMottakereTilRestSimulering(
+            simulering,
+            erManuelPosteringTogglePå
+        ).perioder
+    )
 
-fun opprettVarsel(tilbakekreving: Tilbakekreving?, simulering: List<ØkonomiSimuleringMottaker>): Varsel? =
+fun opprettVarsel(
+    tilbakekreving: Tilbakekreving?,
+    simulering: List<ØkonomiSimuleringMottaker>,
+    erManuelPosteringTogglePå: Boolean
+): Varsel? =
     if (tilbakekreving?.valg == Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL) {
         val varseltekst = tilbakekreving.varsel ?: throw Feil("Varseltekst er ikke satt")
-        val restSimulering = vedtakSimuleringMottakereTilRestSimulering(simulering)
+        val restSimulering = vedtakSimuleringMottakereTilRestSimulering(simulering, erManuelPosteringTogglePå)
 
         Varsel(
             varseltekst = varseltekst,

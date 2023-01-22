@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.tilbakekreving
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
@@ -43,7 +45,8 @@ class TilbakekrevingService(
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val tilbakekrevingKlient: TilbakekrevingKlient,
     private val personidentService: PersonidentService,
-    private val personopplysningerService: PersonopplysningerService
+    private val personopplysningerService: PersonopplysningerService,
+    private val featureToggleService: FeatureToggleService
 ) {
 
     fun validerRestTilbakekreving(restTilbakekreving: RestTilbakekreving?, behandlingId: Long) {
@@ -110,7 +113,8 @@ class TilbakekrevingService(
                 feilutbetaltePerioderDto = FeilutbetaltePerioderDto(
                     sumFeilutbetaling = simuleringService.hentFeilutbetaling(behandlingId).toLong(),
                     perioder = hentTilbakekrevingsperioderISimulering(
-                        simuleringService.hentSimuleringPåBehandling(behandlingId)
+                        simuleringService.hentSimuleringPåBehandling(behandlingId),
+                        featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ)
                     )
                 ),
                 fagsystem = Fagsystem.BA,
@@ -164,7 +168,11 @@ class TilbakekrevingService(
             enhetId = enhet.behandlendeEnhetId,
             enhetsnavn = enhet.behandlendeEnhetNavn,
             saksbehandlerIdent = totrinnskontroll?.saksbehandlerId ?: SikkerhetContext.hentSaksbehandler(),
-            varsel = opprettVarsel(tilbakekreving, simuleringService.hentSimuleringPåBehandling(behandling.id)),
+            varsel = opprettVarsel(
+                tilbakekreving,
+                simuleringService.hentSimuleringPåBehandling(behandling.id),
+                featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ)
+            ),
             revurderingsvedtaksdato = revurderingsvedtaksdato,
             // Verge er per nå ikke støttet i familie-ba-sak.
             verge = verge,
