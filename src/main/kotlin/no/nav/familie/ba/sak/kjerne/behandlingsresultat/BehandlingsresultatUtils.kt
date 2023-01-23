@@ -9,14 +9,54 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilTidslinje
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullMed
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.fpsak.tidsserie.StandardCombinators
 
 object BehandlingsresultatUtils {
+
+    internal fun erEndringIKompetanse(
+        nåværendeKompetanser: List<Kompetanse>,
+        forrigeKompetanser: List<Kompetanse>
+    ): Boolean {
+        val allePersonerMedKompetanser = (nåværendeKompetanser.flatMap { it.barnAktører } + forrigeKompetanser.flatMap { it.barnAktører }).distinct()
+
+        val finnesPersonMedEndretKompetanse = allePersonerMedKompetanser.any { aktør ->
+            erEndringIKompetanseForPerson(
+                nåværendeKompetanser = nåværendeKompetanser.filter { it.barnAktører.contains(aktør) },
+                forrigeKompetanser = forrigeKompetanser.filter { it.barnAktører.contains(aktør) }
+            )
+        }
+
+        return finnesPersonMedEndretKompetanse
+    }
+
+    private fun erEndringIKompetanseForPerson(
+        nåværendeKompetanser: List<Kompetanse>,
+        forrigeKompetanser: List<Kompetanse>
+    ): Boolean {
+        val nåværendeTidslinje = nåværendeKompetanser.tilTidslinje()
+        val forrigeTidslinje = forrigeKompetanser.tilTidslinje()
+
+        val endringerTidslinje = nåværendeTidslinje.kombinerUtenNullMed(forrigeTidslinje) { nåværende, forrige ->
+            (
+                nåværende.søkersAktivitet != forrige.søkersAktivitet ||
+                    nåværende.søkersAktivitetsland != forrige.søkersAktivitetsland ||
+                    nåværende.annenForeldersAktivitet != forrige.annenForeldersAktivitet ||
+                    nåværende.annenForeldersAktivitetsland != forrige.annenForeldersAktivitetsland ||
+                    nåværende.barnetsBostedsland != forrige.barnetsBostedsland ||
+                    nåværende.resultat != forrige.resultat
+                )
+        }
+
+        return endringerTidslinje.perioder().any { it.innhold == true }
+    }
 
     private fun ikkeStøttetFeil(behandlingsresultater: MutableSet<YtelsePersonResultat>) =
         Feil(
