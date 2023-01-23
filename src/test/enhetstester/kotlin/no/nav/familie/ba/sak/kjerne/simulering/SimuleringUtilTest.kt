@@ -251,7 +251,7 @@ class SimuleringUtilTest {
 
     @Test
     fun `ytelse med manuelle posteringer på trekk av 305 over 3 mnd`() {
-        val fil = File("./src/test/resources/kjerne.simulering/simulering_med_justering.json")
+        val fil = File("./src/test/resources/kjerne.simulering/simulering_med_manuell_postering.json")
 
         val ytelseMedManuellePosteringer =
             objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
