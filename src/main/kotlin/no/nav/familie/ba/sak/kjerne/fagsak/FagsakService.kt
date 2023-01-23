@@ -38,6 +38,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -117,6 +118,7 @@ class FagsakService(
                 if (institusjon?.orgNummer == null) throw FunksjonellFeil("Mangler påkrevd variabel orgnummer for institusjon")
                 fagsakRepository.finnFagsakForInstitusjonOgOrgnummer(aktør, institusjon.orgNummer)
             }
+
             else -> fagsakRepository.finnFagsakForAktør(aktør, type)
         }
 
@@ -245,6 +247,7 @@ class FagsakService(
                     fagsakId = fagsakId
                 )
             )
+        logger.info("siste iverksatte behandling ${objectMapper.writeValueAsString(sistIverksatteBehandling)}")
         val gjeldendeUtbetalingsperioder =
             if (sistIverksatteBehandling != null) vedtaksperiodeService.hentUtbetalingsperioder(behandling = sistIverksatteBehandling) else emptyList()
 
@@ -500,7 +503,8 @@ class FagsakService(
             .map { it.behandlingId }.toSet()
             .map { behandlingRepository.finnBehandling(it) }
 
-        val behandlingerSomErSisteIverksattePåFagsak = behandlingerMedLøpendeAndeler.filter { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(it.fagsak.id) == it }
+        val behandlingerSomErSisteIverksattePåFagsak =
+            behandlingerMedLøpendeAndeler.filter { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(it.fagsak.id) == it }
 
         return behandlingerSomErSisteIverksattePåFagsak.map { it.fagsak }
     }
@@ -508,7 +512,10 @@ class FagsakService(
     fun finnAlleFagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær(aktør: Aktør): List<Fagsak> {
         val alleLøpendeFagsakerPåAktør = hentAlleFagsakerForAktør(aktør).filter { it.status == FagsakStatus.LØPENDE }
 
-        val fagsakerHvorAktørHarLøpendeOrdinærBarnetrygd = finnAlleFagsakerHvorAktørHarLøpendeYtelseAvType(aktør = aktør, ytelseTyper = listOf(YtelseType.ORDINÆR_BARNETRYGD))
+        val fagsakerHvorAktørHarLøpendeOrdinærBarnetrygd = finnAlleFagsakerHvorAktørHarLøpendeYtelseAvType(
+            aktør = aktør,
+            ytelseTyper = listOf(YtelseType.ORDINÆR_BARNETRYGD)
+        )
 
         return (alleLøpendeFagsakerPåAktør + fagsakerHvorAktørHarLøpendeOrdinærBarnetrygd).distinct()
     }
