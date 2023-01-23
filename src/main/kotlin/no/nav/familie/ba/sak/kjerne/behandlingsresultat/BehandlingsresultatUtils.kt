@@ -21,7 +21,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjær
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.fpsak.tidsserie.StandardCombinators
-import java.time.YearMonth
 
 object BehandlingsresultatUtils {
 
@@ -42,7 +41,6 @@ object BehandlingsresultatUtils {
             erEndringIBeløpForPerson(
                 nåværendeAndeler = nåværendeAndeler.filter { it.aktør == aktør },
                 forrigeAndeler = forrigeAndeler.filter { it.aktør == aktør },
-                opphørstidspunkt = nåværendeAndeler.maxOf { it.stønadTom },
                 erFremstiltKravForPerson = personerFremstiltKravFor.contains(aktør)
             )
         }
@@ -54,9 +52,9 @@ object BehandlingsresultatUtils {
     private fun erEndringIBeløpForPerson(
         nåværendeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
         forrigeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
-        opphørstidspunkt: YearMonth,
         erFremstiltKravForPerson: Boolean
     ): Boolean {
+        val opphørstidspunkt = nåværendeAndeler.maxOf { it.stønadTom }
         val nåværendeTidslinje = AndelTilkjentYtelseTidslinje(nåværendeAndeler)
         val forrigeTidslinje = AndelTilkjentYtelseTidslinje(forrigeAndeler)
 
