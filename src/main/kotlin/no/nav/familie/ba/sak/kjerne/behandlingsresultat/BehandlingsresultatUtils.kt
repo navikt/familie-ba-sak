@@ -38,7 +38,7 @@ object BehandlingsresultatUtils {
     ): Boolean {
         val allePersonerMedAndeler = (nåværendeAndeler.map { it.aktør } + forrigeAndeler.map { it.aktør }).distinct()
 
-        val erEndringPerPerson = allePersonerMedAndeler.map { aktør ->
+        val erEndringIBeløpForMinstEnPerson = allePersonerMedAndeler.any { aktør ->
             erEndringIBeløpForPerson(
                 nåværendeAndeler = nåværendeAndeler.filter { it.aktør == aktør },
                 forrigeAndeler = forrigeAndeler.filter { it.aktør == aktør },
@@ -47,7 +47,7 @@ object BehandlingsresultatUtils {
             )
         }
 
-        return erEndringPerPerson.any { it }
+        return erEndringIBeløpForMinstEnPerson
     }
 
     // Kun interessert i endringer i beløp FØR opphørstidspunkt
