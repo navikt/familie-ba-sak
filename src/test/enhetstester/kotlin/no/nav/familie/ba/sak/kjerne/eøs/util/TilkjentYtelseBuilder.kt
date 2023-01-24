@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.satstypeTidslinje
-import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.tilAndelerTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.tilAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MAX_MÅNED
 import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MIN_MÅNED
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person

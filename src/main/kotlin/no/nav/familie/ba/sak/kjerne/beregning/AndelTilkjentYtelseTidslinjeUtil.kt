@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
+package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.erTilogMed3ÅrTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
