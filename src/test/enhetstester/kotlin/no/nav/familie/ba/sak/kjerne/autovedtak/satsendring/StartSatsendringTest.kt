@@ -200,18 +200,18 @@ internal class StartSatsendringTest {
                 behandling.id
             )
         } returns
-                listOf(
-                    lagAndelTilkjentYtelseMedEndreteUtbetalinger(
-                        fom = YearMonth.of(2022, 12),
-                        tom = YearMonth.of(2023, 2),
-                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                        behandling = behandling,
-                        person = lagPerson(),
-                        aktør = lagPerson().aktør,
-                        periodeIdOffset = 1,
-                        beløp = 1676
-                    )
+            listOf(
+                lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                    fom = YearMonth.of(2022, 12),
+                    tom = YearMonth.of(2023, 2),
+                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                    behandling = behandling,
+                    person = lagPerson(),
+                    aktør = lagPerson().aktør,
+                    periodeIdOffset = 1,
+                    beløp = 1676
                 )
+            )
 
         startSatsendring.startSatsendring()
 
