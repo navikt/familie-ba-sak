@@ -39,11 +39,13 @@ object BehandlingsresultatUtils {
         personerFremstiltKravFor: List<Aktør>
     ): Boolean {
         val allePersonerMedAndeler = (nåværendeAndeler.map { it.aktør } + forrigeAndeler.map { it.aktør }).distinct()
+        val opphørstidspunkt = nåværendeAndeler.maxOf { it.stønadTom }
 
         val erEndringIBeløpForMinstEnPerson = allePersonerMedAndeler.any { aktør ->
             erEndringIBeløpForPerson(
                 nåværendeAndeler = nåværendeAndeler.filter { it.aktør == aktør },
                 forrigeAndeler = forrigeAndeler.filter { it.aktør == aktør },
+                opphørstidspunkt = opphørstidspunkt,
                 erFremstiltKravForPerson = personerFremstiltKravFor.contains(aktør)
             )
         }
@@ -55,9 +57,9 @@ object BehandlingsresultatUtils {
     private fun erEndringIBeløpForPerson(
         nåværendeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
         forrigeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        opphørstidspunkt: YearMonth,
         erFremstiltKravForPerson: Boolean
     ): Boolean {
-        val opphørstidspunkt = nåværendeAndeler.maxOf { it.stønadTom }
         val nåværendeTidslinje = AndelTilkjentYtelseTidslinje(nåværendeAndeler)
         val forrigeTidslinje = AndelTilkjentYtelseTidslinje(forrigeAndeler)
 
