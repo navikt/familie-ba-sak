@@ -298,8 +298,9 @@ class BrevService(
         val korrigertEtterbetaling =
             korrigertEtterbetalingService.finnAktivtKorrigeringPåBehandling(vedtak.behandling.id)
 
-        return korrigertEtterbetaling?.beløp?.let { Utils.formaterBeløp(it) } ?: simuleringService.hentEtterbetaling(vedtak.behandling.id
-        ).takeIf { it >= BigDecimal.ZERO }?.run { Utils.formaterBeløp(this.toInt()) }
+        return korrigertEtterbetaling?.beløp?.let { Utils.formaterBeløp(it) } ?: simuleringService.hentEtterbetaling(
+            vedtak.behandling.id
+        ).takeIf { it > BigDecimal.ZERO }?.run { Utils.formaterBeløp(this.toInt()) }
     }
 
     private fun erFeilutbetalingPåBehandling(behandlingId: Long): Boolean =
