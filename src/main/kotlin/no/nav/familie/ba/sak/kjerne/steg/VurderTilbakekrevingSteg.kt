@@ -41,8 +41,8 @@ class VurderTilbakekrevingSteg(
         when {
             behandling.erHelmanuellMigrering() ||
                 featureToggleService.isEnabled(ENDRINGER_I_VALIDERING_FOR_MIGRERINGSBEHANDLING) -> {
-                // manuelle migreringer kan ikke fortsettes om det finnes en feilutbetaling
-                // eller en etterbetaling større enn 220 KR
+                // manuelle migreringer kan ikke fortsettes om det finnes en etterbetaling
+                // større enn 220 KR
                 if (finnesPerioderMedEtterbetalingStørreEnnMaksBeløp(behandlinId = behandling.id)) kastException(behandling)
             }
             else -> {
