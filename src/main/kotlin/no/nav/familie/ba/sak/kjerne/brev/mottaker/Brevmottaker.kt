@@ -63,14 +63,7 @@ data class Brevmottaker(
     override fun toString(): String {
         return this::class.simpleName + "(" +
             "id = $id, " +
-            "behandlingId = $behandlingId, " +
-            "type = $type, " +
-            "navn = $navn, " +
-            "adresselinje1 = $adresselinje1, " +
-            "adresselinje2 = $adresselinje2, " +
-            "postnummer = $postnummer, " +
-            "poststed = $poststed, " +
-            "landkode = $landkode)"
+            "behandlingId = $behandlingId)"
     }
 }
 
