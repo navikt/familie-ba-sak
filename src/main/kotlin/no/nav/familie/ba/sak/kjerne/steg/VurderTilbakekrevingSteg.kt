@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.ENDRINGER_I_VALIDERING_FOR_MIGRERINGSBEHANDLING
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.IKKE_STOPP_MIGRERINGSBEHANDLING
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.MIGRERING_MED_FEILUTBETALING_UNDER_BELØPSGRENSE
@@ -82,8 +83,11 @@ class VurderTilbakekrevingSteg(
     }
 
     private fun erNegativePerioderesultaterPåMaks1KroneOgTotalFeilutbetalingMindreEnnBeløpsgrense(behandlingId: Long): Boolean {
-        val simulering = simuleringService.hentSimuleringPåBehandling(behandlingId)
-        val simuleringPerioder = vedtakSimuleringMottakereTilSimuleringPerioder(simulering)
+        val simuleringMottaker = simuleringService.hentSimuleringPåBehandling(behandlingId)
+        val simuleringPerioder = vedtakSimuleringMottakereTilSimuleringPerioder(
+            simuleringMottaker,
+            featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ)
+        )
         return simuleringPerioder.all { it.resultat <= BigDecimal.ZERO && it.resultat >= BigDecimal(-1) } &&
             simuleringService.hentFeilutbetaling(behandlingId) < BigDecimal(HELMANUELL_MIGRERING_FEILUTBETALING_BELØPSGRENSE)
     }
