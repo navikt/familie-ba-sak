@@ -97,7 +97,7 @@ internal class StartSatsendringTest {
     @Test
     fun `skal ikke starte satsendring hvis man har flere satstyper som ikke er skrudd på i featuretoggle`() {
         every { featureToggleService.isEnabled(any(), any()) } returns false
-        //every { featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_TILLEGG_ORBA, any()) } returns true
+        // every { featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_TILLEGG_ORBA, any()) } returns true
 
         val behandling = lagBehandling()
 
