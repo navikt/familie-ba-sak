@@ -82,14 +82,14 @@ class OpprettTaskService(
         }
     }
 
-    fun opprettSatsendringTask(behandlingsId: Long) {
+    fun opprettSatsendringTask(fagsakId: Long) {
         overstyrTaskMedNyCallId(IdUtils.generateId()) {
             taskRepository.save(
                 Task(
                     type = SatsendringTask.TASK_STEP_TYPE,
-                    payload = behandlingsId.toString(),
+                    payload = fagsakId.toString(),
                     properties = Properties().apply {
-                        this["behandlingsId"] = behandlingsId.toString()
+                        this["fagsakId"] = fagsakId.toString()
                     }
                 )
             )

@@ -182,4 +182,39 @@ internal class StartSatsendringTest {
 
         verify(exactly = 1) { satskjøringRepository.save(any()) }
     }
+
+    @Test
+    fun `Ikke start satsendring på sak hvis ytelsen utløper før satstidspunkt`() {
+        every { featureToggleService.isEnabled(any(), any()) } returns true
+        every { featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_OPPRETT_TASKER) } returns true
+        justRun { opprettTaskService.opprettSatsendringTask(any()) }
+
+        val behandling = lagBehandling()
+
+        every { fagsakRepository.finnLøpendeFagsakerForSatsendring(any()) } returns listOf(behandling.fagsak)
+
+        every { behandlingRepository.finnSisteIverksatteBehandling(behandling.fagsak.id) } returns behandling
+
+        every {
+            andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
+                behandling.id
+            )
+        } returns
+                listOf(
+                    lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                        fom = YearMonth.of(2022, 12),
+                        tom = YearMonth.of(2023, 2),
+                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                        behandling = behandling,
+                        person = lagPerson(),
+                        aktør = lagPerson().aktør,
+                        periodeIdOffset = 1,
+                        beløp = 1676
+                    )
+                )
+
+        startSatsendring.startSatsendring()
+
+        verify(exactly = 0) { satskjøringRepository.save(any()) }
+    }
 }
