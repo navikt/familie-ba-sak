@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.satsendring
 
 import io.mockk.every
+import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
@@ -48,9 +49,11 @@ internal class StartSatsendringTest {
     }
 
     @Test
-    fun `start satsendring på sak hvis den kun har satstype for barn under 6 år`() {
+    fun `start satsendring kun for saker som er feature togglet`() {
         every { featureToggleService.isEnabled(any(), any()) } returns false
         every { featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_TILLEGG_ORBA, any()) } returns true
+        every { featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_OPPRETT_TASKER) } returns true
+        justRun { opprettTaskService.opprettSatsendringTask(any()) }
 
         val behandling = lagBehandling()
 
@@ -94,7 +97,7 @@ internal class StartSatsendringTest {
     @Test
     fun `skal ikke starte satsendring hvis man har flere satstyper som ikke er skrudd på i featuretoggle`() {
         every { featureToggleService.isEnabled(any(), any()) } returns false
-        every { featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_TILLEGG_ORBA, any()) } returns true
+        //every { featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_TILLEGG_ORBA, any()) } returns true
 
         val behandling = lagBehandling()
 
@@ -138,6 +141,8 @@ internal class StartSatsendringTest {
     @Test
     fun `start satsendring på sak hvis sakstypen er en av de som er togglet på`() {
         every { featureToggleService.isEnabled(any(), any()) } returns true
+        every { featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_OPPRETT_TASKER) } returns true
+        justRun { opprettTaskService.opprettSatsendringTask(any()) }
 
         val behandling = lagBehandling()
 

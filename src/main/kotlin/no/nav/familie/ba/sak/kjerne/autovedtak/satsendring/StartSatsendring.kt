@@ -5,12 +5,12 @@ import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import org.slf4j.Logger
@@ -83,9 +83,8 @@ class StartSatsendring(
                 ) {
                     satstyper.add(SatsType.TILLEGG_ORBA)
                 }
-                logger.info("Fant satstyper $satstyper på behandling=${sisteIverksatteBehandling.id}")
 
-                sjekkOgTriggSatsendring(satstyper, it, gyldigeSatser)
+                sjekkOgTriggSatsendring(satstyper, sisteIverksatteBehandling, gyldigeSatser)
             } else {
                 logger.info("Satsendring utføres ikke på fagsak=${it.id} fordi fagsaken mangler en iverksatt behandling")
             }
@@ -115,12 +114,17 @@ class StartSatsendring(
 
     private fun sjekkOgTriggSatsendring(
         satstyper: List<SatsType>,
-        it: Fagsak,
+        behandling: Behandling,
         gyldigeSatser: List<SatsType>
     ) {
         if (gyldigeSatser.containsAll(satstyper)) {
-            logger.info("Oppretter satsendringtask for fagsak=${it.id}")
-            satskjøringRepository.save(Satskjøring(fagsak = it))
+            if (featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_OPPRETT_TASKER)) {
+                logger.info("Oppretter satsendringtask for fagsak=${behandling.id}")
+                opprettTaskService.opprettSatsendringTask(behandling.id)
+                satskjøringRepository.save(Satskjøring(fagsak = behandling.fagsak))
+            } else {
+                logger.info("Oppretter ikke satsendringtask for fagsak=${behandling.id}. Toggle avskrudd.")
+            }
         }
     }
 
@@ -130,7 +134,7 @@ class StartSatsendring(
             gyldigeSatser.add(SatsType.TILLEGG_ORBA)
         }
 
-        if (featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_ORBA, true)) {
+        if (featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_ORBA, false)) {
             gyldigeSatser.add(SatsType.ORBA)
         }
 
@@ -142,12 +146,12 @@ class StartSatsendring(
             gyldigeSatser.add(SatsType.SMA)
         }
 
-        logger.info("Gyldige satser $gyldigeSatser")
+        logger.info("Påskrudde satstyper for satskjøring $gyldigeSatser")
         return gyldigeSatser
     }
 
     companion object {
         val logger: Logger = LoggerFactory.getLogger(StartSatsendring::class.java)
-        const val BOLK_STØRRELSE_SATSENDRING = 500
+        const val BOLK_STØRRELSE_SATSENDRING = 100
     }
 }
