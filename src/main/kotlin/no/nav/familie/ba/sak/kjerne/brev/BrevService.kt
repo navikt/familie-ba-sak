@@ -134,6 +134,7 @@ class BrevService(
                 vedtakFellesfelter = vedtakFellesfelter,
                 informasjonOmAarligKontroll = vedtaksperiodeService.skalHaÅrligKontroll(vedtak)
             )
+
             Brevmal.VEDTAK_FORTSATT_INNVILGET_INSTITUSJON -> ForsattInnvilget(
                 mal = Brevmal.VEDTAK_FORTSATT_INNVILGET_INSTITUSJON,
                 vedtakFellesfelter = vedtakFellesfelter
@@ -294,11 +295,11 @@ class BrevService(
         hentEtterbetalingsbeløp(vedtak)?.let { EtterbetalingInstitusjon(it) }
 
     private fun hentEtterbetalingsbeløp(vedtak: Vedtak): String? {
-        val etterbetalingsBeløp =
-            korrigertEtterbetalingService.finnAktivtKorrigeringPåBehandling(vedtak.behandling.id)?.beløp?.toBigDecimal()
-                ?: simuleringService.hentEtterbetaling(vedtak.behandling.id)
+        val korrigertEtterbetaling =
+            korrigertEtterbetalingService.finnAktivtKorrigeringPåBehandling(vedtak.behandling.id)
 
-        return etterbetalingsBeløp.takeIf { it >= BigDecimal.ZERO }?.run { Utils.formaterBeløp(this.toInt()) }
+        return korrigertEtterbetaling?.beløp?.let { Utils.formaterBeløp(it) } ?: simuleringService.hentEtterbetaling(vedtak.behandling.id
+        ).takeIf { it >= BigDecimal.ZERO }?.run { Utils.formaterBeløp(this.toInt()) }
     }
 
     private fun erFeilutbetalingPåBehandling(behandlingId: Long): Boolean =
