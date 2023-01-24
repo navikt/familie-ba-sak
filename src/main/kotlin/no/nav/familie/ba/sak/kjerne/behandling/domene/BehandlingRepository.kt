@@ -162,13 +162,6 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
         månedÅrForEndring: YearMonth
     ): List<Long>
 
-    @Query("SELECT DISTINCT aty.behandlingId FROM AndelTilkjentYtelse aty WHERE aty.behandlingId in :iverksatteLøpende AND aty.sats = :gammelSats AND aty.kalkulertUtbetalingsbeløp > 0 AND aty.stønadTom >= :månedÅrForEndring")
-    fun finnBehandlingerForSatsendring(
-        gammelSats: Int,
-        månedÅrForEndring: YearMonth,
-        page: Pageable
-    ): List<Long>
-
     @Query("SELECT new kotlin.Pair(b.opprettetÅrsak, count(*)) from Behandling b group by b.opprettetÅrsak")
     fun finnAntallBehandlingerPerÅrsak(): List<Pair<BehandlingÅrsak, Long>>
 
