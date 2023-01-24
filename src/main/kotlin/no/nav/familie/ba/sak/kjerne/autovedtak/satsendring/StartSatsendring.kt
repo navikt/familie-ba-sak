@@ -121,7 +121,7 @@ class StartSatsendring(
             if (featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_OPPRETT_TASKER)) {
                 logger.info("Oppretter satsendringtask for fagsak=${behandling.id}")
                 opprettTaskService.opprettSatsendringTask(behandling.id)
-                satskjøringRepository.save(Satskjøring(fagsak = behandling.fagsak))
+                satskjøringRepository.save(Satskjøring(fagsakId = behandling.fagsak.id))
             } else {
                 logger.info("Oppretter ikke satsendringtask for fagsak=${behandling.id}. Toggle avskrudd.")
             }
