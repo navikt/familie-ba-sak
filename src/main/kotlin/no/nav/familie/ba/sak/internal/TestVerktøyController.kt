@@ -11,8 +11,7 @@ import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottaker
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
-import no.nav.familie.ba.sak.task.SatsendringTask
-import no.nav.familie.ba.sak.task.StartSatsendringForAlleBehandlingerTask
+import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.TaBehandlingerEtterVentefristAvVentTask
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.kontrakter.felles.PersonIdent
@@ -36,7 +35,8 @@ class TestVerktøyController(
     private val autovedtakStegService: AutovedtakStegService,
     private val taskRepository: TaskRepositoryWrapper,
     private val tilgangService: TilgangService,
-    private val simuleringService: SimuleringService
+    private val simuleringService: SimuleringService,
+    private val opprettTaskService: OpprettTaskService
 
 ) {
 
@@ -51,23 +51,12 @@ class TestVerktøyController(
         }
     }
 
-    @GetMapping(path = ["/test-satsendring/{behandlingId}"])
+    @GetMapping(path = ["/test-satsendring/{fagsakId}"])
     @Unprotected
-    fun utførSatsendringPåBehandling(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<String>> {
+    fun utførSatsendringPåBehandling(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<String>> {
         return if (envService.erPreprod() || envService.erDev()) {
-            SatsendringTask.opprettTask(behandlingId)
-            ResponseEntity.ok(Ressurs.success("Trigget satsendring for behandling $behandlingId"))
-        } else {
-            ResponseEntity.ok(Ressurs.success(MELDING))
-        }
-    }
-
-    @GetMapping(path = ["/test-satsendring/alle"])
-    @Unprotected
-    fun utførSatsendringPåAlleBehandlinger(): ResponseEntity<Ressurs<String>> {
-        return if (envService.erPreprod() || envService.erDev()) {
-            taskRepository.save(StartSatsendringForAlleBehandlingerTask.opprettTask(1654))
-            ResponseEntity.ok(Ressurs.success("Trigget satsendring for alle behandlinger"))
+            opprettTaskService.opprettSatsendringTask(fagsakId)
+            ResponseEntity.ok(Ressurs.success("Trigget satsendring for behandling $fagsakId"))
         } else {
             ResponseEntity.ok(Ressurs.success(MELDING))
         }

@@ -15,13 +15,9 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
-import no.nav.familie.ba.sak.task.SatsendringTask
-import no.nav.familie.ba.sak.task.erHverdag
-import no.nav.familie.leader.LeaderClient
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDateTime
 import java.time.YearMonth
 
 @Service
@@ -85,38 +81,6 @@ class AutovedtakSatsendringService(
         taskRepository.save(task)
 
         return "Satsendring kjørt OK"
-    }
-
-    /**
-     * Eksempel på hvordan man kan opprette tasker for behandling av fagsaker som
-     * har gammel sats.
-     *
-     * Annoter metoden med @Scheduled(cron = "0 0 7 * * *") så vil den prøve å plukke fagsaker
-     * hver morgen. Ersatt kjøringsmåned med måned for ny sats, eller måneden man ønsker å kjøre satsendring
-     *
-     * Vi forsøker flere dager for å plukke opp eventuelle behandlinger
-     * som blir iverksatt med gammel sats som har ligget åpne.
-     */
-    fun scheduledFinnOgOpprettTaskerForSatsendring() {
-        if (LeaderClient.isLeader() == false) return
-
-        val kjøringsmåned = YearMonth.of(2022, 1)
-
-        // Vi ønsker kun å opprette tasker i inneværende satsendringsmåned som nå er januar 2022
-        if (YearMonth.now() != kjøringsmåned) {
-            logger.info("Dropper å lage satsendringsbehandlinger fordi måneden vi er i er ikke en satsendringsmåned")
-        } else if (!LocalDateTime.now().erHverdag(0)) {
-            logger.info("Dropper å lage satsendringsbehandlinger fordi det ikke er hverdag")
-        } else {
-            finnOgOpprettTaskerForSatsendring(1654)
-        }
-    }
-
-    @Transactional
-    fun finnOgOpprettTaskerForSatsendring(gammelSats: Int) {
-        finnBehandlingerForSatsendring(gammelSats, YearMonth.now()).forEach {
-            taskRepository.save(SatsendringTask.opprettTask(it))
-        }
     }
 
     /**

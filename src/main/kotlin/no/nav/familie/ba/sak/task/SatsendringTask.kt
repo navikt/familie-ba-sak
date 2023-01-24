@@ -5,7 +5,6 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import org.springframework.stereotype.Service
-import java.util.Properties
 
 @Service
 @TaskStepBeskrivelse(
@@ -26,15 +25,5 @@ class SatsendringTask(
     companion object {
 
         const val TASK_STEP_TYPE = "satsendring"
-
-        fun opprettTask(behandlingsId: Long): Task {
-            return Task(
-                type = TASK_STEP_TYPE,
-                payload = behandlingsId.toString(),
-                properties = Properties().apply {
-                    this["behandlingsId"] = behandlingsId.toString()
-                }
-            )
-        }
     }
 }
