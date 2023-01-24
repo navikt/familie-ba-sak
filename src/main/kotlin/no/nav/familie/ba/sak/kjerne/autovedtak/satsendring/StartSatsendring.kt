@@ -34,7 +34,7 @@ class StartSatsendring(
     @Transactional
     fun startSatsendring(satsTidspunkt: YearMonth = YearMonth.of(2023, 3)) {
         val gyldigeSatser = hentGyldigeSatser()
-        fagsakRepository.finnLøpendeFagsakerSatsendring(Pageable.ofSize(BOLK_STØRRELSE_SATSENDRING)).forEach {
+        fagsakRepository.finnLøpendeFagsakerForSatsendring(Pageable.ofSize(BOLK_STØRRELSE_SATSENDRING)).forEach {
             val sisteIverksatteBehandling = behandlingRepository.finnSisteIverksatteBehandling(it.id)
 
             if (sisteIverksatteBehandling != null) {

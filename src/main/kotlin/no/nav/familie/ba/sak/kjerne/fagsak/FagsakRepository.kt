@@ -58,7 +58,7 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
                 ) AND f.status = 'LØPENDE' AND f.arkivert = false""",
         nativeQuery = true
     )
-    fun finnLøpendeFagsakerSatsendring(page: Pageable): List<Fagsak>
+    fun finnLøpendeFagsakerForSatsendring(page: Pageable): List<Fagsak>
 
     @Modifying
     @Query(

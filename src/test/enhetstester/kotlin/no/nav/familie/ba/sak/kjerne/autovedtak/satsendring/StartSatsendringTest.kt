@@ -57,7 +57,7 @@ internal class StartSatsendringTest {
 
         val behandling = lagBehandling()
 
-        every { fagsakRepository.finnLøpendeFagsakerSatsendring(any()) } returns listOf(behandling.fagsak)
+        every { fagsakRepository.finnLøpendeFagsakerForSatsendring(any()) } returns listOf(behandling.fagsak)
 
         every { behandlingRepository.finnSisteIverksatteBehandling(behandling.fagsak.id) } returns behandling
 
@@ -101,7 +101,7 @@ internal class StartSatsendringTest {
 
         val behandling = lagBehandling()
 
-        every { fagsakRepository.finnLøpendeFagsakerSatsendring(any()) } returns listOf(behandling.fagsak)
+        every { fagsakRepository.finnLøpendeFagsakerForSatsendring(any()) } returns listOf(behandling.fagsak)
 
         every { behandlingRepository.finnSisteIverksatteBehandling(behandling.fagsak.id) } returns behandling
 
@@ -146,7 +146,7 @@ internal class StartSatsendringTest {
 
         val behandling = lagBehandling()
 
-        every { fagsakRepository.finnLøpendeFagsakerSatsendring(any()) } returns listOf(behandling.fagsak)
+        every { fagsakRepository.finnLøpendeFagsakerForSatsendring(any()) } returns listOf(behandling.fagsak)
 
         every { behandlingRepository.finnSisteIverksatteBehandling(behandling.fagsak.id) } returns behandling
 
