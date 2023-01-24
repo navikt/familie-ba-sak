@@ -17,9 +17,9 @@ class SatsendringTask(
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
-        val behandlingId = task.payload.toLong()
+        val fagsakId = task.payload.toLong()
 
-        autovedtakSatsendringService.kjørBehandling(sistIverksatteBehandlingId = behandlingId)
+        autovedtakSatsendringService.kjørBehandling(fagsakId = fagsakId)
     }
 
     companion object {

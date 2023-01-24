@@ -35,8 +35,9 @@ class AutovedtakSatsendringService(
      *
      */
     @Transactional
-    override fun kjørBehandling(sistIverksatteBehandlingId: Long): String {
-        val behandling = behandlingRepository.finnBehandling(behandlingId = sistIverksatteBehandlingId)
+    override fun kjørBehandling(fagsakId: Long): String {
+        val behandling = behandlingRepository.finnSisteIverksatteBehandling(fagsakId = fagsakId)
+            ?: error("Fant ikke siste iverksette behandling for $fagsakId")
         val aktivOgÅpenBehandling = behandlingRepository.findByFagsakAndAktivAndOpen(fagsakId = behandling.fagsak.id)
         val søkerAktør = behandling.fagsak.aktør
 

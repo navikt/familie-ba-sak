@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.SatsTidspunkt
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -106,7 +107,7 @@ class BehandlingSatsendringTest(
 
         // Fjerner mocking slik at den siste satsendringen vi fjernet via mocking nå skal komme med.
         unmockkObject(SatsTidspunkt)
-        autovedtakSatsendringService.kjørBehandling(sistIverksatteBehandlingId = behandling.id)
+        autovedtakSatsendringService.kjørBehandling(fagsakId = behandling.fagsak.id)
 
         val satsendingBehandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = behandling.fagsak.id)
         assertEquals(Behandlingsresultat.ENDRET_UTBETALING, satsendingBehandling?.resultat)
@@ -193,8 +194,8 @@ class BehandlingSatsendringTest(
         assertEquals(StegType.BEHANDLINGSRESULTAT, revurderingEtterVilkårsvurdering.data!!.steg)
 
         // Fjerner mocking slik at den siste satsendringen vi fjernet via mocking nå skal komme med.
-        unmockkObject(SatsTidspunkt)
-        autovedtakSatsendringService.kjørBehandling(sistIverksatteBehandlingId = behandling.id)
+        unmockkObject(SatsService)
+        autovedtakSatsendringService.kjørBehandling(fagsakId = behandling.fagsak.id)
 
         val åpenBehandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = behandling.fagsak.id)
         assertEquals(revurdering.data!!.behandlingId, åpenBehandling!!.id)
@@ -270,7 +271,7 @@ class BehandlingSatsendringTest(
         unmockkObject(SatsTidspunkt)
         autovedtakSatsendringService.finnBehandlingerForSatsendring(1054, YearMonth.of(2022, 1))
             .filter { it == behandling.id } // kjør kun satsendring for behandlingen vi tester i dette testcaset
-            .forEach { autovedtakSatsendringService.kjørBehandling(sistIverksatteBehandlingId = it) }
+            .forEach { autovedtakSatsendringService.kjørBehandling(fagsakId = behandling.fagsak.id) }
 
         val satsendingBehandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = behandling.fagsak.id)
         assertEquals(Behandlingsresultat.ENDRET_UTBETALING, satsendingBehandling?.resultat)
