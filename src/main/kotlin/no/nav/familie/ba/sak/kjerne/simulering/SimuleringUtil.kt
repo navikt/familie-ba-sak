@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.simulering
 
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.simulering.domene.RestSimulering
 import no.nav.familie.ba.sak.kjerne.simulering.domene.SimuleringsPeriode
@@ -73,6 +74,12 @@ fun vedtakSimuleringMottakereTilSimuleringPerioder(
     val tidSimuleringHentet = økonomiSimuleringMottakere.firstOrNull()?.opprettetTidspunkt?.toLocalDate()
 
     return simuleringPerioder.map { (fom, posteringListe) ->
+        val manuellPostering = hentManuellPosteringIPeriode(posteringListe)
+
+        if (manuellPostering != BigDecimal.ZERO && !erManuelPosteringTogglePå) {
+            throw FunksjonellFeil("Denne behandlingen inneholder manuelle posteringer. Systemet støtter ikke manuelle posteringer helt enda.")
+        }
+
         SimuleringsPeriode(
             fom,
             posteringListe[0].tom,
@@ -88,7 +95,7 @@ fun vedtakSimuleringMottakereTilSimuleringPerioder(
             } else {
                 hentResultatIPeriodeGammel(posteringListe)
             },
-            manuellPostering = hentManuellPosteringIPeriode(posteringListe),
+            manuellPostering = manuellPostering,
             feilutbetaling = hentPositivFeilbetalingIPeriode(posteringListe),
             etterbetaling = hentEtterbetalingIPeriode(posteringListe, tidSimuleringHentet)
         )

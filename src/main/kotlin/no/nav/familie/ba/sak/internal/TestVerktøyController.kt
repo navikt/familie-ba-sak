@@ -1,11 +1,15 @@
 package no.nav.familie.ba.sak.internal
 
 import no.nav.familie.ba.sak.common.EnvService
+import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.AutobrevScheduler
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
+import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottaker
+import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.ba.sak.task.SatsendringTask
 import no.nav.familie.ba.sak.task.StartSatsendringForAlleBehandlingerTask
@@ -30,7 +34,10 @@ class TestVerktøyController(
     private val personidentService: PersonidentService,
     private val envService: EnvService,
     private val autovedtakStegService: AutovedtakStegService,
-    private val taskRepository: TaskRepositoryWrapper
+    private val taskRepository: TaskRepositoryWrapper,
+    private val tilgangService: TilgangService,
+    private val simuleringService: SimuleringService
+
 ) {
 
     @GetMapping(path = ["/autobrev"])
@@ -104,6 +111,13 @@ class TestVerktøyController(
         } else {
             ResponseEntity.ok(Ressurs.success(MELDING))
         }
+    }
+
+    @GetMapping(path = ["/hent-simulering-pa-behandling/{behandlingId}"])
+    fun hentSimuleringPåBehandling(@PathVariable behandlingId: Long): List<ØkonomiSimuleringMottaker> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
+
+        return simuleringService.hentSimuleringPåBehandling(behandlingId)
     }
 
     companion object {
