@@ -295,12 +295,11 @@ class BrevService(
         hentEtterbetalingsbeløp(vedtak)?.let { EtterbetalingInstitusjon(it) }
 
     private fun hentEtterbetalingsbeløp(vedtak: Vedtak): String? {
-        val korrigertEtterbetaling =
-            korrigertEtterbetalingService.finnAktivtKorrigeringPåBehandling(vedtak.behandling.id)
+        val etterbetalingsBeløp =
+            korrigertEtterbetalingService.finnAktivtKorrigeringPåBehandling(vedtak.behandling.id)?.beløp?.toBigDecimal()
+                ?: simuleringService.hentEtterbetaling(vedtak.behandling.id)
 
-        return korrigertEtterbetaling?.beløp?.let { Utils.formaterBeløp(it) } ?: simuleringService.hentEtterbetaling(
-            vedtak.behandling.id
-        ).takeIf { it > BigDecimal.ZERO }?.run { Utils.formaterBeløp(this.toInt()) }
+        return etterbetalingsBeløp.takeIf { it > BigDecimal.ZERO }?.run { Utils.formaterBeløp(this.toInt()) }
     }
 
     private fun erFeilutbetalingPåBehandling(behandlingId: Long): Boolean =
