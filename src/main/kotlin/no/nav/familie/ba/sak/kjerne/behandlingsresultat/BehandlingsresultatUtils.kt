@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
@@ -346,10 +347,14 @@ fun erEndringIVilkårvurdering(
 
         Vilkår.values().any { vilkårType ->
             erEndringIVilkårvurderingForPerson(
-                nåværendePersonResultat.filter { it.aktør == aktør }.flatMap { it.vilkårResultater }
-                    .filter { it.vilkårType == vilkårType },
-                forrigePersonResultat.filter { it.aktør == aktør }.flatMap { it.vilkårResultater }
-                    .filter { it.vilkårType == vilkårType }
+                nåværendePersonResultat
+                    .filter { it.aktør == aktør }
+                    .flatMap { it.vilkårResultater }
+                    .filter { it.vilkårType == vilkårType && it.resultat == Resultat.OPPFYLT },
+                forrigePersonResultat
+                    .filter { it.aktør == aktør }
+                    .flatMap { it.vilkårResultater }
+                    .filter { it.vilkårType == vilkårType && it.resultat == Resultat.OPPFYLT}
             )
         }
     }
@@ -358,10 +363,9 @@ fun erEndringIVilkårvurdering(
 }
 
 // Relevante endringer er
-// 1. Endringer i resultat
-// 2. Endringer i utdypende vilkårsvurdering
-// 3. Endringer i regelverk
-// 4. Splitt i vilkårsvurderingen
+// 1. Endringer i utdypende vilkårsvurdering
+// 2. Endringer i regelverk
+// 3. Splitt i vilkårsvurderingen
 fun erEndringIVilkårvurderingForPerson(
     nåværendeVilkårResultat: List<VilkårResultat>,
     forrigeVilkårResultat: List<VilkårResultat>
@@ -372,7 +376,6 @@ fun erEndringIVilkårvurderingForPerson(
     val endringIVilkårResultat =
         nåværendeVilkårResultatTidslinje.kombinerUtenNullMed(tidligereVilkårResultatTidslinje) { nåværende, forrige ->
 
-            nåværende.resultat != forrige.resultat ||
                 nåværende.utdypendeVilkårsvurderinger.toSet() != forrige.utdypendeVilkårsvurderinger.toSet() ||
                 nåværende.vurderesEtter != forrige.vurderesEtter ||
                 nåværende.periodeFom != forrige.periodeFom ||
