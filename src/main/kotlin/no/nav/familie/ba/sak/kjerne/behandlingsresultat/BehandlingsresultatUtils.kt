@@ -372,13 +372,11 @@ fun erEndringIVilkårvurderingForPerson(
     val endringIVilkårResultat =
         nåværendeVilkårResultatTidslinje.kombinerUtenNullMed(tidligereVilkårResultatTidslinje) { nåværende, forrige ->
 
-            when {
-                nåværende.resultat != forrige.resultat -> true
-                nåværende.utdypendeVilkårsvurderinger.toSet() != forrige.utdypendeVilkårsvurderinger.toSet() -> true
-                nåværende.vurderesEtter != forrige.vurderesEtter -> true
-                nåværende.periodeFom != forrige.periodeFom || nåværende.periodeTom != forrige.periodeTom -> true
-                else -> false
-            }
+            nåværende.resultat != forrige.resultat ||
+                nåværende.utdypendeVilkårsvurderinger.toSet() != forrige.utdypendeVilkårsvurderinger.toSet() ||
+                nåværende.vurderesEtter != forrige.vurderesEtter ||
+                nåværende.periodeFom != forrige.periodeFom ||
+                nåværende.periodeTom != forrige.periodeTom
         }
 
     return endringIVilkårResultat.perioder().any { it.innhold == true }
