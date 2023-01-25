@@ -51,8 +51,6 @@ object Utils {
 
     inline fun <reified T : Enum<T>> konverterStringTilEnums(string: String?): List<T> =
         if (string.isNullOrBlank()) emptyList() else string.split(";").map { enumValueOf(it) }
-
-    infix fun <T> List<T>?.harIkkeLikInnholdIgnorerRekkefølge(other: List<T>?) = this?.size != other?.size || this?.toSet() != other?.toSet()
 }
 
 fun Any.convertDataClassToJson(): String {

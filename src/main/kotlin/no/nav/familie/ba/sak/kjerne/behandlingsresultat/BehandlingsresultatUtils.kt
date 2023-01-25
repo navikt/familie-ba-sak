@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
-import no.nav.familie.ba.sak.common.Utils.harIkkeLikInnholdIgnorerRekkefølge
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.isSameOrBefore
@@ -375,7 +374,7 @@ fun erEndringIVilkårvurderingForPerson(
 
             when {
                 nåværende.resultat != forrige.resultat -> true
-                nåværende.utdypendeVilkårsvurderinger.harIkkeLikInnholdIgnorerRekkefølge(forrige.utdypendeVilkårsvurderinger) -> true
+                nåværende.utdypendeVilkårsvurderinger.toSet() != forrige.utdypendeVilkårsvurderinger.toSet() -> true
                 nåværende.vurderesEtter != forrige.vurderesEtter -> true
                 nåværende.periodeFom != forrige.periodeFom || nåværende.periodeTom != forrige.periodeTom -> true
                 else -> false
