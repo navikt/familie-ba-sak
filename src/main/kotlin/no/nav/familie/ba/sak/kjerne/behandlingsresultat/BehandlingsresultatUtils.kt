@@ -30,6 +30,11 @@ import java.time.YearMonth
 
 object BehandlingsresultatUtils {
 
+    internal enum class Endringsresultat {
+        ENDRING,
+        INGEN_ENDRING
+    }
+
     internal fun erEndringIKompetanse(
         nåværendeKompetanser: List<Kompetanse>,
         forrigeKompetanser: List<Kompetanse>
@@ -65,6 +70,33 @@ object BehandlingsresultatUtils {
         }
 
         return endringerTidslinje.perioder().any { it.innhold == true }
+    }
+
+    private fun utledEndringsresultat(
+        nåværendeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        forrigeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        personerFremstiltKravFor: List<Aktør>,
+        nåværendeKompetanser: List<Kompetanse>,
+        forrigeKompetanser: List<Kompetanse>
+    ): Endringsresultat {
+        val erEndringIBeløp = erEndringIBeløp(
+            nåværendeAndeler = nåværendeAndeler,
+            forrigeAndeler = forrigeAndeler,
+            personerFremstiltKravFor = personerFremstiltKravFor
+        )
+
+        val erEndringIKompetanse = erEndringIKompetanse(
+            nåværendeKompetanser = nåværendeKompetanser,
+            forrigeKompetanser = forrigeKompetanser
+        )
+
+        val erEndringIVilkårsvurdering = false // TODO
+
+        val erEndringIEndretUtbetalingAndeler = false // TODO
+
+        val erMinstEnEndring = erEndringIBeløp || erEndringIKompetanse || erEndringIVilkårsvurdering || erEndringIEndretUtbetalingAndeler
+
+        return if (erMinstEnEndring) Endringsresultat.ENDRING else Endringsresultat.INGEN_ENDRING
     }
 
     private fun ikkeStøttetFeil(behandlingsresultater: MutableSet<YtelsePersonResultat>) =
