@@ -150,6 +150,12 @@ class StartSatsendring(
     }
 
     private fun skalTriggeFagsak(fagsak: Fagsak, satsTidspunkt: YearMonth, gyldigeSatser: List<SatsType>): Boolean {
+        val aktivOgÅpenBehandling = behandlingRepository.findByFagsakAndAktivAndOpen(fagsakId = fagsak.id)
+        if (aktivOgÅpenBehandling != null) {
+            logger.info("Oppretter ikke satsendringtask for fagsak=${fagsak.id}. Har åpen behandling ${aktivOgÅpenBehandling.id}")
+            return false
+        }
+
         val sisteIverksatteBehandling = behandlingRepository.finnSisteIverksatteBehandling(fagsak.id)
         if (sisteIverksatteBehandling != null) {
             val andelerTilkjentYtelseMedEndreteUtbetalinger =
