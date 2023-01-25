@@ -857,8 +857,8 @@ class BehandlingsresultatUtilsTest {
     }
 
     @Test
-    fun `kombinerSøknadsresultater skal returnere DELVIS_INNVILGET dersom lista består av INNVILGET OG AVSLÅTT`() {
-        val listeMedSøknadsresultat = listOf(BehandlingsresultatUtils.Søknadsresultat.INNVILGET, BehandlingsresultatUtils.Søknadsresultat.AVSLÅTT)
+    fun `kombinerSøknadsresultater skal returnere DELVIS_INNVILGET dersom lista består av INNVILGET, AVSLÅTT OG INGEN_RELEVANTE_ENDRINGER`() {
+        val listeMedSøknadsresultat = listOf(BehandlingsresultatUtils.Søknadsresultat.INNVILGET, BehandlingsresultatUtils.Søknadsresultat.AVSLÅTT, BehandlingsresultatUtils.Søknadsresultat.INGEN_RELEVANTE_ENDRINGER)
 
         val kombinertResultat = listeMedSøknadsresultat.kombinerSøknadsresultater()
 
