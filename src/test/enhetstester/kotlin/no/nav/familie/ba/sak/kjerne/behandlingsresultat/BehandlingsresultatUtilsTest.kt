@@ -13,15 +13,17 @@ import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.SøkersAktivitet
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagKompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import org.hamcrest.MatcherAssert.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.YearMonth
-import org.hamcrest.CoreMatchers.`is` as Is
 
 class BehandlingsresultatUtilsTest {
 
@@ -478,7 +480,7 @@ class BehandlingsresultatUtilsTest {
 
         val opphørsresultat = hentOpphørsresultatPåBehandling(nåværendeAndeler, forrigeAndeler)
 
-        assertThat(opphørsresultat, Is(Opphørsresultat.IKKE_OPPHØRT))
+        assertEquals(Opphørsresultat.IKKE_OPPHØRT, opphørsresultat)
     }
 
     @Test
@@ -521,7 +523,7 @@ class BehandlingsresultatUtilsTest {
 
         val opphørsresultat = hentOpphørsresultatPåBehandling(nåværendeAndeler, forrigeAndeler)
 
-        assertThat(opphørsresultat, Is(Opphørsresultat.OPPHØRT))
+        assertEquals(Opphørsresultat.OPPHØRT, opphørsresultat)
     }
 
     @Test
@@ -565,7 +567,7 @@ class BehandlingsresultatUtilsTest {
 
         val opphørsresultat = hentOpphørsresultatPåBehandling(nåværendeAndeler, forrigeAndeler)
 
-        assertThat(opphørsresultat, Is(Opphørsresultat.OPPHØRT))
+        assertEquals(Opphørsresultat.OPPHØRT, opphørsresultat)
     }
 
     @Test
@@ -609,7 +611,215 @@ class BehandlingsresultatUtilsTest {
 
         val opphørsresultat = hentOpphørsresultatPåBehandling(nåværendeAndeler, forrigeAndeler)
 
-        assertThat(opphørsresultat, Is(Opphørsresultat.FORTSATT_OPPHØRT))
+        assertEquals(Opphørsresultat.FORTSATT_OPPHØRT, opphørsresultat)
+    }
+
+    @Test
+    fun `Endring i kompetanse - skal returnere false når ingenting endrer seg`() {
+        val forrigeBehandling = lagBehandling()
+        val nåværendeBehandling = lagBehandling()
+        val forrigeKompetanse =
+            lagKompetanse(
+                behandlingId = forrigeBehandling.id,
+                barnAktører = setOf(barn1Aktør),
+                barnetsBostedsland = "NO",
+                søkersAktivitet = SøkersAktivitet.ARBEIDER,
+                søkersAktivitetsland = "NO",
+                annenForeldersAktivitet = AnnenForeldersAktivitet.INAKTIV,
+                annenForeldersAktivitetsland = "PO",
+                kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
+                fom = YearMonth.now().minusMonths(6),
+                tom = null
+            )
+
+        val endring = BehandlingsresultatUtils.erEndringIKompetanse(
+            nåværendeKompetanser = listOf(forrigeKompetanse.copy().apply { behandlingId = nåværendeBehandling.id }),
+            forrigeKompetanser = listOf(forrigeKompetanse)
+        )
+
+        assertEquals(false, endring)
+    }
+
+    @Test
+    fun `Endring i kompetanse - skal returnere true når søkers aktivitetsland endrer seg`() {
+        val forrigeBehandling = lagBehandling()
+        val nåværendeBehandling = lagBehandling()
+        val forrigeKompetanse =
+            lagKompetanse(
+                behandlingId = forrigeBehandling.id,
+                barnAktører = setOf(barn1Aktør),
+                barnetsBostedsland = "NO",
+                søkersAktivitet = SøkersAktivitet.ARBEIDER,
+                søkersAktivitetsland = "NO",
+                annenForeldersAktivitet = AnnenForeldersAktivitet.INAKTIV,
+                annenForeldersAktivitetsland = "PO",
+                kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
+                fom = YearMonth.now().minusMonths(6),
+                tom = null
+            )
+
+        val endring = BehandlingsresultatUtils.erEndringIKompetanse(
+            nåværendeKompetanser = listOf(forrigeKompetanse.copy(søkersAktivitetsland = "DK").apply { behandlingId = nåværendeBehandling.id }),
+            forrigeKompetanser = listOf(forrigeKompetanse)
+        )
+
+        assertEquals(true, endring)
+    }
+
+    @Test
+    fun `Endring i kompetanse - skal returnere true når søkers aktivitet endrer seg`() {
+        val forrigeBehandling = lagBehandling()
+        val nåværendeBehandling = lagBehandling()
+        val forrigeKompetanse =
+            lagKompetanse(
+                behandlingId = forrigeBehandling.id,
+                barnAktører = setOf(barn1Aktør),
+                barnetsBostedsland = "NO",
+                søkersAktivitet = SøkersAktivitet.ARBEIDER,
+                søkersAktivitetsland = "NO",
+                annenForeldersAktivitet = AnnenForeldersAktivitet.INAKTIV,
+                annenForeldersAktivitetsland = "PO",
+                kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
+                fom = YearMonth.now().minusMonths(6),
+                tom = null
+            )
+
+        val endring = BehandlingsresultatUtils.erEndringIKompetanse(
+            nåværendeKompetanser = listOf(forrigeKompetanse.copy(søkersAktivitet = SøkersAktivitet.ARBEIDER_PÅ_NORSK_SOKKEL).apply { behandlingId = nåværendeBehandling.id }),
+            forrigeKompetanser = listOf(forrigeKompetanse)
+        )
+
+        assertEquals(true, endring)
+    }
+
+    @Test
+    fun `Endring i kompetanse - skal returnere true når annen forelders aktivitetsland endrer seg`() {
+        val forrigeBehandling = lagBehandling()
+        val nåværendeBehandling = lagBehandling()
+        val forrigeKompetanse =
+            lagKompetanse(
+                behandlingId = forrigeBehandling.id,
+                barnAktører = setOf(barn1Aktør),
+                barnetsBostedsland = "NO",
+                søkersAktivitet = SøkersAktivitet.ARBEIDER,
+                søkersAktivitetsland = "NO",
+                annenForeldersAktivitet = AnnenForeldersAktivitet.INAKTIV,
+                annenForeldersAktivitetsland = "PO",
+                kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
+                fom = YearMonth.now().minusMonths(6),
+                tom = null
+            )
+
+        val endring = BehandlingsresultatUtils.erEndringIKompetanse(
+            nåværendeKompetanser = listOf(forrigeKompetanse.copy(annenForeldersAktivitetsland = "DK").apply { behandlingId = nåværendeBehandling.id }),
+            forrigeKompetanser = listOf(forrigeKompetanse)
+        )
+
+        assertEquals(true, endring)
+    }
+
+    @Test
+    fun `Endring i kompetanse - skal returnere true når annen forelders aktivitet endrer seg`() {
+        val forrigeBehandling = lagBehandling()
+        val nåværendeBehandling = lagBehandling()
+        val forrigeKompetanse =
+            lagKompetanse(
+                behandlingId = forrigeBehandling.id,
+                barnAktører = setOf(barn1Aktør),
+                barnetsBostedsland = "NO",
+                søkersAktivitet = SøkersAktivitet.ARBEIDER,
+                søkersAktivitetsland = "NO",
+                annenForeldersAktivitet = AnnenForeldersAktivitet.INAKTIV,
+                annenForeldersAktivitetsland = "PO",
+                kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
+                fom = YearMonth.now().minusMonths(6),
+                tom = null
+            )
+
+        val endring = BehandlingsresultatUtils.erEndringIKompetanse(
+            nåværendeKompetanser = listOf(forrigeKompetanse.copy(annenForeldersAktivitet = AnnenForeldersAktivitet.FORSIKRET_I_BOSTEDSLAND).apply { behandlingId = nåværendeBehandling.id }),
+            forrigeKompetanser = listOf(forrigeKompetanse)
+        )
+
+        assertEquals(true, endring)
+    }
+
+    @Test
+    fun `Endring i kompetanse - skal returnere true når barnets bostedsland endrer seg`() {
+        val forrigeBehandling = lagBehandling()
+        val nåværendeBehandling = lagBehandling()
+        val forrigeKompetanse =
+            lagKompetanse(
+                behandlingId = forrigeBehandling.id,
+                barnAktører = setOf(barn1Aktør),
+                barnetsBostedsland = "NO",
+                søkersAktivitet = SøkersAktivitet.ARBEIDER,
+                søkersAktivitetsland = "NO",
+                annenForeldersAktivitet = AnnenForeldersAktivitet.INAKTIV,
+                annenForeldersAktivitetsland = "PO",
+                kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
+                fom = YearMonth.now().minusMonths(6),
+                tom = null
+            )
+
+        val endring = BehandlingsresultatUtils.erEndringIKompetanse(
+            nåværendeKompetanser = listOf(forrigeKompetanse.copy(barnetsBostedsland = "DK").apply { behandlingId = nåværendeBehandling.id }),
+            forrigeKompetanser = listOf(forrigeKompetanse)
+        )
+
+        assertEquals(true, endring)
+    }
+
+    @Test
+    fun `Endring i kompetanse - skal returnere true når resultat på kompetansen endrer seg`() {
+        val forrigeBehandling = lagBehandling()
+        val nåværendeBehandling = lagBehandling()
+        val forrigeKompetanse =
+            lagKompetanse(
+                behandlingId = forrigeBehandling.id,
+                barnAktører = setOf(barn1Aktør),
+                barnetsBostedsland = "NO",
+                søkersAktivitet = SøkersAktivitet.ARBEIDER,
+                søkersAktivitetsland = "NO",
+                annenForeldersAktivitet = AnnenForeldersAktivitet.INAKTIV,
+                annenForeldersAktivitetsland = "PO",
+                kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
+                fom = YearMonth.now().minusMonths(6),
+                tom = null
+            )
+
+        val endring = BehandlingsresultatUtils.erEndringIKompetanse(
+            nåværendeKompetanser = listOf(forrigeKompetanse.copy(resultat = KompetanseResultat.NORGE_ER_SEKUNDÆRLAND).apply { behandlingId = nåværendeBehandling.id }),
+            forrigeKompetanser = listOf(forrigeKompetanse)
+        )
+
+        assertEquals(true, endring)
+    }
+
+    @Test
+    fun `Endring i kompetanse - skal returnere false når det kun blir lagt på en ekstra kompetanseperiode`() {
+        val forrigeBehandling = lagBehandling()
+        val nåværendeBehandling = lagBehandling()
+        val forrigeKompetanse =
+            lagKompetanse(
+                behandlingId = forrigeBehandling.id,
+                barnAktører = setOf(barn1Aktør),
+                barnetsBostedsland = "NO",
+                søkersAktivitet = SøkersAktivitet.ARBEIDER,
+                søkersAktivitetsland = "NO",
+                annenForeldersAktivitet = AnnenForeldersAktivitet.INAKTIV,
+                annenForeldersAktivitetsland = "PO",
+                kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
+                fom = YearMonth.now().minusMonths(6),
+                tom = null
+            )
+
+        val endring = BehandlingsresultatUtils.erEndringIKompetanse(
+            nåværendeKompetanser = listOf(forrigeKompetanse.copy(fom = YearMonth.now().minusMonths(10)).apply { behandlingId = nåværendeBehandling.id }),
+            forrigeKompetanser = listOf(forrigeKompetanse)
+        )
+
+        assertEquals(false, endring)
     }
 
     private fun lagYtelsePerson(
