@@ -15,8 +15,10 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilMånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjær
@@ -37,23 +39,25 @@ object BehandlingsresultatUtils {
             message = "Kombiansjonen av behandlingsresultatene $behandlingsresultater er ikke støttet i løsningen."
         )
 
+    // NB: For personer fremstilt krav for tar vi ikke hensyn til alle endringer i beløp i denne funksjonen
     internal fun erEndringIBeløp(
         nåværendeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
         forrigeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
         personerFremstiltKravFor: List<Aktør>
     ): Boolean {
         val allePersonerMedAndeler = (nåværendeAndeler.map { it.aktør } + forrigeAndeler.map { it.aktør }).distinct()
+        val opphørstidspunkt = nåværendeAndeler.maxOf { it.stønadTom }
 
-        val erEndringPerPerson = allePersonerMedAndeler.map { aktør ->
+        val erEndringIBeløpForMinstEnPerson = allePersonerMedAndeler.any { aktør ->
             erEndringIBeløpForPerson(
                 nåværendeAndeler = nåværendeAndeler.filter { it.aktør == aktør },
                 forrigeAndeler = forrigeAndeler.filter { it.aktør == aktør },
-                opphørstidspunkt = nåværendeAndeler.maxOf { it.stønadTom },
+                opphørstidspunkt = opphørstidspunkt,
                 erFremstiltKravForPerson = personerFremstiltKravFor.contains(aktør)
             )
         }
 
-        return erEndringPerPerson.any { it }
+        return erEndringIBeløpForMinstEnPerson
     }
 
     // Kun interessert i endringer i beløp FØR opphørstidspunkt
@@ -83,10 +87,13 @@ object BehandlingsresultatUtils {
                     else -> false
                 }
             }
-        }.beskjær(fraOgMed = TIDENES_MORGEN.tilMånedTidspunkt(), tilOgMed = opphørstidspunkt.tilTidspunkt())
+        }.fjernPerioderEtterOpphørsdato(opphørstidspunkt)
 
         return endringIBeløpTidslinje.perioder().any { it.innhold == true }
     }
+
+    private fun Tidslinje<Boolean, Måned>.fjernPerioderEtterOpphørsdato(opphørstidspunkt: YearMonth) =
+        this.beskjær(fraOgMed = TIDENES_MORGEN.tilMånedTidspunkt(), tilOgMed = opphørstidspunkt.tilTidspunkt())
 
     internal fun utledBehandlingsresultatDataForPerson(
         person: Person,
@@ -330,11 +337,19 @@ fun hentOpphørsresultatPåBehandling(
     val dagensDato = YearMonth.now()
 
     return when {
+        // Rekkefølgen av sjekkene er viktig for å komme fram til riktig opphørsresultat.
         nåværendeBehandlingOpphørsdato > dagensDato -> Opphørsresultat.IKKE_OPPHØRT
         forrigeBehandlingOpphørsdato > dagensDato || forrigeBehandlingOpphørsdato > nåværendeBehandlingOpphørsdato -> Opphørsresultat.OPPHØRT
         else -> Opphørsresultat.FORTSATT_OPPHØRT
     }
 }
+
+enum class Opphørsresultat {
+    OPPHØRT,
+    FORTSATT_OPPHØRT,
+    IKKE_OPPHØRT
+}
+
 
 fun erEndringIVilkårvurdering(
     nåværendePersonResultat: List<PersonResultat>,
@@ -376,7 +391,7 @@ fun erEndringIVilkårvurderingForPerson(
     val endringIVilkårResultat =
         nåværendeVilkårResultatTidslinje.kombinerUtenNullMed(tidligereVilkårResultatTidslinje) { nåværende, forrige ->
 
-                nåværende.utdypendeVilkårsvurderinger.toSet() != forrige.utdypendeVilkårsvurderinger.toSet() ||
+            nåværende.utdypendeVilkårsvurderinger.toSet() != forrige.utdypendeVilkårsvurderinger.toSet() ||
                 nåværende.vurderesEtter != forrige.vurderesEtter ||
                 nåværende.periodeFom != forrige.periodeFom ||
                 nåværende.periodeTom != forrige.periodeTom
@@ -385,8 +400,3 @@ fun erEndringIVilkårvurderingForPerson(
     return endringIVilkårResultat.perioder().any { it.innhold == true }
 }
 
-enum class Opphørsresultat {
-    OPPHØRT,
-    FORTSATT_OPPHØRT,
-    IKKE_OPPHØRT
-}
