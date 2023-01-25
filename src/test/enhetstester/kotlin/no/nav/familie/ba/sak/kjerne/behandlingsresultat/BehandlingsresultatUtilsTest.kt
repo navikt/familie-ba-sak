@@ -30,6 +30,8 @@ class BehandlingsresultatUtilsTest {
     private val barn1Aktør = randomAktør()
 
     val jan22 = YearMonth.of(2022, 1)
+    val feb22 = YearMonth.of(2022, 2)
+    val mar22 = YearMonth.of(2022, 3)
     val mai22 = YearMonth.of(2022, 5)
     val aug22 = YearMonth.of(2022, 8)
     val des22 = YearMonth.of(2022, 12)
@@ -485,7 +487,7 @@ class BehandlingsresultatUtilsTest {
         val barn2Aktør = lagPerson(type = PersonType.BARN).aktør
 
         mockkStatic(YearMonth::class)
-        every { YearMonth.now() } returns YearMonth.of(2022, 6)
+        every { YearMonth.now() } returns YearMonth.of(2022, 4)
 
         val forrigeAndeler = listOf(
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(
@@ -505,13 +507,13 @@ class BehandlingsresultatUtilsTest {
         val nåværendeAndeler = listOf(
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = jan22,
-                tom = mai22,
+                tom = feb22,
                 beløp = 1054,
                 aktør = barn1Aktør
             ),
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = jan22,
-                tom = mai22,
+                tom = feb22,
                 beløp = 1054,
                 aktør = barn2Aktør
             )
@@ -523,23 +525,24 @@ class BehandlingsresultatUtilsTest {
     }
 
     @Test
-    fun `hentOpphørsresultatPåBehandling skal returnere OPPHØRT dersom nåværende andeler opphører tidligere enn forrige andeler og med dagens dato`() {
+    fun `hentOpphørsresultatPåBehandling skal returnere OPPHØRT dersom nåværende andeler opphører tidligere enn forrige andeler og dagens dato`() {
         val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
         val barn2Aktør = lagPerson(type = PersonType.BARN).aktør
+        val apr22 = YearMonth.of(2022, 4)
 
         mockkStatic(YearMonth::class)
-        every { YearMonth.now() } returns YearMonth.of(2022, 9)
+        every { YearMonth.now() } returns apr22
 
         val forrigeAndeler = listOf(
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = jan22,
-                tom = aug22,
+                tom = mar22,
                 beløp = 1054,
                 aktør = barn1Aktør
             ),
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = jan22,
-                tom = aug22,
+                tom = mar22,
                 beløp = 1054,
                 aktør = barn2Aktør
             )
@@ -548,13 +551,13 @@ class BehandlingsresultatUtilsTest {
         val nåværendeAndeler = listOf(
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = jan22,
-                tom = mai22,
+                tom = feb22,
                 beløp = 1054,
                 aktør = barn1Aktør
             ),
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = jan22,
-                tom = mai22,
+                tom = feb22,
                 beløp = 1054,
                 aktør = barn2Aktør
             )
@@ -569,20 +572,21 @@ class BehandlingsresultatUtilsTest {
     fun `hentOpphørsresultatPåBehandling skal returnere FORTSATT_OPPHØRT dersom nåværende andeler har lik opphørsdato som forrige andeler`() {
         val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
         val barn2Aktør = lagPerson(type = PersonType.BARN).aktør
+        val apr22 = YearMonth.of(2022, 4)
 
         mockkStatic(YearMonth::class)
-        every { YearMonth.now() } returns YearMonth.of(2022, 9)
+        every { YearMonth.now() } returns apr22
 
         val forrigeAndeler = listOf(
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = jan22,
-                tom = aug22,
+                tom = mar22,
                 beløp = 1054,
                 aktør = barn1Aktør
             ),
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = jan22,
-                tom = aug22,
+                tom = mar22,
                 beløp = 1054,
                 aktør = barn2Aktør
             )
@@ -591,13 +595,13 @@ class BehandlingsresultatUtilsTest {
         val nåværendeAndeler = listOf(
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = jan22,
-                tom = aug22,
+                tom = mar22,
                 beløp = 1054,
                 aktør = barn1Aktør
             ),
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = jan22,
-                tom = aug22,
+                tom = mar22,
                 beløp = 1054,
                 aktør = barn2Aktør
             )

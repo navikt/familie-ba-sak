@@ -324,6 +324,7 @@ fun hentOpphørsresultatPåBehandling(
     val dagensDato = YearMonth.now()
 
     return when {
+        // Rekkefølgen av sjekkene er viktig for å komme fram til riktig opphørsresultat.
         nåværendeBehandlingOpphørsdato > dagensDato -> Opphørsresultat.IKKE_OPPHØRT
         forrigeBehandlingOpphørsdato > dagensDato || forrigeBehandlingOpphørsdato > nåværendeBehandlingOpphørsdato -> Opphørsresultat.OPPHØRT
         else -> Opphørsresultat.FORTSATT_OPPHØRT
