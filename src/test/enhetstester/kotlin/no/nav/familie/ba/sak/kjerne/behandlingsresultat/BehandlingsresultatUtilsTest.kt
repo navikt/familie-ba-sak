@@ -822,6 +822,17 @@ class BehandlingsresultatUtilsTest {
         assertEquals(false, endring)
     }
 
+    @Test
+    fun `Kombiner resultater - skal returnere FORTSATT_INNVILGET hvis det er søknad og ingen relevante endringer, og ingen opphør`() {
+        val behandlingsresultat = BehandlingsresultatUtils.kombinerResultaterTilBehandlingsresultat(
+            BehandlingsresultatUtils.Søknadsresultat.INGEN_RELEVANTE_ENDRINGER,
+            BehandlingsresultatUtils.Endringsresultat.INGEN_ENDRING,
+            BehandlingsresultatUtils.Opphørsresultat.IKKE_OPPHØRT
+        )
+
+        assertEquals(Behandlingsresultat.FORTSATT_INNVILGET, behandlingsresultat)
+    }
+
     private fun lagYtelsePerson(
         resultat: YtelsePersonResultat,
         ytelseSlutt: YearMonth? = YearMonth.now().minusMonths(2)

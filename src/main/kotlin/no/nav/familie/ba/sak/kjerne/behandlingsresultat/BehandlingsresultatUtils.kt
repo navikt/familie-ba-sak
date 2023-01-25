@@ -67,25 +67,25 @@ object BehandlingsresultatUtils {
         return endringerTidslinje.perioder().any { it.innhold == true }
     }
 
-    private enum class Søknadsresultat {
+    internal enum class Søknadsresultat {
         INNVILGET,
         AVSLÅTT,
         DELVIS_INNVILGET,
         INGEN_RELEVANTE_ENDRINGER
     }
 
-    private enum class Endringsresultat {
+    internal enum class Endringsresultat {
         ENDRING,
         INGEN_ENDRING
     }
 
-    private enum class Opphørsresultat {
+    internal enum class Opphørsresultat {
         OPPHØRT,
         FORTSATT_OPPHØRT,
         IKKE_OPPHØRT
     }
 
-    private fun kombinerResultaterTilBehandlingsresultat(
+    internal fun kombinerResultaterTilBehandlingsresultat(
         søknadsresultat: Søknadsresultat?, // Søknadsresultat er null hvis det ikke er en søknad/fødselshendelse/manuell migrering
         endringsresultat: Endringsresultat,
         opphørsresultat: Opphørsresultat
