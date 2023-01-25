@@ -183,17 +183,17 @@ internal class BeregnAndelerTilkjentYtelseForBarnaTest {
             (BOSATT_I_RIKET og LOVLIG_OPPHOLD oppfylt 26.jan(2020)..uendelig) der
             barn har
             (UNDER_18_ÅR oppfylt barn.under18år()) og
-            (BOR_MED_SØKER oppfylt 26.jan(2020)..13.feb(2022) med DELT_BOSTED) og
-            (BOR_MED_SØKER oppfylt 14.feb(2022)..uendelig) og
+            (BOR_MED_SØKER oppfylt 26.jan(2020)..13.feb(2024) med DELT_BOSTED) og
+            (BOR_MED_SØKER oppfylt 14.feb(2024)..uendelig) og
             (BOSATT_I_RIKET og LOVLIG_OPPHOLD og GIFT_PARTNERSKAP oppfylt 26.jan(2020)..uendelig)
 
         val forventedeAndeler = listOf(
             barn får halvparten av 1054 i feb(2020)..aug(2020),
             barn får halvparten av 1354 i sep(2020)..aug(2021),
             barn får halvparten av 1654 i sep(2021)..des(2021),
-            barn får halvparten av 1676 i jan(2022)..feb(2022),
-            barn får alt av 1676 i mar(2022)..feb(2023),
-            barn får alt av 1723 i mar(2023)..nov(2025),
+            barn får halvparten av 1676 i jan(2022)..feb(2023),
+            barn får halvparten av 1723 i mar(2023)..feb(2024),
+            barn får alt av 1723 i mar(2024)..nov(2025),
             barn får alt av 1083 i des(2025)..nov(2037)
         )
 
