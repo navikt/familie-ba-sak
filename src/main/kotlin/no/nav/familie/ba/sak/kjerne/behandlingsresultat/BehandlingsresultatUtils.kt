@@ -82,7 +82,9 @@ object BehandlingsresultatUtils {
         forrigeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
         personerFremstiltKravFor: List<Aktør>,
         nåværendeKompetanser: List<Kompetanse>,
-        forrigeKompetanser: List<Kompetanse>
+        forrigeKompetanser: List<Kompetanse>,
+        nåværendePersonResultat: List<PersonResultat>,
+        forrigePersonResultat: List<PersonResultat>
     ): Endringsresultat {
         val erEndringIBeløp = erEndringIBeløp(
             nåværendeAndeler = nåværendeAndeler,
@@ -95,7 +97,10 @@ object BehandlingsresultatUtils {
             forrigeKompetanser = forrigeKompetanser
         )
 
-        val erEndringIVilkårsvurdering = false // TODO
+        val erEndringIVilkårsvurdering = erEndringIVilkårvurdering(
+            nåværendePersonResultat = nåværendePersonResultat,
+            forrigePersonResultat = forrigePersonResultat
+        )
 
         val erEndringIEndretUtbetalingAndeler = false // TODO
 
