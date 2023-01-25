@@ -19,6 +19,8 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.data.domain.PageImpl
+import org.springframework.data.domain.Pageable
 import java.time.YearMonth
 
 internal class StartSatsendringTest {
@@ -57,7 +59,11 @@ internal class StartSatsendringTest {
 
         val behandling = lagBehandling()
 
-        every { fagsakRepository.finnLøpendeFagsakerForSatsendring(any()) } returns listOf(behandling.fagsak)
+        every { fagsakRepository.finnLøpendeFagsakerForSatsendring(any()) } returns PageImpl(
+            listOf(behandling.fagsak),
+            Pageable.ofSize(5),
+            0
+        )
 
         every { behandlingRepository.finnSisteIverksatteBehandling(behandling.fagsak.id) } returns behandling
 
@@ -89,7 +95,7 @@ internal class StartSatsendringTest {
                 )
             )
 
-        startSatsendring.startSatsendring()
+        startSatsendring.startSatsendring(5)
 
         verify(exactly = 1) { satskjøringRepository.save(any()) }
     }
@@ -101,7 +107,11 @@ internal class StartSatsendringTest {
 
         val behandling = lagBehandling()
 
-        every { fagsakRepository.finnLøpendeFagsakerForSatsendring(any()) } returns listOf(behandling.fagsak)
+        every { fagsakRepository.finnLøpendeFagsakerForSatsendring(any()) } returns PageImpl(
+            listOf(behandling.fagsak),
+            Pageable.ofSize(5),
+            0
+        )
 
         every { behandlingRepository.finnSisteIverksatteBehandling(behandling.fagsak.id) } returns behandling
 
@@ -133,7 +143,7 @@ internal class StartSatsendringTest {
                 )
             )
 
-        startSatsendring.startSatsendring()
+        startSatsendring.startSatsendring(5)
 
         verify(exactly = 0) { satskjøringRepository.save(any()) }
     }
@@ -146,7 +156,11 @@ internal class StartSatsendringTest {
 
         val behandling = lagBehandling()
 
-        every { fagsakRepository.finnLøpendeFagsakerForSatsendring(any()) } returns listOf(behandling.fagsak)
+        every { fagsakRepository.finnLøpendeFagsakerForSatsendring(any()) } returns PageImpl(
+            listOf(behandling.fagsak),
+            Pageable.ofSize(5),
+            0
+        )
 
         every { behandlingRepository.finnSisteIverksatteBehandling(behandling.fagsak.id) } returns behandling
 
@@ -178,7 +192,7 @@ internal class StartSatsendringTest {
                 )
             )
 
-        startSatsendring.startSatsendring()
+        startSatsendring.startSatsendring(5)
 
         verify(exactly = 1) { satskjøringRepository.save(any()) }
     }
@@ -191,7 +205,11 @@ internal class StartSatsendringTest {
 
         val behandling = lagBehandling()
 
-        every { fagsakRepository.finnLøpendeFagsakerForSatsendring(any()) } returns listOf(behandling.fagsak)
+        every { fagsakRepository.finnLøpendeFagsakerForSatsendring(any()) } returns PageImpl(
+            listOf(behandling.fagsak),
+            Pageable.ofSize(5),
+            0
+        )
 
         every { behandlingRepository.finnSisteIverksatteBehandling(behandling.fagsak.id) } returns behandling
 
@@ -213,8 +231,48 @@ internal class StartSatsendringTest {
                 )
             )
 
-        startSatsendring.startSatsendring()
+        startSatsendring.startSatsendring(5)
 
         verify(exactly = 0) { satskjøringRepository.save(any()) }
+    }
+
+    @Test
+    fun `finnLøpendeFagsaker har totalt antall sider 3, så den skal kalle finnLøpendeFagsaker 3 ganger for å få 5 satsendringer`() {
+        every { featureToggleService.isEnabled(any(), any()) } returns true
+        every { featureToggleService.isEnabled(any()) } returns true
+        justRun { opprettTaskService.opprettSatsendringTask(any()) }
+
+        val behandling = lagBehandling()
+
+        every { fagsakRepository.finnLøpendeFagsakerForSatsendring(any()) } returns PageImpl(
+            listOf(behandling.fagsak, behandling.fagsak),
+            Pageable.ofSize(2), // 5/2 gir totalt 3 sider, så finnLøpendeFagsakerForSatsendring skal trigges 3 ganger
+            5
+        )
+
+        every { behandlingRepository.finnSisteIverksatteBehandling(behandling.fagsak.id) } returns behandling
+
+        every {
+            andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
+                behandling.id
+            )
+        } returns
+            listOf(
+                lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                    fom = YearMonth.of(2022, 12),
+                    tom = YearMonth.of(2040, 12),
+                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                    behandling = behandling,
+                    person = lagPerson(),
+                    aktør = lagPerson().aktør,
+                    periodeIdOffset = 1,
+                    beløp = 1676
+                )
+            )
+
+        startSatsendring.startSatsendring(5)
+
+        verify(exactly = 5) { satskjøringRepository.save(any()) }
+        verify(exactly = 3) { fagsakRepository.finnLøpendeFagsakerForSatsendring(any()) }
     }
 }

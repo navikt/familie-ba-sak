@@ -33,62 +33,31 @@ class StartSatsendring(
 ) {
 
     @Transactional
-    fun startSatsendring(satsTidspunkt: YearMonth = YearMonth.of(2023, 3)) {
+    fun startSatsendring(
+        antallFagsaker: Int,
+        satsTidspunkt: YearMonth = YearMonth.of(2023, 3)
+    ) {
         val gyldigeSatser = hentGyldigeSatser()
-        fagsakRepository.finnLøpendeFagsakerForSatsendring(Pageable.ofSize(BOLK_STØRRELSE_SATSENDRING)).forEach {
-            val sisteIverksatteBehandling = behandlingRepository.finnSisteIverksatteBehandling(it.id)
+        var antallSatsendringerStartet = 0
+        var startSide = 0
+        while (antallSatsendringerStartet < antallFagsaker) {
+            val page =
+                fagsakRepository.finnLøpendeFagsakerForSatsendring(Pageable.ofSize(PAGE_STØRRELSE))
 
-            if (sisteIverksatteBehandling != null) {
-                val andelerTilkjentYtelseMedEndreteUtbetalinger =
-                    andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
-                        sisteIverksatteBehandling.id
-                    )
-
-                val satstyper = mutableListOf<SatsType>()
-                if (harYtelsetype(
-                        YtelseType.SMÅBARNSTILLEGG,
-                        andelerTilkjentYtelseMedEndreteUtbetalinger,
-                        satsTidspunkt
-                    )
-                ) {
-                    satstyper.add(SatsType.SMA)
-                }
-
-                if (harYtelsetype(
-                        YtelseType.UTVIDET_BARNETRYGD,
-                        andelerTilkjentYtelseMedEndreteUtbetalinger,
-                        satsTidspunkt
-                    )
-                ) {
-                    satstyper.add(SatsType.UTVIDET_BARNETRYGD)
-                }
-
-                if (harYtelsetype(
-                        YtelseType.ORDINÆR_BARNETRYGD,
-                        andelerTilkjentYtelseMedEndreteUtbetalinger,
+            val fagsakerForSatsendring = page.toList()
+            logger.info("Fant ${fagsakerForSatsendring.size} personer for satsendring på side $startSide")
+            if (fagsakerForSatsendring.isNotEmpty()) {
+                antallSatsendringerStartet =
+                    oppretteEllerSkipSatsendring(
+                        fagsakerForSatsendring,
+                        antallSatsendringerStartet,
+                        antallFagsaker,
                         satsTidspunkt,
-                        1054
+                        gyldigeSatser
                     )
-
-                ) {
-                    satstyper.add(SatsType.ORBA)
-                }
-
-                if (harYtelsetype(
-                        YtelseType.ORDINÆR_BARNETRYGD,
-                        andelerTilkjentYtelseMedEndreteUtbetalinger,
-                        satsTidspunkt,
-                        1676
-                    )
-
-                ) {
-                    satstyper.add(SatsType.TILLEGG_ORBA)
-                }
-
-                sjekkOgTriggSatsendring(satstyper, it, gyldigeSatser)
-            } else {
-                logger.info("Satsendring utføres ikke på fagsak=${it.id} fordi fagsaken mangler en iverksatt behandling")
             }
+
+            if (++startSide == page.totalPages) break
         }
     }
 
@@ -117,25 +86,28 @@ class StartSatsendring(
         satstyper: List<SatsType>,
         fagsak: Fagsak,
         gyldigeSatser: List<SatsType>
-    ) {
+    ): Boolean {
         if (satstyper.isNotEmpty() && gyldigeSatser.containsAll(satstyper)) {
             if (featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_OPPRETT_TASKER)) {
                 logger.info("Oppretter satsendringtask for fagsak=${fagsak.id}")
                 opprettTaskService.opprettSatsendringTask(fagsak.id)
                 satskjøringRepository.save(Satskjøring(fagsakId = fagsak.id))
+                return true
             } else {
-                logger.info("Oppretter ikke satsendringtask for fagsak=${fagsak.id}. Toggle avskrudd.")
+                logger.info("Oppretter ikke satsendringtask for fagsak=${fagsak.id}. Toggle SATSENDRING_OPPRETT_TASKER avskrudd.")
+                return true // fordi vi vil at den skal telles selv om opprett task er skrudd av
             }
         }
+        return false
     }
 
-    private fun hentGyldigeSatser(): MutableList<SatsType> {
+    private fun hentGyldigeSatser(): List<SatsType> {
         val gyldigeSatser = mutableListOf<SatsType>()
-        if (featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_TILLEGG_ORBA, true)) {
+        if (featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_TILLEGG_ORBA, false)) {
             gyldigeSatser.add(SatsType.TILLEGG_ORBA)
         }
 
-        if (featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_ORBA, false)) {
+        if (featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_ORBA, true)) {
             gyldigeSatser.add(SatsType.ORBA)
         }
 
@@ -151,8 +123,90 @@ class StartSatsendring(
         return gyldigeSatser
     }
 
+    private fun oppretteEllerSkipSatsendring(
+        fagsakForSatsendring: List<Fagsak>,
+        antallAlleredeTriggetSatsendring: Int,
+        antallFagsakerTilSatsendring: Int,
+        satsTidspunkt: YearMonth,
+        gyldigeSatser: List<SatsType>
+    ): Int {
+        var antallFagsakerSatsendring = antallAlleredeTriggetSatsendring
+        for (fagsak in fagsakForSatsendring) {
+            if (skalTriggeFagsak(fagsak, satsTidspunkt, gyldigeSatser)) {
+                antallFagsakerSatsendring++
+            } else {
+                logger.info(
+                    "Skipper oppretting av SatsendringTask for ${
+                    fagsak.id
+                    }"
+                )
+            }
+
+            if (antallFagsakerSatsendring == antallFagsakerTilSatsendring) {
+                return antallFagsakerSatsendring
+            }
+        }
+        return antallFagsakerSatsendring
+    }
+
+    private fun skalTriggeFagsak(fagsak: Fagsak, satsTidspunkt: YearMonth, gyldigeSatser: List<SatsType>): Boolean {
+        val sisteIverksatteBehandling = behandlingRepository.finnSisteIverksatteBehandling(fagsak.id)
+        if (sisteIverksatteBehandling != null) {
+            val andelerTilkjentYtelseMedEndreteUtbetalinger =
+                andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
+                    sisteIverksatteBehandling.id
+                )
+
+            val satstyper = mutableListOf<SatsType>()
+            if (harYtelsetype(
+                    YtelseType.SMÅBARNSTILLEGG,
+                    andelerTilkjentYtelseMedEndreteUtbetalinger,
+                    satsTidspunkt
+                )
+            ) {
+                satstyper.add(SatsType.SMA)
+            }
+
+            if (harYtelsetype(
+                    YtelseType.UTVIDET_BARNETRYGD,
+                    andelerTilkjentYtelseMedEndreteUtbetalinger,
+                    satsTidspunkt
+                )
+            ) {
+                satstyper.add(SatsType.UTVIDET_BARNETRYGD)
+            }
+
+            if (harYtelsetype(
+                    YtelseType.ORDINÆR_BARNETRYGD,
+                    andelerTilkjentYtelseMedEndreteUtbetalinger,
+                    satsTidspunkt,
+                    1054
+                )
+
+            ) {
+                satstyper.add(SatsType.ORBA)
+            }
+
+            if (harYtelsetype(
+                    YtelseType.ORDINÆR_BARNETRYGD,
+                    andelerTilkjentYtelseMedEndreteUtbetalinger,
+                    satsTidspunkt,
+                    1676
+                )
+
+            ) {
+                satstyper.add(SatsType.TILLEGG_ORBA)
+            }
+
+            return sjekkOgTriggSatsendring(satstyper, fagsak, gyldigeSatser)
+        } else {
+            logger.info("Satsendring utføres ikke på fagsak=${fagsak.id} fordi fagsaken mangler en iverksatt behandling")
+            return false
+        }
+    }
+
     companion object {
         val logger: Logger = LoggerFactory.getLogger(StartSatsendring::class.java)
-        const val BOLK_STØRRELSE_SATSENDRING = 100
+        const val PAGE_STØRRELSE = 1000
     }
 }
