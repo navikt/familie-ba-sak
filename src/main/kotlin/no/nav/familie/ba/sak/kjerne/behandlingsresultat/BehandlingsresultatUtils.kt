@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
+import no.nav.familie.ba.sak.common.Utils.harIkkeLikInnholdIgnorerRekkefølge
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.isSameOrBefore
@@ -15,9 +16,14 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilMånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjær
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilTidslinje
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.fpsak.tidsserie.StandardCombinators
@@ -328,6 +334,55 @@ fun hentOpphørsresultatPåBehandling(
         forrigeBehandlingOpphørsdato > dagensDato || forrigeBehandlingOpphørsdato > nåværendeBehandlingOpphørsdato -> Opphørsresultat.OPPHØRT
         else -> Opphørsresultat.FORTSATT_OPPHØRT
     }
+}
+
+fun erEndringIVilkårvurdering(
+    nåværendePersonResultat: List<PersonResultat>,
+    forrigePersonResultat: List<PersonResultat>
+): Boolean {
+    val allePersonerMedPersonResultat =
+        (nåværendePersonResultat.map { it.aktør } + forrigePersonResultat.map { it.aktør }).distinct()
+
+    val finnesPersonMedEndretVilkårsvurdering = allePersonerMedPersonResultat.any { aktør ->
+
+        Vilkår.values().any { vilkårType ->
+            erEndringIVilkårvurderingForPerson(
+                nåværendePersonResultat.filter { it.aktør == aktør }.flatMap { it.vilkårResultater }
+                    .filter { it.vilkårType == vilkårType },
+                forrigePersonResultat.filter { it.aktør == aktør }.flatMap { it.vilkårResultater }
+                    .filter { it.vilkårType == vilkårType }
+            )
+        }
+    }
+
+    return finnesPersonMedEndretVilkårsvurdering
+}
+
+// Relevante endringer er
+// 1. Endringer i resultat
+// 2. Endringer i utdypende vilkårsvurdering
+// 3. Endringer i regelverk
+// 4. Splitt i vilkårsvurderingen
+fun erEndringIVilkårvurderingForPerson(
+    nåværendeVilkårResultat: List<VilkårResultat>,
+    forrigeVilkårResultat: List<VilkårResultat>
+): Boolean {
+    val nåværendeVilkårResultatTidslinje = nåværendeVilkårResultat.tilTidslinje()
+    val tidligereVilkårResultatTidslinje = forrigeVilkårResultat.tilTidslinje()
+
+    val endringIVilkårResultat =
+        nåværendeVilkårResultatTidslinje.kombinerUtenNullMed(tidligereVilkårResultatTidslinje) { nåværende, forrige ->
+
+            when {
+                nåværende.resultat != forrige.resultat -> true
+                nåværende.utdypendeVilkårsvurderinger.harIkkeLikInnholdIgnorerRekkefølge(forrige.utdypendeVilkårsvurderinger) -> true
+                nåværende.vurderesEtter != forrige.vurderesEtter -> true
+                nåværende.periodeFom != forrige.periodeFom || nåværende.periodeTom != forrige.periodeTom -> true
+                else -> false
+            }
+        }
+
+    return endringIVilkårResultat.perioder().any { it.innhold == true }
 }
 
 enum class Opphørsresultat {
