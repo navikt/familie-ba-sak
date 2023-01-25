@@ -4,4 +4,6 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-interface SatskjøringRepository : JpaRepository<Satskjøring, Long>
+interface SatskjøringRepository : JpaRepository<Satskjøring, Long> {
+    fun countByFerdigTidspunktExists(): Long
+}

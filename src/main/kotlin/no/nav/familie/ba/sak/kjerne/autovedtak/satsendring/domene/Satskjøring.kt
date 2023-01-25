@@ -29,7 +29,7 @@ data class Satskjøring(
     val startTidspunkt: LocalDateTime = LocalDateTime.now(),
 
     @Column(name = "ferdig_tid")
-    var endretTidspunkt: LocalDateTime? = null
+    var ferdigTidspunkt: LocalDateTime? = null
 ) {
 
     override fun equals(other: Any?): Boolean {
@@ -37,7 +37,7 @@ data class Satskjøring(
         if (other == null || Hibernate.getClass(this) != Hibernate.getClass(other)) return false
         other as Satskjøring
 
-        return id != null && id == other.id
+        return id == other.id
     }
 
     override fun hashCode(): Int = javaClass.hashCode()
