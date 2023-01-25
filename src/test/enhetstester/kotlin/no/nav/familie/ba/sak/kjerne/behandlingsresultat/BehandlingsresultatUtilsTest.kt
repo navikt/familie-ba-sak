@@ -762,7 +762,6 @@ class BehandlingsresultatUtilsTest {
         assertThat(erEndringIVilkårvurderingForPerson, Is(true))
     }
 
-
     @Test
     fun `erEndringIVilkårvurderingForPerson skal returnere true dersom det har vært endringer i utdypendevilkårsvurdering`() {
         val nåværendeVilkårResultat = listOf(

@@ -350,7 +350,6 @@ enum class Opphørsresultat {
     IKKE_OPPHØRT
 }
 
-
 fun erEndringIVilkårvurdering(
     nåværendePersonResultat: List<PersonResultat>,
     forrigePersonResultat: List<PersonResultat>
@@ -369,7 +368,7 @@ fun erEndringIVilkårvurdering(
                 forrigePersonResultat
                     .filter { it.aktør == aktør }
                     .flatMap { it.vilkårResultater }
-                    .filter { it.vilkårType == vilkårType && it.resultat == Resultat.OPPFYLT}
+                    .filter { it.vilkårType == vilkårType && it.resultat == Resultat.OPPFYLT }
             )
         }
     }
@@ -399,4 +398,3 @@ fun erEndringIVilkårvurderingForPerson(
 
     return endringIVilkårResultat.perioder().any { it.innhold == true }
 }
-
