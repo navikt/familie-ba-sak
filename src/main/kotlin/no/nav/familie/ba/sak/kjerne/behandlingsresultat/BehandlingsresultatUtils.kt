@@ -7,16 +7,127 @@ import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
+import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.fpsak.tidsserie.StandardCombinators
 
 object BehandlingsresultatUtils {
+
+    private fun utledResultatPåSøknad(
+        forrigeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        nåværendeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        nåværendePersonResultater: Set<PersonResultat>,
+        personerFremstiltKravFor: List<Aktør>
+    ): Søknadsresultat {
+        val resultaterFraAndeler = utledSøknadResultatFraAndelerTilkjentYtelse(
+            forrigeAndeler = forrigeAndeler,
+            nåværendeAndeler = nåværendeAndeler,
+            personerFremstiltKravFor = personerFremstiltKravFor
+        )
+
+        val erEksplisittAvslagPåMinstEnPersonFremstiltKravFor = erEksplisittAvslagPåMinstEnPersonFremstiltKravFor(
+            nåværendePersonResultater = nåværendePersonResultater,
+            personerFremstiltKravFor = personerFremstiltKravFor
+        )
+
+        val alleResultater = (
+            if (erEksplisittAvslagPåMinstEnPersonFremstiltKravFor) {
+                resultaterFraAndeler.plus(Søknadsresultat.AVSLÅTT)
+            } else resultaterFraAndeler
+            ).distinct()
+
+        return alleResultater.kombinerSøknadsresultater()
+    }
+
+    private fun List<Søknadsresultat>.kombinerSøknadsresultater(): Søknadsresultat {
+        val resultaterUtenIngenEndringer = this.filter { it != Søknadsresultat.INGEN_RELEVANTE_ENDRINGER }
+
+        return when {
+            this.isEmpty() -> throw Feil("Klarer ikke utlede søknadsresultat")
+            this.size == 1 -> this.single()
+            resultaterUtenIngenEndringer.size == 1 -> this.single()
+            resultaterUtenIngenEndringer.size == 2 && resultaterUtenIngenEndringer.containsAll(listOf(Søknadsresultat.INNVILGET, Søknadsresultat.AVSLÅTT)) -> Søknadsresultat.DELVIS_INNVILGET
+            else -> throw Feil("Klarer ikke kombinere søknadsresultater: $this")
+        }
+    }
+
+    private fun erEksplisittAvslagPåMinstEnPersonFremstiltKravFor(
+        nåværendePersonResultater: Set<PersonResultat>,
+        personerFremstiltKravFor: List<Aktør>
+    ): Boolean =
+        nåværendePersonResultater
+            .filter { personerFremstiltKravFor.contains(it.aktør) }
+            .any {
+                it.vilkårResultater.erEksplisittAvslagPåPerson()
+            }
+
+    private fun utledSøknadResultatFraAndelerTilkjentYtelse(
+        forrigeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        nåværendeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        personerFremstiltKravFor: List<Aktør>
+    ): List<Søknadsresultat> {
+        val alleSøknadsresultater = personerFremstiltKravFor.flatMap { aktør ->
+            utledSøknadResultatFraAndelerTilkjentYtelsePerPerson(
+                forrigeAndeler = forrigeAndeler.filter { it.aktør == aktør },
+                nåværendeAndeler = nåværendeAndeler.filter { it.aktør == aktør }
+            )
+        }
+
+        return alleSøknadsresultater.distinct()
+    }
+
+    private fun utledSøknadResultatFraAndelerTilkjentYtelsePerPerson(
+        forrigeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        nåværendeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
+    ): List<Søknadsresultat> {
+        val forrigeTidslinje = AndelTilkjentYtelseTidslinje(forrigeAndeler)
+        val nåværendeTidslinje = AndelTilkjentYtelseTidslinje(nåværendeAndeler)
+
+        val resultatTidslinje = nåværendeTidslinje.kombinerMed(forrigeTidslinje) { nåværende, forrige ->
+            val forrigeBeløp = forrige?.kalkulertUtbetalingsbeløp
+            val nåværendeBeløp = nåværende?.kalkulertUtbetalingsbeløp
+
+            when {
+                nåværendeBeløp == forrigeBeløp || nåværendeBeløp == null -> Søknadsresultat.INGEN_RELEVANTE_ENDRINGER // Ingen endring eller fjernet en andel
+                nåværendeBeløp > 0 -> Søknadsresultat.INNVILGET // Innvilget beløp som er annerledes enn forrige gang
+                nåværendeBeløp == 0 -> {
+                    val endringsperiode = if (nåværende.endreteUtbetalinger.isNotEmpty()) nåværende.endreteUtbetalinger.singleOrNull() ?: throw Feil("") else null
+                    when (endringsperiode?.årsak) {
+                        null -> if (nåværende.andel.differanseberegnetPeriodebeløp != null) Søknadsresultat.INNVILGET else Søknadsresultat.INGEN_RELEVANTE_ENDRINGER // Blir dette riktig? Eller skal vi sjekke for diggeranseberegning uansett hva endringsperiode er?
+                        Årsak.DELT_BOSTED -> Søknadsresultat.INNVILGET
+                        Årsak.ALLEREDE_UTBETALT,
+                        Årsak.ENDRE_MOTTAKER,
+                        Årsak.ETTERBETALING_3ÅR -> Søknadsresultat.AVSLÅTT
+                    }
+                }
+                else -> Søknadsresultat.INGEN_RELEVANTE_ENDRINGER
+            }
+        }
+
+        return resultatTidslinje.perioder().mapNotNull { it.innhold }.distinct()
+    }
+
+    private fun Set<VilkårResultat>.erEksplisittAvslagPåPerson(): Boolean {
+        // sjekk om vilkårresultater inneholder eksplisitt avslag på et vilkår
+        return this.any { it.erEksplisittAvslagPåSøknad == true }
+    }
+
+    private enum class Søknadsresultat {
+        INNVILGET,
+        AVSLÅTT,
+        DELVIS_INNVILGET,
+        INGEN_RELEVANTE_ENDRINGER
+    }
 
     private fun ikkeStøttetFeil(behandlingsresultater: MutableSet<YtelsePersonResultat>) =
         Feil(
