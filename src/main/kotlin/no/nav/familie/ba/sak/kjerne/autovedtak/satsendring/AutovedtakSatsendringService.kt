@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakBehandlingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -18,7 +19,7 @@ import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.YearMonth
+import java.time.LocalDateTime
 
 @Service
 class AutovedtakSatsendringService(
@@ -26,7 +27,8 @@ class AutovedtakSatsendringService(
     private val behandlingRepository: BehandlingRepository,
     private val autovedtakService: AutovedtakService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
-    private val tilbakestillBehandlingService: TilbakestillBehandlingService
+    private val tilbakestillBehandlingService: TilbakestillBehandlingService,
+    private val satskjøringRepository: SatskjøringRepository
 ) : AutovedtakBehandlingService<Long> {
 
     /**
@@ -36,8 +38,19 @@ class AutovedtakSatsendringService(
      */
     @Transactional
     override fun kjørBehandling(fagsakId: Long): String {
+        val satskjøringForFagsak =
+            satskjøringRepository.findByFagsakId(fagsakId) ?: error("Fant ingen satskjøringsrad for fagsak=$fagsakId")
+
         val behandling = behandlingRepository.finnSisteIverksatteBehandling(fagsakId = fagsakId)
             ?: error("Fant ikke siste iverksette behandling for $fagsakId")
+
+        if (harAlleredeNySats(behandling.id)) {
+            satskjøringForFagsak.ferdigTidspunkt
+            satskjøringRepository.save(satskjøringForFagsak)
+            logger.info("Satsendring allerede utført fagsak=$fagsakId")
+            return "Satsendring allerede utført fagsak=$fagsakId"
+        }
+
         val aktivOgÅpenBehandling = behandlingRepository.findByFagsakAndAktivAndOpen(fagsakId = behandling.fagsak.id)
         val søkerAktør = behandling.fagsak.aktør
 
@@ -79,33 +92,12 @@ class AutovedtakSatsendringService(
             opprettetVedtak,
             SikkerhetContext.hentSaksbehandler()
         )
+
+        satskjøringForFagsak.ferdigTidspunkt = LocalDateTime.now()
+        satskjøringRepository.save(satskjøringForFagsak)
         taskRepository.save(task)
 
         return "Satsendring kjørt OK"
-    }
-
-    /**
-     * Finner behandlinger som trenger satsendring.
-     * Se https://github.com/navikt/familie-ba-sak/pull/1361 for eksempel på scheduler.
-     *
-     * Obs! Denne utplukkingen plukker ut siste iverksatte behandling.
-     * Siden den siste iverksatte ikke nødvendigvis er den aktive/åpne kan det være
-     * åpne behandlinger på fagsaken det kjøres satsendring for. Dette blir håndtert i kjøringen
-     * av satsendringsbehandlingen.
-     */
-    fun finnBehandlingerForSatsendring(
-        gammelSats: Int,
-        satsendringMåned: YearMonth
-    ): List<Long> {
-        val behandlinger = behandlingRepository.finnBehandlingerForSatsendring(
-            iverksatteLøpende = behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker(),
-            gammelSats = gammelSats,
-            månedÅrForEndring = satsendringMåned
-        )
-
-        logger.info("Oppretter ${behandlinger.size} tasker på saker som trenger satsendring.")
-
-        return behandlinger
     }
 
     private fun harAlleredeNySats(behandlingId: Long): Boolean {
@@ -113,7 +105,7 @@ class AutovedtakSatsendringService(
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandlingId)
 
         return andeler.any {
-            it.sats == SatsService.finnSisteSatsFor(SatsType.TILLEGG_ORBA).beløp
+            it.sats == SatsService.finnSisteSatsFor(SatsType.ORBA).beløp
         }
     }
 
