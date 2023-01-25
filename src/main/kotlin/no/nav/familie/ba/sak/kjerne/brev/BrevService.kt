@@ -134,6 +134,7 @@ class BrevService(
                 vedtakFellesfelter = vedtakFellesfelter,
                 informasjonOmAarligKontroll = vedtaksperiodeService.skalHaÅrligKontroll(vedtak)
             )
+
             Brevmal.VEDTAK_FORTSATT_INNVILGET_INSTITUSJON -> ForsattInnvilget(
                 mal = Brevmal.VEDTAK_FORTSATT_INNVILGET_INSTITUSJON,
                 vedtakFellesfelter = vedtakFellesfelter

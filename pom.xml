@@ -23,7 +23,7 @@
         <changelist>-SNAPSHOT</changelist>
         <spring.cloud.version>3.1.5</spring.cloud.version>
         <prosessering.version>1.20230109093555_e5eaa65</prosessering.version>
-        <felles.version>1.20221202080911_bcf8f33</felles.version>
+        <felles.version>1.20230116145510_2afcc20</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20221118130052_e2abd9f</eksterne-kontrakter-bisys.version>
         <felles-kontrakter.version>2.0_20230110150447_4edded8</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20220216121145_5a268ac</familie.kontrakter.saksstatistikk>
