@@ -47,7 +47,6 @@ object BehandlingsresultatUtils {
         val endringerTidslinje = nåværendeTidslinje.kombinerUtenNullMed(forrigeTidslinje) { nåværende, forrige ->
             (
                 nåværende.avtaletidspunktDeltBosted != forrige.avtaletidspunktDeltBosted ||
-                    nåværende.prosent != forrige.prosent ||
                     nåværende.årsak != forrige.årsak ||
                     nåværende.søknadstidspunkt != forrige.søknadstidspunkt
                 )
