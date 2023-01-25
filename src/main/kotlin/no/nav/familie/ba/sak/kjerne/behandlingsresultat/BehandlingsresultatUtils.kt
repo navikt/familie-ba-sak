@@ -321,3 +321,25 @@ private fun Set<YtelsePersonResultat>.matcherAltOgHarBådeEndretOgOpphørtResult
 
     return if (opphørtResultat.isEmpty()) false else this == setOf(endretResultat) + opphørtResultat + andreElementer
 }
+
+fun hentOpphørsresultatPåBehandling(
+    nåværendeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+    forrigeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
+): Opphørsresultat {
+    val nåværendeBehandlingOpphørsdato = nåværendeAndeler.maxOf { it.stønadTom }
+    val forrigeBehandlingOpphørsdato = forrigeAndeler.maxOf { it.stønadTom }
+    val dagensDato = YearMonth.now()
+
+    return when {
+        // Rekkefølgen av sjekkene er viktig for å komme fram til riktig opphørsresultat.
+        nåværendeBehandlingOpphørsdato > dagensDato -> Opphørsresultat.IKKE_OPPHØRT
+        forrigeBehandlingOpphørsdato > dagensDato || forrigeBehandlingOpphørsdato > nåværendeBehandlingOpphørsdato -> Opphørsresultat.OPPHØRT
+        else -> Opphørsresultat.FORTSATT_OPPHØRT
+    }
+}
+
+enum class Opphørsresultat {
+    OPPHØRT,
+    FORTSATT_OPPHØRT,
+    IKKE_OPPHØRT
+}
