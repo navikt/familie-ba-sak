@@ -29,7 +29,7 @@ class BehandlingsresultatUtilsTest {
     val des22 = YearMonth.of(2022, 12)
 
     @Test
-    fun `Skal returnere false dersom eneste endring er opphør`() {
+    fun `Endring i beløp - Skal returnere false dersom eneste endring er opphør`() {
         val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
 
         val forrigeAndeler = listOf(
@@ -59,7 +59,7 @@ class BehandlingsresultatUtilsTest {
     }
 
     @Test
-    fun `Skal returnere true når beløp i periode har gått fra større enn 0 til null og det er søkt for person`() {
+    fun `Endring i beløp - Skal returnere true når beløp i periode har gått fra større enn 0 til null og det er søkt for person`() {
         val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
         val barn2Aktør = lagPerson(type = PersonType.BARN).aktør
 
@@ -102,7 +102,7 @@ class BehandlingsresultatUtilsTest {
     }
 
     @Test
-    fun `Skal returnere false når beløp i periode har gått fra større enn 0 til at annet tall større enn 0 og det er søkt for person`() {
+    fun `Endring i beløp - Skal returnere false når beløp i periode har gått fra større enn 0 til at annet tall større enn 0 og det er søkt for person`() {
         val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
         val barn2Aktør = lagPerson(type = PersonType.BARN).aktør
 
@@ -151,7 +151,7 @@ class BehandlingsresultatUtilsTest {
     }
 
     @Test
-    fun `Skal returnere true når beløp i periode har gått fra null til et tall større enn 0 og det ikke er søkt for person`() {
+    fun `Endring i beløp - Skal returnere true når beløp i periode har gått fra null til et tall større enn 0 og det ikke er søkt for person`() {
         val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
         val barn2Aktør = lagPerson(type = PersonType.BARN).aktør
 
@@ -194,7 +194,7 @@ class BehandlingsresultatUtilsTest {
     }
 
     @Test
-    fun `Skal returnere false når beløp i periode har gått fra null til et tall større enn 0 og det er søkt for person`() {
+    fun `Endring i beløp - Skal returnere false når beløp i periode har gått fra null til et tall større enn 0 og det er søkt for person`() {
         val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
         val barn2Aktør = lagPerson(type = PersonType.BARN).aktør
 
@@ -237,7 +237,7 @@ class BehandlingsresultatUtilsTest {
     }
 
     @Test
-    fun `Skal returnere true når beløp i periode har gått fra større enn 0 til at annet tall større enn 0 og det ikke er søkt for person`() {
+    fun `Endring i beløp - Skal returnere true når beløp i periode har gått fra større enn 0 til at annet tall større enn 0 og det ikke er søkt for person`() {
         val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
         val barn2Aktør = lagPerson(type = PersonType.BARN).aktør
 
