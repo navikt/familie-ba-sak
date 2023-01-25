@@ -33,6 +33,7 @@ object BehandlingsresultatUtils {
             message = "Kombiansjonen av behandlingsresultatene $behandlingsresultater er ikke støttet i løsningen."
         )
 
+    // NB: For personer fremstilt krav for tar vi ikke hensyn til alle endringer i beløp i denne funksjonen
     internal fun erEndringIBeløp(
         nåværendeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
         forrigeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
