@@ -1,20 +1,29 @@
 package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
+import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilMånedTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjær
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.fpsak.tidsserie.StandardCombinators
+import java.time.YearMonth
 
 object BehandlingsresultatUtils {
 
@@ -23,6 +32,62 @@ object BehandlingsresultatUtils {
             frontendFeilmelding = "Behandlingsresultatet du har fått på behandlingen er ikke støttet i løsningen enda. Ta kontakt med Team familie om du er uenig i resultatet.",
             message = "Kombiansjonen av behandlingsresultatene $behandlingsresultater er ikke støttet i løsningen."
         )
+
+    // NB: For personer fremstilt krav for tar vi ikke hensyn til alle endringer i beløp i denne funksjonen
+    internal fun erEndringIBeløp(
+        nåværendeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        forrigeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        personerFremstiltKravFor: List<Aktør>
+    ): Boolean {
+        val allePersonerMedAndeler = (nåværendeAndeler.map { it.aktør } + forrigeAndeler.map { it.aktør }).distinct()
+        val opphørstidspunkt = nåværendeAndeler.maxOf { it.stønadTom }
+
+        val erEndringIBeløpForMinstEnPerson = allePersonerMedAndeler.any { aktør ->
+            erEndringIBeløpForPerson(
+                nåværendeAndeler = nåværendeAndeler.filter { it.aktør == aktør },
+                forrigeAndeler = forrigeAndeler.filter { it.aktør == aktør },
+                opphørstidspunkt = opphørstidspunkt,
+                erFremstiltKravForPerson = personerFremstiltKravFor.contains(aktør)
+            )
+        }
+
+        return erEndringIBeløpForMinstEnPerson
+    }
+
+    // Kun interessert i endringer i beløp FØR opphørstidspunkt
+    private fun erEndringIBeløpForPerson(
+        nåværendeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        forrigeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        opphørstidspunkt: YearMonth,
+        erFremstiltKravForPerson: Boolean
+    ): Boolean {
+        val nåværendeTidslinje = AndelTilkjentYtelseTidslinje(nåværendeAndeler)
+        val forrigeTidslinje = AndelTilkjentYtelseTidslinje(forrigeAndeler)
+
+        val endringIBeløpTidslinje = nåværendeTidslinje.kombinerMed(forrigeTidslinje) { nåværende, forrige ->
+            val nåværendeBeløp = nåværende?.kalkulertUtbetalingsbeløp ?: 0
+            val forrigeBeløp = forrige?.kalkulertUtbetalingsbeløp ?: 0
+
+            if (erFremstiltKravForPerson) {
+                // Hvis det er søkt for person vil vi kun ha med endringer som går fra beløp > 0 til 0/null
+                when {
+                    forrigeBeløp > 0 && nåværendeBeløp == 0 -> true
+                    else -> false
+                }
+            } else {
+                // Hvis det ikke er søkt for person vil vi ha med alle endringer i beløp
+                when {
+                    forrigeBeløp != nåværendeBeløp -> true
+                    else -> false
+                }
+            }
+        }.fjernPerioderEtterOpphørsdato(opphørstidspunkt)
+
+        return endringIBeløpTidslinje.perioder().any { it.innhold == true }
+    }
+
+    private fun Tidslinje<Boolean, Måned>.fjernPerioderEtterOpphørsdato(opphørstidspunkt: YearMonth) =
+        this.beskjær(fraOgMed = TIDENES_MORGEN.tilMånedTidspunkt(), tilOgMed = opphørstidspunkt.tilTidspunkt())
 
     internal fun utledBehandlingsresultatDataForPerson(
         person: Person,
