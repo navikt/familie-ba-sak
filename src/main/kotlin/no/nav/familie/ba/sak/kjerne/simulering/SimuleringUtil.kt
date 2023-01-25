@@ -25,9 +25,10 @@ fun filterBortUrelevanteVedtakSimuleringPosteringer(
 
 fun vedtakSimuleringMottakereTilRestSimulering(
     økonomiSimuleringMottakere: List<ØkonomiSimuleringMottaker>,
-    erManuelPosteringTogglePå: Boolean
+    erManuellPosteringTogglePå: Boolean
 ): RestSimulering {
-    val perioder = vedtakSimuleringMottakereTilSimuleringPerioder(økonomiSimuleringMottakere, erManuelPosteringTogglePå)
+    val perioder =
+        vedtakSimuleringMottakereTilSimuleringPerioder(økonomiSimuleringMottakere, erManuellPosteringTogglePå)
     val tidSimuleringHentet = økonomiSimuleringMottakere.firstOrNull()?.opprettetTidspunkt?.toLocalDate()
 
     val framtidigePerioder =
