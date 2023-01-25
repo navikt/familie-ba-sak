@@ -5,5 +5,5 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface SatskjøringRepository : JpaRepository<Satskjøring, Long> {
-    fun countByFerdigTidspunktExists(): Long
+    fun countByFerdigTidspunktIsNotNull(): Long
 }
