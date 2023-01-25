@@ -11,8 +11,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.EndretUtbetalingAndelTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
-import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -70,8 +70,8 @@ object BehandlingsresultatUtils {
     }
 
     internal fun erEndringIEndretUtbetalingAndeler(
-        nåværendeEndretAndeler: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>,
-        forrigeEndretAndeler: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>
+        nåværendeEndretAndeler: List<EndretUtbetalingAndel>,
+        forrigeEndretAndeler: List<EndretUtbetalingAndel>
     ): Boolean {
         val allePersoner = (nåværendeEndretAndeler.mapNotNull { it.person?.aktør } + forrigeEndretAndeler.mapNotNull { it.person?.aktør }).distinct()
 
@@ -86,8 +86,8 @@ object BehandlingsresultatUtils {
     }
 
     private fun erEndringIEndretUtbetalingAndelPerPerson(
-        nåværendeEndretAndeler: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>,
-        forrigeEndretAndeler: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>
+        nåværendeEndretAndeler: List<EndretUtbetalingAndel>,
+        forrigeEndretAndeler: List<EndretUtbetalingAndel>
     ): Boolean {
         val nåværendeTidslinje = EndretUtbetalingAndelTidslinje(nåværendeEndretAndeler)
         val forrigeTidslinje = EndretUtbetalingAndelTidslinje(forrigeEndretAndeler)
