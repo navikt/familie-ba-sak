@@ -18,6 +18,73 @@ import no.nav.fpsak.tidsserie.StandardCombinators
 
 object BehandlingsresultatUtils {
 
+    private enum class Søknadsresultat {
+        INNVILGET,
+        AVSLÅTT,
+        DELVIS_INNVILGET,
+        INGEN_RELEVANTE_ENDRINGER
+    }
+
+    private enum class Endringsresultat {
+        ENDRING,
+        INGEN_ENDRING
+    }
+
+    private enum class Opphørsresultat {
+        OPPHØRT,
+        FORTSATT_OPPHØRT,
+        IKKE_OPPHØRT
+    }
+
+    private fun kombinerResultaterTilBehandlingsresultat(
+        søknadsresultat: Søknadsresultat?, // Søknadsresultat er null hvis det ikke er en søknad/fødselshendelse/manuell migrering
+        endringsresultat: Endringsresultat,
+        opphørsresultat: Opphørsresultat
+    ): Behandlingsresultat {
+        fun sjekkResultat(
+            ønsketSøknadsresultat: Søknadsresultat?,
+            ønsketEndringsresultat: Endringsresultat,
+            ønsketOpphørsresultat: Opphørsresultat
+        ): Boolean =
+            søknadsresultat == ønsketSøknadsresultat && endringsresultat == ønsketEndringsresultat && opphørsresultat == ønsketOpphørsresultat
+
+        return when {
+            sjekkResultat(Søknadsresultat.INGEN_RELEVANTE_ENDRINGER, Endringsresultat.INGEN_ENDRING, Opphørsresultat.IKKE_OPPHØRT) -> Behandlingsresultat.FORTSATT_INNVILGET
+            sjekkResultat(Søknadsresultat.INGEN_RELEVANTE_ENDRINGER, Endringsresultat.INGEN_ENDRING, Opphørsresultat.FORTSATT_OPPHØRT) -> Behandlingsresultat.FORTSATT_OPPHØRT
+
+            sjekkResultat(Søknadsresultat.INNVILGET, Endringsresultat.ENDRING, Opphørsresultat.OPPHØRT) -> Behandlingsresultat.INNVILGET_ENDRET_OG_OPPHØRT
+            sjekkResultat(Søknadsresultat.INNVILGET, Endringsresultat.ENDRING, Opphørsresultat.FORTSATT_OPPHØRT) -> Behandlingsresultat.INNVILGET_OG_ENDRET
+            sjekkResultat(Søknadsresultat.INNVILGET, Endringsresultat.ENDRING, Opphørsresultat.IKKE_OPPHØRT) -> Behandlingsresultat.INNVILGET_OG_ENDRET
+            sjekkResultat(Søknadsresultat.INNVILGET, Endringsresultat.INGEN_ENDRING, Opphørsresultat.OPPHØRT) -> Behandlingsresultat.INNVILGET_OG_OPPHØRT
+            sjekkResultat(Søknadsresultat.INNVILGET, Endringsresultat.INGEN_ENDRING, Opphørsresultat.FORTSATT_OPPHØRT) -> Behandlingsresultat.INNVILGET
+            sjekkResultat(Søknadsresultat.INNVILGET, Endringsresultat.INGEN_ENDRING, Opphørsresultat.IKKE_OPPHØRT) -> Behandlingsresultat.INNVILGET
+
+            sjekkResultat(Søknadsresultat.AVSLÅTT, Endringsresultat.ENDRING, Opphørsresultat.OPPHØRT) -> Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT
+            sjekkResultat(Søknadsresultat.AVSLÅTT, Endringsresultat.ENDRING, Opphørsresultat.FORTSATT_OPPHØRT) -> Behandlingsresultat.AVSLÅTT_OG_ENDRET
+            sjekkResultat(Søknadsresultat.AVSLÅTT, Endringsresultat.ENDRING, Opphørsresultat.IKKE_OPPHØRT) -> Behandlingsresultat.AVSLÅTT_OG_ENDRET
+            sjekkResultat(Søknadsresultat.AVSLÅTT, Endringsresultat.INGEN_ENDRING, Opphørsresultat.OPPHØRT) -> Behandlingsresultat.AVSLÅTT_OG_OPPHØRT
+            sjekkResultat(Søknadsresultat.AVSLÅTT, Endringsresultat.INGEN_ENDRING, Opphørsresultat.FORTSATT_OPPHØRT) -> Behandlingsresultat.AVSLÅTT
+            sjekkResultat(Søknadsresultat.AVSLÅTT, Endringsresultat.INGEN_ENDRING, Opphørsresultat.IKKE_OPPHØRT) -> Behandlingsresultat.AVSLÅTT
+
+            sjekkResultat(Søknadsresultat.DELVIS_INNVILGET, Endringsresultat.ENDRING, Opphørsresultat.OPPHØRT) -> Behandlingsresultat.DELVIS_INNVILGET_ENDRET_OG_OPPHØRT
+            sjekkResultat(Søknadsresultat.DELVIS_INNVILGET, Endringsresultat.ENDRING, Opphørsresultat.FORTSATT_OPPHØRT) -> Behandlingsresultat.DELVIS_INNVILGET_OG_ENDRET
+            sjekkResultat(Søknadsresultat.DELVIS_INNVILGET, Endringsresultat.ENDRING, Opphørsresultat.IKKE_OPPHØRT) -> Behandlingsresultat.DELVIS_INNVILGET_OG_ENDRET
+            sjekkResultat(Søknadsresultat.DELVIS_INNVILGET, Endringsresultat.INGEN_ENDRING, Opphørsresultat.OPPHØRT) -> Behandlingsresultat.DELVIS_INNVILGET_OG_OPPHØRT
+            sjekkResultat(Søknadsresultat.DELVIS_INNVILGET, Endringsresultat.INGEN_ENDRING, Opphørsresultat.FORTSATT_OPPHØRT) -> Behandlingsresultat.DELVIS_INNVILGET
+            sjekkResultat(Søknadsresultat.DELVIS_INNVILGET, Endringsresultat.INGEN_ENDRING, Opphørsresultat.IKKE_OPPHØRT) -> Behandlingsresultat.DELVIS_INNVILGET
+
+            // Ikke søknad
+            sjekkResultat(null, Endringsresultat.ENDRING, Opphørsresultat.OPPHØRT) -> Behandlingsresultat.ENDRET_OG_OPPHØRT
+            sjekkResultat(null, Endringsresultat.ENDRING, Opphørsresultat.FORTSATT_OPPHØRT) -> Behandlingsresultat.ENDRET_UTBETALING
+            sjekkResultat(null, Endringsresultat.ENDRING, Opphørsresultat.IKKE_OPPHØRT) -> Behandlingsresultat.ENDRET_UTBETALING
+            sjekkResultat(null, Endringsresultat.INGEN_ENDRING, Opphørsresultat.OPPHØRT) -> Behandlingsresultat.OPPHØRT
+            sjekkResultat(null, Endringsresultat.INGEN_ENDRING, Opphørsresultat.FORTSATT_OPPHØRT) -> Behandlingsresultat.FORTSATT_OPPHØRT
+            sjekkResultat(null, Endringsresultat.INGEN_ENDRING, Opphørsresultat.IKKE_OPPHØRT) -> Behandlingsresultat.FORTSATT_INNVILGET
+
+            else -> throw Feil("Klarer ikke utlede behandlingsresultat fra (søknadsresultat=$søknadsresultat, endringsresultat=$endringsresultat, opphørsresultat=$opphørsresultat)")
+        }
+    }
+
     private fun ikkeStøttetFeil(behandlingsresultater: MutableSet<YtelsePersonResultat>) =
         Feil(
             frontendFeilmelding = "Behandlingsresultatet du har fått på behandlingen er ikke støttet i løsningen enda. Ta kontakt med Team familie om du er uenig i resultatet.",
