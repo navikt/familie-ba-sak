@@ -43,19 +43,21 @@ object BehandlingsresultatUtils {
         val alleResultater = (
             if (erEksplisittAvslagPåMinstEnPersonFremstiltKravFor) {
                 resultaterFraAndeler.plus(Søknadsresultat.AVSLÅTT)
-            } else resultaterFraAndeler
+            } else {
+                resultaterFraAndeler
+            }
             ).distinct()
 
         return alleResultater.kombinerSøknadsresultater()
     }
 
-    private fun List<Søknadsresultat>.kombinerSøknadsresultater(): Søknadsresultat {
+    internal fun List<Søknadsresultat>.kombinerSøknadsresultater(): Søknadsresultat {
         val resultaterUtenIngenEndringer = this.filter { it != Søknadsresultat.INGEN_RELEVANTE_ENDRINGER }
 
         return when {
             this.isEmpty() -> throw Feil("Klarer ikke utlede søknadsresultat")
             this.size == 1 -> this.single()
-            resultaterUtenIngenEndringer.size == 1 -> this.single()
+            resultaterUtenIngenEndringer.size == 1 -> resultaterUtenIngenEndringer.single()
             resultaterUtenIngenEndringer.size == 2 && resultaterUtenIngenEndringer.containsAll(listOf(Søknadsresultat.INNVILGET, Søknadsresultat.AVSLÅTT)) -> Søknadsresultat.DELVIS_INNVILGET
             else -> throw Feil("Klarer ikke kombinere søknadsresultater: $this")
         }
@@ -122,7 +124,7 @@ object BehandlingsresultatUtils {
         return this.any { it.erEksplisittAvslagPåSøknad == true }
     }
 
-    private enum class Søknadsresultat {
+    enum class Søknadsresultat {
         INNVILGET,
         AVSLÅTT,
         DELVIS_INNVILGET,

@@ -7,12 +7,17 @@ import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
+import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatUtils.kombinerSøknadsresultater
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import org.hamcrest.MatcherAssert.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import java.time.YearMonth
+import org.hamcrest.CoreMatchers.`is` as Is
 
 class BehandlingsresultatUtilsTest {
 
@@ -158,6 +163,44 @@ class BehandlingsresultatUtilsTest {
             Behandlingsresultat.ENDRET_UTBETALING,
             BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(personer)
         )
+    }
+
+    @Test
+    fun `kombinerSøknadsresultater skal kaste feil dersom lista ikke inneholder noe som helst`() {
+        val listeMedIngenSøknadsresultat = listOf<BehandlingsresultatUtils.Søknadsresultat>()
+
+        val feil = assertThrows<Feil> { listeMedIngenSøknadsresultat.kombinerSøknadsresultater() }
+
+        assertThat(feil.message, Is("Klarer ikke utlede søknadsresultat"))
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = BehandlingsresultatUtils.Søknadsresultat::class)
+    fun `kombinerSøknadsresultater skal alltid returnere innholdet hvis det bare 1 resultat i lista`(søknadsresultat: BehandlingsresultatUtils.Søknadsresultat) {
+        val listeMedSøknadsresultat = listOf(søknadsresultat)
+
+        val kombinertResultat = listeMedSøknadsresultat.kombinerSøknadsresultater()
+
+        assertThat(kombinertResultat, Is(søknadsresultat))
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = BehandlingsresultatUtils.Søknadsresultat::class, names = ["INNVILGET", "AVSLÅTT"])
+    fun `kombinerSøknadsresultater skal ignorere INGEN_RELEVANTE_ENDRINGER dersom den er paret opp med INNVILGET eller AVSLÅTT`(søknadsresultat: BehandlingsresultatUtils.Søknadsresultat) {
+        val listeMedSøknadsresultat = listOf(BehandlingsresultatUtils.Søknadsresultat.INGEN_RELEVANTE_ENDRINGER, søknadsresultat)
+
+        val kombinertResultat = listeMedSøknadsresultat.kombinerSøknadsresultater()
+
+        assertThat(kombinertResultat, Is(søknadsresultat))
+    }
+
+    @Test
+    fun `kombinerSøknadsresultater skal returnere DELVIS_INNVILGET dersom lista består av INNVILGET OG AVSLÅTT`() {
+        val listeMedSøknadsresultat = listOf(BehandlingsresultatUtils.Søknadsresultat.INNVILGET, BehandlingsresultatUtils.Søknadsresultat.AVSLÅTT)
+
+        val kombinertResultat = listeMedSøknadsresultat.kombinerSøknadsresultater()
+
+        assertThat(kombinertResultat, Is(BehandlingsresultatUtils.Søknadsresultat.DELVIS_INNVILGET))
     }
 }
 
