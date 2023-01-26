@@ -120,7 +120,9 @@ object BehandlingsresultatUtils {
         nåværendeKompetanser: List<Kompetanse>,
         forrigeKompetanser: List<Kompetanse>,
         nåværendePersonResultat: List<PersonResultat>,
-        forrigePersonResultat: List<PersonResultat>
+        forrigePersonResultat: List<PersonResultat>,
+        nåværendeEndretAndeler: List<EndretUtbetalingAndel>,
+        forrigeEndretAndeler: List<EndretUtbetalingAndel>
     ): Endringsresultat {
         val erEndringIBeløp = erEndringIBeløp(
             nåværendeAndeler = nåværendeAndeler,
@@ -138,7 +140,10 @@ object BehandlingsresultatUtils {
             forrigePersonResultat = forrigePersonResultat
         )
 
-        val erEndringIEndretUtbetalingAndeler = false // TODO
+        val erEndringIEndretUtbetalingAndeler = erEndringIEndretUtbetalingAndeler(
+            nåværendeEndretAndeler = nåværendeEndretAndeler,
+            forrigeEndretAndeler = forrigeEndretAndeler
+        )
 
         val erMinstEnEndring = erEndringIBeløp || erEndringIKompetanse || erEndringIVilkårsvurdering || erEndringIEndretUtbetalingAndeler
 
