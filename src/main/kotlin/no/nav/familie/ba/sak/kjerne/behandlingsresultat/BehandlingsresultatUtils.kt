@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inneværendeMåned
@@ -113,7 +114,7 @@ object BehandlingsresultatUtils {
         return endringerTidslinje.perioder().any { it.innhold == true }
     }
 
-    private fun utledEndringsresultat(
+    internal fun utledEndringsresultat(
         nåværendeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
         forrigeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
         personerFremstiltKravFor: List<Aktør>,
@@ -134,6 +135,8 @@ object BehandlingsresultatUtils {
             nåværendeKompetanser = nåværendeKompetanser,
             forrigeKompetanser = forrigeKompetanser
         )
+
+        println(erEndringIKompetanse)
 
         val erEndringIVilkårsvurdering = erEndringIVilkårvurdering(
             nåværendePersonResultat = nåværendePersonResultat,
@@ -163,7 +166,7 @@ object BehandlingsresultatUtils {
         personerFremstiltKravFor: List<Aktør>
     ): Boolean {
         val allePersonerMedAndeler = (nåværendeAndeler.map { it.aktør } + forrigeAndeler.map { it.aktør }).distinct()
-        val opphørstidspunkt = nåværendeAndeler.maxOf { it.stønadTom }
+        val opphørstidspunkt = nåværendeAndeler.maxOfOrNull { it.stønadTom } ?: TIDENES_ENDE.toYearMonth()
 
         val erEndringIBeløpForMinstEnPerson = allePersonerMedAndeler.any { aktør ->
             erEndringIBeløpForPerson(
