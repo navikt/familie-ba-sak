@@ -2,6 +2,9 @@ package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.ENDRINGER_I_VALIDERING_FOR_MIGRERINGSBEHANDLING
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.IKKE_STOPP_MIGRERINGSBEHANDLING
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.MIGRERING_MED_FEILUTBETALING_UNDER_BELØPSGRENSE
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -28,40 +31,36 @@ class VurderTilbakekrevingSteg(
             }
         }
 
-        if (!featureToggleService.isEnabled(FeatureToggleConfig.IKKE_STOPP_MIGRERINGSBEHANDLING)) {
-            val finnesFeilutbetaling = simuleringService.hentFeilutbetaling(behandling.id) != BigDecimal.ZERO
-            when {
-                featureToggleService.isEnabled(FeatureToggleConfig.ENDRINGER_I_VALIDERING_FOR_MIGRERINGSBEHANDLING) -> {
-                    // manuelle migreringer kan ikke fortsettes om det finnes en feilutbetaling
-                    // eller en etterbetaling større enn 220 KR
-                    validerNårToggelenErPå(behandling, finnesFeilutbetaling)
-                }
-                else -> {
-                    validerNårToggelenErAv(behandling, finnesFeilutbetaling)
-                }
-            }
+        if (behandling.erManuellMigrering() && !featureToggleService.isEnabled(IKKE_STOPP_MIGRERINGSBEHANDLING)) {
+            validerEtterbetalingForManuellMigrering(behandling)
+            validerFeilutbetalingForManuellMigrering(behandling)
         }
         return hentNesteStegForNormalFlyt(behandling)
     }
 
-    private fun validerNårToggelenErPå(behandling: Behandling, finnesFeilutbetaling: Boolean) {
-        if (behandling.erManuellMigrering() && (
-            finnesFeilutbetaling || finnesPerioderMedEtterbetalingStørreEnnMaksBeløp(behandling.id)
-            )
-        ) {
-            kastException(behandling)
+    private fun validerEtterbetalingForManuellMigrering(behandling: Behandling) {
+        when {
+            behandling.erHelmanuellMigrering() ||
+                featureToggleService.isEnabled(ENDRINGER_I_VALIDERING_FOR_MIGRERINGSBEHANDLING) -> {
+                // manuelle migreringer kan ikke fortsettes om det finnes en etterbetaling
+                // større enn 220 KR
+                if (finnesPerioderMedEtterbetalingStørreEnnMaksBeløp(behandlinId = behandling.id)) kastException(behandling)
+            }
+            else -> {
+                val finnesEtterbetaling = simuleringService.hentEtterbetaling(behandlingId = behandling.id) != BigDecimal.ZERO
+                if (finnesEtterbetaling) kastException(behandling)
+            }
         }
     }
 
-    private fun validerNårToggelenErAv(behandling: Behandling, finnesFeilutbetaling: Boolean) {
-        val finnesEtterbetaling = simuleringService.hentEtterbetaling(behandling.id) != BigDecimal.ZERO
+    private fun validerFeilutbetalingForManuellMigrering(behandling: Behandling) {
+        val finnesFeilutbetaling = simuleringService.hentFeilutbetaling(behandling.id) != BigDecimal.ZERO
+        if (!finnesFeilutbetaling) return
+
         when {
-            behandling.erManuellMigreringForEndreMigreringsdato() &&
-                (finnesFeilutbetaling || finnesEtterbetaling) -> kastException(behandling)
-            behandling.erHelmanuellMigrering() && (
-                finnesFeilutbetaling ||
-                    finnesPerioderMedEtterbetalingStørreEnnMaksBeløp(behandling.id)
-                ) -> kastException(behandling)
+            featureToggleService.isEnabled(MIGRERING_MED_FEILUTBETALING_UNDER_BELØPSGRENSE, true) &&
+                erNegativePerioderesultaterPåMaks1KroneOgTotalFeilutbetalingMindreEnnBeløpsgrense(behandling.id) -> return
+            else -> kastException(behandling)
         }
     }
 
@@ -83,8 +82,19 @@ class VurderTilbakekrevingSteg(
         return simuleringPerioder.any { it.etterbetaling > BigDecimal(HELMANUELL_MIGRERING_MAKS_ETTERBETALING) }
     }
 
+    private fun erNegativePerioderesultaterPåMaks1KroneOgTotalFeilutbetalingMindreEnnBeløpsgrense(behandlingId: Long): Boolean {
+        val simuleringMottaker = simuleringService.hentSimuleringPåBehandling(behandlingId)
+        val simuleringPerioder = vedtakSimuleringMottakereTilSimuleringPerioder(
+            simuleringMottaker,
+            featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ)
+        )
+        return simuleringPerioder.all { it.resultat <= BigDecimal.ZERO && it.resultat >= BigDecimal(-1) } &&
+            simuleringService.hentFeilutbetaling(behandlingId) < BigDecimal(HELMANUELL_MIGRERING_FEILUTBETALING_BELØPSGRENSE)
+    }
+
     companion object {
         const val HELMANUELL_MIGRERING_MAKS_ETTERBETALING = 220
+        const val HELMANUELL_MIGRERING_FEILUTBETALING_BELØPSGRENSE = 100
     }
 
     override fun stegType(): StegType = StegType.VURDER_TILBAKEKREVING
