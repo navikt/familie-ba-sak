@@ -94,7 +94,7 @@ class VurderTilbakekrevingSteg(
 
     companion object {
         const val HELMANUELL_MIGRERING_MAKS_ETTERBETALING = 220
-        const val HELMANUELL_MIGRERING_FEILUTBETALING_BELØPSGRENSE = 40
+        const val HELMANUELL_MIGRERING_FEILUTBETALING_BELØPSGRENSE = 100
     }
 
     override fun stegType(): StegType = StegType.VURDER_TILBAKEKREVING
