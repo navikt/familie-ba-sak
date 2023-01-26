@@ -70,7 +70,7 @@ data class ØkonomiSimuleringPostering(
     @Column(name = "uten_inntrekk", nullable = false)
     val utenInntrekk: Boolean,
 
-    @Column(name = "er_feilkonto", nullable = false)
+    @Column(name = "er_feilkonto", nullable = true)
     val erFeilkonto: Boolean?
 ) : BaseEntitet() {
 
