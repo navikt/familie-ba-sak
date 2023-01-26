@@ -272,5 +272,6 @@ fun SimulertPostering.tilVedtakSimuleringPostering(økonomiSimuleringMottaker: �
         posteringType = this.posteringType,
         forfallsdato = this.forfallsdato,
         utenInntrekk = this.utenInntrekk,
-        økonomiSimuleringMottaker = økonomiSimuleringMottaker
+        økonomiSimuleringMottaker = økonomiSimuleringMottaker,
+        erFeilkonto = this.erFeilkonto
     )
