@@ -129,7 +129,7 @@ fun hentNyttBeløpIPeriode(periode: List<ØkonomiSimuleringPostering>): BigDecim
         .filter { !it.erManuellPostering }
         .sumOf { it.beløp }
     val feilutbetaling = hentFeilutbetalingIPeriode(periode)
-    val feilkorrigering = hentFeilkorregeringIPeriode(periode)
+    val feilkorrigering = hentFeilkorrigeringIPeriode(periode)
 
     return if ((feilutbetaling + feilkorrigering) > BigDecimal.ZERO) {
         sumPositiveYtelser - feilutbetaling - feilkorrigering
@@ -168,7 +168,7 @@ fun hentPositivFeilbetalingIPeriode(periode: List<ØkonomiSimuleringPostering>) 
     .filter { it.beløp > BigDecimal.ZERO }
     .sumOf { it.beløp }
 
-fun hentFeilkorregeringIPeriode(periode: List<ØkonomiSimuleringPostering>) = periode
+fun hentFeilkorrigeringIPeriode(periode: List<ØkonomiSimuleringPostering>) = periode
     .filter { it.posteringType == PosteringType.FEILUTBETALING }
     .filter { it.erFeilkonto == false }
     .filter { !it.erManuellPostering }
