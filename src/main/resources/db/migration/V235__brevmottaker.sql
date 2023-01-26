@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS brevmottaker (
     id               BIGINT       PRIMARY KEY,
-    fk_behandling_id BIGINT       REFERENCES behandling (id) NOT NULL,
+    fk_behandling_id BIGINT       REFERENCES behandling (id) ON DELETE CASCADE NOT NULL,
     type             VARCHAR(50)                             NOT NULL,
     navn             VARCHAR                                 NOT NULL,
     adresselinje_1   VARCHAR                                 NOT NULL,
