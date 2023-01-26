@@ -164,7 +164,7 @@ object BehandlingsresultatUtils {
         personerFremstiltKravFor: List<Aktør>
     ): Boolean {
         val allePersonerMedAndeler = (nåværendeAndeler.map { it.aktør } + forrigeAndeler.map { it.aktør }).distinct()
-        val opphørstidspunkt = nåværendeAndeler.maxOfOrNull { it.stønadTom } ?: TIDENES_ENDE.toYearMonth()
+        val opphørstidspunkt = nåværendeAndeler.maxOfOrNull { it.stønadTom } ?: TIDENES_MORGEN.toYearMonth()
 
         val erEndringIBeløpForMinstEnPerson = allePersonerMedAndeler.any { aktør ->
             erEndringIBeløpForPerson(
