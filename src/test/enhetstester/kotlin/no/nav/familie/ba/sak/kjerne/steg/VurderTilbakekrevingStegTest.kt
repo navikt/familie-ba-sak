@@ -364,6 +364,7 @@ class VurderTilbakekrevingStegTest {
         beløp = beløp.toBigDecimal(),
         posteringType = posteringType,
         forfallsdato = forfallsdato,
-        utenInntrekk = utenInntrekk
+        utenInntrekk = utenInntrekk,
+        erFeilkonto = null
     )
 }
