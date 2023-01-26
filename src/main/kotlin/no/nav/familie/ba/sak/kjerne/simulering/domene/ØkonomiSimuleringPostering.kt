@@ -94,4 +94,6 @@ data class ØkonomiSimuleringPostering(
             "utenInntrekk=$utenInntrekk" +
             ")"
     }
+
+    val erManuellPostering = this.fagOmrådeKode != FagOmrådeKode.BARNETRYGD_INFOTRYGD_MANUELT
 }
