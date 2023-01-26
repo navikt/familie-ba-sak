@@ -120,6 +120,12 @@ object BehandlingsresultatUtils {
         INGEN_ENDRING
     }
 
+    internal enum class Opphørsresultat {
+        OPPHØRT,
+        FORTSATT_OPPHØRT,
+        IKKE_OPPHØRT
+    }
+
     internal fun kombinerResultaterTilBehandlingsresultat(
         søknadsresultat: Søknadsresultat?, // Søknadsresultat er null hvis det ikke er en søknad/fødselshendelse/manuell migrering
         endringsresultat: Endringsresultat,
