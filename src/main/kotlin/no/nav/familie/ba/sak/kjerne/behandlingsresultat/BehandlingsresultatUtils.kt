@@ -88,7 +88,7 @@ object BehandlingsresultatUtils {
                 it.vilkårResultater.erEksplisittAvslagPåPerson()
             }
 
-    private fun utledSøknadResultatFraAndelerTilkjentYtelse(
+    internal fun utledSøknadResultatFraAndelerTilkjentYtelse(
         forrigeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
         nåværendeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
         personerFremstiltKravFor: List<Aktør>
@@ -115,18 +115,20 @@ object BehandlingsresultatUtils {
             val nåværendeBeløp = nåværende?.kalkulertUtbetalingsbeløp
 
             when {
-                nåværendeBeløp == forrigeBeløp || nåværendeBeløp == null -> Søknadsresultat.INGEN_RELEVANTE_ENDRINGER // Ingen endring eller fjernet en andel
-                nåværendeBeløp > 0 -> Søknadsresultat.INNVILGET // Innvilget beløp som er annerledes enn forrige gang
-                nåværendeBeløp == 0 -> {
-                    val endringsperiode = if (nåværende.endreteUtbetalinger.isNotEmpty()) nåværende.endreteUtbetalinger.singleOrNull() ?: throw Feil("") else null
-                    when (endringsperiode?.årsak) {
-                        null -> if (nåværende.andel.differanseberegnetPeriodebeløp != null) Søknadsresultat.INNVILGET else Søknadsresultat.INGEN_RELEVANTE_ENDRINGER // Blir dette riktig? Eller skal vi sjekke for diggeranseberegning uansett hva endringsperiode er?
-                        Årsak.DELT_BOSTED -> Søknadsresultat.INNVILGET
-                        Årsak.ALLEREDE_UTBETALT,
-                        Årsak.ENDRE_MOTTAKER,
-                        Årsak.ETTERBETALING_3ÅR -> Søknadsresultat.AVSLÅTT
+                nåværendeBeløp == forrigeBeløp -> Søknadsresultat.INGEN_RELEVANTE_ENDRINGER // Ingen endring eller fjernet en andel
+                nåværendeBeløp == 0 || nåværendeBeløp == null -> {
+                    val endringsperiodeÅrsak = if (nåværende?.endreteUtbetalinger?.isNotEmpty() == true) nåværende.endreteUtbetalinger.singleOrNull()?.årsak ?: throw Feil("") else null
+
+                    when {
+                        nåværende?.andel?.differanseberegnetPeriodebeløp != null -> Søknadsresultat.INNVILGET
+                        endringsperiodeÅrsak == Årsak.DELT_BOSTED -> Søknadsresultat.INNVILGET
+                        (endringsperiodeÅrsak == Årsak.ALLEREDE_UTBETALT) ||
+                            (endringsperiodeÅrsak == Årsak.ENDRE_MOTTAKER) ||
+                            (endringsperiodeÅrsak == Årsak.ETTERBETALING_3ÅR) -> Søknadsresultat.AVSLÅTT
+                        else -> Søknadsresultat.INGEN_RELEVANTE_ENDRINGER
                     }
                 }
+                nåværendeBeløp > 0 -> Søknadsresultat.INNVILGET // Innvilget beløp som er annerledes enn forrige gang
                 else -> Søknadsresultat.INGEN_RELEVANTE_ENDRINGER
             }
         }

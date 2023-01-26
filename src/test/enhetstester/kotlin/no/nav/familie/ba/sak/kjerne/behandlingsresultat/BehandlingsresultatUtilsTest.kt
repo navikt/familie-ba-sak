@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatUtils.kombinerSøknadsresultater
+import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatUtils.utledSøknadResultatFraAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
@@ -28,6 +29,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
+import org.hamcrest.Matchers.containsInAnyOrder
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -835,7 +837,9 @@ class BehandlingsresultatUtilsTest {
             )
 
         val endring = BehandlingsresultatUtils.erEndringIKompetanse(
-            nåværendeKompetanser = listOf(forrigeKompetanse.copy(søkersAktivitetsland = "DK").apply { behandlingId = nåværendeBehandling.id }),
+            nåværendeKompetanser = listOf(
+                forrigeKompetanse.copy(søkersAktivitetsland = "DK").apply { behandlingId = nåværendeBehandling.id }
+            ),
             forrigeKompetanser = listOf(forrigeKompetanse)
         )
 
@@ -861,7 +865,10 @@ class BehandlingsresultatUtilsTest {
             )
 
         val endring = BehandlingsresultatUtils.erEndringIKompetanse(
-            nåværendeKompetanser = listOf(forrigeKompetanse.copy(søkersAktivitet = SøkersAktivitet.ARBEIDER_PÅ_NORSK_SOKKEL).apply { behandlingId = nåværendeBehandling.id }),
+            nåværendeKompetanser = listOf(
+                forrigeKompetanse.copy(søkersAktivitet = SøkersAktivitet.ARBEIDER_PÅ_NORSK_SOKKEL)
+                    .apply { behandlingId = nåværendeBehandling.id }
+            ),
             forrigeKompetanser = listOf(forrigeKompetanse)
         )
 
@@ -887,7 +894,10 @@ class BehandlingsresultatUtilsTest {
             )
 
         val endring = BehandlingsresultatUtils.erEndringIKompetanse(
-            nåværendeKompetanser = listOf(forrigeKompetanse.copy(annenForeldersAktivitetsland = "DK").apply { behandlingId = nåværendeBehandling.id }),
+            nåværendeKompetanser = listOf(
+                forrigeKompetanse.copy(annenForeldersAktivitetsland = "DK")
+                    .apply { behandlingId = nåværendeBehandling.id }
+            ),
             forrigeKompetanser = listOf(forrigeKompetanse)
         )
 
@@ -913,7 +923,10 @@ class BehandlingsresultatUtilsTest {
             )
 
         val endring = BehandlingsresultatUtils.erEndringIKompetanse(
-            nåværendeKompetanser = listOf(forrigeKompetanse.copy(annenForeldersAktivitet = AnnenForeldersAktivitet.FORSIKRET_I_BOSTEDSLAND).apply { behandlingId = nåværendeBehandling.id }),
+            nåværendeKompetanser = listOf(
+                forrigeKompetanse.copy(annenForeldersAktivitet = AnnenForeldersAktivitet.FORSIKRET_I_BOSTEDSLAND)
+                    .apply { behandlingId = nåværendeBehandling.id }
+            ),
             forrigeKompetanser = listOf(forrigeKompetanse)
         )
 
@@ -939,7 +952,9 @@ class BehandlingsresultatUtilsTest {
             )
 
         val endring = BehandlingsresultatUtils.erEndringIKompetanse(
-            nåværendeKompetanser = listOf(forrigeKompetanse.copy(barnetsBostedsland = "DK").apply { behandlingId = nåværendeBehandling.id }),
+            nåværendeKompetanser = listOf(
+                forrigeKompetanse.copy(barnetsBostedsland = "DK").apply { behandlingId = nåværendeBehandling.id }
+            ),
             forrigeKompetanser = listOf(forrigeKompetanse)
         )
 
@@ -965,7 +980,10 @@ class BehandlingsresultatUtilsTest {
             )
 
         val endring = BehandlingsresultatUtils.erEndringIKompetanse(
-            nåværendeKompetanser = listOf(forrigeKompetanse.copy(resultat = KompetanseResultat.NORGE_ER_SEKUNDÆRLAND).apply { behandlingId = nåværendeBehandling.id }),
+            nåværendeKompetanser = listOf(
+                forrigeKompetanse.copy(resultat = KompetanseResultat.NORGE_ER_SEKUNDÆRLAND)
+                    .apply { behandlingId = nåværendeBehandling.id }
+            ),
             forrigeKompetanser = listOf(forrigeKompetanse)
         )
 
@@ -991,11 +1009,293 @@ class BehandlingsresultatUtilsTest {
             )
 
         val endring = BehandlingsresultatUtils.erEndringIKompetanse(
-            nåværendeKompetanser = listOf(forrigeKompetanse.copy(fom = YearMonth.now().minusMonths(10)).apply { behandlingId = nåværendeBehandling.id }),
+            nåværendeKompetanser = listOf(
+                forrigeKompetanse.copy(fom = YearMonth.now().minusMonths(10))
+                    .apply { behandlingId = nåværendeBehandling.id }
+            ),
             forrigeKompetanser = listOf(forrigeKompetanse)
         )
 
         assertEquals(false, endring)
+    }
+
+    @Test
+    fun `utledSøknadResultatFraAndelerTilkjentYtelse skal bare utlede resultater for personer det er framstilt krav for`() {
+        val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
+
+        val forrigeAndel =
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                fom = jan22,
+                tom = aug22,
+                beløp = 1054,
+                aktør = barn1Aktør
+            )
+
+        val søknadsResultat = utledSøknadResultatFraAndelerTilkjentYtelse(
+            forrigeAndeler = listOf(forrigeAndel),
+            nåværendeAndeler = listOf(forrigeAndel.copy()),
+            personerFremstiltKravFor = emptyList()
+        )
+
+        assertThat(søknadsResultat, Is(emptyList()))
+    }
+
+    @Test
+    fun `utledSøknadResultatFraAndelerTilkjentYtelse skal returnere ingen relevante endringer dersom beløpene for periodene er lik forrige behandling`() {
+        val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
+
+        val forrigeAndel =
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                fom = jan22,
+                tom = aug22,
+                beløp = 1054,
+                aktør = barn1Aktør
+            )
+
+        val søknadsResultat = utledSøknadResultatFraAndelerTilkjentYtelse(
+            forrigeAndeler = listOf(forrigeAndel),
+            nåværendeAndeler = listOf(forrigeAndel.copy()),
+            personerFremstiltKravFor = listOf(barn1Aktør)
+        )
+
+        assertThat(søknadsResultat.size, Is(1))
+        assertThat(søknadsResultat[0], Is(BehandlingsresultatUtils.Søknadsresultat.INGEN_RELEVANTE_ENDRINGER))
+    }
+
+    @Test
+    fun `utledSøknadResultatFraAndelerTilkjentYtelse skal returnere innvilget dersom det finnes beløp for perioder som er annerledes enn sist og større enn 0`() {
+        val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
+
+        val forrigeAndeler = listOf(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                fom = jan22,
+                tom = aug22,
+                beløp = 0,
+                aktør = barn1Aktør
+            )
+        )
+
+        val nåværendeAndeler = listOf(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                fom = jan22,
+                tom = aug22,
+                beløp = 1054,
+                aktør = barn1Aktør
+            )
+        )
+
+        val søknadsResultat = utledSøknadResultatFraAndelerTilkjentYtelse(
+            forrigeAndeler = forrigeAndeler,
+            nåværendeAndeler = nåværendeAndeler,
+            personerFremstiltKravFor = listOf(barn1Aktør)
+        )
+
+        assertThat(søknadsResultat.size, Is(1))
+        assertThat(søknadsResultat[0], Is(BehandlingsresultatUtils.Søknadsresultat.INNVILGET))
+    }
+
+    @Test
+    fun `utledSøknadResultatFraAndelerTilkjentYtelse skal returnere ingen relevante endringer dersom beløp er 0 og det ikke finnes noen endringsperioder eller differanse beregning`() {
+        val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
+
+        val forrigeAndeler = listOf(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                fom = jan22,
+                tom = aug22,
+                beløp = 1054,
+                aktør = barn1Aktør
+            )
+        )
+        val nåværendeAndeler = listOf(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                fom = jan22,
+                tom = aug22,
+                beløp = 0,
+                aktør = barn1Aktør
+            )
+        )
+
+        val søknadsResultat = utledSøknadResultatFraAndelerTilkjentYtelse(
+            forrigeAndeler = forrigeAndeler,
+            nåværendeAndeler = nåværendeAndeler,
+            personerFremstiltKravFor = listOf(barn1Aktør)
+        )
+
+        assertThat(søknadsResultat.size, Is(1))
+        assertThat(søknadsResultat[0], Is(BehandlingsresultatUtils.Søknadsresultat.INGEN_RELEVANTE_ENDRINGER))
+    }
+
+    @Test
+    fun `utledSøknadResultatFraAndelerTilkjentYtelse skal returnere INNVILGET dersom beløp er 0 og det finnes endringsperiode som DELT_BOSTED`() {
+        val barn1Person = lagPerson(type = PersonType.BARN)
+        val barn1Aktør = barn1Person.aktør
+
+        val forrigeAndeler = listOf(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                fom = jan22,
+                tom = aug22,
+                beløp = 1054,
+                aktør = barn1Aktør
+            )
+        )
+        val nåværendeAndeler = listOf(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                fom = jan22,
+                tom = aug22,
+                beløp = 0,
+                aktør = barn1Aktør,
+                endretUtbetalingAndeler = listOf(
+                    lagEndretUtbetalingAndel(
+                        person = barn1Person,
+                        fom = jan22,
+                        tom = aug22,
+                        prosent = BigDecimal(100),
+                        behandlingId = 123L,
+                        årsak = Årsak.DELT_BOSTED
+                    )
+                )
+            )
+        )
+
+        val søknadsResultat = utledSøknadResultatFraAndelerTilkjentYtelse(
+            forrigeAndeler = forrigeAndeler,
+            nåværendeAndeler = nåværendeAndeler,
+            personerFremstiltKravFor = listOf(barn1Aktør)
+        )
+
+        assertThat(søknadsResultat.size, Is(1))
+        assertThat(søknadsResultat[0], Is(BehandlingsresultatUtils.Søknadsresultat.INNVILGET))
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = Årsak::class, mode = EnumSource.Mode.EXCLUDE, names = ["DELT_BOSTED"])
+    fun `utledSøknadResultatFraAndelerTilkjentYtelse skal returnere AVSLÅTT dersom beløp er 0 og det finnes endringsperiode som ikke er DELT_BOSTED`(årsak: Årsak) {
+        val barn1Person = lagPerson(type = PersonType.BARN)
+        val barn1Aktør = barn1Person.aktør
+
+        val forrigeAndeler = listOf(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                fom = jan22,
+                tom = aug22,
+                beløp = 1054,
+                aktør = barn1Aktør
+            )
+        )
+        val nåværendeAndeler = listOf(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                fom = jan22,
+                tom = aug22,
+                beløp = 0,
+                aktør = barn1Aktør,
+                endretUtbetalingAndeler = listOf(
+                    lagEndretUtbetalingAndel(
+                        person = barn1Person,
+                        fom = jan22,
+                        tom = aug22,
+                        prosent = BigDecimal(100),
+                        behandlingId = 123L,
+                        årsak = årsak
+                    )
+                )
+            )
+        )
+
+        val søknadsResultat = utledSøknadResultatFraAndelerTilkjentYtelse(
+            forrigeAndeler = forrigeAndeler,
+            nåværendeAndeler = nåværendeAndeler,
+            personerFremstiltKravFor = listOf(barn1Aktør)
+        )
+
+        assertThat(søknadsResultat.size, Is(1))
+        assertThat(søknadsResultat[0], Is(BehandlingsresultatUtils.Søknadsresultat.AVSLÅTT))
+    }
+
+    @Test
+    fun `utledSøknadResultatFraAndelerTilkjentYtelse skal returnere INNVILGET dersom beløpet er 0 og det ikke finnes noe endringsperioder men er differanseberegnet`() {
+        val barn1Person = lagPerson(type = PersonType.BARN)
+        val barn1Aktør = barn1Person.aktør
+
+        val forrigeAndeler = listOf(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                fom = jan22,
+                tom = aug22,
+                beløp = 1054,
+                aktør = barn1Aktør
+            )
+        )
+        val nåværendeAndeler = listOf(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                fom = jan22,
+                tom = aug22,
+                beløp = 0,
+                aktør = barn1Aktør,
+                differanseberegnetPeriodebeløp = 100
+            )
+        )
+
+        val søknadsResultat = utledSøknadResultatFraAndelerTilkjentYtelse(
+            forrigeAndeler = forrigeAndeler,
+            nåværendeAndeler = nåværendeAndeler,
+            personerFremstiltKravFor = listOf(barn1Aktør)
+        )
+
+        assertThat(søknadsResultat.size, Is(1))
+        assertThat(søknadsResultat[0], Is(BehandlingsresultatUtils.Søknadsresultat.INNVILGET))
+    }
+
+    @Test
+    fun `utledSøknadResultatFraAndelerTilkjentYtelse skal returnere INNVILGET OG AVSLÅTT dersom 1 barn får innvilget og 1 barn får avslått`() {
+        val barn1Person = lagPerson(type = PersonType.BARN)
+        val barn1Aktør = barn1Person.aktør
+        val barn2Aktør = lagPerson(type = PersonType.BARN).aktør
+
+        val forrigeAndeler = listOf(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                fom = jan22,
+                tom = aug22,
+                beløp = 1054,
+                aktør = barn1Aktør
+            ),
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                fom = jan22,
+                tom = aug22,
+                beløp = 1054,
+                aktør = barn2Aktør
+            )
+        )
+        val nåværendeAndeler = listOf(
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                fom = jan22,
+                tom = aug22,
+                beløp = 0,
+                aktør = barn1Aktør,
+                endretUtbetalingAndeler = listOf(
+                    lagEndretUtbetalingAndel(
+                        person = barn1Person,
+                        fom = jan22,
+                        tom = aug22,
+                        prosent = BigDecimal(100),
+                        behandlingId = 123L,
+                        årsak = Årsak.ALLEREDE_UTBETALT
+                    )
+                )
+            ),
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                fom = jan22,
+                tom = aug22,
+                beløp = 1060,
+                aktør = barn2Aktør
+            )
+        )
+
+        val søknadsResultat = utledSøknadResultatFraAndelerTilkjentYtelse(
+            forrigeAndeler = forrigeAndeler,
+            nåværendeAndeler = nåværendeAndeler,
+            personerFremstiltKravFor = listOf(barn1Aktør, barn2Aktør)
+        )
+
+        assertThat(søknadsResultat.size, Is(2))
+        assertThat(søknadsResultat, containsInAnyOrder(BehandlingsresultatUtils.Søknadsresultat.AVSLÅTT, BehandlingsresultatUtils.Søknadsresultat.INNVILGET))
     }
 
     @Test
@@ -1311,7 +1611,7 @@ class BehandlingsresultatUtilsTest {
 
     @ParameterizedTest
     @EnumSource(value = BehandlingsresultatUtils.Søknadsresultat::class)
-    fun `kombinerSøknadsresultater skal alltid returnere innholdet hvis det bare 1 resultat i lista`(søknadsresultat: BehandlingsresultatUtils.Søknadsresultat) {
+    fun `kombinerSøknadsresultater skal alltid returnere innholdet som det er hvis det bare 1 resultat i lista`(søknadsresultat: BehandlingsresultatUtils.Søknadsresultat) {
         val listeMedSøknadsresultat = listOf(søknadsresultat)
 
         val kombinertResultat = listeMedSøknadsresultat.kombinerSøknadsresultater()
@@ -1321,8 +1621,11 @@ class BehandlingsresultatUtilsTest {
 
     @ParameterizedTest
     @EnumSource(value = BehandlingsresultatUtils.Søknadsresultat::class, names = ["INNVILGET", "AVSLÅTT"])
-    fun `kombinerSøknadsresultater skal ignorere INGEN_RELEVANTE_ENDRINGER dersom den er paret opp med INNVILGET eller AVSLÅTT`(søknadsresultat: BehandlingsresultatUtils.Søknadsresultat) {
-        val listeMedSøknadsresultat = listOf(BehandlingsresultatUtils.Søknadsresultat.INGEN_RELEVANTE_ENDRINGER, søknadsresultat)
+    fun `kombinerSøknadsresultater skal ignorere INGEN_RELEVANTE_ENDRINGER dersom den er paret opp med INNVILGET eller AVSLÅTT`(
+        søknadsresultat: BehandlingsresultatUtils.Søknadsresultat
+    ) {
+        val listeMedSøknadsresultat =
+            listOf(BehandlingsresultatUtils.Søknadsresultat.INGEN_RELEVANTE_ENDRINGER, søknadsresultat)
 
         val kombinertResultat = listeMedSøknadsresultat.kombinerSøknadsresultater()
 
@@ -1331,7 +1634,11 @@ class BehandlingsresultatUtilsTest {
 
     @Test
     fun `kombinerSøknadsresultater skal returnere DELVIS_INNVILGET dersom lista består av INNVILGET, AVSLÅTT OG INGEN_RELEVANTE_ENDRINGER`() {
-        val listeMedSøknadsresultat = listOf(BehandlingsresultatUtils.Søknadsresultat.INNVILGET, BehandlingsresultatUtils.Søknadsresultat.AVSLÅTT, BehandlingsresultatUtils.Søknadsresultat.INGEN_RELEVANTE_ENDRINGER)
+        val listeMedSøknadsresultat = listOf(
+            BehandlingsresultatUtils.Søknadsresultat.INNVILGET,
+            BehandlingsresultatUtils.Søknadsresultat.AVSLÅTT,
+            BehandlingsresultatUtils.Søknadsresultat.INGEN_RELEVANTE_ENDRINGER
+        )
 
         val kombinertResultat = listeMedSøknadsresultat.kombinerSøknadsresultater()
 
