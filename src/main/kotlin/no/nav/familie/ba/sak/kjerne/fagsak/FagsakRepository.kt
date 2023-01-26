@@ -3,6 +3,8 @@ package no.nav.familie.ba.sak.kjerne.fagsak
 import io.micrometer.core.annotation.Timed
 import no.nav.familie.ba.sak.ekstern.skatteetaten.UtvidetSkatt
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Lock
 import org.springframework.data.jpa.repository.Modifying
@@ -42,6 +44,18 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
     @Lock(LockModeType.NONE)
     @Query(value = "SELECT f from Fagsak f WHERE f.status = 'LØPENDE'  AND f.arkivert = false")
     fun finnLøpendeFagsaker(): List<Fagsak>
+
+    @Query(
+        value = """SELECT f.*
+            FROM   Fagsak f
+            WHERE  NOT EXISTS (
+                    SELECT  -- SELECT list mostly irrelevant; can just be empty in Postgres
+                    FROM   satskjoering
+                    WHERE  fk_fagsak_id = f.id
+                ) AND f.status = 'LØPENDE' AND f.arkivert = false""",
+        nativeQuery = true
+    )
+    fun finnLøpendeFagsakerForSatsendring(page: Pageable): Page<Fagsak>
 
     @Modifying
     @Query(

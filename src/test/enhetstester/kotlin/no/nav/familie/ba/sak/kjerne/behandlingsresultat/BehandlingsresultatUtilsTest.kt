@@ -5,25 +5,38 @@ import io.mockk.every
 import io.mockk.mockkStatic
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.SøkersAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagKompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
+import org.hamcrest.MatcherAssert.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.YearMonth
+import org.hamcrest.CoreMatchers.`is` as Is
 
 class BehandlingsresultatUtilsTest {
 
@@ -298,6 +311,166 @@ class BehandlingsresultatUtilsTest {
         )
 
         assertEquals(true, erEndringIBeløp)
+    }
+
+    @Test
+    fun `Endring i endret utbetaling andel - skal returnere true hvis årsak er endret`() {
+        val barn = lagPerson(type = PersonType.BARN)
+        val forrigeEndretAndel = lagEndretUtbetalingAndel(
+            person = barn,
+            prosent = BigDecimal.ZERO,
+            fom = jan22,
+            tom = aug22,
+            årsak = Årsak.ETTERBETALING_3ÅR,
+            søknadstidspunkt = des22.førsteDagIInneværendeMåned()
+        )
+
+        val erEndringIEndretAndeler = BehandlingsresultatUtils.erEndringIEndretUtbetalingAndeler(
+            forrigeEndretAndeler = listOf(forrigeEndretAndel),
+            nåværendeEndretAndeler = listOf(forrigeEndretAndel.copy(årsak = Årsak.ALLEREDE_UTBETALT))
+        )
+
+        assertTrue(erEndringIEndretAndeler)
+    }
+
+    @Test
+    fun `Endring i endret utbetaling andel - skal returnere true hvis avtaletidspunktDeltBosted er endret`() {
+        val barn = lagPerson(type = PersonType.BARN)
+        val forrigeEndretAndel = lagEndretUtbetalingAndel(
+            person = barn,
+            prosent = BigDecimal.ZERO,
+            fom = jan22,
+            tom = aug22,
+            årsak = Årsak.DELT_BOSTED,
+            søknadstidspunkt = des22.førsteDagIInneværendeMåned(),
+            avtaletidspunktDeltBosted = jan22.førsteDagIInneværendeMåned()
+        )
+
+        val erEndringIEndretAndeler = BehandlingsresultatUtils.erEndringIEndretUtbetalingAndeler(
+            forrigeEndretAndeler = listOf(forrigeEndretAndel),
+            nåværendeEndretAndeler = listOf(forrigeEndretAndel.copy(avtaletidspunktDeltBosted = feb22.førsteDagIInneværendeMåned()))
+        )
+
+        assertTrue(erEndringIEndretAndeler)
+    }
+
+    @Test
+    fun `Endring i endret utbetaling andel - skal returnere true hvis søknadstidspunkt er endret`() {
+        val barn = lagPerson(type = PersonType.BARN)
+        val forrigeEndretAndel = lagEndretUtbetalingAndel(
+            person = barn,
+            prosent = BigDecimal.ZERO,
+            fom = jan22,
+            tom = aug22,
+            årsak = Årsak.DELT_BOSTED,
+            søknadstidspunkt = des22.førsteDagIInneværendeMåned(),
+            avtaletidspunktDeltBosted = jan22.førsteDagIInneværendeMåned()
+        )
+
+        val erEndringIEndretAndeler = BehandlingsresultatUtils.erEndringIEndretUtbetalingAndeler(
+            forrigeEndretAndeler = listOf(forrigeEndretAndel),
+            nåværendeEndretAndeler = listOf(forrigeEndretAndel.copy(søknadstidspunkt = feb22.førsteDagIInneværendeMåned()))
+        )
+
+        assertTrue(erEndringIEndretAndeler)
+    }
+
+    @Test
+    fun `Endring i endret utbetaling andel - skal returnere false hvis prosent er endret`() {
+        val barn = lagPerson(type = PersonType.BARN)
+        val forrigeEndretAndel = lagEndretUtbetalingAndel(
+            person = barn,
+            prosent = BigDecimal.ZERO,
+            fom = jan22,
+            tom = aug22,
+            årsak = Årsak.DELT_BOSTED,
+            søknadstidspunkt = des22.førsteDagIInneværendeMåned(),
+            avtaletidspunktDeltBosted = jan22.førsteDagIInneværendeMåned()
+        )
+
+        val erEndringIEndretAndeler = BehandlingsresultatUtils.erEndringIEndretUtbetalingAndeler(
+            forrigeEndretAndeler = listOf(forrigeEndretAndel),
+            nåværendeEndretAndeler = listOf(forrigeEndretAndel.copy(prosent = BigDecimal(100)))
+        )
+
+        assertFalse(erEndringIEndretAndeler)
+    }
+
+    @Test
+    fun `Endring i endret utbetaling andel - skal returnere false hvis eneste endring er at perioden blir lenger`() {
+        val barn = lagPerson(type = PersonType.BARN)
+        val forrigeEndretAndel = lagEndretUtbetalingAndel(
+            person = barn,
+            prosent = BigDecimal.ZERO,
+            fom = jan22,
+            tom = aug22,
+            årsak = Årsak.DELT_BOSTED,
+            søknadstidspunkt = des22.førsteDagIInneværendeMåned(),
+            avtaletidspunktDeltBosted = jan22.førsteDagIInneværendeMåned()
+        )
+
+        val erEndringIEndretAndeler = BehandlingsresultatUtils.erEndringIEndretUtbetalingAndeler(
+            forrigeEndretAndeler = listOf(forrigeEndretAndel),
+            nåværendeEndretAndeler = listOf(forrigeEndretAndel.copy(tom = des22))
+        )
+
+        assertFalse(erEndringIEndretAndeler)
+    }
+
+    @Test
+    fun `Endring i endret utbetaling andel - skal returnere false hvis endringsperiode oppstår i nåværende behandling`() {
+        val barn = lagPerson(type = PersonType.BARN)
+        val nåværendeEndretAndel = lagEndretUtbetalingAndel(
+            person = barn,
+            prosent = BigDecimal.ZERO,
+            fom = jan22,
+            tom = aug22,
+            årsak = Årsak.DELT_BOSTED,
+            søknadstidspunkt = des22.førsteDagIInneværendeMåned(),
+            avtaletidspunktDeltBosted = jan22.førsteDagIInneværendeMåned()
+        )
+
+        val erEndringIEndretAndeler = BehandlingsresultatUtils.erEndringIEndretUtbetalingAndeler(
+            forrigeEndretAndeler = emptyList(),
+            nåværendeEndretAndeler = listOf(nåværendeEndretAndel)
+        )
+
+        assertFalse(erEndringIEndretAndeler)
+    }
+
+    @Test
+    fun `Endring i endret utbetaling andel - skal returnere true hvis et av to barn har endring på årsak`() {
+        val barn1 = lagPerson(type = PersonType.BARN)
+        val barn2 = lagPerson(type = PersonType.BARN)
+
+        val forrigeEndretAndelBarn1 = lagEndretUtbetalingAndel(
+            person = barn1,
+            prosent = BigDecimal.ZERO,
+            fom = jan22,
+            tom = aug22,
+            årsak = Årsak.DELT_BOSTED,
+            søknadstidspunkt = des22.førsteDagIInneværendeMåned(),
+            avtaletidspunktDeltBosted = jan22.førsteDagIInneværendeMåned()
+        )
+
+        val forrigeEndretAndelBarn2 = lagEndretUtbetalingAndel(
+            person = barn2,
+            prosent = BigDecimal.ZERO,
+            fom = jan22,
+            tom = aug22,
+            årsak = Årsak.ETTERBETALING_3ÅR,
+            søknadstidspunkt = des22.førsteDagIInneværendeMåned()
+        )
+
+        val erEndringIEndretAndeler = BehandlingsresultatUtils.erEndringIEndretUtbetalingAndeler(
+            forrigeEndretAndeler = listOf(forrigeEndretAndelBarn1, forrigeEndretAndelBarn2),
+            nåværendeEndretAndeler = listOf(
+                forrigeEndretAndelBarn1,
+                forrigeEndretAndelBarn2.copy(årsak = Årsak.ALLEREDE_UTBETALT)
+            )
+        )
+
+        assertTrue(erEndringIEndretAndeler)
     }
 
     @Test
@@ -820,6 +993,308 @@ class BehandlingsresultatUtilsTest {
         )
 
         assertEquals(false, endring)
+    }
+
+    @Test
+    fun `erEndringIVilkårvurderingForPerson skal returnere false dersom vilkårresultatene er helt like`() {
+        val nåværendeVilkårResultat = listOf(
+            VilkårResultat(
+                personResultat = null,
+                vilkårType = Vilkår.BOSATT_I_RIKET,
+                resultat = Resultat.OPPFYLT,
+                periodeFom = LocalDate.of(2015, 1, 1),
+                periodeTom = LocalDate.of(2020, 1, 1),
+                begrunnelse = "begrunnelse",
+                behandlingId = 0,
+                utdypendeVilkårsvurderinger = listOf(
+                    UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
+                    UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP
+                ),
+                vurderesEtter = Regelverk.NASJONALE_REGLER
+            ),
+            VilkårResultat(
+                personResultat = null,
+                vilkårType = Vilkår.BOSATT_I_RIKET,
+                resultat = Resultat.IKKE_OPPFYLT,
+                periodeFom = LocalDate.of(2020, 1, 2),
+                periodeTom = LocalDate.of(2022, 1, 1),
+                begrunnelse = "begrunnelse",
+                behandlingId = 0,
+                utdypendeVilkårsvurderinger = listOf(
+                    UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP,
+                    UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE
+                ),
+                vurderesEtter = Regelverk.NASJONALE_REGLER
+            )
+        )
+
+        val forrigeVilkårResultat = listOf(
+            VilkårResultat(
+                personResultat = null,
+                vilkårType = Vilkår.BOSATT_I_RIKET,
+                resultat = Resultat.OPPFYLT,
+                periodeFom = LocalDate.of(2015, 1, 1),
+                periodeTom = LocalDate.of(2020, 1, 1),
+                begrunnelse = "begrunnelse",
+                behandlingId = 0,
+                utdypendeVilkårsvurderinger = listOf(
+                    UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
+                    UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP
+                ),
+                vurderesEtter = Regelverk.NASJONALE_REGLER
+            ),
+            VilkårResultat(
+                personResultat = null,
+                vilkårType = Vilkår.BOSATT_I_RIKET,
+                resultat = Resultat.IKKE_OPPFYLT,
+                periodeFom = LocalDate.of(2020, 1, 2),
+                periodeTom = LocalDate.of(2022, 1, 1),
+                begrunnelse = "begrunnelse",
+                behandlingId = 0,
+                utdypendeVilkårsvurderinger = listOf(
+                    UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP,
+                    UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE
+                ),
+                vurderesEtter = Regelverk.NASJONALE_REGLER
+            )
+        )
+
+        val erEndringIVilkårvurderingForPerson = erEndringIVilkårvurderingForPerson(
+            nåværendeVilkårResultat,
+            forrigeVilkårResultat
+        )
+
+        assertThat(erEndringIVilkårvurderingForPerson, Is(false))
+    }
+
+    @Test
+    fun `erEndringIVilkårvurderingForPerson skal returnere true dersom det har vært endringer i regelverk`() {
+        val nåværendeVilkårResultat = listOf(
+            VilkårResultat(
+                personResultat = null,
+                vilkårType = Vilkår.BOSATT_I_RIKET,
+                resultat = Resultat.OPPFYLT,
+                periodeFom = LocalDate.of(2015, 1, 1),
+                periodeTom = LocalDate.of(2020, 1, 1),
+                begrunnelse = "begrunnelse",
+                behandlingId = 0,
+                utdypendeVilkårsvurderinger = listOf(
+                    UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
+                    UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP
+                ),
+                vurderesEtter = Regelverk.NASJONALE_REGLER
+            ),
+            VilkårResultat(
+                personResultat = null,
+                vilkårType = Vilkår.BOSATT_I_RIKET,
+                resultat = Resultat.IKKE_OPPFYLT,
+                periodeFom = LocalDate.of(2020, 1, 2),
+                periodeTom = LocalDate.of(2022, 1, 1),
+                begrunnelse = "begrunnelse",
+                behandlingId = 0,
+                utdypendeVilkårsvurderinger = listOf(
+                    UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
+                    UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP
+                ),
+                vurderesEtter = Regelverk.NASJONALE_REGLER
+            )
+        )
+
+        val forrigeVilkårResultat = listOf(
+            VilkårResultat(
+                personResultat = null,
+                vilkårType = Vilkår.BOSATT_I_RIKET,
+                resultat = Resultat.OPPFYLT,
+                periodeFom = LocalDate.of(2015, 1, 1),
+                periodeTom = LocalDate.of(2020, 1, 1),
+                begrunnelse = "begrunnelse",
+                behandlingId = 0,
+                utdypendeVilkårsvurderinger = listOf(
+                    UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
+                    UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP
+                ),
+                vurderesEtter = Regelverk.NASJONALE_REGLER
+            ),
+            VilkårResultat(
+                personResultat = null,
+                vilkårType = Vilkår.BOSATT_I_RIKET,
+                resultat = Resultat.IKKE_OPPFYLT,
+                periodeFom = LocalDate.of(2020, 1, 2),
+                periodeTom = LocalDate.of(2022, 1, 1),
+                begrunnelse = "begrunnelse",
+                behandlingId = 0,
+                utdypendeVilkårsvurderinger = listOf(
+                    UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
+                    UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP
+                ),
+                vurderesEtter = Regelverk.EØS_FORORDNINGEN
+            )
+        )
+
+        val erEndringIVilkårvurderingForPerson = erEndringIVilkårvurderingForPerson(
+            nåværendeVilkårResultat,
+            forrigeVilkårResultat
+        )
+
+        assertThat(erEndringIVilkårvurderingForPerson, Is(true))
+    }
+
+    @Test
+    fun `erEndringIVilkårvurderingForPerson skal returnere true dersom det har vært endringer i utdypendevilkårsvurdering`() {
+        val nåværendeVilkårResultat = listOf(
+            VilkårResultat(
+                personResultat = null,
+                vilkårType = Vilkår.BOSATT_I_RIKET,
+                resultat = Resultat.OPPFYLT,
+                periodeFom = LocalDate.of(2015, 1, 1),
+                periodeTom = LocalDate.of(2020, 1, 1),
+                begrunnelse = "begrunnelse",
+                behandlingId = 0,
+                utdypendeVilkårsvurderinger = listOf(
+                    UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
+                    UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP
+                ),
+                vurderesEtter = Regelverk.NASJONALE_REGLER
+            ),
+            VilkårResultat(
+                personResultat = null,
+                vilkårType = Vilkår.BOSATT_I_RIKET,
+                resultat = Resultat.IKKE_OPPFYLT,
+                periodeFom = LocalDate.of(2020, 1, 2),
+                periodeTom = LocalDate.of(2022, 1, 1),
+                begrunnelse = "begrunnelse",
+                behandlingId = 0,
+                utdypendeVilkårsvurderinger = listOf(
+                    UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
+                    UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP
+                ),
+                vurderesEtter = Regelverk.NASJONALE_REGLER
+            )
+        )
+
+        val forrigeVilkårResultat = listOf(
+            VilkårResultat(
+                personResultat = null,
+                vilkårType = Vilkår.BOSATT_I_RIKET,
+                resultat = Resultat.OPPFYLT,
+                periodeFom = LocalDate.of(2015, 1, 1),
+                periodeTom = LocalDate.of(2020, 1, 1),
+                begrunnelse = "begrunnelse",
+                behandlingId = 0,
+                utdypendeVilkårsvurderinger = listOf(
+                    UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
+                    UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP
+                ),
+                vurderesEtter = Regelverk.NASJONALE_REGLER
+            ),
+            VilkårResultat(
+                personResultat = null,
+                vilkårType = Vilkår.BOSATT_I_RIKET,
+                resultat = Resultat.IKKE_OPPFYLT,
+                periodeFom = LocalDate.of(2020, 1, 2),
+                periodeTom = LocalDate.of(2022, 1, 1),
+                begrunnelse = "begrunnelse",
+                behandlingId = 0,
+                utdypendeVilkårsvurderinger = listOf(
+                    UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
+                    UtdypendeVilkårsvurdering.VURDERING_ANNET_GRUNNLAG
+                ),
+                vurderesEtter = Regelverk.NASJONALE_REGLER
+            )
+        )
+
+        val erEndringIVilkårvurderingForPerson = erEndringIVilkårvurderingForPerson(
+            nåværendeVilkårResultat,
+            forrigeVilkårResultat
+        )
+
+        assertThat(erEndringIVilkårvurderingForPerson, Is(true))
+    }
+
+    @Test
+    fun `erEndringIVilkårvurderingForPerson skal returnere true dersom det har oppstått splitt i vilkårsvurderingen`() {
+        val nåværendeVilkårResultat = listOf(
+            VilkårResultat(
+                personResultat = null,
+                vilkårType = Vilkår.BOSATT_I_RIKET,
+                resultat = Resultat.OPPFYLT,
+                periodeFom = LocalDate.of(2015, 1, 1),
+                periodeTom = LocalDate.of(2020, 1, 1),
+                begrunnelse = "begrunnelse",
+                behandlingId = 0,
+                utdypendeVilkårsvurderinger = listOf(
+                    UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
+                    UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP
+                ),
+                vurderesEtter = Regelverk.NASJONALE_REGLER
+            ),
+            VilkårResultat(
+                personResultat = null,
+                vilkårType = Vilkår.BOSATT_I_RIKET,
+                resultat = Resultat.IKKE_OPPFYLT,
+                periodeFom = LocalDate.of(2020, 1, 2),
+                periodeTom = LocalDate.of(2022, 1, 1),
+                begrunnelse = "begrunnelse",
+                behandlingId = 0,
+                utdypendeVilkårsvurderinger = listOf(
+                    UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP,
+                    UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE
+                ),
+                vurderesEtter = Regelverk.NASJONALE_REGLER
+            )
+        )
+
+        val forrigeVilkårResultat = listOf(
+            VilkårResultat(
+                personResultat = null,
+                vilkårType = Vilkår.BOSATT_I_RIKET,
+                resultat = Resultat.OPPFYLT,
+                periodeFom = LocalDate.of(2015, 1, 1),
+                periodeTom = LocalDate.of(2020, 1, 1),
+                begrunnelse = "begrunnelse",
+                behandlingId = 0,
+                utdypendeVilkårsvurderinger = listOf(
+                    UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
+                    UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP
+                ),
+                vurderesEtter = Regelverk.NASJONALE_REGLER
+            ),
+            VilkårResultat(
+                personResultat = null,
+                vilkårType = Vilkår.BOSATT_I_RIKET,
+                resultat = Resultat.IKKE_OPPFYLT,
+                periodeFom = LocalDate.of(2020, 1, 2),
+                periodeTom = LocalDate.of(2021, 1, 1),
+                begrunnelse = "begrunnelse",
+                behandlingId = 0,
+                utdypendeVilkårsvurderinger = listOf(
+                    UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP,
+                    UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE
+                ),
+                vurderesEtter = Regelverk.NASJONALE_REGLER
+            ),
+            VilkårResultat(
+                personResultat = null,
+                vilkårType = Vilkår.BOSATT_I_RIKET,
+                resultat = Resultat.IKKE_OPPFYLT,
+                periodeFom = LocalDate.of(2021, 1, 2),
+                periodeTom = LocalDate.of(2022, 1, 1),
+                begrunnelse = "begrunnelse",
+                behandlingId = 0,
+                utdypendeVilkårsvurderinger = listOf(
+                    UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP,
+                    UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE
+                ),
+                vurderesEtter = Regelverk.NASJONALE_REGLER
+            )
+        )
+
+        val erEndringIVilkårvurderingForPerson = erEndringIVilkårvurderingForPerson(
+            nåværendeVilkårResultat,
+            forrigeVilkårResultat
+        )
+
+        assertThat(erEndringIVilkårvurderingForPerson, Is(true))
     }
 
     @Test
