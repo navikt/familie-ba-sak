@@ -1,9 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.beregning.domene
 
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils.skalAndelerSlåsSammen
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerPeriodeInnenforTilkjentytelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerÅrsak
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
@@ -11,7 +13,6 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAnde
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.YearMonth
 
 @Service
 class AndelerTilkjentYtelseOgEndreteUtbetalingerService(
@@ -27,6 +28,9 @@ class AndelerTilkjentYtelseOgEndreteUtbetalingerService(
 
     @Transactional
     fun finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandlingId: Long): List<EndretUtbetalingAndelMedAndelerTilkjentYtelse> {
+        // Hvis noen valideringer feiler, så signalerer vi det til frontend ved å fjerne tilknyttede andeler
+        // SB vil få en feilmelding og løsningen blir å slette eller oppdatere endringen
+        // Da vil forhåpentligvis valideringen være ok, koblingene til andelene være beholdt
         return lagKombinator(behandlingId).lagEndreteUtbetalingMedAndeler()
             .map {
                 it.utenAndelerVedValideringsfeil {
@@ -112,9 +116,12 @@ data class AndelTilkjentYtelseMedEndreteUtbetalinger internal constructor(
     fun erUtvidet(): Boolean = andelTilkjentYtelse.erUtvidet()
     fun erAndelSomSkalSendesTilOppdrag() = andelTilkjentYtelse.erAndelSomSkalSendesTilOppdrag()
     fun overlapperPeriode(månedPeriode: MånedPeriode) = andelTilkjentYtelse.overlapperPeriode(månedPeriode)
-    fun medTom(tom: YearMonth): AndelTilkjentYtelseMedEndreteUtbetalinger {
+    fun slåSammenMed(naboAndel: AndelTilkjentYtelseMedEndreteUtbetalinger): AndelTilkjentYtelseMedEndreteUtbetalinger {
+        // Skal allerede være sjekket at disse er naboer som kan slås sammen, bla. at de eventuelt har samme endringsperiode
+        // Dermed skal en en enkel utvidelse med stønadTom fra naboen fungere
+        assert(skalAndelerSlåsSammen(this, naboAndel))
         return AndelTilkjentYtelseMedEndreteUtbetalinger(
-            andelTilkjentYtelse.copy(stønadTom = tom),
+            andelTilkjentYtelse.copy(stønadTom = naboAndel.stønadTom),
             endreteUtbetalinger,
             brukFrikobleteAndelerOgEndringer
         )
@@ -124,8 +131,8 @@ data class AndelTilkjentYtelseMedEndreteUtbetalinger internal constructor(
     val stønadTom get() = andelTilkjentYtelse.stønadTom
     val prosent get() = andelTilkjentYtelse.prosent
     val andel get() = andelTilkjentYtelse
-    val endreteUtbetalinger
-        get() = if (brukFrikobleteAndelerOgEndringer) {
+    val endreteUtbetalinger =
+        if (brukFrikobleteAndelerOgEndringer) {
             endreteUtbetalingerAndeler
         } else {
             andel.endretUtbetalingAndeler
@@ -140,9 +147,9 @@ data class AndelTilkjentYtelseMedEndreteUtbetalinger internal constructor(
             }
 
             return AndelTilkjentYtelseMedEndreteUtbetalinger(
-                andelTilkjentYtelse,
-                emptyList(),
-                true // Likegyldig hvilken verdi denne har. I begge tilfeller returneres tom liste.
+                andelTilkjentYtelse = andelTilkjentYtelse,
+                endreteUtbetalingerAndeler = emptyList(),
+                brukFrikobleteAndelerOgEndringer = true // Likegyldig hvilken verdi denne har. I begge tilfeller returneres tom liste.
             )
         }
     }
@@ -167,8 +174,8 @@ data class EndretUtbetalingAndelMedAndelerTilkjentYtelse(
     val id get() = endretUtbetalingAndel.id
     val fom get() = endretUtbetalingAndel.fom
     val tom get() = endretUtbetalingAndel.tom
-    val andelerTilkjentYtelse
-        get() = if (brukFrikobleteAndelerOgEndringer) {
+    val andelerTilkjentYtelse =
+        if (brukFrikobleteAndelerOgEndringer) {
             andeler
         } else {
             endretUtbetalingAndel.andelTilkjentYtelser
@@ -186,7 +193,7 @@ private fun EndretUtbetalingAndelMedAndelerTilkjentYtelse.utenAndelerVedValideri
     try {
         validator()
         this
-    } catch (e: Throwable) {
+    } catch (e: FunksjonellFeil) {
         this.copy(andeler = emptyList())
     }
 } else {
@@ -201,7 +208,7 @@ private fun EndretUtbetalingAndelMedAndelerTilkjentYtelse.utenAndelerVedValideri
 fun AndelTilkjentYtelse.medEndring(
     endretUtbetalingAndelMedAndelerTilkjentYtelse: EndretUtbetalingAndelMedAndelerTilkjentYtelse
 ) = AndelTilkjentYtelseMedEndreteUtbetalinger(
-    this,
-    listOf(endretUtbetalingAndelMedAndelerTilkjentYtelse.endretUtbetalingAndel),
+    andelTilkjentYtelse = this,
+    endreteUtbetalingerAndeler = listOf(endretUtbetalingAndelMedAndelerTilkjentYtelse.endretUtbetalingAndel),
     brukFrikobleteAndelerOgEndringer = endretUtbetalingAndelMedAndelerTilkjentYtelse.brukFrikobleteAndelerOgEndringer
 )
