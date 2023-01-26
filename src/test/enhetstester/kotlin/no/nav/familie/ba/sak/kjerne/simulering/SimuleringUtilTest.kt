@@ -53,7 +53,8 @@ class SimuleringUtilTest {
         betalingType: BetalingType = if (beløp >= 0) BetalingType.DEBIT else BetalingType.KREDIT,
         posteringType: PosteringType = PosteringType.YTELSE,
         forfallsdato: LocalDate = LocalDate.now().minusMonths(1),
-        utenInntrekk: Boolean = false
+        utenInntrekk: Boolean = false,
+        erFeilkonto: Boolean? = null
     ) = ØkonomiSimuleringPostering(
         økonomiSimuleringMottaker = økonomiSimuleringMottaker,
         fagOmrådeKode = fagOmrådeKode,
@@ -64,7 +65,7 @@ class SimuleringUtilTest {
         posteringType = posteringType,
         forfallsdato = forfallsdato,
         utenInntrekk = utenInntrekk,
-        erFeilkonto = null
+        erFeilkonto = erFeilkonto
     )
 
     fun mockVedtakSimuleringPosteringer(
@@ -535,7 +536,7 @@ class SimuleringUtilTest {
     }
 
     @Test
-    fun `ytelse med mottrekk skal gi riktig resultat`() {
+    fun `ytelse med ikke reelle feilutbetalinger skal gi riktig resultat`() {
         val fil = File("./src/test/resources/kjerne.simulering/simulering_med_mottrekk.json")
 
         val ytelseMedManuellePosteringer =
@@ -550,18 +551,16 @@ class SimuleringUtilTest {
         }
 
         val simuleringsperioder = vedtakSimuleringMottakereTilSimuleringPerioder(vedtakSimuleringMottakere, true)
-        val oppsummering = vedtakSimuleringMottakereTilRestSimulering(vedtakSimuleringMottakere, true)
 
-        simuleringsperioder.forEach {
-            assertThat(it.resultat.abs()).isLessThan(40.toBigDecimal())
-        }
-
-        assertThat(oppsummering.etterbetaling.abs()).isLessThan(40.toBigDecimal())
-        assertThat(oppsummering.feilutbetaling.abs()).isLessThan(40.toBigDecimal())
+        simuleringsperioder
+            .dropLast(1) // Siste måned er ikke utbetalt enda
+            .forEach {
+                assertThat(it.resultat.abs()).isLessThanOrEqualTo(BigDecimal.ONE)
+            }
     }
 
     @Test
-    fun `ytelse med mottrekk skal gi riktig resultat2`() {
+    fun `ytelse med ikke reelle feilutbetalinger skal gi riktig resultat2`() {
         val ytelseMetMotposteringerOgManuellePosteringer = listOf(
             mockVedtakSimuleringPostering(
                 beløp = 658,
@@ -587,12 +586,14 @@ class SimuleringUtilTest {
             mockVedtakSimuleringPostering(
                 beløp = 46,
                 posteringType = PosteringType.FEILUTBETALING,
-                fagOmrådeKode = FagOmrådeKode.BARNETRYGD_INFOTRYGD
+                fagOmrådeKode = FagOmrådeKode.BARNETRYGD_INFOTRYGD,
+                erFeilkonto = false
             ),
             mockVedtakSimuleringPostering(
                 beløp = -46,
                 posteringType = PosteringType.MOTP,
-                fagOmrådeKode = FagOmrådeKode.BARNETRYGD_INFOTRYGD
+                fagOmrådeKode = FagOmrådeKode.BARNETRYGD_INFOTRYGD,
+                erFeilkonto = false
             ),
 
             mockVedtakSimuleringPostering(
@@ -621,7 +622,7 @@ class SimuleringUtilTest {
         assertThat(simuleringsperiode.nyttBeløp).isEqualTo(658.toBigDecimal())
         assertThat(simuleringsperiode.manuellPostering).isEqualTo(50.toBigDecimal())
         assertThat(simuleringsperiode.tidligereUtbetalt).isEqualTo(707.toBigDecimal())
-        assertThat(simuleringsperiode.feilutbetaling).isEqualTo((46).toBigDecimal())
+        assertThat(simuleringsperiode.feilutbetaling).isEqualTo((0).toBigDecimal())
         assertThat(simuleringsperiode.resultat).isEqualTo((1).toBigDecimal())
         assertThat(simuleringsperiode.etterbetaling).isEqualTo((0).toBigDecimal())
     }
