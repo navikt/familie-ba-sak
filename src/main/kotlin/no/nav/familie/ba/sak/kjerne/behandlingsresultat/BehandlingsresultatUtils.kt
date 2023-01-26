@@ -136,8 +136,6 @@ object BehandlingsresultatUtils {
             forrigeKompetanser = forrigeKompetanser
         )
 
-        println(erEndringIKompetanse)
-
         val erEndringIVilkårsvurdering = erEndringIVilkårvurdering(
             nåværendePersonResultat = nåværendePersonResultat,
             forrigePersonResultat = forrigePersonResultat
