@@ -15,7 +15,15 @@ class FeatureToggleConfig {
 
         const val TREKK_I_LØPENDE_UTBETALING = "familie-ba-sak.trekk-i-loepende-utbetaling"
         const val EØS_INFORMASJON_OM_ÅRLIG_KONTROLL = "familie-ba-sak.eos-informasjon-om-aarlig-kontroll"
+
         const val ER_MANUEL_POSTERING_TOGGLE_PÅ = "familie-ba-sak.manuell-postering"
+
+        // unleash toggles for satsendring, kan slettes etter at satsendring er skrudd på for alle satstyper
+        const val SATSENDRING_ORBA = "familie-ba-sak.satsendring-orba"
+        const val SATSENDRING_TILLEGG_ORBA = "familie-ba-sak.satsendring-tillegg-orba"
+        const val SATSENDRING_SMA = "familie-ba-sak.satsendring-sma"
+        const val SATSENDRING_UTVIDET = "familie-ba-sak.satsendring-utvidet"
+        const val SATSENDRING_OPPRETT_TASKER = "familie-ba-sak.satsendring-opprett-satsendring-task"
     }
 }
 
