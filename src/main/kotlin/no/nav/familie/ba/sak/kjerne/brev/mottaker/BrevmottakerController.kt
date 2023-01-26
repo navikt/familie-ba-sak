@@ -28,7 +28,7 @@ class BrevmottakerController(
     private val brevmottakerService: BrevmottakerService,
     private val utvidetBehandlingService: UtvidetBehandlingService
 ) {
-    @PostMapping(path = ["behandling/{behandlingId}"], produces = [APPLICATION_JSON_VALUE], consumes = [APPLICATION_JSON_VALUE])
+    @PostMapping(path = ["{behandlingId}"], produces = [APPLICATION_JSON_VALUE], consumes = [APPLICATION_JSON_VALUE])
     fun leggTilBrevmottaker(
         @PathVariable behandlingId: Long,
         @RequestBody brevmottaker: RestBrevmottaker
@@ -42,7 +42,7 @@ class BrevmottakerController(
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
 
-    @PutMapping(path = ["behandling/{behandlingId}/mottaker/{mottakerId}"], produces = [APPLICATION_JSON_VALUE], consumes = [APPLICATION_JSON_VALUE])
+    @PutMapping(path = ["{behandlingId}/{mottakerId}"], produces = [APPLICATION_JSON_VALUE], consumes = [APPLICATION_JSON_VALUE])
     fun oppdaterBrevmottaker(
         @PathVariable behandlingId: Long,
         @PathVariable mottakerId: Long,
@@ -57,7 +57,7 @@ class BrevmottakerController(
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
 
-    @DeleteMapping(path = ["behandling/{behandlingId}/mottaker/{mottakerId}"])
+    @DeleteMapping(path = ["{behandlingId}/{mottakerId}"])
     fun fjernBrevmottaker(
         @PathVariable behandlingId: Long,
         @PathVariable mottakerId: Long
@@ -71,7 +71,7 @@ class BrevmottakerController(
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
 
-    @GetMapping(path = ["behandling/{behandlingId}"], produces = [APPLICATION_JSON_VALUE])
+    @GetMapping(path = ["{behandlingId}"], produces = [APPLICATION_JSON_VALUE])
     fun hentBrevmottakere(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<List<RestBrevmottaker>>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
