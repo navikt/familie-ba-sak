@@ -1091,7 +1091,7 @@ class BehandlingsresultatUtilsTest {
     }
 
     @Test
-    fun `utledSøknadResultatFraAndelerTilkjentYtelse skal returnere ingen relevante endringer dersom beløp er 0 og det ikke finnes noen endringsperioder eller differanse beregning`() {
+    fun `utledSøknadResultatFraAndelerTilkjentYtelse skal returnere ingen relevante endringer dersom beløp på nåværende andel er 0 og det ikke finnes noen endringsperioder eller differanse beregning`() {
         val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
 
         val forrigeAndel =
@@ -1119,7 +1119,7 @@ class BehandlingsresultatUtilsTest {
     }
 
     @Test
-    fun `utledSøknadResultatFraAndelerTilkjentYtelse skal returnere INNVILGET dersom beløp er 0 og det finnes endringsperiode som DELT_BOSTED`() {
+    fun `utledSøknadResultatFraAndelerTilkjentYtelse skal returnere INNVILGET dersom beløp på nåværende andel er 0 og det finnes endringsperiode som DELT_BOSTED`() {
         val barn1Person = lagPerson(type = PersonType.BARN)
         val barn1Aktør = barn1Person.aktør
 
@@ -1161,7 +1161,7 @@ class BehandlingsresultatUtilsTest {
 
     @ParameterizedTest
     @EnumSource(value = Årsak::class, mode = EnumSource.Mode.EXCLUDE, names = ["DELT_BOSTED"])
-    fun `utledSøknadResultatFraAndelerTilkjentYtelse skal returnere AVSLÅTT dersom beløp er 0 og det finnes endringsperiode som ikke er DELT_BOSTED`(
+    fun `utledSøknadResultatFraAndelerTilkjentYtelse skal returnere AVSLÅTT dersom beløp på nåværende andel er 0 og det finnes endringsperiode som ikke er DELT_BOSTED`(
         årsak: Årsak
     ) {
         val barn1Person = lagPerson(type = PersonType.BARN)
