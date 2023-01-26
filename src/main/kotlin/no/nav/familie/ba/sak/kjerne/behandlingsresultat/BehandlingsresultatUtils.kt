@@ -10,8 +10,10 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
+import no.nav.familie.ba.sak.kjerne.beregning.EndretUtbetalingAndelTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -66,6 +68,40 @@ object BehandlingsresultatUtils {
                     nåværende.annenForeldersAktivitetsland != forrige.annenForeldersAktivitetsland ||
                     nåværende.barnetsBostedsland != forrige.barnetsBostedsland ||
                     nåværende.resultat != forrige.resultat
+                )
+        }
+
+        return endringerTidslinje.perioder().any { it.innhold == true }
+    }
+
+    internal fun erEndringIEndretUtbetalingAndeler(
+        nåværendeEndretAndeler: List<EndretUtbetalingAndel>,
+        forrigeEndretAndeler: List<EndretUtbetalingAndel>
+    ): Boolean {
+        val allePersoner = (nåværendeEndretAndeler.mapNotNull { it.person?.aktør } + forrigeEndretAndeler.mapNotNull { it.person?.aktør }).distinct()
+
+        val finnesPersonerMedEndretEndretUtbetalingAndel = allePersoner.any { aktør ->
+            erEndringIEndretUtbetalingAndelPerPerson(
+                nåværendeEndretAndeler = nåværendeEndretAndeler.filter { it.person?.aktør == aktør },
+                forrigeEndretAndeler = forrigeEndretAndeler.filter { it.person?.aktør == aktør }
+            )
+        }
+
+        return finnesPersonerMedEndretEndretUtbetalingAndel
+    }
+
+    private fun erEndringIEndretUtbetalingAndelPerPerson(
+        nåværendeEndretAndeler: List<EndretUtbetalingAndel>,
+        forrigeEndretAndeler: List<EndretUtbetalingAndel>
+    ): Boolean {
+        val nåværendeTidslinje = EndretUtbetalingAndelTidslinje(nåværendeEndretAndeler)
+        val forrigeTidslinje = EndretUtbetalingAndelTidslinje(forrigeEndretAndeler)
+
+        val endringerTidslinje = nåværendeTidslinje.kombinerUtenNullMed(forrigeTidslinje) { nåværende, forrige ->
+            (
+                nåværende.avtaletidspunktDeltBosted != forrige.avtaletidspunktDeltBosted ||
+                    nåværende.årsak != forrige.årsak ||
+                    nåværende.søknadstidspunkt != forrige.søknadstidspunkt
                 )
         }
 
