@@ -1,8 +1,8 @@
 CREATE TABLE satskjoering
 (
-    ID           BIGINT                              NOT NULL PRIMARY KEY,
-    FK_FAGSAK_ID BIGINT                              NOT NULL,
-    START_TID    TIMESTAMP(3) DEFAULT LOCALTIMESTAMP NOT NULL,
+    ID           BIGINT                                          NOT NULL PRIMARY KEY,
+    FK_FAGSAK_ID BIGINT REFERENCES FAGSAK (ID) ON DELETE CASCADE NOT NULL,
+    START_TID    TIMESTAMP(3) DEFAULT LOCALTIMESTAMP             NOT NULL,
     FERDIG_TID   TIMESTAMP(3)
 );
 
