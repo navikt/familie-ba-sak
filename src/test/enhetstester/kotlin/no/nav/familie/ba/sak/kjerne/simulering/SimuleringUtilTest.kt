@@ -64,8 +64,7 @@ class SimuleringUtilTest {
         beløp = beløp.toBigDecimal(),
         posteringType = posteringType,
         forfallsdato = forfallsdato,
-        utenInntrekk = utenInntrekk,
-        erFeilkonto = erFeilkonto
+        utenInntrekk = utenInntrekk
     )
 
     fun mockVedtakSimuleringPosteringer(
@@ -85,8 +84,7 @@ class SimuleringUtilTest {
             beløp = beløp.toBigDecimal(),
             posteringType = posteringstype,
             forfallsdato = måned.plusMonths(index.toLong()).atEndOfMonth(),
-            utenInntrekk = false,
-            erFeilkonto = null
+            utenInntrekk = false
         )
     }
 
@@ -555,7 +553,7 @@ class SimuleringUtilTest {
         simuleringsperioder
             .dropLast(1) // Siste måned er ikke utbetalt enda
             .forEach {
-                assertThat(it.resultat.abs()).isLessThanOrEqualTo(BigDecimal.ONE)
+                assertThat(it.korrigertResultat.abs()).isLessThanOrEqualTo(BigDecimal.ONE)
             }
     }
 
@@ -623,8 +621,9 @@ class SimuleringUtilTest {
         assertThat(simuleringsperiode.manuellPostering).isEqualTo(50.toBigDecimal())
         assertThat(simuleringsperiode.tidligereUtbetalt).isEqualTo(707.toBigDecimal())
         assertThat(simuleringsperiode.feilutbetaling).isEqualTo((0).toBigDecimal())
-        assertThat(simuleringsperiode.resultat).isEqualTo((1).toBigDecimal())
-        assertThat(simuleringsperiode.etterbetaling).isEqualTo((0).toBigDecimal())
+        assertThat(simuleringsperiode.resultat).isEqualTo((-49).toBigDecimal())
+        assertThat(simuleringsperiode.korrigertResultat).isEqualTo((1).toBigDecimal())
+        assertThat(simuleringsperiode.etterbetaling).isEqualTo((1).toBigDecimal())
     }
 }
 
