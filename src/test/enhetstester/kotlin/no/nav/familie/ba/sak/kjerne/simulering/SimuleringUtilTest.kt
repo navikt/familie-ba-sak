@@ -63,7 +63,8 @@ class SimuleringUtilTest {
         beløp = beløp.toBigDecimal(),
         posteringType = posteringType,
         forfallsdato = forfallsdato,
-        utenInntrekk = utenInntrekk
+        utenInntrekk = utenInntrekk,
+        erFeilkonto = null
     )
 
     fun mockVedtakSimuleringPosteringer(
@@ -83,7 +84,8 @@ class SimuleringUtilTest {
             beløp = beløp.toBigDecimal(),
             posteringType = posteringstype,
             forfallsdato = måned.plusMonths(index.toLong()).atEndOfMonth(),
-            utenInntrekk = false
+            utenInntrekk = false,
+            erFeilkonto = null
         )
     }
 
