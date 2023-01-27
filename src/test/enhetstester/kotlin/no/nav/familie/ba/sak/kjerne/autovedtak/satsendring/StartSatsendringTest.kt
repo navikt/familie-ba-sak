@@ -469,7 +469,7 @@ internal class StartSatsendringTest {
     }
 
     @Test
-    fun `harAlleredeSatsendring skal returnere true hvis fom er på satstidspunktet`() {
+    fun `harAlleredeSatsendring skal returnere true for ny sats når fom er på satstidspunktet`() {
         val behandling = lagBehandling()
         val utgåttAndelTilkjentYtelse =
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(
@@ -490,6 +490,30 @@ internal class StartSatsendringTest {
             )
         ).isEqualTo(true)
     }
+
+    @Test
+    fun `harAlleredeSatsendring skal returnere false for gammel sats når fom er på satstidspunktet`() {
+        val behandling = lagBehandling()
+        val utgåttAndelTilkjentYtelse =
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                fom = SATSTIDSPUNKT,
+                tom = SATSTIDSPUNKT.plusYears(10),
+                ytelseType = ORDINÆR_BARNETRYGD,
+                behandling = behandling,
+                person = lagPerson(),
+                aktør = lagPerson().aktør,
+                periodeIdOffset = 1,
+                beløp = UGYLDIG_SATS
+            )
+
+        assertThat(
+            harAlleredeSisteSats(
+                listOf(utgåttAndelTilkjentYtelse),
+                SATSTIDSPUNKT
+            )
+        ).isEqualTo(false)
+    }
+
 
     private fun lagAndelTilkjentYtelseMedEndreteUtbetalinger(
         satsType: SatsType,

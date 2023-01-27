@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.satsendring
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.isSameOrAfter
+import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakBehandlingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
@@ -138,7 +139,7 @@ class AutovedtakSatsendringService(
             satstidspunkt: YearMonth
         ): Boolean {
             val atyPåSatstidspunkt = aty.filter {
-                it.stønadFom.isBefore(satstidspunkt) && it.stønadTom.isSameOrAfter(
+                it.stønadFom.isSameOrBefore(satstidspunkt) && it.stønadTom.isSameOrAfter(
                     satstidspunkt
                 )
             }
