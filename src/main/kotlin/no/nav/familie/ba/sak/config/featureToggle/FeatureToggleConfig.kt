@@ -9,12 +9,21 @@ class FeatureToggleConfig {
         const val TEKNISK_ENDRING = "familie-ba-sak.behandling.teknisk-endring"
         const val ENDRINGER_I_VALIDERING_FOR_MIGRERINGSBEHANDLING =
             "familie-ba-sak.endringer.validering.migeringsbehandling"
-
+        const val MIGRERING_MED_FEILUTBETALING_UNDER_BELØPSGRENSE =
+            "familie-ba-sak.migrering-med-feilutbetaling-under-belopsgrense"
         const val KAN_GENERERE_UTBETALINGSOPPDRAG_NY = "familie-ba-sak.generer.utbetalingsoppdrag.ny"
 
         const val TREKK_I_LØPENDE_UTBETALING = "familie-ba-sak.trekk-i-loepende-utbetaling"
         const val EØS_INFORMASJON_OM_ÅRLIG_KONTROLL = "familie-ba-sak.eos-informasjon-om-aarlig-kontroll"
+
         const val ER_MANUEL_POSTERING_TOGGLE_PÅ = "familie-ba-sak.manuell-postering"
+
+        // unleash toggles for satsendring, kan slettes etter at satsendring er skrudd på for alle satstyper
+        const val SATSENDRING_ORBA = "familie-ba-sak.satsendring-orba"
+        const val SATSENDRING_TILLEGG_ORBA = "familie-ba-sak.satsendring-tillegg-orba"
+        const val SATSENDRING_SMA = "familie-ba-sak.satsendring-sma"
+        const val SATSENDRING_UTVIDET = "familie-ba-sak.satsendring-utvidet"
+        const val SATSENDRING_OPPRETT_TASKER = "familie-ba-sak.satsendring-opprett-satsendring-task"
     }
 }
 

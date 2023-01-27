@@ -68,10 +68,7 @@ data class ØkonomiSimuleringPostering(
     val forfallsdato: LocalDate,
 
     @Column(name = "uten_inntrekk", nullable = false)
-    val utenInntrekk: Boolean,
-
-    @Column(name = "er_feilkonto", nullable = true)
-    val erFeilkonto: Boolean?
+    val utenInntrekk: Boolean
 ) : BaseEntitet() {
 
     override fun hashCode() = id.hashCode()
@@ -97,4 +94,6 @@ data class ØkonomiSimuleringPostering(
             "utenInntrekk=$utenInntrekk" +
             ")"
     }
+
+    val erManuellPostering get() = this.fagOmrådeKode == FagOmrådeKode.BARNETRYGD_INFOTRYGD_MANUELT
 }

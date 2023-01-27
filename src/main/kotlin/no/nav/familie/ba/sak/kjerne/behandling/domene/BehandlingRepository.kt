@@ -106,6 +106,22 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
     fun finnIverksatteBehandlinger(fagsakId: Long): List<Behandling>
 
     @Query(
+        """WITH sisteiverksattebehandlingfraløpendefagsak AS (
+                    SELECT f.id AS fagsakid, MAX(b.opprettet_tid) AS opprettet_tid
+                    FROM behandling b
+                             INNER JOIN fagsak f ON f.id = b.fk_fagsak_id
+                             INNER JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
+                    WHERE f.id = :fagsakId
+                      AND ty.utbetalingsoppdrag IS NOT NULL
+                      AND f.arkivert = false
+                    GROUP BY fagsakid)
+                
+                SELECT b.* FROM sisteiverksattebehandlingfraløpendefagsak silp JOIN behandling b ON b.fk_fagsak_id = silp.fagsakid WHERE b.opprettet_tid = silp.opprettet_tid""",
+        nativeQuery = true
+    )
+    fun finnSisteIverksatteBehandling(fagsakId: Long): Behandling?
+
+    @Query(
         """
             select b from Behandling b
                             where b.fagsak.id = :fagsakId and b.status = 'IVERKSETTER_VEDTAK'
