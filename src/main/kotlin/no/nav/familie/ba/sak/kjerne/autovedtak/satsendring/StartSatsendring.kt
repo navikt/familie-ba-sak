@@ -37,7 +37,11 @@ class StartSatsendring(
         antallFagsaker: Int,
         satsTidspunkt: YearMonth = YearMonth.of(2023, 3)
     ) {
-        val gyldigeSatser = hentGyldigeSatser()
+        val gyldigeSatstyper = hentGyldigeSatstyper()
+        if (gyldigeSatstyper.isEmpty()) {
+            logger.info("Skipper satsendring da ingen av bryterne for de ulike satstypene er påskrudd.")
+            return
+        }
         var antallSatsendringerStartet = 0
         var startSide = 0
         while (antallSatsendringerStartet < antallFagsaker) {
@@ -53,7 +57,7 @@ class StartSatsendring(
                         antallSatsendringerStartet,
                         antallFagsaker,
                         satsTidspunkt,
-                        gyldigeSatser
+                        gyldigeSatstyper
                     )
             }
 
@@ -85,10 +89,10 @@ class StartSatsendring(
     private fun sjekkOgTriggSatsendring(
         satstyper: List<SatsType>,
         fagsak: Fagsak,
-        gyldigeSatser: List<SatsType>,
+        gyldigeSatstyper: List<SatsType>,
         satsTidspunkt: YearMonth
     ): Boolean {
-        if (satstyper.isNotEmpty() && gyldigeSatser.containsAll(satstyper)) {
+        if (satstyper.isNotEmpty() && gyldigeSatstyper.containsAll(satstyper)) {
             if (featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_OPPRETT_TASKER)) {
                 logger.info("Oppretter satsendringtask for fagsak=${fagsak.id}")
                 opprettTaskService.opprettSatsendringTask(fagsak.id, satsTidspunkt)
@@ -99,29 +103,33 @@ class StartSatsendring(
                 return true // fordi vi vil at den skal telles selv om opprett task er skrudd av
             }
         }
+        logger.info(
+            "Oppretter ikke satsendringtask for fagsak=${fagsak.id}. Mangler ytelse, eller har ytelsestype(r) det ikke" +
+                " skal kjøres for: ${satstyper.filter { it !in gyldigeSatstyper }}"
+        )
         return false
     }
 
-    private fun hentGyldigeSatser(): List<SatsType> {
-        val gyldigeSatser = mutableListOf<SatsType>()
+    private fun hentGyldigeSatstyper(): List<SatsType> {
+        val gyldigeSatstyper = mutableListOf<SatsType>()
         if (featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_TILLEGG_ORBA, false)) {
-            gyldigeSatser.add(SatsType.TILLEGG_ORBA)
+            gyldigeSatstyper.add(SatsType.TILLEGG_ORBA)
         }
 
         if (featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_ORBA, true)) {
-            gyldigeSatser.add(SatsType.ORBA)
+            gyldigeSatstyper.add(SatsType.ORBA)
         }
 
         if (featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_UTVIDET, false)) {
-            gyldigeSatser.add(SatsType.UTVIDET_BARNETRYGD)
+            gyldigeSatstyper.add(SatsType.UTVIDET_BARNETRYGD)
         }
 
         if (featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_SMA, false)) {
-            gyldigeSatser.add(SatsType.SMA)
+            gyldigeSatstyper.add(SatsType.SMA)
         }
 
-        logger.info("Påskrudde satstyper for satskjøring $gyldigeSatser")
-        return gyldigeSatser
+        logger.info("Påskrudde satstyper for satskjøring $gyldigeSatstyper")
+        return gyldigeSatstyper
     }
 
     private fun oppretteEllerSkipSatsendring(
@@ -129,18 +137,12 @@ class StartSatsendring(
         antallAlleredeTriggetSatsendring: Int,
         antallFagsakerTilSatsendring: Int,
         satsTidspunkt: YearMonth,
-        gyldigeSatser: List<SatsType>
+        gyldigeSatstyper: List<SatsType>
     ): Int {
         var antallFagsakerSatsendring = antallAlleredeTriggetSatsendring
         for (fagsak in fagsakForSatsendring) {
-            if (skalTriggeFagsak(fagsak, satsTidspunkt, gyldigeSatser)) {
+            if (skalTriggeFagsak(fagsak, satsTidspunkt, gyldigeSatstyper)) {
                 antallFagsakerSatsendring++
-            } else {
-                logger.info(
-                    "Skipper oppretting av SatsendringTask for ${
-                    fagsak.id
-                    }"
-                )
             }
 
             if (antallFagsakerSatsendring == antallFagsakerTilSatsendring) {
@@ -150,7 +152,7 @@ class StartSatsendring(
         return antallFagsakerSatsendring
     }
 
-    private fun skalTriggeFagsak(fagsak: Fagsak, satsTidspunkt: YearMonth, gyldigeSatser: List<SatsType>): Boolean {
+    private fun skalTriggeFagsak(fagsak: Fagsak, satsTidspunkt: YearMonth, gyldigeSatstyper: List<SatsType>): Boolean {
         val aktivOgÅpenBehandling = behandlingRepository.findByFagsakAndAktivAndOpen(fagsakId = fagsak.id)
         if (aktivOgÅpenBehandling != null) {
             logger.info("Oppretter ikke satsendringtask for fagsak=${fagsak.id}. Har åpen behandling ${aktivOgÅpenBehandling.id}")
@@ -205,7 +207,7 @@ class StartSatsendring(
                 satstyper.add(SatsType.TILLEGG_ORBA)
             }
 
-            return sjekkOgTriggSatsendring(satstyper, fagsak, gyldigeSatser, satsTidspunkt)
+            return sjekkOgTriggSatsendring(satstyper, fagsak, gyldigeSatstyper, satsTidspunkt)
         } else {
             logger.info("Satsendring utføres ikke på fagsak=${fagsak.id} fordi fagsaken mangler en iverksatt behandling")
             return false
