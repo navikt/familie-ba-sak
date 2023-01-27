@@ -85,12 +85,13 @@ class StartSatsendring(
     private fun sjekkOgTriggSatsendring(
         satstyper: List<SatsType>,
         fagsak: Fagsak,
-        gyldigeSatser: List<SatsType>
+        gyldigeSatser: List<SatsType>,
+        satsTidspunkt: YearMonth
     ): Boolean {
         if (satstyper.isNotEmpty() && gyldigeSatser.containsAll(satstyper)) {
             if (featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_OPPRETT_TASKER)) {
                 logger.info("Oppretter satsendringtask for fagsak=${fagsak.id}")
-                opprettTaskService.opprettSatsendringTask(fagsak.id)
+                opprettTaskService.opprettSatsendringTask(fagsak.id, satsTidspunkt)
                 satskjøringRepository.save(Satskjøring(fagsakId = fagsak.id))
                 return true
             } else {
@@ -204,7 +205,7 @@ class StartSatsendring(
                 satstyper.add(SatsType.TILLEGG_ORBA)
             }
 
-            return sjekkOgTriggSatsendring(satstyper, fagsak, gyldigeSatser)
+            return sjekkOgTriggSatsendring(satstyper, fagsak, gyldigeSatser, satsTidspunkt)
         } else {
             logger.info("Satsendring utføres ikke på fagsak=${fagsak.id} fordi fagsaken mangler en iverksatt behandling")
             return false

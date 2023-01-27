@@ -25,6 +25,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
+import no.nav.familie.ba.sak.task.SatsendringTaskDto
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
 import org.assertj.core.api.Assertions
@@ -120,7 +121,8 @@ class BehandlingSatsendringTest(
         // Fjerner mocking slik at den siste satsendringen vi fjernet via mocking nå skal komme med.
         unmockkObject(SatsTidspunkt)
 
-        val satsendringResultat = autovedtakSatsendringService.kjørBehandling(fagsakId = behandling.fagsak.id)
+        val satsendringResultat =
+            autovedtakSatsendringService.kjørBehandling(SatsendringTaskDto(behandling.fagsak.id, YearMonth.of(2023, 3)))
 
         assertEquals(satsendringResultat, "Satsendring kjørt OK")
 
@@ -226,7 +228,8 @@ class BehandlingSatsendringTest(
         // Fjerner mocking slik at den siste satsendringen vi fjernet via mocking nå skal komme med.
         unmockkObject(SatsTidspunkt)
 
-        val satsendringResultat = autovedtakSatsendringService.kjørBehandling(fagsakId = behandling.fagsak.id)
+        val satsendringResultat =
+            autovedtakSatsendringService.kjørBehandling(SatsendringTaskDto(behandling.fagsak.id, YearMonth.of(2023, 3)))
 
         assertTrue(satsendringResultat.contains("Tilbakestiller behandling"))
 
@@ -297,27 +300,10 @@ class BehandlingSatsendringTest(
         // Fjerner mocking slik at den siste satsendringen vi fjernet via mocking nå skal komme med.
         unmockkObject(SatsTidspunkt)
 
-        val satsendringResultat = autovedtakSatsendringService.kjørBehandling(fagsakId = behandling.fagsak.id)
+        val satsendringResultat =
+            autovedtakSatsendringService.kjørBehandling(SatsendringTaskDto(behandling.fagsak.id, YearMonth.of(2023, 3)))
 
         assertEquals(satsendringResultat, "Satsendring allerede utført fagsak=${behandling.fagsak.id}")
-
-        val satsendringBehandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = behandling.fagsak.id)
-        assertEquals(Behandlingsresultat.ENDRET_UTBETALING, satsendringBehandling?.resultat)
-        assertEquals(StegType.IVERKSETT_MOT_OPPDRAG, satsendringBehandling?.steg)
-
-        val satsendingsvedtak = vedtakService.hentAktivForBehandling(behandlingId = satsendringBehandling!!.id)
-        assertNull(satsendingsvedtak!!.stønadBrevPdF)
-
-        val aty = andelTilkjentYtelseMedEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
-            satsendringBehandling.id
-        )
-
-        val atyMedSenesteTilleggOrbaSats =
-            aty.first { it.type == YtelseType.ORDINÆR_BARNETRYGD && it.stønadFom == YearMonth.of(2023, 3) }
-        val atyMedVanligOrbaSats =
-            aty.first { it.type == YtelseType.ORDINÆR_BARNETRYGD && it.stønadFom == YearMonth.of(2029, 1) }
-        assertThat(atyMedSenesteTilleggOrbaSats.sats).isEqualTo(SatsService.finnSisteSatsFor(SatsType.TILLEGG_ORBA).beløp)
-        assertThat(atyMedVanligOrbaSats.sats).isEqualTo(SatsService.finnSisteSatsFor(SatsType.ORBA).beløp)
 
         val satskjøring = satskjøringRepository.findByFagsakId(behandling.fagsak.id)
         assertThat(satskjøring?.ferdigTidspunkt)

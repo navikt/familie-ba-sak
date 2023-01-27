@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import java.time.YearMonth
 
 @RestController
 @RequestMapping(value = ["/internal", "/testverktoy"])
@@ -55,7 +56,7 @@ class TestVerktøyController(
     @Unprotected
     fun utførSatsendringPåBehandling(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<String>> {
         return if (envService.erPreprod() || envService.erDev()) {
-            opprettTaskService.opprettSatsendringTask(fagsakId)
+            opprettTaskService.opprettSatsendringTask(fagsakId, YearMonth.of(2023, 3))
             ResponseEntity.ok(Ressurs.success("Trigget satsendring for behandling $fagsakId"))
         } else {
             ResponseEntity.ok(Ressurs.success(MELDING))
