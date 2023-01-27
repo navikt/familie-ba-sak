@@ -232,7 +232,6 @@ fun hentResultatIPeriode(periode: List<ØkonomiSimuleringPostering>): BigDecimal
         -feilutbetaling
     } else {
         hentNyttBeløpIPeriode(periode) +
-            hentManuellPosteringIPeriode(periode) -
             hentTidligereUtbetaltIPeriode(periode)
     }
 }
