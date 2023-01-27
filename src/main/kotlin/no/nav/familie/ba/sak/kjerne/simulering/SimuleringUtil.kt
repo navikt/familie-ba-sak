@@ -114,7 +114,7 @@ fun vedtakSimuleringMottakereTilSimuleringPerioder(
                 hentEtterbetalingIPeriodeGammel(posteringListe, tidSimuleringHentet)
             },
             korrigertResultat = if (erManuelPosteringTogglePå) {
-                maxOf(BigDecimal.ZERO, hentKorrigertResultatIPeriode(posteringListe))
+                hentKorrigertResultatIPeriode(posteringListe)
             } else {
                 BigDecimal.ZERO
             }

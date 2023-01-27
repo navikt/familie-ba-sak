@@ -239,13 +239,14 @@ class SimuleringUtilTest {
 
         val økonomiSimuleringMottakere =
             listOf(mockØkonomiSimuleringMottaker(økonomiSimuleringPostering = redusertYtelseTil2_000))
-        val simuleringsperioder = vedtakSimuleringMottakereTilSimuleringPerioder(økonomiSimuleringMottakere, false)
-        val oppsummering = vedtakSimuleringMottakereTilRestSimulering(økonomiSimuleringMottakere, false)
+        val simuleringsperioder = vedtakSimuleringMottakereTilSimuleringPerioder(økonomiSimuleringMottakere, true)
+        val oppsummering = vedtakSimuleringMottakereTilRestSimulering(økonomiSimuleringMottakere, true)
 
         assertThat(simuleringsperioder.size).isEqualTo(1)
         assertThat(simuleringsperioder[0].tidligereUtbetalt).isEqualTo(10_000.toBigDecimal())
         assertThat(simuleringsperioder[0].nyttBeløp).isEqualTo(2_000.toBigDecimal())
         assertThat(simuleringsperioder[0].resultat).isEqualTo(-8_000.toBigDecimal())
+        assertThat(simuleringsperioder[0].korrigertResultat).isEqualTo(simuleringsperioder[0].resultat)
         assertThat(simuleringsperioder[0].feilutbetaling).isEqualTo(8_000.toBigDecimal())
         assertThat(oppsummering.etterbetaling).isEqualTo(0.toBigDecimal())
     }
@@ -444,13 +445,14 @@ class SimuleringUtilTest {
 
         val økonomiSimuleringMottakere =
             listOf(mockØkonomiSimuleringMottaker(økonomiSimuleringPostering = øktYtelseFra3_000Til12_000))
-        val simuleringsperioder = vedtakSimuleringMottakereTilSimuleringPerioder(økonomiSimuleringMottakere, false)
-        val oppsummering = vedtakSimuleringMottakereTilRestSimulering(økonomiSimuleringMottakere, false)
+        val simuleringsperioder = vedtakSimuleringMottakereTilSimuleringPerioder(økonomiSimuleringMottakere, true)
+        val oppsummering = vedtakSimuleringMottakereTilRestSimulering(økonomiSimuleringMottakere, true)
 
         assertThat(simuleringsperioder.size).isEqualTo(1)
         assertThat(simuleringsperioder[0].tidligereUtbetalt).isEqualTo(3_000.toBigDecimal())
         assertThat(simuleringsperioder[0].nyttBeløp).isEqualTo(12_000.toBigDecimal())
         assertThat(simuleringsperioder[0].resultat).isEqualTo(9_000.toBigDecimal())
+        assertThat(simuleringsperioder[0].korrigertResultat).isEqualTo(simuleringsperioder[0].resultat)
         assertThat(simuleringsperioder[0].feilutbetaling).isEqualTo(0.toBigDecimal())
         assertThat(oppsummering.etterbetaling).isEqualTo(2_000.toBigDecimal())
     }
