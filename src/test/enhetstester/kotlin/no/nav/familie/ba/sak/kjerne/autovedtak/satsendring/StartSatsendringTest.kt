@@ -514,7 +514,6 @@ internal class StartSatsendringTest {
         ).isEqualTo(false)
     }
 
-
     private fun lagAndelTilkjentYtelseMedEndreteUtbetalinger(
         satsType: SatsType,
         behandling: Behandling,
