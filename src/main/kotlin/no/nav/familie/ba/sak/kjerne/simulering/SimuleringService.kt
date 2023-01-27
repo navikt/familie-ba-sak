@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.simulering
 
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.module.kotlin.readValue
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
@@ -26,6 +28,7 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import no.nav.familie.kontrakter.felles.simulering.SimuleringMottaker
 import org.springframework.stereotype.Service
+import java.io.File
 import java.math.BigDecimal
 import java.time.LocalDate
 import javax.transaction.Transactional
@@ -96,6 +99,19 @@ class SimuleringService(
         øknomiSimuleringMottakerRepository.deleteByBehandlingId(behandlingId)
 
     fun hentSimuleringPåBehandling(behandlingId: Long): List<ØkonomiSimuleringMottaker> {
+        val fil = File("./src/test/resources/kjerne.simulering/simulering_med_mottrekk.json")
+
+        val ytelseMedManuellePosteringer =
+            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .configure(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true)
+                .readValue<DetaljertSimuleringResultat>(fil)
+
+        return ytelseMedManuellePosteringer.simuleringMottaker.map {
+            it.tilBehandlingSimuleringMottaker(
+                behandlingRepository.finnBehandling(behandlingId)
+            )
+        }
+
         return øknomiSimuleringMottakerRepository.findByBehandlingId(behandlingId)
     }
 
