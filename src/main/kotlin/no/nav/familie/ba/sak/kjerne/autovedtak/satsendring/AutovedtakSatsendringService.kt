@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.satsendring
 
+import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
@@ -38,6 +39,10 @@ class AutovedtakSatsendringService(
     private val satskjøringRepository: SatskjøringRepository
 ) : AutovedtakBehandlingService<SatsendringTaskDto> {
 
+    private val satsendringAlleredeUtført = Metrics.counter("satsendring.allerede.utfort")
+    private val satsendringIverksatt = Metrics.counter("satsendring.iverksatt")
+    private val satsendringIgnorertÅpenBehandling = Metrics.counter("satsendring.ignorert.aapenbehandling")
+
     /**
      * Gjennomfører og commiter revurderingsbehandling
      * med årsak satsendring og uten endring i vilkår.
@@ -55,8 +60,9 @@ class AutovedtakSatsendringService(
         if (harAlleredeNySats(behandling.id, behandlingsdata.satstidspunkt)) {
             satskjøringForFagsak.ferdigTidspunkt = LocalDateTime.now()
             satskjøringRepository.save(satskjøringForFagsak)
-            logger.info("Satsendring allerede utført fagsak=$fagsakId")
-            return "Satsendring allerede utført fagsak=$fagsakId"
+            logger.info("Satsendring allerede utført for fagsak=$fagsakId")
+            satsendringAlleredeUtført.increment()
+            return "Satsendring allerede utført for fagsak=$fagsakId"
         }
 
         val aktivOgÅpenBehandling = behandlingRepository.findByFagsakAndAktivAndOpen(fagsakId = behandling.fagsak.id)
@@ -83,6 +89,7 @@ class AutovedtakSatsendringService(
             }
 
             logger.info(brukerHarÅpenBehandlingMelding)
+            satsendringIgnorertÅpenBehandling.increment()
             return brukerHarÅpenBehandlingMelding
         }
 
@@ -108,6 +115,7 @@ class AutovedtakSatsendringService(
         satskjøringForFagsak.ferdigTidspunkt = LocalDateTime.now()
         satskjøringRepository.save(satskjøringForFagsak)
         taskRepository.save(task)
+        satsendringIverksatt.increment()
 
         return "Satsendring kjørt OK"
     }

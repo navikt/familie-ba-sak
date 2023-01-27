@@ -303,7 +303,7 @@ class BehandlingSatsendringTest(
         val satsendringResultat =
             autovedtakSatsendringService.kjørBehandling(SatsendringTaskDto(behandling.fagsak.id, YearMonth.of(2023, 3)))
 
-        assertEquals(satsendringResultat, "Satsendring allerede utført fagsak=${behandling.fagsak.id}")
+        assertEquals(satsendringResultat, "Satsendring allerede utført for fagsak=${behandling.fagsak.id}")
 
         val satskjøring = satskjøringRepository.findByFagsakId(behandling.fagsak.id)
         assertThat(satskjøring?.ferdigTidspunkt)
