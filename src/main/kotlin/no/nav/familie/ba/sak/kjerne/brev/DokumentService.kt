@@ -273,7 +273,12 @@ class DokumentService(
     ) = try {
         distribuerBrevOgLoggHendlese(journalpostId, behandlingId, brevmal, loggBehandlerRolle)
     } catch (ressursException: RessursException) {
-        logger.info("Klarte ikke å distribuere brev til journalpost $journalpostId. Httpstatus ${ressursException.httpStatus}")
+        logger.info("Klarte ikke å distribuere brev til journalpost $journalpostId på behandling $behandlingId. Httpstatus ${ressursException.httpStatus}")
+        secureLogger.info(
+            "Klarte ikke å distribuere brev til journalpost $journalpostId på behandling $behandlingId.\n" +
+                "Httpstatus: ${ressursException.httpStatus}\n" +
+                "Melding: ${ressursException.cause?.message}"
+        )
 
         when {
             mottakerErIkkeDigitalOgHarUkjentAdresse(ressursException) && behandlingId != null ->
@@ -336,6 +341,7 @@ class DokumentService(
     }
 
     companion object {
+        val secureLogger = LoggerFactory.getLogger("secureLogger")
 
         fun alleredeDistribuertMelding(journalpostId: String, behandlingId: Long?) =
             "Journalpost med Id=$journalpostId er allerede distiribuert. Hopper over distribuering." +
