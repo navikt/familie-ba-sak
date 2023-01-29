@@ -1,32 +1,63 @@
 package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
+import io.mockk.every
+import io.mockk.impl.annotations.InjectMockKs
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
+import io.mockk.verify
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
+import no.nav.familie.ba.sak.ekstern.restDomene.BehandlingUnderkategoriDTO
+import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import org.assertj.core.api.Assertions.assertThat
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import org.hamcrest.MatcherAssert.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import java.math.BigDecimal
 import java.time.Month
 import java.time.YearMonth
+import org.hamcrest.CoreMatchers.`is` as Is
 
+@ExtendWith(MockKExtension::class)
 internal class BehandlingsresultatServiceTest {
 
-    private val featureToggleService = mockk<FeatureToggleService>()
+    @MockK
+    private lateinit var behandlingHentOgPersisterService: BehandlingHentOgPersisterService
 
-    private val service = BehandlingsresultatService(
-        mockk(),
-        mockk(),
-        mockk(),
-        mockk(),
-        mockk(),
-        mockk(),
-        featureToggleService
-    )
+    @MockK
+    private lateinit var søknadGrunnlagService: SøknadGrunnlagService
+
+    @MockK
+    private lateinit var personidentService: PersonidentService
+
+    @MockK
+    private lateinit var persongrunnlagService: PersongrunnlagService
+
+    @MockK
+    private lateinit var vilkårsvurderingService: VilkårsvurderingService
+
+    @MockK
+    private lateinit var andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
+
+    @MockK
+    private lateinit var featureToggleService: FeatureToggleService
+
+    @InjectMockKs
+    private lateinit var behandlingsresultatService: BehandlingsresultatService
 
     @Test
     fun `endra fom eller tom for utvida barnetrygd gir behandlingsresultat endret`() {
@@ -65,13 +96,13 @@ internal class BehandlingsresultatServiceTest {
                 prosent = BigDecimal(50)
             )
         )
-        val behandlingsresultat = service.utledBehandlingsresultat(
+        val behandlingsresultat = behandlingsresultatService.utledBehandlingsresultat(
             ytelsePersonerMedResultat = listOf(ytelsePersonSøker, ytelsePersonBarn),
             andelerMedEndringer = listOf(andelMedEndring),
             forrigeAndelerMedEndringer = listOf(forrigeAndelMedEndring),
             behandling = lagBehandling()
         )
-        assertThat(behandlingsresultat).isEqualTo(Behandlingsresultat.ENDRET_UTBETALING)
+        assertThat(behandlingsresultat, Is(Behandlingsresultat.ENDRET_UTBETALING))
     }
 
     @Test
@@ -112,13 +143,13 @@ internal class BehandlingsresultatServiceTest {
             )
         )
 
-        val behandlingsresultat = service.utledBehandlingsresultat(
+        val behandlingsresultat = behandlingsresultatService.utledBehandlingsresultat(
             ytelsePersonerMedResultat = listOf(ytelsePersonSøker, ytelsePersonBarn),
             andelerMedEndringer = listOf(andelMedEndring),
             forrigeAndelerMedEndringer = listOf(forrigeAndelMedEndring),
             behandling = lagBehandling()
         )
-        assertThat(behandlingsresultat).isEqualTo(Behandlingsresultat.FORTSATT_INNVILGET)
+        assertThat(behandlingsresultat, Is(Behandlingsresultat.FORTSATT_INNVILGET))
     }
 
     @Test
@@ -149,13 +180,13 @@ internal class BehandlingsresultatServiceTest {
             )
         )
 
-        val behandlingsresultat = service.utledBehandlingsresultat(
+        val behandlingsresultat = behandlingsresultatService.utledBehandlingsresultat(
             ytelsePersonerMedResultat = listOf(ytelsePersonSøker, ytelsePersonBarn),
             andelerMedEndringer = listOf(andelMedEndring),
             forrigeAndelerMedEndringer = listOf(),
             behandling = lagBehandling()
         )
-        assertThat(behandlingsresultat).isEqualTo(Behandlingsresultat.INNVILGET)
+        assertThat(behandlingsresultat, Is(Behandlingsresultat.INNVILGET))
     }
 
     @Test
@@ -186,12 +217,125 @@ internal class BehandlingsresultatServiceTest {
             )
         )
 
-        val behandlingsresultat = service.utledBehandlingsresultat(
+        val behandlingsresultat = behandlingsresultatService.utledBehandlingsresultat(
             ytelsePersonerMedResultat = listOf(ytelsePersonSøker, ytelsePersonBarn),
             andelerMedEndringer = listOf(),
             forrigeAndelerMedEndringer = listOf(forrigeAndelMedEndring),
             behandling = lagBehandling()
         )
-        assertThat(behandlingsresultat).isEqualTo(Behandlingsresultat.OPPHØRT)
+        assertThat(behandlingsresultat, Is(Behandlingsresultat.OPPHØRT))
+    }
+
+    @Test
+    fun `utvida barnetrygd før, men alat opphørt nå gir behandlingsresultat innvilget`() {
+        val søkerAktør = Aktør("1234567890123")
+        val ytelsePersonSøker = YtelsePerson(
+            søkerAktør,
+            YtelseType.UTVIDET_BARNETRYGD,
+            listOf(KravOpprinnelse.INNEVÆRENDE),
+            setOf(YtelsePersonResultat.OPPHØRT),
+            YearMonth.of(2022, Month.OCTOBER)
+        )
+        val ytelsePersonBarn = YtelsePerson(
+            Aktør("1234567890124"),
+            YtelseType.ORDINÆR_BARNETRYGD,
+            listOf(KravOpprinnelse.INNEVÆRENDE),
+            setOf(YtelsePersonResultat.OPPHØRT),
+            YearMonth.of(2022, Month.OCTOBER)
+        )
+        val forrigeAndelMedEndring = AndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(2021, Month.DECEMBER),
+                tom = YearMonth.of(2037, Month.MAY),
+                ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                aktør = søkerAktør,
+                beløp = 1054,
+                prosent = BigDecimal(50)
+            )
+        )
+
+        val behandlingsresultat = behandlingsresultatService.utledBehandlingsresultat(
+            ytelsePersonerMedResultat = listOf(ytelsePersonSøker, ytelsePersonBarn),
+            andelerMedEndringer = listOf(),
+            forrigeAndelerMedEndringer = listOf(forrigeAndelMedEndring),
+            behandling = lagBehandling()
+        )
+        assertThat(behandlingsresultat, Is(Behandlingsresultat.OPPHØRT))
+    }
+
+    @Test
+    fun `finnPersonerFremstiltKravFor skal returnere tom liste dersom behandlingen ikke er søknad, fødselshendelse eller manuell migrering`() {
+        val behandling = lagBehandling(årsak = BehandlingÅrsak.DØDSFALL_BRUKER)
+
+        val personerFramstiltForKrav = behandlingsresultatService.finnPersonerFremstiltKravFor(behandling, null, null)
+
+        assertThat(personerFramstiltForKrav, Is(emptyList()))
+    }
+
+    @Test
+    fun `finnPersonerFremstiltKravFor skal returnere aktør som person framstilt krav for dersom det er søkt for utvidet barnetrygd`() {
+        val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)
+        val søknadDto = SøknadDTO(
+            underkategori = BehandlingUnderkategoriDTO.UTVIDET,
+            barnaMedOpplysninger = emptyList(),
+            søkerMedOpplysninger = mockk(),
+            endringAvOpplysningerBegrunnelse = ""
+        )
+
+        every { persongrunnlagService.finnNyeBarn(behandling, null) } returns emptyList()
+
+        val personerFramstiltForKrav =
+            behandlingsresultatService.finnPersonerFremstiltKravFor(behandling, søknadDto, null)
+
+        assertThat(personerFramstiltForKrav.single(), Is(behandling.fagsak.aktør))
+    }
+
+    @Test
+    fun `finnPersonerFremstiltKravFor skal returnere barn som er folkeregistret og krysset av på søknad`() {
+        val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)
+        val barn1Fnr = randomFnr()
+        val mocketAktør = mockk<Aktør>()
+
+        val barnSomErKryssetAvFor = BarnMedOpplysninger(
+            ident = barn1Fnr,
+            navn = "barn1",
+            inkludertISøknaden = true,
+            erFolkeregistrert = true
+        )
+
+        val barnSomIkkeErKryssetAvFor = BarnMedOpplysninger(
+            ident = randomFnr(),
+            navn = "barn2",
+            inkludertISøknaden = false,
+            erFolkeregistrert = true
+        )
+
+        val barnSomErKryssetAvForMenIkkeFolkeregistrert = BarnMedOpplysninger(
+            ident = randomFnr(),
+            navn = "barn3",
+            inkludertISøknaden = false,
+            erFolkeregistrert = true
+        )
+
+        val søknadDto = SøknadDTO(
+            underkategori = BehandlingUnderkategoriDTO.ORDINÆR,
+            barnaMedOpplysninger = listOf(
+                barnSomErKryssetAvFor,
+                barnSomIkkeErKryssetAvFor,
+                barnSomErKryssetAvForMenIkkeFolkeregistrert
+            ),
+            søkerMedOpplysninger = mockk(),
+            endringAvOpplysningerBegrunnelse = ""
+        )
+
+        every { persongrunnlagService.finnNyeBarn(behandling, null) } returns emptyList()
+        every { personidentService.hentAktør(barn1Fnr) } returns mocketAktør
+
+        val personerFramstiltForKrav =
+            behandlingsresultatService.finnPersonerFremstiltKravFor(behandling, søknadDto, null)
+
+        assertThat(personerFramstiltForKrav.single(), Is(mocketAktør))
+
+        verify(exactly = 1) { personidentService.hentAktør(barn1Fnr) }
     }
 }

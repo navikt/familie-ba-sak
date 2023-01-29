@@ -59,7 +59,9 @@ class BehandlingsresultatService(
             val nåværendePersonopplysningsgrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandling.id)
 
             nåværendePersonopplysningsgrunnlag.personer.map { it.aktør }
-        } else emptyList()
+        } else {
+            emptyList()
+        }
 
         return personerFremstiltKravFor.distinct()
     }
