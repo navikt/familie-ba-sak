@@ -40,14 +40,19 @@ class BehandlingsresultatService(
     internal fun finnPersonerFremstiltKravFor(behandling: Behandling, søknadDTO: SøknadDTO?, forrigeBehandling: Behandling?) =
         when {
             behandling.opprettetÅrsak in listOf(BehandlingÅrsak.SØKNAD, BehandlingÅrsak.FØDSELSHENDELSE) -> {
+                // alle barna som er krysset av på søknad
                 val barnFraSøknad = søknadDTO?.barnaMedOpplysninger
                     ?.filter { it.erFolkeregistrert && it.inkludertISøknaden }
                     ?.map { personidentService.hentAktør(it.ident) }
                     ?: emptyList()
 
+                // hvis det søkes om utvidet skal søker med
                 val utvidetBarnetrygdSøker = if (søknadDTO?.underkategori == BehandlingUnderkategoriDTO.UTVIDET) listOf(behandling.fagsak.aktør) else emptyList()
 
+                // alle nye barn
                 val nyeBarn = persongrunnlagService.finnNyeBarn(behandling, forrigeBehandling).map { it.aktør }
+
+                // Hva gjør vi med barn som har fått satt eksplisitt avslag, men det er ikke søkt for personen?
 
                 (barnFraSøknad + nyeBarn + utvidetBarnetrygdSøker).distinct()
             }
