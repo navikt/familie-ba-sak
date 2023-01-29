@@ -37,14 +37,14 @@
 
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
         <okhttp3.version>4.9.0</okhttp3.version>
-        <mock-oauth2-server.version>0.5.6</mock-oauth2-server.version>
+        <mock-oauth2-server.version>0.5.7</mock-oauth2-server.version>
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
 
         <medeia-validator-jackson.version>1.1.1</medeia-validator-jackson.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
         <postgresql.version>42.4.3</postgresql.version>
         <testcontainers.postgresql.version>1.17.6</testcontainers.postgresql.version>
-        <unleash.version>7.0.0</unleash.version>
+        <unleash.version>7.1.0</unleash.version>
         <maven.model.version>3.8.7</maven.model.version>
         <jackson.module.kotlin.version>2.14.1</jackson.module.kotlin.version>
         <token-validation-test-support.version>2.0.5</token-validation-test-support.version>
@@ -495,7 +495,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.0.0-M7</version>
+                <version>3.0.0-M8</version>
                 <configuration>
                     <!-- exclude tags -->
                     <!--suppress UnresolvedMavenProperty -->
