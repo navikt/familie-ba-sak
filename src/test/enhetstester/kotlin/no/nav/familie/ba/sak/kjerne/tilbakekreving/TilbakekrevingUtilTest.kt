@@ -123,6 +123,7 @@ class TilbakekrevingUtilTest {
         nyttBeløp = BigDecimal.ZERO,
         tidligereUtbetalt = BigDecimal.ZERO,
         resultat = BigDecimal.ZERO,
-        etterbetaling = BigDecimal.ZERO
+        etterbetaling = BigDecimal.ZERO,
+        korrigertResultat = BigDecimal.ZERO
     )
 }
