@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import io.mockk.clearStaticMockk
 import io.mockk.every
+import io.mockk.mockk
 import io.mockk.mockkStatic
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
@@ -23,6 +24,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.SøkersAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagKompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -1313,6 +1315,97 @@ class BehandlingsresultatUtilsTest {
         )
 
         assertThat(endringsresultat, Is(BehandlingsresultatUtils.Endringsresultat.INGEN_ENDRING))
+    }
+
+    @Test
+    fun `utledEndringsresultat skal returnere ENDRING dersom det finnes endringer i beløp`() {
+        val forrigeAndel =
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                fom = jan22,
+                tom = aug22,
+                beløp = 1054,
+                aktør = barn1Aktør
+            )
+
+        val endringsresultat = utledEndringsresultat(
+            forrigeAndeler = listOf(forrigeAndel),
+            nåværendeAndeler = listOf(forrigeAndel.copy(andelTilkjentYtelse = forrigeAndel.andel.copy(kalkulertUtbetalingsbeløp = 40))),
+            personerFremstiltKravFor = emptyList(),
+            forrigeKompetanser = emptyList(),
+            nåværendeKompetanser = emptyList(),
+            nåværendePersonResultat = emptyList(),
+            forrigePersonResultat = emptyList(),
+            nåværendeEndretAndeler = emptyList(),
+            forrigeEndretAndeler = emptyList()
+        )
+
+        assertThat(endringsresultat, Is(BehandlingsresultatUtils.Endringsresultat.ENDRING))
+    }
+
+    @Test
+    fun `utledEndringsresultat skal returnere ENDRING dersom det finnes endringer i vilkårsvurderingen`() {
+        val forrigeVilkårResultater = listOf(
+            VilkårResultat(
+                personResultat = null,
+                vilkårType = Vilkår.BOSATT_I_RIKET,
+                resultat = Resultat.OPPFYLT,
+                periodeFom = LocalDate.of(2015, 1, 1),
+                periodeTom = LocalDate.of(2020, 1, 1),
+                begrunnelse = "begrunnelse",
+                behandlingId = 0,
+                utdypendeVilkårsvurderinger = listOf(
+                    UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
+                    UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP
+                ),
+                vurderesEtter = Regelverk.NASJONALE_REGLER
+            )
+        )
+
+        val nåværendeVilkårResultater = listOf(
+            VilkårResultat(
+                personResultat = null,
+                vilkårType = Vilkår.BOSATT_I_RIKET,
+                resultat = Resultat.OPPFYLT,
+                periodeFom = LocalDate.of(2015, 1, 1),
+                periodeTom = LocalDate.of(2020, 1, 1),
+                begrunnelse = "begrunnelse",
+                behandlingId = 0,
+                utdypendeVilkårsvurderinger = listOf(
+                    UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
+                    UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP
+                ),
+                vurderesEtter = Regelverk.EØS_FORORDNINGEN
+            )
+        )
+
+        val forrigePersonResultat = PersonResultat(
+            id = 0,
+            vilkårsvurdering = mockk(),
+            aktør = barn1Aktør,
+            vilkårResultater = forrigeVilkårResultater.toMutableSet()
+        )
+
+        val nåværendePersonResultat =
+            PersonResultat(
+                id = 0,
+                vilkårsvurdering = mockk(),
+                aktør = barn1Aktør,
+                vilkårResultater = nåværendeVilkårResultater.toMutableSet()
+            )
+
+        val endringsresultat = utledEndringsresultat(
+            forrigeAndeler = emptyList(),
+            nåværendeAndeler = emptyList(),
+            personerFremstiltKravFor = emptyList(),
+            forrigeKompetanser = emptyList(),
+            nåværendeKompetanser = emptyList(),
+            forrigePersonResultat = listOf(forrigePersonResultat),
+            nåværendePersonResultat = listOf(nåværendePersonResultat),
+            nåværendeEndretAndeler = emptyList(),
+            forrigeEndretAndeler = emptyList()
+        )
+
+        assertThat(endringsresultat, Is(BehandlingsresultatUtils.Endringsresultat.ENDRING))
     }
 
     @Test
