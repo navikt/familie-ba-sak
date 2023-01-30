@@ -10,7 +10,9 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseMedEndreteUtbetalingerTidslinje
+import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.EndretUtbetalingAndelTidslinje
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
@@ -39,8 +41,8 @@ import java.time.YearMonth
 object BehandlingsresultatUtils {
 
     private fun utledResultatPåSøknad(
-        forrigeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
-        nåværendeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        forrigeAndeler: List<AndelTilkjentYtelse>,
+        nåværendeAndeler: List<AndelTilkjentYtelse>,
         nåværendePersonResultater: Set<PersonResultat>,
         personerFremstiltKravFor: List<Aktør>,
         endretUtbetalingAndeler: List<EndretUtbetalingAndel>
@@ -91,8 +93,8 @@ object BehandlingsresultatUtils {
             }
 
     internal fun utledSøknadResultatFraAndelerTilkjentYtelse(
-        forrigeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
-        nåværendeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        forrigeAndeler: List<AndelTilkjentYtelse>,
+        nåværendeAndeler: List<AndelTilkjentYtelse>,
         personerFremstiltKravFor: List<Aktør>,
         endretUtbetalingAndeler: List<EndretUtbetalingAndel>
     ): List<Søknadsresultat> {
@@ -108,12 +110,12 @@ object BehandlingsresultatUtils {
     }
 
     private fun utledSøknadResultatFraAndelerTilkjentYtelsePerPerson(
-        forrigeAndelerForPerson: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
-        nåværendeAndelerForPerson: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        forrigeAndelerForPerson: List<AndelTilkjentYtelse>,
+        nåværendeAndelerForPerson: List<AndelTilkjentYtelse>,
         endretUtbetalingAndelerForPerson: List<EndretUtbetalingAndel>
     ): List<Søknadsresultat> {
-        val forrigeTidslinje = AndelTilkjentYtelseMedEndreteUtbetalingerTidslinje(forrigeAndelerForPerson)
-        val nåværendeTidslinje = AndelTilkjentYtelseMedEndreteUtbetalingerTidslinje(nåværendeAndelerForPerson)
+        val forrigeTidslinje = AndelTilkjentYtelseTidslinje(forrigeAndelerForPerson)
+        val nåværendeTidslinje = AndelTilkjentYtelseTidslinje(nåværendeAndelerForPerson)
         val endretUtbetalingTidslinje = EndretUtbetalingAndelTidslinje(endretUtbetalingAndelerForPerson)
 
         val resultatTidslinje = nåværendeTidslinje.kombinerMed(forrigeTidslinje, endretUtbetalingTidslinje) { nåværende, forrige, endretUtbetalingAndel ->
@@ -127,7 +129,7 @@ object BehandlingsresultatUtils {
                     val endringsperiodeÅrsak = endretUtbetalingAndel?.årsak
 
                     when {
-                        nåværende.andel.differanseberegnetPeriodebeløp != null -> Søknadsresultat.INNVILGET
+                        nåværende.differanseberegnetPeriodebeløp != null -> Søknadsresultat.INNVILGET
                         endringsperiodeÅrsak == Årsak.DELT_BOSTED -> Søknadsresultat.INNVILGET
                         (endringsperiodeÅrsak == Årsak.ALLEREDE_UTBETALT) ||
                             (endringsperiodeÅrsak == Årsak.ENDRE_MOTTAKER) ||
