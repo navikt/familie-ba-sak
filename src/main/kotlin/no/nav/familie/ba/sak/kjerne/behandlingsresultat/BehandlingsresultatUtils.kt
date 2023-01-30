@@ -168,8 +168,8 @@ object BehandlingsresultatUtils {
 
         val finnesPersonMedEndretKompetanse = allePersonerMedKompetanser.any { aktør ->
             erEndringIKompetanseForPerson(
-                nåværendeKompetanser = nåværendeKompetanser.filter { it.barnAktører.contains(aktør) },
-                forrigeKompetanser = forrigeKompetanser.filter { it.barnAktører.contains(aktør) }
+                nåværendeKompetanserForPerson = nåværendeKompetanser.filter { it.barnAktører.contains(aktør) },
+                forrigeKompetanserForPerson = forrigeKompetanser.filter { it.barnAktører.contains(aktør) }
             )
         }
 
@@ -177,11 +177,11 @@ object BehandlingsresultatUtils {
     }
 
     private fun erEndringIKompetanseForPerson(
-        nåværendeKompetanser: List<Kompetanse>,
-        forrigeKompetanser: List<Kompetanse>
+        nåværendeKompetanserForPerson: List<Kompetanse>,
+        forrigeKompetanserForPerson: List<Kompetanse>
     ): Boolean {
-        val nåværendeTidslinje = nåværendeKompetanser.tilTidslinje()
-        val forrigeTidslinje = forrigeKompetanser.tilTidslinje()
+        val nåværendeTidslinje = nåværendeKompetanserForPerson.tilTidslinje()
+        val forrigeTidslinje = forrigeKompetanserForPerson.tilTidslinje()
 
         val endringerTidslinje = nåværendeTidslinje.kombinerUtenNullMed(forrigeTidslinje) { nåværende, forrige ->
             (
@@ -205,8 +205,8 @@ object BehandlingsresultatUtils {
 
         val finnesPersonerMedEndretEndretUtbetalingAndel = allePersoner.any { aktør ->
             erEndringIEndretUtbetalingAndelPerPerson(
-                nåværendeEndretAndeler = nåværendeEndretAndeler.filter { it.person?.aktør == aktør },
-                forrigeEndretAndeler = forrigeEndretAndeler.filter { it.person?.aktør == aktør }
+                nåværendeEndretAndelerForPerson = nåværendeEndretAndeler.filter { it.person?.aktør == aktør },
+                forrigeEndretAndelerForPerson = forrigeEndretAndeler.filter { it.person?.aktør == aktør }
             )
         }
 
@@ -214,11 +214,11 @@ object BehandlingsresultatUtils {
     }
 
     private fun erEndringIEndretUtbetalingAndelPerPerson(
-        nåværendeEndretAndeler: List<EndretUtbetalingAndel>,
-        forrigeEndretAndeler: List<EndretUtbetalingAndel>
+        nåværendeEndretAndelerForPerson: List<EndretUtbetalingAndel>,
+        forrigeEndretAndelerForPerson: List<EndretUtbetalingAndel>
     ): Boolean {
-        val nåværendeTidslinje = EndretUtbetalingAndelTidslinje(nåværendeEndretAndeler)
-        val forrigeTidslinje = EndretUtbetalingAndelTidslinje(forrigeEndretAndeler)
+        val nåværendeTidslinje = EndretUtbetalingAndelTidslinje(nåværendeEndretAndelerForPerson)
+        val forrigeTidslinje = EndretUtbetalingAndelTidslinje(forrigeEndretAndelerForPerson)
 
         val endringerTidslinje = nåværendeTidslinje.kombinerUtenNullMed(forrigeTidslinje) { nåværende, forrige ->
             (
