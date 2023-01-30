@@ -36,7 +36,7 @@ data class SmåbarnstilleggBarnetrygdGenerator(
         val perioderMedFullOvergangsstønadTidslinje =
             InternPeriodeOvergangsstønadTidslinje(perioderMedFullOvergangsstønad)
 
-        val utvidetBarnetrygdTidslinje = AndelTilkjentYtelseTidslinje(andelerTilkjentYtelse = utvidetAndeler)
+        val utvidetBarnetrygdTidslinje = AndelTilkjentYtelseMedEndreteUtbetalingerTidslinje(andelerTilkjentYtelse = utvidetAndeler)
 
         val barnSomGirRettTilSmåbarnstilleggTidslinje = lagTidslinjeForPerioderMedBarnSomGirRettTilSmåbarnstillegg(
             barnasAndeler = barnasAndeler,

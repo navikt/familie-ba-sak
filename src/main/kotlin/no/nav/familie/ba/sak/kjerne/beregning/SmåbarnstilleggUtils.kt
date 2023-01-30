@@ -191,7 +191,7 @@ fun lagTidslinjeForPerioderMedBarnSomGirRettTilSmåbarnstillegg(
     barnasAktørerOgFødselsdatoer: List<Pair<Aktør, LocalDate>>
 ): Tidslinje<BarnSinRettTilSmåbarnstillegg, Måned> {
     val barnasAndelerTidslinjer =
-        barnasAndeler.groupBy { it.aktør }.mapValues { AndelTilkjentYtelseTidslinje(it.value) }
+        barnasAndeler.groupBy { it.aktør }.mapValues { AndelTilkjentYtelseMedEndreteUtbetalingerTidslinje(it.value) }
 
     val barnasAndelerUnder3ÅrTidslinje = barnasAndelerTidslinjer.map { (barnAktør, barnTidslinje) ->
         val barnetsFødselsdato = barnasAktørerOgFødselsdatoer.find { it.first == barnAktør }?.second
@@ -213,7 +213,7 @@ data class SmåbarnstilleggPeriode(
 
 fun kombinerAlleTidslinjerTilProsentTidslinje(
     perioderMedFullOvergangsstønadTidslinje: InternPeriodeOvergangsstønadTidslinje,
-    utvidetBarnetrygdTidslinje: AndelTilkjentYtelseTidslinje,
+    utvidetBarnetrygdTidslinje: AndelTilkjentYtelseMedEndreteUtbetalingerTidslinje,
     barnSomGirRettTilSmåbarnstilleggTidslinje: Tidslinje<BarnSinRettTilSmåbarnstillegg, Måned>
 ): Tidslinje<SmåbarnstilleggPeriode, Måned> {
     return perioderMedFullOvergangsstønadTidslinje

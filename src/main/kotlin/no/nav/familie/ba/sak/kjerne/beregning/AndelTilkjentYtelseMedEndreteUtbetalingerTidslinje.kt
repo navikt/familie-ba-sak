@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
 
-class AndelTilkjentYtelseTidslinje(
+class AndelTilkjentYtelseMedEndreteUtbetalingerTidslinje(
     private val andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
 ) : Tidslinje<AndelTilkjentYtelseMedEndreteUtbetalinger, Måned>() {
 

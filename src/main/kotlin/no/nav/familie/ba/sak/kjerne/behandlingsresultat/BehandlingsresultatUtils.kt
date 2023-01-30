@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
-import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
+import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseMedEndreteUtbetalingerTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.EndretUtbetalingAndelTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -107,8 +107,8 @@ object BehandlingsresultatUtils {
         forrigeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
         nåværendeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
     ): List<Søknadsresultat> {
-        val forrigeTidslinje = AndelTilkjentYtelseTidslinje(forrigeAndeler)
-        val nåværendeTidslinje = AndelTilkjentYtelseTidslinje(nåværendeAndeler)
+        val forrigeTidslinje = AndelTilkjentYtelseMedEndreteUtbetalingerTidslinje(forrigeAndeler)
+        val nåværendeTidslinje = AndelTilkjentYtelseMedEndreteUtbetalingerTidslinje(nåværendeAndeler)
 
         val resultatTidslinje = nåværendeTidslinje.kombinerMed(forrigeTidslinje) { nåværende, forrige ->
             val forrigeBeløp = forrige?.kalkulertUtbetalingsbeløp
@@ -350,8 +350,8 @@ object BehandlingsresultatUtils {
         opphørstidspunkt: YearMonth,
         erFremstiltKravForPerson: Boolean
     ): Boolean {
-        val nåværendeTidslinje = AndelTilkjentYtelseTidslinje(nåværendeAndeler)
-        val forrigeTidslinje = AndelTilkjentYtelseTidslinje(forrigeAndeler)
+        val nåværendeTidslinje = AndelTilkjentYtelseMedEndreteUtbetalingerTidslinje(nåværendeAndeler)
+        val forrigeTidslinje = AndelTilkjentYtelseMedEndreteUtbetalingerTidslinje(forrigeAndeler)
 
         val endringIBeløpTidslinje = nåværendeTidslinje.kombinerMed(forrigeTidslinje) { nåværende, forrige ->
             val nåværendeBeløp = nåværende?.kalkulertUtbetalingsbeløp ?: 0
