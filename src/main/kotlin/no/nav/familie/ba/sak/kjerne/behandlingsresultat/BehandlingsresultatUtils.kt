@@ -42,12 +42,14 @@ object BehandlingsresultatUtils {
         forrigeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
         nåværendeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
         nåværendePersonResultater: Set<PersonResultat>,
-        personerFremstiltKravFor: List<Aktør>
+        personerFremstiltKravFor: List<Aktør>,
+        endretUtbetalingAndeler: List<EndretUtbetalingAndel>
     ): Søknadsresultat {
         val resultaterFraAndeler = utledSøknadResultatFraAndelerTilkjentYtelse(
             forrigeAndeler = forrigeAndeler,
             nåværendeAndeler = nåværendeAndeler,
-            personerFremstiltKravFor = personerFremstiltKravFor
+            personerFremstiltKravFor = personerFremstiltKravFor,
+            endretUtbetalingAndeler = endretUtbetalingAndeler
         )
 
         val erEksplisittAvslagPåMinstEnPersonFremstiltKravFor = erEksplisittAvslagPåMinstEnPersonFremstiltKravFor(
@@ -91,12 +93,14 @@ object BehandlingsresultatUtils {
     internal fun utledSøknadResultatFraAndelerTilkjentYtelse(
         forrigeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
         nåværendeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
-        personerFremstiltKravFor: List<Aktør>
+        personerFremstiltKravFor: List<Aktør>,
+        endretUtbetalingAndeler: List<EndretUtbetalingAndel>
     ): List<Søknadsresultat> {
         val alleSøknadsresultater = personerFremstiltKravFor.flatMap { aktør ->
             utledSøknadResultatFraAndelerTilkjentYtelsePerPerson(
                 forrigeAndelerForPerson = forrigeAndeler.filter { it.aktør == aktør },
-                nåværendeAndelerForPerson = nåværendeAndeler.filter { it.aktør == aktør }
+                nåværendeAndelerForPerson = nåværendeAndeler.filter { it.aktør == aktør },
+                endretUtbetalingAndelerForPerson = endretUtbetalingAndeler.filter { it.person?.aktør == aktør }
             )
         }
 
@@ -106,11 +110,13 @@ object BehandlingsresultatUtils {
     private fun utledSøknadResultatFraAndelerTilkjentYtelsePerPerson(
         forrigeAndelerForPerson: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
         nåværendeAndelerForPerson: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        endretUtbetalingAndelerForPerson: List<EndretUtbetalingAndel>
     ): List<Søknadsresultat> {
         val forrigeTidslinje = AndelTilkjentYtelseMedEndreteUtbetalingerTidslinje(forrigeAndelerForPerson)
         val nåværendeTidslinje = AndelTilkjentYtelseMedEndreteUtbetalingerTidslinje(nåværendeAndelerForPerson)
+        val endretUtbetalingTidslinje = EndretUtbetalingAndelTidslinje(endretUtbetalingAndelerForPerson)
 
-        val resultatTidslinje = nåværendeTidslinje.kombinerMed(forrigeTidslinje) { nåværende, forrige ->
+        val resultatTidslinje = nåværendeTidslinje.kombinerMed(forrigeTidslinje, endretUtbetalingTidslinje) { nåværende, forrige, endretUtbetalingAndel ->
             val forrigeBeløp = forrige?.kalkulertUtbetalingsbeløp
             val nåværendeBeløp = nåværende?.kalkulertUtbetalingsbeløp
 
@@ -118,7 +124,7 @@ object BehandlingsresultatUtils {
                 nåværendeBeløp == forrigeBeløp || nåværendeBeløp == null -> Søknadsresultat.INGEN_RELEVANTE_ENDRINGER // Ingen endring eller fjernet en andel
                 nåværendeBeløp > 0 -> Søknadsresultat.INNVILGET // Innvilget beløp som er annerledes enn forrige gang
                 nåværendeBeløp == 0 -> {
-                    val endringsperiodeÅrsak = if (nåværende.endreteUtbetalinger.isNotEmpty()) nåværende.endreteUtbetalinger.singleOrNull()?.årsak ?: throw Feil("") else null
+                    val endringsperiodeÅrsak = endretUtbetalingAndel?.årsak
 
                     when {
                         nåværende.andel.differanseberegnetPeriodebeløp != null -> Søknadsresultat.INNVILGET
