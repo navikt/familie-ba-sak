@@ -27,6 +27,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.beregning.EndringstidspunktService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
+import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.tilRestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
@@ -68,7 +69,8 @@ class UtvidetBehandlingService(
     private val korrigertEtterbetalingService: KorrigertEtterbetalingService,
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     private val korrigertVedtakService: KorrigertVedtakService,
-    private val feilutbetaltValutaService: FeilutbetaltValutaService
+    private val feilutbetaltValutaService: FeilutbetaltValutaService,
+    private val brevmottakerService: BrevmottakerService
 ) {
     fun lagRestUtvidetBehandling(behandlingId: Long): RestUtvidetBehandling {
         val behandling = behandlingRepository.finnBehandling(behandlingId)
@@ -103,6 +105,8 @@ class UtvidetBehandlingService(
             .finnEndreteUtbetalingerMedAndelerIHenholdTilVilkårsvurdering(behandlingId)
 
         val feilutbetaltValuta = feilutbetaltValutaService.hentFeilutbetaltValutaPerioder(behandlingId)
+
+        val brevmottakere = brevmottakerService.hentBrevmottakere(behandlingId)
 
         return RestUtvidetBehandling(
             behandlingId = behandling.id,
@@ -153,7 +157,8 @@ class UtvidetBehandlingService(
                 ?.tilRestKorrigertEtterbetaling(),
             korrigertVedtak = korrigertVedtakService.finnAktivtKorrigertVedtakPåBehandling(behandlingId)
                 ?.tilRestKorrigertVedtak(),
-            feilutbetaltValuta = feilutbetaltValuta
+            feilutbetaltValuta = feilutbetaltValuta,
+            brevmottakere = brevmottakere
         )
     }
 
