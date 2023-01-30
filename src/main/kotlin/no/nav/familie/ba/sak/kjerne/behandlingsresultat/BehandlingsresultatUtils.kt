@@ -148,6 +148,11 @@ object BehandlingsresultatUtils {
         INGEN_RELEVANTE_ENDRINGER
     }
 
+    internal enum class Endringsresultat {
+        ENDRING,
+        INGEN_ENDRING
+    }
+
     internal fun erEndringIKompetanse(
         nåværendeKompetanser: List<Kompetanse>,
         forrigeKompetanser: List<Kompetanse>
@@ -219,6 +224,43 @@ object BehandlingsresultatUtils {
         return endringerTidslinje.perioder().any { it.innhold == true }
     }
 
+    internal fun utledEndringsresultat(
+        nåværendeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        forrigeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        personerFremstiltKravFor: List<Aktør>,
+        nåværendeKompetanser: List<Kompetanse>,
+        forrigeKompetanser: List<Kompetanse>,
+        nåværendePersonResultat: List<PersonResultat>,
+        forrigePersonResultat: List<PersonResultat>,
+        nåværendeEndretAndeler: List<EndretUtbetalingAndel>,
+        forrigeEndretAndeler: List<EndretUtbetalingAndel>
+    ): Endringsresultat {
+        val erEndringIBeløp = erEndringIBeløp(
+            nåværendeAndeler = nåværendeAndeler,
+            forrigeAndeler = forrigeAndeler,
+            personerFremstiltKravFor = personerFremstiltKravFor
+        )
+
+        val erEndringIKompetanse = erEndringIKompetanse(
+            nåværendeKompetanser = nåværendeKompetanser,
+            forrigeKompetanser = forrigeKompetanser
+        )
+
+        val erEndringIVilkårsvurdering = erEndringIVilkårvurdering(
+            nåværendePersonResultat = nåværendePersonResultat,
+            forrigePersonResultat = forrigePersonResultat
+        )
+
+        val erEndringIEndretUtbetalingAndeler = erEndringIEndretUtbetalingAndeler(
+            nåværendeEndretAndeler = nåværendeEndretAndeler,
+            forrigeEndretAndeler = forrigeEndretAndeler
+        )
+
+        val erMinstEnEndring = erEndringIBeløp || erEndringIKompetanse || erEndringIVilkårsvurdering || erEndringIEndretUtbetalingAndeler
+
+        return if (erMinstEnEndring) Endringsresultat.ENDRING else Endringsresultat.INGEN_ENDRING
+    }
+
     private fun ikkeStøttetFeil(behandlingsresultater: MutableSet<YtelsePersonResultat>) =
         Feil(
             frontendFeilmelding = "Behandlingsresultatet du har fått på behandlingen er ikke støttet i løsningen enda. Ta kontakt med Team familie om du er uenig i resultatet.",
@@ -232,7 +274,7 @@ object BehandlingsresultatUtils {
         personerFremstiltKravFor: List<Aktør>
     ): Boolean {
         val allePersonerMedAndeler = (nåværendeAndeler.map { it.aktør } + forrigeAndeler.map { it.aktør }).distinct()
-        val opphørstidspunkt = nåværendeAndeler.maxOf { it.stønadTom }
+        val opphørstidspunkt = nåværendeAndeler.maxOfOrNull { it.stønadTom } ?: TIDENES_MORGEN.toYearMonth()
 
         val erEndringIBeløpForMinstEnPerson = allePersonerMedAndeler.any { aktør ->
             erEndringIBeløpForPerson(
