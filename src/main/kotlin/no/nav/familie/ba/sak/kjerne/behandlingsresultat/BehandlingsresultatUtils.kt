@@ -115,12 +115,13 @@ object BehandlingsresultatUtils {
             val nåværendeBeløp = nåværende?.kalkulertUtbetalingsbeløp
 
             when {
-                nåværendeBeløp == forrigeBeløp -> Søknadsresultat.INGEN_RELEVANTE_ENDRINGER // Ingen endring eller fjernet en andel
-                nåværendeBeløp == 0 || nåværendeBeløp == null -> {
-                    val endringsperiodeÅrsak = if (nåværende?.endreteUtbetalinger?.isNotEmpty() == true) nåværende.endreteUtbetalinger.singleOrNull()?.årsak ?: throw Feil("") else null
+                nåværendeBeløp == forrigeBeløp || nåværendeBeløp == null -> Søknadsresultat.INGEN_RELEVANTE_ENDRINGER // Ingen endring eller fjernet en andel
+                nåværendeBeløp > 0 -> Søknadsresultat.INNVILGET // Innvilget beløp som er annerledes enn forrige gang
+                nåværendeBeløp == 0 -> {
+                    val endringsperiodeÅrsak = if (nåværende.endreteUtbetalinger.isNotEmpty()) nåværende.endreteUtbetalinger.singleOrNull()?.årsak ?: throw Feil("") else null
 
                     when {
-                        nåværende?.andel?.differanseberegnetPeriodebeløp != null -> Søknadsresultat.INNVILGET
+                        nåværende.andel.differanseberegnetPeriodebeløp != null -> Søknadsresultat.INNVILGET
                         endringsperiodeÅrsak == Årsak.DELT_BOSTED -> Søknadsresultat.INNVILGET
                         (endringsperiodeÅrsak == Årsak.ALLEREDE_UTBETALT) ||
                             (endringsperiodeÅrsak == Årsak.ENDRE_MOTTAKER) ||
@@ -128,7 +129,6 @@ object BehandlingsresultatUtils {
                         else -> Søknadsresultat.INGEN_RELEVANTE_ENDRINGER
                     }
                 }
-                nåværendeBeløp > 0 -> Søknadsresultat.INNVILGET // Innvilget beløp som er annerledes enn forrige gang
                 else -> Søknadsresultat.INGEN_RELEVANTE_ENDRINGER
             }
         }
