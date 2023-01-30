@@ -26,10 +26,18 @@ import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils.beregnTilkjent
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils.mapTilProsentEllerNull
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndeler
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils.tilTidslinjeMedRettTilProsentForPerson
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
+import no.nav.familie.ba.sak.kjerne.eøs.util.der
+import no.nav.familie.ba.sak.kjerne.eøs.util.født
+import no.nav.familie.ba.sak.kjerne.eøs.util.har
+import no.nav.familie.ba.sak.kjerne.eøs.util.og
+import no.nav.familie.ba.sak.kjerne.eøs.util.oppfylt
+import no.nav.familie.ba.sak.kjerne.eøs.util.uendelig
+import no.nav.familie.ba.sak.kjerne.eøs.util.vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -39,7 +47,18 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSiv
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom.TidspunktClosedRange
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom.rangeTo
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.VilkårsvurderingBuilder
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.aug
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.des
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.feb
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.mar
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.nov
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.sep
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -1614,4 +1633,77 @@ internal class TilkjentYtelseUtilsTest {
         personResultat.setSortedVilkårResultater(oppdaterteVilkårResultater.toSet())
         return personResultat
     }
+
+    @Test
+    fun `skal opprette riktige satser for barn og søker ved utvidet barnetrygd`() {
+        val søker = PersonType.SØKER født 19.nov(1995)
+        val barn = PersonType.BARN født 14.des(2018)
+
+        val vurdering = vilkårsvurdering der
+            søker har
+            (Vilkår.BOSATT_I_RIKET oppfylt 26.jan(2018)..uendelig) og
+            (Vilkår.UTVIDET_BARNETRYGD oppfylt 26.jan(2018)..uendelig) og
+            (Vilkår.LOVLIG_OPPHOLD oppfylt 26.jan(2018)..uendelig) der
+            barn har
+            (Vilkår.UNDER_18_ÅR oppfylt 14.des(2018)..14.des(2036)) og
+            (Vilkår.GIFT_PARTNERSKAP oppfylt 26.jan(2018)..14.des(2036)) og
+            (Vilkår.BOR_MED_SØKER oppfylt 26.jan(2018)..14.des(2036)) og
+            (Vilkår.BOSATT_I_RIKET oppfylt 26.jan(2018)..14.des(2036)) og
+            (Vilkår.LOVLIG_OPPHOLD oppfylt 26.jan(2018)..14.des(2036))
+
+        val forventedeAndeler = listOf(
+            andelITidsrom(jan(2019)..feb(2019)) der barn får 970,
+            andelITidsrom(mar(2019)..aug(2020)) der barn får 1054,
+            andelITidsrom(sep(2020)..aug(2021)) der barn får 1354,
+            andelITidsrom(sep(2021)..des(2021)) der barn får 1654,
+            andelITidsrom(jan(2022)..feb(2023)) der barn får 1676,
+            andelITidsrom(mar(2023)..nov(2024)) der barn får 1723,
+            andelITidsrom(des(2025)..nov(2036)) der barn får 1083,
+
+            andelITidsrom(jan(2019)..feb(2019)) der søker får 970,
+            andelITidsrom(mar(2019)..feb(2023)) der søker får 1054,
+            andelITidsrom(mar(2023)..nov(2036)) der søker får 2489
+        )
+
+        val beregnedeAndeler = vurdering.beregnTilkjentYtelse().andelerTilkjentYtelse.toList()
+        forventedeAndeler
+            .zip(beregnedeAndeler)
+            .forEach { (forventetAndel, beregnetAndel) ->
+                assertEquals(forventetAndel.tilDatoPersonBeløp(), beregnetAndel.tilDatoPersonBeløp())
+            }
+    }
 }
+
+private fun andelITidsrom(tid: TidspunktClosedRange<Måned>) = lagAndelTilkjentYtelse(
+    fom = tid.start.tilYearMonth(),
+    tom = tid.endInclusive.tilYearMonth()
+)
+
+private infix fun AndelTilkjentYtelse.der(person: Person) = this.copy(
+    aktør = person.aktør
+)
+
+private infix fun AndelTilkjentYtelse.får(kalkulertUtbetalingsbeløp: Int) = this.copy(
+    kalkulertUtbetalingsbeløp = kalkulertUtbetalingsbeløp
+)
+
+private fun <T : Tidsenhet> VilkårsvurderingBuilder.PersonResultatBuilder<T>.beregnTilkjentYtelse(): TilkjentYtelse =
+    beregnTilkjentYtelse(
+        vilkårsvurdering = this.byggVilkårsvurdering(),
+        personopplysningGrunnlag = this.byggPersonopplysningGrunnlag(),
+        behandling = lagBehandling()
+    )
+
+private data class DatoPersonBeløp(
+    val fom: YearMonth,
+    val tom: YearMonth,
+    val aktør: Aktør,
+    val beløp: Int
+)
+
+private fun AndelTilkjentYtelse.tilDatoPersonBeløp() = DatoPersonBeløp(
+    fom = this.stønadFom,
+    tom = this.stønadTom,
+    aktør = this.aktør,
+    beløp = this.kalkulertUtbetalingsbeløp
+)
