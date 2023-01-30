@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
-import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseMedEndreteUtbetalingerTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.EndretUtbetalingAndelTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -288,8 +287,8 @@ object BehandlingsresultatUtils {
     }
 
     internal fun utledEndringsresultat(
-        nåværendeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
-        forrigeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        nåværendeAndeler: List<AndelTilkjentYtelse>,
+        forrigeAndeler: List<AndelTilkjentYtelse>,
         personerFremstiltKravFor: List<Aktør>,
         nåværendeKompetanser: List<Kompetanse>,
         forrigeKompetanser: List<Kompetanse>,
@@ -332,8 +331,8 @@ object BehandlingsresultatUtils {
 
     // NB: For personer fremstilt krav for tar vi ikke hensyn til alle endringer i beløp i denne funksjonen
     internal fun erEndringIBeløp(
-        nåværendeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
-        forrigeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        nåværendeAndeler: List<AndelTilkjentYtelse>,
+        forrigeAndeler: List<AndelTilkjentYtelse>,
         personerFremstiltKravFor: List<Aktør>
     ): Boolean {
         val allePersonerMedAndeler = (nåværendeAndeler.map { it.aktør } + forrigeAndeler.map { it.aktør }).distinct()
@@ -353,13 +352,13 @@ object BehandlingsresultatUtils {
 
     // Kun interessert i endringer i beløp FØR opphørstidspunkt
     private fun erEndringIBeløpForPerson(
-        nåværendeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
-        forrigeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        nåværendeAndeler: List<AndelTilkjentYtelse>,
+        forrigeAndeler: List<AndelTilkjentYtelse>,
         opphørstidspunkt: YearMonth,
         erFremstiltKravForPerson: Boolean
     ): Boolean {
-        val nåværendeTidslinje = AndelTilkjentYtelseMedEndreteUtbetalingerTidslinje(nåværendeAndeler)
-        val forrigeTidslinje = AndelTilkjentYtelseMedEndreteUtbetalingerTidslinje(forrigeAndeler)
+        val nåværendeTidslinje = AndelTilkjentYtelseTidslinje(nåværendeAndeler)
+        val forrigeTidslinje = AndelTilkjentYtelseTidslinje(forrigeAndeler)
 
         val endringIBeløpTidslinje = nåværendeTidslinje.kombinerMed(forrigeTidslinje) { nåværende, forrige ->
             val nåværendeBeløp = nåværende?.kalkulertUtbetalingsbeløp ?: 0
