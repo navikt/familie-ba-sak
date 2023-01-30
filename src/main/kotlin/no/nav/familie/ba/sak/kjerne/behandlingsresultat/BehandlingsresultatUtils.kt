@@ -95,8 +95,8 @@ object BehandlingsresultatUtils {
     ): List<Søknadsresultat> {
         val alleSøknadsresultater = personerFremstiltKravFor.flatMap { aktør ->
             utledSøknadResultatFraAndelerTilkjentYtelsePerPerson(
-                forrigeAndeler = forrigeAndeler.filter { it.aktør == aktør },
-                nåværendeAndeler = nåværendeAndeler.filter { it.aktør == aktør }
+                forrigeAndelerForPerson = forrigeAndeler.filter { it.aktør == aktør },
+                nåværendeAndelerForPerson = nåværendeAndeler.filter { it.aktør == aktør }
             )
         }
 
@@ -104,11 +104,11 @@ object BehandlingsresultatUtils {
     }
 
     private fun utledSøknadResultatFraAndelerTilkjentYtelsePerPerson(
-        forrigeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
-        nåværendeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
+        forrigeAndelerForPerson: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        nåværendeAndelerForPerson: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
     ): List<Søknadsresultat> {
-        val forrigeTidslinje = AndelTilkjentYtelseMedEndreteUtbetalingerTidslinje(forrigeAndeler)
-        val nåværendeTidslinje = AndelTilkjentYtelseMedEndreteUtbetalingerTidslinje(nåværendeAndeler)
+        val forrigeTidslinje = AndelTilkjentYtelseMedEndreteUtbetalingerTidslinje(forrigeAndelerForPerson)
+        val nåværendeTidslinje = AndelTilkjentYtelseMedEndreteUtbetalingerTidslinje(nåværendeAndelerForPerson)
 
         val resultatTidslinje = nåværendeTidslinje.kombinerMed(forrigeTidslinje) { nåværende, forrige ->
             val forrigeBeløp = forrige?.kalkulertUtbetalingsbeløp
