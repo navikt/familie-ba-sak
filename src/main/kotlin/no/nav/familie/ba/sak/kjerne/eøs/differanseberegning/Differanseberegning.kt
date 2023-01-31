@@ -3,6 +3,11 @@ package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 import minsteAvHver
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.beregning.kunAndelerTilOgMed3År
+import no.nav.familie.ba.sak.kjerne.beregning.tilAndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.tilAndelerTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.tilSeparateTidslinjerForBarna
+import no.nav.familie.ba.sak.kjerne.beregning.tilTidslinjeForSøkersYtelse
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.tilKronerPerValutaenhet
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.tilMånedligValutabeløp
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.times

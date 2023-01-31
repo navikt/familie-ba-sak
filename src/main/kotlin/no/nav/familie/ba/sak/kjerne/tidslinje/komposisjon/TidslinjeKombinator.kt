@@ -150,3 +150,25 @@ fun <A, B, C, R, T : Tidsenhet> Tidslinje<A, T>.kombinerMed(
         tidslinjeC.innholdForTidspunkt(tidspunkt).innhold
     ).tilInnhold()
 }
+
+fun <A, B, C, R, T : Tidsenhet> Tidslinje<A, T>.kombinerMedKunVerdi(
+    tidslinjeB: Tidslinje<B, T>,
+    tidslinjeC: Tidslinje<C, T>,
+    kombinator: (A, B, C) -> R?
+): Tidslinje<R, T> = tidsrom(this, tidslinjeB, tidslinjeC).tidslinjeFraTidspunkt { tidspunkt ->
+    val innholdA = this.innholdForTidspunkt(tidspunkt)
+    val innholdB = tidslinjeB.innholdForTidspunkt(tidspunkt)
+    val innholdC = tidslinjeC.innholdForTidspunkt(tidspunkt)
+
+    when {
+        innholdA.harVerdi && innholdB.harVerdi && innholdC.harVerdi ->
+            kombinator(innholdA.verdi, innholdB.verdi, innholdC.verdi).tilVerdi()
+        else -> Innhold.utenInnhold()
+    }
+}
+
+fun <V, H, T : Tidsenhet> Tidslinje<V, T>.harOverlappMed(tidslinje: Tidslinje<H, T>) =
+    this.kombinerUtenNullMed(tidslinje) { v, h -> true }.erIkkeTom()
+
+fun <V, H, T : Tidsenhet> Tidslinje<V, T>.harIkkeOverlappMed(tidslinje: Tidslinje<H, T>) =
+    !this.harOverlappMed(tidslinje)
