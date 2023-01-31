@@ -5,6 +5,8 @@ import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.AutobrevScheduler
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
@@ -37,7 +39,8 @@ class TestVerktøyController(
     private val taskRepository: TaskRepositoryWrapper,
     private val tilgangService: TilgangService,
     private val simuleringService: SimuleringService,
-    private val opprettTaskService: OpprettTaskService
+    private val opprettTaskService: OpprettTaskService,
+    private val satskjøringRepository: SatskjøringRepository
 
 ) {
 
@@ -56,6 +59,7 @@ class TestVerktøyController(
     @Unprotected
     fun utførSatsendringPåBehandling(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<String>> {
         return if (envService.erPreprod() || envService.erDev()) {
+            satskjøringRepository.save(Satskjøring(fagsakId = fagsakId))
             opprettTaskService.opprettSatsendringTask(fagsakId, YearMonth.of(2023, 3))
             ResponseEntity.ok(Ressurs.success("Trigget satsendring for behandling $fagsakId"))
         } else {
