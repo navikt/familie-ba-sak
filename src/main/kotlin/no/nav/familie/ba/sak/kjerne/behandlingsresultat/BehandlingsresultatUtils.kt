@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.EndretUtbetalingAndelTidslinje
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
@@ -39,15 +40,17 @@ import java.time.YearMonth
 object BehandlingsresultatUtils {
 
     private fun utledResultatPåSøknad(
-        forrigeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
-        nåværendeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        forrigeAndeler: List<AndelTilkjentYtelse>,
+        nåværendeAndeler: List<AndelTilkjentYtelse>,
         nåværendePersonResultater: Set<PersonResultat>,
-        personerFremstiltKravFor: List<Aktør>
+        personerFremstiltKravFor: List<Aktør>,
+        endretUtbetalingAndeler: List<EndretUtbetalingAndel>
     ): Søknadsresultat {
         val resultaterFraAndeler = utledSøknadResultatFraAndelerTilkjentYtelse(
             forrigeAndeler = forrigeAndeler,
             nåværendeAndeler = nåværendeAndeler,
-            personerFremstiltKravFor = personerFremstiltKravFor
+            personerFremstiltKravFor = personerFremstiltKravFor,
+            endretUtbetalingAndeler = endretUtbetalingAndeler
         )
 
         val erEksplisittAvslagPåMinstEnPersonFremstiltKravFor = erEksplisittAvslagPåMinstEnPersonFremstiltKravFor(
@@ -89,14 +92,16 @@ object BehandlingsresultatUtils {
             }
 
     internal fun utledSøknadResultatFraAndelerTilkjentYtelse(
-        forrigeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
-        nåværendeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
-        personerFremstiltKravFor: List<Aktør>
+        forrigeAndeler: List<AndelTilkjentYtelse>,
+        nåværendeAndeler: List<AndelTilkjentYtelse>,
+        personerFremstiltKravFor: List<Aktør>,
+        endretUtbetalingAndeler: List<EndretUtbetalingAndel>
     ): List<Søknadsresultat> {
         val alleSøknadsresultater = personerFremstiltKravFor.flatMap { aktør ->
             utledSøknadResultatFraAndelerTilkjentYtelsePerPerson(
-                forrigeAndeler = forrigeAndeler.filter { it.aktør == aktør },
-                nåværendeAndeler = nåværendeAndeler.filter { it.aktør == aktør }
+                forrigeAndelerForPerson = forrigeAndeler.filter { it.aktør == aktør },
+                nåværendeAndelerForPerson = nåværendeAndeler.filter { it.aktør == aktør },
+                endretUtbetalingAndelerForPerson = endretUtbetalingAndeler.filter { it.person?.aktør == aktør }
             )
         }
 
@@ -104,13 +109,15 @@ object BehandlingsresultatUtils {
     }
 
     private fun utledSøknadResultatFraAndelerTilkjentYtelsePerPerson(
-        forrigeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
-        nåværendeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
+        forrigeAndelerForPerson: List<AndelTilkjentYtelse>,
+        nåværendeAndelerForPerson: List<AndelTilkjentYtelse>,
+        endretUtbetalingAndelerForPerson: List<EndretUtbetalingAndel>
     ): List<Søknadsresultat> {
-        val forrigeTidslinje = AndelTilkjentYtelseTidslinje(forrigeAndeler)
-        val nåværendeTidslinje = AndelTilkjentYtelseTidslinje(nåværendeAndeler)
+        val forrigeTidslinje = AndelTilkjentYtelseTidslinje(forrigeAndelerForPerson)
+        val nåværendeTidslinje = AndelTilkjentYtelseTidslinje(nåværendeAndelerForPerson)
+        val endretUtbetalingTidslinje = EndretUtbetalingAndelTidslinje(endretUtbetalingAndelerForPerson)
 
-        val resultatTidslinje = nåværendeTidslinje.kombinerMed(forrigeTidslinje) { nåværende, forrige ->
+        val resultatTidslinje = nåværendeTidslinje.kombinerMed(forrigeTidslinje, endretUtbetalingTidslinje) { nåværende, forrige, endretUtbetalingAndel ->
             val forrigeBeløp = forrige?.kalkulertUtbetalingsbeløp
             val nåværendeBeløp = nåværende?.kalkulertUtbetalingsbeløp
 
@@ -118,10 +125,10 @@ object BehandlingsresultatUtils {
                 nåværendeBeløp == forrigeBeløp || nåværendeBeløp == null -> Søknadsresultat.INGEN_RELEVANTE_ENDRINGER // Ingen endring eller fjernet en andel
                 nåværendeBeløp > 0 -> Søknadsresultat.INNVILGET // Innvilget beløp som er annerledes enn forrige gang
                 nåværendeBeløp == 0 -> {
-                    val endringsperiodeÅrsak = if (nåværende.endreteUtbetalinger.isNotEmpty()) nåværende.endreteUtbetalinger.singleOrNull()?.årsak ?: throw Feil("") else null
+                    val endringsperiodeÅrsak = endretUtbetalingAndel?.årsak
 
                     when {
-                        nåværende.andel.differanseberegnetPeriodebeløp != null -> Søknadsresultat.INNVILGET
+                        nåværende.differanseberegnetPeriodebeløp != null -> Søknadsresultat.INNVILGET
                         endringsperiodeÅrsak == Årsak.DELT_BOSTED -> Søknadsresultat.INNVILGET
                         (endringsperiodeÅrsak == Årsak.ALLEREDE_UTBETALT) ||
                             (endringsperiodeÅrsak == Årsak.ENDRE_MOTTAKER) ||
@@ -161,8 +168,8 @@ object BehandlingsresultatUtils {
 
         val finnesPersonMedEndretKompetanse = allePersonerMedKompetanser.any { aktør ->
             erEndringIKompetanseForPerson(
-                nåværendeKompetanser = nåværendeKompetanser.filter { it.barnAktører.contains(aktør) },
-                forrigeKompetanser = forrigeKompetanser.filter { it.barnAktører.contains(aktør) }
+                nåværendeKompetanserForPerson = nåværendeKompetanser.filter { it.barnAktører.contains(aktør) },
+                forrigeKompetanserForPerson = forrigeKompetanser.filter { it.barnAktører.contains(aktør) }
             )
         }
 
@@ -170,11 +177,11 @@ object BehandlingsresultatUtils {
     }
 
     private fun erEndringIKompetanseForPerson(
-        nåværendeKompetanser: List<Kompetanse>,
-        forrigeKompetanser: List<Kompetanse>
+        nåværendeKompetanserForPerson: List<Kompetanse>,
+        forrigeKompetanserForPerson: List<Kompetanse>
     ): Boolean {
-        val nåværendeTidslinje = nåværendeKompetanser.tilTidslinje()
-        val forrigeTidslinje = forrigeKompetanser.tilTidslinje()
+        val nåværendeTidslinje = nåværendeKompetanserForPerson.tilTidslinje()
+        val forrigeTidslinje = forrigeKompetanserForPerson.tilTidslinje()
 
         val endringerTidslinje = nåværendeTidslinje.kombinerUtenNullMed(forrigeTidslinje) { nåværende, forrige ->
             (
@@ -198,8 +205,8 @@ object BehandlingsresultatUtils {
 
         val finnesPersonerMedEndretEndretUtbetalingAndel = allePersoner.any { aktør ->
             erEndringIEndretUtbetalingAndelPerPerson(
-                nåværendeEndretAndeler = nåværendeEndretAndeler.filter { it.person?.aktør == aktør },
-                forrigeEndretAndeler = forrigeEndretAndeler.filter { it.person?.aktør == aktør }
+                nåværendeEndretAndelerForPerson = nåværendeEndretAndeler.filter { it.person?.aktør == aktør },
+                forrigeEndretAndelerForPerson = forrigeEndretAndeler.filter { it.person?.aktør == aktør }
             )
         }
 
@@ -207,11 +214,11 @@ object BehandlingsresultatUtils {
     }
 
     private fun erEndringIEndretUtbetalingAndelPerPerson(
-        nåværendeEndretAndeler: List<EndretUtbetalingAndel>,
-        forrigeEndretAndeler: List<EndretUtbetalingAndel>
+        nåværendeEndretAndelerForPerson: List<EndretUtbetalingAndel>,
+        forrigeEndretAndelerForPerson: List<EndretUtbetalingAndel>
     ): Boolean {
-        val nåværendeTidslinje = EndretUtbetalingAndelTidslinje(nåværendeEndretAndeler)
-        val forrigeTidslinje = EndretUtbetalingAndelTidslinje(forrigeEndretAndeler)
+        val nåværendeTidslinje = EndretUtbetalingAndelTidslinje(nåværendeEndretAndelerForPerson)
+        val forrigeTidslinje = EndretUtbetalingAndelTidslinje(forrigeEndretAndelerForPerson)
 
         val endringerTidslinje = nåværendeTidslinje.kombinerUtenNullMed(forrigeTidslinje) { nåværende, forrige ->
             (
@@ -280,8 +287,8 @@ object BehandlingsresultatUtils {
     }
 
     internal fun utledEndringsresultat(
-        nåværendeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
-        forrigeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        nåværendeAndeler: List<AndelTilkjentYtelse>,
+        forrigeAndeler: List<AndelTilkjentYtelse>,
         personerFremstiltKravFor: List<Aktør>,
         nåværendeKompetanser: List<Kompetanse>,
         forrigeKompetanser: List<Kompetanse>,
@@ -324,8 +331,8 @@ object BehandlingsresultatUtils {
 
     // NB: For personer fremstilt krav for tar vi ikke hensyn til alle endringer i beløp i denne funksjonen
     internal fun erEndringIBeløp(
-        nåværendeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
-        forrigeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        nåværendeAndeler: List<AndelTilkjentYtelse>,
+        forrigeAndeler: List<AndelTilkjentYtelse>,
         personerFremstiltKravFor: List<Aktør>
     ): Boolean {
         val allePersonerMedAndeler = (nåværendeAndeler.map { it.aktør } + forrigeAndeler.map { it.aktør }).distinct()
@@ -345,8 +352,8 @@ object BehandlingsresultatUtils {
 
     // Kun interessert i endringer i beløp FØR opphørstidspunkt
     private fun erEndringIBeløpForPerson(
-        nåværendeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
-        forrigeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        nåværendeAndeler: List<AndelTilkjentYtelse>,
+        forrigeAndeler: List<AndelTilkjentYtelse>,
         opphørstidspunkt: YearMonth,
         erFremstiltKravForPerson: Boolean
     ): Boolean {
@@ -612,8 +619,8 @@ private fun Set<YtelsePersonResultat>.matcherAltOgHarBådeEndretOgOpphørtResult
 }
 
 fun hentOpphørsresultatPåBehandling(
-    nåværendeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
-    forrigeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
+    nåværendeAndeler: List<AndelTilkjentYtelse>,
+    forrigeAndeler: List<AndelTilkjentYtelse>
 ): Opphørsresultat {
     val nåværendeBehandlingOpphørsdato = nåværendeAndeler.maxOf { it.stønadTom }
     val forrigeBehandlingOpphørsdato = forrigeAndeler.maxOf { it.stønadTom }

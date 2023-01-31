@@ -215,7 +215,7 @@ class SmåbarnstilleggUtilsTest {
 
         val kombinertTidslinje = kombinerAlleTidslinjerTilProsentTidslinje(
             perioderMedFullOvergangsstønadTidslinje = InternPeriodeOvergangsstønadTidslinje(overgangsstønadPerioder),
-            utvidetBarnetrygdTidslinje = AndelTilkjentYtelseTidslinje(utvidetAndeler),
+            utvidetBarnetrygdTidslinje = AndelTilkjentYtelseMedEndreteUtbetalingerTidslinje(utvidetAndeler),
             barnSomGirRettTilSmåbarnstilleggTidslinje = barnsSomGirRettTilSmåbarnstilleggTidslinje
         )
 
@@ -274,7 +274,7 @@ class SmåbarnstilleggUtilsTest {
 
         val kombinertTidslinje = kombinerAlleTidslinjerTilProsentTidslinje(
             perioderMedFullOvergangsstønadTidslinje = InternPeriodeOvergangsstønadTidslinje(overgangsstønadPerioder),
-            utvidetBarnetrygdTidslinje = AndelTilkjentYtelseTidslinje(utvidetAndeler),
+            utvidetBarnetrygdTidslinje = AndelTilkjentYtelseMedEndreteUtbetalingerTidslinje(utvidetAndeler),
             barnSomGirRettTilSmåbarnstilleggTidslinje = barnsSomGirRettTilSmåbarnstilleggTidslinje
         )
 
