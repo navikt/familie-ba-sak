@@ -82,6 +82,20 @@ class OpprettTaskService(
         }
     }
 
+    fun opprettSatsendringTask(fagsakId: Long) {
+        overstyrTaskMedNyCallId(IdUtils.generateId()) {
+            taskRepository.save(
+                Task(
+                    type = SatsendringTask.TASK_STEP_TYPE,
+                    payload = fagsakId.toString(),
+                    properties = Properties().apply {
+                        this["fagsakId"] = fagsakId.toString()
+                    }
+                )
+            )
+        }
+    }
+
     private inline fun <T> overstyrTaskMedNyCallId(callId: String, body: () -> T): T {
         val originalCallId = MDC.get(MDCConstants.MDC_CALL_ID) ?: null
 

@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
-import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -19,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.totaltUtbetalt
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
+import no.nav.familie.ba.sak.util.tilleggOrdinærSatsNesteMånedTilTester
 import no.nav.familie.kontrakter.felles.getDataOrThrow
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -155,14 +155,14 @@ class FødselshendelseFørstegangsbehandlingTest(
 
         val utbetalingsperioder = aktivBehandling.utbetalingsperioder
         val gjeldendeUtbetalingsperiode = utbetalingsperioder.find {
-            it.periodeFom.toYearMonth() >= SatsService.tilleggOrdinærSatsNesteMånedTilTester.gyldigFom.toYearMonth() &&
-                it.periodeFom.toYearMonth() <= SatsService.tilleggOrdinærSatsNesteMånedTilTester.gyldigTom.toYearMonth()
+            it.periodeFom.toYearMonth() >= tilleggOrdinærSatsNesteMånedTilTester().gyldigFom.toYearMonth() &&
+                it.periodeFom.toYearMonth() <= tilleggOrdinærSatsNesteMånedTilTester().gyldigTom.toYearMonth()
         }!!
 
         assertUtbetalingsperiode(
             gjeldendeUtbetalingsperiode,
             2,
-            SatsService.tilleggOrdinærSatsNesteMånedTilTester.beløp * 2
+            tilleggOrdinærSatsNesteMånedTilTester().beløp * 2
         )
     }
 }

@@ -4,7 +4,9 @@ import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import io.mockk.mockkObject
 import io.mockk.slot
+import io.mockk.unmockkObject
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.forrigeMåned
@@ -54,6 +56,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.felles.Ressurs
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -79,6 +82,17 @@ class BeregningServiceTest {
     )
 
     private lateinit var beregningService: BeregningService
+
+    @BeforeEach
+    fun førHverTest() {
+        mockkObject(SatsTidspunkt)
+        every { SatsTidspunkt.senesteSatsTidspunkt } returns LocalDate.of(2022, 12, 31)
+    }
+
+    @AfterEach
+    fun etterHverTest() {
+        unmockkObject(SatsTidspunkt)
+    }
 
     @BeforeEach
     fun setUp() {

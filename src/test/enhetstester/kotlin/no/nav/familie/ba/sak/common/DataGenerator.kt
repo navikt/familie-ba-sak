@@ -274,7 +274,8 @@ fun lagAndelTilkjentYtelseMedEndreteUtbetalinger(
     forrigeperiodeIdOffset: Long? = null,
     tilkjentYtelse: TilkjentYtelse? = null,
     prosent: BigDecimal = BigDecimal(100),
-    endretUtbetalingAndeler: List<EndretUtbetalingAndel> = emptyList()
+    endretUtbetalingAndeler: List<EndretUtbetalingAndel> = emptyList(),
+    differanseberegnetPeriodebeløp: Int? = null
 ): AndelTilkjentYtelseMedEndreteUtbetalinger {
     val aty = AndelTilkjentYtelse(
         aktør = aktør,
@@ -289,7 +290,8 @@ fun lagAndelTilkjentYtelseMedEndreteUtbetalinger(
         forrigePeriodeOffset = forrigeperiodeIdOffset,
         sats = beløp,
         prosent = prosent,
-        endretUtbetalingAndeler = endretUtbetalingAndeler.toMutableList()
+        endretUtbetalingAndeler = endretUtbetalingAndeler.toMutableList(),
+        differanseberegnetPeriodebeløp = differanseberegnetPeriodebeløp
     )
 
     return AndelTilkjentYtelseMedEndreteUtbetalinger(aty)
@@ -1025,7 +1027,8 @@ fun lagVilkårResultat(
     periodeTom: LocalDate? = LocalDate.of(2010, 1, 31),
     begrunnelse: String = "",
     behandlingId: Long = lagBehandling().id,
-    utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering> = emptyList()
+    utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering> = emptyList(),
+    erEksplisittAvslagPåSøknad: Boolean = false
 ) = VilkårResultat(
     personResultat = personResultat,
     vilkårType = vilkårType,
@@ -1034,7 +1037,8 @@ fun lagVilkårResultat(
     periodeTom = periodeTom,
     begrunnelse = begrunnelse,
     behandlingId = behandlingId,
-    utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger
+    utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger,
+    erEksplisittAvslagPåSøknad = erEksplisittAvslagPåSøknad
 )
 
 val guttenBarnesenFødselsdato = LocalDate.now().withDayOfMonth(10).minusYears(6)

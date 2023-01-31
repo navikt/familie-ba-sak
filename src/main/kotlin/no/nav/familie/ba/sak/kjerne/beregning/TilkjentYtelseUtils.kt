@@ -1,12 +1,14 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.Utils.avrundetHeltallAvProsent
 import no.nav.familie.ba.sak.common.erDagenFør
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inkluderer
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
@@ -134,14 +136,16 @@ object TilkjentYtelseUtils {
         personopplysningGrunnlag: PersonopplysningGrunnlag,
         personResultater: Set<PersonResultat>
     ): List<BeregnetAndel> {
-        val tidslinjerMedRettTilProsentPerBarn = personResultater.lagTidslinjerMedRettTilProsentPerBarn(personopplysningGrunnlag)
+        val tidslinjerMedRettTilProsentPerBarn =
+            personResultater.lagTidslinjerMedRettTilProsentPerBarn(personopplysningGrunnlag)
 
         return tidslinjerMedRettTilProsentPerBarn.flatMap { (barn, tidslinjeMedRettTilProsentForBarn) ->
             val satsTidslinje = lagOrdinærTidslinje(barn)
             val satsProsentTidslinje = kombinerProsentOgSatsTidslinjer(tidslinjeMedRettTilProsentForBarn, satsTidslinje)
 
             satsProsentTidslinje.perioder().map {
-                val innholdIPeriode = it.innhold ?: throw Feil("Finner ikke sats og prosent i periode (${it.fraOgMed} - ${it.tilOgMed}) ved generering av andeler tilkjent ytelse")
+                val innholdIPeriode = it.innhold
+                    ?: throw Feil("Finner ikke sats og prosent i periode (${it.fraOgMed} - ${it.tilOgMed}) ved generering av andeler tilkjent ytelse")
                 BeregnetAndel(
                     person = barn,
                     stønadFom = it.fraOgMed.tilYearMonth(),
@@ -204,7 +208,10 @@ object TilkjentYtelseUtils {
         )
     }
 
-    internal fun PersonResultat.tilTidslinjeMedRettTilProsentForPerson(fødselsdato: LocalDate, personType: PersonType): Tidslinje<BigDecimal, Måned> {
+    internal fun PersonResultat.tilTidslinjeMedRettTilProsentForPerson(
+        fødselsdato: LocalDate,
+        personType: PersonType
+    ): Tidslinje<BigDecimal, Måned> {
         val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår(fødselsdato)
 
         return tidslinjer.kombiner { it.mapTilProsentEllerNull(personType) }.slåSammenLike().filtrerIkkeNull()
@@ -212,7 +219,11 @@ object TilkjentYtelseUtils {
 
     internal fun Iterable<VilkårResultat>.mapTilProsentEllerNull(personType: PersonType): BigDecimal? {
         return if (alleVilkårErOppfylt(personType)) {
-            if (any { it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) }) BigDecimal(50) else BigDecimal(100)
+            if (any { it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) }) {
+                BigDecimal(50)
+            } else {
+                BigDecimal(100)
+            }
         } else {
             null
         }
@@ -230,11 +241,11 @@ object TilkjentYtelseUtils {
         )
             .lagUtvidetBarnetrygdAndeler(
                 utvidetVilkår = utvidetVilkår,
-                andelerBarna = andelerTilkjentYtelseBarnaMedEtterbetaling3ÅrEndringer
+                andelerBarna = andelerTilkjentYtelseBarnaMedEtterbetaling3ÅrEndringer.map { it.andel }
             )
 
         return oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
-            andelTilkjentYtelserUtenEndringer = andelerTilkjentYtelseUtvidet.map { it.andel },
+            andelTilkjentYtelserUtenEndringer = andelerTilkjentYtelseUtvidet,
             endretUtbetalingAndeler = endretUtbetalingAndelerSøker
         )
     }
@@ -243,6 +254,19 @@ object TilkjentYtelseUtils {
         vilkårsvurdering.personResultater
             .flatMap { it.vilkårResultater }
             .filter { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD && it.resultat == Resultat.OPPFYLT }
+            .also { utvidetVilkårsresultater -> utvidetVilkårsresultater.forEach { validerUtvidetVilkårsresultat(it) } }
+
+    private fun validerUtvidetVilkårsresultat(vilkårResultat: VilkårResultat) {
+        val fom = vilkårResultat.periodeFom?.toYearMonth()
+        val tom = vilkårResultat.periodeTom?.toYearMonth()
+
+        if (fom == null) {
+            throw Feil("Fom må være satt på søkers periode ved utvidet barnetrygd")
+        }
+        if (fom == tom) {
+            throw FunksjonellFeil("Du kan ikke legge inn fom og tom innenfor samme kalendermåned. Gå til utvidet barnetrygd vilkåret for å endre")
+        }
+    }
 
     fun oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
         andelTilkjentYtelserUtenEndringer: Collection<AndelTilkjentYtelse>,

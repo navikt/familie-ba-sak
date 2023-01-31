@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.beregning.SatsService
+import no.nav.familie.ba.sak.kjerne.beregning.SatsTidspunkt
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
@@ -41,11 +41,11 @@ class BehandlingSatsendringTest(
 
     @Test
     fun `Skal kjøre satsendring på løpende fagsak`() {
-        mockkObject(SatsService)
+        mockkObject(SatsTidspunkt)
         // Grunnen til at denne mockes er egentlig at den indirekte påvirker hva SatsService.hentGyldigSatsFor
         // returnerer. Det vi ønsker er at den sist tillagte satsendringen ikke kommer med slik at selve
         // satsendringen som skal kjøres senere faktisk utgjør en endring (slik at behandlingsresultatet blir ENDRET).
-        every { SatsService.tilleggEndringJanuar2022 } returns YearMonth.of(2020, 9)
+        every { SatsTidspunkt.senesteSatsTidspunkt } returns LocalDate.of(2020, 9, 1)
 
         every { mockLocalDateService.now() } returns LocalDate.now().minusYears(6) andThen LocalDate.now()
 
@@ -105,7 +105,7 @@ class BehandlingSatsendringTest(
         )!!
 
         // Fjerner mocking slik at den siste satsendringen vi fjernet via mocking nå skal komme med.
-        unmockkObject(SatsService)
+        unmockkObject(SatsTidspunkt)
         autovedtakSatsendringService.kjørBehandling(sistIverksatteBehandlingId = behandling.id)
 
         val satsendingBehandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = behandling.fagsak.id)
@@ -118,11 +118,11 @@ class BehandlingSatsendringTest(
 
     @Test
     fun `Skal tilbakestille åpen behandling ved kjøring av satsendring`() {
-        mockkObject(SatsService)
+        mockkObject(SatsTidspunkt)
         // Grunnen til at denne mockes er egentlig at den indirekte påvirker hva SatsService.hentGyldigSatsFor
         // returnerer. Det vi ønsker er at den sist tillagte satsendringen ikke kommer med slik at selve
         // satsendringen som skal kjøres senere faktisk utgjør en endring (slik at behandlingsresultatet blir ENDRET).
-        every { SatsService.tilleggEndringJanuar2022 } returns YearMonth.of(2020, 9)
+        every { SatsTidspunkt.senesteSatsTidspunkt } returns LocalDate.of(2020, 9, 1)
 
         every { mockLocalDateService.now() } returns LocalDate.now().minusYears(6) andThen LocalDate.now()
 
@@ -193,7 +193,7 @@ class BehandlingSatsendringTest(
         assertEquals(StegType.BEHANDLINGSRESULTAT, revurderingEtterVilkårsvurdering.data!!.steg)
 
         // Fjerner mocking slik at den siste satsendringen vi fjernet via mocking nå skal komme med.
-        unmockkObject(SatsService)
+        unmockkObject(SatsTidspunkt)
         autovedtakSatsendringService.kjørBehandling(sistIverksatteBehandlingId = behandling.id)
 
         val åpenBehandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = behandling.fagsak.id)
@@ -203,11 +203,11 @@ class BehandlingSatsendringTest(
 
     @Test
     fun `Skal finne alle behandlinger som påvirkes av satsendring`() {
-        mockkObject(SatsService)
+        mockkObject(SatsTidspunkt)
         // Grunnen til at denne mockes er egentlig at den indirekte påvirker hva SatsService.hentGyldigSatsFor
         // returnerer. Det vi ønsker er at den sist tillagte satsendringen ikke kommer med slik at selve
         // satsendringen som skal kjøres senere faktisk utgjør en endring (slik at behandlingsresultatet blir ENDRET).
-        every { SatsService.tilleggEndringJanuar2022 } returns YearMonth.of(2020, 9)
+        every { SatsTidspunkt.senesteSatsTidspunkt } returns LocalDate.of(2020, 9, 1)
 
         every { mockLocalDateService.now() } returns LocalDate.now().minusYears(6) andThen LocalDate.now()
 
@@ -267,7 +267,7 @@ class BehandlingSatsendringTest(
         )!!
 
         // Fjerner mocking slik at den siste satsendringen vi fjernet via mocking nå skal komme med.
-        unmockkObject(SatsService)
+        unmockkObject(SatsTidspunkt)
         autovedtakSatsendringService.finnBehandlingerForSatsendring(1054, YearMonth.of(2022, 1))
             .filter { it == behandling.id } // kjør kun satsendring for behandlingen vi tester i dette testcaset
             .forEach { autovedtakSatsendringService.kjørBehandling(sistIverksatteBehandlingId = it) }

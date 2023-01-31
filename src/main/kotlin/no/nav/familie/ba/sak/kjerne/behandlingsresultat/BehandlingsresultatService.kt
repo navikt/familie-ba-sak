@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -35,6 +36,26 @@ class BehandlingsresultatService(
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     private val featureToggleService: FeatureToggleService
 ) {
+
+    internal fun finnPersonerFremstiltKravFor(behandling: Behandling, søknadDTO: SøknadDTO?, forrigeBehandling: Behandling?) =
+        when {
+            behandling.opprettetÅrsak == BehandlingÅrsak.SØKNAD -> {
+                // alle barna som er krysset av på søknad
+                val barnFraSøknad = søknadDTO?.barnaMedOpplysninger
+                    ?.filter { it.erFolkeregistrert && it.inkludertISøknaden }
+                    ?.map { personidentService.hentAktør(it.ident) }
+                    ?: emptyList()
+
+                // hvis det søkes om utvidet skal søker med
+                val utvidetBarnetrygdSøker = if (søknadDTO?.underkategori == BehandlingUnderkategoriDTO.UTVIDET) listOf(behandling.fagsak.aktør) else emptyList()
+
+                barnFraSøknad + utvidetBarnetrygdSøker
+            }
+            behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE -> persongrunnlagService.finnNyeBarn(behandling, forrigeBehandling).map { it.aktør }
+            behandling.erManuellMigrering() -> persongrunnlagService.hentAktivThrows(behandling.id).personer.map { it.aktør }
+            else -> emptyList()
+        }
+
     internal fun utledBehandlingsresultat(behandlingId: Long): Behandlingsresultat {
         return Behandlingsresultat.FORTSATT_INNVILGET
     }

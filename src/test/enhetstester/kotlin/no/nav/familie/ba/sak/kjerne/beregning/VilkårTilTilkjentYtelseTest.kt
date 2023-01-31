@@ -1,5 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import io.mockk.every
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.tilfeldigPerson
@@ -18,7 +21,10 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvu
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.ba.sak.util.sisteSmåbarnstilleggSatsTilTester
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvFileSource
 import java.math.BigDecimal
@@ -26,6 +32,17 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 class VilkårTilTilkjentYtelseTest {
+
+    @BeforeEach
+    fun førHverTest() {
+        mockkObject(SatsTidspunkt)
+        every { SatsTidspunkt.senesteSatsTidspunkt } returns LocalDate.of(2022, 12, 31)
+    }
+
+    @AfterEach
+    fun etterHverTest() {
+        unmockkObject(SatsTidspunkt)
+    }
 
     @ParameterizedTest
     @CsvFileSource(
@@ -120,7 +137,7 @@ class VilkårTilTilkjentYtelseTest {
                 .medAndelTilkjentYtelse(søker, søkerAndel1Beløp, søkerAndel1Periode, søkerAndel1Type)
                 .medAndelTilkjentYtelse(
                     søker,
-                    SatsService.sisteSmåbarnstilleggSatsTilTester.beløp,
+                    sisteSmåbarnstilleggSatsTilTester(),
                     småbarnstilleggPeriode,
                     YtelseType.SMÅBARNSTILLEGG.name
                 )
