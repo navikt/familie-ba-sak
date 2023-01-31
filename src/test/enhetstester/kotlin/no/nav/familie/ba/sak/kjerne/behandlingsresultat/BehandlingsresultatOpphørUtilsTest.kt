@@ -5,7 +5,6 @@ import io.mockk.every
 import io.mockk.mockkStatic
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagPerson
-import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatOpphørUtils.hentOpphørsresultatPåBehandling
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -18,14 +17,11 @@ class BehandlingsresultatOpphørUtilsTest {
 
     val søker = tilfeldigPerson()
 
-    private val barn1Aktør = randomAktør()
-
     val jan22 = YearMonth.of(2022, 1)
     val feb22 = YearMonth.of(2022, 2)
     val mar22 = YearMonth.of(2022, 3)
     val mai22 = YearMonth.of(2022, 5)
     val aug22 = YearMonth.of(2022, 8)
-    val des22 = YearMonth.of(2022, 12)
 
     @BeforeEach
     fun reset() {
