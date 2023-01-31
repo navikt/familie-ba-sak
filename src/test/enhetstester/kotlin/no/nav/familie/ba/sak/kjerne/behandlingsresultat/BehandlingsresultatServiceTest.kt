@@ -231,43 +231,6 @@ internal class BehandlingsresultatServiceTest {
     }
 
     @Test
-    fun `utvida barnetrygd før, men alat opphørt nå gir behandlingsresultat innvilget`() {
-        val søkerAktør = Aktør("1234567890123")
-        val ytelsePersonSøker = YtelsePerson(
-            søkerAktør,
-            YtelseType.UTVIDET_BARNETRYGD,
-            listOf(KravOpprinnelse.INNEVÆRENDE),
-            setOf(YtelsePersonResultat.OPPHØRT),
-            YearMonth.of(2022, Month.OCTOBER)
-        )
-        val ytelsePersonBarn = YtelsePerson(
-            Aktør("1234567890124"),
-            YtelseType.ORDINÆR_BARNETRYGD,
-            listOf(KravOpprinnelse.INNEVÆRENDE),
-            setOf(YtelsePersonResultat.OPPHØRT),
-            YearMonth.of(2022, Month.OCTOBER)
-        )
-        val forrigeAndelMedEndring = AndelTilkjentYtelseMedEndreteUtbetalinger(
-            lagAndelTilkjentYtelse(
-                fom = YearMonth.of(2021, Month.DECEMBER),
-                tom = YearMonth.of(2037, Month.MAY),
-                ytelseType = YtelseType.UTVIDET_BARNETRYGD,
-                aktør = søkerAktør,
-                beløp = 1054,
-                prosent = BigDecimal(50)
-            )
-        )
-
-        val behandlingsresultat = behandlingsresultatService.utledBehandlingsresultat(
-            ytelsePersonerMedResultat = listOf(ytelsePersonSøker, ytelsePersonBarn),
-            andelerMedEndringer = listOf(),
-            forrigeAndelerMedEndringer = listOf(forrigeAndelMedEndring),
-            behandling = lagBehandling()
-        )
-        assertThat(behandlingsresultat, Is(Behandlingsresultat.OPPHØRT))
-    }
-
-    @Test
     fun `finnPersonerFremstiltKravFor skal returnere tom liste dersom behandlingen ikke er søknad, fødselshendelse eller manuell migrering`() {
         val behandling = lagBehandling(årsak = BehandlingÅrsak.DØDSFALL_BRUKER)
 

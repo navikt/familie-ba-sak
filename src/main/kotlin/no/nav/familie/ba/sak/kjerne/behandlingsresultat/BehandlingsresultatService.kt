@@ -57,17 +57,6 @@ class BehandlingsresultatService(
             else -> emptyList()
         }
 
-    private fun validerAtBarePersonerFramstiltKravForHarFåttAvslag(
-        personerDetErFramstiltKravFor: List<Aktør>,
-        vilkårsvurdering: Vilkårsvurdering
-    ) {
-        val personerSomHarFåttAvslag = vilkårsvurdering.personResultater.filter { it.harEksplisittAvslag() }.map { it.aktør }
-
-        if (!personerDetErFramstiltKravFor.containsAll(personerSomHarFåttAvslag)) {
-            throw Feil("Det eksisterer personer som har fått avslag men som ikke har blitt søkt for i søknaden!")
-        }
-    }
-
     internal fun utledBehandlingsresultat(behandlingId: Long): Behandlingsresultat {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
         val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling)

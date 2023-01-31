@@ -30,6 +30,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjær
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilTidslinje
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
@@ -101,6 +102,18 @@ object BehandlingsresultatUtils {
         }
 
         return alleSøknadsresultater.distinct()
+    }
+
+
+    private fun validerAtBarePersonerFramstiltKravForHarFåttAvslag(
+        personerDetErFramstiltKravFor: List<Aktør>,
+        vilkårsvurdering: Vilkårsvurdering
+    ) {
+        val personerSomHarFåttAvslag = vilkårsvurdering.personResultater.filter { it.harEksplisittAvslag() }.map { it.aktør }
+
+        if (!personerDetErFramstiltKravFor.containsAll(personerSomHarFåttAvslag)) {
+            throw Feil("Det eksisterer personer som har fått avslag men som ikke har blitt søkt for i søknaden!")
+        }
     }
 
     private fun utledSøknadResultatFraAndelerTilkjentYtelsePerPerson(
