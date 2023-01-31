@@ -44,7 +44,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.UTVIDET_BAR
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class BeregnAndelerTilkjentYtelseForBarnaTest {
+internal class BeregnAndelerTilkjentYtelseMedGjeldendeSatserTest {
 
     @Test
     fun `tom vilkårsvurdering gir ingen utbetalinger`() {
