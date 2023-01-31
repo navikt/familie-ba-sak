@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
@@ -29,6 +30,7 @@ import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.containsInAnyOrder
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import java.math.BigDecimal
@@ -271,6 +273,40 @@ internal class BehandlingsresultatServiceTest {
             )
 
         assertThat(personerFramstiltForKrav.single(), Is(behandling.fagsak.aktør))
+    }
+
+    @Test
+    fun `finnPersonerFremstiltKravFor skal returnere aktør som person framstilt krav for dersom det er søkt for utvidet barnetrygd og barn som er krysset for`() {
+        val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)
+        val barn = lagPerson(type = PersonType.BARN)
+
+        val barnSomIkkeErKryssetAvFor = BarnMedOpplysninger(
+            ident = barn.aktør.aktivFødselsnummer(),
+            navn = "barn1",
+            inkludertISøknaden = true,
+            erFolkeregistrert = true
+        )
+
+        val søknadDto = SøknadDTO(
+            underkategori = BehandlingUnderkategoriDTO.UTVIDET,
+            barnaMedOpplysninger = listOf(barnSomIkkeErKryssetAvFor),
+            søkerMedOpplysninger = mockk(),
+            endringAvOpplysningerBegrunnelse = ""
+        )
+
+        every { vilkårsvurderingService.hentAktivForBehandlingThrows(any()) } returns Vilkårsvurdering(behandling = behandling)
+        every { personidentService.hentAktør(barn.aktør.aktivFødselsnummer()) } returns barn.aktør
+
+
+        val personerFramstiltForKrav =
+            behandlingsresultatService.finnPersonerFremstiltKravFor(
+                behandling = behandling,
+                søknadDTO = søknadDto,
+                forrigeBehandling = null
+            )
+
+        assertThat(personerFramstiltForKrav.size, Is(2))
+        assertThat(personerFramstiltForKrav, containsInAnyOrder(behandling.fagsak.aktør, barn.aktør))
     }
 
     @Test
