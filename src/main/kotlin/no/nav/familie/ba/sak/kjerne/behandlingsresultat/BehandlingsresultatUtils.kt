@@ -304,8 +304,8 @@ object BehandlingsresultatUtils {
         personerFremstiltKravFor: List<Aktør>,
         nåværendeKompetanser: List<Kompetanse>,
         forrigeKompetanser: List<Kompetanse>,
-        nåværendePersonResultat: List<PersonResultat>,
-        forrigePersonResultat: List<PersonResultat>,
+        nåværendePersonResultat: Set<PersonResultat>,
+        forrigePersonResultat: Set<PersonResultat>,
         nåværendeEndretAndeler: List<EndretUtbetalingAndel>,
         forrigeEndretAndeler: List<EndretUtbetalingAndel>
     ): Endringsresultat {
@@ -396,6 +396,22 @@ object BehandlingsresultatUtils {
 
     private fun Tidslinje<Boolean, Måned>.fjernPerioderEtterOpphørsdato(opphørstidspunkt: YearMonth) =
         this.beskjær(fraOgMed = TIDENES_MORGEN.tilMånedTidspunkt(), tilOgMed = opphørstidspunkt.tilTidspunkt())
+
+    internal fun hentOpphørsresultatPåBehandling(
+        nåværendeAndeler: List<AndelTilkjentYtelse>,
+        forrigeAndeler: List<AndelTilkjentYtelse>
+    ): Opphørsresultat {
+        val nåværendeBehandlingOpphørsdato = nåværendeAndeler.maxOf { it.stønadTom }
+        val forrigeBehandlingOpphørsdato = forrigeAndeler.maxOf { it.stønadTom }
+        val dagensDato = YearMonth.now()
+
+        return when {
+            // Rekkefølgen av sjekkene er viktig for å komme fram til riktig opphørsresultat.
+            nåværendeBehandlingOpphørsdato > dagensDato -> Opphørsresultat.IKKE_OPPHØRT
+            forrigeBehandlingOpphørsdato > dagensDato || forrigeBehandlingOpphørsdato > nåværendeBehandlingOpphørsdato -> Opphørsresultat.OPPHØRT
+            else -> Opphørsresultat.FORTSATT_OPPHØRT
+        }
+    }
 
     internal fun utledBehandlingsresultatDataForPerson(
         person: Person,
@@ -630,31 +646,10 @@ private fun Set<YtelsePersonResultat>.matcherAltOgHarBådeEndretOgOpphørtResult
     return if (opphørtResultat.isEmpty()) false else this == setOf(endretResultat) + opphørtResultat + andreElementer
 }
 
-fun hentOpphørsresultatPåBehandling(
-    nåværendeAndeler: List<AndelTilkjentYtelse>,
-    forrigeAndeler: List<AndelTilkjentYtelse>
-): Opphørsresultat {
-    val nåværendeBehandlingOpphørsdato = nåværendeAndeler.maxOf { it.stønadTom }
-    val forrigeBehandlingOpphørsdato = forrigeAndeler.maxOf { it.stønadTom }
-    val dagensDato = YearMonth.now()
-
-    return when {
-        // Rekkefølgen av sjekkene er viktig for å komme fram til riktig opphørsresultat.
-        nåværendeBehandlingOpphørsdato > dagensDato -> Opphørsresultat.IKKE_OPPHØRT
-        forrigeBehandlingOpphørsdato > dagensDato || forrigeBehandlingOpphørsdato > nåværendeBehandlingOpphørsdato -> Opphørsresultat.OPPHØRT
-        else -> Opphørsresultat.FORTSATT_OPPHØRT
-    }
-}
-
-enum class Opphørsresultat {
-    OPPHØRT,
-    FORTSATT_OPPHØRT,
-    IKKE_OPPHØRT
-}
 
 fun erEndringIVilkårvurdering(
-    nåværendePersonResultat: List<PersonResultat>,
-    forrigePersonResultat: List<PersonResultat>
+    nåværendePersonResultat: Set<PersonResultat>,
+    forrigePersonResultat: Set<PersonResultat>
 ): Boolean {
     val allePersonerMedPersonResultat =
         (nåværendePersonResultat.map { it.aktør } + forrigePersonResultat.map { it.aktør }).distinct()

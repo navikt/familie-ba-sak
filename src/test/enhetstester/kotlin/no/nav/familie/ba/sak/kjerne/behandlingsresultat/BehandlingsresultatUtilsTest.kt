@@ -659,9 +659,9 @@ class BehandlingsresultatUtilsTest {
             )
         )
 
-        val opphørsresultat = hentOpphørsresultatPåBehandling(nåværendeAndeler, forrigeAndeler)
+        val opphørsresultat = BehandlingsresultatUtils.hentOpphørsresultatPåBehandling(nåværendeAndeler, forrigeAndeler)
 
-        assertEquals(Opphørsresultat.IKKE_OPPHØRT, opphørsresultat)
+        assertEquals(BehandlingsresultatUtils.Opphørsresultat.IKKE_OPPHØRT, opphørsresultat)
     }
 
     @Test
@@ -702,9 +702,9 @@ class BehandlingsresultatUtilsTest {
             )
         )
 
-        val opphørsresultat = hentOpphørsresultatPåBehandling(nåværendeAndeler, forrigeAndeler)
+        val opphørsresultat = BehandlingsresultatUtils.hentOpphørsresultatPåBehandling(nåværendeAndeler, forrigeAndeler)
 
-        assertEquals(Opphørsresultat.OPPHØRT, opphørsresultat)
+        assertEquals(BehandlingsresultatUtils.Opphørsresultat.OPPHØRT, opphørsresultat)
     }
 
     @Test
@@ -746,9 +746,9 @@ class BehandlingsresultatUtilsTest {
             )
         )
 
-        val opphørsresultat = hentOpphørsresultatPåBehandling(nåværendeAndeler, forrigeAndeler)
+        val opphørsresultat = BehandlingsresultatUtils.hentOpphørsresultatPåBehandling(nåværendeAndeler, forrigeAndeler)
 
-        assertEquals(Opphørsresultat.OPPHØRT, opphørsresultat)
+        assertEquals(BehandlingsresultatUtils.Opphørsresultat.OPPHØRT, opphørsresultat)
     }
 
     @Test
@@ -790,9 +790,9 @@ class BehandlingsresultatUtilsTest {
             )
         )
 
-        val opphørsresultat = hentOpphørsresultatPåBehandling(nåværendeAndeler, forrigeAndeler)
+        val opphørsresultat = BehandlingsresultatUtils.hentOpphørsresultatPåBehandling(nåværendeAndeler, forrigeAndeler)
 
-        assertEquals(Opphørsresultat.FORTSATT_OPPHØRT, opphørsresultat)
+        assertEquals(BehandlingsresultatUtils.Opphørsresultat.FORTSATT_OPPHØRT, opphørsresultat)
     }
 
     @Test
@@ -1590,8 +1590,8 @@ class BehandlingsresultatUtilsTest {
             personerFremstiltKravFor = emptyList(),
             nåværendeKompetanser = emptyList(),
             forrigeKompetanser = emptyList(),
-            nåværendePersonResultat = emptyList(),
-            forrigePersonResultat = emptyList(),
+            nåværendePersonResultat = emptySet(),
+            forrigePersonResultat = emptySet(),
             nåværendeEndretAndeler = emptyList(),
             forrigeEndretAndeler = emptyList()
         )
@@ -1615,8 +1615,8 @@ class BehandlingsresultatUtilsTest {
             personerFremstiltKravFor = emptyList(),
             forrigeKompetanser = emptyList(),
             nåværendeKompetanser = emptyList(),
-            nåværendePersonResultat = emptyList(),
-            forrigePersonResultat = emptyList(),
+            nåværendePersonResultat = emptySet(),
+            forrigePersonResultat = emptySet(),
             nåværendeEndretAndeler = emptyList(),
             forrigeEndretAndeler = emptyList()
         )
@@ -1681,8 +1681,8 @@ class BehandlingsresultatUtilsTest {
             personerFremstiltKravFor = emptyList(),
             forrigeKompetanser = emptyList(),
             nåværendeKompetanser = emptyList(),
-            forrigePersonResultat = listOf(forrigePersonResultat),
-            nåværendePersonResultat = listOf(nåværendePersonResultat),
+            forrigePersonResultat = setOf(forrigePersonResultat),
+            nåværendePersonResultat = setOf(nåværendePersonResultat),
             nåværendeEndretAndeler = emptyList(),
             forrigeEndretAndeler = emptyList()
         )
@@ -1714,8 +1714,8 @@ class BehandlingsresultatUtilsTest {
             personerFremstiltKravFor = emptyList(),
             forrigeKompetanser = listOf(forrigeKompetanse),
             nåværendeKompetanser = listOf(forrigeKompetanse.copy(søkersAktivitet = SøkersAktivitet.ARBEIDER_PÅ_NORSK_SOKKEL).apply { behandlingId = nåværendeBehandling.id }),
-            nåværendePersonResultat = emptyList(),
-            forrigePersonResultat = emptyList(),
+            nåværendePersonResultat = emptySet(),
+            forrigePersonResultat = emptySet(),
             nåværendeEndretAndeler = emptyList(),
             forrigeEndretAndeler = emptyList()
         )
@@ -1741,8 +1741,8 @@ class BehandlingsresultatUtilsTest {
             personerFremstiltKravFor = emptyList(),
             forrigeKompetanser = emptyList(),
             nåværendeKompetanser = emptyList(),
-            nåværendePersonResultat = emptyList(),
-            forrigePersonResultat = emptyList(),
+            nåværendePersonResultat = emptySet(),
+            forrigePersonResultat = emptySet(),
             forrigeEndretAndeler = listOf(forrigeEndretAndel),
             nåværendeEndretAndeler = listOf(forrigeEndretAndel.copy(årsak = Årsak.ALLEREDE_UTBETALT))
         )
