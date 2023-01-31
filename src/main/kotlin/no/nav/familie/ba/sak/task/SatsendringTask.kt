@@ -21,7 +21,9 @@ class SatsendringTask(
     override fun doTask(task: Task) {
         val dto = objectMapper.readValue(task.payload, SatsendringTaskDto::class.java)
 
-        autovedtakSatsendringService.kjørBehandling(dto)
+        val resultat = autovedtakSatsendringService.kjørBehandling(dto)
+
+        task.metadata.put("resultat", resultat)
     }
 
     companion object {
