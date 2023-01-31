@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
+import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import java.time.YearMonth
 
@@ -21,6 +22,8 @@ object BehandlingsresultatOpphørUtils {
 
         return when {
             // Rekkefølgen av sjekkene er viktig for å komme fram til riktig opphørsresultat.
+            nåværendeBehandlingOpphørsdato == null -> Opphørsresultat.IKKE_OPPHØRT // Både forrige og nåværende behandling har ingen andeler
+            nåværendeAndeler.isEmpty() -> Opphørsresultat.OPPHØRT // Alle andeler fra forrige behandling er fjernet
             nåværendeBehandlingOpphørsdato > dagensDato -> Opphørsresultat.IKKE_OPPHØRT
             forrigeBehandlingOpphørsdato > dagensDato || forrigeBehandlingOpphørsdato > nåværendeBehandlingOpphørsdato -> Opphørsresultat.OPPHØRT
             else -> Opphørsresultat.FORTSATT_OPPHØRT
