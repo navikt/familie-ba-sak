@@ -619,8 +619,8 @@ private fun Set<YtelsePersonResultat>.matcherAltOgHarBådeEndretOgOpphørtResult
 }
 
 fun hentOpphørsresultatPåBehandling(
-    nåværendeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
-    forrigeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
+    nåværendeAndeler: List<AndelTilkjentYtelse>,
+    forrigeAndeler: List<AndelTilkjentYtelse>
 ): Opphørsresultat {
     val nåværendeBehandlingOpphørsdato = nåværendeAndeler.maxOf { it.stønadTom }
     val forrigeBehandlingOpphørsdato = forrigeAndeler.maxOf { it.stønadTom }
