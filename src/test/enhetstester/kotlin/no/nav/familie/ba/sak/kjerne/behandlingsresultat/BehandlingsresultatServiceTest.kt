@@ -6,12 +6,9 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPerson
-import no.nav.familie.ba.sak.common.lagVilkårResultat
-import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
@@ -30,11 +27,9 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import java.math.BigDecimal
 import java.time.Month
@@ -346,7 +341,6 @@ internal class BehandlingsresultatServiceTest {
         )
 
         every { personidentService.hentAktør(barn1Fnr) } returns mocketAktør
-        every { vilkårsvurderingService.hentAktivForBehandlingThrows(any()) } returns Vilkårsvurdering(behandling = behandling)
 
         val personerFramstiltForKrav =
             behandlingsresultatService.finnPersonerFremstiltKravFor(
@@ -358,59 +352,6 @@ internal class BehandlingsresultatServiceTest {
         assertThat(personerFramstiltForKrav.single(), Is(mocketAktør))
 
         verify(exactly = 1) { personidentService.hentAktør(barn1Fnr) }
-    }
-
-    @Test
-    fun `finnPersonerFremstiltKravFor skal kaste feil dersom det eksisterer avslag på personer det ikke er framstilt krav for`() {
-        val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)
-        val barn1Fnr = randomFnr()
-        val barn1Aktør = randomAktør(barn1Fnr)
-
-        val barnSomIkkeErKryssetAvFor = BarnMedOpplysninger(
-            ident = barn1Fnr,
-            navn = "barn1",
-            inkludertISøknaden = false,
-            erFolkeregistrert = true
-        )
-
-        val søknadDto = SøknadDTO(
-            underkategori = BehandlingUnderkategoriDTO.UTVIDET,
-            barnaMedOpplysninger = listOf(
-                barnSomIkkeErKryssetAvFor
-            ),
-            søkerMedOpplysninger = mockk(),
-            endringAvOpplysningerBegrunnelse = ""
-        )
-
-        val vilkårsvurdering = Vilkårsvurdering(
-            behandling = behandling,
-            personResultater = setOf(
-                PersonResultat(
-                    vilkårsvurdering = mockk(),
-                    aktør = barn1Aktør,
-                    vilkårResultater = mutableSetOf(
-                        lagVilkårResultat(
-                            erEksplisittAvslagPåSøknad = true
-                        )
-                    )
-
-                )
-            )
-        )
-
-        every { vilkårsvurderingService.hentAktivForBehandlingThrows(any()) } returns vilkårsvurdering
-
-        val feil = assertThrows<Feil> {
-            behandlingsresultatService.finnPersonerFremstiltKravFor(
-                behandling = behandling,
-                søknadDTO = søknadDto,
-                forrigeBehandling = null
-            )
-        }
-
-        assertThat(feil.message, Is("Det eksisterer personer som har fått avslag men som ikke har blitt søkt for i søknaden!"))
-
-        verify(exactly = 1) { vilkårsvurderingService.hentAktivForBehandlingThrows(any()) }
     }
 
     @Test

@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -49,11 +50,7 @@ class BehandlingsresultatService(
                 // hvis det søkes om utvidet skal søker med
                 val utvidetBarnetrygdSøker = if (søknadDTO?.underkategori == BehandlingUnderkategoriDTO.UTVIDET) listOf(behandling.fagsak.aktør) else emptyList()
 
-                val personerDetErFramstiltKravFor = barnFraSøknad + utvidetBarnetrygdSøker
-
-                validerAtBarePersonerFramstiltKravForHarFåttAvslag(behandling, personerDetErFramstiltKravFor)
-
-                personerDetErFramstiltKravFor
+                barnFraSøknad + utvidetBarnetrygdSøker
             }
             behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE -> persongrunnlagService.finnNyeBarn(behandling, forrigeBehandling).map { it.aktør }
             behandling.erManuellMigrering() -> persongrunnlagService.hentAktivThrows(behandling.id).personer.map { it.aktør }
@@ -61,12 +58,10 @@ class BehandlingsresultatService(
         }
 
     private fun validerAtBarePersonerFramstiltKravForHarFåttAvslag(
-        behandling: Behandling,
-        personerDetErFramstiltKravFor: List<Aktør>
+        personerDetErFramstiltKravFor: List<Aktør>,
+        vilkårsvurdering: Vilkårsvurdering
     ) {
-        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId = behandling.id)
-        val personerSomHarFåttAvslag =
-            vilkårsvurdering.personResultater.filter { it.harEksplisittAvslag() }.map { it.aktør }
+        val personerSomHarFåttAvslag = vilkårsvurdering.personResultater.filter { it.harEksplisittAvslag() }.map { it.aktør }
 
         if (!personerDetErFramstiltKravFor.containsAll(personerSomHarFåttAvslag)) {
             throw Feil("Det eksisterer personer som har fått avslag men som ikke har blitt søkt for i søknaden!")
