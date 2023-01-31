@@ -336,8 +336,8 @@ class BehandlingsresultatSøknadUtilsTest {
     fun `Kombiner resultater - skal returnere FORTSATT_INNVILGET hvis det er søknad og ingen relevante endringer, og ingen opphør`() {
         val behandlingsresultat = BehandlingsresultatUtils.kombinerResultaterTilBehandlingsresultat(
             Søknadsresultat.INGEN_RELEVANTE_ENDRINGER,
-            BehandlingsresultatUtils.Endringsresultat.INGEN_ENDRING,
-            BehandlingsresultatUtils.Opphørsresultat.IKKE_OPPHØRT
+            Endringsresultat.INGEN_ENDRING,
+            Opphørsresultat.IKKE_OPPHØRT
         )
 
         assertEquals(Behandlingsresultat.FORTSATT_INNVILGET, behandlingsresultat)
