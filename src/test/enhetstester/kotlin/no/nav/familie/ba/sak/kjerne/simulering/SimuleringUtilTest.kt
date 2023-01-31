@@ -555,7 +555,6 @@ class SimuleringUtilTest {
         val simuleringsperioder = vedtakSimuleringMottakereTilSimuleringPerioder(vedtakSimuleringMottakere, true)
 
         simuleringsperioder
-            .dropLast(1) // Siste måned er ikke utbetalt enda
             .forEach {
                 assertThat(it.korrigertResultat.abs()).isLessThanOrEqualTo(BigDecimal.ONE)
             }
