@@ -114,7 +114,7 @@ class BehandlingsresultatService(
         }
 
         // 3 OPPHØR
-        val opphørsresultat = BehandlingsresultatUtils.hentOpphørsresultatPåBehandling(
+        val opphørsresultat = BehandlingsresultatOpphørUtils.hentOpphørsresultatPåBehandling(
             nåværendeAndeler = andelerTilkjentYtelse,
             forrigeAndeler = forrigeAndelerTilkjentYtelse
         )

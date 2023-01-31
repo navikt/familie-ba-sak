@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -17,7 +16,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.fpsak.tidsserie.StandardCombinators
-import java.time.YearMonth
 
 object BehandlingsresultatUtils {
     private fun validerAtBarePersonerFramstiltKravForHarFåttAvslag(
@@ -29,12 +27,6 @@ object BehandlingsresultatUtils {
         if (!personerDetErFramstiltKravFor.containsAll(personerSomHarFåttAvslag)) {
             throw Feil("Det eksisterer personer som har fått avslag men som ikke har blitt søkt for i søknaden!")
         }
-    }
-
-    internal enum class Opphørsresultat {
-        OPPHØRT,
-        FORTSATT_OPPHØRT,
-        IKKE_OPPHØRT
     }
 
     internal fun kombinerResultaterTilBehandlingsresultat(
@@ -91,22 +83,6 @@ object BehandlingsresultatUtils {
             frontendFeilmelding = "Behandlingsresultatet du har fått på behandlingen er ikke støttet i løsningen enda. Ta kontakt med Team familie om du er uenig i resultatet.",
             message = "Kombiansjonen av behandlingsresultatene $behandlingsresultater er ikke støttet i løsningen."
         )
-
-    internal fun hentOpphørsresultatPåBehandling(
-        nåværendeAndeler: List<AndelTilkjentYtelse>,
-        forrigeAndeler: List<AndelTilkjentYtelse>
-    ): Opphørsresultat {
-        val nåværendeBehandlingOpphørsdato = nåværendeAndeler.maxOf { it.stønadTom }
-        val forrigeBehandlingOpphørsdato = forrigeAndeler.maxOf { it.stønadTom }
-        val dagensDato = YearMonth.now()
-
-        return when {
-            // Rekkefølgen av sjekkene er viktig for å komme fram til riktig opphørsresultat.
-            nåværendeBehandlingOpphørsdato > dagensDato -> Opphørsresultat.IKKE_OPPHØRT
-            forrigeBehandlingOpphørsdato > dagensDato || forrigeBehandlingOpphørsdato > nåværendeBehandlingOpphørsdato -> Opphørsresultat.OPPHØRT
-            else -> Opphørsresultat.FORTSATT_OPPHØRT
-        }
-    }
 
     internal fun utledBehandlingsresultatDataForPerson(
         person: Person,
