@@ -1,5 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import io.mockk.every
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPerson
@@ -8,7 +11,9 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstøn
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -24,6 +29,17 @@ class SmåbarnstilleggBarnetrygdGeneratorTest {
     val behandling = lagBehandling()
     val tilkjentYtelse =
         TilkjentYtelse(behandling = behandling, opprettetDato = LocalDate.now(), endretDato = LocalDate.now())
+
+    @BeforeEach
+    fun førHverTest() {
+        mockkObject(SatsTidspunkt)
+        every { SatsTidspunkt.senesteSatsTidspunkt } returns LocalDate.of(2022, 12, 31)
+    }
+
+    @AfterEach
+    fun etterHverTest() {
+        unmockkObject(SatsTidspunkt)
+    }
 
     @Test
     fun `Skal kun få småbarnstillegg når alle tre krav er oppfylt i samme periode`() {
