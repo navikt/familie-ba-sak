@@ -1,8 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.Utils.avrundetHeltallAvProsent
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønadTidslinje
@@ -12,8 +11,8 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
 import java.time.LocalDate
 
 data class SmåbarnstilleggBarnetrygdGenerator(
@@ -36,7 +35,7 @@ data class SmåbarnstilleggBarnetrygdGenerator(
         val perioderMedFullOvergangsstønadTidslinje =
             InternPeriodeOvergangsstønadTidslinje(perioderMedFullOvergangsstønad)
 
-        val utvidetBarnetrygdTidslinje = AndelTilkjentYtelseTidslinje(andelerTilkjentYtelse = utvidetAndeler)
+        val utvidetBarnetrygdTidslinje = AndelTilkjentYtelseMedEndreteUtbetalingerTidslinje(andelerTilkjentYtelse = utvidetAndeler)
 
         val barnSomGirRettTilSmåbarnstilleggTidslinje = lagTidslinjeForPerioderMedBarnSomGirRettTilSmåbarnstillegg(
             barnasAndeler = barnasAndeler,
@@ -57,35 +56,21 @@ data class SmåbarnstilleggBarnetrygdGenerator(
     private fun Tidslinje<SmåbarnstilleggPeriode, Måned>.lagSmåbarnstilleggAndeler(
         søkerAktør: Aktør
     ): List<AndelTilkjentYtelseMedEndreteUtbetalinger> {
-        return this.perioder().map {
-            val stønadFom = it.fraOgMed.tilYearMonth()
-            val stønadTom = it.tilOgMed.tilYearMonth()
+        return this.kombinerUtenNullMed(satstypeTidslinje(SatsType.SMA)) { småbarnstilleggPeriode, sats ->
+            val prosentIPeriode = småbarnstilleggPeriode.prosent
+            val beløpIPeriode = sats.avrundetHeltallAvProsent(prosent = prosentIPeriode)
 
-            val ordinærSatsForPeriode = SatsService.hentGyldigSatsFor(
-                satstype = SatsType.SMA,
-                stønadFraOgMed = stønadFom,
-                stønadTilOgMed = stønadTom
-            ).singleOrNull()?.sats
-                ?: throw Feil("Skal finnes én ordinær sats for gitt segment oppdelt basert på andeler")
-
-            val prosentIPeriode = it.innhold?.prosent ?: throw Feil("Skal finnes prosent for gitt periode")
-
-            val beløpIPeriode = ordinærSatsForPeriode.avrundetHeltallAvProsent(prosent = prosentIPeriode)
-
-            val andelTilkjentYtelse = AndelTilkjentYtelse(
-                behandlingId = behandlingId,
-                tilkjentYtelse = tilkjentYtelse,
+            AndelTilkjentYtelseForTidslinje(
                 aktør = søkerAktør,
-                stønadFom = stønadFom,
-                stønadTom = stønadTom,
-                kalkulertUtbetalingsbeløp = beløpIPeriode,
-                nasjonaltPeriodebeløp = beløpIPeriode,
-                type = YtelseType.SMÅBARNSTILLEGG,
-                sats = ordinærSatsForPeriode,
+                // Tar vare på overgangsstøandperiodene
+                stønadFom = småbarnstilleggPeriode.overgangsstønadPeriode.fomDato.toYearMonth(),
+                stønadTom = småbarnstilleggPeriode.overgangsstønadPeriode.tomDato.toYearMonth(),
+                beløp = beløpIPeriode,
+                ytelseType = YtelseType.SMÅBARNSTILLEGG,
+                sats = sats,
                 prosent = prosentIPeriode
             )
-
-            AndelTilkjentYtelseMedEndreteUtbetalinger.utenEndringer(andelTilkjentYtelse)
-        }
+        }.tilAndelerTilkjentYtelse(tilkjentYtelse)
+            .map { AndelTilkjentYtelseMedEndreteUtbetalinger.utenEndringer(it) }
     }
 }

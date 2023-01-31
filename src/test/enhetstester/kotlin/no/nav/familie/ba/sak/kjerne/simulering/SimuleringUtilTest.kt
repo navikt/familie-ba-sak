@@ -53,8 +53,7 @@ class SimuleringUtilTest {
         betalingType: BetalingType = if (beløp >= 0) BetalingType.DEBIT else BetalingType.KREDIT,
         posteringType: PosteringType = PosteringType.YTELSE,
         forfallsdato: LocalDate = LocalDate.now().minusMonths(1),
-        utenInntrekk: Boolean = false,
-        erFeilkonto: Boolean? = null
+        utenInntrekk: Boolean = false
     ) = ØkonomiSimuleringPostering(
         økonomiSimuleringMottaker = økonomiSimuleringMottaker,
         fagOmrådeKode = fagOmrådeKode,
@@ -555,7 +554,6 @@ class SimuleringUtilTest {
         val simuleringsperioder = vedtakSimuleringMottakereTilSimuleringPerioder(vedtakSimuleringMottakere, true)
 
         simuleringsperioder
-            .dropLast(1) // Siste måned er ikke utbetalt enda
             .forEach {
                 assertThat(it.korrigertResultat.abs()).isLessThanOrEqualTo(BigDecimal.ONE)
             }
@@ -588,14 +586,12 @@ class SimuleringUtilTest {
             mockVedtakSimuleringPostering(
                 beløp = 46,
                 posteringType = PosteringType.FEILUTBETALING,
-                fagOmrådeKode = FagOmrådeKode.BARNETRYGD_INFOTRYGD,
-                erFeilkonto = false
+                fagOmrådeKode = FagOmrådeKode.BARNETRYGD_INFOTRYGD
             ),
             mockVedtakSimuleringPostering(
                 beløp = -46,
                 posteringType = PosteringType.MOTP,
-                fagOmrådeKode = FagOmrådeKode.BARNETRYGD_INFOTRYGD,
-                erFeilkonto = false
+                fagOmrådeKode = FagOmrådeKode.BARNETRYGD_INFOTRYGD
             ),
 
             mockVedtakSimuleringPostering(
