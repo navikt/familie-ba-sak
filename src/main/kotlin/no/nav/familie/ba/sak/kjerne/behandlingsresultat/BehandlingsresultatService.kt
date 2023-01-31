@@ -80,7 +80,7 @@ class BehandlingsresultatService(
 
         // 1 SØKNAD
         val søknadsresultat = if (behandling.opprettetÅrsak in listOf(BehandlingÅrsak.FØDSELSHENDELSE, BehandlingÅrsak.SØKNAD) || behandling.erManuellMigrering()) {
-            BehandlingsresultatUtils.utledResultatPåSøknad(
+            BehandlingsresultatSøknadUtils.utledResultatPåSøknad(
                 nåværendeAndeler = andelerTilkjentYtelse,
                 forrigeAndeler = forrigeAndelerTilkjentYtelse,
                 endretUtbetalingAndeler = endretUtbetalingAndeler,
