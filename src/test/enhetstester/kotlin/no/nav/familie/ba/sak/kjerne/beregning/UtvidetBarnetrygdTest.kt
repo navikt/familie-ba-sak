@@ -1,9 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import hentPerioderMedUtbetaling
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelseMedEndreteUtbetalinger
+import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
+import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.nesteMåned
@@ -13,6 +15,7 @@ import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
@@ -29,7 +32,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -449,7 +451,7 @@ internal class UtvidetBarnetrygdTest {
     }
 
     @Test
-    fun `Utvidet andel blir splittet opp på endring i utvidet vilkåret`() {
+    fun `Utvidet andel blir IKKE splittet opp på endring i utvidet vilkåret ved back-to-back, men utbetalingsperiodene blir det`() {
         val søkerOrdinær =
             OppfyltPeriode(fom = LocalDate.of(2019, 4, 1), tom = LocalDate.of(2020, 10, 15))
         val barnOppfylt =
@@ -521,24 +523,39 @@ internal class UtvidetBarnetrygdTest {
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
             behandling = behandling
-        )
-            .andelerTilkjentYtelse.toList().sortedBy { it.type }
+        ).andelerTilkjentYtelse.toList().sortedBy { it.type }
 
-        assertEquals(3, andeler.size)
+        val vedtaksperioderMedBegrunnelser = hentPerioderMedUtbetaling(
+            andelerTilkjentYtelse = andeler.map { AndelTilkjentYtelseMedEndreteUtbetalinger.utenEndringer(it) },
+            vedtak = lagVedtak(behandling),
+            personResultater = vilkårsvurdering.personResultater,
+            personerIPersongrunnlag = personopplysningGrunnlag.personer.toList()
+        )
+
+        // Én  andel for barnet og én andel for utvidet barnetrygd. Utvidet-andelen splittes IKKE
+        assertEquals(2, andeler.size)
 
         val andelBarn = andeler[0]
-        val andelUtvidet1 = andeler[1]
-        val andelUtvidet2 = andeler[2]
+        val andelUtvidet = andeler[1]
 
         assertEquals(barnOppfylt.ident, andelBarn.aktør.aktivFødselsnummer())
-        assertEquals(barnOppfylt.tom.toYearMonth(), andelBarn.stønadTom)
+        assertEquals(YearMonth.of(2019, 5), andelBarn.stønadFom)
+        assertEquals(YearMonth.of(2020, 10), andelBarn.stønadTom)
 
-        assertEquals(søkerOrdinær.ident, andelUtvidet1.aktør.aktivFødselsnummer())
-        assertEquals(søkerOrdinær.ident, andelUtvidet2.aktør.aktivFødselsnummer())
-        assertEquals(søkerOrdinær.fom.plusMonths(1).toYearMonth(), andelUtvidet1.stønadFom)
-        assertEquals(b2bFom.plusMonths(1).toYearMonth(), andelUtvidet2.stønadFom)
-        assertEquals(b2bTom.toYearMonth().plusMonths(1), andelUtvidet1.stønadTom) // Legger på 1mnd pga back2back
-        assertEquals(søkerOrdinær.tom.toYearMonth(), andelUtvidet2.stønadTom)
+        assertEquals(søkerOrdinær.ident, andelUtvidet.aktør.aktivFødselsnummer())
+        assertEquals(YearMonth.of(2019, 5), andelUtvidet.stønadFom)
+        assertEquals(YearMonth.of(2020, 10), andelUtvidet.stønadTom)
+
+        // Én periode frem til og med 2020-02, og én fra og med 2020-03, der vilkåret er splittet
+        assertEquals(2, vedtaksperioderMedBegrunnelser.size)
+
+        val vedtaksperiode1 = vedtaksperioderMedBegrunnelser[0]
+        val vedtaksperiode2 = vedtaksperioderMedBegrunnelser[1]
+
+        assertEquals(LocalDate.of(2019, 5, 1), vedtaksperiode1.fom)
+        assertEquals(LocalDate.of(2020, 2, 29), vedtaksperiode1.tom)
+        assertEquals(LocalDate.of(2020, 3, 1), vedtaksperiode2.fom)
+        assertEquals(LocalDate.of(2020, 10, 31), vedtaksperiode2.tom)
     }
 
     @Test
@@ -874,43 +891,6 @@ internal class UtvidetBarnetrygdTest {
     }
 
     @Test
-    fun `Skal kaste feil hvis fom og tom er satt i samme måned`() {
-        val utvidetVilkårResultat = lagVilkårResultat(
-            vilkår = Vilkår.UTVIDET_BARNETRYGD,
-            fom = YearMonth.of(2022, 2),
-            tom = YearMonth.of(2022, 2)
-        )
-
-        assertThrows<FunksjonellFeil> {
-            utvidetVilkårResultat.tilDatoSegment(
-                utvidetVilkår = listOf(utvidetVilkårResultat)
-            )
-        }
-    }
-
-    @Test
-    fun `Skal ikke kaste feil hvis fom og tom er i samme måned, men tom er siste dag i mnd og nytt utvidet-vilkår starter første dag i neste mnd`() {
-        val utvidetVilkårResultat = lagVilkårResultat(
-            vilkårType = Vilkår.UTVIDET_BARNETRYGD,
-            periodeFom = LocalDate.of(2022, 2, 1),
-            periodeTom = LocalDate.of(2022, 2, 28)
-        )
-
-        assertDoesNotThrow {
-            utvidetVilkårResultat.tilDatoSegment(
-                utvidetVilkår = listOf(
-                    utvidetVilkårResultat,
-                    lagVilkårResultat(
-                        vilkårType = Vilkår.UTVIDET_BARNETRYGD,
-                        periodeFom = LocalDate.of(2022, 3, 1),
-                        periodeTom = null
-                    )
-                )
-            )
-        }
-    }
-
-    @Test
     fun `Skal kaste feil hvis utvidet-andeler ikke overlapper med noen av barnas andeler`() {
         val behandling = lagBehandling()
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling)
@@ -931,7 +911,7 @@ internal class UtvidetBarnetrygdTest {
         )
 
         val barnasAndeler = listOf(
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = YearMonth.of(2021, 10),
                 tom = YearMonth.of(2022, 2),
                 person = tilfeldigPerson(personType = PersonType.BARN),
@@ -939,7 +919,7 @@ internal class UtvidetBarnetrygdTest {
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                 tilkjentYtelse = tilkjentYtelse
             ),
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = YearMonth.of(2021, 10),
                 tom = YearMonth.of(2022, 1),
                 person = tilfeldigPerson(personType = PersonType.BARN),
@@ -981,7 +961,7 @@ internal class UtvidetBarnetrygdTest {
         )
 
         val barnasAndeler = listOf(
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = YearMonth.of(2015, 10),
                 tom = YearMonth.of(2022, 2),
                 person = tilfeldigPerson(personType = PersonType.BARN),

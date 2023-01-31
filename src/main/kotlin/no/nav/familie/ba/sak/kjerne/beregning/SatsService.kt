@@ -57,6 +57,7 @@ object SatsService {
         .filter { it.gyldigFom == startDato }
         .filter { it.gyldigFom != LocalDate.MIN }
 
+    @Deprecated("Denne brukes nå bare av tester, og skal fjernes")
     fun hentGyldigSatsFor(
         satstype: SatsType,
         stønadFraOgMed: YearMonth,
