@@ -87,7 +87,9 @@ class BehandlingsresultatService(
                 personerFremstiltKravFor = personerFremstiltKravFor,
                 nåværendePersonResultater = vilkårsvurdering.personResultater
             )
-        } else null
+        } else {
+            null
+        }
 
         // 2 ENDRINGER
         val endringsresultat = if (forrigeBehandling != null) {
@@ -107,7 +109,9 @@ class BehandlingsresultatService(
                 forrigeKompetanser = forrigeKompetanser.toList(),
                 personerFremstiltKravFor = personerFremstiltKravFor
             )
-        } else BehandlingsresultatUtils.Endringsresultat.INGEN_ENDRING
+        } else {
+            BehandlingsresultatUtils.Endringsresultat.INGEN_ENDRING
+        }
 
         // 3 OPPHØR
         val opphørsresultat = BehandlingsresultatUtils.hentOpphørsresultatPåBehandling(

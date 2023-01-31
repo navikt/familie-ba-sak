@@ -646,7 +646,6 @@ private fun Set<YtelsePersonResultat>.matcherAltOgHarBådeEndretOgOpphørtResult
     return if (opphørtResultat.isEmpty()) false else this == setOf(endretResultat) + opphørtResultat + andreElementer
 }
 
-
 fun erEndringIVilkårvurdering(
     nåværendePersonResultat: Set<PersonResultat>,
     forrigePersonResultat: Set<PersonResultat>
