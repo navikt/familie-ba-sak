@@ -12,22 +12,11 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.fpsak.tidsserie.StandardCombinators
 
 object BehandlingsresultatUtils {
-    private fun validerAtBarePersonerFramstiltKravForHarFåttAvslag(
-        personerDetErFramstiltKravFor: List<Aktør>,
-        vilkårsvurdering: Vilkårsvurdering
-    ) {
-        val personerSomHarFåttAvslag = vilkårsvurdering.personResultater.filter { it.harEksplisittAvslag() }.map { it.aktør }
-
-        if (!personerDetErFramstiltKravFor.containsAll(personerSomHarFåttAvslag)) {
-            throw Feil("Det eksisterer personer som har fått avslag men som ikke har blitt søkt for i søknaden!")
-        }
-    }
 
     internal fun kombinerResultaterTilBehandlingsresultat(
         søknadsresultat: Søknadsresultat?, // Søknadsresultat er null hvis det ikke er en søknad/fødselshendelse/manuell migrering
