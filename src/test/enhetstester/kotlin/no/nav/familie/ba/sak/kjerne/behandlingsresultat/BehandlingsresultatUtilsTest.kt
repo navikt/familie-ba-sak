@@ -7,7 +7,7 @@ import io.mockk.mockkStatic
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelseMedEndreteUtbetalinger
+import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.common.lagPerson
@@ -69,7 +69,7 @@ class BehandlingsresultatUtilsTest {
         val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
 
         val forrigeAndeler = listOf(
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
                 beløp = 1054,
@@ -77,7 +77,7 @@ class BehandlingsresultatUtilsTest {
             )
         )
         val nåværendeAndeler = listOf(
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = mai22,
                 beløp = 1054,
@@ -100,13 +100,13 @@ class BehandlingsresultatUtilsTest {
         val barn2Aktør = lagPerson(type = PersonType.BARN).aktør
 
         val forrigeAndeler = listOf(
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
                 beløp = 1054,
                 aktør = barn1Aktør
             ),
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
                 beløp = 1054,
@@ -114,13 +114,13 @@ class BehandlingsresultatUtilsTest {
             )
         )
         val nåværendeAndeler = listOf(
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = mai22,
                 beløp = 1054,
                 aktør = barn1Aktør
             ),
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
                 beløp = 1054,
@@ -143,13 +143,13 @@ class BehandlingsresultatUtilsTest {
         val barn2Aktør = lagPerson(type = PersonType.BARN).aktør
 
         val forrigeAndeler = listOf(
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
                 beløp = 1054,
                 aktør = barn1Aktør
             ),
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
                 beløp = 1054,
@@ -157,19 +157,19 @@ class BehandlingsresultatUtilsTest {
             )
         )
         val nåværendeAndeler = listOf(
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = mai22,
                 beløp = 1054,
                 aktør = barn1Aktør
             ),
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = mai22.plusMonths(1),
                 tom = aug22,
                 beløp = 527,
                 aktør = barn1Aktør
             ),
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
                 beløp = 1054,
@@ -192,13 +192,13 @@ class BehandlingsresultatUtilsTest {
         val barn2Aktør = lagPerson(type = PersonType.BARN).aktør
 
         val forrigeAndeler = listOf(
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
                 beløp = 1054,
                 aktør = barn1Aktør
             ),
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
                 beløp = 1054,
@@ -206,13 +206,13 @@ class BehandlingsresultatUtilsTest {
             )
         )
         val nåværendeAndeler = listOf(
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = des22,
                 beløp = 1054,
                 aktør = barn1Aktør
             ),
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
                 beløp = 1054,
@@ -235,13 +235,13 @@ class BehandlingsresultatUtilsTest {
         val barn2Aktør = lagPerson(type = PersonType.BARN).aktør
 
         val forrigeAndeler = listOf(
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
                 beløp = 1054,
                 aktør = barn1Aktør
             ),
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
                 beløp = 1054,
@@ -249,13 +249,13 @@ class BehandlingsresultatUtilsTest {
             )
         )
         val nåværendeAndeler = listOf(
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = des22,
                 beløp = 1054,
                 aktør = barn1Aktør
             ),
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
                 beløp = 1054,
@@ -278,13 +278,13 @@ class BehandlingsresultatUtilsTest {
         val barn2Aktør = lagPerson(type = PersonType.BARN).aktør
 
         val forrigeAndeler = listOf(
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
                 beløp = 1054,
                 aktør = barn1Aktør
             ),
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
                 beløp = 1054,
@@ -292,19 +292,19 @@ class BehandlingsresultatUtilsTest {
             )
         )
         val nåværendeAndeler = listOf(
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = mai22,
                 beløp = 1054,
                 aktør = barn1Aktør
             ),
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = mai22.plusMonths(1),
                 tom = aug22,
                 beløp = 527,
                 aktør = barn1Aktør
             ),
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
                 beløp = 1054,
@@ -630,13 +630,13 @@ class BehandlingsresultatUtilsTest {
         every { YearMonth.now() } returns YearMonth.of(2022, 4)
 
         val forrigeAndeler = listOf(
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = mai22,
                 beløp = 1054,
                 aktør = barn1Aktør
             ),
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = mai22,
                 beløp = 1054,
@@ -645,13 +645,13 @@ class BehandlingsresultatUtilsTest {
         )
 
         val nåværendeAndeler = listOf(
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = mai22,
                 beløp = 1054,
                 aktør = barn1Aktør
             ),
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
                 beløp = 1054,
@@ -673,13 +673,13 @@ class BehandlingsresultatUtilsTest {
         every { YearMonth.now() } returns YearMonth.of(2022, 4)
 
         val forrigeAndeler = listOf(
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
                 beløp = 1054,
                 aktør = barn1Aktør
             ),
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
                 beløp = 1054,
@@ -688,13 +688,13 @@ class BehandlingsresultatUtilsTest {
         )
 
         val nåværendeAndeler = listOf(
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = feb22,
                 beløp = 1054,
                 aktør = barn1Aktør
             ),
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = feb22,
                 beløp = 1054,
@@ -717,13 +717,13 @@ class BehandlingsresultatUtilsTest {
         every { YearMonth.now() } returns apr22
 
         val forrigeAndeler = listOf(
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = mar22,
                 beløp = 1054,
                 aktør = barn1Aktør
             ),
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = mar22,
                 beløp = 1054,
@@ -732,13 +732,13 @@ class BehandlingsresultatUtilsTest {
         )
 
         val nåværendeAndeler = listOf(
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = feb22,
                 beløp = 1054,
                 aktør = barn1Aktør
             ),
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = feb22,
                 beløp = 1054,
@@ -761,13 +761,13 @@ class BehandlingsresultatUtilsTest {
         every { YearMonth.now() } returns apr22
 
         val forrigeAndeler = listOf(
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = mar22,
                 beløp = 1054,
                 aktør = barn1Aktør
             ),
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = mar22,
                 beløp = 1054,
@@ -776,13 +776,13 @@ class BehandlingsresultatUtilsTest {
         )
 
         val nåværendeAndeler = listOf(
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = mar22,
                 beløp = 1054,
                 aktør = barn1Aktør
             ),
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = mar22,
                 beløp = 1054,
@@ -1027,7 +1027,7 @@ class BehandlingsresultatUtilsTest {
         val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
 
         val forrigeAndel =
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
                 beløp = 1054,
@@ -1037,7 +1037,8 @@ class BehandlingsresultatUtilsTest {
         val søknadsResultat = utledSøknadResultatFraAndelerTilkjentYtelse(
             forrigeAndeler = listOf(forrigeAndel),
             nåværendeAndeler = listOf(forrigeAndel.copy()),
-            personerFremstiltKravFor = emptyList()
+            personerFremstiltKravFor = emptyList(),
+            endretUtbetalingAndeler = emptyList()
         )
 
         assertThat(søknadsResultat, Is(emptyList()))
@@ -1048,7 +1049,7 @@ class BehandlingsresultatUtilsTest {
         val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
 
         val forrigeAndel =
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
                 beløp = 1054,
@@ -1058,7 +1059,8 @@ class BehandlingsresultatUtilsTest {
         val søknadsResultat = utledSøknadResultatFraAndelerTilkjentYtelse(
             forrigeAndeler = listOf(forrigeAndel),
             nåværendeAndeler = listOf(forrigeAndel.copy()),
-            personerFremstiltKravFor = listOf(barn1Aktør)
+            personerFremstiltKravFor = listOf(barn1Aktør),
+            endretUtbetalingAndeler = emptyList()
         )
 
         assertThat(søknadsResultat.size, Is(1))
@@ -1070,7 +1072,7 @@ class BehandlingsresultatUtilsTest {
         val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
 
         val forrigeAndel =
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
                 beløp = 0,
@@ -1080,13 +1082,10 @@ class BehandlingsresultatUtilsTest {
         val søknadsResultat = utledSøknadResultatFraAndelerTilkjentYtelse(
             forrigeAndeler = listOf(forrigeAndel),
             nåværendeAndeler = listOf(
-                forrigeAndel.copy(
-                    andelTilkjentYtelse = forrigeAndel.andel.copy(
-                        kalkulertUtbetalingsbeløp = 1054
-                    )
-                )
+                forrigeAndel.copy(kalkulertUtbetalingsbeløp = 1054)
             ),
-            personerFremstiltKravFor = listOf(barn1Aktør)
+            personerFremstiltKravFor = listOf(barn1Aktør),
+            endretUtbetalingAndeler = emptyList()
         )
 
         assertThat(søknadsResultat.size, Is(1))
@@ -1098,7 +1097,7 @@ class BehandlingsresultatUtilsTest {
         val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
 
         val forrigeAndel =
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
                 beløp = 1054,
@@ -1108,13 +1107,10 @@ class BehandlingsresultatUtilsTest {
         val søknadsResultat = utledSøknadResultatFraAndelerTilkjentYtelse(
             forrigeAndeler = listOf(forrigeAndel),
             nåværendeAndeler = listOf(
-                forrigeAndel.copy(
-                    andelTilkjentYtelse = forrigeAndel.andel.copy(
-                        kalkulertUtbetalingsbeløp = 0
-                    )
-                )
+                forrigeAndel.copy(kalkulertUtbetalingsbeløp = 0)
             ),
-            personerFremstiltKravFor = listOf(barn1Aktør)
+            personerFremstiltKravFor = listOf(barn1Aktør),
+            endretUtbetalingAndeler = emptyList()
         )
 
         assertThat(søknadsResultat.size, Is(1))
@@ -1127,7 +1123,7 @@ class BehandlingsresultatUtilsTest {
         val barn1Aktør = barn1Person.aktør
 
         val forrigeAndel =
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
                 beløp = 1054,
@@ -1146,16 +1142,10 @@ class BehandlingsresultatUtilsTest {
         val søknadsResultat = utledSøknadResultatFraAndelerTilkjentYtelse(
             forrigeAndeler = listOf(forrigeAndel),
             nåværendeAndeler = listOf(
-                forrigeAndel.copy(
-                    andelTilkjentYtelse = forrigeAndel.andel.copy(
-                        kalkulertUtbetalingsbeløp = 0,
-                        endretUtbetalingAndeler = mutableListOf(
-                            endretUtbetalingAndel
-                        )
-                    )
-                )
+                forrigeAndel.copy(kalkulertUtbetalingsbeløp = 0)
             ),
-            personerFremstiltKravFor = listOf(barn1Aktør)
+            personerFremstiltKravFor = listOf(barn1Aktør),
+            endretUtbetalingAndeler = listOf(endretUtbetalingAndel)
         )
 
         assertThat(søknadsResultat.size, Is(1))
@@ -1171,7 +1161,7 @@ class BehandlingsresultatUtilsTest {
         val barn1Aktør = barn1Person.aktør
 
         val forrigeAndel =
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
                 beløp = 1054,
@@ -1190,16 +1180,10 @@ class BehandlingsresultatUtilsTest {
         val søknadsResultat = utledSøknadResultatFraAndelerTilkjentYtelse(
             forrigeAndeler = listOf(forrigeAndel),
             nåværendeAndeler = listOf(
-                forrigeAndel.copy(
-                    andelTilkjentYtelse = forrigeAndel.andel.copy(
-                        kalkulertUtbetalingsbeløp = 0,
-                        endretUtbetalingAndeler = mutableListOf(
-                            endretUtbetalingAndel
-                        )
-                    )
-                )
+                forrigeAndel.copy(kalkulertUtbetalingsbeløp = 0)
             ),
-            personerFremstiltKravFor = listOf(barn1Aktør)
+            personerFremstiltKravFor = listOf(barn1Aktør),
+            endretUtbetalingAndeler = listOf(endretUtbetalingAndel)
         )
 
         assertThat(søknadsResultat.size, Is(1))
@@ -1212,7 +1196,7 @@ class BehandlingsresultatUtilsTest {
         val barn1Aktør = barn1Person.aktør
 
         val forrigeAndel =
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
                 beløp = 1054,
@@ -1223,13 +1207,12 @@ class BehandlingsresultatUtilsTest {
             forrigeAndeler = listOf(forrigeAndel),
             nåværendeAndeler = listOf(
                 forrigeAndel.copy(
-                    andelTilkjentYtelse = forrigeAndel.andel.copy(
-                        kalkulertUtbetalingsbeløp = 0,
-                        differanseberegnetPeriodebeløp = 0
-                    )
+                    kalkulertUtbetalingsbeløp = 0,
+                    differanseberegnetPeriodebeløp = 0
                 )
             ),
-            personerFremstiltKravFor = listOf(barn1Aktør)
+            personerFremstiltKravFor = listOf(barn1Aktør),
+            endretUtbetalingAndeler = emptyList()
         )
 
         assertThat(søknadsResultat.size, Is(1))
@@ -1243,13 +1226,13 @@ class BehandlingsresultatUtilsTest {
         val barn2Aktør = lagPerson(type = PersonType.BARN).aktør
 
         val forrigeAndeler = listOf(
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
                 beløp = 1054,
                 aktør = barn1Aktør
             ),
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
                 beløp = 1054,
@@ -1257,23 +1240,13 @@ class BehandlingsresultatUtilsTest {
             )
         )
         val nåværendeAndeler = listOf(
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
                 beløp = 0,
-                aktør = barn1Aktør,
-                endretUtbetalingAndeler = listOf(
-                    lagEndretUtbetalingAndel(
-                        person = barn1Person,
-                        fom = jan22,
-                        tom = aug22,
-                        prosent = BigDecimal(100),
-                        behandlingId = 123L,
-                        årsak = Årsak.ALLEREDE_UTBETALT
-                    )
-                )
+                aktør = barn1Aktør
             ),
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
                 beløp = 1060,
@@ -1281,10 +1254,20 @@ class BehandlingsresultatUtilsTest {
             )
         )
 
+        val endretUtbetalingAndel = lagEndretUtbetalingAndel(
+            person = barn1Person,
+            fom = jan22,
+            tom = aug22,
+            prosent = BigDecimal(100),
+            behandlingId = 123L,
+            årsak = Årsak.ALLEREDE_UTBETALT
+        )
+
         val søknadsResultat = utledSøknadResultatFraAndelerTilkjentYtelse(
             forrigeAndeler = forrigeAndeler,
             nåværendeAndeler = nåværendeAndeler,
-            personerFremstiltKravFor = listOf(barn1Aktør, barn2Aktør)
+            personerFremstiltKravFor = listOf(barn1Aktør, barn2Aktør),
+            endretUtbetalingAndeler = listOf(endretUtbetalingAndel)
         )
 
         assertThat(søknadsResultat.size, Is(2))
@@ -1619,7 +1602,7 @@ class BehandlingsresultatUtilsTest {
     @Test
     fun `utledEndringsresultat skal returnere ENDRING dersom det finnes endringer i beløp`() {
         val forrigeAndel =
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+            lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
                 beløp = 1054,
@@ -1628,7 +1611,7 @@ class BehandlingsresultatUtilsTest {
 
         val endringsresultat = utledEndringsresultat(
             forrigeAndeler = listOf(forrigeAndel),
-            nåværendeAndeler = listOf(forrigeAndel.copy(andelTilkjentYtelse = forrigeAndel.andel.copy(kalkulertUtbetalingsbeløp = 40))),
+            nåværendeAndeler = listOf(forrigeAndel.copy(kalkulertUtbetalingsbeløp = 40)),
             personerFremstiltKravFor = emptyList(),
             forrigeKompetanser = emptyList(),
             nåværendeKompetanser = emptyList(),
