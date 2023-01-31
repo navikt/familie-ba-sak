@@ -15,8 +15,8 @@ object BehandlingsresultatOpphørUtils {
         nåværendeAndeler: List<AndelTilkjentYtelse>,
         forrigeAndeler: List<AndelTilkjentYtelse>
     ): Opphørsresultat {
-        val nåværendeBehandlingOpphørsdato = nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(forrigeAndeler = forrigeAndeler) ?: return Opphørsresultat.IKKE_OPPHØRT
-        val forrigeBehandlingOpphørsdato = forrigeAndeler.finnOpphørsdato() ?: YearMonth.now()
+        val nåværendeBehandlingOpphørsdato = nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(forrigeAndeler = forrigeAndeler)
+        val forrigeBehandlingOpphørsdato = forrigeAndeler.utledOpphørsdatoForForrigeBehandling()
         val dagensDato = YearMonth.now()
 
         return when {
@@ -27,7 +27,7 @@ object BehandlingsresultatOpphørUtils {
         }
     }
 
-    internal fun List<AndelTilkjentYtelse>.finnOpphørsdato() = this.maxOfOrNull { it.stønadTom }
+    internal fun List<AndelTilkjentYtelse>.finnOpphørsdato() = this.maxOfOrNull { it.stønadTom }?.nesteMåned()
 
     /**
      * Hvis opphørsdato ikke finnes i denne behandlingen så ønsker vi å bruke tidligste fom-dato fra forrige behandling
@@ -42,5 +42,5 @@ object BehandlingsresultatOpphørUtils {
     /**
      * Hvis det ikke fantes noen andeler i forrige behandling defaulter vi til inneværende måned
      */
-    private fun List<AndelTilkjentYtelse>.utledOpphørsdatoForForrigeBehandling(): YearMonth = this.finnOpphørsdato() ?: YearMonth.now()
+    private fun List<AndelTilkjentYtelse>.utledOpphørsdatoForForrigeBehandling(): YearMonth = this.finnOpphørsdato() ?: YearMonth.now().nesteMåned()
 }
