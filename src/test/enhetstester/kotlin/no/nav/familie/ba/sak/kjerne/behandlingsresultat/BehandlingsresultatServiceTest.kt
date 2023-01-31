@@ -246,9 +246,17 @@ internal class BehandlingsresultatServiceTest {
     @Test
     fun `finnPersonerFremstiltKravFor skal returnere aktør som person framstilt krav for dersom det er søkt for utvidet barnetrygd`() {
         val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)
+
+        val barnSomIkkeErKryssetAvFor = BarnMedOpplysninger(
+            ident = randomFnr(),
+            navn = "barn1",
+            inkludertISøknaden = false,
+            erFolkeregistrert = true
+        )
+
         val søknadDto = SøknadDTO(
             underkategori = BehandlingUnderkategoriDTO.UTVIDET,
-            barnaMedOpplysninger = emptyList(),
+            barnaMedOpplysninger = listOf(barnSomIkkeErKryssetAvFor),
             søkerMedOpplysninger = mockk(),
             endringAvOpplysningerBegrunnelse = ""
         )

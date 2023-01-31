@@ -104,7 +104,6 @@ object BehandlingsresultatUtils {
         return alleSøknadsresultater.distinct()
     }
 
-
     private fun validerAtBarePersonerFramstiltKravForHarFåttAvslag(
         personerDetErFramstiltKravFor: List<Aktør>,
         vilkårsvurdering: Vilkårsvurdering
