@@ -98,7 +98,7 @@ class BehandlingsresultatService(
             val kompetanser = kompetanseService.hentKompetanser(behandlingId = BehandlingId(behandlingId))
             val forrigeKompetanser = kompetanseService.hentKompetanser(behandlingId = BehandlingId(forrigeBehandling.id))
 
-            BehandlingsresultatUtils.utledEndringsresultat(
+            BehandlingsresultatEndringUtils.utledEndringsresultat(
                 nåværendeAndeler = andelerTilkjentYtelse,
                 forrigeAndeler = forrigeAndelerTilkjentYtelse,
                 nåværendeEndretAndeler = endretUtbetalingAndeler,
@@ -110,7 +110,7 @@ class BehandlingsresultatService(
                 personerFremstiltKravFor = personerFremstiltKravFor
             )
         } else {
-            BehandlingsresultatUtils.Endringsresultat.INGEN_ENDRING
+            Endringsresultat.INGEN_ENDRING
         }
 
         // 3 OPPHØR
