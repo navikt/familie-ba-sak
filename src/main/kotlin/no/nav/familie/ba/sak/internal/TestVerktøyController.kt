@@ -61,7 +61,7 @@ class TestVerktøyController(
         return if (envService.erPreprod() || envService.erDev()) {
             satskjøringRepository.save(Satskjøring(fagsakId = fagsakId))
             opprettTaskService.opprettSatsendringTask(fagsakId, YearMonth.of(2023, 3))
-            ResponseEntity.ok(Ressurs.success("Trigget satsendring for behandling $fagsakId"))
+            ResponseEntity.ok(Ressurs.success("Trigget satsendring for fagsak $fagsakId"))
         } else {
             ResponseEntity.ok(Ressurs.success(MELDING))
         }

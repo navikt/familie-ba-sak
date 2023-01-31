@@ -93,14 +93,14 @@ class StartSatsendring(
         satsTidspunkt: YearMonth
     ): Boolean {
         if (satstyper.isNotEmpty() && gyldigeSatstyper.containsAll(satstyper)) {
-            if (featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_OPPRETT_TASKER)) {
+            return if (featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_OPPRETT_TASKER)) {
                 logger.info("Oppretter satsendringtask for fagsak=${fagsak.id}")
                 opprettTaskService.opprettSatsendringTask(fagsak.id, satsTidspunkt)
                 satskjøringRepository.save(Satskjøring(fagsakId = fagsak.id))
-                return true
+                true
             } else {
                 logger.info("Oppretter ikke satsendringtask for fagsak=${fagsak.id}. Toggle SATSENDRING_OPPRETT_TASKER avskrudd.")
-                return true // fordi vi vil at den skal telles selv om opprett task er skrudd av
+                true // fordi vi vil at den skal telles selv om opprett task er skrudd av
             }
         }
         logger.info(
