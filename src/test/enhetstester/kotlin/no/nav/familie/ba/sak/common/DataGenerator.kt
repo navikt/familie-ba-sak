@@ -1025,7 +1025,8 @@ fun lagVilkårResultat(
     periodeTom: LocalDate? = LocalDate.of(2010, 1, 31),
     begrunnelse: String = "",
     behandlingId: Long = lagBehandling().id,
-    utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering> = emptyList()
+    utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering> = emptyList(),
+    erEksplisittAvslagPåSøknad: Boolean = false
 ) = VilkårResultat(
     personResultat = personResultat,
     vilkårType = vilkårType,
@@ -1034,7 +1035,8 @@ fun lagVilkårResultat(
     periodeTom = periodeTom,
     begrunnelse = begrunnelse,
     behandlingId = behandlingId,
-    utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger
+    utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger,
+    erEksplisittAvslagPåSøknad = erEksplisittAvslagPåSøknad
 )
 
 val guttenBarnesenFødselsdato = LocalDate.now().withDayOfMonth(10).minusYears(6)

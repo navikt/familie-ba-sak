@@ -39,7 +39,7 @@ class BehandlingsresultatService(
 
     internal fun finnPersonerFremstiltKravFor(behandling: Behandling, søknadDTO: SøknadDTO?, forrigeBehandling: Behandling?) =
         when {
-            behandling.opprettetÅrsak in listOf(BehandlingÅrsak.SØKNAD, BehandlingÅrsak.FØDSELSHENDELSE) -> {
+            behandling.opprettetÅrsak == BehandlingÅrsak.SØKNAD -> {
                 // alle barna som er krysset av på søknad
                 val barnFraSøknad = søknadDTO?.barnaMedOpplysninger
                     ?.filter { it.erFolkeregistrert && it.inkludertISøknaden }
@@ -49,16 +49,29 @@ class BehandlingsresultatService(
                 // hvis det søkes om utvidet skal søker med
                 val utvidetBarnetrygdSøker = if (søknadDTO?.underkategori == BehandlingUnderkategoriDTO.UTVIDET) listOf(behandling.fagsak.aktør) else emptyList()
 
-                // alle nye barn
-                val nyeBarn = persongrunnlagService.finnNyeBarn(behandling, forrigeBehandling).map { it.aktør }
+                val personerDetErFramstiltKravFor = barnFraSøknad + utvidetBarnetrygdSøker
 
-                // Hva gjør vi med barn som har fått satt eksplisitt avslag, men det er ikke søkt for personen?
+                validerAtBarePersonerFramstiltKravForHarFåttAvslag(behandling, personerDetErFramstiltKravFor)
 
-                (barnFraSøknad + nyeBarn + utvidetBarnetrygdSøker).distinct()
+                personerDetErFramstiltKravFor
             }
+            behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE -> persongrunnlagService.finnNyeBarn(behandling, forrigeBehandling).map { it.aktør }
             behandling.erManuellMigrering() -> persongrunnlagService.hentAktivThrows(behandling.id).personer.map { it.aktør }
             else -> emptyList()
         }
+
+    private fun validerAtBarePersonerFramstiltKravForHarFåttAvslag(
+        behandling: Behandling,
+        personerDetErFramstiltKravFor: List<Aktør>
+    ) {
+        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId = behandling.id)
+        val personerSomHarFåttAvslag =
+            vilkårsvurdering.personResultater.filter { it.harEksplisittAvslag() }.map { it.aktør }
+
+        if (!personerDetErFramstiltKravFor.containsAll(personerSomHarFåttAvslag)) {
+            throw Feil("Det eksisterer personer som har fått avslag men som ikke har blitt søkt for i søknaden!")
+        }
+    }
 
     internal fun utledBehandlingsresultat(behandlingId: Long): Behandlingsresultat {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
