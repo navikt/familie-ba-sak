@@ -22,12 +22,14 @@ class DokumentControllerTest(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService
 ) : AbstractSpringIntegrationTest() {
 
+    private val mockDokumentGenereringService: DokumentGenereringService = mockk()
     private val mockDokumentService: DokumentService = mockk()
     private val vedtakService: VedtakService = mockk(relaxed = true)
     private val fagsakService: FagsakService = mockk()
     private val tilgangService: TilgangService = mockk(relaxed = true)
     val mockDokumentController =
         DokumentController(
+            dokumentGenereringService = mockDokumentGenereringService,
             dokumentService = mockDokumentService,
             vedtakService = vedtakService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
@@ -42,7 +44,7 @@ class DokumentControllerTest(
     @Tag("integration")
     fun `Test generer vedtaksbrev`() {
         every { vedtakService.hent(any()) } returns lagVedtak()
-        every { mockDokumentService.genererBrevForVedtak(any()) } returns "pdf".toByteArray()
+        every { mockDokumentGenereringService.genererBrevForVedtak(any()) } returns "pdf".toByteArray()
 
         val response = mockDokumentController.genererVedtaksbrev(1)
         assert(response.status == Ressurs.Status.SUKSESS)
