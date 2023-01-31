@@ -1244,7 +1244,7 @@ class BehandlingsresultatUtilsTest {
                 fom = jan22,
                 tom = aug22,
                 beløp = 0,
-                aktør = barn1Aktør,
+                aktør = barn1Aktør
             ),
             lagAndelTilkjentYtelse(
                 fom = jan22,
