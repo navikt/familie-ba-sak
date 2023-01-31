@@ -32,6 +32,15 @@ internal infix fun Person.får(prosent: Prosent) = BeregnetAndel(
     sats = 0
 )
 
+internal infix fun Person.får(sats: Int) = BeregnetAndel(
+    person = this,
+    prosent = BigDecimal.valueOf(100),
+    stønadFom = YearMonth.now(),
+    stønadTom = YearMonth.now(),
+    beløp = sats,
+    sats = sats
+)
+
 @Suppress("ktlint:enum-entry-name-case")
 enum class Prosent {
     alt,

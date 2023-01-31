@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.kjerne.beregning.Prosent.alt
 import no.nav.familie.ba.sak.kjerne.beregning.Prosent.halvparten
 import no.nav.familie.ba.sak.kjerne.eøs.util.barn
@@ -15,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.util.søker
 import no.nav.familie.ba.sak.kjerne.eøs.util.uendelig
 import no.nav.familie.ba.sak.kjerne.eøs.util.under18år
 import no.nav.familie.ba.sak.kjerne.eøs.util.vilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom.rangeTo
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.VilkårsvurderingBuilder
@@ -38,6 +40,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.BOSATT_I_RI
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.GIFT_PARTNERSKAP
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.LOVLIG_OPPHOLD
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.UNDER_18_ÅR
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår.UTVIDET_BARNETRYGD
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -283,6 +286,58 @@ internal class BeregnAndelerTilkjentYtelseForBarnaTest {
         )
 
         assertEquals(forventedeAndeler, vurdering.beregnAndelerTilkjentYtelseForBarna())
+    }
+
+    @Test
+    fun `skal opprette riktige satser for barn og søker ved utvidet barnetrygd`() {
+        val søker = PersonType.SØKER født 19.nov(1995)
+        val barn = PersonType.BARN født 14.des(2018)
+
+        val vurdering = vilkårsvurdering der
+            søker har
+            (BOSATT_I_RIKET oppfylt 26.jan(2018)..uendelig) og
+            (UTVIDET_BARNETRYGD oppfylt 26.jan(2018)..uendelig) og
+            (LOVLIG_OPPHOLD oppfylt 26.jan(2018)..uendelig) der
+            barn har
+            (UNDER_18_ÅR oppfylt 14.des(2018)..14.des(2036)) og
+            (GIFT_PARTNERSKAP oppfylt 26.jan(2018)..14.des(2036)) og
+            (BOR_MED_SØKER oppfylt 26.jan(2018)..14.des(2036)) og
+            (BOSATT_I_RIKET oppfylt 26.jan(2018)..14.des(2036)) og
+            (LOVLIG_OPPHOLD oppfylt 26.jan(2018)..14.des(2036))
+
+        val forventedeAndeler = listOf(
+            barn får 970 i jan(2019)..feb(2019),
+            barn får 1054 i mar(2019)..aug(2020),
+            barn får 1354 i sep(2020)..aug(2021),
+            barn får 1654 i sep(2021)..des(2021),
+            barn får 1676 i jan(2022)..feb(2023),
+            barn får 1723 i mar(2023)..nov(2024),
+            barn får 1083 i des(2024)..nov(2036),
+
+            søker får 970 i jan(2019)..feb(2019),
+            søker får 1054 i mar(2019)..feb(2023),
+            søker får 2489 i mar(2023)..nov(2036)
+        )
+
+        assertEquals(forventedeAndeler, vurdering.beregnAndelerTilkjentYteldse())
+    }
+}
+
+private fun <T : Tidsenhet> VilkårsvurderingBuilder.PersonResultatBuilder<T>.beregnAndelerTilkjentYteldse(): List<BeregnetAndel> {
+    val personopplysningGrunnlag = this.byggPersonopplysningGrunnlag()
+    return TilkjentYtelseUtils.beregnTilkjentYtelse(
+        vilkårsvurdering = this.byggVilkårsvurdering(),
+        personopplysningGrunnlag = personopplysningGrunnlag,
+        behandling = lagBehandling()
+    ).andelerTilkjentYtelse.map {
+        BeregnetAndel(
+            person = personopplysningGrunnlag.personer.first { person -> person.aktør == it.aktør },
+            stønadFom = it.stønadFom,
+            stønadTom = it.stønadTom,
+            beløp = it.kalkulertUtbetalingsbeløp,
+            sats = it.sats,
+            prosent = it.prosent
+        )
     }
 }
 
