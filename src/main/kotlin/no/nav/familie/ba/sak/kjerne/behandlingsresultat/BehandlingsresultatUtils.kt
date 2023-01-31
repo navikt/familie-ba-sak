@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.EndretUtbetalingAndelTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -36,6 +37,116 @@ import no.nav.fpsak.tidsserie.StandardCombinators
 import java.time.YearMonth
 
 object BehandlingsresultatUtils {
+
+    private fun utledResultatPåSøknad(
+        forrigeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        nåværendeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        nåværendePersonResultater: Set<PersonResultat>,
+        personerFremstiltKravFor: List<Aktør>
+    ): Søknadsresultat {
+        val resultaterFraAndeler = utledSøknadResultatFraAndelerTilkjentYtelse(
+            forrigeAndeler = forrigeAndeler,
+            nåværendeAndeler = nåværendeAndeler,
+            personerFremstiltKravFor = personerFremstiltKravFor
+        )
+
+        val erEksplisittAvslagPåMinstEnPersonFremstiltKravFor = erEksplisittAvslagPåMinstEnPersonFremstiltKravFor(
+            nåværendePersonResultater = nåværendePersonResultater,
+            personerFremstiltKravFor = personerFremstiltKravFor
+        )
+
+        val alleResultater = (
+            if (erEksplisittAvslagPåMinstEnPersonFremstiltKravFor) {
+                resultaterFraAndeler.plus(Søknadsresultat.AVSLÅTT)
+            } else {
+                resultaterFraAndeler
+            }
+            ).distinct()
+
+        return alleResultater.kombinerSøknadsresultater()
+    }
+
+    internal fun List<Søknadsresultat>.kombinerSøknadsresultater(): Søknadsresultat {
+        val resultaterUtenIngenEndringer = this.filter { it != Søknadsresultat.INGEN_RELEVANTE_ENDRINGER }
+
+        return when {
+            this.isEmpty() -> throw Feil("Klarer ikke utlede søknadsresultat")
+            this.size == 1 -> this.single()
+            resultaterUtenIngenEndringer.size == 1 -> resultaterUtenIngenEndringer.single()
+            resultaterUtenIngenEndringer.size == 2 && resultaterUtenIngenEndringer.containsAll(listOf(Søknadsresultat.INNVILGET, Søknadsresultat.AVSLÅTT)) -> Søknadsresultat.DELVIS_INNVILGET
+            else -> throw Feil("Klarer ikke kombinere søknadsresultater: $this")
+        }
+    }
+
+    private fun erEksplisittAvslagPåMinstEnPersonFremstiltKravFor(
+        nåværendePersonResultater: Set<PersonResultat>,
+        personerFremstiltKravFor: List<Aktør>
+    ): Boolean =
+        nåværendePersonResultater
+            .filter { personerFremstiltKravFor.contains(it.aktør) }
+            .any {
+                it.vilkårResultater.erEksplisittAvslagPåPerson()
+            }
+
+    internal fun utledSøknadResultatFraAndelerTilkjentYtelse(
+        forrigeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        nåværendeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        personerFremstiltKravFor: List<Aktør>
+    ): List<Søknadsresultat> {
+        val alleSøknadsresultater = personerFremstiltKravFor.flatMap { aktør ->
+            utledSøknadResultatFraAndelerTilkjentYtelsePerPerson(
+                forrigeAndeler = forrigeAndeler.filter { it.aktør == aktør },
+                nåværendeAndeler = nåværendeAndeler.filter { it.aktør == aktør }
+            )
+        }
+
+        return alleSøknadsresultater.distinct()
+    }
+
+    private fun utledSøknadResultatFraAndelerTilkjentYtelsePerPerson(
+        forrigeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+        nåværendeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
+    ): List<Søknadsresultat> {
+        val forrigeTidslinje = AndelTilkjentYtelseTidslinje(forrigeAndeler)
+        val nåværendeTidslinje = AndelTilkjentYtelseTidslinje(nåværendeAndeler)
+
+        val resultatTidslinje = nåværendeTidslinje.kombinerMed(forrigeTidslinje) { nåværende, forrige ->
+            val forrigeBeløp = forrige?.kalkulertUtbetalingsbeløp
+            val nåværendeBeløp = nåværende?.kalkulertUtbetalingsbeløp
+
+            when {
+                nåværendeBeløp == forrigeBeløp || nåværendeBeløp == null -> Søknadsresultat.INGEN_RELEVANTE_ENDRINGER // Ingen endring eller fjernet en andel
+                nåværendeBeløp > 0 -> Søknadsresultat.INNVILGET // Innvilget beløp som er annerledes enn forrige gang
+                nåværendeBeløp == 0 -> {
+                    val endringsperiodeÅrsak = if (nåværende.endreteUtbetalinger.isNotEmpty()) nåværende.endreteUtbetalinger.singleOrNull()?.årsak ?: throw Feil("") else null
+
+                    when {
+                        nåværende.andel.differanseberegnetPeriodebeløp != null -> Søknadsresultat.INNVILGET
+                        endringsperiodeÅrsak == Årsak.DELT_BOSTED -> Søknadsresultat.INNVILGET
+                        (endringsperiodeÅrsak == Årsak.ALLEREDE_UTBETALT) ||
+                            (endringsperiodeÅrsak == Årsak.ENDRE_MOTTAKER) ||
+                            (endringsperiodeÅrsak == Årsak.ETTERBETALING_3ÅR) -> Søknadsresultat.AVSLÅTT
+                        else -> Søknadsresultat.INGEN_RELEVANTE_ENDRINGER
+                    }
+                }
+                else -> Søknadsresultat.INGEN_RELEVANTE_ENDRINGER
+            }
+        }
+
+        return resultatTidslinje.perioder().mapNotNull { it.innhold }.distinct()
+    }
+
+    private fun Set<VilkårResultat>.erEksplisittAvslagPåPerson(): Boolean {
+        // sjekk om vilkårresultater inneholder eksplisitt avslag på et vilkår
+        return this.any { it.erEksplisittAvslagPåSøknad == true }
+    }
+
+    enum class Søknadsresultat {
+        INNVILGET,
+        AVSLÅTT,
+        DELVIS_INNVILGET,
+        INGEN_RELEVANTE_ENDRINGER
+    }
 
     internal enum class Endringsresultat {
         ENDRING,
@@ -111,6 +222,61 @@ object BehandlingsresultatUtils {
         }
 
         return endringerTidslinje.perioder().any { it.innhold == true }
+    }
+
+    internal enum class Opphørsresultat {
+        OPPHØRT,
+        FORTSATT_OPPHØRT,
+        IKKE_OPPHØRT
+    }
+
+    internal fun kombinerResultaterTilBehandlingsresultat(
+        søknadsresultat: Søknadsresultat?, // Søknadsresultat er null hvis det ikke er en søknad/fødselshendelse/manuell migrering
+        endringsresultat: Endringsresultat,
+        opphørsresultat: Opphørsresultat
+    ): Behandlingsresultat {
+        fun sjekkResultat(
+            ønsketSøknadsresultat: Søknadsresultat?,
+            ønsketEndringsresultat: Endringsresultat,
+            ønsketOpphørsresultat: Opphørsresultat
+        ): Boolean =
+            søknadsresultat == ønsketSøknadsresultat && endringsresultat == ønsketEndringsresultat && opphørsresultat == ønsketOpphørsresultat
+
+        return when {
+            sjekkResultat(Søknadsresultat.INGEN_RELEVANTE_ENDRINGER, Endringsresultat.INGEN_ENDRING, Opphørsresultat.IKKE_OPPHØRT) -> Behandlingsresultat.FORTSATT_INNVILGET
+            sjekkResultat(Søknadsresultat.INGEN_RELEVANTE_ENDRINGER, Endringsresultat.INGEN_ENDRING, Opphørsresultat.FORTSATT_OPPHØRT) -> Behandlingsresultat.FORTSATT_OPPHØRT
+
+            sjekkResultat(Søknadsresultat.INNVILGET, Endringsresultat.ENDRING, Opphørsresultat.OPPHØRT) -> Behandlingsresultat.INNVILGET_ENDRET_OG_OPPHØRT
+            sjekkResultat(Søknadsresultat.INNVILGET, Endringsresultat.ENDRING, Opphørsresultat.FORTSATT_OPPHØRT) -> Behandlingsresultat.INNVILGET_OG_ENDRET
+            sjekkResultat(Søknadsresultat.INNVILGET, Endringsresultat.ENDRING, Opphørsresultat.IKKE_OPPHØRT) -> Behandlingsresultat.INNVILGET_OG_ENDRET
+            sjekkResultat(Søknadsresultat.INNVILGET, Endringsresultat.INGEN_ENDRING, Opphørsresultat.OPPHØRT) -> Behandlingsresultat.INNVILGET_OG_OPPHØRT
+            sjekkResultat(Søknadsresultat.INNVILGET, Endringsresultat.INGEN_ENDRING, Opphørsresultat.FORTSATT_OPPHØRT) -> Behandlingsresultat.INNVILGET
+            sjekkResultat(Søknadsresultat.INNVILGET, Endringsresultat.INGEN_ENDRING, Opphørsresultat.IKKE_OPPHØRT) -> Behandlingsresultat.INNVILGET
+
+            sjekkResultat(Søknadsresultat.AVSLÅTT, Endringsresultat.ENDRING, Opphørsresultat.OPPHØRT) -> Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT
+            sjekkResultat(Søknadsresultat.AVSLÅTT, Endringsresultat.ENDRING, Opphørsresultat.FORTSATT_OPPHØRT) -> Behandlingsresultat.AVSLÅTT_OG_ENDRET
+            sjekkResultat(Søknadsresultat.AVSLÅTT, Endringsresultat.ENDRING, Opphørsresultat.IKKE_OPPHØRT) -> Behandlingsresultat.AVSLÅTT_OG_ENDRET
+            sjekkResultat(Søknadsresultat.AVSLÅTT, Endringsresultat.INGEN_ENDRING, Opphørsresultat.OPPHØRT) -> Behandlingsresultat.AVSLÅTT_OG_OPPHØRT
+            sjekkResultat(Søknadsresultat.AVSLÅTT, Endringsresultat.INGEN_ENDRING, Opphørsresultat.FORTSATT_OPPHØRT) -> Behandlingsresultat.AVSLÅTT
+            sjekkResultat(Søknadsresultat.AVSLÅTT, Endringsresultat.INGEN_ENDRING, Opphørsresultat.IKKE_OPPHØRT) -> Behandlingsresultat.AVSLÅTT
+
+            sjekkResultat(Søknadsresultat.DELVIS_INNVILGET, Endringsresultat.ENDRING, Opphørsresultat.OPPHØRT) -> Behandlingsresultat.DELVIS_INNVILGET_ENDRET_OG_OPPHØRT
+            sjekkResultat(Søknadsresultat.DELVIS_INNVILGET, Endringsresultat.ENDRING, Opphørsresultat.FORTSATT_OPPHØRT) -> Behandlingsresultat.DELVIS_INNVILGET_OG_ENDRET
+            sjekkResultat(Søknadsresultat.DELVIS_INNVILGET, Endringsresultat.ENDRING, Opphørsresultat.IKKE_OPPHØRT) -> Behandlingsresultat.DELVIS_INNVILGET_OG_ENDRET
+            sjekkResultat(Søknadsresultat.DELVIS_INNVILGET, Endringsresultat.INGEN_ENDRING, Opphørsresultat.OPPHØRT) -> Behandlingsresultat.DELVIS_INNVILGET_OG_OPPHØRT
+            sjekkResultat(Søknadsresultat.DELVIS_INNVILGET, Endringsresultat.INGEN_ENDRING, Opphørsresultat.FORTSATT_OPPHØRT) -> Behandlingsresultat.DELVIS_INNVILGET
+            sjekkResultat(Søknadsresultat.DELVIS_INNVILGET, Endringsresultat.INGEN_ENDRING, Opphørsresultat.IKKE_OPPHØRT) -> Behandlingsresultat.DELVIS_INNVILGET
+
+            // Ikke søknad/fødselshendelse/manuell migrering
+            sjekkResultat(null, Endringsresultat.ENDRING, Opphørsresultat.OPPHØRT) -> Behandlingsresultat.ENDRET_OG_OPPHØRT
+            sjekkResultat(null, Endringsresultat.ENDRING, Opphørsresultat.FORTSATT_OPPHØRT) -> Behandlingsresultat.ENDRET_UTBETALING
+            sjekkResultat(null, Endringsresultat.ENDRING, Opphørsresultat.IKKE_OPPHØRT) -> Behandlingsresultat.ENDRET_UTBETALING
+            sjekkResultat(null, Endringsresultat.INGEN_ENDRING, Opphørsresultat.OPPHØRT) -> Behandlingsresultat.OPPHØRT
+            sjekkResultat(null, Endringsresultat.INGEN_ENDRING, Opphørsresultat.FORTSATT_OPPHØRT) -> Behandlingsresultat.FORTSATT_OPPHØRT
+            sjekkResultat(null, Endringsresultat.INGEN_ENDRING, Opphørsresultat.IKKE_OPPHØRT) -> Behandlingsresultat.FORTSATT_INNVILGET
+
+            else -> throw Feil("Klarer ikke utlede behandlingsresultat fra (søknadsresultat=$søknadsresultat, endringsresultat=$endringsresultat, opphørsresultat=$opphørsresultat)")
+        }
     }
 
     internal fun utledEndringsresultat(
