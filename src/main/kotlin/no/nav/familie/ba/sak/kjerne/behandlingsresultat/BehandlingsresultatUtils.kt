@@ -40,7 +40,7 @@ import java.time.YearMonth
 
 object BehandlingsresultatUtils {
 
-    private fun utledResultatPåSøknad(
+    internal fun utledResultatPåSøknad(
         forrigeAndeler: List<AndelTilkjentYtelse>,
         nåværendeAndeler: List<AndelTilkjentYtelse>,
         nåværendePersonResultater: Set<PersonResultat>,
