@@ -297,7 +297,6 @@ internal class BehandlingsresultatServiceTest {
         every { vilkårsvurderingService.hentAktivForBehandlingThrows(any()) } returns Vilkårsvurdering(behandling = behandling)
         every { personidentService.hentAktør(barn.aktør.aktivFødselsnummer()) } returns barn.aktør
 
-
         val personerFramstiltForKrav =
             behandlingsresultatService.finnPersonerFremstiltKravFor(
                 behandling = behandling,
