@@ -166,6 +166,21 @@ class StartSatsendring(
                     sisteIverksatteBehandling.id
                 )
 
+            if (AutovedtakSatsendringService.harAlleredeSisteSats(
+                    andelerTilkjentYtelseMedEndreteUtbetalinger,
+                    satsTidspunkt
+                )
+            ) {
+                satskjøringRepository.save(
+                    Satskjøring(
+                        fagsakId = fagsak.id,
+                        ferdigTidspunkt = sisteIverksatteBehandling.endretTidspunkt
+                    )
+                )
+                logger.info("Fagsak=${fagsak.id} har alt siste satser")
+                return true
+            }
+
             val satstyper = mutableListOf<SatsType>()
             if (harYtelsetype(
                     YtelseType.SMÅBARNSTILLEGG,
