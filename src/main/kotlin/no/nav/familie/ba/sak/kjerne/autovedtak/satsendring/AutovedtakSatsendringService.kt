@@ -53,10 +53,10 @@ class AutovedtakSatsendringService(
         val satskjøringForFagsak =
             satskjøringRepository.findByFagsakId(fagsakId) ?: error("Fant ingen satskjøringsrad for fagsak=$fagsakId")
 
-        val behandling = behandlingRepository.finnSisteIverksatteBehandling(fagsakId = fagsakId)
+        val sisteIverksatteBehandling = behandlingRepository.finnSisteIverksatteBehandling(fagsakId = fagsakId)
             ?: error("Fant ikke siste iverksette behandling for $fagsakId")
 
-        if (harAlleredeNySats(behandling.id, behandlingsdata.satstidspunkt)) {
+        if (harAlleredeNySats(sisteIverksatteBehandling.id, behandlingsdata.satstidspunkt)) {
             satskjøringForFagsak.ferdigTidspunkt = LocalDateTime.now()
             satskjøringRepository.save(satskjøringForFagsak)
             logger.info("Satsendring allerede utført for fagsak=$fagsakId")
@@ -64,16 +64,17 @@ class AutovedtakSatsendringService(
             return "Satsendring allerede utført for fagsak=$fagsakId"
         }
 
-        val aktivOgÅpenBehandling = behandlingRepository.findByFagsakAndAktivAndOpen(fagsakId = behandling.fagsak.id)
-        val søkerAktør = behandling.fagsak.aktør
+        val aktivOgÅpenBehandling =
+            behandlingRepository.findByFagsakAndAktivAndOpen(fagsakId = sisteIverksatteBehandling.fagsak.id)
+        val søkerAktør = sisteIverksatteBehandling.fagsak.aktør
 
-        logger.info("Kjører satsendring på $behandling")
-        secureLogger.info("Kjører satsendring på $behandling for ${søkerAktør.aktivFødselsnummer()}")
-        if (behandling.fagsak.status != FagsakStatus.LØPENDE) throw Feil("Forsøker å utføre satsendring på ikke løpende fagsak ${behandling.fagsak.id}")
+        logger.info("Kjører satsendring på $sisteIverksatteBehandling")
+        secureLogger.info("Kjører satsendring på $sisteIverksatteBehandling for ${søkerAktør.aktivFødselsnummer()}")
+        if (sisteIverksatteBehandling.fagsak.status != FagsakStatus.LØPENDE) throw Feil("Forsøker å utføre satsendring på ikke løpende fagsak ${sisteIverksatteBehandling.fagsak.id}")
 
         if (aktivOgÅpenBehandling != null) {
             val brukerHarÅpenBehandlingMelding = if (harAlleredeNySats(
-                    behandlingId = aktivOgÅpenBehandling.id,
+                    sisteIverksettBehandlingsId = aktivOgÅpenBehandling.id,
                     satstidspunkt = behandlingsdata.satstidspunkt
                 )
             ) {
@@ -97,7 +98,7 @@ class AutovedtakSatsendringService(
                 aktør = søkerAktør,
                 behandlingType = BehandlingType.REVURDERING,
                 behandlingÅrsak = BehandlingÅrsak.SATSENDRING,
-                fagsakId = behandling.fagsak.id
+                fagsakId = sisteIverksatteBehandling.fagsak.id
             )
 
         val opprettetVedtak =
@@ -119,10 +120,10 @@ class AutovedtakSatsendringService(
         return "Satsendring kjørt OK"
     }
 
-    private fun harAlleredeNySats(behandlingId: Long, satstidspunkt: YearMonth): Boolean {
+    private fun harAlleredeNySats(sisteIverksettBehandlingsId: Long, satstidspunkt: YearMonth): Boolean {
         val andeler =
             andelTilkjentYtelseMedEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
-                behandlingId
+                sisteIverksettBehandlingsId
             )
 
         return harAlleredeSisteSats(andeler, satstidspunkt)

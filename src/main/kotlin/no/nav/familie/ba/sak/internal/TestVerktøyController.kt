@@ -57,7 +57,7 @@ class TestVerktøyController(
 
     @GetMapping(path = ["/test-satsendring/{fagsakId}"])
     @Unprotected
-    fun utførSatsendringPåBehandling(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<String>> {
+    fun utførSatsendringPåFagsak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<String>> {
         return if (envService.erPreprod() || envService.erDev()) {
             satskjøringRepository.save(Satskjøring(fagsakId = fagsakId))
             opprettTaskService.opprettSatsendringTask(fagsakId, YearMonth.of(2023, 3))
