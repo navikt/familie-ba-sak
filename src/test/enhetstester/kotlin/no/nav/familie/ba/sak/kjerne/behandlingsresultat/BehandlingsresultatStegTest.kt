@@ -73,12 +73,12 @@ class BehandlingsresultatStegTest {
             årsak = BehandlingÅrsak.HELMANUELL_MIGRERING
         )
 
-        every { featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_BEREGNE_BEHANDLINGSRESULTAT) } returns true
+        every { featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_BEREGNE_BEHANDLINGSRESULTAT) } returns false
     }
 
     @Test
     fun `skal kaste exception hvis behandlingsresultat er Avslått for en manuell migrering`() {
-        every { mockBehandlingsresultatService.utledBehandlingsresultat(any()) } returns Behandlingsresultat.AVSLÅTT
+        every { mockBehandlingsresultatService.utledBehandlingsresultatGammel(any()) } returns Behandlingsresultat.AVSLÅTT
 
         every {
             behandlingService.oppdaterBehandlingsresultat(
@@ -98,7 +98,7 @@ class BehandlingsresultatStegTest {
 
     @Test
     fun `skal kaste exception hvis behandlingsresultat er Delvis Innvilget for en manuell migrering`() {
-        every { mockBehandlingsresultatService.utledBehandlingsresultat(any()) } returns Behandlingsresultat.DELVIS_INNVILGET
+        every { mockBehandlingsresultatService.utledBehandlingsresultatGammel(any()) } returns Behandlingsresultat.DELVIS_INNVILGET
 
         every {
             behandlingService.oppdaterBehandlingsresultat(
@@ -118,7 +118,7 @@ class BehandlingsresultatStegTest {
 
     @Test
     fun `skal kaste exception hvis behandlingsresultat er Avslått,Endret og Opphørt for en manuell migrering`() {
-        every { mockBehandlingsresultatService.utledBehandlingsresultat(any()) } returns Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT
+        every { mockBehandlingsresultatService.utledBehandlingsresultatGammel(any()) } returns Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT
 
         every {
             behandlingService.oppdaterBehandlingsresultat(
