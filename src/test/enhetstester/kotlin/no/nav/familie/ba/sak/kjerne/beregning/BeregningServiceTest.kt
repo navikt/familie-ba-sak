@@ -4,7 +4,9 @@ import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import io.mockk.mockkObject
 import io.mockk.slot
+import io.mockk.unmockkObject
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.forrigeMåned
@@ -54,6 +56,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.felles.Ressurs
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -72,13 +75,26 @@ class BeregningServiceTest {
     private val personopplysningGrunnlagRepository = mockk<PersonopplysningGrunnlagRepository>()
     private val endretUtbetalingAndelRepository = mockk<EndretUtbetalingAndelRepository>()
     private val småbarnstilleggService = mockk<SmåbarnstilleggService>()
-    private val featureToggleService = mockk<FeatureToggleService>()
+    private val featureToggleService = mockk<FeatureToggleService>(relaxed = true)
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService = AndelerTilkjentYtelseOgEndreteUtbetalingerService(
         andelTilkjentYtelseRepository,
-        endretUtbetalingAndelRepository
+        endretUtbetalingAndelRepository,
+        vilkårsvurderingRepository,
+        featureToggleService
     )
 
     private lateinit var beregningService: BeregningService
+
+    @BeforeEach
+    fun førHverTest() {
+        mockkObject(SatsTidspunkt)
+        every { SatsTidspunkt.senesteSatsTidspunkt } returns LocalDate.of(2022, 12, 31)
+    }
+
+    @AfterEach
+    fun etterHverTest() {
+        unmockkObject(SatsTidspunkt)
+    }
 
     @BeforeEach
     fun setUp() {
@@ -105,7 +121,7 @@ class BeregningServiceTest {
         }
         every { endretUtbetalingAndelRepository.findByBehandlingId(any()) } answers { emptyList() }
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } answers { emptyList() }
-        every { featureToggleService.isEnabled(any()) } answers { true }
+        every { featureToggleService.isEnabled(any(), false) } answers { true }
         every { endretUtbetalingAndelRepository.saveAllAndFlush(any<Collection<EndretUtbetalingAndel>>()) } answers { emptyList() }
         every { andelTilkjentYtelseRepository.saveAllAndFlush(any<Collection<AndelTilkjentYtelse>>()) } answers { emptyList() }
     }
@@ -482,7 +498,20 @@ class BeregningServiceTest {
         val tilleggFom = SatsService.hentDatoForSatsendring(satstype = SatsType.TILLEGG_ORBA, oppdatertBeløp = 1354)
 
         val søkerVilkår = Vilkår.hentVilkårFor(PersonType.SØKER)
-        val vilkårResultaterSøker = søkerVilkår.map { lagVilkårResultat(vilkårType = it, periodeFom = periode1Fom, periodeTom = periode1Tom) } + søkerVilkår.map { lagVilkårResultat(vilkårType = it, periodeFom = periode2Fom, periodeTom = periode2Tom, resultat = Resultat.IKKE_OPPFYLT) } + søkerVilkår.map { lagVilkårResultat(vilkårType = it, periodeFom = periode3Fom, periodeTom = periode3Tom) }
+        val vilkårResultaterSøker = søkerVilkår.map {
+            lagVilkårResultat(
+                vilkårType = it,
+                periodeFom = periode1Fom,
+                periodeTom = periode1Tom
+            )
+        } + søkerVilkår.map {
+            lagVilkårResultat(
+                vilkårType = it,
+                periodeFom = periode2Fom,
+                periodeTom = periode2Tom,
+                resultat = Resultat.IKKE_OPPFYLT
+            )
+        } + søkerVilkår.map { lagVilkårResultat(vilkårType = it, periodeFom = periode3Fom, periodeTom = periode3Tom) }
 
         val personResultatSøker = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
@@ -909,7 +938,15 @@ class BeregningServiceTest {
 
         val vilkårForBarn = Vilkår.hentVilkårFor(PersonType.BARN)
         val vilkårResultaterBarn =
-            vilkårForBarn.lagVilkårResultaterForPerson(fom = førstePeriodeFomForBarnet, tom = førstePeriodeTomForBarnet, erDeltBosted = deltBostedForFørstePeriode) + vilkårForBarn.lagVilkårResultaterForPerson(fom = andrePeriodeFomForBarnet, tom = andrePeriodeTomForBarnet, erDeltBosted = deltBostedForAndrePeriode)
+            vilkårForBarn.lagVilkårResultaterForPerson(
+                fom = førstePeriodeFomForBarnet,
+                tom = førstePeriodeTomForBarnet,
+                erDeltBosted = deltBostedForFørstePeriode
+            ) + vilkårForBarn.lagVilkårResultaterForPerson(
+                fom = andrePeriodeFomForBarnet,
+                tom = andrePeriodeTomForBarnet,
+                erDeltBosted = deltBostedForAndrePeriode
+            )
 
         personResultatBarn.setSortedVilkårResultater(vilkårResultaterBarn.toSet())
         vilkårsvurdering.personResultater = setOf(personResultatSøker, personResultatBarn)
@@ -973,7 +1010,7 @@ class BeregningServiceTest {
             )
         }
 
-        val sisteAndel = if (skalLageSplitt)andelerTilkjentYtelse[3] else andelerTilkjentYtelse[2]
+        val sisteAndel = if (skalLageSplitt) andelerTilkjentYtelse[3] else andelerTilkjentYtelse[2]
         // Siste periode (fra siste satsendring til slutt av endre godkjente perioderesultat for barnet)
         Assertions.assertEquals(andreSatsendringFom.toYearMonth(), sisteAndel.stønadFom)
         Assertions.assertEquals(andrePeriodeTomForBarnet.toYearMonth(), sisteAndel.stønadTom)
@@ -983,7 +1020,11 @@ class BeregningServiceTest {
         )
     }
 
-    private fun Set<Vilkår>.lagVilkårResultaterForPerson(fom: LocalDate, tom: LocalDate, erDeltBosted: Boolean): List<VilkårResultat> =
+    private fun Set<Vilkår>.lagVilkårResultaterForPerson(
+        fom: LocalDate,
+        tom: LocalDate,
+        erDeltBosted: Boolean
+    ): List<VilkårResultat> =
         this.map {
             lagVilkårResultat(
                 vilkårType = it,

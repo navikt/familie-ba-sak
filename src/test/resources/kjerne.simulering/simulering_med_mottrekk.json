@@ -1129,23 +1129,6 @@
           "endretAv": "V142809",
           "endretTid": "2023-01-06 13:11:12.551",
           "versjon": 0
-        },
-        {
-          "id": 5670692,
-          "fk_okonomi_simulering_mottaker_id": 1229110,
-          "fagOmrådeKode": "BARNETRYGD",
-          "fom": "2023-01-01",
-          "tom": "2023-01-31",
-          "betalingType": "DEBIT",
-          "beløp": 658,
-          "posteringType": "YTELSE",
-          "forfallsdato": "2023-01-31",
-          "uten_inntrekk": false,
-          "opprettetAv": "V142809",
-          "opprettetTid": "2023-01-06 13:11:12.551",
-          "endretAv": "V142809",
-          "endretTid": "2023-01-06 13:11:12.551",
-          "versjon": 0
         }
       ]
     }

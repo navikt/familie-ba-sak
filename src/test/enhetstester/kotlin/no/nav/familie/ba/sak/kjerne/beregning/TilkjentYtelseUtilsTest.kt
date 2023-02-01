@@ -1,5 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import io.mockk.every
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
@@ -46,7 +49,9 @@ import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.empty
 import org.hamcrest.Matchers.not
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -54,6 +59,17 @@ import java.time.YearMonth
 import org.hamcrest.CoreMatchers.`is` as Is
 
 internal class TilkjentYtelseUtilsTest {
+
+    @BeforeEach
+    fun førHverTest() {
+        mockkObject(SatsTidspunkt)
+        every { SatsTidspunkt.senesteSatsTidspunkt } returns LocalDate.of(2022, 12, 31)
+    }
+
+    @AfterEach
+    fun etterHverTest() {
+        unmockkObject(SatsTidspunkt)
+    }
 
     @Test
     fun `Barn som fyller 6 år i det vilkårene er oppfylt får andel måneden etter`() {
@@ -404,7 +420,10 @@ internal class TilkjentYtelseUtilsTest {
 
         personResultat.setSortedVilkårResultater(vilkårResulater + borMedSøkerVilkår)
 
-        val tidslinje = personResultat.tilTidslinjeMedRettTilProsentForPerson(fødselsdato = barn.fødselsdato, personType = barn.type)
+        val tidslinje = personResultat.tilTidslinjeMedRettTilProsentForPerson(
+            fødselsdato = barn.fødselsdato,
+            personType = barn.type
+        )
 
         val perioder = tidslinje.perioder().toList()
 
@@ -414,12 +433,32 @@ internal class TilkjentYtelseUtilsTest {
         val periode2 = perioder[1]
         val periode3 = perioder[2]
 
-        assertProsentPeriode(forventetFom = startPåYtelse, forventetTom = rettTilDeltFom.minusMonths(1), forventetProsent = BigDecimal(100), faktisk = periode1)
-        assertProsentPeriode(forventetFom = rettTilDeltFom, forventetTom = rettTilDeltTom, forventetProsent = BigDecimal(50), faktisk = periode2)
-        assertProsentPeriode(forventetFom = rettTilDeltTom.plusMonths(1), forventetTom = månedFørFylte18År, forventetProsent = BigDecimal(100), faktisk = periode3)
+        assertProsentPeriode(
+            forventetFom = startPåYtelse,
+            forventetTom = rettTilDeltFom.minusMonths(1),
+            forventetProsent = BigDecimal(100),
+            faktisk = periode1
+        )
+        assertProsentPeriode(
+            forventetFom = rettTilDeltFom,
+            forventetTom = rettTilDeltTom,
+            forventetProsent = BigDecimal(50),
+            faktisk = periode2
+        )
+        assertProsentPeriode(
+            forventetFom = rettTilDeltTom.plusMonths(1),
+            forventetTom = månedFørFylte18År,
+            forventetProsent = BigDecimal(100),
+            faktisk = periode3
+        )
     }
 
-    private fun assertProsentPeriode(forventetFom: YearMonth, forventetTom: YearMonth, forventetProsent: BigDecimal, faktisk: Periode<BigDecimal, Måned>) {
+    private fun assertProsentPeriode(
+        forventetFom: YearMonth,
+        forventetTom: YearMonth,
+        forventetProsent: BigDecimal,
+        faktisk: Periode<BigDecimal, Måned>
+    ) {
         assertEquals(forventetFom, faktisk.fraOgMed.tilYearMonth())
         assertEquals(forventetTom, faktisk.tilOgMed.tilYearMonth())
         assertEquals(forventetProsent, faktisk.innhold)
@@ -428,7 +467,13 @@ internal class TilkjentYtelseUtilsTest {
     @Test
     fun `Skal returnere 50% hvis vilkårsvurderingen har delt bosted i perioden`() {
         val barn = lagPerson(type = PersonType.BARN)
-        val personResultat = PersonResultat(vilkårsvurdering = lagVilkårsvurdering(barn = listOf(barn), søker = lagPerson(type = PersonType.SØKER)), aktør = barn.aktør)
+        val personResultat = PersonResultat(
+            vilkårsvurdering = lagVilkårsvurdering(
+                barn = listOf(barn),
+                søker = lagPerson(type = PersonType.SØKER)
+            ),
+            aktør = barn.aktør
+        )
         val vilkårResultater = Vilkår.hentVilkårFor(PersonType.BARN).map {
             lagVilkårResultat(
                 vilkårType = it,
@@ -448,7 +493,13 @@ internal class TilkjentYtelseUtilsTest {
     @Test
     fun `Skal returnere 100% hvis vilkårsvurderingen ikke har delt bosted i perioden`() {
         val barn = lagPerson(type = PersonType.BARN)
-        val personResultat = PersonResultat(vilkårsvurdering = lagVilkårsvurdering(barn = listOf(barn), søker = lagPerson(type = PersonType.SØKER)), aktør = barn.aktør)
+        val personResultat = PersonResultat(
+            vilkårsvurdering = lagVilkårsvurdering(
+                barn = listOf(barn),
+                søker = lagPerson(type = PersonType.SØKER)
+            ),
+            aktør = barn.aktør
+        )
         val vilkårResultater = Vilkår.hentVilkårFor(PersonType.BARN).map {
             lagVilkårResultat(
                 vilkårType = it,
@@ -468,7 +519,13 @@ internal class TilkjentYtelseUtilsTest {
     @Test
     fun `Skal returnere null hvis ikke alle vilkår for barn er oppfylt`() {
         val barn = lagPerson(type = PersonType.BARN)
-        val personResultat = PersonResultat(vilkårsvurdering = lagVilkårsvurdering(barn = listOf(barn), søker = lagPerson(type = PersonType.SØKER)), aktør = barn.aktør)
+        val personResultat = PersonResultat(
+            vilkårsvurdering = lagVilkårsvurdering(
+                barn = listOf(barn),
+                søker = lagPerson(type = PersonType.SØKER)
+            ),
+            aktør = barn.aktør
+        )
         val vilkårResultater = Vilkår.hentVilkårFor(PersonType.BARN).mapNotNull {
             if (it == Vilkår.LOVLIG_OPPHOLD) {
                 null
@@ -492,7 +549,13 @@ internal class TilkjentYtelseUtilsTest {
     @Test
     fun `Skal returnere null hvis ikke alle vilkår for søker er oppfylt`() {
         val søker = lagPerson(type = PersonType.SØKER)
-        val personResultat = PersonResultat(vilkårsvurdering = lagVilkårsvurdering(barn = listOf(lagPerson(type = PersonType.BARN)), søker = søker), aktør = søker.aktør)
+        val personResultat = PersonResultat(
+            vilkårsvurdering = lagVilkårsvurdering(
+                barn = listOf(lagPerson(type = PersonType.BARN)),
+                søker = søker
+            ),
+            aktør = søker.aktør
+        )
         val vilkårResultater = Vilkår.hentVilkårFor(PersonType.SØKER).mapNotNull {
             if (it == Vilkår.LOVLIG_OPPHOLD) {
                 null

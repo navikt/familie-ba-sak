@@ -374,7 +374,7 @@ object TilkjentYtelseUtils {
                     skalAndelerSlåsSammen(andel, nesteAndel)
 
                 if (andelerSkalSlåsSammen) {
-                    val nyAndel = periodenViSerPå.medTom(nesteAndel.stønadTom)
+                    val nyAndel = periodenViSerPå.slåSammenMed(nesteAndel)
                     nyAndel
                 } else {
                     oppdatertListeMedAndeler.add(periodenViSerPå)
@@ -392,7 +392,7 @@ object TilkjentYtelseUtils {
      * Slår sammen andeler for barn når beløpet er nedjuster til 0kr som er blitt splittet av
      * for eksempel satsendring.
      */
-    private fun skalAndelerSlåsSammen(
+    fun skalAndelerSlåsSammen(
         førsteAndel: AndelTilkjentYtelseMedEndreteUtbetalinger,
         nesteAndel: AndelTilkjentYtelseMedEndreteUtbetalinger
     ): Boolean =

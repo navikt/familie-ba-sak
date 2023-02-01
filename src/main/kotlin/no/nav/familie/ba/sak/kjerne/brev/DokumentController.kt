@@ -35,6 +35,7 @@ class DokumentController(
     private val fagsakService: FagsakService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val dokumentService: DokumentService,
+    private val dokumentGenereringService: DokumentGenereringService,
     private val vedtakService: VedtakService,
     private val tilgangService: TilgangService,
     private val persongrunnlagService: PersongrunnlagService,
@@ -53,7 +54,7 @@ class DokumentController(
         val vedtak = vedtakService.hent(vedtakId)
         tilgangService.validerTilgangTilBehandling(behandlingId = vedtak.behandling.id, event = AuditLoggerEvent.UPDATE)
 
-        return dokumentService.genererBrevForVedtak(vedtak).let {
+        return dokumentGenereringService.genererBrevForVedtak(vedtak).let {
             vedtak.stønadBrevPdF = it
             vedtakService.oppdater(vedtak)
             Ressurs.success(it)
@@ -92,7 +93,7 @@ class DokumentController(
 
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 
-        return dokumentService.genererManueltBrev(
+        return dokumentGenereringService.genererManueltBrev(
             manueltBrevRequest = manueltBrevRequest.byggMottakerdata(
                 behandling,
                 persongrunnlagService,
@@ -147,7 +148,7 @@ class DokumentController(
             handling = "hente forhåndsvisning brev"
         )
 
-        return dokumentService.genererManueltBrev(
+        return dokumentGenereringService.genererManueltBrev(
             manueltBrevRequest = manueltBrevRequest.leggTilEnhet(arbeidsfordelingService),
             erForhåndsvisning = true
         ).let { Ressurs.success(it) }
