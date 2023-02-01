@@ -101,7 +101,9 @@ class BehandlingsresultatSteg(
             } else {
                 val resultat = if (featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_BEREGNE_BEHANDLINGSRESULTAT)) {
                     behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.id)
-                } else behandlingsresultatService.utledBehandlingsresultatGammel(behandlingId = behandling.id)
+                } else {
+                    behandlingsresultatService.utledBehandlingsresultatGammel(behandlingId = behandling.id)
+                }
 
                 behandlingService.oppdaterBehandlingsresultat(
                     behandlingId = behandling.id,
