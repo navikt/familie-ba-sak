@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.brev.DokumentService
+import no.nav.familie.ba.sak.kjerne.brev.DokumentDistribueringService
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import org.slf4j.LoggerFactory
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class DistribuerVedtaksbrev(
-    private val dokumentService: DokumentService,
+    private val dokumentDistribueringService: DokumentDistribueringService,
     private val taskRepository: TaskRepositoryWrapper
 ) : BehandlingSteg<DistribuerDokumentDTO> {
 
@@ -19,8 +19,7 @@ class DistribuerVedtaksbrev(
         data: DistribuerDokumentDTO
     ): StegType {
         logger.info("Iverksetter distribusjon av vedtaksbrev med journalpostId ${data.journalpostId}")
-
-        dokumentService.prøvDistribuerBrevOgLoggHendelse(
+        dokumentDistribueringService.prøvDistribuerBrevOgLoggHendelse(
             journalpostId = data.journalpostId,
             behandlingId = data.behandlingId,
             loggBehandlerRolle = BehandlerRolle.SYSTEM,

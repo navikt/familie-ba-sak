@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.task
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import io.sentry.Sentry
-import no.nav.familie.ba.sak.kjerne.brev.DokumentService
+import no.nav.familie.ba.sak.kjerne.brev.DokumentDistribueringService
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.brev.mottakerErDødUtenDødsboadresse
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
@@ -30,7 +30,7 @@ const val ANTALL_SEKUNDER_I_EN_UKE = 604800L
     settTilManuellOppfølgning = true
 )
 class DistribuerDødsfallDokumentPåFagsakTask(
-    private val dokumentService: DokumentService
+    private val dokumentDistribueringService: DokumentDistribueringService
 ) : AsyncTaskStep {
 
     private val antallBrevIkkeDistribuertUkjentDødsboadresse: Map<Brevmal, Counter> =
@@ -56,7 +56,7 @@ class DistribuerDødsfallDokumentPåFagsakTask(
             antallBrevIkkeDistribuertUkjentDødsboadresse[brevmal]?.increment()
         } else {
             try {
-                dokumentService.prøvDistribuerBrevOgLoggHendelse(
+                dokumentDistribueringService.prøvDistribuerBrevOgLoggHendelse(
                     journalpostId = journalpostId,
                     behandlingId = null,
                     loggBehandlerRolle = BehandlerRolle.SYSTEM,
