@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.EndretUtbetalingAndelTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -25,7 +27,8 @@ object BehandlingsresultatSøknadUtils {
         nåværendeAndeler: List<AndelTilkjentYtelse>,
         nåværendePersonResultater: Set<PersonResultat>,
         personerFremstiltKravFor: List<Aktør>,
-        endretUtbetalingAndeler: List<EndretUtbetalingAndel>
+        endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
+        behandlingÅrsak: BehandlingÅrsak
     ): Søknadsresultat {
         val resultaterFraAndeler = utledSøknadResultatFraAndelerTilkjentYtelse(
             forrigeAndeler = forrigeAndeler,
@@ -39,8 +42,12 @@ object BehandlingsresultatSøknadUtils {
             personerFremstiltKravFor = personerFremstiltKravFor
         )
 
+        val erFødselshendelseMedAvslag = if (behandlingÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
+            nåværendePersonResultater.any { personResultat -> personResultat.vilkårResultater.any { it.resultat == Resultat.IKKE_OPPFYLT } }
+        } else false
+
         val alleResultater = (
-            if (erEksplisittAvslagPåMinstEnPersonFremstiltKravFor) {
+            if (erEksplisittAvslagPåMinstEnPersonFremstiltKravFor || erFødselshendelseMedAvslag) {
                 resultaterFraAndeler.plus(Søknadsresultat.AVSLÅTT)
             } else {
                 resultaterFraAndeler

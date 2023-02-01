@@ -85,7 +85,8 @@ class BehandlingsresultatService(
                 forrigeAndeler = forrigeAndelerTilkjentYtelse,
                 endretUtbetalingAndeler = endretUtbetalingAndeler,
                 personerFremstiltKravFor = personerFremstiltKravFor,
-                nåværendePersonResultater = vilkårsvurdering.personResultater
+                nåværendePersonResultater = vilkårsvurdering.personResultater,
+                behandlingÅrsak = behandling.opprettetÅrsak
             )
         } else {
             null
