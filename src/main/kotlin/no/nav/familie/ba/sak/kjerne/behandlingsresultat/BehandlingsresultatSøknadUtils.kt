@@ -44,7 +44,9 @@ object BehandlingsresultatSøknadUtils {
 
         val erFødselshendelseMedAvslag = if (behandlingÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
             nåværendePersonResultater.any { personResultat -> personResultat.vilkårResultater.any { it.resultat == Resultat.IKKE_OPPFYLT } }
-        } else false
+        } else {
+            false
+        }
 
         val alleResultater = (
             if (erEksplisittAvslagPåMinstEnPersonFremstiltKravFor || erFødselshendelseMedAvslag) {
