@@ -66,6 +66,7 @@ class BehandlingsresultatService(
         val forrigeBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = behandling.fagsak.id)
 
         val søknadGrunnlag = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)
+        val søknadDTO = søknadGrunnlag?.hentSøknadDto()
 
         val forrigeAndelerTilkjentYtelse = forrigeBehandling?.let { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = it.id) } ?: emptyList()
         val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandlingId)
@@ -74,7 +75,7 @@ class BehandlingsresultatService(
 
         val personerFremstiltKravFor = finnPersonerFremstiltKravFor(
             behandling = behandling,
-            søknadDTO = søknadGrunnlag?.hentSøknadDto(),
+            søknadDTO = søknadDTO,
             forrigeBehandling = forrigeBehandling
         )
 
@@ -86,7 +87,8 @@ class BehandlingsresultatService(
                 endretUtbetalingAndeler = endretUtbetalingAndeler,
                 personerFremstiltKravFor = personerFremstiltKravFor,
                 nåværendePersonResultater = vilkårsvurdering.personResultater,
-                behandlingÅrsak = behandling.opprettetÅrsak
+                behandlingÅrsak = behandling.opprettetÅrsak,
+                finnesUregistrerteBarn = søknadGrunnlag?.hentUregistrerteBarn()?.isNotEmpty() ?: false
             )
         } else {
             null
