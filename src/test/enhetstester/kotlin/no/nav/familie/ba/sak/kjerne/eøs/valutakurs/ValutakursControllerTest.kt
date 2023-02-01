@@ -8,7 +8,6 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.unmockkAll
 import io.mockk.verify
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.ekstern.restDomene.RestValutakurs
 import no.nav.familie.ba.sak.ekstern.restDomene.UtfyltStatus
@@ -29,9 +28,6 @@ import java.time.YearMonth
 @ExtendWith(MockKExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ValutakursControllerTest {
-
-    @MockK
-    private lateinit var featureToggleService: FeatureToggleService
 
     @MockK
     private lateinit var valutakursService: ValutakursService
@@ -55,8 +51,7 @@ class ValutakursControllerTest {
 
     @BeforeEach
     fun setup() {
-        clearMocks(featureToggleService, personidentService, valutakursService, ecbService, utvidetBehandlingService)
-        every { featureToggleService.isEnabled(any()) } returns true
+        clearMocks(personidentService, valutakursService, ecbService, utvidetBehandlingService)
         every { personidentService.hentAktør(any()) } returns tilAktør(barnId)
         every { valutakursService.hentValutakurs(any()) } returns restValutakurs.tilValutakurs(listOf(tilAktør(barnId)))
         every { ecbService.hentValutakurs(any(), any()) } returns BigDecimal.valueOf(0.95)
