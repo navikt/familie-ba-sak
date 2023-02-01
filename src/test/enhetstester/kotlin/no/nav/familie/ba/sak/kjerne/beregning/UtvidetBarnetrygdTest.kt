@@ -526,7 +526,7 @@ internal class UtvidetBarnetrygdTest {
         ).andelerTilkjentYtelse.toList().sortedBy { it.type }
 
         val vedtaksperioderMedBegrunnelser = hentPerioderMedUtbetaling(
-            andelerTilkjentYtelse = andeler.map { AndelTilkjentYtelseMedEndreteUtbetalinger.utenEndringer(it) },
+            andelerTilkjentYtelse = andeler,
             vedtak = lagVedtak(behandling),
             personResultater = vilkårsvurdering.personResultater,
             personerIPersongrunnlag = personopplysningGrunnlag.personer.toList()
