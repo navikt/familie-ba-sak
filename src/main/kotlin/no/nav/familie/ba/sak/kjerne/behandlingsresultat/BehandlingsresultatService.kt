@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.convertDataClassToJson
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.BehandlingUnderkategoriDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -11,8 +10,12 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
+import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -34,7 +37,9 @@ class BehandlingsresultatService(
     private val persongrunnlagService: PersongrunnlagService,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
-    private val featureToggleService: FeatureToggleService
+    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+    private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
+    private val kompetanseService: KompetanseService
 ) {
 
     internal fun finnPersonerFremstiltKravFor(behandling: Behandling, søknadDTO: SøknadDTO?, forrigeBehandling: Behandling?) =
@@ -57,6 +62,74 @@ class BehandlingsresultatService(
         }
 
     internal fun utledBehandlingsresultat(behandlingId: Long): Behandlingsresultat {
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        val forrigeBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = behandling.fagsak.id)
+
+        val søknadGrunnlag = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)
+        val søknadDTO = søknadGrunnlag?.hentSøknadDto()
+
+        val forrigeAndelerTilkjentYtelse = forrigeBehandling?.let { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = it.id) } ?: emptyList()
+        val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandlingId)
+        val endretUtbetalingAndeler = endretUtbetalingAndelService.hentForBehandling(behandlingId = behandlingId)
+        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId = behandlingId)
+
+        val personerFremstiltKravFor = finnPersonerFremstiltKravFor(
+            behandling = behandling,
+            søknadDTO = søknadDTO,
+            forrigeBehandling = forrigeBehandling
+        )
+
+        // 1 SØKNAD
+        val søknadsresultat = if (behandling.opprettetÅrsak in listOf(BehandlingÅrsak.FØDSELSHENDELSE, BehandlingÅrsak.SØKNAD) || behandling.erManuellMigrering()) {
+            BehandlingsresultatSøknadUtils.utledResultatPåSøknad(
+                nåværendeAndeler = andelerTilkjentYtelse,
+                forrigeAndeler = forrigeAndelerTilkjentYtelse,
+                endretUtbetalingAndeler = endretUtbetalingAndeler,
+                personerFremstiltKravFor = personerFremstiltKravFor,
+                nåværendePersonResultater = vilkårsvurdering.personResultater,
+                behandlingÅrsak = behandling.opprettetÅrsak,
+                finnesUregistrerteBarn = søknadGrunnlag?.hentUregistrerteBarn()?.isNotEmpty() ?: false
+            )
+        } else {
+            null
+        }
+
+        // 2 ENDRINGER
+        val endringsresultat = if (forrigeBehandling != null) {
+            val forrigeEndretUtbetalingAndeler = endretUtbetalingAndelService.hentForBehandling(behandlingId = forrigeBehandling.id)
+            val forrigeVilkårsvurdering = vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId = forrigeBehandling.id)
+            val kompetanser = kompetanseService.hentKompetanser(behandlingId = BehandlingId(behandlingId))
+            val forrigeKompetanser = kompetanseService.hentKompetanser(behandlingId = BehandlingId(forrigeBehandling.id))
+
+            BehandlingsresultatEndringUtils.utledEndringsresultat(
+                nåværendeAndeler = andelerTilkjentYtelse,
+                forrigeAndeler = forrigeAndelerTilkjentYtelse,
+                nåværendeEndretAndeler = endretUtbetalingAndeler,
+                forrigeEndretAndeler = forrigeEndretUtbetalingAndeler,
+                nåværendePersonResultat = vilkårsvurdering.personResultater,
+                forrigePersonResultat = forrigeVilkårsvurdering.personResultater,
+                nåværendeKompetanser = kompetanser.toList(),
+                forrigeKompetanser = forrigeKompetanser.toList(),
+                personerFremstiltKravFor = personerFremstiltKravFor
+            )
+        } else {
+            Endringsresultat.INGEN_ENDRING
+        }
+
+        // 3 OPPHØR
+        val opphørsresultat = BehandlingsresultatOpphørUtils.hentOpphørsresultatPåBehandling(
+            nåværendeAndeler = andelerTilkjentYtelse,
+            forrigeAndeler = forrigeAndelerTilkjentYtelse
+        )
+
+        // KOMBINER
+        val behandlingsresultat = BehandlingsresultatUtils.kombinerResultaterTilBehandlingsresultat(søknadsresultat, endringsresultat, opphørsresultat)
+
+        return behandlingsresultat
+    }
+
+    @Deprecated("Skal erstattes av ny metode")
+    internal fun utledBehandlingsresultatGammel(behandlingId: Long): Behandlingsresultat {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
         val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling)
 
@@ -132,7 +205,7 @@ class BehandlingsresultatService(
                 .also { it.ytelsePersoner = ytelsePersonerMedResultat.writeValueAsString() }
         }
 
-        return utledBehandlingsresultat(
+        return utledBehandlingsresultatGammel(
             ytelsePersonerMedResultat,
             andelerMedEndringer,
             forrigeAndelerMedEndringer,
@@ -140,7 +213,7 @@ class BehandlingsresultatService(
         )
     }
 
-    internal fun utledBehandlingsresultat(
+    internal fun utledBehandlingsresultatGammel(
         ytelsePersonerMedResultat: List<YtelsePerson>,
         andelerMedEndringer: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
         forrigeAndelerMedEndringer: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,

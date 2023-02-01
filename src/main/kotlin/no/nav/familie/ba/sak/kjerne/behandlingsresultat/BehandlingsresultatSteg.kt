@@ -99,7 +99,8 @@ class BehandlingsresultatSteg(
             if (behandling.erMigrering() && behandling.skalBehandlesAutomatisk) {
                 settBehandlingsresultat(behandling, Behandlingsresultat.INNVILGET)
             } else {
-                val resultat = behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.id)
+                val resultat = behandlingsresultatService.utledBehandlingsresultatGammel(behandlingId = behandling.id)
+
                 behandlingService.oppdaterBehandlingsresultat(
                     behandlingId = behandling.id,
                     resultat = resultat
