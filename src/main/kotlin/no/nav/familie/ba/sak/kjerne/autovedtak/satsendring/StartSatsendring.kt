@@ -254,8 +254,7 @@ class StartSatsendring(
                     )
                 ) {
                     secureLogger.info("Oppretter satsendringtask for $ident og fagsakID=${fagsak.id}")
-                    satskjøringRepository.save(Satskjøring(fagsakId = fagsak.id))
-                    opprettTaskService.opprettSatsendringTask(fagsak.id, SATSENDRINGMÅNED_2023)
+                    opprettSatsendringForFagsak(fagsakId = fagsak.id)
                 }
             }
         }
