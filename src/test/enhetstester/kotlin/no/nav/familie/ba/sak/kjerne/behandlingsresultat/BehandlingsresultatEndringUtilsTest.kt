@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatEndri
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatEndringUtils.erEndringIKompetanse
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatEndringUtils.erEndringIVilkårvurderingForPerson
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatEndringUtils.utledEndringsresultat
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
@@ -454,6 +455,58 @@ class BehandlingsresultatEndringUtilsTest {
                 tom = aug22,
                 beløp = 527,
                 aktør = barn1Aktør
+            ),
+            lagAndelTilkjentYtelse(
+                fom = jan22,
+                tom = aug22,
+                beløp = 1054,
+                aktør = barn2Aktør
+            )
+        )
+
+        val erEndringIBeløp = erEndringIBeløp(
+            nåværendeAndeler = nåværendeAndeler,
+            forrigeAndeler = forrigeAndeler,
+            personerFremstiltKravFor = listOf()
+        )
+
+        assertEquals(true, erEndringIBeløp)
+    }
+
+    @Test
+    fun `Endring i beløp - Skal returnere true hvis utvidet ikke er endret men småbarnstillegg kun er lagt på`() {
+        val søker = lagPerson(type = PersonType.SØKER).aktør
+        val barn2Aktør = lagPerson(type = PersonType.BARN).aktør
+
+        val forrigeAndeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = jan22,
+                tom = aug22,
+                beløp = 1054,
+                aktør = søker,
+                ytelseType = YtelseType.UTVIDET_BARNETRYGD
+            ),
+            lagAndelTilkjentYtelse(
+                fom = jan22,
+                tom = aug22,
+                beløp = 1054,
+                aktør = barn2Aktør
+            )
+        )
+        val nåværendeAndeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = jan22,
+                tom = aug22,
+                beløp = 1054,
+                aktør = søker,
+                ytelseType = YtelseType.UTVIDET_BARNETRYGD
+            ),
+            lagAndelTilkjentYtelse(
+                fom = mai22,
+                tom = aug22,
+                beløp = 630,
+                aktør = søker,
+                ytelseType = YtelseType.SMÅBARNSTILLEGG
             ),
             lagAndelTilkjentYtelse(
                 fom = jan22,
