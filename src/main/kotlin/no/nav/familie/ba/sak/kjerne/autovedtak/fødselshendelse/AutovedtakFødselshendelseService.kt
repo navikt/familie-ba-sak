@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse
 
 import io.micrometer.core.instrument.Metrics
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
@@ -288,6 +289,7 @@ class AutovedtakFødselshendelseService(
         }
 
         logger.error("Fant ikke begrunnelse for at fødselshendelse ikke kunne automatisk behandles.")
+        throw Feil("Fant ikke begrunnelse for fødselshendelse på fagsak=${behandling.fagsak.id}")
 
         return ""
     }
