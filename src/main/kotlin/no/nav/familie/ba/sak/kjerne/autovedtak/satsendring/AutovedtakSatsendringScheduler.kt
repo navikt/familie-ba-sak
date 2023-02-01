@@ -4,7 +4,6 @@ import no.nav.familie.leader.LeaderClient
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
-import java.time.YearMonth
 
 @Service
 class AutovedtakSatsendringScheduler(private val startSatsendring: StartSatsendring) {
@@ -13,7 +12,10 @@ class AutovedtakSatsendringScheduler(private val startSatsendring: StartSatsendr
     fun triggSatsendring() {
         if (LeaderClient.isLeader() == true) {
             logger.info("Satsendring trigges av schedulert jobb")
-            startSatsendring.startSatsendring(antallFagsaker = 10, satsTidspunkt = YearMonth.of(2023, 3))
+            startSatsendring.startSatsendring(
+                antallFagsaker = 10,
+                satsTidspunkt = StartSatsendring.SATSENDRINGMÅNED_2023
+            )
         }
     }
 

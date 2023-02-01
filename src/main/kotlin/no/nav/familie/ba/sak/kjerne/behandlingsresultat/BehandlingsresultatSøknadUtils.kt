@@ -28,7 +28,8 @@ object BehandlingsresultatSøknadUtils {
         nåværendePersonResultater: Set<PersonResultat>,
         personerFremstiltKravFor: List<Aktør>,
         endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
-        behandlingÅrsak: BehandlingÅrsak
+        behandlingÅrsak: BehandlingÅrsak,
+        finnesUregistrerteBarn: Boolean
     ): Søknadsresultat {
         val resultaterFraAndeler = utledSøknadResultatFraAndelerTilkjentYtelse(
             forrigeAndeler = forrigeAndeler,
@@ -49,7 +50,7 @@ object BehandlingsresultatSøknadUtils {
         }
 
         val alleResultater = (
-            if (erEksplisittAvslagPåMinstEnPersonFremstiltKravFor || erFødselshendelseMedAvslag) {
+            if (erEksplisittAvslagPåMinstEnPersonFremstiltKravFor || erFødselshendelseMedAvslag || finnesUregistrerteBarn) {
                 resultaterFraAndeler.plus(Søknadsresultat.AVSLÅTT)
             } else {
                 resultaterFraAndeler
