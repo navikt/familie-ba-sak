@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.BehandlingUnderkategoriDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
@@ -18,8 +17,11 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -59,7 +61,13 @@ internal class BehandlingsresultatServiceTest {
     private lateinit var andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
 
     @MockK
-    private lateinit var featureToggleService: FeatureToggleService
+    private lateinit var kompetanseService: KompetanseService
+
+    @MockK
+    private lateinit var endretUtbetalingAndelService: EndretUtbetalingAndelService
+
+    @MockK
+    private lateinit var andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
 
     @InjectMockKs
     private lateinit var behandlingsresultatService: BehandlingsresultatService
@@ -100,7 +108,7 @@ internal class BehandlingsresultatServiceTest {
                 prosent = BigDecimal(50)
             )
 
-        val behandlingsresultat = behandlingsresultatService.utledBehandlingsresultat(
+        val behandlingsresultat = behandlingsresultatService.utledBehandlingsresultatGammel(
             ytelsePersonerMedResultat = listOf(ytelsePersonSøker, ytelsePersonBarn),
             andelerMedEndringer = listOf(andelMedEndring),
             forrigeAndelerMedEndringer = listOf(forrigeAndelMedEndring),
@@ -145,7 +153,7 @@ internal class BehandlingsresultatServiceTest {
                 prosent = BigDecimal(50)
             )
 
-        val behandlingsresultat = behandlingsresultatService.utledBehandlingsresultat(
+        val behandlingsresultat = behandlingsresultatService.utledBehandlingsresultatGammel(
             ytelsePersonerMedResultat = listOf(ytelsePersonSøker, ytelsePersonBarn),
             andelerMedEndringer = listOf(andelMedEndring),
             forrigeAndelerMedEndringer = listOf(forrigeAndelMedEndring),
@@ -181,7 +189,7 @@ internal class BehandlingsresultatServiceTest {
                 prosent = BigDecimal(50)
             )
 
-        val behandlingsresultat = behandlingsresultatService.utledBehandlingsresultat(
+        val behandlingsresultat = behandlingsresultatService.utledBehandlingsresultatGammel(
             ytelsePersonerMedResultat = listOf(ytelsePersonSøker, ytelsePersonBarn),
             andelerMedEndringer = listOf(andelMedEndring),
             forrigeAndelerMedEndringer = listOf(),
@@ -217,7 +225,7 @@ internal class BehandlingsresultatServiceTest {
                 prosent = BigDecimal(50)
             )
 
-        val behandlingsresultat = behandlingsresultatService.utledBehandlingsresultat(
+        val behandlingsresultat = behandlingsresultatService.utledBehandlingsresultatGammel(
             ytelsePersonerMedResultat = listOf(ytelsePersonSøker, ytelsePersonBarn),
             andelerMedEndringer = listOf(),
             forrigeAndelerMedEndringer = listOf(forrigeAndelMedEndring),
