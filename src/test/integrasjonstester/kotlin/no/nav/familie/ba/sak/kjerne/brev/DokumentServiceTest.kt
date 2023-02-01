@@ -98,6 +98,9 @@ class DokumentServiceTest(
     private val brevKlient: BrevKlient,
 
     @Autowired
+    private val dokumentGenereringService: DokumentGenereringService,
+
+    @Autowired
     private val databaseCleanupService: DatabaseCleanupService
 ) : AbstractSpringIntegrationTest() {
 
@@ -169,7 +172,7 @@ class DokumentServiceTest(
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVilkårsvurderingSteg.id)
         vedtakService.oppdaterVedtakMedStønadsbrev(vedtak!!)
 
-        val pdfvedtaksbrev = dokumentService.genererBrevForVedtak(vedtak)
+        val pdfvedtaksbrev = dokumentGenereringService.genererBrevForVedtak(vedtak)
         assert(pdfvedtaksbrev.contentEquals(TEST_PDF))
     }
 
@@ -252,7 +255,7 @@ class DokumentServiceTest(
 
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVedtakBesluttet.id)!!
         val feil = assertThrows<FunksjonellFeil> {
-            dokumentService.genererBrevForVedtak(vedtak)
+            dokumentGenereringService.genererBrevForVedtak(vedtak)
         }
 
         assert(
