@@ -211,7 +211,7 @@ internal class StartSatsendringTest {
     }
 
     @Test
-    fun `Ikke start satsendring på sak hvis ytelsen utløper før satstidspunkt`() {
+    fun `Ikke start satsendring på sak hvis ytelsen utløper før satstidspunkt, men marker at sastsendring alt er kjørt`() {
         every { featureToggleService.isEnabled(any(), any()) } returns true
         every { featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_OPPRETT_TASKER) } returns true
         justRun { opprettTaskService.opprettSatsendringTask(any(), any()) }
@@ -246,7 +246,11 @@ internal class StartSatsendringTest {
 
         startSatsendring.startSatsendring(5)
 
-        verify(exactly = 0) { satskjøringRepository.save(any()) }
+        val satskjøringSlot = slot<Satskjøring>()
+        verify(exactly = 1) { satskjøringRepository.save(capture(satskjøringSlot)) }
+        assertThat(satskjøringSlot.captured.fagsakId).isEqualTo(behandling.fagsak.id)
+        assertThat(satskjøringSlot.captured.fagsakId).isEqualTo(behandling.fagsak.id)
+        assertThat(satskjøringSlot.captured.ferdigTidspunkt).isEqualTo(behandling.endretTidspunkt)
     }
 
     @Test
