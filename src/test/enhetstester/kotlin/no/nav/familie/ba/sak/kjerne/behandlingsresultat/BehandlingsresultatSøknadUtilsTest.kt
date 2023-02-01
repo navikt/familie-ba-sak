@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatSøknadUtils.kombinerSøknadsresultater
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatSøknadUtils.utledSøknadResultatFraAndelerTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import org.hamcrest.MatcherAssert.assertThat
@@ -283,6 +284,49 @@ class BehandlingsresultatSøknadUtilsTest {
                 Søknadsresultat.INNVILGET
             )
         )
+    }
+
+    @Test
+    fun `utledSøknadResultatFraAndelerTilkjentYtelse skal returnere INNVILGET dersom småbarnstillegg blir lagt til`() {
+        val barn1Person = lagPerson(type = PersonType.BARN)
+        val barn1Aktør = barn1Person.aktør
+        val søker = lagPerson(type = PersonType.SØKER)
+
+        val forrigeAndelBarn =
+            lagAndelTilkjentYtelse(
+                fom = jan22,
+                tom = aug22,
+                beløp = 1054,
+                aktør = barn1Aktør
+            )
+
+        val forrigeAndelUtvidet = lagAndelTilkjentYtelse(
+            fom = jan22,
+            tom = aug22,
+            beløp = 1054,
+            aktør = søker.aktør,
+            ytelseType = YtelseType.UTVIDET_BARNETRYGD
+        )
+
+        val søknadsResultat = utledSøknadResultatFraAndelerTilkjentYtelse(
+            forrigeAndeler = listOf(forrigeAndelBarn, forrigeAndelUtvidet),
+            nåværendeAndeler = listOf(
+                forrigeAndelBarn,
+                forrigeAndelUtvidet,
+                lagAndelTilkjentYtelse(
+                    fom = jan22,
+                    tom = aug22,
+                    beløp = 630,
+                    aktør = søker.aktør,
+                    ytelseType = YtelseType.SMÅBARNSTILLEGG
+                )
+            ),
+            personerFremstiltKravFor = listOf(søker.aktør),
+            endretUtbetalingAndeler = emptyList()
+        ).filter { it != Søknadsresultat.INGEN_RELEVANTE_ENDRINGER }
+
+        assertThat(søknadsResultat.size, Is(1))
+        assertThat(søknadsResultat[0], Is(Søknadsresultat.INNVILGET))
     }
 
     @Test

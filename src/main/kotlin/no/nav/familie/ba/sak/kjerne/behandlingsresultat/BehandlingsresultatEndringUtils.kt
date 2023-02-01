@@ -77,19 +77,23 @@ object BehandlingsresultatEndringUtils {
         val opphørstidspunkt = nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(forrigeAndeler = forrigeAndeler) ?: return false // Returnerer false hvis verken forrige eller nåværende behandling har andeler
 
         val erEndringIBeløpForMinstEnPerson = allePersonerMedAndeler.any { aktør ->
-            erEndringIBeløpForPerson(
-                nåværendeAndeler = nåværendeAndeler.filter { it.aktør == aktør },
-                forrigeAndeler = forrigeAndeler.filter { it.aktør == aktør },
-                opphørstidspunkt = opphørstidspunkt,
-                erFremstiltKravForPerson = personerFremstiltKravFor.contains(aktør)
-            )
+            val ytelseTyperForPerson = (nåværendeAndeler.map { it.type } + forrigeAndeler.map { it.type }).distinct()
+
+            ytelseTyperForPerson.any { ytelseType ->
+                erEndringIBeløpForPersonOgType(
+                    nåværendeAndeler = nåværendeAndeler.filter { it.aktør == aktør && it.type == ytelseType },
+                    forrigeAndeler = forrigeAndeler.filter { it.aktør == aktør && it.type == ytelseType },
+                    opphørstidspunkt = opphørstidspunkt,
+                    erFremstiltKravForPerson = personerFremstiltKravFor.contains(aktør)
+                )
+            }
         }
 
         return erEndringIBeløpForMinstEnPerson
     }
 
     // Kun interessert i endringer i beløp FØR opphørstidspunkt
-    private fun erEndringIBeløpForPerson(
+    private fun erEndringIBeløpForPersonOgType(
         nåværendeAndeler: List<AndelTilkjentYtelse>,
         forrigeAndeler: List<AndelTilkjentYtelse>,
         opphørstidspunkt: YearMonth,

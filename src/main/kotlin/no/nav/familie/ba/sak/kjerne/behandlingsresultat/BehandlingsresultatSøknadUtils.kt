@@ -67,17 +67,21 @@ object BehandlingsresultatSøknadUtils {
         endretUtbetalingAndeler: List<EndretUtbetalingAndel>
     ): List<Søknadsresultat> {
         val alleSøknadsresultater = personerFremstiltKravFor.flatMap { aktør ->
-            utledSøknadResultatFraAndelerTilkjentYtelsePerPerson(
-                forrigeAndelerForPerson = forrigeAndeler.filter { it.aktør == aktør },
-                nåværendeAndelerForPerson = nåværendeAndeler.filter { it.aktør == aktør },
-                endretUtbetalingAndelerForPerson = endretUtbetalingAndeler.filter { it.person?.aktør == aktør }
-            )
+            val ytelseTyper = (forrigeAndeler.map { it.type } + nåværendeAndeler.map { it.type }).distinct()
+
+            ytelseTyper.flatMap { ytelseType ->
+                utledSøknadResultatFraAndelerTilkjentYtelsePerPersonOgType(
+                    forrigeAndelerForPerson = forrigeAndeler.filter { it.aktør == aktør && it.type == ytelseType },
+                    nåværendeAndelerForPerson = nåværendeAndeler.filter { it.aktør == aktør && it.type == ytelseType },
+                    endretUtbetalingAndelerForPerson = endretUtbetalingAndeler.filter { it.person?.aktør == aktør }
+                )
+            }
         }
 
         return alleSøknadsresultater.distinct()
     }
 
-    private fun utledSøknadResultatFraAndelerTilkjentYtelsePerPerson(
+    private fun utledSøknadResultatFraAndelerTilkjentYtelsePerPersonOgType(
         forrigeAndelerForPerson: List<AndelTilkjentYtelse>,
         nåværendeAndelerForPerson: List<AndelTilkjentYtelse>,
         endretUtbetalingAndelerForPerson: List<EndretUtbetalingAndel>
