@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.satsendring
 
 import no.nav.familie.ba.sak.common.isSameOrAfter
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
@@ -12,11 +13,14 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
 import java.time.YearMonth
@@ -28,7 +32,8 @@ class StartSatsendring(
     private val opprettTaskService: OpprettTaskService,
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     private val satskjøringRepository: SatskjøringRepository,
-    private val featureToggleService: FeatureToggleService
+    private val featureToggleService: FeatureToggleService,
+    private val personidentService: PersonidentService
 
 ) {
 
@@ -229,8 +234,40 @@ class StartSatsendring(
         }
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    fun opprettSatsendringForIdent(ident: String) {
+        val aktør = personidentService.hentAktør(ident)
+        val løpendeFagsakerForAktør = fagsakRepository.finnFagsakerForAktør(aktør)
+            .filter { !it.arkivert && it.status == FagsakStatus.LØPENDE }
+
+        løpendeFagsakerForAktør.forEach { fagsak ->
+            val sisteIverksatteBehandling = behandlingRepository.finnSisteIverksatteBehandling(fagsak.id)
+            if (sisteIverksatteBehandling != null) {
+                val andelerTilkjentYtelseMedEndreteUtbetalinger =
+                    andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
+                        sisteIverksatteBehandling.id
+                    )
+
+                if (!AutovedtakSatsendringService.harAlleredeSisteSats(
+                        andelerTilkjentYtelseMedEndreteUtbetalinger,
+                        SATSENDRINGMÅNED_2023
+                    )
+                ) {
+                    secureLogger.info("Oppretter satsendringtask for $ident og fagsakID=${fagsak.id}")
+                    opprettSatsendringForFagsak(fagsakId = fagsak.id)
+                }
+            }
+        }
+    }
+
+    fun opprettSatsendringForFagsak(fagsakId: Long) {
+        satskjøringRepository.save(Satskjøring(fagsakId = fagsakId))
+        opprettTaskService.opprettSatsendringTask(fagsakId, SATSENDRINGMÅNED_2023)
+    }
+
     companion object {
         val logger: Logger = LoggerFactory.getLogger(StartSatsendring::class.java)
         const val PAGE_STØRRELSE = 1000
+        val SATSENDRINGMÅNED_2023: YearMonth = YearMonth.of(2023, 3)
     }
 }

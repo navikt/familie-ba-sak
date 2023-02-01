@@ -24,6 +24,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.ORDINÆR_BARNETR
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.SMÅBARNSTILLEGG
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.UTVIDET_BARNETRYGD
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -44,6 +45,7 @@ internal class StartSatsendringTest {
         mockk()
     private val satskjøringRepository: SatskjøringRepository = mockk()
     private val featureToggleService: FeatureToggleService = mockk()
+    private val personidentService: PersonidentService = mockk()
 
     lateinit var startSatsendring: StartSatsendring
 
@@ -59,7 +61,8 @@ internal class StartSatsendringTest {
             opprettTaskService,
             andelerTilkjentYtelseOgEndreteUtbetalingerService,
             satskjøringRepository,
-            featureToggleService
+            featureToggleService,
+            personidentService
         )
     }
 
