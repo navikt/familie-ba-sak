@@ -5,14 +5,15 @@ import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.AutobrevScheduler
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottaker
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
-import no.nav.familie.ba.sak.task.SatsendringTask
-import no.nav.familie.ba.sak.task.StartSatsendringForAlleBehandlingerTask
+import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.TaBehandlingerEtterVentefristAvVentTask
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.kontrakter.felles.PersonIdent
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import java.time.YearMonth
 
 @RestController
 @RequestMapping(value = ["/internal", "/testverktoy"])
@@ -36,7 +38,9 @@ class TestVerktøyController(
     private val autovedtakStegService: AutovedtakStegService,
     private val taskRepository: TaskRepositoryWrapper,
     private val tilgangService: TilgangService,
-    private val simuleringService: SimuleringService
+    private val simuleringService: SimuleringService,
+    private val opprettTaskService: OpprettTaskService,
+    private val satskjøringRepository: SatskjøringRepository
 
 ) {
 
@@ -51,23 +55,13 @@ class TestVerktøyController(
         }
     }
 
-    @GetMapping(path = ["/test-satsendring/{behandlingId}"])
+    @GetMapping(path = ["/test-satsendring/{fagsakId}"])
     @Unprotected
-    fun utførSatsendringPåBehandling(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<String>> {
+    fun utførSatsendringPåFagsak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<String>> {
         return if (envService.erPreprod() || envService.erDev()) {
-            SatsendringTask.opprettTask(behandlingId)
-            ResponseEntity.ok(Ressurs.success("Trigget satsendring for behandling $behandlingId"))
-        } else {
-            ResponseEntity.ok(Ressurs.success(MELDING))
-        }
-    }
-
-    @GetMapping(path = ["/test-satsendring/alle"])
-    @Unprotected
-    fun utførSatsendringPåAlleBehandlinger(): ResponseEntity<Ressurs<String>> {
-        return if (envService.erPreprod() || envService.erDev()) {
-            taskRepository.save(StartSatsendringForAlleBehandlingerTask.opprettTask(1654))
-            ResponseEntity.ok(Ressurs.success("Trigget satsendring for alle behandlinger"))
+            satskjøringRepository.save(Satskjøring(fagsakId = fagsakId))
+            opprettTaskService.opprettSatsendringTask(fagsakId, YearMonth.of(2023, 3))
+            ResponseEntity.ok(Ressurs.success("Trigget satsendring for fagsak $fagsakId"))
         } else {
             ResponseEntity.ok(Ressurs.success(MELDING))
         }
