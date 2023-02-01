@@ -58,7 +58,7 @@ data class Totrinnskontroll(
     }
 
     fun erUgyldig(): Boolean {
-        return godkjent && saksbehandler == beslutter &&
+        return godkjent && saksbehandlerId == beslutterId &&
             !(saksbehandler == SikkerhetContext.SYSTEM_NAVN && beslutter == SikkerhetContext.SYSTEM_NAVN)
     }
 }
