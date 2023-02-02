@@ -85,7 +85,7 @@ fun vedtakSimuleringMottakereTilSimuleringPerioder(
     val finnesManuellPosteringISimulering =
         simuleringPerioder.any { (_, posteringerIMåned) -> posteringerIMåned.any { it.erManuellPostering } }
 
-    if (erMigreringsbehandling && finnesManuellPosteringISimulering) {
+    if (erMigreringsbehandling && finnesManuellPosteringISimulering && !erManuelPosteringTogglePå) {
         throw FunksjonellFeil("Det finnes manuelle posteringer i simuleringen. BA-sak støtter ikke manuelle posteringer for migreringsbehandlinger helt enda.")
     }
 
