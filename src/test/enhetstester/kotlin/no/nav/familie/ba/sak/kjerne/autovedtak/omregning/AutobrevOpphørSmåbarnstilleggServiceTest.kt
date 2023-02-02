@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -50,6 +51,7 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
     private val taskRepository = mockk<TaskRepositoryWrapper>(relaxed = true)
     private val vedtaksperiodeService = mockk<VedtaksperiodeService>()
     private val periodeOvergangsstønadGrunnlagRepository = mockk<PeriodeOvergangsstønadGrunnlagRepository>()
+    private val startSatsendring = mockk<StartSatsendring>(relaxed = true)
 
     private val autovedtakBrevService = AutovedtakBrevService(
         fagsakService = fagsakService,
@@ -67,7 +69,8 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
         persongrunnlagService = persongrunnlagService,
         behandlingHentOgPersisterService = behandlingHentOgPersisterService,
         periodeOvergangsstønadGrunnlagRepository = periodeOvergangsstønadGrunnlagRepository,
-        autovedtakStegService = autovedtakStegService
+        autovedtakStegService = autovedtakStegService,
+        startSatsendring = startSatsendring
     )
 
     @Test
