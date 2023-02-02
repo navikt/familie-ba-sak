@@ -87,7 +87,9 @@ class JournalførVedtaksbrev(
                 mottakerInfo = mottakerInfo,
                 tilManuellMottakerEllerVerge = if (vedtak.behandling.verge?.ident != null) {
                     mottakerInfo.erInstitusjonVerge
-                } else (mottakerInfo.navn != null && mottakerInfo.navn != hentMottakerNavn(søkersident)) // mottakersnavn fyller ut kun når manuell mottaker finnes
+                } else {
+                    (mottakerInfo.navn != null && mottakerInfo.navn != hentMottakerNavn(søkersident))
+                } // mottakersnavn fyller ut kun når manuell mottaker finnes
             ).also { journalposterTilDistribusjon[it] = mottakerInfo }
         }
 
