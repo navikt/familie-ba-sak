@@ -235,7 +235,7 @@ class StartSatsendring(
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    fun opprettSatsendringForIdent(ident: String) {
+    fun opprettSatsendringForIdent(ident: String): Boolean {
         val aktør = personidentService.hentAktør(ident)
         val løpendeFagsakerForAktør = fagsakRepository.finnFagsakerForAktør(aktør)
             .filter { !it.arkivert && it.status == FagsakStatus.LØPENDE }
@@ -251,13 +251,15 @@ class StartSatsendring(
                 if (!AutovedtakSatsendringService.harAlleredeSisteSats(
                         andelerTilkjentYtelseMedEndreteUtbetalinger,
                         SATSENDRINGMÅNED_2023
-                    )
+                    ) && satskjøringRepository.findByFagsakId(fagsak.id) == null
                 ) {
                     secureLogger.info("Oppretter satsendringtask for $ident og fagsakID=${fagsak.id}")
                     opprettSatsendringForFagsak(fagsakId = fagsak.id)
+                    return true
                 }
             }
         }
+        return false
     }
 
     fun opprettSatsendringForFagsak(fagsakId: Long) {

@@ -8,10 +8,13 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemRegelVurdering
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemUtfall
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.VelgFagSystemService
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
+import no.nav.familie.prosessering.error.RekjørSenereException
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 internal class BehandleFødselshendelseTaskTest {
 
@@ -49,16 +52,65 @@ internal class BehandleFødselshendelseTaskTest {
         verify { autovedtakStegService.kjørBehandlingFødselshendelse(any(), any()) }
     }
 
-    private fun settOppBehandleFødselshendelseTask(autovedtakStegService: AutovedtakStegService): BehandleFødselshendelseTask =
+    @Test
+    fun `skal kaste rekjør senere exception hvis det opprettes satsendring task`() {
+        assertThrows<RekjørSenereException> {
+            BehandleFødselshendelseTask(
+                autovedtakStegService = mockk<AutovedtakStegService>().apply {
+                    every {
+                        kjørBehandlingFødselshendelse(
+                            any(),
+                            any()
+                        )
+                    } returns ""
+                },
+                velgFagsystemService = mockk<VelgFagSystemService>().apply {
+                    every<Pair<FagsystemRegelVurdering, FagsystemUtfall>> { velgFagsystem(any()) } returns Pair(
+                        FagsystemRegelVurdering.SEND_TIL_BA,
+                        FagsystemUtfall.IVERKSATTE_BEHANDLINGER_I_BA_SAK
+                    )
+                },
+                infotrygdFeedService = mockk(),
+                personidentService = mockk<PersonidentService>().apply { every { hentAktør(any()) } returns mockk() },
+                startSatsendring = mockk<StartSatsendring>().apply {
+                    every {
+                        opprettSatsendringForIdent(
+                            any()
+                        )
+                    } returns true
+                }
+            ).doTask(
+                BehandleFødselshendelseTask.opprettTask(
+                    BehandleFødselshendelseTaskDTO(
+                        nyBehandling = NyBehandlingHendelse(
+                            morsIdent = randomFnr(),
+                            barnasIdenter = listOf("31018721832")
+                        )
+                    )
+                )
+            )
+        }
+    }
+
+    private fun settOppBehandleFødselshendelseTask(
+        autovedtakStegService: AutovedtakStegService
+    ): BehandleFødselshendelseTask =
         BehandleFødselshendelseTask(
-            autovedtakStegService,
-            mockk<VelgFagSystemService>().apply {
+            autovedtakStegService = autovedtakStegService,
+            velgFagsystemService = mockk<VelgFagSystemService>().apply {
                 every<Pair<FagsystemRegelVurdering, FagsystemUtfall>> { velgFagsystem(any()) } returns Pair(
                     FagsystemRegelVurdering.SEND_TIL_BA,
                     FagsystemUtfall.IVERKSATTE_BEHANDLINGER_I_BA_SAK
                 )
             },
-            mockk(),
-            mockk<PersonidentService>().apply { every { hentAktør(any()) } returns mockk() }
+            infotrygdFeedService = mockk(),
+            personidentService = mockk<PersonidentService>().apply { every { hentAktør(any()) } returns mockk() },
+            startSatsendring = mockk<StartSatsendring>().apply {
+                every {
+                    opprettSatsendringForIdent(
+                        any()
+                    )
+                } returns false
+            }
         )
 }
