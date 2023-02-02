@@ -105,15 +105,17 @@ class JournalførVedtaksbrev(
         behandling: Behandling
     ) {
         journalposterTilDistribusjon.forEach {
-            if (it.value.erInstitusjonVerge) {
-                val distribuerTilVergeTask = DistribuerVedtaksbrevTilVergeTask.opprettDistribuerVedtaksbrevTilVergeTask(
-                    distribuerVedtaksbrevTilVergeDTO = DistribuerVedtaksbrevTilVergeDTO(
-                        behandlingId = vedtak.behandling.id,
-                        personIdent = it.value.brukerId,
-                        journalpostId = it.key
-                    ),
-                    properties = data.task.metadata
-                )
+            val finnesBrevMottaker = it.value.navn != null && it.value.navn != hentMottakerNavn(it.value.brukerId)
+            if (it.value.erInstitusjonVerge || finnesBrevMottaker) {
+                val distribuerTilVergeTask =
+                    DistribuerVedtaksbrevTilVergeTask.opprettDistribuerVedtaksbrevTilVergeTask(
+                        distribuerVedtaksbrevTilVergeDTO = DistribuerVedtaksbrevTilVergeDTO(
+                            behandlingId = vedtak.behandling.id,
+                            personIdent = it.value.brukerId,
+                            journalpostId = it.key
+                        ),
+                        properties = data.task.metadata
+                    )
                 taskRepository.save(distribuerTilVergeTask)
             } else {
                 val distribuerTilSøkerEllerBrevMottakereTask = DistribuerDokumentTask.opprettDistribuerDokumentTask(
