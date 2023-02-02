@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.satsendring
 
 import no.nav.familie.ba.sak.common.isSameOrAfter
-import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
@@ -259,7 +258,7 @@ class StartSatsendring(
                     SATSENDRINGMÅNED_2023
                 ) && satskjøringRepository.findByFagsakId(fagsakId) == null
             ) {
-                secureLogger.info("Oppretter satsendringtask fagsakID=$fagsakId")
+                logger.info("Oppretter satsendringtask fagsakID=$fagsakId")
                 opprettSatsendringForFagsak(fagsakId = fagsakId)
                 return true
             }
