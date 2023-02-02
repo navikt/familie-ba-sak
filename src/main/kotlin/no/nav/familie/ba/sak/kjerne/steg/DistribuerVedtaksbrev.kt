@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.brev.DokumentDistribueringService
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
@@ -11,7 +12,8 @@ import org.springframework.stereotype.Service
 @Service
 class DistribuerVedtaksbrev(
     private val dokumentDistribueringService: DokumentDistribueringService,
-    private val taskRepository: TaskRepositoryWrapper
+    private val taskRepository: TaskRepositoryWrapper,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService
 ) : BehandlingSteg<DistribuerDokumentDTO> {
 
     override fun utførStegOgAngiNeste(
@@ -32,7 +34,7 @@ class DistribuerVedtaksbrev(
         )
         taskRepository.save(ferdigstillBehandlingTask)
 
-        return hentNesteStegForNormalFlyt(behandling)
+        return hentNesteStegForNormalFlyt(behandlingHentOgPersisterService.hent(behandling.id))
     }
 
     override fun stegType(): StegType {
