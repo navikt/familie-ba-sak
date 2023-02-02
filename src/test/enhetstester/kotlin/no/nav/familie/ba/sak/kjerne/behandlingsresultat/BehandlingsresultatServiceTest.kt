@@ -6,11 +6,10 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.verify
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.BehandlingUnderkategoriDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
@@ -18,9 +17,11 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -60,7 +61,13 @@ internal class BehandlingsresultatServiceTest {
     private lateinit var andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
 
     @MockK
-    private lateinit var featureToggleService: FeatureToggleService
+    private lateinit var kompetanseService: KompetanseService
+
+    @MockK
+    private lateinit var endretUtbetalingAndelService: EndretUtbetalingAndelService
+
+    @MockK
+    private lateinit var andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
 
     @InjectMockKs
     private lateinit var behandlingsresultatService: BehandlingsresultatService
@@ -82,8 +89,8 @@ internal class BehandlingsresultatServiceTest {
             setOf(),
             YearMonth.of(2037, Month.MAY)
         )
-        val andelMedEndring = AndelTilkjentYtelseMedEndreteUtbetalinger(
-            lagAndelTilkjentYtelse(
+        val andelMedEndring =
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = YearMonth.of(2021, Month.DECEMBER),
                 tom = YearMonth.of(2022, Month.APRIL),
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
@@ -91,9 +98,8 @@ internal class BehandlingsresultatServiceTest {
                 beløp = 1054,
                 prosent = BigDecimal(50)
             )
-        )
-        val forrigeAndelMedEndring = AndelTilkjentYtelseMedEndreteUtbetalinger(
-            lagAndelTilkjentYtelse(
+        val forrigeAndelMedEndring =
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = YearMonth.of(2021, Month.DECEMBER),
                 tom = YearMonth.of(2037, Month.MAY),
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
@@ -101,8 +107,8 @@ internal class BehandlingsresultatServiceTest {
                 beløp = 1054,
                 prosent = BigDecimal(50)
             )
-        )
-        val behandlingsresultat = behandlingsresultatService.utledBehandlingsresultat(
+
+        val behandlingsresultat = behandlingsresultatService.utledBehandlingsresultatGammel(
             ytelsePersonerMedResultat = listOf(ytelsePersonSøker, ytelsePersonBarn),
             andelerMedEndringer = listOf(andelMedEndring),
             forrigeAndelerMedEndringer = listOf(forrigeAndelMedEndring),
@@ -128,8 +134,8 @@ internal class BehandlingsresultatServiceTest {
             setOf(),
             YearMonth.of(2037, Month.MAY)
         )
-        val andelMedEndring = AndelTilkjentYtelseMedEndreteUtbetalinger(
-            lagAndelTilkjentYtelse(
+        val andelMedEndring =
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = YearMonth.of(2021, Month.DECEMBER),
                 tom = YearMonth.of(2037, Month.MAY),
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
@@ -137,9 +143,8 @@ internal class BehandlingsresultatServiceTest {
                 beløp = 1054,
                 prosent = BigDecimal(50)
             )
-        )
-        val forrigeAndelMedEndring = AndelTilkjentYtelseMedEndreteUtbetalinger(
-            lagAndelTilkjentYtelse(
+        val forrigeAndelMedEndring =
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = YearMonth.of(2021, Month.DECEMBER),
                 tom = YearMonth.of(2037, Month.MAY),
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
@@ -147,9 +152,8 @@ internal class BehandlingsresultatServiceTest {
                 beløp = 1054,
                 prosent = BigDecimal(50)
             )
-        )
 
-        val behandlingsresultat = behandlingsresultatService.utledBehandlingsresultat(
+        val behandlingsresultat = behandlingsresultatService.utledBehandlingsresultatGammel(
             ytelsePersonerMedResultat = listOf(ytelsePersonSøker, ytelsePersonBarn),
             andelerMedEndringer = listOf(andelMedEndring),
             forrigeAndelerMedEndringer = listOf(forrigeAndelMedEndring),
@@ -175,8 +179,8 @@ internal class BehandlingsresultatServiceTest {
             setOf(YtelsePersonResultat.INNVILGET),
             YearMonth.of(2037, Month.MAY)
         )
-        val andelMedEndring = AndelTilkjentYtelseMedEndreteUtbetalinger(
-            lagAndelTilkjentYtelse(
+        val andelMedEndring =
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = YearMonth.of(2021, Month.DECEMBER),
                 tom = YearMonth.of(2037, Month.MAY),
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
@@ -184,9 +188,8 @@ internal class BehandlingsresultatServiceTest {
                 beløp = 1054,
                 prosent = BigDecimal(50)
             )
-        )
 
-        val behandlingsresultat = behandlingsresultatService.utledBehandlingsresultat(
+        val behandlingsresultat = behandlingsresultatService.utledBehandlingsresultatGammel(
             ytelsePersonerMedResultat = listOf(ytelsePersonSøker, ytelsePersonBarn),
             andelerMedEndringer = listOf(andelMedEndring),
             forrigeAndelerMedEndringer = listOf(),
@@ -212,8 +215,8 @@ internal class BehandlingsresultatServiceTest {
             setOf(YtelsePersonResultat.OPPHØRT),
             YearMonth.of(2022, Month.OCTOBER)
         )
-        val forrigeAndelMedEndring = AndelTilkjentYtelseMedEndreteUtbetalinger(
-            lagAndelTilkjentYtelse(
+        val forrigeAndelMedEndring =
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = YearMonth.of(2021, Month.DECEMBER),
                 tom = YearMonth.of(2037, Month.MAY),
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
@@ -221,9 +224,8 @@ internal class BehandlingsresultatServiceTest {
                 beløp = 1054,
                 prosent = BigDecimal(50)
             )
-        )
 
-        val behandlingsresultat = behandlingsresultatService.utledBehandlingsresultat(
+        val behandlingsresultat = behandlingsresultatService.utledBehandlingsresultatGammel(
             ytelsePersonerMedResultat = listOf(ytelsePersonSøker, ytelsePersonBarn),
             andelerMedEndringer = listOf(),
             forrigeAndelerMedEndringer = listOf(forrigeAndelMedEndring),
@@ -382,9 +384,13 @@ internal class BehandlingsresultatServiceTest {
 
     @Test
     fun `finnPersonerFremstiltKravFor skal returnere eksisterende personer fra persongrunnlaget dersom behandlingen er en manuell migrering`() {
-        val behandling = lagBehandling(årsak = BehandlingÅrsak.HELMANUELL_MIGRERING, behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD)
+        val behandling = lagBehandling(
+            årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
+            behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD
+        )
         val eksisterendeBarn = lagPerson()
-        val eksisterendePersonpplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id, personer = mutableSetOf(eksisterendeBarn))
+        val eksisterendePersonpplysningGrunnlag =
+            PersonopplysningGrunnlag(behandlingId = behandling.id, personer = mutableSetOf(eksisterendeBarn))
 
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns eksisterendePersonpplysningGrunnlag
 

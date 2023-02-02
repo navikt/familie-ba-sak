@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository
 @Repository
 interface SatskjøringRepository : JpaRepository<Satskjøring, Long> {
     fun countByFerdigTidspunktIsNotNull(): Long
+    fun findByFagsakId(fagsakId: Long): Satskjøring?
 }

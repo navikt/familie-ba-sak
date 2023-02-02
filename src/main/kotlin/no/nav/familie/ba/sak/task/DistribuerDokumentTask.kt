@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
-import no.nav.familie.ba.sak.kjerne.brev.DokumentService
+import no.nav.familie.ba.sak.kjerne.brev.DokumentDistribueringService
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.steg.StegService
@@ -19,14 +19,14 @@ import java.util.Properties
 class DistribuerDokumentTask(
     private val stegService: StegService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    private val dokumentService: DokumentService
+    private val dokumentDistribueringService: DokumentDistribueringService
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
         val distribuerDokumentDTO = objectMapper.readValue(task.payload, DistribuerDokumentDTO::class.java)
 
         if (distribuerDokumentDTO.erManueltSendt && !distribuerDokumentDTO.brevmal.erVedtaksbrev) {
-            dokumentService.prøvDistribuerBrevOgLoggHendelse(
+            dokumentDistribueringService.prøvDistribuerBrevOgLoggHendelse(
                 journalpostId = distribuerDokumentDTO.journalpostId,
                 behandlingId = distribuerDokumentDTO.behandlingId,
                 loggBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,

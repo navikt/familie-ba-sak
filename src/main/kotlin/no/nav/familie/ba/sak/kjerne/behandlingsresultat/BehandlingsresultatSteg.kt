@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -13,9 +14,12 @@ import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.validerAt
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtAlleOpprettedeEndringerErUtfylt
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtEndringerErTilknyttetAndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerPeriodeInnenforTilkjentytelse
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerÅrsak
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.validerBarnasVilkår
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.validerDeltBostedEndringerIkkeKrysserUtvidetYtelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlingSteg
@@ -60,14 +64,33 @@ class BehandlingsresultatSteg(
             personopplysningGrunnlag = personopplysningGrunnlag
         )
 
+        val toggleFrikobleAndelerOgEndringer =
+            featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER)
+
         val endreteUtbetalingerMedAndeler = andelerTilkjentYtelseOgEndreteUtbetalingerService
-            .finnEndreteUtbetalingerMedAndelerIHenholdTilVilkårsvurdering(behandling.id)
+            .finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandling.id)
 
         validerAtAlleOpprettedeEndringerErUtfylt(endreteUtbetalingerMedAndeler.map { it.endretUtbetalingAndel })
         validerAtEndringerErTilknyttetAndelTilkjentYtelse(endreteUtbetalingerMedAndeler)
         validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(
             endretUtbetalingAndelerMedÅrsakDeltBosted = endreteUtbetalingerMedAndeler.filter { it.årsak == Årsak.DELT_BOSTED }
         )
+
+        if (toggleFrikobleAndelerOgEndringer) {
+            validerDeltBostedEndringerIkkeKrysserUtvidetYtelse(
+                endreteUtbetalingerMedAndeler.map { it.endretUtbetalingAndel },
+                tilkjentYtelse.andelerTilkjentYtelse
+            )
+            validerPeriodeInnenforTilkjentytelse(
+                endreteUtbetalingerMedAndeler.map { it.endretUtbetalingAndel },
+                tilkjentYtelse.andelerTilkjentYtelse
+            )
+
+            validerÅrsak(
+                endreteUtbetalingerMedAndeler.map { it.endretUtbetalingAndel },
+                vilkårService.hentVilkårsvurdering(behandling.id)
+            )
+        }
     }
 
     @Transactional
@@ -76,7 +99,12 @@ class BehandlingsresultatSteg(
             if (behandling.erMigrering() && behandling.skalBehandlesAutomatisk) {
                 settBehandlingsresultat(behandling, Behandlingsresultat.INNVILGET)
             } else {
-                val resultat = behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.id)
+                val resultat = if (featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_BEREGNE_BEHANDLINGSRESULTAT)) {
+                    behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.id)
+                } else {
+                    behandlingsresultatService.utledBehandlingsresultatGammel(behandlingId = behandling.id)
+                }
+
                 behandlingService.oppdaterBehandlingsresultat(
                     behandlingId = behandling.id,
                     resultat = resultat

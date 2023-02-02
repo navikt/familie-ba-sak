@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.config
 
 class FeatureToggleConfig {
     companion object {
+        const val BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER = "familie-ba-sak.frikoble-andeler-og-endringer"
         const val KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV = "familie-ba-sak.behandling.korreksjon-vedtaksbrev"
         const val SKATTEETATEN_API_EKTE_DATA = "familie-ba-sak.skatteetaten-api-ekte-data-i-respons"
         const val IKKE_STOPP_MIGRERINGSBEHANDLING = "familie-ba-sak.ikke.stopp.migeringsbehandling"
@@ -9,6 +10,8 @@ class FeatureToggleConfig {
         const val TEKNISK_ENDRING = "familie-ba-sak.behandling.teknisk-endring"
         const val ENDRINGER_I_VALIDERING_FOR_MIGRERINGSBEHANDLING =
             "familie-ba-sak.endringer.validering.migeringsbehandling"
+        const val NY_MÅTE_Å_BEREGNE_BEHANDLINGSRESULTAT = "familie-ba-sak.behandling.behandlingsresultat"
+
         const val MIGRERING_MED_FEILUTBETALING_UNDER_BELØPSGRENSE =
             "familie-ba-sak.migrering-med-feilutbetaling-under-belopsgrense"
         const val KAN_GENERERE_UTBETALINGSOPPDRAG_NY = "familie-ba-sak.generer.utbetalingsoppdrag.ny"

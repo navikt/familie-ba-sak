@@ -1,11 +1,12 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.AutovedtakSatsendringService
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import org.springframework.stereotype.Service
-import java.util.Properties
+import java.time.YearMonth
 
 @Service
 @TaskStepBeskrivelse(
@@ -18,23 +19,20 @@ class SatsendringTask(
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
-        val behandlingId = task.payload.toLong()
+        val dto = objectMapper.readValue(task.payload, SatsendringTaskDto::class.java)
 
-        autovedtakSatsendringService.kjørBehandling(sistIverksatteBehandlingId = behandlingId)
+        val resultat = autovedtakSatsendringService.kjørBehandling(dto)
+
+        task.metadata.put("resultat", resultat)
     }
 
     companion object {
 
         const val TASK_STEP_TYPE = "satsendring"
-
-        fun opprettTask(behandlingsId: Long): Task {
-            return Task(
-                type = TASK_STEP_TYPE,
-                payload = behandlingsId.toString(),
-                properties = Properties().apply {
-                    this["behandlingsId"] = behandlingsId.toString()
-                }
-            )
-        }
     }
 }
+
+data class SatsendringTaskDto(
+    val fagsakId: Long,
+    val satstidspunkt: YearMonth
+)

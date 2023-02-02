@@ -1,19 +1,24 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagSøknadDTO
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.nyOrdinærBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
+import no.nav.familie.ba.sak.ekstern.restDomene.writeValueAsString
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlag
+import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
@@ -56,7 +61,10 @@ class RevurderingMedEndredeUtbetalingandelerTest(
     private val personidentService: PersonidentService,
 
     @Autowired
-    private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService
+    private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService,
+
+    @Autowired
+    private val søknadGrunnlagRepository: SøknadGrunnlagRepository
 
 ) : AbstractVerdikjedetest() {
     @Test
@@ -78,6 +86,14 @@ class RevurderingMedEndredeUtbetalingandelerTest(
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = stegService.håndterNyBehandling(nyOrdinærBehandling(søkersIdent = fnr, fagsakId = fagsak.id))
+
+        val søknadGrunnlag = SøknadGrunnlag(
+            behandlingId = behandling.id,
+            aktiv = true,
+            søknad = lagSøknadDTO(fnr, barnasIdenter = listOf(barnFnr), underkategori = BehandlingUnderkategori.ORDINÆR).writeValueAsString()
+        )
+
+        søknadGrunnlagRepository.save(søknadGrunnlag)
 
         persongrunnlagService.lagreOgDeaktiverGammel(
             lagTestPersonopplysningGrunnlag(
