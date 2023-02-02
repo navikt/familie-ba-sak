@@ -34,6 +34,16 @@ class DistribuerVedtaksbrev(
         )
         taskRepository.save(ferdigstillBehandlingTask)
 
+        // Når vi sender vedtaksbrev til flere mottakere, DistribuerVedtaksbrev steg kjører flere ganger samtidig
+        // Det kan medføre ObjectOptimisticLockingFailureException på DistribuerDokument task
+        // for å fikse det sjekkes behandling sin nåværrende steg etter distribuering og slipper
+        // og returnerer BEHANDLING_AVSLUTTET steg hvis behandling er allerede ferdigstilt slik at
+        // da steg service ikke prøver å oppdatere på nytt
+        val behandlingMedNåværrendeSteg = behandlingHentOgPersisterService.hent(behandling.id)
+        if (behandlingMedNåværrendeSteg.steg == StegType.FERDIGSTILLE_BEHANDLING) {
+            return StegType.BEHANDLING_AVSLUTTET
+        }
+
         return hentNesteStegForNormalFlyt(behandlingHentOgPersisterService.hent(behandling.id))
     }
 
