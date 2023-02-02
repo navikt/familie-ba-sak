@@ -27,13 +27,15 @@ fun filterBortUrelevanteVedtakSimuleringPosteringer(
 fun vedtakSimuleringMottakereTilRestSimulering(
     økonomiSimuleringMottakere: List<ØkonomiSimuleringMottaker>,
     erManuellPosteringTogglePå: Boolean,
-    erMigreringsbehanlding: Boolean
+    // Midlertidig i bruk for å stoppe migreringsbehandlinger som har manuelle posteringer.
+    // Bør fjernes så snart vi har funnet ut av det
+    erMigreringsbehandling: Boolean = false
 ): RestSimulering {
     val perioder =
         vedtakSimuleringMottakereTilSimuleringPerioder(
             økonomiSimuleringMottakere,
             erManuellPosteringTogglePå,
-            erMigreringsbehanlding
+            erMigreringsbehandling
         )
     val tidSimuleringHentet = økonomiSimuleringMottakere.firstOrNull()?.opprettetTidspunkt?.toLocalDate()
 
@@ -64,7 +66,9 @@ fun vedtakSimuleringMottakereTilRestSimulering(
 fun vedtakSimuleringMottakereTilSimuleringPerioder(
     økonomiSimuleringMottakere: List<ØkonomiSimuleringMottaker>,
     erManuelPosteringTogglePå: Boolean,
-    erMigreringsbehanlding: Boolean
+    // Midlertidig i bruk for å stoppe migreringsbehandlinger som har manuelle posteringer.
+    // Bør fjernes så snart vi har funnet ut av det
+    erMigreringsbehandling: Boolean = false
 ): List<SimuleringsPeriode> {
     val simuleringPerioder = mutableMapOf<LocalDate, MutableList<ØkonomiSimuleringPostering>>()
 
@@ -81,7 +85,7 @@ fun vedtakSimuleringMottakereTilSimuleringPerioder(
     val finnesManuellPosteringISimulering =
         simuleringPerioder.any { (_, posteringerIMåned) -> posteringerIMåned.any { it.erManuellPostering } }
 
-    if (erMigreringsbehanlding && finnesManuellPosteringISimulering) {
+    if (erMigreringsbehandling && finnesManuellPosteringISimulering) {
         throw FunksjonellFeil("Det finnes manuelle posteringer i simuleringen. BA-sak støtter ikke manuelle posteringer for migreringsbehandlinger helt enda.")
     }
 
