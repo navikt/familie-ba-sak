@@ -58,7 +58,8 @@ class BehandleFødselshendelseTask(
 
         when (velgFagsystemService.velgFagsystem(nyBehandling).first) {
             FagsystemRegelVurdering.SEND_TIL_BA -> {
-                val harOpprettetSatsendring = startSatsendring.opprettSatsendringForIdent(nyBehandling.morsIdent)
+                val harOpprettetSatsendring =
+                    startSatsendring.sjekkOgOpprettSatsendringVedGammelSats(nyBehandling.morsIdent)
                 if (harOpprettetSatsendring) {
                     throw RekjørSenereException(
                         "Satsedring skal kjøre ferdig før man behandler fødselsehendelse",

@@ -25,7 +25,7 @@ class SatsendringController(
     @PostMapping(path = ["/kjorsatsendringForListeMedIdenter"])
     fun utførSatsendringPåListeIdenter(@RequestBody listeMedIdenter: Set<String>): ResponseEntity<Ressurs<String>> {
         listeMedIdenter.forEach {
-            startSatsendring.opprettSatsendringForIdent(it)
+            startSatsendring.sjekkOgOpprettSatsendringVedGammelSats(it)
         }
         return ResponseEntity.ok(Ressurs.success("Trigget satsendring for liste med identer ${listeMedIdenter.size}"))
     }

@@ -234,31 +234,37 @@ class StartSatsendring(
         }
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
-    fun opprettSatsendringForIdent(ident: String): Boolean {
+    fun sjekkOgOpprettSatsendringVedGammelSats(ident: String): Boolean {
         val aktør = personidentService.hentAktør(ident)
         val løpendeFagsakerForAktør = fagsakRepository.finnFagsakerForAktør(aktør)
             .filter { !it.arkivert && it.status == FagsakStatus.LØPENDE }
 
         løpendeFagsakerForAktør.forEach { fagsak ->
-            val sisteIverksatteBehandling = behandlingRepository.finnSisteIverksatteBehandling(fagsak.id)
-            if (sisteIverksatteBehandling != null) {
-                val andelerTilkjentYtelseMedEndreteUtbetalinger =
-                    andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
-                        sisteIverksatteBehandling.id
-                    )
+            sjekkOgOpprettSatsendringVedGammelSats(fagsak.id)
+        }
+        return false
+    }
 
-                if (!AutovedtakSatsendringService.harAlleredeSisteSats(
-                        andelerTilkjentYtelseMedEndreteUtbetalinger,
-                        SATSENDRINGMÅNED_2023
-                    ) && satskjøringRepository.findByFagsakId(fagsak.id) == null
-                ) {
-                    secureLogger.info("Oppretter satsendringtask for $ident og fagsakID=${fagsak.id}")
-                    opprettSatsendringForFagsak(fagsakId = fagsak.id)
-                    return true
-                }
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    fun sjekkOgOpprettSatsendringVedGammelSats(fagsakId: Long): Boolean {
+        val sisteIverksatteBehandling = behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
+        if (sisteIverksatteBehandling != null) {
+            val andelerTilkjentYtelseMedEndreteUtbetalinger =
+                andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
+                    sisteIverksatteBehandling.id
+                )
+
+            if (!AutovedtakSatsendringService.harAlleredeSisteSats(
+                    andelerTilkjentYtelseMedEndreteUtbetalinger,
+                    SATSENDRINGMÅNED_2023
+                ) && satskjøringRepository.findByFagsakId(fagsakId) == null
+            ) {
+                secureLogger.info("Oppretter satsendringtask fagsakID=$fagsakId")
+                opprettSatsendringForFagsak(fagsakId = fagsakId)
+                return true
             }
         }
+
         return false
     }
 
