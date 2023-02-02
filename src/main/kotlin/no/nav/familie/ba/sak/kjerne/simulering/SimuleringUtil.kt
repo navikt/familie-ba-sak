@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.simulering
 
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.simulering.domene.RestSimulering
 import no.nav.familie.ba.sak.kjerne.simulering.domene.SimuleringsPeriode
@@ -25,10 +26,17 @@ fun filterBortUrelevanteVedtakSimuleringPosteringer(
 
 fun vedtakSimuleringMottakereTilRestSimulering(
     økonomiSimuleringMottakere: List<ØkonomiSimuleringMottaker>,
-    erManuellPosteringTogglePå: Boolean
+    erManuellPosteringTogglePå: Boolean,
+    // Midlertidig i bruk for å stoppe migreringsbehandlinger som har manuelle posteringer.
+    // Bør fjernes så snart vi har funnet ut av det
+    erMigreringsbehandling: Boolean = false
 ): RestSimulering {
     val perioder =
-        vedtakSimuleringMottakereTilSimuleringPerioder(økonomiSimuleringMottakere, erManuellPosteringTogglePå)
+        vedtakSimuleringMottakereTilSimuleringPerioder(
+            økonomiSimuleringMottakere,
+            erManuellPosteringTogglePå,
+            erMigreringsbehandling
+        )
     val tidSimuleringHentet = økonomiSimuleringMottakere.firstOrNull()?.opprettetTidspunkt?.toLocalDate()
 
     val framtidigePerioder =
@@ -57,7 +65,10 @@ fun vedtakSimuleringMottakereTilRestSimulering(
 
 fun vedtakSimuleringMottakereTilSimuleringPerioder(
     økonomiSimuleringMottakere: List<ØkonomiSimuleringMottaker>,
-    erManuelPosteringTogglePå: Boolean
+    erManuelPosteringTogglePå: Boolean,
+    // Midlertidig i bruk for å stoppe migreringsbehandlinger som har manuelle posteringer.
+    // Bør fjernes så snart vi har funnet ut av det
+    erMigreringsbehandling: Boolean = false
 ): List<SimuleringsPeriode> {
     val simuleringPerioder = mutableMapOf<LocalDate, MutableList<ØkonomiSimuleringPostering>>()
 
@@ -69,6 +80,13 @@ fun vedtakSimuleringMottakereTilSimuleringPerioder(
                 simuleringPerioder[postering.fom] = mutableListOf(postering)
             }
         }
+    }
+
+    val finnesManuellPosteringISimulering =
+        simuleringPerioder.any { (_, posteringerIMåned) -> posteringerIMåned.any { it.erManuellPostering } }
+
+    if (erMigreringsbehandling && finnesManuellPosteringISimulering && !erManuelPosteringTogglePå) {
+        throw FunksjonellFeil("Det finnes manuelle posteringer i simuleringen. BA-sak støtter ikke manuelle posteringer for migreringsbehandlinger helt enda.")
     }
 
     val tidSimuleringHentet = økonomiSimuleringMottakere.firstOrNull()?.opprettetTidspunkt?.toLocalDate()
