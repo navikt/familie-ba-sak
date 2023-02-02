@@ -29,10 +29,14 @@ class DistribuerVedtaksbrevTilVergeTask(
         val behandling = behandlingHentOgPersisterService.hent(distribuerVedtaksbrevDTO.behandlingId)
 
         dokumentDistribueringService.prøvDistribuerBrevOgLoggHendelse(
-            journalpostId = distribuerVedtaksbrevDTO.journalpostId,
-            behandlingId = distribuerVedtaksbrevDTO.behandlingId,
-            loggBehandlerRolle = BehandlerRolle.SYSTEM,
-            brevmal = hentBrevmal(behandling)
+            distribuerDokumentDTO = DistribuerDokumentDTO(
+                journalpostId = distribuerVedtaksbrevDTO.journalpostId,
+                personEllerInstitusjonIdent = distribuerVedtaksbrevDTO.personIdent,
+                behandlingId = distribuerVedtaksbrevDTO.behandlingId,
+                brevmal = hentBrevmal(behandling),
+                erManueltSendt = false
+            ),
+            loggBehandlerRolle = BehandlerRolle.SYSTEM
         )
     }
 

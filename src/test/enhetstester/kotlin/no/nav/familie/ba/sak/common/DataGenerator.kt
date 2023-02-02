@@ -67,10 +67,10 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.Personident
 import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
-import no.nav.familie.ba.sak.kjerne.steg.JournalførVedtaksbrevDTO
 import no.nav.familie.ba.sak.kjerne.steg.StatusFraOppdragMedTask
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.ba.sak.kjerne.steg.domene.JournalførVedtaksbrevDTO
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.BarnetsBostedsland
@@ -324,8 +324,16 @@ fun lagAndelTilkjentYtelseUtvidet(
     )
 }
 
-fun lagInitiellTilkjentYtelse(behandling: Behandling = lagBehandling(), utbetalingsoppdrag: String? = null): TilkjentYtelse {
-    return TilkjentYtelse(behandling = behandling, opprettetDato = LocalDate.now(), endretDato = LocalDate.now(), utbetalingsoppdrag = utbetalingsoppdrag)
+fun lagInitiellTilkjentYtelse(
+    behandling: Behandling = lagBehandling(),
+    utbetalingsoppdrag: String? = null
+): TilkjentYtelse {
+    return TilkjentYtelse(
+        behandling = behandling,
+        opprettetDato = LocalDate.now(),
+        endretDato = LocalDate.now(),
+        utbetalingsoppdrag = utbetalingsoppdrag
+    )
 }
 
 fun lagTestPersonopplysningGrunnlag(

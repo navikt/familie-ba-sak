@@ -13,6 +13,8 @@ import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournal
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostResponse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.steg.domene.ManuellAdresseInfo
+import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.ba.sak.task.OpprettTaskService.Companion.RETRY_BACKOFF_5000MS
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.Fagsystem
@@ -22,9 +24,10 @@ import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
 import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
+import no.nav.familie.kontrakter.felles.dokdist.AdresseType
 import no.nav.familie.kontrakter.felles.dokdist.DistribuerJournalpostRequest
 import no.nav.familie.kontrakter.felles.dokdist.Distribusjonstidspunkt
-import no.nav.familie.kontrakter.felles.dokdist.Distribusjonstype
+import no.nav.familie.kontrakter.felles.dokdist.ManuellAdresse
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.journalpost.JournalposterForBrukerRequest
 import no.nav.familie.kontrakter.felles.kodeverk.KodeverkDto
@@ -141,7 +144,7 @@ class IntegrasjonClient(
         }
     }
 
-    fun distribuerBrev(journalpostId: String, distribusjonstype: Distribusjonstype): String {
+    fun distribuerBrev(distribuerDokumentDTO: DistribuerDokumentDTO): String {
         val uri = URI.create("$integrasjonUri/dist/v1")
 
         val resultat: String = kallEksternTjenesteRessurs(
@@ -150,11 +153,12 @@ class IntegrasjonClient(
             formål = "Distribuer brev"
         ) {
             val journalpostRequest = DistribuerJournalpostRequest(
-                journalpostId = journalpostId,
+                journalpostId = distribuerDokumentDTO.journalpostId,
                 bestillendeFagsystem = Fagsystem.BA,
                 dokumentProdApp = "FAMILIE_BA_SAK",
                 distribusjonstidspunkt = Distribusjonstidspunkt.KJERNETID,
-                distribusjonstype = distribusjonstype
+                distribusjonstype = distribuerDokumentDTO.brevmal.distribusjonstype,
+                adresse = distribuerDokumentDTO.manuellAdresseInfo?.let { lagManuellAdresse(it) }
             )
             postForEntity(uri, journalpostRequest, HttpHeaders().medContentTypeJsonUTF8())
         }
@@ -162,6 +166,19 @@ class IntegrasjonClient(
         if (resultat.isBlank()) error("BestillingsId fra integrasjonstjenesten mot dokdist er tom")
         return resultat
     }
+
+    private fun lagManuellAdresse(manuellAdresseInfo: ManuellAdresseInfo) =
+        ManuellAdresse(
+            adresseType = when (manuellAdresseInfo.landkode) {
+                "NO" -> AdresseType.norskPostadresse
+                else -> AdresseType.utenlandskPostadresse
+            },
+            adresselinje1 = manuellAdresseInfo.adresselinje1,
+            adresselinje2 = manuellAdresseInfo.adresselinje2,
+            postnummer = manuellAdresseInfo.postnummer,
+            poststed = manuellAdresseInfo.poststed,
+            land = manuellAdresseInfo.landkode
+        )
 
     fun ferdigstillOppgave(oppgaveId: Long) {
         val uri = URI.create("$integrasjonUri/oppgave/$oppgaveId/ferdigstill")
