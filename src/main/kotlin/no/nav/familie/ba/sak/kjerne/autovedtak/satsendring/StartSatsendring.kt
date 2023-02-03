@@ -239,10 +239,13 @@ class StartSatsendring(
         val løpendeFagsakerForAktør = fagsakRepository.finnFagsakerForAktør(aktør)
             .filter { !it.arkivert && it.status == FagsakStatus.LØPENDE }
 
+        var harOpprettetSatsendring = false
         løpendeFagsakerForAktør.forEach { fagsak ->
-            opprettSatsendringTaskVedGammelSats(fagsak.id)
+            if (opprettSatsendringTaskVedGammelSats(fagsak.id)) {
+                harOpprettetSatsendring = true
+            }
         }
-        return false
+        return harOpprettetSatsendring
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
