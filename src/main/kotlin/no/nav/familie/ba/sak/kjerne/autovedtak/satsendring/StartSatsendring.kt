@@ -233,19 +233,24 @@ class StartSatsendring(
         }
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun sjekkOgOpprettSatsendringVedGammelSats(ident: String): Boolean {
         val aktør = personidentService.hentAktør(ident)
         val løpendeFagsakerForAktør = fagsakRepository.finnFagsakerForAktør(aktør)
             .filter { !it.arkivert && it.status == FagsakStatus.LØPENDE }
 
         løpendeFagsakerForAktør.forEach { fagsak ->
-            sjekkOgOpprettSatsendringVedGammelSats(fagsak.id)
+            opprettSatsendringTaskVedGammelSats(fagsak.id)
         }
         return false
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun sjekkOgOpprettSatsendringVedGammelSats(fagsakId: Long): Boolean {
+        return opprettSatsendringTaskVedGammelSats(fagsakId)
+    }
+
+    private fun opprettSatsendringTaskVedGammelSats(fagsakId: Long): Boolean {
         val sisteIverksatteBehandling = behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
         if (sisteIverksatteBehandling != null) {
             val andelerTilkjentYtelseMedEndreteUtbetalinger =
