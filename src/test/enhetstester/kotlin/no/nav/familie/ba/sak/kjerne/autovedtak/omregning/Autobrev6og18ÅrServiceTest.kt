@@ -12,16 +12,19 @@ import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.tilfeldigSøker
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -49,6 +52,9 @@ internal class Autobrev6og18ÅrServiceTest {
     private val taskRepository = mockk<TaskRepositoryWrapper>(relaxed = true)
     private val vedtaksperiodeService = mockk<VedtaksperiodeService>()
     private val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
+    private val endretUtbetalingAndelRepository = mockk<EndretUtbetalingAndelRepository>(relaxed = true)
+    private val featureToggleService = mockk<FeatureToggleService>(relaxed = true)
+    private val startSatsendring = mockk<StartSatsendring>(relaxed = true)
 
     private val autovedtakBrevService = AutovedtakBrevService(
         behandlingService = behandlingService,
@@ -68,8 +74,11 @@ internal class Autobrev6og18ÅrServiceTest {
         autovedtakStegService = autovedtakStegService,
         andelerTilkjentYtelseOgEndreteUtbetalingerService = AndelerTilkjentYtelseOgEndreteUtbetalingerService(
             andelTilkjentYtelseRepository,
-            mockk()
-        )
+            endretUtbetalingAndelRepository,
+            mockk(),
+            featureToggleService
+        ),
+        startSatsendring = startSatsendring
     )
 
     @Test

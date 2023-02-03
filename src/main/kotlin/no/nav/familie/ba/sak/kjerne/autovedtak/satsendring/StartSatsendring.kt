@@ -12,11 +12,14 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
 import java.time.YearMonth
@@ -28,7 +31,8 @@ class StartSatsendring(
     private val opprettTaskService: OpprettTaskService,
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     private val satskjøringRepository: SatskjøringRepository,
-    private val featureToggleService: FeatureToggleService
+    private val featureToggleService: FeatureToggleService,
+    private val personidentService: PersonidentService
 
 ) {
 
@@ -37,7 +41,11 @@ class StartSatsendring(
         antallFagsaker: Int,
         satsTidspunkt: YearMonth = YearMonth.of(2023, 3)
     ) {
-        val gyldigeSatser = hentGyldigeSatser()
+        val gyldigeSatstyper = hentGyldigeSatstyper()
+        if (gyldigeSatstyper.isEmpty()) {
+            logger.info("Skipper satsendring da ingen av bryterne for de ulike satstypene er påskrudd.")
+            return
+        }
         var antallSatsendringerStartet = 0
         var startSide = 0
         while (antallSatsendringerStartet < antallFagsaker) {
@@ -53,7 +61,7 @@ class StartSatsendring(
                         antallSatsendringerStartet,
                         antallFagsaker,
                         satsTidspunkt,
-                        gyldigeSatser
+                        gyldigeSatstyper
                     )
             }
 
@@ -85,42 +93,47 @@ class StartSatsendring(
     private fun sjekkOgTriggSatsendring(
         satstyper: List<SatsType>,
         fagsak: Fagsak,
-        gyldigeSatser: List<SatsType>
+        gyldigeSatstyper: List<SatsType>,
+        satsTidspunkt: YearMonth
     ): Boolean {
-        if (satstyper.isNotEmpty() && gyldigeSatser.containsAll(satstyper)) {
-            if (featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_OPPRETT_TASKER)) {
+        if (satstyper.isNotEmpty() && gyldigeSatstyper.containsAll(satstyper)) {
+            return if (featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_OPPRETT_TASKER)) {
                 logger.info("Oppretter satsendringtask for fagsak=${fagsak.id}")
-                opprettTaskService.opprettSatsendringTask(fagsak.id)
+                opprettTaskService.opprettSatsendringTask(fagsak.id, satsTidspunkt)
                 satskjøringRepository.save(Satskjøring(fagsakId = fagsak.id))
-                return true
+                true
             } else {
                 logger.info("Oppretter ikke satsendringtask for fagsak=${fagsak.id}. Toggle SATSENDRING_OPPRETT_TASKER avskrudd.")
-                return true // fordi vi vil at den skal telles selv om opprett task er skrudd av
+                true // fordi vi vil at den skal telles selv om opprett task er skrudd av
             }
         }
+        logger.info(
+            "Oppretter ikke satsendringtask for fagsak=${fagsak.id}. Mangler ytelse, eller har ytelsestype(r) det ikke" +
+                " skal kjøres for: ${satstyper.filter { it !in gyldigeSatstyper }}"
+        )
         return false
     }
 
-    private fun hentGyldigeSatser(): List<SatsType> {
-        val gyldigeSatser = mutableListOf<SatsType>()
+    private fun hentGyldigeSatstyper(): List<SatsType> {
+        val gyldigeSatstyper = mutableListOf<SatsType>()
         if (featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_TILLEGG_ORBA, false)) {
-            gyldigeSatser.add(SatsType.TILLEGG_ORBA)
+            gyldigeSatstyper.add(SatsType.TILLEGG_ORBA)
         }
 
         if (featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_ORBA, true)) {
-            gyldigeSatser.add(SatsType.ORBA)
+            gyldigeSatstyper.add(SatsType.ORBA)
         }
 
         if (featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_UTVIDET, false)) {
-            gyldigeSatser.add(SatsType.UTVIDET_BARNETRYGD)
+            gyldigeSatstyper.add(SatsType.UTVIDET_BARNETRYGD)
         }
 
         if (featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_SMA, false)) {
-            gyldigeSatser.add(SatsType.SMA)
+            gyldigeSatstyper.add(SatsType.SMA)
         }
 
-        logger.info("Påskrudde satstyper for satskjøring $gyldigeSatser")
-        return gyldigeSatser
+        logger.info("Påskrudde satstyper for satskjøring $gyldigeSatstyper")
+        return gyldigeSatstyper
     }
 
     private fun oppretteEllerSkipSatsendring(
@@ -128,18 +141,12 @@ class StartSatsendring(
         antallAlleredeTriggetSatsendring: Int,
         antallFagsakerTilSatsendring: Int,
         satsTidspunkt: YearMonth,
-        gyldigeSatser: List<SatsType>
+        gyldigeSatstyper: List<SatsType>
     ): Int {
         var antallFagsakerSatsendring = antallAlleredeTriggetSatsendring
         for (fagsak in fagsakForSatsendring) {
-            if (skalTriggeFagsak(fagsak, satsTidspunkt, gyldigeSatser)) {
+            if (skalTriggeFagsak(fagsak, satsTidspunkt, gyldigeSatstyper)) {
                 antallFagsakerSatsendring++
-            } else {
-                logger.info(
-                    "Skipper oppretting av SatsendringTask for ${
-                    fagsak.id
-                    }"
-                )
             }
 
             if (antallFagsakerSatsendring == antallFagsakerTilSatsendring) {
@@ -149,7 +156,7 @@ class StartSatsendring(
         return antallFagsakerSatsendring
     }
 
-    private fun skalTriggeFagsak(fagsak: Fagsak, satsTidspunkt: YearMonth, gyldigeSatser: List<SatsType>): Boolean {
+    private fun skalTriggeFagsak(fagsak: Fagsak, satsTidspunkt: YearMonth, gyldigeSatstyper: List<SatsType>): Boolean {
         val aktivOgÅpenBehandling = behandlingRepository.findByFagsakAndAktivAndOpen(fagsakId = fagsak.id)
         if (aktivOgÅpenBehandling != null) {
             logger.info("Oppretter ikke satsendringtask for fagsak=${fagsak.id}. Har åpen behandling ${aktivOgÅpenBehandling.id}")
@@ -162,6 +169,21 @@ class StartSatsendring(
                 andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
                     sisteIverksatteBehandling.id
                 )
+
+            if (AutovedtakSatsendringService.harAlleredeSisteSats(
+                    andelerTilkjentYtelseMedEndreteUtbetalinger,
+                    satsTidspunkt
+                )
+            ) {
+                satskjøringRepository.save(
+                    Satskjøring(
+                        fagsakId = fagsak.id,
+                        ferdigTidspunkt = sisteIverksatteBehandling.endretTidspunkt
+                    )
+                )
+                logger.info("Fagsak=${fagsak.id} har alt siste satser")
+                return true
+            }
 
             val satstyper = mutableListOf<SatsType>()
             if (harYtelsetype(
@@ -204,15 +226,63 @@ class StartSatsendring(
                 satstyper.add(SatsType.TILLEGG_ORBA)
             }
 
-            return sjekkOgTriggSatsendring(satstyper, fagsak, gyldigeSatser)
+            return sjekkOgTriggSatsendring(satstyper, fagsak, gyldigeSatstyper, satsTidspunkt)
         } else {
             logger.info("Satsendring utføres ikke på fagsak=${fagsak.id} fordi fagsaken mangler en iverksatt behandling")
             return false
         }
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    fun sjekkOgOpprettSatsendringVedGammelSats(ident: String): Boolean {
+        val aktør = personidentService.hentAktør(ident)
+        val løpendeFagsakerForAktør = fagsakRepository.finnFagsakerForAktør(aktør)
+            .filter { !it.arkivert && it.status == FagsakStatus.LØPENDE }
+
+        var harOpprettetSatsendring = false
+        løpendeFagsakerForAktør.forEach { fagsak ->
+            if (opprettSatsendringTaskVedGammelSats(fagsak.id)) {
+                harOpprettetSatsendring = true
+            }
+        }
+        return harOpprettetSatsendring
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    fun sjekkOgOpprettSatsendringVedGammelSats(fagsakId: Long): Boolean {
+        return opprettSatsendringTaskVedGammelSats(fagsakId)
+    }
+
+    private fun opprettSatsendringTaskVedGammelSats(fagsakId: Long): Boolean {
+        val sisteIverksatteBehandling = behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
+        if (sisteIverksatteBehandling != null) {
+            val andelerTilkjentYtelseMedEndreteUtbetalinger =
+                andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
+                    sisteIverksatteBehandling.id
+                )
+
+            if (!AutovedtakSatsendringService.harAlleredeSisteSats(
+                    andelerTilkjentYtelseMedEndreteUtbetalinger,
+                    SATSENDRINGMÅNED_2023
+                ) && satskjøringRepository.findByFagsakId(fagsakId) == null
+            ) {
+                logger.info("Oppretter satsendringtask fagsakID=$fagsakId")
+                opprettSatsendringForFagsak(fagsakId = fagsakId)
+                return true
+            }
+        }
+
+        return false
+    }
+
+    fun opprettSatsendringForFagsak(fagsakId: Long) {
+        satskjøringRepository.save(Satskjøring(fagsakId = fagsakId))
+        opprettTaskService.opprettSatsendringTask(fagsakId, SATSENDRINGMÅNED_2023)
+    }
+
     companion object {
         val logger: Logger = LoggerFactory.getLogger(StartSatsendring::class.java)
         const val PAGE_STØRRELSE = 1000
+        val SATSENDRINGMÅNED_2023: YearMonth = YearMonth.of(2023, 3)
     }
 }

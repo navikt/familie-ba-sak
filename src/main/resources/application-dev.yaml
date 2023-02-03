@@ -153,3 +153,4 @@ CREDENTIAL_USERNAME: not-a-real-srvuser
 CREDENTIAL_PASSWORD: not-a-real-pw
 
 retry.backoff.delay: 5
+DEPLOY_ENV: dev

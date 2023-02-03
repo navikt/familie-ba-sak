@@ -102,7 +102,7 @@ class UtvidetBehandlingService(
         val utenlandskePeriodebeløp = utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId)
 
         val endreteUtbetalingerMedAndeler = andelerTilkjentYtelseOgEndreteUtbetalingerService
-            .finnEndreteUtbetalingerMedAndelerIHenholdTilVilkårsvurdering(behandlingId)
+            .finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandlingId)
 
         val feilutbetaltValuta = feilutbetaltValutaService.hentFeilutbetaltValutaPerioder(behandlingId)
 

@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.simulering
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.simulering.domene.RestSimulering
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -19,7 +20,8 @@ import org.springframework.web.bind.annotation.RestController
 class SimuleringController(
     private val simuleringService: SimuleringService,
     private val tilgangService: TilgangService,
-    private val featureToggleService: FeatureToggleService
+    private val featureToggleService: FeatureToggleService,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService
 
 ) {
 
@@ -30,8 +32,9 @@ class SimuleringController(
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
         val vedtakSimuleringMottaker = simuleringService.oppdaterSimuleringPåBehandlingVedBehov(behandlingId)
         val restSimulering = vedtakSimuleringMottakereTilRestSimulering(
-            vedtakSimuleringMottaker,
-            featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ)
+            økonomiSimuleringMottakere = vedtakSimuleringMottaker,
+            erManuellPosteringTogglePå = featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ),
+            erMigreringsbehandling = behandlingHentOgPersisterService.hent(behandlingId).erMigrering()
         )
         return ResponseEntity.ok(Ressurs.success(restSimulering))
     }

@@ -1,9 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak
 
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.brev.DokumentService
-import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
+import no.nav.familie.ba.sak.kjerne.brev.DokumentGenereringService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.slf4j.LoggerFactory
 import org.springframework.data.repository.findByIdOrNull
@@ -12,11 +9,8 @@ import java.time.LocalDateTime
 
 @Service
 class VedtakService(
-    private val behandlingService: BehandlingService,
     private val vedtakRepository: VedtakRepository,
-    private val dokumentService: DokumentService,
-    private val tilbakekrevingService: TilbakekrevingService,
-    private val vedtaksperiodeService: VedtaksperiodeService
+    private val dokumentGenereringService: DokumentGenereringService
 ) {
 
     fun hent(vedtakId: Long): Vedtak {
@@ -41,7 +35,7 @@ class VedtakService(
 
     fun oppdaterVedtakMedStønadsbrev(vedtak: Vedtak): Vedtak {
         return if (vedtak.behandling.erBehandlingMedVedtaksbrevutsending()) {
-            val brev = dokumentService.genererBrevForVedtak(vedtak)
+            val brev = dokumentGenereringService.genererBrevForVedtak(vedtak)
             vedtakRepository.save(vedtak.also { it.stønadBrevPdF = brev })
         } else {
             vedtak

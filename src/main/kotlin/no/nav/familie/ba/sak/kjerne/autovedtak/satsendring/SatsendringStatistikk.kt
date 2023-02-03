@@ -8,7 +8,6 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.leader.LeaderClient
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
-import java.time.YearMonth
 
 @Component
 class SatsendringStatistikk(
@@ -20,42 +19,42 @@ class SatsendringStatistikk(
         MultiGauge.builder("satsendring").register(Metrics.globalRegistry)
 
     @Scheduled(
-        fixedRate = OPPDATERING_HVER_TIME
+        fixedRate = OPPDATERING_HVER_HALV_TIME
     )
     fun antallSatsendringerKjørt() {
         if (LeaderClient.isLeader() == true) {
             val antallKjørt = satskjøringRepository.countByFerdigTidspunktIsNotNull()
             val antallTriggetTotalt = satskjøringRepository.count()
-            val antallFagsakerTotalt = fagsakRepository.finnAntallFagsakerTotalt()
+            val antallLøpendeFagsakerTotalt = fagsakRepository.finnAntallFagsakerLøpende()
 
             val rows = listOf(
                 MultiGauge.Row.of(
                     Tags.of(
-                        "totalt",
-                        "${YearMonth.now().year}-${YearMonth.now().month}"
+                        "satsendring",
+                        "totalt"
                     ),
                     antallTriggetTotalt
                 ),
                 MultiGauge.Row.of(
                     Tags.of(
-                        "antall-kjort",
-                        "${YearMonth.now().year}-${YearMonth.now().month}"
+                        "satsendring",
+                        "antallkjort"
                     ),
                     antallKjørt
                 ),
                 MultiGauge.Row.of(
                     Tags.of(
-                        "antall-fagsaker-totalt",
-                        "${YearMonth.now().year}-${YearMonth.now().month}"
+                        "satsendring",
+                        "antallfagsaker"
                     ),
-                    antallFagsakerTotalt
+                    antallLøpendeFagsakerTotalt
                 ),
                 MultiGauge.Row.of(
                     Tags.of(
-                        "antall-gjenstaaende",
-                        "${YearMonth.now().year}-${YearMonth.now().month}"
+                        "satsendring",
+                        "antallgjenstaaende"
                     ),
-                    antallFagsakerTotalt - antallKjørt
+                    antallLøpendeFagsakerTotalt - antallKjørt
                 )
             )
 
@@ -64,6 +63,6 @@ class SatsendringStatistikk(
     }
 
     companion object {
-        const val OPPDATERING_HVER_TIME: Long = 1000 * 60
+        const val OPPDATERING_HVER_HALV_TIME: Long = 1000 * 30
     }
 }
