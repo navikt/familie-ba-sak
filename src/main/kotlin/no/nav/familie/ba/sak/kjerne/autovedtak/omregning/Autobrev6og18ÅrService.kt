@@ -84,7 +84,7 @@ class Autobrev6og18ÅrService(
         if (startSatsendring.sjekkOgOpprettSatsendringVedGammelSats(autobrev6og18ÅrDTO.fagsakId)) {
             throw RekjørSenereException(
                 "Satsedring skal kjøre ferdig før man behandler autobrev 6 og 18 år",
-                LocalDateTime.now().plusMinutes(15)
+                LocalDateTime.now().plusHours(1)
             )
         }
 

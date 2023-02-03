@@ -65,7 +65,7 @@ class AutobrevOpphørSmåbarnstilleggService(
         if (startSatsendring.sjekkOgOpprettSatsendringVedGammelSats(fagsakId)) {
             throw RekjørSenereException(
                 "Satsedring skal kjøre ferdig før man behandler autobrev småbarnstillegg",
-                LocalDateTime.now().plusMinutes(15)
+                LocalDateTime.now().plusHours(1)
             )
         }
 
