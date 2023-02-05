@@ -405,6 +405,7 @@ internal class BehandlingsresultatServiceTest {
 
         verify(exactly = 1) { persongrunnlagService.hentAktivThrows(behandling.id) }
     }
+
     @Test
     fun `finnPersonerFremstiltKravFor skal ikke returnere duplikater av personer`() {
         val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)
@@ -426,7 +427,7 @@ internal class BehandlingsresultatServiceTest {
 
         val søknadDto = SøknadDTO(
             underkategori = BehandlingUnderkategoriDTO.ORDINÆR,
-            barnaMedOpplysninger = listOf(barnSomErKryssetAvFor,duplikatBarnSomErKryssetAvFor),
+            barnaMedOpplysninger = listOf(barnSomErKryssetAvFor, duplikatBarnSomErKryssetAvFor),
             søkerMedOpplysninger = mockk(),
             endringAvOpplysningerBegrunnelse = ""
         )
@@ -444,5 +445,4 @@ internal class BehandlingsresultatServiceTest {
         assertThat(personerFramstiltForKrav.size, Is(1))
         assertThat(personerFramstiltForKrav.single(), Is(barn.aktør))
     }
-
 }
