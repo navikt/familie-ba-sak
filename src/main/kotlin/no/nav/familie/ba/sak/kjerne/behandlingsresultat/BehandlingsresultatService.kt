@@ -70,7 +70,10 @@ class BehandlingsresultatService(
 
         val forrigeAndelerTilkjentYtelse = forrigeBehandling?.let { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = it.id) } ?: emptyList()
         val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandlingId)
+
+        val forrigeEndretUtbetalingAndeler = forrigeBehandling?.let { endretUtbetalingAndelService.hentForBehandling(behandlingId = it.id) } ?: emptyList()
         val endretUtbetalingAndeler = endretUtbetalingAndelService.hentForBehandling(behandlingId = behandlingId)
+
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId = behandlingId)
 
         val personerFremstiltKravFor = finnPersonerFremstiltKravFor(
@@ -96,7 +99,6 @@ class BehandlingsresultatService(
 
         // 2 ENDRINGER
         val endringsresultat = if (forrigeBehandling != null) {
-            val forrigeEndretUtbetalingAndeler = endretUtbetalingAndelService.hentForBehandling(behandlingId = forrigeBehandling.id)
             val forrigeVilkårsvurdering = vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId = forrigeBehandling.id)
             val kompetanser = kompetanseService.hentKompetanser(behandlingId = BehandlingId(behandlingId))
             val forrigeKompetanser = kompetanseService.hentKompetanser(behandlingId = BehandlingId(forrigeBehandling.id))
@@ -119,7 +121,9 @@ class BehandlingsresultatService(
         // 3 OPPHØR
         val opphørsresultat = BehandlingsresultatOpphørUtils.hentOpphørsresultatPåBehandling(
             nåværendeAndeler = andelerTilkjentYtelse,
-            forrigeAndeler = forrigeAndelerTilkjentYtelse
+            forrigeAndeler = forrigeAndelerTilkjentYtelse,
+            nåværendeEndretAndeler = endretUtbetalingAndeler,
+            forrigeEndretAndeler = forrigeEndretUtbetalingAndeler
         )
 
         // KOMBINER
