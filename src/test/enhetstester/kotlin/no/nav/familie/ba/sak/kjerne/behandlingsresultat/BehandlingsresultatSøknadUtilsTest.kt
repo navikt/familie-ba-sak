@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.tilfeldigPerson
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatSøknadUtils.kombinerSøknadsresultater
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatSøknadUtils.utledSøknadResultatFraAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -12,7 +11,6 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsInAnyOrder
-import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
@@ -21,7 +19,7 @@ import java.math.BigDecimal
 import java.time.YearMonth
 import org.hamcrest.CoreMatchers.`is` as Is
 
-class BehandlingsresultatSøknadUtilsTest {
+internal class BehandlingsresultatSøknadUtilsTest {
 
     val søker = tilfeldigPerson()
 
@@ -374,16 +372,5 @@ class BehandlingsresultatSøknadUtilsTest {
         val kombinertResultat = listeMedSøknadsresultat.kombinerSøknadsresultater()
 
         assertThat(kombinertResultat, Is(Søknadsresultat.DELVIS_INNVILGET))
-    }
-
-    @Test
-    fun `Kombiner resultater - skal returnere FORTSATT_INNVILGET hvis det er søknad og ingen relevante endringer, og ingen opphør`() {
-        val behandlingsresultat = BehandlingsresultatUtils.kombinerResultaterTilBehandlingsresultat(
-            Søknadsresultat.INGEN_RELEVANTE_ENDRINGER,
-            Endringsresultat.INGEN_ENDRING,
-            Opphørsresultat.IKKE_OPPHØRT
-        )
-
-        assertEquals(Behandlingsresultat.FORTSATT_INNVILGET, behandlingsresultat)
     }
 }
