@@ -64,7 +64,7 @@ object BehandlingsresultatOpphørUtils {
 
     /**
      * Hvis det eksisterer andeler med beløp == 0 så ønsker vi å filtrere bort disse dersom det eksisterer endret utbetaling andel for perioden
-     * med årsak ALLEREDE_UTBETALT, ENDRE_MOTTAKER, DELT_BOSTED eller ETTERBETALING_3ÅR
+     * med årsak ALLEREDE_UTBETALT, ENDRE_MOTTAKER eller ETTERBETALING_3ÅR
      */
     internal fun List<AndelTilkjentYtelse>.filtrerBortIrrelevanteAndeler(endretUtbetalingAndeler: List<EndretUtbetalingAndel>): List<AndelTilkjentYtelse> {
         val personerMedAndeler = this.map { it.aktør }.distinct()
