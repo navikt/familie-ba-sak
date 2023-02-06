@@ -69,11 +69,18 @@ class IverksettMotOppdragTask(
                 behandling.fagsak.aktør,
                 behandling.id,
                 vedtak.id,
-                saksbehandlerId
+                saksbehandlerId,
+                behandling.fagsak.id
             )
         }
 
-        fun opprettTask(aktør: Aktør, behandlingsId: Long, vedtaksId: Long, saksbehandlerId: String): Task {
+        fun opprettTask(
+            aktør: Aktør,
+            behandlingsId: Long,
+            vedtaksId: Long,
+            saksbehandlerId: String,
+            fagsakId: Long
+        ): Task {
             return Task(
                 type = TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(
@@ -88,6 +95,7 @@ class IverksettMotOppdragTask(
                     this["personIdent"] = aktør.aktivFødselsnummer()
                     this["behandlingsId"] = behandlingsId.toString()
                     this["vedtakId"] = vedtaksId.toString()
+                    this["fagsakId"] = fagsakId.toString()
                 }
             )
         }
