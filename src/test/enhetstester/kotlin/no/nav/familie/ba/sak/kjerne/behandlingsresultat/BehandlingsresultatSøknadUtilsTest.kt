@@ -37,7 +37,6 @@ class BehandlingsresultatSøknadUtilsTest {
     val jan22 = YearMonth.of(2022, 1)
     val aug22 = YearMonth.of(2022, 8)
 
-
     @Test
     fun `utledSøknadResultatFraAndelerTilkjentYtelse skal bare utlede resultater for personer det er framstilt krav for`() {
         val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
