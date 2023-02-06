@@ -282,7 +282,7 @@ internal class BehandlingsresultatServiceTest {
         val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)
         val barn = lagPerson(type = PersonType.BARN)
 
-        val barnSomIkkeErKryssetAvFor = BarnMedOpplysninger(
+        val barnSomErKryssetAvFor = BarnMedOpplysninger(
             ident = barn.aktør.aktivFødselsnummer(),
             navn = "barn1",
             inkludertISøknaden = true,
@@ -291,7 +291,7 @@ internal class BehandlingsresultatServiceTest {
 
         val søknadDto = SøknadDTO(
             underkategori = BehandlingUnderkategoriDTO.UTVIDET,
-            barnaMedOpplysninger = listOf(barnSomIkkeErKryssetAvFor),
+            barnaMedOpplysninger = listOf(barnSomErKryssetAvFor),
             søkerMedOpplysninger = mockk(),
             endringAvOpplysningerBegrunnelse = ""
         )
@@ -311,7 +311,7 @@ internal class BehandlingsresultatServiceTest {
     }
 
     @Test
-    fun `finnPersonerFremstiltKravFor skal returnere barn som er folkeregistret og krysset av på søknad`() {
+    fun `finnPersonerFremstiltKravFor skal bare returnere barn som er folkeregistret og krysset av på søknad`() {
         val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)
         val barn1Fnr = randomFnr()
         val mocketAktør = mockk<Aktør>()
@@ -333,8 +333,8 @@ internal class BehandlingsresultatServiceTest {
         val barnSomErKryssetAvForMenIkkeFolkeregistrert = BarnMedOpplysninger(
             ident = randomFnr(),
             navn = "barn3",
-            inkludertISøknaden = false,
-            erFolkeregistrert = true
+            inkludertISøknaden = true,
+            erFolkeregistrert = false
         )
 
         val søknadDto = SøknadDTO(
@@ -404,5 +404,45 @@ internal class BehandlingsresultatServiceTest {
         assertThat(personerFramstiltForKrav.single(), Is(eksisterendeBarn.aktør))
 
         verify(exactly = 1) { persongrunnlagService.hentAktivThrows(behandling.id) }
+    }
+
+    @Test
+    fun `finnPersonerFremstiltKravFor skal ikke returnere duplikater av personer`() {
+        val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)
+        val barn = lagPerson(type = PersonType.BARN)
+
+        val barnSomErKryssetAvFor = BarnMedOpplysninger(
+            ident = barn.aktør.aktivFødselsnummer(),
+            navn = "barn1",
+            inkludertISøknaden = true,
+            erFolkeregistrert = true
+        )
+
+        val duplikatBarnSomErKryssetAvFor = BarnMedOpplysninger(
+            ident = barn.aktør.aktivFødselsnummer(),
+            navn = "barn1",
+            inkludertISøknaden = true,
+            erFolkeregistrert = true
+        )
+
+        val søknadDto = SøknadDTO(
+            underkategori = BehandlingUnderkategoriDTO.ORDINÆR,
+            barnaMedOpplysninger = listOf(barnSomErKryssetAvFor, duplikatBarnSomErKryssetAvFor),
+            søkerMedOpplysninger = mockk(),
+            endringAvOpplysningerBegrunnelse = ""
+        )
+
+        every { vilkårsvurderingService.hentAktivForBehandlingThrows(any()) } returns Vilkårsvurdering(behandling = behandling)
+        every { personidentService.hentAktør(barn.aktør.aktivFødselsnummer()) } returns barn.aktør
+
+        val personerFramstiltForKrav =
+            behandlingsresultatService.finnPersonerFremstiltKravFor(
+                behandling = behandling,
+                søknadDTO = søknadDto,
+                forrigeBehandling = null
+            )
+
+        assertThat(personerFramstiltForKrav.size, Is(1))
+        assertThat(personerFramstiltForKrav.single(), Is(barn.aktør))
     }
 }
