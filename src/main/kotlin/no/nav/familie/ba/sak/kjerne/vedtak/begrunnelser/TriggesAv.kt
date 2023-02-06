@@ -110,7 +110,7 @@ fun TriggesAv.erTriggereOppfyltForEndretUtbetaling(
 
     val oppfyllerUtvidetScenario =
         this.endretUtbetalingSkalUtbetales == EndretUtbetalingsperiodeDeltBostedTriggere.UTBETALING_IKKE_RELEVANT ||
-            oppfyllerUtvidetScenario(
+            endretUtbetalingBegrunnelseOppfyllerUtvidetScenario(
                 vilkårBegrunnelsenGjelderFor = this.vilkår,
                 minimerteUtbetalingsperiodeDetaljer = minimerteUtbetalingsperiodeDetaljer
             )
@@ -133,15 +133,15 @@ fun MinimertEndretAndel.oppfyllerSkalUtbetalesTrigger(
     }
 }
 
-private fun oppfyllerUtvidetScenario(
+private fun endretUtbetalingBegrunnelseOppfyllerUtvidetScenario(
     vilkårBegrunnelsenGjelderFor: Set<Vilkår>?,
     minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>
 ): Boolean {
     val begrunnelseGjelderUtvidet = vilkårBegrunnelsenGjelderFor?.contains(Vilkår.UTVIDET_BARNETRYGD) ?: false
 
-    val periodeInneholderUtvidetUtenEndring = minimerteUtbetalingsperiodeDetaljer.singleOrNull {
+    val periodeInneholderUtvidetMedEndring = minimerteUtbetalingsperiodeDetaljer.singleOrNull {
         it.ytelseType == YtelseType.UTVIDET_BARNETRYGD
-    }?.erPåvirketAvEndring == false
+    }?.erPåvirketAvEndring == true
 
-    return begrunnelseGjelderUtvidet == periodeInneholderUtvidetUtenEndring
+    return begrunnelseGjelderUtvidet == periodeInneholderUtvidetMedEndring
 }
