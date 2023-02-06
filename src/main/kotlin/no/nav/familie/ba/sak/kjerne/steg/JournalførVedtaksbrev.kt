@@ -103,7 +103,8 @@ class JournalførVedtaksbrev(
         behandling: Behandling
     ) {
         journalposterTilDistribusjon.forEach {
-            val finnesBrevMottaker = it.value.navn != null && it.value.navn != hentMottakerNavn(it.value.brukerId)
+            val finnesBrevMottaker = it.value.navn != null &&
+                it.value.navn != hentMottakerNavn(behandling.fagsak.aktør.aktivFødselsnummer())
             if (it.value.erInstitusjonVerge || finnesBrevMottaker) { // Denne tasken sender kun vedtaksbrev
                 val distribuerTilVergeTask =
                     DistribuerVedtaksbrevTilInstitusjonVergeEllerManuellBrevMottakerTask

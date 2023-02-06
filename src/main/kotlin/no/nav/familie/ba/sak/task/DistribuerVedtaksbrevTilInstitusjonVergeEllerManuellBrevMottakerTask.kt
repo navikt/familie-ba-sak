@@ -42,6 +42,6 @@ class DistribuerVedtaksbrevTilInstitusjonVergeEllerManuellBrevMottakerTask(
             )
         }
 
-        const val TASK_STEP_TYPE = "distribuerVedtaksbrevTilVerge"
+        const val TASK_STEP_TYPE = "distribuerVedtaksbrevTilVergeEllerManuellBrevMottaker"
     }
 }
