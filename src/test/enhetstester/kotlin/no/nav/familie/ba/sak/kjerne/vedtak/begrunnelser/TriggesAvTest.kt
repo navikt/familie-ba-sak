@@ -168,7 +168,6 @@ class TriggesAvTest {
                 lagMinimertUtbetalingsperiodeDetalj(ytelseType = YtelseType.ORDINÆR_BARNETRYGD)
         )
 
-
         Assertions.assertTrue(
             triggesAvSkalUtbetalesUtenUtvidetVilkår blirTriggetVed
                 lagMinimertUtbetalingsperiodeDetalj(
