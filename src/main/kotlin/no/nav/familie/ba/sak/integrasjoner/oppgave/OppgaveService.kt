@@ -150,7 +150,11 @@ class OppgaveService(
         hentOppgaverSomIkkeErFerdigstilt(behandling).forEach { dbOppgave ->
             val oppgave = hentOppgave(dbOppgave.gsakId.toLong())
             logger.info("Oppdaterer enhet fra ${oppgave.tildeltEnhetsnr} til $nyEnhet på oppgave ${oppgave.id}")
-            integrasjonClient.tilordneEnhetForOppgave(oppgaveId = oppgave.id!!, nyEnhet = nyEnhet)
+            if (oppgave.status == FERDIGSTILT) {
+                dbOppgave.erFerdigstilt = true
+            } else {
+                integrasjonClient.tilordneEnhetForOppgave(oppgaveId = oppgave.id!!, nyEnhet = nyEnhet)
+            }
         }
     }
 
