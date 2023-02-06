@@ -96,16 +96,16 @@ class TriggesAvTest {
     }
 
     @Test
-    fun `Skal gi riktig resultat for om endring skal utbetaling`() {
+    fun `Triggere for endret utbetaling-begrunnelser skal bli true ved riktig utbetalingsandel`() {
         val skalUtbetalesMedUtbetaling =
             triggesAvSkalUtbetalesMedUtvidetVilkår.erTriggereOppfyltForEndretUtbetaling(
                 minimertEndretAndel = endretUtbetalingAndelIkkeNull,
                 minimerteUtbetalingsperiodeDetaljer = listOf(
                     lagMinimertUtbetalingsperiodeDetalj(
-                        ytelseType = YtelseType.UTVIDET_BARNETRYGD
+                        ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                        erPåvirketAvEndring = true
                     )
                 )
-
             )
 
         val skalUtbetalesUtenUtbetaling =
@@ -113,10 +113,10 @@ class TriggesAvTest {
                 minimertEndretAndel = endretUtbetalingAndelNull,
                 minimerteUtbetalingsperiodeDetaljer = listOf(
                     lagMinimertUtbetalingsperiodeDetalj(
-                        ytelseType = YtelseType.UTVIDET_BARNETRYGD
+                        ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                        erPåvirketAvEndring = true
                     )
                 )
-
             )
 
         val skalIkkeUtbetalesUtenUtbetaling =
@@ -124,10 +124,10 @@ class TriggesAvTest {
                 minimertEndretAndel = endretUtbetalingAndelNull,
                 minimerteUtbetalingsperiodeDetaljer = listOf(
                     lagMinimertUtbetalingsperiodeDetalj(
-                        ytelseType = YtelseType.UTVIDET_BARNETRYGD
+                        ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                        erPåvirketAvEndring = true
                     )
                 )
-
             )
 
         val skalIkkeUtbetalesMedUtbetaling =
@@ -135,7 +135,8 @@ class TriggesAvTest {
                 minimertEndretAndel = endretUtbetalingAndelIkkeNull,
                 minimerteUtbetalingsperiodeDetaljer = listOf(
                     lagMinimertUtbetalingsperiodeDetalj(
-                        ytelseType = YtelseType.UTVIDET_BARNETRYGD
+                        ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                        erPåvirketAvEndring = true
                     )
                 )
             )
