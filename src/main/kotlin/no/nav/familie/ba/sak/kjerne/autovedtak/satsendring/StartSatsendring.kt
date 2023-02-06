@@ -50,7 +50,7 @@ class StartSatsendring(
         var startSide = 0
         while (antallSatsendringerStartet < antallFagsaker) {
             val page =
-                fagsakRepository.finnLøpendeFagsakerForSatsendring(Pageable.ofSize(PAGE_STØRRELSE))
+                fagsakRepository.finnLøpendeFagsakerForSatsendring(Pageable.ofSize(antallFagsaker).withPage(startSide))
 
             val fagsakerForSatsendring = page.toList()
             logger.info("Fant ${fagsakerForSatsendring.size} personer for satsendring på side $startSide")
@@ -282,7 +282,6 @@ class StartSatsendring(
 
     companion object {
         val logger: Logger = LoggerFactory.getLogger(StartSatsendring::class.java)
-        const val PAGE_STØRRELSE = 1000
         val SATSENDRINGMÅNED_2023: YearMonth = YearMonth.of(2023, 3)
     }
 }
