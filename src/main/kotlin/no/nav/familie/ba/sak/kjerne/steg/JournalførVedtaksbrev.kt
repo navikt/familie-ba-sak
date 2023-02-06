@@ -62,7 +62,7 @@ class JournalførVedtaksbrev(
         if (fagsak.type == FagsakType.INSTITUSJON) {
             mottakere += MottakerInfo(fagsak.institusjon!!.orgNummer, BrukerIdType.ORGNR, false)
         } else {
-            val brevMottakere = brevmottakerService.hentBrevmottagere(behandling.id)
+            val brevMottakere = brevmottakerService.hentBrevmottakere(behandling.id)
             if (brevMottakere.isNotEmpty()) {
                 mottakere += brevmottakerService.lagMottakereFraBrevMottakere(
                     brevMottakere,
@@ -104,8 +104,7 @@ class JournalførVedtaksbrev(
         behandling: Behandling
     ) {
         journalposterTilDistribusjon.forEach {
-            val finnesBrevMottaker = it.value.navn != null &&
-                it.value.navn != hentMottakerNavn(behandling.fagsak.aktør.aktivFødselsnummer())
+            val finnesBrevMottaker = it.value.navn != hentMottakerNavn(behandling.fagsak.aktør.aktivFødselsnummer())
             if (it.value.erInstitusjonVerge || finnesBrevMottaker) { // Denne tasken sender kun vedtaksbrev
                 val distribuerTilVergeTask =
                     DistribuerVedtaksbrevTilInstitusjonVergeEllerManuellBrevMottakerTask
@@ -164,7 +163,7 @@ class JournalførVedtaksbrev(
             vedlegg = vedlegg,
             behandlingId = vedtak.behandling.id,
             avsenderMottaker = utledAvsenderMottaker(mottakerInfo),
-            tilVerge = tilManuellMottakerEllerVerge
+            tilManuellMottakerEllerVerge = tilManuellMottakerEllerVerge
         )
     }
 
