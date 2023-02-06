@@ -21,8 +21,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.ba.sak.task.DistribuerDokumentTask
-import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevTilVergeDTO
-import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevTilVergeTask
+import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevTilInstitusjonVergeEllerManuellBrevMottakerTask
 import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.dokarkiv.AvsenderMottaker
 import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
@@ -93,43 +92,32 @@ class JournalførVedtaksbrev(
             ).also { journalposterTilDistribusjon[it] = mottakerInfo }
         }
 
-        lagTaskForÅDistribuereVedtaksbrev(journalposterTilDistribusjon, vedtak, data, behandling)
+        lagTaskForÅDistribuereVedtaksbrev(journalposterTilDistribusjon, data, behandling)
 
         return hentNesteStegForNormalFlyt(behandling)
     }
 
     private fun lagTaskForÅDistribuereVedtaksbrev(
         journalposterTilDistribusjon: MutableMap<String, MottakerInfo>,
-        vedtak: Vedtak,
         data: JournalførVedtaksbrevDTO,
         behandling: Behandling
     ) {
         journalposterTilDistribusjon.forEach {
             val finnesBrevMottaker = it.value.navn != null && it.value.navn != hentMottakerNavn(it.value.brukerId)
-            if (it.value.erInstitusjonVerge || finnesBrevMottaker) {
+            if (it.value.erInstitusjonVerge || finnesBrevMottaker) { // Denne tasken sender kun vedtaksbrev
                 val distribuerTilVergeTask =
-                    DistribuerVedtaksbrevTilVergeTask.opprettDistribuerVedtaksbrevTilVergeTask(
-                        distribuerVedtaksbrevTilVergeDTO = DistribuerVedtaksbrevTilVergeDTO(
-                            behandlingId = vedtak.behandling.id,
-                            personIdent = it.value.brukerId,
-                            journalpostId = it.key
-                        ),
-                        properties = data.task.metadata
-                    )
+                    DistribuerVedtaksbrevTilInstitusjonVergeEllerManuellBrevMottakerTask
+                        .opprettDistribuerVedtaksbrevTilInstitusjonVergeEllerManuellBrevMottakerTask(
+                            distribuerDokumentDTO = lagDistribuerDokumentDto(behandling, it.key, it.value),
+                            properties = data.task.metadata
+                        )
                 taskRepository.save(distribuerTilVergeTask)
-            } else {
-                val distribuerTilSøkerEllerBrevMottakereTask = DistribuerDokumentTask.opprettDistribuerDokumentTask(
-                    distribuerDokumentDTO = DistribuerDokumentDTO(
-                        personEllerInstitusjonIdent = it.value.brukerId,
-                        behandlingId = vedtak.behandling.id,
-                        journalpostId = it.key,
-                        brevmal = hentBrevmal(behandling),
-                        erManueltSendt = false,
-                        manuellAdresseInfo = it.value.manuellAdresseInfo
-                    ),
+            } else { // Denne tasken sender vedtaksbrev og håndterer steg videre
+                val distribuerTilSøkerTask = DistribuerDokumentTask.opprettDistribuerDokumentTask(
+                    distribuerDokumentDTO = lagDistribuerDokumentDto(behandling, it.key, it.value),
                     properties = data.task.metadata
                 )
-                taskRepository.save(distribuerTilSøkerEllerBrevMottakereTask)
+                taskRepository.save(distribuerTilSøkerTask)
             }
         }
     }
@@ -213,6 +201,16 @@ class JournalførVedtaksbrev(
             it.navn!!
         }
     }
+
+    private fun lagDistribuerDokumentDto(behandling: Behandling, journalPostId: String, mottakerInfo: MottakerInfo) =
+        DistribuerDokumentDTO(
+            personEllerInstitusjonIdent = mottakerInfo.brukerId,
+            behandlingId = behandling.id,
+            journalpostId = journalPostId,
+            brevmal = hentBrevmal(behandling),
+            erManueltSendt = false,
+            manuellAdresseInfo = mottakerInfo.manuellAdresseInfo
+        )
 
     override fun stegType(): StegType {
         return StegType.JOURNALFØR_VEDTAKSBREV
