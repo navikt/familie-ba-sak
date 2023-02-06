@@ -48,12 +48,13 @@ class JournalførVedtaksbrev(
         val fagsakId = "${vedtak.behandling.fagsak.id}"
         val fagsak = fagsakRepository.finnFagsak(vedtak.behandling.fagsak.id)
         val søkersident = vedtak.behandling.fagsak.aktør.aktivFødselsnummer()
+        val institusjonVergeIdent = vedtak.behandling.verge?.ident
 
         if (fagsak == null || fagsak.type == FagsakType.INSTITUSJON && fagsak.institusjon == null) {
             error("Journalfør vedtaksbrev feil: fagsak er null eller institusjon fagsak har ikke institusjonsinformasjon")
         }
 
-        val behanlendeEnhet =
+        val behandlendeEnhet =
             arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id).behandlendeEnhetId
 
         val mottakere = mutableListOf<MottakerInfo>()
@@ -72,7 +73,7 @@ class JournalførVedtaksbrev(
                 mottakere += MottakerInfo(søkersident, BrukerIdType.FNR, false)
             }
         }
-        if (vedtak.behandling.verge?.ident != null) { // brukes kun i institusjon
+        if (institusjonVergeIdent != null) { // brukes kun i institusjon
             mottakere += MottakerInfo(vedtak.behandling.verge.ident, BrukerIdType.FNR, true)
         }
 
@@ -82,9 +83,9 @@ class JournalførVedtaksbrev(
                 fnr = fagsak.aktør.aktivFødselsnummer(),
                 fagsakId = fagsakId,
                 vedtak = vedtak,
-                journalførendeEnhet = behanlendeEnhet,
+                journalførendeEnhet = behandlendeEnhet,
                 mottakerInfo = mottakerInfo,
-                tilManuellMottakerEllerVerge = if (vedtak.behandling.verge?.ident != null) {
+                tilManuellMottakerEllerVerge = if (institusjonVergeIdent != null) {
                     mottakerInfo.erInstitusjonVerge
                 } else {
                     (mottakerInfo.navn != null && mottakerInfo.navn != hentMottakerNavn(søkersident))
@@ -98,7 +99,7 @@ class JournalførVedtaksbrev(
     }
 
     private fun lagTaskForÅDistribuereVedtaksbrev(
-        journalposterTilDistribusjon: MutableMap<String, MottakerInfo>,
+        journalposterTilDistribusjon: Map<String, MottakerInfo>,
         data: JournalførVedtaksbrevDTO,
         behandling: Behandling
     ) {

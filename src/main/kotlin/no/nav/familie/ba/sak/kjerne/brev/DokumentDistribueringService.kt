@@ -25,7 +25,7 @@ class DokumentDistribueringService(
         distribuerDokumentDTO: DistribuerDokumentDTO,
         loggBehandlerRolle: BehandlerRolle
     ) = try {
-        distribuerBrevOgLoggHendlese(distribuerDokumentDTO, loggBehandlerRolle)
+        distribuerBrevOgLoggHendelse(distribuerDokumentDTO, loggBehandlerRolle)
     } catch (ressursException: RessursException) {
         val journalpostId = distribuerDokumentDTO.journalpostId
         val behandlingId = distribuerDokumentDTO.behandlingId
@@ -81,7 +81,7 @@ class DokumentDistribueringService(
         antallBrevIkkeDistribuertUkjentAndresse[brevMal]?.increment()
     }
 
-    private fun distribuerBrevOgLoggHendlese(
+    private fun distribuerBrevOgLoggHendelse(
         distribuerDokumentDTO: DistribuerDokumentDTO,
         loggBehandlerRolle: BehandlerRolle
     ) {
