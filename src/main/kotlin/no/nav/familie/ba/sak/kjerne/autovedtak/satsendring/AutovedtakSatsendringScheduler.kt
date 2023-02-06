@@ -13,7 +13,7 @@ class AutovedtakSatsendringScheduler(private val startSatsendring: StartSatsendr
         if (LeaderClient.isLeader() == true) {
             logger.info("Satsendring trigges av schedulert jobb")
             startSatsendring.startSatsendring(
-                antallFagsaker = 50,
+                antallFagsaker = 200,
                 satsTidspunkt = StartSatsendring.SATSENDRINGMÅNED_2023
             )
         }
