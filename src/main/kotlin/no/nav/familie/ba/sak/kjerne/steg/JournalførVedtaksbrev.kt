@@ -104,18 +104,27 @@ class JournalførVedtaksbrev(
         behandling: Behandling
     ) {
         journalposterTilDistribusjon.forEach {
-            val finnesBrevMottaker = it.value.navn != hentMottakerNavn(behandling.fagsak.aktør.aktivFødselsnummer())
+            val finnesBrevMottaker =
+                it.value.navn != null && it.value.navn != hentMottakerNavn(behandling.fagsak.aktør.aktivFødselsnummer())
             if (it.value.erInstitusjonVerge || finnesBrevMottaker) { // Denne tasken sender kun vedtaksbrev
                 val distribuerTilVergeTask =
                     DistribuerVedtaksbrevTilInstitusjonVergeEllerManuellBrevMottakerTask
                         .opprettDistribuerVedtaksbrevTilInstitusjonVergeEllerManuellBrevMottakerTask(
-                            distribuerDokumentDTO = lagDistribuerDokumentDto(behandling, it.key, it.value),
+                            distribuerDokumentDTO = lagDistribuerDokumentDto(
+                                behandling = behandling,
+                                journalPostId = it.key,
+                                mottakerInfo = it.value
+                            ),
                             properties = data.task.metadata
                         )
                 taskRepository.save(distribuerTilVergeTask)
             } else { // Denne tasken sender vedtaksbrev og håndterer steg videre
                 val distribuerTilSøkerTask = DistribuerDokumentTask.opprettDistribuerDokumentTask(
-                    distribuerDokumentDTO = lagDistribuerDokumentDto(behandling, it.key, it.value),
+                    distribuerDokumentDTO = lagDistribuerDokumentDto(
+                        behandling = behandling,
+                        journalPostId = it.key,
+                        mottakerInfo = it.value
+                    ),
                     properties = data.task.metadata
                 )
                 taskRepository.save(distribuerTilSøkerTask)
