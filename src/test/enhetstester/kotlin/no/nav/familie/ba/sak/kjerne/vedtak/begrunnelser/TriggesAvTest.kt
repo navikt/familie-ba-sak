@@ -147,18 +147,19 @@ class TriggesAvTest {
     }
 
     @Test
-    fun `Skal gi riktig resultat for utvidetScenario`() {
-        val utvidetScenarioUtvidetVilkår =
+    fun `Skal gi riktig resultat for om begrunnelse trigges ved utvidetScenario`() {
+        val utvidetBegrunnelseUtvidetVilkårMedEndring =
             triggesAvSkalUtbetalesMedUtvidetVilkår.erTriggereOppfyltForEndretUtbetaling(
                 minimertEndretAndel = endretUtbetalingAndelIkkeNull,
                 minimerteUtbetalingsperiodeDetaljer = listOf(
                     lagMinimertUtbetalingsperiodeDetalj(
-                        ytelseType = YtelseType.UTVIDET_BARNETRYGD
+                        ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                        erPåvirketAvEndring = true
                     )
                 )
 
             )
-        val utvidetScenarioIkkeUtvidetVilkår =
+        val utvidetBegrunnelseIkkeUtvidetVilkår =
             triggesAvSkalUtbetalesMedUtvidetVilkår.erTriggereOppfyltForEndretUtbetaling(
                 minimertEndretAndel = endretUtbetalingAndelIkkeNull,
                 minimerteUtbetalingsperiodeDetaljer = listOf(
@@ -168,7 +169,7 @@ class TriggesAvTest {
                 )
 
             )
-        val ikkeUtvidetScenarioIkkeUtvidetVilkår =
+        val ikkeUtvidetBegrunnelseIkkeUtvidetVilkår =
             triggesAvSkalUtbetalesUtenUtvidetVilkår.erTriggereOppfyltForEndretUtbetaling(
                 minimertEndretAndel = endretUtbetalingAndelIkkeNull,
                 minimerteUtbetalingsperiodeDetaljer = listOf(
@@ -176,23 +177,46 @@ class TriggesAvTest {
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD
                     )
                 )
-
             )
-        val ikkeUtvidetScenarioUtvidetVilkår =
+        val ikkeUtvidetBegrunnelseUtvidetVilkårMedEndring =
             triggesAvSkalUtbetalesUtenUtvidetVilkår.erTriggereOppfyltForEndretUtbetaling(
                 minimertEndretAndel = endretUtbetalingAndelIkkeNull,
                 minimerteUtbetalingsperiodeDetaljer = listOf(
                     lagMinimertUtbetalingsperiodeDetalj(
-                        ytelseType = YtelseType.UTVIDET_BARNETRYGD
+                        ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                        erPåvirketAvEndring = true
+                    )
+                )
+            )
+
+        val utvidetBegrunnelseUtvidetVilkårUtenEndring =
+            triggesAvSkalUtbetalesMedUtvidetVilkår.erTriggereOppfyltForEndretUtbetaling(
+                minimertEndretAndel = endretUtbetalingAndelIkkeNull,
+                minimerteUtbetalingsperiodeDetaljer = listOf(
+                    lagMinimertUtbetalingsperiodeDetalj(
+                        ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                        erPåvirketAvEndring = false
                     )
                 )
 
             )
+        val ikkeUtvidetBegrunnelseUtvidetVilkårUtenEndring =
+            triggesAvSkalUtbetalesUtenUtvidetVilkår.erTriggereOppfyltForEndretUtbetaling(
+                minimertEndretAndel = endretUtbetalingAndelIkkeNull,
+                minimerteUtbetalingsperiodeDetaljer = listOf(
+                    lagMinimertUtbetalingsperiodeDetalj(
+                        ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                        erPåvirketAvEndring = false
+                    )
+                )
+            )
 
-        Assertions.assertTrue(utvidetScenarioUtvidetVilkår)
-        Assertions.assertFalse(utvidetScenarioIkkeUtvidetVilkår)
-        Assertions.assertTrue(ikkeUtvidetScenarioIkkeUtvidetVilkår)
-        Assertions.assertFalse(ikkeUtvidetScenarioUtvidetVilkår)
+        Assertions.assertTrue(utvidetBegrunnelseUtvidetVilkårMedEndring)
+        Assertions.assertFalse(utvidetBegrunnelseIkkeUtvidetVilkår)
+        Assertions.assertTrue(ikkeUtvidetBegrunnelseIkkeUtvidetVilkår)
+        Assertions.assertFalse(ikkeUtvidetBegrunnelseUtvidetVilkårMedEndring)
+        Assertions.assertFalse(utvidetBegrunnelseUtvidetVilkårUtenEndring)
+        Assertions.assertTrue(ikkeUtvidetBegrunnelseUtvidetVilkårUtenEndring)
     }
 
     @Test
