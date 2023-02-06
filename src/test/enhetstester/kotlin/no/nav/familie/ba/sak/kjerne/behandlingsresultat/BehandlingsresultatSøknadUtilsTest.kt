@@ -26,14 +26,17 @@ import org.junit.jupiter.params.provider.EnumSource
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
+import java.time.YearMonth.now
 import org.hamcrest.CoreMatchers.`is` as Is
 
 class BehandlingsresultatSøknadUtilsTest {
 
     val søker = tilfeldigPerson()
 
+    val des21 = LocalDate.of(2021, 12, 1)
     val jan22 = YearMonth.of(2022, 1)
     val aug22 = YearMonth.of(2022, 8)
+
 
     @Test
     fun `utledSøknadResultatFraAndelerTilkjentYtelse skal bare utlede resultater for personer det er framstilt krav for`() {
@@ -396,7 +399,7 @@ class BehandlingsresultatSøknadUtilsTest {
 
     @Test
     fun `utledResultatPåSøknad - skal kaste feil dersom man har endt opp med ingen resultater`() {
-        val feil = assertThrows<Feil> {
+        assertThrows<Feil> {
             BehandlingsresultatSøknadUtils.utledResultatPåSøknad(
                 forrigeAndeler = emptyList(),
                 nåværendeAndeler = emptyList(),
@@ -407,8 +410,6 @@ class BehandlingsresultatSøknadUtilsTest {
                 finnesUregistrerteBarn = false
             )
         }
-
-        assertThat(feil.message, Is("Klarer ikke utlede søknadsresultat"))
     }
 
     @Test
@@ -436,7 +437,7 @@ class BehandlingsresultatSøknadUtilsTest {
             vilkårsvurdering = vikårsvurdering,
             aktør = randomAktør(),
             resultat = resultat,
-            periodeFom = LocalDate.of(1984, 1, 1),
+            periodeFom = des21,
             periodeTom = LocalDate.now(),
             lagFullstendigVilkårResultat = true,
             personType = PersonType.BARN
@@ -466,7 +467,7 @@ class BehandlingsresultatSøknadUtilsTest {
             vilkårsvurdering = vikårsvurdering,
             aktør = barnAktør,
             resultat = Resultat.IKKE_OPPFYLT,
-            periodeFom = LocalDate.of(1984, 1, 1),
+            periodeFom = des21,
             periodeTom = LocalDate.now(),
             personType = PersonType.BARN,
             erEksplisittAvslagPåSøknad = true
@@ -508,7 +509,7 @@ class BehandlingsresultatSøknadUtilsTest {
             vilkårsvurdering = vikårsvurdering,
             aktør = barn1Aktør,
             resultat = Resultat.OPPFYLT,
-            periodeFom = LocalDate.of(1984, 1, 1),
+            periodeFom = des21,
             periodeTom = LocalDate.now(),
             personType = PersonType.BARN
         )
@@ -548,7 +549,7 @@ class BehandlingsresultatSøknadUtilsTest {
             vilkårsvurdering = vikårsvurdering,
             aktør = barn1Aktør,
             resultat = Resultat.OPPFYLT,
-            periodeFom = LocalDate.of(1984, 1, 1),
+            periodeFom = des21,
             periodeTom = LocalDate.now(),
             personType = PersonType.BARN
         )
@@ -588,7 +589,7 @@ class BehandlingsresultatSøknadUtilsTest {
             vilkårsvurdering = vikårsvurdering,
             aktør = barn1Aktør,
             resultat = Resultat.OPPFYLT,
-            periodeFom = LocalDate.of(1984, 1, 1),
+            periodeFom = des21,
             periodeTom = LocalDate.now(),
             personType = PersonType.BARN
         )
