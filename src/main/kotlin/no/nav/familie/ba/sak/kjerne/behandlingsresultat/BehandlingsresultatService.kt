@@ -42,8 +42,8 @@ class BehandlingsresultatService(
     private val kompetanseService: KompetanseService
 ) {
 
-    internal fun finnPersonerFremstiltKravFor(behandling: Behandling, søknadDTO: SøknadDTO?, forrigeBehandling: Behandling?) =
-        when {
+    internal fun finnPersonerFremstiltKravFor(behandling: Behandling, søknadDTO: SøknadDTO?, forrigeBehandling: Behandling?): List<Aktør> {
+        val personerFremstiltKravFor = when {
             behandling.opprettetÅrsak == BehandlingÅrsak.SØKNAD -> {
                 // alle barna som er krysset av på søknad
                 val barnFraSøknad = søknadDTO?.barnaMedOpplysninger
@@ -52,14 +52,19 @@ class BehandlingsresultatService(
                     ?: emptyList()
 
                 // hvis det søkes om utvidet skal søker med
-                val utvidetBarnetrygdSøker = if (søknadDTO?.underkategori == BehandlingUnderkategoriDTO.UTVIDET) listOf(behandling.fagsak.aktør) else emptyList()
+                val utvidetBarnetrygdSøker =
+                    if (søknadDTO?.underkategori == BehandlingUnderkategoriDTO.UTVIDET) listOf(behandling.fagsak.aktør) else emptyList()
 
                 barnFraSøknad + utvidetBarnetrygdSøker
             }
+
             behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE -> persongrunnlagService.finnNyeBarn(behandling, forrigeBehandling).map { it.aktør }
             behandling.erManuellMigrering() -> persongrunnlagService.hentAktivThrows(behandling.id).personer.map { it.aktør }
             else -> emptyList()
         }
+
+        return personerFremstiltKravFor.distinct()
+    }
 
     internal fun utledBehandlingsresultat(behandlingId: Long): Behandlingsresultat {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
