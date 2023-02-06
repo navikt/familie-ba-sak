@@ -83,8 +83,7 @@ object BehandlingsresultatOpphørUtils {
                 when {
                     kalkulertUtbetalingsbeløp == 0 && (endringsperiodeÅrsak == Årsak.ALLEREDE_UTBETALT) ||
                         (endringsperiodeÅrsak == Årsak.ENDRE_MOTTAKER) ||
-                        (endringsperiodeÅrsak == Årsak.ETTERBETALING_3ÅR) ||
-                        (endringsperiodeÅrsak == Årsak.DELT_BOSTED) -> null
+                        (endringsperiodeÅrsak == Årsak.ETTERBETALING_3ÅR) -> null
 
                     else -> andelTilkjentYtelse
                 }
