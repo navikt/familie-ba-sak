@@ -190,7 +190,6 @@ class OppgaveService(
         return integrasjonClient.finnOppgaveMedId(oppgaveId)
     }
 
-    //her
     fun ferdigstillOppgaver(behandlingId: Long, oppgavetype: Oppgavetype) {
         oppgaveRepository.finnOppgaverSomSkalFerdigstilles(
             oppgavetype,
