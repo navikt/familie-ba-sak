@@ -13,5 +13,6 @@ fun lagMinimertUtbetalingsperiodeDetalj(
     person: MinimertRestPerson = tilfeldigSøker().tilRestPerson().tilMinimertPerson(),
     ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD,
     utbetaltPerMnd: Int = sats(YtelseType.ORDINÆR_BARNETRYGD),
-    prosent: BigDecimal = BigDecimal.valueOf(100)
-) = MinimertUtbetalingsperiodeDetalj(person, ytelseType, utbetaltPerMnd, false, prosent)
+    prosent: BigDecimal = BigDecimal.valueOf(100),
+    erPåvirketAvEndring: Boolean = false
+) = MinimertUtbetalingsperiodeDetalj(person, ytelseType, utbetaltPerMnd, erPåvirketAvEndring, prosent)
