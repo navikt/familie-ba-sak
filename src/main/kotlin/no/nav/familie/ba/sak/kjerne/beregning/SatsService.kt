@@ -19,7 +19,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companio
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerTidligereEnn
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjær
 import java.time.LocalDate
-import java.time.YearMonth
 
 object SatsTidspunkt {
     val senesteSatsTidspunkt: LocalDate = LocalDate.MAX
@@ -57,20 +56,6 @@ object SatsService {
         .filter { it.gyldigFom == startDato }
         .filter { it.gyldigFom != LocalDate.MIN }
 
-    @Deprecated("Denne brukes nå bare av tester, og skal fjernes")
-    fun hentGyldigSatsFor(
-        satstype: SatsType,
-        stønadFraOgMed: YearMonth,
-        stønadTilOgMed: YearMonth,
-        maxSatsGyldigFraOgMed: YearMonth = YearMonth.now()
-    ): List<SatsPeriode> {
-        return finnAlleSatserFor(satstype)
-            .map { SatsPeriode(it.beløp, it.gyldigFom.toYearMonth(), it.gyldigTom.toYearMonth()) }
-            .filter { it.fraOgMed <= maxSatsGyldigFraOgMed }
-            .map { SatsPeriode(it.sats, maxOf(it.fraOgMed, stønadFraOgMed), minOf(it.tilOgMed, stønadTilOgMed)) }
-            .filter { it.fraOgMed <= it.tilOgMed }
-    }
-
     /**
      * SatsService.senesteSatsTidspunkt brukes for å mocke inn et tidspunkt som ligger tidligere enn gjeldende satser
      * alle satser som er gyldige fra etter dette tidspunktet vil filtreres bort
@@ -84,12 +69,6 @@ object SatsService {
         }
 
     fun finnAlleSatserFor(type: SatsType): List<Sats> = hentAllesatser().filter { it.type == type }
-
-    data class SatsPeriode(
-        val sats: Int,
-        val fraOgMed: YearMonth,
-        val tilOgMed: YearMonth
-    )
 
     fun hentDatoForSatsendring(
         satstype: SatsType,
