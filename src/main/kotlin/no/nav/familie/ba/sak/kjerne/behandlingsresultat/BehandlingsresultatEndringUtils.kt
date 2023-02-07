@@ -58,7 +58,7 @@ object BehandlingsresultatEndringUtils {
         val erEndringIVilkårsvurdering = erEndringIVilkårvurdering(
             nåværendePersonResultat = nåværendePersonResultat,
             forrigePersonResultat = forrigePersonResultat,
-            opphørstidspunkt = nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(forrigeAndeler = forrigeAndeler)
+            opphørstidspunkt = nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(forrigeAndeler = forrigeAndeler, nåværendeEndretAndeler = nåværendeEndretAndeler)
         )
 
         val erEndringIEndretUtbetalingAndeler = erEndringIEndretUtbetalingAndeler(
@@ -81,7 +81,7 @@ object BehandlingsresultatEndringUtils {
         val allePersonerMedAndeler = (nåværendeAndeler.map { it.aktør } + forrigeAndeler.map { it.aktør }).distinct()
         val opphørstidspunkt = nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(
             forrigeAndeler = forrigeAndeler,
-            nåværendeEndretUtbetalingAndeler = nåværendeEndretAndeler
+            nåværendeEndretAndeler = nåværendeEndretAndeler
         ) ?: return false // Returnerer false hvis verken forrige eller nåværende behandling har andeler
 
         val erEndringIBeløpForMinstEnPerson = allePersonerMedAndeler.any { aktør ->

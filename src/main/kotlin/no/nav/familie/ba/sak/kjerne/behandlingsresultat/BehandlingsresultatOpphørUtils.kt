@@ -27,11 +27,11 @@ object BehandlingsresultatOpphørUtils {
         val nåværendeBehandlingOpphørsdato =
             nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(
                 forrigeAndeler = forrigeAndeler,
-                nåværendeEndretUtbetalingAndeler = nåværendeEndretAndeler
+                nåværendeEndretAndeler = nåværendeEndretAndeler
             )
 
         val forrigeBehandlingOpphørsdato =
-            forrigeAndeler.utledOpphørsdatoForForrigeBehandling(forrigeEndretUtbetalingAndeler = forrigeEndretAndeler)
+            forrigeAndeler.utledOpphørsdatoForForrigeBehandling(forrigeEndretAndeler = forrigeEndretAndeler)
 
         val dagensDato = YearMonth.now()
 
@@ -55,28 +55,28 @@ object BehandlingsresultatOpphørUtils {
      */
     internal fun List<AndelTilkjentYtelse>.utledOpphørsdatoForNåværendeBehandlingMedFallback(
         forrigeAndeler: List<AndelTilkjentYtelse>,
-        nåværendeEndretUtbetalingAndeler: List<EndretUtbetalingAndel>
+        nåværendeEndretAndeler: List<EndretUtbetalingAndel>
     ): YearMonth? {
-        return this.filtrerBortIrrelevanteAndeler(endretUtbetalingAndeler = nåværendeEndretUtbetalingAndeler).finnOpphørsdato() ?: forrigeAndeler.minOfOrNull { it.stønadFom }
+        return this.filtrerBortIrrelevanteAndeler(endretAndeler = nåværendeEndretAndeler).finnOpphørsdato() ?: forrigeAndeler.minOfOrNull { it.stønadFom }
     }
 
     /**
      * Hvis det ikke fantes noen andeler i forrige behandling defaulter vi til inneværende måned
      */
-    private fun List<AndelTilkjentYtelse>.utledOpphørsdatoForForrigeBehandling(forrigeEndretUtbetalingAndeler: List<EndretUtbetalingAndel>): YearMonth =
-        this.filtrerBortIrrelevanteAndeler(endretUtbetalingAndeler = forrigeEndretUtbetalingAndeler).finnOpphørsdato() ?: YearMonth.now().nesteMåned()
+    private fun List<AndelTilkjentYtelse>.utledOpphørsdatoForForrigeBehandling(forrigeEndretAndeler: List<EndretUtbetalingAndel>): YearMonth =
+        this.filtrerBortIrrelevanteAndeler(endretAndeler = forrigeEndretAndeler).finnOpphørsdato() ?: YearMonth.now().nesteMåned()
 
     /**
      * Hvis det eksisterer andeler med beløp == 0 så ønsker vi å filtrere bort disse dersom det eksisterer endret utbetaling andel for perioden
      * med årsak ALLEREDE_UTBETALT, ENDRE_MOTTAKER eller ETTERBETALING_3ÅR. Vi grupperer type andeler før vi oppretter tidslinjer da det kan oppstå
      * overlapp hvis vi ikke gjør dette.
      */
-    internal fun List<AndelTilkjentYtelse>.filtrerBortIrrelevanteAndeler(endretUtbetalingAndeler: List<EndretUtbetalingAndel>): List<AndelTilkjentYtelse> {
+    internal fun List<AndelTilkjentYtelse>.filtrerBortIrrelevanteAndeler(endretAndeler: List<EndretUtbetalingAndel>): List<AndelTilkjentYtelse> {
         val personerMedAndeler = this.map { it.aktør }.distinct()
 
         return personerMedAndeler.flatMap { aktør ->
             val andelerGruppertPerTypePåPerson = this.filter { it.aktør == aktør }.groupBy { it.type }
-            val endretUtbetalingAndelerPåPerson = endretUtbetalingAndeler.filter { it.person?.aktør == aktør }
+            val endretUtbetalingAndelerPåPerson = endretAndeler.filter { it.person?.aktør == aktør }
 
             andelerGruppertPerTypePåPerson.values.flatMap { andelerPerType ->
                 filtrerBortIrrelevanteAndelerPerPerson(andelerPerType, endretUtbetalingAndelerPåPerson)
