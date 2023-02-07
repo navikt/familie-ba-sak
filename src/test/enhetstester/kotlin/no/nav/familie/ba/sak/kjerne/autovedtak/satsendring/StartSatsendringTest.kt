@@ -28,6 +28,7 @@ import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.prosessering.domene.Task
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.data.domain.PageImpl
@@ -46,6 +47,7 @@ internal class StartSatsendringTest {
     private val satskjøringRepository: SatskjøringRepository = mockk()
     private val featureToggleService: FeatureToggleService = mockk()
     private val personidentService: PersonidentService = mockk()
+    private val autovedtakSatsendringService: AutovedtakSatsendringService = mockk()
 
     lateinit var startSatsendring: StartSatsendring
 
@@ -57,16 +59,17 @@ internal class StartSatsendringTest {
         val taskRepository: TaskRepositoryWrapper = mockk()
         val taskSlot = slot<Task>()
         every { taskRepository.save(capture(taskSlot)) } answers { taskSlot.captured }
-        val opprettTaskService: OpprettTaskService = OpprettTaskService(taskRepository, satskjøringRepository)
+        val opprettTaskService = OpprettTaskService(taskRepository, satskjøringRepository)
 
         startSatsendring = StartSatsendring(
-            fagsakRepository,
-            behandlingRepository,
-            opprettTaskService,
-            andelerTilkjentYtelseOgEndreteUtbetalingerService,
-            satskjøringRepository,
-            featureToggleService,
-            personidentService
+            fagsakRepository = fagsakRepository,
+            behandlingRepository = behandlingRepository,
+            opprettTaskService = opprettTaskService,
+            andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
+            satskjøringRepository = satskjøringRepository,
+            featureToggleService = featureToggleService,
+            personidentService = personidentService,
+            autovedtakSatsendringService = autovedtakSatsendringService
         )
     }
 
@@ -440,4 +443,53 @@ internal class StartSatsendringTest {
             beløp = beløp ?: SatsService.finnSisteSatsFor(satsType).beløp
         )
     )
+
+    @Test
+    fun `kanStarteSatsendringPåFagsak returnerer false når vi ikke har noen tidligere behandling`() {
+        every { behandlingRepository.finnSisteIverksatteBehandling(1L) } returns null
+
+        val result = startSatsendring.kanStarteSatsendringPåFagsak(1L)
+
+        assertFalse(result)
+    }
+
+    @Test
+    fun `kanStarteSatsendringPåFagsak returnerer false når vi har en satskjøring i satskjøringsrepoet`() {
+        every { behandlingRepository.finnSisteIverksatteBehandling(1L) } returns lagBehandling()
+        every { satskjøringRepository.findByFagsakId(1L) } returns Satskjøring(fagsakId = 1L)
+
+        val result = startSatsendring.kanStarteSatsendringPåFagsak(1L)
+
+        assertFalse(result)
+    }
+
+    @Test
+    fun `kanStarteSatsendringPåFagsak returnerer false når harSisteSats er true`() {
+        val behandling = lagBehandling()
+        every { behandlingRepository.finnSisteIverksatteBehandling(1L) } returns behandling
+        every { satskjøringRepository.findByFagsakId(1L) } returns null
+        val atyMedBareOrba =
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(SatsType.ORBA, behandling, ORDINÆR_BARNETRYGD)
+        every {
+            andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.id)
+        } returns atyMedBareOrba
+
+        assertThat(harAlleredeSisteSats(atyMedBareOrba, SATSTIDSPUNKT)).isEqualTo(true)
+        assertThat(startSatsendring.kanStarteSatsendringPåFagsak(1L)).isEqualTo(false)
+    }
+
+    @Test
+    fun `kanStarteSatsendringPåFagsak returnerer true når harSisteSats er false`() {
+        val behandling = lagBehandling()
+        every { behandlingRepository.finnSisteIverksatteBehandling(1L) } returns behandling
+        every { satskjøringRepository.findByFagsakId(1L) } returns null
+        val atyMedUgyldigSatsBareOrba =
+            lagAndelTilkjentYtelseMedEndreteUtbetalinger(SatsType.ORBA, behandling, ORDINÆR_BARNETRYGD, UGYLDIG_SATS)
+        every {
+            andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.id)
+        } returns atyMedUgyldigSatsBareOrba
+
+        assertThat(harAlleredeSisteSats(atyMedUgyldigSatsBareOrba, SATSTIDSPUNKT)).isEqualTo(false)
+        assertThat(startSatsendring.kanStarteSatsendringPåFagsak(1L)).isEqualTo(true)
+    }
 }
