@@ -34,12 +34,6 @@ class JournalføringController(
         return ResponseEntity.ok(Ressurs.success(innkommendeJournalføringService.hentJournalpost(journalpostId)))
     }
 
-    @GetMapping(path = ["/for-bruker/{brukerId}"])
-    @Deprecated("Kan slettes når frontend har byttet over til nytt endepunkt")
-    fun hentJournalposterForBrukerDeprecated(@PathVariable brukerId: String): ResponseEntity<Ressurs<List<Journalpost>>> {
-        return ResponseEntity.ok(Ressurs.success(innkommendeJournalføringService.hentJournalposterForBruker(brukerId)))
-    }
-
     @PostMapping(path = ["/for-bruker"])
     fun hentJournalposterForBruker(@RequestBody personIdentBody: PersonIdent): ResponseEntity<Ressurs<List<Journalpost>>> {
         return ResponseEntity.ok(
