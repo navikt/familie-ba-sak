@@ -11,6 +11,7 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.lagTestOppgaveDTO
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.DbOppgave
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
@@ -134,6 +135,7 @@ class OppgaveServiceTest {
         every { oppgaveRepository.saveAndFlush(any()) } returns lagTestOppgave()
         val slot = slot<Long>()
         every { integrasjonClient.ferdigstillOppgave(capture(slot)) } just runs
+        every { integrasjonClient.finnOppgaveMedId(any()) } returns lagTestOppgaveDTO(0L)
 
         oppgaveService.ferdigstillOppgaver(BEHANDLING_ID, Oppgavetype.BehandleSak)
         assertThat(slot.captured).isEqualTo(OPPGAVE_ID.toLong())
