@@ -25,12 +25,13 @@ object BehandlingsresultatOpphørUtils {
         forrigeEndretAndeler: List<EndretUtbetalingAndel>
     ): Opphørsresultat {
         val nåværendeBehandlingOpphørsdato =
-            nåværendeAndeler.filtrerBortIrrelevanteAndeler(nåværendeEndretAndeler)
-                .utledOpphørsdatoForNåværendeBehandlingMedFallback(forrigeAndeler = forrigeAndeler)
+            nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(
+                forrigeAndeler = forrigeAndeler,
+                nåværendeEndretUtbetalingAndeler = nåværendeEndretAndeler
+            )
 
         val forrigeBehandlingOpphørsdato =
-            forrigeAndeler.filtrerBortIrrelevanteAndeler(forrigeEndretAndeler)
-                .utledOpphørsdatoForForrigeBehandling()
+            forrigeAndeler.utledOpphørsdatoForForrigeBehandling(forrigeEndretUtbetalingAndeler = forrigeEndretAndeler)
 
         val dagensDato = YearMonth.now()
 
@@ -52,15 +53,18 @@ object BehandlingsresultatOpphørUtils {
      * 1. Ingen andeler i denne behandlingen, men andeler i forrige behandling. Da ønsker vi at opphørsdatoen i denne behandlingen skal være "første endring" som altså er lik tidligste fom-dato
      * 2. Ingen andeler i denne behandlingen, ingen andeler i forrige behandling. Da vil denne funksjonen returnere null
      */
-    internal fun List<AndelTilkjentYtelse>.utledOpphørsdatoForNåværendeBehandlingMedFallback(forrigeAndeler: List<AndelTilkjentYtelse>): YearMonth? {
-        return this.finnOpphørsdato() ?: forrigeAndeler.minOfOrNull { it.stønadFom }
+    internal fun List<AndelTilkjentYtelse>.utledOpphørsdatoForNåværendeBehandlingMedFallback(
+        forrigeAndeler: List<AndelTilkjentYtelse>,
+        nåværendeEndretUtbetalingAndeler: List<EndretUtbetalingAndel>
+    ): YearMonth? {
+        return this.filtrerBortIrrelevanteAndeler(endretUtbetalingAndeler = nåværendeEndretUtbetalingAndeler).finnOpphørsdato() ?: forrigeAndeler.minOfOrNull { it.stønadFom }
     }
 
     /**
      * Hvis det ikke fantes noen andeler i forrige behandling defaulter vi til inneværende måned
      */
-    private fun List<AndelTilkjentYtelse>.utledOpphørsdatoForForrigeBehandling(): YearMonth =
-        this.finnOpphørsdato() ?: YearMonth.now().nesteMåned()
+    private fun List<AndelTilkjentYtelse>.utledOpphørsdatoForForrigeBehandling(forrigeEndretUtbetalingAndeler: List<EndretUtbetalingAndel>): YearMonth =
+        this.filtrerBortIrrelevanteAndeler(endretUtbetalingAndeler = forrigeEndretUtbetalingAndeler).finnOpphørsdato() ?: YearMonth.now().nesteMåned()
 
     /**
      * Hvis det eksisterer andeler med beløp == 0 så ønsker vi å filtrere bort disse dersom det eksisterer endret utbetaling andel for perioden
@@ -75,24 +79,31 @@ object BehandlingsresultatOpphørUtils {
             val endretUtbetalingAndelerPåPerson = endretUtbetalingAndeler.filter { it.person?.aktør == aktør }
 
             andelerGruppertPerTypePåPerson.values.flatMap { andelerPerType ->
-                val andelTilkjentYtelseTidslinje = AndelTilkjentYtelseTidslinje(andelerPerType)
-                val endretUtbetalingAndelTidslinje = EndretUtbetalingAndelTidslinje(endretUtbetalingAndelerPåPerson)
-
-                andelTilkjentYtelseTidslinje.kombinerMed(endretUtbetalingAndelTidslinje) { andelTilkjentYtelse, endretUtbetalingAndel ->
-                    val kalkulertUtbetalingsbeløp = andelTilkjentYtelse?.kalkulertUtbetalingsbeløp ?: 0
-                    val endringsperiodeÅrsak = endretUtbetalingAndel?.årsak
-
-                    when {
-                        kalkulertUtbetalingsbeløp == 0 && (
-                            endringsperiodeÅrsak == Årsak.ALLEREDE_UTBETALT ||
-                                endringsperiodeÅrsak == Årsak.ENDRE_MOTTAKER ||
-                                endringsperiodeÅrsak == Årsak.ETTERBETALING_3ÅR
-                            ) -> null
-
-                        else -> andelTilkjentYtelse
-                    }
-                }.tilAndelTilkjentYtelse()
+                filtrerBortIrrelevanteAndelerPerPerson(andelerPerType, endretUtbetalingAndelerPåPerson)
             }
         }
+    }
+
+    private fun filtrerBortIrrelevanteAndelerPerPerson(
+        andelerPåPersonFiltrertPåType: List<AndelTilkjentYtelse>,
+        endretAndelerPåPerson: List<EndretUtbetalingAndel>
+    ): List<AndelTilkjentYtelse> {
+        val andelTilkjentYtelseTidslinje = AndelTilkjentYtelseTidslinje(andelerPåPersonFiltrertPåType)
+        val endretUtbetalingAndelTidslinje = EndretUtbetalingAndelTidslinje(endretAndelerPåPerson)
+
+        return andelTilkjentYtelseTidslinje.kombinerMed(endretUtbetalingAndelTidslinje) { andelTilkjentYtelse, endretUtbetalingAndel ->
+            val kalkulertUtbetalingsbeløp = andelTilkjentYtelse?.kalkulertUtbetalingsbeløp ?: 0
+            val endringsperiodeÅrsak = endretUtbetalingAndel?.årsak
+
+            when {
+                kalkulertUtbetalingsbeløp == 0 && (
+                    endringsperiodeÅrsak == Årsak.ALLEREDE_UTBETALT ||
+                        endringsperiodeÅrsak == Årsak.ENDRE_MOTTAKER ||
+                        endringsperiodeÅrsak == Årsak.ETTERBETALING_3ÅR
+                    ) -> null
+
+                else -> andelTilkjentYtelse
+            }
+        }.tilAndelTilkjentYtelse()
     }
 }
