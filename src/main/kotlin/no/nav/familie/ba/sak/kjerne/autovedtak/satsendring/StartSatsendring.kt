@@ -20,7 +20,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.math.BigDecimal
 import java.time.YearMonth
 
 @Service
@@ -78,13 +77,13 @@ class StartSatsendring(
             andelerTilkjentYtelseMedEndreteUtbetalinger.any {
                 it.type == ytelseType && it.stønadFom.isBefore(tidspunkt) && it.stønadTom.isSameOrAfter(
                     tidspunkt
-                ) && it.prosent != BigDecimal(50) // Ignorerer delt bosted i fase 1
+                )
             }
         } else {
             andelerTilkjentYtelseMedEndreteUtbetalinger.any {
                 it.type == ytelseType && it.sats == sats && it.stønadFom.isBefore(tidspunkt) && it.stønadTom.isSameOrAfter(
                     tidspunkt
-                ) && it.prosent != BigDecimal(50) // Ignorerer delt bosted i fase 1
+                )
             }
         }
     }
