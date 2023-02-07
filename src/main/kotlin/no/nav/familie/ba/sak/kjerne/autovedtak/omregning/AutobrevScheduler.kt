@@ -31,6 +31,7 @@ class AutobrevScheduler(val taskRepository: TaskRepositoryWrapper) {
                     ).atTime(KLOKKETIME_SCHEDULER_TRIGGES.inc(), 0)
                 )
             }
+
             false -> logger.info("Poden er ikke satt opp som leader - oppretter ikke task")
             null -> logger.info("Poden svarer ikke om den er leader eller ikke - oppretter ikke task")
         }
@@ -51,6 +52,6 @@ class AutobrevScheduler(val taskRepository: TaskRepositoryWrapper) {
     companion object {
 
         private val logger = LoggerFactory.getLogger(AutobrevScheduler::class.java)
-        const val KLOKKETIME_SCHEDULER_TRIGGES = 7
+        const val KLOKKETIME_SCHEDULER_TRIGGES = 6
     }
 }
