@@ -361,4 +361,41 @@ class BehandlingsresultatOpphørUtilsTest {
         assertEquals(andelerEtterFiltrering.minOf { it.stønadFom }, jan22)
         assertEquals(andelerEtterFiltrering.maxOf { it.stønadTom }, aug22)
     }
+
+    @Test
+    internal fun `filtrerBortIrrelevanteAndeler - skal ikke filtrere andeler som har 0 i beløp grunnet differanseberegning`() {
+        val barn = lagPerson(type = PersonType.BARN)
+        val barnAktør = barn.aktør
+        val søker = lagPerson(type = PersonType.SØKER)
+        val søkerAktør = søker.aktør
+
+        val andeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = jan22,
+                tom = feb22,
+                beløp = 0,
+                differanseberegnetPeriodebeløp = 50,
+                aktør = søkerAktør
+            ),
+            lagAndelTilkjentYtelse(
+                fom = mar22,
+                tom = mai22,
+                beløp = 0,
+                differanseberegnetPeriodebeløp = 50,
+                aktør = barnAktør
+            ),
+            lagAndelTilkjentYtelse(
+                fom = aug22,
+                tom = aug22,
+                beløp = 0,
+                differanseberegnetPeriodebeløp = 50,
+                aktør = barnAktør
+            )
+        )
+
+        val andelerEtterFiltrering = andeler.filtrerBortIrrelevanteAndeler(endretAndeler = emptyList())
+
+        assertEquals(andelerEtterFiltrering.minOf { it.stønadFom }, jan22)
+        assertEquals(andelerEtterFiltrering.maxOf { it.stønadTom }, aug22)
+    }
 }

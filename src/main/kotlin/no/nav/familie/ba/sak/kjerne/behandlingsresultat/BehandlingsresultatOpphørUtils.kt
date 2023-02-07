@@ -81,12 +81,12 @@ object BehandlingsresultatOpphørUtils {
             val endretUtbetalingAndelerPåPerson = endretAndeler.filter { it.person?.aktør == aktør }
 
             andelerGruppertPerTypePåPerson.values.flatMap { andelerPerType ->
-                filtrerBortIrrelevanteAndelerPerPerson(andelerPerType, endretUtbetalingAndelerPåPerson)
+                filtrerBortIrrelevanteAndelerPerPersonOgType(andelerPerType, endretUtbetalingAndelerPåPerson)
             }
         }
     }
 
-    private fun filtrerBortIrrelevanteAndelerPerPerson(
+    private fun filtrerBortIrrelevanteAndelerPerPersonOgType(
         andelerPåPersonFiltrertPåType: List<AndelTilkjentYtelse>,
         endretAndelerPåPerson: List<EndretUtbetalingAndel>
     ): List<AndelTilkjentYtelse> {
