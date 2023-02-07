@@ -1,21 +1,30 @@
 package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.common.lagPerson
+import no.nav.familie.ba.sak.common.lagPersonResultat
+import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatSøknadUtils.kombinerSøknadsresultater
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatSøknadUtils.utledSøknadResultatFraAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsInAnyOrder
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.YearMonth
 import org.hamcrest.CoreMatchers.`is` as Is
 
@@ -23,6 +32,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
 
     val søker = tilfeldigPerson()
 
+    val des21 = LocalDate.of(2021, 12, 1)
     val jan22 = YearMonth.of(2022, 1)
     val aug22 = YearMonth.of(2022, 8)
 
@@ -372,5 +382,226 @@ internal class BehandlingsresultatSøknadUtilsTest {
         val kombinertResultat = listeMedSøknadsresultat.kombinerSøknadsresultater()
 
         assertThat(kombinertResultat, Is(Søknadsresultat.DELVIS_INNVILGET))
+    }
+
+    @Test
+    fun `Kombiner resultater - skal returnere FORTSATT_INNVILGET hvis det er søknad og ingen relevante endringer, og ingen opphør`() {
+        val behandlingsresultat = BehandlingsresultatUtils.kombinerResultaterTilBehandlingsresultat(
+            Søknadsresultat.INGEN_RELEVANTE_ENDRINGER,
+            Endringsresultat.INGEN_ENDRING,
+            Opphørsresultat.IKKE_OPPHØRT
+        )
+
+        assertEquals(Behandlingsresultat.FORTSATT_INNVILGET, behandlingsresultat)
+    }
+
+    @Test
+    fun `utledResultatPåSøknad - skal kaste feil dersom man har endt opp med ingen resultater`() {
+        assertThrows<Feil> {
+            BehandlingsresultatSøknadUtils.utledResultatPåSøknad(
+                forrigeAndeler = emptyList(),
+                nåværendeAndeler = emptyList(),
+                nåværendePersonResultater = emptySet(),
+                personerFremstiltKravFor = emptyList(),
+                endretUtbetalingAndeler = emptyList(),
+                behandlingÅrsak = BehandlingÅrsak.SØKNAD,
+                finnesUregistrerteBarn = false
+            )
+        }
+    }
+
+    @Test
+    fun `utledResultatPåSøknad - skal returnere AVSLÅTT dersom det er søkt for barn som ikke er registrert`() {
+        val resultatPåSøknad = BehandlingsresultatSøknadUtils.utledResultatPåSøknad(
+            forrigeAndeler = emptyList(),
+            nåværendeAndeler = emptyList(),
+            nåværendePersonResultater = emptySet(),
+            personerFremstiltKravFor = emptyList(),
+            endretUtbetalingAndeler = emptyList(),
+            behandlingÅrsak = BehandlingÅrsak.SØKNAD,
+            finnesUregistrerteBarn = true
+        )
+
+        assertThat(resultatPåSøknad, Is(Søknadsresultat.AVSLÅTT))
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = Resultat::class, names = ["IKKE_OPPFYLT", "IKKE_VURDERT"])
+    fun `utledResultatPåSøknad - skal returnere AVSLÅTT dersom behandlingen er en fødselshendelse og det finnes vilkårsvurdering som ikke er oppfylt eller vurdert`(resultat: Resultat) {
+        val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE)
+        val vikårsvurdering = Vilkårsvurdering(behandling = behandling)
+
+        val barnPersonResultat = lagPersonResultat(
+            vilkårsvurdering = vikårsvurdering,
+            aktør = randomAktør(),
+            resultat = resultat,
+            periodeFom = des21,
+            periodeTom = LocalDate.now(),
+            lagFullstendigVilkårResultat = true,
+            personType = PersonType.BARN
+        )
+
+        val resultatPåSøknad = BehandlingsresultatSøknadUtils.utledResultatPåSøknad(
+            forrigeAndeler = emptyList(),
+            nåværendeAndeler = emptyList(),
+            nåværendePersonResultater = setOf(barnPersonResultat),
+            personerFremstiltKravFor = emptyList(),
+            endretUtbetalingAndeler = emptyList(),
+            behandlingÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
+            finnesUregistrerteBarn = false
+        )
+
+        assertThat(resultatPåSøknad, Is(Søknadsresultat.AVSLÅTT))
+    }
+
+    @Test
+    fun `utledResultatPåSøknad - skal returnere AVSLÅTT dersom er eksplisitt avslag på minst en person det er framstilt krav for`() {
+        val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)
+        val vikårsvurdering = Vilkårsvurdering(behandling = behandling)
+
+        val barnAktør = randomAktør()
+
+        val barnPersonResultat = lagPersonResultat(
+            vilkårsvurdering = vikårsvurdering,
+            aktør = barnAktør,
+            resultat = Resultat.IKKE_OPPFYLT,
+            periodeFom = des21,
+            periodeTom = LocalDate.now(),
+            personType = PersonType.BARN,
+            erEksplisittAvslagPåSøknad = true
+
+        )
+
+        val resultatPåSøknad = BehandlingsresultatSøknadUtils.utledResultatPåSøknad(
+            forrigeAndeler = emptyList(),
+            nåværendeAndeler = emptyList(),
+            nåværendePersonResultater = setOf(barnPersonResultat),
+            personerFremstiltKravFor = listOf(barnAktør),
+            endretUtbetalingAndeler = emptyList(),
+            behandlingÅrsak = BehandlingÅrsak.SØKNAD,
+            finnesUregistrerteBarn = false
+        )
+
+        assertThat(resultatPåSøknad, Is(Søknadsresultat.AVSLÅTT))
+    }
+
+    @Test
+    fun `utledResultatPåSøknad - skal returnere INNVILGET dersom barnet det er søkt for har fått andeler med positive beløp som er annerledes enn forrige gang`() {
+        val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE)
+        val vikårsvurdering = Vilkårsvurdering(behandling = behandling)
+
+        val barn1Person = lagPerson(type = PersonType.BARN)
+        val barn1Aktør = barn1Person.aktør
+
+        val nåværendeAndeler =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = jan22,
+                    tom = aug22,
+                    beløp = 1054,
+                    aktør = barn1Aktør
+                )
+            )
+
+        val barnPersonResultat = lagPersonResultat(
+            vilkårsvurdering = vikårsvurdering,
+            aktør = barn1Aktør,
+            resultat = Resultat.OPPFYLT,
+            periodeFom = des21,
+            periodeTom = LocalDate.now(),
+            personType = PersonType.BARN
+        )
+
+        val resultatPåSøknad = BehandlingsresultatSøknadUtils.utledResultatPåSøknad(
+            forrigeAndeler = emptyList(),
+            nåværendeAndeler = nåværendeAndeler,
+            nåværendePersonResultater = setOf(barnPersonResultat),
+            personerFremstiltKravFor = listOf(barn1Aktør),
+            endretUtbetalingAndeler = emptyList(),
+            behandlingÅrsak = BehandlingÅrsak.SØKNAD,
+            finnesUregistrerteBarn = false
+        )
+
+        assertThat(resultatPåSøknad, Is(Søknadsresultat.INNVILGET))
+    }
+
+    @Test
+    fun `utledResultatPåSøknad - skal returnere DELVIS_INNVILGET dersom det finnes et barn som har fått innvilget men også et barn som ikke er registrert`() {
+        val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE)
+        val vikårsvurdering = Vilkårsvurdering(behandling = behandling)
+
+        val barn1Person = lagPerson(type = PersonType.BARN)
+        val barn1Aktør = barn1Person.aktør
+
+        val nåværendeAndeler =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = jan22,
+                    tom = aug22,
+                    beløp = 1054,
+                    aktør = barn1Aktør
+                )
+            )
+
+        val barnPersonResultat = lagPersonResultat(
+            vilkårsvurdering = vikårsvurdering,
+            aktør = barn1Aktør,
+            resultat = Resultat.OPPFYLT,
+            periodeFom = des21,
+            periodeTom = LocalDate.now(),
+            personType = PersonType.BARN
+        )
+
+        val resultatPåSøknad = BehandlingsresultatSøknadUtils.utledResultatPåSøknad(
+            forrigeAndeler = emptyList(),
+            nåværendeAndeler = nåværendeAndeler,
+            nåværendePersonResultater = setOf(barnPersonResultat),
+            personerFremstiltKravFor = listOf(barn1Aktør),
+            endretUtbetalingAndeler = emptyList(),
+            behandlingÅrsak = BehandlingÅrsak.SØKNAD,
+            finnesUregistrerteBarn = true
+        )
+
+        assertThat(resultatPåSøknad, Is(Søknadsresultat.DELVIS_INNVILGET))
+    }
+
+    @Test
+    fun `utledResultatPåSøknad - skal returnere INGEN_RELEVANTE_ENDRINGER dersom barnet det er søkt for har fått helt lik andel som forrige behandling`() {
+        val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE)
+        val vikårsvurdering = Vilkårsvurdering(behandling = behandling)
+
+        val barn1Person = lagPerson(type = PersonType.BARN)
+        val barn1Aktør = barn1Person.aktør
+
+        val andeler =
+            listOf(
+                lagAndelTilkjentYtelse(
+                    fom = jan22,
+                    tom = aug22,
+                    beløp = 1054,
+                    aktør = barn1Aktør
+                )
+            )
+
+        val barnPersonResultat = lagPersonResultat(
+            vilkårsvurdering = vikårsvurdering,
+            aktør = barn1Aktør,
+            resultat = Resultat.OPPFYLT,
+            periodeFom = des21,
+            periodeTom = LocalDate.now(),
+            personType = PersonType.BARN
+        )
+
+        val resultatPåSøknad = BehandlingsresultatSøknadUtils.utledResultatPåSøknad(
+            forrigeAndeler = andeler,
+            nåværendeAndeler = andeler,
+            nåværendePersonResultater = setOf(barnPersonResultat),
+            personerFremstiltKravFor = listOf(barn1Aktør),
+            endretUtbetalingAndeler = emptyList(),
+            behandlingÅrsak = BehandlingÅrsak.SØKNAD,
+            finnesUregistrerteBarn = false
+        )
+
+        assertThat(resultatPåSøknad, Is(Søknadsresultat.INGEN_RELEVANTE_ENDRINGER))
     }
 }

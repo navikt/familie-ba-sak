@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.satsendring
 
 import io.mockk.every
-import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.verify
@@ -11,6 +10,7 @@ import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.AutovedtakSatsendringService.Companion.harAlleredeSisteSats
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
@@ -26,6 +26,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.UTVIDET_BARNETRY
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.task.OpprettTaskService
+import no.nav.familie.prosessering.domene.Task
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -40,7 +41,6 @@ internal class StartSatsendringTest {
 
     private val fagsakRepository: FagsakRepository = mockk()
     private val behandlingRepository: BehandlingRepository = mockk()
-    private val opprettTaskService: OpprettTaskService = mockk()
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService =
         mockk()
     private val satskjøringRepository: SatskjøringRepository = mockk()
@@ -54,6 +54,10 @@ internal class StartSatsendringTest {
         val satsSlot = slot<Satskjøring>()
         every { satskjøringRepository.save(capture(satsSlot)) } answers { satsSlot.captured }
         every { behandlingRepository.findByFagsakAndAktivAndOpen(any()) } returns null
+        val taskRepository: TaskRepositoryWrapper = mockk()
+        val taskSlot = slot<Task>()
+        every { taskRepository.save(capture(taskSlot)) } answers { taskSlot.captured }
+        val opprettTaskService: OpprettTaskService = OpprettTaskService(taskRepository, satskjøringRepository)
 
         startSatsendring = StartSatsendring(
             fagsakRepository,
@@ -71,7 +75,6 @@ internal class StartSatsendringTest {
         every { featureToggleService.isEnabled(any(), any()) } returns false
         every { featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_TILLEGG_ORBA, any()) } returns true
         every { featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_OPPRETT_TASKER) } returns true
-        justRun { opprettTaskService.opprettSatsendringTask(any(), any()) }
 
         val behandling = lagBehandling()
 
@@ -168,7 +171,6 @@ internal class StartSatsendringTest {
     fun `start satsendring på sak hvis sakstypen er en av de som er togglet på`() {
         every { featureToggleService.isEnabled(any(), any()) } returns true
         every { featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_OPPRETT_TASKER) } returns true
-        justRun { opprettTaskService.opprettSatsendringTask(any(), any()) }
 
         val behandling = lagBehandling()
 
@@ -217,7 +219,6 @@ internal class StartSatsendringTest {
     fun `Ikke start satsendring på sak hvis ytelsen utløper før satstidspunkt, men marker at sastsendring alt er kjørt`() {
         every { featureToggleService.isEnabled(any(), any()) } returns true
         every { featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_OPPRETT_TASKER) } returns true
-        justRun { opprettTaskService.opprettSatsendringTask(any(), any()) }
 
         val behandling = lagBehandling()
 
@@ -260,7 +261,6 @@ internal class StartSatsendringTest {
     fun `finnLøpendeFagsaker har totalt antall sider 3, så den skal kalle finnLøpendeFagsaker 3 ganger for å få 5 satsendringer`() {
         every { featureToggleService.isEnabled(any(), any()) } returns true
         every { featureToggleService.isEnabled(any()) } returns true
-        justRun { opprettTaskService.opprettSatsendringTask(any(), any()) }
 
         val behandling = lagBehandling()
 
@@ -300,7 +300,6 @@ internal class StartSatsendringTest {
     fun `Ikke start satsendring på sak som har åpen behandling`() {
         every { featureToggleService.isEnabled(any(), any()) } returns true
         every { featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_OPPRETT_TASKER) } returns true
-        justRun { opprettTaskService.opprettSatsendringTask(any(), any()) }
 
         val behandling = lagBehandling()
 

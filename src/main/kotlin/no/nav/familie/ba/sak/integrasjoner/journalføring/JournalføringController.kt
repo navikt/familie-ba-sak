@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.ekstern.restDomene.RestJournalføring
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
+import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -33,9 +34,15 @@ class JournalføringController(
         return ResponseEntity.ok(Ressurs.success(innkommendeJournalføringService.hentJournalpost(journalpostId)))
     }
 
-    @GetMapping(path = ["/for-bruker/{brukerId}"])
-    fun hentJournalposterForBruker(@PathVariable brukerId: String): ResponseEntity<Ressurs<List<Journalpost>>> {
-        return ResponseEntity.ok(Ressurs.success(innkommendeJournalføringService.hentJournalposterForBruker(brukerId)))
+    @PostMapping(path = ["/for-bruker"])
+    fun hentJournalposterForBruker(@RequestBody personIdentBody: PersonIdent): ResponseEntity<Ressurs<List<Journalpost>>> {
+        return ResponseEntity.ok(
+            Ressurs.success(
+                innkommendeJournalføringService.hentJournalposterForBruker(
+                    personIdentBody.ident
+                )
+            )
+        )
     }
 
     @GetMapping("/{journalpostId}/hent/{dokumentInfoId}")
@@ -81,7 +88,8 @@ class JournalføringController(
             throw FunksjonellFeil("Minst ett av dokumentene mangler dokumenttittel.")
         }
 
-        val fagsakId = innkommendeJournalføringService.journalfør(request, journalpostId, journalførendeEnhet, oppgaveId)
+        val fagsakId =
+            innkommendeJournalføringService.journalfør(request, journalpostId, journalførendeEnhet, oppgaveId)
         return ResponseEntity.ok(Ressurs.success(fagsakId, "Journalpost $journalpostId Journalført"))
     }
 }

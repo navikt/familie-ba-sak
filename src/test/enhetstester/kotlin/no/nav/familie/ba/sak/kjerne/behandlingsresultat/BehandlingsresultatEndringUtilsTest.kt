@@ -92,6 +92,20 @@ class BehandlingsresultatEndringUtilsTest {
 
     @Test
     fun `utledEndringsresultat skal returnere ENDRING dersom det finnes endringer i vilkårsvurderingen`() {
+        val forrigeAndeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(2015, 2),
+                tom = YearMonth.of(2020, 1)
+            )
+        )
+
+        val nåværendeAndeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(2015, 2),
+                tom = YearMonth.of(2020, 1)
+            )
+        )
+
         val forrigeVilkårResultater = listOf(
             VilkårResultat(
                 personResultat = null,
@@ -142,8 +156,8 @@ class BehandlingsresultatEndringUtilsTest {
             )
 
         val endringsresultat = utledEndringsresultat(
-            forrigeAndeler = emptyList(),
-            nåværendeAndeler = emptyList(),
+            forrigeAndeler = forrigeAndeler,
+            nåværendeAndeler = nåværendeAndeler,
             personerFremstiltKravFor = emptyList(),
             forrigeKompetanser = emptyList(),
             nåværendeKompetanser = emptyList(),
@@ -977,8 +991,9 @@ class BehandlingsresultatEndringUtilsTest {
         )
 
         val erEndringIVilkårvurderingForPerson = erEndringIVilkårvurderingForPerson(
-            nåværendeVilkårResultat,
-            forrigeVilkårResultat
+            nåværendeVilkårResultat = nåværendeVilkårResultat,
+            forrigeVilkårResultat = forrigeVilkårResultat,
+            opphørstidspunkt = YearMonth.of(2020, 2)
         )
 
         assertThat(erEndringIVilkårvurderingForPerson, Is(false))
@@ -1049,8 +1064,9 @@ class BehandlingsresultatEndringUtilsTest {
         )
 
         val erEndringIVilkårvurderingForPerson = erEndringIVilkårvurderingForPerson(
-            nåværendeVilkårResultat,
-            forrigeVilkårResultat
+            nåværendeVilkårResultat = nåværendeVilkårResultat,
+            forrigeVilkårResultat = forrigeVilkårResultat,
+            opphørstidspunkt = YearMonth.of(2020, 2)
         )
 
         assertThat(erEndringIVilkårvurderingForPerson, Is(true))
@@ -1121,8 +1137,9 @@ class BehandlingsresultatEndringUtilsTest {
         )
 
         val erEndringIVilkårvurderingForPerson = erEndringIVilkårvurderingForPerson(
-            nåværendeVilkårResultat,
-            forrigeVilkårResultat
+            nåværendeVilkårResultat = nåværendeVilkårResultat,
+            forrigeVilkårResultat = forrigeVilkårResultat,
+            opphørstidspunkt = YearMonth.of(2020, 2)
         )
 
         assertThat(erEndringIVilkårvurderingForPerson, Is(true))
@@ -1207,10 +1224,56 @@ class BehandlingsresultatEndringUtilsTest {
         )
 
         val erEndringIVilkårvurderingForPerson = erEndringIVilkårvurderingForPerson(
-            nåværendeVilkårResultat,
-            forrigeVilkårResultat
+            nåværendeVilkårResultat = nåværendeVilkårResultat,
+            forrigeVilkårResultat = forrigeVilkårResultat,
+            opphørstidspunkt = YearMonth.of(2020, 2)
         )
 
         assertThat(erEndringIVilkårvurderingForPerson, Is(true))
+    }
+
+    @Test
+    fun `Endring i vilkårsvurdering - skal returnere false hvis det kun er opphørt`() {
+        val nåværendeVilkårResultat = listOf(
+            VilkårResultat(
+                personResultat = null,
+                vilkårType = Vilkår.BOSATT_I_RIKET,
+                resultat = Resultat.OPPFYLT,
+                periodeFom = LocalDate.of(2015, 1, 1),
+                periodeTom = LocalDate.of(2020, 1, 1),
+                begrunnelse = "begrunnelse",
+                behandlingId = 0,
+                utdypendeVilkårsvurderinger = listOf(
+                    UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
+                    UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP
+                ),
+                vurderesEtter = Regelverk.NASJONALE_REGLER
+            )
+        )
+
+        val forrigeVilkårResultat = listOf(
+            VilkårResultat(
+                personResultat = null,
+                vilkårType = Vilkår.BOSATT_I_RIKET,
+                resultat = Resultat.OPPFYLT,
+                periodeFom = LocalDate.of(2015, 1, 1),
+                periodeTom = null,
+                begrunnelse = "begrunnelse",
+                behandlingId = 0,
+                utdypendeVilkårsvurderinger = listOf(
+                    UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
+                    UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP
+                ),
+                vurderesEtter = Regelverk.NASJONALE_REGLER
+            )
+        )
+
+        val erEndringIVilkårvurderingForPerson = erEndringIVilkårvurderingForPerson(
+            nåværendeVilkårResultat = nåværendeVilkårResultat,
+            forrigeVilkårResultat = forrigeVilkårResultat,
+            opphørstidspunkt = YearMonth.of(2020, 2)
+        )
+
+        assertThat(erEndringIVilkårvurderingForPerson, Is(false))
     }
 }

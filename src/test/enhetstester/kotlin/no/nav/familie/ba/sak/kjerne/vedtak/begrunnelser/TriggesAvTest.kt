@@ -96,16 +96,16 @@ class TriggesAvTest {
     }
 
     @Test
-    fun `Skal gi riktig resultat for om endring skal utbetaling`() {
+    fun `Triggere for endret utbetaling-begrunnelser skal bli true ved riktig utbetalingsandel`() {
         val skalUtbetalesMedUtbetaling =
             triggesAvSkalUtbetalesMedUtvidetVilkår.erTriggereOppfyltForEndretUtbetaling(
                 minimertEndretAndel = endretUtbetalingAndelIkkeNull,
                 minimerteUtbetalingsperiodeDetaljer = listOf(
                     lagMinimertUtbetalingsperiodeDetalj(
-                        ytelseType = YtelseType.UTVIDET_BARNETRYGD
+                        ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                        erPåvirketAvEndring = true
                     )
                 )
-
             )
 
         val skalUtbetalesUtenUtbetaling =
@@ -113,10 +113,10 @@ class TriggesAvTest {
                 minimertEndretAndel = endretUtbetalingAndelNull,
                 minimerteUtbetalingsperiodeDetaljer = listOf(
                     lagMinimertUtbetalingsperiodeDetalj(
-                        ytelseType = YtelseType.UTVIDET_BARNETRYGD
+                        ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                        erPåvirketAvEndring = true
                     )
                 )
-
             )
 
         val skalIkkeUtbetalesUtenUtbetaling =
@@ -124,10 +124,10 @@ class TriggesAvTest {
                 minimertEndretAndel = endretUtbetalingAndelNull,
                 minimerteUtbetalingsperiodeDetaljer = listOf(
                     lagMinimertUtbetalingsperiodeDetalj(
-                        ytelseType = YtelseType.UTVIDET_BARNETRYGD
+                        ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                        erPåvirketAvEndring = true
                     )
                 )
-
             )
 
         val skalIkkeUtbetalesMedUtbetaling =
@@ -135,7 +135,8 @@ class TriggesAvTest {
                 minimertEndretAndel = endretUtbetalingAndelIkkeNull,
                 minimerteUtbetalingsperiodeDetaljer = listOf(
                     lagMinimertUtbetalingsperiodeDetalj(
-                        ytelseType = YtelseType.UTVIDET_BARNETRYGD
+                        ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                        erPåvirketAvEndring = true
                     )
                 )
             )
@@ -147,28 +148,29 @@ class TriggesAvTest {
     }
 
     @Test
-    fun `Skal gi riktig resultat for utvidetScenario`() {
-        val utvidetScenarioUtvidetVilkår =
+    fun `Skal gi riktig resultat for om endret utbetaling begrunnelse trigges ved utvidetScenario`() {
+        Assertions.assertTrue(
             triggesAvSkalUtbetalesMedUtvidetVilkår.erTriggereOppfyltForEndretUtbetaling(
                 minimertEndretAndel = endretUtbetalingAndelIkkeNull,
                 minimerteUtbetalingsperiodeDetaljer = listOf(
                     lagMinimertUtbetalingsperiodeDetalj(
-                        ytelseType = YtelseType.UTVIDET_BARNETRYGD
+                        ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                        erPåvirketAvEndring = true
                     )
                 )
-
             )
-        val utvidetScenarioIkkeUtvidetVilkår =
+        )
+
+        Assertions.assertFalse(
             triggesAvSkalUtbetalesMedUtvidetVilkår.erTriggereOppfyltForEndretUtbetaling(
                 minimertEndretAndel = endretUtbetalingAndelIkkeNull,
                 minimerteUtbetalingsperiodeDetaljer = listOf(
-                    lagMinimertUtbetalingsperiodeDetalj(
-                        ytelseType = YtelseType.ORDINÆR_BARNETRYGD
-                    )
+                    lagMinimertUtbetalingsperiodeDetalj(ytelseType = YtelseType.ORDINÆR_BARNETRYGD)
                 )
-
             )
-        val ikkeUtvidetScenarioIkkeUtvidetVilkår =
+        )
+
+        Assertions.assertTrue(
             triggesAvSkalUtbetalesUtenUtvidetVilkår.erTriggereOppfyltForEndretUtbetaling(
                 minimertEndretAndel = endretUtbetalingAndelIkkeNull,
                 minimerteUtbetalingsperiodeDetaljer = listOf(
@@ -176,23 +178,44 @@ class TriggesAvTest {
                         ytelseType = YtelseType.ORDINÆR_BARNETRYGD
                     )
                 )
-
             )
-        val ikkeUtvidetScenarioUtvidetVilkår =
+        )
+
+        Assertions.assertFalse(
             triggesAvSkalUtbetalesUtenUtvidetVilkår.erTriggereOppfyltForEndretUtbetaling(
                 minimertEndretAndel = endretUtbetalingAndelIkkeNull,
                 minimerteUtbetalingsperiodeDetaljer = listOf(
                     lagMinimertUtbetalingsperiodeDetalj(
-                        ytelseType = YtelseType.UTVIDET_BARNETRYGD
+                        ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                        erPåvirketAvEndring = true
                     )
                 )
-
             )
+        )
 
-        Assertions.assertTrue(utvidetScenarioUtvidetVilkår)
-        Assertions.assertFalse(utvidetScenarioIkkeUtvidetVilkår)
-        Assertions.assertTrue(ikkeUtvidetScenarioIkkeUtvidetVilkår)
-        Assertions.assertFalse(ikkeUtvidetScenarioUtvidetVilkår)
+        Assertions.assertFalse(
+            triggesAvSkalUtbetalesMedUtvidetVilkår.erTriggereOppfyltForEndretUtbetaling(
+                minimertEndretAndel = endretUtbetalingAndelIkkeNull,
+                minimerteUtbetalingsperiodeDetaljer = listOf(
+                    lagMinimertUtbetalingsperiodeDetalj(
+                        ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                        erPåvirketAvEndring = false
+                    )
+                )
+            )
+        )
+
+        Assertions.assertTrue(
+            triggesAvSkalUtbetalesUtenUtvidetVilkår.erTriggereOppfyltForEndretUtbetaling(
+                minimertEndretAndel = endretUtbetalingAndelIkkeNull,
+                minimerteUtbetalingsperiodeDetaljer = listOf(
+                    lagMinimertUtbetalingsperiodeDetalj(
+                        ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                        erPåvirketAvEndring = false
+                    )
+                )
+            )
+        )
     }
 
     @Test

@@ -19,9 +19,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
-import java.math.BigDecimal
 import java.time.YearMonth
 
 @Service
@@ -50,7 +48,7 @@ class StartSatsendring(
         var startSide = 0
         while (antallSatsendringerStartet < antallFagsaker) {
             val page =
-                fagsakRepository.finnLøpendeFagsakerForSatsendring(Pageable.ofSize(PAGE_STØRRELSE))
+                fagsakRepository.finnLøpendeFagsakerForSatsendring(Pageable.ofSize(antallFagsaker).withPage(startSide))
 
             val fagsakerForSatsendring = page.toList()
             logger.info("Fant ${fagsakerForSatsendring.size} personer for satsendring på side $startSide")
@@ -65,7 +63,7 @@ class StartSatsendring(
                     )
             }
 
-            if (++startSide == page.totalPages) break
+            if (++startSide >= page.totalPages) break
         }
     }
 
@@ -79,13 +77,13 @@ class StartSatsendring(
             andelerTilkjentYtelseMedEndreteUtbetalinger.any {
                 it.type == ytelseType && it.stønadFom.isBefore(tidspunkt) && it.stønadTom.isSameOrAfter(
                     tidspunkt
-                ) && it.prosent != BigDecimal(50) // Ignorerer delt bosted i fase 1
+                )
             }
         } else {
             andelerTilkjentYtelseMedEndreteUtbetalinger.any {
                 it.type == ytelseType && it.sats == sats && it.stønadFom.isBefore(tidspunkt) && it.stønadTom.isSameOrAfter(
                     tidspunkt
-                ) && it.prosent != BigDecimal(50) // Ignorerer delt bosted i fase 1
+                )
             }
         }
     }
@@ -100,7 +98,6 @@ class StartSatsendring(
             return if (featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_OPPRETT_TASKER)) {
                 logger.info("Oppretter satsendringtask for fagsak=${fagsak.id}")
                 opprettTaskService.opprettSatsendringTask(fagsak.id, satsTidspunkt)
-                satskjøringRepository.save(Satskjøring(fagsakId = fagsak.id))
                 true
             } else {
                 logger.info("Oppretter ikke satsendringtask for fagsak=${fagsak.id}. Toggle SATSENDRING_OPPRETT_TASKER avskrudd.")
@@ -233,7 +230,6 @@ class StartSatsendring(
         }
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun sjekkOgOpprettSatsendringVedGammelSats(ident: String): Boolean {
         val aktør = personidentService.hentAktør(ident)
         val løpendeFagsakerForAktør = fagsakRepository.finnFagsakerForAktør(aktør)
@@ -248,7 +244,6 @@ class StartSatsendring(
         return harOpprettetSatsendring
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun sjekkOgOpprettSatsendringVedGammelSats(fagsakId: Long): Boolean {
         return opprettSatsendringTaskVedGammelSats(fagsakId)
     }
@@ -276,13 +271,11 @@ class StartSatsendring(
     }
 
     fun opprettSatsendringForFagsak(fagsakId: Long) {
-        satskjøringRepository.save(Satskjøring(fagsakId = fagsakId))
         opprettTaskService.opprettSatsendringTask(fagsakId, SATSENDRINGMÅNED_2023)
     }
 
     companion object {
         val logger: Logger = LoggerFactory.getLogger(StartSatsendring::class.java)
-        const val PAGE_STØRRELSE = 1000
         val SATSENDRINGMÅNED_2023: YearMonth = YearMonth.of(2023, 3)
     }
 }
