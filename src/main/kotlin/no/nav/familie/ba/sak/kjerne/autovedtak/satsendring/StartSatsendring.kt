@@ -19,7 +19,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
 import java.time.YearMonth
@@ -100,7 +99,6 @@ class StartSatsendring(
             return if (featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_OPPRETT_TASKER)) {
                 logger.info("Oppretter satsendringtask for fagsak=${fagsak.id}")
                 opprettTaskService.opprettSatsendringTask(fagsak.id, satsTidspunkt)
-                satskjøringRepository.save(Satskjøring(fagsakId = fagsak.id))
                 true
             } else {
                 logger.info("Oppretter ikke satsendringtask for fagsak=${fagsak.id}. Toggle SATSENDRING_OPPRETT_TASKER avskrudd.")
@@ -233,7 +231,6 @@ class StartSatsendring(
         }
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun sjekkOgOpprettSatsendringVedGammelSats(ident: String): Boolean {
         val aktør = personidentService.hentAktør(ident)
         val løpendeFagsakerForAktør = fagsakRepository.finnFagsakerForAktør(aktør)
@@ -248,7 +245,6 @@ class StartSatsendring(
         return harOpprettetSatsendring
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun sjekkOgOpprettSatsendringVedGammelSats(fagsakId: Long): Boolean {
         return opprettSatsendringTaskVedGammelSats(fagsakId)
     }
@@ -276,7 +272,6 @@ class StartSatsendring(
     }
 
     fun opprettSatsendringForFagsak(fagsakId: Long) {
-        satskjøringRepository.save(Satskjøring(fagsakId = fagsakId))
         opprettTaskService.opprettSatsendringTask(fagsakId, SATSENDRINGMÅNED_2023)
     }
 
