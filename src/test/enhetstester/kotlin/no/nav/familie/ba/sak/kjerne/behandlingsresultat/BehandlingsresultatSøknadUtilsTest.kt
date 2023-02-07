@@ -26,10 +26,9 @@ import org.junit.jupiter.params.provider.EnumSource
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
-import java.time.YearMonth.now
 import org.hamcrest.CoreMatchers.`is` as Is
 
-class BehandlingsresultatSøknadUtilsTest {
+internal class BehandlingsresultatSøknadUtilsTest {
 
     val søker = tilfeldigPerson()
 
