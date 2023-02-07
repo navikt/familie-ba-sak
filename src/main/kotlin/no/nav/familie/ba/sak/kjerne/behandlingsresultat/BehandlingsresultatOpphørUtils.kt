@@ -64,30 +64,35 @@ object BehandlingsresultatOpphørUtils {
 
     /**
      * Hvis det eksisterer andeler med beløp == 0 så ønsker vi å filtrere bort disse dersom det eksisterer endret utbetaling andel for perioden
-     * med årsak ALLEREDE_UTBETALT, ENDRE_MOTTAKER eller ETTERBETALING_3ÅR
+     * med årsak ALLEREDE_UTBETALT, ENDRE_MOTTAKER eller ETTERBETALING_3ÅR. Vi grupperer type andeler før vi oppretter tidslinjer da det kan oppstå
+     * overlapp hvis vi ikke gjør dette.
      */
     internal fun List<AndelTilkjentYtelse>.filtrerBortIrrelevanteAndeler(endretUtbetalingAndeler: List<EndretUtbetalingAndel>): List<AndelTilkjentYtelse> {
         val personerMedAndeler = this.map { it.aktør }.distinct()
 
         return personerMedAndeler.flatMap { aktør ->
-            val andeler = this.filter { it.aktør == aktør }
-            val endretUtbetalingAndeler = endretUtbetalingAndeler.filter { it.person?.aktør == aktør }
+            val andelerGruppertPerTypePåPerson = this.filter { it.aktør == aktør }.groupBy { it.type }
+            val endretUtbetalingAndelerPåPerson = endretUtbetalingAndeler.filter { it.person?.aktør == aktør }
 
-            val andelTilkjentYtelseTidslinje = AndelTilkjentYtelseTidslinje(andeler)
-            val endretUtbetalingAndelTidslinje = EndretUtbetalingAndelTidslinje(endretUtbetalingAndeler)
+            andelerGruppertPerTypePåPerson.values.flatMap { andelerPerType ->
+                val andelTilkjentYtelseTidslinje = AndelTilkjentYtelseTidslinje(andelerPerType)
+                val endretUtbetalingAndelTidslinje = EndretUtbetalingAndelTidslinje(endretUtbetalingAndelerPåPerson)
 
-            andelTilkjentYtelseTidslinje.kombinerMed(endretUtbetalingAndelTidslinje) { andelTilkjentYtelse, endretUtbetalingAndel ->
-                val kalkulertUtbetalingsbeløp = andelTilkjentYtelse?.kalkulertUtbetalingsbeløp ?: 0
-                val endringsperiodeÅrsak = endretUtbetalingAndel?.årsak
+                andelTilkjentYtelseTidslinje.kombinerMed(endretUtbetalingAndelTidslinje) { andelTilkjentYtelse, endretUtbetalingAndel ->
+                    val kalkulertUtbetalingsbeløp = andelTilkjentYtelse?.kalkulertUtbetalingsbeløp ?: 0
+                    val endringsperiodeÅrsak = endretUtbetalingAndel?.årsak
 
-                when {
-                    kalkulertUtbetalingsbeløp == 0 && (endringsperiodeÅrsak == Årsak.ALLEREDE_UTBETALT) ||
-                        (endringsperiodeÅrsak == Årsak.ENDRE_MOTTAKER) ||
-                        (endringsperiodeÅrsak == Årsak.ETTERBETALING_3ÅR) -> null
+                    when {
+                        kalkulertUtbetalingsbeløp == 0 && (
+                            endringsperiodeÅrsak == Årsak.ALLEREDE_UTBETALT ||
+                                endringsperiodeÅrsak == Årsak.ENDRE_MOTTAKER ||
+                                endringsperiodeÅrsak == Årsak.ETTERBETALING_3ÅR
+                            ) -> null
 
-                    else -> andelTilkjentYtelse
-                }
-            }.tilAndelTilkjentYtelse()
+                        else -> andelTilkjentYtelse
+                    }
+                }.tilAndelTilkjentYtelse()
+            }
         }
     }
 }
