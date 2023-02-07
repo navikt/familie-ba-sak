@@ -57,14 +57,16 @@ object BehandlingsresultatOpphørUtils {
         forrigeAndeler: List<AndelTilkjentYtelse>,
         nåværendeEndretAndeler: List<EndretUtbetalingAndel>
     ): YearMonth? {
-        return this.filtrerBortIrrelevanteAndeler(endretAndeler = nåværendeEndretAndeler).finnOpphørsdato() ?: forrigeAndeler.minOfOrNull { it.stønadFom }
+        return this.filtrerBortIrrelevanteAndeler(endretAndeler = nåværendeEndretAndeler).finnOpphørsdato()
+            ?: forrigeAndeler.minOfOrNull { it.stønadFom }
     }
 
     /**
      * Hvis det ikke fantes noen andeler i forrige behandling defaulter vi til inneværende måned
      */
     private fun List<AndelTilkjentYtelse>.utledOpphørsdatoForForrigeBehandling(forrigeEndretAndeler: List<EndretUtbetalingAndel>): YearMonth =
-        this.filtrerBortIrrelevanteAndeler(endretAndeler = forrigeEndretAndeler).finnOpphørsdato() ?: YearMonth.now().nesteMåned()
+        this.filtrerBortIrrelevanteAndeler(endretAndeler = forrigeEndretAndeler).finnOpphørsdato() ?: YearMonth.now()
+            .nesteMåned()
 
     /**
      * Hvis det eksisterer andeler med beløp == 0 så ønsker vi å filtrere bort disse dersom det eksisterer endret utbetaling andel for perioden
@@ -92,17 +94,17 @@ object BehandlingsresultatOpphørUtils {
         val endretUtbetalingAndelTidslinje = EndretUtbetalingAndelTidslinje(endretAndelerPåPerson)
 
         return andelTilkjentYtelseTidslinje.kombinerMed(endretUtbetalingAndelTidslinje) { andelTilkjentYtelse, endretUtbetalingAndel ->
-            val kalkulertUtbetalingsbeløp = andelTilkjentYtelse?.kalkulertUtbetalingsbeløp ?: 0
-            val endringsperiodeÅrsak = endretUtbetalingAndel?.årsak
+            val kalkulertUtbetalingsbeløp = andelTilkjentYtelse?.kalkulertUtbetalingsbeløp ?: return@kombinerMed null
+            val endringsperiodeÅrsak = endretUtbetalingAndel?.årsak ?: return@kombinerMed andelTilkjentYtelse
 
-            when {
-                kalkulertUtbetalingsbeløp == 0 && (
-                    endringsperiodeÅrsak == Årsak.ALLEREDE_UTBETALT ||
-                        endringsperiodeÅrsak == Årsak.ENDRE_MOTTAKER ||
-                        endringsperiodeÅrsak == Årsak.ETTERBETALING_3ÅR
-                    ) -> null
+            when (endringsperiodeÅrsak) {
+                Årsak.ALLEREDE_UTBETALT,
+                Årsak.ENDRE_MOTTAKER,
+                Årsak.ETTERBETALING_3ÅR ->
+                    // Vi ønsker å filtrere bort andeler som har 0 i kalkulertUtbetalingsbeløp
+                    if (kalkulertUtbetalingsbeløp == 0) null else andelTilkjentYtelse
 
-                else -> andelTilkjentYtelse
+                Årsak.DELT_BOSTED -> andelTilkjentYtelse
             }
         }.tilAndelTilkjentYtelse()
     }
