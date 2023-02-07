@@ -65,7 +65,7 @@ class StartSatsendring(
                     )
             }
 
-            if (++startSide == page.totalPages) break
+            if (++startSide >= page.totalPages) break
         }
     }
 
