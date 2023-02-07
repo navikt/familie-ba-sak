@@ -14,20 +14,17 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import java.time.YearMonth
+import java.util.stream.Stream
 
 class BehandlingsresultatUtilsTest {
 
     val søker = tilfeldigPerson()
 
     private val barn1Aktør = randomAktør()
-
-    val jan22 = YearMonth.of(2022, 1)
-    val feb22 = YearMonth.of(2022, 2)
-    val mar22 = YearMonth.of(2022, 3)
-    val mai22 = YearMonth.of(2022, 5)
-    val aug22 = YearMonth.of(2022, 8)
-    val des22 = YearMonth.of(2022, 12)
 
     @BeforeEach
     fun reset() {
@@ -172,6 +169,56 @@ class BehandlingsresultatUtilsTest {
             Behandlingsresultat.ENDRET_UTBETALING,
             BehandlingsresultatUtils.utledBehandlingsresultatBasertPåYtelsePersoner(personer)
         )
+    }
+
+    @ParameterizedTest(name = "Søknadsresultat {0}, Endringsresultat {1} og Opphørsresultat {2} skal kombineres til behandlingsresultat {3}")
+    @MethodSource("hentKombinasjonerOgBehandlingsResultat")
+    internal fun `Kombiner resultater - skal kombinere til riktig behandlingsresultat gitt forskjellige kombinasjoner av resultater`(
+        søknadsresultat: Søknadsresultat?,
+        endringsresultat: Endringsresultat,
+        opphørsresultat: Opphørsresultat,
+        behandlingsresultat: Behandlingsresultat
+    ) {
+        val kombinertResultat = BehandlingsresultatUtils.kombinerResultaterTilBehandlingsresultat(
+            søknadsresultat,
+            endringsresultat,
+            opphørsresultat
+        )
+
+        assertEquals(kombinertResultat, behandlingsresultat)
+    }
+
+    companion object {
+        @JvmStatic
+        fun hentKombinasjonerOgBehandlingsResultat() =
+            Stream.of(
+                Arguments.of(Søknadsresultat.INGEN_RELEVANTE_ENDRINGER, Endringsresultat.INGEN_ENDRING, Opphørsresultat.IKKE_OPPHØRT, Behandlingsresultat.FORTSATT_INNVILGET),
+                Arguments.of(Søknadsresultat.INGEN_RELEVANTE_ENDRINGER, Endringsresultat.INGEN_ENDRING, Opphørsresultat.FORTSATT_OPPHØRT, Behandlingsresultat.FORTSATT_OPPHØRT),
+                Arguments.of(Søknadsresultat.INNVILGET, Endringsresultat.ENDRING, Opphørsresultat.OPPHØRT, Behandlingsresultat.INNVILGET_ENDRET_OG_OPPHØRT),
+                Arguments.of(Søknadsresultat.INNVILGET, Endringsresultat.ENDRING, Opphørsresultat.FORTSATT_OPPHØRT, Behandlingsresultat.INNVILGET_OG_ENDRET),
+                Arguments.of(Søknadsresultat.INNVILGET, Endringsresultat.ENDRING, Opphørsresultat.IKKE_OPPHØRT, Behandlingsresultat.INNVILGET_OG_ENDRET),
+                Arguments.of(Søknadsresultat.INNVILGET, Endringsresultat.INGEN_ENDRING, Opphørsresultat.OPPHØRT, Behandlingsresultat.INNVILGET_OG_OPPHØRT),
+                Arguments.of(Søknadsresultat.INNVILGET, Endringsresultat.INGEN_ENDRING, Opphørsresultat.FORTSATT_OPPHØRT, Behandlingsresultat.INNVILGET),
+                Arguments.of(Søknadsresultat.INNVILGET, Endringsresultat.INGEN_ENDRING, Opphørsresultat.IKKE_OPPHØRT, Behandlingsresultat.INNVILGET),
+                Arguments.of(Søknadsresultat.AVSLÅTT, Endringsresultat.ENDRING, Opphørsresultat.OPPHØRT, Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT),
+                Arguments.of(Søknadsresultat.AVSLÅTT, Endringsresultat.ENDRING, Opphørsresultat.FORTSATT_OPPHØRT, Behandlingsresultat.AVSLÅTT_OG_ENDRET),
+                Arguments.of(Søknadsresultat.AVSLÅTT, Endringsresultat.ENDRING, Opphørsresultat.IKKE_OPPHØRT, Behandlingsresultat.AVSLÅTT_OG_ENDRET),
+                Arguments.of(Søknadsresultat.AVSLÅTT, Endringsresultat.INGEN_ENDRING, Opphørsresultat.OPPHØRT, Behandlingsresultat.AVSLÅTT_OG_OPPHØRT),
+                Arguments.of(Søknadsresultat.AVSLÅTT, Endringsresultat.INGEN_ENDRING, Opphørsresultat.FORTSATT_OPPHØRT, Behandlingsresultat.AVSLÅTT),
+                Arguments.of(Søknadsresultat.AVSLÅTT, Endringsresultat.INGEN_ENDRING, Opphørsresultat.IKKE_OPPHØRT, Behandlingsresultat.AVSLÅTT),
+                Arguments.of(Søknadsresultat.DELVIS_INNVILGET, Endringsresultat.ENDRING, Opphørsresultat.OPPHØRT, Behandlingsresultat.DELVIS_INNVILGET_ENDRET_OG_OPPHØRT),
+                Arguments.of(Søknadsresultat.DELVIS_INNVILGET, Endringsresultat.ENDRING, Opphørsresultat.FORTSATT_OPPHØRT, Behandlingsresultat.DELVIS_INNVILGET_OG_ENDRET),
+                Arguments.of(Søknadsresultat.DELVIS_INNVILGET, Endringsresultat.ENDRING, Opphørsresultat.IKKE_OPPHØRT, Behandlingsresultat.DELVIS_INNVILGET_OG_ENDRET),
+                Arguments.of(Søknadsresultat.DELVIS_INNVILGET, Endringsresultat.INGEN_ENDRING, Opphørsresultat.OPPHØRT, Behandlingsresultat.DELVIS_INNVILGET_OG_OPPHØRT),
+                Arguments.of(Søknadsresultat.DELVIS_INNVILGET, Endringsresultat.INGEN_ENDRING, Opphørsresultat.FORTSATT_OPPHØRT, Behandlingsresultat.DELVIS_INNVILGET),
+                Arguments.of(Søknadsresultat.DELVIS_INNVILGET, Endringsresultat.INGEN_ENDRING, Opphørsresultat.IKKE_OPPHØRT, Behandlingsresultat.DELVIS_INNVILGET),
+                Arguments.of(null, Endringsresultat.ENDRING, Opphørsresultat.OPPHØRT, Behandlingsresultat.ENDRET_OG_OPPHØRT),
+                Arguments.of(null, Endringsresultat.ENDRING, Opphørsresultat.FORTSATT_OPPHØRT, Behandlingsresultat.ENDRET_UTBETALING),
+                Arguments.of(null, Endringsresultat.ENDRING, Opphørsresultat.IKKE_OPPHØRT, Behandlingsresultat.ENDRET_UTBETALING),
+                Arguments.of(null, Endringsresultat.INGEN_ENDRING, Opphørsresultat.OPPHØRT, Behandlingsresultat.OPPHØRT),
+                Arguments.of(null, Endringsresultat.INGEN_ENDRING, Opphørsresultat.FORTSATT_OPPHØRT, Behandlingsresultat.FORTSATT_OPPHØRT),
+                Arguments.of(null, Endringsresultat.INGEN_ENDRING, Opphørsresultat.IKKE_OPPHØRT, Behandlingsresultat.FORTSATT_INNVILGET)
+            )
     }
 
     private fun lagYtelsePerson(

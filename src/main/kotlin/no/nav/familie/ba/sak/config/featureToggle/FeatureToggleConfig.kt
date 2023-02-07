@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.config
 
 class FeatureToggleConfig {
     companion object {
+
         const val BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER = "familie-ba-sak.frikoble-andeler-og-endringer"
         const val KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV = "familie-ba-sak.behandling.korreksjon-vedtaksbrev"
         const val SKATTEETATEN_API_EKTE_DATA = "familie-ba-sak.skatteetaten-api-ekte-data-i-respons"
@@ -22,10 +23,7 @@ class FeatureToggleConfig {
         const val ER_MANUEL_POSTERING_TOGGLE_PÅ = "familie-ba-sak.manuell-postering"
 
         // unleash toggles for satsendring, kan slettes etter at satsendring er skrudd på for alle satstyper
-        const val SATSENDRING_ORBA = "familie-ba-sak.satsendring-orba"
-        const val SATSENDRING_TILLEGG_ORBA = "familie-ba-sak.satsendring-tillegg-orba"
-        const val SATSENDRING_SMA = "familie-ba-sak.satsendring-sma"
-        const val SATSENDRING_UTVIDET = "familie-ba-sak.satsendring-utvidet"
+        const val SATSENDRING_ENABLET: String = "familie-ba-sak.satsendring-enablet"
         const val SATSENDRING_OPPRETT_TASKER = "familie-ba-sak.satsendring-opprett-satsendring-task"
     }
 }

@@ -74,8 +74,8 @@ internal class BehandleFødselshendelseTaskTest {
                 personidentService = mockk<PersonidentService>().apply { every { hentAktør(any()) } returns mockk() },
                 startSatsendring = mockk<StartSatsendring>().apply {
                     every {
-                        opprettSatsendringForIdent(
-                            any()
+                        sjekkOgOpprettSatsendringVedGammelSats(
+                            any<String>()
                         )
                     } returns true
                 }
@@ -107,8 +107,8 @@ internal class BehandleFødselshendelseTaskTest {
             personidentService = mockk<PersonidentService>().apply { every { hentAktør(any()) } returns mockk() },
             startSatsendring = mockk<StartSatsendring>().apply {
                 every {
-                    opprettSatsendringForIdent(
-                        any()
+                    sjekkOgOpprettSatsendringVedGammelSats(
+                        any<String>()
                     )
                 } returns false
             }
