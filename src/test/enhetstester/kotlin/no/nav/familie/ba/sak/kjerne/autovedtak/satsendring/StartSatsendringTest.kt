@@ -28,6 +28,8 @@ import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.prosessering.domene.Task
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.data.domain.PageImpl
@@ -46,6 +48,7 @@ internal class StartSatsendringTest {
     private val satskjøringRepository: SatskjøringRepository = mockk()
     private val featureToggleService: FeatureToggleService = mockk()
     private val personidentService: PersonidentService = mockk()
+    private val autovedtakSatsendringService: AutovedtakSatsendringService = mockk()
 
     lateinit var startSatsendring: StartSatsendring
 
@@ -57,16 +60,17 @@ internal class StartSatsendringTest {
         val taskRepository: TaskRepositoryWrapper = mockk()
         val taskSlot = slot<Task>()
         every { taskRepository.save(capture(taskSlot)) } answers { taskSlot.captured }
-        val opprettTaskService: OpprettTaskService = OpprettTaskService(taskRepository, satskjøringRepository)
+        val opprettTaskService = OpprettTaskService(taskRepository, satskjøringRepository)
 
         startSatsendring = StartSatsendring(
-            fagsakRepository,
-            behandlingRepository,
-            opprettTaskService,
-            andelerTilkjentYtelseOgEndreteUtbetalingerService,
-            satskjøringRepository,
-            featureToggleService,
-            personidentService
+            fagsakRepository = fagsakRepository,
+            behandlingRepository = behandlingRepository,
+            opprettTaskService = opprettTaskService,
+            andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
+            satskjøringRepository = satskjøringRepository,
+            featureToggleService = featureToggleService,
+            personidentService = personidentService,
+            autovedtakSatsendringService = autovedtakSatsendringService
         )
     }
 
@@ -440,4 +444,37 @@ internal class StartSatsendringTest {
             beløp = beløp ?: SatsService.finnSisteSatsFor(satsType).beløp
         )
     )
+
+    @Test
+    fun `kanStarteSatsendringPåFagsak gir false når vi ikke har noen tidligere behandling`() {
+        every { behandlingRepository.finnSisteIverksatteBehandling(1L) } returns null
+
+        assertFalse(startSatsendring.kanStarteSatsendringPåFagsak(1L))
+    }
+
+    @Test
+    fun `kanStarteSatsendringPåFagsak gir false når vi har en satskjøring for fagsaken i satskjøringsrepoet`() {
+        every { behandlingRepository.finnSisteIverksatteBehandling(1L) } returns lagBehandling()
+        every { satskjøringRepository.findByFagsakId(1L) } returns Satskjøring(fagsakId = 1L)
+
+        assertFalse(startSatsendring.kanStarteSatsendringPåFagsak(1L))
+    }
+
+    @Test
+    fun `kanStarteSatsendringPåFagsak gir false når harSisteSats er true`() {
+        every { behandlingRepository.finnSisteIverksatteBehandling(1L) } returns lagBehandling()
+        every { satskjøringRepository.findByFagsakId(1L) } returns null
+        every { autovedtakSatsendringService.harAlleredeNySats(any(), any()) } returns true
+
+        assertFalse(startSatsendring.kanStarteSatsendringPåFagsak(1L))
+    }
+
+    @Test
+    fun `kanStarteSatsendringPåFagsak gir true når harSisteSats er false`() {
+        every { behandlingRepository.finnSisteIverksatteBehandling(1L) } returns lagBehandling()
+        every { satskjøringRepository.findByFagsakId(1L) } returns null
+        every { autovedtakSatsendringService.harAlleredeNySats(any(), any()) } returns false
+
+        assertTrue(startSatsendring.kanStarteSatsendringPåFagsak(1L))
+    }
 }
