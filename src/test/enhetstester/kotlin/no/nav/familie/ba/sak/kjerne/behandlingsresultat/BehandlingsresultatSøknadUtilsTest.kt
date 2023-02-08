@@ -44,7 +44,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
     val personResultatBarn1FraDes21TilAug22 = lagPersonResultatForAktør(aktør = barn1Aktør)
 
     @Test
-    fun `Søknadsresultat pr person - skal bare utlede resultater for personer det er framstilt krav for`() {
+    fun `Søknadsresultat for personer fremstilt krav for - skal bare utlede resultater for personer det er framstilt krav for`() {
         val forrigeAndel =
             lagAndelTilkjentYtelse(
                 fom = jan22,
@@ -65,7 +65,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
     }
 
     @Test
-    fun `Søknadsresultat pr person - skal returnere ingen relevante endringer dersom beløpene for periodene er lik forrige behandling`() {
+    fun `Søknadsresultat for personer fremstilt krav for - skal returnere ingen relevante endringer dersom beløpene for periodene er lik forrige behandling`() {
         val forrigeAndel =
             lagAndelTilkjentYtelse(
                 fom = jan22,
@@ -87,7 +87,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
     }
 
     @Test
-    fun `Søknadsresultat pr person - skal returnere innvilget dersom det finnes beløp for perioder som er annerledes enn sist og større enn 0`() {
+    fun `Søknadsresultat for personer fremstilt krav for - skal returnere innvilget dersom det finnes beløp for perioder som er annerledes enn sist og større enn 0`() {
         val forrigeAndel =
             lagAndelTilkjentYtelse(
                 fom = jan22,
@@ -111,7 +111,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
     }
 
     @Test
-    fun `Søknadsresultat pr person - skal returnere ingen relevante endringer dersom beløp på nåværende andel er 0 og det ikke finnes noen endringsperioder eller differanse beregning`() {
+    fun `Søknadsresultat for personer fremstilt krav for - skal returnere ingen relevante endringer dersom beløp på nåværende andel er 0 og det ikke finnes noen endringsperioder eller differanse beregning`() {
         val forrigeAndel =
             lagAndelTilkjentYtelse(
                 fom = jan22,
@@ -135,7 +135,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
     }
 
     @Test
-    fun `Søknadsresultat pr person - skal returnere INNVILGET dersom beløp på nåværende andel er 0 og det finnes endringsperiode som DELT_BOSTED`() {
+    fun `Søknadsresultat for personer fremstilt krav for - skal returnere INNVILGET dersom beløp på nåværende andel er 0 og det finnes endringsperiode som DELT_BOSTED`() {
         val forrigeAndel =
             lagAndelTilkjentYtelse(
                 fom = jan22,
@@ -169,7 +169,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
 
     @ParameterizedTest
     @EnumSource(value = Årsak::class, mode = EnumSource.Mode.EXCLUDE, names = ["DELT_BOSTED"])
-    fun `Søknadsresultat pr person - skal returnere AVSLÅTT dersom beløp på nåværende andel er 0 og det finnes endringsperiode som ikke er DELT_BOSTED`(
+    fun `Søknadsresultat for personer fremstilt krav for - skal returnere AVSLÅTT dersom beløp på nåværende andel er 0 og det finnes endringsperiode som ikke er DELT_BOSTED`(
         årsak: Årsak
     ) {
         val forrigeAndel =
@@ -204,7 +204,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
     }
 
     @Test
-    fun `Søknadsresultat pr person - skal returnere INNVILGET dersom beløpet på nåværende andel er 0 men er differanseberegnet`() {
+    fun `Søknadsresultat for personer fremstilt krav for - skal returnere INNVILGET dersom beløpet på nåværende andel er 0 men er differanseberegnet`() {
         val forrigeAndel =
             lagAndelTilkjentYtelse(
                 fom = jan22,
@@ -231,7 +231,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
     }
 
     @Test
-    fun `Søknadsresultat pr person - skal returnere INNVILGET OG AVSLÅTT dersom 1 barn får innvilget og 1 barn får avslått`() {
+    fun `Søknadsresultat for personer fremstilt krav for - skal returnere INNVILGET OG AVSLÅTT dersom 1 barn får innvilget og 1 barn får avslått`() {
         val barn2Aktør = lagPerson(type = PersonType.BARN).aktør
 
         val forrigeAndeler = listOf(
@@ -293,7 +293,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
     }
 
     @Test
-    fun `Søknadsresultat pr person - skal returnere INNVILGET dersom småbarnstillegg blir lagt til`() {
+    fun `Søknadsresultat for personer fremstilt krav for - skal returnere INNVILGET dersom småbarnstillegg blir lagt til`() {
         val søker = lagPerson(type = PersonType.SØKER)
 
         val forrigeAndelBarn =
@@ -334,6 +334,51 @@ internal class BehandlingsresultatSøknadUtilsTest {
 
         assertThat(søknadsResultat.size, Is(1))
         assertThat(søknadsResultat[0], Is(Søknadsresultat.INNVILGET))
+    }
+
+    @Test
+    fun `Søknadsresultat for personer fremstilt krav for - skal kaste feil hvis kun andeler er fjernet uten å sette eksplisitt avslag`() {
+        val forrigeAndel =
+            lagAndelTilkjentYtelse(
+                fom = jan22,
+                tom = aug22,
+                beløp = 1054,
+                aktør = barn1Aktør
+            )
+
+        assertThrows<Feil> {
+            utledSøknadsresultatForPersonerFremstiltKravFor(
+                forrigeAndeler = listOf(forrigeAndel),
+                nåværendeAndeler = emptyList(),
+                personerFremstiltKravFor = listOf(barn1Aktør),
+                endretUtbetalingAndeler = emptyList(),
+                nåværendePersonResultater = setOf(personResultatBarn1FraDes21TilAug22)
+            )
+        }
+    }
+
+    @Test
+    fun `Søknadsresultat for personer fremstilt krav for - legger på avslag hvis eksplisitt avslag er satt på person`() {
+        val forrigeAndel =
+            lagAndelTilkjentYtelse(
+                fom = jan22,
+                tom = aug22,
+                beløp = 1054,
+                aktør = barn1Aktør
+            )
+
+        val personResultat = lagPersonResultatForAktør(aktør = barn1Aktør, erEksplisittAvslag = true)
+
+        val søknadsresultat = utledSøknadsresultatForPersonerFremstiltKravFor(
+            forrigeAndeler = listOf(forrigeAndel),
+            nåværendeAndeler = emptyList(),
+            personerFremstiltKravFor = listOf(barn1Aktør),
+            endretUtbetalingAndeler = emptyList(),
+            nåværendePersonResultater = setOf(personResultat)
+        )
+
+        assertEquals(2, søknadsresultat.size)
+        assertThat(søknadsresultat, containsInAnyOrder(Søknadsresultat.AVSLÅTT, Søknadsresultat.INGEN_RELEVANTE_ENDRINGER))
     }
 
     @Test
@@ -607,6 +652,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
     private fun lagPersonResultatForAktør(
         aktør: Aktør,
         periodeFom: LocalDate = des21,
-        periodeTom: LocalDate? = aug22.sisteDagIInneværendeMåned()
-    ): PersonResultat = lagPersonResultat(aktør = aktør, vilkårsvurdering = lagVilkårsvurdering(behandling = lagBehandling(), søkerAktør = søker.aktør, resultat = Resultat.OPPFYLT), periodeFom = periodeFom, periodeTom = periodeTom, resultat = Resultat.OPPFYLT, erEksplisittAvslagPåSøknad = false)
+        periodeTom: LocalDate? = aug22.sisteDagIInneværendeMåned(),
+        erEksplisittAvslag: Boolean = false
+    ): PersonResultat = lagPersonResultat(aktør = aktør, vilkårsvurdering = lagVilkårsvurdering(behandling = lagBehandling(), søkerAktør = søker.aktør, resultat = Resultat.OPPFYLT), periodeFom = periodeFom, periodeTom = periodeTom, resultat = Resultat.OPPFYLT, erEksplisittAvslagPåSøknad = erEksplisittAvslag)
 }
