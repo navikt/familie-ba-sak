@@ -183,7 +183,9 @@ class StartSatsendring(
             )
             if (resultattekstSatsendringBehandling == "Satsendring kjørt OK") {
                 true
-            } else throw Feil("Satsendring kjørte ikke OK for fagsak $fagsakId")
+            } else {
+                throw Feil("Satsendring kjørte ikke OK for fagsak $fagsakId")
+            }
         } else {
             false
         }
