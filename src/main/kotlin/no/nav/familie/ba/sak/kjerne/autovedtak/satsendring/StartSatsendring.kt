@@ -6,8 +6,12 @@ import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
+import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
@@ -30,7 +34,8 @@ class StartSatsendring(
     private val satskjøringRepository: SatskjøringRepository,
     private val featureToggleService: FeatureToggleService,
     private val personidentService: PersonidentService,
-    private val autovedtakSatsendringService: AutovedtakSatsendringService
+    private val autovedtakSatsendringService: AutovedtakSatsendringService,
+    private val kompetanseService: KompetanseService
 
 ) {
 
@@ -73,7 +78,7 @@ class StartSatsendring(
     ): Int {
         var antallFagsakerSatsendring = antallAlleredeTriggetSatsendring
         for (fagsak in fagsakForSatsendring) {
-            if (skalTriggeFagsak(fagsak, satsTidspunkt)) {
+            if (skalTriggeSatsendring(fagsak, satsTidspunkt)) {
                 antallFagsakerSatsendring++
             }
 
@@ -84,7 +89,7 @@ class StartSatsendring(
         return antallFagsakerSatsendring
     }
 
-    private fun skalTriggeFagsak(fagsak: Fagsak, satsTidspunkt: YearMonth): Boolean {
+    private fun skalTriggeSatsendring(fagsak: Fagsak, satsTidspunkt: YearMonth): Boolean {
         val aktivOgÅpenBehandling = behandlingRepository.findByFagsakAndAktivAndOpen(fagsakId = fagsak.id)
         if (aktivOgÅpenBehandling != null) {
             logger.info("Oppretter ikke satsendringtask for fagsak=${fagsak.id}. Har åpen behandling ${aktivOgÅpenBehandling.id}")
@@ -111,6 +116,14 @@ class StartSatsendring(
                 )
                 logger.info("Fagsak=${fagsak.id} har alt siste satser")
                 return true
+            }
+
+            if (sisteIverksatteBehandling.kategori == BehandlingKategori.EØS && kompetanseService.hentKompetanser(
+                    BehandlingId(sisteIverksatteBehandling.id)
+                ).any { it.resultat == KompetanseResultat.NORGE_ER_SEKUNDÆRLAND }
+            ) {
+                logger.info("Venter med EØS-sekundærland for fagsak=${fagsak.id}")
+                return false
             }
 
             if (featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_OPPRETT_TASKER)) {
