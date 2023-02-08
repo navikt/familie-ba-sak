@@ -1,27 +1,24 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.satsendring
 
-import no.nav.familie.ba.sak.common.isSameOrAfter
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
-import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
-import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.task.OpprettTaskService
+import no.nav.familie.ba.sak.task.SatsendringTaskDto
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
-import java.math.BigDecimal
 import java.time.YearMonth
 
 @Service
@@ -32,7 +29,8 @@ class StartSatsendring(
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     private val satskjøringRepository: SatskjøringRepository,
     private val featureToggleService: FeatureToggleService,
-    private val personidentService: PersonidentService
+    private val personidentService: PersonidentService,
+    private val autovedtakSatsendringService: AutovedtakSatsendringService
 
 ) {
 
@@ -41,9 +39,8 @@ class StartSatsendring(
         antallFagsaker: Int,
         satsTidspunkt: YearMonth = YearMonth.of(2023, 3)
     ) {
-        val gyldigeSatstyper = hentGyldigeSatstyper()
-        if (gyldigeSatstyper.isEmpty()) {
-            logger.info("Skipper satsendring da ingen av bryterne for de ulike satstypene er påskrudd.")
+        if (!featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_ENABLET, false)) {
+            logger.info("Skipper satsendring da toggle er skrudd av.")
             return
         }
         var antallSatsendringerStartet = 0
@@ -60,8 +57,7 @@ class StartSatsendring(
                         fagsakerForSatsendring,
                         antallSatsendringerStartet,
                         antallFagsaker,
-                        satsTidspunkt,
-                        gyldigeSatstyper
+                        satsTidspunkt
                     )
             }
 
@@ -69,83 +65,15 @@ class StartSatsendring(
         }
     }
 
-    private fun harYtelsetype(
-        ytelseType: YtelseType,
-        andelerTilkjentYtelseMedEndreteUtbetalinger: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
-        tidspunkt: YearMonth,
-        sats: Int? = null
-    ): Boolean {
-        return if (sats == null) {
-            andelerTilkjentYtelseMedEndreteUtbetalinger.any {
-                it.type == ytelseType && it.stønadFom.isBefore(tidspunkt) && it.stønadTom.isSameOrAfter(
-                    tidspunkt
-                ) && it.prosent != BigDecimal(50) // Ignorerer delt bosted i fase 1
-            }
-        } else {
-            andelerTilkjentYtelseMedEndreteUtbetalinger.any {
-                it.type == ytelseType && it.sats == sats && it.stønadFom.isBefore(tidspunkt) && it.stønadTom.isSameOrAfter(
-                    tidspunkt
-                ) && it.prosent != BigDecimal(50) // Ignorerer delt bosted i fase 1
-            }
-        }
-    }
-
-    private fun sjekkOgTriggSatsendring(
-        satstyper: List<SatsType>,
-        fagsak: Fagsak,
-        gyldigeSatstyper: List<SatsType>,
-        satsTidspunkt: YearMonth
-    ): Boolean {
-        if (satstyper.isNotEmpty() && gyldigeSatstyper.containsAll(satstyper)) {
-            return if (featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_OPPRETT_TASKER)) {
-                logger.info("Oppretter satsendringtask for fagsak=${fagsak.id}")
-                opprettTaskService.opprettSatsendringTask(fagsak.id, satsTidspunkt)
-                satskjøringRepository.save(Satskjøring(fagsakId = fagsak.id))
-                true
-            } else {
-                logger.info("Oppretter ikke satsendringtask for fagsak=${fagsak.id}. Toggle SATSENDRING_OPPRETT_TASKER avskrudd.")
-                true // fordi vi vil at den skal telles selv om opprett task er skrudd av
-            }
-        }
-        logger.info(
-            "Oppretter ikke satsendringtask for fagsak=${fagsak.id}. Mangler ytelse, eller har ytelsestype(r) det ikke" +
-                " skal kjøres for: ${satstyper.filter { it !in gyldigeSatstyper }}"
-        )
-        return false
-    }
-
-    private fun hentGyldigeSatstyper(): List<SatsType> {
-        val gyldigeSatstyper = mutableListOf<SatsType>()
-        if (featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_TILLEGG_ORBA, false)) {
-            gyldigeSatstyper.add(SatsType.TILLEGG_ORBA)
-        }
-
-        if (featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_ORBA, true)) {
-            gyldigeSatstyper.add(SatsType.ORBA)
-        }
-
-        if (featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_UTVIDET, false)) {
-            gyldigeSatstyper.add(SatsType.UTVIDET_BARNETRYGD)
-        }
-
-        if (featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_SMA, false)) {
-            gyldigeSatstyper.add(SatsType.SMA)
-        }
-
-        logger.info("Påskrudde satstyper for satskjøring $gyldigeSatstyper")
-        return gyldigeSatstyper
-    }
-
     private fun oppretteEllerSkipSatsendring(
         fagsakForSatsendring: List<Fagsak>,
         antallAlleredeTriggetSatsendring: Int,
         antallFagsakerTilSatsendring: Int,
-        satsTidspunkt: YearMonth,
-        gyldigeSatstyper: List<SatsType>
+        satsTidspunkt: YearMonth
     ): Int {
         var antallFagsakerSatsendring = antallAlleredeTriggetSatsendring
         for (fagsak in fagsakForSatsendring) {
-            if (skalTriggeFagsak(fagsak, satsTidspunkt, gyldigeSatstyper)) {
+            if (skalTriggeFagsak(fagsak, satsTidspunkt)) {
                 antallFagsakerSatsendring++
             }
 
@@ -156,7 +84,7 @@ class StartSatsendring(
         return antallFagsakerSatsendring
     }
 
-    private fun skalTriggeFagsak(fagsak: Fagsak, satsTidspunkt: YearMonth, gyldigeSatstyper: List<SatsType>): Boolean {
+    private fun skalTriggeFagsak(fagsak: Fagsak, satsTidspunkt: YearMonth): Boolean {
         val aktivOgÅpenBehandling = behandlingRepository.findByFagsakAndAktivAndOpen(fagsakId = fagsak.id)
         if (aktivOgÅpenBehandling != null) {
             logger.info("Oppretter ikke satsendringtask for fagsak=${fagsak.id}. Har åpen behandling ${aktivOgÅpenBehandling.id}")
@@ -185,55 +113,19 @@ class StartSatsendring(
                 return true
             }
 
-            val satstyper = mutableListOf<SatsType>()
-            if (harYtelsetype(
-                    YtelseType.SMÅBARNSTILLEGG,
-                    andelerTilkjentYtelseMedEndreteUtbetalinger,
-                    satsTidspunkt
-                )
-            ) {
-                satstyper.add(SatsType.SMA)
+            if (featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_OPPRETT_TASKER)) {
+                logger.info("Oppretter satsendringtask for fagsak=${fagsak.id}")
+                opprettTaskService.opprettSatsendringTask(fagsak.id, satsTidspunkt)
+            } else {
+                logger.info("Oppretter ikke satsendringtask for fagsak=${fagsak.id}. Toggle SATSENDRING_OPPRETT_TASKER avskrudd.")
             }
-
-            if (harYtelsetype(
-                    YtelseType.UTVIDET_BARNETRYGD,
-                    andelerTilkjentYtelseMedEndreteUtbetalinger,
-                    satsTidspunkt
-                )
-            ) {
-                satstyper.add(SatsType.UTVIDET_BARNETRYGD)
-            }
-
-            if (harYtelsetype(
-                    YtelseType.ORDINÆR_BARNETRYGD,
-                    andelerTilkjentYtelseMedEndreteUtbetalinger,
-                    satsTidspunkt,
-                    1054
-                )
-
-            ) {
-                satstyper.add(SatsType.ORBA)
-            }
-
-            if (harYtelsetype(
-                    YtelseType.ORDINÆR_BARNETRYGD,
-                    andelerTilkjentYtelseMedEndreteUtbetalinger,
-                    satsTidspunkt,
-                    1676
-                )
-
-            ) {
-                satstyper.add(SatsType.TILLEGG_ORBA)
-            }
-
-            return sjekkOgTriggSatsendring(satstyper, fagsak, gyldigeSatstyper, satsTidspunkt)
+            return true
         } else {
             logger.info("Satsendring utføres ikke på fagsak=${fagsak.id} fordi fagsaken mangler en iverksatt behandling")
             return false
         }
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun sjekkOgOpprettSatsendringVedGammelSats(ident: String): Boolean {
         val aktør = personidentService.hentAktør(ident)
         val løpendeFagsakerForAktør = fagsakRepository.finnFagsakerForAktør(aktør)
@@ -248,35 +140,58 @@ class StartSatsendring(
         return harOpprettetSatsendring
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun sjekkOgOpprettSatsendringVedGammelSats(fagsakId: Long): Boolean {
         return opprettSatsendringTaskVedGammelSats(fagsakId)
     }
 
-    private fun opprettSatsendringTaskVedGammelSats(fagsakId: Long): Boolean {
-        val sisteIverksatteBehandling = behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
-        if (sisteIverksatteBehandling != null) {
-            val andelerTilkjentYtelseMedEndreteUtbetalinger =
-                andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
-                    sisteIverksatteBehandling.id
-                )
-
-            if (!AutovedtakSatsendringService.harAlleredeSisteSats(
-                    andelerTilkjentYtelseMedEndreteUtbetalinger,
-                    SATSENDRINGMÅNED_2023
-                ) && satskjøringRepository.findByFagsakId(fagsakId) == null
-            ) {
-                logger.info("Oppretter satsendringtask fagsakID=$fagsakId")
-                opprettSatsendringForFagsak(fagsakId = fagsakId)
-                return true
-            }
+    private fun opprettSatsendringTaskVedGammelSats(fagsakId: Long): Boolean =
+        if (kanStarteSatsendringPåFagsak(fagsakId)) {
+            logger.info("Oppretter satsendringtask fagsakID=$fagsakId")
+            opprettSatsendringForFagsak(fagsakId = fagsakId)
+            true
+        } else {
+            false
         }
 
-        return false
+    fun kanStarteSatsendringPåFagsak(fagsakId: Long): Boolean {
+        val sisteIverksatteBehandling = behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
+
+        return sisteIverksatteBehandling != null &&
+            satskjøringRepository.findByFagsakId(fagsakId) == null &&
+            !autovedtakSatsendringService.harAlleredeNySats(
+                sisteIverksettBehandlingsId = sisteIverksatteBehandling.id,
+                satstidspunkt = SATSENDRINGMÅNED_2023
+            )
+    }
+
+    @Transactional
+    fun opprettSatsendringSynkrontVedGammelSats(fagsakId: Long): Boolean {
+        val aktivOgÅpenBehandling =
+            behandlingRepository.findByFagsakAndAktivAndOpen(fagsakId = fagsakId)
+
+        if (aktivOgÅpenBehandling != null) {
+            throw FunksjonellFeil("Det finnes en åpen behandling på fagsaken som må avsluttes før satsendring kan gjennomføres.")
+        }
+
+        return if (kanStarteSatsendringPåFagsak(fagsakId)) {
+            satskjøringRepository.save(Satskjøring(fagsakId = fagsakId))
+            val resultattekstSatsendringBehandling = autovedtakSatsendringService.kjørBehandling(
+                SatsendringTaskDto(
+                    fagsakId = fagsakId,
+                    satstidspunkt = SATSENDRINGMÅNED_2023
+                )
+            )
+            if (resultattekstSatsendringBehandling == "Satsendring kjørt OK") {
+                true
+            } else {
+                throw Feil("Satsendring kjørte ikke OK for fagsak $fagsakId")
+            }
+        } else {
+            false
+        }
     }
 
     fun opprettSatsendringForFagsak(fagsakId: Long) {
-        satskjøringRepository.save(Satskjøring(fagsakId = fagsakId))
         opprettTaskService.opprettSatsendringTask(fagsakId, SATSENDRINGMÅNED_2023)
     }
 
