@@ -29,6 +29,7 @@ import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.prosessering.domene.Task
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.data.domain.PageImpl
@@ -445,39 +446,35 @@ internal class StartSatsendringTest {
     )
 
     @Test
-    fun `kanStarteSatsendringPåFagsak returnerer false når vi ikke har noen tidligere behandling`() {
+    fun `kanStarteSatsendringPåFagsak gir false når vi ikke har noen tidligere behandling`() {
         every { behandlingRepository.finnSisteIverksatteBehandling(1L) } returns null
 
-        val result = startSatsendring.kanStarteSatsendringPåFagsak(1L)
-
-        assertFalse(result)
+        assertFalse(startSatsendring.kanStarteSatsendringPåFagsak(1L))
     }
 
     @Test
-    fun `kanStarteSatsendringPåFagsak returnerer false når vi har en satskjøring i satskjøringsrepoet`() {
+    fun `kanStarteSatsendringPåFagsak gir false når vi har en satskjøring for fagsaken i satskjøringsrepoet`() {
         every { behandlingRepository.finnSisteIverksatteBehandling(1L) } returns lagBehandling()
         every { satskjøringRepository.findByFagsakId(1L) } returns Satskjøring(fagsakId = 1L)
 
-        val result = startSatsendring.kanStarteSatsendringPåFagsak(1L)
-
-        assertFalse(result)
+        assertFalse(startSatsendring.kanStarteSatsendringPåFagsak(1L))
     }
 
     @Test
-    fun `kanStarteSatsendringPåFagsak returnerer false når harSisteSats er true`() {
+    fun `kanStarteSatsendringPåFagsak gir false når harSisteSats er true`() {
         every { behandlingRepository.finnSisteIverksatteBehandling(1L) } returns lagBehandling()
         every { satskjøringRepository.findByFagsakId(1L) } returns null
         every { autovedtakSatsendringService.harAlleredeNySats(any(), any()) } returns true
 
-        assertThat(startSatsendring.kanStarteSatsendringPåFagsak(1L)).isEqualTo(false)
+        assertFalse(startSatsendring.kanStarteSatsendringPåFagsak(1L))
     }
 
     @Test
-    fun `kanStarteSatsendringPåFagsak returnerer true når harSisteSats er false`() {
+    fun `kanStarteSatsendringPåFagsak gir true når harSisteSats er false`() {
         every { behandlingRepository.finnSisteIverksatteBehandling(1L) } returns lagBehandling()
         every { satskjøringRepository.findByFagsakId(1L) } returns null
         every { autovedtakSatsendringService.harAlleredeNySats(any(), any()) } returns false
 
-        assertThat(startSatsendring.kanStarteSatsendringPåFagsak(1L)).isEqualTo(true)
+        assertTrue(startSatsendring.kanStarteSatsendringPåFagsak(1L))
     }
 }
