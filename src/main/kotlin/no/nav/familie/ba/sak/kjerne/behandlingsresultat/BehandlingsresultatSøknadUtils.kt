@@ -38,16 +38,12 @@ object BehandlingsresultatSøknadUtils {
         behandlingÅrsak: BehandlingÅrsak,
         finnesUregistrerteBarn: Boolean
     ): Søknadsresultat {
-        val resultaterFraAndeler = utledSøknadResultatFraAndelerTilkjentYtelse(
+        val resultaterFraAndeler = utledSøknadsresultatForPersonerFremstiltKravFor(
             forrigeAndeler = forrigeAndeler,
             nåværendeAndeler = nåværendeAndeler,
             personerFremstiltKravFor = personerFremstiltKravFor,
-            endretUtbetalingAndeler = endretUtbetalingAndeler
-        )
-
-        val erEksplisittAvslagPåMinstEnPersonFremstiltKravFor = erEksplisittAvslagPåMinstEnPersonFremstiltKravFor(
-            nåværendePersonResultater = nåværendePersonResultater,
-            personerFremstiltKravFor = personerFremstiltKravFor
+            endretUtbetalingAndeler = endretUtbetalingAndeler,
+            nåværendePersonResultater = nåværendePersonResultater
         )
 
         val erFødselshendelseMedAvslag = if (behandlingÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
@@ -60,7 +56,7 @@ object BehandlingsresultatSøknadUtils {
         }
 
         val alleResultater = (
-            if (erEksplisittAvslagPåMinstEnPersonFremstiltKravFor || erFødselshendelseMedAvslag || finnesUregistrerteBarn) {
+            if (erFødselshendelseMedAvslag || finnesUregistrerteBarn) {
                 resultaterFraAndeler.plus(Søknadsresultat.AVSLÅTT)
             } else {
                 resultaterFraAndeler
@@ -70,22 +66,27 @@ object BehandlingsresultatSøknadUtils {
         return alleResultater.kombinerSøknadsresultater()
     }
 
-    internal fun utledSøknadResultatFraAndelerTilkjentYtelse(
+    internal fun utledSøknadsresultatForPersonerFremstiltKravFor(
         forrigeAndeler: List<AndelTilkjentYtelse>,
         nåværendeAndeler: List<AndelTilkjentYtelse>,
         personerFremstiltKravFor: List<Aktør>,
-        endretUtbetalingAndeler: List<EndretUtbetalingAndel>
+        endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
+        nåværendePersonResultater: Set<PersonResultat>
     ): List<Søknadsresultat> {
         val alleSøknadsresultater = personerFremstiltKravFor.flatMap { aktør ->
             val ytelseTyper = (forrigeAndeler.map { it.type } + nåværendeAndeler.map { it.type }).distinct()
 
-            ytelseTyper.flatMap { ytelseType ->
+            val søknadsresultaterFraAndeler = ytelseTyper.flatMap { ytelseType ->
                 sammenlignAndelerTilkjentYtelsePerPersonOgType(
                     forrigeAndelerForPerson = forrigeAndeler.filter { it.aktør == aktør && it.type == ytelseType },
                     nåværendeAndelerForPerson = nåværendeAndeler.filter { it.aktør == aktør && it.type == ytelseType },
                     endretUtbetalingAndelerForPerson = endretUtbetalingAndeler.filter { it.person?.aktør == aktør }
                 ).map { it.tilknyttetSøknadsresultat }
             }
+
+            val harEksplisittAvslag = nåværendePersonResultater.filter { it.aktør == aktør }.any { it.harEksplisittAvslag() }
+
+            if (harEksplisittAvslag) søknadsresultaterFraAndeler.plus(Søknadsresultat.AVSLÅTT) else søknadsresultaterFraAndeler
         }
 
         return alleSøknadsresultater.distinct()
