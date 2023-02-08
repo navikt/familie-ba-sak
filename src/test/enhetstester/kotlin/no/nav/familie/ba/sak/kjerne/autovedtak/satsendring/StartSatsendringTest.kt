@@ -465,31 +465,19 @@ internal class StartSatsendringTest {
 
     @Test
     fun `kanStarteSatsendringPåFagsak returnerer false når harSisteSats er true`() {
-        val behandling = lagBehandling()
-        every { behandlingRepository.finnSisteIverksatteBehandling(1L) } returns behandling
+        every { behandlingRepository.finnSisteIverksatteBehandling(1L) } returns lagBehandling()
         every { satskjøringRepository.findByFagsakId(1L) } returns null
-        val atyMedBareOrba =
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(SatsType.ORBA, behandling, ORDINÆR_BARNETRYGD)
-        every {
-            andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.id)
-        } returns atyMedBareOrba
+        every { autovedtakSatsendringService.harAlleredeNySats(any(), any()) } returns true
 
-        assertThat(harAlleredeSisteSats(atyMedBareOrba, SATSTIDSPUNKT)).isEqualTo(true)
         assertThat(startSatsendring.kanStarteSatsendringPåFagsak(1L)).isEqualTo(false)
     }
 
     @Test
     fun `kanStarteSatsendringPåFagsak returnerer true når harSisteSats er false`() {
-        val behandling = lagBehandling()
-        every { behandlingRepository.finnSisteIverksatteBehandling(1L) } returns behandling
+        every { behandlingRepository.finnSisteIverksatteBehandling(1L) } returns lagBehandling()
         every { satskjøringRepository.findByFagsakId(1L) } returns null
-        val atyMedUgyldigSatsBareOrba =
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(SatsType.ORBA, behandling, ORDINÆR_BARNETRYGD, UGYLDIG_SATS)
-        every {
-            andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.id)
-        } returns atyMedUgyldigSatsBareOrba
+        every { autovedtakSatsendringService.harAlleredeNySats(any(), any()) } returns false
 
-        assertThat(harAlleredeSisteSats(atyMedUgyldigSatsBareOrba, SATSTIDSPUNKT)).isEqualTo(false)
         assertThat(startSatsendring.kanStarteSatsendringPåFagsak(1L)).isEqualTo(true)
     }
 }

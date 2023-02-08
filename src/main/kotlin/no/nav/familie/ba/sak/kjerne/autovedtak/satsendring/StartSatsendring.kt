@@ -156,23 +156,12 @@ class StartSatsendring(
     fun kanStarteSatsendringPåFagsak(fagsakId: Long): Boolean {
         val sisteIverksatteBehandling = behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
 
-        return if (sisteIverksatteBehandling == null) {
-            false
-        } else if (satskjøringRepository.findByFagsakId(fagsakId) != null) {
-            false
-        } else {
-            val andelerTilkjentYtelseMedEndreteUtbetalinger =
-                andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
-                    sisteIverksatteBehandling.id
-                )
-
-            val harSisteSats = AutovedtakSatsendringService.harAlleredeSisteSats(
-                aty = andelerTilkjentYtelseMedEndreteUtbetalinger,
+        return sisteIverksatteBehandling != null &&
+            satskjøringRepository.findByFagsakId(fagsakId) == null &&
+            !autovedtakSatsendringService.harAlleredeNySats(
+                sisteIverksettBehandlingsId = sisteIverksatteBehandling.id,
                 satstidspunkt = SATSENDRINGMÅNED_2023
             )
-
-            !harSisteSats
-        }
     }
 
     @Transactional
