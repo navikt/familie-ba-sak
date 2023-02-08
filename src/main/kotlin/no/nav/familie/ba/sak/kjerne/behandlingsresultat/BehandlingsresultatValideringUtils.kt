@@ -4,9 +4,9 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 
-class BehandlingsresultatValideringUtils {
+object BehandlingsresultatValideringUtils {
 
-    private fun validerAtBarePersonerFremstiltKravForHarFåttEksplisittAvslag(
+    internal fun validerAtBarePersonerFremstiltKravForHarFåttEksplisittAvslag(
         personerFremstiltKravFor: List<Aktør>,
         vilkårsvurdering: Vilkårsvurdering
     ) {
