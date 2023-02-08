@@ -75,15 +75,22 @@ object BehandlingsresultatSøknadUtils {
         val alleSøknadsresultater = personerFremstiltKravFor.flatMap { aktør ->
             val ytelseTyper = (forrigeAndeler.map { it.type } + nåværendeAndeler.map { it.type }).distinct()
 
-            val søknadsresultaterFraAndeler = ytelseTyper.flatMap { ytelseType ->
+            val resultaterFraAndelSammenligning = ytelseTyper.flatMap { ytelseType ->
                 sammenlignAndelerTilkjentYtelsePerPersonOgType(
                     forrigeAndelerForPerson = forrigeAndeler.filter { it.aktør == aktør && it.type == ytelseType },
                     nåværendeAndelerForPerson = nåværendeAndeler.filter { it.aktør == aktør && it.type == ytelseType },
                     endretUtbetalingAndelerForPerson = endretUtbetalingAndeler.filter { it.person?.aktør == aktør }
-                ).map { it.tilknyttetSøknadsresultat }
+                )
             }
 
             val harEksplisittAvslag = nåværendePersonResultater.filter { it.aktør == aktør }.any { it.harEksplisittAvslag() }
+
+            validerEksplisittAvslagSattHvisKunFjernetAndeler(
+                resultaterFraAndelSammenligning = resultaterFraAndelSammenligning,
+                harEksplisittAvslag = harEksplisittAvslag
+            )
+
+            val søknadsresultaterFraAndeler = resultaterFraAndelSammenligning.map { it.tilknyttetSøknadsresultat }
 
             if (harEksplisittAvslag) søknadsresultaterFraAndeler.plus(Søknadsresultat.AVSLÅTT) else søknadsresultaterFraAndeler
         }
@@ -123,6 +130,15 @@ object BehandlingsresultatSøknadUtils {
         }
 
         return resultatTidslinje.perioder().mapNotNull { it.innhold }.distinct()
+    }
+
+    private fun validerEksplisittAvslagSattHvisKunFjernetAndeler(
+        resultaterFraAndelSammenligning: List<AndelSammenligning>,
+        harEksplisittAvslag: Boolean
+    ) {
+        if (resultaterFraAndelSammenligning.size == 1 && resultaterFraAndelSammenligning.single() == AndelSammenligning.ANDEL_FJERNET && !harEksplisittAvslag) {
+            throw Feil("Må sette eksplisitt avslag for person")
+        }
     }
 
     internal fun List<Søknadsresultat>.kombinerSøknadsresultater(): Søknadsresultat {
