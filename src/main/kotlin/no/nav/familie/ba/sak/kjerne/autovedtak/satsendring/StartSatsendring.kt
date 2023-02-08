@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.satsendring
 
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
@@ -11,6 +13,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.task.OpprettTaskService
+import no.nav.familie.ba.sak.task.SatsendringTaskDto
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Pageable
@@ -26,7 +29,8 @@ class StartSatsendring(
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     private val satskjøringRepository: SatskjøringRepository,
     private val featureToggleService: FeatureToggleService,
-    private val personidentService: PersonidentService
+    private val personidentService: PersonidentService,
+    private val autovedtakSatsendringService: AutovedtakSatsendringService
 
 ) {
 
@@ -140,26 +144,51 @@ class StartSatsendring(
         return opprettSatsendringTaskVedGammelSats(fagsakId)
     }
 
-    private fun opprettSatsendringTaskVedGammelSats(fagsakId: Long): Boolean {
-        val sisteIverksatteBehandling = behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
-        if (sisteIverksatteBehandling != null) {
-            val andelerTilkjentYtelseMedEndreteUtbetalinger =
-                andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
-                    sisteIverksatteBehandling.id
-                )
-
-            if (!AutovedtakSatsendringService.harAlleredeSisteSats(
-                    andelerTilkjentYtelseMedEndreteUtbetalinger,
-                    SATSENDRINGMÅNED_2023
-                ) && satskjøringRepository.findByFagsakId(fagsakId) == null
-            ) {
-                logger.info("Oppretter satsendringtask fagsakID=$fagsakId")
-                opprettSatsendringForFagsak(fagsakId = fagsakId)
-                return true
-            }
+    private fun opprettSatsendringTaskVedGammelSats(fagsakId: Long): Boolean =
+        if (kanStarteSatsendringPåFagsak(fagsakId)) {
+            logger.info("Oppretter satsendringtask fagsakID=$fagsakId")
+            opprettSatsendringForFagsak(fagsakId = fagsakId)
+            true
+        } else {
+            false
         }
 
-        return false
+    fun kanStarteSatsendringPåFagsak(fagsakId: Long): Boolean {
+        val sisteIverksatteBehandling = behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
+
+        return sisteIverksatteBehandling != null &&
+            satskjøringRepository.findByFagsakId(fagsakId) == null &&
+            !autovedtakSatsendringService.harAlleredeNySats(
+                sisteIverksettBehandlingsId = sisteIverksatteBehandling.id,
+                satstidspunkt = SATSENDRINGMÅNED_2023
+            )
+    }
+
+    @Transactional
+    fun opprettSatsendringSynkrontVedGammelSats(fagsakId: Long): Boolean {
+        val aktivOgÅpenBehandling =
+            behandlingRepository.findByFagsakAndAktivAndOpen(fagsakId = fagsakId)
+
+        if (aktivOgÅpenBehandling != null) {
+            throw FunksjonellFeil("Det finnes en åpen behandling på fagsaken som må avsluttes før satsendring kan gjennomføres.")
+        }
+
+        return if (kanStarteSatsendringPåFagsak(fagsakId)) {
+            satskjøringRepository.save(Satskjøring(fagsakId = fagsakId))
+            val resultattekstSatsendringBehandling = autovedtakSatsendringService.kjørBehandling(
+                SatsendringTaskDto(
+                    fagsakId = fagsakId,
+                    satstidspunkt = SATSENDRINGMÅNED_2023
+                )
+            )
+            if (resultattekstSatsendringBehandling == "Satsendring kjørt OK") {
+                true
+            } else {
+                throw Feil("Satsendring kjørte ikke OK for fagsak $fagsakId")
+            }
+        } else {
+            false
+        }
     }
 
     fun opprettSatsendringForFagsak(fagsakId: Long) {
