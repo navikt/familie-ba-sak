@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatOpphørUtils.filtrerBortIrrelevanteAndeler
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatOpphørUtils.hentOpphørsresultatPåBehandling
-import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -234,27 +233,18 @@ class BehandlingsresultatOpphørUtilsTest {
     internal fun `filtrerBortIrrelevanteAndeler - skal filtrere andeler som har 0 i beløp og endret utbetaling andel med årsak ALLEREDE_UTBETALT, ENDRE_MOTTAKER eller ETTERBETALING_3ÅR`(årsak: Årsak) {
         val barn = lagPerson(type = PersonType.BARN)
         val barnAktør = barn.aktør
-        val søker = lagPerson(type = PersonType.SØKER)
-        val søkerAktør = søker.aktør
 
         val andeler = listOf(
             lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = feb22,
                 beløp = 0,
-                aktør = søkerAktør
-            ),
-            lagAndelTilkjentYtelse(
-                fom = jan22,
-                tom = feb22,
-                beløp = 60,
-                aktør = søkerAktør,
-                ytelseType = YtelseType.UTVIDET_BARNETRYGD
+                aktør = barnAktør
             ),
             lagAndelTilkjentYtelse(
                 fom = mar22,
                 tom = mai22,
-                beløp = 0,
+                beløp = 1400,
                 aktør = barnAktør
             ),
             lagAndelTilkjentYtelse(
@@ -268,17 +258,10 @@ class BehandlingsresultatOpphørUtilsTest {
         val endretUtBetalingAndeler =
             listOf(
                 lagEndretUtbetalingAndel(
-                    person = søker,
-                    prosent = BigDecimal.ZERO,
-                    fom = jan22,
-                    tom = mar22,
-                    årsak = årsak
-                ),
-                lagEndretUtbetalingAndel(
                     person = barn,
                     prosent = BigDecimal.ZERO,
                     fom = jan22,
-                    tom = mar22,
+                    tom = feb22,
                     årsak = årsak
                 ),
                 lagEndretUtbetalingAndel(
@@ -292,7 +275,7 @@ class BehandlingsresultatOpphørUtilsTest {
 
         val andelerEtterFiltrering = andeler.filtrerBortIrrelevanteAndeler(endretUtBetalingAndeler)
 
-        assertEquals(andelerEtterFiltrering.minOf { it.stønadFom }, jan22)
+        assertEquals(andelerEtterFiltrering.minOf { it.stønadFom }, mar22)
         assertEquals(andelerEtterFiltrering.maxOf { it.stønadTom }, mai22)
     }
 
@@ -300,27 +283,18 @@ class BehandlingsresultatOpphørUtilsTest {
     internal fun `filtrerBortIrrelevanteAndeler - skal ikke filtrere andeler som har 0 i beløp og endret utbetaling andel med årsak DELT_BOSTED`() {
         val barn = lagPerson(type = PersonType.BARN)
         val barnAktør = barn.aktør
-        val søker = lagPerson(type = PersonType.SØKER)
-        val søkerAktør = søker.aktør
 
         val andeler = listOf(
             lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = feb22,
                 beløp = 0,
-                aktør = søkerAktør
-            ),
-            lagAndelTilkjentYtelse(
-                fom = jan22,
-                tom = feb22,
-                beløp = 60,
-                aktør = søkerAktør,
-                ytelseType = YtelseType.UTVIDET_BARNETRYGD
+                aktør = barnAktør
             ),
             lagAndelTilkjentYtelse(
                 fom = mar22,
                 tom = mai22,
-                beløp = 0,
+                beløp = 1400,
                 aktør = barnAktør
             ),
             lagAndelTilkjentYtelse(
@@ -334,17 +308,10 @@ class BehandlingsresultatOpphørUtilsTest {
         val endretUtBetalingAndeler =
             listOf(
                 lagEndretUtbetalingAndel(
-                    person = søker,
-                    prosent = BigDecimal.ZERO,
-                    fom = jan22,
-                    tom = mar22,
-                    årsak = Årsak.DELT_BOSTED
-                ),
-                lagEndretUtbetalingAndel(
                     person = barn,
                     prosent = BigDecimal.ZERO,
                     fom = jan22,
-                    tom = mar22,
+                    tom = feb22,
                     årsak = Årsak.DELT_BOSTED
                 ),
                 lagEndretUtbetalingAndel(
