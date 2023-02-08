@@ -20,6 +20,13 @@ internal enum class Søknadsresultat {
     INGEN_RELEVANTE_ENDRINGER
 }
 
+private enum class AndelSammenligning(val tilknyttetSøknadsresultat: Søknadsresultat) {
+    ANDEL_FJERNET(Søknadsresultat.INGEN_RELEVANTE_ENDRINGER),
+    INNVILGET_ANDEL(Søknadsresultat.INNVILGET),
+    AVSLÅTT_ANDEL(Søknadsresultat.AVSLÅTT),
+    INGEN_ENDRING(Søknadsresultat.INGEN_RELEVANTE_ENDRINGER)
+}
+
 object BehandlingsresultatSøknadUtils {
 
     internal fun utledResultatPåSøknad(
@@ -73,22 +80,22 @@ object BehandlingsresultatSøknadUtils {
             val ytelseTyper = (forrigeAndeler.map { it.type } + nåværendeAndeler.map { it.type }).distinct()
 
             ytelseTyper.flatMap { ytelseType ->
-                utledSøknadResultatFraAndelerTilkjentYtelsePerPersonOgType(
+                sammenlignAndelerTilkjentYtelsePerPersonOgType(
                     forrigeAndelerForPerson = forrigeAndeler.filter { it.aktør == aktør && it.type == ytelseType },
                     nåværendeAndelerForPerson = nåværendeAndeler.filter { it.aktør == aktør && it.type == ytelseType },
                     endretUtbetalingAndelerForPerson = endretUtbetalingAndeler.filter { it.person?.aktør == aktør }
-                )
+                ).map { it.tilknyttetSøknadsresultat }
             }
         }
 
         return alleSøknadsresultater.distinct()
     }
 
-    private fun utledSøknadResultatFraAndelerTilkjentYtelsePerPersonOgType(
+    private fun sammenlignAndelerTilkjentYtelsePerPersonOgType(
         forrigeAndelerForPerson: List<AndelTilkjentYtelse>,
         nåværendeAndelerForPerson: List<AndelTilkjentYtelse>,
         endretUtbetalingAndelerForPerson: List<EndretUtbetalingAndel>
-    ): List<Søknadsresultat> {
+    ): List<AndelSammenligning> {
         val forrigeTidslinje = AndelTilkjentYtelseTidslinje(forrigeAndelerForPerson)
         val nåværendeTidslinje = AndelTilkjentYtelseTidslinje(nåværendeAndelerForPerson)
         val endretUtbetalingTidslinje = EndretUtbetalingAndelTidslinje(endretUtbetalingAndelerForPerson)
@@ -98,18 +105,20 @@ object BehandlingsresultatSøknadUtils {
             val nåværendeBeløp = nåværende?.kalkulertUtbetalingsbeløp
 
             when {
-                nåværendeBeløp == forrigeBeløp || nåværendeBeløp == null -> Søknadsresultat.INGEN_RELEVANTE_ENDRINGER // Ingen endring eller fjernet en andel
-                nåværendeBeløp > 0 -> Søknadsresultat.INNVILGET // Innvilget beløp som er annerledes enn forrige gang
+                // OBS: Rekkefølgen er viktig her
+                nåværendeBeløp == forrigeBeløp -> AndelSammenligning.INGEN_ENDRING
+                nåværendeBeløp == null -> AndelSammenligning.ANDEL_FJERNET
+                nåværendeBeløp > 0 -> AndelSammenligning.INNVILGET_ANDEL // Innvilget beløp som er annerledes enn forrige gang
                 nåværendeBeløp == 0 -> {
                     when (endretUtbetalingAndel?.årsak) {
-                        null -> if (nåværende.differanseberegnetPeriodebeløp != null) Søknadsresultat.INNVILGET else Søknadsresultat.INGEN_RELEVANTE_ENDRINGER
-                        Årsak.DELT_BOSTED -> Søknadsresultat.INNVILGET
+                        null -> if (nåværende.differanseberegnetPeriodebeløp != null) AndelSammenligning.INNVILGET_ANDEL else AndelSammenligning.INGEN_ENDRING
+                        Årsak.DELT_BOSTED -> AndelSammenligning.INNVILGET_ANDEL
                         Årsak.ALLEREDE_UTBETALT,
                         Årsak.ENDRE_MOTTAKER,
-                        Årsak.ETTERBETALING_3ÅR -> Søknadsresultat.AVSLÅTT
+                        Årsak.ETTERBETALING_3ÅR -> AndelSammenligning.AVSLÅTT_ANDEL
                     }
                 }
-                else -> Søknadsresultat.INGEN_RELEVANTE_ENDRINGER
+                else -> AndelSammenligning.INGEN_ENDRING
             }
         }
 
