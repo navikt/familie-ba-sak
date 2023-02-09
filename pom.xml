@@ -17,12 +17,12 @@
 
     <properties>
         <java.version>17</java.version>
-        <kotlin.version>1.8.0</kotlin.version>
+        <kotlin.version>1.8.10</kotlin.version>
         <revision>1</revision>
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
         <spring.cloud.version>3.1.5</spring.cloud.version>
-        <prosessering.version>1.20230131095426_7866ee8</prosessering.version>
+        <prosessering.version>1.20230207133526_5430e48</prosessering.version>
         <felles.version>1.20230116145510_2afcc20</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20221118130052_e2abd9f</eksterne-kontrakter-bisys.version>
         <felles-kontrakter.version>2.0_20230201153833_7f218f3</felles-kontrakter.version>
@@ -33,7 +33,7 @@
         <token-validation-spring.version>2.1.9</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
         <springdoc.version>1.6.14</springdoc.version>
-        <sentry.version>6.13.0</sentry.version>
+        <sentry.version>6.13.1</sentry.version>
 
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
         <okhttp3.version>4.9.0</okhttp3.version>
