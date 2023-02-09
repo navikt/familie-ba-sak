@@ -520,7 +520,8 @@ fun lagPersonResultat(
     personType: PersonType = PersonType.BARN,
     vilkårType: Vilkår = Vilkår.BOSATT_I_RIKET,
     erDeltBosted: Boolean = false,
-    erDeltBostedSkalIkkeDeles: Boolean = false
+    erDeltBostedSkalIkkeDeles: Boolean = false,
+    erEksplisittAvslagPåSøknad: Boolean? = null
 ): PersonResultat {
     val personResultat = PersonResultat(
         vilkårsvurdering = vilkårsvurdering,
@@ -544,7 +545,8 @@ fun lagPersonResultat(
                             erDeltBostedSkalIkkeDeles && it == Vilkår.BOR_MED_SØKER -> UtdypendeVilkårsvurdering.DELT_BOSTED_SKAL_IKKE_DELES
                             else -> null
                         }
-                    )
+                    ),
+                    erEksplisittAvslagPåSøknad = erEksplisittAvslagPåSøknad
                 )
             }.toSet()
         )
@@ -558,7 +560,8 @@ fun lagPersonResultat(
                     vilkårType = vilkårType,
                     resultat = resultat,
                     begrunnelse = "",
-                    behandlingId = vilkårsvurdering.behandling.id
+                    behandlingId = vilkårsvurdering.behandling.id,
+                    erEksplisittAvslagPåSøknad = erEksplisittAvslagPåSøknad
                 )
             )
         )

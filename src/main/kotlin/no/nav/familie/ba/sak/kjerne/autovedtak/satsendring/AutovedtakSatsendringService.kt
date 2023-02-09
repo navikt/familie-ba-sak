@@ -120,7 +120,7 @@ class AutovedtakSatsendringService(
         return "Satsendring kjørt OK"
     }
 
-    private fun harAlleredeNySats(sisteIverksettBehandlingsId: Long, satstidspunkt: YearMonth): Boolean {
+    fun harAlleredeNySats(sisteIverksettBehandlingsId: Long, satstidspunkt: YearMonth): Boolean {
         val andeler =
             andelTilkjentYtelseMedEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
                 sisteIverksettBehandlingsId
