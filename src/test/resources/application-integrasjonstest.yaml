@@ -3,3 +3,10 @@ spring:
     locations: filesystem:./src/test/resources/db/migration-tests,filesystem:./src/main/resources/db/migration
 
 AZURE_OPENID_CONFIG_TOKEN_ENDPOINT: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
+
+junit:
+  jupiter:
+    execution:
+      parallel:
+        mode:
+          default=concurrent:
