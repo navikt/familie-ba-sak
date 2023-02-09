@@ -131,6 +131,21 @@ class SimuleringService(
             erMigreringsbehandling = behandling.erMigrering()
         )
 
+        // TODO Fjern dette når vi har logget det vi skal
+        if (behandlingId == 2199950L) {
+            secureLogger.info(
+                "tidligere lagret simulering =\n" +
+                    objectMapper.writeValueAsString(simulering)
+            )
+            secureLogger.info(
+                "tidligere lagret simulering til restSimulering =\n" +
+                    objectMapper.writeValueAsString(restSimulering)
+            )
+            secureLogger.info(
+                "skal oppdatere Simulering = ${!behandlingErFerdigBesluttet && simuleringErUtdatert(restSimulering)}"
+            )
+        }
+
         return if (!behandlingErFerdigBesluttet && simuleringErUtdatert(restSimulering)) {
             oppdaterSimuleringPåBehandling(behandling)
         } else {
