@@ -62,8 +62,8 @@ class BehandleFødselshendelseTask(
                     startSatsendring.sjekkOgOpprettSatsendringVedGammelSats(nyBehandling.morsIdent)
                 if (harOpprettetSatsendring) {
                     throw RekjørSenereException(
-                        "Satsedring skal kjøre ferdig før man behandler fødselsehendelse",
-                        LocalDateTime.now().plusMinutes(5)
+                        "Satsendring skal kjøre ferdig før man behandler fødselsehendelse",
+                        LocalDateTime.now().plusMinutes(60)
                     )
                 }
                 autovedtakStegService.kjørBehandlingFødselshendelse(
