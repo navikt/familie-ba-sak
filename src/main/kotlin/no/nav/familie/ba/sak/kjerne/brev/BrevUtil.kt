@@ -19,6 +19,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.ENDRET
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.ENDRET_UTBETALING
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.ENDRET_UTEN_UTBETALING
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.FORTSATT_INNVILGET
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.FORTSATT_INNVILGET_OG_ENDRET
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.FORTSATT_OPPHØRT
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.IKKE_VURDERT
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.INNVILGET
@@ -142,7 +143,8 @@ fun hentManuellVedtaksbrevtype(
                     AVSLÅTT_ENDRET_OG_OPPHØRT,
                     ENDRET_OG_OPPHØRT -> Brevmal.VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON
 
-                    FORTSATT_INNVILGET -> Brevmal.VEDTAK_FORTSATT_INNVILGET_INSTITUSJON
+                    FORTSATT_INNVILGET,
+                    FORTSATT_INNVILGET_OG_ENDRET -> Brevmal.VEDTAK_FORTSATT_INNVILGET_INSTITUSJON
 
                     AVSLÅTT -> Brevmal.VEDTAK_AVSLAG_INSTITUSJON
 
@@ -171,7 +173,8 @@ fun hentManuellVedtaksbrevtype(
                     AVSLÅTT_ENDRET_OG_OPPHØRT,
                     ENDRET_OG_OPPHØRT -> Brevmal.VEDTAK_OPPHØR_MED_ENDRING
 
-                    FORTSATT_INNVILGET -> Brevmal.VEDTAK_FORTSATT_INNVILGET
+                    FORTSATT_INNVILGET,
+                    FORTSATT_INNVILGET_OG_ENDRET -> Brevmal.VEDTAK_FORTSATT_INNVILGET
 
                     AVSLÅTT -> Brevmal.VEDTAK_AVSLAG
 
@@ -224,7 +227,7 @@ fun hentOverstyrtDokumenttittel(behandling: Behandling): String? {
                 DELVIS_INNVILGET_OG_OPPHØRT,
                 ENDRET_OG_OPPHØRT
             ).contains(behandling.resultat) -> "Vedtak om endret barnetrygd"
-            behandling.resultat == FORTSATT_INNVILGET -> "Vedtak om fortsatt barnetrygd"
+            behandling.resultat.erFortsattInnvilget() -> "Vedtak om fortsatt barnetrygd"
             else -> null
         }
     } else {
