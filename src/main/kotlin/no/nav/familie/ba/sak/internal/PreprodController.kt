@@ -26,7 +26,7 @@ class PreprodController(
     fun settFomPåTommeVilkårTilFødselsdato(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<String>> {
         val erProd = environment.activeProfiles.any { it == Profil.Prod.navn.trim() }
         val erDevPostgresPreprod = environment.activeProfiles.any { it == Profil.DevPostgresPreprod.navn.trim() }
-        val erPreprod = environment.activeProfiles.any { it == Profil.DevPostgresPreprod.navn.trim() }
+        val erPreprod = environment.activeProfiles.any { it == Profil.Preprod.navn.trim() }
 
         if (erProd) {
             throw Feil("Skal ikke være tilgjengelig i prod")
