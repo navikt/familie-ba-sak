@@ -50,7 +50,7 @@ class ØkonomiKlient(
         return kallEksternTjenesteRessurs(
             tjeneste = "familie-oppdrag",
             uri = uri,
-            formål = "Henter simulering fra Økonomi"
+            formål = "Henter simulering på fagsak ${utbetalingsoppdrag.saksnummer} fra Økonomi"
         ) {
             postForEntity(uri = uri, utbetalingsoppdrag)
         }
