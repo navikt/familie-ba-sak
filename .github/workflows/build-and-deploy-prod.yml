@@ -9,7 +9,7 @@ env:
 jobs:
   integrasjonstester:
     name: Kjører integrasjonstester
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-8-cores
     steps:
       - uses: actions/checkout@v3
         with:
@@ -26,7 +26,7 @@ jobs:
         run: mvn -Dhttp.keepAlive=false -Dmaven.wagon.http.pool=false -Dmaven.wagon.httpconnectionManager.ttlSeconds=120 -B --no-transfer-progress package --settings .m2/maven-settings.xml --file pom.xml -Dtest="!no/nav/familie/ba/sak/kjerne/verdikjedetester/**"
   verdikjedetester:
     name: Kjører verdikjedetester
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-8-cores
     steps:
       - uses: actions/checkout@v3
         with:
