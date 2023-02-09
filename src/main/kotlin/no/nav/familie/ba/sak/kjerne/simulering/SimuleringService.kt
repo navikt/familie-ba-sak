@@ -45,7 +45,6 @@ class SimuleringService(
     private val simulert = Metrics.counter("familie.ba.sak.oppdrag.simulert")
 
     fun hentSimuleringFraFamilieOppdrag(vedtak: Vedtak): DetaljertSimuleringResultat? {
-
         // TODO Fjern dette når vi har logget det vi skal
         if (vedtak.behandling.id == 2199950L) {
             val skalSimuleres = vedtak.behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET ||
