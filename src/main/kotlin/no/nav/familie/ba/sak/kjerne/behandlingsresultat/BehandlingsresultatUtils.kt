@@ -37,8 +37,9 @@ object BehandlingsresultatUtils {
             )
 
         return when {
+            // Søknad/fødselshendelse/manuell migrering
             sjekkResultat(Søknadsresultat.INGEN_RELEVANTE_ENDRINGER, Endringsresultat.ENDRING, Opphørsresultat.OPPHØRT) -> throw ugyldigBehandlingsresultatFeil("Endret og opphørt")
-            sjekkResultat(Søknadsresultat.INGEN_RELEVANTE_ENDRINGER, Endringsresultat.ENDRING, Opphørsresultat.FORTSATT_OPPHØRT) -> throw ugyldigBehandlingsresultatFeil("Fortsatt opphørt og endret")
+            sjekkResultat(Søknadsresultat.INGEN_RELEVANTE_ENDRINGER, Endringsresultat.ENDRING, Opphørsresultat.FORTSATT_OPPHØRT) -> throw ugyldigBehandlingsresultatFeil("Endret og fortsatt opphørt")
             sjekkResultat(Søknadsresultat.INGEN_RELEVANTE_ENDRINGER, Endringsresultat.ENDRING, Opphørsresultat.IKKE_OPPHØRT) -> Behandlingsresultat.FORTSATT_INNVILGET_OG_ENDRET
             sjekkResultat(Søknadsresultat.INGEN_RELEVANTE_ENDRINGER, Endringsresultat.INGEN_ENDRING, Opphørsresultat.OPPHØRT) -> throw ugyldigBehandlingsresultatFeil("Opphørt")
             sjekkResultat(Søknadsresultat.INGEN_RELEVANTE_ENDRINGER, Endringsresultat.INGEN_ENDRING, Opphørsresultat.FORTSATT_OPPHØRT) -> throw ugyldigBehandlingsresultatFeil("Fortsatt opphørt")
@@ -73,6 +74,7 @@ object BehandlingsresultatUtils {
             sjekkResultat(null, Endringsresultat.INGEN_ENDRING, Opphørsresultat.FORTSATT_OPPHØRT) -> Behandlingsresultat.FORTSATT_OPPHØRT
             sjekkResultat(null, Endringsresultat.INGEN_ENDRING, Opphørsresultat.IKKE_OPPHØRT) -> Behandlingsresultat.FORTSATT_INNVILGET
 
+            // Skal egentlig aldri kunne komme hit, alle kombinasjoner skal være skrevet ut
             else -> throw Feil("Klarer ikke utlede behandlingsresultat fra (søknadsresultat=$søknadsresultat, endringsresultat=$endringsresultat, opphørsresultat=$opphørsresultat)")
         }
     }
