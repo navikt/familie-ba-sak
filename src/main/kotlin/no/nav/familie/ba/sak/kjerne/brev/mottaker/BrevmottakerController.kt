@@ -77,6 +77,6 @@ class BrevmottakerController(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
             handling = "hente brevmottakere"
         )
-        return ResponseEntity.ok(Ressurs.success(brevmottakerService.hentBrevmottakere(behandlingId = behandlingId)))
+        return ResponseEntity.ok(Ressurs.success(brevmottakerService.hentRestBrevmottakere(behandlingId = behandlingId)))
     }
 }

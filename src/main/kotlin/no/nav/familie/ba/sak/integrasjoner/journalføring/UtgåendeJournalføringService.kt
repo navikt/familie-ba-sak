@@ -45,7 +45,7 @@ class UtgåendeJournalføringService(
             ),
             førsteside = førsteside,
             avsenderMottaker = avsenderMottaker,
-            tilVerge = tilVerge
+            tilManuellMottakerEllerVerge = tilVerge
         )
     }
 
@@ -58,14 +58,14 @@ class UtgåendeJournalføringService(
         førsteside: Førsteside? = null,
         behandlingId: Long? = null,
         avsenderMottaker: AvsenderMottaker? = null,
-        tilVerge: Boolean = false
+        tilManuellMottakerEllerVerge: Boolean = false
     ): String {
         if (journalførendeEnhet == DEFAULT_JOURNALFØRENDE_ENHET) {
             logger.warn("Informasjon om enhet mangler på bruker og er satt til fallback-verdi, $DEFAULT_JOURNALFØRENDE_ENHET")
         }
 
         val eksternReferanseId =
-            genererEksternReferanseIdForJournalpost(fagsakId, behandlingId, tilVerge)
+            genererEksternReferanseIdForJournalpost(fagsakId, behandlingId, tilManuellMottakerEllerVerge)
 
         val journalpostId = try {
             val journalpost = integrasjonClient.journalførDokument(

@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.kjerne.brev.DokumentDistribueringService
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.steg.StegService
+import no.nav.familie.ba.sak.kjerne.steg.domene.ManuellAdresseInfo
 import no.nav.familie.ba.sak.task.DistribuerDokumentTask.Companion.TASK_STEP_TYPE
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
@@ -27,10 +28,8 @@ class DistribuerDokumentTask(
 
         if (distribuerDokumentDTO.erManueltSendt && !distribuerDokumentDTO.brevmal.erVedtaksbrev) {
             dokumentDistribueringService.prøvDistribuerBrevOgLoggHendelse(
-                journalpostId = distribuerDokumentDTO.journalpostId,
-                behandlingId = distribuerDokumentDTO.behandlingId,
-                loggBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-                brevmal = distribuerDokumentDTO.brevmal
+                distribuerDokumentDTO = distribuerDokumentDTO,
+                loggBehandlerRolle = BehandlerRolle.SAKSBEHANDLER
             )
         } else if (!distribuerDokumentDTO.erManueltSendt && distribuerDokumentDTO.brevmal.erVedtaksbrev && distribuerDokumentDTO.behandlingId != null) {
             stegService.håndterDistribuerVedtaksbrev(
@@ -66,5 +65,6 @@ data class DistribuerDokumentDTO(
     val journalpostId: String,
     val personEllerInstitusjonIdent: String,
     val brevmal: Brevmal,
-    val erManueltSendt: Boolean
+    val erManueltSendt: Boolean,
+    val manuellAdresseInfo: ManuellAdresseInfo? = null
 )

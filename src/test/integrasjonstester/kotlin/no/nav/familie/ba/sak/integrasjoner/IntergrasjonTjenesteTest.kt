@@ -35,6 +35,8 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsta
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Periode
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Skyggesak
 import no.nav.familie.ba.sak.integrasjoner.journalføring.UtgåendeJournalføringService
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
+import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Ressurs.Companion.failure
@@ -45,7 +47,6 @@ import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Dokument
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Filtype
-import no.nav.familie.kontrakter.felles.dokdist.Distribusjonstype
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
@@ -221,7 +222,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
                 .willReturn(okJson(objectMapper.writeValueAsString(success("1234567"))))
         )
 
-        assertDoesNotThrow { integrasjonClient.distribuerBrev("123456789", Distribusjonstype.VIKTIG) }
+        assertDoesNotThrow { integrasjonClient.distribuerBrev(lagDistribuerDokumentDTO()) }
         wireMockServer.verify(
             postRequestedFor(anyUrl())
                 .withHeader(NavHttpHeaders.NAV_CALL_ID.asString(), equalTo("distribuerVedtaksbrev"))
@@ -232,7 +233,9 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
                             "\"bestillendeFagsystem\":\"BA\"," +
                             "\"dokumentProdApp\":\"FAMILIE_BA_SAK\"," +
                             "\"distribusjonstype\" : \"VIKTIG\"," +
-                            "\"distribusjonstidspunkt\" : \"KJERNETID\"}"
+                            "\"distribusjonstidspunkt\" : \"KJERNETID\"}",
+                        false,
+                        true
                     )
                 )
         )
@@ -247,7 +250,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
                 .willReturn(okJson(objectMapper.writeValueAsString(success(""))))
         )
 
-        assertThrows<IllegalStateException> { integrasjonClient.distribuerBrev("123456789", Distribusjonstype.VIKTIG) }
+        assertThrows<IllegalStateException> { integrasjonClient.distribuerBrev(lagDistribuerDokumentDTO()) }
     }
 
     @Test
@@ -259,12 +262,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
                 .willReturn(okJson(objectMapper.writeValueAsString(failure<Any>(""))))
         )
 
-        val feil = assertThrows<IntegrasjonException> {
-            integrasjonClient.distribuerBrev(
-                "123456789",
-                Distribusjonstype.VIKTIG
-            )
-        }
+        val feil = assertThrows<IntegrasjonException> { integrasjonClient.distribuerBrev(lagDistribuerDokumentDTO()) }
         assertTrue(feil.message?.contains("dokdist") == true)
     }
 
@@ -281,12 +279,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
                 )
         )
 
-        assertThrows<HttpClientErrorException.BadRequest> {
-            integrasjonClient.distribuerBrev(
-                "123456789",
-                Distribusjonstype.VIKTIG
-            )
-        }
+        assertThrows<HttpClientErrorException.BadRequest> { integrasjonClient.distribuerBrev(lagDistribuerDokumentDTO()) }
     }
 
     @Test
@@ -516,6 +509,14 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
             eksternReferanseId = "${fagsakId}_${behandlingId}_${MDCOperations.getCallId()}"
         )
     }
+
+    private fun lagDistribuerDokumentDTO() = DistribuerDokumentDTO(
+        journalpostId = "123456789",
+        behandlingId = 1L,
+        brevmal = Brevmal.VARSEL_OM_REVURDERING,
+        personEllerInstitusjonIdent = "test",
+        erManueltSendt = true
+    )
 
     companion object {
 
