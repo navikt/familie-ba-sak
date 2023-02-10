@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClien
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
+import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.ba.sak.task.DistribuerDødsfallDokumentPåFagsakTask
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.prosessering.internal.TaskService
@@ -21,14 +22,19 @@ class DokumentDistribueringService(
 ) {
 
     fun prøvDistribuerBrevOgLoggHendelse(
-        journalpostId: String,
-        behandlingId: Long?,
-        loggBehandlerRolle: BehandlerRolle,
-        brevmal: Brevmal
+        distribuerDokumentDTO: DistribuerDokumentDTO,
+        loggBehandlerRolle: BehandlerRolle
     ) = try {
-        distribuerBrevOgLoggHendlese(journalpostId, behandlingId, brevmal, loggBehandlerRolle)
+        distribuerBrevOgLoggHendelse(distribuerDokumentDTO, loggBehandlerRolle)
     } catch (ressursException: RessursException) {
-        logger.info("Klarte ikke å distribuere brev til journalpost $journalpostId på behandling $behandlingId. Httpstatus ${ressursException.httpStatus}")
+        val journalpostId = distribuerDokumentDTO.journalpostId
+        val behandlingId = distribuerDokumentDTO.behandlingId
+        val brevmal = distribuerDokumentDTO.brevmal
+
+        logger.info(
+            "Klarte ikke å distribuere brev til journalpost $journalpostId på behandling $behandlingId. " +
+                "Httpstatus ${ressursException.httpStatus}"
+        )
         secureLogger.info(
             "Klarte ikke å distribuere brev til journalpost $journalpostId på behandling $behandlingId.\n" +
                 "Httpstatus: ${ressursException.httpStatus}\n" +
@@ -40,7 +46,7 @@ class DokumentDistribueringService(
                 loggBrevIkkeDistribuertUkjentAdresse(journalpostId, behandlingId, brevmal)
 
             mottakerErDødUtenDødsboadresse(ressursException) && behandlingId != null ->
-                håndterMottakerDødIngenAdressePåBehandling(journalpostId, brevmal, behandlingId)
+                håndterMottakerDødIngenAdressePåBehandling(distribuerDokumentDTO)
 
             dokumentetErAlleredeDistribuert(ressursException) ->
                 logger.warn(alleredeDistribuertMelding(journalpostId, behandlingId))
@@ -49,17 +55,16 @@ class DokumentDistribueringService(
         }
     }
 
-    internal fun håndterMottakerDødIngenAdressePåBehandling(
-        journalpostId: String,
-        brevmal: Brevmal,
-        behandlingId: Long
-    ) {
-        val task = DistribuerDødsfallDokumentPåFagsakTask.opprettTask(journalpostId = journalpostId, brevmal = brevmal)
+    internal fun håndterMottakerDødIngenAdressePåBehandling(distribuerDokumentDTO: DistribuerDokumentDTO) {
+        val task = DistribuerDødsfallDokumentPåFagsakTask.opprettTask(distribuerDokumentDTO)
         taskService.save(task)
-        logger.info("Klarte ikke å distribuere brev for journalpostId $journalpostId på behandling $behandlingId. Bruker har ukjent dødsboadresse.")
+        logger.info(
+            "Klarte ikke å distribuere brev for journalpostId ${distribuerDokumentDTO.journalpostId} " +
+                "på behandling ${distribuerDokumentDTO.behandlingId}. Bruker har ukjent dødsboadresse."
+        )
         loggService.opprettBrevIkkeDistribuertUkjentDødsboadresseLogg(
-            behandlingId = behandlingId,
-            brevnavn = brevmal.visningsTekst
+            behandlingId = checkNotNull(distribuerDokumentDTO.behandlingId),
+            brevnavn = distribuerDokumentDTO.brevmal.visningsTekst
         )
     }
 
@@ -76,23 +81,22 @@ class DokumentDistribueringService(
         antallBrevIkkeDistribuertUkjentAndresse[brevMal]?.increment()
     }
 
-    private fun distribuerBrevOgLoggHendlese(
-        journalpostId: String,
-        behandlingId: Long?,
-        brevMal: Brevmal,
+    private fun distribuerBrevOgLoggHendelse(
+        distribuerDokumentDTO: DistribuerDokumentDTO,
         loggBehandlerRolle: BehandlerRolle
     ) {
-        integrasjonClient.distribuerBrev(journalpostId = journalpostId, distribusjonstype = brevMal.distribusjonstype)
+        val brevmal = distribuerDokumentDTO.brevmal
+        integrasjonClient.distribuerBrev(distribuerDokumentDTO)
 
-        if (behandlingId != null) {
+        if (distribuerDokumentDTO.behandlingId != null) {
             loggService.opprettDistribuertBrevLogg(
-                behandlingId = behandlingId,
-                tekst = brevMal.visningsTekst,
+                behandlingId = distribuerDokumentDTO.behandlingId,
+                tekst = brevmal.visningsTekst,
                 rolle = loggBehandlerRolle
             )
         }
 
-        antallBrevSendt[brevMal]?.increment()
+        antallBrevSendt[brevmal]?.increment()
     }
 
     private val antallBrevSendt: Map<Brevmal, Counter> = mutableListOf<Brevmal>().plus(Brevmal.values()).associateWith {

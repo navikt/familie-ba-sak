@@ -20,10 +20,8 @@ class DistribuerVedtaksbrev(
     ): StegType {
         logger.info("Iverksetter distribusjon av vedtaksbrev med journalpostId ${data.journalpostId}")
         dokumentDistribueringService.prøvDistribuerBrevOgLoggHendelse(
-            journalpostId = data.journalpostId,
-            behandlingId = data.behandlingId,
-            loggBehandlerRolle = BehandlerRolle.SYSTEM,
-            brevmal = data.brevmal
+            distribuerDokumentDTO = data,
+            loggBehandlerRolle = BehandlerRolle.SYSTEM
         )
 
         val søkerIdent = behandling.fagsak.aktør.aktivFødselsnummer()

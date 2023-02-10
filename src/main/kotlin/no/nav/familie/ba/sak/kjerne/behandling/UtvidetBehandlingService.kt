@@ -106,7 +106,7 @@ class UtvidetBehandlingService(
 
         val feilutbetaltValuta = feilutbetaltValutaService.hentFeilutbetaltValutaPerioder(behandlingId)
 
-        val brevmottakere = brevmottakerService.hentBrevmottakere(behandlingId)
+        val brevmottakere = brevmottakerService.hentRestBrevmottakere(behandlingId)
 
         return RestUtvidetBehandling(
             behandlingId = behandling.id,
