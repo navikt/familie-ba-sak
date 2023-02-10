@@ -1101,7 +1101,7 @@ class BeregningServiceTest {
 
         every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(any()) } returns null
 
-        return beregningService.erAlleUtbetalingsperioderPåNullKroner(
+        return beregningService.erAlleUtbetalingsperioderPåNullKronerIDenneOgForrigeBehandling(
             behandling = behandling
         )
     }

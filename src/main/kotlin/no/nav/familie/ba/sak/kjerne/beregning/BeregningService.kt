@@ -123,10 +123,21 @@ class BeregningService(
         }.map { it }
     }
 
-    fun erAlleUtbetalingsperioderPåNullKroner(behandling: Behandling): Boolean {
+    fun erAlleUtbetalingsperioderPåNullKronerIDenneOgForrigeBehandling(behandling: Behandling): Boolean {
         val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
 
-        return andelerTilkjentYtelse.all { it.kalkulertUtbetalingsbeløp == 0 }
+        val andelerTilkjentYtelseForrigeBehandling =
+            behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling)
+                ?.let { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(it.id) }
+
+        val erIngenUtbetalingIForrigeBehandling =
+            andelerTilkjentYtelseForrigeBehandling?.all { it.kalkulertUtbetalingsbeløp == 0 } ?: true
+
+        val erAlleUtbetalingsperioderIDenneBehandlingenPåNullKroner =
+            andelerTilkjentYtelse.all { it.kalkulertUtbetalingsbeløp == 0 }
+
+        return erIngenUtbetalingIForrigeBehandling &&
+            erAlleUtbetalingsperioderIDenneBehandlingenPåNullKroner
     }
 
     @Transactional
