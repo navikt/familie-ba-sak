@@ -76,7 +76,9 @@ internal class StartSatsendringTest {
             featureToggleService = featureToggleService,
             personidentService = personidentService,
             autovedtakSatsendringService = autovedtakSatsendringService,
-            kompetanseService = kompetanseService
+            kompetanseService = kompetanseService,
+            beregningService = mockk(),
+            persongrunnlagService = mockk()
         )
     }
 
