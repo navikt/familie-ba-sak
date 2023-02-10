@@ -15,7 +15,6 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.AutovedtakSatsendring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
@@ -25,8 +24,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.ORDINÆR_BARNETR
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.SMÅBARNSTILLEGG
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.UTVIDET_BARNETRYGD
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagKompetanse
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.task.OpprettTaskService
@@ -66,6 +63,7 @@ internal class StartSatsendringTest {
         val taskSlot = slot<Task>()
         every { taskRepository.save(capture(taskSlot)) } answers { taskSlot.captured }
         val opprettTaskService = OpprettTaskService(taskRepository, satskjøringRepository)
+        every { featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_SJEKK_UTBETALING, false) } returns false
 
         startSatsendring = StartSatsendring(
             fagsakRepository = fagsakRepository,
@@ -76,7 +74,6 @@ internal class StartSatsendringTest {
             featureToggleService = featureToggleService,
             personidentService = personidentService,
             autovedtakSatsendringService = autovedtakSatsendringService,
-            kompetanseService = kompetanseService,
             beregningService = mockk(),
             persongrunnlagService = mockk()
         )
@@ -173,104 +170,10 @@ internal class StartSatsendringTest {
     }
 
     @Test
-    fun `Ikke start satsendring på sak hvis EØS sekundærland`() {
-        every { featureToggleService.isEnabled(any(), any()) } returns true
-        every { featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_OPPRETT_TASKER) } returns true
-
-        val behandling = lagBehandling(behandlingKategori = BehandlingKategori.EØS)
-
-        every { fagsakRepository.finnLøpendeFagsakerForSatsendring(any()) } returns PageImpl(
-            listOf(behandling.fagsak),
-            Pageable.ofSize(5),
-            0
-        )
-
-        every { kompetanseService.hentKompetanser(any()) } returns listOf(
-            lagKompetanse(kompetanseResultat = KompetanseResultat.NORGE_ER_SEKUNDÆRLAND)
-        )
-
-        every { behandlingRepository.finnSisteIverksatteBehandling(behandling.fagsak.id) } returns behandling
-
-        every {
-            andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
-                behandling.id
-            )
-        } returns
-            listOf(
-                lagAndelTilkjentYtelseMedEndreteUtbetalinger(
-                    fom = YearMonth.of(2022, 12),
-                    tom = YearMonth.of(2040, 2),
-                    ytelseType = ORDINÆR_BARNETRYGD,
-                    behandling = behandling,
-                    person = lagPerson(),
-                    aktør = lagPerson().aktør,
-                    periodeIdOffset = 1,
-                    beløp = 1676
-                )
-            )
-
-        startSatsendring.startSatsendring(5)
-
-        val satskjøringSlot = slot<Satskjøring>()
-        verify(exactly = 0) { satskjøringRepository.save(capture(satskjøringSlot)) }
-    }
-
-    @Test
-    fun `start satsendring og opprett satsendringtask EØS primærland `() {
-        every { featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_ENABLET, false) } returns true
-        every { featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_OPPRETT_TASKER) } returns true
-
-        val behandling = lagBehandling(behandlingKategori = BehandlingKategori.EØS)
-
-        every { fagsakRepository.finnLøpendeFagsakerForSatsendring(any()) } returns PageImpl(
-            listOf(behandling.fagsak),
-            Pageable.ofSize(5),
-            0
-        )
-
-        every { kompetanseService.hentKompetanser(any()) } returns listOf(
-            lagKompetanse(kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND)
-        )
-
-        every { behandlingRepository.finnSisteIverksatteBehandling(behandling.fagsak.id) } returns behandling
-
-        every {
-            andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
-                behandling.id
-            )
-        } returns
-            listOf(
-                lagAndelTilkjentYtelseMedEndreteUtbetalinger(
-                    YearMonth.of(2022, 12),
-                    YearMonth.of(2039, 11),
-                    ORDINÆR_BARNETRYGD,
-                    behandling = behandling,
-                    person = lagPerson(),
-                    aktør = lagPerson().aktør,
-                    periodeIdOffset = 1,
-                    beløp = 1676
-                ),
-                lagAndelTilkjentYtelseMedEndreteUtbetalinger(
-                    YearMonth.of(2030, 12),
-                    YearMonth.of(2039, 11),
-                    ORDINÆR_BARNETRYGD,
-                    behandling = behandling,
-                    person = lagPerson(),
-                    aktør = lagPerson().aktør,
-                    periodeIdOffset = 1,
-                    beløp = 1054
-                )
-            )
-
-        startSatsendring.startSatsendring(5)
-
-        verify(exactly = 1) { satskjøringRepository.save(any()) }
-    }
-
-    @Test
     fun `finnLøpendeFagsaker har totalt antall sider 3, så den skal kalle finnLøpendeFagsaker 3 ganger for å få 5 satsendringer`() {
         every { featureToggleService.isEnabled(any(), any()) } returns true
         every { featureToggleService.isEnabled(any()) } returns true
+        every { featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_SJEKK_UTBETALING, false) } returns false
 
         val behandling = lagBehandling()
 

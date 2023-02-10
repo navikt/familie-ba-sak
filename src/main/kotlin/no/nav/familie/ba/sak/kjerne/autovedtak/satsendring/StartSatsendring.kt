@@ -13,7 +13,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
@@ -38,7 +37,6 @@ class StartSatsendring(
     private val featureToggleService: FeatureToggleService,
     private val personidentService: PersonidentService,
     private val autovedtakSatsendringService: AutovedtakSatsendringService,
-    private val kompetanseService: KompetanseService,
     private val beregningService: BeregningService,
     private val persongrunnlagService: PersongrunnlagService
 
@@ -122,10 +120,10 @@ class StartSatsendring(
                 logger.info("Fagsak=${fagsak.id} har alt siste satser")
                 return true
             }
-            if (harUtbetalingerSomOverstiger100Prosent(sisteIverksatteBehandling) && featureToggleService.isEnabled(
+            if (featureToggleService.isEnabled(
                     FeatureToggleConfig.SATSENDRING_SJEKK_UTBETALING,
                     false
-                )
+                ) && harUtbetalingerSomOverstiger100Prosent(sisteIverksatteBehandling)
             ) {
                 return false
             }
