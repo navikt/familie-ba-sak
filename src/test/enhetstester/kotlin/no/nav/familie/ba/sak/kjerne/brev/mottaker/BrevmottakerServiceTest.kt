@@ -4,6 +4,8 @@ import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -14,6 +16,12 @@ internal class BrevmottakerServiceTest {
 
     @MockK
     private lateinit var brevmottakerRepository: BrevmottakerRepository
+
+    @MockK
+    private lateinit var personidentService: PersonidentService
+
+    @MockK
+    private lateinit var personopplysningerService: PersonopplysningerService
 
     @InjectMockKs
     private lateinit var brevmottakerService: BrevmottakerService

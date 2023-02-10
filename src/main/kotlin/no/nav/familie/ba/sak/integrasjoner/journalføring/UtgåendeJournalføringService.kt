@@ -30,7 +30,7 @@ class UtgåendeJournalføringService(
         dokumenttype: Dokumenttype,
         førsteside: Førsteside?,
         avsenderMottaker: AvsenderMottaker? = null,
-        tilVerge: Boolean = false
+        tilManuellMottakerEllerVerge: Boolean = false
     ): String {
         return journalførDokument(
             fnr = fnr,
@@ -45,7 +45,7 @@ class UtgåendeJournalføringService(
             ),
             førsteside = førsteside,
             avsenderMottaker = avsenderMottaker,
-            tilManuellMottakerEllerVerge = tilVerge
+            tilManuellMottakerEllerVerge = tilManuellMottakerEllerVerge
         )
     }
 
