@@ -46,6 +46,7 @@ object BehandlingsresultatEndringUtils {
         val erEndringIBeløp = erEndringIBeløp(
             nåværendeAndeler = nåværendeAndeler,
             forrigeAndeler = forrigeAndeler,
+            nåværendeEndretAndeler = nåværendeEndretAndeler,
             personerFremstiltKravFor = personerFremstiltKravFor
         )
 
@@ -57,7 +58,7 @@ object BehandlingsresultatEndringUtils {
         val erEndringIVilkårsvurdering = erEndringIVilkårvurdering(
             nåværendePersonResultat = nåværendePersonResultat,
             forrigePersonResultat = forrigePersonResultat,
-            opphørstidspunkt = nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(forrigeAndeler = forrigeAndeler)
+            opphørstidspunkt = nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(forrigeAndeler = forrigeAndeler, nåværendeEndretAndeler = nåværendeEndretAndeler)
         )
 
         val erEndringIEndretUtbetalingAndeler = erEndringIEndretUtbetalingAndeler(
@@ -73,11 +74,15 @@ object BehandlingsresultatEndringUtils {
     // NB: For personer fremstilt krav for tar vi ikke hensyn til alle endringer i beløp i denne funksjonen
     internal fun erEndringIBeløp(
         nåværendeAndeler: List<AndelTilkjentYtelse>,
+        nåværendeEndretAndeler: List<EndretUtbetalingAndel>,
         forrigeAndeler: List<AndelTilkjentYtelse>,
         personerFremstiltKravFor: List<Aktør>
     ): Boolean {
         val allePersonerMedAndeler = (nåværendeAndeler.map { it.aktør } + forrigeAndeler.map { it.aktør }).distinct()
-        val opphørstidspunkt = nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(forrigeAndeler = forrigeAndeler) ?: return false // Returnerer false hvis verken forrige eller nåværende behandling har andeler
+        val opphørstidspunkt = nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(
+            forrigeAndeler = forrigeAndeler,
+            nåværendeEndretAndeler = nåværendeEndretAndeler
+        ) ?: return false // Returnerer false hvis verken forrige eller nåværende behandling har andeler
 
         val erEndringIBeløpForMinstEnPerson = allePersonerMedAndeler.any { aktør ->
             val ytelseTyperForPerson = (nåværendeAndeler.map { it.type } + forrigeAndeler.map { it.type }).distinct()

@@ -254,6 +254,7 @@ class BehandlingsresultatEndringUtilsTest {
         val erEndringIBeløp = erEndringIBeløp(
             nåværendeAndeler = nåværendeAndeler,
             forrigeAndeler = forrigeAndeler,
+            nåværendeEndretAndeler = emptyList(),
             personerFremstiltKravFor = listOf()
         )
 
@@ -297,6 +298,7 @@ class BehandlingsresultatEndringUtilsTest {
         val erEndringIBeløp = erEndringIBeløp(
             nåværendeAndeler = nåværendeAndeler,
             forrigeAndeler = forrigeAndeler,
+            nåværendeEndretAndeler = emptyList(),
             personerFremstiltKravFor = listOf(barn1Aktør)
         )
 
@@ -346,6 +348,7 @@ class BehandlingsresultatEndringUtilsTest {
         val erEndringIBeløp = erEndringIBeløp(
             nåværendeAndeler = nåværendeAndeler,
             forrigeAndeler = forrigeAndeler,
+            nåværendeEndretAndeler = emptyList(),
             personerFremstiltKravFor = listOf(barn1Aktør)
         )
 
@@ -389,6 +392,7 @@ class BehandlingsresultatEndringUtilsTest {
         val erEndringIBeløp = erEndringIBeløp(
             nåværendeAndeler = nåværendeAndeler,
             forrigeAndeler = forrigeAndeler,
+            nåværendeEndretAndeler = emptyList(),
             personerFremstiltKravFor = listOf()
         )
 
@@ -432,6 +436,7 @@ class BehandlingsresultatEndringUtilsTest {
         val erEndringIBeløp = erEndringIBeløp(
             nåværendeAndeler = nåværendeAndeler,
             forrigeAndeler = forrigeAndeler,
+            nåværendeEndretAndeler = emptyList(),
             personerFremstiltKravFor = listOf(barn1Aktør)
         )
 
@@ -481,6 +486,7 @@ class BehandlingsresultatEndringUtilsTest {
         val erEndringIBeløp = erEndringIBeløp(
             nåværendeAndeler = nåværendeAndeler,
             forrigeAndeler = forrigeAndeler,
+            nåværendeEndretAndeler = emptyList(),
             personerFremstiltKravFor = listOf()
         )
 
@@ -533,6 +539,7 @@ class BehandlingsresultatEndringUtilsTest {
         val erEndringIBeløp = erEndringIBeløp(
             nåværendeAndeler = nåværendeAndeler,
             forrigeAndeler = forrigeAndeler,
+            nåværendeEndretAndeler = emptyList(),
             personerFremstiltKravFor = listOf()
         )
 
