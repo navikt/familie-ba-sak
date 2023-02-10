@@ -216,6 +216,8 @@ fun hentSaksbehandlerOgBeslutter(behandling: Behandling, totrinnskontroll: Totri
     }
 }
 
+// Dokumenttittel legges på i familie-integrasjoner basert på dokumenttype
+// Denne funksjonen bestemmer om dokumenttittelen skal overstyres eller ikke
 fun hentOverstyrtDokumenttittel(behandling: Behandling): String? {
     return if (behandling.type == BehandlingType.REVURDERING) {
         behandling.opprettetÅrsak.hentOverstyrtDokumenttittelForOmregningsbehandling() ?: when {
