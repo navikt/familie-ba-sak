@@ -11,28 +11,24 @@ import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.brev.hentBrevmal
 import no.nav.familie.ba.sak.kjerne.brev.hentOverstyrtDokumenttittel
+import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.steg.domene.JournalførVedtaksbrevDTO
+import no.nav.familie.ba.sak.kjerne.steg.domene.MottakerInfo
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.ba.sak.task.DistribuerDokumentTask
-import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevTilVergeDTO
-import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevTilVergeTask
+import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevTilInstitusjonVergeEllerManuellBrevMottakerTask
 import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.dokarkiv.AvsenderMottaker
 import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Dokument
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.Filtype
-import no.nav.familie.prosessering.domene.Task
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-
-data class JournalførVedtaksbrevDTO(
-    val vedtakId: Long,
-    val task: Task
-)
 
 @Service
 class JournalførVedtaksbrev(
@@ -43,70 +39,97 @@ class JournalførVedtaksbrev(
     private val fagsakRepository: FagsakRepository,
     private val organisasjonService: OrganisasjonService,
     private val personidentService: PersonidentService,
-    private val personopplysningerService: PersonopplysningerService
+    private val personopplysningerService: PersonopplysningerService,
+    private val brevmottakerService: BrevmottakerService
 ) : BehandlingSteg<JournalførVedtaksbrevDTO> {
 
-    override fun utførStegOgAngiNeste(
-        behandling: Behandling,
-        data: JournalførVedtaksbrevDTO
-    ): StegType {
+    override fun utførStegOgAngiNeste(behandling: Behandling, data: JournalførVedtaksbrevDTO): StegType {
         val vedtak = vedtakService.hent(vedtakId = data.vedtakId)
         val fagsakId = "${vedtak.behandling.fagsak.id}"
         val fagsak = fagsakRepository.finnFagsak(vedtak.behandling.fagsak.id)
+        val søkersident = vedtak.behandling.fagsak.aktør.aktivFødselsnummer()
+        val institusjonVergeIdent = vedtak.behandling.verge?.ident
+
         if (fagsak == null || fagsak.type == FagsakType.INSTITUSJON && fagsak.institusjon == null) {
             error("Journalfør vedtaksbrev feil: fagsak er null eller institusjon fagsak har ikke institusjonsinformasjon")
         }
 
-        val behanlendeEnhet =
+        val behandlendeEnhet =
             arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id).behandlendeEnhetId
 
-        val mottaker = if (fagsak.type == FagsakType.INSTITUSJON) {
-            mutableListOf(MottakerInfo(fagsak.institusjon!!.orgNummer, BrukerIdType.ORGNR, false))
+        val mottakere = mutableListOf<MottakerInfo>()
+
+        if (fagsak.type == FagsakType.INSTITUSJON) {
+            mottakere += MottakerInfo(fagsak.institusjon!!.orgNummer, BrukerIdType.ORGNR, false)
         } else {
-            mutableListOf(MottakerInfo(vedtak.behandling.fagsak.aktør.aktivFødselsnummer(), BrukerIdType.FNR, false))
+            val brevMottakere = brevmottakerService.hentBrevmottakere(behandling.id)
+            if (brevMottakere.isNotEmpty()) {
+                mottakere += brevmottakerService.lagMottakereFraBrevMottakere(
+                    brevMottakere,
+                    søkersident,
+                    hentMottakerNavn(søkersident)
+                )
+            } else {
+                mottakere += MottakerInfo(søkersident, BrukerIdType.FNR, false)
+            }
         }
-        if (vedtak.behandling.verge?.ident != null) {
-            mottaker.add(MottakerInfo(vedtak.behandling.verge.ident, BrukerIdType.FNR, true))
+        if (institusjonVergeIdent != null) { // brukes kun i institusjon
+            mottakere += MottakerInfo(vedtak.behandling.verge.ident, BrukerIdType.FNR, true)
         }
 
         val journalposterTilDistribusjon = mutableMapOf<String, MottakerInfo>()
-        mottaker.forEach { mottakerInfo ->
+        mottakere.forEach { mottakerInfo ->
             journalførVedtaksbrev(
                 fnr = fagsak.aktør.aktivFødselsnummer(),
                 fagsakId = fagsakId,
                 vedtak = vedtak,
-                journalførendeEnhet = behanlendeEnhet,
-                mottakerInfo = mottakerInfo
+                journalførendeEnhet = behandlendeEnhet,
+                mottakerInfo = mottakerInfo,
+                tilManuellMottakerEllerVerge = if (institusjonVergeIdent != null) {
+                    mottakerInfo.erInstitusjonVerge
+                } else {
+                    (mottakerInfo.navn != null && mottakerInfo.navn != hentMottakerNavn(søkersident))
+                } // mottakersnavn fyller ut kun når manuell mottaker finnes
             ).also { journalposterTilDistribusjon[it] = mottakerInfo }
         }
 
+        lagTaskForÅDistribuereVedtaksbrev(journalposterTilDistribusjon, data, behandling)
+
+        return hentNesteStegForNormalFlyt(behandling)
+    }
+
+    private fun lagTaskForÅDistribuereVedtaksbrev(
+        journalposterTilDistribusjon: Map<String, MottakerInfo>,
+        data: JournalførVedtaksbrevDTO,
+        behandling: Behandling
+    ) {
         journalposterTilDistribusjon.forEach {
-            if (it.value.erVerge) {
-                val distribuerTilVergeTask = DistribuerVedtaksbrevTilVergeTask.opprettDistribuerVedtaksbrevTilVergeTask(
-                    distribuerVedtaksbrevTilVergeDTO = DistribuerVedtaksbrevTilVergeDTO(
-                        behandlingId = vedtak.behandling.id,
-                        personIdent = it.value.brukerId,
-                        journalpostId = it.key
-                    ),
-                    properties = data.task.metadata
-                )
+            val finnesBrevMottaker =
+                it.value.navn != null && it.value.navn != hentMottakerNavn(behandling.fagsak.aktør.aktivFødselsnummer())
+            if (it.value.erInstitusjonVerge || finnesBrevMottaker) { // Denne tasken sender kun vedtaksbrev
+                val distribuerTilVergeTask =
+                    DistribuerVedtaksbrevTilInstitusjonVergeEllerManuellBrevMottakerTask
+                        .opprettDistribuerVedtaksbrevTilInstitusjonVergeEllerManuellBrevMottakerTask(
+                            distribuerDokumentDTO = lagDistribuerDokumentDto(
+                                behandling = behandling,
+                                journalPostId = it.key,
+                                mottakerInfo = it.value
+                            ),
+                            properties = data.task.metadata
+                        )
                 taskRepository.save(distribuerTilVergeTask)
-            } else {
+            } else { // Denne tasken sender vedtaksbrev og håndterer steg videre
                 val distribuerTilSøkerTask = DistribuerDokumentTask.opprettDistribuerDokumentTask(
-                    distribuerDokumentDTO = DistribuerDokumentDTO(
-                        personEllerInstitusjonIdent = it.value.brukerId,
-                        behandlingId = vedtak.behandling.id,
-                        journalpostId = it.key,
-                        brevmal = hentBrevmal(behandling),
-                        erManueltSendt = false
+                    distribuerDokumentDTO = lagDistribuerDokumentDto(
+                        behandling = behandling,
+                        journalPostId = it.key,
+                        mottakerInfo = it.value
                     ),
                     properties = data.task.metadata
                 )
                 taskRepository.save(distribuerTilSøkerTask)
             }
         }
-
-        return hentNesteStegForNormalFlyt(behandling)
     }
 
     fun journalførVedtaksbrev(
@@ -114,7 +137,8 @@ class JournalførVedtaksbrev(
         fagsakId: String,
         vedtak: Vedtak,
         journalførendeEnhet: String,
-        mottakerInfo: MottakerInfo
+        mottakerInfo: MottakerInfo,
+        tilManuellMottakerEllerVerge: Boolean
     ): String {
         val vedleggPdf =
             hentVedlegg(VEDTAK_VEDLEGG_FILNAVN) ?: error("Klarte ikke hente vedlegg $VEDTAK_VEDLEGG_FILNAVN")
@@ -148,34 +172,55 @@ class JournalførVedtaksbrev(
             vedlegg = vedlegg,
             behandlingId = vedtak.behandling.id,
             avsenderMottaker = utledAvsenderMottaker(mottakerInfo),
-            tilVerge = mottakerInfo.erVerge
+            tilManuellMottakerEllerVerge = tilManuellMottakerEllerVerge
         )
     }
 
     private fun utledAvsenderMottaker(mottakerInfo: MottakerInfo): AvsenderMottaker? {
-        return if (mottakerInfo.brukerIdType == BrukerIdType.ORGNR) {
-            AvsenderMottaker(
-                idType = mottakerInfo.brukerIdType,
-                id = mottakerInfo.brukerId,
-                navn = organisasjonService.hentOrganisasjon(mottakerInfo.brukerId).navn
-            )
-        } else if (mottakerInfo.erVerge) {
-            AvsenderMottaker(
-                idType = mottakerInfo.brukerIdType,
-                id = mottakerInfo.brukerId,
-                navn = hentVergenavn(mottakerInfo.brukerId)
-            )
-        } else {
-            null
+        return when {
+            mottakerInfo.brukerIdType == BrukerIdType.ORGNR -> {
+                AvsenderMottaker(
+                    idType = mottakerInfo.brukerIdType,
+                    id = mottakerInfo.brukerId,
+                    navn = organisasjonService.hentOrganisasjon(mottakerInfo.brukerId).navn
+                )
+            }
+            mottakerInfo.erInstitusjonVerge -> {
+                AvsenderMottaker(
+                    idType = mottakerInfo.brukerIdType,
+                    id = mottakerInfo.brukerId,
+                    navn = hentMottakerNavn(mottakerInfo.brukerId)
+                )
+            }
+            mottakerInfo.brukerIdType == BrukerIdType.FNR && mottakerInfo.navn != null -> {
+                AvsenderMottaker(
+                    idType = mottakerInfo.brukerIdType,
+                    id = mottakerInfo.brukerId,
+                    navn = mottakerInfo.navn
+                )
+            }
+            else -> {
+                null
+            }
         }
     }
 
-    private fun hentVergenavn(vergeIdent: String): String {
-        val aktør = personidentService.hentAktør(vergeIdent)
+    private fun hentMottakerNavn(personIdent: String): String {
+        val aktør = personidentService.hentAktør(personIdent)
         return personopplysningerService.hentPersoninfoNavnOgAdresse(aktør).let {
             it.navn!!
         }
     }
+
+    private fun lagDistribuerDokumentDto(behandling: Behandling, journalPostId: String, mottakerInfo: MottakerInfo) =
+        DistribuerDokumentDTO(
+            personEllerInstitusjonIdent = mottakerInfo.brukerId,
+            behandlingId = behandling.id,
+            journalpostId = journalPostId,
+            brevmal = hentBrevmal(behandling),
+            erManueltSendt = false,
+            manuellAdresseInfo = mottakerInfo.manuellAdresseInfo
+        )
 
     override fun stegType(): StegType {
         return StegType.JOURNALFØR_VEDTAKSBREV
@@ -191,9 +236,3 @@ class JournalførVedtaksbrev(
         }
     }
 }
-
-data class MottakerInfo(
-    val brukerId: String,
-    val brukerIdType: BrukerIdType,
-    val erVerge: Boolean
-)
