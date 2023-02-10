@@ -9,8 +9,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
@@ -40,7 +38,7 @@ class BeregningService(
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     private val småbarnstilleggService: SmåbarnstilleggService,
     private val tilkjentYtelseEndretAbonnenter: List<TilkjentYtelseEndretAbonnent> = emptyList(),
-    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
+    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
 ) {
     fun slettTilkjentYtelseForBehandling(behandlingId: Long) =
         tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)
@@ -125,32 +123,10 @@ class BeregningService(
         }.map { it }
     }
 
-    fun innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(behandling: Behandling): Boolean {
-        val barnMedUtbetalingSomIkkeBlittEndretISisteBehandling =
-            finnAlleBarnFraBehandlingMedPerioderSomSkalUtbetales(behandling.id)
+    fun erAlleUtbetalingsperioderPåNullKroner(behandling: Behandling): Boolean {
+        val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
 
-        val alleBarnISisteBehanlding = finnBarnFraBehandlingMedTilkjentYtelse(behandling.id)
-
-        val alleBarnISistIverksattBehandling =
-            behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling)?.let {
-                finnBarnFraBehandlingMedTilkjentYtelse(
-                    it.id
-                )
-            }
-                ?: emptyList()
-
-        val nyeBarnISisteBehandling = alleBarnISisteBehanlding.minus(alleBarnISistIverksattBehandling.toSet())
-
-        val nyeBarnMedUtebtalingSomIkkeErEndret =
-            barnMedUtbetalingSomIkkeBlittEndretISisteBehandling.intersect(nyeBarnISisteBehandling)
-
-        return behandling.resultat == Behandlingsresultat.INNVILGET_OG_OPPHØRT &&
-            when (behandling.underkategori) {
-                BehandlingUnderkategori.ORDINÆR, BehandlingUnderkategori.INSTITUSJON -> true
-                BehandlingUnderkategori.UTVIDET -> false
-            } &&
-            behandling.erSøknad() &&
-            nyeBarnMedUtebtalingSomIkkeErEndret.isEmpty()
+        return andelerTilkjentYtelse.all { it.kalkulertUtbetalingsbeløp == 0 }
     }
 
     @Transactional
@@ -245,25 +221,7 @@ class BeregningService(
 
         return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)?.barna?.map { it.aktør }
             ?.filter {
-                andelerTilkjentYtelse
-                    .filter { aty -> aty.aktør == it }.isNotEmpty()
-            } ?: emptyList()
-    }
-
-    /**
-     * Henter alle barn på behandlingen som har minst en periode med tilkjentytelse som ikke er endret til null i utbetaling.
-     */
-    fun finnAlleBarnFraBehandlingMedPerioderSomSkalUtbetales(behandlingId: Long): List<Aktør> {
-        val andelerMedEndringer = andelerTilkjentYtelseOgEndreteUtbetalingerService
-            .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId)
-
-        return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)?.barna?.map { it.aktør }
-            ?.filter { aktør ->
-                andelerMedEndringer
-                    .filter { it.aktør == aktør }
-                    .filter { aty ->
-                        aty.kalkulertUtbetalingsbeløp != 0 || aty.endreteUtbetalinger.isEmpty()
-                    }.isNotEmpty()
+                andelerTilkjentYtelse.any { aty -> aty.aktør == it }
             } ?: emptyList()
     }
 

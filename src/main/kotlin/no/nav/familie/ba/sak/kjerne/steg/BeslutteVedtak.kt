@@ -152,7 +152,7 @@ class BeslutteVedtak(
 
         if (nesteSteg == StegType.IVERKSETT_MOT_OPPDRAG) {
             val erInnvilgetSøknadUtenUtebtalingsperioderGrunnetEndringsperioder =
-                beregningService.innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(behandling = behandling)
+                beregningService.erAlleUtbetalingsperioderPåNullKroner(behandling = behandling)
 
             if (erInnvilgetSøknadUtenUtebtalingsperioderGrunnetEndringsperioder) {
                 return StegType.JOURNALFØR_VEDTAKSBREV

@@ -196,7 +196,8 @@ class BeregningServiceTest {
             behandlinsResultat = Behandlingsresultat.INNVILGET_OG_OPPHØRT,
             BehandlingUnderkategori.ORDINÆR,
             0,
-            true
+            true,
+            prosent = BigDecimal.ZERO
         )
 
         Assertions.assertTrue(skalIkkeIverksette)
@@ -208,7 +209,8 @@ class BeregningServiceTest {
             behandlinsResultat = Behandlingsresultat.INNVILGET,
             BehandlingUnderkategori.ORDINÆR,
             0,
-            true
+            true,
+            prosent = BigDecimal.ZERO
         )
 
         Assertions.assertFalse(skalIkkeIverksette)
@@ -220,7 +222,8 @@ class BeregningServiceTest {
             behandlinsResultat = Behandlingsresultat.INNVILGET_OG_OPPHØRT,
             BehandlingUnderkategori.ORDINÆR,
             100,
-            true
+            true,
+            prosent = BigDecimal.ZERO
         )
 
         Assertions.assertFalse(skalIkkeIverksette)
@@ -232,7 +235,8 @@ class BeregningServiceTest {
             behandlinsResultat = Behandlingsresultat.INNVILGET_OG_OPPHØRT,
             BehandlingUnderkategori.ORDINÆR,
             0,
-            false
+            false,
+            prosent = BigDecimal.valueOf(100)
         )
 
         Assertions.assertFalse(skalIkkeIverksette)
@@ -244,7 +248,8 @@ class BeregningServiceTest {
             behandlinsResultat = Behandlingsresultat.INNVILGET_OG_OPPHØRT,
             BehandlingUnderkategori.UTVIDET,
             0,
-            true
+            true,
+            prosent = BigDecimal.ZERO
         )
 
         Assertions.assertFalse(skalIkkeIverksette)
@@ -1043,7 +1048,8 @@ class BeregningServiceTest {
         behandlinsResultat: Behandlingsresultat = Behandlingsresultat.INNVILGET_OG_OPPHØRT,
         behandlingUnderkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
         beløp: Int,
-        endretUtbetaling: Boolean
+        endretUtbetaling: Boolean,
+        prosent: BigDecimal
     ): Boolean {
         val behandling = lagBehandling(resultat = behandlinsResultat, underkategori = behandlingUnderkategori)
 
@@ -1080,7 +1086,8 @@ class BeregningServiceTest {
             fom = periodeFom,
             tom = periodeTom,
             beløp = beløp,
-            endretUtbetalingAndeler = endreteUtbetalingAndeler
+            endretUtbetalingAndeler = endreteUtbetalingAndeler,
+            prosent = prosent
         )
 
         every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns personopplysningGrunnlag
@@ -1094,7 +1101,7 @@ class BeregningServiceTest {
 
         every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(any()) } returns null
 
-        return beregningService.innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(
+        return beregningService.erAlleUtbetalingsperioderPåNullKroner(
             behandling = behandling
         )
     }

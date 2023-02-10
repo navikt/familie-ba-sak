@@ -49,14 +49,14 @@ class SimuleringService(
         if (vedtak.behandling.id == 2199950L) {
             val skalSimuleres = vedtak.behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET ||
                 vedtak.behandling.resultat == Behandlingsresultat.AVSLÅTT ||
-                beregningService.innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(behandling = vedtak.behandling)
+                beregningService.erAlleUtbetalingsperioderPåNullKroner(behandling = vedtak.behandling)
 
             secureLogger.info("behandling skalSimuleres=$skalSimuleres for behandling 2199950")
         }
 
         if (vedtak.behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET ||
             vedtak.behandling.resultat == Behandlingsresultat.AVSLÅTT ||
-            beregningService.innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(behandling = vedtak.behandling)
+            beregningService.erAlleUtbetalingsperioderPåNullKroner(behandling = vedtak.behandling)
         ) {
             return null
         }
