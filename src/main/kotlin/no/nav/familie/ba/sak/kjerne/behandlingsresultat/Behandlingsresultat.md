@@ -1,0 +1,34 @@
+# Behandlingsresultat
+Behandlingsresultatet skal gjenspesile hva som har skjedd i en behandling, og er et resultat av vurderinger og endringer som er gjort i denne behandlingen. Behandlingsresultatet er styrende for hvilken brevmal som skal brukes.
+
+For å utlede behandlingsresultat er det tre ting som peker seg ut som spesielt viktig:
+- **Søknad**: Har vi mottatt en søknad eller er det fremstilt krav for noen personer? Isåfall, må vi gi et svar på søknaden i form av innvilgelse/avslag/fortsatt innvilget. 
+- **Endringer**: Har noe endret seg siden sist? 
+- **Opphør**: Har barnetrygden opphørt i denne behandlingen?
+
+Den tekniske løsningen vi har gått for prøver å utlede de tre aspektene hver for seg, før man til slutt sitter igjen med ett søknadsresultat, ett endringsresultat og ett opphørsresultat som man kan kombinere til et behandlingsresultat.
+
+# Stegene og deres resultater
+| Steg    | Resultater                | Forklaring                                                                                                                                                                                                                                                                                                                  |
+|---------|---------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Søknad  | Innvilget                 | Flere muligheter (gjelder kun personer fremstilt krav for):<br>1. Det er lagt til en ny andel<br>2. Andel har endret beløp siden sist, hvor det nye beløpet er større enn 0<br>3. Andel er satt til 0 kr pga. differanseberegning/delt bosted                                                                               |
+|         | Avslått                   | Flere muligheter:<br>1. Eksplisitt avslag for person fremstilt krav for<br>2. Andel satt til 0 kr pga. etterbetaling 3 år/allerede utbetalt/endre mottaker (for person fremstilt krav for) <br> 3. Det finnes uregistrerte barn <br> 4. Fødselshendelse hvor det finnes vilkår som enten er ikke vurdert eller ikke oppfylt |
+|         | Delvis innvilget          | Vi har både innvilget og avslått (trenger ikke være på samme person).                                                                                                                                                                                                                                                       |
+|         | Ingen relevante endringer | Ingen av alternativene over.                                                                                                                                                                                                                                                                                                |
+ |         | null                      | Ikke søknad/fødselshendelse (dermed ingen personer fremstilt krav for) eller manuell migrering.                                                                                                                                                                                                                             |
+| Endring | Endringer                 | Flere muligheter:<br>1. Endring i beløp <br>&nbsp; a) For personer fremstilt krav for: kun hvis beløp var større enn 0, men nå er andelen fjernet <br>&nbsp; b) Ellers: alle endringer i beløp <br>2. Endring i vilkårsvurdering<br>3. Endring i endret utbetaling andeler<br>4. Endring i kompetanse                       |
+|         | Ingen endringer           | Ingen endring i det som er nevnt i raden over.                                                                                                                                                                                                                                                                              |
+| Opphør  | Opphørt                   | To muligheter:<br>1. Ikke opphørt i forrige behandling, opphørt nå<br>2. Opphør i forrige behandling, men tidligere opphør i denne behandlingen                                                                                                                                                                             |
+|         | Fortsatt opphørt          | Forrige behandling var opphørt, og denne behandlingen opphører samme dato som forrige                                                                                                                                                                                                                                       |
+|         | Ikke opphørt              | Ikke opphør i denne behandlingen                                                                                                                                                                                                                                                                                            |
+
+# Kombinasjon av resultater
+Behandlingsresultat = søknadsresultat + endringsresultat + opphørsresultat
+
+De fleste resultatene forklarer seg selv, men her kommer et par unntak/rariteter:
+- På en søknad/fødselshendelse/manuell migrering må vi gi et resultat på søknaden, og derfor er ikke "Endret og opphørt", "Endret og fortsatt opphørt" eller "Opphørt" gyldige resultater for disse typer saker. I tillegg, "Fortsatt opphørt" er også et ugyldig resultat i disse tilfellene (her må saksbehandler eksplsitt avslå en periode).
+- Fortsatt opphørt i kombinasjon med noe annet som er av betydning (f.eks. "Endret") tar ikke med fortsatt opphørt i resultatet. Vi ønsker kun å snakke om det som skjer i _denne_ behandlingen, og kommuniserer derfor kun ut "fortsatt opphørt" om det er det eneste som gjelder.
+
+# Valideringer
+- Ikke lov med eksplisitt avslag for personer det ikke er fremstilt krav for
+- Søknadsresultat-steget kan ikke returnere null hvis det er søknad/fødselshendelse/manuell migrering
