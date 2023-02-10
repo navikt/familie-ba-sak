@@ -45,6 +45,15 @@ class SimuleringService(
     private val simulert = Metrics.counter("familie.ba.sak.oppdrag.simulert")
 
     fun hentSimuleringFraFamilieOppdrag(vedtak: Vedtak): DetaljertSimuleringResultat? {
+        // TODO Fjern dette når vi har logget det vi skal
+        if (vedtak.behandling.id == 2199950L) {
+            val skalSimuleres = vedtak.behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET ||
+                vedtak.behandling.resultat == Behandlingsresultat.AVSLÅTT ||
+                beregningService.innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(behandling = vedtak.behandling)
+
+            secureLogger.info("behandling skalSimuleres=$skalSimuleres for behandling 2199950")
+        }
+
         if (vedtak.behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET ||
             vedtak.behandling.resultat == Behandlingsresultat.AVSLÅTT ||
             beregningService.innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(behandling = vedtak.behandling)
@@ -64,6 +73,16 @@ class SimuleringService(
             andelTilkjentYtelseForUtbetalingsoppdragFactory = AndelTilkjentYtelseForSimuleringFactory(),
             erSimulering = true
         )
+
+        // TODO Fjern dette når vi har logget det vi skal
+        if (vedtak.behandling.id == 2199950L) {
+            secureLogger.info(
+                "utbetalingsoppdrag =\n " +
+                    "$utbetalingsoppdrag\n " +
+                    "for behandling 2199950"
+            )
+        }
+
         if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_GENERERE_UTBETALINGSOPPDRAG_NY)) {
             val tilkjentYtelse = utbetalingsoppdragService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
                 vedtak = vedtak,
@@ -111,6 +130,21 @@ class SimuleringService(
             erManuellPosteringTogglePå = featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ),
             erMigreringsbehandling = behandling.erMigrering()
         )
+
+        // TODO Fjern dette når vi har logget det vi skal
+        if (behandlingId == 2199950L) {
+            secureLogger.info(
+                "tidligere lagret simulering =\n" +
+                    objectMapper.writeValueAsString(simulering)
+            )
+            secureLogger.info(
+                "tidligere lagret simulering til restSimulering =\n" +
+                    objectMapper.writeValueAsString(restSimulering)
+            )
+            secureLogger.info(
+                "skal oppdatere Simulering = ${!behandlingErFerdigBesluttet && simuleringErUtdatert(restSimulering)}"
+            )
+        }
 
         return if (!behandlingErFerdigBesluttet && simuleringErUtdatert(restSimulering)) {
             oppdaterSimuleringPåBehandling(behandling)

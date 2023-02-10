@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.forrigeMåned
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatOpphørUtils.utledOpphørsdatoForNåværendeBehandlingMedFallback
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
@@ -22,6 +23,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilTidslinje
+import java.time.LocalDate
 import java.time.YearMonth
 
 internal enum class Endringsresultat {
@@ -54,7 +56,8 @@ object BehandlingsresultatEndringUtils {
 
         val erEndringIVilkårsvurdering = erEndringIVilkårvurdering(
             nåværendePersonResultat = nåværendePersonResultat,
-            forrigePersonResultat = forrigePersonResultat
+            forrigePersonResultat = forrigePersonResultat,
+            opphørstidspunkt = nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(forrigeAndeler = forrigeAndeler)
         )
 
         val erEndringIEndretUtbetalingAndeler = erEndringIEndretUtbetalingAndeler(
@@ -166,8 +169,11 @@ object BehandlingsresultatEndringUtils {
 
     fun erEndringIVilkårvurdering(
         nåværendePersonResultat: Set<PersonResultat>,
-        forrigePersonResultat: Set<PersonResultat>
+        forrigePersonResultat: Set<PersonResultat>,
+        opphørstidspunkt: YearMonth?
     ): Boolean {
+        if (opphørstidspunkt == null) return false // Returnerer false hvis verken forrige eller nåværende behandling har andeler
+
         val allePersonerMedPersonResultat =
             (nåværendePersonResultat.map { it.aktør } + forrigePersonResultat.map { it.aktør }).distinct()
 
@@ -182,7 +188,8 @@ object BehandlingsresultatEndringUtils {
                     forrigePersonResultat
                         .filter { it.aktør == aktør }
                         .flatMap { it.vilkårResultater }
-                        .filter { it.vilkårType == vilkårType && it.resultat == Resultat.OPPFYLT }
+                        .filter { it.vilkårType == vilkårType && it.resultat == Resultat.OPPFYLT },
+                    opphørstidspunkt = opphørstidspunkt
                 )
             }
         }
@@ -196,7 +203,8 @@ object BehandlingsresultatEndringUtils {
     // 3. Splitt i vilkårsvurderingen
     fun erEndringIVilkårvurderingForPerson(
         nåværendeVilkårResultat: List<VilkårResultat>,
-        forrigeVilkårResultat: List<VilkårResultat>
+        forrigeVilkårResultat: List<VilkårResultat>,
+        opphørstidspunkt: YearMonth
     ): Boolean {
         val nåværendeVilkårResultatTidslinje = nåværendeVilkårResultat.tilTidslinje()
         val tidligereVilkårResultatTidslinje = forrigeVilkårResultat.tilTidslinje()
@@ -207,11 +215,13 @@ object BehandlingsresultatEndringUtils {
                 nåværende.utdypendeVilkårsvurderinger.toSet() != forrige.utdypendeVilkårsvurderinger.toSet() ||
                     nåværende.vurderesEtter != forrige.vurderesEtter ||
                     nåværende.periodeFom != forrige.periodeFom ||
-                    nåværende.periodeTom != forrige.periodeTom
+                    (nåværende.periodeTom != forrige.periodeTom && nåværende.periodeTom.førerIkkeTilOpphør(opphørstidspunkt))
             }
 
         return endringIVilkårResultat.perioder().any { it.innhold == true }
     }
+
+    private fun LocalDate?.førerIkkeTilOpphør(opphørstidspunkt: YearMonth): Boolean = this?.isBefore(opphørstidspunkt.minusMonths(1).førsteDagIInneværendeMåned()) == true
 
     internal fun erEndringIEndretUtbetalingAndeler(
         nåværendeEndretAndeler: List<EndretUtbetalingAndel>,
