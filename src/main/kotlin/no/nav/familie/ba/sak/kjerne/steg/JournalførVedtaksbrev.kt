@@ -3,12 +3,12 @@ package no.nav.familie.ba.sak.kjerne.steg
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient.Companion.VEDTAK_VEDLEGG_FILNAVN
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient.Companion.VEDTAK_VEDLEGG_TITTEL
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.tilDokumenttype
 import no.nav.familie.ba.sak.integrasjoner.journalføring.UtgåendeJournalføringService
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.brev.hentBrevmal
 import no.nav.familie.ba.sak.kjerne.brev.hentOverstyrtDokumenttittel
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
@@ -150,6 +150,12 @@ class JournalførVedtaksbrev(
             avsenderMottaker = utledAvsenderMottaker(mottakerInfo),
             tilVerge = mottakerInfo.erVerge
         )
+    }
+
+    private fun Behandlingsresultat.tilDokumenttype() = when (this) {
+        Behandlingsresultat.AVSLÅTT -> Dokumenttype.BARNETRYGD_VEDTAK_AVSLAG
+        Behandlingsresultat.OPPHØRT -> Dokumenttype.BARNETRYGD_OPPHØR
+        else -> Dokumenttype.BARNETRYGD_VEDTAK_INNVILGELSE
     }
 
     private fun utledAvsenderMottaker(mottakerInfo: MottakerInfo): AvsenderMottaker? {
