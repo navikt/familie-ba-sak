@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ba.sak.task.SatsendringTaskDto
 import org.slf4j.LoggerFactory
@@ -106,11 +107,24 @@ class AutovedtakSatsendringService(
                 behandlingEtterBehandlingsresultat
             )
 
-        val task = IverksettMotOppdragTask.opprettTask(
-            behandlingEtterBehandlingsresultat,
-            opprettetVedtak,
-            SikkerhetContext.hentSaksbehandler()
-        )
+        val task = when (behandlingEtterBehandlingsresultat.steg) {
+            StegType.IVERKSETT_MOT_OPPDRAG -> {
+                IverksettMotOppdragTask.opprettTask(
+                    behandlingEtterBehandlingsresultat,
+                    opprettetVedtak,
+                    SikkerhetContext.hentSaksbehandler()
+                )
+            }
+
+            StegType.FERDIGSTILLE_BEHANDLING -> {
+                FerdigstillBehandlingTask.opprettTask(
+                    søkerAktør.aktivFødselsnummer(),
+                    behandlingEtterBehandlingsresultat.id
+                )
+            }
+
+            else -> throw Feil("Ugyldig neste steg ${behandlingEtterBehandlingsresultat.steg} ved satsendring for fagsak=$fagsakId")
+        }
 
         satskjøringForFagsak.ferdigTidspunkt = LocalDateTime.now()
         satskjøringRepository.save(satskjøringForFagsak)
