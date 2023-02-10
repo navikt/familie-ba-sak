@@ -143,7 +143,7 @@ class DokumentService(
                 erInstitusjonVerge = false
             ).toList()
             manueltBrevRequest.erTilInstitusjon -> MottakerInfo(
-                brukerId = manueltBrevRequest.mottakerIdent,
+                brukerId = søkersident,
                 brukerIdType = BrukerIdType.ORGNR,
                 erInstitusjonVerge = false
             ).toList()
