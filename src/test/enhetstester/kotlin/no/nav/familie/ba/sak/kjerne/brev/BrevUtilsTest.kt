@@ -281,7 +281,7 @@ internal class BrevUtilsTest {
         }
     }
 
-    private val behandlingsersultaterForFortsattInnvilget = listOf(Behandlingsresultat.FORTSATT_INNVILGET, Behandlingsresultat.FORTSATT_INNVILGET_OG_ENDRET)
+    private val behandlingsersultaterForFortsattInnvilget = listOf(Behandlingsresultat.FORTSATT_INNVILGET, Behandlingsresultat.ENDRET_OG_FORTSATT_INNVILGET)
 
     @Test
     fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for 'Fortsatt innvilget'`() {
