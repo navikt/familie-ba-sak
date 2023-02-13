@@ -215,7 +215,7 @@ class DokumentService(
             properties = Properties().apply
             {
                 this["fagsakIdent"] = fagsak.aktør.aktivFødselsnummer()
-                this["mottakerIdent"] = manueltBrevRequest.mottakerIdent
+                this["mottakerIdent"] = journalPostTilDistribusjon.value.brukerId
                 this["journalpostId"] = journalPostTilDistribusjon.key
                 this["behandlingId"] = behandling?.id.toString()
                 this["fagsakId"] = fagsak.id.toString()
