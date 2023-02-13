@@ -249,6 +249,7 @@ class VedtaksperiodeService(
     @Transactional
     fun oppdaterVedtakMedVedtaksperioder(vedtak: Vedtak, skalOverstyreFortsattInnvilget: Boolean = false) {
         vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(vedtak)
+        // Rent fortsatt innvilget-resultat er det eneste som kun skal gi én vedtaksperiode
         if (vedtak.behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET && (!skalOverstyreFortsattInnvilget || featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_BEREGNE_BEHANDLINGSRESULTAT))) {
             val vedtaksbrevmal = hentVedtaksbrevmal(vedtak.behandling)
             val erAutobrevFor6Og18ÅrOgSmåbarnstillegg =
