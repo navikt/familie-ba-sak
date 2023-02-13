@@ -8,7 +8,9 @@ import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakBehandlingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
@@ -36,7 +38,8 @@ class AutovedtakSatsendringService(
     private val autovedtakService: AutovedtakService,
     private val andelTilkjentYtelseMedEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     private val tilbakestillBehandlingService: TilbakestillBehandlingService,
-    private val satskjøringRepository: SatskjøringRepository
+    private val satskjøringRepository: SatskjøringRepository,
+    private val behandlingService: BehandlingService
 ) : AutovedtakBehandlingService<SatsendringTaskDto> {
 
     private val satsendringAlleredeUtført = Metrics.counter("satsendring.allerede.utfort")
@@ -117,6 +120,10 @@ class AutovedtakSatsendringService(
             }
 
             StegType.FERDIGSTILLE_BEHANDLING -> {
+                behandlingService.oppdaterStatusPåBehandling(
+                    behandlingEtterBehandlingsresultat.id,
+                    BehandlingStatus.IVERKSETTER_VEDTAK
+                )
                 FerdigstillBehandlingTask.opprettTask(
                     søkerAktør.aktivFødselsnummer(),
                     behandlingEtterBehandlingsresultat.id
