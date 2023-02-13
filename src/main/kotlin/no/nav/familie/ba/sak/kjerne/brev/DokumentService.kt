@@ -136,7 +136,7 @@ class DokumentService(
                 frist = LocalDate.now()
                     .plusDays(
                         manueltBrevRequest.brevmal.ventefristDager(
-                            manuellFrist = manueltBrevRequest.antallUkerSvarfrist?.toLong(),
+                            manuellFrist = manueltBrevRequest.antallUkerSvarfrist?.let { it * 7 }?.toLong(),
                             behandlingKategori = behandling.kategori
                         )
                     ),

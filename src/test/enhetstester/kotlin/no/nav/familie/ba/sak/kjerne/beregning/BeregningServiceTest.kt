@@ -191,27 +191,29 @@ class BeregningServiceTest {
     }
 
     @Test
-    fun `Skal ikke iverksettes i økonomi hvis mangler utbetalins perioder grunnet endret utbetalings periode`() {
+    fun `Skal ikke iverksettes i økonomi hvis vi mangler utbetalingsperioder grunnet endret utbetalings periode`() {
         val skalIkkeIverksette = opprettAtyMedEndretUtbetalingsPeriode(
             behandlinsResultat = Behandlingsresultat.INNVILGET_OG_OPPHØRT,
             BehandlingUnderkategori.ORDINÆR,
             0,
-            true
+            true,
+            prosent = BigDecimal.ZERO
         )
 
         Assertions.assertTrue(skalIkkeIverksette)
     }
 
     @Test
-    fun `Skal iverksettes i økonomi hvis mangler utbetalins perioder men behandlinsresultat ikke er innvilget og opphørt`() {
+    fun `Skal ikke iverksettes i økonomi hvis vi mangler utbetalingsperioder uavhengig av behandlingsresultat`() {
         val skalIkkeIverksette = opprettAtyMedEndretUtbetalingsPeriode(
             behandlinsResultat = Behandlingsresultat.INNVILGET,
             BehandlingUnderkategori.ORDINÆR,
             0,
-            true
+            true,
+            prosent = BigDecimal.ZERO
         )
 
-        Assertions.assertFalse(skalIkkeIverksette)
+        Assertions.assertTrue(skalIkkeIverksette)
     }
 
     @Test
@@ -220,34 +222,37 @@ class BeregningServiceTest {
             behandlinsResultat = Behandlingsresultat.INNVILGET_OG_OPPHØRT,
             BehandlingUnderkategori.ORDINÆR,
             100,
-            true
+            true,
+            prosent = BigDecimal.ZERO
         )
 
         Assertions.assertFalse(skalIkkeIverksette)
     }
 
     @Test
-    fun `Skal iverksettes i økonomi hvis mangler utbetalins perioder men mangler endringsperioder`() {
+    fun `Skal ikke iverksettes i økonomi dersom det ikke er utbetaling, selv uten endringsperioder`() {
         val skalIkkeIverksette = opprettAtyMedEndretUtbetalingsPeriode(
             behandlinsResultat = Behandlingsresultat.INNVILGET_OG_OPPHØRT,
             BehandlingUnderkategori.ORDINÆR,
             0,
-            false
+            false,
+            prosent = BigDecimal.valueOf(100)
         )
 
-        Assertions.assertFalse(skalIkkeIverksette)
+        Assertions.assertTrue(skalIkkeIverksette)
     }
 
     @Test
-    fun `Skal iverksettes i økonomi hvis mangler utbetalins perioder men er av underkategori UTVIDET`() {
+    fun `Skal ikke iverksettes i økonomi hvis vi mangler utbetalingsperioder, selv om underkategorien er UTVIDET`() {
         val skalIkkeIverksette = opprettAtyMedEndretUtbetalingsPeriode(
             behandlinsResultat = Behandlingsresultat.INNVILGET_OG_OPPHØRT,
             BehandlingUnderkategori.UTVIDET,
             0,
-            true
+            true,
+            prosent = BigDecimal.ZERO
         )
 
-        Assertions.assertFalse(skalIkkeIverksette)
+        Assertions.assertTrue(skalIkkeIverksette)
     }
 
     @Test
@@ -1043,7 +1048,8 @@ class BeregningServiceTest {
         behandlinsResultat: Behandlingsresultat = Behandlingsresultat.INNVILGET_OG_OPPHØRT,
         behandlingUnderkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
         beløp: Int,
-        endretUtbetaling: Boolean
+        endretUtbetaling: Boolean,
+        prosent: BigDecimal
     ): Boolean {
         val behandling = lagBehandling(resultat = behandlinsResultat, underkategori = behandlingUnderkategori)
 
@@ -1080,7 +1086,8 @@ class BeregningServiceTest {
             fom = periodeFom,
             tom = periodeTom,
             beløp = beløp,
-            endretUtbetalingAndeler = endreteUtbetalingAndeler
+            endretUtbetalingAndeler = endreteUtbetalingAndeler,
+            prosent = prosent
         )
 
         every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns personopplysningGrunnlag
@@ -1094,7 +1101,7 @@ class BeregningServiceTest {
 
         every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(any()) } returns null
 
-        return beregningService.innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(
+        return beregningService.erAlleUtbetalingsperioderPåNullKronerIDenneOgForrigeBehandling(
             behandling = behandling
         )
     }
