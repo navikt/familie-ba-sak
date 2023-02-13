@@ -25,6 +25,7 @@ class FeatureToggleConfig {
         // unleash toggles for satsendring, kan slettes etter at satsendring er skrudd på for alle satstyper
         const val SATSENDRING_ENABLET: String = "familie-ba-sak.satsendring-enablet"
         const val SATSENDRING_OPPRETT_TASKER = "familie-ba-sak.satsendring-opprett-satsendring-task"
+        const val SATSENDRING_SJEKK_UTBETALING = "familie-ba-sak.satsendring-sjekk-utbetaling"
     }
 }
 
