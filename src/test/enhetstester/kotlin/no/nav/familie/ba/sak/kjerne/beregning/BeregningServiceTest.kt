@@ -204,7 +204,7 @@ class BeregningServiceTest {
     }
 
     @Test
-    fun `Skal iverksettes i økonomi hvis mangler utbetalins perioder men behandlinsresultat ikke er innvilget og opphørt`() {
+    fun `Skal ikke iverksettes i økonomi hvis mangler utbetalingsperioder uavhengig av behandlingsresultat`() {
         val skalIkkeIverksette = opprettAtyMedEndretUtbetalingsPeriode(
             behandlinsResultat = Behandlingsresultat.INNVILGET,
             BehandlingUnderkategori.ORDINÆR,
@@ -213,7 +213,7 @@ class BeregningServiceTest {
             prosent = BigDecimal.ZERO
         )
 
-        Assertions.assertFalse(skalIkkeIverksette)
+        Assertions.assertTrue(skalIkkeIverksette)
     }
 
     @Test
@@ -230,7 +230,7 @@ class BeregningServiceTest {
     }
 
     @Test
-    fun `Skal iverksettes i økonomi hvis mangler utbetalins perioder men mangler endringsperioder`() {
+    fun `Skal ikke iverksettes i økonomi dersom det ikke er utbetaling, selv uten endringsperioder`() {
         val skalIkkeIverksette = opprettAtyMedEndretUtbetalingsPeriode(
             behandlinsResultat = Behandlingsresultat.INNVILGET_OG_OPPHØRT,
             BehandlingUnderkategori.ORDINÆR,
@@ -239,11 +239,11 @@ class BeregningServiceTest {
             prosent = BigDecimal.valueOf(100)
         )
 
-        Assertions.assertFalse(skalIkkeIverksette)
+        Assertions.assertTrue(skalIkkeIverksette)
     }
 
     @Test
-    fun `Skal iverksettes i økonomi hvis mangler utbetalins perioder men er av underkategori UTVIDET`() {
+    fun `Skal ikke iverksettes i økonomi hvis mangler utbetalingsperioder men er av underkategori UTVIDET`() {
         val skalIkkeIverksette = opprettAtyMedEndretUtbetalingsPeriode(
             behandlinsResultat = Behandlingsresultat.INNVILGET_OG_OPPHØRT,
             BehandlingUnderkategori.UTVIDET,
@@ -252,7 +252,7 @@ class BeregningServiceTest {
             prosent = BigDecimal.ZERO
         )
 
-        Assertions.assertFalse(skalIkkeIverksette)
+        Assertions.assertTrue(skalIkkeIverksette)
     }
 
     @Test
