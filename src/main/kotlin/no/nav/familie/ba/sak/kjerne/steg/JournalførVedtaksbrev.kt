@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClien
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.tilDokumenttype
 import no.nav.familie.ba.sak.integrasjoner.journalføring.UtgåendeJournalføringService
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.brev.hentBrevmal
@@ -14,7 +13,6 @@ import no.nav.familie.ba.sak.kjerne.brev.hentOverstyrtDokumenttittel
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
-import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.domene.JournalførVedtaksbrevDTO
 import no.nav.familie.ba.sak.kjerne.steg.domene.MottakerInfo
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
@@ -38,8 +36,6 @@ class JournalførVedtaksbrev(
     private val taskRepository: TaskRepositoryWrapper,
     private val fagsakRepository: FagsakRepository,
     private val organisasjonService: OrganisasjonService,
-    private val personidentService: PersonidentService,
-    private val personopplysningerService: PersonopplysningerService,
     private val brevmottakerService: BrevmottakerService
 ) : BehandlingSteg<JournalførVedtaksbrevDTO> {
 
@@ -64,11 +60,7 @@ class JournalførVedtaksbrev(
         } else {
             val brevMottakere = brevmottakerService.hentBrevmottakere(behandling.id)
             if (brevMottakere.isNotEmpty()) {
-                mottakere += brevmottakerService.lagMottakereFraBrevMottakere(
-                    brevMottakere,
-                    søkersident,
-                    hentMottakerNavn(søkersident)
-                )
+                mottakere += brevmottakerService.lagMottakereFraBrevMottakere(brevMottakere, søkersident)
             } else {
                 mottakere += MottakerInfo(søkersident, BrukerIdType.FNR, false)
             }
@@ -88,7 +80,7 @@ class JournalførVedtaksbrev(
                 tilManuellMottakerEllerVerge = if (institusjonVergeIdent != null) {
                     mottakerInfo.erInstitusjonVerge
                 } else {
-                    (mottakerInfo.navn != null && mottakerInfo.navn != hentMottakerNavn(søkersident))
+                    (mottakerInfo.navn != null && mottakerInfo.navn != brevmottakerService.hentMottakerNavn(søkersident))
                 } // mottakersnavn fyller ut kun når manuell mottaker finnes
             ).also { journalposterTilDistribusjon[it] = mottakerInfo }
         }
@@ -105,7 +97,8 @@ class JournalførVedtaksbrev(
     ) {
         journalposterTilDistribusjon.forEach {
             val finnesBrevMottaker =
-                it.value.navn != null && it.value.navn != hentMottakerNavn(behandling.fagsak.aktør.aktivFødselsnummer())
+                it.value.navn != null &&
+                    it.value.navn != brevmottakerService.hentMottakerNavn(behandling.fagsak.aktør.aktivFødselsnummer())
             if (it.value.erInstitusjonVerge || finnesBrevMottaker) { // Denne tasken sender kun vedtaksbrev
                 val distribuerTilVergeTask =
                     DistribuerVedtaksbrevTilInstitusjonVergeEllerManuellBrevMottakerTask
@@ -189,7 +182,7 @@ class JournalførVedtaksbrev(
                 AvsenderMottaker(
                     idType = mottakerInfo.brukerIdType,
                     id = mottakerInfo.brukerId,
-                    navn = hentMottakerNavn(mottakerInfo.brukerId)
+                    navn = brevmottakerService.hentMottakerNavn(mottakerInfo.brukerId)
                 )
             }
             mottakerInfo.brukerIdType == BrukerIdType.FNR && mottakerInfo.navn != null -> {
@@ -202,13 +195,6 @@ class JournalførVedtaksbrev(
             else -> {
                 null
             }
-        }
-    }
-
-    private fun hentMottakerNavn(personIdent: String): String {
-        val aktør = personidentService.hentAktør(personIdent)
-        return personopplysningerService.hentPersoninfoNavnOgAdresse(aktør).let {
-            it.navn!!
         }
     }
 
