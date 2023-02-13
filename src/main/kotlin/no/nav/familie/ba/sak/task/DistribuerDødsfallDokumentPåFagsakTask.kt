@@ -75,7 +75,8 @@ class DistribuerDødsfallDokumentPåFagsakTask(
         fun opprettTask(distribuerDokumentDTO: DistribuerDokumentDTO): Task {
             return Task(
                 type = this.TASK_STEP_TYPE,
-                payload = objectMapper.writeValueAsString(distribuerDokumentDTO)
+                payload = objectMapper.writeValueAsString(distribuerDokumentDTO),
+                triggerTid = LocalDateTime.now().plusMinutes(5)
             )
         }
 
