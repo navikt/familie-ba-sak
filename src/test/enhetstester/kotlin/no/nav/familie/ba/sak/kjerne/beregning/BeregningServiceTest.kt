@@ -243,7 +243,7 @@ class BeregningServiceTest {
     }
 
     @Test
-    fun `Skal ikke iverksettes i økonomi hvis vi mangler utbetalingsperioder men er av underkategori UTVIDET`() {
+    fun `Skal ikke iverksettes i økonomi hvis vi mangler utbetalingsperioder, selv om underkategorien er UTVIDET`() {
         val skalIkkeIverksette = opprettAtyMedEndretUtbetalingsPeriode(
             behandlinsResultat = Behandlingsresultat.INNVILGET_OG_OPPHØRT,
             BehandlingUnderkategori.UTVIDET,
