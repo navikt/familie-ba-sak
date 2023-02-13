@@ -191,7 +191,7 @@ class BeregningServiceTest {
     }
 
     @Test
-    fun `Skal ikke iverksettes i økonomi hvis mangler utbetalins perioder grunnet endret utbetalings periode`() {
+    fun `Skal ikke iverksettes i økonomi hvis vi mangler utbetalingsperioder grunnet endret utbetalings periode`() {
         val skalIkkeIverksette = opprettAtyMedEndretUtbetalingsPeriode(
             behandlinsResultat = Behandlingsresultat.INNVILGET_OG_OPPHØRT,
             BehandlingUnderkategori.ORDINÆR,
@@ -204,7 +204,7 @@ class BeregningServiceTest {
     }
 
     @Test
-    fun `Skal ikke iverksettes i økonomi hvis mangler utbetalingsperioder uavhengig av behandlingsresultat`() {
+    fun `Skal ikke iverksettes i økonomi hvis vi mangler utbetalingsperioder uavhengig av behandlingsresultat`() {
         val skalIkkeIverksette = opprettAtyMedEndretUtbetalingsPeriode(
             behandlinsResultat = Behandlingsresultat.INNVILGET,
             BehandlingUnderkategori.ORDINÆR,
@@ -243,7 +243,7 @@ class BeregningServiceTest {
     }
 
     @Test
-    fun `Skal ikke iverksettes i økonomi hvis mangler utbetalingsperioder men er av underkategori UTVIDET`() {
+    fun `Skal ikke iverksettes i økonomi hvis vi mangler utbetalingsperioder men er av underkategori UTVIDET`() {
         val skalIkkeIverksette = opprettAtyMedEndretUtbetalingsPeriode(
             behandlinsResultat = Behandlingsresultat.INNVILGET_OG_OPPHØRT,
             BehandlingUnderkategori.UTVIDET,
