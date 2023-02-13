@@ -10,7 +10,9 @@ import io.mockk.runs
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.ekstern.restDomene.RestBrevmottaker
+import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
+import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -23,6 +25,12 @@ internal class BrevmottakerServiceTest {
 
     @MockK
     private lateinit var brevmottakerRepository: BrevmottakerRepository
+
+    @MockK
+    private lateinit var personidentService: PersonidentService
+
+    @MockK
+    private lateinit var personopplysningerService: PersonopplysningerService
 
     @MockK
     private lateinit var loggService: LoggService
