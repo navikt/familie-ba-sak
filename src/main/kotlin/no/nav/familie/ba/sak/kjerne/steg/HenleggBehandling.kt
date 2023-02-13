@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.SATSENDRING
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
@@ -13,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.byggMottakerdata
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.BehandleSak
 import org.springframework.stereotype.Service
 
 @Service
@@ -39,6 +41,9 @@ class HenleggBehandling(
         }
 
         oppgaveService.hentOppgaverSomIkkeErFerdigstilt(behandling).forEach {
+            if (data.årsak == HenleggÅrsak.TEKNISK_VEDLIKEHOLD && data.begrunnelse == SATSENDRING && it.type == BehandleSak) {
+                return@forEach // continue
+            }
             oppgaveService.ferdigstillOppgaver(behandling.id, it.type)
         }
 

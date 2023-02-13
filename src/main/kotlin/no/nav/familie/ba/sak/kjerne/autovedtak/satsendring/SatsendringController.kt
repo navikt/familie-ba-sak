@@ -1,8 +1,12 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.satsendring
 
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
+import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
+import no.nav.familie.ba.sak.task.HenleggBehandlingTask
+import no.nav.familie.ba.sak.task.HenleggBehandlingTaskDTO
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.ResponseEntity
@@ -13,14 +17,17 @@ import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import java.time.LocalDate
+
+const val SATSENDRING = "Satsendring"
 
 @RestController
 @RequestMapping("/api/satsendring")
 @ProtectedWithClaims(issuer = "azuread")
 class SatsendringController(
     private val startSatsendring: StartSatsendring,
-    private val tilgangService: TilgangService
-
+    private val tilgangService: TilgangService,
+    private val taskRepository: TaskRepositoryWrapper
 ) {
     @GetMapping(path = ["/kjorsatsendring/{fagsakId}"])
     fun utførSatsendringITaskPåFagsak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<String>> {
@@ -52,5 +59,22 @@ class SatsendringController(
             startSatsendring.sjekkOgOpprettSatsendringVedGammelSats(it)
         }
         return ResponseEntity.ok(Ressurs.success("Trigget satsendring for liste med identer ${listeMedIdenter.size}"))
+    }
+
+    @PostMapping(path = ["/henleggBehandlingerMedLangLiggetid"])
+    fun henleggBehandlingerMedLangLiggetid(@RequestBody behandlinger: Set<String>): ResponseEntity<Ressurs<String>> {
+        behandlinger.forEach {
+            taskRepository.save(
+                HenleggBehandlingTask.opprettTask(
+                    HenleggBehandlingTaskDTO(
+                        behandlingId = it.toLong(),
+                        årsak = HenleggÅrsak.TEKNISK_VEDLIKEHOLD,
+                        begrunnelse = SATSENDRING,
+                        validerOppgavefristErEtterDato = LocalDate.of(2023, 4, 1)
+                    )
+                )
+            )
+        }
+        return ResponseEntity.ok(Ressurs.Companion.success("Trigget henleggelse for ${behandlinger.size} behandlinger"))
     }
 }

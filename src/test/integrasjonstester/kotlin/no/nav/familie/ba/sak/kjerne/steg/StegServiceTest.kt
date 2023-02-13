@@ -11,6 +11,8 @@ import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.mockHentPersoninfoForMedIdenter
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
+import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.DbOppgave
+import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -38,6 +40,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvu
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -83,7 +86,10 @@ class StegServiceTest(
     private val personidentService: PersonidentService,
 
     @Autowired
-    private val vedtaksperiodeService: VedtaksperiodeService
+    private val vedtaksperiodeService: VedtaksperiodeService,
+
+    @Autowired
+    private val oppgaveRepository: OppgaveRepository
 ) : AbstractSpringIntegrationTest() {
 
     @BeforeEach
@@ -281,6 +287,29 @@ class StegServiceTest(
         )
 
         assertEquals(StegType.BEHANDLING_AVSLUTTET, henlagtBehandling.steg)
+    }
+
+    @Test
+    fun `Teknisk henleggelse med begrunnelse Satsendring skal beholde behandleSak-oppgaven åpen`() {
+        val behandling = kjørGjennomStegInkludertVurderTilbakekreving()
+        oppgaveRepository.saveAll(
+            listOf(
+                DbOppgave(behandling = behandling, type = Oppgavetype.GodkjenneVedtak, gsakId = "1"),
+                DbOppgave(behandling = behandling, type = Oppgavetype.BehandleSak, gsakId = "2"),
+                DbOppgave(behandling = behandling, type = Oppgavetype.BehandleUnderkjentVedtak, gsakId = "3")
+            )
+        )
+        val henlagtBehandling = stegService.håndterHenleggBehandling(
+            behandling,
+            RestHenleggBehandlingInfo(
+                årsak = HenleggÅrsak.TEKNISK_VEDLIKEHOLD,
+                begrunnelse = "Satsendring"
+            )
+        )
+        assertEquals(StegType.BEHANDLING_AVSLUTTET, henlagtBehandling.steg)
+        assertTrue {
+            oppgaveRepository.findByBehandlingAndIkkeFerdigstilt(henlagtBehandling).single().type == Oppgavetype.BehandleSak
+        }
     }
 
     @Test
