@@ -47,13 +47,17 @@ class SimuleringService(
     fun hentSimuleringFraFamilieOppdrag(vedtak: Vedtak): DetaljertSimuleringResultat? {
         if (vedtak.behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET ||
             vedtak.behandling.resultat == Behandlingsresultat.AVSLÅTT ||
-            (if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_ATY_FOR_Å_AVGJØRE_DROPPE_SIMULERING)) beregningService.erAlleUtbetalingsperioderPåNullKronerIDenneOgForrigeBehandling(
-                behandling = vedtak.behandling
-            ) else {
-                beregningService.innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(
-                    behandling = vedtak.behandling
+            (
+                if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_ATY_FOR_Å_AVGJØRE_DROPPE_SIMULERING)) {
+                    beregningService.erAlleUtbetalingsperioderPåNullKronerIDenneOgForrigeBehandling(
+                            behandling = vedtak.behandling
+                        )
+                } else {
+                    beregningService.innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(
+                            behandling = vedtak.behandling
+                        )
+                }
                 )
-            })
         ) {
             return null
         }
