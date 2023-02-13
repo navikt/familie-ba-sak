@@ -100,15 +100,12 @@ object BehandlingsresultatSøknadUtils {
                 nåværendeBeløp == forrigeBeløp || nåværendeBeløp == null -> Søknadsresultat.INGEN_RELEVANTE_ENDRINGER // Ingen endring eller fjernet en andel
                 nåværendeBeløp > 0 -> Søknadsresultat.INNVILGET // Innvilget beløp som er annerledes enn forrige gang
                 nåværendeBeløp == 0 -> {
-                    val endringsperiodeÅrsak = endretUtbetalingAndel?.årsak
-
-                    when {
-                        nåværende.differanseberegnetPeriodebeløp != null -> Søknadsresultat.INNVILGET
-                        endringsperiodeÅrsak == Årsak.DELT_BOSTED -> Søknadsresultat.INNVILGET
-                        (endringsperiodeÅrsak == Årsak.ALLEREDE_UTBETALT) ||
-                            (endringsperiodeÅrsak == Årsak.ENDRE_MOTTAKER) ||
-                            (endringsperiodeÅrsak == Årsak.ETTERBETALING_3ÅR) -> Søknadsresultat.AVSLÅTT
-                        else -> Søknadsresultat.INGEN_RELEVANTE_ENDRINGER
+                    when (endretUtbetalingAndel?.årsak) {
+                        null -> if (nåværende.differanseberegnetPeriodebeløp != null) Søknadsresultat.INNVILGET else Søknadsresultat.INGEN_RELEVANTE_ENDRINGER
+                        Årsak.DELT_BOSTED -> Søknadsresultat.INNVILGET
+                        Årsak.ALLEREDE_UTBETALT,
+                        Årsak.ENDRE_MOTTAKER,
+                        Årsak.ETTERBETALING_3ÅR -> Søknadsresultat.AVSLÅTT
                     }
                 }
                 else -> Søknadsresultat.INGEN_RELEVANTE_ENDRINGER
