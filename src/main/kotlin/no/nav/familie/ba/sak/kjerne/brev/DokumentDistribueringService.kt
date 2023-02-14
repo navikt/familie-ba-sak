@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
-import no.nav.familie.ba.sak.task.DistribuerDokumentPåFagsakTask
+import no.nav.familie.ba.sak.task.DistribuerDokumentPåJournalpostIdTask
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.Logger
@@ -60,7 +60,7 @@ class DokumentDistribueringService(
 
             when {
                 mottakerErDødUtenDødsboadresse(ressursException) && behandlingId != null ->
-                    distribuerBrevetPåFagsaknivå(distribuerDokumentDTO)
+                    opprettLogginnslagPåBehandlingOgNyTaskSomDistribuererPåJournalpostId(distribuerDokumentDTO)
 
                 mottakerErIkkeDigitalOgHarUkjentAdresse(ressursException) && behandlingId != null ->
                     loggBrevIkkeDistribuertUkjentAdresse(journalpostId, behandlingId, brevmal)
@@ -70,8 +70,8 @@ class DokumentDistribueringService(
         }
     }
 
-    internal fun distribuerBrevetPåFagsaknivå(distribuerDokumentDTO: DistribuerDokumentDTO) {
-        val task = DistribuerDokumentPåFagsakTask.opprettTask(distribuerDokumentDTO.copy(behandlingId = null))
+    internal fun opprettLogginnslagPåBehandlingOgNyTaskSomDistribuererPåJournalpostId(distribuerDokumentDTO: DistribuerDokumentDTO) {
+        val task = DistribuerDokumentPåJournalpostIdTask.opprettTask(distribuerDokumentDTO.copy(behandlingId = null))
         taskService.save(task)
 
         logger.info(
