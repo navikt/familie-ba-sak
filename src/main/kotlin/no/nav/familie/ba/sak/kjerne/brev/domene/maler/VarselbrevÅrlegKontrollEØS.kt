@@ -14,11 +14,17 @@ data class VarselbrevÅrlegKontrollEøs(
         fødselsnummer: String,
         enhet: String,
         mottakerlandSed: String,
-        dokumentliste: List<String> = emptyList()
+        dokumentliste: List<String> = emptyList(),
+        saksbehandlerNavn: String
     ) : this(
         mal = mal,
         data = VarselbrevÅrlegKontrollEøsData(
-            delmalData = VarselbrevÅrlegKontrollEøsData.DelmalData(signatur = SignaturDelmal(enhet = enhet)),
+            delmalData = VarselbrevÅrlegKontrollEøsData.DelmalData(
+                signatur = SignaturDelmal(
+                    enhet = enhet,
+                    saksbehandlerNavn = saksbehandlerNavn
+                )
+            ),
             flettefelter = VarselbrevÅrlegKontrollEøsData.Flettefelter(
                 navn = navn,
                 fodselsnummer = fødselsnummer,
