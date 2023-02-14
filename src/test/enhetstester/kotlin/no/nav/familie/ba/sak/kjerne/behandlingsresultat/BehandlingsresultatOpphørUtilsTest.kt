@@ -180,6 +180,33 @@ class BehandlingsresultatOpphørUtilsTest {
     }
 
     @Test
+    fun `hentOpphørsresultatPåBehandling skal returnere OPPHØRT dersom vi går fra andeler på person til fullt opphør på person`() {
+        val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
+        val apr22 = YearMonth.of(2022, 4)
+
+        mockkStatic(YearMonth::class)
+        every { YearMonth.now() } returns apr22
+
+        val forrigeAndeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = jan22,
+                tom = mar22,
+                beløp = 1054,
+                aktør = barn1Aktør
+            )
+        )
+
+        val opphørsresultat = hentOpphørsresultatPåBehandling(
+            nåværendeAndeler = emptyList(),
+            forrigeAndeler = forrigeAndeler,
+            nåværendeEndretAndeler = emptyList(),
+            forrigeEndretAndeler = emptyList()
+        )
+
+        assertEquals(Opphørsresultat.OPPHØRT, opphørsresultat)
+    }
+
+    @Test
     fun `hentOpphørsresultatPåBehandling skal returnere FORTSATT_OPPHØRT dersom nåværende andeler har lik opphørsdato som forrige andeler`() {
         val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
         val barn2Aktør = lagPerson(type = PersonType.BARN).aktør

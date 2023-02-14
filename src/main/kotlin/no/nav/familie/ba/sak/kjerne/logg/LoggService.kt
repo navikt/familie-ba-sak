@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.brev.mottaker.Brevmottaker
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.korrigertetterbetaling.KorrigertEtterbetaling
@@ -473,6 +474,36 @@ class LoggService(
             Logg(
                 behandlingId = behandling.id,
                 type = LoggType.KORRIGERT_VEDTAK,
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
+                    rolleConfig,
+                    BehandlerRolle.SAKSBEHANDLER
+                ),
+                tittel = tittel,
+                tekst = tekst
+            )
+        )
+    }
+
+    fun opprettBrevmottakerLogg(
+        brevmottaker: Brevmottaker,
+        brevmottakerFjernet: Boolean
+    ) {
+        val lagtTilEllerFjernet = if (brevmottakerFjernet) "fjernet" else "lagt til"
+        val tittel = "${brevmottaker.type.visningsnavn} er $lagtTilEllerFjernet som brevmottaker"
+
+        val tekst = listOfNotNull(
+            brevmottaker.navn,
+            brevmottaker.adresselinje1,
+            brevmottaker.adresselinje2,
+            brevmottaker.postnummer,
+            brevmottaker.poststed,
+            brevmottaker.landkode
+        ).joinToString(separator = System.lineSeparator())
+
+        lagre(
+            Logg(
+                behandlingId = brevmottaker.behandlingId,
+                type = LoggType.BREVMOTTAKER_LAGT_TIL_ELLER_FJERNET,
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                     rolleConfig,
                     BehandlerRolle.SAKSBEHANDLER
