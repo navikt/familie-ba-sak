@@ -39,8 +39,9 @@ class StartSatsendring(
     private val autovedtakSatsendringService: AutovedtakSatsendringService,
     private val beregningService: BeregningService,
     private val persongrunnlagService: PersongrunnlagService
-
 ) {
+
+    private val ignorerteFagsaker = mutableSetOf<Long>()
 
     @Transactional
     fun startSatsendring(
@@ -93,9 +94,14 @@ class StartSatsendring(
     }
 
     private fun skalTriggeSatsendring(fagsak: Fagsak, satsTidspunkt: YearMonth): Boolean {
+        if (ignorerteFagsaker.contains(fagsak.id)) {
+            return false
+        }
+
         val aktivOgÅpenBehandling = behandlingRepository.findByFagsakAndAktivAndOpen(fagsakId = fagsak.id)
         if (aktivOgÅpenBehandling != null) {
             logger.info("Oppretter ikke satsendringtask for fagsak=${fagsak.id}. Har åpen behandling ${aktivOgÅpenBehandling.id}")
+            ignorerteFagsaker.add(fagsak.id)
             return false
         }
 
@@ -122,9 +128,10 @@ class StartSatsendring(
             }
             if (featureToggleService.isEnabled(
                     FeatureToggleConfig.SATSENDRING_SJEKK_UTBETALING,
-                    false
+                    true
                 ) && harUtbetalingerSomOverstiger100Prosent(sisteIverksatteBehandling)
             ) {
+                ignorerteFagsaker.add(fagsak.id)
                 return false
             }
 
@@ -137,6 +144,7 @@ class StartSatsendring(
             return true
         } else {
             logger.info("Satsendring utføres ikke på fagsak=${fagsak.id} fordi fagsaken mangler en iverksatt behandling")
+            ignorerteFagsaker.add(fagsak.id)
             return false
         }
     }
