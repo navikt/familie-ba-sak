@@ -188,12 +188,28 @@ class BehandlingsresultatUtilsTest {
         assertEquals(kombinertResultat, behandlingsresultat)
     }
 
+    @ParameterizedTest(name = "Søknadsresultat {0}, Endringsresultat {1} og Opphørsresultat {2} skal kaste feil")
+    @MethodSource("hentUgyldigeKombinasjoner")
+    internal fun `Kombiner resultater - skal kaste feil ved ugyldige kombinasjoner av resultat`(
+        søknadsresultat: Søknadsresultat?,
+        endringsresultat: Endringsresultat,
+        opphørsresultat: Opphørsresultat
+    ) {
+        assertThrows<Feil> {
+            BehandlingsresultatUtils.kombinerResultaterTilBehandlingsresultat(
+                søknadsresultat,
+                endringsresultat,
+                opphørsresultat
+            )
+        }
+    }
+
     companion object {
         @JvmStatic
         fun hentKombinasjonerOgBehandlingsResultat() =
             Stream.of(
                 Arguments.of(Søknadsresultat.INGEN_RELEVANTE_ENDRINGER, Endringsresultat.INGEN_ENDRING, Opphørsresultat.IKKE_OPPHØRT, Behandlingsresultat.FORTSATT_INNVILGET),
-                Arguments.of(Søknadsresultat.INGEN_RELEVANTE_ENDRINGER, Endringsresultat.INGEN_ENDRING, Opphørsresultat.FORTSATT_OPPHØRT, Behandlingsresultat.FORTSATT_OPPHØRT),
+                Arguments.of(Søknadsresultat.INGEN_RELEVANTE_ENDRINGER, Endringsresultat.ENDRING, Opphørsresultat.IKKE_OPPHØRT, Behandlingsresultat.ENDRET_OG_FORTSATT_INNVILGET),
                 Arguments.of(Søknadsresultat.INNVILGET, Endringsresultat.ENDRING, Opphørsresultat.OPPHØRT, Behandlingsresultat.INNVILGET_ENDRET_OG_OPPHØRT),
                 Arguments.of(Søknadsresultat.INNVILGET, Endringsresultat.ENDRING, Opphørsresultat.FORTSATT_OPPHØRT, Behandlingsresultat.INNVILGET_OG_ENDRET),
                 Arguments.of(Søknadsresultat.INNVILGET, Endringsresultat.ENDRING, Opphørsresultat.IKKE_OPPHØRT, Behandlingsresultat.INNVILGET_OG_ENDRET),
@@ -218,6 +234,15 @@ class BehandlingsresultatUtilsTest {
                 Arguments.of(null, Endringsresultat.INGEN_ENDRING, Opphørsresultat.OPPHØRT, Behandlingsresultat.OPPHØRT),
                 Arguments.of(null, Endringsresultat.INGEN_ENDRING, Opphørsresultat.FORTSATT_OPPHØRT, Behandlingsresultat.FORTSATT_OPPHØRT),
                 Arguments.of(null, Endringsresultat.INGEN_ENDRING, Opphørsresultat.IKKE_OPPHØRT, Behandlingsresultat.FORTSATT_INNVILGET)
+            )
+
+        @JvmStatic
+        fun hentUgyldigeKombinasjoner() =
+            Stream.of(
+                Arguments.of(Søknadsresultat.INGEN_RELEVANTE_ENDRINGER, Endringsresultat.INGEN_ENDRING, Opphørsresultat.OPPHØRT),
+                Arguments.of(Søknadsresultat.INGEN_RELEVANTE_ENDRINGER, Endringsresultat.INGEN_ENDRING, Opphørsresultat.FORTSATT_OPPHØRT),
+                Arguments.of(Søknadsresultat.INGEN_RELEVANTE_ENDRINGER, Endringsresultat.ENDRING, Opphørsresultat.OPPHØRT),
+                Arguments.of(Søknadsresultat.INGEN_RELEVANTE_ENDRINGER, Endringsresultat.ENDRING, Opphørsresultat.FORTSATT_OPPHØRT)
             )
     }
 

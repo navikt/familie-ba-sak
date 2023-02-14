@@ -44,7 +44,7 @@ internal class DokumentDistribueringServiceEnhetstest {
             cause = RestClientResponseException("Mottaker har ukjent adresse", 400, "", null, null, null)
         )
 
-        dokumentDistribueringService.prøvDistribuerBrevOgLoggHendelse(
+        dokumentDistribueringService.prøvDistribuerBrevOgLoggHendelseFraBehandling(
             distribuerDokumentDTO = lagDistribuerDokumentDTO(),
             loggBehandlerRolle = BehandlerRolle.BESLUTTER
         )
@@ -62,7 +62,7 @@ internal class DokumentDistribueringServiceEnhetstest {
             cause = RestClientResponseException("", 410, "", null, null, null)
         )
 
-        dokumentDistribueringService.prøvDistribuerBrevOgLoggHendelse(
+        dokumentDistribueringService.prøvDistribuerBrevOgLoggHendelseFraBehandling(
             distribuerDokumentDTO = lagDistribuerDokumentDTO(),
             loggBehandlerRolle = BehandlerRolle.BESLUTTER
         )
@@ -83,7 +83,7 @@ internal class DokumentDistribueringServiceEnhetstest {
         )
 
         assertDoesNotThrow {
-            dokumentDistribueringService.prøvDistribuerBrevOgLoggHendelse(
+            dokumentDistribueringService.prøvDistribuerBrevOgLoggHendelseFraBehandling(
                 distribuerDokumentDTO = lagDistribuerDokumentDTO(),
                 loggBehandlerRolle = BehandlerRolle.BESLUTTER
             )

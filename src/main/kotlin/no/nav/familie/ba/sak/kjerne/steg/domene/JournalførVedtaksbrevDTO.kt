@@ -13,6 +13,8 @@ data class MottakerInfo(
     val manuellAdresseInfo: ManuellAdresseInfo? = null
 )
 
+fun MottakerInfo.toList() = listOf(this)
+
 data class ManuellAdresseInfo(
     val adresselinje1: String,
     val adresselinje2: String? = null,

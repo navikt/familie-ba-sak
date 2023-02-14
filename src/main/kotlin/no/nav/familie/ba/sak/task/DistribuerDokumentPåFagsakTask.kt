@@ -21,7 +21,7 @@ const val ANTALL_SEKUNDER_I_EN_UKE = 604800L
 
 @Service
 @TaskStepBeskrivelse(
-    taskStepType = DistribuerDødsfallDokumentPåFagsakTask.TASK_STEP_TYPE,
+    taskStepType = DistribuerDokumentPåFagsakTask.TASK_STEP_TYPE,
     beskrivelse = "Send dødsfall dokument til Dokdist",
     triggerTidVedFeilISekunder = ANTALL_SEKUNDER_I_EN_UKE,
     // ~8 måneder dersom vi prøver én gang i uka.
@@ -29,7 +29,7 @@ const val ANTALL_SEKUNDER_I_EN_UKE = 604800L
     maxAntallFeil = 4 * 8,
     settTilManuellOppfølgning = true
 )
-class DistribuerDødsfallDokumentPåFagsakTask(
+class DistribuerDokumentPåFagsakTask(
     private val dokumentDistribueringService: DokumentDistribueringService
 ) : AsyncTaskStep {
 
@@ -73,9 +73,12 @@ class DistribuerDødsfallDokumentPåFagsakTask(
 
     companion object {
         fun opprettTask(distribuerDokumentDTO: DistribuerDokumentDTO): Task {
+            check(distribuerDokumentDTO.behandlingId == null)
+
             return Task(
                 type = this.TASK_STEP_TYPE,
-                payload = objectMapper.writeValueAsString(distribuerDokumentDTO)
+                payload = objectMapper.writeValueAsString(distribuerDokumentDTO),
+                triggerTid = LocalDateTime.now().plusMinutes(5)
             )
         }
 
