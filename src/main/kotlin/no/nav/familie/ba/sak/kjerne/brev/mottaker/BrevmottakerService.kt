@@ -4,24 +4,34 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.ekstern.restDomene.RestBrevmottaker
 import no.nav.familie.ba.sak.ekstern.restDomene.tilBrevMottaker
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.domene.ManuellAdresseInfo
 import no.nav.familie.ba.sak.kjerne.steg.domene.MottakerInfo
 import no.nav.familie.ba.sak.kjerne.steg.domene.toList
 import no.nav.familie.kontrakter.felles.BrukerIdType
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 class BrevmottakerService(
     private val brevmottakerRepository: BrevmottakerRepository,
+    private val loggService: LoggService,
     private val personidentService: PersonidentService,
     private val personopplysningerService: PersonopplysningerService
 ) {
 
     @Transactional
     fun leggTilBrevmottaker(restBrevMottaker: RestBrevmottaker, behandlingId: Long) {
-        brevmottakerRepository.save(restBrevMottaker.tilBrevMottaker(behandlingId))
+        val brevmottaker = restBrevMottaker.tilBrevMottaker(behandlingId)
+
+        loggService.opprettBrevmottakerLogg(
+            brevmottaker = brevmottaker,
+            brevmottakerFjernet = false
+        )
+
+        brevmottakerRepository.save(brevmottaker)
     }
 
     @Transactional
@@ -39,6 +49,14 @@ class BrevmottakerService(
 
     @Transactional
     fun fjernBrevmottaker(id: Long) {
+        val brevmottaker =
+            brevmottakerRepository.findByIdOrNull(id) ?: throw Feil("Finner ikke brevmottaker med id=$id")
+
+        loggService.opprettBrevmottakerLogg(
+            brevmottaker = brevmottaker,
+            brevmottakerFjernet = true
+        )
+
         brevmottakerRepository.deleteById(id)
     }
 
@@ -94,6 +112,7 @@ class BrevmottakerService(
                         )
                     }
                 }
+
                 MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE, MottakerType.DØDSBO ->
                     // brev sendes til kun bruker sin registerte/manuell adresse
                     MottakerInfo(
