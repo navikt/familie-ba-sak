@@ -41,7 +41,7 @@ class BrevServiceTest {
             totrinnskontroll = null
         )
 
-        Assertions.assertEquals("System", saksbehandler)
+        Assertions.assertEquals("saksbehandlerNavn", saksbehandler)
         Assertions.assertEquals("Beslutter", beslutter)
     }
 
@@ -60,7 +60,7 @@ class BrevServiceTest {
         )
 
         Assertions.assertEquals("Mock Saksbehandler", saksbehandler)
-        Assertions.assertEquals("System", beslutter)
+        Assertions.assertEquals("saksbehandlerNavn", beslutter)
     }
 
     @Test
@@ -78,7 +78,7 @@ class BrevServiceTest {
         )
 
         Assertions.assertEquals("System", saksbehandler)
-        Assertions.assertEquals("Beslutter", beslutter)
+        Assertions.assertEquals("saksbehandlerNavn", beslutter)
     }
 
     @Test
