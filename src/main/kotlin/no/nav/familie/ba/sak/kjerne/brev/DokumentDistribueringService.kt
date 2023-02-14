@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
-import no.nav.familie.ba.sak.task.DistribuerDødsfallDokumentPåFagsakTask
+import no.nav.familie.ba.sak.task.DistribuerDokumentPåJournalpostIdTask
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.Logger
@@ -29,7 +29,6 @@ class DokumentDistribueringService(
     } catch (ressursException: RessursException) {
         val journalpostId = distribuerDokumentDTO.journalpostId
         val behandlingId = distribuerDokumentDTO.behandlingId
-        val brevmal = distribuerDokumentDTO.brevmal
 
         logger.info(
             "Klarte ikke å distribuere brev til journalpost $journalpostId på behandling $behandlingId. " +
@@ -41,27 +40,45 @@ class DokumentDistribueringService(
                 "Melding: ${ressursException.cause?.message}"
         )
 
-        when {
-            mottakerErIkkeDigitalOgHarUkjentAdresse(ressursException) && behandlingId != null ->
-                loggBrevIkkeDistribuertUkjentAdresse(journalpostId, behandlingId, brevmal)
-
-            mottakerErDødUtenDødsboadresse(ressursException) && behandlingId != null ->
-                håndterMottakerDødIngenAdressePåBehandling(distribuerDokumentDTO)
-
-            dokumentetErAlleredeDistribuert(ressursException) ->
-                logger.warn(alleredeDistribuertMelding(journalpostId, behandlingId))
-
-            else -> throw ressursException
+        if (dokumentetErAlleredeDistribuert(ressursException)) {
+            logger.warn(alleredeDistribuertMelding(journalpostId, behandlingId))
+        } else {
+            throw ressursException
         }
     }
 
-    internal fun håndterMottakerDødIngenAdressePåBehandling(distribuerDokumentDTO: DistribuerDokumentDTO) {
-        val task = DistribuerDødsfallDokumentPåFagsakTask.opprettTask(distribuerDokumentDTO)
+    fun prøvDistribuerBrevOgLoggHendelseFraBehandling(
+        distribuerDokumentDTO: DistribuerDokumentDTO,
+        loggBehandlerRolle: BehandlerRolle
+    ) {
+        try {
+            prøvDistribuerBrevOgLoggHendelse(distribuerDokumentDTO, loggBehandlerRolle)
+        } catch (ressursException: RessursException) {
+            val journalpostId = distribuerDokumentDTO.journalpostId
+            val behandlingId = distribuerDokumentDTO.behandlingId
+            val brevmal = distribuerDokumentDTO.brevmal
+
+            when {
+                mottakerErDødUtenDødsboadresse(ressursException) && behandlingId != null ->
+                    opprettLogginnslagPåBehandlingOgNyTaskSomDistribuererPåJournalpostId(distribuerDokumentDTO)
+
+                mottakerErIkkeDigitalOgHarUkjentAdresse(ressursException) && behandlingId != null ->
+                    loggBrevIkkeDistribuertUkjentAdresse(journalpostId, behandlingId, brevmal)
+
+                else -> throw ressursException
+            }
+        }
+    }
+
+    internal fun opprettLogginnslagPåBehandlingOgNyTaskSomDistribuererPåJournalpostId(distribuerDokumentDTO: DistribuerDokumentDTO) {
+        val task = DistribuerDokumentPåJournalpostIdTask.opprettTask(distribuerDokumentDTO.copy(behandlingId = null))
         taskService.save(task)
+
         logger.info(
             "Klarte ikke å distribuere brev for journalpostId ${distribuerDokumentDTO.journalpostId} " +
                 "på behandling ${distribuerDokumentDTO.behandlingId}. Bruker har ukjent dødsboadresse."
         )
+
         loggService.opprettBrevIkkeDistribuertUkjentDødsboadresseLogg(
             behandlingId = checkNotNull(distribuerDokumentDTO.behandlingId),
             brevnavn = distribuerDokumentDTO.brevmal.visningsTekst
