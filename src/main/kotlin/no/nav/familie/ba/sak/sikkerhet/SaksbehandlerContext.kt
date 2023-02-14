@@ -15,7 +15,7 @@ class SaksbehandlerContext(
         return if (grupper.contains(kode6GruppeId)) {
             ""
         } else {
-            SikkerhetContext.hentSaksbehandler()
+            SikkerhetContext.hentSaksbehandlerNavn()
         }
     }
 }
