@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.brev
 
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.tilKortString
+import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertKompetanse
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
@@ -32,6 +33,27 @@ fun List<MinimertRestPerson>.tilBarnasFødselsdatoer(): String =
                 person.fødselsdato.tilKortString()
             }
     )
+
+fun hentBarnasFødselsdatoerForAvslagsbegrunnelse(
+    barnIBegrunnelse: List<MinimertRestPerson>,
+    barnPåBehandling: List<MinimertRestPerson>,
+    uregistrerteBarn: List<MinimertUregistrertBarn>,
+    gjelderSøker: Boolean
+): String {
+    val registrerteBarnFødselsdatoer =
+        if (gjelderSøker) barnPåBehandling.tilBarnasFødselsdatoer() else barnIBegrunnelse.tilBarnasFødselsdatoer()
+    return registrerteBarnFødselsdatoer + uregistrerteBarn.mapNotNull { it.fødselsdato }
+}
+
+fun hentAntallBarnForAvslagsbegrunnelse(
+    barnIBegrunnelse: List<MinimertRestPerson>,
+    barnPåBehandling: List<MinimertRestPerson>,
+    uregistrerteBarn: List<MinimertUregistrertBarn>,
+    gjelderSøker: Boolean
+): Int {
+    val antallRegistrerteBarn = if (gjelderSøker) barnPåBehandling.size else barnIBegrunnelse.size
+    return antallRegistrerteBarn + uregistrerteBarn.size
+}
 
 fun hentRestBehandlingsgrunnlagForBrev(
     persongrunnlag: PersonopplysningGrunnlag,
