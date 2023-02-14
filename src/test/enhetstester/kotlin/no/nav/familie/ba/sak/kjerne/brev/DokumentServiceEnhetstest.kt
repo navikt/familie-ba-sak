@@ -25,6 +25,7 @@ import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerService
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.MottakerType
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
+import no.nav.familie.ba.sak.kjerne.institusjon.Institusjon
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -43,7 +44,7 @@ internal class DokumentServiceEnhetstest {
     val vilkårsvurderingForNyBehandlingService = mockk<VilkårsvurderingForNyBehandlingService>(relaxed = true)
     val utgåendeJournalføringService = mockk<UtgåendeJournalføringService>(relaxed = true)
     val journalføringRepository = mockk<JournalføringRepository>(relaxed = true)
-    val taskRepository = mockk<TaskRepositoryWrapper>()
+    val taskRepository = mockk<TaskRepositoryWrapper>(relaxed = true)
     val fagsakRepository = mockk<FagsakRepository>(relaxed = true)
     val organisasjonService = mockk<OrganisasjonService>(relaxed = true)
     val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>(relaxed = true)
@@ -77,6 +78,7 @@ internal class DokumentServiceEnhetstest {
             val fagsak = mockk<Fagsak>()
             every { fagsak.aktør } returns aktør
             every { fagsakRepository.finnFagsak(any()) } returns fagsak
+            every { fagsak.institusjon } returns Institusjon(orgNummer = "123456789", tssEksternId = "xxx")
 
             every {
                 utgåendeJournalføringService.journalførManueltBrev(
