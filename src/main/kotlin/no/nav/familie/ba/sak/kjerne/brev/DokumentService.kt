@@ -167,8 +167,8 @@ class DokumentService(
             manueltBrevRequest.erTilInstitusjon -> {
                 AvsenderMottaker(
                     idType = BrukerIdType.ORGNR,
-                    id = mottakerInfo.brukerId,
-                    navn = utledInstitusjonNavn(mottakerInfo)
+                    id = manueltBrevRequest.mottakerIdent,
+                    navn = utledInstitusjonNavn(manueltBrevRequest)
                 )
             }
             mottakerInfo.brukerIdType == BrukerIdType.FNR && mottakerInfo.navn != null -> {
@@ -180,8 +180,10 @@ class DokumentService(
         }
     }
 
-    private fun utledInstitusjonNavn(mottakerInfo: MottakerInfo): String {
-        return mottakerInfo.navn ?: organisasjonService.hentOrganisasjon(mottakerInfo.brukerId).navn
+    private fun utledInstitusjonNavn(manueltBrevRequest: ManueltBrevRequest): String {
+        return manueltBrevRequest.mottakerNavn.ifBlank {
+            organisasjonService.hentOrganisasjon(manueltBrevRequest.mottakerIdent).navn
+        }
     }
 
     private fun leggTilOpplysningspliktIVilkårsvurdering(behandling: Behandling) {
