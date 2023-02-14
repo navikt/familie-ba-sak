@@ -93,13 +93,16 @@ class BrevPeriodeGenerator(
                     restBehandlingsgrunnlagForBrev.personerPåBehandling.filter { it.type == PersonType.BARN }
                 val barnIBegrunnelse = personerIBegrunnelse.filter { it.type == PersonType.BARN }
                 val gjelderSøker = personerIBegrunnelse.any { it.type == PersonType.SØKER }
+                val barnasFødselsdatoer =
+                    if (gjelderSøker) barnPåBehandling.tilBarnasFødselsdatoer() else barnIBegrunnelse.tilBarnasFødselsdatoer()
+                val antallBarn = if (gjelderSøker) barnPåBehandling.size else barnIBegrunnelse.size
 
                 listOf(
                     EØSBegrunnelseDataUtenKompetanse(
                         vedtakBegrunnelseType = begrunnelse.vedtakBegrunnelseType,
                         apiNavn = begrunnelse.sanityApiNavn,
-                        barnasFodselsdatoer = if (gjelderSøker) barnPåBehandling.tilBarnasFødselsdatoer() else barnIBegrunnelse.tilBarnasFødselsdatoer(),
-                        antallBarn = if (gjelderSøker) barnPåBehandling.size else barnIBegrunnelse.size,
+                        barnasFodselsdatoer = barnasFødselsdatoer + uregistrerteBarn.mapNotNull { it.fødselsdato },
+                        antallBarn = antallBarn + uregistrerteBarn.size,
                         maalform = brevMålform.tilSanityFormat(),
                         gjelderSoker = gjelderSøker
                     )
