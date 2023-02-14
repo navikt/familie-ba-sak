@@ -83,8 +83,6 @@ class DistribuerDokumentPåJournalpostIdTask(
             val metadata = Properties().apply {
                 this["journalpostId"] = distribuerDokumentDTO.journalpostId
                 this["personEllerInstitusjonIdent"] = distribuerDokumentDTO.personEllerInstitusjonIdent
-                this["erManueltSendt"] = distribuerDokumentDTO.erManueltSendt
-                this["manuellAdresseInfo"] = distribuerDokumentDTO.manuellAdresseInfo
                 this[MDCConstants.MDC_CALL_ID] = MDC.get(MDCConstants.MDC_CALL_ID) ?: IdUtils.generateId()
             }
 
