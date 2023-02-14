@@ -21,7 +21,7 @@ class DistribuerVedtaksbrevTilInstitusjonVergeEllerManuellBrevMottakerTask(
 
     override fun doTask(task: Task) {
         val distribuerDokumentDTO = objectMapper.readValue(task.payload, DistribuerDokumentDTO::class.java)
-        dokumentDistribueringService.prøvDistribuerBrevOgLoggHendelse(
+        dokumentDistribueringService.prøvDistribuerBrevOgLoggHendelseFraBehandling(
             distribuerDokumentDTO = distribuerDokumentDTO,
             loggBehandlerRolle = BehandlerRolle.SYSTEM
         )
