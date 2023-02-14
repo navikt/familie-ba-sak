@@ -33,29 +33,34 @@ internal class HenleggBehandlingTaskTest {
     )
 
     @Test
-    fun doTask() {
+    fun `skal ikke henlegge dersom behandlingen allerede er avsluttet`() {
         every { behandlingHentOgPersisterService.hent(any()) } returns lagBehandling(status = BehandlingStatus.AVSLUTTET)
-        val task = opprettTask()
+        val task = opprettTekniskHenleggelseGrunnetSatsendringTask()
         henleggBehandlingTask.doTask(task)
+        verify(exactly = 0) {
+            stegService.håndterHenleggBehandling(any(), any())
+        }
         assertThat(task.metadata["Resultat"]).isEqualTo("Behandlingen er allerede avsluttet")
     }
 
     @Test
-    fun doTask2() {
+    fun `skal ikke henlegge dersom behandlingsfristen ikke er etter angitt valideringsdato`() {
         val behandling = lagBehandling()
         every { behandlingHentOgPersisterService.hent(any()) } returns behandling
         every { oppgaveService.hentOppgaverSomIkkeErFerdigstilt(any(), any()) } returns
             listOf(DbOppgave(behandling = behandling, gsakId = "1", type = Oppgavetype.BehandleSak))
         every { oppgaveService.hentOppgave(any()) } returns lagTestOppgaveDTO(1, Oppgavetype.BehandleSak)
 
-        val task = opprettTask()
+        val task = opprettTekniskHenleggelseGrunnetSatsendringTask()
         henleggBehandlingTask.doTask(task)
-
-        assertThat(task.metadata["Resultat"] as String).contains("Stoppet.", "frist", "Må være etter 2023-04-01")
+        verify(exactly = 0) {
+            stegService.håndterHenleggBehandling(any(), any())
+        }
+        assertThat(task.metadata["Resultat"] as String).contains("frist", "Må være etter 2023-04-01")
     }
 
     @Test
-    fun happy() {
+    fun `skal henlegge med årsak TEKNISK_VEDLIKEHOLD og begrunnelse Satsendring`() {
         val behandling = lagBehandling()
         every { behandlingHentOgPersisterService.hent(any()) } returns behandling
         every { oppgaveService.hentOppgaverSomIkkeErFerdigstilt(any(), any()) } returns
@@ -64,7 +69,7 @@ internal class HenleggBehandlingTaskTest {
             fristFerdigstillelse = LocalDate.of(2023, 4, 2).toString()
         )
 
-        val task = opprettTask()
+        val task = opprettTekniskHenleggelseGrunnetSatsendringTask()
         henleggBehandlingTask.doTask(task)
 
         val henleggBehandlingInfo = slot<RestHenleggBehandlingInfo>()
@@ -76,7 +81,7 @@ internal class HenleggBehandlingTaskTest {
         assertThat(task.metadata["Resultat"]).isEqualTo("Henleggelse kjørt OK")
     }
 
-    private fun opprettTask(): Task {
+    private fun opprettTekniskHenleggelseGrunnetSatsendringTask(): Task {
         return opprettTask(
             HenleggBehandlingTaskDTO(
                 behandlingId = 1,
