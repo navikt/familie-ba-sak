@@ -65,7 +65,6 @@ class BeslutteVedtakTest {
         featureToggleService = mockk()
         tilkjentYtelseValideringService = mockk()
 
-
         val loggService = mockk<LoggService>()
 
         every { taskRepository.save(any()) } returns Task(OpprettOppgaveTask.TASK_STEP_TYPE, "")
@@ -89,8 +88,6 @@ class BeslutteVedtakTest {
         every { vilkårsvurderingService.lagreNyOgDeaktiverGammel(any()) } returns randomVilkårsvurdering
         every { featureToggleService.isEnabled(any()) } returns false
         every { saksbehandlerContext.hentSaksbehandlerSignaturTilBrev() } returns "saksbehandlerNavn"
-
-
 
         beslutteVedtak = BeslutteVedtak(
             toTrinnKontrollService,

@@ -21,7 +21,7 @@ class DokumentGenereringService(
     private val brevService: BrevService,
     private val brevKlient: BrevKlient,
     private val integrasjonClient: IntegrasjonClient,
-    private val saksbehandlerContext: SaksbehandlerContext,
+    private val saksbehandlerContext: SaksbehandlerContext
 ) {
 
     fun genererBrevForVedtak(vedtak: Vedtak): ByteArray {

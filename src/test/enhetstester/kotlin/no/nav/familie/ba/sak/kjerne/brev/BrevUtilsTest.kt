@@ -30,7 +30,6 @@ import java.time.LocalDate
 
 internal class BrevUtilsTest {
 
-
     private val støttedeBehandlingsersultaterFørstegangsbehandling = listOf(
         Behandlingsresultat.INNVILGET,
         Behandlingsresultat.INNVILGET_OG_OPPHØRT,

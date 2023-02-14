@@ -13,7 +13,7 @@ data class EnkeltInformasjonsbrev(
         fodselsnummer: String,
         enhet: String,
         mal: Brevmal,
-        saksbehandlerNavn: String,
+        saksbehandlerNavn: String
     ) : this(
         mal = mal,
         data = EnkeltInformasjonsbrevData(

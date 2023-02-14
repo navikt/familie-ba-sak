@@ -21,7 +21,7 @@ data class VarselbrevMedÅrsakerOgBarn(
         enhet: String,
         varselÅrsaker: List<String>,
         barnasFødselsdager: String,
-        saksbehandlerNavn: String,
+        saksbehandlerNavn: String
     ) : this(
         mal = mal,
         data = VarselbrevMedÅrsakerOgBarnData(
