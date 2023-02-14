@@ -26,12 +26,22 @@ class DistribuerDokumentTask(
     override fun doTask(task: Task) {
         val distribuerDokumentDTO = objectMapper.readValue(task.payload, DistribuerDokumentDTO::class.java)
 
-        if (distribuerDokumentDTO.erManueltSendt && !distribuerDokumentDTO.brevmal.erVedtaksbrev) {
+        val erManueltSendtOgIkkeVedtaksbrev =
+            distribuerDokumentDTO.erManueltSendt && !distribuerDokumentDTO.brevmal.erVedtaksbrev
+        val erVedtaksbrevOgIkkeManueltSent =
+            !distribuerDokumentDTO.erManueltSendt && distribuerDokumentDTO.brevmal.erVedtaksbrev
+
+        if (erManueltSendtOgIkkeVedtaksbrev && distribuerDokumentDTO.behandlingId == null) {
             dokumentDistribueringService.prøvDistribuerBrevOgLoggHendelse(
                 distribuerDokumentDTO = distribuerDokumentDTO,
                 loggBehandlerRolle = BehandlerRolle.SAKSBEHANDLER
             )
-        } else if (!distribuerDokumentDTO.erManueltSendt && distribuerDokumentDTO.brevmal.erVedtaksbrev && distribuerDokumentDTO.behandlingId != null) {
+        } else if (erManueltSendtOgIkkeVedtaksbrev && distribuerDokumentDTO.behandlingId != null) {
+            dokumentDistribueringService.prøvDistribuerBrevOgLoggHendelseFraBehandling(
+                distribuerDokumentDTO = distribuerDokumentDTO,
+                loggBehandlerRolle = BehandlerRolle.SAKSBEHANDLER
+            )
+        } else if (erVedtaksbrevOgIkkeManueltSent && distribuerDokumentDTO.behandlingId != null) {
             stegService.håndterDistribuerVedtaksbrev(
                 behandling = behandlingHentOgPersisterService.hent(distribuerDokumentDTO.behandlingId),
                 distribuerDokumentDTO = distribuerDokumentDTO

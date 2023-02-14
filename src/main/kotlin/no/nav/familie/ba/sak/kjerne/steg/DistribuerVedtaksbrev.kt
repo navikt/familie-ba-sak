@@ -19,7 +19,7 @@ class DistribuerVedtaksbrev(
         data: DistribuerDokumentDTO
     ): StegType {
         logger.info("Iverksetter distribusjon av vedtaksbrev med journalpostId ${data.journalpostId}")
-        dokumentDistribueringService.prøvDistribuerBrevOgLoggHendelse(
+        dokumentDistribueringService.prøvDistribuerBrevOgLoggHendelseFraBehandling(
             distribuerDokumentDTO = data,
             loggBehandlerRolle = BehandlerRolle.SYSTEM
         )

@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.LogiskVedleggRe
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.LogiskVedleggResponse
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostRequest
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.OppdaterJournalpostResponse
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.steg.domene.ManuellAdresseInfo
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
@@ -22,7 +21,6 @@ import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.dokarkiv.ArkiverDokumentResponse
-import no.nav.familie.kontrakter.felles.dokarkiv.Dokumenttype
 import no.nav.familie.kontrakter.felles.dokarkiv.v2.ArkiverDokumentRequest
 import no.nav.familie.kontrakter.felles.dokdist.AdresseType
 import no.nav.familie.kontrakter.felles.dokdist.DistribuerJournalpostRequest
@@ -469,10 +467,4 @@ class IntegrasjonClient(
             return inputStream?.readAllBytes()
         }
     }
-}
-
-fun Behandlingsresultat.tilDokumenttype() = when (this) {
-    Behandlingsresultat.AVSLÅTT -> Dokumenttype.BARNETRYGD_VEDTAK_AVSLAG
-    Behandlingsresultat.OPPHØRT -> Dokumenttype.BARNETRYGD_OPPHØR
-    else -> Dokumenttype.BARNETRYGD_VEDTAK_INNVILGELSE
 }
