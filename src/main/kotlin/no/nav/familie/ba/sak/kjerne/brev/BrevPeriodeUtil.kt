@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjær
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilMinimertPerson
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import java.time.LocalDate
 import java.time.YearMonth
 
 fun List<MinimertRestPerson>.tilBarnasFødselsdatoer(): String =
@@ -34,6 +35,8 @@ fun List<MinimertRestPerson>.tilBarnasFødselsdatoer(): String =
             }
     )
 
+fun List<LocalDate>.tilSammenslåttKortString(): String = Utils.slåSammen(this.sorted().map { it.tilKortString() })
+
 fun hentBarnasFødselsdatoerForAvslagsbegrunnelse(
     barnIBegrunnelse: List<MinimertRestPerson>,
     barnPåBehandling: List<MinimertRestPerson>,
@@ -41,10 +44,11 @@ fun hentBarnasFødselsdatoerForAvslagsbegrunnelse(
     gjelderSøker: Boolean
 ): String {
     val registrerteBarnFødselsdatoer =
-        if (gjelderSøker) barnPåBehandling.tilBarnasFødselsdatoer() else barnIBegrunnelse.tilBarnasFødselsdatoer()
-    val uregistrerteBarnFødselsdatoer = Utils.slåSammen(
-        uregistrerteBarn.mapNotNull { it.fødselsdato }.sorted().map { it.tilKortString() })
-    return registrerteBarnFødselsdatoer + uregistrerteBarnFødselsdatoer
+        if (gjelderSøker) barnPåBehandling.map { it.fødselsdato } else barnIBegrunnelse.map { it.fødselsdato }
+    val uregistrerteBarnFødselsdatoer =
+        uregistrerteBarn.mapNotNull { it.fødselsdato }
+    val alleBarnaFødselsdatoer = registrerteBarnFødselsdatoer + uregistrerteBarnFødselsdatoer
+    return alleBarnaFødselsdatoer.tilSammenslåttKortString()
 }
 
 fun hentAntallBarnForAvslagsbegrunnelse(
