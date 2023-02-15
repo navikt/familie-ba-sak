@@ -6,8 +6,12 @@ import io.micrometer.core.instrument.Tags
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.leader.LeaderClient
+import no.nav.familie.log.mdc.MDCConstants
+import org.slf4j.LoggerFactory
+import org.slf4j.MDC
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
+import java.util.UUID
 
 @Component
 class SatsendringStatistikk(
@@ -23,46 +27,53 @@ class SatsendringStatistikk(
     )
     fun antallSatsendringerKjørt() {
         if (LeaderClient.isLeader() == true) {
-            val antallKjørt = satskjøringRepository.countByFerdigTidspunktIsNotNull()
-            val antallTriggetTotalt = satskjøringRepository.count()
-            val antallLøpendeFagsakerTotalt = fagsakRepository.finnAntallFagsakerLøpende()
+            try {
+                MDC.put(MDCConstants.MDC_CALL_ID, UUID.randomUUID().toString())
+                logger.info("Kjører statistikk satsendring")
+                val antallKjørt = satskjøringRepository.countByFerdigTidspunktIsNotNull()
+                val antallTriggetTotalt = satskjøringRepository.count()
+                val antallLøpendeFagsakerTotalt = fagsakRepository.finnAntallFagsakerLøpende()
 
-            val rows = listOf(
-                MultiGauge.Row.of(
-                    Tags.of(
-                        "satsendring",
-                        "totalt"
+                val rows = listOf(
+                    MultiGauge.Row.of(
+                        Tags.of(
+                            "satsendring",
+                            "totalt"
+                        ),
+                        antallTriggetTotalt
                     ),
-                    antallTriggetTotalt
-                ),
-                MultiGauge.Row.of(
-                    Tags.of(
-                        "satsendring",
-                        "antallkjort"
+                    MultiGauge.Row.of(
+                        Tags.of(
+                            "satsendring",
+                            "antallkjort"
+                        ),
+                        antallKjørt
                     ),
-                    antallKjørt
-                ),
-                MultiGauge.Row.of(
-                    Tags.of(
-                        "satsendring",
-                        "antallfagsaker"
+                    MultiGauge.Row.of(
+                        Tags.of(
+                            "satsendring",
+                            "antallfagsaker"
+                        ),
+                        antallLøpendeFagsakerTotalt
                     ),
-                    antallLøpendeFagsakerTotalt
-                ),
-                MultiGauge.Row.of(
-                    Tags.of(
-                        "satsendring",
-                        "antallgjenstaaende"
-                    ),
-                    antallLøpendeFagsakerTotalt - antallKjørt
+                    MultiGauge.Row.of(
+                        Tags.of(
+                            "satsendring",
+                            "antallgjenstaaende"
+                        ),
+                        antallLøpendeFagsakerTotalt - antallKjørt
+                    )
                 )
-            )
 
-            satsendringGauge.register(rows)
+                satsendringGauge.register(rows)
+            } finally {
+                MDC.clear()
+            }
         }
     }
 
     companion object {
         const val OPPDATERING_HVER_HALV_TIME: Long = 1000 * 30
+        private val logger = LoggerFactory.getLogger(SatsendringStatistikk::class.java)
     }
 }
