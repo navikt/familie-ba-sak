@@ -197,7 +197,11 @@ class BeregningService(
         )
     }
 
-    private fun genererOgLagreTilkjentYtelse(behandling: Behandling, personopplysningGrunnlag: PersonopplysningGrunnlag, endreteUtbetalingAndeler: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>): TilkjentYtelse{
+    private fun genererOgLagreTilkjentYtelse(
+        behandling: Behandling,
+        personopplysningGrunnlag: PersonopplysningGrunnlag,
+        endreteUtbetalingAndeler: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>
+    ): TilkjentYtelse {
         tilkjentYtelseRepository.slettTilkjentYtelseFor(behandling)
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
             ?: throw IllegalStateException("Kunne ikke hente vilkårsvurdering for behandling med id ${behandling.id}")
