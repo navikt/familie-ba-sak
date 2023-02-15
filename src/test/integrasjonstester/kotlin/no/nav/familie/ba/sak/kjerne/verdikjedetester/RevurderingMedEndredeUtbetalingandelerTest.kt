@@ -4,6 +4,8 @@ import no.nav.familie.ba.sak.common.lagSøknadDTO
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.nyOrdinærBehandling
 import no.nav.familie.ba.sak.common.nyRevurdering
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
@@ -70,7 +72,10 @@ class RevurderingMedEndredeUtbetalingandelerTest(
     private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService,
 
     @Autowired
-    private val søknadGrunnlagRepository: SøknadGrunnlagRepository
+    private val søknadGrunnlagRepository: SøknadGrunnlagRepository,
+
+    @Autowired
+    private val featureToggleService: FeatureToggleService
 
 ) : AbstractVerdikjedetest() {
     @Test
@@ -234,9 +239,12 @@ class RevurderingMedEndredeUtbetalingandelerTest(
         val andelPåvirketAvEndringer = andelerTilkjentYtelse.first()
 
         assertEquals(1, kopierteEndredeUtbetalingAndeler.size)
-        assertEquals(BigDecimal.ZERO, andelPåvirketAvEndringer.prosent)
-        assertEquals(endretAndelFom, andelPåvirketAvEndringer.stønadFom)
-        assertEquals(endretAndelTom, andelPåvirketAvEndringer.stønadTom)
-        assertTrue(andelPåvirketAvEndringer.endreteUtbetalinger.any { it.id == kopierteEndredeUtbetalingAndeler.single().id })
+
+        // Andel skal kun oppdateres direkte hvis toggle er på
+        if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER)) {
+            assertEquals(BigDecimal.ZERO, andelPåvirketAvEndringer.prosent)
+            assertEquals(endretAndelFom, andelPåvirketAvEndringer.stønadFom)
+            assertEquals(endretAndelTom, andelPåvirketAvEndringer.stønadTom)
+            assertTrue(andelPåvirketAvEndringer.endreteUtbetalinger.any { it.id == kopierteEndredeUtbetalingAndeler.single().id }) }
     }
 }
