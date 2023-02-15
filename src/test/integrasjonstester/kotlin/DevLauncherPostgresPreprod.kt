@@ -8,7 +8,6 @@ import java.io.InputStreamReader
 fun main(args: Array<String>) {
     System.setProperty("spring.profiles.active", Profil.DevPostgresPreprod.navn)
     val springBuilder = SpringApplicationBuilder(ApplicationConfig::class.java).profiles(
-        "mock-brev-klient",
         "mock-økonomi",
         "mock-infotrygd-feed",
         "mock-tilbakekreving-klient",
