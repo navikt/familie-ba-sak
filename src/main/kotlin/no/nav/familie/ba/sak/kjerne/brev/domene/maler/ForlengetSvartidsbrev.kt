@@ -15,11 +15,17 @@ data class ForlengetSvartidsbrev(
         årsaker: List<String>,
         antallUkerSvarfrist: Int,
         organisasjonsnummer: String? = null,
-        gjelder: String? = null
+        gjelder: String? = null,
+        saksbehandlerNavn: String
     ) : this(
         mal = mal,
         data = ForlengetSvartidsbrevData(
-            delmalData = ForlengetSvartidsbrevData.DelmalData(signatur = SignaturDelmal(enhet = enhetNavn)),
+            delmalData = ForlengetSvartidsbrevData.DelmalData(
+                signatur = SignaturDelmal(
+                    enhet = enhetNavn,
+                    saksbehandlerNavn = saksbehandlerNavn
+                )
+            ),
             flettefelter = ForlengetSvartidsbrevData.Flettefelter(
                 navn = flettefelt(navn),
                 fodselsnummer = flettefelt(fodselsnummer),

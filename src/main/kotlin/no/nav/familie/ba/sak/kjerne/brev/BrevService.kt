@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Autovedtak6og18årOgSmåbarnstillegg
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.AutovedtakNyfødtBarnFraFør
@@ -40,10 +41,13 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.korrigertetterbetaling.KorrigertEtterbetalingService
 import no.nav.familie.ba.sak.kjerne.korrigertvedtak.KorrigertVedtakService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
+import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
+import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 
@@ -59,7 +63,9 @@ class BrevService(
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val korrigertEtterbetalingService: KorrigertEtterbetalingService,
     private val organisasjonService: OrganisasjonService,
-    private val korrigertVedtakService: KorrigertVedtakService
+    private val korrigertVedtakService: KorrigertVedtakService,
+    private val saksbehandlerContext: SaksbehandlerContext
+
 ) {
 
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
@@ -318,6 +324,36 @@ class BrevService(
             beslutter = beslutter,
             enhet = enhet
         )
+    }
+
+    fun hentSaksbehandlerOgBeslutter(
+        behandling: Behandling,
+        totrinnskontroll: Totrinnskontroll?
+    ): Pair<String, String> {
+        return when {
+            behandling.steg <= StegType.SEND_TIL_BESLUTTER || totrinnskontroll == null -> {
+                Pair(saksbehandlerContext.hentSaksbehandlerSignaturTilBrev(), "Beslutter")
+            }
+
+            totrinnskontroll.erBesluttet() -> {
+                Pair(totrinnskontroll.saksbehandler, totrinnskontroll.beslutter!!)
+            }
+
+            behandling.steg == StegType.BESLUTTE_VEDTAK -> {
+                Pair(
+                    totrinnskontroll.saksbehandler,
+                    if (totrinnskontroll.saksbehandler == saksbehandlerContext.hentSaksbehandlerSignaturTilBrev()) {
+                        "Beslutter"
+                    } else {
+                        saksbehandlerContext.hentSaksbehandlerSignaturTilBrev()
+                    }
+                )
+            }
+
+            else -> {
+                throw Feil("Prøver å hente saksbehandler og beslutters navn for generering av brev i en ukjent tilstand.")
+            }
+        }
     }
 
     private data class GrunnlagOgSignaturData(
