@@ -39,8 +39,8 @@ class KlageController(
     fun hentKlagebehandlinger(@PathVariable fagsakId: Long): Ressurs<List<KlagebehandlingDto>> {
         tilgangService.validerTilgangTilHandlingOgFagsak(
             fagsakId = fagsakId,
-            event = AuditLoggerEvent.CREATE,
-            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+            event = AuditLoggerEvent.ACCESS,
+            minimumBehandlerRolle = BehandlerRolle.VEILEDER,
             handling = "Hent klagebehandlinger på fagsak"
         )
         return Ressurs.success(klageService.hentKlagebehandlingerPåFagsak(fagsakId))
