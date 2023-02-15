@@ -154,9 +154,17 @@ class BeslutteVedtak(
 
         if (nesteSteg == StegType.IVERKSETT_MOT_OPPDRAG) {
             val erInnvilgetSøknadUtenUtebtalingsperioderGrunnetEndringsperioder =
-                beregningService.erAlleUtbetalingsperioderPåNullKronerIDenneOgForrigeBehandling(behandling = behandling)
+                if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_ATY_FOR_Å_AVGJØRE_DROPPE_SIMULERING)) {
+                    beregningService.erAlleUtbetalingsperioderPåNullKronerIDenneOgForrigeBehandling(
+                        behandling = behandling
+                    )
+                } else {
+                    beregningService.innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(
+                        behandling = behandling
+                    )
+                }
 
-            if (erInnvilgetSøknadUtenUtebtalingsperioderGrunnetEndringsperioder) {
+            if (erInnvilgetSøknadUtenUtebtalingsperioderGrunnetEndringsperioder && behandling.erBehandlingMedVedtaksbrevutsending()) {
                 return StegType.JOURNALFØR_VEDTAKSBREV
             }
         }
