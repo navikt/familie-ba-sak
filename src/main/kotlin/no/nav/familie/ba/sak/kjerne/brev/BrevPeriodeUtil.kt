@@ -42,7 +42,9 @@ fun hentBarnasFødselsdatoerForAvslagsbegrunnelse(
 ): String {
     val registrerteBarnFødselsdatoer =
         if (gjelderSøker) barnPåBehandling.tilBarnasFødselsdatoer() else barnIBegrunnelse.tilBarnasFødselsdatoer()
-    return registrerteBarnFødselsdatoer + uregistrerteBarn.mapNotNull { it.fødselsdato }
+    val uregistrerteBarnFødselsdatoer = Utils.slåSammen(
+        uregistrerteBarn.mapNotNull { it.fødselsdato }.sorted().map { it.tilKortString() })
+    return registrerteBarnFødselsdatoer + uregistrerteBarnFødselsdatoer
 }
 
 fun hentAntallBarnForAvslagsbegrunnelse(
