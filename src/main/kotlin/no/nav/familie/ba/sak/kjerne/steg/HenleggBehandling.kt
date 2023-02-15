@@ -40,10 +40,9 @@ class HenleggBehandling(
             )
         }
 
-        oppgaveService.hentOppgaverSomIkkeErFerdigstilt(behandling).forEach {
-            if (data.årsak == HenleggÅrsak.TEKNISK_VEDLIKEHOLD && data.begrunnelse == SATSENDRING && it.type == BehandleSak) {
-                return@forEach // continue
-            }
+        oppgaveService.hentOppgaverSomIkkeErFerdigstilt(behandling)
+        .filter {!(data.årsak == HenleggÅrsak.TEKNISK_VEDLIKEHOLD && data.begrunnelse == SATSENDRING && it.type == BehandleSak)}
+        .forEach {
             oppgaveService.ferdigstillOppgaver(behandling.id, it.type)
         }
 
