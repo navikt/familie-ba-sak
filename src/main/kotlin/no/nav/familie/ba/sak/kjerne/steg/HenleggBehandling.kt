@@ -41,10 +41,10 @@ class HenleggBehandling(
         }
 
         oppgaveService.hentOppgaverSomIkkeErFerdigstilt(behandling)
-        .filter {!(data.årsak == HenleggÅrsak.TEKNISK_VEDLIKEHOLD && data.begrunnelse == SATSENDRING && it.type == BehandleSak)}
-        .forEach {
-            oppgaveService.ferdigstillOppgaver(behandling.id, it.type)
-        }
+            .filter { !(data.årsak == HenleggÅrsak.TEKNISK_VEDLIKEHOLD && data.begrunnelse == SATSENDRING && it.type == BehandleSak) }
+            .forEach {
+                oppgaveService.ferdigstillOppgaver(behandling.id, it.type)
+            }
 
         loggService.opprettHenleggBehandling(behandling, data.årsak.beskrivelse, data.begrunnelse)
 
