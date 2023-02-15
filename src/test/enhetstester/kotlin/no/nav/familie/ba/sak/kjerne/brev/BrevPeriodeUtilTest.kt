@@ -1,12 +1,15 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
 import no.nav.familie.ba.sak.common.MånedPeriode
+import no.nav.familie.ba.sak.dataGenerator.brev.lagMinimertPerson
+import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevperiodeData
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.SøkersAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagKompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import org.junit.jupiter.api.Assertions
@@ -91,6 +94,61 @@ class BrevPeriodeUtilTest {
             listOf(kompetanse1, kompetanse2, kompetanse3.copy(tom = periode2.tom)),
             listOf(kompetanse1, kompetanse2, kompetanse3, kompetanse4)
                 .hentIPeriode(periode1.fom, periode2.tom)
+        )
+    }
+
+    @Test
+    fun `Skal kunne kombinere registrerte og uregistrerte barns fødselsdatoer til avslagsbegrunnelse`() {
+        val barnIBegrunnelse = listOf(
+            lagMinimertPerson(fødselsdato = LocalDate.of(2021, 1, 1), type = PersonType.BARN),
+            lagMinimertPerson(fødselsdato = LocalDate.of(2021, 2, 2), type = PersonType.BARN)
+        ).map { it.tilMinimertRestPerson() }
+        val barnPåBehandling = listOf(
+            lagMinimertPerson(fødselsdato = LocalDate.of(2021, 1, 1), type = PersonType.BARN),
+            lagMinimertPerson(fødselsdato = LocalDate.of(2021, 2, 2), type = PersonType.BARN),
+            lagMinimertPerson(fødselsdato = LocalDate.of(2021, 3, 3), type = PersonType.BARN)
+        ).map { it.tilMinimertRestPerson() }
+        val uregistrerteBarn = listOf(
+            MinimertUregistrertBarn(personIdent = "", navn = "Ole", fødselsdato = LocalDate.of(2021, 4, 4)),
+            MinimertUregistrertBarn(personIdent = "", navn = "Dole", fødselsdato = LocalDate.of(2021, 5, 5)),
+            MinimertUregistrertBarn(personIdent = "", navn = "Doffen", fødselsdato = LocalDate.of(2021, 6, 6))
+        )
+
+        Assertions.assertEquals(
+            hentBarnasFødselsdatoerForAvslagsbegrunnelse(
+                barnIBegrunnelse,
+                barnPåBehandling,
+                uregistrerteBarn,
+                gjelderSøker = true
+            ),
+            "01.01.21, 02.02.21, 03.03.21, 04.04.21, 05.05.21 og 06.06.21"
+        )
+        Assertions.assertEquals(
+            hentBarnasFødselsdatoerForAvslagsbegrunnelse(
+                barnIBegrunnelse,
+                barnPåBehandling,
+                uregistrerteBarn,
+                gjelderSøker = false
+            ),
+            "01.01.21, 02.02.21, 04.04.21, 05.05.21 og 06.06.21"
+        )
+        Assertions.assertEquals(
+            hentBarnasFødselsdatoerForAvslagsbegrunnelse(
+                barnIBegrunnelse,
+                barnPåBehandling,
+                emptyList(),
+                gjelderSøker = true
+            ),
+            "01.01.21, 02.02.21 og 03.03.21"
+        )
+        Assertions.assertEquals(
+            hentBarnasFødselsdatoerForAvslagsbegrunnelse(
+                emptyList(),
+                emptyList(),
+                uregistrerteBarn,
+                gjelderSøker = true
+            ),
+            "04.04.21, 05.05.21 og 06.06.21"
         )
     }
 }
