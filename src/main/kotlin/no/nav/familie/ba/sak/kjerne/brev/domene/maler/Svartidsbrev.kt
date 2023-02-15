@@ -14,7 +14,8 @@ data class Svartidsbrev(
         mal: Brevmal,
         erEøsBehandling: Boolean,
         organisasjonsnummer: String? = null,
-        gjelder: String? = null
+        gjelder: String? = null,
+        saksbehandlerNavn: String
     ) : this(
         mal = mal,
         data = SvartidsbrevData(
@@ -26,7 +27,8 @@ data class Svartidsbrev(
             ),
             delmalData = SvartidsbrevData.DelmalData(
                 signatur = SignaturDelmal(
-                    enhet = enhet
+                    enhet = enhet,
+                    saksbehandlerNavn = saksbehandlerNavn
                 ),
                 kontonummer = erEøsBehandling
 
