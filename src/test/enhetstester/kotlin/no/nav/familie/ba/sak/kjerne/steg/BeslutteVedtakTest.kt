@@ -181,7 +181,7 @@ class BeslutteVedtakTest {
 
         val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
 
-        //verify(exactly = 1) { beregningService.erAlleUtbetalingsperioderPåNullKronerIDenneOgForrigeBehandling(behandling) }
+        // verify(exactly = 1) { beregningService.erAlleUtbetalingsperioderPåNullKronerIDenneOgForrigeBehandling(behandling) }
         verify(exactly = 1) { beregningService.innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(behandling) }
 
         verify(exactly = 1) {

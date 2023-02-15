@@ -164,7 +164,7 @@ class BeslutteVedtak(
                     )
                 }
 
-            if (erInnvilgetSøknadUtenUtebtalingsperioderGrunnetEndringsperioder) {
+            if (erInnvilgetSøknadUtenUtebtalingsperioderGrunnetEndringsperioder && behandling.erBehandlingMedVedtaksbrevutsending()) {
                 return StegType.JOURNALFØR_VEDTAKSBREV
             }
         }
