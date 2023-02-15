@@ -1,9 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
-import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagSøknadDTO
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.nyOrdinærBehandling
+import no.nav.familie.ba.sak.common.nyRevurdering
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
@@ -11,8 +11,10 @@ import no.nav.familie.ba.sak.ekstern.restDomene.writeValueAsString
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -29,6 +31,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
@@ -58,6 +61,9 @@ class RevurderingMedEndredeUtbetalingandelerTest(
     private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
 
     @Autowired
+    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
+
+    @Autowired
     private val personidentService: PersonidentService,
 
     @Autowired
@@ -68,7 +74,7 @@ class RevurderingMedEndredeUtbetalingandelerTest(
 
 ) : AbstractVerdikjedetest() {
     @Test
-    fun `Endrede utbetalingsandeler fra forrige behandling kopieres riktig`() {
+    fun `Endrede utbetalingsandeler fra forrige behandling kopieres riktig og oppdaterer andel med riktig beløp`() {
         val scenario = mockServerKlient().lagScenario(
             RestScenario(
                 søker = RestScenarioPerson(fødselsdato = "1993-01-12", fornavn = "Mor", etternavn = "Søker"),
@@ -141,16 +147,18 @@ class RevurderingMedEndredeUtbetalingandelerTest(
         val endretUtbetalingAndel =
             endretUtbetalingAndelService.opprettTomEndretUtbetalingAndelOgOppdaterTilkjentYtelse(behandling)
 
+        val endretAndelFom = YearMonth.of(2019, 6)
+        val endretAndelTom = YearMonth.of(2020, 10)
         val restEndretUtbetalingAndel = RestEndretUtbetalingAndel(
             id = endretUtbetalingAndel.id,
-            fom = YearMonth.of(2019, 6),
-            tom = YearMonth.of(2020, 10),
+            fom = endretAndelFom,
+            tom = endretAndelTom,
             avtaletidspunktDeltBosted = LocalDate.of(2019, 5, 8),
             søknadstidspunkt = LocalDate.of(2019, 5, 8),
             begrunnelse = "begrunnelse",
             personIdent = barnFnr,
             årsak = Årsak.DELT_BOSTED,
-            prosent = BigDecimal(100),
+            prosent = BigDecimal.ZERO,
             erTilknyttetAndeler = false
         )
 
@@ -171,10 +179,12 @@ class RevurderingMedEndredeUtbetalingandelerTest(
                 behandlingSteg = StegType.BEHANDLING_AVSLUTTET
             )
         )
+        behandlingEtterHåndterBehandlingsresultat.status = BehandlingStatus.AVSLUTTET
+
         val iverksattBehandling =
             behandlingHentOgPersisterService.lagreEllerOppdater(behandlingEtterHåndterBehandlingsresultat)
 
-        val behandlingRevurdering = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val behandlingRevurdering = stegService.håndterNyBehandling(nyRevurdering(søkersIdent = fnr, fagsakId = fagsak.id))
 
         persongrunnlagService.lagreOgDeaktiverGammel(
             lagTestPersonopplysningGrunnlag(
@@ -186,13 +196,47 @@ class RevurderingMedEndredeUtbetalingandelerTest(
             )
         )
 
-        vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
+        val vilkårsvurderingRevurdering = vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
             behandling = behandlingRevurdering,
             bekreftEndringerViaFrontend = true,
             forrigeBehandlingSomErVedtatt = iverksattBehandling
         )
 
+        vilkårsvurderingRevurdering.personResultater.map { personResultat ->
+            personResultat.tilRestPersonResultat().vilkårResultater.map {
+                vilkårService.endreVilkår(
+                    behandlingId = behandlingRevurdering.id,
+                    vilkårId = it.id,
+                    restPersonResultat =
+                    RestPersonResultat(
+                        personIdent = personResultat.aktør.aktivFødselsnummer(),
+                        vilkårResultater = listOf(
+                            it.copy(
+                                resultat = Resultat.OPPFYLT,
+                                periodeFom = LocalDate.of(2019, 5, 8),
+                                utdypendeVilkårsvurderinger = listOfNotNull(
+                                    if (it.vilkårType == Vilkår.BOR_MED_SØKER) UtdypendeVilkårsvurdering.DELT_BOSTED else null
+                                )
+                            )
+                        )
+                    )
+                )
+            }
+        }
+        behandlingRevurdering.behandlingStegTilstand.add(
+            BehandlingStegTilstand(behandling = behandlingRevurdering, behandlingSteg = StegType.VILKÅRSVURDERING)
+        )
+
+        stegService.håndterVilkårsvurdering(behandlingRevurdering)
+
         val kopierteEndredeUtbetalingAndeler = endretUtbetalingAndelService.hentForBehandling(behandlingRevurdering.id)
+        val andelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingRevurdering.id)
+        val andelPåvirketAvEndringer = andelerTilkjentYtelse.first()
+
         assertEquals(1, kopierteEndredeUtbetalingAndeler.size)
+        assertEquals(BigDecimal.ZERO, andelPåvirketAvEndringer.prosent)
+        assertEquals(endretAndelFom, andelPåvirketAvEndringer.stønadFom)
+        assertEquals(endretAndelTom, andelPåvirketAvEndringer.stønadTom)
+        assertTrue(andelPåvirketAvEndringer.endreteUtbetalinger.any { it.id == kopierteEndredeUtbetalingAndeler.single().id })
     }
 }
