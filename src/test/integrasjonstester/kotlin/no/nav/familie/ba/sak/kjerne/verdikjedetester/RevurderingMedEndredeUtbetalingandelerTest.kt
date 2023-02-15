@@ -245,6 +245,7 @@ class RevurderingMedEndredeUtbetalingandelerTest(
             assertEquals(BigDecimal.ZERO, andelPåvirketAvEndringer.prosent)
             assertEquals(endretAndelFom, andelPåvirketAvEndringer.stønadFom)
             assertEquals(endretAndelTom, andelPåvirketAvEndringer.stønadTom)
-            assertTrue(andelPåvirketAvEndringer.endreteUtbetalinger.any { it.id == kopierteEndredeUtbetalingAndeler.single().id }) }
+            assertTrue(andelPåvirketAvEndringer.endreteUtbetalinger.any { it.id == kopierteEndredeUtbetalingAndeler.single().id })
+        }
     }
 }
