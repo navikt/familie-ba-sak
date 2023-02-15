@@ -20,7 +20,8 @@ class ManueltBrevRequestTest {
 
     @Test
     fun `Forlenget svartidsbrev request skal gi forlenget svartid brevmal med riktig data`() {
-        val brev = baseRequest.copy(Brevmal.FORLENGET_SVARTIDSBREV).tilBrev { emptyMap() }
+        val brev =
+            baseRequest.copy(brevmal = Brevmal.FORLENGET_SVARTIDSBREV).tilBrev("saksbehandlerNavn") { emptyMap() }
 
         assertThat(brev::class).isEqualTo(ForlengetSvartidsbrev::class)
         brev as ForlengetSvartidsbrev
@@ -42,7 +43,7 @@ class ManueltBrevRequestTest {
                 navn = "testnavn"
             )
         )
-            .tilBrev { emptyMap() }
+            .tilBrev("saksbehandlerNavn") { emptyMap() }
 
         assertThat(brev::class).isEqualTo(ForlengetSvartidsbrev::class)
         brev as ForlengetSvartidsbrev
@@ -72,13 +73,13 @@ class ManueltBrevRequestTest {
                 navn = "navn tilhørende $fnr"
             )
         )
-        brevRequestTilPerson.tilBrev { emptyMap() }.data.apply {
+        brevRequestTilPerson.tilBrev("saksbehandlerNavn") { emptyMap() }.data.apply {
             assertThat(flettefelter.fodselsnummer).containsExactly(brevRequestTilPerson.mottakerIdent)
             assertThat(flettefelter.navn).containsExactly(brevRequestTilPerson.mottakerNavn)
             assertThat(flettefelter.organisasjonsnummer).isNull()
             assertThat(flettefelter.gjelder).isNull()
         }
-        brevRequestTilInstitusjon.tilBrev { emptyMap() }.data.apply {
+        brevRequestTilInstitusjon.tilBrev("saksbehandlerNavn") { emptyMap() }.data.apply {
             assertThat(flettefelter.organisasjonsnummer).containsExactly(brevRequestTilInstitusjon.mottakerIdent)
             assertThat(flettefelter.fodselsnummer).containsExactly(brevRequestTilInstitusjon.vedrørende?.fødselsnummer)
             assertThat(flettefelter.navn).containsExactly(brevRequestTilPerson.mottakerNavn)
@@ -89,7 +90,7 @@ class ManueltBrevRequestTest {
     @Test
     fun `Varsel årleg kontroll eøs request skal gi varsel årleg kontroll eøs brevmal med riktig data`() {
         val brev = baseRequest.copy(brevmal = Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS, mottakerlandSed = "SE")
-            .tilBrev { mapOf(Pair("SE", "Sverige")) }
+            .tilBrev("saksbehandlerNavn") { mapOf(Pair("SE", "Sverige")) }
 
         assertThat(brev::class).isEqualTo(VarselbrevÅrlegKontrollEøs::class)
         brev as VarselbrevÅrlegKontrollEøs
@@ -108,7 +109,7 @@ class ManueltBrevRequestTest {
             mottakerlandSed = "SE",
             multiselectVerdier = dokumentliste
         )
-            .tilBrev { mapOf(Pair("SE", "Sverige")) }
+            .tilBrev("saksbehandlerNavn") { mapOf(Pair("SE", "Sverige")) }
 
         assertThat(brev::class).isEqualTo(VarselbrevÅrlegKontrollEøs::class)
         brev as VarselbrevÅrlegKontrollEøs
