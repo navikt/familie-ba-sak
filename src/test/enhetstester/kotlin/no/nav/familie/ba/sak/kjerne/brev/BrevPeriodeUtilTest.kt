@@ -111,7 +111,7 @@ class BrevPeriodeUtilTest {
         val uregistrerteBarn = listOf(
             MinimertUregistrertBarn(personIdent = "", navn = "Ole", fødselsdato = LocalDate.of(2021, 4, 4)),
             MinimertUregistrertBarn(personIdent = "", navn = "Dole", fødselsdato = LocalDate.of(2021, 5, 5)),
-            MinimertUregistrertBarn(personIdent = "", navn = "Doffen", fødselsdato = LocalDate.of(2021, 6, 6)),
+            MinimertUregistrertBarn(personIdent = "", navn = "Doffen", fødselsdato = LocalDate.of(2021, 6, 6))
         )
 
         Assertions.assertEquals(
@@ -120,7 +120,8 @@ class BrevPeriodeUtilTest {
                 barnPåBehandling,
                 uregistrerteBarn,
                 gjelderSøker = true
-            ), "01.01.21, 02.02.21, 03.03.21, 04.04.21, 05.05.21 og 06.06.21"
+            ),
+            "01.01.21, 02.02.21, 03.03.21, 04.04.21, 05.05.21 og 06.06.21"
         )
         Assertions.assertEquals(
             hentBarnasFødselsdatoerForAvslagsbegrunnelse(
@@ -128,7 +129,8 @@ class BrevPeriodeUtilTest {
                 barnPåBehandling,
                 uregistrerteBarn,
                 gjelderSøker = false
-            ), "01.01.21, 02.02.21, 04.04.21, 05.05.21 og 06.06.21"
+            ),
+            "01.01.21, 02.02.21, 04.04.21, 05.05.21 og 06.06.21"
         )
         Assertions.assertEquals(
             hentBarnasFødselsdatoerForAvslagsbegrunnelse(
@@ -136,7 +138,8 @@ class BrevPeriodeUtilTest {
                 barnPåBehandling,
                 emptyList(),
                 gjelderSøker = true
-            ), "01.01.21, 02.02.21 og 03.03.21"
+            ),
+            "01.01.21, 02.02.21 og 03.03.21"
         )
         Assertions.assertEquals(
             hentBarnasFødselsdatoerForAvslagsbegrunnelse(
@@ -144,7 +147,8 @@ class BrevPeriodeUtilTest {
                 emptyList(),
                 uregistrerteBarn,
                 gjelderSøker = true
-            ), "04.04.21, 05.05.21 og 06.06.21"
+            ),
+            "04.04.21, 05.05.21 og 06.06.21"
         )
     }
 }
