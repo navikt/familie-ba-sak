@@ -13,7 +13,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegService
-import no.nav.familie.ba.sak.task.HenleggBehandlingTask.Companion.opprettTask
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.prosessering.domene.Task
 import org.assertj.core.api.Assertions.assertThat
@@ -82,12 +82,15 @@ internal class HenleggBehandlingTaskTest {
     }
 
     private fun opprettTekniskHenleggelseGrunnetSatsendringTask(): Task {
-        return opprettTask(
-            HenleggBehandlingTaskDTO(
-                behandlingId = 1,
-                årsak = HenleggÅrsak.TEKNISK_VEDLIKEHOLD,
-                begrunnelse = "Satsendring",
-                validerOppgavefristErEtterDato = LocalDate.of(2023, 4, 1)
+        return Task(
+            type = HenleggBehandlingTask.TASK_STEP_TYPE,
+            payload = objectMapper.writeValueAsString(
+                HenleggBehandlingTaskDTO(
+                    behandlingId = 1,
+                    årsak = HenleggÅrsak.TEKNISK_VEDLIKEHOLD,
+                    begrunnelse = "Satsendring",
+                    validerOppgavefristErEtterDato = LocalDate.of(2023, 4, 1)
+                )
             )
         )
     }

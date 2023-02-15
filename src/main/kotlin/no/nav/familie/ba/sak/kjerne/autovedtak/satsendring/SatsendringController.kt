@@ -1,12 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.satsendring
 
+import no.nav.familie.ba.sak.common.RessursUtils.badRequest
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
-import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
-import no.nav.familie.ba.sak.task.HenleggBehandlingTask
-import no.nav.familie.ba.sak.task.HenleggBehandlingTaskDTO
+import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.ResponseEntity
@@ -27,7 +26,7 @@ const val SATSENDRING = "Satsendring"
 class SatsendringController(
     private val startSatsendring: StartSatsendring,
     private val tilgangService: TilgangService,
-    private val taskRepository: TaskRepositoryWrapper
+    private val opprettTaskService: OpprettTaskService
 ) {
     @GetMapping(path = ["/kjorsatsendring/{fagsakId}"])
     fun utførSatsendringITaskPåFagsak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<String>> {
@@ -61,18 +60,22 @@ class SatsendringController(
         return ResponseEntity.ok(Ressurs.success("Trigget satsendring for liste med identer ${listeMedIdenter.size}"))
     }
 
-    @PostMapping(path = ["/henleggBehandlingerMedLangLiggetid"])
-    fun henleggBehandlingerMedLangLiggetid(@RequestBody behandlinger: Set<String>): ResponseEntity<Ressurs<String>> {
+    @PostMapping(path = ["/henleggBehandlingerMedLangFristSenereEnn/{valideringsdato}"])
+    fun henleggBehandlingerMedLangLiggetid(
+        @RequestBody behandlinger: Set<String>,
+        @PathVariable valideringsdato: String
+    ): ResponseEntity<Ressurs<String>> {
+        val dato = try {
+            LocalDate.parse(valideringsdato).also { assert(it.isAfter(LocalDate.now().plusMonths(1))) }
+        } catch (e: Exception) {
+            return badRequest("Ugyldig dato", e)
+        }
         behandlinger.forEach {
-            taskRepository.save(
-                HenleggBehandlingTask.opprettTask(
-                    HenleggBehandlingTaskDTO(
-                        behandlingId = it.toLong(),
-                        årsak = HenleggÅrsak.TEKNISK_VEDLIKEHOLD,
-                        begrunnelse = SATSENDRING,
-                        validerOppgavefristErEtterDato = LocalDate.of(2023, 4, 1)
-                    )
-                )
+            opprettTaskService.opprettHenleggBehandlingTask(
+                behandlingId = it.toLong(),
+                årsak = HenleggÅrsak.TEKNISK_VEDLIKEHOLD,
+                begrunnelse = SATSENDRING,
+                validerOppgavefristErEtterDato = dato
             )
         }
         return ResponseEntity.ok(Ressurs.Companion.success("Trigget henleggelse for ${behandlinger.size} behandlinger"))

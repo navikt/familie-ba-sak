@@ -14,7 +14,6 @@ import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import org.springframework.stereotype.Service
 import java.time.LocalDate
-import java.util.Properties
 
 @Service
 @TaskStepBeskrivelse(
@@ -31,7 +30,9 @@ class HenleggBehandlingTask(
 
     override fun doTask(task: Task) {
         val henleggBehandlingTaskDTO = objectMapper.readValue(task.payload, HenleggBehandlingTaskDTO::class.java)
-        val behandling = behandlingHentOgPersisterService.hent(henleggBehandlingTaskDTO.behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(henleggBehandlingTaskDTO.behandlingId).apply {
+            task.metadata["fagsakId"] = fagsak.id.toString()
+        }
 
         if (behandling.status == BehandlingStatus.AVSLUTTET) {
             task.metadata["Resultat"] = "Behandlingen er allerede avsluttet"
@@ -56,7 +57,6 @@ class HenleggBehandlingTask(
             henleggBehandlingInfo = henleggBehandlingTaskDTO.run { RestHenleggBehandlingInfo(årsak, begrunnelse) }
         ).apply {
             task.metadata["behandlendeEnhetId"] = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(id).behandlendeEnhetId
-            task.metadata["fagsakId"] = fagsak.id
             task.metadata["Resultat"] = "Henleggelse kjørt OK"
         }
     }
@@ -64,16 +64,6 @@ class HenleggBehandlingTask(
     companion object {
 
         const val TASK_STEP_TYPE = "HenleggBehandling"
-
-        fun opprettTask(henleggBehandlingTaskDTO: HenleggBehandlingTaskDTO): Task {
-            return Task(
-                type = TASK_STEP_TYPE,
-                payload = objectMapper.writeValueAsString(henleggBehandlingTaskDTO),
-                properties = Properties().apply {
-                    this["behandlingId"] = henleggBehandlingTaskDTO.behandlingId.toString()
-                }
-            )
-        }
     }
 }
 
