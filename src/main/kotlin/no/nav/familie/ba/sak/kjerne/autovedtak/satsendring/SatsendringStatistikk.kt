@@ -12,6 +12,7 @@ import org.slf4j.MDC
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import java.util.UUID
+import java.util.concurrent.TimeUnit
 
 @Component
 class SatsendringStatistikk(
@@ -23,7 +24,8 @@ class SatsendringStatistikk(
         MultiGauge.builder("satsendring").register(Metrics.globalRegistry)
 
     @Scheduled(
-        fixedRate = OPPDATERING_HVER_HALV_TIME
+        fixedRate = 30,
+        timeUnit = TimeUnit.MINUTES
     )
     fun antallSatsendringerKjørt() {
         if (LeaderClient.isLeader() == true) {
@@ -73,7 +75,6 @@ class SatsendringStatistikk(
     }
 
     companion object {
-        const val OPPDATERING_HVER_HALV_TIME: Long = 1000 * 30
         private val logger = LoggerFactory.getLogger(SatsendringStatistikk::class.java)
     }
 }
