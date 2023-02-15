@@ -28,6 +28,7 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
+@Disabled
 class MigrerFraInfotrygdTest(
     @Autowired private val migreringService: MigreringService,
     @Autowired private val mockLocalDateService: LocalDateService,

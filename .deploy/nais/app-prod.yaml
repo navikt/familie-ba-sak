@@ -97,7 +97,7 @@ spec:
         - host: xsrv1mh6.api.sanity.io
   replicas:
     min: 3
-    max: 6
+    max: 5
     cpuThresholdPercentage: 50
   resources:
     limits:
