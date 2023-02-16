@@ -13,7 +13,7 @@ class AutovedtakSatsendringScheduler(private val startSatsendring: StartSatsendr
         if (LeaderClient.isLeader() == true) {
             logger.info("Satsendring trigges av schedulert jobb")
             startSatsendring.startSatsendring(
-                antallFagsaker = 400,
+                antallFagsaker = 600,
                 satsTidspunkt = StartSatsendring.SATSENDRINGMÅNED_2023
             )
         }
@@ -22,6 +22,6 @@ class AutovedtakSatsendringScheduler(private val startSatsendring: StartSatsendr
     companion object {
         val logger = LoggerFactory.getLogger(AutovedtakSatsendringScheduler::class.java)
         const val CRON_HVERT_5_MIN_ARBEIDSTID_UKEDAG = "0 */5 7-17 * * MON-FRI"
-        const val CRON_HVERT_10_MIN_ARBEIDSTID_UKEDAG = "0 */10 7-17 * * MON-FRI"
+        const val CRON_HVERT_10_MIN_ARBEIDSTID_UKEDAG = "0 */10 6-18 * * MON-FRI"
     }
 }

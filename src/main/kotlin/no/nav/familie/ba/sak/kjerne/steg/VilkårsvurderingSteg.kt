@@ -66,7 +66,7 @@ class VilkårsvurderingSteg(
         }
 
         tilbakestillBehandlingService.tilbakestillDataTilVilkårsvurderingssteg(behandling)
-        beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
+        beregningService.genererTilkjentYtelseFraVilkårsvurdering(behandling, personopplysningGrunnlag)
 
         tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(BehandlingId(behandling.id))
 

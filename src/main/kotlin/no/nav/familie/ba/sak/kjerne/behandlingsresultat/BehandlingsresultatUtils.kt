@@ -30,9 +30,20 @@ object BehandlingsresultatUtils {
         ): Boolean =
             søknadsresultat == ønsketSøknadsresultat && endringsresultat == ønsketEndringsresultat && opphørsresultat == ønsketOpphørsresultat
 
+        fun ugyldigBehandlingsresultatFeil(behandlingsresultatString: String) =
+            Feil(
+                frontendFeilmelding = "Du har fått behandlingsresultatet $behandlingsresultatString, men behandlingen er registrert med årsak søknad. Du må enten innvilge eller avslå noe for å kunne fortsette. Om du er uenig i resultatet ta kontakt med Superbruker.",
+                message = "Kombinasjonen av (søknadsresultat=$søknadsresultat, endringsresultat=$endringsresultat, opphørsresultat=$opphørsresultat) er ikke støttet i løsningen."
+            )
+
         return when {
+            // Søknad/fødselshendelse/manuell migrering
+            sjekkResultat(Søknadsresultat.INGEN_RELEVANTE_ENDRINGER, Endringsresultat.ENDRING, Opphørsresultat.OPPHØRT) -> throw ugyldigBehandlingsresultatFeil("Endret og opphørt")
+            sjekkResultat(Søknadsresultat.INGEN_RELEVANTE_ENDRINGER, Endringsresultat.ENDRING, Opphørsresultat.FORTSATT_OPPHØRT) -> throw ugyldigBehandlingsresultatFeil("Endret og fortsatt opphørt")
+            sjekkResultat(Søknadsresultat.INGEN_RELEVANTE_ENDRINGER, Endringsresultat.ENDRING, Opphørsresultat.IKKE_OPPHØRT) -> Behandlingsresultat.ENDRET_OG_FORTSATT_INNVILGET
+            sjekkResultat(Søknadsresultat.INGEN_RELEVANTE_ENDRINGER, Endringsresultat.INGEN_ENDRING, Opphørsresultat.OPPHØRT) -> throw ugyldigBehandlingsresultatFeil("Opphørt")
+            sjekkResultat(Søknadsresultat.INGEN_RELEVANTE_ENDRINGER, Endringsresultat.INGEN_ENDRING, Opphørsresultat.FORTSATT_OPPHØRT) -> throw ugyldigBehandlingsresultatFeil("Fortsatt opphørt")
             sjekkResultat(Søknadsresultat.INGEN_RELEVANTE_ENDRINGER, Endringsresultat.INGEN_ENDRING, Opphørsresultat.IKKE_OPPHØRT) -> Behandlingsresultat.FORTSATT_INNVILGET
-            sjekkResultat(Søknadsresultat.INGEN_RELEVANTE_ENDRINGER, Endringsresultat.INGEN_ENDRING, Opphørsresultat.FORTSATT_OPPHØRT) -> Behandlingsresultat.FORTSATT_OPPHØRT
 
             sjekkResultat(Søknadsresultat.INNVILGET, Endringsresultat.ENDRING, Opphørsresultat.OPPHØRT) -> Behandlingsresultat.INNVILGET_ENDRET_OG_OPPHØRT
             sjekkResultat(Søknadsresultat.INNVILGET, Endringsresultat.ENDRING, Opphørsresultat.FORTSATT_OPPHØRT) -> Behandlingsresultat.INNVILGET_OG_ENDRET
@@ -63,6 +74,7 @@ object BehandlingsresultatUtils {
             sjekkResultat(null, Endringsresultat.INGEN_ENDRING, Opphørsresultat.FORTSATT_OPPHØRT) -> Behandlingsresultat.FORTSATT_OPPHØRT
             sjekkResultat(null, Endringsresultat.INGEN_ENDRING, Opphørsresultat.IKKE_OPPHØRT) -> Behandlingsresultat.FORTSATT_INNVILGET
 
+            // Skal egentlig aldri kunne komme hit, alle kombinasjoner skal være skrevet ut
             else -> throw Feil("Klarer ikke utlede behandlingsresultat fra (søknadsresultat=$søknadsresultat, endringsresultat=$endringsresultat, opphørsresultat=$opphørsresultat)")
         }
     }

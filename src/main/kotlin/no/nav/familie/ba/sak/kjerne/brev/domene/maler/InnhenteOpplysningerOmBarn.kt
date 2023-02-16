@@ -13,11 +13,17 @@ data class InnhenteOpplysningerOmBarn(
         fødselsnummer: String,
         barnasFødselsdager: String,
         enhet: String,
-        dokumentliste: List<String>
+        dokumentliste: List<String>,
+        saksbehandlerNavn: String
     ) : this(
         mal = mal,
         data = InnhenteOpplysningerOmBarnData(
-            delmalData = InnhenteOpplysningerOmBarnData.DelmalData(signatur = SignaturDelmal(enhet = enhet)),
+            delmalData = InnhenteOpplysningerOmBarnData.DelmalData(
+                signatur = SignaturDelmal(
+                    enhet = enhet,
+                    saksbehandlerNavn = saksbehandlerNavn
+                )
+            ),
             flettefelter = InnhenteOpplysningerOmBarnData.Flettefelter(
                 navn = navn,
                 fodselsnummer = fødselsnummer,

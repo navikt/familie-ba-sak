@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 
 internal enum class Søknadsresultat {
     INNVILGET,
@@ -126,13 +125,8 @@ object BehandlingsresultatSøknadUtils {
         nåværendePersonResultater
             .filter { personerFremstiltKravFor.contains(it.aktør) }
             .any {
-                it.vilkårResultater.erEksplisittAvslagPåPerson()
+                it.harEksplisittAvslag()
             }
-
-    private fun Set<VilkårResultat>.erEksplisittAvslagPåPerson(): Boolean {
-        // sjekk om vilkårresultater inneholder eksplisitt avslag på et vilkår
-        return this.any { it.erEksplisittAvslagPåSøknad == true }
-    }
 
     internal fun List<Søknadsresultat>.kombinerSøknadsresultater(): Søknadsresultat {
         val resultaterUtenIngenEndringer = this.filter { it != Søknadsresultat.INGEN_RELEVANTE_ENDRINGER }

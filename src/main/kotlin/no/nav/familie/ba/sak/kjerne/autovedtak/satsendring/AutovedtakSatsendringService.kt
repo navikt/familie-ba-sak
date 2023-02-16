@@ -8,7 +8,9 @@ import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakBehandlingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
@@ -20,6 +22,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ba.sak.task.SatsendringTaskDto
 import org.slf4j.LoggerFactory
@@ -35,7 +38,8 @@ class AutovedtakSatsendringService(
     private val autovedtakService: AutovedtakService,
     private val andelTilkjentYtelseMedEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     private val tilbakestillBehandlingService: TilbakestillBehandlingService,
-    private val satskjøringRepository: SatskjøringRepository
+    private val satskjøringRepository: SatskjøringRepository,
+    private val behandlingService: BehandlingService
 ) : AutovedtakBehandlingService<SatsendringTaskDto> {
 
     private val satsendringAlleredeUtført = Metrics.counter("satsendring.allerede.utfort")
@@ -106,11 +110,28 @@ class AutovedtakSatsendringService(
                 behandlingEtterBehandlingsresultat
             )
 
-        val task = IverksettMotOppdragTask.opprettTask(
-            behandlingEtterBehandlingsresultat,
-            opprettetVedtak,
-            SikkerhetContext.hentSaksbehandler()
-        )
+        val task = when (behandlingEtterBehandlingsresultat.steg) {
+            StegType.IVERKSETT_MOT_OPPDRAG -> {
+                IverksettMotOppdragTask.opprettTask(
+                    behandlingEtterBehandlingsresultat,
+                    opprettetVedtak,
+                    SikkerhetContext.hentSaksbehandler()
+                )
+            }
+
+            StegType.FERDIGSTILLE_BEHANDLING -> {
+                behandlingService.oppdaterStatusPåBehandling(
+                    behandlingEtterBehandlingsresultat.id,
+                    BehandlingStatus.IVERKSETTER_VEDTAK
+                )
+                FerdigstillBehandlingTask.opprettTask(
+                    søkerAktør.aktivFødselsnummer(),
+                    behandlingEtterBehandlingsresultat.id
+                )
+            }
+
+            else -> throw Feil("Ugyldig neste steg ${behandlingEtterBehandlingsresultat.steg} ved satsendring for fagsak=$fagsakId")
+        }
 
         satskjøringForFagsak.ferdigTidspunkt = LocalDateTime.now()
         satskjøringRepository.save(satskjøringForFagsak)
