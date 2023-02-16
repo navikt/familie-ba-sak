@@ -98,10 +98,12 @@ class RevurderingMedEndredeUtbetalingandelerTest(
         val barnFnr = scenario.barna[0].ident!!
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = stegService.håndterNyBehandling(nyOrdinærBehandling(søkersIdent = fnr, fagsakId = fagsak.id))
+
+        // Behandling 1 - førstegangsbehandling
+        val førstegangsbehandling = stegService.håndterNyBehandling(nyOrdinærBehandling(søkersIdent = fnr, fagsakId = fagsak.id))
 
         val søknadGrunnlag = SøknadGrunnlag(
-            behandlingId = behandling.id,
+            behandlingId = førstegangsbehandling.id,
             aktiv = true,
             søknad = lagSøknadDTO(fnr, barnasIdenter = listOf(barnFnr), underkategori = BehandlingUnderkategori.ORDINÆR).writeValueAsString()
         )
@@ -110,7 +112,7 @@ class RevurderingMedEndredeUtbetalingandelerTest(
 
         persongrunnlagService.lagreOgDeaktiverGammel(
             lagTestPersonopplysningGrunnlag(
-                behandling.id,
+                førstegangsbehandling.id,
                 fnr,
                 listOf(barnFnr),
                 søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
@@ -119,15 +121,15 @@ class RevurderingMedEndredeUtbetalingandelerTest(
         )
 
         val vilkårsvurdering = vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
-            behandling = behandling,
+            behandling = førstegangsbehandling,
             bekreftEndringerViaFrontend = true,
             forrigeBehandlingSomErVedtatt = null
         )
 
-        gjennomførVilkårsvurdering(vilkårsvurdering = vilkårsvurdering, behandling = behandling)
+        gjennomførVilkårsvurdering(vilkårsvurdering = vilkårsvurdering, behandling = førstegangsbehandling)
 
         val endretUtbetalingAndel =
-            endretUtbetalingAndelService.opprettTomEndretUtbetalingAndelOgOppdaterTilkjentYtelse(behandling)
+            endretUtbetalingAndelService.opprettTomEndretUtbetalingAndelOgOppdaterTilkjentYtelse(førstegangsbehandling)
 
         val endretAndelFom = YearMonth.of(2019, 6)
         val endretAndelTom = YearMonth.of(2020, 10)
@@ -145,27 +147,15 @@ class RevurderingMedEndredeUtbetalingandelerTest(
         )
 
         endretUtbetalingAndelService.oppdaterEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
-            behandling,
+            førstegangsbehandling,
             endretUtbetalingAndel.id,
             restEndretUtbetalingAndel
         )
 
-        behandling.behandlingStegTilstand.add(
-            BehandlingStegTilstand(behandling = behandling, behandlingSteg = StegType.BEHANDLINGSRESULTAT)
-        )
-        val behandlingEtterHåndterBehandlingsresultat = stegService.håndterBehandlingsresultat(behandling)
+        val iverksattFørstegangsbehandling =
+            ferdigstillBehandlingFraBehandlingsresultat(førstegangsbehandling)
 
-        behandlingEtterHåndterBehandlingsresultat.behandlingStegTilstand.add(
-            BehandlingStegTilstand(
-                behandling = behandling,
-                behandlingSteg = StegType.BEHANDLING_AVSLUTTET
-            )
-        )
-        behandlingEtterHåndterBehandlingsresultat.status = BehandlingStatus.AVSLUTTET
-
-        val iverksattBehandling =
-            behandlingHentOgPersisterService.lagreEllerOppdater(behandlingEtterHåndterBehandlingsresultat)
-
+        // Behandling 2 - revurdering
         val behandlingRevurdering = stegService.håndterNyBehandling(nyRevurdering(søkersIdent = fnr, fagsakId = fagsak.id))
 
         persongrunnlagService.lagreOgDeaktiverGammel(
@@ -181,7 +171,7 @@ class RevurderingMedEndredeUtbetalingandelerTest(
         val vilkårsvurderingRevurdering = vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
             behandling = behandlingRevurdering,
             bekreftEndringerViaFrontend = true,
-            forrigeBehandlingSomErVedtatt = iverksattBehandling
+            forrigeBehandlingSomErVedtatt = iverksattFørstegangsbehandling
         )
 
         gjennomførVilkårsvurdering(vilkårsvurdering = vilkårsvurderingRevurdering, behandling = behandlingRevurdering)
@@ -228,5 +218,25 @@ class RevurderingMedEndredeUtbetalingandelerTest(
         )
 
         stegService.håndterVilkårsvurdering(behandling)
+    }
+
+    private fun ferdigstillBehandlingFraBehandlingsresultat(behandling: Behandling): Behandling {
+        behandling.behandlingStegTilstand.add(
+            BehandlingStegTilstand(behandling = behandling, behandlingSteg = StegType.BEHANDLINGSRESULTAT)
+        )
+        val behandlingEtterHåndterBehandlingsresultat = stegService.håndterBehandlingsresultat(behandling)
+
+        behandlingEtterHåndterBehandlingsresultat.behandlingStegTilstand.add(
+            BehandlingStegTilstand(
+                behandling = behandling,
+                behandlingSteg = StegType.BEHANDLING_AVSLUTTET
+            )
+        )
+        behandlingEtterHåndterBehandlingsresultat.status = BehandlingStatus.AVSLUTTET
+
+        val iverksattBehandling =
+            behandlingHentOgPersisterService.lagreEllerOppdater(behandlingEtterHåndterBehandlingsresultat)
+
+        return iverksattBehandling
     }
 }
