@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.writeValueAsString
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
@@ -32,6 +33,7 @@ import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScena
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -122,32 +124,7 @@ class RevurderingMedEndredeUtbetalingandelerTest(
             forrigeBehandlingSomErVedtatt = null
         )
 
-        vilkårsvurdering.personResultater.map { personResultat ->
-            personResultat.tilRestPersonResultat().vilkårResultater.map {
-                vilkårService.endreVilkår(
-                    behandlingId = behandling.id,
-                    vilkårId = it.id,
-                    restPersonResultat =
-                    RestPersonResultat(
-                        personIdent = personResultat.aktør.aktivFødselsnummer(),
-                        vilkårResultater = listOf(
-                            it.copy(
-                                resultat = Resultat.OPPFYLT,
-                                periodeFom = LocalDate.of(2019, 5, 8),
-                                utdypendeVilkårsvurderinger = listOfNotNull(
-                                    if (it.vilkårType == Vilkår.BOR_MED_SØKER) UtdypendeVilkårsvurdering.DELT_BOSTED else null
-                                )
-                            )
-                        )
-                    )
-                )
-            }
-        }
-
-        behandling.behandlingStegTilstand.add(
-            BehandlingStegTilstand(behandling = behandling, behandlingSteg = StegType.VILKÅRSVURDERING)
-        )
-        stegService.håndterVilkårsvurdering(behandling)
+        gjennomførVilkårsvurdering(vilkårsvurdering = vilkårsvurdering, behandling = behandling)
 
         val endretUtbetalingAndel =
             endretUtbetalingAndelService.opprettTomEndretUtbetalingAndelOgOppdaterTilkjentYtelse(behandling)
@@ -207,10 +184,28 @@ class RevurderingMedEndredeUtbetalingandelerTest(
             forrigeBehandlingSomErVedtatt = iverksattBehandling
         )
 
-        vilkårsvurderingRevurdering.personResultater.map { personResultat ->
+        gjennomførVilkårsvurdering(vilkårsvurdering = vilkårsvurderingRevurdering, behandling = behandlingRevurdering)
+
+        val kopierteEndredeUtbetalingAndeler = endretUtbetalingAndelService.hentForBehandling(behandlingRevurdering.id)
+        val andelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingRevurdering.id)
+        val andelPåvirketAvEndringer = andelerTilkjentYtelse.first()
+
+        assertEquals(1, kopierteEndredeUtbetalingAndeler.size)
+
+        // Andel skal kun oppdateres direkte hvis toggle er på
+        if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER)) {
+            assertEquals(BigDecimal.ZERO, andelPåvirketAvEndringer.prosent)
+            assertEquals(endretAndelFom, andelPåvirketAvEndringer.stønadFom)
+            assertEquals(endretAndelTom, andelPåvirketAvEndringer.stønadTom)
+            assertTrue(andelPåvirketAvEndringer.endreteUtbetalinger.any { it.id == kopierteEndredeUtbetalingAndeler.single().id })
+        }
+    }
+
+    private fun gjennomførVilkårsvurdering(vilkårsvurdering: Vilkårsvurdering, behandling: Behandling) {
+        vilkårsvurdering.personResultater.map { personResultat ->
             personResultat.tilRestPersonResultat().vilkårResultater.map {
                 vilkårService.endreVilkår(
-                    behandlingId = behandlingRevurdering.id,
+                    behandlingId = behandling.id,
                     vilkårId = it.id,
                     restPersonResultat =
                     RestPersonResultat(
@@ -228,24 +223,10 @@ class RevurderingMedEndredeUtbetalingandelerTest(
                 )
             }
         }
-        behandlingRevurdering.behandlingStegTilstand.add(
-            BehandlingStegTilstand(behandling = behandlingRevurdering, behandlingSteg = StegType.VILKÅRSVURDERING)
+        behandling.behandlingStegTilstand.add(
+            BehandlingStegTilstand(behandling = behandling, behandlingSteg = StegType.VILKÅRSVURDERING)
         )
 
-        stegService.håndterVilkårsvurdering(behandlingRevurdering)
-
-        val kopierteEndredeUtbetalingAndeler = endretUtbetalingAndelService.hentForBehandling(behandlingRevurdering.id)
-        val andelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingRevurdering.id)
-        val andelPåvirketAvEndringer = andelerTilkjentYtelse.first()
-
-        assertEquals(1, kopierteEndredeUtbetalingAndeler.size)
-
-        // Andel skal kun oppdateres direkte hvis toggle er på
-        if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER)) {
-            assertEquals(BigDecimal.ZERO, andelPåvirketAvEndringer.prosent)
-            assertEquals(endretAndelFom, andelPåvirketAvEndringer.stønadFom)
-            assertEquals(endretAndelTom, andelPåvirketAvEndringer.stønadTom)
-            assertTrue(andelPåvirketAvEndringer.endreteUtbetalinger.any { it.id == kopierteEndredeUtbetalingAndeler.single().id })
-        }
+        stegService.håndterVilkårsvurdering(behandling)
     }
 }
