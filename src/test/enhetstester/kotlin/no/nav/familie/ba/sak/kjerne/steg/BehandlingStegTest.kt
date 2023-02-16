@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -16,7 +15,7 @@ import org.junit.jupiter.api.assertThrows
 class BehandlingStegTest {
 
     @Test
-    fun `Tester rekkefølgen på behandling MIGRERING`() {
+    fun `Tester rekkefølgen på behandling MIGRERING ved endring i utbetaling`() {
         var steg = FØRSTE_STEG
 
         listOf(
@@ -32,10 +31,9 @@ class BehandlingStegTest {
             steg = hentNesteSteg(
                 behandling = lagBehandling(
                     årsak = BehandlingÅrsak.MIGRERING
-                ).copy(
-                    resultat = Behandlingsresultat.INNVILGET
                 ),
-                utførendeStegType = it
+                utførendeStegType = it,
+                endringerIUtbetaling = EndringerIUtbetaling.ENDRING_I_UTBETALING
             )
         }
     }
@@ -58,8 +56,6 @@ class BehandlingStegTest {
             steg = hentNesteSteg(
                 behandling = lagBehandling(
                     årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO
-                ).copy(
-                    resultat = Behandlingsresultat.INNVILGET
                 ),
                 utførendeStegType = it
             )
@@ -67,7 +63,7 @@ class BehandlingStegTest {
     }
 
     @Test
-    fun `Tester rekkefølgen på behandling av søknad`() {
+    fun `Tester rekkefølgen på behandling av søknad ved endringer i utbetaling`() {
         var steg = FØRSTE_STEG
 
         listOf(
@@ -91,16 +87,15 @@ class BehandlingStegTest {
                 behandling = lagBehandling(
                     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                     årsak = BehandlingÅrsak.SØKNAD
-                ).copy(
-                    resultat = Behandlingsresultat.INNVILGET
                 ),
-                utførendeStegType = it
+                utførendeStegType = it,
+                endringerIUtbetaling = EndringerIUtbetaling.ENDRING_I_UTBETALING
             )
         }
     }
 
     @Test
-    fun `Tester rekkefølgen på behandling av avslått søknad`() {
+    fun `Tester rekkefølgen på behandling av søknad ved ingen endringer i utbetaling`() {
         var steg = FØRSTE_STEG
 
         listOf(
@@ -121,16 +116,15 @@ class BehandlingStegTest {
                 behandling = lagBehandling(
                     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                     årsak = BehandlingÅrsak.SØKNAD
-                ).copy(
-                    resultat = Behandlingsresultat.AVSLÅTT
                 ),
-                utførendeStegType = it
+                utførendeStegType = it,
+                endringerIUtbetaling = EndringerIUtbetaling.INGEN_ENDRING_I_UTBETALING
             )
         }
     }
 
     @Test
-    fun `Tester rekkefølgen på behandling av fødselshendelser ved innvilgelse`() {
+    fun `Tester rekkefølgen på behandling av fødselshendelser ved endringer i utbetaling`() {
         var steg = FØRSTE_STEG
 
         listOf(
@@ -150,14 +144,15 @@ class BehandlingStegTest {
                 behandling = lagBehandling(
                     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                     årsak = BehandlingÅrsak.FØDSELSHENDELSE
-                ).copy(resultat = Behandlingsresultat.INNVILGET),
-                utførendeStegType = it
+                ),
+                utførendeStegType = it,
+                endringerIUtbetaling = EndringerIUtbetaling.ENDRING_I_UTBETALING
             )
         }
     }
 
     @Test
-    fun `Tester rekkefølgen på behandling av fødselshendelser ved avslag`() {
+    fun `Tester rekkefølgen på behandling av fødselshendelser ved ingen endringer i utbetaling`() {
         var steg = FØRSTE_STEG
 
         listOf(
@@ -172,8 +167,9 @@ class BehandlingStegTest {
                 behandling = lagBehandling(
                     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                     årsak = BehandlingÅrsak.FØDSELSHENDELSE
-                ).copy(resultat = Behandlingsresultat.AVSLÅTT),
-                utførendeStegType = it
+                ),
+                utførendeStegType = it,
+                endringerIUtbetaling = EndringerIUtbetaling.INGEN_ENDRING_I_UTBETALING
             )
         }
     }
@@ -229,7 +225,7 @@ class BehandlingStegTest {
     }
 
     @Test
-    fun `Tester rekkefølgen på behandling av type teknisk endring`() {
+    fun `Tester rekkefølgen på behandling av type teknisk endring ved endringer i utbetaling`() {
         var steg = FØRSTE_STEG
 
         listOf(
@@ -251,13 +247,14 @@ class BehandlingStegTest {
                     behandlingType = BehandlingType.TEKNISK_ENDRING,
                     årsak = BehandlingÅrsak.TEKNISK_ENDRING
                 ),
-                utførendeStegType = it
+                utførendeStegType = it,
+                endringerIUtbetaling = EndringerIUtbetaling.ENDRING_I_UTBETALING
             )
         }
     }
 
     @Test
-    fun `teknisk endring skal ha riktig seg ved behandlingsresultat fortsatt innvilget`() {
+    fun `teknisk endring skal ha riktig seg ved behandlingsresultat fortsatt innvilget ved ingen endringer i utbetaling`() {
         var steg = FØRSTE_STEG
 
         listOf(
@@ -275,10 +272,10 @@ class BehandlingStegTest {
             steg = hentNesteSteg(
                 behandling = lagBehandling(
                     behandlingType = BehandlingType.TEKNISK_ENDRING,
-                    årsak = BehandlingÅrsak.TEKNISK_ENDRING,
-                    resultat = Behandlingsresultat.FORTSATT_INNVILGET
+                    årsak = BehandlingÅrsak.TEKNISK_ENDRING
                 ),
-                utførendeStegType = it
+                utførendeStegType = it,
+                endringerIUtbetaling = EndringerIUtbetaling.INGEN_ENDRING_I_UTBETALING
             )
         }
     }
@@ -300,14 +297,14 @@ class BehandlingStegTest {
             steg = hentNesteSteg(
                 behandling = lagBehandling(
                     årsak = BehandlingÅrsak.OMREGNING_18ÅR
-                ).copy(resultat = Behandlingsresultat.INNVILGET),
+                ),
                 utførendeStegType = it
             )
         }
     }
 
     @Test
-    fun `Tester rekkefølgen til manuell behandling med årsak småbarnstillegg`() {
+    fun `Tester rekkefølgen til manuell behandling med årsak småbarnstillegg ved endringer i utbetaling`() {
         var steg = FØRSTE_STEG
 
         listOf(
@@ -329,14 +326,15 @@ class BehandlingStegTest {
             steg = hentNesteSteg(
                 behandling = lagBehandling(
                     årsak = BehandlingÅrsak.SMÅBARNSTILLEGG
-                ).copy(resultat = Behandlingsresultat.INNVILGET),
-                utførendeStegType = it
+                ),
+                utførendeStegType = it,
+                endringerIUtbetaling = EndringerIUtbetaling.ENDRING_I_UTBETALING
             )
         }
     }
 
     @Test
-    fun `Tester rekkefølgen på behandling av ÅRLIG_KONTROLL, som er test av else gren`() {
+    fun `Tester rekkefølgen på behandling av ÅRLIG_KONTROLL, som er test av else gren ved endring i utbetaling`() {
         var steg = FØRSTE_STEG
 
         listOf(
@@ -358,14 +356,15 @@ class BehandlingStegTest {
             steg = hentNesteSteg(
                 behandling = lagBehandling(
                     årsak = BehandlingÅrsak.ÅRLIG_KONTROLL
-                ).copy(resultat = Behandlingsresultat.INNVILGET),
-                utførendeStegType = it
+                ),
+                utførendeStegType = it,
+                endringerIUtbetaling = EndringerIUtbetaling.ENDRING_I_UTBETALING
             )
         }
     }
 
     @Test
-    fun `Tester rekkefølgen på behandling av satsendring`() {
+    fun `Tester rekkefølgen på behandling av satsendring ved endringer i utbetaling`() {
         var steg = FØRSTE_STEG
 
         listOf(
@@ -381,14 +380,15 @@ class BehandlingStegTest {
             steg = hentNesteSteg(
                 behandling = lagBehandling(
                     årsak = BehandlingÅrsak.SATSENDRING
-                ).copy(resultat = Behandlingsresultat.ENDRET_UTBETALING),
-                utførendeStegType = it
+                ),
+                utførendeStegType = it,
+                endringerIUtbetaling = EndringerIUtbetaling.ENDRING_I_UTBETALING
             )
         }
     }
 
     @Test
-    fun `Tester at man ikke får lov til å komme videre etter behandlingsresultat om resultatet ikke er ENDRET på satsendring`() {
+    fun `Tester at man ikke får lov til å komme videre etter behandlingsresultat dersom det er ingen endringer i utbetaling`() {
         var steg = FØRSTE_STEG
 
         listOf(
@@ -402,23 +402,25 @@ class BehandlingStegTest {
                     hentNesteSteg(
                         behandling = lagBehandling(
                             årsak = BehandlingÅrsak.SATSENDRING
-                        ).copy(resultat = Behandlingsresultat.AVSLÅTT_OG_ENDRET),
-                        utførendeStegType = it
+                        ),
+                        utførendeStegType = it,
+                        endringerIUtbetaling = EndringerIUtbetaling.INGEN_ENDRING_I_UTBETALING
                     )
                 }
             } else {
                 steg = hentNesteSteg(
                     behandling = lagBehandling(
                         årsak = BehandlingÅrsak.SATSENDRING
-                    ).copy(resultat = Behandlingsresultat.AVSLÅTT_OG_ENDRET),
-                    utførendeStegType = it
+                    ),
+                    utførendeStegType = it,
+                    endringerIUtbetaling = EndringerIUtbetaling.INGEN_ENDRING_I_UTBETALING
                 )
             }
         }
     }
 
     @Test
-    fun `Tester rekkefølgen på behandling av ÅRLIG_KONTROLL, som er test av else gren, med FORTSATT_INNVILGET`() {
+    fun `Tester rekkefølgen på behandling av ÅRLIG_KONTROLL, som er test av else gren, med FORTSATT_INNVILGET ved ingen endringer i utbetaling`() {
         var steg = FØRSTE_STEG
 
         listOf(
@@ -437,8 +439,22 @@ class BehandlingStegTest {
             steg = hentNesteSteg(
                 behandling = lagBehandling(
                     årsak = BehandlingÅrsak.ÅRLIG_KONTROLL
-                ).copy(resultat = Behandlingsresultat.FORTSATT_INNVILGET),
-                utførendeStegType = it
+                ),
+                utførendeStegType = it,
+                endringerIUtbetaling = EndringerIUtbetaling.INGEN_ENDRING_I_UTBETALING
+            )
+        }
+    }
+
+    @Test
+    fun `Skal kaste feil dersom det er en søknad og det forsøkes å gå videre fra beslutt vedtak uten at det har vært sjekk om det finnes endringer i utbetaling`() {
+        assertThrows<Feil> {
+            hentNesteSteg(
+                lagBehandling(
+                    årsak = BehandlingÅrsak.SØKNAD
+                ),
+                utførendeStegType = StegType.BESLUTTE_VEDTAK,
+                endringerIUtbetaling = EndringerIUtbetaling.IKKE_RELEVANT
             )
         }
     }
