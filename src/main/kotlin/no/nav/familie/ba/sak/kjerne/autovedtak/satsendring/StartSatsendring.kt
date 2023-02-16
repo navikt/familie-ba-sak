@@ -81,6 +81,7 @@ class StartSatsendring(
         satsTidspunkt: YearMonth
     ): Int {
         var antallFagsakerSatsendring = antallAlleredeTriggetSatsendring
+
         for (fagsak in fagsakForSatsendring) {
             if (skalTriggeSatsendring(fagsak, satsTidspunkt)) {
                 antallFagsakerSatsendring++
