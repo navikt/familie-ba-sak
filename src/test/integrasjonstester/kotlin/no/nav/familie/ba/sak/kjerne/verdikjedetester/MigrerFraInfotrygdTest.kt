@@ -1,56 +1,45 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import io.mockk.every
-import io.mockk.mockkObject
-import io.mockk.unmockkObject
-import no.nav.familie.ba.sak.common.LocalDateService
+import io.mockk.slot
+import no.nav.familie.ba.sak.config.EfSakRestClientMock
+import no.nav.familie.ba.sak.integrasjoner.`ef-sak`.EfSakRestClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.KanIkkeMigrereException
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.MigreringService
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.MigreringsfeilType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
-import no.nav.familie.ba.sak.kjerne.beregning.SatsTidspunkt
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
-import no.nav.familie.ba.sak.util.sisteTilleggOrdinærSats
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
+import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
+import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadResponse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
-import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
-@Disabled
 class MigrerFraInfotrygdTest(
     @Autowired private val migreringService: MigreringService,
-    @Autowired private val mockLocalDateService: LocalDateService,
     @Autowired private val behandlingRepository: BehandlingRepository,
-    @Autowired private val kompetanseRepository: KompetanseRepository
+    @Autowired private val kompetanseRepository: KompetanseRepository,
+    @Autowired private val efSakRestClient: EfSakRestClient
 ) : AbstractVerdikjedetest() {
 
-    @BeforeEach
-    fun førHverTest() {
-        mockkObject(SatsTidspunkt)
-        every { SatsTidspunkt.senesteSatsTidspunkt } returns LocalDate.of(2022, 12, 31)
-    }
-
     @AfterEach
-    fun etterHverTest() {
-        unmockkObject(SatsTidspunkt)
+    fun ryddOpp() {
+        EfSakRestClientMock.clearEfSakRestMocks(efSakRestClient)
     }
 
     @Test
     fun `skal migrere fagsak selv om ikke alle barn i infotrygd ligger i PDL`() {
-        every { mockLocalDateService.now() } returns LocalDate.of(2021, 12, 12) andThen LocalDate.now()
-
         val barnPåInfotrygdSøknadScenario = mockServerKlient().lagScenario(
             RestScenario(
                 søker = RestScenarioPerson(
@@ -77,7 +66,7 @@ class MigrerFraInfotrygdTest(
                     infotrygdSaker = InfotrygdSøkResponse(
                         bruker = listOf(
                             lagInfotrygdSak(
-                                sisteTilleggOrdinærSats(),
+                                HALV_BARNETRYGD_SATS_UNDER_6_ÅR * 2,
                                 barnPåInfotrygdSøknadScenario.barna.map { it.ident.toString() },
                                 "OR",
                                 "OS"
@@ -108,8 +97,6 @@ class MigrerFraInfotrygdTest(
 
     @Test
     fun `skal migrere delt bosted med 1 barn under 6 år`() {
-        every { mockLocalDateService.now() } returns LocalDate.of(2021, 12, 12) andThen LocalDate.now()
-
         val barnPåInfotrygdSøknadScenario = mockServerKlient().lagScenario(
             RestScenario(
                 søker = RestScenarioPerson(
@@ -167,8 +154,6 @@ class MigrerFraInfotrygdTest(
 
     @Test
     fun `skal migrere delt bosted med 1 barn over 6 år`() {
-        every { mockLocalDateService.now() } returns LocalDate.of(2021, 12, 12) andThen LocalDate.now()
-
         val barnPåInfotrygdSøknadScenario = mockServerKlient().lagScenario(
             RestScenario(
                 søker = RestScenarioPerson(
@@ -226,8 +211,6 @@ class MigrerFraInfotrygdTest(
 
     @Test
     fun `skal migrere delt bosted med 3 barn over 6 år`() {
-        every { mockLocalDateService.now() } returns LocalDate.of(2021, 12, 12) andThen LocalDate.now()
-
         val barnPåInfotrygdSøknadScenario = mockServerKlient().lagScenario(
             RestScenario(
                 søker = RestScenarioPerson(
@@ -295,8 +278,6 @@ class MigrerFraInfotrygdTest(
 
     @Test
     fun `skal migrere delt bosted med 2 barn over 6 år og 1 under`() {
-        every { mockLocalDateService.now() } returns LocalDate.of(2021, 12, 12) andThen LocalDate.now()
-
         val barnPåInfotrygdSøknadScenario = mockServerKlient().lagScenario(
             RestScenario(
                 søker = RestScenarioPerson(
@@ -359,10 +340,7 @@ class MigrerFraInfotrygdTest(
     }
 
     @Test
-    @Disabled("Må skrives om pga nye satser i mars")
     fun `skal feile migrere fordi beregnet beløp er ulikt beregnet beløp i ba-sak `() {
-        every { mockLocalDateService.now() } returns LocalDate.of(2021, 12, 12) andThen LocalDate.now()
-
         val barnPåInfotrygdSøknadScenario = mockServerKlient().lagScenario(
             RestScenario(
                 søker = RestScenarioPerson(
@@ -409,8 +387,6 @@ class MigrerFraInfotrygdTest(
 
     @Test
     fun `skal migrere utvidet barnetrygd med delt bosted for ett barn over 6 år`() {
-        every { mockLocalDateService.now() } returns LocalDate.of(2021, 12, 12) andThen LocalDate.now()
-
         val barnPåInfotrygdSøknadScenario = mockServerKlient().lagScenario(
             RestScenario(
                 søker = RestScenarioPerson(
@@ -467,7 +443,20 @@ class MigrerFraInfotrygdTest(
 
     @Test
     fun `skal migrere utvidet barnetrygd for ett barn under 3 år`() {
-        every { mockLocalDateService.now() } returns LocalDate.of(2021, 12, 12) andThen LocalDate.now()
+        EfSakRestClientMock.clearEfSakRestMocks(efSakRestClient)
+        val hentPerioderMedFullOvergangsstønadSlot = slot<String>()
+        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(capture(hentPerioderMedFullOvergangsstønadSlot)) } answers {
+            PerioderOvergangsstønadResponse(
+                perioder = listOf(
+                    PeriodeOvergangsstønad(
+                        personIdent = hentPerioderMedFullOvergangsstønadSlot.captured,
+                        fomDato = LocalDate.now().minusYears(2),
+                        datakilde = PeriodeOvergangsstønad.Datakilde.EF,
+                        tomDato = LocalDate.now().plusMonths(3)
+                    )
+                )
+            )
+        }
 
         val barnPåInfotrygdSøknadScenario = mockServerKlient().lagScenario(
             RestScenario(
@@ -524,8 +513,6 @@ class MigrerFraInfotrygdTest(
 
     @Test
     fun `skal feile migrering av utvidet barnetrygd med delt bosted pga ulikt antall barn når et av barna er over 18`() {
-        every { mockLocalDateService.now() } returns LocalDate.of(2021, 12, 12) andThen LocalDate.now()
-
         val barnPåInfotrygdSøknadScenario = mockServerKlient().lagScenario(
             RestScenario(
                 søker = RestScenarioPerson(
@@ -577,8 +564,6 @@ class MigrerFraInfotrygdTest(
 
     @Test
     fun `skal feile migrering dersom ikke småbarnstillegg stemmer overens`() {
-        every { mockLocalDateService.now() } returns LocalDate.of(2021, 12, 12) andThen LocalDate.now()
-
         val barnPåInfotrygdSøknadScenario = mockServerKlient().lagScenario(
             RestScenario(
                 søker = RestScenarioPerson(
@@ -637,10 +622,7 @@ class MigrerFraInfotrygdTest(
     }
 
     @Test
-    @Disabled("Trenger fiksing")
     fun `skal migrere EØS ordinær primærland med 1 barn under 6`() {
-        every { mockLocalDateService.now() } returns LocalDate.of(2021, 12, 12) andThen LocalDate.now()
-
         val barnPåInfotrygdSøknadScenario = mockServerKlient().lagScenario(
             RestScenario(
                 søker = RestScenarioPerson(
@@ -684,9 +666,7 @@ class MigrerFraInfotrygdTest(
     }
 
     @Test
-    @Disabled("Trenger fiksing")
     fun `skal migrere EØS ordinær primærland med 2 barn over 6 `() {
-        every { mockLocalDateService.now() } returns LocalDate.of(2021, 12, 12) andThen LocalDate.now()
         val barnPåInfotrygdSøknadScenario = mockServerKlient().lagScenario(
             RestScenario(
                 søker = RestScenarioPerson(
@@ -735,10 +715,7 @@ class MigrerFraInfotrygdTest(
     }
 
     @Test
-    @Disabled("Trenger fiksing")
     fun `skal migrere EØS utvidet primærland`() {
-        every { mockLocalDateService.now() } returns LocalDate.of(2021, 12, 12) andThen LocalDate.now()
-
         val barnPåInfotrygdSøknadScenario = mockServerKlient().lagScenario(
             RestScenario(
                 søker = RestScenarioPerson(
@@ -785,27 +762,22 @@ class MigrerFraInfotrygdTest(
         ident: String,
         behandlingUnderkategori: BehandlingUnderkategori
     ) {
-        if (System.getProperty("mockFeatureToggleAnswer")?.toBoolean() == true) {
-            val migreringsresponse = migreringService.migrer(ident)
-            val restFagsakEtterBehandlingAvsluttet =
-                familieBaSakKlient().hentFagsak(fagsakId = migreringsresponse.fagsakId)
+        val migreringsresponse = migreringService.migrer(ident)
+        val restFagsakEtterBehandlingAvsluttet =
+            familieBaSakKlient().hentFagsak(fagsakId = migreringsresponse.fagsakId)
 
-            val behandling = behandlingRepository.finnBehandling(migreringsresponse.behandlingId)
-            assertThat(behandling.kategori).isEqualTo(BehandlingKategori.EØS)
-            assertThat(behandling.underkategori).isEqualTo(behandlingUnderkategori)
+        val behandling = behandlingRepository.finnBehandling(migreringsresponse.behandlingId)
+        assertThat(behandling.kategori).isEqualTo(BehandlingKategori.EØS)
+        assertThat(behandling.underkategori).isEqualTo(behandlingUnderkategori)
 
-            generellAssertFagsak(
-                restFagsak = restFagsakEtterBehandlingAvsluttet,
-                fagsakStatus = FagsakStatus.OPPRETTET,
-                behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG
-            )
+        generellAssertFagsak(
+            restFagsak = restFagsakEtterBehandlingAvsluttet,
+            fagsakStatus = FagsakStatus.OPPRETTET,
+            behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG
+        )
 
-            assertThat(kompetanseRepository.finnFraBehandlingId(migreringsresponse.behandlingId)).hasSize(1)
-                .extracting("resultat").contains(KompetanseResultat.NORGE_ER_PRIMÆRLAND)
-        } else {
-            val exception = assertThrows<KanIkkeMigrereException> { migreringService.migrer(ident) }
-            assertThat(exception.feiltype).isEqualTo(MigreringsfeilType.IKKE_STØTTET_SAKSTYPE)
-        }
+        assertThat(kompetanseRepository.finnFraBehandlingId(migreringsresponse.behandlingId)).hasSize(1)
+            .extracting("resultat").contains(KompetanseResultat.NORGE_ER_PRIMÆRLAND)
     }
 
     companion object {
