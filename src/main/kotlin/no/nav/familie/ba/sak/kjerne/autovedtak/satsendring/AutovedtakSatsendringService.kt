@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.satsendring
 
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
@@ -9,16 +10,20 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakBehandlingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -39,7 +44,9 @@ class AutovedtakSatsendringService(
     private val andelTilkjentYtelseMedEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     private val tilbakestillBehandlingService: TilbakestillBehandlingService,
     private val satskjøringRepository: SatskjøringRepository,
-    private val behandlingService: BehandlingService
+    private val behandlingService: BehandlingService,
+    private val beregningService: BeregningService,
+    private val persongrunnlagService: PersongrunnlagService
 ) : AutovedtakBehandlingService<SatsendringTaskDto> {
 
     private val satsendringAlleredeUtført = Metrics.counter("satsendring.allerede.utfort")
@@ -97,6 +104,12 @@ class AutovedtakSatsendringService(
             return brukerHarÅpenBehandlingMelding
         }
 
+        if (harUtbetalingerSomOverstiger100Prosent(sisteIverksatteBehandling)) {
+            satskjøringForFagsak.feiltype = "UTBETALING_OVER_100_PROSENT"
+            satskjøringRepository.save(satskjøringForFagsak)
+            return "Fant utbetaling over 100 prosent på barna"
+        }
+
         val behandlingEtterBehandlingsresultat =
             autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
                 aktør = søkerAktør,
@@ -148,6 +161,32 @@ class AutovedtakSatsendringService(
             )
 
         return harAlleredeSisteSats(andeler, satstidspunkt)
+    }
+
+    private fun harUtbetalingerSomOverstiger100Prosent(sisteIverksatteBehandling: Behandling): Boolean {
+        val tilkjentYtelse =
+            beregningService.hentTilkjentYtelseForBehandling(behandlingId = sisteIverksatteBehandling.id)
+        val personopplysningGrunnlag =
+            persongrunnlagService.hentAktivThrows(behandlingId = sisteIverksatteBehandling.id)
+
+        val barnMedAndreRelevanteTilkjentYtelser = personopplysningGrunnlag.barna.map {
+            Pair(
+                it,
+                beregningService.hentRelevanteTilkjentYtelserForBarn(it.aktør, sisteIverksatteBehandling.fagsak.id)
+            )
+        }
+
+        try {
+            TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
+                behandlendeBehandlingTilkjentYtelse = tilkjentYtelse,
+                barnMedAndreRelevanteTilkjentYtelser = barnMedAndreRelevanteTilkjentYtelser,
+                personopplysningGrunnlag = personopplysningGrunnlag
+            )
+        } catch (e: UtbetalingsikkerhetFeil) {
+            secureLogger.info("fagsakId=${sisteIverksatteBehandling.fagsak.id} har UtbetalingsikkerhetFeil. Skipper satsendring: ${e.frontendFeilmelding}")
+            return true
+        }
+        return false
     }
 
     companion object {

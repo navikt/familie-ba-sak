@@ -16,7 +16,6 @@ import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
@@ -27,7 +26,6 @@ import java.time.YearMonth
 
 @ExtendWith(MockKExtension::class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@Disabled
 class MigreringServiceTest() {
     lateinit var migreringServiceMock: MigreringService
     lateinit var mockPersonidentService: PersonidentService
@@ -47,7 +45,6 @@ class MigreringServiceTest() {
             mockk(),
             mockk(),
             mockPersonidentService,
-            mockk(),
             mockk(),
             mockk(),
             mockk(),
