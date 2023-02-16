@@ -23,7 +23,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.ORDINÆR_BARNETRYGD
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.SMÅBARNSTILLEGG
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.UTVIDET_BARNETRYGD
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.task.OpprettTaskService
@@ -50,7 +49,6 @@ internal class StartSatsendringTest {
     private val featureToggleService: FeatureToggleService = mockk()
     private val personidentService: PersonidentService = mockk()
     private val autovedtakSatsendringService: AutovedtakSatsendringService = mockk()
-    private val kompetanseService: KompetanseService = mockk()
 
     lateinit var startSatsendring: StartSatsendring
 
@@ -75,7 +73,8 @@ internal class StartSatsendringTest {
             personidentService = personidentService,
             autovedtakSatsendringService = autovedtakSatsendringService,
             beregningService = mockk(),
-            persongrunnlagService = mockk()
+            persongrunnlagService = mockk(),
+            tilkjentYtelseValideringService = mockk()
         )
     }
 
