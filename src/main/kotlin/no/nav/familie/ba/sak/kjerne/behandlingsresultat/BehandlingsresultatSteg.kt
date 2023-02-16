@@ -19,7 +19,6 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValide
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.validerBarnasVilkår
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.validerDeltBostedEndringerIkkeKrysserUtvidetYtelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlingSteg
@@ -77,10 +76,6 @@ class BehandlingsresultatSteg(
         )
 
         if (toggleFrikobleAndelerOgEndringer) {
-            validerDeltBostedEndringerIkkeKrysserUtvidetYtelse(
-                endreteUtbetalingerMedAndeler.map { it.endretUtbetalingAndel },
-                tilkjentYtelse.andelerTilkjentYtelse
-            )
             validerPeriodeInnenforTilkjentytelse(
                 endreteUtbetalingerMedAndeler.map { it.endretUtbetalingAndel },
                 tilkjentYtelse.andelerTilkjentYtelse
