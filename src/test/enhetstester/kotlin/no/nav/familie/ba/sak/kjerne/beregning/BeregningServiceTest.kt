@@ -49,6 +49,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
+import no.nav.familie.ba.sak.kjerne.steg.EndringerIUtbetaling
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -84,6 +85,9 @@ class BeregningServiceTest {
     )
 
     private lateinit var beregningService: BeregningService
+
+    val jan22 = YearMonth.of(2022, 1)
+    val aug22 = YearMonth.of(2022, 8)
 
     @BeforeEach
     fun førHverTest() {
@@ -894,6 +898,210 @@ class BeregningServiceTest {
             deltBostedForAndrePeriode = true,
             skalLageSplitt = false
         )
+    }
+
+    @Test
+    fun `erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling skal returnere INGEN_ENDRINGER_I_UTBETALING dersom det utbetalingsbeløpene er like mellom nåværende og forrige behandling`() {
+        val forrigeBehandling = lagBehandling()
+        val nåværendeBehandling = lagBehandling()
+        val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
+        val barn2Aktør = lagPerson(type = PersonType.BARN).aktør
+
+        val forrigeAndeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = jan22,
+                tom = aug22,
+                beløp = 1000,
+                aktør = barn1Aktør
+            ),
+            lagAndelTilkjentYtelse(
+                fom = jan22,
+                tom = aug22,
+                beløp = 1000,
+                aktør = barn2Aktør
+            )
+        )
+        val nåværendeAndeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = jan22,
+                tom = aug22,
+                beløp = 1000,
+                aktør = barn1Aktør
+            ),
+            lagAndelTilkjentYtelse(
+                fom = jan22,
+                tom = aug22,
+                beløp = 1000,
+                aktør = barn2Aktør
+            )
+        )
+
+        every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(nåværendeBehandling) } returns forrigeBehandling
+        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) } returns nåværendeAndeler
+        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns forrigeAndeler
+
+        val erEndringIUtbetaling = beregningService.erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(nåværendeBehandling)
+
+        Assertions.assertEquals(erEndringIUtbetaling, EndringerIUtbetaling.INGEN_ENDRING_I_UTBETALING)
+
+        verify { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(nåværendeBehandling) }
+        verify { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) }
+        verify { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) }
+    }
+
+    @Test
+    fun `erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling skal returnere INGEN_ENDRINGER_I_UTBETALING dersom man har gått fra andeler med 0 i beløp til ingen andeler`() {
+        val forrigeBehandling = lagBehandling()
+        val nåværendeBehandling = lagBehandling()
+        val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
+        val barn2Aktør = lagPerson(type = PersonType.BARN).aktør
+
+        val forrigeAndeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = jan22,
+                tom = aug22,
+                beløp = 0,
+                aktør = barn1Aktør
+            ),
+            lagAndelTilkjentYtelse(
+                fom = jan22,
+                tom = aug22,
+                beløp = 0,
+                aktør = barn2Aktør
+            )
+        )
+
+        every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(nåværendeBehandling) } returns forrigeBehandling
+        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) } returns emptyList()
+        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns forrigeAndeler
+
+        val erEndringIUtbetaling = beregningService.erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(nåværendeBehandling)
+
+        Assertions.assertEquals(erEndringIUtbetaling, EndringerIUtbetaling.INGEN_ENDRING_I_UTBETALING)
+
+        verify { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(nåværendeBehandling) }
+        verify { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) }
+        verify { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) }
+    }
+
+    @Test
+    fun `erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling skal returnere INGEN_ENDRINGER_I_UTBETALING dersom man har gått fra ingen andeler til andeler med 0 i beløp`() {
+        val forrigeBehandling = lagBehandling()
+        val nåværendeBehandling = lagBehandling()
+        val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
+        val barn2Aktør = lagPerson(type = PersonType.BARN).aktør
+
+        val nåværendeAndeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = jan22,
+                tom = aug22,
+                beløp = 0,
+                aktør = barn1Aktør
+            ),
+            lagAndelTilkjentYtelse(
+                fom = jan22,
+                tom = aug22,
+                beløp = 0,
+                aktør = barn2Aktør
+            )
+        )
+
+        every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(nåværendeBehandling) } returns forrigeBehandling
+        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) } returns nåværendeAndeler
+        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns emptyList()
+
+        val erEndringIUtbetaling = beregningService.erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(nåværendeBehandling)
+
+        Assertions.assertEquals(erEndringIUtbetaling, EndringerIUtbetaling.INGEN_ENDRING_I_UTBETALING)
+
+        verify { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(nåværendeBehandling) }
+        verify { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) }
+        verify { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) }
+    }
+
+    @Test
+    fun `erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling skal returnere ENDRING_I_UTBETALING dersom man har gått fra ingen andeler til andeler med over 0 i beløp`() {
+        val forrigeBehandling = lagBehandling()
+        val nåværendeBehandling = lagBehandling()
+        val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
+        val barn2Aktør = lagPerson(type = PersonType.BARN).aktør
+
+        val nåværendeAndeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = jan22,
+                tom = aug22,
+                beløp = 1000,
+                aktør = barn1Aktør
+            ),
+            lagAndelTilkjentYtelse(
+                fom = jan22,
+                tom = aug22,
+                beløp = 1000,
+                aktør = barn2Aktør
+            )
+        )
+
+        every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(nåværendeBehandling) } returns forrigeBehandling
+        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) } returns nåværendeAndeler
+        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns emptyList()
+
+        val erEndringIUtbetaling = beregningService.erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(nåværendeBehandling)
+
+        Assertions.assertEquals(erEndringIUtbetaling, EndringerIUtbetaling.ENDRING_I_UTBETALING)
+
+        verify { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(nåværendeBehandling) }
+        verify { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) }
+        verify { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) }
+    }
+
+    @Test
+    fun `erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling skal returnere ENDRING_I_UTBETALING dersom man fikk beløp over 0 i forrige behandling og det har forandret på seg`() {
+        val forrigeBehandling = lagBehandling()
+        val nåværendeBehandling = lagBehandling()
+        val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
+        val barn2Aktør = lagPerson(type = PersonType.BARN).aktør
+
+        val forrigeAndeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = jan22,
+                tom = aug22,
+                beløp = 1000,
+                aktør = barn1Aktør
+            ),
+            lagAndelTilkjentYtelse(
+                fom = jan22,
+                tom = aug22,
+                beløp = 1000,
+                aktør = barn2Aktør
+            )
+        )
+
+        val nåværendeAndeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = jan22,
+                tom = aug22,
+                beløp = 500,
+                aktør = barn1Aktør
+            ),
+            lagAndelTilkjentYtelse(
+                fom = jan22,
+                tom = aug22,
+                beløp = 1000,
+                aktør = barn2Aktør
+            )
+        )
+
+        every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(nåværendeBehandling) } returns forrigeBehandling
+        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) } returns nåværendeAndeler
+        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns forrigeAndeler
+
+        val erEndringIUtbetaling = beregningService.erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(nåværendeBehandling)
+
+        Assertions.assertEquals(erEndringIUtbetaling, EndringerIUtbetaling.ENDRING_I_UTBETALING)
+
+        verify { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(nåværendeBehandling) }
+        verify { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) }
+        verify { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) }
     }
 
     private fun kjørScenarioForBack2Backtester(

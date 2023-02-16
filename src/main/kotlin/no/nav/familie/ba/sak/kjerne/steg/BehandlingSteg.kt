@@ -275,7 +275,7 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType, endringe
                 REGISTRERE_PERSONGRUNNLAG -> FILTRERING_FØDSELSHENDELSER
                 FILTRERING_FØDSELSHENDELSER -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
-                BEHANDLINGSRESULTAT -> if (behandling.resultat == Behandlingsresultat.INNVILGET) IVERKSETT_MOT_OPPDRAG else HENLEGG_BEHANDLING
+                BEHANDLINGSRESULTAT -> if (endringerIUtbetaling == EndringerIUtbetaling.ENDRING_I_UTBETALING) IVERKSETT_MOT_OPPDRAG else HENLEGG_BEHANDLING
                 IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
                 VENTE_PÅ_STATUS_FRA_ØKONOMI -> JOURNALFØR_VEDTAKSBREV
                 JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV
@@ -383,14 +383,14 @@ private fun hentNesteStegTypeBasertPåOmDetErEndringIUtbetaling(endringerIUtbeta
     when (endringerIUtbetaling) {
         EndringerIUtbetaling.ENDRING_I_UTBETALING -> IVERKSETT_MOT_OPPDRAG
         EndringerIUtbetaling.INGEN_ENDRING_I_UTBETALING -> JOURNALFØR_VEDTAKSBREV
-        EndringerIUtbetaling.IKKE_RELEVANT -> throw Feil("Tentativ feilmelding")
+        EndringerIUtbetaling.IKKE_RELEVANT -> throw Feil("Endringer i utbetaling må utledes før man kan gå videre til neste steg.")
     }
 
 private fun hentStegEtterBeslutteVedtakForTekniskEndring(endringerIUtbetaling: EndringerIUtbetaling): StegType =
-     when (endringerIUtbetaling) {
+    when (endringerIUtbetaling) {
         EndringerIUtbetaling.ENDRING_I_UTBETALING -> IVERKSETT_MOT_OPPDRAG
         EndringerIUtbetaling.INGEN_ENDRING_I_UTBETALING -> FERDIGSTILLE_BEHANDLING
-        EndringerIUtbetaling.IKKE_RELEVANT -> throw Feil("Tentativ feilmelding")
+        EndringerIUtbetaling.IKKE_RELEVANT -> throw Feil("Endringer i utbetaling må utledes før man kan gå videre til neste steg.")
     }
 
 enum class BehandlerRolle(val nivå: Int) {
