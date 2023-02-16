@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.finnAktørIderMedUgyldigEtterbetalingsperiode
@@ -51,6 +50,11 @@ class TilkjentYtelseValideringService(
                 personopplysningGrunnlag = personopplysningGrunnlag
             )
         }
+    }
+
+    fun validerAtIngenUtbetalingerOverstiger100Prosent(fagsakId: Long) {
+        val forrigeBehanlding = behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = fagsakId)
+        forrigeBehanlding?.let { validerAtIngenUtbetalingerOverstiger100Prosent(forrigeBehanlding) }
     }
 
     fun validerIngenAndelerTilkjentYtelseMedSammeOffsetIBehandling(behandlingId: Long) {

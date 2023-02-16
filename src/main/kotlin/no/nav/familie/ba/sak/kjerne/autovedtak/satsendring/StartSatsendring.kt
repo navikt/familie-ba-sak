@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
@@ -38,7 +39,8 @@ class StartSatsendring(
     private val personidentService: PersonidentService,
     private val autovedtakSatsendringService: AutovedtakSatsendringService,
     private val beregningService: BeregningService,
-    private val persongrunnlagService: PersongrunnlagService
+    private val persongrunnlagService: PersongrunnlagService,
+    private val tilkjentYtelseValideringService: TilkjentYtelseValideringService
 ) {
 
     private val ignorerteFagsaker = mutableSetOf<Long>()
@@ -220,6 +222,15 @@ class StartSatsendring(
 
         if (aktivOgÅpenBehandling != null) {
             throw FunksjonellFeil("Det finnes en åpen behandling på fagsaken som må avsluttes før satsendring kan gjennomføres.")
+        }
+
+        try {
+            tilkjentYtelseValideringService.validerAtIngenUtbetalingerOverstiger100Prosent(fagsakId = fagsakId)
+        } catch (feil: UtbetalingsikkerhetFeil) {
+            throw FunksjonellFeil(
+                "Satsendring kan ikke gjennomføres fordi det er mer enn 100% utbetaling for barn i fagsaken.\n" +
+                    "Barnetrygden til en av mottakerne må revurderes."
+            )
         }
 
         return if (kanStarteSatsendringPåFagsak(fagsakId)) {
