@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTil
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
+import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlag
@@ -99,61 +100,18 @@ class RevurderingMedEndredeUtbetalingandelerTest(
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
 
-        // Behandling 1 - førstegangsbehandling
-        val førstegangsbehandling = stegService.håndterNyBehandling(nyOrdinærBehandling(søkersIdent = fnr, fagsakId = fagsak.id))
-
-        val søknadGrunnlag = SøknadGrunnlag(
-            behandlingId = førstegangsbehandling.id,
-            aktiv = true,
-            søknad = lagSøknadDTO(fnr, barnasIdenter = listOf(barnFnr), underkategori = BehandlingUnderkategori.ORDINÆR).writeValueAsString()
-        )
-
-        søknadGrunnlagRepository.save(søknadGrunnlag)
-
-        persongrunnlagService.lagreOgDeaktiverGammel(
-            lagTestPersonopplysningGrunnlag(
-                førstegangsbehandling.id,
-                fnr,
-                listOf(barnFnr),
-                søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
-                barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true)
-            )
-        )
-
-        val vilkårsvurdering = vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
-            behandling = førstegangsbehandling,
-            bekreftEndringerViaFrontend = true,
-            forrigeBehandlingSomErVedtatt = null
-        )
-
-        gjennomførVilkårsvurdering(vilkårsvurdering = vilkårsvurdering, behandling = førstegangsbehandling)
-
-        val endretUtbetalingAndel =
-            endretUtbetalingAndelService.opprettTomEndretUtbetalingAndelOgOppdaterTilkjentYtelse(førstegangsbehandling)
-
         val endretAndelFom = YearMonth.of(2019, 6)
         val endretAndelTom = YearMonth.of(2020, 10)
-        val restEndretUtbetalingAndel = RestEndretUtbetalingAndel(
-            id = endretUtbetalingAndel.id,
-            fom = endretAndelFom,
-            tom = endretAndelTom,
-            avtaletidspunktDeltBosted = LocalDate.of(2019, 5, 8),
-            søknadstidspunkt = LocalDate.of(2019, 5, 8),
-            begrunnelse = "begrunnelse",
-            personIdent = barnFnr,
-            årsak = Årsak.DELT_BOSTED,
-            prosent = BigDecimal.ZERO,
-            erTilknyttetAndeler = false
-        )
 
-        endretUtbetalingAndelService.oppdaterEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
-            førstegangsbehandling,
-            endretUtbetalingAndel.id,
-            restEndretUtbetalingAndel
-        )
-
+        // Behandling 1 - førstegangsbehandling
         val iverksattFørstegangsbehandling =
-            ferdigstillBehandlingFraBehandlingsresultat(førstegangsbehandling)
+            lagFørstegangsbehandlingMedEndretUtbetalingAndel(
+                endretAndelFom = endretAndelFom,
+                endretAndelTom = endretAndelTom,
+                søkersIdent = fnr,
+                barnFnr = barnFnr,
+                fagsak = fagsak
+            )
 
         // Behandling 2 - revurdering
         val behandlingRevurdering = stegService.håndterNyBehandling(nyRevurdering(søkersIdent = fnr, fagsakId = fagsak.id))
@@ -220,15 +178,65 @@ class RevurderingMedEndredeUtbetalingandelerTest(
         stegService.håndterVilkårsvurdering(behandling)
     }
 
-    private fun ferdigstillBehandlingFraBehandlingsresultat(behandling: Behandling): Behandling {
-        behandling.behandlingStegTilstand.add(
-            BehandlingStegTilstand(behandling = behandling, behandlingSteg = StegType.BEHANDLINGSRESULTAT)
+    private fun lagFørstegangsbehandlingMedEndretUtbetalingAndel(endretAndelFom: YearMonth, endretAndelTom: YearMonth, søkersIdent: String, barnFnr: String, fagsak: Fagsak): Behandling {
+        val førstegangsbehandling = stegService.håndterNyBehandling(nyOrdinærBehandling(søkersIdent = søkersIdent, fagsakId = fagsak.id))
+
+        val søknadGrunnlag = SøknadGrunnlag(
+            behandlingId = førstegangsbehandling.id,
+            aktiv = true,
+            søknad = lagSøknadDTO(søkersIdent, barnasIdenter = listOf(barnFnr), underkategori = BehandlingUnderkategori.ORDINÆR).writeValueAsString()
         )
-        val behandlingEtterHåndterBehandlingsresultat = stegService.håndterBehandlingsresultat(behandling)
+
+        søknadGrunnlagRepository.save(søknadGrunnlag)
+
+        persongrunnlagService.lagreOgDeaktiverGammel(
+            lagTestPersonopplysningGrunnlag(
+                førstegangsbehandling.id,
+                søkersIdent,
+                listOf(barnFnr),
+                søkerAktør = personidentService.hentOgLagreAktør(søkersIdent, true),
+                barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true)
+            )
+        )
+
+        val vilkårsvurdering = vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
+            behandling = førstegangsbehandling,
+            bekreftEndringerViaFrontend = true,
+            forrigeBehandlingSomErVedtatt = null
+        )
+
+        gjennomførVilkårsvurdering(vilkårsvurdering = vilkårsvurdering, behandling = førstegangsbehandling)
+
+        val endretUtbetalingAndel =
+            endretUtbetalingAndelService.opprettTomEndretUtbetalingAndelOgOppdaterTilkjentYtelse(førstegangsbehandling)
+
+        val restEndretUtbetalingAndel = RestEndretUtbetalingAndel(
+            id = endretUtbetalingAndel.id,
+            fom = endretAndelFom,
+            tom = endretAndelTom,
+            avtaletidspunktDeltBosted = LocalDate.of(2019, 5, 8),
+            søknadstidspunkt = LocalDate.of(2019, 5, 8),
+            begrunnelse = "begrunnelse",
+            personIdent = barnFnr,
+            årsak = Årsak.DELT_BOSTED,
+            prosent = BigDecimal.ZERO,
+            erTilknyttetAndeler = false
+        )
+
+        endretUtbetalingAndelService.oppdaterEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
+            førstegangsbehandling,
+            endretUtbetalingAndel.id,
+            restEndretUtbetalingAndel
+        )
+
+        førstegangsbehandling.behandlingStegTilstand.add(
+            BehandlingStegTilstand(behandling = førstegangsbehandling, behandlingSteg = StegType.BEHANDLINGSRESULTAT)
+        )
+        val behandlingEtterHåndterBehandlingsresultat = stegService.håndterBehandlingsresultat(førstegangsbehandling)
 
         behandlingEtterHåndterBehandlingsresultat.behandlingStegTilstand.add(
             BehandlingStegTilstand(
-                behandling = behandling,
+                behandling = førstegangsbehandling,
                 behandlingSteg = StegType.BEHANDLING_AVSLUTTET
             )
         )
