@@ -81,6 +81,9 @@ class StartSatsendring(
         satsTidspunkt: YearMonth
     ): Int {
         var antallFagsakerSatsendring = antallAlleredeTriggetSatsendring
+
+        fagsakForSatsendring.parallelStream()
+
         for (fagsak in fagsakForSatsendring) {
             if (skalTriggeSatsendring(fagsak, satsTidspunkt)) {
                 antallFagsakerSatsendring++
