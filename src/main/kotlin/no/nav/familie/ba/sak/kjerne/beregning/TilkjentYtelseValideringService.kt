@@ -51,7 +51,7 @@ class TilkjentYtelseValideringService(
             )
         }
     }
-    
+
     fun validerIngenAndelerTilkjentYtelseMedSammeOffsetIBehandling(behandlingId: Long) {
         val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandlingId)
 

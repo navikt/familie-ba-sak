@@ -253,5 +253,5 @@ enum class SatsendringSvar(val melding: String) {
     TILBAKESTILLER_BEHANDLINGEN_TIL_VILKÅRSVURDERINGEN(melding = "Tilbakestiller behandlingen til vilkårsvurderingen"),
     BEHANDLINGEN_ER_UNDER_UTREDNING_MEN_I_RIKTIG_TILSTAND(
         melding = "Behandlingen er under utredning, men er allerede i riktig tilstand."
-    ),
+    )
 }

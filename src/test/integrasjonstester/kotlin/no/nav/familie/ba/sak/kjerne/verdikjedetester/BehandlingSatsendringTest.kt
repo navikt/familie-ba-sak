@@ -33,7 +33,6 @@ import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
@@ -125,7 +124,7 @@ class BehandlingSatsendringTest(
         val satsendringResultat =
             autovedtakSatsendringService.kjørBehandling(SatsendringTaskDto(behandling.fagsak.id, YearMonth.of(2023, 3)))
 
-        assertEquals(satsendringResultat, SatsendringSvar.SATSENDRING_KJØRT_OK)
+        assertEquals(SatsendringSvar.SATSENDRING_KJØRT_OK, satsendringResultat)
 
         val satsendringBehandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = behandling.fagsak.id)
         assertEquals(Behandlingsresultat.ENDRET_UTBETALING, satsendringBehandling?.resultat)
@@ -232,7 +231,7 @@ class BehandlingSatsendringTest(
         val satsendringResultat =
             autovedtakSatsendringService.kjørBehandling(SatsendringTaskDto(behandling.fagsak.id, YearMonth.of(2023, 3)))
 
-        assertTrue(satsendringResultat == SatsendringSvar.TILBAKESTILLER_BEHANDLINGEN_TIL_VILKÅRSVURDERINGEN)
+        assertEquals(SatsendringSvar.TILBAKESTILLER_BEHANDLINGEN_TIL_VILKÅRSVURDERINGEN, satsendringResultat)
 
         val åpenBehandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = behandling.fagsak.id)
         assertEquals(revurdering.data!!.behandlingId, åpenBehandling!!.id)
@@ -304,7 +303,7 @@ class BehandlingSatsendringTest(
         val satsendringResultat =
             autovedtakSatsendringService.kjørBehandling(SatsendringTaskDto(behandling.fagsak.id, YearMonth.of(2023, 3)))
 
-        assertTrue(satsendringResultat == SatsendringSvar.SATSENDRING_ER_ALLEREDE_UTFØRT)
+        assertEquals(SatsendringSvar.SATSENDRING_ER_ALLEREDE_UTFØRT, satsendringResultat)
 
         val satskjøring = satskjøringRepository.findByFagsakId(behandling.fagsak.id)
         assertThat(satskjøring?.ferdigTidspunkt)
