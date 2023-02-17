@@ -51,12 +51,7 @@ class TilkjentYtelseValideringService(
             )
         }
     }
-
-    fun validerAtIngenUtbetalingerOverstiger100ProsentISisteIverksatteBehandling(fagsakId: Long) {
-        val forrigeBehanlding = behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = fagsakId)
-        forrigeBehanlding?.let { validerAtIngenUtbetalingerOverstiger100Prosent(forrigeBehanlding) }
-    }
-
+    
     fun validerIngenAndelerTilkjentYtelseMedSammeOffsetIBehandling(behandlingId: Long) {
         val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandlingId)
 
