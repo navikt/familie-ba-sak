@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.steg.StegType.BEHANDLINGSRESULTAT
@@ -344,9 +343,10 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType, endringe
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
                 BEHANDLINGSRESULTAT -> if (endringerIUtbetaling == EndringerIUtbetaling.ENDRING_I_UTBETALING) {
                     IVERKSETT_MOT_OPPDRAG
-                } else if (behandling.kategori == BehandlingKategori.EØS && behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET) {
+                } else if (behandling.kategori == BehandlingKategori.EØS && endringerIUtbetaling == EndringerIUtbetaling.INGEN_ENDRING_I_UTBETALING) {
                     FERDIGSTILLE_BEHANDLING
                 } else {
+                    // TODO: Flytt denne valideringen til behandlingsresultat valideringen
                     throw Feil("Resultat ${behandling.resultat} er ikke støttet etter behandlingsresultat for satsendringsbehandling.")
                 }
 
