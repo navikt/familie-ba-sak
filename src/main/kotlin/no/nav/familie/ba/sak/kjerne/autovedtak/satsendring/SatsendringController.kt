@@ -43,8 +43,8 @@ class SatsendringController(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER
         )
 
-        val erSatsendringOpprettetOk = startSatsendring.opprettSatsendringSynkrontVedGammelSats(fagsakId)
-        return ResponseEntity.ok(if (erSatsendringOpprettetOk) Ressurs.success(Unit) else Ressurs.failure())
+        startSatsendring.opprettSatsendringSynkrontVedGammelSats(fagsakId)
+        return ResponseEntity.ok(Ressurs.success(Unit))
     }
 
     @GetMapping(path = ["/{fagsakId}/kan-kjore-satsendring"])
