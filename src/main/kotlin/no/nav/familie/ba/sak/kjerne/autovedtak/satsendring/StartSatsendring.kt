@@ -3,15 +3,12 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.satsendring
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
-import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
-import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
@@ -37,9 +34,7 @@ class StartSatsendring(
     private val satskjøringRepository: SatskjøringRepository,
     private val featureToggleService: FeatureToggleService,
     private val personidentService: PersonidentService,
-    private val autovedtakSatsendringService: AutovedtakSatsendringService,
-    private val beregningService: BeregningService,
-    private val persongrunnlagService: PersongrunnlagService,
+    private val autovedtakSatsendringService: AutovedtakSatsendringService
     private val tilkjentYtelseValideringService: TilkjentYtelseValideringService
 ) {
 
@@ -129,14 +124,6 @@ class StartSatsendring(
                 logger.info("Fagsak=${fagsak.id} har alt siste satser")
                 return true
             }
-            if (featureToggleService.isEnabled(
-                    FeatureToggleConfig.SATSENDRING_SJEKK_UTBETALING,
-                    true
-                ) && harUtbetalingerSomOverstiger100Prosent(sisteIverksatteBehandling)
-            ) {
-                ignorerteFagsaker.add(fagsak.id)
-                return false
-            }
 
             if (featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_OPPRETT_TASKER)) {
                 logger.info("Oppretter satsendringtask for fagsak=${fagsak.id}")
@@ -150,32 +137,6 @@ class StartSatsendring(
             ignorerteFagsaker.add(fagsak.id)
             return false
         }
-    }
-
-    private fun harUtbetalingerSomOverstiger100Prosent(sisteIverksatteBehandling: Behandling): Boolean {
-        val tilkjentYtelse =
-            beregningService.hentTilkjentYtelseForBehandling(behandlingId = sisteIverksatteBehandling.id)
-        val personopplysningGrunnlag =
-            persongrunnlagService.hentAktivThrows(behandlingId = sisteIverksatteBehandling.id)
-
-        val barnMedAndreRelevanteTilkjentYtelser = personopplysningGrunnlag.barna.map {
-            Pair(
-                it,
-                beregningService.hentRelevanteTilkjentYtelserForBarn(it.aktør, sisteIverksatteBehandling.fagsak.id)
-            )
-        }
-
-        try {
-            TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
-                behandlendeBehandlingTilkjentYtelse = tilkjentYtelse,
-                barnMedAndreRelevanteTilkjentYtelser = barnMedAndreRelevanteTilkjentYtelser,
-                personopplysningGrunnlag = personopplysningGrunnlag
-            )
-        } catch (e: UtbetalingsikkerhetFeil) {
-            secureLogger.info("fagsakId=${sisteIverksatteBehandling.fagsak.id} har UtbetalingsikkerhetFeil. Skipper satsendring: ${e.frontendFeilmelding}")
-            return true
-        }
-        return false
     }
 
     fun sjekkOgOpprettSatsendringVedGammelSats(ident: String): Boolean {
