@@ -5,6 +5,7 @@ import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.AutovedtakSatsendringService
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.SatsendringSvar
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -124,7 +125,7 @@ class BehandlingSatsendringTest(
         val satsendringResultat =
             autovedtakSatsendringService.kjørBehandling(SatsendringTaskDto(behandling.fagsak.id, YearMonth.of(2023, 3)))
 
-        assertEquals(satsendringResultat, "Satsendring kjørt OK")
+        assertEquals(satsendringResultat, SatsendringSvar.SATSENDRING_KJØRT_OK)
 
         val satsendringBehandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = behandling.fagsak.id)
         assertEquals(Behandlingsresultat.ENDRET_UTBETALING, satsendringBehandling?.resultat)
@@ -231,7 +232,7 @@ class BehandlingSatsendringTest(
         val satsendringResultat =
             autovedtakSatsendringService.kjørBehandling(SatsendringTaskDto(behandling.fagsak.id, YearMonth.of(2023, 3)))
 
-        assertTrue(satsendringResultat.contains("Tilbakestiller behandling"))
+        assertTrue(satsendringResultat == SatsendringSvar.TILBAKESTILLER_BEHANDLINGEN_TIL_VILKÅRSVURDERINGEN)
 
         val åpenBehandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = behandling.fagsak.id)
         assertEquals(revurdering.data!!.behandlingId, åpenBehandling!!.id)
@@ -303,7 +304,7 @@ class BehandlingSatsendringTest(
         val satsendringResultat =
             autovedtakSatsendringService.kjørBehandling(SatsendringTaskDto(behandling.fagsak.id, YearMonth.of(2023, 3)))
 
-        assertEquals(satsendringResultat, "Satsendring allerede utført for fagsak=${behandling.fagsak.id}")
+        assertTrue(satsendringResultat == SatsendringSvar.SATSENDRING_ER_ALLEREDE_UTFØRT)
 
         val satskjøring = satskjøringRepository.findByFagsakId(behandling.fagsak.id)
         assertThat(satskjøring?.ferdigTidspunkt)

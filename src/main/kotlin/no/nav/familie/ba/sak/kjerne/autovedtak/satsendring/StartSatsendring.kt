@@ -187,18 +187,21 @@ class StartSatsendring(
         )
 
         when (resultatSatsendringBehandling) {
-            is SatsendringSvar.SATSENDRING_KJØRT_OK -> Unit
+            SatsendringSvar.SATSENDRING_KJØRT_OK -> Unit
 
-            is SatsendringSvar.FANT_OVER_100_PROSENT_UTBETALING ->
+            SatsendringSvar.FANT_OVER_100_PROSENT_UTBETALING ->
                 throw FunksjonellFeil(
                     "Satsendring kan ikke gjennomføres fordi det er mer enn 100% utbetaling for barn i fagsaken.\n" +
                         "Barnetrygden til en av mottakerne må revurderes."
                 )
 
-            is SatsendringSvar.SATSENDRING_ER_ALLEREDE_UTFØRT ->
+            SatsendringSvar.SATSENDRING_ER_ALLEREDE_UTFØRT ->
                 throw FunksjonellFeil("Satsendring er allerede gjennomført på fagsaken. Last inn siden på nytt for å få opp siste behandling.")
 
-            is SatsendringSvar.ÅpenBehandlingSvar ->
+            SatsendringSvar.HAR_ALLEREDE_SISTE_SATS,
+            SatsendringSvar.BEHANDLING_ER_LÅST_SATSENDRING_TRIGGES_NESTE_VIRKEDAG,
+            SatsendringSvar.TILBAKESTILLER_BEHANDLINGEN_TIL_VILKÅRSVURDERINGEN,
+            SatsendringSvar.BEHANDLINGEN_ER_UNDER_UTREDNING_MEN_I_RIKTIG_TILSTAND ->
                 throw FunksjonellFeil("Det finnes en åpen behandling på fagsaken som må avsluttes før satsendring kan gjennomføres.")
         }
     }
