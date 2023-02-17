@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.satsendring
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import io.mockk.spyk
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.common.lagBehandling
@@ -23,7 +24,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.ORDINÆR_BARNETRYGD
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.SMÅBARNSTILLEGG
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.UTVIDET_BARNETRYGD
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.task.OpprettTaskService
@@ -33,6 +33,8 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
+import org.junit.jupiter.api.assertThrows
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import java.time.YearMonth
@@ -50,9 +52,8 @@ internal class StartSatsendringTest {
     private val featureToggleService: FeatureToggleService = mockk()
     private val personidentService: PersonidentService = mockk()
     private val autovedtakSatsendringService: AutovedtakSatsendringService = mockk()
-    private val kompetanseService: KompetanseService = mockk()
 
-    lateinit var startSatsendring: StartSatsendring
+    private lateinit var startSatsendring: StartSatsendring
 
     @BeforeEach
     fun setUp() {
@@ -65,17 +66,17 @@ internal class StartSatsendringTest {
         val opprettTaskService = OpprettTaskService(taskRepository, satskjøringRepository)
         every { featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_SJEKK_UTBETALING, true) } returns false
 
-        startSatsendring = StartSatsendring(
-            fagsakRepository = fagsakRepository,
-            behandlingRepository = behandlingRepository,
-            opprettTaskService = opprettTaskService,
-            andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
-            satskjøringRepository = satskjøringRepository,
-            featureToggleService = featureToggleService,
-            personidentService = personidentService,
-            autovedtakSatsendringService = autovedtakSatsendringService,
-            beregningService = mockk(),
-            persongrunnlagService = mockk()
+        startSatsendring = spyk(
+            StartSatsendring(
+                fagsakRepository = fagsakRepository,
+                behandlingRepository = behandlingRepository,
+                opprettTaskService = opprettTaskService,
+                andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
+                satskjøringRepository = satskjøringRepository,
+                featureToggleService = featureToggleService,
+                personidentService = personidentService,
+                autovedtakSatsendringService = autovedtakSatsendringService
+            )
         )
     }
 
@@ -482,5 +483,35 @@ internal class StartSatsendringTest {
         every { autovedtakSatsendringService.harAlleredeNySats(any(), any()) } returns false
 
         assertTrue(startSatsendring.kanStarteSatsendringPåFagsak(1L))
+    }
+
+    @Test
+    fun `opprettSatsendringSynkrontVedGammelSats skal kaste dersom man ikke kan starte satsendring`() {
+        every { startSatsendring.kanStarteSatsendringPåFagsak(any()) } returns false
+
+        assertThrows<Exception> {
+            startSatsendring.opprettSatsendringSynkrontVedGammelSats(0L)
+        }
+    }
+
+    @Test
+    fun `opprettSatsendringSynkrontVedGammelSats skal kaste feil for alle andre resultater enn OK`() {
+        every { startSatsendring.kanStarteSatsendringPåFagsak(any()) } returns true
+
+        val satsendringSvar = SatsendringSvar.values()
+
+        satsendringSvar.forEach {
+            every { autovedtakSatsendringService.kjørBehandling(any()) } returns it
+
+            when (it) {
+                SatsendringSvar.SATSENDRING_KJØRT_OK -> assertDoesNotThrow {
+                    startSatsendring.opprettSatsendringSynkrontVedGammelSats(0L)
+                }
+
+                else -> assertThrows<Exception> {
+                    startSatsendring.opprettSatsendringSynkrontVedGammelSats(0L)
+                }
+            }
+        }
     }
 }

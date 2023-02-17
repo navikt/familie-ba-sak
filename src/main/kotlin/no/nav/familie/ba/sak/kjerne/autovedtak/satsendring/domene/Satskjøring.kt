@@ -29,7 +29,10 @@ data class Satskjøring(
     val startTidspunkt: LocalDateTime = LocalDateTime.now(),
 
     @Column(name = "ferdig_tid")
-    var ferdigTidspunkt: LocalDateTime? = null
+    var ferdigTidspunkt: LocalDateTime? = null,
+
+    @Column(name = "feiltype")
+    var feiltype: String? = null
 ) {
 
     override fun equals(other: Any?): Boolean {

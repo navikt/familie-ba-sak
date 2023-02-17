@@ -10,15 +10,18 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.tilBrev
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
+import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import java.lang.Exception
 
 @Service
 class DokumentGenereringService(
     private val persongrunnlagService: PersongrunnlagService,
     private val brevService: BrevService,
     private val brevKlient: BrevKlient,
-    private val integrasjonClient: IntegrasjonClient
+    private val integrasjonClient: IntegrasjonClient,
+    private val saksbehandlerContext: SaksbehandlerContext
 ) {
 
     fun genererBrevForVedtak(vedtak: Vedtak): ByteArray {
@@ -51,26 +54,24 @@ class DokumentGenereringService(
         manueltBrevRequest: ManueltBrevRequest,
         erForhåndsvisning: Boolean = false
     ): ByteArray {
-        Result.runCatching {
-            val brev: Brev = manueltBrevRequest.tilBrev { integrasjonClient.hentLandkoderISO2() }
+        try {
+            val brev: Brev =
+                manueltBrevRequest.tilBrev(saksbehandlerContext.hentSaksbehandlerSignaturTilBrev()) { integrasjonClient.hentLandkoderISO2() }
             return brevKlient.genererBrev(
                 målform = manueltBrevRequest.mottakerMålform.tilSanityFormat(),
                 brev = brev
             )
-        }.fold(
-            onSuccess = { it },
-            onFailure = {
-                if (it is Feil) {
-                    throw it
-                } else {
-                    throw Feil(
-                        message = "Klarte ikke generere brev for ${manueltBrevRequest.brevmal}. ${it.message}",
-                        frontendFeilmelding = "${if (erForhåndsvisning) "Det har skjedd en feil" else "Det har skjedd en feil, og brevet er ikke sendt"}. Prøv igjen, og ta kontakt med brukerstøtte hvis problemet vedvarer.",
-                        httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
-                        throwable = it
-                    )
-                }
+        } catch (exception: Exception) {
+            if (exception is Feil || exception is FunksjonellFeil) {
+                throw exception
             }
-        )
+
+            throw Feil(
+                message = "Klarte ikke generere brev for ${manueltBrevRequest.brevmal}. ${exception.message}",
+                frontendFeilmelding = "${if (erForhåndsvisning) "Det har skjedd en feil" else "Det har skjedd en feil, og brevet er ikke sendt"}. Prøv igjen, og ta kontakt med brukerstøtte hvis problemet vedvarer.",
+                httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
+                throwable = exception
+            )
+        }
     }
 }

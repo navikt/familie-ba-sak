@@ -18,8 +18,6 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
-import no.nav.familie.ba.sak.kjerne.steg.StegType
-import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.EØSBegrunnelse
@@ -31,78 +29,6 @@ import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 
 internal class BrevUtilsTest {
-
-    /**
-     * Siden navnet til saksbehandler blir hentet fra sikkerhetscontext er det riktig at denne er system her.
-     */
-    @Test
-    fun `Saksbehandler blir hentet fra sikkerhetscontext og beslutter viser placeholder tekst under behandling`() {
-        val behandling = lagBehandling()
-
-        val (saksbehandler, beslutter) = hentSaksbehandlerOgBeslutter(
-            behandling = behandling,
-            totrinnskontroll = null
-        )
-
-        Assertions.assertEquals("System", saksbehandler)
-        Assertions.assertEquals("Beslutter", beslutter)
-    }
-
-    @Test
-    fun `Saksbehandler blir hentet og beslutter er hentet fra sikkerhetscontext under beslutning`() {
-        val behandling = lagBehandling()
-        behandling.leggTilBehandlingStegTilstand(StegType.BESLUTTE_VEDTAK)
-
-        val (saksbehandler, beslutter) = hentSaksbehandlerOgBeslutter(
-            behandling = behandling,
-            totrinnskontroll = Totrinnskontroll(
-                behandling = behandling,
-                saksbehandler = "Mock Saksbehandler",
-                saksbehandlerId = "mock.saksbehandler@nav.no"
-            )
-        )
-
-        Assertions.assertEquals("Mock Saksbehandler", saksbehandler)
-        Assertions.assertEquals("System", beslutter)
-    }
-
-    @Test
-    fun `Saksbehandler blir hentet og beslutter viser placeholder tekst under beslutning`() {
-        val behandling = lagBehandling()
-        behandling.leggTilBehandlingStegTilstand(StegType.BESLUTTE_VEDTAK)
-
-        val (saksbehandler, beslutter) = hentSaksbehandlerOgBeslutter(
-            behandling = behandling,
-            totrinnskontroll = Totrinnskontroll(
-                behandling = behandling,
-                saksbehandler = "System",
-                saksbehandlerId = "systembruker"
-            )
-        )
-
-        Assertions.assertEquals("System", saksbehandler)
-        Assertions.assertEquals("Beslutter", beslutter)
-    }
-
-    @Test
-    fun `Saksbehandler og beslutter blir hentet etter at totrinnskontroll er besluttet`() {
-        val behandling = lagBehandling()
-        behandling.leggTilBehandlingStegTilstand(StegType.BESLUTTE_VEDTAK)
-
-        val (saksbehandler, beslutter) = hentSaksbehandlerOgBeslutter(
-            behandling = behandling,
-            totrinnskontroll = Totrinnskontroll(
-                behandling = behandling,
-                saksbehandler = "Mock Saksbehandler",
-                saksbehandlerId = "mock.saksbehandler@nav.no",
-                beslutter = "Mock Beslutter",
-                beslutterId = "mock.beslutter@nav.no"
-            )
-        )
-
-        Assertions.assertEquals("Mock Saksbehandler", saksbehandler)
-        Assertions.assertEquals("Mock Beslutter", beslutter)
-    }
 
     private val støttedeBehandlingsersultaterFørstegangsbehandling = listOf(
         Behandlingsresultat.INNVILGET,

@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
+import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.task.dto.Autobrev6og18ÅrDTO
 import no.nav.familie.ba.sak.task.dto.AutobrevOpphørSmåbarnstilleggDTO
@@ -102,6 +103,31 @@ class OpprettTaskService(
             )
         }
         satskjøringRepository.save(Satskjøring(fagsakId = fagsakId))
+    }
+
+    @Transactional
+    fun opprettHenleggBehandlingTask(
+        behandlingId: Long,
+        årsak: HenleggÅrsak,
+        begrunnelse: String,
+        validerOppgavefristErEtterDato: LocalDate? = null
+    ) {
+        taskRepository.save(
+            Task(
+                type = HenleggBehandlingTask.TASK_STEP_TYPE,
+                payload = objectMapper.writeValueAsString(
+                    HenleggBehandlingTaskDTO(
+                        behandlingId = behandlingId,
+                        årsak = årsak,
+                        begrunnelse = begrunnelse,
+                        validerOppgavefristErEtterDato = validerOppgavefristErEtterDato
+                    )
+                ),
+                properties = Properties().apply {
+                    this["behandlingId"] = behandlingId.toString()
+                }
+            )
+        )
     }
 
     private inline fun <T> overstyrTaskMedNyCallId(callId: String, body: () -> T): T {

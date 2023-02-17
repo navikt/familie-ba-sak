@@ -23,7 +23,7 @@ class SatsendringTask(
 
         val resultat = autovedtakSatsendringService.kjørBehandling(dto)
 
-        task.metadata.put("resultat", resultat)
+        task.metadata["resultat"] = resultat.melding
     }
 
     companion object {

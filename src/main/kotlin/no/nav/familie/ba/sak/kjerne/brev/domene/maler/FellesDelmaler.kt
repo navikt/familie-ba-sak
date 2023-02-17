@@ -1,13 +1,14 @@
 package no.nav.familie.ba.sak.kjerne.brev.domene.maler
 
-import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
-
 data class SignaturDelmal(
     val enhet: Flettefelt,
-    val saksbehandler: Flettefelt = flettefelt(SikkerhetContext.hentSaksbehandlerNavn())
+    val saksbehandler: Flettefelt
 ) {
 
-    constructor(enhet: String) : this(flettefelt(enhet))
+    constructor(enhet: String, saksbehandlerNavn: String) : this(
+        enhet = flettefelt(enhet),
+        saksbehandler = flettefelt(saksbehandlerNavn)
+    )
 }
 
 data class SignaturVedtak(

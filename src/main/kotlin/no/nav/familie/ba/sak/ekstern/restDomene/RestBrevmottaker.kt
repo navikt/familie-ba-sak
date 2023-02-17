@@ -20,7 +20,7 @@ fun RestBrevmottaker.tilBrevMottaker(behandlingId: Long) = Brevmottaker(
     navn = navn,
     adresselinje1 = adresselinje1,
     adresselinje2 = adresselinje2,
-    postnummer = postnummer,
-    poststed = poststed,
+    postnummer = postnummer.trim(),
+    poststed = poststed.trim(),
     landkode = landkode
 )
