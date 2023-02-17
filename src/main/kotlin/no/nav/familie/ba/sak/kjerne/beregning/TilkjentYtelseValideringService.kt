@@ -52,7 +52,7 @@ class TilkjentYtelseValideringService(
         }
     }
 
-    fun validerAtIngenUtbetalingerOverstiger100Prosent(fagsakId: Long) {
+    fun validerAtIngenUtbetalingerOverstiger100ProsentISisteIverksatteBehandling(fagsakId: Long) {
         val forrigeBehanlding = behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = fagsakId)
         forrigeBehanlding?.let { validerAtIngenUtbetalingerOverstiger100Prosent(forrigeBehanlding) }
     }

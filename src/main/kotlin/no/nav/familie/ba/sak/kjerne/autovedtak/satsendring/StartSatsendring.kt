@@ -226,7 +226,8 @@ class StartSatsendring(
         }
 
         try {
-            tilkjentYtelseValideringService.validerAtIngenUtbetalingerOverstiger100Prosent(fagsakId = fagsakId)
+            tilkjentYtelseValideringService
+                .validerAtIngenUtbetalingerOverstiger100ProsentISisteIverksatteBehandling(fagsakId = fagsakId)
         } catch (feil: UtbetalingsikkerhetFeil) {
             throw FunksjonellFeil(
                 "Satsendring kan ikke gjennomføres fordi det er mer enn 100% utbetaling for barn i fagsaken.\n" +
