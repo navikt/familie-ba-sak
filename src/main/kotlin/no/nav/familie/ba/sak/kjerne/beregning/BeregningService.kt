@@ -217,12 +217,12 @@ class BeregningService(
         val forrigeTidslinje = AndelTilkjentYtelseTidslinje(forrigeAndeler)
 
         val endringIBeløpTidslinje = nåværendeTidslinje.kombinerMed(forrigeTidslinje) { nåværende, forrige ->
+            val nåværendeBeløp = nåværende?.kalkulertUtbetalingsbeløp ?: 0
+            val forrigeBeløp = forrige?.kalkulertUtbetalingsbeløp ?: 0
 
             when {
-                forrige == null && nåværende?.kalkulertUtbetalingsbeløp == 0 ||
-                    forrige?.kalkulertUtbetalingsbeløp == 0 && nåværende == null ||
-                    forrige?.kalkulertUtbetalingsbeløp == nåværende?.kalkulertUtbetalingsbeløp -> false
-                else -> true
+                nåværendeBeløp != forrigeBeløp -> true
+                else -> false
             }
         }
 

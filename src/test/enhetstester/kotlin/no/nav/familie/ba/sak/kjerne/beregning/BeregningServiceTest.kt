@@ -901,7 +901,7 @@ class BeregningServiceTest {
     }
 
     @Test
-    fun `erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling skal returnere INGEN_ENDRINGER_I_UTBETALING dersom det utbetalingsbeløpene er like mellom nåværende og forrige behandling`() {
+    fun `erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling skal returnere INGEN_ENDRING_I_UTBETALING dersom det utbetalingsbeløpene er like mellom nåværende og forrige behandling`() {
         val forrigeBehandling = lagBehandling()
         val nåværendeBehandling = lagBehandling()
         val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
@@ -950,7 +950,7 @@ class BeregningServiceTest {
     }
 
     @Test
-    fun `erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling skal returnere INGEN_ENDRINGER_I_UTBETALING dersom man har gått fra andeler med 0 i beløp til ingen andeler`() {
+    fun `erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling skal returnere INGEN_ENDRING_I_UTBETALING dersom man har gått fra andeler med 0 i beløp til ingen andeler`() {
         val forrigeBehandling = lagBehandling()
         val nåværendeBehandling = lagBehandling()
         val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
@@ -985,7 +985,7 @@ class BeregningServiceTest {
     }
 
     @Test
-    fun `erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling skal returnere INGEN_ENDRINGER_I_UTBETALING dersom man har gått fra ingen andeler til andeler med 0 i beløp`() {
+    fun `erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling skal returnere INGEN_ENDRING_I_UTBETALING dersom man har gått fra ingen andeler til andeler med 0 i beløp`() {
         val forrigeBehandling = lagBehandling()
         val nåværendeBehandling = lagBehandling()
         val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
