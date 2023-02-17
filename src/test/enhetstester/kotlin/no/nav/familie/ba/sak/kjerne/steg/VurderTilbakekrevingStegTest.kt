@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottaker
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringPostering
+import no.nav.familie.ba.sak.kjerne.steg.VurderTilbakekrevingSteg.Companion.februar2023
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.kontrakter.felles.simulering.BetalingType
 import no.nav.familie.kontrakter.felles.simulering.FagOmrådeKode
@@ -146,7 +147,7 @@ class VurderTilbakekrevingStegTest {
     }
 
     @Test
-    fun `skal ikke utføre steg for migreringsbehandling med endre migreringsdato når det finnes etterbetaling mer enn maks beløp`() {
+    fun `skal ikke utføre steg for migreringsbehandling med endre migreringsdato når det finnes etterbetaling mer enn maks beløp før satsendring 2023`() {
         val behandling: Behandling = lagBehandling(
             behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
             årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
@@ -154,8 +155,12 @@ class VurderTilbakekrevingStegTest {
         )
         every { featureToggleService.isEnabled(FeatureToggleConfig.IKKE_STOPP_MIGRERINGSBEHANDLING) } returns false
         every { simuleringService.hentFeilutbetaling(behandling.id) } returns BigDecimal.ZERO
-        // etterbetaling 1000 KR
+
+        // etterbetaling 2000 KR
         val posteringer = listOf(
+            mockVedtakSimuleringPostering(fom = februar2023, beløp = 1000, betalingType = BetalingType.DEBIT),
+            mockVedtakSimuleringPostering(fom = februar2023, beløp = -1000, betalingType = BetalingType.KREDIT),
+            mockVedtakSimuleringPostering(fom = februar2023, beløp = 1000, betalingType = BetalingType.DEBIT),
             mockVedtakSimuleringPostering(beløp = 1000, betalingType = BetalingType.DEBIT),
             mockVedtakSimuleringPostering(beløp = -1000, betalingType = BetalingType.KREDIT),
             mockVedtakSimuleringPostering(beløp = 1000, betalingType = BetalingType.DEBIT)
@@ -266,7 +271,7 @@ class VurderTilbakekrevingStegTest {
     }
 
     @Test
-    fun `skal ikke utføre steg for helmanuell migrering når det finnes etterbetaling mer enn maks beløp`() {
+    fun `skal ikke utføre steg for helmanuell migrering når det finnes etterbetaling mer enn maks beløp før satsendring 2023`() {
         val behandling: Behandling = lagBehandling(
             behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
             årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
@@ -275,8 +280,11 @@ class VurderTilbakekrevingStegTest {
         every { featureToggleService.isEnabled(FeatureToggleConfig.IKKE_STOPP_MIGRERINGSBEHANDLING) } returns false
         every { simuleringService.hentFeilutbetaling(behandling.id) } returns BigDecimal.ZERO
 
-        // etterbetaling 1000 KR
+        // etterbetaling 2000 KR
         val posteringer = listOf(
+            mockVedtakSimuleringPostering(fom = februar2023, beløp = 1000, betalingType = BetalingType.DEBIT),
+            mockVedtakSimuleringPostering(fom = februar2023, beløp = -1000, betalingType = BetalingType.KREDIT),
+            mockVedtakSimuleringPostering(fom = februar2023, beløp = 1000, betalingType = BetalingType.DEBIT),
             mockVedtakSimuleringPostering(beløp = 1000, betalingType = BetalingType.DEBIT),
             mockVedtakSimuleringPostering(beløp = -1000, betalingType = BetalingType.KREDIT),
             mockVedtakSimuleringPostering(beløp = 1000, betalingType = BetalingType.DEBIT)
