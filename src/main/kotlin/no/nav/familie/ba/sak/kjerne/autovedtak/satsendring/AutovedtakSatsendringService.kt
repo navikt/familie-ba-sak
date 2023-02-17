@@ -6,8 +6,8 @@ import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakBehandlingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.SatsendringSvar.ÅpenBehandlingSvar
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -47,7 +47,7 @@ class AutovedtakSatsendringService(
     private val behandlingService: BehandlingService,
     private val beregningService: BeregningService,
     private val persongrunnlagService: PersongrunnlagService
-) : AutovedtakBehandlingService<SatsendringTaskDto> {
+) {
 
     private val satsendringAlleredeUtført = Metrics.counter("satsendring.allerede.utfort")
     private val satsendringIverksatt = Metrics.counter("satsendring.iverksatt")
@@ -59,7 +59,7 @@ class AutovedtakSatsendringService(
      *
      */
     @Transactional
-    override fun kjørBehandling(behandlingsdata: SatsendringTaskDto): String {
+    fun kjørBehandling(behandlingsdata: SatsendringTaskDto): SatsendringSvar {
         val fagsakId = behandlingsdata.fagsakId
         val satskjøringForFagsak =
             satskjøringRepository.findByFagsakId(fagsakId) ?: error("Fant ingen satskjøringsrad for fagsak=$fagsakId")
@@ -72,7 +72,7 @@ class AutovedtakSatsendringService(
             satskjøringRepository.save(satskjøringForFagsak)
             logger.info("Satsendring allerede utført for fagsak=$fagsakId")
             satsendringAlleredeUtført.increment()
-            return "Satsendring allerede utført for fagsak=$fagsakId"
+            return SatsendringSvar.SATSENDRING_ER_ALLEREDE_UTFØRT(fagsakId)
         }
 
         val aktivOgÅpenBehandling =
@@ -84,30 +84,21 @@ class AutovedtakSatsendringService(
         if (sisteIverksatteBehandling.fagsak.status != FagsakStatus.LØPENDE) throw Feil("Forsøker å utføre satsendring på ikke løpende fagsak ${sisteIverksatteBehandling.fagsak.id}")
 
         if (aktivOgÅpenBehandling != null) {
-            val brukerHarÅpenBehandlingMelding = if (harAlleredeNySats(
-                    sisteIverksettBehandlingsId = aktivOgÅpenBehandling.id,
-                    satstidspunkt = behandlingsdata.satstidspunkt
-                )
-            ) {
-                "Åpen behandling har allerede siste sats og vi lar den ligge."
-            } else if (aktivOgÅpenBehandling.status.erLåstMenIkkeAvsluttet()) {
-                "Behandling $aktivOgÅpenBehandling er låst for endringer og satsendring vil bli trigget neste virkedag."
-            } else if (aktivOgÅpenBehandling.steg.rekkefølge > StegType.VILKÅRSVURDERING.rekkefølge) {
-                tilbakestillBehandlingService.tilbakestillBehandlingTilVilkårsvurdering(aktivOgÅpenBehandling)
-                "Tilbakestiller behandling $aktivOgÅpenBehandling til vilkårsvurderingen"
-            } else {
-                "Behandling $aktivOgÅpenBehandling er under utredning, men er allerede i riktig tilstand."
-            }
+            val brukerHarÅpenBehandlingSvar = hentBrukerHarÅpenBehandlingSvar(aktivOgÅpenBehandling, behandlingsdata)
 
-            logger.info(brukerHarÅpenBehandlingMelding)
+            satskjøringForFagsak.feiltype = "ÅPEN_BEHANDLING"
+            satskjøringRepository.save(satskjøringForFagsak)
+
+            logger.info(brukerHarÅpenBehandlingSvar.melding)
             satsendringIgnorertÅpenBehandling.increment()
-            return brukerHarÅpenBehandlingMelding
+
+            return brukerHarÅpenBehandlingSvar
         }
 
         if (harUtbetalingerSomOverstiger100Prosent(sisteIverksatteBehandling)) {
             satskjøringForFagsak.feiltype = "UTBETALING_OVER_100_PROSENT"
             satskjøringRepository.save(satskjøringForFagsak)
-            return "Fant utbetaling over 100 prosent på barna"
+            return SatsendringSvar.FANT_OVER_100_PROSENT_UTBETALING
         }
 
         val behandlingEtterBehandlingsresultat =
@@ -151,7 +142,30 @@ class AutovedtakSatsendringService(
         taskRepository.save(task)
         satsendringIverksatt.increment()
 
-        return "Satsendring kjørt OK"
+        return SatsendringSvar.SATSENDRING_KJØRT_OK
+    }
+
+    private fun hentBrukerHarÅpenBehandlingSvar(
+        aktivOgÅpenBehandling: Behandling,
+        behandlingsdata: SatsendringTaskDto
+    ): ÅpenBehandlingSvar {
+        val brukerHarÅpenBehandlingSvar = if (harAlleredeNySats(
+                sisteIverksettBehandlingsId = aktivOgÅpenBehandling.id,
+                satstidspunkt = behandlingsdata.satstidspunkt
+            )
+        ) {
+            ÅpenBehandlingSvar.HAR_ALLEREDE_SISTE_SATS
+        } else if (aktivOgÅpenBehandling.status.erLåstMenIkkeAvsluttet()) {
+            ÅpenBehandlingSvar.BEHANDLING_ER_LÅST_SATSENDRING_TRIGGES_NESTE_VIRKEDAG(aktivOgÅpenBehandling)
+        } else if (aktivOgÅpenBehandling.steg.rekkefølge > StegType.VILKÅRSVURDERING.rekkefølge) {
+            tilbakestillBehandlingService.tilbakestillBehandlingTilVilkårsvurdering(aktivOgÅpenBehandling)
+            ÅpenBehandlingSvar.TILBAKESTILLER_BEHANDLINGEN_TIL_VILKÅRSVURDERINGEN(aktivOgÅpenBehandling)
+        } else {
+            ÅpenBehandlingSvar.BEHANDLINGEN_ER_UNDER_UTREDNING_MEN_I_RIKTIG_TILSTAND(
+                aktivOgÅpenBehandling
+            )
+        }
+        return brukerHarÅpenBehandlingSvar
     }
 
     fun harAlleredeNySats(sisteIverksettBehandlingsId: Long, satstidspunkt: YearMonth): Boolean {
@@ -227,6 +241,45 @@ class AutovedtakSatsendringService(
                 satser.forEach { if (!gyldigeOrdinæreSatser.contains(it)) return false }
             }
             return true
+        }
+    }
+}
+
+sealed interface SatsendringSvar {
+    val melding: String
+
+    object FANT_OVER_100_PROSENT_UTBETALING : SatsendringSvar {
+        override val melding = "Fant utbetaling over 100 prosent på barna"
+    }
+
+    object SATSENDRING_KJØRT_OK : SatsendringSvar {
+        override val melding = "Satsendring kjørt OK"
+    }
+
+    class SATSENDRING_ER_ALLEREDE_UTFØRT(fagsakId: Long) : SatsendringSvar {
+        override val melding = "Satsendring allerede utført for fagsak=$fagsakId"
+    }
+
+    sealed interface ÅpenBehandlingSvar : SatsendringSvar {
+        object HAR_ALLEREDE_SISTE_SATS : ÅpenBehandlingSvar {
+            override val melding = "Åpen behandling har allerede siste sats og vi lar den ligge."
+        }
+
+        class BEHANDLING_ER_LÅST_SATSENDRING_TRIGGES_NESTE_VIRKEDAG(aktivOgÅpenBehandling: Behandling) :
+            ÅpenBehandlingSvar {
+            override val melding =
+                "Behandling $aktivOgÅpenBehandling er låst for endringer og satsendring vil bli trigget neste virkedag."
+        }
+
+        class TILBAKESTILLER_BEHANDLINGEN_TIL_VILKÅRSVURDERINGEN(aktivOgÅpenBehandling: Behandling) :
+            ÅpenBehandlingSvar {
+            override val melding = "Tilbakestiller behandling $aktivOgÅpenBehandling til vilkårsvurderingen"
+        }
+
+        class BEHANDLINGEN_ER_UNDER_UTREDNING_MEN_I_RIKTIG_TILSTAND(aktivOgÅpenBehandling: Behandling) :
+            ÅpenBehandlingSvar {
+            override val melding =
+                "Behandling $aktivOgÅpenBehandling er under utredning, men er allerede i riktig tilstand."
         }
     }
 }
