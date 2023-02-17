@@ -137,21 +137,21 @@ class DokumentService(
         val søkersident = fagsak.aktør.aktivFødselsnummer()
         val brevmottakere = behandling?.let { brevmottakerService.hentBrevmottakere(it.id) } ?: emptyList()
         return when {
-            behandling == null -> MottakerInfo(
+            behandling == null -> MottakerInfo( // når brevet sender på fagsak nivå
                 brukerId = søkersident,
                 brukerIdType = BrukerIdType.FNR,
                 erInstitusjonVerge = false
             ).toList()
-            manueltBrevRequest.erTilInstitusjon -> MottakerInfo(
+            manueltBrevRequest.erTilInstitusjon -> MottakerInfo( // når brevet sender til en institusjonssak
                 brukerId = checkNotNull(fagsak.institusjon).orgNummer,
                 brukerIdType = BrukerIdType.ORGNR,
                 erInstitusjonVerge = false
             ).toList()
-            brevmottakere.isNotEmpty() -> brevmottakerService.lagMottakereFraBrevMottakere(
+            brevmottakere.isNotEmpty() -> brevmottakerService.lagMottakereFraBrevMottakere( // brevet sender til manuell mottakere om det finnes
                 brevmottakere,
                 søkersident
             )
-            else -> MottakerInfo(
+            else -> MottakerInfo( // når det ikke finnes manuelt mottakere, sender brevet til søker
                 brukerIdType = BrukerIdType.FNR,
                 brukerId = søkersident,
                 erInstitusjonVerge = false
@@ -167,8 +167,8 @@ class DokumentService(
             manueltBrevRequest.erTilInstitusjon -> {
                 AvsenderMottaker(
                     idType = BrukerIdType.ORGNR,
-                    id = manueltBrevRequest.mottakerIdent,
-                    navn = utledInstitusjonNavn(manueltBrevRequest)
+                    id = mottakerInfo.brukerId,
+                    navn = utledInstitusjonNavn(mottakerInfo)
                 )
             }
             mottakerInfo.brukerIdType == BrukerIdType.FNR && mottakerInfo.navn != null -> {
@@ -180,10 +180,8 @@ class DokumentService(
         }
     }
 
-    private fun utledInstitusjonNavn(manueltBrevRequest: ManueltBrevRequest): String {
-        return manueltBrevRequest.mottakerNavn.ifBlank {
-            organisasjonService.hentOrganisasjon(manueltBrevRequest.mottakerIdent).navn
-        }
+    private fun utledInstitusjonNavn(mottakerInfo: MottakerInfo): String {
+        return mottakerInfo.navn ?: organisasjonService.hentOrganisasjon(mottakerInfo.brukerId).navn
     }
 
     private fun leggTilOpplysningspliktIVilkårsvurdering(behandling: Behandling) {

@@ -5,6 +5,7 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -27,6 +28,7 @@ class DokumentControllerTest(
     private val vedtakService: VedtakService = mockk(relaxed = true)
     private val fagsakService: FagsakService = mockk()
     private val tilgangService: TilgangService = mockk(relaxed = true)
+    private val mockPersonopplysningerService: PersonopplysningerService = mockk(relaxed = true)
     val mockDokumentController =
         DokumentController(
             dokumentGenereringService = mockDokumentGenereringService,
@@ -37,7 +39,8 @@ class DokumentControllerTest(
             tilgangService = tilgangService,
             persongrunnlagService = mockk(relaxed = true),
             arbeidsfordelingService = mockk(relaxed = true),
-            utvidetBehandlingService = mockk(relaxed = true)
+            utvidetBehandlingService = mockk(relaxed = true),
+            personopplysningerService = mockPersonopplysningerService
         )
 
     @Test

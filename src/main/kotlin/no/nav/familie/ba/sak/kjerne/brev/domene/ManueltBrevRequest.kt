@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.Utils.storForbokstav
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.tilKortString
+import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
@@ -31,6 +32,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselOmRevurderingSamboer
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselbrevMedÅrsaker
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselbrevÅrlegKontrollEøs
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.VarselbrevMedÅrsakerOgBarn
+import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.kontrakter.felles.arbeidsfordeling.Enhet
@@ -44,12 +46,12 @@ interface Person {
 data class ManueltBrevRequest(
     val brevmal: Brevmal,
     val multiselectVerdier: List<String> = emptyList(),
-    val mottakerIdent: String,
+    val mottakerIdent: String = "", // skal settes i backend
     val barnIBrev: List<String> = emptyList(),
     val datoAvtale: String? = null,
     // Settes av backend ved utsending fra behandling
     val mottakerMålform: Målform = Målform.NB,
-    val mottakerNavn: String = "",
+    val mottakerNavn: String = "", // skal settes i backend
     val enhet: Enhet? = null,
     val antallUkerSvarfrist: Int? = null,
     val barnasFødselsdager: List<LocalDate>? = null,
@@ -57,7 +59,6 @@ data class ManueltBrevRequest(
     val vedrørende: Person? = null,
     val mottakerlandSed: String? = null
 ) {
-
     override fun toString(): String {
         return "${ManueltBrevRequest::class}, $brevmal"
     }
@@ -90,26 +91,36 @@ fun ManueltBrevRequest.byggMottakerdata(
                 }
             )
 
-        else -> hentPerson(mottakerIdent).let { mottakerPerson ->
+        else -> hentPerson(behandling.fagsak.aktør.aktivFødselsnummer()).let { mottakerPerson ->
             this.copy(
                 enhet = enhet,
                 mottakerMålform = mottakerPerson.målform,
-                mottakerNavn = mottakerPerson.navn
+                mottakerNavn = mottakerPerson.navn,
+                mottakerIdent = mottakerPerson.aktør.aktivFødselsnummer()
             )
         }
     }
 }
 
-fun ManueltBrevRequest.leggTilEnhet(arbeidsfordelingService: ArbeidsfordelingService): ManueltBrevRequest {
+// Denne metoden brukes for å legge til detaljer som kreves for å sende brev på fagsak nivå
+fun ManueltBrevRequest.leggTilEnhetMottakerIdentOgMottakerNavn(
+    arbeidsfordelingService: ArbeidsfordelingService,
+    personopplysningerService: PersonopplysningerService,
+    fagsak: Fagsak
+): ManueltBrevRequest {
     val arbeidsfordelingsenhet = arbeidsfordelingService.hentArbeidsfordelingsenhetPåIdenter(
-        søkerIdent = mottakerIdent,
+        søkerIdent = fagsak.aktør.aktivFødselsnummer(),
         barnIdenter = barnIBrev
     )
+    val søkerAktør = fagsak.aktør
     return this.copy(
         enhet = Enhet(
             enhetNavn = arbeidsfordelingsenhet.enhetNavn,
             enhetId = arbeidsfordelingsenhet.enhetId
-        )
+        ),
+        mottakerIdent = søkerAktør.aktivFødselsnummer(),
+        mottakerNavn = personopplysningerService.hentPersoninfoEnkel(søkerAktør).navn
+            ?: error("Kan ikke hente navn på søker med aktør=$søkerAktør")
     )
 }
 

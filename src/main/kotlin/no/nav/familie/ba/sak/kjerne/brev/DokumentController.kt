@@ -3,12 +3,13 @@ package no.nav.familie.ba.sak.kjerne.brev
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
+import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
 import no.nav.familie.ba.sak.kjerne.brev.domene.byggMottakerdata
-import no.nav.familie.ba.sak.kjerne.brev.domene.leggTilEnhet
+import no.nav.familie.ba.sak.kjerne.brev.domene.leggTilEnhetMottakerIdentOgMottakerNavn
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
@@ -40,7 +41,8 @@ class DokumentController(
     private val tilgangService: TilgangService,
     private val persongrunnlagService: PersongrunnlagService,
     private val arbeidsfordelingService: ArbeidsfordelingService,
-    private val utvidetBehandlingService: UtvidetBehandlingService
+    private val utvidetBehandlingService: UtvidetBehandlingService,
+    private val personopplysningerService: PersonopplysningerService
 ) {
 
     @PostMapping(path = ["vedtaksbrev/{vedtakId}"])
@@ -148,8 +150,13 @@ class DokumentController(
             handling = "hente forhåndsvisning brev"
         )
 
+        val fagsak = fagsakService.hentPåFagsakId(fagsakId)
         return dokumentGenereringService.genererManueltBrev(
-            manueltBrevRequest = manueltBrevRequest.leggTilEnhet(arbeidsfordelingService),
+            manueltBrevRequest = manueltBrevRequest.leggTilEnhetMottakerIdentOgMottakerNavn(
+                arbeidsfordelingService,
+                personopplysningerService,
+                fagsak
+            ),
             erForhåndsvisning = true
         ).let { Ressurs.success(it) }
     }
@@ -164,9 +171,13 @@ class DokumentController(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "sende brev"
         )
-
+        val fagsak = fagsakService.hentPåFagsakId(fagsakId)
         dokumentService.sendManueltBrev(
-            manueltBrevRequest = manueltBrevRequest.leggTilEnhet(arbeidsfordelingService),
+            manueltBrevRequest = manueltBrevRequest.leggTilEnhetMottakerIdentOgMottakerNavn(
+                arbeidsfordelingService,
+                personopplysningerService,
+                fagsak
+            ),
             fagsakId = fagsakId
         )
         return ResponseEntity.ok(Ressurs.success(fagsakService.lagRestMinimalFagsak(fagsakId = fagsakId)))
