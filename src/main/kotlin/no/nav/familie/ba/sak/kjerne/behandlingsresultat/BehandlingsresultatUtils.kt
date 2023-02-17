@@ -75,7 +75,10 @@ object BehandlingsresultatUtils {
             sjekkResultat(null, Endringsresultat.INGEN_ENDRING, Opphørsresultat.IKKE_OPPHØRT) -> Behandlingsresultat.FORTSATT_INNVILGET
 
             // Skal egentlig aldri kunne komme hit, alle kombinasjoner skal være skrevet ut
-            else -> throw Feil("Klarer ikke utlede behandlingsresultat fra (søknadsresultat=$søknadsresultat, endringsresultat=$endringsresultat, opphørsresultat=$opphørsresultat)")
+            else -> throw Feil(
+                frontendFeilmelding = "Du har fått et behandlingsresultat vi ikke støtter. Ta kontakt med Team Familie.",
+                message = "Klarer ikke utlede behandlingsresultat fra (søknadsresultat=$søknadsresultat, endringsresultat=$endringsresultat, opphørsresultat=$opphørsresultat)"
+            )
         }
     }
 
