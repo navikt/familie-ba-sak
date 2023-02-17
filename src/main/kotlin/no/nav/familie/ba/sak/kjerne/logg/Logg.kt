@@ -92,5 +92,6 @@ enum class LoggType(val visningsnavn: String, val tittel: String = visningsnavn)
     MANUELT_SMÅBARNSTILLEGG_JUSTERING("Småbarnstillegg er manuelt endret."),
     KORRIGERT_VEDTAK("Behandlingen er korrigering av vedtak"),
     FEILUTBETALT_VALUTA_LAGT_TIL("Feilutbetalt valuta lagt til"),
-    FEILUTBETALT_VALUTA_FJERNET("Feilutbetalt valuta fjernet")
+    FEILUTBETALT_VALUTA_FJERNET("Feilutbetalt valuta fjernet"),
+    BREVMOTTAKER_LAGT_TIL_ELLER_FJERNET("Brevmottaker lagt til eller fjernet")
 }

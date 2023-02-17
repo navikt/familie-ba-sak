@@ -288,7 +288,6 @@ class AutovedtakFødselshendelseService(
         }
 
         logger.error("Fant ikke begrunnelse for at fødselshendelse ikke kunne automatisk behandles.")
-        error("Fant ikke begrunnelse for at fødselshendelse ikke kunne automatisk behandles.")
 
         return ""
     }

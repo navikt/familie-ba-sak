@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -328,6 +329,8 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
                 BEHANDLINGSRESULTAT -> if (behandling.resultat == Behandlingsresultat.ENDRET_UTBETALING) {
                     IVERKSETT_MOT_OPPDRAG
+                } else if (behandling.kategori == BehandlingKategori.EØS && behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET) {
+                    FERDIGSTILLE_BEHANDLING
                 } else {
                     throw Feil("Resultat ${behandling.resultat} er ikke støttet etter behandlingsresultat for satsendringsbehandling.")
                 }

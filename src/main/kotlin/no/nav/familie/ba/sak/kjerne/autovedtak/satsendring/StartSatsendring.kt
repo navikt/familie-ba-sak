@@ -6,12 +6,8 @@ import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
-import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
@@ -34,10 +30,10 @@ class StartSatsendring(
     private val satskjøringRepository: SatskjøringRepository,
     private val featureToggleService: FeatureToggleService,
     private val personidentService: PersonidentService,
-    private val autovedtakSatsendringService: AutovedtakSatsendringService,
-    private val kompetanseService: KompetanseService
-
+    private val autovedtakSatsendringService: AutovedtakSatsendringService
 ) {
+
+    private val ignorerteFagsaker = mutableSetOf<Long>()
 
     @Transactional
     fun startSatsendring(
@@ -77,6 +73,7 @@ class StartSatsendring(
         satsTidspunkt: YearMonth
     ): Int {
         var antallFagsakerSatsendring = antallAlleredeTriggetSatsendring
+
         for (fagsak in fagsakForSatsendring) {
             if (skalTriggeSatsendring(fagsak, satsTidspunkt)) {
                 antallFagsakerSatsendring++
@@ -90,9 +87,14 @@ class StartSatsendring(
     }
 
     private fun skalTriggeSatsendring(fagsak: Fagsak, satsTidspunkt: YearMonth): Boolean {
+        if (ignorerteFagsaker.contains(fagsak.id)) {
+            return false
+        }
+
         val aktivOgÅpenBehandling = behandlingRepository.findByFagsakAndAktivAndOpen(fagsakId = fagsak.id)
         if (aktivOgÅpenBehandling != null) {
             logger.info("Oppretter ikke satsendringtask for fagsak=${fagsak.id}. Har åpen behandling ${aktivOgÅpenBehandling.id}")
+            ignorerteFagsaker.add(fagsak.id)
             return false
         }
 
@@ -118,14 +120,6 @@ class StartSatsendring(
                 return true
             }
 
-            if (sisteIverksatteBehandling.kategori == BehandlingKategori.EØS && kompetanseService.hentKompetanser(
-                    BehandlingId(sisteIverksatteBehandling.id)
-                ).any { it.resultat == KompetanseResultat.NORGE_ER_SEKUNDÆRLAND }
-            ) {
-                logger.info("Venter med EØS-sekundærland for fagsak=${fagsak.id}")
-                return false
-            }
-
             if (featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_OPPRETT_TASKER)) {
                 logger.info("Oppretter satsendringtask for fagsak=${fagsak.id}")
                 opprettTaskService.opprettSatsendringTask(fagsak.id, satsTidspunkt)
@@ -135,6 +129,7 @@ class StartSatsendring(
             return true
         } else {
             logger.info("Satsendring utføres ikke på fagsak=${fagsak.id} fordi fagsaken mangler en iverksatt behandling")
+            ignorerteFagsaker.add(fagsak.id)
             return false
         }
     }
@@ -178,29 +173,36 @@ class StartSatsendring(
     }
 
     @Transactional
-    fun opprettSatsendringSynkrontVedGammelSats(fagsakId: Long): Boolean {
-        val aktivOgÅpenBehandling =
-            behandlingRepository.findByFagsakAndAktivAndOpen(fagsakId = fagsakId)
-
-        if (aktivOgÅpenBehandling != null) {
-            throw FunksjonellFeil("Det finnes en åpen behandling på fagsaken som må avsluttes før satsendring kan gjennomføres.")
+    fun opprettSatsendringSynkrontVedGammelSats(fagsakId: Long) {
+        if (!kanStarteSatsendringPåFagsak(fagsakId)) {
+            throw Feil("Kan ikke starte Satsendring på fagsak=$fagsakId")
         }
 
-        return if (kanStarteSatsendringPåFagsak(fagsakId)) {
-            satskjøringRepository.save(Satskjøring(fagsakId = fagsakId))
-            val resultattekstSatsendringBehandling = autovedtakSatsendringService.kjørBehandling(
-                SatsendringTaskDto(
-                    fagsakId = fagsakId,
-                    satstidspunkt = SATSENDRINGMÅNED_2023
-                )
+        satskjøringRepository.save(Satskjøring(fagsakId = fagsakId))
+        val resultatSatsendringBehandling = autovedtakSatsendringService.kjørBehandling(
+            SatsendringTaskDto(
+                fagsakId = fagsakId,
+                satstidspunkt = SATSENDRINGMÅNED_2023
             )
-            if (resultattekstSatsendringBehandling == "Satsendring kjørt OK") {
-                true
-            } else {
-                throw Feil("Satsendring kjørte ikke OK for fagsak $fagsakId")
-            }
-        } else {
-            false
+        )
+
+        when (resultatSatsendringBehandling) {
+            SatsendringSvar.SATSENDRING_KJØRT_OK -> Unit
+
+            SatsendringSvar.FANT_OVER_100_PROSENT_UTBETALING ->
+                throw FunksjonellFeil(
+                    "Satsendring kan ikke gjennomføres fordi det er mer enn 100% utbetaling for barn i fagsaken.\n" +
+                        "Barnetrygden til en av mottakerne må revurderes."
+                )
+
+            SatsendringSvar.SATSENDRING_ER_ALLEREDE_UTFØRT ->
+                throw FunksjonellFeil("Satsendring er allerede gjennomført på fagsaken. Last inn siden på nytt for å få opp siste behandling.")
+
+            SatsendringSvar.HAR_ALLEREDE_SISTE_SATS,
+            SatsendringSvar.BEHANDLING_ER_LÅST_SATSENDRING_TRIGGES_NESTE_VIRKEDAG,
+            SatsendringSvar.TILBAKESTILLER_BEHANDLINGEN_TIL_VILKÅRSVURDERINGEN,
+            SatsendringSvar.BEHANDLINGEN_ER_UNDER_UTREDNING_MEN_I_RIKTIG_TILSTAND ->
+                throw FunksjonellFeil("Det finnes en åpen behandling på fagsaken som må avsluttes før satsendring kan gjennomføres.")
         }
     }
 

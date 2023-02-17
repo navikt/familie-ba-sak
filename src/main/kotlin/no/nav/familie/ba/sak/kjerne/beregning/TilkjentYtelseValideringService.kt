@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.finnAktørIderMedUgyldigEtterbetalingsperiode
@@ -11,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
@@ -36,6 +36,13 @@ class TilkjentYtelseValideringService(
                     beregningService.hentRelevanteTilkjentYtelserForBarn(it.aktør, behandling.fagsak.id)
                 )
             }
+
+            secureLogger.info("Andeler tilkjent ytelse i inneværende behandling: " + tilkjentYtelse.andelerTilkjentYtelse)
+            secureLogger.info(
+                "Barn og deres andeler tilkjent ytelse fra andre fagsaker: " + barnMedAndreRelevanteTilkjentYtelser.map {
+                    "${it.first} -> ${it.second}"
+                }
+            )
 
             TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
                 behandlendeBehandlingTilkjentYtelse = tilkjentYtelse,
@@ -88,5 +95,11 @@ class TilkjentYtelseValideringService(
         )
 
         return aktørIderMedUgyldigEtterbetaling.map { aktørId -> personidentService.hentAktør(identEllerAktørId = aktørId) }
+    }
+
+    companion object {
+
+        val logger = LoggerFactory.getLogger(TilkjentYtelseValideringService::class.java)
+        val secureLogger = LoggerFactory.getLogger("secureLogger")
     }
 }

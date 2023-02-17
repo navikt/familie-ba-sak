@@ -9,27 +9,32 @@ import no.nav.familie.ba.sak.kjerne.brev.mottakerErDødUtenDødsboadresse
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.objectMapper
+import no.nav.familie.log.IdUtils
+import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
+import no.nav.familie.prosessering.domene.PropertiesWrapper
 import no.nav.familie.prosessering.domene.Task
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.slf4j.MDC
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
+import java.util.Properties
 
 const val ANTALL_SEKUNDER_I_EN_UKE = 604800L
 
 @Service
 @TaskStepBeskrivelse(
-    taskStepType = DistribuerDødsfallDokumentPåFagsakTask.TASK_STEP_TYPE,
-    beskrivelse = "Send dødsfall dokument til Dokdist",
+    taskStepType = DistribuerDokumentPåJournalpostIdTask.TASK_STEP_TYPE,
+    beskrivelse = "Distribuer dokument på journalpostId",
     triggerTidVedFeilISekunder = ANTALL_SEKUNDER_I_EN_UKE,
     // ~8 måneder dersom vi prøver én gang i uka.
     // Tasken skal stoppe etter 6 måneder, så om vi kommer hit har det skjedd noe galt.
     maxAntallFeil = 4 * 8,
     settTilManuellOppfølgning = true
 )
-class DistribuerDødsfallDokumentPåFagsakTask(
+class DistribuerDokumentPåJournalpostIdTask(
     private val dokumentDistribueringService: DokumentDistribueringService
 ) : AsyncTaskStep {
 
@@ -43,12 +48,8 @@ class DistribuerDødsfallDokumentPåFagsakTask(
         }
 
     override fun doTask(task: Task) {
-        val distribuerDødsfallDokumentPåFagsakTask =
-            objectMapper.readValue(task.payload, DistribuerDødsfallDokumentPåFagsakDTO::class.java)
-
-        val journalpostId = distribuerDødsfallDokumentPåFagsakTask.journalpostId
-        val brevmal = distribuerDødsfallDokumentPåFagsakTask.brevmal
-
+        val taskData = objectMapper.readValue(task.payload, DistribuerDokumentDTO::class.java)
+        val brevmal = taskData.brevmal
         val erTaskEldreEnn6Mnd = task.opprettetTid.isBefore(LocalDateTime.now().minusMonths(6))
 
         if (erTaskEldreEnn6Mnd) {
@@ -57,14 +58,15 @@ class DistribuerDødsfallDokumentPåFagsakTask(
         } else {
             try {
                 dokumentDistribueringService.prøvDistribuerBrevOgLoggHendelse(
-                    journalpostId = journalpostId,
-                    behandlingId = null,
-                    loggBehandlerRolle = BehandlerRolle.SYSTEM,
-                    brevmal = brevmal
+                    distribuerDokumentDTO = taskData,
+                    loggBehandlerRolle = BehandlerRolle.SYSTEM
                 )
             } catch (e: Exception) {
                 if (e is RessursException && mottakerErDødUtenDødsboadresse(e)) {
-                    logger.info("Klarte ikke å distribuere \"${brevmal.visningsTekst}\" på journalpost $journalpostId. Prøver igjen om 7 dager.")
+                    logger.info(
+                        "Klarte ikke å distribuere \"${brevmal.visningsTekst}\" på journalpost " +
+                            "${taskData.journalpostId}. Prøver igjen om 7 dager."
+                    )
                     throw e
                 } else {
                     Sentry.captureException(e)
@@ -75,15 +77,20 @@ class DistribuerDødsfallDokumentPåFagsakTask(
     }
 
     companion object {
-        fun opprettTask(journalpostId: String, brevmal: Brevmal): Task {
+        fun opprettTask(distribuerDokumentDTO: DistribuerDokumentDTO): Task {
+            check(distribuerDokumentDTO.behandlingId == null)
+
+            val metadata = Properties().apply {
+                this["journalpostId"] = distribuerDokumentDTO.journalpostId
+                this["personEllerInstitusjonIdent"] = distribuerDokumentDTO.personEllerInstitusjonIdent
+                this[MDCConstants.MDC_CALL_ID] = MDC.get(MDCConstants.MDC_CALL_ID) ?: IdUtils.generateId()
+            }
+
             return Task(
                 type = this.TASK_STEP_TYPE,
-                payload = objectMapper.writeValueAsString(
-                    DistribuerDødsfallDokumentPåFagsakDTO(
-                        journalpostId,
-                        brevmal
-                    )
-                )
+                payload = objectMapper.writeValueAsString(distribuerDokumentDTO),
+                triggerTid = LocalDateTime.now().plusMinutes(5),
+                metadataWrapper = PropertiesWrapper(metadata)
             )
         }
 
@@ -91,8 +98,3 @@ class DistribuerDødsfallDokumentPåFagsakTask(
         val logger: Logger = LoggerFactory.getLogger(this::class.java)
     }
 }
-
-data class DistribuerDødsfallDokumentPåFagsakDTO(
-    val journalpostId: String,
-    val brevmal: Brevmal
-)

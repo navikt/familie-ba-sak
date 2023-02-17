@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.DELVIS
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.DELVIS_INNVILGET_ENDRET_OG_OPPHØRT
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.DELVIS_INNVILGET_OG_ENDRET
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.DELVIS_INNVILGET_OG_OPPHØRT
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.ENDRET_OG_FORTSATT_INNVILGET
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.ENDRET_OG_OPPHØRT
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.ENDRET_UTBETALING
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.ENDRET_UTEN_UTBETALING
@@ -32,12 +33,9 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
-import no.nav.familie.ba.sak.kjerne.steg.StegType
-import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hjemlerTilhørendeFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Opphørsperiode
-import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 
 fun hentBrevmal(behandling: Behandling): Brevmal =
     when (behandling.opprettetÅrsak) {
@@ -142,7 +140,8 @@ fun hentManuellVedtaksbrevtype(
                     AVSLÅTT_ENDRET_OG_OPPHØRT,
                     ENDRET_OG_OPPHØRT -> Brevmal.VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON
 
-                    FORTSATT_INNVILGET -> Brevmal.VEDTAK_FORTSATT_INNVILGET_INSTITUSJON
+                    FORTSATT_INNVILGET,
+                    ENDRET_OG_FORTSATT_INNVILGET -> Brevmal.VEDTAK_FORTSATT_INNVILGET_INSTITUSJON
 
                     AVSLÅTT -> Brevmal.VEDTAK_AVSLAG_INSTITUSJON
 
@@ -171,7 +170,8 @@ fun hentManuellVedtaksbrevtype(
                     AVSLÅTT_ENDRET_OG_OPPHØRT,
                     ENDRET_OG_OPPHØRT -> Brevmal.VEDTAK_OPPHØR_MED_ENDRING
 
-                    FORTSATT_INNVILGET -> Brevmal.VEDTAK_FORTSATT_INNVILGET
+                    FORTSATT_INNVILGET,
+                    ENDRET_OG_FORTSATT_INNVILGET -> Brevmal.VEDTAK_FORTSATT_INNVILGET
 
                     AVSLÅTT -> Brevmal.VEDTAK_AVSLAG
 
@@ -189,30 +189,8 @@ fun hentManuellVedtaksbrevtype(
     }
 }
 
-fun hentSaksbehandlerOgBeslutter(behandling: Behandling, totrinnskontroll: Totrinnskontroll?): Pair<String, String> {
-    return when {
-        behandling.steg <= StegType.SEND_TIL_BESLUTTER || totrinnskontroll == null -> {
-            Pair(SikkerhetContext.hentSaksbehandlerNavn(), "Beslutter")
-        }
-        totrinnskontroll.erBesluttet() -> {
-            Pair(totrinnskontroll.saksbehandler, totrinnskontroll.beslutter!!)
-        }
-        behandling.steg == StegType.BESLUTTE_VEDTAK -> {
-            Pair(
-                totrinnskontroll.saksbehandler,
-                if (totrinnskontroll.saksbehandler == SikkerhetContext.hentSaksbehandlerNavn()) {
-                    "Beslutter"
-                } else {
-                    SikkerhetContext.hentSaksbehandlerNavn()
-                }
-            )
-        }
-        else -> {
-            throw Feil("Prøver å hente saksbehandler og beslutters navn for generering av brev i en ukjent tilstand.")
-        }
-    }
-}
-
+// Dokumenttittel legges på i familie-integrasjoner basert på dokumenttype
+// Denne funksjonen bestemmer om dokumenttittelen skal overstyres eller ikke
 fun hentOverstyrtDokumenttittel(behandling: Behandling): String? {
     return if (behandling.type == BehandlingType.REVURDERING) {
         behandling.opprettetÅrsak.hentOverstyrtDokumenttittelForOmregningsbehandling() ?: when {
@@ -224,7 +202,7 @@ fun hentOverstyrtDokumenttittel(behandling: Behandling): String? {
                 DELVIS_INNVILGET_OG_OPPHØRT,
                 ENDRET_OG_OPPHØRT
             ).contains(behandling.resultat) -> "Vedtak om endret barnetrygd"
-            behandling.resultat == FORTSATT_INNVILGET -> "Vedtak om fortsatt barnetrygd"
+            behandling.resultat.erFortsattInnvilget() -> "Vedtak om fortsatt barnetrygd"
             else -> null
         }
     } else {

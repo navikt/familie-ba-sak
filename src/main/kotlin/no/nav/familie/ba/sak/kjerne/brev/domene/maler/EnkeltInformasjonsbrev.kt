@@ -12,7 +12,8 @@ data class EnkeltInformasjonsbrev(
         navn: String,
         fodselsnummer: String,
         enhet: String,
-        mal: Brevmal
+        mal: Brevmal,
+        saksbehandlerNavn: String
     ) : this(
         mal = mal,
         data = EnkeltInformasjonsbrevData(
@@ -22,7 +23,8 @@ data class EnkeltInformasjonsbrev(
             ),
             delmalData = EnkeltInformasjonsbrevData.DelmalData(
                 SignaturDelmal(
-                    enhet = enhet
+                    enhet = enhet,
+                    saksbehandlerNavn = saksbehandlerNavn
                 )
             )
         )

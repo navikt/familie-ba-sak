@@ -24,10 +24,10 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.kjerne.steg.JournalførVedtaksbrevDTO
 import no.nav.familie.ba.sak.kjerne.steg.StatusFraOppdragMedTask
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.ba.sak.kjerne.steg.domene.JournalførVedtaksbrevDTO
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.tilMinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.tilMinimertePersoner

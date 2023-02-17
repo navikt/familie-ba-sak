@@ -31,6 +31,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
+import no.nav.familie.ba.sak.kjerne.steg.domene.JournalførVedtaksbrevDTO
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO

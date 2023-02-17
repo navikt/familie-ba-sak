@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
+import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -14,7 +15,8 @@ import org.springframework.stereotype.Service
 @Service
 class TotrinnskontrollService(
     private val behandlingService: BehandlingService,
-    private val totrinnskontrollRepository: TotrinnskontrollRepository
+    private val totrinnskontrollRepository: TotrinnskontrollRepository,
+    private val saksbehandlerContext: SaksbehandlerContext
 ) {
 
     fun hentAktivForBehandling(behandlingId: Long): Totrinnskontroll? {
@@ -23,7 +25,7 @@ class TotrinnskontrollService(
 
     fun opprettTotrinnskontrollMedSaksbehandler(
         behandling: Behandling,
-        saksbehandler: String = SikkerhetContext.hentSaksbehandlerNavn(),
+        saksbehandler: String = saksbehandlerContext.hentSaksbehandlerSignaturTilBrev(),
         saksbehandlerId: String = SikkerhetContext.hentSaksbehandler()
     ): Totrinnskontroll {
         return lagreOgDeaktiverGammel(
