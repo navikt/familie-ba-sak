@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.hentPerioderMedEndringerFra
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.utledSegmenter
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
@@ -271,6 +272,41 @@ fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.lagVertikaleSegmenter(): Map
 
 fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.erUlike(andreAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>): Boolean {
     return this.hentPerioderMedEndringerFra(andreAndeler).isNotEmpty()
+}
+fun List<AndelTilkjentYtelse>.erEndringerIUtbetalingMellomForrigeAndeler(
+    forrigeAndeler: List<AndelTilkjentYtelse>
+): Boolean {
+    if (isEmpty() && forrigeAndeler.isEmpty()) return false
+    val allePersonerMedAndeler = (map { it.aktør } + forrigeAndeler.map { it.aktør }).distinct()
+
+    return allePersonerMedAndeler.any { aktør ->
+        val ytelseTyperForPerson = (map { it.type } + forrigeAndeler.map { it.type }).distinct()
+        ytelseTyperForPerson.any { ytelseType ->
+            filter { it.aktør == aktør && it.type == ytelseType }.erEndringIUtbetalingForPersonOgType(
+                forrigeAndeler = forrigeAndeler.filter { it.aktør == aktør && it.type == ytelseType }
+            )
+        }
+    }
+}
+
+// Det regnes ikke ut som en endring dersom
+// 1. Vi har fått nye andeler som har 0 i utbetalingsbeløp
+// 2. Vi har mistet andeler som har hatt 0 i utbetalingsbeløp
+// 3. Vi har lik utbetalingsbeløp mellom nåværende og forrige andeler
+private fun List<AndelTilkjentYtelse>.erEndringIUtbetalingForPersonOgType(
+    forrigeAndeler: List<AndelTilkjentYtelse>
+): Boolean {
+    val nåværendeTidslinje = AndelTilkjentYtelseTidslinje(this)
+    val forrigeTidslinje = AndelTilkjentYtelseTidslinje(forrigeAndeler)
+
+    val endringIBeløpTidslinje = nåværendeTidslinje.kombinerMed(forrigeTidslinje) { nåværende, forrige ->
+        val nåværendeBeløp = nåværende?.kalkulertUtbetalingsbeløp ?: 0
+        val forrigeBeløp = forrige?.kalkulertUtbetalingsbeløp ?: 0
+
+        nåværendeBeløp != forrigeBeløp
+    }
+
+    return endringIBeløpTidslinje.perioder().any { it.innhold == true }
 }
 
 enum class YtelseType(val klassifisering: String) {
