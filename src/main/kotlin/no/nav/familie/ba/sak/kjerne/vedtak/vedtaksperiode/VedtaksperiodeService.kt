@@ -32,6 +32,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.brev.hentIPeriode
 import no.nav.familie.ba.sak.kjerne.brev.hentKompetanserSomStopperRettFørPeriode
+import no.nav.familie.ba.sak.kjerne.brev.hentVedtaksbrevmalGammel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
@@ -259,7 +260,14 @@ class VedtaksperiodeService(
                 )
             )
         ) {
-            val vedtaksbrevmal = brevmalService.hentVedtaksbrevmal(behandling)
+            val vedtaksbrevmal =
+                if (featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_BEREGNE_BEHANDLINGSRESULTAT)) {
+                    brevmalService.hentVedtaksbrevmal(
+                        behandling
+                    )
+                } else {
+                    hentVedtaksbrevmalGammel(behandling)
+                }
             val erAutobrevFor6Og18ÅrOgSmåbarnstillegg =
                 vedtaksbrevmal == Brevmal.AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG
 

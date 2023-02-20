@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.NY_MÅTE_Å_BEREGNE_BEHANDLINGSRESULTAT
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient.Companion.VEDTAK_VEDLEGG_FILNAVN
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient.Companion.VEDTAK_VEDLEGG_TITTEL
@@ -9,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
+import no.nav.familie.ba.sak.kjerne.brev.hentBrevmalGammel
 import no.nav.familie.ba.sak.kjerne.brev.hentOverstyrtDokumenttittel
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
@@ -37,7 +40,8 @@ class JournalførVedtaksbrev(
     private val fagsakRepository: FagsakRepository,
     private val organisasjonService: OrganisasjonService,
     private val brevmottakerService: BrevmottakerService,
-    private val brevmalService: BrevmalService
+    private val brevmalService: BrevmalService,
+    private val featureToggleService: FeatureToggleService
 ) : BehandlingSteg<JournalførVedtaksbrevDTO> {
 
     override fun utførStegOgAngiNeste(behandling: Behandling, data: JournalførVedtaksbrevDTO): StegType {
@@ -217,7 +221,14 @@ class JournalførVedtaksbrev(
             personEllerInstitusjonIdent = mottakerInfo.brukerId,
             behandlingId = behandling.id,
             journalpostId = journalPostId,
-            brevmal = brevmalService.hentBrevmal(behandling),
+            brevmal =
+            if (featureToggleService.isEnabled(NY_MÅTE_Å_BEREGNE_BEHANDLINGSRESULTAT)) {
+                brevmalService.hentBrevmal(
+                    behandling
+                )
+            } else {
+                hentBrevmalGammel(behandling)
+            },
             erManueltSendt = false,
             manuellAdresseInfo = mottakerInfo.manuellAdresseInfo
         )

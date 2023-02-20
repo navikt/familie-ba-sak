@@ -12,7 +12,9 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import org.springframework.stereotype.Service
 
 @Service
-class BrevmalService(private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository) {
+class BrevmalService(
+    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
+) {
 
     fun hentBrevmal(behandling: Behandling): Brevmal =
         when (behandling.opprettetÅrsak) {
@@ -46,8 +48,9 @@ class BrevmalService(private val andelTilkjentYtelseRepository: AndelTilkjentYte
             "Brev ikke støttet for behandlingstype=$behandlingType og behandlingsresultat=$behandlingsresultat"
         val feilmelidingBehandlingType =
             "Brev ikke støttet for behandlingstype=$behandlingType"
-        val frontendFeilmelding = "Vi finner ikke vedtaksbrev som matcher med behandlingen og resultatet du har fått. " +
-            "Meld sak i Porten slik at vi kan se nærmere på saken."
+        val frontendFeilmelding =
+            "Vi finner ikke vedtaksbrev som matcher med behandlingen og resultatet du har fått. " +
+                "Meld sak i Porten slik at vi kan se nærmere på saken."
 
         return when (behandlingType) {
             BehandlingType.FØRSTEGANGSBEHANDLING ->
@@ -110,12 +113,13 @@ class BrevmalService(private val andelTilkjentYtelseRepository: AndelTilkjentYte
                         Behandlingsresultat.AVSLÅTT_OG_OPPHØRT,
                         Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT,
                         Behandlingsresultat.ENDRET_UTBETALING,
-                        Behandlingsresultat.ENDRET_OG_OPPHØRT ->
-                            {
-                                val ytelseErLøpende = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id).any { it.erLøpende() }
+                        Behandlingsresultat.ENDRET_OG_OPPHØRT -> {
+                            val ytelseErLøpende =
+                                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
+                                    .any { it.erLøpende() }
 
-                                if (ytelseErLøpende) Brevmal.VEDTAK_ENDRING_INSTITUSJON else Brevmal.VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON
-                            }
+                            if (ytelseErLøpende) Brevmal.VEDTAK_ENDRING_INSTITUSJON else Brevmal.VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON
+                        }
 
                         Behandlingsresultat.OPPHØRT,
                         Behandlingsresultat.FORTSATT_OPPHØRT -> Brevmal.VEDTAK_OPPHØRT_INSTITUSJON
@@ -145,10 +149,13 @@ class BrevmalService(private val andelTilkjentYtelseRepository: AndelTilkjentYte
                         Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT,
                         Behandlingsresultat.ENDRET_UTBETALING,
                         Behandlingsresultat.ENDRET_OG_OPPHØRT -> {
-                            val ytelseErLøpende = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id).any { it.erLøpende() }
+                            val ytelseErLøpende =
+                                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
+                                    .any { it.erLøpende() }
 
                             if (ytelseErLøpende) Brevmal.VEDTAK_ENDRING else Brevmal.VEDTAK_OPPHØR_MED_ENDRING
                         }
+
                         Behandlingsresultat.OPPHØRT,
                         Behandlingsresultat.FORTSATT_OPPHØRT -> Brevmal.VEDTAK_OPPHØRT
 
