@@ -88,7 +88,7 @@ class OppgaveService(
                 },
                 behandlingstype = behandling.kategori.tilOppgavebehandlingType().value,
                 tilordnetRessurs = tilordnetNavIdent,
-                behandlesAvApplikasjon = "familie-ba-sak"
+                behandlesAvApplikasjon = if (oppgavetyperSomBehandlesAvBaSak.contains(oppgavetype)) "familie-ba-sak" else ""
             )
             val opprettetOppgaveId = integrasjonClient.opprettOppgave(opprettOppgave).oppgaveId.toString()
 
@@ -305,5 +305,11 @@ class OppgaveService(
 
         private val logger = LoggerFactory.getLogger(OppgaveService::class.java)
         private val secureLogger = LoggerFactory.getLogger("secureLoger")
+        private val oppgavetyperSomBehandlesAvBaSak = listOf(
+            Oppgavetype.BehandleSak,
+            Oppgavetype.GodkjenneVedtak,
+            Oppgavetype.BehandleUnderkjentVedtak,
+            Oppgavetype.VurderLivshendelse
+        )
     }
 }
