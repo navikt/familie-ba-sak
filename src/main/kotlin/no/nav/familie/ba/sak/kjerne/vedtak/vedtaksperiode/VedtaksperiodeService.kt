@@ -528,21 +528,22 @@ class VedtaksperiodeService(
     ): List<Opphørsperiode> {
         if (behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET) return emptyList()
 
-        val vedtattBehandlinger = behandlingRepository.finnVedtattBehandlinger(fagsakId = behandling.fagsak.id)
+        val alleAvsluttetBehandlingerPåFagsak =
+            behandlingRepository.findByFagsakAndAvsluttet(fagsakId = behandling.fagsak.id)
 
-        val forrigeVedtattBehandling: Behandling? = Behandlingutils.hentSisteBehandlingSomErVedtatt(
-            vedtattBehandlinger
+        val sisteVedtattBehandling: Behandling? = Behandlingutils.hentSisteBehandlingSomErVedtatt(
+            alleAvsluttetBehandlingerPåFagsak
         )
 
         val forrigePersonopplysningGrunnlag: PersonopplysningGrunnlag? =
-            if (forrigeVedtattBehandling != null) {
-                persongrunnlagService.hentAktiv(behandlingId = forrigeVedtattBehandling.id)
+            if (sisteVedtattBehandling != null) {
+                persongrunnlagService.hentAktiv(behandlingId = sisteVedtattBehandling.id)
             } else {
                 null
             }
-        val forrigeAndelerMedEndringer = if (forrigeVedtattBehandling != null) {
+        val forrigeAndelerMedEndringer = if (sisteVedtattBehandling != null) {
             andelerTilkjentYtelseOgEndreteUtbetalingerService
-                .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(forrigeVedtattBehandling.id)
+                .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(sisteVedtattBehandling.id)
         } else {
             emptyList()
         }

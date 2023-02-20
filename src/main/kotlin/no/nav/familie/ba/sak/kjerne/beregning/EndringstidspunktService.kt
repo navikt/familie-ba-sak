@@ -21,8 +21,9 @@ class EndringstidspunktService(
     fun finnEndringstidpunkForBehandling(behandlingId: Long): LocalDate {
         val nyBehandling = behandlingRepository.finnBehandling(behandlingId)
 
-        val vedtattBehandlinger = behandlingRepository.finnVedtattBehandlinger(fagsakId = nyBehandling.fagsak.id)
-        val sisteVedtattBehandling = Behandlingutils.hentSisteBehandlingSomErVedtatt(vedtattBehandlinger)
+        val alleAvsluttetBehandlingerPåFagsak =
+            behandlingRepository.findByFagsakAndAvsluttet(fagsakId = nyBehandling.fagsak.id)
+        val sisteVedtattBehandling = Behandlingutils.hentSisteBehandlingSomErVedtatt(alleAvsluttetBehandlingerPåFagsak)
             ?: return TIDENES_MORGEN
 
         val nyeAndelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService

@@ -106,11 +106,6 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
     fun finnIverksatteBehandlinger(fagsakId: Long): List<Behandling>
 
     @Query(
-        """select b from Behandling b where b.fagsak.id = :fagsakId AND b.status='AVSLUTTET'"""
-    )
-    fun finnVedtattBehandlinger(fagsakId: Long): List<Behandling>
-
-    @Query(
         """WITH sisteiverksattebehandlingfraløpendefagsak AS (
                     SELECT f.id AS fagsakid, MAX(b.opprettet_tid) AS opprettet_tid
                     FROM behandling b
