@@ -152,7 +152,7 @@ class BeslutteVedtak(
     private fun sjekkOmBehandlingSkalIverksettesOgHentNesteSteg(behandling: Behandling): StegType {
         val endringerIUtbetaling = beregningService.erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling)
 
-        val nesteSteg = hentNesteStegMedEndringIUtbetalingIBetrakning(behandling, endringerIUtbetaling)
+        val nesteSteg = hentNesteStegGittEndringerIUtbetaling(behandling, endringerIUtbetaling)
 
         if (nesteSteg == StegType.IVERKSETT_MOT_OPPDRAG) {
             val erInnvilgetSøknadUtenUtebtalingsperioderGrunnetEndringsperioder =

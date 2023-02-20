@@ -135,7 +135,7 @@ class BehandlingsresultatSteg(
 
         val endringerIUtbetaling = beregningService.erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling)
 
-        return hentNesteStegMedEndringIUtbetalingIBetrakning(behandlingMedOppdatertBehandlingsresultat, endringerIUtbetaling)
+        return hentNesteStegGittEndringerIUtbetaling(behandlingMedOppdatertBehandlingsresultat, endringerIUtbetaling)
     }
 
     override fun stegType(): StegType {

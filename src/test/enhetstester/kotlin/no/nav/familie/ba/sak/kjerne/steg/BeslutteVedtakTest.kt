@@ -111,7 +111,7 @@ class BeslutteVedtakTest {
         val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.GODKJENT)
 
         every { vedtakService.hentAktivForBehandling(any()) } returns lagVedtak(behandling)
-        every { beregningService.erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling) } returns EndringerIUtbetaling.ENDRING_I_UTBETALING
+        every { beregningService.erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling) } returns EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
         mockkObject(FerdigstillOppgaver.Companion)
         every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
         every { beregningService.erAlleUtbetalingsperioderPåNullKronerIDenneOgForrigeBehandling(behandling = behandling) } returns false
@@ -168,7 +168,7 @@ class BeslutteVedtakTest {
         val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.GODKJENT)
 
         every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
-        every { beregningService.erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling) } returns EndringerIUtbetaling.INGEN_ENDRING_I_UTBETALING
+        every { beregningService.erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling) } returns EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING
 
         mockkObject(JournalførVedtaksbrevTask.Companion)
         every {

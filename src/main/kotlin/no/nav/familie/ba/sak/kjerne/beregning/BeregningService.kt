@@ -22,7 +22,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.steg.EndringerIUtbetaling
+import no.nav.familie.ba.sak.kjerne.steg.EndringerIUtbetalingForBehandlingSteg
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -174,7 +174,7 @@ class BeregningService(
             erAlleUtbetalingsperioderIDenneBehandlingenPåNullKroner
     }
 
-    fun erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling: Behandling): EndringerIUtbetaling {
+    fun erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling: Behandling): EndringerIUtbetalingForBehandlingSteg {
         val nåværendeAndeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
 
         val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling)
@@ -184,7 +184,7 @@ class BeregningService(
 
         val endringerIUtbetaling = erEndringerIUtbetalingMellomNåværendeOgForrigeAndeler(nåværendeAndeler, forrigeAndeler)
 
-        return if (endringerIUtbetaling) EndringerIUtbetaling.ENDRING_I_UTBETALING else EndringerIUtbetaling.INGEN_ENDRING_I_UTBETALING
+        return if (endringerIUtbetaling) EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING else EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING
     }
 
     private fun erEndringerIUtbetalingMellomNåværendeOgForrigeAndeler(
@@ -220,10 +220,7 @@ class BeregningService(
             val nåværendeBeløp = nåværende?.kalkulertUtbetalingsbeløp ?: 0
             val forrigeBeløp = forrige?.kalkulertUtbetalingsbeløp ?: 0
 
-            when {
-                nåværendeBeløp != forrigeBeløp -> true
-                else -> false
-            }
+            nåværendeBeløp != forrigeBeløp
         }
 
         return endringIBeløpTidslinje.perioder().any { it.innhold == true }

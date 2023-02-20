@@ -33,7 +33,7 @@ class BehandlingStegTest {
                     årsak = BehandlingÅrsak.MIGRERING
                 ),
                 utførendeStegType = it,
-                endringerIUtbetaling = EndringerIUtbetaling.ENDRING_I_UTBETALING
+                endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
             )
         }
     }
@@ -89,7 +89,7 @@ class BehandlingStegTest {
                     årsak = BehandlingÅrsak.SØKNAD
                 ),
                 utførendeStegType = it,
-                endringerIUtbetaling = EndringerIUtbetaling.ENDRING_I_UTBETALING
+                endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
             )
         }
     }
@@ -118,7 +118,7 @@ class BehandlingStegTest {
                     årsak = BehandlingÅrsak.SØKNAD
                 ),
                 utførendeStegType = it,
-                endringerIUtbetaling = EndringerIUtbetaling.INGEN_ENDRING_I_UTBETALING
+                endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING
             )
         }
     }
@@ -146,7 +146,7 @@ class BehandlingStegTest {
                     årsak = BehandlingÅrsak.FØDSELSHENDELSE
                 ),
                 utførendeStegType = it,
-                endringerIUtbetaling = EndringerIUtbetaling.ENDRING_I_UTBETALING
+                endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
             )
         }
     }
@@ -169,7 +169,7 @@ class BehandlingStegTest {
                     årsak = BehandlingÅrsak.FØDSELSHENDELSE
                 ),
                 utførendeStegType = it,
-                endringerIUtbetaling = EndringerIUtbetaling.INGEN_ENDRING_I_UTBETALING
+                endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING
             )
         }
     }
@@ -248,7 +248,7 @@ class BehandlingStegTest {
                     årsak = BehandlingÅrsak.TEKNISK_ENDRING
                 ),
                 utførendeStegType = it,
-                endringerIUtbetaling = EndringerIUtbetaling.ENDRING_I_UTBETALING
+                endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
             )
         }
     }
@@ -275,7 +275,7 @@ class BehandlingStegTest {
                     årsak = BehandlingÅrsak.TEKNISK_ENDRING
                 ),
                 utførendeStegType = it,
-                endringerIUtbetaling = EndringerIUtbetaling.INGEN_ENDRING_I_UTBETALING
+                endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING
             )
         }
     }
@@ -328,7 +328,7 @@ class BehandlingStegTest {
                     årsak = BehandlingÅrsak.SMÅBARNSTILLEGG
                 ),
                 utførendeStegType = it,
-                endringerIUtbetaling = EndringerIUtbetaling.ENDRING_I_UTBETALING
+                endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
             )
         }
     }
@@ -358,7 +358,7 @@ class BehandlingStegTest {
                     årsak = BehandlingÅrsak.ÅRLIG_KONTROLL
                 ),
                 utførendeStegType = it,
-                endringerIUtbetaling = EndringerIUtbetaling.ENDRING_I_UTBETALING
+                endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
             )
         }
     }
@@ -382,7 +382,7 @@ class BehandlingStegTest {
                     årsak = BehandlingÅrsak.SATSENDRING
                 ),
                 utførendeStegType = it,
-                endringerIUtbetaling = EndringerIUtbetaling.ENDRING_I_UTBETALING
+                endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
             )
         }
     }
@@ -404,7 +404,7 @@ class BehandlingStegTest {
                             årsak = BehandlingÅrsak.SATSENDRING
                         ),
                         utførendeStegType = it,
-                        endringerIUtbetaling = EndringerIUtbetaling.INGEN_ENDRING_I_UTBETALING
+                        endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING
                     )
                 }
             } else {
@@ -413,7 +413,7 @@ class BehandlingStegTest {
                         årsak = BehandlingÅrsak.SATSENDRING
                     ),
                     utførendeStegType = it,
-                    endringerIUtbetaling = EndringerIUtbetaling.INGEN_ENDRING_I_UTBETALING
+                    endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING
                 )
             }
         }
@@ -441,7 +441,7 @@ class BehandlingStegTest {
                     årsak = BehandlingÅrsak.ÅRLIG_KONTROLL
                 ),
                 utførendeStegType = it,
-                endringerIUtbetaling = EndringerIUtbetaling.INGEN_ENDRING_I_UTBETALING
+                endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING
             )
         }
     }
@@ -454,7 +454,7 @@ class BehandlingStegTest {
                     årsak = BehandlingÅrsak.SØKNAD
                 ),
                 utførendeStegType = StegType.BESLUTTE_VEDTAK,
-                endringerIUtbetaling = EndringerIUtbetaling.IKKE_RELEVANT
+                endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.IKKE_RELEVANT
             )
         }
     }

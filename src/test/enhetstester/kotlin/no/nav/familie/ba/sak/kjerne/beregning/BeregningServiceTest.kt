@@ -49,7 +49,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
-import no.nav.familie.ba.sak.kjerne.steg.EndringerIUtbetaling
+import no.nav.familie.ba.sak.kjerne.steg.EndringerIUtbetalingForBehandlingSteg
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -942,7 +942,7 @@ class BeregningServiceTest {
 
         val erEndringIUtbetaling = beregningService.erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(nåværendeBehandling)
 
-        Assertions.assertEquals(erEndringIUtbetaling, EndringerIUtbetaling.INGEN_ENDRING_I_UTBETALING)
+        Assertions.assertEquals(erEndringIUtbetaling, EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING)
 
         verify { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(nåværendeBehandling) }
         verify { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) }
@@ -977,7 +977,7 @@ class BeregningServiceTest {
 
         val erEndringIUtbetaling = beregningService.erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(nåværendeBehandling)
 
-        Assertions.assertEquals(erEndringIUtbetaling, EndringerIUtbetaling.INGEN_ENDRING_I_UTBETALING)
+        Assertions.assertEquals(erEndringIUtbetaling, EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING)
 
         verify { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(nåværendeBehandling) }
         verify { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) }
@@ -1012,7 +1012,7 @@ class BeregningServiceTest {
 
         val erEndringIUtbetaling = beregningService.erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(nåværendeBehandling)
 
-        Assertions.assertEquals(erEndringIUtbetaling, EndringerIUtbetaling.INGEN_ENDRING_I_UTBETALING)
+        Assertions.assertEquals(erEndringIUtbetaling, EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING)
 
         verify { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(nåværendeBehandling) }
         verify { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) }
@@ -1047,7 +1047,7 @@ class BeregningServiceTest {
 
         val erEndringIUtbetaling = beregningService.erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(nåværendeBehandling)
 
-        Assertions.assertEquals(erEndringIUtbetaling, EndringerIUtbetaling.ENDRING_I_UTBETALING)
+        Assertions.assertEquals(erEndringIUtbetaling, EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING)
 
         verify { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(nåværendeBehandling) }
         verify { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) }
@@ -1097,7 +1097,7 @@ class BeregningServiceTest {
 
         val erEndringIUtbetaling = beregningService.erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(nåværendeBehandling)
 
-        Assertions.assertEquals(erEndringIUtbetaling, EndringerIUtbetaling.ENDRING_I_UTBETALING)
+        Assertions.assertEquals(erEndringIUtbetaling, EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING)
 
         verify { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(nåværendeBehandling) }
         verify { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) }

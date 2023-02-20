@@ -37,11 +37,11 @@ interface BehandlingSteg<T> {
         return hentNesteSteg(
             utførendeStegType = this.stegType(),
             behandling = behandling,
-            endringerIUtbetaling = EndringerIUtbetaling.IKKE_RELEVANT
+            endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.IKKE_RELEVANT
         )
     }
 
-    fun hentNesteStegMedEndringIUtbetalingIBetrakning(behandling: Behandling, endringerIUtbetaling: EndringerIUtbetaling): StegType {
+    fun hentNesteStegGittEndringerIUtbetaling(behandling: Behandling, endringerIUtbetaling: EndringerIUtbetalingForBehandlingSteg): StegType {
         return hentNesteSteg(
             utførendeStegType = this.stegType(),
             behandling = behandling,
@@ -54,7 +54,7 @@ interface BehandlingSteg<T> {
     fun postValiderSteg(behandling: Behandling) {}
 }
 
-enum class EndringerIUtbetaling {
+enum class EndringerIUtbetalingForBehandlingSteg {
     IKKE_RELEVANT,
     INGEN_ENDRING_I_UTBETALING,
     ENDRING_I_UTBETALING
@@ -181,7 +181,7 @@ enum class StegType(
     }
 }
 
-fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType, endringerIUtbetaling: EndringerIUtbetaling = EndringerIUtbetaling.IKKE_RELEVANT): StegType {
+fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType, endringerIUtbetaling: EndringerIUtbetalingForBehandlingSteg = EndringerIUtbetalingForBehandlingSteg.IKKE_RELEVANT): StegType {
     if (utførendeStegType == HENLEGG_BEHANDLING) {
         return FERDIGSTILLE_BEHANDLING
     }
@@ -274,7 +274,7 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType, endringe
                 REGISTRERE_PERSONGRUNNLAG -> FILTRERING_FØDSELSHENDELSER
                 FILTRERING_FØDSELSHENDELSER -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
-                BEHANDLINGSRESULTAT -> if (endringerIUtbetaling == EndringerIUtbetaling.ENDRING_I_UTBETALING) IVERKSETT_MOT_OPPDRAG else HENLEGG_BEHANDLING
+                BEHANDLINGSRESULTAT -> if (endringerIUtbetaling == EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING) IVERKSETT_MOT_OPPDRAG else HENLEGG_BEHANDLING
                 IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
                 VENTE_PÅ_STATUS_FRA_ØKONOMI -> JOURNALFØR_VEDTAKSBREV
                 JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV
@@ -341,9 +341,9 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType, endringe
             when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
-                BEHANDLINGSRESULTAT -> if (endringerIUtbetaling == EndringerIUtbetaling.ENDRING_I_UTBETALING) {
+                BEHANDLINGSRESULTAT -> if (endringerIUtbetaling == EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING) {
                     IVERKSETT_MOT_OPPDRAG
-                } else if (behandling.kategori == BehandlingKategori.EØS && endringerIUtbetaling == EndringerIUtbetaling.INGEN_ENDRING_I_UTBETALING) {
+                } else if (behandling.kategori == BehandlingKategori.EØS && endringerIUtbetaling == EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING) {
                     FERDIGSTILLE_BEHANDLING
                 } else {
                     // TODO: Flytt denne valideringen til behandlingsresultat valideringen
@@ -379,18 +379,18 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType, endringe
     }
 }
 
-private fun hentNesteStegTypeBasertPåOmDetErEndringIUtbetaling(endringerIUtbetaling: EndringerIUtbetaling): StegType =
+private fun hentNesteStegTypeBasertPåOmDetErEndringIUtbetaling(endringerIUtbetaling: EndringerIUtbetalingForBehandlingSteg): StegType =
     when (endringerIUtbetaling) {
-        EndringerIUtbetaling.ENDRING_I_UTBETALING -> IVERKSETT_MOT_OPPDRAG
-        EndringerIUtbetaling.INGEN_ENDRING_I_UTBETALING -> JOURNALFØR_VEDTAKSBREV
-        EndringerIUtbetaling.IKKE_RELEVANT -> throw Feil("Endringer i utbetaling må utledes før man kan gå videre til neste steg.")
+        EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING -> IVERKSETT_MOT_OPPDRAG
+        EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING -> JOURNALFØR_VEDTAKSBREV
+        EndringerIUtbetalingForBehandlingSteg.IKKE_RELEVANT -> throw Feil("Endringer i utbetaling må utledes før man kan gå videre til neste steg.")
     }
 
-private fun hentStegEtterBeslutteVedtakForTekniskEndring(endringerIUtbetaling: EndringerIUtbetaling): StegType =
+private fun hentStegEtterBeslutteVedtakForTekniskEndring(endringerIUtbetaling: EndringerIUtbetalingForBehandlingSteg): StegType =
     when (endringerIUtbetaling) {
-        EndringerIUtbetaling.ENDRING_I_UTBETALING -> IVERKSETT_MOT_OPPDRAG
-        EndringerIUtbetaling.INGEN_ENDRING_I_UTBETALING -> FERDIGSTILLE_BEHANDLING
-        EndringerIUtbetaling.IKKE_RELEVANT -> throw Feil("Endringer i utbetaling må utledes før man kan gå videre til neste steg.")
+        EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING -> IVERKSETT_MOT_OPPDRAG
+        EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING -> FERDIGSTILLE_BEHANDLING
+        EndringerIUtbetalingForBehandlingSteg.IKKE_RELEVANT -> throw Feil("Endringer i utbetaling må utledes før man kan gå videre til neste steg.")
     }
 
 enum class BehandlerRolle(val nivå: Int) {
