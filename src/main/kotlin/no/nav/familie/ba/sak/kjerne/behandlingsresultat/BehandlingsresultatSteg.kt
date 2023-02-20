@@ -94,11 +94,12 @@ class BehandlingsresultatSteg(
             if (behandling.erMigrering() && behandling.skalBehandlesAutomatisk) {
                 settBehandlingsresultat(behandling, Behandlingsresultat.INNVILGET)
             } else {
-                val resultat = if (featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_BEREGNE_BEHANDLINGSRESULTAT)) {
-                    behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.id)
-                } else {
-                    behandlingsresultatService.utledBehandlingsresultatGammel(behandlingId = behandling.id)
-                }
+                val resultat =
+                    if (featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_BEREGNE_BEHANDLINGSRESULTAT)) {
+                        behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.id)
+                    } else {
+                        behandlingsresultatService.utledBehandlingsresultatGammel(behandlingId = behandling.id)
+                    }
 
                 behandlingService.oppdaterBehandlingsresultat(
                     behandlingId = behandling.id,
@@ -133,7 +134,13 @@ class BehandlingsresultatSteg(
             simuleringService.oppdaterSimuleringPåBehandling(behandlingMedOppdatertBehandlingsresultat)
         }
 
-        return hentNesteStegForNormalFlyt(behandlingMedOppdatertBehandlingsresultat)
+        return if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_ANDELER_FOR_IVERKSETTELSE_SJEKK)) {
+            val endringerIUtbetaling =
+                beregningService.erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling)
+            hentNesteStegGittEndringerIUtbetaling(behandling, endringerIUtbetaling)
+        } else {
+            hentNesteStegForNormalFlytGammel(behandling)
+        }
     }
 
     override fun stegType(): StegType {

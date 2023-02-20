@@ -17,11 +17,13 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndr
 import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.erEndringerIUtbetalingMellomForrigeAndeler
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.steg.EndringerIUtbetalingForBehandlingSteg
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
@@ -170,6 +172,19 @@ class BeregningService(
 
         return erIngenUtbetalingIForrigeBehandling &&
             erAlleUtbetalingsperioderIDenneBehandlingenPåNullKroner
+    }
+
+    fun erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling: Behandling): EndringerIUtbetalingForBehandlingSteg {
+        val nåværendeAndeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
+
+        val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling)
+        val forrigeAndeler =
+            forrigeBehandling?.let { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(it.id) }
+                ?: emptyList()
+
+        val endringerIUtbetaling = nåværendeAndeler.erEndringerIUtbetalingMellomForrigeAndeler(forrigeAndeler)
+
+        return if (endringerIUtbetaling) EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING else EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING
     }
 
     @Transactional
