@@ -37,7 +37,7 @@ object BehandlingsresultatSøknadUtils {
             endretUtbetalingAndeler = endretUtbetalingAndeler
         )
 
-        val erEksplisittAvslagPåMinstEnPersonFremstiltKravFor = erEksplisittAvslagPåMinstEnPersonFremstiltKravFor(
+        val erEksplisittAvslagPåMinstEnPersonFremstiltKravFor = erEksplisittAvslagPåMinstEnPersonFremstiltKravForEllerSøker(
             nåværendePersonResultater = nåværendePersonResultater,
             personerFremstiltKravFor = personerFremstiltKravFor
         )
@@ -115,12 +115,12 @@ object BehandlingsresultatSøknadUtils {
         return resultatTidslinje.perioder().mapNotNull { it.innhold }.distinct()
     }
 
-    private fun erEksplisittAvslagPåMinstEnPersonFremstiltKravFor(
+    private fun erEksplisittAvslagPåMinstEnPersonFremstiltKravForEllerSøker(
         nåværendePersonResultater: Set<PersonResultat>,
         personerFremstiltKravFor: List<Aktør>
     ): Boolean =
         nåværendePersonResultater
-            .filter { personerFremstiltKravFor.contains(it.aktør) }
+            .filter { personerFremstiltKravFor.contains(it.aktør) || it.erSøkersResultater() }
             .any {
                 it.harEksplisittAvslag()
             }
