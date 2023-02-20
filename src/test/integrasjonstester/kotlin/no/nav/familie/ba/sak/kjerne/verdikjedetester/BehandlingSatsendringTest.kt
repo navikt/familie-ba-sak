@@ -5,6 +5,7 @@ import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.AutovedtakSatsendringService
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.SatsendringSvar
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -32,7 +33,6 @@ import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
@@ -124,7 +124,7 @@ class BehandlingSatsendringTest(
         val satsendringResultat =
             autovedtakSatsendringService.kjørBehandling(SatsendringTaskDto(behandling.fagsak.id, YearMonth.of(2023, 3)))
 
-        assertEquals(satsendringResultat, "Satsendring kjørt OK")
+        assertEquals(SatsendringSvar.SATSENDRING_KJØRT_OK, satsendringResultat)
 
         val satsendringBehandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = behandling.fagsak.id)
         assertEquals(Behandlingsresultat.ENDRET_UTBETALING, satsendringBehandling?.resultat)
@@ -231,7 +231,7 @@ class BehandlingSatsendringTest(
         val satsendringResultat =
             autovedtakSatsendringService.kjørBehandling(SatsendringTaskDto(behandling.fagsak.id, YearMonth.of(2023, 3)))
 
-        assertTrue(satsendringResultat.contains("Tilbakestiller behandling"))
+        assertEquals(SatsendringSvar.TILBAKESTILLER_BEHANDLINGEN_TIL_VILKÅRSVURDERINGEN, satsendringResultat)
 
         val åpenBehandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = behandling.fagsak.id)
         assertEquals(revurdering.data!!.behandlingId, åpenBehandling!!.id)
@@ -303,7 +303,7 @@ class BehandlingSatsendringTest(
         val satsendringResultat =
             autovedtakSatsendringService.kjørBehandling(SatsendringTaskDto(behandling.fagsak.id, YearMonth.of(2023, 3)))
 
-        assertEquals(satsendringResultat, "Satsendring allerede utført for fagsak=${behandling.fagsak.id}")
+        assertEquals(SatsendringSvar.SATSENDRING_ER_ALLEREDE_UTFØRT, satsendringResultat)
 
         val satskjøring = satskjøringRepository.findByFagsakId(behandling.fagsak.id)
         assertThat(satskjøring?.ferdigTidspunkt)

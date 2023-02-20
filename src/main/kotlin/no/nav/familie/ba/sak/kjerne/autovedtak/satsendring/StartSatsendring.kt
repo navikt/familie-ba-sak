@@ -173,29 +173,36 @@ class StartSatsendring(
     }
 
     @Transactional
-    fun opprettSatsendringSynkrontVedGammelSats(fagsakId: Long): Boolean {
-        val aktivOgÅpenBehandling =
-            behandlingRepository.findByFagsakAndAktivAndOpen(fagsakId = fagsakId)
-
-        if (aktivOgÅpenBehandling != null) {
-            throw FunksjonellFeil("Det finnes en åpen behandling på fagsaken som må avsluttes før satsendring kan gjennomføres.")
+    fun opprettSatsendringSynkrontVedGammelSats(fagsakId: Long) {
+        if (!kanStarteSatsendringPåFagsak(fagsakId)) {
+            throw Feil("Kan ikke starte Satsendring på fagsak=$fagsakId")
         }
 
-        return if (kanStarteSatsendringPåFagsak(fagsakId)) {
-            satskjøringRepository.save(Satskjøring(fagsakId = fagsakId))
-            val resultattekstSatsendringBehandling = autovedtakSatsendringService.kjørBehandling(
-                SatsendringTaskDto(
-                    fagsakId = fagsakId,
-                    satstidspunkt = SATSENDRINGMÅNED_2023
-                )
+        satskjøringRepository.save(Satskjøring(fagsakId = fagsakId))
+        val resultatSatsendringBehandling = autovedtakSatsendringService.kjørBehandling(
+            SatsendringTaskDto(
+                fagsakId = fagsakId,
+                satstidspunkt = SATSENDRINGMÅNED_2023
             )
-            if (resultattekstSatsendringBehandling == "Satsendring kjørt OK") {
-                true
-            } else {
-                throw Feil("Satsendring kjørte ikke OK for fagsak $fagsakId")
-            }
-        } else {
-            false
+        )
+
+        when (resultatSatsendringBehandling) {
+            SatsendringSvar.SATSENDRING_KJØRT_OK -> Unit
+
+            SatsendringSvar.FANT_OVER_100_PROSENT_UTBETALING ->
+                throw FunksjonellFeil(
+                    "Satsendring kan ikke gjennomføres fordi det er mer enn 100% utbetaling for barn i fagsaken.\n" +
+                        "Barnetrygden til en av mottakerne må revurderes."
+                )
+
+            SatsendringSvar.SATSENDRING_ER_ALLEREDE_UTFØRT ->
+                throw FunksjonellFeil("Satsendring er allerede gjennomført på fagsaken. Last inn siden på nytt for å få opp siste behandling.")
+
+            SatsendringSvar.HAR_ALLEREDE_SISTE_SATS,
+            SatsendringSvar.BEHANDLING_ER_LÅST_SATSENDRING_TRIGGES_NESTE_VIRKEDAG,
+            SatsendringSvar.TILBAKESTILLER_BEHANDLINGEN_TIL_VILKÅRSVURDERINGEN,
+            SatsendringSvar.BEHANDLINGEN_ER_UNDER_UTREDNING_MEN_I_RIKTIG_TILSTAND ->
+                throw FunksjonellFeil("Det finnes en åpen behandling på fagsaken som må avsluttes før satsendring kan gjennomføres.")
         }
     }
 
