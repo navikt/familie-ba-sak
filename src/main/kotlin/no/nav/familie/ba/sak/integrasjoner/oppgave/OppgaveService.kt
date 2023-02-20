@@ -89,7 +89,7 @@ class OppgaveService(
                 },
                 behandlingstype = behandling.kategori.tilOppgavebehandlingType().value,
                 tilordnetRessurs = tilordnetNavIdent,
-                behandlesAvApplikasjon = Applikasjon.FAMILIE_BA_SAK.name
+                behandlesAvApplikasjon = "familie-ba-sak"
             )
             val opprettetOppgaveId = integrasjonClient.opprettOppgave(opprettOppgave).oppgaveId.toString()
 
