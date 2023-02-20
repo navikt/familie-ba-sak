@@ -379,7 +379,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
 
         val feil = assertThrows<Feil> { listeMedIngenSøknadsresultat.kombinerSøknadsresultater() }
 
-        assertThat(feil.message, Is("Klarer ikke utlede søknadsresultat"))
+        assertThat(feil.message, Is("Klarer ikke utlede søknadsresultat. Finner ingen resultater."))
     }
 
     @ParameterizedTest
