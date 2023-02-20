@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
-import no.nav.familie.ba.sak.kjerne.brev.hentBrevmal
+import no.nav.familie.ba.sak.kjerne.brev.hentBrevmalGammel
 import no.nav.familie.ba.sak.kjerne.brev.hentOverstyrtDokumenttittel
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
@@ -209,7 +209,7 @@ class JournalførVedtaksbrev(
             personEllerInstitusjonIdent = mottakerInfo.brukerId,
             behandlingId = behandling.id,
             journalpostId = journalPostId,
-            brevmal = hentBrevmal(behandling),
+            brevmal = hentBrevmalGammel(behandling),
             erManueltSendt = false,
             manuellAdresseInfo = mottakerInfo.manuellAdresseInfo
         )

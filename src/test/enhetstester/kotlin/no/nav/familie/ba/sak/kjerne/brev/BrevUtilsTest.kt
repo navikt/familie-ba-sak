@@ -43,7 +43,7 @@ internal class BrevUtilsTest {
         støttedeBehandlingsersultaterFørstegangsbehandling.filterNot { it == Behandlingsresultat.AVSLÅTT }.forEach {
             Assertions.assertEquals(
                 Brevmal.VEDTAK_FØRSTEGANGSVEDTAK,
-                hentManuellVedtaksbrevtype(
+                hentManuellVedtaksbrevtypeGammel(
                     BehandlingType.FØRSTEGANGSBEHANDLING,
                     it
                 )
@@ -56,7 +56,7 @@ internal class BrevUtilsTest {
         støttedeBehandlingsersultaterFørstegangsbehandling.filterNot { it == Behandlingsresultat.AVSLÅTT }.forEach {
             Assertions.assertEquals(
                 Brevmal.VEDTAK_FØRSTEGANGSVEDTAK_INSTITUSJON,
-                hentManuellVedtaksbrevtype(
+                hentManuellVedtaksbrevtypeGammel(
                     BehandlingType.FØRSTEGANGSBEHANDLING,
                     it,
                     true
@@ -69,7 +69,7 @@ internal class BrevUtilsTest {
     fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for avslått førstegangsbehandling`() {
         Assertions.assertEquals(
             Brevmal.VEDTAK_AVSLAG,
-            hentManuellVedtaksbrevtype(
+            hentManuellVedtaksbrevtypeGammel(
                 BehandlingType.FØRSTEGANGSBEHANDLING,
                 Behandlingsresultat.AVSLÅTT
             )
@@ -80,7 +80,7 @@ internal class BrevUtilsTest {
     fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for avslått førstegangsbehandling og institusjon`() {
         Assertions.assertEquals(
             Brevmal.VEDTAK_AVSLAG_INSTITUSJON,
-            hentManuellVedtaksbrevtype(
+            hentManuellVedtaksbrevtypeGammel(
                 BehandlingType.FØRSTEGANGSBEHANDLING,
                 Behandlingsresultat.AVSLÅTT,
                 true
@@ -95,7 +95,7 @@ internal class BrevUtilsTest {
 
         ikkeStøttedeBehandlingsersultater.forEach {
             assertThrows<Exception> {
-                hentManuellVedtaksbrevtype(
+                hentManuellVedtaksbrevtypeGammel(
                     BehandlingType.FØRSTEGANGSBEHANDLING,
                     it
                 )
@@ -118,7 +118,7 @@ internal class BrevUtilsTest {
         behandlingsersultaterForVedtakEndring.forEach {
             Assertions.assertEquals(
                 Brevmal.VEDTAK_ENDRING,
-                hentManuellVedtaksbrevtype(
+                hentManuellVedtaksbrevtypeGammel(
                     BehandlingType.REVURDERING,
                     it
                 )
@@ -131,7 +131,7 @@ internal class BrevUtilsTest {
         behandlingsersultaterForVedtakEndring.forEach {
             Assertions.assertEquals(
                 Brevmal.VEDTAK_ENDRING_INSTITUSJON,
-                hentManuellVedtaksbrevtype(
+                hentManuellVedtaksbrevtypeGammel(
                     BehandlingType.REVURDERING,
                     it,
                     true
@@ -148,7 +148,7 @@ internal class BrevUtilsTest {
         behandlingsersultaterForOpphørt.forEach {
             Assertions.assertEquals(
                 Brevmal.VEDTAK_OPPHØRT,
-                hentManuellVedtaksbrevtype(
+                hentManuellVedtaksbrevtypeGammel(
                     BehandlingType.REVURDERING,
                     it
                 )
@@ -161,7 +161,7 @@ internal class BrevUtilsTest {
         behandlingsersultaterForOpphørt.forEach {
             Assertions.assertEquals(
                 Brevmal.VEDTAK_OPPHØRT_INSTITUSJON,
-                hentManuellVedtaksbrevtype(
+                hentManuellVedtaksbrevtypeGammel(
                     BehandlingType.REVURDERING,
                     it,
                     true
@@ -185,7 +185,7 @@ internal class BrevUtilsTest {
         behandlingsersultaterForOpphørMedEndring.forEach {
             Assertions.assertEquals(
                 Brevmal.VEDTAK_OPPHØR_MED_ENDRING,
-                hentManuellVedtaksbrevtype(
+                hentManuellVedtaksbrevtypeGammel(
                     BehandlingType.REVURDERING,
                     it
                 )
@@ -198,7 +198,7 @@ internal class BrevUtilsTest {
         behandlingsersultaterForOpphørMedEndring.forEach {
             Assertions.assertEquals(
                 Brevmal.VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON,
-                hentManuellVedtaksbrevtype(
+                hentManuellVedtaksbrevtypeGammel(
                     BehandlingType.REVURDERING,
                     it,
                     true
@@ -214,7 +214,7 @@ internal class BrevUtilsTest {
         behandlingsersultaterForFortsattInnvilget.forEach {
             Assertions.assertEquals(
                 Brevmal.VEDTAK_FORTSATT_INNVILGET,
-                hentManuellVedtaksbrevtype(
+                hentManuellVedtaksbrevtypeGammel(
                     BehandlingType.REVURDERING,
                     it
                 )
@@ -227,7 +227,7 @@ internal class BrevUtilsTest {
         behandlingsersultaterForFortsattInnvilget.forEach {
             Assertions.assertEquals(
                 Brevmal.VEDTAK_FORTSATT_INNVILGET_INSTITUSJON,
-                hentManuellVedtaksbrevtype(
+                hentManuellVedtaksbrevtypeGammel(
                     BehandlingType.REVURDERING,
                     it,
                     true
@@ -243,7 +243,7 @@ internal class BrevUtilsTest {
         behandlingsersultaterForAvslag.forEach {
             Assertions.assertEquals(
                 Brevmal.VEDTAK_AVSLAG,
-                hentManuellVedtaksbrevtype(
+                hentManuellVedtaksbrevtypeGammel(
                     BehandlingType.REVURDERING,
                     it
                 )
@@ -256,7 +256,7 @@ internal class BrevUtilsTest {
         behandlingsersultaterForAvslag.forEach {
             Assertions.assertEquals(
                 Brevmal.VEDTAK_AVSLAG_INSTITUSJON,
-                hentManuellVedtaksbrevtype(
+                hentManuellVedtaksbrevtypeGammel(
                     BehandlingType.REVURDERING,
                     it,
                     true
@@ -279,7 +279,7 @@ internal class BrevUtilsTest {
 
         ikkeStøttedeBehandlingsersultater.forEach {
             assertThrows<Exception> {
-                hentManuellVedtaksbrevtype(
+                hentManuellVedtaksbrevtypeGammel(
                     BehandlingType.REVURDERING,
                     it
                 )
@@ -300,7 +300,7 @@ internal class BrevUtilsTest {
             )
         Assertions.assertEquals(
             Brevmal.AUTOVEDTAK_NYFØDT_BARN_FRA_FØR,
-            hentBrevmal(behandling)
+            hentBrevmalGammel(behandling)
         )
     }
 
@@ -317,7 +317,7 @@ internal class BrevUtilsTest {
             )
         Assertions.assertEquals(
             Brevmal.AUTOVEDTAK_NYFØDT_FØRSTE_BARN,
-            hentBrevmal(behandling)
+            hentBrevmalGammel(behandling)
         )
     }
 

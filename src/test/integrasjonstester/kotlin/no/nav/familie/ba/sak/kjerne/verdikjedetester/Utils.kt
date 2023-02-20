@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
-import no.nav.familie.ba.sak.kjerne.brev.hentBrevmal
+import no.nav.familie.ba.sak.kjerne.brev.hentBrevmalGammel
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -215,7 +215,7 @@ fun håndterIverksettingAvBehandling(
                         behandlingId = behandlingEtterJournalførtVedtak.id,
                         journalpostId = "1234",
                         personEllerInstitusjonIdent = søkerFnr,
-                        brevmal = hentBrevmal(
+                        brevmal = hentBrevmalGammel(
                             behandlingEtterJournalførtVedtak
                         ),
                         erManueltSendt = false

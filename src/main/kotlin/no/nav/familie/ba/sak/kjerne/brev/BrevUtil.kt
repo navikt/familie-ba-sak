@@ -37,14 +37,16 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hjemlerTilhørendeFritek
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Opphørsperiode
 
-fun hentBrevmal(behandling: Behandling): Brevmal =
+@Deprecated("Bruk hentBrevmal")
+fun hentBrevmalGammel(behandling: Behandling): Brevmal =
     when (behandling.opprettetÅrsak) {
         BehandlingÅrsak.DØDSFALL_BRUKER -> Brevmal.VEDTAK_OPPHØR_DØDSFALL
         BehandlingÅrsak.KORREKSJON_VEDTAKSBREV -> Brevmal.VEDTAK_KORREKSJON_VEDTAKSBREV
-        else -> hentVedtaksbrevmal(behandling)
+        else -> hentVedtaksbrevmalGammel(behandling)
     }
 
-fun hentVedtaksbrevmal(behandling: Behandling): Brevmal {
+@Deprecated("Bruk hentVedtaksbrevmal")
+fun hentVedtaksbrevmalGammel(behandling: Behandling): Brevmal {
     if (behandling.resultat == IKKE_VURDERT) {
         throw Feil("Kan ikke opprette brev. Behandlingen er ikke vurdert.")
     }
@@ -52,7 +54,7 @@ fun hentVedtaksbrevmal(behandling: Behandling): Brevmal {
     val brevmal = if (behandling.skalBehandlesAutomatisk) {
         hentAutomatiskVedtaksbrevtype(behandling.opprettetÅrsak, behandling.fagsak.status)
     } else {
-        hentManuellVedtaksbrevtype(behandling.type, behandling.resultat, behandling.fagsak.institusjon != null)
+        hentManuellVedtaksbrevtypeGammel(behandling.type, behandling.resultat, behandling.fagsak.institusjon != null)
     }
 
     return if (brevmal.erVedtaksbrev) brevmal else throw Feil("Brevmal ${brevmal.visningsTekst} er ikke vedtaksbrev")
@@ -75,7 +77,8 @@ private fun hentAutomatiskVedtaksbrevtype(behandlingÅrsak: BehandlingÅrsak, fa
         else -> throw Feil("Det er ikke laget funksjonalitet for automatisk behandling for $behandlingÅrsak")
     }
 
-fun hentManuellVedtaksbrevtype(
+@Deprecated("Bruk hentManuellVedtaksbrevtype")
+fun hentManuellVedtaksbrevtypeGammel(
     behandlingType: BehandlingType,
     behandlingsresultat: Behandlingsresultat,
     erInstitusjon: Boolean = false

@@ -69,7 +69,7 @@ class BrevService(
 ) {
 
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
-        val brevmal = hentVedtaksbrevmal(vedtak.behandling)
+        val brevmal = hentVedtaksbrevmalGammel(vedtak.behandling)
         val vedtakFellesfelter = lagVedtaksbrevFellesfelter(vedtak)
         validerBrevdata(brevmal, vedtakFellesfelter)
 
