@@ -151,7 +151,7 @@ class BehandlingsresultatSteg(
                 "Du har fått behandlingsresultatet " +
                     "${behandlingMedOppdatertBehandlingsresultat.resultat.displayName}. " +
                     "Dette er ikke støttet på migreringsbehandlinger. " +
-                    "Ta kontakt med Team familie om du er uenig i resultatet."
+                    "Meld sak i Porten om du er uenig i resultatet."
             )
         }
     }
