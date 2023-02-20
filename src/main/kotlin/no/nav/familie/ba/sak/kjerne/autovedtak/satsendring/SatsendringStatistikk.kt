@@ -5,7 +5,6 @@ import io.micrometer.core.instrument.MultiGauge
 import io.micrometer.core.instrument.Tags
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
-import no.nav.familie.leader.LeaderClient
 import no.nav.familie.log.mdc.MDCConstants
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
@@ -24,53 +23,52 @@ class SatsendringStatistikk(
         MultiGauge.builder("satsendring").register(Metrics.globalRegistry)
 
     @Scheduled(
-        fixedRate = 30,
-        timeUnit = TimeUnit.MINUTES
+        fixedDelay = 60,
+        timeUnit = TimeUnit.MINUTES,
+        initialDelay = 5
     )
     fun antallSatsendringerKjørt() {
-        if (LeaderClient.isLeader() == true) {
-            try {
-                MDC.put(MDCConstants.MDC_CALL_ID, UUID.randomUUID().toString())
-                logger.info("Kjører statistikk satsendring")
-                val antallKjørt = satskjøringRepository.countByFerdigTidspunktIsNotNull()
-                val antallTriggetTotalt = satskjøringRepository.count()
-                val antallLøpendeFagsakerTotalt = fagsakRepository.finnAntallFagsakerLøpende()
+        try {
+            MDC.put(MDCConstants.MDC_CALL_ID, UUID.randomUUID().toString())
+            logger.info("Kjører statistikk satsendring")
+            val antallKjørt = satskjøringRepository.countByFerdigTidspunktIsNotNull()
+            val antallTriggetTotalt = satskjøringRepository.count()
+            val antallLøpendeFagsakerTotalt = fagsakRepository.finnAntallFagsakerLøpende()
 
-                val rows = listOf(
-                    MultiGauge.Row.of(
-                        Tags.of(
-                            "satsendring",
-                            "totalt"
-                        ),
-                        antallTriggetTotalt
+            val rows = listOf(
+                MultiGauge.Row.of(
+                    Tags.of(
+                        "satsendring",
+                        "totalt"
                     ),
-                    MultiGauge.Row.of(
-                        Tags.of(
-                            "satsendring",
-                            "antallkjort"
-                        ),
-                        antallKjørt
+                    antallTriggetTotalt
+                ),
+                MultiGauge.Row.of(
+                    Tags.of(
+                        "satsendring",
+                        "antallkjort"
                     ),
-                    MultiGauge.Row.of(
-                        Tags.of(
-                            "satsendring",
-                            "antallfagsaker"
-                        ),
-                        antallLøpendeFagsakerTotalt
+                    antallKjørt
+                ),
+                MultiGauge.Row.of(
+                    Tags.of(
+                        "satsendring",
+                        "antallfagsaker"
                     ),
-                    MultiGauge.Row.of(
-                        Tags.of(
-                            "satsendring",
-                            "antallgjenstaaende"
-                        ),
-                        antallLøpendeFagsakerTotalt - antallKjørt
-                    )
+                    antallLøpendeFagsakerTotalt
+                ),
+                MultiGauge.Row.of(
+                    Tags.of(
+                        "satsendring",
+                        "antallgjenstaaende"
+                    ),
+                    antallLøpendeFagsakerTotalt - antallKjørt
                 )
+            )
 
-                satsendringGauge.register(rows)
-            } finally {
-                MDC.clear()
-            }
+            satsendringGauge.register(rows)
+        } finally {
+            MDC.clear()
         }
     }
 
