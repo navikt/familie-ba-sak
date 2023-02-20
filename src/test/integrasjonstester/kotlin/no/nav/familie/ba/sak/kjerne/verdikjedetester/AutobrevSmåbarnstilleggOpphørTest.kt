@@ -154,7 +154,8 @@ class AutobrevSmåbarnstilleggOpphørTest(
             vedtakService = vedtakService,
             stegService = stegService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-            lagToken = ::token
+            lagToken = ::token,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
         )
     }
 
@@ -195,7 +196,8 @@ class AutobrevSmåbarnstilleggOpphørTest(
             vedtakService = vedtakService,
             stegService = stegService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-            lagToken = ::token
+            lagToken = ::token,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
         )
     }
 

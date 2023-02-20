@@ -31,7 +31,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.brev.hentIPeriode
 import no.nav.familie.ba.sak.kjerne.brev.hentKompetanserSomStopperRettFørPeriode
-import no.nav.familie.ba.sak.kjerne.brev.hentVedtaksbrevmalGammel
+import no.nav.familie.ba.sak.kjerne.brev.hentVedtaksbrevmal
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
@@ -250,8 +250,17 @@ class VedtaksperiodeService(
     fun oppdaterVedtakMedVedtaksperioder(vedtak: Vedtak, skalOverstyreFortsattInnvilget: Boolean = false) {
         vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(vedtak)
         // Rent fortsatt innvilget-resultat er det eneste som kun skal gi én vedtaksperiode
-        if (vedtak.behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET && (!skalOverstyreFortsattInnvilget || featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_BEREGNE_BEHANDLINGSRESULTAT))) {
-            val vedtaksbrevmal = hentVedtaksbrevmalGammel(vedtak.behandling)
+        val behandling = vedtak.behandling
+        val erLøpendeYtelse =
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id).any { it.erLøpende() }
+
+        if (behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET && (
+            !skalOverstyreFortsattInnvilget || featureToggleService.isEnabled(
+                    FeatureToggleConfig.NY_MÅTE_Å_BEREGNE_BEHANDLINGSRESULTAT
+                )
+            )
+        ) {
+            val vedtaksbrevmal = hentVedtaksbrevmal(behandling, erLøpendeYtelse)
             val erAutobrevFor6Og18ÅrOgSmåbarnstillegg =
                 vedtaksbrevmal == Brevmal.AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG
 
@@ -262,7 +271,7 @@ class VedtaksperiodeService(
             }
 
             val tom = if (erAutobrevFor6Og18ÅrOgSmåbarnstillegg) {
-                finnTomDatoIFørsteUtbetalingsintervallFraInneværendeMåned(vedtak.behandling.id)
+                finnTomDatoIFørsteUtbetalingsintervallFraInneværendeMåned(behandling.id)
             } else {
                 null
             }
@@ -517,7 +526,10 @@ class VedtaksperiodeService(
         )
     }
 
-    fun hentOpphørsperioder(behandling: Behandling, endringstidspunkt: LocalDate = TIDENES_MORGEN): List<Opphørsperiode> {
+    fun hentOpphørsperioder(
+        behandling: Behandling,
+        endringstidspunkt: LocalDate = TIDENES_MORGEN
+    ): List<Opphørsperiode> {
         if (behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET) return emptyList()
 
         val iverksatteBehandlinger =

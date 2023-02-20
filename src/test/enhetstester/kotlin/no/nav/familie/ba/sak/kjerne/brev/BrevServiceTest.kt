@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.brev
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.Test
 
 class BrevServiceTest {
     val saksbehandlerContext = mockk<SaksbehandlerContext>()
+    val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
     val brevService = BrevService(
         totrinnskontrollService = mockk(),
         persongrunnlagService = mockk(),
@@ -24,7 +26,8 @@ class BrevServiceTest {
         korrigertEtterbetalingService = mockk(),
         organisasjonService = mockk(),
         korrigertVedtakService = mockk(),
-        saksbehandlerContext = saksbehandlerContext
+        saksbehandlerContext = saksbehandlerContext,
+        andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
     )
 
     @BeforeEach

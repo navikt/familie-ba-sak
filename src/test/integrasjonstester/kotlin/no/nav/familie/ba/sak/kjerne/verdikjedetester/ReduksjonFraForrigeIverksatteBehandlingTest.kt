@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.SatsTidspunkt
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
@@ -40,7 +41,8 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
     @Autowired private val stegService: StegService,
-    @Autowired private val efSakRestClient: EfSakRestClient
+    @Autowired private val efSakRestClient: EfSakRestClient,
+    @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
 ) : AbstractVerdikjedetest() {
 
     private val barnFødselsdato: LocalDate = LocalDate.now().minusYears(2)
@@ -168,7 +170,8 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
             vedtakService = vedtakService,
             stegService = stegService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-            lagToken = ::token
+            lagToken = ::token,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
         )
     }
 
@@ -202,7 +205,8 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
             vedtakService = vedtakService,
             stegService = stegService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-            lagToken = ::token
+            lagToken = ::token,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
         )
     }
 }

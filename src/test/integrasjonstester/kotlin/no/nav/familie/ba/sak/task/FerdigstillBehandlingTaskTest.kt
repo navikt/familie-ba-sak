@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -62,6 +63,9 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
     @Autowired
     lateinit var personidentService: PersonidentService
 
+    @Autowired
+    lateinit var andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
+
     @BeforeEach
     fun init() {
         databaseCleanupService.truncate()
@@ -81,7 +85,8 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
             persongrunnlagService = persongrunnlagService,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService
+            vedtaksperiodeService = vedtaksperiodeService,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
         )
 
         return if (resultat == Resultat.IKKE_OPPFYLT) {

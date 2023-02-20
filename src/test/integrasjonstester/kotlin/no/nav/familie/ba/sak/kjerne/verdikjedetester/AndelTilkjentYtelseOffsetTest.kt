@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -32,7 +33,8 @@ class AndelTilkjentYtelseOffsetTest(
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val stegService: StegService,
     @Autowired private val efSakRestClient: EfSakRestClient,
-    @Autowired private val beregningService: BeregningService
+    @Autowired private val beregningService: BeregningService,
+    @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
 ) : AbstractVerdikjedetest() {
     private val barnFødselsdato: LocalDate = LocalDate.now().minusYears(2)
 
@@ -128,7 +130,8 @@ class AndelTilkjentYtelseOffsetTest(
             vedtakService = vedtakService,
             stegService = stegService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-            lagToken = ::token
+            lagToken = ::token,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
         )
     }
 
@@ -169,7 +172,8 @@ class AndelTilkjentYtelseOffsetTest(
             vedtakService = vedtakService,
             stegService = stegService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-            lagToken = ::token
+            lagToken = ::token,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
         )
     }
 }

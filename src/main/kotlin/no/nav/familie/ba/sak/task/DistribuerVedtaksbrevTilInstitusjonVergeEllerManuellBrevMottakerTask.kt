@@ -31,7 +31,8 @@ class DistribuerVedtaksbrevTilInstitusjonVergeEllerManuellBrevMottakerTask(
 
         fun opprettDistribuerVedtaksbrevTilInstitusjonVergeEllerManuellBrevMottakerTask(
             distribuerDokumentDTO: DistribuerDokumentDTO,
-            properties: Properties
+            properties: Properties,
+            harLøpendeYtelse: Boolean
         ): Task {
             return Task(
                 type = TASK_STEP_TYPE,

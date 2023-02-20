@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
 import no.nav.familie.ba.sak.kjerne.brev.domene.byggMottakerdata
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
@@ -101,7 +102,10 @@ class DokumentServiceTest(
     private val dokumentGenereringService: DokumentGenereringService,
 
     @Autowired
-    private val databaseCleanupService: DatabaseCleanupService
+    private val databaseCleanupService: DatabaseCleanupService,
+
+    @Autowired
+    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
 ) : AbstractSpringIntegrationTest() {
 
     @BeforeEach
@@ -120,7 +124,8 @@ class DokumentServiceTest(
             persongrunnlagService = persongrunnlagService,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService
+            vedtaksperiodeService = vedtaksperiodeService,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
         )
 
         totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(
@@ -154,7 +159,8 @@ class DokumentServiceTest(
             persongrunnlagService = persongrunnlagService,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService
+            vedtaksperiodeService = vedtaksperiodeService,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
         )
 
         totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(
@@ -192,7 +198,8 @@ class DokumentServiceTest(
             persongrunnlagService = persongrunnlagService,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService
+            vedtaksperiodeService = vedtaksperiodeService,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
         )
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVilkårsvurderingSteg.id)!!
 
@@ -250,7 +257,8 @@ class DokumentServiceTest(
             persongrunnlagService = persongrunnlagService,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService
+            vedtaksperiodeService = vedtaksperiodeService,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
         )
 
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVedtakBesluttet.id)!!

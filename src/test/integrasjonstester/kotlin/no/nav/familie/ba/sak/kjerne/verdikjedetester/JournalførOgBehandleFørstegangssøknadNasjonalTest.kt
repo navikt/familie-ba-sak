@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.SatsTidspunkt
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
@@ -44,7 +45,8 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
     @Autowired private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val stegService: StegService,
-    @Autowired private val featureToggleService: FeatureToggleService
+    @Autowired private val featureToggleService: FeatureToggleService,
+    @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
 ) : AbstractVerdikjedetest() {
 
     @BeforeEach
@@ -219,7 +221,8 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
             søkerFnr = scenario.søker.ident,
             fagsakService = fagsakService,
             vedtakService = vedtakService,
-            stegService = stegService
+            stegService = stegService,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
         )
     }
 
@@ -399,7 +402,8 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
             søkerFnr = scenario.søker.ident,
             fagsakService = fagsakService,
             vedtakService = vedtakService,
-            stegService = stegService
+            stegService = stegService,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
         )
     }
 }

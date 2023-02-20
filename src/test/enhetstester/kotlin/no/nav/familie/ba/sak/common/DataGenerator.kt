@@ -29,6 +29,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.initStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -40,7 +41,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.SanityVilkår
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårRolle
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårTrigger
 import no.nav.familie.ba.sak.kjerne.brev.domene.ØvrigTrigger
-import no.nav.familie.ba.sak.kjerne.brev.hentBrevmalGammel
+import no.nav.familie.ba.sak.kjerne.brev.hentBrevmal
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
@@ -644,7 +645,7 @@ fun lagVilkårsvurdering(
 /**
  * Dette er en funksjon for å få en førstegangsbehandling til en ønsket tilstand ved test.
  * Man sender inn steg man ønsker å komme til (tilSteg), personer på behandlingen (søkerFnr og barnasIdenter),
- * og serviceinstanser som brukes i testen.
+ * og servic Feinstanser som brukes i testen.
  */
 fun kjørStegprosessForFGB(
     tilSteg: StegType,
@@ -658,7 +659,8 @@ fun kjørStegprosessForFGB(
     vedtaksperiodeService: VedtaksperiodeService,
     behandlingUnderkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
     institusjon: InstitusjonInfo? = null,
-    verge: VergeInfo? = null
+    verge: VergeInfo? = null,
+    andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
 ): Behandling {
     val fagsakType = utledFagsaktype(institusjon, verge)
     val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(
@@ -786,6 +788,9 @@ fun kjørStegprosessForFGB(
         )
     if (tilSteg == StegType.JOURNALFØR_VEDTAKSBREV) return behandlingEtterJournalførtVedtak
 
+    val harLøpendeYtelse =
+        andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id).any { it.erLøpende() }
+
     val behandlingEtterDistribuertVedtak =
         stegService.håndterDistribuerVedtaksbrev(
             behandlingEtterJournalførtVedtak,
@@ -793,8 +798,9 @@ fun kjørStegprosessForFGB(
                 behandlingId = behandlingEtterJournalførtVedtak.id,
                 journalpostId = "1234",
                 personEllerInstitusjonIdent = søkerFnr,
-                brevmal = hentBrevmalGammel(
-                    behandlingEtterJournalførtVedtak
+                brevmal = hentBrevmal(
+                    behandlingEtterJournalførtVedtak,
+                    harLøpendeYtelse
                 ),
                 erManueltSendt = false
             )
@@ -825,7 +831,8 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
     barnasIdenter: List<String>,
     vedtakService: VedtakService,
     stegService: StegService,
-    fagsakId: Long
+    fagsakId: Long,
+    andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
 ): Behandling {
     val behandling = stegService.håndterNyBehandling(
         NyBehandling(
@@ -913,6 +920,10 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
         )
     if (tilSteg == StegType.JOURNALFØR_VEDTAKSBREV) return behandlingEtterJournalførtVedtak
 
+    val harLøpendeYtelse =
+        andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingEtterJournalførtVedtak.id)
+            .any { it.erLøpende() }
+
     val behandlingEtterDistribuertVedtak =
         stegService.håndterDistribuerVedtaksbrev(
             behandlingEtterJournalførtVedtak,
@@ -920,7 +931,7 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
                 behandlingId = behandling.id,
                 journalpostId = "1234",
                 personEllerInstitusjonIdent = søkerFnr,
-                brevmal = hentBrevmalGammel(behandling),
+                brevmal = hentBrevmal(behandling, harLøpendeYtelse),
                 erManueltSendt = false
             )
         )

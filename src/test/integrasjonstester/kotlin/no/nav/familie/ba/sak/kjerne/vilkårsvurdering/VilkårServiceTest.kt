@@ -28,6 +28,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -97,7 +98,10 @@ class VilkårServiceTest(
     private val stegService: StegService,
 
     @Autowired
-    private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService
+    private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService,
+
+    @Autowired
+    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
 
 ) : AbstractSpringIntegrationTest() {
 
@@ -1154,8 +1158,9 @@ class VilkårServiceTest(
             vedtakService = vedtakService,
             persongrunnlagService = persongrunnlagService,
             vilkårsvurderingService = vilkårsvurderingService,
+            stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
-            stegService = stegService
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
         )
         var vilkårsvurdering = vilkårService.hentVilkårsvurderingThrows(behandling.id)
         assertTrue {

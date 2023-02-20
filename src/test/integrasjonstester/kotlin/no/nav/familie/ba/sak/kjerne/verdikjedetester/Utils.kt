@@ -10,7 +10,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
-import no.nav.familie.ba.sak.kjerne.brev.hentBrevmalGammel
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.brev.hentBrevmal
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -111,7 +112,8 @@ fun behandleFødselshendelse(
     behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     personidentService: PersonidentService,
     vedtakService: VedtakService,
-    stegService: StegService
+    stegService: StegService,
+    andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
 ): Behandling? {
     val søkerFnr = nyBehandlingHendelse.morsIdent
     val søkerAktør = personidentService.hentAktør(søkerFnr)
@@ -148,7 +150,8 @@ fun behandleFødselshendelse(
         søkerFnr = søkerFnr,
         fagsakService = fagsakService,
         vedtakService = vedtakService,
-        stegService = stegService
+        stegService = stegService,
+        andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
     )
 }
 
@@ -158,7 +161,8 @@ fun håndterIverksettingAvBehandling(
     fagsakStatusEtterIverksetting: FagsakStatus = FagsakStatus.LØPENDE,
     fagsakService: FagsakService,
     vedtakService: VedtakService,
-    stegService: StegService
+    stegService: StegService,
+    andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
 ): Behandling {
     val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandlingEtterVurdering.id)
     val behandlingEtterIverksetteVedtak =
@@ -208,6 +212,8 @@ fun håndterIverksettingAvBehandling(
                     )
                 )
 
+            val harLøpendeYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingEtterJournalførtVedtak.id).any { it.erLøpende() }
+
             val behandlingEtterDistribuertVedtak =
                 stegService.håndterDistribuerVedtaksbrev(
                     behandlingEtterJournalførtVedtak,
@@ -215,8 +221,9 @@ fun håndterIverksettingAvBehandling(
                         behandlingId = behandlingEtterJournalførtVedtak.id,
                         journalpostId = "1234",
                         personEllerInstitusjonIdent = søkerFnr,
-                        brevmal = hentBrevmalGammel(
-                            behandlingEtterJournalførtVedtak
+                        brevmal = hentBrevmal(
+                            behandlingEtterJournalførtVedtak,
+                            harLøpendeYtelse
                         ),
                         erManueltSendt = false
                     )

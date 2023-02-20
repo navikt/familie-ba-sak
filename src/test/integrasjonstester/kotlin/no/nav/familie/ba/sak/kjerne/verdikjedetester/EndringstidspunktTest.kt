@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.dataGenerator.vilkårsvurdering.lagVilkårsvurderin
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -39,7 +40,8 @@ class EndringstidspunktTest(
     @Autowired private val vilkårsvurderingService: VilkårsvurderingService,
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
     @Autowired private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
-    @Autowired private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
+    @Autowired private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
+    @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
 ) : AbstractVerdikjedetest() {
 
     @Test
@@ -72,22 +74,23 @@ class EndringstidspunktTest(
             tilSteg = StegType.BEHANDLING_AVSLUTTET,
             søkerFnr = scenario.søker.ident!!,
             barnasIdenter = listOf(scenario.barna.first().ident!!),
+            vedtakService = vedtakService,
             underkategori = BehandlingUnderkategori.ORDINÆR,
             behandlingÅrsak = BehandlingÅrsak.SØKNAD,
             overstyrendeVilkårsvurdering = lagVilkårsvurderingFraRestScenario(
                 scenario,
                 overstyrendeVilkårResultaterFGB
             ),
-            behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING,
 
-            vedtakService = vedtakService,
+            behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
             endretUtbetalingAndelService = endretUtbetalingAndelService,
             fagsakService = fagsakService,
             persongrunnlagService = persongrunnlagService,
-            andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService
+            andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
         )
 
         val sisteDagUtenDeltBostedOppfylt = barnFødselsdato.plusYears(1).sisteDagIMåned()
@@ -126,22 +129,23 @@ class EndringstidspunktTest(
             tilSteg = StegType.BEHANDLING_AVSLUTTET,
             søkerFnr = scenario.søker.ident,
             barnasIdenter = listOf(scenario.barna.first().ident!!),
+            vedtakService = vedtakService,
             underkategori = BehandlingUnderkategori.ORDINÆR,
             behandlingÅrsak = BehandlingÅrsak.SØKNAD,
             overstyrendeVilkårsvurdering = lagVilkårsvurderingFraRestScenario(
                 scenario,
                 overstyrendeVilkårResultaterRevurdering
             ),
-            behandlingstype = BehandlingType.REVURDERING,
 
-            vedtakService = vedtakService,
+            behandlingstype = BehandlingType.REVURDERING,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
             endretUtbetalingAndelService = endretUtbetalingAndelService,
             fagsakService = fagsakService,
             persongrunnlagService = persongrunnlagService,
-            andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService
+            andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
         )
 
         val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = revurdering.id)

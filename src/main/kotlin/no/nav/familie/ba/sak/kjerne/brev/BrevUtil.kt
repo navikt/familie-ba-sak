@@ -136,6 +136,7 @@ fun hentManuellVedtaksbrevtype(
                     AVSLÅTT_OG_ENDRET,
                     AVSLÅTT_OG_OPPHØRT,
                     AVSLÅTT_ENDRET_OG_OPPHØRT,
+                    ENDRET_UTBETALING,
                     ENDRET_OG_OPPHØRT ->
                         if (ytelseErLøpende) Brevmal.VEDTAK_ENDRING_INSTITUSJON else Brevmal.VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON
 
@@ -165,6 +166,7 @@ fun hentManuellVedtaksbrevtype(
                     AVSLÅTT_OG_ENDRET,
                     AVSLÅTT_OG_OPPHØRT,
                     AVSLÅTT_ENDRET_OG_OPPHØRT,
+                    ENDRET_UTBETALING,
                     ENDRET_OG_OPPHØRT -> if (ytelseErLøpende) Brevmal.VEDTAK_ENDRING else Brevmal.VEDTAK_OPPHØR_MED_ENDRING
 
                     OPPHØRT,

@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -27,7 +28,8 @@ class FødselshendelseRevurderingTest(
     @Autowired private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     @Autowired private val personidentService: PersonidentService,
     @Autowired private val vedtakService: VedtakService,
-    @Autowired private val stegService: StegService
+    @Autowired private val stegService: StegService,
+    @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
 ) : AbstractVerdikjedetest() {
 
     @Test
@@ -61,7 +63,8 @@ class FødselshendelseRevurderingTest(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             vedtakService = vedtakService,
             stegService = stegService,
-            personidentService = personidentService
+            personidentService = personidentService,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
         )
 
         val søkerIdent = scenario.søker.ident
@@ -77,7 +80,8 @@ class FødselshendelseRevurderingTest(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             personidentService = personidentService,
             vedtakService = vedtakService,
-            stegService = stegService
+            stegService = stegService,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
         )
 
         val restFagsakEtterBehandlingAvsluttet =

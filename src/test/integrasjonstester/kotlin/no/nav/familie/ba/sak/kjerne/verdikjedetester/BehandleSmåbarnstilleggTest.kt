@@ -299,7 +299,8 @@ class BehandleSmåbarnstilleggTest(
             søkerFnr = søkersIdent,
             fagsakService = fagsakService,
             vedtakService = vedtakService,
-            stegService = stegService
+            stegService = stegService,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
         )
     }
 
@@ -431,7 +432,8 @@ class BehandleSmåbarnstilleggTest(
             søkerFnr = søkersIdent,
             fagsakService = fagsakService,
             vedtakService = vedtakService,
-            stegService = stegService
+            stegService = stegService,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
         )
     }
 
@@ -565,22 +567,23 @@ class BehandleSmåbarnstilleggTest(
             tilSteg = StegType.BEHANDLING_AVSLUTTET,
             søkerFnr = scenario.søker.ident!!,
             barnasIdenter = listOf(scenario.barna.first().ident!!),
+            vedtakService = vedtakService,
             underkategori = BehandlingUnderkategori.UTVIDET,
             behandlingÅrsak = BehandlingÅrsak.SØKNAD,
             overstyrendeVilkårsvurdering = lagVilkårsvurderingFraRestScenario(
                 scenario,
                 overstyrendeVilkårResultaterFGB
             ),
-            behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING,
 
-            vedtakService = vedtakService,
+            behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
             endretUtbetalingAndelService = endretUtbetalingAndelService,
             fagsakService = fagsakService,
             persongrunnlagService = persongrunnlagService,
-            andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService
+            andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
+            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
         )
     }
 }
