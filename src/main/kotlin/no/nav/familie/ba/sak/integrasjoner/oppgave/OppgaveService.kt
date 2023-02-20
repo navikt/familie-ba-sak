@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.task.OpprettTaskService
+import no.nav.familie.kontrakter.felles.Applikasjon
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
@@ -55,11 +56,10 @@ class OppgaveService(
         val eksisterendeOppgave =
             oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(oppgavetype, behandling)
 
-        return if (eksisterendeOppgave != null &&
-            oppgavetype != Oppgavetype.Journalføring
-        ) {
+        return if (eksisterendeOppgave != null && oppgavetype != Oppgavetype.Journalføring) {
             logger.warn(
-                "Fant eksisterende oppgave med samme oppgavetype som ikke er ferdigstilt ved opprettelse av ny oppgave $eksisterendeOppgave. " +
+                "Fant eksisterende oppgave med samme oppgavetype som ikke er ferdigstilt " +
+                    "ved opprettelse av ny oppgave $eksisterendeOppgave. " +
                     "Vi oppretter ikke ny oppgave, men gjenbruker eksisterende."
             )
 
@@ -69,7 +69,10 @@ class OppgaveService(
                 arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(behandling.id)
 
             if (arbeidsfordelingsenhet == null) {
-                logger.warn("Fant ikke behandlende enhet på behandling ${behandling.id} ved opprettelse av $oppgavetype-oppgave.")
+                logger.warn(
+                    "Fant ikke behandlende enhet på behandling ${behandling.id} " +
+                        "ved opprettelse av $oppgavetype-oppgave."
+                )
             }
 
             val opprettOppgave = OpprettOppgaveRequest(
@@ -85,7 +88,8 @@ class OppgaveService(
                         behandling.underkategori.tilOppgaveBehandlingTema().value
                 },
                 behandlingstype = behandling.kategori.tilOppgavebehandlingType().value,
-                tilordnetRessurs = tilordnetNavIdent
+                tilordnetRessurs = tilordnetNavIdent,
+                behandlesAvApplikasjon = Applikasjon.FAMILIE_BA_SAK.name
             )
             val opprettetOppgaveId = integrasjonClient.opprettOppgave(opprettOppgave).oppgaveId.toString()
 
