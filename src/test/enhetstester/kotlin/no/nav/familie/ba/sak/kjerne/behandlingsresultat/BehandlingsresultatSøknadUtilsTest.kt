@@ -379,7 +379,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
 
         val feil = assertThrows<Feil> { listeMedIngenSøknadsresultat.kombinerSøknadsresultater() }
 
-        assertThat(feil.message, Is("Klarer ikke utlede søknadsresultat"))
+        assertThat(feil.message, Is("Klarer ikke utlede søknadsresultat. Finner ingen resultater."))
     }
 
     @ParameterizedTest
@@ -461,6 +461,37 @@ internal class BehandlingsresultatSøknadUtilsTest {
         assertThat(resultatPåSøknad, Is(Søknadsresultat.AVSLÅTT))
     }
 
+    @Test
+    fun `utledResultatPåSøknad - skal returnere AVSLÅTT dersom det er eksplisitt avslag på søker (uten at det er søkt om utvidet)`() {
+        val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)
+        val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
+
+        val søker = lagPerson(type = PersonType.SØKER)
+
+        val søkersPersonResultat = lagPersonResultat(
+            vilkårsvurdering = vilkårsvurdering,
+            aktør = søker.aktør,
+            resultat = Resultat.IKKE_OPPFYLT,
+            periodeFom = des21,
+            periodeTom = LocalDate.now(),
+            personType = PersonType.SØKER,
+            erEksplisittAvslagPåSøknad = true,
+            lagFullstendigVilkårResultat = true
+
+        )
+        val resultatPåSøknad = BehandlingsresultatSøknadUtils.utledResultatPåSøknad(
+            forrigeAndeler = emptyList(),
+            nåværendeAndeler = emptyList(),
+            nåværendePersonResultater = setOf(søkersPersonResultat),
+            personerFremstiltKravFor = emptyList(),
+            endretUtbetalingAndeler = emptyList(),
+            behandlingÅrsak = BehandlingÅrsak.SØKNAD,
+            finnesUregistrerteBarn = false
+        )
+
+        assertThat(resultatPåSøknad, Is(Søknadsresultat.AVSLÅTT))
+    }
+
     @ParameterizedTest
     @EnumSource(value = Resultat::class, names = ["IKKE_OPPFYLT", "IKKE_VURDERT"])
     fun `utledResultatPåSøknad - skal returnere AVSLÅTT dersom behandlingen er en fødselshendelse og det finnes vilkårsvurdering som ikke er oppfylt eller vurdert`(resultat: Resultat) {
@@ -504,7 +535,8 @@ internal class BehandlingsresultatSøknadUtilsTest {
             periodeFom = des21,
             periodeTom = LocalDate.now(),
             personType = PersonType.BARN,
-            erEksplisittAvslagPåSøknad = true
+            erEksplisittAvslagPåSøknad = true,
+            lagFullstendigVilkårResultat = true
 
         )
 
@@ -545,7 +577,8 @@ internal class BehandlingsresultatSøknadUtilsTest {
             resultat = Resultat.OPPFYLT,
             periodeFom = des21,
             periodeTom = LocalDate.now(),
-            personType = PersonType.BARN
+            personType = PersonType.BARN,
+            lagFullstendigVilkårResultat = true
         )
 
         val resultatPåSøknad = BehandlingsresultatSøknadUtils.utledResultatPåSøknad(
@@ -585,7 +618,8 @@ internal class BehandlingsresultatSøknadUtilsTest {
             resultat = Resultat.OPPFYLT,
             periodeFom = des21,
             periodeTom = LocalDate.now(),
-            personType = PersonType.BARN
+            personType = PersonType.BARN,
+            lagFullstendigVilkårResultat = true
         )
 
         val resultatPåSøknad = BehandlingsresultatSøknadUtils.utledResultatPåSøknad(
@@ -625,7 +659,8 @@ internal class BehandlingsresultatSøknadUtilsTest {
             resultat = Resultat.OPPFYLT,
             periodeFom = des21,
             periodeTom = LocalDate.now(),
-            personType = PersonType.BARN
+            personType = PersonType.BARN,
+            lagFullstendigVilkårResultat = true
         )
 
         val resultatPåSøknad = BehandlingsresultatSøknadUtils.utledResultatPåSøknad(

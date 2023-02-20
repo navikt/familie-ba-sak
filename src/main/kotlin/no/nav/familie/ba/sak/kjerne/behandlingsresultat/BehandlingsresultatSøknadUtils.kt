@@ -37,7 +37,7 @@ object BehandlingsresultatSøknadUtils {
             endretUtbetalingAndeler = endretUtbetalingAndeler
         )
 
-        val erEksplisittAvslagPåMinstEnPersonFremstiltKravFor = erEksplisittAvslagPåMinstEnPersonFremstiltKravFor(
+        val erEksplisittAvslagPåMinstEnPersonFremstiltKravFor = erEksplisittAvslagPåMinstEnPersonFremstiltKravForEllerSøker(
             nåværendePersonResultater = nåværendePersonResultater,
             personerFremstiltKravFor = personerFremstiltKravFor
         )
@@ -115,12 +115,12 @@ object BehandlingsresultatSøknadUtils {
         return resultatTidslinje.perioder().mapNotNull { it.innhold }.distinct()
     }
 
-    private fun erEksplisittAvslagPåMinstEnPersonFremstiltKravFor(
+    private fun erEksplisittAvslagPåMinstEnPersonFremstiltKravForEllerSøker(
         nåværendePersonResultater: Set<PersonResultat>,
         personerFremstiltKravFor: List<Aktør>
     ): Boolean =
         nåværendePersonResultater
-            .filter { personerFremstiltKravFor.contains(it.aktør) }
+            .filter { personerFremstiltKravFor.contains(it.aktør) || it.erSøkersResultater() }
             .any {
                 it.harEksplisittAvslag()
             }
@@ -129,7 +129,7 @@ object BehandlingsresultatSøknadUtils {
         val resultaterUtenIngenEndringer = this.filter { it != Søknadsresultat.INGEN_RELEVANTE_ENDRINGER }
 
         return when {
-            this.isEmpty() -> throw Feil("Klarer ikke utlede søknadsresultat")
+            this.isEmpty() -> throw Feil(frontendFeilmelding = "Du har opprettet en behandling som følge av søknad, men har ikke avslått eller innvilget noen perioder.", message = "Klarer ikke utlede søknadsresultat. Finner ingen resultater.")
             this.size == 1 -> this.single()
             resultaterUtenIngenEndringer.size == 1 -> resultaterUtenIngenEndringer.single()
             resultaterUtenIngenEndringer.size == 2 && resultaterUtenIngenEndringer.containsAll(
