@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.steg
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.BRUK_ANDELER_FOR_IVERKSETTELSE_SJEKK
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -150,9 +151,14 @@ class BeslutteVedtak(
     }
 
     private fun sjekkOmBehandlingSkalIverksettesOgHentNesteSteg(behandling: Behandling): StegType {
-        val endringerIUtbetaling = beregningService.erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling)
+        val nesteSteg = if (featureToggleService.isEnabled(BRUK_ANDELER_FOR_IVERKSETTELSE_SJEKK)) {
+            val endringerIUtbetaling =
+                beregningService.erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling)
 
-        val nesteSteg = hentNesteStegGittEndringerIUtbetaling(behandling, endringerIUtbetaling)
+            hentNesteStegGittEndringerIUtbetaling(behandling, endringerIUtbetaling)
+        } else {
+            hentNesteStegForNormalFlytGammel(behandling)
+        }
 
         if (nesteSteg == StegType.IVERKSETT_MOT_OPPDRAG) {
             val erInnvilgetSøknadUtenUtebtalingsperioderGrunnetEndringsperioder =

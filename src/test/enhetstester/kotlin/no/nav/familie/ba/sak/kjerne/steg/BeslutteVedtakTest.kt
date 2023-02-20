@@ -10,6 +10,7 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVedtak
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.BRUK_ANDELER_FOR_IVERKSETTELSE_SJEKK
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -169,6 +170,7 @@ class BeslutteVedtakTest {
 
         every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
         every { beregningService.erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling) } returns EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING
+        every { featureToggleService.isEnabled(BRUK_ANDELER_FOR_IVERKSETTELSE_SJEKK) } returns true
 
         mockkObject(JournalførVedtaksbrevTask.Companion)
         every {
