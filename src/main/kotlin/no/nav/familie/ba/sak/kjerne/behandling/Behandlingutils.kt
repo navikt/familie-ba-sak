@@ -18,7 +18,7 @@ object Behandlingutils {
     }
 
     fun hentSisteBehandlingSomErVedtatt(vedtattBehandlinger: List<Behandling>): Behandling? = vedtattBehandlinger
-        .filter { it.steg == StegType.BEHANDLING_AVSLUTTET }
+        .filter { !it.erHenlagt() }
         .maxByOrNull { it.opprettetTidspunkt }
 
     fun hentForrigeBehandlingSomErVedtatt(

@@ -108,7 +108,7 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
     @Query(
         """select b from Behandling b 
                             inner join Vedtak v on b.id = v.behandling.id 
-                        where b.fagsak.id = :fagsakId AND v.aktiv=true"""
+                        where b.fagsak.id = :fagsakId AND b.status='AVSLUTTET' AND v.aktiv=true"""
     )
     fun finnVedtattBehandlinger(fagsakId: Long): List<Behandling>
 
