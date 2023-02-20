@@ -76,11 +76,7 @@ class VurderTilbakekrevingSteg(
             erMigreringsbehandling = false // ikke relevant for etterbetaling
         ).filter { it.fom.isSameOrBefore(februar2023) }
 
-        return if (beløpsgrense == HELMANUELL_MIGRERING_MAKS_ETTERBETALING) {
-            simuleringPerioder.any { it.etterbetaling > BigDecimal(HELMANUELL_MIGRERING_MAKS_ETTERBETALING) }
-        } else {
-            simuleringPerioder.sumOf { it.etterbetaling } > BigDecimal(beløpsgrense)
-        }
+        return simuleringPerioder.any { it.etterbetaling > BigDecimal(beløpsgrense) }
     }
 
     private fun erNegativePerioderesultaterPåMaks1KroneOgTotalFeilutbetalingMindreEnnBeløpsgrense(behandlingId: Long): Boolean {
