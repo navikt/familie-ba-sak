@@ -13,7 +13,10 @@ object BehandlingsresultatValideringUtils {
         val personerSomHarEksplisittAvslag = vilkårsvurdering.personResultater.filter { it.harEksplisittAvslag() }.map { it.aktør }
 
         if (!personerFremstiltKravFor.containsAll(personerSomHarEksplisittAvslag)) {
-            throw Feil("Det eksisterer personer som har fått eksplisitt avslag, men som det ikke har blitt fremstilt krav for.")
+            throw Feil(
+                frontendFeilmelding = "Det eksisterer personer som har fått eksplisitt avslag, men som det ikke er blitt fremstilt krav for.",
+                message = "Det eksisterer personer som har fått eksplisitt avslag, men som det ikke har blitt fremstilt krav for."
+            )
         }
     }
 }
