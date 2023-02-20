@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakBehandlingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -47,7 +46,7 @@ class AutovedtakSatsendringService(
     private val behandlingService: BehandlingService,
     private val beregningService: BeregningService,
     private val persongrunnlagService: PersongrunnlagService
-) : AutovedtakBehandlingService<SatsendringTaskDto> {
+) {
 
     private val satsendringAlleredeUtført = Metrics.counter("satsendring.allerede.utfort")
     private val satsendringIverksatt = Metrics.counter("satsendring.iverksatt")
@@ -59,7 +58,7 @@ class AutovedtakSatsendringService(
      *
      */
     @Transactional
-    override fun kjørBehandling(behandlingsdata: SatsendringTaskDto): String {
+    fun kjørBehandling(behandlingsdata: SatsendringTaskDto): SatsendringSvar {
         val fagsakId = behandlingsdata.fagsakId
         val satskjøringForFagsak =
             satskjøringRepository.findByFagsakId(fagsakId) ?: error("Fant ingen satskjøringsrad for fagsak=$fagsakId")
@@ -72,7 +71,7 @@ class AutovedtakSatsendringService(
             satskjøringRepository.save(satskjøringForFagsak)
             logger.info("Satsendring allerede utført for fagsak=$fagsakId")
             satsendringAlleredeUtført.increment()
-            return "Satsendring allerede utført for fagsak=$fagsakId"
+            return SatsendringSvar.SATSENDRING_ER_ALLEREDE_UTFØRT
         }
 
         val aktivOgÅpenBehandling =
@@ -84,30 +83,21 @@ class AutovedtakSatsendringService(
         if (sisteIverksatteBehandling.fagsak.status != FagsakStatus.LØPENDE) throw Feil("Forsøker å utføre satsendring på ikke løpende fagsak ${sisteIverksatteBehandling.fagsak.id}")
 
         if (aktivOgÅpenBehandling != null) {
-            val brukerHarÅpenBehandlingMelding = if (harAlleredeNySats(
-                    sisteIverksettBehandlingsId = aktivOgÅpenBehandling.id,
-                    satstidspunkt = behandlingsdata.satstidspunkt
-                )
-            ) {
-                "Åpen behandling har allerede siste sats og vi lar den ligge."
-            } else if (aktivOgÅpenBehandling.status.erLåstMenIkkeAvsluttet()) {
-                "Behandling $aktivOgÅpenBehandling er låst for endringer og satsendring vil bli trigget neste virkedag."
-            } else if (aktivOgÅpenBehandling.steg.rekkefølge > StegType.VILKÅRSVURDERING.rekkefølge) {
-                tilbakestillBehandlingService.tilbakestillBehandlingTilVilkårsvurdering(aktivOgÅpenBehandling)
-                "Tilbakestiller behandling $aktivOgÅpenBehandling til vilkårsvurderingen"
-            } else {
-                "Behandling $aktivOgÅpenBehandling er under utredning, men er allerede i riktig tilstand."
-            }
+            val brukerHarÅpenBehandlingSvar = hentBrukerHarÅpenBehandlingSvar(aktivOgÅpenBehandling, behandlingsdata)
 
-            logger.info(brukerHarÅpenBehandlingMelding)
+            satskjøringForFagsak.feiltype = "ÅPEN_BEHANDLING"
+            satskjøringRepository.save(satskjøringForFagsak)
+
+            logger.info(brukerHarÅpenBehandlingSvar.melding)
             satsendringIgnorertÅpenBehandling.increment()
-            return brukerHarÅpenBehandlingMelding
+
+            return brukerHarÅpenBehandlingSvar
         }
 
         if (harUtbetalingerSomOverstiger100Prosent(sisteIverksatteBehandling)) {
             satskjøringForFagsak.feiltype = "UTBETALING_OVER_100_PROSENT"
             satskjøringRepository.save(satskjøringForFagsak)
-            return "Fant utbetaling over 100 prosent på barna"
+            return SatsendringSvar.FANT_OVER_100_PROSENT_UTBETALING
         }
 
         val behandlingEtterBehandlingsresultat =
@@ -151,7 +141,28 @@ class AutovedtakSatsendringService(
         taskRepository.save(task)
         satsendringIverksatt.increment()
 
-        return "Satsendring kjørt OK"
+        return SatsendringSvar.SATSENDRING_KJØRT_OK
+    }
+
+    private fun hentBrukerHarÅpenBehandlingSvar(
+        aktivOgÅpenBehandling: Behandling,
+        behandlingsdata: SatsendringTaskDto
+    ): SatsendringSvar {
+        val brukerHarÅpenBehandlingSvar = if (harAlleredeNySats(
+                sisteIverksettBehandlingsId = aktivOgÅpenBehandling.id,
+                satstidspunkt = behandlingsdata.satstidspunkt
+            )
+        ) {
+            SatsendringSvar.HAR_ALLEREDE_SISTE_SATS
+        } else if (aktivOgÅpenBehandling.status.erLåstMenIkkeAvsluttet()) {
+            SatsendringSvar.BEHANDLING_ER_LÅST_SATSENDRING_TRIGGES_NESTE_VIRKEDAG
+        } else if (aktivOgÅpenBehandling.steg.rekkefølge > StegType.VILKÅRSVURDERING.rekkefølge) {
+            tilbakestillBehandlingService.tilbakestillBehandlingTilVilkårsvurdering(aktivOgÅpenBehandling)
+            SatsendringSvar.TILBAKESTILLER_BEHANDLINGEN_TIL_VILKÅRSVURDERINGEN
+        } else {
+            SatsendringSvar.BEHANDLINGEN_ER_UNDER_UTREDNING_MEN_I_RIKTIG_TILSTAND
+        }
+        return brukerHarÅpenBehandlingSvar
     }
 
     fun harAlleredeNySats(sisteIverksettBehandlingsId: Long, satstidspunkt: YearMonth): Boolean {
@@ -229,4 +240,18 @@ class AutovedtakSatsendringService(
             return true
         }
     }
+}
+
+enum class SatsendringSvar(val melding: String) {
+    FANT_OVER_100_PROSENT_UTBETALING(melding = "Fant utbetaling over 100 prosent på barna"),
+    SATSENDRING_KJØRT_OK(melding = "Satsendring kjørt OK"),
+    SATSENDRING_ER_ALLEREDE_UTFØRT(melding = "Satsendring allerede utført for fagsak"),
+    HAR_ALLEREDE_SISTE_SATS(melding = "Åpen behandling har allerede siste sats og vi lar den ligge."),
+    BEHANDLING_ER_LÅST_SATSENDRING_TRIGGES_NESTE_VIRKEDAG(
+        melding = "Behandlingen er låst for endringer og satsendring vil bli trigget neste virkedag."
+    ),
+    TILBAKESTILLER_BEHANDLINGEN_TIL_VILKÅRSVURDERINGEN(melding = "Tilbakestiller behandlingen til vilkårsvurderingen"),
+    BEHANDLINGEN_ER_UNDER_UTREDNING_MEN_I_RIKTIG_TILSTAND(
+        melding = "Behandlingen er under utredning, men er allerede i riktig tilstand."
+    )
 }
