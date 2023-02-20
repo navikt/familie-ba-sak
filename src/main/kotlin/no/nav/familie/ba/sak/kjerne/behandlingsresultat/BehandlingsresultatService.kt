@@ -87,7 +87,7 @@ class BehandlingsresultatService(
             forrigeBehandling = forrigeBehandling
         )
 
-        BehandlingsresultatValideringUtils.validerAtBarePersonerFremstiltKravForHarFåttEksplisittAvslag(personerFremstiltKravFor = personerFremstiltKravFor, vilkårsvurdering = vilkårsvurdering)
+        BehandlingsresultatValideringUtils.validerAtBarePersonerFremstiltKravForEllerSøkerHarFåttEksplisittAvslag(personerFremstiltKravFor = personerFremstiltKravFor, personResultater = vilkårsvurdering.personResultater)
 
         // 1 SØKNAD
         val søknadsresultat = if (behandling.opprettetÅrsak in listOf(BehandlingÅrsak.FØDSELSHENDELSE, BehandlingÅrsak.SØKNAD) || behandling.erManuellMigrering()) {
