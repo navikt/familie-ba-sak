@@ -83,6 +83,7 @@ fun hentMinimerteKompetanserForPeriode(
     landkoderISO2: Map<String, String>
 ): List<MinimertKompetanse> {
     val minimerteKompetanser = kompetanser.hentIPeriode(fom, tom)
+        .filter { it.erFelterSatt() }
         .map {
             it.tilMinimertKompetanse(
                 personopplysningGrunnlag = personopplysningGrunnlag,
