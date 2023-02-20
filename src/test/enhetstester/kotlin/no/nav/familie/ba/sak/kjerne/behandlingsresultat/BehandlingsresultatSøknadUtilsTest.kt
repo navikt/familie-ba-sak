@@ -464,12 +464,12 @@ internal class BehandlingsresultatSøknadUtilsTest {
     @Test
     fun `utledResultatPåSøknad - skal returnere AVSLÅTT dersom det er eksplisitt avslag på søker (uten at det er søkt om utvidet)`() {
         val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)
-        val vikårsvurdering = Vilkårsvurdering(behandling = behandling)
+        val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
 
         val søker = lagPerson(type = PersonType.SØKER)
 
         val søkersPersonResultat = lagPersonResultat(
-            vilkårsvurdering = vikårsvurdering,
+            vilkårsvurdering = vilkårsvurdering,
             aktør = søker.aktør,
             resultat = Resultat.IKKE_OPPFYLT,
             periodeFom = des21,
