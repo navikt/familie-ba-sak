@@ -97,20 +97,17 @@ object BehandlingsresultatSøknadUtils {
             val nåværendeBeløp = nåværende?.kalkulertUtbetalingsbeløp
 
             when {
-                nåværendeBeløp == forrigeBeløp || nåværendeBeløp == null -> Søknadsresultat.INGEN_RELEVANTE_ENDRINGER // Ingen endring eller fjernet en andel
-                nåværendeBeløp > 0 -> Søknadsresultat.INNVILGET // Innvilget beløp som er annerledes enn forrige gang
-                nåværendeBeløp == 0 -> {
-                    val endringsperiodeÅrsak = endretUtbetalingAndel?.årsak
-
-                    when {
-                        nåværende.differanseberegnetPeriodebeløp != null -> Søknadsresultat.INNVILGET
-                        endringsperiodeÅrsak == Årsak.DELT_BOSTED -> Søknadsresultat.INNVILGET
-                        (endringsperiodeÅrsak == Årsak.ALLEREDE_UTBETALT) ||
-                            (endringsperiodeÅrsak == Årsak.ENDRE_MOTTAKER) ||
-                            (endringsperiodeÅrsak == Årsak.ETTERBETALING_3ÅR) -> Søknadsresultat.AVSLÅTT
-                        else -> Søknadsresultat.INGEN_RELEVANTE_ENDRINGER
+                nåværendeBeløp == null -> Søknadsresultat.INGEN_RELEVANTE_ENDRINGER // Finnes ikke andel i denne behandlingen
+                forrigeBeløp == null && nåværendeBeløp == 0 -> { // Lagt til ny andel, men den er overstyrt til 0 kr. Må se på årsak for å finne resultat
+                    when (endretUtbetalingAndel?.årsak) {
+                        null -> if (nåværende.differanseberegnetPeriodebeløp != null) Søknadsresultat.INNVILGET else throw Feil("Andel er satt til 0 kr, men det skyldes verken differanseberegning eller endret utbetaling andel")
+                        Årsak.DELT_BOSTED -> Søknadsresultat.INNVILGET
+                        Årsak.ALLEREDE_UTBETALT,
+                        Årsak.ENDRE_MOTTAKER,
+                        Årsak.ETTERBETALING_3ÅR -> Søknadsresultat.AVSLÅTT
                     }
                 }
+                forrigeBeløp != nåværendeBeløp && nåværendeBeløp > 0 -> Søknadsresultat.INNVILGET // Innvilget beløp som er annerledes enn forrige
                 else -> Søknadsresultat.INGEN_RELEVANTE_ENDRINGER
             }
         }
