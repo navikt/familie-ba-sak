@@ -37,14 +37,14 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hjemlerTilhørendeFritek
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Opphørsperiode
 
-fun hentBrevmal(behandling: Behandling, ytelserErLøpende: Boolean): Brevmal =
+fun hentBrevmal(behandling: Behandling, harLøpendeYtelse: Boolean): Brevmal =
     when (behandling.opprettetÅrsak) {
         BehandlingÅrsak.DØDSFALL_BRUKER -> Brevmal.VEDTAK_OPPHØR_DØDSFALL
         BehandlingÅrsak.KORREKSJON_VEDTAKSBREV -> Brevmal.VEDTAK_KORREKSJON_VEDTAKSBREV
-        else -> hentVedtaksbrevmal(behandling, ytelserErLøpende)
+        else -> hentVedtaksbrevmal(behandling, harLøpendeYtelse)
     }
 
-fun hentVedtaksbrevmal(behandling: Behandling, ytelserErLøpende: Boolean): Brevmal {
+fun hentVedtaksbrevmal(behandling: Behandling, harLøpendeYtelse: Boolean): Brevmal {
     if (behandling.resultat == IKKE_VURDERT) {
         throw Feil("Kan ikke opprette brev. Behandlingen er ikke vurdert.")
     }
@@ -56,7 +56,7 @@ fun hentVedtaksbrevmal(behandling: Behandling, ytelserErLøpende: Boolean): Brev
             behandlingType = behandling.type,
             behandlingsresultat = behandling.resultat,
             erInstitusjon = behandling.fagsak.institusjon != null,
-            ytelseErLøpende = ytelserErLøpende
+            ytelseErLøpende = harLøpendeYtelse
         )
     }
 
