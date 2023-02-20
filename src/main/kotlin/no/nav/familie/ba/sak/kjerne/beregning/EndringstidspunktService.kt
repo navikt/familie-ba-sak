@@ -21,22 +21,22 @@ class EndringstidspunktService(
     fun finnEndringstidpunkForBehandling(behandlingId: Long): LocalDate {
         val nyBehandling = behandlingRepository.finnBehandling(behandlingId)
 
-        val iverksatteBehandlinger = behandlingRepository.finnIverksatteBehandlinger(fagsakId = nyBehandling.fagsak.id)
-        val sistIverksatteBehandling = Behandlingutils.hentSisteBehandlingSomErIverksatt(iverksatteBehandlinger)
+        val vedtattBehandlinger = behandlingRepository.finnVedtattBehandlinger(fagsakId = nyBehandling.fagsak.id)
+        val sisteVedtattBehandling = Behandlingutils.hentSisteBehandlingSomErVedtatt(vedtattBehandlinger)
             ?: return TIDENES_MORGEN
 
         val nyeAndelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService
             .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId)
 
         val forrigeAndelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService
-            .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(sistIverksatteBehandling.id)
+            .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(sisteVedtattBehandling.id)
 
         val førsteEndringstidspunktFraAndelTilkjentYtelse = nyeAndelerTilkjentYtelse.hentFørsteEndringstidspunkt(
             forrigeAndelerTilkjentYtelse = forrigeAndelerTilkjentYtelse
         ) ?: TIDENES_ENDE
 
         val kompetansePerioder = kompetanseRepository.finnFraBehandlingId(nyBehandling.id)
-        val forrigeKompetansePerioder = kompetanseRepository.finnFraBehandlingId(sistIverksatteBehandling.id)
+        val forrigeKompetansePerioder = kompetanseRepository.finnFraBehandlingId(sisteVedtattBehandling.id)
         val førsteEndringstidspunkt = kompetansePerioder.finnFørsteEndringstidspunkt(forrigeKompetansePerioder)
 
         val førsteEndringstidspunktIKompetansePerioder =
