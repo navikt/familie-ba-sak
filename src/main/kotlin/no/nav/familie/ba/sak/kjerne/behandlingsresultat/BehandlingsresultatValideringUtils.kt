@@ -2,18 +2,21 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 
 object BehandlingsresultatValideringUtils {
 
-    internal fun validerAtBarePersonerFremstiltKravForHarFåttEksplisittAvslag(
+    internal fun validerAtBarePersonerFremstiltKravForEllerSøkerHarFåttEksplisittAvslag(
         personerFremstiltKravFor: List<Aktør>,
-        vilkårsvurdering: Vilkårsvurdering
+        personResultater: Set<PersonResultat>
     ) {
-        val personerSomHarEksplisittAvslag = vilkårsvurdering.personResultater.filter { it.harEksplisittAvslag() }.map { it.aktør }
+        val personerSomHarEksplisittAvslag = personResultater.filter { it.harEksplisittAvslag() }
 
-        if (!personerFremstiltKravFor.containsAll(personerSomHarEksplisittAvslag)) {
-            throw Feil("Det eksisterer personer som har fått eksplisitt avslag, men som det ikke har blitt fremstilt krav for.")
+        if (personerSomHarEksplisittAvslag.any { !personerFremstiltKravFor.contains(it.aktør) && !it.erSøkersResultater() }) {
+            throw Feil(
+                frontendFeilmelding = "Det eksisterer personer som har fått eksplisitt avslag, men som det ikke er blitt fremstilt krav for.",
+                message = "Det eksisterer personer som har fått eksplisitt avslag, men som det ikke har blitt fremstilt krav for."
+            )
         }
     }
 }

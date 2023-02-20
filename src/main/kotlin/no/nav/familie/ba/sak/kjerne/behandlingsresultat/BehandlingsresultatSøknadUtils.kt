@@ -37,7 +37,7 @@ object BehandlingsresultatSøknadUtils {
             endretUtbetalingAndeler = endretUtbetalingAndeler
         )
 
-        val erEksplisittAvslagPåMinstEnPersonFremstiltKravFor = erEksplisittAvslagPåMinstEnPersonFremstiltKravFor(
+        val erEksplisittAvslagPåMinstEnPersonFremstiltKravFor = erEksplisittAvslagPåMinstEnPersonFremstiltKravForEllerSøker(
             nåværendePersonResultater = nåværendePersonResultater,
             personerFremstiltKravFor = personerFremstiltKravFor
         )
@@ -97,20 +97,17 @@ object BehandlingsresultatSøknadUtils {
             val nåværendeBeløp = nåværende?.kalkulertUtbetalingsbeløp
 
             when {
-                nåværendeBeløp == forrigeBeløp || nåværendeBeløp == null -> Søknadsresultat.INGEN_RELEVANTE_ENDRINGER // Ingen endring eller fjernet en andel
-                nåværendeBeløp > 0 -> Søknadsresultat.INNVILGET // Innvilget beløp som er annerledes enn forrige gang
-                nåværendeBeløp == 0 -> {
-                    val endringsperiodeÅrsak = endretUtbetalingAndel?.årsak
-
-                    when {
-                        nåværende.differanseberegnetPeriodebeløp != null -> Søknadsresultat.INNVILGET
-                        endringsperiodeÅrsak == Årsak.DELT_BOSTED -> Søknadsresultat.INNVILGET
-                        (endringsperiodeÅrsak == Årsak.ALLEREDE_UTBETALT) ||
-                            (endringsperiodeÅrsak == Årsak.ENDRE_MOTTAKER) ||
-                            (endringsperiodeÅrsak == Årsak.ETTERBETALING_3ÅR) -> Søknadsresultat.AVSLÅTT
-                        else -> Søknadsresultat.INGEN_RELEVANTE_ENDRINGER
+                nåværendeBeløp == null -> Søknadsresultat.INGEN_RELEVANTE_ENDRINGER // Finnes ikke andel i denne behandlingen
+                forrigeBeløp == null && nåværendeBeløp == 0 -> { // Lagt til ny andel, men den er overstyrt til 0 kr. Må se på årsak for å finne resultat
+                    when (endretUtbetalingAndel?.årsak) {
+                        null -> if (nåværende.differanseberegnetPeriodebeløp != null) Søknadsresultat.INNVILGET else throw Feil("Andel er satt til 0 kr, men det skyldes verken differanseberegning eller endret utbetaling andel")
+                        Årsak.DELT_BOSTED -> Søknadsresultat.INNVILGET
+                        Årsak.ALLEREDE_UTBETALT,
+                        Årsak.ENDRE_MOTTAKER,
+                        Årsak.ETTERBETALING_3ÅR -> Søknadsresultat.AVSLÅTT
                     }
                 }
+                forrigeBeløp != nåværendeBeløp && nåværendeBeløp > 0 -> Søknadsresultat.INNVILGET // Innvilget beløp som er annerledes enn forrige
                 else -> Søknadsresultat.INGEN_RELEVANTE_ENDRINGER
             }
         }
@@ -118,12 +115,12 @@ object BehandlingsresultatSøknadUtils {
         return resultatTidslinje.perioder().mapNotNull { it.innhold }.distinct()
     }
 
-    private fun erEksplisittAvslagPåMinstEnPersonFremstiltKravFor(
+    private fun erEksplisittAvslagPåMinstEnPersonFremstiltKravForEllerSøker(
         nåværendePersonResultater: Set<PersonResultat>,
         personerFremstiltKravFor: List<Aktør>
     ): Boolean =
         nåværendePersonResultater
-            .filter { personerFremstiltKravFor.contains(it.aktør) }
+            .filter { personerFremstiltKravFor.contains(it.aktør) || it.erSøkersResultater() }
             .any {
                 it.harEksplisittAvslag()
             }
@@ -132,7 +129,7 @@ object BehandlingsresultatSøknadUtils {
         val resultaterUtenIngenEndringer = this.filter { it != Søknadsresultat.INGEN_RELEVANTE_ENDRINGER }
 
         return when {
-            this.isEmpty() -> throw Feil("Klarer ikke utlede søknadsresultat")
+            this.isEmpty() -> throw Feil(frontendFeilmelding = "Du har opprettet en behandling som følge av søknad, men har ikke avslått eller innvilget noen perioder.", message = "Klarer ikke utlede søknadsresultat. Finner ingen resultater.")
             this.size == 1 -> this.single()
             resultaterUtenIngenEndringer.size == 1 -> resultaterUtenIngenEndringer.single()
             resultaterUtenIngenEndringer.size == 2 && resultaterUtenIngenEndringer.containsAll(
