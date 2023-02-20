@@ -29,10 +29,10 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.initStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeDeltBostedTriggere
 import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeTrigger
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestSanityBegrunnelse
@@ -41,7 +41,6 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.SanityVilkår
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårRolle
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårTrigger
 import no.nav.familie.ba.sak.kjerne.brev.domene.ØvrigTrigger
-import no.nav.familie.ba.sak.kjerne.brev.hentBrevmal
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
@@ -660,7 +659,7 @@ fun kjørStegprosessForFGB(
     behandlingUnderkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
     institusjon: InstitusjonInfo? = null,
     verge: VergeInfo? = null,
-    andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
+    brevmalService: BrevmalService
 ): Behandling {
     val fagsakType = utledFagsaktype(institusjon, verge)
     val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(
@@ -788,9 +787,6 @@ fun kjørStegprosessForFGB(
         )
     if (tilSteg == StegType.JOURNALFØR_VEDTAKSBREV) return behandlingEtterJournalførtVedtak
 
-    val harLøpendeYtelse =
-        andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id).any { it.erLøpende() }
-
     val behandlingEtterDistribuertVedtak =
         stegService.håndterDistribuerVedtaksbrev(
             behandlingEtterJournalførtVedtak,
@@ -798,9 +794,8 @@ fun kjørStegprosessForFGB(
                 behandlingId = behandlingEtterJournalførtVedtak.id,
                 journalpostId = "1234",
                 personEllerInstitusjonIdent = søkerFnr,
-                brevmal = hentBrevmal(
-                    behandlingEtterJournalførtVedtak,
-                    harLøpendeYtelse
+                brevmal = brevmalService.hentBrevmal(
+                    behandlingEtterJournalførtVedtak
                 ),
                 erManueltSendt = false
             )
@@ -832,7 +827,7 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
     vedtakService: VedtakService,
     stegService: StegService,
     fagsakId: Long,
-    andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
+    brevmalService: BrevmalService
 ): Behandling {
     val behandling = stegService.håndterNyBehandling(
         NyBehandling(
@@ -920,10 +915,6 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
         )
     if (tilSteg == StegType.JOURNALFØR_VEDTAKSBREV) return behandlingEtterJournalførtVedtak
 
-    val harLøpendeYtelse =
-        andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingEtterJournalførtVedtak.id)
-            .any { it.erLøpende() }
-
     val behandlingEtterDistribuertVedtak =
         stegService.håndterDistribuerVedtaksbrev(
             behandlingEtterJournalførtVedtak,
@@ -931,7 +922,7 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
                 behandlingId = behandling.id,
                 journalpostId = "1234",
                 personEllerInstitusjonIdent = søkerFnr,
-                brevmal = hentBrevmal(behandling, harLøpendeYtelse),
+                brevmal = brevmalService.hentBrevmal(behandling),
                 erManueltSendt = false
             )
         )

@@ -12,8 +12,8 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
+import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -63,7 +63,7 @@ class VilkårsvurderingFlyttResultaterTest(
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
 
     @Autowired
-    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
+    private val brevmalService: BrevmalService
 
 ) : AbstractSpringIntegrationTest() {
 
@@ -140,7 +140,8 @@ class VilkårsvurderingFlyttResultaterTest(
             fagsakService = fagsakService,
             persongrunnlagService = persongrunnlagService,
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
+            brevmalService = brevmalService
+
         )
 
         val vilkårsvurderingFraForrigeBehandlingFørNyRevurdering =
@@ -163,7 +164,8 @@ class VilkårsvurderingFlyttResultaterTest(
             fagsakService = fagsakService,
             persongrunnlagService = persongrunnlagService,
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
+            brevmalService = brevmalService
+
         )
 
         // Sjekker at vilkårsvurderingen fra forrige behandling ikke er endret

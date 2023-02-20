@@ -8,8 +8,7 @@ import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.brev.hentBrevmal
+import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.brev.hentOverstyrtDokumenttittel
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
@@ -38,7 +37,7 @@ class JournalførVedtaksbrev(
     private val fagsakRepository: FagsakRepository,
     private val organisasjonService: OrganisasjonService,
     private val brevmottakerService: BrevmottakerService,
-    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
+    private val brevmalService: BrevmalService
 ) : BehandlingSteg<JournalførVedtaksbrevDTO> {
 
     override fun utførStegOgAngiNeste(behandling: Behandling, data: JournalførVedtaksbrevDTO): StegType {
@@ -97,9 +96,6 @@ class JournalførVedtaksbrev(
         data: JournalførVedtaksbrevDTO,
         behandling: Behandling
     ) {
-        val harLøpendeYtelse =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id).any { it.erLøpende() }
-
         journalposterTilDistribusjon.forEach {
             val finnesBrevMottaker =
                 it.value.navn != null &&
@@ -111,11 +107,9 @@ class JournalførVedtaksbrev(
                             distribuerDokumentDTO = lagDistribuerDokumentDto(
                                 behandling = behandling,
                                 journalPostId = it.key,
-                                mottakerInfo = it.value,
-                                harLøpendeYtelse = harLøpendeYtelse
+                                mottakerInfo = it.value
                             ),
-                            properties = data.task.metadata,
-                            harLøpendeYtelse = harLøpendeYtelse
+                            properties = data.task.metadata
                         )
                 taskRepository.save(distribuerTilVergeTask)
             } else { // Denne tasken sender vedtaksbrev og håndterer steg videre
@@ -123,8 +117,7 @@ class JournalførVedtaksbrev(
                     distribuerDokumentDTO = lagDistribuerDokumentDto(
                         behandling = behandling,
                         journalPostId = it.key,
-                        mottakerInfo = it.value,
-                        harLøpendeYtelse = harLøpendeYtelse
+                        mottakerInfo = it.value
                     ),
                     properties = data.task.metadata
                 )
@@ -218,14 +211,13 @@ class JournalførVedtaksbrev(
     private fun lagDistribuerDokumentDto(
         behandling: Behandling,
         journalPostId: String,
-        mottakerInfo: MottakerInfo,
-        harLøpendeYtelse: Boolean
+        mottakerInfo: MottakerInfo
     ) =
         DistribuerDokumentDTO(
             personEllerInstitusjonIdent = mottakerInfo.brukerId,
             behandlingId = behandling.id,
             journalpostId = journalPostId,
-            brevmal = hentBrevmal(behandling, harLøpendeYtelse),
+            brevmal = brevmalService.hentBrevmal(behandling),
             erManueltSendt = false,
             manuellAdresseInfo = mottakerInfo.manuellAdresseInfo
         )

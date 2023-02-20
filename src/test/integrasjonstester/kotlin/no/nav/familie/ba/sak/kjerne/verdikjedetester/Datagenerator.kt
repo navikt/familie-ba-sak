@@ -15,7 +15,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
@@ -129,7 +129,7 @@ fun fullførBehandlingFraVilkårsvurderingAlleVilkårOppfylt(
     fagsakService: FagsakService,
     vedtakService: VedtakService,
     stegService: StegService,
-    andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
+    brevmalService: BrevmalService
 ): Behandling {
     settAlleVilkårTilOppfylt(
         restUtvidetBehandling = restUtvidetBehandling,
@@ -189,7 +189,7 @@ fun fullførBehandlingFraVilkårsvurderingAlleVilkårOppfylt(
         fagsakService = fagsakService,
         vedtakService = vedtakService,
         stegService = stegService,
-        andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
+        brevmalService = brevmalService
     )
 }
 

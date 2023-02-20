@@ -1,8 +1,7 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.brev.hentBrevmal
+import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevTask.Companion.TASK_STEP_TYPE
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -16,21 +15,19 @@ import org.springframework.stereotype.Service
 class DistribuerVedtaksbrevTask(
     private val stegService: StegService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
+    private val brevmalService: BrevmalService
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
         val distribuerVedtaksbrevDTO = objectMapper.readValue(task.payload, DistribuerVedtaksbrevDTO::class.java)
 
         val behandling = behandlingHentOgPersisterService.hent(distribuerVedtaksbrevDTO.behandlingId)
-        val harLøpendeYtelse =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id).any { it.erLøpende() }
 
         val distribuerDokumentDTO = DistribuerDokumentDTO(
             behandlingId = distribuerVedtaksbrevDTO.behandlingId,
             journalpostId = distribuerVedtaksbrevDTO.journalpostId,
             personEllerInstitusjonIdent = distribuerVedtaksbrevDTO.personIdent,
-            brevmal = hentBrevmal(behandling, harLøpendeYtelse),
+            brevmal = brevmalService.hentBrevmal(behandling),
             erManueltSendt = false
         )
         stegService.håndterDistribuerVedtaksbrev(

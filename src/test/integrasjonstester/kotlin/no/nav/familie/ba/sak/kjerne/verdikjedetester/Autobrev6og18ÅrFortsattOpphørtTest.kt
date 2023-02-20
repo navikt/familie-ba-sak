@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.Autobrev6og18ÅrService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
@@ -34,7 +34,7 @@ class Autobrev6og18ÅrFortsattOpphørtTest(
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val stegService: StegService,
     @Autowired private val autobrev6og18ÅrService: Autobrev6og18ÅrService,
-    @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
+    @Autowired private val brevmalService: BrevmalService
 ) : AbstractVerdikjedetest() {
 
     @Test
@@ -153,7 +153,8 @@ class Autobrev6og18ÅrFortsattOpphørtTest(
             fagsakService = fagsakService,
             vedtakService = vedtakService,
             stegService = stegService,
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
+            brevmalService = brevmalService
+
         )
 
         autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(

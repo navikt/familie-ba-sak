@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
@@ -36,7 +37,8 @@ class SettPåVentServiceTest(
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
     @Autowired private val settPåVentRepository: SettPåVentRepository,
     @Autowired private val taBehandlingerEtterVentefristAvVentTask: TaBehandlingerEtterVentefristAvVentTask,
-    @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
+    @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+    @Autowired private val brevmalService: BrevmalService
 ) : AbstractSpringIntegrationTest() {
 
     @BeforeAll
@@ -54,7 +56,7 @@ class SettPåVentServiceTest(
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
+            brevmalService = brevmalService
         )
 
         settPåVentRepository.save(
@@ -80,7 +82,7 @@ class SettPåVentServiceTest(
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
+            brevmalService = brevmalService
         )
 
         settPåVentRepository.save(
@@ -118,7 +120,7 @@ class SettPåVentServiceTest(
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
+            brevmalService = brevmalService
         )
 
         assertThrows<FunksjonellFeil> {
@@ -140,7 +142,7 @@ class SettPåVentServiceTest(
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
+            brevmalService = brevmalService
         )
 
         val behandlingId = behandlingEtterVilkårsvurderingSteg.id
@@ -175,7 +177,7 @@ class SettPåVentServiceTest(
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
+            brevmalService = brevmalService
         )
 
         val behandling2 = kjørStegprosessForFGB(
@@ -186,7 +188,7 @@ class SettPåVentServiceTest(
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
+            brevmalService = brevmalService
         )
 
         settPåVentRepository.save(

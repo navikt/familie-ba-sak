@@ -5,8 +5,8 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandard
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.brev.BrevService
+import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.brev.DokumentService
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
@@ -41,7 +41,7 @@ class OpplysningspliktTest(
     @Autowired private val dokumentService: DokumentService,
     @Autowired private val brevService: BrevService,
     @Autowired private val settPåVentService: SettPåVentService,
-    @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
+    @Autowired private val brevmalService: BrevmalService
 ) : AbstractVerdikjedetest() {
 
     @Test
@@ -69,7 +69,8 @@ class OpplysningspliktTest(
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
+            brevmalService = brevmalService
+
         )
 
         // Send "innhente opplysninger"-brev og sjekk at opplysningsplikt vilkåret dukker opp på _kun_ søker

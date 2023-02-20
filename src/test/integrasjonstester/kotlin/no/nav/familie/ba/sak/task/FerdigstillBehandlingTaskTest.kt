@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -64,7 +64,7 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
     lateinit var personidentService: PersonidentService
 
     @Autowired
-    lateinit var andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
+    lateinit var brevmalService: BrevmalService
 
     @BeforeEach
     fun init() {
@@ -86,7 +86,8 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
+            brevmalService = brevmalService
+
         )
 
         return if (resultat == Resultat.IKKE_OPPFYLT) {

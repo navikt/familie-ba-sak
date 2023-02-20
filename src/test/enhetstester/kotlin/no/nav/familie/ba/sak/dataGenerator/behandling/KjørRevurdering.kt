@@ -12,12 +12,11 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
+import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertPersonResultat
-import no.nav.familie.ba.sak.kjerne.brev.hentBrevmal
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
@@ -68,7 +67,7 @@ fun kjørStegprosessForBehandling(
     fagsakService: FagsakService,
     persongrunnlagService: PersongrunnlagService,
     andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
-    andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
+    brevmalService: BrevmalService
 ): Behandling {
     val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
 
@@ -145,10 +144,8 @@ fun kjørStegprosessForBehandling(
         håndterJournalførtVedtakSteg(stegService, behandlingEtterIverksetteMotTilbake, vedtakService)
     if (tilSteg == StegType.JOURNALFØR_VEDTAKSBREV) return behandlingEtterJournalførtVedtak
 
-    val harLøpendeYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingEtterJournalførtVedtak.id).any { it.erLøpende() }
-
     val behandlingEtterDistribuertVedtak =
-        håndterDistribuertVedtakSteg(stegService, behandlingEtterJournalførtVedtak, søkerFnr, harLøpendeYtelse)
+        håndterDistribuertVedtakSteg(stegService, behandlingEtterJournalførtVedtak, søkerFnr, brevmalService)
     if (tilSteg == StegType.DISTRIBUER_VEDTAKSBREV) return behandlingEtterDistribuertVedtak
 
     return stegService.håndterFerdigstillBehandling(behandlingEtterDistribuertVedtak)
@@ -210,7 +207,7 @@ private fun håndterDistribuertVedtakSteg(
     stegService: StegService,
     behandling: Behandling,
     søkerFnr: String,
-    harLøpendeYtelse: Boolean
+    brevmalService: BrevmalService
 ): Behandling {
     val behandlingEtterDistribuertVedtak =
         stegService.håndterDistribuerVedtaksbrev(
@@ -219,7 +216,7 @@ private fun håndterDistribuertVedtakSteg(
                 behandlingId = behandling.id,
                 journalpostId = "1234",
                 personEllerInstitusjonIdent = søkerFnr,
-                brevmal = hentBrevmal(behandling, harLøpendeYtelse),
+                brevmal = brevmalService.hentBrevmal(behandling),
                 erManueltSendt = false
             )
         )

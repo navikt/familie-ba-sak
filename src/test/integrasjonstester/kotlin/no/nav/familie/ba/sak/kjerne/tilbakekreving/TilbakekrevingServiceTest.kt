@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonInfo
 import no.nav.familie.ba.sak.ekstern.restDomene.VergeInfo
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
@@ -35,7 +35,7 @@ class TilbakekrevingServiceTest(
     @Autowired private val tilbakekrevingRepository: TilbakekrevingRepository,
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
     @Autowired private val databaseCleanupService: DatabaseCleanupService,
-    @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
+    @Autowired private val brevmalService: BrevmalService
 ) : AbstractSpringIntegrationTest() {
 
     @BeforeAll
@@ -56,7 +56,7 @@ class TilbakekrevingServiceTest(
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
+            brevmalService = brevmalService
         )
 
         val restTilbakekreving = opprettRestTilbakekreving()
@@ -86,7 +86,7 @@ class TilbakekrevingServiceTest(
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
             institusjon = InstitusjonInfo(orgNummer = "998765432", tssEksternId = "8000000"),
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
+            brevmalService = brevmalService
         )
 
         val restTilbakekreving = opprettRestTilbakekreving()
@@ -116,7 +116,7 @@ class TilbakekrevingServiceTest(
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
             verge = VergeInfo("04068203010"),
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
+            brevmalService = brevmalService
         )
 
         val restTilbakekreving = opprettRestTilbakekreving()

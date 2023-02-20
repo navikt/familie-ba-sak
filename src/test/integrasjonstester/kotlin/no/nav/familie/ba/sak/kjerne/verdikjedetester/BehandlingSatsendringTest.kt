@@ -15,10 +15,10 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.SatsTidspunkt
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
@@ -52,7 +52,7 @@ class BehandlingSatsendringTest(
     @Autowired private val autovedtakSatsendringService: AutovedtakSatsendringService,
     @Autowired private val andelTilkjentYtelseMedEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     @Autowired private val satskjøringRepository: SatskjøringRepository,
-    @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
+    @Autowired private val brevmalService: BrevmalService
 ) : AbstractVerdikjedetest() {
 
     @Test
@@ -117,7 +117,8 @@ class BehandlingSatsendringTest(
             vedtakService = vedtakService,
             stegService = stegService,
             personidentService = personidentService,
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
+            brevmalService = brevmalService
+
         )!!
         satskjøringRepository.saveAndFlush(Satskjøring(fagsakId = behandling.fagsak.id))
 
@@ -214,7 +215,8 @@ class BehandlingSatsendringTest(
             vedtakService = vedtakService,
             stegService = stegService,
             personidentService = personidentService,
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
+            brevmalService = brevmalService
+
         )!!
         satskjøringRepository.saveAndFlush(Satskjøring(fagsakId = behandling.fagsak.id))
 
@@ -298,7 +300,8 @@ class BehandlingSatsendringTest(
             vedtakService = vedtakService,
             stegService = stegService,
             personidentService = personidentService,
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
+            brevmalService = brevmalService
+
         )!!
         satskjøringRepository.saveAndFlush(Satskjøring(fagsakId = behandling.fagsak.id))
 

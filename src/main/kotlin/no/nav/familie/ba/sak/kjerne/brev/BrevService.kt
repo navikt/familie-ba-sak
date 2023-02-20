@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Autovedtak6og18årOgSmåbarnstillegg
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.AutovedtakNyfødtBarnFraFør
@@ -66,15 +65,13 @@ class BrevService(
     private val organisasjonService: OrganisasjonService,
     private val korrigertVedtakService: KorrigertVedtakService,
     private val saksbehandlerContext: SaksbehandlerContext,
-    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
+    private val brevmalService: BrevmalService
 ) {
 
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
         val behandling = vedtak.behandling
-        val harLøpendeYtelse =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id).any { it.erLøpende() }
 
-        val brevmal = hentBrevmal(behandling, harLøpendeYtelse)
+        val brevmal = brevmalService.hentBrevmal(behandling)
         val vedtakFellesfelter = lagVedtaksbrevFellesfelter(vedtak)
         validerBrevdata(brevmal, vedtakFellesfelter)
 

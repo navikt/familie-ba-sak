@@ -11,8 +11,8 @@ import no.nav.familie.ba.sak.dataGenerator.vilkårsvurdering.lagVilkårsvurderin
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
+import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -41,7 +41,7 @@ class EndringstidspunktTest(
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
     @Autowired private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
     @Autowired private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
-    @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
+    @Autowired private val brevmalService: BrevmalService
 ) : AbstractVerdikjedetest() {
 
     @Test
@@ -90,7 +90,8 @@ class EndringstidspunktTest(
             fagsakService = fagsakService,
             persongrunnlagService = persongrunnlagService,
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
+            brevmalService = brevmalService
+
         )
 
         val sisteDagUtenDeltBostedOppfylt = barnFødselsdato.plusYears(1).sisteDagIMåned()
@@ -145,7 +146,8 @@ class EndringstidspunktTest(
             fagsakService = fagsakService,
             persongrunnlagService = persongrunnlagService,
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
+            brevmalService = brevmalService
+
         )
 
         val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = revurdering.id)

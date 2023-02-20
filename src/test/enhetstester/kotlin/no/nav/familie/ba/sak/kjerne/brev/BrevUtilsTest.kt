@@ -300,7 +300,7 @@ internal class BrevUtilsTest {
             )
         Assertions.assertEquals(
             Brevmal.AUTOVEDTAK_NYFØDT_BARN_FRA_FØR,
-            hentBrevmal(behandling, true)
+            hentBrevmalGammel(behandling)
         )
     }
 
@@ -317,7 +317,7 @@ internal class BrevUtilsTest {
             )
         Assertions.assertEquals(
             Brevmal.AUTOVEDTAK_NYFØDT_FØRSTE_BARN,
-            hentBrevmal(behandling, false)
+            hentBrevmalGammel(behandling)
         )
     }
 

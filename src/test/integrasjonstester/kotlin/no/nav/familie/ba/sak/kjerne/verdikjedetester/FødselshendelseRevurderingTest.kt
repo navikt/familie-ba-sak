@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -29,7 +30,8 @@ class FødselshendelseRevurderingTest(
     @Autowired private val personidentService: PersonidentService,
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val stegService: StegService,
-    @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
+    @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+    @Autowired private val brevmalService: BrevmalService
 ) : AbstractVerdikjedetest() {
 
     @Test
@@ -64,7 +66,8 @@ class FødselshendelseRevurderingTest(
             vedtakService = vedtakService,
             stegService = stegService,
             personidentService = personidentService,
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
+            brevmalService = brevmalService
+
         )
 
         val søkerIdent = scenario.søker.ident
@@ -81,7 +84,8 @@ class FødselshendelseRevurderingTest(
             personidentService = personidentService,
             vedtakService = vedtakService,
             stegService = stegService,
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
+            brevmalService = brevmalService
+
         )
 
         val restFagsakEtterBehandlingAvsluttet =

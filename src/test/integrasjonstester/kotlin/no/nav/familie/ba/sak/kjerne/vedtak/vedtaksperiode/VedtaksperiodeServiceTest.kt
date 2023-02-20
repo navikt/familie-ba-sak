@@ -23,7 +23,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
@@ -70,7 +70,7 @@ class VedtaksperiodeServiceTest(
     private val databaseCleanupService: DatabaseCleanupService,
 
     @Autowired
-    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
+    private val brevmalService: BrevmalService
 
 ) : AbstractSpringIntegrationTest() {
 
@@ -93,7 +93,7 @@ class VedtaksperiodeServiceTest(
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
+            brevmalService = brevmalService
         )
 
         revurdering = kjørStegprosessForRevurderingÅrligKontroll(
@@ -103,7 +103,7 @@ class VedtaksperiodeServiceTest(
             vedtakService = vedtakService,
             stegService = stegService,
             fagsakId = førstegangsbehandling!!.fagsak.id,
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
+            brevmalService = brevmalService
         )
     }
 
@@ -120,7 +120,7 @@ class VedtaksperiodeServiceTest(
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
+            brevmalService = brevmalService
         )
 
         val behandlingEtterNySøknadsregistrering = stegService.håndterSøknad(
@@ -168,7 +168,7 @@ class VedtaksperiodeServiceTest(
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
-            andelTilkjentYtelseRepository = andelTilkjentYtelseRepository
+            brevmalService = brevmalService
         )
         val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandling.id)
 

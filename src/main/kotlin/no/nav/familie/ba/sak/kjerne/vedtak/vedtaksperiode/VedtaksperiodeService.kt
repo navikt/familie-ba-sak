@@ -27,11 +27,11 @@ import no.nav.familie.ba.sak.kjerne.beregning.EndringstidspunktService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
+import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.brev.hentIPeriode
 import no.nav.familie.ba.sak.kjerne.brev.hentKompetanserSomStopperRettFørPeriode
-import no.nav.familie.ba.sak.kjerne.brev.hentVedtaksbrevmal
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
@@ -84,7 +84,8 @@ class VedtaksperiodeService(
     private val kompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse>,
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     private val featureToggleService: FeatureToggleService,
-    private val feilutbetaltValutaRepository: FeilutbetaltValutaRepository
+    private val feilutbetaltValutaRepository: FeilutbetaltValutaRepository,
+    private val brevmalService: BrevmalService
 ) {
     fun oppdaterVedtaksperiodeMedFritekster(
         vedtaksperiodeId: Long,
@@ -251,8 +252,6 @@ class VedtaksperiodeService(
         vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(vedtak)
         // Rent fortsatt innvilget-resultat er det eneste som kun skal gi én vedtaksperiode
         val behandling = vedtak.behandling
-        val erLøpendeYtelse =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id).any { it.erLøpende() }
 
         if (behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET && (
             !skalOverstyreFortsattInnvilget || featureToggleService.isEnabled(
@@ -260,7 +259,7 @@ class VedtaksperiodeService(
                 )
             )
         ) {
-            val vedtaksbrevmal = hentVedtaksbrevmal(behandling, erLøpendeYtelse)
+            val vedtaksbrevmal = brevmalService.hentVedtaksbrevmal(behandling)
             val erAutobrevFor6Og18ÅrOgSmåbarnstillegg =
                 vedtaksbrevmal == Brevmal.AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG
 
