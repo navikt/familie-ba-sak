@@ -17,13 +17,13 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndr
 import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.erEndringerIUtbetalingMellomForrigeAndeler
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.steg.EndringerIUtbetalingForBehandlingSteg
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
@@ -182,48 +182,9 @@ class BeregningService(
             forrigeBehandling?.let { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(it.id) }
                 ?: emptyList()
 
-        val endringerIUtbetaling = erEndringerIUtbetalingMellomNåværendeOgForrigeAndeler(nåværendeAndeler, forrigeAndeler)
+        val endringerIUtbetaling = nåværendeAndeler.erEndringerIUtbetalingMellomForrigeAndeler(forrigeAndeler)
 
         return if (endringerIUtbetaling) EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING else EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING
-    }
-
-    private fun erEndringerIUtbetalingMellomNåværendeOgForrigeAndeler(
-        nåværendeAndeler: List<AndelTilkjentYtelse>,
-        forrigeAndeler: List<AndelTilkjentYtelse>
-    ): Boolean {
-        if (nåværendeAndeler.isEmpty() && forrigeAndeler.isEmpty()) return false
-        val allePersonerMedAndeler = (nåværendeAndeler.map { it.aktør } + forrigeAndeler.map { it.aktør }).distinct()
-
-        return allePersonerMedAndeler.any { aktør ->
-            val ytelseTyperForPerson = (nåværendeAndeler.map { it.type } + forrigeAndeler.map { it.type }).distinct()
-            ytelseTyperForPerson.any { ytelseType ->
-                erEndringIUtbetalingForPersonOgType(
-                    nåværendeAndeler = nåværendeAndeler.filter { it.aktør == aktør && it.type == ytelseType },
-                    forrigeAndeler = forrigeAndeler.filter { it.aktør == aktør && it.type == ytelseType }
-                )
-            }
-        }
-    }
-
-    // Det regnes ikke ut som en endring dersom
-    // 1. Vi har fått nye andeler som har 0 i utbetalingsbeløp
-    // 2. Vi har mistet andeler som har hatt 0 i utbetalingsbeløp
-    // 3. Vi har lik utbetalingsbeløp mellom nåværende og forrige andeler
-    private fun erEndringIUtbetalingForPersonOgType(
-        nåværendeAndeler: List<AndelTilkjentYtelse>,
-        forrigeAndeler: List<AndelTilkjentYtelse>
-    ): Boolean {
-        val nåværendeTidslinje = AndelTilkjentYtelseTidslinje(nåværendeAndeler)
-        val forrigeTidslinje = AndelTilkjentYtelseTidslinje(forrigeAndeler)
-
-        val endringIBeløpTidslinje = nåværendeTidslinje.kombinerMed(forrigeTidslinje) { nåværende, forrige ->
-            val nåværendeBeløp = nåværende?.kalkulertUtbetalingsbeløp ?: 0
-            val forrigeBeløp = forrige?.kalkulertUtbetalingsbeløp ?: 0
-
-            nåværendeBeløp != forrigeBeløp
-        }
-
-        return endringIBeløpTidslinje.perioder().any { it.innhold == true }
     }
 
     @Transactional
