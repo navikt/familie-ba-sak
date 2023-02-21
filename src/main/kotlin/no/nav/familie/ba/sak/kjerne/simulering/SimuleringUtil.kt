@@ -59,7 +59,7 @@ fun vedtakSimuleringMottakereTilRestSimulering(
 
 fun vedtakSimuleringMottakereTilSimuleringPerioder(
     økonomiSimuleringMottakere: List<ØkonomiSimuleringMottaker>,
-    erManuelPosteringTogglePå: Boolean,
+    erManuelPosteringTogglePå: Boolean
 ): List<SimuleringsPeriode> {
     val simuleringPerioder = filterBortUrelevanteVedtakSimuleringPosteringer(økonomiSimuleringMottakere)
         .flatMap { it.økonomiSimuleringPostering }
