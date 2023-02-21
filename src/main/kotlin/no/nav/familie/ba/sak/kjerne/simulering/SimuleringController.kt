@@ -20,9 +20,7 @@ import org.springframework.web.bind.annotation.RestController
 class SimuleringController(
     private val simuleringService: SimuleringService,
     private val tilgangService: TilgangService,
-    private val featureToggleService: FeatureToggleService,
-    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService
-
+    private val featureToggleService: FeatureToggleService
 ) {
 
     @GetMapping(path = ["/{behandlingId}/simulering"])
@@ -33,8 +31,7 @@ class SimuleringController(
         val vedtakSimuleringMottaker = simuleringService.oppdaterSimuleringPåBehandlingVedBehov(behandlingId)
         val restSimulering = vedtakSimuleringMottakereTilRestSimulering(
             økonomiSimuleringMottakere = vedtakSimuleringMottaker,
-            erManuellPosteringTogglePå = featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ),
-            erMigreringsbehandling = behandlingHentOgPersisterService.hent(behandlingId).erMigrering()
+            erManuellPosteringTogglePå = featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ)
         )
         return ResponseEntity.ok(Ressurs.success(restSimulering))
     }

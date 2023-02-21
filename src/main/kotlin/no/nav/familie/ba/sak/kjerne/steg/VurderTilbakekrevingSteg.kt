@@ -78,7 +78,6 @@ class VurderTilbakekrevingSteg(
         val simuleringPerioder = vedtakSimuleringMottakereTilSimuleringPerioder(
             simuleringMottaker,
             featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ),
-            erMigreringsbehandling = false // ikke relevant for etterbetaling
         )
         return simuleringPerioder.any { it.etterbetaling > BigDecimal(HELMANUELL_MIGRERING_MAKS_ETTERBETALING) }
     }
@@ -88,7 +87,6 @@ class VurderTilbakekrevingSteg(
         val simuleringPerioder = vedtakSimuleringMottakereTilSimuleringPerioder(
             simuleringMottaker,
             featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ),
-            erMigreringsbehandling = false // ikke relevant for feilutbetaling
         )
         return simuleringPerioder.all { it.resultat <= BigDecimal.ZERO && it.resultat >= BigDecimal(-1) } &&
             simuleringService.hentFeilutbetaling(behandlingId) < BigDecimal(HELMANUELL_MIGRERING_FEILUTBETALING_BELØPSGRENSE)
