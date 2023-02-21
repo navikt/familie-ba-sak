@@ -88,9 +88,9 @@ Vi har noen unntak når resultatet fra søknadssteget er "ingen relevante endrin
 | Ingen relevante endringer | Ingen endring    | Fortsatt opphørt | Ugyldig - ville ha blitt "fortsatt opphørt" som er ugydlig på søknad                  |
 | Ingen relevante endringer | Ingen endring    | Ikke opphørt     | **Fortsatt innvilget**                                                                |
 
-Her kommer et par unntak/rariteter:
+En annen ting det er verdt å være obs på er:
 - Fortsatt opphørt i kombinasjon med noe annet som er av betydning (f.eks. "Endret") tar ikke med fortsatt opphørt i resultatet. Vi ønsker kun å snakke om det som skjer i _denne_ behandlingen, og kommuniserer derfor kun ut "fortsatt opphørt" om det er det eneste som gjelder.
 
 ## Valideringer
-- Ikke lov med eksplisitt avslag for personer det ikke er fremstilt krav for
-- Søknadsresultat-steget kan ikke returnere null hvis det er søknad/fødselshendelse/manuell migrering
+- Ikke lov med eksplisitt avslag for personer det ikke er fremstilt krav for (som ikke er søker)
+- Søknadsresultat-steget må returnere et resultat (altså ikke null) hvis det er søknad/fødselshendelse/manuell migrering
