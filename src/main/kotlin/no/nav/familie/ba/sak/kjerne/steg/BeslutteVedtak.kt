@@ -160,21 +160,11 @@ class BeslutteVedtak(
             hentNesteStegForNormalFlytGammel(behandling)
         }
 
-        if (nesteSteg == StegType.IVERKSETT_MOT_OPPDRAG) {
-            val erInnvilgetSøknadUtenUtebtalingsperioderGrunnetEndringsperioder =
-                if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_ATY_FOR_Å_AVGJØRE_DROPPE_SIMULERING)) {
-                    beregningService.erAlleUtbetalingsperioderPåNullKronerIDenneOgForrigeBehandling(
-                        behandling = behandling
-                    )
-                } else {
-                    beregningService.innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(
-                        behandling = behandling
-                    )
-                }
-
-            if (erInnvilgetSøknadUtenUtebtalingsperioderGrunnetEndringsperioder && behandling.erBehandlingMedVedtaksbrevutsending()) {
-                return StegType.JOURNALFØR_VEDTAKSBREV
-            }
+        if (nesteSteg == StegType.IVERKSETT_MOT_OPPDRAG &&
+            beregningService.erAlleUtbetalingsperioderPåNullKronerIDenneOgForrigeBehandling(behandling) &&
+            behandling.erBehandlingMedVedtaksbrevutsending()
+        ) {
+            return StegType.JOURNALFØR_VEDTAKSBREV
         }
         return nesteSteg
     }

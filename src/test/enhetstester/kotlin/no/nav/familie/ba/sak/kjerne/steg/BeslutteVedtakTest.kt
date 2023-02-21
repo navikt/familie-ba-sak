@@ -116,7 +116,6 @@ class BeslutteVedtakTest {
         mockkObject(FerdigstillOppgaver.Companion)
         every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
         every { beregningService.erAlleUtbetalingsperioderPåNullKronerIDenneOgForrigeBehandling(behandling = behandling) } returns false
-        every { beregningService.innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(behandling = behandling) } returns false
 
         val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
 

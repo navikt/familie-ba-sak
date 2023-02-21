@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
+import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -59,7 +60,10 @@ class VilkårsvurderingFlyttResultaterTest(
     private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
 
     @Autowired
-    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
+    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
+
+    @Autowired
+    private val brevmalService: BrevmalService
 
 ) : AbstractSpringIntegrationTest() {
 
@@ -124,18 +128,20 @@ class VilkårsvurderingFlyttResultaterTest(
         val førstegangsbehandling = kjørStegprosessForBehandling(
             søkerFnr = søker,
             barnasIdenter = listOf(barn1, barn2),
+            vedtakService = vedtakService,
             underkategori = BehandlingUnderkategori.UTVIDET,
             behandlingÅrsak = BehandlingÅrsak.SØKNAD,
             overstyrendeVilkårsvurdering = vilkårsvurderingMedUtvidetAvslått,
             behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING,
-            vedtakService = vedtakService,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
             endretUtbetalingAndelService = endretUtbetalingAndelService,
             fagsakService = fagsakService,
             persongrunnlagService = persongrunnlagService,
-            andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService
+            andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
+            brevmalService = brevmalService
+
         )
 
         val vilkårsvurderingFraForrigeBehandlingFørNyRevurdering =
@@ -146,18 +152,20 @@ class VilkårsvurderingFlyttResultaterTest(
             tilSteg = StegType.REGISTRERE_PERSONGRUNNLAG,
             søkerFnr = søker,
             barnasIdenter = listOf(barn1, barn2),
+            vedtakService = vedtakService,
             underkategori = BehandlingUnderkategori.ORDINÆR,
             behandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
             overstyrendeVilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling()),
             behandlingstype = BehandlingType.REVURDERING,
-            vedtakService = vedtakService,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
             endretUtbetalingAndelService = endretUtbetalingAndelService,
             fagsakService = fagsakService,
             persongrunnlagService = persongrunnlagService,
-            andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService
+            andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
+            brevmalService = brevmalService
+
         )
 
         // Sjekker at vilkårsvurderingen fra forrige behandling ikke er endret

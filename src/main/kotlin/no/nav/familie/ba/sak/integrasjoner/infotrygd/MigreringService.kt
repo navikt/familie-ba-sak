@@ -308,7 +308,10 @@ class MigreringService(
     }
 
     private fun hentLøpendeSakFraInfotrygd(personIdent: String): Sak {
-        val (ferdigBehandledeSaker, åpneSaker) = infotrygdBarnetrygdClient.hentSaker(listOf(personIdent)).bruker.partition { it.status == "FB" }
+        val (ferdigBehandledeSaker, åpneSaker) = infotrygdBarnetrygdClient.hentSaker(listOf(personIdent)).bruker
+            .filter { it.resultat != "HB" } // Filterer bort henlagte behandlinger
+            .partition { it.status == "FB" }
+
         if (åpneSaker.isNotEmpty()) {
             kastOgTellMigreringsFeil(MigreringsfeilType.ÅPEN_SAK_INFOTRYGD)
         }

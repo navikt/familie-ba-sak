@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.SatsTidspunkt
+import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -60,7 +61,8 @@ class FødselshendelseHenleggelseTest(
     @Autowired private val persongrunnlagService: PersongrunnlagService,
     @Autowired private val vilkårsvurderingService: VilkårsvurderingService,
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
-    @Autowired private val utvidetBehandlingService: UtvidetBehandlingService
+    @Autowired private val utvidetBehandlingService: UtvidetBehandlingService,
+    @Autowired private val brevmalService: BrevmalService
 ) : AbstractVerdikjedetest() {
 
     @BeforeEach
@@ -114,7 +116,9 @@ class FødselshendelseHenleggelseTest(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             vedtakService = vedtakService,
             stegService = stegService,
-            personidentService = personidentService
+            personidentService = personidentService,
+            brevmalService = brevmalService
+
         )
         assertNull(behandling)
 
@@ -152,7 +156,9 @@ class FødselshendelseHenleggelseTest(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             personidentService = personidentService,
             vedtakService = vedtakService,
-            stegService = stegService
+            stegService = stegService,
+            brevmalService = brevmalService
+
         )
 
         assertEquals(Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE, behandling?.resultat)
@@ -237,7 +243,9 @@ class FødselshendelseHenleggelseTest(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             personidentService = personidentService,
             vedtakService = vedtakService,
-            stegService = stegService
+            stegService = stegService,
+            brevmalService = brevmalService
+
         )
 
         assertEquals(Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE, behandling?.resultat)
@@ -279,7 +287,9 @@ class FødselshendelseHenleggelseTest(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             personidentService = personidentService,
             vedtakService = vedtakService,
-            stegService = stegService
+            stegService = stegService,
+            brevmalService = brevmalService
+
         )
 
         assertEquals(Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE, behandling?.resultat)
@@ -343,7 +353,9 @@ class FødselshendelseHenleggelseTest(
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
-            behandlingUnderkategori = BehandlingUnderkategori.UTVIDET
+            behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
+            brevmalService = brevmalService
+
         )
 
         assertEquals(BehandlingUnderkategori.UTVIDET, behandling.underkategori)
@@ -364,7 +376,9 @@ class FødselshendelseHenleggelseTest(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             personidentService = personidentService,
             vedtakService = vedtakService,
-            stegService = stegService
+            stegService = stegService,
+            brevmalService = brevmalService
+
         )
 
         assertEquals(BehandlingUnderkategori.UTVIDET, revurdering?.underkategori)
@@ -414,7 +428,9 @@ class FødselshendelseHenleggelseTest(
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
-            behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR
+            behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
+            brevmalService = brevmalService
+
         )
 
         oppdaterRegelverkTilEøs(behandling)
@@ -429,7 +445,9 @@ class FødselshendelseHenleggelseTest(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             personidentService = personidentService,
             vedtakService = vedtakService,
-            stegService = stegService
+            stegService = stegService,
+            brevmalService = brevmalService
+
         )
 
         assertEquals(BehandlingKategori.EØS, revurdering?.kategori)
@@ -489,7 +507,9 @@ class FødselshendelseHenleggelseTest(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             vedtakService = vedtakService,
             stegService = stegService,
-            personidentService = personidentService
+            personidentService = personidentService,
+            brevmalService = brevmalService
+
         )!!
 
         assertEquals(Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE, behandling.resultat)

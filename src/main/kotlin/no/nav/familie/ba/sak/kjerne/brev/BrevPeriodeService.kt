@@ -168,7 +168,9 @@ class BrevPeriodeService(
             minimerteKompetanserSomStopperRettFørPeriode = hentKompetanserSomStopperRettFørPeriode(
                 kompetanser = kompetanser,
                 periodeFom = minimertVedtaksperiode.fom?.toYearMonth()
-            ).map {
+            ).filter {
+                it.erFelterSatt()
+            }.map {
                 it.tilMinimertKompetanse(
                     personopplysningGrunnlag = personopplysningGrunnlag,
                     landkoderISO2 = landkoderISO2

@@ -101,7 +101,10 @@ class DokumentServiceTest(
     private val dokumentGenereringService: DokumentGenereringService,
 
     @Autowired
-    private val databaseCleanupService: DatabaseCleanupService
+    private val databaseCleanupService: DatabaseCleanupService,
+
+    @Autowired
+    private val brevmalService: BrevmalService
 ) : AbstractSpringIntegrationTest() {
 
     @BeforeEach
@@ -120,7 +123,8 @@ class DokumentServiceTest(
             persongrunnlagService = persongrunnlagService,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService
+            vedtaksperiodeService = vedtaksperiodeService,
+            brevmalService = brevmalService
         )
 
         totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(
@@ -154,7 +158,8 @@ class DokumentServiceTest(
             persongrunnlagService = persongrunnlagService,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService
+            vedtaksperiodeService = vedtaksperiodeService,
+            brevmalService = brevmalService
         )
 
         totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(
@@ -192,7 +197,8 @@ class DokumentServiceTest(
             persongrunnlagService = persongrunnlagService,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService
+            vedtaksperiodeService = vedtaksperiodeService,
+            brevmalService = brevmalService
         )
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVilkårsvurderingSteg.id)!!
 
@@ -250,7 +256,8 @@ class DokumentServiceTest(
             persongrunnlagService = persongrunnlagService,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService
+            vedtaksperiodeService = vedtaksperiodeService,
+            brevmalService = brevmalService
         )
 
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVedtakBesluttet.id)!!

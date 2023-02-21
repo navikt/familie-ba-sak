@@ -55,11 +55,10 @@ class OppgaveService(
         val eksisterendeOppgave =
             oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(oppgavetype, behandling)
 
-        return if (eksisterendeOppgave != null &&
-            oppgavetype != Oppgavetype.Journalføring
-        ) {
+        return if (eksisterendeOppgave != null && oppgavetype != Oppgavetype.Journalføring) {
             logger.warn(
-                "Fant eksisterende oppgave med samme oppgavetype som ikke er ferdigstilt ved opprettelse av ny oppgave $eksisterendeOppgave. " +
+                "Fant eksisterende oppgave med samme oppgavetype som ikke er ferdigstilt " +
+                    "ved opprettelse av ny oppgave $eksisterendeOppgave. " +
                     "Vi oppretter ikke ny oppgave, men gjenbruker eksisterende."
             )
 
@@ -69,7 +68,10 @@ class OppgaveService(
                 arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(behandling.id)
 
             if (arbeidsfordelingsenhet == null) {
-                logger.warn("Fant ikke behandlende enhet på behandling ${behandling.id} ved opprettelse av $oppgavetype-oppgave.")
+                logger.warn(
+                    "Fant ikke behandlende enhet på behandling ${behandling.id} " +
+                        "ved opprettelse av $oppgavetype-oppgave."
+                )
             }
 
             val opprettOppgave = OpprettOppgaveRequest(
@@ -85,7 +87,8 @@ class OppgaveService(
                         behandling.underkategori.tilOppgaveBehandlingTema().value
                 },
                 behandlingstype = behandling.kategori.tilOppgavebehandlingType().value,
-                tilordnetRessurs = tilordnetNavIdent
+                tilordnetRessurs = tilordnetNavIdent,
+                behandlesAvApplikasjon = if (oppgavetyperSomBehandlesAvBaSak.contains(oppgavetype)) "familie-ba-sak" else null
             )
             val opprettetOppgaveId = integrasjonClient.opprettOppgave(opprettOppgave).oppgaveId.toString()
 
@@ -302,5 +305,11 @@ class OppgaveService(
 
         private val logger = LoggerFactory.getLogger(OppgaveService::class.java)
         private val secureLogger = LoggerFactory.getLogger("secureLoger")
+        private val oppgavetyperSomBehandlesAvBaSak = listOf(
+            Oppgavetype.BehandleSak,
+            Oppgavetype.GodkjenneVedtak,
+            Oppgavetype.BehandleUnderkjentVedtak,
+            Oppgavetype.VurderLivshendelse
+        )
     }
 }

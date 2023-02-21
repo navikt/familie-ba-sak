@@ -5,6 +5,8 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.Utils.storForbokstavIHvertOrd
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.NY_MÅTE_Å_BEREGNE_BEHANDLINGSRESULTAT
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
@@ -64,12 +66,23 @@ class BrevService(
     private val korrigertEtterbetalingService: KorrigertEtterbetalingService,
     private val organisasjonService: OrganisasjonService,
     private val korrigertVedtakService: KorrigertVedtakService,
-    private val saksbehandlerContext: SaksbehandlerContext
-
+    private val saksbehandlerContext: SaksbehandlerContext,
+    private val brevmalService: BrevmalService,
+    private val featureToggleService: FeatureToggleService
 ) {
 
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
-        val brevmal = hentVedtaksbrevmal(vedtak.behandling)
+        val behandling = vedtak.behandling
+
+        val brevmal =
+            if (featureToggleService.isEnabled(NY_MÅTE_Å_BEREGNE_BEHANDLINGSRESULTAT)) {
+                brevmalService.hentBrevmal(
+                    behandling
+                )
+            } else {
+                hentBrevmalGammel(behandling)
+            }
+
         val vedtakFellesfelter = lagVedtaksbrevFellesfelter(vedtak)
         validerBrevdata(brevmal, vedtakFellesfelter)
 
@@ -89,8 +102,8 @@ class BrevService(
             Brevmal.VEDTAK_ENDRING -> VedtakEndring(
                 vedtakFellesfelter = vedtakFellesfelter,
                 etterbetaling = hentEtterbetaling(vedtak),
-                erKlage = vedtak.behandling.erKlage(),
-                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = vedtak.behandling.id),
+                erKlage = behandling.erKlage(),
+                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = behandling.id),
                 informasjonOmAarligKontroll = vedtaksperiodeService.skalHaÅrligKontroll(vedtak),
                 feilutbetaltValuta = vedtaksperiodeService.beskrivPerioderMedFeilutbetaltValuta(vedtak)?.let {
                     FeilutbetaltValuta(perioderMedForMyeUtbetalt = it)
@@ -101,33 +114,33 @@ class BrevService(
                 mal = Brevmal.VEDTAK_ENDRING_INSTITUSJON,
                 vedtakFellesfelter = vedtakFellesfelter,
                 etterbetalingInstitusjon = hentEtterbetalingInstitusjon(vedtak),
-                erKlage = vedtak.behandling.erKlage(),
-                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = vedtak.behandling.id),
+                erKlage = behandling.erKlage(),
+                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = behandling.id),
                 informasjonOmAarligKontroll = vedtaksperiodeService.skalHaÅrligKontroll(vedtak)
             )
 
             Brevmal.VEDTAK_OPPHØRT -> Opphørt(
                 vedtakFellesfelter = vedtakFellesfelter,
-                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = vedtak.behandling.id)
+                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = behandling.id)
             )
 
             Brevmal.VEDTAK_OPPHØRT_INSTITUSJON -> Opphørt(
                 mal = Brevmal.VEDTAK_OPPHØRT_INSTITUSJON,
                 vedtakFellesfelter = vedtakFellesfelter,
-                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = vedtak.behandling.id)
+                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = behandling.id)
             )
 
             Brevmal.VEDTAK_OPPHØR_MED_ENDRING -> OpphørMedEndring(
                 vedtakFellesfelter = vedtakFellesfelter,
                 etterbetaling = hentEtterbetaling(vedtak),
-                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = vedtak.behandling.id)
+                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = behandling.id)
             )
 
             Brevmal.VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON -> OpphørMedEndring(
                 mal = Brevmal.VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON,
                 vedtakFellesfelter = vedtakFellesfelter,
                 etterbetalingInstitusjon = hentEtterbetalingInstitusjon(vedtak),
-                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = vedtak.behandling.id)
+                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = behandling.id)
             )
 
             Brevmal.VEDTAK_AVSLAG -> Avslag(vedtakFellesfelter = vedtakFellesfelter)
