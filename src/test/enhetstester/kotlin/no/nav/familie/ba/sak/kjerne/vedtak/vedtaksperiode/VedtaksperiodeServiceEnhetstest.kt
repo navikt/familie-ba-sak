@@ -34,7 +34,8 @@ class VedtaksperiodeServiceEnhetstest {
 
     private val behandlingRepository: BehandlingRepository = mockk()
     private val persongrunnlagService: PersongrunnlagService = mockk()
-    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService = mockk()
+    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService =
+        mockk()
     private val endringstidspunktService: EndringstidspunktService = mockk()
     private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService = mockk()
     private val featureToggleService: FeatureToggleService = mockk()
@@ -82,18 +83,25 @@ class VedtaksperiodeServiceEnhetstest {
 
     @BeforeEach
     fun init() {
-        every { behandlingRepository.finnIverksatteBehandlinger(any()) } returns listOf(behandling, forrigeBehandling)
+        every { behandlingRepository.findByFagsakAndAvsluttet(any()) } returns listOf(forrigeBehandling)
         every { endringstidspunktService.finnEndringstidpunkForBehandling(vedtak.behandling.id) } returns endringstidspunkt
         every { persongrunnlagService.hentAktiv(any()) } returns
             lagTestPersonopplysningGrunnlag(vedtak.behandling.id, person)
         every {
-            andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(forrigeBehandling.id)
+            andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
+                forrigeBehandling.id
+            )
         } returns listOf(ytelseOpphørtSammeMåned)
 
         every {
             andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.id)
         } returns listOf(ytelseOpphørtFørEndringstidspunkt)
-        every { featureToggleService.isEnabled(FeatureToggleConfig.EØS_INFORMASJON_OM_ÅRLIG_KONTROLL, any()) } returns true
+        every {
+            featureToggleService.isEnabled(
+                FeatureToggleConfig.EØS_INFORMASJON_OM_ÅRLIG_KONTROLL,
+                any()
+            )
+        } returns true
         every { feilutbetaltValutaRepository.finnFeilutbetaltValutaForBehandling(any()) } returns emptyList()
     }
 
@@ -106,13 +114,17 @@ class VedtaksperiodeServiceEnhetstest {
         val førsteOpphørFomDato =
             returnerteVedtaksperioderNårUtledetEndringstidspunktErLikSisteOpphørFom.minOf { it.fom!! }
         val senesteOpphørTomDato =
-            returnerteVedtaksperioderNårUtledetEndringstidspunktErLikSisteOpphørFom.sortedBy { it.tom ?: TIDENES_ENDE }.last().tom
+            returnerteVedtaksperioderNårUtledetEndringstidspunktErLikSisteOpphørFom.sortedBy { it.tom ?: TIDENES_ENDE }
+                .last().tom
 
         val returnerteVedtaksperioderNårOverstyrtEndringstidspunktErFørsteOpphørFom = vedtaksperiodeService
             .genererVedtaksperioderMedBegrunnelser(vedtak, manueltOverstyrtEndringstidspunkt = førsteOpphørFomDato)
             .filter { it.type == Vedtaksperiodetype.OPPHØR }
         val returnerteVedtaksperioderNårOverstyrtEndringstidspunktErFørFørsteOpphør = vedtaksperiodeService
-            .genererVedtaksperioderMedBegrunnelser(vedtak, manueltOverstyrtEndringstidspunkt = førsteOpphørFomDato.minusMonths(1))
+            .genererVedtaksperioderMedBegrunnelser(
+                vedtak,
+                manueltOverstyrtEndringstidspunkt = førsteOpphørFomDato.minusMonths(1)
+            )
             .filter { it.type == Vedtaksperiodetype.OPPHØR }
 
         assertThat(returnerteVedtaksperioderNårUtledetEndringstidspunktErLikSisteOpphørFom).hasSize(2).last()
