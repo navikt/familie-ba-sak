@@ -60,8 +60,7 @@ fun hentTilbakekrevingsperioderISimulering(
     slåsammenNærliggendeFeilutbtalingPerioder(
         vedtakSimuleringMottakereTilRestSimulering(
             økonomiSimuleringMottakere = simulering,
-            erManuellPosteringTogglePå = erManuelPosteringTogglePå,
-            erMigreringsbehandling = false // ikke relevant når vi henter tilbakekrevingsperioder
+            erManuellPosteringTogglePå = erManuelPosteringTogglePå
         ).perioder
     )
 
@@ -74,8 +73,7 @@ fun opprettVarsel(
         val varseltekst = tilbakekreving.varsel ?: throw Feil("Varseltekst er ikke satt")
         val restSimulering = vedtakSimuleringMottakereTilRestSimulering(
             økonomiSimuleringMottakere = simulering,
-            erManuellPosteringTogglePå = erManuelPosteringTogglePå,
-            erMigreringsbehandling = false // ikke relevant for tilbakekreving
+            erManuellPosteringTogglePå = erManuelPosteringTogglePå
         )
 
         Varsel(
