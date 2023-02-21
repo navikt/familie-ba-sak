@@ -52,7 +52,7 @@ fun hentVedtaksbrevmalGammel(behandling: Behandling): Brevmal {
     }
 
     val brevmal = if (behandling.skalBehandlesAutomatisk) {
-        hentAutomatiskVedtaksbrevtype(behandling.opprettetÅrsak, behandling.fagsak.status)
+        hentAutomatiskVedtaksbrevtype(behandling)
     } else {
         hentManuellVedtaksbrevtypeGammel(behandling.type, behandling.resultat, behandling.fagsak.institusjon != null)
     }
@@ -60,9 +60,11 @@ fun hentVedtaksbrevmalGammel(behandling: Behandling): Brevmal {
     return if (brevmal.erVedtaksbrev) brevmal else throw Feil("Brevmal ${brevmal.visningsTekst} er ikke vedtaksbrev")
 }
 
-private fun hentAutomatiskVedtaksbrevtype(behandlingÅrsak: BehandlingÅrsak, fagsakStatus: FagsakStatus): Brevmal =
+fun hentAutomatiskVedtaksbrevtype(behandling: Behandling): Brevmal {
+    val behandlingÅrsak = behandling.opprettetÅrsak
+    val fagsakStatus = behandling.fagsak.status
 
-    when (behandlingÅrsak) {
+    return when (behandlingÅrsak) {
         BehandlingÅrsak.FØDSELSHENDELSE -> {
             if (fagsakStatus == FagsakStatus.LØPENDE) {
                 Brevmal.AUTOVEDTAK_NYFØDT_BARN_FRA_FØR
@@ -78,6 +80,7 @@ private fun hentAutomatiskVedtaksbrevtype(behandlingÅrsak: BehandlingÅrsak, fa
 
         else -> throw Feil("Det er ikke laget funksjonalitet for automatisk behandling for $behandlingÅrsak")
     }
+}
 
 @Deprecated("Bruk hentManuellVedtaksbrevtype")
 fun hentManuellVedtaksbrevtypeGammel(

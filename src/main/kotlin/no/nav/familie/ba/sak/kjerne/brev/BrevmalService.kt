@@ -8,7 +8,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import org.springframework.stereotype.Service
 
 @Service
@@ -43,6 +42,10 @@ class BrevmalService(
         val behandlingType = behandling.type
         val behandlingsresultat = behandling.resultat
         val erInstitusjon = behandling.fagsak.institusjon != null
+        val ytelseErLøpende by lazy {
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
+                .any { it.erLøpende() }
+        }
 
         val feilmeldingBehandlingTypeOgResultat =
             "Brev ikke støttet for behandlingstype=$behandlingType og behandlingsresultat=$behandlingsresultat"
@@ -70,7 +73,18 @@ class BrevmalService(
 
                         Behandlingsresultat.AVSLÅTT -> Brevmal.VEDTAK_AVSLAG_INSTITUSJON
 
-                        else -> throw FunksjonellFeil(
+                        Behandlingsresultat.ENDRET_OG_FORTSATT_INNVILGET,
+                        Behandlingsresultat.ENDRET_UTBETALING,
+                        Behandlingsresultat.ENDRET_UTEN_UTBETALING,
+                        Behandlingsresultat.ENDRET_OG_OPPHØRT,
+                        Behandlingsresultat.OPPHØRT,
+                        Behandlingsresultat.FORTSATT_OPPHØRT,
+                        Behandlingsresultat.FORTSATT_INNVILGET,
+                        Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET,
+                        Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET,
+                        Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE,
+                        Behandlingsresultat.HENLAGT_TEKNISK_VEDLIKEHOLD,
+                        Behandlingsresultat.IKKE_VURDERT -> throw FunksjonellFeil(
                             melding = feilmeldingBehandlingTypeOgResultat,
                             frontendFeilmelding = frontendFeilmelding
                         )
@@ -91,7 +105,18 @@ class BrevmalService(
 
                         Behandlingsresultat.AVSLÅTT -> Brevmal.VEDTAK_AVSLAG
 
-                        else -> throw FunksjonellFeil(
+                        Behandlingsresultat.ENDRET_OG_FORTSATT_INNVILGET,
+                        Behandlingsresultat.ENDRET_UTBETALING,
+                        Behandlingsresultat.ENDRET_UTEN_UTBETALING,
+                        Behandlingsresultat.ENDRET_OG_OPPHØRT,
+                        Behandlingsresultat.OPPHØRT,
+                        Behandlingsresultat.FORTSATT_OPPHØRT,
+                        Behandlingsresultat.FORTSATT_INNVILGET,
+                        Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET,
+                        Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET,
+                        Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE,
+                        Behandlingsresultat.HENLAGT_TEKNISK_VEDLIKEHOLD,
+                        Behandlingsresultat.IKKE_VURDERT -> throw FunksjonellFeil(
                             melding = feilmeldingBehandlingTypeOgResultat,
                             frontendFeilmelding = frontendFeilmelding
                         )
@@ -113,13 +138,7 @@ class BrevmalService(
                         Behandlingsresultat.AVSLÅTT_OG_OPPHØRT,
                         Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT,
                         Behandlingsresultat.ENDRET_UTBETALING,
-                        Behandlingsresultat.ENDRET_OG_OPPHØRT -> {
-                            val ytelseErLøpende =
-                                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
-                                    .any { it.erLøpende() }
-
-                            if (ytelseErLøpende) Brevmal.VEDTAK_ENDRING_INSTITUSJON else Brevmal.VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON
-                        }
+                        Behandlingsresultat.ENDRET_OG_OPPHØRT -> if (ytelseErLøpende) Brevmal.VEDTAK_ENDRING_INSTITUSJON else Brevmal.VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON
 
                         Behandlingsresultat.OPPHØRT,
                         Behandlingsresultat.FORTSATT_OPPHØRT -> Brevmal.VEDTAK_OPPHØRT_INSTITUSJON
@@ -129,7 +148,12 @@ class BrevmalService(
 
                         Behandlingsresultat.AVSLÅTT -> Brevmal.VEDTAK_AVSLAG_INSTITUSJON
 
-                        else -> throw FunksjonellFeil(
+                        Behandlingsresultat.ENDRET_UTEN_UTBETALING,
+                        Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET,
+                        Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET,
+                        Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE,
+                        Behandlingsresultat.HENLAGT_TEKNISK_VEDLIKEHOLD,
+                        Behandlingsresultat.IKKE_VURDERT -> throw FunksjonellFeil(
                             melding = feilmeldingBehandlingTypeOgResultat,
                             frontendFeilmelding = frontendFeilmelding
                         )
@@ -148,13 +172,7 @@ class BrevmalService(
                         Behandlingsresultat.AVSLÅTT_OG_OPPHØRT,
                         Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT,
                         Behandlingsresultat.ENDRET_UTBETALING,
-                        Behandlingsresultat.ENDRET_OG_OPPHØRT -> {
-                            val ytelseErLøpende =
-                                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
-                                    .any { it.erLøpende() }
-
-                            if (ytelseErLøpende) Brevmal.VEDTAK_ENDRING else Brevmal.VEDTAK_OPPHØR_MED_ENDRING
-                        }
+                        Behandlingsresultat.ENDRET_OG_OPPHØRT -> if (ytelseErLøpende) Brevmal.VEDTAK_ENDRING else Brevmal.VEDTAK_OPPHØR_MED_ENDRING
 
                         Behandlingsresultat.OPPHØRT,
                         Behandlingsresultat.FORTSATT_OPPHØRT -> Brevmal.VEDTAK_OPPHØRT
@@ -163,40 +181,25 @@ class BrevmalService(
                         Behandlingsresultat.ENDRET_OG_FORTSATT_INNVILGET -> Brevmal.VEDTAK_FORTSATT_INNVILGET
 
                         Behandlingsresultat.AVSLÅTT -> Brevmal.VEDTAK_AVSLAG
-
-                        else -> throw FunksjonellFeil(
+                        Behandlingsresultat.ENDRET_UTEN_UTBETALING,
+                        Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET,
+                        Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET,
+                        Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE,
+                        Behandlingsresultat.HENLAGT_TEKNISK_VEDLIKEHOLD,
+                        Behandlingsresultat.IKKE_VURDERT -> throw FunksjonellFeil(
                             melding = feilmeldingBehandlingTypeOgResultat,
                             frontendFeilmelding = frontendFeilmelding
                         )
                     }
                 }
 
-            else -> throw FunksjonellFeil(
+            BehandlingType.MIGRERING_FRA_INFOTRYGD,
+            BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT,
+            BehandlingType.TEKNISK_OPPHØR,
+            BehandlingType.TEKNISK_ENDRING -> throw FunksjonellFeil(
                 melding = feilmelidingBehandlingType,
                 frontendFeilmelding = frontendFeilmelding
             )
-        }
-    }
-
-    fun hentAutomatiskVedtaksbrevtype(behandling: Behandling): Brevmal {
-        val behandlingÅrsak = behandling.opprettetÅrsak
-        val fagsakStatus = behandling.fagsak.status
-
-        return when (behandlingÅrsak) {
-            BehandlingÅrsak.FØDSELSHENDELSE -> {
-                if (fagsakStatus == FagsakStatus.LØPENDE) {
-                    Brevmal.AUTOVEDTAK_NYFØDT_BARN_FRA_FØR
-                } else {
-                    Brevmal.AUTOVEDTAK_NYFØDT_FØRSTE_BARN
-                }
-            }
-
-            BehandlingÅrsak.OMREGNING_6ÅR,
-            BehandlingÅrsak.OMREGNING_18ÅR,
-            BehandlingÅrsak.SMÅBARNSTILLEGG,
-            BehandlingÅrsak.OMREGNING_SMÅBARNSTILLEGG -> Brevmal.AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG
-
-            else -> throw Feil("Det er ikke laget funksjonalitet for automatisk behandling for $behandlingÅrsak")
         }
     }
 }
