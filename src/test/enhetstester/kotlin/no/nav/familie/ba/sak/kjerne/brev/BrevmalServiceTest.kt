@@ -60,7 +60,7 @@ internal class BrevmalServiceTest {
         value = Behandlingsresultat::class,
         names = ["INNVILGET", "INNVILGET_OG_ENDRET", "INNVILGET_OG_OPPHØRT", "INNVILGET_ENDRET_OG_OPPHØRT", "DELVIS_INNVILGET", "DELVIS_INNVILGET_OG_ENDRET", "DELVIS_INNVILGET_OG_OPPHØRT", "DELVIS_INNVILGET_ENDRET_OG_OPPHØRT", "AVSLÅTT_OG_ENDRET", "AVSLÅTT_OG_OPPHØRT", "AVSLÅTT_ENDRET_OG_OPPHØRT"]
     )
-    fun `hentManuellVedtaksbrevtype skal returnere VEDTAK_FØRSTEGANGSVEDTAK_INSTITUSJON for førstegangsbehandling som er institusjon og gitte typer behandlingsresultat `(behandlingsresultat: Behandlingsresultat) {
+    fun `hentManuellVedtaksbrevtype skal returnere VEDTAK_FØRSTEGANGSVEDTAK_INSTITUSJON for førstegangsbehandling som er institusjon med gitte typer behandlingsresultat `(behandlingsresultat: Behandlingsresultat) {
         val behandling = mockk<Behandling>().apply {
             every { resultat } returns behandlingsresultat
             every { fagsak.institusjon } returns mockk()
@@ -70,12 +70,12 @@ internal class BrevmalServiceTest {
         assertThat(brevmalService.hentManuellVedtaksbrevtype(behandling), Is(Brevmal.VEDTAK_FØRSTEGANGSVEDTAK_INSTITUSJON))
     }
 
-    @ParameterizedTest(name = "hentManuellVedtaksbrevtype skal returnere VEDTAK_FØRSTEGANGSVEDTAK for førstegangsbehandling som ikke er institusjon med behandlingsresultat {0}")
+    @ParameterizedTest(name = "hentManuellVedtaksbrevtype skal returnere VEDTAK_FØRSTEGANGSVEDTAK for førstegangsbehandling med behandlingsresultat {0}")
     @EnumSource(
         value = Behandlingsresultat::class,
         names = ["INNVILGET", "INNVILGET_OG_ENDRET", "INNVILGET_OG_OPPHØRT", "INNVILGET_ENDRET_OG_OPPHØRT", "DELVIS_INNVILGET", "DELVIS_INNVILGET_OG_ENDRET", "DELVIS_INNVILGET_OG_OPPHØRT", "DELVIS_INNVILGET_ENDRET_OG_OPPHØRT", "AVSLÅTT_OG_ENDRET", "AVSLÅTT_OG_OPPHØRT", "AVSLÅTT_ENDRET_OG_OPPHØRT"]
     )
-    fun `hentManuellVedtaksbrevtype skal returnere VEDTAK_FØRSTEGANGSVEDTAK for førstegangsbehandling som ikke er institusjon og gitte typer behandlingsresultat `(behandlingsresultat: Behandlingsresultat) {
+    fun `hentManuellVedtaksbrevtype skal returnere VEDTAK_FØRSTEGANGSVEDTAK for førstegangsbehandling med gitte behandlingsresultat `(behandlingsresultat: Behandlingsresultat) {
         val behandling = mockk<Behandling>().apply {
             every { resultat } returns behandlingsresultat
             every { fagsak.institusjon } returns null
@@ -90,7 +90,7 @@ internal class BrevmalServiceTest {
         value = Behandlingsresultat::class,
         names = ["INNVILGET", "INNVILGET_OG_ENDRET", "INNVILGET_OG_OPPHØRT", "INNVILGET_ENDRET_OG_OPPHØRT", "DELVIS_INNVILGET", "DELVIS_INNVILGET_OG_ENDRET", "DELVIS_INNVILGET_OG_OPPHØRT", "DELVIS_INNVILGET_ENDRET_OG_OPPHØRT", "AVSLÅTT_OG_ENDRET", "AVSLÅTT_OG_OPPHØRT", "AVSLÅTT_ENDRET_OG_OPPHØRT"]
     )
-    fun `hentManuellVedtaksbrevtype skal returnere VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON for revurdering med ingen løpende ytelser som er institusjon og gitte typer behandlingsresultat `(behandlingsresultat: Behandlingsresultat) {
+    fun `hentManuellVedtaksbrevtype skal returnere VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON for revurdering med ingen løpende ytelser som er institusjon med gitte behandlingsresultat `(behandlingsresultat: Behandlingsresultat) {
         val behandling = mockk<Behandling>(relaxed = true).apply {
             every { resultat } returns behandlingsresultat
             every { fagsak.institusjon } returns mockk()
@@ -112,7 +112,7 @@ internal class BrevmalServiceTest {
         value = Behandlingsresultat::class,
         names = ["INNVILGET", "INNVILGET_OG_ENDRET", "INNVILGET_OG_OPPHØRT", "INNVILGET_ENDRET_OG_OPPHØRT", "DELVIS_INNVILGET", "DELVIS_INNVILGET_OG_ENDRET", "DELVIS_INNVILGET_OG_OPPHØRT", "DELVIS_INNVILGET_ENDRET_OG_OPPHØRT", "AVSLÅTT_OG_ENDRET", "AVSLÅTT_OG_OPPHØRT", "AVSLÅTT_ENDRET_OG_OPPHØRT"]
     )
-    fun `hentManuellVedtaksbrevtype skal returnere VEDTAK_ENDRING_INSTITUSJON for revurdering med løpende ytelser som er institusjon og gitte typer behandlingsresultat `(behandlingsresultat: Behandlingsresultat) {
+    fun `hentManuellVedtaksbrevtype skal returnere VEDTAK_ENDRING_INSTITUSJON for revurdering med løpende ytelser som er institusjon med gitte typer behandlingsresultat `(behandlingsresultat: Behandlingsresultat) {
         val behandling = mockk<Behandling>(relaxed = true).apply {
             every { resultat } returns behandlingsresultat
             every { fagsak.institusjon } returns mockk()
@@ -134,7 +134,7 @@ internal class BrevmalServiceTest {
         value = Behandlingsresultat::class,
         names = ["INNVILGET", "INNVILGET_OG_ENDRET", "INNVILGET_OG_OPPHØRT", "INNVILGET_ENDRET_OG_OPPHØRT", "DELVIS_INNVILGET", "DELVIS_INNVILGET_OG_ENDRET", "DELVIS_INNVILGET_OG_OPPHØRT", "DELVIS_INNVILGET_ENDRET_OG_OPPHØRT", "AVSLÅTT_OG_ENDRET", "AVSLÅTT_OG_OPPHØRT", "AVSLÅTT_ENDRET_OG_OPPHØRT"]
     )
-    fun `hentManuellVedtaksbrevtype skal returnere VEDTAK_ENDRING for revurdering med løpende ytelser som ikke er institusjon og gitte typer behandlingsresultat `(behandlingsresultat: Behandlingsresultat) {
+    fun `hentManuellVedtaksbrevtype skal returnere VEDTAK_ENDRING for revurdering med løpende ytelser med gitte behandlingsresultat `(behandlingsresultat: Behandlingsresultat) {
         val behandling = mockk<Behandling>(relaxed = true).apply {
             every { resultat } returns behandlingsresultat
             every { fagsak.institusjon } returns null
@@ -156,7 +156,7 @@ internal class BrevmalServiceTest {
         value = Behandlingsresultat::class,
         names = ["INNVILGET", "INNVILGET_OG_ENDRET", "INNVILGET_OG_OPPHØRT", "INNVILGET_ENDRET_OG_OPPHØRT", "DELVIS_INNVILGET", "DELVIS_INNVILGET_OG_ENDRET", "DELVIS_INNVILGET_OG_OPPHØRT", "DELVIS_INNVILGET_ENDRET_OG_OPPHØRT", "AVSLÅTT_OG_ENDRET", "AVSLÅTT_OG_OPPHØRT", "AVSLÅTT_ENDRET_OG_OPPHØRT"]
     )
-    fun `hentManuellVedtaksbrevtype skal returnere VEDTAK_OPPHØR_MED_ENDRING for revurdering med ingen løpende ytelser som ikke er institusjon og gitte typer behandlingsresultat `(behandlingsresultat: Behandlingsresultat) {
+    fun `hentManuellVedtaksbrevtype skal returnere VEDTAK_OPPHØR_MED_ENDRING for revurdering med ingen løpende ytelser med gitte behandlingsresultat `(behandlingsresultat: Behandlingsresultat) {
         val behandling = mockk<Behandling>(relaxed = true).apply {
             every { resultat } returns behandlingsresultat
             every { fagsak.institusjon } returns null
