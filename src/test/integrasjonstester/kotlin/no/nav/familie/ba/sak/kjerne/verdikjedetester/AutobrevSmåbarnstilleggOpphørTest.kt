@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
@@ -37,7 +38,8 @@ class AutobrevSmåbarnstilleggOpphørTest(
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val stegService: StegService,
     @Autowired private val efSakRestClient: EfSakRestClient,
-    @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
+    @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+    @Autowired private val brevmalService: BrevmalService
 ) : AbstractVerdikjedetest() {
 
     private val barnFødselsdato: LocalDate = LocalDate.now().minusYears(2)
@@ -154,7 +156,9 @@ class AutobrevSmåbarnstilleggOpphørTest(
             vedtakService = vedtakService,
             stegService = stegService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-            lagToken = ::token
+            lagToken = ::token,
+            brevmalService = brevmalService
+
         )
     }
 
@@ -195,7 +199,9 @@ class AutobrevSmåbarnstilleggOpphørTest(
             vedtakService = vedtakService,
             stegService = stegService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-            lagToken = ::token
+            lagToken = ::token,
+            brevmalService = brevmalService
+
         )
     }
 

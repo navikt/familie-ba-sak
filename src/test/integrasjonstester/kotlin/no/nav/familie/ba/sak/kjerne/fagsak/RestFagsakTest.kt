@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.kjerne.beregning.SatsTidspunkt
+import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
@@ -48,7 +49,10 @@ class RestFagsakTest(
     private val tilbakekrevingService: TilbakekrevingService,
 
     @Autowired
-    private val vedtaksperiodeService: VedtaksperiodeService
+    private val vedtaksperiodeService: VedtaksperiodeService,
+
+    @Autowired
+    private val brevmalService: BrevmalService
 
 ) : AbstractSpringIntegrationTest() {
 
@@ -82,7 +86,8 @@ class RestFagsakTest(
             persongrunnlagService = persongrunnlagService,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
-            vedtaksperiodeService
+            vedtaksperiodeService,
+            brevmalService = brevmalService
         )
 
         kjørStegprosessForRevurderingÅrligKontroll(
@@ -91,7 +96,8 @@ class RestFagsakTest(
             barnasIdenter = listOf(barnFnr),
             vedtakService = vedtakService,
             stegService = stegService,
-            fagsakId = førstegangsbehandling.fagsak.id
+            fagsakId = førstegangsbehandling.fagsak.id,
+            brevmalService = brevmalService
         )
 
         val restfagsak = fagsakService.hentRestFagsak(fagsakId = førstegangsbehandling.fagsak.id)

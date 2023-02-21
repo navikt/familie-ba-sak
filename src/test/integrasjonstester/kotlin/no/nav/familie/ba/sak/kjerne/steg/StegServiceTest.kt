@@ -27,6 +27,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
+import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
@@ -89,7 +90,11 @@ class StegServiceTest(
     private val vedtaksperiodeService: VedtaksperiodeService,
 
     @Autowired
-    private val oppgaveRepository: OppgaveRepository
+    private val oppgaveRepository: OppgaveRepository,
+
+    @Autowired
+    private val brevmalService: BrevmalService
+
 ) : AbstractSpringIntegrationTest() {
 
     @BeforeEach
@@ -113,7 +118,8 @@ class StegServiceTest(
             persongrunnlagService = persongrunnlagService,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService
+            vedtaksperiodeService = vedtaksperiodeService,
+            brevmalService = brevmalService
         )
 
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)!!
@@ -141,7 +147,8 @@ class StegServiceTest(
             persongrunnlagService = persongrunnlagService,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService
+            vedtaksperiodeService = vedtaksperiodeService,
+            brevmalService = brevmalService
         )
 
         // Venter med å kjøre gjennom til avsluttet til brev er støttet for fortsatt innvilget.
@@ -151,7 +158,8 @@ class StegServiceTest(
             barnasIdenter = listOf(ClientMocks.barnFnr[0]),
             vedtakService = vedtakService,
             stegService = stegService,
-            fagsakId = behandling.fagsak.id
+            fagsakId = behandling.fagsak.id,
+            brevmalService = brevmalService
         )
     }
 
@@ -346,7 +354,8 @@ class StegServiceTest(
             persongrunnlagService = persongrunnlagService,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService
+            vedtaksperiodeService = vedtaksperiodeService,
+            brevmalService = brevmalService
         )
 
         val nyMigreringsdato = LocalDate.now().minusMonths(6)
@@ -509,7 +518,8 @@ class StegServiceTest(
             persongrunnlagService = persongrunnlagService,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService
+            vedtaksperiodeService = vedtaksperiodeService,
+            brevmalService = brevmalService
         )
     }
 

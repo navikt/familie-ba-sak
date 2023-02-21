@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.beregning.EndringstidspunktService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
+import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
@@ -38,6 +39,7 @@ class VedtaksperiodeServiceEnhetstest {
     private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService = mockk()
     private val featureToggleService: FeatureToggleService = mockk()
     private val feilutbetaltValutaRepository: FeilutbetaltValutaRepository = mockk()
+    private val brevmalService: BrevmalService = mockk()
 
     private val vedtaksperiodeService = VedtaksperiodeService(
         behandlingRepository = behandlingRepository,
@@ -55,7 +57,8 @@ class VedtaksperiodeServiceEnhetstest {
         kompetanseRepository = mockk(),
         andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
         featureToggleService = featureToggleService,
-        feilutbetaltValutaRepository = feilutbetaltValutaRepository
+        feilutbetaltValutaRepository = feilutbetaltValutaRepository,
+        brevmalService = brevmalService
     )
 
     private val person = lagPerson()
