@@ -160,14 +160,11 @@ class BeslutteVedtak(
             hentNesteStegForNormalFlytGammel(behandling)
         }
 
-        if (nesteSteg == StegType.IVERKSETT_MOT_OPPDRAG) {
-            val erInnvilgetSøknadUtenUtebtalingsperioderGrunnetEndringsperioder =
-                beregningService.erAlleUtbetalingsperioderPåNullKronerIDenneOgForrigeBehandling(behandling)
-
-
-            if (erInnvilgetSøknadUtenUtebtalingsperioderGrunnetEndringsperioder && behandling.erBehandlingMedVedtaksbrevutsending()) {
-                return StegType.JOURNALFØR_VEDTAKSBREV
-            }
+        if (nesteSteg == StegType.IVERKSETT_MOT_OPPDRAG &&
+            beregningService.erAlleUtbetalingsperioderPåNullKronerIDenneOgForrigeBehandling(behandling) &&
+            behandling.erBehandlingMedVedtaksbrevutsending()
+        ) {
+            return StegType.JOURNALFØR_VEDTAKSBREV
         }
         return nesteSteg
     }
