@@ -245,13 +245,12 @@ class SimuleringUtilTest {
         assertThat(simuleringsperioder[0].tidligereUtbetalt).isEqualTo(10_000.toBigDecimal())
         assertThat(simuleringsperioder[0].nyttBeløp).isEqualTo(2_000.toBigDecimal())
         assertThat(simuleringsperioder[0].resultat).isEqualTo(-8_000.toBigDecimal())
-        assertThat(simuleringsperioder[0].korrigertResultat).isEqualTo(simuleringsperioder[0].resultat)
         assertThat(simuleringsperioder[0].feilutbetaling).isEqualTo(8_000.toBigDecimal())
         assertThat(oppsummering.etterbetaling).isEqualTo(0.toBigDecimal())
     }
 
     @Test
-    fun `ytelse med manuelle posteringer på trekk av 305 over 3 mnd`() {
+    fun `ytelse med manuelle posteringer på trekk av 770 over 3 mnd`() {
         val fil = File("./src/test/resources/kjerne.simulering/simulering_med_manuell_postering.json")
 
         val ytelseMedManuellePosteringer =
@@ -268,8 +267,29 @@ class SimuleringUtilTest {
         val simuleringsperioder = vedtakSimuleringMottakereTilSimuleringPerioder(vedtakSimuleringMottakere, true)
         val oppsummering = vedtakSimuleringMottakereTilRestSimulering(vedtakSimuleringMottakere, true)
 
-        assertThat(simuleringsperioder[0].resultat).isEqualTo(0.toBigDecimal())
-        assertThat(oppsummering.etterbetaling).isEqualTo(0.toBigDecimal())
+        val simuleringJanuar22 = simuleringsperioder.single { it.fom == LocalDate.of(2022, 1, 1) }
+        val simuleringFebruar22 = simuleringsperioder.single { it.fom == LocalDate.of(2022, 2, 1) }
+        val simuleringMars22 = simuleringsperioder.single { it.fom == LocalDate.of(2022, 3, 1) }
+        val simuleringApril22 = simuleringsperioder.single { it.fom == LocalDate.of(2022, 4, 1) }
+
+        assertThat(simuleringJanuar22.tidligereUtbetalt).isEqualTo(305.toBigDecimal())
+        assertThat(simuleringJanuar22.resultat).isEqualTo(0.toBigDecimal())
+        assertThat(simuleringJanuar22.manuellPostering).isEqualTo(0.toBigDecimal())
+
+        assertThat(simuleringFebruar22.tidligereUtbetalt).isEqualTo(0.toBigDecimal())
+        assertThat(simuleringFebruar22.resultat).isEqualTo(305.toBigDecimal())
+        assertThat(simuleringFebruar22.manuellPostering).isEqualTo((-305).toBigDecimal())
+
+        assertThat(simuleringMars22.tidligereUtbetalt).isEqualTo(0.toBigDecimal())
+        assertThat(simuleringMars22.resultat).isEqualTo(305.toBigDecimal())
+        assertThat(simuleringMars22.manuellPostering).isEqualTo((-305).toBigDecimal())
+
+        assertThat(simuleringApril22.tidligereUtbetalt).isEqualTo(140.toBigDecimal())
+        assertThat(simuleringApril22.resultat).isEqualTo(165.toBigDecimal())
+        assertThat(simuleringApril22.manuellPostering).isEqualTo((-165).toBigDecimal())
+
+        assertThat(simuleringsperioder.sumOf { it.manuellPostering }).isEqualTo((-775).toBigDecimal())
+        assertThat(oppsummering.etterbetaling).isEqualTo(775.toBigDecimal())
     }
 
     @Test
@@ -316,7 +336,7 @@ class SimuleringUtilTest {
     }
 
     @Test
-    fun `ytelse med manuellt trekk av valutajustering`() {
+    fun `ytelse med manuellt trekk av valutajustering deler er trukket`() {
         val YtelsefraBA = listOf(
             mockVedtakSimuleringPostering(
                 beløp = 305,
@@ -359,13 +379,12 @@ class SimuleringUtilTest {
         assertThat(simuleringsperioder[0].manuellPostering).isEqualTo((-165).toBigDecimal())
         assertThat(simuleringsperioder[0].tidligereUtbetalt).isEqualTo(140.toBigDecimal())
         assertThat(simuleringsperioder[0].resultat).isEqualTo(165.toBigDecimal())
-        assertThat(simuleringsperioder[0].korrigertResultat).isEqualTo(0.toBigDecimal())
         assertThat(simuleringsperioder[0].feilutbetaling).isEqualTo(0.toBigDecimal())
-        assertThat(oppsummering.etterbetaling).isEqualTo(0.toBigDecimal())
+        assertThat(oppsummering.etterbetaling).isEqualTo(165.toBigDecimal())
     }
 
     @Test
-    fun `ytelse med manuellt trekk av valutajustering 2`() {
+    fun `ytelse med manuellt trekk av valutajustering alt er trukket`() {
         val YtelsefraBA = listOf(
             mockVedtakSimuleringPostering(
                 beløp = 305,
@@ -404,14 +423,14 @@ class SimuleringUtilTest {
         val simuleringsperioder = vedtakSimuleringMottakereTilSimuleringPerioder(økonomiSimuleringMottakere, true)
         val oppsummering = vedtakSimuleringMottakereTilRestSimulering(økonomiSimuleringMottakere, true)
 
-        assertThat(simuleringsperioder.size).isEqualTo(1)
-        assertThat(simuleringsperioder[0].nyttBeløp).isEqualTo(305.toBigDecimal())
-        assertThat(simuleringsperioder[0].manuellPostering).isEqualTo((-305).toBigDecimal())
-        assertThat(simuleringsperioder[0].tidligereUtbetalt).isEqualTo(0.toBigDecimal())
-        assertThat(simuleringsperioder[0].resultat).isEqualTo(305.toBigDecimal())
-        assertThat(simuleringsperioder[0].korrigertResultat).isEqualTo(0.toBigDecimal())
-        assertThat(simuleringsperioder[0].feilutbetaling).isEqualTo(0.toBigDecimal())
-        assertThat(oppsummering.etterbetaling).isEqualTo(0.toBigDecimal())
+        val simuleringsperiode = simuleringsperioder.single()
+
+        assertThat(simuleringsperiode.nyttBeløp).isEqualTo(305.toBigDecimal())
+        assertThat(simuleringsperiode.manuellPostering).isEqualTo((-305).toBigDecimal())
+        assertThat(simuleringsperiode.tidligereUtbetalt).isEqualTo(0.toBigDecimal())
+        assertThat(simuleringsperiode.resultat).isEqualTo(305.toBigDecimal())
+        assertThat(simuleringsperiode.feilutbetaling).isEqualTo(0.toBigDecimal())
+        assertThat(oppsummering.etterbetaling).isEqualTo(305.toBigDecimal())
     }
 
     @Test
@@ -453,7 +472,6 @@ class SimuleringUtilTest {
         assertThat(simuleringsperioder[0].tidligereUtbetalt).isEqualTo(3_000.toBigDecimal())
         assertThat(simuleringsperioder[0].nyttBeløp).isEqualTo(12_000.toBigDecimal())
         assertThat(simuleringsperioder[0].resultat).isEqualTo(9_000.toBigDecimal())
-        assertThat(simuleringsperioder[0].korrigertResultat).isEqualTo(simuleringsperioder[0].resultat)
         assertThat(simuleringsperioder[0].feilutbetaling).isEqualTo(0.toBigDecimal())
         assertThat(oppsummering.etterbetaling).isEqualTo(2_000.toBigDecimal())
     }
@@ -538,29 +556,6 @@ class SimuleringUtilTest {
 
     @Test
     fun `ytelse med ikke reelle feilutbetalinger skal gi riktig resultat`() {
-        val fil = File("./src/test/resources/kjerne.simulering/simulering_med_mottrekk.json")
-
-        val ytelseMedManuellePosteringer =
-            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                .configure(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true)
-                .readValue<DetaljertSimuleringResultat>(fil)
-
-        val vedtakSimuleringMottakere = ytelseMedManuellePosteringer.simuleringMottaker.map {
-            it.tilBehandlingSimuleringMottaker(
-                lagBehandling()
-            )
-        }
-
-        val simuleringsperioder = vedtakSimuleringMottakereTilSimuleringPerioder(vedtakSimuleringMottakere, true)
-
-        simuleringsperioder
-            .forEach {
-                assertThat(it.korrigertResultat.abs()).isLessThanOrEqualTo(BigDecimal.ONE)
-            }
-    }
-
-    @Test
-    fun `ytelse med ikke reelle feilutbetalinger skal gi riktig resultat2`() {
         val ytelseMetMotposteringerOgManuellePosteringer = listOf(
             mockVedtakSimuleringPostering(
                 beløp = 658,
@@ -620,10 +615,9 @@ class SimuleringUtilTest {
         assertThat(simuleringsperiode.nyttBeløp).isEqualTo(658.toBigDecimal())
         assertThat(simuleringsperiode.manuellPostering).isEqualTo(50.toBigDecimal())
         assertThat(simuleringsperiode.tidligereUtbetalt).isEqualTo(707.toBigDecimal())
-        assertThat(simuleringsperiode.feilutbetaling).isEqualTo((0).toBigDecimal())
+        assertThat(simuleringsperiode.feilutbetaling).isEqualTo((49).toBigDecimal())
         assertThat(simuleringsperiode.resultat).isEqualTo((-49).toBigDecimal())
-        assertThat(simuleringsperiode.korrigertResultat).isEqualTo((1).toBigDecimal())
-        assertThat(simuleringsperiode.etterbetaling).isEqualTo((1).toBigDecimal())
+        assertThat(simuleringsperiode.etterbetaling).isEqualTo((0).toBigDecimal())
     }
 }
 
