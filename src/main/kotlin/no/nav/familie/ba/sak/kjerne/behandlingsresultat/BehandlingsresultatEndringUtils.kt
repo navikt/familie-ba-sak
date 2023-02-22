@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
+import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIKompetanseUtil
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
@@ -155,19 +156,7 @@ object BehandlingsresultatEndringUtils {
         nåværendeKompetanserForPerson: List<Kompetanse>,
         forrigeKompetanserForPerson: List<Kompetanse>
     ): Boolean {
-        val nåværendeTidslinje = nåværendeKompetanserForPerson.tilTidslinje()
-        val forrigeTidslinje = forrigeKompetanserForPerson.tilTidslinje()
-
-        val endringerTidslinje = nåværendeTidslinje.kombinerUtenNullMed(forrigeTidslinje) { nåværende, forrige ->
-            (
-                nåværende.søkersAktivitet != forrige.søkersAktivitet ||
-                    nåværende.søkersAktivitetsland != forrige.søkersAktivitetsland ||
-                    nåværende.annenForeldersAktivitet != forrige.annenForeldersAktivitet ||
-                    nåværende.annenForeldersAktivitetsland != forrige.annenForeldersAktivitetsland ||
-                    nåværende.barnetsBostedsland != forrige.barnetsBostedsland ||
-                    nåværende.resultat != forrige.resultat
-                )
-        }
+        val endringerTidslinje = EndringIKompetanseUtil().endringIKompetanseForPersonTidslinje(nåværendeKompetanserForPerson, forrigeKompetanserForPerson)
 
         return endringerTidslinje.perioder().any { it.innhold == true }
     }
