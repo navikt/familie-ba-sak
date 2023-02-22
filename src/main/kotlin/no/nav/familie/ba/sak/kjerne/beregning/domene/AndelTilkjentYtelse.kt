@@ -277,27 +277,13 @@ fun List<AndelTilkjentYtelse>.erEndringerIUtbetalingMellomForrigeAndeler(
     forrigeAndeler: List<AndelTilkjentYtelse>
 ): Boolean {
     if (isEmpty() && forrigeAndeler.isEmpty()) return false
-    val allePersonerMedAndeler = (map { it.aktør } + forrigeAndeler.map { it.aktør }).distinct()
 
-    return allePersonerMedAndeler.any { aktør ->
-        val ytelseTyperForPerson = (map { it.type } + forrigeAndeler.map { it.type }).distinct()
-        ytelseTyperForPerson.any { ytelseType ->
-            filter { it.aktør == aktør && it.type == ytelseType }.erEndringIUtbetalingForPersonOgType(
-                forrigeAndeler = forrigeAndeler.filter { it.aktør == aktør && it.type == ytelseType }
-            )
-        }
-    }
-}
-
-private fun List<AndelTilkjentYtelse>.erEndringIUtbetalingForPersonOgType(
-    forrigeAndeler: List<AndelTilkjentYtelse>
-): Boolean {
-    val endringIBeløpTidslinje = EndringIUtbetalingUtil().lagEndringIUtbetalingForPersonOgTypeTidslinje(
+    val endringIUtbetalingTidslinje = EndringIUtbetalingUtil().lagEndringIUtbetalingTidslinje(
         nåværendeAndeler = this,
         forrigeAndeler = forrigeAndeler
     )
 
-    return endringIBeløpTidslinje.perioder().any { it.innhold == true }
+    return endringIUtbetalingTidslinje.perioder().any { it.innhold == true }
 }
 
 enum class YtelseType(val klassifisering: String) {
