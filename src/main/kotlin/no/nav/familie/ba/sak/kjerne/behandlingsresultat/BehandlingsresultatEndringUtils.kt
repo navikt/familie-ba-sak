@@ -19,7 +19,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companio
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjær
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import java.time.YearMonth
 
 internal enum class Endringsresultat {
@@ -156,20 +155,6 @@ object BehandlingsresultatEndringUtils {
             opphørstidspunkt = opphørstidspunkt
         )
         return endringIVilkårsvurderingTidslinje.perioder().any { it.innhold == true }
-    }
-
-    fun erEndringIVilkårvurderingForPerson(
-        nåværendeVilkårResultat: List<VilkårResultat>,
-        forrigeVilkårResultat: List<VilkårResultat>,
-        opphørstidspunkt: YearMonth
-    ): Boolean {
-        val endringIVilkårResultat = EndringIVilkårsvurderingUtil().lagEndringIVilkårsvurderingForPersonOgVilkårTidslinje(
-            nåværendeVilkårResultat = nåværendeVilkårResultat,
-            forrigeVilkårResultat = forrigeVilkårResultat,
-            opphørstidspunkt = opphørstidspunkt
-        )
-
-        return endringIVilkårResultat.perioder().any { it.innhold == true }
     }
 
     internal fun erEndringIEndretUtbetalingAndeler(
