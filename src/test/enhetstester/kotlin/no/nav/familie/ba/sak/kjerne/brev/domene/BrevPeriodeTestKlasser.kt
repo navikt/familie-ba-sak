@@ -5,8 +5,8 @@ import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.brev.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.brev.domene.LandNavn
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertAnnenVurdering
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertKompetanse

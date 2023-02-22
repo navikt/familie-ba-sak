@@ -2,10 +2,8 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import io.mockk.clearStaticMockk
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
-import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.assertThrows
@@ -97,20 +95,5 @@ class BehandlingsresultatUtilsTest {
                 Arguments.of(Søknadsresultat.INGEN_RELEVANTE_ENDRINGER, Endringsresultat.ENDRING, Opphørsresultat.OPPHØRT),
                 Arguments.of(Søknadsresultat.INGEN_RELEVANTE_ENDRINGER, Endringsresultat.ENDRING, Opphørsresultat.FORTSATT_OPPHØRT)
             )
-    }
-
-    private fun lagYtelsePerson(
-        resultat: YtelsePersonResultat,
-        ytelseSlutt: YearMonth? = YearMonth.now().minusMonths(2)
-    ): YtelsePerson {
-        val ytelseType = YtelseType.ORDINÆR_BARNETRYGD
-        val kravOpprinnelse = listOf(KravOpprinnelse.TIDLIGERE, KravOpprinnelse.INNEVÆRENDE)
-        return YtelsePerson(
-            aktør = randomAktør(),
-            ytelseType = ytelseType,
-            kravOpprinnelse = kravOpprinnelse,
-            resultater = setOf(resultat),
-            ytelseSlutt = ytelseSlutt
-        )
     }
 }
