@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.brev.domene
 
-import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
+import no.nav.familie.ba.sak.kjerne.brev.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.brev.domene.eøs.EØSBegrunnelseMedTriggere
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.SanityEØSBegrunnelse
