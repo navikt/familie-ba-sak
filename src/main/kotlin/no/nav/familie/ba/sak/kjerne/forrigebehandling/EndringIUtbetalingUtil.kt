@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 
-class EndringIUtbetalingUtil {
+object EndringIUtbetalingUtil {
 
     fun erEndringerIUtbetalingFraForrigeBehandling(
         nåværendeAndeler: List<AndelTilkjentYtelse>,

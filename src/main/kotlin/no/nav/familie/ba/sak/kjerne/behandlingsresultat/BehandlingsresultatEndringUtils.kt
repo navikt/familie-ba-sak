@@ -133,7 +133,7 @@ object BehandlingsresultatEndringUtils {
         nåværendeKompetanser: List<Kompetanse>,
         forrigeKompetanser: List<Kompetanse>
     ): Boolean {
-        val endringIKompetanseTidslinje = EndringIKompetanseUtil().lagEndringIKompetanseTidslinje(
+        val endringIKompetanseTidslinje = EndringIKompetanseUtil.lagEndringIKompetanseTidslinje(
             nåværendeKompetanser = nåværendeKompetanser,
             forrigeKompetanser = forrigeKompetanser
         )
@@ -148,7 +148,7 @@ object BehandlingsresultatEndringUtils {
     ): Boolean {
         if (opphørstidspunkt == null) return false // Returnerer false hvis verken forrige eller nåværende behandling har andeler
 
-        val endringIVilkårsvurderingTidslinje = EndringIVilkårsvurderingUtil().lagEndringIVilkårsvurderingTidslinje(
+        val endringIVilkårsvurderingTidslinje = EndringIVilkårsvurderingUtil.lagEndringIVilkårsvurderingTidslinje(
             nåværendePersonResultat = nåværendePersonResultat,
             forrigePersonResultat = forrigePersonResultat,
             opphørstidspunkt = opphørstidspunkt
@@ -160,7 +160,7 @@ object BehandlingsresultatEndringUtils {
         nåværendeEndretAndeler: List<EndretUtbetalingAndel>,
         forrigeEndretAndeler: List<EndretUtbetalingAndel>
     ): Boolean {
-        val endringIEndretUtbetalingAndelTidslinje = EndringIEndretUtbetalingAndelUtil().lagEndringIEndretUtbetalingAndelTidslinje(
+        val endringIEndretUtbetalingAndelTidslinje = EndringIEndretUtbetalingAndelUtil.lagEndringIEndretUtbetalingAndelTidslinje(
             nåværendeEndretAndeler = nåværendeEndretAndeler,
             forrigeEndretAndeler = forrigeEndretAndeler
         )

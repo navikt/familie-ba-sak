@@ -13,7 +13,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilTidslinje
 import java.time.LocalDate
 import java.time.YearMonth
 
-class EndringIVilkårsvurderingUtil {
+object EndringIVilkårsvurderingUtil {
 
     fun lagEndringIVilkårsvurderingTidslinje(
         nåværendePersonResultat: Set<PersonResultat>,

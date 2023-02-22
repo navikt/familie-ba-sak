@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 
-class EndringIKompetanseUtil {
+object EndringIKompetanseUtil {
 
     fun lagEndringIKompetanseTidslinje(
         nåværendeKompetanser: List<Kompetanse>,
