@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.forrigeMåned
-import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatOpphørUtils.utledOpphørsdatoForNåværendeBehandlingMedFallback
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
@@ -11,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIKompetanseUtil
+import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIVilkårsvurderingUtil
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
@@ -22,8 +22,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjær
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilTidslinje
-import java.time.LocalDate
 import java.time.YearMonth
 
 internal enum class Endringsresultat {
@@ -177,31 +175,19 @@ object BehandlingsresultatEndringUtils {
         return finnesPersonMedEndretVilkårsvurdering
     }
 
-    // Relevante endringer er
-    // 1. Endringer i utdypende vilkårsvurdering
-    // 2. Endringer i regelverk
-    // 3. Splitt i vilkårsvurderingen
     fun erEndringIVilkårvurderingForPerson(
         nåværendeVilkårResultat: List<VilkårResultat>,
         forrigeVilkårResultat: List<VilkårResultat>,
         opphørstidspunkt: YearMonth
     ): Boolean {
-        val nåværendeVilkårResultatTidslinje = nåværendeVilkårResultat.tilTidslinje()
-        val tidligereVilkårResultatTidslinje = forrigeVilkårResultat.tilTidslinje()
-
-        val endringIVilkårResultat =
-            nåværendeVilkårResultatTidslinje.kombinerUtenNullMed(tidligereVilkårResultatTidslinje) { nåværende, forrige ->
-
-                nåværende.utdypendeVilkårsvurderinger.toSet() != forrige.utdypendeVilkårsvurderinger.toSet() ||
-                    nåværende.vurderesEtter != forrige.vurderesEtter ||
-                    nåværende.periodeFom != forrige.periodeFom ||
-                    (nåværende.periodeTom != forrige.periodeTom && nåværende.periodeTom.førerIkkeTilOpphør(opphørstidspunkt))
-            }
+        val endringIVilkårResultat = EndringIVilkårsvurderingUtil().lagEndringIVilkårsvurderingForPersonOgVilkårTidslinje(
+            nåværendeVilkårResultat = nåværendeVilkårResultat,
+            forrigeVilkårResultat = forrigeVilkårResultat,
+            opphørstidspunkt = opphørstidspunkt
+        )
 
         return endringIVilkårResultat.perioder().any { it.innhold == true }
     }
-
-    private fun LocalDate?.førerIkkeTilOpphør(opphørstidspunkt: YearMonth): Boolean = this?.isBefore(opphørstidspunkt.minusMonths(1).førsteDagIInneværendeMåned()) == true
 
     internal fun erEndringIEndretUtbetalingAndeler(
         nåværendeEndretAndeler: List<EndretUtbetalingAndel>,
