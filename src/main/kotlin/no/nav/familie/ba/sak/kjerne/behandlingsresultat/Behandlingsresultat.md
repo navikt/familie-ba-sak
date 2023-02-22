@@ -13,7 +13,7 @@ Søknadsresultat skal kun genereres for behandlinger med årsak søknad, fødsel
 
 ### Personer fremstilt krav for
 Det er ulik utledning for hvilke personer det er fremstilt krav for avhengig av type sak:
-- **Søknad**: barn som er krysset av på "Registrer søknad"-steget + søker hvis det er søkt om utvidet
+- **Søknad**: barn som er krysset av på "Registrer søknad"-steget + søker hvis det er søkt om utvidet barnetrygd
 - **Fødselshendelse**: barn som er nye på behandlingen siden forrige gang
 - **Manuell migrering**: alle personer i persongrunnlaget
 
