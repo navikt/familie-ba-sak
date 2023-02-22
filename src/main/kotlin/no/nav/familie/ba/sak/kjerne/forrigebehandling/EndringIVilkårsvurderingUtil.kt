@@ -50,7 +50,7 @@ object EndringIVilkårsvurderingUtil {
     // 1. Endringer i utdypende vilkårsvurdering
     // 2. Endringer i regelverk
     // 3. Splitt i vilkårsvurderingen
-    fun lagEndringIVilkårsvurderingForPersonOgVilkårTidslinje(
+    private fun lagEndringIVilkårsvurderingForPersonOgVilkårTidslinje(
         nåværendeVilkårResultat: List<VilkårResultat>,
         forrigeVilkårResultat: List<VilkårResultat>,
         opphørstidspunkt: YearMonth
