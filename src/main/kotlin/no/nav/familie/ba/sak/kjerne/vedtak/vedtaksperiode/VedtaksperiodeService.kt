@@ -27,11 +27,12 @@ import no.nav.familie.ba.sak.kjerne.beregning.EndringstidspunktService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
+import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.brev.hentIPeriode
 import no.nav.familie.ba.sak.kjerne.brev.hentKompetanserSomStopperRettFørPeriode
-import no.nav.familie.ba.sak.kjerne.brev.hentVedtaksbrevmal
+import no.nav.familie.ba.sak.kjerne.brev.hentVedtaksbrevmalGammel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
@@ -84,7 +85,8 @@ class VedtaksperiodeService(
     private val kompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse>,
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     private val featureToggleService: FeatureToggleService,
-    private val feilutbetaltValutaRepository: FeilutbetaltValutaRepository
+    private val feilutbetaltValutaRepository: FeilutbetaltValutaRepository,
+    private val brevmalService: BrevmalService
 ) {
     fun oppdaterVedtaksperiodeMedFritekster(
         vedtaksperiodeId: Long,
@@ -249,9 +251,23 @@ class VedtaksperiodeService(
     @Transactional
     fun oppdaterVedtakMedVedtaksperioder(vedtak: Vedtak, skalOverstyreFortsattInnvilget: Boolean = false) {
         vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(vedtak)
+        val behandling = vedtak.behandling
+
         // Rent fortsatt innvilget-resultat er det eneste som kun skal gi én vedtaksperiode
-        if (vedtak.behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET && (!skalOverstyreFortsattInnvilget || featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_BEREGNE_BEHANDLINGSRESULTAT))) {
-            val vedtaksbrevmal = hentVedtaksbrevmal(vedtak.behandling)
+        if (behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET && (
+            !skalOverstyreFortsattInnvilget || featureToggleService.isEnabled(
+                    FeatureToggleConfig.NY_MÅTE_Å_BEREGNE_BEHANDLINGSRESULTAT
+                )
+            )
+        ) {
+            val vedtaksbrevmal =
+                if (featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_BEREGNE_BEHANDLINGSRESULTAT)) {
+                    brevmalService.hentVedtaksbrevmal(
+                        behandling
+                    )
+                } else {
+                    hentVedtaksbrevmalGammel(behandling)
+                }
             val erAutobrevFor6Og18ÅrOgSmåbarnstillegg =
                 vedtaksbrevmal == Brevmal.AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG
 
@@ -262,7 +278,7 @@ class VedtaksperiodeService(
             }
 
             val tom = if (erAutobrevFor6Og18ÅrOgSmåbarnstillegg) {
-                finnTomDatoIFørsteUtbetalingsintervallFraInneværendeMåned(vedtak.behandling.id)
+                finnTomDatoIFørsteUtbetalingsintervallFraInneværendeMåned(behandling.id)
             } else {
                 null
             }
@@ -527,26 +543,28 @@ class VedtaksperiodeService(
         )
     }
 
-    fun hentOpphørsperioder(behandling: Behandling, endringstidspunkt: LocalDate = TIDENES_MORGEN): List<Opphørsperiode> {
+    fun hentOpphørsperioder(
+        behandling: Behandling,
+        endringstidspunkt: LocalDate = TIDENES_MORGEN
+    ): List<Opphørsperiode> {
         if (behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET) return emptyList()
 
-        val iverksatteBehandlinger =
-            behandlingRepository.finnIverksatteBehandlinger(fagsakId = behandling.fagsak.id)
+        val alleAvsluttetBehandlingerPåFagsak =
+            behandlingRepository.findByFagsakAndAvsluttet(fagsakId = behandling.fagsak.id)
 
-        val forrigeIverksatteBehandling: Behandling? = Behandlingutils.hentForrigeIverksatteBehandling(
-            iverksatteBehandlinger = iverksatteBehandlinger,
-            behandlingFørFølgende = behandling
+        val sisteVedtattBehandling: Behandling? = Behandlingutils.hentSisteBehandlingSomErVedtatt(
+            alleAvsluttetBehandlingerPåFagsak
         )
 
         val forrigePersonopplysningGrunnlag: PersonopplysningGrunnlag? =
-            if (forrigeIverksatteBehandling != null) {
-                persongrunnlagService.hentAktiv(behandlingId = forrigeIverksatteBehandling.id)
+            if (sisteVedtattBehandling != null) {
+                persongrunnlagService.hentAktiv(behandlingId = sisteVedtattBehandling.id)
             } else {
                 null
             }
-        val forrigeAndelerMedEndringer = if (forrigeIverksatteBehandling != null) {
+        val forrigeAndelerMedEndringer = if (sisteVedtattBehandling != null) {
             andelerTilkjentYtelseOgEndreteUtbetalingerService
-                .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(forrigeIverksatteBehandling.id)
+                .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(sisteVedtattBehandling.id)
         } else {
             emptyList()
         }

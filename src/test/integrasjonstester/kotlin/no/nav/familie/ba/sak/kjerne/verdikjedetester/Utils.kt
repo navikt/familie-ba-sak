@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
-import no.nav.familie.ba.sak.kjerne.brev.hentBrevmal
+import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -111,7 +111,8 @@ fun behandleFødselshendelse(
     behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     personidentService: PersonidentService,
     vedtakService: VedtakService,
-    stegService: StegService
+    stegService: StegService,
+    brevmalService: BrevmalService
 ): Behandling? {
     val søkerFnr = nyBehandlingHendelse.morsIdent
     val søkerAktør = personidentService.hentAktør(søkerFnr)
@@ -148,7 +149,8 @@ fun behandleFødselshendelse(
         søkerFnr = søkerFnr,
         fagsakService = fagsakService,
         vedtakService = vedtakService,
-        stegService = stegService
+        stegService = stegService,
+        brevmalService = brevmalService
     )
 }
 
@@ -158,7 +160,8 @@ fun håndterIverksettingAvBehandling(
     fagsakStatusEtterIverksetting: FagsakStatus = FagsakStatus.LØPENDE,
     fagsakService: FagsakService,
     vedtakService: VedtakService,
-    stegService: StegService
+    stegService: StegService,
+    brevmalService: BrevmalService
 ): Behandling {
     val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandlingEtterVurdering.id)
     val behandlingEtterIverksetteVedtak =
@@ -215,7 +218,7 @@ fun håndterIverksettingAvBehandling(
                         behandlingId = behandlingEtterJournalførtVedtak.id,
                         journalpostId = "1234",
                         personEllerInstitusjonIdent = søkerFnr,
-                        brevmal = hentBrevmal(
+                        brevmal = brevmalService.hentBrevmal(
                             behandlingEtterJournalførtVedtak
                         ),
                         erManueltSendt = false

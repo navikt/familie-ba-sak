@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
+import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
@@ -42,7 +43,8 @@ class RevurderingDødsfall(
     @Autowired private val vilkårsvurderingService: VilkårsvurderingService,
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
     @Autowired private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
-    @Autowired private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
+    @Autowired private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
+    @Autowired private val brevmalService: BrevmalService
 ) : AbstractVerdikjedetest() {
 
     @Test
@@ -74,7 +76,9 @@ class RevurderingDødsfall(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             vedtakService = vedtakService,
             stegService = stegService,
-            personidentService = personidentService
+            personidentService = personidentService,
+            brevmalService = brevmalService
+
         )
 
         val overstyrendeVilkårResultater =
@@ -100,19 +104,21 @@ class RevurderingDødsfall(
             tilSteg = StegType.BEHANDLING_AVSLUTTET,
             søkerFnr = scenario.søker.ident,
             barnasIdenter = listOf(scenario.barna.first().ident!!),
+            vedtakService = vedtakService,
             underkategori = BehandlingUnderkategori.ORDINÆR,
             behandlingÅrsak = BehandlingÅrsak.DØDSFALL_BRUKER,
             overstyrendeVilkårsvurdering = lagVilkårsvurderingFraRestScenario(scenario, overstyrendeVilkårResultater),
-            behandlingstype = BehandlingType.REVURDERING,
 
-            vedtakService = vedtakService,
+            behandlingstype = BehandlingType.REVURDERING,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
             endretUtbetalingAndelService = endretUtbetalingAndelService,
             fagsakService = fagsakService,
             persongrunnlagService = persongrunnlagService,
-            andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService
+            andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
+            brevmalService = brevmalService
+
         )
 
         val restFagsakEtterBehandlingAvsluttet =
@@ -155,7 +161,9 @@ class RevurderingDødsfall(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             vedtakService = vedtakService,
             stegService = stegService,
-            personidentService = personidentService
+            personidentService = personidentService,
+            brevmalService = brevmalService
+
         )
 
         val overstyrendeVilkårResultater =
@@ -166,22 +174,24 @@ class RevurderingDødsfall(
                 tilSteg = StegType.BEHANDLINGSRESULTAT,
                 søkerFnr = scenario.søker.ident,
                 barnasIdenter = listOf(scenario.barna.first().ident!!),
+                vedtakService = vedtakService,
                 underkategori = BehandlingUnderkategori.ORDINÆR,
                 behandlingÅrsak = BehandlingÅrsak.DØDSFALL_BRUKER,
                 overstyrendeVilkårsvurdering = lagVilkårsvurderingFraRestScenario(
                     scenario,
                     overstyrendeVilkårResultater
                 ),
-                behandlingstype = BehandlingType.REVURDERING,
 
-                vedtakService = vedtakService,
+                behandlingstype = BehandlingType.REVURDERING,
                 vilkårsvurderingService = vilkårsvurderingService,
                 stegService = stegService,
                 vedtaksperiodeService = vedtaksperiodeService,
                 endretUtbetalingAndelService = endretUtbetalingAndelService,
                 fagsakService = fagsakService,
                 persongrunnlagService = persongrunnlagService,
-                andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService
+                andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
+                brevmalService = brevmalService
+
             )
         }
     }
