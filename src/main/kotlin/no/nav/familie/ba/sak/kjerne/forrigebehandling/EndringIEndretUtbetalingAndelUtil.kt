@@ -29,7 +29,7 @@ object EndringIEndretUtbetalingAndelUtil {
         endringer: Iterable<Boolean>
     ): Boolean = endringer.any { it }
 
-    fun lagEndringIEndretUbetalingAndelPerPersonTidslinje(
+    private fun lagEndringIEndretUbetalingAndelPerPersonTidslinje(
         nåværendeEndretAndelerForPerson: List<EndretUtbetalingAndel>,
         forrigeEndretAndelerForPerson: List<EndretUtbetalingAndel>
     ): Tidslinje<Boolean, Måned> {
