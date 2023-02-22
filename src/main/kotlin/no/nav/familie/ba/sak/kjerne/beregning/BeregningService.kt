@@ -74,8 +74,8 @@ class BeregningService(
         tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)
 
     fun hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(fagsakId: Long): List<TilkjentYtelse> {
-        val iverksatteBehandlinger = behandlingRepository.findByFagsakAndAvsluttet(fagsakId)
-        return iverksatteBehandlinger.mapNotNull {
+        val avsluttedeBehandlingerSomIkkeErHenlagtPåFagsak = behandlingRepository.findByFagsakAndAvsluttet(fagsakId).filter { !it.erHenlagt() }
+        return avsluttedeBehandlingerSomIkkeErHenlagtPåFagsak.mapNotNull {
             tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(
                 it.id
             )?.takeIf { tilkjentYtelse ->
