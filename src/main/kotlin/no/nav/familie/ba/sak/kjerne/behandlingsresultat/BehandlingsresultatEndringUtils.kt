@@ -139,25 +139,12 @@ object BehandlingsresultatEndringUtils {
         nåværendeKompetanser: List<Kompetanse>,
         forrigeKompetanser: List<Kompetanse>
     ): Boolean {
-        val allePersonerMedKompetanser = (nåværendeKompetanser.flatMap { it.barnAktører } + forrigeKompetanser.flatMap { it.barnAktører }).distinct()
+        val endringIKompetanseTidslinje = EndringIKompetanseUtil().lagEndringIKompetanseTidslinje(
+            nåværendeKompetanser = nåværendeKompetanser,
+            forrigeKompetanser = forrigeKompetanser
+        )
 
-        val finnesPersonMedEndretKompetanse = allePersonerMedKompetanser.any { aktør ->
-            erEndringIKompetanseForPerson(
-                nåværendeKompetanserForPerson = nåværendeKompetanser.filter { it.barnAktører.contains(aktør) },
-                forrigeKompetanserForPerson = forrigeKompetanser.filter { it.barnAktører.contains(aktør) }
-            )
-        }
-
-        return finnesPersonMedEndretKompetanse
-    }
-
-    private fun erEndringIKompetanseForPerson(
-        nåværendeKompetanserForPerson: List<Kompetanse>,
-        forrigeKompetanserForPerson: List<Kompetanse>
-    ): Boolean {
-        val endringerTidslinje = EndringIKompetanseUtil().lagEndringIKompetanseForPersonTidslinje(nåværendeKompetanserForPerson, forrigeKompetanserForPerson)
-
-        return endringerTidslinje.perioder().any { it.innhold == true }
+        return endringIKompetanseTidslinje.perioder().any { it.innhold == true }
     }
 
     fun erEndringIVilkårvurdering(
