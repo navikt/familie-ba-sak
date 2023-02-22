@@ -10,8 +10,8 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.hentPerioderMedEndringerFra
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.utledSegmenter
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
@@ -289,22 +289,13 @@ fun List<AndelTilkjentYtelse>.erEndringerIUtbetalingMellomForrigeAndeler(
     }
 }
 
-// Det regnes ikke ut som en endring dersom
-// 1. Vi har fått nye andeler som har 0 i utbetalingsbeløp
-// 2. Vi har mistet andeler som har hatt 0 i utbetalingsbeløp
-// 3. Vi har lik utbetalingsbeløp mellom nåværende og forrige andeler
 private fun List<AndelTilkjentYtelse>.erEndringIUtbetalingForPersonOgType(
     forrigeAndeler: List<AndelTilkjentYtelse>
 ): Boolean {
-    val nåværendeTidslinje = AndelTilkjentYtelseTidslinje(this)
-    val forrigeTidslinje = AndelTilkjentYtelseTidslinje(forrigeAndeler)
-
-    val endringIBeløpTidslinje = nåværendeTidslinje.kombinerMed(forrigeTidslinje) { nåværende, forrige ->
-        val nåværendeBeløp = nåværende?.kalkulertUtbetalingsbeløp ?: 0
-        val forrigeBeløp = forrige?.kalkulertUtbetalingsbeløp ?: 0
-
-        nåværendeBeløp != forrigeBeløp
-    }
+    val endringIBeløpTidslinje = EndringIUtbetalingUtil().lagEndringIUtbetalingForPersonOgTypeTidslinje(
+        nåværendeAndeler = this,
+        forrigeAndeler = forrigeAndeler
+    )
 
     return endringIBeløpTidslinje.perioder().any { it.innhold == true }
 }
