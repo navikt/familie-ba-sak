@@ -74,7 +74,6 @@ class BehandlingsresultatStegTest {
         )
 
         every { featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_BEREGNE_BEHANDLINGSRESULTAT) } returns false
-        every { featureToggleService.isEnabled(FeatureToggleConfig.BRUK_ANDELER_FOR_IVERKSETTELSE_SJEKK) } returns true
     }
 
     @Test
