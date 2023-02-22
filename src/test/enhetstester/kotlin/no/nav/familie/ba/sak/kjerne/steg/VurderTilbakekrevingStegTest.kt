@@ -103,7 +103,7 @@ class VurderTilbakekrevingStegTest {
         every { simuleringService.hentSimuleringPåBehandling(behandling.id) } returns emptyList()
 
         val posteringer = listOf(
-            mockVedtakSimuleringPostering(beløp = 2500, posteringType = PosteringType.FEILUTBETALING),
+            mockVedtakSimuleringPostering(beløp = 2500, posteringType = PosteringType.FEILUTBETALING)
         )
         val simuleringMottaker =
             listOf(mockØkonomiSimuleringMottaker(behandling = behandling, økonomiSimuleringPostering = posteringer))
@@ -237,7 +237,7 @@ class VurderTilbakekrevingStegTest {
         every { simuleringService.hentSimuleringPåBehandling(behandling.id) } returns emptyList()
 
         val posteringer = listOf(
-            mockVedtakSimuleringPostering(beløp = 2500, posteringType = PosteringType.FEILUTBETALING),
+            mockVedtakSimuleringPostering(beløp = 2500, posteringType = PosteringType.FEILUTBETALING)
         )
         val simuleringMottaker =
             listOf(mockØkonomiSimuleringMottaker(behandling = behandling, økonomiSimuleringPostering = posteringer))

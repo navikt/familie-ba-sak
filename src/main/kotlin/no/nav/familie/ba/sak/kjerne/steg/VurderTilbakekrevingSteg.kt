@@ -65,7 +65,7 @@ class VurderTilbakekrevingSteg(
 
         when {
             featureToggleService.isEnabled(MIGRERING_MED_FEILUTBETALING_UNDER_BELØPSGRENSE, true) &&
-                    erNegativePerioderesultaterPåMaks1KronePerBarnOgTotaltAvvikUnderBeløpsgrense(behandling.id) -> return
+                erNegativePerioderesultaterPåMaks1KronePerBarnOgTotaltAvvikUnderBeløpsgrense(behandling.id) -> return
             else -> kastException(behandling)
         }
     }
@@ -87,21 +87,21 @@ class VurderTilbakekrevingSteg(
     private fun erNegativePerioderesultaterPåMaks1KronePerBarnOgTotaltAvvikUnderBeløpsgrense(behandlingId: Long): Boolean {
         val simuleringPerioder = hentSimuleringsperioderFørMars2023(behandlingId)
         val antallBarn = persongrunnlagService.hentBarna(behandlingId).size
-        return simuleringPerioder.all { it.resultat <= BigDecimal.ZERO && it.resultat >= BigDecimal(-1*antallBarn) } &&
-                simuleringPerioder.sumOf { it.resultat }.abs() < BigDecimal(MANUELL_MIGRERING_BELØPSGRENSE_FOR_TOTALT_AVVIK)
+        return simuleringPerioder.all { it.resultat <= BigDecimal.ZERO && it.resultat >= BigDecimal(-1 * antallBarn) } &&
+            simuleringPerioder.sumOf { it.resultat }.abs() < BigDecimal(MANUELL_MIGRERING_BELØPSGRENSE_FOR_TOTALT_AVVIK)
     }
 
     private fun erPositivePerioderesultaterPåMaks1KronePerBarnOgTotaltAvvikUnderBeløpsgrense(behandlingId: Long): Boolean {
         val simuleringPerioder = hentSimuleringsperioderFørMars2023(behandlingId)
         val antallBarn = persongrunnlagService.hentBarna(behandlingId).size
         return simuleringPerioder.all { it.resultat >= BigDecimal.ZERO && it.resultat <= BigDecimal(antallBarn) } &&
-                simuleringPerioder.sumOf { it.resultat } < BigDecimal(MANUELL_MIGRERING_BELØPSGRENSE_FOR_TOTALT_AVVIK)
+            simuleringPerioder.sumOf { it.resultat } < BigDecimal(MANUELL_MIGRERING_BELØPSGRENSE_FOR_TOTALT_AVVIK)
     }
 
     private fun hentSimuleringsperioderFørMars2023(behandlingId: Long): List<SimuleringsPeriode> {
         return vedtakSimuleringMottakereTilSimuleringPerioder(
             økonomiSimuleringMottakere = simuleringService.hentSimuleringPåBehandling(behandlingId),
-            erManuelPosteringTogglePå = featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ),
+            erManuelPosteringTogglePå = featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ)
         ).filter { it.fom.isSameOrBefore(februar2023) }
     }
 
