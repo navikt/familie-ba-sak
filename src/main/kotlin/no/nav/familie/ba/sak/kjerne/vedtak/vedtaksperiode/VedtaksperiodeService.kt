@@ -306,11 +306,21 @@ class VedtaksperiodeService(
         gjelderFortsattInnvilget: Boolean = false,
         manueltOverstyrtEndringstidspunkt: LocalDate? = null
     ): List<VedtaksperiodeMedBegrunnelser> {
+        /**
+         * Hvis endringstidspunktet er overskrevet av saksbehandler skal man bruke det saksbehandler har valgt
+         * Hvis toggle for behandlingsresultat er AV og man ønsker å ha fortsatt innvilget MED perioder:
+         *         - alle perioder skal med -> endringstidspunkt = tidenes morgen
+         * Hvis toggle for behandlingsresultat er PÅ og behandlingsresultat = endret og fortsatt innvilget (betyr i praksis det samme som den over, fordi med toggle på oppfører "endret og fortsatt innvilget" seg likt som fortsatt innvilget med perioder )
+         *         - alle perioder skal med -> endringstidspunkt = tidenes morgen
+         * Ellers: endringstidspunkt skal utledes
+         **/
         val endringstidspunkt = manueltOverstyrtEndringstidspunkt
-            ?: if (!gjelderFortsattInnvilget) {
-                endringstidspunktService.finnEndringstidpunkForBehandling(behandlingId = vedtak.behandling.id)
-            } else {
+            ?: if (
+                (gjelderFortsattInnvilget && !featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_BEREGNE_BEHANDLINGSRESULTAT)) || vedtak.behandling.resultat == Behandlingsresultat.ENDRET_OG_FORTSATT_INNVILGET
+            ) {
                 TIDENES_MORGEN
+            } else {
+                endringstidspunktService.finnEndringstidpunkForBehandling(behandlingId = vedtak.behandling.id)
             }
         val opphørsperioder =
             hentOpphørsperioder(vedtak.behandling, endringstidspunkt).map { it.tilVedtaksperiodeMedBegrunnelse(vedtak) }
