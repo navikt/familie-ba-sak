@@ -1,15 +1,50 @@
 package no.nav.familie.ba.sak.kjerne.forrigebehandling
 
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Dag
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilTidslinje
 import java.time.LocalDate
 import java.time.YearMonth
 
 class EndringIVilkårsvurderingUtil {
+
+    fun lagEndringIVilkårsvurderingTidslinje(
+        nåværendePersonResultat: Set<PersonResultat>,
+        forrigePersonResultat: Set<PersonResultat>,
+        opphørstidspunkt: YearMonth
+    ): Tidslinje<Boolean, Dag> {
+        val allePersonerMedPersonResultat =
+            (nåværendePersonResultat.map { it.aktør } + forrigePersonResultat.map { it.aktør }).distinct()
+
+        val tidslinjerPerPersonOgVilkår = allePersonerMedPersonResultat.flatMap { aktør ->
+            Vilkår.values().map { vilkår ->
+                lagEndringIVilkårsvurderingForPersonOgVilkårTidslinje(
+                    nåværendePersonResultat
+                        .filter { it.aktør == aktør }
+                        .flatMap { it.vilkårResultater }
+                        .filter { it.vilkårType == vilkår && it.resultat == Resultat.OPPFYLT },
+                    forrigePersonResultat
+                        .filter { it.aktør == aktør }
+                        .flatMap { it.vilkårResultater }
+                        .filter { it.vilkårType == vilkår && it.resultat == Resultat.OPPFYLT },
+                    opphørstidspunkt = opphørstidspunkt
+                )
+            }
+        }
+
+        return tidslinjerPerPersonOgVilkår.kombiner { finnesMinstEnEndringIPeriode(it) }
+    }
+
+    private fun finnesMinstEnEndringIPeriode(
+        endringer: Iterable<Boolean>
+    ): Boolean = endringer.any { it }
 
     // Relevante endringer er
     // 1. Endringer i utdypende vilkårsvurdering

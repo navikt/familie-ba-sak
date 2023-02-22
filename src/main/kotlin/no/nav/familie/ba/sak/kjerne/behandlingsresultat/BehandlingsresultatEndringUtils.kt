@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.forrigeMåned
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatOpphørUtils.utledOpphørsdatoForNåværendeBehandlingMedFallback
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.EndretUtbetalingAndelTidslinje
@@ -20,7 +19,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companio
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjær
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import java.time.YearMonth
 
@@ -152,27 +150,12 @@ object BehandlingsresultatEndringUtils {
     ): Boolean {
         if (opphørstidspunkt == null) return false // Returnerer false hvis verken forrige eller nåværende behandling har andeler
 
-        val allePersonerMedPersonResultat =
-            (nåværendePersonResultat.map { it.aktør } + forrigePersonResultat.map { it.aktør }).distinct()
-
-        val finnesPersonMedEndretVilkårsvurdering = allePersonerMedPersonResultat.any { aktør ->
-
-            Vilkår.values().any { vilkårType ->
-                erEndringIVilkårvurderingForPerson(
-                    nåværendePersonResultat
-                        .filter { it.aktør == aktør }
-                        .flatMap { it.vilkårResultater }
-                        .filter { it.vilkårType == vilkårType && it.resultat == Resultat.OPPFYLT },
-                    forrigePersonResultat
-                        .filter { it.aktør == aktør }
-                        .flatMap { it.vilkårResultater }
-                        .filter { it.vilkårType == vilkårType && it.resultat == Resultat.OPPFYLT },
-                    opphørstidspunkt = opphørstidspunkt
-                )
-            }
-        }
-
-        return finnesPersonMedEndretVilkårsvurdering
+        val endringIVilkårsvurderingTidslinje = EndringIVilkårsvurderingUtil().lagEndringIVilkårsvurderingTidslinje(
+            nåværendePersonResultat = nåværendePersonResultat,
+            forrigePersonResultat = forrigePersonResultat,
+            opphørstidspunkt = opphørstidspunkt
+        )
+        return endringIVilkårsvurderingTidslinje.perioder().any { it.innhold == true }
     }
 
     fun erEndringIVilkårvurderingForPerson(
