@@ -936,7 +936,7 @@ class BehandlingsresultatEndringUtilsTest {
     }
 
     @Test
-    fun `erEndringIVilkårvurderingForPerson skal returnere false dersom vilkårresultatene er helt like`() {
+    fun `Endring i vilkårsvurdering - skal returnere false dersom vilkårresultatene er helt like`() {
         val nåværendeVilkårResultat = setOf(
             VilkårResultat(
                 personResultat = null,
@@ -1011,7 +1011,7 @@ class BehandlingsresultatEndringUtilsTest {
     }
 
     @Test
-    fun `erEndringIVilkårvurderingForPerson skal returnere true dersom det har vært endringer i regelverk`() {
+    fun `Endring i vilkårsvurdering - skal returnere true dersom det har vært endringer i regelverk`() {
         val nåværendeVilkårResultat = setOf(
             VilkårResultat(
                 personResultat = null,
@@ -1058,7 +1058,7 @@ class BehandlingsresultatEndringUtilsTest {
     }
 
     @Test
-    fun `erEndringIVilkårvurderingForPerson skal returnere true dersom det har vært endringer i utdypendevilkårsvurdering`() {
+    fun `Endring i vilkårsvurdering - skal returnere true dersom det har vært endringer i utdypendevilkårsvurdering`() {
         val nåværendeVilkårResultat = setOf(
             VilkårResultat(
                 personResultat = null,
@@ -1104,7 +1104,7 @@ class BehandlingsresultatEndringUtilsTest {
     }
 
     @Test
-    fun `erEndringIVilkårvurderingForPerson skal returnere true dersom det har oppstått splitt i vilkårsvurderingen`() {
+    fun `Endring i vilkårsvurdering - skal returnere true dersom det har oppstått splitt i vilkårsvurderingen`() {
         val nåværendeVilkårResultat = setOf(
             VilkårResultat(
                 personResultat = null,
