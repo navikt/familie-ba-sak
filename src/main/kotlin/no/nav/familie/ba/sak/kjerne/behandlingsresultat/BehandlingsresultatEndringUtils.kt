@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.EndretUtbetalingAndelTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
-import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIKompetanseUtil
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -156,7 +155,7 @@ object BehandlingsresultatEndringUtils {
         nåværendeKompetanserForPerson: List<Kompetanse>,
         forrigeKompetanserForPerson: List<Kompetanse>
     ): Boolean {
-        val endringerTidslinje = EndringIKompetanseUtil().endringIKompetanseForPersonTidslinje(nåværendeKompetanserForPerson, forrigeKompetanserForPerson)
+        val endringerTidslinje = EndringIKompetanseUtil().lagEndringIKompetanseForPersonTidslinje(nåværendeKompetanserForPerson, forrigeKompetanserForPerson)
 
         return endringerTidslinje.perioder().any { it.innhold == true }
     }

@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 
 class EndringIKompetanseUtil {
 
-    fun endringIKompetanseForPersonTidslinje(
+    fun lagEndringIKompetanseForPersonTidslinje(
         nåværendeKompetanserForPerson: List<Kompetanse>,
         forrigeKompetanserForPerson: List<Kompetanse>
     ): Tidslinje<Boolean, Måned> {
