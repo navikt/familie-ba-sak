@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.brev
 
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.tilKortString
-import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
+import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertKompetanse
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
@@ -108,3 +108,15 @@ fun Collection<Kompetanse>.hentIPeriode(
         tilOgMed = tom.tilTidspunktEllerSenereEnn(fom)
     )
 }.tilSkjemaer()
+
+data class MinimertUregistrertBarn(
+    val personIdent: String,
+    val navn: String,
+    val fødselsdato: LocalDate? = null
+)
+
+fun BarnMedOpplysninger.tilMinimertUregisrertBarn() = MinimertUregistrertBarn(
+    personIdent = this.ident,
+    navn = this.navn,
+    fødselsdato = this.fødselsdato
+)

@@ -36,10 +36,6 @@ data class YtelsePerson(
     override fun hashCode(): Int {
         return Objects.hash(aktør, ytelseType)
     }
-
-    fun erFramstiltKravForIInneværendeBehandling() = this.kravOpprinnelse.contains(KravOpprinnelse.INNEVÆRENDE)
-
-    fun erFramstiltKravForITidligereBehandling() = this.kravOpprinnelse.contains(KravOpprinnelse.TIDLIGERE)
 }
 
 enum class YtelsePersonResultat(val displayName: String) {
