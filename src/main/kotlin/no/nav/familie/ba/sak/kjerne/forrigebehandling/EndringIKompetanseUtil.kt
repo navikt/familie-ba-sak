@@ -29,7 +29,7 @@ class EndringIKompetanseUtil {
         endringer: Iterable<Boolean>
     ): Boolean = endringer.any { it }
 
-    fun lagEndringIKompetanseForPersonTidslinje(
+    private fun lagEndringIKompetanseForPersonTidslinje(
         nåværendeKompetanserForPerson: List<Kompetanse>,
         forrigeKompetanserForPerson: List<Kompetanse>
     ): Tidslinje<Boolean, Måned> {
