@@ -134,7 +134,7 @@ class BehandlingsresultatSteg(
             simuleringService.oppdaterSimuleringPåBehandling(behandlingMedOppdatertBehandlingsresultat)
         }
 
-        return if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_ANDELER_FOR_IVERKSETTELSE_SJEKK)) {
+        return if (featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_BEREGNE_BEHANDLINGSRESULTAT)) {
             val endringerIUtbetaling =
                 beregningService.erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling)
             hentNesteStegGittEndringerIUtbetaling(behandling, endringerIUtbetaling)
