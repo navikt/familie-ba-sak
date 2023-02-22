@@ -79,7 +79,7 @@ object SikkerhetContext {
         }
     }
 
-    private fun hentGrupper(): List<String> {
+    fun hentGrupper(): List<String> {
         return Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
             .fold(
                 onSuccess = {
@@ -89,6 +89,7 @@ object SikkerhetContext {
                 onFailure = { emptyList() }
             )
     }
+
     fun kallKommerFraKlage(): Boolean {
         return kallKommerFra("teamfamilie:familie-klage")
     }

@@ -74,6 +74,7 @@ class BehandlingsresultatStegTest {
         )
 
         every { featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_BEREGNE_BEHANDLINGSRESULTAT) } returns false
+        every { featureToggleService.isEnabled(FeatureToggleConfig.BRUK_ANDELER_FOR_IVERKSETTELSE_SJEKK) } returns true
     }
 
     @Test
@@ -91,7 +92,7 @@ class BehandlingsresultatStegTest {
         assertEquals(
             "Du har fått behandlingsresultatet Avslått. " +
                 "Dette er ikke støttet på migreringsbehandlinger. " +
-                "Ta kontakt med Team familie om du er uenig i resultatet.",
+                "Meld sak i Porten om du er uenig i resultatet.",
             exception.message
         )
     }
@@ -111,7 +112,7 @@ class BehandlingsresultatStegTest {
         assertEquals(
             "Du har fått behandlingsresultatet Delvis innvilget. " +
                 "Dette er ikke støttet på migreringsbehandlinger. " +
-                "Ta kontakt med Team familie om du er uenig i resultatet.",
+                "Meld sak i Porten om du er uenig i resultatet.",
             exception.message
         )
     }
@@ -131,7 +132,7 @@ class BehandlingsresultatStegTest {
         assertEquals(
             "Du har fått behandlingsresultatet Avslått, endret og opphørt. " +
                 "Dette er ikke støttet på migreringsbehandlinger. " +
-                "Ta kontakt med Team familie om du er uenig i resultatet.",
+                "Meld sak i Porten om du er uenig i resultatet.",
             exception.message
         )
     }

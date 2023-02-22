@@ -75,13 +75,16 @@ object BehandlingsresultatUtils {
             sjekkResultat(null, Endringsresultat.INGEN_ENDRING, Opphørsresultat.IKKE_OPPHØRT) -> Behandlingsresultat.FORTSATT_INNVILGET
 
             // Skal egentlig aldri kunne komme hit, alle kombinasjoner skal være skrevet ut
-            else -> throw Feil("Klarer ikke utlede behandlingsresultat fra (søknadsresultat=$søknadsresultat, endringsresultat=$endringsresultat, opphørsresultat=$opphørsresultat)")
+            else -> throw Feil(
+                frontendFeilmelding = "Du har fått et behandlingsresultat vi ikke støtter. Meld sak i Porten om du er uenig i resultatet.",
+                message = "Klarer ikke utlede behandlingsresultat fra (søknadsresultat=$søknadsresultat, endringsresultat=$endringsresultat, opphørsresultat=$opphørsresultat)"
+            )
         }
     }
 
     private fun ikkeStøttetFeil(behandlingsresultater: MutableSet<YtelsePersonResultat>) =
         Feil(
-            frontendFeilmelding = "Behandlingsresultatet du har fått på behandlingen er ikke støttet i løsningen enda. Ta kontakt med Team familie om du er uenig i resultatet.",
+            frontendFeilmelding = "Behandlingsresultatet du har fått på behandlingen er ikke støttet i løsningen enda. Meld sak i Porten om du er uenig i resultatet.",
             message = "Kombiansjonen av behandlingsresultatene $behandlingsresultater er ikke støttet i løsningen."
         )
 

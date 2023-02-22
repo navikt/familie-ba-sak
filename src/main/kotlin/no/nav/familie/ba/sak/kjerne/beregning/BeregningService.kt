@@ -9,18 +9,19 @@ import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.erEndringerIUtbetalingMellomForrigeAndeler
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.steg.EndringerIUtbetalingForBehandlingSteg
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
@@ -125,35 +126,6 @@ class BeregningService(
         }.map { it }
     }
 
-    @Deprecated("Bruk ny funksjon erAlleUtbetalingsperioderPåNullKronerIDenneOgForrigeBehandling")
-    fun innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(behandling: Behandling): Boolean {
-        val barnMedUtbetalingSomIkkeBlittEndretISisteBehandling =
-            finnAlleBarnFraBehandlingMedPerioderSomSkalUtbetales(behandling.id)
-
-        val alleBarnISisteBehanlding = finnBarnFraBehandlingMedTilkjentYtelse(behandling.id)
-
-        val alleBarnISistIverksattBehandling =
-            behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling)?.let {
-                finnBarnFraBehandlingMedTilkjentYtelse(
-                    it.id
-                )
-            }
-                ?: emptyList()
-
-        val nyeBarnISisteBehandling = alleBarnISisteBehanlding.minus(alleBarnISistIverksattBehandling.toSet())
-
-        val nyeBarnMedUtebtalingSomIkkeErEndret =
-            barnMedUtbetalingSomIkkeBlittEndretISisteBehandling.intersect(nyeBarnISisteBehandling)
-
-        return behandling.resultat == Behandlingsresultat.INNVILGET_OG_OPPHØRT &&
-            when (behandling.underkategori) {
-                BehandlingUnderkategori.ORDINÆR, BehandlingUnderkategori.INSTITUSJON -> true
-                BehandlingUnderkategori.UTVIDET -> false
-            } &&
-            behandling.erSøknad() &&
-            nyeBarnMedUtebtalingSomIkkeErEndret.isEmpty()
-    }
-
     fun erAlleUtbetalingsperioderPåNullKronerIDenneOgForrigeBehandling(behandling: Behandling): Boolean {
         val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
 
@@ -169,6 +141,19 @@ class BeregningService(
 
         return erIngenUtbetalingIForrigeBehandling &&
             erAlleUtbetalingsperioderIDenneBehandlingenPåNullKroner
+    }
+
+    fun erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling: Behandling): EndringerIUtbetalingForBehandlingSteg {
+        val nåværendeAndeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
+
+        val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling)
+        val forrigeAndeler =
+            forrigeBehandling?.let { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(it.id) }
+                ?: emptyList()
+
+        val endringerIUtbetaling = nåværendeAndeler.erEndringerIUtbetalingMellomForrigeAndeler(forrigeAndeler)
+
+        return if (endringerIUtbetaling) EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING else EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING
     }
 
     @Transactional
@@ -189,6 +174,18 @@ class BeregningService(
                 }
             }
 
+        return genererOgLagreTilkjentYtelse(
+            behandling = behandling,
+            personopplysningGrunnlag = personopplysningGrunnlag,
+            endreteUtbetalingAndeler = endreteUtbetalingAndeler
+        )
+    }
+
+    private fun genererOgLagreTilkjentYtelse(
+        behandling: Behandling,
+        personopplysningGrunnlag: PersonopplysningGrunnlag,
+        endreteUtbetalingAndeler: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>
+    ): TilkjentYtelse {
         tilkjentYtelseRepository.slettTilkjentYtelseFor(behandling)
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
             ?: throw IllegalStateException("Kunne ikke hente vilkårsvurdering for behandling med id ${behandling.id}")
@@ -209,6 +206,24 @@ class BeregningService(
         val lagretTilkjentYtelse = tilkjentYtelseRepository.save(tilkjentYtelse)
         tilkjentYtelseEndretAbonnenter.forEach { it.endretTilkjentYtelse(lagretTilkjentYtelse) }
         return lagretTilkjentYtelse
+    }
+
+    // For at endret utbetaling andeler skal fungere så må man generere andeler før man kobler endringene på andelene
+    // Dette er fordi en endring regnes som gyldig når den overlapper med en andel og har gyldig årsak
+    // Hvis man ikke genererer andeler før man kobler på endringene så vil ingen av endringene ses på som gyldige, altså ikke oppdatere noen andeler
+    fun genererTilkjentYtelseFraVilkårsvurdering(
+        behandling: Behandling,
+        personopplysningGrunnlag: PersonopplysningGrunnlag
+    ): TilkjentYtelse {
+        // 1: Genererer andeler fra vilkårsvurderingen uten å ta hensyn til endret utbetaling andeler
+        genererOgLagreTilkjentYtelse(
+            behandling = behandling,
+            personopplysningGrunnlag = personopplysningGrunnlag,
+            endreteUtbetalingAndeler = emptyList()
+        )
+
+        // 2: Genererer andeler som også tar hensyn til endret utbetaling andeler
+        return oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
     }
 
     fun oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
@@ -264,23 +279,6 @@ class BeregningService(
         return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)?.barna?.map { it.aktør }
             ?.filter {
                 andelerTilkjentYtelse.any { aty -> aty.aktør == it }
-            } ?: emptyList()
-    }
-
-    /**
-     * Henter alle barn på behandlingen som har minst en periode med tilkjentytelse som ikke er endret til null i utbetaling.
-     */
-    fun finnAlleBarnFraBehandlingMedPerioderSomSkalUtbetales(behandlingId: Long): List<Aktør> {
-        val andelerMedEndringer = andelerTilkjentYtelseOgEndreteUtbetalingerService
-            .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId)
-
-        return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)?.barna?.map { it.aktør }
-            ?.filter { aktør ->
-                andelerMedEndringer
-                    .filter { it.aktør == aktør }
-                    .filter { aty ->
-                        aty.kalkulertUtbetalingsbeløp != 0 || aty.endreteUtbetalinger.isEmpty()
-                    }.isNotEmpty()
             } ?: emptyList()
     }
 

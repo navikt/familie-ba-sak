@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.simuleringMottakerMock
+import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
@@ -28,7 +29,8 @@ class SimuleringServiceTest(
     @Autowired private val stegService: StegService,
     @Autowired private val simuleringService: SimuleringService,
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
-    @Autowired private val databaseCleanupService: DatabaseCleanupService
+    @Autowired private val databaseCleanupService: DatabaseCleanupService,
+    @Autowired private val brevmalService: BrevmalService
 ) : AbstractSpringIntegrationTest() {
 
     @BeforeAll
@@ -47,7 +49,8 @@ class SimuleringServiceTest(
             persongrunnlagService = persongrunnlagService,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService
+            vedtaksperiodeService = vedtaksperiodeService,
+            brevmalService = brevmalService
         )
 
         val vedtakSimuleringMottakerMock =

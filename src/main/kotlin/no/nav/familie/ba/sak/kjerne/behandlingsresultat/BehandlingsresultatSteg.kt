@@ -19,7 +19,6 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValide
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.validerBarnasVilkår
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.validerDeltBostedEndringerIkkeKrysserUtvidetYtelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlingSteg
@@ -77,10 +76,6 @@ class BehandlingsresultatSteg(
         )
 
         if (toggleFrikobleAndelerOgEndringer) {
-            validerDeltBostedEndringerIkkeKrysserUtvidetYtelse(
-                endreteUtbetalingerMedAndeler.map { it.endretUtbetalingAndel },
-                tilkjentYtelse.andelerTilkjentYtelse
-            )
             validerPeriodeInnenforTilkjentytelse(
                 endreteUtbetalingerMedAndeler.map { it.endretUtbetalingAndel },
                 tilkjentYtelse.andelerTilkjentYtelse
@@ -99,11 +94,12 @@ class BehandlingsresultatSteg(
             if (behandling.erMigrering() && behandling.skalBehandlesAutomatisk) {
                 settBehandlingsresultat(behandling, Behandlingsresultat.INNVILGET)
             } else {
-                val resultat = if (featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_BEREGNE_BEHANDLINGSRESULTAT)) {
-                    behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.id)
-                } else {
-                    behandlingsresultatService.utledBehandlingsresultatGammel(behandlingId = behandling.id)
-                }
+                val resultat =
+                    if (featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_BEREGNE_BEHANDLINGSRESULTAT)) {
+                        behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.id)
+                    } else {
+                        behandlingsresultatService.utledBehandlingsresultatGammel(behandlingId = behandling.id)
+                    }
 
                 behandlingService.oppdaterBehandlingsresultat(
                     behandlingId = behandling.id,
@@ -138,7 +134,13 @@ class BehandlingsresultatSteg(
             simuleringService.oppdaterSimuleringPåBehandling(behandlingMedOppdatertBehandlingsresultat)
         }
 
-        return hentNesteStegForNormalFlyt(behandlingMedOppdatertBehandlingsresultat)
+        return if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_ANDELER_FOR_IVERKSETTELSE_SJEKK)) {
+            val endringerIUtbetaling =
+                beregningService.erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling)
+            hentNesteStegGittEndringerIUtbetaling(behandling, endringerIUtbetaling)
+        } else {
+            hentNesteStegForNormalFlytGammel(behandling)
+        }
     }
 
     override fun stegType(): StegType {
@@ -156,7 +158,7 @@ class BehandlingsresultatSteg(
                 "Du har fått behandlingsresultatet " +
                     "${behandlingMedOppdatertBehandlingsresultat.resultat.displayName}. " +
                     "Dette er ikke støttet på migreringsbehandlinger. " +
-                    "Ta kontakt med Team familie om du er uenig i resultatet."
+                    "Meld sak i Porten om du er uenig i resultatet."
             )
         }
     }

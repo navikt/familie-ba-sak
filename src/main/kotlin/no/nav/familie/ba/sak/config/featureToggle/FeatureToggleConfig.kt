@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.config
 class FeatureToggleConfig {
     companion object {
 
+        const val BRUK_ANDELER_FOR_IVERKSETTELSE_SJEKK = "familie-ba-sak.bruk-andeler-for-iverksettelse-sjekk"
         const val BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER = "familie-ba-sak.frikoble-andeler-og-endringer"
         const val KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV = "familie-ba-sak.behandling.korreksjon-vedtaksbrev"
         const val SKATTEETATEN_API_EKTE_DATA = "familie-ba-sak.skatteetaten-api-ekte-data-i-respons"
@@ -26,8 +27,6 @@ class FeatureToggleConfig {
         const val SATSENDRING_ENABLET: String = "familie-ba-sak.satsendring-enablet"
         const val SATSENDRING_OPPRETT_TASKER = "familie-ba-sak.satsendring-opprett-satsendring-task"
         const val SATSENDRING_SJEKK_UTBETALING = "familie-ba-sak.satsendring-sjekk-utbetaling"
-        const val BRUK_ATY_FOR_Å_AVGJØRE_DROPPE_SIMULERING =
-            "familie-ba-sak.skal-se-paa-aty-om-vi-skal-hoppe-over-simulering\n"
     }
 }
 

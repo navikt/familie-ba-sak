@@ -2,21 +2,15 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.satsendring
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
-import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
-import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.SatsendringTaskDto
@@ -36,9 +30,7 @@ class StartSatsendring(
     private val satskjøringRepository: SatskjøringRepository,
     private val featureToggleService: FeatureToggleService,
     private val personidentService: PersonidentService,
-    private val autovedtakSatsendringService: AutovedtakSatsendringService,
-    private val beregningService: BeregningService,
-    private val persongrunnlagService: PersongrunnlagService
+    private val autovedtakSatsendringService: AutovedtakSatsendringService
 ) {
 
     private val ignorerteFagsaker = mutableSetOf<Long>()
@@ -81,6 +73,7 @@ class StartSatsendring(
         satsTidspunkt: YearMonth
     ): Int {
         var antallFagsakerSatsendring = antallAlleredeTriggetSatsendring
+
         for (fagsak in fagsakForSatsendring) {
             if (skalTriggeSatsendring(fagsak, satsTidspunkt)) {
                 antallFagsakerSatsendring++
@@ -126,14 +119,6 @@ class StartSatsendring(
                 logger.info("Fagsak=${fagsak.id} har alt siste satser")
                 return true
             }
-            if (featureToggleService.isEnabled(
-                    FeatureToggleConfig.SATSENDRING_SJEKK_UTBETALING,
-                    true
-                ) && harUtbetalingerSomOverstiger100Prosent(sisteIverksatteBehandling)
-            ) {
-                ignorerteFagsaker.add(fagsak.id)
-                return false
-            }
 
             if (featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_OPPRETT_TASKER)) {
                 logger.info("Oppretter satsendringtask for fagsak=${fagsak.id}")
@@ -147,32 +132,6 @@ class StartSatsendring(
             ignorerteFagsaker.add(fagsak.id)
             return false
         }
-    }
-
-    private fun harUtbetalingerSomOverstiger100Prosent(sisteIverksatteBehandling: Behandling): Boolean {
-        val tilkjentYtelse =
-            beregningService.hentTilkjentYtelseForBehandling(behandlingId = sisteIverksatteBehandling.id)
-        val personopplysningGrunnlag =
-            persongrunnlagService.hentAktivThrows(behandlingId = sisteIverksatteBehandling.id)
-
-        val barnMedAndreRelevanteTilkjentYtelser = personopplysningGrunnlag.barna.map {
-            Pair(
-                it,
-                beregningService.hentRelevanteTilkjentYtelserForBarn(it.aktør, sisteIverksatteBehandling.fagsak.id)
-            )
-        }
-
-        try {
-            TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
-                behandlendeBehandlingTilkjentYtelse = tilkjentYtelse,
-                barnMedAndreRelevanteTilkjentYtelser = barnMedAndreRelevanteTilkjentYtelser,
-                personopplysningGrunnlag = personopplysningGrunnlag
-            )
-        } catch (e: UtbetalingsikkerhetFeil) {
-            secureLogger.info("fagsakId=${sisteIverksatteBehandling.fagsak.id} har UtbetalingsikkerhetFeil. Skipper satsendring: ${e.frontendFeilmelding}")
-            return true
-        }
-        return false
     }
 
     fun sjekkOgOpprettSatsendringVedGammelSats(ident: String): Boolean {
@@ -214,29 +173,36 @@ class StartSatsendring(
     }
 
     @Transactional
-    fun opprettSatsendringSynkrontVedGammelSats(fagsakId: Long): Boolean {
-        val aktivOgÅpenBehandling =
-            behandlingRepository.findByFagsakAndAktivAndOpen(fagsakId = fagsakId)
-
-        if (aktivOgÅpenBehandling != null) {
-            throw FunksjonellFeil("Det finnes en åpen behandling på fagsaken som må avsluttes før satsendring kan gjennomføres.")
+    fun opprettSatsendringSynkrontVedGammelSats(fagsakId: Long) {
+        if (!kanStarteSatsendringPåFagsak(fagsakId)) {
+            throw Feil("Kan ikke starte Satsendring på fagsak=$fagsakId")
         }
 
-        return if (kanStarteSatsendringPåFagsak(fagsakId)) {
-            satskjøringRepository.save(Satskjøring(fagsakId = fagsakId))
-            val resultattekstSatsendringBehandling = autovedtakSatsendringService.kjørBehandling(
-                SatsendringTaskDto(
-                    fagsakId = fagsakId,
-                    satstidspunkt = SATSENDRINGMÅNED_2023
-                )
+        satskjøringRepository.save(Satskjøring(fagsakId = fagsakId))
+        val resultatSatsendringBehandling = autovedtakSatsendringService.kjørBehandling(
+            SatsendringTaskDto(
+                fagsakId = fagsakId,
+                satstidspunkt = SATSENDRINGMÅNED_2023
             )
-            if (resultattekstSatsendringBehandling == "Satsendring kjørt OK") {
-                true
-            } else {
-                throw Feil("Satsendring kjørte ikke OK for fagsak $fagsakId")
-            }
-        } else {
-            false
+        )
+
+        when (resultatSatsendringBehandling) {
+            SatsendringSvar.SATSENDRING_KJØRT_OK -> Unit
+
+            SatsendringSvar.FANT_OVER_100_PROSENT_UTBETALING ->
+                throw FunksjonellFeil(
+                    "Satsendring kan ikke gjennomføres fordi det er mer enn 100% utbetaling for barn i fagsaken.\n" +
+                        "Barnetrygden til en av mottakerne må revurderes."
+                )
+
+            SatsendringSvar.SATSENDRING_ER_ALLEREDE_UTFØRT ->
+                throw FunksjonellFeil("Satsendring er allerede gjennomført på fagsaken. Last inn siden på nytt for å få opp siste behandling.")
+
+            SatsendringSvar.HAR_ALLEREDE_SISTE_SATS,
+            SatsendringSvar.BEHANDLING_ER_LÅST_SATSENDRING_TRIGGES_NESTE_VIRKEDAG,
+            SatsendringSvar.TILBAKESTILLER_BEHANDLINGEN_TIL_VILKÅRSVURDERINGEN,
+            SatsendringSvar.BEHANDLINGEN_ER_UNDER_UTREDNING_MEN_I_RIKTIG_TILSTAND ->
+                throw FunksjonellFeil("Det finnes en åpen behandling på fagsaken som må avsluttes før satsendring kan gjennomføres.")
         }
     }
 

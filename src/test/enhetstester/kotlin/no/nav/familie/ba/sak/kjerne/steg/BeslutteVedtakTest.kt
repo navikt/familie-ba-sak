@@ -10,6 +10,7 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVedtak
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.BRUK_ANDELER_FOR_IVERKSETTELSE_SJEKK
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -27,6 +28,7 @@ import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
 import no.nav.familie.ba.sak.task.FerdigstillOppgaver
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
 import no.nav.familie.ba.sak.task.OpprettOppgaveTask
@@ -48,6 +50,7 @@ class BeslutteVedtakTest {
     private lateinit var vilkårsvurderingService: VilkårsvurderingService
     private lateinit var featureToggleService: FeatureToggleService
     private lateinit var tilkjentYtelseValideringService: TilkjentYtelseValideringService
+    private val saksbehandlerContext = mockk<SaksbehandlerContext>()
 
     private val randomVilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling())
 
@@ -85,6 +88,7 @@ class BeslutteVedtakTest {
         every { vilkårsvurderingService.hentAktivForBehandling(any()) } returns randomVilkårsvurdering
         every { vilkårsvurderingService.lagreNyOgDeaktiverGammel(any()) } returns randomVilkårsvurdering
         every { featureToggleService.isEnabled(any()) } returns false
+        every { saksbehandlerContext.hentSaksbehandlerSignaturTilBrev() } returns "saksbehandlerNavn"
 
         beslutteVedtak = BeslutteVedtak(
             toTrinnKontrollService,
@@ -95,7 +99,8 @@ class BeslutteVedtakTest {
             loggService,
             vilkårsvurderingService,
             featureToggleService,
-            tilkjentYtelseValideringService
+            tilkjentYtelseValideringService,
+            saksbehandlerContext
         )
     }
 
@@ -107,6 +112,7 @@ class BeslutteVedtakTest {
         val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.GODKJENT)
 
         every { vedtakService.hentAktivForBehandling(any()) } returns lagVedtak(behandling)
+        every { beregningService.erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling) } returns EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
         mockkObject(FerdigstillOppgaver.Companion)
         every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
         every { beregningService.erAlleUtbetalingsperioderPåNullKronerIDenneOgForrigeBehandling(behandling = behandling) } returns false
@@ -154,7 +160,7 @@ class BeslutteVedtakTest {
     }
 
     @Test
-    fun `Skal ikke iverksette hvis mangler utbtalingsperioder`() {
+    fun `Skal ikke iverksette hvis det ikke er forskjell i utbetaling mellom nåværende og forrige andeler`() {
         val behandling = lagBehandling()
         val vedtak = lagVedtak(behandling)
         behandling.status = BehandlingStatus.FATTER_VEDTAK
@@ -162,7 +168,8 @@ class BeslutteVedtakTest {
         val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.GODKJENT)
 
         every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
-        every { beregningService.erAlleUtbetalingsperioderPåNullKronerIDenneOgForrigeBehandling(behandling) } returns true
+        every { beregningService.erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling) } returns EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING
+        every { featureToggleService.isEnabled(BRUK_ANDELER_FOR_IVERKSETTELSE_SJEKK) } returns true
 
         mockkObject(JournalførVedtaksbrevTask.Companion)
         every {
@@ -175,7 +182,8 @@ class BeslutteVedtakTest {
 
         val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
 
-        verify(exactly = 1) { beregningService.erAlleUtbetalingsperioderPåNullKronerIDenneOgForrigeBehandling(behandling) }
+        // verify(exactly = 1) { beregningService.erAlleUtbetalingsperioderPåNullKronerIDenneOgForrigeBehandling(behandling) }
+        verify(exactly = 1) { beregningService.erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling) }
 
         verify(exactly = 1) {
             JournalførVedtaksbrevTask.opprettTaskJournalførVedtaksbrev(

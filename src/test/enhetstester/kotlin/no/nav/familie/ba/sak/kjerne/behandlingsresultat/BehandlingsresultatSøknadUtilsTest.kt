@@ -136,11 +136,12 @@ internal class BehandlingsresultatSøknadUtilsTest {
         val barn1Person = lagPerson(type = PersonType.BARN)
         val barn1Aktør = barn1Person.aktør
 
-        val forrigeAndel =
+        val andel =
             lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
-                beløp = 1054,
+                beløp = 0,
+                prosent = BigDecimal.ZERO,
                 aktør = barn1Aktør
             )
 
@@ -154,9 +155,9 @@ internal class BehandlingsresultatSøknadUtilsTest {
         )
 
         val søknadsResultat = utledSøknadResultatFraAndelerTilkjentYtelse(
-            forrigeAndeler = listOf(forrigeAndel),
+            forrigeAndeler = emptyList(),
             nåværendeAndeler = listOf(
-                forrigeAndel.copy(kalkulertUtbetalingsbeløp = 0)
+                andel.copy(kalkulertUtbetalingsbeløp = 0)
             ),
             personerFremstiltKravFor = listOf(barn1Aktør),
             endretUtbetalingAndeler = listOf(endretUtbetalingAndel)
@@ -169,6 +170,45 @@ internal class BehandlingsresultatSøknadUtilsTest {
     @ParameterizedTest
     @EnumSource(value = Årsak::class, mode = EnumSource.Mode.EXCLUDE, names = ["DELT_BOSTED"])
     fun `utledSøknadResultatFraAndelerTilkjentYtelse skal returnere AVSLÅTT dersom beløp på nåværende andel er 0 og det finnes endringsperiode som ikke er DELT_BOSTED`(
+        årsak: Årsak
+    ) {
+        val barn1Person = lagPerson(type = PersonType.BARN)
+        val barn1Aktør = barn1Person.aktør
+
+        val andel =
+            lagAndelTilkjentYtelse(
+                fom = jan22,
+                tom = aug22,
+                beløp = 0,
+                prosent = BigDecimal.ZERO,
+                aktør = barn1Aktør
+            )
+
+        val endretUtbetalingAndel = lagEndretUtbetalingAndel(
+            person = barn1Person,
+            fom = jan22,
+            tom = aug22,
+            prosent = BigDecimal(100),
+            behandlingId = 123L,
+            årsak = årsak
+        )
+
+        val søknadsResultat = utledSøknadResultatFraAndelerTilkjentYtelse(
+            forrigeAndeler = emptyList(),
+            nåværendeAndeler = listOf(
+                andel
+            ),
+            personerFremstiltKravFor = listOf(barn1Aktør),
+            endretUtbetalingAndeler = listOf(endretUtbetalingAndel)
+        )
+
+        assertThat(søknadsResultat.size, Is(1))
+        assertThat(søknadsResultat[0], Is(Søknadsresultat.AVSLÅTT))
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = Årsak::class)
+    fun `utledSøknadResultatFraAndelerTilkjentYtelse skal returnere INGEN_RELEVANTE_ENDRINGER dersom beløp på nåværende andel er 0 og andelen eksisterte forrige gang (beløp større eller lik 0)`(
         årsak: Årsak
     ) {
         val barn1Person = lagPerson(type = PersonType.BARN)
@@ -201,7 +241,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
         )
 
         assertThat(søknadsResultat.size, Is(1))
-        assertThat(søknadsResultat[0], Is(Søknadsresultat.AVSLÅTT))
+        assertThat(søknadsResultat[0], Is(Søknadsresultat.INGEN_RELEVANTE_ENDRINGER))
     }
 
     @Test
@@ -209,18 +249,20 @@ internal class BehandlingsresultatSøknadUtilsTest {
         val barn1Person = lagPerson(type = PersonType.BARN)
         val barn1Aktør = barn1Person.aktør
 
-        val forrigeAndel =
+        val andel =
             lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
-                beløp = 1054,
+                beløp = 0,
+                prosent = BigDecimal.ZERO,
+                differanseberegnetPeriodebeløp = 0,
                 aktør = barn1Aktør
             )
 
         val søknadsResultat = utledSøknadResultatFraAndelerTilkjentYtelse(
-            forrigeAndeler = listOf(forrigeAndel),
+            forrigeAndeler = emptyList(),
             nåværendeAndeler = listOf(
-                forrigeAndel.copy(
+                andel.copy(
                     kalkulertUtbetalingsbeløp = 0,
                     differanseberegnetPeriodebeløp = 0
                 )
@@ -240,12 +282,6 @@ internal class BehandlingsresultatSøknadUtilsTest {
         val barn2Aktør = lagPerson(type = PersonType.BARN).aktør
 
         val forrigeAndeler = listOf(
-            lagAndelTilkjentYtelse(
-                fom = jan22,
-                tom = aug22,
-                beløp = 1054,
-                aktør = barn1Aktør
-            ),
             lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
@@ -343,7 +379,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
 
         val feil = assertThrows<Feil> { listeMedIngenSøknadsresultat.kombinerSøknadsresultater() }
 
-        assertThat(feil.message, Is("Klarer ikke utlede søknadsresultat"))
+        assertThat(feil.message, Is("Klarer ikke utlede søknadsresultat. Finner ingen resultater."))
     }
 
     @ParameterizedTest
@@ -425,6 +461,37 @@ internal class BehandlingsresultatSøknadUtilsTest {
         assertThat(resultatPåSøknad, Is(Søknadsresultat.AVSLÅTT))
     }
 
+    @Test
+    fun `utledResultatPåSøknad - skal returnere AVSLÅTT dersom det er eksplisitt avslag på søker (uten at det er søkt om utvidet)`() {
+        val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)
+        val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
+
+        val søker = lagPerson(type = PersonType.SØKER)
+
+        val søkersPersonResultat = lagPersonResultat(
+            vilkårsvurdering = vilkårsvurdering,
+            aktør = søker.aktør,
+            resultat = Resultat.IKKE_OPPFYLT,
+            periodeFom = des21,
+            periodeTom = LocalDate.now(),
+            personType = PersonType.SØKER,
+            erEksplisittAvslagPåSøknad = true,
+            lagFullstendigVilkårResultat = true
+
+        )
+        val resultatPåSøknad = BehandlingsresultatSøknadUtils.utledResultatPåSøknad(
+            forrigeAndeler = emptyList(),
+            nåværendeAndeler = emptyList(),
+            nåværendePersonResultater = setOf(søkersPersonResultat),
+            personerFremstiltKravFor = emptyList(),
+            endretUtbetalingAndeler = emptyList(),
+            behandlingÅrsak = BehandlingÅrsak.SØKNAD,
+            finnesUregistrerteBarn = false
+        )
+
+        assertThat(resultatPåSøknad, Is(Søknadsresultat.AVSLÅTT))
+    }
+
     @ParameterizedTest
     @EnumSource(value = Resultat::class, names = ["IKKE_OPPFYLT", "IKKE_VURDERT"])
     fun `utledResultatPåSøknad - skal returnere AVSLÅTT dersom behandlingen er en fødselshendelse og det finnes vilkårsvurdering som ikke er oppfylt eller vurdert`(resultat: Resultat) {
@@ -468,7 +535,8 @@ internal class BehandlingsresultatSøknadUtilsTest {
             periodeFom = des21,
             periodeTom = LocalDate.now(),
             personType = PersonType.BARN,
-            erEksplisittAvslagPåSøknad = true
+            erEksplisittAvslagPåSøknad = true,
+            lagFullstendigVilkårResultat = true
 
         )
 
@@ -509,7 +577,8 @@ internal class BehandlingsresultatSøknadUtilsTest {
             resultat = Resultat.OPPFYLT,
             periodeFom = des21,
             periodeTom = LocalDate.now(),
-            personType = PersonType.BARN
+            personType = PersonType.BARN,
+            lagFullstendigVilkårResultat = true
         )
 
         val resultatPåSøknad = BehandlingsresultatSøknadUtils.utledResultatPåSøknad(
@@ -549,7 +618,8 @@ internal class BehandlingsresultatSøknadUtilsTest {
             resultat = Resultat.OPPFYLT,
             periodeFom = des21,
             periodeTom = LocalDate.now(),
-            personType = PersonType.BARN
+            personType = PersonType.BARN,
+            lagFullstendigVilkårResultat = true
         )
 
         val resultatPåSøknad = BehandlingsresultatSøknadUtils.utledResultatPåSøknad(
@@ -589,7 +659,8 @@ internal class BehandlingsresultatSøknadUtilsTest {
             resultat = Resultat.OPPFYLT,
             periodeFom = des21,
             periodeTom = LocalDate.now(),
-            personType = PersonType.BARN
+            personType = PersonType.BARN,
+            lagFullstendigVilkårResultat = true
         )
 
         val resultatPåSøknad = BehandlingsresultatSøknadUtils.utledResultatPåSøknad(

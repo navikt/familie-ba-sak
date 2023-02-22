@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -69,7 +70,10 @@ class SøknadGrunnlagTest(
     private val vedtaksperiodeService: VedtaksperiodeService,
 
     @Autowired
-    private val databaseCleanupService: DatabaseCleanupService
+    private val databaseCleanupService: DatabaseCleanupService,
+
+    @Autowired
+    private val brevmalService: BrevmalService
 ) : AbstractSpringIntegrationTest() {
 
     @BeforeAll
@@ -206,7 +210,8 @@ class SøknadGrunnlagTest(
             persongrunnlagService = persongrunnlagService,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService
+            vedtaksperiodeService = vedtaksperiodeService,
+            brevmalService = brevmalService
         )
 
         val tilkjentYtelse =
@@ -271,7 +276,8 @@ class SøknadGrunnlagTest(
             persongrunnlagService = persongrunnlagService,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService
+            vedtaksperiodeService = vedtaksperiodeService,
+            brevmalService = brevmalService
         )
 
         val behandlingEtterNyRegistrering = stegService.håndterSøknad(

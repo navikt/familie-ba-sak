@@ -33,37 +33,38 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
-import no.nav.familie.ba.sak.kjerne.steg.StegType
-import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hjemlerTilhørendeFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Opphørsperiode
-import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 
-fun hentBrevmal(behandling: Behandling): Brevmal =
+@Deprecated("Bruk hentBrevmal")
+fun hentBrevmalGammel(behandling: Behandling): Brevmal =
     when (behandling.opprettetÅrsak) {
         BehandlingÅrsak.DØDSFALL_BRUKER -> Brevmal.VEDTAK_OPPHØR_DØDSFALL
         BehandlingÅrsak.KORREKSJON_VEDTAKSBREV -> Brevmal.VEDTAK_KORREKSJON_VEDTAKSBREV
-        else -> hentVedtaksbrevmal(behandling)
+        else -> hentVedtaksbrevmalGammel(behandling)
     }
 
-fun hentVedtaksbrevmal(behandling: Behandling): Brevmal {
+@Deprecated("Bruk hentVedtaksbrevmal")
+fun hentVedtaksbrevmalGammel(behandling: Behandling): Brevmal {
     if (behandling.resultat == IKKE_VURDERT) {
         throw Feil("Kan ikke opprette brev. Behandlingen er ikke vurdert.")
     }
 
     val brevmal = if (behandling.skalBehandlesAutomatisk) {
-        hentAutomatiskVedtaksbrevtype(behandling.opprettetÅrsak, behandling.fagsak.status)
+        hentAutomatiskVedtaksbrevtype(behandling)
     } else {
-        hentManuellVedtaksbrevtype(behandling.type, behandling.resultat, behandling.fagsak.institusjon != null)
+        hentManuellVedtaksbrevtypeGammel(behandling.type, behandling.resultat, behandling.fagsak.institusjon != null)
     }
 
     return if (brevmal.erVedtaksbrev) brevmal else throw Feil("Brevmal ${brevmal.visningsTekst} er ikke vedtaksbrev")
 }
 
-private fun hentAutomatiskVedtaksbrevtype(behandlingÅrsak: BehandlingÅrsak, fagsakStatus: FagsakStatus): Brevmal =
+fun hentAutomatiskVedtaksbrevtype(behandling: Behandling): Brevmal {
+    val behandlingÅrsak = behandling.opprettetÅrsak
+    val fagsakStatus = behandling.fagsak.status
 
-    when (behandlingÅrsak) {
+    return when (behandlingÅrsak) {
         BehandlingÅrsak.FØDSELSHENDELSE -> {
             if (fagsakStatus == FagsakStatus.LØPENDE) {
                 Brevmal.AUTOVEDTAK_NYFØDT_BARN_FRA_FØR
@@ -71,14 +72,18 @@ private fun hentAutomatiskVedtaksbrevtype(behandlingÅrsak: BehandlingÅrsak, fa
                 Brevmal.AUTOVEDTAK_NYFØDT_FØRSTE_BARN
             }
         }
+
         BehandlingÅrsak.OMREGNING_6ÅR,
         BehandlingÅrsak.OMREGNING_18ÅR,
         BehandlingÅrsak.SMÅBARNSTILLEGG,
         BehandlingÅrsak.OMREGNING_SMÅBARNSTILLEGG -> Brevmal.AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG
+
         else -> throw Feil("Det er ikke laget funksjonalitet for automatisk behandling for $behandlingÅrsak")
     }
+}
 
-fun hentManuellVedtaksbrevtype(
+@Deprecated("Bruk hentManuellVedtaksbrevtype")
+fun hentManuellVedtaksbrevtypeGammel(
     behandlingType: BehandlingType,
     behandlingsresultat: Behandlingsresultat,
     erInstitusjon: Boolean = false
@@ -88,7 +93,7 @@ fun hentManuellVedtaksbrevtype(
     val feilmelidingBehandlingType =
         "Brev ikke støttet for behandlingstype=$behandlingType"
     val frontendFeilmelding = "Vi finner ikke vedtaksbrev som matcher med behandlingen og resultatet du har fått. " +
-        "Ta kontakt med Team familie slik at vi kan se nærmere på saken."
+        "Meld sak i Porten slik at vi kan se nærmere på saken."
 
     return when (behandlingType) {
         BehandlingType.FØRSTEGANGSBEHANDLING ->
@@ -192,30 +197,6 @@ fun hentManuellVedtaksbrevtype(
     }
 }
 
-fun hentSaksbehandlerOgBeslutter(behandling: Behandling, totrinnskontroll: Totrinnskontroll?): Pair<String, String> {
-    return when {
-        behandling.steg <= StegType.SEND_TIL_BESLUTTER || totrinnskontroll == null -> {
-            Pair(SikkerhetContext.hentSaksbehandlerNavn(), "Beslutter")
-        }
-        totrinnskontroll.erBesluttet() -> {
-            Pair(totrinnskontroll.saksbehandler, totrinnskontroll.beslutter!!)
-        }
-        behandling.steg == StegType.BESLUTTE_VEDTAK -> {
-            Pair(
-                totrinnskontroll.saksbehandler,
-                if (totrinnskontroll.saksbehandler == SikkerhetContext.hentSaksbehandlerNavn()) {
-                    "Beslutter"
-                } else {
-                    SikkerhetContext.hentSaksbehandlerNavn()
-                }
-            )
-        }
-        else -> {
-            throw Feil("Prøver å hente saksbehandler og beslutters navn for generering av brev i en ukjent tilstand.")
-        }
-    }
-}
-
 // Dokumenttittel legges på i familie-integrasjoner basert på dokumenttype
 // Denne funksjonen bestemmer om dokumenttittelen skal overstyres eller ikke
 fun hentOverstyrtDokumenttittel(behandling: Behandling): String? {
@@ -229,6 +210,7 @@ fun hentOverstyrtDokumenttittel(behandling: Behandling): String? {
                 DELVIS_INNVILGET_OG_OPPHØRT,
                 ENDRET_OG_OPPHØRT
             ).contains(behandling.resultat) -> "Vedtak om endret barnetrygd"
+
             behandling.resultat.erFortsattInnvilget() -> "Vedtak om fortsatt barnetrygd"
             else -> null
         }

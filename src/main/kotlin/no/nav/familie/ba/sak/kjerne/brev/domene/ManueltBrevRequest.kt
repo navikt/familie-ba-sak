@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.EnkeltInformasjonsbrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.FlettefelterForDokumentImpl
@@ -30,7 +31,6 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselOmRevurderingSamboer
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselbrevMedÅrsaker
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselbrevÅrlegKontrollEøs
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.VarselbrevMedÅrsakerOgBarn
-import no.nav.familie.ba.sak.kjerne.brev.domene.maler.flettefelt
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.kontrakter.felles.arbeidsfordeling.Enhet
@@ -113,250 +113,268 @@ fun ManueltBrevRequest.leggTilEnhet(arbeidsfordelingService: ArbeidsfordelingSer
     )
 }
 
-fun ManueltBrevRequest.tilBrev(hentLandkoder: (() -> Map<String, String>)) = when (this.brevmal) {
-    Brevmal.INFORMASJONSBREV_DELT_BOSTED ->
-        InformasjonsbrevDeltBostedBrev(
-            data = InformasjonsbrevDeltBostedData(
-                delmalData = InformasjonsbrevDeltBostedData.DelmalData(
-                    signatur = SignaturDelmal(
-                        enhet = flettefelt(
-                            this.enhetNavn()
-                        )
-                    )
-                ),
-                flettefelter = InformasjonsbrevDeltBostedData.Flettefelter(
-                    navn = this.mottakerNavn,
-                    fodselsnummer = this.mottakerIdent,
-                    barnMedDeltBostedAvtale = this.multiselectVerdier
-                )
-            )
-        )
+fun ManueltBrevRequest.tilBrev(saksbehandlerNavn: String, hentLandkoder: (() -> Map<String, String>)): Brev {
+    val signaturDelmal = SignaturDelmal(
+        enhet = this.enhetNavn(),
+        saksbehandlerNavn = saksbehandlerNavn
+    )
 
-    Brevmal.INNHENTE_OPPLYSNINGER,
-    Brevmal.INNHENTE_OPPLYSNINGER_INSTITUSJON ->
-        InnhenteOpplysningerBrev(
-            mal = brevmal,
-            data = InnhenteOpplysningerData(
-                delmalData = InnhenteOpplysningerData.DelmalData(signatur = SignaturDelmal(enhet = this.enhetNavn())),
-                flettefelter = InnhenteOpplysningerData.Flettefelter(
-                    navn = this.mottakerNavn,
-                    fodselsnummer = this.vedrørende?.fødselsnummer ?: mottakerIdent,
-                    organisasjonsnummer = if (erTilInstitusjon) mottakerIdent else null,
-                    gjelder = this.vedrørende?.navn,
-                    dokumentliste = this.multiselectVerdier
-                )
-            )
-        )
-
-    Brevmal.HENLEGGE_TRUKKET_SØKNAD ->
-        HenleggeTrukketSøknadBrev(
-            data = HenleggeTrukketSøknadData(
-                delmalData = HenleggeTrukketSøknadData.DelmalData(signatur = SignaturDelmal(enhet = this.enhetNavn())),
-                flettefelter = FlettefelterForDokumentImpl(
-                    navn = this.mottakerNavn,
-                    fodselsnummer = this.mottakerIdent
-                )
-            )
-        )
-
-    Brevmal.VARSEL_OM_REVURDERING ->
-        VarselbrevMedÅrsaker(
-            mal = Brevmal.VARSEL_OM_REVURDERING,
-            navn = this.mottakerNavn,
-            fødselsnummer = this.mottakerIdent,
-            varselÅrsaker = this.multiselectVerdier,
-            enhet = this.enhetNavn()
-        )
-
-    Brevmal.VARSEL_OM_REVURDERING_INSTITUSJON ->
-        VarselbrevMedÅrsaker(
-            mal = Brevmal.VARSEL_OM_REVURDERING_INSTITUSJON,
-            navn = this.mottakerNavn,
-            fødselsnummer = this.vedrørende?.fødselsnummer ?: mottakerIdent,
-            varselÅrsaker = this.multiselectVerdier,
-            enhet = this.enhetNavn(),
-            organisasjonsnummer = mottakerIdent,
-            gjelder = this.vedrørende?.navn
-        )
-
-    Brevmal.VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14 ->
-        VarselOmRevurderingDeltBostedParagraf14Brev(
-            data = VarselOmRevurderingDeltBostedParagraf14Data(
-                delmalData = VarselOmRevurderingDeltBostedParagraf14Data.DelmalData(signatur = SignaturDelmal(enhet = this.enhetNavn())),
-                flettefelter = VarselOmRevurderingDeltBostedParagraf14Data.Flettefelter(
-                    navn = this.mottakerNavn,
-                    fodselsnummer = this.mottakerIdent,
-                    barnMedDeltBostedAvtale = this.multiselectVerdier
-                )
-            )
-        )
-
-    Brevmal.VARSEL_OM_REVURDERING_SAMBOER ->
-        if (this.datoAvtale == null) {
-            throw FunksjonellFeil(
-                frontendFeilmelding = "Du må sette dato for samboerskap for å sende dette brevet.",
-                melding = "Dato er ikke satt for brevtype 'varsel om revurdering samboer'"
-            )
-        } else {
-            VarselOmRevurderingSamboerBrev(
-                data = VarselOmRevurderingSamboerData(
-                    delmalData = VarselOmRevurderingSamboerData.DelmalData(signatur = SignaturDelmal(enhet = this.enhetNavn())),
-                    flettefelter = VarselOmRevurderingSamboerData.Flettefelter(
+    return when (this.brevmal) {
+        Brevmal.INFORMASJONSBREV_DELT_BOSTED ->
+            InformasjonsbrevDeltBostedBrev(
+                data = InformasjonsbrevDeltBostedData(
+                    delmalData = InformasjonsbrevDeltBostedData.DelmalData(
+                        signatur = signaturDelmal
+                    ),
+                    flettefelter = InformasjonsbrevDeltBostedData.Flettefelter(
                         navn = this.mottakerNavn,
                         fodselsnummer = this.mottakerIdent,
-                        datoAvtale = LocalDate.parse(this.datoAvtale).tilDagMånedÅr()
+                        barnMedDeltBostedAvtale = this.multiselectVerdier
                     )
                 )
             )
-        }
 
-    Brevmal.SVARTIDSBREV ->
-        Svartidsbrev(
-            navn = this.mottakerNavn,
-            fodselsnummer = this.mottakerIdent,
-            enhet = this.enhetNavn(),
-            mal = Brevmal.SVARTIDSBREV,
-            erEøsBehandling = if (this.behandlingKategori == null) {
-                throw Feil("Trenger å vite om behandling er EØS for å sende ut svartidsbrev.")
+        Brevmal.INNHENTE_OPPLYSNINGER,
+        Brevmal.INNHENTE_OPPLYSNINGER_INSTITUSJON ->
+            InnhenteOpplysningerBrev(
+                mal = brevmal,
+                data = InnhenteOpplysningerData(
+                    delmalData = InnhenteOpplysningerData.DelmalData(signatur = signaturDelmal),
+                    flettefelter = InnhenteOpplysningerData.Flettefelter(
+                        navn = this.mottakerNavn,
+                        fodselsnummer = this.vedrørende?.fødselsnummer ?: mottakerIdent,
+                        organisasjonsnummer = if (erTilInstitusjon) mottakerIdent else null,
+                        gjelder = this.vedrørende?.navn,
+                        dokumentliste = this.multiselectVerdier
+                    )
+                )
+            )
+
+        Brevmal.HENLEGGE_TRUKKET_SØKNAD ->
+            HenleggeTrukketSøknadBrev(
+                data = HenleggeTrukketSøknadData(
+                    delmalData = HenleggeTrukketSøknadData.DelmalData(signatur = signaturDelmal),
+                    flettefelter = FlettefelterForDokumentImpl(
+                        navn = this.mottakerNavn,
+                        fodselsnummer = this.mottakerIdent
+                    )
+                )
+            )
+
+        Brevmal.VARSEL_OM_REVURDERING ->
+            VarselbrevMedÅrsaker(
+                mal = Brevmal.VARSEL_OM_REVURDERING,
+                navn = this.mottakerNavn,
+                fødselsnummer = this.mottakerIdent,
+                varselÅrsaker = this.multiselectVerdier,
+                enhet = this.enhetNavn(),
+                saksbehandlerNavn = saksbehandlerNavn
+            )
+
+        Brevmal.VARSEL_OM_REVURDERING_INSTITUSJON ->
+            VarselbrevMedÅrsaker(
+                mal = Brevmal.VARSEL_OM_REVURDERING_INSTITUSJON,
+                navn = this.mottakerNavn,
+                fødselsnummer = this.vedrørende?.fødselsnummer ?: mottakerIdent,
+                varselÅrsaker = this.multiselectVerdier,
+                enhet = this.enhetNavn(),
+                organisasjonsnummer = mottakerIdent,
+                gjelder = this.vedrørende?.navn,
+                saksbehandlerNavn = saksbehandlerNavn
+            )
+
+        Brevmal.VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14 ->
+            VarselOmRevurderingDeltBostedParagraf14Brev(
+                data = VarselOmRevurderingDeltBostedParagraf14Data(
+                    delmalData = VarselOmRevurderingDeltBostedParagraf14Data.DelmalData(signatur = signaturDelmal),
+                    flettefelter = VarselOmRevurderingDeltBostedParagraf14Data.Flettefelter(
+                        navn = this.mottakerNavn,
+                        fodselsnummer = this.mottakerIdent,
+                        barnMedDeltBostedAvtale = this.multiselectVerdier
+                    )
+                )
+            )
+
+        Brevmal.VARSEL_OM_REVURDERING_SAMBOER ->
+            if (this.datoAvtale == null) {
+                throw FunksjonellFeil(
+                    frontendFeilmelding = "Du må sette dato for samboerskap for å sende dette brevet.",
+                    melding = "Dato er ikke satt for brevtype 'varsel om revurdering samboer'"
+                )
             } else {
-                this.behandlingKategori == BehandlingKategori.EØS
+                VarselOmRevurderingSamboerBrev(
+                    data = VarselOmRevurderingSamboerData(
+                        delmalData = VarselOmRevurderingSamboerData.DelmalData(signatur = signaturDelmal),
+                        flettefelter = VarselOmRevurderingSamboerData.Flettefelter(
+                            navn = this.mottakerNavn,
+                            fodselsnummer = this.mottakerIdent,
+                            datoAvtale = LocalDate.parse(this.datoAvtale).tilDagMånedÅr()
+                        )
+                    )
+                )
             }
-        )
 
-    Brevmal.SVARTIDSBREV_INSTITUSJON ->
-        Svartidsbrev(
-            navn = this.mottakerNavn,
-            fodselsnummer = this.vedrørende?.fødselsnummer ?: mottakerIdent,
-            enhet = this.enhetNavn(),
-            mal = Brevmal.SVARTIDSBREV_INSTITUSJON,
-            erEøsBehandling = false,
-            organisasjonsnummer = mottakerIdent,
-            gjelder = this.vedrørende?.navn
-        )
+        Brevmal.SVARTIDSBREV ->
+            Svartidsbrev(
+                navn = this.mottakerNavn,
+                fodselsnummer = this.mottakerIdent,
+                enhet = this.enhetNavn(),
+                mal = Brevmal.SVARTIDSBREV,
+                erEøsBehandling = if (this.behandlingKategori == null) {
+                    throw Feil("Trenger å vite om behandling er EØS for å sende ut svartidsbrev.")
+                } else {
+                    this.behandlingKategori == BehandlingKategori.EØS
+                },
+                saksbehandlerNavn = saksbehandlerNavn
+            )
 
-    Brevmal.FORLENGET_SVARTIDSBREV,
-    Brevmal.FORLENGET_SVARTIDSBREV_INSTITUSJON ->
-        ForlengetSvartidsbrev(
-            mal = brevmal,
-            navn = this.mottakerNavn,
-            fodselsnummer = this.vedrørende?.fødselsnummer ?: mottakerIdent,
-            enhetNavn = this.enhetNavn(),
-            årsaker = this.multiselectVerdier,
-            antallUkerSvarfrist = this.antallUkerSvarfrist ?: throw Feil(
-                message = "Antall uker svarfrist er ikke satt",
-                frontendFeilmelding = "Antall uker svarfrist er ikke satt"
-            ),
-            organisasjonsnummer = if (erTilInstitusjon) mottakerIdent else null,
-            gjelder = this.vedrørende?.navn
-        )
+        Brevmal.SVARTIDSBREV_INSTITUSJON ->
+            Svartidsbrev(
+                navn = this.mottakerNavn,
+                fodselsnummer = this.vedrørende?.fødselsnummer ?: mottakerIdent,
+                enhet = this.enhetNavn(),
+                mal = Brevmal.SVARTIDSBREV_INSTITUSJON,
+                erEøsBehandling = false,
+                organisasjonsnummer = mottakerIdent,
+                gjelder = this.vedrørende?.navn,
+                saksbehandlerNavn = saksbehandlerNavn
+            )
 
-    Brevmal.INFORMASJONSBREV_FØDSEL_MINDREÅRIG ->
-        EnkeltInformasjonsbrev(
-            navn = this.mottakerNavn,
-            fodselsnummer = this.mottakerIdent,
-            enhet = this.enhetNavn(),
-            mal = Brevmal.INFORMASJONSBREV_FØDSEL_MINDREÅRIG
-        )
+        Brevmal.FORLENGET_SVARTIDSBREV,
+        Brevmal.FORLENGET_SVARTIDSBREV_INSTITUSJON ->
+            ForlengetSvartidsbrev(
+                mal = brevmal,
+                navn = this.mottakerNavn,
+                fodselsnummer = this.vedrørende?.fødselsnummer ?: mottakerIdent,
+                enhetNavn = this.enhetNavn(),
+                årsaker = this.multiselectVerdier,
+                antallUkerSvarfrist = this.antallUkerSvarfrist ?: throw Feil(
+                    message = "Antall uker svarfrist er ikke satt",
+                    frontendFeilmelding = "Antall uker svarfrist er ikke satt"
+                ),
+                organisasjonsnummer = if (erTilInstitusjon) mottakerIdent else null,
+                gjelder = this.vedrørende?.navn,
+                saksbehandlerNavn = saksbehandlerNavn
+            )
 
-    Brevmal.INFORMASJONSBREV_FØDSEL_UMYNDIG,
-    Brevmal.INFORMASJONSBREV_FØDSEL_VERGEMÅL ->
-        EnkeltInformasjonsbrev(
-            navn = this.mottakerNavn,
-            fodselsnummer = this.mottakerIdent,
-            enhet = this.enhetNavn(),
-            mal = Brevmal.INFORMASJONSBREV_FØDSEL_VERGEMÅL
-        )
+        Brevmal.INFORMASJONSBREV_FØDSEL_MINDREÅRIG ->
+            EnkeltInformasjonsbrev(
+                navn = this.mottakerNavn,
+                fodselsnummer = this.mottakerIdent,
+                enhet = this.enhetNavn(),
+                mal = Brevmal.INFORMASJONSBREV_FØDSEL_MINDREÅRIG,
+                saksbehandlerNavn = saksbehandlerNavn
+            )
 
-    Brevmal.INFORMASJONSBREV_FØDSEL_GENERELL ->
-        EnkeltInformasjonsbrev(
-            navn = this.mottakerNavn,
-            fodselsnummer = this.mottakerIdent,
-            enhet = this.enhetNavn(),
-            mal = Brevmal.INFORMASJONSBREV_FØDSEL_GENERELL
-        )
+        Brevmal.INFORMASJONSBREV_FØDSEL_UMYNDIG,
+        Brevmal.INFORMASJONSBREV_FØDSEL_VERGEMÅL ->
+            EnkeltInformasjonsbrev(
+                navn = this.mottakerNavn,
+                fodselsnummer = this.mottakerIdent,
+                enhet = this.enhetNavn(),
+                mal = Brevmal.INFORMASJONSBREV_FØDSEL_VERGEMÅL,
+                saksbehandlerNavn = saksbehandlerNavn
+            )
 
-    Brevmal.INFORMASJONSBREV_KAN_SØKE ->
-        InformasjonsbrevKanSøke(
-            navn = this.mottakerNavn,
-            fodselsnummer = this.mottakerIdent,
-            enhet = this.enhetNavn(),
-            dokumentliste = this.multiselectVerdier
-        )
+        Brevmal.INFORMASJONSBREV_FØDSEL_GENERELL ->
+            EnkeltInformasjonsbrev(
+                navn = this.mottakerNavn,
+                fodselsnummer = this.mottakerIdent,
+                enhet = this.enhetNavn(),
+                mal = Brevmal.INFORMASJONSBREV_FØDSEL_GENERELL,
+                saksbehandlerNavn = saksbehandlerNavn
+            )
 
-    Brevmal.VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED ->
-        VarselbrevMedÅrsakerOgBarn(
-            mal = Brevmal.VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED,
-            navn = this.mottakerNavn,
-            fødselsnummer = this.mottakerIdent,
-            enhet = this.enhetNavn(),
-            varselÅrsaker = this.multiselectVerdier,
-            barnasFødselsdager = this.barnasFødselsdager.tilFormaterteFødselsdager()
-        )
+        Brevmal.INFORMASJONSBREV_KAN_SØKE ->
+            InformasjonsbrevKanSøke(
+                navn = this.mottakerNavn,
+                fodselsnummer = this.mottakerIdent,
+                enhet = this.enhetNavn(),
+                dokumentliste = this.multiselectVerdier,
+                saksbehandlerNavn = saksbehandlerNavn
+            )
 
-    Brevmal.VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS ->
-        VarselbrevMedÅrsaker(
-            mal = Brevmal.VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS,
-            navn = this.mottakerNavn,
-            fødselsnummer = this.mottakerIdent,
-            varselÅrsaker = this.multiselectVerdier,
-            enhet = this.enhetNavn()
-        )
+        Brevmal.VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED ->
+            VarselbrevMedÅrsakerOgBarn(
+                mal = Brevmal.VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED,
+                navn = this.mottakerNavn,
+                fødselsnummer = this.mottakerIdent,
+                enhet = this.enhetNavn(),
+                varselÅrsaker = this.multiselectVerdier,
+                barnasFødselsdager = this.barnasFødselsdager.tilFormaterteFødselsdager(),
+                saksbehandlerNavn = saksbehandlerNavn
+            )
 
-    Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS ->
-        VarselbrevÅrlegKontrollEøs(
-            mal = Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS,
-            navn = this.mottakerNavn,
-            fødselsnummer = this.mottakerIdent,
-            enhet = this.enhetNavn(),
-            mottakerlandSed = tilLandNavn(hentLandkoder(), this.mottakerlandSED())
-        )
+        Brevmal.VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS ->
+            VarselbrevMedÅrsaker(
+                mal = Brevmal.VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS,
+                navn = this.mottakerNavn,
+                fødselsnummer = this.mottakerIdent,
+                varselÅrsaker = this.multiselectVerdier,
+                enhet = this.enhetNavn(),
+                saksbehandlerNavn = saksbehandlerNavn
+            )
 
-    Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS_MED_INNHENTING_AV_OPPLYSNINGER ->
-        VarselbrevÅrlegKontrollEøs(
-            mal = Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS_MED_INNHENTING_AV_OPPLYSNINGER,
-            navn = this.mottakerNavn,
-            fødselsnummer = this.mottakerIdent,
-            enhet = this.enhetNavn(),
-            mottakerlandSed = tilLandNavn(hentLandkoder(), this.mottakerlandSED()),
-            dokumentliste = this.multiselectVerdier
-        )
+        Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS ->
+            VarselbrevÅrlegKontrollEøs(
+                mal = Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS,
+                navn = this.mottakerNavn,
+                fødselsnummer = this.mottakerIdent,
+                enhet = this.enhetNavn(),
+                mottakerlandSed = tilLandNavn(hentLandkoder(), this.mottakerlandSED()),
+                saksbehandlerNavn = saksbehandlerNavn
+            )
 
-    Brevmal.INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED ->
-        InnhenteOpplysningerOmBarn(
-            mal = Brevmal.INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED,
-            navn = this.mottakerNavn,
-            fødselsnummer = this.mottakerIdent,
-            dokumentliste = this.multiselectVerdier,
-            enhet = this.enhetNavn(),
-            barnasFødselsdager = this.barnasFødselsdager.tilFormaterteFødselsdager()
-        )
+        Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS_MED_INNHENTING_AV_OPPLYSNINGER ->
+            VarselbrevÅrlegKontrollEøs(
+                mal = Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS_MED_INNHENTING_AV_OPPLYSNINGER,
+                navn = this.mottakerNavn,
+                fødselsnummer = this.mottakerIdent,
+                enhet = this.enhetNavn(),
+                mottakerlandSed = tilLandNavn(hentLandkoder(), this.mottakerlandSED()),
+                dokumentliste = this.multiselectVerdier,
+                saksbehandlerNavn = saksbehandlerNavn
+            )
 
-    Brevmal.INFORMASJONSBREV_KAN_SØKE_EØS ->
-        EnkeltInformasjonsbrev(
-            navn = this.mottakerNavn,
-            fodselsnummer = this.mottakerIdent,
-            enhet = this.enhetNavn(),
-            mal = Brevmal.INFORMASJONSBREV_KAN_SØKE_EØS
-        )
+        Brevmal.INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED ->
+            InnhenteOpplysningerOmBarn(
+                mal = Brevmal.INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED,
+                navn = this.mottakerNavn,
+                fødselsnummer = this.mottakerIdent,
+                dokumentliste = this.multiselectVerdier,
+                enhet = this.enhetNavn(),
+                barnasFødselsdager = this.barnasFødselsdager.tilFormaterteFødselsdager(),
+                saksbehandlerNavn = saksbehandlerNavn
+            )
 
-    Brevmal.VEDTAK_FØRSTEGANGSVEDTAK,
-    Brevmal.VEDTAK_ENDRING,
-    Brevmal.VEDTAK_OPPHØRT,
-    Brevmal.VEDTAK_OPPHØR_MED_ENDRING,
-    Brevmal.VEDTAK_AVSLAG,
-    Brevmal.VEDTAK_FORTSATT_INNVILGET,
-    Brevmal.VEDTAK_KORREKSJON_VEDTAKSBREV,
-    Brevmal.VEDTAK_OPPHØR_DØDSFALL,
-    Brevmal.VEDTAK_FØRSTEGANGSVEDTAK_INSTITUSJON,
-    Brevmal.VEDTAK_AVSLAG_INSTITUSJON,
-    Brevmal.VEDTAK_OPPHØRT_INSTITUSJON,
-    Brevmal.VEDTAK_ENDRING_INSTITUSJON,
-    Brevmal.VEDTAK_FORTSATT_INNVILGET_INSTITUSJON,
-    Brevmal.VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON,
-    Brevmal.DØDSFALL,
-    Brevmal.AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG,
-    Brevmal.AUTOVEDTAK_NYFØDT_FØRSTE_BARN,
-    Brevmal.AUTOVEDTAK_NYFØDT_BARN_FRA_FØR -> throw Feil("Kan ikke mappe fra manuel brevrequest til ${this.brevmal}.")
+        Brevmal.INFORMASJONSBREV_KAN_SØKE_EØS ->
+            EnkeltInformasjonsbrev(
+                navn = this.mottakerNavn,
+                fodselsnummer = this.mottakerIdent,
+                enhet = this.enhetNavn(),
+                mal = Brevmal.INFORMASJONSBREV_KAN_SØKE_EØS,
+                saksbehandlerNavn = saksbehandlerNavn
+            )
+
+        Brevmal.VEDTAK_FØRSTEGANGSVEDTAK,
+        Brevmal.VEDTAK_ENDRING,
+        Brevmal.VEDTAK_OPPHØRT,
+        Brevmal.VEDTAK_OPPHØR_MED_ENDRING,
+        Brevmal.VEDTAK_AVSLAG,
+        Brevmal.VEDTAK_FORTSATT_INNVILGET,
+        Brevmal.VEDTAK_KORREKSJON_VEDTAKSBREV,
+        Brevmal.VEDTAK_OPPHØR_DØDSFALL,
+        Brevmal.VEDTAK_FØRSTEGANGSVEDTAK_INSTITUSJON,
+        Brevmal.VEDTAK_AVSLAG_INSTITUSJON,
+        Brevmal.VEDTAK_OPPHØRT_INSTITUSJON,
+        Brevmal.VEDTAK_ENDRING_INSTITUSJON,
+        Brevmal.VEDTAK_FORTSATT_INNVILGET_INSTITUSJON,
+        Brevmal.VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON,
+        Brevmal.DØDSFALL,
+        Brevmal.AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG,
+        Brevmal.AUTOVEDTAK_NYFØDT_FØRSTE_BARN,
+        Brevmal.AUTOVEDTAK_NYFØDT_BARN_FRA_FØR -> throw Feil("Kan ikke mappe fra manuel brevrequest til ${this.brevmal}.")
+    }
 }
 
 private fun tilLandNavn(landkoderISO2: Map<String, String>, landKode: String): String {

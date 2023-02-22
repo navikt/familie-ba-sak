@@ -47,17 +47,7 @@ class SimuleringService(
     fun hentSimuleringFraFamilieOppdrag(vedtak: Vedtak): DetaljertSimuleringResultat? {
         if (vedtak.behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET ||
             vedtak.behandling.resultat == Behandlingsresultat.AVSLÅTT ||
-            (
-                if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_ATY_FOR_Å_AVGJØRE_DROPPE_SIMULERING)) {
-                    beregningService.erAlleUtbetalingsperioderPåNullKronerIDenneOgForrigeBehandling(
-                            behandling = vedtak.behandling
-                        )
-                } else {
-                    beregningService.innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(
-                            behandling = vedtak.behandling
-                        )
-                }
-                )
+            beregningService.erAlleUtbetalingsperioderPåNullKronerIDenneOgForrigeBehandling(vedtak.behandling)
         ) {
             return null
         }
@@ -119,8 +109,7 @@ class SimuleringService(
         val simulering = hentSimuleringPåBehandling(behandlingId)
         val restSimulering = vedtakSimuleringMottakereTilRestSimulering(
             økonomiSimuleringMottakere = simulering,
-            erManuellPosteringTogglePå = featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ),
-            erMigreringsbehandling = behandling.erMigrering()
+            erManuellPosteringTogglePå = featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ)
         )
 
         return if (!behandlingErFerdigBesluttet && simuleringErUtdatert(restSimulering)) {
@@ -167,16 +156,14 @@ class SimuleringService(
     fun hentEtterbetaling(økonomiSimuleringMottakere: List<ØkonomiSimuleringMottaker>): BigDecimal {
         return vedtakSimuleringMottakereTilRestSimulering(
             økonomiSimuleringMottakere = økonomiSimuleringMottakere,
-            erManuellPosteringTogglePå = featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ),
-            erMigreringsbehandling = false // ikke relevant når vi henter etterbetaling
+            erManuellPosteringTogglePå = featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ)
         ).etterbetaling
     }
 
     fun hentFeilutbetaling(økonomiSimuleringMottakere: List<ØkonomiSimuleringMottaker>): BigDecimal {
         return vedtakSimuleringMottakereTilRestSimulering(
             økonomiSimuleringMottakere,
-            featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ),
-            erMigreringsbehandling = false // ikke relevant når vi henter feilutbetaling
+            featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ)
         ).feilutbetaling
     }
 }

@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.steg
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.BRUK_ANDELER_FOR_IVERKSETTELSE_SJEKK
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -18,6 +19,7 @@ import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.FerdigstillOppgaver
@@ -38,7 +40,8 @@ class BeslutteVedtak(
     private val loggService: LoggService,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val featureToggleService: FeatureToggleService,
-    private val tilkjentYtelseValideringService: TilkjentYtelseValideringService
+    private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
+    private val saksbehandlerContext: SaksbehandlerContext
 ) : BehandlingSteg<RestBeslutningPåVedtak> {
 
     override fun utførStegOgAngiNeste(
@@ -66,7 +69,7 @@ class BeslutteVedtak(
             beslutter = if (behandling.erManuellMigrering()) {
                 SikkerhetContext.SYSTEM_NAVN
             } else {
-                SikkerhetContext.hentSaksbehandlerNavn()
+                saksbehandlerContext.hentSaksbehandlerSignaturTilBrev()
             },
             beslutterId = if (behandling.erManuellMigrering()) {
                 SikkerhetContext.SYSTEM_FORKORTELSE
@@ -148,15 +151,20 @@ class BeslutteVedtak(
     }
 
     private fun sjekkOmBehandlingSkalIverksettesOgHentNesteSteg(behandling: Behandling): StegType {
-        val nesteSteg = hentNesteStegForNormalFlyt(behandling)
+        val nesteSteg = if (featureToggleService.isEnabled(BRUK_ANDELER_FOR_IVERKSETTELSE_SJEKK)) {
+            val endringerIUtbetaling =
+                beregningService.erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling)
 
-        if (nesteSteg == StegType.IVERKSETT_MOT_OPPDRAG) {
-            val erInnvilgetSøknadUtenUtebtalingsperioderGrunnetEndringsperioder =
-                beregningService.erAlleUtbetalingsperioderPåNullKronerIDenneOgForrigeBehandling(behandling = behandling)
+            hentNesteStegGittEndringerIUtbetaling(behandling, endringerIUtbetaling)
+        } else {
+            hentNesteStegForNormalFlytGammel(behandling)
+        }
 
-            if (erInnvilgetSøknadUtenUtebtalingsperioderGrunnetEndringsperioder) {
-                return StegType.JOURNALFØR_VEDTAKSBREV
-            }
+        if (nesteSteg == StegType.IVERKSETT_MOT_OPPDRAG &&
+            beregningService.erAlleUtbetalingsperioderPåNullKronerIDenneOgForrigeBehandling(behandling) &&
+            behandling.erBehandlingMedVedtaksbrevutsending()
+        ) {
+            return StegType.JOURNALFØR_VEDTAKSBREV
         }
         return nesteSteg
     }
