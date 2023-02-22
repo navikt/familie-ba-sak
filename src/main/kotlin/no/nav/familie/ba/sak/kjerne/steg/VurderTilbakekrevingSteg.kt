@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.simulering.domene.SimuleringsPeriode
+import no.nav.familie.ba.sak.kjerne.simulering.hentTotalEtterbetaling
 import no.nav.familie.ba.sak.kjerne.simulering.vedtakSimuleringMottakereTilSimuleringPerioder
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import org.springframework.stereotype.Service
@@ -52,7 +53,10 @@ class VurderTilbakekrevingSteg(
                 if (finnesPerioderMedEtterbetalingStørreEnnMaksBeløp(behandlinId = behandling.id)) kastException(behandling)
             }
             else -> {
-                if (!erPositivePerioderesultaterPåMaks1KronePerBarnOgTotaltAvvikUnderBeløpsgrense(behandling.id)) {
+                val finnesEtterBetaling = hentTotalEtterbetalingFørMars2023(behandling.id) != BigDecimal.ZERO
+                if (finnesEtterBetaling &&
+                    !erPositivePerioderesultaterPåMaks1KronePerBarnOgTotaltAvvikUnderBeløpsgrense(behandling.id)
+                ) {
                     kastException(behandling)
                 }
             }
@@ -104,6 +108,9 @@ class VurderTilbakekrevingSteg(
             erManuelPosteringTogglePå = featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ)
         ).filter { it.fom.isSameOrBefore(februar2023) }
     }
+
+    private fun hentTotalEtterbetalingFørMars2023(behandlingId: Long) =
+        hentTotalEtterbetaling(hentSimuleringsperioderFørMars2023(behandlingId), null)
 
     companion object {
         const val HELMANUELL_MIGRERING_MAKS_ETTERBETALING_PER_PERIODE = 220
