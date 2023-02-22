@@ -4,16 +4,15 @@ import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatOpphørUtils.utledOpphørsdatoForNåværendeBehandlingMedFallback
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
-import no.nav.familie.ba.sak.kjerne.beregning.EndretUtbetalingAndelTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
+import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIEndretUtbetalingAndelUtil
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIKompetanseUtil
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIVilkårsvurderingUtil
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilMånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
@@ -177,16 +176,10 @@ object BehandlingsresultatEndringUtils {
         nåværendeEndretAndelerForPerson: List<EndretUtbetalingAndel>,
         forrigeEndretAndelerForPerson: List<EndretUtbetalingAndel>
     ): Boolean {
-        val nåværendeTidslinje = EndretUtbetalingAndelTidslinje(nåværendeEndretAndelerForPerson)
-        val forrigeTidslinje = EndretUtbetalingAndelTidslinje(forrigeEndretAndelerForPerson)
-
-        val endringerTidslinje = nåværendeTidslinje.kombinerUtenNullMed(forrigeTidslinje) { nåværende, forrige ->
-            (
-                nåværende.avtaletidspunktDeltBosted != forrige.avtaletidspunktDeltBosted ||
-                    nåværende.årsak != forrige.årsak ||
-                    nåværende.søknadstidspunkt != forrige.søknadstidspunkt
-                )
-        }
+        val endringerTidslinje = EndringIEndretUtbetalingAndelUtil().lagEndringIEndretUbetalingAndelPerPersonTidslinje(
+            nåværendeEndretAndelerForPerson = nåværendeEndretAndelerForPerson,
+            forrigeEndretAndelerForPerson = forrigeEndretAndelerForPerson
+        )
 
         return endringerTidslinje.perioder().any { it.innhold == true }
     }
