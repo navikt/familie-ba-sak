@@ -1,5 +1,5 @@
 # Behandlingsresultat
-Behandlingsresultatet skal gjenspesile hva som har skjedd i en behandling, og er et resultat av vurderinger og endringer som er gjort i denne behandlingen. Behandlingsresultatet er styrende for hvilken brevmal som skal brukes.
+Behandlingsresultatet skal gjenspeile hva som har skjedd i en behandling, og er et resultat av vurderinger og endringer som er gjort i denne behandlingen. Behandlingsresultatet er styrende for hvilken brevmal som skal brukes.
 
 For å utlede behandlingsresultat er det tre ting som peker seg ut som spesielt viktig:
 - **Søknad**: Har vi mottatt en søknad eller er det fremstilt krav for noen personer? Isåfall, må vi gi et svar på søknaden i form av innvilgelse/avslag/fortsatt innvilget. 
