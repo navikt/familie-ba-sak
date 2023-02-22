@@ -160,27 +160,11 @@ object BehandlingsresultatEndringUtils {
         nåværendeEndretAndeler: List<EndretUtbetalingAndel>,
         forrigeEndretAndeler: List<EndretUtbetalingAndel>
     ): Boolean {
-        val allePersoner = (nåværendeEndretAndeler.mapNotNull { it.person?.aktør } + forrigeEndretAndeler.mapNotNull { it.person?.aktør }).distinct()
-
-        val finnesPersonerMedEndretEndretUtbetalingAndel = allePersoner.any { aktør ->
-            erEndringIEndretUtbetalingAndelPerPerson(
-                nåværendeEndretAndelerForPerson = nåværendeEndretAndeler.filter { it.person?.aktør == aktør },
-                forrigeEndretAndelerForPerson = forrigeEndretAndeler.filter { it.person?.aktør == aktør }
-            )
-        }
-
-        return finnesPersonerMedEndretEndretUtbetalingAndel
-    }
-
-    private fun erEndringIEndretUtbetalingAndelPerPerson(
-        nåværendeEndretAndelerForPerson: List<EndretUtbetalingAndel>,
-        forrigeEndretAndelerForPerson: List<EndretUtbetalingAndel>
-    ): Boolean {
-        val endringerTidslinje = EndringIEndretUtbetalingAndelUtil().lagEndringIEndretUbetalingAndelPerPersonTidslinje(
-            nåværendeEndretAndelerForPerson = nåværendeEndretAndelerForPerson,
-            forrigeEndretAndelerForPerson = forrigeEndretAndelerForPerson
+        val endringIEndretUtbetalingAndelTidslinje = EndringIEndretUtbetalingAndelUtil().lagEndringIEndretUtbetalingAndelTidslinje(
+            nåværendeEndretAndeler = nåværendeEndretAndeler,
+            forrigeEndretAndeler = forrigeEndretAndeler
         )
 
-        return endringerTidslinje.perioder().any { it.innhold == true }
+        return endringIEndretUtbetalingAndelTidslinje.perioder().any { it.innhold == true }
     }
 }

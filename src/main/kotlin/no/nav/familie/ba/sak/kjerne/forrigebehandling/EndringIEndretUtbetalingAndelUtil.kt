@@ -3,10 +3,31 @@ package no.nav.familie.ba.sak.kjerne.forrigebehandling
 import no.nav.familie.ba.sak.kjerne.beregning.EndretUtbetalingAndelTidslinje
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 
 class EndringIEndretUtbetalingAndelUtil {
+
+    fun lagEndringIEndretUtbetalingAndelTidslinje(
+        nåværendeEndretAndeler: List<EndretUtbetalingAndel>,
+        forrigeEndretAndeler: List<EndretUtbetalingAndel>
+    ): Tidslinje<Boolean, Måned> {
+        val allePersoner = (nåværendeEndretAndeler.mapNotNull { it.person?.aktør } + forrigeEndretAndeler.mapNotNull { it.person?.aktør }).distinct()
+
+        val tidslinjePerPerson = allePersoner.map { aktør ->
+            lagEndringIEndretUbetalingAndelPerPersonTidslinje(
+                nåværendeEndretAndelerForPerson = nåværendeEndretAndeler.filter { it.person?.aktør == aktør },
+                forrigeEndretAndelerForPerson = forrigeEndretAndeler.filter { it.person?.aktør == aktør }
+            )
+        }
+
+        return tidslinjePerPerson.kombiner { finnesMinstEnEndringIPeriode(it) }
+    }
+
+    private fun finnesMinstEnEndringIPeriode(
+        endringer: Iterable<Boolean>
+    ): Boolean = endringer.any { it }
 
     fun lagEndringIEndretUbetalingAndelPerPersonTidslinje(
         nåværendeEndretAndelerForPerson: List<EndretUtbetalingAndel>,
