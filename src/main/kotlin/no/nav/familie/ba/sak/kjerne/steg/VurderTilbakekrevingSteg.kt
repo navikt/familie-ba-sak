@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.ENDRINGER_I_VALIDERING_FOR_MIGRERINGSBEHANDLING
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.IKKE_STOPP_MIGRERINGSBEHANDLING
@@ -16,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.math.BigDecimal
+import java.time.LocalDate
 
 @Service
 class VurderTilbakekrevingSteg(
@@ -78,34 +80,35 @@ class VurderTilbakekrevingSteg(
     }
 
     private fun finnesPerioderMedEtterbetalingStørreEnnMaksBeløp(behandlinId: Long): Boolean {
-        val simuleringPerioder = hentSimuleringsperioder(behandlinId)
+        val simuleringPerioder = hentSimuleringsperioderFørMars2023(behandlinId)
         return simuleringPerioder.any { it.etterbetaling > BigDecimal(HELMANUELL_MIGRERING_MAKS_ETTERBETALING_PER_PERIODE) }
     }
 
     private fun erNegativePerioderesultaterPåMaks1KronePerBarnOgTotaltAvvikUnderBeløpsgrense(behandlingId: Long): Boolean {
-        val simuleringPerioder = hentSimuleringsperioder(behandlingId)
+        val simuleringPerioder = hentSimuleringsperioderFørMars2023(behandlingId)
         val antallBarn = persongrunnlagService.hentBarna(behandlingId).size
         return simuleringPerioder.all { it.resultat <= BigDecimal.ZERO && it.resultat >= BigDecimal(-1*antallBarn) } &&
                 simuleringPerioder.sumOf { it.resultat }.abs() < BigDecimal(MANUELL_MIGRERING_BELØPSGRENSE_FOR_TOTALT_AVVIK)
     }
 
     private fun erPositivePerioderesultaterPåMaks1KronePerBarnOgTotaltAvvikUnderBeløpsgrense(behandlingId: Long): Boolean {
-        val simuleringPerioder = hentSimuleringsperioder(behandlingId)
+        val simuleringPerioder = hentSimuleringsperioderFørMars2023(behandlingId)
         val antallBarn = persongrunnlagService.hentBarna(behandlingId).size
         return simuleringPerioder.all { it.resultat >= BigDecimal.ZERO && it.resultat <= BigDecimal(antallBarn) } &&
                 simuleringPerioder.sumOf { it.resultat } < BigDecimal(MANUELL_MIGRERING_BELØPSGRENSE_FOR_TOTALT_AVVIK)
     }
 
-    private fun hentSimuleringsperioder(behandlingId: Long): List<SimuleringsPeriode> {
+    private fun hentSimuleringsperioderFørMars2023(behandlingId: Long): List<SimuleringsPeriode> {
         return vedtakSimuleringMottakereTilSimuleringPerioder(
             økonomiSimuleringMottakere = simuleringService.hentSimuleringPåBehandling(behandlingId),
             erManuelPosteringTogglePå = featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ),
-        )
+        ).filter { it.fom.isSameOrBefore(februar2023) }
     }
 
     companion object {
         const val HELMANUELL_MIGRERING_MAKS_ETTERBETALING_PER_PERIODE = 220
         const val MANUELL_MIGRERING_BELØPSGRENSE_FOR_TOTALT_AVVIK = 100
+        val februar2023 = LocalDate.of(2023, 2, 1)
     }
 
     override fun stegType(): StegType = StegType.VURDER_TILBAKEKREVING
