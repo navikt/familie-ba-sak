@@ -141,7 +141,7 @@ object BehandlingsresultatEndringUtils {
         return endringIKompetanseTidslinje.perioder().any { it.innhold == true }
     }
 
-    fun erEndringIVilkårvurdering(
+    internal fun erEndringIVilkårvurdering(
         nåværendePersonResultat: Set<PersonResultat>,
         forrigePersonResultat: Set<PersonResultat>,
         opphørstidspunkt: YearMonth?
