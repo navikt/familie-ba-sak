@@ -18,7 +18,8 @@ class EndringstidspunktService(
     private val kompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse>,
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
 ) {
-    fun finnEndringstidpunkForBehandling(behandlingId: Long): LocalDate {
+    @Deprecated("Skal erstattes av finnEndringstidpunkForBehandling")
+    fun finnEndringstidpunkForBehandlingGammel(behandlingId: Long): LocalDate {
         val nyBehandling = behandlingRepository.finnBehandling(behandlingId)
 
         val alleAvsluttetBehandlingerPåFagsak =

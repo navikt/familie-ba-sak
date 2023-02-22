@@ -93,7 +93,7 @@ class UtvidetBehandlingService(
 
         val tilbakekreving = tilbakekrevingRepository.findByBehandlingId(behandling.id)
 
-        val endringstidspunkt = endringstidspunktService.finnEndringstidpunkForBehandling(behandlingId)
+        val endringstidspunkt = endringstidspunktService.finnEndringstidpunkForBehandlingGammel(behandlingId)
 
         val kompetanser: Collection<Kompetanse> = kompetanseRepository.finnFraBehandlingId(behandlingId)
 

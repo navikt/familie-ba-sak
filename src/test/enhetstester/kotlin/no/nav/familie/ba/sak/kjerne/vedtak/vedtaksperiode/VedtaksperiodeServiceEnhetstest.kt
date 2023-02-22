@@ -84,7 +84,7 @@ class VedtaksperiodeServiceEnhetstest {
     @BeforeEach
     fun init() {
         every { behandlingRepository.findByFagsakAndAvsluttet(any()) } returns listOf(forrigeBehandling)
-        every { endringstidspunktService.finnEndringstidpunkForBehandling(vedtak.behandling.id) } returns endringstidspunkt
+        every { endringstidspunktService.finnEndringstidpunkForBehandlingGammel(vedtak.behandling.id) } returns endringstidspunkt
         every { persongrunnlagService.hentAktiv(any()) } returns
             lagTestPersonopplysningGrunnlag(vedtak.behandling.id, person)
         every {

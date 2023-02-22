@@ -320,7 +320,7 @@ class VedtaksperiodeService(
             ) {
                 TIDENES_MORGEN
             } else {
-                endringstidspunktService.finnEndringstidpunkForBehandling(behandlingId = vedtak.behandling.id)
+                endringstidspunktService.finnEndringstidpunkForBehandlingGammel(behandlingId = vedtak.behandling.id)
             }
         val opphørsperioder =
             hentOpphørsperioder(vedtak.behandling, endringstidspunkt).map { it.tilVedtaksperiodeMedBegrunnelse(vedtak) }
