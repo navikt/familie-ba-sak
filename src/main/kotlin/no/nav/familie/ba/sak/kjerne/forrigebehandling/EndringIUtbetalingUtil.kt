@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 
 class EndringIUtbetalingUtil {
 
-    fun erEndringerIUtbetalingMellomForrigeAndeler(
+    fun erEndringerIUtbetalingFraForrigeBehandling(
         nåværendeAndeler: List<AndelTilkjentYtelse>,
         forrigeAndeler: List<AndelTilkjentYtelse>
     ): Boolean {

@@ -151,7 +151,7 @@ class BeregningService(
             forrigeBehandling?.let { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(it.id) }
                 ?: emptyList()
 
-        val endringerIUtbetaling = EndringIUtbetalingUtil().erEndringerIUtbetalingMellomForrigeAndeler(
+        val endringerIUtbetaling = EndringIUtbetalingUtil().erEndringerIUtbetalingFraForrigeBehandling(
             nåværendeAndeler = nåværendeAndeler,
             forrigeAndeler = forrigeAndeler
         )
