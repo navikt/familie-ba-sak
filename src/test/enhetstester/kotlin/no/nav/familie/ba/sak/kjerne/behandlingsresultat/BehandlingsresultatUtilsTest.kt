@@ -19,8 +19,6 @@ class BehandlingsresultatUtilsTest {
 
     val søker = tilfeldigPerson()
 
-    private val barn1Aktør = randomAktør()
-
     @BeforeEach
     fun reset() {
         clearStaticMockk(YearMonth::class)
