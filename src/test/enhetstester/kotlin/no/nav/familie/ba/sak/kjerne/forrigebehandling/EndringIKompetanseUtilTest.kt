@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
 import java.time.YearMonth
 
-class EndringIKompetanseTest {
+class EndringIKompetanseUtilTest {
 
     private val barn1Aktør = randomAktør()
     val jan22 = YearMonth.of(2022, 1)

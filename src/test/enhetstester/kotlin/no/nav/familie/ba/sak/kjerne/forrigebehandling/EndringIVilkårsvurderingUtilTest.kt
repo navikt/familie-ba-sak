@@ -18,7 +18,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.YearMonth
 
-class EndringIVilkårsvurderingTest {
+class EndringIVilkårsvurderingUtilTest {
 
     val jan22 = YearMonth.of(2022, 1)
     val feb22 = YearMonth.of(2022, 2)
