@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.hentPerioderMedEndringerFra
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
-import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.utledSegmenter
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -272,18 +271,6 @@ fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.lagVertikaleSegmenter(): Map
 
 fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.erUlike(andreAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>): Boolean {
     return this.hentPerioderMedEndringerFra(andreAndeler).isNotEmpty()
-}
-fun List<AndelTilkjentYtelse>.erEndringerIUtbetalingMellomForrigeAndeler(
-    forrigeAndeler: List<AndelTilkjentYtelse>
-): Boolean {
-    if (isEmpty() && forrigeAndeler.isEmpty()) return false
-
-    val endringIUtbetalingTidslinje = EndringIUtbetalingUtil().lagEndringIUtbetalingTidslinje(
-        nåværendeAndeler = this,
-        forrigeAndeler = forrigeAndeler
-    )
-
-    return endringIUtbetalingTidslinje.perioder().any { it.innhold == true }
 }
 
 enum class YtelseType(val klassifisering: String) {

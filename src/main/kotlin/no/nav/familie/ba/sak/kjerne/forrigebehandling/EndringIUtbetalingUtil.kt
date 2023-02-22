@@ -9,6 +9,20 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 
 class EndringIUtbetalingUtil {
 
+    fun erEndringerIUtbetalingMellomForrigeAndeler(
+        nåværendeAndeler: List<AndelTilkjentYtelse>,
+        forrigeAndeler: List<AndelTilkjentYtelse>
+    ): Boolean {
+        if (nåværendeAndeler.isEmpty() && forrigeAndeler.isEmpty()) return false
+
+        val endringIUtbetalingTidslinje = lagEndringIUtbetalingTidslinje(
+            nåværendeAndeler = nåværendeAndeler,
+            forrigeAndeler = forrigeAndeler
+        )
+
+        return endringIUtbetalingTidslinje.perioder().any { it.innhold == true }
+    }
+
     fun lagEndringIUtbetalingTidslinje(
         nåværendeAndeler: List<AndelTilkjentYtelse>,
         forrigeAndeler: List<AndelTilkjentYtelse>
