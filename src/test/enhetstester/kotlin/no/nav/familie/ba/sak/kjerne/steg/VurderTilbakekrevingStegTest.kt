@@ -132,17 +132,17 @@ class VurderTilbakekrevingStegTest {
                 førsteSteg = StegType.VURDER_TILBAKEKREVING
             )
             every { featureToggleService.isEnabled(FeatureToggleConfig.IKKE_STOPP_MIGRERINGSBEHANDLING) } returns false
-            every { featureToggleService.isEnabled(FeatureToggleConfig.ENDRINGER_I_VALIDERING_FOR_MIGRERINGSBEHANDLING) } returns false
             every { simuleringService.hentFeilutbetaling(behandling.id) } returns BigDecimal(0)
+            every { personGrunnlagService.hentBarna(any<Long>()) } returns listOf(lagPerson(), lagPerson())
 
-            // etterbetaling 2 KR
+            // etterbetaling 4 KR pga. avrundingsfeil. 1 KR per barn i hver periode.
             val posteringer = listOf(
-                mockVedtakSimuleringPostering(fom = februar2023, beløp = 1, betalingType = BetalingType.DEBIT),
-                mockVedtakSimuleringPostering(fom = februar2023, beløp = -1, betalingType = BetalingType.KREDIT),
-                mockVedtakSimuleringPostering(fom = februar2023, beløp = 1, betalingType = BetalingType.DEBIT),
-                mockVedtakSimuleringPostering(beløp = 1, betalingType = BetalingType.DEBIT),
-                mockVedtakSimuleringPostering(beløp = -1, betalingType = BetalingType.KREDIT),
-                mockVedtakSimuleringPostering(beløp = 1, betalingType = BetalingType.DEBIT)
+                mockVedtakSimuleringPostering(fom = februar2023, beløp = 2, betalingType = BetalingType.DEBIT),
+                mockVedtakSimuleringPostering(fom = februar2023, beløp = -2, betalingType = BetalingType.KREDIT),
+                mockVedtakSimuleringPostering(fom = februar2023, beløp = 2, betalingType = BetalingType.DEBIT),
+                mockVedtakSimuleringPostering(beløp = 2, betalingType = BetalingType.DEBIT),
+                mockVedtakSimuleringPostering(beløp = -2, betalingType = BetalingType.KREDIT),
+                mockVedtakSimuleringPostering(beløp = 2, betalingType = BetalingType.DEBIT)
             )
             val simuleringMottaker =
                 listOf(mockØkonomiSimuleringMottaker(behandling = behandling, økonomiSimuleringPostering = posteringer))
@@ -194,35 +194,6 @@ class VurderTilbakekrevingStegTest {
                 "når det finnes feilutbetaling/etterbetaling",
             exception.message
         )
-    }
-
-    @Test
-    fun `skal utføre steg for migreringsbehandling med endre migreringsdato når det finnes etterbetaling mindre enn maks beløp`() {
-        val behandling: Behandling = lagBehandling(
-            behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-            årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
-            førsteSteg = StegType.VURDER_TILBAKEKREVING
-        )
-        every { featureToggleService.isEnabled(FeatureToggleConfig.IKKE_STOPP_MIGRERINGSBEHANDLING) } returns false
-        every { simuleringService.hentFeilutbetaling(behandling.id) } returns BigDecimal.ZERO
-        // etterbetaling 200 KR
-        val posteringer = listOf(
-            mockVedtakSimuleringPostering(beløp = 200, betalingType = BetalingType.DEBIT),
-            mockVedtakSimuleringPostering(beløp = -200, betalingType = BetalingType.KREDIT),
-            mockVedtakSimuleringPostering(beløp = 200, betalingType = BetalingType.DEBIT)
-        )
-        val simuleringMottaker =
-            listOf(mockØkonomiSimuleringMottaker(behandling = behandling, økonomiSimuleringPostering = posteringer))
-
-        every { simuleringService.hentSimuleringPåBehandling(behandling.id) } returns simuleringMottaker
-
-        val stegType = assertDoesNotThrow {
-            vurderTilbakekrevingSteg.utførStegOgAngiNeste(
-                behandling,
-                restTilbakekreving
-            )
-        }
-        assertTrue { stegType == StegType.SEND_TIL_BESLUTTER }
     }
 
     @Test
