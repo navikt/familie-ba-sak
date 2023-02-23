@@ -36,7 +36,8 @@ class BehandlingHentOgPersisterService(
     }
 
     fun hent(behandlingId: Long): Behandling {
-        return behandlingRepository.finnBehandlingNullable(behandlingId) ?: throw Feil("Finner ikke behandling med id $behandlingId")
+        return behandlingRepository.finnBehandlingNullable(behandlingId)
+            ?: throw Feil("Finner ikke behandling med id $behandlingId")
     }
 
     /**
@@ -105,6 +106,9 @@ class BehandlingHentOgPersisterService(
         hentBehandlinger(fagsakId).filter { it.erVedtatt() }
 
     fun hentAktivtFødselsnummerForBehandlinger(behandlingIder: List<Long>): Map<Long, String> =
+        behandlingRepository.finnAktivtFødselsnummerForBehandlinger(behandlingIder).associate { it.first to it.second }
+
+    fun hentTssEksternIdForBehandlinger(behandlingIder: List<Long>): Map<Long, String> =
         behandlingRepository.finnAktivtFødselsnummerForBehandlinger(behandlingIder).associate { it.first to it.second }
 
     fun hentIverksatteBehandlinger(fagsakId: Long): List<Behandling> {
