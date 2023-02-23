@@ -12,7 +12,6 @@ import java.time.YearMonth
 class EndringIUtbetalingUtilTest {
 
     val jan22 = YearMonth.of(2022, 1)
-    val feb22 = YearMonth.of(2022, 2)
     val mai22 = YearMonth.of(2022, 5)
     val aug22 = YearMonth.of(2022, 8)
     val sep22 = YearMonth.of(2022, 9)
@@ -144,7 +143,7 @@ class EndringIUtbetalingUtilTest {
     }
 
     @Test
-    fun `Endring i beløp - Skal returnere periode med endring hvis andel er fjernet`() {
+    fun `Endring i beløp - Skal returnere periode med endring hvis andel med beløp større enn 0 er fjernet`() {
         val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
         val barn2Aktør = lagPerson(type = PersonType.BARN).aktør
 
@@ -171,5 +170,33 @@ class EndringIUtbetalingUtilTest {
         Assertions.assertEquals(1, perioderMedEndring.size)
         Assertions.assertEquals(jan22, perioderMedEndring.single().fraOgMed.tilYearMonth())
         Assertions.assertEquals(aug22, perioderMedEndring.single().tilOgMed.tilYearMonth())
+    }
+
+    @Test
+    fun `Endring i beløp - Skal ikke returnere periode med endring hvis andel med 0 i beløp er fjernet`() {
+        val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
+        val barn2Aktør = lagPerson(type = PersonType.BARN).aktør
+
+        val andelBarn1 =
+            lagAndelTilkjentYtelse(
+                fom = jan22,
+                tom = aug22,
+                beløp = 0,
+                aktør = barn1Aktør
+            )
+        val andelBarn2 =
+            lagAndelTilkjentYtelse(
+                fom = jan22,
+                tom = aug22,
+                beløp = 1054,
+                aktør = barn2Aktør
+            )
+
+        val perioderMedEndring = EndringIUtbetalingUtil.lagEndringIUtbetalingTidslinje(
+            nåværendeAndeler = listOf(andelBarn2),
+            forrigeAndeler = listOf(andelBarn2, andelBarn1)
+        ).perioder().filter { it.innhold == true }
+
+        Assertions.assertTrue(perioderMedEndring.isEmpty())
     }
 }
