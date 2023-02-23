@@ -296,7 +296,7 @@ fun lagAndelTilkjentYtelseMedEndreteUtbetalinger(
         differanseberegnetPeriodebeløp = differanseberegnetPeriodebeløp
     )
 
-    return AndelTilkjentYtelseMedEndreteUtbetalinger(aty, endretUtbetalingAndeler, true)
+    return AndelTilkjentYtelseMedEndreteUtbetalinger(aty, endretUtbetalingAndeler)
 }
 
 fun lagAndelTilkjentYtelseUtvidet(
@@ -1136,7 +1136,7 @@ fun lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
         andelTilkjentYtelser = andelTilkjentYtelser
     )
 
-    return EndretUtbetalingAndelMedAndelerTilkjentYtelse(eua, andelTilkjentYtelser, true)
+    return EndretUtbetalingAndelMedAndelerTilkjentYtelse(eua, andelTilkjentYtelser)
 }
 
 fun lagPerson(
