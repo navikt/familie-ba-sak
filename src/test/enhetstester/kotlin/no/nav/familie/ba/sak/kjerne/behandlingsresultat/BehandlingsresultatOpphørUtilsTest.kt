@@ -255,6 +255,55 @@ class BehandlingsresultatOpphørUtilsTest {
         assertEquals(Opphørsresultat.FORTSATT_OPPHØRT, opphørsresultat)
     }
 
+    @Test
+    fun `hentOpphørsresultatPåBehandling skal returnere IKKE_OPPHØRT dersom nåværende andeler har lik opphørsdato som forrige andeler men det er i fremtiden`() {
+        val barn1Aktør = lagPerson(type = PersonType.BARN).aktør
+        val barn2Aktør = lagPerson(type = PersonType.BARN).aktør
+        val apr22 = YearMonth.of(2022, 4)
+
+        mockkStatic(YearMonth::class)
+        every { YearMonth.now() } returns apr22
+
+        val forrigeAndeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = jan22,
+                tom = aug22,
+                beløp = 1054,
+                aktør = barn1Aktør
+            ),
+            lagAndelTilkjentYtelse(
+                fom = jan22,
+                tom = mar22,
+                beløp = 1054,
+                aktør = barn2Aktør
+            )
+        )
+
+        val nåværendeAndeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = jan22,
+                tom = aug22,
+                beløp = 1054,
+                aktør = barn1Aktør
+            ),
+            lagAndelTilkjentYtelse(
+                fom = jan22,
+                tom = mar22,
+                beløp = 1054,
+                aktør = barn2Aktør
+            )
+        )
+
+        val opphørsresultat = hentOpphørsresultatPåBehandling(
+            nåværendeAndeler = nåværendeAndeler,
+            forrigeAndeler = forrigeAndeler,
+            nåværendeEndretAndeler = emptyList(),
+            forrigeEndretAndeler = emptyList()
+        )
+
+        assertEquals(Opphørsresultat.IKKE_OPPHØRT, opphørsresultat)
+    }
+
     @ParameterizedTest
     @EnumSource(Årsak::class, names = ["ALLEREDE_UTBETALT", "ENDRE_MOTTAKER", "ETTERBETALING_3ÅR"])
     internal fun `filtrerBortIrrelevanteAndeler - skal filtrere andeler som har 0 i beløp og endret utbetaling andel med årsak ALLEREDE_UTBETALT, ENDRE_MOTTAKER eller ETTERBETALING_3ÅR`(årsak: Årsak) {
