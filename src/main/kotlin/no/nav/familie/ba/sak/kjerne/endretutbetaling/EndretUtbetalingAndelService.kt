@@ -26,13 +26,9 @@ class EndretUtbetalingAndelService(
     private val beregningService: BeregningService,
     private val persongrunnlagService: PersongrunnlagService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
-    private val sanityService: SanityService,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val endretUtbetalingAndelOppdatertAbonnementer: List<EndretUtbetalingAndelerOppdatertAbonnent> = emptyList()
 ) {
-    fun hentEndredeUtbetalingAndeler(behandlingId: Long) =
-        endretUtbetalingAndelRepository.findByBehandlingId(behandlingId)
-
     @Transactional
     fun oppdaterEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
         behandling: Behandling,
@@ -52,7 +48,7 @@ class EndretUtbetalingAndelService(
 
         endretUtbetalingAndel.fraRestEndretUtbetalingAndel(restEndretUtbetalingAndel, person)
 
-        val andreEndredeAndelerPåBehandling = hentEndredeUtbetalingAndeler(behandling.id)
+        val andreEndredeAndelerPåBehandling = hentForBehandling(behandling.id)
             .filter { it.id != endretUtbetalingAndelId }
 
         val gyldigTomEtterDagensDato = beregnGyldigTomIFremtiden(
