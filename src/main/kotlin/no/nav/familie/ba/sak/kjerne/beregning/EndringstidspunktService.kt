@@ -5,13 +5,10 @@ import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
-import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatOpphørUtils.utledOpphørsdatoForNåværendeBehandlingMedFallback
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
-import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIEndretUtbetalingAndelUtil
@@ -25,7 +22,6 @@ import java.time.YearMonth
 
 @Service
 class EndringstidspunktService(
-    private val behandlingRepository: BehandlingRepository,
     private val kompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse>,
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
@@ -34,7 +30,7 @@ class EndringstidspunktService(
     private val vilkårsvurderingService: VilkårsvurderingService
 ) {
     fun finnEndringstidspunktForBehandling(behandlingId: Long): LocalDate {
-        val behandling = behandlingRepository.finnBehandling(behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 
         // Hvis det ikke finnes en forrige behandling vil vi ha med alt (derfor setter vi endringstidspunkt til tidenes morgen)
         val forrigeBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = behandling.fagsak.id) ?: return TIDENES_MORGEN
@@ -101,11 +97,9 @@ class EndringstidspunktService(
 
     @Deprecated("Skal erstattes av finnEndringstidpunkForBehandling")
     fun finnEndringstidpunkForBehandlingGammel(behandlingId: Long): LocalDate {
-        val nyBehandling = behandlingRepository.finnBehandling(behandlingId)
+        val nyBehandling = behandlingHentOgPersisterService.hent(behandlingId)
 
-        val alleAvsluttetBehandlingerPåFagsak =
-            behandlingRepository.findByFagsakAndAvsluttet(fagsakId = nyBehandling.fagsak.id)
-        val sisteVedtattBehandling = Behandlingutils.hentSisteBehandlingSomErVedtatt(alleAvsluttetBehandlingerPåFagsak)
+        val sisteVedtattBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandlingId)
             ?: return TIDENES_MORGEN
 
         val nyeAndelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService
