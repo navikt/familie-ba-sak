@@ -49,7 +49,7 @@ object BehandlingsresultatEndringUtils {
             forrigeKompetanser = forrigeKompetanser
         )
 
-        val erEndringIVilkårsvurdering = erEndringIVilkårvurdering(
+        val erEndringIVilkårsvurdering = erEndringIVilkårsvurdering(
             nåværendePersonResultat = nåværendePersonResultat,
             forrigePersonResultat = forrigePersonResultat,
             opphørstidspunkt = nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(forrigeAndeler = forrigeAndeler, nåværendeEndretAndeler = nåværendeEndretAndeler)
@@ -141,7 +141,7 @@ object BehandlingsresultatEndringUtils {
         return endringIKompetanseTidslinje.perioder().any { it.innhold == true }
     }
 
-    internal fun erEndringIVilkårvurdering(
+    internal fun erEndringIVilkårsvurdering(
         nåværendePersonResultat: Set<PersonResultat>,
         forrigePersonResultat: Set<PersonResultat>,
         opphørstidspunkt: YearMonth?

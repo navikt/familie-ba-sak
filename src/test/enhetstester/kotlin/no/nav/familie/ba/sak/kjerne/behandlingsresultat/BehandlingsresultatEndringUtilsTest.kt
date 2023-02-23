@@ -13,7 +13,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatEndringUtils.erEndringIBeløp
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatEndringUtils.erEndringIEndretUtbetalingAndeler
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatEndringUtils.erEndringIKompetanse
-import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatEndringUtils.erEndringIVilkårvurdering
+import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatEndringUtils.erEndringIVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatEndringUtils.utledEndringsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
@@ -1001,7 +1001,7 @@ class BehandlingsresultatEndringUtilsTest {
 
         val aktør = randomAktør()
 
-        val erEndringIVilkårvurderingForPerson = erEndringIVilkårvurdering(
+        val erEndringIVilkårvurderingForPerson = erEndringIVilkårsvurdering(
             nåværendePersonResultat = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
             forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
             opphørstidspunkt = YearMonth.of(2020, 2)
@@ -1048,7 +1048,7 @@ class BehandlingsresultatEndringUtilsTest {
 
         val aktør = randomAktør()
 
-        val erEndringIVilkårvurderingForPerson = erEndringIVilkårvurdering(
+        val erEndringIVilkårvurderingForPerson = erEndringIVilkårsvurdering(
             nåværendePersonResultat = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
             forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
             opphørstidspunkt = YearMonth.of(2020, 2)
@@ -1094,7 +1094,7 @@ class BehandlingsresultatEndringUtilsTest {
 
         val aktør = randomAktør()
 
-        val erEndringIVilkårvurderingForPerson = erEndringIVilkårvurdering(
+        val erEndringIVilkårvurderingForPerson = erEndringIVilkårsvurdering(
             nåværendePersonResultat = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
             forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
             opphørstidspunkt = YearMonth.of(2020, 2)
@@ -1155,7 +1155,7 @@ class BehandlingsresultatEndringUtilsTest {
 
         val aktør = randomAktør()
 
-        val erEndringIVilkårvurderingForPerson = erEndringIVilkårvurdering(
+        val erEndringIVilkårvurderingForPerson = erEndringIVilkårsvurdering(
             nåværendePersonResultat = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
             forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
             opphørstidspunkt = YearMonth.of(2020, 2)
@@ -1202,7 +1202,7 @@ class BehandlingsresultatEndringUtilsTest {
 
         val aktør = randomAktør()
 
-        val erEndringIVilkårvurderingForPerson = erEndringIVilkårvurdering(
+        val erEndringIVilkårvurderingForPerson = erEndringIVilkårsvurdering(
             nåværendePersonResultat = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
             forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
             opphørstidspunkt = YearMonth.of(2020, 2)
