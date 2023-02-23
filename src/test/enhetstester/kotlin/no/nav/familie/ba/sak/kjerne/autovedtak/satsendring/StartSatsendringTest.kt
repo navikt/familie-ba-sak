@@ -236,7 +236,7 @@ internal class StartSatsendringTest {
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(SatsType.SMA, behandling, SMÅBARNSTILLEGG)
 
         assertThat(
-            AutovedtakSatsendringService.erOppdatertMedSatserTilOgMed(
+            AutovedtakSatsendringService.harAlleredeSisteSats(
                 atyMedBareSmåbarnstillegg,
                 SATSTIDSPUNKT
             )
@@ -246,7 +246,7 @@ internal class StartSatsendringTest {
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(SatsType.UTVIDET_BARNETRYGD, behandling, UTVIDET_BARNETRYGD)
 
         assertThat(
-            AutovedtakSatsendringService.erOppdatertMedSatserTilOgMed(
+            AutovedtakSatsendringService.harAlleredeSisteSats(
                 atyMedBareUtvidet,
                 SATSTIDSPUNKT
             )
@@ -255,7 +255,7 @@ internal class StartSatsendringTest {
         val atyMedBareOrba =
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(SatsType.ORBA, behandling, ORDINÆR_BARNETRYGD)
 
-        assertThat(AutovedtakSatsendringService.erOppdatertMedSatserTilOgMed(atyMedBareOrba, SATSTIDSPUNKT)).isEqualTo(
+        assertThat(AutovedtakSatsendringService.harAlleredeSisteSats(atyMedBareOrba, SATSTIDSPUNKT)).isEqualTo(
             true
         )
 
@@ -267,14 +267,14 @@ internal class StartSatsendringTest {
             )
 
         assertThat(
-            AutovedtakSatsendringService.erOppdatertMedSatserTilOgMed(
+            AutovedtakSatsendringService.harAlleredeSisteSats(
                 atyMedBareTilleggOrba,
                 SATSTIDSPUNKT
             )
         ).isEqualTo(true)
 
         assertThat(
-            AutovedtakSatsendringService.erOppdatertMedSatserTilOgMed(
+            AutovedtakSatsendringService.harAlleredeSisteSats(
                 (atyMedBareTilleggOrba + atyMedBareOrba + atyMedBareUtvidet + atyMedBareSmåbarnstillegg),
                 SATSTIDSPUNKT
             )
@@ -288,7 +288,7 @@ internal class StartSatsendringTest {
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(SatsType.SMA, behandling, SMÅBARNSTILLEGG, UGYLDIG_SATS)
 
         assertThat(
-            AutovedtakSatsendringService.erOppdatertMedSatserTilOgMed(
+            AutovedtakSatsendringService.harAlleredeSisteSats(
                 atyMedUgyldigSatsSmåbarnstillegg,
                 SATSTIDSPUNKT
             )
@@ -303,7 +303,7 @@ internal class StartSatsendringTest {
             )
 
         assertThat(
-            AutovedtakSatsendringService.erOppdatertMedSatserTilOgMed(
+            AutovedtakSatsendringService.harAlleredeSisteSats(
                 atyMedUglydligSatsUtvidet,
                 SATSTIDSPUNKT
             )
@@ -313,7 +313,7 @@ internal class StartSatsendringTest {
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(SatsType.ORBA, behandling, ORDINÆR_BARNETRYGD, UGYLDIG_SATS)
 
         assertThat(
-            AutovedtakSatsendringService.erOppdatertMedSatserTilOgMed(
+            AutovedtakSatsendringService.harAlleredeSisteSats(
                 atyMedUgyldigSatsBareOrba,
                 SATSTIDSPUNKT
             )
@@ -328,7 +328,7 @@ internal class StartSatsendringTest {
             )
 
         assertThat(
-            AutovedtakSatsendringService.erOppdatertMedSatserTilOgMed(
+            AutovedtakSatsendringService.harAlleredeSisteSats(
                 atyMedUgyldigSatsTilleggOrba,
                 SATSTIDSPUNKT
             )
@@ -352,7 +352,7 @@ internal class StartSatsendringTest {
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(SatsType.ORBA, behandling, ORDINÆR_BARNETRYGD)
 
         assertThat(
-            AutovedtakSatsendringService.erOppdatertMedSatserTilOgMed(
+            AutovedtakSatsendringService.harAlleredeSisteSats(
                 (atyMedBGyldigOrba + atyMedGyldigUtvidet + atyMedUgyldigSatsSmåbarnstillegg),
                 SATSTIDSPUNKT
             )
@@ -375,7 +375,7 @@ internal class StartSatsendringTest {
             )
 
         assertThat(
-            AutovedtakSatsendringService.erOppdatertMedSatserTilOgMed(
+            AutovedtakSatsendringService.harAlleredeSisteSats(
                 listOf(atySomGårUtPåSatstidspunktGyldig),
                 SATSTIDSPUNKT
             )
@@ -394,7 +394,7 @@ internal class StartSatsendringTest {
             )
 
         assertThat(
-            AutovedtakSatsendringService.erOppdatertMedSatserTilOgMed(
+            AutovedtakSatsendringService.harAlleredeSisteSats(
                 listOf(atySomGårUtPåSatstidspunktUgyldig),
                 SATSTIDSPUNKT
             )
@@ -417,7 +417,7 @@ internal class StartSatsendringTest {
             )
 
         assertThat(
-            AutovedtakSatsendringService.erOppdatertMedSatserTilOgMed(
+            AutovedtakSatsendringService.harAlleredeSisteSats(
                 listOf(utgåttAndelTilkjentYtelse),
                 SATSTIDSPUNKT
             )
@@ -440,7 +440,7 @@ internal class StartSatsendringTest {
             )
 
         assertThat(
-            AutovedtakSatsendringService.erOppdatertMedSatserTilOgMed(
+            AutovedtakSatsendringService.harAlleredeSisteSats(
                 listOf(utgåttAndelTilkjentYtelse),
                 SATSTIDSPUNKT
             )
@@ -463,7 +463,7 @@ internal class StartSatsendringTest {
             )
 
         assertThat(
-            AutovedtakSatsendringService.erOppdatertMedSatserTilOgMed(
+            AutovedtakSatsendringService.harAlleredeSisteSats(
                 listOf(utgåttAndelTilkjentYtelse),
                 SATSTIDSPUNKT
             )

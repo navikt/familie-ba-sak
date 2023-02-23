@@ -105,7 +105,7 @@ class StartSatsendring(
                     sisteIverksatteBehandling.id
                 )
 
-            if (AutovedtakSatsendringService.erOppdatertMedSatserTilOgMed(
+            if (AutovedtakSatsendringService.harAlleredeSisteSats(
                     andelerTilkjentYtelseMedEndreteUtbetalinger,
                     satsTidspunkt
                 )

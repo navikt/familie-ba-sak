@@ -171,7 +171,7 @@ class AutovedtakSatsendringService(
                 sisteIverksettBehandlingsId
             )
 
-        return erOppdatertMedSatserTilOgMed(andeler, satstidspunkt)
+        return harAlleredeSisteSats(andeler, satstidspunkt)
     }
 
     private fun harUtbetalingerSomOverstiger100Prosent(sisteIverksatteBehandling: Behandling): Boolean {
@@ -204,7 +204,7 @@ class AutovedtakSatsendringService(
         val logger = LoggerFactory.getLogger(AutovedtakSatsendringService::class.java)
         val secureLogger = LoggerFactory.getLogger("secureLogger")
 
-        fun erOppdatertMedSatserTilOgMed(
+        fun harAlleredeSisteSats(
             aty: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
             satstidspunkt: YearMonth
         ): Boolean {
