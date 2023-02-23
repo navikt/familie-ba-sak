@@ -15,13 +15,11 @@ import java.time.YearMonth
 class EndringIEndretUtbetalingAndelUtilTest {
 
     val jan22 = YearMonth.of(2022, 1)
-    val feb22 = YearMonth.of(2022, 2)
-    val mai22 = YearMonth.of(2022, 5)
     val aug22 = YearMonth.of(2022, 8)
     val des22 = YearMonth.of(2022, 12)
 
     @Test
-    fun `Endring i endret utbetaling andel - skal returnere true hvis årsak er endret`() {
+    fun `Endring i endret utbetaling andel - skal ha endret periode hvis årsak er endret`() {
         val barn = lagPerson(type = PersonType.BARN)
         val forrigeEndretAndel = lagEndretUtbetalingAndel(
             person = barn,
