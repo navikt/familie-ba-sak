@@ -19,7 +19,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companio
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerTidligereEnn
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjær
 import java.time.LocalDate
-import java.time.YearMonth
 
 object SatsTidspunkt {
     val senesteSatsTidspunkt: LocalDate = LocalDate.MAX
@@ -75,8 +74,6 @@ object SatsService {
         satstype: SatsType,
         oppdatertBeløp: Int
     ): LocalDate? = hentAllesatser().find { it.type == satstype && it.beløp == oppdatertBeløp }?.gyldigFom
-
-    val DATO_SISTE_SATSENDRING: YearMonth = YearMonth.of(2023, 3)
 }
 
 fun fomErPåSatsendring(fom: LocalDate?): Boolean =

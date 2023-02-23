@@ -5,6 +5,7 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.SatsendringService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
@@ -15,7 +16,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -27,8 +27,7 @@ internal class StegServiceEnhetstest {
     private val behandlingService: BehandlingService = mockk()
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
     private val settPåVentService: SettPåVentService = mockk()
-    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService =
-        mockk()
+    private val satsendringService: SatsendringService = mockk()
 
     private val stegService = StegService(
         steg = listOf(mockRegistrerPersongrunnlag()),
@@ -40,7 +39,7 @@ internal class StegServiceEnhetstest {
         tilgangService = mockk(relaxed = true),
         infotrygdFeedService = mockk(),
         settPåVentService = settPåVentService,
-        andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService
+        satsendringService = satsendringService
     )
 
     @BeforeEach
@@ -94,6 +93,24 @@ internal class StegServiceEnhetstest {
                 )
             }
         }
+    }
+
+    @Test
+    fun `Skal feile dersom vi har en gammel sats på forrige iverksatte behandling på endre migreringsdato behandling`() {
+        every { satsendringService.erFagsakOppdatertMedSisteSats(any()) } returns false
+
+        val nyBehandling = NyBehandling(
+            kategori = BehandlingKategori.NASJONAL,
+            underkategori = BehandlingUnderkategori.ORDINÆR,
+            behandlingType = BehandlingType.REVURDERING,
+            behandlingÅrsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
+            søkersIdent = randomFnr(),
+            barnasIdenter = listOf(randomFnr()),
+            nyMigreringsdato = LocalDate.now().minusMonths(6),
+            fagsakId = 1L
+        )
+
+        assertThrows<FunksjonellFeil> { stegService.håndterNyBehandling(nyBehandling) }
     }
 
     private fun mockRegistrerPersongrunnlag() = object : RegistrerPersongrunnlag(mockk(), mockk(), mockk(), mockk()) {

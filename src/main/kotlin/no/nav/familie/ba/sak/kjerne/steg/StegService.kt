@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.writeValueAsString
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
-import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.erOppdatertMedSatserTilOgMed
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.SatsendringService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
@@ -26,8 +26,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatSteg
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
-import no.nav.familie.ba.sak.kjerne.beregning.SatsService
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
@@ -58,7 +56,7 @@ class StegService(
     private val tilgangService: TilgangService,
     private val infotrygdFeedService: InfotrygdFeedService,
     private val settPåVentService: SettPåVentService,
-    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
+    private val satsendringService: SatsendringService
 ) {
 
     private val stegSuksessMetrics: Map<StegType, Counter> = initStegMetrikker("suksess")
@@ -79,13 +77,13 @@ class StegService(
 
     @Transactional
     fun håndterNyBehandling(nyBehandling: NyBehandling): Behandling {
-        val behandling = behandlingService.opprettBehandling(nyBehandling)
-
         when (nyBehandling.behandlingÅrsak) {
-            BehandlingÅrsak.HELMANUELL_MIGRERING -> validerHelmanuelMigrering(behandling)
+            BehandlingÅrsak.HELMANUELL_MIGRERING -> validerHelmanuelMigrering(nyBehandling)
             BehandlingÅrsak.ENDRE_MIGRERINGSDATO -> validerEndreMigreringsdato(nyBehandling)
             else -> Unit
         }
+
+        val behandling = behandlingService.opprettBehandling(nyBehandling)
 
         val barnasIdenter: List<String> = when (nyBehandling.behandlingÅrsak) {
             BehandlingÅrsak.MIGRERING,
@@ -126,28 +124,19 @@ class StegService(
     }
 
     fun validerEndreMigreringsdato(nyBehandling: NyBehandling) {
-        // Må se på siste iverksatte og ikke siste vedtatte siden vi ønsker å se på
-        // den forrige behandlingen som sendte noe til økonomi
-        val sisteIverksatteBehandlingId =
-            behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(nyBehandling.fagsakId)?.id
+        check(nyBehandling.behandlingÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO)
 
-        val årsakErEndreMigreringsdato = nyBehandling.behandlingÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO
-        val forrigeIverksatteBehandlingHarSisteSats = sisteIverksatteBehandlingId != null &&
-            !andelerTilkjentYtelseOgEndreteUtbetalingerService
-                .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(sisteIverksatteBehandlingId)
-                .erOppdatertMedSatserTilOgMed(SatsService.DATO_SISTE_SATSENDRING)
-
-        if (årsakErEndreMigreringsdato && !forrigeIverksatteBehandlingHarSisteSats) {
+        if (!satsendringService.erFagsakOppdatertMedSisteSats(fagsakId = nyBehandling.fagsakId)) {
             throw FunksjonellFeil("Fagsaken har ikke siste sats. Gjennomfør satsendring før du endrer migreringsdato.")
         }
     }
 
-    private fun validerHelmanuelMigrering(behandling: Behandling) {
+    private fun validerHelmanuelMigrering(nyBehandling: NyBehandling) {
         val sisteBehandlingSomErVedtatt =
-            behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id)
+            behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(nyBehandling.fagsakId)
         if (sisteBehandlingSomErVedtatt != null && !sisteBehandlingSomErVedtatt.erTekniskEndringMedOpphør()) {
             throw FunksjonellFeil(
-                melding = "Det finnes allerede en vedtatt behandling på fagsak ${behandling.fagsak.id}." +
+                melding = "Det finnes allerede en vedtatt behandling på fagsak ${nyBehandling.fagsakId}." +
                     "Behandling kan ikke opprettes med årsak " +
                     BehandlingÅrsak.HELMANUELL_MIGRERING.visningsnavn,
                 frontendFeilmelding = "Det finnes allerede en vedtatt behandling på fagsak." +
