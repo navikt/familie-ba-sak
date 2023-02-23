@@ -2,11 +2,11 @@ package no.nav.familie.ba.sak.kjerne.forrigebehandling
 
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringUtil.tilFørsteEndringstidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
 import java.time.YearMonth
 
 object EndringIUtbetalingUtil {
@@ -34,7 +34,7 @@ object EndringIUtbetalingUtil {
             forrigeAndeler = forrigeAndeler
         )
 
-        return endringIUtbetalingTidslinje.perioder().filter { it.innhold == true }.minOfOrNull { it.fraOgMed }?.tilYearMonth()
+        return endringIUtbetalingTidslinje.tilFørsteEndringstidspunkt()
     }
 
     internal fun lagEndringIUtbetalingTidslinje(
