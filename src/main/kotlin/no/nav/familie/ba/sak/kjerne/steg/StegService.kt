@@ -87,11 +87,6 @@ class StegService(
             else -> Unit
         }
 
-        when (nyBehandling.behandlingType) {
-            BehandlingType.MIGRERING_FRA_INFOTRYGD -> validerMigreringFraInfotrygd(nyBehandling)
-            else -> Unit
-        }
-
         val barnasIdenter: List<String> = when (nyBehandling.behandlingÅrsak) {
             BehandlingÅrsak.MIGRERING,
             BehandlingÅrsak.FØDSELSHENDELSE,
@@ -104,6 +99,9 @@ class StegService(
                 BehandlingType.REVURDERING,
                 BehandlingType.TEKNISK_ENDRING,
                 BehandlingType.MIGRERING_FRA_INFOTRYGD -> {
+                    if (nyBehandling.behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD) {
+                        validerMigreringFraInfotrygd(nyBehandling)
+                    }
                     hentBarnFraForrigeAvsluttedeBehandling(behandling)
                 }
 

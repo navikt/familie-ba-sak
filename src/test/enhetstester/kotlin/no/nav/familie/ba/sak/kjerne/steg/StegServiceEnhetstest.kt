@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -26,6 +27,8 @@ internal class StegServiceEnhetstest {
     private val behandlingService: BehandlingService = mockk()
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
     private val settPåVentService: SettPåVentService = mockk()
+    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService =
+        mockk()
 
     private val stegService = StegService(
         steg = listOf(mockRegistrerPersongrunnlag()),
@@ -36,7 +39,8 @@ internal class StegServiceEnhetstest {
         søknadGrunnlagService = mockk(),
         tilgangService = mockk(relaxed = true),
         infotrygdFeedService = mockk(),
-        settPåVentService = settPåVentService
+        settPåVentService = settPåVentService,
+        andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService
     )
 
     @BeforeEach
@@ -96,6 +100,7 @@ internal class StegServiceEnhetstest {
         override fun utførStegOgAngiNeste(behandling: Behandling, data: RegistrerPersongrunnlagDTO): StegType {
             return StegType.VILKÅRSVURDERING
         }
+
         override fun stegType(): StegType {
             return StegType.REGISTRERE_PERSONGRUNNLAG
         }
