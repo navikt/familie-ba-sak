@@ -10,6 +10,7 @@ class FeatureToggleConfig {
         const val TEKNISK_VEDLIKEHOLD_HENLEGGELSE = "familie-ba-sak.teknisk-vedlikehold-henleggelse.tilgangsstyring"
         const val TEKNISK_ENDRING = "familie-ba-sak.behandling.teknisk-endring"
         const val NY_MÅTE_Å_BEREGNE_BEHANDLINGSRESULTAT = "familie-ba-sak.behandling.behandlingsresultat"
+        const val NY_MÅTE_Å_UTLEDE_ENDRINGSTIDSPUNKT = "familie-ba-sak.release.endringstidspunkt-oppgradering"
 
         const val KAN_GENERERE_UTBETALINGSOPPDRAG_NY = "familie-ba-sak.generer.utbetalingsoppdrag.ny"
 
