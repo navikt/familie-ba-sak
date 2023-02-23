@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
+import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
@@ -33,6 +34,20 @@ data class AndelTilkjentYtelseDataForÅKalkulereEndring(
     val endretUtbetalingÅrsaker: List<Årsak>,
     val behandlingAlder: BehandlingAlder
 )
+
+internal fun utledEndringstidspunkt(
+    endringstidspunktUtbetalingsbeløp: YearMonth?,
+    endringstidspunktKompetanse: YearMonth?,
+    endringstidspunktVilkårsvurdering: YearMonth?,
+    endringstidspunktEndretUtbetalingAndeler: YearMonth?
+): LocalDate {
+    return listOfNotNull(
+        endringstidspunktUtbetalingsbeløp,
+        endringstidspunktKompetanse,
+        endringstidspunktVilkårsvurdering,
+        endringstidspunktEndretUtbetalingAndeler
+    ).minOfOrNull { it }?.førsteDagIInneværendeMåned() ?: TIDENES_MORGEN
+}
 
 fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.hentFørsteEndringstidspunkt(
     forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>

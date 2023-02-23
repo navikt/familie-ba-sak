@@ -43,12 +43,12 @@ class EndringstidspunktService(
 
         val endringstidspunktEndretUtbetalingAndeler = finnEndringstidspunktForEndretUtbetalingAndel(inneværendeBehandlingId = behandlingId, forrigeBehandlingId = forrigeBehandling.id)
 
-        return listOfNotNull(
-            endringstidspunktUtbetalingsbeløp,
-            endringstidspunktKompetanse,
-            endringstidspunktVilkårsvurdering,
-            endringstidspunktEndretUtbetalingAndeler
-        ).minOfOrNull { it }?.førsteDagIInneværendeMåned() ?: TIDENES_MORGEN
+        return utledEndringstidspunkt(
+            endringstidspunktUtbetalingsbeløp = endringstidspunktUtbetalingsbeløp,
+            endringstidspunktKompetanse = endringstidspunktKompetanse,
+            endringstidspunktVilkårsvurdering = endringstidspunktVilkårsvurdering,
+            endringstidspunktEndretUtbetalingAndeler = endringstidspunktEndretUtbetalingAndeler
+        )
     }
 
     private fun finnEndringstidspunktForBeløp(inneværendeBehandlingId: Long, forrigeBehandlingId: Long): YearMonth? {
