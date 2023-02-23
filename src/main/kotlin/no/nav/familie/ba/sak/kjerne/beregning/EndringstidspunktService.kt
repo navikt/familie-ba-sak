@@ -13,7 +13,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndr
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIEndretUtbetalingAndelUtil
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIKompetanseUtil
@@ -31,7 +30,6 @@ class EndringstidspunktService(
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
-    private val kompetanseService: KompetanseService,
     private val endreteUtbetalingerService: EndretUtbetalingAndelService,
     private val vilkårsvurderingService: VilkårsvurderingService
 ) {
@@ -67,8 +65,8 @@ class EndringstidspunktService(
         )
     }
     private fun finnEndringstidspunktForKompetanse(inneværendeBehandlingId: Long, forrigeBehandlingId: Long): YearMonth? {
-        val nåværendeKompetanser = kompetanseService.hentKompetanser(behandlingId = BehandlingId(inneværendeBehandlingId)).toList()
-        val forrigeKompetanser = kompetanseService.hentKompetanser(behandlingId = BehandlingId(forrigeBehandlingId)).toList()
+        val nåværendeKompetanser = kompetanseRepository.finnFraBehandlingId(behandlingId = inneværendeBehandlingId).toList()
+        val forrigeKompetanser = kompetanseRepository.finnFraBehandlingId(behandlingId = forrigeBehandlingId).toList()
 
         return EndringIKompetanseUtil.utledEndringstidspunktForKompetanse(
             nåværendeKompetanser = nåværendeKompetanser,
