@@ -98,7 +98,9 @@ class UtvidetBehandlingService(
 
         val endringstidspunkt = if (featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_UTLEDE_ENDRINGSTIDSPUNKT)) {
             endringstidspunktService.finnEndringstidspunktForBehandling(behandlingId)
-        } else endringstidspunktService.finnEndringstidpunkForBehandlingGammel(behandlingId)
+        } else {
+            endringstidspunktService.finnEndringstidpunkForBehandlingGammel(behandlingId)
+        }
 
         val kompetanser: Collection<Kompetanse> = kompetanseRepository.finnFraBehandlingId(behandlingId)
 
