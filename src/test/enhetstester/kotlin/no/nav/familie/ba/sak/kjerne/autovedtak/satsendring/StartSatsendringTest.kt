@@ -235,17 +235,29 @@ internal class StartSatsendringTest {
         val atyMedBareSmåbarnstillegg =
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(SatsType.SMA, behandling, SMÅBARNSTILLEGG)
 
-        assertThat(atyMedBareSmåbarnstillegg.erOppdatertMedSatserTilOgMed(SATSTIDSPUNKT)).isEqualTo(true)
+        assertThat(
+            AutovedtakSatsendringService.erOppdatertMedSatserTilOgMed(
+                atyMedBareSmåbarnstillegg,
+                SATSTIDSPUNKT
+            )
+        ).isEqualTo(true)
 
         val atyMedBareUtvidet =
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(SatsType.UTVIDET_BARNETRYGD, behandling, UTVIDET_BARNETRYGD)
 
-        assertThat(atyMedBareUtvidet.erOppdatertMedSatserTilOgMed(SATSTIDSPUNKT)).isEqualTo(true)
+        assertThat(
+            AutovedtakSatsendringService.erOppdatertMedSatserTilOgMed(
+                atyMedBareUtvidet,
+                SATSTIDSPUNKT
+            )
+        ).isEqualTo(true)
 
         val atyMedBareOrba =
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(SatsType.ORBA, behandling, ORDINÆR_BARNETRYGD)
 
-        assertThat(atyMedBareOrba.erOppdatertMedSatserTilOgMed(SATSTIDSPUNKT)).isEqualTo(true)
+        assertThat(AutovedtakSatsendringService.erOppdatertMedSatserTilOgMed(atyMedBareOrba, SATSTIDSPUNKT)).isEqualTo(
+            true
+        )
 
         val atyMedBareTilleggOrba =
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(
@@ -254,10 +266,16 @@ internal class StartSatsendringTest {
                 ORDINÆR_BARNETRYGD
             )
 
-        assertThat(atyMedBareTilleggOrba.erOppdatertMedSatserTilOgMed(SATSTIDSPUNKT)).isEqualTo(true)
+        assertThat(
+            AutovedtakSatsendringService.erOppdatertMedSatserTilOgMed(
+                atyMedBareTilleggOrba,
+                SATSTIDSPUNKT
+            )
+        ).isEqualTo(true)
 
         assertThat(
-            (atyMedBareTilleggOrba + atyMedBareOrba + atyMedBareUtvidet + atyMedBareSmåbarnstillegg).erOppdatertMedSatserTilOgMed(
+            AutovedtakSatsendringService.erOppdatertMedSatserTilOgMed(
+                (atyMedBareTilleggOrba + atyMedBareOrba + atyMedBareUtvidet + atyMedBareSmåbarnstillegg),
                 SATSTIDSPUNKT
             )
         ).isEqualTo(true)
@@ -269,7 +287,12 @@ internal class StartSatsendringTest {
         val atyMedUgyldigSatsSmåbarnstillegg =
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(SatsType.SMA, behandling, SMÅBARNSTILLEGG, UGYLDIG_SATS)
 
-        assertThat(atyMedUgyldigSatsSmåbarnstillegg.erOppdatertMedSatserTilOgMed(SATSTIDSPUNKT)).isEqualTo(false)
+        assertThat(
+            AutovedtakSatsendringService.erOppdatertMedSatserTilOgMed(
+                atyMedUgyldigSatsSmåbarnstillegg,
+                SATSTIDSPUNKT
+            )
+        ).isEqualTo(false)
 
         val atyMedUglydligSatsUtvidet =
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(
@@ -279,12 +302,22 @@ internal class StartSatsendringTest {
                 UGYLDIG_SATS
             )
 
-        assertThat(atyMedUglydligSatsUtvidet.erOppdatertMedSatserTilOgMed(SATSTIDSPUNKT)).isEqualTo(false)
+        assertThat(
+            AutovedtakSatsendringService.erOppdatertMedSatserTilOgMed(
+                atyMedUglydligSatsUtvidet,
+                SATSTIDSPUNKT
+            )
+        ).isEqualTo(false)
 
         val atyMedUgyldigSatsBareOrba =
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(SatsType.ORBA, behandling, ORDINÆR_BARNETRYGD, UGYLDIG_SATS)
 
-        assertThat(atyMedUgyldigSatsBareOrba.erOppdatertMedSatserTilOgMed(SATSTIDSPUNKT)).isEqualTo(false)
+        assertThat(
+            AutovedtakSatsendringService.erOppdatertMedSatserTilOgMed(
+                atyMedUgyldigSatsBareOrba,
+                SATSTIDSPUNKT
+            )
+        ).isEqualTo(false)
 
         val atyMedUgyldigSatsTilleggOrba =
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(
@@ -294,7 +327,12 @@ internal class StartSatsendringTest {
                 UGYLDIG_SATS
             )
 
-        assertThat(atyMedUgyldigSatsTilleggOrba.erOppdatertMedSatserTilOgMed(SATSTIDSPUNKT)).isEqualTo(false)
+        assertThat(
+            AutovedtakSatsendringService.erOppdatertMedSatserTilOgMed(
+                atyMedUgyldigSatsTilleggOrba,
+                SATSTIDSPUNKT
+            )
+        ).isEqualTo(false)
     }
 
     @Test
@@ -314,7 +352,8 @@ internal class StartSatsendringTest {
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(SatsType.ORBA, behandling, ORDINÆR_BARNETRYGD)
 
         assertThat(
-            (atyMedBGyldigOrba + atyMedGyldigUtvidet + atyMedUgyldigSatsSmåbarnstillegg).erOppdatertMedSatserTilOgMed(
+            AutovedtakSatsendringService.erOppdatertMedSatserTilOgMed(
+                (atyMedBGyldigOrba + atyMedGyldigUtvidet + atyMedUgyldigSatsSmåbarnstillegg),
                 SATSTIDSPUNKT
             )
         ).isEqualTo(false)
@@ -336,7 +375,8 @@ internal class StartSatsendringTest {
             )
 
         assertThat(
-            listOf(atySomGårUtPåSatstidspunktGyldig).erOppdatertMedSatserTilOgMed(
+            AutovedtakSatsendringService.erOppdatertMedSatserTilOgMed(
+                listOf(atySomGårUtPåSatstidspunktGyldig),
                 SATSTIDSPUNKT
             )
         ).isEqualTo(true)
@@ -354,7 +394,8 @@ internal class StartSatsendringTest {
             )
 
         assertThat(
-            listOf(atySomGårUtPåSatstidspunktUgyldig).erOppdatertMedSatserTilOgMed(
+            AutovedtakSatsendringService.erOppdatertMedSatserTilOgMed(
+                listOf(atySomGårUtPåSatstidspunktUgyldig),
                 SATSTIDSPUNKT
             )
         ).isEqualTo(false)
@@ -376,7 +417,8 @@ internal class StartSatsendringTest {
             )
 
         assertThat(
-            listOf(utgåttAndelTilkjentYtelse).erOppdatertMedSatserTilOgMed(
+            AutovedtakSatsendringService.erOppdatertMedSatserTilOgMed(
+                listOf(utgåttAndelTilkjentYtelse),
                 SATSTIDSPUNKT
             )
         ).isEqualTo(true)
@@ -398,7 +440,8 @@ internal class StartSatsendringTest {
             )
 
         assertThat(
-            listOf(utgåttAndelTilkjentYtelse).erOppdatertMedSatserTilOgMed(
+            AutovedtakSatsendringService.erOppdatertMedSatserTilOgMed(
+                listOf(utgåttAndelTilkjentYtelse),
                 SATSTIDSPUNKT
             )
         ).isEqualTo(true)
@@ -420,7 +463,8 @@ internal class StartSatsendringTest {
             )
 
         assertThat(
-            listOf(utgåttAndelTilkjentYtelse).erOppdatertMedSatserTilOgMed(
+            AutovedtakSatsendringService.erOppdatertMedSatserTilOgMed(
+                listOf(utgåttAndelTilkjentYtelse),
                 SATSTIDSPUNKT
             )
         ).isEqualTo(false)

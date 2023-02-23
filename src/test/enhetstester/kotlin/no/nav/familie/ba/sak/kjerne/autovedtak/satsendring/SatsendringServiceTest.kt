@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
-import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -40,13 +39,7 @@ class SatsendringServiceTest {
                     fom = sisteSats.gyldigFom.toYearMonth(),
                     tom = sisteSats.gyldigTom.toYearMonth(),
                     beløp = sisteSats.beløp,
-                    ytelseType = when (it) {
-                        SatsType.ORBA -> YtelseType.ORDINÆR_BARNETRYGD
-                        SatsType.SMA -> YtelseType.SMÅBARNSTILLEGG
-                        SatsType.TILLEGG_ORBA -> YtelseType.ORDINÆR_BARNETRYGD
-                        SatsType.FINN_SVAL -> YtelseType.ORDINÆR_BARNETRYGD
-                        SatsType.UTVIDET_BARNETRYGD -> YtelseType.UTVIDET_BARNETRYGD
-                    }
+                    ytelseType = it.tilYtelseType()
                 )
             }
 
@@ -61,27 +54,45 @@ class SatsendringServiceTest {
             .filter { it != SatsType.FINN_SVAL }
             .forEach {
                 val sisteSats = SatsService.finnSisteSatsFor(it)
-                val andelerMedSisteSats = listOf(
+                val andelerMedFeilSats = listOf(
                     lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                         fom = sisteSats.gyldigFom.toYearMonth(),
                         tom = sisteSats.gyldigTom.toYearMonth(),
                         beløp = sisteSats.beløp - 1,
-                        ytelseType = when (it) {
-                            SatsType.ORBA -> YtelseType.ORDINÆR_BARNETRYGD
-                            SatsType.SMA -> YtelseType.SMÅBARNSTILLEGG
-                            SatsType.TILLEGG_ORBA -> YtelseType.ORDINÆR_BARNETRYGD
-                            SatsType.FINN_SVAL -> YtelseType.ORDINÆR_BARNETRYGD
-                            SatsType.UTVIDET_BARNETRYGD -> YtelseType.UTVIDET_BARNETRYGD
-                        }
+                        ytelseType = it.tilYtelseType()
                     )
                 )
 
                 every {
                     andelerTilkjentYtelseOgEndreteUtbetalingerService
                         .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(any())
-                } returns andelerMedSisteSats
+                } returns andelerMedFeilSats
 
                 assertFalse(satsendringService.erFagsakOppdatertMedSisteSats(1L))
+            }
+    }
+
+    @Test
+    fun `Skal ignorere andeler som ikke overlapper siste sats`() {
+        SatsType.values()
+            .filter { it != SatsType.FINN_SVAL }
+            .forEach {
+                val sisteSats = SatsService.finnSisteSatsFor(it)
+                val andelerSomErFørSisteSats = listOf(
+                    lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                        fom = sisteSats.gyldigFom.toYearMonth().minusMonths(100),
+                        tom = sisteSats.gyldigFom.toYearMonth().minusMonths(1),
+                        beløp = sisteSats.beløp - 1,
+                        ytelseType = it.tilYtelseType()
+                    )
+                )
+
+                every {
+                    andelerTilkjentYtelseOgEndreteUtbetalingerService
+                        .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(any())
+                } returns andelerSomErFørSisteSats
+
+                assertTrue(satsendringService.erFagsakOppdatertMedSisteSats(1L))
             }
     }
 }

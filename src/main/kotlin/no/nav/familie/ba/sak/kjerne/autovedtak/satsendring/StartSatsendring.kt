@@ -105,7 +105,11 @@ class StartSatsendring(
                     sisteIverksatteBehandling.id
                 )
 
-            if (andelerTilkjentYtelseMedEndreteUtbetalinger.erOppdatertMedSatserTilOgMed(satsTidspunkt)) {
+            if (AutovedtakSatsendringService.erOppdatertMedSatserTilOgMed(
+                    andelerTilkjentYtelseMedEndreteUtbetalinger,
+                    satsTidspunkt
+                )
+            ) {
                 satskjøringRepository.save(
                     Satskjøring(
                         fagsakId = fagsak.id,

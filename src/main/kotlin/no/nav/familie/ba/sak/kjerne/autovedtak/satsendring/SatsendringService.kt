@@ -1,7 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.satsendring
 
-import no.nav.familie.ba.sak.common.TIDENES_ENDE
-import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import org.springframework.stereotype.Service
@@ -20,6 +18,6 @@ class SatsendringService(
         return sisteIverksatteBehandlingId == null ||
             andelerTilkjentYtelseOgEndreteUtbetalingerService
                 .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(sisteIverksatteBehandlingId)
-                .erOppdatertMedSatserTilOgMed(TIDENES_ENDE.toYearMonth())
+                .erOppdatertMedSisteSatsForAlleSatstyper()
     }
 }
