@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.forrigebehandling
 
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringUtil.tilFørsteEndringstidspunktForDagtidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullMed
@@ -14,6 +15,20 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 object EndringIVilkårsvurderingUtil {
+
+    fun utledEndringstidspunktForVilkårsvurdering(
+        nåværendePersonResultat: Set<PersonResultat>,
+        forrigePersonResultat: Set<PersonResultat>,
+        opphørstidspunkt: YearMonth
+    ): YearMonth? {
+        val endringIVilkårsvurderingTidslinje = lagEndringIVilkårsvurderingTidslinje(
+            nåværendePersonResultat = nåværendePersonResultat,
+            forrigePersonResultat = forrigePersonResultat,
+            opphørstidspunkt = opphørstidspunkt
+        )
+
+        return endringIVilkårsvurderingTidslinje.tilFørsteEndringstidspunktForDagtidslinje()
+    }
 
     fun lagEndringIVilkårsvurderingTidslinje(
         nåværendePersonResultat: Set<PersonResultat>,

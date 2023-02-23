@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatOpphørUtils.utledOpphørsdatoForNåværendeBehandlingMedFallback
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
@@ -17,6 +18,8 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIEndretUtbetalingAndelUtil
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIKompetanseUtil
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil
+import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIVilkårsvurderingUtil
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.YearMonth
@@ -29,7 +32,8 @@ class EndringstidspunktService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val kompetanseService: KompetanseService,
-    private val endreteUtbetalingerService: EndretUtbetalingAndelService
+    private val endreteUtbetalingerService: EndretUtbetalingAndelService,
+    private val vilkårsvurderingService: VilkårsvurderingService
 ) {
     fun finnEndringstidspunktForBehandling(behandlingId: Long): LocalDate {
         val behandling = behandlingRepository.finnBehandling(behandlingId)
@@ -41,7 +45,7 @@ class EndringstidspunktService(
 
         val endringstidspunktKompetanse: YearMonth? = finnEndringstidspunktForKompetanse(inneværendeBehandlingId = behandlingId, forrigeBehandlingId = forrigeBehandling.id)
 
-        val endringstidspunktVilkårsvurdering: YearMonth? = finnEndringstidspunktForVilkårsvurdering()
+        val endringstidspunktVilkårsvurdering: YearMonth? = finnEndringstidspunktForVilkårsvurdering(inneværendeBehandlingId = behandlingId, forrigeBehandlingId = forrigeBehandling.id)
 
         val endringstidspunktEndretUtbetalingAndeler: YearMonth? = finnEndringstidspunktForEndretUtbetalingAndel(inneværendeBehandlingId = behandlingId, forrigeBehandlingId = forrigeBehandling.id)
 
@@ -71,7 +75,22 @@ class EndringstidspunktService(
             forrigeKompetanser = forrigeKompetanser
         )
     }
-    private fun finnEndringstidspunktForVilkårsvurdering(): YearMonth? = TODO()
+    private fun finnEndringstidspunktForVilkårsvurdering(inneværendeBehandlingId: Long, forrigeBehandlingId: Long): YearMonth? {
+        val nåværendeVilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = inneværendeBehandlingId) ?: return null
+        val forrigeVilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = forrigeBehandlingId) ?: return null
+
+        val nåværendeAndeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = inneværendeBehandlingId)
+        val forrigeAndeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = forrigeBehandlingId)
+        val nåværendeEndretAndeler = endreteUtbetalingerService.hentForBehandling(behandlingId = inneværendeBehandlingId)
+
+        val opphørstidspunkt = nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(forrigeAndeler, nåværendeEndretAndeler) ?: return null
+
+        return EndringIVilkårsvurderingUtil.utledEndringstidspunktForVilkårsvurdering(
+            nåværendePersonResultat = nåværendeVilkårsvurdering.personResultater,
+            forrigePersonResultat = forrigeVilkårsvurdering.personResultater,
+            opphørstidspunkt = opphørstidspunkt
+        )
+    }
     private fun finnEndringstidspunktForEndretUtbetalingAndel(inneværendeBehandlingId: Long, forrigeBehandlingId: Long): YearMonth? {
         val nåværendeEndretAndeler = endreteUtbetalingerService.hentForBehandling(behandlingId = inneværendeBehandlingId)
         val forrigeEndretAndeler = endreteUtbetalingerService.hentForBehandling(behandlingId = forrigeBehandlingId)
