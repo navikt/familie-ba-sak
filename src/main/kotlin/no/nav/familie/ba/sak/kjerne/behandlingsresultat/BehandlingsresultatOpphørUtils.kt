@@ -38,10 +38,9 @@ object BehandlingsresultatOpphørUtils {
         return when {
             // Rekkefølgen av sjekkene er viktig for å komme fram til riktig opphørsresultat.
             nåværendeBehandlingOpphørsdato == null -> Opphørsresultat.IKKE_OPPHØRT // Både forrige og nåværende behandling har ingen andeler
-            nåværendeAndeler.isEmpty() -> Opphørsresultat.OPPHØRT // Alle andeler fra forrige behandling er fjernet
-            nåværendeBehandlingOpphørsdato > nesteMåned -> Opphørsresultat.IKKE_OPPHØRT
-            forrigeBehandlingOpphørsdato > nesteMåned || forrigeBehandlingOpphørsdato > nåværendeBehandlingOpphørsdato -> Opphørsresultat.OPPHØRT
-            else -> Opphørsresultat.FORTSATT_OPPHØRT
+            nåværendeBehandlingOpphørsdato <= nesteMåned && forrigeBehandlingOpphørsdato > nåværendeBehandlingOpphørsdato -> Opphørsresultat.OPPHØRT // Nåværende behandling er opphørt og forrige har senere opphørsdato
+            nåværendeBehandlingOpphørsdato <= nesteMåned && nåværendeBehandlingOpphørsdato == forrigeBehandlingOpphørsdato -> Opphørsresultat.FORTSATT_OPPHØRT
+            else -> Opphørsresultat.IKKE_OPPHØRT
         }
     }
 
