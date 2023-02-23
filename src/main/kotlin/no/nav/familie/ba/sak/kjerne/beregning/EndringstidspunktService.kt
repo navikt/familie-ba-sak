@@ -9,8 +9,11 @@ import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
+import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
+import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIKompetanseUtil
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -22,7 +25,8 @@ class EndringstidspunktService(
     private val kompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse>,
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
+    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
+    private val kompetanseService: KompetanseService
 ) {
     fun finnEndringstidspunktForBehandling(behandlingId: Long): LocalDate {
         val behandling = behandlingRepository.finnBehandling(behandlingId)
@@ -32,7 +36,7 @@ class EndringstidspunktService(
 
         val endringstidspunktUtbetalingsbeløp: YearMonth? = finnEndringstidspunktForBeløp(inneværendeBehandlingId = behandlingId, forrigeBehandlingId = forrigeBehandling.id)
 
-        val endringstidspunktKompetanse: YearMonth? = finnEndringstidspunktForKompetanse()
+        val endringstidspunktKompetanse: YearMonth? = finnEndringstidspunktForKompetanse(inneværendeBehandlingId = behandlingId, forrigeBehandlingId = forrigeBehandling.id)
 
         val endringstidspunktVilkårsvurdering: YearMonth? = finnEndringstidspunktForVilkårsvurdering()
 
@@ -55,7 +59,15 @@ class EndringstidspunktService(
             forrigeAndeler = forrigeAndeler
         )
     }
-    private fun finnEndringstidspunktForKompetanse(): YearMonth? = TODO()
+    private fun finnEndringstidspunktForKompetanse(inneværendeBehandlingId: Long, forrigeBehandlingId: Long): YearMonth? {
+        val nåværendeKompetanser = kompetanseService.hentKompetanser(behandlingId = BehandlingId(inneværendeBehandlingId)).toList()
+        val forrigeKompetanser = kompetanseService.hentKompetanser(behandlingId = BehandlingId(forrigeBehandlingId)).toList()
+
+        return EndringIKompetanseUtil.utledEndringstidspunktForKompetanse(
+            nåværendeKompetanser = nåværendeKompetanser,
+            forrigeKompetanser = forrigeKompetanser
+        )
+    }
     private fun finnEndringstidspunktForVilkårsvurdering(): YearMonth? = TODO()
     private fun finnEndringstidspunktForEndretUtbetalingAndel(): YearMonth? = TODO()
 
