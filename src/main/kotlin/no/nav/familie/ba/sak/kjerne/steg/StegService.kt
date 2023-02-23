@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.writeValueAsString
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
-import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.erOppdatertMedSatserTilOgMed
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -27,6 +26,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatSteg
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -135,7 +135,7 @@ class StegService(
         val forrigeIverksatteBehandlingHarSisteSats = sisteIverksatteBehandlingId != null &&
             !andelerTilkjentYtelseOgEndreteUtbetalingerService
                 .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(sisteIverksatteBehandlingId)
-                .erOppdatertMedSatserTilOgMed(StartSatsendring.SATSENDRINGMÅNED_2023)
+                .erOppdatertMedSatserTilOgMed(SatsService.DATO_SISTE_SATSENDRING)
 
         if (årsakErEndreMigreringsdato && !forrigeIverksatteBehandlingHarSisteSats) {
             throw FunksjonellFeil("Fagsaken har ikke siste sats. Gjennomfør satsendring før du endrer migreringsdato.")
