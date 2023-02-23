@@ -33,15 +33,14 @@ object BehandlingsresultatOpphørUtils {
         val forrigeBehandlingOpphørsdato =
             forrigeAndeler.utledOpphørsdatoForForrigeBehandling(forrigeEndretAndeler = forrigeEndretAndeler)
 
-        val dagensDato = YearMonth.now()
+        val nesteMåned = YearMonth.now().plusMonths(1)
 
         return when {
             // Rekkefølgen av sjekkene er viktig for å komme fram til riktig opphørsresultat.
             nåværendeBehandlingOpphørsdato == null -> Opphørsresultat.IKKE_OPPHØRT // Både forrige og nåværende behandling har ingen andeler
-            nåværendeAndeler.isEmpty() -> Opphørsresultat.OPPHØRT // Alle andeler fra forrige behandling er fjernet
-            nåværendeBehandlingOpphørsdato > dagensDato -> Opphørsresultat.IKKE_OPPHØRT
-            forrigeBehandlingOpphørsdato > dagensDato || forrigeBehandlingOpphørsdato > nåværendeBehandlingOpphørsdato -> Opphørsresultat.OPPHØRT
-            else -> Opphørsresultat.FORTSATT_OPPHØRT
+            nåværendeBehandlingOpphørsdato <= nesteMåned && forrigeBehandlingOpphørsdato > nåværendeBehandlingOpphørsdato -> Opphørsresultat.OPPHØRT // Nåværende behandling er opphørt og forrige har senere opphørsdato
+            nåværendeBehandlingOpphørsdato <= nesteMåned && nåværendeBehandlingOpphørsdato == forrigeBehandlingOpphørsdato -> Opphørsresultat.FORTSATT_OPPHØRT
+            else -> Opphørsresultat.IKKE_OPPHØRT
         }
     }
 
