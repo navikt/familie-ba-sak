@@ -125,7 +125,9 @@ class StegService(
         }
     }
 
-    private fun validerEndreMigreringsdato(nyBehandling: NyBehandling) {
+    fun validerEndreMigreringsdato(nyBehandling: NyBehandling) {
+        // Må se på siste iverksatte og ikke siste vedtatte siden vi ønsker å se på
+        // den forrige behandlingen som sendte noe til økonomi
         val sisteIverksatteBehandlingId =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(nyBehandling.fagsakId)?.id
 
