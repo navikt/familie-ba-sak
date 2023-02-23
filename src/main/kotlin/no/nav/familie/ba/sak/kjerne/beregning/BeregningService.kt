@@ -15,9 +15,9 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndr
 import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.beregning.domene.erEndringerIUtbetalingMellomForrigeAndeler
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -151,7 +151,10 @@ class BeregningService(
             forrigeBehandling?.let { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(it.id) }
                 ?: emptyList()
 
-        val endringerIUtbetaling = nåværendeAndeler.erEndringerIUtbetalingMellomForrigeAndeler(forrigeAndeler)
+        val endringerIUtbetaling = EndringIUtbetalingUtil.erEndringerIUtbetalingFraForrigeBehandling(
+            nåværendeAndeler = nåværendeAndeler,
+            forrigeAndeler = forrigeAndeler
+        )
 
         return if (endringerIUtbetaling) EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING else EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING
     }
