@@ -7,9 +7,11 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
+import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.YearMonth
@@ -19,7 +21,8 @@ class EndringstidspunktService(
     private val behandlingRepository: BehandlingRepository,
     private val kompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse>,
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
-    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
+    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
 ) {
     fun finnEndringstidspunktForBehandling(behandlingId: Long): LocalDate {
         val behandling = behandlingRepository.finnBehandling(behandlingId)
@@ -27,7 +30,7 @@ class EndringstidspunktService(
         // Hvis det ikke finnes en forrige behandling vil vi ha med alt (derfor setter vi endringstidspunkt til tidenes morgen)
         val forrigeBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = behandling.fagsak.id) ?: return TIDENES_MORGEN
 
-        val endringstidspunktUtbetalingsbeløp: YearMonth? = finnEndringstidspunktForBeløp()
+        val endringstidspunktUtbetalingsbeløp: YearMonth? = finnEndringstidspunktForBeløp(inneværendeBehandlingId = behandlingId, forrigeBehandlingId = forrigeBehandling.id)
 
         val endringstidspunktKompetanse: YearMonth? = finnEndringstidspunktForKompetanse()
 
@@ -43,7 +46,15 @@ class EndringstidspunktService(
         ).minOfOrNull { it }?.førsteDagIInneværendeMåned() ?: TIDENES_MORGEN
     }
 
-    private fun finnEndringstidspunktForBeløp(): YearMonth? = TODO()
+    private fun finnEndringstidspunktForBeløp(inneværendeBehandlingId: Long, forrigeBehandlingId: Long): YearMonth? {
+        val nåværendeAndeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = inneværendeBehandlingId)
+        val forrigeAndeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = forrigeBehandlingId)
+
+        return EndringIUtbetalingUtil.utledEndringstidspunktForUtbetalingsbeløp(
+            nåværendeAndeler = nåværendeAndeler,
+            forrigeAndeler = forrigeAndeler
+        )
+    }
     private fun finnEndringstidspunktForKompetanse(): YearMonth? = TODO()
     private fun finnEndringstidspunktForVilkårsvurdering(): YearMonth? = TODO()
     private fun finnEndringstidspunktForEndretUtbetalingAndel(): YearMonth? = TODO()

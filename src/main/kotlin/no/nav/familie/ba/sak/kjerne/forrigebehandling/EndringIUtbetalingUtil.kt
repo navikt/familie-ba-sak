@@ -6,6 +6,8 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
+import java.time.YearMonth
 
 object EndringIUtbetalingUtil {
 
@@ -23,7 +25,19 @@ object EndringIUtbetalingUtil {
         return endringIUtbetalingTidslinje.perioder().any { it.innhold == true }
     }
 
-    fun lagEndringIUtbetalingTidslinje(
+    fun utledEndringstidspunktForUtbetalingsbeløp(
+        nåværendeAndeler: List<AndelTilkjentYtelse>,
+        forrigeAndeler: List<AndelTilkjentYtelse>
+    ): YearMonth? {
+        val endringIUtbetalingTidslinje = lagEndringIUtbetalingTidslinje(
+            nåværendeAndeler = nåværendeAndeler,
+            forrigeAndeler = forrigeAndeler
+        )
+
+        return endringIUtbetalingTidslinje.perioder().filter { it.innhold == true }.minOfOrNull { it.fraOgMed }?.tilYearMonth()
+    }
+
+    internal fun lagEndringIUtbetalingTidslinje(
         nåværendeAndeler: List<AndelTilkjentYtelse>,
         forrigeAndeler: List<AndelTilkjentYtelse>
     ): Tidslinje<Boolean, Måned> {
