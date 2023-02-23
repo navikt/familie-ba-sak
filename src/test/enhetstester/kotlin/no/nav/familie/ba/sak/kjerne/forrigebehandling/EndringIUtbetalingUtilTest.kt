@@ -59,6 +59,13 @@ class EndringIUtbetalingUtilTest {
         Assertions.assertEquals(1, perioderMedEndring.size)
         Assertions.assertEquals(sep22, perioderMedEndring.single().fraOgMed.tilYearMonth())
         Assertions.assertEquals(des22, perioderMedEndring.single().tilOgMed.tilYearMonth())
+
+        val endringstidspunkt = EndringIUtbetalingUtil.utledEndringstidspunktForUtbetalingsbeløp(
+            nåværendeAndeler = nåværendeAndeler,
+            forrigeAndeler = forrigeAndeler
+        )
+
+        Assertions.assertEquals(sep22, endringstidspunkt)
     }
 
     @Test
@@ -87,6 +94,13 @@ class EndringIUtbetalingUtilTest {
         ).perioder().filter { it.innhold == true }
 
         Assertions.assertTrue(perioderMedEndring.isEmpty())
+
+        val endringstidspunkt = EndringIUtbetalingUtil.utledEndringstidspunktForUtbetalingsbeløp(
+            nåværendeAndeler = andeler,
+            forrigeAndeler = andeler
+        )
+
+        Assertions.assertNull(endringstidspunkt)
     }
 
     @Test
@@ -140,6 +154,13 @@ class EndringIUtbetalingUtilTest {
         Assertions.assertEquals(1, perioderMedEndring.size)
         Assertions.assertEquals(mai22, perioderMedEndring.single().fraOgMed.tilYearMonth())
         Assertions.assertEquals(aug22, perioderMedEndring.single().tilOgMed.tilYearMonth())
+
+        val endringstidspunkt = EndringIUtbetalingUtil.utledEndringstidspunktForUtbetalingsbeløp(
+            nåværendeAndeler = nåværendeAndeler,
+            forrigeAndeler = forrigeAndeler
+        )
+
+        Assertions.assertEquals(mai22, endringstidspunkt)
     }
 
     @Test
@@ -170,6 +191,13 @@ class EndringIUtbetalingUtilTest {
         Assertions.assertEquals(1, perioderMedEndring.size)
         Assertions.assertEquals(jan22, perioderMedEndring.single().fraOgMed.tilYearMonth())
         Assertions.assertEquals(aug22, perioderMedEndring.single().tilOgMed.tilYearMonth())
+
+        val endringstidspunkt = EndringIUtbetalingUtil.lagEndringIUtbetalingTidslinje(
+            nåværendeAndeler = listOf(andelBarn2),
+            forrigeAndeler = listOf(andelBarn2, andelBarn1)
+        )
+
+        Assertions.assertEquals(jan22, endringstidspunkt)
     }
 
     @Test
@@ -198,5 +226,12 @@ class EndringIUtbetalingUtilTest {
         ).perioder().filter { it.innhold == true }
 
         Assertions.assertTrue(perioderMedEndring.isEmpty())
+
+        val endringstidspunkt = EndringIUtbetalingUtil.utledEndringstidspunktForUtbetalingsbeløp(
+            nåværendeAndeler = listOf(andelBarn2),
+            forrigeAndeler = listOf(andelBarn2, andelBarn1)
+        )
+
+        Assertions.assertEquals(jan22, endringstidspunkt)
     }
 }

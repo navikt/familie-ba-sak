@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -30,14 +31,23 @@ class EndringIEndretUtbetalingAndelUtilTest {
             søknadstidspunkt = des22.førsteDagIInneværendeMåned()
         )
 
+        val nåværendeEndretAndel = forrigeEndretAndel.copy(årsak = Årsak.ALLEREDE_UTBETALT)
+
         val perioderMedEndring = EndringIEndretUtbetalingAndelUtil.lagEndringIEndretUtbetalingAndelTidslinje(
             forrigeEndretAndeler = listOf(forrigeEndretAndel),
-            nåværendeEndretAndeler = listOf(forrigeEndretAndel.copy(årsak = Årsak.ALLEREDE_UTBETALT))
+            nåværendeEndretAndeler = listOf(nåværendeEndretAndel)
         ).perioder().filter { it.innhold == true }
 
         assertEquals(1, perioderMedEndring.size)
         assertEquals(jan22, perioderMedEndring.single().fraOgMed.tilYearMonth())
         assertEquals(aug22, perioderMedEndring.single().tilOgMed.tilYearMonth())
+
+        val endringstidspunkt = EndringIEndretUtbetalingAndelUtil.utledEndringstidspunktForEndetUtbetalingAndel(
+            forrigeEndretAndeler = listOf(forrigeEndretAndel),
+            nåværendeEndretAndeler = listOf(nåværendeEndretAndel)
+        )
+
+        assertEquals(jan22, endringstidspunkt)
     }
 
     @Test
@@ -53,12 +63,21 @@ class EndringIEndretUtbetalingAndelUtilTest {
             avtaletidspunktDeltBosted = jan22.førsteDagIInneværendeMåned()
         )
 
+        val nåværendeEndretAndel = forrigeEndretAndel.copy(prosent = BigDecimal(100))
+
         val perioderMedEndring = EndringIEndretUtbetalingAndelUtil.lagEndringIEndretUtbetalingAndelTidslinje(
             forrigeEndretAndeler = listOf(forrigeEndretAndel),
-            nåværendeEndretAndeler = listOf(forrigeEndretAndel.copy(prosent = BigDecimal(100)))
+            nåværendeEndretAndeler = listOf(nåværendeEndretAndel)
         ).perioder().filter { it.innhold == true }
 
         assertTrue(perioderMedEndring.isEmpty())
+
+        val endringstidspunkt = EndringIEndretUtbetalingAndelUtil.utledEndringstidspunktForEndetUtbetalingAndel(
+            forrigeEndretAndeler = listOf(forrigeEndretAndel),
+            nåværendeEndretAndeler = listOf(nåværendeEndretAndel)
+        )
+
+        Assertions.assertNull(endringstidspunkt)
     }
 
     @Test
@@ -74,12 +93,21 @@ class EndringIEndretUtbetalingAndelUtilTest {
             avtaletidspunktDeltBosted = jan22.førsteDagIInneværendeMåned()
         )
 
+        val nåværendeEndretAndel = forrigeEndretAndel.copy(tom = des22)
+
         val perioderMedEndring = EndringIEndretUtbetalingAndelUtil.lagEndringIEndretUtbetalingAndelTidslinje(
             forrigeEndretAndeler = listOf(forrigeEndretAndel),
-            nåværendeEndretAndeler = listOf(forrigeEndretAndel.copy(tom = des22))
+            nåværendeEndretAndeler = listOf(nåværendeEndretAndel)
         ).perioder().filter { it.innhold == true }
 
         assertTrue(perioderMedEndring.isEmpty())
+
+        val endringstidspunkt = EndringIEndretUtbetalingAndelUtil.utledEndringstidspunktForEndetUtbetalingAndel(
+            forrigeEndretAndeler = listOf(forrigeEndretAndel),
+            nåværendeEndretAndeler = listOf(nåværendeEndretAndel)
+        )
+
+        Assertions.assertNull(endringstidspunkt)
     }
 
     @Test
@@ -101,6 +129,13 @@ class EndringIEndretUtbetalingAndelUtilTest {
         ).perioder().filter { it.innhold == true }
 
         assertTrue(perioderMedEndring.isEmpty())
+
+        val endringstidspunkt = EndringIEndretUtbetalingAndelUtil.utledEndringstidspunktForEndetUtbetalingAndel(
+            forrigeEndretAndeler = emptyList(),
+            nåværendeEndretAndeler = listOf(nåværendeEndretAndel)
+        )
+
+        Assertions.assertNull(endringstidspunkt)
     }
 
     @Test
@@ -138,5 +173,15 @@ class EndringIEndretUtbetalingAndelUtilTest {
         assertEquals(1, perioderMedEndring.size)
         assertEquals(jan22, perioderMedEndring.single().fraOgMed.tilYearMonth())
         assertEquals(aug22, perioderMedEndring.single().tilOgMed.tilYearMonth())
+
+        val endringstidspunkt = EndringIEndretUtbetalingAndelUtil.utledEndringstidspunktForEndetUtbetalingAndel(
+            forrigeEndretAndeler = listOf(forrigeEndretAndelBarn1, forrigeEndretAndelBarn2),
+            nåværendeEndretAndeler = listOf(
+                forrigeEndretAndelBarn1,
+                forrigeEndretAndelBarn2.copy(årsak = Årsak.ALLEREDE_UTBETALT)
+            )
+        )
+
+        assertEquals(jan22, endringstidspunkt)
     }
 }

@@ -35,12 +35,21 @@ class EndringIKompetanseUtilTest {
                 tom = mai22
             )
 
+        val nåværendeKompetanse = forrigeKompetanse.copy().apply { behandlingId = nåværendeBehandling.id }
+
         val perioderMedEndring = EndringIKompetanseUtil.lagEndringIKompetanseTidslinje(
-            nåværendeKompetanser = listOf(forrigeKompetanse.copy().apply { behandlingId = nåværendeBehandling.id }),
+            nåværendeKompetanser = listOf(nåværendeKompetanse),
             forrigeKompetanser = listOf(forrigeKompetanse)
         ).perioder().filter { it.innhold == true }
 
         Assertions.assertTrue(perioderMedEndring.isEmpty())
+
+        val endringstidspunkt = EndringIKompetanseUtil.utledEndringstidspunktForKompetanse(
+            nåværendeKompetanser = listOf(nåværendeKompetanse),
+            forrigeKompetanser = listOf(forrigeKompetanse)
+        )
+
+        Assertions.assertNull(endringstidspunkt)
     }
 
     @Test
@@ -61,9 +70,11 @@ class EndringIKompetanseUtilTest {
                 tom = mai22
             )
 
+        val nåværendeKompetanse = forrigeKompetanse.copy(søkersAktivitetsland = "DK").apply { behandlingId = nåværendeBehandling.id }
+
         val perioderMedEndring = EndringIKompetanseUtil.lagEndringIKompetanseTidslinje(
             nåværendeKompetanser = listOf(
-                forrigeKompetanse.copy(søkersAktivitetsland = "DK").apply { behandlingId = nåværendeBehandling.id }
+                nåværendeKompetanse
             ),
             forrigeKompetanser = listOf(forrigeKompetanse)
         ).perioder().filter { it.innhold == true }
@@ -71,6 +82,15 @@ class EndringIKompetanseUtilTest {
         Assertions.assertEquals(1, perioderMedEndring.size)
         Assertions.assertEquals(jan22, perioderMedEndring.single().fraOgMed.tilYearMonth())
         Assertions.assertEquals(mai22, perioderMedEndring.single().tilOgMed.tilYearMonth())
+
+        val endringstidspunkt = EndringIKompetanseUtil.utledEndringstidspunktForKompetanse(
+            nåværendeKompetanser = listOf(
+                nåværendeKompetanse
+            ),
+            forrigeKompetanser = listOf(forrigeKompetanse)
+        )
+
+        Assertions.assertEquals(jan22, endringstidspunkt)
     }
 
     @Test
@@ -91,14 +111,25 @@ class EndringIKompetanseUtilTest {
                 tom = null
             )
 
+        val nåværendeKompetanse = forrigeKompetanse.copy(fom = YearMonth.now().minusMonths(10))
+            .apply { behandlingId = nåværendeBehandling.id }
+
         val perioderMedEndring = EndringIKompetanseUtil.lagEndringIKompetanseTidslinje(
             nåværendeKompetanser = listOf(
-                forrigeKompetanse.copy(fom = YearMonth.now().minusMonths(10))
-                    .apply { behandlingId = nåværendeBehandling.id }
+                nåværendeKompetanse
             ),
             forrigeKompetanser = listOf(forrigeKompetanse)
         ).perioder().filter { it.innhold == true }
 
         Assertions.assertTrue(perioderMedEndring.isEmpty())
+
+        val endringstidspunkt = EndringIKompetanseUtil.utledEndringstidspunktForKompetanse(
+            nåværendeKompetanser = listOf(
+                nåværendeKompetanse
+            ),
+            forrigeKompetanser = listOf(forrigeKompetanse)
+        )
+
+        Assertions.assertNull(endringstidspunkt)
     }
 }
