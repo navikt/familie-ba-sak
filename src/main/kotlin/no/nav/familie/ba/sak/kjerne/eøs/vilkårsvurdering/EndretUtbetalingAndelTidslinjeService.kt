@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering
 
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
@@ -16,10 +17,10 @@ import org.springframework.stereotype.Service
 
 @Service
 class EndretUtbetalingAndelTidslinjeService(
-    val endretUtbetalingAndelService: EndretUtbetalingAndelService
+    val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService
 ) {
     fun hentBarnasHarEtterbetaling3ÅrTidslinjer(behandlingId: BehandlingId) =
-        endretUtbetalingAndelService
+        endretUtbetalingAndelHentOgPersisterService
             .hentForBehandling(behandlingId.id)
             .tilBarnasHarEtterbetaling3ÅrTidslinjer()
 }

@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.endretutbetaling
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
-import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
@@ -27,7 +26,8 @@ class EndretUtbetalingAndelService(
     private val persongrunnlagService: PersongrunnlagService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val vilkårsvurderingService: VilkårsvurderingService,
-    private val endretUtbetalingAndelOppdatertAbonnementer: List<EndretUtbetalingAndelerOppdatertAbonnent> = emptyList()
+    private val endretUtbetalingAndelOppdatertAbonnementer: List<EndretUtbetalingAndelerOppdatertAbonnent> = emptyList(),
+    private val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService
 ) {
     @Transactional
     fun oppdaterEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
@@ -48,7 +48,7 @@ class EndretUtbetalingAndelService(
 
         endretUtbetalingAndel.fraRestEndretUtbetalingAndel(restEndretUtbetalingAndel, person)
 
-        val andreEndredeAndelerPåBehandling = hentForBehandling(behandling.id)
+        val andreEndredeAndelerPåBehandling = endretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandling.id)
             .filter { it.id != endretUtbetalingAndelId }
 
         val gyldigTomEtterDagensDato = beregnGyldigTomIFremtiden(
@@ -135,7 +135,7 @@ class EndretUtbetalingAndelService(
 
     @Transactional
     fun kopierEndretUtbetalingAndelFraForrigeBehandling(behandling: Behandling, forrigeBehandling: Behandling) {
-        hentForBehandling(forrigeBehandling.id).forEach {
+        endretUtbetalingAndelHentOgPersisterService.hentForBehandling(forrigeBehandling.id).forEach {
             endretUtbetalingAndelRepository.save(
                 it.copy(
                     id = 0,
@@ -146,11 +146,9 @@ class EndretUtbetalingAndelService(
         }
     }
 
-    fun hentForBehandling(behandlingId: Long) = endretUtbetalingAndelRepository.findByBehandlingId(behandlingId)
-
     @Transactional
     fun fjernKnytningTilAndelTilkjentYtelse(behandlingId: Long) {
-        hentForBehandling(behandlingId).filter { it.andelTilkjentYtelser.isNotEmpty() }.forEach {
+        endretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandlingId).filter { it.andelTilkjentYtelser.isNotEmpty() }.forEach {
             it.andelTilkjentYtelser.clear()
         }
     }
