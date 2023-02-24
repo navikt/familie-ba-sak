@@ -13,7 +13,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndre
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
@@ -38,7 +38,7 @@ class BehandlingsresultatService(
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
-    private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
+    private val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
     private val kompetanseService: KompetanseService
 ) {
 
@@ -76,8 +76,8 @@ class BehandlingsresultatService(
         val forrigeAndelerTilkjentYtelse = forrigeBehandling?.let { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = it.id) } ?: emptyList()
         val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandlingId)
 
-        val forrigeEndretUtbetalingAndeler = forrigeBehandling?.let { endretUtbetalingAndelService.hentForBehandling(behandlingId = it.id) } ?: emptyList()
-        val endretUtbetalingAndeler = endretUtbetalingAndelService.hentForBehandling(behandlingId = behandlingId)
+        val forrigeEndretUtbetalingAndeler = forrigeBehandling?.let { endretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandlingId = it.id) } ?: emptyList()
+        val endretUtbetalingAndeler = endretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandlingId = behandlingId)
 
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId = behandlingId)
 

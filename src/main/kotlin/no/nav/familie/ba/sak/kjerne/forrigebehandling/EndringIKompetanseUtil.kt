@@ -2,12 +2,26 @@ package no.nav.familie.ba.sak.kjerne.forrigebehandling
 
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
+import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringUtil.tilFørsteEndringstidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
+import java.time.YearMonth
 
 object EndringIKompetanseUtil {
+
+    fun utledEndringstidspunktForKompetanse(
+        nåværendeKompetanser: List<Kompetanse>,
+        forrigeKompetanser: List<Kompetanse>
+    ): YearMonth? {
+        val endringIKompetanseTidslinje = lagEndringIKompetanseTidslinje(
+            nåværendeKompetanser = nåværendeKompetanser,
+            forrigeKompetanser = forrigeKompetanser
+        )
+
+        return endringIKompetanseTidslinje.tilFørsteEndringstidspunkt()
+    }
 
     fun lagEndringIKompetanseTidslinje(
         nåværendeKompetanser: List<Kompetanse>,
