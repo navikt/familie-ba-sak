@@ -6,8 +6,8 @@ import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
@@ -37,7 +37,6 @@ import org.springframework.transaction.annotation.Transactional
 class TilbakekrevingService(
     private val tilbakekrevingRepository: TilbakekrevingRepository,
     private val vedtakRepository: VedtakRepository,
-    private val behandlingRepository: BehandlingRepository,
     private val totrinnskontrollRepository: TotrinnskontrollRepository,
     private val simuleringService: SimuleringService,
     private val tilgangService: TilgangService,
@@ -46,7 +45,8 @@ class TilbakekrevingService(
     private val tilbakekrevingKlient: TilbakekrevingKlient,
     private val personidentService: PersonidentService,
     private val personopplysningerService: PersonopplysningerService,
-    private val featureToggleService: FeatureToggleService
+    private val featureToggleService: FeatureToggleService,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService
 ) {
 
     fun validerRestTilbakekreving(restTilbakekreving: RestTilbakekreving?, behandlingId: Long) {
@@ -61,7 +61,7 @@ class TilbakekrevingService(
 
     @Transactional
     fun lagreTilbakekreving(restTilbakekreving: RestTilbakekreving, behandlingId: Long): Tilbakekreving? {
-        val behandling = behandlingRepository.finnBehandling(behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 
         val tilbakekreving = Tilbakekreving(
             begrunnelse = restTilbakekreving.begrunnelse,
@@ -191,7 +191,7 @@ class TilbakekrevingService(
         }
 
         val behandling = kanOpprettesRespons.kravgrunnlagsreferanse?.toLong()
-            ?.let { behandlingRepository.findByFagsakAndAvsluttet(fagsakId).find { beh -> beh.id == it } }
+            ?.let { behandlingHentOgPersisterService.hentAvsluttedeBehandlingerPåFagsak(fagsakId = fagsakId).find { beh -> beh.id == it } }
         return if (behandling != null) {
             tilbakekrevingKlient.opprettTilbakekrevingsbehandlingManuelt(
                 OpprettManueltTilbakekrevingRequest(
