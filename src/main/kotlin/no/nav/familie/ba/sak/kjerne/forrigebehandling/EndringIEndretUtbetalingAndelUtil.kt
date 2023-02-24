@@ -11,7 +11,7 @@ import java.time.YearMonth
 
 object EndringIEndretUtbetalingAndelUtil {
 
-    fun utledEndringstidspunktForEndetUtbetalingAndel(
+    fun utledEndringstidspunktForEndretUtbetalingAndel(
         nåværendeEndretAndeler: List<EndretUtbetalingAndel>,
         forrigeEndretAndeler: List<EndretUtbetalingAndel>
     ): YearMonth? {

@@ -42,7 +42,7 @@ class EndringIEndretUtbetalingAndelUtilTest {
         assertEquals(jan22, perioderMedEndring.single().fraOgMed.tilYearMonth())
         assertEquals(aug22, perioderMedEndring.single().tilOgMed.tilYearMonth())
 
-        val endringstidspunkt = EndringIEndretUtbetalingAndelUtil.utledEndringstidspunktForEndetUtbetalingAndel(
+        val endringstidspunkt = EndringIEndretUtbetalingAndelUtil.utledEndringstidspunktForEndretUtbetalingAndel(
             forrigeEndretAndeler = listOf(forrigeEndretAndel),
             nåværendeEndretAndeler = listOf(nåværendeEndretAndel)
         )
@@ -72,7 +72,7 @@ class EndringIEndretUtbetalingAndelUtilTest {
 
         assertTrue(perioderMedEndring.isEmpty())
 
-        val endringstidspunkt = EndringIEndretUtbetalingAndelUtil.utledEndringstidspunktForEndetUtbetalingAndel(
+        val endringstidspunkt = EndringIEndretUtbetalingAndelUtil.utledEndringstidspunktForEndretUtbetalingAndel(
             forrigeEndretAndeler = listOf(forrigeEndretAndel),
             nåværendeEndretAndeler = listOf(nåværendeEndretAndel)
         )
@@ -102,7 +102,7 @@ class EndringIEndretUtbetalingAndelUtilTest {
 
         assertTrue(perioderMedEndring.isEmpty())
 
-        val endringstidspunkt = EndringIEndretUtbetalingAndelUtil.utledEndringstidspunktForEndetUtbetalingAndel(
+        val endringstidspunkt = EndringIEndretUtbetalingAndelUtil.utledEndringstidspunktForEndretUtbetalingAndel(
             forrigeEndretAndeler = listOf(forrigeEndretAndel),
             nåværendeEndretAndeler = listOf(nåværendeEndretAndel)
         )
@@ -130,7 +130,7 @@ class EndringIEndretUtbetalingAndelUtilTest {
 
         assertTrue(perioderMedEndring.isEmpty())
 
-        val endringstidspunkt = EndringIEndretUtbetalingAndelUtil.utledEndringstidspunktForEndetUtbetalingAndel(
+        val endringstidspunkt = EndringIEndretUtbetalingAndelUtil.utledEndringstidspunktForEndretUtbetalingAndel(
             forrigeEndretAndeler = emptyList(),
             nåværendeEndretAndeler = listOf(nåværendeEndretAndel)
         )
@@ -174,7 +174,7 @@ class EndringIEndretUtbetalingAndelUtilTest {
         assertEquals(jan22, perioderMedEndring.single().fraOgMed.tilYearMonth())
         assertEquals(aug22, perioderMedEndring.single().tilOgMed.tilYearMonth())
 
-        val endringstidspunkt = EndringIEndretUtbetalingAndelUtil.utledEndringstidspunktForEndetUtbetalingAndel(
+        val endringstidspunkt = EndringIEndretUtbetalingAndelUtil.utledEndringstidspunktForEndretUtbetalingAndel(
             forrigeEndretAndeler = listOf(forrigeEndretAndelBarn1, forrigeEndretAndelBarn2),
             nåværendeEndretAndeler = listOf(
                 forrigeEndretAndelBarn1,

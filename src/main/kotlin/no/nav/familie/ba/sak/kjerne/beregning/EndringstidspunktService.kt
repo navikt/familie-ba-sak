@@ -89,7 +89,7 @@ class EndringstidspunktService(
         val nåværendeEndretAndeler = endretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandlingId = inneværendeBehandlingId)
         val forrigeEndretAndeler = endretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandlingId = forrigeBehandlingId)
 
-        return EndringIEndretUtbetalingAndelUtil.utledEndringstidspunktForEndetUtbetalingAndel(
+        return EndringIEndretUtbetalingAndelUtil.utledEndringstidspunktForEndretUtbetalingAndel(
             nåværendeEndretAndeler = nåværendeEndretAndeler,
             forrigeEndretAndeler = forrigeEndretAndeler
         )
