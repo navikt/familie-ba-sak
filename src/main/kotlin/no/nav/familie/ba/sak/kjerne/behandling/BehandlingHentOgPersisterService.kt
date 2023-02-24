@@ -118,4 +118,8 @@ class BehandlingHentOgPersisterService(
     fun hentIverksatteBehandlinger(fagsakId: Long): List<Behandling> {
         return behandlingRepository.finnIverksatteBehandlinger(fagsakId = fagsakId)
     }
+
+    fun hentAvsluttedeBehandlingerPåFagsak(fagsakId: Long): List<Behandling> {
+        return behandlingRepository.findByFagsakAndAvsluttet(fagsakId = fagsakId)
+    }
 }
