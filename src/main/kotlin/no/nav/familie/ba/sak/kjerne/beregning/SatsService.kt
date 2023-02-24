@@ -48,9 +48,7 @@ object SatsService {
         Sats(SatsType.UTVIDET_BARNETRYGD, 2489, LocalDate.of(2023, 3, 1), LocalDate.MAX)
     )
 
-    fun finnSisteSatsFor(satstype: SatsType) = finnAlleSatserFor(satstype).find {
-        it.gyldigTom == LocalDate.MAX
-    }!!
+    fun finnSisteSatsFor(satstype: SatsType) = finnAlleSatserFor(satstype).maxBy { it.gyldigTom }
 
     fun finnSatsendring(startDato: LocalDate): List<Sats> = hentAllesatser()
         .filter { it.gyldigFom == startDato }
