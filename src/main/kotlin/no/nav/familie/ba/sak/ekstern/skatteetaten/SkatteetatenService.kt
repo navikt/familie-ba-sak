@@ -2,8 +2,8 @@ package no.nav.familie.ba.sak.ekstern.skatteetaten
 
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPeriode
@@ -25,7 +25,7 @@ class SkatteetatenService(
     private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
     private val fagsakRepository: FagsakRepository,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
-    private val behandlingRepository: BehandlingRepository
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService
 ) {
     @Cacheable("skatt_personer", cacheManager = "skattPersonerCache", unless = "#result == null")
     fun finnPersonerMedUtvidetBarnetrygd(år: String): SkatteetatenPersonerResponse {
@@ -99,7 +99,7 @@ class SkatteetatenService(
         stonadPerioder.groupBy { it.getId() }.values.forEach { perioderGroupedByPerson ->
             if (perioderGroupedByPerson.size > 1) {
                 val behandlinger =
-                    perioderGroupedByPerson.map { behandlingRepository.finnBehandling(it.getBehandlingId()) }
+                    perioderGroupedByPerson.map { behandlingHentOgPersisterService.hent(it.getBehandlingId()) }
                 val sisteIverksatteBehandling = Behandlingutils.hentSisteBehandlingSomErIverksatt(behandlinger)
                 if (sisteIverksatteBehandling != null) {
                     aktivAndelTilkjentYtelsePeriode.addAll(perioderGroupedByPerson.filter { it.getBehandlingId() == sisteIverksatteBehandling.id })
