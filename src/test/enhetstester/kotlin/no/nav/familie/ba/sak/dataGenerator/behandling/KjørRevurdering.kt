@@ -17,7 +17,7 @@ import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertPersonResultat
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -63,7 +63,7 @@ fun kjørStegprosessForBehandling(
     vilkårsvurderingService: VilkårsvurderingService,
     stegService: StegService,
     vedtaksperiodeService: VedtaksperiodeService,
-    endretUtbetalingAndelService: EndretUtbetalingAndelService,
+    endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
     fagsakService: FagsakService,
     persongrunnlagService: PersongrunnlagService,
     andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
@@ -118,7 +118,7 @@ fun kjørStegprosessForBehandling(
             stegService = stegService,
             persongrunnlagService = persongrunnlagService,
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
-            endretUtbetalingAndelService = endretUtbetalingAndelService,
+            endretUtbetalingAndelHentOgPersisterService = endretUtbetalingAndelHentOgPersisterService,
             sanityBegrunnelser = hentBegrunnelser(),
             vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingEtterSimuleringSteg.id)!!
         )
@@ -176,7 +176,7 @@ private fun håndterSendtTilBeslutterSteg(
     stegService: StegService,
     persongrunnlagService: PersongrunnlagService,
     andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
-    endretUtbetalingAndelService: EndretUtbetalingAndelService,
+    endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
     sanityBegrunnelser: List<SanityBegrunnelse>,
     vilkårsvurdering: Vilkårsvurdering
 ): Behandling {
@@ -186,7 +186,7 @@ private fun håndterSendtTilBeslutterSteg(
     val persongrunnlag =
         persongrunnlagService.hentAktivThrows(behandlingEtterSimuleringSteg.id)
 
-    val endredeUtbetalingAndeler = endretUtbetalingAndelService.hentEndredeUtbetalingAndeler(
+    val endredeUtbetalingAndeler = endretUtbetalingAndelHentOgPersisterService.hentForBehandling(
         behandlingEtterSimuleringSteg.id
     )
     leggTilAlleGyldigeBegrunnelserPåVedtaksperiodeIBehandling(

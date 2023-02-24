@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
@@ -60,6 +61,9 @@ class RevurderingMedEndredeUtbetalingandelerTest(
 
     @Autowired
     private val stegService: StegService,
+
+    @Autowired
+    private val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
 
     @Autowired
     private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
@@ -133,7 +137,7 @@ class RevurderingMedEndredeUtbetalingandelerTest(
 
         gjennomførVilkårsvurdering(vilkårsvurdering = vilkårsvurderingRevurdering, behandling = behandlingRevurdering)
 
-        val kopierteEndredeUtbetalingAndeler = endretUtbetalingAndelService.hentForBehandling(behandlingRevurdering.id)
+        val kopierteEndredeUtbetalingAndeler = endretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandlingRevurdering.id)
         val andelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingRevurdering.id)
         val andelPåvirketAvEndringer = andelerTilkjentYtelse.first()
 

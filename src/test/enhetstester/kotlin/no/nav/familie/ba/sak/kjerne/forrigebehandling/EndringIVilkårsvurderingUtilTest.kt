@@ -25,7 +25,7 @@ class EndringIVilkårsvurderingUtilTest {
     val mai22 = YearMonth.of(2022, 5)
 
     @Test
-    fun `Endring i vilkårsvurdering - skal returnere false dersom vilkårresultatene er helt like`() {
+    fun `Endring i vilkårsvurdering - skal ikke lage periode med endring dersom vilkårresultatene er helt like`() {
         val vilkårResultater = setOf(
             VilkårResultat(
                 personResultat = null,
@@ -66,6 +66,14 @@ class EndringIVilkårsvurderingUtilTest {
         ).perioder().filter { it.innhold == true }
 
         Assertions.assertTrue(perioderMedEndring.isEmpty())
+
+        val endringstidspunkt = EndringIVilkårsvurderingUtil.utledEndringstidspunktForVilkårsvurdering(
+            nåværendePersonResultat = setOf(lagPersonResultatFraVilkårResultater(vilkårResultater, aktør)),
+            forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(vilkårResultater, aktør)),
+            opphørstidspunkt = YearMonth.of(2020, 2)
+        )
+
+        Assertions.assertNull(endringstidspunkt)
     }
 
     @Test
@@ -115,6 +123,14 @@ class EndringIVilkårsvurderingUtilTest {
         Assertions.assertEquals(1, perioderMedEndring.size)
         Assertions.assertEquals(jan22, perioderMedEndring.single().fraOgMed.tilYearMonth())
         Assertions.assertEquals(mai22, perioderMedEndring.single().tilOgMed.tilYearMonth())
+
+        val endringstidspunkt = EndringIVilkårsvurderingUtil.utledEndringstidspunktForVilkårsvurdering(
+            nåværendePersonResultat = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
+            forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
+            opphørstidspunkt = YearMonth.of(2020, 2)
+        )
+
+        Assertions.assertEquals(jan22, endringstidspunkt)
     }
 
     @Test
@@ -178,6 +194,14 @@ class EndringIVilkårsvurderingUtilTest {
         Assertions.assertEquals(1, perioderMedEndring.size)
         Assertions.assertEquals(feb22, perioderMedEndring.single().fraOgMed.tilYearMonth())
         Assertions.assertEquals(mai22, perioderMedEndring.single().tilOgMed.tilYearMonth())
+
+        val endringstidspunkt = EndringIVilkårsvurderingUtil.utledEndringstidspunktForVilkårsvurdering(
+            nåværendePersonResultat = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
+            forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
+            opphørstidspunkt = YearMonth.of(2020, 2)
+        )
+
+        Assertions.assertEquals(feb22, endringstidspunkt)
     }
 
     @Test
@@ -225,6 +249,14 @@ class EndringIVilkårsvurderingUtilTest {
         ).perioder().filter { it.innhold == true }
 
         Assertions.assertTrue(perioderMedEndring.isEmpty())
+
+        val endringstidspunkt = EndringIVilkårsvurderingUtil.utledEndringstidspunktForVilkårsvurdering(
+            nåværendePersonResultat = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
+            forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
+            opphørstidspunkt = YearMonth.of(2020, 2)
+        )
+
+        Assertions.assertNull(endringstidspunkt)
     }
 
     private fun lagPersonResultatFraVilkårResultater(vilkårResultater: Set<VilkårResultat>, aktør: Aktør): PersonResultat {

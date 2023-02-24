@@ -2,12 +2,26 @@ package no.nav.familie.ba.sak.kjerne.forrigebehandling
 
 import no.nav.familie.ba.sak.kjerne.beregning.EndretUtbetalingAndelTidslinje
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringUtil.tilFørsteEndringstidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
+import java.time.YearMonth
 
 object EndringIEndretUtbetalingAndelUtil {
+
+    fun utledEndringstidspunktForEndretUtbetalingAndel(
+        nåværendeEndretAndeler: List<EndretUtbetalingAndel>,
+        forrigeEndretAndeler: List<EndretUtbetalingAndel>
+    ): YearMonth? {
+        val endringIEndretUtbetalingAndelTidslinje = lagEndringIEndretUtbetalingAndelTidslinje(
+            nåværendeEndretAndeler = nåværendeEndretAndeler,
+            forrigeEndretAndeler = forrigeEndretAndeler
+        )
+
+        return endringIEndretUtbetalingAndelTidslinje.tilFørsteEndringstidspunkt()
+    }
 
     fun lagEndringIEndretUtbetalingAndelTidslinje(
         nåværendeEndretAndeler: List<EndretUtbetalingAndel>,
