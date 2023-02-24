@@ -179,7 +179,7 @@ class BehandlingService(
 
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} omgjør automatisk behandling $behandling til manuell.")
         behandling.skalBehandlesAutomatisk = false
-        return behandlingHentOgPersisterService.lagreEllerOppdater(behandling, false)
+        return behandlingHentOgPersisterService.lagreEllerOppdater(behandling, true)
     }
 
     fun lagreNyOgDeaktiverGammelBehandling(behandling: Behandling): Behandling {
