@@ -21,7 +21,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -52,7 +51,6 @@ class FagsakService(
     private val personRepository: PersonRepository,
     private val andelerTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val personidentService: PersonidentService,
-    private val behandlingRepository: BehandlingRepository,
     private val behandlingstemaService: BehandlingstemaService,
     private val utvidetBehandlingService: UtvidetBehandlingService,
     private val behandlingService: BehandlingService,
