@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.writeValueAsString
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.SatsendringService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
@@ -54,7 +55,8 @@ class StegService(
     private val søknadGrunnlagService: SøknadGrunnlagService,
     private val tilgangService: TilgangService,
     private val infotrygdFeedService: InfotrygdFeedService,
-    private val settPåVentService: SettPåVentService
+    private val settPåVentService: SettPåVentService,
+    private val satsendringService: SatsendringService
 ) {
 
     private val stegSuksessMetrics: Map<StegType, Counter> = initStegMetrikker("suksess")
@@ -75,17 +77,21 @@ class StegService(
 
     @Transactional
     fun håndterNyBehandling(nyBehandling: NyBehandling): Behandling {
+        when (nyBehandling.behandlingÅrsak) {
+            BehandlingÅrsak.HELMANUELL_MIGRERING -> validerHelmanuelMigrering(nyBehandling)
+            BehandlingÅrsak.ENDRE_MIGRERINGSDATO -> validerEndreMigreringsdato(nyBehandling)
+            else -> Unit
+        }
+
         val behandling = behandlingService.opprettBehandling(nyBehandling)
 
         val barnasIdenter: List<String> = when (nyBehandling.behandlingÅrsak) {
             BehandlingÅrsak.MIGRERING,
             BehandlingÅrsak.FØDSELSHENDELSE,
             BehandlingÅrsak.HELMANUELL_MIGRERING -> {
-                if (nyBehandling.behandlingÅrsak == BehandlingÅrsak.HELMANUELL_MIGRERING) {
-                    validerHelmanuelMigrering(behandling)
-                }
                 nyBehandling.barnasIdenter
             }
+
             else -> when (nyBehandling.behandlingType) {
                 BehandlingType.FØRSTEGANGSBEHANDLING -> emptyList()
                 BehandlingType.REVURDERING,
@@ -96,6 +102,7 @@ class StegService(
                     }
                     hentBarnFraForrigeAvsluttedeBehandling(behandling)
                 }
+
                 else -> throw Feil(hentUkjentBehandlingTypeOgÅrsakFeilMelding(nyBehandling))
             }
         }
@@ -116,11 +123,20 @@ class StegService(
         }
     }
 
-    private fun validerHelmanuelMigrering(behandling: Behandling) {
-        val sisteBehandlingSomErVedtatt = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id)
+    fun validerEndreMigreringsdato(nyBehandling: NyBehandling) {
+        check(nyBehandling.behandlingÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO)
+
+        if (!satsendringService.erFagsakOppdatertMedSisteSats(fagsakId = nyBehandling.fagsakId)) {
+            throw FunksjonellFeil("Fagsaken har ikke siste sats. Gjennomfør satsendring før du endrer migreringsdato.")
+        }
+    }
+
+    private fun validerHelmanuelMigrering(nyBehandling: NyBehandling) {
+        val sisteBehandlingSomErVedtatt =
+            behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(nyBehandling.fagsakId)
         if (sisteBehandlingSomErVedtatt != null && !sisteBehandlingSomErVedtatt.erTekniskEndringMedOpphør()) {
             throw FunksjonellFeil(
-                melding = "Det finnes allerede en vedtatt behandling på fagsak ${behandling.fagsak.id}." +
+                melding = "Det finnes allerede en vedtatt behandling på fagsak ${nyBehandling.fagsakId}." +
                     "Behandling kan ikke opprettes med årsak " +
                     BehandlingÅrsak.HELMANUELL_MIGRERING.visningsnavn,
                 frontendFeilmelding = "Det finnes allerede en vedtatt behandling på fagsak." +
@@ -481,10 +497,12 @@ class StegService(
                     stegFunksjonellFeilMetrics[behandlingSteg.stegType()]?.increment()
                     logger.info("Steg '${behandlingSteg.stegType()}' har trigget rekjøring senere på behandling $behandling. Årsak: ${exception.årsak}")
                 }
+
                 is FunksjonellFeil -> {
                     stegFunksjonellFeilMetrics[behandlingSteg.stegType()]?.increment()
                     logger.info("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet på grunn av funksjonell feil på behandling $behandling. Melding: ${exception.melding}")
                 }
+
                 else -> {
                     stegFeiletMetrics[behandlingSteg.stegType()]?.increment()
                     logger.info("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet på behandling $behandling.")
