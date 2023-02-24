@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.bestemUnderkatego
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfoRepository
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus.AVSLUTTET
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus.FATTER_VEDTAK
@@ -45,7 +44,6 @@ import java.time.YearMonth
 
 @Service
 class BehandlingService(
-    private val behandlingRepository: BehandlingRepository,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val behandlingstemaService: BehandlingstemaService,
     private val behandlingSøknadsinfoService: BehandlingSøknadsinfoService,
@@ -143,7 +141,7 @@ class BehandlingService(
     }
 
     fun nullstillEndringstidspunkt(behandlingId: Long) {
-        val behandling = behandlingRepository.finnBehandling(behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         behandling.overstyrtEndringstidspunkt = null
         behandlingHentOgPersisterService.lagreEllerOppdater(behandling, false)
     }
@@ -181,14 +179,14 @@ class BehandlingService(
 
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} omgjør automatisk behandling $behandling til manuell.")
         behandling.skalBehandlesAutomatisk = false
-        return behandlingRepository.save(behandling)
+        return behandlingHentOgPersisterService.lagreEllerOppdater(behandling, false)
     }
 
     fun lagreNyOgDeaktiverGammelBehandling(behandling: Behandling): Behandling {
         val aktivBehandling = behandlingHentOgPersisterService.hentAktivForFagsak(behandling.fagsak.id)
 
         if (aktivBehandling != null) {
-            behandlingRepository.saveAndFlush(aktivBehandling.also { it.aktiv = false })
+            behandlingHentOgPersisterService.lagreOgFlush(aktivBehandling.also { it.aktiv = false })
             saksstatistikkEventPublisher.publiserBehandlingsstatistikk(aktivBehandling.id)
         } else if (harAktivInfotrygdSak(behandling)) {
             throw FunksjonellFeil(
