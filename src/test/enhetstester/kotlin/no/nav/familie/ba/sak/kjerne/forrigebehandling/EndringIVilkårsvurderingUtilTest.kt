@@ -164,11 +164,9 @@ class EndringIVilkårsvurderingUtilTest {
                 resultat = Resultat.OPPFYLT,
                 periodeFom = mai22.atDay(8),
                 periodeTom = null,
-                begrunnelse = "begrunnelse",
+                begrunnelse = "",
                 behandlingId = 0,
-                utdypendeVilkårsvurderinger = listOf(
-                    UtdypendeVilkårsvurdering.VURDERING_ANNET_GRUNNLAG
-                ),
+                utdypendeVilkårsvurderinger = listOf(),
                 vurderesEtter = Regelverk.NASJONALE_REGLER
             )
         )
