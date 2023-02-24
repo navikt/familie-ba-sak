@@ -234,7 +234,7 @@ class FagsakService(
     private fun lagRestBaseFagsak(fagsakId: Long): RestBaseFagsak {
         val fagsak = hentPåFagsakId(fagsakId = fagsakId)
 
-        val aktivBehandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId)
+        val aktivBehandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = fagsakId)
 
         val sistVedtatteBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsakId)
 

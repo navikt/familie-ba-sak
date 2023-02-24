@@ -99,7 +99,7 @@ class SkatteetatenService(
         stonadPerioder.groupBy { it.getId() }.values.forEach { perioderGroupedByPerson ->
             if (perioderGroupedByPerson.size > 1) {
                 val behandlinger =
-                    perioderGroupedByPerson.map { behandlingHentOgPersisterService.hent(it.getBehandlingId()) }
+                    perioderGroupedByPerson.map { behandlingHentOgPersisterService.hent(behandlingId = it.getBehandlingId()) }
                 val sisteIverksatteBehandling = Behandlingutils.hentSisteBehandlingSomErIverksatt(behandlinger)
                 if (sisteIverksatteBehandling != null) {
                     aktivAndelTilkjentYtelsePeriode.addAll(perioderGroupedByPerson.filter { it.getBehandlingId() == sisteIverksatteBehandling.id })

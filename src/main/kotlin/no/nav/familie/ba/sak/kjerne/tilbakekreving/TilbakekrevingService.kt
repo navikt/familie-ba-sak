@@ -61,7 +61,7 @@ class TilbakekrevingService(
 
     @Transactional
     fun lagreTilbakekreving(restTilbakekreving: RestTilbakekreving, behandlingId: Long): Tilbakekreving? {
-        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
 
         val tilbakekreving = Tilbakekreving(
             begrunnelse = restTilbakekreving.begrunnelse,

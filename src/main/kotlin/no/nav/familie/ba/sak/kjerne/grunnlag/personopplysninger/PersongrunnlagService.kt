@@ -87,8 +87,8 @@ class PersongrunnlagService(
 
     @Transactional
     fun oppdaterRegisteropplysninger(behandlingId: Long): PersonopplysningGrunnlag {
-        val nåværendeGrunnlag = hentAktivThrows(behandlingId)
-        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        val nåværendeGrunnlag = hentAktivThrows(behandlingId = behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
 
         if (behandling.status != BehandlingStatus.UTREDES) throw Feil("BehandlingStatus må være UTREDES for å manuelt oppdatere registeropplysninger")
         return hentOgLagreSøkerOgBarnINyttGrunnlag(

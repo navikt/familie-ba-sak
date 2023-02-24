@@ -141,9 +141,9 @@ class BehandlingService(
     }
 
     fun nullstillEndringstidspunkt(behandlingId: Long) {
-        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
         behandling.overstyrtEndringstidspunkt = null
-        behandlingHentOgPersisterService.lagreEllerOppdater(behandling, false)
+        behandlingHentOgPersisterService.lagreEllerOppdater(behandling = behandling, sendTilDvh = false)
     }
 
     @Transactional
@@ -183,10 +183,10 @@ class BehandlingService(
     }
 
     fun lagreNyOgDeaktiverGammelBehandling(behandling: Behandling): Behandling {
-        val aktivBehandling = behandlingHentOgPersisterService.hentAktivForFagsak(behandling.fagsak.id)
+        val aktivBehandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = behandling.fagsak.id)
 
         if (aktivBehandling != null) {
-            behandlingHentOgPersisterService.lagreOgFlush(aktivBehandling.also { it.aktiv = false })
+            behandlingHentOgPersisterService.lagreOgFlush(behandling = aktivBehandling.also { it.aktiv = false })
             saksstatistikkEventPublisher.publiserBehandlingsstatistikk(aktivBehandling.id)
         } else if (harAktivInfotrygdSak(behandling)) {
             throw FunksjonellFeil(
