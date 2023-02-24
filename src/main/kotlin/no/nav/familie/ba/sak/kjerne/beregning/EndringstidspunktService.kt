@@ -99,7 +99,7 @@ class EndringstidspunktService(
     fun finnEndringstidpunkForBehandlingGammel(behandlingId: Long): LocalDate {
         val nyBehandling = behandlingHentOgPersisterService.hent(behandlingId)
 
-        val sisteVedtattBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandlingId)
+        val sisteVedtattBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = nyBehandling.fagsak.id)
             ?: return TIDENES_MORGEN
 
         val nyeAndelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService
