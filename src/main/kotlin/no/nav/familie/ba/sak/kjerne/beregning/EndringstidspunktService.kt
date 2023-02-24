@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
-import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatOpphørUtils.utledOpphørsdatoForNåværendeBehandlingMedFallback
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelHentOgPersisterService
@@ -73,16 +72,9 @@ class EndringstidspunktService(
         val nåværendeVilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = inneværendeBehandlingId) ?: return null
         val forrigeVilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = forrigeBehandlingId) ?: return null
 
-        val nåværendeAndeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = inneværendeBehandlingId)
-        val forrigeAndeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = forrigeBehandlingId)
-        val nåværendeEndretAndeler = endretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandlingId = inneværendeBehandlingId)
-
-        val opphørstidspunkt = nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(forrigeAndeler, nåværendeEndretAndeler) ?: return null
-
         return EndringIVilkårsvurderingUtil.utledEndringstidspunktForVilkårsvurdering(
             nåværendePersonResultat = nåværendeVilkårsvurdering.personResultater,
-            forrigePersonResultat = forrigeVilkårsvurdering.personResultater,
-            opphørstidspunkt = opphørstidspunkt
+            forrigePersonResultat = forrigeVilkårsvurdering.personResultater
         )
     }
     private fun finnEndringstidspunktForEndretUtbetalingAndel(inneværendeBehandlingId: Long, forrigeBehandlingId: Long): YearMonth? {

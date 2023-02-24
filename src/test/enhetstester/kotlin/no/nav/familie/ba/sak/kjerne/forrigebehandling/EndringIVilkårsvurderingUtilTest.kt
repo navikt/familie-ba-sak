@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Uendelighet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
@@ -61,16 +62,14 @@ class EndringIVilkårsvurderingUtilTest {
 
         val perioderMedEndring = EndringIVilkårsvurderingUtil.lagEndringIVilkårsvurderingTidslinje(
             nåværendePersonResultat = setOf(lagPersonResultatFraVilkårResultater(vilkårResultater, aktør)),
-            forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(vilkårResultater, aktør)),
-            opphørstidspunkt = YearMonth.of(2020, 2)
+            forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(vilkårResultater, aktør))
         ).perioder().filter { it.innhold == true }
 
         Assertions.assertTrue(perioderMedEndring.isEmpty())
 
         val endringstidspunkt = EndringIVilkårsvurderingUtil.utledEndringstidspunktForVilkårsvurdering(
             nåværendePersonResultat = setOf(lagPersonResultatFraVilkårResultater(vilkårResultater, aktør)),
-            forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(vilkårResultater, aktør)),
-            opphørstidspunkt = YearMonth.of(2020, 2)
+            forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(vilkårResultater, aktør))
         )
 
         Assertions.assertNull(endringstidspunkt)
@@ -116,8 +115,7 @@ class EndringIVilkårsvurderingUtilTest {
 
         val perioderMedEndring = EndringIVilkårsvurderingUtil.lagEndringIVilkårsvurderingTidslinje(
             nåværendePersonResultat = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
-            forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
-            opphørstidspunkt = YearMonth.of(2020, 2)
+            forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør))
         ).perioder().filter { it.innhold == true }
 
         Assertions.assertEquals(1, perioderMedEndring.size)
@@ -126,8 +124,7 @@ class EndringIVilkårsvurderingUtilTest {
 
         val endringstidspunkt = EndringIVilkårsvurderingUtil.utledEndringstidspunktForVilkårsvurdering(
             nåværendePersonResultat = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
-            forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
-            opphørstidspunkt = YearMonth.of(2020, 2)
+            forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør))
         )
 
         Assertions.assertEquals(jan22, endringstidspunkt)
@@ -135,49 +132,42 @@ class EndringIVilkårsvurderingUtilTest {
 
     @Test
     fun `Endring i vilkårsvurdering - skal returnere periode med endring dersom det har oppstått splitt i vilkårsvurderingen`() {
-        val nåværendeVilkårResultat = setOf(
-            VilkårResultat(
-                personResultat = null,
-                vilkårType = Vilkår.BOSATT_I_RIKET,
-                resultat = Resultat.OPPFYLT,
-                periodeFom = jan22.førsteDagIInneværendeMåned(),
-                periodeTom = mai22.sisteDagIInneværendeMåned(),
-                begrunnelse = "begrunnelse",
-                behandlingId = 0,
-                utdypendeVilkårsvurderinger = listOf(
-                    UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
-                    UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP
-                ),
-                vurderesEtter = Regelverk.NASJONALE_REGLER
-            )
-        )
-
         val forrigeVilkårResultat = setOf(
             VilkårResultat(
                 personResultat = null,
                 vilkårType = Vilkår.BOSATT_I_RIKET,
                 resultat = Resultat.OPPFYLT,
                 periodeFom = jan22.førsteDagIInneværendeMåned(),
-                periodeTom = feb22.atDay(14),
-                begrunnelse = "begrunnelse",
+                periodeTom = null,
+                begrunnelse = "",
                 behandlingId = 0,
-                utdypendeVilkårsvurderinger = listOf(
-                    UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
-                    UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP
-                ),
+                utdypendeVilkårsvurderinger = listOf(),
+                vurderesEtter = Regelverk.NASJONALE_REGLER
+            )
+        )
+
+        val nåværendeVilkårResultat = setOf(
+            VilkårResultat(
+                personResultat = null,
+                vilkårType = Vilkår.BOSATT_I_RIKET,
+                resultat = Resultat.OPPFYLT,
+                periodeFom = jan22.førsteDagIInneværendeMåned(),
+                periodeTom = mai22.atDay(7),
+                begrunnelse = "",
+                behandlingId = 0,
+                utdypendeVilkårsvurderinger = listOf(),
                 vurderesEtter = Regelverk.NASJONALE_REGLER
             ),
             VilkårResultat(
                 personResultat = null,
                 vilkårType = Vilkår.BOSATT_I_RIKET,
                 resultat = Resultat.OPPFYLT,
-                periodeFom = feb22.atDay(15),
-                periodeTom = mai22.sisteDagIInneværendeMåned(),
+                periodeFom = mai22.atDay(8),
+                periodeTom = null,
                 begrunnelse = "begrunnelse",
                 behandlingId = 0,
                 utdypendeVilkårsvurderinger = listOf(
-                    UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP,
-                    UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE
+                    UtdypendeVilkårsvurdering.VURDERING_ANNET_GRUNNLAG
                 ),
                 vurderesEtter = Regelverk.NASJONALE_REGLER
             )
@@ -187,21 +177,19 @@ class EndringIVilkårsvurderingUtilTest {
 
         val perioderMedEndring = EndringIVilkårsvurderingUtil.lagEndringIVilkårsvurderingTidslinje(
             nåværendePersonResultat = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
-            forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
-            opphørstidspunkt = YearMonth.of(2020, 2)
+            forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør))
         ).perioder().filter { it.innhold == true }
 
         Assertions.assertEquals(1, perioderMedEndring.size)
-        Assertions.assertEquals(feb22, perioderMedEndring.single().fraOgMed.tilYearMonth())
-        Assertions.assertEquals(mai22, perioderMedEndring.single().tilOgMed.tilYearMonth())
+        Assertions.assertEquals(mai22, perioderMedEndring.single().fraOgMed.tilYearMonth())
+        Assertions.assertEquals(Uendelighet.FREMTID, perioderMedEndring.single().tilOgMed.uendelighet)
 
         val endringstidspunkt = EndringIVilkårsvurderingUtil.utledEndringstidspunktForVilkårsvurdering(
             nåværendePersonResultat = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
-            forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
-            opphørstidspunkt = YearMonth.of(2020, 2)
+            forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør))
         )
 
-        Assertions.assertEquals(feb22, endringstidspunkt)
+        Assertions.assertEquals(mai22, endringstidspunkt)
     }
 
     @Test
@@ -244,16 +232,14 @@ class EndringIVilkårsvurderingUtilTest {
 
         val perioderMedEndring = EndringIVilkårsvurderingUtil.lagEndringIVilkårsvurderingTidslinje(
             nåværendePersonResultat = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
-            forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
-            opphørstidspunkt = YearMonth.of(2020, 2)
+            forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør))
         ).perioder().filter { it.innhold == true }
 
         Assertions.assertTrue(perioderMedEndring.isEmpty())
 
         val endringstidspunkt = EndringIVilkårsvurderingUtil.utledEndringstidspunktForVilkårsvurdering(
             nåværendePersonResultat = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
-            forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
-            opphørstidspunkt = YearMonth.of(2020, 2)
+            forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør))
         )
 
         Assertions.assertNull(endringstidspunkt)

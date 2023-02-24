@@ -1003,8 +1003,7 @@ class BehandlingsresultatEndringUtilsTest {
 
         val erEndringIVilkårvurderingForPerson = erEndringIVilkårsvurdering(
             nåværendePersonResultat = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
-            forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
-            opphørstidspunkt = YearMonth.of(2020, 2)
+            forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør))
         )
 
         assertThat(erEndringIVilkårvurderingForPerson, Is(false))
@@ -1050,8 +1049,7 @@ class BehandlingsresultatEndringUtilsTest {
 
         val erEndringIVilkårvurderingForPerson = erEndringIVilkårsvurdering(
             nåværendePersonResultat = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
-            forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
-            opphørstidspunkt = YearMonth.of(2020, 2)
+            forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør))
         )
 
         assertThat(erEndringIVilkårvurderingForPerson, Is(true))
@@ -1096,8 +1094,7 @@ class BehandlingsresultatEndringUtilsTest {
 
         val erEndringIVilkårvurderingForPerson = erEndringIVilkårsvurdering(
             nåværendePersonResultat = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
-            forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
-            opphørstidspunkt = YearMonth.of(2020, 2)
+            forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør))
         )
 
         assertThat(erEndringIVilkårvurderingForPerson, Is(true))
@@ -1157,8 +1154,7 @@ class BehandlingsresultatEndringUtilsTest {
 
         val erEndringIVilkårvurderingForPerson = erEndringIVilkårsvurdering(
             nåværendePersonResultat = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
-            forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
-            opphørstidspunkt = YearMonth.of(2020, 2)
+            forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør))
         )
 
         assertThat(erEndringIVilkårvurderingForPerson, Is(true))
@@ -1204,8 +1200,7 @@ class BehandlingsresultatEndringUtilsTest {
 
         val erEndringIVilkårvurderingForPerson = erEndringIVilkårsvurdering(
             nåværendePersonResultat = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
-            forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
-            opphørstidspunkt = YearMonth.of(2020, 2)
+            forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør))
         )
 
         assertThat(erEndringIVilkårvurderingForPerson, Is(false))
