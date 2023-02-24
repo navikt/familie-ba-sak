@@ -177,6 +177,14 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
     fun finnAktivtFødselsnummerForBehandlinger(behandlingIder: List<Long>): List<Pair<Long, String>>
 
     @Query(
+        "SELECT new kotlin.Pair(b.id, i.tssEksternId) from Behandling b " +
+            "INNER JOIN Fagsak f ON f.id = b.fagsak.id " +
+            "INNER JOIN Institusjon i on i.id = f.institusjon.id " +
+            "where b.id in (:behandlingIder) AND f.institusjon IS NOT NULL AND f.status = 'LØPENDE' "
+    )
+    fun finnTssEksternIdForBehandlinger(behandlingIder: List<Long>): List<Pair<Long, String>>
+
+    @Query(
         """select distinct b.id from AndelTilkjentYtelse aty
             inner join Behandling b on b.id = aty.behandlingId
             where b.resultat not in (:ugyldigeResultater)
