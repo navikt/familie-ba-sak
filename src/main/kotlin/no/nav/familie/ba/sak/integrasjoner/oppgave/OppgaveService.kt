@@ -308,8 +308,7 @@ class OppgaveService(
         private val oppgavetyperSomBehandlesAvBaSak = listOf(
             Oppgavetype.BehandleSak,
             Oppgavetype.GodkjenneVedtak,
-            Oppgavetype.BehandleUnderkjentVedtak,
-            Oppgavetype.VurderLivshendelse
+            Oppgavetype.BehandleUnderkjentVedtak
         )
     }
 }
