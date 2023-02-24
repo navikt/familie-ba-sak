@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
-import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelseMedEndreteUtbetalinger
@@ -41,7 +40,7 @@ class EndringstidspunktUtilsTest {
     }
 
     @Test
-    fun `Skal returnere tidenes morgen som endringstidspunkt hvis det ikke finnes noen endringer i beløp, vilkårsvurdering, endret andeler eller kompetanse`() {
+    fun `Skal returnere tidenes ende som endringstidspunkt hvis det ikke finnes noen endringer i beløp, vilkårsvurdering, endret andeler eller kompetanse`() {
         val endringstidspunkt = utledEndringstidspunkt(
             endringstidspunktUtbetalingsbeløp = null,
             endringstidspunktKompetanse = null,
@@ -49,7 +48,7 @@ class EndringstidspunktUtilsTest {
             endringstidspunktEndretUtbetalingAndeler = null
         )
 
-        assertEquals(TIDENES_MORGEN, endringstidspunkt)
+        assertEquals(TIDENES_ENDE, endringstidspunkt)
     }
 
     @Test
