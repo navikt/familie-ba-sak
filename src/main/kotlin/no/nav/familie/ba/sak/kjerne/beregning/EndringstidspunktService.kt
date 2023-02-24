@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIKompetanseUtil
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIVilkårsvurderingUtil
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.YearMonth
@@ -43,12 +44,22 @@ class EndringstidspunktService(
 
         val endringstidspunktEndretUtbetalingAndeler = finnEndringstidspunktForEndretUtbetalingAndel(inneværendeBehandlingId = behandlingId, forrigeBehandlingId = forrigeBehandling.id)
 
-        return utledEndringstidspunkt(
+        val tidligsteEndringstidspunkt = utledEndringstidspunkt(
             endringstidspunktUtbetalingsbeløp = endringstidspunktUtbetalingsbeløp,
             endringstidspunktKompetanse = endringstidspunktKompetanse,
             endringstidspunktVilkårsvurdering = endringstidspunktVilkårsvurdering,
             endringstidspunktEndretUtbetalingAndeler = endringstidspunktEndretUtbetalingAndeler
         )
+
+        logger.info(
+            "Tidligste endringstidspunkt ble utledet til å være $tidligsteEndringstidspunkt." +
+                "Endringstidspunkt utbetalingsbeløp: $endringstidspunktUtbetalingsbeløp" +
+                "Endringstidspunkt kompetanse: $endringstidspunktKompetanse" +
+                "Endringstidspunkt vilkårsvurdering: $endringstidspunktVilkårsvurdering" +
+                "Endringstidspunkt endret utbetaling andeler: $endringstidspunktEndretUtbetalingAndeler"
+        )
+
+        return tidligsteEndringstidspunkt
     }
 
     private fun finnEndringstidspunktForBeløp(inneværendeBehandlingId: Long, forrigeBehandlingId: Long): YearMonth? {
@@ -124,5 +135,9 @@ class EndringstidspunktService(
             }
 
         return minOf(førsteEndringstidspunktFraAndelTilkjentYtelse, førsteEndringstidspunktIKompetansePerioder)
+    }
+
+    companion object {
+        private val logger = LoggerFactory.getLogger(EndringstidspunktService::class.java)
     }
 }
