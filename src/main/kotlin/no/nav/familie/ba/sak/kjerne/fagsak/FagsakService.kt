@@ -19,7 +19,6 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.integrasjoner.skyggesak.SkyggesakService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -147,7 +146,7 @@ class FagsakService(
         return versjonerAvBarn.map {
             it.personopplysningGrunnlag.behandlingId
         }.map {
-            behandlingRepository.finnBehandling(it).fagsak
+            behandlingHentOgPersisterService.hent(behandlingId = it).fagsak
         }.distinct()
     }
 
@@ -209,7 +208,7 @@ class FagsakService(
 
         val tilbakekrevingsbehandlinger =
             tilbakekrevingsbehandlingService.hentRestTilbakekrevingsbehandlinger((fagsakId))
-        val visningsbehandlinger = behandlingRepository.finnBehandlinger(fagsakId).map {
+        val visningsbehandlinger = behandlingHentOgPersisterService.hentBehandlinger(fagsakId = fagsakId).map {
             it.tilRestVisningBehandling(
                 vedtaksdato = vedtakRepository.findByBehandlingAndAktivOptional(it.id)?.vedtaksdato
             )
@@ -228,7 +227,7 @@ class FagsakService(
         val tilbakekrevingsbehandlinger =
             tilbakekrevingsbehandlingService.hentRestTilbakekrevingsbehandlinger((fagsakId))
         val utvidedeBehandlinger =
-            behandlingRepository.finnBehandlinger(fagsakId)
+            behandlingHentOgPersisterService.hentBehandlinger(fagsakId = fagsakId)
                 .map { utvidetBehandlingService.lagRestUtvidetBehandling(it.id) }
 
         return restBaseFagsak.tilRestFagsak(utvidedeBehandlinger, tilbakekrevingsbehandlinger)
@@ -237,16 +236,12 @@ class FagsakService(
     private fun lagRestBaseFagsak(fagsakId: Long): RestBaseFagsak {
         val fagsak = hentPåFagsakId(fagsakId = fagsakId)
 
-        val aktivBehandling = behandlingRepository.findByFagsakAndAktiv(fagsakId)
+        val aktivBehandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId)
 
-        val sistIverksatteBehandling =
-            Behandlingutils.hentSisteBehandlingSomErIverksatt(
-                iverksatteBehandlinger = behandlingRepository.finnIverksatteBehandlinger(
-                    fagsakId = fagsakId
-                )
-            )
+        val sistVedtatteBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsakId)
+
         val gjeldendeUtbetalingsperioder =
-            if (sistIverksatteBehandling != null) vedtaksperiodeService.hentUtbetalingsperioder(behandling = sistIverksatteBehandling) else emptyList()
+            if (sistVedtatteBehandling != null) vedtaksperiodeService.hentUtbetalingsperioder(behandling = sistVedtatteBehandling) else emptyList()
 
         return RestBaseFagsak(
             opprettetTidspunkt = fagsak.opprettetTidspunkt,
@@ -417,7 +412,7 @@ class FagsakService(
 
         personRepository.findByAktør(aktør).forEach { person: Person ->
             if (person.personopplysningGrunnlag.aktiv) {
-                val behandling = behandlingRepository.finnBehandling(person.personopplysningGrunnlag.behandlingId)
+                val behandling = behandlingHentOgPersisterService.hent(behandlingId = person.personopplysningGrunnlag.behandlingId)
                 if (behandling.aktiv && !behandling.fagsak.arkivert && !assosierteFagsakDeltagerMap.containsKey(
                         behandling.fagsak.id
                     )
@@ -498,7 +493,7 @@ class FagsakService(
 
         val behandlingerMedLøpendeAndeler = løpendeAndeler
             .map { it.behandlingId }.toSet()
-            .map { behandlingRepository.finnBehandling(it) }
+            .map { behandlingHentOgPersisterService.hent(behandlingId = it) }
 
         val behandlingerSomErSisteIverksattePåFagsak = behandlingerMedLøpendeAndeler.filter { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(it.fagsak.id) == it }
 
