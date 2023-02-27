@@ -175,8 +175,6 @@ class StartSatsendring(
     fun kanGjennomføreSatsendringManuelt(fagsakId: Long): Boolean {
         val sisteIverksatteBehandling = behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
 
-
-
         return sisteIverksatteBehandling != null && !autovedtakSatsendringService.harAlleredeNySats(
             sisteIverksettBehandlingsId = sisteIverksatteBehandling.id,
             satstidspunkt = SATSENDRINGMÅNED_2023
