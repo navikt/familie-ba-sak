@@ -5,14 +5,19 @@ import no.nav.familie.ba.sak.common.KONTAKT_TEAMET_SUFFIX
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.harLøpendeUtbetaling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 
 fun Utbetalingsoppdrag.valider(
     behandlingsresultat: Behandlingsresultat,
-    erEndreMigreringsdatoBehandling: Boolean = false
+    behandlingÅrsak: BehandlingÅrsak
 ) {
-    if (this.utbetalingsperiode.isNotEmpty() && behandlingsresultat == Behandlingsresultat.FORTSATT_INNVILGET && !erEndreMigreringsdatoBehandling) {
+    if (this.utbetalingsperiode.isNotEmpty() &&
+        behandlingsresultat == Behandlingsresultat.FORTSATT_INNVILGET &&
+        behandlingÅrsak != BehandlingÅrsak.ENDRE_MIGRERINGSDATO &&
+        behandlingÅrsak != BehandlingÅrsak.TEKNISK_ENDRING
+    ) {
         throw FunksjonellFeil("Behandling har resultat fortsatt innvilget, men det finnes utbetalingsperioder som ifølge systemet skal endres. $KONTAKT_TEAMET_SUFFIX")
     } else if (this.utbetalingsperiode.isEmpty()) {
         throw FunksjonellFeil(
@@ -27,9 +32,13 @@ fun Utbetalingsoppdrag.valider(
     behandlingsresultat: Behandlingsresultat,
     behandlingskategori: BehandlingKategori,
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-    erEndreMigreringsdatoBehandling: Boolean = false
+    behandlingÅrsak: BehandlingÅrsak
 ) {
-    if (this.utbetalingsperiode.isNotEmpty() && behandlingsresultat == Behandlingsresultat.FORTSATT_INNVILGET && !erEndreMigreringsdatoBehandling) {
+    if (this.utbetalingsperiode.isNotEmpty() &&
+        behandlingsresultat == Behandlingsresultat.FORTSATT_INNVILGET &&
+        behandlingÅrsak != BehandlingÅrsak.ENDRE_MIGRERINGSDATO &&
+        behandlingÅrsak != BehandlingÅrsak.TEKNISK_ENDRING
+    ) {
         throw FunksjonellFeil("Behandling har resultat fortsatt innvilget, men det finnes utbetalingsperioder som ifølge systemet skal endres. $KONTAKT_TEAMET_SUFFIX")
     } else if (this.utbetalingsperiode.isEmpty() &&
         !kanHaNullutbetaling(behandlingskategori, andelerTilkjentYtelse)

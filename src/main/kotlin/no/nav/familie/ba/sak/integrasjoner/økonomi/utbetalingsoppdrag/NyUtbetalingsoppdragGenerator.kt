@@ -15,7 +15,6 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.sisteAndelPerK
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.sisteBeståendeAndelPerKjede
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
@@ -139,7 +138,7 @@ class NyUtbetalingsoppdragGenerator {
                 behandlingskategori = vedtak.behandling.kategori,
                 // her må vi sende alle andeler slik at det valideres for nullutbetalinger også
                 andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.toList(),
-                erEndreMigreringsdatoBehandling = vedtak.behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO
+                behandlingÅrsak = vedtak.behandling.opprettetÅrsak
             )
         }
 

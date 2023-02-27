@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.medDifferanseberegning
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
@@ -33,7 +34,7 @@ internal class UtbetalingsoppdragValidatorTest {
                         beløp = 1054
                     )
                 ),
-                erEndreMigreringsdatoBehandling = false
+                behandlingÅrsak = BehandlingÅrsak.SØKNAD
             )
         }
     }
@@ -52,7 +53,7 @@ internal class UtbetalingsoppdragValidatorTest {
                         beløp = 0
                     ).medDifferanseberegning(BigDecimal("10"))
                 ),
-                erEndreMigreringsdatoBehandling = false
+                behandlingÅrsak = BehandlingÅrsak.SØKNAD
             )
         }
     }
@@ -71,7 +72,7 @@ internal class UtbetalingsoppdragValidatorTest {
                         beløp = 1054
                     )
                 ),
-                erEndreMigreringsdatoBehandling = false
+                behandlingÅrsak = BehandlingÅrsak.SØKNAD
             )
         }
     }
@@ -105,7 +106,7 @@ internal class UtbetalingsoppdragValidatorTest {
                         beløp = 1024
                     ).medDifferanseberegning(BigDecimal("10"))
                 ),
-                erEndreMigreringsdatoBehandling = false
+                behandlingÅrsak = BehandlingÅrsak.SØKNAD
             )
         }
     }

@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -21,7 +22,10 @@ class UtbetalingsoppdragUtilsTest {
                 saksbehandlerId = "",
                 saksnummer = "",
                 utbetalingsperiode = emptyList()
-            ).valider(behandlingsresultat = Behandlingsresultat.FORTSATT_INNVILGET)
+            ).valider(
+                behandlingsresultat = Behandlingsresultat.FORTSATT_INNVILGET,
+                behandlingÅrsak = BehandlingÅrsak.SØKNAD
+            )
         }
         assertTrue(
             feil.message!!.contains("Utbetalingsoppdraget inneholder ingen utbetalingsperioder")
@@ -39,7 +43,10 @@ class UtbetalingsoppdragUtilsTest {
                 saksbehandlerId = "",
                 saksnummer = "",
                 utbetalingsperiode = listOf(mockk())
-            ).valider(behandlingsresultat = Behandlingsresultat.FORTSATT_INNVILGET)
+            ).valider(
+                behandlingsresultat = Behandlingsresultat.FORTSATT_INNVILGET,
+                behandlingÅrsak = BehandlingÅrsak.SØKNAD
+            )
         }
         assertTrue(
             feil.message!!.contains("Behandling har resultat fortsatt innvilget")
