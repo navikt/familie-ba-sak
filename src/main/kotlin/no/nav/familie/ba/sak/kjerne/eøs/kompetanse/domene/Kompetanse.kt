@@ -93,13 +93,13 @@ data class Kompetanse(
         )
 
     fun validerFelterErSatt() {
-        if (!erFelterSatt()
+        if (!erObligatoriskeFelterSatt()
         ) {
             throw Feil("Kompetanse mangler verdier")
         }
     }
 
-    fun erFelterSatt() = søkersAktivitet != null &&
+    fun erObligatoriskeFelterSatt() = søkersAktivitet != null &&
         annenForeldersAktivitet != null &&
         søkersAktivitetsland != null &&
         barnetsBostedsland != null &&
