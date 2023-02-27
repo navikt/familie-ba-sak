@@ -96,7 +96,7 @@ internal class UtbetalingsoppdragValidatorTest {
                         tom = inneværendeMåned(),
                         beløp = 1024
                     ).medDifferanseberegning(BigDecimal("10"))
-                ),
+                )
             )
         }
     }

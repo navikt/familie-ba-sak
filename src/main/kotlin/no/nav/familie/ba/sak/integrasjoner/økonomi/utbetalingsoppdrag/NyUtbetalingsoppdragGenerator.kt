@@ -136,7 +136,7 @@ class NyUtbetalingsoppdragGenerator {
             it.validerNullutbetaling(
                 behandlingskategori = vedtak.behandling.kategori,
                 // her må vi sende alle andeler slik at det valideres for nullutbetalinger også
-                andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.toList(),
+                andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.toList()
             )
         }
 
