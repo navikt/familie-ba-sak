@@ -154,10 +154,10 @@ class ØkonomiService(
             )
 
             if (!erSimulering && (
-                oppdatertBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT || behandlingHentOgPersisterService.hent(
+                    oppdatertBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT || behandlingHentOgPersisterService.hent(
                         oppdatertBehandling.id
                     ).resultat == Behandlingsresultat.OPPHØRT
-                )
+                    )
             ) {
                 utbetalingsoppdrag.validerOpphørsoppdrag()
             }
@@ -165,14 +165,16 @@ class ØkonomiService(
             utbetalingsoppdrag
         }
 
-        return utbetalingsoppdrag.also {
-            if (skalValideres) {
-                it.validerNullutbetaling(
-                    behandlingskategori = vedtak.behandling.kategori,
-                    andelerTilkjentYtelse = beregningService.hentAndelerTilkjentYtelseForBehandling(vedtak.behandling.id)
-                )
-            }
+        if (skalValideres) {
+            utbetalingsoppdrag.validerNullutbetaling(
+                behandlingskategori = vedtak.behandling.kategori,
+                andelerTilkjentYtelse = beregningService.hentAndelerTilkjentYtelseForBehandling(vedtak.behandling.id)
+            )
         }
+
+        opprettAdvarselLoggVedForstattInnvilgetMedUtbetaling(utbetalingsoppdrag, vedtak.behandling)
+
+        return utbetalingsoppdrag
     }
 
     private fun beregnOmMigreringsDatoErEndret(behandling: Behandling, forrigeTilstandFraDato: YearMonth?): YearMonth? {

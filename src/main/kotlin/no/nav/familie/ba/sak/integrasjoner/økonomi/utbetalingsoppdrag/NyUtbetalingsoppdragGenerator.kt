@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForUtbetalingsoppdrag
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForUtbetalingsoppdragFactory
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsperiodeMal
+import no.nav.familie.ba.sak.integrasjoner.økonomi.opprettAdvarselLoggVedForstattInnvilgetMedUtbetaling
 import no.nav.familie.ba.sak.integrasjoner.økonomi.pakkInnForUtbetaling
 import no.nav.familie.ba.sak.integrasjoner.økonomi.validerNullutbetaling
 import no.nav.familie.ba.sak.integrasjoner.økonomi.validerOpphørsoppdrag
@@ -132,13 +133,13 @@ class NyUtbetalingsoppdragGenerator {
         val erBehandlingOpphørt = vedtak.behandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT ||
             vedtak.behandling.resultat == Behandlingsresultat.OPPHØRT
         if (!vedtakMedTilkjentYtelse.erSimulering && erBehandlingOpphørt) utbetalingsoppdrag.validerOpphørsoppdrag()
-        utbetalingsoppdrag.also {
-            it.validerNullutbetaling(
-                behandlingskategori = vedtak.behandling.kategori,
-                // her må vi sende alle andeler slik at det valideres for nullutbetalinger også
-                andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.toList()
-            )
-        }
+
+        utbetalingsoppdrag.validerNullutbetaling(
+            behandlingskategori = vedtak.behandling.kategori,
+            andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.toList()
+        )
+
+        opprettAdvarselLoggVedForstattInnvilgetMedUtbetaling(utbetalingsoppdrag, vedtak.behandling)
 
         // oppdater tilkjentYtlese med andelerTilkjentYTelser og utbetalingsoppdrag
         return tilkjentYtelse.copy(
