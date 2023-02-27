@@ -90,7 +90,7 @@ class BeregningService(
      * Denne metoden henter alle relaterte behandlinger på en person.
      * Per fagsak henter man tilkjent ytelse fra:
      * 1. Behandling som er til godkjenning
-     * 2. Siste behandling som er iverksatt
+     * 2. Siste behandling som er vedtatt
      * 3. Filtrer bort behandlinger der barnet ikke lenger finnes
      */
     fun hentRelevanteTilkjentYtelserForBarn(
