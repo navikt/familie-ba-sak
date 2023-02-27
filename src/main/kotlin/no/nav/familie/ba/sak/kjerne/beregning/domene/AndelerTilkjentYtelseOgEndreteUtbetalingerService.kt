@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.beregning.domene
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils.skalAndelerSlåsSammen
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerPeriodeInnenforTilkjentytelse
@@ -51,15 +50,13 @@ class AndelerTilkjentYtelseOgEndreteUtbetalingerService(
     private fun lagKombinator(behandlingId: Long) =
         AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId),
-            endretUtbetalingAndelRepository.findByBehandlingId(behandlingId),
-            featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER, false)
+            endretUtbetalingAndelRepository.findByBehandlingId(behandlingId)
         )
 }
 
 private class AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
     private val andelerTilkjentYtelse: Collection<AndelTilkjentYtelse>,
-    private val endretUtbetalingAndeler: Collection<EndretUtbetalingAndel>,
-    private val brukFrikobleteAndelerOgEndringer: Boolean
+    private val endretUtbetalingAndeler: Collection<EndretUtbetalingAndel>
 ) {
     fun lagAndelerMedEndringer(): List<AndelTilkjentYtelseMedEndreteUtbetalinger> {
         return andelerTilkjentYtelse.map { lagAndelMedEndringer(it) }
@@ -75,8 +72,7 @@ private class AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
 
         return AndelTilkjentYtelseMedEndreteUtbetalinger(
             andelTilkjentYtelse,
-            endreteUtbetalinger,
-            brukFrikobleteAndelerOgEndringer
+            endreteUtbetalinger
         )
     }
 
@@ -86,8 +82,7 @@ private class AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
 
         return EndretUtbetalingAndelMedAndelerTilkjentYtelse(
             endretUtbetalingAndel,
-            andeler,
-            brukFrikobleteAndelerOgEndringer
+            andeler
         )
     }
 
@@ -103,8 +98,7 @@ private class AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
 
 data class AndelTilkjentYtelseMedEndreteUtbetalinger internal constructor(
     private val andelTilkjentYtelse: AndelTilkjentYtelse,
-    private val endreteUtbetalingerAndeler: Collection<EndretUtbetalingAndel>,
-    private val brukFrikobleteAndelerOgEndringer: Boolean
+    private val endreteUtbetalingerAndeler: Collection<EndretUtbetalingAndel>
 ) {
     val periodeOffset get() = andelTilkjentYtelse.periodeOffset
     val sats get() = andelTilkjentYtelse.sats
@@ -122,8 +116,7 @@ data class AndelTilkjentYtelseMedEndreteUtbetalinger internal constructor(
         assert(skalAndelerSlåsSammen(this, naboAndel))
         return AndelTilkjentYtelseMedEndreteUtbetalinger(
             andelTilkjentYtelse.copy(stønadTom = naboAndel.stønadTom),
-            endreteUtbetalinger,
-            brukFrikobleteAndelerOgEndringer
+            endreteUtbetalinger
         )
     }
 
@@ -131,12 +124,7 @@ data class AndelTilkjentYtelseMedEndreteUtbetalinger internal constructor(
     val stønadTom get() = andelTilkjentYtelse.stønadTom
     val prosent get() = andelTilkjentYtelse.prosent
     val andel get() = andelTilkjentYtelse
-    val endreteUtbetalinger =
-        if (brukFrikobleteAndelerOgEndringer) {
-            endreteUtbetalingerAndeler
-        } else {
-            andel.endretUtbetalingAndeler
-        }
+    val endreteUtbetalinger = endreteUtbetalingerAndeler
 
     companion object {
         fun utenEndringer(andelTilkjentYtelse: AndelTilkjentYtelse): AndelTilkjentYtelseMedEndreteUtbetalinger {
@@ -148,8 +136,7 @@ data class AndelTilkjentYtelseMedEndreteUtbetalinger internal constructor(
 
             return AndelTilkjentYtelseMedEndreteUtbetalinger(
                 andelTilkjentYtelse = andelTilkjentYtelse,
-                endreteUtbetalingerAndeler = emptyList(),
-                brukFrikobleteAndelerOgEndringer = true // Likegyldig hvilken verdi denne har. I begge tilfeller returneres tom liste.
+                endreteUtbetalingerAndeler = emptyList()
             )
         }
     }
@@ -157,8 +144,7 @@ data class AndelTilkjentYtelseMedEndreteUtbetalinger internal constructor(
 
 data class EndretUtbetalingAndelMedAndelerTilkjentYtelse(
     val endretUtbetalingAndel: EndretUtbetalingAndel,
-    private val andeler: List<AndelTilkjentYtelse>,
-    internal val brukFrikobleteAndelerOgEndringer: Boolean
+    private val andeler: List<AndelTilkjentYtelse>
 ) {
     fun overlapperMed(månedPeriode: MånedPeriode) = endretUtbetalingAndel.overlapperMed(månedPeriode)
     fun årsakErDeltBosted() = endretUtbetalingAndel.årsakErDeltBosted()
@@ -174,12 +160,7 @@ data class EndretUtbetalingAndelMedAndelerTilkjentYtelse(
     val id get() = endretUtbetalingAndel.id
     val fom get() = endretUtbetalingAndel.fom
     val tom get() = endretUtbetalingAndel.tom
-    val andelerTilkjentYtelse =
-        if (brukFrikobleteAndelerOgEndringer) {
-            andeler
-        } else {
-            endretUtbetalingAndel.andelTilkjentYtelser
-        }
+    val andelerTilkjentYtelse = andeler
 }
 
 /**
@@ -189,15 +170,11 @@ data class EndretUtbetalingAndelMedAndelerTilkjentYtelse(
  */
 private fun EndretUtbetalingAndelMedAndelerTilkjentYtelse.utenAndelerVedValideringsfeil(
     validator: () -> Unit
-) = if (brukFrikobleteAndelerOgEndringer == true) {
-    try {
-        validator()
-        this
-    } catch (e: FunksjonellFeil) {
-        this.copy(andeler = emptyList())
-    }
-} else {
+) = try {
+    validator()
     this
+} catch (e: FunksjonellFeil) {
+    this.copy(andeler = emptyList())
 }
 
 /**
@@ -209,6 +186,5 @@ fun AndelTilkjentYtelse.medEndring(
     endretUtbetalingAndelMedAndelerTilkjentYtelse: EndretUtbetalingAndelMedAndelerTilkjentYtelse
 ) = AndelTilkjentYtelseMedEndreteUtbetalinger(
     andelTilkjentYtelse = this,
-    endreteUtbetalingerAndeler = listOf(endretUtbetalingAndelMedAndelerTilkjentYtelse.endretUtbetalingAndel),
-    brukFrikobleteAndelerOgEndringer = endretUtbetalingAndelMedAndelerTilkjentYtelse.brukFrikobleteAndelerOgEndringer
+    endreteUtbetalingerAndeler = listOf(endretUtbetalingAndelMedAndelerTilkjentYtelse.endretUtbetalingAndel)
 )
