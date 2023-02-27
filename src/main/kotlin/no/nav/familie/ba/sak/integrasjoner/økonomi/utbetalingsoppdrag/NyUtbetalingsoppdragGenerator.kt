@@ -82,7 +82,7 @@ class NyUtbetalingsoppdragGenerator {
         // Setter offsettet til andeler som ikke er endret i denne behandlingen til
         // offsettet de hadde i forrige behandling.
         // NB! Denne funksjonen muterer på tilkjent ytelse i databasen.
-        if (andelerTilkjentYtelse.isNotEmpty() && !forrigeAndeler.isNullOrEmpty()) {
+        if (andelerTilkjentYtelse.isNotEmpty() && forrigeAndeler.isNotEmpty()) {
             ØkonomiUtils.oppdaterBeståendeAndelerMedOffset(
                 oppdaterteKjeder = kjedeinndelteAndeler(andelerTilkjentYtelse),
                 forrigeKjeder = kjedeinndelteAndeler(forrigeAndeler)
