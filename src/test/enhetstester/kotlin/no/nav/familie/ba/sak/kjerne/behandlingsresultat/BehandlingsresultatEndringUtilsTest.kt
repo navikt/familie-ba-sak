@@ -1102,50 +1102,41 @@ class BehandlingsresultatEndringUtilsTest {
 
     @Test
     fun `Endring i vilkårsvurdering - skal returnere true dersom det har oppstått splitt i vilkårsvurderingen`() {
-        val nåværendeVilkårResultat = setOf(
-            VilkårResultat(
-                personResultat = null,
-                vilkårType = Vilkår.BOSATT_I_RIKET,
-                resultat = Resultat.OPPFYLT,
-                periodeFom = LocalDate.of(2015, 1, 1),
-                periodeTom = LocalDate.of(2020, 1, 1),
-                begrunnelse = "begrunnelse",
-                behandlingId = 0,
-                utdypendeVilkårsvurderinger = listOf(
-                    UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
-                    UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP
-                ),
-                vurderesEtter = Regelverk.NASJONALE_REGLER
-            )
-        )
-
         val forrigeVilkårResultat = setOf(
             VilkårResultat(
                 personResultat = null,
                 vilkårType = Vilkår.BOSATT_I_RIKET,
                 resultat = Resultat.OPPFYLT,
-                periodeFom = LocalDate.of(2015, 1, 1),
-                periodeTom = LocalDate.of(2019, 1, 14),
-                begrunnelse = "begrunnelse",
+                periodeFom = jan22.førsteDagIInneværendeMåned(),
+                periodeTom = null,
+                begrunnelse = "",
                 behandlingId = 0,
-                utdypendeVilkårsvurderinger = listOf(
-                    UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
-                    UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP
-                ),
+                utdypendeVilkårsvurderinger = listOf(),
+                vurderesEtter = Regelverk.NASJONALE_REGLER
+            )
+        )
+
+        val nåværendeVilkårResultat = setOf(
+            VilkårResultat(
+                personResultat = null,
+                vilkårType = Vilkår.BOSATT_I_RIKET,
+                resultat = Resultat.OPPFYLT,
+                periodeFom = jan22.førsteDagIInneværendeMåned(),
+                periodeTom = mai22.atDay(7),
+                begrunnelse = "",
+                behandlingId = 0,
+                utdypendeVilkårsvurderinger = listOf(),
                 vurderesEtter = Regelverk.NASJONALE_REGLER
             ),
             VilkårResultat(
                 personResultat = null,
                 vilkårType = Vilkår.BOSATT_I_RIKET,
                 resultat = Resultat.OPPFYLT,
-                periodeFom = LocalDate.of(2019, 1, 15),
-                periodeTom = LocalDate.of(2020, 1, 1),
-                begrunnelse = "begrunnelse",
+                periodeFom = mai22.atDay(8),
+                periodeTom = null,
+                begrunnelse = "",
                 behandlingId = 0,
-                utdypendeVilkårsvurderinger = listOf(
-                    UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP,
-                    UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE
-                ),
+                utdypendeVilkårsvurderinger = listOf(),
                 vurderesEtter = Regelverk.NASJONALE_REGLER
             )
         )
