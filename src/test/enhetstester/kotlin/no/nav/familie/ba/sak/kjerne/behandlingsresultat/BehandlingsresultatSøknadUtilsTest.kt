@@ -1,5 +1,4 @@
 package no.nav.familie.ba.sak.kjerne.behandlingsresultat
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
@@ -376,7 +375,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
     fun `kombinerSøknadsresultater skal kaste feil dersom lista ikke inneholder noe som helst`() {
         val listeMedIngenSøknadsresultat = listOf<Søknadsresultat>()
 
-        val feil = assertThrows<Feil> { listeMedIngenSøknadsresultat.kombinerSøknadsresultater() }
+        val feil = assertThrows<FunksjonellFeil> { listeMedIngenSøknadsresultat.kombinerSøknadsresultater() }
 
         assertThat(feil.message, Is("Klarer ikke utlede søknadsresultat. Finner ingen resultater."))
     }
