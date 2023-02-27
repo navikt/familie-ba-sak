@@ -39,6 +39,8 @@ interface IVedtakBegrunnelse {
     }
 }
 
+fun IVedtakBegrunnelse.erAvslagUregistrerteBarnBegrunnelse() = this in setOf(Standardbegrunnelse.AVSLAG_UREGISTRERT_BARN, EØSStandardbegrunnelse.AVSLAG_EØS_UREGISTRERT_BARN)
+
 class IVedtakBegrunnelseDeserializer : StdDeserializer<List<IVedtakBegrunnelse>>(List::class.java) {
     override fun deserialize(jsonParser: JsonParser?, p1: DeserializationContext?): List<IVedtakBegrunnelse> {
         val node: ArrayNode = jsonParser!!.codec.readTree(jsonParser)
