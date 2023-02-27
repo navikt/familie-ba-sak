@@ -1,9 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import io.micrometer.core.instrument.Metrics
-import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.UtbetalingsoppdragService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.kjedeinndelteAndeler
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.oppdaterBeståendeAndelerMedOffset
@@ -26,8 +24,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.math.BigDecimal
-import java.time.LocalDate
 import java.time.YearMonth
 
 @Service
@@ -37,7 +33,6 @@ class ØkonomiService(
     private val beregningService: BeregningService,
     private val utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator,
     private val behandlingService: BehandlingService,
-    private val featureToggleService: FeatureToggleService,
     private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository
 
@@ -213,10 +208,3 @@ private fun Utbetalingsoppdrag.skalIverksettesMotOppdrag(): Boolean = utbetaling
 
 private fun TilkjentYtelse.skalIverksettesMotOppdrag(): Boolean =
     this.utbetalingsoppdrag()?.skalIverksettesMotOppdrag() ?: false
-
-fun Utbetalingsoppdrag.harLøpendeUtbetaling() =
-    this.utbetalingsperiode.any {
-        it.opphør == null &&
-            it.sats > BigDecimal.ZERO &&
-            it.vedtakdatoTom > LocalDate.now().sisteDagIMåned()
-    }
