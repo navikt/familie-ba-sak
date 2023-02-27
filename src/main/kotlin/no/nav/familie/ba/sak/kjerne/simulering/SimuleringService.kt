@@ -45,7 +45,7 @@ class SimuleringService(
     private val simulert = Metrics.counter("familie.ba.sak.oppdrag.simulert")
 
     fun hentSimuleringFraFamilieOppdrag(vedtak: Vedtak): DetaljertSimuleringResultat? {
-        if (vedtak.behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET ||
+        if (!beregningService.erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(vedtak.behandling) ||
             vedtak.behandling.resultat == Behandlingsresultat.AVSLÅTT ||
             beregningService.erAlleUtbetalingsperioderPåNullKronerIDenneOgForrigeBehandling(vedtak.behandling)
         ) {
