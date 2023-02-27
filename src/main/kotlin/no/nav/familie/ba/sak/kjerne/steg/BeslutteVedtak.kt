@@ -152,7 +152,7 @@ class BeslutteVedtak(
     private fun sjekkOmBehandlingSkalIverksettesOgHentNesteSteg(behandling: Behandling): StegType {
         val nesteSteg = if (featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_BEREGNE_BEHANDLINGSRESULTAT)) {
             val endringerIUtbetaling =
-                beregningService.erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling)
+                beregningService.hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling)
 
             hentNesteStegGittEndringerIUtbetaling(behandling, endringerIUtbetaling)
         } else {

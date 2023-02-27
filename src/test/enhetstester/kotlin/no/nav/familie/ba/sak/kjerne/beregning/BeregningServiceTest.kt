@@ -940,7 +940,8 @@ class BeregningServiceTest {
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) } returns nåværendeAndeler
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns forrigeAndeler
 
-        val erEndringIUtbetaling = beregningService.erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(nåværendeBehandling)
+        val erEndringIUtbetaling =
+            beregningService.hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(nåværendeBehandling)
 
         Assertions.assertEquals(erEndringIUtbetaling, EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING)
 
@@ -975,7 +976,8 @@ class BeregningServiceTest {
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) } returns emptyList()
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns forrigeAndeler
 
-        val erEndringIUtbetaling = beregningService.erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(nåværendeBehandling)
+        val erEndringIUtbetaling =
+            beregningService.hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(nåværendeBehandling)
 
         Assertions.assertEquals(erEndringIUtbetaling, EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING)
 
@@ -1010,7 +1012,8 @@ class BeregningServiceTest {
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) } returns nåværendeAndeler
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns emptyList()
 
-        val erEndringIUtbetaling = beregningService.erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(nåværendeBehandling)
+        val erEndringIUtbetaling =
+            beregningService.hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(nåværendeBehandling)
 
         Assertions.assertEquals(erEndringIUtbetaling, EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING)
 
@@ -1045,7 +1048,8 @@ class BeregningServiceTest {
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) } returns nåværendeAndeler
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns emptyList()
 
-        val erEndringIUtbetaling = beregningService.erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(nåværendeBehandling)
+        val erEndringIUtbetaling =
+            beregningService.hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(nåværendeBehandling)
 
         Assertions.assertEquals(erEndringIUtbetaling, EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING)
 
@@ -1095,7 +1099,8 @@ class BeregningServiceTest {
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) } returns nåværendeAndeler
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns forrigeAndeler
 
-        val erEndringIUtbetaling = beregningService.erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(nåværendeBehandling)
+        val erEndringIUtbetaling =
+            beregningService.hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(nåværendeBehandling)
 
         Assertions.assertEquals(erEndringIUtbetaling, EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING)
 
