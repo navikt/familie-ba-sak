@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForUtbeta
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForUtbetalingsoppdragFactory
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsperiodeMal
 import no.nav.familie.ba.sak.integrasjoner.økonomi.pakkInnForUtbetaling
-import no.nav.familie.ba.sak.integrasjoner.økonomi.valider
+import no.nav.familie.ba.sak.integrasjoner.økonomi.validerNullutbetaling
 import no.nav.familie.ba.sak.integrasjoner.økonomi.validerOpphørsoppdrag
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.SMÅBARNSTILLEGG_SUFFIX
@@ -15,7 +15,6 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.sisteAndelPerK
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.sisteBeståendeAndelPerKjede
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
@@ -34,7 +33,7 @@ class NyUtbetalingsoppdragGenerator {
      * Ved opphør sendes kun siste utbetalingsperiode (med opphørsdato).
      *
      * @param[vedtakMedTilkjentYtelse] tilpasset objekt som inneholder tilkjentytelse,og andre nødvendige felter som trenges for å lage utbetalingsoppdrag
-     * @param[forrigeTilkjentYtelser] forrige tilkjentYtelser
+     * @param[forrigeTilkjentYtelse] forrige tilkjentYtelser
      * @return oppdatert TilkjentYtelse som inneholder generert utbetalingsoppdrag
      */
     internal fun lagTilkjentYtelseMedUtbetalingsoppdrag(
@@ -134,12 +133,10 @@ class NyUtbetalingsoppdragGenerator {
             vedtak.behandling.resultat == Behandlingsresultat.OPPHØRT
         if (!vedtakMedTilkjentYtelse.erSimulering && erBehandlingOpphørt) utbetalingsoppdrag.validerOpphørsoppdrag()
         utbetalingsoppdrag.also {
-            it.valider(
-                behandlingsresultat = vedtak.behandling.resultat,
+            it.validerNullutbetaling(
                 behandlingskategori = vedtak.behandling.kategori,
                 // her må vi sende alle andeler slik at det valideres for nullutbetalinger også
                 andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.toList(),
-                erEndreMigreringsdatoBehandling = vedtak.behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO
             )
         }
 
