@@ -95,9 +95,7 @@ class AutovedtakSatsendringService(
         }
 
         if (harUtbetalingerSomOverstiger100Prosent(sisteIverksatteBehandling)) {
-            satskjøringForFagsak.feiltype = "UTBETALING_OVER_100_PROSENT"
-            satskjøringRepository.save(satskjøringForFagsak)
-            return SatsendringSvar.FANT_OVER_100_PROSENT_UTBETALING
+            logger.warn("Det løper over 100% utbetaling på fagsak=${sisteIverksatteBehandling.fagsak.id}")
         }
 
         val behandlingEtterBehandlingsresultat =
@@ -243,7 +241,6 @@ class AutovedtakSatsendringService(
 }
 
 enum class SatsendringSvar(val melding: String) {
-    FANT_OVER_100_PROSENT_UTBETALING(melding = "Fant utbetaling over 100 prosent på barna"),
     SATSENDRING_KJØRT_OK(melding = "Satsendring kjørt OK"),
     SATSENDRING_ER_ALLEREDE_UTFØRT(melding = "Satsendring allerede utført for fagsak"),
     HAR_ALLEREDE_SISTE_SATS(melding = "Åpen behandling har allerede siste sats og vi lar den ligge."),

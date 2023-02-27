@@ -43,13 +43,13 @@ class SatsendringController(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER
         )
 
-        startSatsendring.opprettSatsendringSynkrontVedGammelSats(fagsakId)
+        startSatsendring.gjennomførSatsendringManuelt(fagsakId)
         return ResponseEntity.ok(Ressurs.success(Unit))
     }
 
     @GetMapping(path = ["/{fagsakId}/kan-kjore-satsendring"])
     fun kanKjøreSatsendringPåFagsak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<Boolean>> {
-        return ResponseEntity.ok(Ressurs.success(startSatsendring.kanStarteSatsendringPåFagsak(fagsakId)))
+        return ResponseEntity.ok(Ressurs.success(startSatsendring.kanGjennomføreSatsendringManuelt(fagsakId)))
     }
 
     @PostMapping(path = ["/kjorsatsendringForListeMedIdenter"])

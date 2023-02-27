@@ -526,7 +526,7 @@ internal class StartSatsendringTest {
         every { startSatsendring.kanStarteSatsendringPåFagsak(any()) } returns false
 
         assertThrows<Exception> {
-            startSatsendring.opprettSatsendringSynkrontVedGammelSats(0L)
+            startSatsendring.gjennomførSatsendringManuelt(0L)
         }
     }
 
@@ -541,11 +541,11 @@ internal class StartSatsendringTest {
 
             when (it) {
                 SatsendringSvar.SATSENDRING_KJØRT_OK -> assertDoesNotThrow {
-                    startSatsendring.opprettSatsendringSynkrontVedGammelSats(0L)
+                    startSatsendring.gjennomførSatsendringManuelt(0L)
                 }
 
                 else -> assertThrows<Exception> {
-                    startSatsendring.opprettSatsendringSynkrontVedGammelSats(0L)
+                    startSatsendring.gjennomførSatsendringManuelt(0L)
                 }
             }
         }

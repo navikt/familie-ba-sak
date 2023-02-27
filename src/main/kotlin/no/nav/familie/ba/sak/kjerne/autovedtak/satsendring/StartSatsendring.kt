@@ -172,13 +172,23 @@ class StartSatsendring(
             )
     }
 
+    fun kanGjennomføreSatsendringManuelt(fagsakId: Long): Boolean {
+        val sisteIverksatteBehandling = behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
+
+
+
+        return sisteIverksatteBehandling != null && !autovedtakSatsendringService.harAlleredeNySats(
+            sisteIverksettBehandlingsId = sisteIverksatteBehandling.id,
+            satstidspunkt = SATSENDRINGMÅNED_2023
+        )
+    }
+
     @Transactional
-    fun opprettSatsendringSynkrontVedGammelSats(fagsakId: Long) {
-        if (!kanStarteSatsendringPåFagsak(fagsakId)) {
+    fun gjennomførSatsendringManuelt(fagsakId: Long) {
+        if (!kanGjennomføreSatsendringManuelt(fagsakId)) {
             throw Feil("Kan ikke starte Satsendring på fagsak=$fagsakId")
         }
 
-        satskjøringRepository.save(Satskjøring(fagsakId = fagsakId))
         val resultatSatsendringBehandling = autovedtakSatsendringService.kjørBehandling(
             SatsendringTaskDto(
                 fagsakId = fagsakId,
@@ -188,12 +198,6 @@ class StartSatsendring(
 
         when (resultatSatsendringBehandling) {
             SatsendringSvar.SATSENDRING_KJØRT_OK -> Unit
-
-            SatsendringSvar.FANT_OVER_100_PROSENT_UTBETALING ->
-                throw FunksjonellFeil(
-                    "Satsendring kan ikke gjennomføres fordi det er mer enn 100% utbetaling for barn i fagsaken.\n" +
-                        "Barnetrygden til en av mottakerne må revurderes."
-                )
 
             SatsendringSvar.SATSENDRING_ER_ALLEREDE_UTFØRT ->
                 throw FunksjonellFeil("Satsendring er allerede gjennomført på fagsaken. Last inn siden på nytt for å få opp siste behandling.")
