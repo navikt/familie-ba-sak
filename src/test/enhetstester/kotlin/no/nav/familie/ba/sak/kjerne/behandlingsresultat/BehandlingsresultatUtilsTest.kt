@@ -195,7 +195,7 @@ class BehandlingsresultatUtilsTest {
         endringsresultat: Endringsresultat,
         opphørsresultat: Opphørsresultat
     ) {
-        assertThrows<Feil> {
+        assertThrows<FunksjonellFeil> {
             BehandlingsresultatUtils.kombinerResultaterTilBehandlingsresultat(
                 søknadsresultat,
                 endringsresultat,
