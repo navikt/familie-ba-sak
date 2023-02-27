@@ -55,6 +55,8 @@ På **kompetanser** regner man endring som endring av:
 - Barnets bostedsland
 - Resultat (primærland/sekundærland osv.)
 
+Hvis forrige kompetanse ikke var fylt ut ordentlig (som skjer ved migrering + evt autovedtak) så blir det returnert ingen endring.
+
 For **endret utbetaling andeler** bryr vi oss kun om endringer av:
 - Avtaletidspunkt delt bosted
 - Årsak
