@@ -101,6 +101,7 @@ data class Kompetanse(
 
     fun erFelterSatt() = søkersAktivitet != null &&
         annenForeldersAktivitet != null &&
+        søkersAktivitetsland != null &&
         barnetsBostedsland != null &&
         resultat != null &&
         barnAktører.isNotEmpty()
