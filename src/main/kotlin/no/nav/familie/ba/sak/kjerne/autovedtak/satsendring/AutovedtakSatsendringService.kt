@@ -95,7 +95,7 @@ class AutovedtakSatsendringService(
         }
 
         if (harUtbetalingerSomOverstiger100Prosent(sisteIverksatteBehandling)) {
-            logger.warn("Det løper over 100% utbetaling på fagsak=${sisteIverksatteBehandling.fagsak.id}")
+            logger.warn("Det løper over 100 prosent utbetaling på fagsak=${sisteIverksatteBehandling.fagsak.id}")
         }
 
         val behandlingEtterBehandlingsresultat =
