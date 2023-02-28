@@ -243,6 +243,55 @@ class EndringIVilkårsvurderingUtilTest {
         Assertions.assertNull(endringstidspunkt)
     }
 
+    @Test
+    fun `Endring i vilkårsvurdering - skal ikke lage periode med endring hvis eneste endring er å sette obligatoriske utdypende vilkårsvurderinger`() {
+        val forrigeVilkårResultat = setOf(
+            VilkårResultat(
+                personResultat = null,
+                vilkårType = Vilkår.BOSATT_I_RIKET,
+                resultat = Resultat.OPPFYLT,
+                periodeFom = LocalDate.of(2015, 1, 1),
+                periodeTom = null,
+                begrunnelse = "migrering",
+                behandlingId = 0,
+                utdypendeVilkårsvurderinger = listOf(),
+                vurderesEtter = Regelverk.EØS_FORORDNINGEN
+            )
+        )
+
+        val nåværendeVilkårResultat = setOf(
+            VilkårResultat(
+                personResultat = null,
+                vilkårType = Vilkår.BOSATT_I_RIKET,
+                resultat = Resultat.OPPFYLT,
+                periodeFom = LocalDate.of(2015, 1, 1),
+                periodeTom = null,
+                begrunnelse = "migrering",
+                behandlingId = 0,
+                utdypendeVilkårsvurderinger = listOf(
+                    UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE
+                ),
+                vurderesEtter = Regelverk.EØS_FORORDNINGEN
+            )
+        )
+
+        val aktør = randomAktør()
+
+        val perioderMedEndring = EndringIVilkårsvurderingUtil.lagEndringIVilkårsvurderingTidslinje(
+            nåværendePersonResultat = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
+            forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør))
+        ).perioder().filter { it.innhold == true }
+
+        Assertions.assertTrue(perioderMedEndring.isEmpty())
+
+        val endringstidspunkt = EndringIVilkårsvurderingUtil.utledEndringstidspunktForVilkårsvurdering(
+            nåværendePersonResultat = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
+            forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør))
+        )
+
+        Assertions.assertNull(endringstidspunkt)
+    }
+
     private fun lagPersonResultatFraVilkårResultater(vilkårResultater: Set<VilkårResultat>, aktør: Aktør): PersonResultat {
         val vilkårsvurdering = lagVilkårsvurdering(behandling = lagBehandling(), resultat = Resultat.OPPFYLT, søkerAktør = randomAktør())
         val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = aktør)

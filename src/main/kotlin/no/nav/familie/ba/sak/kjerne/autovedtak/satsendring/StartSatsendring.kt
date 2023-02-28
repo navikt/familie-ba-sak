@@ -187,7 +187,6 @@ class StartSatsendring(
             throw Feil("Kan ikke starte Satsendring på fagsak=$fagsakId")
         }
 
-        satskjøringRepository.save(Satskjøring(fagsakId = fagsakId))
         val resultatSatsendringBehandling = autovedtakSatsendringService.kjørBehandling(
             SatsendringTaskDto(
                 fagsakId = fagsakId,
