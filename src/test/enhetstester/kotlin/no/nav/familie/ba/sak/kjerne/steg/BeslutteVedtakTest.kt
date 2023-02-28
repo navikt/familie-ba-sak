@@ -115,7 +115,6 @@ class BeslutteVedtakTest {
         every { beregningService.hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling) } returns EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
         mockkObject(FerdigstillOppgaver.Companion)
         every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
-        every { beregningService.erAlleUtbetalingsperioderPåNullKronerIDenneOgForrigeBehandling(behandling = behandling) } returns false
 
         val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
 
@@ -182,7 +181,6 @@ class BeslutteVedtakTest {
 
         val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
 
-        // verify(exactly = 1) { beregningService.erAlleUtbetalingsperioderPåNullKronerIDenneOgForrigeBehandling(behandling) }
         verify(exactly = 1) { beregningService.hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling) }
 
         verify(exactly = 1) {
