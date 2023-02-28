@@ -3,9 +3,9 @@ package no.nav.familie.ba.sak.kjerne.brev.domene
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.erAvslagUregistrerteBarnBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
 import java.time.LocalDate
 
@@ -21,8 +21,7 @@ data class BrevBegrunnelseGrunnlagMedPersoner(
         gjelderSøker: Boolean,
         barnasFødselsdatoer: List<LocalDate>
     ): Int {
-        val erAvslagUregistrerteBarn =
-            this.standardbegrunnelse == Standardbegrunnelse.AVSLAG_UREGISTRERT_BARN
+        val erAvslagUregistrerteBarn = standardbegrunnelse.erAvslagUregistrerteBarnBegrunnelse()
 
         return when {
             erAvslagUregistrerteBarn -> uregistrerteBarn.size
@@ -38,8 +37,7 @@ data class BrevBegrunnelseGrunnlagMedPersoner(
         personerPåBegrunnelse: List<MinimertRestPerson>,
         personerMedUtbetaling: List<MinimertRestPerson>
     ) = when {
-        this.standardbegrunnelse == Standardbegrunnelse.AVSLAG_UREGISTRERT_BARN ->
-            uregistrerteBarn.mapNotNull { it.fødselsdato }
+        this.standardbegrunnelse.erAvslagUregistrerteBarnBegrunnelse() -> uregistrerteBarn.mapNotNull { it.fødselsdato }
 
         gjelderSøker && this.vedtakBegrunnelseType != VedtakBegrunnelseType.ENDRET_UTBETALING && this.vedtakBegrunnelseType != VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING -> {
             if (this.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG) {
