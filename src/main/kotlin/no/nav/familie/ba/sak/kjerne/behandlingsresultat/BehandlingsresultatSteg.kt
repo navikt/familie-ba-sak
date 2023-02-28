@@ -171,7 +171,7 @@ class BehandlingsresultatSteg(
         return behandlingHentOgPersisterService.lagreEllerOppdater(behandling)
     }
 
-    private fun validerIngenEndringIUtbetalingEtterMigreringsdatoenTilForrigeIverksatteBehandling(behandling: Behandling) {
+    fun validerIngenEndringIUtbetalingEtterMigreringsdatoenTilForrigeIverksatteBehandling(behandling: Behandling) {
         val endringIUtbetalingTidslinje =
             beregningService.hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandlingTidslinje(behandling)
 
