@@ -160,6 +160,11 @@ class AvstemmingService(
                         relevanteAndeler.mapNotNull { it.kildeBehandlingId }
                     )
 
+                val tssEksternIdForBehandlinger =
+                    behandlingHentOgPersisterService.hentTssEksternIdForBehandlinger(
+                        relevanteAndeler.mapNotNull { it.kildeBehandlingId }
+                    )
+
                 relevanteAndeler.groupBy { it.kildeBehandlingId }
                     .map { (kildeBehandlingId, andeler) ->
                         if (kildeBehandlingId == null) {
@@ -174,7 +179,8 @@ class AvstemmingService(
                                     it.periodeOffset
                                         ?: error("Andel ${it.id} på iverksatt behandling på løpende fagsak mangler periodeOffset")
                                 }
-                                .toSet()
+                                .toSet(),
+                            utebetalesTil = tssEksternIdForBehandlinger[kildeBehandlingId]
                         )
                     }
             }.flatten()

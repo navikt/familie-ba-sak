@@ -63,9 +63,6 @@ class BehandlingsresultatSteg(
             personopplysningGrunnlag = personopplysningGrunnlag
         )
 
-        val toggleFrikobleAndelerOgEndringer =
-            featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER)
-
         val endreteUtbetalingerMedAndeler = andelerTilkjentYtelseOgEndreteUtbetalingerService
             .finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandling.id)
 
@@ -75,17 +72,15 @@ class BehandlingsresultatSteg(
             endretUtbetalingAndelerMedÅrsakDeltBosted = endreteUtbetalingerMedAndeler.filter { it.årsak == Årsak.DELT_BOSTED }
         )
 
-        if (toggleFrikobleAndelerOgEndringer) {
-            validerPeriodeInnenforTilkjentytelse(
-                endreteUtbetalingerMedAndeler.map { it.endretUtbetalingAndel },
-                tilkjentYtelse.andelerTilkjentYtelse
-            )
+        validerPeriodeInnenforTilkjentytelse(
+            endreteUtbetalingerMedAndeler.map { it.endretUtbetalingAndel },
+            tilkjentYtelse.andelerTilkjentYtelse
+        )
 
-            validerÅrsak(
-                endreteUtbetalingerMedAndeler.map { it.endretUtbetalingAndel },
-                vilkårService.hentVilkårsvurdering(behandling.id)
-            )
-        }
+        validerÅrsak(
+            endreteUtbetalingerMedAndeler.map { it.endretUtbetalingAndel },
+            vilkårService.hentVilkårsvurdering(behandling.id)
+        )
     }
 
     @Transactional

@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.AutovedtakSatsendringService.Companion.harAlleredeSisteSats
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -236,17 +235,29 @@ internal class StartSatsendringTest {
         val atyMedBareSmåbarnstillegg =
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(SatsType.SMA, behandling, SMÅBARNSTILLEGG)
 
-        assertThat(harAlleredeSisteSats(atyMedBareSmåbarnstillegg, SATSTIDSPUNKT)).isEqualTo(true)
+        assertThat(
+            AutovedtakSatsendringService.harAlleredeSisteSats(
+                atyMedBareSmåbarnstillegg,
+                SATSTIDSPUNKT
+            )
+        ).isEqualTo(true)
 
         val atyMedBareUtvidet =
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(SatsType.UTVIDET_BARNETRYGD, behandling, UTVIDET_BARNETRYGD)
 
-        assertThat(harAlleredeSisteSats(atyMedBareUtvidet, SATSTIDSPUNKT)).isEqualTo(true)
+        assertThat(
+            AutovedtakSatsendringService.harAlleredeSisteSats(
+                atyMedBareUtvidet,
+                SATSTIDSPUNKT
+            )
+        ).isEqualTo(true)
 
         val atyMedBareOrba =
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(SatsType.ORBA, behandling, ORDINÆR_BARNETRYGD)
 
-        assertThat(harAlleredeSisteSats(atyMedBareOrba, SATSTIDSPUNKT)).isEqualTo(true)
+        assertThat(AutovedtakSatsendringService.harAlleredeSisteSats(atyMedBareOrba, SATSTIDSPUNKT)).isEqualTo(
+            true
+        )
 
         val atyMedBareTilleggOrba =
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(
@@ -255,11 +266,16 @@ internal class StartSatsendringTest {
                 ORDINÆR_BARNETRYGD
             )
 
-        assertThat(harAlleredeSisteSats(atyMedBareTilleggOrba, SATSTIDSPUNKT)).isEqualTo(true)
+        assertThat(
+            AutovedtakSatsendringService.harAlleredeSisteSats(
+                atyMedBareTilleggOrba,
+                SATSTIDSPUNKT
+            )
+        ).isEqualTo(true)
 
         assertThat(
-            harAlleredeSisteSats(
-                atyMedBareTilleggOrba + atyMedBareOrba + atyMedBareUtvidet + atyMedBareSmåbarnstillegg,
+            AutovedtakSatsendringService.harAlleredeSisteSats(
+                (atyMedBareTilleggOrba + atyMedBareOrba + atyMedBareUtvidet + atyMedBareSmåbarnstillegg),
                 SATSTIDSPUNKT
             )
         ).isEqualTo(true)
@@ -271,7 +287,12 @@ internal class StartSatsendringTest {
         val atyMedUgyldigSatsSmåbarnstillegg =
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(SatsType.SMA, behandling, SMÅBARNSTILLEGG, UGYLDIG_SATS)
 
-        assertThat(harAlleredeSisteSats(atyMedUgyldigSatsSmåbarnstillegg, SATSTIDSPUNKT)).isEqualTo(false)
+        assertThat(
+            AutovedtakSatsendringService.harAlleredeSisteSats(
+                atyMedUgyldigSatsSmåbarnstillegg,
+                SATSTIDSPUNKT
+            )
+        ).isEqualTo(false)
 
         val atyMedUglydligSatsUtvidet =
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(
@@ -281,12 +302,22 @@ internal class StartSatsendringTest {
                 UGYLDIG_SATS
             )
 
-        assertThat(harAlleredeSisteSats(atyMedUglydligSatsUtvidet, SATSTIDSPUNKT)).isEqualTo(false)
+        assertThat(
+            AutovedtakSatsendringService.harAlleredeSisteSats(
+                atyMedUglydligSatsUtvidet,
+                SATSTIDSPUNKT
+            )
+        ).isEqualTo(false)
 
         val atyMedUgyldigSatsBareOrba =
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(SatsType.ORBA, behandling, ORDINÆR_BARNETRYGD, UGYLDIG_SATS)
 
-        assertThat(harAlleredeSisteSats(atyMedUgyldigSatsBareOrba, SATSTIDSPUNKT)).isEqualTo(false)
+        assertThat(
+            AutovedtakSatsendringService.harAlleredeSisteSats(
+                atyMedUgyldigSatsBareOrba,
+                SATSTIDSPUNKT
+            )
+        ).isEqualTo(false)
 
         val atyMedUgyldigSatsTilleggOrba =
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(
@@ -296,7 +327,12 @@ internal class StartSatsendringTest {
                 UGYLDIG_SATS
             )
 
-        assertThat(harAlleredeSisteSats(atyMedUgyldigSatsTilleggOrba, SATSTIDSPUNKT)).isEqualTo(false)
+        assertThat(
+            AutovedtakSatsendringService.harAlleredeSisteSats(
+                atyMedUgyldigSatsTilleggOrba,
+                SATSTIDSPUNKT
+            )
+        ).isEqualTo(false)
     }
 
     @Test
@@ -316,8 +352,8 @@ internal class StartSatsendringTest {
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(SatsType.ORBA, behandling, ORDINÆR_BARNETRYGD)
 
         assertThat(
-            harAlleredeSisteSats(
-                atyMedBGyldigOrba + atyMedGyldigUtvidet + atyMedUgyldigSatsSmåbarnstillegg,
+            AutovedtakSatsendringService.harAlleredeSisteSats(
+                (atyMedBGyldigOrba + atyMedGyldigUtvidet + atyMedUgyldigSatsSmåbarnstillegg),
                 SATSTIDSPUNKT
             )
         ).isEqualTo(false)
@@ -339,7 +375,7 @@ internal class StartSatsendringTest {
             )
 
         assertThat(
-            harAlleredeSisteSats(
+            AutovedtakSatsendringService.harAlleredeSisteSats(
                 listOf(atySomGårUtPåSatstidspunktGyldig),
                 SATSTIDSPUNKT
             )
@@ -358,7 +394,7 @@ internal class StartSatsendringTest {
             )
 
         assertThat(
-            harAlleredeSisteSats(
+            AutovedtakSatsendringService.harAlleredeSisteSats(
                 listOf(atySomGårUtPåSatstidspunktUgyldig),
                 SATSTIDSPUNKT
             )
@@ -381,7 +417,7 @@ internal class StartSatsendringTest {
             )
 
         assertThat(
-            harAlleredeSisteSats(
+            AutovedtakSatsendringService.harAlleredeSisteSats(
                 listOf(utgåttAndelTilkjentYtelse),
                 SATSTIDSPUNKT
             )
@@ -404,7 +440,7 @@ internal class StartSatsendringTest {
             )
 
         assertThat(
-            harAlleredeSisteSats(
+            AutovedtakSatsendringService.harAlleredeSisteSats(
                 listOf(utgåttAndelTilkjentYtelse),
                 SATSTIDSPUNKT
             )
@@ -427,7 +463,7 @@ internal class StartSatsendringTest {
             )
 
         assertThat(
-            harAlleredeSisteSats(
+            AutovedtakSatsendringService.harAlleredeSisteSats(
                 listOf(utgåttAndelTilkjentYtelse),
                 SATSTIDSPUNKT
             )
@@ -486,17 +522,42 @@ internal class StartSatsendringTest {
     }
 
     @Test
+    fun `kanGjennomføreSatsendringManuelt gir false når vi ikke har noen tidligere behandling`() {
+        every { behandlingRepository.finnSisteIverksatteBehandling(1L) } returns null
+
+        assertFalse(startSatsendring.kanGjennomføreSatsendringManuelt(1L))
+    }
+
+    @Test
+    fun `kanGjennomføreSatsendringManuelt gir false når harSisteSats er true`() {
+        every { behandlingRepository.finnSisteIverksatteBehandling(1L) } returns lagBehandling()
+        every { satskjøringRepository.findByFagsakId(1L) } returns null
+        every { autovedtakSatsendringService.harAlleredeNySats(any(), any()) } returns true
+
+        assertFalse(startSatsendring.kanGjennomføreSatsendringManuelt(1L))
+    }
+
+    @Test
+    fun `kanGjennomføreSatsendringManuelt gir true når harSisteSats er false`() {
+        every { behandlingRepository.finnSisteIverksatteBehandling(1L) } returns lagBehandling()
+        every { satskjøringRepository.findByFagsakId(1L) } returns null
+        every { autovedtakSatsendringService.harAlleredeNySats(any(), any()) } returns false
+
+        assertTrue(startSatsendring.kanGjennomføreSatsendringManuelt(1L))
+    }
+
+    @Test
     fun `opprettSatsendringSynkrontVedGammelSats skal kaste dersom man ikke kan starte satsendring`() {
         every { startSatsendring.kanStarteSatsendringPåFagsak(any()) } returns false
 
         assertThrows<Exception> {
-            startSatsendring.opprettSatsendringSynkrontVedGammelSats(0L)
+            startSatsendring.gjennomførSatsendringManuelt(0L)
         }
     }
 
     @Test
     fun `opprettSatsendringSynkrontVedGammelSats skal kaste feil for alle andre resultater enn OK`() {
-        every { startSatsendring.kanStarteSatsendringPåFagsak(any()) } returns true
+        every { startSatsendring.kanGjennomføreSatsendringManuelt(any()) } returns true
 
         val satsendringSvar = SatsendringSvar.values()
 
@@ -505,11 +566,11 @@ internal class StartSatsendringTest {
 
             when (it) {
                 SatsendringSvar.SATSENDRING_KJØRT_OK -> assertDoesNotThrow {
-                    startSatsendring.opprettSatsendringSynkrontVedGammelSats(0L)
+                    startSatsendring.gjennomførSatsendringManuelt(0L)
                 }
 
                 else -> assertThrows<Exception> {
-                    startSatsendring.opprettSatsendringSynkrontVedGammelSats(0L)
+                    startSatsendring.gjennomførSatsendringManuelt(0L)
                 }
             }
         }

@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.Utils.avrundetHeltallAvProsent
 import no.nav.familie.ba.sak.common.erDagenFør
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inkluderer
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -264,6 +265,7 @@ object TilkjentYtelseUtils {
             throw Feil("Fom må være satt på søkers periode ved utvidet barnetrygd")
         }
         if (fom == tom) {
+            secureLogger.warn("Du kan ikke legge inn fom og tom innenfor samme kalendermåned: $vilkårResultat")
             throw FunksjonellFeil("Du kan ikke legge inn fom og tom innenfor samme kalendermåned. Gå til utvidet barnetrygd vilkåret for å endre")
         }
     }
@@ -411,10 +413,12 @@ object TilkjentYtelseUtils {
                 PersonType.BARN -> YtelseType.ORDINÆR_BARNETRYGD
                 PersonType.ANNENPART -> throw Feil("Utvidet barnetrygd kan ikke værre knyttet til Annen part")
             }
+
             BehandlingUnderkategori.ORDINÆR -> when (personType) {
                 PersonType.BARN -> YtelseType.ORDINÆR_BARNETRYGD
                 PersonType.SØKER, PersonType.ANNENPART -> throw Feil("Ordinær barnetrygd kan bare være knyttet til barn")
             }
+
             BehandlingUnderkategori.INSTITUSJON -> when (personType) {
                 PersonType.BARN -> YtelseType.ORDINÆR_BARNETRYGD
                 PersonType.SØKER, PersonType.ANNENPART -> throw Feil("Institusjon kan ikke være knyttet til noe annet enn barn")

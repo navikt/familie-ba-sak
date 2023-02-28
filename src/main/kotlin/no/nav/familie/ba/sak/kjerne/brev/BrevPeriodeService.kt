@@ -77,7 +77,7 @@ class BrevPeriodeService(
         val kompetanser = kompetanseService.hentKompetanser(behandlingId = behandlingId)
             .filter {
                 if (forrigeBehandling?.erAutomatiskEøsMigrering() == true && inneværendeBehandling.skalBehandlesAutomatisk) {
-                    it.erFelterSatt()
+                    it.erObligatoriskeFelterSatt()
                 } else {
                     true
                 }
@@ -168,7 +168,7 @@ class BrevPeriodeService(
                 kompetanser = kompetanser,
                 periodeFom = minimertVedtaksperiode.fom?.toYearMonth()
             ).filter {
-                it.erFelterSatt()
+                it.erObligatoriskeFelterSatt()
             }.map {
                 it.tilMinimertKompetanse(
                     personopplysningGrunnlag = personopplysningGrunnlag,

@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.common.lagSøknadDTO
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.nyOrdinærBehandling
 import no.nav.familie.ba.sak.common.nyRevurdering
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
@@ -18,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
@@ -61,6 +61,9 @@ class RevurderingMedEndredeUtbetalingandelerTest(
 
     @Autowired
     private val stegService: StegService,
+
+    @Autowired
+    private val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
 
     @Autowired
     private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
@@ -134,19 +137,16 @@ class RevurderingMedEndredeUtbetalingandelerTest(
 
         gjennomførVilkårsvurdering(vilkårsvurdering = vilkårsvurderingRevurdering, behandling = behandlingRevurdering)
 
-        val kopierteEndredeUtbetalingAndeler = endretUtbetalingAndelService.hentForBehandling(behandlingRevurdering.id)
+        val kopierteEndredeUtbetalingAndeler = endretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandlingRevurdering.id)
         val andelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingRevurdering.id)
         val andelPåvirketAvEndringer = andelerTilkjentYtelse.first()
 
         assertEquals(1, kopierteEndredeUtbetalingAndeler.size)
 
-        // Andel skal kun oppdateres direkte hvis toggle er på
-        if (featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER)) {
-            assertEquals(BigDecimal.ZERO, andelPåvirketAvEndringer.prosent)
-            assertEquals(endretAndelFom, andelPåvirketAvEndringer.stønadFom)
-            assertEquals(endretAndelTom, andelPåvirketAvEndringer.stønadTom)
-            assertTrue(andelPåvirketAvEndringer.endreteUtbetalinger.any { it.id == kopierteEndredeUtbetalingAndeler.single().id })
-        }
+        assertEquals(BigDecimal.ZERO, andelPåvirketAvEndringer.prosent)
+        assertEquals(endretAndelFom, andelPåvirketAvEndringer.stønadFom)
+        assertEquals(endretAndelTom, andelPåvirketAvEndringer.stønadTom)
+        assertTrue(andelPåvirketAvEndringer.endreteUtbetalinger.any { it.id == kopierteEndredeUtbetalingAndeler.single().id })
     }
 
     private fun gjennomførVilkårsvurdering(vilkårsvurdering: Vilkårsvurdering, behandling: Behandling) {

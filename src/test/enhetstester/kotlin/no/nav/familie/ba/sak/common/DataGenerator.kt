@@ -296,7 +296,7 @@ fun lagAndelTilkjentYtelseMedEndreteUtbetalinger(
         differanseberegnetPeriodebeløp = differanseberegnetPeriodebeløp
     )
 
-    return AndelTilkjentYtelseMedEndreteUtbetalinger(aty, endretUtbetalingAndeler, true)
+    return AndelTilkjentYtelseMedEndreteUtbetalinger(aty, endretUtbetalingAndeler)
 }
 
 fun lagAndelTilkjentYtelseUtvidet(
@@ -659,7 +659,8 @@ fun kjørStegprosessForFGB(
     behandlingUnderkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
     institusjon: InstitusjonInfo? = null,
     verge: VergeInfo? = null,
-    brevmalService: BrevmalService
+    brevmalService: BrevmalService,
+    behandlingKategori: BehandlingKategori = BehandlingKategori.NASJONAL
 ): Behandling {
     val fagsakType = utledFagsaktype(institusjon, verge)
     val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(
@@ -669,7 +670,7 @@ fun kjørStegprosessForFGB(
     )
     val behandling = stegService.håndterNyBehandling(
         NyBehandling(
-            kategori = BehandlingKategori.NASJONAL,
+            kategori = behandlingKategori,
             underkategori = behandlingUnderkategori,
             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
             behandlingÅrsak = BehandlingÅrsak.SØKNAD,
@@ -1136,7 +1137,7 @@ fun lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
         andelTilkjentYtelser = andelTilkjentYtelser
     )
 
-    return EndretUtbetalingAndelMedAndelerTilkjentYtelse(eua, andelTilkjentYtelser, true)
+    return EndretUtbetalingAndelMedAndelerTilkjentYtelse(eua, andelTilkjentYtelser)
 }
 
 fun lagPerson(

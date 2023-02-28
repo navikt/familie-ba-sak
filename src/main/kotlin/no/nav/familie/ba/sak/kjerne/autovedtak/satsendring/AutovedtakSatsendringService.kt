@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -60,8 +61,10 @@ class AutovedtakSatsendringService(
     @Transactional
     fun kjørBehandling(behandlingsdata: SatsendringTaskDto): SatsendringSvar {
         val fagsakId = behandlingsdata.fagsakId
+
         val satskjøringForFagsak =
-            satskjøringRepository.findByFagsakId(fagsakId) ?: error("Fant ingen satskjøringsrad for fagsak=$fagsakId")
+            satskjøringRepository.findByFagsakId(fagsakId)
+                ?: satskjøringRepository.save(Satskjøring(fagsakId = fagsakId))
 
         val sisteIverksatteBehandling = behandlingRepository.finnSisteIverksatteBehandling(fagsakId = fagsakId)
             ?: error("Fant ikke siste iverksette behandling for $fagsakId")
@@ -95,9 +98,7 @@ class AutovedtakSatsendringService(
         }
 
         if (harUtbetalingerSomOverstiger100Prosent(sisteIverksatteBehandling)) {
-            satskjøringForFagsak.feiltype = "UTBETALING_OVER_100_PROSENT"
-            satskjøringRepository.save(satskjøringForFagsak)
-            return SatsendringSvar.FANT_OVER_100_PROSENT_UTBETALING
+            logger.warn("Det løper over 100 prosent utbetaling på fagsak=${sisteIverksatteBehandling.fagsak.id}")
         }
 
         val behandlingEtterBehandlingsresultat =
@@ -243,7 +244,6 @@ class AutovedtakSatsendringService(
 }
 
 enum class SatsendringSvar(val melding: String) {
-    FANT_OVER_100_PROSENT_UTBETALING(melding = "Fant utbetaling over 100 prosent på barna"),
     SATSENDRING_KJØRT_OK(melding = "Satsendring kjørt OK"),
     SATSENDRING_ER_ALLEREDE_UTFØRT(melding = "Satsendring allerede utført for fagsak"),
     HAR_ALLEREDE_SISTE_SATS(melding = "Åpen behandling har allerede siste sats og vi lar den ligge."),

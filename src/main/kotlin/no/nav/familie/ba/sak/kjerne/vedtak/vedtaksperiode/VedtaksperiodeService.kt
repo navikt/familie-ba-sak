@@ -315,12 +315,14 @@ class VedtaksperiodeService(
          * Ellers: endringstidspunkt skal utledes
          **/
         val endringstidspunkt = manueltOverstyrtEndringstidspunkt
-            ?: if (
+            ?: if (featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_UTLEDE_ENDRINGSTIDSPUNKT)) {
+                endringstidspunktService.finnEndringstidspunktForBehandling(behandlingId = vedtak.behandling.id)
+            } else if (
                 (gjelderFortsattInnvilget && !featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_BEREGNE_BEHANDLINGSRESULTAT)) || vedtak.behandling.resultat == Behandlingsresultat.ENDRET_OG_FORTSATT_INNVILGET
             ) {
                 TIDENES_MORGEN
             } else {
-                endringstidspunktService.finnEndringstidpunkForBehandling(behandlingId = vedtak.behandling.id)
+                endringstidspunktService.finnEndringstidpunkForBehandlingGammel(behandlingId = vedtak.behandling.id)
             }
         val opphørsperioder =
             hentOpphørsperioder(vedtak.behandling, endringstidspunkt).map { it.tilVedtaksperiodeMedBegrunnelse(vedtak) }
@@ -670,12 +672,20 @@ class VedtaksperiodeService(
         return avslagsperioderMedTomPeriode.map {
             if (it.fom == null && it.tom == null && uregistrerteBarn.isNotEmpty()) {
                 it.apply {
-                    begrunnelser.add(
-                        Vedtaksbegrunnelse(
-                            vedtaksperiodeMedBegrunnelser = this,
-                            standardbegrunnelse = Standardbegrunnelse.AVSLAG_UREGISTRERT_BARN
+                    when (vedtak.behandling.kategori) {
+                        BehandlingKategori.NASJONAL -> begrunnelser.add(
+                            Vedtaksbegrunnelse(
+                                vedtaksperiodeMedBegrunnelser = this,
+                                standardbegrunnelse = Standardbegrunnelse.AVSLAG_UREGISTRERT_BARN
+                            )
                         )
-                    )
+                        BehandlingKategori.EØS -> eøsBegrunnelser.add(
+                            EØSBegrunnelse(
+                                vedtaksperiodeMedBegrunnelser = this,
+                                begrunnelse = EØSStandardbegrunnelse.AVSLAG_EØS_UREGISTRERT_BARN
+                            )
+                        )
+                    }
                 }
             } else {
                 it
