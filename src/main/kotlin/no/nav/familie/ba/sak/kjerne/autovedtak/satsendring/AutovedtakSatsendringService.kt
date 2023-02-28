@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -60,8 +61,10 @@ class AutovedtakSatsendringService(
     @Transactional
     fun kjørBehandling(behandlingsdata: SatsendringTaskDto): SatsendringSvar {
         val fagsakId = behandlingsdata.fagsakId
+
         val satskjøringForFagsak =
-            satskjøringRepository.findByFagsakId(fagsakId) ?: error("Fant ingen satskjøringsrad for fagsak=$fagsakId")
+            satskjøringRepository.findByFagsakId(fagsakId)
+                ?: satskjøringRepository.save(Satskjøring(fagsakId = fagsakId))
 
         val sisteIverksatteBehandling = behandlingRepository.finnSisteIverksatteBehandling(fagsakId = fagsakId)
             ?: error("Fant ikke siste iverksette behandling for $fagsakId")
