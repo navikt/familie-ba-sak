@@ -70,7 +70,7 @@ object EndringIVilkårsvurderingUtil {
         val endringIVilkårResultat =
             nåværendeVilkårResultatTidslinje.kombinerUtenNullMed(tidligereVilkårResultatTidslinje) { nåværende, forrige ->
 
-                (forrige.erObligatoriskeFelterSatt() && nåværende.utdypendeVilkårsvurderinger.toSet() != forrige.utdypendeVilkårsvurderinger.toSet()) ||
+                (forrige.erObligatoriskeUtdypendeVilkårsvurderingSatt() && nåværende.utdypendeVilkårsvurderinger.toSet() != forrige.utdypendeVilkårsvurderinger.toSet()) ||
                     nåværende.vurderesEtter != forrige.vurderesEtter ||
                     nåværende.periodeFom != forrige.periodeFom
             }
@@ -78,7 +78,7 @@ object EndringIVilkårsvurderingUtil {
         return endringIVilkårResultat
     }
 
-    private fun VilkårResultat.erObligatoriskeFelterSatt(): Boolean {
+    private fun VilkårResultat.erObligatoriskeUtdypendeVilkårsvurderingSatt(): Boolean {
         return (this.utdypendeVilkårsvurderingErObligatorisk() && this.utdypendeVilkårsvurderinger.isNotEmpty()) || !this.utdypendeVilkårsvurderingErObligatorisk()
     }
 
