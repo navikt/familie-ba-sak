@@ -83,14 +83,17 @@ object EndringIVilkårsvurderingUtil {
     }
 
     private fun VilkårResultat.utdypendeVilkårsvurderingErObligatorisk(): Boolean {
-        return if (this.vurderesEtter == Regelverk.NASJONALE_REGLER) false
-        else when (this.vilkårType) {
-            Vilkår.BOSATT_I_RIKET,
-            Vilkår.BOR_MED_SØKER -> true
-            Vilkår.UNDER_18_ÅR,
-            Vilkår.LOVLIG_OPPHOLD,
-            Vilkår.GIFT_PARTNERSKAP,
-            Vilkår.UTVIDET_BARNETRYGD -> false
+        return if (this.vurderesEtter == Regelverk.NASJONALE_REGLER) {
+            false
+        } else {
+            when (this.vilkårType) {
+                Vilkår.BOSATT_I_RIKET,
+                Vilkår.BOR_MED_SØKER -> true
+                Vilkår.UNDER_18_ÅR,
+                Vilkår.LOVLIG_OPPHOLD,
+                Vilkår.GIFT_PARTNERSKAP,
+                Vilkår.UTVIDET_BARNETRYGD -> false
+            }
         }
     }
 }
