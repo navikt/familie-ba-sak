@@ -13,7 +13,6 @@ class FeatureToggleConfig {
         const val NY_MÅTE_Å_BEREGNE_BEHANDLINGSRESULTAT = "familie-ba-sak.behandling.behandlingsresultat"
         const val NY_MÅTE_Å_UTLEDE_ENDRINGSTIDSPUNKT = "familie-ba-sak.release.endringstidspunkt-oppgradering"
         const val KAN_GENERERE_UTBETALINGSOPPDRAG_NY = "familie-ba-sak.generer.utbetalingsoppdrag.ny"
-        const val TREKK_I_LØPENDE_UTBETALING = "familie-ba-sak.trekk-i-loepende-utbetaling"
         const val EØS_INFORMASJON_OM_ÅRLIG_KONTROLL = "familie-ba-sak.eos-informasjon-om-aarlig-kontroll"
         const val ER_MANUEL_POSTERING_TOGGLE_PÅ = "familie-ba-sak.manuell-postering"
 
