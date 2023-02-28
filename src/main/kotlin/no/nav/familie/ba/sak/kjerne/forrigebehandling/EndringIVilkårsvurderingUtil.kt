@@ -70,15 +70,19 @@ object EndringIVilkårsvurderingUtil {
         val endringIVilkårResultat =
             nåværendeVilkårResultatTidslinje.kombinerUtenNullMed(tidligereVilkårResultatTidslinje) { nåværende, forrige ->
 
-                (forrige.erObligatoriskUtdypendeVilkårsvurderingSatt() && nåværende.utdypendeVilkårsvurderinger.toSet() != forrige.utdypendeVilkårsvurderinger.toSet()) ||
-                    nåværende.vurderesEtter != forrige.vurderesEtter ||
-                    nåværende.periodeFom != forrige.periodeFom
+                val erEndringerIUtdypendeVilkårsvurdering = nåværende.utdypendeVilkårsvurderinger.toSet() != forrige.utdypendeVilkårsvurderinger.toSet()
+                val erEndringerIRegelverk = nåværende.vurderesEtter != forrige.vurderesEtter
+                val erVilkårSomErSplittetOpp = nåværende.periodeFom != forrige.periodeFom
+
+                (forrige.obligatoriskUtdypendeVilkårsvurderingErSatt() && erEndringerIUtdypendeVilkårsvurdering) ||
+                    erEndringerIRegelverk ||
+                    erVilkårSomErSplittetOpp
             }
 
         return endringIVilkårResultat
     }
 
-    private fun VilkårResultat.erObligatoriskUtdypendeVilkårsvurderingSatt(): Boolean {
+    private fun VilkårResultat.obligatoriskUtdypendeVilkårsvurderingErSatt(): Boolean {
         return this.utdypendeVilkårsvurderinger.isNotEmpty() || !this.utdypendeVilkårsvurderingErObligatorisk()
     }
 
