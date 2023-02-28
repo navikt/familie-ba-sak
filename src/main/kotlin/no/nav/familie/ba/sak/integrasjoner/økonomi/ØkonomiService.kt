@@ -154,10 +154,10 @@ class ØkonomiService(
             )
 
             if (!erSimulering && (
-                    oppdatertBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT || behandlingHentOgPersisterService.hent(
+                oppdatertBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT || behandlingHentOgPersisterService.hent(
                         oppdatertBehandling.id
                     ).resultat == Behandlingsresultat.OPPHØRT
-                    )
+                )
             ) {
                 utbetalingsoppdrag.validerOpphørsoppdrag()
             }

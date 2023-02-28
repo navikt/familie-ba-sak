@@ -49,7 +49,6 @@ class HentStatusTest {
             beregningService = beregningService,
             utbetalingsoppdragGenerator = mockk(),
             behandlingService = mockk(),
-            featureToggleService = mockk(),
             tilkjentYtelseValideringService = mockk(),
             tilkjentYtelseRepository = tilkjentYtelseRepository
         )
