@@ -51,8 +51,7 @@ object BehandlingsresultatEndringUtils {
 
         val erEndringIVilkårsvurdering = erEndringIVilkårsvurdering(
             nåværendePersonResultat = nåværendePersonResultat,
-            forrigePersonResultat = forrigePersonResultat,
-            opphørstidspunkt = nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(forrigeAndeler = forrigeAndeler, nåværendeEndretAndeler = nåværendeEndretAndeler)
+            forrigePersonResultat = forrigePersonResultat
         )
 
         val erEndringIEndretUtbetalingAndeler = erEndringIEndretUtbetalingAndeler(
@@ -143,15 +142,11 @@ object BehandlingsresultatEndringUtils {
 
     internal fun erEndringIVilkårsvurdering(
         nåværendePersonResultat: Set<PersonResultat>,
-        forrigePersonResultat: Set<PersonResultat>,
-        opphørstidspunkt: YearMonth?
+        forrigePersonResultat: Set<PersonResultat>
     ): Boolean {
-        if (opphørstidspunkt == null) return false // Returnerer false hvis verken forrige eller nåværende behandling har andeler
-
         val endringIVilkårsvurderingTidslinje = EndringIVilkårsvurderingUtil.lagEndringIVilkårsvurderingTidslinje(
             nåværendePersonResultat = nåværendePersonResultat,
-            forrigePersonResultat = forrigePersonResultat,
-            opphørstidspunkt = opphørstidspunkt
+            forrigePersonResultat = forrigePersonResultat
         )
         return endringIVilkårsvurderingTidslinje.perioder().any { it.innhold == true }
     }

@@ -45,7 +45,9 @@ Dette kan være både endringer i beløp og endringer i andre ting som ikke påv
 Endringer i **vilkårsvurdering** innebærer:
 - Endringer i utdypende vilkårsvurdering
 - Endringer i lovverk/regelverk
-- Nye splitter i vilkår (utenom å sette tom-dato på vilkår som fører til opphør)
+- Nye splitter i vilkår
+
+Vi ser kun på perioder som var oppfylt både i forrige behandling og i nåværende behandling. Dvs. hvis det eneste som er gjort er å sette tom-dato på et vilkår tidligere for å opphøre ytelsen, så blir ikke det regnet som en endring.
 
 På **kompetanser** regner man endring som endring av:
 - Søkers aktivitet
@@ -54,6 +56,8 @@ På **kompetanser** regner man endring som endring av:
 - Annen forelders aktivitetsland
 - Barnets bostedsland
 - Resultat (primærland/sekundærland osv.)
+
+Hvis forrige kompetanse ikke var fylt ut ordentlig (som skjer ved migrering + evt autovedtak) så blir det returnert ingen endring.
 
 For **endret utbetaling andeler** bryr vi oss kun om endringer av:
 - Avtaletidspunkt delt bosted

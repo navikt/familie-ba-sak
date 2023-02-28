@@ -51,16 +51,18 @@ object EndringIKompetanseUtil {
         val forrigeTidslinje = forrigeKompetanserForPerson.tilTidslinje()
 
         val endringerTidslinje = nåværendeTidslinje.kombinerUtenNullMed(forrigeTidslinje) { nåværende, forrige ->
-            (
-                nåværende.søkersAktivitet != forrige.søkersAktivitet ||
-                    nåværende.søkersAktivitetsland != forrige.søkersAktivitetsland ||
-                    nåværende.annenForeldersAktivitet != forrige.annenForeldersAktivitet ||
-                    nåværende.annenForeldersAktivitetsland != forrige.annenForeldersAktivitetsland ||
-                    nåværende.barnetsBostedsland != forrige.barnetsBostedsland ||
-                    nåværende.resultat != forrige.resultat
-                )
+            forrige.erObligatoriskeFelterSatt() && nåværende.felterHarEndretSegSidenForrigeBehandling(forrigeKompetanse = forrige)
         }
 
         return endringerTidslinje
+    }
+
+    private fun Kompetanse.felterHarEndretSegSidenForrigeBehandling(forrigeKompetanse: Kompetanse): Boolean {
+        return this.søkersAktivitet != forrigeKompetanse.søkersAktivitet ||
+            this.søkersAktivitetsland != forrigeKompetanse.søkersAktivitetsland ||
+            this.annenForeldersAktivitet != forrigeKompetanse.annenForeldersAktivitet ||
+            this.annenForeldersAktivitetsland != forrigeKompetanse.annenForeldersAktivitetsland ||
+            this.barnetsBostedsland != forrigeKompetanse.barnetsBostedsland ||
+            this.resultat != forrigeKompetanse.resultat
     }
 }

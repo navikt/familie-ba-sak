@@ -18,13 +18,11 @@ object EndringIVilkårsvurderingUtil {
 
     fun utledEndringstidspunktForVilkårsvurdering(
         nåværendePersonResultat: Set<PersonResultat>,
-        forrigePersonResultat: Set<PersonResultat>,
-        opphørstidspunkt: YearMonth
+        forrigePersonResultat: Set<PersonResultat>
     ): YearMonth? {
         val endringIVilkårsvurderingTidslinje = lagEndringIVilkårsvurderingTidslinje(
             nåværendePersonResultat = nåværendePersonResultat,
-            forrigePersonResultat = forrigePersonResultat,
-            opphørstidspunkt = opphørstidspunkt
+            forrigePersonResultat = forrigePersonResultat
         )
 
         return endringIVilkårsvurderingTidslinje.tilFørsteEndringstidspunktForDagtidslinje()
@@ -32,8 +30,7 @@ object EndringIVilkårsvurderingUtil {
 
     fun lagEndringIVilkårsvurderingTidslinje(
         nåværendePersonResultat: Set<PersonResultat>,
-        forrigePersonResultat: Set<PersonResultat>,
-        opphørstidspunkt: YearMonth
+        forrigePersonResultat: Set<PersonResultat>
     ): Tidslinje<Boolean, Dag> {
         val allePersonerMedPersonResultat =
             (nåværendePersonResultat.map { it.aktør } + forrigePersonResultat.map { it.aktør }).distinct()
@@ -48,8 +45,7 @@ object EndringIVilkårsvurderingUtil {
                     forrigePersonResultat
                         .filter { it.aktør == aktør }
                         .flatMap { it.vilkårResultater }
-                        .filter { it.vilkårType == vilkår && it.resultat == Resultat.OPPFYLT },
-                    opphørstidspunkt = opphørstidspunkt
+                        .filter { it.vilkårType == vilkår && it.resultat == Resultat.OPPFYLT }
                 )
             }
         }
@@ -67,8 +63,7 @@ object EndringIVilkårsvurderingUtil {
     // 3. Splitt i vilkårsvurderingen
     private fun lagEndringIVilkårsvurderingForPersonOgVilkårTidslinje(
         nåværendeVilkårResultat: List<VilkårResultat>,
-        forrigeVilkårResultat: List<VilkårResultat>,
-        opphørstidspunkt: YearMonth
+        forrigeVilkårResultat: List<VilkårResultat>
     ): Tidslinje<Boolean, Dag> {
         val nåværendeVilkårResultatTidslinje = nåværendeVilkårResultat.tilTidslinje()
         val tidligereVilkårResultatTidslinje = forrigeVilkårResultat.tilTidslinje()
@@ -78,8 +73,7 @@ object EndringIVilkårsvurderingUtil {
 
                 nåværende.utdypendeVilkårsvurderinger.toSet() != forrige.utdypendeVilkårsvurderinger.toSet() ||
                     nåværende.vurderesEtter != forrige.vurderesEtter ||
-                    nåværende.periodeFom != forrige.periodeFom ||
-                    (nåværende.periodeTom != forrige.periodeTom && nåværende.periodeTom.førerIkkeTilOpphør(opphørstidspunkt))
+                    nåværende.periodeFom != forrige.periodeFom
             }
 
         return endringIVilkårResultat

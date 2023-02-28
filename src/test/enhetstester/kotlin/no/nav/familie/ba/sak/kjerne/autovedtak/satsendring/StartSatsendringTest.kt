@@ -522,17 +522,42 @@ internal class StartSatsendringTest {
     }
 
     @Test
+    fun `kanGjennomføreSatsendringManuelt gir false når vi ikke har noen tidligere behandling`() {
+        every { behandlingRepository.finnSisteIverksatteBehandling(1L) } returns null
+
+        assertFalse(startSatsendring.kanGjennomføreSatsendringManuelt(1L))
+    }
+
+    @Test
+    fun `kanGjennomføreSatsendringManuelt gir false når harSisteSats er true`() {
+        every { behandlingRepository.finnSisteIverksatteBehandling(1L) } returns lagBehandling()
+        every { satskjøringRepository.findByFagsakId(1L) } returns null
+        every { autovedtakSatsendringService.harAlleredeNySats(any(), any()) } returns true
+
+        assertFalse(startSatsendring.kanGjennomføreSatsendringManuelt(1L))
+    }
+
+    @Test
+    fun `kanGjennomføreSatsendringManuelt gir true når harSisteSats er false`() {
+        every { behandlingRepository.finnSisteIverksatteBehandling(1L) } returns lagBehandling()
+        every { satskjøringRepository.findByFagsakId(1L) } returns null
+        every { autovedtakSatsendringService.harAlleredeNySats(any(), any()) } returns false
+
+        assertTrue(startSatsendring.kanGjennomføreSatsendringManuelt(1L))
+    }
+
+    @Test
     fun `opprettSatsendringSynkrontVedGammelSats skal kaste dersom man ikke kan starte satsendring`() {
         every { startSatsendring.kanStarteSatsendringPåFagsak(any()) } returns false
 
         assertThrows<Exception> {
-            startSatsendring.opprettSatsendringSynkrontVedGammelSats(0L)
+            startSatsendring.gjennomførSatsendringManuelt(0L)
         }
     }
 
     @Test
     fun `opprettSatsendringSynkrontVedGammelSats skal kaste feil for alle andre resultater enn OK`() {
-        every { startSatsendring.kanStarteSatsendringPåFagsak(any()) } returns true
+        every { startSatsendring.kanGjennomføreSatsendringManuelt(any()) } returns true
 
         val satsendringSvar = SatsendringSvar.values()
 
@@ -541,11 +566,11 @@ internal class StartSatsendringTest {
 
             when (it) {
                 SatsendringSvar.SATSENDRING_KJØRT_OK -> assertDoesNotThrow {
-                    startSatsendring.opprettSatsendringSynkrontVedGammelSats(0L)
+                    startSatsendring.gjennomførSatsendringManuelt(0L)
                 }
 
                 else -> assertThrows<Exception> {
-                    startSatsendring.opprettSatsendringSynkrontVedGammelSats(0L)
+                    startSatsendring.gjennomførSatsendringManuelt(0L)
                 }
             }
         }

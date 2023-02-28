@@ -132,4 +132,55 @@ class EndringIKompetanseUtilTest {
 
         Assertions.assertNull(endringstidspunkt)
     }
+
+    @Test
+    fun `Endring i kompetanse - skal ikke lage endret periode når forrige kompetanse ikke er utfylt (pga migrering+ evt autovedtak)`() {
+        val forrigeBehandling = lagBehandling()
+        val nåværendeBehandling = lagBehandling()
+        val forrigeKompetanse =
+            lagKompetanse(
+                behandlingId = forrigeBehandling.id,
+                barnAktører = setOf(barn1Aktør),
+                barnetsBostedsland = null,
+                søkersAktivitet = null,
+                søkersAktivitetsland = null,
+                annenForeldersAktivitet = null,
+                annenForeldersAktivitetsland = null,
+                kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
+                fom = YearMonth.now().minusMonths(6),
+                tom = null
+            )
+
+        val nåværendeKompetanse =
+            lagKompetanse(
+                behandlingId = nåværendeBehandling.id,
+                barnAktører = setOf(barn1Aktør),
+                barnetsBostedsland = "NO",
+                søkersAktivitet = SøkersAktivitet.ARBEIDER,
+                søkersAktivitetsland = "NO",
+                annenForeldersAktivitet = AnnenForeldersAktivitet.INAKTIV,
+                annenForeldersAktivitetsland = "PO",
+                kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
+                fom = YearMonth.now().minusMonths(6),
+                tom = null
+            )
+
+        val perioderMedEndring = EndringIKompetanseUtil.lagEndringIKompetanseTidslinje(
+            nåværendeKompetanser = listOf(
+                nåværendeKompetanse
+            ),
+            forrigeKompetanser = listOf(forrigeKompetanse)
+        ).perioder().filter { it.innhold == true }
+
+        Assertions.assertTrue(perioderMedEndring.isEmpty())
+
+        val endringstidspunkt = EndringIKompetanseUtil.utledEndringstidspunktForKompetanse(
+            nåværendeKompetanser = listOf(
+                nåværendeKompetanse
+            ),
+            forrigeKompetanser = listOf(forrigeKompetanse)
+        )
+
+        Assertions.assertNull(endringstidspunkt)
+    }
 }
