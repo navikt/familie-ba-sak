@@ -54,7 +54,7 @@ class BehandlingstemaServiceTest {
 
     @BeforeAll
     fun init() {
-        every { behandlingHentOgPersisterService.hentAktivOgÅpenForFagsak(defaultFagsak.id) } returns defaultBehandling
+        every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(defaultFagsak.id) } returns defaultBehandling
     }
 
     @Test

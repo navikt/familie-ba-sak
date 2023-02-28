@@ -31,12 +31,12 @@ class BehandlingHentOgPersisterService(
         return behandlingRepository.findByFagsakAndAktiv(fagsakId)
     }
 
-    fun hentAktivOgÅpenForFagsak(fagsakId: Long): Behandling? {
+    fun finnAktivOgÅpenForFagsak(fagsakId: Long): Behandling? {
         return behandlingRepository.findByFagsakAndAktivAndOpen(fagsakId)
     }
 
     fun erÅpenBehandlingPåFagsak(fagsakId: Long): Boolean {
-        return hentAktivOgÅpenForFagsak(fagsakId) != null
+        return finnAktivOgÅpenForFagsak(fagsakId) != null
     }
 
     fun hent(behandlingId: Long): Behandling {

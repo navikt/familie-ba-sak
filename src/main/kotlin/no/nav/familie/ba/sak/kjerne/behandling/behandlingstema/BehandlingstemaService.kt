@@ -105,7 +105,7 @@ class BehandlingstemaService(
 
     fun hentKategoriFraInneværendeBehandling(fagsakId: Long): BehandlingKategori {
         val aktivBehandling =
-            behandlingHentOgPersisterService.hentAktivOgÅpenForFagsak(fagsakId = fagsakId)
+            behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsakId = fagsakId)
                 ?: return BehandlingKategori.NASJONAL
         val vilkårsvurdering =
             vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = aktivBehandling.id)
@@ -129,7 +129,7 @@ class BehandlingstemaService(
 
     fun hentUnderkategoriFraInneværendeBehandling(fagsakId: Long): BehandlingUnderkategori {
         val aktivBehandling =
-            behandlingHentOgPersisterService.hentAktivOgÅpenForFagsak(fagsakId = fagsakId)
+            behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsakId = fagsakId)
                 ?: return BehandlingUnderkategori.ORDINÆR
 
         val erUtvidetVilkårBehandlet =
