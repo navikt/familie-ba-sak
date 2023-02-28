@@ -191,7 +191,7 @@ class TilbakekrevingService(
         }
 
         val behandling = kanOpprettesRespons.kravgrunnlagsreferanse?.toLong()
-            ?.let { behandlingHentOgPersisterService.hentAvsluttedeBehandlingerPåFagsak(fagsakId = fagsakId).find { beh -> beh.id == it } }
+            ?.let { behandlingHentOgPersisterService.finnAvsluttedeBehandlingerPåFagsak(fagsakId = fagsakId).find { beh -> beh.id == it } }
         return if (behandling != null) {
             tilbakekrevingKlient.opprettTilbakekrevingsbehandlingManuelt(
                 OpprettManueltTilbakekrevingRequest(

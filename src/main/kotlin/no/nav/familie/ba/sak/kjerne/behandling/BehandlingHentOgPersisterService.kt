@@ -119,7 +119,7 @@ class BehandlingHentOgPersisterService(
         return behandlingRepository.finnIverksatteBehandlinger(fagsakId = fagsakId)
     }
 
-    fun hentAvsluttedeBehandlingerPåFagsak(fagsakId: Long): List<Behandling> {
+    fun finnAvsluttedeBehandlingerPåFagsak(fagsakId: Long): List<Behandling> {
         return behandlingRepository.findByFagsakAndAvsluttet(fagsakId = fagsakId)
     }
 }
