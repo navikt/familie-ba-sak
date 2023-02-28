@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
@@ -129,7 +130,10 @@ object BehandlingsresultatSøknadUtils {
         val resultaterUtenIngenEndringer = this.filter { it != Søknadsresultat.INGEN_RELEVANTE_ENDRINGER }
 
         return when {
-            this.isEmpty() -> throw Feil(frontendFeilmelding = "Du har opprettet en behandling som følge av søknad, men har enten ikke krysset av for noen barn det er søkt for eller avslått/innvilget noen perioder.", message = "Klarer ikke utlede søknadsresultat. Finner ingen resultater.")
+            this.isEmpty() -> throw FunksjonellFeil(
+                frontendFeilmelding = "Du har opprettet en behandling som følge av søknad, men har enten ikke krysset av for noen barn det er søkt for eller avslått/innvilget noen perioder.",
+                melding = "Klarer ikke utlede søknadsresultat. Finner ingen resultater."
+            )
             this.size == 1 -> this.single()
             resultaterUtenIngenEndringer.size == 1 -> resultaterUtenIngenEndringer.single()
             resultaterUtenIngenEndringer.size == 2 && resultaterUtenIngenEndringer.containsAll(
