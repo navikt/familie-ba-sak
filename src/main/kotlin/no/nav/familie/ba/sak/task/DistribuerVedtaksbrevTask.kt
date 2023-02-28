@@ -1,10 +1,7 @@
 package no.nav.familie.ba.sak.task
 
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
-import no.nav.familie.ba.sak.kjerne.brev.hentBrevmalGammel
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevTask.Companion.TASK_STEP_TYPE
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -18,8 +15,7 @@ import org.springframework.stereotype.Service
 class DistribuerVedtaksbrevTask(
     private val stegService: StegService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    private val brevmalService: BrevmalService,
-    private val featureToggleService: FeatureToggleService
+    private val brevmalService: BrevmalService
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
@@ -31,14 +27,7 @@ class DistribuerVedtaksbrevTask(
             behandlingId = distribuerVedtaksbrevDTO.behandlingId,
             journalpostId = distribuerVedtaksbrevDTO.journalpostId,
             personEllerInstitusjonIdent = distribuerVedtaksbrevDTO.personIdent,
-            brevmal =
-            if (featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_BEREGNE_BEHANDLINGSRESULTAT)) {
-                brevmalService.hentBrevmal(
-                    behandling
-                )
-            } else {
-                hentBrevmalGammel(behandling)
-            },
+            brevmal = brevmalService.hentBrevmal(behandling),
             erManueltSendt = false
         )
         stegService.håndterDistribuerVedtaksbrev(
