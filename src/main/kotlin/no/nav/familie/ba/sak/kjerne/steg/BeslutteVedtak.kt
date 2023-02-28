@@ -156,15 +156,10 @@ class BeslutteVedtak(
 
             hentNesteStegGittEndringerIUtbetaling(behandling, endringerIUtbetaling)
         } else {
+            throw Feil("Gammel kode som er nødvendig når vi kjører den gamle koden er fjernet")
             hentNesteStegForNormalFlytGammel(behandling)
         }
 
-        if (nesteSteg == StegType.IVERKSETT_MOT_OPPDRAG &&
-            beregningService.erAlleUtbetalingsperioderPåNullKronerIDenneOgForrigeBehandling(behandling) &&
-            behandling.erBehandlingMedVedtaksbrevutsending()
-        ) {
-            return StegType.JOURNALFØR_VEDTAKSBREV
-        }
         return nesteSteg
     }
 

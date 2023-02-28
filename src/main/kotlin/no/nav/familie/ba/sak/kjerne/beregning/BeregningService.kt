@@ -126,23 +126,6 @@ class BeregningService(
         }.map { it }
     }
 
-    fun erAlleUtbetalingsperioderPåNullKronerIDenneOgForrigeBehandling(behandling: Behandling): Boolean {
-        val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
-
-        val andelerTilkjentYtelseForrigeBehandling =
-            behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling)
-                ?.let { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(it.id) }
-
-        val erIngenUtbetalingIForrigeBehandling =
-            andelerTilkjentYtelseForrigeBehandling?.all { it.kalkulertUtbetalingsbeløp == 0 } ?: true
-
-        val erAlleUtbetalingsperioderIDenneBehandlingenPåNullKroner =
-            andelerTilkjentYtelse.all { it.kalkulertUtbetalingsbeløp == 0 }
-
-        return erIngenUtbetalingIForrigeBehandling &&
-            erAlleUtbetalingsperioderIDenneBehandlingenPåNullKroner
-    }
-
     fun erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling: Behandling): Boolean =
         hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling) == EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
 
