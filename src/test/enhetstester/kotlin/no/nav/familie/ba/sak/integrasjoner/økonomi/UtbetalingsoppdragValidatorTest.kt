@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.medDifferanseberegning
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
@@ -23,8 +22,7 @@ internal class UtbetalingsoppdragValidatorTest {
     fun `nasjonalt utbetalingsoppdrag må ha utbetalingsperiode`() {
         val utbetalingsoppdrag = lagUtbetalingsoppdrag()
         assertThrows<FunksjonellFeil> {
-            utbetalingsoppdrag.valider(
-                behandlingsresultat = Behandlingsresultat.INNVILGET,
+            utbetalingsoppdrag.validerNullutbetaling(
                 behandlingskategori = BehandlingKategori.NASJONAL,
                 andelerTilkjentYtelse = listOf(
                     lagAndelTilkjentYtelse(
@@ -32,8 +30,7 @@ internal class UtbetalingsoppdragValidatorTest {
                         tom = inneværendeMåned(),
                         beløp = 1054
                     )
-                ),
-                erEndreMigreringsdatoBehandling = false
+                )
             )
         }
     }
@@ -42,8 +39,7 @@ internal class UtbetalingsoppdragValidatorTest {
     fun `innvilget EØS-utbetalingsoppdrag hvor Norge er sekundærland kan mangle utbetalingsperiode`() {
         val utbetalingsoppdrag = lagUtbetalingsoppdrag()
         assertDoesNotThrow {
-            utbetalingsoppdrag.valider(
-                behandlingsresultat = Behandlingsresultat.INNVILGET,
+            utbetalingsoppdrag.validerNullutbetaling(
                 behandlingskategori = BehandlingKategori.EØS,
                 andelerTilkjentYtelse = listOf(
                     lagAndelTilkjentYtelse(
@@ -51,8 +47,7 @@ internal class UtbetalingsoppdragValidatorTest {
                         tom = inneværendeMåned(),
                         beløp = 0
                     ).medDifferanseberegning(BigDecimal("10"))
-                ),
-                erEndreMigreringsdatoBehandling = false
+                )
             )
         }
     }
@@ -61,8 +56,7 @@ internal class UtbetalingsoppdragValidatorTest {
     fun `innvilget EØS-utbetalingsoppdrag hvor Norge er Primærland kan ikke mangle utbetalingsperiode`() {
         val utbetalingsoppdrag = lagUtbetalingsoppdrag()
         assertThrows<FunksjonellFeil> {
-            utbetalingsoppdrag.valider(
-                behandlingsresultat = Behandlingsresultat.INNVILGET,
+            utbetalingsoppdrag.validerNullutbetaling(
                 behandlingskategori = BehandlingKategori.EØS,
                 andelerTilkjentYtelse = listOf(
                     lagAndelTilkjentYtelse(
@@ -70,8 +64,7 @@ internal class UtbetalingsoppdragValidatorTest {
                         tom = inneværendeMåned(),
                         beløp = 1054
                     )
-                ),
-                erEndreMigreringsdatoBehandling = false
+                )
             )
         }
     }
@@ -95,8 +88,7 @@ internal class UtbetalingsoppdragValidatorTest {
             )
         )
         assertDoesNotThrow {
-            utbetalingsoppdrag.valider(
-                behandlingsresultat = Behandlingsresultat.INNVILGET,
+            utbetalingsoppdrag.validerNullutbetaling(
                 behandlingskategori = BehandlingKategori.EØS,
                 andelerTilkjentYtelse = listOf(
                     lagAndelTilkjentYtelse(
@@ -104,8 +96,7 @@ internal class UtbetalingsoppdragValidatorTest {
                         tom = inneværendeMåned(),
                         beløp = 1024
                     ).medDifferanseberegning(BigDecimal("10"))
-                ),
-                erEndreMigreringsdatoBehandling = false
+                )
             )
         }
     }

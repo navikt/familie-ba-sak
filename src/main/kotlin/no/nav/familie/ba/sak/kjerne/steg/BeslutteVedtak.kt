@@ -150,22 +150,10 @@ class BeslutteVedtak(
     }
 
     private fun sjekkOmBehandlingSkalIverksettesOgHentNesteSteg(behandling: Behandling): StegType {
-        val nesteSteg = if (featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_BEREGNE_BEHANDLINGSRESULTAT)) {
-            val endringerIUtbetaling =
-                beregningService.erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling)
+        val endringerIUtbetaling =
+            beregningService.hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling)
 
-            hentNesteStegGittEndringerIUtbetaling(behandling, endringerIUtbetaling)
-        } else {
-            hentNesteStegForNormalFlytGammel(behandling)
-        }
-
-        if (nesteSteg == StegType.IVERKSETT_MOT_OPPDRAG &&
-            beregningService.erAlleUtbetalingsperioderPåNullKronerIDenneOgForrigeBehandling(behandling) &&
-            behandling.erBehandlingMedVedtaksbrevutsending()
-        ) {
-            return StegType.JOURNALFØR_VEDTAKSBREV
-        }
-        return nesteSteg
+        return hentNesteStegGittEndringerIUtbetaling(behandling, endringerIUtbetaling)
     }
 
     private fun opprettFerdigstillBehandlingTask(behandling: Behandling) {
