@@ -79,7 +79,7 @@ object EndringIVilkårsvurderingUtil {
     }
 
     private fun VilkårResultat.erObligatoriskUtdypendeVilkårsvurderingSatt(): Boolean {
-        return (this.utdypendeVilkårsvurderingErObligatorisk() && this.utdypendeVilkårsvurderinger.isNotEmpty()) || !this.utdypendeVilkårsvurderingErObligatorisk()
+        return this.utdypendeVilkårsvurderinger.isNotEmpty() || !this.utdypendeVilkårsvurderingErObligatorisk()
     }
 
     private fun VilkårResultat.utdypendeVilkårsvurderingErObligatorisk(): Boolean {
