@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForUtbetalingsoppdragFactory
 import no.nav.familie.ba.sak.integrasjoner.økonomi.pakkInnForUtbetaling
@@ -22,6 +23,10 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.steg.EndringerIUtbetalingForBehandlingSteg
+import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
@@ -29,6 +34,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 
 @Service
 class BeregningService(
@@ -144,6 +150,15 @@ class BeregningService(
     }
 
     fun erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling: Behandling): EndringerIUtbetalingForBehandlingSteg {
+        val endringerIUtbetaling =
+            hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandlingTidslinje(behandling)
+                .perioder()
+                .any { it.innhold == true }
+
+        return if (endringerIUtbetaling) EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING else EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING
+    }
+
+    fun hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandlingTidslinje(behandling: Behandling): Tidslinje<Boolean, Måned> {
         val nåværendeAndeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
 
         val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling)
@@ -151,12 +166,25 @@ class BeregningService(
             forrigeBehandling?.let { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(it.id) }
                 ?: emptyList()
 
-        val endringerIUtbetaling = EndringIUtbetalingUtil.erEndringerIUtbetalingFraForrigeBehandling(
+        if (nåværendeAndeler.isEmpty() && forrigeAndeler.isEmpty()) return TomTidslinje()
+
+        return EndringIUtbetalingUtil.lagEndringIUtbetalingTidslinje(
             nåværendeAndeler = nåværendeAndeler,
             forrigeAndeler = forrigeAndeler
         )
+    }
 
-        return if (endringerIUtbetaling) EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING else EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING
+    fun erEndringerIUtbetalingMellomNåværendeOgForrigeBehandlingEtterDato(
+        behandling: Behandling,
+        etterDato: YearMonth
+    ): Boolean {
+        val endringIUtbetalingTidslinje =
+            hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandlingTidslinje(behandling)
+
+        val endringIUtbetalingEtterDato = endringIUtbetalingTidslinje.perioder()
+            .filter { it.fraOgMed.tilYearMonth().isSameOrAfter(etterDato) }
+
+        return endringIUtbetalingEtterDato.any { it.innhold == true }
     }
 
     @Transactional
