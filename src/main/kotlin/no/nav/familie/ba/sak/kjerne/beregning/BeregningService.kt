@@ -77,7 +77,8 @@ class BeregningService(
         tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)
 
     fun hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(fagsakId: Long): List<TilkjentYtelse> {
-        val avsluttedeBehandlingerSomIkkeErHenlagtPåFagsak = behandlingRepository.findByFagsakAndAvsluttet(fagsakId).filter { !it.erHenlagt() }
+        val avsluttedeBehandlingerSomIkkeErHenlagtPåFagsak =
+            behandlingRepository.findByFagsakAndAvsluttet(fagsakId).filter { !it.erHenlagt() }
         return avsluttedeBehandlingerSomIkkeErHenlagtPåFagsak.mapNotNull {
             tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(
                 it.id
@@ -129,24 +130,10 @@ class BeregningService(
         }.map { it }
     }
 
-    fun erAlleUtbetalingsperioderPåNullKronerIDenneOgForrigeBehandling(behandling: Behandling): Boolean {
-        val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
+    fun erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling: Behandling): Boolean =
+        hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling) == EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
 
-        val andelerTilkjentYtelseForrigeBehandling =
-            behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling)
-                ?.let { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(it.id) }
-
-        val erIngenUtbetalingIForrigeBehandling =
-            andelerTilkjentYtelseForrigeBehandling?.all { it.kalkulertUtbetalingsbeløp == 0 } ?: true
-
-        val erAlleUtbetalingsperioderIDenneBehandlingenPåNullKroner =
-            andelerTilkjentYtelse.all { it.kalkulertUtbetalingsbeløp == 0 }
-
-        return erIngenUtbetalingIForrigeBehandling &&
-            erAlleUtbetalingsperioderIDenneBehandlingenPåNullKroner
-    }
-
-    fun erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling: Behandling): EndringerIUtbetalingForBehandlingSteg {
+    fun hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling: Behandling): EndringerIUtbetalingForBehandlingSteg {
         val endringerIUtbetaling =
             hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandlingTidslinje(behandling)
                 .perioder()
@@ -226,8 +213,8 @@ class BeregningService(
     }
 
     // For at endret utbetaling andeler skal fungere så må man generere andeler før man kobler endringene på andelene
-    // Dette er fordi en endring regnes som gyldig når den overlapper med en andel og har gyldig årsak
-    // Hvis man ikke genererer andeler før man kobler på endringene så vil ingen av endringene ses på som gyldige, altså ikke oppdatere noen andeler
+// Dette er fordi en endring regnes som gyldig når den overlapper med en andel og har gyldig årsak
+// Hvis man ikke genererer andeler før man kobler på endringene så vil ingen av endringene ses på som gyldige, altså ikke oppdatere noen andeler
     fun genererTilkjentYtelseFraVilkårsvurdering(
         behandling: Behandling,
         personopplysningGrunnlag: PersonopplysningGrunnlag

@@ -112,10 +112,11 @@ class BeslutteVedtakTest {
         val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.GODKJENT)
 
         every { vedtakService.hentAktivForBehandling(any()) } returns lagVedtak(behandling)
-        every { beregningService.erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling) } returns EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
+        every { beregningService.hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling) } returns EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
         mockkObject(FerdigstillOppgaver.Companion)
         every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
-        every { beregningService.erAlleUtbetalingsperioderPåNullKronerIDenneOgForrigeBehandling(behandling = behandling) } returns false
+        every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
+        every { featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_BEREGNE_BEHANDLINGSRESULTAT) } returns true
 
         val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
 
@@ -168,7 +169,7 @@ class BeslutteVedtakTest {
         val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.GODKJENT)
 
         every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
-        every { beregningService.erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling) } returns EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING
+        every { beregningService.hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling) } returns EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING
         every { featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_BEREGNE_BEHANDLINGSRESULTAT) } returns true
 
         mockkObject(JournalførVedtaksbrevTask.Companion)
@@ -182,8 +183,7 @@ class BeslutteVedtakTest {
 
         val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
 
-        // verify(exactly = 1) { beregningService.erAlleUtbetalingsperioderPåNullKronerIDenneOgForrigeBehandling(behandling) }
-        verify(exactly = 1) { beregningService.erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling) }
+        verify(exactly = 1) { beregningService.hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling) }
 
         verify(exactly = 1) {
             JournalførVedtaksbrevTask.opprettTaskJournalførVedtaksbrev(
