@@ -150,17 +150,10 @@ class BeslutteVedtak(
     }
 
     private fun sjekkOmBehandlingSkalIverksettesOgHentNesteSteg(behandling: Behandling): StegType {
-        val nesteSteg = if (featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_BEREGNE_BEHANDLINGSRESULTAT)) {
-            val endringerIUtbetaling =
-                beregningService.hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling)
+        val endringerIUtbetaling =
+            beregningService.hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling)
 
-            hentNesteStegGittEndringerIUtbetaling(behandling, endringerIUtbetaling)
-        } else {
-            throw Feil("Gammel kode som er nødvendig når vi kjører den gamle koden er fjernet")
-            hentNesteStegForNormalFlytGammel(behandling)
-        }
-
-        return nesteSteg
+        return hentNesteStegGittEndringerIUtbetaling(behandling, endringerIUtbetaling)
     }
 
     private fun opprettFerdigstillBehandlingTask(behandling: Behandling) {
