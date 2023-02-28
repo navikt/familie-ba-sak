@@ -34,7 +34,7 @@ class NyUtbetalingsoppdragGenerator {
      * Ved opphør sendes kun siste utbetalingsperiode (med opphørsdato).
      *
      * @param[vedtakMedTilkjentYtelse] tilpasset objekt som inneholder tilkjentytelse,og andre nødvendige felter som trenges for å lage utbetalingsoppdrag
-     * @param[forrigeTilkjentYtelse] forrige tilkjentYtelser
+     * @param[forrigeTilkjentYtelse] forrige tilkjentYtelse
      * @return oppdatert TilkjentYtelse som inneholder generert utbetalingsoppdrag
      */
     internal fun lagTilkjentYtelseMedUtbetalingsoppdrag(
