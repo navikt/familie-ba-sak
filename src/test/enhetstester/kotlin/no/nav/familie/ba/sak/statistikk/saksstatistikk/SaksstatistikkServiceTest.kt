@@ -351,7 +351,7 @@ internal class SaksstatistikkServiceTest(
             )
         )
 
-        every { behandlingHentOgPersisterService.hentAktivForFagsak(any()) } returns null
+        every { behandlingHentOgPersisterService.finnAktivForFagsak(any()) } returns null
 
         val sakDvh = sakstatistikkService.mapTilSakDvh(1)
         println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(sakDvh))
@@ -381,7 +381,7 @@ internal class SaksstatistikkServiceTest(
         )
         every { personopplysningerService.hentLandkodeAlpha2UtenlandskBostedsadresse(tilAktør("12345678910")) } returns "SE"
 
-        every { behandlingHentOgPersisterService.hentAktivForFagsak(any()) } returns null
+        every { behandlingHentOgPersisterService.finnAktivForFagsak(any()) } returns null
 
         val sakDvh = sakstatistikkService.mapTilSakDvh(1)
         println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(sakDvh))
@@ -408,7 +408,7 @@ internal class SaksstatistikkServiceTest(
             tilfeldigPerson(personType = PersonType.SØKER)
         )
 
-        every { behandlingHentOgPersisterService.hentAktivForFagsak(any()) } returns lagBehandling()
+        every { behandlingHentOgPersisterService.finnAktivForFagsak(any()) } returns lagBehandling()
 
         val sakDvh = sakstatistikkService.mapTilSakDvh(1)
         println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(sakDvh))

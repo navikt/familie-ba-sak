@@ -278,7 +278,7 @@ class MigreringService(
     }
 
     private fun kastFeilDersomAlleredeMigrert(fagsak: Fagsak) {
-        val aktivBehandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = fagsak.id)
+        val aktivBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = fagsak.id)
         if (aktivBehandling != null) {
             val behandlinger = behandlingHentOgPersisterService.hentBehandlinger(fagsakId = fagsak.id).sortedBy { it.opprettetTidspunkt }
 

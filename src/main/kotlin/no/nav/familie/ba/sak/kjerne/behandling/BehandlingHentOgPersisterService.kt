@@ -27,7 +27,7 @@ class BehandlingHentOgPersisterService(
         return behandlingRepository.saveAndFlush(behandling)
     }
 
-    fun hentAktivForFagsak(fagsakId: Long): Behandling? {
+    fun finnAktivForFagsak(fagsakId: Long): Behandling? {
         return behandlingRepository.findByFagsakAndAktiv(fagsakId)
     }
 

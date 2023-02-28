@@ -67,7 +67,7 @@ class BehandlingService(
             frontendFeilmelding = "Kan ikke lage behandling på person. Fant ikke fagsak."
         )
 
-        val aktivBehandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = fagsak.id)
+        val aktivBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = fagsak.id)
         val sisteBehandlingSomErVedtatt =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsak.id)
 
@@ -183,7 +183,7 @@ class BehandlingService(
     }
 
     fun lagreNyOgDeaktiverGammelBehandling(behandling: Behandling): Behandling {
-        val aktivBehandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = behandling.fagsak.id)
+        val aktivBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = behandling.fagsak.id)
 
         if (aktivBehandling != null) {
             behandlingHentOgPersisterService.lagreOgFlush(behandling = aktivBehandling.also { it.aktiv = false })
