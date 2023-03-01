@@ -123,7 +123,7 @@ class BrevPeriodeService(
         val vedtaksperiodeMedBegrunnelser =
             vedtaksperiodeHentOgPersisterService.hentVedtaksperiodeThrows(vedtaksperiodeId)
 
-        val minimerteUregistrerteBarn = uregistrerteBarn.map { it.tilMinimertUregisrertBarn() }
+        val minimerteUregistrerteBarn = uregistrerteBarn.map { it.tilMinimertUregistrertBarn() }
 
         val utvidetVedtaksperiodeMedBegrunnelse = vedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
             personopplysningGrunnlag = personopplysningGrunnlag,
