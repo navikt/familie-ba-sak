@@ -53,7 +53,7 @@ class SkatteetatenService(
         LOG.info("Fant ${perioderFraInfotrygd.size} skatteetatenperioder fra infotrygd")
 
         val samletPerioder = mutableListOf<SkatteetatenPerioder>()
-        unikePersoner.forEach {person ->
+        unikePersoner.forEach { person ->
             val resultatInfotrygdForPerson =
                 perioderFraInfotrygd.firstOrNull { perioder -> perioder.ident == person }
             val perioderFraInfotrygdForPerson =
