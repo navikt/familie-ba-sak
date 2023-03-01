@@ -23,7 +23,6 @@ object BehandlingsresultatValideringUtils {
         }
     }
 
-    // TODO: Finne ut om denne kan fjernes eller skal være med
     internal fun validerBehandlingsresultat(behandling: Behandling, resultat: Behandlingsresultat) {
         if ((
             behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING && setOf(
