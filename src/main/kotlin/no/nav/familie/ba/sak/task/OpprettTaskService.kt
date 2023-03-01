@@ -13,6 +13,7 @@ import no.nav.familie.prosessering.domene.Task
 import org.slf4j.MDC
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import java.time.YearMonth
 import java.util.Properties
 
 @Service
@@ -82,12 +83,12 @@ class OpprettTaskService(
         }
     }
 
-    fun opprettSatsendringTask(fagsakId: Long) {
+    fun opprettSatsendringTask(fagsakId: Long, satstidspunkt: YearMonth) {
         overstyrTaskMedNyCallId(IdUtils.generateId()) {
             taskRepository.save(
                 Task(
                     type = SatsendringTask.TASK_STEP_TYPE,
-                    payload = fagsakId.toString(),
+                    payload = objectMapper.writeValueAsString(SatsendringTaskDto(fagsakId, satstidspunkt)),
                     properties = Properties().apply {
                         this["fagsakId"] = fagsakId.toString()
                     }

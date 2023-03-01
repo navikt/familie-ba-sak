@@ -38,21 +38,21 @@ class SatsendringStatistikk(
                 ),
                 MultiGauge.Row.of(
                     Tags.of(
-                        "antall-kjort",
+                        "antallkjort",
                         "${YearMonth.now().year}-${YearMonth.now().month}"
                     ),
                     antallKjørt
                 ),
                 MultiGauge.Row.of(
                     Tags.of(
-                        "antall-fagsaker-totalt",
+                        "antallfagsaker",
                         "${YearMonth.now().year}-${YearMonth.now().month}"
                     ),
                     antallFagsakerTotalt
                 ),
                 MultiGauge.Row.of(
                     Tags.of(
-                        "antall-gjenstaaende",
+                        "antallgjenstaaende",
                         "${YearMonth.now().year}-${YearMonth.now().month}"
                     ),
                     antallFagsakerTotalt - antallKjørt
