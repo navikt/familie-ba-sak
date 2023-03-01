@@ -126,7 +126,7 @@ class BehandlingsresultatSteg(
 
         return if (featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_BEREGNE_BEHANDLINGSRESULTAT)) {
             val endringerIUtbetaling =
-                beregningService.erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling)
+                beregningService.hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling)
             hentNesteStegGittEndringerIUtbetaling(behandling, endringerIUtbetaling)
         } else {
             hentNesteStegForNormalFlytGammel(behandling)
