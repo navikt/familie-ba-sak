@@ -24,7 +24,8 @@ object BehandlingsresultatUtils {
     internal fun skalUtledeSøknadsresultatForBehandling(behandling: Behandling): Boolean {
         return behandling.erManuellMigrering() || behandling.opprettetÅrsak in listOf(
             BehandlingÅrsak.SØKNAD,
-            BehandlingÅrsak.FØDSELSHENDELSE
+            BehandlingÅrsak.FØDSELSHENDELSE,
+            BehandlingÅrsak.KLAGE
         )
     }
 
