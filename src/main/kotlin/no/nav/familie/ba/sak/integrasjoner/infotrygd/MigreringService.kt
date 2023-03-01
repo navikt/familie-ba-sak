@@ -431,12 +431,14 @@ class MigreringService(
                 this.isBefore(kjøredato) -> førsteDagIInneværendeMåned()
                 this.isAfter(kjøredato.plusDays(1)) -> førsteDagINesteMåned()
                 else -> {
-                    if (env.erProd()) {
+                    if (env.erDev()) {
+                        førsteDagINesteMåned()
+                    } else {
                         kastOgTellMigreringsFeil(
                             MigreringsfeilType.IKKE_GYLDIG_KJØREDATO,
                             "Kjøring pågår. Vent med migrering til etter ${kjøredato.plusDays(2)}"
                         )
-                    } else førsteDagINesteMåned()
+                    }
                 }
             }.minusMonths(1)
         }
