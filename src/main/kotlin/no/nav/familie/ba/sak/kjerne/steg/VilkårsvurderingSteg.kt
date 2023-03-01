@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -25,7 +24,6 @@ class VilkårsvurderingSteg(
     private val persongrunnlagService: PersongrunnlagService,
     private val tilbakestillBehandlingService: TilbakestillBehandlingService,
     private val tilpassKompetanserTilRegelverkService: TilpassKompetanserTilRegelverkService,
-    private val featureToggleService: FeatureToggleService,
     private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService
 ) : BehandlingSteg<String> {
 
