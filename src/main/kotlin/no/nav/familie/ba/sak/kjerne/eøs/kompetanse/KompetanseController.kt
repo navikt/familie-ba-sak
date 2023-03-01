@@ -60,10 +60,11 @@ class KompetanseController(
 
         val gjeldendeKompetanse = kompetanseService.hentKompetanse(kompetanseId)
 
-        val behandlingId = BehandlingId(gjeldendeKompetanse.behandlingId)
-        kompetanseService.oppdaterKompetanse(behandlingId, kompetanse)
+        val behandlingIdObjekt = BehandlingId(gjeldendeKompetanse.behandlingId)
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId.id)))
+        kompetanseService.oppdaterKompetanse(behandlingIdObjekt, kompetanse)
+
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingIdObjekt.id)))
     }
 
     @DeleteMapping(path = ["{behandlingId}/{kompetanseId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
