@@ -6,8 +6,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilKompetanse
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
-import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MAX_MÅNED
-import no.nav.familie.ba.sak.kjerne.eøs.felles.util.MIN_MÅNED
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -58,8 +56,9 @@ class KompetanseController(
         val barnAktører = restKompetanse.barnIdenter.map { personidentService.hentAktør(it) }
         val kompetanse = restKompetanse.tilKompetanse(barnAktører = barnAktører)
 
+        validerOppdatering(kompetanse)
+
         val gjeldendeKompetanse = kompetanseService.hentKompetanse(kompetanseId)
-        validerOppdatering(gjeldendeKompetanse, kompetanse)
 
         val behandlingId = BehandlingId(gjeldendeKompetanse.behandlingId)
         kompetanseService.oppdaterKompetanse(behandlingId, kompetanse)
@@ -86,24 +85,6 @@ class KompetanseController(
         }
         if (oppdatertKompetanse.barnAktører.isEmpty()) {
             throw FunksjonellFeil("Mangler barn", httpStatus = HttpStatus.BAD_REQUEST)
-        }
-    }
-
-    @Deprecated("Unødvendig med validering av gjeldende kompetanse")
-    private fun validerOppdatering(gjeldendeKompetanse: Kompetanse, oppdatertKompetanse: Kompetanse) {
-        validerOppdatering(oppdatertKompetanse)
-
-        if (oppdatertKompetanse.fom!! < (gjeldendeKompetanse.fom ?: MIN_MÅNED)) {
-            throw FunksjonellFeil("Setter fra-og-med tidligere", httpStatus = HttpStatus.BAD_REQUEST)
-        }
-        if ((oppdatertKompetanse.tom ?: MAX_MÅNED) > (gjeldendeKompetanse.tom ?: MAX_MÅNED)) {
-            throw FunksjonellFeil("Setter til-og-med senere ", httpStatus = HttpStatus.BAD_REQUEST)
-        }
-        if (!gjeldendeKompetanse.barnAktører.containsAll(oppdatertKompetanse.barnAktører)) {
-            throw FunksjonellFeil(
-                "Oppdaterer barn som ikke er knyttet til kompetansen",
-                httpStatus = HttpStatus.BAD_REQUEST
-            )
         }
     }
 }
