@@ -427,15 +427,16 @@ class MigreringService(
     private fun virkningsdatoFra(kjøredato: LocalDate): LocalDate {
         LocalDate.now().run {
             return when {
-                env.erDev() -> this.førsteDagINesteMåned()
                 env.erPreprod() -> LocalDate.of(2022, 1, 1)
-                this.isBefore(kjøredato) -> this.førsteDagIInneværendeMåned()
-                this.isAfter(kjøredato.plusDays(1)) -> this.førsteDagINesteMåned()
+                this.isBefore(kjøredato) -> førsteDagIInneværendeMåned()
+                this.isAfter(kjøredato.plusDays(1)) -> førsteDagINesteMåned()
                 else -> {
-                    kastOgTellMigreringsFeil(
-                        MigreringsfeilType.IKKE_GYLDIG_KJØREDATO,
-                        "Kjøring pågår. Vent med migrering til etter ${kjøredato.plusDays(2)}"
-                    )
+                    if (env.erProd()) {
+                        kastOgTellMigreringsFeil(
+                            MigreringsfeilType.IKKE_GYLDIG_KJØREDATO,
+                            "Kjøring pågår. Vent med migrering til etter ${kjøredato.plusDays(2)}"
+                        )
+                    } else førsteDagINesteMåned()
                 }
             }.minusMonths(1)
         }

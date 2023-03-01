@@ -424,11 +424,11 @@ class VurderTilbakekrevingStegTest {
         økonomiSimuleringMottaker: ØkonomiSimuleringMottaker = mockk(relaxed = true),
         beløp: Int = 0,
         fagOmrådeKode: FagOmrådeKode = FagOmrådeKode.BARNETRYGD,
-        fom: LocalDate = LocalDate.now().minusMonths(1),
-        tom: LocalDate = LocalDate.now().minusMonths(1),
+        fom: LocalDate = LocalDate.of(2023,1,1),
+        tom: LocalDate = LocalDate.of(2023,1,1),
         betalingType: BetalingType = BetalingType.DEBIT,
         posteringType: PosteringType = PosteringType.YTELSE,
-        forfallsdato: LocalDate = LocalDate.now().minusMonths(1),
+        forfallsdato: LocalDate = LocalDate.of(2023,1,1),
         utenInntrekk: Boolean = false
     ) = ØkonomiSimuleringPostering(
         økonomiSimuleringMottaker = økonomiSimuleringMottaker,
