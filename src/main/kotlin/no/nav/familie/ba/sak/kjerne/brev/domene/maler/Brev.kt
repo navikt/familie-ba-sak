@@ -72,11 +72,6 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
         "Informasjonsbrev fødsel mindreårig"
     ),
 
-    @Deprecated(
-        "Brukes ikke lenger. Må ha denne for å kunne få gjennom tasker med gammelt enum-navn." +
-            "Kan fjernes når de har kjørt."
-    )
-    INFORMASJONSBREV_FØDSEL_UMYNDIG(false, "informasjonsbrevFodselVergemaal", "Informasjonsbrev fødsel umyndig"),
     INFORMASJONSBREV_FØDSEL_VERGEMÅL(false, "informasjonsbrevFodselVergemaal", "Informasjonsbrev fødsel vergemål"),
     INFORMASJONSBREV_KAN_SØKE(false, "informasjonsbrevKanSoke", "Informasjonsbrev kan søke"),
     INFORMASJONSBREV_KAN_SØKE_EØS(false, "informasjonsbrevKanSokeEOS", "Informasjonsbrev kan søke EØS"),
@@ -131,7 +126,6 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             SVARTIDSBREV_INSTITUSJON,
             FORLENGET_SVARTIDSBREV,
             FORLENGET_SVARTIDSBREV_INSTITUSJON,
-            INFORMASJONSBREV_FØDSEL_UMYNDIG,
             INFORMASJONSBREV_FØDSEL_VERGEMÅL,
             INFORMASJONSBREV_FØDSEL_MINDREÅRIG,
             INFORMASJONSBREV_KAN_SØKE,
@@ -169,7 +163,6 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             HENLEGGE_TRUKKET_SØKNAD -> Dokumenttype.BARNETRYGD_HENLEGGE_TRUKKET_SØKNAD
             SVARTIDSBREV -> Dokumenttype.BARNETRYGD_SVARTIDSBREV
             FORLENGET_SVARTIDSBREV -> Dokumenttype.BARNETRYGD_FORLENGET_SVARTIDSBREV
-            INFORMASJONSBREV_FØDSEL_UMYNDIG -> Dokumenttype.BARNETRYGD_INFORMASJONSBREV_FØDSEL_VERGEMÅL
             INFORMASJONSBREV_FØDSEL_VERGEMÅL -> Dokumenttype.BARNETRYGD_INFORMASJONSBREV_FØDSEL_VERGEMÅL
             INFORMASJONSBREV_FØDSEL_MINDREÅRIG -> Dokumenttype.BARNETRYGD_INFORMASJONSBREV_FØDSEL_MINDREÅRIG
             INFORMASJONSBREV_KAN_SØKE -> Dokumenttype.BARNETRYGD_INFORMASJONSBREV_KAN_SØKE
@@ -221,7 +214,6 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             SVARTIDSBREV, SVARTIDSBREV_INSTITUSJON -> Distribusjonstype.ANNET
             FORLENGET_SVARTIDSBREV, FORLENGET_SVARTIDSBREV_INSTITUSJON -> Distribusjonstype.ANNET
             INFORMASJONSBREV_FØDSEL_MINDREÅRIG -> Distribusjonstype.ANNET
-            INFORMASJONSBREV_FØDSEL_UMYNDIG -> Distribusjonstype.ANNET
             INFORMASJONSBREV_FØDSEL_VERGEMÅL -> Distribusjonstype.ANNET
             INFORMASJONSBREV_KAN_SØKE -> Distribusjonstype.ANNET
             INFORMASJONSBREV_KAN_SØKE_EØS -> Distribusjonstype.ANNET

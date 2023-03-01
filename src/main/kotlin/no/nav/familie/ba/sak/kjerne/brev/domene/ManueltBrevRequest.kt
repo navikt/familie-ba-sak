@@ -266,7 +266,6 @@ fun ManueltBrevRequest.tilBrev(saksbehandlerNavn: String, hentLandkoder: (() -> 
                 saksbehandlerNavn = saksbehandlerNavn
             )
 
-        Brevmal.INFORMASJONSBREV_FØDSEL_UMYNDIG,
         Brevmal.INFORMASJONSBREV_FØDSEL_VERGEMÅL ->
             EnkeltInformasjonsbrev(
                 navn = this.mottakerNavn,
