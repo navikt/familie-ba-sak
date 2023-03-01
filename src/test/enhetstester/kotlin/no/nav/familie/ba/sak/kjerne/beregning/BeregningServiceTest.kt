@@ -334,8 +334,7 @@ class BeregningServiceTest {
                     avtaletidspunktDeltBosted = avtaletidspunktDeltBosted,
                     søknadstidspunkt = søkandtidspunkt,
                     årsak = Årsak.DELT_BOSTED,
-                    begrunnelse = "En begrunnelse",
-                    andelTilkjentYtelser = andelTilkjentYtelser
+                    begrunnelse = "En begrunnelse"
                 )
             )
 

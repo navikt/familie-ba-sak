@@ -1130,8 +1130,7 @@ fun lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
         avtaletidspunktDeltBosted = avtaletidspunktDeltBosted,
         søknadstidspunkt = søknadstidspunkt,
         begrunnelse = "Test",
-        standardbegrunnelser = standardbegrunnelser,
-        andelTilkjentYtelser = andelTilkjentYtelser
+        standardbegrunnelser = standardbegrunnelser
     )
 
     return EndretUtbetalingAndelMedAndelerTilkjentYtelse(eua, andelTilkjentYtelser)
