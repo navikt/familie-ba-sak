@@ -158,7 +158,7 @@ class BehandlingService(
         begrunnelseVilkårPekere: List<OriginalOgKopiertVilkårResultat> = emptyList()
     ) {
         behandling.steg.takeUnless { it !== StegType.BESLUTTE_VEDTAK && it !== StegType.REGISTRERE_PERSONGRUNNLAG }
-            ?: throw error("Forsøker å initiere vedtak på steg ${behandling.steg}")
+            ?: error("Forsøker å initiere vedtak på steg ${behandling.steg}")
 
         val deaktivertVedtak =
             vedtakRepository.findByBehandlingAndAktivOptional(behandlingId = behandling.id)
