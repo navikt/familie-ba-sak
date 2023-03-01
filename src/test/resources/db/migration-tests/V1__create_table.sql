@@ -3,7 +3,7 @@
 --
 
 -- Dumped from database version 14.5 (Debian 14.5-1.pgdg110+1)
--- Dumped by pg_dump version 14.5
+-- Dumped by pg_dump version 14.6 (Homebrew)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -314,6 +314,40 @@ CREATE SEQUENCE public.behandling_steg_tilstand_seq
 
 
 --
+-- Name: brevmottaker; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.brevmottaker (
+    id bigint NOT NULL,
+    fk_behandling_id bigint NOT NULL,
+    type character varying(50) NOT NULL,
+    navn character varying NOT NULL,
+    adresselinje_1 character varying NOT NULL,
+    adresselinje_2 character varying,
+    postnummer character varying NOT NULL,
+    poststed character varying NOT NULL,
+    landkode character varying(2) NOT NULL,
+    versjon bigint DEFAULT 0 NOT NULL,
+    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
+    endret_av character varying,
+    endret_tid timestamp(3) without time zone
+);
+
+
+--
+-- Name: brevmottaker_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.brevmottaker_seq
+    START WITH 1000000
+    INCREMENT BY 50
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
 -- Name: data_chunk; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -438,6 +472,36 @@ CREATE SEQUENCE public.fagsak_person_seq
 --
 
 CREATE SEQUENCE public.fagsak_seq
+    START WITH 1000000
+    INCREMENT BY 50
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: feilutbetalt_valuta; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.feilutbetalt_valuta (
+    id bigint NOT NULL,
+    fk_behandling_id bigint NOT NULL,
+    fom timestamp(3) without time zone NOT NULL,
+    tom timestamp(3) without time zone NOT NULL,
+    feilutbetalt_beloep numeric,
+    versjon bigint DEFAULT 0 NOT NULL,
+    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
+    endret_av character varying,
+    endret_tid timestamp(3) without time zone
+);
+
+
+--
+-- Name: feilutbetalt_valuta_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.feilutbetalt_valuta_seq
     START WITH 1000000
     INCREMENT BY 50
     NO MINVALUE
@@ -600,8 +664,8 @@ CREATE SEQUENCE public.gr_soknad_seq
 
 CREATE TABLE public.institusjon (
     id bigint NOT NULL,
-    org_nummer character varying,
-    tss_ekstern_id character varying NOT NULL,
+    org_nummer character varying NOT NULL,
+    tss_ekstern_id character varying,
     versjon bigint DEFAULT 0 NOT NULL,
     opprettet_av character varying(20) DEFAULT 'VL'::character varying NOT NULL,
     opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
@@ -715,6 +779,36 @@ CREATE SEQUENCE public.korrigert_etterbetaling_seq
 
 
 --
+-- Name: korrigert_vedtak; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.korrigert_vedtak (
+    id bigint NOT NULL,
+    begrunnelse character varying,
+    vedtaksdato timestamp(3) without time zone DEFAULT NULL::timestamp without time zone,
+    aktiv boolean NOT NULL,
+    fk_behandling_id bigint NOT NULL,
+    versjon bigint DEFAULT 0 NOT NULL,
+    opprettet_av character varying DEFAULT 'VL'::character varying NOT NULL,
+    opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
+    endret_av character varying,
+    endret_tid timestamp(3) without time zone
+);
+
+
+--
+-- Name: korrigert_vedtak_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.korrigert_vedtak_seq
+    START WITH 1000000
+    INCREMENT BY 50
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
 -- Name: logg; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -790,7 +884,8 @@ CREATE TABLE public.okonomi_simulering_postering (
     opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
     endret_av character varying(512),
     endret_tid timestamp(3) without time zone,
-    versjon bigint DEFAULT 0
+    versjon bigint DEFAULT 0,
+    er_feilkonto boolean
 );
 
 
@@ -1144,7 +1239,8 @@ CREATE TABLE public.saksstatistikk_mellomlagring (
     konvertert_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP,
     opprettet_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
     sendt_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP,
-    type_id bigint
+    type_id bigint,
+    offset_aiven bigint
 );
 
 
@@ -1165,6 +1261,31 @@ CREATE SEQUENCE public.saksstatistikk_mellomlagring_seq
 --
 
 CREATE SEQUENCE public.sats_seq
+    START WITH 1000000
+    INCREMENT BY 50
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: satskjoering; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.satskjoering (
+    id bigint NOT NULL,
+    fk_fagsak_id bigint NOT NULL,
+    start_tid timestamp(3) without time zone DEFAULT LOCALTIMESTAMP NOT NULL,
+    ferdig_tid timestamp(3) without time zone,
+    feiltype character varying
+);
+
+
+--
+-- Name: satskjoering_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.satskjoering_seq
     START WITH 1000000
     INCREMENT BY 50
     NO MINVALUE
@@ -1780,6 +1901,18 @@ COPY public.batch (id, kjoredato, status) FROM stdin;
 1001050	2022-09-29 00:00:00	LEDIG
 1001100	2022-10-28 00:00:00	LEDIG
 1001150	2022-11-21 00:00:00	LEDIG
+1001200	2023-01-05 00:00:00	LEDIG
+1001250	2023-01-30 00:00:00	LEDIG
+1001300	2023-02-27 00:00:00	LEDIG
+1001350	2023-03-28 00:00:00	LEDIG
+1001400	2023-04-25 00:00:00	LEDIG
+1001450	2023-05-30 00:00:00	LEDIG
+1001500	2023-06-29 00:00:00	LEDIG
+1001550	2023-07-28 00:00:00	LEDIG
+1001600	2023-08-30 00:00:00	LEDIG
+1001650	2023-09-29 00:00:00	LEDIG
+1001700	2023-10-30 00:00:00	LEDIG
+1001750	2023-11-22 00:00:00	LEDIG
 \.
 
 
@@ -1816,6 +1949,14 @@ COPY public.behandling_steg_tilstand (id, fk_behandling_id, behandling_steg, beh
 
 
 --
+-- Data for Name: brevmottaker; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.brevmottaker (id, fk_behandling_id, type, navn, adresselinje_1, adresselinje_2, postnummer, poststed, landkode, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid) FROM stdin;
+\.
+
+
+--
 -- Data for Name: data_chunk; Type: TABLE DATA; Schema: public; Owner: -
 --
 
@@ -1844,6 +1985,14 @@ COPY public.eos_begrunnelse (id, fk_vedtaksperiode_id, begrunnelse) FROM stdin;
 --
 
 COPY public.fagsak (id, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid, status, arkivert, fk_aktoer_id, type, fk_institusjon_id) FROM stdin;
+\.
+
+
+--
+-- Data for Name: feilutbetalt_valuta; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.feilutbetalt_valuta (id, fk_behandling_id, fom, tom, feilutbetalt_beloep, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid) FROM stdin;
 \.
 
 
@@ -1920,6 +2069,14 @@ COPY public.korrigert_etterbetaling (id, aarsak, begrunnelse, belop, aktiv, fk_b
 
 
 --
+-- Data for Name: korrigert_vedtak; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.korrigert_vedtak (id, begrunnelse, vedtaksdato, aktiv, fk_behandling_id, versjon, opprettet_av, opprettet_tid, endret_av, endret_tid) FROM stdin;
+\.
+
+
+--
 -- Data for Name: logg; Type: TABLE DATA; Schema: public; Owner: -
 --
 
@@ -1939,7 +2096,7 @@ COPY public.okonomi_simulering_mottaker (id, mottaker_nummer, mottaker_type, opp
 -- Data for Name: okonomi_simulering_postering; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.okonomi_simulering_postering (id, fk_okonomi_simulering_mottaker_id, fag_omraade_kode, fom, tom, betaling_type, belop, postering_type, forfallsdato, uten_inntrekk, opprettet_av, opprettet_tid, endret_av, endret_tid, versjon) FROM stdin;
+COPY public.okonomi_simulering_postering (id, fk_okonomi_simulering_mottaker_id, fag_omraade_kode, fom, tom, betaling_type, belop, postering_type, forfallsdato, uten_inntrekk, opprettet_av, opprettet_tid, endret_av, endret_tid, versjon, er_feilkonto) FROM stdin;
 \.
 
 
@@ -2035,7 +2192,15 @@ COPY public.po_statsborgerskap (id, fk_po_person_id, landkode, fom, tom, opprett
 -- Data for Name: saksstatistikk_mellomlagring; Type: TABLE DATA; Schema: public; Owner: -
 --
 
-COPY public.saksstatistikk_mellomlagring (id, offset_verdi, funksjonell_id, type, kontrakt_versjon, json, konvertert_tid, opprettet_tid, sendt_tid, type_id) FROM stdin;
+COPY public.saksstatistikk_mellomlagring (id, offset_verdi, funksjonell_id, type, kontrakt_versjon, json, konvertert_tid, opprettet_tid, sendt_tid, type_id, offset_aiven) FROM stdin;
+\.
+
+
+--
+-- Data for Name: satskjoering; Type: TABLE DATA; Schema: public; Owner: -
+--
+
+COPY public.satskjoering (id, fk_fagsak_id, start_tid, ferdig_tid, feiltype) FROM stdin;
 \.
 
 
@@ -2060,8 +2225,8 @@ COPY public.skyggesak (id, fk_fagsak_id, sendt_tid) FROM stdin;
 --
 
 COPY public.task (id, payload, status, versjon, opprettet_tid, type, metadata, trigger_tid, avvikstype) FROM stdin;
-51	1654	FERDIG	4	2022-09-04 22:01:02.051	startsatsendringforallebehandlinger	callId=startsatsendringforallebehandlinger-07.01.2022\n	2022-09-04 22:01:02.050895	\N
-1	1654	FERDIG	4	2022-09-04 22:01:01.532	startsatsendringforallebehandlinger	callId=startsatsendringforallebehandlinger-06.01.2022\n	2022-09-04 22:01:01.531917	\N
+51	1654	UBEHANDLET	1	2023-03-01 20:04:59.417	startsatsendringforallebehandlinger	callId=startsatsendringforallebehandlinger-07.01.2022	2023-03-01 20:04:59.416685	\N
+1	1654	UBEHANDLET	1	2023-03-01 20:04:59.393	startsatsendringforallebehandlinger	callId=startsatsendringforallebehandlinger-06.01.2022	2023-03-01 20:04:59.39289	\N
 \.
 
 
@@ -2070,12 +2235,6 @@ COPY public.task (id, payload, status, versjon, opprettet_tid, type, metadata, t
 --
 
 COPY public.task_logg (id, task_id, type, node, opprettet_tid, melding, endret_av) FROM stdin;
-51	1	PLUKKET	node1	2022-09-04 22:02:04.294	\N	VL
-251	1	BEHANDLER	node1	2022-09-04 22:02:04.589	\N	VL
-351	1	FERDIG	node1	2022-09-04 22:02:04.874	\N	VL
-1	51	PLUKKET	node1	2022-09-04 22:02:04.298	\N	VL
-201	51	BEHANDLER	node1	2022-09-04 22:02:04.588	\N	VL
-301	51	FERDIG	node1	2022-09-04 22:02:04.873	\N	VL
 \.
 
 
@@ -2200,7 +2359,7 @@ SELECT pg_catalog.setval('public.arbeidsfordeling_pa_behandling_seq', 1000000, f
 -- Name: batch_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.batch_seq', 1001150, true);
+SELECT pg_catalog.setval('public.batch_seq', 1001750, true);
 
 
 --
@@ -2229,6 +2388,13 @@ SELECT pg_catalog.setval('public.behandling_soknadsinfo_seq', 1000000, false);
 --
 
 SELECT pg_catalog.setval('public.behandling_steg_tilstand_seq', 1000000, false);
+
+
+--
+-- Name: brevmottaker_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.brevmottaker_seq', 1000000, false);
 
 
 --
@@ -2264,6 +2430,13 @@ SELECT pg_catalog.setval('public.fagsak_person_seq', 1000000, false);
 --
 
 SELECT pg_catalog.setval('public.fagsak_seq', 1000000, false);
+
+
+--
+-- Name: feilutbetalt_valuta_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.feilutbetalt_valuta_seq', 1000000, false);
 
 
 --
@@ -2327,6 +2500,13 @@ SELECT pg_catalog.setval('public.kompetanse_seq', 1000000, false);
 --
 
 SELECT pg_catalog.setval('public.korrigert_etterbetaling_seq', 1000000, false);
+
+
+--
+-- Name: korrigert_vedtak_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.korrigert_vedtak_seq', 1000000, false);
 
 
 --
@@ -2435,6 +2615,13 @@ SELECT pg_catalog.setval('public.sats_seq', 1000000, false);
 
 
 --
+-- Name: satskjoering_seq; Type: SEQUENCE SET; Schema: public; Owner: -
+--
+
+SELECT pg_catalog.setval('public.satskjoering_seq', 1000000, false);
+
+
+--
 -- Name: sett_paa_vent_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
@@ -2452,7 +2639,7 @@ SELECT pg_catalog.setval('public.skyggesak_seq', 1000000, false);
 -- Name: task_logg_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.task_logg_seq', 351, true);
+SELECT pg_catalog.setval('public.task_logg_seq', 1, false);
 
 
 --
@@ -2690,6 +2877,14 @@ ALTER TABLE ONLY public.tilkjent_ytelse
 
 
 --
+-- Name: brevmottaker brevmottaker_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.brevmottaker
+    ADD CONSTRAINT brevmottaker_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: data_chunk data_chunk_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2810,6 +3005,14 @@ ALTER TABLE ONLY public.korrigert_etterbetaling
 
 
 --
+-- Name: korrigert_vedtak korrigert_vedtak_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.korrigert_vedtak
+    ADD CONSTRAINT korrigert_vedtak_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: logg logg_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2922,6 +3125,14 @@ ALTER TABLE ONLY public.saksstatistikk_mellomlagring
 
 
 --
+-- Name: satskjoering satskjoering_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.satskjoering
+    ADD CONSTRAINT satskjoering_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: sett_paa_vent sett_paa_vent_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -2951,6 +3162,14 @@ ALTER TABLE ONLY public.tilbakekreving
 
 ALTER TABLE ONLY public.totrinnskontroll
     ADD CONSTRAINT totrinnskontroll_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: feilutbetalt_valuta trekk_i_loepende_utbetaling_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.feilutbetalt_valuta
+    ADD CONSTRAINT trekk_i_loepende_utbetaling_pkey PRIMARY KEY (id);
 
 
 --
@@ -3090,6 +3309,13 @@ CREATE INDEX behandling_migreringsinfo_fk_behandling_id_idx ON public.behandling
 
 
 --
+-- Name: behandling_opprettet_tid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX behandling_opprettet_tid_idx ON public.behandling USING btree (opprettet_tid);
+
+
+--
 -- Name: behandling_soknadsinfo_fk_behandling_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -3115,6 +3341,13 @@ CREATE INDEX behandling_vedtak_fk_behandling_id_idx ON public.vedtak USING btree
 --
 
 CREATE INDEX beregning_resultat_fk_behandling_id_idx ON public.tilkjent_ytelse USING btree (fk_behandling_id);
+
+
+--
+-- Name: brevmottaker_fk_behandling_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX brevmottaker_fk_behandling_id_idx ON public.brevmottaker USING btree (fk_behandling_id);
 
 
 --
@@ -3157,6 +3390,20 @@ CREATE INDEX eos_begrunnelse_fk_vedtaksperiode_id_idx ON public.eos_begrunnelse 
 --
 
 CREATE INDEX fagsak_fk_idx ON public.fagsak USING btree (fk_aktoer_id);
+
+
+--
+-- Name: fagsak_status_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX fagsak_status_idx ON public.fagsak USING btree (status);
+
+
+--
+-- Name: feilutbetalt_valuta_fk_behandling_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX feilutbetalt_valuta_fk_behandling_id_idx ON public.feilutbetalt_valuta USING btree (fk_behandling_id);
 
 
 --
@@ -3234,6 +3481,13 @@ CREATE INDEX kompetanse_fk_behandling_id_idx ON public.kompetanse USING btree (f
 --
 
 CREATE INDEX korrigert_etterbetaling_fk_behandling_id_idx ON public.korrigert_etterbetaling USING btree (fk_behandling_id);
+
+
+--
+-- Name: korrigert_vedtak_fk_behandling_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX korrigert_vedtak_fk_behandling_id_idx ON public.korrigert_vedtak USING btree (fk_behandling_id);
 
 
 --
@@ -3353,6 +3607,13 @@ CREATE INDEX saksstatistikk_mellomlagring_sendt_tid_null_idx ON public.saksstati
 --
 
 CREATE INDEX saksstatistikk_mellomlagring_type_id_idx ON public.saksstatistikk_mellomlagring USING btree (type_id);
+
+
+--
+-- Name: satskjoering_fagsak_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX satskjoering_fagsak_id_idx ON public.satskjoering USING btree (fk_fagsak_id);
 
 
 --
@@ -3483,6 +3744,13 @@ CREATE UNIQUE INDEX uidx_institusjon_tss_ekstern_id ON public.institusjon USING 
 --
 
 CREATE UNIQUE INDEX uidx_korrigert_etterbetaling_fk_behandling_id_aktiv ON public.korrigert_etterbetaling USING btree (fk_behandling_id) WHERE (aktiv = true);
+
+
+--
+-- Name: uidx_korrigert_vedtak_fk_behandling_id_aktiv; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX uidx_korrigert_vedtak_fk_behandling_id_aktiv ON public.korrigert_vedtak USING btree (fk_behandling_id) WHERE (aktiv = true);
 
 
 --
@@ -3744,6 +4012,14 @@ ALTER TABLE ONLY public.tilkjent_ytelse
 
 
 --
+-- Name: brevmottaker brevmottaker_fk_behandling_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.brevmottaker
+    ADD CONSTRAINT brevmottaker_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling(id) ON DELETE CASCADE;
+
+
+--
 -- Name: data_chunk data_chunk_fk_batch_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -3912,6 +4188,14 @@ ALTER TABLE ONLY public.korrigert_etterbetaling
 
 
 --
+-- Name: korrigert_vedtak korrigert_vedtak_fk_behandling_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.korrigert_vedtak
+    ADD CONSTRAINT korrigert_vedtak_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling(id);
+
+
+--
 -- Name: logg logg_fk_behandling_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -4008,6 +4292,14 @@ ALTER TABLE ONLY public.po_statsborgerskap
 
 
 --
+-- Name: satskjoering satskjoering_fk_fagsak_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.satskjoering
+    ADD CONSTRAINT satskjoering_fk_fagsak_id_fkey FOREIGN KEY (fk_fagsak_id) REFERENCES public.fagsak(id) ON DELETE CASCADE;
+
+
+--
 -- Name: sett_paa_vent sett_paa_vent_fk_behandling_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -4029,6 +4321,14 @@ ALTER TABLE ONLY public.tilbakekreving
 
 ALTER TABLE ONLY public.totrinnskontroll
     ADD CONSTRAINT totrinnskontroll_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling(id);
+
+
+--
+-- Name: feilutbetalt_valuta trekk_i_loepende_utbetaling_fk_behandling_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.feilutbetalt_valuta
+    ADD CONSTRAINT trekk_i_loepende_utbetaling_fk_behandling_id_fkey FOREIGN KEY (fk_behandling_id) REFERENCES public.behandling(id);
 
 
 --
