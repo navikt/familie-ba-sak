@@ -1,9 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
 import io.mockk.every
-import io.mockk.impl.annotations.InjectMockKs
-import io.mockk.impl.annotations.MockK
-import io.mockk.junit5.MockKExtension
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.lagBehandling
@@ -29,23 +26,17 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
-import org.junit.jupiter.api.extension.ExtendWith
 import java.math.BigDecimal
 import java.time.LocalDate
 
-@ExtendWith(MockKExtension::class)
 class VurderTilbakekrevingStegTest {
-    @MockK
-    private lateinit var tilbakekrevingService: TilbakekrevingService
 
-    @MockK
-    private lateinit var simuleringService: SimuleringService
+    private val tilbakekrevingService: TilbakekrevingService = mockk()
+    private val simuleringService: SimuleringService = mockk()
+    private val featureToggleService: FeatureToggleService = mockk()
 
-    @MockK
-    private lateinit var featureToggleService: FeatureToggleService
-
-    @InjectMockKs
-    private lateinit var vurderTilbakekrevingSteg: VurderTilbakekrevingSteg
+    private val vurderTilbakekrevingSteg: VurderTilbakekrevingSteg =
+        VurderTilbakekrevingSteg(featureToggleService, tilbakekrevingService, simuleringService)
 
     private val behandling: Behandling = lagBehandling(
         behandlingType = BehandlingType.REVURDERING,
@@ -63,9 +54,8 @@ class VurderTilbakekrevingStegTest {
         every { tilbakekrevingService.søkerHarÅpenTilbakekreving(any()) } returns false
         every { tilbakekrevingService.validerRestTilbakekreving(any(), any()) } returns Unit
         every { tilbakekrevingService.lagreTilbakekreving(any(), any()) } returns null
-        every { featureToggleService.isEnabled(FeatureToggleConfig.ENDRINGER_I_VALIDERING_FOR_MIGRERINGSBEHANDLING) } returns true
-        every { featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ) } returns true
-        every { featureToggleService.isEnabled(FeatureToggleConfig.MIGRERING_MED_FEILUTBETALING_UNDER_BELØPSGRENSE, true) } returns true
+        every { featureToggleService.isEnabled(any()) } returns true
+        every { featureToggleService.isEnabled(any(), true) } returns true
     }
 
     @Test

@@ -51,6 +51,7 @@ class RegistrerPersongrunnlagEnhetTest {
         val behandling2 = lagBehandling()
 
         every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling2) } returns behandling1
+        every { featureToggleService.isEnabled(any()) } returns true
 
         every {
             personopplysningGrunnlagForNyBehandlingService.opprettPersonopplysningGrunnlag(

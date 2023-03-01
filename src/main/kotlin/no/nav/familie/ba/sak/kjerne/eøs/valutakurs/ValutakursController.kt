@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.valutakurs
 
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.RestValutakurs
 import no.nav.familie.ba.sak.ekstern.restDomene.tilValutakurs
@@ -25,6 +26,7 @@ import java.time.LocalDate
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class ValutakursController(
+    private val featureToggleService: FeatureToggleService,
     private val valutakursService: ValutakursService,
     private val personidentService: PersonidentService,
     private val utvidetBehandlingService: UtvidetBehandlingService,

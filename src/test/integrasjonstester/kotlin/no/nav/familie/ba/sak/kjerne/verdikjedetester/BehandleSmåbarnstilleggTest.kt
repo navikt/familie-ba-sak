@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.EfSakRestClientMock
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.dataGenerator.behandling.kjørStegprosessForBehandling
 import no.nav.familie.ba.sak.dataGenerator.vilkårsvurdering.lagVilkårsvurderingFraRestScenario
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
@@ -81,6 +82,7 @@ class BehandleSmåbarnstilleggTest(
     @Autowired private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val stegService: StegService,
+    @Autowired private val featureToggleService: FeatureToggleService,
     @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     @Autowired private val personidentService: PersonidentService,
     @Autowired private val efSakRestClient: EfSakRestClient,
@@ -142,6 +144,7 @@ class BehandleSmåbarnstilleggTest(
     @Test
     @Order(1)
     fun `Skal behandle utvidet nasjonal sak med småbarnstillegg`() {
+        every { featureToggleService.isEnabled(any()) } returns true
         val søkersIdent = scenario.søker.ident!!
         settOppefSakMockForDeFørste2Testene(søkersIdent)
 

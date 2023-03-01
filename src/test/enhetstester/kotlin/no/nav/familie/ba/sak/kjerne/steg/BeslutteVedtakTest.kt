@@ -2,17 +2,14 @@ package no.nav.familie.ba.sak.kjerne.steg
 
 import io.mockk.Runs
 import io.mockk.every
-import io.mockk.impl.annotations.InjectMockKs
-import io.mockk.impl.annotations.MockK
-import io.mockk.junit5.MockKExtension
 import io.mockk.just
+import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.runs
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVedtak
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -39,51 +36,38 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.junit.jupiter.api.extension.ExtendWith
 
-@ExtendWith(MockKExtension::class)
 class BeslutteVedtakTest {
 
-    @MockK
-    private lateinit var vedtakService: VedtakService
-
-    @MockK
-    private lateinit var behandlingService: BehandlingService
-
-    @MockK
-    private lateinit var beregningService: BeregningService
-
-    @MockK
-    private lateinit var taskRepository: TaskRepositoryWrapper
-
-    @MockK
-    private lateinit var dokumentService: DokumentService
-
-    @MockK
-    private lateinit var vilkårsvurderingService: VilkårsvurderingService
-
-    @MockK
-    private lateinit var featureToggleService: FeatureToggleService
-
-    @MockK
-    private lateinit var tilkjentYtelseValideringService: TilkjentYtelseValideringService
-
-    @MockK
-    private lateinit var totrinnskontrollService: TotrinnskontrollService
-
-    @MockK
-    private lateinit var loggService: LoggService
-
-    @InjectMockKs
     private lateinit var beslutteVedtak: BeslutteVedtak
+    private lateinit var vedtakService: VedtakService
+    private lateinit var behandlingService: BehandlingService
+    private lateinit var beregningService: BeregningService
+    private lateinit var taskRepository: TaskRepositoryWrapper
+    private lateinit var dokumentService: DokumentService
+    private lateinit var vilkårsvurderingService: VilkårsvurderingService
+    private lateinit var featureToggleService: FeatureToggleService
+    private lateinit var tilkjentYtelseValideringService: TilkjentYtelseValideringService
 
     private val randomVilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling())
 
     @BeforeEach
     fun setUp() {
+        val toTrinnKontrollService = mockk<TotrinnskontrollService>()
+        vedtakService = mockk()
+        taskRepository = mockk()
+        dokumentService = mockk()
+        behandlingService = mockk()
+        beregningService = mockk()
+        vilkårsvurderingService = mockk()
+        featureToggleService = mockk()
+        tilkjentYtelseValideringService = mockk()
+
+        val loggService = mockk<LoggService>()
+
         every { taskRepository.save(any()) } returns Task(OpprettOppgaveTask.TASK_STEP_TYPE, "")
         every {
-            totrinnskontrollService.besluttTotrinnskontroll(
+            toTrinnKontrollService.besluttTotrinnskontroll(
                 any(),
                 any(),
                 any(),
@@ -100,6 +84,19 @@ class BeslutteVedtakTest {
         every { behandlingService.opprettOgInitierNyttVedtakForBehandling(any(), any(), any()) } just runs
         every { vilkårsvurderingService.hentAktivForBehandling(any()) } returns randomVilkårsvurdering
         every { vilkårsvurderingService.lagreNyOgDeaktiverGammel(any()) } returns randomVilkårsvurdering
+        every { featureToggleService.isEnabled(any()) } returns false
+
+        beslutteVedtak = BeslutteVedtak(
+            toTrinnKontrollService,
+            vedtakService,
+            behandlingService,
+            beregningService,
+            taskRepository,
+            loggService,
+            vilkårsvurderingService,
+            featureToggleService,
+            tilkjentYtelseValideringService
+        )
     }
 
     @Test
@@ -212,8 +209,6 @@ class BeslutteVedtakTest {
 
     @Test
     fun `Skal kaste feil dersom toggle ikke er enabled og årsak er korreksjon vedtaksbrev`() {
-        every { featureToggleService.isEnabled(FeatureToggleConfig.KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV) } returns false
-
         val behandling = lagBehandling(årsak = BehandlingÅrsak.KORREKSJON_VEDTAKSBREV)
         behandling.status = BehandlingStatus.FATTER_VEDTAK
         behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
@@ -231,8 +226,6 @@ class BeslutteVedtakTest {
 
     @Test
     fun `Skal kaste feil dersom saksbehandler uten tilgang til teknisk endring prøve å godkjenne en behandling med årsak=teknisk endring`() {
-        every { featureToggleService.isEnabled(FeatureToggleConfig.TEKNISK_ENDRING) } returns false
-
         val behandling = lagBehandling(årsak = BehandlingÅrsak.TEKNISK_ENDRING)
         behandling.status = BehandlingStatus.FATTER_VEDTAK
         behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))

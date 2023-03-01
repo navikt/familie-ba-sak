@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import io.mockk.every
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
@@ -42,7 +41,7 @@ class TekniskEndringAvFødselshendelseTest(
 
     @Test
     fun `Skal teknisk opphøre fødselshendelse`() {
-        every { featureToggleService.isEnabled(FeatureToggleConfig.TEKNISK_ENDRING) } returns true
+        every { featureToggleService.isEnabled(any()) } returns true
 
         val scenario = mockServerKlient().lagScenario(
             RestScenario(
