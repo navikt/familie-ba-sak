@@ -47,7 +47,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers.empty
 import org.hamcrest.Matchers.not
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -894,31 +893,25 @@ internal class TilkjentYtelseUtilsTest {
         assertThat(utvidetAndeler[0].stønadFom, Is(april2022))
         assertThat(utvidetAndeler[0].stønadTom, Is(juli2022))
         assertThat(utvidetAndeler[0].prosent, Is(BigDecimal.ZERO))
-        assertThat(utvidetAndeler[0].endretUtbetalingAndeler, Is(not(empty())))
         assertThat(utvidetAndeler[1].stønadFom, Is(august2022))
         assertThat(utvidetAndeler[1].stønadTom, Is(månedFørBarnBlir18))
         assertThat(utvidetAndeler[1].prosent, Is(BigDecimal(50)))
-        assertThat(utvidetAndeler[1].endretUtbetalingAndeler, Is((empty())))
 
         assertEquals(2, småbarnstilleggAndeler.size)
         assertThat(småbarnstilleggAndeler[0].stønadFom, Is(april2022))
         assertThat(småbarnstilleggAndeler[0].stønadTom, Is(juli2022))
         assertThat(småbarnstilleggAndeler[0].prosent, Is(BigDecimal.ZERO))
-        assertThat(småbarnstilleggAndeler[0].endretUtbetalingAndeler, Is((empty())))
         assertThat(småbarnstilleggAndeler[1].stønadFom, Is(august2022))
         assertThat(småbarnstilleggAndeler[1].stønadTom, Is(barnFyller3ÅrDato))
         assertThat(småbarnstilleggAndeler[1].prosent, Is(BigDecimal(100)))
-        assertThat(småbarnstilleggAndeler[1].endretUtbetalingAndeler, Is((empty())))
 
         assertEquals(2, barnasAndeler.size)
         assertThat(barnasAndeler[0].stønadFom, Is(april2022))
         assertThat(barnasAndeler[0].stønadTom, Is(juli2022))
         assertThat(barnasAndeler[0].prosent, Is(BigDecimal.ZERO))
-        assertThat(barnasAndeler[0].endretUtbetalingAndeler, Is(not(empty())))
         assertThat(barnasAndeler[1].stønadFom, Is(august2022))
         assertThat(barnasAndeler[1].stønadTom, Is(månedFørBarnBlir6))
         assertThat(barnasAndeler[1].prosent, Is(BigDecimal(50)))
-        assertThat(barnasAndeler[1].endretUtbetalingAndeler, Is((empty())))
     }
 
     // src/test/resources/scenario/Far søker om delt bosted - Mor har tidligere mottatt fult, men har ikke mottatt utvidet
@@ -964,24 +957,20 @@ internal class TilkjentYtelseUtilsTest {
         assertThat(utvidetAndeler[0].stønadFom, Is(april2022))
         assertThat(utvidetAndeler[0].stønadTom, Is(månedFørBarnBlir18))
         assertThat(utvidetAndeler[0].prosent, Is(BigDecimal(50)))
-        assertThat(utvidetAndeler[0].endretUtbetalingAndeler, Is((empty())))
 
         assertEquals(1, småbarnstilleggAndeler.size)
         assertThat(småbarnstilleggAndeler[0].stønadFom, Is(april2022))
         assertThat(småbarnstilleggAndeler[0].stønadTom, Is(barnFyller3ÅrDato))
         assertThat(småbarnstilleggAndeler[0].prosent, Is(BigDecimal(100)))
-        assertThat(småbarnstilleggAndeler[0].endretUtbetalingAndeler, Is((empty())))
 
         // BARN
         assertEquals(2, barnasAndeler.size)
         assertThat(barnasAndeler[0].stønadFom, Is(april2022))
         assertThat(barnasAndeler[0].stønadTom, Is(juli2022))
         assertThat(barnasAndeler[0].prosent, Is(BigDecimal.ZERO))
-        assertThat(barnasAndeler[0].endretUtbetalingAndeler, Is(not(empty())))
         assertThat(barnasAndeler[1].stønadFom, Is(august2022))
         assertThat(barnasAndeler[1].stønadTom, Is(månedFørBarnBlir6))
         assertThat(barnasAndeler[1].prosent, Is(BigDecimal(50)))
-        assertThat(barnasAndeler[1].endretUtbetalingAndeler, Is((empty())))
     }
 
     // src/test/resources/scenario/Mor har tidligere mottatt barnetrygden - Far har nå søkt om delt bosted og mors barnetrygd skal også deles
@@ -1040,28 +1029,23 @@ internal class TilkjentYtelseUtilsTest {
         assertThat(utvidetAndeler[0].stønadFom, Is(juni2022))
         assertThat(utvidetAndeler[0].stønadTom, Is(månedFørBarnBlir18))
         assertThat(utvidetAndeler[0].prosent, Is(BigDecimal(50)))
-        assertThat(utvidetAndeler[0].endretUtbetalingAndeler, Is((empty())))
 
         assertEquals(1, småbarnstilleggAndeler.size)
         assertThat(småbarnstilleggAndeler[0].stønadFom, Is(juni2022))
         assertThat(småbarnstilleggAndeler[0].stønadTom, Is(barnFyller3ÅrDato))
         assertThat(småbarnstilleggAndeler[0].prosent, Is(BigDecimal(100)))
-        assertThat(småbarnstilleggAndeler[0].endretUtbetalingAndeler, Is((empty())))
 
         // BARN
         assertEquals(3, barnasAndeler.size)
         assertThat(barnasAndeler[0].stønadFom, Is(mars2022))
         assertThat(barnasAndeler[0].stønadTom, Is(mai2022))
         assertThat(barnasAndeler[0].prosent, Is(BigDecimal(100)))
-        assertThat(barnasAndeler[0].endretUtbetalingAndeler, Is((empty())))
         assertThat(barnasAndeler[1].stønadFom, Is(juni2022))
         assertThat(barnasAndeler[1].stønadTom, Is(juli2022))
         assertThat(barnasAndeler[1].prosent, Is(BigDecimal(100)))
-        assertThat(barnasAndeler[1].endretUtbetalingAndeler, Is(not(empty())))
         assertThat(barnasAndeler[2].stønadFom, Is(august2022))
         assertThat(barnasAndeler[2].stønadTom, Is(månedFørBarnBlir6))
         assertThat(barnasAndeler[2].prosent, Is(BigDecimal(50)))
-        assertThat(barnasAndeler[2].endretUtbetalingAndeler, Is((empty())))
     }
 
     // src/test/resources/scenario/Mor har tidligere mottatt barnetrygden - Far har nå søkt om delt bosted og mors barnetrygd skal også deles 2
@@ -1125,35 +1109,28 @@ internal class TilkjentYtelseUtilsTest {
         assertThat(utvidetAndeler[0].stønadFom, Is(mars2022))
         assertThat(utvidetAndeler[0].stønadTom, Is(mai2022))
         assertThat(utvidetAndeler[0].prosent, Is(BigDecimal(100)))
-        assertThat(utvidetAndeler[0].endretUtbetalingAndeler, Is((empty())))
         assertThat(utvidetAndeler[1].stønadFom, Is(juni2022))
         assertThat(utvidetAndeler[1].stønadTom, Is(juli2022))
         assertThat(utvidetAndeler[1].prosent, Is(BigDecimal(100)))
-        assertThat(utvidetAndeler[1].endretUtbetalingAndeler, Is(not(empty())))
         assertThat(utvidetAndeler[2].stønadFom, Is(august2022))
         assertThat(utvidetAndeler[2].stønadTom, Is(månedFørBarnBlir18))
         assertThat(utvidetAndeler[2].prosent, Is(BigDecimal(50)))
-        assertThat(utvidetAndeler[2].endretUtbetalingAndeler, Is((empty())))
 
         assertEquals(1, småbarnstilleggAndeler.size)
         assertThat(småbarnstilleggAndeler[0].stønadFom, Is(mars2022))
         assertThat(småbarnstilleggAndeler[0].stønadTom, Is(barnFyller3ÅrDato))
         assertThat(småbarnstilleggAndeler[0].prosent, Is(BigDecimal(100)))
-        assertThat(småbarnstilleggAndeler[0].endretUtbetalingAndeler, Is((empty())))
 
         assertEquals(3, barnasAndeler.size)
         assertThat(barnasAndeler[0].stønadFom, Is(mars2022))
         assertThat(barnasAndeler[0].stønadTom, Is(mai2022))
         assertThat(barnasAndeler[0].prosent, Is(BigDecimal(100)))
-        assertThat(barnasAndeler[0].endretUtbetalingAndeler, Is((empty())))
         assertThat(barnasAndeler[1].stønadFom, Is(juni2022))
         assertThat(barnasAndeler[1].stønadTom, Is(juli2022))
         assertThat(barnasAndeler[1].prosent, Is(BigDecimal(100)))
-        assertThat(barnasAndeler[1].endretUtbetalingAndeler, Is(not(empty())))
         assertThat(barnasAndeler[2].stønadFom, Is(august2022))
         assertThat(barnasAndeler[2].stønadTom, Is(månedFørBarnBlir6))
         assertThat(barnasAndeler[2].prosent, Is(BigDecimal(50)))
-        assertThat(barnasAndeler[2].endretUtbetalingAndeler, Is((empty())))
     }
 
     // src/test/resources/scenario/Far søker om utvidet barnetrygd - Har full overgangsstønad, men søker sent og får ikke etterbetalt mer enn 3år
@@ -1202,32 +1179,26 @@ internal class TilkjentYtelseUtilsTest {
         assertThat(utvidetAndeler[0].stønadFom, Is(april2019))
         assertThat(utvidetAndeler[0].stønadTom, Is(juli2019))
         assertThat(utvidetAndeler[0].prosent, Is(BigDecimal(0)))
-        assertThat(utvidetAndeler[0].endretUtbetalingAndeler, Is(not(empty())))
         assertThat(utvidetAndeler[1].stønadFom, Is(august2019))
         assertThat(utvidetAndeler[1].stønadTom, Is(månedFørBarnBlir18))
         assertThat(utvidetAndeler[1].prosent, Is(BigDecimal(100)))
-        assertThat(utvidetAndeler[1].endretUtbetalingAndeler, Is((empty())))
 
         assertEquals(2, småbarnstilleggAndeler.size)
         assertThat(småbarnstilleggAndeler[0].stønadFom, Is(april2019))
         assertThat(småbarnstilleggAndeler[0].stønadTom, Is(juli2019))
         assertThat(småbarnstilleggAndeler[0].prosent, Is(BigDecimal(0)))
-        assertThat(småbarnstilleggAndeler[0].endretUtbetalingAndeler, Is((empty())))
         assertThat(småbarnstilleggAndeler[1].stønadFom, Is(august2019))
         assertThat(småbarnstilleggAndeler[1].stønadTom, Is(august2019))
         assertThat(småbarnstilleggAndeler[1].prosent, Is(BigDecimal(100)))
-        assertThat(småbarnstilleggAndeler[1].endretUtbetalingAndeler, Is((empty())))
 
         // BARN
         assertEquals(2, barnasAndeler.size)
         assertThat(barnasAndeler[0].stønadFom, Is(april2019))
         assertThat(barnasAndeler[0].stønadTom, Is(juli2019))
         assertThat(barnasAndeler[0].prosent, Is(BigDecimal(0)))
-        assertThat(barnasAndeler[0].endretUtbetalingAndeler, Is(not(empty())))
         assertThat(barnasAndeler[1].stønadFom, Is(august2019))
         assertThat(barnasAndeler[1].stønadTom, Is(august2020))
         assertThat(barnasAndeler[1].prosent, Is(BigDecimal(100)))
-        assertThat(barnasAndeler[1].endretUtbetalingAndeler, Is((empty())))
     }
 
     // src/test/resources/scenario/Far har mottatt delt utvidet barnetrygd for barn 12år - Søker nå om barnetrygd for barn som flyttet til han for over 3 år siden
@@ -1288,21 +1259,17 @@ internal class TilkjentYtelseUtilsTest {
         assertThat(utvidetAndeler[0].stønadFom, Is(mars2019))
         assertThat(utvidetAndeler[0].stønadTom, Is(juli2019))
         assertThat(utvidetAndeler[0].prosent, Is(BigDecimal(50)))
-        assertThat(utvidetAndeler[0].endretUtbetalingAndeler, Is((empty())))
         assertThat(utvidetAndeler[1].stønadFom, Is(august2019))
         assertThat(utvidetAndeler[1].stønadTom, Is(månedFørBarnFødtAugust2016Blir18))
         assertThat(utvidetAndeler[1].prosent, Is(BigDecimal(100)))
-        assertThat(utvidetAndeler[1].endretUtbetalingAndeler, Is((empty())))
 
         assertEquals(2, småbarnstilleggAndeler.size)
         assertThat(småbarnstilleggAndeler[0].stønadFom, Is(april2019))
         assertThat(småbarnstilleggAndeler[0].stønadTom, Is(juli2019))
         assertThat(småbarnstilleggAndeler[0].prosent, Is(BigDecimal(0)))
-        assertThat(småbarnstilleggAndeler[0].endretUtbetalingAndeler, Is((empty())))
         assertThat(småbarnstilleggAndeler[1].stønadFom, Is(august2019))
         assertThat(småbarnstilleggAndeler[1].stønadTom, Is(august2019))
         assertThat(småbarnstilleggAndeler[1].prosent, Is(BigDecimal(100)))
-        assertThat(småbarnstilleggAndeler[1].endretUtbetalingAndeler, Is((empty())))
 
         // BARN
         val (barn1Andeler, barn2Andeler) = barnasAndeler.partition { it.aktør == barnFødtAugust2016.aktør }
@@ -1310,21 +1277,17 @@ internal class TilkjentYtelseUtilsTest {
         assertThat(barn1Andeler[0].stønadFom, Is(april2019))
         assertThat(barn1Andeler[0].stønadTom, Is(juli2019))
         assertThat(barn1Andeler[0].prosent, Is(BigDecimal(0)))
-        assertThat(barn1Andeler[0].endretUtbetalingAndeler, Is(not(empty())))
         assertThat(barn1Andeler[1].stønadFom, Is(august2019))
         assertThat(barn1Andeler[1].stønadTom, Is(august2020))
         assertThat(barn1Andeler[1].prosent, Is(BigDecimal(100)))
-        assertThat(barn1Andeler[1].endretUtbetalingAndeler, Is((empty())))
 
         assertEquals(2, barn2Andeler.size)
         assertThat(barn2Andeler[0].stønadFom, Is(februar2019))
         assertThat(barn2Andeler[0].stønadTom, Is(februar2019))
         assertThat(barn2Andeler[0].prosent, Is(BigDecimal(50)))
-        assertThat(barn2Andeler[0].endretUtbetalingAndeler, Is((empty())))
         assertThat(barn2Andeler[1].stønadFom, Is(mars2019))
         assertThat(barn2Andeler[1].stønadTom, Is(månedFørBarnFødtDesember2006Blir18))
         assertThat(barn2Andeler[1].prosent, Is(BigDecimal(50)))
-        assertThat(barn2Andeler[1].endretUtbetalingAndeler, Is((empty())))
     }
 
     // src/test/resources/scenario/Far søker om utvidet barnetrygd for barn under 3 år - han har full overgangsstlnad for bare deler av perioden
@@ -1365,19 +1328,16 @@ internal class TilkjentYtelseUtilsTest {
         assertThat(utvidetAndeler[0].stønadFom, Is(mars2022))
         assertThat(utvidetAndeler[0].stønadTom, Is(august2022))
         assertThat(utvidetAndeler[0].prosent, Is(BigDecimal(100)))
-        assertThat(utvidetAndeler[0].endretUtbetalingAndeler, Is((empty())))
 
         assertEquals(1, småbarnstilleggAndeler.size)
         assertThat(småbarnstilleggAndeler[0].stønadFom, Is(april2022))
         assertThat(småbarnstilleggAndeler[0].stønadTom, Is(juni2022))
         assertThat(småbarnstilleggAndeler[0].prosent, Is(BigDecimal(100)))
-        assertThat(småbarnstilleggAndeler[0].endretUtbetalingAndeler, Is((empty())))
 
         assertEquals(1, barnasAndeler.size)
         assertThat(barnasAndeler[0].stønadFom, Is(mars2022))
         assertThat(barnasAndeler[0].stønadTom, Is(månedFørBarnBlir6))
         assertThat(barnasAndeler[0].prosent, Is(BigDecimal(100)))
-        assertThat(barnasAndeler[0].endretUtbetalingAndeler, Is((empty())))
     }
 
     // src/test/resources/scenario/Far søker om utvidet barnetrygd for barn under 3år, men oppfyller vilkårene kun tilbake i tid
@@ -1419,19 +1379,16 @@ internal class TilkjentYtelseUtilsTest {
         assertThat(utvidetAndeler[0].stønadFom, Is(mars2022))
         assertThat(utvidetAndeler[0].stønadTom, Is(juni2022))
         assertThat(utvidetAndeler[0].prosent, Is(BigDecimal(100)))
-        assertThat(utvidetAndeler[0].endretUtbetalingAndeler, Is((empty())))
 
         assertEquals(1, småbarnstilleggAndeler.size)
         assertThat(småbarnstilleggAndeler[0].stønadFom, Is(april2022))
         assertThat(småbarnstilleggAndeler[0].stønadTom, Is(juni2022))
         assertThat(småbarnstilleggAndeler[0].prosent, Is(BigDecimal(100)))
-        assertThat(småbarnstilleggAndeler[0].endretUtbetalingAndeler, Is((empty())))
 
         assertEquals(1, barnasAndeler.size)
         assertThat(barnasAndeler[0].stønadFom, Is(mars2022))
         assertThat(barnasAndeler[0].stønadTom, Is(månedFørBarnBlir6))
         assertThat(barnasAndeler[0].prosent, Is(BigDecimal(100)))
-        assertThat(barnasAndeler[0].endretUtbetalingAndeler, Is((empty())))
     }
 
     // src/test/resources/scenario/Far søker om utvidet barnetrygd for barn under 3 år - Har full overgangsstønad som opphører når barnet fyller 3 år
@@ -1468,19 +1425,16 @@ internal class TilkjentYtelseUtilsTest {
         assertThat(utvidetAndeler[0].stønadFom, Is(mars2022))
         assertThat(utvidetAndeler[0].stønadTom, Is(månedFørBarnBlir18))
         assertThat(utvidetAndeler[0].prosent, Is(BigDecimal(100)))
-        assertThat(utvidetAndeler[0].endretUtbetalingAndeler, Is((empty())))
 
         assertEquals(1, småbarnstilleggAndeler.size)
         assertThat(småbarnstilleggAndeler[0].stønadFom, Is(april2022))
         assertThat(småbarnstilleggAndeler[0].stønadTom, Is(august2022))
         assertThat(småbarnstilleggAndeler[0].prosent, Is(BigDecimal(100)))
-        assertThat(småbarnstilleggAndeler[0].endretUtbetalingAndeler, Is((empty())))
 
         assertEquals(1, barnasAndeler.size)
         assertThat(barnasAndeler[0].stønadFom, Is(mars2022))
         assertThat(barnasAndeler[0].stønadTom, Is(månedFørBarnBlir6))
         assertThat(barnasAndeler[0].prosent, Is(BigDecimal(100)))
-        assertThat(barnasAndeler[0].endretUtbetalingAndeler, Is((empty())))
     }
 
     private data class EndretAndel(

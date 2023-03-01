@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.eøs.differanseberegning
 
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.tilfeldigPerson
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.util.DeltBostedBuilder
@@ -72,7 +71,7 @@ class TilkjentYtelseDifferanseberegningTest {
         assertEquals(8, tilkjentYtelse.andelerTilkjentYtelse.size)
         assertEqualsUnordered(
             forventetTilkjentYtelseMedDelt.andelerTilkjentYtelse,
-            tilkjentYtelse.andelerTilkjentYtelse.utenEndringer() // Equals tar hensyn til endringsperioder. Fjerner dem
+            tilkjentYtelse.andelerTilkjentYtelse
         )
 
         val utenlandskePeriodebeløp = UtenlandskPeriodebeløpBuilder(startMåned, behandlingId)
@@ -99,7 +98,7 @@ class TilkjentYtelseDifferanseberegningTest {
         assertEquals(14, andelerMedDifferanse.size)
         assertEqualsUnordered(
             forventetTilkjentYtelseMedDiff.andelerTilkjentYtelse,
-            andelerMedDifferanse.utenEndringer() // Equals tar hensyn til endringsperioder. Fjerner dem
+            andelerMedDifferanse // Equals tar hensyn til endringsperioder. Fjerner dem
         )
     }
 
@@ -157,7 +156,7 @@ class TilkjentYtelseDifferanseberegningTest {
         assertEquals(6, andelerMedDiff.size)
         assertEqualsUnordered(
             forventetTilkjentYtelseMedDiff.andelerTilkjentYtelse,
-            andelerMedDiff.utenEndringer() // Equals tar hensyn til endringsperioder. Fjerner dem
+            andelerMedDiff // Equals tar hensyn til endringsperioder. Fjerner dem
         )
 
         val blanktUtenlandskPeridebeløp = UtenlandskPeriodebeløpBuilder(startMåned, behandlingId)
@@ -182,7 +181,4 @@ class TilkjentYtelseDifferanseberegningTest {
             andelerMedDiffIgjen
         )
     }
-
-    fun Collection<AndelTilkjentYtelse>.utenEndringer() =
-        this.map { it.copy(endretUtbetalingAndeler = mutableListOf()) }
 }
