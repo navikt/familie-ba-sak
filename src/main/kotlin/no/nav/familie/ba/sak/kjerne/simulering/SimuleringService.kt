@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.simulering.domene.RestSimulering
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØknomiSimuleringMottakerRepository
@@ -45,10 +44,7 @@ class SimuleringService(
     private val simulert = Metrics.counter("familie.ba.sak.oppdrag.simulert")
 
     fun hentSimuleringFraFamilieOppdrag(vedtak: Vedtak): DetaljertSimuleringResultat? {
-        if (vedtak.behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET ||
-            vedtak.behandling.resultat == Behandlingsresultat.AVSLÅTT ||
-            beregningService.erAlleUtbetalingsperioderPåNullKronerIDenneOgForrigeBehandling(vedtak.behandling)
-        ) {
+        if (!beregningService.erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(vedtak.behandling)) {
             return null
         }
 

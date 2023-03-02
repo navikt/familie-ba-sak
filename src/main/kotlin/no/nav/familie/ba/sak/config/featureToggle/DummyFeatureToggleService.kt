@@ -8,7 +8,7 @@ class DummyFeatureToggleService(
 ) : FeatureToggleService {
 
     private val overstyrteBrytere = mapOf(
-        Pair(FeatureToggleConfig.TREKK_I_LØPENDE_UTBETALING, true)
+        Pair(FeatureToggleConfig.TEKNISK_VEDLIKEHOLD_HENLEGGELSE, true)
     )
 
     override fun isEnabled(toggleId: String, defaultValue: Boolean): Boolean {

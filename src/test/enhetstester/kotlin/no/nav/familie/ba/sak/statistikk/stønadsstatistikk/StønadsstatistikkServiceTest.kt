@@ -32,6 +32,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.eksterne.kontrakter.BehandlingTypeV2
 import no.nav.familie.eksterne.kontrakter.BehandlingÅrsakV2
 import no.nav.familie.eksterne.kontrakter.FagsakType
+import no.nav.familie.eksterne.kontrakter.Kompetanse
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -121,6 +122,16 @@ internal class StønadsstatistikkServiceTest(
                 annenForeldersAktivitetsland = "PL",
                 barnetsBostedsland = "PL",
                 resultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND
+            ),
+            no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse(
+                fom = null,
+                tom = null,
+                barnAktører = emptySet(),
+                søkersAktivitet = null,
+                annenForeldersAktivitet = null,
+                annenForeldersAktivitetsland = null,
+                barnetsBostedsland = null,
+                resultat = null
             )
         )
 
@@ -157,6 +168,19 @@ internal class StønadsstatistikkServiceTest(
         assertEquals(
             1 * sats(YtelseType.ORDINÆR_BARNETRYGD) + sats(YtelseType.UTVIDET_BARNETRYGD),
             vedtak.utbetalingsperioderV2[0].utbetaltPerMnd
+        )
+
+        assertThat(vedtak.kompetanseperioder).hasSize(1).contains(
+            Kompetanse(
+                fom = YearMonth.now(),
+                tom = null,
+                barnsIdenter = listOf(barn1.aktør.aktivFødselsnummer()),
+                sokersaktivitet = no.nav.familie.eksterne.kontrakter.SøkersAktivitet.ARBEIDER,
+                annenForeldersAktivitet = no.nav.familie.eksterne.kontrakter.AnnenForeldersAktivitet.I_ARBEID,
+                annenForeldersAktivitetsland = "PL",
+                barnetsBostedsland = "PL",
+                resultat = no.nav.familie.eksterne.kontrakter.KompetanseResultat.NORGE_ER_PRIMÆRLAND
+            )
         )
 
         vedtak.utbetalingsperioderV2

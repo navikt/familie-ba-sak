@@ -128,24 +128,10 @@ class BeregningService(
         }.map { it }
     }
 
-    fun erAlleUtbetalingsperioderPåNullKronerIDenneOgForrigeBehandling(behandling: Behandling): Boolean {
-        val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
+    fun erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling: Behandling): Boolean =
+        hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling) == EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
 
-        val andelerTilkjentYtelseForrigeBehandling =
-            behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling)
-                ?.let { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(it.id) }
-
-        val erIngenUtbetalingIForrigeBehandling =
-            andelerTilkjentYtelseForrigeBehandling?.all { it.kalkulertUtbetalingsbeløp == 0 } ?: true
-
-        val erAlleUtbetalingsperioderIDenneBehandlingenPåNullKroner =
-            andelerTilkjentYtelse.all { it.kalkulertUtbetalingsbeløp == 0 }
-
-        return erIngenUtbetalingIForrigeBehandling &&
-            erAlleUtbetalingsperioderIDenneBehandlingenPåNullKroner
-    }
-
-    fun erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling: Behandling): EndringerIUtbetalingForBehandlingSteg {
+    fun hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling: Behandling): EndringerIUtbetalingForBehandlingSteg {
         val nåværendeAndeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
 
         val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling)

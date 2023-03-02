@@ -9,10 +9,10 @@ import no.nav.familie.ba.sak.common.erDagenFør
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.tilKortString
-import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevBegrunnelseGrunnlagMedPersoner
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestEndretAndel
+import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.kjerne.brev.domene.beløpUtbetaltFor
 import no.nav.familie.ba.sak.kjerne.brev.domene.totaltUtbetalt
@@ -23,6 +23,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.erAvslagUregistrerteBarnBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hentMånedOgÅrForBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilBrevTekst
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.RestVedtaksbegrunnelse
@@ -294,8 +295,7 @@ private fun BrevBegrunnelseGrunnlagMedPersoner.validerBrevbegrunnelse(
     barnasFødselsdatoer: List<LocalDate>
 ) {
     if (!gjelderSøker && barnasFødselsdatoer.isEmpty() &&
-        !this.triggesAv.satsendring &&
-        this.standardbegrunnelse != Standardbegrunnelse.AVSLAG_UREGISTRERT_BARN
+        !this.triggesAv.satsendring && !this.standardbegrunnelse.erAvslagUregistrerteBarnBegrunnelse()
     ) {
         throw IllegalStateException("Ingen personer på brevbegrunnelse")
     }

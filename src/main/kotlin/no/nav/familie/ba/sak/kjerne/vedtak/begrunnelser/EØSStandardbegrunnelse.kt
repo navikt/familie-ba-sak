@@ -276,6 +276,10 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
         override val sanityApiNavn = "avslagEosVurderingIkkeAnsvarForBarn"
     },
+    AVSLAG_EØS_UREGISTRERT_BARN {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
+        override val sanityApiNavn = "avslagEosUregistrertBarn"
+    },
     FORTSATT_INNVILGET_PRIMÆRLAND_STANDARD {
         override val sanityApiNavn = "fortsattInnvilgetPrimaerlandStandard"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET

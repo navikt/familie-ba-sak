@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagPersonResultat
@@ -31,8 +30,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.tilRestFagsak
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
@@ -192,71 +189,6 @@ class BeregningServiceTest {
         Assertions.assertEquals(1054, slot.captured.andelerTilkjentYtelse.first().kalkulertUtbetalingsbeløp)
         Assertions.assertEquals(periodeFom.nesteMåned(), slot.captured.andelerTilkjentYtelse.first().stønadFom)
         Assertions.assertEquals(periodeTom.forrigeMåned(), slot.captured.andelerTilkjentYtelse.first().stønadTom)
-    }
-
-    @Test
-    fun `Skal ikke iverksettes i økonomi hvis vi mangler utbetalingsperioder grunnet endret utbetalings periode`() {
-        val skalIkkeIverksette = opprettAtyMedEndretUtbetalingsPeriode(
-            behandlinsResultat = Behandlingsresultat.INNVILGET_OG_OPPHØRT,
-            BehandlingUnderkategori.ORDINÆR,
-            0,
-            true,
-            prosent = BigDecimal.ZERO
-        )
-
-        Assertions.assertTrue(skalIkkeIverksette)
-    }
-
-    @Test
-    fun `Skal ikke iverksettes i økonomi hvis vi mangler utbetalingsperioder uavhengig av behandlingsresultat`() {
-        val skalIkkeIverksette = opprettAtyMedEndretUtbetalingsPeriode(
-            behandlinsResultat = Behandlingsresultat.INNVILGET,
-            BehandlingUnderkategori.ORDINÆR,
-            0,
-            true,
-            prosent = BigDecimal.ZERO
-        )
-
-        Assertions.assertTrue(skalIkkeIverksette)
-    }
-
-    @Test
-    fun `Skal iverksettes i økonomi om utbetalins perioder finnes`() {
-        val skalIkkeIverksette = opprettAtyMedEndretUtbetalingsPeriode(
-            behandlinsResultat = Behandlingsresultat.INNVILGET_OG_OPPHØRT,
-            BehandlingUnderkategori.ORDINÆR,
-            100,
-            true,
-            prosent = BigDecimal.ZERO
-        )
-
-        Assertions.assertFalse(skalIkkeIverksette)
-    }
-
-    @Test
-    fun `Skal ikke iverksettes i økonomi dersom det ikke er utbetaling, selv uten endringsperioder`() {
-        val skalIkkeIverksette = opprettAtyMedEndretUtbetalingsPeriode(
-            behandlinsResultat = Behandlingsresultat.INNVILGET_OG_OPPHØRT,
-            BehandlingUnderkategori.ORDINÆR,
-            0,
-            false,
-            prosent = BigDecimal.valueOf(100)
-        )
-
-        Assertions.assertTrue(skalIkkeIverksette)
-    }
-
-    @Test
-    fun `Skal ikke iverksettes i økonomi hvis vi mangler utbetalingsperioder, selv om underkategorien er UTVIDET`() {
-        val skalIkkeIverksette = opprettAtyMedEndretUtbetalingsPeriode(
-            behandlinsResultat = Behandlingsresultat.INNVILGET_OG_OPPHØRT,
-            BehandlingUnderkategori.UTVIDET,
-            0,
-            true,
-            prosent = BigDecimal.ZERO
-        )
-
-        Assertions.assertTrue(skalIkkeIverksette)
     }
 
     @Test
@@ -940,7 +872,8 @@ class BeregningServiceTest {
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) } returns nåværendeAndeler
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns forrigeAndeler
 
-        val erEndringIUtbetaling = beregningService.erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(nåværendeBehandling)
+        val erEndringIUtbetaling =
+            beregningService.hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(nåværendeBehandling)
 
         Assertions.assertEquals(erEndringIUtbetaling, EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING)
 
@@ -975,7 +908,8 @@ class BeregningServiceTest {
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) } returns emptyList()
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns forrigeAndeler
 
-        val erEndringIUtbetaling = beregningService.erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(nåværendeBehandling)
+        val erEndringIUtbetaling =
+            beregningService.hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(nåværendeBehandling)
 
         Assertions.assertEquals(erEndringIUtbetaling, EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING)
 
@@ -1010,7 +944,8 @@ class BeregningServiceTest {
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) } returns nåværendeAndeler
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns emptyList()
 
-        val erEndringIUtbetaling = beregningService.erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(nåværendeBehandling)
+        val erEndringIUtbetaling =
+            beregningService.hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(nåværendeBehandling)
 
         Assertions.assertEquals(erEndringIUtbetaling, EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING)
 
@@ -1045,7 +980,8 @@ class BeregningServiceTest {
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) } returns nåværendeAndeler
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns emptyList()
 
-        val erEndringIUtbetaling = beregningService.erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(nåværendeBehandling)
+        val erEndringIUtbetaling =
+            beregningService.hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(nåværendeBehandling)
 
         Assertions.assertEquals(erEndringIUtbetaling, EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING)
 
@@ -1095,7 +1031,8 @@ class BeregningServiceTest {
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) } returns nåværendeAndeler
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns forrigeAndeler
 
-        val erEndringIUtbetaling = beregningService.erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(nåværendeBehandling)
+        val erEndringIUtbetaling =
+            beregningService.hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(nåværendeBehandling)
 
         Assertions.assertEquals(erEndringIUtbetaling, EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING)
 
@@ -1251,68 +1188,6 @@ class BeregningServiceTest {
                 )
             )
         }
-
-    fun opprettAtyMedEndretUtbetalingsPeriode(
-        behandlinsResultat: Behandlingsresultat = Behandlingsresultat.INNVILGET_OG_OPPHØRT,
-        behandlingUnderkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
-        beløp: Int,
-        endretUtbetaling: Boolean,
-        prosent: BigDecimal
-    ): Boolean {
-        val behandling = lagBehandling(resultat = behandlinsResultat, underkategori = behandlingUnderkategori)
-
-        val barn1Fnr = randomFnr()
-        val barn1Aktør = tilAktør(barn1Fnr)
-
-        val barn1 =
-            tilfeldigPerson(fødselsdato = LocalDate.of(2002, 7, 1), personType = PersonType.BARN, aktør = barn1Aktør)
-
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
-            behandlingId = behandling.id,
-            søkerPersonIdent = randomFnr(),
-            barnasIdenter = listOf(barn1.aktør.aktivFødselsnummer()),
-            barnasFødselsdatoer = listOf(barn1.fødselsdato)
-        )
-
-        val periodeFom = LocalDate.now().toYearMonth().minusMonths(1)
-        val periodeTom = LocalDate.now().toYearMonth().plusMonths(1)
-        val endreteUtbetalingAndeler = if (endretUtbetaling) {
-            listOf(
-                lagEndretUtbetalingAndel(
-                    behandlingId = behandling.id,
-                    person = barn1,
-                    fom = periodeFom,
-                    tom = periodeTom
-                )
-            )
-        } else {
-            emptyList()
-        }
-
-        val aty = lagAndelTilkjentYtelse(
-            person = barn1,
-            fom = periodeFom,
-            tom = periodeTom,
-            beløp = beløp,
-            endretUtbetalingAndeler = endreteUtbetalingAndeler,
-            prosent = prosent
-        )
-
-        every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns personopplysningGrunnlag
-        every {
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
-        } returns listOf(aty)
-
-        every {
-            endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
-        } returns endreteUtbetalingAndeler
-
-        every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(any()) } returns null
-
-        return beregningService.erAlleUtbetalingsperioderPåNullKronerIDenneOgForrigeBehandling(
-            behandling = behandling
-        )
-    }
 
     private fun genererAndelerTilkjentYtelseForScenario(
         endretUtbetalingÅrsak: Årsak,

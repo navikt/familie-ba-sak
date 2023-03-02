@@ -666,12 +666,20 @@ class VedtaksperiodeService(
         return avslagsperioderMedTomPeriode.map {
             if (it.fom == null && it.tom == null && uregistrerteBarn.isNotEmpty()) {
                 it.apply {
-                    begrunnelser.add(
-                        Vedtaksbegrunnelse(
-                            vedtaksperiodeMedBegrunnelser = this,
-                            standardbegrunnelse = Standardbegrunnelse.AVSLAG_UREGISTRERT_BARN
+                    when (vedtak.behandling.kategori) {
+                        BehandlingKategori.NASJONAL -> begrunnelser.add(
+                            Vedtaksbegrunnelse(
+                                vedtaksperiodeMedBegrunnelser = this,
+                                standardbegrunnelse = Standardbegrunnelse.AVSLAG_UREGISTRERT_BARN
+                            )
                         )
-                    )
+                        BehandlingKategori.EØS -> eøsBegrunnelser.add(
+                            EØSBegrunnelse(
+                                vedtaksperiodeMedBegrunnelser = this,
+                                begrunnelse = EØSStandardbegrunnelse.AVSLAG_EØS_UREGISTRERT_BARN
+                            )
+                        )
+                    }
                 }
             } else {
                 it

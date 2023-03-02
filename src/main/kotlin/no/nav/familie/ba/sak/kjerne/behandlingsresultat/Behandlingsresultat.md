@@ -9,13 +9,13 @@ For å utlede behandlingsresultat er det tre ting som peker seg ut som spesielt 
 Den tekniske løsningen vi har gått for prøver å utlede de tre aspektene hver for seg, før man til slutt sitter igjen med ett søknadsresultat, ett endringsresultat og ett opphørsresultat som man kan kombinere til et behandlingsresultat.
 
 ## 1. Søknadsresultat
-Søknadsresultat skal kun genereres for behandlinger med årsak søknad, fødselshendelse eller grunnet manuell migrering. En viktig ting å legge merke til er også at søknadsresultat ikke utledes for _alle_ personer i disse behandlingene, men kun personene det er fremstilt krav for.
+Søknadsresultat skal kun genereres for behandlinger med årsak søknad, fødselshendelse, klage eller grunnet manuell migrering. En viktig ting å legge merke til er også at søknadsresultat ikke utledes for _alle_ personer i disse behandlingene, men kun personene det er fremstilt krav for.
 
 ### Personer fremstilt krav for
 Det er ulik utledning for hvilke personer det er fremstilt krav for avhengig av type sak:
 - **Søknad**: barn som er krysset av på "Registrer søknad"-steget + søker hvis det er søkt om utvidet barnetrygd
 - **Fødselshendelse**: barn som er nye på behandlingen siden forrige gang
-- **Manuell migrering**: alle personer i persongrunnlaget
+- **Manuell migrering** eller **klage**: alle personer i persongrunnlaget
 
 ### Mulige søknadsresultater
 

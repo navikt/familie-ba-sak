@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -29,6 +30,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
@@ -153,6 +155,56 @@ class VedtaksperiodeServiceTest(
         assertEquals(
             Standardbegrunnelse.AVSLAG_UREGISTRERT_BARN,
             vedtaksperioder.flatMap { it.begrunnelser }.first().standardbegrunnelse
+        )
+    }
+
+    @Test
+    fun `Skal lage og populere avslagsperiode for uregistrert barn med eøs begrunnelse dersom behandling sin kategori er EØS`() {
+        val søkerFnr = randomFnr()
+        val behandling = kjørStegprosessForFGB(
+            tilSteg = StegType.REGISTRERE_SØKNAD,
+            søkerFnr = søkerFnr,
+            barnasIdenter = listOf(barnFnr),
+            fagsakService = fagsakService,
+            vedtakService = vedtakService,
+            persongrunnlagService = persongrunnlagService,
+            vilkårsvurderingService = vilkårsvurderingService,
+            stegService = stegService,
+            vedtaksperiodeService = vedtaksperiodeService,
+            brevmalService = brevmalService,
+            behandlingKategori = BehandlingKategori.EØS
+        )
+
+        val behandlingEtterNySøknadsregistrering = stegService.håndterSøknad(
+            behandling = behandling,
+            restRegistrerSøknad = RestRegistrerSøknad(
+                søknad = SøknadDTO(
+                    underkategori = BehandlingUnderkategoriDTO.ORDINÆR,
+                    søkerMedOpplysninger = SøkerMedOpplysninger(
+                        ident = søkerFnr
+                    ),
+                    barnaMedOpplysninger = listOf(
+                        BarnMedOpplysninger(
+                            ident = "",
+                            erFolkeregistrert = false,
+                            inkludertISøknaden = true
+                        )
+                    ),
+                    endringAvOpplysningerBegrunnelse = ""
+                ),
+                bekreftEndringerViaFrontend = true
+            )
+        )
+
+        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandlingEtterNySøknadsregistrering.id)
+
+        val vedtaksperioder = vedtaksperiodeService.genererVedtaksperioderMedBegrunnelser(vedtak)
+
+        assertEquals(1, vedtaksperioder.size)
+        assertEquals(1, vedtaksperioder.flatMap { it.eøsBegrunnelser }.size)
+        assertEquals(
+            EØSStandardbegrunnelse.AVSLAG_EØS_UREGISTRERT_BARN,
+            vedtaksperioder.flatMap { it.eøsBegrunnelser }.first().begrunnelse
         )
     }
 
