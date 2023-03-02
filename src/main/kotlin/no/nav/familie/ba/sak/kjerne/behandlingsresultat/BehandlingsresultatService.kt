@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatUtils.skalUtledeSøknadsresultatForBehandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
@@ -48,7 +49,7 @@ class BehandlingsresultatService(
             }
 
             behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE -> persongrunnlagService.finnNyeBarn(behandling, forrigeBehandling).map { it.aktør }
-            behandling.erManuellMigrering() -> persongrunnlagService.hentAktivThrows(behandling.id).personer.map { it.aktør }
+            behandling.erManuellMigrering() || behandling.opprettetÅrsak == BehandlingÅrsak.KLAGE -> persongrunnlagService.hentAktivThrows(behandling.id).personer.map { it.aktør }
             else -> emptyList()
         }
 
@@ -79,7 +80,7 @@ class BehandlingsresultatService(
         BehandlingsresultatValideringUtils.validerAtBarePersonerFremstiltKravForEllerSøkerHarFåttEksplisittAvslag(personerFremstiltKravFor = personerFremstiltKravFor, personResultater = vilkårsvurdering.personResultater)
 
         // 1 SØKNAD
-        val søknadsresultat = if (behandling.opprettetÅrsak in listOf(BehandlingÅrsak.FØDSELSHENDELSE, BehandlingÅrsak.SØKNAD) || behandling.erManuellMigrering()) {
+        val søknadsresultat = if (skalUtledeSøknadsresultatForBehandling(behandling)) {
             BehandlingsresultatSøknadUtils.utledResultatPåSøknad(
                 nåværendeAndeler = andelerTilkjentYtelse,
                 forrigeAndeler = forrigeAndelerTilkjentYtelse,

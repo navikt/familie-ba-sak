@@ -4,7 +4,9 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.fpsak.tidsserie.LocalDateSegment
@@ -12,6 +14,14 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.fpsak.tidsserie.StandardCombinators
 
 object BehandlingsresultatUtils {
+
+    internal fun skalUtledeSøknadsresultatForBehandling(behandling: Behandling): Boolean {
+        return behandling.erManuellMigrering() || behandling.opprettetÅrsak in listOf(
+            BehandlingÅrsak.SØKNAD,
+            BehandlingÅrsak.FØDSELSHENDELSE,
+            BehandlingÅrsak.KLAGE
+        )
+    }
 
     internal fun kombinerResultaterTilBehandlingsresultat(
         søknadsresultat: Søknadsresultat?, // Søknadsresultat er null hvis det ikke er en søknad/fødselshendelse/manuell migrering
