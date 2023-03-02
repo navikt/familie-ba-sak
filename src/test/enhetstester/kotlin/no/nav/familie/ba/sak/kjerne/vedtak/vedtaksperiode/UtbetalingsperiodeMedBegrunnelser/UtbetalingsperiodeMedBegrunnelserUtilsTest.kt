@@ -76,7 +76,7 @@ class UtbetalingsperiodeMedBegrunnelserUtilsTest {
             MånedPeriode(YearMonth.of(2021, 9), YearMonth.of(2021, 12)),
             MånedPeriode(YearMonth.of(2022, 1), YearMonth.of(2022, 3)),
             MånedPeriode(YearMonth.of(2022, 4), YearMonth.of(2038, 3))
-        ).mapIndexed { index, it ->
+        ).mapIndexed { _, it ->
             lagVedtaksperiodeMedBegrunnelser(
                 type = Vedtaksperiodetype.UTBETALING,
                 fom = it.fom.førsteDagIInneværendeMåned(),
