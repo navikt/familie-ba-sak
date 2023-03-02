@@ -375,7 +375,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
     fun `kombinerSøknadsresultater skal kaste feil dersom lista ikke inneholder noe som helst`() {
         val listeMedIngenSøknadsresultat = listOf<Søknadsresultat>()
 
-        val feil = assertThrows<FunksjonellFeil> { listeMedIngenSøknadsresultat.kombinerSøknadsresultater() }
+        val feil = assertThrows<FunksjonellFeil> { listeMedIngenSøknadsresultat.kombinerSøknadsresultater(behandlingÅrsak = BehandlingÅrsak.SØKNAD) }
 
         assertThat(feil.message, Is("Klarer ikke utlede søknadsresultat. Finner ingen resultater."))
     }
@@ -387,7 +387,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
     ) {
         val listeMedSøknadsresultat = listOf(søknadsresultat)
 
-        val kombinertResultat = listeMedSøknadsresultat.kombinerSøknadsresultater()
+        val kombinertResultat = listeMedSøknadsresultat.kombinerSøknadsresultater(behandlingÅrsak = BehandlingÅrsak.SØKNAD)
 
         assertThat(kombinertResultat, Is(søknadsresultat))
     }
@@ -400,7 +400,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
         val listeMedSøknadsresultat =
             listOf(Søknadsresultat.INGEN_RELEVANTE_ENDRINGER, søknadsresultat)
 
-        val kombinertResultat = listeMedSøknadsresultat.kombinerSøknadsresultater()
+        val kombinertResultat = listeMedSøknadsresultat.kombinerSøknadsresultater(behandlingÅrsak = BehandlingÅrsak.SØKNAD)
 
         assertThat(kombinertResultat, Is(søknadsresultat))
     }
@@ -413,7 +413,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
             Søknadsresultat.INGEN_RELEVANTE_ENDRINGER
         )
 
-        val kombinertResultat = listeMedSøknadsresultat.kombinerSøknadsresultater()
+        val kombinertResultat = listeMedSøknadsresultat.kombinerSøknadsresultater(behandlingÅrsak = BehandlingÅrsak.SØKNAD)
 
         assertThat(kombinertResultat, Is(Søknadsresultat.DELVIS_INNVILGET))
     }
