@@ -98,7 +98,7 @@ class TilkjentYtelseDifferanseberegningTest {
         assertEquals(14, andelerMedDifferanse.size)
         assertEqualsUnordered(
             forventetTilkjentYtelseMedDiff.andelerTilkjentYtelse,
-            andelerMedDifferanse // Equals tar hensyn til endringsperioder. Fjerner dem
+            andelerMedDifferanse
         )
     }
 
@@ -156,7 +156,7 @@ class TilkjentYtelseDifferanseberegningTest {
         assertEquals(6, andelerMedDiff.size)
         assertEqualsUnordered(
             forventetTilkjentYtelseMedDiff.andelerTilkjentYtelse,
-            andelerMedDiff // Equals tar hensyn til endringsperioder. Fjerner dem
+            andelerMedDiff
         )
 
         val blanktUtenlandskPeridebeløp = UtenlandskPeriodebeløpBuilder(startMåned, behandlingId)
