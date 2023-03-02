@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagPersonResultat
-import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -457,7 +456,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
 
         val søkersPersonResultat = lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            aktør = søker.aktør,
+            person = søker,
             resultat = Resultat.IKKE_OPPFYLT,
             periodeFom = des21,
             periodeTom = LocalDate.now(),
@@ -487,7 +486,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
 
         val barnPersonResultat = lagPersonResultat(
             vilkårsvurdering = vikårsvurdering,
-            aktør = randomAktør(),
+            person = lagPerson(type = PersonType.BARN, fødselsdato = des21),
             resultat = resultat,
             periodeFom = des21,
             periodeTom = LocalDate.now(),
@@ -513,11 +512,11 @@ internal class BehandlingsresultatSøknadUtilsTest {
         val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)
         val vikårsvurdering = Vilkårsvurdering(behandling = behandling)
 
-        val barnAktør = randomAktør()
+        val barn = lagPerson(type = PersonType.BARN, fødselsdato = des21)
 
         val barnPersonResultat = lagPersonResultat(
             vilkårsvurdering = vikårsvurdering,
-            aktør = barnAktør,
+            person = barn,
             resultat = Resultat.IKKE_OPPFYLT,
             periodeFom = des21,
             periodeTom = LocalDate.now(),
@@ -531,7 +530,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
             forrigeAndeler = emptyList(),
             nåværendeAndeler = emptyList(),
             nåværendePersonResultater = setOf(barnPersonResultat),
-            personerFremstiltKravFor = listOf(barnAktør),
+            personerFremstiltKravFor = listOf(barn.aktør),
             endretUtbetalingAndeler = emptyList(),
             behandlingÅrsak = BehandlingÅrsak.SØKNAD,
             finnesUregistrerteBarn = false
@@ -545,8 +544,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
         val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE)
         val vikårsvurdering = Vilkårsvurdering(behandling = behandling)
 
-        val barn1Person = lagPerson(type = PersonType.BARN)
-        val barn1Aktør = barn1Person.aktør
+        val barn1Person = lagPerson(type = PersonType.BARN, fødselsdato = des21)
 
         val nåværendeAndeler =
             listOf(
@@ -554,13 +552,13 @@ internal class BehandlingsresultatSøknadUtilsTest {
                     fom = jan22,
                     tom = aug22,
                     beløp = 1054,
-                    aktør = barn1Aktør
+                    aktør = barn1Person.aktør
                 )
             )
 
         val barnPersonResultat = lagPersonResultat(
             vilkårsvurdering = vikårsvurdering,
-            aktør = barn1Aktør,
+            person = barn1Person,
             resultat = Resultat.OPPFYLT,
             periodeFom = des21,
             periodeTom = LocalDate.now(),
@@ -572,7 +570,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
             forrigeAndeler = emptyList(),
             nåværendeAndeler = nåværendeAndeler,
             nåværendePersonResultater = setOf(barnPersonResultat),
-            personerFremstiltKravFor = listOf(barn1Aktør),
+            personerFremstiltKravFor = listOf(barn1Person.aktør),
             endretUtbetalingAndeler = emptyList(),
             behandlingÅrsak = BehandlingÅrsak.SØKNAD,
             finnesUregistrerteBarn = false
@@ -587,7 +585,6 @@ internal class BehandlingsresultatSøknadUtilsTest {
         val vikårsvurdering = Vilkårsvurdering(behandling = behandling)
 
         val barn1Person = lagPerson(type = PersonType.BARN)
-        val barn1Aktør = barn1Person.aktør
 
         val nåværendeAndeler =
             listOf(
@@ -595,13 +592,13 @@ internal class BehandlingsresultatSøknadUtilsTest {
                     fom = jan22,
                     tom = aug22,
                     beløp = 1054,
-                    aktør = barn1Aktør
+                    aktør = barn1Person.aktør
                 )
             )
 
         val barnPersonResultat = lagPersonResultat(
             vilkårsvurdering = vikårsvurdering,
-            aktør = barn1Aktør,
+            person = barn1Person,
             resultat = Resultat.OPPFYLT,
             periodeFom = des21,
             periodeTom = LocalDate.now(),
@@ -613,7 +610,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
             forrigeAndeler = emptyList(),
             nåværendeAndeler = nåværendeAndeler,
             nåværendePersonResultater = setOf(barnPersonResultat),
-            personerFremstiltKravFor = listOf(barn1Aktør),
+            personerFremstiltKravFor = listOf(barn1Person.aktør),
             endretUtbetalingAndeler = emptyList(),
             behandlingÅrsak = BehandlingÅrsak.SØKNAD,
             finnesUregistrerteBarn = true
@@ -627,8 +624,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
         val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE)
         val vikårsvurdering = Vilkårsvurdering(behandling = behandling)
 
-        val barn1Person = lagPerson(type = PersonType.BARN)
-        val barn1Aktør = barn1Person.aktør
+        val barn1Person = lagPerson(type = PersonType.BARN, fødselsdato = des21)
 
         val andeler =
             listOf(
@@ -636,13 +632,13 @@ internal class BehandlingsresultatSøknadUtilsTest {
                     fom = jan22,
                     tom = aug22,
                     beløp = 1054,
-                    aktør = barn1Aktør
+                    aktør = barn1Person.aktør
                 )
             )
 
         val barnPersonResultat = lagPersonResultat(
             vilkårsvurdering = vikårsvurdering,
-            aktør = barn1Aktør,
+            person = barn1Person,
             resultat = Resultat.OPPFYLT,
             periodeFom = des21,
             periodeTom = LocalDate.now(),
@@ -654,7 +650,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
             forrigeAndeler = andeler,
             nåværendeAndeler = andeler,
             nåværendePersonResultater = setOf(barnPersonResultat),
-            personerFremstiltKravFor = listOf(barn1Aktør),
+            personerFremstiltKravFor = listOf(barn1Person.aktør),
             endretUtbetalingAndeler = emptyList(),
             behandlingÅrsak = BehandlingÅrsak.SØKNAD,
             finnesUregistrerteBarn = false
