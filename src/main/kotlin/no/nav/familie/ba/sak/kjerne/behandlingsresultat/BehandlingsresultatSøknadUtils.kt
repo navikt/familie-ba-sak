@@ -130,7 +130,7 @@ object BehandlingsresultatSøknadUtils {
         val resultaterUtenIngenEndringer = this.filter { it != Søknadsresultat.INGEN_RELEVANTE_ENDRINGER }
 
         val ingenSøknadsresultatFeil = if (behandlingÅrsak == BehandlingÅrsak.KLAGE) FunksjonellFeil(
-            frontendFeilmelding = "Du har opprettet en revurdering med årsak klage, men ikke innvilget noen perioder. Denne behandlingen kan kun gjøres til full omgjøring.",
+            frontendFeilmelding = "Du har opprettet en revurdering med årsak klage, men ikke innvilget noen perioder. Denne behandlingen kan kun brukes til full omgjøring.",
             melding = "Klarer ikke utlede søknadsresultat for behandling med årsak klage. Det er ikke innvilget noen perioder."
         ) else FunksjonellFeil(
             frontendFeilmelding = "Du har opprettet en behandling som følge av søknad, men har enten ikke krysset av for noen barn det er søkt for eller avslått/innvilget noen perioder.",
