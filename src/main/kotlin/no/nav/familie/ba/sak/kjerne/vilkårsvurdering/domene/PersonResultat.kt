@@ -157,17 +157,16 @@ fun Set<PersonResultat>.tilTidslinjeForSplitt(personerIPersongrunnlag: List<Pers
     val tidslinjerPerPerson = this.map { personResultat ->
         val person = personerIPersongrunnlag.find { it.aktør == personResultat.aktør }
             ?: throw Feil("Finner ikke person med aktørId=${personResultat.aktør.aktørId} i persongrunnlaget ved generering av tidslinje for splitt")
-        personResultat.tilTidslinjeForSplittForPerson(fødselsdato = person.fødselsdato, personType = person.type)
+        personResultat.tilTidslinjeForSplittForPerson(personType = person.type)
     }
 
     return tidslinjerPerPerson.kombiner { it.filterNotNull().flatten() }.filtrerIkkeNull().slåSammenLike()
 }
 
 fun PersonResultat.tilTidslinjeForSplittForPerson(
-    fødselsdato: LocalDate,
     personType: PersonType
 ): Tidslinje<List<VilkårResultat>, Måned> {
-    val tidslinjer = this.vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår(fødselsdato)
+    val tidslinjer = this.vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår()
 
     return tidslinjer.kombiner { alleVilkårOppfyltEllerNull(vilkårResultater = it, personType = personType) }
         .filtrerIkkeNull().slåSammenLike()
@@ -177,15 +176,14 @@ fun PersonResultat.tilTidslinjeForSplittForPerson(
  * Extention-funksjon som tar inn et sett med vilkårResultater og returnerer en forskjøvet måned-basert tidslinje for hvert vilkår
  * Se readme-fil for utdypende forklaring av logikken for hvert vilkår
  * */
-fun Collection<VilkårResultat>.tilForskjøvetTidslinjerForHvertOppfylteVilkår(fødselsdato: LocalDate): List<Tidslinje<VilkårResultat, Måned>> {
+fun Collection<VilkårResultat>.tilForskjøvetTidslinjerForHvertOppfylteVilkår(): List<Tidslinje<VilkårResultat, Måned>> {
     return this.groupBy { it.vilkårType }.map { (vilkår, vilkårResultater) ->
-        val tidslinje = vilkårResultater.tilForskjøvetTidslinjeForOppfyltVilkår(vilkår)
-        if (vilkår == Vilkår.UNDER_18_ÅR) tidslinje.beskjærPå18År(fødselsdato) else tidslinje
+        vilkårResultater.tilForskjøvetTidslinjeForOppfyltVilkår(vilkår)
     }
 }
 
 fun Collection<VilkårResultat>.tilForskjøvetTidslinjeForOppfyltVilkår(vilkår: Vilkår): Tidslinje<VilkårResultat, Måned> {
-    return this
+    val tidslinje = this
         .filter { it.vilkårType == vilkår && it.erOppfylt() }
         .tilTidslinje()
         .tilMånedFraMånedsskifteIkkeNull { innholdSisteDagForrigeMåned, innholdFørsteDagDenneMåned ->
@@ -195,6 +193,11 @@ fun Collection<VilkårResultat>.tilForskjøvetTidslinjeForOppfyltVilkår(vilkår
                 else -> innholdFørsteDagDenneMåned
             }
         }
+
+    return if (vilkår == Vilkår.UNDER_18_ÅR) {
+        val minstePeriodeFom = this.minOf { it.periodeFom ?: throw Feil("Finner ikke fra og med dato på under 18år-vilkåret") }
+        tidslinje.beskjærPå18År(fødselsdato = minstePeriodeFom)
+    } else tidslinje
 }
 
 fun Tidslinje<VilkårResultat, Måned>.beskjærPå18År(fødselsdato: LocalDate): Tidslinje<VilkårResultat, Måned> {

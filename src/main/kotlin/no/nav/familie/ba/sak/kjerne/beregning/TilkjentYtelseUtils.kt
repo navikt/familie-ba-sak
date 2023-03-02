@@ -204,16 +204,14 @@ object TilkjentYtelseUtils {
         val person = personopplysningGrunnlag.personer.find { it.aktør == personResultat.aktør }
             ?: throw Feil("Finner ikke person med aktørId=${personResultat.aktør.aktørId} i persongrunnlaget ved generering av andeler tilkjent ytelse")
         person to personResultat.tilTidslinjeMedRettTilProsentForPerson(
-            fødselsdato = person.fødselsdato,
             personType = person.type
         )
     }
 
     internal fun PersonResultat.tilTidslinjeMedRettTilProsentForPerson(
-        fødselsdato: LocalDate,
         personType: PersonType
     ): Tidslinje<BigDecimal, Måned> {
-        val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår(fødselsdato)
+        val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår()
 
         return tidslinjer.kombiner { it.mapTilProsentEllerNull(personType) }.slåSammenLike().filtrerIkkeNull()
     }

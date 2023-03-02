@@ -62,7 +62,7 @@ class PersonResultatTest {
             maksTom = barnets18årsdag
         )
 
-        val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår(barnets18årsdag.minusYears(18))
+        val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår()
 
         Assertions.assertEquals(5, tidslinjer.size)
 
@@ -114,7 +114,7 @@ class PersonResultatTest {
             maksTom = barnets18årsdag
         )
 
-        val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår(barnets18årsdag.minusYears(18))
+        val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår()
 
         Assertions.assertEquals(5, tidslinjer.size)
 
@@ -165,7 +165,7 @@ class PersonResultatTest {
             maksTom = barnets18årsdag
         )
 
-        val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår(barnets18årsdag.minusYears(18))
+        val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår()
 
         Assertions.assertEquals(5, tidslinjer.size)
 

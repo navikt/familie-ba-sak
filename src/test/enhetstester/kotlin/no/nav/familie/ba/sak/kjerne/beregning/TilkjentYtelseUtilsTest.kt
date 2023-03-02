@@ -421,7 +421,6 @@ internal class TilkjentYtelseUtilsTest {
         personResultat.setSortedVilkårResultater(vilkårResulater + borMedSøkerVilkår)
 
         val tidslinje = personResultat.tilTidslinjeMedRettTilProsentForPerson(
-            fødselsdato = barn.fødselsdato,
             personType = barn.type
         )
 
