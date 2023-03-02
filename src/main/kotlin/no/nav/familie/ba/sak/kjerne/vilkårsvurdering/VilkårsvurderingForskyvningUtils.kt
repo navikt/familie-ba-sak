@@ -62,7 +62,7 @@ object VilkårsvurderingForskyvningUtils {
             }
 
         return if (vilkår == Vilkår.UNDER_18_ÅR) {
-            val minstePeriodeFom = this.minOf { it.periodeFom ?: throw Feil("Finner ikke fra og med dato på under 18år-vilkåret") }
+            val minstePeriodeFom = this.minOf { it.periodeFom ?: throw Feil("Finner ikke fra og med dato på 'under 18 år'-vilkåret") }
             tidslinje.beskjærPå18År(fødselsdato = minstePeriodeFom)
         } else tidslinje
     }
