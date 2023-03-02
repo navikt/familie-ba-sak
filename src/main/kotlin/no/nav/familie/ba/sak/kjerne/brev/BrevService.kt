@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.Utils.storForbokstavIHvertOrd
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
@@ -66,8 +65,7 @@ class BrevService(
     private val organisasjonService: OrganisasjonService,
     private val korrigertVedtakService: KorrigertVedtakService,
     private val saksbehandlerContext: SaksbehandlerContext,
-    private val brevmalService: BrevmalService,
-    private val featureToggleService: FeatureToggleService
+    private val brevmalService: BrevmalService
 ) {
 
     fun hentVedtaksbrevData(vedtak: Vedtak): Vedtaksbrev {
