@@ -53,15 +53,15 @@ class SkatteetatenService(
         LOG.info("Fant ${perioderFraInfotrygd.size} skatteetatenperioder fra infotrygd")
 
         val samletPerioder = mutableListOf<SkatteetatenPerioder>()
-        unikePersoner.forEach { person ->
+        unikePersoner.forEach { personIdent ->
             val resultatInfotrygdForPerson =
-                perioderFraInfotrygd.firstOrNull { perioder -> perioder.ident == person }
+                perioderFraInfotrygd.firstOrNull { perioder -> perioder.ident == personIdent }
             val perioderFraInfotrygdForPerson =
                 resultatInfotrygdForPerson?.perioder ?: emptyList()
 
-            val resutatBaSakForPerson = perioderFraBaSak.firstOrNull { perioder -> perioder.ident == person }
+            val resultatBaSakForPerson = perioderFraBaSak.firstOrNull { perioder -> perioder.ident == personIdent }
 
-            val perioderFraBasak = resutatBaSakForPerson?.perioder ?: emptyList()
+            val perioderFraBasak = resultatBaSakForPerson?.perioder ?: emptyList()
 
             val perioder =
                 (perioderFraBasak + perioderFraInfotrygdForPerson).groupBy { periode -> periode.delingsprosent }.values
@@ -69,9 +69,9 @@ class SkatteetatenService(
             if (perioder.isNotEmpty()) {
                 samletPerioder.add(
                     SkatteetatenPerioder(
-                        ident = person,
+                        ident = personIdent,
                         perioder = perioder,
-                        sisteVedtakPaaIdent = resutatBaSakForPerson?.sisteVedtakPaaIdent
+                        sisteVedtakPaaIdent = resultatBaSakForPerson?.sisteVedtakPaaIdent
                             ?: resultatInfotrygdForPerson!!.sisteVedtakPaaIdent
                     )
                 )

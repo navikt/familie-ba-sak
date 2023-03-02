@@ -46,27 +46,6 @@ class KompetanseController(
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
 
-    @Deprecated("Bruk endepunkt som bare krever behandlingId")
-    @PutMapping(path = ["{behandlingId}/{kompetanseId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun oppdaterKompetanseOld(
-        @PathVariable behandlingId: Long,
-        @PathVariable kompetanseId: Long,
-        @RequestBody restKompetanse: RestKompetanse
-    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
-        val barnAktører = restKompetanse.barnIdenter.map { personidentService.hentAktør(it) }
-        val kompetanse = restKompetanse.tilKompetanse(barnAktører = barnAktører)
-
-        validerOppdatering(kompetanse)
-
-        val gjeldendeKompetanse = kompetanseService.hentKompetanse(kompetanseId)
-
-        val behandlingIdObjekt = BehandlingId(gjeldendeKompetanse.behandlingId)
-
-        kompetanseService.oppdaterKompetanse(behandlingIdObjekt, kompetanse)
-
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingIdObjekt.id)))
-    }
-
     @DeleteMapping(path = ["{behandlingId}/{kompetanseId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun slettKompetanse(
         @PathVariable behandlingId: Long,
