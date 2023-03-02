@@ -226,7 +226,7 @@ class VedtaksperiodeServiceTest(
 
         val fom = inneværendeMåned().minusMonths(12).førsteDagIInneværendeMåned()
         val tom = inneværendeMåned().sisteDagIInneværendeMåned()
-        val type = Vedtaksperiodetype.ENDRET_UTBETALING
+        val type = Vedtaksperiodetype.UTBETALING
         val vedtaksperiode = VedtaksperiodeMedBegrunnelser(
             vedtak = vedtak,
             fom = fom,
