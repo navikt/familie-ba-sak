@@ -135,7 +135,6 @@ class NyUtbetalingsoppdragGeneratorTest(
             utbetalingsperioderPerKlasse.getValue("BATR")[0],
             0,
             null,
-            fagsak.aktør.aktivFødselsnummer(),
             1054,
             "2019-03-01",
             "2037-02-28"
@@ -144,7 +143,6 @@ class NyUtbetalingsoppdragGeneratorTest(
             utbetalingsperioderPerKlasse.getValue("BATRSMA")[0],
             1,
             null,
-            fagsak.aktør.aktivFødselsnummer(),
             660,
             "2019-04-01",
             "2023-03-31"
@@ -153,7 +151,6 @@ class NyUtbetalingsoppdragGeneratorTest(
             utbetalingsperioderPerKlasse.getValue("BATRSMA")[1],
             2,
             1,
-            fagsak.aktør.aktivFødselsnummer(),
             660,
             "2026-05-01",
             "2027-06-30"
@@ -229,7 +226,6 @@ class NyUtbetalingsoppdragGeneratorTest(
             utbetalingsperioderPerKlasse.getValue("BATRSMA")[0],
             1,
             null,
-            fagsak.aktør.aktivFødselsnummer(),
             660,
             "2026-05-01",
             "2027-06-30",
@@ -239,7 +235,6 @@ class NyUtbetalingsoppdragGeneratorTest(
             utbetalingsperioderPerKlasse.getValue("BATR")[0],
             2,
             null,
-            fagsak.aktør.aktivFødselsnummer(),
             1054,
             "2019-03-01",
             "2037-02-28",
@@ -374,7 +369,6 @@ class NyUtbetalingsoppdragGeneratorTest(
             opphørsperiode!!,
             2,
             1,
-            fagsak.aktør.aktivFødselsnummer(),
             1054,
             "2037-01-01",
             "2039-12-31",
@@ -384,7 +378,6 @@ class NyUtbetalingsoppdragGeneratorTest(
             nyeUtbetalingsPerioderSortert.first(),
             3,
             2,
-            fagsak.aktør.aktivFødselsnummer(),
             1054,
             "2034-01-01",
             "2034-12-31"
@@ -393,7 +386,6 @@ class NyUtbetalingsoppdragGeneratorTest(
             nyeUtbetalingsPerioderSortert.last(),
             4,
             3,
-            fagsak.aktør.aktivFødselsnummer(),
             1054,
             "2037-01-01",
             "2039-12-31"
@@ -502,7 +494,6 @@ class NyUtbetalingsoppdragGeneratorTest(
             sorterteUtbetalingsperioder[0],
             1,
             0,
-            fagsak.aktør.aktivFødselsnummer(),
             1054,
             "2033-01-01",
             "2034-12-31"
@@ -511,7 +502,6 @@ class NyUtbetalingsoppdragGeneratorTest(
             sorterteUtbetalingsperioder[1],
             2,
             null,
-            fagsak.aktør.aktivFødselsnummer(),
             1054,
             "2022-01-01",
             "2034-12-31"
@@ -520,7 +510,6 @@ class NyUtbetalingsoppdragGeneratorTest(
             sorterteUtbetalingsperioder[2],
             3,
             2,
-            fagsak.aktør.aktivFødselsnummer(),
             1054,
             "2037-01-01",
             "2039-12-31"
@@ -584,7 +573,6 @@ class NyUtbetalingsoppdragGeneratorTest(
             utbetalingsperioderPerKlasse.getValue("BATR")[0],
             0,
             null,
-            fagsak.aktør.aktivFødselsnummer(),
             1054,
             "2019-03-01",
             "2037-02-28"
@@ -593,7 +581,6 @@ class NyUtbetalingsoppdragGeneratorTest(
             utbetalingsperioderPerKlasse.getValue("BATRSMA")[0],
             1,
             null,
-            fagsak.aktør.aktivFødselsnummer(),
             660,
             "2019-04-01",
             "2023-03-31"
@@ -602,7 +589,6 @@ class NyUtbetalingsoppdragGeneratorTest(
             utbetalingsperioderPerKlasse.getValue("BATRSMA")[1],
             2,
             1,
-            fagsak.aktør.aktivFødselsnummer(),
             660,
             "2026-05-01",
             "2027-06-30"
@@ -775,7 +761,6 @@ class NyUtbetalingsoppdragGeneratorTest(
             opphørsperiode!!,
             2,
             1,
-            fagsak.aktør.aktivFødselsnummer(),
             1054,
             "2035-01-01",
             "2039-12-31",
@@ -785,7 +770,6 @@ class NyUtbetalingsoppdragGeneratorTest(
             nyeUtbetalingsPerioderSortert.first(),
             3,
             2,
-            fagsak.aktør.aktivFødselsnummer(),
             1054,
             "2020-01-01",
             "2029-12-31"
@@ -794,7 +778,6 @@ class NyUtbetalingsoppdragGeneratorTest(
             nyeUtbetalingsPerioderSortert[1],
             4,
             3,
-            fagsak.aktør.aktivFødselsnummer(),
             1054,
             "2030-01-01",
             "2034-12-31"
@@ -803,7 +786,6 @@ class NyUtbetalingsoppdragGeneratorTest(
             nyeUtbetalingsPerioderSortert.last(),
             5,
             4,
-            fagsak.aktør.aktivFødselsnummer(),
             1054,
             "2035-01-01",
             "2039-12-31"
@@ -1037,7 +1019,6 @@ class NyUtbetalingsoppdragGeneratorTest(
             utbetalingsperioderPerKlasse.getValue("BATR")[0],
             0,
             null,
-            TSS_ID_INSTITUSJON,
             1054,
             "2019-03-01",
             "2037-02-28"
@@ -1069,7 +1050,6 @@ class NyUtbetalingsoppdragGeneratorTest(
         utbetalingsperiode: Utbetalingsperiode,
         periodeId: Long,
         forrigePeriodeId: Long?,
-        utbetalesTils: String,
         sats: Int,
         fom: String,
         tom: String,
