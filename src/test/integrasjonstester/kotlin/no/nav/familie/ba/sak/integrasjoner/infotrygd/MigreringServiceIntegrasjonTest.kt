@@ -487,7 +487,7 @@ class MigreringServiceIntegrasjonTest(
     }
 
     @Test
-    fun `Migreringskal stoppes hvis antall barn på stønad ikke stemmer overens med antall barn under 18, når person har 1 barn over 18`() {
+    fun `Migrering skal stoppes hvis antall barn på stønad ikke stemmer overens med antall barn under 18, når person har 1 barn over 18`() {
         val fødselsnrBarn =
             FoedselsnummerGenerator().foedselsnummer(LocalDate.now().minusYears(18)).asString
 
@@ -533,7 +533,7 @@ class MigreringServiceIntegrasjonTest(
     }
 
     @Test
-    fun `Migreringskal stoppes hvis antall delytelser er null og antall barn er 0`() {
+    fun `Migrering skal stoppes hvis antall delytelser er null og antall barn er 0`() {
         every {
             infotrygdBarnetrygdClient.hentSaker(any(), any())
         } returns InfotrygdSøkResponse(
