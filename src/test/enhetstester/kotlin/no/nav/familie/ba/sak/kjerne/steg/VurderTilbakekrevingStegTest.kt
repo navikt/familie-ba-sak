@@ -26,7 +26,6 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
@@ -125,7 +124,6 @@ class VurderTilbakekrevingStegTest {
     }
 
     @Test
-    @Disabled("TODO Fikses senere")
     fun `skal utføre steg for migreringsbehandling når avvik i form av etterbetaling er under beløpsgrense`() {
         listOf(BehandlingÅrsak.HELMANUELL_MIGRERING, BehandlingÅrsak.ENDRE_MIGRERINGSDATO).forEach {
             val behandling: Behandling = lagBehandling(
