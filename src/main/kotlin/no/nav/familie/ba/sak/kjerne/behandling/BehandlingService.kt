@@ -186,7 +186,7 @@ class BehandlingService(
         val aktivBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = behandling.fagsak.id)
 
         if (aktivBehandling != null) {
-            behandlingHentOgPersisterService.lagreOgFlush(behandling = aktivBehandling.also { it.aktiv = false })
+            behandlingHentOgPersisterService.lagreOgFlush(aktivBehandling.also { it.aktiv = false })
             saksstatistikkEventPublisher.publiserBehandlingsstatistikk(aktivBehandling.id)
         } else if (harAktivInfotrygdSak(behandling)) {
             throw FunksjonellFeil(
