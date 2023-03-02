@@ -1078,6 +1078,7 @@ class NyUtbetalingsoppdragGeneratorTest(
         assertEquals(periodeId, utbetalingsperiode.periodeId)
         assertEquals(forrigePeriodeId, utbetalingsperiode.forrigePeriodeId)
         assertEquals(sats, utbetalingsperiode.sats.toInt())
+        assertEquals(utbetalesTils, utbetalingsperiode.utbetalesTil)
         assertEquals(dato(fom), utbetalingsperiode.vedtakdatoFom)
         assertEquals(dato(tom), utbetalingsperiode.vedtakdatoTom)
         if (opphørFom != null) {
