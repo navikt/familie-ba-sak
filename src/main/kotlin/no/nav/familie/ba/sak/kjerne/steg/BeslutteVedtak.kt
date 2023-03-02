@@ -151,17 +151,9 @@ class BeslutteVedtak(
 
     private fun sjekkOmBehandlingSkalIverksettesOgHentNesteSteg(behandling: Behandling): StegType {
         val endringerIUtbetaling =
-            beregningService.erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling)
+            beregningService.hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling)
 
-        val nesteSteg = hentNesteStegGittEndringerIUtbetaling(behandling, endringerIUtbetaling)
-
-        if (nesteSteg == StegType.IVERKSETT_MOT_OPPDRAG &&
-            beregningService.erAlleUtbetalingsperioderPåNullKronerIDenneOgForrigeBehandling(behandling) &&
-            behandling.erBehandlingMedVedtaksbrevutsending()
-        ) {
-            return StegType.JOURNALFØR_VEDTAKSBREV
-        }
-        return nesteSteg
+        return hentNesteStegGittEndringerIUtbetaling(behandling, endringerIUtbetaling)
     }
 
     private fun opprettFerdigstillBehandlingTask(behandling: Behandling) {

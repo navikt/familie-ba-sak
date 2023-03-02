@@ -92,7 +92,7 @@ class StønadsstatistikkService(
     private fun hentKompetanse(behandlingId: BehandlingId): List<Kompetanse> {
         val kompetanser = kompetanseService.hentKompetanser(behandlingId)
 
-        return kompetanser.map { kompetanse ->
+        return kompetanser.filter { it.resultat != null }.map { kompetanse ->
             Kompetanse(
                 barnsIdenter = kompetanse.barnAktører.map { aktør -> aktør.aktivFødselsnummer() },
                 annenForeldersAktivitet = if (kompetanse.annenForeldersAktivitet != null) {

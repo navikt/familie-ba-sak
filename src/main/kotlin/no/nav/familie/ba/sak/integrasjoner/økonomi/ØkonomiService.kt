@@ -1,9 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import io.micrometer.core.instrument.Metrics
-import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.UtbetalingsoppdragService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.kjedeinndelteAndeler
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.oppdaterBeståendeAndelerMedOffset
@@ -12,7 +10,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
@@ -27,8 +24,6 @@ import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.math.BigDecimal
-import java.time.LocalDate
 import java.time.YearMonth
 
 @Service
@@ -38,7 +33,6 @@ class ØkonomiService(
     private val beregningService: BeregningService,
     private val utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator,
     private val behandlingService: BehandlingService,
-    private val featureToggleService: FeatureToggleService,
     private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository
 
@@ -171,16 +165,16 @@ class ØkonomiService(
             utbetalingsoppdrag
         }
 
-        return utbetalingsoppdrag.also {
-            if (skalValideres) {
-                it.valider(
-                    behandlingsresultat = vedtak.behandling.resultat,
-                    behandlingskategori = vedtak.behandling.kategori,
-                    andelerTilkjentYtelse = beregningService.hentAndelerTilkjentYtelseForBehandling(vedtak.behandling.id),
-                    erEndreMigreringsdatoBehandling = vedtak.behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO
-                )
-            }
+        if (skalValideres) {
+            utbetalingsoppdrag.validerNullutbetaling(
+                behandlingskategori = vedtak.behandling.kategori,
+                andelerTilkjentYtelse = beregningService.hentAndelerTilkjentYtelseForBehandling(vedtak.behandling.id)
+            )
         }
+
+        opprettAdvarselLoggVedForstattInnvilgetMedUtbetaling(utbetalingsoppdrag, vedtak.behandling)
+
+        return utbetalingsoppdrag
     }
 
     private fun beregnOmMigreringsDatoErEndret(behandling: Behandling, forrigeTilstandFraDato: YearMonth?): YearMonth? {
@@ -216,10 +210,3 @@ private fun Utbetalingsoppdrag.skalIverksettesMotOppdrag(): Boolean = utbetaling
 
 private fun TilkjentYtelse.skalIverksettesMotOppdrag(): Boolean =
     this.utbetalingsoppdrag()?.skalIverksettesMotOppdrag() ?: false
-
-fun Utbetalingsoppdrag.harLøpendeUtbetaling() =
-    this.utbetalingsperiode.any {
-        it.opphør == null &&
-            it.sats > BigDecimal.ZERO &&
-            it.vedtakdatoTom > LocalDate.now().sisteDagIMåned()
-    }
