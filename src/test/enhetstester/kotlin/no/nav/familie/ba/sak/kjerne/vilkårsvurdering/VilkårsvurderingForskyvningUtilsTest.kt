@@ -33,7 +33,7 @@ import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
 
-class PersonResultatTest {
+class VilkårsvurderingForskyvningUtilsTest {
 
     @Test
     fun `Skal lage riktig splitt når bor med søker går fra delt bosted til fullt`() {
