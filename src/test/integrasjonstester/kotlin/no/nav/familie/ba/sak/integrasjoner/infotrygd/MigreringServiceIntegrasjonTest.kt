@@ -534,9 +534,6 @@ class MigreringServiceIntegrasjonTest(
 
     @Test
     fun `Migrerin skal stoppes hvis antall delytelser er null og antall barn er 0`() {
-        val fødselsnrBarn =
-            FoedselsnummerGenerator().foedselsnummer(LocalDate.now().minusYears(18)).asString
-
         every {
             infotrygdBarnetrygdClient.hentSaker(any(), any())
         } returns InfotrygdSøkResponse(
