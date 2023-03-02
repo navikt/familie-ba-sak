@@ -3,8 +3,6 @@ package no.nav.familie.ba.sak.kjerne.brev
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.NY_MÅTE_Å_BEREGNE_BEHANDLINGSRESULTAT
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
 import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
@@ -15,7 +13,6 @@ import org.junit.jupiter.api.Test
 class BrevServiceTest {
     val saksbehandlerContext = mockk<SaksbehandlerContext>()
     val brevmalService = mockk<BrevmalService>()
-    val featureToggleService = mockk<FeatureToggleService>()
     val brevService = BrevService(
         totrinnskontrollService = mockk(),
         persongrunnlagService = mockk(),
@@ -29,14 +26,12 @@ class BrevServiceTest {
         organisasjonService = mockk(),
         korrigertVedtakService = mockk(),
         saksbehandlerContext = saksbehandlerContext,
-        brevmalService = brevmalService,
-        featureToggleService = featureToggleService
+        brevmalService = brevmalService
     )
 
     @BeforeEach
     fun setUp() {
         every { saksbehandlerContext.hentSaksbehandlerSignaturTilBrev() } returns "saksbehandlerNavn"
-        every { featureToggleService.isEnabled(NY_MÅTE_Å_BEREGNE_BEHANDLINGSRESULTAT) } returns true
     }
 
     @Test
