@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering
 import no.nav.familie.ba.sak.common.ikkeOppfyltVilkår
 import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.common.oppfyltVilkår
-import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.kjerne.eøs.util.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.konkatenerTidslinjer
@@ -44,7 +43,6 @@ class VilkårsresultatMånedTidslinjeTest {
     fun `Back to back perioder i månedsskiftet gir sammenhengende perioder`() {
         val periodeFom = LocalDate.of(2022, 4, 15)
         val periodeFom2 = LocalDate.of(2022, 7, 1)
-        val senesteDato = periodeFom.til18ÅrsVilkårsdato() // 2040-04-14
         val vilkårsresultatMånedTidslinje =
             listOf(
                 lagVilkårResultat(
@@ -128,7 +126,7 @@ class VilkårsresultatMånedTidslinjeTest {
     fun `Hvis det byttes fra oppfylt til ikke oppfylt i månedskiftet, skal kun gi oppfylt til og med denne måneden`() {
         val dagvilkårtidslinje = konkatenerTidslinjer(
             31.mar(2020).ogTidligere().tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET, EØS_FORORDNINGEN) },
-            1.apr(2020).ogSenere().tilTidslinje { ikkeOppfyltVilkår(BOSATT_I_RIKET, NASJONALE_REGLER) }
+            1.apr(2020).ogSenere().tilTidslinje { ikkeOppfyltVilkår(BOSATT_I_RIKET) }
         )
 
         val forventetMånedstidslinje = konkatenerTidslinjer(
