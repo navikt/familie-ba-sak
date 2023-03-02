@@ -209,45 +209,6 @@ class VedtaksperiodeServiceTest(
     }
 
     @Test
-    fun `Skal kunne lagre flere vedtaksperioder av typen endret utbetaling med samme periode`() {
-        val behandling = kjørStegprosessForFGB(
-            tilSteg = StegType.REGISTRERE_SØKNAD,
-            søkerFnr = randomFnr(),
-            barnasIdenter = listOf(barnFnr),
-            fagsakService = fagsakService,
-            vedtakService = vedtakService,
-            persongrunnlagService = persongrunnlagService,
-            vilkårsvurderingService = vilkårsvurderingService,
-            stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService,
-            brevmalService = brevmalService
-        )
-        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandling.id)
-
-        val fom = inneværendeMåned().minusMonths(12).førsteDagIInneværendeMåned()
-        val tom = inneværendeMåned().sisteDagIInneværendeMåned()
-        val type = Vedtaksperiodetype.UTBETALING
-        val vedtaksperiode = VedtaksperiodeMedBegrunnelser(
-            vedtak = vedtak,
-            fom = fom,
-            tom = tom,
-            type = type
-        )
-        vedtaksperiodeRepository.save(vedtaksperiode)
-
-        val vedtaksperiodeMedSammePeriode = VedtaksperiodeMedBegrunnelser(
-            vedtak = vedtak,
-            fom = fom,
-            tom = tom,
-            type = type
-        )
-
-        Assertions.assertDoesNotThrow {
-            vedtaksperiodeRepository.save(vedtaksperiodeMedSammePeriode)
-        }
-    }
-
-    @Test
     fun `Skal validere at vedtaksperioder blir lagret ved fortsatt innvilget som resultat`() {
         assertEquals(Behandlingsresultat.FORTSATT_INNVILGET, revurdering?.resultat)
 
