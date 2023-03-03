@@ -316,6 +316,7 @@ data class Behandling(
  * @displayName benyttes for visning av resultat
  */
 enum class Behandlingsresultat(val displayName: String) {
+
     // Søknad
     INNVILGET(displayName = "Innvilget"),
     INNVILGET_OG_OPPHØRT(displayName = "Innvilget og opphørt"),
@@ -333,8 +334,9 @@ enum class Behandlingsresultat(val displayName: String) {
     AVSLÅTT_OG_ENDRET(displayName = "Avslått og endret"),
     AVSLÅTT_ENDRET_OG_OPPHØRT(displayName = "Avslått, endret og opphørt"),
 
-    // Revurdering
+    // Revurdering uten søknad
     ENDRET_UTBETALING(displayName = "Endret utbetaling"),
+    ENDRET_UTEN_UTBETALING(displayName = "Endret, uten endret utbetaling"),
     ENDRET_OG_OPPHØRT(displayName = "Endret og opphørt"),
     OPPHØRT(displayName = "Opphørt"),
     FORTSATT_OPPHØRT(displayName = "Fortsatt opphørt"),
@@ -345,9 +347,6 @@ enum class Behandlingsresultat(val displayName: String) {
     HENLAGT_SØKNAD_TRUKKET(displayName = "Henlagt søknad trukket"),
     HENLAGT_AUTOMATISK_FØDSELSHENDELSE(displayName = "Henlagt avslått i automatisk vilkårsvurdering"),
     HENLAGT_TEKNISK_VEDLIKEHOLD(displayName = "Henlagt teknisk vedlikehold"),
-
-    @Deprecated("Skal ikke brukes lenger")
-    ENDRET_UTEN_UTBETALING(displayName = "Endret, uten endret utbetaling"),
 
     IKKE_VURDERT(displayName = "Ikke vurdert");
 
