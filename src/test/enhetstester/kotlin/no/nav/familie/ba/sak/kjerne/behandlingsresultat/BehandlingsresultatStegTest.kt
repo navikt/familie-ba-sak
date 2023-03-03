@@ -5,8 +5,6 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -56,8 +54,6 @@ class BehandlingsresultatStegTest {
 
     private lateinit var behandling: Behandling
 
-    private val featureToggleService: FeatureToggleService = mockk()
-
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService =
         mockk<AndelerTilkjentYtelseOgEndreteUtbetalingerService>()
 
@@ -73,7 +69,6 @@ class BehandlingsresultatStegTest {
             vilkårService,
             persongrunnlagService,
             beregningService,
-            featureToggleService,
             andelerTilkjentYtelseOgEndreteUtbetalingerService
         )
 
@@ -81,13 +76,11 @@ class BehandlingsresultatStegTest {
             behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
             årsak = BehandlingÅrsak.HELMANUELL_MIGRERING
         )
-
-        every { featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_BEREGNE_BEHANDLINGSRESULTAT) } returns false
     }
 
     @Test
     fun `skal kaste exception hvis behandlingsresultat er Avslått for en manuell migrering`() {
-        every { mockBehandlingsresultatService.utledBehandlingsresultatGammel(any()) } returns Behandlingsresultat.AVSLÅTT
+        every { mockBehandlingsresultatService.utledBehandlingsresultat(any()) } returns Behandlingsresultat.AVSLÅTT
 
         every {
             behandlingService.oppdaterBehandlingsresultat(
@@ -107,7 +100,7 @@ class BehandlingsresultatStegTest {
 
     @Test
     fun `skal kaste exception hvis behandlingsresultat er Delvis Innvilget for en manuell migrering`() {
-        every { mockBehandlingsresultatService.utledBehandlingsresultatGammel(any()) } returns Behandlingsresultat.DELVIS_INNVILGET
+        every { mockBehandlingsresultatService.utledBehandlingsresultat(any()) } returns Behandlingsresultat.DELVIS_INNVILGET
 
         every {
             behandlingService.oppdaterBehandlingsresultat(
@@ -127,7 +120,7 @@ class BehandlingsresultatStegTest {
 
     @Test
     fun `skal kaste exception hvis behandlingsresultat er Avslått,Endret og Opphørt for en manuell migrering`() {
-        every { mockBehandlingsresultatService.utledBehandlingsresultatGammel(any()) } returns Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT
+        every { mockBehandlingsresultatService.utledBehandlingsresultat(any()) } returns Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT
 
         every {
             behandlingService.oppdaterBehandlingsresultat(

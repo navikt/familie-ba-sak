@@ -247,8 +247,18 @@ class VurderTilbakekrevingStegTest {
 
             // feilutbetaling 1 KR per barn i hver periode
             val posteringer = listOf(
-                mockVedtakSimuleringPostering(fom = fom, tom = tom, beløp = 2, posteringType = PosteringType.FEILUTBETALING),
-                mockVedtakSimuleringPostering(fom = fom2, tom = tom2, beløp = 2, posteringType = PosteringType.FEILUTBETALING)
+                mockVedtakSimuleringPostering(
+                    fom = fom,
+                    tom = tom,
+                    beløp = 2,
+                    posteringType = PosteringType.FEILUTBETALING
+                ),
+                mockVedtakSimuleringPostering(
+                    fom = fom2,
+                    tom = tom2,
+                    beløp = 2,
+                    posteringType = PosteringType.FEILUTBETALING
+                )
             )
             val simuleringMottaker =
                 listOf(mockØkonomiSimuleringMottaker(behandling = behandling, økonomiSimuleringPostering = posteringer))
@@ -424,11 +434,11 @@ class VurderTilbakekrevingStegTest {
         økonomiSimuleringMottaker: ØkonomiSimuleringMottaker = mockk(relaxed = true),
         beløp: Int = 0,
         fagOmrådeKode: FagOmrådeKode = FagOmrådeKode.BARNETRYGD,
-        fom: LocalDate = LocalDate.now().minusMonths(1),
-        tom: LocalDate = LocalDate.now().minusMonths(1),
+        fom: LocalDate = LocalDate.of(2023, 1, 1),
+        tom: LocalDate = LocalDate.of(2023, 1, 1),
         betalingType: BetalingType = BetalingType.DEBIT,
         posteringType: PosteringType = PosteringType.YTELSE,
-        forfallsdato: LocalDate = LocalDate.now().minusMonths(1),
+        forfallsdato: LocalDate = LocalDate.of(2023, 1, 1),
         utenInntrekk: Boolean = false
     ) = ØkonomiSimuleringPostering(
         økonomiSimuleringMottaker = økonomiSimuleringMottaker,
