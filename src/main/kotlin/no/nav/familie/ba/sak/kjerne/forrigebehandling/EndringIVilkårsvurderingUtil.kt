@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringUtil.tilFørsteEndr
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilForskjøvetTidslinjeForOppfyltVilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -67,7 +66,6 @@ object EndringIVilkårsvurderingUtil {
         forrigeVilkårResultat: List<VilkårResultat>,
         vilkår: Vilkår
     ): Tidslinje<Boolean, Måned> {
-        if (nåværendeVilkårResultat.isEmpty() && forrigeVilkårResultat.isEmpty()) return tidslinje { emptyList() }
         val nåværendeVilkårResultatTidslinje = nåværendeVilkårResultat.tilForskjøvetTidslinjeForOppfyltVilkår(vilkår)
         val tidligereVilkårResultatTidslinje = forrigeVilkårResultat.tilForskjøvetTidslinjeForOppfyltVilkår(vilkår)
 
