@@ -2,9 +2,9 @@ package no.nav.familie.ba.sak.kjerne.brev
 
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.tilKortString
-import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertKompetanse
+import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertKompetanse
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertPersonResultat
