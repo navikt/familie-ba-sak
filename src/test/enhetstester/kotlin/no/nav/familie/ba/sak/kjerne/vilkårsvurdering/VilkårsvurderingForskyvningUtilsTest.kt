@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.neste
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonthEllerNull
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.beskjærPå18År
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilForskjøvetTidslinjeForOppfyltVilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilForskjøvetTidslinjerForHvertOppfylteVilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilTidslinjeForSplitt
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -188,6 +189,58 @@ class VilkårsvurderingForskyvningUtilsTest {
             Assertions.assertEquals(fom.plusMonths(1).toYearMonth(), periode.fraOgMed.tilYearMonth())
             Assertions.assertNull(andrePeriode.tilOgMed.tilYearMonthEllerNull())
         }
+    }
+
+    @Test
+    fun `Skal forskyve UNDER_18 tidslinjen og beskjære den måneden før 18-årsdag`() {
+        val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2022, Month.DECEMBER, 1).minusYears(18))
+
+        val under18VilkårResultat = listOf(
+            lagVilkårResultat(
+                periodeFom = barn.fødselsdato,
+                periodeTom = barn.fødselsdato.plusYears(18).minusDays(1),
+                vilkårType = Vilkår.UNDER_18_ÅR,
+                resultat = Resultat.OPPFYLT
+            )
+        )
+
+        val forskjøvetTidslinje = under18VilkårResultat.tilForskjøvetTidslinjeForOppfyltVilkår(vilkår = Vilkår.UNDER_18_ÅR)
+
+        val forskjøvedePerioder = forskjøvetTidslinje.perioder()
+
+        Assertions.assertEquals(1, forskjøvedePerioder.size)
+
+        val forskjøvetPeriode = forskjøvedePerioder.single()
+
+        Assertions.assertEquals(barn.fødselsdato.plusMonths(1).toYearMonth(), forskjøvetPeriode.fraOgMed.tilYearMonth())
+        Assertions.assertEquals(barn.fødselsdato.plusYears(18).minusMonths(1).toYearMonth(), forskjøvetPeriode.tilOgMed.tilYearMonth())
+    }
+
+    @Test
+    fun `Skal forskyve UNDER_18 tidslinjen, men ikke kutte den måneden før hvis til og med dato ikke er i måneden hen fyller 18`() {
+        val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2022, Month.DECEMBER, 1).minusYears(18))
+
+        val tomDato = barn.fødselsdato.plusYears(7)
+
+        val under18VilkårResultat = listOf(
+            lagVilkårResultat(
+                periodeFom = barn.fødselsdato,
+                periodeTom = tomDato,
+                vilkårType = Vilkår.UNDER_18_ÅR,
+                resultat = Resultat.OPPFYLT
+            )
+        )
+
+        val forskjøvetTidslinje = under18VilkårResultat.tilForskjøvetTidslinjeForOppfyltVilkår(vilkår = Vilkår.UNDER_18_ÅR)
+
+        val forskjøvedePerioder = forskjøvetTidslinje.perioder()
+
+        Assertions.assertEquals(1, forskjøvedePerioder.size)
+
+        val forskjøvetPeriode = forskjøvedePerioder.single()
+
+        Assertions.assertEquals(barn.fødselsdato.plusMonths(1).toYearMonth(), forskjøvetPeriode.fraOgMed.tilYearMonth())
+        Assertions.assertEquals(tomDato.toYearMonth(), forskjøvetPeriode.tilOgMed.tilYearMonth())
     }
 
     @Test
