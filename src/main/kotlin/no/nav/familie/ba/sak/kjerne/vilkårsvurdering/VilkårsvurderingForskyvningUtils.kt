@@ -13,6 +13,8 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærEtter
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.tilMånedFraMånedsskifteIkkeNull
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.beskjærPå18År
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilForskjøvetTidslinjeForOppfyltVilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -52,7 +54,14 @@ object VilkårsvurderingForskyvningUtils {
 
     fun Collection<VilkårResultat>.tilForskjøvetTidslinjeForOppfyltVilkår(vilkår: Vilkår): Tidslinje<VilkårResultat, Måned> {
         if (this.isEmpty()) return tidslinje { emptyList() }
-        val tidslinje = this
+
+        val tidslinje = this.lagForskjøvetTidslinjeForOppfylteVilkår(vilkår)
+
+        return tidslinje.beskjærPå18ÅrHvisUnder18ÅrVilkår(vilkår = vilkår, vilkårResultater = this)
+    }
+
+    private fun Collection<VilkårResultat>.lagForskjøvetTidslinjeForOppfylteVilkår(vilkår: Vilkår): Tidslinje<VilkårResultat, Måned> {
+        return this
             .filter { it.vilkårType == vilkår && it.erOppfylt() }
             .tilTidslinje()
             .tilMånedFraMånedsskifteIkkeNull { innholdSisteDagForrigeMåned, innholdFørsteDagDenneMåned ->
@@ -62,16 +71,18 @@ object VilkårsvurderingForskyvningUtils {
                     else -> innholdFørsteDagDenneMåned
                 }
             }
+    }
 
+    private fun Tidslinje<VilkårResultat, Måned>.beskjærPå18ÅrHvisUnder18ÅrVilkår(vilkår: Vilkår, vilkårResultater: Iterable<VilkårResultat>): Tidslinje<VilkårResultat, Måned> {
         return if (vilkår == Vilkår.UNDER_18_ÅR) {
-            val minstePeriodeFom = this.minOf { it.periodeFom ?: throw Feil("Finner ikke fra og med dato på 'under 18 år'-vilkåret") } // Fra og med dato skal være lik fødselsdato for under 18-vilkåret
-            tidslinje.beskjærPå18År(fødselsdato = minstePeriodeFom)
+            val minstePeriodeFom = vilkårResultater.minOf { it.periodeFom ?: throw Feil("Finner ikke fra og med dato på 'under 18 år'-vilkåret") } // Fra og med dato skal være lik fødselsdato for under 18-vilkåret
+            this.beskjærPå18År(fødselsdato = minstePeriodeFom)
         } else {
-            tidslinje
+            this
         }
     }
 
-    fun Tidslinje<VilkårResultat, Måned>.beskjærPå18År(fødselsdato: LocalDate): Tidslinje<VilkårResultat, Måned> {
+    internal fun Tidslinje<VilkårResultat, Måned>.beskjærPå18År(fødselsdato: LocalDate): Tidslinje<VilkårResultat, Måned> {
         val under18Tidslinje = erUnder18ÅrVilkårTidslinje(fødselsdato)
         return this.beskjærEtter(under18Tidslinje)
     }
