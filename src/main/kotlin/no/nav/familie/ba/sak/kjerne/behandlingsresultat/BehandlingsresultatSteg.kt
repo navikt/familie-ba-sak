@@ -186,4 +186,3 @@ class BehandlingsresultatSteg(
         val logger = LoggerFactory.getLogger(this::class.java)!!
     }
 }
-
