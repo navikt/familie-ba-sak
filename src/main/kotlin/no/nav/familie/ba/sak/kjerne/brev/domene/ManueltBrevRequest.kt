@@ -55,7 +55,7 @@ data class ManueltBrevRequest(
     val barnasFødselsdager: List<LocalDate>? = null,
     val behandlingKategori: BehandlingKategori? = null,
     val vedrørende: Person? = null,
-    val mottakerlandSed: String? = null
+    val mottakerlandSed: List<String> = emptyList()
 ) {
 
     override fun toString(): String {
@@ -64,7 +64,7 @@ data class ManueltBrevRequest(
 
     fun enhetNavn(): String = this.enhet?.enhetNavn ?: error("Finner ikke enhetsnavn på manuell brevrequest")
 
-    fun mottakerlandSED(): String =
+    fun mottakerlandSED(): List<String> =
         this.mottakerlandSed ?: error("Finner ikke mottakerland for SED på manuell brevrequest")
 }
 
@@ -321,7 +321,7 @@ fun ManueltBrevRequest.tilBrev(saksbehandlerNavn: String, hentLandkoder: (() -> 
                 navn = this.mottakerNavn,
                 fødselsnummer = this.mottakerIdent,
                 enhet = this.enhetNavn(),
-                mottakerlandSed = tilLandNavn(hentLandkoder(), this.mottakerlandSED()),
+                mottakerlandSed = Utils.slåSammen(this.mottakerlandSED().map { tilLandNavn(hentLandkoder(), it) }),
                 saksbehandlerNavn = saksbehandlerNavn
             )
 
@@ -331,7 +331,7 @@ fun ManueltBrevRequest.tilBrev(saksbehandlerNavn: String, hentLandkoder: (() -> 
                 navn = this.mottakerNavn,
                 fødselsnummer = this.mottakerIdent,
                 enhet = this.enhetNavn(),
-                mottakerlandSed = tilLandNavn(hentLandkoder(), this.mottakerlandSED()),
+                mottakerlandSed = Utils.slåSammen(this.mottakerlandSED().map { tilLandNavn(hentLandkoder(), it) }),
                 dokumentliste = this.multiselectVerdier,
                 saksbehandlerNavn = saksbehandlerNavn
             )
