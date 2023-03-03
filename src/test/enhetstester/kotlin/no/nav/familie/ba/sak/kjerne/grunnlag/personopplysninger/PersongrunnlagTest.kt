@@ -42,7 +42,7 @@ class PersongrunnlagTest {
     }
 
     @Test
-    fun `Returnerer barnet som "søker" når grunnlag kun består av ett barn (enslig mindreårig eller institusjonsbarn)`() {
+    fun `Returnerer barnet som 'søker' når grunnlag kun består av ett barn (enslig mindreårig eller institusjonsbarn)`() {
         val barnet = lagPerson(type = PersonType.BARN)
         val persongrunnlag = lagTestPersonopplysningGrunnlag(1L, barnet)
         Assertions.assertEquals(barnet, persongrunnlag.søker)

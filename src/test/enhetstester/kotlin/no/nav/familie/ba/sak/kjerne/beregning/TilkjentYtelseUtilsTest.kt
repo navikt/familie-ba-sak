@@ -465,7 +465,7 @@ internal class TilkjentYtelseUtilsTest {
     }
 
     @Test
-    fun `Skal returnere 50% hvis vilkårsvurderingen har delt bosted i perioden`() {
+    fun `Skal returnere 50 prosent hvis vilkårsvurderingen har delt bosted i perioden`() {
         val barn = lagPerson(type = PersonType.BARN)
         val personResultat = PersonResultat(
             vilkårsvurdering = lagVilkårsvurdering(
@@ -491,7 +491,7 @@ internal class TilkjentYtelseUtilsTest {
     }
 
     @Test
-    fun `Skal returnere 100% hvis vilkårsvurderingen ikke har delt bosted i perioden`() {
+    fun `Skal returnere 100 prosent hvis vilkårsvurderingen ikke har delt bosted i perioden`() {
         val barn = lagPerson(type = PersonType.BARN)
         val personResultat = PersonResultat(
             vilkårsvurdering = lagVilkårsvurdering(

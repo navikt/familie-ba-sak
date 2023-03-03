@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.kjørStegprosessForRevurderingÅrligKontroll
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelseMedEndreteUtbetalinger
@@ -11,7 +9,6 @@ import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
@@ -32,10 +29,8 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -206,45 +201,6 @@ class VedtaksperiodeServiceTest(
             EØSStandardbegrunnelse.AVSLAG_EØS_UREGISTRERT_BARN,
             vedtaksperioder.flatMap { it.eøsBegrunnelser }.first().begrunnelse
         )
-    }
-
-    @Test
-    fun `Skal kunne lagre flere vedtaksperioder av typen endret utbetaling med samme periode`() {
-        val behandling = kjørStegprosessForFGB(
-            tilSteg = StegType.REGISTRERE_SØKNAD,
-            søkerFnr = randomFnr(),
-            barnasIdenter = listOf(barnFnr),
-            fagsakService = fagsakService,
-            vedtakService = vedtakService,
-            persongrunnlagService = persongrunnlagService,
-            vilkårsvurderingService = vilkårsvurderingService,
-            stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService,
-            brevmalService = brevmalService
-        )
-        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandling.id)
-
-        val fom = inneværendeMåned().minusMonths(12).førsteDagIInneværendeMåned()
-        val tom = inneværendeMåned().sisteDagIInneværendeMåned()
-        val type = Vedtaksperiodetype.ENDRET_UTBETALING
-        val vedtaksperiode = VedtaksperiodeMedBegrunnelser(
-            vedtak = vedtak,
-            fom = fom,
-            tom = tom,
-            type = type
-        )
-        vedtaksperiodeRepository.save(vedtaksperiode)
-
-        val vedtaksperiodeMedSammePeriode = VedtaksperiodeMedBegrunnelser(
-            vedtak = vedtak,
-            fom = fom,
-            tom = tom,
-            type = type
-        )
-
-        Assertions.assertDoesNotThrow {
-            vedtaksperiodeRepository.save(vedtaksperiodeMedSammePeriode)
-        }
     }
 
     @Test

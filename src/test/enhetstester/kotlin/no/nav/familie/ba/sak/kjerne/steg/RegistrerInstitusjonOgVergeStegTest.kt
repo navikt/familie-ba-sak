@@ -106,7 +106,7 @@ class RegistrerInstitusjonOgVergeStegTest {
         )
 
         assertThat(fagsakSlot.captured.institusjon!!.orgNummer).isEqualTo(restRegistrerInstitusjonOgVerge.institusjonInfo!!.orgNummer)
-        assertThat(vergeSlot.captured!!.ident).isEqualTo(restRegistrerInstitusjonOgVerge.vergeInfo!!.ident)
+        assertThat(vergeSlot.captured.ident).isEqualTo(restRegistrerInstitusjonOgVerge.vergeInfo!!.ident)
         verify(exactly = 1) {
             loggServiceMock.opprettRegistrerVergeLogg(any())
         }
