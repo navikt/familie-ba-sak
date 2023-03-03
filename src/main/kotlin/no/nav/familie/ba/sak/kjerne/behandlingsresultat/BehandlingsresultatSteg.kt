@@ -31,6 +31,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -185,10 +186,16 @@ class BehandlingsresultatSteg(
         val erEndringIUtbetalingEtterMigreringsdato = endringIUtbetalingEtterDato.any { it.innhold == true }
 
         if (erEndringIUtbetalingEtterMigreringsdato) {
+            logger.warn("Feil i behandling $behandling.\n\nEndring i måned ${endringIUtbetalingEtterDato.first { it.innhold == true }.fraOgMed.tilYearMonth()}.")
             throw Feil(
-                "Det finnes endringer i behandlingen som har økonomisk konsekvens for bruker. " +
+                "Det finnes endringer i behandlingen som har økonomisk konsekvens for bruker." +
                     "Det skal ikke skje for endre migreringsdatobehandlinger."
             )
         }
     }
+
+    companion object {
+        val logger = LoggerFactory.getLogger(this::class.java)!!
+    }
 }
+
