@@ -65,8 +65,7 @@ data class ManueltBrevRequest(
     fun enhetNavn(): String = this.enhet?.enhetNavn ?: error("Finner ikke enhetsnavn på manuell brevrequest")
 
     fun mottakerlandSED(): List<String> =
-        this.mottakerlandSed ?: error("Finner ikke mottakerland for SED på manuell brevrequest")
-}
+        this.mottakerlandSed.takeIf { it.isNotEmpty() } ?: error("Finner ikke noen mottakerland for SED på manuell brevrequest")
 
 fun ManueltBrevRequest.byggMottakerdata(
     behandling: Behandling,
