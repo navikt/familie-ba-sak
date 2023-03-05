@@ -30,8 +30,7 @@ internal class BostedsadresseTest {
         val adresseMedNullFom = adresse.copy().apply { periode = DatoIntervallEntitet(fom = null) }
         val adresseMedEldreDato = adresse.copy().apply { periode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(3)) }
         val adresseMedNyereDato = adresse.copy().apply { periode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(1)) }
-        val adresserTilSortering =
-            mutableListOf(adresseMedEldreDato, adresseMedNyereDato, adresseMedNullFom) as MutableList<GrBostedsadresse>
+        val adresserTilSortering = mutableListOf<GrBostedsadresse>(adresseMedEldreDato, adresseMedNyereDato, adresseMedNullFom)
         assertEquals(adresseMedNyereDato, adresserTilSortering.sisteAdresse())
     }
 

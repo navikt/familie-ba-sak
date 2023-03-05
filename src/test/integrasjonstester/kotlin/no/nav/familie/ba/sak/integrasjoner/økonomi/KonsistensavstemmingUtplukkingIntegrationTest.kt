@@ -29,7 +29,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.math.BigDecimal
 import java.time.LocalDate
 
-@TestMethodOrder(MethodOrderer.Alphanumeric::class)
+@TestMethodOrder(MethodOrderer.MethodName::class)
 class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationTest() {
 
     @Autowired

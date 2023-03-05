@@ -229,7 +229,7 @@ internal class Autobrev6og18ÅrServiceTest {
 
     @Test
     fun `Verifiser at behandling for omregning ikke blir trigget for løpende fagsak med barn som fyller 18år inneværende måned, hvis barnet ikke har løpende andel tilkjent ytelse`() {
-        val (behandling, søker, barnIBrytningsalder) = initMock(alder = 18, medSøsken = true)
+        val (behandling, _, barnIBrytningsalder) = initMock(alder = 18, medSøsken = true)
 
         val autobrev6og18ÅrDTO = Autobrev6og18ÅrDTO(
             fagsakId = behandling.fagsak.id,

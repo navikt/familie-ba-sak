@@ -3,8 +3,6 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -47,8 +45,6 @@ class BehandlingsresultatStegTest {
 
     private lateinit var behandling: Behandling
 
-    private val featureToggleService: FeatureToggleService = mockk()
-
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService =
         mockk<AndelerTilkjentYtelseOgEndreteUtbetalingerService>()
 
@@ -64,7 +60,6 @@ class BehandlingsresultatStegTest {
             vilkårService,
             persongrunnlagService,
             beregningService,
-            featureToggleService,
             andelerTilkjentYtelseOgEndreteUtbetalingerService
         )
 
@@ -72,8 +67,6 @@ class BehandlingsresultatStegTest {
             behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
             årsak = BehandlingÅrsak.HELMANUELL_MIGRERING
         )
-
-        every { featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_BEREGNE_BEHANDLINGSRESULTAT) } returns false
     }
 
     @Test
