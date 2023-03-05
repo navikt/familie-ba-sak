@@ -106,7 +106,7 @@ class EndretUtbetalingAndelService(
         endretUtbetalingAndelId: Long
     ) {
         val endretUtbetalingAndel = endretUtbetalingAndelRepository.getById(endretUtbetalingAndelId)
-        endretUtbetalingAndel?.andelTilkjentYtelser?.forEach { it.endretUtbetalingAndeler.clear() }
+        endretUtbetalingAndel.andelTilkjentYtelser.forEach { it.endretUtbetalingAndeler.clear() }
         endretUtbetalingAndelRepository.deleteById(endretUtbetalingAndelId)
 
         val personopplysningGrunnlag =

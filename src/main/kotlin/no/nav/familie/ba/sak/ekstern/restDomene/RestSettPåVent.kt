@@ -5,8 +5,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentÅrsak
 import java.time.LocalDate
 
 data class RestSettPåVent(
-    open val frist: LocalDate,
-    open val årsak: SettPåVentÅrsak
+    val frist: LocalDate,
+    val årsak: SettPåVentÅrsak
 )
 
 fun SettPåVent.tilRestSettPåVent(): RestSettPåVent = RestSettPåVent(
