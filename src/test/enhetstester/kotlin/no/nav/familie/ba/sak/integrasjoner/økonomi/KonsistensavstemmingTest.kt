@@ -340,7 +340,7 @@ class KonsistensavstemmingTest {
         lagMockFinnPerioderForRelevanteBehandlingerHappeCase()
         konsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask.doTask(
             Task(
-                payload = finnPerioderTask!!.payload,
+                payload = finnPerioderTask.payload,
                 type = KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask.TASK_STEP_TYPE
             )
         )
@@ -500,6 +500,7 @@ class KonsistensavstemmingTest {
         )
         val aktivFødselsnummere = mapOf(behandlingId.toLong() to "test")
         every { behandlingHentOgPersisterService.hentAktivtFødselsnummerForBehandlinger(any()) } returns aktivFødselsnummere
+        every { behandlingHentOgPersisterService.hentTssEksternIdForBehandlinger(any()) } returns emptyMap()
     }
 
     private fun lagMockOppdragDataHappeCase(transaksjonsId: UUID) {

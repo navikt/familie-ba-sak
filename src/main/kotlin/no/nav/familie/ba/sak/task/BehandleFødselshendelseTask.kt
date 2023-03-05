@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.FagsystemRegelVurdering
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.VelgFagSystemService
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.kontrakter.felles.Fødselsnummer
@@ -13,6 +14,7 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
+import no.nav.familie.prosessering.error.RekjørSenereException
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -29,7 +31,8 @@ class BehandleFødselshendelseTask(
     private val autovedtakStegService: AutovedtakStegService,
     private val velgFagsystemService: VelgFagSystemService,
     private val infotrygdFeedService: InfotrygdFeedService,
-    private val personidentService: PersonidentService
+    private val personidentService: PersonidentService,
+    private val startSatsendring: StartSatsendring
 ) : AsyncTaskStep {
 
     private val dagerSidenBarnBleFødt: DistributionSummary = Metrics.summary("foedselshendelse.dagersidenbarnfoedt")
@@ -54,12 +57,23 @@ class BehandleFødselshendelseTask(
         }
 
         when (velgFagsystemService.velgFagsystem(nyBehandling).first) {
-            FagsystemRegelVurdering.SEND_TIL_BA -> autovedtakStegService.kjørBehandlingFødselshendelse(
-                mottakersAktør = personidentService.hentAktør(
-                    nyBehandling.morsIdent
-                ),
-                behandlingsdata = nyBehandling
-            )
+            FagsystemRegelVurdering.SEND_TIL_BA -> {
+                val harOpprettetSatsendring =
+                    startSatsendring.sjekkOgOpprettSatsendringVedGammelSats(nyBehandling.morsIdent)
+                if (harOpprettetSatsendring) {
+                    throw RekjørSenereException(
+                        "Satsendring skal kjøre ferdig før man behandler fødselsehendelse",
+                        LocalDateTime.now().plusMinutes(60)
+                    )
+                }
+                autovedtakStegService.kjørBehandlingFødselshendelse(
+                    mottakersAktør = personidentService.hentAktør(
+                        nyBehandling.morsIdent
+                    ),
+                    behandlingsdata = nyBehandling
+                )
+            }
+
             FagsystemRegelVurdering.SEND_TIL_INFOTRYGD -> {
                 infotrygdFeedService.sendTilInfotrygdFeed(nyBehandling.barnasIdenter)
             }

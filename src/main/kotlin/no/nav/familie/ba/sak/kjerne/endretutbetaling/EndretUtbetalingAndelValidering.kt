@@ -16,14 +16,12 @@ import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.slåSammenOverlappendePerioder
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
-import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.tilMånedPeriode
 import no.nav.familie.ba.sak.common.toPeriode
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.hentGyldigEtterbetalingFom
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
@@ -172,37 +170,6 @@ object EndretUtbetalingAndelValidering {
                 melding = "Det er opprettet instanser av EndretUtbetalingandel som ikke er tilknyttet noen andeler. De må enten lagres eller slettes av SB.",
                 frontendFeilmelding = "Du har endrede utbetalingsperioder. Bekreft, slett eller oppdater periodene i listen."
             )
-        }
-    }
-}
-
-fun validerDeltBostedEndringerIkkeKrysserUtvidetYtelse(
-    endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
-    andelerTilkjentYtelse: Collection<AndelTilkjentYtelse>
-) {
-    fun EndretUtbetalingAndel.finnKryssendeUtvidetYtelse(
-        andelTilkjentYtelser: Collection<AndelTilkjentYtelse>
-    ): AndelTilkjentYtelse? =
-        andelTilkjentYtelser
-            .filter { it.type == YtelseType.UTVIDET_BARNETRYGD }
-            .find {
-                it.overlapperPeriode(MånedPeriode(this.fom!!, this.tom!!)) &&
-                    (this.fom!! < it.stønadFom || this.tom!! > it.stønadTom)
-            }
-
-    endretUtbetalingAndeler.forEach {
-        val kryssendeTilkjentYtelse = it.finnKryssendeUtvidetYtelse(
-            andelerTilkjentYtelse
-        )
-        if (it.årsakErDeltBosted() && kryssendeTilkjentYtelse != null) {
-            val feilmelding =
-                "Delt bosted endring fra ${it.fom?.tilKortString()} til ${it.tom?.tilKortString()} krysser " +
-                    "starten eller slutten på den utvidede perioden fra " +
-                    "${kryssendeTilkjentYtelse.stønadFom.tilKortString()} " +
-                    "til ${kryssendeTilkjentYtelse.stønadTom.tilKortString()}. " +
-                    "Om endringen er i riktig periode må du opprette to endringsperioder, en utenfor" +
-                    " og en inni den utvidede ytelsen."
-            throw FunksjonellFeil(frontendFeilmelding = feilmelding, melding = feilmelding)
         }
     }
 }

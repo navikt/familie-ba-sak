@@ -5,10 +5,10 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.commons.foedselsnummer.FoedselsNr
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.del
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.isSameOrBefore
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.MigreringResponseDto
 import no.nav.familie.ba.sak.integrasjoner.migrering.MigreringRestClient
@@ -21,8 +21,11 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
@@ -46,6 +49,7 @@ import no.nav.familie.kontrakter.ba.infotrygd.Sak
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.Month.APRIL
 import java.time.Month.AUGUST
@@ -63,6 +67,7 @@ import java.time.YearMonth
 import javax.validation.ConstraintViolationException
 
 private const val NULLDATO = "000000"
+private val SISTE_DATO_FORRIGE_SATS = LocalDate.of(2023, 2, 28)
 
 @Service
 class MigreringService(
@@ -81,7 +86,6 @@ class MigreringService(
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val migreringRestClient: MigreringRestClient,
     private val kompetanseService: KompetanseService,
-    private val featureToggleService: FeatureToggleService,
     private val persongrunnlagService: PersongrunnlagService
 ) {
 
@@ -304,7 +308,10 @@ class MigreringService(
     }
 
     private fun hentLøpendeSakFraInfotrygd(personIdent: String): Sak {
-        val (ferdigBehandledeSaker, åpneSaker) = infotrygdBarnetrygdClient.hentSaker(listOf(personIdent)).bruker.partition { it.status == "FB" }
+        val (ferdigBehandledeSaker, åpneSaker) = infotrygdBarnetrygdClient.hentSaker(listOf(personIdent)).bruker
+            .filter { it.resultat != "HB" } // Filterer bort henlagte behandlinger
+            .partition { it.status == "FB" }
+
         if (åpneSaker.isNotEmpty()) {
             kastOgTellMigreringsFeil(MigreringsfeilType.ÅPEN_SAK_INFOTRYGD)
         }
@@ -420,10 +427,10 @@ class MigreringService(
     private fun virkningsdatoFra(kjøredato: LocalDate): LocalDate {
         LocalDate.now().run {
             return when {
+                env.erDev() -> if (this.isBefore(kjøredato)) førsteDagIInneværendeMåned() else førsteDagINesteMåned()
                 env.erPreprod() -> LocalDate.of(2022, 1, 1)
-                this.isBefore(kjøredato) -> this.førsteDagIInneværendeMåned()
-                this.isAfter(kjøredato.plusDays(1)) -> this.førsteDagINesteMåned()
-                env.erDev() -> this.førsteDagINesteMåned()
+                this.isBefore(kjøredato) -> førsteDagIInneværendeMåned()
+                this.isAfter(kjøredato.plusDays(1)) -> førsteDagINesteMåned()
                 else -> {
                     kastOgTellMigreringsFeil(
                         MigreringsfeilType.IKKE_GYLDIG_KJØREDATO,
@@ -498,7 +505,6 @@ class MigreringService(
         fnr: String,
         barnasIdenter: List<String>
     ) {
-        val førsteUtbetalingsbeløp = førsteAndelerTilkjentYtelse.sumOf { it.kalkulertUtbetalingsbeløp }
         val delytelserInfotrygd = infotrygdSak.stønad!!.delytelse.filter { it.tom == null }
         val beløpFraInfotrygd = delytelserInfotrygd.sumOf { it.beløp }.toInt()
 
@@ -520,6 +526,7 @@ class MigreringService(
                 ?: kastOgTellMigreringsFeil(MigreringsfeilType.SMÅBARNSTILLEGG_INFOTRYGD_IKKE_BA_SAK)
         }
 
+        val førsteUtbetalingsbeløp = kalkulerFørsteUtbetalingsbeløpSomFørSatsendring(førsteAndelerTilkjentYtelse)
         if (førsteUtbetalingsbeløp != beløpFraInfotrygd) {
             val beløpfeilType = if (infotrygdSak.undervalg == "MD") {
                 MigreringsfeilType.BEREGNET_DELT_BOSTED_BELØP_ULIKT_BELØP_FRA_INFOTRYGD
@@ -532,6 +539,55 @@ class MigreringService(
             )
             secureLog.info("Beløp fra infotrygd sammsvarer ikke med beløp fra ba-sak for ${infotrygdSak.valg} ${infotrygdSak.undervalg} fnr=$fnr baSak=$førsteUtbetalingsbeløp infotrygd=$beløpFraInfotrygd")
             kastOgTellMigreringsFeil(beløpfeilType)
+        }
+    }
+
+    fun kalkulerFørsteUtbetalingsbeløpSomFørSatsendring(atys: List<AndelTilkjentYtelse>): Int {
+        return atys.sumOf { aty ->
+            when (aty.type) {
+                YtelseType.ORDINÆR_BARNETRYGD -> {
+                    val beløp = if (aty.sats == SatsService.finnSisteSatsFor(SatsType.TILLEGG_ORBA).beløp) {
+                        SatsService.finnAlleSatserFor(SatsType.TILLEGG_ORBA).find {
+                            it.gyldigTom == SISTE_DATO_FORRIGE_SATS
+                        }!!.beløp
+                    } else if (aty.sats == SatsService.finnSisteSatsFor(SatsType.ORBA).beløp) {
+                        SatsService.finnAlleSatserFor(SatsType.ORBA).find {
+                            it.gyldigTom == SISTE_DATO_FORRIGE_SATS
+                        }!!.beløp
+                    } else {
+                        aty.sats
+                    }
+                    if (aty.prosent == BigDecimal(50)) {
+                        beløp.toBigDecimal().del(2.toBigDecimal(), 0).toInt()
+                    } else {
+                        beløp
+                    }
+                }
+
+                YtelseType.SMÅBARNSTILLEGG -> {
+                    val beløp = SatsService.finnAlleSatserFor(SatsType.SMA).find {
+                        it.gyldigTom == SISTE_DATO_FORRIGE_SATS
+                    }!!.beløp
+                    if (aty.prosent == BigDecimal(50)) {
+                        beløp.toBigDecimal().del(2.toBigDecimal(), 0).toInt()
+                    } else {
+                        beløp
+                    }
+                }
+
+                YtelseType.UTVIDET_BARNETRYGD -> {
+                    val beløp = SatsService.finnAlleSatserFor(SatsType.UTVIDET_BARNETRYGD).find {
+                        it.gyldigTom == SISTE_DATO_FORRIGE_SATS
+                    }!!.beløp
+                    if (aty.prosent == BigDecimal(50)) {
+                        beløp.toBigDecimal().del(2.toBigDecimal(), 0).toInt()
+                    } else {
+                        beløp
+                    }
+                }
+
+                else -> Integer.valueOf(0)
+            }
         }
     }
 

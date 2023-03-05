@@ -272,6 +272,9 @@ data class Behandling(
 
     fun erTekniskEndring() = opprettetÅrsak == BehandlingÅrsak.TEKNISK_ENDRING
 
+    fun erTekniskEndringMedOpphør() =
+        erTekniskEndring() && resultat in listOf(Behandlingsresultat.OPPHØRT, Behandlingsresultat.ENDRET_OG_OPPHØRT)
+
     fun erTekniskBehandling() = opprettetÅrsak == BehandlingÅrsak.TEKNISK_OPPHØR || erTekniskEndring()
 
     fun erKorrigereVedtak() = opprettetÅrsak == BehandlingÅrsak.KORREKSJON_VEDTAKSBREV
@@ -319,6 +322,7 @@ enum class Behandlingsresultat(val displayName: String) {
     INNVILGET_OG_OPPHØRT(displayName = "Innvilget og opphørt"),
     INNVILGET_OG_ENDRET(displayName = "Innvilget og endret"),
     INNVILGET_ENDRET_OG_OPPHØRT(displayName = "Innvilget, endret og opphørt"),
+    ENDRET_OG_FORTSATT_INNVILGET("Endret og fortsatt innvilget"),
 
     DELVIS_INNVILGET(displayName = "Delvis innvilget"),
     DELVIS_INNVILGET_OG_OPPHØRT(displayName = "Delvis innvilget og opphørt"),
@@ -350,6 +354,8 @@ enum class Behandlingsresultat(val displayName: String) {
         this in listOf(FORTSATT_INNVILGET, AVSLÅTT, FORTSATT_OPPHØRT, ENDRET_UTEN_UTBETALING)
 
     fun erAvslått(): Boolean = this in listOf(AVSLÅTT, AVSLÅTT_OG_OPPHØRT, AVSLÅTT_OG_ENDRET, AVSLÅTT_ENDRET_OG_OPPHØRT)
+
+    fun erFortsattInnvilget(): Boolean = this in listOf(FORTSATT_INNVILGET, ENDRET_OG_FORTSATT_INNVILGET)
 }
 
 /**

@@ -13,21 +13,21 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
+import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertPersonResultat
-import no.nav.familie.ba.sak.kjerne.brev.hentBrevmal
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.kjerne.steg.JournalførVedtaksbrevDTO
 import no.nav.familie.ba.sak.kjerne.steg.StatusFraOppdragMedTask
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.ba.sak.kjerne.steg.domene.JournalførVedtaksbrevDTO
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.tilMinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.tilMinimertePersoner
@@ -63,10 +63,11 @@ fun kjørStegprosessForBehandling(
     vilkårsvurderingService: VilkårsvurderingService,
     stegService: StegService,
     vedtaksperiodeService: VedtaksperiodeService,
-    endretUtbetalingAndelService: EndretUtbetalingAndelService,
+    endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
     fagsakService: FagsakService,
     persongrunnlagService: PersongrunnlagService,
-    andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
+    andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
+    brevmalService: BrevmalService
 ): Behandling {
     val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
 
@@ -117,7 +118,7 @@ fun kjørStegprosessForBehandling(
             stegService = stegService,
             persongrunnlagService = persongrunnlagService,
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
-            endretUtbetalingAndelService = endretUtbetalingAndelService,
+            endretUtbetalingAndelHentOgPersisterService = endretUtbetalingAndelHentOgPersisterService,
             sanityBegrunnelser = hentBegrunnelser(),
             vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingEtterSimuleringSteg.id)!!
         )
@@ -144,7 +145,7 @@ fun kjørStegprosessForBehandling(
     if (tilSteg == StegType.JOURNALFØR_VEDTAKSBREV) return behandlingEtterJournalførtVedtak
 
     val behandlingEtterDistribuertVedtak =
-        håndterDistribuertVedtakSteg(stegService, behandlingEtterJournalførtVedtak, søkerFnr)
+        håndterDistribuertVedtakSteg(stegService, behandlingEtterJournalførtVedtak, søkerFnr, brevmalService)
     if (tilSteg == StegType.DISTRIBUER_VEDTAKSBREV) return behandlingEtterDistribuertVedtak
 
     return stegService.håndterFerdigstillBehandling(behandlingEtterDistribuertVedtak)
@@ -175,7 +176,7 @@ private fun håndterSendtTilBeslutterSteg(
     stegService: StegService,
     persongrunnlagService: PersongrunnlagService,
     andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
-    endretUtbetalingAndelService: EndretUtbetalingAndelService,
+    endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
     sanityBegrunnelser: List<SanityBegrunnelse>,
     vilkårsvurdering: Vilkårsvurdering
 ): Behandling {
@@ -185,7 +186,7 @@ private fun håndterSendtTilBeslutterSteg(
     val persongrunnlag =
         persongrunnlagService.hentAktivThrows(behandlingEtterSimuleringSteg.id)
 
-    val endredeUtbetalingAndeler = endretUtbetalingAndelService.hentEndredeUtbetalingAndeler(
+    val endredeUtbetalingAndeler = endretUtbetalingAndelHentOgPersisterService.hentForBehandling(
         behandlingEtterSimuleringSteg.id
     )
     leggTilAlleGyldigeBegrunnelserPåVedtaksperiodeIBehandling(
@@ -205,7 +206,8 @@ private fun håndterSendtTilBeslutterSteg(
 private fun håndterDistribuertVedtakSteg(
     stegService: StegService,
     behandling: Behandling,
-    søkerFnr: String
+    søkerFnr: String,
+    brevmalService: BrevmalService
 ): Behandling {
     val behandlingEtterDistribuertVedtak =
         stegService.håndterDistribuerVedtaksbrev(
@@ -214,7 +216,7 @@ private fun håndterDistribuertVedtakSteg(
                 behandlingId = behandling.id,
                 journalpostId = "1234",
                 personEllerInstitusjonIdent = søkerFnr,
-                brevmal = hentBrevmal(behandling),
+                brevmal = brevmalService.hentBrevmal(behandling),
                 erManueltSendt = false
             )
         )

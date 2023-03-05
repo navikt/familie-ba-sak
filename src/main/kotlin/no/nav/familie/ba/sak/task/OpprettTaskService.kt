@@ -2,6 +2,9 @@ package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
+import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.task.dto.Autobrev6og18ÅrDTO
 import no.nav.familie.ba.sak.task.dto.AutobrevOpphørSmåbarnstilleggDTO
@@ -12,13 +15,16 @@ import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.prosessering.domene.Task
 import org.slf4j.MDC
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.YearMonth
 import java.util.Properties
 
 @Service
 class OpprettTaskService(
-    val taskRepository: TaskRepositoryWrapper
+    val taskRepository: TaskRepositoryWrapper,
+    val satskjøringRepository: SatskjøringRepository
 ) {
 
     fun opprettOppgaveTask(
@@ -83,6 +89,7 @@ class OpprettTaskService(
         }
     }
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun opprettSatsendringTask(fagsakId: Long, satstidspunkt: YearMonth) {
         overstyrTaskMedNyCallId(IdUtils.generateId()) {
             taskRepository.save(
@@ -95,6 +102,32 @@ class OpprettTaskService(
                 )
             )
         }
+        satskjøringRepository.save(Satskjøring(fagsakId = fagsakId))
+    }
+
+    @Transactional
+    fun opprettHenleggBehandlingTask(
+        behandlingId: Long,
+        årsak: HenleggÅrsak,
+        begrunnelse: String,
+        validerOppgavefristErEtterDato: LocalDate? = null
+    ) {
+        taskRepository.save(
+            Task(
+                type = HenleggBehandlingTask.TASK_STEP_TYPE,
+                payload = objectMapper.writeValueAsString(
+                    HenleggBehandlingTaskDTO(
+                        behandlingId = behandlingId,
+                        årsak = årsak,
+                        begrunnelse = begrunnelse,
+                        validerOppgavefristErEtterDato = validerOppgavefristErEtterDato
+                    )
+                ),
+                properties = Properties().apply {
+                    this["behandlingId"] = behandlingId.toString()
+                }
+            )
+        )
     }
 
     private inline fun <T> overstyrTaskMedNyCallId(callId: String, body: () -> T): T {

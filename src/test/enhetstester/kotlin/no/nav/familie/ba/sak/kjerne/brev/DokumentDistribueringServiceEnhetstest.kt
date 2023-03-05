@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClien
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
+import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.prosessering.internal.TaskService
@@ -36,19 +37,16 @@ internal class DokumentDistribueringServiceEnhetstest {
     @Test
     fun `Skal kalle 'loggBrevIkkeDistribuertUkjentAdresse' ved 400 kode og 'Mottaker har ukjent adresse' melding`() {
         every {
-            integrasjonClient.distribuerBrev(any(), any())
+            integrasjonClient.distribuerBrev(any())
         } throws RessursException(
             httpStatus = HttpStatus.BAD_REQUEST,
             ressurs = Ressurs.failure(),
             cause = RestClientResponseException("Mottaker har ukjent adresse", 400, "", null, null, null)
         )
 
-        val journalpostId = "testId"
-        dokumentDistribueringService.prøvDistribuerBrevOgLoggHendelse(
-            journalpostId,
-            1L,
-            BehandlerRolle.BESLUTTER,
-            Brevmal.SVARTIDSBREV
+        dokumentDistribueringService.prøvDistribuerBrevOgLoggHendelseFraBehandling(
+            distribuerDokumentDTO = lagDistribuerDokumentDTO(),
+            loggBehandlerRolle = BehandlerRolle.BESLUTTER
         )
 
         verify(exactly = 1) { loggService.opprettBrevIkkeDistribuertUkjentAdresseLogg(any(), any()) }
@@ -57,19 +55,16 @@ internal class DokumentDistribueringServiceEnhetstest {
     @Test
     fun `Skal kalle 'håndterMottakerDødIngenAdressePåBehandling' ved 410 Gone svar under distribuering`() {
         every {
-            integrasjonClient.distribuerBrev(any(), any())
+            integrasjonClient.distribuerBrev(any())
         } throws RessursException(
             httpStatus = HttpStatus.GONE,
             ressurs = Ressurs.failure(),
             cause = RestClientResponseException("", 410, "", null, null, null)
         )
 
-        val journalpostId = "testId"
-        dokumentDistribueringService.prøvDistribuerBrevOgLoggHendelse(
-            journalpostId,
-            1L,
-            BehandlerRolle.BESLUTTER,
-            Brevmal.SVARTIDSBREV
+        dokumentDistribueringService.prøvDistribuerBrevOgLoggHendelseFraBehandling(
+            distribuerDokumentDTO = lagDistribuerDokumentDTO(),
+            loggBehandlerRolle = BehandlerRolle.BESLUTTER
         )
 
         verify(exactly = 1) {
@@ -80,22 +75,26 @@ internal class DokumentDistribueringServiceEnhetstest {
     @Test
     fun `Skal hoppe over distribuering ved 409 Conflict mot dokdist`() {
         every {
-            integrasjonClient.distribuerBrev(any(), any())
+            integrasjonClient.distribuerBrev(any())
         } throws RessursException(
             httpStatus = HttpStatus.CONFLICT,
             ressurs = Ressurs.failure(),
             cause = RestClientResponseException("", 409, "", null, null, null)
         )
 
-        val journalpostId = "testId"
-        val behandlingId = 1L
         assertDoesNotThrow {
-            dokumentDistribueringService.prøvDistribuerBrevOgLoggHendelse(
-                journalpostId = journalpostId,
-                behandlingId = behandlingId,
-                loggBehandlerRolle = BehandlerRolle.BESLUTTER,
-                brevmal = Brevmal.SVARTIDSBREV
+            dokumentDistribueringService.prøvDistribuerBrevOgLoggHendelseFraBehandling(
+                distribuerDokumentDTO = lagDistribuerDokumentDTO(),
+                loggBehandlerRolle = BehandlerRolle.BESLUTTER
             )
         }
     }
+
+    private fun lagDistribuerDokumentDTO() = DistribuerDokumentDTO(
+        journalpostId = "testId",
+        behandlingId = 1L,
+        brevmal = Brevmal.SVARTIDSBREV,
+        personEllerInstitusjonIdent = "test",
+        erManueltSendt = true
+    )
 }

@@ -14,6 +14,7 @@ import javax.persistence.OneToOne
 import javax.persistence.SequenceGenerator
 import javax.persistence.Table
 
+// Denne tabellen brukes for å lagre verge detaljer kun til institusjon
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "Verge")
 @Table(name = "VERGE")

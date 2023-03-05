@@ -48,6 +48,8 @@ spec:
           - id: "93a26831-9866-4410-927b-74ff51a9107c"  # VEILEDER_ROLLE
           - id: "d21e00a4-969d-4b28-8782-dc818abfae65"  # SAKSBEHANDLER_ROLLE
           - id: "9449c153-5a1e-44a7-84c6-7cc7a8867233"  # BESLUTTER_ROLLE
+          - id: "5ef775f2-61f8-4283-bf3d-8d03f428aa14"  # 0000-GA-Strengt_Fortrolig_Adresse
+          - id: "ea930b6b-9397-44d9-b9e6-f4cf527a632a"  # 0000-GA-Fortrolig_Adresse
   accessPolicy:
     inbound:
       rules:
@@ -97,7 +99,7 @@ spec:
         - host: xsrv1mh6.api.sanity.io
   replicas:
     min: 2
-    max: 4
+    max: 2
     cpuThresholdPercentage: 50
   resources:
     limits:

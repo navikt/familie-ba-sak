@@ -93,14 +93,15 @@ data class Kompetanse(
         )
 
     fun validerFelterErSatt() {
-        if (!erFelterSatt()
+        if (!erObligatoriskeFelterSatt()
         ) {
             throw Feil("Kompetanse mangler verdier")
         }
     }
 
-    fun erFelterSatt() = søkersAktivitet != null &&
+    fun erObligatoriskeFelterSatt() = søkersAktivitet != null &&
         annenForeldersAktivitet != null &&
+        søkersAktivitetsland != null &&
         barnetsBostedsland != null &&
         resultat != null &&
         barnAktører.isNotEmpty()
@@ -133,7 +134,8 @@ enum class AnnenForeldersAktivitet {
     FORSIKRET_I_BOSTEDSLAND,
     MOTTAR_PENSJON,
     INAKTIV,
-    IKKE_AKTUELT
+    IKKE_AKTUELT,
+    UTSENDT_ARBEIDSTAKER
 }
 
 enum class KompetanseResultat {

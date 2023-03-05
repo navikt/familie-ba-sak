@@ -27,11 +27,11 @@ import no.nav.familie.ba.sak.kjerne.beregning.EndringstidspunktService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
+import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.brev.hentIPeriode
 import no.nav.familie.ba.sak.kjerne.brev.hentKompetanserSomStopperRettFørPeriode
-import no.nav.familie.ba.sak.kjerne.brev.hentVedtaksbrevmal
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
@@ -84,7 +84,8 @@ class VedtaksperiodeService(
     private val kompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse>,
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     private val featureToggleService: FeatureToggleService,
-    private val feilutbetaltValutaRepository: FeilutbetaltValutaRepository
+    private val feilutbetaltValutaRepository: FeilutbetaltValutaRepository,
+    private val brevmalService: BrevmalService
 ) {
     fun oppdaterVedtaksperiodeMedFritekster(
         vedtaksperiodeId: Long,
@@ -247,10 +248,16 @@ class VedtaksperiodeService(
     }
 
     @Transactional
-    fun oppdaterVedtakMedVedtaksperioder(vedtak: Vedtak, skalOverstyreFortsattInnvilget: Boolean = false) {
+    fun oppdaterVedtakMedVedtaksperioder(vedtak: Vedtak) {
         vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(vedtak)
-        if (vedtak.behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET && !skalOverstyreFortsattInnvilget) {
-            val vedtaksbrevmal = hentVedtaksbrevmal(vedtak.behandling)
+        val behandling = vedtak.behandling
+
+        // Rent fortsatt innvilget-resultat er det eneste som kun skal gi én vedtaksperiode
+        if (behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET) {
+            val vedtaksbrevmal = brevmalService.hentVedtaksbrevmal(
+                behandling
+            )
+
             val erAutobrevFor6Og18ÅrOgSmåbarnstillegg =
                 vedtaksbrevmal == Brevmal.AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG
 
@@ -261,7 +268,7 @@ class VedtaksperiodeService(
             }
 
             val tom = if (erAutobrevFor6Og18ÅrOgSmåbarnstillegg) {
-                finnTomDatoIFørsteUtbetalingsintervallFraInneværendeMåned(vedtak.behandling.id)
+                finnTomDatoIFørsteUtbetalingsintervallFraInneværendeMåned(behandling.id)
             } else {
                 null
             }
@@ -277,8 +284,7 @@ class VedtaksperiodeService(
         } else {
             vedtaksperiodeHentOgPersisterService.lagre(
                 genererVedtaksperioderMedBegrunnelser(
-                    vedtak,
-                    gjelderFortsattInnvilget = skalOverstyreFortsattInnvilget
+                    vedtak
                 )
             )
         }
@@ -286,14 +292,23 @@ class VedtaksperiodeService(
 
     fun genererVedtaksperioderMedBegrunnelser(
         vedtak: Vedtak,
-        gjelderFortsattInnvilget: Boolean = false,
         manueltOverstyrtEndringstidspunkt: LocalDate? = null
     ): List<VedtaksperiodeMedBegrunnelser> {
+        /**
+         * Hvis endringstidspunktet er overskrevet av saksbehandler skal man bruke det saksbehandler har valgt
+         * Hvis toggle for behandlingsresultat er AV og man ønsker å ha fortsatt innvilget MED perioder:
+         *         - alle perioder skal med -> endringstidspunkt = tidenes morgen
+         * Hvis toggle for behandlingsresultat er PÅ og behandlingsresultat = endret og fortsatt innvilget (betyr i praksis det samme som den over, fordi med toggle på oppfører "endret og fortsatt innvilget" seg likt som fortsatt innvilget med perioder )
+         *         - alle perioder skal med -> endringstidspunkt = tidenes morgen
+         * Ellers: endringstidspunkt skal utledes
+         **/
         val endringstidspunkt = manueltOverstyrtEndringstidspunkt
-            ?: if (!gjelderFortsattInnvilget) {
-                endringstidspunktService.finnEndringstidpunkForBehandling(behandlingId = vedtak.behandling.id)
-            } else {
+            ?: if (featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_UTLEDE_ENDRINGSTIDSPUNKT)) {
+                endringstidspunktService.finnEndringstidspunktForBehandling(behandlingId = vedtak.behandling.id)
+            } else if (vedtak.behandling.resultat == Behandlingsresultat.ENDRET_OG_FORTSATT_INNVILGET) {
                 TIDENES_MORGEN
+            } else {
+                endringstidspunktService.finnEndringstidpunkForBehandlingGammel(behandlingId = vedtak.behandling.id)
             }
         val opphørsperioder =
             hentOpphørsperioder(vedtak.behandling, endringstidspunkt).map { it.tilVedtaksperiodeMedBegrunnelse(vedtak) }
@@ -516,26 +531,28 @@ class VedtaksperiodeService(
         )
     }
 
-    fun hentOpphørsperioder(behandling: Behandling, endringstidspunkt: LocalDate = TIDENES_MORGEN): List<Opphørsperiode> {
+    fun hentOpphørsperioder(
+        behandling: Behandling,
+        endringstidspunkt: LocalDate = TIDENES_MORGEN
+    ): List<Opphørsperiode> {
         if (behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET) return emptyList()
 
-        val iverksatteBehandlinger =
-            behandlingRepository.finnIverksatteBehandlinger(fagsakId = behandling.fagsak.id)
+        val alleAvsluttetBehandlingerPåFagsak =
+            behandlingRepository.findByFagsakAndAvsluttet(fagsakId = behandling.fagsak.id)
 
-        val forrigeIverksatteBehandling: Behandling? = Behandlingutils.hentForrigeIverksatteBehandling(
-            iverksatteBehandlinger = iverksatteBehandlinger,
-            behandlingFørFølgende = behandling
+        val sisteVedtattBehandling: Behandling? = Behandlingutils.hentSisteBehandlingSomErVedtatt(
+            alleAvsluttetBehandlingerPåFagsak
         )
 
         val forrigePersonopplysningGrunnlag: PersonopplysningGrunnlag? =
-            if (forrigeIverksatteBehandling != null) {
-                persongrunnlagService.hentAktiv(behandlingId = forrigeIverksatteBehandling.id)
+            if (sisteVedtattBehandling != null) {
+                persongrunnlagService.hentAktiv(behandlingId = sisteVedtattBehandling.id)
             } else {
                 null
             }
-        val forrigeAndelerMedEndringer = if (forrigeIverksatteBehandling != null) {
+        val forrigeAndelerMedEndringer = if (sisteVedtattBehandling != null) {
             andelerTilkjentYtelseOgEndreteUtbetalingerService
-                .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(forrigeIverksatteBehandling.id)
+                .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(sisteVedtattBehandling.id)
         } else {
             emptyList()
         }
@@ -641,12 +658,20 @@ class VedtaksperiodeService(
         return avslagsperioderMedTomPeriode.map {
             if (it.fom == null && it.tom == null && uregistrerteBarn.isNotEmpty()) {
                 it.apply {
-                    begrunnelser.add(
-                        Vedtaksbegrunnelse(
-                            vedtaksperiodeMedBegrunnelser = this,
-                            standardbegrunnelse = Standardbegrunnelse.AVSLAG_UREGISTRERT_BARN
+                    when (vedtak.behandling.kategori) {
+                        BehandlingKategori.NASJONAL -> begrunnelser.add(
+                            Vedtaksbegrunnelse(
+                                vedtaksperiodeMedBegrunnelser = this,
+                                standardbegrunnelse = Standardbegrunnelse.AVSLAG_UREGISTRERT_BARN
+                            )
                         )
-                    )
+                        BehandlingKategori.EØS -> eøsBegrunnelser.add(
+                            EØSBegrunnelse(
+                                vedtaksperiodeMedBegrunnelser = this,
+                                begrunnelse = EØSStandardbegrunnelse.AVSLAG_EØS_UREGISTRERT_BARN
+                            )
+                        )
+                    }
                 }
             } else {
                 it

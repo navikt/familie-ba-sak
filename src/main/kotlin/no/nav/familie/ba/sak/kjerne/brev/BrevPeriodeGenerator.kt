@@ -6,9 +6,9 @@ import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.erSenereEnnInneværendeMåned
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.tilKortString
-import no.nav.familie.ba.sak.kjerne.behandlingsresultat.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevBegrunnelseGrunnlagMedPersoner
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertKompetanse
+import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.eøs.EØSBegrunnelseMedKompetanser
@@ -94,12 +94,25 @@ class BrevPeriodeGenerator(
                 val barnIBegrunnelse = personerIBegrunnelse.filter { it.type == PersonType.BARN }
                 val gjelderSøker = personerIBegrunnelse.any { it.type == PersonType.SØKER }
 
+                val barnasFødselsdatoer = hentBarnasFødselsdatoerForAvslagsbegrunnelse(
+                    barnIBegrunnelse = barnIBegrunnelse,
+                    barnPåBehandling = barnPåBehandling,
+                    uregistrerteBarn = uregistrerteBarn,
+                    gjelderSøker = gjelderSøker
+                )
+                val antallBarn = hentAntallBarnForAvslagsbegrunnelse(
+                    barnIBegrunnelse = barnIBegrunnelse,
+                    barnPåBehandling = barnPåBehandling,
+                    uregistrerteBarn = uregistrerteBarn,
+                    gjelderSøker = gjelderSøker
+                )
+
                 listOf(
                     EØSBegrunnelseDataUtenKompetanse(
                         vedtakBegrunnelseType = begrunnelse.vedtakBegrunnelseType,
                         apiNavn = begrunnelse.sanityApiNavn,
-                        barnasFodselsdatoer = if (gjelderSøker) barnPåBehandling.tilBarnasFødselsdatoer() else barnIBegrunnelse.tilBarnasFødselsdatoer(),
-                        antallBarn = if (gjelderSøker) barnPåBehandling.size else barnIBegrunnelse.size,
+                        barnasFodselsdatoer = barnasFødselsdatoer,
+                        antallBarn = antallBarn,
                         maalform = brevMålform.tilSanityFormat(),
                         gjelderSoker = gjelderSøker
                     )

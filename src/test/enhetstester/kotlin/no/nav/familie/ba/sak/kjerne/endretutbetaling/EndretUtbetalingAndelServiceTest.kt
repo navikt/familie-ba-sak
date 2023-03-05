@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndelMedAndelerTilkjentYt
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagPersonResultat
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -38,21 +37,21 @@ class EndretUtbetalingAndelServiceTest {
     private val mockPersonopplysningGrunnlagRepository = mockk<PersonopplysningGrunnlagRepository>()
     private val mockAndelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
     private val mockVilkårsvurderingService = mockk<VilkårsvurderingService>()
+    private val mockEndretUtbetalingAndelHentOgPersisterService = mockk<EndretUtbetalingAndelHentOgPersisterService>()
 
     private lateinit var endretUtbetalingAndelService: EndretUtbetalingAndelService
 
     @BeforeEach
     fun setup() {
         val beregningService = mockk<BeregningService>()
-        val sanityService = mockk<SanityService>()
         endretUtbetalingAndelService = EndretUtbetalingAndelService(
             endretUtbetalingAndelRepository = mockEndretUtbetalingAndelRepository,
             personopplysningGrunnlagRepository = mockPersonopplysningGrunnlagRepository,
             beregningService = beregningService,
             persongrunnlagService = mockPersongrunnlagService,
             andelTilkjentYtelseRepository = mockAndelTilkjentYtelseRepository,
-            sanityService = sanityService,
-            vilkårsvurderingService = mockVilkårsvurderingService
+            vilkårsvurderingService = mockVilkårsvurderingService,
+            endretUtbetalingAndelHentOgPersisterService = mockEndretUtbetalingAndelHentOgPersisterService
         )
     }
 
@@ -106,7 +105,7 @@ class EndretUtbetalingAndelServiceTest {
             barn
         )
         every { mockAndelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id) } returns andelerTilkjentYtelse
-        every { mockEndretUtbetalingAndelRepository.findByBehandlingId(behandlingId = behandling.id) } returns emptyList()
+        every { mockEndretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandlingId = behandling.id) } returns emptyList()
         every { mockVilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id) } returns vilkårsvurderingUtenDeltBosted
 
         val feil = assertThrows<FunksjonellFeil> {

@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
@@ -37,7 +38,8 @@ class TekniskEndringAvFødselshendelseTest(
     @Autowired private val personidentService: PersonidentService,
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val stegService: StegService,
-    @Autowired private val featureToggleService: FeatureToggleService
+    @Autowired private val featureToggleService: FeatureToggleService,
+    @Autowired private val brevmalService: BrevmalService
 ) : AbstractVerdikjedetest() {
 
     @Test
@@ -66,7 +68,9 @@ class TekniskEndringAvFødselshendelseTest(
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             personidentService = personidentService,
             vedtakService = vedtakService,
-            stegService = stegService
+            stegService = stegService,
+            brevmalService = brevmalService
+
         )!!
 
         val restUtvidetBehandling = familieBaSakKlient().opprettBehandling(
@@ -171,7 +175,9 @@ class TekniskEndringAvFødselshendelseTest(
             fagsakStatusEtterIverksetting = FagsakStatus.AVSLUTTET,
             fagsakService = fagsakService,
             vedtakService = vedtakService,
-            stegService = stegService
+            stegService = stegService,
+            brevmalService = brevmalService
+
         )
     }
 }

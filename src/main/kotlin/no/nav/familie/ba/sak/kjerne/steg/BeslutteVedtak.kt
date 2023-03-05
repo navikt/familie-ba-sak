@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
+import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.FerdigstillOppgaver
@@ -38,7 +39,8 @@ class BeslutteVedtak(
     private val loggService: LoggService,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val featureToggleService: FeatureToggleService,
-    private val tilkjentYtelseValideringService: TilkjentYtelseValideringService
+    private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
+    private val saksbehandlerContext: SaksbehandlerContext
 ) : BehandlingSteg<RestBeslutningPåVedtak> {
 
     override fun utførStegOgAngiNeste(
@@ -66,7 +68,7 @@ class BeslutteVedtak(
             beslutter = if (behandling.erManuellMigrering()) {
                 SikkerhetContext.SYSTEM_NAVN
             } else {
-                SikkerhetContext.hentSaksbehandlerNavn()
+                saksbehandlerContext.hentSaksbehandlerSignaturTilBrev()
             },
             beslutterId = if (behandling.erManuellMigrering()) {
                 SikkerhetContext.SYSTEM_FORKORTELSE
@@ -148,17 +150,10 @@ class BeslutteVedtak(
     }
 
     private fun sjekkOmBehandlingSkalIverksettesOgHentNesteSteg(behandling: Behandling): StegType {
-        val nesteSteg = hentNesteStegForNormalFlyt(behandling)
+        val endringerIUtbetaling =
+            beregningService.hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling)
 
-        if (nesteSteg == StegType.IVERKSETT_MOT_OPPDRAG) {
-            val erInnvilgetSøknadUtenUtebtalingsperioderGrunnetEndringsperioder =
-                beregningService.innvilgetSøknadUtenUtbetalingsperioderGrunnetEndringsPerioder(behandling = behandling)
-
-            if (erInnvilgetSøknadUtenUtebtalingsperioderGrunnetEndringsperioder) {
-                return StegType.JOURNALFØR_VEDTAKSBREV
-            }
-        }
-        return nesteSteg
+        return hentNesteStegGittEndringerIUtbetaling(behandling, endringerIUtbetaling)
     }
 
     private fun opprettFerdigstillBehandlingTask(behandling: Behandling) {

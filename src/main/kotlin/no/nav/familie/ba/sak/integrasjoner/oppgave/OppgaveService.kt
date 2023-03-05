@@ -22,6 +22,7 @@ import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveResponse
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
+import no.nav.familie.kontrakter.felles.oppgave.StatusEnum.FEILREGISTRERT
 import no.nav.familie.kontrakter.felles.oppgave.StatusEnum.FERDIGSTILT
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -54,11 +55,10 @@ class OppgaveService(
         val eksisterendeOppgave =
             oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(oppgavetype, behandling)
 
-        return if (eksisterendeOppgave != null &&
-            oppgavetype != Oppgavetype.Journalføring
-        ) {
+        return if (eksisterendeOppgave != null && oppgavetype != Oppgavetype.Journalføring) {
             logger.warn(
-                "Fant eksisterende oppgave med samme oppgavetype som ikke er ferdigstilt ved opprettelse av ny oppgave $eksisterendeOppgave. " +
+                "Fant eksisterende oppgave med samme oppgavetype som ikke er ferdigstilt " +
+                    "ved opprettelse av ny oppgave $eksisterendeOppgave. " +
                     "Vi oppretter ikke ny oppgave, men gjenbruker eksisterende."
             )
 
@@ -68,7 +68,10 @@ class OppgaveService(
                 arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(behandling.id)
 
             if (arbeidsfordelingsenhet == null) {
-                logger.warn("Fant ikke behandlende enhet på behandling ${behandling.id} ved opprettelse av $oppgavetype-oppgave.")
+                logger.warn(
+                    "Fant ikke behandlende enhet på behandling ${behandling.id} " +
+                        "ved opprettelse av $oppgavetype-oppgave."
+                )
             }
 
             val opprettOppgave = OpprettOppgaveRequest(
@@ -84,7 +87,12 @@ class OppgaveService(
                         behandling.underkategori.tilOppgaveBehandlingTema().value
                 },
                 behandlingstype = behandling.kategori.tilOppgavebehandlingType().value,
-                tilordnetRessurs = tilordnetNavIdent
+                tilordnetRessurs = tilordnetNavIdent,
+                behandlesAvApplikasjon = when {
+                    oppgavetyperSomBehandlesAvBaSak.contains(oppgavetype) -> "familie-ba-sak"
+                    oppgavetype == Oppgavetype.VurderLivshendelse && !behandling.erVedtatt() -> "familie-ba-sak"
+                    else -> null
+                }
             )
             val opprettetOppgaveId = integrasjonClient.opprettOppgave(opprettOppgave).oppgaveId.toString()
 
@@ -150,7 +158,11 @@ class OppgaveService(
         hentOppgaverSomIkkeErFerdigstilt(behandling).forEach { dbOppgave ->
             val oppgave = hentOppgave(dbOppgave.gsakId.toLong())
             logger.info("Oppdaterer enhet fra ${oppgave.tildeltEnhetsnr} til $nyEnhet på oppgave ${oppgave.id}")
-            integrasjonClient.tilordneEnhetForOppgave(oppgaveId = oppgave.id!!, nyEnhet = nyEnhet)
+            if (oppgave.status == FERDIGSTILT && oppgave.oppgavetype == Oppgavetype.VurderLivshendelse.value) {
+                dbOppgave.erFerdigstilt = true
+            } else {
+                integrasjonClient.tilordneEnhetForOppgave(oppgaveId = oppgave.id!!, nyEnhet = nyEnhet)
+            }
         }
     }
 
@@ -192,14 +204,23 @@ class OppgaveService(
                 behandlingId
             )
         ).forEach {
-            try {
-                integrasjonClient.ferdigstillOppgave(it.gsakId.toLong())
+            val oppgave = hentOppgave(it.gsakId.toLong())
 
+            if (oppgave.status == FERDIGSTILT || oppgave.status == FEILREGISTRERT) {
                 it.erFerdigstilt = true
+
                 // Her sørger vi for at oppgaver som blir ferdigstilt riktig får samme status hos oss selv om en av de andre dbOppgavene feiler.
                 oppgaveRepository.saveAndFlush(it)
-            } catch (exception: Exception) {
-                throw Feil(message = "Klarte ikke å ferdigstille oppgave med id ${it.gsakId}.", cause = exception)
+            } else {
+                try {
+                    integrasjonClient.ferdigstillOppgave(it.gsakId.toLong())
+
+                    it.erFerdigstilt = true
+                    // I tilfelle noen av de andre dbOppgavene feiler
+                    oppgaveRepository.saveAndFlush(it)
+                } catch (exception: Exception) {
+                    throw Feil(message = "Klarte ikke å ferdigstille oppgave med id ${it.gsakId}.", cause = exception)
+                }
             }
         }
     }
@@ -233,9 +254,10 @@ class OppgaveService(
 
         val behandlingsfrister = åpneUtvidetBarnetrygdBehandlinger.map { behandling ->
             val behandleSakOppgave = try {
-                oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(Oppgavetype.BehandleSak, behandling)?.let {
-                    hentOppgave(it.gsakId.toLong())
-                }
+                oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(Oppgavetype.BehandleSak, behandling)
+                    ?.let {
+                        hentOppgave(it.gsakId.toLong())
+                    }
             } catch (e: Exception) {
                 secureLogger.warn("Klarte ikke hente BehandleSak-oppgaven for behandling ${behandling.id}", e)
                 null
@@ -287,5 +309,10 @@ class OppgaveService(
 
         private val logger = LoggerFactory.getLogger(OppgaveService::class.java)
         private val secureLogger = LoggerFactory.getLogger("secureLoger")
+        private val oppgavetyperSomBehandlesAvBaSak = listOf(
+            Oppgavetype.BehandleSak,
+            Oppgavetype.GodkjenneVedtak,
+            Oppgavetype.BehandleUnderkjentVedtak
+        )
     }
 }

@@ -1,13 +1,14 @@
 package no.nav.familie.ba.sak.kjerne.beregning.domene
 
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseMedEndreteUtbetalingerTidslinje
+import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.hentPerioderMedEndringerFra
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -210,9 +211,6 @@ data class AndelTilkjentYtelse(
         this.differanseberegnetPeriodebeløp != null &&
         this.differanseberegnetPeriodebeløp <= 0
 
-    fun harEndringsutbetalingIPerioden(fom: YearMonth?, tom: YearMonth?) =
-        endretUtbetalingAndeler.any { it.fom == fom && it.tom == tom }
-
     private fun finnRelevanteVilkårsresulaterForRegelverk(
         personResultater: Set<PersonResultat>
     ): List<VilkårResultat> =
@@ -280,6 +278,13 @@ enum class YtelseType(val klassifisering: String) {
     MANUELL_VURDERING("BATR");
 
     fun erKnyttetTilSøker() = this == SMÅBARNSTILLEGG || this == UTVIDET_BARNETRYGD
+
+    fun hentSatsTyper(): List<SatsType> = when (this) {
+        ORDINÆR_BARNETRYGD -> listOf(SatsType.ORBA, SatsType.TILLEGG_ORBA)
+        UTVIDET_BARNETRYGD -> listOf(SatsType.UTVIDET_BARNETRYGD)
+        SMÅBARNSTILLEGG -> listOf(SatsType.SMA)
+        MANUELL_VURDERING -> throw Feil("Ingen satstype for manuell vurdering")
+    }
 }
 
 private fun regelverkavhenigeVilkår(): List<Vilkår> {
@@ -312,9 +317,9 @@ fun List<AndelTilkjentYtelse>?.hentTidslinje() =
         } ?: emptyList()
     )
 
-fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.tilTidslinjerPerPersonOgType(): Map<Pair<Aktør, YtelseType>, AndelTilkjentYtelseMedEndreteUtbetalingerTidslinje> =
+fun List<AndelTilkjentYtelse>.tilTidslinjerPerPersonOgType(): Map<Pair<Aktør, YtelseType>, AndelTilkjentYtelseTidslinje> =
     groupBy { Pair(it.aktør, it.type) }.mapValues { (_, andelerTilkjentYtelsePåPerson) ->
-        AndelTilkjentYtelseMedEndreteUtbetalingerTidslinje(
+        AndelTilkjentYtelseTidslinje(
             andelerTilkjentYtelsePåPerson
         )
     }

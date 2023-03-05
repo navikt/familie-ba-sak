@@ -34,7 +34,8 @@ import no.nav.familie.ba.sak.kjerne.beregning.SatsTidspunkt
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
+import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
@@ -88,9 +89,10 @@ class BehandleSmåbarnstilleggTest(
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
     @Autowired private val opprettTaskService: OpprettTaskService,
     @Autowired private val vilkårsvurderingService: VilkårsvurderingService,
-    @Autowired private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
+    @Autowired private val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
     @Autowired private val persongrunnlagService: PersongrunnlagService,
-    @Autowired private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
+    @Autowired private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
+    @Autowired private val brevmalService: BrevmalService
 ) : AbstractVerdikjedetest() {
 
     private val barnFødselsdato = LocalDate.now().minusYears(2)
@@ -296,7 +298,8 @@ class BehandleSmåbarnstilleggTest(
             søkerFnr = søkersIdent,
             fagsakService = fagsakService,
             vedtakService = vedtakService,
-            stegService = stegService
+            stegService = stegService,
+            brevmalService = brevmalService
         )
     }
 
@@ -428,7 +431,8 @@ class BehandleSmåbarnstilleggTest(
             søkerFnr = søkersIdent,
             fagsakService = fagsakService,
             vedtakService = vedtakService,
-            stegService = stegService
+            stegService = stegService,
+            brevmalService = brevmalService
         )
     }
 
@@ -562,22 +566,23 @@ class BehandleSmåbarnstilleggTest(
             tilSteg = StegType.BEHANDLING_AVSLUTTET,
             søkerFnr = scenario.søker.ident!!,
             barnasIdenter = listOf(scenario.barna.first().ident!!),
+            vedtakService = vedtakService,
             underkategori = BehandlingUnderkategori.UTVIDET,
             behandlingÅrsak = BehandlingÅrsak.SØKNAD,
             overstyrendeVilkårsvurdering = lagVilkårsvurderingFraRestScenario(
                 scenario,
                 overstyrendeVilkårResultaterFGB
             ),
-            behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING,
 
-            vedtakService = vedtakService,
+            behandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
-            endretUtbetalingAndelService = endretUtbetalingAndelService,
+            endretUtbetalingAndelHentOgPersisterService = endretUtbetalingAndelHentOgPersisterService,
             fagsakService = fagsakService,
             persongrunnlagService = persongrunnlagService,
-            andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService
+            andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
+            brevmalService = brevmalService
         )
     }
 }

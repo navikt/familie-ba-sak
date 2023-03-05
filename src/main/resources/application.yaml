@@ -31,7 +31,7 @@ spring:
     hikari:
       maximum-pool-size: 20
       connection-test-query: "select 1"
-      max-lifetime: 30000
+      max-lifetime: 900000
       minimum-idle: 1
       data-source-properties.stringtype: unspecified # Nødvendig for å kunde sende en String til et json-felt i PostgresSql
   jpa:
@@ -104,7 +104,7 @@ springdoc:
 
 prosessering:
   continuousRunning.enabled: true
-  maxantall: 5
+  maxantall: 10
   fixedDelayString:
     in:
       milliseconds: 5000

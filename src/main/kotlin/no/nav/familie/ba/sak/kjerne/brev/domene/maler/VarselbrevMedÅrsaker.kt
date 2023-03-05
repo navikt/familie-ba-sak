@@ -14,11 +14,17 @@ data class VarselbrevMedÅrsaker(
         varselÅrsaker: List<String>,
         enhet: String,
         organisasjonsnummer: String? = null,
-        gjelder: String? = null
+        gjelder: String? = null,
+        saksbehandlerNavn: String
     ) : this(
         mal = mal,
         data = VarselOmRevurderingData(
-            delmalData = VarselOmRevurderingData.DelmalData(signatur = SignaturDelmal(enhet = enhet)),
+            delmalData = VarselOmRevurderingData.DelmalData(
+                signatur = SignaturDelmal(
+                    enhet = enhet,
+                    saksbehandlerNavn = saksbehandlerNavn
+                )
+            ),
             flettefelter = VarselOmRevurderingData.Flettefelter(
                 navn = navn,
                 fodselsnummer = fødselsnummer,

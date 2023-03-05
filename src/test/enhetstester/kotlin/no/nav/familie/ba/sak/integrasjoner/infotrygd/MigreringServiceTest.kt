@@ -51,7 +51,6 @@ class MigreringServiceTest() {
             mockk(),
             mockk(),
             mockk(),
-            mockk(),
             mockk(relaxed = true),
             mockk(),
             mockk(),

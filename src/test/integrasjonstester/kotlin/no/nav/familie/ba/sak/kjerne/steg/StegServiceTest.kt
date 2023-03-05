@@ -11,6 +11,8 @@ import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.mockHentPersoninfoForMedIdenter
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
+import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.DbOppgave
+import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -25,6 +27,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
+import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
@@ -38,6 +41,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvu
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -83,7 +87,14 @@ class StegServiceTest(
     private val personidentService: PersonidentService,
 
     @Autowired
-    private val vedtaksperiodeService: VedtaksperiodeService
+    private val vedtaksperiodeService: VedtaksperiodeService,
+
+    @Autowired
+    private val oppgaveRepository: OppgaveRepository,
+
+    @Autowired
+    private val brevmalService: BrevmalService
+
 ) : AbstractSpringIntegrationTest() {
 
     @BeforeEach
@@ -107,7 +118,8 @@ class StegServiceTest(
             persongrunnlagService = persongrunnlagService,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService
+            vedtaksperiodeService = vedtaksperiodeService,
+            brevmalService = brevmalService
         )
 
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)!!
@@ -135,7 +147,8 @@ class StegServiceTest(
             persongrunnlagService = persongrunnlagService,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService
+            vedtaksperiodeService = vedtaksperiodeService,
+            brevmalService = brevmalService
         )
 
         // Venter med å kjøre gjennom til avsluttet til brev er støttet for fortsatt innvilget.
@@ -145,7 +158,8 @@ class StegServiceTest(
             barnasIdenter = listOf(ClientMocks.barnFnr[0]),
             vedtakService = vedtakService,
             stegService = stegService,
-            fagsakId = behandling.fagsak.id
+            fagsakId = behandling.fagsak.id,
+            brevmalService = brevmalService
         )
     }
 
@@ -284,6 +298,29 @@ class StegServiceTest(
     }
 
     @Test
+    fun `Teknisk henleggelse med begrunnelse Satsendring skal beholde behandleSak-oppgaven åpen`() {
+        val behandling = kjørGjennomStegInkludertVurderTilbakekreving()
+        oppgaveRepository.saveAll(
+            listOf(
+                DbOppgave(behandling = behandling, type = Oppgavetype.GodkjenneVedtak, gsakId = "1"),
+                DbOppgave(behandling = behandling, type = Oppgavetype.BehandleSak, gsakId = "2"),
+                DbOppgave(behandling = behandling, type = Oppgavetype.BehandleUnderkjentVedtak, gsakId = "3")
+            )
+        )
+        val henlagtBehandling = stegService.håndterHenleggBehandling(
+            behandling,
+            RestHenleggBehandlingInfo(
+                årsak = HenleggÅrsak.TEKNISK_VEDLIKEHOLD,
+                begrunnelse = "Satsendring"
+            )
+        )
+        assertEquals(StegType.BEHANDLING_AVSLUTTET, henlagtBehandling.steg)
+        assertTrue {
+            oppgaveRepository.findByBehandlingAndIkkeFerdigstilt(henlagtBehandling).single().type == Oppgavetype.BehandleSak
+        }
+    }
+
+    @Test
     fun `Henlegge etter behandling er sendt til beslutter`() {
         val vilkårsvurdertBehandling = kjørGjennomStegInkludertVurderTilbakekreving()
         stegService.håndterSendTilBeslutter(vilkårsvurdertBehandling, "1234")
@@ -317,7 +354,8 @@ class StegServiceTest(
             persongrunnlagService = persongrunnlagService,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService
+            vedtaksperiodeService = vedtaksperiodeService,
+            brevmalService = brevmalService
         )
 
         val nyMigreringsdato = LocalDate.now().minusMonths(6)
@@ -480,7 +518,8 @@ class StegServiceTest(
             persongrunnlagService = persongrunnlagService,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService
+            vedtaksperiodeService = vedtaksperiodeService,
+            brevmalService = brevmalService
         )
     }
 

@@ -32,6 +32,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndre
 import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeDeltBostedTriggere
 import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeTrigger
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestSanityBegrunnelse
@@ -40,7 +41,6 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.SanityVilkår
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårRolle
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårTrigger
 import no.nav.familie.ba.sak.kjerne.brev.domene.ØvrigTrigger
-import no.nav.familie.ba.sak.kjerne.brev.hentBrevmal
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
@@ -67,10 +67,10 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.Personident
 import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
-import no.nav.familie.ba.sak.kjerne.steg.JournalførVedtaksbrevDTO
 import no.nav.familie.ba.sak.kjerne.steg.StatusFraOppdragMedTask
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.ba.sak.kjerne.steg.domene.JournalførVedtaksbrevDTO
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.BarnetsBostedsland
@@ -242,7 +242,8 @@ fun lagAndelTilkjentYtelse(
     tilkjentYtelse: TilkjentYtelse? = null,
     prosent: BigDecimal = BigDecimal(100),
     endretUtbetalingAndeler: List<EndretUtbetalingAndel> = emptyList(),
-    kildeBehandlingId: Long? = behandling.id
+    kildeBehandlingId: Long? = behandling.id,
+    differanseberegnetPeriodebeløp: Int? = null
 ): AndelTilkjentYtelse {
     return AndelTilkjentYtelse(
         aktør = aktør,
@@ -258,7 +259,8 @@ fun lagAndelTilkjentYtelse(
         sats = beløp,
         prosent = prosent,
         endretUtbetalingAndeler = endretUtbetalingAndeler.toMutableList(),
-        kildeBehandlingId = kildeBehandlingId
+        kildeBehandlingId = kildeBehandlingId,
+        differanseberegnetPeriodebeløp = differanseberegnetPeriodebeløp
     )
 }
 
@@ -294,7 +296,7 @@ fun lagAndelTilkjentYtelseMedEndreteUtbetalinger(
         differanseberegnetPeriodebeløp = differanseberegnetPeriodebeløp
     )
 
-    return AndelTilkjentYtelseMedEndreteUtbetalinger(aty, endretUtbetalingAndeler, true)
+    return AndelTilkjentYtelseMedEndreteUtbetalinger(aty, endretUtbetalingAndeler)
 }
 
 fun lagAndelTilkjentYtelseUtvidet(
@@ -324,8 +326,16 @@ fun lagAndelTilkjentYtelseUtvidet(
     )
 }
 
-fun lagInitiellTilkjentYtelse(behandling: Behandling = lagBehandling(), utbetalingsoppdrag: String? = null): TilkjentYtelse {
-    return TilkjentYtelse(behandling = behandling, opprettetDato = LocalDate.now(), endretDato = LocalDate.now(), utbetalingsoppdrag = utbetalingsoppdrag)
+fun lagInitiellTilkjentYtelse(
+    behandling: Behandling = lagBehandling(),
+    utbetalingsoppdrag: String? = null
+): TilkjentYtelse {
+    return TilkjentYtelse(
+        behandling = behandling,
+        opprettetDato = LocalDate.now(),
+        endretDato = LocalDate.now(),
+        utbetalingsoppdrag = utbetalingsoppdrag
+    )
 }
 
 fun lagTestPersonopplysningGrunnlag(
@@ -518,7 +528,8 @@ fun lagPersonResultat(
     personType: PersonType = PersonType.BARN,
     vilkårType: Vilkår = Vilkår.BOSATT_I_RIKET,
     erDeltBosted: Boolean = false,
-    erDeltBostedSkalIkkeDeles: Boolean = false
+    erDeltBostedSkalIkkeDeles: Boolean = false,
+    erEksplisittAvslagPåSøknad: Boolean? = null
 ): PersonResultat {
     val personResultat = PersonResultat(
         vilkårsvurdering = vilkårsvurdering,
@@ -542,7 +553,8 @@ fun lagPersonResultat(
                             erDeltBostedSkalIkkeDeles && it == Vilkår.BOR_MED_SØKER -> UtdypendeVilkårsvurdering.DELT_BOSTED_SKAL_IKKE_DELES
                             else -> null
                         }
-                    )
+                    ),
+                    erEksplisittAvslagPåSøknad = erEksplisittAvslagPåSøknad
                 )
             }.toSet()
         )
@@ -556,7 +568,8 @@ fun lagPersonResultat(
                     vilkårType = vilkårType,
                     resultat = resultat,
                     begrunnelse = "",
-                    behandlingId = vilkårsvurdering.behandling.id
+                    behandlingId = vilkårsvurdering.behandling.id,
+                    erEksplisittAvslagPåSøknad = erEksplisittAvslagPåSøknad
                 )
             )
         )
@@ -645,7 +658,9 @@ fun kjørStegprosessForFGB(
     vedtaksperiodeService: VedtaksperiodeService,
     behandlingUnderkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
     institusjon: InstitusjonInfo? = null,
-    verge: VergeInfo? = null
+    verge: VergeInfo? = null,
+    brevmalService: BrevmalService,
+    behandlingKategori: BehandlingKategori = BehandlingKategori.NASJONAL
 ): Behandling {
     val fagsakType = utledFagsaktype(institusjon, verge)
     val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(
@@ -655,7 +670,7 @@ fun kjørStegprosessForFGB(
     )
     val behandling = stegService.håndterNyBehandling(
         NyBehandling(
-            kategori = BehandlingKategori.NASJONAL,
+            kategori = behandlingKategori,
             underkategori = behandlingUnderkategori,
             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
             behandlingÅrsak = BehandlingÅrsak.SØKNAD,
@@ -780,7 +795,7 @@ fun kjørStegprosessForFGB(
                 behandlingId = behandlingEtterJournalførtVedtak.id,
                 journalpostId = "1234",
                 personEllerInstitusjonIdent = søkerFnr,
-                brevmal = hentBrevmal(
+                brevmal = brevmalService.hentBrevmal(
                     behandlingEtterJournalførtVedtak
                 ),
                 erManueltSendt = false
@@ -812,7 +827,8 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
     barnasIdenter: List<String>,
     vedtakService: VedtakService,
     stegService: StegService,
-    fagsakId: Long
+    fagsakId: Long,
+    brevmalService: BrevmalService
 ): Behandling {
     val behandling = stegService.håndterNyBehandling(
         NyBehandling(
@@ -907,7 +923,7 @@ fun kjørStegprosessForRevurderingÅrligKontroll(
                 behandlingId = behandling.id,
                 journalpostId = "1234",
                 personEllerInstitusjonIdent = søkerFnr,
-                brevmal = hentBrevmal(behandling),
+                brevmal = brevmalService.hentBrevmal(behandling),
                 erManueltSendt = false
             )
         )
@@ -1121,7 +1137,7 @@ fun lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
         andelTilkjentYtelser = andelTilkjentYtelser
     )
 
-    return EndretUtbetalingAndelMedAndelerTilkjentYtelse(eua, andelTilkjentYtelser, true)
+    return EndretUtbetalingAndelMedAndelerTilkjentYtelse(eua, andelTilkjentYtelser)
 }
 
 fun lagPerson(
@@ -1276,7 +1292,7 @@ fun oppfyltVilkår(vilkår: Vilkår, regelverk: Regelverk? = null) =
         }
     )
 
-fun ikkeOppfyltVilkår(vilkår: Vilkår, regelverk: Regelverk? = null) =
+fun ikkeOppfyltVilkår(vilkår: Vilkår) =
     VilkårRegelverkResultat(
         vilkår = vilkår,
         regelverkResultat = RegelverkResultat.IKKE_OPPFYLT

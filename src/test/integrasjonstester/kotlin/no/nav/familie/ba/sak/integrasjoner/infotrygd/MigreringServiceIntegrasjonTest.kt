@@ -6,6 +6,7 @@ import io.mockk.slot
 import no.nav.commons.foedselsnummer.testutils.FoedselsnummerGenerator
 import no.nav.familie.ba.sak.common.DbContainerInitializer
 import no.nav.familie.ba.sak.common.EnvService
+import no.nav.familie.ba.sak.common.Utils.avrundetHeltallAvProsent
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
@@ -18,6 +19,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.beregning.SatsService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -57,6 +60,7 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -277,8 +281,10 @@ class MigreringServiceIntegrasjonTest(
 
             val vedtakDVHV2 = MockKafkaProducer.sendteMeldinger.values.last() as VedtakDVHV2
             assertThat(vedtakDVHV2.utbetalingsperioderV2.first().stønadFom).isEqualTo(forventetUtbetalingFom)
-            assertThat(vedtakDVHV2.utbetalingsperioderV2.first().utbetaltPerMnd.toDouble()).isEqualTo(
-                SAK_BELØP_2_BARN_1_UNDER_6 / 2
+            assertThat(vedtakDVHV2.utbetalingsperioderV2.first().utbetaltPerMnd).isEqualTo(
+                SatsService.finnSisteSatsFor(SatsType.ORBA).beløp.avrundetHeltallAvProsent(BigDecimal(50)) + SatsService.finnSisteSatsFor(
+                    SatsType.TILLEGG_ORBA
+                ).beløp.avrundetHeltallAvProsent(BigDecimal(50))
             )
         }
     }
@@ -479,7 +485,7 @@ class MigreringServiceIntegrasjonTest(
     }
 
     @Test
-    fun `Migrerin skal stoppes hvis antall barn på stønad ikke stemmer overens med antall barn under 18, når person har 1 barn over 18`() {
+    fun `Migrering skal stoppes hvis antall barn på stønad ikke stemmer overens med antall barn under 18, når person har 1 barn over 18`() {
         val fødselsnrBarn =
             FoedselsnummerGenerator().foedselsnummer(LocalDate.now().minusYears(18)).asString
 
@@ -525,10 +531,7 @@ class MigreringServiceIntegrasjonTest(
     }
 
     @Test
-    fun `Migrerin skal stoppes hvis antall delytelser er null og antall barn er 0`() {
-        val fødselsnrBarn =
-            FoedselsnummerGenerator().foedselsnummer(LocalDate.now().minusYears(18)).asString
-
+    fun `Migrering skal stoppes hvis antall delytelser er null og antall barn er 0`() {
         every {
             infotrygdBarnetrygdClient.hentSaker(any(), any())
         } returns InfotrygdSøkResponse(

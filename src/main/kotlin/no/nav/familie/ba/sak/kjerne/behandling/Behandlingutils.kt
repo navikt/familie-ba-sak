@@ -17,6 +17,10 @@ object Behandlingutils {
             .maxByOrNull { it.opprettetTidspunkt }
     }
 
+    fun hentSisteBehandlingSomErVedtatt(alleBehandlingerPåFagsak: List<Behandling>): Behandling? = alleBehandlingerPåFagsak
+        .filter { !it.erHenlagt() && it.steg == StegType.BEHANDLING_AVSLUTTET }
+        .maxByOrNull { it.opprettetTidspunkt }
+
     fun hentForrigeBehandlingSomErVedtatt(
         behandlinger: List<Behandling>,
         behandlingFørFølgende: Behandling

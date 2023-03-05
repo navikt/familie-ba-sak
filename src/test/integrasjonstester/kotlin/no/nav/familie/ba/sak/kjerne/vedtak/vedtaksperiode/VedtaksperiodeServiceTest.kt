@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.kjørStegprosessForRevurderingÅrligKontroll
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelseMedEndreteUtbetalinger
@@ -11,7 +9,6 @@ import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
@@ -22,17 +19,18 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.SøkerMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
+import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeRepository
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -66,7 +64,11 @@ class VedtaksperiodeServiceTest(
     private val vedtaksperiodeService: VedtaksperiodeService,
 
     @Autowired
-    private val databaseCleanupService: DatabaseCleanupService
+    private val databaseCleanupService: DatabaseCleanupService,
+
+    @Autowired
+    private val brevmalService: BrevmalService
+
 ) : AbstractSpringIntegrationTest() {
 
     val søkerFnr = randomFnr()
@@ -87,7 +89,8 @@ class VedtaksperiodeServiceTest(
             persongrunnlagService = persongrunnlagService,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService
+            vedtaksperiodeService = vedtaksperiodeService,
+            brevmalService = brevmalService
         )
 
         revurdering = kjørStegprosessForRevurderingÅrligKontroll(
@@ -96,7 +99,8 @@ class VedtaksperiodeServiceTest(
             barnasIdenter = listOf(barnFnr, barn2Fnr),
             vedtakService = vedtakService,
             stegService = stegService,
-            fagsakId = førstegangsbehandling!!.fagsak.id
+            fagsakId = førstegangsbehandling!!.fagsak.id,
+            brevmalService = brevmalService
         )
     }
 
@@ -112,7 +116,8 @@ class VedtaksperiodeServiceTest(
             persongrunnlagService = persongrunnlagService,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService
+            vedtaksperiodeService = vedtaksperiodeService,
+            brevmalService = brevmalService
         )
 
         val behandlingEtterNySøknadsregistrering = stegService.håndterSøknad(
@@ -149,41 +154,53 @@ class VedtaksperiodeServiceTest(
     }
 
     @Test
-    fun `Skal kunne lagre flere vedtaksperioder av typen endret utbetaling med samme periode`() {
+    fun `Skal lage og populere avslagsperiode for uregistrert barn med eøs begrunnelse dersom behandling sin kategori er EØS`() {
+        val søkerFnr = randomFnr()
         val behandling = kjørStegprosessForFGB(
             tilSteg = StegType.REGISTRERE_SØKNAD,
-            søkerFnr = randomFnr(),
+            søkerFnr = søkerFnr,
             barnasIdenter = listOf(barnFnr),
             fagsakService = fagsakService,
             vedtakService = vedtakService,
             persongrunnlagService = persongrunnlagService,
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
-            vedtaksperiodeService = vedtaksperiodeService
-        )
-        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandling.id)
-
-        val fom = inneværendeMåned().minusMonths(12).førsteDagIInneværendeMåned()
-        val tom = inneværendeMåned().sisteDagIInneværendeMåned()
-        val type = Vedtaksperiodetype.ENDRET_UTBETALING
-        val vedtaksperiode = VedtaksperiodeMedBegrunnelser(
-            vedtak = vedtak,
-            fom = fom,
-            tom = tom,
-            type = type
-        )
-        vedtaksperiodeRepository.save(vedtaksperiode)
-
-        val vedtaksperiodeMedSammePeriode = VedtaksperiodeMedBegrunnelser(
-            vedtak = vedtak,
-            fom = fom,
-            tom = tom,
-            type = type
+            vedtaksperiodeService = vedtaksperiodeService,
+            brevmalService = brevmalService,
+            behandlingKategori = BehandlingKategori.EØS
         )
 
-        Assertions.assertDoesNotThrow {
-            vedtaksperiodeRepository.save(vedtaksperiodeMedSammePeriode)
-        }
+        val behandlingEtterNySøknadsregistrering = stegService.håndterSøknad(
+            behandling = behandling,
+            restRegistrerSøknad = RestRegistrerSøknad(
+                søknad = SøknadDTO(
+                    underkategori = BehandlingUnderkategoriDTO.ORDINÆR,
+                    søkerMedOpplysninger = SøkerMedOpplysninger(
+                        ident = søkerFnr
+                    ),
+                    barnaMedOpplysninger = listOf(
+                        BarnMedOpplysninger(
+                            ident = "",
+                            erFolkeregistrert = false,
+                            inkludertISøknaden = true
+                        )
+                    ),
+                    endringAvOpplysningerBegrunnelse = ""
+                ),
+                bekreftEndringerViaFrontend = true
+            )
+        )
+
+        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandlingEtterNySøknadsregistrering.id)
+
+        val vedtaksperioder = vedtaksperiodeService.genererVedtaksperioderMedBegrunnelser(vedtak)
+
+        assertEquals(1, vedtaksperioder.size)
+        assertEquals(1, vedtaksperioder.flatMap { it.eøsBegrunnelser }.size)
+        assertEquals(
+            EØSStandardbegrunnelse.AVSLAG_EØS_UREGISTRERT_BARN,
+            vedtaksperioder.flatMap { it.eøsBegrunnelser }.first().begrunnelse
+        )
     }
 
     @Test

@@ -34,6 +34,30 @@ data class AndelTilkjentYtelseDataForÅKalkulereEndring(
     val behandlingAlder: BehandlingAlder
 )
 
+/**
+ * Utleder første endringstidspunkt fra fire mulige datoer basert på første endring av:
+ * - utbetaling
+ * - kompetanse
+ * - vilkårsvurdering
+ * - endret utbetaling andel
+ * Hvis det ikke er endring på feks. utbetaling blir den datoen null.
+ * Hvis det ikke finnes noen endring i det hele tatt (dvs. alle er null) setter vi endringstidspunkt til tidenes ende
+ * Dette er for at vi dermed kun skal få med vedtaksperioder som kun strekker seg uendelig frem i tid (feks. opphørsperiode)
+ * * */
+internal fun utledEndringstidspunkt(
+    endringstidspunktUtbetalingsbeløp: YearMonth?,
+    endringstidspunktKompetanse: YearMonth?,
+    endringstidspunktVilkårsvurdering: YearMonth?,
+    endringstidspunktEndretUtbetalingAndeler: YearMonth?
+): LocalDate {
+    return listOfNotNull(
+        endringstidspunktUtbetalingsbeløp,
+        endringstidspunktKompetanse,
+        endringstidspunktVilkårsvurdering,
+        endringstidspunktEndretUtbetalingAndeler
+    ).minOfOrNull { it }?.førsteDagIInneværendeMåned() ?: TIDENES_ENDE
+}
+
 fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.hentFørsteEndringstidspunkt(
     forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
 ): LocalDate? = this.hentPerioderMedEndringerFra(forrigeAndelerTilkjentYtelse)

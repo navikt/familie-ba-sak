@@ -20,11 +20,17 @@ data class VarselbrevMedÅrsakerOgBarn(
         fødselsnummer: String,
         enhet: String,
         varselÅrsaker: List<String>,
-        barnasFødselsdager: String
+        barnasFødselsdager: String,
+        saksbehandlerNavn: String
     ) : this(
         mal = mal,
         data = VarselbrevMedÅrsakerOgBarnData(
-            delmalData = VarselbrevMedÅrsakerOgBarnData.DelmalData(signatur = SignaturDelmal(enhet = enhet)),
+            delmalData = VarselbrevMedÅrsakerOgBarnData.DelmalData(
+                signatur = SignaturDelmal(
+                    enhet = enhet,
+                    saksbehandlerNavn = saksbehandlerNavn
+                )
+            ),
             flettefelter = VarselbrevMedÅrsakerOgBarnData.Flettefelter(
                 navn = navn,
                 fodselsnummer = fødselsnummer,

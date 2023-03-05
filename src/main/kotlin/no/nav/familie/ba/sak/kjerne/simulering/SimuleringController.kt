@@ -20,7 +20,6 @@ class SimuleringController(
     private val simuleringService: SimuleringService,
     private val tilgangService: TilgangService,
     private val featureToggleService: FeatureToggleService
-
 ) {
 
     @GetMapping(path = ["/{behandlingId}/simulering"])
@@ -30,8 +29,8 @@ class SimuleringController(
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
         val vedtakSimuleringMottaker = simuleringService.oppdaterSimuleringPåBehandlingVedBehov(behandlingId)
         val restSimulering = vedtakSimuleringMottakereTilRestSimulering(
-            vedtakSimuleringMottaker,
-            featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ)
+            økonomiSimuleringMottakere = vedtakSimuleringMottaker,
+            erManuellPosteringTogglePå = featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ)
         )
         return ResponseEntity.ok(Ressurs.success(restSimulering))
     }

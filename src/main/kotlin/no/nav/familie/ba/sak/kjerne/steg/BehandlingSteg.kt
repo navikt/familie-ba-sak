@@ -2,8 +2,8 @@ package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.steg.StegType.BEHANDLINGSRESULTAT
@@ -36,13 +36,28 @@ interface BehandlingSteg<T> {
     fun hentNesteStegForNormalFlyt(behandling: Behandling): StegType {
         return hentNesteSteg(
             utførendeStegType = this.stegType(),
-            behandling = behandling
+            behandling = behandling,
+            endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.IKKE_RELEVANT
+        )
+    }
+
+    fun hentNesteStegGittEndringerIUtbetaling(behandling: Behandling, endringerIUtbetaling: EndringerIUtbetalingForBehandlingSteg): StegType {
+        return hentNesteSteg(
+            utførendeStegType = this.stegType(),
+            behandling = behandling,
+            endringerIUtbetaling = endringerIUtbetaling
         )
     }
 
     fun preValiderSteg(behandling: Behandling, stegService: StegService? = null) {}
 
     fun postValiderSteg(behandling: Behandling) {}
+}
+
+enum class EndringerIUtbetalingForBehandlingSteg {
+    IKKE_RELEVANT,
+    INGEN_ENDRING_I_UTBETALING,
+    ENDRING_I_UTBETALING
 }
 
 val FØRSTE_STEG = REGISTRERE_PERSONGRUNNLAG
@@ -166,7 +181,7 @@ enum class StegType(
     }
 }
 
-fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegType {
+fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType, endringerIUtbetaling: EndringerIUtbetalingForBehandlingSteg = EndringerIUtbetalingForBehandlingSteg.IKKE_RELEVANT): StegType {
     if (utførendeStegType == HENLEGG_BEHANDLING) {
         return FERDIGSTILLE_BEHANDLING
     }
@@ -245,7 +260,7 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
                 BEHANDLINGSRESULTAT -> VURDER_TILBAKEKREVING
                 VURDER_TILBAKEKREVING -> SEND_TIL_BESLUTTER
                 SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
-                BESLUTTE_VEDTAK -> hentStegEtterBeslutteVedtakForTekniskEndring(behandling.resultat)
+                BESLUTTE_VEDTAK -> hentStegEtterBeslutteVedtakForTekniskEndring(endringerIUtbetaling)
                 IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
                 VENTE_PÅ_STATUS_FRA_ØKONOMI -> FERDIGSTILLE_BEHANDLING
                 FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
@@ -259,7 +274,7 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
                 REGISTRERE_PERSONGRUNNLAG -> FILTRERING_FØDSELSHENDELSER
                 FILTRERING_FØDSELSHENDELSER -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
-                BEHANDLINGSRESULTAT -> if (behandling.resultat == Behandlingsresultat.INNVILGET) IVERKSETT_MOT_OPPDRAG else HENLEGG_BEHANDLING
+                BEHANDLINGSRESULTAT -> if (endringerIUtbetaling == EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING) IVERKSETT_MOT_OPPDRAG else HENLEGG_BEHANDLING
                 IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
                 VENTE_PÅ_STATUS_FRA_ØKONOMI -> JOURNALFØR_VEDTAKSBREV
                 JOURNALFØR_VEDTAKSBREV -> DISTRIBUER_VEDTAKSBREV
@@ -286,7 +301,7 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
                 BEHANDLINGSRESULTAT -> VURDER_TILBAKEKREVING
                 VURDER_TILBAKEKREVING -> SEND_TIL_BESLUTTER
                 SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
-                BESLUTTE_VEDTAK -> hentNesteStegTypeBasertPåBehandlingsresultat(behandling.resultat)
+                BESLUTTE_VEDTAK -> hentNesteStegTypeBasertPåOmDetErEndringIUtbetaling(endringerIUtbetaling)
                 IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
                 VENTE_PÅ_STATUS_FRA_ØKONOMI -> IVERKSETT_MOT_FAMILIE_TILBAKE
                 IVERKSETT_MOT_FAMILIE_TILBAKE -> JOURNALFØR_VEDTAKSBREV
@@ -310,7 +325,7 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
 
                 VURDER_TILBAKEKREVING -> SEND_TIL_BESLUTTER
                 SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
-                BESLUTTE_VEDTAK -> hentNesteStegTypeBasertPåBehandlingsresultat(behandling.resultat)
+                BESLUTTE_VEDTAK -> hentNesteStegTypeBasertPåOmDetErEndringIUtbetaling(endringerIUtbetaling)
                 IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
                 VENTE_PÅ_STATUS_FRA_ØKONOMI -> IVERKSETT_MOT_FAMILIE_TILBAKE
                 IVERKSETT_MOT_FAMILIE_TILBAKE -> JOURNALFØR_VEDTAKSBREV
@@ -326,9 +341,12 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
             when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
-                BEHANDLINGSRESULTAT -> if (behandling.resultat == Behandlingsresultat.ENDRET_UTBETALING) {
+                BEHANDLINGSRESULTAT -> if (endringerIUtbetaling == EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING) {
                     IVERKSETT_MOT_OPPDRAG
+                } else if (behandling.kategori == BehandlingKategori.EØS && endringerIUtbetaling == EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING) {
+                    FERDIGSTILLE_BEHANDLING
                 } else {
+                    // TODO: Flytt denne valideringen til behandlingsresultat valideringen
                     throw Feil("Resultat ${behandling.resultat} er ikke støttet etter behandlingsresultat for satsendringsbehandling.")
                 }
 
@@ -347,7 +365,7 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
                 BEHANDLINGSRESULTAT -> VURDER_TILBAKEKREVING
                 VURDER_TILBAKEKREVING -> SEND_TIL_BESLUTTER
                 SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
-                BESLUTTE_VEDTAK -> hentNesteStegTypeBasertPåBehandlingsresultat(behandling.resultat)
+                BESLUTTE_VEDTAK -> hentNesteStegTypeBasertPåOmDetErEndringIUtbetaling(endringerIUtbetaling)
                 IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
                 VENTE_PÅ_STATUS_FRA_ØKONOMI -> IVERKSETT_MOT_FAMILIE_TILBAKE
                 IVERKSETT_MOT_FAMILIE_TILBAKE -> JOURNALFØR_VEDTAKSBREV
@@ -361,19 +379,19 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType): StegTyp
     }
 }
 
-fun hentNesteStegTypeBasertPåBehandlingsresultat(resultat: Behandlingsresultat): StegType {
-    return when {
-        resultat.kanIkkeSendesTilOppdrag() -> JOURNALFØR_VEDTAKSBREV
-        else -> IVERKSETT_MOT_OPPDRAG
+private fun hentNesteStegTypeBasertPåOmDetErEndringIUtbetaling(endringerIUtbetaling: EndringerIUtbetalingForBehandlingSteg): StegType =
+    when (endringerIUtbetaling) {
+        EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING -> IVERKSETT_MOT_OPPDRAG
+        EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING -> JOURNALFØR_VEDTAKSBREV
+        EndringerIUtbetalingForBehandlingSteg.IKKE_RELEVANT -> throw Feil("Endringer i utbetaling må utledes før man kan gå videre til neste steg.")
     }
-}
 
-fun hentStegEtterBeslutteVedtakForTekniskEndring(resultat: Behandlingsresultat): StegType {
-    return when {
-        resultat.kanIkkeSendesTilOppdrag() -> FERDIGSTILLE_BEHANDLING
-        else -> IVERKSETT_MOT_OPPDRAG
+private fun hentStegEtterBeslutteVedtakForTekniskEndring(endringerIUtbetaling: EndringerIUtbetalingForBehandlingSteg): StegType =
+    when (endringerIUtbetaling) {
+        EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING -> IVERKSETT_MOT_OPPDRAG
+        EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING -> FERDIGSTILLE_BEHANDLING
+        EndringerIUtbetalingForBehandlingSteg.IKKE_RELEVANT -> throw Feil("Endringer i utbetaling må utledes før man kan gå videre til neste steg.")
     }
-}
 
 enum class BehandlerRolle(val nivå: Int) {
     SYSTEM(4),

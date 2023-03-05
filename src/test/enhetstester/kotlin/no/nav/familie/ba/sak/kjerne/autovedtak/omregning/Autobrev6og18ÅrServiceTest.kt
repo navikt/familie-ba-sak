@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -53,6 +54,7 @@ internal class Autobrev6og18ÅrServiceTest {
     private val andelTilkjentYtelseRepository = mockk<AndelTilkjentYtelseRepository>()
     private val endretUtbetalingAndelRepository = mockk<EndretUtbetalingAndelRepository>(relaxed = true)
     private val featureToggleService = mockk<FeatureToggleService>(relaxed = true)
+    private val startSatsendring = mockk<StartSatsendring>(relaxed = true)
 
     private val autovedtakBrevService = AutovedtakBrevService(
         behandlingService = behandlingService,
@@ -75,7 +77,8 @@ internal class Autobrev6og18ÅrServiceTest {
             endretUtbetalingAndelRepository,
             mockk(),
             featureToggleService
-        )
+        ),
+        startSatsendring = startSatsendring
     )
 
     @Test
@@ -226,7 +229,7 @@ internal class Autobrev6og18ÅrServiceTest {
 
     @Test
     fun `Verifiser at behandling for omregning ikke blir trigget for løpende fagsak med barn som fyller 18år inneværende måned, hvis barnet ikke har løpende andel tilkjent ytelse`() {
-        val (behandling, søker, barnIBrytningsalder) = initMock(alder = 18, medSøsken = true)
+        val (behandling, _, barnIBrytningsalder) = initMock(alder = 18, medSøsken = true)
 
         val autobrev6og18ÅrDTO = Autobrev6og18ÅrDTO(
             fagsakId = behandling.fagsak.id,

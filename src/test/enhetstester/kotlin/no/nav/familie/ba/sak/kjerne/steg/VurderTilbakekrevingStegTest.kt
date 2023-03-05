@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
@@ -11,9 +12,11 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottaker
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringPostering
+import no.nav.familie.ba.sak.kjerne.steg.VurderTilbakekrevingSteg.Companion.februar2023
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.kontrakter.felles.simulering.BetalingType
 import no.nav.familie.kontrakter.felles.simulering.FagOmrådeKode
@@ -34,9 +37,10 @@ class VurderTilbakekrevingStegTest {
     private val tilbakekrevingService: TilbakekrevingService = mockk()
     private val simuleringService: SimuleringService = mockk()
     private val featureToggleService: FeatureToggleService = mockk()
+    private val personGrunnlagService: PersongrunnlagService = mockk()
 
     private val vurderTilbakekrevingSteg: VurderTilbakekrevingSteg =
-        VurderTilbakekrevingSteg(featureToggleService, tilbakekrevingService, simuleringService)
+        VurderTilbakekrevingSteg(featureToggleService, tilbakekrevingService, simuleringService, personGrunnlagService)
 
     private val behandling: Behandling = lagBehandling(
         behandlingType = BehandlingType.REVURDERING,
@@ -54,9 +58,8 @@ class VurderTilbakekrevingStegTest {
         every { tilbakekrevingService.søkerHarÅpenTilbakekreving(any()) } returns false
         every { tilbakekrevingService.validerRestTilbakekreving(any(), any()) } returns Unit
         every { tilbakekrevingService.lagreTilbakekreving(any(), any()) } returns null
-        every { featureToggleService.isEnabled(FeatureToggleConfig.ENDRINGER_I_VALIDERING_FOR_MIGRERINGSBEHANDLING) } returns true
+        every { personGrunnlagService.hentBarna(any<Long>()) } returns listOf(lagPerson())
         every { featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ) } returns true
-        every { featureToggleService.isEnabled(FeatureToggleConfig.MIGRERING_MED_FEILUTBETALING_UNDER_BELØPSGRENSE, true) } returns true
     }
 
     @Test
@@ -98,6 +101,14 @@ class VurderTilbakekrevingStegTest {
         every { simuleringService.hentEtterbetaling(behandling.id) } returns BigDecimal.ZERO
         every { simuleringService.hentSimuleringPåBehandling(behandling.id) } returns emptyList()
 
+        val posteringer = listOf(
+            mockVedtakSimuleringPostering(beløp = 2500, posteringType = PosteringType.FEILUTBETALING)
+        )
+        val simuleringMottaker =
+            listOf(mockØkonomiSimuleringMottaker(behandling = behandling, økonomiSimuleringPostering = posteringer))
+
+        every { simuleringService.hentSimuleringPåBehandling(behandling.id) } returns simuleringMottaker
+
         val exception = assertThrows<RuntimeException> {
             vurderTilbakekrevingSteg.utførStegOgAngiNeste(
                 behandling,
@@ -112,42 +123,43 @@ class VurderTilbakekrevingStegTest {
     }
 
     @Test
-    fun `skal utføre steg for migreringsbehandling med endre migreringsdato når feilutbetaling er under beløpsgrense`() {
-        val behandling: Behandling = lagBehandling(
-            behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-            årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
-            førsteSteg = StegType.VURDER_TILBAKEKREVING
-        )
-        every { featureToggleService.isEnabled(FeatureToggleConfig.IKKE_STOPP_MIGRERINGSBEHANDLING) } returns false
-        every { simuleringService.hentFeilutbetaling(behandling.id) } returns BigDecimal(2)
-        every { simuleringService.hentEtterbetaling(behandling.id) } returns BigDecimal.ZERO
-
-        val fom = LocalDate.of(2021, 1, 1)
-        val tom = LocalDate.of(2021, 1, 31)
-        val fom2 = LocalDate.of(2021, 2, 1)
-        val tom2 = LocalDate.of(2021, 2, 28)
-
-        // feilutbetaling 2 KR
-        val posteringer = listOf(
-            mockVedtakSimuleringPostering(fom = fom, tom = tom, beløp = 1, posteringType = PosteringType.FEILUTBETALING),
-            mockVedtakSimuleringPostering(fom = fom2, tom = tom2, beløp = 1, posteringType = PosteringType.FEILUTBETALING)
-        )
-        val simuleringMottaker =
-            listOf(mockØkonomiSimuleringMottaker(behandling = behandling, økonomiSimuleringPostering = posteringer))
-
-        every { simuleringService.hentSimuleringPåBehandling(behandling.id) } returns simuleringMottaker
-
-        val stegType = assertDoesNotThrow {
-            vurderTilbakekrevingSteg.utførStegOgAngiNeste(
-                behandling,
-                restTilbakekreving
+    fun `skal utføre steg for migreringsbehandling når avvik i form av etterbetaling er under beløpsgrense`() {
+        listOf(BehandlingÅrsak.HELMANUELL_MIGRERING, BehandlingÅrsak.ENDRE_MIGRERINGSDATO).forEach {
+            val behandling: Behandling = lagBehandling(
+                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                årsak = it,
+                førsteSteg = StegType.VURDER_TILBAKEKREVING
             )
+            every { featureToggleService.isEnabled(FeatureToggleConfig.IKKE_STOPP_MIGRERINGSBEHANDLING) } returns false
+            every { simuleringService.hentFeilutbetaling(behandling.id) } returns BigDecimal(0)
+            every { personGrunnlagService.hentBarna(any<Long>()) } returns listOf(lagPerson(), lagPerson())
+
+            // etterbetaling 4 KR pga. avrundingsfeil. 1 KR per barn i hver periode.
+            val posteringer = listOf(
+                mockVedtakSimuleringPostering(fom = februar2023, beløp = 2, betalingType = BetalingType.DEBIT),
+                mockVedtakSimuleringPostering(fom = februar2023, beløp = -2, betalingType = BetalingType.KREDIT),
+                mockVedtakSimuleringPostering(fom = februar2023, beløp = 2, betalingType = BetalingType.DEBIT),
+                mockVedtakSimuleringPostering(beløp = 2, betalingType = BetalingType.DEBIT),
+                mockVedtakSimuleringPostering(beløp = -2, betalingType = BetalingType.KREDIT),
+                mockVedtakSimuleringPostering(beløp = 2, betalingType = BetalingType.DEBIT)
+            )
+            val simuleringMottaker =
+                listOf(mockØkonomiSimuleringMottaker(behandling = behandling, økonomiSimuleringPostering = posteringer))
+
+            every { simuleringService.hentSimuleringPåBehandling(behandling.id) } returns simuleringMottaker
+
+            val stegType = assertDoesNotThrow {
+                vurderTilbakekrevingSteg.utførStegOgAngiNeste(
+                    behandling,
+                    restTilbakekreving
+                )
+            }
+            assertTrue { stegType == StegType.SEND_TIL_BESLUTTER }
         }
-        assertTrue { stegType == StegType.SEND_TIL_BESLUTTER }
     }
 
     @Test
-    fun `skal ikke utføre steg for migreringsbehandling med endre migreringsdato når det finnes etterbetaling mer enn maks beløp`() {
+    fun `skal ikke utføre steg for migreringsbehandling med endre migreringsdato når det finnes etterbetaling mer enn maks beløp før satsendring 2023`() {
         val behandling: Behandling = lagBehandling(
             behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
             årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
@@ -155,8 +167,12 @@ class VurderTilbakekrevingStegTest {
         )
         every { featureToggleService.isEnabled(FeatureToggleConfig.IKKE_STOPP_MIGRERINGSBEHANDLING) } returns false
         every { simuleringService.hentFeilutbetaling(behandling.id) } returns BigDecimal.ZERO
-        // etterbetaling 1000 KR
+
+        // etterbetaling 2000 KR
         val posteringer = listOf(
+            mockVedtakSimuleringPostering(fom = februar2023, beløp = 1000, betalingType = BetalingType.DEBIT),
+            mockVedtakSimuleringPostering(fom = februar2023, beløp = -1000, betalingType = BetalingType.KREDIT),
+            mockVedtakSimuleringPostering(fom = februar2023, beløp = 1000, betalingType = BetalingType.DEBIT),
             mockVedtakSimuleringPostering(beløp = 1000, betalingType = BetalingType.DEBIT),
             mockVedtakSimuleringPostering(beløp = -1000, betalingType = BetalingType.KREDIT),
             mockVedtakSimuleringPostering(beløp = 1000, betalingType = BetalingType.DEBIT)
@@ -180,35 +196,6 @@ class VurderTilbakekrevingStegTest {
     }
 
     @Test
-    fun `skal utføre steg for migreringsbehandling med endre migreringsdato når det finnes etterbetaling mindre enn maks beløp`() {
-        val behandling: Behandling = lagBehandling(
-            behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-            årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
-            førsteSteg = StegType.VURDER_TILBAKEKREVING
-        )
-        every { featureToggleService.isEnabled(FeatureToggleConfig.IKKE_STOPP_MIGRERINGSBEHANDLING) } returns false
-        every { simuleringService.hentFeilutbetaling(behandling.id) } returns BigDecimal.ZERO
-        // etterbetaling 200 KR
-        val posteringer = listOf(
-            mockVedtakSimuleringPostering(beløp = 200, betalingType = BetalingType.DEBIT),
-            mockVedtakSimuleringPostering(beløp = -200, betalingType = BetalingType.KREDIT),
-            mockVedtakSimuleringPostering(beløp = 200, betalingType = BetalingType.DEBIT)
-        )
-        val simuleringMottaker =
-            listOf(mockØkonomiSimuleringMottaker(behandling = behandling, økonomiSimuleringPostering = posteringer))
-
-        every { simuleringService.hentSimuleringPåBehandling(behandling.id) } returns simuleringMottaker
-
-        val stegType = assertDoesNotThrow {
-            vurderTilbakekrevingSteg.utførStegOgAngiNeste(
-                behandling,
-                restTilbakekreving
-            )
-        }
-        assertTrue { stegType == StegType.SEND_TIL_BESLUTTER }
-    }
-
-    @Test
     fun `skal ikke utføre steg for helmanuell migrering når det finnes feilutbetaling over beløpsgrense`() {
         val behandling: Behandling = lagBehandling(
             behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
@@ -218,6 +205,14 @@ class VurderTilbakekrevingStegTest {
         every { featureToggleService.isEnabled(FeatureToggleConfig.IKKE_STOPP_MIGRERINGSBEHANDLING) } returns false
         every { simuleringService.hentFeilutbetaling(behandling.id) } returns BigDecimal(2500)
         every { simuleringService.hentSimuleringPåBehandling(behandling.id) } returns emptyList()
+
+        val posteringer = listOf(
+            mockVedtakSimuleringPostering(beløp = 2500, posteringType = PosteringType.FEILUTBETALING)
+        )
+        val simuleringMottaker =
+            listOf(mockØkonomiSimuleringMottaker(behandling = behandling, økonomiSimuleringPostering = posteringer))
+
+        every { simuleringService.hentSimuleringPåBehandling(behandling.id) } returns simuleringMottaker
 
         val exception = assertThrows<RuntimeException> {
             vurderTilbakekrevingSteg.utførStegOgAngiNeste(
@@ -233,41 +228,54 @@ class VurderTilbakekrevingStegTest {
     }
 
     @Test
-    fun `skal utføre steg for helmanuell migrering når feilutbetaling er under beløpsgrense`() {
-        val behandling: Behandling = lagBehandling(
-            behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-            årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
-            førsteSteg = StegType.VURDER_TILBAKEKREVING
-        )
-        every { featureToggleService.isEnabled(FeatureToggleConfig.IKKE_STOPP_MIGRERINGSBEHANDLING) } returns false
-        every { simuleringService.hentFeilutbetaling(behandling.id) } returns BigDecimal(2)
-
-        val fom = LocalDate.of(2021, 1, 1)
-        val tom = LocalDate.of(2021, 1, 31)
-        val fom2 = LocalDate.of(2021, 2, 1)
-        val tom2 = LocalDate.of(2021, 2, 28)
-
-        // feilutbetaling 2 KR
-        val posteringer = listOf(
-            mockVedtakSimuleringPostering(fom = fom, tom = tom, beløp = 1, posteringType = PosteringType.FEILUTBETALING),
-            mockVedtakSimuleringPostering(fom = fom2, tom = tom2, beløp = 1, posteringType = PosteringType.FEILUTBETALING)
-        )
-        val simuleringMottaker =
-            listOf(mockØkonomiSimuleringMottaker(behandling = behandling, økonomiSimuleringPostering = posteringer))
-
-        every { simuleringService.hentSimuleringPåBehandling(behandling.id) } returns simuleringMottaker
-
-        val stegType = assertDoesNotThrow {
-            vurderTilbakekrevingSteg.utførStegOgAngiNeste(
-                behandling,
-                restTilbakekreving
+    fun `skal utføre steg for migreringsbehandling når avvik i form av feilutbetaling er under beløpsgrense`() {
+        listOf(BehandlingÅrsak.HELMANUELL_MIGRERING, BehandlingÅrsak.ENDRE_MIGRERINGSDATO).forEach {
+            val behandling: Behandling = lagBehandling(
+                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                årsak = it,
+                førsteSteg = StegType.VURDER_TILBAKEKREVING
             )
+            every { featureToggleService.isEnabled(FeatureToggleConfig.IKKE_STOPP_MIGRERINGSBEHANDLING) } returns false
+            every { simuleringService.hentFeilutbetaling(behandling.id) } returns BigDecimal(4)
+            every { personGrunnlagService.hentBarna(any<Long>()) } returns listOf(lagPerson(), lagPerson())
+
+            val fom = LocalDate.of(2021, 1, 1)
+            val tom = LocalDate.of(2021, 1, 31)
+            val fom2 = LocalDate.of(2021, 2, 1)
+            val tom2 = LocalDate.of(2021, 2, 28)
+
+            // feilutbetaling 1 KR per barn i hver periode
+            val posteringer = listOf(
+                mockVedtakSimuleringPostering(
+                    fom = fom,
+                    tom = tom,
+                    beløp = 2,
+                    posteringType = PosteringType.FEILUTBETALING
+                ),
+                mockVedtakSimuleringPostering(
+                    fom = fom2,
+                    tom = tom2,
+                    beløp = 2,
+                    posteringType = PosteringType.FEILUTBETALING
+                )
+            )
+            val simuleringMottaker =
+                listOf(mockØkonomiSimuleringMottaker(behandling = behandling, økonomiSimuleringPostering = posteringer))
+
+            every { simuleringService.hentSimuleringPåBehandling(behandling.id) } returns simuleringMottaker
+
+            val stegType = assertDoesNotThrow {
+                vurderTilbakekrevingSteg.utførStegOgAngiNeste(
+                    behandling,
+                    restTilbakekreving
+                )
+            }
+            assertTrue { stegType == StegType.SEND_TIL_BESLUTTER }
         }
-        assertTrue { stegType == StegType.SEND_TIL_BESLUTTER }
     }
 
     @Test
-    fun `skal ikke utføre steg for helmanuell migrering når det finnes etterbetaling mer enn maks beløp`() {
+    fun `skal ikke utføre steg for helmanuell migrering når det finnes etterbetaling mer enn maks beløp før satsendring 2023`() {
         val behandling: Behandling = lagBehandling(
             behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
             årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
@@ -276,8 +284,11 @@ class VurderTilbakekrevingStegTest {
         every { featureToggleService.isEnabled(FeatureToggleConfig.IKKE_STOPP_MIGRERINGSBEHANDLING) } returns false
         every { simuleringService.hentFeilutbetaling(behandling.id) } returns BigDecimal.ZERO
 
-        // etterbetaling 1000 KR
+        // etterbetaling 2000 KR
         val posteringer = listOf(
+            mockVedtakSimuleringPostering(fom = februar2023, beløp = 1000, betalingType = BetalingType.DEBIT),
+            mockVedtakSimuleringPostering(fom = februar2023, beløp = -1000, betalingType = BetalingType.KREDIT),
+            mockVedtakSimuleringPostering(fom = februar2023, beløp = 1000, betalingType = BetalingType.DEBIT),
             mockVedtakSimuleringPostering(beløp = 1000, betalingType = BetalingType.DEBIT),
             mockVedtakSimuleringPostering(beløp = -1000, betalingType = BetalingType.KREDIT),
             mockVedtakSimuleringPostering(beløp = 1000, betalingType = BetalingType.DEBIT)
@@ -422,11 +433,11 @@ class VurderTilbakekrevingStegTest {
         økonomiSimuleringMottaker: ØkonomiSimuleringMottaker = mockk(relaxed = true),
         beløp: Int = 0,
         fagOmrådeKode: FagOmrådeKode = FagOmrådeKode.BARNETRYGD,
-        fom: LocalDate = LocalDate.now().minusMonths(1),
-        tom: LocalDate = LocalDate.now().minusMonths(1),
+        fom: LocalDate = LocalDate.of(2023, 1, 1),
+        tom: LocalDate = LocalDate.of(2023, 1, 1),
         betalingType: BetalingType = BetalingType.DEBIT,
         posteringType: PosteringType = PosteringType.YTELSE,
-        forfallsdato: LocalDate = LocalDate.now().minusMonths(1),
+        forfallsdato: LocalDate = LocalDate.of(2023, 1, 1),
         utenInntrekk: Boolean = false
     ) = ØkonomiSimuleringPostering(
         økonomiSimuleringMottaker = økonomiSimuleringMottaker,

@@ -3,18 +3,19 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.KONTAKT_TEAMET_SUFFIX
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.harLøpendeUtbetaling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.logger
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 
-fun Utbetalingsoppdrag.valider(
-    behandlingsresultat: Behandlingsresultat,
-    erEndreMigreringsdatoBehandling: Boolean = false
+fun Utbetalingsoppdrag.validerNullutbetaling(
+    behandlingskategori: BehandlingKategori,
+    andelerTilkjentYtelse: List<AndelTilkjentYtelse>
 ) {
-    if (this.utbetalingsperiode.isNotEmpty() && behandlingsresultat == Behandlingsresultat.FORTSATT_INNVILGET && !erEndreMigreringsdatoBehandling) {
-        throw FunksjonellFeil("Behandling har resultat fortsatt innvilget, men det finnes utbetalingsperioder som ifølge systemet skal endres. $KONTAKT_TEAMET_SUFFIX")
-    } else if (this.utbetalingsperiode.isEmpty()) {
+    if (this.utbetalingsperiode.isEmpty() && !kanHaNullutbetaling(behandlingskategori, andelerTilkjentYtelse)) {
         throw FunksjonellFeil(
             "Utbetalingsoppdraget inneholder ingen utbetalingsperioder " +
                 "og det er grunn til å tro at denne ikke bør simuleres eller iverksettes. $KONTAKT_TEAMET_SUFFIX"
@@ -22,21 +23,17 @@ fun Utbetalingsoppdrag.valider(
     }
 }
 
-// nyValideringsmetode med logikk for å slippe nullutbetaling saker
-fun Utbetalingsoppdrag.valider(
-    behandlingsresultat: Behandlingsresultat,
-    behandlingskategori: BehandlingKategori,
-    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-    erEndreMigreringsdatoBehandling: Boolean = false
+fun opprettAdvarselLoggVedForstattInnvilgetMedUtbetaling(
+    utbetalingsoppdrag: Utbetalingsoppdrag,
+    behandling: Behandling
 ) {
-    if (this.utbetalingsperiode.isNotEmpty() && behandlingsresultat == Behandlingsresultat.FORTSATT_INNVILGET && !erEndreMigreringsdatoBehandling) {
-        throw FunksjonellFeil("Behandling har resultat fortsatt innvilget, men det finnes utbetalingsperioder som ifølge systemet skal endres. $KONTAKT_TEAMET_SUFFIX")
-    } else if (this.utbetalingsperiode.isEmpty() &&
-        !kanHaNullutbetaling(behandlingskategori, andelerTilkjentYtelse)
+    if (utbetalingsoppdrag.utbetalingsperiode.isNotEmpty() &&
+        behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET &&
+        behandling.opprettetÅrsak != BehandlingÅrsak.ENDRE_MIGRERINGSDATO
     ) {
-        throw FunksjonellFeil(
-            "Utbetalingsoppdraget inneholder ingen utbetalingsperioder " +
-                "og det er grunn til å tro at denne ikke bør simuleres eller iverksettes. $KONTAKT_TEAMET_SUFFIX"
+        logger.warn(
+            "Behandling=$behandling med resultat fortsatt innvilget har utbetalingsperioder. " +
+                "Dette kan tyde på at noe er galt og burde sjekkes opp."
         )
     }
 }

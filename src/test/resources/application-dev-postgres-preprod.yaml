@@ -200,3 +200,4 @@ retry.backoff.delay: 5
 NAIS_APP_NAME: familie-ba-sak
 
 AZURE_OPENID_CONFIG_TOKEN_ENDPOINT: https://login.microsoftonline.com/navq.onmicrosoft.com/oauth2/v2.0/token
+DEPLOY_ENV: dev

@@ -2,24 +2,32 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.satsendring
 
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakBehandlingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
+import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ba.sak.task.SatsendringTaskDto
 import org.slf4j.LoggerFactory
@@ -35,8 +43,11 @@ class AutovedtakSatsendringService(
     private val autovedtakService: AutovedtakService,
     private val andelTilkjentYtelseMedEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     private val tilbakestillBehandlingService: TilbakestillBehandlingService,
-    private val satskjøringRepository: SatskjøringRepository
-) : AutovedtakBehandlingService<SatsendringTaskDto> {
+    private val satskjøringRepository: SatskjøringRepository,
+    private val behandlingService: BehandlingService,
+    private val beregningService: BeregningService,
+    private val persongrunnlagService: PersongrunnlagService
+) {
 
     private val satsendringAlleredeUtført = Metrics.counter("satsendring.allerede.utfort")
     private val satsendringIverksatt = Metrics.counter("satsendring.iverksatt")
@@ -48,10 +59,12 @@ class AutovedtakSatsendringService(
      *
      */
     @Transactional
-    override fun kjørBehandling(behandlingsdata: SatsendringTaskDto): String {
+    fun kjørBehandling(behandlingsdata: SatsendringTaskDto): SatsendringSvar {
         val fagsakId = behandlingsdata.fagsakId
+
         val satskjøringForFagsak =
-            satskjøringRepository.findByFagsakId(fagsakId) ?: error("Fant ingen satskjøringsrad for fagsak=$fagsakId")
+            satskjøringRepository.findByFagsakId(fagsakId)
+                ?: satskjøringRepository.save(Satskjøring(fagsakId = fagsakId))
 
         val sisteIverksatteBehandling = behandlingRepository.finnSisteIverksatteBehandling(fagsakId = fagsakId)
             ?: error("Fant ikke siste iverksette behandling for $fagsakId")
@@ -61,7 +74,7 @@ class AutovedtakSatsendringService(
             satskjøringRepository.save(satskjøringForFagsak)
             logger.info("Satsendring allerede utført for fagsak=$fagsakId")
             satsendringAlleredeUtført.increment()
-            return "Satsendring allerede utført for fagsak=$fagsakId"
+            return SatsendringSvar.SATSENDRING_ER_ALLEREDE_UTFØRT
         }
 
         val aktivOgÅpenBehandling =
@@ -73,24 +86,19 @@ class AutovedtakSatsendringService(
         if (sisteIverksatteBehandling.fagsak.status != FagsakStatus.LØPENDE) throw Feil("Forsøker å utføre satsendring på ikke løpende fagsak ${sisteIverksatteBehandling.fagsak.id}")
 
         if (aktivOgÅpenBehandling != null) {
-            val brukerHarÅpenBehandlingMelding = if (harAlleredeNySats(
-                    sisteIverksettBehandlingsId = aktivOgÅpenBehandling.id,
-                    satstidspunkt = behandlingsdata.satstidspunkt
-                )
-            ) {
-                "Åpen behandling har allerede siste sats og vi lar den ligge."
-            } else if (aktivOgÅpenBehandling.status.erLåstMenIkkeAvsluttet()) {
-                "Behandling $aktivOgÅpenBehandling er låst for endringer og satsendring vil bli trigget neste virkedag."
-            } else if (aktivOgÅpenBehandling.steg.rekkefølge > StegType.VILKÅRSVURDERING.rekkefølge) {
-                tilbakestillBehandlingService.tilbakestillBehandlingTilVilkårsvurdering(aktivOgÅpenBehandling)
-                "Tilbakestiller behandling $aktivOgÅpenBehandling til vilkårsvurderingen"
-            } else {
-                "Behandling $aktivOgÅpenBehandling er under utredning, men er allerede i riktig tilstand."
-            }
+            val brukerHarÅpenBehandlingSvar = hentBrukerHarÅpenBehandlingSvar(aktivOgÅpenBehandling, behandlingsdata)
 
-            logger.info(brukerHarÅpenBehandlingMelding)
+            satskjøringForFagsak.feiltype = "ÅPEN_BEHANDLING"
+            satskjøringRepository.save(satskjøringForFagsak)
+
+            logger.info(brukerHarÅpenBehandlingSvar.melding)
             satsendringIgnorertÅpenBehandling.increment()
-            return brukerHarÅpenBehandlingMelding
+
+            return brukerHarÅpenBehandlingSvar
+        }
+
+        if (harUtbetalingerSomOverstiger100Prosent(sisteIverksatteBehandling)) {
+            logger.warn("Det løper over 100 prosent utbetaling på fagsak=${sisteIverksatteBehandling.fagsak.id}")
         }
 
         val behandlingEtterBehandlingsresultat =
@@ -106,27 +114,91 @@ class AutovedtakSatsendringService(
                 behandlingEtterBehandlingsresultat
             )
 
-        val task = IverksettMotOppdragTask.opprettTask(
-            behandlingEtterBehandlingsresultat,
-            opprettetVedtak,
-            SikkerhetContext.hentSaksbehandler()
-        )
+        val task = when (behandlingEtterBehandlingsresultat.steg) {
+            StegType.IVERKSETT_MOT_OPPDRAG -> {
+                IverksettMotOppdragTask.opprettTask(
+                    behandlingEtterBehandlingsresultat,
+                    opprettetVedtak,
+                    SikkerhetContext.hentSaksbehandler()
+                )
+            }
+
+            StegType.FERDIGSTILLE_BEHANDLING -> {
+                behandlingService.oppdaterStatusPåBehandling(
+                    behandlingEtterBehandlingsresultat.id,
+                    BehandlingStatus.IVERKSETTER_VEDTAK
+                )
+                FerdigstillBehandlingTask.opprettTask(
+                    søkerAktør.aktivFødselsnummer(),
+                    behandlingEtterBehandlingsresultat.id
+                )
+            }
+
+            else -> throw Feil("Ugyldig neste steg ${behandlingEtterBehandlingsresultat.steg} ved satsendring for fagsak=$fagsakId")
+        }
 
         satskjøringForFagsak.ferdigTidspunkt = LocalDateTime.now()
         satskjøringRepository.save(satskjøringForFagsak)
         taskRepository.save(task)
         satsendringIverksatt.increment()
 
-        return "Satsendring kjørt OK"
+        return SatsendringSvar.SATSENDRING_KJØRT_OK
     }
 
-    private fun harAlleredeNySats(sisteIverksettBehandlingsId: Long, satstidspunkt: YearMonth): Boolean {
+    private fun hentBrukerHarÅpenBehandlingSvar(
+        aktivOgÅpenBehandling: Behandling,
+        behandlingsdata: SatsendringTaskDto
+    ): SatsendringSvar {
+        val brukerHarÅpenBehandlingSvar = if (harAlleredeNySats(
+                sisteIverksettBehandlingsId = aktivOgÅpenBehandling.id,
+                satstidspunkt = behandlingsdata.satstidspunkt
+            )
+        ) {
+            SatsendringSvar.HAR_ALLEREDE_SISTE_SATS
+        } else if (aktivOgÅpenBehandling.status.erLåstMenIkkeAvsluttet()) {
+            SatsendringSvar.BEHANDLING_ER_LÅST_SATSENDRING_TRIGGES_NESTE_VIRKEDAG
+        } else if (aktivOgÅpenBehandling.steg.rekkefølge > StegType.VILKÅRSVURDERING.rekkefølge) {
+            tilbakestillBehandlingService.tilbakestillBehandlingTilVilkårsvurdering(aktivOgÅpenBehandling)
+            SatsendringSvar.TILBAKESTILLER_BEHANDLINGEN_TIL_VILKÅRSVURDERINGEN
+        } else {
+            SatsendringSvar.BEHANDLINGEN_ER_UNDER_UTREDNING_MEN_I_RIKTIG_TILSTAND
+        }
+        return brukerHarÅpenBehandlingSvar
+    }
+
+    fun harAlleredeNySats(sisteIverksettBehandlingsId: Long, satstidspunkt: YearMonth): Boolean {
         val andeler =
             andelTilkjentYtelseMedEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
                 sisteIverksettBehandlingsId
             )
 
         return harAlleredeSisteSats(andeler, satstidspunkt)
+    }
+
+    private fun harUtbetalingerSomOverstiger100Prosent(sisteIverksatteBehandling: Behandling): Boolean {
+        val tilkjentYtelse =
+            beregningService.hentTilkjentYtelseForBehandling(behandlingId = sisteIverksatteBehandling.id)
+        val personopplysningGrunnlag =
+            persongrunnlagService.hentAktivThrows(behandlingId = sisteIverksatteBehandling.id)
+
+        val barnMedAndreRelevanteTilkjentYtelser = personopplysningGrunnlag.barna.map {
+            Pair(
+                it,
+                beregningService.hentRelevanteTilkjentYtelserForBarn(it.aktør, sisteIverksatteBehandling.fagsak.id)
+            )
+        }
+
+        try {
+            TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
+                behandlendeBehandlingTilkjentYtelse = tilkjentYtelse,
+                barnMedAndreRelevanteTilkjentYtelser = barnMedAndreRelevanteTilkjentYtelser,
+                personopplysningGrunnlag = personopplysningGrunnlag
+            )
+        } catch (e: UtbetalingsikkerhetFeil) {
+            secureLogger.info("fagsakId=${sisteIverksatteBehandling.fagsak.id} har UtbetalingsikkerhetFeil. Skipper satsendring: ${e.frontendFeilmelding}")
+            return true
+        }
+        return false
     }
 
     companion object {
@@ -169,4 +241,17 @@ class AutovedtakSatsendringService(
             return true
         }
     }
+}
+
+enum class SatsendringSvar(val melding: String) {
+    SATSENDRING_KJØRT_OK(melding = "Satsendring kjørt OK"),
+    SATSENDRING_ER_ALLEREDE_UTFØRT(melding = "Satsendring allerede utført for fagsak"),
+    HAR_ALLEREDE_SISTE_SATS(melding = "Åpen behandling har allerede siste sats og vi lar den ligge."),
+    BEHANDLING_ER_LÅST_SATSENDRING_TRIGGES_NESTE_VIRKEDAG(
+        melding = "Behandlingen er låst for endringer og satsendring vil bli trigget neste virkedag."
+    ),
+    TILBAKESTILLER_BEHANDLINGEN_TIL_VILKÅRSVURDERINGEN(melding = "Tilbakestiller behandlingen til vilkårsvurderingen"),
+    BEHANDLINGEN_ER_UNDER_UTREDNING_MEN_I_RIKTIG_TILSTAND(
+        melding = "Behandlingen er under utredning, men er allerede i riktig tilstand."
+    )
 }

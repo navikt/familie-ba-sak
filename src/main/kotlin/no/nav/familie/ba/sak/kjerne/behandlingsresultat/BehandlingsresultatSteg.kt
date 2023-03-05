@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -19,7 +17,6 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValide
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.validerBarnasVilkår
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.validerDeltBostedEndringerIkkeKrysserUtvidetYtelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlingSteg
@@ -42,7 +39,6 @@ class BehandlingsresultatSteg(
     private val vilkårService: VilkårService,
     private val persongrunnlagService: PersongrunnlagService,
     private val beregningService: BeregningService,
-    private val featureToggleService: FeatureToggleService,
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
 ) : BehandlingSteg<String> {
 
@@ -64,9 +60,6 @@ class BehandlingsresultatSteg(
             personopplysningGrunnlag = personopplysningGrunnlag
         )
 
-        val toggleFrikobleAndelerOgEndringer =
-            featureToggleService.isEnabled(FeatureToggleConfig.BRUK_FRIKOBLEDE_ANDELER_OG_ENDRINGER)
-
         val endreteUtbetalingerMedAndeler = andelerTilkjentYtelseOgEndreteUtbetalingerService
             .finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandling.id)
 
@@ -76,21 +69,15 @@ class BehandlingsresultatSteg(
             endretUtbetalingAndelerMedÅrsakDeltBosted = endreteUtbetalingerMedAndeler.filter { it.årsak == Årsak.DELT_BOSTED }
         )
 
-        if (toggleFrikobleAndelerOgEndringer) {
-            validerDeltBostedEndringerIkkeKrysserUtvidetYtelse(
-                endreteUtbetalingerMedAndeler.map { it.endretUtbetalingAndel },
-                tilkjentYtelse.andelerTilkjentYtelse
-            )
-            validerPeriodeInnenforTilkjentytelse(
-                endreteUtbetalingerMedAndeler.map { it.endretUtbetalingAndel },
-                tilkjentYtelse.andelerTilkjentYtelse
-            )
+        validerPeriodeInnenforTilkjentytelse(
+            endreteUtbetalingerMedAndeler.map { it.endretUtbetalingAndel },
+            tilkjentYtelse.andelerTilkjentYtelse
+        )
 
-            validerÅrsak(
-                endreteUtbetalingerMedAndeler.map { it.endretUtbetalingAndel },
-                vilkårService.hentVilkårsvurdering(behandling.id)
-            )
-        }
+        validerÅrsak(
+            endreteUtbetalingerMedAndeler.map { it.endretUtbetalingAndel },
+            vilkårService.hentVilkårsvurdering(behandling.id)
+        )
     }
 
     @Transactional
@@ -99,7 +86,7 @@ class BehandlingsresultatSteg(
             if (behandling.erMigrering() && behandling.skalBehandlesAutomatisk) {
                 settBehandlingsresultat(behandling, Behandlingsresultat.INNVILGET)
             } else {
-                val resultat = behandlingsresultatService.utledBehandlingsresultatGammel(behandlingId = behandling.id)
+                val resultat = behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.id)
 
                 behandlingService.oppdaterBehandlingsresultat(
                     behandlingId = behandling.id,
@@ -134,7 +121,9 @@ class BehandlingsresultatSteg(
             simuleringService.oppdaterSimuleringPåBehandling(behandlingMedOppdatertBehandlingsresultat)
         }
 
-        return hentNesteStegForNormalFlyt(behandlingMedOppdatertBehandlingsresultat)
+        val endringerIUtbetaling =
+            beregningService.hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling)
+        return hentNesteStegGittEndringerIUtbetaling(behandling, endringerIUtbetaling)
     }
 
     override fun stegType(): StegType {
@@ -152,7 +141,7 @@ class BehandlingsresultatSteg(
                 "Du har fått behandlingsresultatet " +
                     "${behandlingMedOppdatertBehandlingsresultat.resultat.displayName}. " +
                     "Dette er ikke støttet på migreringsbehandlinger. " +
-                    "Ta kontakt med Team familie om du er uenig i resultatet."
+                    "Meld sak i Porten om du er uenig i resultatet."
             )
         }
     }
