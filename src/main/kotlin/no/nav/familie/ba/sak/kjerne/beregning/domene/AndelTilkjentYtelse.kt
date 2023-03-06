@@ -124,7 +124,7 @@ data class AndelTilkjentYtelse(
         get() = MånedPeriode(stønadFom, stønadTom)
 
     fun endretUtbetalingAndelIder() =
-        (endretUtbetalingAndeler as MutableList<EndretUtbetalingAndel>?)?.map { it.id as Long? }?.filterNotNull()
+        (endretUtbetalingAndeler as MutableList<EndretUtbetalingAndel>?)?.map { it.id }
 
     override fun equals(other: Any?): Boolean {
         if (other == null || javaClass != other.javaClass) {

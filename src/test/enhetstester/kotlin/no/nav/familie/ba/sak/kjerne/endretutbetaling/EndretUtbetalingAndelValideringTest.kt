@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagPersonResultat
-import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -317,14 +316,17 @@ class EndretUtbetalingAndelValideringTest {
     @Test
     fun `Skal finne riktige delt bosted perioder for barn, og slå sammen de som er sammenhengende`() {
         val behandling = lagBehandling()
-        val person = lagPerson(type = PersonType.BARN)
-        val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
+
         val fom = LocalDate.now().minusMonths(5)
         val tom = LocalDate.now().plusMonths(7)
+
+        val barn = lagPerson(type = PersonType.BARN, fødselsdato = fom)
+        val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
+
         val personResultatForPerson =
             PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                aktør = person.aktør
+                aktør = barn.aktør
             )
 
         val vilkårResultaterForPerson = mutableSetOf<VilkårResultat>()
@@ -373,7 +375,7 @@ class EndretUtbetalingAndelValideringTest {
             personResultatForPerson,
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                aktør = randomAktør(),
+                person = lagPerson(type = PersonType.BARN, fødselsdato = fom.minusYears(4)),
                 resultat = Resultat.OPPFYLT,
                 personType = PersonType.BARN,
                 periodeFom = fom.minusMonths(3),
@@ -383,7 +385,7 @@ class EndretUtbetalingAndelValideringTest {
             )
         )
 
-        val deltBostedPerioder = finnDeltBostedPerioder(person = person, vilkårsvurdering = vilkårsvurdering)
+        val deltBostedPerioder = finnDeltBostedPerioder(person = barn, vilkårsvurdering = vilkårsvurdering)
 
         assertTrue(deltBostedPerioder.size == 1)
         assertEquals(fom.plusMonths(1).førsteDagIInneværendeMåned(), deltBostedPerioder.single().fom)
@@ -393,7 +395,7 @@ class EndretUtbetalingAndelValideringTest {
     @Test
     fun `Skal finne riktige delt bosted perioder for barn og ikke slå de sammen når de ikke er sammenhengde`() {
         val behandling = lagBehandling()
-        val person = lagPerson(type = PersonType.BARN)
+        val barn = lagPerson(type = PersonType.BARN)
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
         val fom1 = LocalDate.now().minusMonths(5)
         val tom1 = LocalDate.now().minusMonths(2)
@@ -402,7 +404,7 @@ class EndretUtbetalingAndelValideringTest {
         val personResultatForPerson =
             PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                aktør = person.aktør
+                aktør = barn.aktør
             )
 
         val vilkårResultaterForPerson = mutableSetOf<VilkårResultat>()
@@ -451,7 +453,7 @@ class EndretUtbetalingAndelValideringTest {
             personResultatForPerson,
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                aktør = randomAktør(),
+                person = lagPerson(type = PersonType.BARN, fødselsdato = fom1.minusYears(5)),
                 resultat = Resultat.OPPFYLT,
                 personType = PersonType.BARN,
                 periodeFom = fom1.minusMonths(3),
@@ -462,7 +464,7 @@ class EndretUtbetalingAndelValideringTest {
             )
         )
 
-        val deltBostedPerioder = finnDeltBostedPerioder(person = person, vilkårsvurdering = vilkårsvurdering)
+        val deltBostedPerioder = finnDeltBostedPerioder(person = barn, vilkårsvurdering = vilkårsvurdering)
 
         assertTrue(deltBostedPerioder.size == 2)
 
@@ -536,7 +538,7 @@ class EndretUtbetalingAndelValideringTest {
             personResultatForPerson,
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                aktør = randomAktør(),
+                person = lagPerson(type = PersonType.BARN, fødselsdato = fomBarn2),
                 resultat = Resultat.OPPFYLT,
                 personType = PersonType.BARN,
                 periodeFom = fomBarn2,
@@ -615,7 +617,7 @@ class EndretUtbetalingAndelValideringTest {
             personResultatForPerson,
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                aktør = randomAktør(),
+                person = lagPerson(type = PersonType.BARN, fødselsdato = fomBarn2),
                 resultat = Resultat.OPPFYLT,
                 personType = PersonType.BARN,
                 periodeFom = fomBarn2,
@@ -636,27 +638,28 @@ class EndretUtbetalingAndelValideringTest {
     @Test
     fun `Skal returnere tom liste hvis det ikke finnes noen delt bosted perioder på person`() {
         val behandling = lagBehandling()
-        val person = lagPerson()
+        val barn1 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(5))
+        val barn2 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(4))
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
 
         vilkårsvurdering.personResultater = setOf(
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                aktør = person.aktør,
+                person = barn1,
                 periodeFom = LocalDate.now().minusMonths(7),
                 periodeTom = LocalDate.now(),
                 resultat = Resultat.OPPFYLT
             ),
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                aktør = randomAktør(),
+                person = barn2,
                 periodeFom = LocalDate.now().minusMonths(4),
                 periodeTom = LocalDate.now(),
                 resultat = Resultat.OPPFYLT
             )
         )
 
-        val deltBostedPerioder = finnDeltBostedPerioder(person = person, vilkårsvurdering = vilkårsvurdering)
+        val deltBostedPerioder = finnDeltBostedPerioder(person = barn1, vilkårsvurdering = vilkårsvurdering)
 
         assertTrue(deltBostedPerioder.isEmpty())
     }

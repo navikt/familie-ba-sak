@@ -20,5 +20,6 @@ class TaskRepositoryWrapper(private val taskService: TaskService) {
     fun findAll(): Iterable<Task> =
         taskService.findAll()
 
-    fun findByStatus(status: Status): List<Task> = taskService.finnTasksMedStatus(listOf(status), Pageable.unpaged())
+    fun findByStatus(status: Status): List<Task> =
+        taskService.finnTasksMedStatus(listOf(status), type = null, page = Pageable.unpaged())
 }
