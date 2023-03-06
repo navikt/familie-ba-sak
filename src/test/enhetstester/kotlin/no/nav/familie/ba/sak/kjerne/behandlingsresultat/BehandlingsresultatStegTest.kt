@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -140,33 +139,27 @@ class BehandlingsresultatStegTest {
 
     @Test
     fun `skal kaste feil om det er endring etter migreringsdatoen til behandling 1`() {
-        every { beregningService.hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandlingTidslinje(any()) } returns "TTTFFFF".tilBoolskTidslinje(
-            YearMonth.of(2023, 2)
-        )
-
-        every { beregningService.hentAndelerFraForrigeIverksattebehandling(any()) } returns listOf(
-            lagAndelTilkjentYtelse(fom = YearMonth.of(2023, 2), tom = YearMonth.of(2023, 2).plusMonths(2))
+        val startdato = YearMonth.of(2023, 2)
+        val endringTidslinje =  "TTTFFFF".tilBoolskTidslinje(
+            startdato
         )
 
         assertThrows<Feil> {
-            behandlingsresultatSteg
-                .validerIngenEndringIUtbetalingEtterMigreringsdatoenTilForrigeIverksatteBehandling(lagBehandling())
+            endringTidslinje.kastFeilVedEndringEtter(startdato, lagBehandling())
         }
     }
 
     @Test
     fun `skal ikke kaste feil om det ikke er endring etter migreringsdatoen til behandling 1`() {
-        every { beregningService.hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandlingTidslinje(any()) } returns "TTTFFFF".tilBoolskTidslinje(
-            YearMonth.of(2023, 2)
-        )
+        val startdato = YearMonth.of(2023, 2)
+        val treMånederEtterStartdato = startdato.plusMonths(3)
 
-        every { beregningService.hentAndelerFraForrigeIverksattebehandling(any()) } returns listOf(
-            lagAndelTilkjentYtelse(fom = YearMonth.of(2023, 2).plusMonths(3), tom = YearMonth.of(2023, 2).plusMonths(3))
+        val endringTidslinje =  "TTTFFFF".tilBoolskTidslinje(
+            startdato
         )
 
         assertDoesNotThrow {
-            behandlingsresultatSteg
-                .validerIngenEndringIUtbetalingEtterMigreringsdatoenTilForrigeIverksatteBehandling(lagBehandling())
+            endringTidslinje.kastFeilVedEndringEtter(treMånederEtterStartdato, lagBehandling())
         }
     }
 

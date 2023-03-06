@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -25,7 +23,6 @@ import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlingSteg
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
@@ -168,18 +165,7 @@ class BehandlingsresultatSteg(
             .hentAndelerFraForrigeIverksattebehandling(behandling)
             .minOf { it.stønadFom }
 
-        val endringIUtbetalingEtterDato = endringIUtbetalingTidslinje.perioder()
-            .filter { it.tilOgMed.tilYearMonth().isSameOrAfter(migreringsdatoForrigeIverksatteBehandling) }
-
-        val erEndringIUtbetalingEtterMigreringsdato = endringIUtbetalingEtterDato.any { it.innhold == true }
-
-        if (erEndringIUtbetalingEtterMigreringsdato) {
-            logger.warn("Feil i behandling $behandling.\n\nEndring i måned ${endringIUtbetalingEtterDato.first { it.innhold == true }.fraOgMed.tilYearMonth()}.")
-            throw Feil(
-                "Det finnes endringer i behandlingen som har økonomisk konsekvens for bruker." +
-                    "Det skal ikke skje for endre migreringsdatobehandlinger."
-            )
-        }
+        endringIUtbetalingTidslinje.kastFeilVedEndringEtter(migreringsdatoForrigeIverksatteBehandling, behandling)
     }
 
     companion object {
