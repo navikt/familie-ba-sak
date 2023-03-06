@@ -6,10 +6,9 @@ import io.mockk.just
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
+import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagPersonResultat
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.randomAktør
-import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -64,17 +63,15 @@ class VilkårsvurderingStegTest {
         behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
         årsak = BehandlingÅrsak.HELMANUELL_MIGRERING
     )
-    val søkerPersonIdent = randomFnr()
-    val søkerAktørId = randomAktør(søkerPersonIdent)
-    val barnIdent = randomFnr()
-    val barnAktørId = randomAktør(barnIdent)
+    val søker = lagPerson(type = PersonType.SØKER, fødselsdato = LocalDate.of(1984, 1, 1))
+    val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 1, 1))
 
     @BeforeEach
     fun setup() {
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns lagTestPersonopplysningGrunnlag(
             behandlingId = behandling.id,
-            søkerPersonIdent = søkerPersonIdent,
-            barnasIdenter = listOf(barnIdent)
+            søkerPersonIdent = søker.aktør.aktivFødselsnummer(),
+            barnasIdenter = listOf(barn.aktør.aktivFødselsnummer())
         )
         every { tilbakestillBehandlingService.tilbakestillDataTilVilkårsvurderingssteg(behandling) } returns Unit
         every { beregningService.genererTilkjentYtelseFraVilkårsvurdering(any(), any()) } returns lagInitiellTilkjentYtelse(
@@ -90,9 +87,9 @@ class VilkårsvurderingStegTest {
         val vikårsvurdering = Vilkårsvurdering(behandling = behandling)
         val søkerPersonResultat = lagPersonResultat(
             vilkårsvurdering = vikårsvurdering,
-            aktør = søkerAktørId,
+            person = søker,
             resultat = Resultat.OPPFYLT,
-            periodeFom = LocalDate.of(1984, 1, 1),
+            periodeFom = søker.fødselsdato,
             periodeTom = LocalDate.now(),
             lagFullstendigVilkårResultat = true,
             personType = PersonType.SØKER,
@@ -100,9 +97,9 @@ class VilkårsvurderingStegTest {
         )
         val barnPersonResultat = lagPersonResultat(
             vilkårsvurdering = vikårsvurdering,
-            aktør = barnAktørId,
+            person = barn,
             resultat = Resultat.OPPFYLT,
-            periodeFom = LocalDate.of(2019, 1, 1),
+            periodeFom = barn.fødselsdato,
             periodeTom = LocalDate.now(),
             lagFullstendigVilkårResultat = true,
             personType = PersonType.BARN,

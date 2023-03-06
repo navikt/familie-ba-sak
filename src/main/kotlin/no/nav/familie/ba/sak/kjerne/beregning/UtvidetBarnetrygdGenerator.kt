@@ -8,9 +8,9 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMedKunVerdi
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullOgIkkeTom
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilForskjøvetTidslinjeForOppfyltVilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilForskjøvetTidslinjeForOppfyltVilkår
 
 data class UtvidetBarnetrygdGenerator(
     val behandlingId: Long,
@@ -33,7 +33,7 @@ data class UtvidetBarnetrygdGenerator(
         val utvidetAndeler = utvidetVilkårTidslinje.kombinerMedKunVerdi(
             størsteProsentTidslinje,
             satstypeTidslinje(SatsType.UTVIDET_BARNETRYGD)
-        ) { vilkår, prosent, sats ->
+        ) { _, prosent, sats ->
             val nasjonaltPeriodebeløp = sats.avrundetHeltallAvProsent(prosent)
             AndelTilkjentYtelseForTidslinje(
                 aktør = søkerAktør,

@@ -1069,7 +1069,7 @@ class NyUtbetalingsoppdragGeneratorTest(
         utbetalingsperiode: Utbetalingsperiode,
         periodeId: Long,
         forrigePeriodeId: Long?,
-        utbetalesTils: String,
+        utbetalesTil: String,
         sats: Int,
         fom: String,
         tom: String,
@@ -1078,6 +1078,7 @@ class NyUtbetalingsoppdragGeneratorTest(
         assertEquals(periodeId, utbetalingsperiode.periodeId)
         assertEquals(forrigePeriodeId, utbetalingsperiode.forrigePeriodeId)
         assertEquals(sats, utbetalingsperiode.sats.toInt())
+        assertEquals(utbetalesTil, utbetalingsperiode.utbetalesTil)
         assertEquals(dato(fom), utbetalingsperiode.vedtakdatoFom)
         assertEquals(dato(tom), utbetalingsperiode.vedtakdatoTom)
         if (opphørFom != null) {

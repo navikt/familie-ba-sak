@@ -459,7 +459,7 @@ internal class BrevUtilsTest {
     }
 
     @Test
-    fun `Skal slå sammen hjemlene riktig når det er 3 eller flere hjemler på "siste" hjemmeltype`() {
+    fun `Skal slå sammen hjemlene riktig når det er 3 eller flere hjemler på 'siste' hjemmeltype`() {
         val utvidetVedtaksperioderMedBegrunnelser = listOf(
             lagUtvidetVedtaksperiodeMedBegrunnelser(
                 begrunnelser = listOf(
