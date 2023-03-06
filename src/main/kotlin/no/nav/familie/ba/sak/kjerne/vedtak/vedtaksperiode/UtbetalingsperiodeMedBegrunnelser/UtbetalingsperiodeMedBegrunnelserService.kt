@@ -69,15 +69,15 @@ class UtbetalingsperiodeMedBegrunnelserService(
         val behandling = vedtak.behandling
         if (behandling.skalBehandlesAutomatisk) return emptyList()
 
-        val forrigeIverksatteBehandling: Behandling =
-            behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
+        val forrigeVedtatteBehandling: Behandling =
+            behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = behandling.fagsak.id)
                 ?: return emptyList()
 
         val forrigePersonopplysningGrunnlag: PersonopplysningGrunnlag =
-            forrigeIverksatteBehandling.let { persongrunnlagService.hentAktivThrows(it.id) }
+            forrigeVedtatteBehandling.let { persongrunnlagService.hentAktivThrows(it.id) }
 
         val forrigeAndelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService
-            .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(forrigeIverksatteBehandling.id)
+            .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(forrigeVedtatteBehandling.id)
 
         val andelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService
             .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.id)
