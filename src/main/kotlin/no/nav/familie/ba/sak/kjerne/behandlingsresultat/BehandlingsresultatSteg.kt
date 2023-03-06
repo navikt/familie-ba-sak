@@ -169,7 +169,7 @@ class BehandlingsresultatSteg(
             .minOf { it.stønadFom }
 
         val endringIUtbetalingEtterDato = endringIUtbetalingTidslinje.perioder()
-            .filter { it.fraOgMed.tilYearMonth().isSameOrAfter(migreringsdatoForrigeIverksatteBehandling) }
+            .filter { it.tilOgMed.tilYearMonth().isSameOrAfter(migreringsdatoForrigeIverksatteBehandling) }
 
         val erEndringIUtbetalingEtterMigreringsdato = endringIUtbetalingEtterDato.any { it.innhold == true }
 
