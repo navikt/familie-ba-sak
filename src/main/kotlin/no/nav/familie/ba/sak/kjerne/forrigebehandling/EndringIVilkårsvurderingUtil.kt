@@ -37,11 +37,11 @@ object EndringIVilkårsvurderingUtil {
         val tidslinjerPerPersonOgVilkår = allePersonerMedPersonResultat.flatMap { aktør ->
             Vilkår.values().map { vilkår ->
                 lagEndringIVilkårsvurderingForPersonOgVilkårTidslinje(
-                    nåværendePersonResultat
+                    nåværendeVilkårResultat = nåværendePersonResultat
                         .filter { it.aktør == aktør }
                         .flatMap { it.vilkårResultater }
                         .filter { it.vilkårType == vilkår && it.resultat == Resultat.OPPFYLT },
-                    forrigePersonResultat
+                    forrigeVilkårResultat = forrigePersonResultat
                         .filter { it.aktør == aktør }
                         .flatMap { it.vilkårResultater }
                         .filter { it.vilkårType == vilkår && it.resultat == Resultat.OPPFYLT },
