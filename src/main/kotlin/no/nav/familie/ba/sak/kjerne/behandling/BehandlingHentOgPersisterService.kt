@@ -74,10 +74,21 @@ class BehandlingHentOgPersisterService(
     }
 
     fun hentSisteBehandlingSomErVedtatt(fagsakId: Long): Behandling? {
-        return behandlingRepository.finnBehandlinger(fagsakId)
-            .filter { !it.erHenlagt() && it.status == BehandlingStatus.AVSLUTTET }
-            .maxByOrNull { it.opprettetTidspunkt }
+        val behandlingerPåFagsak = behandlingRepository.finnBehandlinger(fagsakId)
+        return behandlingerPåFagsak.hentSisteSomErVedtatt()
     }
+
+    fun hentSisteBehandlingSomErVedtattPerFagsak(fagsakIder: Set<Long>): List<Behandling> {
+        val behandlingerPåFagsakene = behandlingRepository.finnBehandlinger(fagsakIder)
+
+        return behandlingerPåFagsakene
+            .groupBy { it.fagsak.id }
+            .mapNotNull { (_, behandling) -> behandling.hentSisteSomErVedtatt() }
+    }
+
+    private fun List<Behandling>.hentSisteSomErVedtatt() =
+        filter { !it.erHenlagt() && it.status == BehandlingStatus.AVSLUTTET }
+            .maxByOrNull { it.opprettetTidspunkt }
 
     /**
      * Henter siste behandling som er vedtatt FØR en gitt behandling
