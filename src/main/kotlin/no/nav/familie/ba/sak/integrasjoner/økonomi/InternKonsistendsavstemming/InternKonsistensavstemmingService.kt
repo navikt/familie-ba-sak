@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseReposito
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.task.InternKonsistensavstemmingTask
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
+import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
@@ -21,16 +22,19 @@ class InternKonsistensavstemmingService(
     val økonomiKlient: ØkonomiKlient,
     val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
-    val fagsakRepository: FagsakRepository
+    val fagsakRepository: FagsakRepository,
+    val taskService: TaskService
 ) {
     fun validerLikUtbetalingIAndeleneOgUtbetalingsoppdragetPåAlleFagsaker(maksAntallTasker: Int = Int.MAX_VALUE) {
         fagsakRepository.hentIkkeArkiverteFagsaker()
             .map { it.id }
             .sortedBy { it }
-            // Størrelse burde være en multippel av 3000 siden vi chunker det i 3000 i familie-oppdrag
+            // Størrelse burde være en multippel av 3000 siden vi chunker databasekallet i 3000 i familie-oppdrag
             .chunked(3000)
             .take(maksAntallTasker)
-            .forEach { InternKonsistensavstemmingTask.opprettTask(it.toSet()) }
+            .forEach {
+                taskService.save(InternKonsistensavstemmingTask.opprettTask(it.toSet()))
+            }
     }
 
     fun validerLikUtbetalingIAndeleneOgUtbetalingsoppdraget(fagsaker: Set<Long>) {
