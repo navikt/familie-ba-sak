@@ -119,7 +119,6 @@ class BeregningServiceTest {
         }
         every { endretUtbetalingAndelRepository.findByBehandlingId(any()) } answers { emptyList() }
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } answers { emptyList() }
-        every { featureToggleService.isEnabled(any(), false) } answers { true }
         every { endretUtbetalingAndelRepository.saveAllAndFlush(any<Collection<EndretUtbetalingAndel>>()) } answers { emptyList() }
         every { andelTilkjentYtelseRepository.saveAllAndFlush(any<Collection<AndelTilkjentYtelse>>()) } answers { emptyList() }
     }
@@ -1100,7 +1099,6 @@ class BeregningServiceTest {
             søker.aktør.aktivFødselsnummer(),
             listOf(barn.aktør.aktivFødselsnummer())
         )
-        every { featureToggleService.isEnabled(any()) } returns true
 
         beregningService.oppdaterBehandlingMedBeregning(
             behandling = behandling,

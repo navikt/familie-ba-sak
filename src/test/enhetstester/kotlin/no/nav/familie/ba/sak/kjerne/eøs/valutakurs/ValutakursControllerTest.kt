@@ -1,14 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.eøs.valutakurs
 
 import io.mockk.MockKException
-import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
-import io.mockk.unmockkAll
 import io.mockk.verify
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.ekstern.restDomene.RestValutakurs
 import no.nav.familie.ba.sak.ekstern.restDomene.UtfyltStatus
@@ -16,10 +13,8 @@ import no.nav.familie.ba.sak.ekstern.restDomene.tilValutakurs
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
-import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import java.math.BigDecimal
@@ -27,11 +22,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 @ExtendWith(MockKExtension::class)
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ValutakursControllerTest {
-
-    @MockK
-    private lateinit var featureToggleService: FeatureToggleService
 
     @MockK
     private lateinit var valutakursService: ValutakursService
@@ -55,16 +46,9 @@ class ValutakursControllerTest {
 
     @BeforeEach
     fun setup() {
-        clearMocks(featureToggleService, personidentService, valutakursService, ecbService, utvidetBehandlingService)
-        every { featureToggleService.isEnabled(any()) } returns true
         every { personidentService.hentAktør(any()) } returns tilAktør(barnId)
         every { valutakursService.hentValutakurs(any()) } returns restValutakurs.tilValutakurs(listOf(tilAktør(barnId)))
         every { ecbService.hentValutakurs(any(), any()) } returns BigDecimal.valueOf(0.95)
-    }
-
-    @AfterAll
-    fun tearDown() {
-        unmockkAll()
     }
 
     @Test
