@@ -38,13 +38,13 @@ class KompetanseTestController(
         @PathVariable behandlingId: Long,
         @RequestBody restKompetanser: Map<LocalDate, String>
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
-        val behandlingId = BehandlingId(behandlingId)
-        val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId.id)!!
-        restKompetanser.tilKompetanser(behandlingId, personopplysningGrunnlag).forEach {
-            kompetanseService.oppdaterKompetanse(behandlingId, it)
+        val behandlingIdObjekt = BehandlingId(behandlingId)
+        val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingIdObjekt.id)!!
+        restKompetanser.tilKompetanser(behandlingIdObjekt, personopplysningGrunnlag).forEach {
+            kompetanseService.oppdaterKompetanse(behandlingIdObjekt, it)
         }
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId.id)))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingIdObjekt.id)))
     }
 }
 

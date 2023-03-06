@@ -312,7 +312,6 @@ class OppdaterVilkårsvurderingTest {
 
     @Test
     fun `Skal kun kopiere over oppfylte utvidet-vilkår ved opprettelse av ny behandling, men slette alle fra aktiv`() {
-        val søkerFnr = randomFnr()
         val søkerAktørId = randomAktør()
         val nyBehandling = lagBehandling()
         val forrigeBehandling = lagBehandling()
