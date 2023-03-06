@@ -342,13 +342,13 @@ private fun <T : Tidsenhet> VilkårsvurderingBuilder.PersonResultatBuilder<T>.be
 }
 
 internal fun <T : Tidsenhet> VilkårsvurderingBuilder<T>.beregnAndelerTilkjentYtelseForBarna(): List<BeregnetAndel> =
-    TilkjentYtelseUtils.beregnAndelerTilkjentYtelseForBarna(
+    OrdinærBarnetrygdUtil.beregnAndelerTilkjentYtelseForBarna(
         this.byggPersonopplysningGrunnlag(),
         this.byggVilkårsvurdering().personResultater
     )
 
 internal fun <T : Tidsenhet> VilkårsvurderingBuilder.PersonResultatBuilder<T>.beregnAndelerTilkjentYtelseForBarna(): List<BeregnetAndel> =
-    TilkjentYtelseUtils.beregnAndelerTilkjentYtelseForBarna(
+    OrdinærBarnetrygdUtil.beregnAndelerTilkjentYtelseForBarna(
         this.byggPersonopplysningGrunnlag(),
         this.byggVilkårsvurdering().personResultater
     )
