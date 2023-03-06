@@ -87,7 +87,7 @@ class LagreMigreringsdatoTest {
     @Test
     fun `Lagre likt migreringstidspunkt skal kaste feil`() {
         every { behandlingMigreringsinfoRepository.finnSisteMigreringsdatoPåFagsak(any()) } returns LocalDate.now()
-        every { behandlingRepository.finnBehandlinger(any()) } returns emptyList()
+        every { behandlingRepository.finnBehandlinger(any<Long>()) } returns emptyList()
         every { behandlingMigreringsinfoRepository.save(any()) } returns mockk()
 
         val feil = assertThrows<FunksjonellFeil> {
