@@ -49,8 +49,7 @@ class SmåbarnstilleggService(
             .splitFramtidigePerioderFraForrigeBehandling(
                 overgangsstønadPerioderFraForrigeBehandling = hentPerioderMedOvergangsstønadFraForrigeIverksatteBehandling(
                     behandlingId
-                ),
-                søkerAktør = søkerAktør
+                )
             )
     }
 
