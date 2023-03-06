@@ -20,28 +20,28 @@ object EndringIVilkårsvurderingUtil {
         forrigePersonResultat: Set<PersonResultat>
     ): YearMonth? {
         val endringIVilkårsvurderingTidslinje = lagEndringIVilkårsvurderingTidslinje(
-            nåværendePersonResultat = nåværendePersonResultat,
-            forrigePersonResultat = forrigePersonResultat
+            nåværendePersonResultater = nåværendePersonResultat,
+            forrigePersonResultater = forrigePersonResultat
         )
 
         return endringIVilkårsvurderingTidslinje.tilFørsteEndringstidspunkt()
     }
 
     fun lagEndringIVilkårsvurderingTidslinje(
-        nåværendePersonResultat: Set<PersonResultat>,
-        forrigePersonResultat: Set<PersonResultat>
+        nåværendePersonResultater: Set<PersonResultat>,
+        forrigePersonResultater: Set<PersonResultat>
     ): Tidslinje<Boolean, Måned> {
         val allePersonerMedPersonResultat =
-            (nåværendePersonResultat.map { it.aktør } + forrigePersonResultat.map { it.aktør }).distinct()
+            (nåværendePersonResultater.map { it.aktør } + forrigePersonResultater.map { it.aktør }).distinct()
 
         val tidslinjerPerPersonOgVilkår = allePersonerMedPersonResultat.flatMap { aktør ->
             Vilkår.values().map { vilkår ->
                 lagEndringIVilkårsvurderingForPersonOgVilkårTidslinje(
-                    nåværendeVilkårResultat = nåværendePersonResultat
+                    nåværendeOppfylteVilkårResultater = nåværendePersonResultater
                         .filter { it.aktør == aktør }
                         .flatMap { it.vilkårResultater }
                         .filter { it.vilkårType == vilkår && it.resultat == Resultat.OPPFYLT },
-                    forrigeVilkårResultat = forrigePersonResultat
+                    forrigeOppfylteVilkårResultater = forrigePersonResultater
                         .filter { it.aktør == aktør }
                         .flatMap { it.vilkårResultater }
                         .filter { it.vilkårType == vilkår && it.resultat == Resultat.OPPFYLT },
@@ -62,12 +62,12 @@ object EndringIVilkårsvurderingUtil {
     // 2. Endringer i regelverk
     // 3. Splitt i vilkårsvurderingen
     private fun lagEndringIVilkårsvurderingForPersonOgVilkårTidslinje(
-        nåværendeVilkårResultat: List<VilkårResultat>,
-        forrigeVilkårResultat: List<VilkårResultat>,
+        nåværendeOppfylteVilkårResultater: List<VilkårResultat>,
+        forrigeOppfylteVilkårResultater: List<VilkårResultat>,
         vilkår: Vilkår
     ): Tidslinje<Boolean, Måned> {
-        val nåværendeVilkårResultatTidslinje = nåværendeVilkårResultat.tilForskjøvetTidslinjeForOppfyltVilkår(vilkår)
-        val tidligereVilkårResultatTidslinje = forrigeVilkårResultat.tilForskjøvetTidslinjeForOppfyltVilkår(vilkår)
+        val nåværendeVilkårResultatTidslinje = nåværendeOppfylteVilkårResultater.tilForskjøvetTidslinjeForOppfyltVilkår(vilkår)
+        val tidligereVilkårResultatTidslinje = forrigeOppfylteVilkårResultater.tilForskjøvetTidslinjeForOppfyltVilkår(vilkår)
 
         val endringIVilkårResultat =
             nåværendeVilkårResultatTidslinje.kombinerUtenNullMed(tidligereVilkårResultatTidslinje) { nåværende, forrige ->
