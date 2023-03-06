@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.kallEksternTjenesteRessurs
 import no.nav.familie.ba.sak.config.RestTemplateConfig.Companion.RETRY_BACKOFF_500MS
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.http.client.AbstractRestClient
+import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.GrensesnittavstemmingRequest
 import no.nav.familie.kontrakter.felles.oppdrag.KonsistensavstemmingRequestV2
 import no.nav.familie.kontrakter.felles.oppdrag.OppdragId
@@ -159,4 +160,25 @@ class ØkonomiKlient(
             )
         }
     }
+
+    fun hentSisteUtbetalingsoppdragForFagsaker(
+        fagsakIder: Set<Long>
+    ): List<UtbetalingsoppdragMedBehandlingOgFagsak> {
+        val uri = URI.create(
+            "$familieOppdragUri/$FAGSYSTEM/fagsaker/siste-utbetalingsoppdrag" +
+                "?behandlingIder=${objectMapper.writeValueAsString(fagsakIder)}"
+        )
+
+        return kallEksternTjenesteRessurs(
+            tjeneste = "familie-oppdrag",
+            uri = uri,
+            formål = "Hent utbetalingsoppdrag for behandlinger"
+        ) { getForEntity(uri = uri) }
+    }
 }
+
+data class UtbetalingsoppdragMedBehandlingOgFagsak(
+    val fagsakId: Long,
+    val behandlingId: Long,
+    val utbetalingsoppdrag: Utbetalingsoppdrag
+)
