@@ -42,9 +42,9 @@ class TestVerktøyController(
     private val simuleringService: SimuleringService,
     private val opprettTaskService: OpprettTaskService,
     private val satskjøringRepository: SatskjøringRepository,
-    private val internKonsistensavstemmingService: InternKonsistensavstemmingService,
+    private val internKonsistensavstemmingService: InternKonsistensavstemmingService
 
-    ) {
+) {
 
     @GetMapping(path = ["/autobrev"])
     @Unprotected

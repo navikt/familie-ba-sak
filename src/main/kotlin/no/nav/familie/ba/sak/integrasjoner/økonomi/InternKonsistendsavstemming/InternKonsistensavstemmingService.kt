@@ -92,4 +92,3 @@ class InternKonsistensavstemmingService(
         val logger = LoggerFactory.getLogger(this::class.java)!!
     }
 }
-

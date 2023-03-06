@@ -21,7 +21,7 @@ import kotlin.system.measureTimeMillis
 @TaskStepBeskrivelse(
     taskStepType = InternKonsistensavstemmingTask.TASK_STEP_TYPE,
     beskrivelse = "Kjør intern konsistensavstemming",
-    maxAntallFeil = 3,
+    maxAntallFeil = 3
 )
 class InternKonsistensavstemmingTask(
     val internKonsistensavstemmingService: InternKonsistensavstemmingService
@@ -30,12 +30,14 @@ class InternKonsistensavstemmingTask(
     override fun doTask(task: Task) {
         val fagsakIder = objectMapper.readValue<Set<Long>>(task.payload)
 
-        val tidBrukt = measureTimeMillis{
+        val tidBrukt = measureTimeMillis {
             internKonsistensavstemmingService.validerLikUtbetalingIAndeleneOgUtbetalingsoppdraget(fagsakIder)
         }
 
-        logger.info("Fullført intern konsistensavstemming på fagsak ${fagsakIder.min()} til ${fagsakIder.max()}. " +
-            "Tid brukt = $tidBrukt millisekunder")
+        logger.info(
+            "Fullført intern konsistensavstemming på fagsak ${fagsakIder.min()} til ${fagsakIder.max()}. " +
+                "Tid brukt = $tidBrukt millisekunder"
+        )
     }
 
     companion object {
@@ -57,4 +59,3 @@ class InternKonsistensavstemmingTask(
         val logger: Logger = LoggerFactory.getLogger(this::class.java)
     }
 }
-
