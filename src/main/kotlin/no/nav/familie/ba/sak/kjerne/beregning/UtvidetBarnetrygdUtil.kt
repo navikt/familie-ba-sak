@@ -44,7 +44,7 @@ object UtvidetBarnetrygdUtil {
         return utvidetVilkårResultater
     }
 
-    private fun validerUtvidetVilkårsresultat(vilkårResultat: VilkårResultat, utvidetVilkårResultater: List<VilkårResultat>) {
+    internal fun validerUtvidetVilkårsresultat(vilkårResultat: VilkårResultat, utvidetVilkårResultater: List<VilkårResultat>) {
         val fom = vilkårResultat.periodeFom?.toYearMonth()
         val tom = vilkårResultat.periodeTom?.toYearMonth()
 
