@@ -1292,7 +1292,7 @@ fun oppfyltVilkår(vilkår: Vilkår, regelverk: Regelverk? = null) =
         }
     )
 
-fun ikkeOppfyltVilkår(vilkår: Vilkår, regelverk: Regelverk? = null) =
+fun ikkeOppfyltVilkår(vilkår: Vilkår) =
     VilkårRegelverkResultat(
         vilkår = vilkår,
         regelverkResultat = RegelverkResultat.IKKE_OPPFYLT

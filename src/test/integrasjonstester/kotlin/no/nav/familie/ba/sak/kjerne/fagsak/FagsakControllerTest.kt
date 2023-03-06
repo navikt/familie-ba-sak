@@ -157,7 +157,7 @@ class FagsakControllerTest(
         assertEquals(fnr, fagsakService.hentNormalFagsak(aktør)?.aktør?.aktivFødselsnummer())
 
         personidentRepository.save(
-            personidentRepository.getById(fnr).also { it.aktiv = false }
+            personidentRepository.getReferenceById(fnr).also { it.aktiv = false }
         )
         personidentRepository.save(Personident(fødselsnummer = nyttFnr, aktør = aktør, aktiv = true))
 
