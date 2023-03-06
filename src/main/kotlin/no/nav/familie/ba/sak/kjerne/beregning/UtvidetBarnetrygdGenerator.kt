@@ -33,7 +33,7 @@ data class UtvidetBarnetrygdGenerator(
         val utvidetAndeler = utvidetVilkårTidslinje.kombinerMedKunVerdi(
             størsteProsentTidslinje,
             satstypeTidslinje(SatsType.UTVIDET_BARNETRYGD)
-        ) { vilkår, prosent, sats ->
+        ) { _, prosent, sats ->
             val nasjonaltPeriodebeløp = sats.avrundetHeltallAvProsent(prosent)
             AndelTilkjentYtelseForTidslinje(
                 aktør = søkerAktør,

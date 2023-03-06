@@ -447,11 +447,6 @@ private fun KompetanseService.finnKompetanse(behandlingId: BehandlingId, kompeta
         .first { it == kompetanse }
 }
 
-fun KompetanseBuilder.lagreTil(kompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse>): List<Kompetanse> {
-    val byggKompetanser = this.byggKompetanser()
-    return kompetanseRepository.saveAll(byggKompetanser)
-}
-
 fun Kompetanse.lagreTil(kompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse>): Kompetanse {
     return kompetanseRepository.saveAll(listOf(this)).first()
 }

@@ -37,13 +37,13 @@ class ValutakursTestController(
         @PathVariable behandlingId: Long,
         @RequestBody restValutakurser: Map<LocalDate, String>
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
-        val behandlingId = BehandlingId(behandlingId)
-        val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId.id)!!
-        restValutakurser.tilValutakurser(behandlingId, personopplysningGrunnlag).forEach {
-            valutakursService.oppdaterValutakurs(behandlingId, it)
+        val behandlingIdObjekt = BehandlingId(behandlingId)
+        val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingIdObjekt.id)!!
+        restValutakurser.tilValutakurser(behandlingIdObjekt, personopplysningGrunnlag).forEach {
+            valutakursService.oppdaterValutakurs(behandlingIdObjekt, it)
         }
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId.id)))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingIdObjekt.id)))
     }
 }
 

@@ -266,7 +266,6 @@ fun ManueltBrevRequest.tilBrev(saksbehandlerNavn: String, hentLandkoder: (() -> 
                 saksbehandlerNavn = saksbehandlerNavn
             )
 
-        Brevmal.INFORMASJONSBREV_FØDSEL_UMYNDIG,
         Brevmal.INFORMASJONSBREV_FØDSEL_VERGEMÅL ->
             EnkeltInformasjonsbrev(
                 navn = this.mottakerNavn,
@@ -370,7 +369,6 @@ fun ManueltBrevRequest.tilBrev(saksbehandlerNavn: String, hentLandkoder: (() -> 
         Brevmal.VEDTAK_ENDRING_INSTITUSJON,
         Brevmal.VEDTAK_FORTSATT_INNVILGET_INSTITUSJON,
         Brevmal.VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON,
-        Brevmal.DØDSFALL,
         Brevmal.AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG,
         Brevmal.AUTOVEDTAK_NYFØDT_FØRSTE_BARN,
         Brevmal.AUTOVEDTAK_NYFØDT_BARN_FRA_FØR -> throw Feil("Kan ikke mappe fra manuel brevrequest til ${this.brevmal}.")

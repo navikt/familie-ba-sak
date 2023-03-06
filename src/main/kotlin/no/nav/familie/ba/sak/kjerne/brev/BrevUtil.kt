@@ -6,27 +6,12 @@ import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.AVSLÅTT
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.AVSLÅTT_OG_ENDRET
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.AVSLÅTT_OG_OPPHØRT
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.DELVIS_INNVILGET
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.DELVIS_INNVILGET_ENDRET_OG_OPPHØRT
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.DELVIS_INNVILGET_OG_ENDRET
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.DELVIS_INNVILGET_OG_OPPHØRT
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.ENDRET_OG_FORTSATT_INNVILGET
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.ENDRET_OG_OPPHØRT
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.ENDRET_UTBETALING
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.ENDRET_UTEN_UTBETALING
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.FORTSATT_INNVILGET
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.FORTSATT_OPPHØRT
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.IKKE_VURDERT
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.INNVILGET
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.INNVILGET_ENDRET_OG_OPPHØRT
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.INNVILGET_OG_ENDRET
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.INNVILGET_OG_OPPHØRT
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat.OPPHØRT
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
@@ -36,29 +21,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hjemlerTilhørendeFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Opphørsperiode
-
-@Deprecated("Bruk hentBrevmal")
-fun hentBrevmalGammel(behandling: Behandling): Brevmal =
-    when (behandling.opprettetÅrsak) {
-        BehandlingÅrsak.DØDSFALL_BRUKER -> Brevmal.VEDTAK_OPPHØR_DØDSFALL
-        BehandlingÅrsak.KORREKSJON_VEDTAKSBREV -> Brevmal.VEDTAK_KORREKSJON_VEDTAKSBREV
-        else -> hentVedtaksbrevmalGammel(behandling)
-    }
-
-@Deprecated("Bruk hentVedtaksbrevmal")
-fun hentVedtaksbrevmalGammel(behandling: Behandling): Brevmal {
-    if (behandling.resultat == IKKE_VURDERT) {
-        throw Feil("Kan ikke opprette brev. Behandlingen er ikke vurdert.")
-    }
-
-    val brevmal = if (behandling.skalBehandlesAutomatisk) {
-        hentAutomatiskVedtaksbrevtype(behandling)
-    } else {
-        hentManuellVedtaksbrevtypeGammel(behandling.type, behandling.resultat, behandling.fagsak.institusjon != null)
-    }
-
-    return if (brevmal.erVedtaksbrev) brevmal else throw Feil("Brevmal ${brevmal.visningsTekst} er ikke vedtaksbrev")
-}
 
 fun hentAutomatiskVedtaksbrevtype(behandling: Behandling): Brevmal {
     val behandlingÅrsak = behandling.opprettetÅrsak
@@ -79,121 +41,6 @@ fun hentAutomatiskVedtaksbrevtype(behandling: Behandling): Brevmal {
         BehandlingÅrsak.OMREGNING_SMÅBARNSTILLEGG -> Brevmal.AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG
 
         else -> throw Feil("Det er ikke laget funksjonalitet for automatisk behandling for $behandlingÅrsak")
-    }
-}
-
-@Deprecated("Bruk hentManuellVedtaksbrevtype")
-fun hentManuellVedtaksbrevtypeGammel(
-    behandlingType: BehandlingType,
-    behandlingsresultat: Behandlingsresultat,
-    erInstitusjon: Boolean = false
-): Brevmal {
-    val feilmeldingBehandlingTypeOgResultat =
-        "Brev ikke støttet for behandlingstype=$behandlingType og behandlingsresultat=$behandlingsresultat"
-    val feilmelidingBehandlingType =
-        "Brev ikke støttet for behandlingstype=$behandlingType"
-    val frontendFeilmelding = "Vi finner ikke vedtaksbrev som matcher med behandlingen og resultatet du har fått. " +
-        "Meld sak i Porten slik at vi kan se nærmere på saken."
-
-    return when (behandlingType) {
-        BehandlingType.FØRSTEGANGSBEHANDLING ->
-            if (erInstitusjon) {
-                when (behandlingsresultat) {
-                    INNVILGET,
-                    INNVILGET_OG_OPPHØRT,
-                    DELVIS_INNVILGET,
-                    DELVIS_INNVILGET_OG_OPPHØRT -> Brevmal.VEDTAK_FØRSTEGANGSVEDTAK_INSTITUSJON
-
-                    AVSLÅTT -> Brevmal.VEDTAK_AVSLAG_INSTITUSJON
-
-                    else -> throw FunksjonellFeil(
-                        melding = feilmeldingBehandlingTypeOgResultat,
-                        frontendFeilmelding = frontendFeilmelding
-                    )
-                }
-            } else {
-                when (behandlingsresultat) {
-                    INNVILGET,
-                    INNVILGET_OG_OPPHØRT,
-                    DELVIS_INNVILGET,
-                    DELVIS_INNVILGET_OG_OPPHØRT -> Brevmal.VEDTAK_FØRSTEGANGSVEDTAK
-
-                    AVSLÅTT -> Brevmal.VEDTAK_AVSLAG
-
-                    else -> throw FunksjonellFeil(
-                        melding = feilmeldingBehandlingTypeOgResultat,
-                        frontendFeilmelding = frontendFeilmelding
-                    )
-                }
-            }
-
-        BehandlingType.REVURDERING ->
-            if (erInstitusjon) {
-                when (behandlingsresultat) {
-                    INNVILGET,
-                    INNVILGET_OG_ENDRET,
-                    DELVIS_INNVILGET,
-                    DELVIS_INNVILGET_OG_ENDRET,
-                    AVSLÅTT_OG_ENDRET,
-                    ENDRET_UTBETALING, ENDRET_UTEN_UTBETALING -> Brevmal.VEDTAK_ENDRING_INSTITUSJON
-
-                    OPPHØRT,
-                    FORTSATT_OPPHØRT -> Brevmal.VEDTAK_OPPHØRT_INSTITUSJON
-
-                    INNVILGET_OG_OPPHØRT,
-                    INNVILGET_ENDRET_OG_OPPHØRT,
-                    DELVIS_INNVILGET_OG_OPPHØRT,
-                    DELVIS_INNVILGET_ENDRET_OG_OPPHØRT,
-                    AVSLÅTT_OG_OPPHØRT,
-                    AVSLÅTT_ENDRET_OG_OPPHØRT,
-                    ENDRET_OG_OPPHØRT -> Brevmal.VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON
-
-                    FORTSATT_INNVILGET,
-                    ENDRET_OG_FORTSATT_INNVILGET -> Brevmal.VEDTAK_FORTSATT_INNVILGET_INSTITUSJON
-
-                    AVSLÅTT -> Brevmal.VEDTAK_AVSLAG_INSTITUSJON
-
-                    else -> throw FunksjonellFeil(
-                        melding = feilmeldingBehandlingTypeOgResultat,
-                        frontendFeilmelding = frontendFeilmelding
-                    )
-                }
-            } else {
-                when (behandlingsresultat) {
-                    INNVILGET,
-                    INNVILGET_OG_ENDRET,
-                    DELVIS_INNVILGET,
-                    DELVIS_INNVILGET_OG_ENDRET,
-                    AVSLÅTT_OG_ENDRET,
-                    ENDRET_UTBETALING, ENDRET_UTEN_UTBETALING -> Brevmal.VEDTAK_ENDRING
-
-                    OPPHØRT,
-                    FORTSATT_OPPHØRT -> Brevmal.VEDTAK_OPPHØRT
-
-                    INNVILGET_OG_OPPHØRT,
-                    INNVILGET_ENDRET_OG_OPPHØRT,
-                    DELVIS_INNVILGET_OG_OPPHØRT,
-                    DELVIS_INNVILGET_ENDRET_OG_OPPHØRT,
-                    AVSLÅTT_OG_OPPHØRT,
-                    AVSLÅTT_ENDRET_OG_OPPHØRT,
-                    ENDRET_OG_OPPHØRT -> Brevmal.VEDTAK_OPPHØR_MED_ENDRING
-
-                    FORTSATT_INNVILGET,
-                    ENDRET_OG_FORTSATT_INNVILGET -> Brevmal.VEDTAK_FORTSATT_INNVILGET
-
-                    AVSLÅTT -> Brevmal.VEDTAK_AVSLAG
-
-                    else -> throw FunksjonellFeil(
-                        melding = feilmeldingBehandlingTypeOgResultat,
-                        frontendFeilmelding = frontendFeilmelding
-                    )
-                }
-            }
-
-        else -> throw FunksjonellFeil(
-            melding = feilmelidingBehandlingType,
-            frontendFeilmelding = frontendFeilmelding
-        )
     }
 }
 
