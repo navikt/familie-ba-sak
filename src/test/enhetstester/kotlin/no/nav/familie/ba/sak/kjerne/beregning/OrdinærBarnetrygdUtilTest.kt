@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.gjelderAlltidFraBarnetsFødselsdato
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -52,7 +53,7 @@ class OrdinærBarnetrygdUtilTest {
             } else {
                 lagVilkårResultat(
                     personResultat = personResultat,
-                    periodeFom = generellVilkårFom,
+                    periodeFom = if (it.gjelderAlltidFraBarnetsFødselsdato()) barn.fødselsdato else generellVilkårFom,
                     periodeTom = null,
                     resultat = Resultat.OPPFYLT,
                     vilkårType = it
@@ -120,7 +121,7 @@ class OrdinærBarnetrygdUtilTest {
     }
 
     @Test
-    fun `Skal returnere 50% hvis vilkårsvurderingen har delt bosted i perioden`() {
+    fun `Skal returnere 50 prosent hvis vilkårsvurderingen har delt bosted i perioden`() {
         val barn = lagPerson(type = PersonType.BARN)
         val personResultat = PersonResultat(
             vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling()),
@@ -143,7 +144,7 @@ class OrdinærBarnetrygdUtilTest {
     }
 
     @Test
-    fun `Skal returnere 100% hvis vilkårsvurderingen ikke har delt bosted i perioden`() {
+    fun `Skal returnere 100 prosent hvis vilkårsvurderingen ikke har delt bosted i perioden`() {
         val barn = lagPerson(type = PersonType.BARN)
         val personResultat = PersonResultat(
             vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling()),
