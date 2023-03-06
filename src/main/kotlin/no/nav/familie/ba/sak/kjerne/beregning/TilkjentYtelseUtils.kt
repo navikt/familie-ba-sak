@@ -251,11 +251,14 @@ object TilkjentYtelseUtils {
         )
     }
 
-    private fun finnUtvidetVilkår(vilkårsvurdering: Vilkårsvurdering) =
-        vilkårsvurdering.personResultater
+    private fun finnUtvidetVilkår(vilkårsvurdering: Vilkårsvurdering): List<VilkårResultat> {
+        val utvidetVilkårResultater = vilkårsvurdering.personResultater
             .flatMap { it.vilkårResultater }
             .filter { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD && it.resultat == Resultat.OPPFYLT }
-            .also { utvidetVilkårsresultater -> utvidetVilkårsresultater.forEach { validerUtvidetVilkårsresultat(it) } }
+
+        utvidetVilkårResultater.forEach { validerUtvidetVilkårsresultat(vilkårResultat = it) }
+        return utvidetVilkårResultater
+    }
 
     private fun validerUtvidetVilkårsresultat(vilkårResultat: VilkårResultat) {
         val fom = vilkårResultat.periodeFom?.toYearMonth()
