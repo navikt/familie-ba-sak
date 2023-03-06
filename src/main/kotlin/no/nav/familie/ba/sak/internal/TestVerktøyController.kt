@@ -96,7 +96,7 @@ class TestVerktøyController(
         }
     }
 
-    @GetMapping(path = ["/kjør-intern-konsistensavstemming/{maksAntallTasker}"])
+    @GetMapping(path = ["/kjor-intern-konsistensavstemming/{maksAntallTasker}"])
     @Unprotected
     fun kjørInternKonsistensavstemming(@PathVariable maksAntallTasker: Int): ResponseEntity<Ressurs<String>> {
         if (!envService.erPreprod() && !envService.erDev()) {
