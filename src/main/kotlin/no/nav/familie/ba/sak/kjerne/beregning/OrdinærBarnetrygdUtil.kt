@@ -12,13 +12,12 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.slåSammenLike
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.alleVilkårErOppfylt
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilForskjøvetTidslinjerForHvertOppfylteVilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.alleVilkårErOppfylt
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilForskjøvetTidslinjerForHvertOppfylteVilkår
 import java.math.BigDecimal
-import java.time.LocalDate
 
 object OrdinærBarnetrygdUtil {
 
@@ -93,16 +92,14 @@ object OrdinærBarnetrygdUtil {
         val person = personopplysningGrunnlag.personer.find { it.aktør == personResultat.aktør }
             ?: throw Feil("Finner ikke person med aktørId=${personResultat.aktør.aktørId} i persongrunnlaget ved generering av andeler tilkjent ytelse")
         person to personResultat.tilTidslinjeMedRettTilProsentForPerson(
-            fødselsdato = person.fødselsdato,
             personType = person.type
         )
     }
 
     internal fun PersonResultat.tilTidslinjeMedRettTilProsentForPerson(
-        fødselsdato: LocalDate,
         personType: PersonType
     ): Tidslinje<BigDecimal, Måned> {
-        val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår(fødselsdato)
+        val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår()
 
         return tidslinjer.kombiner { it.mapTilProsentEllerNull(personType) }.slåSammenLike().filtrerIkkeNull()
     }

@@ -4,10 +4,11 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagPersonResultat
-import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.ekstern.restDomene.RestAnnenVurdering
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingRepository
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
@@ -31,7 +32,7 @@ class AnnenVurderingServiceTest {
 
         personResultat = lagPersonResultat(
             vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling()),
-            aktør = randomAktør(),
+            person = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 1, 1)),
             resultat = Resultat.OPPFYLT,
             periodeFom = LocalDate.of(2020, 1, 1),
             periodeTom = LocalDate.of(2020, 7, 1)

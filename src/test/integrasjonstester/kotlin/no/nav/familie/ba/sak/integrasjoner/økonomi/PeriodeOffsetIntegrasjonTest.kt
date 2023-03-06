@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import io.mockk.every
 import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagPersonResultat
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomFnr
@@ -201,7 +202,7 @@ class PeriodeOffsetIntegrasjonTest(
         vilkårsvurdering.personResultater = setOf(
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                aktør = søkerAktør,
+                person = lagPerson(type = PersonType.SØKER, aktør = søkerAktør),
                 resultat = Resultat.OPPFYLT,
                 periodeFom = stønadFom,
                 periodeTom = stønadTom,
@@ -210,7 +211,7 @@ class PeriodeOffsetIntegrasjonTest(
             ),
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                aktør = barnAktør,
+                person = lagPerson(type = PersonType.BARN, aktør = barnAktør, fødselsdato = stønadFom),
                 resultat = Resultat.OPPFYLT,
                 periodeFom = stønadFom,
                 periodeTom = stønadTom,
