@@ -87,7 +87,7 @@ class EndretUtbetalingAndelServiceTest {
         vilkårsvurderingUtenDeltBosted.personResultater = setOf(
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurderingUtenDeltBosted,
-                aktør = barn.aktør,
+                person = barn,
                 resultat = Resultat.OPPFYLT,
                 periodeFom = endretUtbetalingAndel.fom?.minusMonths(1)?.førsteDagIInneværendeMåned(),
                 periodeTom = LocalDate.now(),

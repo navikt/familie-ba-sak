@@ -1,9 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagPersonResultat
 import no.nav.familie.ba.sak.common.lagVilkårResultat
-import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
@@ -74,15 +74,19 @@ class VilkårsvurderingFlyttResultaterTest(
 
     @Test
     fun `Skal ikke endre på forrige behandling sin vilkårsvurdering ved flytting av resultater`() {
-        val søker = randomFnr()
-        val barn1 = ClientMocks.barnFnr[0]
-        val barn2 = ClientMocks.barnFnr[1]
+        val søker = lagPerson(type = PersonType.SØKER)
+
+        val barn1Fnr = ClientMocks.barnFnr[0]
+        val barn1Aktør = personidentService.hentAktør(barn1Fnr)
+
+        val barn2Fnr = ClientMocks.barnFnr[1]
+        val barn2Aktør = personidentService.hentAktør(barn2Fnr)
 
         // Lager førstegangsbehandling med utvidet vilkåret avslått
         val vilkårsvurderingMedUtvidetAvslått = Vilkårsvurdering(behandling = lagBehandling())
         val søkerPersonResultat = lagPersonResultat(
             vilkårsvurdering = vilkårsvurderingMedUtvidetAvslått,
-            aktør = personidentService.hentAktør(søker),
+            person = søker,
             periodeFom = LocalDate.now().minusMonths(8),
             periodeTom = LocalDate.now().plusYears(2),
             lagFullstendigVilkårResultat = true,
@@ -105,7 +109,7 @@ class VilkårsvurderingFlyttResultaterTest(
             søkerPersonResultat,
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurderingMedUtvidetAvslått,
-                aktør = personidentService.hentAktør(barn1),
+                person = lagPerson(type = PersonType.BARN, aktør = barn1Aktør, fødselsdato = ClientMocks.personInfo[barn1Fnr]!!.fødselsdato),
                 periodeFom = LocalDate.now().minusMonths(8),
                 periodeTom = LocalDate.now().plusYears(2),
                 lagFullstendigVilkårResultat = true,
@@ -114,7 +118,7 @@ class VilkårsvurderingFlyttResultaterTest(
             ),
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurderingMedUtvidetAvslått,
-                aktør = personidentService.hentAktør(barn2),
+                person = lagPerson(type = PersonType.BARN, aktør = barn2Aktør, fødselsdato = ClientMocks.personInfo[barn2Fnr]!!.fødselsdato),
                 periodeFom = LocalDate.now().minusMonths(8),
                 periodeTom = LocalDate.now().plusYears(2),
                 lagFullstendigVilkårResultat = true,
@@ -126,8 +130,8 @@ class VilkårsvurderingFlyttResultaterTest(
         vilkårsvurderingMedUtvidetAvslått.personResultater = førstegangsbehandlingPersonResultater
 
         val førstegangsbehandling = kjørStegprosessForBehandling(
-            søkerFnr = søker,
-            barnasIdenter = listOf(barn1, barn2),
+            søkerFnr = søker.aktør.aktivFødselsnummer(),
+            barnasIdenter = listOf(barn1Fnr, barn2Fnr),
             vedtakService = vedtakService,
             underkategori = BehandlingUnderkategori.UTVIDET,
             behandlingÅrsak = BehandlingÅrsak.SØKNAD,
@@ -150,8 +154,8 @@ class VilkårsvurderingFlyttResultaterTest(
         // Lager revurdering når utvidet ikke løper, så underkategorien er ordinær
         kjørStegprosessForBehandling(
             tilSteg = StegType.REGISTRERE_PERSONGRUNNLAG,
-            søkerFnr = søker,
-            barnasIdenter = listOf(barn1, barn2),
+            søkerFnr = søker.aktør.aktivFødselsnummer(),
+            barnasIdenter = listOf(barn1Fnr, barn2Fnr),
             vedtakService = vedtakService,
             underkategori = BehandlingUnderkategori.ORDINÆR,
             behandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
@@ -182,20 +186,20 @@ class VilkårsvurderingFlyttResultaterTest(
 
         Assertions.assertEquals(
             5,
-            vilkårsvurderingFraForrigeBehandlingEtterNyRevurdering?.personResultater?.find { it.aktør.aktivFødselsnummer() == barn1 }?.vilkårResultater?.size
+            vilkårsvurderingFraForrigeBehandlingEtterNyRevurdering?.personResultater?.find { it.aktør.aktivFødselsnummer() == barn1Fnr }?.vilkårResultater?.size
         )
         Assertions.assertEquals(
-            vilkårsvurderingMedUtvidetAvslått.personResultater.find { it.aktør.aktivFødselsnummer() == barn1 }?.vilkårResultater,
-            vilkårsvurderingFraForrigeBehandlingEtterNyRevurdering?.personResultater?.find { it.aktør.aktivFødselsnummer() == barn1 }?.vilkårResultater
+            vilkårsvurderingMedUtvidetAvslått.personResultater.find { it.aktør.aktivFødselsnummer() == barn1Fnr }?.vilkårResultater,
+            vilkårsvurderingFraForrigeBehandlingEtterNyRevurdering?.personResultater?.find { it.aktør.aktivFødselsnummer() == barn1Fnr }?.vilkårResultater
         )
 
         Assertions.assertEquals(
             5,
-            vilkårsvurderingFraForrigeBehandlingEtterNyRevurdering?.personResultater?.find { it.aktør.aktivFødselsnummer() == barn2 }?.vilkårResultater?.size
+            vilkårsvurderingFraForrigeBehandlingEtterNyRevurdering?.personResultater?.find { it.aktør.aktivFødselsnummer() == barn2Fnr }?.vilkårResultater?.size
         )
         Assertions.assertEquals(
-            vilkårsvurderingMedUtvidetAvslått.personResultater.find { it.aktør.aktivFødselsnummer() == barn2 }?.vilkårResultater,
-            vilkårsvurderingFraForrigeBehandlingEtterNyRevurdering?.personResultater?.find { it.aktør.aktivFødselsnummer() == barn2 }?.vilkårResultater
+            vilkårsvurderingMedUtvidetAvslått.personResultater.find { it.aktør.aktivFødselsnummer() == barn2Fnr }?.vilkårResultater,
+            vilkårsvurderingFraForrigeBehandlingEtterNyRevurdering?.personResultater?.find { it.aktør.aktivFødselsnummer() == barn2Fnr }?.vilkårResultater
         )
 
         Assertions.assertEquals(
