@@ -87,7 +87,6 @@ class BeslutteVedtakTest {
         every { behandlingService.opprettOgInitierNyttVedtakForBehandling(any(), any(), any()) } just runs
         every { vilkårsvurderingService.hentAktivForBehandling(any()) } returns randomVilkårsvurdering
         every { vilkårsvurderingService.lagreNyOgDeaktiverGammel(any()) } returns randomVilkårsvurdering
-        every { featureToggleService.isEnabled(any()) } returns false
         every { saksbehandlerContext.hentSaksbehandlerSignaturTilBrev() } returns "saksbehandlerNavn"
 
         beslutteVedtak = BeslutteVedtak(
@@ -116,7 +115,6 @@ class BeslutteVedtakTest {
         mockkObject(FerdigstillOppgaver.Companion)
         every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
         every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
-        every { featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_BEREGNE_BEHANDLINGSRESULTAT) } returns true
 
         val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
 
@@ -170,7 +168,6 @@ class BeslutteVedtakTest {
 
         every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
         every { beregningService.hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling) } returns EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING
-        every { featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_BEREGNE_BEHANDLINGSRESULTAT) } returns true
 
         mockkObject(JournalførVedtaksbrevTask.Companion)
         every {
@@ -217,6 +214,8 @@ class BeslutteVedtakTest {
 
     @Test
     fun `Skal kaste feil dersom toggle ikke er enabled og årsak er korreksjon vedtaksbrev`() {
+        every { featureToggleService.isEnabled(FeatureToggleConfig.KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV) } returns false
+
         val behandling = lagBehandling(årsak = BehandlingÅrsak.KORREKSJON_VEDTAKSBREV)
         behandling.status = BehandlingStatus.FATTER_VEDTAK
         behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
@@ -234,6 +233,8 @@ class BeslutteVedtakTest {
 
     @Test
     fun `Skal kaste feil dersom saksbehandler uten tilgang til teknisk endring prøve å godkjenne en behandling med årsak=teknisk endring`() {
+        every { featureToggleService.isEnabled(FeatureToggleConfig.TEKNISK_ENDRING) } returns false
+
         val behandling = lagBehandling(årsak = BehandlingÅrsak.TEKNISK_ENDRING)
         behandling.status = BehandlingStatus.FATTER_VEDTAK
         behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))

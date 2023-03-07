@@ -370,8 +370,8 @@ class FagsakService(
                             }
                         )
 
-                        val fagsaker = fagsakRepository.finnFagsakerForAktør(relasjon.aktør).ifEmpty { listOf(null) }
-                        fagsaker.forEach { fagsak ->
+                        val fagsakerForRelasjon = fagsakRepository.finnFagsakerForAktør(relasjon.aktør).ifEmpty { listOf(null) }
+                        fagsakerForRelasjon.forEach { fagsak ->
                             assosierteFagsakDeltagere.add(
                                 RestFagsakDeltager(
                                     navn = forelderInfo.navn,

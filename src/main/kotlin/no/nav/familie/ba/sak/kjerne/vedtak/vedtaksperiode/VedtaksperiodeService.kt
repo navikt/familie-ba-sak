@@ -31,7 +31,6 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.brev.hentIPeriode
 import no.nav.familie.ba.sak.kjerne.brev.hentKompetanserSomStopperRettFørPeriode
-import no.nav.familie.ba.sak.kjerne.brev.hentVedtaksbrevmalGammel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
@@ -248,25 +247,16 @@ class VedtaksperiodeService(
     }
 
     @Transactional
-    fun oppdaterVedtakMedVedtaksperioder(vedtak: Vedtak, skalOverstyreFortsattInnvilget: Boolean = false) {
+    fun oppdaterVedtakMedVedtaksperioder(vedtak: Vedtak) {
         vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(vedtak)
         val behandling = vedtak.behandling
 
         // Rent fortsatt innvilget-resultat er det eneste som kun skal gi én vedtaksperiode
-        if (behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET && (
-            !skalOverstyreFortsattInnvilget || featureToggleService.isEnabled(
-                    FeatureToggleConfig.NY_MÅTE_Å_BEREGNE_BEHANDLINGSRESULTAT
-                )
+        if (behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET) {
+            val vedtaksbrevmal = brevmalService.hentVedtaksbrevmal(
+                behandling
             )
-        ) {
-            val vedtaksbrevmal =
-                if (featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_BEREGNE_BEHANDLINGSRESULTAT)) {
-                    brevmalService.hentVedtaksbrevmal(
-                        behandling
-                    )
-                } else {
-                    hentVedtaksbrevmalGammel(behandling)
-                }
+
             val erAutobrevFor6Og18ÅrOgSmåbarnstillegg =
                 vedtaksbrevmal == Brevmal.AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG
 
@@ -293,8 +283,7 @@ class VedtaksperiodeService(
         } else {
             vedtaksperiodeHentOgPersisterService.lagre(
                 genererVedtaksperioderMedBegrunnelser(
-                    vedtak,
-                    gjelderFortsattInnvilget = skalOverstyreFortsattInnvilget
+                    vedtak
                 )
             )
         }
@@ -302,7 +291,6 @@ class VedtaksperiodeService(
 
     fun genererVedtaksperioderMedBegrunnelser(
         vedtak: Vedtak,
-        gjelderFortsattInnvilget: Boolean = false,
         manueltOverstyrtEndringstidspunkt: LocalDate? = null
     ): List<VedtaksperiodeMedBegrunnelser> {
         /**
@@ -316,9 +304,7 @@ class VedtaksperiodeService(
         val endringstidspunkt = manueltOverstyrtEndringstidspunkt
             ?: if (featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_UTLEDE_ENDRINGSTIDSPUNKT)) {
                 endringstidspunktService.finnEndringstidspunktForBehandling(behandlingId = vedtak.behandling.id)
-            } else if (
-                (gjelderFortsattInnvilget && !featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_BEREGNE_BEHANDLINGSRESULTAT)) || vedtak.behandling.resultat == Behandlingsresultat.ENDRET_OG_FORTSATT_INNVILGET
-            ) {
+            } else if (vedtak.behandling.resultat == Behandlingsresultat.ENDRET_OG_FORTSATT_INNVILGET) {
                 TIDENES_MORGEN
             } else {
                 endringstidspunktService.finnEndringstidpunkForBehandlingGammel(behandlingId = vedtak.behandling.id)

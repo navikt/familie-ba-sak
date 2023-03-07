@@ -4,6 +4,7 @@ import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import no.nav.familie.ba.sak.common.lagSøknadDTO
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.BehandlingUnderkategoriDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.NavnOgIdent
@@ -229,7 +230,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
 
     @Test
     fun `Skal journalføre og behandle utvidet nasjonal sak`() {
-        every { featureToggleService.isEnabled(any()) } returns true
+        every { featureToggleService.isEnabled(FeatureToggleConfig.TEKNISK_ENDRING) } returns true
 
         val scenario = mockServerKlient().lagScenario(
             RestScenario(
