@@ -59,7 +59,7 @@ class SendMeldingTilBisysTaskTest {
         every { behandlingHentOgPersisterServiceMock.hent(forrigeBehandling.id) } returns forrigeBehandling
         every { behandlingHentOgPersisterServiceMock.hent(nyBehandling.id) } returns nyBehandling
 
-        every { behandlingHentOgPersisterServiceMock.hentForrigeBehandlingSomErIverksatt(nyBehandling) } returns forrigeBehandling
+        every { behandlingHentOgPersisterServiceMock.hentForrigeBehandlingSomErVedtatt(nyBehandling) } returns forrigeBehandling
 
         every { listenableFutureMock.addCallback(any(), any()) } just runs
         kafkaProducer.kafkaAivenTemplate = mockk()
