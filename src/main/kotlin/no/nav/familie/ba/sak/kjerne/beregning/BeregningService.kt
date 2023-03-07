@@ -21,6 +21,9 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.steg.EndringerIUtbetalingForBehandlingSteg
+import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
@@ -132,19 +135,30 @@ class BeregningService(
         hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling) == EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
 
     fun hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling: Behandling): EndringerIUtbetalingForBehandlingSteg {
+        val endringerIUtbetaling =
+            hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandlingTidslinje(behandling)
+                .perioder()
+                .any { it.innhold == true }
+
+        return if (endringerIUtbetaling) EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING else EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING
+    }
+
+    fun hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandlingTidslinje(behandling: Behandling): Tidslinje<Boolean, Måned> {
         val nåværendeAndeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
+        val forrigeAndeler = hentAndelerFraForrigeIverksattebehandling(behandling)
 
-        val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling)
-        val forrigeAndeler =
-            forrigeBehandling?.let { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(it.id) }
-                ?: emptyList()
+        if (nåværendeAndeler.isEmpty() && forrigeAndeler.isEmpty()) return TomTidslinje()
 
-        val endringerIUtbetaling = EndringIUtbetalingUtil.erEndringerIUtbetalingFraForrigeBehandling(
+        return EndringIUtbetalingUtil.lagEndringIUtbetalingTidslinje(
             nåværendeAndeler = nåværendeAndeler,
             forrigeAndeler = forrigeAndeler
         )
+    }
 
-        return if (endringerIUtbetaling) EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING else EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING
+    fun hentAndelerFraForrigeIverksattebehandling(behandling: Behandling): List<AndelTilkjentYtelse> {
+        val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling)
+        return forrigeBehandling?.let { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(it.id) }
+            ?: emptyList()
     }
 
     @Transactional
@@ -200,8 +214,8 @@ class BeregningService(
     }
 
     // For at endret utbetaling andeler skal fungere så må man generere andeler før man kobler endringene på andelene
-    // Dette er fordi en endring regnes som gyldig når den overlapper med en andel og har gyldig årsak
-    // Hvis man ikke genererer andeler før man kobler på endringene så vil ingen av endringene ses på som gyldige, altså ikke oppdatere noen andeler
+// Dette er fordi en endring regnes som gyldig når den overlapper med en andel og har gyldig årsak
+// Hvis man ikke genererer andeler før man kobler på endringene så vil ingen av endringene ses på som gyldige, altså ikke oppdatere noen andeler
     fun genererTilkjentYtelseFraVilkårsvurdering(
         behandling: Behandling,
         personopplysningGrunnlag: PersonopplysningGrunnlag
