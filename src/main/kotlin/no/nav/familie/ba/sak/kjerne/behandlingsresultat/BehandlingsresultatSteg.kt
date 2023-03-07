@@ -158,6 +158,8 @@ class BehandlingsresultatSteg(
     }
 
     fun validerIngenEndringIUtbetalingEtterMigreringsdatoenTilForrigeIverksatteBehandling(behandling: Behandling) {
+        if (behandling.status == BehandlingStatus.AVSLUTTET) return
+
         val endringIUtbetalingTidslinje =
             beregningService.hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandlingTidslinje(behandling)
 
