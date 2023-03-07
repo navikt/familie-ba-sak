@@ -58,9 +58,8 @@ class VurderTilbakekrevingStegTest {
         every { tilbakekrevingService.søkerHarÅpenTilbakekreving(any()) } returns false
         every { tilbakekrevingService.validerRestTilbakekreving(any(), any()) } returns Unit
         every { tilbakekrevingService.lagreTilbakekreving(any(), any()) } returns null
-        every { featureToggleService.isEnabled(any()) } returns true
-        every { featureToggleService.isEnabled(any(), true) } returns true
         every { personGrunnlagService.hentBarna(any<Long>()) } returns listOf(lagPerson())
+        every { featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ) } returns true
     }
 
     @Test

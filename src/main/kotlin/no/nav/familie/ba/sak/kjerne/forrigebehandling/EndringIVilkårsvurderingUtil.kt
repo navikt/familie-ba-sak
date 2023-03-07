@@ -1,16 +1,16 @@
 package no.nav.familie.ba.sak.kjerne.forrigebehandling
 
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringUtil.tilFørsteEndringstidspunktForDagtidslinje
+import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringUtil.tilFørsteEndringstidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Dag
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilForskjøvetTidslinjeForOppfyltVilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilTidslinje
 import java.time.YearMonth
 
 object EndringIVilkårsvurderingUtil {
@@ -20,31 +20,32 @@ object EndringIVilkårsvurderingUtil {
         forrigePersonResultat: Set<PersonResultat>
     ): YearMonth? {
         val endringIVilkårsvurderingTidslinje = lagEndringIVilkårsvurderingTidslinje(
-            nåværendePersonResultat = nåværendePersonResultat,
-            forrigePersonResultat = forrigePersonResultat
+            nåværendePersonResultater = nåværendePersonResultat,
+            forrigePersonResultater = forrigePersonResultat
         )
 
-        return endringIVilkårsvurderingTidslinje.tilFørsteEndringstidspunktForDagtidslinje()
+        return endringIVilkårsvurderingTidslinje.tilFørsteEndringstidspunkt()
     }
 
     fun lagEndringIVilkårsvurderingTidslinje(
-        nåværendePersonResultat: Set<PersonResultat>,
-        forrigePersonResultat: Set<PersonResultat>
-    ): Tidslinje<Boolean, Dag> {
+        nåværendePersonResultater: Set<PersonResultat>,
+        forrigePersonResultater: Set<PersonResultat>
+    ): Tidslinje<Boolean, Måned> {
         val allePersonerMedPersonResultat =
-            (nåværendePersonResultat.map { it.aktør } + forrigePersonResultat.map { it.aktør }).distinct()
+            (nåværendePersonResultater.map { it.aktør } + forrigePersonResultater.map { it.aktør }).distinct()
 
         val tidslinjerPerPersonOgVilkår = allePersonerMedPersonResultat.flatMap { aktør ->
             Vilkår.values().map { vilkår ->
                 lagEndringIVilkårsvurderingForPersonOgVilkårTidslinje(
-                    nåværendePersonResultat
+                    nåværendeOppfylteVilkårResultater = nåværendePersonResultater
                         .filter { it.aktør == aktør }
                         .flatMap { it.vilkårResultater }
                         .filter { it.vilkårType == vilkår && it.resultat == Resultat.OPPFYLT },
-                    forrigePersonResultat
+                    forrigeOppfylteVilkårResultater = forrigePersonResultater
                         .filter { it.aktør == aktør }
                         .flatMap { it.vilkårResultater }
-                        .filter { it.vilkårType == vilkår && it.resultat == Resultat.OPPFYLT }
+                        .filter { it.vilkårType == vilkår && it.resultat == Resultat.OPPFYLT },
+                    vilkår = vilkår
                 )
             }
         }
@@ -61,11 +62,12 @@ object EndringIVilkårsvurderingUtil {
     // 2. Endringer i regelverk
     // 3. Splitt i vilkårsvurderingen
     private fun lagEndringIVilkårsvurderingForPersonOgVilkårTidslinje(
-        nåværendeVilkårResultat: List<VilkårResultat>,
-        forrigeVilkårResultat: List<VilkårResultat>
-    ): Tidslinje<Boolean, Dag> {
-        val nåværendeVilkårResultatTidslinje = nåværendeVilkårResultat.tilTidslinje()
-        val tidligereVilkårResultatTidslinje = forrigeVilkårResultat.tilTidslinje()
+        nåværendeOppfylteVilkårResultater: List<VilkårResultat>,
+        forrigeOppfylteVilkårResultater: List<VilkårResultat>,
+        vilkår: Vilkår
+    ): Tidslinje<Boolean, Måned> {
+        val nåværendeVilkårResultatTidslinje = nåværendeOppfylteVilkårResultater.tilForskjøvetTidslinjeForOppfyltVilkår(vilkår)
+        val tidligereVilkårResultatTidslinje = forrigeOppfylteVilkårResultater.tilForskjøvetTidslinjeForOppfyltVilkår(vilkår)
 
         val endringIVilkårResultat =
             nåværendeVilkårResultatTidslinje.kombinerUtenNullMed(tidligereVilkårResultatTidslinje) { nåværende, forrige ->
