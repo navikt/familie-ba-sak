@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
@@ -341,15 +340,11 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType, endringe
             when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
-                BEHANDLINGSRESULTAT -> if (endringerIUtbetaling == EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING) {
-                    IVERKSETT_MOT_OPPDRAG
-                } else if (behandling.kategori == BehandlingKategori.EØS && endringerIUtbetaling == EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING) {
-                    FERDIGSTILLE_BEHANDLING
-                } else {
-                    // TODO: Flytt denne valideringen til behandlingsresultat valideringen
-                    throw Feil("Resultat ${behandling.resultat} er ikke støttet etter behandlingsresultat for satsendringsbehandling.")
+                BEHANDLINGSRESULTAT -> when (endringerIUtbetaling) {
+                    EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING -> IVERKSETT_MOT_OPPDRAG
+                    EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING -> FERDIGSTILLE_BEHANDLING
+                    EndringerIUtbetalingForBehandlingSteg.IKKE_RELEVANT -> throw Feil("Fikk endring i utbetaling = ikke relevant etter behandlingsresultatsteget på behandling $behandling.")
                 }
-
                 IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
                 VENTE_PÅ_STATUS_FRA_ØKONOMI -> FERDIGSTILLE_BEHANDLING
                 FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
