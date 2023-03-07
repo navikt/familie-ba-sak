@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling
 
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpService
@@ -9,7 +8,6 @@ import org.springframework.stereotype.Service
 
 @Service
 class EøsSkjemaerForNyBehandlingService(
-    private val featureToggleService: FeatureToggleService,
     private val kompetanseService: KompetanseService,
     private val utenlandskPeriodebeløpService: UtenlandskPeriodebeløpService,
     private val valutakursService: ValutakursService

@@ -7,7 +7,6 @@ import io.mockk.runs
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPerson
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
@@ -25,7 +24,6 @@ class RegistrerPersongrunnlagEnhetTest {
     private val personopplysningGrunnlagForNyBehandlingService: PersonopplysningGrunnlagForNyBehandlingService = mockk()
     private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService = mockk()
     private val kompetanseService: KompetanseService = mockk()
-    private val featureToggleService: FeatureToggleService = mockk()
     private val valutakursService: ValutakursService = mockk()
     private val utenlandskPeriodebeløpService: UtenlandskPeriodebeløpService = mockk()
 
@@ -34,7 +32,6 @@ class RegistrerPersongrunnlagEnhetTest {
         vilkårsvurderingForNyBehandlingService = vilkårsvurderingForNyBehandlingService,
         personopplysningGrunnlagForNyBehandlingService = personopplysningGrunnlagForNyBehandlingService,
         eøsSkjemaerForNyBehandlingService = EøsSkjemaerForNyBehandlingService(
-            featureToggleService = featureToggleService,
             kompetanseService = kompetanseService,
             utenlandskPeriodebeløpService = utenlandskPeriodebeløpService,
             valutakursService = valutakursService
@@ -51,7 +48,6 @@ class RegistrerPersongrunnlagEnhetTest {
         val behandling2 = lagBehandling()
 
         every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling2) } returns behandling1
-        every { featureToggleService.isEnabled(any()) } returns true
 
         every {
             personopplysningGrunnlagForNyBehandlingService.opprettPersonopplysningGrunnlag(
