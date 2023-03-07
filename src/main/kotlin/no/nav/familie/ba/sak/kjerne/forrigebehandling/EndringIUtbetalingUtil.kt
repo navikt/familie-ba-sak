@@ -11,20 +11,6 @@ import java.time.YearMonth
 
 object EndringIUtbetalingUtil {
 
-    fun erEndringerIUtbetalingFraForrigeBehandling(
-        nåværendeAndeler: List<AndelTilkjentYtelse>,
-        forrigeAndeler: List<AndelTilkjentYtelse>
-    ): Boolean {
-        if (nåværendeAndeler.isEmpty() && forrigeAndeler.isEmpty()) return false
-
-        val endringIUtbetalingTidslinje = lagEndringIUtbetalingTidslinje(
-            nåværendeAndeler = nåværendeAndeler,
-            forrigeAndeler = forrigeAndeler
-        )
-
-        return endringIUtbetalingTidslinje.perioder().any { it.innhold == true }
-    }
-
     fun utledEndringstidspunktForUtbetalingsbeløp(
         nåværendeAndeler: List<AndelTilkjentYtelse>,
         forrigeAndeler: List<AndelTilkjentYtelse>

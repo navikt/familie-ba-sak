@@ -10,6 +10,7 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVedtak
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -86,7 +87,6 @@ class BeslutteVedtakTest {
         every { behandlingService.opprettOgInitierNyttVedtakForBehandling(any(), any(), any()) } just runs
         every { vilkårsvurderingService.hentAktivForBehandling(any()) } returns randomVilkårsvurdering
         every { vilkårsvurderingService.lagreNyOgDeaktiverGammel(any()) } returns randomVilkårsvurdering
-        every { featureToggleService.isEnabled(any()) } returns false
         every { saksbehandlerContext.hentSaksbehandlerSignaturTilBrev() } returns "saksbehandlerNavn"
 
         beslutteVedtak = BeslutteVedtak(
@@ -214,6 +214,8 @@ class BeslutteVedtakTest {
 
     @Test
     fun `Skal kaste feil dersom toggle ikke er enabled og årsak er korreksjon vedtaksbrev`() {
+        every { featureToggleService.isEnabled(FeatureToggleConfig.KAN_MANUELT_KORRIGERE_MED_VEDTAKSBREV) } returns false
+
         val behandling = lagBehandling(årsak = BehandlingÅrsak.KORREKSJON_VEDTAKSBREV)
         behandling.status = BehandlingStatus.FATTER_VEDTAK
         behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))
@@ -231,6 +233,8 @@ class BeslutteVedtakTest {
 
     @Test
     fun `Skal kaste feil dersom saksbehandler uten tilgang til teknisk endring prøve å godkjenne en behandling med årsak=teknisk endring`() {
+        every { featureToggleService.isEnabled(FeatureToggleConfig.TEKNISK_ENDRING) } returns false
+
         val behandling = lagBehandling(årsak = BehandlingÅrsak.TEKNISK_ENDRING)
         behandling.status = BehandlingStatus.FATTER_VEDTAK
         behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BESLUTTE_VEDTAK))

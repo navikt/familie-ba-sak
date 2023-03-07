@@ -477,7 +477,7 @@ class UtbetalingsperiodeUtilTest {
 
     private fun Vilkårsvurdering.lagGodkjentPersonResultatForBarn(person: Person) = lagPersonResultat(
         vilkårsvurdering = this,
-        aktør = person.aktør,
+        person = person,
         resultat = Resultat.OPPFYLT,
         periodeFom = person.fødselsdato,
         periodeTom = person.fødselsdato.til18ÅrsVilkårsdato(),

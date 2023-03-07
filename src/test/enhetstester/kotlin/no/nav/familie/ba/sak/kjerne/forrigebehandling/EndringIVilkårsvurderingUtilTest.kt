@@ -24,6 +24,7 @@ class EndringIVilkårsvurderingUtilTest {
     val jan22 = YearMonth.of(2022, 1)
     val feb22 = YearMonth.of(2022, 2)
     val mai22 = YearMonth.of(2022, 5)
+    val jun22 = YearMonth.of(2022, 6)
 
     @Test
     fun `Endring i vilkårsvurdering - skal ikke lage periode med endring dersom vilkårresultatene er helt like`() {
@@ -61,8 +62,8 @@ class EndringIVilkårsvurderingUtilTest {
         val aktør = randomAktør()
 
         val perioderMedEndring = EndringIVilkårsvurderingUtil.lagEndringIVilkårsvurderingTidslinje(
-            nåværendePersonResultat = setOf(lagPersonResultatFraVilkårResultater(vilkårResultater, aktør)),
-            forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(vilkårResultater, aktør))
+            nåværendePersonResultater = setOf(lagPersonResultatFraVilkårResultater(vilkårResultater, aktør)),
+            forrigePersonResultater = setOf(lagPersonResultatFraVilkårResultater(vilkårResultater, aktør))
         ).perioder().filter { it.innhold == true }
 
         Assertions.assertTrue(perioderMedEndring.isEmpty())
@@ -114,12 +115,12 @@ class EndringIVilkårsvurderingUtilTest {
         val aktør = randomAktør()
 
         val perioderMedEndring = EndringIVilkårsvurderingUtil.lagEndringIVilkårsvurderingTidslinje(
-            nåværendePersonResultat = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
-            forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør))
+            nåværendePersonResultater = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
+            forrigePersonResultater = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør))
         ).perioder().filter { it.innhold == true }
 
         Assertions.assertEquals(1, perioderMedEndring.size)
-        Assertions.assertEquals(jan22, perioderMedEndring.single().fraOgMed.tilYearMonth())
+        Assertions.assertEquals(feb22, perioderMedEndring.single().fraOgMed.tilYearMonth())
         Assertions.assertEquals(mai22, perioderMedEndring.single().tilOgMed.tilYearMonth())
 
         val endringstidspunkt = EndringIVilkårsvurderingUtil.utledEndringstidspunktForVilkårsvurdering(
@@ -127,7 +128,7 @@ class EndringIVilkårsvurderingUtilTest {
             forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør))
         )
 
-        Assertions.assertEquals(jan22, endringstidspunkt)
+        Assertions.assertEquals(feb22, endringstidspunkt)
     }
 
     @Test
@@ -174,12 +175,12 @@ class EndringIVilkårsvurderingUtilTest {
         val aktør = randomAktør()
 
         val perioderMedEndring = EndringIVilkårsvurderingUtil.lagEndringIVilkårsvurderingTidslinje(
-            nåværendePersonResultat = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
-            forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør))
+            nåværendePersonResultater = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
+            forrigePersonResultater = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør))
         ).perioder().filter { it.innhold == true }
 
         Assertions.assertEquals(1, perioderMedEndring.size)
-        Assertions.assertEquals(mai22, perioderMedEndring.single().fraOgMed.tilYearMonth())
+        Assertions.assertEquals(jun22, perioderMedEndring.single().fraOgMed.tilYearMonth())
         Assertions.assertEquals(Uendelighet.FREMTID, perioderMedEndring.single().tilOgMed.uendelighet)
 
         val endringstidspunkt = EndringIVilkårsvurderingUtil.utledEndringstidspunktForVilkårsvurdering(
@@ -187,7 +188,7 @@ class EndringIVilkårsvurderingUtilTest {
             forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør))
         )
 
-        Assertions.assertEquals(mai22, endringstidspunkt)
+        Assertions.assertEquals(jun22, endringstidspunkt)
     }
 
     @Test
@@ -229,8 +230,8 @@ class EndringIVilkårsvurderingUtilTest {
         val aktør = randomAktør()
 
         val perioderMedEndring = EndringIVilkårsvurderingUtil.lagEndringIVilkårsvurderingTidslinje(
-            nåværendePersonResultat = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
-            forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør))
+            nåværendePersonResultater = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
+            forrigePersonResultater = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør))
         ).perioder().filter { it.innhold == true }
 
         Assertions.assertTrue(perioderMedEndring.isEmpty())
@@ -278,8 +279,8 @@ class EndringIVilkårsvurderingUtilTest {
         val aktør = randomAktør()
 
         val perioderMedEndring = EndringIVilkårsvurderingUtil.lagEndringIVilkårsvurderingTidslinje(
-            nåværendePersonResultat = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
-            forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør))
+            nåværendePersonResultater = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
+            forrigePersonResultater = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør))
         ).perioder().filter { it.innhold == true }
 
         Assertions.assertTrue(perioderMedEndring.isEmpty())
