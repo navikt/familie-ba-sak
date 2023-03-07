@@ -54,9 +54,9 @@ class InternKonsistensavstemmingService(
 
             if (sumUtbetalingFraUtbetalingsoppdrag != sumUtbetalingFraAndeler.toBigDecimal()) {
                 secureLogger.info(
-                    "Fagsak $fagsakId har ulikt utbetalingsbeløp i andelene og utbetalingsoppdraget. " +
-                        "\nBetalingen i utbetalingsoppdraget=$sumUtbetalingFraUtbetalingsoppdrag" +
-                        "\nBetalingen i andelene=$sumUtbetalingFraAndeler"
+                    "Fagsak $fagsakId har ulikt utbetalingsbeløp i andelene tilkjent ytelse og utbetalingsoppdraget." +
+                        "\nSum utbetaling i utbetalingsperiodene=$sumUtbetalingFraUtbetalingsoppdrag" +
+                        "\nSum utbetaling i andelene=$sumUtbetalingFraAndeler"
                 )
 
                 fagsakId
