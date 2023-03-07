@@ -4,6 +4,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -41,7 +42,7 @@ class InternKonsistensavstemmingService(
         val fagsakTilSisteUtbetalingsoppdragOgSisteAndelerMap =
             hentFagsakTilSisteUtbetalingsoppdragOgSisteAndelerMap(fagsaker)
 
-        fagsakTilSisteUtbetalingsoppdragOgSisteAndelerMap.forEach { entry ->
+        val fagsakerMedFeil = fagsakTilSisteUtbetalingsoppdragOgSisteAndelerMap.mapNotNull { entry ->
             val fagsakId = entry.key
             val andeler = entry.value.first
             val utbetalingsoppdrag = entry.value.second
@@ -52,13 +53,22 @@ class InternKonsistensavstemmingService(
                 utbetalingsoppdrag?.utbetalingsperiode?.sumOf { it.sats } ?: BigDecimal.ZERO
 
             if (sumUtbetalingFraUtbetalingsoppdrag != sumUtbetalingFraAndeler.toBigDecimal()) {
-                logger.error("Fagsak $fagsakId har ulikt utbetalingsbeløp i andelene og utbetalingsoppdraget")
                 secureLogger.info(
                     "Fagsak $fagsakId har ulikt utbetalingsbeløp i andelene og utbetalingsoppdraget. " +
                         "\nBetalingen i utbetalingsoppdraget=$sumUtbetalingFraUtbetalingsoppdrag" +
                         "\nBetalingen i andelene=$sumUtbetalingFraAndeler"
                 )
-            }
+
+                fagsakId
+            } else null
+        }
+
+        if (fagsakerMedFeil.isNotEmpty()){
+            throw Feil(
+                "Tilkjent ytelse og utbetalingsoppdraget som er lagret i familie-oppdrag er inkonsistent" +
+                    "\nSe secure logs for mer detaljer." +
+                    "\nDette gjelder fagsakene $fagsakerMedFeil"
+            )
         }
     }
 
