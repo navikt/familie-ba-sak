@@ -78,16 +78,20 @@ class BehandlingHentOgPersisterService(
         return behandlingerPåFagsak.hentSisteSomErVedtatt()
     }
 
-    fun hentSisteBehandlingSomErVedtattPerFagsak(fagsakIder: Set<Long>): List<Behandling> {
+    fun hentSisteBehandlingSomErSendtTilØkonomiPerFagsak(fagsakIder: Set<Long>): List<Behandling> {
         val behandlingerPåFagsakene = behandlingRepository.finnBehandlinger(fagsakIder)
 
         return behandlingerPåFagsakene
             .groupBy { it.fagsak.id }
-            .mapNotNull { (_, behandling) -> behandling.hentSisteSomErVedtatt() }
+            .mapNotNull { (_, behandling) -> behandling.hentSisteSomErSentTilØkonomi() }
     }
 
     private fun List<Behandling>.hentSisteSomErVedtatt() =
         filter { !it.erHenlagt() && it.status == BehandlingStatus.AVSLUTTET }
+            .maxByOrNull { it.opprettetTidspunkt }
+
+    private fun List<Behandling>.hentSisteSomErSentTilØkonomi() =
+        filter { !it.erHenlagt() && (it.status == BehandlingStatus.AVSLUTTET || it.status == BehandlingStatus.IVERKSETTER_VEDTAK)}
             .maxByOrNull { it.opprettetTidspunkt }
 
     /**

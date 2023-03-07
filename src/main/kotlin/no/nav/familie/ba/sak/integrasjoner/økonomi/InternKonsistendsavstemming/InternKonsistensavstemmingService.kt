@@ -68,13 +68,13 @@ class InternKonsistensavstemmingService(
             hentFagsakTilSissteUtbetalingsoppdragMap(fagsakIder)
         }
 
-        val fagsakTilAndelerISisteVedtatteBehandlingMap = hentFagsakTilAndelerISisteVedtatteBehandlingMap(fagsakIder)
+        val fagsakTilAndelerISisteBehandlingSendTilØkonomiMap = hentFagsakTilAndelerISisteBehandlingSendtTilØkonomiMap(fagsakIder)
 
         val fagsakTilSisteUtbetalingsoppdragMap =
             runBlocking { fagsakTilSisteUtbetalingsoppdragMapDeffered.await() }
 
         val fagsakTilSisteUtbetalingsoppdragOgSisteAndeler =
-            fagsakTilAndelerISisteVedtatteBehandlingMap.mapValues { (fagsakId, andel) ->
+            fagsakTilAndelerISisteBehandlingSendTilØkonomiMap.mapValues { (fagsakId, andel) ->
                 Pair(andel, fagsakTilSisteUtbetalingsoppdragMap[fagsakId])
             }
         return fagsakTilSisteUtbetalingsoppdragOgSisteAndeler
@@ -84,8 +84,8 @@ class InternKonsistensavstemmingService(
         økonomiKlient.hentSisteUtbetalingsoppdragForFagsaker(fagsakIder)
             .associate { it.fagsakId to it.utbetalingsoppdrag }
 
-    private fun hentFagsakTilAndelerISisteVedtatteBehandlingMap(fagsaker: Set<Long>): Map<Long, List<AndelTilkjentYtelse>> {
-        val behandlinger = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtattPerFagsak(fagsaker)
+    private fun hentFagsakTilAndelerISisteBehandlingSendtTilØkonomiMap(fagsaker: Set<Long>): Map<Long, List<AndelTilkjentYtelse>> {
+        val behandlinger = behandlingHentOgPersisterService.hentSisteBehandlingSomErSendtTilØkonomiPerFagsak(fagsaker)
 
         return andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(behandlinger.map { it.id })
             .groupBy { it.behandlingId }
