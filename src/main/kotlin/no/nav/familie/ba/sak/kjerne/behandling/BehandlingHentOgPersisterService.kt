@@ -23,16 +23,20 @@ class BehandlingHentOgPersisterService(
         }
     }
 
-    fun hentAktivForFagsak(fagsakId: Long): Behandling? {
+    fun lagreOgFlush(behandling: Behandling): Behandling {
+        return behandlingRepository.saveAndFlush(behandling)
+    }
+
+    fun finnAktivForFagsak(fagsakId: Long): Behandling? {
         return behandlingRepository.findByFagsakAndAktiv(fagsakId)
     }
 
-    fun hentAktivOgÅpenForFagsak(fagsakId: Long): Behandling? {
+    fun finnAktivOgÅpenForFagsak(fagsakId: Long): Behandling? {
         return behandlingRepository.findByFagsakAndAktivAndOpen(fagsakId)
     }
 
     fun erÅpenBehandlingPåFagsak(fagsakId: Long): Boolean {
-        return hentAktivOgÅpenForFagsak(fagsakId) != null
+        return finnAktivOgÅpenForFagsak(fagsakId) != null
     }
 
     fun hent(behandlingId: Long): Behandling {
@@ -128,5 +132,9 @@ class BehandlingHentOgPersisterService(
 
     fun hentIverksatteBehandlinger(fagsakId: Long): List<Behandling> {
         return behandlingRepository.finnIverksatteBehandlinger(fagsakId = fagsakId)
+    }
+
+    fun finnAvsluttedeBehandlingerPåFagsak(fagsakId: Long): List<Behandling> {
+        return behandlingRepository.findByFagsakAndAvsluttet(fagsakId = fagsakId)
     }
 }

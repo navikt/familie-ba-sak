@@ -47,7 +47,7 @@ class FerdigstillBehandling(
             if (behandlingHentOgPersisterService.hentBehandlinger(behandling.fagsak.id).size == 1) {
                 fagsakService.oppdaterStatus(behandling.fagsak, FagsakStatus.AVSLUTTET)
             }
-            behandlingHentOgPersisterService.hentAktivForFagsak(behandling.fagsak.id)?.aktiv = false
+            behandlingHentOgPersisterService.finnAktivForFagsak(behandling.fagsak.id)?.aktiv = false
             behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id)?.apply {
                 aktiv = true
                 behandlingHentOgPersisterService.lagreEllerOppdater(this)

@@ -294,7 +294,7 @@ class BehandleSmåbarnstilleggTest(
         )
 
         håndterIverksettingAvBehandling(
-            behandlingEtterVurdering = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = fagsak.data!!.id)!!,
+            behandlingEtterVurdering = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = fagsak.data!!.id)!!,
             søkerFnr = søkersIdent,
             fagsakService = fagsakService,
             vedtakService = vedtakService,
@@ -315,7 +315,7 @@ class BehandleSmåbarnstilleggTest(
             behandlingsdata = søkersAktør
         )
         val fagsak = fagsakService.hentFagsakPåPerson(aktør = søkersAktør)
-        val aktivBehandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = fagsak!!.id)!!
+        val aktivBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = fagsak!!.id)!!
 
         assertEquals(BehandlingStatus.AVSLUTTET, aktivBehandling.status)
         assertNotEquals(BehandlingÅrsak.SMÅBARNSTILLEGG, aktivBehandling.opprettetÅrsak)
@@ -345,7 +345,7 @@ class BehandleSmåbarnstilleggTest(
         )
 
         val fagsak = fagsakService.hentFagsakPåPerson(aktør = søkersAktør)
-        val aktivBehandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = fagsak!!.id)!!
+        val aktivBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = fagsak!!.id)!!
 
         // Vedtaksperioder skal være slettet etter at den er blitt omgjort til manuell behandling
         assertEquals(
@@ -401,7 +401,7 @@ class BehandleSmåbarnstilleggTest(
         )
 
         val fagsak = fagsakService.hentFagsakPåPerson(aktør = søkersAktør)
-        val aktivBehandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = fagsak!!.id)!!
+        val aktivBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = fagsak!!.id)!!
 
         val andelerTilkjentYtelse =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
@@ -427,7 +427,7 @@ class BehandleSmåbarnstilleggTest(
         assertTrue(aktuellVedtaksperiode?.begrunnelser?.any { it.standardbegrunnelse == Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD } == true)
 
         håndterIverksettingAvBehandling(
-            behandlingEtterVurdering = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = fagsak.id)!!,
+            behandlingEtterVurdering = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = fagsak.id)!!,
             søkerFnr = søkersIdent,
             fagsakService = fagsakService,
             vedtakService = vedtakService,
@@ -465,7 +465,7 @@ class BehandleSmåbarnstilleggTest(
             behandlingsdata = søkersAktør
         )
         val fagsak = fagsakService.hentFagsakPåPerson(aktør = søkersAktør)
-        val aktivBehandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = fagsak!!.id)!!
+        val aktivBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = fagsak!!.id)!!
 
         val andelerTilkjentYtelse =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
@@ -533,7 +533,7 @@ class BehandleSmåbarnstilleggTest(
         )
 
         val fagsak = fagsakService.hentFagsakPåPerson(aktør = søkersAktør)
-        val aktivBehandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = fagsak!!.id)!!
+        val aktivBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = fagsak!!.id)!!
 
         val småbarnstilleggAndeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
             behandlingId = aktivBehandling.id

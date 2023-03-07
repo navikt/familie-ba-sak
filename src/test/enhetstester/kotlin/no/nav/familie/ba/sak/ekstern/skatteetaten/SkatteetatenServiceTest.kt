@@ -4,7 +4,7 @@ import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPerson
@@ -18,7 +18,7 @@ internal class SkatteetatenServiceTest {
     private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient = mockk()
     private val fagsakRepository: FagsakRepository = mockk()
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository = mockk()
-    private val behandlingRepository: BehandlingRepository = mockk()
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
 
     @Test
     fun `finnPersonerMedUtvidetBarnetrygd() skal returnere person fra fagsystem med nyeste vedtaksdato`() {
@@ -42,7 +42,7 @@ internal class SkatteetatenServiceTest {
                 infotrygdBarnetrygdClient,
                 fagsakRepository,
                 andelTilkjentYtelseRepository,
-                behandlingRepository
+                behandlingHentOgPersisterService
             )
 
         assertThat(skatteetatenService.finnPersonerMedUtvidetBarnetrygd(nyesteVedtaksdato.year.toString()).brukere).hasSize(
@@ -82,7 +82,7 @@ internal class SkatteetatenServiceTest {
                 infotrygdBarnetrygdClient,
                 fagsakRepository,
                 andelTilkjentYtelseRepository,
-                behandlingRepository
+                behandlingHentOgPersisterService
             )
         val personerMedUtvidetBarnetrygd =
             skatteetatenService.finnPersonerMedUtvidetBarnetrygd(vedtaksdato.year.toString())
@@ -124,7 +124,7 @@ internal class SkatteetatenServiceTest {
                 infotrygdBarnetrygdClient,
                 fagsakRepository,
                 andelTilkjentYtelseRepository,
-                behandlingRepository
+                behandlingHentOgPersisterService
             )
         val personerMedUtvidetBarnetrygd =
             skatteetatenService.finnPersonerMedUtvidetBarnetrygd(vedtaksdato.year.toString())

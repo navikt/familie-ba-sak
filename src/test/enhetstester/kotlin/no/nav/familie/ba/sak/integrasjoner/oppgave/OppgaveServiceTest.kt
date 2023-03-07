@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -64,6 +65,9 @@ class OppgaveServiceTest {
     lateinit var behandlingRepository: BehandlingRepository
 
     @MockK
+    lateinit var behandlingHentOgPersisterService: BehandlingHentOgPersisterService
+
+    @MockK
     lateinit var personidentService: PersonidentService
 
     @MockK
@@ -80,8 +84,8 @@ class OppgaveServiceTest {
 
     @Test
     fun `Opprett oppgave skal lage oppgave med enhetsnummer fra behandlingen`() {
-        every { behandlingRepository.finnBehandling(BEHANDLING_ID) } returns lagTestBehandling(aktørId = AKTØR_ID_FAGSAK)
-        every { behandlingRepository.save(any()) } returns lagTestBehandling()
+        every { behandlingHentOgPersisterService.hent(BEHANDLING_ID) } returns lagTestBehandling(aktørId = AKTØR_ID_FAGSAK)
+        every { behandlingHentOgPersisterService.lagreEllerOppdater(any()) } returns lagTestBehandling()
         every { oppgaveRepository.save(any()) } returns lagTestOppgave()
         every {
             oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(
@@ -125,7 +129,7 @@ class OppgaveServiceTest {
 
     @Test
     fun `Ferdigstill oppgave`() {
-        every { behandlingRepository.finnBehandling(BEHANDLING_ID) } returns mockk {}
+        every { behandlingHentOgPersisterService.hent(BEHANDLING_ID) } returns mockk {}
         every {
             oppgaveRepository.finnOppgaverSomSkalFerdigstilles(
                 any(),
