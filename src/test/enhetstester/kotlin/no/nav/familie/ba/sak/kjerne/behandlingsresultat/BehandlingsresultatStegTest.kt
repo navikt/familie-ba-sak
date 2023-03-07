@@ -140,7 +140,7 @@ class BehandlingsresultatStegTest {
     @Test
     fun `skal kaste feil om det er endring etter migreringsdatoen til første behandling`() {
         val startdato = YearMonth.of(2023, 2)
-        val endringTidslinje =  "TTTFFFF".tilBoolskTidslinje(
+        val endringTidslinje = "TTTFFFF".tilBoolskTidslinje(
             startdato
         )
 
@@ -154,7 +154,7 @@ class BehandlingsresultatStegTest {
         val startdato = YearMonth.of(2023, 2)
         val treMånederEtterStartdato = startdato.plusMonths(3)
 
-        val endringTidslinje =  "TTTFFFF".tilBoolskTidslinje(
+        val endringTidslinje = "TTTFFFF".tilBoolskTidslinje(
             startdato
         )
 
