@@ -181,7 +181,7 @@ class TriggingAvAutobrev6og18ÅrTest(
         )
 
         håndterIverksettingAvBehandling(
-            behandlingEtterVurdering = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = fagsakId)!!,
+            behandlingEtterVurdering = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = fagsakId)!!,
             søkerFnr = scenario.søker.ident,
             fagsakService = fagsakService,
             vedtakService = vedtakService,
@@ -216,7 +216,7 @@ class TriggingAvAutobrev6og18ÅrTest(
 
         // Skal nye autobrev trigges må aktiv behandling være avsluttet. Gjør dette eksplisitt (og utenfor normal
         // flyt) ettersom dette skjer via en task når autobrev-koden kjøres.
-        val revurderingMedAutobrev = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId)!!
+        val revurderingMedAutobrev = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId)!!
         revurderingMedAutobrev.status = BehandlingStatus.AVSLUTTET
         behandlingHentOgPersisterService.lagreEllerOppdater(revurderingMedAutobrev)
 

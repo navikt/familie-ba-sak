@@ -23,7 +23,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.tilRestVedtak
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultatRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.beregning.EndringstidspunktService
@@ -55,7 +54,7 @@ class UtvidetBehandlingService(
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val persongrunnlagService: PersongrunnlagService,
     private val behandlingService: BehandlingService,
-    private val behandlingRepository: BehandlingRepository,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val vedtakRepository: VedtakRepository,
     private val totrinnskontrollRepository: TotrinnskontrollRepository,
@@ -76,7 +75,7 @@ class UtvidetBehandlingService(
     private val featureToggleService: FeatureToggleService
 ) {
     fun lagRestUtvidetBehandling(behandlingId: Long): RestUtvidetBehandling {
-        val behandling = behandlingRepository.finnBehandling(behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
 
         val søknadsgrunnlag = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)

@@ -11,8 +11,8 @@ import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.beregning.EndringstidspunktService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
@@ -31,8 +31,6 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 class VedtaksperiodeServiceEnhetstest {
-
-    private val behandlingRepository: BehandlingRepository = mockk()
     private val persongrunnlagService: PersongrunnlagService = mockk()
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService =
         mockk()
@@ -41,9 +39,9 @@ class VedtaksperiodeServiceEnhetstest {
     private val featureToggleService: FeatureToggleService = mockk()
     private val feilutbetaltValutaRepository: FeilutbetaltValutaRepository = mockk()
     private val brevmalService: BrevmalService = mockk()
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
 
     private val vedtaksperiodeService = VedtaksperiodeService(
-        behandlingRepository = behandlingRepository,
         personidentService = mockk(),
         persongrunnlagService = persongrunnlagService,
         andelTilkjentYtelseRepository = mockk(),
@@ -59,7 +57,8 @@ class VedtaksperiodeServiceEnhetstest {
         andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
         featureToggleService = featureToggleService,
         feilutbetaltValutaRepository = feilutbetaltValutaRepository,
-        brevmalService = brevmalService
+        brevmalService = brevmalService,
+        behandlingHentOgPersisterService = behandlingHentOgPersisterService
     )
 
     private val person = lagPerson()
@@ -83,7 +82,6 @@ class VedtaksperiodeServiceEnhetstest {
 
     @BeforeEach
     fun init() {
-        every { behandlingRepository.findByFagsakAndAvsluttet(any()) } returns listOf(forrigeBehandling)
         every { featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_UTLEDE_ENDRINGSTIDSPUNKT) } returns true
         every { endringstidspunktService.finnEndringstidspunktForBehandling(vedtak.behandling.id) } returns endringstidspunkt
         every { persongrunnlagService.hentAktiv(any()) } returns

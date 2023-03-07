@@ -158,7 +158,7 @@ class AutovedtakStegService(
             fagsakService.hentNormalFagsak(aktør = aktør)
         }
         val åpenBehandling = fagsak?.let {
-            behandlingHentOgPersisterService.hentAktivOgÅpenForFagsak(it.id)
+            behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(it.id)
         }
 
         return if (åpenBehandling == null) {

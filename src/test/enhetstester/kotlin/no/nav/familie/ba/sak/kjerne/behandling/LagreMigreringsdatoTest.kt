@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfoRepository
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -32,7 +31,6 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 class LagreMigreringsdatoTest {
-    val behandlingRepository = mockk<BehandlingRepository>()
     val behandlingstemaService = mockk<BehandlingstemaService>()
     val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>(relaxed = true)
     val behandlingSøknadsinfoService = mockk<BehandlingSøknadsinfoService>()
@@ -52,7 +50,6 @@ class LagreMigreringsdatoTest {
     val vilkårsvurderingService = mockk<VilkårsvurderingService>()
 
     private val behandlingService = BehandlingService(
-        behandlingRepository,
         behandlingHentOgPersisterService,
         behandlingstemaService,
         behandlingSøknadsinfoService,
@@ -87,7 +84,7 @@ class LagreMigreringsdatoTest {
     @Test
     fun `Lagre likt migreringstidspunkt skal kaste feil`() {
         every { behandlingMigreringsinfoRepository.finnSisteMigreringsdatoPåFagsak(any()) } returns LocalDate.now()
-        every { behandlingRepository.finnBehandlinger(any()) } returns emptyList()
+        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns null
         every { behandlingMigreringsinfoRepository.save(any()) } returns mockk()
 
         val feil = assertThrows<FunksjonellFeil> {
