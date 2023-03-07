@@ -19,12 +19,12 @@ internal class BehandlingsresultatValideringUtilsTest {
     fun `Valider eksplisitt avlag - Skal kaste feil hvis eksplisitt avslått for barn det ikke er fremstilt krav for`() {
         val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)
         val vikårsvurdering = Vilkårsvurdering(behandling = behandling)
-        val barn1 = lagPerson(type = PersonType.BARN)
-        val barn2 = lagPerson(type = PersonType.BARN)
+        val barn1 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(5))
+        val barn2 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(7))
 
         val barn1PersonResultat = lagPersonResultat(
             vilkårsvurdering = vikårsvurdering,
-            aktør = barn1.aktør,
+            person = barn1,
             resultat = Resultat.IKKE_OPPFYLT,
             periodeFom = LocalDate.now().minusMonths(5),
             periodeTom = LocalDate.now(),
@@ -34,7 +34,7 @@ internal class BehandlingsresultatValideringUtilsTest {
         )
         val barn2PersonResultat = lagPersonResultat(
             vilkårsvurdering = vikårsvurdering,
-            aktør = barn2.aktør,
+            person = barn2,
             resultat = Resultat.IKKE_OPPFYLT,
             periodeFom = LocalDate.now().minusMonths(5),
             periodeTom = LocalDate.now(),
@@ -59,7 +59,7 @@ internal class BehandlingsresultatValideringUtilsTest {
 
         val søkerPersonResultat = lagPersonResultat(
             vilkårsvurdering = vikårsvurdering,
-            aktør = søker.aktør,
+            person = søker,
             resultat = Resultat.IKKE_OPPFYLT,
             periodeFom = LocalDate.now().minusMonths(5),
             periodeTom = LocalDate.now(),
@@ -80,12 +80,12 @@ internal class BehandlingsresultatValideringUtilsTest {
     fun `Valider eksplisitt avslag - Skal ikke kaste feil hvis person med eksplsitt avslag er fremstilt krav for`() {
         val behandling = lagBehandling(årsak = BehandlingÅrsak.SØKNAD)
         val vikårsvurdering = Vilkårsvurdering(behandling = behandling)
-        val barn1 = lagPerson(type = PersonType.BARN)
-        val barn2 = lagPerson(type = PersonType.BARN)
+        val barn1 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(5))
+        val barn2 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(7))
 
         val barn1PersonResultat = lagPersonResultat(
             vilkårsvurdering = vikårsvurdering,
-            aktør = barn1.aktør,
+            person = barn1,
             resultat = Resultat.IKKE_OPPFYLT,
             periodeFom = LocalDate.now().minusMonths(5),
             periodeTom = LocalDate.now(),
@@ -95,7 +95,7 @@ internal class BehandlingsresultatValideringUtilsTest {
         )
         val barn2PersonResultat = lagPersonResultat(
             vilkårsvurdering = vikårsvurdering,
-            aktør = barn2.aktør,
+            person = barn2,
             resultat = Resultat.OPPFYLT,
             periodeFom = LocalDate.now().minusMonths(5),
             periodeTom = LocalDate.now(),

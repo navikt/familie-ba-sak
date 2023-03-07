@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.personident.AktørIdRepository
 import org.assertj.core.api.Assertions
@@ -17,14 +17,14 @@ class FeilutbetaltValutaControllerTest(
     @Autowired val feilutbetaltValutaService: FeilutbetaltValutaService,
     @Autowired val aktørIdRepository: AktørIdRepository,
     @Autowired val fagsakRepository: FagsakRepository,
-    @Autowired val behandlingRepository: BehandlingRepository
+    @Autowired val behandlingHentOgPersisterService: BehandlingHentOgPersisterService
 ) : AbstractSpringIntegrationTest() {
 
     @Test
     fun kanLagreEndreOgSlette() {
         val fagsak =
             defaultFagsak(aktør = randomAktør().also { aktørIdRepository.save(it) }).let { fagsakRepository.save(it) }
-        val behandling = lagBehandling(fagsak = fagsak).let { behandlingRepository.save(it) }
+        val behandling = lagBehandling(fagsak = fagsak).let { behandlingHentOgPersisterService.lagreEllerOppdater(it, false) }
         val feilutbetaltValuta = RestFeilutbetaltValuta(
             id = 0,
             fom = LocalDate.of(2020, Month.JANUARY, 1),

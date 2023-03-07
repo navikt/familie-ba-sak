@@ -2,8 +2,8 @@ package no.nav.familie.ba.sak.ekstern.skatteetaten
 
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.eksterne.kontrakter.skatteetaten.SkatteetatenPeriode
@@ -25,7 +25,7 @@ class SkatteetatenService(
     private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
     private val fagsakRepository: FagsakRepository,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
-    private val behandlingRepository: BehandlingRepository
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService
 ) {
     @Cacheable("skatt_personer", cacheManager = "skattPersonerCache", unless = "#result == null")
     fun finnPersonerMedUtvidetBarnetrygd(år: String): SkatteetatenPersonerResponse {
@@ -53,25 +53,25 @@ class SkatteetatenService(
         LOG.info("Fant ${perioderFraInfotrygd.size} skatteetatenperioder fra infotrygd")
 
         val samletPerioder = mutableListOf<SkatteetatenPerioder>()
-        unikePersoner.forEach {
+        unikePersoner.forEach { personIdent ->
             val resultatInfotrygdForPerson =
-                perioderFraInfotrygd.firstOrNull { perioder -> perioder.ident == it }
-            val perioderFraInfotrygd =
+                perioderFraInfotrygd.firstOrNull { perioder -> perioder.ident == personIdent }
+            val perioderFraInfotrygdForPerson =
                 resultatInfotrygdForPerson?.perioder ?: emptyList()
 
-            val resutatBaSakForPerson = perioderFraBaSak.firstOrNull { perioder -> perioder.ident == it }
+            val resultatBaSakForPerson = perioderFraBaSak.firstOrNull { perioder -> perioder.ident == personIdent }
 
-            val perioderFraBasak = resutatBaSakForPerson?.perioder ?: emptyList()
+            val perioderFraBasak = resultatBaSakForPerson?.perioder ?: emptyList()
 
             val perioder =
-                (perioderFraBasak + perioderFraInfotrygd).groupBy { periode -> periode.delingsprosent }.values
+                (perioderFraBasak + perioderFraInfotrygdForPerson).groupBy { periode -> periode.delingsprosent }.values
                     .flatMap(::slåSammenSkatteetatenPeriode).toMutableList()
             if (perioder.isNotEmpty()) {
                 samletPerioder.add(
                     SkatteetatenPerioder(
-                        ident = it,
+                        ident = personIdent,
                         perioder = perioder,
-                        sisteVedtakPaaIdent = resutatBaSakForPerson?.sisteVedtakPaaIdent
+                        sisteVedtakPaaIdent = resultatBaSakForPerson?.sisteVedtakPaaIdent
                             ?: resultatInfotrygdForPerson!!.sisteVedtakPaaIdent
                     )
                 )
@@ -99,7 +99,7 @@ class SkatteetatenService(
         stonadPerioder.groupBy { it.getId() }.values.forEach { perioderGroupedByPerson ->
             if (perioderGroupedByPerson.size > 1) {
                 val behandlinger =
-                    perioderGroupedByPerson.map { behandlingRepository.finnBehandling(it.getBehandlingId()) }
+                    perioderGroupedByPerson.map { behandlingHentOgPersisterService.hent(behandlingId = it.getBehandlingId()) }
                 val sisteIverksatteBehandling = Behandlingutils.hentSisteBehandlingSomErIverksatt(behandlinger)
                 if (sisteIverksatteBehandling != null) {
                     aktivAndelTilkjentYtelsePeriode.addAll(perioderGroupedByPerson.filter { it.getBehandlingId() == sisteIverksatteBehandling.id })

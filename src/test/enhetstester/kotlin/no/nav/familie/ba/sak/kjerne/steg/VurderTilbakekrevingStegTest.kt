@@ -26,7 +26,6 @@ import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
@@ -59,9 +58,8 @@ class VurderTilbakekrevingStegTest {
         every { tilbakekrevingService.søkerHarÅpenTilbakekreving(any()) } returns false
         every { tilbakekrevingService.validerRestTilbakekreving(any(), any()) } returns Unit
         every { tilbakekrevingService.lagreTilbakekreving(any(), any()) } returns null
-        every { featureToggleService.isEnabled(any()) } returns true
-        every { featureToggleService.isEnabled(any(), true) } returns true
         every { personGrunnlagService.hentBarna(any<Long>()) } returns listOf(lagPerson())
+        every { featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ) } returns true
     }
 
     @Test
@@ -125,7 +123,6 @@ class VurderTilbakekrevingStegTest {
     }
 
     @Test
-    @Disabled("TODO Fikses senere")
     fun `skal utføre steg for migreringsbehandling når avvik i form av etterbetaling er under beløpsgrense`() {
         listOf(BehandlingÅrsak.HELMANUELL_MIGRERING, BehandlingÅrsak.ENDRE_MIGRERINGSDATO).forEach {
             val behandling: Behandling = lagBehandling(

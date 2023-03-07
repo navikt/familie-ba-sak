@@ -95,6 +95,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvu
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.gjelderAlltidFraBarnetsFødselsdato
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
 import no.nav.familie.ba.sak.task.StatusFraOppdragTask
@@ -485,7 +486,7 @@ fun lagPersonResultaterForSøkerOgToBarn(
     return setOf(
         lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            aktør = søkerAktør,
+            person = lagPerson(type = PersonType.SØKER, aktør = søkerAktør),
             resultat = Resultat.OPPFYLT,
             periodeFom = stønadFom,
             periodeTom = stønadTom,
@@ -494,7 +495,11 @@ fun lagPersonResultaterForSøkerOgToBarn(
         ),
         lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            aktør = barn1Aktør,
+            person = lagPerson(
+                type = PersonType.BARN,
+                aktør = barn1Aktør,
+                fødselsdato = stønadFom
+            ),
             resultat = Resultat.OPPFYLT,
             periodeFom = stønadFom,
             periodeTom = stønadTom,
@@ -504,7 +509,7 @@ fun lagPersonResultaterForSøkerOgToBarn(
         ),
         lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            aktør = barn2Aktør,
+            person = lagPerson(type = PersonType.BARN, aktør = barn2Aktør, fødselsdato = stønadFom),
             resultat = Resultat.OPPFYLT,
             periodeFom = stønadFom,
             periodeTom = stønadTom,
@@ -517,7 +522,7 @@ fun lagPersonResultaterForSøkerOgToBarn(
 
 fun lagPersonResultat(
     vilkårsvurdering: Vilkårsvurdering,
-    aktør: Aktør,
+    person: Person,
     resultat: Resultat,
     periodeFom: LocalDate?,
     periodeTom: LocalDate?,
@@ -530,7 +535,7 @@ fun lagPersonResultat(
 ): PersonResultat {
     val personResultat = PersonResultat(
         vilkårsvurdering = vilkårsvurdering,
-        aktør = aktør
+        aktør = person.aktør
     )
 
     if (lagFullstendigVilkårResultat) {
@@ -538,7 +543,7 @@ fun lagPersonResultat(
             Vilkår.hentVilkårFor(personType).map {
                 VilkårResultat(
                     personResultat = personResultat,
-                    periodeFom = periodeFom,
+                    periodeFom = if (it.gjelderAlltidFraBarnetsFødselsdato()) person.fødselsdato else periodeFom,
                     periodeTom = periodeTom,
                     vilkårType = it,
                     resultat = resultat,
@@ -1288,7 +1293,7 @@ fun oppfyltVilkår(vilkår: Vilkår, regelverk: Regelverk? = null) =
         }
     )
 
-fun ikkeOppfyltVilkår(vilkår: Vilkår, regelverk: Regelverk? = null) =
+fun ikkeOppfyltVilkår(vilkår: Vilkår) =
     VilkårRegelverkResultat(
         vilkår = vilkår,
         regelverkResultat = RegelverkResultat.IKKE_OPPFYLT

@@ -1,14 +1,13 @@
 package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
@@ -27,6 +26,7 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -41,7 +41,6 @@ class BehandlingsresultatSteg(
     private val vilkårService: VilkårService,
     private val persongrunnlagService: PersongrunnlagService,
     private val beregningService: BeregningService,
-    private val featureToggleService: FeatureToggleService,
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
 ) : BehandlingSteg<String> {
 
@@ -81,6 +80,10 @@ class BehandlingsresultatSteg(
             endreteUtbetalingerMedAndeler.map { it.endretUtbetalingAndel },
             vilkårService.hentVilkårsvurdering(behandling.id)
         )
+
+        if (behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO) {
+            validerIngenEndringIUtbetalingEtterMigreringsdatoenTilForrigeIverksatteBehandling(behandling)
+        }
     }
 
     @Transactional
@@ -89,12 +92,7 @@ class BehandlingsresultatSteg(
             if (behandling.erMigrering() && behandling.skalBehandlesAutomatisk) {
                 settBehandlingsresultat(behandling, Behandlingsresultat.INNVILGET)
             } else {
-                val resultat =
-                    if (featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_BEREGNE_BEHANDLINGSRESULTAT)) {
-                        behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.id)
-                    } else {
-                        behandlingsresultatService.utledBehandlingsresultatGammel(behandlingId = behandling.id)
-                    }
+                val resultat = behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.id)
 
                 behandlingService.oppdaterBehandlingsresultat(
                     behandlingId = behandling.id,
@@ -129,13 +127,9 @@ class BehandlingsresultatSteg(
             simuleringService.oppdaterSimuleringPåBehandling(behandlingMedOppdatertBehandlingsresultat)
         }
 
-        return if (featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_BEREGNE_BEHANDLINGSRESULTAT)) {
-            val endringerIUtbetaling =
-                beregningService.hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling)
-            hentNesteStegGittEndringerIUtbetaling(behandling, endringerIUtbetaling)
-        } else {
-            hentNesteStegForNormalFlytGammel(behandling)
-        }
+        val endringerIUtbetaling =
+            beregningService.hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling)
+        return hentNesteStegGittEndringerIUtbetaling(behandling, endringerIUtbetaling)
     }
 
     override fun stegType(): StegType {
@@ -161,5 +155,22 @@ class BehandlingsresultatSteg(
     private fun settBehandlingsresultat(behandling: Behandling, resultat: Behandlingsresultat): Behandling {
         behandling.resultat = resultat
         return behandlingHentOgPersisterService.lagreEllerOppdater(behandling)
+    }
+
+    fun validerIngenEndringIUtbetalingEtterMigreringsdatoenTilForrigeIverksatteBehandling(behandling: Behandling) {
+        if (behandling.status == BehandlingStatus.AVSLUTTET) return
+
+        val endringIUtbetalingTidslinje =
+            beregningService.hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandlingTidslinje(behandling)
+
+        val migreringsdatoForrigeIverksatteBehandling = beregningService
+            .hentAndelerFraForrigeIverksattebehandling(behandling)
+            .minOf { it.stønadFom }
+
+        endringIUtbetalingTidslinje.kastFeilVedEndringEtter(migreringsdatoForrigeIverksatteBehandling, behandling)
+    }
+
+    companion object {
+        val logger = LoggerFactory.getLogger(this::class.java)!!
     }
 }

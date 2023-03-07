@@ -9,8 +9,8 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForSimule
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.UtbetalingsoppdragService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.simulering.domene.RestSimulering
@@ -39,7 +39,7 @@ class SimuleringService(
     private val tilgangService: TilgangService,
     private val featureToggleService: FeatureToggleService,
     private val vedtakRepository: VedtakRepository,
-    private val behandlingRepository: BehandlingRepository
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService
 ) {
     private val simulert = Metrics.counter("familie.ba.sak.oppdrag.simulert")
 
@@ -97,7 +97,7 @@ class SimuleringService(
     }
 
     fun oppdaterSimuleringPåBehandlingVedBehov(behandlingId: Long): List<ØkonomiSimuleringMottaker> {
-        val behandling = behandlingRepository.finnBehandling(behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
         val behandlingErFerdigBesluttet =
             behandling.status == BehandlingStatus.IVERKSETTER_VEDTAK ||
                 behandling.status == BehandlingStatus.AVSLUTTET

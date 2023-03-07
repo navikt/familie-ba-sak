@@ -29,7 +29,7 @@ class AutobrevOpphørSmåbarnstilleggService(
     @Transactional
     fun kjørBehandlingOgSendBrevForOpphørAvSmåbarnstillegg(fagsakId: Long) {
         val behandling =
-            behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = fagsakId)
+            behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = fagsakId)
                 ?: error("Fant ikke aktiv behandling")
 
         val personopplysningGrunnlag: PersonopplysningGrunnlag =

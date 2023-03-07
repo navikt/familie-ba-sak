@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.bestemUnderkatego
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfoRepository
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus.AVSLUTTET
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus.FATTER_VEDTAK
@@ -20,7 +19,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoServ
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.initStatus
-import no.nav.familie.ba.sak.kjerne.behandlingsresultat.validerBehandlingsresultat
+import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatValideringUtils
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.logg.BehandlingLoggRequest
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
@@ -45,7 +44,6 @@ import java.time.YearMonth
 
 @Service
 class BehandlingService(
-    private val behandlingRepository: BehandlingRepository,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val behandlingstemaService: BehandlingstemaService,
     private val behandlingSøknadsinfoService: BehandlingSøknadsinfoService,
@@ -69,7 +67,7 @@ class BehandlingService(
             frontendFeilmelding = "Kan ikke lage behandling på person. Fant ikke fagsak."
         )
 
-        val aktivBehandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = fagsak.id)
+        val aktivBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = fagsak.id)
         val sisteBehandlingSomErVedtatt =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsak.id)
 
@@ -143,13 +141,10 @@ class BehandlingService(
     }
 
     fun nullstillEndringstidspunkt(behandlingId: Long) {
-        val behandling = behandlingRepository.finnBehandling(behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
         behandling.overstyrtEndringstidspunkt = null
-        behandlingHentOgPersisterService.lagreEllerOppdater(behandling, false)
+        behandlingHentOgPersisterService.lagreEllerOppdater(behandling = behandling, sendTilDvh = false)
     }
-
-    @Transactional
-    fun lagre(behandling: Behandling) = behandlingRepository.save(behandling)
 
     @Transactional
     fun opprettOgInitierNyttVedtakForBehandling(
@@ -158,7 +153,7 @@ class BehandlingService(
         begrunnelseVilkårPekere: List<OriginalOgKopiertVilkårResultat> = emptyList()
     ) {
         behandling.steg.takeUnless { it !== StegType.BESLUTTE_VEDTAK && it !== StegType.REGISTRERE_PERSONGRUNNLAG }
-            ?: throw error("Forsøker å initiere vedtak på steg ${behandling.steg}")
+            ?: error("Forsøker å initiere vedtak på steg ${behandling.steg}")
 
         val deaktivertVedtak =
             vedtakRepository.findByBehandlingAndAktivOptional(behandlingId = behandling.id)
@@ -184,14 +179,14 @@ class BehandlingService(
 
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} omgjør automatisk behandling $behandling til manuell.")
         behandling.skalBehandlesAutomatisk = false
-        return behandlingRepository.save(behandling)
+        return behandlingHentOgPersisterService.lagreEllerOppdater(behandling = behandling, sendTilDvh = true)
     }
 
     fun lagreNyOgDeaktiverGammelBehandling(behandling: Behandling): Behandling {
-        val aktivBehandling = behandlingHentOgPersisterService.hentAktivForFagsak(behandling.fagsak.id)
+        val aktivBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = behandling.fagsak.id)
 
         if (aktivBehandling != null) {
-            behandlingRepository.saveAndFlush(aktivBehandling.also { it.aktiv = false })
+            behandlingHentOgPersisterService.lagreOgFlush(aktivBehandling.also { it.aktiv = false })
             saksstatistikkEventPublisher.publiserBehandlingsstatistikk(aktivBehandling.id)
         } else if (harAktivInfotrygdSak(behandling)) {
             throw FunksjonellFeil(
@@ -232,7 +227,7 @@ class BehandlingService(
 
     fun oppdaterBehandlingsresultat(behandlingId: Long, resultat: Behandlingsresultat): Behandling {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
-        validerBehandlingsresultat(behandling, resultat)
+        BehandlingsresultatValideringUtils.validerBehandlingsresultat(behandling, resultat)
 
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer resultat på behandling $behandlingId fra ${behandling.resultat} til $resultat")
         loggService.opprettVilkårsvurderingLogg(

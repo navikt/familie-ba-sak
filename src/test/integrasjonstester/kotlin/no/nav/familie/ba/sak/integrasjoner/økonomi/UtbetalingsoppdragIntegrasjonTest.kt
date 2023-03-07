@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.common.årMnd
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonInfo
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -47,6 +48,9 @@ class UtbetalingsoppdragIntegrasjonTest(
 
     @Autowired
     private val behandlingService: BehandlingService,
+
+    @Autowired
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 
     @Autowired
     private val fagsakService: FagsakService,
@@ -1184,7 +1188,7 @@ class UtbetalingsoppdragIntegrasjonTest(
         )
         førsteBehandling.status = BehandlingStatus.AVSLUTTET
         førsteBehandling.leggTilBehandlingStegTilstand(StegType.BEHANDLING_AVSLUTTET)
-        behandlingService.lagre(førsteBehandling)
+        behandlingHentOgPersisterService.lagreEllerOppdater(førsteBehandling, false)
 
         val andreBehandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
             lagBehandling(

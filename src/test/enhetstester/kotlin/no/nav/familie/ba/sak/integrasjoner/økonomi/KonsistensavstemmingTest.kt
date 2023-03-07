@@ -340,7 +340,7 @@ class KonsistensavstemmingTest {
         lagMockFinnPerioderForRelevanteBehandlingerHappeCase()
         konsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask.doTask(
             Task(
-                payload = finnPerioderTask!!.payload,
+                payload = finnPerioderTask.payload,
                 type = KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask.TASK_STEP_TYPE
             )
         )

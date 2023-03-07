@@ -4,7 +4,9 @@ import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import io.mockk.verify
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagPersonResultat
 import no.nav.familie.ba.sak.common.lagPersonResultaterForSøkerOgToBarn
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
@@ -369,7 +371,7 @@ class BehandlingIntegrationTest(
         vilkårsvurdering.personResultater = setOf(
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                aktør = søkerAktørId,
+                person = lagPerson(type = PersonType.SØKER, aktør = søkerAktørId),
                 resultat = Resultat.OPPFYLT,
                 periodeFom = januar2020.minusMonths(1).toLocalDate(),
                 periodeTom = stønadTom.toLocalDate(),
@@ -378,7 +380,7 @@ class BehandlingIntegrationTest(
             ),
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                aktør = barn1AktørId,
+                person = lagPerson(type = PersonType.BARN, aktør = barn1AktørId, fødselsdato = januar2020.minusYears(2).førsteDagIInneværendeMåned()),
                 resultat = Resultat.OPPFYLT,
                 periodeFom = januar2020.minusMonths(1).toLocalDate(),
                 periodeTom = stønadTom.toLocalDate(),
@@ -387,7 +389,7 @@ class BehandlingIntegrationTest(
             ),
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                aktør = barn2AktørId,
+                person = lagPerson(type = PersonType.BARN, aktør = barn2AktørId, fødselsdato = januar2020.førsteDagIInneværendeMåned()),
                 resultat = Resultat.OPPFYLT,
                 periodeFom = oktober2020.minusMonths(1).toLocalDate(),
                 periodeTom = stønadTom.toLocalDate(),
@@ -628,7 +630,7 @@ class BehandlingIntegrationTest(
 
         val personResultatBarn1 = lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            aktør = barn1AktørId,
+            person = lagPerson(type = PersonType.BARN, aktør = barn1AktørId, fødselsdato = barn1Fødselsdato),
             resultat = Resultat.OPPFYLT,
             periodeFom = mars2018.minusMonths(1).toLocalDate(),
             periodeTom = barn1Fødselsdato.plusYears(18),
@@ -638,7 +640,7 @@ class BehandlingIntegrationTest(
         )
         val personResultatSøker = lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            aktør = søkerAktørId,
+            person = lagPerson(type = PersonType.SØKER, aktør = søkerAktørId),
             resultat = Resultat.OPPFYLT,
             periodeFom = mars2018.minusMonths(1).toLocalDate(),
             periodeTom = stønadTom,

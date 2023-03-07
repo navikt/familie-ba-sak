@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
 import io.mockk.mockk
-import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagSanityBegrunnelse
 import no.nav.familie.ba.sak.common.lagSanityEøsBegrunnelse
@@ -14,9 +13,7 @@ import no.nav.familie.ba.sak.integrasjoner.sanity.hentBegrunnelser
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertVedtaksperiode
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
@@ -25,302 +22,9 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Opphørsperiode
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 
 internal class BrevUtilsTest {
-
-    private val støttedeBehandlingsersultaterFørstegangsbehandling = listOf(
-        Behandlingsresultat.INNVILGET,
-        Behandlingsresultat.INNVILGET_OG_OPPHØRT,
-        Behandlingsresultat.DELVIS_INNVILGET,
-        Behandlingsresultat.DELVIS_INNVILGET_OG_OPPHØRT,
-        Behandlingsresultat.AVSLÅTT
-    )
-
-    @Test
-    fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for innvilget førstegangsbehandling`() {
-        støttedeBehandlingsersultaterFørstegangsbehandling.filterNot { it == Behandlingsresultat.AVSLÅTT }.forEach {
-            Assertions.assertEquals(
-                Brevmal.VEDTAK_FØRSTEGANGSVEDTAK,
-                hentManuellVedtaksbrevtypeGammel(
-                    BehandlingType.FØRSTEGANGSBEHANDLING,
-                    it
-                )
-            )
-        }
-    }
-
-    @Test
-    fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for innvilget førstegangsbehandling og institusjon`() {
-        støttedeBehandlingsersultaterFørstegangsbehandling.filterNot { it == Behandlingsresultat.AVSLÅTT }.forEach {
-            Assertions.assertEquals(
-                Brevmal.VEDTAK_FØRSTEGANGSVEDTAK_INSTITUSJON,
-                hentManuellVedtaksbrevtypeGammel(
-                    BehandlingType.FØRSTEGANGSBEHANDLING,
-                    it,
-                    true
-                )
-            )
-        }
-    }
-
-    @Test
-    fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for avslått førstegangsbehandling`() {
-        Assertions.assertEquals(
-            Brevmal.VEDTAK_AVSLAG,
-            hentManuellVedtaksbrevtypeGammel(
-                BehandlingType.FØRSTEGANGSBEHANDLING,
-                Behandlingsresultat.AVSLÅTT
-            )
-        )
-    }
-
-    @Test
-    fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for avslått førstegangsbehandling og institusjon`() {
-        Assertions.assertEquals(
-            Brevmal.VEDTAK_AVSLAG_INSTITUSJON,
-            hentManuellVedtaksbrevtypeGammel(
-                BehandlingType.FØRSTEGANGSBEHANDLING,
-                Behandlingsresultat.AVSLÅTT,
-                true
-            )
-        )
-    }
-
-    @Test
-    fun `skal kaste exception for ikke-støttede behandlingsresultater ved førstegangsbehandling`() {
-        val ikkeStøttedeBehandlingsersultater =
-            Behandlingsresultat.values().subtract(støttedeBehandlingsersultaterFørstegangsbehandling)
-
-        ikkeStøttedeBehandlingsersultater.forEach {
-            assertThrows<Exception> {
-                hentManuellVedtaksbrevtypeGammel(
-                    BehandlingType.FØRSTEGANGSBEHANDLING,
-                    it
-                )
-            }
-        }
-    }
-
-    private val behandlingsersultaterForVedtakEndring = listOf(
-        Behandlingsresultat.INNVILGET,
-        Behandlingsresultat.INNVILGET_OG_ENDRET,
-        Behandlingsresultat.DELVIS_INNVILGET,
-        Behandlingsresultat.DELVIS_INNVILGET_OG_ENDRET,
-        Behandlingsresultat.AVSLÅTT_OG_ENDRET,
-        Behandlingsresultat.ENDRET_UTBETALING,
-        Behandlingsresultat.ENDRET_UTEN_UTBETALING
-    )
-
-    @Test
-    fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for 'Vedtak endring'`() {
-        behandlingsersultaterForVedtakEndring.forEach {
-            Assertions.assertEquals(
-                Brevmal.VEDTAK_ENDRING,
-                hentManuellVedtaksbrevtypeGammel(
-                    BehandlingType.REVURDERING,
-                    it
-                )
-            )
-        }
-    }
-
-    @Test
-    fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for 'Vedtak endring' og institusjon`() {
-        behandlingsersultaterForVedtakEndring.forEach {
-            Assertions.assertEquals(
-                Brevmal.VEDTAK_ENDRING_INSTITUSJON,
-                hentManuellVedtaksbrevtypeGammel(
-                    BehandlingType.REVURDERING,
-                    it,
-                    true
-                )
-            )
-        }
-    }
-
-    private val behandlingsersultaterForOpphørt = listOf(Behandlingsresultat.OPPHØRT)
-    private val behandlingsersultaterForFortsattOpphørt = listOf(Behandlingsresultat.FORTSATT_OPPHØRT)
-
-    @Test
-    fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for 'Opphørt'`() {
-        behandlingsersultaterForOpphørt.forEach {
-            Assertions.assertEquals(
-                Brevmal.VEDTAK_OPPHØRT,
-                hentManuellVedtaksbrevtypeGammel(
-                    BehandlingType.REVURDERING,
-                    it
-                )
-            )
-        }
-    }
-
-    @Test
-    fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for 'Opphørt' og institusjon`() {
-        behandlingsersultaterForOpphørt.forEach {
-            Assertions.assertEquals(
-                Brevmal.VEDTAK_OPPHØRT_INSTITUSJON,
-                hentManuellVedtaksbrevtypeGammel(
-                    BehandlingType.REVURDERING,
-                    it,
-                    true
-                )
-            )
-        }
-    }
-
-    private val behandlingsersultaterForOpphørMedEndring = listOf(
-        Behandlingsresultat.INNVILGET_OG_OPPHØRT,
-        Behandlingsresultat.INNVILGET_ENDRET_OG_OPPHØRT,
-        Behandlingsresultat.DELVIS_INNVILGET_OG_OPPHØRT,
-        Behandlingsresultat.DELVIS_INNVILGET_ENDRET_OG_OPPHØRT,
-        Behandlingsresultat.AVSLÅTT_OG_OPPHØRT,
-        Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT,
-        Behandlingsresultat.ENDRET_OG_OPPHØRT
-    )
-
-    @Test
-    fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for 'Opphør med endring'`() {
-        behandlingsersultaterForOpphørMedEndring.forEach {
-            Assertions.assertEquals(
-                Brevmal.VEDTAK_OPPHØR_MED_ENDRING,
-                hentManuellVedtaksbrevtypeGammel(
-                    BehandlingType.REVURDERING,
-                    it
-                )
-            )
-        }
-    }
-
-    @Test
-    fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for 'Opphør med endring' og institusjon`() {
-        behandlingsersultaterForOpphørMedEndring.forEach {
-            Assertions.assertEquals(
-                Brevmal.VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON,
-                hentManuellVedtaksbrevtypeGammel(
-                    BehandlingType.REVURDERING,
-                    it,
-                    true
-                )
-            )
-        }
-    }
-
-    private val behandlingsersultaterForFortsattInnvilget = listOf(Behandlingsresultat.FORTSATT_INNVILGET, Behandlingsresultat.ENDRET_OG_FORTSATT_INNVILGET)
-
-    @Test
-    fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for 'Fortsatt innvilget'`() {
-        behandlingsersultaterForFortsattInnvilget.forEach {
-            Assertions.assertEquals(
-                Brevmal.VEDTAK_FORTSATT_INNVILGET,
-                hentManuellVedtaksbrevtypeGammel(
-                    BehandlingType.REVURDERING,
-                    it
-                )
-            )
-        }
-    }
-
-    @Test
-    fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for 'Fortsatt innvilget' og institusjon`() {
-        behandlingsersultaterForFortsattInnvilget.forEach {
-            Assertions.assertEquals(
-                Brevmal.VEDTAK_FORTSATT_INNVILGET_INSTITUSJON,
-                hentManuellVedtaksbrevtypeGammel(
-                    BehandlingType.REVURDERING,
-                    it,
-                    true
-                )
-            )
-        }
-    }
-
-    private val behandlingsersultaterForAvslag = listOf(Behandlingsresultat.AVSLÅTT)
-
-    @Test
-    fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for 'Avslag'`() {
-        behandlingsersultaterForAvslag.forEach {
-            Assertions.assertEquals(
-                Brevmal.VEDTAK_AVSLAG,
-                hentManuellVedtaksbrevtypeGammel(
-                    BehandlingType.REVURDERING,
-                    it
-                )
-            )
-        }
-    }
-
-    @Test
-    fun `test hentManuellVedtaksbrevtype gir riktig vedtaksbrevtype for 'Avslag' og institusjon`() {
-        behandlingsersultaterForAvslag.forEach {
-            Assertions.assertEquals(
-                Brevmal.VEDTAK_AVSLAG_INSTITUSJON,
-                hentManuellVedtaksbrevtypeGammel(
-                    BehandlingType.REVURDERING,
-                    it,
-                    true
-                )
-            )
-        }
-    }
-
-    @Test
-    fun `test hentManuellVedtaksbrevtype kaster exception for ikke-støttede behandlingsresultater ved revurdering`() {
-        val ikkeStøttedeBehandlingsersultater =
-            Behandlingsresultat.values()
-                .subtract(behandlingsersultaterForVedtakEndring)
-                .subtract(behandlingsersultaterForOpphørt)
-                .subtract(behandlingsersultaterForFortsattOpphørt)
-                .subtract(behandlingsersultaterForOpphørMedEndring)
-                .subtract(behandlingsersultaterForOpphørMedEndring)
-                .subtract(behandlingsersultaterForAvslag)
-                .subtract(behandlingsersultaterForFortsattInnvilget)
-
-        ikkeStøttedeBehandlingsersultater.forEach {
-            assertThrows<Exception> {
-                hentManuellVedtaksbrevtypeGammel(
-                    BehandlingType.REVURDERING,
-                    it
-                )
-            }
-        }
-    }
-
-    @Test
-    fun `test hentAutomatiskVedtaksbrevtype gir riktig vedtaksbrevtype for revurdering barn fra før`() {
-        val fagsak = defaultFagsak().copy(status = FagsakStatus.LØPENDE)
-        val behandling =
-            lagBehandling(
-                fagsak = fagsak,
-                skalBehandlesAutomatisk = true,
-                årsak = BehandlingÅrsak.FØDSELSHENDELSE
-            ).copy(
-                resultat = Behandlingsresultat.INNVILGET
-            )
-        Assertions.assertEquals(
-            Brevmal.AUTOVEDTAK_NYFØDT_BARN_FRA_FØR,
-            hentBrevmalGammel(behandling)
-        )
-    }
-
-    @Test
-    fun `test hentAutomatiskVedtaksbrevtype gir riktig vedtaksbrevtype for førstegangsbehandling nyfødt barn`() {
-        val fagsak = defaultFagsak()
-        val behandling =
-            lagBehandling(
-                fagsak = fagsak,
-                skalBehandlesAutomatisk = true,
-                årsak = BehandlingÅrsak.FØDSELSHENDELSE
-            ).copy(
-                resultat = Behandlingsresultat.INNVILGET
-            )
-        Assertions.assertEquals(
-            Brevmal.AUTOVEDTAK_NYFØDT_FØRSTE_BARN,
-            hentBrevmalGammel(behandling)
-        )
-    }
-
     @Test
     fun `hent dokumenttittel dersom denne skal overstyres for behandlingen`() {
         assertNull(hentOverstyrtDokumenttittel(lagBehandling().copy(type = BehandlingType.FØRSTEGANGSBEHANDLING)))
@@ -755,7 +459,7 @@ internal class BrevUtilsTest {
     }
 
     @Test
-    fun `Skal slå sammen hjemlene riktig når det er 3 eller flere hjemler på "siste" hjemmeltype`() {
+    fun `Skal slå sammen hjemlene riktig når det er 3 eller flere hjemler på 'siste' hjemmeltype`() {
         val utvidetVedtaksperioderMedBegrunnelser = listOf(
             lagUtvidetVedtaksperiodeMedBegrunnelser(
                 begrunnelser = listOf(
