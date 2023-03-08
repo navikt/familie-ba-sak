@@ -127,18 +127,11 @@ data class AndelTilkjentYtelseMedEndreteUtbetalinger internal constructor(
     val endreteUtbetalinger = endreteUtbetalingerAndeler
 
     companion object {
-        fun utenEndringer(andelTilkjentYtelse: AndelTilkjentYtelse): AndelTilkjentYtelseMedEndreteUtbetalinger {
-            if (andelTilkjentYtelse.endretUtbetalingAndeler.size > 0) {
-                throw IllegalArgumentException(
-                    "Skal opprette AndelTilkjentYtelseMedEndreteUtbetalinger uten endringer, men underliggende andel HAR endringer"
-                )
-            }
-
-            return AndelTilkjentYtelseMedEndreteUtbetalinger(
+        fun utenEndringer(andelTilkjentYtelse: AndelTilkjentYtelse): AndelTilkjentYtelseMedEndreteUtbetalinger =
+            AndelTilkjentYtelseMedEndreteUtbetalinger(
                 andelTilkjentYtelse = andelTilkjentYtelse,
                 endreteUtbetalingerAndeler = emptyList()
             )
-        }
     }
 }
 
