@@ -1,7 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg
 
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfoRepository
+import no.nav.familie.ba.sak.kjerne.beregning.SatsService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
@@ -9,6 +13,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.erAlleredeBegrunnetMedBegrunne
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.leader.LeaderClient
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
@@ -23,7 +28,8 @@ class RestartAvSmåbarnstilleggService(
     private val opprettTaskService: OpprettTaskService,
     private val vedtakService: VedtakService,
     private val vedtaksperiodeService: VedtaksperiodeService,
-    private val behandlingMigreringsinfoRepository: BehandlingMigreringsinfoRepository
+    private val behandlingMigreringsinfoRepository: BehandlingMigreringsinfoRepository,
+    private val andelerTilkjentYtelseRepository: AndelTilkjentYtelseRepository
 ) {
 
     /**
@@ -34,6 +40,12 @@ class RestartAvSmåbarnstilleggService(
     @Scheduled(cron = "0 0 7 1 * *")
     @Transactional
     fun scheduledFinnRestartetSmåbarnstilleggOgOpprettOppgave() {
+        if (LeaderClient.isLeader() == true) {
+            finnRestartetSmåbarnstilleggOgOpprettOppgave(true)
+        }
+    }
+
+    fun finnRestartetSmåbarnstilleggOgOpprettOppgave(skalOppretteOppgaver: Boolean) {
         finnAlleFagsakerMedRestartetSmåbarnstilleggIMåned().forEach { fagsakId ->
             logger.info("Oppretter 'vurder livshendelse'-oppgave på fagsak $fagsakId fordi småbarnstillegg har startet opp igjen denne måneden")
 
@@ -41,26 +53,59 @@ class RestartAvSmåbarnstilleggService(
                 behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = fagsakId)
 
             if (sisteIverksatteBehandling != null) {
-                opprettTaskService.opprettOppgaveTask(
-                    behandlingId = sisteIverksatteBehandling.id,
-                    oppgavetype = Oppgavetype.VurderLivshendelse,
-                    beskrivelse = "Småbarnstillegg: endring i overgangsstønad må behandles manuelt"
-                )
+                if (skalOppretteOppgaver) {
+                    opprettTaskService.opprettOppgaveTask(
+                        behandlingId = sisteIverksatteBehandling.id,
+                        oppgavetype = Oppgavetype.VurderLivshendelse,
+                        beskrivelse = "Småbarnstillegg: endring i overgangsstønad må behandles manuelt"
+                    )
+                } else {
+                    logger.info("DryRun av RestartAvSmåbarnstilleggService. Ville ha opprettet en VurderLivshendelse for behandling=${sisteIverksatteBehandling.id}, fagsakId=$fagsakId")
+                }
             }
         }
     }
 
     fun finnAlleFagsakerMedRestartetSmåbarnstilleggIMåned(måned: YearMonth = YearMonth.now()): List<Long> {
         return behandlingHentOgPersisterService.partitionByIverksatteBehandlinger {
-            fagsakRepository.finnAlleFagsakerMedOppstartSmåbarnstilleggIMåned(
-                iverksatteLøpendeBehandlinger = it,
-                stønadFom = måned
-            )
+            finnAlleFagsakerMedOppstartSmåbarnstilleggIMåned(it, måned)
         }.filter { fagsakId ->
             val migreringsdato = behandlingMigreringsinfoRepository.finnSisteMigreringsdatoPåFagsak(fagsakId)
             migreringsdato?.month != LocalDate.now().minusMonths(1).month
         }.filter { fagsakId ->
             !periodeMedRestartetSmåbarnstilleggErAlleredeBegrunnet(fagsakId = fagsakId, måned = måned)
+        }
+    }
+
+    private fun finnAlleFagsakerMedOppstartSmåbarnstilleggIMåned(
+        it: List<Long>,
+        måned: YearMonth
+    ): List<Long> {
+        val fagsaker = fagsakRepository.finnAlleFagsakerMedOppstartSmåbarnstilleggIMåned(
+            iverksatteLøpendeBehandlinger = it,
+            stønadFom = måned
+        )
+        if (SatsService.finnSisteSatsFor(SatsType.SMA).gyldigFom.toYearMonth() == måned) {
+            return fagsaker.mapNotNull { fagsakId ->
+                val sisteVedtatteBehandling =
+                    behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId)
+
+                if (sisteVedtatteBehandling != null) {
+                    val atySmåbarnstillegg =
+                        andelerTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteVedtatteBehandling.id)
+                            .filter { it.erSmåbarnstillegg() }
+                    val harSmåbarnstilleggForrigeMåned = atySmåbarnstillegg.any { it.stønadTom == måned.minusMonths(1) }
+                    if (harSmåbarnstilleggForrigeMåned) {
+                        null
+                    } else {
+                        fagsakId
+                    }
+                } else {
+                    null
+                }
+            }
+        } else {
+            return fagsaker
         }
     }
 
