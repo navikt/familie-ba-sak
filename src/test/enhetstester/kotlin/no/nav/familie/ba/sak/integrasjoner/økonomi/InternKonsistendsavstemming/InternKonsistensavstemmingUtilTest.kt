@@ -7,7 +7,6 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-
 import java.time.YearMonth
 
 class InternKonsistensavstemmingUtilTest {
@@ -38,7 +37,7 @@ class InternKonsistensavstemmingUtilTest {
                 tom = YearMonth.parse("2039-10"),
                 beløp = 1083,
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD
-            ),
+            )
         )
         val utbetalingsoppdrag = objectMapper.readValue<Utbetalingsoppdrag>(mockUtbetalingsoppdrag)
 
@@ -77,7 +76,7 @@ class InternKonsistensavstemmingUtilTest {
                 tom = YearMonth.parse("2040-10"),
                 beløp = 1083,
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD
-            ),
+            )
         )
         val utbetalingsoppdrag = objectMapper.readValue<Utbetalingsoppdrag>(mockUtbetalingsoppdrag)
 
