@@ -46,6 +46,7 @@ class RestartAvSmåbarnstilleggService(
     }
 
     fun finnRestartetSmåbarnstilleggOgOpprettOppgave(skalOppretteOppgaver: Boolean) {
+        logger.info("Starter jobb for å finne småbarnstillegg som skal restartes, men som ikke allerede begrunnet. skalOppretteOppgaver=$skalOppretteOppgaver")
         finnAlleFagsakerMedRestartetSmåbarnstilleggIMåned().forEach { fagsakId ->
             logger.info("Oppretter 'vurder livshendelse'-oppgave på fagsak $fagsakId fordi småbarnstillegg har startet opp igjen denne måneden")
 
@@ -64,6 +65,7 @@ class RestartAvSmåbarnstilleggService(
                 }
             }
         }
+        logger.info("Avslutter jobb for å finne småbarnstillegg som skal restartes, men som ikke allerede begrunnet")
     }
 
     fun finnAlleFagsakerMedRestartetSmåbarnstilleggIMåned(måned: YearMonth = YearMonth.now()): List<Long> {
