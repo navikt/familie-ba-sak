@@ -5,7 +5,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -16,7 +15,6 @@ import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import java.math.BigDecimal
 
 @Service
 class InternKonsistensavstemmingService(
@@ -47,20 +45,9 @@ class InternKonsistensavstemmingService(
             val andeler = entry.value.first
             val utbetalingsoppdrag = entry.value.second
 
-            val sumUtbetalingFraAndeler = andeler.sumOf { it.kalkulertUtbetalingsbeløp }
+            val harFeil = erForskjellMellomAndelerOgOppdrag(andeler, utbetalingsoppdrag, fagsakId)
 
-            val sumUtbetalingFraUtbetalingsoppdrag =
-                utbetalingsoppdrag?.utbetalingsperiode?.sumOf { it.sats } ?: BigDecimal.ZERO
-
-            if (sumUtbetalingFraUtbetalingsoppdrag != sumUtbetalingFraAndeler.toBigDecimal()) {
-                secureLogger.info(
-                    "Fagsak $fagsakId har ulikt utbetalingsbeløp i andelene tilkjent ytelse og utbetalingsoppdraget." +
-                        "\nSum utbetaling i utbetalingsperiodene=$sumUtbetalingFraUtbetalingsoppdrag" +
-                        "\nSum utbetaling i andelene=$sumUtbetalingFraAndeler"
-                )
-
-                fagsakId
-            } else null
+            fagsakId.takeIf { harFeil }
         }
 
         if (fagsakerMedFeil.isNotEmpty()){

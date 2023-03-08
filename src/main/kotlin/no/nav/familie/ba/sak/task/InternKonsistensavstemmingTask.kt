@@ -44,7 +44,8 @@ class InternKonsistensavstemmingTask(
         fun opprettTask(fagsakIder: Set<Long>): Task {
             val metadata = Properties().apply {
                 this["fagsakerIder"] = "${fagsakIder.min()} til ${fagsakIder.max()}"
-                this[MDCConstants.MDC_CALL_ID] = MDC.get(MDCConstants.MDC_CALL_ID) ?: IdUtils.generateId()
+                this[MDCConstants.MDC_CALL_ID] = IdUtils.generateId()
+                this["Parent call id"] = MDC.get(MDCConstants.MDC_CALL_ID) ?: ""
             }
 
             return Task(

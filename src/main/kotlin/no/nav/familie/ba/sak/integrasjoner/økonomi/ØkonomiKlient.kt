@@ -168,7 +168,7 @@ class ØkonomiKlient(
         return kallEksternTjenesteRessurs(
             tjeneste = "familie-oppdrag",
             uri = uri,
-            formål = "Hent utbetalingsoppdrag for behandlinger"
+            formål = "Hent utbetalingsoppdrag for fagsaker"
         ) { postForEntity(uri = uri, payload = fagsakIder) }
     }
 }
