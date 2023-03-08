@@ -242,7 +242,6 @@ fun lagAndelTilkjentYtelse(
     forrigeperiodeIdOffset: Long? = null,
     tilkjentYtelse: TilkjentYtelse? = null,
     prosent: BigDecimal = BigDecimal(100),
-    endretUtbetalingAndeler: List<EndretUtbetalingAndel> = emptyList(),
     kildeBehandlingId: Long? = behandling.id,
     differanseberegnetPeriodebeløp: Int? = null
 ): AndelTilkjentYtelse {
@@ -259,7 +258,6 @@ fun lagAndelTilkjentYtelse(
         forrigePeriodeOffset = forrigeperiodeIdOffset,
         sats = beløp,
         prosent = prosent,
-        endretUtbetalingAndeler = endretUtbetalingAndeler.toMutableList(),
         kildeBehandlingId = kildeBehandlingId,
         differanseberegnetPeriodebeløp = differanseberegnetPeriodebeløp
     )
@@ -293,7 +291,6 @@ fun lagAndelTilkjentYtelseMedEndreteUtbetalinger(
         forrigePeriodeOffset = forrigeperiodeIdOffset,
         sats = beløp,
         prosent = prosent,
-        endretUtbetalingAndeler = endretUtbetalingAndeler.toMutableList(),
         differanseberegnetPeriodebeløp = differanseberegnetPeriodebeløp
     )
 
@@ -1138,8 +1135,7 @@ fun lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
         avtaletidspunktDeltBosted = avtaletidspunktDeltBosted,
         søknadstidspunkt = søknadstidspunkt,
         begrunnelse = "Test",
-        standardbegrunnelser = standardbegrunnelser,
-        andelTilkjentYtelser = andelTilkjentYtelser
+        standardbegrunnelser = standardbegrunnelser
     )
 
     return EndretUtbetalingAndelMedAndelerTilkjentYtelse(eua, andelTilkjentYtelser)
