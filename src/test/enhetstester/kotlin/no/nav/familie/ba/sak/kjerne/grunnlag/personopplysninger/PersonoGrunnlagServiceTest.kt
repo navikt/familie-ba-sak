@@ -34,7 +34,7 @@ class PersonoGrunnlagServiceTest {
             personopplysningerService = personopplysningerService,
             personidentService = personidentService,
             saksstatistikkEventPublisher = mockk(relaxed = true),
-            behandlingRepository = mockk(),
+            behandlingHentOgPersisterService = mockk(),
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             loggService = mockk(),
             arbeidsforholdService = mockk()

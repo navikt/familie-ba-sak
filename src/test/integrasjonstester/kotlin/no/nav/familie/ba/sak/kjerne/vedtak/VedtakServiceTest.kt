@@ -134,7 +134,6 @@ class VedtakServiceTest(
     @BeforeEach
     fun setup() {
         behandlingService = BehandlingService(
-            behandlingRepository,
             behandlingHentOgPersisterService,
             behandlingstemaService,
             behandlingSøknadsinfoService,

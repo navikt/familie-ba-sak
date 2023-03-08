@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClien
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.DbOppgave
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
@@ -38,7 +39,8 @@ class OppgaveService(
     private val oppgaveRepository: OppgaveRepository,
     private val arbeidsfordelingPåBehandlingRepository: ArbeidsfordelingPåBehandlingRepository,
     private val opprettTaskService: OpprettTaskService,
-    private val loggService: LoggService
+    private val loggService: LoggService,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService
 ) {
     private val antallOppgaveTyper: MutableMap<Oppgavetype, Counter> = mutableMapOf()
 
@@ -49,7 +51,7 @@ class OppgaveService(
         tilordnetNavIdent: String? = null,
         beskrivelse: String? = null
     ): String {
-        val behandling = behandlingRepository.finnBehandling(behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
         val fagsakId = behandling.fagsak.id
 
         val eksisterendeOppgave =
@@ -199,9 +201,9 @@ class OppgaveService(
 
     fun ferdigstillOppgaver(behandlingId: Long, oppgavetype: Oppgavetype) {
         oppgaveRepository.finnOppgaverSomSkalFerdigstilles(
-            oppgavetype,
-            behandlingRepository.finnBehandling(
-                behandlingId
+            oppgavetype = oppgavetype,
+            behandling = behandlingHentOgPersisterService.hent(
+                behandlingId = behandlingId
             )
         ).forEach {
             val oppgave = hentOppgave(it.gsakId.toLong())
