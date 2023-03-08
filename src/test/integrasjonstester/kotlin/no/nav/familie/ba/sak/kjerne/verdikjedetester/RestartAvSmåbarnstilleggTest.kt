@@ -167,7 +167,7 @@ class RestartAvSmåbarnstilleggTest(
     }
 
     @Test
-    fun `Ved satsendring skal man restarte sak som ikke hadde småbarnstillegg forrige måned, men som har restart i satsendringmåneden`() {
+    fun `Skal finne en fagsak hvor småbarnstillegg starter opp igjen inneværende måned selv om det er utført satsendring`() {
         mockkObject(SatsTidspunkt)
         every { SatsTidspunkt.senesteSatsTidspunkt } returns LocalDate.of(
             2022,
@@ -193,7 +193,7 @@ class RestartAvSmåbarnstilleggTest(
                 PeriodeOvergangsstønad(
                     personIdent = personScenario.søker.ident!!,
                     fomDato = barnFødselsdato.plusYears(1),
-                    tomDato = LocalDate.now().minusMonths(5).førsteDagIInneværendeMåned(),
+                    tomDato = LocalDate.now().minusMonths(4).førsteDagIInneværendeMåned(),
                     datakilde = PeriodeOvergangsstønad.Datakilde.EF
                 ),
                 PeriodeOvergangsstønad(
@@ -204,6 +204,26 @@ class RestartAvSmåbarnstilleggTest(
                 )
             )
         )
+
+        // satsendring gjør at den får en ny andel på småbarnstillegg med gyldig fom satsendringsdatoen
+        fullførSatsendring(fagsakMedSatsendringOgSmåbarnstilleggSomSkalRestartes.id, satsendringDato.toYearMonth())
+
+        val fagsaker: List<Long> =
+            restartAvSmåbarnstilleggService.finnAlleFagsakerMedRestartetSmåbarnstilleggIMåned(måned = satsendringDato.toYearMonth())
+
+        Assertions.assertTrue(fagsaker.contains(fagsakMedSatsendringOgSmåbarnstilleggSomSkalRestartes.id))
+    }
+
+    @Test
+    fun `Satsendring skal ikke restarte småbarnstillegg på allerede løpende småbarnstillegg`() {
+        mockkObject(SatsTidspunkt)
+        every { SatsTidspunkt.senesteSatsTidspunkt } returns LocalDate.of(
+            2022,
+            12,
+            1
+        ) // Mocker slik at behandling får gammel sats
+        val satsendringDato = LocalDate.of(2023, 3, 1)
+
         // Fagsak  - har løpende fagsak med småbarnstillegg og skal ikke restartes
         val personScenario2: RestScenario = lagScenario(barnFødselsdato)
         val fagsakMedSatsendringOgSmåbarnstilleggSomIkkeSkalRestartes: RestMinimalFagsak =
@@ -228,13 +248,11 @@ class RestartAvSmåbarnstilleggTest(
         )
 
         // satsendring gjør at den får en ny andel på småbarnstillegg med gyldig fom satsendringsdatoen
-        fullførSatsendring(fagsakMedSatsendringOgSmåbarnstilleggSomSkalRestartes.id, satsendringDato.toYearMonth())
         fullførSatsendring(fagsakMedSatsendringOgSmåbarnstilleggSomIkkeSkalRestartes.id, satsendringDato.toYearMonth())
 
         val fagsaker: List<Long> =
             restartAvSmåbarnstilleggService.finnAlleFagsakerMedRestartetSmåbarnstilleggIMåned(måned = satsendringDato.toYearMonth())
 
-        Assertions.assertTrue(fagsaker.contains(fagsakMedSatsendringOgSmåbarnstilleggSomSkalRestartes.id))
         Assertions.assertFalse(fagsaker.contains(fagsakMedSatsendringOgSmåbarnstilleggSomIkkeSkalRestartes.id))
     }
 

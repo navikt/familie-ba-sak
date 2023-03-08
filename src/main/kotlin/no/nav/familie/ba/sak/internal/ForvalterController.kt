@@ -47,12 +47,12 @@ class ForvalterController(
     }
 
     @PostMapping(
-        path = ["/start-manuell-restart-av-smaabarnstillegg-jobb/dryrun/{dryRun}"],
+        path = ["/start-manuell-restart-av-smaabarnstillegg-jobb/skalOppretteOppgaver/{skalOppretteOppgaver}"],
         consumes = [MediaType.APPLICATION_JSON_VALUE],
         produces = [MediaType.APPLICATION_JSON_VALUE]
     )
-    fun triggManuellStartAvSmåbarnstillegg(@PathVariable dryRun: Boolean = true): ResponseEntity<String> {
-        restartAvSmåbarnstilleggService.finnRestartetSmåbarnstilleggOgOpprettOppgave(dryRun)
+    fun triggManuellStartAvSmåbarnstillegg(@PathVariable skalOppretteOppgaver: Boolean = true): ResponseEntity<String> {
+        restartAvSmåbarnstilleggService.finnRestartetSmåbarnstilleggOgOpprettOppgave(skalOppretteOppgaver)
         return ResponseEntity.ok("OK")
     }
 
