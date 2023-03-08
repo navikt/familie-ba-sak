@@ -288,10 +288,10 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType, endringe
         BehandlingÅrsak.SØKNAD -> {
             when (utførendeStegType) {
                 REGISTRERE_PERSONGRUNNLAG -> {
-                    if (behandling.fagsak.type == FagsakType.NORMAL) {
-                        REGISTRERE_SØKNAD
-                    } else {
+                    if (behandling.fagsak.type == FagsakType.INSTITUSJON) {
                         REGISTRERE_INSTITUSJON_OG_VERGE
+                    } else {
+                        REGISTRERE_SØKNAD
                     }
                 }
 

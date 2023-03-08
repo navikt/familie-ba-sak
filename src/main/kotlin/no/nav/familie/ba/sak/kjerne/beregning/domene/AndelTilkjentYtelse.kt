@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.hentPerioderMedEndringerFra
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.utledSegmenter
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -31,13 +30,10 @@ import javax.persistence.Entity
 import javax.persistence.EntityListeners
 import javax.persistence.EnumType
 import javax.persistence.Enumerated
-import javax.persistence.FetchType
 import javax.persistence.GeneratedValue
 import javax.persistence.GenerationType
 import javax.persistence.Id
 import javax.persistence.JoinColumn
-import javax.persistence.JoinTable
-import javax.persistence.ManyToMany
 import javax.persistence.ManyToOne
 import javax.persistence.OneToOne
 import javax.persistence.SequenceGenerator
@@ -89,14 +85,6 @@ data class AndelTilkjentYtelse(
     @Column(name = "prosent", nullable = false)
     val prosent: BigDecimal,
 
-    @ManyToMany(cascade = [CascadeType.PERSIST, CascadeType.REMOVE], fetch = FetchType.EAGER)
-    @JoinTable(
-        name = "ANDEL_TIL_ENDRET_ANDEL",
-        joinColumns = [JoinColumn(name = "fk_andel_tilkjent_ytelse_id")],
-        inverseJoinColumns = [JoinColumn(name = "fk_endret_utbetaling_andel_id")]
-    )
-    val endretUtbetalingAndeler: MutableList<EndretUtbetalingAndel> = mutableListOf(),
-
     // kildeBehandlingId, periodeOffset og forrigePeriodeOffset trengs kun i forbindelse med
     // iverksetting/konsistensavstemming, og settes først ved generering av selve oppdraget mot økonomi.
 
@@ -123,9 +111,6 @@ data class AndelTilkjentYtelse(
     val periode
         get() = MånedPeriode(stønadFom, stønadTom)
 
-    fun endretUtbetalingAndelIder() =
-        (endretUtbetalingAndeler as MutableList<EndretUtbetalingAndel>?)?.map { it.id }
-
     override fun equals(other: Any?): Boolean {
         if (other == null || javaClass != other.javaClass) {
             return false
@@ -141,8 +126,7 @@ data class AndelTilkjentYtelse(
             Objects.equals(stønadTom, annen.stønadTom) &&
             Objects.equals(aktør, annen.aktør) &&
             Objects.equals(nasjonaltPeriodebeløp, annen.nasjonaltPeriodebeløp) &&
-            Objects.equals(differanseberegnetPeriodebeløp, annen.differanseberegnetPeriodebeløp) &&
-            Objects.equals(endretUtbetalingAndelIder(), annen.endretUtbetalingAndelIder())
+            Objects.equals(differanseberegnetPeriodebeløp, annen.differanseberegnetPeriodebeløp)
     }
 
     override fun hashCode(): Int {
@@ -155,8 +139,7 @@ data class AndelTilkjentYtelse(
             stønadTom,
             aktør,
             nasjonaltPeriodebeløp,
-            differanseberegnetPeriodebeløp,
-            endretUtbetalingAndelIder()
+            differanseberegnetPeriodebeløp
         )
     }
 
