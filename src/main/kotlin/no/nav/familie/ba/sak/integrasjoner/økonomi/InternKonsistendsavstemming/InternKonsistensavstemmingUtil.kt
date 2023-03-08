@@ -31,7 +31,7 @@ fun erForskjellMellomAndelerOgOppdrag(
     if (erForskjellMellomAndelerOgOppdrag) {
         secureLogger.info(
             "Fagsak $fagsakId har ulikt utbetalingsbeløp i andelene tilkjent ytelse og utbetalingsoppdraget." +
-                "\nSum utbetaling i utbetalingsperiodene=$oppdragsperioder" +
+                "\nSum utbetaling i utbetalingsperiodene=$sumUtbetalingFraOppdrag" +
                 "\nSum utbetaling i andelene=$sumUtbetalingFraAndeler"
         )
     }
