@@ -50,7 +50,7 @@ class InternKonsistensavstemmingService(
             fagsakId.takeIf { harFeil }
         }
 
-        if (fagsakerMedFeil.isNotEmpty()){
+        if (fagsakerMedFeil.isNotEmpty()) {
             throw Feil(
                 "Tilkjent ytelse og utbetalingsoppdraget som er lagret i familie-oppdrag er inkonsistent" +
                     "\nSe secure logs for mer detaljer." +

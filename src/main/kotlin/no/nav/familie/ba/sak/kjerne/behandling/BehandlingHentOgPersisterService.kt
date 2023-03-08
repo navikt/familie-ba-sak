@@ -95,7 +95,7 @@ class BehandlingHentOgPersisterService(
             .maxByOrNull { it.opprettetTidspunkt }
 
     private fun List<Behandling>.hentSisteSomErSentTilØkonomi() =
-        filter { !it.erHenlagt() && (it.status == BehandlingStatus.AVSLUTTET || it.status == BehandlingStatus.IVERKSETTER_VEDTAK)}
+        filter { !it.erHenlagt() && (it.status == BehandlingStatus.AVSLUTTET || it.status == BehandlingStatus.IVERKSETTER_VEDTAK) }
             .maxByOrNull { it.opprettetTidspunkt }
 
     /**

@@ -17,7 +17,7 @@ fun erForskjellMellomAndelerOgOppdrag(
             ?.filter { it.opphør == null }
             ?: emptyList()
 
-    val startFørsteOppdragsperiode = oppdragsperioder.minOfOrNull { it.vedtakdatoFom }?: TIDENES_MORGEN
+    val startFørsteOppdragsperiode = oppdragsperioder.minOfOrNull { it.vedtakdatoFom } ?: TIDENES_MORGEN
 
     val sumUtbetalingFraAndeler = andeler
         .filter { it.stønadFom.isSameOrAfter(startFørsteOppdragsperiode.toYearMonth()) }
