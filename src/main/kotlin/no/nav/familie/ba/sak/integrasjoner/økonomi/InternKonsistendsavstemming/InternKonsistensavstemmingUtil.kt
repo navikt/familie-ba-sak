@@ -16,24 +16,30 @@ fun erForskjellMellomAndelerOgOppdrag(
             ?.filter { it.opphør == null }
             ?: emptyList()
 
-    val forskjell: AndelOgOppdragForskjell = hentForskjellIAndelerOgUtbetalingsoppdrag(oppdragsperioder, andeler)
+    val forskjellMellomAndeleneOgUtbetalingsoppdraget: AndelOgOppdragForskjell = hentForskjellIAndelerOgUtbetalingsoppdrag(oppdragsperioder, andeler)
 
-    when (forskjell) {
-        AndelOgOppdragForskjell.TOMT_OPPDRAG_OG_ANDELER_MED_UTBETALIGNG -> secureLogger.info(
-            "Fagsak $fagsakId har andeler med utbetaling, men har ikke sendt noe oppdragsperioder til økonomi"
+    when (forskjellMellomAndeleneOgUtbetalingsoppdraget) {
+        AndelOgOppdragForskjell.TOMT_OPPDRAG_OG_ANDELER_MED_UTBETALING -> secureLogger.info(
+            "Fagsak $fagsakId har andeler med utbetaling, men har ikke sendt noe oppdragsperioder til økonomi." +
+                "Siste utbetalingsoppdrag som er sendt til familie-øknonomi på fagsaken er:" +
+                "\n\n $utbetalingsoppdrag"
         )
 
         AndelOgOppdragForskjell.FORSKJELLIG_AVSLUTTNING_DATO -> secureLogger.info(
-            "Fagsak $fagsakId sine andeler har annen avsluttnignsdato enn oppdraget som er sendt til økonomi"
+            "Fagsak $fagsakId sine andeler har annen avsluttnignsdato enn oppdraget som er sendt til økonomi" +
+                "Siste utbetalingsoppdrag som er sendt til familie-øknonomi på fagsaken er:" +
+                "\n\n $utbetalingsoppdrag"
         )
 
         AndelOgOppdragForskjell.OPPDRAGSPERIODE_UTEN_TILSVARENDE_ANDEL -> secureLogger.info(
-            "Fagsak $fagsakId har sendt utbetalingsoppdrag til økonomi som ikke har tilsvarende andel tilkjent ytelse"
+            "Fagsak $fagsakId har sendt utbetalingsperiode(r) til økonomi som ikke har tilsvarende andel tilkjent ytelse" +
+                "Siste utbetalingsoppdrag som er sendt til familie-øknonomi på fagsaken er:" +
+                "\n\n $utbetalingsoppdrag"
         )
         AndelOgOppdragForskjell.INGEN_FORSKJELL -> Unit
     }
 
-    return forskjell != AndelOgOppdragForskjell.INGEN_FORSKJELL
+    return forskjellMellomAndeleneOgUtbetalingsoppdraget != AndelOgOppdragForskjell.INGEN_FORSKJELL
 }
 
 private fun hentForskjellIAndelerOgUtbetalingsoppdrag(
@@ -41,7 +47,7 @@ private fun hentForskjellIAndelerOgUtbetalingsoppdrag(
     andeler: List<AndelTilkjentYtelse>
 ) = when {
     erOppdragTomtOgAndelerMedUtbetaling(oppdragsperioder, andeler) ->
-        AndelOgOppdragForskjell.TOMT_OPPDRAG_OG_ANDELER_MED_UTBETALIGNG
+        AndelOgOppdragForskjell.TOMT_OPPDRAG_OG_ANDELER_MED_UTBETALING
 
     erForskjelligTomDato(oppdragsperioder, andeler) ->
         AndelOgOppdragForskjell.FORSKJELLIG_AVSLUTTNING_DATO
@@ -74,7 +80,7 @@ private fun erOppdragTomtOgAndelerMedUtbetaling(
 ) = oppdragsperioder.isEmpty() && andeler.sumOf { it.kalkulertUtbetalingsbeløp } != 0
 
 enum class AndelOgOppdragForskjell {
-    TOMT_OPPDRAG_OG_ANDELER_MED_UTBETALIGNG,
+    TOMT_OPPDRAG_OG_ANDELER_MED_UTBETALING,
     FORSKJELLIG_AVSLUTTNING_DATO,
     OPPDRAGSPERIODE_UTEN_TILSVARENDE_ANDEL,
     INGEN_FORSKJELL
