@@ -100,7 +100,10 @@ class TestVerktøyController(
     @Unprotected
     fun kjørInternKonsistensavstemming(@PathVariable maksAntallTasker: Int): ResponseEntity<Ressurs<String>> {
         if (!envService.erPreprod() && !envService.erDev()) {
-            return ResponseEntity.ok(Ressurs.success(MELDING))
+            internKonsistensavstemmingService
+                .validerLikUtbetalingIAndeleneOgUtbetalingsoppdragetPåAlleFagsaker(12)
+
+            return ResponseEntity.ok(Ressurs.success("Kjørt ok"))
         }
 
         internKonsistensavstemmingService
