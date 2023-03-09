@@ -45,9 +45,7 @@ class InternKonsistensavstemmingService(
             val andeler = entry.value.first
             val utbetalingsoppdrag = entry.value.second
 
-            val harFeil = erForskjellMellomAndelerOgOppdrag(andeler, utbetalingsoppdrag, fagsakId)
-
-            fagsakId.takeIf { harFeil }
+            fagsakId.takeIf { erForskjellMellomAndelerOgOppdrag(andeler, utbetalingsoppdrag, fagsakId) }
         }
 
         if (fagsakerMedFeil.isNotEmpty()) {
