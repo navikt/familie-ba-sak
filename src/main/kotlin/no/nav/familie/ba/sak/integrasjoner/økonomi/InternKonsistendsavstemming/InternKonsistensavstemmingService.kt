@@ -59,13 +59,13 @@ class InternKonsistensavstemmingService(
 
     private fun hentFagsakTilSisteUtbetalingsoppdragOgSisteAndelerMap(fagsakIder: Set<Long>): Map<Long, Pair<List<AndelTilkjentYtelse>, Utbetalingsoppdrag?>> {
         val scope = CoroutineScope(SupervisorJob())
-        val utbetalingsoppdragDeffered = scope.async {
+        val utbetalingsoppdragDeferred = scope.async {
             økonomiKlient.hentSisteUtbetalingsoppdragForFagsaker(fagsakIder)
         }
 
         val fagsakTilAndelerISisteBehandlingSendTilØkonomiMap = hentFagsakTilAndelerISisteBehandlingSendtTilØkonomiMap(fagsakIder)
 
-        val fagsakTilSisteUtbetalingsoppdragMap = runBlocking { utbetalingsoppdragDeffered.await() }
+        val fagsakTilSisteUtbetalingsoppdragMap = runBlocking { utbetalingsoppdragDeferred.await() }
             .associate { it.fagsakId to it.utbetalingsoppdrag }
 
         val fagsakTilSisteUtbetalingsoppdragOgSisteAndeler =
