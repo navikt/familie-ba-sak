@@ -137,6 +137,33 @@ class InternKonsistensavstemmingUtilTest {
 
         Assertions.assertFalse(erForskjellMellomAndelerOgOppdrag(andelerSisteVedtatteBehandling, utbetalingsoppdrag, 0L))
     }
+
+    @Test
+    fun `skal ikke si det er forskjell ved opphør`() {
+        val andelStringer = listOf(
+            "2016-02,2019-02,970,ORDINÆR_BARNETRYGD,2193974415300",
+            "2019-03,2020-08,1054,ORDINÆR_BARNETRYGD,2193974415300",
+            "2020-09,2021-08,1354,ORDINÆR_BARNETRYGD,2193974415300",
+            "2021-09,2021-12,1654,ORDINÆR_BARNETRYGD,2193974415300",
+            "2022-01,2022-02,1054,ORDINÆR_BARNETRYGD,2193974415300",
+            "2012-06,2019-02,970,ORDINÆR_BARNETRYGD,2094407059820",
+            "2019-03,2022-01,1054,ORDINÆR_BARNETRYGD,2094407059820"
+        )
+
+        val andelerSisteVedtatteBehandling = andelStringer.map { it.split(",") }.map {
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.parse(it[0]),
+                tom = YearMonth.parse(it[1]),
+                beløp = it[2].toInt(),
+                ytelseType = YtelseType.valueOf(it[3]),
+                aktør = Aktør(it[4])
+            )
+        }
+
+        val utbetalingsoppdrag = objectMapper.readValue<Utbetalingsoppdrag>(utbetalingsoppdragMockOpphør)
+
+        Assertions.assertFalse(erForskjellMellomAndelerOgOppdrag(andelerSisteVedtatteBehandling, utbetalingsoppdrag, 0L))
+    }
 }
 
 private val mockUtbetalingsoppdrag = """
@@ -407,6 +434,37 @@ val utbetalingsoppdragMockEndringKunEttBarn = """
           "satsType": "MND",
           "utbetalesTil": "07118905215",
           "behandlingId": 100098303,
+          "utbetalingsgrad": null
+        }
+      ],
+      "gOmregning": false
+    }
+""".trimIndent()
+
+val utbetalingsoppdragMockOpphør = """
+    {
+      "kodeEndring": "ENDR",
+      "fagSystem": "BA",
+      "saksnummer": "200001701",
+      "aktoer": "25118604604",
+      "saksbehandlerId": "Z991771",
+      "avstemmingTidspunkt": "2022-08-09T14:42:14.977345689",
+      "utbetalingsperiode": [
+        {
+          "erEndringPåEksisterendePeriode": true,
+          "opphør": {
+            "opphørDatoFom": "2022-08-01"
+          },
+          "periodeId": 10,
+          "forrigePeriodeId": 9,
+          "datoForVedtak": "2022-08-09",
+          "klassifisering": "BATR",
+          "vedtakdatoFom": "2025-02-01",
+          "vedtakdatoTom": "2037-01-31",
+          "sats": 1054,
+          "satsType": "MND",
+          "utbetalesTil": "25118604604",
+          "behandlingId": 100096955,
           "utbetalingsgrad": null
         }
       ],

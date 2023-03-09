@@ -19,12 +19,6 @@ fun erForskjellMellomAndelerOgOppdrag(
     val forskjellMellomAndeleneOgUtbetalingsoppdraget: AndelOgOppdragForskjell = hentForskjellIAndelerOgUtbetalingsoppdrag(oppdragsperioder, andeler)
 
     when (forskjellMellomAndeleneOgUtbetalingsoppdraget) {
-        AndelOgOppdragForskjell.TOMT_OPPDRAG_OG_ANDELER_MED_UTBETALING -> secureLogger.info(
-            "Fagsak $fagsakId har andeler med utbetaling, men har ikke sendt noe oppdragsperioder til økonomi." +
-                "Siste utbetalingsoppdrag som er sendt til familie-øknonomi på fagsaken er:" +
-                "\n\n $utbetalingsoppdrag"
-        )
-
         AndelOgOppdragForskjell.OPPDRAGSPERIODE_UTEN_TILSVARENDE_ANDEL -> secureLogger.info(
             "Fagsak $fagsakId har sendt utbetalingsperiode(r) til økonomi som ikke har tilsvarende andel tilkjent ytelse" +
                 "Siste utbetalingsoppdrag som er sendt til familie-øknonomi på fagsaken er:" +
@@ -40,9 +34,6 @@ private fun hentForskjellIAndelerOgUtbetalingsoppdrag(
     oppdragsperioder: List<Utbetalingsperiode>,
     andeler: List<AndelTilkjentYtelse>
 ) = when {
-    erOppdragTomtOgAndelerMedUtbetaling(oppdragsperioder, andeler) ->
-        AndelOgOppdragForskjell.TOMT_OPPDRAG_OG_ANDELER_MED_UTBETALING
-
     erOppdragsperiodeUtenTilsvarendeAndel(oppdragsperioder, andeler) ->
         AndelOgOppdragForskjell.OPPDRAGSPERIODE_UTEN_TILSVARENDE_ANDEL
 
@@ -60,13 +51,7 @@ private fun erOppdragsperiodeUtenTilsvarendeAndel(
     }
 }
 
-private fun erOppdragTomtOgAndelerMedUtbetaling(
-    oppdragsperioder: List<Utbetalingsperiode>,
-    andeler: List<AndelTilkjentYtelse>
-) = oppdragsperioder.isEmpty() && andeler.sumOf { it.kalkulertUtbetalingsbeløp } != 0
-
 enum class AndelOgOppdragForskjell {
-    TOMT_OPPDRAG_OG_ANDELER_MED_UTBETALING,
     OPPDRAGSPERIODE_UTEN_TILSVARENDE_ANDEL,
     INGEN_FORSKJELL
 }
