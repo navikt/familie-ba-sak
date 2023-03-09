@@ -52,7 +52,9 @@ class ForvalterController(
         produces = [MediaType.APPLICATION_JSON_VALUE]
     )
     fun triggManuellStartAvSmåbarnstillegg(@PathVariable skalOppretteOppgaver: Boolean = true): ResponseEntity<String> {
-        restartAvSmåbarnstilleggService.finnRestartetSmåbarnstilleggOgOpprettOppgave(skalOppretteOppgaver)
+        restartAvSmåbarnstilleggService.finnOgOpprettetOppgaveForSmåbarnstilleggSomSkalRestartesIDenneMåned(
+            skalOppretteOppgaver
+        )
         return ResponseEntity.ok("OK")
     }
 

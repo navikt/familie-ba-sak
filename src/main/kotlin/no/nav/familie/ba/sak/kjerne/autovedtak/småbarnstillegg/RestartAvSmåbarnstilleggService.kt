@@ -41,11 +41,11 @@ class RestartAvSmåbarnstilleggService(
     @Transactional
     fun scheduledFinnRestartetSmåbarnstilleggOgOpprettOppgave() {
         if (LeaderClient.isLeader() == true) {
-            finnRestartetSmåbarnstilleggOgOpprettOppgave(true)
+            finnOgOpprettetOppgaveForSmåbarnstilleggSomSkalRestartesIDenneMåned(true)
         }
     }
 
-    fun finnRestartetSmåbarnstilleggOgOpprettOppgave(skalOppretteOppgaver: Boolean) {
+    fun finnOgOpprettetOppgaveForSmåbarnstilleggSomSkalRestartesIDenneMåned(skalOppretteOppgaver: Boolean) {
         logger.info("Starter jobb for å finne småbarnstillegg som skal restartes, men som ikke allerede begrunnet. skalOppretteOppgaver=$skalOppretteOppgaver")
         finnAlleFagsakerMedRestartetSmåbarnstilleggIMåned().forEach { fagsakId ->
             logger.info("Oppretter 'vurder livshendelse'-oppgave på fagsak $fagsakId fordi småbarnstillegg har startet opp igjen denne måneden")
@@ -70,7 +70,7 @@ class RestartAvSmåbarnstilleggService(
 
     fun finnAlleFagsakerMedRestartetSmåbarnstilleggIMåned(måned: YearMonth = YearMonth.now()): List<Long> {
         return behandlingHentOgPersisterService.partitionByIverksatteBehandlinger {
-            finnAlleFagsakerMedOppstartSmåbarnstilleggIMåned(it, måned)
+            finnAlleFagsakerMedOppstartSmåbarnstilleggIMåned(iverksatteLøpendeBehandlinger = it, måned = måned)
         }.filter { fagsakId ->
             val migreringsdato = behandlingMigreringsinfoRepository.finnSisteMigreringsdatoPåFagsak(fagsakId)
             migreringsdato?.month != LocalDate.now().minusMonths(1).month
@@ -80,11 +80,11 @@ class RestartAvSmåbarnstilleggService(
     }
 
     private fun finnAlleFagsakerMedOppstartSmåbarnstilleggIMåned(
-        it: List<Long>,
+        iverksatteLøpendeBehandlinger: List<Long>,
         måned: YearMonth
     ): List<Long> {
         val fagsaker = fagsakRepository.finnAlleFagsakerMedOppstartSmåbarnstilleggIMåned(
-            iverksatteLøpendeBehandlinger = it,
+            iverksatteLøpendeBehandlinger = iverksatteLøpendeBehandlinger,
             stønadFom = måned
         )
         if (SatsService.finnSisteSatsFor(SatsType.SMA).gyldigFom.toYearMonth() == måned) {
