@@ -25,12 +25,6 @@ fun erForskjellMellomAndelerOgOppdrag(
                 "\n\n $utbetalingsoppdrag"
         )
 
-        AndelOgOppdragForskjell.FORSKJELLIG_AVSLUTTNING_DATO -> secureLogger.info(
-            "Fagsak $fagsakId sine andeler har annen avsluttnignsdato enn oppdraget som er sendt til økonomi" +
-                "Siste utbetalingsoppdrag som er sendt til familie-øknonomi på fagsaken er:" +
-                "\n\n $utbetalingsoppdrag"
-        )
-
         AndelOgOppdragForskjell.OPPDRAGSPERIODE_UTEN_TILSVARENDE_ANDEL -> secureLogger.info(
             "Fagsak $fagsakId har sendt utbetalingsperiode(r) til økonomi som ikke har tilsvarende andel tilkjent ytelse" +
                 "Siste utbetalingsoppdrag som er sendt til familie-øknonomi på fagsaken er:" +
@@ -49,9 +43,6 @@ private fun hentForskjellIAndelerOgUtbetalingsoppdrag(
     erOppdragTomtOgAndelerMedUtbetaling(oppdragsperioder, andeler) ->
         AndelOgOppdragForskjell.TOMT_OPPDRAG_OG_ANDELER_MED_UTBETALING
 
-    erForskjelligTomDato(oppdragsperioder, andeler) ->
-        AndelOgOppdragForskjell.FORSKJELLIG_AVSLUTTNING_DATO
-
     erOppdragsperiodeUtenTilsvarendeAndel(oppdragsperioder, andeler) ->
         AndelOgOppdragForskjell.OPPDRAGSPERIODE_UTEN_TILSVARENDE_ANDEL
 
@@ -69,11 +60,6 @@ private fun erOppdragsperiodeUtenTilsvarendeAndel(
     }
 }
 
-private fun erForskjelligTomDato(
-    oppdragsperioder: List<Utbetalingsperiode>,
-    andeler: List<AndelTilkjentYtelse>
-) = oppdragsperioder.maxOf { it.vedtakdatoTom.toYearMonth() } != andeler.maxOf { it.stønadTom }
-
 private fun erOppdragTomtOgAndelerMedUtbetaling(
     oppdragsperioder: List<Utbetalingsperiode>,
     andeler: List<AndelTilkjentYtelse>
@@ -81,7 +67,6 @@ private fun erOppdragTomtOgAndelerMedUtbetaling(
 
 enum class AndelOgOppdragForskjell {
     TOMT_OPPDRAG_OG_ANDELER_MED_UTBETALING,
-    FORSKJELLIG_AVSLUTTNING_DATO,
     OPPDRAGSPERIODE_UTEN_TILSVARENDE_ANDEL,
     INGEN_FORSKJELL
 }
