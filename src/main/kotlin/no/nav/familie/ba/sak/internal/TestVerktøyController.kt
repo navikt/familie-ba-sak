@@ -101,7 +101,7 @@ class TestVerktøyController(
     fun kjørInternKonsistensavstemming(@PathVariable maksAntallTasker: Int): ResponseEntity<Ressurs<String>> {
         if (!envService.erPreprod() && !envService.erDev()) {
             internKonsistensavstemmingService
-                .validerLikUtbetalingIAndeleneOgUtbetalingsoppdragetPåAlleFagsaker(12)
+                .validerLikUtbetalingIAndeleneOgUtbetalingsoppdragetPåAlleFagsaker(maksAntallTasker = 12)
 
             return ResponseEntity.ok(Ressurs.success("Kjørt ok"))
         }
