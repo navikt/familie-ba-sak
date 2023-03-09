@@ -46,7 +46,34 @@ class InternKonsistensavstemmingUtilTest {
     }
 
     @Test
-    fun `skal at det er forskjellig avsluttningsdato mellom andelene og utbetalingsoppdraget`() {
+    fun `skal se at vi mangler andel for oppdragsperiode`() {
+        val andelerSisteVedtatteBehandling = listOf(
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.parse("2021-12"),
+                tom = YearMonth.parse("2021-12"),
+                beløp = 1654,
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD
+            ),
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.parse("2022-01"),
+                tom = YearMonth.parse("2023-02"),
+                beløp = 1676,
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD
+            ),
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.parse("2023-03"),
+                tom = YearMonth.parse("2027-10"),
+                beløp = 1723,
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD
+            ),
+        )
+        val utbetalingsoppdrag = objectMapper.readValue<Utbetalingsoppdrag>(mockUtbetalingsoppdrag)
+
+        Assertions.assertTrue(erForskjellMellomAndelerOgOppdrag(andelerSisteVedtatteBehandling, utbetalingsoppdrag, 0L))
+    }
+
+    @Test
+    fun `skal se at andel og oppdragsperiode har forskjellig beløp`() {
         val andelerSisteVedtatteBehandling = listOf(
             lagAndelTilkjentYtelse(
                 fom = YearMonth.parse("2021-12"),
@@ -69,13 +96,7 @@ class InternKonsistensavstemmingUtilTest {
             lagAndelTilkjentYtelse(
                 fom = YearMonth.parse("2027-11"),
                 tom = YearMonth.parse("2039-10"),
-                beløp = 1083,
-                ytelseType = YtelseType.ORDINÆR_BARNETRYGD
-            ),
-            lagAndelTilkjentYtelse(
-                fom = YearMonth.parse("2039-11"),
-                tom = YearMonth.parse("2040-10"),
-                beløp = 1083,
+                beløp = 9999,
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD
             )
         )
