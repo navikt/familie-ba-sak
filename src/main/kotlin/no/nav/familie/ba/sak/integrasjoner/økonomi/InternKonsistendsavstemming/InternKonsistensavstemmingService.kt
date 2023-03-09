@@ -25,7 +25,7 @@ class InternKonsistensavstemmingService(
     val taskService: TaskService
 ) {
     fun validerLikUtbetalingIAndeleneOgUtbetalingsoppdragetPåAlleFagsaker(maksAntallTasker: Int = Int.MAX_VALUE) {
-        fagsakRepository.hentIkkeArkiverteFagsaker()
+        fagsakRepository.hentFagsakerSomIkkeErArkivert()
             .map { it.id }
             .sortedBy { it }
             // Størrelse burde være en multippel av 3000 siden vi chunker databasekallet i 3000 i familie-oppdrag
