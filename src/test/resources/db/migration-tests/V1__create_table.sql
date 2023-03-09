@@ -65,16 +65,6 @@ CREATE TABLE public.aktoer_til_valutakurs (
 
 
 --
--- Name: andel_til_endret_andel; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.andel_til_endret_andel (
-    fk_andel_tilkjent_ytelse_id bigint NOT NULL,
-    fk_endret_utbetaling_andel_id bigint NOT NULL
-);
-
-
---
 -- Name: andel_tilkjent_ytelse; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1841,14 +1831,6 @@ COPY public.aktoer_til_valutakurs (fk_valutakurs_id, fk_aktoer_id) FROM stdin;
 
 
 --
--- Data for Name: andel_til_endret_andel; Type: TABLE DATA; Schema: public; Owner: -
---
-
-COPY public.andel_til_endret_andel (fk_andel_tilkjent_ytelse_id, fk_endret_utbetaling_andel_id) FROM stdin;
-\.
-
-
---
 -- Data for Name: andel_tilkjent_ytelse; Type: TABLE DATA; Schema: public; Owner: -
 --
 
@@ -2225,8 +2207,6 @@ COPY public.skyggesak (id, fk_fagsak_id, sendt_tid) FROM stdin;
 --
 
 COPY public.task (id, payload, status, versjon, opprettet_tid, type, metadata, trigger_tid, avvikstype) FROM stdin;
-51	1654	UBEHANDLET	1	2023-03-01 20:04:59.417	startsatsendringforallebehandlinger	callId=startsatsendringforallebehandlinger-07.01.2022	2023-03-01 20:04:59.416685	\N
-1	1654	UBEHANDLET	1	2023-03-01 20:04:59.393	startsatsendringforallebehandlinger	callId=startsatsendringforallebehandlinger-06.01.2022	2023-03-01 20:04:59.39289	\N
 \.
 
 
@@ -2639,7 +2619,7 @@ SELECT pg_catalog.setval('public.skyggesak_seq', 1000000, false);
 -- Name: task_logg_seq; Type: SEQUENCE SET; Schema: public; Owner: -
 --
 
-SELECT pg_catalog.setval('public.task_logg_seq', 1, false);
+SELECT pg_catalog.setval('public.task_logg_seq', 151, true);
 
 
 --
@@ -2770,14 +2750,6 @@ ALTER TABLE ONLY public.aktoer_til_utenlandsk_periodebeloep
 
 ALTER TABLE ONLY public.aktoer_til_valutakurs
     ADD CONSTRAINT aktoer_til_valutakurs_pkey PRIMARY KEY (fk_valutakurs_id, fk_aktoer_id);
-
-
---
--- Name: andel_til_endret_andel andel_til_endret_andel_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.andel_til_endret_andel
-    ADD CONSTRAINT andel_til_endret_andel_pkey PRIMARY KEY (fk_andel_tilkjent_ytelse_id, fk_endret_utbetaling_andel_id);
 
 
 --
@@ -3905,22 +3877,6 @@ ALTER TABLE ONLY public.aktoer_til_valutakurs
 
 ALTER TABLE ONLY public.aktoer_til_valutakurs
     ADD CONSTRAINT aktoer_til_valutakurs_fk_valutakurs_id_fkey FOREIGN KEY (fk_valutakurs_id) REFERENCES public.valutakurs(id);
-
-
---
--- Name: andel_til_endret_andel andel_til_endret_andel_fk_andel_tilkjent_ytelse_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.andel_til_endret_andel
-    ADD CONSTRAINT andel_til_endret_andel_fk_andel_tilkjent_ytelse_id_fkey FOREIGN KEY (fk_andel_tilkjent_ytelse_id) REFERENCES public.andel_tilkjent_ytelse(id) ON DELETE CASCADE;
-
-
---
--- Name: andel_til_endret_andel andel_til_endret_andel_fk_endret_utbetaling_andel_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.andel_til_endret_andel
-    ADD CONSTRAINT andel_til_endret_andel_fk_endret_utbetaling_andel_id_fkey FOREIGN KEY (fk_endret_utbetaling_andel_id) REFERENCES public.endret_utbetaling_andel(id);
 
 
 --
