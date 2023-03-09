@@ -66,7 +66,7 @@ class InternKonsistensavstemmingService(
         val fagsakTilAndelerISisteBehandlingSendTilØkonomiMap = hentFagsakTilAndelerISisteBehandlingSendtTilØkonomiMap(fagsakIder)
 
         val fagsakTilSisteUtbetalingsoppdragMap = runBlocking { utbetalingsoppdragDeffered.await() }
-                .associate { it.fagsakId to it.utbetalingsoppdrag }
+            .associate { it.fagsakId to it.utbetalingsoppdrag }
 
         val fagsakTilSisteUtbetalingsoppdragOgSisteAndeler =
             fagsakTilAndelerISisteBehandlingSendTilØkonomiMap.mapValues { (fagsakId, andel) ->
