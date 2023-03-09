@@ -106,11 +106,7 @@ class StartSatsendring(
                     sisteIverksatteBehandling.id
                 )
 
-            if (AutovedtakSatsendringService.harAlleredeSisteSats(
-                    andelerTilkjentYtelseMedEndreteUtbetalinger,
-                    satsTidspunkt
-                )
-            ) {
+            if (andelerTilkjentYtelseMedEndreteUtbetalinger.erOppdatertMedSisteSatsForAlleSatstyper()) {
                 satskjøringRepository.save(
                     Satskjøring(
                         fagsakId = fagsak.id,
@@ -163,14 +159,8 @@ class StartSatsendring(
         }
 
     fun kanStarteSatsendringPåFagsak(fagsakId: Long): Boolean {
-        val sisteIverksatteBehandling = behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
-
-        return sisteIverksatteBehandling != null &&
-            satskjøringRepository.findByFagsakId(fagsakId) == null &&
-            !autovedtakSatsendringService.harAlleredeNySats(
-                sisteIverksettBehandlingsId = sisteIverksatteBehandling.id,
-                satstidspunkt = SATSENDRINGMÅNED_2023
-            )
+        return satskjøringRepository.findByFagsakId(fagsakId) == null &&
+            !satsendringService.erFagsakOppdatertMedSisteSats(fagsakId)
     }
 
     fun kanGjennomføreSatsendringManuelt(fagsakId: Long): Boolean =
