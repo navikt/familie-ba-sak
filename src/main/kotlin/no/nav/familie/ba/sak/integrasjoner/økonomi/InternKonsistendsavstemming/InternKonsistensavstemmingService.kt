@@ -60,7 +60,7 @@ class InternKonsistensavstemmingService(
     private fun hentFagsakTilSisteUtbetalingsoppdragOgSisteAndelerMap(fagsakIder: Set<Long>): Map<Long, Pair<List<AndelTilkjentYtelse>, Utbetalingsoppdrag?>> {
         val scope = CoroutineScope(SupervisorJob())
         val fagsakTilSisteUtbetalingsoppdragMapDeffered = scope.async {
-            hentFagsakTilSissteUtbetalingsoppdragMap(fagsakIder)
+            hentFagsakTilSisteUtbetalingsoppdragMap(fagsakIder)
         }
 
         val fagsakTilAndelerISisteBehandlingSendTilØkonomiMap = hentFagsakTilAndelerISisteBehandlingSendtTilØkonomiMap(fagsakIder)
@@ -75,7 +75,7 @@ class InternKonsistensavstemmingService(
         return fagsakTilSisteUtbetalingsoppdragOgSisteAndeler
     }
 
-    private fun hentFagsakTilSissteUtbetalingsoppdragMap(fagsakIder: Set<Long>) =
+    private fun hentFagsakTilSisteUtbetalingsoppdragMap(fagsakIder: Set<Long>) =
         økonomiKlient.hentSisteUtbetalingsoppdragForFagsaker(fagsakIder)
             .associate { it.fagsakId to it.utbetalingsoppdrag }
 
