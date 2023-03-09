@@ -61,7 +61,7 @@ class AutovedtakSatsendringService(
         val sisteIverksatteBehandling = behandlingRepository.finnSisteIverksatteBehandling(fagsakId = fagsakId)
             ?: error("Fant ikke siste iverksette behandling for $fagsakId")
 
-        if (satsendringService.erFagsakOppdatertMedSisteSats(fagsakId)) {
+        if (satsendringService.erFagsakOppdatertMedSisteSatser(fagsakId)) {
             satskjøringForFagsak.ferdigTidspunkt = LocalDateTime.now()
             satskjøringRepository.save(satskjøringForFagsak)
             logger.info("Satsendring allerede utført for fagsak=$fagsakId")
@@ -140,7 +140,7 @@ class AutovedtakSatsendringService(
     private fun hentBrukerHarÅpenBehandlingSvar(
         aktivOgÅpenBehandling: Behandling
     ): SatsendringSvar {
-        val brukerHarÅpenBehandlingSvar = if (satsendringService.erFagsakOppdatertMedSisteSats(aktivOgÅpenBehandling.fagsak.id)) {
+        val brukerHarÅpenBehandlingSvar = if (satsendringService.erFagsakOppdatertMedSisteSatser(aktivOgÅpenBehandling.fagsak.id)) {
             SatsendringSvar.HAR_ALLEREDE_SISTE_SATS
         } else if (aktivOgÅpenBehandling.status.erLåstMenIkkeAvsluttet()) {
             SatsendringSvar.BEHANDLING_ER_LÅST_SATSENDRING_TRIGGES_NESTE_VIRKEDAG

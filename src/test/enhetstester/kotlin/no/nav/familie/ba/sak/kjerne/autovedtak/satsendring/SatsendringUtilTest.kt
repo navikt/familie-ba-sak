@@ -34,7 +34,7 @@ class SatsendringUtilTest {
                 )
             }
 
-        assertTrue(andelerMedSisteSats.erOppdatertMedSisteSatsForAlleSatstyper())
+        assertTrue(andelerMedSisteSats.erOppdatertMedSisteSatser())
     }
 
     @Test
@@ -51,7 +51,7 @@ class SatsendringUtilTest {
                 )
             }
 
-        assertTrue(andelerMedSisteSats.erOppdatertMedSisteSatsForAlleSatstyper())
+        assertTrue(andelerMedSisteSats.erOppdatertMedSisteSatser())
     }
 
     @Test
@@ -69,7 +69,7 @@ class SatsendringUtilTest {
                     )
                 )
 
-                assertFalse(andelerMedFeilSats.erOppdatertMedSisteSatsForAlleSatstyper())
+                assertFalse(andelerMedFeilSats.erOppdatertMedSisteSatser())
             }
     }
 
@@ -88,7 +88,7 @@ class SatsendringUtilTest {
                     )
                 )
 
-                assertTrue(andelerSomErFørSisteSats.erOppdatertMedSisteSatsForAlleSatstyper())
+                assertTrue(andelerSomErFørSisteSats.erOppdatertMedSisteSatser())
             }
     }
 
@@ -108,7 +108,7 @@ class SatsendringUtilTest {
                     )
                 )
 
-                assertTrue(andelerMedFeilSats.erOppdatertMedSisteSatsForAlleSatstyper())
+                assertTrue(andelerMedFeilSats.erOppdatertMedSisteSatser())
             }
     }
 
@@ -122,7 +122,7 @@ class SatsendringUtilTest {
                 YtelseType.SMÅBARNSTILLEGG
             )
 
-        Assertions.assertThat(atyMedBareSmåbarnstillegg.erOppdatertMedSisteSatsForAlleSatstyper()).isEqualTo(true)
+        Assertions.assertThat(atyMedBareSmåbarnstillegg.erOppdatertMedSisteSatser()).isEqualTo(true)
 
         val atyMedBareUtvidet =
             lagAndelTilkjentYtelseMedEndreteUtbetalingerIPeriodenRundtSisteSatsenring(
@@ -131,7 +131,7 @@ class SatsendringUtilTest {
                 YtelseType.UTVIDET_BARNETRYGD
             )
 
-        Assertions.assertThat(atyMedBareUtvidet.erOppdatertMedSisteSatsForAlleSatstyper()).isEqualTo(true)
+        Assertions.assertThat(atyMedBareUtvidet.erOppdatertMedSisteSatser()).isEqualTo(true)
 
         val atyMedBareOrba =
             lagAndelTilkjentYtelseMedEndreteUtbetalingerIPeriodenRundtSisteSatsenring(
@@ -140,7 +140,7 @@ class SatsendringUtilTest {
                 YtelseType.ORDINÆR_BARNETRYGD
             )
 
-        Assertions.assertThat(atyMedBareOrba.erOppdatertMedSisteSatsForAlleSatstyper()).isEqualTo(true)
+        Assertions.assertThat(atyMedBareOrba.erOppdatertMedSisteSatser()).isEqualTo(true)
 
         val atyMedBareTilleggOrba =
             lagAndelTilkjentYtelseMedEndreteUtbetalingerIPeriodenRundtSisteSatsenring(
@@ -149,11 +149,11 @@ class SatsendringUtilTest {
                 YtelseType.ORDINÆR_BARNETRYGD
             )
 
-        Assertions.assertThat(atyMedBareTilleggOrba.erOppdatertMedSisteSatsForAlleSatstyper()).isEqualTo(true)
+        Assertions.assertThat(atyMedBareTilleggOrba.erOppdatertMedSisteSatser()).isEqualTo(true)
 
         Assertions.assertThat(
             (atyMedBareTilleggOrba + atyMedBareOrba + atyMedBareUtvidet + atyMedBareSmåbarnstillegg)
-                .erOppdatertMedSisteSatsForAlleSatstyper()
+                .erOppdatertMedSisteSatser()
         ).isEqualTo(true)
     }
 
@@ -168,7 +168,7 @@ class SatsendringUtilTest {
                 UGYLDIG_SATS
             )
 
-        Assertions.assertThat(atyMedUgyldigSatsSmåbarnstillegg.erOppdatertMedSisteSatsForAlleSatstyper()).isEqualTo(false)
+        Assertions.assertThat(atyMedUgyldigSatsSmåbarnstillegg.erOppdatertMedSisteSatser()).isEqualTo(false)
 
         val atyMedUglydligSatsUtvidet =
             lagAndelTilkjentYtelseMedEndreteUtbetalingerIPeriodenRundtSisteSatsenring(
@@ -178,7 +178,7 @@ class SatsendringUtilTest {
                 UGYLDIG_SATS
             )
 
-        Assertions.assertThat(atyMedUglydligSatsUtvidet.erOppdatertMedSisteSatsForAlleSatstyper()).isEqualTo(false)
+        Assertions.assertThat(atyMedUglydligSatsUtvidet.erOppdatertMedSisteSatser()).isEqualTo(false)
 
         val atyMedUgyldigSatsBareOrba =
             lagAndelTilkjentYtelseMedEndreteUtbetalingerIPeriodenRundtSisteSatsenring(
@@ -188,7 +188,7 @@ class SatsendringUtilTest {
                 UGYLDIG_SATS
             )
 
-        Assertions.assertThat(atyMedUgyldigSatsBareOrba.erOppdatertMedSisteSatsForAlleSatstyper()).isEqualTo(false)
+        Assertions.assertThat(atyMedUgyldigSatsBareOrba.erOppdatertMedSisteSatser()).isEqualTo(false)
 
         val atyMedUgyldigSatsTilleggOrba =
             lagAndelTilkjentYtelseMedEndreteUtbetalingerIPeriodenRundtSisteSatsenring(
@@ -198,7 +198,7 @@ class SatsendringUtilTest {
                 UGYLDIG_SATS
             )
 
-        Assertions.assertThat(atyMedUgyldigSatsTilleggOrba.erOppdatertMedSisteSatsForAlleSatstyper()).isEqualTo(false)
+        Assertions.assertThat(atyMedUgyldigSatsTilleggOrba.erOppdatertMedSisteSatser()).isEqualTo(false)
     }
 
     @Test
@@ -227,7 +227,7 @@ class SatsendringUtilTest {
             )
 
         Assertions.assertThat(
-            (atyMedBGyldigOrba + atyMedGyldigUtvidet + atyMedUgyldigSatsSmåbarnstillegg).erOppdatertMedSisteSatsForAlleSatstyper()
+            (atyMedBGyldigOrba + atyMedGyldigUtvidet + atyMedUgyldigSatsSmåbarnstillegg).erOppdatertMedSisteSatser()
         ).isEqualTo(false)
     }
 
@@ -246,7 +246,7 @@ class SatsendringUtilTest {
                 beløp = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp
             )
 
-        Assertions.assertThat(listOf(atySomGårUtPåSatstidspunktGyldig).erOppdatertMedSisteSatsForAlleSatstyper()).isEqualTo(true)
+        Assertions.assertThat(listOf(atySomGårUtPåSatstidspunktGyldig).erOppdatertMedSisteSatser()).isEqualTo(true)
 
         val atySomGårUtPåSatstidspunktUgyldig =
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(
@@ -260,7 +260,7 @@ class SatsendringUtilTest {
                 beløp = UGYLDIG_SATS
             )
 
-        Assertions.assertThat(listOf(atySomGårUtPåSatstidspunktUgyldig).erOppdatertMedSisteSatsForAlleSatstyper()).isEqualTo(false)
+        Assertions.assertThat(listOf(atySomGårUtPåSatstidspunktUgyldig).erOppdatertMedSisteSatser()).isEqualTo(false)
     }
 
     @Test
@@ -278,7 +278,7 @@ class SatsendringUtilTest {
                 beløp = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp
             )
 
-        Assertions.assertThat(listOf(utgåttAndelTilkjentYtelse).erOppdatertMedSisteSatsForAlleSatstyper()).isEqualTo(true)
+        Assertions.assertThat(listOf(utgåttAndelTilkjentYtelse).erOppdatertMedSisteSatser()).isEqualTo(true)
     }
 
     @Test
@@ -296,7 +296,7 @@ class SatsendringUtilTest {
                 beløp = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp
             )
 
-        Assertions.assertThat(listOf(utgåttAndelTilkjentYtelse).erOppdatertMedSisteSatsForAlleSatstyper()).isEqualTo(true)
+        Assertions.assertThat(listOf(utgåttAndelTilkjentYtelse).erOppdatertMedSisteSatser()).isEqualTo(true)
     }
 
     @Test
@@ -314,7 +314,7 @@ class SatsendringUtilTest {
                 beløp = UGYLDIG_SATS
             )
 
-        Assertions.assertThat(listOf(utgåttAndelTilkjentYtelse).erOppdatertMedSisteSatsForAlleSatstyper()).isEqualTo(false)
+        Assertions.assertThat(listOf(utgåttAndelTilkjentYtelse).erOppdatertMedSisteSatser()).isEqualTo(false)
     }
 
     private fun lagAndelTilkjentYtelseMedEndreteUtbetalingerIPeriodenRundtSisteSatsenring(

@@ -106,7 +106,7 @@ class StartSatsendring(
                     sisteIverksatteBehandling.id
                 )
 
-            if (andelerTilkjentYtelseMedEndreteUtbetalinger.erOppdatertMedSisteSatsForAlleSatstyper()) {
+            if (andelerTilkjentYtelseMedEndreteUtbetalinger.erOppdatertMedSisteSatser()) {
                 satskjøringRepository.save(
                     Satskjøring(
                         fagsakId = fagsak.id,
@@ -160,11 +160,11 @@ class StartSatsendring(
 
     fun kanStarteSatsendringPåFagsak(fagsakId: Long): Boolean {
         return satskjøringRepository.findByFagsakId(fagsakId) == null &&
-            !satsendringService.erFagsakOppdatertMedSisteSats(fagsakId)
+            !satsendringService.erFagsakOppdatertMedSisteSatser(fagsakId)
     }
 
     fun kanGjennomføreSatsendringManuelt(fagsakId: Long): Boolean =
-        !satsendringService.erFagsakOppdatertMedSisteSats(fagsakId)
+        !satsendringService.erFagsakOppdatertMedSisteSatser(fagsakId)
 
     @Transactional
     fun gjennomførSatsendringManuelt(fagsakId: Long) {

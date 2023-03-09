@@ -55,7 +55,7 @@ internal class StartSatsendringTest {
         every { taskRepository.save(capture(taskSlot)) } answers { taskSlot.captured }
         val opprettTaskService = OpprettTaskService(taskRepository, satskjøringRepository)
         every { featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_SJEKK_UTBETALING, true) } returns false
-        every { satsendringService.erFagsakOppdatertMedSisteSats(any()) } returns true
+        every { satsendringService.erFagsakOppdatertMedSisteSatser(any()) } returns true
 
         startSatsendring = spyk(
             StartSatsendring(
@@ -242,7 +242,7 @@ internal class StartSatsendringTest {
     fun `kanStarteSatsendringPåFagsak gir false når harSisteSats er true`() {
         every { behandlingRepository.finnSisteIverksatteBehandling(1L) } returns lagBehandling()
         every { satskjøringRepository.findByFagsakId(1L) } returns null
-        every { satsendringService.erFagsakOppdatertMedSisteSats(any()) } returns true
+        every { satsendringService.erFagsakOppdatertMedSisteSatser(any()) } returns true
 
         assertFalse(startSatsendring.kanStarteSatsendringPåFagsak(1L))
     }
@@ -251,7 +251,7 @@ internal class StartSatsendringTest {
     fun `kanStarteSatsendringPåFagsak gir true når harSisteSats er false`() {
         every { behandlingRepository.finnSisteIverksatteBehandling(1L) } returns lagBehandling()
         every { satskjøringRepository.findByFagsakId(1L) } returns null
-        every { satsendringService.erFagsakOppdatertMedSisteSats(any()) } returns false
+        every { satsendringService.erFagsakOppdatertMedSisteSatser(any()) } returns false
 
         assertTrue(startSatsendring.kanStarteSatsendringPåFagsak(1L))
     }
@@ -267,7 +267,7 @@ internal class StartSatsendringTest {
     fun `kanGjennomføreSatsendringManuelt gir false når harSisteSats er true`() {
         every { behandlingRepository.finnSisteIverksatteBehandling(1L) } returns lagBehandling()
         every { satskjøringRepository.findByFagsakId(1L) } returns null
-        every { satsendringService.erFagsakOppdatertMedSisteSats(any()) } returns true
+        every { satsendringService.erFagsakOppdatertMedSisteSatser(any()) } returns true
 
         assertFalse(startSatsendring.kanGjennomføreSatsendringManuelt(1L))
     }
