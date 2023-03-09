@@ -28,7 +28,7 @@ class InternKonsistensavstemmingService(
         fagsakRepository.hentFagsakerSomIkkeErArkivert()
             .map { it.id }
             .sortedBy { it }
-            // Størrelse burde være en multippel av 3000 siden vi chunker databasekallet i 3000 i familie-oppdrag
+            // Antall fagsaker per task burde være en multippel av 3000 siden vi chunker databasekallet i 3000 i familie-oppdrag
             .chunked(3000)
             .take(maksAntallTasker)
             .forEach {
