@@ -334,5 +334,4 @@ class SatsendringUtilTest {
             beløp = beløp ?: SatsService.finnSisteSatsFor(satsType).beløp
         )
     )
-
 }
