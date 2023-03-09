@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.hentTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjeMedAndeler
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -118,14 +119,16 @@ object TilkjentYtelseValidering {
 
         val tidslinjeMedAndeler = tilkjentYtelse.tilTidslinjeMedAndeler()
 
+        val fagsakType = tilkjentYtelse.behandling.fagsak.type
+
         tidslinjeMedAndeler.toSegments().forEach {
             val søkersAndeler = hentSøkersAndeler(it.value, søker)
             val barnasAndeler = hentBarnasAndeler(it.value, barna)
 
-            validerAtBeløpForPartStemmerMedSatser(søker, søkersAndeler)
+            validerAtBeløpForPartStemmerMedSatser(person = søker, andeler = søkersAndeler, fagsakType = fagsakType)
 
             barnasAndeler.forEach { (person, andeler) ->
-                validerAtBeløpForPartStemmerMedSatser(person, andeler)
+                validerAtBeløpForPartStemmerMedSatser(person = person, andeler = andeler, fagsakType = fagsakType)
             }
         }
     }
@@ -167,7 +170,7 @@ object TilkjentYtelseValidering {
         }
     }
 
-    fun maksBeløp(personType: PersonType): Int {
+    fun maksBeløp(personType: PersonType, fagsakType: FagsakType): Int {
         val satser = SatsService.hentAllesatser()
         val småbarnsTillegg = satser.filter { it.type == SatsType.SMA }
         val ordinærMedTillegg = satser.filter { it.type == SatsType.TILLEGG_ORBA }
@@ -176,7 +179,9 @@ object TilkjentYtelseValidering {
         val maksSmåbarnstillegg = småbarnsTillegg.maxByOrNull { it.beløp }!!.beløp
         val maksOrdinærMedTillegg = ordinærMedTillegg.maxByOrNull { it.beløp }!!.beløp
         val maksUtvidet = utvidet.maxBy { it.beløp }.beløp
-        return when (personType) {
+
+        return if (fagsakType == FagsakType.BARN_ENSLIG_MINDREÅRIG) maksOrdinærMedTillegg + maksUtvidet
+        else when (personType) {
             PersonType.BARN -> maksOrdinærMedTillegg
             PersonType.SØKER -> maksUtvidet + maksSmåbarnstillegg
             else -> throw Feil("Ikke støtte for å utbetale til persontype ${personType.name}")
@@ -211,10 +216,11 @@ object TilkjentYtelseValidering {
 
 private fun validerAtBeløpForPartStemmerMedSatser(
     person: Person,
-    andeler: List<AndelTilkjentYtelse>
+    andeler: List<AndelTilkjentYtelse>,
+    fagsakType: FagsakType
 ) {
-    val maksAntallAndeler = if (person.type == PersonType.BARN) 1 else 2
-    val maksTotalBeløp = maksBeløp(person.type)
+    val maksAntallAndeler = if (fagsakType == FagsakType.BARN_ENSLIG_MINDREÅRIG) 2 else if (person.type == PersonType.BARN) 1 else 2
+    val maksTotalBeløp = maksBeløp(personType = person.type, fagsakType = fagsakType)
 
     if (andeler.size > maksAntallAndeler) {
         throw UtbetalingsikkerhetFeil(
