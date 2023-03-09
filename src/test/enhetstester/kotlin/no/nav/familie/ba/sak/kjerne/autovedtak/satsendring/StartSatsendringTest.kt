@@ -8,21 +8,14 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPerson
-import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
-import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
-import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.ORDINÆR_BARNETRYGD
-import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.SMÅBARNSTILLEGG
-import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.UTVIDET_BARNETRYGD
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.task.OpprettTaskService
@@ -37,9 +30,6 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
 import java.time.YearMonth
-
-private const val UGYLDIG_SATS = 1000
-private val SATSTIDSPUNKT = YearMonth.of(2023, 3)
 
 internal class StartSatsendringTest {
 
@@ -233,229 +223,6 @@ internal class StartSatsendringTest {
     }
 
     @Test
-    fun `harAlleredeSatsendring skal returnere true hvis den har siste satsendring`() {
-        val behandling = lagBehandling()
-        val atyMedBareSmåbarnstillegg =
-            lagAndelTilkjentYtelseMedEndreteUtbetalingerIPeriodenRundtSisteSatsenring(
-                SatsType.SMA,
-                behandling,
-                SMÅBARNSTILLEGG
-            )
-
-        assertThat(atyMedBareSmåbarnstillegg.erOppdatertMedSisteSatsForAlleSatstyper()).isEqualTo(true)
-
-        val atyMedBareUtvidet =
-            lagAndelTilkjentYtelseMedEndreteUtbetalingerIPeriodenRundtSisteSatsenring(
-                SatsType.UTVIDET_BARNETRYGD,
-                behandling,
-                UTVIDET_BARNETRYGD
-            )
-
-        assertThat(atyMedBareUtvidet.erOppdatertMedSisteSatsForAlleSatstyper()).isEqualTo(true)
-
-        val atyMedBareOrba =
-            lagAndelTilkjentYtelseMedEndreteUtbetalingerIPeriodenRundtSisteSatsenring(
-                SatsType.ORBA,
-                behandling,
-                ORDINÆR_BARNETRYGD
-            )
-
-        assertThat(atyMedBareOrba.erOppdatertMedSisteSatsForAlleSatstyper()).isEqualTo(true)
-
-        val atyMedBareTilleggOrba =
-            lagAndelTilkjentYtelseMedEndreteUtbetalingerIPeriodenRundtSisteSatsenring(
-                SatsType.TILLEGG_ORBA,
-                behandling,
-                ORDINÆR_BARNETRYGD
-            )
-
-        assertThat(atyMedBareTilleggOrba.erOppdatertMedSisteSatsForAlleSatstyper()).isEqualTo(true)
-
-        assertThat(
-            (atyMedBareTilleggOrba + atyMedBareOrba + atyMedBareUtvidet + atyMedBareSmåbarnstillegg)
-                .erOppdatertMedSisteSatsForAlleSatstyper()
-        ).isEqualTo(true)
-    }
-
-    @Test
-    fun `harAlleredeSatsendring skal returnere false hvis den har gammel satsendring`() {
-        val behandling = lagBehandling()
-        val atyMedUgyldigSatsSmåbarnstillegg =
-            lagAndelTilkjentYtelseMedEndreteUtbetalingerIPeriodenRundtSisteSatsenring(
-                SatsType.SMA,
-                behandling,
-                SMÅBARNSTILLEGG,
-                UGYLDIG_SATS
-            )
-
-        assertThat(atyMedUgyldigSatsSmåbarnstillegg.erOppdatertMedSisteSatsForAlleSatstyper()).isEqualTo(false)
-
-        val atyMedUglydligSatsUtvidet =
-            lagAndelTilkjentYtelseMedEndreteUtbetalingerIPeriodenRundtSisteSatsenring(
-                SatsType.UTVIDET_BARNETRYGD,
-                behandling,
-                UTVIDET_BARNETRYGD,
-                UGYLDIG_SATS
-            )
-
-        assertThat(atyMedUglydligSatsUtvidet.erOppdatertMedSisteSatsForAlleSatstyper()).isEqualTo(false)
-
-        val atyMedUgyldigSatsBareOrba =
-            lagAndelTilkjentYtelseMedEndreteUtbetalingerIPeriodenRundtSisteSatsenring(
-                SatsType.ORBA,
-                behandling,
-                ORDINÆR_BARNETRYGD,
-                UGYLDIG_SATS
-            )
-
-        assertThat(atyMedUgyldigSatsBareOrba.erOppdatertMedSisteSatsForAlleSatstyper()).isEqualTo(false)
-
-        val atyMedUgyldigSatsTilleggOrba =
-            lagAndelTilkjentYtelseMedEndreteUtbetalingerIPeriodenRundtSisteSatsenring(
-                SatsType.TILLEGG_ORBA,
-                behandling,
-                ORDINÆR_BARNETRYGD,
-                UGYLDIG_SATS
-            )
-
-        assertThat(atyMedUgyldigSatsTilleggOrba.erOppdatertMedSisteSatsForAlleSatstyper()).isEqualTo(false)
-    }
-
-    @Test
-    fun `harAlleredeSatsendring skal returnere false en av satsene ikke er ny`() {
-        val behandling = lagBehandling()
-        val atyMedUgyldigSatsSmåbarnstillegg =
-            lagAndelTilkjentYtelseMedEndreteUtbetalingerIPeriodenRundtSisteSatsenring(
-                SatsType.SMA,
-                behandling,
-                SMÅBARNSTILLEGG,
-                UGYLDIG_SATS
-            )
-
-        val atyMedGyldigUtvidet =
-            lagAndelTilkjentYtelseMedEndreteUtbetalingerIPeriodenRundtSisteSatsenring(
-                SatsType.UTVIDET_BARNETRYGD,
-                behandling,
-                UTVIDET_BARNETRYGD
-            )
-
-        val atyMedBGyldigOrba =
-            lagAndelTilkjentYtelseMedEndreteUtbetalingerIPeriodenRundtSisteSatsenring(
-                SatsType.ORBA,
-                behandling,
-                ORDINÆR_BARNETRYGD
-            )
-
-        assertThat(
-            (atyMedBGyldigOrba + atyMedGyldigUtvidet + atyMedUgyldigSatsSmåbarnstillegg).erOppdatertMedSisteSatsForAlleSatstyper()
-        ).isEqualTo(false)
-    }
-
-    @Test
-    fun `harAlleredeSatsendring skal returnere true på ytelse med rett sats når tom dato er på samme dato som satstidspunkt`() {
-        val behandling = lagBehandling()
-        val atySomGårUtPåSatstidspunktGyldig =
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
-                fom = SATSTIDSPUNKT.minusMonths(1),
-                tom = SATSTIDSPUNKT,
-                ytelseType = ORDINÆR_BARNETRYGD,
-                behandling = behandling,
-                person = lagPerson(),
-                aktør = lagPerson().aktør,
-                periodeIdOffset = 1,
-                beløp = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp
-            )
-
-        assertThat(listOf(atySomGårUtPåSatstidspunktGyldig).erOppdatertMedSisteSatsForAlleSatstyper()).isEqualTo(true)
-
-        val atySomGårUtPåSatstidspunktUgyldig =
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
-                fom = SATSTIDSPUNKT.minusMonths(1),
-                tom = SATSTIDSPUNKT,
-                ytelseType = ORDINÆR_BARNETRYGD,
-                behandling = behandling,
-                person = lagPerson(),
-                aktør = lagPerson().aktør,
-                periodeIdOffset = 1,
-                beløp = UGYLDIG_SATS
-            )
-
-        assertThat(listOf(atySomGårUtPåSatstidspunktUgyldig).erOppdatertMedSisteSatsForAlleSatstyper()).isEqualTo(false)
-    }
-
-    @Test
-    fun `harAlleredeSatsendring skal returnere true hvis ingen aktive andel tilkjent ytelser`() {
-        val behandling = lagBehandling()
-        val utgåttAndelTilkjentYtelse =
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
-                fom = SATSTIDSPUNKT.minusMonths(10),
-                tom = SATSTIDSPUNKT.minusMonths(1),
-                ytelseType = ORDINÆR_BARNETRYGD,
-                behandling = behandling,
-                person = lagPerson(),
-                aktør = lagPerson().aktør,
-                periodeIdOffset = 1,
-                beløp = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp
-            )
-
-        assertThat(listOf(utgåttAndelTilkjentYtelse).erOppdatertMedSisteSatsForAlleSatstyper()).isEqualTo(true)
-    }
-
-    @Test
-    fun `harAlleredeSatsendring skal returnere true for ny sats når fom er på satstidspunktet`() {
-        val behandling = lagBehandling()
-        val utgåttAndelTilkjentYtelse =
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
-                fom = SATSTIDSPUNKT,
-                tom = SATSTIDSPUNKT.plusYears(10),
-                ytelseType = ORDINÆR_BARNETRYGD,
-                behandling = behandling,
-                person = lagPerson(),
-                aktør = lagPerson().aktør,
-                periodeIdOffset = 1,
-                beløp = SatsService.finnSisteSatsFor(SatsType.ORBA).beløp
-            )
-
-        assertThat(listOf(utgåttAndelTilkjentYtelse).erOppdatertMedSisteSatsForAlleSatstyper()).isEqualTo(true)
-    }
-
-    @Test
-    fun `harAlleredeSatsendring skal returnere false for gammel sats når fom er på satstidspunktet`() {
-        val behandling = lagBehandling()
-        val utgåttAndelTilkjentYtelse =
-            lagAndelTilkjentYtelseMedEndreteUtbetalinger(
-                fom = SATSTIDSPUNKT,
-                tom = SATSTIDSPUNKT.plusYears(10),
-                ytelseType = ORDINÆR_BARNETRYGD,
-                behandling = behandling,
-                person = lagPerson(),
-                aktør = lagPerson().aktør,
-                periodeIdOffset = 1,
-                beløp = UGYLDIG_SATS
-            )
-
-        assertThat(listOf(utgåttAndelTilkjentYtelse).erOppdatertMedSisteSatsForAlleSatstyper()).isEqualTo(false)
-    }
-
-    private fun lagAndelTilkjentYtelseMedEndreteUtbetalingerIPeriodenRundtSisteSatsenring(
-        satsType: SatsType,
-        behandling: Behandling,
-        ytelseType: YtelseType,
-        beløp: Int? = null
-    ) = listOf(
-        lagAndelTilkjentYtelseMedEndreteUtbetalinger(
-            fom = SatsService.finnSisteSatsFor(satsType).gyldigFom.minusMonths(1).toYearMonth(),
-            tom = SatsService.finnSisteSatsFor(satsType).gyldigFom.plusMonths(1).toYearMonth(),
-            ytelseType = ytelseType,
-            behandling = behandling,
-            person = lagPerson(),
-            aktør = lagPerson().aktør,
-            periodeIdOffset = 1,
-            beløp = beløp ?: SatsService.finnSisteSatsFor(satsType).beløp
-        )
-    )
-
-    @Test
     fun `kanStarteSatsendringPåFagsak gir false når vi ikke har noen tidligere behandling`() {
         every { behandlingRepository.finnSisteIverksatteBehandling(1L) } returns null
         every { satskjøringRepository.findByFagsakId(1L) } returns Satskjøring(fagsakId = 1L)
@@ -515,7 +282,7 @@ internal class StartSatsendringTest {
     }
 
     @Test
-    fun `opprettSatsendringSynkrontVedGammelSats skal kaste feil for alle andre resultater enn OK`() {
+    fun `kanGjennomføreSatsendringManuelt skal kaste feil for alle andre resultater enn OK`() {
         every { startSatsendring.kanGjennomføreSatsendringManuelt(any()) } returns true
 
         val satsendringSvar = SatsendringSvar.values()
