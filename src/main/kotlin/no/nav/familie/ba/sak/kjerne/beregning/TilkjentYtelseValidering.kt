@@ -211,10 +211,11 @@ object TilkjentYtelseValidering {
 
 private fun validerAtBeløpForPartStemmerMedSatser(
     person: Person,
-    andeler: List<AndelTilkjentYtelse>,
-    maksAntallAndeler: Int = if (person.type == PersonType.BARN) 1 else 2,
-    maksTotalBeløp: Int = maksBeløp(person.type)
+    andeler: List<AndelTilkjentYtelse>
 ) {
+    val maksAntallAndeler = if (person.type == PersonType.BARN) 1 else 2
+    val maksTotalBeløp = maksBeløp(person.type)
+
     if (andeler.size > maksAntallAndeler) {
         throw UtbetalingsikkerhetFeil(
             melding = "Validering av andeler for ${person.type} i perioden (${andeler.first().stønadFom} - ${andeler.first().stønadTom}) feilet: Tillatte andeler = $maksAntallAndeler, faktiske andeler = ${andeler.size}.",
