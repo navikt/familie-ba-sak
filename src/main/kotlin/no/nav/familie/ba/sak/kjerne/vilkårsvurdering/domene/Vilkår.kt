@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurderin
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.VurderPersonHarLovligOpphold
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType.BARN
@@ -69,9 +70,11 @@ enum class Vilkår(
 
     companion object {
 
-        fun hentVilkårFor(personType: PersonType, ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD): Set<Vilkår> {
+        fun hentVilkårFor(personType: PersonType, ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD, fagsakType: FagsakType = FagsakType.NORMAL): Set<Vilkår> {
             return values().filter {
-                if (ytelseType == YtelseType.UTVIDET_BARNETRYGD) {
+                if (fagsakType == FagsakType.BARN_ENSLIG_MINDREÅRIG && ytelseType == YtelseType.UTVIDET_BARNETRYGD) {
+                    personType in it.parterDetteGjelderFor || it == UTVIDET_BARNETRYGD
+                } else if (ytelseType == YtelseType.UTVIDET_BARNETRYGD) {
                     personType in it.parterDetteGjelderFor
                 } else {
                     personType in it.parterDetteGjelderFor && ytelseType == it.ytelseType
