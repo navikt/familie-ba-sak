@@ -11,8 +11,8 @@ import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagPerson
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -35,7 +35,7 @@ import java.time.YearMonth
 class SendMeldingTilBisysTaskTest {
 
     data class Mocks(
-        val behandlingRepository: BehandlingRepository,
+        val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
         val kafkaProducer: DefaultKafkaProducer,
         val tilkjentYtelseRepository: TilkjentYtelseRepository,
         val kafkaResult: ListenableFuture<SendResult<String, String>>,
@@ -46,7 +46,7 @@ class SendMeldingTilBisysTaskTest {
         val tilkjentYtelseRepositoryMock = mockk<TilkjentYtelseRepository>()
         val kafkaProducer = DefaultKafkaProducer(mockk())
         val listenableFutureMock = mockk<ListenableFuture<SendResult<String, String>>>()
-        val behandlingRepositoryMock = mockk<BehandlingRepository>()
+        val behandlingHentOgPersisterServiceMock = mockk<BehandlingHentOgPersisterService>()
 
         val forrigeBehandling = lagBehandling(defaultFagsak(), førsteSteg = StegType.BEHANDLING_AVSLUTTET)
 
@@ -56,18 +56,15 @@ class SendMeldingTilBisysTaskTest {
             førsteSteg = StegType.IVERKSETT_MOT_OPPDRAG
         )
 
-        every { behandlingRepositoryMock.finnBehandling(forrigeBehandling.id) } returns forrigeBehandling
-        every { behandlingRepositoryMock.finnBehandling(nyBehandling.id) } returns nyBehandling
+        every { behandlingHentOgPersisterServiceMock.hent(forrigeBehandling.id) } returns forrigeBehandling
+        every { behandlingHentOgPersisterServiceMock.hent(nyBehandling.id) } returns nyBehandling
 
-        every { behandlingRepositoryMock.finnIverksatteBehandlinger(nyBehandling.fagsak.id) } returns listOf(
-            forrigeBehandling,
-            nyBehandling
-        )
+        every { behandlingHentOgPersisterServiceMock.hentForrigeBehandlingSomErVedtatt(nyBehandling) } returns forrigeBehandling
 
         every { listenableFutureMock.addCallback(any(), any()) } just runs
         kafkaProducer.kafkaAivenTemplate = mockk()
         return Mocks(
-            behandlingRepositoryMock,
+            behandlingHentOgPersisterServiceMock,
             kafkaProducer,
             tilkjentYtelseRepositoryMock,
             listenableFutureMock,

@@ -148,7 +148,7 @@ class Autobrev6og18ÅrFortsattOpphørtTest(
         )
 
         håndterIverksettingAvBehandling(
-            behandlingEtterVurdering = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = fagsakId)!!,
+            behandlingEtterVurdering = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = fagsakId)!!,
             søkerFnr = scenario.søker.ident,
             fagsakService = fagsakService,
             vedtakService = vedtakService,

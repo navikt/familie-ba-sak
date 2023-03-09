@@ -4,9 +4,8 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.isSameOrBefore
-import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.statistikk.producer.KafkaProducer
@@ -30,14 +29,14 @@ import java.util.Properties
 class SendMeldingTilBisysTask(
     private val kafkaProducer: KafkaProducer,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
-    private val behandlingRepository: BehandlingRepository
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService
 ) : AsyncTaskStep {
 
     private val logger = LoggerFactory.getLogger(SendMeldingTilBisysTask::class.java)
     private val meldingsTeller = Metrics.counter("familie.ba.sak.bisys.meldinger.sendt")
 
     override fun doTask(task: Task) {
-        val behandling = behandlingRepository.finnBehandling(task.payload.toLong())
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId = task.payload.toLong())
 
         // Bisys vil kun ha rene manuelle opphør eller reduksjon
         if (behandling.resultat == Behandlingsresultat.OPPHØRT ||
@@ -68,12 +67,7 @@ class SendMeldingTilBisysTask(
     }
 
     fun finnBarnEndretOpplysning(behandling: Behandling): Map<String, List<BarnEndretOpplysning>> {
-        val iverksatteBehandlinger =
-            behandlingRepository.finnIverksatteBehandlinger(fagsakId = behandling.fagsak.id)
-        val forrigeIverksatteBehandling = Behandlingutils.hentForrigeIverksatteBehandling(
-            iverksatteBehandlinger = iverksatteBehandlinger,
-            behandlingFørFølgende = behandling
-        ) ?: error("Finnes ikke forrige behandling for behandling ${behandling.id}")
+        val forrigeIverksatteBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling = behandling) ?: error("Finnes ikke forrige behandling for behandling ${behandling.id}")
 
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.id)
         val forrigeTilkjentYtelse = tilkjentYtelseRepository.findByBehandling(forrigeIverksatteBehandling.id)

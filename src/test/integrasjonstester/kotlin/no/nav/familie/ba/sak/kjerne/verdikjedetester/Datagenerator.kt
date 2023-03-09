@@ -184,7 +184,7 @@ fun fullførBehandlingFraVilkårsvurderingAlleVilkårOppfylt(
         }
     )
     return håndterIverksettingAvBehandling(
-        behandlingEtterVurdering = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = fagsak.id)!!,
+        behandlingEtterVurdering = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = fagsak.id)!!,
         søkerFnr = personScenario.søker.ident!!,
         fagsakService = fagsakService,
         vedtakService = vedtakService,

@@ -218,7 +218,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
         )
 
         håndterIverksettingAvBehandling(
-            behandlingEtterVurdering = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = fagsakId.data!!.toLong())!!,
+            behandlingEtterVurdering = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = fagsakId.data!!.toLong())!!,
             søkerFnr = scenario.søker.ident,
             fagsakService = fagsakService,
             vedtakService = vedtakService,
@@ -400,7 +400,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
         )
 
         håndterIverksettingAvBehandling(
-            behandlingEtterVurdering = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = fagsakId.data!!.toLong())!!,
+            behandlingEtterVurdering = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = fagsakId.data!!.toLong())!!,
             søkerFnr = scenario.søker.ident,
             fagsakService = fagsakService,
             vedtakService = vedtakService,
