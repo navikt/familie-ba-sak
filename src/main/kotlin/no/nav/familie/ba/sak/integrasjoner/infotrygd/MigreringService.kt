@@ -12,11 +12,11 @@ import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.MigreringResponseDto
 import no.nav.familie.ba.sak.integrasjoner.migrering.MigreringRestClient
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
@@ -71,7 +71,7 @@ private val SISTE_DATO_FORRIGE_SATS = LocalDate.of(2023, 2, 28)
 
 @Service
 class MigreringService(
-    private val behandlingRepository: BehandlingRepository,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val behandlingService: BehandlingService,
     private val env: EnvService,
     private val fagsakService: FagsakService,
@@ -278,9 +278,9 @@ class MigreringService(
     }
 
     private fun kastFeilDersomAlleredeMigrert(fagsak: Fagsak) {
-        val aktivBehandling = behandlingRepository.findByFagsakAndAktiv(fagsak.id)
+        val aktivBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = fagsak.id)
         if (aktivBehandling != null) {
-            val behandlinger = behandlingRepository.finnBehandlinger(fagsak.id).sortedBy { it.opprettetTidspunkt }
+            val behandlinger = behandlingHentOgPersisterService.hentBehandlinger(fagsakId = fagsak.id).sortedBy { it.opprettetTidspunkt }
 
             behandlinger.findLast { it.erMigrering() && !it.erHenlagt() }?.apply {
                 when (fagsak.status) {

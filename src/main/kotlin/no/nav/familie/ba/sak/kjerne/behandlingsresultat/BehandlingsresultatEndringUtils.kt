@@ -145,8 +145,8 @@ object BehandlingsresultatEndringUtils {
         forrigePersonResultat: Set<PersonResultat>
     ): Boolean {
         val endringIVilkårsvurderingTidslinje = EndringIVilkårsvurderingUtil.lagEndringIVilkårsvurderingTidslinje(
-            nåværendePersonResultat = nåværendePersonResultat,
-            forrigePersonResultat = forrigePersonResultat
+            nåværendePersonResultater = nåværendePersonResultat,
+            forrigePersonResultater = forrigePersonResultat
         )
         return endringIVilkårsvurderingTidslinje.perioder().any { it.innhold == true }
     }

@@ -51,7 +51,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.assertj.core.api.Assertions.tuple
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -84,7 +83,6 @@ import java.time.format.DateTimeFormatter
     "mock-rest-template-config"
 )
 @Tag("integration")
-@Disabled("TODO Fikses senere")
 class MigreringServiceIntegrasjonTest(
     @Autowired
     private val databaseCleanupService: DatabaseCleanupService,
@@ -487,7 +485,7 @@ class MigreringServiceIntegrasjonTest(
     }
 
     @Test
-    fun `Migrerin skal stoppes hvis antall barn på stønad ikke stemmer overens med antall barn under 18, når person har 1 barn over 18`() {
+    fun `Migrering skal stoppes hvis antall barn på stønad ikke stemmer overens med antall barn under 18, når person har 1 barn over 18`() {
         val fødselsnrBarn =
             FoedselsnummerGenerator().foedselsnummer(LocalDate.now().minusYears(18)).asString
 
@@ -533,10 +531,7 @@ class MigreringServiceIntegrasjonTest(
     }
 
     @Test
-    fun `Migrerin skal stoppes hvis antall delytelser er null og antall barn er 0`() {
-        val fødselsnrBarn =
-            FoedselsnummerGenerator().foedselsnummer(LocalDate.now().minusYears(18)).asString
-
+    fun `Migrering skal stoppes hvis antall delytelser er null og antall barn er 0`() {
         every {
             infotrygdBarnetrygdClient.hentSaker(any(), any())
         } returns InfotrygdSøkResponse(

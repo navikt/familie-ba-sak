@@ -17,7 +17,6 @@ import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.tilfeldigSøker
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.dataGenerator.SettPåVent.lagSettPåVent
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
@@ -108,9 +107,6 @@ internal class SaksstatistikkServiceTest(
 
     @MockK
     private val vedtaksperiodeService: VedtaksperiodeService,
-
-    @MockK
-    private val featureToggleService: FeatureToggleService,
 
     @MockK
     private val settPåVentService: SettPåVentService
@@ -264,8 +260,6 @@ internal class SaksstatistikkServiceTest(
         val mottattDato = LocalDateTime.now()
         every { behandlingSøknadsinfoService.hentSøknadMottattDato(any()) } returns mottattDato
 
-        every { featureToggleService.isEnabled(any()) } returns true
-
         val tidSattPåVent = now()
         val frist = now().plusWeeks(3)
         every { settPåVentService.finnAktivSettPåVentPåBehandling(any()) } returns lagSettPåVent(
@@ -351,7 +345,7 @@ internal class SaksstatistikkServiceTest(
             )
         )
 
-        every { behandlingHentOgPersisterService.hentAktivForFagsak(any()) } returns null
+        every { behandlingHentOgPersisterService.finnAktivForFagsak(any()) } returns null
 
         val sakDvh = sakstatistikkService.mapTilSakDvh(1)
         println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(sakDvh))
@@ -381,7 +375,7 @@ internal class SaksstatistikkServiceTest(
         )
         every { personopplysningerService.hentLandkodeAlpha2UtenlandskBostedsadresse(tilAktør("12345678910")) } returns "SE"
 
-        every { behandlingHentOgPersisterService.hentAktivForFagsak(any()) } returns null
+        every { behandlingHentOgPersisterService.finnAktivForFagsak(any()) } returns null
 
         val sakDvh = sakstatistikkService.mapTilSakDvh(1)
         println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(sakDvh))
@@ -408,7 +402,7 @@ internal class SaksstatistikkServiceTest(
             tilfeldigPerson(personType = PersonType.SØKER)
         )
 
-        every { behandlingHentOgPersisterService.hentAktivForFagsak(any()) } returns lagBehandling()
+        every { behandlingHentOgPersisterService.finnAktivForFagsak(any()) } returns lagBehandling()
 
         val sakDvh = sakstatistikkService.mapTilSakDvh(1)
         println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(sakDvh))

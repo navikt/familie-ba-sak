@@ -105,8 +105,6 @@ class EndretUtbetalingAndelService(
         behandling: Behandling,
         endretUtbetalingAndelId: Long
     ) {
-        val endretUtbetalingAndel = endretUtbetalingAndelRepository.getById(endretUtbetalingAndelId)
-        endretUtbetalingAndel?.andelTilkjentYtelser?.forEach { it.endretUtbetalingAndeler.clear() }
         endretUtbetalingAndelRepository.deleteById(endretUtbetalingAndelId)
 
         val personopplysningGrunnlag =
@@ -139,17 +137,9 @@ class EndretUtbetalingAndelService(
             endretUtbetalingAndelRepository.save(
                 it.copy(
                     id = 0,
-                    behandlingId = behandling.id,
-                    andelTilkjentYtelser = mutableListOf()
+                    behandlingId = behandling.id
                 )
             )
-        }
-    }
-
-    @Transactional
-    fun fjernKnytningTilAndelTilkjentYtelse(behandlingId: Long) {
-        endretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandlingId).filter { it.andelTilkjentYtelser.isNotEmpty() }.forEach {
-            it.andelTilkjentYtelser.clear()
         }
     }
 }

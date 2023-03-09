@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForUtbeta
 import no.nav.familie.ba.sak.integrasjoner.økonomi.pakkInnForUtbetaling
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
-import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -22,6 +21,9 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.steg.EndringerIUtbetalingForBehandlingSteg
+import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
@@ -74,7 +76,10 @@ class BeregningService(
         tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)
 
     fun hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(fagsakId: Long): List<TilkjentYtelse> {
-        val avsluttedeBehandlingerSomIkkeErHenlagtPåFagsak = behandlingRepository.findByFagsakAndAvsluttet(fagsakId).filter { !it.erHenlagt() }
+        val avsluttedeBehandlingerSomIkkeErHenlagtPåFagsak = behandlingHentOgPersisterService.finnAvsluttedeBehandlingerPåFagsak(
+            fagsakId = fagsakId
+        ).filter { !it.erHenlagt() }
+
         return avsluttedeBehandlingerSomIkkeErHenlagtPåFagsak.mapNotNull {
             tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(
                 it.id
@@ -88,7 +93,7 @@ class BeregningService(
      * Denne metoden henter alle relaterte behandlinger på en person.
      * Per fagsak henter man tilkjent ytelse fra:
      * 1. Behandling som er til godkjenning
-     * 2. Siste behandling som er iverksatt
+     * 2. Siste behandling som er vedtatt
      * 3. Filtrer bort behandlinger der barnet ikke lenger finnes
      */
     fun hentRelevanteTilkjentYtelserForBarn(
@@ -111,8 +116,8 @@ class BeregningService(
                 if (godkjenteBehandlingerSomIkkeErIverksattEnda != null) {
                     godkjenteBehandlingerSomIkkeErIverksattEnda
                 } else {
-                    val iverksatteBehandlinger = behandlingRepository.finnIverksatteBehandlinger(fagsakId = fagsak.id)
-                    Behandlingutils.hentSisteBehandlingSomErIverksatt(iverksatteBehandlinger)
+                    val sisteVedtatteBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsak.id)
+                    sisteVedtatteBehandling
                 }
             }
         }.map {
@@ -130,19 +135,30 @@ class BeregningService(
         hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling) == EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
 
     fun hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling: Behandling): EndringerIUtbetalingForBehandlingSteg {
+        val endringerIUtbetaling =
+            hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandlingTidslinje(behandling)
+                .perioder()
+                .any { it.innhold == true }
+
+        return if (endringerIUtbetaling) EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING else EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING
+    }
+
+    fun hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandlingTidslinje(behandling: Behandling): Tidslinje<Boolean, Måned> {
         val nåværendeAndeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
+        val forrigeAndeler = hentAndelerFraForrigeIverksattebehandling(behandling)
 
-        val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling)
-        val forrigeAndeler =
-            forrigeBehandling?.let { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(it.id) }
-                ?: emptyList()
+        if (nåværendeAndeler.isEmpty() && forrigeAndeler.isEmpty()) return TomTidslinje()
 
-        val endringerIUtbetaling = EndringIUtbetalingUtil.erEndringerIUtbetalingFraForrigeBehandling(
+        return EndringIUtbetalingUtil.lagEndringIUtbetalingTidslinje(
             nåværendeAndeler = nåværendeAndeler,
             forrigeAndeler = forrigeAndeler
         )
+    }
 
-        return if (endringerIUtbetaling) EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING else EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING
+    fun hentAndelerFraForrigeIverksattebehandling(behandling: Behandling): List<AndelTilkjentYtelse> {
+        val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling)
+        return forrigeBehandling?.let { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(it.id) }
+            ?: emptyList()
     }
 
     @Transactional
@@ -198,8 +214,8 @@ class BeregningService(
     }
 
     // For at endret utbetaling andeler skal fungere så må man generere andeler før man kobler endringene på andelene
-    // Dette er fordi en endring regnes som gyldig når den overlapper med en andel og har gyldig årsak
-    // Hvis man ikke genererer andeler før man kobler på endringene så vil ingen av endringene ses på som gyldige, altså ikke oppdatere noen andeler
+// Dette er fordi en endring regnes som gyldig når den overlapper med en andel og har gyldig årsak
+// Hvis man ikke genererer andeler før man kobler på endringene så vil ingen av endringene ses på som gyldige, altså ikke oppdatere noen andeler
     fun genererTilkjentYtelseFraVilkårsvurdering(
         behandling: Behandling,
         personopplysningGrunnlag: PersonopplysningGrunnlag

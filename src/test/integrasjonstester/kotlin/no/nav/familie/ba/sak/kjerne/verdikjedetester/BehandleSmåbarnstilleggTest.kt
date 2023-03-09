@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.EfSakRestClientMock
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.dataGenerator.behandling.kjørStegprosessForBehandling
 import no.nav.familie.ba.sak.dataGenerator.vilkårsvurdering.lagVilkårsvurderingFraRestScenario
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
@@ -83,7 +82,6 @@ class BehandleSmåbarnstilleggTest(
     @Autowired private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val stegService: StegService,
-    @Autowired private val featureToggleService: FeatureToggleService,
     @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     @Autowired private val personidentService: PersonidentService,
     @Autowired private val efSakRestClient: EfSakRestClient,
@@ -146,7 +144,6 @@ class BehandleSmåbarnstilleggTest(
     @Test
     @Order(1)
     fun `Skal behandle utvidet nasjonal sak med småbarnstillegg`() {
-        every { featureToggleService.isEnabled(any()) } returns true
         val søkersIdent = scenario.søker.ident!!
         settOppefSakMockForDeFørste2Testene(søkersIdent)
 
@@ -297,7 +294,7 @@ class BehandleSmåbarnstilleggTest(
         )
 
         håndterIverksettingAvBehandling(
-            behandlingEtterVurdering = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = fagsak.data!!.id)!!,
+            behandlingEtterVurdering = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = fagsak.data!!.id)!!,
             søkerFnr = søkersIdent,
             fagsakService = fagsakService,
             vedtakService = vedtakService,
@@ -318,7 +315,7 @@ class BehandleSmåbarnstilleggTest(
             behandlingsdata = søkersAktør
         )
         val fagsak = fagsakService.hentFagsakPåPerson(aktør = søkersAktør)
-        val aktivBehandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = fagsak!!.id)!!
+        val aktivBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = fagsak!!.id)!!
 
         assertEquals(BehandlingStatus.AVSLUTTET, aktivBehandling.status)
         assertNotEquals(BehandlingÅrsak.SMÅBARNSTILLEGG, aktivBehandling.opprettetÅrsak)
@@ -348,7 +345,7 @@ class BehandleSmåbarnstilleggTest(
         )
 
         val fagsak = fagsakService.hentFagsakPåPerson(aktør = søkersAktør)
-        val aktivBehandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = fagsak!!.id)!!
+        val aktivBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = fagsak!!.id)!!
 
         // Vedtaksperioder skal være slettet etter at den er blitt omgjort til manuell behandling
         assertEquals(
@@ -404,7 +401,7 @@ class BehandleSmåbarnstilleggTest(
         )
 
         val fagsak = fagsakService.hentFagsakPåPerson(aktør = søkersAktør)
-        val aktivBehandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = fagsak!!.id)!!
+        val aktivBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = fagsak!!.id)!!
 
         val andelerTilkjentYtelse =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
@@ -430,7 +427,7 @@ class BehandleSmåbarnstilleggTest(
         assertTrue(aktuellVedtaksperiode?.begrunnelser?.any { it.standardbegrunnelse == Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD } == true)
 
         håndterIverksettingAvBehandling(
-            behandlingEtterVurdering = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = fagsak.id)!!,
+            behandlingEtterVurdering = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = fagsak.id)!!,
             søkerFnr = søkersIdent,
             fagsakService = fagsakService,
             vedtakService = vedtakService,
@@ -468,7 +465,7 @@ class BehandleSmåbarnstilleggTest(
             behandlingsdata = søkersAktør
         )
         val fagsak = fagsakService.hentFagsakPåPerson(aktør = søkersAktør)
-        val aktivBehandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = fagsak!!.id)!!
+        val aktivBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = fagsak!!.id)!!
 
         val andelerTilkjentYtelse =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
@@ -536,7 +533,7 @@ class BehandleSmåbarnstilleggTest(
         )
 
         val fagsak = fagsakService.hentFagsakPåPerson(aktør = søkersAktør)
-        val aktivBehandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = fagsak!!.id)!!
+        val aktivBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = fagsak!!.id)!!
 
         val småbarnstilleggAndeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
             behandlingId = aktivBehandling.id

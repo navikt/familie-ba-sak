@@ -80,7 +80,7 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
         val personopplysningGrunnlag: PersonopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(behandlingId = behandlingId, barn3ÅrForrigeMåned)
 
-        every { behandlingHentOgPersisterService.hentAktivForFagsak(any()) } returns behandling
+        every { behandlingHentOgPersisterService.finnAktivForFagsak(any()) } returns behandling
         every { behandlingHentOgPersisterService.hentBehandlinger(any()) } returns listOf(behandling)
         every { behandlingService.harBehandlingsårsakAlleredeKjørt(any(), any(), any()) } returns false
         every { persongrunnlagService.hentAktivThrows(any()) } returns personopplysningGrunnlag
@@ -131,7 +131,7 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
             }
         )
 
-        every { behandlingHentOgPersisterService.hentAktivForFagsak(any()) } returns behandling
+        every { behandlingHentOgPersisterService.finnAktivForFagsak(any()) } returns behandling
         every { behandlingHentOgPersisterService.hentBehandlinger(behandling.fagsak.id) } returns listOf(behandling)
         every { vedtaksperiodeService.hentPersisterteVedtaksperioder(any()) } returns vedtaksperioder
         every { behandlingService.harBehandlingsårsakAlleredeKjørt(any(), any(), any()) } returns false
@@ -162,7 +162,7 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
         val personopplysningGrunnlag: PersonopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(behandlingId = behandlingId, barn3ÅrForrigeMåned)
 
-        every { behandlingHentOgPersisterService.hentAktivForFagsak(any()) } returns behandling
+        every { behandlingHentOgPersisterService.finnAktivForFagsak(any()) } returns behandling
         every { behandlingService.harBehandlingsårsakAlleredeKjørt(any(), any(), any()) } returns true
         every { persongrunnlagService.hentAktivThrows(any()) } returns personopplysningGrunnlag
         every { periodeOvergangsstønadGrunnlagRepository.findByBehandlingId(any()) } returns emptyList()

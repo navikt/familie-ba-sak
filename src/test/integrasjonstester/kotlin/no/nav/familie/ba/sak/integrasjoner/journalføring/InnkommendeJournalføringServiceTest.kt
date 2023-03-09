@@ -83,7 +83,7 @@ class InnkommendeJournalføringServiceTest(
         val request = lagMockRestJournalføring(bruker = NavnOgIdent("Mock", søkerFnr))
         val fagsakId = innkommendeJournalføringService.journalfør(request, "123", "mockEnhet", "1")
 
-        val behandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId.toLong())
+        val behandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId.toLong())
         assertNotNull(behandling)
         assertEquals(request.nyBehandlingstype, behandling!!.type)
         assertEquals(request.nyBehandlingsårsak, behandling.opprettetÅrsak)
@@ -98,7 +98,7 @@ class InnkommendeJournalføringServiceTest(
         val request = lagMockRestJournalføring(bruker = NavnOgIdent("Mock", randomFnr()))
             .copy(fagsakType = FagsakType.BARN_ENSLIG_MINDREÅRIG)
         val fagsakId = innkommendeJournalføringService.journalfør(request, "123", "mockEnhet", "1")
-        val behandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId.toLong())
+        val behandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId.toLong())
 
         assertNotNull(behandling)
         assertEquals(FagsakType.BARN_ENSLIG_MINDREÅRIG, behandling!!.fagsak.type)
@@ -106,7 +106,7 @@ class InnkommendeJournalføringServiceTest(
         val request2 = lagMockRestJournalføring(bruker = NavnOgIdent("Mock", randomFnr()))
             .copy(fagsakType = FagsakType.INSTITUSJON, institusjon = InstitusjonInfo("orgnr", tssEksternId = "tss"))
         val fagsakId2 = innkommendeJournalføringService.journalfør(request2, "1234", "mockEnhet", "2")
-        val behandling2 = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId2.toLong())
+        val behandling2 = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId2.toLong())
 
         assertNotNull(behandling2)
         assertEquals(FagsakType.INSTITUSJON, behandling2!!.fagsak.type)

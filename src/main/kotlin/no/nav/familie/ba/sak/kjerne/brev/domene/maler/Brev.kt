@@ -72,11 +72,6 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
         "Informasjonsbrev fødsel mindreårig"
     ),
 
-    @Deprecated(
-        "Brukes ikke lenger. Må ha denne for å kunne få gjennom tasker med gammelt enum-navn." +
-            "Kan fjernes når de har kjørt."
-    )
-    INFORMASJONSBREV_FØDSEL_UMYNDIG(false, "informasjonsbrevFodselVergemaal", "Informasjonsbrev fødsel umyndig"),
     INFORMASJONSBREV_FØDSEL_VERGEMÅL(false, "informasjonsbrevFodselVergemaal", "Informasjonsbrev fødsel vergemål"),
     INFORMASJONSBREV_KAN_SØKE(false, "informasjonsbrevKanSoke", "Informasjonsbrev kan søke"),
     INFORMASJONSBREV_KAN_SØKE_EØS(false, "informasjonsbrevKanSokeEOS", "Informasjonsbrev kan søke EØS"),
@@ -96,12 +91,6 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
     VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON(true, "opphorMedEndringInstitusjon", "Opphør med endring"),
     VEDTAK_AVSLAG_INSTITUSJON(true, "vedtakAvslagInstitusjon", "Avslag"),
     VEDTAK_FORTSATT_INNVILGET_INSTITUSJON(true, "vedtakFortsattInnvilgetInstitusjon", "Vedtak fortstatt innvilget"),
-
-    @Deprecated(
-        "Brukes ikke lenger. Må ha denne for å kunne få gjennom tasker med gammelt enum-navn." +
-            "Kan fjernes når de har kjørt."
-    )
-    DØDSFALL(true, "dodsfall", "Dødsfall"),
 
     AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG(
         true,
@@ -131,7 +120,6 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             SVARTIDSBREV_INSTITUSJON,
             FORLENGET_SVARTIDSBREV,
             FORLENGET_SVARTIDSBREV_INSTITUSJON,
-            INFORMASJONSBREV_FØDSEL_UMYNDIG,
             INFORMASJONSBREV_FØDSEL_VERGEMÅL,
             INFORMASJONSBREV_FØDSEL_MINDREÅRIG,
             INFORMASJONSBREV_KAN_SØKE,
@@ -152,7 +140,6 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             VEDTAK_ENDRING_INSTITUSJON,
             VEDTAK_FORTSATT_INNVILGET_INSTITUSJON,
             VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON,
-            DØDSFALL,
             AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG,
             AUTOVEDTAK_NYFØDT_FØRSTE_BARN,
             AUTOVEDTAK_NYFØDT_BARN_FRA_FØR -> throw Feil("Ikke avgjort om $this skal generere forside")
@@ -169,7 +156,6 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             HENLEGGE_TRUKKET_SØKNAD -> Dokumenttype.BARNETRYGD_HENLEGGE_TRUKKET_SØKNAD
             SVARTIDSBREV -> Dokumenttype.BARNETRYGD_SVARTIDSBREV
             FORLENGET_SVARTIDSBREV -> Dokumenttype.BARNETRYGD_FORLENGET_SVARTIDSBREV
-            INFORMASJONSBREV_FØDSEL_UMYNDIG -> Dokumenttype.BARNETRYGD_INFORMASJONSBREV_FØDSEL_VERGEMÅL
             INFORMASJONSBREV_FØDSEL_VERGEMÅL -> Dokumenttype.BARNETRYGD_INFORMASJONSBREV_FØDSEL_VERGEMÅL
             INFORMASJONSBREV_FØDSEL_MINDREÅRIG -> Dokumenttype.BARNETRYGD_INFORMASJONSBREV_FØDSEL_MINDREÅRIG
             INFORMASJONSBREV_KAN_SØKE -> Dokumenttype.BARNETRYGD_INFORMASJONSBREV_KAN_SØKE
@@ -198,7 +184,6 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             VEDTAK_ENDRING_INSTITUSJON,
             VEDTAK_FORTSATT_INNVILGET_INSTITUSJON,
             VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON,
-            DØDSFALL,
             AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG,
             AUTOVEDTAK_NYFØDT_FØRSTE_BARN,
             AUTOVEDTAK_NYFØDT_BARN_FRA_FØR -> throw Feil("Ingen dokumenttype for $this")
@@ -221,7 +206,6 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             SVARTIDSBREV, SVARTIDSBREV_INSTITUSJON -> Distribusjonstype.ANNET
             FORLENGET_SVARTIDSBREV, FORLENGET_SVARTIDSBREV_INSTITUSJON -> Distribusjonstype.ANNET
             INFORMASJONSBREV_FØDSEL_MINDREÅRIG -> Distribusjonstype.ANNET
-            INFORMASJONSBREV_FØDSEL_UMYNDIG -> Distribusjonstype.ANNET
             INFORMASJONSBREV_FØDSEL_VERGEMÅL -> Distribusjonstype.ANNET
             INFORMASJONSBREV_KAN_SØKE -> Distribusjonstype.ANNET
             INFORMASJONSBREV_KAN_SØKE_EØS -> Distribusjonstype.ANNET
@@ -240,7 +224,6 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             VEDTAK_ENDRING_INSTITUSJON -> Distribusjonstype.VEDTAK
             VEDTAK_FORTSATT_INNVILGET_INSTITUSJON -> Distribusjonstype.VEDTAK
             VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON -> Distribusjonstype.VEDTAK
-            DØDSFALL -> throw Feil("Dødsfall skal ikke brukes")
             AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG -> Distribusjonstype.VEDTAK
             AUTOVEDTAK_NYFØDT_FØRSTE_BARN -> Distribusjonstype.VEDTAK
             AUTOVEDTAK_NYFØDT_BARN_FRA_FØR -> Distribusjonstype.VEDTAK

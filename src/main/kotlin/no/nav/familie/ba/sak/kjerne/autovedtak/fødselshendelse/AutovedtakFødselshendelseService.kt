@@ -181,7 +181,7 @@ class AutovedtakFødselshendelseService(
 
     private fun hentÅpenNormalBehandling(aktør: Aktør): Behandling? {
         return fagsakService.hentNormalFagsak(aktør)?.let {
-            behandlingHentOgPersisterService.hentAktivOgÅpenForFagsak(it.id)
+            behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(it.id)
         }
     }
 

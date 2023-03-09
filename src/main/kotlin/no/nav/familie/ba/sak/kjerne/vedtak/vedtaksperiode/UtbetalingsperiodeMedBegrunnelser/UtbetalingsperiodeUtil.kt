@@ -10,8 +10,8 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilSisteDagIMåneden
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilTidslinjeForSplitt
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilTidslinjeForSplitt
 
 fun hentPerioderMedUtbetaling(
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>,

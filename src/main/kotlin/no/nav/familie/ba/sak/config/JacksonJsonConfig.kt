@@ -25,7 +25,7 @@ class JacksonJsonConfig {
             OM.setVisibility(PropertyAccessor.CREATOR, JsonAutoDetect.Visibility.ANY)
             OM.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
             OM.registerModule(JavaTimeModule())
-            OM.registerModule(KotlinModule())
+            OM.registerModule(KotlinModule.Builder().build())
         }
     }
 

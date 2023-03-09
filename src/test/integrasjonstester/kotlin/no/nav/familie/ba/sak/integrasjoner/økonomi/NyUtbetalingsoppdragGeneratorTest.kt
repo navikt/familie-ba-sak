@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonInfo
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.NyUtbetalingsoppdragGenerator
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.UtbetalingsoppdragService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.VedtakMedTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -54,6 +55,9 @@ class NyUtbetalingsoppdragGeneratorTest(
 
     @Autowired
     private val behandlingService: BehandlingService,
+
+    @Autowired
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 
     @Autowired
     private val fagsakService: FagsakService,
@@ -941,7 +945,7 @@ class NyUtbetalingsoppdragGeneratorTest(
         )
         førsteBehandling.status = BehandlingStatus.AVSLUTTET
         førsteBehandling.leggTilBehandlingStegTilstand(StegType.BEHANDLING_AVSLUTTET)
-        behandlingService.lagre(førsteBehandling)
+        behandlingHentOgPersisterService.lagreEllerOppdater(førsteBehandling, false)
 
         val andreBehandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
             lagBehandling(
@@ -1069,7 +1073,7 @@ class NyUtbetalingsoppdragGeneratorTest(
         utbetalingsperiode: Utbetalingsperiode,
         periodeId: Long,
         forrigePeriodeId: Long?,
-        utbetalesTils: String,
+        utbetalesTil: String,
         sats: Int,
         fom: String,
         tom: String,
@@ -1078,6 +1082,7 @@ class NyUtbetalingsoppdragGeneratorTest(
         assertEquals(periodeId, utbetalingsperiode.periodeId)
         assertEquals(forrigePeriodeId, utbetalingsperiode.forrigePeriodeId)
         assertEquals(sats, utbetalingsperiode.sats.toInt())
+        assertEquals(utbetalesTil, utbetalingsperiode.utbetalesTil)
         assertEquals(dato(fom), utbetalingsperiode.vedtakdatoFom)
         assertEquals(dato(tom), utbetalingsperiode.vedtakdatoTom)
         if (opphørFom != null) {
