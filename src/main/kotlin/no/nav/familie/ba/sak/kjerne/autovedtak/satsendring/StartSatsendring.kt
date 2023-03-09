@@ -31,7 +31,7 @@ class StartSatsendring(
     private val featureToggleService: FeatureToggleService,
     private val personidentService: PersonidentService,
     private val autovedtakSatsendringService: AutovedtakSatsendringService,
-    private val satsendringService: SatsendringService,
+    private val satsendringService: SatsendringService
 ) {
 
     private val ignorerteFagsaker = mutableSetOf<Long>()

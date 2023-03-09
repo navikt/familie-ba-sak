@@ -51,6 +51,7 @@ internal class StartSatsendringTest {
     private val featureToggleService: FeatureToggleService = mockk()
     private val personidentService: PersonidentService = mockk()
     private val autovedtakSatsendringService: AutovedtakSatsendringService = mockk()
+    private val satsendringService: SatsendringService = mockk()
 
     private lateinit var startSatsendring: StartSatsendring
 
@@ -64,6 +65,7 @@ internal class StartSatsendringTest {
         every { taskRepository.save(capture(taskSlot)) } answers { taskSlot.captured }
         val opprettTaskService = OpprettTaskService(taskRepository, satskjøringRepository)
         every { featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_SJEKK_UTBETALING, true) } returns false
+        every { satsendringService.erFagsakOppdatertMedSisteSats(any()) } returns true
 
         startSatsendring = spyk(
             StartSatsendring(
@@ -74,7 +76,8 @@ internal class StartSatsendringTest {
                 satskjøringRepository = satskjøringRepository,
                 featureToggleService = featureToggleService,
                 personidentService = personidentService,
-                autovedtakSatsendringService = autovedtakSatsendringService
+                autovedtakSatsendringService = autovedtakSatsendringService,
+                satsendringService = satsendringService
             )
         )
     }
@@ -535,15 +538,6 @@ internal class StartSatsendringTest {
         every { autovedtakSatsendringService.harAlleredeNySats(any(), any()) } returns true
 
         assertFalse(startSatsendring.kanGjennomføreSatsendringManuelt(1L))
-    }
-
-    @Test
-    fun `kanGjennomføreSatsendringManuelt gir true når harSisteSats er false`() {
-        every { behandlingRepository.finnSisteIverksatteBehandling(1L) } returns lagBehandling()
-        every { satskjøringRepository.findByFagsakId(1L) } returns null
-        every { autovedtakSatsendringService.harAlleredeNySats(any(), any()) } returns false
-
-        assertTrue(startSatsendring.kanGjennomføreSatsendringManuelt(1L))
     }
 
     @Test

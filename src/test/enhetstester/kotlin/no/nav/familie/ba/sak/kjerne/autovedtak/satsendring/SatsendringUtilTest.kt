@@ -83,8 +83,6 @@ class SatsendringUtilTest {
             }
     }
 
-
-
     @Test
     fun `Skal ikke returnere false dersom vi ikke har siste sats, men de er redusert til 0 prosent`() {
         SatsType.values()
