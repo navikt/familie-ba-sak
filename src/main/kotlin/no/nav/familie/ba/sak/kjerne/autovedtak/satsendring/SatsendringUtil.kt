@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
+import java.math.BigDecimal
 
 fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.erOppdatertMedSisteSatsForAlleSatstyper(): Boolean =
     SatsType.values()
@@ -21,6 +22,7 @@ private fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.erOppdatertFor(satst
 
     return this.filter { it.stønadTom.isSameOrAfter(fomSisteSatsForSatstype) }
         .filter { it.type == satstype.tilYtelseType() }
+        .filter { it.prosent != BigDecimal.ZERO }
         .all { andelTilkjentYtelse ->
             satsTyperMedTilsvarendeYtelsestype
                 .any { andelTilkjentYtelse.sats == SatsService.finnSisteSatsFor(it).beløp }
