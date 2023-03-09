@@ -65,7 +65,7 @@ class InternKonsistensavstemmingUtilTest {
                 tom = YearMonth.parse("2027-10"),
                 beløp = 1723,
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD
-            ),
+            )
         )
         val utbetalingsoppdrag = objectMapper.readValue<Utbetalingsoppdrag>(mockUtbetalingsoppdrag)
 
