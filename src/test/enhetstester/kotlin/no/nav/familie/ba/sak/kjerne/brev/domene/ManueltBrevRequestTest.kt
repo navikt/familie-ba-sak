@@ -89,7 +89,7 @@ class ManueltBrevRequestTest {
 
     @Test
     fun `Varsel årleg kontroll eøs request skal gi varsel årleg kontroll eøs brevmal med riktig data`() {
-        val brev = baseRequest.copy(brevmal = Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS, mottakerlandSed = "SE")
+        val brev = baseRequest.copy(brevmal = Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS, mottakerlandSed = listOf("SE"))
             .tilBrev("saksbehandlerNavn") { mapOf(Pair("SE", "Sverige")) }
 
         assertThat(brev::class).isEqualTo(VarselbrevÅrlegKontrollEøs::class)
@@ -106,7 +106,7 @@ class ManueltBrevRequestTest {
         val dokumentliste = listOf("Dokument 1", "Dokument 2")
         val brev = baseRequest.copy(
             brevmal = Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS_MED_INNHENTING_AV_OPPLYSNINGER,
-            mottakerlandSed = "SE",
+            mottakerlandSed = listOf("SE"),
             multiselectVerdier = dokumentliste
         )
             .tilBrev("saksbehandlerNavn") { mapOf(Pair("SE", "Sverige")) }
