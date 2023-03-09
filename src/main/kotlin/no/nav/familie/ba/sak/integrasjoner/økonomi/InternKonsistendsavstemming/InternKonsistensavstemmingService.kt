@@ -59,14 +59,14 @@ class InternKonsistensavstemmingService(
 
     private fun hentFagsakTilSisteUtbetalingsoppdragOgSisteAndelerMap(fagsakIder: Set<Long>): Map<Long, Pair<List<AndelTilkjentYtelse>, Utbetalingsoppdrag?>> {
         val scope = CoroutineScope(SupervisorJob())
-        val fagsakTilSisteUtbetalingsoppdragMapDeffered = scope.async {
-            hentFagsakTilSisteUtbetalingsoppdragMap(fagsakIder)
+        val utbetalingsoppdragDeffered = scope.async {
+            økonomiKlient.hentSisteUtbetalingsoppdragForFagsaker(fagsakIder)
         }
 
         val fagsakTilAndelerISisteBehandlingSendTilØkonomiMap = hentFagsakTilAndelerISisteBehandlingSendtTilØkonomiMap(fagsakIder)
 
-        val fagsakTilSisteUtbetalingsoppdragMap =
-            runBlocking { fagsakTilSisteUtbetalingsoppdragMapDeffered.await() }
+        val fagsakTilSisteUtbetalingsoppdragMap = runBlocking { utbetalingsoppdragDeffered.await() }
+                .associate { it.fagsakId to it.utbetalingsoppdrag }
 
         val fagsakTilSisteUtbetalingsoppdragOgSisteAndeler =
             fagsakTilAndelerISisteBehandlingSendTilØkonomiMap.mapValues { (fagsakId, andel) ->
@@ -74,10 +74,6 @@ class InternKonsistensavstemmingService(
             }
         return fagsakTilSisteUtbetalingsoppdragOgSisteAndeler
     }
-
-    private fun hentFagsakTilSisteUtbetalingsoppdragMap(fagsakIder: Set<Long>) =
-        økonomiKlient.hentSisteUtbetalingsoppdragForFagsaker(fagsakIder)
-            .associate { it.fagsakId to it.utbetalingsoppdrag }
 
     private fun hentFagsakTilAndelerISisteBehandlingSendtTilØkonomiMap(fagsaker: Set<Long>): Map<Long, List<AndelTilkjentYtelse>> {
         val behandlinger = behandlingHentOgPersisterService.hentSisteBehandlingSomErSendtTilØkonomiPerFagsak(fagsaker)
