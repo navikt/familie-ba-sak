@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi.InternKonsistendsavstemming
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import org.junit.jupiter.api.Assertions
@@ -13,7 +14,7 @@ class InternKonsistensavstemmingUtilTest {
 
     @Test
     fun `Skal ignorere forskjeller før første utbetalingsoppdragsperiode`() {
-        val andeler = listOf(
+        val andelerSisteVedtatteBehandling = listOf(
             lagAndelTilkjentYtelse(
                 fom = YearMonth.parse("2021-12"),
                 tom = YearMonth.parse("2021-12"),
@@ -41,12 +42,12 @@ class InternKonsistensavstemmingUtilTest {
         )
         val utbetalingsoppdrag = objectMapper.readValue<Utbetalingsoppdrag>(mockUtbetalingsoppdrag)
 
-        Assertions.assertFalse(erForskjellMellomAndelerOgOppdrag(andeler, utbetalingsoppdrag, 0L))
+        Assertions.assertFalse(erForskjellMellomAndelerOgOppdrag(andelerSisteVedtatteBehandling, utbetalingsoppdrag, 0L))
     }
 
     @Test
     fun `skal at det er forskjellig avsluttningsdato mellom andelene og utbetalingsoppdraget`() {
-        val andeler = listOf(
+        val andelerSisteVedtatteBehandling = listOf(
             lagAndelTilkjentYtelse(
                 fom = YearMonth.parse("2021-12"),
                 tom = YearMonth.parse("2021-12"),
@@ -80,7 +81,7 @@ class InternKonsistensavstemmingUtilTest {
         )
         val utbetalingsoppdrag = objectMapper.readValue<Utbetalingsoppdrag>(mockUtbetalingsoppdrag)
 
-        Assertions.assertTrue(erForskjellMellomAndelerOgOppdrag(andeler, utbetalingsoppdrag, 0L))
+        Assertions.assertTrue(erForskjellMellomAndelerOgOppdrag(andelerSisteVedtatteBehandling, utbetalingsoppdrag, 0L))
     }
 
     @Test
@@ -97,7 +98,7 @@ class InternKonsistensavstemmingUtilTest {
             "2023-03,2036-11,2489,UTVIDET_BARNETRYGD"
         )
 
-        val andeler = andelStringer.map { it.split(",") }.map {
+        val andelerSisteVedtatteBehandling = andelStringer.map { it.split(",") }.map {
             lagAndelTilkjentYtelse(
                 fom = YearMonth.parse(it[0]),
                 tom = YearMonth.parse(it[1]),
@@ -108,7 +109,33 @@ class InternKonsistensavstemmingUtilTest {
 
         val utbetalingsoppdrag = objectMapper.readValue<Utbetalingsoppdrag>(utbetalingsoppdragMockMedUtvidet)
 
-        Assertions.assertFalse(erForskjellMellomAndelerOgOppdrag(andeler, utbetalingsoppdrag, 0L))
+        Assertions.assertFalse(erForskjellMellomAndelerOgOppdrag(andelerSisteVedtatteBehandling, utbetalingsoppdrag, 0L))
+    }
+
+    @Test
+    fun `skal ikke si det er forskjell ved riktig utbetalingsoppdrag når kun ett barn ble endret i siste behandling som iverksatte`() {
+        val andelStringer = listOf(
+            "2022-05,2022-06,1676,ORDINÆR_BARNETRYGD,2554733867704", // barn 1, ble laget i siste behandling som iverksatte
+            "2022-07,2028-03,838,ORDINÆR_BARNETRYGD,2554733867704", // barn 1, ble laget i siste behandling som iverksatte
+            "2028-04,2040-03,527,ORDINÆR_BARNETRYGD,2554733867704", // barn 1, ble laget i siste behandling som iverksatte
+
+            "2022-07,2028-05,1676,ORDINÆR_BARNETRYGD,2909658383415", // barn 2, ble laget før siste behandling som iverksatte
+            "2028-06,2040-05,1054,ORDINÆR_BARNETRYGD,2909658383415" // barn 2, ble laget før siste behandling som iverksatte
+        )
+
+        val andelerSisteVedtatteBehandling = andelStringer.map { it.split(",") }.map {
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.parse(it[0]),
+                tom = YearMonth.parse(it[1]),
+                beløp = it[2].toInt(),
+                ytelseType = YtelseType.valueOf(it[3]),
+                aktør = Aktør(it[4])
+            )
+        }
+
+        val utbetalingsoppdrag = objectMapper.readValue<Utbetalingsoppdrag>(utbetalingsoppdragMockEndringKunEttBarn)
+
+        Assertions.assertFalse(erForskjellMellomAndelerOgOppdrag(andelerSisteVedtatteBehandling, utbetalingsoppdrag, 0L))
     }
 }
 
@@ -304,6 +331,82 @@ private val utbetalingsoppdragMockMedUtvidet = """
           "satsType": "MND",
           "utbetalesTil": "02416938515",
           "behandlingId": 100134370,
+          "utbetalingsgrad": null
+        }
+      ],
+      "gOmregning": false
+    }
+""".trimIndent()
+
+val utbetalingsoppdragMockEndringKunEttBarn = """
+    {
+      "kodeEndring": "ENDR",
+      "fagSystem": "BA",
+      "saksnummer": "200002102",
+      "aktoer": "07118905215",
+      "saksbehandlerId": "Z994623",
+      "avstemmingTidspunkt": "2022-08-16T08:49:13.565620862",
+      "utbetalingsperiode": [
+        {
+          "erEndringPåEksisterendePeriode": true,
+          "opphør": {
+            "opphørDatoFom": "2022-05-01"
+          },
+          "periodeId": 3,
+          "forrigePeriodeId": 2,
+          "datoForVedtak": "2022-08-16",
+          "klassifisering": "BATR",
+          "vedtakdatoFom": "2028-04-01",
+          "vedtakdatoTom": "2040-03-31",
+          "sats": 1054,
+          "satsType": "MND",
+          "utbetalesTil": "07118905215",
+          "behandlingId": 100098303,
+          "utbetalingsgrad": null
+        },
+        {
+          "erEndringPåEksisterendePeriode": false,
+          "opphør": null,
+          "periodeId": 4,
+          "forrigePeriodeId": 3,
+          "datoForVedtak": "2022-08-16",
+          "klassifisering": "BATR",
+          "vedtakdatoFom": "2022-05-01",
+          "vedtakdatoTom": "2022-06-30",
+          "sats": 1676,
+          "satsType": "MND",
+          "utbetalesTil": "07118905215",
+          "behandlingId": 100098303,
+          "utbetalingsgrad": null
+        },
+        {
+          "erEndringPåEksisterendePeriode": false,
+          "opphør": null,
+          "periodeId": 5,
+          "forrigePeriodeId": 4,
+          "datoForVedtak": "2022-08-16",
+          "klassifisering": "BATR",
+          "vedtakdatoFom": "2022-07-01",
+          "vedtakdatoTom": "2028-03-31",
+          "sats": 838,
+          "satsType": "MND",
+          "utbetalesTil": "07118905215",
+          "behandlingId": 100098303,
+          "utbetalingsgrad": null
+        },
+        {
+          "erEndringPåEksisterendePeriode": false,
+          "opphør": null,
+          "periodeId": 6,
+          "forrigePeriodeId": 5,
+          "datoForVedtak": "2022-08-16",
+          "klassifisering": "BATR",
+          "vedtakdatoFom": "2028-04-01",
+          "vedtakdatoTom": "2040-03-31",
+          "sats": 527,
+          "satsType": "MND",
+          "utbetalesTil": "07118905215",
+          "behandlingId": 100098303,
           "utbetalingsgrad": null
         }
       ],
