@@ -170,24 +170,24 @@ spring:
 
 SANITY_DATASET: "ba-test"
 
-FAMILIE_INTEGRASJONER_API_URL: https://familie-integrasjoner.dev.intern.nav.no/api
+FAMILIE_INTEGRASJONER_API_URL: https://familie-integrasjoner.intern.dev.nav.no/api
 FAMILIE_INTEGRASJONER_SCOPE: api://dev-fss.teamfamilie.familie-integrasjoner/.default
-PDL_URL: https://pdl-api.dev.intern.nav.no/
+PDL_URL: https://pdl-api.intern.dev.nav.no/
 PDL_SCOPE: api://dev-fss.pdl.pdl-api/.default
-FAMILIE_OPPDRAG_API_URL: https://familie-oppdrag.dev.intern.nav.no
+FAMILIE_OPPDRAG_API_URL: https://familie-oppdrag.intern.dev.nav.no
 FAMILIE_OPPDRAG_SCOPE: api://dev-fss.teamfamilie.famillie-oppdrag/.default
-FAMILIE_BREV_API_URL: https://familie-brev.dev.intern.nav.no
-FAMILIE_TILBAKE_API_URL: https://familie-tilbake.dev.intern.nav.no
+FAMILIE_BREV_API_URL: https://familie-brev.intern.dev.nav.no
+FAMILIE_TILBAKE_API_URL: https://familie-tilbake.intern.dev.nav.no
 FAMILIE_TILBAKE_API_URL_SCOPE: api://dev-gcp.teamfamilie.famillie-tilbake/.default
-FAMILIE_KLAGE_URL: https://familie-klage-backend.dev.intern.nav.no
+FAMILIE_KLAGE_URL: https://familie-klage-backend.intern.dev.nav.no
 FAMILIE_BA_SAK_API_URL: http://localhost:8086/api
-FAMILIE_BA_INFOTRYGD_API_URL: https://familie-ba-infotrygd.dev.intern.nav.no
+FAMILIE_BA_INFOTRYGD_API_URL: https://familie-ba-infotrygd.intern.dev.nav.no
 FAMILIE_BA_INFOTRYGD_SCOPE: api://dev-fss.teamfamilie.familie-ba-infotrygd/.default
-FAMILIE_STATISTIKK_URL: https://familie-ba-statistikk.dev.intern.nav.no
+FAMILIE_STATISTIKK_URL: https://familie-ba-statistikk.intern.dev.nav.no
 
-FAMILIE_EF_SAK_API_URL: https://familie-ef-sak.dev.intern.nav.no
+FAMILIE_EF_SAK_API_URL: https://familie-ef-sak.intern.dev.nav.no
 FAMILIE_EF_SAK_API_URL_SCOPE: api://dev-gcp.teamfamilie.familie-ef-sak/.default
-FAMILIE_BA_INFOTRYGD_FEED_API_URL: https://familie-ba-infotrygd-feed.dev.intern.nav.no
+FAMILIE_BA_INFOTRYGD_FEED_API_URL: https://familie-ba-infotrygd-feed.intern.dev.nav.no
 FAMILIE_BA_INFOTRYGD_FEED_SCOPE: api://dev-fss.teamfamilie.familie-ba-infotrygd.feed/.default
 
 
