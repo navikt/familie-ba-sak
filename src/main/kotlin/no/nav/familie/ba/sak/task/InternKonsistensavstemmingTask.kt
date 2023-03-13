@@ -28,7 +28,7 @@ class InternKonsistensavstemmingTask(
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
-        val fagsakIder = objectMapper.readValue<Set<Long>>(task.payload)
+        val fagsakIder: Set<Long> = objectMapper.readValue(task.payload)
 
         val tidBrukt = measureTimeMillis {
             internKonsistensavstemmingService.validerLikUtbetalingIAndeleneOgUtbetalingsoppdraget(fagsakIder)
