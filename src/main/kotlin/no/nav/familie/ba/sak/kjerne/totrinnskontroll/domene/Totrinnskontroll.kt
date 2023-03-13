@@ -23,7 +23,11 @@ import javax.persistence.Table
 data class Totrinnskontroll(
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "totrinnskontroll_seq_generator")
-    @SequenceGenerator(name = "totrinnskontroll_seq_generator", sequenceName = "totrinnskontroll_seq", allocationSize = 50)
+    @SequenceGenerator(
+        name = "totrinnskontroll_seq_generator",
+        sequenceName = "totrinnskontroll_seq",
+        allocationSize = 50
+    )
     val id: Long = 0,
 
     @ManyToOne(optional = false)
@@ -59,6 +63,7 @@ data class Totrinnskontroll(
 
     fun erUgyldig(): Boolean {
         return godkjent && saksbehandlerId == beslutterId &&
-            !(saksbehandler == SikkerhetContext.SYSTEM_NAVN && beslutter == SikkerhetContext.SYSTEM_NAVN)
+            !(saksbehandler == SikkerhetContext.SYSTEM_NAVN && beslutter == SikkerhetContext.SYSTEM_NAVN) &&
+            !(saksbehandlerId == SikkerhetContext.SYSTEM_FORKORTELSE && beslutterId == SikkerhetContext.SYSTEM_FORKORTELSE)
     }
 }
