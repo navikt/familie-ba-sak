@@ -36,7 +36,7 @@ class InternKonsistensavstemmingService(
             .chunked(3000)
             .take(maksAntallTasker)
             .forEach {
-                overstyrTaskMedNyCallId(IdUtils.generateId()){
+                overstyrTaskMedNyCallId(IdUtils.generateId()) {
                     taskService.save(InternKonsistensavstemmingTask.opprettTask(it.toSet()))
                 }
             }
