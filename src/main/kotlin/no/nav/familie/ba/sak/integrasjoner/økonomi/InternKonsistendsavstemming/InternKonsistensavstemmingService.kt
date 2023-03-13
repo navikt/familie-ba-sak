@@ -11,7 +11,9 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.task.InternKonsistensavstemmingTask
+import no.nav.familie.ba.sak.task.OpprettTaskService.Companion.overstyrTaskMedNyCallId
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
+import no.nav.familie.log.IdUtils
 import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -34,7 +36,9 @@ class InternKonsistensavstemmingService(
             .chunked(3000)
             .take(maksAntallTasker)
             .forEach {
-                taskService.save(InternKonsistensavstemmingTask.opprettTask(it.toSet()))
+                overstyrTaskMedNyCallId(IdUtils.generateId()){
+                    taskService.save(InternKonsistensavstemmingTask.opprettTask(it.toSet()))
+                }
             }
     }
 

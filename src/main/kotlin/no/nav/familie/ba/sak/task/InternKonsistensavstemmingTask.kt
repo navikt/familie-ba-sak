@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.task
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ba.sak.integrasjoner.økonomi.InternKonsistendsavstemming.InternKonsistensavstemmingService
 import no.nav.familie.kontrakter.felles.objectMapper
-import no.nav.familie.log.IdUtils
 import no.nav.familie.log.mdc.MDCConstants
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
@@ -43,8 +42,7 @@ class InternKonsistensavstemmingTask(
         fun opprettTask(fagsakIder: Set<Long>): Task {
             val metadata = Properties().apply {
                 this["fagsakerIder"] = "${fagsakIder.min()} til ${fagsakIder.max()}"
-                this[MDCConstants.MDC_CALL_ID] = IdUtils.generateId()
-                this["Parent call id"] = MDC.get(MDCConstants.MDC_CALL_ID) ?: ""
+                this[MDCConstants.MDC_CALL_ID] = MDC.get(MDCConstants.MDC_CALL_ID) ?: ""
             }
 
             return Task(
