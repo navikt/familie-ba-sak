@@ -15,6 +15,7 @@ import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class InternKonsistensavstemmingService(
@@ -24,6 +25,7 @@ class InternKonsistensavstemmingService(
     val fagsakRepository: FagsakRepository,
     val taskService: TaskService
 ) {
+    @Transactional
     fun validerLikUtbetalingIAndeleneOgUtbetalingsoppdragetPåAlleFagsaker(maksAntallTasker: Int = Int.MAX_VALUE) {
         fagsakRepository.hentFagsakerSomIkkeErArkivert()
             .map { it.id }
