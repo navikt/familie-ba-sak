@@ -276,7 +276,8 @@ fun lagAndelTilkjentYtelseMedEndreteUtbetalinger(
     tilkjentYtelse: TilkjentYtelse? = null,
     prosent: BigDecimal = BigDecimal(100),
     endretUtbetalingAndeler: List<EndretUtbetalingAndel> = emptyList(),
-    differanseberegnetPeriodebeløp: Int? = null
+    differanseberegnetPeriodebeløp: Int? = null,
+    sats: Int = beløp
 ): AndelTilkjentYtelseMedEndreteUtbetalinger {
     val aty = AndelTilkjentYtelse(
         aktør = aktør,
@@ -289,7 +290,7 @@ fun lagAndelTilkjentYtelseMedEndreteUtbetalinger(
         type = ytelseType,
         periodeOffset = periodeIdOffset,
         forrigePeriodeOffset = forrigeperiodeIdOffset,
-        sats = beløp,
+        sats = sats,
         prosent = prosent,
         differanseberegnetPeriodebeløp = differanseberegnetPeriodebeløp
     )
