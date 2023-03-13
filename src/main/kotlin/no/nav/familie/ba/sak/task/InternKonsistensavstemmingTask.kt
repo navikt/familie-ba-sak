@@ -13,7 +13,6 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
 import java.util.Properties
 import kotlin.system.measureTimeMillis
 
@@ -51,7 +50,6 @@ class InternKonsistensavstemmingTask(
             return Task(
                 type = this.TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(fagsakIder),
-                triggerTid = LocalDateTime.now().plusMinutes(5),
                 metadataWrapper = PropertiesWrapper(metadata)
             )
         }
