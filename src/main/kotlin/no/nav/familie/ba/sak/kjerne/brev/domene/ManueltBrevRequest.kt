@@ -64,9 +64,16 @@ data class ManueltBrevRequest(
 
     fun enhetNavn(): String = this.enhet?.enhetNavn ?: error("Finner ikke enhetsnavn på manuell brevrequest")
 
-    fun mottakerlandSED(): List<String> =
-        this.mottakerlandSed.takeIf { it.isNotEmpty() }
+    fun mottakerlandSED(): List<String> {
+        if (this.mottakerlandSed.contains("NO")) {
+            throw FunksjonellFeil(
+                frontendFeilmelding = "Norge kan ikke velges som mottakerland.",
+                melding = "Ugyldig mottakerland for brevtype 'varsel om årlig revurdering EØS'"
+            )
+        }
+        return this.mottakerlandSed.takeIf { it.isNotEmpty() }
             ?: error("Finner ikke noen mottakerland for SED på manuell brevrequest")
+    }
 }
 
 fun ManueltBrevRequest.byggMottakerdata(
@@ -316,39 +323,25 @@ fun ManueltBrevRequest.tilBrev(saksbehandlerNavn: String, hentLandkoder: (() -> 
             )
 
         Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS ->
-            if (this.mottakerlandSed.contains("NO")) {
-                throw FunksjonellFeil(
-                    frontendFeilmelding = "Norge kan ikke velges som mottakerland.",
-                    melding = "Ugyldig mottakerland for brevtype 'varsel om årlig revurdering EØS'"
-                )
-            } else {
-                VarselbrevÅrlegKontrollEøs(
-                    mal = Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS,
-                    navn = this.mottakerNavn,
-                    fødselsnummer = this.mottakerIdent,
-                    enhet = this.enhetNavn(),
-                    mottakerlandSed = Utils.slåSammen(this.mottakerlandSED().map { tilLandNavn(hentLandkoder(), it) }),
-                    saksbehandlerNavn = saksbehandlerNavn
-                )
-            }
+            VarselbrevÅrlegKontrollEøs(
+                mal = Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS,
+                navn = this.mottakerNavn,
+                fødselsnummer = this.mottakerIdent,
+                enhet = this.enhetNavn(),
+                mottakerlandSed = Utils.slåSammen(this.mottakerlandSED().map { tilLandNavn(hentLandkoder(), it) }),
+                saksbehandlerNavn = saksbehandlerNavn
+            )
 
         Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS_MED_INNHENTING_AV_OPPLYSNINGER ->
-            if (this.mottakerlandSed.contains("NO")) {
-                throw FunksjonellFeil(
-                    frontendFeilmelding = "Norge kan ikke velges som mottakerland.",
-                    melding = "Ugyldig mottakerland for brevtype 'varsel om årlig revurdering EØS med innhenting'"
-                )
-            } else {
-                VarselbrevÅrlegKontrollEøs(
-                    mal = Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS_MED_INNHENTING_AV_OPPLYSNINGER,
-                    navn = this.mottakerNavn,
-                    fødselsnummer = this.mottakerIdent,
-                    enhet = this.enhetNavn(),
-                    mottakerlandSed = Utils.slåSammen(this.mottakerlandSED().map { tilLandNavn(hentLandkoder(), it) }),
-                    dokumentliste = this.multiselectVerdier,
-                    saksbehandlerNavn = saksbehandlerNavn
-                )
-            }
+            VarselbrevÅrlegKontrollEøs(
+                mal = Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS_MED_INNHENTING_AV_OPPLYSNINGER,
+                navn = this.mottakerNavn,
+                fødselsnummer = this.mottakerIdent,
+                enhet = this.enhetNavn(),
+                mottakerlandSed = Utils.slåSammen(this.mottakerlandSED().map { tilLandNavn(hentLandkoder(), it) }),
+                dokumentliste = this.multiselectVerdier,
+                saksbehandlerNavn = saksbehandlerNavn
+            )
 
         Brevmal.INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED ->
             InnhenteOpplysningerOmBarn(

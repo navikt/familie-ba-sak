@@ -1,11 +1,13 @@
 package no.nav.familie.ba.sak.kjerne.brev.domene
 
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.ForlengetSvartidsbrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VarselbrevÅrlegKontrollEøs
 import no.nav.familie.kontrakter.felles.arbeidsfordeling.Enhet
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 class ManueltBrevRequestTest {
     private val årsaker = listOf("1", "2", "3")
@@ -119,6 +121,33 @@ class ManueltBrevRequestTest {
         assertThat(brev.data.flettefelter.mottakerlandSed!!.single()).isEqualTo("Sverige")
         assertThat(brev.data.flettefelter.dokumentliste!!.isEmpty()).isFalse
         assertThat(brev.data.flettefelter.dokumentliste).containsAll(dokumentliste)
+    }
+
+    @Test
+    fun `Varsel årleg kontroll EØS request med flere mottakerland skal gi riktig brevdata`() {
+        val brev =
+            baseRequest.copy(brevmal = Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS, mottakerlandSed = listOf("SE", "DK"))
+                .tilBrev("saksbehandlerNavn") { mapOf(Pair("SE", "Sverige"), Pair("DK", "Danmark")) }
+
+        assertThat(brev::class).isEqualTo(VarselbrevÅrlegKontrollEøs::class)
+        brev as VarselbrevÅrlegKontrollEøs
+
+        assertThat(brev.mal).isEqualTo(Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS)
+
+        assertThat(brev.data.flettefelter.mottakerlandSed!!.single()).isEqualTo("Sverige og Danmark")
+    }
+
+    @Test
+    fun `Varsel årleg kontroll EØS request skal validere mottakerland`() {
+        val brevRequest =
+            baseRequest.copy(
+                brevmal = Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS,
+                mottakerlandSed = listOf("SE", "NO")
+            )
+
+        assertThrows<FunksjonellFeil> {
+            brevRequest.tilBrev("saksbehandlerNavn") { mapOf(Pair("SE", "Sverige"), Pair("NO", "Norge")) }
+        }
     }
 
     class PersonITest(override val fødselsnummer: String, override val navn: String) : Person
