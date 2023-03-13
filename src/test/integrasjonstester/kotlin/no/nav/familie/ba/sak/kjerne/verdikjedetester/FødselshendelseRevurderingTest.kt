@@ -101,7 +101,7 @@ class FødselshendelseRevurderingTest(
         val aktivBehandling =
             restFagsakEtterBehandlingAvsluttet.getDataOrThrow().behandlinger
                 .single {
-                    it.behandlingId == behandlingHentOgPersisterService.hentAktivForFagsak(
+                    it.behandlingId == behandlingHentOgPersisterService.finnAktivForFagsak(
                         restFagsakEtterBehandlingAvsluttet.data!!.id
                     )?.id
                 }

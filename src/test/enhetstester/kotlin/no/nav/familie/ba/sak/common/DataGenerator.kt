@@ -242,7 +242,6 @@ fun lagAndelTilkjentYtelse(
     forrigeperiodeIdOffset: Long? = null,
     tilkjentYtelse: TilkjentYtelse? = null,
     prosent: BigDecimal = BigDecimal(100),
-    endretUtbetalingAndeler: List<EndretUtbetalingAndel> = emptyList(),
     kildeBehandlingId: Long? = behandling.id,
     differanseberegnetPeriodebeløp: Int? = null
 ): AndelTilkjentYtelse {
@@ -259,7 +258,6 @@ fun lagAndelTilkjentYtelse(
         forrigePeriodeOffset = forrigeperiodeIdOffset,
         sats = beløp,
         prosent = prosent,
-        endretUtbetalingAndeler = endretUtbetalingAndeler.toMutableList(),
         kildeBehandlingId = kildeBehandlingId,
         differanseberegnetPeriodebeløp = differanseberegnetPeriodebeløp
     )
@@ -278,7 +276,8 @@ fun lagAndelTilkjentYtelseMedEndreteUtbetalinger(
     tilkjentYtelse: TilkjentYtelse? = null,
     prosent: BigDecimal = BigDecimal(100),
     endretUtbetalingAndeler: List<EndretUtbetalingAndel> = emptyList(),
-    differanseberegnetPeriodebeløp: Int? = null
+    differanseberegnetPeriodebeløp: Int? = null,
+    sats: Int = beløp
 ): AndelTilkjentYtelseMedEndreteUtbetalinger {
     val aty = AndelTilkjentYtelse(
         aktør = aktør,
@@ -291,9 +290,8 @@ fun lagAndelTilkjentYtelseMedEndreteUtbetalinger(
         type = ytelseType,
         periodeOffset = periodeIdOffset,
         forrigePeriodeOffset = forrigeperiodeIdOffset,
-        sats = beløp,
+        sats = sats,
         prosent = prosent,
-        endretUtbetalingAndeler = endretUtbetalingAndeler.toMutableList(),
         differanseberegnetPeriodebeløp = differanseberegnetPeriodebeløp
     )
 
@@ -1138,8 +1136,7 @@ fun lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
         avtaletidspunktDeltBosted = avtaletidspunktDeltBosted,
         søknadstidspunkt = søknadstidspunkt,
         begrunnelse = "Test",
-        standardbegrunnelser = standardbegrunnelser,
-        andelTilkjentYtelser = andelTilkjentYtelser
+        standardbegrunnelser = standardbegrunnelser
     )
 
     return EndretUtbetalingAndelMedAndelerTilkjentYtelse(eua, andelTilkjentYtelser)

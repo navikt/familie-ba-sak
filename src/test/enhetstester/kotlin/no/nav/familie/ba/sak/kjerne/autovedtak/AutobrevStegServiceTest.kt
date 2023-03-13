@@ -44,7 +44,7 @@ class AutobrevStegServiceTest {
 
         every { autovedtakSmåbarnstilleggService.skalAutovedtakBehandles(aktør) } returns true
         every { fagsakService.hentNormalFagsak(aktør) } returns fagsak
-        every { behandlingHentOgPersisterService.hentAktivOgÅpenForFagsak(fagsakId = fagsak.id) } returns behandling
+        every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsakId = fagsak.id) } returns behandling
         every { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any()) } returns ""
 
         autovedtakStegService.kjørBehandlingSmåbarnstillegg(
@@ -65,7 +65,7 @@ class AutobrevStegServiceTest {
 
         every { autovedtakSmåbarnstilleggService.skalAutovedtakBehandles(aktør) } returns true
         every { fagsakService.hentNormalFagsak(aktør) } returns fagsak
-        every { behandlingHentOgPersisterService.hentAktivOgÅpenForFagsak(fagsakId = fagsak.id) } returns behandling
+        every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsakId = fagsak.id) } returns behandling
         every { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any()) } returns ""
 
         autovedtakStegService.kjørBehandlingSmåbarnstillegg(
@@ -86,7 +86,7 @@ class AutobrevStegServiceTest {
 
         every { autovedtakSmåbarnstilleggService.skalAutovedtakBehandles(aktør) } returns true
         every { fagsakService.hentNormalFagsak(aktør) } returns fagsak
-        every { behandlingHentOgPersisterService.hentAktivOgÅpenForFagsak(fagsakId = fagsak.id) } returns behandling
+        every { behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsakId = fagsak.id) } returns behandling
         every { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any()) } returns ""
 
         assertThrows<RekjørSenereException> {

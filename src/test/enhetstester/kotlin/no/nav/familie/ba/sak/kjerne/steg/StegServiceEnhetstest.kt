@@ -97,7 +97,7 @@ internal class StegServiceEnhetstest {
 
     @Test
     fun `Skal feile dersom vi har en gammel sats på forrige iverksatte behandling på endre migreringsdato behandling`() {
-        every { satsendringService.erFagsakOppdatertMedSisteSats(any()) } returns false
+        every { satsendringService.erFagsakOppdatertMedSisteSatser(any()) } returns false
 
         val nyBehandling = NyBehandling(
             kategori = BehandlingKategori.NASJONAL,

@@ -130,7 +130,7 @@ class BehandlingSatsendringTest(
 
         assertEquals(SatsendringSvar.SATSENDRING_KJØRT_OK, satsendringResultat)
 
-        val satsendringBehandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = behandling.fagsak.id)
+        val satsendringBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = behandling.fagsak.id)
         assertEquals(Behandlingsresultat.ENDRET_UTBETALING, satsendringBehandling?.resultat)
         assertEquals(StegType.IVERKSETT_MOT_OPPDRAG, satsendringBehandling?.steg)
 
@@ -239,7 +239,7 @@ class BehandlingSatsendringTest(
 
         assertEquals(SatsendringSvar.TILBAKESTILLER_BEHANDLINGEN_TIL_VILKÅRSVURDERINGEN, satsendringResultat)
 
-        val åpenBehandling = behandlingHentOgPersisterService.hentAktivForFagsak(fagsakId = behandling.fagsak.id)
+        val åpenBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = behandling.fagsak.id)
         assertEquals(revurdering.data!!.behandlingId, åpenBehandling!!.id)
         assertEquals(StegType.VILKÅRSVURDERING, åpenBehandling.steg)
     }

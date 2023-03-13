@@ -8,9 +8,9 @@ import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
@@ -60,7 +60,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
     lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
 
     @Autowired
-    lateinit var behandlingRepository: BehandlingRepository
+    lateinit var behandlingHentOgPersisterService: BehandlingHentOgPersisterService
 
     val infotrygdBarnetrygdClientMock = mockk<InfotrygdBarnetrygdClient>()
 
@@ -78,7 +78,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                 infotrygdBarnetrygdClientMock,
                 fagsakRepository,
                 andelTilkjentYtelseRepository,
-                behandlingRepository
+                behandlingHentOgPersisterService
             )
     }
 
@@ -673,7 +673,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
             status = BehandlingStatus.AVSLUTTET,
             aktiv = false
         )
-        behandlingRepository.saveAndFlush(behandling)
+        behandlingHentOgPersisterService.lagreOgFlush(behandling)
 
         val ty = TilkjentYtelse(
             behandling = behandling,
@@ -707,7 +707,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
         val fagsak = fagsakRepository.finnFagsakForAktør(aktør)!!
 
-        val behandling = behandlingRepository.saveAndFlush(
+        val behandling = behandlingHentOgPersisterService.lagreOgFlush(
             Behandling(
                 id = nesteBehandlingId(),
                 fagsak = fagsak,

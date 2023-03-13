@@ -5,7 +5,6 @@ import io.micrometer.core.instrument.DistributionSummary
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -26,7 +25,7 @@ import java.time.temporal.ChronoUnit
 
 @Component
 class BehandlingMetrikker(
-    private val behandlingRepository: BehandlingRepository,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val vedtakRepository: VedtakRepository,
     private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService,
     private val sanityService: SanityService
@@ -123,14 +122,14 @@ class BehandlingMetrikker(
     }
 
     private fun økBehandlingsresultatTypeMetrikk(behandling: Behandling) {
-        val behandlingsresultat = behandlingRepository.finnBehandling(behandling.id).resultat
+        val behandlingsresultat = behandlingHentOgPersisterService.hent(behandlingId = behandling.id).resultat
         antallBehandlingsresultat[behandlingsresultat]?.increment()
     }
 
     private fun økBegrunnelseMetrikk(behandling: Behandling) {
         if (antallGangerBruktStandardbegrunnelse.isEmpty()) hentBegrunnelserOgByggMetrikker()
 
-        if (!behandlingRepository.finnBehandling(behandling.id).erHenlagt()) {
+        if (!behandlingHentOgPersisterService.hent(behandlingId = behandling.id).erHenlagt()) {
             val vedtak = vedtakRepository.findByBehandlingAndAktivOptional(behandlingId = behandling.id)
                 ?: error("Finner ikke aktivt vedtak på behandling ${behandling.id}")
 
