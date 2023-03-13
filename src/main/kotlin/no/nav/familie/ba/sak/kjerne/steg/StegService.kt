@@ -126,7 +126,7 @@ class StegService(
     fun validerEndreMigreringsdato(nyBehandling: NyBehandling) {
         check(nyBehandling.behandlingÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO)
 
-        if (!satsendringService.erFagsakOppdatertMedSisteSats(fagsakId = nyBehandling.fagsakId)) {
+        if (!satsendringService.erFagsakOppdatertMedSisteSatser(fagsakId = nyBehandling.fagsakId)) {
             throw FunksjonellFeil("Fagsaken har ikke siste sats. Gjennomfør satsendring før du endrer migreringsdato.")
         }
     }
