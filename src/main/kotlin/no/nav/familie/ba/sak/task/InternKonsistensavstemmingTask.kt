@@ -12,6 +12,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 import java.util.Properties
 import kotlin.system.measureTimeMillis
 
@@ -19,7 +20,7 @@ import kotlin.system.measureTimeMillis
 @TaskStepBeskrivelse(
     taskStepType = InternKonsistensavstemmingTask.TASK_STEP_TYPE,
     beskrivelse = "Kjør intern konsistensavstemming",
-    maxAntallFeil = 1
+    maxAntallFeil = 3
 )
 class InternKonsistensavstemmingTask(
     val internKonsistensavstemmingService: InternKonsistensavstemmingService
@@ -39,7 +40,7 @@ class InternKonsistensavstemmingTask(
     }
 
     companion object {
-        fun opprettTask(fagsakIder: Set<Long>): Task {
+        fun opprettTask(fagsakIder: Set<Long>, startTid: LocalDateTime): Task {
             val metadata = Properties().apply {
                 this["fagsakerIder"] = "${fagsakIder.min()} til ${fagsakIder.max()}"
                 this[MDCConstants.MDC_CALL_ID] = MDC.get(MDCConstants.MDC_CALL_ID) ?: ""
@@ -48,6 +49,7 @@ class InternKonsistensavstemmingTask(
             return Task(
                 type = this.TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(fagsakIder),
+                triggerTid = startTid,
                 metadataWrapper = PropertiesWrapper(metadata)
             )
         }
