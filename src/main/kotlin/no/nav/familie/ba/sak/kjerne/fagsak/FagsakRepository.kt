@@ -108,6 +108,9 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
     @Query(value = "SELECT count(*) from Fagsak where arkivert = false")
     fun finnAntallFagsakerTotalt(): Long
 
+    @Query(value = "SELECT f from Fagsak f where f.arkivert = false")
+    fun hentFagsakerSomIkkeErArkivert(): List<Fagsak>
+
     @Lock(LockModeType.NONE)
     @Query(value = "SELECT count(*) from Fagsak f where f.status='LØPENDE' and f.arkivert = false")
     fun finnAntallFagsakerLøpende(): Long

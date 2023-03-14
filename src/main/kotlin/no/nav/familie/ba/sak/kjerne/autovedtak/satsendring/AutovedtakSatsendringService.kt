@@ -3,8 +3,6 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.satsendring
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
-import no.nav.familie.ba.sak.common.isSameOrAfter
-import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
@@ -16,12 +14,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
-import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
-import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
-import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
@@ -34,19 +27,18 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
-import java.time.YearMonth
 
 @Service
 class AutovedtakSatsendringService(
     private val taskRepository: TaskRepositoryWrapper,
     private val behandlingRepository: BehandlingRepository,
     private val autovedtakService: AutovedtakService,
-    private val andelTilkjentYtelseMedEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     private val tilbakestillBehandlingService: TilbakestillBehandlingService,
     private val satskjøringRepository: SatskjøringRepository,
     private val behandlingService: BehandlingService,
     private val beregningService: BeregningService,
-    private val persongrunnlagService: PersongrunnlagService
+    private val persongrunnlagService: PersongrunnlagService,
+    private val satsendringService: SatsendringService
 ) {
 
     private val satsendringAlleredeUtført = Metrics.counter("satsendring.allerede.utfort")
@@ -69,7 +61,7 @@ class AutovedtakSatsendringService(
         val sisteIverksatteBehandling = behandlingRepository.finnSisteIverksatteBehandling(fagsakId = fagsakId)
             ?: error("Fant ikke siste iverksette behandling for $fagsakId")
 
-        if (harAlleredeNySats(sisteIverksatteBehandling.id, behandlingsdata.satstidspunkt)) {
+        if (satsendringService.erFagsakOppdatertMedSisteSatser(fagsakId)) {
             satskjøringForFagsak.ferdigTidspunkt = LocalDateTime.now()
             satskjøringRepository.save(satskjøringForFagsak)
             logger.info("Satsendring allerede utført for fagsak=$fagsakId")
@@ -86,7 +78,7 @@ class AutovedtakSatsendringService(
         if (sisteIverksatteBehandling.fagsak.status != FagsakStatus.LØPENDE) throw Feil("Forsøker å utføre satsendring på ikke løpende fagsak ${sisteIverksatteBehandling.fagsak.id}")
 
         if (aktivOgÅpenBehandling != null) {
-            val brukerHarÅpenBehandlingSvar = hentBrukerHarÅpenBehandlingSvar(aktivOgÅpenBehandling, behandlingsdata)
+            val brukerHarÅpenBehandlingSvar = hentBrukerHarÅpenBehandlingSvar(aktivOgÅpenBehandling)
 
             satskjøringForFagsak.feiltype = "ÅPEN_BEHANDLING"
             satskjøringRepository.save(satskjøringForFagsak)
@@ -146,14 +138,9 @@ class AutovedtakSatsendringService(
     }
 
     private fun hentBrukerHarÅpenBehandlingSvar(
-        aktivOgÅpenBehandling: Behandling,
-        behandlingsdata: SatsendringTaskDto
+        aktivOgÅpenBehandling: Behandling
     ): SatsendringSvar {
-        val brukerHarÅpenBehandlingSvar = if (harAlleredeNySats(
-                sisteIverksettBehandlingsId = aktivOgÅpenBehandling.id,
-                satstidspunkt = behandlingsdata.satstidspunkt
-            )
-        ) {
+        val brukerHarÅpenBehandlingSvar = if (satsendringService.erFagsakOppdatertMedSisteSatser(aktivOgÅpenBehandling.fagsak.id)) {
             SatsendringSvar.HAR_ALLEREDE_SISTE_SATS
         } else if (aktivOgÅpenBehandling.status.erLåstMenIkkeAvsluttet()) {
             SatsendringSvar.BEHANDLING_ER_LÅST_SATSENDRING_TRIGGES_NESTE_VIRKEDAG
@@ -164,15 +151,6 @@ class AutovedtakSatsendringService(
             SatsendringSvar.BEHANDLINGEN_ER_UNDER_UTREDNING_MEN_I_RIKTIG_TILSTAND
         }
         return brukerHarÅpenBehandlingSvar
-    }
-
-    fun harAlleredeNySats(sisteIverksettBehandlingsId: Long, satstidspunkt: YearMonth): Boolean {
-        val andeler =
-            andelTilkjentYtelseMedEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
-                sisteIverksettBehandlingsId
-            )
-
-        return harAlleredeSisteSats(andeler, satstidspunkt)
     }
 
     private fun harUtbetalingerSomOverstiger100Prosent(sisteIverksatteBehandling: Behandling): Boolean {
@@ -204,42 +182,6 @@ class AutovedtakSatsendringService(
     companion object {
         val logger = LoggerFactory.getLogger(AutovedtakSatsendringService::class.java)
         val secureLogger = LoggerFactory.getLogger("secureLogger")
-
-        fun harAlleredeSisteSats(
-            aty: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
-            satstidspunkt: YearMonth
-        ): Boolean {
-            val atyPåSatstidspunkt = aty.filter {
-                it.stønadFom.isSameOrBefore(satstidspunkt) && it.stønadTom.isSameOrAfter(
-                    satstidspunkt
-                )
-            }
-
-            val atySmåbarnstillegg = atyPåSatstidspunkt.filter { it.type == YtelseType.SMÅBARNSTILLEGG }
-            if (atySmåbarnstillegg.isNotEmpty()) {
-                val harGammelSats =
-                    atySmåbarnstillegg.any { it.sats != SatsService.finnSisteSatsFor(SatsType.SMA).beløp }
-                if (harGammelSats) return false
-            }
-
-            val atyUtvidet = atyPåSatstidspunkt.filter { it.type == YtelseType.UTVIDET_BARNETRYGD }
-            if (atyUtvidet.isNotEmpty()) {
-                val harGammelSats =
-                    atyUtvidet.any { it.sats != SatsService.finnSisteSatsFor(SatsType.UTVIDET_BARNETRYGD).beløp }
-                if (harGammelSats) return false
-            }
-
-            val atyOrdinær = atyPåSatstidspunkt.filter { it.type == YtelseType.ORDINÆR_BARNETRYGD }
-            if (atyOrdinær.isNotEmpty()) {
-                val satser = atyOrdinær.map { it.sats }
-                val gyldigeOrdinæreSatser = listOf(
-                    SatsService.finnSisteSatsFor(SatsType.ORBA).beløp,
-                    SatsService.finnSisteSatsFor(SatsType.TILLEGG_ORBA).beløp
-                )
-                satser.forEach { if (!gyldigeOrdinæreSatser.contains(it)) return false }
-            }
-            return true
-        }
     }
 }
 

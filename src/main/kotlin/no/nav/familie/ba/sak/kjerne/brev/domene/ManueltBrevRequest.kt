@@ -55,7 +55,7 @@ data class ManueltBrevRequest(
     val barnasFødselsdager: List<LocalDate>? = null,
     val behandlingKategori: BehandlingKategori? = null,
     val vedrørende: Person? = null,
-    val mottakerlandSed: String? = null
+    val mottakerlandSed: List<String> = emptyList()
 ) {
 
     override fun toString(): String {
@@ -64,8 +64,16 @@ data class ManueltBrevRequest(
 
     fun enhetNavn(): String = this.enhet?.enhetNavn ?: error("Finner ikke enhetsnavn på manuell brevrequest")
 
-    fun mottakerlandSED(): String =
-        this.mottakerlandSed ?: error("Finner ikke mottakerland for SED på manuell brevrequest")
+    fun mottakerlandSED(): List<String> {
+        if (this.mottakerlandSed.contains("NO")) {
+            throw FunksjonellFeil(
+                frontendFeilmelding = "Norge kan ikke velges som mottakerland.",
+                melding = "Ugyldig mottakerland for brevtype 'varsel om årlig revurdering EØS'"
+            )
+        }
+        return this.mottakerlandSed.takeIf { it.isNotEmpty() }
+            ?: error("Finner ikke noen mottakerland for SED på manuell brevrequest")
+    }
 }
 
 fun ManueltBrevRequest.byggMottakerdata(
@@ -248,8 +256,8 @@ fun ManueltBrevRequest.tilBrev(saksbehandlerNavn: String, hentLandkoder: (() -> 
                 fodselsnummer = this.vedrørende?.fødselsnummer ?: mottakerIdent,
                 enhetNavn = this.enhetNavn(),
                 årsaker = this.multiselectVerdier,
-                antallUkerSvarfrist = this.antallUkerSvarfrist ?: throw Feil(
-                    message = "Antall uker svarfrist er ikke satt",
+                antallUkerSvarfrist = this.antallUkerSvarfrist ?: throw FunksjonellFeil(
+                    melding = "Antall uker svarfrist er ikke satt",
                     frontendFeilmelding = "Antall uker svarfrist er ikke satt"
                 ),
                 organisasjonsnummer = if (erTilInstitusjon) mottakerIdent else null,
@@ -320,7 +328,7 @@ fun ManueltBrevRequest.tilBrev(saksbehandlerNavn: String, hentLandkoder: (() -> 
                 navn = this.mottakerNavn,
                 fødselsnummer = this.mottakerIdent,
                 enhet = this.enhetNavn(),
-                mottakerlandSed = tilLandNavn(hentLandkoder(), this.mottakerlandSED()),
+                mottakerlandSed = Utils.slåSammen(this.mottakerlandSED().map { tilLandNavn(hentLandkoder(), it) }),
                 saksbehandlerNavn = saksbehandlerNavn
             )
 
@@ -330,7 +338,7 @@ fun ManueltBrevRequest.tilBrev(saksbehandlerNavn: String, hentLandkoder: (() -> 
                 navn = this.mottakerNavn,
                 fødselsnummer = this.mottakerIdent,
                 enhet = this.enhetNavn(),
-                mottakerlandSed = tilLandNavn(hentLandkoder(), this.mottakerlandSED()),
+                mottakerlandSed = Utils.slåSammen(this.mottakerlandSED().map { tilLandNavn(hentLandkoder(), it) }),
                 dokumentliste = this.multiselectVerdier,
                 saksbehandlerNavn = saksbehandlerNavn
             )

@@ -159,4 +159,22 @@ class ØkonomiKlient(
             )
         }
     }
+
+    fun hentSisteUtbetalingsoppdragForFagsaker(
+        fagsakIder: Set<Long>
+    ): List<UtbetalingsoppdragMedBehandlingOgFagsak> {
+        val uri = URI.create("$familieOppdragUri/$FAGSYSTEM/fagsaker/siste-utbetalingsoppdrag")
+
+        return kallEksternTjenesteRessurs(
+            tjeneste = "familie-oppdrag",
+            uri = uri,
+            formål = "Hent utbetalingsoppdrag for fagsaker"
+        ) { postForEntity(uri = uri, payload = fagsakIder) }
+    }
 }
+
+data class UtbetalingsoppdragMedBehandlingOgFagsak(
+    val fagsakId: Long,
+    val behandlingId: Long,
+    val utbetalingsoppdrag: Utbetalingsoppdrag
+)
