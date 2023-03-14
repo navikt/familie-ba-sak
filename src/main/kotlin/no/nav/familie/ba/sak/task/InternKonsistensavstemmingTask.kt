@@ -19,7 +19,7 @@ import kotlin.system.measureTimeMillis
 @TaskStepBeskrivelse(
     taskStepType = InternKonsistensavstemmingTask.TASK_STEP_TYPE,
     beskrivelse = "Kjør intern konsistensavstemming",
-    maxAntallFeil = 3
+    maxAntallFeil = 1
 )
 class InternKonsistensavstemmingTask(
     val internKonsistensavstemmingService: InternKonsistensavstemmingService
