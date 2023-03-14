@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilMånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import java.math.BigDecimal
@@ -29,9 +28,9 @@ fun erForskjellMellomAndelerOgOppdrag(
         hentForskjellIAndelerOgUtbetalingsoppdrag(utbetalingsperioder, andeler)
 
     when (forskjellMellomAndeleneOgUtbetalingsoppdraget) {
-        is OPPDRAGSPERIODER_UTEN_TILSVARENDE_ANDEL -> secureLogger.info(
+        is UTBETALINGSPERIODER_UTEN_TILSVARENDE_ANDEL -> secureLogger.info(
             "Fagsak $fagsakId har sendt utbetalingsperiode(r) til økonomi som ikke har tilsvarende andel tilkjent ytelse." +
-                "\nDet er differanse i periodene ${forskjellMellomAndeleneOgUtbetalingsoppdraget.perioderMedForskjell.tilTidStrenger()}." +
+                "\nDet er differanse i periodene ${forskjellMellomAndeleneOgUtbetalingsoppdraget.utbetalingsperioder.tilTidStrenger()}." +
                 "\n\nSiste utbetalingsoppdrag som er sendt til familie-øknonomi på fagsaken er:" +
                 "\n$utbetalingsoppdrag"
         )
@@ -46,31 +45,50 @@ private fun hentForskjellIAndelerOgUtbetalingsoppdrag(
     utbetalingsperioder: List<Utbetalingsperiode>,
     andeler: List<AndelTilkjentYtelse>
 ): AndelOgOppdragForskjell {
-    val erBeløpLiktTidslinje = utbetalingsperioder.tilBeløpstidslinje()
-        .kombinerMed(andeler.tilBeløpstidslinje()) { utbetaling, andel ->
-            utbetaling == andel
-        }
+    val utbetalingsperioderUtenTilsvarendeAndel = utbetalingsperioder.filter {
+        it.erIngenPersonerMedTilsvarendeAndelITidsrommet(andeler)
+    }
 
-    val perioderMedForskjell = erBeløpLiktTidslinje.perioder().filter { it.innhold == false }
-
-    return if (perioderMedForskjell.isEmpty()) {
+    return if (utbetalingsperioderUtenTilsvarendeAndel.isEmpty()) {
         INGEN_FORSKJELL
     } else {
-        OPPDRAGSPERIODER_UTEN_TILSVARENDE_ANDEL(perioderMedForskjell)
+        UTBETALINGSPERIODER_UTEN_TILSVARENDE_ANDEL(utbetalingsperioderUtenTilsvarendeAndel)
     }
 }
 
-private fun List<Utbetalingsperiode>.tilBeløpstidslinje(): Tidslinje<BigDecimal, Måned> = tidslinje {
-    this.map {
+private fun Utbetalingsperiode.erIngenPersonerMedTilsvarendeAndelITidsrommet(
+    andeler: List<AndelTilkjentYtelse>
+): Boolean {
+    val andelsTidslinjerPerPersonOgYtelsetype = andeler
+        .groupBy { Pair(it.aktør, it.type) }
+        .map { (_, andeler) -> andeler.tilBeløpstidslinje() }
+
+    return andelsTidslinjerPerPersonOgYtelsetype.all {
+        this.harIkkeTilsvarendeAndelForPersonOgYtelsetype(it)
+    }
+}
+
+private fun Utbetalingsperiode.harIkkeTilsvarendeAndelForPersonOgYtelsetype(
+    andelerTidslinjeForEnPersonOgYtelsetype: Tidslinje<BigDecimal, Måned>
+): Boolean {
+    val erAndelLikUtbetalingTidslinje = this.tilBeløpstidslinje()
+        .kombinerMed(andelerTidslinjeForEnPersonOgYtelsetype) { utbetalingsperiode, andel ->
+            utbetalingsperiode?.let { utbetalingsperiode == andel }
+        }
+
+    return erAndelLikUtbetalingTidslinje.perioder().any { it.innhold == false }
+}
+
+private fun Utbetalingsperiode.tilBeløpstidslinje(): Tidslinje<BigDecimal, Måned> = tidslinje {
+    listOf(
         Periode(
-            fraOgMed = it.vedtakdatoFom.tilMånedTidspunkt(),
-            tilOgMed = it.vedtakdatoTom.tilMånedTidspunkt(),
-            innhold = it.sats
+            fraOgMed = this.vedtakdatoFom.tilMånedTidspunkt(),
+            tilOgMed = this.vedtakdatoTom.tilMånedTidspunkt(),
+            innhold = this.sats
         )
-    }
+    )
 }
 
-@JvmName("atyListeTilBeløpstidslinje")
 private fun List<AndelTilkjentYtelse>.tilBeløpstidslinje(): Tidslinje<BigDecimal, Måned> = tidslinje {
     this.map {
         Periode(
@@ -81,12 +99,12 @@ private fun List<AndelTilkjentYtelse>.tilBeløpstidslinje(): Tidslinje<BigDecima
     }
 }
 
-private fun List<Periode<*, Måned>>.tilTidStrenger() =
-    Utils.slåSammen(this.map { "${it.fraOgMed.tilYearMonth()} - ${it.tilOgMed.tilYearMonth()}" })
+private fun List<Utbetalingsperiode>.tilTidStrenger() =
+    Utils.slåSammen(this.map { "${it.vedtakdatoFom} - ${it.vedtakdatoFom}" })
 
 private sealed interface AndelOgOppdragForskjell
 
-private data class OPPDRAGSPERIODER_UTEN_TILSVARENDE_ANDEL(val perioderMedForskjell: List<Periode<Boolean, Måned>>) :
+private data class UTBETALINGSPERIODER_UTEN_TILSVARENDE_ANDEL(val utbetalingsperioder: List<Utbetalingsperiode>) :
     AndelOgOppdragForskjell
 
 private object INGEN_FORSKJELL : AndelOgOppdragForskjell
