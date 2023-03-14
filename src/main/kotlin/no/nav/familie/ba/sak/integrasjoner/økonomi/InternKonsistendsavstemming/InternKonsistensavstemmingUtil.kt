@@ -70,6 +70,7 @@ private fun List<Utbetalingsperiode>.tilBeløpstidslinje(): Tidslinje<BigDecimal
     }
 }
 
+@JvmName("atyListeTilBeløpstidslinje")
 private fun List<AndelTilkjentYtelse>.tilBeløpstidslinje(): Tidslinje<BigDecimal, Måned> = tidslinje {
     this.map {
         Periode(
