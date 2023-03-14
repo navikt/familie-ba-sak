@@ -55,7 +55,9 @@ private fun hentForskjellIAndelerOgUtbetalingsoppdrag(
 
     return if (perioderMedForskjell.isEmpty()) {
         INGEN_FORSKJELL
-    } else OPPDRAGSPERIODER_UTEN_TILSVARENDE_ANDEL(perioderMedForskjell)
+    } else {
+        OPPDRAGSPERIODER_UTEN_TILSVARENDE_ANDEL(perioderMedForskjell)
+    }
 }
 
 private fun List<Utbetalingsperiode>.tilBeløpstidslinje(): Tidslinje<BigDecimal, Måned> = tidslinje {
@@ -87,4 +89,3 @@ private data class OPPDRAGSPERIODER_UTEN_TILSVARENDE_ANDEL(val perioderMedForskj
     AndelOgOppdragForskjell
 
 private object INGEN_FORSKJELL : AndelOgOppdragForskjell
-
