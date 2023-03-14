@@ -180,11 +180,14 @@ object TilkjentYtelseValidering {
         val maksOrdinærMedTillegg = ordinærMedTillegg.maxByOrNull { it.beløp }!!.beløp
         val maksUtvidet = utvidet.maxBy { it.beløp }.beløp
 
-        return if (fagsakType == FagsakType.BARN_ENSLIG_MINDREÅRIG) maksOrdinærMedTillegg + maksUtvidet
-        else when (personType) {
-            PersonType.BARN -> maksOrdinærMedTillegg
-            PersonType.SØKER -> maksUtvidet + maksSmåbarnstillegg
-            else -> throw Feil("Ikke støtte for å utbetale til persontype ${personType.name}")
+        return if (fagsakType == FagsakType.BARN_ENSLIG_MINDREÅRIG) {
+            maksOrdinærMedTillegg + maksUtvidet
+        } else {
+            when (personType) {
+                PersonType.BARN -> maksOrdinærMedTillegg
+                PersonType.SØKER -> maksUtvidet + maksSmåbarnstillegg
+                else -> throw Feil("Ikke støtte for å utbetale til persontype ${personType.name}")
+            }
         }
     }
 
