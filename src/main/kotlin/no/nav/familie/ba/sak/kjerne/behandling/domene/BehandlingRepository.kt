@@ -21,6 +21,9 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
     @Query(value = "SELECT b FROM Behandling b JOIN b.fagsak f WHERE f.id = :fagsakId AND f.arkivert = false")
     fun finnBehandlinger(fagsakId: Long): List<Behandling>
 
+    @Query(value = "SELECT b FROM Behandling b JOIN b.fagsak f WHERE f.id in :fagsakIder AND f.arkivert = false")
+    fun finnBehandlinger(fagsakIder: Set<Long>): List<Behandling>
+
     @Query("SELECT b FROM Behandling b JOIN b.fagsak f WHERE f.id = :fagsakId AND b.aktiv = true AND f.arkivert = false")
     fun findByFagsakAndAktiv(fagsakId: Long): Behandling?
 

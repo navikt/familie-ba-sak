@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.internal
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.integrasjoner.økonomi.InternKonsistendsavstemming.InternKonsistensavstemmingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.AutobrevScheduler
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
@@ -40,7 +41,8 @@ class TestVerktøyController(
     private val tilgangService: TilgangService,
     private val simuleringService: SimuleringService,
     private val opprettTaskService: OpprettTaskService,
-    private val satskjøringRepository: SatskjøringRepository
+    private val satskjøringRepository: SatskjøringRepository,
+    private val internKonsistensavstemmingService: InternKonsistensavstemmingService
 
 ) {
 
@@ -92,6 +94,22 @@ class TestVerktøyController(
         } else {
             ResponseEntity.ok(Ressurs.success(MELDING))
         }
+    }
+
+    @GetMapping(path = ["/kjor-intern-konsistensavstemming/{maksAntallTasker}"])
+    @Unprotected
+    fun kjørInternKonsistensavstemming(@PathVariable maksAntallTasker: Int): ResponseEntity<Ressurs<String>> {
+        if (!envService.erPreprod() && !envService.erDev()) {
+            internKonsistensavstemmingService
+                .validerLikUtbetalingIAndeleneOgUtbetalingsoppdragetPåAlleFagsaker(maksAntallTasker = 12)
+
+            return ResponseEntity.ok(Ressurs.success("Kjørt ok"))
+        }
+
+        internKonsistensavstemmingService
+            .validerLikUtbetalingIAndeleneOgUtbetalingsoppdragetPåAlleFagsaker(maksAntallTasker)
+
+        return ResponseEntity.ok(Ressurs.success("Kjørt ok"))
     }
 
     @GetMapping(path = ["/ta-behandlinger-etter-ventefrist-av-vent"])
