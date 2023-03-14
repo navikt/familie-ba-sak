@@ -21,8 +21,8 @@ fun erForskjellMellomAndelerOgOppdrag(
     when (forskjellMellomAndeleneOgUtbetalingsoppdraget) {
         AndelOgOppdragForskjell.OPPDRAGSPERIODE_UTEN_TILSVARENDE_ANDEL -> secureLogger.info(
             "Fagsak $fagsakId har sendt utbetalingsperiode(r) til økonomi som ikke har tilsvarende andel tilkjent ytelse" +
-                "Siste utbetalingsoppdrag som er sendt til familie-øknonomi på fagsaken er:" +
-                "\n\n $utbetalingsoppdrag"
+                "\n\nSiste utbetalingsoppdrag som er sendt til familie-øknonomi på fagsaken er:" +
+                "\n $utbetalingsoppdrag"
         )
         AndelOgOppdragForskjell.INGEN_FORSKJELL -> Unit
     }
