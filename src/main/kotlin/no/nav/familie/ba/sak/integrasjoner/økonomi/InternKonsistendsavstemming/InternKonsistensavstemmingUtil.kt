@@ -30,7 +30,7 @@ fun erForskjellMellomAndelerOgOppdrag(
     when (forskjellMellomAndeleneOgUtbetalingsoppdraget) {
         is UTBETALINGSPERIODER_UTEN_TILSVARENDE_ANDEL -> secureLogger.info(
             "Fagsak $fagsakId har sendt utbetalingsperiode(r) til økonomi som ikke har tilsvarende andel tilkjent ytelse." +
-                "\nDet er differanse i periodene ${forskjellMellomAndeleneOgUtbetalingsoppdraget.utbetalingsperioder.tilTidStrenger()}." +
+                "\nDet er differanse i perioden(e) ${forskjellMellomAndeleneOgUtbetalingsoppdraget.utbetalingsperioder.tilTidStrenger()}." +
                 "\n\nSiste utbetalingsoppdrag som er sendt til familie-øknonomi på fagsaken er:" +
                 "\n$utbetalingsoppdrag"
         )
