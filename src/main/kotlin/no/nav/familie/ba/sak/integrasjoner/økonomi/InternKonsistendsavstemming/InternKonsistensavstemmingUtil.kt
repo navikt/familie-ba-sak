@@ -39,7 +39,7 @@ fun erForskjellMellomAndelerOgOppdrag(
         is INGEN_FORSKJELL -> Unit
     }
 
-    return forskjellMellomAndeleneOgUtbetalingsoppdraget is INGEN_FORSKJELL
+    return forskjellMellomAndeleneOgUtbetalingsoppdraget !is INGEN_FORSKJELL
 }
 
 private fun hentForskjellIAndelerOgUtbetalingsoppdrag(
