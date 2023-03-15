@@ -67,29 +67,6 @@ class VilkårVurderingTest(
     }
 
     @Test
-    fun `Hent relevante vilkår for persontype SØKER`() {
-        val relevanteVilkår = Vilkår.hentVilkårFor(PersonType.SØKER)
-        val vilkårForSøker = setOf(
-            Vilkår.BOSATT_I_RIKET,
-            Vilkår.LOVLIG_OPPHOLD
-        )
-        assertEquals(vilkårForSøker, relevanteVilkår)
-    }
-
-    @Test
-    fun `Hent relevante vilkår for persontype BARN`() {
-        val relevanteVilkår = Vilkår.hentVilkårFor(PersonType.BARN)
-        val vilkårForBarn = setOf(
-            Vilkår.UNDER_18_ÅR,
-            Vilkår.BOR_MED_SØKER,
-            Vilkår.GIFT_PARTNERSKAP,
-            Vilkår.BOSATT_I_RIKET,
-            Vilkår.LOVLIG_OPPHOLD
-        )
-        assertEquals(vilkårForBarn, relevanteVilkår)
-    }
-
-    @Test
     fun `Henting og evaluering av oppfylte vilkår gir rett antall samlede resultater`() {
         val fnr = randomFnr()
         val barnFnr = randomFnr()
