@@ -65,11 +65,11 @@ private fun Utbetalingsperiode.erIngenPersonerMedTilsvarendeAndelITidsrommet(
         .map { (_, andeler) -> andeler.tilBeløpstidslinje() }
 
     return andelsTidslinjerPerPersonOgYtelsetype.all {
-        this.harIkkeTilsvarendeAndelForPersonOgYtelsetype(it)
+        !this.harTilsvarendeAndelerForPersonOgYtelsetype(it)
     }
 }
 
-private fun Utbetalingsperiode.harIkkeTilsvarendeAndelForPersonOgYtelsetype(
+private fun Utbetalingsperiode.harTilsvarendeAndelerForPersonOgYtelsetype(
     andelerTidslinjeForEnPersonOgYtelsetype: Tidslinje<BigDecimal, Måned>
 ): Boolean {
     val erAndelLikUtbetalingTidslinje = this.tilBeløpstidslinje()
@@ -77,7 +77,7 @@ private fun Utbetalingsperiode.harIkkeTilsvarendeAndelForPersonOgYtelsetype(
             utbetalingsperiode?.let { utbetalingsperiode == andel }
         }
 
-    return erAndelLikUtbetalingTidslinje.perioder().any { it.innhold == false }
+    return erAndelLikUtbetalingTidslinje.perioder().all { it.innhold != false }
 }
 
 private fun Utbetalingsperiode.tilBeløpstidslinje(): Tidslinje<BigDecimal, Måned> = tidslinje {
