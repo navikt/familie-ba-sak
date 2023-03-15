@@ -240,7 +240,7 @@ class UtbetalingsperiodeUtilTest {
             resultat = Resultat.OPPFYLT,
             begrunnelse = "",
             behandlingId = vilkårsvurdering.behandling.id,
-            utdypendeVilkårsvurderinger = emptyList(),
+            utdypendeVilkårsvurderinger = emptyList()
         )
 
         val resterendeVilkårForBarn = Vilkår.hentVilkårFor(PersonType.BARN, fagsakType = FagsakType.NORMAL).mapNotNull { if (it == Vilkår.BOR_MED_SØKER) null else lagVilkårResultat(vilkår = it, fom = mars2020.minusMonths(1), tom = juli2020) }
