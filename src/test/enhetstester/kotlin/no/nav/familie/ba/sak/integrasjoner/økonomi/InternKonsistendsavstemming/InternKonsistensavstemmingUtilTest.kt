@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi.InternKonsistendsavstemming
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -182,6 +183,30 @@ class InternKonsistensavstemmingUtilTest {
         }
 
         val utbetalingsoppdrag = objectMapper.readValue<Utbetalingsoppdrag>(utbetalingsoppdragMockOpphør)
+
+        Assertions.assertFalse(erForskjellMellomAndelerOgOppdrag(andelerSisteVedtatteBehandling, utbetalingsoppdrag, 0L))
+    }
+
+    @Test
+    fun `skal si andelene og utbetalingene er like dersom andel blir splittet opp, men betaler ut det samme i periodene`() {
+        val andelStringer = listOf(
+            "2021-01,2022-03,1054,ORDINÆR_BARNETRYGD",
+            "2022-04,2022-06,1054,ORDINÆR_BARNETRYGD"
+        )
+
+        val aktør = randomAktør()
+
+        val andelerSisteVedtatteBehandling = andelStringer.map { it.split(",") }.map {
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.parse(it[0]),
+                tom = YearMonth.parse(it[1]),
+                beløp = it[2].toInt(),
+                ytelseType = YtelseType.valueOf(it[3]),
+                aktør = aktør
+            )
+        }
+
+        val utbetalingsoppdrag = objectMapper.readValue<Utbetalingsoppdrag>(utbetalingsoppdragMockEnPeriode)
 
         Assertions.assertFalse(erForskjellMellomAndelerOgOppdrag(andelerSisteVedtatteBehandling, utbetalingsoppdrag, 0L))
     }
@@ -490,5 +515,33 @@ val utbetalingsoppdragMockOpphør = """
         }
       ],
       "gOmregning": false
+    }
+""".trimIndent()
+
+val utbetalingsoppdragMockEnPeriode = """
+    {
+      "kodeEndring": "NY",
+      "fagSystem": "BA",
+      "saksnummer": "1",
+      "aktoer": "1",
+      "saksbehandlerId": "",
+      "avstemmingTidspunkt": "2021-12-23T08:11:33.333476714",
+      "utbetalingsperiode": [
+        {
+          "erEndringPåEksisterendePeriode": false,
+          "opphør": null,
+          "periodeId": 0,
+          "forrigePeriodeId": null,
+          "datoForVedtak": "2021-12-23",
+          "klassifisering": "BATR",
+          "vedtakdatoFom": "2021-01-01",
+          "vedtakdatoTom": "2022-06-30",
+          "sats": 1054,
+          "satsType": "MND",
+          "utbetalesTil": "1",
+          "behandlingId": 1,
+          "utbetalingsgrad": null
+        }
+      ]
     }
 """.trimIndent()

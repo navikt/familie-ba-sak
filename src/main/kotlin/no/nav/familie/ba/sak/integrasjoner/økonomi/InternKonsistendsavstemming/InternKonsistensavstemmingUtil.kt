@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi.InternKonsistendsavstemming
 
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
@@ -64,11 +65,11 @@ private fun Utbetalingsperiode.erIngenPersonerMedTilsvarendeAndelITidsrommet(
         .map { (_, andeler) -> andeler.tilBeløpstidslinje() }
 
     return andelsTidslinjerPerPersonOgYtelsetype.all {
-        this.harIkkeTilsvarendeAndelForPersonOgYtelsetype(it)
+        !this.harTilsvarendeAndelerForPersonOgYtelsetype(it)
     }
 }
 
-private fun Utbetalingsperiode.harIkkeTilsvarendeAndelForPersonOgYtelsetype(
+private fun Utbetalingsperiode.harTilsvarendeAndelerForPersonOgYtelsetype(
     andelerTidslinjeForEnPersonOgYtelsetype: Tidslinje<BigDecimal, Måned>
 ): Boolean {
     val erAndelLikUtbetalingTidslinje = this.tilBeløpstidslinje()
@@ -76,7 +77,7 @@ private fun Utbetalingsperiode.harIkkeTilsvarendeAndelForPersonOgYtelsetype(
             utbetalingsperiode?.let { utbetalingsperiode == andel }
         }
 
-    return erAndelLikUtbetalingTidslinje.perioder().any { it.innhold == false }
+    return erAndelLikUtbetalingTidslinje.perioder().all { it.innhold != false }
 }
 
 private fun Utbetalingsperiode.tilBeløpstidslinje(): Tidslinje<BigDecimal, Måned> = tidslinje {
@@ -100,7 +101,7 @@ private fun List<AndelTilkjentYtelse>.tilBeløpstidslinje(): Tidslinje<BigDecima
 }
 
 private fun List<Utbetalingsperiode>.tilTidStrenger() =
-    Utils.slåSammen(this.map { "${it.vedtakdatoFom} - ${it.vedtakdatoFom}" })
+    Utils.slåSammen(this.map { "${it.vedtakdatoFom.toYearMonth()} til ${it.vedtakdatoTom.toYearMonth()}" })
 
 private sealed interface AndelOgOppdragForskjell
 

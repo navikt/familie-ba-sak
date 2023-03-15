@@ -39,10 +39,12 @@ class InternKonsistensavstemmingService(
             .chunked(3000)
             .take(maksAntallTasker)
             .forEachIndexed { index, fagsaker ->
-                // Venter 60 sekunder mellom hver task for å ikke overkjøre familie-oppdrag siden ba-sak har mer ressurser
-                val startTidForTask = startTid.plusSeconds(60 * index.toLong())
-                val task = InternKonsistensavstemmingTask.opprettTask(fagsaker.toSet(), startTidForTask)
-                overstyrTaskMedNyCallId(IdUtils.generateId()) { taskService.save(task) }
+                // Venter 15 sekunder mellom hver task for å ikke overkjøre familie-oppdrag siden ba-sak har mer ressurser
+                val startTidForTask = startTid.plusSeconds(15 * index.toLong())
+                overstyrTaskMedNyCallId(IdUtils.generateId()) {
+                    val task = InternKonsistensavstemmingTask.opprettTask(fagsaker.toSet(), startTidForTask)
+                    taskService.save(task)
+                }
             }
     }
 
