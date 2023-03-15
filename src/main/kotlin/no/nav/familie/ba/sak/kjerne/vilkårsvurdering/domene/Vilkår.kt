@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType.ANNENPART
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType.BARN
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType.SØKER
 import java.time.LocalDate
@@ -71,15 +72,21 @@ enum class Vilkår(
     companion object {
 
         fun hentVilkårFor(personType: PersonType, ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD, fagsakType: FagsakType = FagsakType.NORMAL): Set<Vilkår> {
-            return values().filter {
-                if (fagsakType == FagsakType.BARN_ENSLIG_MINDREÅRIG && ytelseType == YtelseType.UTVIDET_BARNETRYGD) {
-                    personType in it.parterDetteGjelderFor || it == UTVIDET_BARNETRYGD
-                } else if (ytelseType == YtelseType.UTVIDET_BARNETRYGD) {
-                    personType in it.parterDetteGjelderFor
-                } else {
-                    personType in it.parterDetteGjelderFor && ytelseType == it.ytelseType
+            return when (fagsakType) {
+                FagsakType.NORMAL -> when (personType) {
+                    BARN -> setOf(UNDER_18_ÅR, BOR_MED_SØKER, GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD)
+                    SØKER -> setOf(BOSATT_I_RIKET, LOVLIG_OPPHOLD) + if (ytelseType == YtelseType.UTVIDET_BARNETRYGD) setOf(UTVIDET_BARNETRYGD) else emptySet()
+                    ANNENPART -> emptySet()
                 }
-            }.toSet()
+                FagsakType.INSTITUSJON -> when (personType) {
+                    BARN -> setOf(UNDER_18_ÅR, BOR_MED_SØKER, GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD)
+                    SØKER, ANNENPART -> emptySet()
+                }
+                FagsakType.BARN_ENSLIG_MINDREÅRIG -> when (personType) {
+                    BARN -> setOf(UNDER_18_ÅR, BOR_MED_SØKER, GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD) + if (ytelseType == YtelseType.UTVIDET_BARNETRYGD) setOf(UTVIDET_BARNETRYGD) else emptySet()
+                    SØKER, ANNENPART -> emptySet()
+                }
+            }
         }
 
         fun hentFødselshendelseVilkårsreglerRekkefølge(): List<Vilkår> {
