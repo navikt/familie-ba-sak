@@ -191,7 +191,7 @@ class InternKonsistensavstemmingUtilTest {
     fun `skal si andelene og utbetalingene er like dersom andel blir splittet opp, men betaler ut det samme i periodene`() {
         val andelStringer = listOf(
             "2021-01,2022-03,1054,ORDINÆR_BARNETRYGD",
-            "2022-04,2022-06,1054,ORDINÆR_BARNETRYGD",
+            "2022-04,2022-06,1054,ORDINÆR_BARNETRYGD"
         )
 
         val aktør = randomAktør()
