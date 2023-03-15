@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.internal
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.integrasjoner.økonomi.InternKonsistendsavstemming.InternKonsistensavstemmingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.AutobrevScheduler
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
@@ -14,12 +13,14 @@ import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottaker
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
+import no.nav.familie.ba.sak.task.InternKonsistensavstemming.OpprettInternKonsistensavstemmingTaskerTask
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.TaBehandlingerEtterVentefristAvVentTask
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.prosessering.domene.Task
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -42,7 +43,7 @@ class TestVerktøyController(
     private val simuleringService: SimuleringService,
     private val opprettTaskService: OpprettTaskService,
     private val satskjøringRepository: SatskjøringRepository,
-    private val internKonsistensavstemmingService: InternKonsistensavstemmingService
+    private val taskService: TaskService
 
 ) {
 
@@ -100,16 +101,10 @@ class TestVerktøyController(
     @Unprotected
     fun kjørInternKonsistensavstemming(@PathVariable maksAntallTasker: Int): ResponseEntity<Ressurs<String>> {
         if (!envService.erPreprod() && !envService.erDev()) {
-            internKonsistensavstemmingService.validerLikUtbetalingIAndeleneOgUtbetalingsoppdragetPåAlleFagsaker(
-                maksAntallTasker = minOf(maksAntallTasker, 12)
-            )
-
-            return ResponseEntity.ok(Ressurs.success("Kjørt ok"))
+            return ResponseEntity.ok(Ressurs.success(MELDING))
         }
 
-        internKonsistensavstemmingService
-            .validerLikUtbetalingIAndeleneOgUtbetalingsoppdragetPåAlleFagsaker(maksAntallTasker)
-
+        taskService.save(OpprettInternKonsistensavstemmingTaskerTask.opprettTask(maksAntallTasker))
         return ResponseEntity.ok(Ressurs.success("Kjørt ok"))
     }
 
