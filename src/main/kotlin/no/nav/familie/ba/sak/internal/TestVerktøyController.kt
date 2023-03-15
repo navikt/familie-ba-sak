@@ -54,7 +54,7 @@ class TestVerktøyController(
             scheduler.opprettTask()
             ResponseEntity.ok(Ressurs.success("Laget task."))
         } else {
-            ResponseEntity.ok(Ressurs.success(MELDING))
+            ResponseEntity.ok(Ressurs.success(ENDEPUNKTET_GJØR_IKKE_NOE_I_PROD_MELDING))
         }
     }
 
@@ -66,7 +66,7 @@ class TestVerktøyController(
             opprettTaskService.opprettSatsendringTask(fagsakId, YearMonth.of(2023, 3))
             ResponseEntity.ok(Ressurs.success("Trigget satsendring for fagsak $fagsakId"))
         } else {
-            ResponseEntity.ok(Ressurs.success(MELDING))
+            ResponseEntity.ok(Ressurs.success(ENDEPUNKTET_GJØR_IKKE_NOE_I_PROD_MELDING))
         }
     }
 
@@ -81,7 +81,7 @@ class TestVerktøyController(
             )
             ResponseEntity.ok(Ressurs.success(melding))
         } else {
-            ResponseEntity.ok(Ressurs.success(MELDING))
+            ResponseEntity.ok(Ressurs.success(ENDEPUNKTET_GJØR_IKKE_NOE_I_PROD_MELDING))
         }
     }
 
@@ -93,7 +93,7 @@ class TestVerktøyController(
             taskRepository.save(task)
             ResponseEntity.ok(Ressurs.success("Task for behandling av fødselshendelse på ${nyBehandlingHendelse.morsIdent} er opprettet"))
         } else {
-            ResponseEntity.ok(Ressurs.success(MELDING))
+            ResponseEntity.ok(Ressurs.success(ENDEPUNKTET_GJØR_IKKE_NOE_I_PROD_MELDING))
         }
     }
 
@@ -101,7 +101,7 @@ class TestVerktøyController(
     @Unprotected
     fun kjørInternKonsistensavstemming(@PathVariable maksAntallTasker: Int): ResponseEntity<Ressurs<String>> {
         if (!envService.erPreprod() && !envService.erDev()) {
-            return ResponseEntity.ok(Ressurs.success(MELDING))
+            return ResponseEntity.ok(Ressurs.success(ENDEPUNKTET_GJØR_IKKE_NOE_I_PROD_MELDING))
         }
 
         taskService.save(OpprettInternKonsistensavstemmingTaskerTask.opprettTask(maksAntallTasker))
@@ -117,7 +117,7 @@ class TestVerktøyController(
             taskRepository.save(taBehandlingerEtterVentefristAvVentTask)
             ResponseEntity.ok(Ressurs.success("Task for å ta behandlinger av vent etter at fristen har gått ut er opprettet"))
         } else {
-            ResponseEntity.ok(Ressurs.success(MELDING))
+            ResponseEntity.ok(Ressurs.success(ENDEPUNKTET_GJØR_IKKE_NOE_I_PROD_MELDING))
         }
     }
 
@@ -129,6 +129,6 @@ class TestVerktøyController(
     }
 
     companion object {
-        const val MELDING = "Endepunktet gjør ingenting i prod."
+        const val ENDEPUNKTET_GJØR_IKKE_NOE_I_PROD_MELDING = "Endepunktet gjør ingenting i prod."
     }
 }
