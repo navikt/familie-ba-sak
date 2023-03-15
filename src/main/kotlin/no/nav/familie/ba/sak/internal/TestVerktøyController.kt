@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.internal
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
-import no.nav.familie.ba.sak.integrasjoner.økonomi.InternKonsistendsavstemming.InternKonsistensavstemmingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.AutobrevScheduler
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
@@ -14,12 +13,14 @@ import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottaker
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
+import no.nav.familie.ba.sak.task.InternKonsistensavstemming.OpprettInternKonsistensavstemmingTaskerTask
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.TaBehandlingerEtterVentefristAvVentTask
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.prosessering.domene.Task
+import no.nav.familie.prosessering.internal.TaskService
 import no.nav.security.token.support.core.api.Unprotected
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -42,7 +43,7 @@ class TestVerktøyController(
     private val simuleringService: SimuleringService,
     private val opprettTaskService: OpprettTaskService,
     private val satskjøringRepository: SatskjøringRepository,
-    private val internKonsistensavstemmingService: InternKonsistensavstemmingService
+    private val taskService: TaskService
 
 ) {
 
@@ -53,7 +54,7 @@ class TestVerktøyController(
             scheduler.opprettTask()
             ResponseEntity.ok(Ressurs.success("Laget task."))
         } else {
-            ResponseEntity.ok(Ressurs.success(MELDING))
+            ResponseEntity.ok(Ressurs.success(ENDEPUNKTET_GJØR_IKKE_NOE_I_PROD_MELDING))
         }
     }
 
@@ -65,7 +66,7 @@ class TestVerktøyController(
             opprettTaskService.opprettSatsendringTask(fagsakId, YearMonth.of(2023, 3))
             ResponseEntity.ok(Ressurs.success("Trigget satsendring for fagsak $fagsakId"))
         } else {
-            ResponseEntity.ok(Ressurs.success(MELDING))
+            ResponseEntity.ok(Ressurs.success(ENDEPUNKTET_GJØR_IKKE_NOE_I_PROD_MELDING))
         }
     }
 
@@ -80,7 +81,7 @@ class TestVerktøyController(
             )
             ResponseEntity.ok(Ressurs.success(melding))
         } else {
-            ResponseEntity.ok(Ressurs.success(MELDING))
+            ResponseEntity.ok(Ressurs.success(ENDEPUNKTET_GJØR_IKKE_NOE_I_PROD_MELDING))
         }
     }
 
@@ -92,7 +93,7 @@ class TestVerktøyController(
             taskRepository.save(task)
             ResponseEntity.ok(Ressurs.success("Task for behandling av fødselshendelse på ${nyBehandlingHendelse.morsIdent} er opprettet"))
         } else {
-            ResponseEntity.ok(Ressurs.success(MELDING))
+            ResponseEntity.ok(Ressurs.success(ENDEPUNKTET_GJØR_IKKE_NOE_I_PROD_MELDING))
         }
     }
 
@@ -100,15 +101,10 @@ class TestVerktøyController(
     @Unprotected
     fun kjørInternKonsistensavstemming(@PathVariable maksAntallTasker: Int): ResponseEntity<Ressurs<String>> {
         if (!envService.erPreprod() && !envService.erDev()) {
-            internKonsistensavstemmingService
-                .validerLikUtbetalingIAndeleneOgUtbetalingsoppdragetPåAlleFagsaker(maksAntallTasker = 12)
-
-            return ResponseEntity.ok(Ressurs.success("Kjørt ok"))
+            return ResponseEntity.ok(Ressurs.success(ENDEPUNKTET_GJØR_IKKE_NOE_I_PROD_MELDING))
         }
 
-        internKonsistensavstemmingService
-            .validerLikUtbetalingIAndeleneOgUtbetalingsoppdragetPåAlleFagsaker(maksAntallTasker)
-
+        taskService.save(OpprettInternKonsistensavstemmingTaskerTask.opprettTask(maksAntallTasker))
         return ResponseEntity.ok(Ressurs.success("Kjørt ok"))
     }
 
@@ -121,7 +117,7 @@ class TestVerktøyController(
             taskRepository.save(taBehandlingerEtterVentefristAvVentTask)
             ResponseEntity.ok(Ressurs.success("Task for å ta behandlinger av vent etter at fristen har gått ut er opprettet"))
         } else {
-            ResponseEntity.ok(Ressurs.success(MELDING))
+            ResponseEntity.ok(Ressurs.success(ENDEPUNKTET_GJØR_IKKE_NOE_I_PROD_MELDING))
         }
     }
 
@@ -133,6 +129,6 @@ class TestVerktøyController(
     }
 
     companion object {
-        const val MELDING = "Endepunktet gjør ingenting i prod."
+        const val ENDEPUNKTET_GJØR_IKKE_NOE_I_PROD_MELDING = "Endepunktet gjør ingenting i prod."
     }
 }
