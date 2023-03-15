@@ -4,7 +4,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -17,7 +16,7 @@ import no.nav.familie.log.IdUtils
 import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
 
 @Service
 class InternKonsistensavstemmingService(
@@ -27,18 +26,23 @@ class InternKonsistensavstemmingService(
     val fagsakRepository: FagsakRepository,
     val taskService: TaskService
 ) {
-    @Transactional
     fun validerLikUtbetalingIAndeleneOgUtbetalingsoppdragetPåAlleFagsaker(maksAntallTasker: Int = Int.MAX_VALUE) {
-        fagsakRepository.hentFagsakerSomIkkeErArkivert()
+        val fagsakerSomIkkeErArkivert = fagsakRepository
+            .hentFagsakerSomIkkeErArkivert()
             .map { it.id }
             .sortedBy { it }
+
+        val startTid = LocalDateTime.now()
+
+        fagsakerSomIkkeErArkivert
             // Antall fagsaker per task burde være en multippel av 3000 siden vi chunker databasekallet i 3000 i familie-oppdrag
             .chunked(3000)
             .take(maksAntallTasker)
-            .forEach {
-                overstyrTaskMedNyCallId(IdUtils.generateId()) {
-                    taskService.save(InternKonsistensavstemmingTask.opprettTask(it.toSet()))
-                }
+            .forEachIndexed { index, fagsaker ->
+                // Venter 60 sekunder mellom hver task for å ikke overkjøre familie-oppdrag siden ba-sak har mer ressurser
+                val startTidForTask = startTid.plusSeconds(60 * index.toLong())
+                val task = InternKonsistensavstemmingTask.opprettTask(fagsaker.toSet(), startTidForTask)
+                overstyrTaskMedNyCallId(IdUtils.generateId()) { taskService.save(task) }
             }
     }
 
@@ -55,7 +59,7 @@ class InternKonsistensavstemmingService(
         }
 
         if (fagsakerMedFeil.isNotEmpty()) {
-            throw Feil(
+            logger.error(
                 "Tilkjent ytelse og utbetalingsoppdraget som er lagret i familie-oppdrag er inkonsistent" +
                     "\nSe secure logs for mer detaljer." +
                     "\nDette gjelder fagsakene $fagsakerMedFeil"
@@ -69,7 +73,8 @@ class InternKonsistensavstemmingService(
             økonomiKlient.hentSisteUtbetalingsoppdragForFagsaker(fagsakIder)
         }
 
-        val fagsakTilAndelerISisteBehandlingSendTilØkonomiMap = hentFagsakTilAndelerISisteBehandlingSendtTilØkonomiMap(fagsakIder)
+        val fagsakTilAndelerISisteBehandlingSendTilØkonomiMap =
+            hentFagsakTilAndelerISisteBehandlingSendtTilØkonomiMap(fagsakIder)
 
         val fagsakTilSisteUtbetalingsoppdragMap = runBlocking { utbetalingsoppdragDeferred.await() }
             .associate { it.fagsakId to it.utbetalingsoppdrag }
