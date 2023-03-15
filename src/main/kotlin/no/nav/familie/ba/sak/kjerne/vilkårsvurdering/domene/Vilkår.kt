@@ -71,7 +71,7 @@ enum class Vilkår(
 
     companion object {
 
-        fun hentVilkårFor(personType: PersonType, ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD, fagsakType: FagsakType = FagsakType.NORMAL): Set<Vilkår> {
+        fun hentVilkårFor(personType: PersonType, ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD, fagsakType: FagsakType): Set<Vilkår> {
             return when (fagsakType) {
                 FagsakType.NORMAL -> when (personType) {
                     BARN -> setOf(UNDER_18_ÅR, BOR_MED_SØKER, GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD)

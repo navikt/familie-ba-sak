@@ -28,6 +28,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstøn
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -80,7 +81,8 @@ internal class TilkjentYtelseUtilsTest {
         val tilkjentYtelse = beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            behandling = lagBehandling()
+            behandling = lagBehandling(),
+            fagsakType = FagsakType.NORMAL
         )
 
         assertEquals(1, tilkjentYtelse.andelerTilkjentYtelse.size)
@@ -113,7 +115,8 @@ internal class TilkjentYtelseUtilsTest {
         val tilkjentYtelse = beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            behandling = lagBehandling()
+            behandling = lagBehandling(),
+            fagsakType = FagsakType.NORMAL
         )
 
         assertEquals(2, tilkjentYtelse.andelerTilkjentYtelse.size)
@@ -150,7 +153,8 @@ internal class TilkjentYtelseUtilsTest {
         val tilkjentYtelse = beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            behandling = lagBehandling()
+            behandling = lagBehandling(),
+            fagsakType = FagsakType.NORMAL
         )
 
         assertEquals(2, tilkjentYtelse.andelerTilkjentYtelse.size)
@@ -182,7 +186,8 @@ internal class TilkjentYtelseUtilsTest {
         val tilkjentYtelse = beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            behandling = lagBehandling()
+            behandling = lagBehandling(),
+            fagsakType = FagsakType.NORMAL
         )
 
         assertEquals(2, tilkjentYtelse.andelerTilkjentYtelse.size)
@@ -211,7 +216,8 @@ internal class TilkjentYtelseUtilsTest {
         val andeler = beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            behandling = lagBehandling()
+            behandling = lagBehandling(),
+            fagsakType = FagsakType.NORMAL
         )
             .andelerTilkjentYtelse
             .toList()
@@ -272,7 +278,8 @@ internal class TilkjentYtelseUtilsTest {
         val andeler = beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            behandling = lagBehandling()
+            behandling = lagBehandling(),
+            fagsakType = FagsakType.NORMAL
         )
             .andelerTilkjentYtelse.toList()
             .sortedBy { it.stønadFom }
@@ -313,7 +320,8 @@ internal class TilkjentYtelseUtilsTest {
         val andeler = beregnTilkjentYtelse(
             vilkårsvurdering = oppdatertVilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            behandling = oppdatertVilkårsvurdering.behandling
+            behandling = oppdatertVilkårsvurdering.behandling,
+            fagsakType = FagsakType.NORMAL
         )
             .andelerTilkjentYtelse.toList()
             .sortedBy { it.stønadFom }
@@ -345,7 +353,8 @@ internal class TilkjentYtelseUtilsTest {
         val andeler = beregnTilkjentYtelse(
             vilkårsvurdering = oppdatertVilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            behandling = oppdatertVilkårsvurdering.behandling
+            behandling = oppdatertVilkårsvurdering.behandling,
+            fagsakType = FagsakType.NORMAL
         )
             .andelerTilkjentYtelse.toList()
             .sortedBy { it.stønadFom }
@@ -1257,7 +1266,8 @@ internal class TilkjentYtelseUtilsTest {
                 behandlingId = vilkårsvurdering.behandling.id
             ),
             behandling = vilkårsvurdering.behandling,
-            endretUtbetalingAndeler = endretUtbetalingAndeler
+            endretUtbetalingAndeler = endretUtbetalingAndeler,
+            fagsakType = FagsakType.NORMAL
         ) { (_) ->
             lagOvergangsstønadPerioder(
                 perioder = overgangsstønadPerioder,
@@ -1362,7 +1372,7 @@ internal class TilkjentYtelseUtilsTest {
             aktør = person.aktør
         )
 
-        val vilkårForPersonType = Vilkår.hentVilkårFor(personType = person.type, ytelseType = ytelseType)
+        val vilkårForPersonType = Vilkår.hentVilkårFor(personType = person.type, ytelseType = ytelseType, fagsakType = FagsakType.NORMAL)
 
         val ordinæreVilkårResultater = vilkårForPersonType.map { vilkår ->
             lagVilkårResultat(

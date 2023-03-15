@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.erUnder18ÅrVilkårTidslinje
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -34,12 +35,18 @@ class VilkårsvurderingTidslinjer(
         }
 
     private val søkersTidslinje: SøkersTidslinjer =
-        SøkersTidslinjer(this, søker)
+        SøkersTidslinjer(tidslinjer = this, aktør = søker, fagsakType = vilkårsvurdering.behandling.fagsak.type)
 
     fun søkersTidslinjer(): SøkersTidslinjer = søkersTidslinje
 
     private val barnasTidslinjer: Map<Aktør, BarnetsTidslinjer> =
-        barna.associateWith { BarnetsTidslinjer(this, it) }
+        barna.associateWith {
+            BarnetsTidslinjer(
+                tidslinjer = this,
+                aktør = it,
+                fagsakType = vilkårsvurdering.behandling.fagsak.type
+            )
+        }
 
     fun forBarn(barn: Person) = barnasTidslinjer[barn.aktør]!!
 
@@ -48,7 +55,8 @@ class VilkårsvurderingTidslinjer(
 
     class SøkersTidslinjer(
         tidslinjer: VilkårsvurderingTidslinjer,
-        aktør: Aktør
+        aktør: Aktør,
+        fagsakType: FagsakType
     ) {
         val vilkårsresultatTidslinjer = tidslinjer.vilkårsresultaterTidslinjeMap[aktør] ?: listOf(TomTidslinje())
 
@@ -57,13 +65,18 @@ class VilkårsvurderingTidslinjer(
 
         val regelverkResultatTidslinje = vilkårsresultatMånedTidslinjer
             .kombinerUtenNull {
-                kombinerVilkårResultaterTilRegelverkResultat(PersonType.SØKER, it)
+                kombinerVilkårResultaterTilRegelverkResultat(
+                    personType = PersonType.SØKER,
+                    alleVilkårResultater = it,
+                    fagsakType = fagsakType
+                )
             }
     }
 
     class BarnetsTidslinjer(
         tidslinjer: VilkårsvurderingTidslinjer,
-        aktør: Aktør
+        aktør: Aktør,
+        fagsakType: FagsakType
     ) {
         private val søkersTidslinje = tidslinjer.søkersTidslinje
 
@@ -77,7 +90,13 @@ class VilkårsvurderingTidslinjer(
 
         val egetRegelverkResultatTidslinje: Tidslinje<RegelverkResultat, Måned> =
             vilkårsresultatMånedTidslinjer
-                .kombinerUtenNull { kombinerVilkårResultaterTilRegelverkResultat(PersonType.BARN, it) }
+                .kombinerUtenNull {
+                    kombinerVilkårResultaterTilRegelverkResultat(
+                        personType = PersonType.BARN,
+                        alleVilkårResultater = it,
+                        fagsakType = fagsakType
+                    )
+                }
                 .beskjærEtter(erUnder18ÅrVilkårTidslinje)
 
         val regelverkResultatTidslinje = egetRegelverkResultatTidslinje

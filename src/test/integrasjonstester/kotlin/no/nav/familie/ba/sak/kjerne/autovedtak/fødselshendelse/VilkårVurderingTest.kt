@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -90,8 +91,8 @@ class VilkårVurderingTest(
             vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(behandling, false, null)
 
         val forventetAntallVurderteVilkår =
-            Vilkår.hentVilkårFor(PersonType.BARN).size +
-                Vilkår.hentVilkårFor(PersonType.SØKER).size
+            Vilkår.hentVilkårFor(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL).size +
+                Vilkår.hentVilkårFor(personType = PersonType.SØKER, fagsakType = FagsakType.NORMAL).size
         assertEquals(
             forventetAntallVurderteVilkår,
             vilkårsvurdering.personResultater.flatMap { personResultat -> personResultat.vilkårResultater }.size

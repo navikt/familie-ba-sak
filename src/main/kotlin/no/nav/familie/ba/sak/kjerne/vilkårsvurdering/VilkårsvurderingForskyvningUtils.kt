@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.erUnder18ÅrVilkårTidslinje
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
@@ -21,22 +22,23 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilTidslinje
 import java.time.LocalDate
 
 object VilkårsvurderingForskyvningUtils {
-    fun Set<PersonResultat>.tilTidslinjeForSplitt(personerIPersongrunnlag: List<Person>): Tidslinje<List<VilkårResultat>, Måned> {
+    fun Set<PersonResultat>.tilTidslinjeForSplitt(personerIPersongrunnlag: List<Person>, fagsakType: FagsakType): Tidslinje<List<VilkårResultat>, Måned> {
         val tidslinjerPerPerson = this.map { personResultat ->
             val person = personerIPersongrunnlag.find { it.aktør == personResultat.aktør }
                 ?: throw Feil("Finner ikke person med aktørId=${personResultat.aktør.aktørId} i persongrunnlaget ved generering av tidslinje for splitt")
-            personResultat.tilTidslinjeForSplittForPerson(personType = person.type)
+            personResultat.tilTidslinjeForSplittForPerson(personType = person.type, fagsakType = fagsakType)
         }
 
         return tidslinjerPerPerson.kombiner { it.filterNotNull().flatten() }.filtrerIkkeNull().slåSammenLike()
     }
 
     fun PersonResultat.tilTidslinjeForSplittForPerson(
-        personType: PersonType
+        personType: PersonType,
+        fagsakType: FagsakType
     ): Tidslinje<List<VilkårResultat>, Måned> {
         val tidslinjer = this.vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår()
 
-        return tidslinjer.kombiner { alleVilkårOppfyltEllerNull(vilkårResultater = it, personType = personType) }
+        return tidslinjer.kombiner { alleVilkårOppfyltEllerNull(vilkårResultater = it, personType = personType, fagsakType = fagsakType) }
             .filtrerIkkeNull().slåSammenLike()
     }
 
@@ -92,13 +94,14 @@ object VilkårsvurderingForskyvningUtils {
 
     private fun alleVilkårOppfyltEllerNull(
         vilkårResultater: Iterable<VilkårResultat>,
-        personType: PersonType
+        personType: PersonType,
+        fagsakType: FagsakType
     ): List<VilkårResultat>? {
-        return if (vilkårResultater.alleVilkårErOppfylt(personType)) vilkårResultater.filterNotNull() else null
+        return if (vilkårResultater.alleVilkårErOppfylt(personType, fagsakType)) vilkårResultater.filterNotNull() else null
     }
 
-    fun Iterable<VilkårResultat>.alleVilkårErOppfylt(personType: PersonType): Boolean {
-        val alleVilkårForPersonType = Vilkår.hentVilkårFor(personType)
+    fun Iterable<VilkårResultat>.alleVilkårErOppfylt(personType: PersonType, fagsakType: FagsakType): Boolean {
+        val alleVilkårForPersonType = Vilkår.hentVilkårFor(personType = personType, fagsakType = fagsakType)
         return this.map { it.vilkårType }
             .containsAll(alleVilkårForPersonType) && this.all { it.resultat == Resultat.OPPFYLT }
     }

@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -91,7 +92,8 @@ class VilkårTilTilkjentYtelseTest {
         val faktiskTilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            behandling = lagBehandling()
+            behandling = lagBehandling(),
+            fagsakType = FagsakType.NORMAL
         )
 
         Assertions.assertEquals(
@@ -154,7 +156,8 @@ class VilkårTilTilkjentYtelseTest {
         val faktiskTilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            behandling = lagBehandling()
+            behandling = lagBehandling(),
+            fagsakType = FagsakType.NORMAL
         ) { aktør ->
             if (småbarnstilleggTestPeriode != null) {
                 listOf(
@@ -231,7 +234,8 @@ class VilkårTilTilkjentYtelseTest {
         val faktiskTilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            behandling = lagBehandling()
+            behandling = lagBehandling(),
+            fagsakType = FagsakType.NORMAL
         )
 
         Assertions.assertEquals(

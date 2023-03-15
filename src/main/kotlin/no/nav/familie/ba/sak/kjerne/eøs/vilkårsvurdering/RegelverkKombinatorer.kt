@@ -6,15 +6,17 @@ import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.RegelverkResultat.OPP
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.RegelverkResultat.OPPFYLT_EØS_FORORDNINGEN
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.RegelverkResultat.OPPFYLT_NASJONALE_REGLER
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.RegelverkResultat.OPPFYLT_REGELVERK_IKKE_SATT
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 
 fun kombinerVilkårResultaterTilRegelverkResultat(
     personType: PersonType,
-    alleVilkårResultater: Iterable<VilkårRegelverkResultat>
+    alleVilkårResultater: Iterable<VilkårRegelverkResultat>,
+    fagsakType: FagsakType
 ): RegelverkResultat? {
-    val nødvendigeVilkår = Vilkår.hentVilkårFor(personType)
+    val nødvendigeVilkår = Vilkår.hentVilkårFor(personType = personType, fagsakType = fagsakType)
         .filter { it != Vilkår.UTVIDET_BARNETRYGD }
 
     val regelverkVilkår = nødvendigeVilkår
