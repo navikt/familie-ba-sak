@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi.InternKonsistendsavstemming
 
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
@@ -100,7 +101,7 @@ private fun List<AndelTilkjentYtelse>.tilBeløpstidslinje(): Tidslinje<BigDecima
 }
 
 private fun List<Utbetalingsperiode>.tilTidStrenger() =
-    Utils.slåSammen(this.map { "${it.vedtakdatoFom} - ${it.vedtakdatoFom}" })
+    Utils.slåSammen(this.map { "${it.vedtakdatoFom.toYearMonth()} til ${it.vedtakdatoTom.toYearMonth()}" })
 
 private sealed interface AndelOgOppdragForskjell
 
