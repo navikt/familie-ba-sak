@@ -22,47 +22,33 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType.SØKE
 import java.time.LocalDate
 
 enum class Vilkår(
-    val parterDetteGjelderFor: List<PersonType>,
-    val ytelseType: YtelseType,
     val beskrivelse: String,
     val harRegelverk: Boolean
 ) {
 
     UNDER_18_ÅR(
-        parterDetteGjelderFor = listOf(BARN),
-        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
         beskrivelse = "Er under 18 år",
-        false
+        harRegelverk = false
     ),
     BOR_MED_SØKER(
-        parterDetteGjelderFor = listOf(BARN),
-        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
         beskrivelse = "Bor med søker",
-        true
+        harRegelverk = true
     ),
     GIFT_PARTNERSKAP(
-        parterDetteGjelderFor = listOf(BARN),
-        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
         beskrivelse = "Gift/partnerskap",
-        false
+        harRegelverk = false
     ),
     BOSATT_I_RIKET(
-        parterDetteGjelderFor = listOf(SØKER, BARN),
-        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
         beskrivelse = "Bosatt i riket",
-        true
+        harRegelverk = true
     ),
     LOVLIG_OPPHOLD(
-        parterDetteGjelderFor = listOf(SØKER, BARN),
-        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
         beskrivelse = "Lovlig opphold",
-        true
+        harRegelverk = true
     ),
     UTVIDET_BARNETRYGD(
-        parterDetteGjelderFor = listOf(SØKER),
-        ytelseType = YtelseType.UTVIDET_BARNETRYGD,
         beskrivelse = "Utvidet barnetrygd",
-        false
+        harRegelverk = false
     );
 
     override fun toString(): String {
