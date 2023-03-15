@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatSteg
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
+import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
@@ -32,7 +33,8 @@ class SendTilBeslutter(
     private val totrinnskontrollService: TotrinnskontrollService,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val vedtakService: VedtakService,
-    private val vedtaksperiodeService: VedtaksperiodeService
+    private val vedtaksperiodeService: VedtaksperiodeService,
+    private val simuleringService: SimuleringService
 ) : BehandlingSteg<String> {
 
     override fun preValiderSteg(
@@ -66,8 +68,8 @@ class SendTilBeslutter(
         loggService.opprettSendTilBeslutterLogg(behandling)
         totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandling)
 
-        // oppretter ikke GodkjenneVedtak task for manuell migrering
-        if (!behandling.erManuellMigrering()) {
+        // oppretter ikke GodkjenneVedtak task for manuell migrering som har avvik innenfor beløpsgrenser
+        if (!behandling.erManuellMigrering() || !simuleringService.harMigreringsbehandlingAvvikInnenforBeløpsgrenser(behandling)) {
             val godkjenneVedtakTask = OpprettOppgaveTask.opprettTask(
                 behandlingId = behandling.id,
                 oppgavetype = Oppgavetype.GodkjenneVedtak,

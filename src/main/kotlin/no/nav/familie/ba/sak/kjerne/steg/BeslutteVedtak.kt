@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
+import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -40,7 +41,8 @@ class BeslutteVedtak(
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val featureToggleService: FeatureToggleService,
     private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
-    private val saksbehandlerContext: SaksbehandlerContext
+    private val saksbehandlerContext: SaksbehandlerContext,
+    private val simuleringService: SimuleringService
 ) : BehandlingSteg<RestBeslutningPåVedtak> {
 
     override fun utførStegOgAngiNeste(
@@ -63,18 +65,17 @@ class BeslutteVedtak(
                 "Du har ikke tilgang til å beslutte en behandling med årsak=${behandling.opprettetÅrsak.visningsnavn}. Ta kontakt med teamet dersom dette ikke stemmer."
             )
         }
+
+        val behandlingErAutomatiskBesluttet =
+            behandling.erManuellMigrering() && simuleringService.harMigreringsbehandlingAvvikInnenforBeløpsgrenser(behandling)
+
+        val beslutter = if (behandlingErAutomatiskBesluttet) SikkerhetContext.SYSTEM_NAVN else saksbehandlerContext.hentSaksbehandlerSignaturTilBrev()
+        val beslutterId = if (behandlingErAutomatiskBesluttet) SikkerhetContext.SYSTEM_FORKORTELSE else SikkerhetContext.hentSaksbehandler()
+
         val totrinnskontroll = totrinnskontrollService.besluttTotrinnskontroll(
             behandling = behandling,
-            beslutter = if (behandling.erManuellMigrering()) {
-                SikkerhetContext.SYSTEM_NAVN
-            } else {
-                saksbehandlerContext.hentSaksbehandlerSignaturTilBrev()
-            },
-            beslutterId = if (behandling.erManuellMigrering()) {
-                SikkerhetContext.SYSTEM_FORKORTELSE
-            } else {
-                SikkerhetContext.hentSaksbehandler()
-            },
+            beslutter = beslutter,
+            beslutterId = beslutterId,
             beslutning = data.beslutning,
             kontrollerteSider = data.kontrollerteSider
         )
