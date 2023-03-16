@@ -8,6 +8,8 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerRepository
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
@@ -21,8 +23,13 @@ import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingstype
+import no.nav.familie.kontrakter.felles.tilbakekreving.Brevmottaker
 import no.nav.familie.kontrakter.felles.tilbakekreving.FeilutbetaltePerioderDto
 import no.nav.familie.kontrakter.felles.tilbakekreving.ForhåndsvisVarselbrevRequest
+import no.nav.familie.kontrakter.felles.tilbakekreving.ManuellAdresseInfo
+import no.nav.familie.kontrakter.felles.tilbakekreving.MottakerType
+import no.nav.familie.kontrakter.felles.tilbakekreving.MottakerType.FULLMEKTIG
+import no.nav.familie.kontrakter.felles.tilbakekreving.MottakerType.VERGE
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettManueltTilbakekrevingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
@@ -38,6 +45,7 @@ class TilbakekrevingService(
     private val tilbakekrevingRepository: TilbakekrevingRepository,
     private val vedtakRepository: VedtakRepository,
     private val totrinnskontrollRepository: TotrinnskontrollRepository,
+    private val brevmottakerRepository: BrevmottakerRepository,
     private val simuleringService: SimuleringService,
     private val tilgangService: TilgangService,
     private val persongrunnlagService: PersongrunnlagService,
@@ -46,13 +54,13 @@ class TilbakekrevingService(
     private val personidentService: PersonidentService,
     private val personopplysningerService: PersonopplysningerService,
     private val featureToggleService: FeatureToggleService,
-    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 ) {
 
     fun validerRestTilbakekreving(restTilbakekreving: RestTilbakekreving?, behandlingId: Long) {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "opprette tilbakekreving"
+            handling = "opprette tilbakekreving",
         )
 
         val feilutbetaling = simuleringService.hentFeilutbetaling(behandlingId)
@@ -69,7 +77,7 @@ class TilbakekrevingService(
             valg = restTilbakekreving.valg,
             varsel = restTilbakekreving.varsel,
             tilbakekrevingsbehandlingId = tilbakekrevingRepository
-                .findByBehandlingId(behandling.id)?.tilbakekrevingsbehandlingId
+                .findByBehandlingId(behandling.id)?.tilbakekrevingsbehandlingId,
         )
 
         tilbakekrevingRepository.deleteByBehandlingId(behandlingId)
@@ -85,17 +93,17 @@ class TilbakekrevingService(
 
     fun hentForhåndsvisningVarselbrev(
         behandlingId: Long,
-        forhåndsvisTilbakekrevingsvarselbrevRequest: ForhåndsvisTilbakekrevingsvarselbrevRequest
+        forhåndsvisTilbakekrevingsvarselbrevRequest: ForhåndsvisTilbakekrevingsvarselbrevRequest,
     ): ByteArray {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
-            handling = "hent forhåndsvisning av varselbrev for tilbakekreving"
+            handling = "hent forhåndsvisning av varselbrev for tilbakekreving",
         )
 
         val vedtak = vedtakRepository.findByBehandlingAndAktivOptional(behandlingId)
             ?: throw Feil(
                 "Fant ikke vedtak for behandling $behandlingId ved forhåndsvisning av varselbrev" +
-                    " for tilbakekreving."
+                    " for tilbakekreving.",
             )
 
         val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId)
@@ -114,16 +122,16 @@ class TilbakekrevingService(
                     sumFeilutbetaling = simuleringService.hentFeilutbetaling(behandlingId).toLong(),
                     perioder = hentTilbakekrevingsperioderISimulering(
                         simuleringService.hentSimuleringPåBehandling(behandlingId),
-                        featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ)
-                    )
+                        featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ),
+                    ),
                 ),
                 fagsystem = Fagsystem.BA,
                 eksternFagsakId = vedtak.behandling.fagsak.id.toString(),
                 ident = persongrunnlag.søker.aktør.aktivFødselsnummer(),
                 saksbehandlerIdent = SikkerhetContext.hentSaksbehandlerNavn(),
                 verge = verge,
-                institusjon = institusjon
-            )
+                institusjon = institusjon,
+            ),
         )
     }
 
@@ -145,7 +153,7 @@ class TilbakekrevingService(
 
         val revurderingsvedtaksdato = aktivtVedtak.vedtaksdato?.toLocalDate() ?: throw Feil(
             message = "Finner ikke revurderingsvedtaksdato på vedtak ${aktivtVedtak.id} " +
-                "ved iverksetting av tilbakekreving mot familie-tilbake"
+                "ved iverksetting av tilbakekreving mot familie-tilbake",
         )
 
         val tilbakekreving = tilbakekrevingRepository.findByBehandlingId(behandling.id)
@@ -153,6 +161,30 @@ class TilbakekrevingService(
 
         val institusjon = hentTilbakekrevingInstitusjon(behandling.fagsak)
         val verge = hentVerge(behandling.verge?.ident)
+
+        val manuelleBrevMottakere =
+            brevmottakerRepository.finnBrevMottakereForBehandling(behandling.id).map { baSakBrevMottaker ->
+                val mottakerType = MottakerType.valueOf(baSakBrevMottaker.type.name)
+                val vergetype = when {
+                    mottakerType == FULLMEKTIG -> Vergetype.ANNEN_FULLMEKTIG
+                    mottakerType == VERGE && behandling.fagsak.type == FagsakType.NORMAL -> Vergetype.VERGE_FOR_VOKSEN
+                    mottakerType == VERGE && behandling.fagsak.type != FagsakType.NORMAL -> Vergetype.VERGE_FOR_BARN
+                    else -> null
+                }
+
+                Brevmottaker(
+                    type = mottakerType,
+                    vergetype = vergetype,
+                    navn = baSakBrevMottaker.navn,
+                    manuellAdresseInfo = ManuellAdresseInfo(
+                        adresselinje1 = baSakBrevMottaker.adresselinje1,
+                        adresselinje2 = baSakBrevMottaker.adresselinje2,
+                        postnummer = baSakBrevMottaker.postnummer,
+                        poststed = baSakBrevMottaker.poststed,
+                        landkode = baSakBrevMottaker.landkode,
+                    ),
+                )
+            }.toSet()
 
         return OpprettTilbakekrevingRequest(
             fagsystem = Fagsystem.BA,
@@ -171,13 +203,14 @@ class TilbakekrevingService(
             varsel = opprettVarsel(
                 tilbakekreving,
                 simuleringService.hentSimuleringPåBehandling(behandling.id),
-                featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ)
+                featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ),
             ),
             revurderingsvedtaksdato = revurderingsvedtaksdato,
             // Verge er per nå ikke støttet i familie-ba-sak.
             verge = verge,
             faktainfo = hentFaktainfoForTilbakekreving(behandling, tilbakekreving),
-            institusjon = institusjon
+            institusjon = institusjon,
+            manuelleBrevmottakere = manuelleBrevMottakere,
         )
     }
 
@@ -186,19 +219,22 @@ class TilbakekrevingService(
         if (!kanOpprettesRespons.kanBehandlingOpprettes) {
             return Ressurs.funksjonellFeil(
                 frontendFeilmelding = kanOpprettesRespons.melding,
-                melding = "familie-tilbake svarte nei på om tilbakekreving kunne opprettes"
+                melding = "familie-tilbake svarte nei på om tilbakekreving kunne opprettes",
             )
         }
 
         val behandling = kanOpprettesRespons.kravgrunnlagsreferanse?.toLong()
-            ?.let { behandlingHentOgPersisterService.finnAvsluttedeBehandlingerPåFagsak(fagsakId = fagsakId).find { beh -> beh.id == it } }
+            ?.let {
+                behandlingHentOgPersisterService.finnAvsluttedeBehandlingerPåFagsak(fagsakId = fagsakId)
+                    .find { beh -> beh.id == it }
+            }
         return if (behandling != null) {
             tilbakekrevingKlient.opprettTilbakekrevingsbehandlingManuelt(
                 OpprettManueltTilbakekrevingRequest(
                     eksternFagsakId = fagsakId.toString(),
                     ytelsestype = Ytelsestype.BARNETRYGD,
-                    eksternId = kanOpprettesRespons.kravgrunnlagsreferanse!!
-                )
+                    eksternId = kanOpprettesRespons.kravgrunnlagsreferanse!!,
+                ),
             )
 
             Ressurs.success("Tilbakekreving opprettet")
@@ -206,7 +242,7 @@ class TilbakekrevingService(
             logger.error("Kan ikke opprette tilbakekrevingsbehandling. Respons inneholder referanse til en ukjent behandling")
             Ressurs.funksjonellFeil(
                 melding = "Kan ikke opprette tilbakekrevingsbehandling. Respons inneholder referanse til en ukjent behandling",
-                frontendFeilmelding = "Av tekniske årsaker så kan ikke behandling opprettes. Kontakt brukerstøtte for å rapportere feilen."
+                frontendFeilmelding = "Av tekniske årsaker så kan ikke behandling opprettes. Kontakt brukerstøtte for å rapportere feilen.",
             )
         }
     }
@@ -218,7 +254,7 @@ class TilbakekrevingService(
                 Verge(
                     vergetype = Vergetype.VERGE_FOR_BARN,
                     navn = it.navn!!,
-                    personIdent = aktør.aktivFødselsnummer()
+                    personIdent = aktør.aktivFødselsnummer(),
                 )
             }
         } else {

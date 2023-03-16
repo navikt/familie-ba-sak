@@ -9,6 +9,9 @@ import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonInfo
 import no.nav.familie.ba.sak.ekstern.restDomene.VergeInfo
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
+import no.nav.familie.ba.sak.kjerne.brev.mottaker.Brevmottaker
+import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerRepository
+import no.nav.familie.ba.sak.kjerne.brev.mottaker.MottakerType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
@@ -18,12 +21,14 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
+import no.nav.familie.kontrakter.felles.tilbakekreving.Vergetype
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.util.Properties
+import no.nav.familie.kontrakter.felles.tilbakekreving.Brevmottaker as TilbakekrevingBrevmottaker
 
 class TilbakekrevingServiceTest(
     @Autowired private val vilkårsvurderingService: VilkårsvurderingService,
@@ -35,7 +40,8 @@ class TilbakekrevingServiceTest(
     @Autowired private val tilbakekrevingRepository: TilbakekrevingRepository,
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
     @Autowired private val databaseCleanupService: DatabaseCleanupService,
-    @Autowired private val brevmalService: BrevmalService
+    @Autowired private val brevmalService: BrevmalService,
+    @Autowired private val brevmottakerRepository: BrevmottakerRepository,
 ) : AbstractSpringIntegrationTest() {
 
     @BeforeAll
@@ -56,7 +62,7 @@ class TilbakekrevingServiceTest(
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
         )
 
         val restTilbakekreving = opprettRestTilbakekreving()
@@ -86,7 +92,7 @@ class TilbakekrevingServiceTest(
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
             institusjon = InstitusjonInfo(orgNummer = "998765432", tssEksternId = "8000000"),
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
         )
 
         val restTilbakekreving = opprettRestTilbakekreving()
@@ -116,7 +122,7 @@ class TilbakekrevingServiceTest(
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
             verge = VergeInfo("04068203010"),
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
         )
 
         val restTilbakekreving = opprettRestTilbakekreving()
@@ -130,5 +136,49 @@ class TilbakekrevingServiceTest(
         assertEquals(Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL, tilbakekreving?.valg)
         assertEquals("id1", tilbakekreving?.tilbakekrevingsbehandlingId)
         assertEquals("Varsel", tilbakekreving?.varsel)
+    }
+
+    @Test
+    @Tag("integration")
+    fun `lagOpprettTilbakekrevingRequest sender brevmottakere i kall mot familie-tilbake`() {
+        val behandling = kjørStegprosessForFGB(
+            tilSteg = StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
+            søkerFnr = randomFnr(),
+            barnasIdenter = listOf(ClientMocks.barnFnr[0]),
+            fagsakService = fagsakService,
+            vedtakService = vedtakService,
+            persongrunnlagService = persongrunnlagService,
+            vilkårsvurderingService = vilkårsvurderingService,
+            stegService = stegService,
+            vedtaksperiodeService = vedtaksperiodeService,
+            brevmalService = brevmalService,
+        )
+
+        val brevmottaker = Brevmottaker(
+            behandlingId = behandling.id,
+            type = MottakerType.VERGE,
+            navn = "Donald Duck",
+            adresselinje1 = "Andebyveien 1",
+            postnummer = "0000",
+            poststed = "OSLO",
+            landkode = "NO",
+        )
+        brevmottakerRepository.saveAndFlush(brevmottaker)
+
+        val opprettTilbakekrevingRequest = tilbakekrevingService.lagOpprettTilbakekrevingRequest(behandling)
+        assertEquals(1, opprettTilbakekrevingRequest.manuelleBrevmottakere.size)
+        val actualBrevmottaker = opprettTilbakekrevingRequest.manuelleBrevmottakere.first()
+
+        assertBrevmottakerEquals(brevmottaker, actualBrevmottaker)
+        assertEquals(Vergetype.VERGE_FOR_VOKSEN, actualBrevmottaker.vergetype)
+    }
+
+    private fun assertBrevmottakerEquals(expected: Brevmottaker, actual: TilbakekrevingBrevmottaker) {
+        assertEquals(expected.navn, actual.navn)
+        assertEquals(expected.type.name, actual.type.name)
+        assertEquals(expected.adresselinje1, actual.manuellAdresseInfo?.adresselinje1)
+        assertEquals(expected.postnummer, actual.manuellAdresseInfo?.postnummer)
+        assertEquals(expected.poststed, actual.manuellAdresseInfo?.poststed)
+        assertEquals(expected.landkode, actual.manuellAdresseInfo?.landkode)
     }
 }
