@@ -438,7 +438,8 @@ fun genererPersonResultatForPerson(
 
     val vilkårForPerson = Vilkår.hentVilkårFor(
         personType = person.type,
-        ytelseType = vilkårsvurdering.behandling.hentYtelseTypeTilVilkår()
+        ytelseType = vilkårsvurdering.behandling.hentYtelseTypeTilVilkår(),
+        fagsakType = vilkårsvurdering.behandling.fagsak.type
     )
 
     val vilkårResultater = vilkårForPerson.map { vilkår ->

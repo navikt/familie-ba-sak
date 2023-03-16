@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.SøkersAktivitet
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
@@ -110,7 +111,7 @@ data class BrevPeriodeTestPerson(
 
     private fun hentVilkårForPerson() =
         this.overstyrteVilkårresultater +
-            Vilkår.hentVilkårFor(this.type)
+            Vilkår.hentVilkårFor(personType = this.type, fagsakType = FagsakType.NORMAL)
                 .filter { vilkår -> !this.overstyrteVilkårresultater.any { it.vilkårType == vilkår } }
                 .map { vilkår ->
                     MinimertVilkårResultat(

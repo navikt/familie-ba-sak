@@ -8,6 +8,8 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerRepository
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
@@ -21,8 +23,13 @@ import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingstype
+import no.nav.familie.kontrakter.felles.tilbakekreving.Brevmottaker
 import no.nav.familie.kontrakter.felles.tilbakekreving.FeilutbetaltePerioderDto
 import no.nav.familie.kontrakter.felles.tilbakekreving.ForhåndsvisVarselbrevRequest
+import no.nav.familie.kontrakter.felles.tilbakekreving.ManuellAdresseInfo
+import no.nav.familie.kontrakter.felles.tilbakekreving.MottakerType
+import no.nav.familie.kontrakter.felles.tilbakekreving.MottakerType.FULLMEKTIG
+import no.nav.familie.kontrakter.felles.tilbakekreving.MottakerType.VERGE
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettManueltTilbakekrevingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.OpprettTilbakekrevingRequest
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
@@ -38,6 +45,7 @@ class TilbakekrevingService(
     private val tilbakekrevingRepository: TilbakekrevingRepository,
     private val vedtakRepository: VedtakRepository,
     private val totrinnskontrollRepository: TotrinnskontrollRepository,
+    private val brevmottakerRepository: BrevmottakerRepository,
     private val simuleringService: SimuleringService,
     private val tilgangService: TilgangService,
     private val persongrunnlagService: PersongrunnlagService,
@@ -154,6 +162,30 @@ class TilbakekrevingService(
         val institusjon = hentTilbakekrevingInstitusjon(behandling.fagsak)
         val verge = hentVerge(behandling.verge?.ident)
 
+        val manuelleBrevMottakere =
+            brevmottakerRepository.finnBrevMottakereForBehandling(behandling.id).map { baSakBrevMottaker ->
+                val mottakerType = MottakerType.valueOf(baSakBrevMottaker.type.name)
+                val vergetype = when {
+                    mottakerType == FULLMEKTIG -> Vergetype.ANNEN_FULLMEKTIG
+                    mottakerType == VERGE && behandling.fagsak.type == FagsakType.NORMAL -> Vergetype.VERGE_FOR_VOKSEN
+                    mottakerType == VERGE && behandling.fagsak.type != FagsakType.NORMAL -> Vergetype.VERGE_FOR_BARN
+                    else -> null
+                }
+
+                Brevmottaker(
+                    type = mottakerType,
+                    vergetype = vergetype,
+                    navn = baSakBrevMottaker.navn,
+                    manuellAdresseInfo = ManuellAdresseInfo(
+                        adresselinje1 = baSakBrevMottaker.adresselinje1,
+                        adresselinje2 = baSakBrevMottaker.adresselinje2,
+                        postnummer = baSakBrevMottaker.postnummer,
+                        poststed = baSakBrevMottaker.poststed,
+                        landkode = baSakBrevMottaker.landkode
+                    )
+                )
+            }.toSet()
+
         return OpprettTilbakekrevingRequest(
             fagsystem = Fagsystem.BA,
             regelverk = behandling.kategori.tilRegelverk(),
@@ -177,7 +209,8 @@ class TilbakekrevingService(
             // Verge er per nå ikke støttet i familie-ba-sak.
             verge = verge,
             faktainfo = hentFaktainfoForTilbakekreving(behandling, tilbakekreving),
-            institusjon = institusjon
+            institusjon = institusjon,
+            manuelleBrevmottakere = manuelleBrevMottakere
         )
     }
 
@@ -191,7 +224,10 @@ class TilbakekrevingService(
         }
 
         val behandling = kanOpprettesRespons.kravgrunnlagsreferanse?.toLong()
-            ?.let { behandlingHentOgPersisterService.finnAvsluttedeBehandlingerPåFagsak(fagsakId = fagsakId).find { beh -> beh.id == it } }
+            ?.let {
+                behandlingHentOgPersisterService.finnAvsluttedeBehandlingerPåFagsak(fagsakId = fagsakId)
+                    .find { beh -> beh.id == it }
+            }
         return if (behandling != null) {
             tilbakekrevingKlient.opprettTilbakekrevingsbehandlingManuelt(
                 OpprettManueltTilbakekrevingRequest(

@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
@@ -92,7 +93,8 @@ class UtbetalingsperiodeUtilTest {
             andelerTilkjentYtelse = listOf(andelPerson1MarsTilApril, andelPerson1MaiTilJuli, andelPerson2MarsTilJuli),
             vedtak = vedtak,
             personResultater = personResultater,
-            personerIPersongrunnlag = listOf(person1, person2)
+            personerIPersongrunnlag = listOf(person1, person2),
+            fagsakType = FagsakType.NORMAL
         )
 
         Assertions.assertEquals(
@@ -167,7 +169,8 @@ class UtbetalingsperiodeUtilTest {
             andelerTilkjentYtelse = listOf(andelPerson1MarsTilMai, andelPerson2MaiTilJuli),
             vedtak = vedtak,
             personResultater = personResultater,
-            personerIPersongrunnlag = listOf(person1, person2)
+            personerIPersongrunnlag = listOf(person1, person2),
+            fagsakType = FagsakType.NORMAL
         )
 
         Assertions.assertEquals(
@@ -240,7 +243,7 @@ class UtbetalingsperiodeUtilTest {
             utdypendeVilkårsvurderinger = emptyList()
         )
 
-        val resterendeVilkårForBarn = Vilkår.hentVilkårFor(PersonType.BARN).mapNotNull { if (it == Vilkår.BOR_MED_SØKER) null else lagVilkårResultat(vilkår = it, fom = mars2020.minusMonths(1), tom = juli2020) }
+        val resterendeVilkårForBarn = Vilkår.hentVilkårFor(PersonType.BARN, fagsakType = FagsakType.NORMAL).mapNotNull { if (it == Vilkår.BOR_MED_SØKER) null else lagVilkårResultat(vilkår = it, fom = mars2020.minusMonths(1), tom = juli2020) }
 
         val vilkårResultaterBarn1 = listOf(
             vilkårResultatBorMedSøkerMedUtdypendeVilkårsvurderingBarn1,
@@ -307,7 +310,8 @@ class UtbetalingsperiodeUtilTest {
             andelerTilkjentYtelse = listOf(andelBarn1MarsTilJuli, andelBarn2MarsTilJuli),
             vedtak = vedtak,
             personResultater = setOf(personResultatBarn1, personResultatBarn2),
-            personerIPersongrunnlag = listOf(søker, barn1, barn2)
+            personerIPersongrunnlag = listOf(søker, barn1, barn2),
+            fagsakType = FagsakType.NORMAL
         )
 
         Assertions.assertEquals(
@@ -346,7 +350,8 @@ class UtbetalingsperiodeUtilTest {
             andelerTilkjentYtelse = listOf(andelBarn1MarsTilApril, andelBarn1JuliTilJuli),
             vedtak = vedtak,
             personResultater = emptySet(),
-            personerIPersongrunnlag = listOf(barn1)
+            personerIPersongrunnlag = listOf(barn1),
+            fagsakType = FagsakType.NORMAL
         )
 
         val forventetResultat = listOf(
@@ -432,7 +437,7 @@ class UtbetalingsperiodeUtilTest {
                 vurderesEtter = Regelverk.EØS_FORORDNINGEN
             )
 
-        val vilkårForBarn = Vilkår.hentVilkårFor(PersonType.BARN)
+        val vilkårForBarn = Vilkår.hentVilkårFor(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL)
 
         val vilkårResultaterBarn1 = vilkårForBarn.map { nasjonaltVilkår(it) } + vilkårForBarn.map { eøsVilkår(it) }
 
@@ -461,7 +466,8 @@ class UtbetalingsperiodeUtilTest {
             andelerTilkjentYtelse = listOf(andelBarnMarsTilJuli),
             vedtak = vedtak,
             personResultater = setOf(personResultatBarn),
-            personerIPersongrunnlag = listOf(søker, barn)
+            personerIPersongrunnlag = listOf(søker, barn),
+            fagsakType = FagsakType.NORMAL
         )
 
         Assertions.assertEquals(

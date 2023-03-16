@@ -122,7 +122,7 @@ data class VilkårsvurderingForNyBehandlingUtils(
                 }
             }
 
-            val vilkårTyperForPerson = Vilkår.hentVilkårFor(person.type, ytelseType = ytelseType)
+            val vilkårTyperForPerson = Vilkår.hentVilkårFor(person.type, ytelseType = ytelseType, fagsakType = vilkårsvurdering.behandling.fagsak.type)
 
             val vilkårResultater = vilkårTyperForPerson.map { vilkår ->
                 val fom = if (vilkår.gjelderAlltidFraBarnetsFødselsdato()) person.fødselsdato else null
@@ -163,7 +163,7 @@ data class VilkårsvurderingForNyBehandlingUtils(
         return personopplysningGrunnlag.søkerOgBarn.map { person ->
             val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = person.aktør)
 
-            val vilkårForPerson = Vilkår.hentVilkårFor(person.type)
+            val vilkårForPerson = Vilkår.hentVilkårFor(personType = person.type, fagsakType = vilkårsvurdering.behandling.fagsak.type)
 
             val vilkårResultater = vilkårForPerson.map { vilkår ->
                 genererVilkårResultatForEtVilkårPåEnPerson(
@@ -195,7 +195,7 @@ data class VilkårsvurderingForNyBehandlingUtils(
         return personopplysningGrunnlag.søkerOgBarn.map { person ->
             val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = person.aktør)
 
-            val vilkårForPerson = Vilkår.hentVilkårFor(person.type)
+            val vilkårForPerson = Vilkår.hentVilkårFor(personType = person.type, fagsakType = vilkårsvurdering.behandling.fagsak.type)
 
             val vilkårResultater = vilkårForPerson.map { vilkår ->
                 VilkårResultat(
@@ -276,7 +276,7 @@ data class VilkårsvurderingForNyBehandlingUtils(
         return personopplysningGrunnlag.søkerOgBarn.map { person ->
             val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = person.aktør)
 
-            val vilkårTyperForPerson = Vilkår.hentVilkårFor(person.type)
+            val vilkårTyperForPerson = Vilkår.hentVilkårFor(personType = person.type, fagsakType = vilkårsvurdering.behandling.fagsak.type)
             val vilkårResultater = vilkårTyperForPerson.map { vilkår ->
                 val fom = when {
                     vilkår.gjelderAlltidFraBarnetsFødselsdato() -> person.fødselsdato

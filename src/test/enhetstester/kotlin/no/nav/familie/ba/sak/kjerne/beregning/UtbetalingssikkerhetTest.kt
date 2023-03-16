@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilBrevTekst
@@ -348,13 +349,15 @@ class UtbetalingssikkerhetTest {
 
     @Test
     fun `Korrekt maksbeløp gis for persontype`() {
-        val søkersSatser = SatsService.finnSisteSatsFor(SatsType.UTVIDET_BARNETRYGD).beløp +
-            SatsService.finnSisteSatsFor(SatsType.SMA).beløp
+        val utvidetBarnetrygd = SatsService.finnSisteSatsFor(SatsType.UTVIDET_BARNETRYGD).beløp
+        val småbarnstillegg = SatsService.finnSisteSatsFor(SatsType.SMA).beløp
         val tilleggOrdinærBarnetrygd = SatsService.finnSisteSatsFor(SatsType.TILLEGG_ORBA).beløp
 
-        assertEquals(søkersSatser, TilkjentYtelseValidering.maksBeløp(personType = PersonType.SØKER))
-        assertEquals(tilleggOrdinærBarnetrygd, TilkjentYtelseValidering.maksBeløp(personType = PersonType.BARN))
-        assertThrows<Feil> { TilkjentYtelseValidering.maksBeløp(personType = PersonType.ANNENPART) }
+        assertEquals(utvidetBarnetrygd + småbarnstillegg, TilkjentYtelseValidering.maksBeløp(personType = PersonType.SØKER, fagsakType = FagsakType.NORMAL))
+        assertEquals(tilleggOrdinærBarnetrygd, TilkjentYtelseValidering.maksBeløp(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL))
+        assertEquals(tilleggOrdinærBarnetrygd, TilkjentYtelseValidering.maksBeløp(personType = PersonType.BARN, fagsakType = FagsakType.INSTITUSJON))
+        assertEquals(tilleggOrdinærBarnetrygd + utvidetBarnetrygd, TilkjentYtelseValidering.maksBeløp(personType = PersonType.BARN, fagsakType = FagsakType.BARN_ENSLIG_MINDREÅRIG))
+        assertThrows<Feil> { TilkjentYtelseValidering.maksBeløp(personType = PersonType.ANNENPART, FagsakType.NORMAL) }
     }
 
     /**

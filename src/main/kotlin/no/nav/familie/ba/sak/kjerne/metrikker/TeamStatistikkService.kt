@@ -34,9 +34,9 @@ class TeamStatistikkService(
         if (!erLeader()) return
 
         val månederMedTotalUtbetaling =
-            listOf<LocalDateTime>(
-                LocalDateTime.now(),
-                LocalDateTime.now().plusMonths(1)
+            listOf<YearMonth>(
+                YearMonth.now(),
+                YearMonth.now().plusMonths(1)
             ).associateWith {
                 behandlingRepository.hentTotalUtbetalingForMåned(it)
             }

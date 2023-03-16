@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonInfo
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.MigreringResponseDto
 import no.nav.familie.ba.sak.integrasjoner.migrering.MigreringRestClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -32,14 +33,15 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.institusjon.InstitusjonService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -83,10 +85,10 @@ class MigreringService(
     private val totrinnskontrollService: TotrinnskontrollService,
     private val vedtakService: VedtakService,
     private val vilkårService: VilkårService,
-    private val vilkårsvurderingService: VilkårsvurderingService,
     private val migreringRestClient: MigreringRestClient,
     private val kompetanseService: KompetanseService,
-    private val persongrunnlagService: PersongrunnlagService
+    private val persongrunnlagService: PersongrunnlagService,
+    private val institusjonService: InstitusjonService
 ) {
 
     private val logger = LoggerFactory.getLogger(MigreringService::class.java)
@@ -113,12 +115,7 @@ class MigreringService(
             val barnasIdenter = finnBarnMedLøpendeStønad(løpendeInfotrygdsak)
 
             secureLog.info("barnasIdenter=$barnasIdenter")
-
-            if (løpendeInfotrygdsak.type == "I") {
-                secureLog.info("Løpendesak er av type institusjon for $personIdent")
-                kastOgTellMigreringsFeil(MigreringsfeilType.ENSLIG_MINDREÅRIG)
-            }
-            if (personIdent in barnasIdenter) {
+            if (løpendeInfotrygdsak.erEnslingMindreårig(personIdent, barnasIdenter)) {
                 secureLog.info("Migrering: $personIdent er lik barn registert på stønad=${løpendeInfotrygdsak.stønad?.id}")
                 kastOgTellMigreringsFeil(MigreringsfeilType.ENSLIG_MINDREÅRIG)
             }
@@ -128,8 +125,24 @@ class MigreringService(
             kastFeilVedDobbeltforekomstViaHistoriskIdent(barnasAktør, barnasIdenter)
 
             val fagsak = try {
-                fagsakService.hentEllerOpprettFagsakForPersonIdent(personIdent)
-                    .also { kastFeilDersomAlleredeMigrert(it) }
+                if (løpendeInfotrygdsak.erInstitusjon()) {
+                    løpendeInfotrygdsak.validerInstitusjonSak()
+                    val tssEksternId = løpendeInfotrygdsak.stønad?.mottakerNummer!!.toString()
+
+                    val orgNr =
+                        institusjonService.hentOrgnummerForTssEksternId(tssEksternId)
+
+                    val instInfo = InstitusjonInfo(orgNummer = orgNr, tssEksternId = tssEksternId)
+                    fagsakService.hentEllerOpprettFagsakForPersonIdent(
+                        fødselsnummer = personIdent,
+                        institusjon = instInfo,
+                        fagsakType = FagsakType.INSTITUSJON
+                    )
+                        .also { kastFeilDersomAlleredeMigrert(it) }
+                } else {
+                    fagsakService.hentEllerOpprettFagsakForPersonIdent(fødselsnummer = personIdent)
+                        .also { kastFeilDersomAlleredeMigrert(it) }
+                }
             } catch (exception: Exception) {
                 if (exception is ConstraintViolationException) {
                     logger.warn("Migrering: Klarte ikke å opprette fagsak på grunn av krasj i databasen, prøver igjen senere. Feilmelding: ${exception.message}.")
@@ -162,7 +175,6 @@ class MigreringService(
             vilkårService.hentVilkårsvurdering(behandlingId = behandling.id)?.apply {
                 forsøkSettPerioderFomTilpassetInfotrygdKjøreplan(this, migreringsdato)
                 if (løpendeInfotrygdsak.undervalg == "MD") leggTilVilkårsvurderingDeltBostedPåBarna()
-                vilkårsvurderingService.oppdater(this)
             } ?: kastOgTellMigreringsFeil(MigreringsfeilType.MANGLER_VILKÅRSVURDERING)
             // Lagre ned migreringsdato
             behandlingService.lagreNedMigreringsdato(migreringsdato, behandling)
@@ -195,7 +207,7 @@ class MigreringService(
             when (underkategori) {
                 BehandlingUnderkategori.ORDINÆR -> migrertCounter.increment()
                 BehandlingUnderkategori.UTVIDET -> migrertUtvidetCounter.increment()
-                BehandlingUnderkategori.INSTITUSJON -> throw Feil("Migrering av institusjon er ikke støttet")
+                BehandlingUnderkategori.INSTITUSJON -> throw Feil("Institusjon bruker samme underkategori som Ordinær")
             }
             val migreringResponseDto = MigreringResponseDto(
                 fagsakId = behandlingEtterVilkårsvurdering.fagsak.id,
@@ -280,7 +292,8 @@ class MigreringService(
     private fun kastFeilDersomAlleredeMigrert(fagsak: Fagsak) {
         val aktivBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = fagsak.id)
         if (aktivBehandling != null) {
-            val behandlinger = behandlingHentOgPersisterService.hentBehandlinger(fagsakId = fagsak.id).sortedBy { it.opprettetTidspunkt }
+            val behandlinger = behandlingHentOgPersisterService.hentBehandlinger(fagsakId = fagsak.id)
+                .sortedBy { it.opprettetTidspunkt }
 
             behandlinger.findLast { it.erMigrering() && !it.erHenlagt() }?.apply {
                 when (fagsak.status) {
@@ -340,20 +353,16 @@ class MigreringService(
 
     private fun kastFeilEllerHentUnderkategori(sak: Sak): BehandlingUnderkategori {
         return when {
-            (sak.valg == "OR" && sak.undervalg in listOf("OS", "MD")) -> {
+            (sak.valg == "OR" && sak.undervalg in listOf("OS", "MD", "EU")) -> {
                 BehandlingUnderkategori.ORDINÆR
             }
 
-            (sak.valg == "UT" && sak.undervalg in listOf("EF", "MD")) -> {
+            (sak.valg == "UT" && sak.undervalg in listOf("EF", "MD", "EU")) -> {
                 BehandlingUnderkategori.UTVIDET
             }
 
-            (sak.valg == "OR" && sak.undervalg == "EU") -> {
+            (sak.erInstitusjon()) -> {
                 BehandlingUnderkategori.ORDINÆR
-            }
-
-            (sak.valg == "UT" && sak.undervalg == "EU") -> {
-                BehandlingUnderkategori.UTVIDET
             }
 
             else -> {
@@ -622,6 +631,7 @@ enum class MigreringsfeilType(val beskrivelse: String) {
     HISTORISK_IDENT_REGNET_SOM_EKSTRA_BARN_I_INFOTRYGD("Saken kan ikke migreres. Meld saken i Porten. Velg '\"Meld sak om Infotrygd\"."),
     IDENT_IKKE_LENGER_AKTIV("Saken kan ikke migreres. Meld saken i Porten. Velg \"Meld sak om Infotrygd\"."),
     IDENT_BARN_IKKE_LENGER_AKTIV("Saken kan ikke migreres. Meld saken i Porten. "),
+    INSTITUSJON_MANGLER_INFO("Saken kan ikke migreres. Meld saken i Porten. Velg \"Meld sak om Infotrygd\"."),
     IKKE_GYLDIG_KJØREDATO("Kjøring pågår. Vent med migrering til etter kjøring."),
     IKKE_STØTTET_SAKSTYPE("Denne saken må migreres manuelt."),
     INGEN_BARN_MED_LØPENDE_STØNAD_I_INFOTRYGD("Ingen barn med stønad i Infotrygd. Saken kan ikke migreres. Meld saken i Porten. Velg \"Meld sak om Infotrygd\"."),
@@ -661,3 +671,13 @@ fun kastOgTellMigreringsFeil(
 
         migreringsFeilCounter[feiltype.name]?.increment()
     }
+
+fun Sak.erInstitusjon() = this.valg == "OR" && this.undervalg == "IB"
+fun Sak.validerInstitusjonSak() {
+    if (this.stønad?.mottakerNummer == null || this.stønad?.status != "04") { // I følge Infotrygd-Tore så skal Institusjonsstønader ha status 04
+        kastOgTellMigreringsFeil(feiltype = MigreringsfeilType.INSTITUSJON_MANGLER_INFO)
+    }
+}
+
+fun Sak.erEnslingMindreårig(personIdent: String, barnasIdenter: List<String>) =
+    personIdent in barnasIdenter && !this.erInstitusjon()
