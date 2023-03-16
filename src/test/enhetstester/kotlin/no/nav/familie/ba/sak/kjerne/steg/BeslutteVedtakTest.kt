@@ -86,7 +86,7 @@ class BeslutteVedtakTest {
             saksbehandler = "Mock Saksbehandler",
             saksbehandlerId = "Mock.Saksbehandler"
         )
-        every { loggService.opprettBeslutningOmVedtakLogg(any(), any(), any()) } just Runs
+        every { loggService.opprettBeslutningOmVedtakLogg(any(), any(), any(), any()) } just Runs
         every { vedtakService.oppdaterVedtaksdatoOgBrev(any()) } just runs
         every { behandlingService.opprettOgInitierNyttVedtakForBehandling(any(), any(), any()) } just runs
         every { vilkårsvurderingService.hentAktivForBehandling(any()) } returns randomVilkårsvurdering

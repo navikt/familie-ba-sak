@@ -65,7 +65,6 @@ class SendTilBeslutter(
         behandling: Behandling,
         data: String
     ): StegType {
-        loggService.opprettSendTilBeslutterLogg(behandling)
         totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandling)
 
         // oppretter ikke GodkjenneVedtak task for manuell migrering som har avvik innenfor beløpsgrenser
@@ -75,8 +74,12 @@ class SendTilBeslutter(
                 oppgavetype = Oppgavetype.GodkjenneVedtak,
                 fristForFerdigstillelse = LocalDate.now()
             )
+            loggService.opprettSendTilBeslutterLogg(behandling = behandling, skalAutomatiskBesluttes = false)
             taskRepository.save(godkjenneVedtakTask)
+        } else {
+            loggService.opprettSendTilBeslutterLogg(behandling = behandling, skalAutomatiskBesluttes = true)
         }
+
         opprettFerdigstillOppgaveTasker(behandling)
 
         behandlingService.sendBehandlingTilBeslutter(behandling)

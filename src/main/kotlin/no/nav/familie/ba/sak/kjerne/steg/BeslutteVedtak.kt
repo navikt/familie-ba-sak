@@ -80,12 +80,17 @@ class BeslutteVedtak(
             kontrollerteSider = data.kontrollerteSider
         )
 
+        opprettTaskFerdigstillGodkjenneVedtak(
+            behandling = behandling,
+            beslutning = data,
+            behandlingErAutomatiskBesluttet = behandlingErAutomatiskBesluttet
+        )
+
         return if (data.beslutning.erGodkjent()) {
             val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
                 ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
 
             vedtakService.oppdaterVedtaksdatoOgBrev(vedtak)
-            opprettTaskFerdigstillGodkjenneVedtak(behandling = behandling, beslutning = data)
 
             val nesteSteg = sjekkOmBehandlingSkalIverksettesOgHentNesteSteg(behandling)
 
@@ -129,8 +134,6 @@ class BeslutteVedtak(
                 )
             )
 
-            opprettTaskFerdigstillGodkjenneVedtak(behandling = behandling, beslutning = data)
-
             val behandleUnderkjentVedtakTask = OpprettOppgaveTask.opprettTask(
                 behandlingId = behandling.id,
                 oppgavetype = Oppgavetype.BehandleUnderkjentVedtak,
@@ -165,9 +168,19 @@ class BeslutteVedtak(
         taskRepository.save(ferdigstillBehandlingTask)
     }
 
-    private fun opprettTaskFerdigstillGodkjenneVedtak(behandling: Behandling, beslutning: RestBeslutningPåVedtak) {
-        loggService.opprettBeslutningOmVedtakLogg(behandling, beslutning.beslutning, beslutning.begrunnelse)
-        if (!behandling.erManuellMigrering()) {
+    private fun opprettTaskFerdigstillGodkjenneVedtak(
+        behandling: Behandling,
+        beslutning: RestBeslutningPåVedtak,
+        behandlingErAutomatiskBesluttet: Boolean
+    ) {
+        loggService.opprettBeslutningOmVedtakLogg(
+            behandling = behandling,
+            beslutning = beslutning.beslutning,
+            begrunnelse = beslutning.begrunnelse,
+            behandlingErAutomatiskBesluttet = behandlingErAutomatiskBesluttet
+        )
+
+        if (!behandling.erManuellMigrering() || !behandlingErAutomatiskBesluttet) {
             val ferdigstillGodkjenneVedtakTask =
                 FerdigstillOppgaver.opprettTask(behandling.id, Oppgavetype.GodkjenneVedtak)
             taskRepository.save(ferdigstillGodkjenneVedtakTask)
