@@ -765,7 +765,6 @@ class MigrerFraInfotrygdTest(
 
     @Test
     fun `skal migrere Institusjon sak`() {
-
         val fnrBarnet = fødselsnummerGenerator.foedselsnummer(foedselsdato = LocalDate.now().minusYears(7))
 
         mockServerKlient().lagScenario(
@@ -857,7 +856,6 @@ class MigrerFraInfotrygdTest(
             fagsakStatus = FagsakStatus.OPPRETTET,
             behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG
         )
-
 
         assertThat(kompetanseRepository.finnFraBehandlingId(migreringsresponse.behandlingId)).hasSize(0)
 
