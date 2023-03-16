@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import io.mockk.every
 import io.mockk.slot
+import no.nav.familie.ba.sak.common.fødselsnummerGenerator
 import no.nav.familie.ba.sak.config.EfSakRestClientMock
 import no.nav.familie.ba.sak.integrasjoner.`ef-sak`.EfSakRestClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.KanIkkeMigrereException
@@ -16,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
 import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadResponse
@@ -23,6 +25,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
@@ -30,8 +33,10 @@ class MigrerFraInfotrygdTest(
     @Autowired private val migreringService: MigreringService,
     @Autowired private val behandlingRepository: BehandlingRepository,
     @Autowired private val kompetanseRepository: KompetanseRepository,
-    @Autowired private val efSakRestClient: EfSakRestClient
+    @Autowired private val efSakRestClient: EfSakRestClient,
+    @Autowired private val vilkårsvurderingRepository: VilkårsvurderingRepository
 ) : AbstractVerdikjedetest() {
+    private val logger = LoggerFactory.getLogger(MigrerFraInfotrygdTest::class.java)
 
     @AfterEach
     fun ryddOpp() {
@@ -758,11 +763,49 @@ class MigrerFraInfotrygdTest(
         kjørOgAssertEØS(sakKlarForMigreringScenario.søker.ident!!, BehandlingUnderkategori.UTVIDET)
     }
 
+    @Test
+    fun `skal migrere Institusjon sak`() {
+
+        val fnrBarnet = fødselsnummerGenerator.foedselsnummer(foedselsdato = LocalDate.now().minusYears(7))
+
+        mockServerKlient().lagScenario(
+            RestScenario(
+                søker = RestScenarioPerson(
+                    ident = fnrBarnet.asString,
+                    fødselsdato = fnrBarnet.foedselsdato.toString(),
+                    fornavn = "Barn2",
+                    etternavn = "Barnesen2",
+                    infotrygdSaker = InfotrygdSøkResponse(
+                        bruker = listOf(
+                            lagInfotrygdSak(
+                                1054.0,
+                                listOf(fnrBarnet.asString),
+                                "OR",
+                                "IB"
+                            )
+                        ),
+                        barn = emptyList()
+                    )
+                ),
+                barna = emptyList()
+            )
+        )
+
+        kjørOgAssertInstitusjon(fnrBarnet.asString)
+    }
+
     private fun kjørOgAssertEØS(
         ident: String,
         behandlingUnderkategori: BehandlingUnderkategori
     ) {
-        val migreringsresponse = migreringService.migrer(ident)
+        val migreringsresponse = kotlin.runCatching { migreringService.migrer(ident) }
+            .getOrElse {
+                if (it is KanIkkeMigrereException) {
+                    logger.error("KanIkkeMigrereException ${it.feiltype}", it)
+                }
+                throw it
+            }
+
         val restFagsakEtterBehandlingAvsluttet =
             familieBaSakKlient().hentFagsak(fagsakId = migreringsresponse.fagsakId)
 
@@ -778,6 +821,51 @@ class MigrerFraInfotrygdTest(
 
         assertThat(kompetanseRepository.finnFraBehandlingId(migreringsresponse.behandlingId)).hasSize(1)
             .extracting("resultat").contains(KompetanseResultat.NORGE_ER_PRIMÆRLAND)
+
+        val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
+        assertThat((vilkårsvurdering?.personResultater?.filter { it.erSøkersResultater() }?.first()?.vilkårResultater))
+            .isNotEmpty()
+            .extracting("periodeFom").doesNotContainNull()
+        assertThat((vilkårsvurdering?.personResultater?.filter { !it.erSøkersResultater() }?.first()?.vilkårResultater))
+            .isNotEmpty()
+            .extracting("periodeFom").doesNotContainNull()
+    }
+
+    private fun kjørOgAssertInstitusjon(
+        ident: String
+    ) {
+        val migreringsresponse = kotlin.runCatching { migreringService.migrer(ident) }
+            .getOrElse {
+                if (it is KanIkkeMigrereException) {
+                    logger.error("KanIkkeMigrereException ${it.feiltype}", it)
+                }
+                throw it
+            }
+
+        val restFagsakEtterBehandlingAvsluttet =
+            familieBaSakKlient().hentFagsak(fagsakId = migreringsresponse.fagsakId)
+
+        val behandling = behandlingRepository.finnBehandling(migreringsresponse.behandlingId)
+        assertThat(behandling.kategori).isEqualTo(BehandlingKategori.NASJONAL)
+        assertThat(behandling.underkategori).isEqualTo(BehandlingUnderkategori.ORDINÆR)
+        assertThat(behandling.fagsak.institusjon).isNotNull
+        assertThat(behandling.fagsak.institusjon?.tssEksternId).isEqualTo("80000123456")
+        assertThat(behandling.fagsak.institusjon?.orgNummer).isEqualTo("974652269")
+
+        generellAssertFagsak(
+            restFagsak = restFagsakEtterBehandlingAvsluttet,
+            fagsakStatus = FagsakStatus.OPPRETTET,
+            behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG
+        )
+
+
+        assertThat(kompetanseRepository.finnFraBehandlingId(migreringsresponse.behandlingId)).hasSize(0)
+
+        val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
+        assertThat((vilkårsvurdering?.personResultater)).hasSize(1)
+        assertThat((vilkårsvurdering?.personResultater?.first()?.vilkårResultater))
+            .hasSize(5)
+            .extracting("periodeFom").doesNotContainNull()
     }
 
     companion object {
