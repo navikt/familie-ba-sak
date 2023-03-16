@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service
 @Service
 class AutovedtakSatsendringScheduler(private val startSatsendring: StartSatsendring) {
 
-    @Scheduled(cron = CRON_HVERT_10_MIN_ARBEIDSTID_UKEDAG)
+    @Scheduled(cron = CRON_KL_7_OG_14_UKEDAGER)
     fun triggSatsendring() {
         if (LeaderClient.isLeader() == true) {
             logger.info("Satsendring trigges av schedulert jobb")
@@ -21,6 +21,6 @@ class AutovedtakSatsendringScheduler(private val startSatsendring: StartSatsendr
 
     companion object {
         val logger = LoggerFactory.getLogger(AutovedtakSatsendringScheduler::class.java)
-        const val CRON_HVERT_10_MIN_ARBEIDSTID_UKEDAG = "0 */10 6-19 * * MON-FRI"
+        const val CRON_KL_7_OG_14_UKEDAGER = "0 0 7,14 * * MON-FRI"
     }
 }
