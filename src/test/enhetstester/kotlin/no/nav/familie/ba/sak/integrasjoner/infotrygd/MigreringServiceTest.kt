@@ -50,11 +50,11 @@ class MigreringServiceTest() {
             mockk(),
             mockk(),
             mockk(),
-            mockk(),
             mockk(relaxed = true),
             mockk(),
             mockk(),
-            mockPersongrunnlagService
+            mockPersongrunnlagService,
+            mockk()
         ) // => env.erDev() = env.erE2E() = false
     }
 

@@ -32,6 +32,19 @@ class SamhandlerKlient(
         }
     }
 
+    @Cacheable("hent-samhandler-tss", cacheManager = "dailyCache")
+    fun hentSamhandlerVedTssEksternId(tssEksternId: String): SamhandlerInfo {
+        val uri = URI.create("$familieOppdragUri/tss/tssnr/$tssEksternId")
+
+        return kallEksternTjenesteRessurs(
+            tjeneste = "familie-oppdrag",
+            uri = uri,
+            formål = "Henter samhandler fra TSS med tss"
+        ) {
+            getForEntity(uri = uri)
+        }
+    }
+
     fun søkSamhandlere(navn: String?, postnummer: String?, område: String?, side: Int): SøkSamhandlerInfo {
         val uri = URI.create("$familieOppdragUri/tss/navn")
 
