@@ -28,11 +28,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
-import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlingStegStatus
@@ -473,51 +471,6 @@ class VilkårServiceTest(
         val borMedSøkerVilkårEtterEndring =
             personResultatEtterEndring.vilkårResultater.find { it.vilkårType == Vilkår.BOR_MED_SØKER }!!
         assertEquals(behandling2.id, borMedSøkerVilkårEtterEndring.behandlingId)
-    }
-
-    @Test
-    fun `Valider gyldige vilkårspermutasjoner for barn og søker`() {
-        assertEquals(
-            setOf(
-                Vilkår.UNDER_18_ÅR,
-                Vilkår.BOR_MED_SØKER,
-                Vilkår.GIFT_PARTNERSKAP,
-                Vilkår.BOSATT_I_RIKET,
-                Vilkår.LOVLIG_OPPHOLD
-            ),
-            Vilkår.hentVilkårFor(PersonType.BARN)
-        )
-
-        assertEquals(
-            setOf(
-                Vilkår.BOSATT_I_RIKET,
-                Vilkår.LOVLIG_OPPHOLD
-            ),
-            Vilkår.hentVilkårFor(PersonType.SØKER)
-        )
-    }
-
-    @Test
-    fun `Valider gyldige vilkårspermutasjoner for barn og søker ved utvidet barnetrygd`() {
-        assertEquals(
-            setOf(
-                Vilkår.UNDER_18_ÅR,
-                Vilkår.BOR_MED_SØKER,
-                Vilkår.GIFT_PARTNERSKAP,
-                Vilkår.BOSATT_I_RIKET,
-                Vilkår.LOVLIG_OPPHOLD
-            ),
-            Vilkår.hentVilkårFor(personType = PersonType.BARN, ytelseType = YtelseType.UTVIDET_BARNETRYGD)
-        )
-
-        assertEquals(
-            setOf(
-                Vilkår.BOSATT_I_RIKET,
-                Vilkår.LOVLIG_OPPHOLD,
-                Vilkår.UTVIDET_BARNETRYGD
-            ),
-            Vilkår.hentVilkårFor(personType = PersonType.SØKER, ytelseType = YtelseType.UTVIDET_BARNETRYGD)
-        )
     }
 
     @Test

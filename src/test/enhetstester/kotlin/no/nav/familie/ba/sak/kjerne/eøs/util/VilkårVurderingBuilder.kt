@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårRegelverkResultat
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjer
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
@@ -123,7 +124,8 @@ fun <T : Tidsenhet> VilkårsvurderingBuilder<T>.byggTilkjentYtelse() =
     TilkjentYtelseUtils.beregnTilkjentYtelse(
         vilkårsvurdering = this.byggVilkårsvurdering(),
         personopplysningGrunnlag = this.byggPersonopplysningGrunnlag(),
-        behandling = behandling
+        behandling = behandling,
+        fagsakType = FagsakType.NORMAL
     )
 
 data class UtdypendeVilkårRegelverkResultat(

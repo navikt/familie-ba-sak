@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
@@ -389,7 +390,8 @@ class VilkårsvurderingForskyvningUtilsTest {
         val personResultater = setOf(personResultatSøker, personResultatBarn1, personResultatBarn2)
 
         val tidslinje = personResultater.tilTidslinjeForSplitt(
-            listOf(søker, barn1, barn2)
+            personerIPersongrunnlag = listOf(søker, barn1, barn2),
+            fagsakType = FagsakType.NORMAL
         )
 
         val perioder = tidslinje.perioder()

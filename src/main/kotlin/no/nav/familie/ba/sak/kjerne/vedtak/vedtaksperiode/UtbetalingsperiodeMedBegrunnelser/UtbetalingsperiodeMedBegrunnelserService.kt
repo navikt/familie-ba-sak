@@ -38,7 +38,8 @@ class UtbetalingsperiodeMedBegrunnelserService(
             andelerTilkjentYtelse = andelerTilkjentYtelse,
             vedtak = vedtak,
             personResultater = vilkårsvurdering.personResultater,
-            personerIPersongrunnlag = personopplysningGrunnlag.personer.toList()
+            personerIPersongrunnlag = personopplysningGrunnlag.personer.toList(),
+            fagsakType = vedtak.behandling.fagsak.type
         )
 
         val perioderMedReduksjonFraSistIverksatteBehandling =

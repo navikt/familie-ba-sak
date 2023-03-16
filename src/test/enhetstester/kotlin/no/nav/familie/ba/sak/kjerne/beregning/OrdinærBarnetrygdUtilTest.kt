@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.OrdinærBarnetrygdUtil.mapTilProsentEllerNull
 import no.nav.familie.ba.sak.kjerne.beregning.OrdinærBarnetrygdUtil.tilTidslinjeMedRettTilProsentForPerson
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
@@ -47,7 +48,7 @@ class OrdinærBarnetrygdUtilTest {
         val rettTilDeltTom = borMedSøkerVilkårTom.toYearMonth()
         val månedFørFylte18År = barn.fødselsdato.plusYears(18).forrigeMåned()
 
-        val vilkårResulater = Vilkår.hentVilkårFor(PersonType.BARN).mapNotNull {
+        val vilkårResulater = Vilkår.hentVilkårFor(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL).mapNotNull {
             if (it == Vilkår.BOR_MED_SØKER) {
                 null
             } else {
@@ -89,7 +90,8 @@ class OrdinærBarnetrygdUtilTest {
         personResultat.setSortedVilkårResultater(vilkårResulater + borMedSøkerVilkår)
 
         val tidslinje = personResultat.tilTidslinjeMedRettTilProsentForPerson(
-            personType = barn.type
+            personType = barn.type,
+            fagsakType = FagsakType.NORMAL
         )
 
         val perioder = tidslinje.perioder().toList()
@@ -127,7 +129,7 @@ class OrdinærBarnetrygdUtilTest {
             vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling()),
             aktør = barn.aktør
         )
-        val vilkårResultater = Vilkår.hentVilkårFor(PersonType.BARN).map {
+        val vilkårResultater = Vilkår.hentVilkårFor(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL).map {
             lagVilkårResultat(
                 vilkårType = it,
                 periodeFom = LocalDate.now().minusMonths(5),
@@ -138,7 +140,7 @@ class OrdinærBarnetrygdUtilTest {
             )
         }
 
-        val prosent = vilkårResultater.mapTilProsentEllerNull(PersonType.BARN)
+        val prosent = vilkårResultater.mapTilProsentEllerNull(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL)
 
         Assertions.assertEquals(BigDecimal(50), prosent)
     }
@@ -150,7 +152,7 @@ class OrdinærBarnetrygdUtilTest {
             vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling()),
             aktør = barn.aktør
         )
-        val vilkårResultater = Vilkår.hentVilkårFor(PersonType.BARN).map {
+        val vilkårResultater = Vilkår.hentVilkårFor(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL).map {
             lagVilkårResultat(
                 vilkårType = it,
                 periodeFom = LocalDate.now().minusMonths(5),
@@ -161,7 +163,7 @@ class OrdinærBarnetrygdUtilTest {
             )
         }
 
-        val prosent = vilkårResultater.mapTilProsentEllerNull(PersonType.BARN)
+        val prosent = vilkårResultater.mapTilProsentEllerNull(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL)
 
         Assertions.assertEquals(BigDecimal(100), prosent)
     }
@@ -173,7 +175,7 @@ class OrdinærBarnetrygdUtilTest {
             vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling()),
             aktør = barn.aktør
         )
-        val vilkårResultater = Vilkår.hentVilkårFor(PersonType.BARN).mapNotNull {
+        val vilkårResultater = Vilkår.hentVilkårFor(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL).mapNotNull {
             if (it == Vilkår.LOVLIG_OPPHOLD) {
                 null
             } else {
@@ -188,7 +190,7 @@ class OrdinærBarnetrygdUtilTest {
             }
         }
 
-        val prosent = vilkårResultater.mapTilProsentEllerNull(PersonType.BARN)
+        val prosent = vilkårResultater.mapTilProsentEllerNull(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL)
 
         assertEquals(null, prosent)
     }
@@ -200,7 +202,7 @@ class OrdinærBarnetrygdUtilTest {
             vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling()),
             aktør = søker.aktør
         )
-        val vilkårResultater = Vilkår.hentVilkårFor(PersonType.SØKER).mapNotNull {
+        val vilkårResultater = Vilkår.hentVilkårFor(personType = PersonType.SØKER, fagsakType = FagsakType.NORMAL).mapNotNull {
             if (it == Vilkår.LOVLIG_OPPHOLD) {
                 null
             } else {
@@ -215,7 +217,7 @@ class OrdinærBarnetrygdUtilTest {
             }
         }
 
-        val prosent = vilkårResultater.mapTilProsentEllerNull(PersonType.SØKER)
+        val prosent = vilkårResultater.mapTilProsentEllerNull(personType = PersonType.SØKER, fagsakType = FagsakType.NORMAL)
 
         assertEquals(null, prosent)
     }

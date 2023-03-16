@@ -200,7 +200,8 @@ class BeregningService(
                 vilkårsvurdering = vilkårsvurdering,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 behandling = behandling,
-                endretUtbetalingAndeler = endreteUtbetalingAndeler
+                endretUtbetalingAndeler = endreteUtbetalingAndeler,
+                fagsakType = behandling.fagsak.type
             ) { søkerAktør ->
                 småbarnstilleggService.hentOgLagrePerioderMedFullOvergangsstønad(
                     søkerAktør = søkerAktør,

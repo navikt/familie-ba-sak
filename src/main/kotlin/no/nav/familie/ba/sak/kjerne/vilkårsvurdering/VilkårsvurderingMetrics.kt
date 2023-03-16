@@ -57,22 +57,18 @@ class VilkårsvurderingMetrics(
                                 error("Årsak $årsak deler navn med minst en annen årsak")
                             }
 
-                            val vilkår = Vilkår.valueOf(årsak.hentIdentifikator())
-
-                            if (vilkår.parterDetteGjelderFor.contains(personType)) {
-                                vilkårUtfallMap[årsak.toString()] =
-                                    Metrics.counter(
-                                        vilkårTellerType.navn,
-                                        "vilkaar",
-                                        årsak.hentIdentifikator(),
-                                        "resultat",
-                                        resultat.name,
-                                        "personType",
-                                        personTypeToDisplayedType[personType],
-                                        "beskrivelse",
-                                        årsak.hentMetrikkBeskrivelse()
-                                    )
-                            }
+                            vilkårUtfallMap[årsak.toString()] =
+                                Metrics.counter(
+                                    vilkårTellerType.navn,
+                                    "vilkaar",
+                                    årsak.hentIdentifikator(),
+                                    "resultat",
+                                    resultat.name,
+                                    "personType",
+                                    personTypeToDisplayedType[personType],
+                                    "beskrivelse",
+                                    årsak.hentMetrikkBeskrivelse()
+                                )
                         }
                 }
 

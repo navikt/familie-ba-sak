@@ -38,6 +38,7 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAnde
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -423,7 +424,7 @@ class BeregningServiceTest {
 
         val tilleggFom = SatsService.hentDatoForSatsendring(satstype = SatsType.TILLEGG_ORBA, oppdatertBeløp = 1354)
 
-        val søkerVilkår = Vilkår.hentVilkårFor(PersonType.SØKER)
+        val søkerVilkår = Vilkår.hentVilkårFor(personType = PersonType.SØKER, fagsakType = FagsakType.NORMAL)
         val vilkårResultaterSøker = søkerVilkår.map {
             lagVilkårResultat(
                 vilkårType = it,
@@ -1069,7 +1070,7 @@ class BeregningServiceTest {
             aktør = barn.aktør
         )
 
-        val vilkårForBarn = Vilkår.hentVilkårFor(PersonType.BARN)
+        val vilkårForBarn = Vilkår.hentVilkårFor(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL)
         val vilkårResultaterBarn =
             vilkårForBarn.lagVilkårResultaterForPerson(
                 fom = førstePeriodeFomForBarnet,

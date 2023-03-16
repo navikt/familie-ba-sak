@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.medEndring
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -34,6 +35,7 @@ object TilkjentYtelseUtils {
         personopplysningGrunnlag: PersonopplysningGrunnlag,
         behandling: Behandling,
         endretUtbetalingAndeler: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse> = emptyList(),
+        fagsakType: FagsakType,
         hentPerioderMedFullOvergangsstønad: (aktør: Aktør) -> List<InternPeriodeOvergangsstønad> = { _ -> emptyList() }
     ): TilkjentYtelse {
         val tilkjentYtelse = TilkjentYtelse(
@@ -46,7 +48,8 @@ object TilkjentYtelseUtils {
 
         val andelerTilkjentYtelseBarnaUtenEndringer = OrdinærBarnetrygdUtil.beregnAndelerTilkjentYtelseForBarna(
             personopplysningGrunnlag = personopplysningGrunnlag,
-            personResultater = vilkårsvurdering.personResultater
+            personResultater = vilkårsvurdering.personResultater,
+            fagsakType = fagsakType
         )
             .map {
                 AndelTilkjentYtelse(

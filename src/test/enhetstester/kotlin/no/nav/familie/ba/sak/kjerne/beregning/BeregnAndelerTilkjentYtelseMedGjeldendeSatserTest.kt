@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.util.søker
 import no.nav.familie.ba.sak.kjerne.eøs.util.uendelig
 import no.nav.familie.ba.sak.kjerne.eøs.util.under18år
 import no.nav.familie.ba.sak.kjerne.eøs.util.vilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidsenhet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom.rangeTo
@@ -328,7 +329,8 @@ private fun <T : Tidsenhet> VilkårsvurderingBuilder.PersonResultatBuilder<T>.be
     return TilkjentYtelseUtils.beregnTilkjentYtelse(
         vilkårsvurdering = this.byggVilkårsvurdering(),
         personopplysningGrunnlag = personopplysningGrunnlag,
-        behandling = lagBehandling()
+        behandling = lagBehandling(),
+        fagsakType = FagsakType.NORMAL
     ).andelerTilkjentYtelse.map {
         BeregnetAndel(
             person = personopplysningGrunnlag.personer.first { person -> person.aktør == it.aktør },
@@ -343,12 +345,14 @@ private fun <T : Tidsenhet> VilkårsvurderingBuilder.PersonResultatBuilder<T>.be
 
 internal fun <T : Tidsenhet> VilkårsvurderingBuilder<T>.beregnAndelerTilkjentYtelseForBarna(): List<BeregnetAndel> =
     OrdinærBarnetrygdUtil.beregnAndelerTilkjentYtelseForBarna(
-        this.byggPersonopplysningGrunnlag(),
-        this.byggVilkårsvurdering().personResultater
+        personopplysningGrunnlag = this.byggPersonopplysningGrunnlag(),
+        personResultater = this.byggVilkårsvurdering().personResultater,
+        fagsakType = FagsakType.NORMAL
     )
 
 internal fun <T : Tidsenhet> VilkårsvurderingBuilder.PersonResultatBuilder<T>.beregnAndelerTilkjentYtelseForBarna(): List<BeregnetAndel> =
     OrdinærBarnetrygdUtil.beregnAndelerTilkjentYtelseForBarna(
-        this.byggPersonopplysningGrunnlag(),
-        this.byggVilkårsvurdering().personResultater
+        personopplysningGrunnlag = this.byggPersonopplysningGrunnlag(),
+        personResultater = this.byggVilkårsvurdering().personResultater,
+        fagsakType = FagsakType.NORMAL
     )

@@ -13,54 +13,42 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurderin
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.VurderPersonHarLovligOpphold
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType.ANNENPART
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType.BARN
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType.SØKER
 import java.time.LocalDate
 
 enum class Vilkår(
-    val parterDetteGjelderFor: List<PersonType>,
-    val ytelseType: YtelseType,
     val beskrivelse: String,
     val harRegelverk: Boolean
 ) {
 
     UNDER_18_ÅR(
-        parterDetteGjelderFor = listOf(BARN),
-        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
         beskrivelse = "Er under 18 år",
-        false
+        harRegelverk = false
     ),
     BOR_MED_SØKER(
-        parterDetteGjelderFor = listOf(BARN),
-        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
         beskrivelse = "Bor med søker",
-        true
+        harRegelverk = true
     ),
     GIFT_PARTNERSKAP(
-        parterDetteGjelderFor = listOf(BARN),
-        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
         beskrivelse = "Gift/partnerskap",
-        false
+        harRegelverk = false
     ),
     BOSATT_I_RIKET(
-        parterDetteGjelderFor = listOf(SØKER, BARN),
-        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
         beskrivelse = "Bosatt i riket",
-        true
+        harRegelverk = true
     ),
     LOVLIG_OPPHOLD(
-        parterDetteGjelderFor = listOf(SØKER, BARN),
-        ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
         beskrivelse = "Lovlig opphold",
-        true
+        harRegelverk = true
     ),
     UTVIDET_BARNETRYGD(
-        parterDetteGjelderFor = listOf(SØKER),
-        ytelseType = YtelseType.UTVIDET_BARNETRYGD,
         beskrivelse = "Utvidet barnetrygd",
-        false
+        harRegelverk = false
     );
 
     override fun toString(): String {
@@ -69,14 +57,22 @@ enum class Vilkår(
 
     companion object {
 
-        fun hentVilkårFor(personType: PersonType, ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD): Set<Vilkår> {
-            return values().filter {
-                if (ytelseType == YtelseType.UTVIDET_BARNETRYGD) {
-                    personType in it.parterDetteGjelderFor
-                } else {
-                    personType in it.parterDetteGjelderFor && ytelseType == it.ytelseType
+        fun hentVilkårFor(personType: PersonType, ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD, fagsakType: FagsakType): Set<Vilkår> {
+            return when (fagsakType) {
+                FagsakType.NORMAL -> when (personType) {
+                    BARN -> setOf(UNDER_18_ÅR, BOR_MED_SØKER, GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD)
+                    SØKER -> setOf(BOSATT_I_RIKET, LOVLIG_OPPHOLD) + if (ytelseType == YtelseType.UTVIDET_BARNETRYGD) setOf(UTVIDET_BARNETRYGD) else emptySet()
+                    ANNENPART -> emptySet()
                 }
-            }.toSet()
+                FagsakType.INSTITUSJON -> when (personType) {
+                    BARN -> setOf(UNDER_18_ÅR, BOR_MED_SØKER, GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD)
+                    SØKER, ANNENPART -> emptySet()
+                }
+                FagsakType.BARN_ENSLIG_MINDREÅRIG -> when (personType) {
+                    BARN -> setOf(UNDER_18_ÅR, BOR_MED_SØKER, GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD) + if (ytelseType == YtelseType.UTVIDET_BARNETRYGD) setOf(UTVIDET_BARNETRYGD) else emptySet()
+                    SØKER, ANNENPART -> emptySet()
+                }
+            }
         }
 
         fun hentFødselshendelseVilkårsreglerRekkefølge(): List<Vilkår> {

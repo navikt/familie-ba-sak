@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.Utils.avrundetHeltallAvProsent
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -23,10 +24,11 @@ object OrdinærBarnetrygdUtil {
 
     internal fun beregnAndelerTilkjentYtelseForBarna(
         personopplysningGrunnlag: PersonopplysningGrunnlag,
-        personResultater: Set<PersonResultat>
+        personResultater: Set<PersonResultat>,
+        fagsakType: FagsakType
     ): List<BeregnetAndel> {
         val tidslinjerMedRettTilProsentPerBarn =
-            personResultater.lagTidslinjerMedRettTilProsentPerBarn(personopplysningGrunnlag)
+            personResultater.lagTidslinjerMedRettTilProsentPerBarn(personopplysningGrunnlag, fagsakType)
 
         return tidslinjerMedRettTilProsentPerBarn.flatMap { (barn, tidslinjeMedRettTilProsentForBarn) ->
             val satsTidslinje = lagOrdinærTidslinje(barn)
@@ -63,8 +65,8 @@ object OrdinærBarnetrygdUtil {
         val prosent: BigDecimal
     )
 
-    private fun Set<PersonResultat>.lagTidslinjerMedRettTilProsentPerBarn(personopplysningGrunnlag: PersonopplysningGrunnlag): Map<Person, Tidslinje<BigDecimal, Måned>> {
-        val tidslinjerPerPerson = lagTidslinjerMedRettTilProsentPerPerson(personopplysningGrunnlag)
+    private fun Set<PersonResultat>.lagTidslinjerMedRettTilProsentPerBarn(personopplysningGrunnlag: PersonopplysningGrunnlag, fagsakType: FagsakType): Map<Person, Tidslinje<BigDecimal, Måned>> {
+        val tidslinjerPerPerson = lagTidslinjerMedRettTilProsentPerPerson(personopplysningGrunnlag, fagsakType)
 
         if (tidslinjerPerPerson.isEmpty()) return emptyMap()
 
@@ -87,25 +89,28 @@ object OrdinærBarnetrygdUtil {
     }
 
     private fun Set<PersonResultat>.lagTidslinjerMedRettTilProsentPerPerson(
-        personopplysningGrunnlag: PersonopplysningGrunnlag
+        personopplysningGrunnlag: PersonopplysningGrunnlag,
+        fagsakType: FagsakType
     ) = this.associate { personResultat ->
         val person = personopplysningGrunnlag.personer.find { it.aktør == personResultat.aktør }
             ?: throw Feil("Finner ikke person med aktørId=${personResultat.aktør.aktørId} i persongrunnlaget ved generering av andeler tilkjent ytelse")
         person to personResultat.tilTidslinjeMedRettTilProsentForPerson(
-            personType = person.type
+            personType = person.type,
+            fagsakType = fagsakType
         )
     }
 
     internal fun PersonResultat.tilTidslinjeMedRettTilProsentForPerson(
-        personType: PersonType
+        personType: PersonType,
+        fagsakType: FagsakType
     ): Tidslinje<BigDecimal, Måned> {
         val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår()
 
-        return tidslinjer.kombiner { it.mapTilProsentEllerNull(personType) }.slåSammenLike().filtrerIkkeNull()
+        return tidslinjer.kombiner { it.mapTilProsentEllerNull(personType, fagsakType) }.slåSammenLike().filtrerIkkeNull()
     }
 
-    internal fun Iterable<VilkårResultat>.mapTilProsentEllerNull(personType: PersonType): BigDecimal? {
-        return if (alleVilkårErOppfylt(personType)) {
+    internal fun Iterable<VilkårResultat>.mapTilProsentEllerNull(personType: PersonType, fagsakType: FagsakType): BigDecimal? {
+        return if (alleVilkårErOppfylt(personType, fagsakType)) {
             if (any { it.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) }) {
                 BigDecimal(50)
             } else {

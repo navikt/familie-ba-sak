@@ -38,6 +38,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRequest
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonRepository
@@ -604,7 +605,7 @@ class BehandlingIntegrationTest(
         )
 
         personResultatBarn2.setSortedVilkårResultater(
-            Vilkår.hentVilkårFor(PersonType.BARN).map {
+            Vilkår.hentVilkårFor(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL).map {
                 lagVilkårResultat(
                     personResultat = personResultatBarn2,
                     periodeFom = mars2018.minusMonths(1).toLocalDate(),
@@ -612,7 +613,7 @@ class BehandlingIntegrationTest(
                     vilkårType = it,
                     behandlingId = vilkårsvurdering.behandling.id
                 )
-            }.toSet() + Vilkår.hentVilkårFor(PersonType.BARN).map {
+            }.toSet() + Vilkår.hentVilkårFor(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL).map {
                 lagVilkårResultat(
                     personResultat = personResultatBarn2,
                     periodeFom = mars2018.toLocalDate(),
