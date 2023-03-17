@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.validerBarnasVilkår
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlingSteg
+import no.nav.familie.ba.sak.kjerne.steg.EndringerIUtbetalingForBehandlingSteg
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -111,7 +112,12 @@ class BehandlingsresultatSteg(
             )
         }
 
-        if (behandlingMedOppdatertBehandlingsresultat.skalRettFraBehandlingsresultatTilIverksetting() ||
+        val endringSidenForrigeIverksatteBehandling =
+            beregningService.hentEndringerIUtbetalingFraForrigeIverksatteBehandling(behandling)
+
+        if (behandlingMedOppdatertBehandlingsresultat.skalRettFraBehandlingsresultatTilIverksetting(
+                endringSidenForrigeIverksatteBehandling == EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
+            ) ||
             beregningService.kanAutomatiskIverksetteSmåbarnstilleggEndring(
                     behandling = behandlingMedOppdatertBehandlingsresultat,
                     sistIverksatteBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(
@@ -127,9 +133,7 @@ class BehandlingsresultatSteg(
             simuleringService.oppdaterSimuleringPåBehandling(behandlingMedOppdatertBehandlingsresultat)
         }
 
-        val endringerIUtbetaling =
-            beregningService.hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling)
-        return hentNesteStegGittEndringerIUtbetaling(behandling, endringerIUtbetaling)
+        return hentNesteStegGittEndringerIUtbetaling(behandling, endringSidenForrigeIverksatteBehandling)
     }
 
     override fun stegType(): StegType {

@@ -200,13 +200,13 @@ data class Behandling(
         return this
     }
 
-    fun skalRettFraBehandlingsresultatTilIverksetting(): Boolean {
+    fun skalRettFraBehandlingsresultatTilIverksetting(erEndringSidenForrigeIverksatteBehandling: Boolean): Boolean {
         return when {
             skalBehandlesAutomatisk && erOmregning() &&
                 resultat in listOf(Behandlingsresultat.FORTSATT_INNVILGET, Behandlingsresultat.FORTSATT_OPPHØRT) -> true
             skalBehandlesAutomatisk && erMigrering() && resultat == Behandlingsresultat.INNVILGET -> true
             skalBehandlesAutomatisk && erFødselshendelse() && resultat == Behandlingsresultat.INNVILGET -> true
-            skalBehandlesAutomatisk && erSatsendring() && resultat == Behandlingsresultat.ENDRET_UTBETALING -> true
+            skalBehandlesAutomatisk && erSatsendring() && erEndringSidenForrigeIverksatteBehandling -> true
             else -> false
         }
     }

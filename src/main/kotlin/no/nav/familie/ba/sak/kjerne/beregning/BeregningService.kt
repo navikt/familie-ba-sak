@@ -131,10 +131,10 @@ class BeregningService(
         }.map { it }
     }
 
-    fun erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling: Behandling): Boolean =
-        hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling) == EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
+    fun erEndringerIUtbetalingFraForrigeIverksatteBehandling(behandling: Behandling): Boolean =
+        hentEndringerIUtbetalingFraForrigeIverksatteBehandling(behandling) == EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
 
-    fun hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling: Behandling): EndringerIUtbetalingForBehandlingSteg {
+    fun hentEndringerIUtbetalingFraForrigeIverksatteBehandling(behandling: Behandling): EndringerIUtbetalingForBehandlingSteg {
         val endringerIUtbetaling =
             hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandlingTidslinje(behandling)
                 .perioder()
