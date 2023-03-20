@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
@@ -51,9 +52,20 @@ class AutovedtakService(
         totrinnskontrollService.opprettAutomatiskTotrinnskontroll(behandling)
         loggService.opprettBeslutningOmVedtakLogg(behandling, Beslutning.GODKJENT)
 
+        settBehandlingsstatusTilIverksetterVedtak(behandling)
+
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
             ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
         return vedtakService.oppdaterVedtakMedStønadsbrev(vedtak = vedtak)
+    }
+
+    private fun settBehandlingsstatusTilIverksetterVedtak(behandling: Behandling) {
+
+
+        behandlingService.oppdaterStatusPåBehandling(
+            behandlingId = behandling.id,
+            status = BehandlingStatus.IVERKSETTER_VEDTAK
+        )
     }
 
     fun omgjørBehandlingTilManuellOgKjørSteg(behandling: Behandling, steg: StegType): Behandling {
