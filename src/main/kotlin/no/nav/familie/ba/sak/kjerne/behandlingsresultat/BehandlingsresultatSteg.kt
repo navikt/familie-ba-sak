@@ -112,7 +112,7 @@ class BehandlingsresultatSteg(
         }
 
         val endringSidenForrigeBehandlingSendtTilØkonomi =
-            beregningService.hentEndringerIUtbetalingFraForrigeIverksatteBehandling(behandling)
+            beregningService.hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling)
 
         if (behandlingMedOppdatertBehandlingsresultat.skalBehandlesAutomatisk) {
             behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)

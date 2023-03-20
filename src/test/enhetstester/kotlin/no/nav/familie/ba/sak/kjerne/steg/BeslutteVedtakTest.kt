@@ -116,7 +116,7 @@ class BeslutteVedtakTest {
         val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.GODKJENT)
 
         every { vedtakService.hentAktivForBehandling(any()) } returns lagVedtak(behandling)
-        every { beregningService.hentEndringerIUtbetalingFraForrigeIverksatteBehandling(behandling) } returns EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
+        every { beregningService.hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling) } returns EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
         mockkObject(FerdigstillOppgaver.Companion)
         every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
         every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
@@ -172,7 +172,7 @@ class BeslutteVedtakTest {
         val restBeslutningPåVedtak = RestBeslutningPåVedtak(Beslutning.GODKJENT)
 
         every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
-        every { beregningService.hentEndringerIUtbetalingFraForrigeIverksatteBehandling(behandling) } returns EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING
+        every { beregningService.hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling) } returns EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING
 
         mockkObject(JournalførVedtaksbrevTask.Companion)
         every {
@@ -185,7 +185,7 @@ class BeslutteVedtakTest {
 
         val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
 
-        verify(exactly = 1) { beregningService.hentEndringerIUtbetalingFraForrigeIverksatteBehandling(behandling) }
+        verify(exactly = 1) { beregningService.hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling) }
 
         verify(exactly = 1) {
             JournalførVedtaksbrevTask.opprettTaskJournalførVedtaksbrev(
