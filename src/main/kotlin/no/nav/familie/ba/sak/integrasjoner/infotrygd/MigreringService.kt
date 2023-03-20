@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonInfo
+import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerInstitusjonOgVerge
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.MigreringResponseDto
 import no.nav.familie.ba.sak.integrasjoner.migrering.MigreringRestClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -124,18 +125,23 @@ class MigreringService(
             val barnasAktør = personidentService.hentOgLagreAktørIder(barnasIdenter, false)
             kastFeilVedDobbeltforekomstViaHistoriskIdent(barnasAktør, barnasIdenter)
 
+            val institusjonInfo = if (løpendeInfotrygdsak.erInstitusjon()) {
+                løpendeInfotrygdsak.validerInstitusjonSak()
+                val tssEksternId = løpendeInfotrygdsak.stønad?.mottakerNummer!!.toString()
+
+                val orgNr =
+                    institusjonService.hentOrgnummerForTssEksternId(tssEksternId)
+
+                InstitusjonInfo(orgNummer = orgNr, tssEksternId = tssEksternId)
+            } else {
+                null
+            }
+
             val fagsak = try {
                 if (løpendeInfotrygdsak.erInstitusjon()) {
-                    løpendeInfotrygdsak.validerInstitusjonSak()
-                    val tssEksternId = løpendeInfotrygdsak.stønad?.mottakerNummer!!.toString()
-
-                    val orgNr =
-                        institusjonService.hentOrgnummerForTssEksternId(tssEksternId)
-
-                    val instInfo = InstitusjonInfo(orgNummer = orgNr, tssEksternId = tssEksternId)
                     fagsakService.hentEllerOpprettFagsakForPersonIdent(
                         fødselsnummer = personIdent,
-                        institusjon = instInfo,
+                        institusjon = institusjonInfo,
                         fagsakType = FagsakType.INSTITUSJON
                     )
                         .also { kastFeilDersomAlleredeMigrert(it) }
@@ -178,6 +184,13 @@ class MigreringService(
             } ?: kastOgTellMigreringsFeil(MigreringsfeilType.MANGLER_VILKÅRSVURDERING)
             // Lagre ned migreringsdato
             behandlingService.lagreNedMigreringsdato(migreringsdato, behandling)
+
+            if (løpendeInfotrygdsak.erInstitusjon()) {
+                stegService.håndterRegistrerVerge(
+                    behandling,
+                    RestRegistrerInstitusjonOgVerge(institusjonInfo = institusjonInfo, vergeInfo = null)
+                )
+            }
 
             val behandlingEtterVilkårsvurdering =
                 stegService.håndterVilkårsvurdering(behandling) // Se funksjonen lagVilkårsvurderingForMigreringsbehandling i VilkårService

@@ -41,7 +41,10 @@ interface BehandlingSteg<T> {
         )
     }
 
-    fun hentNesteStegGittEndringerIUtbetaling(behandling: Behandling, endringerIUtbetaling: EndringerIUtbetalingForBehandlingSteg): StegType {
+    fun hentNesteStegGittEndringerIUtbetaling(
+        behandling: Behandling,
+        endringerIUtbetaling: EndringerIUtbetalingForBehandlingSteg
+    ): StegType {
         return hentNesteSteg(
             utførendeStegType = this.stegType(),
             behandling = behandling,
@@ -181,7 +184,11 @@ enum class StegType(
     }
 }
 
-fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType, endringerIUtbetaling: EndringerIUtbetalingForBehandlingSteg = EndringerIUtbetalingForBehandlingSteg.IKKE_RELEVANT): StegType {
+fun hentNesteSteg(
+    behandling: Behandling,
+    utførendeStegType: StegType,
+    endringerIUtbetaling: EndringerIUtbetalingForBehandlingSteg = EndringerIUtbetalingForBehandlingSteg.IKKE_RELEVANT
+): StegType {
     if (utførendeStegType == HENLEGG_BEHANDLING) {
         return FERDIGSTILLE_BEHANDLING
     }
@@ -206,7 +213,15 @@ fun hentNesteSteg(behandling: Behandling, utførendeStegType: StegType, endringe
         BehandlingÅrsak.TEKNISK_OPPHØR -> throw Feil("Teknisk opphør er ikke mulig å behandle lenger")
         BehandlingÅrsak.MIGRERING -> {
             when (utførendeStegType) {
-                REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
+                REGISTRERE_PERSONGRUNNLAG -> {
+                    if (behandling.fagsak.type == FagsakType.INSTITUSJON) {
+                        REGISTRERE_INSTITUSJON_OG_VERGE
+                    } else {
+                        VILKÅRSVURDERING
+                    }
+                }
+
+                REGISTRERE_INSTITUSJON_OG_VERGE -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
                 BEHANDLINGSRESULTAT -> IVERKSETT_MOT_OPPDRAG
                 IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
