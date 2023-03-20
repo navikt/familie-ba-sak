@@ -102,7 +102,7 @@ class AutovedtakSmåbarnstilleggService(
                 fagsakId = fagsak.id
             )
 
-        if (kanSmåbarnstilleggBehandlesAutomatisk(behandlingEtterBehandlingsresultat)) {
+        if (!kanSmåbarnstilleggBehandlesAutomatisk(behandlingEtterBehandlingsresultat)) {
             return kanIkkeBehandleAutomatisk(
                 behandling = behandlingEtterBehandlingsresultat,
                 metric = antallVedtakOmOvergangsstønadTilManuellBehandling[TilManuellBehandlingÅrsak.NYE_UTBETALINGSPERIODER_FØRER_TIL_MANUELL_BEHANDLING]!!,
