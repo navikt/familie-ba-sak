@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.SmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.beregning.VedtaksperiodefinnerSmåbarnstilleggFeil
 import no.nav.familie.ba.sak.kjerne.beregning.finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse
 import no.nav.familie.ba.sak.kjerne.beregning.hentInnvilgedeOgReduserteAndelerSmåbarnstillegg
+import no.nav.familie.ba.sak.kjerne.beregning.kanAutomatiskIverksetteSmåbarnstillegg
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.steg.StegType
@@ -101,7 +102,7 @@ class AutovedtakSmåbarnstilleggService(
                 fagsakId = fagsak.id
             )
 
-        if (behandlingEtterBehandlingsresultat.status != BehandlingStatus.IVERKSETTER_VEDTAK) {
+        if (kanSmåbarnstilleggBehandlesAutomatisk(behandlingEtterBehandlingsresultat)) {
             return kanIkkeBehandleAutomatisk(
                 behandling = behandlingEtterBehandlingsresultat,
                 metric = antallVedtakOmOvergangsstønadTilManuellBehandling[TilManuellBehandlingÅrsak.NYE_UTBETALINGSPERIODER_FØRER_TIL_MANUELL_BEHANDLING]!!,
@@ -139,19 +140,43 @@ class AutovedtakSmåbarnstilleggService(
         return AutovedtakStegService.BEHANDLING_FERDIG
     }
 
+    fun kanSmåbarnstilleggBehandlesAutomatisk(
+        behandling: Behandling,
+    ): Boolean {
+        if (!behandling.skalBehandlesAutomatisk || !behandling.erSmåbarnstillegg()) return false
+
+        val forrigeVedtatteBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
+
+        val forrigeSmåbarnstilleggAndeler =
+            hentForrigeSmåbarnstilleggAndeler(forrigeVedtatteBehandling = forrigeVedtatteBehandling)
+
+        val nyeSmåbarnstilleggAndeler =
+            if (forrigeVedtatteBehandling == null) {
+                emptyList()
+            } else {
+                beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(
+                    behandlingId = behandling.id
+                ).filter { it.erSmåbarnstillegg() }
+            }
+
+        val (innvilgedeMånedPerioder, reduserteMånedPerioder) = hentInnvilgedeOgReduserteAndelerSmåbarnstillegg(
+            forrigeSmåbarnstilleggAndeler = forrigeSmåbarnstilleggAndeler,
+            nyeSmåbarnstilleggAndeler = nyeSmåbarnstilleggAndeler
+        )
+
+        return kanAutomatiskIverksetteSmåbarnstillegg(
+            innvilgedeMånedPerioder = innvilgedeMånedPerioder,
+            reduserteMånedPerioder = reduserteMånedPerioder
+        )
+    }
+
     private fun begrunnAutovedtakForSmåbarnstillegg(
         behandlingEtterBehandlingsresultat: Behandling
     ) {
         val sistIverksatteBehandling =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = behandlingEtterBehandlingsresultat.fagsak.id)
         val forrigeSmåbarnstilleggAndeler =
-            if (sistIverksatteBehandling == null) {
-                emptyList()
-            } else {
-                beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(
-                    behandlingId = sistIverksatteBehandling.id
-                ).filter { it.erSmåbarnstillegg() }
-            }
+            hentForrigeSmåbarnstilleggAndeler(forrigeVedtatteBehandling = sistIverksatteBehandling)
 
         val nyeSmåbarnstilleggAndeler =
             if (sistIverksatteBehandling == null) {
@@ -179,6 +204,15 @@ class AutovedtakSmåbarnstilleggService(
             )
         )
     }
+
+    private fun hentForrigeSmåbarnstilleggAndeler(forrigeVedtatteBehandling: Behandling?) =
+        if (forrigeVedtatteBehandling == null) {
+            emptyList()
+        } else {
+            beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(
+                behandlingId = forrigeVedtatteBehandling.id
+            ).filter { it.erSmåbarnstillegg() }
+        }
 
     private fun kanIkkeBehandleAutomatisk(
         behandling: Behandling,

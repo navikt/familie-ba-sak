@@ -21,7 +21,6 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.validerBarnasVilkår
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlingSteg
-import no.nav.familie.ba.sak.kjerne.steg.EndringerIUtbetalingForBehandlingSteg
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -112,28 +111,14 @@ class BehandlingsresultatSteg(
             )
         }
 
-        val endringSidenForrigeIverksatteBehandling =
+        val endringSidenForrigeBehandlingSendtTilØkonomi =
             beregningService.hentEndringerIUtbetalingFraForrigeIverksatteBehandling(behandling)
 
-        if (behandlingMedOppdatertBehandlingsresultat.skalRettFraBehandlingsresultatTilIverksetting(
-                endringSidenForrigeIverksatteBehandling == EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
-            ) ||
-            beregningService.kanAutomatiskIverksetteSmåbarnstilleggEndring(
-                    behandling = behandlingMedOppdatertBehandlingsresultat,
-                    sistIverksatteBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(
-                            behandling = behandlingMedOppdatertBehandlingsresultat
-                        )
-                )
-        ) {
-            behandlingService.oppdaterStatusPåBehandling(
-                behandlingMedOppdatertBehandlingsresultat.id,
-                BehandlingStatus.IVERKSETTER_VEDTAK
-            )
-        } else {
+        if (!behandlingMedOppdatertBehandlingsresultat.skalBehandlesAutomatisk) {
             simuleringService.oppdaterSimuleringPåBehandling(behandlingMedOppdatertBehandlingsresultat)
         }
 
-        return hentNesteStegGittEndringerIUtbetaling(behandling, endringSidenForrigeIverksatteBehandling)
+        return hentNesteStegGittEndringerIUtbetaling(behandling, endringSidenForrigeBehandlingSendtTilØkonomi)
     }
 
     override fun stegType(): StegType {
