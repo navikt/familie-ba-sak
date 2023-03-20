@@ -114,7 +114,9 @@ class BehandlingsresultatSteg(
         val endringSidenForrigeBehandlingSendtTilØkonomi =
             beregningService.hentEndringerIUtbetalingFraForrigeIverksatteBehandling(behandling)
 
-        if (!behandlingMedOppdatertBehandlingsresultat.skalBehandlesAutomatisk) {
+        if(behandlingMedOppdatertBehandlingsresultat.skalBehandlesAutomatisk){
+            behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)
+        } else {
             simuleringService.oppdaterSimuleringPåBehandling(behandlingMedOppdatertBehandlingsresultat)
         }
 
