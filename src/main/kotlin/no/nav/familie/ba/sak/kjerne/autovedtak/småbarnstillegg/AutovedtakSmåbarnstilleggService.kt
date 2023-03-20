@@ -141,7 +141,7 @@ class AutovedtakSmåbarnstilleggService(
     }
 
     fun kanSmåbarnstilleggBehandlesAutomatisk(
-        behandling: Behandling,
+        behandling: Behandling
     ): Boolean {
         if (!behandling.skalBehandlesAutomatisk || !behandling.erSmåbarnstillegg()) return false
 
