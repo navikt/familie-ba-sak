@@ -49,7 +49,12 @@ class AutovedtakService(
 
     fun opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(behandling: Behandling): Vedtak {
         totrinnskontrollService.opprettAutomatiskTotrinnskontroll(behandling)
-        loggService.opprettBeslutningOmVedtakLogg(behandling, Beslutning.GODKJENT)
+
+        loggService.opprettBeslutningOmVedtakLogg(
+            behandling = behandling,
+            beslutning = Beslutning.GODKJENT,
+            behandlingErAutomatiskBesluttet = true
+        )
 
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
             ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
