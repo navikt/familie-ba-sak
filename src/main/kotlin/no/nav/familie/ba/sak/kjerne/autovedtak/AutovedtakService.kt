@@ -49,7 +49,7 @@ class AutovedtakService(
     }
 
     @Transactional
-    fun fattVedtakOgOppdaterBehandlingsstatus(behandling: Behandling): Vedtak {
+    fun opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(behandling: Behandling): Vedtak {
         totrinnskontrollService.opprettAutomatiskTotrinnskontroll(behandling)
         loggService.opprettBeslutningOmVedtakLogg(behandling, Beslutning.GODKJENT)
 

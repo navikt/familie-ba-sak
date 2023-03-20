@@ -99,7 +99,7 @@ class AutovedtakSatsendringService(
             )
 
         val opprettetVedtak =
-            autovedtakService.fattVedtakOgOppdaterBehandlingsstatus(
+            autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(
                 behandlingEtterBehandlingsresultat
             )
 

@@ -143,7 +143,7 @@ class AutovedtakFødselshendelseService(
             vedtaksperiodeService.oppdaterVedtaksperioderForBarnVurdertIFødselshendelse(vedtak, barnaSomVurderes)
 
             val vedtakEtterToTrinn =
-                autovedtakService.fattVedtakOgOppdaterBehandlingsstatus(behandling = behandlingEtterVilkårsvurdering)
+                autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(behandling = behandlingEtterVilkårsvurdering)
 
             val task = IverksettMotOppdragTask.opprettTask(
                 behandling,

@@ -305,7 +305,7 @@ internal class Autobrev6og18ÅrServiceTest {
                 any()
             )
         }
-        verify(exactly = 0) { autovedtakService.fattVedtakOgOppdaterBehandlingsstatus(any()) }
+        verify(exactly = 0) { autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(any()) }
         verify(exactly = 0) { taskRepository.save(any()) }
     }
 
