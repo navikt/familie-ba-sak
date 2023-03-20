@@ -305,7 +305,7 @@ internal class Autobrev6og18ÅrServiceTest {
                 any()
             )
         }
-        verify(exactly = 0) { autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(any()) }
+        verify(exactly = 0) { autovedtakService.fattVedtakOgOppdaterBehandlingsstatus(any()) }
         verify(exactly = 0) { taskRepository.save(any()) }
     }
 
@@ -322,7 +322,7 @@ internal class Autobrev6og18ÅrServiceTest {
 
         val søker = tilfeldigSøker()
         var barnIBrytningsalder: Person = tilfeldigPerson(LocalDate.now().minusYears(alder))
-        var søsken: Person = tilfeldigPerson(LocalDate.now().minusYears(3))
+        val søsken: Person = tilfeldigPerson(LocalDate.now().minusYears(3))
 
         if (alder == 6L) {
             val andelTilkjentYtelseSøsken = if (medSøsken) {

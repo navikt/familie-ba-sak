@@ -126,7 +126,7 @@ class AutovedtakSmåbarnstilleggService(
             )
         }
 
-        val vedtakEtterTotrinn = autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(
+        val vedtakEtterTotrinn = autovedtakService.fattVedtakOgOppdaterBehandlingsstatus(
             behandlingEtterBehandlingsresultat
         )
 

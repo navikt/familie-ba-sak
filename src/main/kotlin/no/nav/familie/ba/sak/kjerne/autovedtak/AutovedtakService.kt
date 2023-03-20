@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class AutovedtakService(
@@ -48,7 +49,8 @@ class AutovedtakService(
         return behandlingEtterBehandlingsresultat
     }
 
-    fun opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(behandling: Behandling): Vedtak {
+    @Transactional
+    fun fattVedtakOgOppdaterBehandlingsstatus(behandling: Behandling): Vedtak {
         totrinnskontrollService.opprettAutomatiskTotrinnskontroll(behandling)
         loggService.opprettBeslutningOmVedtakLogg(behandling, Beslutning.GODKJENT)
 
