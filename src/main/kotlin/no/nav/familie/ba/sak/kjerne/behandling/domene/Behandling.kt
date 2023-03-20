@@ -200,17 +200,6 @@ data class Behandling(
         return this
     }
 
-    fun skalRettFraBehandlingsresultatTilIverksetting(erEndringSidenForrigeIverksatteBehandling: Boolean): Boolean {
-        return when {
-            skalBehandlesAutomatisk && erOmregning() &&
-                resultat in listOf(Behandlingsresultat.FORTSATT_INNVILGET, Behandlingsresultat.FORTSATT_OPPHØRT) -> true
-            skalBehandlesAutomatisk && erMigrering() && resultat == Behandlingsresultat.INNVILGET -> true
-            skalBehandlesAutomatisk && erFødselshendelse() && resultat == Behandlingsresultat.INNVILGET -> true
-            skalBehandlesAutomatisk && erSatsendring() && erEndringSidenForrigeIverksatteBehandling -> true
-            else -> false
-        }
-    }
-
     private fun leggTilStegOmDetIkkeFinnesFraFør(steg: StegType) {
         if (behandlingStegTilstand.none { it.behandlingSteg == steg }) {
             behandlingStegTilstand.add(
