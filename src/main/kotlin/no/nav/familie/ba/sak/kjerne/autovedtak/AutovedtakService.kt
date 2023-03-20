@@ -52,16 +52,14 @@ class AutovedtakService(
         totrinnskontrollService.opprettAutomatiskTotrinnskontroll(behandling)
         loggService.opprettBeslutningOmVedtakLogg(behandling, Beslutning.GODKJENT)
 
-        settBehandlingsstatusTilIverksetterVedtak(behandling)
+        settBehandlingStatusTilIverksetterVedtak(behandling)
 
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
             ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
         return vedtakService.oppdaterVedtakMedStønadsbrev(vedtak = vedtak)
     }
 
-    private fun settBehandlingsstatusTilIverksetterVedtak(behandling: Behandling) {
-
-
+    private fun settBehandlingStatusTilIverksetterVedtak(behandling: Behandling) {
         behandlingService.oppdaterStatusPåBehandling(
             behandlingId = behandling.id,
             status = BehandlingStatus.IVERKSETTER_VEDTAK
