@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
+import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -28,6 +29,7 @@ internal class StegServiceEnhetstest {
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
     private val settPåVentService: SettPåVentService = mockk()
     private val satsendringService: SatsendringService = mockk()
+    private val simuleringService: SimuleringService = mockk()
 
     private val stegService = StegService(
         steg = listOf(mockRegistrerPersongrunnlag()),
@@ -39,7 +41,8 @@ internal class StegServiceEnhetstest {
         tilgangService = mockk(relaxed = true),
         infotrygdFeedService = mockk(),
         settPåVentService = settPåVentService,
-        satsendringService = satsendringService
+        satsendringService = satsendringService,
+        simuleringService = simuleringService
     )
 
     @BeforeEach

@@ -32,6 +32,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
+import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.steg.domene.JournalførVedtaksbrevDTO
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
@@ -56,7 +57,8 @@ class StegService(
     private val tilgangService: TilgangService,
     private val infotrygdFeedService: InfotrygdFeedService,
     private val settPåVentService: SettPåVentService,
-    private val satsendringService: SatsendringService
+    private val satsendringService: SatsendringService,
+    private val simuleringService: SimuleringService
 ) {
 
     private val stegSuksessMetrics: Map<StegType, Counter> = initStegMetrikker("suksess")
@@ -293,7 +295,12 @@ class StegService(
         val behandlingEtterBeslutterSteg = håndterSteg(behandling, behandlingSteg) {
             behandlingSteg.utførStegOgAngiNeste(behandling, behandlendeEnhet)
         }
-        if (behandlingEtterBeslutterSteg.erManuellMigrering()) {
+
+        val harMigreringsbehandlingAvvikInnenforbeløpsgrenser by lazy {
+            simuleringService.harMigreringsbehandlingAvvikInnenforBeløpsgrenser(behandling)
+        }
+
+        if (behandlingEtterBeslutterSteg.erManuellMigrering() && harMigreringsbehandlingAvvikInnenforbeløpsgrenser) {
             return håndterBeslutningForVedtak(
                 behandlingEtterBeslutterSteg,
                 RestBeslutningPåVedtak(Beslutning.GODKJENT)

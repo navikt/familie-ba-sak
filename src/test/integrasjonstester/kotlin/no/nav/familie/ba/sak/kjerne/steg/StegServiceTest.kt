@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
+import io.mockk.every
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.kjørStegprosessForRevurderingÅrligKontroll
@@ -14,6 +15,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.DbOppgave
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -42,6 +44,13 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.kontrakter.felles.simulering.BetalingType
+import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
+import no.nav.familie.kontrakter.felles.simulering.FagOmrådeKode
+import no.nav.familie.kontrakter.felles.simulering.MottakerType
+import no.nav.familie.kontrakter.felles.simulering.PosteringType
+import no.nav.familie.kontrakter.felles.simulering.SimuleringMottaker
+import no.nav.familie.kontrakter.felles.simulering.SimulertPostering
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -93,7 +102,10 @@ class StegServiceTest(
     private val oppgaveRepository: OppgaveRepository,
 
     @Autowired
-    private val brevmalService: BrevmalService
+    private val brevmalService: BrevmalService,
+
+    @Autowired
+    private val økonomiKlient: ØkonomiKlient
 
 ) : AbstractSpringIntegrationTest() {
 
@@ -316,7 +328,8 @@ class StegServiceTest(
         )
         assertEquals(StegType.BEHANDLING_AVSLUTTET, henlagtBehandling.steg)
         assertTrue {
-            oppgaveRepository.findByBehandlingAndIkkeFerdigstilt(henlagtBehandling).single().type == Oppgavetype.BehandleSak
+            oppgaveRepository.findByBehandlingAndIkkeFerdigstilt(henlagtBehandling)
+                .single().type == Oppgavetype.BehandleSak
         }
     }
 
@@ -340,7 +353,31 @@ class StegServiceTest(
     }
 
     @Test
-    fun `skal kjøre gjennom steg for migreringsbehandling med årsak endre migreringsdato`() {
+    fun `skal kjøre gjennom steg for migreringsbehandling med årsak endre migreringsdato og avvik i simulering innenfor beløpsgrenser`() {
+        val simulertPosteringMock = listOf(
+            SimulertPostering(
+                fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
+                fom = LocalDate.parse("2019-09-01"),
+                tom = LocalDate.parse("2019-09-30"),
+                betalingType = BetalingType.DEBIT,
+                beløp = 1.toBigDecimal(),
+                posteringType = PosteringType.FEILUTBETALING,
+                forfallsdato = LocalDate.parse("2021-02-23"),
+                utenInntrekk = false,
+                erFeilkonto = null
+            )
+        )
+
+        val simuleringMottakerMock = listOf(
+            SimuleringMottaker(
+                simulertPostering = simulertPosteringMock,
+                mottakerType = MottakerType.BRUKER,
+                mottakerNummer = "12345678910"
+            )
+        )
+
+        every { økonomiKlient.hentSimulering(any()) } returns DetaljertSimuleringResultat(simuleringMottakerMock)
+
         val søkerFnr = randomFnr()
         val barnFnr = ClientMocks.barnFnr[0]
         val barnasIdenter = listOf(barnFnr)
@@ -398,19 +435,19 @@ class StegServiceTest(
         )
         assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterTilbakekrevingSteg.steg)
 
-        val behandlingEtterBesultterSteg = stegService.håndterSendTilBeslutter(
+        val behandlingEtterBeslutterSteg = stegService.håndterSendTilBeslutter(
             behandlingEtterTilbakekrevingSteg,
             "1234"
         )
-        assertEquals(StegType.FERDIGSTILLE_BEHANDLING, behandlingEtterBesultterSteg.steg)
+        assertEquals(StegType.FERDIGSTILLE_BEHANDLING, behandlingEtterBeslutterSteg.steg)
         assertTrue {
-            behandlingEtterBesultterSteg.behandlingStegTilstand.any {
+            behandlingEtterBeslutterSteg.behandlingStegTilstand.any {
                 it.behandlingSteg == StegType.SEND_TIL_BESLUTTER &&
                     it.behandlingStegStatus == BehandlingStegStatus.UTFØRT
             }
         }
         assertTrue {
-            behandlingEtterBesultterSteg.behandlingStegTilstand.any {
+            behandlingEtterBeslutterSteg.behandlingStegTilstand.any {
                 it.behandlingSteg == StegType.BESLUTTE_VEDTAK &&
                     it.behandlingStegStatus == BehandlingStegStatus.UTFØRT
             }
@@ -425,7 +462,141 @@ class StegServiceTest(
     }
 
     @Test
-    fun `skal kjøre gjennom steg for helmanuell migrering`() {
+    fun `skal kjøre gjennom steg for migreringsbehandling med årsak endre migreringsdato og avvik i simulering utenfor beløpsgrenser`() {
+        val simulertPosteringMock = listOf(
+            SimulertPostering(
+                fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
+                fom = LocalDate.parse("2019-09-01"),
+                tom = LocalDate.parse("2019-09-30"),
+                betalingType = BetalingType.DEBIT,
+                beløp = 500.toBigDecimal(),
+                posteringType = PosteringType.FEILUTBETALING,
+                forfallsdato = LocalDate.parse("2021-02-23"),
+                utenInntrekk = false,
+                erFeilkonto = null
+            )
+        )
+
+        val simuleringMottakerMock = listOf(
+            SimuleringMottaker(
+                simulertPostering = simulertPosteringMock,
+                mottakerType = MottakerType.BRUKER,
+                mottakerNummer = "12345678910"
+            )
+        )
+
+        every { økonomiKlient.hentSimulering(any()) } returns DetaljertSimuleringResultat(simuleringMottakerMock)
+
+        val søkerFnr = randomFnr()
+        val barnFnr = ClientMocks.barnFnr[0]
+        val barnasIdenter = listOf(barnFnr)
+
+        kjørStegprosessForFGB(
+            tilSteg = StegType.BEHANDLING_AVSLUTTET,
+            søkerFnr = søkerFnr,
+            barnasIdenter = barnasIdenter,
+            fagsakService = fagsakService,
+            vedtakService = vedtakService,
+            persongrunnlagService = persongrunnlagService,
+            vilkårsvurderingService = vilkårsvurderingService,
+            stegService = stegService,
+            vedtaksperiodeService = vedtaksperiodeService,
+            brevmalService = brevmalService
+        )
+
+        val nyMigreringsdato = LocalDate.now().minusMonths(6)
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
+        val behandling = stegService.håndterNyBehandling(
+            NyBehandling(
+                kategori = BehandlingKategori.NASJONAL,
+                underkategori = BehandlingUnderkategori.ORDINÆR,
+                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                behandlingÅrsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
+                søkersIdent = søkerFnr,
+                barnasIdenter = barnasIdenter,
+                nyMigreringsdato = nyMigreringsdato,
+                fagsakId = fagsak.id
+            )
+        )
+        assertEquals(StegType.VILKÅRSVURDERING, behandling.steg)
+        assertTrue {
+            behandling.behandlingStegTilstand.any {
+                it.behandlingSteg == StegType.REGISTRERE_PERSONGRUNNLAG &&
+                    it.behandlingStegStatus == BehandlingStegStatus.UTFØRT
+            }
+        }
+        assertMigreringsdato(nyMigreringsdato, behandling)
+        assertNotNull(vilkårsvurderingService.hentAktivForBehandling(behandling.id))
+
+        val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandling)
+        assertEquals(StegType.BEHANDLINGSRESULTAT, behandlingEtterVilkårsvurdering.steg)
+
+        val behandlingEtterBehandlingsresultatSteg =
+            stegService.håndterBehandlingsresultat(behandlingEtterVilkårsvurdering)
+        assertEquals(StegType.VURDER_TILBAKEKREVING, behandlingEtterBehandlingsresultatSteg.steg)
+
+        val behandlingEtterTilbakekrevingSteg = stegService.håndterVurderTilbakekreving(
+            behandlingEtterBehandlingsresultatSteg,
+            RestTilbakekreving(
+                valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
+                begrunnelse = "ignorer tilbakekreving"
+            )
+        )
+
+        assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterTilbakekrevingSteg.steg)
+
+        val behandlingEtterSendTilBeslutterSteg = stegService.håndterSendTilBeslutter(
+            behandlingEtterTilbakekrevingSteg,
+            "1234"
+        )
+
+        assertEquals(StegType.BESLUTTE_VEDTAK, behandlingEtterSendTilBeslutterSteg.steg)
+
+        val behandlingEtterBesluttVedtakSteg = stegService.håndterBeslutningForVedtak(
+            behandlingEtterSendTilBeslutterSteg,
+            RestBeslutningPåVedtak(
+                Beslutning.GODKJENT,
+                "godkjent manuelt"
+            )
+        )
+
+        assertEquals(StegType.FERDIGSTILLE_BEHANDLING, behandlingEtterBesluttVedtakSteg.steg)
+
+        val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandling.id)
+        assertNotNull(totrinnskontroll)
+        assertEquals(true, totrinnskontroll!!.godkjent)
+        assertEquals(SikkerhetContext.hentSaksbehandlerNavn(), totrinnskontroll.saksbehandler)
+        assertEquals(SikkerhetContext.hentSaksbehandler(), totrinnskontroll.saksbehandlerId)
+        assertEquals(SikkerhetContext.SYSTEM_NAVN, totrinnskontroll.beslutter)
+        assertEquals(SikkerhetContext.SYSTEM_FORKORTELSE, totrinnskontroll.beslutterId)
+    }
+
+    @Test
+    fun `skal kjøre gjennom steg for helmanuell migrering med avvik i simulering innenfor beløpsgrenser`() {
+        val simulertPosteringMock = listOf(
+            SimulertPostering(
+                fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
+                fom = LocalDate.parse("2019-09-01"),
+                tom = LocalDate.parse("2019-09-30"),
+                betalingType = BetalingType.DEBIT,
+                beløp = 1.toBigDecimal(),
+                posteringType = PosteringType.FEILUTBETALING,
+                forfallsdato = LocalDate.parse("2021-02-23"),
+                utenInntrekk = false,
+                erFeilkonto = null
+            )
+        )
+
+        val simuleringMottakerMock = listOf(
+            SimuleringMottaker(
+                simulertPostering = simulertPosteringMock,
+                mottakerType = MottakerType.BRUKER,
+                mottakerNummer = "12345678910"
+            )
+        )
+
+        every { økonomiKlient.hentSimulering(any()) } returns DetaljertSimuleringResultat(simuleringMottakerMock)
+
         val søkerFnr = randomFnr()
         val barnFnr = ClientMocks.barnFnr[0]
         val barnasIdenter = listOf(barnFnr)
@@ -492,6 +663,124 @@ class StegServiceTest(
         }
         assertTrue {
             behandlingEtterBesultterSteg.behandlingStegTilstand.any {
+                it.behandlingSteg == StegType.BESLUTTE_VEDTAK &&
+                    it.behandlingStegStatus == BehandlingStegStatus.UTFØRT
+            }
+        }
+        val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandling.id)
+        assertNotNull(totrinnskontroll)
+        assertEquals(true, totrinnskontroll!!.godkjent)
+        assertEquals(SikkerhetContext.hentSaksbehandlerNavn(), totrinnskontroll.saksbehandler)
+        assertEquals(SikkerhetContext.hentSaksbehandler(), totrinnskontroll.saksbehandlerId)
+        assertEquals(SikkerhetContext.SYSTEM_NAVN, totrinnskontroll.beslutter)
+        assertEquals(SikkerhetContext.SYSTEM_FORKORTELSE, totrinnskontroll.beslutterId)
+    }
+
+    @Test
+    fun `skal kjøre gjennom steg for helmanuell migrering med avvik i simulering utenfor beløpsgrenser`() {
+        val simulertPosteringMock = listOf(
+            SimulertPostering(
+                fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
+                fom = LocalDate.parse("2019-09-01"),
+                tom = LocalDate.parse("2019-09-30"),
+                betalingType = BetalingType.DEBIT,
+                beløp = 300.toBigDecimal(),
+                posteringType = PosteringType.FEILUTBETALING,
+                forfallsdato = LocalDate.parse("2021-02-23"),
+                utenInntrekk = false,
+                erFeilkonto = null
+            )
+        )
+
+        val simuleringMottakerMock = listOf(
+            SimuleringMottaker(
+                simulertPostering = simulertPosteringMock,
+                mottakerType = MottakerType.BRUKER,
+                mottakerNummer = "12345678910"
+            )
+        )
+
+        every { økonomiKlient.hentSimulering(any()) } returns DetaljertSimuleringResultat(simuleringMottakerMock)
+
+        val søkerFnr = randomFnr()
+        val barnFnr = ClientMocks.barnFnr[0]
+        val barnasIdenter = listOf(barnFnr)
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
+        val migreringsdato = LocalDate.now().minusMonths(6)
+        val behandling = stegService.håndterNyBehandling(
+            NyBehandling(
+                kategori = BehandlingKategori.NASJONAL,
+                underkategori = BehandlingUnderkategori.ORDINÆR,
+                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                behandlingÅrsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
+                søkersIdent = søkerFnr,
+                barnasIdenter = barnasIdenter,
+                nyMigreringsdato = migreringsdato,
+                fagsakId = fagsak.id
+            )
+        )
+        assertEquals(StegType.VILKÅRSVURDERING, behandling.steg)
+        assertTrue {
+            behandling.behandlingStegTilstand.any {
+                it.behandlingSteg == StegType.REGISTRERE_PERSONGRUNNLAG &&
+                    it.behandlingStegStatus == BehandlingStegStatus.UTFØRT
+            }
+        }
+        assertMigreringsdato(migreringsdato, behandling)
+        assertNotNull(vilkårsvurderingService.hentAktivForBehandling(behandling.id))
+        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandling.id)!!
+        val barnPersonResultat =
+            vilkårsvurdering.personResultater.first { it.aktør.aktivFødselsnummer() == barnFnr }.apply {
+                vilkårResultater.first { it.vilkårType == Vilkår.BOR_MED_SØKER }
+                    .apply { utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED) }
+            }
+        val søkerPersonResultat = vilkårsvurdering.personResultater.first { it.aktør.aktivFødselsnummer() == søkerFnr }
+        vilkårsvurdering.personResultater = setOf(søkerPersonResultat, barnPersonResultat)
+        vilkårsvurderingService.oppdater(vilkårsvurdering)
+
+        val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandling)
+        assertEquals(StegType.BEHANDLINGSRESULTAT, behandlingEtterVilkårsvurdering.steg)
+
+        val behandlingEtterBehandlingsresultatSteg =
+            stegService.håndterBehandlingsresultat(behandlingEtterVilkårsvurdering)
+        assertEquals(StegType.VURDER_TILBAKEKREVING, behandlingEtterBehandlingsresultatSteg.steg)
+
+        val behandlingEtterTilbakekrevingSteg = stegService.håndterVurderTilbakekreving(
+            behandlingEtterBehandlingsresultatSteg,
+            RestTilbakekreving(
+                valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
+                begrunnelse = "ignorer tilbakekreving"
+            )
+        )
+        assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterTilbakekrevingSteg.steg)
+
+        val behandlingEtterSendTilBeslutterSteg = stegService.håndterSendTilBeslutter(
+            behandlingEtterTilbakekrevingSteg,
+            "1234"
+        )
+
+        assertEquals(StegType.BESLUTTE_VEDTAK, behandlingEtterSendTilBeslutterSteg.steg)
+
+        val behandlingEtterBesluttVedtakSteg = stegService.håndterBeslutningForVedtak(
+            behandlingEtterSendTilBeslutterSteg,
+            RestBeslutningPåVedtak(
+                Beslutning.GODKJENT,
+                "godkjent manuelt"
+            )
+        )
+
+        assertEquals(StegType.IVERKSETT_MOT_OPPDRAG, behandlingEtterBesluttVedtakSteg.steg)
+
+        assertTrue {
+            behandlingEtterBesluttVedtakSteg.behandlingStegTilstand.any {
+                it.behandlingSteg == StegType.SEND_TIL_BESLUTTER &&
+                    it.behandlingStegStatus == BehandlingStegStatus.UTFØRT
+            }
+        }
+
+        assertTrue {
+            behandlingEtterBesluttVedtakSteg.behandlingStegTilstand.any {
                 it.behandlingSteg == StegType.BESLUTTE_VEDTAK &&
                     it.behandlingStegStatus == BehandlingStegStatus.UTFØRT
             }
