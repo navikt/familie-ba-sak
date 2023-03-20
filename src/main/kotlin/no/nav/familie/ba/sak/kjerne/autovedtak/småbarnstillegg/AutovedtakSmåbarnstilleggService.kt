@@ -18,7 +18,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.SmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.beregning.VedtaksperiodefinnerSmåbarnstilleggFeil
 import no.nav.familie.ba.sak.kjerne.beregning.finnAktuellVedtaksperiodeOgLeggTilSmåbarnstilleggbegrunnelse
 import no.nav.familie.ba.sak.kjerne.beregning.hentInnvilgedeOgReduserteAndelerSmåbarnstillegg
-import no.nav.familie.ba.sak.kjerne.beregning.kanAutomatiskIverksetteSmåbarnstillegg
+import no.nav.familie.ba.sak.kjerne.beregning.kanAutomatiskBehandleSmåbarnstillegg
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.steg.StegType
@@ -164,7 +164,7 @@ class AutovedtakSmåbarnstilleggService(
             nyeSmåbarnstilleggAndeler = nyeSmåbarnstilleggAndeler
         )
 
-        return kanAutomatiskIverksetteSmåbarnstillegg(
+        return kanAutomatiskBehandleSmåbarnstillegg(
             innvilgedeMånedPerioder = innvilgedeMånedPerioder,
             reduserteMånedPerioder = reduserteMånedPerioder
         )

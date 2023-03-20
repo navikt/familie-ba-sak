@@ -664,7 +664,7 @@ class SmåbarnstilleggUtilsTest {
         )
 
         assertTrue(
-            kanAutomatiskIverksetteSmåbarnstillegg(
+            kanAutomatiskBehandleSmåbarnstillegg(
                 innvilgedeMånedPerioder = innvilgedeMånedPerioder,
                 reduserteMånedPerioder = reduserteMånedPerioder
             )
@@ -697,7 +697,7 @@ class SmåbarnstilleggUtilsTest {
         )
 
         assertFalse(
-            kanAutomatiskIverksetteSmåbarnstillegg(
+            kanAutomatiskBehandleSmåbarnstillegg(
                 innvilgedeMånedPerioder = innvilgedeMånedPerioder,
                 reduserteMånedPerioder = reduserteMånedPerioder
             )
@@ -730,7 +730,7 @@ class SmåbarnstilleggUtilsTest {
         )
 
         assertFalse(
-            kanAutomatiskIverksetteSmåbarnstillegg(
+            kanAutomatiskBehandleSmåbarnstillegg(
                 innvilgedeMånedPerioder = innvilgedeMånedPerioder,
                 reduserteMånedPerioder = reduserteMånedPerioder
             )
@@ -754,7 +754,7 @@ class SmåbarnstilleggUtilsTest {
         )
 
         assertFalse(
-            kanAutomatiskIverksetteSmåbarnstillegg(
+            kanAutomatiskBehandleSmåbarnstillegg(
                 innvilgedeMånedPerioder = innvilgedeMånedPerioder,
                 reduserteMånedPerioder = reduserteMånedPerioder
             )

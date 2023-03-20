@@ -97,7 +97,7 @@ fun hentInnvilgedeOgReduserteAndelerSmåbarnstillegg(
     )
 }
 
-fun kanAutomatiskIverksetteSmåbarnstillegg(
+fun kanAutomatiskBehandleSmåbarnstillegg(
     innvilgedeMånedPerioder: List<MånedPeriode>,
     reduserteMånedPerioder: List<MånedPeriode>
 ): Boolean {
