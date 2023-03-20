@@ -149,15 +149,20 @@ class LoggServiceTest(
     }
 
     @Test
-    fun `Skal lage noen logginnslag på helmanuell migrering`() {
+    fun `Skal lage noen logginnslag på helmanuell migrering ved avvik innenfor beløpsgrenser`() {
         val behandling = lagBehandling(
             behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
             årsak = BehandlingÅrsak.HELMANUELL_MIGRERING
         )
         loggService.opprettBehandlingLogg(BehandlingLoggRequest(behandling))
         loggService.opprettVilkårsvurderingLogg(behandling, behandling.resultat, Behandlingsresultat.INNVILGET)
-        loggService.opprettSendTilBeslutterLogg(behandling)
-        loggService.opprettBeslutningOmVedtakLogg(behandling, Beslutning.GODKJENT, "begrunnelse")
+        loggService.opprettSendTilBeslutterLogg(behandling = behandling, skalAutomatiskBesluttes = true)
+        loggService.opprettBeslutningOmVedtakLogg(
+            behandling = behandling,
+            beslutning = Beslutning.GODKJENT,
+            begrunnelse = "begrunnelse",
+            behandlingErAutomatiskBesluttet = true
+        )
         loggService.opprettFerdigstillBehandling(behandling)
 
         val logger = loggService.hentLoggForBehandling(behandling.id)
@@ -183,6 +188,57 @@ class LoggServiceTest(
             logger.any {
                 it.type == LoggType.MIGRERING_BEKREFTET &&
                     it.tittel == "Migrering bekreftet" &&
+                    it.opprettetAv == SikkerhetContext.SYSTEM_NAVN
+            }
+        }
+        assertTrue {
+            logger.any {
+                it.type == LoggType.FERDIGSTILLE_BEHANDLING &&
+                    it.tittel == "Ferdigstilt behandling"
+            }
+        }
+    }
+
+    @Test
+    fun `Skal lage noen logginnslag på helmanuell migrering ved avvik utenfor beløpsgrenser`() {
+        val behandling = lagBehandling(
+            behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+            årsak = BehandlingÅrsak.HELMANUELL_MIGRERING
+        )
+        loggService.opprettBehandlingLogg(BehandlingLoggRequest(behandling))
+        loggService.opprettVilkårsvurderingLogg(behandling, behandling.resultat, Behandlingsresultat.INNVILGET)
+        loggService.opprettSendTilBeslutterLogg(behandling = behandling, skalAutomatiskBesluttes = false)
+        loggService.opprettBeslutningOmVedtakLogg(
+            behandling = behandling,
+            beslutning = Beslutning.GODKJENT,
+            begrunnelse = "begrunnelse",
+            behandlingErAutomatiskBesluttet = false
+        )
+        loggService.opprettFerdigstillBehandling(behandling)
+
+        val logger = loggService.hentLoggForBehandling(behandling.id)
+        assertEquals(5, logger.size)
+        assertTrue {
+            logger.any {
+                it.type == LoggType.BEHANDLING_OPPRETTET && it.tittel == "Migrering fra infotrygd opprettet"
+            }
+        }
+        assertTrue {
+            logger.any {
+                it.type == LoggType.VILKÅRSVURDERING &&
+                    it.tittel == "Vilkårsvurdering gjennomført" && it.tekst == "Resultat ble innvilget"
+            }
+        }
+        assertTrue {
+            logger.any {
+                it.type == LoggType.SEND_TIL_BESLUTTER &&
+                    it.tittel == "Sendt til beslutter"
+            }
+        }
+        assertTrue {
+            logger.any {
+                it.type == LoggType.GODKJENNE_VEDTAK &&
+                    it.tittel == "Vedtak godkjent" &&
                     it.opprettetAv == SikkerhetContext.SYSTEM_NAVN
             }
         }

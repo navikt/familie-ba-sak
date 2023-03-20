@@ -242,11 +242,11 @@ class LoggService(
         )
     }
 
-    fun opprettSendTilBeslutterLogg(behandling: Behandling) {
+    fun opprettSendTilBeslutterLogg(behandling: Behandling, skalAutomatiskBesluttes: Boolean) {
         lagre(
             Logg(
                 behandlingId = behandling.id,
-                type = if (behandling.erManuellMigrering()) LoggType.SEND_TIL_SYSTEM else LoggType.SEND_TIL_BESLUTTER,
+                type = if (behandling.erManuellMigrering() && skalAutomatiskBesluttes) LoggType.SEND_TIL_SYSTEM else LoggType.SEND_TIL_BESLUTTER,
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                     rolleConfig,
                     BehandlerRolle.SAKSBEHANDLER
@@ -255,19 +255,21 @@ class LoggService(
         )
     }
 
-    fun opprettBeslutningOmVedtakLogg(behandling: Behandling, beslutning: Beslutning, begrunnelse: String? = null) {
+    fun opprettBeslutningOmVedtakLogg(behandling: Behandling, beslutning: Beslutning, begrunnelse: String? = null, behandlingErAutomatiskBesluttet: Boolean) {
+        val behandlingErManuellMigreringSomBleAutomatiskBesluttet = behandling.erManuellMigrering() && behandlingErAutomatiskBesluttet
+
         lagre(
             Logg(
                 behandlingId = behandling.id,
-                type = if (behandling.erManuellMigrering()) LoggType.MIGRERING_BEKREFTET else LoggType.GODKJENNE_VEDTAK,
+                type = if (behandlingErManuellMigreringSomBleAutomatiskBesluttet) LoggType.MIGRERING_BEKREFTET else LoggType.GODKJENNE_VEDTAK,
                 tittel = if (beslutning.erGodkjent()) {
-                    if (behandling.erManuellMigrering()) "Migrering bekreftet" else "Vedtak godkjent"
+                    if (behandlingErManuellMigreringSomBleAutomatiskBesluttet) "Migrering bekreftet" else "Vedtak godkjent"
                 } else {
                     "Vedtak underkjent"
                 },
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.BESLUTTER),
                 tekst = if (!beslutning.erGodkjent()) "Begrunnelse: $begrunnelse" else "",
-                opprettetAv = if (behandling.erManuellMigrering()) {
+                opprettetAv = if (behandlingErManuellMigreringSomBleAutomatiskBesluttet) {
                     SikkerhetContext.SYSTEM_NAVN
                 } else {
                     SikkerhetContext.hentSaksbehandlerNavn()

@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.simulering
 
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
@@ -13,7 +14,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.simulering.domene.RestSimulering
+import no.nav.familie.ba.sak.kjerne.simulering.domene.SimuleringsPeriode
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØknomiSimuleringMottakerRepository
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottaker
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
@@ -39,7 +42,8 @@ class SimuleringService(
     private val tilgangService: TilgangService,
     private val featureToggleService: FeatureToggleService,
     private val vedtakRepository: VedtakRepository,
-    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
+    private val persongrunnlagService: PersongrunnlagService
 ) {
     private val simulert = Metrics.counter("familie.ba.sak.oppdrag.simulert")
 
@@ -161,5 +165,81 @@ class SimuleringService(
             økonomiSimuleringMottakere,
             featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ)
         ).feilutbetaling
+    }
+
+    fun harMigreringsbehandlingAvvikInnenforBeløpsgrenser(behandling: Behandling): Boolean {
+        if (!behandling.erManuellMigrering()) throw Feil("Avvik innenfor beløpsgrenser skal bare sjekkes for manuelle migreringsbehandlinger")
+
+        val antallBarn = persongrunnlagService.hentBarna(behandling.id).size
+
+        return sjekkOmBehandlingHarEtterbetalingInnenforBeløpsgrenser(behandling, antallBarn) &&
+            sjekkOmBehandlingHarFeilutbetalingInnenforBeløpsgrenser(behandling, antallBarn)
+    }
+
+    private fun sjekkOmBehandlingHarEtterbetalingInnenforBeløpsgrenser(
+        behandling: Behandling,
+        antallBarn: Int
+    ): Boolean {
+        val finnesEtterBetaling = hentTotalEtterbetalingFørMars2023(behandling.id) != BigDecimal.ZERO
+        if (!finnesEtterBetaling) return true
+
+        val simuleringsperioderFørMars2023 = hentSimuleringsperioderFørMars2023(behandling.id)
+        if (
+            simuleringsperioderFørMars2023.harKunPositiveResultater() &&
+            simuleringsperioderFørMars2023.harMaks1KroneIResultatPerBarn(antallBarn) &&
+            simuleringsperioderFørMars2023.harTotaltAvvikUnderBeløpsgrense()
+        ) {
+            return true
+        }
+
+        return false
+    }
+
+    private fun sjekkOmBehandlingHarFeilutbetalingInnenforBeløpsgrenser(
+        behandling: Behandling,
+        antallBarn: Int
+    ): Boolean {
+        val finnesFeilutbetaling = hentFeilutbetaling(behandling.id) != BigDecimal.ZERO
+        if (!finnesFeilutbetaling) return true
+
+        val simuleringsperioderFørMars2023 = hentSimuleringsperioderFørMars2023(behandling.id)
+        if (
+            simuleringsperioderFørMars2023.harKunNegativeResultater() &&
+            simuleringsperioderFørMars2023.harMaks1KroneIResultatPerBarn(antallBarn) &&
+            simuleringsperioderFørMars2023.harTotaltAvvikUnderBeløpsgrense()
+        ) {
+            return true
+        }
+
+        return false
+    }
+
+    private fun hentSimuleringsperioderFørMars2023(behandlingId: Long): List<SimuleringsPeriode> {
+        val februar2023 = LocalDate.of(2023, 2, 1)
+
+        return vedtakSimuleringMottakereTilSimuleringPerioder(
+            økonomiSimuleringMottakere = hentSimuleringPåBehandling(behandlingId),
+            erManuelPosteringTogglePå = featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ)
+        ).filter {
+            it.fom.isSameOrBefore(februar2023)
+        }
+    }
+
+    private fun hentTotalEtterbetalingFørMars2023(behandlingId: Long) =
+        hentTotalEtterbetaling(hentSimuleringsperioderFørMars2023(behandlingId), null)
+
+    private fun List<SimuleringsPeriode>.harKunPositiveResultater() = all { it.resultat >= BigDecimal.ZERO }
+
+    private fun List<SimuleringsPeriode>.harKunNegativeResultater() = all { it.resultat <= BigDecimal.ZERO }
+
+    private fun List<SimuleringsPeriode>.harMaks1KroneIResultatPerBarn(antallBarn: Int) = all {
+        it.resultat.abs() <= BigDecimal(antallBarn)
+    }
+
+    private fun List<SimuleringsPeriode>.harTotaltAvvikUnderBeløpsgrense() =
+        sumOf { it.resultat }.abs() < BigDecimal(MANUELL_MIGRERING_BELØPSGRENSE_FOR_TOTALT_AVVIK)
+
+    companion object {
+        const val MANUELL_MIGRERING_BELØPSGRENSE_FOR_TOTALT_AVVIK = 100
     }
 }

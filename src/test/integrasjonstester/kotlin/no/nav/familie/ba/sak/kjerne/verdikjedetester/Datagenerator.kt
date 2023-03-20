@@ -79,7 +79,9 @@ fun lagInfotrygdSak(beløp: Double, identBarn: List<String>, valg: String? = "OR
                 )
             ),
             opphørsgrunn = "0",
-            antallBarn = identBarn.size
+            antallBarn = identBarn.size,
+            mottakerNummer = 80000123456,
+            status = "04"
         ),
         status = "FB",
         valg = valg,
