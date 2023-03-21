@@ -34,6 +34,12 @@ class SatsendringController(
         return ResponseEntity.ok(Ressurs.success("Trigget satsendring for fagsak $fagsakId"))
     }
 
+    @PostMapping(path = ["/kjorsatsendring"])
+    fun utførSatsendringITaskPåFagsaker(@RequestBody fagsaker: Set<Long>): ResponseEntity<Ressurs<String>> {
+        fagsaker.forEach { startSatsendring.opprettSatsendringForFagsak(it) }
+        return ResponseEntity.ok(Ressurs.success("Trigget satsendring for fagsakene $fagsaker"))
+    }
+
     @PutMapping(path = ["/{fagsakId}/kjor-satsendring-synkront"])
     fun utførSatsendringSynkrontPåFagsak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<Unit>> {
         tilgangService.validerTilgangTilHandlingOgFagsak(
