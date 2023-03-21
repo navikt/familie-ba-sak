@@ -131,7 +131,7 @@ class BeregningService(
         }.map { it }
     }
 
-    fun erEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling: Behandling): Boolean =
+    fun erEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(behandling: Behandling): Boolean =
         hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(behandling) == EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
 
     fun hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(behandling: Behandling): EndringerIUtbetalingForBehandlingSteg {
