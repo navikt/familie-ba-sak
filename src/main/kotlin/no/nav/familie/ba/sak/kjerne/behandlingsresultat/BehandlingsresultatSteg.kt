@@ -127,9 +127,9 @@ class BehandlingsresultatSteg(
             simuleringService.oppdaterSimuleringPåBehandling(behandlingMedOppdatertBehandlingsresultat)
         }
 
-        val endringerIUtbetaling =
-            beregningService.hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling)
-        return hentNesteStegGittEndringerIUtbetaling(behandling, endringerIUtbetaling)
+        val endringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi =
+            beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(behandling)
+        return hentNesteStegGittEndringerIUtbetaling(behandling, endringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi)
     }
 
     override fun stegType(): StegType {

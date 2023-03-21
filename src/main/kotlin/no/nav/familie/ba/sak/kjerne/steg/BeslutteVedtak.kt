@@ -155,7 +155,7 @@ class BeslutteVedtak(
 
     private fun sjekkOmBehandlingSkalIverksettesOgHentNesteSteg(behandling: Behandling): StegType {
         val endringerIUtbetaling =
-            beregningService.hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling)
+            beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(behandling)
 
         return hentNesteStegGittEndringerIUtbetaling(behandling, endringerIUtbetaling)
     }
