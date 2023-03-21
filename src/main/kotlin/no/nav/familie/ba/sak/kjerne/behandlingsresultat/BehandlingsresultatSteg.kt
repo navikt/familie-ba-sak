@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.validerBarnasVilkår
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlingSteg
+import no.nav.familie.ba.sak.kjerne.steg.EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -111,8 +112,12 @@ class BehandlingsresultatSteg(
             )
         }
 
-        if (behandlingMedOppdatertBehandlingsresultat.skalRettFraBehandlingsresultatTilIverksetting() ||
-            beregningService.kanAutomatiskIverksetteSmåbarnstilleggEndring(
+        val endringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi =
+            beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(behandling)
+
+        if (behandlingMedOppdatertBehandlingsresultat.skalRettFraBehandlingsresultatTilIverksetting(
+                endringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi == ENDRING_I_UTBETALING
+            ) || beregningService.kanAutomatiskIverksetteSmåbarnstilleggEndring(
                     behandling = behandlingMedOppdatertBehandlingsresultat,
                     sistIverksatteBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(
                             behandling = behandlingMedOppdatertBehandlingsresultat
@@ -127,9 +132,7 @@ class BehandlingsresultatSteg(
             simuleringService.oppdaterSimuleringPåBehandling(behandlingMedOppdatertBehandlingsresultat)
         }
 
-        val endringerIUtbetaling =
-            beregningService.hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandling(behandling)
-        return hentNesteStegGittEndringerIUtbetaling(behandling, endringerIUtbetaling)
+        return hentNesteStegGittEndringerIUtbetaling(behandling, endringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi)
     }
 
     override fun stegType(): StegType {
@@ -161,7 +164,7 @@ class BehandlingsresultatSteg(
         if (behandling.status == BehandlingStatus.AVSLUTTET) return
 
         val endringIUtbetalingTidslinje =
-            beregningService.hentEndringerIUtbetalingMellomNåværendeOgForrigeBehandlingTidslinje(behandling)
+            beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomiTidslinje(behandling)
 
         val migreringsdatoForrigeIverksatteBehandling = beregningService
             .hentAndelerFraForrigeIverksattebehandling(behandling)
