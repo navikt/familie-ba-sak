@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.metrikker
 import io.micrometer.core.instrument.Metrics
 import io.micrometer.core.instrument.MultiGauge
 import io.micrometer.core.instrument.Tags
+import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.leader.LeaderClient
@@ -38,7 +39,7 @@ class TeamStatistikkService(
                 YearMonth.now(),
                 YearMonth.now().plusMonths(1)
             ).associateWith {
-                behandlingRepository.hentTotalUtbetalingForMåned(it)
+                behandlingRepository.hentTotalUtbetalingForMåned(it.førsteDagIInneværendeMåned().atStartOfDay())
             }
 
         val rows = månederMedTotalUtbetaling.map {

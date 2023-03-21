@@ -50,7 +50,7 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
                                                      WHERE b.opprettet_tid = silp.opprettet_tid)""",
         nativeQuery = true
     )
-    fun hentTotalUtbetalingForMåned(måned: YearMonth): Long
+    fun hentTotalUtbetalingForMåned(måned: LocalDateTime): Long
 
     /* Denne henter først siste iverksatte behandling på en løpende fagsak.
      * Finner så alle perioder på siste iverksatte behandling
