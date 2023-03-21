@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
@@ -67,9 +68,12 @@ class AutovedtakService(
         val omgjortBehandling = behandlingService.omgjørTilManuellBehandling(behandling)
 
         return when (steg) {
-            StegType.VILKÅRSVURDERING ->
+            StegType.VILKÅRSVURDERING -> {
+                behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.UTREDES)
+
                 tilbakestillBehandlingTilBehandlingsresultatService
                     .tilbakestillBehandlingTilBehandlingsresultat(behandlingId = omgjortBehandling.id)
+            }
 
             else -> throw Feil("Steg $steg er ikke støttet ved omgjøring av automatisk behandling til manuell.")
         }
