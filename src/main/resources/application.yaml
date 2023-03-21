@@ -99,8 +99,6 @@ management:
           autotime:
             enabled: true
 
-springdoc:
-  packagesToScan: "no.nav.familie.ba.sak.ekstern.bisys"
 
 prosessering:
   continuousRunning.enabled: true
