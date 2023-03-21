@@ -114,6 +114,7 @@ class OppgaveController(
             null -> {
                 ResponseEntity.ok(Ressurs.success(dataForManuellJournalføring))
             }
+
             else -> ResponseEntity.ok(
                 Ressurs.success(
                     dataForManuellJournalføring.copy(
@@ -159,5 +160,12 @@ class OppgaveController(
         val behandleSakOppgaveFrister = oppgaveService.hentFristerForÅpneUtvidetBarnetrygdBehandlinger()
 
         return ResponseEntity.ok(Ressurs.success(behandleSakOppgaveFrister))
+    }
+
+    @PostMapping("/fjern-behandles-av-applikasjon")
+    fun fjernBehandlesAvApplikasjonFor(@RequestBody oppgaver: List<Long>): ResponseEntity<Ressurs<String>> {
+        oppgaveService.fjernBehandlesAvApplikasjon(oppgaver)
+
+        return ResponseEntity.ok(Ressurs.success("Fjernet behandlesAvApplikasjon for $oppgaver"))
     }
 }

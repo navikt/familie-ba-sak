@@ -284,6 +284,33 @@ class IntegrasjonClient(
         }
     }
 
+    @Retryable(
+        value = [Exception::class],
+        maxAttempts = 3,
+        backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS)
+    )
+    fun fjernBehandlesAvApplikasjon(oppgaveId: Long): OppgaveResponse {
+        val oppgave = finnOppgaveMedId(oppgaveId)
+        if (oppgave.behandlesAvApplikasjon != null) {
+            return OppgaveResponse(oppgaveId)
+        }
+
+        val baseUri = URI.create("$integrasjonUri/oppgave/$oppgaveId/fjern-behandles-av-applikasjon")
+        val uri = UriComponentsBuilder.fromUri(baseUri).queryParam("versjon", oppgave.versjon).build()
+            .toUri()
+
+        return kallEksternTjenesteRessurs(
+            tjeneste = "oppgave",
+            uri = uri,
+            formål = "fjern behandlesAvApplikasjon"
+        ) {
+            patchForEntity(
+                uri,
+                HttpHeaders().medContentTypeJsonUTF8()
+            )
+        }
+    }
+
     fun finnOppgaveMedId(oppgaveId: Long): Oppgave {
         val uri = URI.create("$integrasjonUri/oppgave/$oppgaveId")
 
