@@ -14,5 +14,7 @@ class RolleConfig(
     @Value("\${rolle.kode6}")
     val KODE6: String,
     @Value("\${rolle.kode7}")
-    val KODE7: String
+    val KODE7: String,
+    @Value("\${rolle.teamfamilie-forvaltning}")
+    val FORVALTER: String
 )

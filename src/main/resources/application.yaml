@@ -61,6 +61,7 @@ rolle:
   beslutter: "9449c153-5a1e-44a7-84c6-7cc7a8867233"
   kode6: "5ef775f2-61f8-4283-bf3d-8d03f428aa14" # 0000-GA-Strengt_Fortrolig_Adresse
   kode7: "ea930b6b-9397-44d9-b9e6-f4cf527a632a" # 0000-GA-Fortrolig_Adresse
+  teamfamilie-forvaltning: "c62e908a-cf20-4ad0-b7b3-3ff6ca4bf38b" # 0000-GA-Fortrolig_Adresse
 
 funksjonsbrytere:
   enabled: true

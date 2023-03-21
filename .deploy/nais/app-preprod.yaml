@@ -50,6 +50,7 @@ spec:
           - id: "9449c153-5a1e-44a7-84c6-7cc7a8867233"  # BESLUTTER_ROLLE
           - id: "5ef775f2-61f8-4283-bf3d-8d03f428aa14"  # 0000-GA-Strengt_Fortrolig_Adresse
           - id: "ea930b6b-9397-44d9-b9e6-f4cf527a632a"  # 0000-GA-Fortrolig_Adresse
+          - id: "c62e908a-cf20-4ad0-b7b3-3ff6ca4bf38b"  # teamfamilie-forvaltning
   accessPolicy:
     inbound:
       rules:
