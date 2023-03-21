@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.integrasjoner.økonomi.InternKonsistendsavstemming
+package no.nav.familie.ba.sak.integrasjoner.økonomi.internkonsistensavstemming
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
