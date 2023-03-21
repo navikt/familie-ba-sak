@@ -79,6 +79,8 @@ object SikkerhetContext {
         }
     }
 
+    fun erForvalter(rolleConfig: RolleConfig): Boolean = hentGrupper().contains(rolleConfig.FORVALTER)
+
     fun hentGrupper(): List<String> {
         return Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
             .fold(

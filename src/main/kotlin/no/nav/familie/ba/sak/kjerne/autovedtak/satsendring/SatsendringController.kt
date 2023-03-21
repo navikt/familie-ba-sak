@@ -2,8 +2,10 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.satsendring
 
 import no.nav.familie.ba.sak.common.RessursUtils.badRequest
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
+import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -26,7 +28,8 @@ const val SATSENDRING = "Satsendring"
 class SatsendringController(
     private val startSatsendring: StartSatsendring,
     private val tilgangService: TilgangService,
-    private val opprettTaskService: OpprettTaskService
+    private val opprettTaskService: OpprettTaskService,
+    private val rolleConfig: RolleConfig
 ) {
     @GetMapping(path = ["/kjorsatsendring/{fagsakId}"])
     fun utførSatsendringITaskPåFagsak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<String>> {
@@ -36,12 +39,14 @@ class SatsendringController(
 
     @PutMapping(path = ["/{fagsakId}/kjor-satsendring-synkront"])
     fun utførSatsendringSynkrontPåFagsak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<Unit>> {
-        tilgangService.validerTilgangTilHandlingOgFagsak(
-            fagsakId = fagsakId,
-            handling = "Valider vi kan kjøre satsendring",
-            event = AuditLoggerEvent.UPDATE,
-            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER
-        )
+        if (!SikkerhetContext.erForvalter(rolleConfig)) {
+            tilgangService.validerTilgangTilHandlingOgFagsak(
+                fagsakId = fagsakId,
+                handling = "Valider vi kan kjøre satsendring",
+                event = AuditLoggerEvent.UPDATE,
+                minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER
+            )
+        }
 
         startSatsendring.gjennomførSatsendringManuelt(fagsakId)
         return ResponseEntity.ok(Ressurs.success(Unit))
