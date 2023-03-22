@@ -3,10 +3,13 @@ package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingIdConverter
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
 import javax.persistence.CascadeType
 import javax.persistence.Column
+import javax.persistence.Convert
 import javax.persistence.Entity
 import javax.persistence.EntityListeners
 import javax.persistence.FetchType
@@ -31,7 +34,8 @@ data class PersonopplysningGrunnlag(
     val id: Long = 0,
 
     @Column(name = "fk_behandling_id", updatable = false, nullable = false)
-    val behandlingId: Long,
+    @Convert(converter = BehandlingIdConverter::class)
+    val behandlingId: BehandlingId,
 
     @OneToMany(
         fetch = FetchType.EAGER,
@@ -53,7 +57,7 @@ data class PersonopplysningGrunnlag(
 
     val søker: Person
         get() = personer.singleOrNull { it.type == PersonType.SØKER }
-            // Vil returnere barnet på EM-saker, som da i prinsippet også er søkeren. Vil også returnere barnet på inst. saker
+        // Vil returnere barnet på EM-saker, som da i prinsippet også er søkeren. Vil også returnere barnet på inst. saker
             ?: personer.singleOrNull()?.takeIf { it.type == PersonType.BARN }
             ?: error("Persongrunnlag mangler søker eller det finnes flere personer i grunnlaget med type=SØKER")
 

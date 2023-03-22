@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.secureLogger
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.BARN_ENSLIG_MINDREÅRIG
@@ -62,31 +63,31 @@ class PersongrunnlagService(
     }
 
     fun hentBarna(behandling: Behandling): List<Person> {
-        return hentBarna(behandling.id)
+        return hentBarna(behandling.behandlingId)
     }
 
-    fun hentBarna(behandlingId: Long): List<Person> = personopplysningGrunnlagRepository
-        .findByBehandlingAndAktiv(behandlingId)!!.barna
+    fun hentBarna(behandlingId: BehandlingId): List<Person> = personopplysningGrunnlagRepository
+        .findByBehandlingAndAktiv(behandlingId.id)!!.barna
 
     fun hentPersonerPåBehandling(identer: List<String>, behandling: Behandling): List<Person> {
         val aktørIder = personidentService.hentAktørIder(identer)
 
-        val grunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
-            ?: throw Feil("Finner ikke personopplysningsgrunnlag på behandling ${behandling.id}")
+        val grunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.behandlingId.id)
+            ?: throw Feil("Finner ikke personopplysningsgrunnlag på behandling ${behandling.behandlingId}")
         return grunnlag.søkerOgBarn.filter { person -> aktørIder.contains(person.aktør) }
     }
 
-    fun hentAktiv(behandlingId: Long): PersonopplysningGrunnlag? {
-        return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandlingId)
+    fun hentAktiv(behandlingId: BehandlingId): PersonopplysningGrunnlag? {
+        return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandlingId.id)
     }
 
-    fun hentAktivThrows(behandlingId: Long): PersonopplysningGrunnlag {
+    fun hentAktivThrows(behandlingId: BehandlingId): PersonopplysningGrunnlag {
         return hentAktiv(behandlingId = behandlingId)
             ?: throw Feil("Finner ikke personopplysningsgrunnlag på behandling $behandlingId")
     }
 
     @Transactional
-    fun oppdaterRegisteropplysninger(behandlingId: Long): PersonopplysningGrunnlag {
+    fun oppdaterRegisteropplysninger(behandlingId: BehandlingId): PersonopplysningGrunnlag {
         val nåværendeGrunnlag = hentAktivThrows(behandlingId = behandlingId)
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
 
@@ -109,7 +110,7 @@ class PersongrunnlagService(
     ) {
         val nyttbarnAktør = personidentService.hentOgLagreAktør(nyttBarnIdent, true)
 
-        val personopplysningGrunnlag = hentAktivThrows(behandlingId = behandling.id)
+        val personopplysningGrunnlag = hentAktivThrows(behandlingId = behandling.behandlingId)
 
         val barnIGrunnlag = personopplysningGrunnlag.barna.map { it.aktør }
 
@@ -135,8 +136,9 @@ class PersongrunnlagService(
     }
 
     fun finnNyeBarn(behandling: Behandling, forrigeBehandling: Behandling?): List<Person> {
-        val barnIForrigeGrunnlag = forrigeBehandling?.let { hentAktiv(behandlingId = it.id)?.barna } ?: emptySet()
-        val barnINyttGrunnlag = behandling.let { hentAktivThrows(behandlingId = it.id).barna }
+        val barnIForrigeGrunnlag =
+            forrigeBehandling?.let { hentAktiv(behandlingId = it.behandlingId)?.barna } ?: emptySet()
+        val barnINyttGrunnlag = behandling.let { hentAktivThrows(behandlingId = it.behandlingId).barna }
 
         return barnINyttGrunnlag.filter { barn -> barnIForrigeGrunnlag.none { barn.aktør == it.aktør } }
     }
@@ -172,8 +174,9 @@ class PersongrunnlagService(
     }
 
     private fun finnBarnMedTilkjentYtelseIBehandling(behandling: Behandling): List<Aktør> =
-        hentAktiv(behandlingId = behandling.id)?.barna?.map { it.aktør }?.filter {
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.id, it).isNotEmpty()
+        hentAktiv(behandlingId = behandling.behandlingId)?.barna?.map { it.aktør }?.filter {
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(behandling.behandlingId.id, it)
+                .isNotEmpty()
         } ?: emptyList()
 
     /**
@@ -187,7 +190,8 @@ class PersongrunnlagService(
         målform: Målform,
         barnFraForrigeBehandling: List<Aktør> = emptyList()
     ): PersonopplysningGrunnlag {
-        val personopplysningGrunnlag = lagreOgDeaktiverGammel(PersonopplysningGrunnlag(behandlingId = behandling.id))
+        val personopplysningGrunnlag =
+            lagreOgDeaktiverGammel(PersonopplysningGrunnlag(behandlingId = behandling.behandlingId))
 
         val enkelPersonInfo = behandling.erMigrering() || behandling.erSatsendring()
         val søker = hentPerson(
