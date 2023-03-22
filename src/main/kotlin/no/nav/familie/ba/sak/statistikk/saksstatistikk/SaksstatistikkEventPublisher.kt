@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.statistikk.saksstatistikk
 
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationEvent
 import org.springframework.context.ApplicationEventPublisher
@@ -11,8 +12,8 @@ class SaksstatistikkEventPublisher {
     @Autowired
     lateinit var applicationEventPublisher: ApplicationEventPublisher
 
-    fun publiserBehandlingsstatistikk(behandlingId: Long) {
-        applicationEventPublisher.publishEvent(SaksstatistikkEvent(this, null, behandlingId))
+    fun publiserBehandlingsstatistikk(behandlingId: BehandlingId) {
+        applicationEventPublisher.publishEvent(SaksstatistikkEvent(this, null, behandlingId.id))
     }
 
     fun publiserSaksstatistikk(fagsakId: Long) {
