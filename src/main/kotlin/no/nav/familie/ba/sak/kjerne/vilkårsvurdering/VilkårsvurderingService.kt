@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtakBegrunnelseTilknyttetVilkår
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -23,12 +24,13 @@ class VilkårsvurderingService(
     private val sanityService: SanityService
 ) {
 
-    fun hentAktivForBehandling(behandlingId: Long): Vilkårsvurdering? {
-        return vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId)
+    fun hentAktivForBehandling(behandlingId: BehandlingId): Vilkårsvurdering? {
+        return vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId.id)
     }
 
-    fun hentAktivForBehandlingThrows(behandlingId: Long): Vilkårsvurdering = hentAktivForBehandling(behandlingId)
-        ?: throw Feil("Fant ikke vilkårsvurdering knyttet til behandling=$behandlingId")
+    fun hentAktivForBehandlingThrows(behandlingId: BehandlingId): Vilkårsvurdering =
+        hentAktivForBehandling(behandlingId)
+            ?: throw Feil("Fant ikke vilkårsvurdering knyttet til behandling=$behandlingId")
 
     fun oppdater(vilkårsvurdering: Vilkårsvurdering): Vilkårsvurdering {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppdaterer vilkårsvurdering $vilkårsvurdering")
@@ -38,7 +40,7 @@ class VilkårsvurderingService(
     fun lagreNyOgDeaktiverGammel(vilkårsvurdering: Vilkårsvurdering): Vilkårsvurdering {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter vilkårsvurdering $vilkårsvurdering")
 
-        val aktivVilkårsvurdering = hentAktivForBehandling(vilkårsvurdering.behandling.id)
+        val aktivVilkårsvurdering = hentAktivForBehandling(vilkårsvurdering.behandling.behandlingId)
 
         if (aktivVilkårsvurdering != null) {
             vilkårsvurderingRepository.saveAndFlush(aktivVilkårsvurdering.also { it.aktiv = false })
@@ -50,9 +52,9 @@ class VilkårsvurderingService(
     fun lagreInitielt(vilkårsvurdering: Vilkårsvurdering): Vilkårsvurdering {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppretter vilkårsvurdering $vilkårsvurdering")
 
-        val aktivVilkårsvurdering = hentAktivForBehandling(vilkårsvurdering.behandling.id)
+        val aktivVilkårsvurdering = hentAktivForBehandling(vilkårsvurdering.behandling.behandlingId)
         if (aktivVilkårsvurdering != null) {
-            error("Det finnes allerede et aktivt vilkårsvurdering for behandling ${vilkårsvurdering.behandling.id}")
+            error("Det finnes allerede et aktivt vilkårsvurdering for behandling ${vilkårsvurdering.behandling.behandlingId}")
         }
 
         return vilkårsvurderingRepository.save(vilkårsvurdering)
@@ -63,7 +65,7 @@ class VilkårsvurderingService(
             sanityService.hentSanityEØSBegrunnelser()
         )
 
-    fun hentTidligsteVilkårsvurderingKnyttetTilMigrering(behandlingId: Long): YearMonth? {
+    fun hentTidligsteVilkårsvurderingKnyttetTilMigrering(behandlingId: BehandlingId): YearMonth? {
         val vilkårsvurdering = hentAktivForBehandling(
             behandlingId = behandlingId
         )
