@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.behandling
 
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.VergeInfo
@@ -95,11 +94,7 @@ class UtvidetBehandlingService(
 
         val tilbakekreving = tilbakekrevingRepository.findByBehandlingId(behandling.id)
 
-        val endringstidspunkt = if (featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_UTLEDE_ENDRINGSTIDSPUNKT)) {
-            endringstidspunktService.finnEndringstidspunktForBehandling(behandlingId)
-        } else {
-            endringstidspunktService.finnEndringstidpunkForBehandlingGammel(behandlingId)
-        }
+        val endringstidspunkt = endringstidspunktService.finnEndringstidspunktForBehandling(behandlingId)
 
         val kompetanser: Collection<Kompetanse> = kompetanseRepository.finnFraBehandlingId(behandlingId)
 
