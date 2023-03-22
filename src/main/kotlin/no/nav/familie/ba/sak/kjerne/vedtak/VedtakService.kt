@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak
 
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.brev.DokumentGenereringService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.slf4j.LoggerFactory
@@ -17,12 +18,12 @@ class VedtakService(
         return vedtakRepository.getById(vedtakId)
     }
 
-    fun hentAktivForBehandling(behandlingId: Long): Vedtak? {
-        return vedtakRepository.findByBehandlingAndAktivOptional(behandlingId)
+    fun hentAktivForBehandling(behandlingId: BehandlingId): Vedtak? {
+        return vedtakRepository.findByBehandlingAndAktivOptional(behandlingId.id)
     }
 
-    fun hentAktivForBehandlingThrows(behandlingId: Long): Vedtak {
-        return vedtakRepository.findByBehandlingAndAktiv(behandlingId)
+    fun hentAktivForBehandlingThrows(behandlingId: BehandlingId): Vedtak {
+        return vedtakRepository.findByBehandlingAndAktiv(behandlingId.id)
     }
 
     fun oppdater(vedtak: Vedtak): Vedtak {
