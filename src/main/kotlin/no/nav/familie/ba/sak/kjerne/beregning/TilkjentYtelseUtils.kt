@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.Utils.avrundetHeltallAvProsent
 import no.nav.familie.ba.sak.common.erDagenFør
@@ -48,6 +49,8 @@ object TilkjentYtelseUtils {
             fagsakType = fagsakType
         )
             .map {
+                if (it.person.type != PersonType.BARN) throw Feil("Prøver å generere ordinær andel for person av typen ${it.person.type}")
+
                 AndelTilkjentYtelse(
                     behandlingId = vilkårsvurdering.behandling.id,
                     tilkjentYtelse = tilkjentYtelse,
