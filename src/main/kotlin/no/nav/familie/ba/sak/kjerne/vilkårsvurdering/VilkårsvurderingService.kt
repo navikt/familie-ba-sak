@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -30,23 +29,6 @@ class VilkårsvurderingService(
 
     fun hentAktivForBehandlingThrows(behandlingId: Long): Vilkårsvurdering = hentAktivForBehandling(behandlingId)
         ?: throw Feil("Fant ikke vilkårsvurdering knyttet til behandling=$behandlingId")
-
-    fun finnBarnMedEksplisittAvslagPåBehandling(behandlingId: Long): List<Aktør> {
-        val eksplisistteAvslagPåBehandling = hentEksplisitteAvslagPåBehandling(behandlingId)
-        return eksplisistteAvslagPåBehandling
-            .filterNot {
-                it.personResultat?.erSøkersResultater()
-                    ?: error("VilkårResultat mangler kobling til PersonResultat")
-            }
-            .map { it.personResultat!!.aktør }
-            .distinct()
-    }
-
-    private fun hentEksplisitteAvslagPåBehandling(behandlingId: Long): List<VilkårResultat> {
-        val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId)
-        return vilkårsvurdering?.personResultater?.flatMap { it.vilkårResultater }
-            ?.filter { it.erEksplisittAvslagPåSøknad ?: false } ?: emptyList()
-    }
 
     fun oppdater(vilkårsvurdering: Vilkårsvurdering): Vilkårsvurdering {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} oppdaterer vilkårsvurdering $vilkårsvurdering")
@@ -74,17 +56,6 @@ class VilkårsvurderingService(
         }
 
         return vilkårsvurderingRepository.save(vilkårsvurdering)
-    }
-
-    fun opprettOglagreBlankAnnenVurdering(annenVurderingType: AnnenVurderingType, behandlingId: Long) {
-        val vilkårVurdering = hentAktivForBehandling(behandlingId = behandlingId)
-
-        if (vilkårVurdering != null) {
-            val søkersResultater = vilkårVurdering.personResultater.single { it.erSøkersResultater() }
-            søkersResultater.leggTilBlankAnnenVurdering(annenVurderingType = AnnenVurderingType.OPPLYSNINGSPLIKT)
-
-            oppdater(vilkårVurdering)
-        }
     }
 
     fun hentVilkårsbegrunnelser(): Map<VedtakBegrunnelseType, List<RestVedtakBegrunnelseTilknyttetVilkår>> =
