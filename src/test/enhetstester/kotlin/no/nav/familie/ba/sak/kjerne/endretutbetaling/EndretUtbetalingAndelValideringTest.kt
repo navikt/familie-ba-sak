@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.common.lagPersonResultat
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -331,7 +332,7 @@ class EndretUtbetalingAndelValideringTest {
             )
 
         val vilkårResultaterForPerson = mutableSetOf<VilkårResultat>()
-        Vilkår.hentVilkårFor(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL).forEach {
+        Vilkår.hentVilkårFor(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL, behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR).forEach {
             if (it == Vilkår.BOR_MED_SØKER) {
                 vilkårResultaterForPerson.addAll(
                     listOf(
@@ -409,7 +410,7 @@ class EndretUtbetalingAndelValideringTest {
             )
 
         val vilkårResultaterForPerson = mutableSetOf<VilkårResultat>()
-        Vilkår.hentVilkårFor(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL).forEach {
+        Vilkår.hentVilkårFor(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL, behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR).forEach {
             if (it == Vilkår.BOR_MED_SØKER) {
                 vilkårResultaterForPerson.addAll(
                     listOf(
@@ -494,7 +495,7 @@ class EndretUtbetalingAndelValideringTest {
             )
 
         val vilkårResultaterForPerson = mutableSetOf<VilkårResultat>()
-        Vilkår.hentVilkårFor(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL).forEach {
+        Vilkår.hentVilkårFor(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL, behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR).forEach {
             if (it == Vilkår.BOR_MED_SØKER) {
                 vilkårResultaterForPerson.addAll(
                     listOf(
@@ -573,7 +574,7 @@ class EndretUtbetalingAndelValideringTest {
             )
 
         val vilkårResultaterForPerson = mutableSetOf<VilkårResultat>()
-        Vilkår.hentVilkårFor(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL).forEach {
+        Vilkår.hentVilkårFor(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL, behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR).forEach {
             if (it == Vilkår.BOR_MED_SØKER) {
                 vilkårResultaterForPerson.addAll(
                     listOf(

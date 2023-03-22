@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.brev.domene.LandNavn
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertAnnenVurdering
@@ -111,7 +112,11 @@ data class BrevPeriodeTestPerson(
 
     private fun hentVilkårForPerson() =
         this.overstyrteVilkårresultater +
-            Vilkår.hentVilkårFor(personType = this.type, fagsakType = FagsakType.NORMAL)
+            Vilkår.hentVilkårFor(
+                personType = this.type,
+                fagsakType = FagsakType.NORMAL,
+                behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR
+            )
                 .filter { vilkår -> !this.overstyrteVilkårresultater.any { it.vilkårType == vilkår } }
                 .map { vilkår ->
                     MinimertVilkårResultat(
