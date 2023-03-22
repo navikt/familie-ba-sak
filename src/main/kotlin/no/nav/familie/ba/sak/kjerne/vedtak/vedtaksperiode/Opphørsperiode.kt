@@ -143,7 +143,9 @@ private fun <V, T : Tidsenhet> Tidslinje<V, T>.tilHarVerdiTidslinje(): Tidslinje
     }
 
 private fun finnOpphørsperiodeEtterSisteUtbetalingsperiode(utbetalingsperioder: List<Utbetalingsperiode>): List<Opphørsperiode> {
-    val sisteUtbetalingsperiodeTom = utbetalingsperioder.maxOf { it.periodeTom }.toYearMonth()
+    val sisteUtbetalingsperiodeTom = utbetalingsperioder
+        .maxOfOrNull { it.periodeTom }?.toYearMonth()
+        ?: TIDENES_ENDE.toYearMonth()
     val nesteMåned = inneværendeMåned().nesteMåned()
 
     return if (sisteUtbetalingsperiodeTom.isBefore(nesteMåned)) {
