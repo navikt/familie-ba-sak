@@ -304,10 +304,10 @@ class VedtaksperiodeService(
         val endringstidspunkt = manueltOverstyrtEndringstidspunkt
             ?: endringstidspunktService.finnEndringstidspunktForBehandling(behandlingId = vedtak.behandling.id)
 
-        val opphørsperioder =
+        val opphørsperioder: List<VedtaksperiodeMedBegrunnelser> =
             hentOpphørsperioder(vedtak.behandling, endringstidspunkt).map { it.tilVedtaksperiodeMedBegrunnelse(vedtak) }
 
-        val utbetalingsperioder =
+        val utbetalingsperioder: List<VedtaksperiodeMedBegrunnelser> =
             utbetalingsperiodeMedBegrunnelserService.hentUtbetalingsperioder(vedtak, opphørsperioder)
 
         val avslagsperioder = hentAvslagsperioderMedBegrunnelser(vedtak)
