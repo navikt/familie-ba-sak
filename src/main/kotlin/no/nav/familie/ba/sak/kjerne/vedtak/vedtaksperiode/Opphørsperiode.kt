@@ -179,6 +179,6 @@ fun slåSammenOpphørsperioder(alleOpphørsperioder: List<Opphørsperiode>): Lis
     }
 }
 
-fun maxOfOpphørsperiodeTom(a: LocalDate?, b: LocalDate?): LocalDate? {
+private fun maxOfOpphørsperiodeTom(a: LocalDate?, b: LocalDate?): LocalDate? {
     return if (a != null && b != null) maxOf(a, b) else null
 }
