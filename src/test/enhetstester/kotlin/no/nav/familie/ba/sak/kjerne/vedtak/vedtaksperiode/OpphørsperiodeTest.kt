@@ -296,7 +296,7 @@ class OpphørsperiodeTest {
     }
 
     @Test
-    fun `Skal håndtere tom forrigeUtbetalingsPeriode`() {
+    fun `Skal håndtere at det ikke er noen andeler i denne behandlingen`() {
         val forrigeAndel1Barn1 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             januar2023,
             februar2023,
@@ -323,5 +323,18 @@ class OpphørsperiodeTest {
         assertEquals(1, opphørsperioder.size)
         assertEquals(januar2023, opphørsperioder[0].periodeFom.toYearMonth())
         assertEquals(april2023, opphørsperioder[0].periodeTom?.toYearMonth())
+    }
+
+    @Test
+    fun `Skal håndtere at det ikke er noen andeler i denne eller forrige behandling`() {
+
+        val opphørsperioder = mapTilOpphørsperioder(
+            forrigeAndelerTilkjentYtelse = emptyList(),
+            andelerTilkjentYtelse = emptyList(),
+            personopplysningGrunnlag = personopplysningGrunnlag,
+            forrigePersonopplysningGrunnlag = personopplysningGrunnlag
+        )
+
+        assertEquals(0, opphørsperioder.size)
     }
 }
