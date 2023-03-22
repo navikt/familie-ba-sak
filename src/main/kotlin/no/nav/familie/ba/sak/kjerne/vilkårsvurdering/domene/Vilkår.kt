@@ -12,7 +12,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurderin
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.VurderPersonErBosattIRiket
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.VurderPersonHarLovligOpphold
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
-import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -57,11 +57,15 @@ enum class Vilkår(
 
     companion object {
 
-        fun hentVilkårFor(personType: PersonType, ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD, fagsakType: FagsakType): Set<Vilkår> {
+        fun hentVilkårFor(
+            personType: PersonType,
+            fagsakType: FagsakType,
+            behandlingUnderkategori: BehandlingUnderkategori
+        ): Set<Vilkår> {
             return when (fagsakType) {
                 FagsakType.NORMAL -> when (personType) {
                     BARN -> setOf(UNDER_18_ÅR, BOR_MED_SØKER, GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD)
-                    SØKER -> setOf(BOSATT_I_RIKET, LOVLIG_OPPHOLD) + if (ytelseType == YtelseType.UTVIDET_BARNETRYGD) setOf(UTVIDET_BARNETRYGD) else emptySet()
+                    SØKER -> setOf(BOSATT_I_RIKET, LOVLIG_OPPHOLD) + if (behandlingUnderkategori == BehandlingUnderkategori.UTVIDET) setOf(UTVIDET_BARNETRYGD) else emptySet()
                     ANNENPART -> emptySet()
                 }
                 FagsakType.INSTITUSJON -> when (personType) {
@@ -69,7 +73,7 @@ enum class Vilkår(
                     SØKER, ANNENPART -> emptySet()
                 }
                 FagsakType.BARN_ENSLIG_MINDREÅRIG -> when (personType) {
-                    BARN -> setOf(UNDER_18_ÅR, BOR_MED_SØKER, GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD) + if (ytelseType == YtelseType.UTVIDET_BARNETRYGD) setOf(UTVIDET_BARNETRYGD) else emptySet()
+                    BARN -> setOf(UNDER_18_ÅR, BOR_MED_SØKER, GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD) + if (behandlingUnderkategori == BehandlingUnderkategori.UTVIDET) setOf(UTVIDET_BARNETRYGD) else emptySet()
                     SØKER, ANNENPART -> emptySet()
                 }
             }

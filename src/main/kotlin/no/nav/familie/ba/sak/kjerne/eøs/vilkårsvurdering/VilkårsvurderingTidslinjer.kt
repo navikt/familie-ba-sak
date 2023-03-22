@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.erUnder18ÅrVilkårTidslinje
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -35,7 +36,7 @@ class VilkårsvurderingTidslinjer(
         }
 
     private val søkersTidslinje: SøkersTidslinjer =
-        SøkersTidslinjer(tidslinjer = this, aktør = søker, fagsakType = vilkårsvurdering.behandling.fagsak.type)
+        SøkersTidslinjer(tidslinjer = this, aktør = søker, fagsakType = vilkårsvurdering.behandling.fagsak.type, behandlingUnderkategori = vilkårsvurdering.behandling.underkategori)
 
     fun søkersTidslinjer(): SøkersTidslinjer = søkersTidslinje
 
@@ -44,7 +45,8 @@ class VilkårsvurderingTidslinjer(
             BarnetsTidslinjer(
                 tidslinjer = this,
                 aktør = it,
-                fagsakType = vilkårsvurdering.behandling.fagsak.type
+                fagsakType = vilkårsvurdering.behandling.fagsak.type,
+                behandlingUnderkategori = vilkårsvurdering.behandling.underkategori
             )
         }
 
@@ -56,7 +58,8 @@ class VilkårsvurderingTidslinjer(
     class SøkersTidslinjer(
         tidslinjer: VilkårsvurderingTidslinjer,
         aktør: Aktør,
-        fagsakType: FagsakType
+        fagsakType: FagsakType,
+        behandlingUnderkategori: BehandlingUnderkategori
     ) {
         val vilkårsresultatTidslinjer = tidslinjer.vilkårsresultaterTidslinjeMap[aktør] ?: listOf(TomTidslinje())
 
@@ -68,7 +71,8 @@ class VilkårsvurderingTidslinjer(
                 kombinerVilkårResultaterTilRegelverkResultat(
                     personType = PersonType.SØKER,
                     alleVilkårResultater = it,
-                    fagsakType = fagsakType
+                    fagsakType = fagsakType,
+                    behandlingUnderkategori = behandlingUnderkategori
                 )
             }
     }
@@ -76,7 +80,8 @@ class VilkårsvurderingTidslinjer(
     class BarnetsTidslinjer(
         tidslinjer: VilkårsvurderingTidslinjer,
         aktør: Aktør,
-        fagsakType: FagsakType
+        fagsakType: FagsakType,
+        behandlingUnderkategori: BehandlingUnderkategori
     ) {
         private val søkersTidslinje = tidslinjer.søkersTidslinje
 
@@ -94,7 +99,8 @@ class VilkårsvurderingTidslinjer(
                     kombinerVilkårResultaterTilRegelverkResultat(
                         personType = PersonType.BARN,
                         alleVilkårResultater = it,
-                        fagsakType = fagsakType
+                        fagsakType = fagsakType,
+                        behandlingUnderkategori = behandlingUnderkategori
                     )
                 }
                 .beskjærEtter(erUnder18ÅrVilkårTidslinje)
