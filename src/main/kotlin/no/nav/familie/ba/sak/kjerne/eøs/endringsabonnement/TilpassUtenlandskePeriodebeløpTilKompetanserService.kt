@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement
 
-import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.FinnPeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEndringAbonnent
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
@@ -75,6 +75,7 @@ internal fun tilpassUtenlandskePeriodebeløpTilKompetanser(
                 kompetanse == null -> null
                 upb == null || upb.utbetalingsland != kompetanse.annenForeldersAktivitetsland ->
                     UtenlandskPeriodebeløp.NULL.copy(utbetalingsland = kompetanse.annenForeldersAktivitetsland)
+
                 else -> upb
             }
         }

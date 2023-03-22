@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.valutakurs
 
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
-import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.slåSammen
 import no.nav.familie.ba.sak.kjerne.eøs.util.ValutakursBuilder
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -38,7 +38,8 @@ class ValutakursTestController(
         @RequestBody restValutakurser: Map<LocalDate, String>
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         val behandlingIdObjekt = BehandlingId(behandlingId)
-        val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingIdObjekt.id)!!
+        val personopplysningGrunnlag =
+            personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingIdObjekt.id)!!
         restValutakurser.tilValutakurser(behandlingIdObjekt, personopplysningGrunnlag).forEach {
             valutakursService.oppdaterValutakurs(behandlingIdObjekt, it)
         }

@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.felles
 
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.oppdaterSkjemaerRekursivt
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.slåSammen
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.somInversOppdateringEllersNull

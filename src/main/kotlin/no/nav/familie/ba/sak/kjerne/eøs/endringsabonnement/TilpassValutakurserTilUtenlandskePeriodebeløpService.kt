@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement
 
-import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.FinnPeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEndringAbonnent
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
@@ -68,6 +68,7 @@ internal fun tilpassValutakurserTilUtenlandskePeriodebeløp(
                 utenlandskPeriodebeløp == null -> null
                 valutakurs == null || valutakurs.valutakode != utenlandskPeriodebeløp.valutakode ->
                     Valutakurs.NULL.copy(valutakode = utenlandskPeriodebeløp.valutakode)
+
                 else -> valutakurs
             }
         }

@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestValutakurs
 import no.nav.familie.ba.sak.ekstern.restDomene.tilValutakurs
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
-import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims

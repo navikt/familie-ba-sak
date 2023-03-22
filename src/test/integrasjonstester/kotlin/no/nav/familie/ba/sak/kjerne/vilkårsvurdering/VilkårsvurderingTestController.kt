@@ -7,13 +7,13 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassKompetanserTilRegelverkService
-import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -161,10 +161,13 @@ private fun Vilkårsvurdering.leggPåUtdypendeVilkår(): Vilkårsvurdering {
             when {
                 it.vilkårType == BOSATT_I_RIKET && personresultat.erSøkersResultater() && it.vurderesEtter == EØS_FORORDNINGEN ->
                     it.utdypendeVilkårsvurderinger = it.utdypendeVilkårsvurderinger + OMFATTET_AV_NORSK_LOVGIVNING
+
                 it.vilkårType == BOSATT_I_RIKET && !personresultat.erSøkersResultater() && it.vurderesEtter == EØS_FORORDNINGEN ->
                     it.utdypendeVilkårsvurderinger = it.utdypendeVilkårsvurderinger + BARN_BOR_I_NORGE
+
                 it.vilkårType == BOR_MED_SØKER && !personresultat.erSøkersResultater() && it.vurderesEtter == EØS_FORORDNINGEN ->
                     it.utdypendeVilkårsvurderinger = it.utdypendeVilkårsvurderinger + BARN_BOR_I_NORGE_MED_SØKER
+
                 else -> Any()
             }
         }

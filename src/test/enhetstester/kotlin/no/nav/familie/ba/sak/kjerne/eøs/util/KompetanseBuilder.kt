@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.util
 
-import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
@@ -23,10 +23,12 @@ class KompetanseBuilder(
                     resultat = KompetanseResultat.NORGE_ER_SEKUNDÆRLAND,
                     annenForeldersAktivitetsland = annenForeldersAktivitetsland
                 ).fyllUt()
+
                 'P' -> Kompetanse.NULL.copy(
                     resultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
                     annenForeldersAktivitetsland = annenForeldersAktivitetsland
                 ).fyllUt()
+
                 else -> null
             }
         }

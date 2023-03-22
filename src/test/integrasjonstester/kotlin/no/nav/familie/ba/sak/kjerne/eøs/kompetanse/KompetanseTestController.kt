@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
-import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.slåSammen
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -39,7 +39,8 @@ class KompetanseTestController(
         @RequestBody restKompetanser: Map<LocalDate, String>
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         val behandlingIdObjekt = BehandlingId(behandlingId)
-        val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingIdObjekt.id)!!
+        val personopplysningGrunnlag =
+            personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingIdObjekt.id)!!
         restKompetanser.tilKompetanser(behandlingIdObjekt, personopplysningGrunnlag).forEach {
             kompetanseService.oppdaterKompetanse(behandlingIdObjekt, it)
         }

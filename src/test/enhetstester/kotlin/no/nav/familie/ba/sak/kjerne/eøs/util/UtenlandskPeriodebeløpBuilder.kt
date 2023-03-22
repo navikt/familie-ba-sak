@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.eøs.util
 
 import no.nav.familie.ba.sak.ekstern.restDomene.tilKalkulertMånedligBeløp
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
-import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
@@ -21,6 +21,7 @@ class UtenlandskPeriodebeløpBuilder(
                     valutakode = valutakode,
                     utbetalingsland = utbetalingsland
                 )
+
                 it?.isDigit() ?: false -> {
                     UtenlandskPeriodebeløp.NULL.copy(
                         beløp = it?.digitToInt()?.toBigDecimal(),
@@ -30,6 +31,7 @@ class UtenlandskPeriodebeløpBuilder(
                         kalkulertMånedligBeløp = it?.digitToInt()?.toBigDecimal()
                     )
                 }
+
                 else -> null
             }
         }
