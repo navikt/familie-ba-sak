@@ -92,7 +92,6 @@ class VilkårTilTilkjentYtelseTest {
         val faktiskTilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            behandling = lagBehandling(),
             fagsakType = FagsakType.NORMAL
         )
 
@@ -156,7 +155,6 @@ class VilkårTilTilkjentYtelseTest {
         val faktiskTilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            behandling = lagBehandling(),
             fagsakType = FagsakType.NORMAL
         ) { aktør ->
             if (småbarnstilleggTestPeriode != null) {
@@ -234,7 +232,6 @@ class VilkårTilTilkjentYtelseTest {
         val faktiskTilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            behandling = lagBehandling(),
             fagsakType = FagsakType.NORMAL
         )
 

@@ -104,7 +104,6 @@ internal class UtvidetBarnetrygdTest {
         val andeler = TilkjentYtelseUtils.beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            behandling = behandling,
             fagsakType = FagsakType.NORMAL
         )
             .andelerTilkjentYtelse.toList()
@@ -195,7 +194,6 @@ internal class UtvidetBarnetrygdTest {
         val andeler = TilkjentYtelseUtils.beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            behandling = behandling,
             fagsakType = FagsakType.NORMAL
         )
             .andelerTilkjentYtelse.toList()
@@ -278,7 +276,6 @@ internal class UtvidetBarnetrygdTest {
         val andeler = TilkjentYtelseUtils.beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            behandling = behandling,
             fagsakType = FagsakType.NORMAL
         )
             .andelerTilkjentYtelse.toList().sortedBy { it.type }
@@ -358,7 +355,6 @@ internal class UtvidetBarnetrygdTest {
         val andeler = TilkjentYtelseUtils.beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            behandling = behandling,
             fagsakType = FagsakType.NORMAL
         )
             .andelerTilkjentYtelse.toList().sortedBy { it.type }
@@ -438,7 +434,6 @@ internal class UtvidetBarnetrygdTest {
         val andeler = TilkjentYtelseUtils.beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            behandling = behandling,
             fagsakType = FagsakType.NORMAL
         )
             .andelerTilkjentYtelse.toList().sortedBy { it.type }
@@ -527,7 +522,6 @@ internal class UtvidetBarnetrygdTest {
         val andeler = TilkjentYtelseUtils.beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            behandling = behandling,
             fagsakType = FagsakType.NORMAL
         ).andelerTilkjentYtelse.toList().sortedBy { it.type }
 
@@ -658,7 +652,6 @@ internal class UtvidetBarnetrygdTest {
         val andeler = TilkjentYtelseUtils.beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            behandling = behandling,
             fagsakType = FagsakType.NORMAL
         )
             .andelerTilkjentYtelse.toList().sortedBy { it.type }
@@ -769,7 +762,6 @@ internal class UtvidetBarnetrygdTest {
         val andeler = TilkjentYtelseUtils.beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            behandling = behandling,
             fagsakType = FagsakType.NORMAL
         )
             .andelerTilkjentYtelse.toList().sortedBy { it.type }
@@ -879,7 +871,6 @@ internal class UtvidetBarnetrygdTest {
         val andeler = TilkjentYtelseUtils.beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            behandling = behandling,
             fagsakType = FagsakType.NORMAL
         )
             .andelerTilkjentYtelse.toList().sortedBy { it.type }

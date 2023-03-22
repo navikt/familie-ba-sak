@@ -43,7 +43,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers.not
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -81,7 +80,6 @@ internal class TilkjentYtelseUtilsTest {
         val tilkjentYtelse = beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            behandling = lagBehandling(),
             fagsakType = FagsakType.NORMAL
         )
 
@@ -115,7 +113,6 @@ internal class TilkjentYtelseUtilsTest {
         val tilkjentYtelse = beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            behandling = lagBehandling(),
             fagsakType = FagsakType.NORMAL
         )
 
@@ -153,7 +150,6 @@ internal class TilkjentYtelseUtilsTest {
         val tilkjentYtelse = beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            behandling = lagBehandling(),
             fagsakType = FagsakType.NORMAL
         )
 
@@ -186,7 +182,6 @@ internal class TilkjentYtelseUtilsTest {
         val tilkjentYtelse = beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            behandling = lagBehandling(),
             fagsakType = FagsakType.NORMAL
         )
 
@@ -216,7 +211,6 @@ internal class TilkjentYtelseUtilsTest {
         val andeler = beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            behandling = lagBehandling(),
             fagsakType = FagsakType.NORMAL
         )
             .andelerTilkjentYtelse
@@ -278,7 +272,6 @@ internal class TilkjentYtelseUtilsTest {
         val andeler = beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            behandling = lagBehandling(),
             fagsakType = FagsakType.NORMAL
         )
             .andelerTilkjentYtelse.toList()
@@ -320,7 +313,6 @@ internal class TilkjentYtelseUtilsTest {
         val andeler = beregnTilkjentYtelse(
             vilkårsvurdering = oppdatertVilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            behandling = oppdatertVilkårsvurdering.behandling,
             fagsakType = FagsakType.NORMAL
         )
             .andelerTilkjentYtelse.toList()
@@ -353,7 +345,6 @@ internal class TilkjentYtelseUtilsTest {
         val andeler = beregnTilkjentYtelse(
             vilkårsvurdering = oppdatertVilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            behandling = oppdatertVilkårsvurdering.behandling,
             fagsakType = FagsakType.NORMAL
         )
             .andelerTilkjentYtelse.toList()
@@ -1265,7 +1256,6 @@ internal class TilkjentYtelseUtilsTest {
                 personer = barna.plus(søker),
                 behandlingId = vilkårsvurdering.behandling.id
             ),
-            behandling = vilkårsvurdering.behandling,
             endretUtbetalingAndeler = endretUtbetalingAndeler,
             fagsakType = FagsakType.NORMAL
         ) { (_) ->

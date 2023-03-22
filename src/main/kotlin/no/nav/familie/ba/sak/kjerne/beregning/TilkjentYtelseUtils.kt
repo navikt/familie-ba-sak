@@ -1,14 +1,11 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.Utils.avrundetHeltallAvProsent
 import no.nav.familie.ba.sak.common.erDagenFør
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inkluderer
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.UtvidetBarnetrygdUtil.finnUtvidetVilkår
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
@@ -33,7 +30,6 @@ object TilkjentYtelseUtils {
     fun beregnTilkjentYtelse(
         vilkårsvurdering: Vilkårsvurdering,
         personopplysningGrunnlag: PersonopplysningGrunnlag,
-        behandling: Behandling,
         endretUtbetalingAndeler: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse> = emptyList(),
         fagsakType: FagsakType,
         hentPerioderMedFullOvergangsstønad: (aktør: Aktør) -> List<InternPeriodeOvergangsstønad> = { _ -> emptyList() }
@@ -60,7 +56,7 @@ object TilkjentYtelseUtils {
                     stønadTom = it.stønadTom,
                     kalkulertUtbetalingsbeløp = it.beløp,
                     nasjonaltPeriodebeløp = it.beløp,
-                    type = finnYtelseType(behandling.underkategori, it.person.type),
+                    type = YtelseType.ORDINÆR_BARNETRYGD,
                     sats = it.sats,
                     prosent = it.prosent
                 )
@@ -246,29 +242,6 @@ object TilkjentYtelseUtils {
             .erDagenFør(nesteAndel.stønadFom.førsteDagIInneværendeMåned()) && førsteAndel.prosent == BigDecimal(0) && nesteAndel.prosent == BigDecimal(
             0
         ) && førsteAndel.endreteUtbetalinger.isNotEmpty() && førsteAndel.endreteUtbetalinger.singleOrNull() == nesteAndel.endreteUtbetalinger.singleOrNull()
-
-    private fun finnYtelseType(
-        underkategori: BehandlingUnderkategori,
-        personType: PersonType
-    ): YtelseType {
-        return when (underkategori) {
-            BehandlingUnderkategori.UTVIDET -> when (personType) {
-                PersonType.SØKER -> YtelseType.UTVIDET_BARNETRYGD
-                PersonType.BARN -> YtelseType.ORDINÆR_BARNETRYGD
-                PersonType.ANNENPART -> throw Feil("Utvidet barnetrygd kan ikke værre knyttet til Annen part")
-            }
-
-            BehandlingUnderkategori.ORDINÆR -> when (personType) {
-                PersonType.BARN -> YtelseType.ORDINÆR_BARNETRYGD
-                PersonType.SØKER, PersonType.ANNENPART -> throw Feil("Ordinær barnetrygd kan bare være knyttet til barn")
-            }
-
-            BehandlingUnderkategori.INSTITUSJON -> when (personType) {
-                PersonType.BARN -> YtelseType.ORDINÆR_BARNETRYGD
-                PersonType.SØKER, PersonType.ANNENPART -> throw Feil("Institusjon kan ikke være knyttet til noe annet enn barn")
-            }
-        }
-    }
 }
 
 fun MånedPeriode.perioderMedOgUtenOverlapp(perioder: List<MånedPeriode>): Pair<List<MånedPeriode>, List<MånedPeriode>> {
