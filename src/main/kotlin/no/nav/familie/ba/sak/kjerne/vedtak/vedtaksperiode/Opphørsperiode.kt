@@ -44,27 +44,14 @@ fun mapTilOpphørsperioder(
     val utbetalingsperioder =
         andelerTilkjentYtelse.mapTilUtbetalingsperioder(personopplysningGrunnlag)
 
-    return if (utbetalingsperioder.isEmpty()) {
-        if (forrigeUtbetalingsperioder.isEmpty()) {
-            emptyList()
-        } else {
-            listOf(
-                Opphørsperiode(
-                    periodeFom = forrigeUtbetalingsperioder.minOf { it.periodeFom },
-                    periodeTom = forrigeUtbetalingsperioder.maxOf { it.periodeTom }
-                )
-            )
-        }
-    } else {
-        listOf(
+    return listOf(
             finnOpphørsperioderPåGrunnAvReduksjonIRevurdering(
                 forrigeUtbetalingsperioder = forrigeUtbetalingsperioder,
                 utbetalingsperioder = utbetalingsperioder
             ),
             finnOpphørsperioderMellomUtbetalingsperioder(utbetalingsperioder),
             finnOpphørsperiodeEtterSisteUtbetalingsperiode(utbetalingsperioder)
-        ).flatten()
-    }.sortedBy { it.periodeFom }
+        ).flatten().sortedBy { it.periodeFom }
 }
 
 private fun finnOpphørsperioderPåGrunnAvReduksjonIRevurdering(
