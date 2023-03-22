@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestNyttVilkår
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSlettVilkår
@@ -11,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -33,15 +33,15 @@ class VilkårService(
     private val behandlingService: BehandlingService,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val personidentService: PersonidentService,
-    private val featureToggleService: FeatureToggleService,
     private val persongrunnlagService: PersongrunnlagService
 ) {
 
-    fun hentVilkårsvurdering(behandlingId: Long): Vilkårsvurdering? = vilkårsvurderingService.hentAktivForBehandling(
-        behandlingId = behandlingId
-    )
+    fun hentVilkårsvurdering(behandlingId: BehandlingId): Vilkårsvurdering? =
+        vilkårsvurderingService.hentAktivForBehandling(
+            behandlingId = behandlingId
+        )
 
-    fun hentVilkårsvurderingThrows(behandlingId: Long): Vilkårsvurdering =
+    fun hentVilkårsvurderingThrows(behandlingId: BehandlingId): Vilkårsvurdering =
         hentVilkårsvurdering(behandlingId) ?: throw Feil(
             message = "Fant ikke aktiv vilkårsvurdering for behandling $behandlingId",
             frontendFeilmelding = fantIkkeAktivVilkårsvurderingFeilmelding
@@ -49,7 +49,7 @@ class VilkårService(
 
     @Transactional
     fun endreVilkår(
-        behandlingId: Long,
+        behandlingId: BehandlingId,
         vilkårId: Long,
         restPersonResultat: RestPersonResultat
     ): List<RestPersonResultat> {
@@ -81,7 +81,7 @@ class VilkårService(
     }
 
     @Transactional
-    fun deleteVilkårsperiode(behandlingId: Long, vilkårId: Long, aktør: Aktør): List<RestPersonResultat> {
+    fun deleteVilkårsperiode(behandlingId: BehandlingId, vilkårId: Long, aktør: Aktør): List<RestPersonResultat> {
         val vilkårsvurdering = hentVilkårsvurderingThrows(behandlingId)
 
         val personResultat =
@@ -93,7 +93,7 @@ class VilkårService(
     }
 
     @Transactional
-    fun deleteVilkår(behandlingId: Long, restSlettVilkår: RestSlettVilkår): List<RestPersonResultat> {
+    fun deleteVilkår(behandlingId: BehandlingId, restSlettVilkår: RestSlettVilkår): List<RestPersonResultat> {
         val vilkårsvurdering = hentVilkårsvurderingThrows(behandlingId)
         val personResultat =
             finnPersonResultatForPersonThrows(vilkårsvurdering.personResultater, restSlettVilkår.personIdent)
@@ -124,7 +124,7 @@ class VilkårService(
     }
 
     @Transactional
-    fun postVilkår(behandlingId: Long, restNyttVilkår: RestNyttVilkår): List<RestPersonResultat> {
+    fun postVilkår(behandlingId: BehandlingId, restNyttVilkår: RestNyttVilkår): List<RestPersonResultat> {
         val vilkårsvurdering = hentVilkårsvurderingThrows(behandlingId)
 
         val behandling = vilkårsvurdering.behandling
@@ -153,16 +153,16 @@ class VilkårService(
     ) {
         if (!behandling.kanLeggeTilOgFjerneUtvidetVilkår() && !harUtvidetVilkår(vilkårsvurdering)) {
             throw FunksjonellFeil(
-                melding = "${restNyttVilkår.vilkårType.beskrivelse} kan ikke legges til for behandling ${behandling.id} " +
+                melding = "${restNyttVilkår.vilkårType.beskrivelse} kan ikke legges til for behandling ${behandling.behandlingId.id} " +
                     "med behandlingType ${behandling.type.visningsnavn}",
                 frontendFeilmelding = "${restNyttVilkår.vilkårType.beskrivelse} kan ikke legges til " +
-                    "for behandling ${behandling.id} med behandlingType ${behandling.type.visningsnavn}"
+                    "for behandling ${behandling.behandlingId.id} med behandlingType ${behandling.type.visningsnavn}"
             )
         }
 
-        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandling.id)
+        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandling.behandlingId)
         if (personopplysningGrunnlag.søkerOgBarn
-            .single { it.aktør == personidentService.hentAktør(restNyttVilkår.personIdent) }.type != PersonType.SØKER
+                .single { it.aktør == personidentService.hentAktør(restNyttVilkår.personIdent) }.type != PersonType.SØKER
         ) {
             throw FunksjonellFeil(
                 melding = "${Vilkår.UTVIDET_BARNETRYGD.beskrivelse} kan ikke legges til for BARN",
@@ -180,8 +180,8 @@ class VilkårService(
             behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
         if (forrigeBehandlingSomErVedtatt != null) {
             val forrigeBehandlingsvilkårsvurdering =
-                hentVilkårsvurdering(forrigeBehandlingSomErVedtatt.id) ?: throw Feil(
-                    message = "Forrige behandling $${forrigeBehandlingSomErVedtatt.id} " +
+                hentVilkårsvurdering(forrigeBehandlingSomErVedtatt.behandlingId) ?: throw Feil(
+                    message = "Forrige behandling $${forrigeBehandlingSomErVedtatt.behandlingId} " +
                         "har ikke en aktiv vilkårsvurdering"
                 )
             val aktør = personidentService.hentAktør(personIdent)
