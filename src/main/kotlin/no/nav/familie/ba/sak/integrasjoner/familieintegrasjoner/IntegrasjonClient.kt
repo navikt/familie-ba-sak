@@ -291,7 +291,7 @@ class IntegrasjonClient(
     )
     fun fjernBehandlesAvApplikasjon(oppgaveId: Long): OppgaveResponse {
         val oppgave = finnOppgaveMedId(oppgaveId)
-        if (oppgave.behandlesAvApplikasjon != null) {
+        if (oppgave.behandlesAvApplikasjon == null) {
             logger.info("behandlesAvApplikasjon er allerede null for $oppgaveId")
             return OppgaveResponse(oppgaveId)
         }
