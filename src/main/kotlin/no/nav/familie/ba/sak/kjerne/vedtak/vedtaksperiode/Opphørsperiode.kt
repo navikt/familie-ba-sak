@@ -45,13 +45,13 @@ fun mapTilOpphørsperioder(
         andelerTilkjentYtelse.mapTilUtbetalingsperioder(personopplysningGrunnlag)
 
     return listOf(
-            finnOpphørsperioderPåGrunnAvReduksjonIRevurdering(
-                forrigeUtbetalingsperioder = forrigeUtbetalingsperioder,
-                utbetalingsperioder = utbetalingsperioder
-            ),
-            finnOpphørsperioderMellomUtbetalingsperioder(utbetalingsperioder),
-            finnOpphørsperiodeEtterSisteUtbetalingsperiode(utbetalingsperioder)
-        ).flatten().sortedBy { it.periodeFom }
+        finnOpphørsperioderPåGrunnAvReduksjonIRevurdering(
+            forrigeUtbetalingsperioder = forrigeUtbetalingsperioder,
+            utbetalingsperioder = utbetalingsperioder
+        ),
+        finnOpphørsperioderMellomUtbetalingsperioder(utbetalingsperioder),
+        finnOpphørsperiodeEtterSisteUtbetalingsperiode(utbetalingsperioder)
+    ).flatten().sortedBy { it.periodeFom }
 }
 
 private fun finnOpphørsperioderPåGrunnAvReduksjonIRevurdering(
