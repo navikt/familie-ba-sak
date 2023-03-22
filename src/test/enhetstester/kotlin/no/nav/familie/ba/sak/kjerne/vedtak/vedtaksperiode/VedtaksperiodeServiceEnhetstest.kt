@@ -83,7 +83,6 @@ class VedtaksperiodeServiceEnhetstest {
     @BeforeEach
     fun init() {
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns forrigeBehandling
-        every { featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_UTLEDE_ENDRINGSTIDSPUNKT) } returns true
         every { endringstidspunktService.finnEndringstidspunktForBehandling(vedtak.behandling.id) } returns endringstidspunkt
         every { persongrunnlagService.hentAktiv(any()) } returns
             lagTestPersonopplysningGrunnlag(vedtak.behandling.id, person)

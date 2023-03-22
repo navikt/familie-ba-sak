@@ -302,13 +302,8 @@ class VedtaksperiodeService(
          * Ellers: endringstidspunkt skal utledes
          **/
         val endringstidspunkt = manueltOverstyrtEndringstidspunkt
-            ?: if (featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_UTLEDE_ENDRINGSTIDSPUNKT)) {
-                endringstidspunktService.finnEndringstidspunktForBehandling(behandlingId = vedtak.behandling.id)
-            } else if (vedtak.behandling.resultat == Behandlingsresultat.ENDRET_OG_FORTSATT_INNVILGET) {
-                TIDENES_MORGEN
-            } else {
-                endringstidspunktService.finnEndringstidpunkForBehandlingGammel(behandlingId = vedtak.behandling.id)
-            }
+            ?: endringstidspunktService.finnEndringstidspunktForBehandling(behandlingId = vedtak.behandling.id)
+
         val opphørsperioder =
             hentOpphørsperioder(vedtak.behandling, endringstidspunkt).map { it.tilVedtaksperiodeMedBegrunnelse(vedtak) }
 
