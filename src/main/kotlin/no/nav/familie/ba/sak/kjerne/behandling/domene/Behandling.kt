@@ -42,7 +42,7 @@ data class Behandling(
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "behandling_seq_generator")
     @SequenceGenerator(name = "behandling_seq_generator", sequenceName = "behandling_seq", allocationSize = 50)
-    val id: Long = 0,
+    private val id: Long = 0,
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "fk_fagsak_id", nullable = false, updatable = false)
@@ -87,6 +87,9 @@ data class Behandling(
     @OneToOne(mappedBy = "behandling", optional = true)
     val verge: Verge? = null
 ) : BaseEntitet() {
+
+    val behandlingId: BehandlingId
+        get() = BehandlingId(this.id)
 
     val steg: StegType
         get() = behandlingStegTilstand.last().behandlingSteg
@@ -204,6 +207,7 @@ data class Behandling(
         return when {
             skalBehandlesAutomatisk && erOmregning() &&
                 resultat in listOf(Behandlingsresultat.FORTSATT_INNVILGET, Behandlingsresultat.FORTSATT_OPPHØRT) -> true
+
             skalBehandlesAutomatisk && erMigrering() && resultat == Behandlingsresultat.INNVILGET -> true
             skalBehandlesAutomatisk && erFødselshendelse() && resultat == Behandlingsresultat.INNVILGET -> true
             skalBehandlesAutomatisk && erSatsendring() && erEndringFraForrigeBehandlingSendtTilØkonomi -> true
@@ -268,7 +272,8 @@ data class Behandling(
 
     fun erManuellMigrering() = erManuellMigreringForEndreMigreringsdato() || erHelmanuellMigrering()
 
-    fun erAutomatiskEøsMigrering() = erMigrering() && opprettetÅrsak == BehandlingÅrsak.MIGRERING && kategori == BehandlingKategori.EØS
+    fun erAutomatiskEøsMigrering() =
+        erMigrering() && opprettetÅrsak == BehandlingÅrsak.MIGRERING && kategori == BehandlingKategori.EØS
 
     fun erTekniskEndring() = opprettetÅrsak == BehandlingÅrsak.TEKNISK_ENDRING
 
