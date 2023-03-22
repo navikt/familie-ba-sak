@@ -327,7 +327,6 @@ class OpphørsperiodeTest {
 
     @Test
     fun `Skal håndtere at det ikke er noen andeler i denne eller forrige behandling`() {
-
         val opphørsperioder = mapTilOpphørsperioder(
             forrigeAndelerTilkjentYtelse = emptyList(),
             andelerTilkjentYtelse = emptyList(),
