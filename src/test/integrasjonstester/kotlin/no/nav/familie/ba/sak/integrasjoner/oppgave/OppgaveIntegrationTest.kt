@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
+import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -40,6 +41,9 @@ class OppgaveIntegrationTest : AbstractSpringIntegrationTest() {
 
     @Autowired
     private lateinit var personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
+
+    @Autowired
+    private lateinit var databaseCleanupService: DatabaseCleanupService
 
     @Test
     fun `Skal opprette oppgave og ferdigstille oppgave for behandling`() {
@@ -115,6 +119,29 @@ class OppgaveIntegrationTest : AbstractSpringIntegrationTest() {
         assertThat(loggingEvents)
             .extracting<String, RuntimeException> { obj: ILoggingEvent -> obj.formattedMessage }
             .anyMatch { message -> message.contains("Fant eksisterende oppgave med samme oppgavetype") }
+    }
+
+    @Test
+    fun `Skal fjerne behandlesAvApplikasjon på liste med oppgaver som finnes i ba-ak`() {
+        databaseCleanupService.truncate()
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(SØKER_FNR)
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val barnAktør = personidentService.hentOgLagreAktørIder(listOf(BARN_FNR), true)
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
+            behandling.id,
+            SØKER_FNR,
+            listOf(BARN_FNR),
+            søkerAktør = fagsak.aktør,
+            barnAktør = barnAktør
+        )
+
+        personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
+
+        val oppgave1 =
+            oppgaveService.opprettOppgave(behandling.id, Oppgavetype.GodkjenneVedtak, LocalDate.now()).toLong()
+
+        val response = oppgaveService.fjernBehandlesAvApplikasjon(listOf(oppgave1, 123456L))
+        assertThat(response.toList()).hasSize(1).containsOnly(oppgave1)
     }
 
     protected fun initLoggingEventListAppender(): ListAppender<ILoggingEvent> {

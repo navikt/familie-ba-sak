@@ -17,6 +17,7 @@ import no.nav.familie.kontrakter.felles.journalpost.Journalpost
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
 import no.nav.familie.kontrakter.felles.oppgave.Oppgave
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
@@ -42,6 +43,7 @@ class OppgaveController(
     private val tilgangService: TilgangService,
     private val innkommendeJournalføringService: InnkommendeJournalføringService
 ) {
+    private val logger = LoggerFactory.getLogger(OppgaveController::class.java)
 
     @PostMapping(
         path = ["/hent-oppgaver"],
@@ -164,8 +166,14 @@ class OppgaveController(
 
     @PostMapping("/fjern-behandles-av-applikasjon")
     fun fjernBehandlesAvApplikasjonFor(@RequestBody oppgaver: List<Long>): ResponseEntity<Ressurs<String>> {
-        oppgaveService.fjernBehandlesAvApplikasjon(oppgaver)
-
-        return ResponseEntity.ok(Ressurs.success("Fjernet behandlesAvApplikasjon for $oppgaver"))
+        val fjernetBehandlesAvApplikasjonForOppgaver = oppgaveService.fjernBehandlesAvApplikasjon(
+            oppgaver
+        )
+        logger.info("Fjernet behandlesAvApplikasjon for oppgaver=$fjernetBehandlesAvApplikasjonForOppgaver")
+        return ResponseEntity.ok(
+            Ressurs.success(
+                "Fjernet behandlesAvApplikasjon for $fjernetBehandlesAvApplikasjonForOppgaver"
+            )
+        )
     }
 }
