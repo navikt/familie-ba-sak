@@ -8,8 +8,9 @@ import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
 import no.nav.familie.ba.sak.kjerne.beregning.beregnUtbetalingsperioderUtenKlassifisering
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.beregning.domene.lagVertikaleSegmenter
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilDagEllerFørsteDagIPerioden
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilDagEllerSisteDagIPerioden
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -65,18 +66,24 @@ fun mapTilUtbetalingsperioder(
     personopplysningGrunnlag: PersonopplysningGrunnlag,
     andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
 ): List<Utbetalingsperiode> {
-    return andelerTilkjentYtelse.lagVertikaleSegmenter().map { (segment, andelerForSegment) ->
-        Utbetalingsperiode(
-            periodeFom = segment.fom,
-            periodeTom = segment.tom,
-            ytelseTyper = andelerForSegment.map(AndelTilkjentYtelseMedEndreteUtbetalinger::type),
-            utbetaltPerMnd = segment.value,
-            antallBarn = andelerForSegment.count { andel ->
-                personopplysningGrunnlag.barna.any { barn -> barn.aktør == andel.aktør }
-            },
-            utbetalingsperiodeDetaljer = andelerForSegment.lagUtbetalingsperiodeDetaljer(personopplysningGrunnlag)
-        )
-    }
+    val andelerTidslinjePerAktørOgType = andelerTilkjentYtelse.tilKombinertTidslinjePerAktør()
+
+    val utbetalingsPerioder = andelerTidslinjePerAktørOgType.perioder()
+        .filter { !it.innhold.isNullOrEmpty() }
+        .map { periode ->
+            Utbetalingsperiode(
+                periodeFom = periode.fraOgMed.tilDagEllerFørsteDagIPerioden().tilLocalDate(),
+                periodeTom = periode.tilOgMed.tilDagEllerSisteDagIPerioden().tilLocalDate(),
+                ytelseTyper = periode.innhold!!.map { andelTilkjentYtelse -> andelTilkjentYtelse.type },
+                utbetaltPerMnd = periode.innhold.sumOf { andelTilkjentYtelse -> andelTilkjentYtelse.kalkulertUtbetalingsbeløp },
+                antallBarn = periode.innhold
+                    .map { it.aktør }.toSet()
+                    .count { aktør -> personopplysningGrunnlag.barna.any { barn -> barn.aktør == aktør } },
+                utbetalingsperiodeDetaljer = periode.innhold.lagUtbetalingsperiodeDetaljer(personopplysningGrunnlag)
+            )
+        }
+
+    return utbetalingsPerioder
 }
 
 internal fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.utledSegmenter(): List<LocalDateSegment<Int>> {
@@ -89,7 +96,7 @@ internal fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.utledSegmenter(): L
         .sortedWith(compareBy<LocalDateSegment<Int>>({ it.fom }, { it.value }, { it.tom }))
 }
 
-internal fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.lagUtbetalingsperiodeDetaljer(
+fun Collection<AndelTilkjentYtelseMedEndreteUtbetalinger>.lagUtbetalingsperiodeDetaljer(
     personopplysningGrunnlag: PersonopplysningGrunnlag
 ): List<UtbetalingsperiodeDetalj> =
     this.map { andel ->

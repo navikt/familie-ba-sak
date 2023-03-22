@@ -309,10 +309,10 @@ class VedtaksperiodeService(
             } else {
                 endringstidspunktService.finnEndringstidpunkForBehandlingGammel(behandlingId = vedtak.behandling.id)
             }
-        val opphørsperioder =
+        val opphørsperioder: List<VedtaksperiodeMedBegrunnelser> =
             hentOpphørsperioder(vedtak.behandling, endringstidspunkt).map { it.tilVedtaksperiodeMedBegrunnelse(vedtak) }
 
-        val utbetalingsperioder =
+        val utbetalingsperioder: List<VedtaksperiodeMedBegrunnelser> =
             utbetalingsperiodeMedBegrunnelserService.hentUtbetalingsperioder(vedtak, opphørsperioder)
 
         val avslagsperioder = hentAvslagsperioderMedBegrunnelser(vedtak)
@@ -536,7 +536,8 @@ class VedtaksperiodeService(
     ): List<Opphørsperiode> {
         if (behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET) return emptyList()
 
-        val sisteVedtattBehandling: Behandling? = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = behandling.fagsak.id)
+        val sisteVedtattBehandling: Behandling? =
+            behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = behandling.fagsak.id)
 
         val forrigePersonopplysningGrunnlag: PersonopplysningGrunnlag? =
             if (sisteVedtattBehandling != null) {
@@ -659,6 +660,7 @@ class VedtaksperiodeService(
                                 standardbegrunnelse = Standardbegrunnelse.AVSLAG_UREGISTRERT_BARN
                             )
                         )
+
                         BehandlingKategori.EØS -> eøsBegrunnelser.add(
                             EØSBegrunnelse(
                                 vedtaksperiodeMedBegrunnelser = this,

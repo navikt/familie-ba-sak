@@ -8,8 +8,20 @@ import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.fpsak.tidsserie.LocalDateSegment
-import no.nav.fpsak.tidsserie.LocalDateTimeline
+import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
+import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.Innhold
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.innholdForTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.tidslinjeFraTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilMånedTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidsenhet
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilLocalDate
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom
+import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import java.time.LocalDate
 
 data class Opphørsperiode(
@@ -35,26 +47,118 @@ fun mapTilOpphørsperioder(
     val utbetalingsperioder =
         mapTilUtbetalingsperioder(personopplysningGrunnlag, andelerTilkjentYtelse)
 
-    return if (forrigeUtbetalingsperioder.isNotEmpty() && utbetalingsperioder.isEmpty()) {
-        listOf(
-            Opphørsperiode(
-                periodeFom = forrigeUtbetalingsperioder.minOf { it.periodeFom },
-                periodeTom = forrigeUtbetalingsperioder.maxOf { it.periodeTom }
-            )
-        )
-    } else {
-        if (utbetalingsperioder.isEmpty()) {
+    return if (utbetalingsperioder.isEmpty()) {
+        if (forrigeUtbetalingsperioder.isEmpty()) {
             emptyList()
         } else {
             listOf(
-                finnOpphørsperioderPåGrunnAvReduksjonIRevurdering(
-                    forrigeUtbetalingsperioder = forrigeUtbetalingsperioder,
-                    utbetalingsperioder = utbetalingsperioder
-                ),
-                finnOpphørsperioderMellomUtbetalingsperioder(utbetalingsperioder),
-                finnOpphørsperiodeEtterSisteUtbetalingsperiode(utbetalingsperioder)
-            ).flatten()
-        }.sortedBy { it.periodeFom }
+                Opphørsperiode(
+                    periodeFom = forrigeUtbetalingsperioder.minOf { it.periodeFom },
+                    periodeTom = forrigeUtbetalingsperioder.maxOf { it.periodeTom }
+                )
+            )
+        }
+    } else {
+        listOf(
+            finnOpphørsperioderPåGrunnAvReduksjonIRevurdering(
+                forrigeUtbetalingsperioder = forrigeUtbetalingsperioder,
+                utbetalingsperioder = utbetalingsperioder
+            ),
+            finnOpphørsperioderMellomUtbetalingsperioder(utbetalingsperioder),
+            finnOpphørsperiodeEtterSisteUtbetalingsperiode(utbetalingsperioder)
+        ).flatten()
+    }.sortedBy { it.periodeFom }
+}
+
+private fun finnOpphørsperioderPåGrunnAvReduksjonIRevurdering(
+    forrigeUtbetalingsperioder: List<Utbetalingsperiode>,
+    utbetalingsperioder: List<Utbetalingsperiode>
+): List<Opphørsperiode> {
+    val erUtbetalingOpphørtTidslinje = forrigeUtbetalingsperioder
+        .tilTidslinje()
+        .kombinerMed(utbetalingsperioder.tilTidslinje()) { forrigeUtbetaling, utbetaling ->
+            forrigeUtbetaling != null && utbetaling == null
+        }
+
+    return erUtbetalingOpphørtTidslinje.perioder()
+        .mapNotNull { erUtbetalingOpphørtPeriode ->
+            if (erUtbetalingOpphørtPeriode.innhold == true) {
+                Opphørsperiode(
+                    periodeFom = erUtbetalingOpphørtPeriode.fraOgMed.tilLocalDate(),
+                    periodeTom = erUtbetalingOpphørtPeriode.tilOgMed.tilLocalDate(),
+                    vedtaksperiodetype = Vedtaksperiodetype.OPPHØR
+                )
+            } else {
+                null
+            }
+        }
+}
+
+fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.tilKombinertTidslinjePerAktør():
+    Tidslinje<Collection<AndelTilkjentYtelseMedEndreteUtbetalinger>, Måned> {
+    val andelTilkjentYtelsePerPersonOgType = groupBy { Pair(it.aktør, it.type) }
+
+    val andelTilkjentYtelsePerPersonOgTypeTidslinjer =
+        andelTilkjentYtelsePerPersonOgType.values.map { it.tilTidslinje() }
+
+    return andelTilkjentYtelsePerPersonOgTypeTidslinjer.kombiner { it.toList() }
+}
+
+@JvmName("AndelTilkjentYtelseMedEndreteUtbetalingerTilTidslinje")
+fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.tilTidslinje(): Tidslinje<AndelTilkjentYtelseMedEndreteUtbetalinger, Måned> =
+    this.map {
+        Periode(
+            fraOgMed = it.stønadFom.tilTidspunkt(),
+            tilOgMed = it.stønadTom.tilTidspunkt(),
+            innhold = it
+        )
+    }.tilTidslinje()
+
+private fun List<Utbetalingsperiode>.tilTidslinje() =
+    this.map {
+        Periode(
+            fraOgMed = it.periodeFom.tilMånedTidspunkt(),
+            tilOgMed = it.periodeTom.tilMånedTidspunkt(),
+            innhold = it
+        )
+    }.tilTidslinje()
+
+private fun finnOpphørsperioderMellomUtbetalingsperioder(utbetalingsperioder: List<Utbetalingsperiode>): List<Opphørsperiode> =
+    utbetalingsperioder
+        .tilTidslinje()
+        .tilHarVerdiTidslinje()
+        .perioder()
+        .mapNotNull { erUtbetalingIPeriode ->
+            if (erUtbetalingIPeriode.innhold != true) {
+                Opphørsperiode(
+                    periodeFom = erUtbetalingIPeriode.fraOgMed.tilLocalDate(),
+                    periodeTom = erUtbetalingIPeriode.tilOgMed.tilLocalDate(),
+                    vedtaksperiodetype = Vedtaksperiodetype.OPPHØR
+                )
+            } else {
+                null
+            }
+        }
+
+private fun <V, T : Tidsenhet> Tidslinje<V, T>.tilHarVerdiTidslinje(): Tidslinje<Boolean, T> =
+    this.tidsrom().tidslinjeFraTidspunkt { tidspunkt ->
+        Innhold(this.innholdForTidspunkt(tidspunkt).innhold != null)
+    }
+
+private fun finnOpphørsperiodeEtterSisteUtbetalingsperiode(utbetalingsperioder: List<Utbetalingsperiode>): List<Opphørsperiode> {
+    val sisteUtbetalingsperiodeTom = utbetalingsperioder.maxOf { it.periodeTom }.toYearMonth()
+    val nesteMåned = inneværendeMåned().nesteMåned()
+
+    return if (sisteUtbetalingsperiodeTom.isBefore(nesteMåned)) {
+        listOf(
+            Opphørsperiode(
+                periodeFom = sisteUtbetalingsperiodeTom.nesteMåned().førsteDagIInneværendeMåned(),
+                periodeTom = null,
+                vedtaksperiodetype = Vedtaksperiodetype.OPPHØR
+            )
+        )
+    } else {
+        emptyList()
     }
 }
 
@@ -79,6 +183,7 @@ fun slåSammenOpphørsperioder(alleOpphørsperioder: List<Opphørsperiode>): Lis
                         )
                     )
             }
+
             else -> {
                 acc.add(nesteOpphørsperiode)
             }
@@ -88,62 +193,6 @@ fun slåSammenOpphørsperioder(alleOpphørsperioder: List<Opphørsperiode>): Lis
     }
 }
 
-private fun maxOfOpphørsperiodeTom(a: LocalDate?, b: LocalDate?): LocalDate? {
+fun maxOfOpphørsperiodeTom(a: LocalDate?, b: LocalDate?): LocalDate? {
     return if (a != null && b != null) maxOf(a, b) else null
-}
-
-private fun finnOpphørsperioderMellomUtbetalingsperioder(utbetalingsperioder: List<Utbetalingsperiode>): List<Opphørsperiode> {
-    val helYtelseTidslinje = LocalDateTimeline(
-        listOf(
-            LocalDateSegment(
-                utbetalingsperioder.minOf { it.periodeFom },
-                utbetalingsperioder.maxOf { it.periodeTom },
-                null
-            )
-        )
-    )
-
-    return utledSegmenterFjernetOgMapTilOpphørsperioder(utbetalingsperioder, helYtelseTidslinje)
-}
-
-private fun finnOpphørsperiodeEtterSisteUtbetalingsperiode(utbetalingsperioder: List<Utbetalingsperiode>): List<Opphørsperiode> {
-    val sisteUtbetalingsperiodeTom = utbetalingsperioder.maxOf { it.periodeTom }.toYearMonth()
-    val nesteMåned = inneværendeMåned().nesteMåned()
-
-    return if (sisteUtbetalingsperiodeTom.isBefore(nesteMåned)) {
-        listOf(
-            Opphørsperiode(
-                periodeFom = sisteUtbetalingsperiodeTom.nesteMåned().førsteDagIInneværendeMåned(),
-                periodeTom = null,
-                vedtaksperiodetype = Vedtaksperiodetype.OPPHØR
-            )
-        )
-    } else {
-        emptyList()
-    }
-}
-
-private fun finnOpphørsperioderPåGrunnAvReduksjonIRevurdering(
-    forrigeUtbetalingsperioder: List<Utbetalingsperiode>,
-    utbetalingsperioder: List<Utbetalingsperiode>
-): List<Opphørsperiode> {
-    val forrigeUtbetalingstidslinje = LocalDateTimeline(forrigeUtbetalingsperioder.map { it.tilTomtSegment() })
-
-    return utledSegmenterFjernetOgMapTilOpphørsperioder(utbetalingsperioder, forrigeUtbetalingstidslinje)
-}
-
-private fun utledSegmenterFjernetOgMapTilOpphørsperioder(
-    utbetalingsperioder: List<Utbetalingsperiode>,
-    sammenligningstidslinje: LocalDateTimeline<Nothing?>
-): List<Opphørsperiode> {
-    val utbetalingstidslinje = LocalDateTimeline(utbetalingsperioder.map { it.tilTomtSegment() })
-    val segmenterFjernet = sammenligningstidslinje.disjoint(utbetalingstidslinje).compress()
-
-    return segmenterFjernet.toList().map {
-        Opphørsperiode(
-            periodeFom = it.fom,
-            periodeTom = it.tom,
-            vedtaksperiodetype = Vedtaksperiodetype.OPPHØR
-        )
-    }
 }
