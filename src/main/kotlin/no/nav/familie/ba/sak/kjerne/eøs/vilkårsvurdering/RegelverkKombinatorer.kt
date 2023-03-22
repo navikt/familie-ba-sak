@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering
 
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.RegelverkResultat.IKKE_FULLT_VURDERT
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.RegelverkResultat.OPPFYLT_BLANDET_REGELVERK
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.RegelverkResultat.OPPFYLT_EØS_FORORDNINGEN
@@ -14,9 +15,14 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 fun kombinerVilkårResultaterTilRegelverkResultat(
     personType: PersonType,
     alleVilkårResultater: Iterable<VilkårRegelverkResultat>,
-    fagsakType: FagsakType
+    fagsakType: FagsakType,
+    behandlingUnderkategori: BehandlingUnderkategori
 ): RegelverkResultat? {
-    val nødvendigeVilkår = Vilkår.hentVilkårFor(personType = personType, fagsakType = fagsakType)
+    val nødvendigeVilkår = Vilkår.hentVilkårFor(
+        personType = personType,
+        fagsakType = fagsakType,
+        behandlingUnderkategori = behandlingUnderkategori
+    )
         .filter { it != Vilkår.UTVIDET_BARNETRYGD }
 
     val regelverkVilkår = nødvendigeVilkår

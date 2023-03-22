@@ -302,17 +302,12 @@ class VedtaksperiodeService(
          * Ellers: endringstidspunkt skal utledes
          **/
         val endringstidspunkt = manueltOverstyrtEndringstidspunkt
-            ?: if (featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_UTLEDE_ENDRINGSTIDSPUNKT)) {
-                endringstidspunktService.finnEndringstidspunktForBehandling(behandlingId = vedtak.behandling.id)
-            } else if (vedtak.behandling.resultat == Behandlingsresultat.ENDRET_OG_FORTSATT_INNVILGET) {
-                TIDENES_MORGEN
-            } else {
-                endringstidspunktService.finnEndringstidpunkForBehandlingGammel(behandlingId = vedtak.behandling.id)
-            }
-        val opphørsperioder: List<VedtaksperiodeMedBegrunnelser> =
+            ?: endringstidspunktService.finnEndringstidspunktForBehandling(behandlingId = vedtak.behandling.id)
+
+        val opphørsperioder =
             hentOpphørsperioder(vedtak.behandling, endringstidspunkt).map { it.tilVedtaksperiodeMedBegrunnelse(vedtak) }
 
-        val utbetalingsperioder: List<VedtaksperiodeMedBegrunnelser> =
+        val utbetalingsperioder =
             utbetalingsperiodeMedBegrunnelserService.hentUtbetalingsperioder(vedtak, opphørsperioder)
 
         val avslagsperioder = hentAvslagsperioderMedBegrunnelser(vedtak)
@@ -659,7 +654,6 @@ class VedtaksperiodeService(
                                 standardbegrunnelse = Standardbegrunnelse.AVSLAG_UREGISTRERT_BARN
                             )
                         )
-
                         BehandlingKategori.EØS -> eøsBegrunnelser.add(
                             EØSBegrunnelse(
                                 vedtaksperiodeMedBegrunnelser = this,

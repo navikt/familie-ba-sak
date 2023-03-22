@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.OrdinærBarnetrygdUtil.mapTilProsentEllerNull
 import no.nav.familie.ba.sak.kjerne.beregning.OrdinærBarnetrygdUtil.tilTidslinjeMedRettTilProsentForPerson
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
@@ -48,7 +49,7 @@ class OrdinærBarnetrygdUtilTest {
         val rettTilDeltTom = borMedSøkerVilkårTom.toYearMonth()
         val månedFørFylte18År = barn.fødselsdato.plusYears(18).forrigeMåned()
 
-        val vilkårResulater = Vilkår.hentVilkårFor(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL).mapNotNull {
+        val vilkårResulater = Vilkår.hentVilkårFor(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL, behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR).mapNotNull {
             if (it == Vilkår.BOR_MED_SØKER) {
                 null
             } else {
@@ -129,7 +130,7 @@ class OrdinærBarnetrygdUtilTest {
             vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling()),
             aktør = barn.aktør
         )
-        val vilkårResultater = Vilkår.hentVilkårFor(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL).map {
+        val vilkårResultater = Vilkår.hentVilkårFor(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL, behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR).map {
             lagVilkårResultat(
                 vilkårType = it,
                 periodeFom = LocalDate.now().minusMonths(5),
@@ -152,7 +153,7 @@ class OrdinærBarnetrygdUtilTest {
             vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling()),
             aktør = barn.aktør
         )
-        val vilkårResultater = Vilkår.hentVilkårFor(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL).map {
+        val vilkårResultater = Vilkår.hentVilkårFor(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL, behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR).map {
             lagVilkårResultat(
                 vilkårType = it,
                 periodeFom = LocalDate.now().minusMonths(5),
@@ -175,7 +176,7 @@ class OrdinærBarnetrygdUtilTest {
             vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling()),
             aktør = barn.aktør
         )
-        val vilkårResultater = Vilkår.hentVilkårFor(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL).mapNotNull {
+        val vilkårResultater = Vilkår.hentVilkårFor(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL, behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR).mapNotNull {
             if (it == Vilkår.LOVLIG_OPPHOLD) {
                 null
             } else {
@@ -202,7 +203,7 @@ class OrdinærBarnetrygdUtilTest {
             vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling()),
             aktør = søker.aktør
         )
-        val vilkårResultater = Vilkår.hentVilkårFor(personType = PersonType.SØKER, fagsakType = FagsakType.NORMAL).mapNotNull {
+        val vilkårResultater = Vilkår.hentVilkårFor(personType = PersonType.SØKER, fagsakType = FagsakType.NORMAL, behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR).mapNotNull {
             if (it == Vilkår.LOVLIG_OPPHOLD) {
                 null
             } else {

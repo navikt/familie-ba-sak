@@ -22,11 +22,11 @@ import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils.beregnTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndeler
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
@@ -43,7 +43,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers.not
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -1243,9 +1242,9 @@ internal class TilkjentYtelseUtilsTest {
         val vilkårsvurdering = lagVilkårsvurdering(
             søker = søker,
             barn = barna,
-            ytelseType = YtelseType.UTVIDET_BARNETRYGD,
             atypiskeVilkårBarna = atypiskeVilkårBarna,
-            atypiskeVilkårSøker = atypiskeVilkårSøker
+            atypiskeVilkårSøker = atypiskeVilkårSøker,
+            behandlingUnderkategori = BehandlingUnderkategori.UTVIDET
         )
 
         val endretUtbetalingAndeler = endretAndeler.map {
@@ -1330,7 +1329,7 @@ internal class TilkjentYtelseUtilsTest {
     private fun lagVilkårsvurdering(
         søker: Person,
         barn: List<Person>,
-        ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD,
+        behandlingUnderkategori: BehandlingUnderkategori,
         atypiskeVilkårSøker: List<AtypiskVilkår> = emptyList(),
         atypiskeVilkårBarna: List<AtypiskVilkår> = emptyList()
     ): Vilkårsvurdering {
@@ -1341,7 +1340,7 @@ internal class TilkjentYtelseUtilsTest {
         val søkerPersonResultat = lagPersonResultat(
             vilkårsvurdering = vilkårsvurdering,
             person = søker,
-            ytelseType = ytelseType,
+            behandlingUnderkategori = behandlingUnderkategori,
             standardFom = eldsteBarn.fødselsdato,
             atypiskeVilkår = atypiskeVilkårSøker
         )
@@ -1350,7 +1349,7 @@ internal class TilkjentYtelseUtilsTest {
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
                 person = barnet,
-                ytelseType = ytelseType,
+                behandlingUnderkategori = behandlingUnderkategori,
                 standardFom = barnet.fødselsdato,
                 atypiskeVilkår = atypiskeVilkårBarna.filter { it.aktør == barnet.aktør }
             )
@@ -1363,7 +1362,7 @@ internal class TilkjentYtelseUtilsTest {
     private fun lagPersonResultat(
         vilkårsvurdering: Vilkårsvurdering,
         person: Person,
-        ytelseType: YtelseType,
+        behandlingUnderkategori: BehandlingUnderkategori,
         standardFom: LocalDate,
         atypiskeVilkår: List<AtypiskVilkår>
     ): PersonResultat {
@@ -1372,7 +1371,11 @@ internal class TilkjentYtelseUtilsTest {
             aktør = person.aktør
         )
 
-        val vilkårForPersonType = Vilkår.hentVilkårFor(personType = person.type, ytelseType = ytelseType, fagsakType = FagsakType.NORMAL)
+        val vilkårForPersonType = Vilkår.hentVilkårFor(
+            personType = person.type,
+            fagsakType = FagsakType.NORMAL,
+            behandlingUnderkategori = behandlingUnderkategori
+        )
 
         val ordinæreVilkårResultater = vilkårForPersonType.map { vilkår ->
             lagVilkårResultat(
