@@ -108,20 +108,14 @@ private fun List<Utbetalingsperiode>.tilTidslinje() =
     }.tilTidslinje()
 
 private fun finnOpphørsperioderMellomUtbetalingsperioder(utbetalingsperioder: List<Utbetalingsperiode>): List<Opphørsperiode> =
-    utbetalingsperioder
-        .tilTidslinje()
-        .tilHarVerdiTidslinje()
-        .perioder()
-        .mapNotNull { erUtbetalingIPeriode ->
-            if (erUtbetalingIPeriode.innhold != true) {
-                Opphørsperiode(
-                    periodeFom = erUtbetalingIPeriode.fraOgMed.tilLocalDate(),
-                    periodeTom = erUtbetalingIPeriode.tilOgMed.tilLocalDate(),
-                    vedtaksperiodetype = Vedtaksperiodetype.OPPHØR
-                )
-            } else {
-                null
-            }
+    utbetalingsperioder.tilTidslinje().tilHarVerdiTidslinje().perioder()
+        .filter { erUtbetalingIPeriode -> erUtbetalingIPeriode.innhold != true }
+        .map {
+            Opphørsperiode(
+                periodeFom = it.fraOgMed.tilLocalDate(),
+                periodeTom = it.tilOgMed.tilLocalDate(),
+                vedtaksperiodetype = Vedtaksperiodetype.OPPHØR
+            )
         }
 
 private fun <V, T : Tidsenhet> Tidslinje<V, T>.tilHarVerdiTidslinje(): Tidslinje<Boolean, T> =
