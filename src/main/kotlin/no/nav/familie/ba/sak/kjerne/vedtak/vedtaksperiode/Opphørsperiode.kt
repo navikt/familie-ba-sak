@@ -37,15 +37,12 @@ fun mapTilOpphørsperioder(
     andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
 ): List<Opphørsperiode> {
     val forrigeUtbetalingsperioder = if (forrigePersonopplysningGrunnlag != null) {
-        mapTilUtbetalingsperioder(
-            personopplysningGrunnlag = forrigePersonopplysningGrunnlag,
-            andelerTilkjentYtelse = forrigeAndelerTilkjentYtelse
-        )
+        forrigeAndelerTilkjentYtelse.mapTilUtbetalingsperioder(forrigePersonopplysningGrunnlag)
     } else {
         emptyList()
     }
     val utbetalingsperioder =
-        mapTilUtbetalingsperioder(personopplysningGrunnlag, andelerTilkjentYtelse)
+        andelerTilkjentYtelse.mapTilUtbetalingsperioder(personopplysningGrunnlag)
 
     return if (utbetalingsperioder.isEmpty()) {
         if (forrigeUtbetalingsperioder.isEmpty()) {

@@ -524,8 +524,7 @@ class VedtaksperiodeService(
         val andelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService
             .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.id)
 
-        return mapTilUtbetalingsperioder(
-            andelerTilkjentYtelse = andelerTilkjentYtelse,
+        return andelerTilkjentYtelse.mapTilUtbetalingsperioder(
             personopplysningGrunnlag = personopplysningGrunnlag
         )
     }

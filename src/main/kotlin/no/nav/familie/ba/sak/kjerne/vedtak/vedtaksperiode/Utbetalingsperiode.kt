@@ -62,11 +62,10 @@ fun hentUtbetalingsperiodeForVedtaksperiode(
         ?: throw Feil("Finner ikke gjeldende utbetalingsperiode ved fortsatt innvilget")
 }
 
-fun mapTilUtbetalingsperioder(
-    personopplysningGrunnlag: PersonopplysningGrunnlag,
-    andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
+fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.mapTilUtbetalingsperioder(
+    personopplysningGrunnlag: PersonopplysningGrunnlag
 ): List<Utbetalingsperiode> {
-    val andelerTidslinjePerAktørOgType = andelerTilkjentYtelse.tilKombinertTidslinjePerAktør()
+    val andelerTidslinjePerAktørOgType = tilKombinertTidslinjePerAktør()
 
     val utbetalingsPerioder = andelerTidslinjePerAktørOgType.perioder()
         .filter { !it.innhold.isNullOrEmpty() }
