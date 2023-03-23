@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.satsendring
 
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringÅpenBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import org.springframework.stereotype.Service
@@ -23,6 +24,6 @@ class SatsendringService(
                 .erOppdatertMedSisteSatser()
     }
 
-    fun finnSatskjøringerSomHarStoppetPgaÅpenBehandling(): List<Pair<Long, Long>> =
+    fun finnSatskjøringerSomHarStoppetPgaÅpenBehandling(): List<SatskjøringÅpenBehandling> =
         satskjøringRepository.finnSatskjøringerSomHarStoppetPgaÅpenBehandling()
 }

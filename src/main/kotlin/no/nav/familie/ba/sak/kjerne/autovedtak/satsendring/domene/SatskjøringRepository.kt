@@ -11,12 +11,12 @@ interface SatskjøringRepository : JpaRepository<Satskjøring, Long> {
 
     @Query(
         value = """
-            SELECT f.id as first, b.id as second
+            SELECT f.id as fagsakId, b.id as behandlingId
             FROM   Fagsak f
                 join behandling b on f.id = b.fk_fagsak_id
                 join arbeidsfordeling_pa_behandling arb on b.id = arb.fk_behandling_id
             WHERE NOT EXISTS (
-                    SELECT  
+                    SELECT
                     FROM   satskjoering
                     WHERE  fk_fagsak_id = f.id
                 ) AND f.status = 'LØPENDE' AND f.arkivert = false AND b.status <> 'AVSLUTTET'
@@ -24,5 +24,10 @@ interface SatskjøringRepository : JpaRepository<Satskjøring, Long> {
         """,
         nativeQuery = true
     )
-    fun finnSatskjøringerSomHarStoppetPgaÅpenBehandling(): List<Pair<Long, Long>>
+    fun finnSatskjøringerSomHarStoppetPgaÅpenBehandling(): List<SatskjøringÅpenBehandling>
+}
+
+interface SatskjøringÅpenBehandling {
+    val fagsakId: Long
+    val behandlingId: Long
 }

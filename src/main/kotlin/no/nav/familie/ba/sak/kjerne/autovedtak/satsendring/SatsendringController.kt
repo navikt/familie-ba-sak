@@ -8,7 +8,6 @@ import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import no.nav.security.token.support.core.api.Unprotected
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -94,27 +93,26 @@ class SatsendringController(
     }
 
     @PostMapping(path = ["/lukkAapneBehandlingerSatsendring"])
-    @Unprotected
     fun lukkÅpneBehandlingerDetIkkeErKjørtSatsendringPå(
         @RequestParam(value = "opprettTask", required = true) opprettTask: Boolean,
         @RequestParam(value = "antall", required = true) antall: Int
     ) {
         val åpneBehandlinger = satsendringService.finnSatskjøringerSomHarStoppetPgaÅpenBehandling()
         åpneBehandlinger.take(antall).forEach { it ->
-            val (fagsakId, behandlingId) = it
-            if (!satsendringService.erFagsakOppdatertMedSisteSatser(fagsakId)) {
+
+            if (!satsendringService.erFagsakOppdatertMedSisteSatser(it.fagsakId)) {
                 if (opprettTask) {
                     opprettTaskService.opprettHenleggBehandlingTask(
-                        behandlingId = behandlingId,
+                        behandlingId = it.behandlingId,
                         årsak = HenleggÅrsak.TEKNISK_VEDLIKEHOLD,
                         begrunnelse = SATSENDRING,
                         validerOppgavefristErEtterDato = LocalDate.now()
                     )
                 } else {
-                    logger.info("Skulle ha trigget henleggBehandlingTask for fagsakId=$fagsakId behandlingId=$behandlingId")
+                    logger.info("Skulle ha trigget henleggBehandlingTask for fagsakIs=${it.fagsakId} behandlingId=${it.behandlingId}")
                 }
             } else {
-                logger.info("Henlegger ikke behandling. fagsakId=$fagsakId har alt siste sats")
+                logger.info("Henlegger ikke behandling. ${it.fagsakId} har alt siste sats")
             }
         }
     }
