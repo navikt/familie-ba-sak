@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
 
@@ -26,8 +28,11 @@ const val SATSENDRING = "Satsendring"
 class SatsendringController(
     private val startSatsendring: StartSatsendring,
     private val tilgangService: TilgangService,
-    private val opprettTaskService: OpprettTaskService
+    private val opprettTaskService: OpprettTaskService,
+    private val satsendringService: SatsendringService
 ) {
+    private val logger = LoggerFactory.getLogger(SatsendringController::class.java)
+
     @GetMapping(path = ["/kjorsatsendring/{fagsakId}"])
     fun utførSatsendringITaskPåFagsak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<String>> {
         startSatsendring.opprettSatsendringForFagsak(fagsakId)
@@ -85,5 +90,28 @@ class SatsendringController(
             )
         }
         return ResponseEntity.ok(Ressurs.Companion.success("Trigget henleggelse for ${behandlinger.size} behandlinger"))
+    }
+
+    @PostMapping(path = ["/lukkAapneBehandlingerSatsendring"])
+    fun lukkÅpneBehandlingerDetIkkeErKjørtSatsendringPå(
+        @RequestParam(value = "opprettTask", required = true) opprettTask: Boolean,
+        @RequestParam(value = "antall", required = true) antall: Int
+    ) {
+        val åpneBehandlinger = satsendringService.finnSatskjøringerSomHarStoppetPgaÅpenBehandling(antall)
+        åpneBehandlinger.forEach { it ->
+            val (fagsakId, behandlingId) = it
+            if (!satsendringService.erFagsakOppdatertMedSisteSatser(fagsakId)) {
+                if (opprettTask) {
+                    opprettTaskService.opprettHenleggBehandlingTask(
+                        behandlingId = behandlingId,
+                        årsak = HenleggÅrsak.TEKNISK_VEDLIKEHOLD,
+                        begrunnelse = SATSENDRING,
+                        validerOppgavefristErEtterDato = LocalDate.now()
+                    )
+                } else {
+                    logger.info("Skulle ha trigget henleggBehandlingTask for behandlingId=$behandlingId")
+                }
+            }
+        }
     }
 }
