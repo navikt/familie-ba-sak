@@ -307,6 +307,17 @@ class OppgaveService(
         integrasjonClient.ferdigstillOppgave(oppgaveId = oppgave.id!!)
     }
 
+    fun fjernBehandlesAvApplikasjon(oppgaver: List<Long>): Set<Long> {
+        return oppgaver.fold(LinkedHashSet()) { accumulator, oppgaveId ->
+            val dbOppgave = oppgaveRepository.findByGsakId(oppgaveId.toString())
+            if (dbOppgave != null) {
+                integrasjonClient.fjernBehandlesAvApplikasjon(oppgaveId)
+                accumulator.add(oppgaveId)
+            }
+            accumulator
+        }
+    }
+
     companion object {
 
         private val logger = LoggerFactory.getLogger(OppgaveService::class.java)

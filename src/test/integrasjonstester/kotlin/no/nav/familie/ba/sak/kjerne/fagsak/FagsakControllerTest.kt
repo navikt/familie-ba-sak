@@ -39,7 +39,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 
-// Todo. Bruker every. Dette endrer funksjonalliteten for alle klasser.
 class FagsakControllerTest(
     @Autowired
     private val fagsakService: FagsakService,
