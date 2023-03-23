@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import no.nav.security.token.support.core.api.Unprotected
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -93,12 +94,13 @@ class SatsendringController(
     }
 
     @PostMapping(path = ["/lukkAapneBehandlingerSatsendring"])
+    @Unprotected
     fun lukkÅpneBehandlingerDetIkkeErKjørtSatsendringPå(
         @RequestParam(value = "opprettTask", required = true) opprettTask: Boolean,
         @RequestParam(value = "antall", required = true) antall: Int
     ) {
-        val åpneBehandlinger = satsendringService.finnSatskjøringerSomHarStoppetPgaÅpenBehandling(antall)
-        åpneBehandlinger.forEach { it ->
+        val åpneBehandlinger = satsendringService.finnSatskjøringerSomHarStoppetPgaÅpenBehandling()
+        åpneBehandlinger.take(antall).forEach { it ->
             val (fagsakId, behandlingId) = it
             if (!satsendringService.erFagsakOppdatertMedSisteSatser(fagsakId)) {
                 if (opprettTask) {
