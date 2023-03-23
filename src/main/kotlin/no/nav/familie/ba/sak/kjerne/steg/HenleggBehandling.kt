@@ -52,7 +52,7 @@ class HenleggBehandling(
         }
 
         oppgaverTekniskVedlikeholdPgaSatsendring.forEach {
-            logger.info("Teknisk opphør pga satsendring. Fjerner behandlesAvApplikasjon for oppgaveId=${it.gsakId} slik at saksbehandler kan lukke den fra Gosys")
+            logger.info("Teknisk opphør pga satsendring. Fjerner behandlesAvApplikasjon for oppgaveId=${it.gsakId} slik at saksbehandler kan lukke den fra Gosys. fagsakId=${behandling.fagsak.id}, behandlingId=${behandling.id}")
             oppgaveService.fjernBehandlesAvApplikasjon(listOf(it.gsakId.toLong()))
         }
 

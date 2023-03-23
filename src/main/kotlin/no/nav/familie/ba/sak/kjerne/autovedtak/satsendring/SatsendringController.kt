@@ -109,8 +109,10 @@ class SatsendringController(
                         validerOppgavefristErEtterDato = LocalDate.now()
                     )
                 } else {
-                    logger.info("Skulle ha trigget henleggBehandlingTask for behandlingId=$behandlingId")
+                    logger.info("Skulle ha trigget henleggBehandlingTask for fagsakId=$fagsakId behandlingId=$behandlingId")
                 }
+            } else {
+                logger.info("Henlegger ikke behandling. fagsakId=$fagsakId har alt siste sats")
             }
         }
     }
