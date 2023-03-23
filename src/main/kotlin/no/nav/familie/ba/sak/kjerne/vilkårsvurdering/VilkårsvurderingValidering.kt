@@ -61,7 +61,7 @@ fun valider18ÅrsVilkårEksistererFraFødselsdato(
         val person = personopplysningGrunnlag.personer.find { it.aktør == personResultat.aktør }
         if (person?.type == PersonType.BARN && !personResultat.vilkårResultater.finnesUnder18VilkårFraFødselsdato(person.fødselsdato)) {
             throw FunksjonellFeil(
-                melding = "Finnes barn som ikke har under 18-vilkåret vurdert fra fødselsdato",
+                melding = "Barn født ${person.fødselsdato} har ikke fått under 18-vilkåret vurdert fra fødselsdato",
                 frontendFeilmelding = "Det må finnes en periode på 18-årsvilkåret som starter på barnets fødselsdato"
             )
         }
