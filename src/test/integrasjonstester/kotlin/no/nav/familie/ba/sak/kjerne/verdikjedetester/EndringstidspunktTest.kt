@@ -1,9 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
 import io.mockk.mockk
-import no.nav.familie.ba.sak.common.TIDENES_ENDE
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
-import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.dataGenerator.behandling.kjørStegprosessForBehandling
@@ -27,7 +26,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvu
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
@@ -45,7 +43,6 @@ class EndringstidspunktTest(
 ) : AbstractVerdikjedetest() {
 
     @Test
-    @Disabled("TODO fiks test senere")
     fun `Skal filtrere bort alle vedtaksperioder før endringstidspunktet`() {
         val barnFødselsdato = LocalDate.now().minusYears(2)
         val scenario = mockServerKlient().lagScenario(
@@ -132,7 +129,7 @@ class EndringstidspunktTest(
             barnasIdenter = listOf(scenario.barna.first().ident!!),
             vedtakService = vedtakService,
             underkategori = BehandlingUnderkategori.ORDINÆR,
-            behandlingÅrsak = BehandlingÅrsak.SØKNAD,
+            behandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
             overstyrendeVilkårsvurdering = lagVilkårsvurderingFraRestScenario(
                 scenario,
                 overstyrendeVilkårResultaterRevurdering
@@ -153,11 +150,11 @@ class EndringstidspunktTest(
         val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = revurdering.id)
         val vedtaksperioder = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
 
-        val førsteTomDatoIVedtaksperiodene =
-            vedtaksperioder.minOf { it.tom ?: TIDENES_ENDE } ?: error("Fant ingen vedtaksperioder")
+        val førsteFomDatoIVedtaksperiodene =
+            vedtaksperioder.minOf { it.fom ?: throw Feil("Ingen fom-dato") }
 
         assertTrue(
-            førsteTomDatoIVedtaksperiodene.isSameOrAfter(
+            førsteFomDatoIVedtaksperiodene.isEqual(
                 førsteDagMedDeltBostedOppfylt.førsteDagINesteMåned()
             )
         )
