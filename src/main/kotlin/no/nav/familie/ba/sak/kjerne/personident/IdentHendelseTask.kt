@@ -40,7 +40,7 @@ class IdentHendelseTask(
                     this["nyPersonIdent"] = nyIdent.ident
                 }
             ).medTriggerTid(
-                triggerTid = LocalDateTime.now().plusMinutes(1) // TODO: Settes med liten forsinkelse for test
+                triggerTid = LocalDateTime.now().plusMinutes(1)
             )
         }
     }
