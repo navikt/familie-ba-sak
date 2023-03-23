@@ -4,7 +4,10 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjer
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.harBlandetRegelverk
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import java.time.LocalDate
 
@@ -49,3 +52,20 @@ fun validerIkkeBlandetRegelverk(
         )
     }
 }
+
+fun valider18ÅrsVilkårEksistererFraFødselsdato(
+    personopplysningGrunnlag: PersonopplysningGrunnlag,
+    vilkårsvurdering: Vilkårsvurdering
+) {
+    vilkårsvurdering.personResultater.forEach { personResultat ->
+        val person = personopplysningGrunnlag.personer.find { it.aktør == personResultat.aktør }
+        if (person?.type == PersonType.BARN && !personResultat.vilkårResultater.finnesUnder18VilkårFraFødselsdato(person.fødselsdato)) {
+            throw FunksjonellFeil(
+                melding = "Finnes barn som ikke har under 18-vilkåret vurdert fra fødselsdato",
+                frontendFeilmelding = "Det må finnes en periode på 18-årsvilkåret som starter på barnets fødselsdato"
+            )
+        }
+    }
+}
+
+private fun Set<VilkårResultat>.finnesUnder18VilkårFraFødselsdato(fødselsdato: LocalDate): Boolean = this.filter { it.vilkårType == Vilkår.UNDER_18_ÅR }.any { it.periodeFom == fødselsdato }
