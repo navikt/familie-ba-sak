@@ -65,7 +65,7 @@ fun hentUtbetalingsperiodeForVedtaksperiode(
 fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.mapTilUtbetalingsperioder(
     personopplysningGrunnlag: PersonopplysningGrunnlag
 ): List<Utbetalingsperiode> {
-    val andelerTidslinjePerAktørOgType = tilKombinertTidslinjePerAktør()
+    val andelerTidslinjePerAktørOgType = this.tilKombinertTidslinjePerAktørOgType()
 
     val utbetalingsPerioder = andelerTidslinjePerAktørOgType.perioder()
         .filter { !it.innhold.isNullOrEmpty() }

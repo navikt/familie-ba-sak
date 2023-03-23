@@ -78,7 +78,7 @@ private fun finnOpphørsperioderPåGrunnAvReduksjonIRevurdering(
         }
 }
 
-fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.tilKombinertTidslinjePerAktør():
+fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.tilKombinertTidslinjePerAktørOgType():
     Tidslinje<Collection<AndelTilkjentYtelseMedEndreteUtbetalinger>, Måned> {
     val andelTilkjentYtelsePerPersonOgType = groupBy { Pair(it.aktør, it.type) }
 
