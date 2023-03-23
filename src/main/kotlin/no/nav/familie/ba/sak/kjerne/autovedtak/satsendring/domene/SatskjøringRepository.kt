@@ -20,8 +20,18 @@ interface SatskjøringRepository : JpaRepository<Satskjøring, Long> {
                     SELECT  
                     FROM   satskjoering
                     WHERE  fk_fagsak_id = f.id
+                ) AND f.status = 'LØPENDE' AND f.arkivert = false AND b.status <> 'AVSLUTTET';
+        """,
+        countQuery = """
+            SELECT count(*)
+            FROM   Fagsak f
+                join behandling b on f.id = b.fk_fagsak_id
+                join arbeidsfordeling_pa_behandling arb on b.id = arb.fk_behandling_id
+            WHERE NOT EXISTS (
+                    SELECT  
+                    FROM   satskjoering
+                    WHERE  fk_fagsak_id = f.id
                 ) AND f.status = 'LØPENDE' AND f.arkivert = false AND b.status <> 'AVSLUTTET'
-            ORDER BY b.opprettet_tid;
         """,
         nativeQuery = true
     )
