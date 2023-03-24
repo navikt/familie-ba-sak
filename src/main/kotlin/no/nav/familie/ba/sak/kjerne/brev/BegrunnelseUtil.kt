@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.harPersonerSomManglerOpplysninger
 import no.nav.familie.ba.sak.kjerne.brev.domene.somOverlapper
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.hentPersonerForEtterEndretUtbetalingsperiode
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
@@ -58,7 +59,8 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
         (triggesAv.vilkår.contains(Vilkår.UTVIDET_BARNETRYGD) || triggesAv.småbarnstillegg) && !erEndretUtbetalingBegrunnelse -> hentPersonerForUtvidetOgSmåbarnstilleggBegrunnelse(
             identerMedUtbetaling = identerMedUtbetalingPåPeriode,
             restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
-            periode = periode
+            periode = periode,
+            fagsakType = restBehandlingsgrunnlagForBrev.fagsakType
         ) + when {
             triggesAv.vilkår.any { it != Vilkår.UTVIDET_BARNETRYGD } -> hentPersonerForUtgjørendeVilkår()
             else -> emptyList()
@@ -132,14 +134,21 @@ private fun hentPersonerForEndretUtbetalingBegrunnelse(
 private fun hentPersonerForUtvidetOgSmåbarnstilleggBegrunnelse(
     identerMedUtbetaling: List<String>,
     restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
-    periode: NullablePeriode
+    periode: NullablePeriode,
+    fagsakType: FagsakType
 ): List<String> {
     val identerFraSammenfallendeEndringsperioder =
         restBehandlingsgrunnlagForBrev.minimerteEndredeUtbetalingAndeler.somOverlapper(periode.tilNullableMånedPeriode())
             .map { it.personIdent }
 
     val søkersIdent =
-        restBehandlingsgrunnlagForBrev.personerPåBehandling.find { it.type == PersonType.SØKER }?.personIdent
+        restBehandlingsgrunnlagForBrev.personerPåBehandling.find {
+            when (fagsakType) {
+                FagsakType.NORMAL,
+                FagsakType.INSTITUSJON -> it.type == PersonType.SØKER
+                FagsakType.BARN_ENSLIG_MINDREÅRIG -> it.type == PersonType.BARN
+            }
+        }?.personIdent
             ?: throw IllegalStateException("Søker mangler i behandlingsgrunnlag for brev")
 
     return identerMedUtbetaling + identerFraSammenfallendeEndringsperioder + søkersIdent
