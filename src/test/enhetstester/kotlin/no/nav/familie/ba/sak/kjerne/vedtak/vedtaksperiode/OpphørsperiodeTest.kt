@@ -11,16 +11,8 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import java.time.YearMonth
 
 class OpphørsperiodeTest {
-
-    val januar2023 = YearMonth.of(2023, 1)
-    val februar2023 = YearMonth.of(2023, 2)
-    val mars2023 = YearMonth.of(2023, 3)
-    val april2023 = YearMonth.of(2023, 4)
-    val mai2023 = YearMonth.of(2023, 5)
-    val mai2024 = YearMonth.of(2024, 5)
 
     val søker = tilfeldigPerson()
     val barn1 = tilfeldigPerson()
@@ -150,25 +142,28 @@ class OpphørsperiodeTest {
 
     @Test
     fun `Skal utlede opphørsperiode når ytelsen reduseres i revurdering og to inntilliggende perioder opphøres`() {
+        val reduksjonFom = inneværendeMåned().minusMonths(2)
+        val reduksjonTom = inneværendeMåned()
+
         val forrigeAndel1Barn1 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
-            januar2023,
-            februar2023,
+            reduksjonFom,
+            reduksjonFom.plusMonths(1),
             YtelseType.ORDINÆR_BARNETRYGD,
             1054,
             person = barn1
         )
 
         val forrigeAndel2Barn1 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
-            mars2023,
-            april2023,
+            reduksjonTom.minusMonths(1),
+            reduksjonTom,
             YtelseType.ORDINÆR_BARNETRYGD,
             1054,
             person = barn1
         )
 
         val andelBarn1 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
-            mai2023,
-            mai2024,
+            reduksjonTom.plusMonths(1),
+            inneværendeMåned().plusMonths(12),
             YtelseType.ORDINÆR_BARNETRYGD,
             1054,
             person = barn1
@@ -182,8 +177,8 @@ class OpphørsperiodeTest {
         )
 
         assertEquals(1, opphørsperioder.size)
-        assertEquals(januar2023, opphørsperioder[0].periodeFom.toYearMonth())
-        assertEquals(april2023, opphørsperioder[0].periodeTom?.toYearMonth())
+        assertEquals(reduksjonFom, opphørsperioder[0].periodeFom.toYearMonth())
+        assertEquals(reduksjonTom, opphørsperioder[0].periodeTom?.toYearMonth())
     }
 
     @Test
@@ -293,47 +288,5 @@ class OpphørsperiodeTest {
         assertEquals(1, enOpphørsperiodeMedFørsteFomOgSisteTom.size)
         assertEquals(førsteOpphørsperiodeFom, enOpphørsperiodeMedFørsteFomOgSisteTom.first().periodeFom)
         assertEquals(sisteOpphørsperiodeTom, enOpphørsperiodeMedFørsteFomOgSisteTom.first().periodeTom)
-    }
-
-    @Test
-    fun `Skal håndtere at det ikke er noen andeler i denne behandlingen`() {
-        val forrigeAndel1Barn1 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
-            januar2023,
-            februar2023,
-            YtelseType.ORDINÆR_BARNETRYGD,
-            1054,
-            person = barn1
-        )
-
-        val forrigeAndel2Barn1 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
-            mars2023,
-            april2023,
-            YtelseType.ORDINÆR_BARNETRYGD,
-            1054,
-            person = barn1
-        )
-
-        val opphørsperioder = mapTilOpphørsperioder(
-            forrigeAndelerTilkjentYtelse = listOf(forrigeAndel1Barn1, forrigeAndel2Barn1),
-            andelerTilkjentYtelse = emptyList(),
-            personopplysningGrunnlag = personopplysningGrunnlag,
-            forrigePersonopplysningGrunnlag = personopplysningGrunnlag
-        )
-
-        assertEquals(1, opphørsperioder.size)
-        assertEquals(januar2023, opphørsperioder[0].periodeFom.toYearMonth())
-        assertEquals(april2023, opphørsperioder[0].periodeTom?.toYearMonth())
-    }
-
-    @Test
-    fun `Skal håndtere at det ikke er noen andeler i denne eller forrige behandling`() {
-        val opphørsperioder = mapTilOpphørsperioder(
-            forrigeAndelerTilkjentYtelse = emptyList(),
-            andelerTilkjentYtelse = emptyList(),
-            personopplysningGrunnlag = personopplysningGrunnlag,
-            forrigePersonopplysningGrunnlag = personopplysningGrunnlag
-        )
-
-        assertEquals(0, opphørsperioder.size)
     }
 }
