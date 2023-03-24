@@ -1,7 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene
 
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingIdConverter
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import javax.persistence.Column
+import javax.persistence.Convert
 import javax.persistence.Entity
 import javax.persistence.EntityListeners
 import javax.persistence.GeneratedValue
@@ -24,7 +27,8 @@ data class ArbeidsfordelingPåBehandling(
     val id: Long = 0,
 
     @Column(name = "fk_behandling_id", nullable = false, updatable = false, unique = true)
-    val behandlingId: Long,
+    @Convert(converter = BehandlingIdConverter::class)
+    val behandlingId: BehandlingId,
 
     @Column(name = "behandlende_enhet_id", nullable = false)
     var behandlendeEnhetId: String,
