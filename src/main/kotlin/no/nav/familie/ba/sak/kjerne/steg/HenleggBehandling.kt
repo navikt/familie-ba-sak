@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.BehandleSak
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
@@ -27,6 +28,7 @@ class HenleggBehandling(
     private val persongrunnlagService: PersongrunnlagService,
     private val arbeidsfordelingService: ArbeidsfordelingService
 ) : BehandlingSteg<RestHenleggBehandlingInfo> {
+    private val logger = LoggerFactory.getLogger(HenleggBehandling::class.java)
 
     override fun utførStegOgAngiNeste(behandling: Behandling, data: RestHenleggBehandlingInfo): StegType {
         if (data.årsak == HenleggÅrsak.SØKNAD_TRUKKET) {
@@ -40,11 +42,19 @@ class HenleggBehandling(
             )
         }
 
-        oppgaveService.hentOppgaverSomIkkeErFerdigstilt(behandling)
-            .filter { !(data.årsak == HenleggÅrsak.TEKNISK_VEDLIKEHOLD && data.begrunnelse == SATSENDRING && it.type == BehandleSak) }
-            .forEach {
-                oppgaveService.ferdigstillOppgaver(behandling.id, it.type)
-            }
+        val (oppgaverTekniskVedlikeholdPgaSatsendring, oppgaverSomSkalFerdigstilles) = oppgaveService.hentOppgaverSomIkkeErFerdigstilt(
+            behandling
+        )
+            .partition { (data.årsak == HenleggÅrsak.TEKNISK_VEDLIKEHOLD && data.begrunnelse == SATSENDRING && it.type == BehandleSak) }
+
+        oppgaverSomSkalFerdigstilles.forEach {
+            oppgaveService.ferdigstillOppgaver(behandling.id, it.type)
+        }
+
+        oppgaverTekniskVedlikeholdPgaSatsendring.forEach {
+            logger.info("Teknisk opphør pga satsendring. Fjerner behandlesAvApplikasjon for oppgaveId=${it.gsakId} slik at saksbehandler kan lukke den fra Gosys. fagsakId=${behandling.fagsak.id}, behandlingId=${behandling.id}")
+            oppgaveService.fjernBehandlesAvApplikasjon(listOf(it.gsakId.toLong()))
+        }
 
         loggService.opprettHenleggBehandling(behandling, data.årsak.beskrivelse, data.begrunnelse)
 
