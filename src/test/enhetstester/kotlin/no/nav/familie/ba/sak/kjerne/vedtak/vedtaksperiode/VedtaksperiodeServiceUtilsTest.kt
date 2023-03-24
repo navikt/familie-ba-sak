@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertPersonResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertRestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.brev.hentPersonidenterGjeldendeForBegrunnelse
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.periodeErOppyltForYtelseType
@@ -50,7 +51,7 @@ class VedtaksperiodeServiceUtilsTest {
                 personerPåBehandling = persongrunnlag.personer.map { it.tilMinimertPerson() },
                 minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                 minimerteEndredeUtbetalingAndeler = emptyList(),
-                erInstitusjon = false
+                fagsakType = FagsakType.NORMAL
             ),
             identerMedUtbetalingPåPeriode = identerMedUtbetaling,
             erFørsteVedtaksperiodePåFagsak = false,
@@ -104,7 +105,7 @@ class VedtaksperiodeServiceUtilsTest {
                 minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                 minimerteEndredeUtbetalingAndeler = endredeUtbetalingAndeler
                     .map { it.tilMinimertRestEndretUtbetalingAndel() },
-                erInstitusjon = false
+                fagsakType = FagsakType.NORMAL
             ),
             identerMedUtbetalingPåPeriode = identerMedUtbetaling,
             erFørsteVedtaksperiodePåFagsak = false,

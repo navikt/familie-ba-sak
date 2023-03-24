@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.eøs.hentKompetanserForEØSBegru
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.BrevPeriodeType
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
 import no.nav.familie.ba.sak.kjerne.brev.domene.totaltUtbetalt
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
@@ -257,7 +258,7 @@ class BrevPeriodeGenerator(
         fom: LocalDate?,
         barnMedUtbetaling: List<MinimertRestPerson>,
         utbetalingsbeløp: Int
-    ) = if (restBehandlingsgrunnlagForBrev.erInstitusjon) {
+    ) = if (restBehandlingsgrunnlagForBrev.fagsakType == FagsakType.INSTITUSJON) {
         when (minimertVedtaksperiode.type) {
             Vedtaksperiodetype.FORTSATT_INNVILGET -> BrevPeriodeType.FORTSATT_INNVILGET_INSTITUSJON
             Vedtaksperiodetype.UTBETALING -> when (utbetalingsbeløp) {
