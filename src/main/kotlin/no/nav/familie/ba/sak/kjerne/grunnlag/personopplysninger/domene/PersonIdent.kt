@@ -2,8 +2,8 @@ package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import java.util.Objects
-import javax.persistence.Column
-import javax.persistence.Embeddable
+import jakarta.persistence.Column
+import jakarta.persistence.Embeddable
 
 /**
  * Denne mapper p.t Norsk person ident (fødselsnummer, inkl F-nr, D-nr eller FDAT)

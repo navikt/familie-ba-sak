@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.eøs.felles
 
 import no.nav.familie.ba.sak.common.BaseEntitet
-import javax.persistence.MappedSuperclass
+import jakarta.persistence.MappedSuperclass
 
 @MappedSuperclass
 abstract class PeriodeOgBarnSkjemaEntitet<T : PeriodeOgBarnSkjema<T>> :

@@ -67,7 +67,7 @@ import java.time.Month.NOVEMBER
 import java.time.Month.OCTOBER
 import java.time.Month.SEPTEMBER
 import java.time.YearMonth
-import javax.validation.ConstraintViolationException
+import jakarta.validation.ConstraintViolationException
 
 private const val NULLDATO = "000000"
 private val SISTE_DATO_FORRIGE_SATS = LocalDate.of(2023, 2, 28)

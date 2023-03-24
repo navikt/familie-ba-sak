@@ -6,18 +6,18 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
 import java.time.LocalDate
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.EntityListeners
-import javax.persistence.EnumType
-import javax.persistence.Enumerated
-import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType
-import javax.persistence.Id
-import javax.persistence.JoinColumn
-import javax.persistence.OneToOne
-import javax.persistence.SequenceGenerator
-import javax.persistence.Table
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.EntityListeners
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.OneToOne
+import jakarta.persistence.SequenceGenerator
+import jakarta.persistence.Table
 
 /**
  * Periode vi har hentet fra ef-sak som representerer når en person

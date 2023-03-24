@@ -5,17 +5,17 @@ import no.nav.familie.ba.sak.common.StringListConverter
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.Filtreringsregel
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
-import javax.persistence.Column
-import javax.persistence.Convert
-import javax.persistence.Entity
-import javax.persistence.EntityListeners
-import javax.persistence.EnumType
-import javax.persistence.Enumerated
-import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType
-import javax.persistence.Id
-import javax.persistence.SequenceGenerator
-import javax.persistence.Table
+import jakarta.persistence.Column
+import jakarta.persistence.Convert
+import jakarta.persistence.Entity
+import jakarta.persistence.EntityListeners
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
+import jakarta.persistence.SequenceGenerator
+import jakarta.persistence.Table
 
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "FødselshendelsefiltreringResultat")

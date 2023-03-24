@@ -30,7 +30,7 @@ import no.nav.familie.kontrakter.felles.simulering.SimuleringMottaker
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.LocalDate
-import javax.transaction.Transactional
+import jakarta.transaction.Transactional
 
 @Service
 class SimuleringService(

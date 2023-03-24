@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.integrasjoner.infotrygd
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import org.springframework.stereotype.Service
-import javax.transaction.Transactional
+import jakarta.transaction.Transactional
 
 @Service
 class InfotrygdFeedService(

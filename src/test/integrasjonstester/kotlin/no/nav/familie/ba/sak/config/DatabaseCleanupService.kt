@@ -6,10 +6,10 @@ import org.springframework.core.env.Environment
 import org.springframework.data.relational.core.mapping.RelationalMappingContext
 import org.springframework.data.relational.core.sql.IdentifierProcessing
 import org.springframework.stereotype.Service
-import javax.persistence.EntityManager
-import javax.persistence.Table
-import javax.persistence.metamodel.Metamodel
-import javax.transaction.Transactional
+import jakarta.persistence.EntityManager
+import jakarta.persistence.Table
+import jakarta.persistence.metamodel.Metamodel
+import jakarta.transaction.Transactional
 import kotlin.reflect.full.findAnnotation
 import org.springframework.data.relational.core.mapping.Table as JdbcTable
 
@@ -45,7 +45,7 @@ class DatabaseCleanupService(
                         val tableAnnotation: Table? = it.javaType.kotlin.findAnnotation()
                         val jdbcTableAnnotation: JdbcTable? = it.javaType.kotlin.findAnnotation()
                         tableAnnotation?.name ?: jdbcTableAnnotation?.value
-                            ?: throw IllegalStateException("should never get here")
+                        ?: throw IllegalStateException("should never get here")
                     } + getJdbcTableNames()
             }
             return field

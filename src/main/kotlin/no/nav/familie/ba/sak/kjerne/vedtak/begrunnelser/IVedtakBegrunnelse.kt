@@ -8,8 +8,8 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevBegrunnelseGrunnlagMedPersoner
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
-import javax.persistence.AttributeConverter
-import javax.persistence.Converter
+import jakarta.persistence.AttributeConverter
+import jakarta.persistence.Converter
 
 interface IVedtakBegrunnelse {
 
@@ -39,7 +39,8 @@ interface IVedtakBegrunnelse {
     }
 }
 
-fun IVedtakBegrunnelse.erAvslagUregistrerteBarnBegrunnelse() = this in setOf(Standardbegrunnelse.AVSLAG_UREGISTRERT_BARN, EØSStandardbegrunnelse.AVSLAG_EØS_UREGISTRERT_BARN)
+fun IVedtakBegrunnelse.erAvslagUregistrerteBarnBegrunnelse() =
+    this in setOf(Standardbegrunnelse.AVSLAG_UREGISTRERT_BARN, EØSStandardbegrunnelse.AVSLAG_EØS_UREGISTRERT_BARN)
 
 class IVedtakBegrunnelseDeserializer : StdDeserializer<List<IVedtakBegrunnelse>>(List::class.java) {
     override fun deserialize(jsonParser: JsonParser?, p1: DeserializationContext?): List<IVedtakBegrunnelse> {

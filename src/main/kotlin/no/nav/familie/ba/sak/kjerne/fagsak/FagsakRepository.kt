@@ -14,7 +14,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.Optional
-import javax.persistence.LockModeType
+import jakarta.persistence.LockModeType
 
 @Repository
 interface FagsakRepository : JpaRepository<Fagsak, Long> {

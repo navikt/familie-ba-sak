@@ -6,8 +6,8 @@ import no.nav.familie.ba.sak.config.RolleConfig
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import javax.servlet.http.HttpServletRequest
-import javax.servlet.http.HttpServletResponse
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 
 internal class RolletilgangInterceptorTest : AbstractSpringIntegrationTest() {
 

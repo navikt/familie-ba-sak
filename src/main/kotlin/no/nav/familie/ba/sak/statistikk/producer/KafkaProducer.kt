@@ -109,22 +109,20 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
         val meldingIString: String = objectMapper.writeValueAsString(melding)
 
         kafkaAivenTemplate.send(FAGSYSTEMSBEHANDLING_RESPONS_TBK_TOPIC, key, meldingIString)
-            .addCallback(
-                {
-                    logger.info(
-                        "Melding på topic $FAGSYSTEMSBEHANDLING_RESPONS_TBK_TOPIC for " +
-                            "$behandlingId med $key er sendt. " +
-                            "Fikk offset ${it?.recordMetadata?.offset()}"
-                    )
-                },
-                {
-                    val feilmelding =
-                        "Melding på topic $FAGSYSTEMSBEHANDLING_RESPONS_TBK_TOPIC kan ikke sendes for " +
-                            "$behandlingId med $key. Feiler med ${it.message}"
-                    logger.warn(feilmelding)
-                    throw Feil(message = feilmelding)
-                }
-            )
+            .thenAccept {
+                logger.info(
+                    "Melding på topic $FAGSYSTEMSBEHANDLING_RESPONS_TBK_TOPIC for " +
+                        "$behandlingId med $key er sendt. " +
+                        "Fikk offset ${it?.recordMetadata?.offset()}"
+                )
+            }
+            .exceptionally {
+                val feilmelding =
+                    "Melding på topic $FAGSYSTEMSBEHANDLING_RESPONS_TBK_TOPIC kan ikke sendes for " +
+                        "$behandlingId med $key. Feiler med ${it.message}"
+                logger.warn(feilmelding)
+                throw Feil(message = feilmelding)
+            }
     }
 
     override fun sendBarnetrygdBisysMelding(
@@ -135,23 +133,23 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
             objectMapper.writeValueAsString(barnetrygdBisysMelding)
 
         kafkaAivenTemplate.send(OPPHOER_BARNETRYGD_BISYS_TOPIC, behandlingId, opphørBarnetrygdBisysMelding)
-            .addCallback(
-                {
-                    logger.info(
-                        "Melding på topic $OPPHOER_BARNETRYGD_BISYS_TOPIC for " +
-                            "$behandlingId er sendt. " +
-                            "Fikk offset ${it?.recordMetadata?.offset()}"
-                    )
-                    secureLogger.info("Send barnetrygd bisys melding $opphørBarnetrygdBisysMelding")
-                },
-                {
-                    val feilmelding =
-                        "Melding på topic $OPPHOER_BARNETRYGD_BISYS_TOPIC kan ikke sendes for " +
-                            "$behandlingId. Feiler med ${it.message}"
-                    logger.warn(feilmelding)
-                    throw Feil(message = feilmelding)
-                }
-            )
+            .thenAccept {
+
+                logger.info(
+                    "Melding på topic $OPPHOER_BARNETRYGD_BISYS_TOPIC for " +
+                        "$behandlingId er sendt. " +
+                        "Fikk offset ${it?.recordMetadata?.offset()}"
+                )
+                secureLogger.info("Send barnetrygd bisys melding $opphørBarnetrygdBisysMelding")
+            }
+            .exceptionally {
+
+                val feilmelding =
+                    "Melding på topic $OPPHOER_BARNETRYGD_BISYS_TOPIC kan ikke sendes for " +
+                        "$behandlingId. Feiler med ${it.message}"
+                logger.warn(feilmelding)
+                throw Feil(message = feilmelding)
+            }
     }
 
     companion object {

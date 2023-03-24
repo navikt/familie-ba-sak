@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.common
 
 import java.sql.Date
 import java.time.YearMonth
-import javax.persistence.AttributeConverter
+import jakarta.persistence.AttributeConverter
 
 class YearMonthConverter : AttributeConverter<YearMonth, Date> {
 

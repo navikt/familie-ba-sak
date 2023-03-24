@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import javax.transaction.Transactional
+import jakarta.transaction.Transactional
 
 @RestController
 @RequestMapping("/api/konsistensavstemming")

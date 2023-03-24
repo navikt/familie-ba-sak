@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.Query
 import java.math.BigInteger
 import java.time.LocalDateTime
 import java.time.YearMonth
-import javax.persistence.LockModeType
+import jakarta.persistence.LockModeType
 
 interface BehandlingRepository : JpaRepository<Behandling, Long> {
 

@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.10</version>
+        <version>3.0.5</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -21,16 +21,16 @@
         <revision>1</revision>
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
-        <spring.cloud.version>3.1.5</spring.cloud.version>
-        <prosessering.version>1.20230228091402_e6ac3c2</prosessering.version>
-        <felles.version>1.20230116145510_2afcc20</felles.version>
+        <spring.cloud.version>4.0.0</spring.cloud.version>
+        <prosessering.version>2.20230322091650_fb0187e-SPRING_BOOT_3</prosessering.version>
+        <felles.version>2.20230210162649_a258d57-SPRING_BOOT_3</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20221118130052_e2abd9f</eksterne-kontrakter-bisys.version>
-        <felles-kontrakter.version>2.0_20230313155154_f9438bd</felles-kontrakter.version>
+        <felles-kontrakter.version>3.0_20230314075921_27fa962-JAKARTA</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20220216121145_5a268ac</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20230223155122_2e81c44</familie.kontrakter.stønadsstatistikk>
         <familie.kontrakter.skatteetaten>2.0_20210920094114_9c74239</familie.kontrakter.skatteetaten>
         <mockk.version>1.13.4</mockk.version>
-        <token-validation-spring.version>2.1.9</token-validation-spring.version>
+        <token-validation-spring.version>3.0.3</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
         <springdoc.version>1.6.15</springdoc.version>
         <sentry.version>6.16.0</sentry.version>
@@ -43,7 +43,6 @@
 
         <medeia-validator-jackson.version>1.1.1</medeia-validator-jackson.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
-        <postgresql.version>42.5.4</postgresql.version>
         <testcontainers.postgresql.version>1.17.6</testcontainers.postgresql.version>
         <unleash.version>7.1.0</unleash.version>
         <maven.model.version>3.9.1</maven.model.version>
@@ -164,7 +163,6 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>${postgresql.version}</version>
         </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
@@ -177,6 +175,12 @@
             <groupId>io.getunleash</groupId>
             <artifactId>unleash-client-java</artifactId>
             <version>${unleash.version}</version>
+        </dependency>
+
+        <!-- https://github.com/spring-projects/spring-boot/issues/33044#issuecomment-1379812611 -->
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-server</artifactId>
         </dependency>
 
         <dependency>

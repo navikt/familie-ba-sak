@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.korrigertetterbetaling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import org.springframework.stereotype.Service
-import javax.transaction.Transactional
+import jakarta.transaction.Transactional
 
 @Service
 class KorrigertEtterbetalingService(

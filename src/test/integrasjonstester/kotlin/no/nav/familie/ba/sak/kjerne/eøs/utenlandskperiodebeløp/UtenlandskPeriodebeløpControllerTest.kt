@@ -19,7 +19,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.http.HttpStatus
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
-import javax.validation.ConstraintViolationException
+import jakarta.validation.ConstraintViolationException
 
 @SpringBootTest
 @ContextConfiguration(classes = [TestConfig::class, UtenlandskPeriodebeløpController::class, ValidationAutoConfiguration::class])

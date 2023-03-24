@@ -21,7 +21,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullMed
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.YearMonth
-import javax.transaction.Transactional
+import jakarta.transaction.Transactional
 
 @Service
 class SmåbarnstilleggKorrigeringService(

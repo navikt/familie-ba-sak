@@ -3,14 +3,14 @@ package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
-import javax.persistence.Embedded
-import javax.persistence.Entity
-import javax.persistence.EntityListeners
-import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType
-import javax.persistence.Id
-import javax.persistence.SequenceGenerator
-import javax.persistence.Table
+import jakarta.persistence.Embedded
+import jakarta.persistence.Entity
+import jakarta.persistence.EntityListeners
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
+import jakarta.persistence.SequenceGenerator
+import jakarta.persistence.Table
 
 /**
  * Ble brukt i tidlig fase av automatisk vurdering av fødselshendelser, men brukes ikke lenger.

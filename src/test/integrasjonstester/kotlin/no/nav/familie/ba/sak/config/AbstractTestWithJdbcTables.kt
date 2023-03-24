@@ -4,7 +4,7 @@ import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.core.io.ClassPathResource
 import org.springframework.jdbc.datasource.init.ScriptUtils
 import org.springframework.test.context.ActiveProfiles
-import javax.sql.DataSource
+import jakarta.sql.DataSource
 
 @TestConfiguration
 @ActiveProfiles("!preprod", "!prod")

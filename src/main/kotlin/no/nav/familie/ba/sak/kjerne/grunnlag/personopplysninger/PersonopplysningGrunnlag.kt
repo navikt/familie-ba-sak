@@ -7,17 +7,17 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
-import javax.persistence.CascadeType
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.EntityListeners
-import javax.persistence.FetchType
-import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType
-import javax.persistence.Id
-import javax.persistence.OneToMany
-import javax.persistence.SequenceGenerator
-import javax.persistence.Table
+import jakarta.persistence.CascadeType
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.EntityListeners
+import jakarta.persistence.FetchType
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
+import jakarta.persistence.OneToMany
+import jakarta.persistence.SequenceGenerator
+import jakarta.persistence.Table
 
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity
@@ -55,7 +55,7 @@ data class PersonopplysningGrunnlag(
 
     val søker: Person
         get() = personer.singleOrNull { it.type == PersonType.SØKER }
-            // Vil returnere barnet på EM-saker, som da i prinsippet også er søkeren. Vil også returnere barnet på inst. saker
+        // Vil returnere barnet på EM-saker, som da i prinsippet også er søkeren. Vil også returnere barnet på inst. saker
             ?: personer.singleOrNull()?.takeIf { it.type == PersonType.BARN }
             ?: error("Persongrunnlag mangler søker eller det finnes flere personer i grunnlaget med type=SØKER")
 

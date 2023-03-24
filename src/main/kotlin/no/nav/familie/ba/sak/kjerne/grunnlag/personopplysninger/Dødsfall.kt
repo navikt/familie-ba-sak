@@ -6,16 +6,16 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestRegisteropplysning
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlKontaktinformasjonForDødsboAdresse
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.EntityListeners
-import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType
-import javax.persistence.Id
-import javax.persistence.JoinColumn
-import javax.persistence.OneToOne
-import javax.persistence.SequenceGenerator
-import javax.persistence.Table
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.EntityListeners
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.OneToOne
+import jakarta.persistence.SequenceGenerator
+import jakarta.persistence.Table
 
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "Dødsfall")
@@ -43,7 +43,9 @@ data class Dødsfall(
     @Column(name = "doedsfall_poststed", nullable = true)
     val dødsfallPoststed: String?
 ) : BaseEntitet() {
-    fun hentAdresseToString(): String { return """$dødsfallAdresse, $dødsfallPostnummer $dødsfallPoststed""" }
+    fun hentAdresseToString(): String {
+        return """$dødsfallAdresse, $dødsfallPostnummer $dødsfallPoststed"""
+    }
 
     fun tilRestRegisteropplysning() = RestRegisteropplysning(
         fom = this.dødsfallDato,
@@ -52,7 +54,11 @@ data class Dødsfall(
     )
 }
 
-fun lagDødsfall(person: Person, dødsfallDatoFraPdl: String?, dødsfallAdresseFraPdl: PdlKontaktinformasjonForDødsboAdresse?): Dødsfall? {
+fun lagDødsfall(
+    person: Person,
+    dødsfallDatoFraPdl: String?,
+    dødsfallAdresseFraPdl: PdlKontaktinformasjonForDødsboAdresse?
+): Dødsfall? {
     if (dødsfallDatoFraPdl == null || dødsfallDatoFraPdl == "") {
         return null
     }

@@ -12,20 +12,20 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.fpsak.tidsserie.StandardCombinators
 import java.time.LocalDate
 import java.time.YearMonth
-import javax.persistence.CascadeType
-import javax.persistence.Column
-import javax.persistence.Convert
-import javax.persistence.Entity
-import javax.persistence.EntityListeners
-import javax.persistence.FetchType
-import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType
-import javax.persistence.Id
-import javax.persistence.JoinColumn
-import javax.persistence.OneToMany
-import javax.persistence.OneToOne
-import javax.persistence.SequenceGenerator
-import javax.persistence.Table
+import jakarta.persistence.CascadeType
+import jakarta.persistence.Column
+import jakarta.persistence.Convert
+import jakarta.persistence.Entity
+import jakarta.persistence.EntityListeners
+import jakarta.persistence.FetchType
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.OneToMany
+import jakarta.persistence.OneToOne
+import jakarta.persistence.SequenceGenerator
+import jakarta.persistence.Table
 
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "TilkjentYtelse")
@@ -121,6 +121,7 @@ fun TilkjentYtelse.tilTidslinjeMedAndeler(): LocalDateTimeline<List<AndelTilkjen
     return lagTidslinjeMedOverlappendePerioderForAndeler(tidslinjer)
 }
 
-fun TilkjentYtelse.utbetalingsoppdrag(): Utbetalingsoppdrag? = objectMapper.readValue(this.utbetalingsoppdrag, Utbetalingsoppdrag::class.java)
+fun TilkjentYtelse.utbetalingsoppdrag(): Utbetalingsoppdrag? =
+    objectMapper.readValue(this.utbetalingsoppdrag, Utbetalingsoppdrag::class.java)
 
 fun TilkjentYtelse.utbetalingsperioder() = this.utbetalingsoppdrag()?.utbetalingsperiode ?: emptyList()

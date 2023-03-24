@@ -38,7 +38,7 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
-import javax.transaction.Transactional
+import jakarta.transaction.Transactional
 
 @Service
 class InnkommendeJournalføringService(
@@ -240,6 +240,7 @@ class InnkommendeJournalføringService(
                         frontendFeilmelding = "Oppslag på fagsak feilet med behandlingene som ble sendt inn."
                     )
             }
+
             false -> null
         }
 

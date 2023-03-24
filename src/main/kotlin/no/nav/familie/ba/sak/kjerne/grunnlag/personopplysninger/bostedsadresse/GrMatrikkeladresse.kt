@@ -3,10 +3,10 @@ package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
 import java.util.Objects
-import javax.persistence.Column
-import javax.persistence.DiscriminatorValue
-import javax.persistence.Entity
-import javax.persistence.EntityListeners
+import jakarta.persistence.Column
+import jakarta.persistence.DiscriminatorValue
+import jakarta.persistence.Entity
+import jakarta.persistence.EntityListeners
 
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "GrMatrikkeladresse")
