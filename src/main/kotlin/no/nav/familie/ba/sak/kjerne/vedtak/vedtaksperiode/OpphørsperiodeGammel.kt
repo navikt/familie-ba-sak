@@ -14,18 +14,12 @@ import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import java.time.LocalDate
 
-data class OpphørsperiodeGammel(
-    override val periodeFom: LocalDate,
-    override val periodeTom: LocalDate?,
-    override val vedtaksperiodetype: Vedtaksperiodetype = Vedtaksperiodetype.OPPHØR
-) : Vedtaksperiode
-
 fun mapTilOpphørsperioderGammel(
     forrigePersonopplysningGrunnlag: PersonopplysningGrunnlag? = null,
     forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger> = emptyList(),
     personopplysningGrunnlag: PersonopplysningGrunnlag,
     andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
-): List<OpphørsperiodeGammel> {
+): List<Opphørsperiode> {
     val forrigeUtbetalingsperioder = if (forrigePersonopplysningGrunnlag != null) {
         mapTilUtbetalingsperioderGammel(
             personopplysningGrunnlag = forrigePersonopplysningGrunnlag,
@@ -39,7 +33,7 @@ fun mapTilOpphørsperioderGammel(
 
     return if (forrigeUtbetalingsperioder.isNotEmpty() && utbetalingsperioder.isEmpty()) {
         listOf(
-            OpphørsperiodeGammel(
+            Opphørsperiode(
                 periodeFom = forrigeUtbetalingsperioder.minOf { it.periodeFom },
                 periodeTom = forrigeUtbetalingsperioder.maxOf { it.periodeTom }
             )
@@ -60,14 +54,14 @@ fun mapTilOpphørsperioderGammel(
     }
 }
 
-fun slåSammenOpphørsperioderGammel(alleOpphørsperioder: List<OpphørsperiodeGammel>): List<OpphørsperiodeGammel> {
+fun slåSammenOpphørsperioderGammel(alleOpphørsperioder: List<Opphørsperiode>): List<Opphørsperiode> {
     if (alleOpphørsperioder.isEmpty()) return emptyList()
     val sortertOpphørsperioder = alleOpphørsperioder.sortedBy { it.periodeFom }
     return sortertOpphørsperioder.fold(
         mutableListOf(
             sortertOpphørsperioder.first()
         )
-    ) { acc: MutableList<OpphørsperiodeGammel>, nesteOpphørsperiode: OpphørsperiodeGammel ->
+    ) { acc: MutableList<Opphørsperiode>, nesteOpphørsperiode: Opphørsperiode ->
         val forrigeOpphørsperiode = acc.last()
         when {
             nesteOpphørsperiode.periodeFom.isSameOrBefore(forrigeOpphørsperiode.periodeTom ?: TIDENES_ENDE) -> {
@@ -92,7 +86,7 @@ private fun maxOfOpphørsperiodeTom(a: LocalDate?, b: LocalDate?): LocalDate? {
     return if (a != null && b != null) maxOf(a, b) else null
 }
 
-private fun finnOpphørsperioderMellomUtbetalingsperioder(utbetalingsperioder: List<Utbetalingsperiode>): List<OpphørsperiodeGammel> {
+private fun finnOpphørsperioderMellomUtbetalingsperioder(utbetalingsperioder: List<Utbetalingsperiode>): List<Opphørsperiode> {
     val helYtelseTidslinje = LocalDateTimeline(
         listOf(
             LocalDateSegment(
@@ -106,13 +100,13 @@ private fun finnOpphørsperioderMellomUtbetalingsperioder(utbetalingsperioder: L
     return utledSegmenterFjernetOgMapTilOpphørsperioder(utbetalingsperioder, helYtelseTidslinje)
 }
 
-private fun finnOpphørsperiodeEtterSisteUtbetalingsperiode(utbetalingsperioder: List<Utbetalingsperiode>): List<OpphørsperiodeGammel> {
+private fun finnOpphørsperiodeEtterSisteUtbetalingsperiode(utbetalingsperioder: List<Utbetalingsperiode>): List<Opphørsperiode> {
     val sisteUtbetalingsperiodeTom = utbetalingsperioder.maxOf { it.periodeTom }.toYearMonth()
     val nesteMåned = inneværendeMåned().nesteMåned()
 
     return if (sisteUtbetalingsperiodeTom.isBefore(nesteMåned)) {
         listOf(
-            OpphørsperiodeGammel(
+            Opphørsperiode(
                 periodeFom = sisteUtbetalingsperiodeTom.nesteMåned().førsteDagIInneværendeMåned(),
                 periodeTom = null,
                 vedtaksperiodetype = Vedtaksperiodetype.OPPHØR
@@ -160,7 +154,7 @@ internal fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.lagUtbetalingsperio
 private fun finnOpphørsperioderPåGrunnAvReduksjonIRevurdering(
     forrigeUtbetalingsperioder: List<Utbetalingsperiode>,
     utbetalingsperioder: List<Utbetalingsperiode>
-): List<OpphørsperiodeGammel> {
+): List<Opphørsperiode> {
     val forrigeUtbetalingstidslinje = LocalDateTimeline(forrigeUtbetalingsperioder.map { it.tilTomtSegment() })
 
     return utledSegmenterFjernetOgMapTilOpphørsperioder(utbetalingsperioder, forrigeUtbetalingstidslinje)
@@ -169,12 +163,12 @@ private fun finnOpphørsperioderPåGrunnAvReduksjonIRevurdering(
 private fun utledSegmenterFjernetOgMapTilOpphørsperioder(
     utbetalingsperioder: List<Utbetalingsperiode>,
     sammenligningstidslinje: LocalDateTimeline<Nothing?>
-): List<OpphørsperiodeGammel> {
+): List<Opphørsperiode> {
     val utbetalingstidslinje = LocalDateTimeline(utbetalingsperioder.map { it.tilTomtSegment() })
     val segmenterFjernet = sammenligningstidslinje.disjoint(utbetalingstidslinje).compress()
 
     return segmenterFjernet.toList().map {
-        OpphørsperiodeGammel(
+        Opphørsperiode(
             periodeFom = it.fom,
             periodeTom = it.tom,
             vedtaksperiodetype = Vedtaksperiodetype.OPPHØR
