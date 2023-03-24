@@ -8,6 +8,8 @@ import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingIdConverter
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.hentPerioderMedEndringerFra
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -53,7 +55,8 @@ data class AndelTilkjentYtelse(
     val id: Long = 0,
 
     @Column(name = "fk_behandling_id", nullable = false, updatable = false)
-    val behandlingId: Long,
+    @Convert(converter = BehandlingIdConverter::class)
+    val behandlingId: BehandlingId,
 
     @ManyToOne(cascade = [CascadeType.MERGE])
     @JoinColumn(name = "tilkjent_ytelse_id", nullable = false, updatable = false)
@@ -92,7 +95,8 @@ data class AndelTilkjentYtelse(
     // og enklere å jobbe med har vi valgt å trekke det ut hit.
 
     @Column(name = "kilde_behandling_id")
-    var kildeBehandlingId: Long? = null, // Brukes til å finne hvilke behandlinger som skal konsistensavstemmes
+    @Convert(converter = BehandlingIdConverter::class)
+    var kildeBehandlingId: BehandlingId? = null, // Brukes til å finne hvilke behandlinger som skal konsistensavstemmes
 
     @Column(name = "periode_offset")
     var periodeOffset: Long? = null, // Brukes for å koble seg på tidligere kjeder sendt til økonomi
