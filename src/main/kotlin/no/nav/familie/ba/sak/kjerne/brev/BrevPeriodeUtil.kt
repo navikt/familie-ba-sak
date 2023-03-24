@@ -64,14 +64,13 @@ fun hentAntallBarnForAvslagsbegrunnelse(
 fun hentRestBehandlingsgrunnlagForBrev(
     persongrunnlag: PersonopplysningGrunnlag,
     vilkårsvurdering: Vilkårsvurdering,
-    endredeUtbetalingAndeler: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>,
-    erInstitusjon: Boolean
+    endredeUtbetalingAndeler: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>
 ): RestBehandlingsgrunnlagForBrev {
     return RestBehandlingsgrunnlagForBrev(
         personerPåBehandling = persongrunnlag.søkerOgBarn.map { it.tilMinimertPerson() },
         minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
         minimerteEndredeUtbetalingAndeler = endredeUtbetalingAndeler.map { it.tilMinimertRestEndretUtbetalingAndel() },
-        erInstitusjon = erInstitusjon
+        fagsakType = vilkårsvurdering.behandling.fagsak.type
     )
 }
 

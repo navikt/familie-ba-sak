@@ -541,7 +541,7 @@ fun lagPersonResultat(
 
     if (lagFullstendigVilkårResultat) {
         personResultat.setSortedVilkårResultater(
-            Vilkår.hentVilkårFor(personType = personType, fagsakType = FagsakType.NORMAL).map {
+            Vilkår.hentVilkårFor(personType = personType, fagsakType = FagsakType.NORMAL, behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR).map {
                 VilkårResultat(
                     personResultat = personResultat,
                     periodeFom = if (it.gjelderAlltidFraBarnetsFødselsdato()) person.fødselsdato else periodeFom,

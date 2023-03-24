@@ -3,16 +3,9 @@ package no.nav.familie.ba.sak.kjerne.beregning
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.hentUtbetalingstidslinjeForSøker
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
-import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerForBarna
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
-import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
-import no.nav.familie.ba.sak.kjerne.tidslinje.fraOgMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.outerJoin
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonthEllerNull
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.fpsak.tidsserie.StandardCombinators
@@ -58,12 +51,6 @@ internal fun utledEndringstidspunkt(
     ).minOfOrNull { it }?.førsteDagIInneværendeMåned() ?: TIDENES_ENDE
 }
 
-fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.hentFørsteEndringstidspunkt(
-    forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
-): LocalDate? = this.hentPerioderMedEndringerFra(forrigeAndelerTilkjentYtelse)
-    .mapNotNull { (_, tidslinjeMedDifferanserPåPerson) -> tidslinjeMedDifferanserPåPerson.minOfOrNull { it.fom } }
-    .minOfOrNull { it }
-
 fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.hentPerioderMedEndringerFra(
     forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
 ): Map<AktørId, LocalDateTimeline<Beløpsdifferanse>> {
@@ -88,23 +75,6 @@ fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.hentPerioderMedEndringerFra(
             kombinertTidslinje.toSegments().mapNotNull { it.tilSegmentMedEndringer() }
         )
     }.filter { it.value.toSegments().isNotEmpty() }
-}
-
-fun Iterable<Kompetanse>.finnFørsteEndringstidspunkt(forrigeKompetansePerioder: Iterable<Kompetanse>): YearMonth {
-    val separateTidslinjerForBarna = this.tilSeparateTidslinjerForBarna()
-    val separateTidslinjerForBarnaForrigeBehandling = forrigeKompetansePerioder.tilSeparateTidslinjerForBarna()
-
-    return separateTidslinjerForBarna.outerJoin(separateTidslinjerForBarnaForrigeBehandling) { nyKompetanse, forrigeKompetanse ->
-        when {
-            nyKompetanse == forrigeKompetanse -> null
-            nyKompetanse == null -> forrigeKompetanse
-            forrigeKompetanse == null -> nyKompetanse
-            nyKompetanse != forrigeKompetanse -> nyKompetanse
-            else -> null
-        }
-    }.values
-        .mapNotNull { it.filtrerIkkeNull().fraOgMed()?.tilYearMonthEllerNull() }
-        .minOfOrNull { it } ?: TIDENES_ENDE.toYearMonth()
 }
 
 private fun LocalDateSegment<List<AndelTilkjentYtelseDataForÅKalkulereEndring>>.tilSegmentMedEndringer(): LocalDateSegment<Int>? {

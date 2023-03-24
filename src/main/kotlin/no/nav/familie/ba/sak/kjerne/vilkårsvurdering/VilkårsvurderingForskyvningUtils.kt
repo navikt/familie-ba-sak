@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.erUnder18ÅrVilkårTidslinje
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -38,7 +39,7 @@ object VilkårsvurderingForskyvningUtils {
     ): Tidslinje<List<VilkårResultat>, Måned> {
         val tidslinjer = this.vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår()
 
-        return tidslinjer.kombiner { alleVilkårOppfyltEllerNull(vilkårResultater = it, personType = personType, fagsakType = fagsakType) }
+        return tidslinjer.kombiner { alleOrdinæreVilkårErOppfyltEllerNull(vilkårResultater = it, personType = personType, fagsakType = fagsakType) }
             .filtrerIkkeNull().slåSammenLike()
     }
 
@@ -92,16 +93,20 @@ object VilkårsvurderingForskyvningUtils {
             UtdypendeVilkårsvurdering.DELT_BOSTED_SKAL_IKKE_DELES
         )
 
-    private fun alleVilkårOppfyltEllerNull(
+    private fun alleOrdinæreVilkårErOppfyltEllerNull(
         vilkårResultater: Iterable<VilkårResultat>,
         personType: PersonType,
         fagsakType: FagsakType
     ): List<VilkårResultat>? {
-        return if (vilkårResultater.alleVilkårErOppfylt(personType, fagsakType)) vilkårResultater.filterNotNull() else null
+        return if (vilkårResultater.alleOrdinæreVilkårErOppfylt(personType, fagsakType)) vilkårResultater.filterNotNull() else null
     }
 
-    fun Iterable<VilkårResultat>.alleVilkårErOppfylt(personType: PersonType, fagsakType: FagsakType): Boolean {
-        val alleVilkårForPersonType = Vilkår.hentVilkårFor(personType = personType, fagsakType = fagsakType)
+    fun Iterable<VilkårResultat>.alleOrdinæreVilkårErOppfylt(personType: PersonType, fagsakType: FagsakType): Boolean {
+        val alleVilkårForPersonType = Vilkår.hentVilkårFor(
+            personType = personType,
+            fagsakType = fagsakType,
+            behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR
+        )
         return this.map { it.vilkårType }
             .containsAll(alleVilkårForPersonType) && this.all { it.resultat == Resultat.OPPFYLT }
     }

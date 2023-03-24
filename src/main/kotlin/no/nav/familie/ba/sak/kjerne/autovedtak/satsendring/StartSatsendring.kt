@@ -92,13 +92,6 @@ class StartSatsendring(
             return false
         }
 
-        val aktivOgÅpenBehandling = behandlingRepository.findByFagsakAndAktivAndOpen(fagsakId = fagsak.id)
-        if (aktivOgÅpenBehandling != null) {
-            logger.info("Oppretter ikke satsendringtask for fagsak=${fagsak.id}. Har åpen behandling ${aktivOgÅpenBehandling.id}")
-            ignorerteFagsaker.add(fagsak.id)
-            return false
-        }
-
         val sisteIverksatteBehandling = behandlingRepository.finnSisteIverksatteBehandling(fagsak.id)
         if (sisteIverksatteBehandling != null) {
             val andelerTilkjentYtelseMedEndreteUtbetalinger =
@@ -115,6 +108,13 @@ class StartSatsendring(
                 )
                 logger.info("Fagsak=${fagsak.id} har alt siste satser")
                 return true
+            }
+
+            val aktivOgÅpenBehandling = behandlingRepository.findByFagsakAndAktivAndOpen(fagsakId = fagsak.id)
+            if (aktivOgÅpenBehandling != null) {
+                logger.info("Oppretter ikke satsendringtask for fagsak=${fagsak.id}. Har åpen behandling ${aktivOgÅpenBehandling.id}")
+                ignorerteFagsaker.add(fagsak.id)
+                return false
             }
 
             if (featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_OPPRETT_TASKER)) {

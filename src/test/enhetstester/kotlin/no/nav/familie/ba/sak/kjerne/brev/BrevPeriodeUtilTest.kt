@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.SøkersAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagKompetanse
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -158,7 +159,7 @@ private fun lagBrevperiodeData(fom: LocalDate?, tom: LocalDate?, type: Vedtakspe
         personerPåBehandling = emptyList(),
         minimertePersonResultater = emptyList(),
         minimerteEndredeUtbetalingAndeler = emptyList(),
-        erInstitusjon = false
+        fagsakType = FagsakType.NORMAL
     )
     return BrevperiodeData(
         restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
