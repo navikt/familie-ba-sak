@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.BRUKE_TIDSLINJE_I_STEDET_FOR
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestGenererVedtaksperioderForOverstyrtEndringstidspunkt
@@ -519,9 +520,11 @@ class VedtaksperiodeService(
         val andelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService
             .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.id)
 
-        return andelerTilkjentYtelse.mapTilUtbetalingsperioder(
-            personopplysningGrunnlag = personopplysningGrunnlag
-        )
+        if (featureToggleService.isEnabled(BRUKE_TIDSLINJE_I_STEDET_FOR)) {
+            return andelerTilkjentYtelse.mapTilUtbetalingsperioder(
+                personopplysningGrunnlag = personopplysningGrunnlag
+            )
+        } else return mapTilUtbetalingsperioderGammel(personopplysningGrunnlag, andelerTilkjentYtelse)
     }
 
     fun hentOpphørsperioder(
@@ -552,16 +555,31 @@ class VedtaksperiodeService(
         val andelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService
             .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.id)
 
-        val alleOpphørsperioder = mapTilOpphørsperioder(
-            forrigePersonopplysningGrunnlag = forrigePersonopplysningGrunnlag,
-            forrigeAndelerTilkjentYtelse = forrigeAndelerMedEndringer,
-            personopplysningGrunnlag = personopplysningGrunnlag,
-            andelerTilkjentYtelse = andelerTilkjentYtelse
-        )
+        val alleOpphørsperioder = if (featureToggleService.isEnabled(BRUKE_TIDSLINJE_I_STEDET_FOR)) {
+            mapTilOpphørsperioder(
+                forrigePersonopplysningGrunnlag = forrigePersonopplysningGrunnlag,
+                forrigeAndelerTilkjentYtelse = forrigeAndelerMedEndringer,
+                personopplysningGrunnlag = personopplysningGrunnlag,
+                andelerTilkjentYtelse = andelerTilkjentYtelse
+            )
+        } else {
+            mapTilOpphørsperioderGammel(
+                forrigePersonopplysningGrunnlag = forrigePersonopplysningGrunnlag,
+                forrigeAndelerTilkjentYtelse = forrigeAndelerMedEndringer,
+                personopplysningGrunnlag = personopplysningGrunnlag,
+                andelerTilkjentYtelse = andelerTilkjentYtelse
+            )
+        }
         val (perioderFørEndringstidspunkt, fraEndringstidspunktOgUtover) =
             alleOpphørsperioder.partition { it.periodeFom.isBefore(endringstidspunkt) }
 
-        return perioderFørEndringstidspunkt + slåSammenOpphørsperioder(fraEndringstidspunktOgUtover)
+        val sammenSlåtteOpphørsPerioder = if (featureToggleService.isEnabled(BRUKE_TIDSLINJE_I_STEDET_FOR)) {
+            slåSammenOpphørsperioder(fraEndringstidspunktOgUtover)
+        } else {
+            slåSammenOpphørsperioderGammel(fraEndringstidspunktOgUtover)
+        }
+
+        return perioderFørEndringstidspunkt + sammenSlåtteOpphørsPerioder
     }
 
     private fun hentAvslagsperioderMedBegrunnelser(vedtak: Vedtak): List<VedtaksperiodeMedBegrunnelser> {
@@ -653,6 +671,7 @@ class VedtaksperiodeService(
                                 standardbegrunnelse = Standardbegrunnelse.AVSLAG_UREGISTRERT_BARN
                             )
                         )
+
                         BehandlingKategori.EØS -> eøsBegrunnelser.add(
                             EØSBegrunnelse(
                                 vedtaksperiodeMedBegrunnelser = this,
