@@ -110,7 +110,7 @@ internal class BisysServiceTest {
 
         every { mockFagsakRepository.finnFagsakForAktør(any()) } returns behandling.fagsak
         every { mockBehandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id) } returns behandling
-        every { mockTilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandling.id) } returns andelTilkjentYtelse.tilkjentYtelse
+        every { mockTilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandling.behandlingId.id) } returns andelTilkjentYtelse.tilkjentYtelse
         every { mockPersonidentService.hentAktør(any()) } answers { behandling.fagsak.aktør }
         every { mockPersonidentService.hentAlleFødselsnummerForEnAktør(any()) } answers { listOf(behandling.fagsak.aktør.aktivFødselsnummer()) }
 
@@ -165,7 +165,7 @@ internal class BisysServiceTest {
         every { mockFagsakRepository.finnFagsakForAktør(any()) } returns behandling.fagsak
 
         every { mockBehandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id) } returns behandling
-        every { mockTilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandling.id) } returns andelTilkjentYtelse.tilkjentYtelse
+        every { mockTilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandling.behandlingId.id) } returns andelTilkjentYtelse.tilkjentYtelse
 
         val response =
             bisysService.hentUtvidetBarnetrygd(andelTilkjentYtelse.aktør.aktivFødselsnummer(), LocalDate.of(2019, 1, 1))
@@ -217,7 +217,7 @@ internal class BisysServiceTest {
         every { mockFagsakRepository.finnFagsakForAktør(any()) } returns behandling.fagsak
 
         every { mockBehandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id) } returns behandling
-        every { mockTilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandling.id) } returns andelTilkjentYtelse.tilkjentYtelse
+        every { mockTilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandling.behandlingId.id) } returns andelTilkjentYtelse.tilkjentYtelse
 
         val response =
             bisysService.hentUtvidetBarnetrygd(andelTilkjentYtelse.aktør.aktivFødselsnummer(), LocalDate.of(2021, 1, 1))
@@ -269,7 +269,7 @@ internal class BisysServiceTest {
         every { mockFagsakRepository.finnFagsakForAktør(any()) } returns behandling.fagsak
 
         every { mockBehandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id) } returns behandling
-        every { mockTilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandling.id) } returns andelTilkjentYtelse.tilkjentYtelse
+        every { mockTilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandling.behandlingId.id) } returns andelTilkjentYtelse.tilkjentYtelse
 
         val response =
             bisysService.hentUtvidetBarnetrygd(andelTilkjentYtelse.aktør.aktivFødselsnummer(), LocalDate.of(2021, 1, 1))
@@ -320,7 +320,7 @@ internal class BisysServiceTest {
 
         every { mockFagsakRepository.finnFagsakForAktør(any()) } returns behandling.fagsak
         every { mockBehandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(behandling.fagsak.id) } returns behandling
-        every { mockTilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandling.id) } returns andelTilkjentYtelse.tilkjentYtelse
+        every { mockTilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandling.behandlingId.id) } returns andelTilkjentYtelse.tilkjentYtelse
 
         val response =
             bisysService.hentUtvidetBarnetrygd(andelTilkjentYtelse.aktør.aktivFødselsnummer(), LocalDate.of(2019, 1, 1))

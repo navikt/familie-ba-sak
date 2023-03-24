@@ -69,8 +69,8 @@ class BisysService(
         if (fagsak == null || behandling == null) {
             return emptyList()
         }
-        logger.info("Henter bisysperioder for siste iverksette behandlong for fagsakId=${fagsak.id}, behandlingId=${behandling.id}")
-        return tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandling.id)?.andelerTilkjentYtelse
+        logger.info("Henter bisysperioder for siste iverksette behandling for fagsakId=${fagsak.id}, behandlingId=${behandling.behandlingId.id}")
+        return tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandling.behandlingId.id)?.andelerTilkjentYtelse
             ?.filter { it.erSøkersAndel() }
             ?.filter {
                 it.stønadTom.isSameOrAfter(fraDato.toYearMonth())

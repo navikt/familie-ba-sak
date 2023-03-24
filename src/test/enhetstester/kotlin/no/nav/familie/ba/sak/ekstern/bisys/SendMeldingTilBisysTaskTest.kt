@@ -56,8 +56,8 @@ class SendMeldingTilBisysTaskTest {
             førsteSteg = StegType.IVERKSETT_MOT_OPPDRAG
         )
 
-        every { behandlingHentOgPersisterServiceMock.hent(forrigeBehandling.id) } returns forrigeBehandling
-        every { behandlingHentOgPersisterServiceMock.hent(nyBehandling.id) } returns nyBehandling
+        every { behandlingHentOgPersisterServiceMock.hent(forrigeBehandling.behandlingId) } returns forrigeBehandling
+        every { behandlingHentOgPersisterServiceMock.hent(nyBehandling.behandlingId) } returns nyBehandling
 
         every { behandlingHentOgPersisterServiceMock.hentForrigeBehandlingSomErVedtatt(nyBehandling) } returns forrigeBehandling
 
@@ -80,7 +80,7 @@ class SendMeldingTilBisysTaskTest {
 
         val barn1 = lagPerson(type = PersonType.BARN)
 
-        every { tilkjentYtelseRepository.findByBehandling(behandling[0].id) } returns lagInitiellTilkjentYtelse().also {
+        every { tilkjentYtelseRepository.findByBehandling(behandling[0].behandlingId.id) } returns lagInitiellTilkjentYtelse().also {
             it.andelerTilkjentYtelse.add(
                 lagAndelTilkjentYtelse(
                     fom = YearMonth.of(2020, 1),
@@ -90,7 +90,7 @@ class SendMeldingTilBisysTaskTest {
                 )
             )
         }
-        every { tilkjentYtelseRepository.findByBehandling(behandling[1].id) } returns lagInitiellTilkjentYtelse().also {
+        every { tilkjentYtelseRepository.findByBehandling(behandling[1].behandlingId.id) } returns lagInitiellTilkjentYtelse().also {
             // Barn1 opphør fra 04/2022
             it.andelerTilkjentYtelse.add(
                 lagAndelTilkjentYtelse(
@@ -106,12 +106,12 @@ class SendMeldingTilBisysTaskTest {
         every {
             kafkaProducer.kafkaAivenTemplate.send(
                 OPPHOER_BARNETRYGD_BISYS_TOPIC,
-                behandling[1].id.toString(),
+                behandling[1].behandlingId.id.toString(),
                 capture(meldingSlot)
             )
         } returns kafkaResult
 
-        sendMeldingTilBisysTask.doTask(SendMeldingTilBisysTask.opprettTask(behandling[1].id))
+        sendMeldingTilBisysTask.doTask(SendMeldingTilBisysTask.opprettTask(behandling[1].behandlingId))
 
         verify(exactly = 1) { kafkaProducer.kafkaAivenTemplate.send(any(), any(), any()) }
         val jsonMelding = objectMapper.readValue(meldingSlot.captured, BarnetrygdBisysMelding::class.java)
@@ -130,7 +130,7 @@ class SendMeldingTilBisysTaskTest {
 
         val barn1 = lagPerson(type = PersonType.BARN)
 
-        every { tilkjentYtelseRepository.findByBehandling(behandling[0].id) } returns lagInitiellTilkjentYtelse().also {
+        every { tilkjentYtelseRepository.findByBehandling(behandling[0].behandlingId.id) } returns lagInitiellTilkjentYtelse().also {
             it.andelerTilkjentYtelse.add(
                 lagAndelTilkjentYtelse(
                     fom = YearMonth.of(2020, 1),
@@ -140,7 +140,7 @@ class SendMeldingTilBisysTaskTest {
                 )
             )
         }
-        every { tilkjentYtelseRepository.findByBehandling(behandling[1].id) } returns lagInitiellTilkjentYtelse().also {
+        every { tilkjentYtelseRepository.findByBehandling(behandling[1].behandlingId.id) } returns lagInitiellTilkjentYtelse().also {
             // Barn1 reduser fra 04/2022
             it.andelerTilkjentYtelse.add(
                 lagAndelTilkjentYtelse(
@@ -164,12 +164,12 @@ class SendMeldingTilBisysTaskTest {
         every {
             kafkaProducer.kafkaAivenTemplate.send(
                 OPPHOER_BARNETRYGD_BISYS_TOPIC,
-                behandling[1].id.toString(),
+                behandling[1].behandlingId.id.toString(),
                 capture(meldingSlot)
             )
         } returns kafkaResult
 
-        sendMeldingTilBisysTask.doTask(SendMeldingTilBisysTask.opprettTask(behandling[1].id))
+        sendMeldingTilBisysTask.doTask(SendMeldingTilBisysTask.opprettTask(behandling[1].behandlingId))
 
         verify(exactly = 1) { kafkaProducer.kafkaAivenTemplate.send(any(), any(), any()) }
         val jsonMelding = objectMapper.readValue(meldingSlot.captured, BarnetrygdBisysMelding::class.java)
@@ -191,7 +191,7 @@ class SendMeldingTilBisysTaskTest {
         val barn2 = lagPerson(type = PersonType.BARN)
         val barn3 = lagPerson(type = PersonType.BARN)
 
-        every { tilkjentYtelseRepository.findByBehandling(behandling[0].id) } returns lagInitiellTilkjentYtelse().also {
+        every { tilkjentYtelseRepository.findByBehandling(behandling[0].behandlingId.id) } returns lagInitiellTilkjentYtelse().also {
             it.andelerTilkjentYtelse.add(
                 lagAndelTilkjentYtelse(
                     fom = YearMonth.of(2020, 1),
@@ -217,7 +217,7 @@ class SendMeldingTilBisysTaskTest {
                 )
             )
         }
-        every { tilkjentYtelseRepository.findByBehandling(behandling[1].id) } returns lagInitiellTilkjentYtelse().also {
+        every { tilkjentYtelseRepository.findByBehandling(behandling[1].behandlingId.id) } returns lagInitiellTilkjentYtelse().also {
             // Barn1 opphør fra 04/2022
             it.andelerTilkjentYtelse.add(
                 lagAndelTilkjentYtelse(
@@ -297,7 +297,7 @@ class SendMeldingTilBisysTaskTest {
 
         val barn1 = lagPerson(type = PersonType.BARN)
 
-        every { tilkjentYtelseRepository.findByBehandling(behandling[0].id) } returns lagInitiellTilkjentYtelse().also {
+        every { tilkjentYtelseRepository.findByBehandling(behandling[0].behandlingId.id) } returns lagInitiellTilkjentYtelse().also {
             it.andelerTilkjentYtelse.add(
                 lagAndelTilkjentYtelse(
                     fom = YearMonth.of(2020, 1),
@@ -307,7 +307,7 @@ class SendMeldingTilBisysTaskTest {
                 )
             )
         }
-        every { tilkjentYtelseRepository.findByBehandling(behandling[1].id) } returns lagInitiellTilkjentYtelse().also {
+        every { tilkjentYtelseRepository.findByBehandling(behandling[1].behandlingId.id) } returns lagInitiellTilkjentYtelse().also {
             // Barn1 legger til period fra 04/2022
             it.andelerTilkjentYtelse.add(
                 lagAndelTilkjentYtelse(
@@ -327,7 +327,7 @@ class SendMeldingTilBisysTaskTest {
             )
         }
 
-        sendMeldingTilBisysTask.doTask(SendMeldingTilBisysTask.opprettTask(behandling[1].id))
+        sendMeldingTilBisysTask.doTask(SendMeldingTilBisysTask.opprettTask(behandling[1].behandlingId))
 
         verify(exactly = 0) { kafkaProducer.kafkaAivenTemplate.send(any(), any(), any()) }
     }
