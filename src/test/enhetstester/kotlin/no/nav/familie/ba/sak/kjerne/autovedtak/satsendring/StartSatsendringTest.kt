@@ -53,7 +53,7 @@ internal class StartSatsendringTest {
         val taskRepository: TaskRepositoryWrapper = mockk()
         val taskSlot = slot<Task>()
         every { taskRepository.save(capture(taskSlot)) } answers { taskSlot.captured }
-        val opprettTaskService = OpprettTaskService(taskRepository, satskjøringRepository)
+        val opprettTaskService = OpprettTaskService(taskRepository)
         every { featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_SJEKK_UTBETALING, true) } returns false
         every { satsendringService.erFagsakOppdatertMedSisteSatser(any()) } returns true
 
