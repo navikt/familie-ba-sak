@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.brev.domene
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.kjerne.brev.hentPersonidenterGjeldendeForBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
@@ -48,7 +49,7 @@ data class BegrunnelseMedTriggere(
                 !erUregistrerteBarnPåbehandling &&
                 !this.triggesAv.satsendring
             ) {
-                throw Feil(
+                throw FunksjonellFeil(
                     "Begrunnelse '${this.standardbegrunnelse}' var ikke knyttet til noen personer."
                 )
             }
