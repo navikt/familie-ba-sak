@@ -524,7 +524,9 @@ class VedtaksperiodeService(
             return andelerTilkjentYtelse.mapTilUtbetalingsperioder(
                 personopplysningGrunnlag = personopplysningGrunnlag
             )
-        } else return mapTilUtbetalingsperioderGammel(personopplysningGrunnlag, andelerTilkjentYtelse)
+        } else {
+            return mapTilUtbetalingsperioderGammel(personopplysningGrunnlag, andelerTilkjentYtelse)
+        }
     }
 
     fun hentOpphørsperioder(
