@@ -106,7 +106,7 @@ class SatsendringController(
                         behandlingId = it.behandlingId,
                         årsak = HenleggÅrsak.TEKNISK_VEDLIKEHOLD,
                         begrunnelse = SATSENDRING,
-                        validerOppgavefristErEtterDato = LocalDate.now()
+                        validerOppgavefristErEtterDato = null
                     )
                 } else {
                     logger.info("Skulle ha trigget henleggBehandlingTask for fagsakIs=${it.fagsakId} behandlingId=${it.behandlingId}")
