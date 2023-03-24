@@ -1,9 +1,9 @@
 package no.nav.familie.ba.sak.ekstern.bisys
 
+import io.mockk.awaits
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
-import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.defaultFagsak
@@ -27,9 +27,9 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.kafka.support.SendResult
-import org.springframework.util.concurrent.ListenableFuture
 import java.math.BigDecimal
 import java.time.YearMonth
+import java.util.concurrent.CompletableFuture
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SendMeldingTilBisysTaskTest {
@@ -38,14 +38,14 @@ class SendMeldingTilBisysTaskTest {
         val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
         val kafkaProducer: DefaultKafkaProducer,
         val tilkjentYtelseRepository: TilkjentYtelseRepository,
-        val kafkaResult: ListenableFuture<SendResult<String, String>>,
+        val kafkaResult: CompletableFuture<SendResult<String, String>>,
         val behandling: List<Behandling>
     )
 
     fun setupMocks(): Mocks {
         val tilkjentYtelseRepositoryMock = mockk<TilkjentYtelseRepository>()
         val kafkaProducer = DefaultKafkaProducer(mockk())
-        val listenableFutureMock = mockk<ListenableFuture<SendResult<String, String>>>()
+        val listenableFutureMock = mockk<CompletableFuture<SendResult<String, String>>>()
         val behandlingHentOgPersisterServiceMock = mockk<BehandlingHentOgPersisterService>()
 
         val forrigeBehandling = lagBehandling(defaultFagsak(), førsteSteg = StegType.BEHANDLING_AVSLUTTET)
@@ -61,7 +61,8 @@ class SendMeldingTilBisysTaskTest {
 
         every { behandlingHentOgPersisterServiceMock.hentForrigeBehandlingSomErVedtatt(nyBehandling) } returns forrigeBehandling
 
-        every { listenableFutureMock.addCallback(any(), any()) } just runs
+        every { listenableFutureMock.thenAccept(any()) } just awaits
+
         kafkaProducer.kafkaAivenTemplate = mockk()
         return Mocks(
             behandlingHentOgPersisterServiceMock,
