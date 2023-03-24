@@ -33,7 +33,6 @@ abstract class Tidslinje<I, T : Tidsenhet> {
             when {
                 it.fraOgMed > it.tilOgMed ->
                     TidslinjeFeil(periode = it, tidslinje = this, type = TidslinjeFeilType.TOM_ER_FØR_FOM)
-
                 else -> null
             }
         }
@@ -46,21 +45,18 @@ abstract class Tidslinje<I, T : Tidsenhet> {
                         tidslinje = this,
                         type = TidslinjeFeilType.UENDELIG_FORTID_ETTER_FØRSTE_PERIODE
                     )
-
                 periode1.tilOgMed.erUendeligLengeTil() ->
                     TidslinjeFeil(
                         periode = periode1,
                         tidslinje = this,
                         type = TidslinjeFeilType.UENDELIG_FREMTID_FØR_SISTE_PERIODE
                     )
-
                 periode1.tilOgMed >= periode2.fraOgMed ->
                     TidslinjeFeil(
                         periode = periode1,
                         tidslinje = this,
                         type = TidslinjeFeilType.OVERLAPPER_ETTERFØLGENDE_PERIODE
                     )
-
                 else -> null
             }
         }
@@ -107,5 +103,3 @@ fun <I, T : Tidsenhet> tidslinje(lagPerioder: () -> Collection<Periode<I, T>>) =
     object : Tidslinje<I, T>() {
         override fun lagPerioder() = lagPerioder()
     }
-
-fun <I, T : Tidsenhet> List<Periode<I, T>>.tilTidslinje(): Tidslinje<I, T> = tidslinje { this }
