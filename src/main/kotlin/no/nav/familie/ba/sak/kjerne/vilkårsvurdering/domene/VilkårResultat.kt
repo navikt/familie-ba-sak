@@ -8,6 +8,8 @@ import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingIdConverter
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelseListConverter
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
@@ -64,7 +66,8 @@ class VilkårResultat(
     var begrunnelse: String,
 
     @Column(name = "fk_behandling_id", nullable = false)
-    var behandlingId: Long,
+    @Convert(converter = BehandlingIdConverter::class)
+    var behandlingId: BehandlingId,
 
     @Column(name = "er_automatisk_vurdert", nullable = false)
     var erAutomatiskVurdert: Boolean = false,
@@ -144,7 +147,7 @@ class VilkårResultat(
         )
     }
 
-    fun kopierMedNyPeriode(fom: LocalDate, tom: LocalDate, behandlingId: Long): VilkårResultat {
+    fun kopierMedNyPeriode(fom: LocalDate, tom: LocalDate, behandlingId: BehandlingId): VilkårResultat {
         return VilkårResultat(
             personResultat = personResultat,
             erAutomatiskVurdert = erAutomatiskVurdert,
@@ -163,7 +166,7 @@ class VilkårResultat(
     }
 
     fun oppdaterPekerTilBehandling() {
-        behandlingId = personResultat!!.vilkårsvurdering.behandling.id
+        behandlingId = personResultat!!.vilkårsvurdering.behandling.behandlingId
     }
 
     fun erAvslagUtenPeriode() =
