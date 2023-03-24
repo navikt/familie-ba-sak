@@ -627,7 +627,15 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
         val testDataBaSak =
             PerioderTestData(
                 fnr = fnr,
-                aktør = tilAktør(fnr).also { it.personidenter.add(Personident(historiskIdent, aktiv = false, aktør = it)) },
+                aktør = tilAktør(fnr).also {
+                    it.personidenter.add(
+                        Personident(
+                            historiskIdent,
+                            aktiv = false,
+                            aktør = it
+                        )
+                    )
+                },
                 endretDato = LocalDateTime.of(2020, 11, 6, 12, 0),
                 perioder = listOf(
                     Triple(
@@ -684,7 +692,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
             it.andelerTilkjentYtelse.addAll(
                 perioderTestData.perioder.map { p ->
                     AndelTilkjentYtelse(
-                        behandlingId = it.behandling.id,
+                        behandlingId = it.behandling.behandlingId,
                         tilkjentYtelse = it,
                         aktør = perioderTestData.aktør,
                         kalkulertUtbetalingsbeløp = 1000,
@@ -728,7 +736,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
             it.andelerTilkjentYtelse.addAll(
                 perioderTestData.perioder.map { p ->
                     AndelTilkjentYtelse(
-                        behandlingId = it.behandling.id,
+                        behandlingId = it.behandling.behandlingId,
                         tilkjentYtelse = it,
                         aktør = perioderTestData.aktør,
                         kalkulertUtbetalingsbeløp = 1000,

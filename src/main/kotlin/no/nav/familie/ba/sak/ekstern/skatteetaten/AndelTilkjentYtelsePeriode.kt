@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.ekstern.skatteetaten
 
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import java.time.LocalDateTime
 
 interface AndelTilkjentYtelsePeriode {
@@ -16,5 +17,5 @@ interface AndelTilkjentYtelsePeriode {
 
     fun getEndretDato(): LocalDateTime
 
-    fun getBehandlingId(): Long
+    fun getBehandlingId(): BehandlingId
 }

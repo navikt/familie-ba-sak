@@ -102,7 +102,7 @@ class SkatteetatenService(
                     perioderGroupedByPerson.map { behandlingHentOgPersisterService.hent(behandlingId = it.getBehandlingId()) }
                 val sisteIverksatteBehandling = Behandlingutils.hentSisteBehandlingSomErIverksatt(behandlinger)
                 if (sisteIverksatteBehandling != null) {
-                    aktivAndelTilkjentYtelsePeriode.addAll(perioderGroupedByPerson.filter { it.getBehandlingId() == sisteIverksatteBehandling.id })
+                    aktivAndelTilkjentYtelsePeriode.addAll(perioderGroupedByPerson.filter { it.getBehandlingId() == sisteIverksatteBehandling.behandlingId })
                 }
             } else {
                 aktivAndelTilkjentYtelsePeriode.add(perioderGroupedByPerson.first())
