@@ -208,6 +208,34 @@ internal class StartSatsendringTest {
         every { featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_OPPRETT_TASKER) } returns true
 
         val behandling = lagBehandling()
+        every { behandlingRepository.finnSisteIverksatteBehandling(behandling.fagsak.id) } returns behandling
+        every {
+            andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
+                behandling.id
+            )
+        } returns
+            listOf(
+                lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                    YearMonth.of(2022, 12),
+                    YearMonth.of(2039, 11),
+                    ORDINÆR_BARNETRYGD,
+                    behandling = behandling,
+                    person = lagPerson(),
+                    aktør = lagPerson().aktør,
+                    periodeIdOffset = 1,
+                    beløp = 1676
+                ),
+                lagAndelTilkjentYtelseMedEndreteUtbetalinger(
+                    YearMonth.of(2030, 12),
+                    YearMonth.of(2039, 11),
+                    ORDINÆR_BARNETRYGD,
+                    behandling = behandling,
+                    person = lagPerson(),
+                    aktør = lagPerson().aktør,
+                    periodeIdOffset = 1,
+                    beløp = 1054
+                )
+            )
 
         every { behandlingRepository.findByFagsakAndAktivAndOpen(any()) } returns behandling
 
