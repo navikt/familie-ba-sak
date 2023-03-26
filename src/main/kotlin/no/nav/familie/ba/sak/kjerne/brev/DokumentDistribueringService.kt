@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.brev
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
@@ -63,7 +64,7 @@ class DokumentDistribueringService(
                     opprettLogginnslagPåBehandlingOgNyTaskSomDistribuererPåJournalpostId(distribuerDokumentDTO)
 
                 mottakerErIkkeDigitalOgHarUkjentAdresse(ressursException) && behandlingId != null ->
-                    loggBrevIkkeDistribuertUkjentAdresse(journalpostId, behandlingId, brevmal)
+                    loggBrevIkkeDistribuertUkjentAdresse(journalpostId, BehandlingId(behandlingId), brevmal)
 
                 else -> throw ressursException
             }
@@ -80,14 +81,14 @@ class DokumentDistribueringService(
         )
 
         loggService.opprettBrevIkkeDistribuertUkjentDødsboadresseLogg(
-            behandlingId = checkNotNull(distribuerDokumentDTO.behandlingId),
+            behandlingId = BehandlingId(checkNotNull(distribuerDokumentDTO.behandlingId)),
             brevnavn = distribuerDokumentDTO.brevmal.visningsTekst
         )
     }
 
     internal fun loggBrevIkkeDistribuertUkjentAdresse(
         journalpostId: String,
-        behandlingId: Long,
+        behandlingId: BehandlingId,
         brevMal: Brevmal
     ) {
         logger.info("Klarte ikke å distribuere brev for journalpostId $journalpostId på behandling $behandlingId. Bruker har ukjent adresse.")
@@ -107,7 +108,7 @@ class DokumentDistribueringService(
 
         if (distribuerDokumentDTO.behandlingId != null) {
             loggService.opprettDistribuertBrevLogg(
-                behandlingId = distribuerDokumentDTO.behandlingId,
+                behandlingId = BehandlingId(distribuerDokumentDTO.behandlingId),
                 tekst = brevmal.visningsTekst,
                 rolle = loggBehandlerRolle
             )

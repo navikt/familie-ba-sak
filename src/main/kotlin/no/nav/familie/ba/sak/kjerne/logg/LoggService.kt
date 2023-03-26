@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
@@ -52,7 +53,7 @@ class LoggService(
     ) {
         lagre(
             Logg(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId,
                 type = LoggType.BEHANDLENDE_ENHET_ENDRET,
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                     rolleConfig,
@@ -68,7 +69,7 @@ class LoggService(
     fun opprettMottattDokument(behandling: Behandling, tekst: String, mottattDato: LocalDateTime) {
         lagre(
             Logg(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId,
                 type = LoggType.DOKUMENT_MOTTATT,
                 tittel = "Dokument mottatt ${mottattDato.toLocalDate().tilKortString()}",
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
@@ -83,7 +84,7 @@ class LoggService(
     fun opprettRegistrerInstitusjonLogg(behandling: Behandling) {
         lagre(
             Logg(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId,
                 type = LoggType.INSTITUSJON_REGISTRERT,
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                     rolleConfig,
@@ -98,7 +99,7 @@ class LoggService(
         val tittel = "Verge ble registrert"
         lagre(
             Logg(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId,
                 type = LoggType.VERGE_REGISTRERT,
                 tittel = tittel,
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
@@ -114,7 +115,7 @@ class LoggService(
         val tittel = if (!søknadFinnesFraFør) "Søknaden ble registrert" else "Søknaden ble endret"
         lagre(
             Logg(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId,
                 type = LoggType.SØKNAD_REGISTRERT,
                 tittel = tittel,
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
@@ -135,17 +136,17 @@ class LoggService(
     ) {
         lagre(
             Logg(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId,
                 type = LoggType.BEHANDLINGSTYPE_ENDRET,
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                     rolleConfig,
                     BehandlerRolle.SAKSBEHANDLER
                 ),
                 tekst = "Behandlingstema er manuelt endret fra ${
-                tilBehandlingstema(
-                    underkategori = forrigeUnderkategori,
-                    kategori = forrigeKategori
-                )
+                    tilBehandlingstema(
+                        underkategori = forrigeUnderkategori,
+                        kategori = forrigeKategori
+                    )
                 } til ${tilBehandlingstema(underkategori = nyUnderkategori, kategori = nyKategori)}"
             )
         )
@@ -170,7 +171,7 @@ class LoggService(
 
         return lagre(
             Logg(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId,
                 type = LoggType.VILKÅRSVURDERING,
                 tittel = if (forrigeBehandlingsresultat != Behandlingsresultat.IKKE_VURDERT) "Vilkårsvurdering endret" else "Vilkårsvurdering gjennomført",
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
@@ -185,7 +186,7 @@ class LoggService(
     fun opprettAutovedtakTilManuellBehandling(behandling: Behandling, tekst: String) {
         lagre(
             Logg(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId,
                 type = LoggType.AUTOVEDTAK_TIL_MANUELL_BEHANDLING,
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                     rolleConfig,
@@ -199,7 +200,7 @@ class LoggService(
     private fun opprettLivshendelseLogg(behandling: BehandlingLoggRequest, tittel: String) {
         lagre(
             Logg(
-                behandlingId = behandling.behandling.id,
+                behandlingId = behandling.behandling.behandlingId,
                 type = LoggType.LIVSHENDELSE,
                 tittel = tittel,
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
@@ -230,7 +231,7 @@ class LoggService(
 
         lagre(
             Logg(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId,
                 type = LoggType.BEHANDLING_OPPRETTET,
                 tittel = "${behandling.type.visningsnavn} opprettet",
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
@@ -245,7 +246,7 @@ class LoggService(
     fun opprettSendTilBeslutterLogg(behandling: Behandling, skalAutomatiskBesluttes: Boolean) {
         lagre(
             Logg(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId,
                 type = if (behandling.erManuellMigrering() && skalAutomatiskBesluttes) LoggType.SEND_TIL_SYSTEM else LoggType.SEND_TIL_BESLUTTER,
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                     rolleConfig,
@@ -255,12 +256,18 @@ class LoggService(
         )
     }
 
-    fun opprettBeslutningOmVedtakLogg(behandling: Behandling, beslutning: Beslutning, begrunnelse: String? = null, behandlingErAutomatiskBesluttet: Boolean) {
-        val behandlingErManuellMigreringSomBleAutomatiskBesluttet = behandling.erManuellMigrering() && behandlingErAutomatiskBesluttet
+    fun opprettBeslutningOmVedtakLogg(
+        behandling: Behandling,
+        beslutning: Beslutning,
+        begrunnelse: String? = null,
+        behandlingErAutomatiskBesluttet: Boolean
+    ) {
+        val behandlingErManuellMigreringSomBleAutomatiskBesluttet =
+            behandling.erManuellMigrering() && behandlingErAutomatiskBesluttet
 
         lagre(
             Logg(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId,
                 type = if (behandlingErManuellMigreringSomBleAutomatiskBesluttet) LoggType.MIGRERING_BEKREFTET else LoggType.GODKJENNE_VEDTAK,
                 tittel = if (beslutning.erGodkjent()) {
                     if (behandlingErManuellMigreringSomBleAutomatiskBesluttet) "Migrering bekreftet" else "Vedtak godkjent"
@@ -278,7 +285,7 @@ class LoggService(
         )
     }
 
-    fun opprettDistribuertBrevLogg(behandlingId: Long, tekst: String, rolle: BehandlerRolle) {
+    fun opprettDistribuertBrevLogg(behandlingId: BehandlingId, tekst: String, rolle: BehandlerRolle) {
         lagre(
             Logg(
                 behandlingId = behandlingId,
@@ -289,7 +296,7 @@ class LoggService(
         )
     }
 
-    fun opprettBrevIkkeDistribuertUkjentAdresseLogg(behandlingId: Long, brevnavn: String) {
+    fun opprettBrevIkkeDistribuertUkjentAdresseLogg(behandlingId: BehandlingId, brevnavn: String) {
         lagre(
             Logg(
                 behandlingId = behandlingId,
@@ -300,7 +307,7 @@ class LoggService(
         )
     }
 
-    fun opprettBrevIkkeDistribuertUkjentDødsboadresseLogg(behandlingId: Long, brevnavn: String) {
+    fun opprettBrevIkkeDistribuertUkjentDødsboadresseLogg(behandlingId: BehandlingId, brevnavn: String) {
         lagre(
             Logg(
                 behandlingId = behandlingId,
@@ -314,7 +321,7 @@ class LoggService(
     fun opprettFerdigstillBehandling(behandling: Behandling) {
         lagre(
             Logg(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId,
                 type = LoggType.FERDIGSTILLE_BEHANDLING,
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.SYSTEM)
             )
@@ -324,7 +331,7 @@ class LoggService(
     fun opprettHenleggBehandling(behandling: Behandling, årsak: String, begrunnelse: String) {
         lagre(
             Logg(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId,
                 type = LoggType.HENLEGG_BEHANDLING,
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                     rolleConfig,
@@ -340,7 +347,7 @@ class LoggService(
             "${barn.navn.uppercase()} (${barn.hentAlder()} år) | ${Identkonverterer.formaterIdent(barn.aktør.aktivFødselsnummer())} lagt til"
         lagre(
             Logg(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId,
                 type = LoggType.BARN_LAGT_TIL,
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                     rolleConfig,
@@ -354,7 +361,7 @@ class LoggService(
     fun opprettSettPåVentLogg(behandling: Behandling, årsak: String) {
         lagre(
             Logg(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId,
                 type = LoggType.BEHANDLIG_SATT_PÅ_VENT,
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                     rolleConfig,
@@ -378,7 +385,7 @@ class LoggService(
 
         lagre(
             Logg(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId,
                 type = LoggType.VENTENDE_BEHANDLING_ENDRET,
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                     rolleConfig,
@@ -411,7 +418,7 @@ class LoggService(
 
         lagre(
             Logg(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId,
                 type = LoggType.KORRIGERT_ETTERBETALING,
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                     rolleConfig,
@@ -429,7 +436,7 @@ class LoggService(
     ) =
         lagre(
             Logg(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId,
                 type = LoggType.MANUELT_SMÅBARNSTILLEGG_JUSTERING,
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                     rolleConfig,
@@ -443,7 +450,7 @@ class LoggService(
     fun gjenopptaBehandlingLogg(behandling: Behandling) {
         lagre(
             Logg(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId,
                 type = LoggType.BEHANDLIG_GJENOPPTATT,
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                     rolleConfig,
@@ -474,7 +481,7 @@ class LoggService(
 
         lagre(
             Logg(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId,
                 type = LoggType.KORRIGERT_VEDTAK,
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                     rolleConfig,
@@ -516,7 +523,7 @@ class LoggService(
         )
     }
 
-    fun loggFeilutbetaltValutaPeriodeLagtTil(behandlingId: Long, feilutbetaltValuta: FeilutbetaltValuta) =
+    fun loggFeilutbetaltValutaPeriodeLagtTil(behandlingId: BehandlingId, feilutbetaltValuta: FeilutbetaltValuta) =
         lagre(
             Logg(
                 behandlingId = behandlingId,
@@ -532,7 +539,7 @@ class LoggService(
             )
         )
 
-    fun loggFeilutbetaltValutaPeriodeFjernet(behandlingId: Long, feilutbetaltValuta: FeilutbetaltValuta) =
+    fun loggFeilutbetaltValutaPeriodeFjernet(behandlingId: BehandlingId, feilutbetaltValuta: FeilutbetaltValuta) =
         lagre(
             Logg(
                 behandlingId = behandlingId,
@@ -554,8 +561,8 @@ class LoggService(
         return loggRepository.save(logg)
     }
 
-    fun hentLoggForBehandling(behandlingId: Long): List<Logg> {
-        return loggRepository.hentLoggForBehandling(behandlingId)
+    fun hentLoggForBehandling(behandlingId: BehandlingId): List<Logg> {
+        return loggRepository.hentLoggForBehandling(behandlingId.id)
     }
 
     companion object {

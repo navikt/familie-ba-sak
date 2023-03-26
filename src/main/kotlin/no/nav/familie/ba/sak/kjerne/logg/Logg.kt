@@ -1,10 +1,13 @@
 package no.nav.familie.ba.sak.kjerne.logg
 
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingIdConverter
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import java.time.LocalDateTime
 import javax.persistence.Column
+import javax.persistence.Convert
 import javax.persistence.Entity
 import javax.persistence.EntityListeners
 import javax.persistence.EnumType
@@ -31,7 +34,8 @@ data class Logg(
     val opprettetTidspunkt: LocalDateTime = LocalDateTime.now(),
 
     @Column(name = "fk_behandling_id")
-    val behandlingId: Long,
+    @Convert(converter = BehandlingIdConverter::class)
+    val behandlingId: BehandlingId,
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type")
@@ -51,7 +55,7 @@ data class Logg(
     val tekst: String
 ) {
 
-    constructor(behandlingId: Long, type: LoggType, rolle: BehandlerRolle, tekst: String = "") : this(
+    constructor(behandlingId: BehandlingId, type: LoggType, rolle: BehandlerRolle, tekst: String = "") : this(
         behandlingId = behandlingId,
         type = type,
         tittel = type.tittel,

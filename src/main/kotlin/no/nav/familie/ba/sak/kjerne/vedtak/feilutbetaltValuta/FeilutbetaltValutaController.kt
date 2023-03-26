@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta
 
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -27,7 +28,11 @@ class FeilutbetaltValutaController(
     private val feilutbetaltValutaService: FeilutbetaltValutaService,
     private val utvidetBehandlingService: UtvidetBehandlingService
 ) {
-    @PostMapping(path = ["behandling/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE], consumes = [MediaType.APPLICATION_JSON_VALUE])
+    @PostMapping(
+        path = ["behandling/{behandlingId}"],
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+        consumes = [MediaType.APPLICATION_JSON_VALUE]
+    )
     fun leggTilFeilutbetaltValutaPeriode(
         @PathVariable behandlingId: Long,
         @RequestBody feilutbetaltValuta: RestFeilutbetaltValuta
@@ -38,12 +43,19 @@ class FeilutbetaltValutaController(
             handling = "legg til periode med feilutbetalt valuta"
         )
 
-        feilutbetaltValutaService.leggTilFeilutbetaltValutaPeriode(feilutbetaltValuta = feilutbetaltValuta, behandlingId = behandlingId)
+        feilutbetaltValutaService.leggTilFeilutbetaltValutaPeriode(
+            feilutbetaltValuta = feilutbetaltValuta,
+            behandlingId = BehandlingId(behandlingId)
+        )
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
 
-    @PutMapping(path = ["behandling/{behandlingId}/periode/{id}"], produces = [MediaType.APPLICATION_JSON_VALUE], consumes = [MediaType.APPLICATION_JSON_VALUE])
+    @PutMapping(
+        path = ["behandling/{behandlingId}/periode/{id}"],
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+        consumes = [MediaType.APPLICATION_JSON_VALUE]
+    )
     fun oppdaterFeilutbetaltValutaPeriode(
         @PathVariable behandlingId: Long,
         @PathVariable id: Long,
@@ -68,7 +80,7 @@ class FeilutbetaltValutaController(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
             handling = "Fjerner periode med feilutbetalt valuta"
         )
-        feilutbetaltValutaService.fjernFeilutbetaltValutaPeriode(id = id, behandlingId = behandlingId)
+        feilutbetaltValutaService.fjernFeilutbetaltValutaPeriode(id = id, behandlingId = BehandlingId(behandlingId))
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }

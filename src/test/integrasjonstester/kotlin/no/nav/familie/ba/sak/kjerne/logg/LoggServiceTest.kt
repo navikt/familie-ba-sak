@@ -56,7 +56,7 @@ class LoggServiceTest(
         val behandling1: Behandling = lagBehandling()
 
         val logg1 = Logg(
-            behandlingId = behandling.id,
+            behandlingId = behandling.behandlingId,
             type = LoggType.BEHANDLING_OPPRETTET,
             tittel = "Førstegangsbehandling opprettet",
             rolle = BehandlerRolle.SYSTEM,
@@ -65,7 +65,7 @@ class LoggServiceTest(
         loggService.lagre(logg1)
 
         val logg2 = Logg(
-            behandlingId = behandling.id,
+            behandlingId = behandling.behandlingId,
             type = LoggType.BEHANDLING_OPPRETTET,
             tittel = "Revurdering opprettet",
             rolle = BehandlerRolle.SYSTEM,
@@ -74,7 +74,7 @@ class LoggServiceTest(
         loggService.lagre(logg2)
 
         val logg3 = Logg(
-            behandlingId = behandling1.id,
+            behandlingId = behandling1.behandlingId,
             type = LoggType.BEHANDLING_OPPRETTET,
             tittel = "Førstegangsbehandling opprettet",
             rolle = BehandlerRolle.SYSTEM,
@@ -82,10 +82,10 @@ class LoggServiceTest(
         )
         loggService.lagre(logg3)
 
-        val loggForBehandling = loggService.hentLoggForBehandling(behandling.id)
+        val loggForBehandling = loggService.hentLoggForBehandling(behandling.behandlingId)
         assertEquals(2, loggForBehandling.size)
 
-        val loggForBehandling1 = loggService.hentLoggForBehandling(behandling1.id)
+        val loggForBehandling1 = loggService.hentLoggForBehandling(behandling1.behandlingId)
         assertEquals(1, loggForBehandling1.size)
     }
 
@@ -103,7 +103,7 @@ class LoggServiceTest(
             )
         )
 
-        val loggForBehandling = loggService.hentLoggForBehandling(behandlingId = behandling.id)
+        val loggForBehandling = loggService.hentLoggForBehandling(behandlingId = behandling.behandlingId)
         assertEquals(2, loggForBehandling.size)
         assertTrue(loggForBehandling.any { it.type == LoggType.LIVSHENDELSE && it.tekst == "Gjelder barn 29.02.20" })
         assertTrue(loggForBehandling.any { it.type == LoggType.BEHANDLING_OPPRETTET })
@@ -133,7 +133,7 @@ class LoggServiceTest(
         assertNotNull(nyVilkårsvurderingLogg)
         assertEquals("Vilkårsvurdering endret", nyVilkårsvurderingLogg!!.tittel)
 
-        val logger = loggService.hentLoggForBehandling(behandlingId = behandling.id)
+        val logger = loggService.hentLoggForBehandling(behandlingId = behandling.behandlingId)
         assertEquals(2, logger.size)
     }
 
@@ -165,7 +165,7 @@ class LoggServiceTest(
         )
         loggService.opprettFerdigstillBehandling(behandling)
 
-        val logger = loggService.hentLoggForBehandling(behandling.id)
+        val logger = loggService.hentLoggForBehandling(behandling.behandlingId)
         assertEquals(5, logger.size)
         assertTrue {
             logger.any {
@@ -216,7 +216,7 @@ class LoggServiceTest(
         )
         loggService.opprettFerdigstillBehandling(behandling)
 
-        val logger = loggService.hentLoggForBehandling(behandling.id)
+        val logger = loggService.hentLoggForBehandling(behandling.behandlingId)
         assertEquals(5, logger.size)
         assertTrue {
             logger.any {
@@ -255,7 +255,7 @@ class LoggServiceTest(
         val behandlingId = lagBehandling(
             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
             årsak = BehandlingÅrsak.SØKNAD
-        ).id
+        ).behandlingId
         val tidspunkt = LocalDateTime.now()
         val logg1 = loggService.lagre(
             Logg(
@@ -287,7 +287,7 @@ class LoggServiceTest(
         val behandlingId = lagBehandling(
             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
             årsak = BehandlingÅrsak.SØKNAD
-        ).id
+        ).behandlingId
         val eldst = loggService.lagre(
             Logg(
                 behandlingId = behandlingId,

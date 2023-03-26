@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -16,14 +17,15 @@ class FeilutbetaltValutaService(
 ) {
 
     private fun finnFeilutbetaltValutaThrows(id: Long): FeilutbetaltValuta {
-        return feilutbetaltValutaRepository.finnFeilutbetaltValuta(id) ?: throw Feil("Finner ikke feilutbetalt valuta med id=$id")
+        return feilutbetaltValutaRepository.finnFeilutbetaltValuta(id)
+            ?: throw Feil("Finner ikke feilutbetalt valuta med id=$id")
     }
 
     @Transactional
-    fun leggTilFeilutbetaltValutaPeriode(feilutbetaltValuta: RestFeilutbetaltValuta, behandlingId: Long): Long {
+    fun leggTilFeilutbetaltValutaPeriode(feilutbetaltValuta: RestFeilutbetaltValuta, behandlingId: BehandlingId): Long {
         val lagret = feilutbetaltValutaRepository.save(
             FeilutbetaltValuta(
-                behandlingId = behandlingId,
+                behandlingId = behandlingId.id,
                 fom = feilutbetaltValuta.fom,
                 tom = feilutbetaltValuta.tom,
                 feilutbetaltBeløp = feilutbetaltValuta.feilutbetaltBeløp
@@ -34,7 +36,7 @@ class FeilutbetaltValutaService(
     }
 
     @Transactional
-    fun fjernFeilutbetaltValutaPeriode(id: Long, behandlingId: Long) {
+    fun fjernFeilutbetaltValutaPeriode(id: Long, behandlingId: BehandlingId) {
         loggService.loggFeilutbetaltValutaPeriodeFjernet(
             behandlingId = behandlingId,
             feilutbetaltValuta = finnFeilutbetaltValutaThrows(id)
@@ -43,7 +45,8 @@ class FeilutbetaltValutaService(
     }
 
     fun hentFeilutbetaltValutaPerioder(behandlingId: Long) =
-        feilutbetaltValutaRepository.finnFeilutbetaltValutaForBehandling(behandlingId = behandlingId).map { tilRest(it) }
+        feilutbetaltValutaRepository.finnFeilutbetaltValutaForBehandling(behandlingId = behandlingId)
+            .map { tilRest(it) }
 
     private fun tilRest(it: FeilutbetaltValuta) =
         RestFeilutbetaltValuta(
@@ -55,7 +58,8 @@ class FeilutbetaltValutaService(
 
     @Transactional
     fun oppdatertFeilutbetaltValutaPeriode(feilutbetaltValuta: RestFeilutbetaltValuta, id: Long) {
-        val periode = feilutbetaltValutaRepository.findById(id).orElseThrow { Feil("Finner ikke feilutbetalt valuta med id=${feilutbetaltValuta.id}") }
+        val periode = feilutbetaltValutaRepository.findById(id)
+            .orElseThrow { Feil("Finner ikke feilutbetalt valuta med id=${feilutbetaltValuta.id}") }
 
         periode.fom = feilutbetaltValuta.fom
         periode.tom = feilutbetaltValuta.tom
