@@ -19,6 +19,7 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.sats
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -338,7 +339,7 @@ fun lagInitiellTilkjentYtelse(
 }
 
 fun lagTestPersonopplysningGrunnlag(
-    behandlingId: Long,
+    behandlingId: BehandlingId,
     vararg personer: Person
 ): PersonopplysningGrunnlag {
     val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandlingId)
@@ -1114,7 +1115,7 @@ fun lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
 
 fun lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
     id: Long = 0,
-    behandlingId: Long = 0,
+    behandlingId: BehandlingId = BehandlingId(0),
     person: Person,
     prosent: BigDecimal = BigDecimal.valueOf(100),
     fom: YearMonth = YearMonth.now().minusMonths(1),

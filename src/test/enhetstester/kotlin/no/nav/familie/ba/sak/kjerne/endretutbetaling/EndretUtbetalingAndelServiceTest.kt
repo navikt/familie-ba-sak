@@ -60,7 +60,7 @@ class EndretUtbetalingAndelServiceTest {
         val behandling = lagBehandling()
         val barn = lagPerson(type = PersonType.BARN)
         val endretUtbetalingAndel = lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
-            behandlingId = behandling.id,
+            behandlingId = behandling.behandlingId,
             person = barn,
             årsak = Årsak.DELT_BOSTED,
             fom = YearMonth.now().minusMonths(5),
@@ -100,11 +100,11 @@ class EndretUtbetalingAndelServiceTest {
 
         every { mockEndretUtbetalingAndelRepository.getById(any()) } returns endretUtbetalingAndel.endretUtbetalingAndel
         every { mockPersongrunnlagService.hentPersonerPåBehandling(any(), behandling) } returns listOf(barn)
-        every { mockPersonopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns lagTestPersonopplysningGrunnlag(
-            behandling.id,
+        every { mockPersonopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.behandlingId.id) } returns lagTestPersonopplysningGrunnlag(
+            behandling.behandlingId,
             barn
         )
-        every { mockAndelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id) } returns andelerTilkjentYtelse
+        every { mockAndelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.behandlingId.id) } returns andelerTilkjentYtelse
         every { mockEndretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandlingId = behandling.behandlingId) } returns emptyList()
         every { mockVilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.behandlingId) } returns vilkårsvurderingUtenDeltBosted
 
