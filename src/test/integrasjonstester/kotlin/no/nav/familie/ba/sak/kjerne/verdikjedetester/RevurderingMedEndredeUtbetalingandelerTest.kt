@@ -122,7 +122,7 @@ class RevurderingMedEndredeUtbetalingandelerTest(
 
         persongrunnlagService.lagreOgDeaktiverGammel(
             lagTestPersonopplysningGrunnlag(
-                behandlingRevurdering.id,
+                behandlingRevurdering.behandlingId,
                 fnr,
                 listOf(barnFnr),
                 søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
@@ -142,7 +142,7 @@ class RevurderingMedEndredeUtbetalingandelerTest(
             endretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandlingRevurdering.behandlingId)
         val andelerTilkjentYtelse =
             andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
-                behandlingRevurdering.id
+                behandlingRevurdering.behandlingId
             )
         val andelPåvirketAvEndringer = andelerTilkjentYtelse.first()
 
@@ -158,7 +158,7 @@ class RevurderingMedEndredeUtbetalingandelerTest(
         vilkårsvurdering.personResultater.map { personResultat ->
             personResultat.tilRestPersonResultat().vilkårResultater.map {
                 vilkårService.endreVilkår(
-                    behandlingId = behandling.id,
+                    behandlingId = behandling.behandlingId,
                     vilkårId = it.id,
                     restPersonResultat =
                     RestPersonResultat(
@@ -207,7 +207,7 @@ class RevurderingMedEndredeUtbetalingandelerTest(
 
         persongrunnlagService.lagreOgDeaktiverGammel(
             lagTestPersonopplysningGrunnlag(
-                førstegangsbehandling.id,
+                førstegangsbehandling.behandlingId,
                 søkersIdent,
                 listOf(barnFnr),
                 søkerAktør = personidentService.hentOgLagreAktør(søkersIdent, true),

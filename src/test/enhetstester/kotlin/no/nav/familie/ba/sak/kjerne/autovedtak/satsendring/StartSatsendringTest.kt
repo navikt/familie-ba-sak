@@ -89,7 +89,7 @@ internal class StartSatsendringTest {
 
         every {
             andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
-                behandling.id
+                behandling.behandlingId
             )
         } returns
             listOf(
@@ -137,7 +137,7 @@ internal class StartSatsendringTest {
 
         every {
             andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
-                behandling.id
+                behandling.behandlingId
             )
         } returns
             listOf(
@@ -180,7 +180,7 @@ internal class StartSatsendringTest {
 
         every {
             andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
-                behandling.id
+                behandling.behandlingId
             )
         } returns
             listOf(

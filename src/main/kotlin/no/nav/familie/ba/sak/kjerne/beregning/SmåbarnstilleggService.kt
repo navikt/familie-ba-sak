@@ -83,7 +83,7 @@ class SmåbarnstilleggService(
                 .slåSammenTidligerePerioder()
 
         val andelerMedEndringerFraSistIverksatteBehandling = andelerTilkjentYtelseOgEndreteUtbetalingerService
-            .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(sistIverksatteBehandling.id)
+            .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(sistIverksatteBehandling.behandlingId)
 
         secureLogger.info("Perioder med overgangsstønad fra EF: ${nyePerioderMedFullOvergangsstønad.map { "Periode(fom=${it.fomDato}, tom=${it.tomDato})" }}")
 

@@ -94,7 +94,7 @@ class StartSatsendring(
 
         val aktivOgÅpenBehandling = behandlingRepository.findByFagsakAndAktivAndOpen(fagsakId = fagsak.id)
         if (aktivOgÅpenBehandling != null) {
-            logger.info("Oppretter ikke satsendringtask for fagsak=${fagsak.id}. Har åpen behandling ${aktivOgÅpenBehandling.id}")
+            logger.info("Oppretter ikke satsendringtask for fagsak=${fagsak.id}. Har åpen behandling ${aktivOgÅpenBehandling.behandlingId}")
             ignorerteFagsaker.add(fagsak.id)
             return false
         }
@@ -103,7 +103,7 @@ class StartSatsendring(
         if (sisteIverksatteBehandling != null) {
             val andelerTilkjentYtelseMedEndreteUtbetalinger =
                 andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
-                    sisteIverksatteBehandling.id
+                    sisteIverksatteBehandling.behandlingId
                 )
 
             if (andelerTilkjentYtelseMedEndreteUtbetalinger.erOppdatertMedSisteSatser()) {

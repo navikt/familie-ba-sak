@@ -134,11 +134,12 @@ class BehandlingSatsendringTest(
         assertEquals(Behandlingsresultat.ENDRET_UTBETALING, satsendringBehandling?.resultat)
         assertEquals(StegType.IVERKSETT_MOT_OPPDRAG, satsendringBehandling?.steg)
 
-        val satsendingsvedtak = vedtakService.hentAktivForBehandling(behandlingId = satsendringBehandling!!.id)
+        val satsendingsvedtak =
+            vedtakService.hentAktivForBehandling(behandlingId = satsendringBehandling!!.behandlingId)
         assertNull(satsendingsvedtak!!.stønadBrevPdF)
 
         val aty = andelTilkjentYtelseMedEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
-            satsendringBehandling.id
+            satsendringBehandling.behandlingId
         )
 
         val atyMedSenesteTilleggOrbaSats =
@@ -240,7 +241,7 @@ class BehandlingSatsendringTest(
         assertEquals(SatsendringSvar.TILBAKESTILLER_BEHANDLINGEN_TIL_VILKÅRSVURDERINGEN, satsendringResultat)
 
         val åpenBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = behandling.fagsak.id)
-        assertEquals(revurdering.data!!.behandlingId, åpenBehandling!!.id)
+        assertEquals(revurdering.data!!.behandlingId, åpenBehandling!!.behandlingId)
         assertEquals(StegType.VILKÅRSVURDERING, åpenBehandling.steg)
     }
 

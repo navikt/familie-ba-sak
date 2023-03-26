@@ -84,17 +84,17 @@ class VedtaksperiodeServiceEnhetstest {
     @BeforeEach
     fun init() {
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns forrigeBehandling
-        every { endringstidspunktService.finnEndringstidspunktForBehandling(vedtak.behandling.id) } returns endringstidspunkt
+        every { endringstidspunktService.finnEndringstidspunktForBehandling(vedtak.behandling.behandlingId) } returns endringstidspunkt
         every { persongrunnlagService.hentAktiv(any()) } returns
-            lagTestPersonopplysningGrunnlag(vedtak.behandling.id, person)
+            lagTestPersonopplysningGrunnlag(vedtak.behandling.behandlingId, person)
         every {
             andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
-                forrigeBehandling.id
+                forrigeBehandling.behandlingId
             )
         } returns listOf(ytelseOpphørtSammeMåned)
 
         every {
-            andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.id)
+            andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.behandlingId)
         } returns listOf(ytelseOpphørtFørEndringstidspunkt)
         every {
             featureToggleService.isEnabled(

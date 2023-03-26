@@ -120,7 +120,7 @@ fun kjørStegprosessForBehandling(
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
             endretUtbetalingAndelHentOgPersisterService = endretUtbetalingAndelHentOgPersisterService,
             sanityBegrunnelser = hentBegrunnelser(),
-            vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingEtterSimuleringSteg.id)!!
+            vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingEtterSimuleringSteg.behandlingId)!!
         )
     if (tilSteg == StegType.SEND_TIL_BESLUTTER) return behandlingEtterSendTilBeslutter
 
@@ -181,7 +181,7 @@ private fun håndterSendtTilBeslutterSteg(
     vilkårsvurdering: Vilkårsvurdering
 ): Behandling {
     val andelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService
-        .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId = behandlingEtterSimuleringSteg.id)
+        .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId = behandlingEtterSimuleringSteg.behandlingId)
 
     val persongrunnlag =
         persongrunnlagService.hentAktivThrows(behandlingEtterSimuleringSteg.behandlingId)

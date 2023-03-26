@@ -66,7 +66,7 @@ class BrevPeriodeService(
         val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandlingId.id)
 
         val andelerMedEndringer = andelerTilkjentYtelseOgEndreteUtbetalingerService
-            .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId.id)
+            .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId)
 
         val uregistrerteBarn =
             søknadGrunnlagService.hentAktiv(behandlingId = behandlingId)?.hentUregistrerteBarn()
@@ -198,7 +198,7 @@ class BrevPeriodeService(
             behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(vedtaksperiodeMedBegrunnelser.vedtak.behandling)
         return if (forrigeBehandling != null) {
             val forrigeAndelerMedEndringer = andelerTilkjentYtelseOgEndreteUtbetalingerService
-                .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(forrigeBehandling.id)
+                .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(forrigeBehandling.behandlingId)
             val endringerITilkjentYtelsePerBarn =
                 andelerTilkjentYtelse.hentPerioderMedEndringerFra(forrigeAndelerMedEndringer)
             endringerITilkjentYtelsePerBarn.keys.filter { barn ->

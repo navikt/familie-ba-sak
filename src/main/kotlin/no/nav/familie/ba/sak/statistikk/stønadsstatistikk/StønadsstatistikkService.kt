@@ -53,7 +53,7 @@ class StønadsstatistikkService(
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
 ) {
 
-    fun hentVedtakV2(behandlingId: Long): VedtakDVHV2 {
+    fun hentVedtakV2(behandlingId: BehandlingId): VedtakDVHV2 {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId)
@@ -62,7 +62,7 @@ class StønadsstatistikkService(
         var datoVedtak = vedtak?.vedtaksdato
 
         if (datoVedtak == null) {
-            datoVedtak = vedtakRepository.finnVedtakForBehandling(behandlingId).singleOrNull()?.vedtaksdato
+            datoVedtak = vedtakRepository.finnVedtakForBehandling(behandlingId.id).singleOrNull()?.vedtaksdato
                 ?: error("Fant ikke vedtaksdato for behandling $behandlingId")
         }
 
@@ -71,7 +71,7 @@ class StønadsstatistikkService(
         return VedtakDVHV2(
             fagsakId = behandling.fagsak.id.toString(),
             fagsakType = FagsakType.valueOf(behandling.fagsak.type.name),
-            behandlingsId = behandlingId.toString(),
+            behandlingsId = behandlingId.id.toString(),
             tidspunktVedtak = tidspunktVedtak.atZone(TIMEZONE),
             personV2 = hentSøkerV2(behandlingId),
             ensligForsørger = utledEnsligForsørger(behandlingId), // TODO implementere støtte for dette
@@ -84,7 +84,7 @@ class StønadsstatistikkService(
             behandlingTypeV2 = BehandlingTypeV2.valueOf(behandling.type.name),
             utbetalingsperioderV2 = hentUtbetalingsperioderV2(behandlingId),
             funksjonellId = UUID.randomUUID().toString(),
-            kompetanseperioder = hentKompetanse(BehandlingId(behandlingId)),
+            kompetanseperioder = hentKompetanse(behandlingId),
             behandlingÅrsakV2 = BehandlingÅrsakV2.valueOf(behandling.opprettetÅrsak.name)
         )
     }
@@ -113,13 +113,13 @@ class StønadsstatistikkService(
         }
     }
 
-    private fun hentSøkerV2(behandlingId: Long): PersonDVHV2 {
+    private fun hentSøkerV2(behandlingId: BehandlingId): PersonDVHV2 {
         val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId)
         val søker = persongrunnlag.søker
         return lagPersonDVHV2(søker)
     }
 
-    private fun hentUtbetalingsperioderV2(behandlingId: Long): List<UtbetalingsperiodeDVHV2> {
+    private fun hentUtbetalingsperioderV2(behandlingId: BehandlingId): List<UtbetalingsperiodeDVHV2> {
         val andelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService
             .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId)
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
@@ -149,7 +149,7 @@ class StønadsstatistikkService(
             }
     }
 
-    private fun utledEnsligForsørger(behandlingId: Long): Boolean {
+    private fun utledEnsligForsørger(behandlingId: BehandlingId): Boolean {
         val andelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService
             .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId)
         if (andelerTilkjentYtelse.isEmpty()) {

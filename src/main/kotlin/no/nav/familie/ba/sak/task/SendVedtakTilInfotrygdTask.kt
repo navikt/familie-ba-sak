@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.task
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedClient
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdVedtakFeedDto
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.domene.InfotrygdVedtakFeedTaskDto
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.beregning.beregnUtbetalingsperioderUtenKlassifisering
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -34,12 +35,12 @@ class SendVedtakTilInfotrygdTask(
         infotrygdFeedClient.sendVedtakFeedTilInfotrygd(
             InfotrygdVedtakFeedDto(
                 infotrygdVedtakFeedTaskDto.fnrStoenadsmottaker,
-                finnFørsteUtbetalingsperiode(infotrygdVedtakFeedTaskDto.behandlingId)
+                finnFørsteUtbetalingsperiode(BehandlingId(infotrygdVedtakFeedTaskDto.behandlingId))
             )
         )
     }
 
-    private fun finnFørsteUtbetalingsperiode(behandlingId: Long): LocalDate {
+    private fun finnFørsteUtbetalingsperiode(behandlingId: BehandlingId): LocalDate {
         val andelerMedEndringer = andelerTilkjentYtelseOgEndreteUtbetalingerService
             .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId)
 

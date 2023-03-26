@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.beregning.domene
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
-import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils.skalAndelerSlåsSammen
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerPeriodeInnenforTilkjentytelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerÅrsak
@@ -18,15 +18,14 @@ class AndelerTilkjentYtelseOgEndreteUtbetalingerService(
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
-    private val featureToggleService: FeatureToggleService
 ) {
     @Transactional
-    fun finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId: Long): List<AndelTilkjentYtelseMedEndreteUtbetalinger> {
+    fun finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId: BehandlingId): List<AndelTilkjentYtelseMedEndreteUtbetalinger> {
         return lagKombinator(behandlingId).lagAndelerMedEndringer()
     }
 
     @Transactional
-    fun finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandlingId: Long): List<EndretUtbetalingAndelMedAndelerTilkjentYtelse> {
+    fun finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandlingId: BehandlingId): List<EndretUtbetalingAndelMedAndelerTilkjentYtelse> {
         // Hvis noen valideringer feiler, så signalerer vi det til frontend ved å fjerne tilknyttede andeler
         // SB vil få en feilmelding og løsningen blir å slette eller oppdatere endringen
         // Da vil forhåpentligvis valideringen være ok, koblingene til andelene være beholdt
@@ -41,16 +40,16 @@ class AndelerTilkjentYtelseOgEndreteUtbetalingerService(
                     validerÅrsak(
                         it.årsak,
                         it.endretUtbetalingAndel,
-                        vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId)
+                        vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId.id)
                     )
                 }
             }
     }
 
-    private fun lagKombinator(behandlingId: Long) =
+    private fun lagKombinator(behandlingId: BehandlingId) =
         AndelTilkjentYtelseOgEndreteUtbetalingerKombinator(
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId),
-            endretUtbetalingAndelRepository.findByBehandlingId(behandlingId)
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId.id),
+            endretUtbetalingAndelRepository.findByBehandlingId(behandlingId.id)
         )
 }
 

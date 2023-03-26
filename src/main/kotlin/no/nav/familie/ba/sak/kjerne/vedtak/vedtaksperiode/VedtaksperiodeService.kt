@@ -117,7 +117,7 @@ class VedtaksperiodeService(
 
         val behandling = vedtaksperiodeMedBegrunnelser.vedtak.behandling
 
-        val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandling.id)
+        val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandling.behandlingId)
 
         val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
 
@@ -152,7 +152,7 @@ class VedtaksperiodeService(
             standardbegrunnelserFraFrontend.any { it.vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING }
         ) {
             val andelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService
-                .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.id)
+                .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.behandlingId)
 
             validerEndretUtbetalingsbegrunnelse(vedtaksperiodeMedBegrunnelser, andelerTilkjentYtelse, persongrunnlag)
         }
@@ -184,7 +184,7 @@ class VedtaksperiodeService(
 
         val vedtaksperioderMedBegrunnelser =
             vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(vedtakId = vedtak.id)
-        val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = vedtak.behandling.id)
+        val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = vedtak.behandling.behandlingId)
         val vurderteBarnSomPersoner =
             barnaAktørSomVurderes.map { barnAktørSomVurderes ->
                 persongrunnlag.barna.find { it.aktør == barnAktørSomVurderes }
@@ -198,7 +198,7 @@ class VedtaksperiodeService(
 
             if (vedtaksperiodeMedBegrunnelser == null) {
                 val vilkårsvurdering =
-                    vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = vedtak.behandling.id)
+                    vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = vedtak.behandling.behandlingId.id)
                 secureLogger.info(
                     vilkårsvurdering?.personResultater?.map {
                         "Fødselsnummer: ${it.aktør.aktivFødselsnummer()}.  Resultater: ${it.vilkårResultater}"
@@ -302,7 +302,7 @@ class VedtaksperiodeService(
          * Ellers: endringstidspunkt skal utledes
          **/
         val endringstidspunkt = manueltOverstyrtEndringstidspunkt
-            ?: endringstidspunktService.finnEndringstidspunktForBehandling(behandlingId = vedtak.behandling.id)
+            ?: endringstidspunktService.finnEndringstidspunktForBehandling(behandlingId = vedtak.behandling.behandlingId)
 
         val opphørsperioder =
             hentOpphørsperioder(vedtak.behandling, endringstidspunkt).map { it.tilVedtaksperiodeMedBegrunnelse(vedtak) }
@@ -394,13 +394,13 @@ class VedtaksperiodeService(
 
         val behandling = vedtak.behandling
 
-        val endreteUtbetalinger = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
+        val endreteUtbetalinger = endretUtbetalingAndelRepository.findByBehandlingId(behandling.behandlingId.id)
 
         val andelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService
-            .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.id)
+            .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.behandlingId)
 
         val persongrunnlag =
-            persongrunnlagService.hentAktivThrows(behandling.id)
+            persongrunnlagService.hentAktivThrows(behandling.behandlingId)
 
         val utvidetVedtaksperioderMedBegrunnelser = vedtaksperioderMedBegrunnelser.map {
             it.tilUtvidetVedtaksperiodeMedBegrunnelser(
@@ -513,11 +513,11 @@ class VedtaksperiodeService(
         behandling: Behandling
     ): List<Utbetalingsperiode> {
         val personopplysningGrunnlag =
-            persongrunnlagService.hentAktiv(behandlingId = behandling.id)
+            persongrunnlagService.hentAktiv(behandlingId = behandling.behandlingId)
                 ?: return emptyList()
 
         val andelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService
-            .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.id)
+            .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.behandlingId)
 
         return mapTilUtbetalingsperioder(
             andelerTilkjentYtelse = andelerTilkjentYtelse,
@@ -536,23 +536,23 @@ class VedtaksperiodeService(
 
         val forrigePersonopplysningGrunnlag: PersonopplysningGrunnlag? =
             if (sisteVedtattBehandling != null) {
-                persongrunnlagService.hentAktiv(behandlingId = sisteVedtattBehandling.id)
+                persongrunnlagService.hentAktiv(behandlingId = sisteVedtattBehandling.behandlingId)
             } else {
                 null
             }
         val forrigeAndelerMedEndringer = if (sisteVedtattBehandling != null) {
             andelerTilkjentYtelseOgEndreteUtbetalingerService
-                .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(sisteVedtattBehandling.id)
+                .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(sisteVedtattBehandling.behandlingId)
         } else {
             emptyList()
         }
 
         val personopplysningGrunnlag =
-            persongrunnlagService.hentAktiv(behandlingId = behandling.id)
+            persongrunnlagService.hentAktiv(behandlingId = behandling.behandlingId)
                 ?: return emptyList()
 
         val andelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService
-            .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.id)
+            .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.behandlingId)
 
         val alleOpphørsperioder = mapTilOpphørsperioder(
             forrigePersonopplysningGrunnlag = forrigePersonopplysningGrunnlag,
@@ -679,7 +679,7 @@ class VedtaksperiodeService(
     }
 
     fun beskrivPerioderMedFeilutbetaltValuta(vedtak: Vedtak): Set<String>? {
-        val målform = persongrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id)?.søker?.målform
+        val målform = persongrunnlagService.hentAktiv(behandlingId = vedtak.behandling.behandlingId)?.søker?.målform
         val fra = mapOf(NB to "Fra", NN to "Frå").getOrDefault(målform, "Fra")
         val mye = mapOf(NB to "mye", NN to "mykje").getOrDefault(målform, "mye")
 
