@@ -108,7 +108,7 @@ class OpprettTaskService(
 
     @Transactional
     fun opprettHenleggBehandlingTask(
-        behandlingId: Long,
+        behandlingId: BehandlingId,
         årsak: HenleggÅrsak,
         begrunnelse: String,
         validerOppgavefristErEtterDato: LocalDate? = null
@@ -118,14 +118,14 @@ class OpprettTaskService(
                 type = HenleggBehandlingTask.TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(
                     HenleggBehandlingTaskDTO(
-                        behandlingId = behandlingId,
+                        behandlingId = behandlingId.id,
                         årsak = årsak,
                         begrunnelse = begrunnelse,
                         validerOppgavefristErEtterDato = validerOppgavefristErEtterDato
                     )
                 ),
                 properties = Properties().apply {
-                    this["behandlingId"] = behandlingId.toString()
+                    this["behandlingId"] = behandlingId.id.toString()
                 }
             )
         )

@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.satsendring
 import no.nav.familie.ba.sak.common.RessursUtils.badRequest
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.task.OpprettTaskService
@@ -78,7 +79,7 @@ class SatsendringController(
         }
         behandlinger.forEach {
             opprettTaskService.opprettHenleggBehandlingTask(
-                behandlingId = it.toLong(),
+                behandlingId = BehandlingId(it.toLong()),
                 årsak = HenleggÅrsak.TEKNISK_VEDLIKEHOLD,
                 begrunnelse = SATSENDRING,
                 validerOppgavefristErEtterDato = dato
