@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.config.ClientMocks.Companion.søkerFnr
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.sats
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
@@ -80,7 +81,8 @@ internal class StønadsstatistikkServiceTest(
             andelerTilkjentYtelseOgEndreteUtbetalingerService
         )
     private val behandling = lagBehandling()
-    private val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr[0], barnFnr.toList())
+    private val personopplysningGrunnlag =
+        lagTestPersonopplysningGrunnlag(behandling.behandlingId, søkerFnr[0], barnFnr.toList())
     private val barn1 = personopplysningGrunnlag.barna.first()
     private val barn2 = personopplysningGrunnlag.barna.last()
 
@@ -161,7 +163,7 @@ internal class StønadsstatistikkServiceTest(
 
     @Test
     fun hentVedtakV2() {
-        val vedtak = stønadsstatistikkService.hentVedtakV2(1L)
+        val vedtak = stønadsstatistikkService.hentVedtakV2(BehandlingId(1L))
         println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(vedtak))
 
         assertEquals(2, vedtak.utbetalingsperioderV2[0].utbetalingsDetaljer.size)
