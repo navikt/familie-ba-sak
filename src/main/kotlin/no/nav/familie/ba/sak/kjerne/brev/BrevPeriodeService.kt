@@ -69,7 +69,7 @@ class BrevPeriodeService(
             .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId.id)
 
         val uregistrerteBarn =
-            søknadGrunnlagService.hentAktiv(behandlingId = behandlingId.id)?.hentUregistrerteBarn()
+            søknadGrunnlagService.hentAktiv(behandlingId = behandlingId)?.hentUregistrerteBarn()
                 ?: emptyList()
 
         val forrigeBehandling =

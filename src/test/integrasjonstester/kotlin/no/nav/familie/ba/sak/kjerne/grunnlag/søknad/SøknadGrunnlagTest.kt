@@ -100,7 +100,7 @@ class SøknadGrunnlagTest(
             )
         )
 
-        val søknadGrunnlag = søknadGrunnlagService.hentAktiv(behandling.id)
+        val søknadGrunnlag = søknadGrunnlagService.hentAktiv(behandling.behandlingId)
         assertNotNull(søknadGrunnlag)
         assertEquals(behandling.behandlingId, søknadGrunnlag?.behandlingId)
         assertEquals(true, søknadGrunnlag?.aktiv)
@@ -135,10 +135,10 @@ class SøknadGrunnlagTest(
                 søknad = søknadDTO2.writeValueAsString()
             )
         )
-        val søknadsGrunnlag = søknadGrunnlagService.hentAlle(behandling.id)
+        val søknadsGrunnlag = søknadGrunnlagService.hentAlle(behandling.behandlingId)
         assertEquals(2, søknadsGrunnlag.size)
 
-        val aktivSøknadGrunnlag = søknadGrunnlagService.hentAktiv(behandling.id)
+        val aktivSøknadGrunnlag = søknadGrunnlagService.hentAktiv(behandling.behandlingId)
         assertNotNull(aktivSøknadGrunnlag)
     }
 

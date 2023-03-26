@@ -29,7 +29,7 @@ class RegistrereSøknad(
         behandling: Behandling,
         data: RestRegistrerSøknad
     ): StegType {
-        val aktivSøknadGrunnlagFinnes = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id) != null
+        val aktivSøknadGrunnlagFinnes = søknadGrunnlagService.hentAktiv(behandlingId = behandling.behandlingId) != null
         val søknadDTO: SøknadDTO = data.søknad
         val innsendtSøknad = søknadDTO.writeValueAsString()
 

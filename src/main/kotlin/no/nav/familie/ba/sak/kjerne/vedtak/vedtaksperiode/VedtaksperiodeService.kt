@@ -531,7 +531,8 @@ class VedtaksperiodeService(
     ): List<Opphørsperiode> {
         if (behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET) return emptyList()
 
-        val sisteVedtattBehandling: Behandling? = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = behandling.fagsak.id)
+        val sisteVedtattBehandling: Behandling? =
+            behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = behandling.fagsak.id)
 
         val forrigePersonopplysningGrunnlag: PersonopplysningGrunnlag? =
             if (sisteVedtattBehandling != null) {
@@ -613,7 +614,7 @@ class VedtaksperiodeService(
         }.toMutableList()
 
         val uregistrerteBarn =
-            søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)?.hentUregistrerteBarn()
+            søknadGrunnlagService.hentAktiv(behandlingId = behandling.behandlingId)?.hentUregistrerteBarn()
                 ?: emptyList()
 
         return if (uregistrerteBarn.isNotEmpty()) {
@@ -654,6 +655,7 @@ class VedtaksperiodeService(
                                 standardbegrunnelse = Standardbegrunnelse.AVSLAG_UREGISTRERT_BARN
                             )
                         )
+
                         BehandlingKategori.EØS -> eøsBegrunnelser.add(
                             EØSBegrunnelse(
                                 vedtaksperiodeMedBegrunnelser = this,

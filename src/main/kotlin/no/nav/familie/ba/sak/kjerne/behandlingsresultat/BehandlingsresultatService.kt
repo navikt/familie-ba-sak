@@ -72,7 +72,7 @@ class BehandlingsresultatService(
         val forrigeBehandling =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = behandling.fagsak.id)
 
-        val søknadGrunnlag = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)
+        val søknadGrunnlag = søknadGrunnlagService.hentAktiv(behandlingId = behandling.behandlingId)
         val søknadDTO = søknadGrunnlag?.hentSøknadDto()
 
         val forrigeAndelerTilkjentYtelse =

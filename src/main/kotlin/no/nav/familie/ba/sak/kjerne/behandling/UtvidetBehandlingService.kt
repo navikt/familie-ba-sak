@@ -77,7 +77,7 @@ class UtvidetBehandlingService(
     fun lagRestUtvidetBehandling(behandlingId: Long): RestUtvidetBehandling {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
 
-        val søknadsgrunnlag = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)
+        val søknadsgrunnlag = søknadGrunnlagService.hentAktiv(behandlingId = behandling.behandlingId)
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
         val personer = personopplysningGrunnlag?.søkerOgBarn
 
