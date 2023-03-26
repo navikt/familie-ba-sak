@@ -105,8 +105,8 @@ class EndretUtbetalingAndelServiceTest {
             barn
         )
         every { mockAndelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id) } returns andelerTilkjentYtelse
-        every { mockEndretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandlingId = behandling.id) } returns emptyList()
-        every { mockVilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id) } returns vilkårsvurderingUtenDeltBosted
+        every { mockEndretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandlingId = behandling.behandlingId) } returns emptyList()
+        every { mockVilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.behandlingId) } returns vilkårsvurderingUtenDeltBosted
 
         val feil = assertThrows<FunksjonellFeil> {
             endretUtbetalingAndelService.oppdaterEndretUtbetalingAndelOgOppdaterTilkjentYtelse(

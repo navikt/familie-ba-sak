@@ -139,7 +139,7 @@ class RevurderingMedEndredeUtbetalingandelerTest(
         gjennomførVilkårsvurdering(vilkårsvurdering = vilkårsvurderingRevurdering, behandling = behandlingRevurdering)
 
         val kopierteEndredeUtbetalingAndeler =
-            endretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandlingRevurdering.id)
+            endretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandlingRevurdering.behandlingId)
         val andelerTilkjentYtelse =
             andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
                 behandlingRevurdering.id

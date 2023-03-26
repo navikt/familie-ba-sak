@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.endretutbetaling
 
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import org.springframework.stereotype.Service
 
@@ -8,5 +9,6 @@ class EndretUtbetalingAndelHentOgPersisterService(
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository
 ) {
 
-    fun hentForBehandling(behandlingId: Long) = endretUtbetalingAndelRepository.findByBehandlingId(behandlingId)
+    fun hentForBehandling(behandlingId: BehandlingId) =
+        endretUtbetalingAndelRepository.findByBehandlingId(behandlingId.id)
 }

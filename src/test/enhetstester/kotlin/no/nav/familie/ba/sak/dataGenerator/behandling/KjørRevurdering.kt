@@ -184,10 +184,10 @@ private fun håndterSendtTilBeslutterSteg(
         .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId = behandlingEtterSimuleringSteg.id)
 
     val persongrunnlag =
-        persongrunnlagService.hentAktivThrows(behandlingEtterSimuleringSteg.id)
+        persongrunnlagService.hentAktivThrows(behandlingEtterSimuleringSteg.behandlingId)
 
     val endredeUtbetalingAndeler = endretUtbetalingAndelHentOgPersisterService.hentForBehandling(
-        behandlingEtterSimuleringSteg.id
+        behandlingEtterSimuleringSteg.behandlingId
     )
     leggTilAlleGyldigeBegrunnelserPåVedtaksperiodeIBehandling(
         behandling = behandlingEtterSimuleringSteg,

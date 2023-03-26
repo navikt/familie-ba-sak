@@ -48,8 +48,9 @@ class EndretUtbetalingAndelService(
 
         endretUtbetalingAndel.fraRestEndretUtbetalingAndel(restEndretUtbetalingAndel, person)
 
-        val andreEndredeAndelerPåBehandling = endretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandling.id)
-            .filter { it.id != endretUtbetalingAndelId }
+        val andreEndredeAndelerPåBehandling =
+            endretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandling.behandlingId)
+                .filter { it.id != endretUtbetalingAndelId }
 
         val gyldigTomEtterDagensDato = beregnGyldigTomIFremtiden(
             andreEndredeAndelerPåBehandling = andreEndredeAndelerPåBehandling,
@@ -133,11 +134,11 @@ class EndretUtbetalingAndelService(
 
     @Transactional
     fun kopierEndretUtbetalingAndelFraForrigeBehandling(behandling: Behandling, forrigeBehandling: Behandling) {
-        endretUtbetalingAndelHentOgPersisterService.hentForBehandling(forrigeBehandling.id).forEach {
+        endretUtbetalingAndelHentOgPersisterService.hentForBehandling(forrigeBehandling.behandlingId).forEach {
             endretUtbetalingAndelRepository.save(
                 it.copy(
                     id = 0,
-                    behandlingId = behandling.id
+                    behandlingId = behandling.behandlingId
                 )
             )
         }

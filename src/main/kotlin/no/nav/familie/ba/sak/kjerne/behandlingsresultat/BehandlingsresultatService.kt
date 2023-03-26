@@ -58,7 +58,7 @@ class BehandlingsresultatService(
             ).map { it.aktør }
 
             behandling.erManuellMigrering() || behandling.opprettetÅrsak == BehandlingÅrsak.KLAGE -> persongrunnlagService.hentAktivThrows(
-                behandling.id
+                behandling.behandlingId
             ).personer.map { it.aktør }
 
             else -> emptyList()
@@ -67,7 +67,7 @@ class BehandlingsresultatService(
         return personerFremstiltKravFor.distinct()
     }
 
-    internal fun utledBehandlingsresultat(behandlingId: Long): Behandlingsresultat {
+    internal fun utledBehandlingsresultat(behandlingId: BehandlingId): Behandlingsresultat {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         val forrigeBehandling =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = behandling.fagsak.id)
@@ -76,13 +76,13 @@ class BehandlingsresultatService(
         val søknadDTO = søknadGrunnlag?.hentSøknadDto()
 
         val forrigeAndelerTilkjentYtelse =
-            forrigeBehandling?.let { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = it.id) }
+            forrigeBehandling?.let { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = it.behandlingId.id) }
                 ?: emptyList()
         val andelerTilkjentYtelse =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandlingId)
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandlingId.id)
 
         val forrigeEndretUtbetalingAndeler =
-            forrigeBehandling?.let { endretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandlingId = it.id) }
+            forrigeBehandling?.let { endretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandlingId = it.behandlingId) }
                 ?: emptyList()
         val endretUtbetalingAndeler =
             endretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandlingId = behandlingId)
@@ -118,10 +118,10 @@ class BehandlingsresultatService(
         // 2 ENDRINGER
         val endringsresultat = if (forrigeBehandling != null) {
             val forrigeVilkårsvurdering =
-                vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId = forrigeBehandling.id)
-            val kompetanser = kompetanseService.hentKompetanser(behandlingId = BehandlingId(behandlingId))
+                vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId = forrigeBehandling.behandlingId)
+            val kompetanser = kompetanseService.hentKompetanser(behandlingId = behandlingId)
             val forrigeKompetanser =
-                kompetanseService.hentKompetanser(behandlingId = BehandlingId(forrigeBehandling.id))
+                kompetanseService.hentKompetanser(behandlingId = forrigeBehandling.behandlingId)
 
             BehandlingsresultatEndringUtils.utledEndringsresultat(
                 nåværendeAndeler = andelerTilkjentYtelse,

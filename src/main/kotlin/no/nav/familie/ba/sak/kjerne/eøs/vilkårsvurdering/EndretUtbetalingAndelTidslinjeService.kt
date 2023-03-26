@@ -20,7 +20,7 @@ class EndretUtbetalingAndelTidslinjeService(
 ) {
     fun hentBarnasHarEtterbetaling3ÅrTidslinjer(behandlingId: BehandlingId) =
         endretUtbetalingAndelHentOgPersisterService
-            .hentForBehandling(behandlingId.id)
+            .hentForBehandling(behandlingId)
             .tilBarnasHarEtterbetaling3ÅrTidslinjer()
 }
 
