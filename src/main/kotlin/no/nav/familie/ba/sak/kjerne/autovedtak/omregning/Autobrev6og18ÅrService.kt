@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
@@ -57,7 +58,7 @@ class Autobrev6og18ÅrService(
         }
 
         if (!barnMedAngittAlderInneværendeMånedEksisterer(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId,
                 alder = autobrev6og18ÅrDTO.alder
             )
         ) {
@@ -72,7 +73,7 @@ class Autobrev6og18ÅrService(
 
         if (!barnIBrytningsalderHarLøpendeYtelse(
                 alder = autobrev6og18ÅrDTO.alder,
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId,
                 årMåned = autobrev6og18ÅrDTO.årMåned
 
             )
@@ -106,7 +107,7 @@ class Autobrev6og18ÅrService(
         behandling: Behandling
     ) =
         autobrev6og18ÅrDTO.alder == Alder.ATTEN.år &&
-            !barnUnder18årInneværendeMånedEksisterer(behandlingId = behandling.id)
+            !barnUnder18årInneværendeMånedEksisterer(behandlingId = behandling.behandlingId)
 
     private fun finnBehandlingÅrsakForAlder(alder: Int): BehandlingÅrsak =
         when (alder) {
@@ -115,20 +116,20 @@ class Autobrev6og18ÅrService(
             else -> throw Feil("Alder må være oppgitt til enten 6 eller 18 år.")
         }
 
-    private fun barnMedAngittAlderInneværendeMånedEksisterer(behandlingId: Long, alder: Int): Boolean =
+    private fun barnMedAngittAlderInneværendeMånedEksisterer(behandlingId: BehandlingId, alder: Int): Boolean =
         barnMedAngittAlderInneværendeMåned(behandlingId, alder).isNotEmpty()
 
-    private fun barnMedAngittAlderInneværendeMåned(behandlingId: Long, alder: Int): List<Person> =
-        personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandlingId)?.barna
+    private fun barnMedAngittAlderInneværendeMåned(behandlingId: BehandlingId, alder: Int): List<Person> =
+        personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandlingId.id)?.barna
             ?.filter { it.type == PersonType.BARN && it.fyllerAntallÅrInneværendeMåned(alder) }?.toList() ?: listOf()
 
-    private fun barnUnder18årInneværendeMånedEksisterer(behandlingId: Long): Boolean =
-        personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandlingId)?.barna
+    private fun barnUnder18årInneværendeMånedEksisterer(behandlingId: BehandlingId): Boolean =
+        personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandlingId.id)?.barna
             ?.any { it.type == PersonType.BARN && it.erYngreEnnInneværendeMåned(Alder.ATTEN.år) } ?: false
 
     private fun barnIBrytningsalderHarLøpendeYtelse(
         alder: Int,
-        behandlingId: Long,
+        behandlingId: BehandlingId,
         årMåned: YearMonth
     ): Boolean {
         val barnIBrytningsalder =
