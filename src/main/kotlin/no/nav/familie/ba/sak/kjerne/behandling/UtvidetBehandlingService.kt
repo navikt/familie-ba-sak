@@ -78,25 +78,26 @@ class UtvidetBehandlingService(
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
 
         val søknadsgrunnlag = søknadGrunnlagService.hentAktiv(behandlingId = behandling.behandlingId)
-        val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
+        val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.behandlingId)
         val personer = personopplysningGrunnlag?.søkerOgBarn
 
         val arbeidsfordeling =
             arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.behandlingId)
 
-        val vedtak = vedtakRepository.findByBehandlingAndAktivOptional(behandling.id)
+        val vedtak = vedtakRepository.findByBehandlingAndAktivOptional(behandling.behandlingId.id)
 
-        val personResultater = vilkårsvurderingService.hentAktivForBehandling(behandling.id)?.personResultater
+        val personResultater = vilkårsvurderingService.hentAktivForBehandling(behandling.behandlingId)?.personResultater
 
         val andelerTilkjentYtelse =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandling.id))
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandling.behandlingId.id))
 
         val totrinnskontroll =
-            totrinnskontrollRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
+            totrinnskontrollRepository.findByBehandlingAndAktiv(behandlingId = behandling.behandlingId.id)
 
-        val tilbakekreving = tilbakekrevingRepository.findByBehandlingId(behandling.id)
+        val tilbakekreving = tilbakekrevingRepository.findByBehandlingId(behandling.behandlingId.id)
 
-        val endringstidspunkt = endringstidspunktService.finnEndringstidspunktForBehandling(behandlingId)
+        val endringstidspunkt =
+            endringstidspunktService.finnEndringstidspunktForBehandling(behandlingId = behandling.behandlingId)
 
         val kompetanser: Collection<Kompetanse> = kompetanseRepository.finnFraBehandlingId(behandlingId)
 
