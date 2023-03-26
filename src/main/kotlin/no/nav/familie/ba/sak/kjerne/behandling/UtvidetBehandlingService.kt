@@ -99,21 +99,21 @@ class UtvidetBehandlingService(
         val endringstidspunkt =
             endringstidspunktService.finnEndringstidspunktForBehandling(behandlingId = behandling.behandlingId)
 
-        val kompetanser: Collection<Kompetanse> = kompetanseRepository.finnFraBehandlingId(behandlingId)
+        val kompetanser: Collection<Kompetanse> = kompetanseRepository.finnFraBehandlingId(behandlingId.id)
 
-        val valutakurser = valutakursRepository.finnFraBehandlingId(behandlingId)
+        val valutakurser = valutakursRepository.finnFraBehandlingId(behandlingId.id)
 
-        val utenlandskePeriodebeløp = utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId)
+        val utenlandskePeriodebeløp = utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId.id)
 
         val endreteUtbetalingerMedAndeler = andelerTilkjentYtelseOgEndreteUtbetalingerService
             .finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandlingId)
 
-        val feilutbetaltValuta = feilutbetaltValutaService.hentFeilutbetaltValutaPerioder(BehandlingId(behandlingId))
+        val feilutbetaltValuta = feilutbetaltValutaService.hentFeilutbetaltValutaPerioder(behandlingId)
 
         val brevmottakere = brevmottakerService.hentRestBrevmottakere(behandlingId)
 
         return RestUtvidetBehandling(
-            behandlingId = behandling.id,
+            behandlingId = behandling.behandlingId.id,
             steg = behandling.steg,
             stegTilstand = behandling.behandlingStegTilstand.map { it.tilRestBehandlingStegTilstand() },
             status = behandling.status,

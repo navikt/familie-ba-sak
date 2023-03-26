@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.ekstern.restDomene.RestBrevmottaker
 import no.nav.familie.ba.sak.ekstern.restDomene.tilBrevMottaker
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.domene.ManuellAdresseInfo
@@ -23,7 +24,7 @@ class BrevmottakerService(
 ) {
 
     @Transactional
-    fun leggTilBrevmottaker(restBrevMottaker: RestBrevmottaker, behandlingId: Long) {
+    fun leggTilBrevmottaker(restBrevMottaker: RestBrevmottaker, behandlingId: BehandlingId) {
         val brevmottaker = restBrevMottaker.tilBrevMottaker(behandlingId)
 
         loggService.opprettBrevmottakerLogg(
@@ -62,8 +63,8 @@ class BrevmottakerService(
 
     fun hentBrevmottakere(behandlingId: Long) = brevmottakerRepository.finnBrevMottakereForBehandling(behandlingId)
 
-    fun hentRestBrevmottakere(behandlingId: Long) =
-        brevmottakerRepository.finnBrevMottakereForBehandling(behandlingId).map {
+    fun hentRestBrevmottakere(behandlingId: BehandlingId) =
+        brevmottakerRepository.finnBrevMottakereForBehandling(behandlingId.id).map {
             RestBrevmottaker(
                 id = it.id,
                 type = it.type,

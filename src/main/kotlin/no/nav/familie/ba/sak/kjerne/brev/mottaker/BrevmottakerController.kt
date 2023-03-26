@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.brev.mottaker
 import no.nav.familie.ba.sak.ekstern.restDomene.RestBrevmottaker
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -37,12 +38,24 @@ class BrevmottakerController(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "legge til brevmottaker"
         )
-        brevmottakerService.leggTilBrevmottaker(brevmottaker, behandlingId)
+        brevmottakerService.leggTilBrevmottaker(brevmottaker, BehandlingId(behandlingId))
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
+        return ResponseEntity.ok(
+            Ressurs.success(
+                utvidetBehandlingService.lagRestUtvidetBehandling(
+                    behandlingId = BehandlingId(
+                        behandlingId
+                    )
+                )
+            )
+        )
     }
 
-    @PutMapping(path = ["{behandlingId}/{mottakerId}"], produces = [APPLICATION_JSON_VALUE], consumes = [APPLICATION_JSON_VALUE])
+    @PutMapping(
+        path = ["{behandlingId}/{mottakerId}"],
+        produces = [APPLICATION_JSON_VALUE],
+        consumes = [APPLICATION_JSON_VALUE]
+    )
     fun oppdaterBrevmottaker(
         @PathVariable behandlingId: Long,
         @PathVariable mottakerId: Long,
@@ -54,7 +67,15 @@ class BrevmottakerController(
         )
         brevmottakerService.oppdaterBrevmottaker(brevmottaker, id = mottakerId)
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
+        return ResponseEntity.ok(
+            Ressurs.success(
+                utvidetBehandlingService.lagRestUtvidetBehandling(
+                    behandlingId = BehandlingId(
+                        behandlingId
+                    )
+                )
+            )
+        )
     }
 
     @DeleteMapping(path = ["{behandlingId}/{mottakerId}"])
@@ -68,7 +89,15 @@ class BrevmottakerController(
         )
         brevmottakerService.fjernBrevmottaker(id = mottakerId)
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
+        return ResponseEntity.ok(
+            Ressurs.success(
+                utvidetBehandlingService.lagRestUtvidetBehandling(
+                    behandlingId = BehandlingId(
+                        behandlingId
+                    )
+                )
+            )
+        )
     }
 
     @GetMapping(path = ["{behandlingId}"], produces = [APPLICATION_JSON_VALUE])
@@ -77,6 +106,14 @@ class BrevmottakerController(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
             handling = "hente brevmottakere"
         )
-        return ResponseEntity.ok(Ressurs.success(brevmottakerService.hentRestBrevmottakere(behandlingId = behandlingId)))
+        return ResponseEntity.ok(
+            Ressurs.success(
+                brevmottakerService.hentRestBrevmottakere(
+                    behandlingId = BehandlingId(
+                        behandlingId
+                    )
+                )
+            )
+        )
     }
 }
