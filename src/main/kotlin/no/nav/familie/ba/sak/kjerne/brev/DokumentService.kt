@@ -116,7 +116,7 @@ class DokumentService(
 
         if (behandling != null && manueltBrevRequest.brevmal.setterBehandlingPåVent()) {
             settPåVentService.settBehandlingPåVent(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId,
                 frist = LocalDate.now()
                     .plusDays(
                         manueltBrevRequest.brevmal.ventefristDager(
@@ -142,15 +142,18 @@ class DokumentService(
                 brukerIdType = BrukerIdType.FNR,
                 erInstitusjonVerge = false
             ).toList()
+
             manueltBrevRequest.erTilInstitusjon -> MottakerInfo(
                 brukerId = checkNotNull(fagsak.institusjon).orgNummer,
                 brukerIdType = BrukerIdType.ORGNR,
                 erInstitusjonVerge = false
             ).toList()
+
             brevmottakere.isNotEmpty() -> brevmottakerService.lagMottakereFraBrevMottakere(
                 brevmottakere,
                 søkersident
             )
+
             else -> MottakerInfo(
                 brukerIdType = BrukerIdType.FNR,
                 brukerId = søkersident,
@@ -171,9 +174,11 @@ class DokumentService(
                     navn = utledInstitusjonNavn(manueltBrevRequest)
                 )
             }
+
             mottakerInfo.brukerIdType == BrukerIdType.FNR && mottakerInfo.navn != null -> {
                 AvsenderMottaker(idType = BrukerIdType.FNR, id = mottakerInfo.brukerId, navn = mottakerInfo.navn)
             }
+
             else -> {
                 null
             }

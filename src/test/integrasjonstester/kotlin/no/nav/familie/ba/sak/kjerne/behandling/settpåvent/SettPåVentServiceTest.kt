@@ -125,7 +125,7 @@ class SettPåVentServiceTest(
 
         assertThrows<FunksjonellFeil> {
             settPåVentService.settBehandlingPåVent(
-                behandlingId = behandlingEtterVilkårsvurderingSteg.id,
+                behandlingId = behandlingEtterVilkårsvurderingSteg.behandlingId,
                 frist = LocalDate.now().minusDays(1),
                 årsak = SettPåVentÅrsak.AVVENTER_DOKUMENTASJON
             )
@@ -145,7 +145,7 @@ class SettPåVentServiceTest(
             brevmalService = brevmalService
         )
 
-        val behandlingId = behandlingEtterVilkårsvurderingSteg.id
+        val behandlingId = behandlingEtterVilkårsvurderingSteg.behandlingId
 
         val frist1 = LocalDate.now().plusDays(21)
 

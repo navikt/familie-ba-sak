@@ -119,7 +119,7 @@ class SaksstatistikkService(
         )
     }
 
-    private fun hentSettPåVentDVH(behandlingId: Long): SettPåVent? {
+    private fun hentSettPåVentDVH(behandlingId: BehandlingId): SettPåVent? {
         val settPåVent = settPåVentService.finnAktivSettPåVentPåBehandling(behandlingId) ?: return null
         return SettPåVent(
             frist = settPåVent.frist.atStartOfDay(TIMEZONE),

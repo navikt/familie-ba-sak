@@ -528,11 +528,11 @@ class StegService(
         behandling: Behandling,
         behandlingSteg: BehandlingSteg<*>
     ) {
-        if (settPåVentService.finnAktivSettPåVentPåBehandling(behandlingId = behandling.id) != null) {
+        if (settPåVentService.finnAktivSettPåVentPåBehandling(behandlingId = behandling.behandlingId) != null) {
             throw FunksjonellFeil(
                 "${SikkerhetContext.hentSaksbehandlerNavn()} prøver å utføre steg " +
                     behandlingSteg.stegType() +
-                    " på behandling ${behandling.id} som er på vent."
+                    " på behandling ${behandling.behandlingId} som er på vent."
             )
         }
     }
