@@ -25,7 +25,7 @@ class FeilutbetaltValutaService(
     fun leggTilFeilutbetaltValutaPeriode(feilutbetaltValuta: RestFeilutbetaltValuta, behandlingId: BehandlingId): Long {
         val lagret = feilutbetaltValutaRepository.save(
             FeilutbetaltValuta(
-                behandlingId = behandlingId.id,
+                behandlingId = behandlingId,
                 fom = feilutbetaltValuta.fom,
                 tom = feilutbetaltValuta.tom,
                 feilutbetaltBeløp = feilutbetaltValuta.feilutbetaltBeløp
@@ -44,8 +44,8 @@ class FeilutbetaltValutaService(
         feilutbetaltValutaRepository.deleteById(id)
     }
 
-    fun hentFeilutbetaltValutaPerioder(behandlingId: Long) =
-        feilutbetaltValutaRepository.finnFeilutbetaltValutaForBehandling(behandlingId = behandlingId)
+    fun hentFeilutbetaltValutaPerioder(behandlingId: BehandlingId) =
+        feilutbetaltValutaRepository.finnFeilutbetaltValutaForBehandling(behandlingId = behandlingId.id)
             .map { tilRest(it) }
 
     private fun tilRest(it: FeilutbetaltValuta) =

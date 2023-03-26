@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
 import no.nav.familie.ba.sak.kjerne.beregning.EndringstidspunktService
@@ -192,9 +193,9 @@ class VedtaksperiodeServiceEnhetstest {
         assertThat(vedtaksperiodeService.beskrivPerioderMedFeilutbetaltValuta(vedtak)).isNull()
 
         every {
-            feilutbetaltValutaRepository.finnFeilutbetaltValutaForBehandling(vedtak.behandling.id)
+            feilutbetaltValutaRepository.finnFeilutbetaltValutaForBehandling(vedtak.behandling.behandlingId.id)
         } returns perioder.map {
-            FeilutbetaltValuta(1L, fom = it.first, tom = it.second, 200)
+            FeilutbetaltValuta(BehandlingId(1L), fom = it.first, tom = it.second, 200)
         }
         val periodebeskrivelser = vedtaksperiodeService.beskrivPerioderMedFeilutbetaltValuta(vedtak)
 

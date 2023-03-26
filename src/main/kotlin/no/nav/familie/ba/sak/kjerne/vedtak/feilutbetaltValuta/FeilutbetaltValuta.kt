@@ -1,9 +1,12 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta
 
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingIdConverter
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
 import javax.persistence.Column
+import javax.persistence.Convert
 import javax.persistence.Entity
 import javax.persistence.EntityListeners
 import javax.persistence.GeneratedValue
@@ -17,7 +20,8 @@ import javax.persistence.Table
 @Table(name = "FEILUTBETALT_VALUTA")
 data class FeilutbetaltValuta(
     @Column(name = "fk_behandling_id", updatable = false, nullable = false)
-    val behandlingId: Long,
+    @Convert(converter = BehandlingIdConverter::class)
+    val behandlingId: BehandlingId,
     @Column(name = "fom", columnDefinition = "DATE")
     var fom: LocalDate,
     @Column(name = "tom", columnDefinition = "DATE")

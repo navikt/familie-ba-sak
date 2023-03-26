@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.tilRestVedtak
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultatRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.beregning.EndringstidspunktService
@@ -105,7 +106,7 @@ class UtvidetBehandlingService(
         val endreteUtbetalingerMedAndeler = andelerTilkjentYtelseOgEndreteUtbetalingerService
             .finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandlingId)
 
-        val feilutbetaltValuta = feilutbetaltValutaService.hentFeilutbetaltValutaPerioder(behandlingId)
+        val feilutbetaltValuta = feilutbetaltValutaService.hentFeilutbetaltValutaPerioder(BehandlingId(behandlingId))
 
         val brevmottakere = brevmottakerService.hentRestBrevmottakere(behandlingId)
 

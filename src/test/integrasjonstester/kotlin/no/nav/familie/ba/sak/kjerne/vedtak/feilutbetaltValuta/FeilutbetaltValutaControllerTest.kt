@@ -38,7 +38,7 @@ class FeilutbetaltValutaControllerTest(
             behandlingId = behandling.behandlingId
         )
 
-        feilutbetaltValutaService.hentFeilutbetaltValutaPerioder(behandlingId = behandling.id)
+        feilutbetaltValutaService.hentFeilutbetaltValutaPerioder(behandlingId = behandling.behandlingId)
             .also { Assertions.assertThat(it[0].id).isEqualTo(id) }
             .also { Assertions.assertThat(it[0].fom).isNotNull() }
             .also { Assertions.assertThat(it[0].tom).isNotNull() }
@@ -53,7 +53,7 @@ class FeilutbetaltValutaControllerTest(
             id = id
         )
 
-        feilutbetaltValutaService.hentFeilutbetaltValutaPerioder(behandlingId = behandling.id)
+        feilutbetaltValutaService.hentFeilutbetaltValutaPerioder(behandlingId = behandling.behandlingId)
             .also { Assertions.assertThat(it.get(0).id).isEqualTo(id) }
             .also { Assertions.assertThat(it.get(0).tom).isEqualTo("2020-05-31") }
 
@@ -69,13 +69,13 @@ class FeilutbetaltValutaControllerTest(
             behandlingId = behandling.behandlingId
         )
 
-        feilutbetaltValutaService.hentFeilutbetaltValutaPerioder(behandlingId = behandling.id)
+        feilutbetaltValutaService.hentFeilutbetaltValutaPerioder(behandlingId = behandling.behandlingId)
             .also { Assertions.assertThat(it.size).isEqualTo(2) }
             .also { Assertions.assertThat(it.get(0).id).isEqualTo(id2) }
 
         feilutbetaltValutaService.fjernFeilutbetaltValutaPeriode(id = id, behandlingId = behandling.behandlingId)
 
-        feilutbetaltValutaService.hentFeilutbetaltValutaPerioder(behandlingId = behandling.id)
+        feilutbetaltValutaService.hentFeilutbetaltValutaPerioder(behandlingId = behandling.behandlingId)
             .also { Assertions.assertThat(it.size).isEqualTo(1) }
             .also { Assertions.assertThat(it[0].id).isEqualTo(id2) }
     }
