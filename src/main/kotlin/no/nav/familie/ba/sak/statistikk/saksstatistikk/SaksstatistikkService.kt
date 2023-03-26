@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
@@ -49,7 +50,7 @@ class SaksstatistikkService(
     private val settPåVentService: SettPåVentService
 ) {
 
-    fun mapTilBehandlingDVH(behandlingId: Long): BehandlingDVH? {
+    fun mapTilBehandlingDVH(behandlingId: BehandlingId): BehandlingDVH? {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         val forrigeBehandlingId = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
             .takeIf { erRevurderingEllerTekniskBehandling(behandling) }?.id

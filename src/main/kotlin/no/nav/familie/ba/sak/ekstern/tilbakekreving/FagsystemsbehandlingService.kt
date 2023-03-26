@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.ekstern.tilbakekreving
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.hentTilbakekrevingInstitusjon
@@ -29,7 +30,7 @@ class FagsystemsbehandlingService(
 
     fun hentFagsystemsbehandling(request: HentFagsystemsbehandlingRequest): HentFagsystemsbehandlingRespons {
         logger.info("Henter behandling for behandlingId=${request.eksternId}")
-        val behandling = behandlingHentOgPersisterService.hent(request.eksternId.toLong())
+        val behandling = behandlingHentOgPersisterService.hent(BehandlingId(request.eksternId.toLong()))
 
         return lagRespons(request, behandling)
     }
@@ -46,7 +47,7 @@ class FagsystemsbehandlingService(
         request: HentFagsystemsbehandlingRequest,
         behandling: Behandling
     ): HentFagsystemsbehandlingRespons {
-        val behandlingId = behandling.id
+        val behandlingId = behandling.behandlingId
         val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandlingId)
         val arbeidsfordeling = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId)
         val aktivVedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId)
@@ -54,7 +55,7 @@ class FagsystemsbehandlingService(
         val faktainfo = Faktainfo(
             revurderingsårsak = behandling.opprettetÅrsak.visningsnavn,
             revurderingsresultat = behandling.resultat.displayName,
-            tilbakekrevingsvalg = tilbakekrevingService.hentTilbakekrevingsvalg(behandlingId)
+            tilbakekrevingsvalg = tilbakekrevingService.hentTilbakekrevingsvalg(behandlingId.id)
         )
 
         val hentFagsystemsbehandling = HentFagsystemsbehandling(

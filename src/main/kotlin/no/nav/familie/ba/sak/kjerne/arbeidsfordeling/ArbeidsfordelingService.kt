@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -33,8 +34,8 @@ class ArbeidsfordelingService(
     @Transactional
     fun manueltOppdaterBehandlendeEnhet(behandling: Behandling, endreBehandlendeEnhet: RestEndreBehandlendeEnhet) {
         val aktivArbeidsfordelingPåBehandling =
-            arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(behandling.id)
-                ?: throw Feil("Finner ikke tilknyttet arbeidsfordelingsenhet på behandling ${behandling.id}")
+            arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(behandling.behandlingId.id)
+                ?: throw Feil("Finner ikke tilknyttet arbeidsfordelingsenhet på behandling ${behandling.behandlingId}")
 
         val forrigeArbeidsfordelingsenhet = Arbeidsfordelingsenhet(
             enhetId = aktivArbeidsfordelingPåBehandling.behandlendeEnhetId,
@@ -56,12 +57,12 @@ class ArbeidsfordelingService(
             manuellOppdatering = true,
             begrunnelse = endreBehandlendeEnhet.begrunnelse
         )
-        saksstatistikkEventPublisher.publiserBehandlingsstatistikk(behandling.id)
+        saksstatistikkEventPublisher.publiserBehandlingsstatistikk(behandling.behandlingId)
     }
 
     fun fastsettBehandlendeEnhet(behandling: Behandling, sisteBehandlingSomErIverksatt: Behandling? = null) {
         val aktivArbeidsfordelingPåBehandling =
-            arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(behandling.id)
+            arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(behandling.behandlingId.id)
 
         val forrigeArbeidsfordelingsenhet =
             if (aktivArbeidsfordelingPåBehandling != null) {
@@ -87,7 +88,7 @@ class ArbeidsfordelingService(
                     null -> {
                         arbeidsfordelingPåBehandlingRepository.save(
                             ArbeidsfordelingPåBehandling(
-                                behandlingId = behandling.id,
+                                behandlingId = behandling.behandlingId,
                                 behandlendeEnhetId = arbeidsfordelingsenhet.enhetId,
                                 behandlendeEnhetNavn = arbeidsfordelingsenhet.enhetNavn
                             )
@@ -126,13 +127,13 @@ class ArbeidsfordelingService(
             ?: if (sisteBehandlingSomErIverksatt != null) {
                 val forrigeIverksattesBehandlingArbeidsfordelingsenhet =
                     arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(
-                        sisteBehandlingSomErIverksatt.id
+                        sisteBehandlingSomErIverksatt.behandlingId.id
                     )
 
                 arbeidsfordelingPåBehandlingRepository.save(
                     forrigeIverksattesBehandlingArbeidsfordelingsenhet?.copy(
                         id = 0,
-                        behandlingId = behandling.id
+                        behandlingId = behandling.behandlingId
                     )
                         ?: throw Feil("Finner ikke arbeidsfordelingsenhet på forrige iverksatte behandling på satsendringsbehandling")
                 )
@@ -148,8 +149,8 @@ class ArbeidsfordelingService(
         manuellOppdatering: Boolean,
         begrunnelse: String = ""
     ) {
-        logger.info("Fastsatt behandlende enhet ${if (manuellOppdatering) "manuelt" else "automatisk"} på behandling ${behandling.id}: $oppdatertArbeidsfordelingPåBehandling")
-        secureLogger.info("Fastsatt behandlende enhet ${if (manuellOppdatering) "manuelt" else "automatisk"} på behandling ${behandling.id}: ${oppdatertArbeidsfordelingPåBehandling.toSecureString()}")
+        logger.info("Fastsatt behandlende enhet ${if (manuellOppdatering) "manuelt" else "automatisk"} på behandling ${behandling.behandlingId}: $oppdatertArbeidsfordelingPåBehandling")
+        secureLogger.info("Fastsatt behandlende enhet ${if (manuellOppdatering) "manuelt" else "automatisk"} på behandling ${behandling.behandlingId}: ${oppdatertArbeidsfordelingPåBehandling.toSecureString()}")
 
         if (forrigeArbeidsfordelingsenhet != null && forrigeArbeidsfordelingsenhet.enhetId != oppdatertArbeidsfordelingPåBehandling.behandlendeEnhetId) {
             loggService.opprettBehandlendeEnhetEndret(
@@ -167,9 +168,9 @@ class ArbeidsfordelingService(
         }
     }
 
-    fun hentArbeidsfordelingPåBehandling(behandlingId: Long): ArbeidsfordelingPåBehandling {
-        return arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(behandlingId)
-            ?: error("Finner ikke tilknyttet arbeidsfordeling på behandling med id $behandlingId")
+    fun hentArbeidsfordelingPåBehandling(behandlingId: BehandlingId): ArbeidsfordelingPåBehandling {
+        return arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(behandlingId.id)
+            ?: error("Finner ikke tilknyttet arbeidsfordeling på behandling med $behandlingId")
     }
 
     fun hentArbeidsfordelingsenhet(behandling: Behandling): Arbeidsfordelingsenhet {
@@ -177,7 +178,7 @@ class ArbeidsfordelingService(
 
         val personinfoliste = when (
             val personopplysningGrunnlag =
-                personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
+                personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.behandlingId.id)
         ) {
             null -> listOf(søker)
             else -> personopplysningGrunnlag.barna.map { barn ->

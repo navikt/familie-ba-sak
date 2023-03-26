@@ -43,8 +43,9 @@ class HenleggBehandlingTask(
             val valideringsdato = henleggBehandlingTaskDTO.validerOppgavefristErEtterDato
             val frist = oppgaveService.hentOppgaverSomIkkeErFerdigstilt(Oppgavetype.BehandleSak, behandling).let {
                 it.singleOrNull()?.run {
-                    oppgaveService.hentOppgave(gsakId.toLong()).fristFerdigstillelse ?: error("Oppgave $gsakId mangler frist")
-                } ?: error("Behandling ${behandling.id} har ingen, eller mer enn en behandleSak-oppgave: $it")
+                    oppgaveService.hentOppgave(gsakId.toLong()).fristFerdigstillelse
+                        ?: error("Oppgave $gsakId mangler frist")
+                } ?: error("Behandling ${behandling.behandlingId} har ingen, eller mer enn en behandleSak-oppgave: $it")
             }
             if (!LocalDate.parse(frist).isAfter(henleggBehandlingTaskDTO.validerOppgavefristErEtterDato)) {
                 task.metadata["Resultat"] = "Stoppet. Behandlingen har frist $frist. Må være etter $valideringsdato"
@@ -56,7 +57,8 @@ class HenleggBehandlingTask(
             behandling = behandling,
             henleggBehandlingInfo = henleggBehandlingTaskDTO.run { RestHenleggBehandlingInfo(årsak, begrunnelse) }
         ).apply {
-            task.metadata["behandlendeEnhetId"] = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(id).behandlendeEnhetId
+            task.metadata["behandlendeEnhetId"] =
+                arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId).behandlendeEnhetId
             task.metadata["Resultat"] = "Henleggelse kjørt OK"
         }
     }

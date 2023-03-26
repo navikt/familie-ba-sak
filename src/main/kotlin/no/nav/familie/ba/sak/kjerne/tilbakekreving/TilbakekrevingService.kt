@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -92,7 +93,7 @@ class TilbakekrevingService(
         tilbakekrevingRepository.findByBehandlingId(behandlingId)?.let { tilbakekrevingRepository.delete(it) }
 
     fun hentForhåndsvisningVarselbrev(
-        behandlingId: Long,
+        behandlingId: BehandlingId,
         forhåndsvisTilbakekrevingsvarselbrevRequest: ForhåndsvisTilbakekrevingsvarselbrevRequest
     ): ByteArray {
         tilgangService.verifiserHarTilgangTilHandling(
@@ -100,7 +101,7 @@ class TilbakekrevingService(
             handling = "hent forhåndsvisning av varselbrev for tilbakekreving"
         )
 
-        val vedtak = vedtakRepository.findByBehandlingAndAktivOptional(behandlingId)
+        val vedtak = vedtakRepository.findByBehandlingAndAktivOptional(behandlingId.id)
             ?: throw Feil(
                 "Fant ikke vedtak for behandling $behandlingId ved forhåndsvisning av varselbrev" +
                     " for tilbakekreving."
@@ -144,7 +145,7 @@ class TilbakekrevingService(
     fun lagOpprettTilbakekrevingRequest(behandling: Behandling): OpprettTilbakekrevingRequest {
         val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandling.id)
 
-        val enhet = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandling.id)
+        val enhet = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandling.behandlingId)
 
         val aktivtVedtak = vedtakRepository.findByBehandlingAndAktivOptional(behandling.id)
             ?: throw Feil("Fant ikke aktivt vedtak på behandling ${behandling.id}")

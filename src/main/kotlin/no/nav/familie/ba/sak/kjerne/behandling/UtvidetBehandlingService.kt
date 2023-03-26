@@ -74,14 +74,15 @@ class UtvidetBehandlingService(
     private val brevmottakerService: BrevmottakerService,
     private val featureToggleService: FeatureToggleService
 ) {
-    fun lagRestUtvidetBehandling(behandlingId: Long): RestUtvidetBehandling {
+    fun lagRestUtvidetBehandling(behandlingId: BehandlingId): RestUtvidetBehandling {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
 
         val søknadsgrunnlag = søknadGrunnlagService.hentAktiv(behandlingId = behandling.behandlingId)
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
         val personer = personopplysningGrunnlag?.søkerOgBarn
 
-        val arbeidsfordeling = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id)
+        val arbeidsfordeling =
+            arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.behandlingId)
 
         val vedtak = vedtakRepository.findByBehandlingAndAktivOptional(behandling.id)
 

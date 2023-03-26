@@ -85,7 +85,7 @@ fun ManueltBrevRequest.byggMottakerdata(
         persongrunnlagService.hentPersonerPåBehandling(listOf(ident), behandling).singleOrNull()
             ?: error("Fant flere eller ingen personer med angitt personident på behandling $behandling")
     }
-    val enhet = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandling.id).run {
+    val enhet = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandling.behandlingId).run {
         Enhet(enhetId = behandlendeEnhetId, enhetNavn = behandlendeEnhetNavn)
     }
     return when {

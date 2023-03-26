@@ -52,7 +52,7 @@ class JournalførVedtaksbrev(
         }
 
         val behandlendeEnhet =
-            arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.id).behandlendeEnhetId
+            arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = behandling.behandlingId).behandlendeEnhetId
 
         val mottakere = mutableListOf<MottakerInfo>()
 
@@ -146,8 +146,8 @@ class JournalførVedtaksbrev(
             )
         )
         logger.info(
-            "Journalfører vedtaksbrev for behandling ${vedtak.behandling.id} med tittel ${
-            hentOverstyrtDokumenttittel(vedtak.behandling)
+            "Journalfører vedtaksbrev for behandling ${vedtak.behandling.behandlingId} med tittel ${
+                hentOverstyrtDokumenttittel(vedtak.behandling)
             }"
         )
         val vedlegg = listOf(
