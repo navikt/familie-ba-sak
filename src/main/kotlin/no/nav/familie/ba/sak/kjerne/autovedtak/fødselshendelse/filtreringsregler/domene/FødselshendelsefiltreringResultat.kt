@@ -4,6 +4,8 @@ import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.StringListConverter
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.Filtreringsregel
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingIdConverter
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import javax.persistence.Column
 import javax.persistence.Convert
@@ -31,7 +33,8 @@ class FødselshendelsefiltreringResultat(
     val id: Long = 0,
 
     @Column(name = "fk_behandling_id", nullable = false, updatable = false, unique = true)
-    val behandlingId: Long,
+    @Convert(converter = BehandlingIdConverter::class)
+    val behandlingId: BehandlingId,
 
     @Enumerated(EnumType.STRING)
     @Column(name = "filtreringsregel")

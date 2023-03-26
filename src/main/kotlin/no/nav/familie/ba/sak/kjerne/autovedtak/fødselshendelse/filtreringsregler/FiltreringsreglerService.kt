@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregle
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
@@ -64,7 +65,7 @@ class FiltreringsreglerService(
 
     fun lagreFiltreringsregler(
         evalueringer: List<Evaluering>,
-        behandlingId: Long,
+        behandlingId: BehandlingId,
         fakta: FiltreringsreglerFakta
     ): List<FødselshendelsefiltreringResultat> {
         return fødselshendelsefiltreringResultatRepository.saveAll(
@@ -81,8 +82,8 @@ class FiltreringsreglerService(
         )
     }
 
-    fun hentFødselshendelsefiltreringResultater(behandlingId: Long): List<FødselshendelsefiltreringResultat> {
-        return fødselshendelsefiltreringResultatRepository.finnFødselshendelsefiltreringResultater(behandlingId = behandlingId)
+    fun hentFødselshendelsefiltreringResultater(behandlingId: BehandlingId): List<FødselshendelsefiltreringResultat> {
+        return fødselshendelsefiltreringResultatRepository.finnFødselshendelsefiltreringResultater(behandlingId = behandlingId.id)
     }
 
     fun kjørFiltreringsregler(
@@ -92,8 +93,9 @@ class FiltreringsreglerService(
         val morsAktørId = personidentService.hentAktør(nyBehandlingHendelse.morsIdent)
         val barnasAktørId = personidentService.hentAktørIder(nyBehandlingHendelse.barnasIdenter)
 
-        val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
-            ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.id}")
+        val personopplysningGrunnlag =
+            personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.behandlingId.id)
+                ?: throw IllegalStateException("Fant ikke personopplysninggrunnlag for behandling ${behandling.behandlingId}")
         val barnaFraHendelse = personopplysningGrunnlag.barna.filter { barnasAktørId.contains(it.aktør) }
 
         val migreringsdatoPåFagsak = behandlingService.hentMigreringsdatoPåFagsak(behandling.fagsak.id)
@@ -127,7 +129,7 @@ class FiltreringsreglerService(
 
         return lagreFiltreringsregler(
             evalueringer = evalueringer,
-            behandlingId = behandling.id,
+            behandlingId = behandling.behandlingId,
             fakta = fakta
         )
     }

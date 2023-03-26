@@ -128,7 +128,7 @@ class UtvidetBehandlingService(
                 ?: emptyList(),
             personResultater = personResultater?.map { it.tilRestPersonResultat() } ?: emptyList(),
             fødselshendelsefiltreringResultater = fødselshendelsefiltreringResultatRepository.finnFødselshendelsefiltreringResultater(
-                behandlingId = behandling.id
+                behandlingId = behandling.behandlingId.id
             ).map { it.tilRestFødselshendelsefiltreringResultat() },
             utbetalingsperioder = vedtaksperiodeService.hentUtbetalingsperioder(behandling),
             personerMedAndelerTilkjentYtelse = personopplysningGrunnlag?.tilRestPersonerMedAndeler(andelerTilkjentYtelse)
