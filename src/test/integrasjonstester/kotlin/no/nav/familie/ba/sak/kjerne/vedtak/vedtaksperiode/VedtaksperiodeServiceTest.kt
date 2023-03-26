@@ -146,7 +146,8 @@ class VedtaksperiodeServiceTest(
             )
         )
 
-        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandlingEtterNySøknadsregistrering.id)
+        val vedtak =
+            vedtakService.hentAktivForBehandlingThrows(behandlingId = behandlingEtterNySøknadsregistrering.behandlingId)
 
         val vedtaksperioder = vedtaksperiodeService.genererVedtaksperioderMedBegrunnelser(vedtak)
 
@@ -196,7 +197,8 @@ class VedtaksperiodeServiceTest(
             )
         )
 
-        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandlingEtterNySøknadsregistrering.id)
+        val vedtak =
+            vedtakService.hentAktivForBehandlingThrows(behandlingId = behandlingEtterNySøknadsregistrering.behandlingId)
 
         val vedtaksperioder = vedtaksperiodeService.genererVedtaksperioderMedBegrunnelser(vedtak)
 
@@ -222,7 +224,7 @@ class VedtaksperiodeServiceTest(
             vedtaksperiodeService = vedtaksperiodeService,
             brevmalService = brevmalService
         )
-        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandling.id)
+        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandling.behandlingId)
 
         val fom = inneværendeMåned().minusMonths(12).førsteDagIInneværendeMåned()
         val tom = inneværendeMåned().sisteDagIInneværendeMåned()
@@ -251,7 +253,7 @@ class VedtaksperiodeServiceTest(
     fun `Skal validere at vedtaksperioder blir lagret ved fortsatt innvilget som resultat`() {
         assertEquals(Behandlingsresultat.FORTSATT_INNVILGET, revurdering?.resultat)
 
-        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = revurdering!!.id)
+        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = revurdering!!.behandlingId)
         val vedtaksperioder = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
 
         assertEquals(1, vedtaksperioder.size)
@@ -260,7 +262,7 @@ class VedtaksperiodeServiceTest(
 
     @Test
     fun `Skal legge til og overskrive begrunnelser og fritekst på vedtaksperiode`() {
-        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = revurdering!!.id)
+        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = revurdering!!.behandlingId)
         val vedtaksperioder = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
 
         vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
@@ -295,7 +297,7 @@ class VedtaksperiodeServiceTest(
 
     @Test
     fun `Skal kaste feil når feil type blir valgt`() {
-        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = revurdering!!.id)
+        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = revurdering!!.behandlingId)
         val vedtaksperioder = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
 
         val feil = assertThrows<Feil> {
@@ -318,7 +320,7 @@ class VedtaksperiodeServiceTest(
         val barn2 = tilAktør(barn2Fnr)
         val behandling = lagBehandling()
         val personopplysningGrunnlag =
-            lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barnFnr, barn2Fnr))
+            lagTestPersonopplysningGrunnlag(behandling.behandlingId, søkerFnr, listOf(barnFnr, barn2Fnr))
 
         val forrigeAndelTilkjentYtelse1 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = YearMonth.of(2021, 4),
@@ -384,7 +386,7 @@ class VedtaksperiodeServiceTest(
         val barn2 = tilAktør(barn2Fnr)
         val behandling = lagBehandling()
         val personopplysningGrunnlag =
-            lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barnFnr, barn2Fnr))
+            lagTestPersonopplysningGrunnlag(behandling.behandlingId, søkerFnr, listOf(barnFnr, barn2Fnr))
 
         val forrigeAndelTilkjentYtelse1 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = YearMonth.of(2021, 4),
@@ -450,7 +452,7 @@ class VedtaksperiodeServiceTest(
         val barn2 = tilAktør(barn2Fnr)
         val behandling = lagBehandling()
         val personopplysningGrunnlag =
-            lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barnFnr, barn2Fnr))
+            lagTestPersonopplysningGrunnlag(behandling.behandlingId, søkerFnr, listOf(barnFnr, barn2Fnr))
 
         val forrigeAndelTilkjentYtelse1 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = YearMonth.of(2021, 4),
@@ -540,7 +542,7 @@ class VedtaksperiodeServiceTest(
         val barn2 = tilAktør(barn2Fnr)
         val behandling = lagBehandling()
         val personopplysningGrunnlag =
-            lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barnFnr, barn2Fnr))
+            lagTestPersonopplysningGrunnlag(behandling.behandlingId, søkerFnr, listOf(barnFnr, barn2Fnr))
 
         val forrigeAndelTilkjentYtelse1 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = YearMonth.of(2021, 4),

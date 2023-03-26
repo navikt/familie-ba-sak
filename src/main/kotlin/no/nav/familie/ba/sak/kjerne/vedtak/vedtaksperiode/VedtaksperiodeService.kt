@@ -19,6 +19,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedFritekst
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
@@ -267,7 +268,7 @@ class VedtaksperiodeService(
             }
 
             val tom = if (erAutobrevFor6Og18ÅrOgSmåbarnstillegg) {
-                finnTomDatoIFørsteUtbetalingsintervallFraInneværendeMåned(behandling.id)
+                finnTomDatoIFørsteUtbetalingsintervallFraInneværendeMåned(behandling.behandlingId)
             } else {
                 null
             }
@@ -342,10 +343,10 @@ class VedtaksperiodeService(
                 )
             vedtaksperiodeHentOgPersisterService.lagre(vedtaksperioder.sortedBy { it.fom })
         }
-        lagreNedOverstyrtEndringstidspunkt(vedtak.behandling.id, overstyrtEndringstidspunkt)
+        lagreNedOverstyrtEndringstidspunkt(vedtak.behandling.behandlingId, overstyrtEndringstidspunkt)
     }
 
-    private fun lagreNedOverstyrtEndringstidspunkt(behandlingId: Long, overstyrtEndringstidspunkt: LocalDate) {
+    private fun lagreNedOverstyrtEndringstidspunkt(behandlingId: BehandlingId, overstyrtEndringstidspunkt: LocalDate) {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
         behandling.overstyrtEndringstidspunkt = overstyrtEndringstidspunkt
         behandlingHentOgPersisterService.lagreEllerOppdater(behandling = behandling, sendTilDvh = false)
@@ -432,12 +433,12 @@ class VedtaksperiodeService(
         andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
         endretUtbetalingAndeler: List<EndretUtbetalingAndel>
     ): List<UtvidetVedtaksperiodeMedBegrunnelser> {
-        val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
+        val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.behandlingId.id)
             ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
 
         val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
         val sanityEØSBegrunnelser = sanityService.hentSanityEØSBegrunnelser()
-        val kompetanser = kompetanseRepository.finnFraBehandlingId(behandling.id)
+        val kompetanser = kompetanseRepository.finnFraBehandlingId(behandling.behandlingId.id)
 
         return utvidedeVedtaksperioderMedBegrunnelser.map { utvidetVedtaksperiodeMedBegrunnelser ->
             val kompetanserIPeriode = kompetanser.hentIPeriode(
@@ -503,8 +504,8 @@ class VedtaksperiodeService(
         vedtaksperiodeHentOgPersisterService.lagre(fortsattInnvilgetPeriode)
     }
 
-    private fun finnTomDatoIFørsteUtbetalingsintervallFraInneværendeMåned(behandlingId: Long): LocalDate =
-        andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandlingId))
+    private fun finnTomDatoIFørsteUtbetalingsintervallFraInneværendeMåned(behandlingId: BehandlingId): LocalDate =
+        andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(listOf(behandlingId.id))
             .filter { it.stønadFom <= YearMonth.now() && it.stønadTom >= YearMonth.now() }
             .minByOrNull { it.stønadTom }?.stønadTom?.sisteDagIInneværendeMåned()
             ?: error("Fant ikke andel for tilkjent ytelse inneværende måned for behandling $behandlingId.")
@@ -569,9 +570,9 @@ class VedtaksperiodeService(
     private fun hentAvslagsperioderMedBegrunnelser(vedtak: Vedtak): List<VedtaksperiodeMedBegrunnelser> {
         val behandling = vedtak.behandling
         val vilkårsvurdering =
-            vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
+            vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = behandling.behandlingId.id)
                 ?: throw Feil(
-                    "Fant ikke vilkårsvurdering for behandling ${behandling.id} ved generering av avslagsperioder"
+                    "Fant ikke vilkårsvurdering for behandling ${behandling.behandlingId} ved generering av avslagsperioder"
                 )
 
         val periodegrupperteAvslagsvilkår: Map<NullablePeriode, List<VilkårResultat>> =
@@ -683,7 +684,7 @@ class VedtaksperiodeService(
         val fra = mapOf(NB to "Fra", NN to "Frå").getOrDefault(målform, "Fra")
         val mye = mapOf(NB to "mye", NN to "mykje").getOrDefault(målform, "mye")
 
-        return feilutbetaltValutaRepository.finnFeilutbetaltValutaForBehandling(vedtak.behandling.id).map {
+        return feilutbetaltValutaRepository.finnFeilutbetaltValutaForBehandling(vedtak.behandling.behandlingId.id).map {
             val (fom, tom) = it.fom.tilDagMånedÅr() to it.tom.tilDagMånedÅr()
             "$fra $fom til $tom er det utbetalt ${it.feilutbetaltBeløp} kroner for $mye."
         }.toSet().takeIf { it.isNotEmpty() }
