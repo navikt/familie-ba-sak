@@ -29,12 +29,13 @@ class UtbetalingsperiodeMedBegrunnelserService(
         opphørsperioder: List<VedtaksperiodeMedBegrunnelser>
     ): List<VedtaksperiodeMedBegrunnelser> {
         val andelerTilkjentYtelse =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(vedtak.behandling.id)
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(vedtak.behandling.behandlingId.id)
 
         val vilkårsvurdering =
-            vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId = vedtak.behandling.id)
+            vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId = vedtak.behandling.behandlingId)
 
-        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = vedtak.behandling.id)
+        val personopplysningGrunnlag =
+            persongrunnlagService.hentAktivThrows(behandlingId = vedtak.behandling.behandlingId)
         val utbetalingsperioder = hentPerioderMedUtbetaling(
             andelerTilkjentYtelse = andelerTilkjentYtelse,
             vedtak = vedtak,
@@ -56,7 +57,7 @@ class UtbetalingsperiodeMedBegrunnelserService(
                 reduksjonsperioder = perioderMedReduksjonFraSistIverksatteBehandling
             )
 
-        val kompetanser = kompetanseRepository.finnFraBehandlingId(vedtak.behandling.id)
+        val kompetanser = kompetanseRepository.finnFraBehandlingId(vedtak.behandling.behandlingId.id)
         return splittUtbetalingsperioderPåKompetanser(
             utbetalingsperioder = utbetalingsperioderMedReduksjon,
             kompetanser = kompetanser.toList()
@@ -76,7 +77,7 @@ class UtbetalingsperiodeMedBegrunnelserService(
                 ?: return emptyList()
 
         val forrigePersonopplysningGrunnlag: PersonopplysningGrunnlag =
-            forrigeVedtatteBehandling.let { persongrunnlagService.hentAktivThrows(it.id) }
+            forrigeVedtatteBehandling.let { persongrunnlagService.hentAktivThrows(it.behandlingId) }
 
         val forrigeAndelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService
             .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(forrigeVedtatteBehandling.behandlingId)
