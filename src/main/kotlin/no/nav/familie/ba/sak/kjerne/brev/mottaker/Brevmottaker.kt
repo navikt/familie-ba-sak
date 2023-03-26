@@ -1,9 +1,12 @@
 package no.nav.familie.ba.sak.kjerne.brev.mottaker
 
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingIdConverter
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import org.hibernate.Hibernate
 import javax.persistence.Column
+import javax.persistence.Convert
 import javax.persistence.Entity
 import javax.persistence.EntityListeners
 import javax.persistence.EnumType
@@ -24,7 +27,8 @@ data class Brevmottaker(
     val id: Long = 0,
 
     @Column(name = "fk_behandling_id", updatable = false, nullable = false)
-    val behandlingId: Long,
+    @Convert(converter = BehandlingIdConverter::class)
+    val behandlingId: BehandlingId,
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
