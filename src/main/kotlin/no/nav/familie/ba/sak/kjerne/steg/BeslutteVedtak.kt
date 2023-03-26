@@ -67,10 +67,14 @@ class BeslutteVedtak(
         }
 
         val behandlingErAutomatiskBesluttet =
-            behandling.erManuellMigrering() && simuleringService.harMigreringsbehandlingAvvikInnenforBeløpsgrenser(behandling)
+            behandling.erManuellMigrering() && simuleringService.harMigreringsbehandlingAvvikInnenforBeløpsgrenser(
+                behandling
+            )
 
-        val beslutter = if (behandlingErAutomatiskBesluttet) SikkerhetContext.SYSTEM_NAVN else saksbehandlerContext.hentSaksbehandlerSignaturTilBrev()
-        val beslutterId = if (behandlingErAutomatiskBesluttet) SikkerhetContext.SYSTEM_FORKORTELSE else SikkerhetContext.hentSaksbehandler()
+        val beslutter =
+            if (behandlingErAutomatiskBesluttet) SikkerhetContext.SYSTEM_NAVN else saksbehandlerContext.hentSaksbehandlerSignaturTilBrev()
+        val beslutterId =
+            if (behandlingErAutomatiskBesluttet) SikkerhetContext.SYSTEM_FORKORTELSE else SikkerhetContext.hentSaksbehandler()
 
         val totrinnskontroll = totrinnskontrollService.besluttTotrinnskontroll(
             behandling = behandling,
@@ -135,7 +139,7 @@ class BeslutteVedtak(
             )
 
             val behandleUnderkjentVedtakTask = OpprettOppgaveTask.opprettTask(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId,
                 oppgavetype = Oppgavetype.BehandleUnderkjentVedtak,
                 tilordnetRessurs = totrinnskontroll.saksbehandlerId,
                 fristForFerdigstillelse = LocalDate.now()

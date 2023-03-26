@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.task.dto.OpprettOppgaveTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
@@ -23,7 +24,7 @@ class OpprettOppgaveTask(
     override fun doTask(task: Task) {
         val opprettOppgaveTaskDTO = objectMapper.readValue(task.payload, OpprettOppgaveTaskDTO::class.java)
         task.metadata["oppgaveId"] = oppgaveService.opprettOppgave(
-            behandlingId = opprettOppgaveTaskDTO.behandlingId,
+            behandlingId = BehandlingId(opprettOppgaveTaskDTO.behandlingId),
             oppgavetype = opprettOppgaveTaskDTO.oppgavetype,
             fristForFerdigstillelse = opprettOppgaveTaskDTO.fristForFerdigstillelse,
             tilordnetNavIdent = opprettOppgaveTaskDTO.tilordnetRessurs,
@@ -36,7 +37,7 @@ class OpprettOppgaveTask(
         const val TASK_STEP_TYPE = "opprettOppgaveTask"
 
         fun opprettTask(
-            behandlingId: Long,
+            behandlingId: BehandlingId,
             oppgavetype: Oppgavetype,
             fristForFerdigstillelse: LocalDate,
             tilordnetRessurs: String? = null,
@@ -46,7 +47,7 @@ class OpprettOppgaveTask(
                 type = TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(
                     OpprettOppgaveTaskDTO(
-                        behandlingId,
+                        behandlingId.id,
                         oppgavetype,
                         fristForFerdigstillelse,
                         tilordnetRessurs,

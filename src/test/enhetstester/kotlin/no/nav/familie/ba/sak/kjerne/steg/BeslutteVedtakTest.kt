@@ -153,7 +153,7 @@ class BeslutteVedtakTest {
         verify(exactly = 1) { FerdigstillOppgaver.opprettTask(behandling.id, Oppgavetype.GodkjenneVedtak) }
         verify(exactly = 1) {
             OpprettOppgaveTask.opprettTask(
-                behandling.id,
+                behandling.behandlingId,
                 Oppgavetype.BehandleUnderkjentVedtak,
                 any(),
                 any(),

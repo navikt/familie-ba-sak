@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.task.dto.Autobrev6og18ÅrDTO
 import no.nav.familie.ba.sak.task.dto.AutobrevOpphørSmåbarnstilleggDTO
@@ -28,7 +29,7 @@ class OpprettTaskService(
 ) {
 
     fun opprettOppgaveTask(
-        behandlingId: Long,
+        behandlingId: BehandlingId,
         oppgavetype: Oppgavetype,
         beskrivelse: String? = null,
         fristForFerdigstillelse: LocalDate = LocalDate.now()

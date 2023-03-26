@@ -240,6 +240,7 @@ class InnkommendeJournalføringService(
                         frontendFeilmelding = "Oppslag på fagsak feilet med behandlingene som ble sendt inn."
                     )
             }
+
             false -> null
         }
 
@@ -301,7 +302,7 @@ class InnkommendeJournalføringService(
 
     private fun opprettOppgaveFor(behandling: Behandling, navIdent: String) {
         OpprettOppgaveTask.opprettTask(
-            behandlingId = behandling.id,
+            behandlingId = behandling.behandlingId,
             oppgavetype = Oppgavetype.BehandleSak,
             fristForFerdigstillelse = LocalDate.now(),
             tilordnetRessurs = navIdent
