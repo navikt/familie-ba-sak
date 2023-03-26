@@ -95,14 +95,14 @@ class SøknadGrunnlagTest(
         val søknadDTO = lagSøknadDTO(søkerIdent = søkerIdent, barnasIdenter = listOf(barnIdent))
         søknadGrunnlagService.lagreOgDeaktiverGammel(
             SøknadGrunnlag(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId,
                 søknad = søknadDTO.writeValueAsString()
             )
         )
 
         val søknadGrunnlag = søknadGrunnlagService.hentAktiv(behandling.id)
         assertNotNull(søknadGrunnlag)
-        assertEquals(behandling.id, søknadGrunnlag?.behandlingId)
+        assertEquals(behandling.behandlingId, søknadGrunnlag?.behandlingId)
         assertEquals(true, søknadGrunnlag?.aktiv)
         assertEquals(søkerIdent, søknadGrunnlag?.hentSøknadDto()?.søkerMedOpplysninger?.ident)
     }
@@ -124,14 +124,14 @@ class SøknadGrunnlagTest(
 
         søknadGrunnlagService.lagreOgDeaktiverGammel(
             SøknadGrunnlag(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId,
                 søknad = søknadDTO.writeValueAsString()
             )
         )
 
         søknadGrunnlagService.lagreOgDeaktiverGammel(
             SøknadGrunnlag(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId,
                 søknad = søknadDTO2.writeValueAsString()
             )
         )

@@ -2,11 +2,14 @@ package no.nav.familie.ba.sak.kjerne.grunnlag.søknad
 
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingIdConverter
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.objectMapper
 import java.time.LocalDateTime
 import javax.persistence.Column
+import javax.persistence.Convert
 import javax.persistence.Entity
 import javax.persistence.EntityListeners
 import javax.persistence.GeneratedValue
@@ -31,7 +34,8 @@ data class SøknadGrunnlag(
     val opprettetTidspunkt: LocalDateTime = LocalDateTime.now(),
 
     @Column(name = "fk_behandling_id", updatable = false, nullable = false)
-    val behandlingId: Long,
+    @Convert(converter = BehandlingIdConverter::class)
+    val behandlingId: BehandlingId,
 
     @Column(name = "soknad", nullable = false, columnDefinition = "text")
     var søknad: String,

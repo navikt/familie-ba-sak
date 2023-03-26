@@ -117,7 +117,8 @@ class RevurderingMedEndredeUtbetalingandelerTest(
             )
 
         // Behandling 2 - revurdering
-        val behandlingRevurdering = stegService.håndterNyBehandling(nyRevurdering(søkersIdent = fnr, fagsakId = fagsak.id))
+        val behandlingRevurdering =
+            stegService.håndterNyBehandling(nyRevurdering(søkersIdent = fnr, fagsakId = fagsak.id))
 
         persongrunnlagService.lagreOgDeaktiverGammel(
             lagTestPersonopplysningGrunnlag(
@@ -137,8 +138,12 @@ class RevurderingMedEndredeUtbetalingandelerTest(
 
         gjennomførVilkårsvurdering(vilkårsvurdering = vilkårsvurderingRevurdering, behandling = behandlingRevurdering)
 
-        val kopierteEndredeUtbetalingAndeler = endretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandlingRevurdering.id)
-        val andelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingRevurdering.id)
+        val kopierteEndredeUtbetalingAndeler =
+            endretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandlingRevurdering.id)
+        val andelerTilkjentYtelse =
+            andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
+                behandlingRevurdering.id
+            )
         val andelPåvirketAvEndringer = andelerTilkjentYtelse.first()
 
         assertEquals(1, kopierteEndredeUtbetalingAndeler.size)
@@ -178,13 +183,24 @@ class RevurderingMedEndredeUtbetalingandelerTest(
         stegService.håndterVilkårsvurdering(behandling)
     }
 
-    private fun lagFørstegangsbehandlingMedEndretUtbetalingAndel(endretAndelFom: YearMonth, endretAndelTom: YearMonth, søkersIdent: String, barnFnr: String, fagsak: Fagsak): Behandling {
-        val førstegangsbehandling = stegService.håndterNyBehandling(nyOrdinærBehandling(søkersIdent = søkersIdent, fagsakId = fagsak.id))
+    private fun lagFørstegangsbehandlingMedEndretUtbetalingAndel(
+        endretAndelFom: YearMonth,
+        endretAndelTom: YearMonth,
+        søkersIdent: String,
+        barnFnr: String,
+        fagsak: Fagsak
+    ): Behandling {
+        val førstegangsbehandling =
+            stegService.håndterNyBehandling(nyOrdinærBehandling(søkersIdent = søkersIdent, fagsakId = fagsak.id))
 
         val søknadGrunnlag = SøknadGrunnlag(
-            behandlingId = førstegangsbehandling.id,
+            behandlingId = førstegangsbehandling.behandlingId,
             aktiv = true,
-            søknad = lagSøknadDTO(søkersIdent, barnasIdenter = listOf(barnFnr), underkategori = BehandlingUnderkategori.ORDINÆR).writeValueAsString()
+            søknad = lagSøknadDTO(
+                søkersIdent,
+                barnasIdenter = listOf(barnFnr),
+                underkategori = BehandlingUnderkategori.ORDINÆR
+            ).writeValueAsString()
         )
 
         søknadGrunnlagRepository.save(søknadGrunnlag)

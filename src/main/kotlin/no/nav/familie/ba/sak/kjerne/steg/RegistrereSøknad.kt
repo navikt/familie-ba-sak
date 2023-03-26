@@ -43,7 +43,7 @@ class RegistrereSøknad(
         loggService.opprettRegistrertSøknadLogg(behandling, aktivSøknadGrunnlagFinnes)
         søknadGrunnlagService.lagreOgDeaktiverGammel(
             søknadGrunnlag = SøknadGrunnlag(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId,
                 søknad = innsendtSøknad
             )
         )
