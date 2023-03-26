@@ -1,10 +1,13 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.gdpr.domene
 
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingIdConverter
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.util.Objects
 import javax.persistence.Column
+import javax.persistence.Convert
 import javax.persistence.Entity
 import javax.persistence.EntityListeners
 import javax.persistence.GeneratedValue
@@ -33,7 +36,8 @@ data class FødselshendelsePreLansering(
     val id: Long = 0,
 
     @Column(name = "fk_behandling_id", nullable = false, updatable = false)
-    val behandlingId: Long,
+    @Convert(converter = BehandlingIdConverter::class)
+    val behandlingId: BehandlingId,
 
     @OneToOne(optional = false)
     @JoinColumn(name = "fk_aktoer_id", nullable = false, updatable = false)
