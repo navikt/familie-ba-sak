@@ -1,12 +1,15 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg
 
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingIdConverter
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
 import java.time.LocalDate
 import javax.persistence.Column
+import javax.persistence.Convert
 import javax.persistence.Entity
 import javax.persistence.EntityListeners
 import javax.persistence.EnumType
@@ -37,7 +40,8 @@ class PeriodeOvergangsstønadGrunnlag(
     val id: Long = 0,
 
     @Column(name = "fk_behandling_id", nullable = false, updatable = false)
-    val behandlingId: Long,
+    @Convert(converter = BehandlingIdConverter::class)
+    val behandlingId: BehandlingId,
 
     @OneToOne(optional = false)
     @JoinColumn(name = "fk_aktoer_id", nullable = false, updatable = false)
@@ -60,7 +64,7 @@ class PeriodeOvergangsstønadGrunnlag(
     )
 }
 
-fun PeriodeOvergangsstønad.tilPeriodeOvergangsstønadGrunnlag(behandlingId: Long, aktør: Aktør) =
+fun PeriodeOvergangsstønad.tilPeriodeOvergangsstønadGrunnlag(behandlingId: BehandlingId, aktør: Aktør) =
     PeriodeOvergangsstønadGrunnlag(
         behandlingId = behandlingId,
         aktør = aktør,

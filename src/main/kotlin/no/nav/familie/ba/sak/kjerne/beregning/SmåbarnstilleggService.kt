@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.integrasjoner.`ef-sak`.EfSakRestClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
@@ -37,7 +38,7 @@ class SmåbarnstilleggService(
         periodeOvergangsstønadGrunnlagRepository.saveAll(
             periodeOvergangsstønad.map {
                 it.tilPeriodeOvergangsstønadGrunnlag(
-                    behandlingId = behandlingId,
+                    behandlingId = BehandlingId(behandlingId),
                     aktør = søkerAktør
                 )
             }

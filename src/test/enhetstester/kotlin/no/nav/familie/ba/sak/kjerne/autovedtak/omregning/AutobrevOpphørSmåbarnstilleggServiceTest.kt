@@ -19,6 +19,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -307,7 +308,7 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
         tom: LocalDate
     ) = PeriodeOvergangsstønadGrunnlag(
         id = 1,
-        behandlingId = 1,
+        behandlingId = BehandlingId(1),
         aktør = randomAktør(),
         fom = fom,
         tom = tom,
