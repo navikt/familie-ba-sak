@@ -9,5 +9,5 @@ abstract class PeriodeOgBarnSkjemaEntitet<T : PeriodeOgBarnSkjema<T>> :
     PeriodeOgBarnSkjema<T> {
 
     abstract var id: Long
-    abstract var behandlingId: Long
+    abstract var behandlingId: Long // TODO må være en basic type?
 }
