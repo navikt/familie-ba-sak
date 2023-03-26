@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.endretutbetaling
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerIngenOverlappendeEndring
@@ -41,10 +42,11 @@ class EndretUtbetalingAndelService(
                 .first()
 
         val personopplysningGrunnlag =
-            personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
-                ?: throw Feil("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
+            personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.behandlingId.id)
+                ?: throw Feil("Fant ikke personopplysninggrunnlag på behandling ${behandling.behandlingId}")
 
-        val andelTilkjentYtelser = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
+        val andelTilkjentYtelser =
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.behandlingId.id)
 
         endretUtbetalingAndel.fraRestEndretUtbetalingAndel(restEndretUtbetalingAndel, person)
 
@@ -70,7 +72,7 @@ class EndretUtbetalingAndelService(
         validerÅrsak(
             årsak = endretUtbetalingAndel.årsak,
             endretUtbetalingAndel = endretUtbetalingAndel,
-            vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
+            vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.behandlingId)
         )
 
         validerUtbetalingMotÅrsak(
@@ -95,7 +97,7 @@ class EndretUtbetalingAndelService(
 
         endretUtbetalingAndelOppdatertAbonnementer.forEach {
             it.endretUtbetalingAndelerOppdatert(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId,
                 endretUtbetalingAndeler = andreEndredeAndelerPåBehandling + endretUtbetalingAndel
             )
         }
@@ -109,15 +111,15 @@ class EndretUtbetalingAndelService(
         endretUtbetalingAndelRepository.deleteById(endretUtbetalingAndelId)
 
         val personopplysningGrunnlag =
-            personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
-                ?: throw Feil("Fant ikke personopplysninggrunnlag på behandling ${behandling.id}")
+            personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.behandlingId.id)
+                ?: throw Feil("Fant ikke personopplysninggrunnlag på behandling ${behandling.behandlingId}")
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
         endretUtbetalingAndelOppdatertAbonnementer.forEach { abonnent ->
             abonnent.endretUtbetalingAndelerOppdatert(
-                behandlingId = behandling.id,
-                endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id)
+                behandlingId = behandling.behandlingId,
+                endretUtbetalingAndeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling.behandlingId.id)
             )
         }
     }
@@ -128,7 +130,7 @@ class EndretUtbetalingAndelService(
     ) =
         endretUtbetalingAndelRepository.save(
             EndretUtbetalingAndel(
-                behandlingId = behandling.id
+                behandlingId = behandling.behandlingId
             )
         )
 
@@ -147,7 +149,7 @@ class EndretUtbetalingAndelService(
 
 interface EndretUtbetalingAndelerOppdatertAbonnent {
     fun endretUtbetalingAndelerOppdatert(
-        behandlingId: Long,
+        behandlingId: BehandlingId,
         endretUtbetalingAndeler: List<EndretUtbetalingAndel>
     )
 }
