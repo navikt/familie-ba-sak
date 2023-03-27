@@ -605,7 +605,7 @@ class BehandlingIntegrationTest(
         )
 
         personResultatBarn2.setSortedVilkårResultater(
-            Vilkår.hentVilkårFor(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL).map {
+            Vilkår.hentVilkårFor(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL, behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR).map {
                 lagVilkårResultat(
                     personResultat = personResultatBarn2,
                     periodeFom = mars2018.minusMonths(1).toLocalDate(),
@@ -613,7 +613,7 @@ class BehandlingIntegrationTest(
                     vilkårType = it,
                     behandlingId = vilkårsvurdering.behandling.id
                 )
-            }.toSet() + Vilkår.hentVilkårFor(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL).map {
+            }.toSet() + Vilkår.hentVilkårFor(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL, behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR).map {
                 lagVilkårResultat(
                     personResultat = personResultatBarn2,
                     periodeFom = mars2018.toLocalDate(),

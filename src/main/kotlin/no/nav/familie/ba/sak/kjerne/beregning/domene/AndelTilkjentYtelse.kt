@@ -81,7 +81,6 @@ data class AndelTilkjentYtelse(
     @Column(name = "sats", nullable = false)
     val sats: Int,
 
-    // TODO: Bør dette hete gradering? I så fall rename og migrer i endringstabell også
     @Column(name = "prosent", nullable = false)
     val prosent: BigDecimal,
 

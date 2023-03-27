@@ -361,8 +361,7 @@ fun hentNesteSteg(
                 } else if (behandling.kategori == BehandlingKategori.EØS && endringerIUtbetaling == EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING) {
                     FERDIGSTILLE_BEHANDLING
                 } else {
-                    // TODO: Flytt denne valideringen til behandlingsresultat valideringen
-                    throw Feil("Resultat ${behandling.resultat} er ikke støttet etter behandlingsresultat for satsendringsbehandling.")
+                    throw Feil("Satsendringsbehandling har ingen endringer i utbetaling.")
                 }
 
                 IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI

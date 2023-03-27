@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
@@ -1019,7 +1020,11 @@ internal class UtvidetBarnetrygdTest {
         val vilkårSomSkalVurderes = if (erUtvidet) {
             listOf(Vilkår.UTVIDET_BARNETRYGD)
         } else {
-            Vilkår.hentVilkårFor(personType = personType, fagsakType = FagsakType.NORMAL)
+            Vilkår.hentVilkårFor(
+                personType = personType,
+                fagsakType = FagsakType.NORMAL,
+                behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR
+            )
         }
 
         return vilkårSomSkalVurderes.map {

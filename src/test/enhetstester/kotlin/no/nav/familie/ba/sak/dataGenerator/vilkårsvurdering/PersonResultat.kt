@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.dataGenerator.vilkårsvurdering
 
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -25,8 +25,8 @@ fun lagPersonResultatAvOverstyrteResultater(
 
     val vilkårResultater = Vilkår.hentVilkårFor(
         personType = person.type,
-        ytelseType = if (erUtvidet) YtelseType.UTVIDET_BARNETRYGD else YtelseType.ORDINÆR_BARNETRYGD,
-        fagsakType = FagsakType.NORMAL
+        fagsakType = FagsakType.NORMAL,
+        behandlingUnderkategori = if (erUtvidet) BehandlingUnderkategori.UTVIDET else BehandlingUnderkategori.ORDINÆR
     ).map { vilkårType ->
         overstyrendeVilkårResultater
             .find { it.vilkårType == vilkårType }
