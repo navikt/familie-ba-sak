@@ -23,6 +23,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingService
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilMånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.VilkårsvurderingBuilder
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -110,14 +111,14 @@ class VilkårsvurderingStegTest {
     @Test
     fun `skal validere når regelverk er konsistent`() {
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
-        val barn1 = tilfeldigPerson(personType = PersonType.BARN)
+        val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = LocalDate.now().minusMonths(2).withDayOfMonth(1))
 
         val behandling = lagBehandling()
 
         val vilkårsvurderingBygger = VilkårsvurderingBuilder<Måned>(behandling)
             .forPerson(søker, MånedTidspunkt.nå())
             .medVilkår("N>", Vilkår.BOSATT_I_RIKET, Vilkår.LOVLIG_OPPHOLD)
-            .forPerson(barn1, MånedTidspunkt.nå())
+            .forPerson(barn1, barn1.fødselsdato.tilMånedTidspunkt())
             .medVilkår("+>", Vilkår.UNDER_18_ÅR, Vilkår.GIFT_PARTNERSKAP)
             .medVilkår("N>", Vilkår.BOSATT_I_RIKET, Vilkår.LOVLIG_OPPHOLD, Vilkår.BOR_MED_SØKER)
             .byggPerson()
