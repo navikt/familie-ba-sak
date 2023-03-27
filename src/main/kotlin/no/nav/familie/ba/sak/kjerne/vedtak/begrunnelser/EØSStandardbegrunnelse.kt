@@ -164,6 +164,10 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val sanityApiNavn = "innvilgetTilleggestekstUkFullEtterbetaling"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
     },
+    INNVILGET_PRIMÆRLAND_DEN_ANDRE_FORELDEREN_UTSENDT_ARBEIDSTAKER {
+        override val sanityApiNavn = "innvilgetPrimaerlandDenAndreForelderenUtsendtArbeidstaker"
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_INNVILGET
+    },
     OPPHØR_EØS_STANDARD {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_OPPHØR
         override val sanityApiNavn = "opphorEosStandard"
@@ -279,6 +283,10 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
     AVSLAG_EØS_UREGISTRERT_BARN {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
         override val sanityApiNavn = "avslagEosUregistrertBarn"
+    },
+    AVSLAG_EØS_BOR_IKKE_FAST_MED_BARNET {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
+        override val sanityApiNavn = "avslagEosBorIkkeFastMedBarnet"
     },
     FORTSATT_INNVILGET_PRIMÆRLAND_STANDARD {
         override val sanityApiNavn = "fortsattInnvilgetPrimaerlandStandard"
