@@ -106,6 +106,8 @@ class VedtaksperiodeServiceEnhetstest {
 
     @Test
     fun `genererVedtaksperioderMedBegrunnelser skal slå sammen opphørsperioder fra og med endringstidspunkt`() {
+        every { featureToggleService.isEnabled(FeatureToggleConfig.BRUKE_TIDSLINJE_I_STEDET_FOR) } returns true
+
         val returnerteVedtaksperioderNårUtledetEndringstidspunktErLikSisteOpphørFom = vedtaksperiodeService
             .genererVedtaksperioderMedBegrunnelser(vedtak)
             .filter { it.type == Vedtaksperiodetype.OPPHØR }

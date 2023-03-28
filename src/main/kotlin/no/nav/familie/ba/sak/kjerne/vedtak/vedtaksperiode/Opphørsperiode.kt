@@ -19,6 +19,8 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilMånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidsenhet
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilDagEllerFørsteDagIPerioden
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilDagEllerSisteDagIPerioden
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilLocalDate
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
@@ -68,8 +70,8 @@ private fun finnOpphørsperioderPåGrunnAvReduksjonIRevurdering(
         .mapNotNull { erUtbetalingOpphørtPeriode ->
             if (erUtbetalingOpphørtPeriode.innhold == true) {
                 Opphørsperiode(
-                    periodeFom = erUtbetalingOpphørtPeriode.fraOgMed.tilLocalDate(),
-                    periodeTom = erUtbetalingOpphørtPeriode.tilOgMed.tilLocalDate(),
+                    periodeFom = erUtbetalingOpphørtPeriode.fraOgMed.tilDagEllerFørsteDagIPerioden().tilLocalDate(),
+                    periodeTom = erUtbetalingOpphørtPeriode.tilOgMed.tilDagEllerSisteDagIPerioden().tilLocalDate(),
                     vedtaksperiodetype = Vedtaksperiodetype.OPPHØR
                 )
             } else {
