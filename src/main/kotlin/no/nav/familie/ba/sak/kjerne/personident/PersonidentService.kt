@@ -120,15 +120,6 @@ class PersonidentService(
         return barnasFødselsnummer.map { hentAktør(it) }
     }
 
-    // TODO: Skriv test for denne metoden når den tas i bruk.
-    fun hentGjeldendeFødselsnummerForTidspunkt(aktør: Aktør, tidspunkt: LocalDateTime): String {
-        val alleIdenter = personidentRepository.hentAlleIdenterForAktørid(aktør.aktørId)
-        if (alleIdenter.size == 1) return alleIdenter.first().fødselsnummer
-        return alleIdenter.filter { it.gjelderTil?.isAfter(tidspunkt) ?: false }
-            .minByOrNull { it.gjelderTil!! }?.fødselsnummer
-            ?: alleIdenter.first { it.aktiv }.fødselsnummer
-    }
-
     private fun validerOmAktørIdErMerget(ident: String, aktørId: String) {
         /*
         Lokikken i denne metoden skal håndtere fallet når to aktørider blir merget.

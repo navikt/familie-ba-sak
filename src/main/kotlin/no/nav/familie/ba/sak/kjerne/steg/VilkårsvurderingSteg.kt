@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.valider18ÅrsVilkårEksistererFraFødselsdato
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.validerIkkeBlandetRegelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.validerIngenVilkårSattEtterSøkersDød
 import org.springframework.stereotype.Service
@@ -40,6 +41,11 @@ class VilkårsvurderingSteg(
 
         vilkårService.hentVilkårsvurdering(behandling.id)?.apply {
             validerIkkeBlandetRegelverk(
+                personopplysningGrunnlag = personopplysningGrunnlag,
+                vilkårsvurdering = this
+            )
+
+            valider18ÅrsVilkårEksistererFraFødselsdato(
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 vilkårsvurdering = this
             )

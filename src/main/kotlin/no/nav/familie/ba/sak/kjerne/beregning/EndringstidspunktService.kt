@@ -1,9 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
-import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
-import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
@@ -96,37 +93,6 @@ class EndringstidspunktService(
             nåværendeEndretAndeler = nåværendeEndretAndeler,
             forrigeEndretAndeler = forrigeEndretAndeler
         )
-    }
-
-    @Deprecated("Skal erstattes av finnEndringstidpunkForBehandling")
-    fun finnEndringstidpunkForBehandlingGammel(behandlingId: Long): LocalDate {
-        val nyBehandling = behandlingHentOgPersisterService.hent(behandlingId)
-
-        val sisteVedtattBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = nyBehandling.fagsak.id)
-            ?: return TIDENES_MORGEN
-
-        val nyeAndelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService
-            .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId)
-
-        val forrigeAndelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService
-            .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(sisteVedtattBehandling.id)
-
-        val førsteEndringstidspunktFraAndelTilkjentYtelse = nyeAndelerTilkjentYtelse.hentFørsteEndringstidspunkt(
-            forrigeAndelerTilkjentYtelse = forrigeAndelerTilkjentYtelse
-        ) ?: TIDENES_ENDE
-
-        val kompetansePerioder = kompetanseRepository.finnFraBehandlingId(nyBehandling.id)
-        val forrigeKompetansePerioder = kompetanseRepository.finnFraBehandlingId(sisteVedtattBehandling.id)
-        val førsteEndringstidspunkt = kompetansePerioder.finnFørsteEndringstidspunkt(forrigeKompetansePerioder)
-
-        val førsteEndringstidspunktIKompetansePerioder =
-            if (førsteEndringstidspunkt != TIDENES_ENDE.toYearMonth()) {
-                førsteEndringstidspunkt.førsteDagIInneværendeMåned()
-            } else {
-                TIDENES_ENDE
-            }
-
-        return minOf(førsteEndringstidspunktFraAndelTilkjentYtelse, førsteEndringstidspunktIKompetansePerioder)
     }
 
     companion object {

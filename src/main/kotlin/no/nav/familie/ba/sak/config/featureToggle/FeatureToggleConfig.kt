@@ -8,9 +8,9 @@ class FeatureToggleConfig {
         const val IKKE_STOPP_MIGRERINGSBEHANDLING = "familie-ba-sak.ikke.stopp.migeringsbehandling"
         const val TEKNISK_VEDLIKEHOLD_HENLEGGELSE = "familie-ba-sak.teknisk-vedlikehold-henleggelse.tilgangsstyring"
         const val TEKNISK_ENDRING = "familie-ba-sak.behandling.teknisk-endring"
+        const val BRUKE_TIDSLINJE_I_STEDET_FOR = "familie-ba-sak.tidslinje-opphorsperiode"
 
         // Release
-        const val NY_MÅTE_Å_UTLEDE_ENDRINGSTIDSPUNKT = "familie-ba-sak.release.endringstidspunkt-oppgradering"
         const val KAN_GENERERE_UTBETALINGSOPPDRAG_NY = "familie-ba-sak.generer.utbetalingsoppdrag.ny"
         const val EØS_INFORMASJON_OM_ÅRLIG_KONTROLL = "familie-ba-sak.eos-informasjon-om-aarlig-kontroll"
         const val ER_MANUEL_POSTERING_TOGGLE_PÅ = "familie-ba-sak.manuell-postering"

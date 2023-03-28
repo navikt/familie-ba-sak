@@ -83,7 +83,6 @@ class VedtaksperiodeServiceEnhetstest {
     @BeforeEach
     fun init() {
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns forrigeBehandling
-        every { featureToggleService.isEnabled(FeatureToggleConfig.NY_MÅTE_Å_UTLEDE_ENDRINGSTIDSPUNKT) } returns true
         every { endringstidspunktService.finnEndringstidspunktForBehandling(vedtak.behandling.id) } returns endringstidspunkt
         every { persongrunnlagService.hentAktiv(any()) } returns
             lagTestPersonopplysningGrunnlag(vedtak.behandling.id, person)
@@ -107,6 +106,8 @@ class VedtaksperiodeServiceEnhetstest {
 
     @Test
     fun `genererVedtaksperioderMedBegrunnelser skal slå sammen opphørsperioder fra og med endringstidspunkt`() {
+        every { featureToggleService.isEnabled(FeatureToggleConfig.BRUKE_TIDSLINJE_I_STEDET_FOR) } returns true
+
         val returnerteVedtaksperioderNårUtledetEndringstidspunktErLikSisteOpphørFom = vedtaksperiodeService
             .genererVedtaksperioderMedBegrunnelser(vedtak)
             .filter { it.type == Vedtaksperiodetype.OPPHØR }

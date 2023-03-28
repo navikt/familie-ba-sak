@@ -9,7 +9,6 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
-import no.nav.familie.ba.sak.kjerne.beregning.hentPerioderMedEndringerFra
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.utledSegmenter
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -81,7 +80,6 @@ data class AndelTilkjentYtelse(
     @Column(name = "sats", nullable = false)
     val sats: Int,
 
-    // TODO: Bør dette hete gradering? I så fall rename og migrer i endringstabell også
     @Column(name = "prosent", nullable = false)
     val prosent: BigDecimal,
 
@@ -248,10 +246,6 @@ fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.lagVertikaleSegmenter(): Map
             acc[segment] = andelerForSegment
             acc
         }
-}
-
-fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.erUlike(andreAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>): Boolean {
-    return this.hentPerioderMedEndringerFra(andreAndeler).isNotEmpty()
 }
 
 enum class YtelseType(val klassifisering: String) {

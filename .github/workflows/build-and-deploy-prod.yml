@@ -8,7 +8,7 @@ env:
   IMAGE_LATEST: ghcr.io/navikt/familie-ba-sak:latest
 jobs:
   integrasjonstester:
-    name: Kjører integrasjonstester
+    name: Kjører enhetstester og integrasjonstester
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
