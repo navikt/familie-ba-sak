@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.satsendring
 
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringÅpenBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import org.springframework.stereotype.Service
@@ -7,7 +9,8 @@ import org.springframework.stereotype.Service
 @Service
 class SatsendringService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
+    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
+    private val satskjøringRepository: SatskjøringRepository
 ) {
     fun erFagsakOppdatertMedSisteSatser(fagsakId: Long): Boolean {
         // Må se på siste iverksatte og ikke siste vedtatte siden vi ønsker å se på
@@ -20,4 +23,7 @@ class SatsendringService(
                 .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(sisteIverksatteBehandlingId)
                 .erOppdatertMedSisteSatser()
     }
+
+    fun finnSatskjøringerSomHarStoppetPgaÅpenBehandling(): List<SatskjøringÅpenBehandling> =
+        satskjøringRepository.finnSatskjøringerSomHarStoppetPgaÅpenBehandling()
 }

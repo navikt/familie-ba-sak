@@ -199,7 +199,6 @@ class BeregningService(
             TilkjentYtelseUtils.beregnTilkjentYtelse(
                 vilkårsvurdering = vilkårsvurdering,
                 personopplysningGrunnlag = personopplysningGrunnlag,
-                behandling = behandling,
                 endretUtbetalingAndeler = endreteUtbetalingAndeler,
                 fagsakType = behandling.fagsak.type
             ) { søkerAktør ->
