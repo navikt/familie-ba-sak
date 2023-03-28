@@ -12,7 +12,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønadTidslinje
-import no.nav.familie.ba.sak.kjerne.beregning.domene.erUlike
+import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
@@ -62,7 +62,18 @@ fun vedtakOmOvergangsstønadPåvirkerFagsak(
         barnasAktørerOgFødselsdatoer = barnasAktørerOgFødselsdatoer
     )
 
-    return forrigeSmåbarnstilleggAndeler.erUlike(nyeSmåbarnstilleggAndeler)
+    return nyeSmåbarnstilleggAndeler.førerTilEndringIUtbetalingFraForrigeBehandling(
+        forrigeAndeler = forrigeSmåbarnstilleggAndeler
+    )
+}
+
+private fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.førerTilEndringIUtbetalingFraForrigeBehandling(forrigeAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>): Boolean {
+    val endringstidslinje = EndringIUtbetalingUtil.lagEndringIUtbetalingTidslinje(
+        nåværendeAndeler = this.map { it.andel },
+        forrigeAndeler = forrigeAndeler.map { it.andel }
+    )
+
+    return endringstidslinje.perioder().any { it.innhold == true }
 }
 
 fun hentInnvilgedeOgReduserteAndelerSmåbarnstillegg(
