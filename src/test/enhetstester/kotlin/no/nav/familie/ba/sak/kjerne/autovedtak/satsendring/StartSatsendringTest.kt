@@ -42,6 +42,7 @@ internal class StartSatsendringTest {
     private val personidentService: PersonidentService = mockk()
     private val autovedtakSatsendringService: AutovedtakSatsendringService = mockk()
     private val satsendringService: SatsendringService = mockk()
+    private val taskRepository: TaskRepositoryWrapper = mockk()
 
     private lateinit var startSatsendring: StartSatsendring
 
@@ -50,10 +51,9 @@ internal class StartSatsendringTest {
         val satsSlot = slot<Satskjøring>()
         every { satskjøringRepository.save(capture(satsSlot)) } answers { satsSlot.captured }
         every { behandlingRepository.findByFagsakAndAktivAndOpen(any()) } returns null
-        val taskRepository: TaskRepositoryWrapper = mockk()
         val taskSlot = slot<Task>()
         every { taskRepository.save(capture(taskSlot)) } answers { taskSlot.captured }
-        val opprettTaskService = OpprettTaskService(taskRepository, satskjøringRepository)
+        val opprettTaskService = OpprettTaskService(taskRepository)
         every { featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_SJEKK_UTBETALING, true) } returns false
         every { satsendringService.erFagsakOppdatertMedSisteSatser(any()) } returns true
 
@@ -117,7 +117,7 @@ internal class StartSatsendringTest {
 
         startSatsendring.startSatsendring(5)
 
-        verify(exactly = 1) { satskjøringRepository.save(any()) }
+        verify(exactly = 1) { taskRepository.save(any()) }
     }
 
     @Test
@@ -198,7 +198,7 @@ internal class StartSatsendringTest {
 
         startSatsendring.startSatsendring(5)
 
-        verify(exactly = 5) { satskjøringRepository.save(any()) }
+        verify(exactly = 5) { taskRepository.save(any()) }
         verify(exactly = 3) { fagsakRepository.finnLøpendeFagsakerForSatsendring(any()) }
     }
 
