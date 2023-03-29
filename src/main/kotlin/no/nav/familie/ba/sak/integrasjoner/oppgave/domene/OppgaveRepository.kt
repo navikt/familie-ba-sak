@@ -22,4 +22,7 @@ interface OppgaveRepository : JpaRepository<DbOppgave, Long> {
     fun findByBehandlingIdAndIkkeFerdigstilt(behandlingId: Long): List<DbOppgave>
 
     fun findByGsakId(gsakId: String): DbOppgave?
+
+    @Query(value = "SELECT o FROM Oppgave o WHERE o.erFerdigstilt = true AND o.behandling.id = :behandlingId AND o.type = :oppgavetype")
+    fun findByBehandlingAndTypeAndErFerdigstilt(behandlingId: Long, oppgavetype: Oppgavetype): DbOppgave?
 }
