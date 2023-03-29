@@ -100,6 +100,11 @@ spec:
       external:
         - host: xsrv1mh6.api.sanity.io
         - host: unleash.nais.io
+        - host: familie-integrasjoner.prod-fss-pub.nais.io
+        - host: familie-oppdrag.prod-fss-pub.nais.io
+        - host: familie-ba-statistikk.prod-fss-pub.nais.io
+        - host: familie-ba-infotrygd.prod-fss-pub.nais.io
+        - host: familie-ba-infotrygd-feed.prod-fss-pub.nais.io
   replicas:
     min: 2
     max: 4
