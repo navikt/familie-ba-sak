@@ -234,7 +234,7 @@ internal class DokumentServiceEnhetstest {
         val manueltBrevRequest = ManueltBrevRequest(mottakerIdent = søkersident, brevmal = Brevmal.SVARTIDSBREV)
         val avsenderMottakere = mutableListOf<AvsenderMottaker>()
 
-        every { brevmottakerService.hentBrevmottakere(behandling.id) } returns listOf(
+        every { brevmottakerService.hentBrevmottakere(behandling.behandlingId) } returns listOf(
             Brevmottaker(
                 behandlingId = behandling.id,
                 type = MottakerType.FULLMEKTIG,

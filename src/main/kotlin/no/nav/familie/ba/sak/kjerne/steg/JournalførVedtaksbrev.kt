@@ -59,7 +59,7 @@ class JournalførVedtaksbrev(
         if (fagsak.type == FagsakType.INSTITUSJON) {
             mottakere += MottakerInfo(fagsak.institusjon!!.orgNummer, BrukerIdType.ORGNR, false)
         } else {
-            val brevMottakere = brevmottakerService.hentBrevmottakere(behandling.id)
+            val brevMottakere = brevmottakerService.hentBrevmottakere(behandling.behandlingId)
             if (brevMottakere.isNotEmpty()) {
                 mottakere += brevmottakerService.lagMottakereFraBrevMottakere(brevMottakere, søkersident)
             } else {

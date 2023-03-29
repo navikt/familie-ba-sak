@@ -61,7 +61,8 @@ class BrevmottakerService(
         brevmottakerRepository.deleteById(id)
     }
 
-    fun hentBrevmottakere(behandlingId: Long) = brevmottakerRepository.finnBrevMottakereForBehandling(behandlingId)
+    fun hentBrevmottakere(behandlingId: BehandlingId) =
+        brevmottakerRepository.finnBrevMottakereForBehandling(behandlingId.id)
 
     fun hentRestBrevmottakere(behandlingId: BehandlingId) =
         brevmottakerRepository.finnBrevMottakereForBehandling(behandlingId.id).map {

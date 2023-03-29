@@ -135,7 +135,7 @@ class DokumentService(
         behandling: Behandling?
     ): List<MottakerInfo> {
         val søkersident = fagsak.aktør.aktivFødselsnummer()
-        val brevmottakere = behandling?.let { brevmottakerService.hentBrevmottakere(it.id) } ?: emptyList()
+        val brevmottakere = behandling?.let { brevmottakerService.hentBrevmottakere(it.behandlingId) } ?: emptyList()
         return when {
             behandling == null -> MottakerInfo(
                 brukerId = søkersident,
