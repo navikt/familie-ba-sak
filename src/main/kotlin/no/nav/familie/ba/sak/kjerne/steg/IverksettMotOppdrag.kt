@@ -87,7 +87,7 @@ class IverksettMotOppdrag(
             taskRepository.save(
                 SendVedtakTilInfotrygdTask.opprettTask(
                     hentFnrStoenadsmottaker(behandling.fagsak),
-                    behandling.id
+                    behandling.behandlingId.id
                 )
             )
         }
