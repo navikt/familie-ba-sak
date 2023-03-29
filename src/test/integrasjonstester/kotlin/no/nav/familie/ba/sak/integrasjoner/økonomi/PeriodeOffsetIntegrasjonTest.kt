@@ -88,9 +88,9 @@ class PeriodeOffsetIntegrasjonTest(
         val barnAktør = personidentService.hentAktørIder(listOf(barnFnr))
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
-                behandling.id,
-                fnr,
-                listOf(barnFnr),
+                behandlingId = behandling.behandlingId,
+                søkerPersonIdent = fnr,
+                barnasIdenter = listOf(barnFnr),
                 søkerAktør = fagsak.aktør,
                 barnAktør = barnAktør
             )
@@ -98,7 +98,7 @@ class PeriodeOffsetIntegrasjonTest(
 
         behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling = behandling)
 
-        val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
+        val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.behandlingId)
         Assertions.assertNotNull(vedtak)
         vedtak!!.vedtaksdato = LocalDateTime.now()
         vedtakService.oppdater(vedtak)
@@ -116,7 +116,7 @@ class PeriodeOffsetIntegrasjonTest(
             iverksettMotOppdrag.utførStegOgAngiNeste(
                 behandling,
                 IverksettingTaskDTO(
-                    behandlingsId = behandling.id,
+                    behandlingsId = behandling.behandlingId.id,
                     vedtaksId = vedtak.id,
                     saksbehandlerId = "ansvarligSaksbehandler",
                     personIdent = fagsak.aktør.aktivFødselsnummer()
@@ -154,9 +154,9 @@ class PeriodeOffsetIntegrasjonTest(
         val barnAktør = personidentService.hentAktørIder(listOf(barnFnr))
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
-                behandling.id,
-                fnr,
-                listOf(barnFnr),
+                behandlingId = behandling.behandlingId,
+                søkerPersonIdent = fnr,
+                barnasIdenter = listOf(barnFnr),
                 søkerAktør = fagsak.aktør,
                 barnAktør = barnAktør
             )
@@ -164,7 +164,7 @@ class PeriodeOffsetIntegrasjonTest(
 
         behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling = behandling)
 
-        val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
+        val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.behandlingId)
         Assertions.assertNotNull(vedtak)
         vedtak!!.vedtaksdato = LocalDateTime.now()
         vedtakService.oppdater(vedtak)
