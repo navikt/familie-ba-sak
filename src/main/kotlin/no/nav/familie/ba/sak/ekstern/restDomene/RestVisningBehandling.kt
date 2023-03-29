@@ -23,7 +23,7 @@ class RestVisningBehandling(
 )
 
 fun Behandling.tilRestVisningBehandling(vedtaksdato: LocalDateTime?) = RestVisningBehandling(
-    behandlingId = this.id,
+    behandlingId = this.behandlingId.id,
     opprettetTidspunkt = this.opprettetTidspunkt,
     kategori = this.kategori,
     underkategori = this.underkategori.tilDto(),
