@@ -21,7 +21,7 @@
         <revision>1</revision>
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
-        <spring.cloud.version>3.1.5</spring.cloud.version>
+        <spring.cloud.version>4.0.2</spring.cloud.version>
         <prosessering.version>1.20230228091402_e6ac3c2</prosessering.version>
         <felles.version>1.20230116145510_2afcc20</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20221118130052_e2abd9f</eksterne-kontrakter-bisys.version>
