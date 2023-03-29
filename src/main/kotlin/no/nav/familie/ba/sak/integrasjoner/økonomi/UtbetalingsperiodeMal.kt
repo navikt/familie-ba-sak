@@ -60,7 +60,7 @@ data class UtbetalingsperiodeMal(
             sats = BigDecimal(andel.kalkulertUtbetalingsbeløp),
             satsType = Utbetalingsperiode.SatsType.MND,
             utbetalesTil = hentUtebetalesTil(vedtak.behandling.fagsak),
-            behandlingId = vedtak.behandling.id
+            behandlingId = vedtak.behandling.behandlingId.id
         )
 
     private fun hentUtebetalesTil(fagsak: Fagsak): String {
