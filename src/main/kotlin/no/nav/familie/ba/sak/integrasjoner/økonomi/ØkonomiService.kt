@@ -97,7 +97,7 @@ class ØkonomiService(
     ): Utbetalingsoppdrag {
         val oppdatertBehandling = vedtak.behandling
         val oppdatertTilstand =
-            beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandlingId = oppdatertBehandling.id)
+            beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandlingId = oppdatertBehandling.behandlingId)
                 .pakkInnForUtbetaling(andelTilkjentYtelseForUtbetalingsoppdragFactory)
 
         val oppdaterteKjeder = kjedeinndelteAndeler(oppdatertTilstand)
@@ -120,7 +120,7 @@ class ØkonomiService(
                     ?: error("Finner ikke forrige behandling ved oppdatering av tilkjent ytelse og iverksetting av vedtak")
 
             val forrigeTilstand =
-                beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(forrigeBehandling.id)
+                beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(forrigeBehandling.behandlingId)
                     .pakkInnForUtbetaling(andelTilkjentYtelseForUtbetalingsoppdragFactory)
 
             val forrigeKjeder = kjedeinndelteAndeler(forrigeTilstand)
@@ -154,10 +154,10 @@ class ØkonomiService(
             )
 
             if (!erSimulering && (
-                oppdatertBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT || behandlingHentOgPersisterService.hent(
+                    oppdatertBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT || behandlingHentOgPersisterService.hent(
                         oppdatertBehandling.id
                     ).resultat == Behandlingsresultat.OPPHØRT
-                )
+                    )
             ) {
                 utbetalingsoppdrag.validerOpphørsoppdrag()
             }
@@ -168,7 +168,7 @@ class ØkonomiService(
         if (skalValideres) {
             utbetalingsoppdrag.validerNullutbetaling(
                 behandlingskategori = vedtak.behandling.kategori,
-                andelerTilkjentYtelse = beregningService.hentAndelerTilkjentYtelseForBehandling(vedtak.behandling.id)
+                andelerTilkjentYtelse = beregningService.hentAndelerTilkjentYtelseForBehandling(vedtak.behandling.behandlingId)
             )
         }
 

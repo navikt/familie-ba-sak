@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragAvsluttTask
 import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask
@@ -146,7 +147,7 @@ class AvstemmingService(
 
     fun hentDataForKonsistensavstemming(
         avstemmingstidspunkt: LocalDateTime,
-        relevanteBehandlinger: List<Long>
+        relevanteBehandlinger: List<BehandlingId>
     ): List<PerioderForBehandling> {
         return relevanteBehandlinger
             .chunked(1000)

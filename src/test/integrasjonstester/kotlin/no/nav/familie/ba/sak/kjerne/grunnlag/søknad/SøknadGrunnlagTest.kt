@@ -215,7 +215,7 @@ class SøknadGrunnlagTest(
         )
 
         val tilkjentYtelse =
-            beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandlingEtterVilkårsvurderingSteg.id)
+            beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandlingEtterVilkårsvurderingSteg.behandlingId)
         val steg = behandlingEtterVilkårsvurderingSteg.behandlingStegTilstand.map { it.behandlingSteg }.toSet()
         assertEquals(
             setOf(
@@ -253,7 +253,7 @@ class SøknadGrunnlagTest(
             )
         )
 
-        assertThrows<EmptyResultDataAccessException> { beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandlingEtterNyRegistrering.id) }
+        assertThrows<EmptyResultDataAccessException> { beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandlingEtterNyRegistrering.behandlingId) }
         val stegEtterNyRegistrering =
             behandlingEtterNyRegistrering.behandlingStegTilstand.map { it.behandlingSteg }.toSet()
         assertEquals(

@@ -174,7 +174,7 @@ class BehandlingServiceTest(
 
         assertEquals(
             0,
-            beregningService.finnBarnFraBehandlingMedTilkjentYtelse(behandlingId = behandling.id).size
+            beregningService.finnBarnFraBehandlingMedTilkjentYtelse(behandlingId = behandling.behandlingId).size
         )
     }
 

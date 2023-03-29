@@ -30,7 +30,7 @@ class PersonopplysningGrunnlagForNyBehandlingService(
 
         val barnMedTilkjentYtelseIForrigeBehandling =
             if (skalTaMedBarnFraForrigeBehandling(behandling) && forrigeBehandlingSomErVedtatt != null) {
-                beregningService.finnBarnFraBehandlingMedTilkjentYtelse(behandlingId = forrigeBehandlingSomErVedtatt.id)
+                beregningService.finnBarnFraBehandlingMedTilkjentYtelse(behandlingId = forrigeBehandlingSomErVedtatt.behandlingId)
             } else {
                 emptyList()
             }

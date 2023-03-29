@@ -134,17 +134,17 @@ class TilkjentYtelseValideringServiceTest {
             )
         )
 
-        every { beregningServiceMock.hentTilkjentYtelseForBehandling(behandlingId = behandling.id) } answers { tilkjentYtelse }
-        every { behandlingHentOgPersisterService.hent(behandlingId = behandling.id) } answers { behandling }
+        every { beregningServiceMock.hentTilkjentYtelseForBehandling(behandlingId = behandling.behandlingId) } answers { tilkjentYtelse }
+        every { behandlingHentOgPersisterService.hent(behandlingId = behandling.behandlingId) } answers { behandling }
         every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling = behandling) } answers { forrigeBehandling }
-        every { beregningServiceMock.hentOptionalTilkjentYtelseForBehandling(behandlingId = forrigeBehandling.id) } answers { forrigeTilkjentYtelse }
+        every { beregningServiceMock.hentOptionalTilkjentYtelseForBehandling(behandlingId = forrigeBehandling.behandlingId) } answers { forrigeTilkjentYtelse }
         every { personidentServiceMock.hentAktør(person1.aktør.aktørId) } answers { person1.aktør }
         every { personidentServiceMock.hentAktør(person2.aktør.aktørId) } answers { person2.aktør }
 
-        Assertions.assertTrue(tilkjentYtelseValideringService.finnAktørerMedUgyldigEtterbetalingsperiode(behandlingId = behandling.id).size == 1)
+        Assertions.assertTrue(tilkjentYtelseValideringService.finnAktørerMedUgyldigEtterbetalingsperiode(behandlingId = behandling.behandlingId).size == 1)
         Assertions.assertEquals(
             person2.aktør,
-            tilkjentYtelseValideringService.finnAktørerMedUgyldigEtterbetalingsperiode(behandlingId = behandling.id)
+            tilkjentYtelseValideringService.finnAktørerMedUgyldigEtterbetalingsperiode(behandlingId = behandling.behandlingId)
                 .single()
         )
     }

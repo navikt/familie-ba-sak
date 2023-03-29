@@ -140,24 +140,25 @@ class AutovedtakSatsendringService(
     private fun hentBrukerHarÅpenBehandlingSvar(
         aktivOgÅpenBehandling: Behandling
     ): SatsendringSvar {
-        val brukerHarÅpenBehandlingSvar = if (satsendringService.erFagsakOppdatertMedSisteSatser(aktivOgÅpenBehandling.fagsak.id)) {
-            SatsendringSvar.HAR_ALLEREDE_SISTE_SATS
-        } else if (aktivOgÅpenBehandling.status.erLåstMenIkkeAvsluttet()) {
-            SatsendringSvar.BEHANDLING_ER_LÅST_SATSENDRING_TRIGGES_NESTE_VIRKEDAG
-        } else if (aktivOgÅpenBehandling.steg.rekkefølge > StegType.VILKÅRSVURDERING.rekkefølge) {
-            tilbakestillBehandlingService.tilbakestillBehandlingTilVilkårsvurdering(aktivOgÅpenBehandling)
-            SatsendringSvar.TILBAKESTILLER_BEHANDLINGEN_TIL_VILKÅRSVURDERINGEN
-        } else {
-            SatsendringSvar.BEHANDLINGEN_ER_UNDER_UTREDNING_MEN_I_RIKTIG_TILSTAND
-        }
+        val brukerHarÅpenBehandlingSvar =
+            if (satsendringService.erFagsakOppdatertMedSisteSatser(aktivOgÅpenBehandling.fagsak.id)) {
+                SatsendringSvar.HAR_ALLEREDE_SISTE_SATS
+            } else if (aktivOgÅpenBehandling.status.erLåstMenIkkeAvsluttet()) {
+                SatsendringSvar.BEHANDLING_ER_LÅST_SATSENDRING_TRIGGES_NESTE_VIRKEDAG
+            } else if (aktivOgÅpenBehandling.steg.rekkefølge > StegType.VILKÅRSVURDERING.rekkefølge) {
+                tilbakestillBehandlingService.tilbakestillBehandlingTilVilkårsvurdering(aktivOgÅpenBehandling)
+                SatsendringSvar.TILBAKESTILLER_BEHANDLINGEN_TIL_VILKÅRSVURDERINGEN
+            } else {
+                SatsendringSvar.BEHANDLINGEN_ER_UNDER_UTREDNING_MEN_I_RIKTIG_TILSTAND
+            }
         return brukerHarÅpenBehandlingSvar
     }
 
     private fun harUtbetalingerSomOverstiger100Prosent(sisteIverksatteBehandling: Behandling): Boolean {
         val tilkjentYtelse =
-            beregningService.hentTilkjentYtelseForBehandling(behandlingId = sisteIverksatteBehandling.id)
+            beregningService.hentTilkjentYtelseForBehandling(behandlingId = sisteIverksatteBehandling.behandlingId)
         val personopplysningGrunnlag =
-            persongrunnlagService.hentAktivThrows(behandlingId = sisteIverksatteBehandling.id)
+            persongrunnlagService.hentAktivThrows(behandlingId = sisteIverksatteBehandling.behandlingId)
 
         val barnMedAndreRelevanteTilkjentYtelser = personopplysningGrunnlag.barna.map {
             Pair(

@@ -57,10 +57,12 @@ class AndelTilkjentYtelseOffsetTest(
             barnFødselsdato = barnFødselsdato
         )
 
-        val andelerBehandling1 = beregningService.hentAndelerTilkjentYtelseForBehandling(behandlingId = behandling1.id)
+        val andelerBehandling1 =
+            beregningService.hentAndelerTilkjentYtelseForBehandling(behandlingId = behandling1.behandlingId)
         val offsetBehandling1 = andelerBehandling1.mapNotNull { it.periodeOffset }.map { it.toInt() }.sorted()
 
-        val andelerBehandling2 = beregningService.hentAndelerTilkjentYtelseForBehandling(behandlingId = behandling2.id)
+        val andelerBehandling2 =
+            beregningService.hentAndelerTilkjentYtelseForBehandling(behandlingId = behandling2.behandlingId)
         val offsetBehandling2 = andelerBehandling2.mapNotNull { it.periodeOffset }.map { it.toInt() }.sorted()
 
         val nyAndelIBehandling2 = andelerBehandling2.single { it.erSmåbarnstillegg() }

@@ -149,7 +149,7 @@ class AutovedtakSmåbarnstilleggService(
                 emptyList()
             } else {
                 beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(
-                    behandlingId = sistIverksatteBehandling.id
+                    behandlingId = sistIverksatteBehandling.behandlingId
                 ).filter { it.erSmåbarnstillegg() }
             }
 
@@ -158,7 +158,7 @@ class AutovedtakSmåbarnstilleggService(
                 emptyList()
             } else {
                 beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(
-                    behandlingId = behandlingEtterBehandlingsresultat.id
+                    behandlingId = behandlingEtterBehandlingsresultat.behandlingId
                 ).filter { it.erSmåbarnstillegg() }
             }
 

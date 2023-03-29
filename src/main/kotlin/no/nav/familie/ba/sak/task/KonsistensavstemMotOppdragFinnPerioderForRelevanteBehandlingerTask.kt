@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AvstemmingService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingDataTaskDTO
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -44,7 +45,7 @@ class KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask(
         val perioderTilAvstemming =
             avstemmingService.hentDataForKonsistensavstemming(
                 taskDto.avstemmingsdato,
-                taskDto.relevanteBehandlinger
+                taskDto.relevanteBehandlinger.map { BehandlingId(it) }
             )
 
         logger.info("Finner perioder til avstemming for transaksjonsId ${taskDto.transaksjonsId} og chunk ${taskDto.chunkNr} med ${perioderTilAvstemming.size} løpende saker")

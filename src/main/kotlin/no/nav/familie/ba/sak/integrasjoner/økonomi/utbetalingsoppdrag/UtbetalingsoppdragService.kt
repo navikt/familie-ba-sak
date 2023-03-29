@@ -90,13 +90,14 @@ class UtbetalingsoppdragService(
         andelTilkjentYtelseForUtbetalingsoppdragFactory: AndelTilkjentYtelseForUtbetalingsoppdragFactory,
         erSimulering: Boolean = false
     ): TilkjentYtelse {
-        val behandlingId = vedtak.behandling.id
+        val behandlingId = vedtak.behandling.behandlingId
         val behandling = vedtak.behandling
         val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId)
 
         // Henter tilkjentYtelse som har utbetalingsoppdrag og var sendt til oppdrag fra forrige iverksatt behandling
         val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling)
-        val forrigeTilkjentYtelse = forrigeBehandling?.let { beregningService.hentTilkjentYtelseForBehandling(it.id) }
+        val forrigeTilkjentYtelse =
+            forrigeBehandling?.let { beregningService.hentTilkjentYtelseForBehandling(it.behandlingId) }
         val forrigeAndeler =
             forrigeTilkjentYtelse?.andelerTilkjentYtelse?.filter { it.erAndelSomSkalSendesTilOppdrag() }
 

@@ -55,8 +55,8 @@ class BehandlingsresultatSteg(
             validerBarnasVilkår(barna, vilkårsvurdering)
         }
 
-        val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandling.id)
-        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandling.id)
+        val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandling.behandlingId)
+        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandling.behandlingId)
 
         validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
             tilkjentYtelse = tilkjentYtelse,
@@ -118,11 +118,11 @@ class BehandlingsresultatSteg(
         if (behandlingMedOppdatertBehandlingsresultat.skalRettFraBehandlingsresultatTilIverksetting(
                 endringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi == ENDRING_I_UTBETALING
             ) || beregningService.kanAutomatiskIverksetteSmåbarnstilleggEndring(
-                    behandling = behandlingMedOppdatertBehandlingsresultat,
-                    sistIverksatteBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(
-                            behandling = behandlingMedOppdatertBehandlingsresultat
-                        )
+                behandling = behandlingMedOppdatertBehandlingsresultat,
+                sistIverksatteBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(
+                    behandling = behandlingMedOppdatertBehandlingsresultat
                 )
+            )
         ) {
             behandlingService.oppdaterStatusPåBehandling(
                 behandlingMedOppdatertBehandlingsresultat.id,
@@ -132,7 +132,10 @@ class BehandlingsresultatSteg(
             simuleringService.oppdaterSimuleringPåBehandling(behandlingMedOppdatertBehandlingsresultat)
         }
 
-        return hentNesteStegGittEndringerIUtbetaling(behandling, endringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi)
+        return hentNesteStegGittEndringerIUtbetaling(
+            behandling,
+            endringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi
+        )
     }
 
     override fun stegType(): StegType {
