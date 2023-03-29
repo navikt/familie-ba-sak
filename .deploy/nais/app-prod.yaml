@@ -95,6 +95,8 @@ spec:
           cluster: prod-fss
         - application: familie-klage
           cluster: prod-gcp
+        - application: pdl-api
+          cluster: prod-fss
       external:
         - host: xsrv1mh6.api.sanity.io
         - host: unleash.nais.io
