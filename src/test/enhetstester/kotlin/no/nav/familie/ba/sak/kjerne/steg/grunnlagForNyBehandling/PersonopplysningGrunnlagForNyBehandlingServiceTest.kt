@@ -55,7 +55,7 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
                 any(),
                 any()
             )
-        } returns PersonopplysningGrunnlag(behandlingId = behandling.id)
+        } returns PersonopplysningGrunnlag(behandlingId = behandling.behandlingId)
 
         personopplysningGrunnlagForNyBehandlingService.opprettPersonopplysningGrunnlag(
             behandling = behandling,
