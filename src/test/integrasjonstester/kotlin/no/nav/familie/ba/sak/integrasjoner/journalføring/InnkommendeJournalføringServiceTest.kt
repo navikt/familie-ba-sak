@@ -88,7 +88,7 @@ class InnkommendeJournalføringServiceTest(
         assertEquals(request.nyBehandlingstype, behandling!!.type)
         assertEquals(request.nyBehandlingsårsak, behandling.opprettetÅrsak)
 
-        val søknadMottattDato = behandlingSøknadsinfoService.hentSøknadMottattDato(behandling.id)
+        val søknadMottattDato = behandlingSøknadsinfoService.hentSøknadMottattDato(behandling.behandlingId)
         assertNotNull(søknadMottattDato)
         assertEquals(request.datoMottatt!!.toLocalDate(), søknadMottattDato!!.toLocalDate())
     }
