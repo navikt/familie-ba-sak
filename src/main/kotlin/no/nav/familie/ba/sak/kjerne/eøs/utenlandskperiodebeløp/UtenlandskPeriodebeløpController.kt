@@ -42,10 +42,11 @@ class UtenlandskPeriodebeløpController(
         val utenlandskPeriodebeløp =
             restUtenlandskPeriodebeløp.tilUtenlandskPeriodebeløp(barnAktører, eksisterendeUtenlandskPeriodeBeløp)
 
+        val parsetBehandlingId = BehandlingId(behandlingId)
         utenlandskPeriodebeløpService
-            .oppdaterUtenlandskPeriodebeløp(BehandlingId(behandlingId), utenlandskPeriodebeløp)
+            .oppdaterUtenlandskPeriodebeløp(parsetBehandlingId, utenlandskPeriodebeløp)
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId)))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(parsetBehandlingId)))
     }
 
     @DeleteMapping(path = ["{behandlingId}/{utenlandskPeriodebeløpId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -55,6 +56,14 @@ class UtenlandskPeriodebeløpController(
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         utenlandskPeriodebeløpService.slettUtenlandskPeriodebeløp(utenlandskPeriodebeløpId)
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
+        return ResponseEntity.ok(
+            Ressurs.success(
+                utvidetBehandlingService.lagRestUtvidetBehandling(
+                    behandlingId = BehandlingId(
+                        behandlingId
+                    )
+                )
+            )
+        )
     }
 }
