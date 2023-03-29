@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.Utils.avrundetHeltallAvProsent
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønadTidslinje
@@ -16,7 +17,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import java.time.LocalDate
 
 data class SmåbarnstilleggBarnetrygdGenerator(
-    val behandlingId: Long,
+    val behandlingId: BehandlingId,
     val tilkjentYtelse: TilkjentYtelse
 ) {
 
@@ -35,7 +36,8 @@ data class SmåbarnstilleggBarnetrygdGenerator(
         val perioderMedFullOvergangsstønadTidslinje =
             InternPeriodeOvergangsstønadTidslinje(perioderMedFullOvergangsstønad)
 
-        val utvidetBarnetrygdTidslinje = AndelTilkjentYtelseMedEndreteUtbetalingerTidslinje(andelerTilkjentYtelse = utvidetAndeler)
+        val utvidetBarnetrygdTidslinje =
+            AndelTilkjentYtelseMedEndreteUtbetalingerTidslinje(andelerTilkjentYtelse = utvidetAndeler)
 
         val barnSomGirRettTilSmåbarnstilleggTidslinje = lagTidslinjeForPerioderMedBarnSomGirRettTilSmåbarnstillegg(
             barnasAndeler = barnasAndeler,

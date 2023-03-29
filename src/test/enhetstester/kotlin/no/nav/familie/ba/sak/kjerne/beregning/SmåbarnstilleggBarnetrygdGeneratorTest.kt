@@ -70,7 +70,7 @@ class SmåbarnstilleggBarnetrygdGeneratorTest {
         )
 
         val småbarnstilleggAndeler =
-            SmåbarnstilleggBarnetrygdGenerator(behandlingId = behandling.id, tilkjentYtelse = tilkjentYtelse)
+            SmåbarnstilleggBarnetrygdGenerator(behandlingId = behandling.behandlingId, tilkjentYtelse = tilkjentYtelse)
                 .lagSmåbarnstilleggAndeler(
                     perioderMedFullOvergangsstønad = overgangsstønadPerioder,
                     utvidetAndeler = utvidetAndeler,
@@ -133,7 +133,7 @@ class SmåbarnstilleggBarnetrygdGeneratorTest {
         )
 
         val småbarnstilleggAndeler =
-            SmåbarnstilleggBarnetrygdGenerator(behandlingId = behandling.id, tilkjentYtelse = tilkjentYtelse)
+            SmåbarnstilleggBarnetrygdGenerator(behandlingId = behandling.behandlingId, tilkjentYtelse = tilkjentYtelse)
                 .lagSmåbarnstilleggAndeler(
                     perioderMedFullOvergangsstønad = overgangsstønadPerioder,
                     utvidetAndeler = utvidetAndeler,
@@ -193,7 +193,7 @@ class SmåbarnstilleggBarnetrygdGeneratorTest {
         )
 
         val småbarnstilleggAndeler =
-            SmåbarnstilleggBarnetrygdGenerator(behandlingId = behandling.id, tilkjentYtelse = tilkjentYtelse)
+            SmåbarnstilleggBarnetrygdGenerator(behandlingId = behandling.behandlingId, tilkjentYtelse = tilkjentYtelse)
                 .lagSmåbarnstilleggAndeler(
                     perioderMedFullOvergangsstønad = overgangsstønadPerioder,
                     utvidetAndeler = utvidetAndeler,
@@ -256,7 +256,7 @@ class SmåbarnstilleggBarnetrygdGeneratorTest {
         )
 
         val småbarnstilleggAndeler =
-            SmåbarnstilleggBarnetrygdGenerator(behandlingId = behandling.id, tilkjentYtelse = tilkjentYtelse)
+            SmåbarnstilleggBarnetrygdGenerator(behandlingId = behandling.behandlingId, tilkjentYtelse = tilkjentYtelse)
                 .lagSmåbarnstilleggAndeler(
                     perioderMedFullOvergangsstønad = overgangsstønadPerioder,
                     utvidetAndeler = utvidetAndeler,

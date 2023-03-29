@@ -85,7 +85,7 @@ object TilkjentYtelseUtils {
 
         val andelerTilkjentYtelseSmåbarnstillegg = if (småbarnstilleggErMulig) {
             SmåbarnstilleggBarnetrygdGenerator(
-                behandlingId = vilkårsvurdering.behandling.id,
+                behandlingId = vilkårsvurdering.behandling.behandlingId,
                 tilkjentYtelse = tilkjentYtelse
             )
                 .lagSmåbarnstilleggAndeler(
