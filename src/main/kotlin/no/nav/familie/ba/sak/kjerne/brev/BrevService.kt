@@ -95,7 +95,7 @@ class BrevService(
                 vedtakFellesfelter = vedtakFellesfelter,
                 etterbetaling = hentEtterbetaling(vedtak),
                 erKlage = behandling.erKlage(),
-                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = behandling.id),
+                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = behandling.behandlingId),
                 informasjonOmAarligKontroll = vedtaksperiodeService.skalHaÅrligKontroll(vedtak),
                 feilutbetaltValuta = vedtaksperiodeService.beskrivPerioderMedFeilutbetaltValuta(vedtak)?.let {
                     FeilutbetaltValuta(perioderMedForMyeUtbetalt = it)
@@ -107,32 +107,32 @@ class BrevService(
                 vedtakFellesfelter = vedtakFellesfelter,
                 etterbetalingInstitusjon = hentEtterbetalingInstitusjon(vedtak),
                 erKlage = behandling.erKlage(),
-                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = behandling.id),
+                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = behandling.behandlingId),
                 informasjonOmAarligKontroll = vedtaksperiodeService.skalHaÅrligKontroll(vedtak)
             )
 
             Brevmal.VEDTAK_OPPHØRT -> Opphørt(
                 vedtakFellesfelter = vedtakFellesfelter,
-                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = behandling.id)
+                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = behandling.behandlingId)
             )
 
             Brevmal.VEDTAK_OPPHØRT_INSTITUSJON -> Opphørt(
                 mal = Brevmal.VEDTAK_OPPHØRT_INSTITUSJON,
                 vedtakFellesfelter = vedtakFellesfelter,
-                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = behandling.id)
+                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = behandling.behandlingId)
             )
 
             Brevmal.VEDTAK_OPPHØR_MED_ENDRING -> OpphørMedEndring(
                 vedtakFellesfelter = vedtakFellesfelter,
                 etterbetaling = hentEtterbetaling(vedtak),
-                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = behandling.id)
+                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = behandling.behandlingId)
             )
 
             Brevmal.VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON -> OpphørMedEndring(
                 mal = Brevmal.VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON,
                 vedtakFellesfelter = vedtakFellesfelter,
                 etterbetalingInstitusjon = hentEtterbetalingInstitusjon(vedtak),
-                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = behandling.id)
+                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = behandling.behandlingId)
             )
 
             Brevmal.VEDTAK_AVSLAG -> Avslag(vedtakFellesfelter = vedtakFellesfelter)
@@ -203,7 +203,7 @@ class BrevService(
                         navnAvdode = data.grunnlag.søker.navn.storForbokstavIHvertOrd(),
                         virkningstidspunkt = hentVirkningstidspunkt(
                             opphørsperioder = vedtaksperiodeService.hentOpphørsperioder(vedtak.behandling),
-                            behandlingId = vedtak.behandling.id
+                            behandlingId = vedtak.behandling.behandlingId
                         )
                     )
                 )
@@ -244,7 +244,7 @@ class BrevService(
         val grunnlagOgSignaturData = hentGrunnlagOgSignaturData(vedtak)
         val brevPerioderData = brevPeriodeService.hentBrevperioderData(
             vedtaksperioderId = utvidetVedtaksperioderMedBegrunnelser.map { it.id },
-            behandlingId = BehandlingId(vedtak.behandling.id)
+            behandlingId = vedtak.behandling.behandlingId
         )
         val brevperioder = brevPerioderData.sorted().mapNotNull {
             it.tilBrevPeriodeGenerator().genererBrevPeriode()
@@ -253,7 +253,7 @@ class BrevService(
             korrigertVedtakService.finnAktivtKorrigertVedtakPåBehandling(vedtak.behandling.behandlingId)
 
         val hjemler = hentHjemler(
-            behandlingId = vedtak.behandling.id,
+            behandlingId = vedtak.behandling.behandlingId,
             minimerteVedtaksperioder = brevPerioderData.map { it.minimertVedtaksperiode },
             målform = brevPerioderData.first().brevMålform,
             vedtakKorrigertHjemmelSkalMedIBrev = korrigertVedtak != null
@@ -277,7 +277,7 @@ class BrevService(
     }
 
     private fun hentHjemler(
-        behandlingId: Long,
+        behandlingId: BehandlingId,
         minimerteVedtaksperioder: List<MinimertVedtaksperiode>,
         målform: Målform,
         vedtakKorrigertHjemmelSkalMedIBrev: Boolean = false
@@ -297,7 +297,7 @@ class BrevService(
         )
     }
 
-    private fun hentAktivtPersonopplysningsgrunnlag(behandlingId: Long) =
+    private fun hentAktivtPersonopplysningsgrunnlag(behandlingId: BehandlingId) =
         persongrunnlagService.hentAktivThrows(behandlingId = behandlingId)
 
     private fun hentEtterbetaling(vedtak: Vedtak): Etterbetaling? =
@@ -314,14 +314,14 @@ class BrevService(
         return etterbetalingsBeløp.takeIf { it > BigDecimal.ZERO }?.run { Utils.formaterBeløp(this.toInt()) }
     }
 
-    private fun erFeilutbetalingPåBehandling(behandlingId: Long): Boolean =
+    private fun erFeilutbetalingPåBehandling(behandlingId: BehandlingId): Boolean =
         simuleringService.hentFeilutbetaling(behandlingId) > BigDecimal.ZERO
 
     private fun hentGrunnlagOgSignaturData(vedtak: Vedtak): GrunnlagOgSignaturData {
-        val personopplysningGrunnlag = hentAktivtPersonopplysningsgrunnlag(vedtak.behandling.id)
+        val personopplysningGrunnlag = hentAktivtPersonopplysningsgrunnlag(vedtak.behandling.behandlingId)
         val (saksbehandler, beslutter) = hentSaksbehandlerOgBeslutter(
             behandling = vedtak.behandling,
-            totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(vedtak.behandling.id)
+            totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(vedtak.behandling.behandlingId)
         )
         val enhet =
             arbeidsfordelingService.hentArbeidsfordelingPåBehandling(vedtak.behandling.behandlingId).behandlendeEnhetNavn
