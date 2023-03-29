@@ -43,7 +43,7 @@ class HenleggBehandling(
         oppgaveService.hentOppgaverSomIkkeErFerdigstilt(behandling)
             .filter { !(data.årsak == HenleggÅrsak.TEKNISK_VEDLIKEHOLD && data.begrunnelse == SATSENDRING && it.type == BehandleSak) }
             .forEach {
-                oppgaveService.ferdigstillOppgaver(behandling.id, it.type)
+                oppgaveService.ferdigstillOppgaver(behandling.behandlingId, it.type)
             }
 
         loggService.opprettHenleggBehandling(behandling, data.årsak.beskrivelse, data.begrunnelse)
@@ -54,7 +54,7 @@ class HenleggBehandling(
         behandlingHentOgPersisterService.lagreEllerOppdater(behandling)
 
         // Slett migreringsdato
-        behandlingService.deleteMigreringsdatoVedHenleggelse(behandling.id)
+        behandlingService.deleteMigreringsdatoVedHenleggelse(behandling.behandlingId)
 
         return hentNesteStegForNormalFlyt(behandling)
     }

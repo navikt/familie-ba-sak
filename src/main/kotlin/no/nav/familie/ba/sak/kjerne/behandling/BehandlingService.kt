@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaSe
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.bestemKategoriVedOpprettelse
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.bestemUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfoRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -104,7 +105,7 @@ class BehandlingService(
                 if (nyBehandling.søknadMottattDato != null) {
                     behandlingSøknadsinfoService.lagreNedSøknadMottattDato(nyBehandling.søknadMottattDato, behandling)
                 }
-                saksstatistikkEventPublisher.publiserBehandlingsstatistikk(it.id)
+                saksstatistikkEventPublisher.publiserBehandlingsstatistikk(it.behandlingId)
             }
             opprettOgInitierNyttVedtakForBehandling(behandling = lagretBehandling)
 
@@ -118,7 +119,7 @@ class BehandlingService(
                  */
                 taskRepository.save(
                     OpprettOppgaveTask.opprettTask(
-                        behandlingId = lagretBehandling.id,
+                        behandlingId = lagretBehandling.behandlingId,
                         oppgavetype = Oppgavetype.BehandleSak,
                         fristForFerdigstillelse = LocalDate.now(),
                         tilordnetRessurs = nyBehandling.navIdent
@@ -140,7 +141,7 @@ class BehandlingService(
         }
     }
 
-    fun nullstillEndringstidspunkt(behandlingId: Long) {
+    fun nullstillEndringstidspunkt(behandlingId: BehandlingId) {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
         behandling.overstyrtEndringstidspunkt = null
         behandlingHentOgPersisterService.lagreEllerOppdater(behandling = behandling, sendTilDvh = false)
@@ -156,7 +157,7 @@ class BehandlingService(
             ?: error("Forsøker å initiere vedtak på steg ${behandling.steg}")
 
         val deaktivertVedtak =
-            vedtakRepository.findByBehandlingAndAktivOptional(behandlingId = behandling.id)
+            vedtakRepository.findByBehandlingAndAktivOptional(behandlingId = behandling.behandlingId.id)
                 ?.let { vedtakRepository.saveAndFlush(it.also { it.aktiv = false }) }
 
         val nyttVedtak = Vedtak(
@@ -187,7 +188,7 @@ class BehandlingService(
 
         if (aktivBehandling != null) {
             behandlingHentOgPersisterService.lagreOgFlush(aktivBehandling.also { it.aktiv = false })
-            saksstatistikkEventPublisher.publiserBehandlingsstatistikk(aktivBehandling.id)
+            saksstatistikkEventPublisher.publiserBehandlingsstatistikk(aktivBehandling.behandlingId)
         } else if (harAktivInfotrygdSak(behandling)) {
             throw FunksjonellFeil(
                 "Kan ikke lage behandling på person med aktiv sak i Infotrygd",
@@ -214,10 +215,10 @@ class BehandlingService(
     }
 
     fun sendBehandlingTilBeslutter(behandling: Behandling) {
-        oppdaterStatusPåBehandling(behandlingId = behandling.id, status = FATTER_VEDTAK)
+        oppdaterStatusPåBehandling(behandlingId = behandling.behandlingId, status = FATTER_VEDTAK)
     }
 
-    fun oppdaterStatusPåBehandling(behandlingId: Long, status: BehandlingStatus): Behandling {
+    fun oppdaterStatusPåBehandling(behandlingId: BehandlingId, status: BehandlingStatus): Behandling {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} endrer status på behandling $behandlingId fra ${behandling.status} til $status")
 
@@ -225,7 +226,7 @@ class BehandlingService(
         return behandlingHentOgPersisterService.lagreEllerOppdater(behandling)
     }
 
-    fun oppdaterBehandlingsresultat(behandlingId: Long, resultat: Behandlingsresultat): Behandling {
+    fun oppdaterBehandlingsresultat(behandlingId: BehandlingId, resultat: Behandlingsresultat): Behandling {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         BehandlingsresultatValideringUtils.validerBehandlingsresultat(behandling, resultat)
 
@@ -241,7 +242,7 @@ class BehandlingService(
     }
 
     fun leggTilStegPåBehandlingOgSettTidligereStegSomUtført(
-        behandlingId: Long,
+        behandlingId: BehandlingId,
         steg: StegType
     ): Behandling {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
@@ -271,7 +272,7 @@ class BehandlingService(
                 ?: behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = behandling.fagsak.id)
                     ?.takeIf { it.erMigrering() }?.let { // fordi migreringsdato kun kan lagret for migreringsbehandling
                         vilkårsvurderingService.hentTidligsteVilkårsvurderingKnyttetTilMigrering(
-                            behandlingId = it.id
+                            behandlingId = it.behandlingId
                         )
                     }
 
@@ -287,8 +288,8 @@ class BehandlingService(
         behandlingMigreringsinfoRepository.save(behandlingMigreringsinfo)
     }
 
-    fun hentMigreringsdatoIBehandling(behandlingId: Long): LocalDate? {
-        return behandlingMigreringsinfoRepository.findByBehandlingId(behandlingId)?.migreringsdato
+    fun hentMigreringsdatoIBehandling(behandlingId: BehandlingId): LocalDate? {
+        return behandlingMigreringsinfoRepository.findByBehandlingId(behandlingId.id)?.migreringsdato
     }
 
     fun hentMigreringsdatoPåFagsak(fagsakId: Long): LocalDate? {
@@ -296,8 +297,8 @@ class BehandlingService(
     }
 
     @Transactional
-    fun deleteMigreringsdatoVedHenleggelse(behandlingId: Long) {
-        behandlingMigreringsinfoRepository.findByBehandlingId(behandlingId)
+    fun deleteMigreringsdatoVedHenleggelse(behandlingId: BehandlingId) {
+        behandlingMigreringsinfoRepository.findByBehandlingId(behandlingId.id)
             ?.let { behandlingMigreringsinfoRepository.delete(it) }
     }
 
