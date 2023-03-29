@@ -51,9 +51,9 @@ class InnkommendeJournalføringServiceTest(
         val behandling = behandlingHentOgPersisterService.lagreEllerOppdater(lagBehandling(fagsak))
 
         val (sak, behandlinger) = innkommendeJournalføringService
-            .lagreJournalpostOgKnyttFagsakTilJournalpost(listOf(behandling.id.toString()), "12345")
+            .lagreJournalpostOgKnyttFagsakTilJournalpost(listOf(behandling.behandlingId.id.toString()), "12345")
 
-        val journalposter = journalføringRepository.findByBehandlingId(behandlingId = behandling.id)
+        val journalposter = journalføringRepository.findByBehandlingId(behandlingId = behandling.behandlingId.id)
 
         assertEquals(1, journalposter.size)
         assertEquals(DbJournalpostType.I, journalposter.first().type)

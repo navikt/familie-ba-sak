@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.secureLogger
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
@@ -163,7 +164,7 @@ class InnkommendeJournalføringService(
                     fagsakType = request.fagsakType,
                     institusjon = request.institusjon
                 )
-            tilknyttedeBehandlingIder.add(nyBehandling.id.toString())
+            tilknyttedeBehandlingIder.add(nyBehandling.behandlingId.id.toString())
         }
 
         val (sak, behandlinger) = lagreJournalpostOgKnyttFagsakTilJournalpost(tilknyttedeBehandlingIder, journalpostId)
@@ -203,7 +204,7 @@ class InnkommendeJournalføringService(
                     underkategori = request.underkategori,
                     søknadMottattDato = request.datoMottatt?.toLocalDate()
                 )
-            tilknyttedeBehandlingIder.add(nyBehandling.id.toString())
+            tilknyttedeBehandlingIder.add(nyBehandling.behandlingId.id.toString())
         }
 
         val (sak) = lagreJournalpostOgKnyttFagsakTilJournalpost(tilknyttedeBehandlingIder, journalpost.journalpostId)
@@ -218,7 +219,7 @@ class InnkommendeJournalføringService(
         journalpostId: String
     ): Pair<Sak, List<Behandling>> {
         val behandlinger = tilknyttedeBehandlingIder.map {
-            behandlingHentOgPersisterService.hent(it.toLong())
+            behandlingHentOgPersisterService.hent(BehandlingId(it.toLong()))
         }
 
         val journalpost = hentJournalpost(journalpostId)
