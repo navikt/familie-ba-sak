@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.task
 
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.domene.JournalførVedtaksbrevDTO
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -30,7 +31,7 @@ class JournalførVedtaksbrevTask(
 
         fun opprettTaskJournalførVedtaksbrev(
             personIdent: String,
-            behandlingId: Long,
+            behandlingId: BehandlingId,
             vedtakId: Long,
             gammelTask: Task? = null
         ): Task {
@@ -39,7 +40,7 @@ class JournalførVedtaksbrevTask(
                 "$vedtakId",
                 gammelTask?.metadata ?: Properties().apply {
                     this["personIdent"] = personIdent
-                    this["behandlingsId"] = behandlingId.toString()
+                    this["behandlingsId"] = behandlingId.id.toString()
                     this["vedtakId"] = vedtakId.toString()
                 }
             )

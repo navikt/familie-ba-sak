@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.task.dto.FerdigstillOppgaveDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
@@ -22,7 +23,7 @@ class FerdigstillOppgaver(
     override fun doTask(task: Task) {
         val ferdigstillOppgave = objectMapper.readValue(task.payload, FerdigstillOppgaveDTO::class.java)
         oppgaveService.ferdigstillOppgaver(
-            behandlingId = ferdigstillOppgave.behandlingId,
+            behandlingId = BehandlingId(ferdigstillOppgave.behandlingId),
             oppgavetype = ferdigstillOppgave.oppgavetype
         )
     }
@@ -30,12 +31,12 @@ class FerdigstillOppgaver(
     companion object {
         const val TASK_STEP_TYPE = "ferdigstillOppgaveTask"
 
-        fun opprettTask(behandlingId: Long, oppgavetype: Oppgavetype): Task {
+        fun opprettTask(behandlingId: BehandlingId, oppgavetype: Oppgavetype): Task {
             return Task(
                 type = TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(
                     FerdigstillOppgaveDTO(
-                        behandlingId = behandlingId,
+                        behandlingId = behandlingId.id,
                         oppgavetype = oppgavetype
                     )
                 )
