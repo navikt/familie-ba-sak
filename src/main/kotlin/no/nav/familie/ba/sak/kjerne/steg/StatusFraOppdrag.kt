@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.IverksettMotFamilieTilbakeTask
 import no.nav.familie.ba.sak.task.JournalførVedtaksbrevTask
@@ -59,10 +60,12 @@ class StatusFraOppdrag(
                     statusFraOppdragDTO.vedtaksId,
                     task
                 )
+
                 StegType.IVERKSETT_MOT_FAMILIE_TILBAKE -> opprettTaskIverksettMotTilbake(
                     statusFraOppdragDTO.behandlingsId,
                     task.metadata
                 )
+
                 StegType.FERDIGSTILLE_BEHANDLING -> opprettFerdigstillBehandling(statusFraOppdragDTO)
                 else -> error("Neste task er ikke implementert.")
             }
@@ -74,7 +77,7 @@ class StatusFraOppdrag(
     private fun opprettFerdigstillBehandling(statusFraOppdragDTO: StatusFraOppdragDTO) {
         val ferdigstillBehandling = FerdigstillBehandlingTask.opprettTask(
             søkerIdent = statusFraOppdragDTO.aktørId,
-            behandlingsId = statusFraOppdragDTO.behandlingsId
+            behandlingsId = BehandlingId(statusFraOppdragDTO.behandlingsId)
         )
         taskRepository.save(ferdigstillBehandling)
     }

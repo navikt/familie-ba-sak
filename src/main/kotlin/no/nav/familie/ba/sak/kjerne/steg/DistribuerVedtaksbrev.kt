@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.brev.DokumentDistribueringService
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
@@ -28,7 +29,7 @@ class DistribuerVedtaksbrev(
 
         val ferdigstillBehandlingTask = FerdigstillBehandlingTask.opprettTask(
             søkerIdent = søkerIdent,
-            behandlingsId = data.behandlingId!!
+            behandlingsId = BehandlingId(data.behandlingId!!)
         )
         taskRepository.save(ferdigstillBehandlingTask)
 
