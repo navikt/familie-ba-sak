@@ -30,15 +30,15 @@ class SmåbarnstilleggService(
 
     fun hentOgLagrePerioderMedFullOvergangsstønad(
         søkerAktør: Aktør,
-        behandlingId: Long
+        behandlingId: BehandlingId
     ): List<InternPeriodeOvergangsstønad> {
         val periodeOvergangsstønad = hentPerioderMedFullOvergangsstønad(aktør = søkerAktør)
 
-        periodeOvergangsstønadGrunnlagRepository.deleteByBehandlingId(behandlingId = behandlingId)
+        periodeOvergangsstønadGrunnlagRepository.deleteByBehandlingId(behandlingId = behandlingId.id)
         periodeOvergangsstønadGrunnlagRepository.saveAll(
             periodeOvergangsstønad.map {
                 it.tilPeriodeOvergangsstønadGrunnlag(
-                    behandlingId = BehandlingId(behandlingId),
+                    behandlingId = behandlingId,
                     aktør = søkerAktør
                 )
             }
@@ -54,13 +54,13 @@ class SmåbarnstilleggService(
             )
     }
 
-    private fun hentPerioderMedOvergangsstønadFraForrigeIverksatteBehandling(behandlingId: Long): List<InternPeriodeOvergangsstønad> {
+    private fun hentPerioderMedOvergangsstønadFraForrigeIverksatteBehandling(behandlingId: BehandlingId): List<InternPeriodeOvergangsstønad> {
         val forrigeIverksatteBehandling =
             behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksattFraBehandlingsId(behandlingId = behandlingId)
 
         return if (forrigeIverksatteBehandling != null) {
             periodeOvergangsstønadGrunnlagRepository.findByBehandlingId(
-                behandlingId = forrigeIverksatteBehandling.id
+                behandlingId = forrigeIverksatteBehandling.behandlingId.id
             ).map { it.tilInternPeriodeOvergangsstønad() }
         } else {
             emptyList()
@@ -73,10 +73,10 @@ class SmåbarnstilleggService(
                 ?: return false
 
         val tilkjentYtelseFraSistIverksatteBehandling =
-            tilkjentYtelseRepository.findByBehandling(behandlingId = sistIverksatteBehandling.id)
+            tilkjentYtelseRepository.findByBehandling(behandlingId = sistIverksatteBehandling.behandlingId.id)
 
         val persongrunnlagFraSistIverksatteBehandling =
-            persongrunnlagService.hentAktivThrows(behandlingId = sistIverksatteBehandling.id)
+            persongrunnlagService.hentAktivThrows(behandlingId = sistIverksatteBehandling.behandlingId)
 
         val nyePerioderMedFullOvergangsstønad =
             hentPerioderMedFullOvergangsstønad(aktør = fagsak.aktør).map { it.tilInternPeriodeOvergangsstønad() }
@@ -89,7 +89,7 @@ class SmåbarnstilleggService(
 
         return vedtakOmOvergangsstønadPåvirkerFagsak(
             småbarnstilleggBarnetrygdGenerator = SmåbarnstilleggBarnetrygdGenerator(
-                behandlingId = sistIverksatteBehandling.id,
+                behandlingId = sistIverksatteBehandling.behandlingId,
                 tilkjentYtelse = tilkjentYtelseFraSistIverksatteBehandling
             ),
             nyePerioderMedFullOvergangsstønad = nyePerioderMedFullOvergangsstønad,
