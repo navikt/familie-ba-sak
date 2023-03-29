@@ -11,6 +11,7 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.ekstern.restDomene.RestBrevmottaker
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -181,7 +182,7 @@ internal class BrevmottakerServiceTest {
 
     private fun lagBrevMottaker(mottakerType: MottakerType, poststed: String = "Oslo", landkode: String = "NO") =
         Brevmottaker(
-            behandlingId = 1,
+            behandlingId = BehandlingId(1),
             type = mottakerType,
             navn = "John Doe",
             adresselinje1 = "adresse 1",

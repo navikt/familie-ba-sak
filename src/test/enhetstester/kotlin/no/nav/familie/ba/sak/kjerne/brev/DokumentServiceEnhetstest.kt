@@ -236,7 +236,7 @@ internal class DokumentServiceEnhetstest {
 
         every { brevmottakerService.hentBrevmottakere(behandling.behandlingId) } returns listOf(
             Brevmottaker(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId,
                 type = MottakerType.FULLMEKTIG,
                 navn = "John Doe",
                 adresselinje1 = "Test adresse",
