@@ -35,6 +35,7 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsta
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Periode
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Skyggesak
 import no.nav.familie.ba.sak.integrasjoner.journalføring.UtgåendeJournalføringService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.task.DistribuerDokumentDTO
 import no.nav.familie.http.client.RessursException
@@ -204,7 +205,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
                         objectMapper.writeValueAsString(
                             forventetRequestArkiverDokument(
                                 fagsakId = vedtak.behandling.fagsak.id,
-                                behandlingId = vedtak.behandling.id
+                                behandlingId = vedtak.behandling.behandlingId
                             )
                         )
                     )
@@ -481,7 +482,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
         return success(ArkiverDokumentResponse(MOCK_JOURNALPOST_FOR_VEDTAK_ID, true))
     }
 
-    private fun forventetRequestArkiverDokument(fagsakId: Long, behandlingId: Long): ArkiverDokumentRequest {
+    private fun forventetRequestArkiverDokument(fagsakId: Long, behandlingId: BehandlingId): ArkiverDokumentRequest {
         val vedleggPdf = hentVedlegg(VEDTAK_VEDLEGG_FILNAVN)
         val brev = listOf(
             Dokument(
@@ -506,7 +507,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
             journalførendeEnhet = "1",
             hoveddokumentvarianter = brev,
             vedleggsdokumenter = vedlegg,
-            eksternReferanseId = "${fagsakId}_${behandlingId}_${MDCOperations.getCallId()}"
+            eksternReferanseId = "${fagsakId}_${behandlingId.id}_${MDCOperations.getCallId()}"
         )
     }
 
