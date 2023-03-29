@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -127,7 +128,7 @@ class AutovedtakFødselshendelseService(
 
             henleggBehandlingOgOpprettManuellOppgave(
                 behandling = behandlingEtterFiltrering,
-                begrunnelse = filtreringsreglerService.hentFødselshendelsefiltreringResultater(behandlingId = behandling.id)
+                begrunnelse = filtreringsreglerService.hentFødselshendelsefiltreringResultater(behandlingId = behandling.behandlingId)
                     .first { it.resultat == Resultat.IKKE_OPPFYLT }.begrunnelse
             )
         } else {
@@ -139,7 +140,7 @@ class AutovedtakFødselshendelseService(
         val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandling = behandling)
 
         return if (behandlingEtterVilkårsvurdering.resultat == Behandlingsresultat.INNVILGET) {
-            val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandling.id)
+            val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandling.behandlingId)
             vedtaksperiodeService.oppdaterVedtaksperioderForBarnVurdertIFødselshendelse(vedtak, barnaSomVurderes)
 
             val vedtakEtterToTrinn =
@@ -171,7 +172,7 @@ class AutovedtakFødselshendelseService(
         if (medlemskap == Medlemskap.EØS) {
             logger.info("Oppretter task for opprettelse av fremleggsoppgave på $behandling")
             opprettTaskService.opprettOppgaveTask(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId,
                 oppgavetype = Oppgavetype.Fremlegg,
                 beskrivelse = "Kontroller gyldig opphold",
                 fristForFerdigstillelse = LocalDate.now().plusYears(1)
@@ -216,7 +217,7 @@ class AutovedtakFødselshendelseService(
         begrunnelse: String = ""
     ): String {
         val begrunnelseForManuellOppgave = if (begrunnelse == "") {
-            hentBegrunnelseFraVilkårsvurdering(behandlingId = behandling.id)
+            hentBegrunnelseFraVilkårsvurdering(behandlingId = behandling.behandlingId)
         } else {
             begrunnelse
         }
@@ -238,8 +239,8 @@ class AutovedtakFødselshendelseService(
         return "Henlegger behandling $behandling automatisk på grunn av ugyldig resultat"
     }
 
-    private fun hentBegrunnelseFraVilkårsvurdering(behandlingId: Long): String {
-        val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId)
+    private fun hentBegrunnelseFraVilkårsvurdering(behandlingId: BehandlingId): String {
+        val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId.id)
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         val søker = persongrunnlagService.hentSøker(behandling.behandlingId)
         val søkerResultat = vilkårsvurdering?.personResultater?.find { it.aktør == søker?.aktør }
