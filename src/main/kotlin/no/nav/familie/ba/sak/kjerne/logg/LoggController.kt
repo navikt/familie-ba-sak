@@ -27,8 +27,9 @@ class LoggController(
         @PathVariable
         behandlingId: Long
     ): ResponseEntity<Ressurs<List<Logg>>> {
-        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
-        return Result.runCatching { loggService.hentLoggForBehandling(BehandlingId(behandlingId)) }
+        val parsetBehandlingId = BehandlingId(behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandlingId = parsetBehandlingId, event = AuditLoggerEvent.ACCESS)
+        return Result.runCatching { loggService.hentLoggForBehandling(parsetBehandlingId) }
             .fold(
                 onSuccess = { ResponseEntity.ok(Ressurs.success(it)) },
                 onFailure = {
