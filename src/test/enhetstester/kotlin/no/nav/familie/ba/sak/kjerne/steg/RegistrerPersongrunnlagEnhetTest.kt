@@ -8,7 +8,6 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløpService
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.ValutakursService
@@ -67,20 +66,20 @@ class RegistrerPersongrunnlagEnhetTest {
 
         every {
             kompetanseService.kopierOgErstattKompetanser(
-                BehandlingId(behandling1.id),
-                BehandlingId(behandling2.id)
+                behandling1.behandlingId,
+                behandling2.behandlingId
             )
         } just runs
         every {
             valutakursService.kopierOgErstattValutakurser(
-                BehandlingId(behandling1.id),
-                BehandlingId(behandling2.id)
+                behandling1.behandlingId,
+                behandling2.behandlingId
             )
         } just runs
         every {
             utenlandskPeriodebeløpService.kopierOgErstattUtenlandskPeriodebeløp(
-                BehandlingId(behandling1.id),
-                BehandlingId(behandling2.id)
+                behandling1.behandlingId,
+                behandling2.behandlingId
             )
         } just runs
 
@@ -94,16 +93,16 @@ class RegistrerPersongrunnlagEnhetTest {
 
         verify(exactly = 1) {
             kompetanseService.kopierOgErstattKompetanser(
-                BehandlingId(behandling1.id),
-                BehandlingId(behandling2.id)
+                behandling1.behandlingId,
+                behandling2.behandlingId
             )
             valutakursService.kopierOgErstattValutakurser(
-                BehandlingId(behandling1.id),
-                BehandlingId(behandling2.id)
+                behandling1.behandlingId,
+                behandling2.behandlingId
             )
             utenlandskPeriodebeløpService.kopierOgErstattUtenlandskPeriodebeløp(
-                BehandlingId(behandling1.id),
-                BehandlingId(behandling2.id)
+                behandling1.behandlingId,
+                behandling2.behandlingId
             )
         }
     }
