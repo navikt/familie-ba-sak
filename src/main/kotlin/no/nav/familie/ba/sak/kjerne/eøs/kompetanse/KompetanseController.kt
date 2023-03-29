@@ -41,9 +41,10 @@ class KompetanseController(
 
         validerOppdatering(kompetanse)
 
-        kompetanseService.oppdaterKompetanse(BehandlingId(behandlingId), kompetanse)
+        val parsetBehandlingId = BehandlingId(behandlingId)
+        kompetanseService.oppdaterKompetanse(parsetBehandlingId, kompetanse)
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = parsetBehandlingId)))
     }
 
     @DeleteMapping(path = ["{behandlingId}/{kompetanseId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -53,7 +54,15 @@ class KompetanseController(
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         kompetanseService.slettKompetanse(kompetanseId)
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
+        return ResponseEntity.ok(
+            Ressurs.success(
+                utvidetBehandlingService.lagRestUtvidetBehandling(
+                    behandlingId = BehandlingId(
+                        behandlingId
+                    )
+                )
+            )
+        )
     }
 
     private fun validerOppdatering(oppdatertKompetanse: Kompetanse) {
