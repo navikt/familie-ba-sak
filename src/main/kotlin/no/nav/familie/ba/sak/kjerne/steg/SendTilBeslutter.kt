@@ -41,7 +41,7 @@ class SendTilBeslutter(
         behandling: Behandling,
         stegService: StegService?
     ) {
-        vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
+        vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.behandlingId)
             ?.validerAtAlleAnndreVurderingerErVurdert()
 
         val behandlingsresultatSteg: BehandlingsresultatSteg =
@@ -52,10 +52,10 @@ class SendTilBeslutter(
         behandling.validerMaksimaltEtStegIkkeUtført()
 
         if (behandling.resultat != Behandlingsresultat.FORTSATT_INNVILGET) {
-            val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandling.id)
+            val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandling.behandlingId)
             val utvidetVedtaksperioder = vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(vedtak)
             utvidetVedtaksperioder.validerPerioderInneholderBegrunnelser(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId,
                 fagsakId = behandling.fagsak.id
             )
         }
@@ -124,7 +124,7 @@ fun Behandling.validerRekkefølgeOgUnikhetPåSteg(): Boolean {
                     forrigeBehandlingStegTilstand!!.behandlingSteg == it.behandlingSteg
                 )
         ) {
-            throw Feil("Rekkefølge på steg registrert på behandling $id er feil eller redundante.")
+            throw Feil("Rekkefølge på steg registrert på behandling ${behandlingId.id} er feil eller redundante.")
         }
         forrigeBehandlingStegTilstand = it
     }
@@ -137,7 +137,7 @@ fun Behandling.validerMaksimaltEtStegIkkeUtført() {
     }
 
     if (behandlingStegTilstand.filter { it.behandlingStegStatus == BehandlingStegStatus.IKKE_UTFØRT }.size > 1) {
-        throw Feil("Behandling $id har mer enn ett ikke fullført steg.")
+        throw Feil("Behandling ${behandlingId.id} har mer enn ett ikke fullført steg.")
     }
 }
 
