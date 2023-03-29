@@ -114,7 +114,7 @@ class BehandlingServiceTest(
             behandlingRepository.finnÅpneBehandlinger(LocalDateTime.now().plusDays(1))
 
         assertEquals(1, behandlingerSomErOpprettetFørIMorgen.size)
-        assertEquals(behandling.id, behandlingerSomErOpprettetFørIMorgen.single().id)
+        assertEquals(behandling.behandlingId, behandlingerSomErOpprettetFørIMorgen.single().behandlingId)
     }
 
     @Test
@@ -142,7 +142,7 @@ class BehandlingServiceTest(
         val forrigeBehandling =
             behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling = revurderingInnvilgetBehandling)
         Assertions.assertNotNull(forrigeBehandling)
-        assertEquals(behandling.id, forrigeBehandling?.id)
+        assertEquals(behandling.behandlingId, forrigeBehandling?.behandlingId)
     }
 
     @Test
@@ -164,7 +164,7 @@ class BehandlingServiceTest(
 
         val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barn), true)
         val testPersonopplysningsGrunnlag = lagTestPersonopplysningGrunnlag(
-            behandlingId = behandling.id,
+            behandlingId = behandling.behandlingId,
             søkerPersonIdent = søker,
             barnasIdenter = listOf(barn),
             søkerAktør = fagsak.aktør,
@@ -179,9 +179,9 @@ class BehandlingServiceTest(
     }
 
     private fun ferdigstillBehandling(behandling: Behandling) {
-        behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.AVSLUTTET)
+        behandlingService.oppdaterStatusPåBehandling(behandling.behandlingId, BehandlingStatus.AVSLUTTET)
         behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(
-            behandling.id,
+            behandling.behandlingId,
             StegType.BEHANDLING_AVSLUTTET
         )
     }

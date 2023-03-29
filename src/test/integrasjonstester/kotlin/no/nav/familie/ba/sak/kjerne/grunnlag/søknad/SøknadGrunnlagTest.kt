@@ -180,7 +180,7 @@ class SøknadGrunnlagTest(
             )
         )
 
-        val persongrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
+        val persongrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.behandlingId)
 
         assertEquals(1, persongrunnlag!!.barna.size)
         assertTrue(persongrunnlag.barna.any { it.aktør.aktivFødselsnummer() == folkeregistrertBarn })
@@ -304,6 +304,6 @@ class SøknadGrunnlagTest(
             )
         )
 
-        assertDoesNotThrow { utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingEtterNyRegistrering.id) }
+        assertDoesNotThrow { utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingEtterNyRegistrering.behandlingId) }
     }
 }
