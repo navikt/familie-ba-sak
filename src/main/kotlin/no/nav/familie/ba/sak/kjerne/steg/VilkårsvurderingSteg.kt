@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.steg
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassKompetanserTilRegelverkService
@@ -28,17 +27,17 @@ class VilkårsvurderingSteg(
 ) : BehandlingSteg<String> {
 
     override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
-        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandling.id)
+        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandling.behandlingId)
 
         if (behandling.opprettetÅrsak == BehandlingÅrsak.DØDSFALL_BRUKER) {
-            val vilkårsvurdering = vilkårService.hentVilkårsvurderingThrows(behandling.id)
+            val vilkårsvurdering = vilkårService.hentVilkårsvurderingThrows(behandling.behandlingId)
             validerIngenVilkårSattEtterSøkersDød(
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 vilkårsvurdering = vilkårsvurdering
             )
         }
 
-        vilkårService.hentVilkårsvurdering(behandling.id)?.apply {
+        vilkårService.hentVilkårsvurdering(behandling.behandlingId)?.apply {
             validerIkkeBlandetRegelverk(
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 vilkårsvurdering = this
@@ -51,7 +50,7 @@ class VilkårsvurderingSteg(
         behandling: Behandling,
         data: String
     ): StegType {
-        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandling.id)
+        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandling.behandlingId)
 
         if (behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
             vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
@@ -66,10 +65,10 @@ class VilkårsvurderingSteg(
         tilbakestillBehandlingService.tilbakestillDataTilVilkårsvurderingssteg(behandling)
         beregningService.genererTilkjentYtelseFraVilkårsvurdering(behandling, personopplysningGrunnlag)
 
-        tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(BehandlingId(behandling.id))
+        tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(behandlingId = behandling.behandlingId)
 
         behandlingstemaService.oppdaterBehandlingstema(
-            behandling = behandlingHentOgPersisterService.hent(behandlingId = behandling.id)
+            behandling = behandlingHentOgPersisterService.hent(behandlingId = behandling.behandlingId)
         )
 
         return hentNesteStegForNormalFlyt(behandling)
