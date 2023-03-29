@@ -164,7 +164,7 @@ class JournalførVedtaksbrev(
             journalførendeEnhet = journalførendeEnhet,
             brev = brev,
             vedlegg = vedlegg,
-            behandlingId = vedtak.behandling.id,
+            behandlingId = vedtak.behandling.behandlingId,
             avsenderMottaker = utledAvsenderMottaker(mottakerInfo),
             tilManuellMottakerEllerVerge = tilManuellMottakerEllerVerge
         )
@@ -215,7 +215,7 @@ class JournalførVedtaksbrev(
     ) =
         DistribuerDokumentDTO(
             personEllerInstitusjonIdent = mottakerInfo.brukerId,
-            behandlingId = behandling.id,
+            behandlingId = behandling.behandlingId.id,
             journalpostId = journalPostId,
             brevmal = brevmalService.hentBrevmal(behandling),
             erManueltSendt = false,

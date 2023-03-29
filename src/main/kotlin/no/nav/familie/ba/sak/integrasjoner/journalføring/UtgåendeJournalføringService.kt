@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.integrasjoner.journalføring
 import no.nav.familie.ba.sak.common.MDCOperations
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.DEFAULT_JOURNALFØRENDE_ENHET
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.http.client.RessursException
 import no.nav.familie.kontrakter.felles.BrukerIdType
 import no.nav.familie.kontrakter.felles.dokarkiv.AvsenderMottaker
@@ -56,7 +57,7 @@ class UtgåendeJournalføringService(
         brev: List<Dokument>,
         vedlegg: List<Dokument> = emptyList(),
         førsteside: Førsteside? = null,
-        behandlingId: Long? = null,
+        behandlingId: BehandlingId? = null,
         avsenderMottaker: AvsenderMottaker? = null,
         tilManuellMottakerEllerVerge: Boolean = false
     ): String {
@@ -97,6 +98,7 @@ class UtgåendeJournalføringService(
 
                     hentEksisterendeJournalpost(eksternReferanseId, fnr)
                 }
+
                 else -> throw ressursException
             }
         }
@@ -114,8 +116,8 @@ class UtgåendeJournalføringService(
         )
     ).single { it.eksternReferanseId == eksternReferanseId }.journalpostId
 
-    fun genererEksternReferanseIdForJournalpost(fagsakId: String, behandlingId: Long?, tilVerge: Boolean) =
-        "${fagsakId}_${behandlingId}${if (tilVerge) "_verge" else ""}_${MDCOperations.getCallId()}"
+    fun genererEksternReferanseIdForJournalpost(fagsakId: String, behandlingId: BehandlingId?, tilVerge: Boolean) =
+        "${fagsakId}_${behandlingId?.id}${if (tilVerge) "_verge" else ""}_${MDCOperations.getCallId()}"
 
     companion object {
 

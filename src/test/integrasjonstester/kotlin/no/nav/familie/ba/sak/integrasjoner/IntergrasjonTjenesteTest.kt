@@ -191,7 +191,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
                         tittel = VEDTAK_VEDLEGG_TITTEL
                     )
                 ),
-                behandlingId = vedtak.behandling.id
+                behandlingId = vedtak.behandling.behandlingId
             )
 
         assertThat(journalPostId).isEqualTo(MOCK_JOURNALPOST_FOR_VEDTAK_ID)
