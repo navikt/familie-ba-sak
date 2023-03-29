@@ -57,13 +57,13 @@ class BrevPeriodeService(
         behandlingId: BehandlingId,
         skalLogge: Boolean = true
     ): List<BrevperiodeData> {
-        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandlingId.id)
+        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandlingId)
             ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
 
         val endredeUtbetalingAndeler = andelerTilkjentYtelseOgEndreteUtbetalingerService
-            .finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandlingId = behandlingId.id)
+            .finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandlingId = behandlingId)
 
-        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandlingId.id)
+        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandlingId)
 
         val andelerMedEndringer = andelerTilkjentYtelseOgEndreteUtbetalingerService
             .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId)
@@ -73,8 +73,8 @@ class BrevPeriodeService(
                 ?: emptyList()
 
         val forrigeBehandling =
-            behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksattFraBehandlingsId(behandlingId = behandlingId.id)
-        val inneværendeBehandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId.id)
+            behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksattFraBehandlingsId(behandlingId = behandlingId)
+        val inneværendeBehandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
 
         val kompetanser = kompetanseService.hentKompetanser(behandlingId = behandlingId)
             .filter {
@@ -231,7 +231,7 @@ class BrevPeriodeService(
         val begrunnelseDataForVedtaksperiode =
             hentBrevperioderData(
                 vedtaksperioderId = listOf(vedtaksperiodeId),
-                behandlingId = BehandlingId(vedtaksperiodeMedBegrunnelser.vedtak.behandling.id)
+                behandlingId = vedtaksperiodeMedBegrunnelser.vedtak.behandling.behandlingId
             ).single()
         return begrunnelseDataForVedtaksperiode.hentBegrunnelserOgFritekster()
     }
