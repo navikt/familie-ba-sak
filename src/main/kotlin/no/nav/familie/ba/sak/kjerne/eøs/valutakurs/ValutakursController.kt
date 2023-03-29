@@ -43,9 +43,10 @@ class ValutakursController(
             oppdaterValutakursMedKursFraECB(restValutakurs, restValutakurs.tilValutakurs(barnAktører = barnAktører))
         }
 
-        valutakursService.oppdaterValutakurs(BehandlingId(behandlingId), valutaKurs)
+        val parsetBehandlingId = BehandlingId(behandlingId)
+        valutakursService.oppdaterValutakurs(parsetBehandlingId, valutaKurs)
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = parsetBehandlingId)))
     }
 
     @DeleteMapping(path = ["{behandlingId}/{valutakursId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -55,7 +56,15 @@ class ValutakursController(
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         valutakursService.slettValutakurs(valutakursId)
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
+        return ResponseEntity.ok(
+            Ressurs.success(
+                utvidetBehandlingService.lagRestUtvidetBehandling(
+                    behandlingId = BehandlingId(
+                        behandlingId
+                    )
+                )
+            )
+        )
     }
 
     private fun oppdaterValutakursMedKursFraECB(restValutakurs: RestValutakurs, valutakurs: Valutakurs) =
