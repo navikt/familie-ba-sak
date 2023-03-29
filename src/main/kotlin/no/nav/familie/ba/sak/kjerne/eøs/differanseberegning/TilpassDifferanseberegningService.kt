@@ -28,7 +28,7 @@ class TilpassDifferanseberegningEtterTilkjentYtelseService(
 
     @Transactional
     override fun endretTilkjentYtelse(tilkjentYtelse: TilkjentYtelse) {
-        val behandlingId = BehandlingId(tilkjentYtelse.behandling.id)
+        val behandlingId = tilkjentYtelse.behandling.behandlingId
         val valutakurser = valutakursRepository.finnFraBehandlingId(behandlingId.id)
         val utenlandskePeriodebeløp = utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId.id)
 
@@ -99,8 +99,8 @@ class TilpassDifferanseberegningSøkersYtelserService(
 ) : BarnasDifferanseberegningEndretAbonnent {
     override fun barnasDifferanseberegningEndret(tilkjentYtelse: TilkjentYtelse) {
         val oppdaterteAndeler = tilkjentYtelse.andelerTilkjentYtelse.differanseberegnSøkersYtelser(
-            barna = persongrunnlagService.hentBarna(tilkjentYtelse.behandling.id),
-            kompetanser = kompetanseRepository.finnFraBehandlingId(tilkjentYtelse.behandling.id)
+            barna = persongrunnlagService.hentBarna(tilkjentYtelse.behandling.behandlingId),
+            kompetanser = kompetanseRepository.finnFraBehandlingId(tilkjentYtelse.behandling.behandlingId.id)
         )
         tilkjentYtelseRepository.oppdaterTilkjentYtelse(tilkjentYtelse, oppdaterteAndeler)
     }
