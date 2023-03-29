@@ -52,7 +52,7 @@ object VilkårsvurderingUtils {
             vilkårType = vilkårType,
             resultat = Resultat.IKKE_VURDERT,
             begrunnelse = "",
-            behandlingId = personResultat.vilkårsvurdering.behandling.id
+            behandlingId = personResultat.vilkårsvurdering.behandling.behandlingId
         )
         if (harUvurdertePerioder(personResultat, vilkårType)) {
             throw FunksjonellFeil(
@@ -154,14 +154,14 @@ object VilkårsvurderingUtils {
                         vilkårResultat.kopierMedNyPeriode(
                             fom = periode.fom,
                             tom = nyTom,
-                            behandlingId = personResultat.vilkårsvurdering.behandling.id
+                            behandlingId = personResultat.vilkårsvurdering.behandling.behandlingId
                         )
                     )
                     personResultat.addVilkårResultat(
                         vilkårResultat.kopierMedNyPeriode(
                             fom = nyFom,
                             tom = periode.tom,
-                            behandlingId = personResultat.vilkårsvurdering.behandling.id
+                            behandlingId = personResultat.vilkårsvurdering.behandling.behandlingId
                         )
                     )
                 }
@@ -226,7 +226,7 @@ object VilkårsvurderingUtils {
                 oppdaterEksisterendePerson(
                     personenSomFinnes = personenSomFinnes,
                     personFraInit = personFraInit,
-                    kopieringSkjerFraForrigeBehandling = initiellVilkårsvurderingKopi.behandling.id != aktivVilkårsvurderingKopi.behandling.id,
+                    kopieringSkjerFraForrigeBehandling = initiellVilkårsvurderingKopi.behandling.behandlingId != aktivVilkårsvurderingKopi.behandling.behandlingId,
                     personTilOppdatert = personTilOppdatert,
                     forrigeBehandlingVilkårsvurdering = forrigeBehandlingVilkårsvurdering,
                     løpendeUnderkategori = løpendeUnderkategori,
@@ -463,7 +463,7 @@ fun genererPersonResultatForPerson(
             periodeFom = fom,
             periodeTom = tom,
             begrunnelse = utledBegrunnelse(vilkår, person),
-            behandlingId = personResultat.vilkårsvurdering.behandling.id
+            behandlingId = personResultat.vilkårsvurdering.behandling.behandlingId
         )
     }.toSortedSet(VilkårResultat.VilkårResultatComparator)
 
