@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.steg
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.TilbakekrevingService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeHentOgPersisterService
@@ -21,7 +22,7 @@ class TilbakestillBehandlingTilBehandlingsresultatService(
      * Når en andel vurderes (endres) vil vi resette steget og slette data som blir generert senere i løypa
      */
     @Transactional
-    fun tilbakestillBehandlingTilBehandlingsresultat(behandlingId: Long): Behandling {
+    fun tilbakestillBehandlingTilBehandlingsresultat(behandlingId: BehandlingId): Behandling {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 
         if (behandling.erTilbakestiltTilBehandlingsresultat()) {
@@ -30,7 +31,7 @@ class TilbakestillBehandlingTilBehandlingsresultatService(
 
         vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(
             vedtak = vedtakRepository.findByBehandlingAndAktiv(
-                behandlingId
+                behandlingId.id
             )
         )
         tilbakekrevingService.slettTilbakekrevingPåBehandling(behandlingId)

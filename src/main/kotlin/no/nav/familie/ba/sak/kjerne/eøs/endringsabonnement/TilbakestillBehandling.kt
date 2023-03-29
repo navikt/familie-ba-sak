@@ -14,7 +14,7 @@ class TilbakestillBehandlingFraKompetanseEndringService(
 ) : PeriodeOgBarnSkjemaEndringAbonnent<Kompetanse> {
     override fun skjemaerEndret(behandlingId: BehandlingId, endretTil: Collection<Kompetanse>) {
         tilbakestillBehandlingTilBehandlingsresultatService
-            .tilbakestillBehandlingTilBehandlingsresultat(behandlingId.id)
+            .tilbakestillBehandlingTilBehandlingsresultat(behandlingId)
     }
 }
 
@@ -24,7 +24,7 @@ class TilbakestillBehandlingFraUtenlandskPeriodebeløpEndringService(
 ) : PeriodeOgBarnSkjemaEndringAbonnent<UtenlandskPeriodebeløp> {
     override fun skjemaerEndret(behandlingId: BehandlingId, endretTil: Collection<UtenlandskPeriodebeløp>) {
         tilbakestillBehandlingTilBehandlingsresultatService
-            .tilbakestillBehandlingTilBehandlingsresultat(behandlingId.id)
+            .tilbakestillBehandlingTilBehandlingsresultat(behandlingId)
     }
 }
 
@@ -34,6 +34,6 @@ class TilbakestillBehandlingFraValutakursEndringService(
 ) : PeriodeOgBarnSkjemaEndringAbonnent<Valutakurs> {
     override fun skjemaerEndret(behandlingId: BehandlingId, endretTil: Collection<Valutakurs>) {
         tilbakestillBehandlingTilBehandlingsresultatService
-            .tilbakestillBehandlingTilBehandlingsresultat(behandlingId.id)
+            .tilbakestillBehandlingTilBehandlingsresultat(behandlingId)
     }
 }

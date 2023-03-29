@@ -67,7 +67,7 @@ class AutovedtakService(
         return when (steg) {
             StegType.VILKÅRSVURDERING ->
                 tilbakestillBehandlingTilBehandlingsresultatService
-                    .tilbakestillBehandlingTilBehandlingsresultat(behandlingId = omgjortBehandling.id)
+                    .tilbakestillBehandlingTilBehandlingsresultat(behandlingId = omgjortBehandling.behandlingId)
 
             else -> throw Feil("Steg $steg er ikke støttet ved omgjøring av automatisk behandling til manuell.")
         }
