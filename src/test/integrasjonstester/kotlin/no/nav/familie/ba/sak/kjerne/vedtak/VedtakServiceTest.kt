@@ -165,34 +165,34 @@ class VedtakServiceTest(
         )
 
         vilkårResultat1 = VilkårResultat(
-            1,
-            personResultat,
-            vilkår,
-            resultat,
-            LocalDate.of(2010, 1, 1),
-            LocalDate.of(2010, 6, 1),
-            "",
-            vilkårsvurdering.behandling.id
+            id = 1,
+            personResultat = personResultat,
+            vilkårType = vilkår,
+            resultat = resultat,
+            periodeFom = LocalDate.of(2010, 1, 1),
+            periodeTom = LocalDate.of(2010, 6, 1),
+            begrunnelse = "",
+            behandlingId = vilkårsvurdering.behandling.behandlingId
         )
         vilkårResultat2 = VilkårResultat(
-            2,
-            personResultat,
-            vilkår,
-            resultat,
-            LocalDate.of(2010, 6, 2),
-            LocalDate.of(2010, 8, 1),
-            "",
-            vilkårsvurdering.behandling.id
+            id = 2,
+            personResultat = personResultat,
+            vilkårType = vilkår,
+            resultat = resultat,
+            periodeFom = LocalDate.of(2010, 6, 2),
+            periodeTom = LocalDate.of(2010, 8, 1),
+            begrunnelse = "",
+            behandlingId = vilkårsvurdering.behandling.behandlingId
         )
         vilkårResultat3 = VilkårResultat(
-            3,
-            personResultat,
-            vilkår,
-            resultat,
-            LocalDate.of(2010, 8, 2),
-            LocalDate.of(2010, 12, 1),
-            "",
-            vilkårsvurdering.behandling.id
+            id = 3,
+            personResultat = personResultat,
+            vilkårType = vilkår,
+            resultat = resultat,
+            periodeFom = LocalDate.of(2010, 8, 2),
+            periodeTom = LocalDate.of(2010, 12, 1),
+            begrunnelse = "",
+            behandlingId = vilkårsvurdering.behandling.behandlingId
         )
         personResultat.setSortedVilkårResultater(
             setOf(
@@ -222,9 +222,9 @@ class VedtakServiceTest(
         val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true)
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
-                behandling.id,
-                fnr,
-                listOf(barnFnr),
+                behandlingId = behandling.behandlingId,
+                søkerPersonIdent = fnr,
+                barnasIdenter = listOf(barnFnr),
                 søkerAktør = fagsak.aktør,
                 barnAktør = barnAktør
             )
@@ -244,7 +244,7 @@ class VedtakServiceTest(
             Beslutning.GODKJENT
         )
 
-        val hentetVedtak = vedtakService.hentAktivForBehandling(behandling.id)
+        val hentetVedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.behandlingId)
         Assertions.assertNotNull(hentetVedtak)
         Assertions.assertNull(hentetVedtak!!.vedtaksdato)
         Assertions.assertEquals(null, hentetVedtak.stønadBrevPdF)
