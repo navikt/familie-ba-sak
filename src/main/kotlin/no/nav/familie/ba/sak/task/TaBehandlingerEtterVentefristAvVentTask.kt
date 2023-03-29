@@ -22,8 +22,8 @@ class TaBehandlingerEtterVentefristAvVentTask(val settPåVentService: SettPåVen
 
         sakerPåVent.forEach {
             if (it.frist.isBefore(LocalDate.now())) {
-                logger.info("Ventefrist på behandling ${it.behandling.id} er gått ut. Tar behandlingen av vent.")
-                settPåVentService.gjenopptaBehandling(behandlingId = it.behandling.id)
+                logger.info("Ventefrist på behandling ${it.behandling.behandlingId.id} er gått ut. Tar behandlingen av vent.")
+                settPåVentService.gjenopptaBehandling(behandlingId = it.behandling.behandlingId)
             }
         }
     }
