@@ -57,18 +57,21 @@ class TotrinnskontrollTest(
             behandlingService.opprettBehandling(nyOrdinærBehandling(søkersIdent = fnr, fagsakId = fagsak.id))
 
         behandlingService.sendBehandlingTilBeslutter(behandling)
-        assertEquals(BehandlingStatus.FATTER_VEDTAK, behandlingHentOgPersisterService.hent(behandling.id).status)
+        assertEquals(
+            BehandlingStatus.FATTER_VEDTAK,
+            behandlingHentOgPersisterService.hent(behandling.behandlingId).status
+        )
         assertThat(
             saksstatistikkMellomlagringRepository.findByTypeAndTypeId(
                 SaksstatistikkMellomlagringType.BEHANDLING,
-                behandling.id
+                behandling.behandlingId.id
             )
         )
             .hasSize(2)
         assertThat(
             saksstatistikkMellomlagringRepository.findByTypeAndTypeId(
                 SaksstatistikkMellomlagringType.BEHANDLING,
-                behandling.id
+                behandling.behandlingId.id
             )
                 .last().jsonToBehandlingDVH().behandlingStatus
         ).isEqualTo(BehandlingStatus.FATTER_VEDTAK.name)
@@ -77,19 +80,22 @@ class TotrinnskontrollTest(
 
         totrinnskontrollService.besluttTotrinnskontroll(behandling, "Beslutter", "beslutterId", Beslutning.GODKJENT)
 
-        assertEquals(BehandlingStatus.IVERKSETTER_VEDTAK, behandlingHentOgPersisterService.hent(behandling.id).status)
+        assertEquals(
+            BehandlingStatus.IVERKSETTER_VEDTAK,
+            behandlingHentOgPersisterService.hent(behandling.behandlingId).status
+        )
 
         assertThat(
             saksstatistikkMellomlagringRepository.findByTypeAndTypeId(
                 SaksstatistikkMellomlagringType.BEHANDLING,
-                behandling.id
+                behandling.behandlingId.id
             )
         )
             .hasSize(3)
         assertThat(
             saksstatistikkMellomlagringRepository.findByTypeAndTypeId(
                 SaksstatistikkMellomlagringType.BEHANDLING,
-                behandling.id
+                behandling.behandlingId.id
             )
                 .last().jsonToBehandlingDVH().behandlingStatus
         ).isEqualTo(BehandlingStatus.IVERKSETTER_VEDTAK.name)
@@ -108,22 +114,25 @@ class TotrinnskontrollTest(
             behandlingService.opprettBehandling(nyOrdinærBehandling(søkersIdent = fnr, fagsakId = fagsak.id))
 
         behandlingService.sendBehandlingTilBeslutter(behandling)
-        assertEquals(BehandlingStatus.FATTER_VEDTAK, behandlingHentOgPersisterService.hent(behandling.id).status)
+        assertEquals(
+            BehandlingStatus.FATTER_VEDTAK,
+            behandlingHentOgPersisterService.hent(behandling.behandlingId).status
+        )
 
         totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandling = behandling)
         totrinnskontrollService.besluttTotrinnskontroll(behandling, "Beslutter", "beslutterId", Beslutning.UNDERKJENT)
-        assertEquals(BehandlingStatus.UTREDES, behandlingHentOgPersisterService.hent(behandling.id).status)
+        assertEquals(BehandlingStatus.UTREDES, behandlingHentOgPersisterService.hent(behandling.behandlingId).status)
         assertThat(
             saksstatistikkMellomlagringRepository.findByTypeAndTypeId(
                 SaksstatistikkMellomlagringType.BEHANDLING,
-                behandling.id
+                behandling.behandlingId.id
             )
         )
             .hasSize(3)
         assertThat(
             saksstatistikkMellomlagringRepository.findByTypeAndTypeId(
                 SaksstatistikkMellomlagringType.BEHANDLING,
-                behandling.id
+                behandling.behandlingId.id
             )
                 .last().jsonToBehandlingDVH().behandlingStatus
         ).isEqualTo(BehandlingStatus.UTREDES.name)
