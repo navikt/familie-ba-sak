@@ -53,7 +53,7 @@ class SaksstatistikkService(
     fun mapTilBehandlingDVH(behandlingId: BehandlingId): BehandlingDVH? {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         val forrigeBehandlingId = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
-            .takeIf { erRevurderingEllerTekniskBehandling(behandling) }?.id
+            .takeIf { erRevurderingEllerTekniskBehandling(behandling) }?.behandlingId
 
         val datoMottatt = when (behandling.opprettetÅrsak) {
             BehandlingÅrsak.SØKNAD -> {
@@ -77,7 +77,7 @@ class SaksstatistikkService(
             tekniskTid = now,
             mottattDato = datoMottatt.atZone(TIMEZONE),
             registrertDato = behandling.opprettetTidspunkt.atZone(TIMEZONE),
-            behandlingId = behandling.id.toString(),
+            behandlingId = behandling.behandlingId.id.toString(),
             funksjonellId = UUID.randomUUID().toString(),
             sakId = behandling.fagsak.id.toString(),
             behandlingType = behandling.type.name,
@@ -135,7 +135,8 @@ class SaksstatistikkService(
         var landkodeSøker: String = PersonopplysningerService.UKJENT_LANDKODE
 
         val deltagere = if (aktivBehandling != null) {
-            val personer = persongrunnlagService.hentAktiv(behandlingId = aktivBehandling.id)?.søkerOgBarn ?: emptySet()
+            val personer =
+                persongrunnlagService.hentAktiv(behandlingId = aktivBehandling.behandlingId)?.søkerOgBarn ?: emptySet()
             personer.map {
                 if (it.type == PersonType.SØKER) {
                     landkodeSøker = hentLandkode(it)
@@ -193,7 +194,7 @@ class SaksstatistikkService(
     private fun Behandling.resultatBegrunnelser(): List<ResultatBegrunnelseDVH> {
         return when (resultat) {
             HENLAGT_SØKNAD_TRUKKET, HENLAGT_FEILAKTIG_OPPRETTET -> emptyList()
-            else -> vedtakService.hentAktivForBehandling(behandlingId = id)
+            else -> vedtakService.hentAktivForBehandling(behandlingId = behandlingId)
                 ?.hentResultatBegrunnelserFraVedtaksbegrunnelser()
                 ?: emptyList()
         }

@@ -26,6 +26,7 @@ import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
@@ -133,7 +134,7 @@ internal class SaksstatistikkServiceTest(
         every { arbeidsfordelingService.hentArbeidsfordelingPåBehandling(any()) } returns ArbeidsfordelingPåBehandling(
             behandlendeEnhetId = "4820",
             behandlendeEnhetNavn = "Nav",
-            behandlingId = 1
+            behandlingId = BehandlingId(1)
         )
         every { arbeidsfordelingService.hentArbeidsfordelingsenhet(any()) } returns Arbeidsfordelingsenhet(
             "4821",
@@ -158,7 +159,7 @@ internal class SaksstatistikkServiceTest(
         every { totrinnskontrollService.hentAktivForBehandling(any()) } returns null
         every { vedtakService.hentAktivForBehandling(any()) } returns null
 
-        val behandlingDvh = sakstatistikkService.mapTilBehandlingDVH(2)
+        val behandlingDvh = sakstatistikkService.mapTilBehandlingDVH(BehandlingId(2))
         println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(behandlingDvh))
 
         assertThat(behandlingDvh?.resultat).isEqualTo("HENLAGT_FEILAKTIG_OPPRETTET")
@@ -189,7 +190,7 @@ internal class SaksstatistikkServiceTest(
             behandling = behandling
         )
 
-        val behandlingDvh = sakstatistikkService.mapTilBehandlingDVH(2)
+        val behandlingDvh = sakstatistikkService.mapTilBehandlingDVH(BehandlingId(2))
         println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(behandlingDvh))
 
         assertThat(behandlingDvh?.funksjonellTid).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.MINUTES))
@@ -207,7 +208,7 @@ internal class SaksstatistikkServiceTest(
             )
         )
         assertThat(behandlingDvh?.vedtaksDato).isEqualTo(vedtak.vedtaksdato?.toLocalDate())
-        assertThat(behandlingDvh?.behandlingId).isEqualTo(behandling.id.toString())
+        assertThat(behandlingDvh?.behandlingId).isEqualTo(behandling.behandlingId.id.toString())
         assertThat(behandlingDvh?.relatertBehandlingId).isNull()
         assertThat(behandlingDvh?.sakId).isEqualTo(behandling.fagsak.id.toString())
         assertThat(behandlingDvh?.vedtakId).isEqualTo(vedtak.id.toString())
@@ -268,7 +269,7 @@ internal class SaksstatistikkServiceTest(
             frist = frist
         )
 
-        val behandlingDvh = sakstatistikkService.mapTilBehandlingDVH(2)
+        val behandlingDvh = sakstatistikkService.mapTilBehandlingDVH(BehandlingId(2))
         println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(behandlingDvh))
 
         assertThat(behandlingDvh?.funksjonellTid).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.MINUTES))
@@ -280,7 +281,7 @@ internal class SaksstatistikkServiceTest(
             behandling.opprettetTidspunkt.atZone(SaksstatistikkService.TIMEZONE)
         )
         assertThat(behandlingDvh?.vedtaksDato).isEqualTo(vedtak.vedtaksdato?.toLocalDate())
-        assertThat(behandlingDvh?.behandlingId).isEqualTo(behandling.id.toString())
+        assertThat(behandlingDvh?.behandlingId).isEqualTo(behandling.behandlingId.id.toString())
         assertThat(behandlingDvh?.relatertBehandlingId).isNull()
         assertThat(behandlingDvh?.sakId).isEqualTo(behandling.fagsak.id.toString())
         assertThat(behandlingDvh?.vedtakId).isEqualTo(vedtak.id.toString())
@@ -310,7 +311,7 @@ internal class SaksstatistikkServiceTest(
 
                 every { behandlingHentOgPersisterService.hent(any()) } returns behandling
 
-                val behandlingDvh = sakstatistikkService.mapTilBehandlingDVH(2)
+                val behandlingDvh = sakstatistikkService.mapTilBehandlingDVH(BehandlingId(2))
                 assertThat("${behandlingDvh?.behandlingUnderkategori}").isSubstringOf("${optionalSakstype?.name}")
             }
     }
@@ -397,7 +398,7 @@ internal class SaksstatistikkServiceTest(
         every { personopplysningerService.hentLandkodeAlpha2UtenlandskBostedsadresse(any()) } returns "SE"
 
         every { persongrunnlagService.hentAktiv(any()) } returns lagTestPersonopplysningGrunnlag(
-            1,
+            BehandlingId(1),
             tilfeldigPerson(personType = PersonType.BARN),
             tilfeldigPerson(personType = PersonType.SØKER)
         )
