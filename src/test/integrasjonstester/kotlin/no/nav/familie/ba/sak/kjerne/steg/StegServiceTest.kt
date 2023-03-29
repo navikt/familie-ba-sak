@@ -134,7 +134,7 @@ class StegServiceTest(
             brevmalService = brevmalService
         )
 
-        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)!!
+        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.behandlingId)!!
         assertEquals(
             Resultat.OPPFYLT,
             vilkårsvurdering.personResultater.first { it.aktør.aktivFødselsnummer() == barnFnr1 }.vilkårResultater
@@ -208,7 +208,7 @@ class StegServiceTest(
             stegService.håndterSendTilBeslutter(behandling, "1234")
         }
         assertEquals(
-            "Behandling med id ${behandling.id} er avsluttet og stegprosessen kan ikke gjenåpnes",
+            "Behandling med id ${behandling.behandlingId.id} er avsluttet og stegprosessen kan ikke gjenåpnes",
             feil.message
         )
     }
@@ -280,7 +280,8 @@ class StegServiceTest(
             RestBeslutningPåVedtak(beslutning = Beslutning.UNDERKJENT, begrunnelse = "Feil")
         )
 
-        val behandlingEtterPersongrunnlagSteg = behandlingHentOgPersisterService.hent(behandlingId = behandling.id)
+        val behandlingEtterPersongrunnlagSteg =
+            behandlingHentOgPersisterService.hent(behandlingId = behandling.behandlingId)
         assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterPersongrunnlagSteg.steg)
     }
 
@@ -339,7 +340,7 @@ class StegServiceTest(
         stegService.håndterSendTilBeslutter(vilkårsvurdertBehandling, "1234")
 
         val behandlingEtterSendTilBeslutter =
-            behandlingHentOgPersisterService.hent(behandlingId = vilkårsvurdertBehandling.id)
+            behandlingHentOgPersisterService.hent(behandlingId = vilkårsvurdertBehandling.behandlingId)
 
         assertThrows<FunksjonellFeil> {
             stegService.håndterHenleggBehandling(
@@ -417,7 +418,7 @@ class StegServiceTest(
             }
         }
         assertMigreringsdato(nyMigreringsdato, behandling)
-        assertNotNull(vilkårsvurderingService.hentAktivForBehandling(behandling.id))
+        assertNotNull(vilkårsvurderingService.hentAktivForBehandling(behandling.behandlingId))
 
         val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandling)
         assertEquals(StegType.BEHANDLINGSRESULTAT, behandlingEtterVilkårsvurdering.steg)
@@ -526,7 +527,7 @@ class StegServiceTest(
             }
         }
         assertMigreringsdato(nyMigreringsdato, behandling)
-        assertNotNull(vilkårsvurderingService.hentAktivForBehandling(behandling.id))
+        assertNotNull(vilkårsvurderingService.hentAktivForBehandling(behandling.behandlingId))
 
         val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandling)
         assertEquals(StegType.BEHANDLINGSRESULTAT, behandlingEtterVilkårsvurdering.steg)
@@ -623,8 +624,8 @@ class StegServiceTest(
             }
         }
         assertMigreringsdato(migreringsdato, behandling)
-        assertNotNull(vilkårsvurderingService.hentAktivForBehandling(behandling.id))
-        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandling.id)!!
+        assertNotNull(vilkårsvurderingService.hentAktivForBehandling(behandling.behandlingId))
+        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandling.behandlingId)!!
         val barnPersonResultat =
             vilkårsvurdering.personResultater.first { it.aktør.aktivFødselsnummer() == barnFnr }.apply {
                 vilkårResultater.first { it.vilkårType == Vilkår.BOR_MED_SØKER }
@@ -728,8 +729,8 @@ class StegServiceTest(
             }
         }
         assertMigreringsdato(migreringsdato, behandling)
-        assertNotNull(vilkårsvurderingService.hentAktivForBehandling(behandling.id))
-        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandling.id)!!
+        assertNotNull(vilkårsvurderingService.hentAktivForBehandling(behandling.behandlingId))
+        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandling.behandlingId)!!
         val barnPersonResultat =
             vilkårsvurdering.personResultater.first { it.aktør.aktivFødselsnummer() == barnFnr }.apply {
                 vilkårResultater.first { it.vilkårType == Vilkår.BOR_MED_SØKER }
@@ -813,6 +814,6 @@ class StegServiceTest(
     }
 
     private fun assertMigreringsdato(migreringsdato: LocalDate, behandling: Behandling) {
-        assertEquals(migreringsdato, behandlingService.hentMigreringsdatoIBehandling(behandling.id))
+        assertEquals(migreringsdato, behandlingService.hentMigreringsdatoIBehandling(behandling.behandlingId))
     }
 }

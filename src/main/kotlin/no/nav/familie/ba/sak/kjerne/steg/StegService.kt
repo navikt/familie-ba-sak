@@ -430,9 +430,9 @@ class StegService(
         utførendeSteg: () -> StegType
     ): Behandling {
         try {
-            logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} håndterer ${behandlingSteg.stegType()} på behandling ${behandling.id}")
+            logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} håndterer ${behandlingSteg.stegType()} på behandling ${behandling.behandlingId}")
             tilgangService.validerTilgangTilBehandling(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId,
                 event = AuditLoggerEvent.UPDATE
             )
             if (behandling.erManuellMigrering() && behandlingSteg.stegType() == StegType.BESLUTTE_VEDTAK) {
@@ -451,7 +451,7 @@ class StegService(
             validerBehandlingIkkeSattPåVent(behandling, behandlingSteg)
 
             if (behandling.steg == SISTE_STEG) {
-                throw FunksjonellFeil("Behandling med id ${behandling.id} er avsluttet og stegprosessen kan ikke gjenåpnes")
+                throw FunksjonellFeil("Behandling med id ${behandling.behandlingId.id} er avsluttet og stegprosessen kan ikke gjenåpnes")
             }
 
             if (behandlingSteg.stegType().erSaksbehandlerSteg() && behandlingSteg.stegType()
@@ -478,7 +478,7 @@ class StegService(
             behandlingSteg.preValiderSteg(behandling, this)
             val nesteSteg = utførendeSteg()
             behandlingSteg.postValiderSteg(behandling)
-            val behandlingEtterUtførtSteg = behandlingHentOgPersisterService.hent(behandling.id)
+            val behandlingEtterUtførtSteg = behandlingHentOgPersisterService.hent(behandling.behandlingId)
 
             stegSuksessMetrics[behandlingSteg.stegType()]?.increment()
 
@@ -488,7 +488,7 @@ class StegService(
 
             val returBehandling =
                 behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(
-                    behandlingId = behandling.id,
+                    behandlingId = behandling.behandlingId,
                     steg = nesteSteg
                 )
 
