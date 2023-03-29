@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.DEFAULT_JOURNALFØRENDE_ENHET
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
@@ -124,10 +125,10 @@ class FamilieBaSakKlient(
     }
 
     fun registrererSøknad(
-        behandlingId: Long,
+        behandlingId: BehandlingId,
         restRegistrerSøknad: RestRegistrerSøknad
     ): Ressurs<RestUtvidetBehandling> {
-        val uri = URI.create("$baSakUrl/api/behandlinger/$behandlingId/steg/registrer-søknad")
+        val uri = URI.create("$baSakUrl/api/behandlinger/${behandlingId.id}/steg/registrer-søknad")
 
         return postForEntity(uri, restRegistrerSøknad, headers)
     }

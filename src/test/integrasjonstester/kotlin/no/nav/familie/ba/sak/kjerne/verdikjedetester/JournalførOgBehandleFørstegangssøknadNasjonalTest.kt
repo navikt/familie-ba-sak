@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.SatsTidspunkt
@@ -109,7 +110,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
             )
         val restUtvidetBehandling: Ressurs<RestUtvidetBehandling> =
             familieBaSakKlient().registrererSøknad(
-                behandlingId = aktivBehandling.behandlingId,
+                behandlingId = BehandlingId(aktivBehandling.behandlingId),
                 restRegistrerSøknad = restRegistrerSøknad
             )
         generellAssertRestUtvidetBehandling(
@@ -285,7 +286,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
             )
         val restUtvidetBehandling: Ressurs<RestUtvidetBehandling> =
             familieBaSakKlient().registrererSøknad(
-                behandlingId = aktivBehandling.behandlingId,
+                behandlingId = BehandlingId(aktivBehandling.behandlingId),
                 restRegistrerSøknad = restRegistrerSøknad
             )
         generellAssertRestUtvidetBehandling(

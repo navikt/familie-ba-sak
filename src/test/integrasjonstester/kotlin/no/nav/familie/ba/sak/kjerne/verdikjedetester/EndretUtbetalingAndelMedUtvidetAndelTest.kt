@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
@@ -63,7 +64,7 @@ class EndretUtbetalingAndelMedUtvidetAndelTest(
             )
         val restBehandlingEtterRegistrertSøknad: Ressurs<RestUtvidetBehandling> =
             familieBaSakKlient().registrererSøknad(
-                behandlingId = restUtvidetBehandling.behandlingId,
+                behandlingId = BehandlingId(restUtvidetBehandling.behandlingId),
                 restRegistrerSøknad = restRegistrerSøknad
             )
 

@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.integrasjoner.`ef-sak`.EfSakRestClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -80,7 +81,7 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
             )
         )
         val perioderBehandling1 = vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(
-            vedtak = vedtakService.hentAktivForBehandling(behandling1.id)!!
+            vedtak = vedtakService.hentAktivForBehandling(behandling1.behandlingId)!!
         )
 
         Assertions.assertEquals(
@@ -95,7 +96,7 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
         )
 
         val perioderBehandling2 = vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(
-            vedtak = vedtakService.hentAktivForBehandling(behandling2.id)!!
+            vedtak = vedtakService.hentAktivForBehandling(behandling2.behandlingId)!!
         )
         val periodeMedReduksjon =
             perioderBehandling2.singleOrNull { it.type == Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING }
@@ -145,7 +146,7 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
                 behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
                 fagsakId = fagsak.id
             )
-        val behandling = behandlingHentOgPersisterService.hent(restBehandling.data!!.behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(BehandlingId(restBehandling.data!!.behandlingId))
         val restRegistrerSøknad =
             RestRegistrerSøknad(
                 søknad = lagSøknadDTO(
@@ -157,7 +158,7 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
             )
         val restUtvidetBehandling: Ressurs<RestUtvidetBehandling> =
             familieBaSakKlient().registrererSøknad(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId,
                 restRegistrerSøknad = restRegistrerSøknad
             )
 

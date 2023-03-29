@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
@@ -57,7 +58,7 @@ class HenleggelseTest(
         )
 
         val ferdigstiltBehandling =
-            behandlingHentOgPersisterService.hent(behandlingId = responseHenlagtSøknad.data!!.behandlingId)
+            behandlingHentOgPersisterService.hent(behandlingId = BehandlingId(responseHenlagtSøknad.data!!.behandlingId))
 
         assertThat(!ferdigstiltBehandling.aktiv)
         assertThat(ferdigstiltBehandling.resultat == Behandlingsresultat.HENLAGT_FEILAKTIG_OPPRETTET)
@@ -104,7 +105,7 @@ class HenleggelseTest(
         )
 
         val ferdigstiltBehandling =
-            behandlingHentOgPersisterService.hent(behandlingId = responseHenlagtSøknad.data!!.behandlingId)
+            behandlingHentOgPersisterService.hent(behandlingId = BehandlingId(responseHenlagtSøknad.data!!.behandlingId))
 
         assertThat(!ferdigstiltBehandling.aktiv)
         assertThat(ferdigstiltBehandling.resultat == Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET)
@@ -124,7 +125,8 @@ class HenleggelseTest(
             fagsakId = fagsak.data!!.id
         )
 
-        val behandling = behandlingHentOgPersisterService.hent(restFagsakMedBehandling.data!!.behandlingId)
+        val behandling =
+            behandlingHentOgPersisterService.hent(BehandlingId(restFagsakMedBehandling.data!!.behandlingId))
         val restRegistrerSøknad = RestRegistrerSøknad(
             søknad = lagSøknadDTO(
                 søkerIdent = søkersIdent,
@@ -133,7 +135,7 @@ class HenleggelseTest(
             bekreftEndringerViaFrontend = false
         )
         return familieBaSakKlient().registrererSøknad(
-            behandlingId = behandling.id,
+            behandlingId = behandling.behandlingId,
             restRegistrerSøknad = restRegistrerSøknad
         ).data!!
     }

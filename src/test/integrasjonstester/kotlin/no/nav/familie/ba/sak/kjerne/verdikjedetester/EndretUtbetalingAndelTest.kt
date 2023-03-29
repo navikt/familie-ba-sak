@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
@@ -150,7 +151,8 @@ class EndretUtbetalingAndelTest(
             fagsakId = fagsak.data!!.id
         )
 
-        val behandling = behandlingHentOgPersisterService.hent(restFagsakMedBehandling.data!!.behandlingId)
+        val behandling =
+            behandlingHentOgPersisterService.hent(BehandlingId(restFagsakMedBehandling.data!!.behandlingId))
         val restRegistrerSøknad =
             RestRegistrerSøknad(
                 søknad = lagSøknadDTO(
@@ -162,7 +164,7 @@ class EndretUtbetalingAndelTest(
             )
         val restUtvidetBehandling: Ressurs<RestUtvidetBehandling> =
             familieBaSakKlient().registrererSøknad(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId,
                 restRegistrerSøknad = restRegistrerSøknad
             )
 

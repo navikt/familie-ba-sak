@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.integrasjoner.`ef-sak`.EfSakRestClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -78,7 +79,7 @@ class AutobrevSmåbarnstilleggOpphørTest(
         )
 
         val andelerForSmåbarnstilleggFagsak1Behandling2 =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = fagsak2behandling2.id)
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = fagsak2behandling2.behandlingId.id)
         val førsteDagIStønadTomMåned = YearMonth.now().minusMonths(1)
         assertEquals(
             førsteDagIStønadTomMåned,
@@ -89,7 +90,10 @@ class AutobrevSmåbarnstilleggOpphørTest(
 
         val fagsaker: List<Long> =
             fagsakRepository.finnAlleFagsakerMedOpphørSmåbarnstilleggIMåned(
-                iverksatteLøpendeBehandlinger = listOf(fagsak1behandling2.id, fagsak2behandling2.id)
+                iverksatteLøpendeBehandlinger = listOf(
+                    fagsak1behandling2.behandlingId.id,
+                    fagsak2behandling2.behandlingId.id
+                )
             )
 
         assertTrue(fagsaker.containsAll(listOf(fagsak2.id)))
@@ -131,7 +135,7 @@ class AutobrevSmåbarnstilleggOpphørTest(
                 behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
                 fagsakId = fagsak.id
             )
-        val behandling = behandlingHentOgPersisterService.hent(restBehandling.data!!.behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(BehandlingId(restBehandling.data!!.behandlingId))
         val restRegistrerSøknad =
             RestRegistrerSøknad(
                 søknad = lagSøknadDTO(
@@ -143,7 +147,7 @@ class AutobrevSmåbarnstilleggOpphørTest(
             )
         val restUtvidetBehandling: Ressurs<RestUtvidetBehandling> =
             familieBaSakKlient().registrererSøknad(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId,
                 restRegistrerSøknad = restRegistrerSøknad
             )
 
@@ -232,6 +236,6 @@ class AutobrevSmåbarnstilleggOpphørTest(
                 behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
                 fagsakId = fagsak.id
             )
-        return behandlingHentOgPersisterService.hent(restUtvidetBehandling.data!!.behandlingId)
+        return behandlingHentOgPersisterService.hent(BehandlingId(restUtvidetBehandling.data!!.behandlingId))
     }
 }

@@ -26,6 +26,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
@@ -154,7 +155,7 @@ class BehandleSmåbarnstilleggTest(
             fagsakId = fagsak.data!!.id
         )
 
-        val behandling = behandlingHentOgPersisterService.hent(restBehandling.data!!.behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(BehandlingId(restBehandling.data!!.behandlingId))
         val restRegistrerSøknad =
             RestRegistrerSøknad(
                 søknad = lagSøknadDTO(
@@ -166,7 +167,7 @@ class BehandleSmåbarnstilleggTest(
             )
         val restUtvidetBehandling: Ressurs<RestUtvidetBehandling> =
             familieBaSakKlient().registrererSøknad(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId,
                 restRegistrerSøknad = restRegistrerSøknad
             )
         generellAssertRestUtvidetBehandling(
@@ -351,13 +352,13 @@ class BehandleSmåbarnstilleggTest(
         assertEquals(
             0,
             vedtaksperiodeService.hentPersisterteVedtaksperioder(
-                vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = aktivBehandling.id)
+                vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = aktivBehandling.behandlingId)
             ).size
         )
 
         verify(exactly = 1) {
             opprettTaskService.opprettOppgaveTask(
-                behandlingId = aktivBehandling.id,
+                behandlingId = aktivBehandling.behandlingId,
                 oppgavetype = Oppgavetype.VurderLivshendelse,
                 beskrivelse = "Småbarnstillegg: endring i overgangsstønad må behandles manuelt"
             )
@@ -405,7 +406,7 @@ class BehandleSmåbarnstilleggTest(
 
         val andelerTilkjentYtelse =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
-                behandlingId = aktivBehandling.id
+                behandlingId = aktivBehandling.behandlingId.id
             )
         val småbarnstilleggAndel = andelerTilkjentYtelse.single { it.type == YtelseType.SMÅBARNSTILLEGG }
         assertEquals(
@@ -418,7 +419,7 @@ class BehandleSmåbarnstilleggTest(
         )
 
         val vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(
-            vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = aktivBehandling.id)
+            vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = aktivBehandling.behandlingId)
         )
 
         val aktuellVedtaksperiode =
@@ -469,7 +470,7 @@ class BehandleSmåbarnstilleggTest(
 
         val andelerTilkjentYtelse =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
-                behandlingId = aktivBehandling.id
+                behandlingId = aktivBehandling.behandlingId.id
             )
 
         val småbarnstilleggAndeler = andelerTilkjentYtelse.filter { it.erSmåbarnstillegg() }
@@ -480,7 +481,7 @@ class BehandleSmåbarnstilleggTest(
         assertEquals(YearMonth.now().plusMonths(3), småbarnstilleggAndeler.last().stønadTom)
 
         val vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(
-            vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = aktivBehandling.id)
+            vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = aktivBehandling.behandlingId)
         )
 
         val aktuellVedtaksperiode =
@@ -536,7 +537,7 @@ class BehandleSmåbarnstilleggTest(
         val aktivBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = fagsak!!.id)!!
 
         val småbarnstilleggAndeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
-            behandlingId = aktivBehandling.id
+            behandlingId = aktivBehandling.behandlingId.id
         ).filter { it.erSmåbarnstillegg() }.sortedBy { it.id }
 
         assertEquals(2, småbarnstilleggAndeler.size)

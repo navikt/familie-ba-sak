@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.AutovedtakSatsendring
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.RestartAvSmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -291,7 +292,7 @@ class RestartAvSmåbarnstilleggTest(
                 behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
                 fagsakId = fagsak.id
             )
-        val behandling = behandlingHentOgPersisterService.hent(restBehandling.data!!.behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(BehandlingId(restBehandling.data!!.behandlingId))
         val restRegistrerSøknad =
             RestRegistrerSøknad(
                 søknad = lagSøknadDTO(
@@ -303,7 +304,7 @@ class RestartAvSmåbarnstilleggTest(
             )
         val restUtvidetBehandling: Ressurs<RestUtvidetBehandling> =
             familieBaSakKlient().registrererSøknad(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId,
                 restRegistrerSøknad = restRegistrerSøknad
             )
 
@@ -417,7 +418,7 @@ class RestartAvSmåbarnstilleggTest(
                 behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
                 fagsakId = fagsak.id
             )
-        return behandlingHentOgPersisterService.hent(restUtvidetBehandling.data!!.behandlingId)
+        return behandlingHentOgPersisterService.hent(BehandlingId(restUtvidetBehandling.data!!.behandlingId))
     }
 
     fun fullførRestenAvBehandlingen(
