@@ -178,7 +178,7 @@ class MigreringService(
 
             val migreringsdato = virkningsdatoFra(infotrygdKjøredato(YearMonth.now()))
 
-            vilkårService.hentVilkårsvurdering(behandlingId = behandling.id)?.apply {
+            vilkårService.hentVilkårsvurdering(behandlingId = behandling.behandlingId)?.apply {
                 forsøkSettPerioderFomTilpassetInfotrygdKjøreplan(this, migreringsdato)
                 if (løpendeInfotrygdsak.undervalg == "MD") leggTilVilkårsvurderingDeltBostedPåBarna()
             } ?: kastOgTellMigreringsFeil(MigreringsfeilType.MANGLER_VILKÅRSVURDERING)
@@ -195,7 +195,7 @@ class MigreringService(
             val behandlingEtterVilkårsvurdering =
                 stegService.håndterVilkårsvurdering(behandling) // Se funksjonen lagVilkårsvurderingForMigreringsbehandling i VilkårService
 
-            val førsteAndelerTilkjentYtelse = finnFørsteAndelerTilkjentYtelse(behandling.id)
+            val førsteAndelerTilkjentYtelse = finnFørsteAndelerTilkjentYtelse(behandling.behandlingId)
 
             sammenlignBeregnetYtelseMedNåværendeFraInfotrygd(
                 førsteAndelerTilkjentYtelse,
@@ -205,9 +205,9 @@ class MigreringService(
             )
 
             if (løpendeInfotrygdsak.undervalg == "EU") {
-                kompetanseService.hentKompetanser(BehandlingId(behandling.id)).forEach { kompetanse ->
+                kompetanseService.hentKompetanser(behandling.behandlingId).forEach { kompetanse ->
                     kompetanseService.oppdaterKompetanse(
-                        BehandlingId(behandling.id),
+                        behandling.behandlingId,
                         kompetanse.copy(resultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND)
                     )
                 }
@@ -224,7 +224,7 @@ class MigreringService(
             }
             val migreringResponseDto = MigreringResponseDto(
                 fagsakId = behandlingEtterVilkårsvurdering.fagsak.id,
-                behandlingId = behandlingEtterVilkårsvurdering.id,
+                behandlingId = behandlingEtterVilkårsvurdering.behandlingId.id,
                 infotrygdStønadId = løpendeInfotrygdsak.stønad?.id,
                 infotrygdSakId = løpendeInfotrygdsak.id,
                 virkningFom = førsteAndelerTilkjentYtelse.first().stønadFom,
@@ -511,9 +511,9 @@ class MigreringService(
         }
     }
 
-    private fun finnFørsteAndelerTilkjentYtelse(behandlingId: Long): List<AndelTilkjentYtelse> {
+    private fun finnFørsteAndelerTilkjentYtelse(behandlingId: BehandlingId): List<AndelTilkjentYtelse> {
         val andelerTilkjentYtelse =
-            tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)?.andelerTilkjentYtelse
+            tilkjentYtelseRepository.findByBehandlingOptional(behandlingId.id)?.andelerTilkjentYtelse
                 ?: kastOgTellMigreringsFeil(MigreringsfeilType.MANGLER_ANDEL_TILKJENT_YTELSE)
         val førsteUtbetalingsMåned = andelerTilkjentYtelse.minOfOrNull { it.stønadFom }
             ?: kastOgTellMigreringsFeil(MigreringsfeilType.MANGLER_ANDEL_TILKJENT_YTELSE)
@@ -615,14 +615,15 @@ class MigreringService(
 
     private fun iverksett(behandling: Behandling) {
         totrinnskontrollService.opprettAutomatiskTotrinnskontroll(behandling)
-        val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id) ?: kastOgTellMigreringsFeil(
-            MigreringsfeilType.IVERKSETT_BEHANDLING_UTEN_VEDTAK
-        )
+        val vedtak =
+            vedtakService.hentAktivForBehandling(behandlingId = behandling.behandlingId) ?: kastOgTellMigreringsFeil(
+                MigreringsfeilType.IVERKSETT_BEHANDLING_UTEN_VEDTAK
+            )
         if (env.erPreprod()) {
             vedtak.vedtaksdato = LocalDate.of(2022, 1, 1).atStartOfDay()
         }
         vedtakService.oppdater(vedtak)
-        behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)
+        behandlingService.oppdaterStatusPåBehandling(behandling.behandlingId, BehandlingStatus.IVERKSETTER_VEDTAK)
         val task = IverksettMotOppdragTask.opprettTask(behandling, vedtak, SikkerhetContext.hentSaksbehandler())
         taskRepository.save(task)
     }
