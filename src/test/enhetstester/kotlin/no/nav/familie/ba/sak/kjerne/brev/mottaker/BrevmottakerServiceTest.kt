@@ -148,7 +148,7 @@ internal class BrevmottakerServiceTest {
         every { loggService.opprettBrevmottakerLogg(any(), false) } just runs
         every { brevmottakerRepository.save(any()) } returns mockk()
 
-        brevmottakerService.leggTilBrevmottaker(restBrevmottaker, 200)
+        brevmottakerService.leggTilBrevmottaker(restBrevmottaker, BehandlingId(200))
 
         verify { loggService.opprettBrevmottakerLogg(any(), false) }
         verify { brevmottakerRepository.save(any()) }
