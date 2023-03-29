@@ -10,6 +10,7 @@ data class ForsattInnvilget(
     constructor(
         mal: Brevmal = Brevmal.VEDTAK_FORTSATT_INNVILGET,
         vedtakFellesfelter: VedtakFellesfelter,
+        etterbetaling: Etterbetaling? = null,
         informasjonOmAarligKontroll: Boolean = false
     ) :
         this(
@@ -22,6 +23,7 @@ data class ForsattInnvilget(
                         beslutter = vedtakFellesfelter.beslutter
                     ),
                     hjemmeltekst = vedtakFellesfelter.hjemmeltekst,
+                    etterbetaling = etterbetaling,
                     korrigertVedtak = vedtakFellesfelter.korrigertVedtakData,
                     informasjonOmAarligKontroll = informasjonOmAarligKontroll
                 ),
@@ -45,6 +47,7 @@ data class ForsattInnvilgetData(
     data class Delmaler(
         val signaturVedtak: SignaturVedtak,
         val hjemmeltekst: Hjemmeltekst,
+        val etterbetaling: Etterbetaling?,
         val korrigertVedtak: KorrigertVedtakData?,
         val informasjonOmAarligKontroll: Boolean
     )
