@@ -77,7 +77,7 @@ internal class TidslinjerTest {
 
         val vilkårsvurderingTidslinjer = VilkårsvurderingTidslinjer(
             vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
-            personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1, barn2)
+            personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.behandlingId, søker, barn1, barn2)
         )
 
         assertEquals(søkerResult, vilkårsvurderingTidslinjer.søkersTidslinjer().regelverkResultatTidslinje)
@@ -112,7 +112,7 @@ internal class TidslinjerTest {
 
         val vilkårsvurderingTidslinjer = VilkårsvurderingTidslinjer(
             vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
-            personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1)
+            personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.behandlingId, søker, barn1)
         )
 
         assertEquals(søkerResult, vilkårsvurderingTidslinjer.søkersTidslinjer().regelverkResultatTidslinje)
@@ -140,7 +140,7 @@ internal class TidslinjerTest {
 
         val vilkårsvurderingTidslinjer = VilkårsvurderingTidslinjer(
             vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
-            personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1)
+            personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.behandlingId, søker, barn1)
         )
 
         assertEquals(
