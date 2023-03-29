@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
 import no.nav.familie.ba.sak.kjerne.brev.domene.byggMottakerdata
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
@@ -138,7 +139,8 @@ class DokumentServiceTest(
             "beslutterId",
             Beslutning.GODKJENT
         )
-        val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVilkårsvurderingSteg.id)
+        val vedtak =
+            vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVilkårsvurderingSteg.behandlingId)
 
         vedtakService.oppdaterVedtakMedStønadsbrev(vedtak!!)
 
@@ -174,7 +176,8 @@ class DokumentServiceTest(
             Beslutning.GODKJENT
         )
 
-        val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVilkårsvurderingSteg.id)
+        val vedtak =
+            vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVilkårsvurderingSteg.behandlingId)
         vedtakService.oppdaterVedtakMedStønadsbrev(vedtak!!)
 
         val pdfvedtaksbrev = dokumentGenereringService.genererBrevForVedtak(vedtak)
@@ -200,7 +203,8 @@ class DokumentServiceTest(
             vedtaksperiodeService = vedtaksperiodeService,
             brevmalService = brevmalService
         )
-        val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVilkårsvurderingSteg.id)!!
+        val vedtak =
+            vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVilkårsvurderingSteg.behandlingId)!!
 
         val vedtaksbrevFellesFelter = brevService.lagVedtaksbrevFellesfelter(vedtak)
 
@@ -218,7 +222,7 @@ class DokumentServiceTest(
         behandlingHentOgPersisterService.lagreEllerOppdater(behandlingEtterSendTilBeslutter)
 
         val vedtakEtterSendTilBeslutter =
-            vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterSendTilBeslutter.id)!!
+            vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterSendTilBeslutter.behandlingId)!!
 
         val vedtaksbrevFellesFelterEtterSendTilBeslutter =
             brevService.lagVedtaksbrevFellesfelter(vedtakEtterSendTilBeslutter)
@@ -236,7 +240,7 @@ class DokumentServiceTest(
             behandlingEtterVilkårsvurderingSteg.leggTilBehandlingStegTilstand(StegType.IVERKSETT_MOT_OPPDRAG)
 
         val vedtakEtterVedtakBesluttet =
-            vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVedtakBesluttet.id)!!
+            vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVedtakBesluttet.behandlingId)!!
 
         val vedtaksbrevFellesFelterEtterVedtakBesluttet =
             brevService.lagVedtaksbrevFellesfelter(vedtakEtterVedtakBesluttet)
@@ -260,7 +264,7 @@ class DokumentServiceTest(
             brevmalService = brevmalService
         )
 
-        val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVedtakBesluttet.id)!!
+        val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandlingEtterVedtakBesluttet.behandlingId)!!
         val feil = assertThrows<FunksjonellFeil> {
             dokumentGenereringService.genererBrevForVedtak(vedtak)
         }
@@ -282,7 +286,7 @@ class DokumentServiceTest(
         val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barn1Fnr, barn2Fnr), true)
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
-                behandling.id,
+                behandling.behandlingId,
                 fnr,
                 listOf(barn1Fnr, barn2Fnr),
                 søkerAktør = behandling.fagsak.aktør,
@@ -318,7 +322,7 @@ class DokumentServiceTest(
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlagForInstitusjon(
-            behandlingId = behandling.id,
+            behandlingId = behandling.behandlingId,
             barnasIdenter = listOf(fnr)
         )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
@@ -370,7 +374,7 @@ class DokumentServiceTest(
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlagForInstitusjon(
-            behandlingId = behandling.id,
+            behandlingId = behandling.behandlingId,
             barnasIdenter = listOf(fnr)
         )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
@@ -413,7 +417,7 @@ class DokumentServiceTest(
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlagForInstitusjon(
-            behandlingId = behandling.id,
+            behandlingId = behandling.behandlingId,
             barnasIdenter = listOf(fnr)
         )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
@@ -456,7 +460,7 @@ class DokumentServiceTest(
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlagForInstitusjon(
-            behandlingId = behandling.id,
+            behandlingId = behandling.behandlingId,
             barnasIdenter = listOf(fnr)
         )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
@@ -488,7 +492,7 @@ class DokumentServiceTest(
     }
 
     fun lagTestPersonopplysningGrunnlagForInstitusjon(
-        behandlingId: Long,
+        behandlingId: BehandlingId,
         barnasIdenter: List<String>,
         barnasFødselsdatoer: List<LocalDate> = barnasIdenter.map { LocalDate.of(2019, 1, 1) },
         barnAktør: List<Aktør> = barnasIdenter.map { fødselsnummer ->

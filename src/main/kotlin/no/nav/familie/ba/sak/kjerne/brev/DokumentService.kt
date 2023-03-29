@@ -192,7 +192,7 @@ class DokumentService(
     }
 
     private fun leggTilOpplysningspliktIVilkårsvurdering(behandling: Behandling) {
-        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandling.id)
+        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandling.behandlingId)
             ?: vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
                 behandling = behandling,
                 bekreftEndringerViaFrontend = false,
@@ -212,7 +212,7 @@ class DokumentService(
         DistribuerDokumentTask.opprettDistribuerDokumentTask(
             distribuerDokumentDTO = DistribuerDokumentDTO(
                 personEllerInstitusjonIdent = journalPostTilDistribusjon.value.brukerId,
-                behandlingId = behandling?.id,
+                behandlingId = behandling?.behandlingId!!.id,
                 journalpostId = journalPostTilDistribusjon.key,
                 brevmal = manueltBrevRequest.brevmal,
                 erManueltSendt = true
@@ -222,7 +222,7 @@ class DokumentService(
                 this["fagsakIdent"] = fagsak.aktør.aktivFødselsnummer()
                 this["mottakerIdent"] = journalPostTilDistribusjon.value.brukerId
                 this["journalpostId"] = journalPostTilDistribusjon.key
-                this["behandlingId"] = behandling?.id.toString()
+                this["behandlingId"] = behandling?.behandlingId!!.id.toString()
                 this["fagsakId"] = fagsak.id.toString()
             }
         ).also { taskRepository.save(it) }
