@@ -111,7 +111,7 @@ class TilkjentYtelseBuilder(
                     .filtrer { char -> char?.let { !it.isWhitespace() } ?: false }
                     .map {
                         AndelTilkjentYtelse(
-                            behandlingId = behandling.id,
+                            behandlingId = behandling.behandlingId,
                             tilkjentYtelse = tilkjentYtelse,
                             aktør = person.aktør,
                             stønadFom = MIN_MÅNED,
@@ -129,6 +129,7 @@ class TilkjentYtelseBuilder(
                     YtelseType.ORDINÆR_BARNETRYGD -> andelTilkjentYtelseTidslinje.beskjærEtter(
                         erUnder18ÅrVilkårTidslinje(person.fødselsdato)
                     )
+
                     else -> andelTilkjentYtelseTidslinje
                 }
 

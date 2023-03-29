@@ -252,7 +252,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
     }
 
     private fun lagAndelTilkjentYtelse(barn: Person, fom: YearMonth, tom: YearMonth) = AndelTilkjentYtelse(
-        behandlingId = behandling.id,
+        behandlingId = behandling.behandlingId,
         tilkjentYtelse = tilkjentYtelse,
         aktør = barn.aktør,
         kalkulertUtbetalingsbeløp = beløp.toInt(),

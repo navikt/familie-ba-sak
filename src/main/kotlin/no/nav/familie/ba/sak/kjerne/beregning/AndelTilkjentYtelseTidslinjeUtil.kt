@@ -111,7 +111,7 @@ fun Tidslinje<AndelTilkjentYtelseForTidslinje, Måned>.tilAndelerTilkjentYtelse(
         .filter { it.innhold != null }
         .map {
             AndelTilkjentYtelse(
-                behandlingId = tilkjentYtelse.behandling.id,
+                behandlingId = tilkjentYtelse.behandling.behandlingId,
                 tilkjentYtelse = tilkjentYtelse,
                 aktør = it.innhold!!.aktør,
                 type = it.innhold.ytelseType,

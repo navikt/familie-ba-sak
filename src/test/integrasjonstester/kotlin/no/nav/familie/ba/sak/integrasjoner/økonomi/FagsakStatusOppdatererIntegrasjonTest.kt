@@ -137,7 +137,7 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
         aktør: Aktør = randomAktør()
     ) = AndelTilkjentYtelse(
         aktør = aktør,
-        behandlingId = tilkjentYtelse.behandling.id,
+        behandlingId = tilkjentYtelse.behandling.behandlingId,
         tilkjentYtelse = tilkjentYtelse,
         kalkulertUtbetalingsbeløp = 1054,
         nasjonaltPeriodebeløp = 1054,

@@ -138,7 +138,7 @@ class BehandlingUtilsTest {
 
         val andelTilkjentYtelse = listOf(
             AndelTilkjentYtelse(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId,
                 type = YtelseType.UTVIDET_BARNETRYGD,
                 tilkjentYtelse = tilkjentYtelse,
                 aktør = søkerAktørId,
@@ -170,7 +170,7 @@ class BehandlingUtilsTest {
 
         val andelTilkjentYtelse = listOf(
             AndelTilkjentYtelse(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId,
                 type = YtelseType.UTVIDET_BARNETRYGD,
                 tilkjentYtelse = tilkjentYtelse,
                 aktør = søkerAktørId,
@@ -202,7 +202,7 @@ class BehandlingUtilsTest {
 
         val andelTilkjentYtelse = listOf(
             AndelTilkjentYtelse(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId,
                 type = YtelseType.ORDINÆR_BARNETRYGD,
                 tilkjentYtelse = tilkjentYtelse,
                 aktør = søkerAktørId,

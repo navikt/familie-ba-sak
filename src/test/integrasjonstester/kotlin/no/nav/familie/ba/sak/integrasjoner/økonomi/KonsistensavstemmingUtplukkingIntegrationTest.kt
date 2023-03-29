@@ -281,7 +281,7 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
         periodeOffset: Long,
         aktør: Aktør = randomAktør()
     ) = AndelTilkjentYtelse(
-        behandlingId = tilkjentYtelse.behandling.id,
+        behandlingId = tilkjentYtelse.behandling.behandlingId,
         tilkjentYtelse = tilkjentYtelse,
         kalkulertUtbetalingsbeløp = 1054,
         nasjonaltPeriodebeløp = 1054,

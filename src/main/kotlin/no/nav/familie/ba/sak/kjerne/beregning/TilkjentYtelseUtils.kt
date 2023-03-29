@@ -53,7 +53,7 @@ object TilkjentYtelseUtils {
         )
             .map {
                 AndelTilkjentYtelse(
-                    behandlingId = vilkårsvurdering.behandling.id,
+                    behandlingId = vilkårsvurdering.behandling.behandlingId,
                     tilkjentYtelse = tilkjentYtelse,
                     aktør = it.person.aktør,
                     stønadFom = it.stønadFom,

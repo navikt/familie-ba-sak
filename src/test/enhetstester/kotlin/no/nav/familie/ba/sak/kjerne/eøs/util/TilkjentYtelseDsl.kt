@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.eøs.util
 
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -30,7 +31,7 @@ infix fun TilkjentYtelse.der(andelTilkjentYtelse: AndelTilkjentYtelse): Tilkjent
     this.andelerTilkjentYtelse.add(
         andelTilkjentYtelse.copy(
             tilkjentYtelse = this,
-            behandlingId = this.behandling.id
+            behandlingId = this.behandling.behandlingId
         )
     )
     return this
@@ -42,7 +43,7 @@ infix fun Person.har(sats: Int) = AndelTilkjentYtelse(
     aktør = this.aktør,
     sats = sats,
     kalkulertUtbetalingsbeløp = sats,
-    behandlingId = 0,
+    behandlingId = BehandlingId(0),
     tilkjentYtelse = lagInitiellTilkjentYtelse(),
     stønadFom = YearMonth.now(),
     stønadTom = YearMonth.now(),

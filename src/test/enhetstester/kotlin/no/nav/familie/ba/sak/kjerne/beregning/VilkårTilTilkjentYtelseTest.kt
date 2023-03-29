@@ -324,7 +324,7 @@ class TestTilkjentYtelseBuilder(val behandling: Behandling) {
 
         tilkjentYtelse.andelerTilkjentYtelse.add(
             AndelTilkjentYtelse(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId,
                 tilkjentYtelse = tilkjentYtelse,
                 aktør = person.aktør,
                 stønadFom = stønadPeriode.fraOgMed.toYearMonth(),
@@ -354,7 +354,7 @@ data class TestPeriode(val fraOgMed: LocalDate, val tilOgMed: LocalDate?) {
 
         fun parse(s: String): TestPeriode {
             return prøvLocalDate(s) ?: prøvYearMonth(s)
-                ?: throw IllegalArgumentException("Kunne ikke parse periode '$s'")
+            ?: throw IllegalArgumentException("Kunne ikke parse periode '$s'")
         }
 
         private fun prøvLocalDate(s: String): TestPeriode? {
