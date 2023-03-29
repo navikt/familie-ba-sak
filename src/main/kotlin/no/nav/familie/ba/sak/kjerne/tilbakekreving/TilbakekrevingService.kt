@@ -58,18 +58,18 @@ class TilbakekrevingService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService
 ) {
 
-    fun validerRestTilbakekreving(restTilbakekreving: RestTilbakekreving?, behandlingId: Long) {
+    fun validerRestTilbakekreving(restTilbakekreving: RestTilbakekreving?, behandlingId: BehandlingId) {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "opprette tilbakekreving"
         )
 
-        val feilutbetaling = simuleringService.hentFeilutbetaling(behandlingId)
+        val feilutbetaling = simuleringService.hentFeilutbetaling(behandlingId = behandlingId)
         validerVerdierPåRestTilbakekreving(restTilbakekreving, feilutbetaling)
     }
 
     @Transactional
-    fun lagreTilbakekreving(restTilbakekreving: RestTilbakekreving, behandlingId: Long): Tilbakekreving? {
+    fun lagreTilbakekreving(restTilbakekreving: RestTilbakekreving, behandlingId: BehandlingId): Tilbakekreving? {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
 
         val tilbakekreving = Tilbakekreving(
@@ -78,19 +78,19 @@ class TilbakekrevingService(
             valg = restTilbakekreving.valg,
             varsel = restTilbakekreving.varsel,
             tilbakekrevingsbehandlingId = tilbakekrevingRepository
-                .findByBehandlingId(behandling.id)?.tilbakekrevingsbehandlingId
+                .findByBehandlingId(behandling.behandlingId.id)?.tilbakekrevingsbehandlingId
         )
 
-        tilbakekrevingRepository.deleteByBehandlingId(behandlingId)
+        tilbakekrevingRepository.deleteByBehandlingId(behandlingId.id)
         return tilbakekrevingRepository.save(tilbakekreving)
     }
 
-    fun hentTilbakekrevingsvalg(behandlingId: Long): Tilbakekrevingsvalg? {
-        return tilbakekrevingRepository.findByBehandlingId(behandlingId)?.valg
+    fun hentTilbakekrevingsvalg(behandlingId: BehandlingId): Tilbakekrevingsvalg? {
+        return tilbakekrevingRepository.findByBehandlingId(behandlingId.id)?.valg
     }
 
-    fun slettTilbakekrevingPåBehandling(behandlingId: Long) =
-        tilbakekrevingRepository.findByBehandlingId(behandlingId)?.let { tilbakekrevingRepository.delete(it) }
+    fun slettTilbakekrevingPåBehandling(behandlingId: BehandlingId) =
+        tilbakekrevingRepository.findByBehandlingId(behandlingId.id)?.let { tilbakekrevingRepository.delete(it) }
 
     fun hentForhåndsvisningVarselbrev(
         behandlingId: BehandlingId,
@@ -143,28 +143,28 @@ class TilbakekrevingService(
         tilbakekrevingKlient.opprettTilbakekrevingBehandling(lagOpprettTilbakekrevingRequest(behandling))
 
     fun lagOpprettTilbakekrevingRequest(behandling: Behandling): OpprettTilbakekrevingRequest {
-        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandling.id)
+        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandling.behandlingId)
 
         val enhet = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandling.behandlingId)
 
-        val aktivtVedtak = vedtakRepository.findByBehandlingAndAktivOptional(behandling.id)
-            ?: throw Feil("Fant ikke aktivt vedtak på behandling ${behandling.id}")
+        val aktivtVedtak = vedtakRepository.findByBehandlingAndAktivOptional(behandling.behandlingId.id)
+            ?: throw Feil("Fant ikke aktivt vedtak på behandling ${behandling.behandlingId}")
 
-        val totrinnskontroll = totrinnskontrollRepository.findByBehandlingAndAktiv(behandling.id)
+        val totrinnskontroll = totrinnskontrollRepository.findByBehandlingAndAktiv(behandling.behandlingId.id)
 
         val revurderingsvedtaksdato = aktivtVedtak.vedtaksdato?.toLocalDate() ?: throw Feil(
             message = "Finner ikke revurderingsvedtaksdato på vedtak ${aktivtVedtak.id} " +
                 "ved iverksetting av tilbakekreving mot familie-tilbake"
         )
 
-        val tilbakekreving = tilbakekrevingRepository.findByBehandlingId(behandling.id)
-            ?: throw Feil("Fant ikke tilbakekreving på behandling ${behandling.id}")
+        val tilbakekreving = tilbakekrevingRepository.findByBehandlingId(behandling.behandlingId.id)
+            ?: throw Feil("Fant ikke tilbakekreving på behandling ${behandling.behandlingId}")
 
         val institusjon = hentTilbakekrevingInstitusjon(behandling.fagsak)
         val verge = hentVerge(behandling.verge?.ident)
 
         val manuelleBrevMottakere =
-            brevmottakerRepository.finnBrevMottakereForBehandling(behandling.id).map { baSakBrevMottaker ->
+            brevmottakerRepository.finnBrevMottakereForBehandling(behandling.behandlingId.id).map { baSakBrevMottaker ->
                 val mottakerType = MottakerType.valueOf(baSakBrevMottaker.type.name)
                 val vergetype = when {
                     mottakerType == FULLMEKTIG -> Vergetype.ANNEN_FULLMEKTIG
@@ -193,7 +193,7 @@ class TilbakekrevingService(
             ytelsestype = Ytelsestype.BARNETRYGD,
             eksternFagsakId = behandling.fagsak.id.toString(),
             personIdent = personopplysningGrunnlag.søker.aktør.aktivFødselsnummer(),
-            eksternId = behandling.id.toString(),
+            eksternId = behandling.behandlingId.id.toString(),
             behandlingstype = Behandlingstype.TILBAKEKREVING,
             // Manuelt opprettet er per nå ikke håndtert i familie-tilbake.
             manueltOpprettet = false,
@@ -203,7 +203,7 @@ class TilbakekrevingService(
             saksbehandlerIdent = totrinnskontroll?.saksbehandlerId ?: SikkerhetContext.hentSaksbehandler(),
             varsel = opprettVarsel(
                 tilbakekreving,
-                simuleringService.hentSimuleringPåBehandling(behandling.id),
+                simuleringService.hentSimuleringPåBehandling(behandling.behandlingId),
                 featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ)
             ),
             revurderingsvedtaksdato = revurderingsvedtaksdato,
@@ -227,7 +227,7 @@ class TilbakekrevingService(
         val behandling = kanOpprettesRespons.kravgrunnlagsreferanse?.toLong()
             ?.let {
                 behandlingHentOgPersisterService.finnAvsluttedeBehandlingerPåFagsak(fagsakId = fagsakId)
-                    .find { beh -> beh.id == it }
+                    .find { beh -> beh.behandlingId.id == it }
             }
         return if (behandling != null) {
             tilbakekrevingKlient.opprettTilbakekrevingsbehandlingManuelt(

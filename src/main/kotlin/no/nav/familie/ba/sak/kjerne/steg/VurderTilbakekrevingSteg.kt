@@ -18,9 +18,9 @@ class VurderTilbakekrevingSteg(
     @Transactional
     override fun utførStegOgAngiNeste(behandling: Behandling, data: RestTilbakekreving?): StegType {
         if (!tilbakekrevingService.søkerHarÅpenTilbakekreving(behandling.fagsak.id)) {
-            tilbakekrevingService.validerRestTilbakekreving(data, behandling.id)
+            tilbakekrevingService.validerRestTilbakekreving(data, behandling.behandlingId)
             if (data != null) {
-                tilbakekrevingService.lagreTilbakekreving(data, behandling.id)
+                tilbakekrevingService.lagreTilbakekreving(data, behandling.behandlingId)
             }
         }
 

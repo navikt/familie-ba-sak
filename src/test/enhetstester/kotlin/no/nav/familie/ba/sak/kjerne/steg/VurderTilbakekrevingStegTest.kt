@@ -55,8 +55,13 @@ class VurderTilbakekrevingStegTest {
             )
         }
         assertTrue { stegType == StegType.SEND_TIL_BESLUTTER }
-        verify(exactly = 1) { tilbakekrevingService.validerRestTilbakekreving(restTilbakekreving, behandling.id) }
-        verify(exactly = 1) { tilbakekrevingService.lagreTilbakekreving(restTilbakekreving, behandling.id) }
+        verify(exactly = 1) {
+            tilbakekrevingService.validerRestTilbakekreving(
+                restTilbakekreving,
+                behandling.behandlingId
+            )
+        }
+        verify(exactly = 1) { tilbakekrevingService.lagreTilbakekreving(restTilbakekreving, behandling.behandlingId) }
     }
 
     @Test
@@ -69,7 +74,12 @@ class VurderTilbakekrevingStegTest {
             )
         }
         assertTrue { stegType == StegType.SEND_TIL_BESLUTTER }
-        verify(exactly = 0) { tilbakekrevingService.validerRestTilbakekreving(restTilbakekreving, behandling.id) }
-        verify(exactly = 0) { tilbakekrevingService.lagreTilbakekreving(restTilbakekreving, behandling.id) }
+        verify(exactly = 0) {
+            tilbakekrevingService.validerRestTilbakekreving(
+                restTilbakekreving,
+                behandling.behandlingId
+            )
+        }
+        verify(exactly = 0) { tilbakekrevingService.lagreTilbakekreving(restTilbakekreving, behandling.behandlingId) }
     }
 }

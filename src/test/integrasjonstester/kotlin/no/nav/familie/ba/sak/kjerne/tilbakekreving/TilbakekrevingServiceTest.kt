@@ -72,12 +72,12 @@ class TilbakekrevingServiceTest(
         )
 
         val restTilbakekreving = opprettRestTilbakekreving()
-        tilbakekrevingService.validerRestTilbakekreving(restTilbakekreving, behandling.id)
-        tilbakekrevingService.lagreTilbakekreving(restTilbakekreving, behandling.id)
+        tilbakekrevingService.validerRestTilbakekreving(restTilbakekreving, behandling.behandlingId)
+        tilbakekrevingService.lagreTilbakekreving(restTilbakekreving, behandling.behandlingId)
 
         stegService.håndterIverksettMotFamilieTilbake(behandling, Properties())
 
-        val tilbakekreving = tilbakekrevingRepository.findByBehandlingId(behandling.id)
+        val tilbakekreving = tilbakekrevingRepository.findByBehandlingId(behandling.behandlingId.id)
 
         assertEquals(Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL, tilbakekreving?.valg)
         assertEquals("id1", tilbakekreving?.tilbakekrevingsbehandlingId)
@@ -102,12 +102,12 @@ class TilbakekrevingServiceTest(
         )
 
         val restTilbakekreving = opprettRestTilbakekreving()
-        tilbakekrevingService.validerRestTilbakekreving(restTilbakekreving, behandling.id)
-        tilbakekrevingService.lagreTilbakekreving(restTilbakekreving, behandling.id)
+        tilbakekrevingService.validerRestTilbakekreving(restTilbakekreving, behandling.behandlingId)
+        tilbakekrevingService.lagreTilbakekreving(restTilbakekreving, behandling.behandlingId)
 
         stegService.håndterIverksettMotFamilieTilbake(behandling, Properties())
 
-        val tilbakekreving = tilbakekrevingRepository.findByBehandlingId(behandling.id)
+        val tilbakekreving = tilbakekrevingRepository.findByBehandlingId(behandling.behandlingId.id)
 
         assertEquals(Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL, tilbakekreving?.valg)
         assertEquals("id1", tilbakekreving?.tilbakekrevingsbehandlingId)
@@ -132,12 +132,12 @@ class TilbakekrevingServiceTest(
         )
 
         val restTilbakekreving = opprettRestTilbakekreving()
-        tilbakekrevingService.validerRestTilbakekreving(restTilbakekreving, behandling.id)
-        tilbakekrevingService.lagreTilbakekreving(restTilbakekreving, behandling.id)
+        tilbakekrevingService.validerRestTilbakekreving(restTilbakekreving, behandling.behandlingId)
+        tilbakekrevingService.lagreTilbakekreving(restTilbakekreving, behandling.behandlingId)
 
         stegService.håndterIverksettMotFamilieTilbake(behandling, Properties())
 
-        val tilbakekreving = tilbakekrevingRepository.findByBehandlingId(behandling.id)
+        val tilbakekreving = tilbakekrevingRepository.findByBehandlingId(behandling.behandlingId.id)
 
         assertEquals(Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL, tilbakekreving?.valg)
         assertEquals("id1", tilbakekreving?.tilbakekrevingsbehandlingId)
@@ -164,7 +164,7 @@ class TilbakekrevingServiceTest(
         )
 
         val brevmottaker = Brevmottaker(
-            behandlingId = behandling.id,
+            behandlingId = behandling.behandlingId,
             type = arguments.second,
             navn = "Donald Duck",
             adresselinje1 = "Andebyveien 1",
