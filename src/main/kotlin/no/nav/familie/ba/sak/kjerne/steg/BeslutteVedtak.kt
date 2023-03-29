@@ -91,8 +91,8 @@ class BeslutteVedtak(
         )
 
         return if (data.beslutning.erGodkjent()) {
-            val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
-                ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
+            val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.behandlingId)
+                ?: error("Fant ikke aktivt vedtak på behandling ${behandling.behandlingId}")
 
             vedtakService.oppdaterVedtaksdatoOgBrev(vedtak)
 
@@ -123,8 +123,9 @@ class BeslutteVedtak(
             }
             nesteSteg
         } else {
-            val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
-                ?: throw Feil("Fant ikke vilkårsvurdering på behandling")
+            val vilkårsvurdering =
+                vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.behandlingId)
+                    ?: throw Feil("Fant ikke vilkårsvurdering på behandling")
             val kopiertVilkårsVurdering = vilkårsvurdering.kopier(inkluderAndreVurderinger = true)
             vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = kopiertVilkårsVurdering)
 
@@ -186,7 +187,7 @@ class BeslutteVedtak(
 
         if (!behandling.erManuellMigrering() || !behandlingErAutomatiskBesluttet) {
             val ferdigstillGodkjenneVedtakTask =
-                FerdigstillOppgaver.opprettTask(behandling.id, Oppgavetype.GodkjenneVedtak)
+                FerdigstillOppgaver.opprettTask(behandling.behandlingId, Oppgavetype.GodkjenneVedtak)
             taskRepository.save(ferdigstillGodkjenneVedtakTask)
         }
     }
@@ -200,7 +201,7 @@ class BeslutteVedtak(
         val task = JournalførVedtaksbrevTask.opprettTaskJournalførVedtaksbrev(
             vedtakId = vedtak.id,
             personIdent = behandling.fagsak.aktør.aktivFødselsnummer(),
-            behandlingId = behandling.id
+            behandlingId = behandling.behandlingId
         )
         taskRepository.save(task)
     }

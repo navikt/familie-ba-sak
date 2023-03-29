@@ -123,7 +123,7 @@ class BeslutteVedtakTest {
 
         val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
 
-        verify(exactly = 1) { FerdigstillOppgaver.opprettTask(behandling.id, Oppgavetype.GodkjenneVedtak) }
+        verify(exactly = 1) { FerdigstillOppgaver.opprettTask(behandling.behandlingId, Oppgavetype.GodkjenneVedtak) }
         Assertions.assertEquals(StegType.IVERKSETT_MOT_OPPDRAG, nesteSteg)
     }
 
@@ -150,7 +150,7 @@ class BeslutteVedtakTest {
 
         val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
 
-        verify(exactly = 1) { FerdigstillOppgaver.opprettTask(behandling.id, Oppgavetype.GodkjenneVedtak) }
+        verify(exactly = 1) { FerdigstillOppgaver.opprettTask(behandling.behandlingId, Oppgavetype.GodkjenneVedtak) }
         verify(exactly = 1) {
             OpprettOppgaveTask.opprettTask(
                 behandling.behandlingId,
@@ -190,7 +190,7 @@ class BeslutteVedtakTest {
         verify(exactly = 1) {
             JournalførVedtaksbrevTask.opprettTaskJournalførVedtaksbrev(
                 personIdent = behandling.fagsak.aktør.aktivFødselsnummer(),
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId,
                 vedtakId = vedtak.id
             )
         }
