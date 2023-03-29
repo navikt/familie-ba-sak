@@ -72,7 +72,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
             )
         )
         val forrigePersonopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
-            behandlingId = forrigeBehandling.id,
+            behandlingId = forrigeBehandling.behandlingId,
             søkerPersonIdent = fnr,
             barnasIdenter = listOf(barnFnr),
             barnasFødselsdatoer = listOf(barnetsFødselsdato),
@@ -90,7 +90,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
             lagSøkerVilkårResultat(
                 søkerPersonResultat = søkerPersonResultat,
                 periodeFom = søkerFødselsdato,
-                behandlingId = forrigeBehandling.id
+                behandlingId = forrigeBehandling.behandlingId
             )
         )
         val barnPersonResultat = PersonResultat(
@@ -101,7 +101,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
             lagBarnVilkårResultat(
                 barnPersonResultat = barnPersonResultat,
                 barnetsFødselsdato = barnetsFødselsdato,
-                behandlingId = forrigeBehandling.id,
+                behandlingId = forrigeBehandling.behandlingId,
                 periodeFom = LocalDate.now().minusMonths(1),
                 flytteSak = true
             )
@@ -123,7 +123,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
             )
         )
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
-            behandlingId = behandling.id,
+            behandlingId = behandling.behandlingId,
             søkerPersonIdent = fnr,
             barnasIdenter = listOf(barnFnr),
             barnasFødselsdatoer = listOf(barnetsFødselsdato),
@@ -190,7 +190,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
             )
         )
         val forrigePersonopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
-            behandlingId = forrigeBehandling.id,
+            behandlingId = forrigeBehandling.behandlingId,
             søkerPersonIdent = fnr,
             barnasIdenter = listOf(barnFnr),
             barnasFødselsdatoer = listOf(barnetsFødselsdato),
@@ -208,7 +208,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
             lagSøkerVilkårResultat(
                 søkerPersonResultat = søkerPersonResultat,
                 periodeFom = søkerFødselsdato,
-                behandlingId = forrigeBehandling.id
+                behandlingId = forrigeBehandling.behandlingId
             )
         )
         val barnPersonResultat = PersonResultat(
@@ -223,7 +223,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
                     resultat = Resultat.OPPFYLT,
                     periodeFom = barnetsFødselsdato,
                     periodeTom = barnetsFødselsdato.plusYears(18).minusMonths(1),
-                    behandlingId = forrigeBehandling.id
+                    behandlingId = forrigeBehandling.behandlingId
                 ),
                 lagVilkårResultat(
                     personResultat = barnPersonResultat,
@@ -231,7 +231,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
                     resultat = Resultat.OPPFYLT,
                     periodeFom = barnetsFødselsdato,
                     periodeTom = null,
-                    behandlingId = forrigeBehandling.id
+                    behandlingId = forrigeBehandling.behandlingId
                 ),
                 lagVilkårResultat(
                     personResultat = barnPersonResultat,
@@ -239,7 +239,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
                     resultat = Resultat.OPPFYLT,
                     periodeFom = LocalDate.of(2021, 4, 14),
                     periodeTom = LocalDate.of(2021, 8, 16),
-                    behandlingId = forrigeBehandling.id
+                    behandlingId = forrigeBehandling.behandlingId
                 ),
                 lagVilkårResultat(
                     personResultat = barnPersonResultat,
@@ -247,7 +247,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
                     resultat = Resultat.OPPFYLT,
                     periodeFom = LocalDate.of(2021, 10, 5),
                     periodeTom = null,
-                    behandlingId = forrigeBehandling.id
+                    behandlingId = forrigeBehandling.behandlingId
                 ),
                 lagVilkårResultat(
                     personResultat = barnPersonResultat,
@@ -255,7 +255,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
                     resultat = Resultat.OPPFYLT,
                     periodeFom = barnetsFødselsdato,
                     periodeTom = null,
-                    behandlingId = forrigeBehandling.id
+                    behandlingId = forrigeBehandling.behandlingId
                 ),
                 lagVilkårResultat(
                     personResultat = barnPersonResultat,
@@ -263,7 +263,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
                     resultat = Resultat.OPPFYLT,
                     periodeFom = barnetsFødselsdato,
                     periodeTom = null,
-                    behandlingId = forrigeBehandling.id
+                    behandlingId = forrigeBehandling.behandlingId
                 )
             )
         )
@@ -283,7 +283,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
             )
         )
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
-            behandlingId = behandling.id,
+            behandlingId = behandling.behandlingId,
             søkerPersonIdent = fnr,
             barnasIdenter = listOf(barnFnr),
             barnasFødselsdatoer = listOf(barnetsFødselsdato),
@@ -353,7 +353,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
             )
         )
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
-            behandlingId = behandling.id,
+            behandlingId = behandling.behandlingId,
             søkerPersonIdent = fnr,
             barnasIdenter = listOf(barnFnr),
             barnasFødselsdatoer = listOf(barnetsFødselsdato),
@@ -420,7 +420,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
             )
         )
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
-            behandlingId = behandling.id,
+            behandlingId = behandling.behandlingId,
             søkerPersonIdent = fnr,
             barnasIdenter = listOf(barnFnr),
             barnasFødselsdatoer = listOf(barnetsFødselsdato),

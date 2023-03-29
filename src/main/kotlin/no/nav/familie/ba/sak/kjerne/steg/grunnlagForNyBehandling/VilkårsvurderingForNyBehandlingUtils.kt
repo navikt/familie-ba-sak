@@ -116,13 +116,18 @@ data class VilkårsvurderingForNyBehandlingUtils(
                     BehandlingUnderkategori.UTVIDET -> YtelseType.UTVIDET_BARNETRYGD
                     BehandlingUnderkategori.ORDINÆR, BehandlingUnderkategori.INSTITUSJON -> YtelseType.ORDINÆR_BARNETRYGD
                 }
+
                 PersonType.BARN, PersonType.ANNENPART -> when (vilkårsvurdering.behandling.underkategori) {
                     BehandlingUnderkategori.UTVIDET -> YtelseType.ORDINÆR_BARNETRYGD // Er ikke dette en feilsituasjon? Ref TilkjentYtelseUtils.finnYtelseType
                     BehandlingUnderkategori.ORDINÆR, BehandlingUnderkategori.INSTITUSJON -> YtelseType.ORDINÆR_BARNETRYGD
                 }
             }
 
-            val vilkårTyperForPerson = Vilkår.hentVilkårFor(person.type, ytelseType = ytelseType, fagsakType = vilkårsvurdering.behandling.fagsak.type)
+            val vilkårTyperForPerson = Vilkår.hentVilkårFor(
+                person.type,
+                ytelseType = ytelseType,
+                fagsakType = vilkårsvurdering.behandling.fagsak.type
+            )
 
             val vilkårResultater = vilkårTyperForPerson.map { vilkår ->
                 val fom = if (vilkår.gjelderAlltidFraBarnetsFødselsdato()) person.fødselsdato else null
@@ -140,7 +145,7 @@ data class VilkårsvurderingForNyBehandlingUtils(
                     periodeFom = fom,
                     periodeTom = tom,
                     begrunnelse = begrunnelse,
-                    behandlingId = personResultat.vilkårsvurdering.behandling.id
+                    behandlingId = personResultat.vilkårsvurdering.behandling.behandlingId
                 )
             }.toSortedSet(VilkårResultat.VilkårResultatComparator)
 
@@ -163,7 +168,8 @@ data class VilkårsvurderingForNyBehandlingUtils(
         return personopplysningGrunnlag.søkerOgBarn.map { person ->
             val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = person.aktør)
 
-            val vilkårForPerson = Vilkår.hentVilkårFor(personType = person.type, fagsakType = vilkårsvurdering.behandling.fagsak.type)
+            val vilkårForPerson =
+                Vilkår.hentVilkårFor(personType = person.type, fagsakType = vilkårsvurdering.behandling.fagsak.type)
 
             val vilkårResultater = vilkårForPerson.map { vilkår ->
                 genererVilkårResultatForEtVilkårPåEnPerson(
@@ -195,7 +201,8 @@ data class VilkårsvurderingForNyBehandlingUtils(
         return personopplysningGrunnlag.søkerOgBarn.map { person ->
             val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = person.aktør)
 
-            val vilkårForPerson = Vilkår.hentVilkårFor(personType = person.type, fagsakType = vilkårsvurdering.behandling.fagsak.type)
+            val vilkårForPerson =
+                Vilkår.hentVilkårFor(personType = person.type, fagsakType = vilkårsvurdering.behandling.fagsak.type)
 
             val vilkårResultater = vilkårForPerson.map { vilkår ->
                 VilkårResultat(
@@ -204,7 +211,7 @@ data class VilkårsvurderingForNyBehandlingUtils(
                     resultat = Resultat.IKKE_VURDERT,
                     vilkårType = vilkår,
                     begrunnelse = "",
-                    behandlingId = personResultat.vilkårsvurdering.behandling.id
+                    behandlingId = personResultat.vilkårsvurdering.behandling.behandlingId
                 )
             }.toSortedSet(VilkårResultat.VilkårResultatComparator)
 
@@ -253,7 +260,7 @@ data class VilkårsvurderingForNyBehandlingUtils(
                     periodeFom = fom,
                     periodeTom = tom,
                     begrunnelse = begrunnelse,
-                    behandlingId = personResultat.vilkårsvurdering.behandling.id
+                    behandlingId = personResultat.vilkårsvurdering.behandling.behandlingId
                 )
             }.toSortedSet(VilkårResultat.VilkårResultatComparator)
 
@@ -276,7 +283,8 @@ data class VilkårsvurderingForNyBehandlingUtils(
         return personopplysningGrunnlag.søkerOgBarn.map { person ->
             val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = person.aktør)
 
-            val vilkårTyperForPerson = Vilkår.hentVilkårFor(personType = person.type, fagsakType = vilkårsvurdering.behandling.fagsak.type)
+            val vilkårTyperForPerson =
+                Vilkår.hentVilkårFor(personType = person.type, fagsakType = vilkårsvurdering.behandling.fagsak.type)
             val vilkårResultater = vilkårTyperForPerson.map { vilkår ->
                 val fom = when {
                     vilkår.gjelderAlltidFraBarnetsFødselsdato() -> person.fødselsdato
@@ -301,7 +309,7 @@ data class VilkårsvurderingForNyBehandlingUtils(
                     periodeFom = fom,
                     periodeTom = tom,
                     begrunnelse = begrunnelse,
-                    behandlingId = personResultat.vilkårsvurdering.behandling.id
+                    behandlingId = personResultat.vilkårsvurdering.behandling.behandlingId
                 )
             }.toSortedSet(VilkårResultat.VilkårResultatComparator)
 

@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -84,7 +85,7 @@ fun lagSøkerVilkårResultat(
     søkerPersonResultat: PersonResultat,
     periodeFom: LocalDate,
     periodeTom: LocalDate? = null,
-    behandlingId: Long
+    behandlingId: BehandlingId
 ): Set<VilkårResultat> {
     return setOf(
         lagVilkårResultat(
@@ -109,7 +110,7 @@ fun lagSøkerVilkårResultat(
 fun lagBarnVilkårResultat(
     barnPersonResultat: PersonResultat,
     barnetsFødselsdato: LocalDate,
-    behandlingId: Long,
+    behandlingId: BehandlingId,
     periodeFom: LocalDate,
     flytteSak: Boolean = false
 ): Set<VilkårResultat> {

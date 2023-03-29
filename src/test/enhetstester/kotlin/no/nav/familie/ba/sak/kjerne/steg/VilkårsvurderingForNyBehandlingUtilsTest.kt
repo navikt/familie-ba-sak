@@ -21,7 +21,15 @@ class VilkårsvurderingForNyBehandlingUtilsTest {
 
     @Test
     fun `Skal lage vilkårsvurdering med søkers vilkår satt med tom=dødsdato`() {
-        val søker = lagPerson(type = PersonType.SØKER).also { it.dødsfall = Dødsfall(person = it, dødsfallDato = LocalDate.now(), dødsfallAdresse = "Adresse 1", dødsfallPostnummer = "1234", dødsfallPoststed = "Oslo") }
+        val søker = lagPerson(type = PersonType.SØKER).also {
+            it.dødsfall = Dødsfall(
+                person = it,
+                dødsfallDato = LocalDate.now(),
+                dødsfallAdresse = "Adresse 1",
+                dødsfallPostnummer = "1234",
+                dødsfallPoststed = "Oslo"
+            )
+        }
         val barn = lagPerson(type = PersonType.BARN)
         val behandling = lagBehandling()
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling)
@@ -29,7 +37,12 @@ class VilkårsvurderingForNyBehandlingUtilsTest {
         val tomPåFørsteUtvidetVilkår = LocalDate.now().minusMonths(8)
 
         val søkerPersonResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = søker.aktør)
-        val søkerVilkårResultater = lagSøkerVilkårResultat(søkerPersonResultat = søkerPersonResultat, periodeFom = LocalDate.now().minusYears(2), periodeTom = null, behandlingId = behandling.id) + setOf(
+        val søkerVilkårResultater = lagSøkerVilkårResultat(
+            søkerPersonResultat = søkerPersonResultat,
+            periodeFom = LocalDate.now().minusYears(2),
+            periodeTom = null,
+            behandlingId = behandling.behandlingId
+        ) + setOf(
             VilkårResultat(
                 personResultat = søkerPersonResultat,
                 vilkårType = Vilkår.UTVIDET_BARNETRYGD,
@@ -37,7 +50,7 @@ class VilkårsvurderingForNyBehandlingUtilsTest {
                 periodeFom = LocalDate.now().minusYears(2),
                 periodeTom = tomPåFørsteUtvidetVilkår,
                 begrunnelse = "",
-                behandlingId = vilkårsvurdering.behandling.id,
+                behandlingId = vilkårsvurdering.behandling.behandlingId,
                 utdypendeVilkårsvurderinger = emptyList()
             ),
             VilkårResultat(
@@ -47,7 +60,7 @@ class VilkårsvurderingForNyBehandlingUtilsTest {
                 periodeFom = tomPåFørsteUtvidetVilkår.plusMonths(1),
                 periodeTom = null,
                 begrunnelse = "",
-                behandlingId = vilkårsvurdering.behandling.id,
+                behandlingId = vilkårsvurdering.behandling.behandlingId,
                 utdypendeVilkårsvurderinger = emptyList()
             )
         )
@@ -57,7 +70,7 @@ class VilkårsvurderingForNyBehandlingUtilsTest {
             barnPersonResultat = barnPersonResultat,
             barnetsFødselsdato = barn.fødselsdato,
             periodeFom = LocalDate.now().minusYears(2),
-            behandlingId = behandling.id
+            behandlingId = behandling.behandlingId
         )
 
         søkerPersonResultat.setSortedVilkårResultater(søkerVilkårResultater)
@@ -65,10 +78,16 @@ class VilkårsvurderingForNyBehandlingUtilsTest {
 
         vilkårsvurdering.personResultater = setOf(søkerPersonResultat, barnPersonResultat)
 
-        val nyVilkårsvurdering = VilkårsvurderingForNyBehandlingUtils(personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id, personer = mutableSetOf(barn, søker))).hentVilkårsvurderingMedDødsdatoSomTomDato(
+        val nyVilkårsvurdering = VilkårsvurderingForNyBehandlingUtils(
+            personopplysningGrunnlag = PersonopplysningGrunnlag(
+                behandlingId = behandling.behandlingId,
+                personer = mutableSetOf(barn, søker)
+            )
+        ).hentVilkårsvurderingMedDødsdatoSomTomDato(
             vilkårsvurdering = vilkårsvurdering
         )
-        val søkersVilkårResultater = nyVilkårsvurdering.personResultater.find { it.erSøkersResultater() }?.vilkårResultater
+        val søkersVilkårResultater =
+            nyVilkårsvurdering.personResultater.find { it.erSøkersResultater() }?.vilkårResultater
         val søkersUtvidetVilkår = søkersVilkårResultater?.filter { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
 
         Assertions.assertEquals(2, søkersUtvidetVilkår?.size)
@@ -81,9 +100,15 @@ class VilkårsvurderingForNyBehandlingUtilsTest {
         Assertions.assertEquals(tomPåFørsteUtvidetVilkår.plusMonths(1), utvidetVilkårSortert?.last()?.periodeFom)
 
         Assertions.assertEquals(1, søkerVilkårResultater.filter { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }.size)
-        Assertions.assertEquals(søker.dødsfall?.dødsfallDato, søkerVilkårResultater.first { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }.periodeTom)
+        Assertions.assertEquals(
+            søker.dødsfall?.dødsfallDato,
+            søkerVilkårResultater.first { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }.periodeTom
+        )
 
         Assertions.assertEquals(1, søkerVilkårResultater.filter { it.vilkårType == Vilkår.BOSATT_I_RIKET }.size)
-        Assertions.assertEquals(søker.dødsfall?.dødsfallDato, søkerVilkårResultater.first { it.vilkårType == Vilkår.BOSATT_I_RIKET }.periodeTom)
+        Assertions.assertEquals(
+            søker.dødsfall?.dødsfallDato,
+            søkerVilkårResultater.first { it.vilkårType == Vilkår.BOSATT_I_RIKET }.periodeTom
+        )
     }
 }
