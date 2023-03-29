@@ -241,16 +241,16 @@ class AutovedtakFødselshendelseService(
     private fun hentBegrunnelseFraVilkårsvurdering(behandlingId: Long): String {
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId)
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
-        val søker = persongrunnlagService.hentSøker(behandling.id)
+        val søker = persongrunnlagService.hentSøker(behandling.behandlingId)
         val søkerResultat = vilkårsvurdering?.personResultater?.find { it.aktør == søker?.aktør }
 
         val bosattIRiketResultat = søkerResultat?.vilkårResultater?.find { it.vilkårType == Vilkår.BOSATT_I_RIKET }
         val lovligOppholdResultat = søkerResultat?.vilkårResultater?.find { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }
         if (bosattIRiketResultat?.resultat == Resultat.IKKE_OPPFYLT && bosattIRiketResultat.evalueringÅrsaker.any {
-            VilkårIkkeOppfyltÅrsak.valueOf(
+                VilkårIkkeOppfyltÅrsak.valueOf(
                     it
                 ) == VilkårIkkeOppfyltÅrsak.BOR_IKKE_I_RIKET_FLERE_ADRESSER_UTEN_FOM
-        }
+            }
         ) {
             return "Mor har flere bostedsadresser uten fra- og med dato"
         } else if (bosattIRiketResultat?.resultat == Resultat.IKKE_OPPFYLT) {

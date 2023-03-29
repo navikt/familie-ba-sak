@@ -13,7 +13,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.sikkerhet.SaksbehandlerContext
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
-import java.lang.Exception
 
 @Service
 class DokumentGenereringService(
@@ -30,7 +29,7 @@ class DokumentGenereringService(
                 throw FunksjonellFeil("Ikke tillatt å generere brev etter at behandlingen er sendt fra beslutter")
             }
 
-            val målform = persongrunnlagService.hentSøkersMålform(vedtak.behandling.id)
+            val målform = persongrunnlagService.hentSøkersMålform(vedtak.behandling.behandlingId)
             val vedtaksbrev =
                 when (vedtak.behandling.opprettetÅrsak) {
                     BehandlingÅrsak.DØDSFALL_BRUKER -> brevService.hentDødsfallbrevData(vedtak)

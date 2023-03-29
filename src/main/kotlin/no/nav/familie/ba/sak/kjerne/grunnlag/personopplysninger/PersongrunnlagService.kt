@@ -58,8 +58,8 @@ class PersongrunnlagService(
         return restPerson
     }
 
-    fun hentSøker(behandlingId: Long): Person? {
-        return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)!!.søker
+    fun hentSøker(behandlingId: BehandlingId): Person? {
+        return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId.id)!!.søker
     }
 
     fun hentBarna(behandling: Behandling): List<Person> {
@@ -318,7 +318,7 @@ class PersongrunnlagService(
         return personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
     }
 
-    fun hentSøkersMålform(behandlingId: Long) =
+    fun hentSøkersMålform(behandlingId: BehandlingId) =
         hentSøker(behandlingId)?.målform ?: Målform.NB
 
     companion object {

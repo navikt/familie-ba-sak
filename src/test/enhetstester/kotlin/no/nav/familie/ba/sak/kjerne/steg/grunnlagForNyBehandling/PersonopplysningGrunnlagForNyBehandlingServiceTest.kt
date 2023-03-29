@@ -45,7 +45,7 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
         every { beregningService.finnBarnFraBehandlingMedTilkjentYtelse(behandlingId = forrigeBehandling.behandlingId) } returns
             listOf(barnFraForrigeBehanlding.aktør)
 
-        every { persongrunnlagService.hentSøkersMålform(forrigeBehandling.id) } returns søker.målform
+        every { persongrunnlagService.hentSøkersMålform(forrigeBehandling.behandlingId) } returns søker.målform
 
         every {
             persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(

@@ -25,7 +25,7 @@ class PersonopplysningGrunnlagForNyBehandlingService(
         val barnaAktør = personidentService.hentOgLagreAktørIder(barnasIdenter, true)
 
         val målform = forrigeBehandlingSomErVedtatt
-            ?.let { persongrunnlagService.hentSøkersMålform(behandlingId = it.id) }
+            ?.let { persongrunnlagService.hentSøkersMålform(behandlingId = it.behandlingId) }
             ?: Målform.NB
 
         val barnMedTilkjentYtelseIForrigeBehandling =
