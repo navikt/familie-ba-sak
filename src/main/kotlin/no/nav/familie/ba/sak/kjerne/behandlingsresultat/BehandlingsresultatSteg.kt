@@ -49,7 +49,7 @@ class BehandlingsresultatSteg(
         if (behandling.skalBehandlesAutomatisk) return
 
         if (behandling.type != BehandlingType.TEKNISK_ENDRING && behandling.type != BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT) {
-            val vilkårsvurdering = vilkårService.hentVilkårsvurderingThrows(behandlingId = behandling.id)
+            val vilkårsvurdering = vilkårService.hentVilkårsvurderingThrows(behandlingId = behandling.behandlingId)
             val barna = persongrunnlagService.hentBarna(behandling)
 
             validerBarnasVilkår(barna, vilkårsvurdering)
@@ -64,7 +64,7 @@ class BehandlingsresultatSteg(
         )
 
         val endreteUtbetalingerMedAndeler = andelerTilkjentYtelseOgEndreteUtbetalingerService
-            .finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandling.id)
+            .finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandling.behandlingId)
 
         validerAtAlleOpprettedeEndringerErUtfylt(endreteUtbetalingerMedAndeler.map { it.endretUtbetalingAndel })
         validerAtEndringerErTilknyttetAndelTilkjentYtelse(endreteUtbetalingerMedAndeler)
@@ -79,7 +79,7 @@ class BehandlingsresultatSteg(
 
         validerÅrsak(
             endreteUtbetalingerMedAndeler.map { it.endretUtbetalingAndel },
-            vilkårService.hentVilkårsvurdering(behandling.id)
+            vilkårService.hentVilkårsvurdering(behandling.behandlingId)
         )
 
         if (behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO) {
@@ -93,10 +93,11 @@ class BehandlingsresultatSteg(
             if (behandling.erMigrering() && behandling.skalBehandlesAutomatisk) {
                 settBehandlingsresultat(behandling, Behandlingsresultat.INNVILGET)
             } else {
-                val resultat = behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.id)
+                val resultat =
+                    behandlingsresultatService.utledBehandlingsresultat(behandlingId = behandling.behandlingId)
 
                 behandlingService.oppdaterBehandlingsresultat(
-                    behandlingId = behandling.id,
+                    behandlingId = behandling.behandlingId,
                     resultat = resultat
                 )
             }
@@ -104,10 +105,10 @@ class BehandlingsresultatSteg(
         validerBehandlingsresultatErGyldigForÅrsak(behandlingMedOppdatertBehandlingsresultat)
 
         if (behandlingMedOppdatertBehandlingsresultat.erBehandlingMedVedtaksbrevutsending()) {
-            behandlingService.nullstillEndringstidspunkt(behandling.id)
+            behandlingService.nullstillEndringstidspunkt(behandling.behandlingId)
             vedtaksperiodeService.oppdaterVedtakMedVedtaksperioder(
                 vedtak = vedtakService.hentAktivForBehandlingThrows(
-                    behandlingId = behandling.id
+                    behandlingId = behandling.behandlingId
                 )
             )
         }
@@ -125,7 +126,7 @@ class BehandlingsresultatSteg(
             )
         ) {
             behandlingService.oppdaterStatusPåBehandling(
-                behandlingMedOppdatertBehandlingsresultat.id,
+                behandlingMedOppdatertBehandlingsresultat.behandlingId,
                 BehandlingStatus.IVERKSETTER_VEDTAK
             )
         } else {
