@@ -92,7 +92,7 @@ class ForvalterController(
                             request.ferdigstiltTom
                         ) &&
                     eksisterendeOppgave.tema != Tema.BAR &&
-                    eksisterendeOppgave.oppgavetype != request.oppgavetype.name
+                    eksisterendeOppgave.oppgavetype != request.oppgavetype.value
                 ) {
                     val klonetOppgave = OpprettOppgaveRequest(
                         ident = OppgaveIdentV2(
