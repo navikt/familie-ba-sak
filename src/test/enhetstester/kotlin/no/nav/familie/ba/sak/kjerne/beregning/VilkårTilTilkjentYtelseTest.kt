@@ -87,7 +87,8 @@ class VilkårTilTilkjentYtelseTest {
             .medAndelTilkjentYtelse(barn1, barn1Andel3Beløp?.div(delBeløp), barn1Andel3Periode, barn1Andel3Type)
             .bygg()
 
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(vilkårsvurdering.behandling.id, søker, barn1)
+        val personopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlag(vilkårsvurdering.behandling.behandlingId, søker, barn1)
 
         val faktiskTilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
@@ -151,7 +152,8 @@ class VilkårTilTilkjentYtelseTest {
                 .bygg()
         }
 
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(vilkårsvurdering.behandling.id, søker, barn1)
+        val personopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlag(vilkårsvurdering.behandling.behandlingId, søker, barn1)
 
         val faktiskTilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
@@ -229,7 +231,7 @@ class VilkårTilTilkjentYtelseTest {
             .bygg()
 
         val personopplysningGrunnlag =
-            lagTestPersonopplysningGrunnlag(vilkårsvurdering.behandling.id, søker, barn1, barn2)
+            lagTestPersonopplysningGrunnlag(vilkårsvurdering.behandling.behandlingId, søker, barn1, barn2)
 
         val faktiskTilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
@@ -280,7 +282,7 @@ class TestVilkårsvurderingBuilder(sakType: String) {
                 periodeFom = testperiode.fraOgMed,
                 periodeTom = testperiode.tilOgMed,
                 begrunnelse = "",
-                behandlingId = vilkårsvurdering.behandling.id,
+                behandlingId = vilkårsvurdering.behandling.behandlingId,
                 utdypendeVilkårsvurderinger = listOfNotNull(
                     if (erDeltBosted == true) UtdypendeVilkårsvurdering.DELT_BOSTED else null
                 )

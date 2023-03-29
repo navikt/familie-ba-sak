@@ -87,7 +87,7 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
                 fagsakId = fagsakOriginal.id
             )
 
-        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(førstegangsbehandling.id)
+        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(førstegangsbehandling.behandlingId.id)
 
         tilkjentYtelse.stønadTom = LocalDate.now().minusMonths(1).toYearMonth()
         tilkjentYtelseRepository.save(tilkjentYtelse)

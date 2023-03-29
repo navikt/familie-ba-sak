@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -82,7 +83,7 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
                 .map { it.kildeBehandlingId }
                 .distinct()
 
-        Assertions.assertTrue(behandlingerMedRelevanteAndeler.any { it == førstegangsbehandling.id })
+        Assertions.assertTrue(behandlingerMedRelevanteAndeler.any { it?.id == førstegangsbehandling.behandlingId.id })
     }
 
     @Test
@@ -104,7 +105,7 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
             opprettOgLagreRevurderingMedAndeler(
                 personIdent = forelderIdent,
                 kildeOgOffsetPåAndeler = listOf(
-                    KildeOgOffsetPåAndel(førstegangsbehandling.id, 1L),
+                    KildeOgOffsetPåAndel(førstegangsbehandling.behandlingId.id, 1L),
                     KildeOgOffsetPåAndel(null, 2L)
                 ),
                 fagsakId = fagsak.id
@@ -114,12 +115,12 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
         val behandlingerMedRelevanteAndeler =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlinger(iverksattOgLøpendeBehandlinger.content.map { it.toLong() })
                 .map { it.kildeBehandlingId }
-                .sortedBy { it }
+                .sortedBy { it?.id }
                 .distinct()
 
         Assertions.assertEquals(2, behandlingerMedRelevanteAndeler.size)
-        Assertions.assertEquals(førstegangsbehandling.id, behandlingerMedRelevanteAndeler[0])
-        Assertions.assertEquals(revurdering.id, behandlingerMedRelevanteAndeler[1])
+        Assertions.assertEquals(førstegangsbehandling.behandlingId.id, behandlingerMedRelevanteAndeler[0]?.id)
+        Assertions.assertEquals(revurdering.behandlingId.id, behandlingerMedRelevanteAndeler[1]?.id)
     }
 
     @Test
@@ -150,7 +151,7 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
                 .distinct()
 
         Assertions.assertEquals(1, behandlingerMedRelevanteAndeler.size)
-        Assertions.assertEquals(revurdering.id, behandlingerMedRelevanteAndeler[0])
+        Assertions.assertEquals(revurdering.behandlingId.id, behandlingerMedRelevanteAndeler[0]?.id)
     }
 
     @Test
@@ -211,7 +212,7 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
                 .distinct()
 
         Assertions.assertEquals(1, behandlingerMedRelevanteAndeler.size)
-        Assertions.assertEquals(iverksattBehandling.id, behandlingerMedRelevanteAndeler[0])
+        Assertions.assertEquals(iverksattBehandling.behandlingId.id, behandlingerMedRelevanteAndeler[0]?.id)
     }
 
     private fun opprettOgLagreBehandlingMedAndeler(
@@ -233,7 +234,7 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
             andelTilkjentYtelseRepository.save(
                 andelPåTilkjentYtelse(
                     tilkjentYtelse = tilkjentYtelse,
-                    kildeBehandlingId = it.kilde ?: behandling.id,
+                    kildeBehandlingId = if (it.kilde != null) BehandlingId(it.kilde) else behandling.behandlingId,
                     periodeOffset = it.offset,
                     aktør = aktør
                 )
@@ -258,7 +259,7 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
             andelTilkjentYtelseRepository.save(
                 andelPåTilkjentYtelse(
                     tilkjentYtelse = tilkjentYtelse,
-                    kildeBehandlingId = it.kilde ?: behandling.id,
+                    kildeBehandlingId = if (it.kilde != null) BehandlingId(it.kilde) else behandling.behandlingId,
                     periodeOffset = it.offset,
                     aktør = aktør
                 )
@@ -277,7 +278,7 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
     // Kun offset og kobling til behandling/tilkjent ytelse som er relevant når man skal plukke ut til konsistensavstemming
     private fun andelPåTilkjentYtelse(
         tilkjentYtelse: TilkjentYtelse,
-        kildeBehandlingId: Long,
+        kildeBehandlingId: BehandlingId,
         periodeOffset: Long,
         aktør: Aktør = randomAktør()
     ) = AndelTilkjentYtelse(

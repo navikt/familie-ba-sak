@@ -77,7 +77,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
             MånedPeriode(YearMonth.of(2018, 4), YearMonth.of(2018, 4))
         )
             .map {
-                lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(behandling.id, barn1, it.fom, it.tom, 50)
+                lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(behandling.behandlingId, barn1, it.fom, it.tom, 50)
             }
 
         val endretUtbetalingerForBarn2 = listOf(
@@ -86,7 +86,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
             MånedPeriode(YearMonth.of(2021, 11), YearMonth.of(2021, 12))
         )
             .map {
-                lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(behandling.id, barn2, it.fom, it.tom, 50)
+                lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(behandling.behandlingId, barn2, it.fom, it.tom, 50)
             }
 
         val andelerTilkjentYtelserEtterEUA =
