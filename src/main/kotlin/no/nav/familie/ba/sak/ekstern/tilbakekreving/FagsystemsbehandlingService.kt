@@ -55,7 +55,7 @@ class FagsystemsbehandlingService(
         val faktainfo = Faktainfo(
             revurderingsårsak = behandling.opprettetÅrsak.visningsnavn,
             revurderingsresultat = behandling.resultat.displayName,
-            tilbakekrevingsvalg = tilbakekrevingService.hentTilbakekrevingsvalg(behandlingId.id)
+            tilbakekrevingsvalg = tilbakekrevingService.hentTilbakekrevingsvalg(behandlingId)
         )
 
         val hentFagsystemsbehandling = HentFagsystemsbehandling(
