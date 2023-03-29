@@ -56,8 +56,8 @@ class AutovedtakService(
             behandlingErAutomatiskBesluttet = true
         )
 
-        val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
-            ?: error("Fant ikke aktivt vedtak på behandling ${behandling.id}")
+        val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.behandlingId)
+            ?: error("Fant ikke aktivt vedtak på behandling ${behandling.behandlingId.id}")
         return vedtakService.oppdaterVedtakMedStønadsbrev(vedtak = vedtak)
     }
 

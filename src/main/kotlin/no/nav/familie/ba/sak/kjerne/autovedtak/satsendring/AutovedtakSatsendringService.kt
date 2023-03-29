@@ -117,12 +117,12 @@ class AutovedtakSatsendringService(
 
             StegType.FERDIGSTILLE_BEHANDLING -> {
                 behandlingService.oppdaterStatusPåBehandling(
-                    behandlingEtterBehandlingsresultat.id,
-                    BehandlingStatus.IVERKSETTER_VEDTAK
+                    behandlingId = behandlingEtterBehandlingsresultat.behandlingId,
+                    status = BehandlingStatus.IVERKSETTER_VEDTAK
                 )
                 FerdigstillBehandlingTask.opprettTask(
-                    søkerAktør.aktivFødselsnummer(),
-                    behandlingEtterBehandlingsresultat.id
+                    søkerIdent = søkerAktør.aktivFødselsnummer(),
+                    behandlingsId = behandlingEtterBehandlingsresultat.behandlingId
                 )
             }
 

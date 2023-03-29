@@ -115,7 +115,7 @@ class AutovedtakSmåbarnstilleggService(
             logger.warn(e.message, e)
 
             val behandlingSomSkalManueltBehandles = behandlingService.oppdaterStatusPåBehandling(
-                behandlingEtterBehandlingsresultat.id,
+                behandlingEtterBehandlingsresultat.behandlingId,
                 BehandlingStatus.UTREDES
             )
             return kanIkkeBehandleAutomatisk(
@@ -173,7 +173,7 @@ class AutovedtakSmåbarnstilleggService(
                 redusertMånedPeriode = reduserteMånedPerioder.singleOrNull(),
                 vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(
                     vedtak = vedtakService.hentAktivForBehandlingThrows(
-                        behandlingId = behandlingEtterBehandlingsresultat.id
+                        behandlingId = behandlingEtterBehandlingsresultat.behandlingId
                     )
                 )
             )
