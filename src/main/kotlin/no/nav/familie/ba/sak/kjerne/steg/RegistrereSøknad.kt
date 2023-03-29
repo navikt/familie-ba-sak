@@ -35,7 +35,7 @@ class RegistrereSøknad(
 
         if (behandling.underkategori != søknadDTO.underkategori.tilDomene()) {
             behandlingstemaService.oppdaterBehandlingstema(
-                behandling = behandlingHentOgPersisterService.hent(behandlingId = behandling.id),
+                behandling = behandlingHentOgPersisterService.hent(behandlingId = behandling.behandlingId),
                 overstyrtUnderkategori = søknadDTO.underkategori.tilDomene()
             )
         }
@@ -51,21 +51,21 @@ class RegistrereSøknad(
         val forrigeBehandlingSomErVedtatt =
             behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling = behandling)
         persongrunnlagService.registrerBarnFraSøknad(
-            behandling = behandlingHentOgPersisterService.hent(behandlingId = behandling.id),
+            behandling = behandlingHentOgPersisterService.hent(behandlingId = behandling.behandlingId),
             forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErVedtatt,
             søknadDTO = søknadDTO
         )
 
         tilbakestillBehandlingService.initierOgSettBehandlingTilVilkårsvurdering(
-            behandling = behandlingHentOgPersisterService.hent(behandlingId = behandling.id),
+            behandling = behandlingHentOgPersisterService.hent(behandlingId = behandling.behandlingId),
             bekreftEndringerViaFrontend = data.bekreftEndringerViaFrontend
         )
 
-        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandling.id)
+        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandling.behandlingId)
 
         vedtakService.oppdater(vedtak)
 
-        return hentNesteStegForNormalFlyt(behandling = behandlingHentOgPersisterService.hent(behandlingId = behandling.id))
+        return hentNesteStegForNormalFlyt(behandling = behandlingHentOgPersisterService.hent(behandlingId = behandling.behandlingId))
     }
 
     override fun stegType(): StegType {
