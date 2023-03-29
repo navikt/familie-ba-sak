@@ -101,7 +101,7 @@ spec:
         - host: xsrv1mh6.api.sanity.io
         - host: unleash.nais.io
         - host: familie-integrasjoner.dev-fss-pub.nais.io
-        - host: familie-oppdrag.prod-fss-pub.nais.io
+        - host: familie-oppdrag.dev-fss-pub.nais.io
         - host: familie-ba-statistikk.dev-fss-pub.nais.io
         - host: familie-ba-infotrygd.dev-fss-pub.nais.io
         - host: familie-ba-infotrygd-feed.dev-fss-pub.nais.io
