@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.brev.DokumentDistribueringService
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
@@ -43,7 +44,7 @@ class DistribuerDokumentTask(
             )
         } else if (erVedtaksbrevOgIkkeManueltSent && distribuerDokumentDTO.behandlingId != null) {
             stegService.håndterDistribuerVedtaksbrev(
-                behandling = behandlingHentOgPersisterService.hent(distribuerDokumentDTO.behandlingId),
+                behandling = behandlingHentOgPersisterService.hent(BehandlingId(distribuerDokumentDTO.behandlingId)),
                 distribuerDokumentDTO = distribuerDokumentDTO
             )
         } else {
