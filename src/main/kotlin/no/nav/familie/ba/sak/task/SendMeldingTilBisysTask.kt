@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.statistikk.producer.KafkaProducer
@@ -36,7 +37,7 @@ class SendMeldingTilBisysTask(
     private val meldingsTeller = Metrics.counter("familie.ba.sak.bisys.meldinger.sendt")
 
     override fun doTask(task: Task) {
-        val behandling = behandlingHentOgPersisterService.hent(behandlingId = task.payload.toLong())
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId = BehandlingId(task.payload.toLong()))
 
         // Bisys vil kun ha rene manuelle opphør eller reduksjon
         if (behandling.resultat == Behandlingsresultat.OPPHØRT ||
@@ -57,7 +58,7 @@ class SendMeldingTilBisysTask(
             logger.info("Sender melding til bisys om opphør eller reduksjon av barnetrygd.")
 
             kafkaProducer.sendBarnetrygdBisysMelding(
-                behandling.id.toString(),
+                behandling.behandlingId.id.toString(),
                 barnetrygdBisysMelding
             )
             meldingsTeller.increment()
@@ -67,10 +68,13 @@ class SendMeldingTilBisysTask(
     }
 
     fun finnBarnEndretOpplysning(behandling: Behandling): Map<String, List<BarnEndretOpplysning>> {
-        val forrigeIverksatteBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling = behandling) ?: error("Finnes ikke forrige behandling for behandling ${behandling.id}")
+        val forrigeIverksatteBehandling =
+            behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling = behandling)
+                ?: error("Finnes ikke forrige behandling for behandling ${behandling.behandlingId.id}")
 
-        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.id)
-        val forrigeTilkjentYtelse = tilkjentYtelseRepository.findByBehandling(forrigeIverksatteBehandling.id)
+        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.behandlingId.id)
+        val forrigeTilkjentYtelse =
+            tilkjentYtelseRepository.findByBehandling(forrigeIverksatteBehandling.behandlingId.id)
 
         val endretOpplysning: MutableMap<String, MutableList<BarnEndretOpplysning>> = mutableMapOf()
 
