@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -30,9 +31,10 @@ class HenleggBehandlingTask(
 
     override fun doTask(task: Task) {
         val henleggBehandlingTaskDTO = objectMapper.readValue(task.payload, HenleggBehandlingTaskDTO::class.java)
-        val behandling = behandlingHentOgPersisterService.hent(henleggBehandlingTaskDTO.behandlingId).apply {
-            task.metadata["fagsakId"] = fagsak.id.toString()
-        }
+        val behandling =
+            behandlingHentOgPersisterService.hent(BehandlingId(henleggBehandlingTaskDTO.behandlingId)).apply {
+                task.metadata["fagsakId"] = fagsak.id.toString()
+            }
 
         if (behandling.status == BehandlingStatus.AVSLUTTET) {
             task.metadata["Resultat"] = "Behandlingen er allerede avsluttet"
