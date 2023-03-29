@@ -38,6 +38,7 @@ class FeilutbetaltValutaController(
         @RequestBody feilutbetaltValuta: RestFeilutbetaltValuta
     ):
         ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        val parsetBehandlingId = BehandlingId(behandlingId)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
             handling = "legg til periode med feilutbetalt valuta"
@@ -45,10 +46,10 @@ class FeilutbetaltValutaController(
 
         feilutbetaltValutaService.leggTilFeilutbetaltValutaPeriode(
             feilutbetaltValuta = feilutbetaltValuta,
-            behandlingId = BehandlingId(behandlingId)
+            behandlingId = parsetBehandlingId
         )
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = parsetBehandlingId)))
     }
 
     @PutMapping(
@@ -68,7 +69,15 @@ class FeilutbetaltValutaController(
 
         feilutbetaltValutaService.oppdatertFeilutbetaltValutaPeriode(feilutbetaltValuta = feilutbetaltValuta, id = id)
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
+        return ResponseEntity.ok(
+            Ressurs.success(
+                utvidetBehandlingService.lagRestUtvidetBehandling(
+                    behandlingId = BehandlingId(
+                        behandlingId
+                    )
+                )
+            )
+        )
     }
 
     @DeleteMapping(path = ["behandling/{behandlingId}/periode/{id}"])
@@ -80,9 +89,10 @@ class FeilutbetaltValutaController(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
             handling = "Fjerner periode med feilutbetalt valuta"
         )
-        feilutbetaltValutaService.fjernFeilutbetaltValutaPeriode(id = id, behandlingId = BehandlingId(behandlingId))
+        val parsetBehandlingId = BehandlingId(behandlingId)
+        feilutbetaltValutaService.fjernFeilutbetaltValutaPeriode(id = id, behandlingId = parsetBehandlingId)
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = parsetBehandlingId)))
     }
 
     @GetMapping(path = ["behandling/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
