@@ -172,8 +172,8 @@ class AvstemmingService(
                             secureLogger.warn("Finner ikke behandlingsId for andeler=$andeler")
                         }
                         PerioderForBehandling(
-                            behandlingId = kildeBehandlingId.toString(),
-                            aktivFødselsnummer = aktiveFødselsnummere[kildeBehandlingId]
+                            behandlingId = kildeBehandlingId!!.id.toString(),
+                            aktivFødselsnummer = aktiveFødselsnummere[kildeBehandlingId!!.id]
                                 ?: error("Finnes ikke et aktivt fødselsnummer for behandling $kildeBehandlingId"),
                             perioder = andeler
                                 .map {
@@ -181,7 +181,7 @@ class AvstemmingService(
                                         ?: error("Andel ${it.id} på iverksatt behandling på løpende fagsak mangler periodeOffset")
                                 }
                                 .toSet(),
-                            utebetalesTil = tssEksternIdForBehandlinger[kildeBehandlingId]
+                            utebetalesTil = tssEksternIdForBehandlinger[kildeBehandlingId!!.id]
                         )
                     }
             }.flatten()

@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.oppdaterBestå
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
@@ -52,16 +53,16 @@ class ØkonomiService(
         )
         beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(oppdatertBehandling, utbetalingsoppdrag)
 
-        tilkjentYtelseValideringService.validerIngenAndelerTilkjentYtelseMedSammeOffsetIBehandling(behandlingId = vedtak.behandling.id)
-        iverksettOppdrag(utbetalingsoppdrag, oppdatertBehandling.id)
+        tilkjentYtelseValideringService.validerIngenAndelerTilkjentYtelseMedSammeOffsetIBehandling(behandlingId = vedtak.behandling.behandlingId)
+        iverksettOppdrag(utbetalingsoppdrag, oppdatertBehandling.behandlingId)
         return utbetalingsoppdrag
     }
 
-    private fun iverksettOppdrag(utbetalingsoppdrag: Utbetalingsoppdrag, behandlingId: Long) {
+    private fun iverksettOppdrag(utbetalingsoppdrag: Utbetalingsoppdrag, behandlingId: BehandlingId) {
         if (!utbetalingsoppdrag.skalIverksettesMotOppdrag()) {
             UtbetalingsoppdragService.logger.warn(
                 "Iverksetter ikke noe mot oppdrag. " +
-                    "Ingen utbetalingsperioder for behandlingId=$behandlingId"
+                    "Ingen utbetalingsperioder for behandlingId=${behandlingId.id}"
             )
             return
         }
@@ -155,7 +156,7 @@ class ØkonomiService(
 
             if (!erSimulering && (
                     oppdatertBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT || behandlingHentOgPersisterService.hent(
-                        oppdatertBehandling.id
+                        oppdatertBehandling.behandlingId
                     ).resultat == Behandlingsresultat.OPPHØRT
                     )
             ) {
