@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
@@ -58,7 +59,7 @@ class TilgangService(
         }
     }
 
-    fun validerTilgangTilBehandling(behandlingId: Long, event: AuditLoggerEvent) {
+    fun validerTilgangTilBehandling(behandlingId: BehandlingId, event: AuditLoggerEvent) {
         val harTilgang = harSaksbehandlerTilgang("validerTilgangTilBehandling", behandlingId) {
             val behandling = behandlingHentOgPersisterService.hent(behandlingId)
             val personIdenter =
@@ -94,7 +95,7 @@ class TilgangService(
         }
         val behandlinger = behandlingHentOgPersisterService.hentBehandlinger(fagsakId)
         val personIdenterIFagsak = behandlinger.flatMap { behandling ->
-            val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandling.id)
+            val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandling.behandlingId)
             when {
                 personopplysningGrunnlag != null -> personopplysningGrunnlag.søkerOgBarn.map { person -> person.aktør.aktivFødselsnummer() }
                 else -> emptyList()
