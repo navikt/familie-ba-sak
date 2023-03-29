@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -86,21 +87,21 @@ class SimuleringService(
     @Transactional
     fun lagreSimuleringPåBehandling(
         simuleringMottakere: List<SimuleringMottaker>,
-        beahndling: Behandling
+        behandling: Behandling
     ): List<ØkonomiSimuleringMottaker> {
-        val vedtakSimuleringMottakere = simuleringMottakere.map { it.tilBehandlingSimuleringMottaker(beahndling) }
+        val vedtakSimuleringMottakere = simuleringMottakere.map { it.tilBehandlingSimuleringMottaker(behandling) }
         return øknomiSimuleringMottakerRepository.saveAll(vedtakSimuleringMottakere)
     }
 
     @Transactional
-    fun slettSimuleringPåBehandling(behandlingId: Long) =
-        øknomiSimuleringMottakerRepository.deleteByBehandlingId(behandlingId)
+    fun slettSimuleringPåBehandling(behandlingId: BehandlingId) =
+        øknomiSimuleringMottakerRepository.deleteByBehandlingId(behandlingId.id)
 
-    fun hentSimuleringPåBehandling(behandlingId: Long): List<ØkonomiSimuleringMottaker> {
-        return øknomiSimuleringMottakerRepository.findByBehandlingId(behandlingId)
+    fun hentSimuleringPåBehandling(behandlingId: BehandlingId): List<ØkonomiSimuleringMottaker> {
+        return øknomiSimuleringMottakerRepository.findByBehandlingId(behandlingId.id)
     }
 
-    fun oppdaterSimuleringPåBehandlingVedBehov(behandlingId: Long): List<ØkonomiSimuleringMottaker> {
+    fun oppdaterSimuleringPåBehandlingVedBehov(behandlingId: BehandlingId): List<ØkonomiSimuleringMottaker> {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
         val behandlingErFerdigBesluttet =
             behandling.status == BehandlingStatus.IVERKSETTER_VEDTAK ||
@@ -129,8 +130,8 @@ class SimuleringService(
 
     @Transactional
     fun oppdaterSimuleringPåBehandling(behandling: Behandling): List<ØkonomiSimuleringMottaker> {
-        val aktivtVedtak = vedtakRepository.findByBehandlingAndAktivOptional(behandling.id)
-            ?: throw Feil("Fant ikke aktivt vedtak på behandling${behandling.id}")
+        val aktivtVedtak = vedtakRepository.findByBehandlingAndAktivOptional(behandling.behandlingId.id)
+            ?: throw Feil("Fant ikke aktivt vedtak på behandling${behandling.behandlingId}")
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "opprette simulering"
@@ -139,16 +140,16 @@ class SimuleringService(
         val simulering: List<SimuleringMottaker> =
             hentSimuleringFraFamilieOppdrag(vedtak = aktivtVedtak)?.simuleringMottaker ?: emptyList()
 
-        slettSimuleringPåBehandling(behandling.id)
+        slettSimuleringPåBehandling(behandling.behandlingId)
         return lagreSimuleringPåBehandling(simulering, behandling)
     }
 
-    fun hentEtterbetaling(behandlingId: Long): BigDecimal {
+    fun hentEtterbetaling(behandlingId: BehandlingId): BigDecimal {
         val vedtakSimuleringMottakere = hentSimuleringPåBehandling(behandlingId)
         return hentEtterbetaling(vedtakSimuleringMottakere)
     }
 
-    fun hentFeilutbetaling(behandlingId: Long): BigDecimal {
+    fun hentFeilutbetaling(behandlingId: BehandlingId): BigDecimal {
         val vedtakSimuleringMottakere = hentSimuleringPåBehandling(behandlingId)
         return hentFeilutbetaling(vedtakSimuleringMottakere)
     }
@@ -170,7 +171,7 @@ class SimuleringService(
     fun harMigreringsbehandlingAvvikInnenforBeløpsgrenser(behandling: Behandling): Boolean {
         if (!behandling.erManuellMigrering()) throw Feil("Avvik innenfor beløpsgrenser skal bare sjekkes for manuelle migreringsbehandlinger")
 
-        val antallBarn = persongrunnlagService.hentBarna(behandling.id).size
+        val antallBarn = persongrunnlagService.hentBarna(behandling.behandlingId).size
 
         return sjekkOmBehandlingHarEtterbetalingInnenforBeløpsgrenser(behandling, antallBarn) &&
             sjekkOmBehandlingHarFeilutbetalingInnenforBeløpsgrenser(behandling, antallBarn)
@@ -180,10 +181,10 @@ class SimuleringService(
         behandling: Behandling,
         antallBarn: Int
     ): Boolean {
-        val finnesEtterBetaling = hentTotalEtterbetalingFørMars2023(behandling.id) != BigDecimal.ZERO
+        val finnesEtterBetaling = hentTotalEtterbetalingFørMars2023(behandling.behandlingId) != BigDecimal.ZERO
         if (!finnesEtterBetaling) return true
 
-        val simuleringsperioderFørMars2023 = hentSimuleringsperioderFørMars2023(behandling.id)
+        val simuleringsperioderFørMars2023 = hentSimuleringsperioderFørMars2023(behandling.behandlingId)
         if (
             simuleringsperioderFørMars2023.harKunPositiveResultater() &&
             simuleringsperioderFørMars2023.harMaks1KroneIResultatPerBarn(antallBarn) &&
@@ -199,10 +200,10 @@ class SimuleringService(
         behandling: Behandling,
         antallBarn: Int
     ): Boolean {
-        val finnesFeilutbetaling = hentFeilutbetaling(behandling.id) != BigDecimal.ZERO
+        val finnesFeilutbetaling = hentFeilutbetaling(behandling.behandlingId) != BigDecimal.ZERO
         if (!finnesFeilutbetaling) return true
 
-        val simuleringsperioderFørMars2023 = hentSimuleringsperioderFørMars2023(behandling.id)
+        val simuleringsperioderFørMars2023 = hentSimuleringsperioderFørMars2023(behandling.behandlingId)
         if (
             simuleringsperioderFørMars2023.harKunNegativeResultater() &&
             simuleringsperioderFørMars2023.harMaks1KroneIResultatPerBarn(antallBarn) &&
@@ -214,7 +215,7 @@ class SimuleringService(
         return false
     }
 
-    private fun hentSimuleringsperioderFørMars2023(behandlingId: Long): List<SimuleringsPeriode> {
+    private fun hentSimuleringsperioderFørMars2023(behandlingId: BehandlingId): List<SimuleringsPeriode> {
         val februar2023 = LocalDate.of(2023, 2, 1)
 
         return vedtakSimuleringMottakereTilSimuleringPerioder(
@@ -225,7 +226,7 @@ class SimuleringService(
         }
     }
 
-    private fun hentTotalEtterbetalingFørMars2023(behandlingId: Long) =
+    private fun hentTotalEtterbetalingFørMars2023(behandlingId: BehandlingId) =
         hentTotalEtterbetaling(hentSimuleringsperioderFørMars2023(behandlingId), null)
 
     private fun List<SimuleringsPeriode>.harKunPositiveResultater() = all { it.resultat >= BigDecimal.ZERO }

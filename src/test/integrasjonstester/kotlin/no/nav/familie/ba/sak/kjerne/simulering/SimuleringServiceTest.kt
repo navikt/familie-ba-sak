@@ -58,7 +58,7 @@ class SimuleringServiceTest(
 
         assertEquals(
             vedtakSimuleringMottakerMock.size,
-            simuleringService.oppdaterSimuleringPåBehandlingVedBehov(behandlingEtterVilkårsvurderingSteg.id).size
+            simuleringService.oppdaterSimuleringPåBehandlingVedBehov(behandlingEtterVilkårsvurderingSteg.behandlingId).size
         )
 
         assertEquals(
