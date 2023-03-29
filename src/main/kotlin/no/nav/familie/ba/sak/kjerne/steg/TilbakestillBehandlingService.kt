@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingService
@@ -37,16 +38,16 @@ class TilbakestillBehandlingService(
             )
         )
 
-        val vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
+        val vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.behandlingId.id)
 
-        beregningService.slettTilkjentYtelseForBehandling(behandlingId = behandling.id)
+        beregningService.slettTilkjentYtelseForBehandling(behandlingId = behandling.behandlingId)
         vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(vedtak = vedtak)
 
         behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(
-            behandlingId = behandling.id,
+            behandlingId = behandling.behandlingId,
             steg = StegType.VILKÅRSVURDERING
         )
-        tilbakekrevingService.slettTilbakekrevingPåBehandling(behandling.id)
+        tilbakekrevingService.slettTilbakekrevingPåBehandling(behandlingId = behandling.behandlingId)
 
         vedtakRepository.saveAndFlush(vedtak)
     }
@@ -55,16 +56,16 @@ class TilbakestillBehandlingService(
     fun tilbakestillBehandlingTilVilkårsvurdering(behandling: Behandling) {
         if (behandling.status.erLåstMenIkkeAvsluttet() || behandling.status == BehandlingStatus.AVSLUTTET) throw Feil("Prøver å tilbakestille $behandling, men den er avsluttet eller låst for endringer")
 
-        beregningService.slettTilkjentYtelseForBehandling(behandlingId = behandling.id)
+        beregningService.slettTilkjentYtelseForBehandling(behandlingId = behandling.behandlingId)
         vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(
             vedtak = vedtakRepository.findByBehandlingAndAktiv(
-                behandlingId = behandling.id
+                behandlingId = behandling.behandlingId.id
             )
         )
-        tilbakekrevingService.slettTilbakekrevingPåBehandling(behandling.id)
+        tilbakekrevingService.slettTilbakekrevingPåBehandling(behandlingId = behandling.behandlingId)
 
         behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(
-            behandlingId = behandling.id,
+            behandlingId = behandling.behandlingId,
             steg = StegType.VILKÅRSVURDERING
         )
     }
@@ -73,7 +74,7 @@ class TilbakestillBehandlingService(
     fun tilbakestillDataTilVilkårsvurderingssteg(behandling: Behandling) {
         vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(
             vedtak = vedtakRepository.findByBehandlingAndAktiv(
-                behandlingId = behandling.id
+                behandlingId = behandling.behandlingId.id
             )
         )
     }
@@ -82,13 +83,13 @@ class TilbakestillBehandlingService(
      * Når et vilkår vurderes (endres) vil vi resette steget og slette data som blir generert senere i løypa
      */
     @Transactional
-    fun resettStegVedEndringPåVilkår(behandlingId: Long): Behandling {
+    fun resettStegVedEndringPåVilkår(behandlingId: BehandlingId): Behandling {
         vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(
             vedtak = vedtakRepository.findByBehandlingAndAktiv(
-                behandlingId
+                behandlingId.id
             )
         )
-        tilbakekrevingService.slettTilbakekrevingPåBehandling(behandlingId)
+        tilbakekrevingService.slettTilbakekrevingPåBehandling(behandlingId = behandlingId)
         return behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(
             behandlingId = behandlingId,
             steg = StegType.VILKÅRSVURDERING
