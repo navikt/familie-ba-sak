@@ -66,7 +66,7 @@ class HentStatusTest {
 
         every {
             økonomiKlient.hentStatus(
-                match { it.behandlingsId == nyBehandling.id.toString() }
+                match { it.behandlingsId == nyBehandling.behandlingId.id.toString() }
             )
         } returns OppdragStatus.KVITTERT_OK
         val andelerTilkjentYtelse = listOf(
@@ -88,7 +88,7 @@ class HentStatusTest {
         val nesteSteg =
             statusFraOppdrag.utførStegOgAngiNeste(nyBehandling, statusFraOppdragMedTask(tilfeldigPerson, nyBehandling))
         assertThat(nesteSteg).isEqualTo(StegType.IVERKSETT_MOT_FAMILIE_TILBAKE)
-        verify { økonomiKlient.hentStatus(match { it.behandlingsId == nyBehandling.id.toString() }) }
+        verify { økonomiKlient.hentStatus(match { it.behandlingsId == nyBehandling.behandlingId.id.toString() }) }
     }
 
     @Test
@@ -99,7 +99,7 @@ class HentStatusTest {
 
         every {
             økonomiKlient.hentStatus(
-                match { it.behandlingsId == nyBehandling.id.toString() }
+                match { it.behandlingsId == nyBehandling.behandlingId.id.toString() }
             )
         } returns OppdragStatus.KVITTERT_OK
         val andelerTilkjentYtelse = listOf(
@@ -129,7 +129,7 @@ class HentStatusTest {
             behandling = behandling,
             utbetalingsoppdrag = objectMapper.writeValueAsString(lagUtbetalingsoppdrag(utbetalingsperiode = utbetalingsperiode))
         )
-        every { tilkjentYtelseRepository.findByBehandling(behandling.id) } returns nyTilkjentYtelse
+        every { tilkjentYtelseRepository.findByBehandling(behandling.behandlingId.id) } returns nyTilkjentYtelse
     }
 
     private fun statusFraOppdragMedTask(
@@ -140,7 +140,7 @@ class HentStatusTest {
             fagsystem = "BA",
             personIdent = tilfeldigPerson.aktør.aktivFødselsnummer(),
             aktørId = "Søker1",
-            behandlingsId = nyBehandling.id,
+            behandlingsId = nyBehandling.behandlingId.id,
             vedtaksId = 0L
         ),
         task = Task(
@@ -159,7 +159,7 @@ class HentStatusTest {
             vedtakdatoTom = LocalDate.of(2020, Month.MARCH, 31),
             erEndringPåEksisterendePeriode = false,
             periodeId = 1L,
-            behandlingId = nyBehandling.id,
+            behandlingId = nyBehandling.behandlingId.id,
             datoForVedtak = LocalDate.of(2020, Month.APRIL, 1),
             klassifisering = "",
             sats = BigDecimal.ONE,

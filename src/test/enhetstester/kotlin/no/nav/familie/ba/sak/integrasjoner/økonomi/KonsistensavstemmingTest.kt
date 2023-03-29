@@ -7,6 +7,7 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragAvsluttTask
 import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragDataTask
@@ -496,7 +497,7 @@ class KonsistensavstemmingTest {
                 fom = YearMonth.now().minusMonths(4),
                 tom = YearMonth.now(),
                 periodeIdOffset = 0
-            ).also { it.kildeBehandlingId = behandlingId.toLong() }
+            ).also { it.kildeBehandlingId = BehandlingId(behandlingId.toLong()) }
         )
         val aktivFødselsnummere = mapOf(behandlingId.toLong() to "test")
         every { behandlingHentOgPersisterService.hentAktivtFødselsnummerForBehandlinger(any()) } returns aktivFødselsnummere
