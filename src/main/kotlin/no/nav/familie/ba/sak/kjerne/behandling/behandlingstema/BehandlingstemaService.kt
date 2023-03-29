@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -98,7 +97,7 @@ class BehandlingstemaService(
                 ?: return BehandlingKategori.NASJONAL
 
         val barnasTidslinjer =
-            vilkårsvurderingTidslinjeService.hentTidslinjer(behandlingId = BehandlingId(forrigeIverksattBehandling.id))
+            vilkårsvurderingTidslinjeService.hentTidslinjer(behandlingId = forrigeIverksattBehandling.behandlingId)
                 ?.barnasTidslinjer()
         return utledLøpendeKategori(barnasTidslinjer)
     }
@@ -108,11 +107,11 @@ class BehandlingstemaService(
             behandlingHentOgPersisterService.finnAktivOgÅpenForFagsak(fagsakId = fagsakId)
                 ?: return BehandlingKategori.NASJONAL
         val vilkårsvurdering =
-            vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = aktivBehandling.id)
+            vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = aktivBehandling.behandlingId.id)
                 ?: return aktivBehandling.kategori
         val erVilkårMedEØSRegelverkBehandlet = vilkårsvurdering.personResultater
             .flatMap { it.vilkårResultater }
-            .filter { it.behandlingId == aktivBehandling.id }
+            .filter { it.behandlingId == aktivBehandling.behandlingId }
             .any { it.vurderesEtter == Regelverk.EØS_FORORDNINGEN }
 
         return if (erVilkårMedEØSRegelverkBehandlet) {
@@ -133,10 +132,10 @@ class BehandlingstemaService(
                 ?: return BehandlingUnderkategori.ORDINÆR
 
         val erUtvidetVilkårBehandlet =
-            vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = aktivBehandling.id)
+            vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = aktivBehandling.behandlingId.id)
                 ?.personResultater
                 ?.flatMap { it.vilkårResultater }
-                ?.filter { it.behandlingId == aktivBehandling.id }
+                ?.filter { it.behandlingId == aktivBehandling.behandlingId }
                 ?.any { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
 
         return if (erUtvidetVilkårBehandlet == true) {
@@ -149,6 +148,6 @@ class BehandlingstemaService(
     private fun hentForrigeAndeler(fagsakId: Long): List<AndelTilkjentYtelse>? {
         val forrigeIverksattBehandling =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = fagsakId) ?: return null
-        return andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = forrigeIverksattBehandling.id)
+        return andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = forrigeIverksattBehandling.behandlingId.id)
     }
 }
