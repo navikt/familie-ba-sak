@@ -9,12 +9,12 @@ import io.mockk.verify
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
-import org.hamcrest.CoreMatchers
 import org.hamcrest.MatcherAssert
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.api.fail
 import java.time.LocalDate
+import org.hamcrest.CoreMatchers.`is` as Is
 
 @ExtendWith(MockKExtension::class)
 internal class KorrigertVedtakServiceTest {
@@ -33,16 +33,16 @@ internal class KorrigertVedtakServiceTest {
         val behandling = lagBehandling()
         val korrigertVedtak = lagKorrigertVedtak(behandling)
 
-        every { korrigertVedtakRepository.finnAktivtKorrigertVedtakPåBehandling(behandling.id) } returns korrigertVedtak
+        every { korrigertVedtakRepository.finnAktivtKorrigertVedtakPåBehandling(behandling.behandlingId.id) } returns korrigertVedtak
 
         val hentetKorrigertVedtak =
-            korrigertVedtakService.finnAktivtKorrigertVedtakPåBehandling(behandling.id)
+            korrigertVedtakService.finnAktivtKorrigertVedtakPåBehandling(behandling.behandlingId)
                 ?: fail("korrigert vedtak ikke hentet riktig")
 
-        MatcherAssert.assertThat(hentetKorrigertVedtak.behandling.id, CoreMatchers.`is`(behandling.id))
-        MatcherAssert.assertThat(hentetKorrigertVedtak.aktiv, CoreMatchers.`is`(true))
+        MatcherAssert.assertThat(hentetKorrigertVedtak.behandling.behandlingId, Is(behandling.behandlingId))
+        MatcherAssert.assertThat(hentetKorrigertVedtak.aktiv, Is(true))
 
-        verify(exactly = 1) { korrigertVedtakRepository.finnAktivtKorrigertVedtakPåBehandling(behandling.id) }
+        verify(exactly = 1) { korrigertVedtakRepository.finnAktivtKorrigertVedtakPåBehandling(behandling.behandlingId.id) }
     }
 
     @Test
@@ -50,16 +50,16 @@ internal class KorrigertVedtakServiceTest {
         val behandling = lagBehandling()
         val korrigertVedtak = lagKorrigertVedtak(behandling)
 
-        every { korrigertVedtakRepository.finnAktivtKorrigertVedtakPåBehandling(behandling.id) } returns null
+        every { korrigertVedtakRepository.finnAktivtKorrigertVedtakPåBehandling(behandling.behandlingId.id) } returns null
         every { korrigertVedtakRepository.save(korrigertVedtak) } returns korrigertVedtak
         every { loggService.opprettKorrigertVedtakLogg(behandling, any()) } returns Unit
 
         val lagretKorrigertVedtak =
             korrigertVedtakService.lagreKorrigertVedtak(korrigertVedtak)
 
-        MatcherAssert.assertThat(lagretKorrigertVedtak.behandling.id, CoreMatchers.`is`(behandling.id))
+        MatcherAssert.assertThat(lagretKorrigertVedtak.behandling.behandlingId, Is(behandling.behandlingId))
 
-        verify(exactly = 1) { korrigertVedtakRepository.finnAktivtKorrigertVedtakPåBehandling(behandling.id) }
+        verify(exactly = 1) { korrigertVedtakRepository.finnAktivtKorrigertVedtakPåBehandling(behandling.behandlingId.id) }
         verify(exactly = 1) { korrigertVedtakRepository.save(korrigertVedtak) }
         verify(exactly = 1) {
             loggService.opprettKorrigertVedtakLogg(

@@ -249,7 +249,8 @@ class BrevService(
         val brevperioder = brevPerioderData.sorted().mapNotNull {
             it.tilBrevPeriodeGenerator().genererBrevPeriode()
         }
-        val korrigertVedtak = korrigertVedtakService.finnAktivtKorrigertVedtakPåBehandling(vedtak.behandling.id)
+        val korrigertVedtak =
+            korrigertVedtakService.finnAktivtKorrigertVedtakPåBehandling(vedtak.behandling.behandlingId)
 
         val hjemler = hentHjemler(
             behandlingId = vedtak.behandling.id,
