@@ -37,7 +37,7 @@ class IverksettMotOppdrag(
     override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
         tilkjentYtelseValideringService.validerAtIngenUtbetalingerOverstiger100Prosent(behandling)
 
-        val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandlingId = behandling.id)
+        val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandlingId = behandling.behandlingId)
             ?: throw Feil(
                 message = "Mangler totrinnskontroll ved iverksetting",
                 frontendFeilmelding = "Mangler totrinnskontroll ved iverksetting"

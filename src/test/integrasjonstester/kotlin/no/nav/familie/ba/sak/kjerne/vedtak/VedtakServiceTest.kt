@@ -249,7 +249,7 @@ class VedtakServiceTest(
         Assertions.assertNull(hentetVedtak!!.vedtaksdato)
         Assertions.assertEquals(null, hentetVedtak.stønadBrevPdF)
 
-        val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandlingId = behandling.id)
+        val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandlingId = behandling.behandlingId)
         Assertions.assertNotNull(totrinnskontroll)
         Assertions.assertEquals("ansvarligSaksbehandler", totrinnskontroll!!.saksbehandler)
         Assertions.assertEquals("saksbehandlerId", totrinnskontroll.saksbehandlerId)

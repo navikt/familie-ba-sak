@@ -452,7 +452,7 @@ class StegServiceTest(
                     it.behandlingStegStatus == BehandlingStegStatus.UTFØRT
             }
         }
-        val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandling.id)
+        val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandling.behandlingId)
         assertNotNull(totrinnskontroll)
         assertEquals(true, totrinnskontroll!!.godkjent)
         assertEquals(SikkerhetContext.hentSaksbehandlerNavn(), totrinnskontroll.saksbehandler)
@@ -562,7 +562,7 @@ class StegServiceTest(
 
         assertEquals(StegType.FERDIGSTILLE_BEHANDLING, behandlingEtterBesluttVedtakSteg.steg)
 
-        val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandling.id)
+        val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandling.behandlingId)
         assertNotNull(totrinnskontroll)
         assertEquals(true, totrinnskontroll!!.godkjent)
         assertEquals(SikkerhetContext.hentSaksbehandlerNavn(), totrinnskontroll.saksbehandler)
@@ -667,7 +667,7 @@ class StegServiceTest(
                     it.behandlingStegStatus == BehandlingStegStatus.UTFØRT
             }
         }
-        val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandling.id)
+        val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandling.behandlingId)
         assertNotNull(totrinnskontroll)
         assertEquals(true, totrinnskontroll!!.godkjent)
         assertEquals(SikkerhetContext.hentSaksbehandlerNavn(), totrinnskontroll.saksbehandler)
@@ -785,7 +785,7 @@ class StegServiceTest(
                     it.behandlingStegStatus == BehandlingStegStatus.UTFØRT
             }
         }
-        val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandling.id)
+        val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandling.behandlingId)
         assertNotNull(totrinnskontroll)
         assertEquals(true, totrinnskontroll!!.godkjent)
         assertEquals(SikkerhetContext.hentSaksbehandlerNavn(), totrinnskontroll.saksbehandler)

@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.domene.Totrinnskontroll
@@ -19,8 +20,8 @@ class TotrinnskontrollService(
     private val saksbehandlerContext: SaksbehandlerContext
 ) {
 
-    fun hentAktivForBehandling(behandlingId: Long): Totrinnskontroll? {
-        return totrinnskontrollRepository.findByBehandlingAndAktiv(behandlingId)
+    fun hentAktivForBehandling(behandlingId: BehandlingId): Totrinnskontroll? {
+        return totrinnskontrollRepository.findByBehandlingAndAktiv(behandlingId.id)
     }
 
     fun opprettTotrinnskontrollMedSaksbehandler(
@@ -44,7 +45,7 @@ class TotrinnskontrollService(
         beslutning: Beslutning,
         kontrollerteSider: List<String> = emptyList()
     ): Totrinnskontroll {
-        val totrinnskontroll = hentAktivForBehandling(behandlingId = behandling.id)
+        val totrinnskontroll = hentAktivForBehandling(behandlingId = behandling.behandlingId)
             ?: throw Feil(message = "Kan ikke beslutte et vedtak som ikke er sendt til beslutter")
 
         totrinnskontroll.beslutter = beslutter
@@ -61,7 +62,7 @@ class TotrinnskontrollService(
         lagreEllerOppdater(totrinnskontroll)
 
         behandlingService.oppdaterStatusPåBehandling(
-            behandlingId = behandling.id,
+            behandlingId = behandling.behandlingId,
             status = if (beslutning.erGodkjent()) BehandlingStatus.IVERKSETTER_VEDTAK else BehandlingStatus.UTREDES
         )
 
@@ -86,7 +87,7 @@ class TotrinnskontrollService(
     }
 
     fun lagreOgDeaktiverGammel(totrinnskontroll: Totrinnskontroll): Totrinnskontroll {
-        val aktivTotrinnskontroll = hentAktivForBehandling(totrinnskontroll.behandling.id)
+        val aktivTotrinnskontroll = hentAktivForBehandling(totrinnskontroll.behandling.behandlingId)
 
         if (aktivTotrinnskontroll != null && aktivTotrinnskontroll.id != totrinnskontroll.id) {
             totrinnskontrollRepository.saveAndFlush(aktivTotrinnskontroll.also { it.aktiv = false })

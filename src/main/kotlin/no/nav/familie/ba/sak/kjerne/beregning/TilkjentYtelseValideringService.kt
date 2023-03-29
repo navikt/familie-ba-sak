@@ -24,7 +24,7 @@ class TilkjentYtelseValideringService(
 ) {
     fun validerAtIngenUtbetalingerOverstiger100Prosent(behandling: Behandling) {
         if (behandling.erMigrering() || behandling.erTekniskEndring() || behandling.erSatsendring()) return
-        val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandling.id)
+        val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandling.behandlingId)
 
         if (totrinnskontroll?.godkjent == true) {
             val tilkjentYtelse =

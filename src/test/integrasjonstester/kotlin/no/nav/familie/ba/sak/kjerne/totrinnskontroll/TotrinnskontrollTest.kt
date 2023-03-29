@@ -94,7 +94,7 @@ class TotrinnskontrollTest(
                 .last().jsonToBehandlingDVH().behandlingStatus
         ).isEqualTo(BehandlingStatus.IVERKSETTER_VEDTAK.name)
 
-        val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandlingId = behandling.id)!!
+        val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandlingId = behandling.behandlingId)!!
         assertTrue(totrinnskontroll.godkjent)
     }
 
@@ -128,7 +128,7 @@ class TotrinnskontrollTest(
                 .last().jsonToBehandlingDVH().behandlingStatus
         ).isEqualTo(BehandlingStatus.UTREDES.name)
 
-        val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandlingId = behandling.id)!!
+        val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandlingId = behandling.behandlingId)!!
         assertFalse(totrinnskontroll.godkjent)
     }
 
