@@ -28,12 +28,12 @@ class FerdigstillBehandling(
         behandling: Behandling,
         data: String
     ): StegType {
-        logger.info("Forsøker å ferdigstille behandling ${behandling.id}")
+        logger.info("Forsøker å ferdigstille behandling ${behandling.behandlingId.id}")
 
-        val erHenlagt = behandlingHentOgPersisterService.hent(behandling.id).erHenlagt()
+        val erHenlagt = behandlingHentOgPersisterService.hent(behandling.behandlingId).erHenlagt()
 
         if (behandling.status !== BehandlingStatus.IVERKSETTER_VEDTAK && !erHenlagt) {
-            error("Prøver å ferdigstille behandling ${behandling.id}, men status er ${behandling.status}")
+            error("Prøver å ferdigstille behandling ${behandling.behandlingId.id}, men status er ${behandling.status}")
         }
 
         if (!erHenlagt) {
@@ -54,7 +54,10 @@ class FerdigstillBehandling(
             }
         }
 
-        behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.id, status = BehandlingStatus.AVSLUTTET)
+        behandlingService.oppdaterStatusPåBehandling(
+            behandlingId = behandling.behandlingId,
+            status = BehandlingStatus.AVSLUTTET
+        )
         return hentNesteStegForNormalFlyt(behandling)
     }
 

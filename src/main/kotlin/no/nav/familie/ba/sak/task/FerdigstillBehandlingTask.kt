@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.task.dto.FerdigstillBehandlingDTO
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -25,7 +26,7 @@ class FerdigstillBehandlingTask(
         val ferdigstillBehandling = objectMapper.readValue(task.payload, FerdigstillBehandlingDTO::class.java)
         stegService.håndterFerdigstillBehandling(
             behandling = behandlingHentOgPersisterService.hent(
-                ferdigstillBehandling.behandlingsId
+                BehandlingId(ferdigstillBehandling.behandlingsId)
             )
         )
     }
