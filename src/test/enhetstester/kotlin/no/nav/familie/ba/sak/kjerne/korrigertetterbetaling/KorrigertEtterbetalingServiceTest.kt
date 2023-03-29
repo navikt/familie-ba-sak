@@ -32,16 +32,16 @@ internal class KorrigertEtterbetalingServiceTest {
         val behandling = lagBehandling()
         val korrigertEtterbetaling = lagKorrigertEtterbetaling(behandling)
 
-        every { korrigertEtterbetalingRepository.finnAktivtKorrigeringPåBehandling(behandling.id) } returns korrigertEtterbetaling
+        every { korrigertEtterbetalingRepository.finnAktivtKorrigeringPåBehandling(behandling.behandlingId.id) } returns korrigertEtterbetaling
 
         val hentetKorrigertEtterbetaling =
-            korrigertEtterbetalingService.finnAktivtKorrigeringPåBehandling(behandling.id)
+            korrigertEtterbetalingService.finnAktivtKorrigeringPåBehandling(behandling.behandlingId)
                 ?: fail("etterbetaling korrigering ikke hentet riktig")
 
-        assertThat(hentetKorrigertEtterbetaling.behandling.id, Is(behandling.id))
+        assertThat(hentetKorrigertEtterbetaling.behandling.behandlingId, Is(behandling.behandlingId))
         assertThat(hentetKorrigertEtterbetaling.aktiv, Is(true))
 
-        verify(exactly = 1) { korrigertEtterbetalingRepository.finnAktivtKorrigeringPåBehandling(behandling.id) }
+        verify(exactly = 1) { korrigertEtterbetalingRepository.finnAktivtKorrigeringPåBehandling(behandling.behandlingId.id) }
     }
 
     @Test
@@ -49,17 +49,17 @@ internal class KorrigertEtterbetalingServiceTest {
         val behandling = lagBehandling()
         val korrigertEtterbetaling = lagKorrigertEtterbetaling(behandling)
 
-        every { korrigertEtterbetalingRepository.finnAlleKorrigeringerPåBehandling(behandling.id) } returns listOf(
+        every { korrigertEtterbetalingRepository.finnAlleKorrigeringerPåBehandling(behandling.behandlingId.id) } returns listOf(
             korrigertEtterbetaling,
             korrigertEtterbetaling
         )
 
         val hentetKorrigertEtterbetaling =
-            korrigertEtterbetalingService.finnAlleKorrigeringerPåBehandling(behandling.id)
+            korrigertEtterbetalingService.finnAlleKorrigeringerPåBehandling(behandling.behandlingId)
 
         assertThat(hentetKorrigertEtterbetaling.size, Is(2))
 
-        verify(exactly = 1) { korrigertEtterbetalingRepository.finnAlleKorrigeringerPåBehandling(behandling.id) }
+        verify(exactly = 1) { korrigertEtterbetalingRepository.finnAlleKorrigeringerPåBehandling(behandling.behandlingId.id) }
     }
 
     @Test
@@ -67,16 +67,16 @@ internal class KorrigertEtterbetalingServiceTest {
         val behandling = lagBehandling()
         val korrigertEtterbetaling = lagKorrigertEtterbetaling(behandling)
 
-        every { korrigertEtterbetalingRepository.finnAktivtKorrigeringPåBehandling(behandling.id) } returns null
+        every { korrigertEtterbetalingRepository.finnAktivtKorrigeringPåBehandling(behandling.behandlingId.id) } returns null
         every { korrigertEtterbetalingRepository.save(korrigertEtterbetaling) } returns korrigertEtterbetaling
         every { loggService.opprettKorrigertEtterbetalingLogg(behandling, any()) } returns Unit
 
         val lagretKorrigertEtterbetaling =
             korrigertEtterbetalingService.lagreKorrigertEtterbetaling(korrigertEtterbetaling)
 
-        assertThat(lagretKorrigertEtterbetaling.behandling.id, Is(behandling.id))
+        assertThat(lagretKorrigertEtterbetaling.behandling.behandlingId.id, Is(behandling.behandlingId.id))
 
-        verify(exactly = 1) { korrigertEtterbetalingRepository.finnAktivtKorrigeringPåBehandling(behandling.id) }
+        verify(exactly = 1) { korrigertEtterbetalingRepository.finnAktivtKorrigeringPåBehandling(behandling.behandlingId.id) }
         verify(exactly = 1) { korrigertEtterbetalingRepository.save(korrigertEtterbetaling) }
         verify(exactly = 1) {
             loggService.opprettKorrigertEtterbetalingLogg(

@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.korrigertetterbetaling
 
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import org.springframework.stereotype.Service
 import javax.transaction.Transactional
@@ -11,17 +12,17 @@ class KorrigertEtterbetalingService(
     private val loggService: LoggService
 ) {
 
-    fun finnAktivtKorrigeringPåBehandling(behandlingId: Long): KorrigertEtterbetaling? =
-        korrigertEtterbetalingRepository.finnAktivtKorrigeringPåBehandling(behandlingId)
+    fun finnAktivtKorrigeringPåBehandling(behandlingId: BehandlingId): KorrigertEtterbetaling? =
+        korrigertEtterbetalingRepository.finnAktivtKorrigeringPåBehandling(behandlingId.id)
 
-    fun finnAlleKorrigeringerPåBehandling(behandlingId: Long): List<KorrigertEtterbetaling> =
-        korrigertEtterbetalingRepository.finnAlleKorrigeringerPåBehandling(behandlingId)
+    fun finnAlleKorrigeringerPåBehandling(behandlingId: BehandlingId): List<KorrigertEtterbetaling> =
+        korrigertEtterbetalingRepository.finnAlleKorrigeringerPåBehandling(behandlingId.id)
 
     @Transactional
     fun lagreKorrigertEtterbetaling(korrigertEtterbetaling: KorrigertEtterbetaling): KorrigertEtterbetaling {
         val behandling = korrigertEtterbetaling.behandling
 
-        finnAktivtKorrigeringPåBehandling(behandling.id)?.let {
+        finnAktivtKorrigeringPåBehandling(behandling.behandlingId)?.let {
             it.aktiv = false
             korrigertEtterbetalingRepository.saveAndFlush(it)
         }
@@ -32,7 +33,7 @@ class KorrigertEtterbetalingService(
 
     @Transactional
     fun settKorrigeringPåBehandlingTilInaktiv(behandling: Behandling): KorrigertEtterbetaling? =
-        finnAktivtKorrigeringPåBehandling(behandling.id)?.apply {
+        finnAktivtKorrigeringPåBehandling(behandling.behandlingId)?.apply {
             aktiv = false
             loggService.opprettKorrigertEtterbetalingLogg(behandling, this)
         }

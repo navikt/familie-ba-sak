@@ -307,8 +307,8 @@ class BrevService(
 
     private fun hentEtterbetalingsbeløp(vedtak: Vedtak): String? {
         val etterbetalingsBeløp =
-            korrigertEtterbetalingService.finnAktivtKorrigeringPåBehandling(vedtak.behandling.id)?.beløp?.toBigDecimal()
-                ?: simuleringService.hentEtterbetaling(vedtak.behandling.id)
+            korrigertEtterbetalingService.finnAktivtKorrigeringPåBehandling(vedtak.behandling.behandlingId)?.beløp?.toBigDecimal()
+                ?: simuleringService.hentEtterbetaling(vedtak.behandling.behandlingId)
 
         return etterbetalingsBeløp.takeIf { it > BigDecimal.ZERO }?.run { Utils.formaterBeløp(this.toInt()) }
     }
