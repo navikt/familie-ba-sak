@@ -89,8 +89,8 @@ class ForvalterController(
                 if (eksisterendeOppgave.status == StatusEnum.FERDIGSTILT &&
                     ferdigstiltTid.isAfter(request.ferdigstiltFom) &&
                     ferdigstiltTid.isBefore(
-                        request.ferdigstiltTom
-                    ) &&
+                            request.ferdigstiltTom
+                        ) &&
                     eksisterendeOppgave.tema != Tema.BAR &&
                     eksisterendeOppgave.oppgavetype != request.oppgavetype.name
                 ) {
