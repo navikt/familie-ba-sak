@@ -14,7 +14,6 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.oppgave.OpprettOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.StatusEnum
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import no.nav.security.token.support.core.api.Unprotected
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
@@ -67,7 +66,6 @@ class ForvalterController(
         consumes = [MediaType.APPLICATION_JSON_VALUE],
         produces = [MediaType.APPLICATION_JSON_VALUE]
     )
-    @Unprotected
     fun gjenåpneFeilaktigLukketOppgave(@RequestBody request: GjenåpneOppgaverRequest): ResponseEntity<Map<String, Set<Long>>> {
         val result = mutableSetOf<Long>()
 
@@ -91,8 +89,8 @@ class ForvalterController(
                 if (eksisterendeOppgave.status == StatusEnum.FERDIGSTILT &&
                     ferdigstiltTid.isAfter(request.ferdigstiltFom) &&
                     ferdigstiltTid.isBefore(
-                            request.ferdigstiltTom
-                        ) &&
+                        request.ferdigstiltTom
+                    ) &&
                     eksisterendeOppgave.tema != Tema.BAR &&
                     eksisterendeOppgave.oppgavetype != request.oppgavetype.name
                 ) {
