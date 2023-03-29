@@ -33,10 +33,10 @@ class AutobrevOpphørSmåbarnstilleggService(
                 ?: error("Fant ikke aktiv behandling")
 
         val personopplysningGrunnlag: PersonopplysningGrunnlag =
-            persongrunnlagService.hentAktivThrows(behandling.id)
+            persongrunnlagService.hentAktivThrows(behandling.behandlingId)
 
         val listePeriodeOvergangsstønadGrunnlag: List<PeriodeOvergangsstønadGrunnlag> =
-            periodeOvergangsstønadGrunnlagRepository.findByBehandlingId(behandlingId = behandling.id)
+            periodeOvergangsstønadGrunnlagRepository.findByBehandlingId(behandlingId = behandling.behandlingId.id)
 
         val behandlingsårsak = BehandlingÅrsak.OMREGNING_SMÅBARNSTILLEGG
 

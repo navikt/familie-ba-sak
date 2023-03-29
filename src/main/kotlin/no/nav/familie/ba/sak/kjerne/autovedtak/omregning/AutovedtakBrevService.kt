@@ -55,7 +55,7 @@ class AutovedtakBrevService(
             )
 
         vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(
-            vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingEtterBehandlingsresultat.id),
+            vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingEtterBehandlingsresultat.behandlingId),
             standardbegrunnelse = behandlingsdata.standardbegrunnelse
         )
 
@@ -98,7 +98,7 @@ class AutovedtakBrevService(
                     behandling.erVedtatt()
                 }
                 .flatMap { behandling ->
-                    val vedtak = vedtakService.hentAktivForBehandlingThrows(behandling.id)
+                    val vedtak = vedtakService.hentAktivForBehandlingThrows(behandling.behandlingId)
                     vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
                 }
 

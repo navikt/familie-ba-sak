@@ -56,12 +56,12 @@ class RestartAvSmåbarnstilleggService(
             if (sisteIverksatteBehandling != null) {
                 if (skalOppretteOppgaver) {
                     opprettTaskService.opprettOppgaveTask(
-                        behandlingId = sisteIverksatteBehandling.id,
+                        behandlingId = sisteIverksatteBehandling.behandlingId,
                         oppgavetype = Oppgavetype.VurderLivshendelse,
                         beskrivelse = "Småbarnstillegg: endring i overgangsstønad må behandles manuelt"
                     )
                 } else {
-                    logger.info("DryRun av RestartAvSmåbarnstilleggService. Ville ha opprettet en VurderLivshendelse for behandling=${sisteIverksatteBehandling.id}, fagsakId=$fagsakId")
+                    logger.info("DryRun av RestartAvSmåbarnstilleggService. Ville ha opprettet en VurderLivshendelse for behandling=${sisteIverksatteBehandling.behandlingId.id}, fagsakId=$fagsakId")
                 }
             }
         }
@@ -94,7 +94,7 @@ class RestartAvSmåbarnstilleggService(
 
                 if (sisteVedtatteBehandling != null) {
                     val atySmåbarnstillegg =
-                        andelerTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteVedtatteBehandling.id)
+                        andelerTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(sisteVedtatteBehandling.behandlingId.id)
                             .filter { it.erSmåbarnstillegg() }
                     val harSmåbarnstilleggForrigeMåned = atySmåbarnstillegg.any { it.stønadTom == måned.minusMonths(1) }
                     if (harSmåbarnstilleggForrigeMåned) {
@@ -118,7 +118,7 @@ class RestartAvSmåbarnstilleggService(
                     behandling.erVedtatt()
                 }
                 .flatMap { behandling ->
-                    val vedtak = vedtakService.hentAktivForBehandlingThrows(behandling.id)
+                    val vedtak = vedtakService.hentAktivForBehandlingThrows(behandling.behandlingId)
                     vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
                 }
 
