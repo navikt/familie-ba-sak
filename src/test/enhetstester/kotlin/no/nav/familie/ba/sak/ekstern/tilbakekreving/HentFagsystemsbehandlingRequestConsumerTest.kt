@@ -79,14 +79,14 @@ internal class HentFagsystemsbehandlingRequestConsumerTest {
 
         every { behandlingHentOgPersisterService.hent(any()) } returns behandling
         every { persongrunnlagService.hentAktivThrows(any()) } returns lagTestPersonopplysningGrunnlag(
-            behandling.id,
+            behandling.behandlingId,
             tilfeldigPerson(personType = PersonType.BARN),
             tilfeldigPerson(personType = PersonType.SØKER)
         )
         every { arbeidsfordelingService.hentArbeidsfordelingPåBehandling(any()) } returns ArbeidsfordelingPåBehandling(
             behandlendeEnhetId = "4820",
             behandlendeEnhetNavn = "Nav",
-            behandlingId = behandling.id
+            behandlingId = behandling.behandlingId
         )
         every { vedtakService.hentAktivForBehandlingThrows(any()) } returns lagVedtak(behandling)
         every { tilbakekrevingService.hentTilbakekrevingsvalg(any()) } returns Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING
@@ -102,7 +102,7 @@ internal class HentFagsystemsbehandlingRequestConsumerTest {
 
         val request = requestSlot.captured
         assertEquals(behandling.fagsak.id.toString(), request.eksternFagsakId)
-        assertEquals(behandling.id.toString(), request.eksternId)
+        assertEquals(behandling.behandlingId.id.toString(), request.eksternId)
         assertEquals(Ytelsestype.BARNETRYGD, request.ytelsestype)
 
         verify {
@@ -119,7 +119,7 @@ internal class HentFagsystemsbehandlingRequestConsumerTest {
         val fagsystemsbehandling = respons.hentFagsystemsbehandling
         assertNotNull(fagsystemsbehandling)
         assertEquals(behandling.fagsak.id.toString(), fagsystemsbehandling!!.eksternFagsakId)
-        assertEquals(behandling.id.toString(), fagsystemsbehandling.eksternId)
+        assertEquals(behandling.behandlingId.id.toString(), fagsystemsbehandling.eksternId)
         assertEquals(Ytelsestype.BARNETRYGD, fagsystemsbehandling.ytelsestype)
         assertEquals("4820", fagsystemsbehandling.enhetId)
         assertEquals("Nav", fagsystemsbehandling.enhetsnavn)
@@ -136,7 +136,7 @@ internal class HentFagsystemsbehandlingRequestConsumerTest {
         return objectMapper.writeValueAsString(
             HentFagsystemsbehandlingRequest(
                 eksternFagsakId = behandling.fagsak.id.toString(),
-                eksternId = behandling.id.toString(),
+                eksternId = behandling.behandlingId.id.toString(),
                 ytelsestype = Ytelsestype.BARNETRYGD
             )
         )
