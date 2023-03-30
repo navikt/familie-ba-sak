@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
 import no.nav.familie.ba.sak.kjerne.brev.domene.byggMottakerdata
 import no.nav.familie.ba.sak.kjerne.brev.domene.leggTilEnhet
@@ -52,7 +53,10 @@ class DokumentController(
         )
 
         val vedtak = vedtakService.hent(vedtakId)
-        tilgangService.validerTilgangTilBehandling(behandlingId = vedtak.behandling.id, event = AuditLoggerEvent.UPDATE)
+        tilgangService.validerTilgangTilBehandling(
+            behandlingId = vedtak.behandling.behandlingId,
+            event = AuditLoggerEvent.UPDATE
+        )
 
         return dokumentGenereringService.genererBrevForVedtak(vedtak).let {
             vedtak.stønadBrevPdF = it
@@ -71,7 +75,10 @@ class DokumentController(
 
         val vedtak = vedtakService.hent(vedtakId)
 
-        tilgangService.validerTilgangTilBehandling(behandlingId = vedtak.behandling.id, event = AuditLoggerEvent.ACCESS)
+        tilgangService.validerTilgangTilBehandling(
+            behandlingId = vedtak.behandling.behandlingId,
+            event = AuditLoggerEvent.ACCESS
+        )
 
         return dokumentService.hentBrevForVedtak(vedtak)
     }
@@ -85,13 +92,14 @@ class DokumentController(
             "${SikkerhetContext.hentSaksbehandlerNavn()} henter forhåndsvisning av brev " +
                 "for mal: ${manueltBrevRequest.brevmal}"
         )
-        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
+        val parsetBehandlingId = BehandlingId(behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandlingId = parsetBehandlingId, event = AuditLoggerEvent.ACCESS)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "hente forhåndsvisning brev"
         )
 
-        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(parsetBehandlingId)
 
         return dokumentGenereringService.genererManueltBrev(
             manueltBrevRequest = manueltBrevRequest.byggMottakerdata(
@@ -108,14 +116,15 @@ class DokumentController(
         @PathVariable behandlingId: Long,
         @RequestBody manueltBrevRequest: ManueltBrevRequest
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        val parsetBehandlingId = BehandlingId(behandlingId)
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} genererer og sender brev: ${manueltBrevRequest.brevmal}")
-        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
+        tilgangService.validerTilgangTilBehandling(behandlingId = parsetBehandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "sende brev"
         )
 
-        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(parsetBehandlingId)
 
         dokumentService.sendManueltBrev(
             manueltBrevRequest = manueltBrevRequest.byggMottakerdata(
@@ -129,7 +138,7 @@ class DokumentController(
         return ResponseEntity.ok(
             Ressurs.success(
                 utvidetBehandlingService
-                    .lagRestUtvidetBehandling(behandlingId = behandlingId)
+                    .lagRestUtvidetBehandling(behandlingId = parsetBehandlingId)
             )
         )
     }
