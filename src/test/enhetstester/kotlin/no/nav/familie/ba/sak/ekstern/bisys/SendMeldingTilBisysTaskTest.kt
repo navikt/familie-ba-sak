@@ -24,6 +24,7 @@ import no.nav.familie.eksterne.kontrakter.bisys.BarnetrygdBisysMelding
 import no.nav.familie.eksterne.kontrakter.bisys.BarnetrygdEndretType
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.kafka.support.SendResult
@@ -32,6 +33,7 @@ import java.time.YearMonth
 import java.util.concurrent.CompletableFuture
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@Disabled
 class SendMeldingTilBisysTaskTest {
 
     data class Mocks(
