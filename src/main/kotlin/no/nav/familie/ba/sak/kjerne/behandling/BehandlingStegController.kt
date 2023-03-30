@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.validerBehandlingIkkeSendtTilEksterneTjenester
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.validerhenleggelsestype
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatSteg
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
@@ -55,10 +56,10 @@ class BehandlingStegController(
             handling = "registrere søknad"
         )
 
-        val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId = BehandlingId(behandlingId))
 
         stegService.håndterSøknad(behandling = behandling, restRegistrerSøknad = restRegistrerSøknad)
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.behandlingId)))
     }
 
     @PostMapping(path = ["vilkårsvurdering"])
@@ -68,10 +69,10 @@ class BehandlingStegController(
             handling = "vurdere vilkårsvurdering"
         )
 
-        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(BehandlingId(behandlingId))
         stegService.håndterVilkårsvurdering(behandling)
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.behandlingId)))
     }
 
     @GetMapping(path = ["behandlingsresultat/valider"])
@@ -81,7 +82,7 @@ class BehandlingStegController(
             handling = "validere behandlingsresultat"
         )
 
-        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(BehandlingId(behandlingId))
         val behandlingSteg: BehandlingsresultatSteg =
             stegService.hentBehandlingSteg(StegType.BEHANDLINGSRESULTAT) as BehandlingsresultatSteg
 
@@ -104,10 +105,10 @@ class BehandlingStegController(
             handling = "vurdere behandlingsresultat"
         )
 
-        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(BehandlingId(behandlingId))
         stegService.håndterBehandlingsresultat(behandling)
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.behandlingId)))
     }
 
     @PostMapping(path = ["tilbakekreving"])
@@ -120,10 +121,10 @@ class BehandlingStegController(
             handling = "vurdere tilbakekreving"
         )
 
-        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(BehandlingId(behandlingId))
         stegService.håndterVurderTilbakekreving(behandling, restTilbakekreving)
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.behandlingId)))
     }
 
     @PostMapping(path = ["send-til-beslutter"], produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -136,10 +137,10 @@ class BehandlingStegController(
             handling = "foreslå vedtak"
         )
 
-        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(BehandlingId(behandlingId))
 
         stegService.håndterSendTilBeslutter(behandling, behandlendeEnhet)
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.behandlingId)))
     }
 
     @PostMapping(path = ["iverksett-vedtak"], produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -152,10 +153,10 @@ class BehandlingStegController(
             handling = "iverksette vedtak"
         )
 
-        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(BehandlingId(behandlingId))
 
         stegService.håndterBeslutningForVedtak(behandling, restBeslutningPåVedtak)
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.behandlingId)))
     }
 
     @PutMapping(path = ["henlegg"], produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -168,12 +169,12 @@ class BehandlingStegController(
             handling = "henlegge behandling"
         )
 
-        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(BehandlingId(behandlingId))
 
         validerhenleggelsestype(
             henleggÅrsak = henleggInfo.årsak,
             tekniskVedlikeholdToggel = featureToggleService.isEnabled(TEKNISK_VEDLIKEHOLD_HENLEGGELSE),
-            behandlingId = behandling.id
+            behandlingId = behandling.behandlingId
         )
 
         validerTilgangTilHenleggelseAvBehandling(
@@ -184,7 +185,7 @@ class BehandlingStegController(
         validerBehandlingIkkeSendtTilEksterneTjenester(behandling = behandling)
 
         stegService.håndterHenleggBehandling(behandling, henleggInfo)
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.behandlingId)))
     }
 
     private fun validerTilgangTilHenleggelseAvBehandling(
@@ -201,13 +202,13 @@ class BehandlingStegController(
         @PathVariable behandlingId: Long,
         @RequestBody institusjonOgVergeInfo: RestRegistrerInstitusjonOgVerge
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
-        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(BehandlingId(behandlingId))
         if (institusjonOgVergeInfo.tilVerge(behandling) == null && institusjonOgVergeInfo.tilInstitusjon() == null) {
             return ResponseEntity.ok(Ressurs.failure("Ugydig verge info"))
         }
 
         stegService.håndterRegistrerVerge(behandling, institusjonOgVergeInfo)
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.behandlingId)))
     }
 }
 

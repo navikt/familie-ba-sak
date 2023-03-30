@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -54,11 +55,15 @@ object Behandlingutils {
         }
     }
 
-    fun validerhenleggelsestype(henleggÅrsak: HenleggÅrsak, tekniskVedlikeholdToggel: Boolean, behandlingId: Long) {
+    fun validerhenleggelsestype(
+        henleggÅrsak: HenleggÅrsak,
+        tekniskVedlikeholdToggel: Boolean,
+        behandlingId: BehandlingId
+    ) {
         if (!tekniskVedlikeholdToggel && henleggÅrsak == HenleggÅrsak.TEKNISK_VEDLIKEHOLD) {
             throw Feil(
                 "Teknisk vedlikehold henleggele er ikke påslått for " +
-                    "${SikkerhetContext.hentSaksbehandlerNavn()}. Kan ikke henlegge behandling $behandlingId."
+                    "${SikkerhetContext.hentSaksbehandlerNavn()}. Kan ikke henlegge behandling ${behandlingId.id}."
             )
         }
     }
