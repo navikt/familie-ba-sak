@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.task.DistribuerVedtaksbrevTask.Companion.TASK_STEP_TYPE
@@ -21,7 +22,7 @@ class DistribuerVedtaksbrevTask(
     override fun doTask(task: Task) {
         val distribuerVedtaksbrevDTO = objectMapper.readValue(task.payload, DistribuerVedtaksbrevDTO::class.java)
 
-        val behandling = behandlingHentOgPersisterService.hent(distribuerVedtaksbrevDTO.behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(BehandlingId(distribuerVedtaksbrevDTO.behandlingId))
 
         val distribuerDokumentDTO = DistribuerDokumentDTO(
             behandlingId = distribuerVedtaksbrevDTO.behandlingId,
@@ -31,7 +32,7 @@ class DistribuerVedtaksbrevTask(
             erManueltSendt = false
         )
         stegService.håndterDistribuerVedtaksbrev(
-            behandling = behandlingHentOgPersisterService.hent(distribuerVedtaksbrevDTO.behandlingId),
+            behandling = behandling,
             distribuerDokumentDTO = distribuerDokumentDTO
         )
     }

@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StatusFraOppdragMedTask
 import no.nav.familie.ba.sak.kjerne.steg.StegService
@@ -42,7 +43,7 @@ class StatusFraOppdragTask(
         val statusFraOppdragDTO = objectMapper.readValue(task.payload, StatusFraOppdragDTO::class.java)
 
         stegService.håndterStatusFraØkonomi(
-            behandling = behandlingHentOgPersisterService.hent(behandlingId = statusFraOppdragDTO.behandlingsId),
+            behandling = behandlingHentOgPersisterService.hent(behandlingId = BehandlingId(statusFraOppdragDTO.behandlingsId)),
             statusFraOppdragMedTask = StatusFraOppdragMedTask(statusFraOppdragDTO = statusFraOppdragDTO, task = task)
         )
     }
@@ -51,7 +52,7 @@ class StatusFraOppdragTask(
         val statusFraOppdragDTO = objectMapper.readValue(task.payload, StatusFraOppdragDTO::class.java)
         val personIdent = personidentService.hentAktør(statusFraOppdragDTO.aktørId).aktivFødselsnummer()
 
-        val nyTaskV2 = PubliserVedtakV2Task.opprettTask(personIdent, statusFraOppdragDTO.behandlingsId)
+        val nyTaskV2 = PubliserVedtakV2Task.opprettTask(personIdent, BehandlingId(statusFraOppdragDTO.behandlingsId))
         taskRepository.save(nyTaskV2)
     }
 

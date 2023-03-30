@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.task.dto.IverksettMotFamilieTilbakeDTO
 import no.nav.familie.kontrakter.felles.objectMapper
@@ -24,7 +25,7 @@ class IverksettMotFamilieTilbakeTask(
     override fun doTask(task: Task) {
         val iverksettMotFamilieTilbake = objectMapper.readValue(task.payload, IverksettMotFamilieTilbakeDTO::class.java)
         stegService.håndterIverksettMotFamilieTilbake(
-            behandling = behandlingHentOgPersisterService.hent(iverksettMotFamilieTilbake.behandlingsId),
+            behandling = behandlingHentOgPersisterService.hent(BehandlingId(iverksettMotFamilieTilbake.behandlingsId)),
             task.metadata
         )
     }

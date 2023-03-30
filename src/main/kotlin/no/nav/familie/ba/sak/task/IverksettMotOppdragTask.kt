@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.task
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
@@ -30,7 +31,7 @@ class IverksettMotOppdragTask(
     override fun doTask(task: Task) {
         val iverksettingTask = objectMapper.readValue(task.payload, IverksettingTaskDTO::class.java)
         stegService.håndterIverksettMotØkonomi(
-            behandling = behandlingHentOgPersisterService.hent(iverksettingTask.behandlingsId),
+            behandling = behandlingHentOgPersisterService.hent(BehandlingId(iverksettingTask.behandlingsId)),
             iverksettingTaskDTO = iverksettingTask
         )
     }
@@ -67,7 +68,7 @@ class IverksettMotOppdragTask(
         fun opprettTask(behandling: Behandling, vedtak: Vedtak, saksbehandlerId: String): Task {
             return opprettTask(
                 behandling.fagsak.aktør,
-                behandling.id,
+                behandling.behandlingId,
                 vedtak.id,
                 saksbehandlerId,
                 behandling.fagsak.id
@@ -76,7 +77,7 @@ class IverksettMotOppdragTask(
 
         fun opprettTask(
             aktør: Aktør,
-            behandlingsId: Long,
+            behandlingsId: BehandlingId,
             vedtaksId: Long,
             saksbehandlerId: String,
             fagsakId: Long
@@ -86,7 +87,7 @@ class IverksettMotOppdragTask(
                 payload = objectMapper.writeValueAsString(
                     IverksettingTaskDTO(
                         personIdent = aktør.aktivFødselsnummer(),
-                        behandlingsId = behandlingsId,
+                        behandlingsId = behandlingsId.id,
                         vedtaksId = vedtaksId,
                         saksbehandlerId = saksbehandlerId
                     )
