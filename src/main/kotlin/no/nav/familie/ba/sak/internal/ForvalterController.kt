@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClien
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.RestartAvSmåbarnstilleggService
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
@@ -34,7 +33,6 @@ class ForvalterController(
     private val oppgaveRepository: OppgaveRepository,
     private val integrasjonClient: IntegrasjonClient,
     private val restartAvSmåbarnstilleggService: RestartAvSmåbarnstilleggService,
-    private val behandlingService: BehandlingHentOgPersisterService,
     private val oppgaveService: OppgaveService
 
 ) {
@@ -91,8 +89,8 @@ class ForvalterController(
                     ferdigstiltTid.isBefore(
                             request.ferdigstiltTom
                         ) &&
-                    eksisterendeOppgave.tema != Tema.BAR &&
-                    eksisterendeOppgave.oppgavetype != request.oppgavetype.value
+                    eksisterendeOppgave.tema == Tema.BAR &&
+                    eksisterendeOppgave.oppgavetype == request.oppgavetype.value
                 ) {
                     val klonetOppgave = OpprettOppgaveRequest(
                         ident = OppgaveIdentV2(
