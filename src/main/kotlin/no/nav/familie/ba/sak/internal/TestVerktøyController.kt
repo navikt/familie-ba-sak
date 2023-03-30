@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.AutobrevScheduler
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottaker
@@ -123,9 +124,10 @@ class TestVerktøyController(
 
     @GetMapping(path = ["/hent-simulering-pa-behandling/{behandlingId}"])
     fun hentSimuleringPåBehandling(@PathVariable behandlingId: Long): List<ØkonomiSimuleringMottaker> {
-        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
+        val parsetBehandlingId = BehandlingId(behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandlingId = parsetBehandlingId, event = AuditLoggerEvent.ACCESS)
 
-        return simuleringService.hentSimuleringPåBehandling(behandlingId)
+        return simuleringService.hentSimuleringPåBehandling(parsetBehandlingId)
     }
 
     companion object {
