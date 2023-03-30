@@ -126,7 +126,7 @@ class KlageService(
         )
 
         val revurdering = stegService.håndterNyBehandling(nyBehandling)
-        OpprettRevurderingResponse(Opprettet(revurdering.id.toString()))
+        OpprettRevurderingResponse(Opprettet(revurdering.behandlingId.id.toString()))
     } catch (e: Exception) {
         logger.error("Feilet opprettelse av revurdering for fagsak=${fagsak.id}, se secure logg for detaljer")
         secureLogger.error("Feilet opprettelse av revurdering for fagsak=$fagsak", e)
@@ -158,13 +158,14 @@ class KlageService(
     }
 
     private fun Behandling.tilFagsystemVedtak(): FagsystemVedtak {
-        val vedtak = vedtakService.hentAktivForBehandlingThrows(id)
+        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId)
 
         return FagsystemVedtak(
-            eksternBehandlingId = this.id.toString(),
+            eksternBehandlingId = this.behandlingId.id.toString(),
             behandlingstype = this.type.visningsnavn,
             resultat = this.resultat.displayName,
-            vedtakstidspunkt = vedtak.vedtaksdato ?: error("Mangler vedtakstidspunkt for behandling=$id"),
+            vedtakstidspunkt = vedtak.vedtaksdato
+                ?: error("Mangler vedtakstidspunkt for behandling=${behandlingId.id}"),
             fagsystemType = FagsystemType.ORDNIÆR,
             regelverk = this.kategori.tilRegelverk()
         )
