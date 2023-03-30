@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.behandling.settpåvent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSettPåVent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -32,9 +33,10 @@ class SettPåVentController(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Sett behandling på vent"
         )
-        settPåVentService.settBehandlingPåVent(behandlingId, restSettPåVent.frist, restSettPåVent.årsak)
+        val parsetBehandlingId = BehandlingId(behandlingId)
+        settPåVentService.settBehandlingPåVent(parsetBehandlingId, restSettPåVent.frist, restSettPåVent.årsak)
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = parsetBehandlingId)))
     }
 
     @PutMapping(path = ["{behandlingId}"])
@@ -46,9 +48,10 @@ class SettPåVentController(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Sett behandling på vent"
         )
-        settPåVentService.oppdaterSettBehandlingPåVent(behandlingId, restSettPåVent.frist, restSettPåVent.årsak)
+        val parsetBehandlingId = BehandlingId(behandlingId)
+        settPåVentService.oppdaterSettBehandlingPåVent(parsetBehandlingId, restSettPåVent.frist, restSettPåVent.årsak)
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = parsetBehandlingId)))
     }
 
     @PutMapping(path = ["{behandlingId}/fortsettbehandling"])
@@ -57,8 +60,9 @@ class SettPåVentController(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Sett behandling på vent"
         )
-        settPåVentService.gjenopptaBehandling(behandlingId)
+        val parsetBehandlingId = BehandlingId(behandlingId)
+        settPåVentService.gjenopptaBehandling(parsetBehandlingId)
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = parsetBehandlingId)))
     }
 }
