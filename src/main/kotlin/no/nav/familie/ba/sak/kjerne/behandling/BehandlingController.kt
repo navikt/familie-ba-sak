@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
@@ -60,11 +61,11 @@ class BehandlingController(
         val behandling = stegService.håndterNyBehandlingOgSendInfotrygdFeed(nyBehandling)
 
         // Basert på hvilke personer som ble hentet inn på behandlingen kan saksbehandler ha mistet tilgangen til behandlingen
-        tilgangService.validerTilgangTilBehandling(behandlingId = behandling.id, AuditLoggerEvent.UPDATE)
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandling.behandlingId, AuditLoggerEvent.UPDATE)
         return ResponseEntity.ok(
             Ressurs.success(
                 utvidetBehandlingService
-                    .lagRestUtvidetBehandling(behandlingId = behandling.id)
+                    .lagRestUtvidetBehandling(behandlingId = behandling.behandlingId)
             )
         )
     }
@@ -94,14 +95,15 @@ class BehandlingController(
         @RequestBody
         endreBehandling: RestEndreBehandlingstema
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
-        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
+        val parsetBehandlingId = BehandlingId(behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandlingId = parsetBehandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "endre behandlingstema"
         )
 
         val behandling = behandlingstemaService.oppdaterBehandlingstema(
-            behandling = behandlingHentOgPersisterService.hent(behandlingId),
+            behandling = behandlingHentOgPersisterService.hent(parsetBehandlingId),
             overstyrtUnderkategori = endreBehandling.behandlingUnderkategori,
             overstyrtKategori = endreBehandling.behandlingKategori,
             manueltOppdatert = true
@@ -110,7 +112,7 @@ class BehandlingController(
         return ResponseEntity.ok(
             Ressurs.success(
                 utvidetBehandlingService
-                    .lagRestUtvidetBehandling(behandlingId = behandling.id)
+                    .lagRestUtvidetBehandling(behandlingId = behandling.behandlingId)
             )
         )
     }
@@ -119,7 +121,8 @@ class BehandlingController(
     fun hentPersonerMedUgyldigEtterbetalingsperiode(
         @PathVariable behandlingId: Long
     ): ResponseEntity<Ressurs<List<String>>> {
-        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
+        val parsetBehandlingId = BehandlingId(behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandlingId = parsetBehandlingId, event = AuditLoggerEvent.ACCESS)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
             handling = "hent gyldig etterbetaling"
@@ -127,7 +130,7 @@ class BehandlingController(
 
         val aktørerMedUgyldigEtterbetalingsperiode =
             tilkjentYtelseValideringService.finnAktørerMedUgyldigEtterbetalingsperiode(
-                behandlingId = behandlingId
+                behandlingId = parsetBehandlingId
             )
         val personerMedUgyldigEtterbetalingsperiode =
             aktørerMedUgyldigEtterbetalingsperiode.map { it.aktivFødselsnummer() }
@@ -156,6 +159,7 @@ data class NyBehandling(
                 message = "Søkers ident kan ikke være blank",
                 frontendFeilmelding = "Klarte ikke å opprette behandling. Mangler ident på bruker."
             )
+
             BehandlingType.MIGRERING_FRA_INFOTRYGD == behandlingType &&
                 behandlingÅrsak.erManuellMigreringsårsak() &&
                 nyMigreringsdato == null -> {
@@ -164,6 +168,7 @@ data class NyBehandling(
                     frontendFeilmelding = "Du må sette ny migreringsdato før du kan fortsette videre"
                 )
             }
+
             behandlingType in listOf(BehandlingType.FØRSTEGANGSBEHANDLING, BehandlingType.REVURDERING) &&
                 behandlingÅrsak == BehandlingÅrsak.SØKNAD &&
                 søknadMottattDato == null -> {
