@@ -122,16 +122,16 @@ class BehandlingMetrikker(
     }
 
     private fun økBehandlingsresultatTypeMetrikk(behandling: Behandling) {
-        val behandlingsresultat = behandlingHentOgPersisterService.hent(behandlingId = behandling.id).resultat
+        val behandlingsresultat = behandlingHentOgPersisterService.hent(behandlingId = behandling.behandlingId).resultat
         antallBehandlingsresultat[behandlingsresultat]?.increment()
     }
 
     private fun økBegrunnelseMetrikk(behandling: Behandling) {
         if (antallGangerBruktStandardbegrunnelse.isEmpty()) hentBegrunnelserOgByggMetrikker()
 
-        if (!behandlingHentOgPersisterService.hent(behandlingId = behandling.id).erHenlagt()) {
-            val vedtak = vedtakRepository.findByBehandlingAndAktivOptional(behandlingId = behandling.id)
-                ?: error("Finner ikke aktivt vedtak på behandling ${behandling.id}")
+        if (!behandlingHentOgPersisterService.hent(behandlingId = behandling.behandlingId).erHenlagt()) {
+            val vedtak = vedtakRepository.findByBehandlingAndAktivOptional(behandlingId = behandling.behandlingId.id)
+                ?: error("Finner ikke aktivt vedtak på behandling ${behandling.behandlingId.id}")
 
             val vedtaksperiodeMedBegrunnelser =
                 vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(vedtakId = vedtak.id)
