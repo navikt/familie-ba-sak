@@ -16,7 +16,7 @@ class FiltreringFødselshendelserSteg(
         behandling: Behandling,
         data: NyBehandlingHendelse
     ): StegType {
-        logger.info("Kjører filtreringsregler for behandling ${behandling.id}")
+        logger.info("Kjører filtreringsregler for behandling ${behandling.behandlingId.id}")
 
         val fødselshendelsefiltreringResultat = filtreringsreglerService.kjørFiltreringsregler(
             data,
