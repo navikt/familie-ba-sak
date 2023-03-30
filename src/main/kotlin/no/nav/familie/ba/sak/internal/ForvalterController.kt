@@ -71,7 +71,7 @@ class ForvalterController(
             val lagretDbOppgave = oppgaveRepository.findByBehandlingAndTypeAndErFerdigstilt(
                 behandlingId,
                 request.oppgavetype
-            )
+            ).maxBy { it.opprettetTidspunkt }
 
             if (lagretDbOppgave == null) {
                 logger.info("Finner ikke oppgave for behandlingId=$behandlingId")
