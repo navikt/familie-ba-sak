@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.internal
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.featureToggle.miljø.Profil
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
@@ -34,9 +35,10 @@ class PreprodController(
             throw Feil("Skal bare være tilgjengelig i for preprod eller lokalt")
         }
 
-        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.CREATE)
+        val parsetBehandlingId = BehandlingId(behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandlingId = parsetBehandlingId, event = AuditLoggerEvent.CREATE)
 
-        testVerktøyService.oppdaterVilkårUtenFomTilFødselsdato(behandlingId)
+        testVerktøyService.oppdaterVilkårUtenFomTilFødselsdato(parsetBehandlingId)
 
         return ResponseEntity.ok(Ressurs.success("Oppdaterte vilkårsvurdering"))
     }
