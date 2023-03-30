@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.korrigertvedtak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
@@ -30,21 +31,23 @@ class KorrigertVedtakController(
         @PathVariable behandlingId: Long,
         @RequestBody korrigerVedtakRequest: KorrigerVedtakRequest
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
-        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        val parsetBehandlingId = BehandlingId(behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(parsetBehandlingId)
         val korrigertVedtak = korrigerVedtakRequest.tilKorrigerVedtak(behandling)
 
         korrigertVedtakService.lagreKorrigertVedtak(korrigertVedtak)
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId)))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(parsetBehandlingId)))
     }
 
     @PatchMapping(path = ["/behandling/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun settKorrigertVedtakTilInaktivPåBehandling(
         @PathVariable behandlingId: Long
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
-        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        val parsetBehandlingId = BehandlingId(behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(parsetBehandlingId)
         korrigertVedtakService.settKorrigertVedtakPåBehandlingTilInaktiv(behandling)
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = parsetBehandlingId)))
     }
 }
