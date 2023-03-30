@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.andelerTilOpph
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.andelerTilOpprettelse
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.sisteAndelPerKjede
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.sisteBeståendeAndelPerKjede
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
@@ -188,7 +189,7 @@ class UtbetalingsoppdragGenerator(
 }
 
 abstract class AndelTilkjentYtelseForUtbetalingsoppdrag(private val andelTilkjentYtelse: AndelTilkjentYtelse) {
-    val behandlingId: Long? = andelTilkjentYtelse.behandlingId
+    val behandlingId: BehandlingId? = andelTilkjentYtelse.behandlingId
     val tilkjentYtelse: TilkjentYtelse = andelTilkjentYtelse.tilkjentYtelse
     val kalkulertUtbetalingsbeløp: Int = andelTilkjentYtelse.kalkulertUtbetalingsbeløp
     val stønadFom: YearMonth = andelTilkjentYtelse.stønadFom
@@ -198,7 +199,7 @@ abstract class AndelTilkjentYtelseForUtbetalingsoppdrag(private val andelTilkjen
     fun erUtvidet() = andelTilkjentYtelse.erUtvidet()
     abstract var periodeOffset: Long?
     abstract var forrigePeriodeOffset: Long?
-    abstract var kildeBehandlingId: Long?
+    abstract var kildeBehandlingId: BehandlingId?
 
     override fun equals(other: Any?): Boolean {
         return if (other is AndelTilkjentYtelseForUtbetalingsoppdrag) {
@@ -226,7 +227,7 @@ class AndelTilkjentYtelseForSimuleringFactory : AndelTilkjentYtelseForUtbetaling
     ) : AndelTilkjentYtelseForUtbetalingsoppdrag(andelTilkjentYtelse) {
         override var periodeOffset: Long? = andelTilkjentYtelse.periodeOffset
         override var forrigePeriodeOffset: Long? = andelTilkjentYtelse.forrigePeriodeOffset
-        override var kildeBehandlingId: Long? = andelTilkjentYtelse.kildeBehandlingId
+        override var kildeBehandlingId: BehandlingId? = andelTilkjentYtelse.kildeBehandlingId
     }
 }
 
@@ -249,7 +250,7 @@ class AndelTilkjentYtelseForIverksettingFactory : AndelTilkjentYtelseForUtbetali
                 andelTilkjentYtelse.forrigePeriodeOffset = value
             }
 
-        override var kildeBehandlingId: Long?
+        override var kildeBehandlingId: BehandlingId?
             get() = andelTilkjentYtelse.kildeBehandlingId
             set(value) {
                 andelTilkjentYtelse.kildeBehandlingId = value
