@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
@@ -46,6 +47,7 @@ class VilkårsvurderingForNyBehandlingService(
                 // Lagre ned migreringsdato
                 behandlingService.lagreNedMigreringsdato(nyMigreringsdato, behandling)
             }
+
             BehandlingÅrsak.HELMANUELL_MIGRERING -> {
                 genererVilkårsvurderingForHelmanuellMigrering(
                     behandling = behandling,
@@ -55,6 +57,7 @@ class VilkårsvurderingForNyBehandlingService(
                 // Lagre ned migreringsdato
                 behandlingService.lagreNedMigreringsdato(nyMigreringsdato, behandling)
             }
+
             !in listOf(BehandlingÅrsak.SØKNAD, BehandlingÅrsak.FØDSELSHENDELSE) -> {
                 initierVilkårsvurderingForBehandling(
                     behandling = behandling,
@@ -62,6 +65,7 @@ class VilkårsvurderingForNyBehandlingService(
                     forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErVedtatt
                 )
             }
+
             else -> logger.info(
                 "Perioder i vilkårsvurdering generer ikke automatisk for " +
                     behandling.opprettetÅrsak.visningsnavn
@@ -78,16 +82,16 @@ class VilkårsvurderingForNyBehandlingService(
             personResultater =
                 VilkårsvurderingForNyBehandlingUtils(
                     personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(
-                        behandling.id
+                        behandling.behandlingId
                     )
                 ).lagPersonResultaterForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
                     vilkårsvurdering = this,
                     nyMigreringsdato = nyMigreringsdato,
                     forrigeBehandlingVilkårsvurdering = hentVilkårsvurderingThrows(
-                        forrigeBehandlingSomErVedtatt.id,
+                        forrigeBehandlingSomErVedtatt.behandlingId,
                         feilmelding =
-                        "Kan ikke kopiere vilkårsvurdering fra forrige behandling ${forrigeBehandlingSomErVedtatt.id}" +
-                            "til behandling ${behandling.id}"
+                        "Kan ikke kopiere vilkårsvurdering fra forrige behandling ${forrigeBehandlingSomErVedtatt.behandlingId.id}" +
+                            "til behandling ${behandling.behandlingId.id}"
                     )
                 )
         }
@@ -100,7 +104,7 @@ class VilkårsvurderingForNyBehandlingService(
     ): Vilkårsvurdering {
         val vilkårsvurdering = Vilkårsvurdering(behandling = behandling).apply {
             personResultater = VilkårsvurderingForNyBehandlingUtils(
-                personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandling.id)
+                personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandling.behandlingId)
             ).lagPersonResultaterForHelmanuellMigrering(
                 vilkårsvurdering = this,
                 nyMigreringsdato = nyMigreringsdato
@@ -114,11 +118,11 @@ class VilkårsvurderingForNyBehandlingService(
         bekreftEndringerViaFrontend: Boolean,
         forrigeBehandlingSomErVedtatt: Behandling?
     ): Vilkårsvurdering {
-        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandling.id)
+        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandling.behandlingId)
 
         validerAtFødselshendelseInneholderMinstEttBarn(behandling, personopplysningGrunnlag)
 
-        val aktivVilkårsvurdering = hentVilkårsvurdering(behandling.id)
+        val aktivVilkårsvurdering = hentVilkårsvurdering(behandling.behandlingId)
 
         val initiellVilkårsvurdering =
             VilkårsvurderingForNyBehandlingUtils(personopplysningGrunnlag = personopplysningGrunnlag).genererInitiellVilkårsvurdering(
@@ -174,7 +178,7 @@ class VilkårsvurderingForNyBehandlingService(
             løpendeUnderkategori = løpendeUnderkategori,
             forrigeBehandlingVilkårsvurdering = if (forrigeBehandlingSomErVedtatt != null) {
                 hentVilkårsvurdering(
-                    forrigeBehandlingSomErVedtatt.id
+                    forrigeBehandlingSomErVedtatt.behandlingId
                 )
             } else {
                 null
@@ -220,7 +224,7 @@ class VilkårsvurderingForNyBehandlingService(
             personopplysningGrunnlag = personopplysningGrunnlag
         ).genererVilkårsvurderingFraForrigeVedtattBehandling(
             initiellVilkårsvurdering = initiellVilkårsvurdering,
-            forrigeBehandlingVilkårsvurdering = hentVilkårsvurderingThrows(forrigeBehandlingSomErVedtatt.id),
+            forrigeBehandlingVilkårsvurdering = hentVilkårsvurderingThrows(forrigeBehandlingSomErVedtatt.behandlingId),
             behandling = behandling,
             løpendeUnderkategori = løpendeUnderkategori
         )
@@ -231,12 +235,13 @@ class VilkårsvurderingForNyBehandlingService(
         return vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
     }
 
-    fun hentVilkårsvurdering(behandlingId: Long): Vilkårsvurdering? = vilkårsvurderingService.hentAktivForBehandling(
-        behandlingId = behandlingId
-    )
+    fun hentVilkårsvurdering(behandlingId: BehandlingId): Vilkårsvurdering? =
+        vilkårsvurderingService.hentAktivForBehandling(
+            behandlingId = behandlingId
+        )
 
     fun hentVilkårsvurderingThrows(
-        behandlingId: Long,
+        behandlingId: BehandlingId,
         feilmelding: String? = null
     ): Vilkårsvurdering =
         hentVilkårsvurdering(behandlingId) ?: throw Feil(
