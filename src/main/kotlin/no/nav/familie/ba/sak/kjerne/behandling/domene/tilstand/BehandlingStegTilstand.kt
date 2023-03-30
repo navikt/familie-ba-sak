@@ -61,6 +61,6 @@ data class BehandlingStegTilstand(
     }
 
     override fun toString(): String {
-        return "BehandlingStegTilstand(id=$id, behandling=${behandling.id}, behandlingSteg=$behandlingSteg, behandlingStegStatus=$behandlingStegStatus)"
+        return "BehandlingStegTilstand(id=$id, behandling=${behandling.behandlingId.id}, behandlingSteg=$behandlingSteg, behandlingStegStatus=$behandlingStegStatus)"
     }
 }
