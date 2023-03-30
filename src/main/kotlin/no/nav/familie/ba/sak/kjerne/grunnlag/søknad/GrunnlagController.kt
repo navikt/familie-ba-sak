@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
@@ -34,13 +35,14 @@ class GrunnlagController(
         @RequestBody
         leggTilBarnDto: LeggTilBarnDto
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
-        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
+        val parsetBehandlingId = BehandlingId(behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandlingId = parsetBehandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "legge til barn"
         )
 
-        val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId = parsetBehandlingId)
         persongrunnlagService.leggTilBarnIPersonopplysningsgrunnlag(
             behandling = behandling,
             nyttBarnIdent = leggTilBarnDto.barnIdent
@@ -49,7 +51,7 @@ class GrunnlagController(
         return ResponseEntity.ok(
             Ressurs.success(
                 utvidetBehandlingService
-                    .lagRestUtvidetBehandling(behandlingId = behandling.id)
+                    .lagRestUtvidetBehandling(behandlingId = behandling.behandlingId)
             )
         )
     }
