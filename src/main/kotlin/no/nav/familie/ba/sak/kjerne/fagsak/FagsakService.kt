@@ -114,6 +114,7 @@ class FagsakService(
                 if (institusjon?.orgNummer == null) throw FunksjonellFeil("Mangler påkrevd variabel orgnummer for institusjon")
                 fagsakRepository.finnFagsakForInstitusjonOgOrgnummer(aktør, institusjon.orgNummer)
             }
+
             else -> fagsakRepository.finnFagsakForAktør(aktør, type)
         }
 
@@ -208,7 +209,7 @@ class FagsakService(
             tilbakekrevingsbehandlingService.hentRestTilbakekrevingsbehandlinger((fagsakId))
         val visningsbehandlinger = behandlingHentOgPersisterService.hentBehandlinger(fagsakId = fagsakId).map {
             it.tilRestVisningBehandling(
-                vedtaksdato = vedtakRepository.findByBehandlingAndAktivOptional(it.id)?.vedtaksdato
+                vedtaksdato = vedtakRepository.findByBehandlingAndAktivOptional(it.behandlingId.id)?.vedtaksdato
             )
         }
         val migreringsdato = behandlingService.hentMigreringsdatoPåFagsak(fagsakId)
@@ -226,7 +227,7 @@ class FagsakService(
             tilbakekrevingsbehandlingService.hentRestTilbakekrevingsbehandlinger((fagsakId))
         val utvidedeBehandlinger =
             behandlingHentOgPersisterService.hentBehandlinger(fagsakId = fagsakId)
-                .map { utvidetBehandlingService.lagRestUtvidetBehandling(it.id) }
+                .map { utvidetBehandlingService.lagRestUtvidetBehandling(it.behandlingId) }
 
         return restBaseFagsak.tilRestFagsak(utvidedeBehandlinger, tilbakekrevingsbehandlinger)
     }
@@ -236,7 +237,8 @@ class FagsakService(
 
         val aktivBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = fagsakId)
 
-        val sistVedtatteBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsakId)
+        val sistVedtatteBehandling =
+            behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsakId)
 
         val gjeldendeUtbetalingsperioder =
             if (sistVedtatteBehandling != null) vedtaksperiodeService.hentUtbetalingsperioder(behandling = sistVedtatteBehandling) else emptyList()
@@ -353,8 +355,8 @@ class FagsakService(
                     relasjon.relasjonsrolle == FORELDERBARNRELASJONROLLE.MEDMOR
             }.forEach { relasjon ->
                 if (assosierteFagsakDeltagere.find { fagsakDeltager ->
-                    fagsakDeltager.ident == relasjon.aktør.aktivFødselsnummer()
-                } == null
+                        fagsakDeltager.ident == relasjon.aktør.aktivFødselsnummer()
+                    } == null
                 ) {
                     val maskertForelder =
                         hentMaskertFagsakdeltakerVedManglendeTilgang(relasjon.aktør)
@@ -370,7 +372,8 @@ class FagsakService(
                             }
                         )
 
-                        val fagsakerForRelasjon = fagsakRepository.finnFagsakerForAktør(relasjon.aktør).ifEmpty { listOf(null) }
+                        val fagsakerForRelasjon =
+                            fagsakRepository.finnFagsakerForAktør(relasjon.aktør).ifEmpty { listOf(null) }
                         fagsakerForRelasjon.forEach { fagsak ->
                             assosierteFagsakDeltagere.add(
                                 RestFagsakDeltager(
@@ -410,7 +413,8 @@ class FagsakService(
 
         personRepository.findByAktør(aktør).forEach { person: Person ->
             if (person.personopplysningGrunnlag.aktiv) {
-                val behandling = behandlingHentOgPersisterService.hent(behandlingId = person.personopplysningGrunnlag.behandlingId)
+                val behandling =
+                    behandlingHentOgPersisterService.hent(behandlingId = person.personopplysningGrunnlag.behandlingId)
                 if (behandling.aktiv && !behandling.fagsak.arkivert && !assosierteFagsakDeltagerMap.containsKey(
                         behandling.fagsak.id
                     )
@@ -493,7 +497,8 @@ class FagsakService(
             .map { it.behandlingId }.toSet()
             .map { behandlingHentOgPersisterService.hent(behandlingId = it) }
 
-        val behandlingerSomErSisteIverksattePåFagsak = behandlingerMedLøpendeAndeler.filter { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(it.fagsak.id) == it }
+        val behandlingerSomErSisteIverksattePåFagsak =
+            behandlingerMedLøpendeAndeler.filter { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(it.fagsak.id) == it }
 
         return behandlingerSomErSisteIverksattePåFagsak.map { it.fagsak }
     }
@@ -501,7 +506,10 @@ class FagsakService(
     fun finnAlleFagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær(aktør: Aktør): List<Fagsak> {
         val alleLøpendeFagsakerPåAktør = hentAlleFagsakerForAktør(aktør).filter { it.status == FagsakStatus.LØPENDE }
 
-        val fagsakerHvorAktørHarLøpendeOrdinærBarnetrygd = finnAlleFagsakerHvorAktørHarLøpendeYtelseAvType(aktør = aktør, ytelseTyper = listOf(YtelseType.ORDINÆR_BARNETRYGD))
+        val fagsakerHvorAktørHarLøpendeOrdinærBarnetrygd = finnAlleFagsakerHvorAktørHarLøpendeYtelseAvType(
+            aktør = aktør,
+            ytelseTyper = listOf(YtelseType.ORDINÆR_BARNETRYGD)
+        )
 
         return (alleLøpendeFagsakerPåAktør + fagsakerHvorAktørHarLøpendeOrdinærBarnetrygd).distinct()
     }
