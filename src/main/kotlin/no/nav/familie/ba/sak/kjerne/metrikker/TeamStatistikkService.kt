@@ -158,14 +158,14 @@ class TeamStatistikkService(
         listOf(180, 150, 120, 90, 60).fold(mutableSetOf<Long>()) { acc, dagerSiden ->
             val åpneBehandlinger = behandlingRepository.finnÅpneBehandlinger(
                 opprettetFør = LocalDateTime.now().minusDays(dagerSiden.toLong())
-            ).filter { !acc.contains(it.id) }
+            ).filter { !acc.contains(it.behandlingId.id) }
 
             if (åpneBehandlinger.isNotEmpty()) {
                 logger.warn(
                     "${åpneBehandlinger.size} åpne behandlinger har ligget i over $dagerSiden dager: \n" +
                         "${åpneBehandlinger.map { behandling -> "$behandling\n" }}"
                 )
-                acc.addAll(åpneBehandlinger.map { it.id })
+                acc.addAll(åpneBehandlinger.map { it.behandlingId.id })
             }
 
             acc
