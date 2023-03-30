@@ -43,7 +43,7 @@ class BrevmalService(
         val behandlingsresultat = behandling.resultat
         val erInstitusjon = behandling.fagsak.institusjon != null
         val ytelseErLøpende by lazy {
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.behandlingId.id)
                 .any { it.erLøpende() }
         }
 
