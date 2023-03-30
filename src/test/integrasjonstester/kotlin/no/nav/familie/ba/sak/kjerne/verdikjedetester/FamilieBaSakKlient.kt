@@ -73,7 +73,7 @@ class FamilieBaSakKlient(
         restJournalføring: RestJournalføring
     ): Ressurs<String> {
         val uri =
-            URI.create(encodePath("$baSakUrl/api/journalpost/$journalpostId/journalfør/$oppgaveId?journalfoerendeEnhet=$journalførendeEnhet"))
+            URI.create(encodePath("$baSakUrl/api/journalpost/$journalpostId/journalfør/$oppgaveId") + "?journalfoerendeEnhet=$journalførendeEnhet")
         return postForEntity(
             uri,
             restJournalføring,
