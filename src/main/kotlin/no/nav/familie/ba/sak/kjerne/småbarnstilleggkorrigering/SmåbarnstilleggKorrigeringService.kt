@@ -30,7 +30,7 @@ class SmåbarnstilleggKorrigeringService(
 ) {
     @Transactional
     fun leggTilSmåbarnstilleggPåBehandling(årMåned: YearMonth, behandling: Behandling): List<AndelTilkjentYtelse> {
-        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandlingId = behandling.id)
+        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandlingId = behandling.behandlingId.id)
         val andelTilkjentYtelser = tilkjentYtelse.andelerTilkjentYtelse
 
         val småbarnstilleggTidslinje = andelTilkjentYtelser.tilTryggTidslinjeForSøkersYtelse(YtelseType.SMÅBARNSTILLEGG)
@@ -60,7 +60,7 @@ class SmåbarnstilleggKorrigeringService(
 
     @Transactional
     fun fjernSmåbarnstilleggPåBehandling(årMåned: YearMonth, behandling: Behandling): List<AndelTilkjentYtelse> {
-        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandlingId = behandling.id)
+        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandlingId = behandling.behandlingId.id)
 
         val småbarnstilleggTidslinje = tilkjentYtelse.andelerTilkjentYtelse
             .tilTryggTidslinjeForSøkersYtelse(YtelseType.SMÅBARNSTILLEGG)
