@@ -40,7 +40,7 @@ object VilkårResultatUtils {
             periodeFom = fom,
             periodeTom = tom,
             begrunnelse = "Vurdert og satt automatisk: ${automatiskVurderingResultat.evaluering.begrunnelse}",
-            behandlingId = personResultat.vilkårsvurdering.behandling.id,
+            behandlingId = personResultat.vilkårsvurdering.behandling.behandlingId,
             evalueringÅrsaker = automatiskVurderingResultat.evaluering.evalueringÅrsaker.map { it.toString() }
         )
     }

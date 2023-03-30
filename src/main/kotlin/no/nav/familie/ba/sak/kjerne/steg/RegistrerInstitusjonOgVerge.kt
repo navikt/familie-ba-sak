@@ -50,7 +50,7 @@ class RegistrerInstitusjonOgVerge(
             throw Feil("Ugyldig DTO for registrer verge")
         }
 
-        return hentNesteStegForNormalFlyt(behandling = behandlingHentOgPersisterService.hent(behandlingId = behandling.id))
+        return hentNesteStegForNormalFlyt(behandling = behandlingHentOgPersisterService.hent(behandlingId = behandling.behandlingId))
     }
 
     override fun stegType(): StegType {

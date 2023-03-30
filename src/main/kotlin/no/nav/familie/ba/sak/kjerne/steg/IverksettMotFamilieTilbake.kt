@@ -26,11 +26,11 @@ class IverksettMotFamilieTilbake(
 ) : BehandlingSteg<IverksettMotFamilieTilbakeData> {
 
     override fun utførStegOgAngiNeste(behandling: Behandling, data: IverksettMotFamilieTilbakeData): StegType {
-        val vedtak = vedtakService.hentAktivForBehandling(behandling.id) ?: throw Feil(
-            "Fant ikke vedtak for behandling ${behandling.id} ved iverksetting mot familie-tilbake."
+        val vedtak = vedtakService.hentAktivForBehandling(behandling.behandlingId) ?: throw Feil(
+            "Fant ikke vedtak for behandling ${behandling.behandlingId.id} ved iverksetting mot familie-tilbake."
         )
 
-        val tilbakekreving = tilbakekrevingRepository.findByBehandlingId(behandling.id)
+        val tilbakekreving = tilbakekrevingRepository.findByBehandlingId(behandling.behandlingId.id)
 
         if (tilbakekreving != null &&
             tilbakekreving.valg != Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING &&
@@ -39,7 +39,7 @@ class IverksettMotFamilieTilbake(
             val tilbakekrevingId = tilbakekrevingService.opprettTilbakekreving(behandling)
             tilbakekreving.tilbakekrevingsbehandlingId = tilbakekrevingId
 
-            logger.info("Opprettet tilbakekreving for behandling ${behandling.id} og tilbakekrevingsid $tilbakekrevingId")
+            logger.info("Opprettet tilbakekreving for behandling ${behandling.behandlingId.id} og tilbakekrevingsid $tilbakekrevingId")
             tilbakekrevingRepository.save(tilbakekreving)
         }
 

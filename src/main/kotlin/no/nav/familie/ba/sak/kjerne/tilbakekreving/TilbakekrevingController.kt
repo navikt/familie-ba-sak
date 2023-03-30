@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.tilbakekreving
 
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.ResponseEntity
@@ -28,7 +29,7 @@ class TilbakekrevingController(
         return ResponseEntity.ok(
             Ressurs.success(
                 tilbakekrevingService.hentForhåndsvisningVarselbrev(
-                    behandlingId,
+                    BehandlingId(behandlingId),
                     forhåndsvisTilbakekrevingsvarselbrevRequest
                 )
             )

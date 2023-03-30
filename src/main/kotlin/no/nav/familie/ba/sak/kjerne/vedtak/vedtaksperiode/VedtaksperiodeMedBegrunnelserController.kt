@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedFritekst
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.brev.BrevKlient
 import no.nav.familie.ba.sak.kjerne.brev.BrevPeriodeService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
@@ -66,7 +67,7 @@ class VedtaksperiodeMedBegrunnelserController(
             eøsStandardbegrunnelserFraFrontend = eøsStandardbegrunnelser
         )
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = vedtak.behandling.id)))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = vedtak.behandling.behandlingId)))
     }
 
     @PutMapping("/fritekster/{vedtaksperiodeId}")
@@ -86,7 +87,7 @@ class VedtaksperiodeMedBegrunnelserController(
             restPutVedtaksperiodeMedFritekster
         )
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = vedtak.behandling.id)))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = vedtak.behandling.behandlingId)))
     }
 
     @PutMapping("/endringstidspunkt")
@@ -97,7 +98,7 @@ class VedtaksperiodeMedBegrunnelserController(
         return ResponseEntity.ok(
             Ressurs.success(
                 utvidetBehandlingService
-                    .lagRestUtvidetBehandling(behandlingId = restGenererVedtaksperioder.behandlingId)
+                    .lagRestUtvidetBehandling(behandlingId = BehandlingId(restGenererVedtaksperioder.behandlingId))
             )
         )
     }

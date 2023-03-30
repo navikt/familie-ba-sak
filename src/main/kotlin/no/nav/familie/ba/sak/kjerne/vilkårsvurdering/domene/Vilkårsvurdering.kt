@@ -50,7 +50,7 @@ data class Vilkårsvurdering(
 ) : BaseEntitet() {
 
     override fun toString(): String {
-        return "Vilkårsvurdering(id=$id, behandling=${behandling.id})"
+        return "Vilkårsvurdering(id=$id, behandling=${behandling.behandlingId.id})"
     }
 
     fun kopier(inkluderAndreVurderinger: Boolean = false): Vilkårsvurdering {

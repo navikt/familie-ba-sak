@@ -62,7 +62,7 @@ data class Tilbakekreving(
     override fun toString(): String {
         return "Tilbakekreving(" +
             "id=$id, " +
-            "behandlingId=${behandling.id} " +
+            "behandlingId=${behandling.behandlingId.id} " +
             "valg=$valg, " +
             "tilbakekrevingsbehandlingId=$tilbakekrevingsbehandlingId" +
             ")"

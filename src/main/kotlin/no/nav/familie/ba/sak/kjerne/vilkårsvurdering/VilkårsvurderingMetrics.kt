@@ -77,8 +77,9 @@ class VilkårsvurderingMetrics(
     }
 
     fun tellMetrikker(vilkårsvurdering: Vilkårsvurdering) {
-        val persongrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(vilkårsvurdering.behandling.id)
-            ?: error("Finner ikke aktivt persongrunnlag ved telling av metrikker")
+        val persongrunnlag =
+            personopplysningGrunnlagRepository.findByBehandlingAndAktiv(vilkårsvurdering.behandling.behandlingId.id)
+                ?: error("Finner ikke aktivt persongrunnlag ved telling av metrikker")
 
         vilkårsvurdering.personResultater.forEach { personResultat ->
             val person = persongrunnlag.søkerOgBarn.firstOrNull { it.aktør == personResultat.aktør }
@@ -89,8 +90,8 @@ class VilkårsvurderingMetrics(
             }
 
             if (negativeVilkår.isNotEmpty()) {
-                logger.info("Behandling: ${vilkårsvurdering.behandling.id}, personType=${person.type}. Vilkår som får negativt resultat og årsakene: ${negativeVilkår.map { "${it.vilkårType}=${it.evalueringÅrsaker}" }}.")
-                secureLogger.info("Behandling: ${vilkårsvurdering.behandling.id}, person=${person.aktør.aktivFødselsnummer()}. Vilkår som får negativt resultat og årsakene: ${negativeVilkår.map { "${it.vilkårType}=${it.evalueringÅrsaker}" }}.")
+                logger.info("Behandling: ${vilkårsvurdering.behandling.behandlingId.id}, personType=${person.type}. Vilkår som får negativt resultat og årsakene: ${negativeVilkår.map { "${it.vilkårType}=${it.evalueringÅrsaker}" }}.")
+                secureLogger.info("Behandling: ${vilkårsvurdering.behandling.behandlingId.id}, person=${person.aktør.aktivFødselsnummer()}. Vilkår som får negativt resultat og årsakene: ${negativeVilkår.map { "${it.vilkårType}=${it.evalueringÅrsaker}" }}.")
             }
 
             personResultat.vilkårResultater.forEach { vilkårResultat ->
@@ -121,6 +122,7 @@ class VilkårsvurderingMetrics(
                             vilkårResultatSøker.second!!
                         )
                     }
+
                     vilkårResultatBarn != null -> {
                         økTellerForFørsteUtfallVilkårVedAutomatiskSaksbehandling(
                             vilkårResultatBarn.second!!
@@ -135,8 +137,8 @@ class VilkårsvurderingMetrics(
         vilkår: Vilkår
     ): List<Pair<Person, VilkårResultat?>> {
         val personer =
-            personopplysningGrunnlagRepository.findByBehandlingAndAktiv(vilkårsvurdering.behandling.id)?.søkerOgBarn
-                ?: error("Finner ikke persongrunnlag på behandling ${vilkårsvurdering.behandling.id}")
+            personopplysningGrunnlagRepository.findByBehandlingAndAktiv(vilkårsvurdering.behandling.behandlingId.id)?.søkerOgBarn
+                ?: error("Finner ikke persongrunnlag på behandling ${vilkårsvurdering.behandling.behandlingId.id}")
 
         return personer.map { person ->
             val personResultat = vilkårsvurdering.personResultater.firstOrNull { personResultat ->
@@ -151,15 +153,15 @@ class VilkårsvurderingMetrics(
     }
 
     private fun økTellerForFørsteUtfallVilkårVedAutomatiskSaksbehandling(vilkårResultat: VilkårResultat) {
-        val behandlingId = vilkårResultat.personResultat?.vilkårsvurdering?.behandling?.id!!
-        val personer = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)?.søkerOgBarn
+        val behandlingId = vilkårResultat.personResultat?.vilkårsvurdering?.behandling?.behandlingId!!
+        val personer = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId.id)?.søkerOgBarn
             ?: error("Finner ikke aktivt persongrunnlag ved telling av metrikker")
 
         val person = personer.firstOrNull { it.aktør == vilkårResultat.personResultat?.aktør }
             ?: error("Finner ikke person")
 
-        logger.info("Første vilkår med feil=$vilkårResultat, på personType=${person.type}, på behandling $behandlingId")
-        secureLogger.info("Første vilkår med feil=$vilkårResultat, på person=${person.aktør.aktivFødselsnummer()}, på behandling $behandlingId")
+        logger.info("Første vilkår med feil=$vilkårResultat, på personType=${person.type}, på behandling ${behandlingId.id}")
+        secureLogger.info("Første vilkår med feil=$vilkårResultat, på person=${person.aktør.aktivFødselsnummer()}, på behandling ${behandlingId.id}")
         vilkårResultat.evalueringÅrsaker.forEach { årsak ->
             vilkårsvurderingFørsteUtfall[person.type]?.get(årsak)?.increment()
         }
