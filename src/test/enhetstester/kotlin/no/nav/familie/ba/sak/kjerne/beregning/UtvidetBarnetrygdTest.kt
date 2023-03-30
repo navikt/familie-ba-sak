@@ -941,7 +941,7 @@ internal class UtvidetBarnetrygdTest {
 
         assertThrows<FunksjonellFeil> {
             UtvidetBarnetrygdGenerator(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId,
                 tilkjentYtelse = tilkjentYtelse
             ).lagUtvidetBarnetrygdAndeler(
                 utvidetVilkår = listOf(utvidetVilkår),
@@ -982,7 +982,7 @@ internal class UtvidetBarnetrygdTest {
         )
 
         val utvidetAndeler = UtvidetBarnetrygdGenerator(
-            behandlingId = behandling.id,
+            behandlingId = behandling.behandlingId,
             tilkjentYtelse = tilkjentYtelse
         ).lagUtvidetBarnetrygdAndeler(
             utvidetVilkår = listOf(utvidetVilkår),

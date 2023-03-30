@@ -21,7 +21,7 @@ object UtvidetBarnetrygdUtil {
         endretUtbetalingAndelerSøker: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>
     ): List<AndelTilkjentYtelseMedEndreteUtbetalinger> {
         val andelerTilkjentYtelseUtvidet = UtvidetBarnetrygdGenerator(
-            behandlingId = tilkjentYtelse.behandling.id,
+            behandlingId = tilkjentYtelse.behandling.behandlingId,
             tilkjentYtelse = tilkjentYtelse
         )
             .lagUtvidetBarnetrygdAndeler(
@@ -40,15 +40,28 @@ object UtvidetBarnetrygdUtil {
             .flatMap { it.vilkårResultater }
             .filter { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD && it.resultat == Resultat.OPPFYLT }
 
-        utvidetVilkårResultater.forEach { validerUtvidetVilkårsresultat(vilkårResultat = it, utvidetVilkårResultater = utvidetVilkårResultater) }
+        utvidetVilkårResultater.forEach {
+            validerUtvidetVilkårsresultat(
+                vilkårResultat = it,
+                utvidetVilkårResultater = utvidetVilkårResultater
+            )
+        }
         return utvidetVilkårResultater
     }
 
-    internal fun validerUtvidetVilkårsresultat(vilkårResultat: VilkårResultat, utvidetVilkårResultater: List<VilkårResultat>) {
+    internal fun validerUtvidetVilkårsresultat(
+        vilkårResultat: VilkårResultat,
+        utvidetVilkårResultater: List<VilkårResultat>
+    ) {
         val fom = vilkårResultat.periodeFom?.toYearMonth()
         val tom = vilkårResultat.periodeTom?.toYearMonth()
 
-        val finnesEtterfølgendeBack2BackPeriode = utvidetVilkårResultater.any { erBack2BackIMånedsskifte(tilOgMed = vilkårResultat.periodeTom, fraOgMed = it.periodeFom) }
+        val finnesEtterfølgendeBack2BackPeriode = utvidetVilkårResultater.any {
+            erBack2BackIMånedsskifte(
+                tilOgMed = vilkårResultat.periodeTom,
+                fraOgMed = it.periodeFom
+            )
+        }
 
         if (fom == null) {
             throw Feil("Fom må være satt på søkers periode ved utvidet barnetrygd")
