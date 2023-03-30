@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestKorrigertEtterbetaling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
@@ -32,20 +33,22 @@ class KorrigertEtterbetalingController(
         @PathVariable behandlingId: Long,
         @RequestBody korrigertEtterbetalingRequest: KorrigertEtterbetalingRequest
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
-        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        val parsetBehandlingId = BehandlingId(behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(parsetBehandlingId)
         val korrigertEtterbetaling = korrigertEtterbetalingRequest.tilKorrigertEtterbetaling(behandling)
 
         korrigertEtterbetalingService.lagreKorrigertEtterbetaling(korrigertEtterbetaling)
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId)))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(parsetBehandlingId)))
     }
 
     @GetMapping(path = ["/behandling/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentAlleKorrigerteEtterbetalingPåBehandling(
         @PathVariable behandlingId: Long
     ): ResponseEntity<Ressurs<List<RestKorrigertEtterbetaling>>> {
-        val korrigerteEtterbetalinger = korrigertEtterbetalingService.finnAlleKorrigeringerPåBehandling(behandlingId)
-            .map { it.tilRestKorrigertEtterbetaling() }
+        val korrigerteEtterbetalinger =
+            korrigertEtterbetalingService.finnAlleKorrigeringerPåBehandling(BehandlingId(behandlingId))
+                .map { it.tilRestKorrigertEtterbetaling() }
 
         return ResponseEntity.ok(Ressurs.success(korrigerteEtterbetalinger))
     }
@@ -54,9 +57,10 @@ class KorrigertEtterbetalingController(
     fun settKorrigertEtterbetalingTilInaktivPåBehandling(
         @PathVariable behandlingId: Long
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
-        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        val parsetBehandlingId = BehandlingId(behandlingId)
+        val behandling = behandlingHentOgPersisterService.hent(parsetBehandlingId)
         korrigertEtterbetalingService.settKorrigeringPåBehandlingTilInaktiv(behandling)
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = parsetBehandlingId)))
     }
 }
