@@ -96,7 +96,7 @@ internal class UtvidetBarnetrygdTest {
         }
         vilkårsvurdering.apply { personResultater = (listOf(søkerResultat) + barnResultater).toSet() }
 
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id)
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.behandlingId)
             .apply {
                 personer.addAll(listOf(søker, barnA, barnB).lagGrunnlagPersoner(this))
             }
@@ -187,7 +187,7 @@ internal class UtvidetBarnetrygdTest {
 
         vilkårsvurdering.apply { personResultater = (listOf(søkerResultat) + barnResultater).toSet() }
 
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id)
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.behandlingId)
             .apply {
                 personer.addAll(listOf(søker, oppfyltBarn).lagGrunnlagPersoner(this, fødselsdatoUnder6År))
             }
@@ -270,7 +270,7 @@ internal class UtvidetBarnetrygdTest {
                 }
         vilkårsvurdering.apply { personResultater = listOf(søkerResultat, barnResultater).toSet() }
 
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id)
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.behandlingId)
             .apply {
                 personer.addAll(listOf(søkerOrdinær, barnOppfylt).lagGrunnlagPersoner(this))
             }
@@ -350,7 +350,7 @@ internal class UtvidetBarnetrygdTest {
                 }
         vilkårsvurdering.apply { personResultater = listOf(søkerResultat, barnResultater).toSet() }
 
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id)
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.behandlingId)
             .apply {
                 personer.addAll(listOf(søkerOrdinær, barnOppfylt).lagGrunnlagPersoner(this))
             }
@@ -430,7 +430,7 @@ internal class UtvidetBarnetrygdTest {
                 }
         vilkårsvurdering.apply { personResultater = listOf(søkerResultat, barnResultater).toSet() }
 
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id)
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.behandlingId)
             .apply {
                 personer.addAll(listOf(søkerOrdinær, barnOppfylt).lagGrunnlagPersoner(this))
             }
@@ -487,7 +487,7 @@ internal class UtvidetBarnetrygdTest {
                             periodeFom = søkerOrdinær.fom,
                             periodeTom = b2bTom,
                             begrunnelse = "",
-                            behandlingId = this.vilkårsvurdering.behandling.id,
+                            behandlingId = this.vilkårsvurdering.behandling.behandlingId,
                             utdypendeVilkårsvurderinger = emptyList()
                         ),
                         VilkårResultat(
@@ -497,7 +497,7 @@ internal class UtvidetBarnetrygdTest {
                             periodeFom = b2bFom,
                             periodeTom = null,
                             begrunnelse = "",
-                            behandlingId = this.vilkårsvurdering.behandling.id,
+                            behandlingId = this.vilkårsvurdering.behandling.behandlingId,
                             utdypendeVilkårsvurderinger = emptyList()
                         )
                     )
@@ -520,7 +520,7 @@ internal class UtvidetBarnetrygdTest {
                     )
                 }
         vilkårsvurdering.apply { personResultater = listOf(søkerResultat, barnResultater).toSet() }
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id)
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.behandlingId)
             .apply {
                 personer.addAll(listOf(søkerOrdinær, barnOppfylt).lagGrunnlagPersoner(this))
             }
@@ -596,7 +596,7 @@ internal class UtvidetBarnetrygdTest {
                             periodeFom = søkerOrdinær.fom,
                             periodeTom = søkerOrdinær.tom,
                             begrunnelse = "",
-                            behandlingId = this.vilkårsvurdering.behandling.id,
+                            behandlingId = this.vilkårsvurdering.behandling.behandlingId,
                             utdypendeVilkårsvurderinger = emptyList()
                         )
                     )
@@ -632,7 +632,7 @@ internal class UtvidetBarnetrygdTest {
                                 periodeFom = søkerOrdinær.fom,
                                 periodeTom = b2bTom,
                                 begrunnelse = "",
-                                behandlingId = this.vilkårsvurdering.behandling.id,
+                                behandlingId = this.vilkårsvurdering.behandling.behandlingId,
                                 utdypendeVilkårsvurderinger = emptyList()
                             ),
                             VilkårResultat(
@@ -642,7 +642,7 @@ internal class UtvidetBarnetrygdTest {
                                 periodeFom = b2bFom,
                                 periodeTom = søkerOrdinær.tom,
                                 begrunnelse = "",
-                                behandlingId = this.vilkårsvurdering.behandling.id,
+                                behandlingId = this.vilkårsvurdering.behandling.behandlingId,
                                 utdypendeVilkårsvurderinger = emptyList()
                             )
                         )
@@ -650,7 +650,7 @@ internal class UtvidetBarnetrygdTest {
                 }
         vilkårsvurdering.apply { personResultater = listOf(søkerResultat, barnResultater).toSet() }
 
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id)
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.behandlingId)
             .apply {
                 personer.addAll(listOf(søkerOrdinær, barnOppfylt).lagGrunnlagPersoner(this))
             }
@@ -708,7 +708,7 @@ internal class UtvidetBarnetrygdTest {
                             periodeFom = søkerOrdinær.fom,
                             periodeTom = søkerOrdinær.tom,
                             begrunnelse = "",
-                            behandlingId = this.vilkårsvurdering.behandling.id,
+                            behandlingId = this.vilkårsvurdering.behandling.behandlingId,
                             utdypendeVilkårsvurderinger = emptyList()
                         )
                     )
@@ -743,7 +743,7 @@ internal class UtvidetBarnetrygdTest {
                                 periodeFom = søkerOrdinær.fom,
                                 periodeTom = b2bTom,
                                 begrunnelse = "",
-                                behandlingId = this.vilkårsvurdering.behandling.id,
+                                behandlingId = this.vilkårsvurdering.behandling.behandlingId,
                                 utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED)
                             ),
                             VilkårResultat(
@@ -753,7 +753,7 @@ internal class UtvidetBarnetrygdTest {
                                 periodeFom = b2bFom,
                                 periodeTom = søkerOrdinær.tom,
                                 begrunnelse = "",
-                                behandlingId = this.vilkårsvurdering.behandling.id,
+                                behandlingId = this.vilkårsvurdering.behandling.behandlingId,
                                 utdypendeVilkårsvurderinger = emptyList()
                             )
                         )
@@ -761,7 +761,7 @@ internal class UtvidetBarnetrygdTest {
                 }
         vilkårsvurdering.apply { personResultater = listOf(søkerResultat, barnResultater).toSet() }
 
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id)
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.behandlingId)
             .apply {
                 personer.addAll(listOf(søkerOrdinær, barnOppfylt).lagGrunnlagPersoner(this))
             }
@@ -836,7 +836,7 @@ internal class UtvidetBarnetrygdTest {
                             periodeFom = søkerOrdinær.fom,
                             periodeTom = utvidetFørstePeriodeTom,
                             begrunnelse = "",
-                            behandlingId = this.vilkårsvurdering.behandling.id,
+                            behandlingId = this.vilkårsvurdering.behandling.behandlingId,
                             utdypendeVilkårsvurderinger = emptyList()
                         ),
                         VilkårResultat(
@@ -846,7 +846,7 @@ internal class UtvidetBarnetrygdTest {
                             periodeFom = utvidetAndrePeriodeFom,
                             periodeTom = null,
                             begrunnelse = "",
-                            behandlingId = this.vilkårsvurdering.behandling.id,
+                            behandlingId = this.vilkårsvurdering.behandling.behandlingId,
                             utdypendeVilkårsvurderinger = emptyList()
                         )
                     )
@@ -871,7 +871,7 @@ internal class UtvidetBarnetrygdTest {
                 }
         vilkårsvurdering.apply { personResultater = listOf(søkerResultat, barnResultater).toSet() }
 
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id)
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.behandlingId)
             .apply {
                 personer.addAll(listOf(søkerOrdinær, barnOppfylt).lagGrunnlagPersoner(this))
             }
@@ -1039,7 +1039,7 @@ internal class UtvidetBarnetrygdTest {
                 periodeFom = if (it == Vilkår.UNDER_18_ÅR) fødselsdato else vilkårOppfyltFom,
                 periodeTom = if (it == Vilkår.UNDER_18_ÅR) fødselsdato.plusYears(18) else vilkårOppfyltTom,
                 begrunnelse = "",
-                behandlingId = personResultat.vilkårsvurdering.behandling.id,
+                behandlingId = personResultat.vilkårsvurdering.behandling.behandlingId,
                 utdypendeVilkårsvurderinger = listOfNotNull(
                     if (erDeltBosted) UtdypendeVilkårsvurdering.DELT_BOSTED else null
                 )
