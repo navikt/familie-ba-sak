@@ -13,7 +13,7 @@ class SaksstatistikkEventPublisher {
     lateinit var applicationEventPublisher: ApplicationEventPublisher
 
     fun publiserBehandlingsstatistikk(behandlingId: BehandlingId) {
-        applicationEventPublisher.publishEvent(SaksstatistikkEvent(this, null, behandlingId.id))
+        applicationEventPublisher.publishEvent(SaksstatistikkEvent(this, null, behandlingId))
     }
 
     fun publiserSaksstatistikk(fagsakId: Long) {
@@ -24,5 +24,5 @@ class SaksstatistikkEventPublisher {
 class SaksstatistikkEvent(
     source: Any,
     val fagsakId: Long?,
-    val behandlingId: Long?
+    val behandlingId: BehandlingId?
 ) : ApplicationEvent(source)

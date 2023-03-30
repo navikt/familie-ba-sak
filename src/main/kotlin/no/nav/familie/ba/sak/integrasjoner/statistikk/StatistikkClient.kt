@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.statistikk
 
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.getDataOrThrow
@@ -19,8 +20,8 @@ class StatistikkClient(
     @Qualifier("jwtBearer") val restTemplate: RestOperations
 ) : AbstractRestClient(restTemplate, "statistikk") {
 
-    fun harSendtVedtaksmeldingForBehandling(behandlingId: Long): Boolean {
-        val uri = URI.create("$baseUri/vedtak/$behandlingId")
+    fun harSendtVedtaksmeldingForBehandling(behandlingId: BehandlingId): Boolean {
+        val uri = URI.create("$baseUri/vedtak/${behandlingId.id}")
 
         return try {
             val response: Ressurs<Boolean> = getForEntity(uri, httpHeaders())

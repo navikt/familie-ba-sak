@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.statistikk.saksstatistikk
 
 import io.swagger.v3.oas.annotations.Operation
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagring
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringType
@@ -30,7 +31,7 @@ class SaksstatistikkController(
     @GetMapping(path = ["/behandling/{behandlingId}"])
     fun hentBehandlingDvh(@PathVariable(name = "behandlingId", required = true) behandlingId: Long): BehandlingDVH {
         try {
-            return saksstatistikkService.mapTilBehandlingDVH(behandlingId)!!
+            return saksstatistikkService.mapTilBehandlingDVH(BehandlingId(behandlingId))!!
         } catch (e: Exception) {
             logger.warn("Feil ved henting av sakstatistikk behandling", e)
             throw e

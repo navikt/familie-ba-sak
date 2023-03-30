@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.statistikk.stønadsstatistikk
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.pdl.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.statistikk.StatistikkClient
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
@@ -32,7 +33,7 @@ class StønadsstatistikkController(
     @PostMapping(path = ["/vedtakV2"])
     fun hentVedtakDvhV2(@RequestBody(required = true) behandlinger: List<Long>): List<VedtakDVHV2> {
         try {
-            return behandlinger.map { stønadsstatistikkService.hentVedtakV2(it) }
+            return behandlinger.map { stønadsstatistikkService.hentVedtakV2(BehandlingId(it)) }
         } catch (e: Exception) {
             logger.warn("Feil ved henting av stønadsstatistikk V2 for $behandlinger", e)
             throw e
@@ -42,9 +43,10 @@ class StønadsstatistikkController(
     @PostMapping(path = ["/send-til-dvh"])
     fun sendTilStønadsstatistikk(@RequestBody(required = true) behandlinger: List<Long>) {
         behandlinger.forEach {
-            if (!statistikkClient.harSendtVedtaksmeldingForBehandling(it)) {
-                val vedtakV2DVH = stønadsstatistikkService.hentVedtakV2(it)
-                val vedtakV2Task = PubliserVedtakV2Task.opprettTask(vedtakV2DVH.personV2.personIdent, it)
+            val behandlingId = BehandlingId(it)
+            if (!statistikkClient.harSendtVedtaksmeldingForBehandling(behandlingId)) {
+                val vedtakV2DVH = stønadsstatistikkService.hentVedtakV2(behandlingId)
+                val vedtakV2Task = PubliserVedtakV2Task.opprettTask(vedtakV2DVH.personV2.personIdent, behandlingId)
                 taskRepository.save(vedtakV2Task)
             }
         }
@@ -53,8 +55,9 @@ class StønadsstatistikkController(
     @PostMapping(path = ["/send-til-dvh-manuell"])
     fun sendTilStønadsstatistikkManuell(@RequestBody(required = true) behandlinger: List<Long>) {
         behandlinger.forEach {
-            val vedtakV2DVH = stønadsstatistikkService.hentVedtakV2(it)
-            val vedtakV2Task = PubliserVedtakV2Task.opprettTask(vedtakV2DVH.personV2.personIdent, it)
+            val behandlingId = BehandlingId(it)
+            val vedtakV2DVH = stønadsstatistikkService.hentVedtakV2(behandlingId)
+            val vedtakV2Task = PubliserVedtakV2Task.opprettTask(vedtakV2DVH.personV2.personIdent, behandlingId)
             taskRepository.save(vedtakV2Task)
         }
     }
@@ -69,20 +72,24 @@ class StønadsstatistikkController(
         )
 
         manuelleMigreringer.forEach {
-            if (!statistikkClient.harSendtVedtaksmeldingForBehandling(it) && erIverksattBehandling(it)) {
-                logger.info("Ettersender stønadstatistikk for behandlingId=$it dryRun=$dryRun")
-                val vedtakV2DVH = stønadsstatistikkService.hentVedtakV2(it)
+            val behandlingId = BehandlingId(it)
+            if (!statistikkClient.harSendtVedtaksmeldingForBehandling(behandlingId) && erIverksattBehandling(
+                    behandlingId
+                )
+            ) {
+                logger.info("Ettersender stønadstatistikk for behandlingId=${behandlingId.id} dryRun=$dryRun")
+                val vedtakV2DVH = stønadsstatistikkService.hentVedtakV2(behandlingId)
                 if (!dryRun) {
                     secureLogger.info("Oppretter task for å ettersende vedtak $vedtakV2DVH.person.personIdent")
-                    val vedtakV2Task = PubliserVedtakV2Task.opprettTask(vedtakV2DVH.personV2.personIdent, it)
+                    val vedtakV2Task = PubliserVedtakV2Task.opprettTask(vedtakV2DVH.personV2.personIdent, behandlingId)
                     taskRepository.save(vedtakV2Task)
                 }
             }
         }
     }
 
-    private fun erIverksattBehandling(behandlingId: Long): Boolean {
-        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)
+    private fun erIverksattBehandling(behandlingId: BehandlingId): Boolean {
+        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandlingOptional(behandlingId.id)
 
         return if (tilkjentYtelse != null) {
             tilkjentYtelse.utbetalingsoppdrag != null

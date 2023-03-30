@@ -25,7 +25,7 @@ class SaksstatistikkEventListener(
                         kontraktVersjon = it.versjon,
                         json = sakstatistikkObjectMapper.writeValueAsString(it),
                         type = SaksstatistikkMellomlagringType.BEHANDLING,
-                        typeId = event.behandlingId
+                        typeId = event.behandlingId.id
                     )
                 )
             }
