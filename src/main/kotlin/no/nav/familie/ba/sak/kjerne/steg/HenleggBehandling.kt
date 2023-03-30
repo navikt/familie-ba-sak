@@ -15,6 +15,9 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.BehandleSak
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.BehandleUnderkjentVedtak
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.GodkjenneVedtak
+import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype.VurderLivshendelse
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -45,7 +48,16 @@ class HenleggBehandling(
         val (oppgaverTekniskVedlikeholdPgaSatsendring, oppgaverSomSkalFerdigstilles) = oppgaveService.hentOppgaverSomIkkeErFerdigstilt(
             behandling
         )
-            .partition { (data.årsak == HenleggÅrsak.TEKNISK_VEDLIKEHOLD && data.begrunnelse == SATSENDRING && it.type == BehandleSak) }
+            .partition {
+                (
+                    data.årsak == HenleggÅrsak.TEKNISK_VEDLIKEHOLD && data.begrunnelse == SATSENDRING && it.type in listOf(
+                        BehandleSak,
+                        GodkjenneVedtak,
+                        BehandleUnderkjentVedtak,
+                        VurderLivshendelse
+                    )
+                    )
+            }
 
         oppgaverSomSkalFerdigstilles.forEach {
             oppgaveService.ferdigstillOppgaver(behandling.id, it.type)
