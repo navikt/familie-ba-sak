@@ -1,8 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
 import javax.persistence.CascadeType
@@ -77,4 +79,10 @@ data class PersonopplysningGrunnlag(
         sb.append('}')
         return sb.toString()
     }
+}
+
+fun Aktør.tilPerson(personopplysningGrunnlag: PersonopplysningGrunnlag): Person? = personopplysningGrunnlag.personer.find { it.aktør == this }
+fun Aktør.erBarn(personopplysningGrunnlag: PersonopplysningGrunnlag): Boolean {
+    val person = this.tilPerson(personopplysningGrunnlag) ?: throw Feil("Fant ikke aktør på personopplysningsgrunnlaget")
+    return person.type == PersonType.BARN
 }
