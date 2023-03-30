@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonInfoMedNavnOgAdress
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.PersonIdent
@@ -72,9 +73,10 @@ class PersonController(
 
     @GetMapping(path = ["/oppdater-registeropplysninger/{behandlingId}"])
     fun hentOgOppdaterRegisteropplysninger(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
-        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
+        val parsetBehandlingId = BehandlingId(behandlingId)
+        tilgangService.validerTilgangTilBehandling(behandlingId = parsetBehandlingId, event = AuditLoggerEvent.ACCESS)
 
-        val personopplysningGrunnlag = persongrunnlagService.oppdaterRegisteropplysninger(behandlingId)
+        val personopplysningGrunnlag = persongrunnlagService.oppdaterRegisteropplysninger(parsetBehandlingId)
         return ResponseEntity.ok(
             Ressurs.success(
                 utvidetBehandlingService
