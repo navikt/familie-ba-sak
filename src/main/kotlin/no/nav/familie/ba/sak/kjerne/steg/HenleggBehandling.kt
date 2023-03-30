@@ -49,14 +49,12 @@ class HenleggBehandling(
             behandling
         )
             .partition {
-                (
-                    data.årsak == HenleggÅrsak.TEKNISK_VEDLIKEHOLD && data.begrunnelse == SATSENDRING && it.type in listOf(
-                        BehandleSak,
-                        GodkjenneVedtak,
-                        BehandleUnderkjentVedtak,
-                        VurderLivshendelse
-                    )
-                    )
+                data.årsak == HenleggÅrsak.TEKNISK_VEDLIKEHOLD && data.begrunnelse == SATSENDRING && it.type in listOf(
+                    BehandleSak,
+                    GodkjenneVedtak,
+                    BehandleUnderkjentVedtak,
+                    VurderLivshendelse
+                )
             }
 
         oppgaverSomSkalFerdigstilles.forEach {
