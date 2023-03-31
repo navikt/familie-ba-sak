@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.beregning.endringstidspunkt
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
@@ -20,7 +19,6 @@ import java.time.YearMonth
 @Service
 class EndringstidspunktService(
     private val kompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse>,
-    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,

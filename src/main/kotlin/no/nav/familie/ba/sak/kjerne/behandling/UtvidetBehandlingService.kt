@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.behandling
 
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.VergeInfo
 import no.nav.familie.ba.sak.ekstern.restDomene.tilDto
@@ -70,8 +69,7 @@ class UtvidetBehandlingService(
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     private val korrigertVedtakService: KorrigertVedtakService,
     private val feilutbetaltValutaService: FeilutbetaltValutaService,
-    private val brevmottakerService: BrevmottakerService,
-    private val featureToggleService: FeatureToggleService
+    private val brevmottakerService: BrevmottakerService
 ) {
     fun lagRestUtvidetBehandling(behandlingId: Long): RestUtvidetBehandling {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
