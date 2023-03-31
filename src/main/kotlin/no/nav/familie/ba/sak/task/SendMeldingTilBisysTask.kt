@@ -133,12 +133,12 @@ class SendMeldingTilBisysTask(
     companion object {
         const val TASK_STEP_TYPE = "sendMeldingOmOpphørTilBisys"
 
-        fun opprettTask(behandlingsId: Long): Task {
+        fun opprettTask(behandlingsId: BehandlingId): Task {
             return Task(
                 type = TASK_STEP_TYPE,
-                payload = behandlingsId.toString(),
+                payload = behandlingsId.id.toString(),
                 properties = Properties().apply {
-                    this["behandlingsId"] = behandlingsId.toString()
+                    this["behandlingsId"] = behandlingsId.id.toString()
                 }
             )
         }
