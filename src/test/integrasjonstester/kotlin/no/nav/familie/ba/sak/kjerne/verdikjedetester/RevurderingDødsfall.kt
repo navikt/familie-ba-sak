@@ -128,7 +128,7 @@ class RevurderingDødsfall(
             restFagsak = restFagsakEtterBehandlingAvsluttet,
             fagsakStatus = FagsakStatus.AVSLUTTET,
             behandlingStegType = StegType.BEHANDLING_AVSLUTTET,
-            aktivBehandlingId = behandlingDødsfall.id
+            aktivBehandlingId = behandlingDødsfall.behandlingId
         )
     }
 

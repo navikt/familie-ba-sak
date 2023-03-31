@@ -198,7 +198,7 @@ class FagsakServiceTest(
             RegistrerPersongrunnlagDTO(ident = søker1Fnr, barnasIdenter = listOf(barn1Fnr))
         )
 
-        behandlingService.oppdaterStatusPåBehandling(førsteBehandling.id, BehandlingStatus.AVSLUTTET)
+        behandlingService.oppdaterStatusPåBehandling(førsteBehandling.behandlingId, BehandlingStatus.AVSLUTTET)
 
         val andreBehandling = stegService.håndterNyBehandling(
             NyBehandling(
@@ -345,7 +345,7 @@ class FagsakServiceTest(
 
         val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true)
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
-            behandlingMor.id,
+            behandlingMor.behandlingId,
             mor,
             listOf(barnFnr),
             søkerAktør = fagsakMor.aktør,
@@ -359,7 +359,7 @@ class FagsakServiceTest(
         val behandlingFar = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsakFar))
 
         val personopplysningGrunnlagFar = lagTestPersonopplysningGrunnlag(
-            behandlingFar.id,
+            behandlingFar.behandlingId,
             far,
             listOf(barnFnr),
             søkerAktør = fagsakFar.aktør,
@@ -389,12 +389,16 @@ class FagsakServiceTest(
     fun `Skal kun hente løpende fagsak for søker`() {
         val søker = lagPerson(type = PersonType.SØKER)
 
-        val normalFagsakForSøker = opprettFagsakForPersonMedStatus(personIdent = søker.aktør.aktivFødselsnummer(), fagsakStatus = FagsakStatus.LØPENDE)
+        val normalFagsakForSøker = opprettFagsakForPersonMedStatus(
+            personIdent = søker.aktør.aktivFødselsnummer(),
+            fagsakStatus = FagsakStatus.LØPENDE
+        )
         opprettFagsakForPersonMedStatus(personIdent = randomFnr(), fagsakStatus = FagsakStatus.LØPENDE)
         opprettFagsakForPersonMedStatus(personIdent = randomFnr(), fagsakStatus = FagsakStatus.AVSLUTTET)
         opprettFagsakForPersonMedStatus(personIdent = randomFnr(), fagsakStatus = FagsakStatus.OPPRETTET)
 
-        val fagsakerMedSøkerSomDeltaker = fagsakService.finnAlleFagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær(søker.aktør)
+        val fagsakerMedSøkerSomDeltaker =
+            fagsakService.finnAlleFagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær(søker.aktør)
 
         assertEquals(1, fagsakerMedSøkerSomDeltaker.size)
         assertEquals(normalFagsakForSøker, fagsakerMedSøkerSomDeltaker.single())
@@ -404,12 +408,17 @@ class FagsakServiceTest(
     fun `Skal hente løpende institusjonsfagsak for søker`() {
         val barn = lagPerson(type = PersonType.BARN)
 
-        val normalFagsakForSøker = opprettFagsakForPersonMedStatus(personIdent = barn.aktør.aktivFødselsnummer(), fagsakStatus = FagsakStatus.LØPENDE, fagsakType = FagsakType.INSTITUSJON)
+        val normalFagsakForSøker = opprettFagsakForPersonMedStatus(
+            personIdent = barn.aktør.aktivFødselsnummer(),
+            fagsakStatus = FagsakStatus.LØPENDE,
+            fagsakType = FagsakType.INSTITUSJON
+        )
         opprettFagsakForPersonMedStatus(personIdent = randomFnr(), fagsakStatus = FagsakStatus.LØPENDE)
         opprettFagsakForPersonMedStatus(personIdent = randomFnr(), fagsakStatus = FagsakStatus.AVSLUTTET)
         opprettFagsakForPersonMedStatus(personIdent = randomFnr(), fagsakStatus = FagsakStatus.OPPRETTET)
 
-        val fagsakerMedSøkerSomDeltaker = fagsakService.finnAlleFagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær(barn.aktør)
+        val fagsakerMedSøkerSomDeltaker =
+            fagsakService.finnAlleFagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær(barn.aktør)
 
         assertEquals(1, fagsakerMedSøkerSomDeltaker.size)
         assertEquals(normalFagsakForSøker, fagsakerMedSøkerSomDeltaker.single())
@@ -421,7 +430,10 @@ class FagsakServiceTest(
         personidentService.hentOgLagreAktørIder(listOf(barn.aktør.aktivFødselsnummer()), lagre = true)
 
         val fagsak = opprettFagsakForPersonMedStatus(randomFnr(), FagsakStatus.LØPENDE)
-        opprettFagsakForPersonMedStatus(personIdent = randomFnr(), fagsakStatus = FagsakStatus.LØPENDE) // Lager en ekstre fagsak for å teste at denne ikke kommer med
+        opprettFagsakForPersonMedStatus(
+            personIdent = randomFnr(),
+            fagsakStatus = FagsakStatus.LØPENDE
+        ) // Lager en ekstre fagsak for å teste at denne ikke kommer med
 
         val perioderTilAndeler = listOf(
             PeriodeForAktør(
@@ -436,9 +448,14 @@ class FagsakServiceTest(
             )
         )
 
-        opprettAndelerOgBehandling(fagsak = fagsak, barnasIdenter = listOf(barn.aktør.aktivFødselsnummer()), perioderTilAndeler = perioderTilAndeler)
+        opprettAndelerOgBehandling(
+            fagsak = fagsak,
+            barnasIdenter = listOf(barn.aktør.aktivFødselsnummer()),
+            perioderTilAndeler = perioderTilAndeler
+        )
 
-        val fagsakerMedSøkerSomDeltaker = fagsakService.finnAlleFagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær(barn.aktør)
+        val fagsakerMedSøkerSomDeltaker =
+            fagsakService.finnAlleFagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær(barn.aktør)
 
         assertEquals(1, fagsakerMedSøkerSomDeltaker.size)
         assertEquals(fagsak, fagsakerMedSøkerSomDeltaker.single())
@@ -450,7 +467,10 @@ class FagsakServiceTest(
         personidentService.hentOgLagreAktørIder(listOf(barn.aktør.aktivFødselsnummer()), lagre = true)
 
         val fagsak = opprettFagsakForPersonMedStatus(randomFnr(), FagsakStatus.LØPENDE)
-        opprettFagsakForPersonMedStatus(personIdent = randomFnr(), fagsakStatus = FagsakStatus.LØPENDE) // Lager en ekstre fagsak for å teste at denne ikke kommer med
+        opprettFagsakForPersonMedStatus(
+            personIdent = randomFnr(),
+            fagsakStatus = FagsakStatus.LØPENDE
+        ) // Lager en ekstre fagsak for å teste at denne ikke kommer med
 
         val perioderTilAndeler = listOf(
             PeriodeForAktør(
@@ -459,9 +479,14 @@ class FagsakServiceTest(
                 aktør = barn.aktør
             )
         )
-        opprettAndelerOgBehandling(fagsak = fagsak, barnasIdenter = listOf(barn.aktør.aktivFødselsnummer()), perioderTilAndeler = perioderTilAndeler)
+        opprettAndelerOgBehandling(
+            fagsak = fagsak,
+            barnasIdenter = listOf(barn.aktør.aktivFødselsnummer()),
+            perioderTilAndeler = perioderTilAndeler
+        )
 
-        val fagsakerMedSøkerSomDeltaker = fagsakService.finnAlleFagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær(barn.aktør)
+        val fagsakerMedSøkerSomDeltaker =
+            fagsakService.finnAlleFagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær(barn.aktør)
 
         assertEquals(0, fagsakerMedSøkerSomDeltaker.size)
     }
@@ -472,8 +497,12 @@ class FagsakServiceTest(
         personidentService.hentOgLagreAktørIder(listOf(person.aktør.aktivFødselsnummer()), lagre = true)
 
         val fagsakHvorPersonErBarn = opprettFagsakForPersonMedStatus(randomFnr(), FagsakStatus.LØPENDE)
-        val fagsakHvorPersonErSøker = opprettFagsakForPersonMedStatus(person.aktør.aktivFødselsnummer(), FagsakStatus.LØPENDE)
-        opprettFagsakForPersonMedStatus(personIdent = randomFnr(), fagsakStatus = FagsakStatus.LØPENDE) // Lager en ekstre fagsak for å teste at denne ikke kommer med
+        val fagsakHvorPersonErSøker =
+            opprettFagsakForPersonMedStatus(person.aktør.aktivFødselsnummer(), FagsakStatus.LØPENDE)
+        opprettFagsakForPersonMedStatus(
+            personIdent = randomFnr(),
+            fagsakStatus = FagsakStatus.LØPENDE
+        ) // Lager en ekstre fagsak for å teste at denne ikke kommer med
 
         val perioderTilAndeler = listOf(
             PeriodeForAktør(
@@ -488,9 +517,14 @@ class FagsakServiceTest(
             )
         )
 
-        opprettAndelerOgBehandling(fagsak = fagsakHvorPersonErBarn, barnasIdenter = listOf(person.aktør.aktivFødselsnummer()), perioderTilAndeler = perioderTilAndeler)
+        opprettAndelerOgBehandling(
+            fagsak = fagsakHvorPersonErBarn,
+            barnasIdenter = listOf(person.aktør.aktivFødselsnummer()),
+            perioderTilAndeler = perioderTilAndeler
+        )
 
-        val fagsakerMedSøkerSomDeltaker = fagsakService.finnAlleFagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær(person.aktør)
+        val fagsakerMedSøkerSomDeltaker =
+            fagsakService.finnAlleFagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær(person.aktør)
 
         assertEquals(2, fagsakerMedSøkerSomDeltaker.size)
         assertEquals(fagsakHvorPersonErSøker, fagsakerMedSøkerSomDeltaker.first())
@@ -503,7 +537,10 @@ class FagsakServiceTest(
         personidentService.hentOgLagreAktørIder(listOf(person.aktør.aktivFødselsnummer()), lagre = true)
 
         val fagsakHvorPersonErBarn = opprettFagsakForPersonMedStatus(randomFnr(), FagsakStatus.LØPENDE)
-        opprettFagsakForPersonMedStatus(personIdent = randomFnr(), fagsakStatus = FagsakStatus.LØPENDE) // Lager en ekstre fagsak for å teste at denne ikke kommer med
+        opprettFagsakForPersonMedStatus(
+            personIdent = randomFnr(),
+            fagsakStatus = FagsakStatus.LØPENDE
+        ) // Lager en ekstre fagsak for å teste at denne ikke kommer med
 
         val gamlePerioder = listOf(
             PeriodeForAktør(
@@ -526,10 +563,19 @@ class FagsakServiceTest(
             )
         )
 
-        opprettAndelerOgBehandling(fagsak = fagsakHvorPersonErBarn, barnasIdenter = listOf(person.aktør.aktivFødselsnummer()), perioderTilAndeler = gamlePerioder) // gammel behandling
-        opprettAndelerOgBehandling(fagsak = fagsakHvorPersonErBarn, barnasIdenter = listOf(person.aktør.aktivFødselsnummer()), perioderTilAndeler = nyePerioder) // ny behandling
+        opprettAndelerOgBehandling(
+            fagsak = fagsakHvorPersonErBarn,
+            barnasIdenter = listOf(person.aktør.aktivFødselsnummer()),
+            perioderTilAndeler = gamlePerioder
+        ) // gammel behandling
+        opprettAndelerOgBehandling(
+            fagsak = fagsakHvorPersonErBarn,
+            barnasIdenter = listOf(person.aktør.aktivFødselsnummer()),
+            perioderTilAndeler = nyePerioder
+        ) // ny behandling
 
-        val fagsakerMedSøkerSomDeltaker = fagsakService.finnAlleFagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær(person.aktør)
+        val fagsakerMedSøkerSomDeltaker =
+            fagsakService.finnAlleFagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær(person.aktør)
 
         assertEquals(0, fagsakerMedSøkerSomDeltaker.size)
     }
@@ -538,7 +584,12 @@ class FagsakServiceTest(
     fun `Skal returnere fagsak hvor person mottar løpende utvidet`() {
         val person = lagPerson(type = PersonType.SØKER)
         val barn = lagPerson(type = PersonType.BARN)
-        personidentService.hentOgLagreAktørIder(listOf(person.aktør.aktivFødselsnummer(), barn.aktør.aktivFødselsnummer()), lagre = true)
+        personidentService.hentOgLagreAktørIder(
+            listOf(
+                person.aktør.aktivFødselsnummer(),
+                barn.aktør.aktivFødselsnummer()
+            ), lagre = true
+        )
 
         val fagsakHvorPersonErSøker = opprettFagsakForPersonMedStatus(randomFnr(), FagsakStatus.LØPENDE)
 
@@ -563,9 +614,16 @@ class FagsakServiceTest(
             )
         )
 
-        opprettAndelerOgBehandling(fagsak = fagsakHvorPersonErSøker, barnasIdenter = listOf(barn.aktør.aktivFødselsnummer()), perioderTilAndeler = perioder)
+        opprettAndelerOgBehandling(
+            fagsak = fagsakHvorPersonErSøker,
+            barnasIdenter = listOf(barn.aktør.aktivFødselsnummer()),
+            perioderTilAndeler = perioder
+        )
 
-        val fagsakerMedPersonSomFårUtvidetEllerOrdinær = fagsakService.finnAlleFagsakerHvorAktørHarLøpendeYtelseAvType(aktør = person.aktør, ytelseTyper = listOf(YtelseType.ORDINÆR_BARNETRYGD, YtelseType.UTVIDET_BARNETRYGD))
+        val fagsakerMedPersonSomFårUtvidetEllerOrdinær = fagsakService.finnAlleFagsakerHvorAktørHarLøpendeYtelseAvType(
+            aktør = person.aktør,
+            ytelseTyper = listOf(YtelseType.ORDINÆR_BARNETRYGD, YtelseType.UTVIDET_BARNETRYGD)
+        )
 
         assertEquals(1, fagsakerMedPersonSomFårUtvidetEllerOrdinær.size)
         assertEquals(fagsakHvorPersonErSøker, fagsakerMedPersonSomFårUtvidetEllerOrdinær.single())
@@ -575,7 +633,12 @@ class FagsakServiceTest(
     fun `Skal returnere ikke fagsak hvor person mottok utvidet som ikke er løpende lenger`() {
         val person = lagPerson(type = PersonType.SØKER)
         val barn = lagPerson(type = PersonType.BARN)
-        personidentService.hentOgLagreAktørIder(listOf(person.aktør.aktivFødselsnummer(), barn.aktør.aktivFødselsnummer()), lagre = true)
+        personidentService.hentOgLagreAktørIder(
+            listOf(
+                person.aktør.aktivFødselsnummer(),
+                barn.aktør.aktivFødselsnummer()
+            ), lagre = true
+        )
 
         val fagsakHvorPersonErSøker = opprettFagsakForPersonMedStatus(randomFnr(), FagsakStatus.LØPENDE)
 
@@ -594,9 +657,16 @@ class FagsakServiceTest(
             )
         )
 
-        opprettAndelerOgBehandling(fagsak = fagsakHvorPersonErSøker, barnasIdenter = listOf(barn.aktør.aktivFødselsnummer()), perioderTilAndeler = perioder)
+        opprettAndelerOgBehandling(
+            fagsak = fagsakHvorPersonErSøker,
+            barnasIdenter = listOf(barn.aktør.aktivFødselsnummer()),
+            perioderTilAndeler = perioder
+        )
 
-        val fagsakerMedPersonSomFårUtvidetEllerOrdinær = fagsakService.finnAlleFagsakerHvorAktørHarLøpendeYtelseAvType(aktør = person.aktør, ytelseTyper = listOf(YtelseType.ORDINÆR_BARNETRYGD, YtelseType.UTVIDET_BARNETRYGD))
+        val fagsakerMedPersonSomFårUtvidetEllerOrdinær = fagsakService.finnAlleFagsakerHvorAktørHarLøpendeYtelseAvType(
+            aktør = person.aktør,
+            ytelseTyper = listOf(YtelseType.ORDINÆR_BARNETRYGD, YtelseType.UTVIDET_BARNETRYGD)
+        )
 
         assertEquals(0, fagsakerMedPersonSomFårUtvidetEllerOrdinær.size)
     }
@@ -607,8 +677,14 @@ class FagsakServiceTest(
         personidentService.hentOgLagreAktørIder(listOf(person.aktør.aktivFødselsnummer()), lagre = true)
 
         val fagsakHvorPersonErBarn = opprettFagsakForPersonMedStatus(randomFnr(), FagsakStatus.LØPENDE)
-        opprettFagsakForPersonMedStatus(person.aktør.aktivFødselsnummer(), FagsakStatus.LØPENDE) // Fagsak hvor person er søker, men ikke har noen løpende utvidet-andeler
-        opprettFagsakForPersonMedStatus(personIdent = randomFnr(), fagsakStatus = FagsakStatus.LØPENDE) // Lager en ekstre fagsak for å teste at denne ikke kommer med
+        opprettFagsakForPersonMedStatus(
+            person.aktør.aktivFødselsnummer(),
+            FagsakStatus.LØPENDE
+        ) // Fagsak hvor person er søker, men ikke har noen løpende utvidet-andeler
+        opprettFagsakForPersonMedStatus(
+            personIdent = randomFnr(),
+            fagsakStatus = FagsakStatus.LØPENDE
+        ) // Lager en ekstre fagsak for å teste at denne ikke kommer med
 
         val perioderTilAndeler = listOf(
             PeriodeForAktør(
@@ -623,9 +699,16 @@ class FagsakServiceTest(
             )
         )
 
-        opprettAndelerOgBehandling(fagsak = fagsakHvorPersonErBarn, barnasIdenter = listOf(person.aktør.aktivFødselsnummer()), perioderTilAndeler = perioderTilAndeler)
+        opprettAndelerOgBehandling(
+            fagsak = fagsakHvorPersonErBarn,
+            barnasIdenter = listOf(person.aktør.aktivFødselsnummer()),
+            perioderTilAndeler = perioderTilAndeler
+        )
 
-        val fagsakerMedSøkerSomDeltaker = fagsakService.finnAlleFagsakerHvorAktørHarLøpendeYtelseAvType(aktør = person.aktør, ytelseTyper = listOf(YtelseType.ORDINÆR_BARNETRYGD, YtelseType.UTVIDET_BARNETRYGD))
+        val fagsakerMedSøkerSomDeltaker = fagsakService.finnAlleFagsakerHvorAktørHarLøpendeYtelseAvType(
+            aktør = person.aktør,
+            ytelseTyper = listOf(YtelseType.ORDINÆR_BARNETRYGD, YtelseType.UTVIDET_BARNETRYGD)
+        )
 
         assertEquals(1, fagsakerMedSøkerSomDeltaker.size)
         assertEquals(fagsakHvorPersonErBarn, fagsakerMedSøkerSomDeltaker.single())
@@ -635,11 +718,20 @@ class FagsakServiceTest(
     fun `Skal hente to fagsaker hvor person mottar løpende utvidet i en behandling og blir mottatt løpende ordinær for i en annen`() {
         val person = lagPerson(type = PersonType.BARN)
         val barn = lagPerson(type = PersonType.BARN)
-        personidentService.hentOgLagreAktørIder(listOf(person.aktør.aktivFødselsnummer(), barn.aktør.aktivFødselsnummer()), lagre = true)
+        personidentService.hentOgLagreAktørIder(
+            listOf(
+                person.aktør.aktivFødselsnummer(),
+                barn.aktør.aktivFødselsnummer()
+            ), lagre = true
+        )
 
         val fagsakHvorPersonErBarn = opprettFagsakForPersonMedStatus(randomFnr(), FagsakStatus.LØPENDE)
-        val fagsakHvorPersonErSøker = opprettFagsakForPersonMedStatus(person.aktør.aktivFødselsnummer(), FagsakStatus.LØPENDE)
-        opprettFagsakForPersonMedStatus(personIdent = randomFnr(), fagsakStatus = FagsakStatus.LØPENDE) // Lager en ekstre fagsak for å teste at denne ikke kommer med
+        val fagsakHvorPersonErSøker =
+            opprettFagsakForPersonMedStatus(person.aktør.aktivFødselsnummer(), FagsakStatus.LØPENDE)
+        opprettFagsakForPersonMedStatus(
+            personIdent = randomFnr(),
+            fagsakStatus = FagsakStatus.LØPENDE
+        ) // Lager en ekstre fagsak for å teste at denne ikke kommer med
 
         val perioderTilFagsakBarn = listOf(
             PeriodeForAktør(
@@ -669,10 +761,21 @@ class FagsakServiceTest(
             )
         )
 
-        opprettAndelerOgBehandling(fagsak = fagsakHvorPersonErBarn, barnasIdenter = listOf(person.aktør.aktivFødselsnummer()), perioderTilAndeler = perioderTilFagsakBarn)
-        opprettAndelerOgBehandling(fagsak = fagsakHvorPersonErSøker, barnasIdenter = listOf(barn.aktør.aktivFødselsnummer()), perioderTilAndeler = perioderTilFagsakSøker)
+        opprettAndelerOgBehandling(
+            fagsak = fagsakHvorPersonErBarn,
+            barnasIdenter = listOf(person.aktør.aktivFødselsnummer()),
+            perioderTilAndeler = perioderTilFagsakBarn
+        )
+        opprettAndelerOgBehandling(
+            fagsak = fagsakHvorPersonErSøker,
+            barnasIdenter = listOf(barn.aktør.aktivFødselsnummer()),
+            perioderTilAndeler = perioderTilFagsakSøker
+        )
 
-        val fagsakerMedSøkerSomDeltaker = fagsakService.finnAlleFagsakerHvorAktørHarLøpendeYtelseAvType(aktør = person.aktør, ytelseTyper = listOf(YtelseType.ORDINÆR_BARNETRYGD, YtelseType.UTVIDET_BARNETRYGD))
+        val fagsakerMedSøkerSomDeltaker = fagsakService.finnAlleFagsakerHvorAktørHarLøpendeYtelseAvType(
+            aktør = person.aktør,
+            ytelseTyper = listOf(YtelseType.ORDINÆR_BARNETRYGD, YtelseType.UTVIDET_BARNETRYGD)
+        )
 
         assertEquals(2, fagsakerMedSøkerSomDeltaker.size)
         assertEquals(fagsakHvorPersonErBarn, fagsakerMedSøkerSomDeltaker.first())
@@ -686,13 +789,25 @@ class FagsakServiceTest(
         val ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD
     )
 
-    private fun opprettFagsakForPersonMedStatus(personIdent: String, fagsakStatus: FagsakStatus, fagsakType: FagsakType = FagsakType.NORMAL): Fagsak {
+    private fun opprettFagsakForPersonMedStatus(
+        personIdent: String,
+        fagsakStatus: FagsakStatus,
+        fagsakType: FagsakType = FagsakType.NORMAL
+    ): Fagsak {
         val institusjon = InstitusjonInfo(orgNummer = "123456789", tssEksternId = "testid")
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fødselsnummer = personIdent, fagsakType = fagsakType, institusjon = if (fagsakType == FagsakType.INSTITUSJON) institusjon else null)
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(
+            fødselsnummer = personIdent,
+            fagsakType = fagsakType,
+            institusjon = if (fagsakType == FagsakType.INSTITUSJON) institusjon else null
+        )
         return fagsakService.oppdaterStatus(fagsak, fagsakStatus)
     }
 
-    private fun opprettAndelerOgBehandling(fagsak: Fagsak, barnasIdenter: List<String>, perioderTilAndeler: List<PeriodeForAktør>) {
+    private fun opprettAndelerOgBehandling(
+        fagsak: Fagsak,
+        barnasIdenter: List<String>,
+        perioderTilAndeler: List<PeriodeForAktør>
+    ) {
         val nyBehandling = NyBehandling(
             kategori = BehandlingKategori.NASJONAL,
             underkategori = BehandlingUnderkategori.ORDINÆR,
@@ -705,7 +820,8 @@ class FagsakServiceTest(
             fagsakId = fagsak.id
         )
         val behandling = behandlingService.opprettBehandling(nyBehandling = nyBehandling)
-        val tilkjentYtelse = TilkjentYtelse(behandling = behandling, endretDato = LocalDate.now(), opprettetDato = LocalDate.now())
+        val tilkjentYtelse =
+            TilkjentYtelse(behandling = behandling, endretDato = LocalDate.now(), opprettetDato = LocalDate.now())
         val andelerTilkjentYtelse = perioderTilAndeler.map {
             lagAndelTilkjentYtelse(
                 fom = it.fom,
@@ -720,6 +836,9 @@ class FagsakServiceTest(
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelse)
         tilkjentYtelseRepository.save(tilkjentYtelse)
 
-        behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.id, status = BehandlingStatus.AVSLUTTET)
+        behandlingService.oppdaterStatusPåBehandling(
+            behandlingId = behandling.behandlingId,
+            status = BehandlingStatus.AVSLUTTET
+        )
     }
 }

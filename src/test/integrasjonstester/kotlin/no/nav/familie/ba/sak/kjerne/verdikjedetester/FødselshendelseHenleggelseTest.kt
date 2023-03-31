@@ -166,7 +166,7 @@ class FødselshendelseHenleggelseTest(
 
         verify(exactly = 1) {
             opprettTaskService.opprettOppgaveTask(
-                behandlingId = behandling!!.id,
+                behandlingId = behandling!!.behandlingId,
                 oppgavetype = Oppgavetype.VurderLivshendelse,
                 beskrivelse = "Fødselshendelse: Mor er under 18 år."
             )
@@ -253,7 +253,7 @@ class FødselshendelseHenleggelseTest(
 
         verify(exactly = 1) {
             opprettTaskService.opprettOppgaveTask(
-                behandlingId = behandling!!.id,
+                behandlingId = behandling!!.behandlingId,
                 oppgavetype = Oppgavetype.VurderLivshendelse,
                 beskrivelse = "Fødselshendelse: Mor har flere bostedsadresser uten fra- og med dato"
             )
@@ -297,11 +297,11 @@ class FødselshendelseHenleggelseTest(
 
         verify(exactly = 1) {
             opprettTaskService.opprettOppgaveTask(
-                behandlingId = behandling!!.id,
+                behandlingId = behandling!!.behandlingId,
                 oppgavetype = Oppgavetype.VurderLivshendelse,
                 beskrivelse = "Fødselshendelse: Barnet (fødselsdato: ${
-                LocalDate.parse(scenario.barna.first().fødselsdato)
-                    .tilKortString()
+                    LocalDate.parse(scenario.barna.first().fødselsdato)
+                        .tilKortString()
                 }) er ikke bosatt med mor."
             )
         }
@@ -362,7 +362,7 @@ class FødselshendelseHenleggelseTest(
         assertEquals(
             tilleggOrdinærSatsNesteMånedTilTester().beløp + sisteUtvidetSatsTilTester(),
             hentNåværendeEllerNesteMånedsUtbetaling(
-                behandling = utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)
+                behandling = utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.behandlingId)
             )
         )
 
@@ -387,7 +387,7 @@ class FødselshendelseHenleggelseTest(
 
         verify(exactly = 1) {
             opprettTaskService.opprettOppgaveTask(
-                behandlingId = revurdering!!.id,
+                behandlingId = revurdering!!.behandlingId,
                 oppgavetype = Oppgavetype.VurderLivshendelse,
                 beskrivelse = "Fødselshendelse: Mor mottar utvidet barnetrygd."
             )
@@ -456,7 +456,7 @@ class FødselshendelseHenleggelseTest(
 
         verify(exactly = 1) {
             opprettTaskService.opprettOppgaveTask(
-                behandlingId = revurdering!!.id,
+                behandlingId = revurdering!!.behandlingId,
                 oppgavetype = Oppgavetype.VurderLivshendelse,
                 beskrivelse = "Fødselshendelse: Mor har EØS-barnetrygd"
             )
@@ -517,7 +517,7 @@ class FødselshendelseHenleggelseTest(
 
         verify(exactly = 1) {
             opprettTaskService.opprettOppgaveTask(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId,
                 oppgavetype = Oppgavetype.VurderLivshendelse,
                 beskrivelse = "Fødselshendelse: ${VilkårKanskjeOppfyltÅrsak.LOVLIG_OPPHOLD_MÅ_VURDERE_LENGDEN_PÅ_OPPHOLDSTILLATELSEN.beskrivelse}"
             )
@@ -525,7 +525,7 @@ class FødselshendelseHenleggelseTest(
     }
 
     private fun oppdaterRegelverkTilEøs(behandling: Behandling) {
-        vilkårsvurderingService.hentAktivForBehandling(behandling.id)!!.apply {
+        vilkårsvurderingService.hentAktivForBehandling(behandling.behandlingId)!!.apply {
             personResultater.first { !it.erSøkersResultater() }.apply {
                 vilkårResultater.forEach {
                     it.vurderesEtter = Regelverk.EØS_FORORDNINGEN

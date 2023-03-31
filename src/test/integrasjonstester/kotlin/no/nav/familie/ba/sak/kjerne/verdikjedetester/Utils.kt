@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestVisningBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
@@ -60,7 +61,7 @@ fun generellAssertFagsak(
     fagsakStatus: FagsakStatus,
     behandlingStegType: StegType? = null,
     behandlingsresultat: Behandlingsresultat? = null,
-    aktivBehandlingId: Long? = null
+    aktivBehandlingId: BehandlingId? = null
 ) {
     if (restFagsak.status != Ressurs.Status.SUKSESS) throw IllegalStateException("generellAssertFagsak feilet. status: ${restFagsak.status.name},  melding: ${restFagsak.melding}")
     assertEquals(fagsakStatus, restFagsak.data?.status)
@@ -68,7 +69,7 @@ fun generellAssertFagsak(
     val aktivBehandling = if (aktivBehandlingId == null) {
         hentAktivBehandling(restFagsak = restFagsak.data!!)
     } else {
-        restFagsak.data!!.behandlinger.single { it.behandlingId == aktivBehandlingId }
+        restFagsak.data!!.behandlinger.single { it.behandlingId == aktivBehandlingId.id }
     }
 
     if (behandlingStegType != null) {
@@ -141,7 +142,7 @@ fun behandleFødselshendelse(
         restFagsak = fagsakService.hentRestFagsak(restMinimalFagsakEtterVurdering.data!!.id),
         fagsakStatus = fagsakStatusEtterVurdering,
         behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG,
-        aktivBehandlingId = behandlingEtterVurdering.id
+        aktivBehandlingId = behandlingEtterVurdering.behandlingId
     )
 
     return håndterIverksettingAvBehandling(
@@ -163,12 +164,12 @@ fun håndterIverksettingAvBehandling(
     stegService: StegService,
     brevmalService: BrevmalService
 ): Behandling {
-    val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandlingEtterVurdering.id)
+    val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandlingEtterVurdering.behandlingId)
     val behandlingEtterIverksetteVedtak =
         stegService.håndterIverksettMotØkonomi(
             behandlingEtterVurdering,
             IverksettingTaskDTO(
-                behandlingsId = behandlingEtterVurdering.id,
+                behandlingsId = behandlingEtterVurdering.behandlingId.id,
                 vedtaksId = vedtak.id,
                 saksbehandlerId = "System",
                 personIdent = behandlingEtterVurdering.fagsak.aktør.aktivFødselsnummer()
@@ -183,7 +184,7 @@ fun håndterIverksettingAvBehandling(
                     fagsystem = FAGSYSTEM,
                     personIdent = søkerFnr,
                     aktørId = behandlingEtterVurdering.fagsak.aktør.aktørId,
-                    behandlingsId = behandlingEtterIverksetteVedtak.id,
+                    behandlingsId = behandlingEtterIverksetteVedtak.behandlingId.id,
                     vedtaksId = vedtak.id
                 ),
                 task = Task(type = StatusFraOppdragTask.TASK_STEP_TYPE, payload = "")
@@ -215,7 +216,7 @@ fun håndterIverksettingAvBehandling(
                 stegService.håndterDistribuerVedtaksbrev(
                     behandlingEtterJournalførtVedtak,
                     DistribuerDokumentDTO(
-                        behandlingId = behandlingEtterJournalførtVedtak.id,
+                        behandlingId = behandlingEtterJournalførtVedtak.behandlingId.id,
                         journalpostId = "1234",
                         personEllerInstitusjonIdent = søkerFnr,
                         brevmal = brevmalService.hentBrevmal(
@@ -237,9 +238,11 @@ fun håndterIverksettingAvBehandling(
         restFagsak = fagsakService.hentRestFagsak(restMinimalFagsakEtterAvsluttetBehandling.data!!.id),
         fagsakStatus = fagsakStatusEtterIverksetting,
         behandlingStegType = StegType.BEHANDLING_AVSLUTTET,
-        aktivBehandlingId = hentAktivBehandling(
-            restMinimalFagsakEtterAvsluttetBehandling.data!!
-        ).behandlingId
+        aktivBehandlingId = BehandlingId(
+            hentAktivBehandling(
+                restMinimalFagsakEtterAvsluttetBehandling.data!!
+            ).behandlingId
+        )
     )
 
     return ferdigstiltBehandling

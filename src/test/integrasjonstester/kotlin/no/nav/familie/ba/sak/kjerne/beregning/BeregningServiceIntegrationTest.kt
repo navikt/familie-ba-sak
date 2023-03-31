@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -86,7 +87,7 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
         val utbetalingsoppdrag = lagTestUtbetalingsoppdragForFGBMedToBarn(
             fnr,
             fagsak.id.toString(),
-            behandling.id,
+            behandling.behandlingId,
             dagensDato,
             fomBarn1,
             tomBarn1,
@@ -131,7 +132,7 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
         val utbetalingsoppdrag = lagTestUtbetalingsoppdragForOpphørMedToBarn(
             fnr,
             fagsak.id.toString(),
-            behandling.id,
+            behandling.behandlingId,
             dagensDato,
             fomBarn1,
             tomBarn1,
@@ -184,8 +185,8 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
         val utbetalingsoppdrag = lagTestUtbetalingsoppdragForRevurderingMedToBarn(
             fnr,
             fagsak.id.toString(),
-            behandling.id,
-            behandling.id - 1,
+            behandling.behandlingId,
+            BehandlingId(behandling.behandlingId.id - 1),
             dagensDato,
             opphørFomBarn1,
             revurderingFomBarn1,
@@ -234,7 +235,7 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
         val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barn1Fnr, barn2Fnr), true)
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
-                behandling.id,
+                behandling.behandlingId,
                 søkerFnr,
                 listOf(barn1Fnr, barn2Fnr),
                 søkerAktør = fagsak.aktør,
@@ -260,7 +261,7 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
-        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.id)
+        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.behandlingId.id)
         val andelBarn1 = tilkjentYtelse.andelerTilkjentYtelse.filter { it.aktør.aktivFødselsnummer() == barn1Id }
         val andelBarn2 = tilkjentYtelse.andelerTilkjentYtelse.filter { it.aktør.aktivFødselsnummer() == barn2Id }
 
@@ -284,7 +285,7 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
     }
 
     private fun leggTilAndelTilkjentYtelsePåTilkjentYtelse(behandling: Behandling, fom: YearMonth, tom: YearMonth) {
-        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.id)
+        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandling.behandlingId.id)
         val tilfeldigperson = tilfeldigPerson(aktør = tilAktør(randomFnr()))
         aktørIdRepository.saveAndFlush(tilfeldigperson.aktør)
 

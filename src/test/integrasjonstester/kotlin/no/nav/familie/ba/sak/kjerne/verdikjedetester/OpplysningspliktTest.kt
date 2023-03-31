@@ -84,9 +84,9 @@ class OpplysningspliktTest(
             behandling = behandling
         )
 
-        settPåVentService.gjenopptaBehandling(behandling.id)
+        settPåVentService.gjenopptaBehandling(behandling.behandlingId)
 
-        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
+        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.behandlingId)
 
         val opplysningspliktVilkårPåSøker =
             vilkårsvurdering?.personResultater?.single { it.erSøkersResultater() }?.andreVurderinger?.singleOrNull { it.type == AnnenVurderingType.OPPLYSNINGSPLIKT }
@@ -101,17 +101,18 @@ class OpplysningspliktTest(
         opplysningspliktVilkårPåSøker?.resultat = Resultat.IKKE_OPPFYLT
         vilkårsvurderingService.oppdater(vilkårsvurdering = vilkårsvurdering!!)
 
-        val vilkårsvurderingOppdatert = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
+        val vilkårsvurderingOppdatert =
+            vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.behandlingId)
 
         Assertions.assertTrue(vilkårsvurderingOppdatert?.personResultater?.single { it.erSøkersResultater() }?.andreVurderinger?.single { it.type == AnnenVurderingType.OPPLYSNINGSPLIKT }?.resultat == Resultat.IKKE_OPPFYLT)
 
         familieBaSakKlient().validerVilkårsvurdering(
-            behandlingId = behandling.id
+            behandlingId = behandling.behandlingId.id
         )
 
         val behandlingEtterBehandlingsResultat =
             familieBaSakKlient().behandlingsresultatStegOgGåVidereTilNesteSteg(
-                behandlingId = behandling.id
+                behandlingId = behandling.behandlingId.id
             )
 
         val behandlingEtterVurderTilbakekreving =

@@ -97,11 +97,11 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
             val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandling)
 
             behandlingService.oppdaterStatusPåBehandling(
-                behandlingEtterVilkårsvurdering.id,
+                behandlingEtterVilkårsvurdering.behandlingId,
                 BehandlingStatus.IVERKSETTER_VEDTAK
             )
             behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(
-                behandlingId = behandlingEtterVilkårsvurdering.id,
+                behandlingId = behandlingEtterVilkårsvurdering.behandlingId,
                 steg = StegType.FERDIGSTILLE_BEHANDLING
             )
         } else {
@@ -120,7 +120,7 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
             FagsakStatus.AVSLUTTET.name,
             saksstatistikkMellomlagringRepository.findByTypeAndTypeId(
                 SaksstatistikkMellomlagringType.BEHANDLING,
-                ferdigstiltBehandling.id
+                ferdigstiltBehandling.behandlingId.id
             )
                 .last().jsonToBehandlingDVH().behandlingStatus
         )

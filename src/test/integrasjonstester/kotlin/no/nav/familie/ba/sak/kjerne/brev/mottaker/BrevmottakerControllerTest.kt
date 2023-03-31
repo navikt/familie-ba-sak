@@ -45,25 +45,29 @@ internal class BrevmottakerControllerTest(
             "NO"
 
         )
-        brevmottakerController.leggTilBrevmottaker(behandling.id, brevmottaker)
-        brevmottakerController.hentBrevmottakere(behandling.id).body?.data!!.apply {
+        brevmottakerController.leggTilBrevmottaker(behandling.behandlingId.id, brevmottaker)
+        brevmottakerController.hentBrevmottakere(behandling.behandlingId.id).body?.data!!.apply {
             brevmottakerController.oppdaterBrevmottaker(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId.id,
                 mottakerId = first().id!!,
                 brevmottaker = brevmottaker.copy(navn = "endret navn")
             )
         }
-        Assertions.assertThat(brevmottakerController.hentBrevmottakere(behandling.id).body?.data!!)
+        Assertions.assertThat(brevmottakerController.hentBrevmottakere(behandling.behandlingId.id).body?.data!!)
             .extracting("navn")
             .containsOnly("endret navn")
 
-        brevmottakerController.leggTilBrevmottaker(behandling.id, brevmottaker.copy(type = MottakerType.VERGE))
-        brevmottakerController.hentBrevmottakere(behandling.id).body?.data!!.apply {
+        brevmottakerController.leggTilBrevmottaker(
+            behandling.behandlingId.id,
+            brevmottaker.copy(type = MottakerType.VERGE)
+        )
+        brevmottakerController.hentBrevmottakere(behandling.behandlingId.id).body?.data!!.apply {
             Assertions.assertThat(this).hasSize(2)
             forEach { lagretBrevmottaker ->
-                brevmottakerController.fjernBrevmottaker(behandling.id, lagretBrevmottaker.id!!)
+                brevmottakerController.fjernBrevmottaker(behandling.behandlingId.id, lagretBrevmottaker.id!!)
             }
         }
-        Assertions.assertThat(brevmottakerController.hentBrevmottakere(behandling.id).body?.data!!).hasSize(0)
+        Assertions.assertThat(brevmottakerController.hentBrevmottakere(behandling.behandlingId.id).body?.data!!)
+            .hasSize(0)
     }
 }

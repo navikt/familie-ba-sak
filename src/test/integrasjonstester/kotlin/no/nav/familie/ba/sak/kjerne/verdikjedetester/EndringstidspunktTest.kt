@@ -150,7 +150,7 @@ class EndringstidspunktTest(
 
         )
 
-        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = revurdering.id)
+        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = revurdering.behandlingId)
         val vedtaksperioder = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
 
         val førsteTomDatoIVedtaksperiodene =

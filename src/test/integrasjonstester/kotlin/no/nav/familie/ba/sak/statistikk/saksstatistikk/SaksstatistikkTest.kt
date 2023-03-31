@@ -121,10 +121,10 @@ class SaksstatistikkTest(
             )
         )
 
-        behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.id, BehandlingStatus.AVSLUTTET)
+        behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.behandlingId, BehandlingStatus.AVSLUTTET)
 
         val mellomlagretBehandling =
-            saksstatistikkMellomlagringRepository.findByTypeAndTypeId(BEHANDLING, behandling.id)
+            saksstatistikkMellomlagringRepository.findByTypeAndTypeId(BEHANDLING, behandling.behandlingId.id)
         assertEquals(2, mellomlagretBehandling.size)
         assertNull(mellomlagretBehandling.first().konvertertTidspunkt)
         assertNull(mellomlagretBehandling.first().sendtTidspunkt)
@@ -143,6 +143,6 @@ class SaksstatistikkTest(
             saksstatistikkMellomlagringRepository.findByIdOrNull(mellomlagretBehandling.first().id)
 
         assertNotNull(oppdatertMellomlagretSaksstatistikkHendelse!!.sendtTidspunkt)
-        assertEquals(lagretJsonSomSakDVH, sendteMeldinger["behandling-${behandling.id}"] as BehandlingDVH)
+        assertEquals(lagretJsonSomSakDVH, sendteMeldinger["behandling-${behandling.behandlingId.id}"] as BehandlingDVH)
     }
 }

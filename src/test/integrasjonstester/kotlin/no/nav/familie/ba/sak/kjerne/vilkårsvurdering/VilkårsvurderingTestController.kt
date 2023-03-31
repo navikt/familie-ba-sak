@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -86,7 +85,7 @@ class VilkårsvurderingTestController(
 
         // Opprett persongrunnlag
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.save(
-            lagTestPersonopplysningGrunnlag(behandling.id, *personer.toTypedArray())
+            lagTestPersonopplysningGrunnlag(behandling.behandlingId, *personer.toTypedArray())
         )
 
         // Opprett og lagre vilkårsvurdering
@@ -100,9 +99,9 @@ class VilkårsvurderingTestController(
         )
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
-        tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(BehandlingId(behandling.id))
+        tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(behandling.behandlingId)
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.behandlingId)))
     }
 
     @PostMapping("/{behandlingId}")
@@ -121,9 +120,9 @@ class VilkårsvurderingTestController(
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(nyVilkårsvurdering)
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
-        tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(BehandlingId(behandling.id))
+        tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(behandling.behandlingId)
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.behandlingId)))
     }
 }
 

@@ -27,11 +27,11 @@ class BehandlingHentOgPersisterServiceTest(
 
         val aktivFødselsnummere = behandlingHentOgPersisterService.hentAktivtFødselsnummerForBehandlinger(
             listOf(
-                behandling1.id,
-                behandling2.id
+                behandling1.behandlingId,
+                behandling2.behandlingId
             )
         )
-        assertEquals(fødselsnummere[0], aktivFødselsnummere[behandling1.id])
-        assertEquals(fødselsnummere[1], aktivFødselsnummere[behandling2.id])
+        assertEquals(fødselsnummere[0], aktivFødselsnummere[behandling1.behandlingId.id])
+        assertEquals(fødselsnummere[1], aktivFødselsnummere[behandling2.behandlingId.id])
     }
 }

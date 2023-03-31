@@ -37,7 +37,7 @@ class KorrigertVedtakRepositoryTest(
         korrigertVedtakRepository.saveAndFlush(inaktivKorrigertVedtak)
 
         val ikkeEksisterendeKorrigertVedtak =
-            korrigertVedtakRepository.finnAktivtKorrigertVedtakPåBehandling(behandling.id)
+            korrigertVedtakRepository.finnAktivtKorrigertVedtakPåBehandling(behandling.behandlingId.id)
 
         Assertions.assertNull(ikkeEksisterendeKorrigertVedtak, "Skal ikke finnes aktiv korrigert vedtak på behandling")
     }
@@ -57,7 +57,7 @@ class KorrigertVedtakRepositoryTest(
         korrigertVedtakRepository.saveAndFlush(aktivKorrigertVedtak)
 
         val eksisterendeKorrigertVedtak =
-            korrigertVedtakRepository.finnAktivtKorrigertVedtakPåBehandling(behandling.id)
+            korrigertVedtakRepository.finnAktivtKorrigertVedtakPåBehandling(behandling.behandlingId.id)
 
         Assertions.assertNotNull(
             eksisterendeKorrigertVedtak,

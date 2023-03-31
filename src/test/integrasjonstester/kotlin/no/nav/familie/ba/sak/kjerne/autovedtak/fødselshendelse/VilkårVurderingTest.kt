@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
@@ -79,7 +80,7 @@ class VilkårVurderingTest(
 
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
-                behandling.id,
+                behandling.behandlingId,
                 fnr,
                 listOf(barnFnr),
                 søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
@@ -160,7 +161,7 @@ class VilkårVurderingTest(
             "whatever",
             "4322"
         )
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 1)
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = BehandlingId(1))
 
         val søker = genererPerson(PersonType.SØKER, personopplysningGrunnlag, søkerAddress)
         personopplysningGrunnlag.personer.add(søker)
@@ -209,7 +210,7 @@ class VilkårVurderingTest(
                 periode = DatoIntervallEntitet(LocalDate.now().minusMonths(1))
             }
 
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 1)
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = BehandlingId(1))
 
         val søker = genererPerson(PersonType.SØKER, personopplysningGrunnlag, søkerAddress)
         personopplysningGrunnlag.personer.add(søker)
@@ -222,7 +223,7 @@ class VilkårVurderingTest(
 
     @Test
     fun `Negativ vurdering - Barn og søker har ikke adresse angitt`() {
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 2)
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = BehandlingId(2))
         val søker = genererPerson(PersonType.SØKER, personopplysningGrunnlag, null)
         personopplysningGrunnlag.personer.add(søker)
 
@@ -245,7 +246,7 @@ class VilkårVurderingTest(
             "4322"
         )
 
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 4)
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = BehandlingId(4))
         val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, søkerAddress, Kjønn.MANN)
         val feilregistrertSøker = genererPerson(PersonType.BARN, personopplysningGrunnlag, søkerAddress, Kjønn.KVINNE)
         personopplysningGrunnlag.personer.add(barn)
@@ -259,7 +260,7 @@ class VilkårVurderingTest(
     @Test
     fun `Negativ vurdering - søker har ukjentadresse`() {
         val ukjentbosted = GrUkjentBosted("Oslo")
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = BehandlingId(6))
         val søker = genererPerson(PersonType.SØKER, personopplysningGrunnlag, ukjentbosted)
         personopplysningGrunnlag.personer.add(søker)
         val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, ukjentbosted)
@@ -270,7 +271,7 @@ class VilkårVurderingTest(
 
     @Test
     fun `Sjekk at barn er ugift`() {
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = BehandlingId(6))
         val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag)
         personopplysningGrunnlag.personer.add(barn)
 
@@ -279,7 +280,7 @@ class VilkårVurderingTest(
 
     @Test
     fun `Negativ vurdering - barn er gift`() {
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = BehandlingId(6))
         val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT)
         personopplysningGrunnlag.personer.add(barn)
 
@@ -291,7 +292,7 @@ class VilkårVurderingTest(
 
     @Test
     fun `Negativ vurdering - barn har vært gift`() {
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = BehandlingId(6))
         val barn = genererPerson(PersonType.BARN, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT).apply {
             sivilstander = mutableListOf(
                 GrSivilstand(fom = LocalDate.now().minusMonths(2), type = SIVILSTAND.GIFT, person = this),
@@ -308,7 +309,7 @@ class VilkårVurderingTest(
 
     @Test
     fun `Negativ vurdering - søker er ikke bosatt i norge`() {
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = BehandlingId(6))
         val søker = genererPerson(PersonType.SØKER, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT)
         personopplysningGrunnlag.personer.add(søker)
 
@@ -317,7 +318,7 @@ class VilkårVurderingTest(
 
     @Test
     fun `Negativ vurdering - søker har ikke vært bosatt i norge siden barnets fødselsdato`() {
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = BehandlingId(6))
         val søker = genererPerson(PersonType.SØKER, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT).apply {
             bostedsadresser = mutableListOf(
                 GrVegadresse(
@@ -357,7 +358,7 @@ class VilkårVurderingTest(
         ).apply {
             periode = DatoIntervallEntitet(TIDENES_MORGEN)
         }
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = BehandlingId(6))
         val mor = genererPerson(PersonType.SØKER, personopplysningGrunnlag, vegadresse)
         personopplysningGrunnlag.personer.add(mor)
 
@@ -379,7 +380,7 @@ class VilkårVurderingTest(
             periode = DatoIntervallEntitet(LocalDate.now().minusMonths(10))
         }
 
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = BehandlingId(6))
         val mor = genererPerson(PersonType.SØKER, personopplysningGrunnlag, vegadresse)
         personopplysningGrunnlag.personer.add(mor)
 
@@ -409,7 +410,7 @@ class VilkårVurderingTest(
             }
         }
 
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = BehandlingId(6))
         val mor = genererPerson(PersonType.SØKER, personopplysningGrunnlag).apply {
             bostedsadresser = vegadresser.toMutableList()
         }
@@ -423,7 +424,7 @@ class VilkårVurderingTest(
 
     @Test
     fun `Negativ vurdering - mor er ikke bosatt i norge`() {
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = BehandlingId(6))
         val mor = genererPerson(PersonType.SØKER, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT)
         personopplysningGrunnlag.personer.add(mor)
 
@@ -432,7 +433,7 @@ class VilkårVurderingTest(
 
     @Test
     fun `Lovlig opphold - nordisk statsborger`() {
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = BehandlingId(6))
         val person = genererPerson(PersonType.BARN, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT)
             .also {
                 it.statsborgerskap =
@@ -455,7 +456,7 @@ class VilkårVurderingTest(
     @Test
     @Disabled
     fun `Mor er fra EØS og har et løpende arbeidsforhold - lovlig opphold, skal evalueres til Ja`() {
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = BehandlingId(6))
         val person = genererPerson(PersonType.SØKER, personopplysningGrunnlag, sivilstand = SIVILSTAND.GIFT)
             .also {
                 it.statsborgerskap = mutableListOf(
@@ -479,7 +480,7 @@ class VilkårVurderingTest(
     @Test
     @Disabled
     fun `Mor er fra EØS og har ikke et løpende arbeidsforhold, bor sammen med annen forelder som er fra norden - lovlig opphold, skal evalueres til Ja`() {
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = BehandlingId(6))
         val bostedsadresse = Bostedsadresse(vegadresse = Vegadresse(0, null, null, "32E", null, null, null, null))
         val person = genererPerson(
             PersonType.SØKER,
@@ -511,7 +512,7 @@ class VilkårVurderingTest(
     @Test
     @Disabled
     fun `Mor er fra EØS og har ikke et løpende arbeidsforhold, bor sammen med annen forelder som er tredjelandsborger - lovlig opphold, skal evalueres til Nei`() {
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = BehandlingId(6))
         val bostedsadresse = Bostedsadresse(vegadresse = Vegadresse(0, null, null, "32E", null, null, null, null))
         val person = genererPerson(
             PersonType.SØKER,
@@ -547,7 +548,7 @@ class VilkårVurderingTest(
     @Test
     @Disabled
     fun `Mor er fra EØS og har ikke et løpende arbeidsforhold, bor sammen med annen forelder som er statsløs - lovlig opphold, skal evalueres til Nei`() {
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = BehandlingId(6))
         val bostedsadresse = Bostedsadresse(vegadresse = Vegadresse(0, null, null, "32E", null, null, null, null))
         val person = genererPerson(
             PersonType.SØKER,
@@ -582,7 +583,7 @@ class VilkårVurderingTest(
     @Test
     @Disabled
     fun `Mor er fra EØS og har ikke et løpende arbeidsforhold, bor sammen med annen forelder fra EØS som har løpende arbeidsforhold - lovlig opphold, skal evalueres til Ja`() {
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = 6)
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = BehandlingId(6))
         val bostedsadresse = Bostedsadresse(vegadresse = Vegadresse(0, null, null, "32E", null, null, null, null))
         val person = genererPerson(
             PersonType.SØKER,

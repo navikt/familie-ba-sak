@@ -101,7 +101,7 @@ class VilkårsvurderingFlyttResultaterTest(
                 resultat = Resultat.IKKE_OPPFYLT,
                 periodeFom = LocalDate.now().minusMonths(8),
                 periodeTom = LocalDate.now().plusYears(2),
-                behandlingId = vilkårsvurderingMedUtvidetAvslått.behandling.id
+                behandlingId = vilkårsvurderingMedUtvidetAvslått.behandling.behandlingId
             )
         )
 
@@ -109,7 +109,11 @@ class VilkårsvurderingFlyttResultaterTest(
             søkerPersonResultat,
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurderingMedUtvidetAvslått,
-                person = lagPerson(type = PersonType.BARN, aktør = barn1Aktør, fødselsdato = ClientMocks.personInfo[barn1Fnr]!!.fødselsdato),
+                person = lagPerson(
+                    type = PersonType.BARN,
+                    aktør = barn1Aktør,
+                    fødselsdato = ClientMocks.personInfo[barn1Fnr]!!.fødselsdato
+                ),
                 periodeFom = LocalDate.now().minusMonths(8),
                 periodeTom = LocalDate.now().plusYears(2),
                 lagFullstendigVilkårResultat = true,
@@ -118,7 +122,11 @@ class VilkårsvurderingFlyttResultaterTest(
             ),
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurderingMedUtvidetAvslått,
-                person = lagPerson(type = PersonType.BARN, aktør = barn2Aktør, fødselsdato = ClientMocks.personInfo[barn2Fnr]!!.fødselsdato),
+                person = lagPerson(
+                    type = PersonType.BARN,
+                    aktør = barn2Aktør,
+                    fødselsdato = ClientMocks.personInfo[barn2Fnr]!!.fødselsdato
+                ),
                 periodeFom = LocalDate.now().minusMonths(8),
                 periodeTom = LocalDate.now().plusYears(2),
                 lagFullstendigVilkårResultat = true,
@@ -149,7 +157,7 @@ class VilkårsvurderingFlyttResultaterTest(
         )
 
         val vilkårsvurderingFraForrigeBehandlingFørNyRevurdering =
-            vilkårsvurderingService.hentAktivForBehandling(behandlingId = førstegangsbehandling.id)
+            vilkårsvurderingService.hentAktivForBehandling(behandlingId = førstegangsbehandling.behandlingId)
 
         // Lager revurdering når utvidet ikke løper, så underkategorien er ordinær
         kjørStegprosessForBehandling(
@@ -174,7 +182,7 @@ class VilkårsvurderingFlyttResultaterTest(
 
         // Sjekker at vilkårsvurderingen fra forrige behandling ikke er endret
         val vilkårsvurderingFraForrigeBehandlingEtterNyRevurdering =
-            vilkårsvurderingService.hentAktivForBehandling(behandlingId = førstegangsbehandling.id)
+            vilkårsvurderingService.hentAktivForBehandling(behandlingId = førstegangsbehandling.behandlingId)
 
         val søkersVilkår =
             vilkårsvurderingFraForrigeBehandlingEtterNyRevurdering?.personResultater?.find { it.erSøkersResultater() }?.vilkårResultater

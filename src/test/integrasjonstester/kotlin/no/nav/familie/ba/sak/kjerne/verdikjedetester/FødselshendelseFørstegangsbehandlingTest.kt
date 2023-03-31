@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -81,7 +82,8 @@ class FødselshendelseFørstegangsbehandlingTest(
         val aktivBehandling = restFagsakEtterBehandlingAvsluttet.getDataOrThrow().behandlinger.single()
         assertEquals(Behandlingsresultat.INNVILGET, aktivBehandling.resultat)
 
-        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = aktivBehandling.behandlingId)
+        val vedtak =
+            vedtakService.hentAktivForBehandlingThrows(behandlingId = BehandlingId(aktivBehandling.behandlingId))
         val vedtaksperioder = vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(vedtak = vedtak)
 
         val desember2021Vedtaksperiode = vedtaksperioder.find { it.fom == LocalDate.of(2021, 12, 1) }

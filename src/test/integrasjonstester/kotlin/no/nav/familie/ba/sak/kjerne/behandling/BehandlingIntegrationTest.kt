@@ -221,7 +221,7 @@ class BehandlingIntegrationTest(
                 fagsakId = fagsak.id
             )
         )
-        assertNotNull(vedtakService.hentAktivForBehandling(behandlingId = behandling.id))
+        assertNotNull(vedtakService.hentAktivForBehandling(behandlingId = behandling.behandlingId))
         assertDoesNotThrow {
             behandlingService.lagreNyOgDeaktiverGammelBehandling(
                 lagBehandling(
@@ -252,7 +252,7 @@ class BehandlingIntegrationTest(
         val behandling =
             behandlingService.opprettBehandling(nyOrdinærBehandling(søkersIdent = fnr, fagsakId = fagsak.id))
 
-        assertNotNull(vedtakService.hentAktivForBehandling(behandlingId = behandling.id))
+        assertNotNull(vedtakService.hentAktivForBehandling(behandlingId = behandling.behandlingId))
     }
 
     @Test
@@ -357,7 +357,7 @@ class BehandlingIntegrationTest(
         val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barn1Fnr, barn2Fnr), true)
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
-                behandling.id,
+                behandling.behandlingId,
                 søkerFnr,
                 listOf(barn1Fnr, barn2Fnr),
                 søkerAktør = behandling.fagsak.aktør,
@@ -381,7 +381,11 @@ class BehandlingIntegrationTest(
             ),
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                person = lagPerson(type = PersonType.BARN, aktør = barn1AktørId, fødselsdato = januar2020.minusYears(2).førsteDagIInneværendeMåned()),
+                person = lagPerson(
+                    type = PersonType.BARN,
+                    aktør = barn1AktørId,
+                    fødselsdato = januar2020.minusYears(2).førsteDagIInneværendeMåned()
+                ),
                 resultat = Resultat.OPPFYLT,
                 periodeFom = januar2020.minusMonths(1).toLocalDate(),
                 periodeTom = stønadTom.toLocalDate(),
@@ -390,7 +394,11 @@ class BehandlingIntegrationTest(
             ),
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                person = lagPerson(type = PersonType.BARN, aktør = barn2AktørId, fødselsdato = januar2020.førsteDagIInneværendeMåned()),
+                person = lagPerson(
+                    type = PersonType.BARN,
+                    aktør = barn2AktørId,
+                    fødselsdato = januar2020.førsteDagIInneværendeMåned()
+                ),
                 resultat = Resultat.OPPFYLT,
                 periodeFom = oktober2020.minusMonths(1).toLocalDate(),
                 periodeTom = stønadTom.toLocalDate(),
@@ -479,7 +487,7 @@ class BehandlingIntegrationTest(
         val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barn1Fnr, barn2Fnr, barn3Fnr), true)
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
-                behandling.id,
+                behandling.behandlingId,
                 søkerFnr,
                 listOf(barn1Fnr, barn2Fnr, barn3Fnr),
                 søkerAktør = behandling.fagsak.aktør,
@@ -585,7 +593,7 @@ class BehandlingIntegrationTest(
         val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barn1Fnr, barn2Fnr), true)
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
-                behandling.id,
+                behandling.behandlingId,
                 søkerFnr,
                 listOf(barn1Fnr, barn2Fnr),
                 søkerAktør = behandling.fagsak.aktør,
@@ -611,7 +619,7 @@ class BehandlingIntegrationTest(
                     periodeFom = mars2018.minusMonths(1).toLocalDate(),
                     periodeTom = mars2018.toLocalDate().minusDays(1),
                     vilkårType = it,
-                    behandlingId = vilkårsvurdering.behandling.id
+                    behandlingId = vilkårsvurdering.behandling.behandlingId
                 )
             }.toSet() + Vilkår.hentVilkårFor(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL).map {
                 lagVilkårResultat(
@@ -619,7 +627,7 @@ class BehandlingIntegrationTest(
                     periodeFom = mars2018.toLocalDate(),
                     periodeTom = barn2Fødselsdato.plusYears(18),
                     vilkårType = it,
-                    behandlingId = vilkårsvurdering.behandling.id,
+                    behandlingId = vilkårsvurdering.behandling.behandlingId,
                     utdypendeVilkårsvurderinger = if (it == Vilkår.BOR_MED_SØKER) {
                         listOf(UtdypendeVilkårsvurdering.DELT_BOSTED_SKAL_IKKE_DELES)
                     } else {
@@ -660,7 +668,7 @@ class BehandlingIntegrationTest(
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering)
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
 
-        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandling.id)
+        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandling.behandlingId)
         val utbetalingsperioder = utbetalingsperiodeMedBegrunnelserService.hentUtbetalingsperioder(vedtak, emptyList())
 
         assertTrue(utbetalingsperioder.any { it.fom == LocalDate.of(2018, 4, 1) })
@@ -837,7 +845,7 @@ class BehandlingIntegrationTest(
         val behandling =
             behandlingService.opprettBehandling(nyOrdinærBehandling(søkersIdent = fnr, fagsakId = fagsak.data!!.id))
         behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling = behandling)
-        val vedtak = vedtakService.hentAktivForBehandling(behandling.id)
+        val vedtak = vedtakService.hentAktivForBehandling(behandling.behandlingId)
 
         vedtakService.oppdater(vedtak!!)
 

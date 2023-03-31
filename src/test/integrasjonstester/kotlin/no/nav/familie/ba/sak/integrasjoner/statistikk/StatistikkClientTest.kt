@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner.statistikk
 
 import com.github.tomakehurst.wiremock.client.WireMock
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.junit.jupiter.api.AfterEach
@@ -46,7 +47,7 @@ internal class StatistikkClientTest : AbstractSpringIntegrationTest() {
         )
 
         assertEquals(
-            client.harSendtVedtaksmeldingForBehandling(123),
+            client.harSendtVedtaksmeldingForBehandling(BehandlingId(123)),
             true
         )
     }

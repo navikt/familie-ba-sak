@@ -120,7 +120,7 @@ class VilkårServiceTest(
 
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
-                behandling.id,
+                behandling.behandlingId,
                 fnr,
                 listOf(barnFnr),
                 søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
@@ -156,7 +156,7 @@ class VilkårServiceTest(
 
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
-                behandling.id,
+                behandling.behandlingId,
                 fnr,
                 listOf(barnFnr),
                 søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
@@ -175,7 +175,7 @@ class VilkårServiceTest(
 
         val endretVilkårsvurdering: List<RestPersonResultat> =
             vilkårService.endreVilkår(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId,
                 vilkårId = under18ÅrVilkårForBarn!!.id,
                 restPersonResultat =
                 RestPersonResultat(
@@ -208,7 +208,7 @@ class VilkårServiceTest(
 
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
-                behandling.id,
+                behandling.behandlingId,
                 fnr,
                 listOf(barnFnr),
                 søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
@@ -225,7 +225,7 @@ class VilkårServiceTest(
 
         val personopplysningGrunnlagMedEkstraBarn =
             lagTestPersonopplysningGrunnlag(
-                behandling.id,
+                behandling.behandlingId,
                 fnr,
                 listOf(barnFnr, barnFnr2),
                 søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
@@ -251,7 +251,7 @@ class VilkårServiceTest(
 
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
-                behandling.id,
+                behandling.behandlingId,
                 fnr,
                 listOf(barnFnr),
                 søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
@@ -272,7 +272,7 @@ class VilkårServiceTest(
 
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
-                behandling.id,
+                behandling.behandlingId,
                 fnr,
                 listOf(barnFnr),
                 søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
@@ -296,7 +296,7 @@ class VilkårServiceTest(
 
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = kopiertVilkårsvurdering)
         val personResultater = vilkårsvurderingService
-            .hentAktivForBehandling(behandlingId = behandling.id)!!.personResultater
+            .hentAktivForBehandling(behandlingId = behandling.behandlingId)!!.personResultater
 
         assertEquals(2, personResultater.size)
         Assertions.assertNotEquals(vilkårsvurdering.id, kopiertVilkårsvurdering.id)
@@ -320,7 +320,7 @@ class VilkårServiceTest(
 
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
-                behandling.id,
+                behandling.behandlingId,
                 fnr,
                 listOf(barnFnr),
                 søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
@@ -338,7 +338,7 @@ class VilkårServiceTest(
         vilkårsvurdering.personResultater.map { personResultat ->
             personResultat.tilRestPersonResultat().vilkårResultater.map {
                 vilkårService.endreVilkår(
-                    behandlingId = behandling.id,
+                    behandlingId = behandling.behandlingId,
                     vilkårId = it.id,
                     restPersonResultat =
                     RestPersonResultat(
@@ -363,7 +363,7 @@ class VilkårServiceTest(
 
         val personopplysningGrunnlag2 =
             lagTestPersonopplysningGrunnlag(
-                behandling2.id,
+                behandling2.behandlingId,
                 fnr,
                 listOf(barnFnr, barnFnr2),
                 søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
@@ -382,10 +382,10 @@ class VilkårServiceTest(
         vilkårsvurdering2.personResultater.forEach { personResultat ->
             personResultat.vilkårResultater.forEach { vilkårResultat ->
                 if (personResultat.aktør.aktivFødselsnummer() == barnFnr2) {
-                    assertEquals(behandling2.id, vilkårResultat.behandlingId)
+                    assertEquals(behandling2.behandlingId, vilkårResultat.behandlingId)
                 } else {
                     assertEquals(Resultat.OPPFYLT, vilkårResultat.resultat)
-                    assertEquals(behandling.id, vilkårResultat.behandlingId)
+                    assertEquals(behandling.behandlingId, vilkårResultat.behandlingId)
                 }
             }
         }
@@ -403,7 +403,7 @@ class VilkårServiceTest(
 
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
-                behandling.id,
+                behandling.behandlingId,
                 fnr,
                 listOf(barnFnr),
                 søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
@@ -430,7 +430,7 @@ class VilkårServiceTest(
 
         val personopplysningGrunnlag2 =
             lagTestPersonopplysningGrunnlag(
-                behandling2.id,
+                behandling2.behandlingId,
                 fnr,
                 listOf(barnFnr, barnFnr2),
                 søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
@@ -448,7 +448,7 @@ class VilkårServiceTest(
 
         val personResultat = vilkårsvurdering1.personResultater.find { it.aktør.aktivFødselsnummer() == barnFnr }!!
         val borMedSøkerVilkår = personResultat.vilkårResultater.find { it.vilkårType == Vilkår.BOR_MED_SØKER }!!
-        assertEquals(behandling.id, borMedSøkerVilkår.behandlingId)
+        assertEquals(behandling.behandlingId, borMedSøkerVilkår.behandlingId)
 
         VilkårsvurderingUtils.muterPersonVilkårResultaterPut(
             personResultat,
@@ -461,7 +461,7 @@ class VilkårServiceTest(
                 "",
                 "",
                 LocalDateTime.now(),
-                behandling.id
+                behandling.behandlingId.id
             )
         )
 
@@ -470,7 +470,7 @@ class VilkårServiceTest(
             vilkårsvurderingEtterEndring.personResultater.find { it.aktør.aktivFødselsnummer() == barnFnr }!!
         val borMedSøkerVilkårEtterEndring =
             personResultatEtterEndring.vilkårResultater.find { it.vilkårType == Vilkår.BOR_MED_SØKER }!!
-        assertEquals(behandling2.id, borMedSøkerVilkårEtterEndring.behandlingId)
+        assertEquals(behandling2.behandlingId, borMedSøkerVilkårEtterEndring.behandlingId)
     }
 
     @Test
@@ -486,7 +486,7 @@ class VilkårServiceTest(
 
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
-                behandling.id,
+                behandling.behandlingId,
                 fnr,
                 listOf(barnFnr),
                 søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
@@ -505,7 +505,7 @@ class VilkårServiceTest(
 
         val endretVilkårsvurdering: List<RestPersonResultat> =
             vilkårService.endreVilkår(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId,
                 vilkårId = under18ÅrVilkårForBarn!!.id,
                 restPersonResultat =
                 RestPersonResultat(
@@ -605,13 +605,13 @@ class VilkårServiceTest(
         assertTrue { vilkårsvurdering.personResultater.any { it.aktør.aktivFødselsnummer() == fnr } }
         assertTrue { vilkårsvurdering.personResultater.find { it.aktør.aktivFødselsnummer() == fnr }!!.vilkårResultater.size == 2 }
         vilkårService.postVilkår(
-            nåVærendeBehandling.id,
+            nåVærendeBehandling.behandlingId,
             RestNyttVilkår(
                 personIdent = fnr,
                 vilkårType = Vilkår.UTVIDET_BARNETRYGD
             )
         )
-        vilkårsvurdering = vilkårService.hentVilkårsvurdering(nåVærendeBehandling.id)!!
+        vilkårsvurdering = vilkårService.hentVilkårsvurdering(nåVærendeBehandling.behandlingId)!!
         assertEquals(BehandlingUnderkategori.UTVIDET, vilkårsvurdering.behandling.underkategori)
         assertTrue { vilkårsvurdering.personResultater.find { it.aktør.aktivFødselsnummer() == fnr }!!.vilkårResultater.size == 3 }
         val personResultat = vilkårsvurdering.personResultater.find { it.aktør.aktivFødselsnummer() == fnr }!!
@@ -636,7 +636,7 @@ class VilkårServiceTest(
             )
         )
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
-            behandlingId = behandling.id,
+            behandlingId = behandling.behandlingId,
             søkerPersonIdent = fnr,
             barnasIdenter = listOf(barnFnr),
             barnasFødselsdatoer = listOf(LocalDate.now().minusYears(1)),
@@ -647,7 +647,7 @@ class VilkårServiceTest(
         vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(behandling, false, null)
         val exception = assertThrows<RuntimeException> {
             vilkårService.postVilkår(
-                behandling.id,
+                behandling.behandlingId,
                 RestNyttVilkår(
                     personIdent = fnr,
                     vilkårType = Vilkår.UTVIDET_BARNETRYGD
@@ -656,7 +656,7 @@ class VilkårServiceTest(
         }
         assertEquals(
             "${Vilkår.UTVIDET_BARNETRYGD.beskrivelse} kan ikke legges til for behandling " +
-                "${behandling.id} med behandlingType ${behandling.type.visningsnavn}",
+                "${behandling.behandlingId.id} med behandlingType ${behandling.type.visningsnavn}",
             exception.message
         )
     }
@@ -675,7 +675,7 @@ class VilkårServiceTest(
             )
         )
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
-            behandlingId = behandling.id,
+            behandlingId = behandling.behandlingId,
             søkerPersonIdent = fnr,
             barnasIdenter = listOf(barnFnr),
             barnasFødselsdatoer = listOf(LocalDate.now().minusYears(1)),
@@ -693,7 +693,7 @@ class VilkårServiceTest(
         val utvidetVilkår =
             vilkårsvurdering.personResultater.find { it.erSøkersResultater() }?.vilkårResultater?.single { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
         vilkårService.endreVilkår(
-            behandlingId = behandling.id,
+            behandlingId = behandling.behandlingId,
             vilkårId = utvidetVilkår!!.id,
             restPersonResultat = RestPersonResultat(
                 personIdent = fnr,
@@ -707,7 +707,7 @@ class VilkårServiceTest(
                         begrunnelse = "",
                         endretAv = "",
                         endretTidspunkt = LocalDateTime.now(),
-                        behandlingId = behandling.id
+                        behandlingId = behandling.behandlingId.id
                     )
                 )
             )
@@ -715,7 +715,7 @@ class VilkårServiceTest(
 
         assertDoesNotThrow {
             vilkårService.postVilkår(
-                behandling.id,
+                behandling.behandlingId,
                 RestNyttVilkår(
                     personIdent = fnr,
                     vilkårType = Vilkår.UTVIDET_BARNETRYGD
@@ -746,7 +746,7 @@ class VilkårServiceTest(
         assertTrue { vilkårsvurdering.personResultater.find { it.aktør.aktivFødselsnummer() == fnr }!!.vilkårResultater.size == 2 }
         val exception = assertThrows<RuntimeException> {
             vilkårService.postVilkår(
-                nåVærendeBehandling.id,
+                nåVærendeBehandling.behandlingId,
                 RestNyttVilkår(
                     personIdent = barnFnr,
                     vilkårType = Vilkår.UTVIDET_BARNETRYGD
@@ -773,7 +773,7 @@ class VilkårServiceTest(
 
         val exception = assertThrows<RuntimeException> {
             vilkårService.deleteVilkår(
-                behandling.id,
+                behandling.behandlingId,
                 RestSlettVilkår(
                     personIdent = fnr,
                     vilkårType = Vilkår.BOR_MED_SØKER
@@ -782,7 +782,7 @@ class VilkårServiceTest(
         }
         assertEquals(
             "Vilkår ${Vilkår.BOR_MED_SØKER.beskrivelse} kan ikke slettes " +
-                "for behandling ${behandling.id}",
+                "for behandling ${behandling.behandlingId.id}",
             exception.message
         )
     }
@@ -800,7 +800,7 @@ class VilkårServiceTest(
             )
         )
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
-            behandlingId = behandling.id,
+            behandlingId = behandling.behandlingId,
             søkerPersonIdent = fnr,
             barnasIdenter = listOf(barnFnr),
             barnasFødselsdatoer = listOf(LocalDate.now().minusYears(1)),
@@ -812,7 +812,7 @@ class VilkårServiceTest(
 
         val exception = assertThrows<RuntimeException> {
             vilkårService.deleteVilkår(
-                behandling.id,
+                behandling.behandlingId,
                 RestSlettVilkår(
                     personIdent = fnr,
                     vilkårType = Vilkår.UTVIDET_BARNETRYGD
@@ -821,7 +821,7 @@ class VilkårServiceTest(
         }
         assertEquals(
             "Vilkår ${Vilkår.UTVIDET_BARNETRYGD.beskrivelse} kan ikke slettes " +
-                "for behandling ${behandling.id}",
+                "for behandling ${behandling.behandlingId.id}",
             exception.message
         )
     }
@@ -837,7 +837,7 @@ class VilkårServiceTest(
         var forrigeBehandling = behandlinger.first
         val behandling = behandlinger.second
 
-        val forrigeVilkårvurdering = vilkårService.hentVilkårsvurdering(forrigeBehandling.id)!!
+        val forrigeVilkårvurdering = vilkårService.hentVilkårsvurdering(forrigeBehandling.behandlingId)!!
         val forrigeSøkerPersonResultat =
             forrigeVilkårvurdering.personResultater.first { it.aktør.aktivFødselsnummer() == fnr }
         val forrigeBarnPersonResultat =
@@ -849,7 +849,7 @@ class VilkårServiceTest(
                 vilkårType = Vilkår.UTVIDET_BARNETRYGD,
                 periodeFom = LocalDate.of(2021, 5, 1),
                 periodeTom = LocalDate.of(2021, 5, 31),
-                behandlingId = forrigeBehandling.id
+                behandlingId = forrigeBehandling.behandlingId
             )
         )
         vilkårsvurderingService.oppdater(
@@ -860,7 +860,7 @@ class VilkårServiceTest(
                 )
             )
         )
-        forrigeBehandling = behandlingHentOgPersisterService.hent(forrigeBehandling.id)
+        forrigeBehandling = behandlingHentOgPersisterService.hent(forrigeBehandling.behandlingId)
         forrigeBehandling.behandlingStegTilstand.add(
             BehandlingStegTilstand(
                 behandling = forrigeBehandling,
@@ -879,7 +879,7 @@ class VilkårServiceTest(
         assertTrue { vilkårsvurdering.personResultater.first { it.aktør.aktivFødselsnummer() == fnr }.vilkårResultater.size == 3 }
         val exception = assertThrows<RuntimeException> {
             vilkårService.deleteVilkår(
-                behandling.id,
+                behandling.behandlingId,
                 RestSlettVilkår(
                     personIdent = fnr,
                     vilkårType = Vilkår.UTVIDET_BARNETRYGD
@@ -888,7 +888,7 @@ class VilkårServiceTest(
         }
         assertEquals(
             "Vilkår ${Vilkår.UTVIDET_BARNETRYGD.beskrivelse} kan ikke slettes " +
-                "for behandling ${behandling.id}",
+                "for behandling ${behandling.behandlingId.id}",
             exception.message
         )
     }
@@ -909,11 +909,11 @@ class VilkårServiceTest(
         )
 
         vilkårService.postVilkår(
-            behandling.id,
+            behandling.behandlingId,
             RestNyttVilkår(personIdent = fnr, vilkårType = Vilkår.UTVIDET_BARNETRYGD)
         )
 
-        val vilkårsvurderingFørSlett = vilkårService.hentVilkårsvurdering(behandling.id)!!
+        val vilkårsvurderingFørSlett = vilkårService.hentVilkårsvurdering(behandling.behandlingId)!!
 
         assertEquals(BehandlingUnderkategori.UTVIDET, vilkårsvurderingFørSlett.behandling.underkategori)
         assertTrue {
@@ -928,14 +928,14 @@ class VilkårServiceTest(
         }
 
         vilkårService.deleteVilkår(
-            behandling.id,
+            behandling.behandlingId,
             RestSlettVilkår(
                 personIdent = fnr,
                 vilkårType = Vilkår.UTVIDET_BARNETRYGD
             )
         )
 
-        val vilkårsvurderingEtterSlett = vilkårService.hentVilkårsvurdering(behandling.id)!!
+        val vilkårsvurderingEtterSlett = vilkårService.hentVilkårsvurdering(behandling.behandlingId)!!
 
         assertEquals(BehandlingUnderkategori.ORDINÆR, vilkårsvurderingEtterSlett.behandling.underkategori)
         assertTrue {
@@ -964,7 +964,7 @@ class VilkårServiceTest(
             )
         )
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
-            behandlingId = behandling.id,
+            behandlingId = behandling.behandlingId,
             søkerPersonIdent = fnr,
             barnasIdenter = listOf(barnFnr),
             barnasFødselsdatoer = listOf(barnetsFødselsdato),
@@ -980,11 +980,11 @@ class VilkårServiceTest(
         )
 
         vilkårService.postVilkår(
-            behandling.id,
+            behandling.behandlingId,
             RestNyttVilkår(personIdent = fnr, vilkårType = Vilkår.UTVIDET_BARNETRYGD)
         )
 
-        val vilkårsvurderingFørSlett = vilkårService.hentVilkårsvurdering(behandling.id)!!
+        val vilkårsvurderingFørSlett = vilkårService.hentVilkårsvurdering(behandling.behandlingId)!!
 
         assertEquals(BehandlingUnderkategori.UTVIDET, vilkårsvurderingFørSlett.behandling.underkategori)
         assertTrue {
@@ -999,14 +999,14 @@ class VilkårServiceTest(
         }
 
         vilkårService.deleteVilkår(
-            behandling.id,
+            behandling.behandlingId,
             RestSlettVilkår(
                 personIdent = fnr,
                 vilkårType = Vilkår.UTVIDET_BARNETRYGD
             )
         )
 
-        val vilkårsvurderingEtterSlett = vilkårService.hentVilkårsvurdering(behandling.id)!!
+        val vilkårsvurderingEtterSlett = vilkårService.hentVilkårsvurdering(behandling.behandlingId)!!
 
         assertEquals(BehandlingUnderkategori.ORDINÆR, vilkårsvurderingEtterSlett.behandling.underkategori)
         assertTrue {
@@ -1035,7 +1035,7 @@ class VilkårServiceTest(
             )
         )
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
-            behandlingId = behandling.id,
+            behandlingId = behandling.behandlingId,
             søkerPersonIdent = fnr,
             barnasIdenter = listOf(barnFnr),
             barnasFødselsdatoer = listOf(barnetsFødselsdato),
@@ -1084,11 +1084,11 @@ class VilkårServiceTest(
             begrunnelse = "Migrering",
             endretAv = "",
             endretTidspunkt = LocalDateTime.now(),
-            behandlingId = behandling.id
+            behandlingId = behandling.behandlingId.id
         )
         val exception = assertThrows<RuntimeException> {
             vilkårService.endreVilkår(
-                behandling.id,
+                behandling.behandlingId,
                 vilkårId,
                 RestPersonResultat(
                     barnFnr,
@@ -1116,7 +1116,7 @@ class VilkårServiceTest(
             brevmalService = brevmalService
 
         )
-        var vilkårsvurdering = vilkårService.hentVilkårsvurderingThrows(behandling.id)
+        var vilkårsvurdering = vilkårService.hentVilkårsvurderingThrows(behandling.behandlingId)
         assertTrue {
             vilkårsvurdering.personResultater.all { personResultat ->
                 personResultat.vilkårResultater.filter {
@@ -1130,7 +1130,7 @@ class VilkårServiceTest(
             BehandlingKategori.EØS,
             BehandlingUnderkategori.ORDINÆR
         )
-        vilkårsvurdering = vilkårService.hentVilkårsvurderingThrows(behandling.id)
+        vilkårsvurdering = vilkårService.hentVilkårsvurderingThrows(behandling.behandlingId)
         assertTrue {
             vilkårsvurdering.personResultater.all { personResultat ->
                 personResultat.vilkårResultater.filter {
@@ -1139,9 +1139,9 @@ class VilkårServiceTest(
             }
         }
 
-        vilkårService.postVilkår(behandling.id, RestNyttVilkår(ClientMocks.barnFnr[0], Vilkår.BOR_MED_SØKER))
+        vilkårService.postVilkår(behandling.behandlingId, RestNyttVilkår(ClientMocks.barnFnr[0], Vilkår.BOR_MED_SØKER))
 
-        vilkårsvurdering = vilkårService.hentVilkårsvurderingThrows(behandling.id)
+        vilkårsvurdering = vilkårService.hentVilkårsvurderingThrows(behandling.behandlingId)
         assertTrue {
             vilkårsvurdering.personResultater.all { personResultat ->
                 personResultat.vilkårResultater.filter {
@@ -1166,7 +1166,7 @@ class VilkårServiceTest(
             )
         )
         val forrigePersonopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
-            behandlingId = forrigeBehandling.id,
+            behandlingId = forrigeBehandling.behandlingId,
             søkerPersonIdent = fnr,
             barnasIdenter = listOf(barnFnr),
             barnasFødselsdatoer = listOf(barnetsFødselsdato),
@@ -1184,7 +1184,7 @@ class VilkårServiceTest(
             lagSøkerVilkårResultat(
                 søkerPersonResultat = søkerPersonResultat,
                 periodeFom = forrigeVilkårsdato,
-                behandlingId = forrigeBehandling.id
+                behandlingId = forrigeBehandling.behandlingId
             )
         )
         val barnPersonResultat = PersonResultat(
@@ -1196,7 +1196,7 @@ class VilkårServiceTest(
                 barnPersonResultat = barnPersonResultat,
                 barnetsFødselsdato = barnetsFødselsdato,
                 periodeFom = forrigeVilkårsdato,
-                behandlingId = forrigeBehandling.id,
+                behandlingId = forrigeBehandling.behandlingId,
                 flytteSak = false
             )
         )
@@ -1216,7 +1216,7 @@ class VilkårServiceTest(
             )
         )
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
-            behandlingId = behandling.id,
+            behandlingId = behandling.behandlingId,
             søkerPersonIdent = fnr,
             barnasIdenter = listOf(barnFnr),
             barnasFødselsdatoer = listOf(barnetsFødselsdato),

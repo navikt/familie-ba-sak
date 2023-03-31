@@ -58,7 +58,8 @@ class RegistrerPersongrunnlagTest(
             )
         )
 
-        val grunnlag1 = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling1.id)
+        val grunnlag1 =
+            personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling1.behandlingId.id)
 
         Assertions.assertEquals(3, grunnlag1!!.personer.size)
         Assertions.assertTrue(grunnlag1.personer.any { it.aktør.aktivFødselsnummer() == morId })
@@ -87,7 +88,8 @@ class RegistrerPersongrunnlagTest(
             )
         )
 
-        val grunnlag1 = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling1.id)
+        val grunnlag1 =
+            personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling1.behandlingId.id)
 
         Assertions.assertEquals(2, grunnlag1!!.personer.size)
         Assertions.assertTrue(grunnlag1.personer.any { it.aktør.aktivFødselsnummer() == morId })
@@ -103,7 +105,8 @@ class RegistrerPersongrunnlagTest(
                 )
             )
         )
-        val grunnlag2 = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling1.id)
+        val grunnlag2 =
+            personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling1.behandlingId.id)
 
         Assertions.assertEquals(3, grunnlag2!!.personer.size)
         Assertions.assertTrue(grunnlag2.personer.any { it.aktør.aktivFødselsnummer() == morId })
@@ -122,7 +125,8 @@ class RegistrerPersongrunnlagTest(
             )
         )
 
-        val grunnlag3 = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling1.id)
+        val grunnlag3 =
+            personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling1.behandlingId.id)
 
         Assertions.assertEquals(3, grunnlag3!!.personer.size)
         Assertions.assertTrue(grunnlag3.personer.any { it.aktør.aktivFødselsnummer() == morId })

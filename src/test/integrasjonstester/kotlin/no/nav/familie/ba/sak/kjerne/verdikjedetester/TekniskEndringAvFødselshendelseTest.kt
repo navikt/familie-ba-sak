@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
@@ -170,7 +171,11 @@ class TekniskEndringAvFødselshendelseTest(
         )
 
         håndterIverksettingAvBehandling(
-            behandlingEtterVurdering = behandlingHentOgPersisterService.hent(behandlingId = restUtvidetBehandlingEtterIverksetting.data?.behandlingId!!),
+            behandlingEtterVurdering = behandlingHentOgPersisterService.hent(
+                behandlingId = BehandlingId(
+                    restUtvidetBehandlingEtterIverksetting.data?.behandlingId!!
+                )
+            ),
             søkerFnr = scenario.søker.ident,
             fagsakStatusEtterIverksetting = FagsakStatus.AVSLUTTET,
             fagsakService = fagsakService,

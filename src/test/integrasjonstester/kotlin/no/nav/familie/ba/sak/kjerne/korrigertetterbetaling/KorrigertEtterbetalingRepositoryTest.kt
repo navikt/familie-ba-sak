@@ -40,7 +40,7 @@ class KorrigertEtterbetalingRepositoryTest(
         korrigertEtterbetalingRepository.saveAndFlush(inaktivKorrigertEtterbetaling)
 
         val ikkeEksisterendeKorrigertEtterbetaling =
-            korrigertEtterbetalingRepository.finnAktivtKorrigeringPåBehandling(behandling.id)
+            korrigertEtterbetalingRepository.finnAktivtKorrigeringPåBehandling(behandling.behandlingId.id)
 
         assertThat(ikkeEksisterendeKorrigertEtterbetaling, Is(nullValue()))
     }
@@ -61,7 +61,7 @@ class KorrigertEtterbetalingRepositoryTest(
         korrigertEtterbetalingRepository.saveAndFlush(aktivKorrigertEtterbetaling)
 
         val eksisterendeKorrigertEtterbetaling =
-            korrigertEtterbetalingRepository.finnAktivtKorrigeringPåBehandling(behandling.id)!!
+            korrigertEtterbetalingRepository.finnAktivtKorrigeringPåBehandling(behandling.behandlingId.id)!!
 
         assertThat(eksisterendeKorrigertEtterbetaling.begrunnelse, Is("Test på aktiv korrigering"))
         assertThat(eksisterendeKorrigertEtterbetaling.beløp, Is(1000))
@@ -122,7 +122,7 @@ class KorrigertEtterbetalingRepositoryTest(
         korrigertEtterbetalingRepository.saveAndFlush(inaktivKorrigertEtterbetaling)
 
         val eksisterendeKorrigertEtterbetaling =
-            korrigertEtterbetalingRepository.finnAlleKorrigeringerPåBehandling(behandling.id)
+            korrigertEtterbetalingRepository.finnAlleKorrigeringerPåBehandling(behandling.behandlingId.id)
 
         assertThat(eksisterendeKorrigertEtterbetaling.size, Is(2))
         assertThat(eksisterendeKorrigertEtterbetaling.map { it.begrunnelse }, containsInAnyOrder("1", "2"))

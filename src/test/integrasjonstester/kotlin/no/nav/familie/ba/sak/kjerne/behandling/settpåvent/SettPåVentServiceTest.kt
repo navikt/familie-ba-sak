@@ -96,7 +96,7 @@ class SettPåVentServiceTest(
         val nå = LocalDate.now()
 
         val settPåVent = settPåVentService.gjenopptaBehandling(
-            behandlingId = behandlingEtterVilkårsvurderingSteg.id,
+            behandlingId = behandlingEtterVilkårsvurderingSteg.behandlingId,
             nå = nå
         )
 
@@ -214,7 +214,7 @@ class SettPåVentServiceTest(
             )
         )
 
-        Assertions.assertNull(settPåVentRepository.findByBehandlingIdAndAktiv(behandling1.id, true))
-        Assertions.assertNotNull(settPåVentRepository.findByBehandlingIdAndAktiv(behandling2.id, true))
+        Assertions.assertNull(settPåVentRepository.findByBehandlingIdAndAktiv(behandling1.behandlingId.id, true))
+        Assertions.assertNotNull(settPåVentRepository.findByBehandlingIdAndAktiv(behandling2.behandlingId.id, true))
     }
 }

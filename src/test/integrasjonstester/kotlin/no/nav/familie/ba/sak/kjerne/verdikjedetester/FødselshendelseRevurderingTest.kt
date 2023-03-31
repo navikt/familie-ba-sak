@@ -95,7 +95,7 @@ class FødselshendelseRevurderingTest(
             restFagsak = restFagsakEtterBehandlingAvsluttet,
             fagsakStatus = FagsakStatus.LØPENDE,
             behandlingStegType = StegType.BEHANDLING_AVSLUTTET,
-            aktivBehandlingId = behandling.id
+            aktivBehandlingId = behandling.behandlingId
         )
 
         val aktivBehandling =
@@ -103,7 +103,7 @@ class FødselshendelseRevurderingTest(
                 .single {
                     it.behandlingId == behandlingHentOgPersisterService.finnAktivForFagsak(
                         restFagsakEtterBehandlingAvsluttet.data!!.id
-                    )?.id
+                    )?.behandlingId?.id
                 }
 
         val vurderteVilkårIDenneBehandlingen = aktivBehandling.personResultater.flatMap { it.vilkårResultater }

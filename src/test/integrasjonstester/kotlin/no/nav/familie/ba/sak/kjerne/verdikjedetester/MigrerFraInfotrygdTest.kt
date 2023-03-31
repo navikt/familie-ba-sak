@@ -821,7 +821,7 @@ class MigrerFraInfotrygdTest(
         assertThat(kompetanseRepository.finnFraBehandlingId(migreringsresponse.behandlingId)).hasSize(1)
             .extracting("resultat").contains(KompetanseResultat.NORGE_ER_PRIMÆRLAND)
 
-        val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
+        val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.behandlingId.id)
         assertThat((vilkårsvurdering?.personResultater?.filter { it.erSøkersResultater() }?.first()?.vilkårResultater))
             .isNotEmpty()
             .extracting("periodeFom").doesNotContainNull()
@@ -859,7 +859,7 @@ class MigrerFraInfotrygdTest(
 
         assertThat(kompetanseRepository.finnFraBehandlingId(migreringsresponse.behandlingId)).hasSize(0)
 
-        val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
+        val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.behandlingId.id)
         assertThat((vilkårsvurdering?.personResultater)).hasSize(1)
         assertThat((vilkårsvurdering?.personResultater?.first()?.vilkårResultater))
             .hasSize(5)

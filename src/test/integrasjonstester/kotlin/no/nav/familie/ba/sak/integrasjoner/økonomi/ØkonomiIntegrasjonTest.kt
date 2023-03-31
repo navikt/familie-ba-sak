@@ -84,7 +84,7 @@ class ØkonomiIntegrasjonTest(
         val barnAktør = personidentService.hentAktørIder(listOf(barnFnr))
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
-                behandling.id,
+                behandling.behandlingId,
                 fnr,
                 listOf(barnFnr),
                 søkerAktør = fagsak.aktør,
@@ -94,7 +94,7 @@ class ØkonomiIntegrasjonTest(
 
         behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling = behandling)
 
-        val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)
+        val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.behandlingId)
         Assertions.assertNotNull(vedtak)
         vedtak!!.vedtaksdato = LocalDateTime.now()
         vedtakService.oppdater(vedtak)
@@ -131,7 +131,7 @@ class ØkonomiIntegrasjonTest(
         val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true)
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
-                behandling.id,
+                behandling.behandlingId,
                 fnr,
                 listOf(barnFnr),
                 søkerAktør = fagsak.aktør,
@@ -151,7 +151,7 @@ class ØkonomiIntegrasjonTest(
             "ansvarligSaksbehandler",
             AndelTilkjentYtelseForIverksettingFactory()
         )
-        behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.AVSLUTTET)
+        behandlingService.oppdaterStatusPåBehandling(behandling.behandlingId, BehandlingStatus.AVSLUTTET)
 
         fagsak.status = FagsakStatus.LØPENDE
         fagsakService.lagre(fagsak)
@@ -159,7 +159,7 @@ class ØkonomiIntegrasjonTest(
         val behandlingerMedAndelerTilAvstemming =
             behandlingHentOgPersisterService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker()
 
-        Assertions.assertTrue(behandlingerMedAndelerTilAvstemming.contains(behandling.id))
+        Assertions.assertTrue(behandlingerMedAndelerTilAvstemming.contains(behandling.behandlingId))
     }
 
     private fun lagVilkårsvurdering(
