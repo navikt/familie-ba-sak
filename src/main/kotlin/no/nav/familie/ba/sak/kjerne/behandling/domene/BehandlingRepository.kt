@@ -1,14 +1,13 @@
 package no.nav.familie.ba.sak.kjerne.behandling.domene
 
+import jakarta.persistence.LockModeType
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Lock
 import org.springframework.data.jpa.repository.Query
-import java.math.BigInteger
 import java.time.LocalDateTime
 import java.time.YearMonth
-import jakarta.persistence.LockModeType
 
 interface BehandlingRepository : JpaRepository<Behandling, Long> {
 
@@ -99,7 +98,7 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
                         SELECT count(b.id) FROM sisteiverksattebehandlingfraløpendefagsak silp JOIN behandling b ON b.fk_fagsak_id = silp.fagsakid WHERE b.opprettet_tid = silp.opprettet_tid""",
         nativeQuery = true
     )
-    fun finnSisteIverksatteBehandlingFraLøpendeFagsaker(page: Pageable): Page<BigInteger>
+    fun finnSisteIverksatteBehandlingFraLøpendeFagsaker(page: Pageable): Page<Long>
 
     @Query(
         """select b from Behandling b

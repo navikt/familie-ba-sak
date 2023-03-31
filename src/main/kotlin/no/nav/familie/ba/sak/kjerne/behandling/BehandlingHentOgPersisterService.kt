@@ -8,7 +8,6 @@ import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublis
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
-import java.math.BigInteger
 
 @Service
 class BehandlingHentOgPersisterService(
@@ -106,7 +105,7 @@ class BehandlingHentOgPersisterService(
         return Behandlingutils.hentForrigeBehandlingSomErVedtatt(behandlinger, behandling)
     }
 
-    fun hentSisteIverksatteBehandlingerFraLøpendeFagsaker(page: Pageable): Page<BigInteger> =
+    fun hentSisteIverksatteBehandlingerFraLøpendeFagsaker(page: Pageable): Page<Long> =
         behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker(page)
 
     fun <T> partitionByIverksatteBehandlinger(funksjon: (iverksatteBehandlinger: List<Long>) -> List<T>): List<T> {
