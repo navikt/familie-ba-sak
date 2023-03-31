@@ -143,12 +143,14 @@ class BrevService(
 
             Brevmal.VEDTAK_FORTSATT_INNVILGET -> ForsattInnvilget(
                 vedtakFellesfelter = vedtakFellesfelter,
+                etterbetaling = hentEtterbetaling(vedtak),
                 informasjonOmAarligKontroll = vedtaksperiodeService.skalHaÅrligKontroll(vedtak)
             )
 
             Brevmal.VEDTAK_FORTSATT_INNVILGET_INSTITUSJON -> ForsattInnvilget(
                 mal = Brevmal.VEDTAK_FORTSATT_INNVILGET_INSTITUSJON,
-                vedtakFellesfelter = vedtakFellesfelter
+                vedtakFellesfelter = vedtakFellesfelter,
+                etterbetalingInstitusjon = hentEtterbetalingInstitusjon(vedtak)
             )
 
             Brevmal.AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG -> Autovedtak6og18årOgSmåbarnstillegg(

@@ -11,7 +11,7 @@ class InternKonsistensavstemmingScheduler(
     val taskService: TaskService
 ) {
 
-    @Scheduled(cron = "0 0 0 16 * *")
+    @Scheduled(cron = "0 0 0 29 * *")
     fun startInternKonsistensavstemming() {
         if (LeaderClient.isLeader() == true) {
             taskService.save(OpprettInternKonsistensavstemmingTaskerTask.opprettTask())
