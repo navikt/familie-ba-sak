@@ -32,7 +32,7 @@ class VedtaksperiodeServiceUtilsTest {
         val barn = lagPerson(type = PersonType.BARN)
 
         val persongrunnlag =
-            lagTestPersonopplysningGrunnlag(behandlingId = behandling.id, personer = arrayOf(søker, barn))
+            lagTestPersonopplysningGrunnlag(behandlingId = behandling.behandlingId, personer = arrayOf(søker, barn))
         val triggesAv = lagTriggesAv(vilkår = setOf(Vilkår.UTVIDET_BARNETRYGD))
         val vilkårsvurdering = lagVilkårsvurdering(
             søkerAktør = søker.aktør,
@@ -77,7 +77,7 @@ class VedtaksperiodeServiceUtilsTest {
         }
 
         val persongrunnlag =
-            lagTestPersonopplysningGrunnlag(behandlingId = behandling.id, personer = arrayOf(søker, barn2))
+            lagTestPersonopplysningGrunnlag(behandlingId = behandling.behandlingId, personer = arrayOf(søker, barn2))
         val triggesAv = lagTriggesAv(vilkår = setOf(Vilkår.UTVIDET_BARNETRYGD))
         val vilkårsvurdering = lagVilkårsvurdering(
             søkerAktør = søker.aktør,

@@ -58,7 +58,7 @@ class VilkårsvurderingStegUtilsTest {
             LocalDate.of(2010, 1, 1),
             LocalDate.of(2010, 6, 1),
             "",
-            vilkårsvurdering.behandling.id
+            vilkårsvurdering.behandling.behandlingId
         )
         vilkårResultat2 = VilkårResultat(
             2,
@@ -68,7 +68,7 @@ class VilkårsvurderingStegUtilsTest {
             LocalDate.of(2010, 6, 2),
             LocalDate.of(2010, 8, 1),
             "",
-            vilkårsvurdering.behandling.id
+            vilkårsvurdering.behandling.behandlingId
         )
         vilkårResultat3 = VilkårResultat(
             3,
@@ -78,7 +78,7 @@ class VilkårsvurderingStegUtilsTest {
             LocalDate.of(2010, 8, 2),
             LocalDate.of(2010, 12, 1),
             "",
-            vilkårsvurdering.behandling.id
+            vilkårsvurdering.behandling.behandlingId
         )
         personResultat.setSortedVilkårResultater(
             setOf(
@@ -102,7 +102,7 @@ class VilkårsvurderingStegUtilsTest {
             "",
             "",
             LocalDateTime.now(),
-            behandling.id
+            behandling.behandlingId.id
         )
         VilkårsvurderingUtils.muterPersonVilkårResultaterPut(
             personResultat,
@@ -135,7 +135,7 @@ class VilkårsvurderingStegUtilsTest {
             "",
             "",
             LocalDateTime.now(),
-            behandling.id
+            behandling.behandlingId.id
         )
 
         VilkårsvurderingUtils.muterPersonVilkårResultaterPut(
@@ -182,7 +182,7 @@ class VilkårsvurderingStegUtilsTest {
             "",
             "",
             LocalDateTime.now(),
-            behandling.id
+            behandling.behandlingId.id
         )
 
         VilkårsvurderingUtils.muterPersonVilkårResultaterPut(
@@ -222,7 +222,7 @@ class VilkårsvurderingStegUtilsTest {
             "",
             "",
             LocalDateTime.now(),
-            behandling.id
+            behandling.behandlingId.id
         )
 
         VilkårsvurderingUtils.muterPersonVilkårResultaterPut(
@@ -338,7 +338,7 @@ class VilkårsvurderingStegUtilsTest {
             LocalDate.of(2010, 1, 1),
             LocalDate.of(2010, 6, 1),
             "",
-            vilkårsvurdering.behandling.id
+            vilkårsvurdering.behandling.behandlingId
         )
         mockPersonResultat.setSortedVilkårResultater(setOf(mockVilkårResultat))
 
@@ -374,7 +374,7 @@ class VilkårsvurderingStegUtilsTest {
             resultat = resultat,
             periodeFom = LocalDate.of(2020, 1, 1),
             begrunnelse = "",
-            behandlingId = vilkårsvurdering.behandling.id
+            behandlingId = vilkårsvurdering.behandling.behandlingId
         )
         val restVilkårResultat = RestVilkårResultat(
             id = 1,
@@ -385,7 +385,7 @@ class VilkårsvurderingStegUtilsTest {
             begrunnelse = "",
             endretAv = "",
             endretTidspunkt = LocalDateTime.now(),
-            behandlingId = behandling.id
+            behandlingId = behandling.behandlingId.id
         )
 
         VilkårsvurderingUtils.tilpassVilkårForEndretVilkår(personResultat, vilkårResultat, restVilkårResultat)
@@ -498,7 +498,7 @@ class VilkårsvurderingStegUtilsTest {
                     periodeFom = LocalDate.now().plusMonths(månedsteller++),
                     periodeTom = LocalDate.now().plusMonths(månedsteller++),
                     begrunnelse = "",
-                    behandlingId = behandling.id
+                    behandlingId = behandling.behandlingId
                 )
             }.toSet()
         )

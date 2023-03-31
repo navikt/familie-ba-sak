@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåB
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -96,13 +97,13 @@ class OppgaveServiceTest {
         every { personidentService.hentAktør(any()) } returns Aktør(AKTØR_ID_FAGSAK)
 
         every { arbeidsfordelingService.hentArbeidsfordelingPåBehandling(any()) } returns ArbeidsfordelingPåBehandling(
-            behandlingId = 1,
+            behandlingId = BehandlingId(1),
             behandlendeEnhetId = ENHETSNUMMER,
             behandlendeEnhetNavn = "enhet"
         )
 
         every { arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(any()) } returns ArbeidsfordelingPåBehandling(
-            behandlingId = 1,
+            behandlingId = BehandlingId(1),
             behandlendeEnhetId = ENHETSNUMMER,
             behandlendeEnhetNavn = "enhet"
         )
@@ -207,9 +208,17 @@ class OppgaveServiceTest {
             lagTestBehandling().copy(underkategori = BehandlingUnderkategori.UTVIDET, id = 1002602L),
             lagTestBehandling().copy(underkategori = BehandlingUnderkategori.UTVIDET, id = 1002602L)
         )
-        every { oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(any(), any()) } returns lagTestOppgave()
+        every {
+            oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(
+                any(),
+                any()
+            )
+        } returns lagTestOppgave()
 
-        every { integrasjonClient.finnOppgaveMedId(any()) } returns Oppgave(id = 10018798L, fristFerdigstillelse = "21.01.23")
+        every { integrasjonClient.finnOppgaveMedId(any()) } returns Oppgave(
+            id = 10018798L,
+            fristFerdigstillelse = "21.01.23"
+        )
 
         assertEquals(
             "behandlingId;oppgaveId;frist\n" +
@@ -238,7 +247,7 @@ class OppgaveServiceTest {
     companion object {
 
         private const val FAGSAK_ID = 10000000L
-        private const val BEHANDLING_ID = 20000000L
+        private val BEHANDLING_ID = BehandlingId(20000000L)
         private const val OPPGAVE_ID = "42"
         private const val FNR = "12345678910"
         private const val ENHETSNUMMER = "enhet"

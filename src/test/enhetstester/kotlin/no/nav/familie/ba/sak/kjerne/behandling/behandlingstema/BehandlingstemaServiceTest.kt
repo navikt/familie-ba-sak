@@ -70,17 +70,17 @@ class BehandlingstemaServiceTest {
                 lagVilkårResultat(
                     vilkår = Vilkår.BOSATT_I_RIKET,
                     vilkårRegelverk = Regelverk.NASJONALE_REGLER,
-                    behandlingId = defaultBehandling.id
+                    behandlingId = defaultBehandling.behandlingId
                 ),
                 lagVilkårResultat(
                     vilkår = Vilkår.BOSATT_I_RIKET,
                     vilkårRegelverk = Regelverk.EØS_FORORDNINGEN,
-                    behandlingId = defaultBehandling.id
+                    behandlingId = defaultBehandling.behandlingId
                 )
             )
         )
         vilkårsvurdering.personResultater = setOf(personResultat)
-        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(defaultBehandling.id) } returns vilkårsvurdering
+        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(defaultBehandling.behandlingId.id) } returns vilkårsvurdering
 
         val kategori = behandlingstemaService.hentKategoriFraInneværendeBehandling(defaultFagsak.id)
 
@@ -100,17 +100,17 @@ class BehandlingstemaServiceTest {
                 lagVilkårResultat(
                     vilkår = Vilkår.BOSATT_I_RIKET,
                     vilkårRegelverk = Regelverk.NASJONALE_REGLER,
-                    behandlingId = defaultBehandling.id
+                    behandlingId = defaultBehandling.behandlingId
                 ),
                 lagVilkårResultat(
                     vilkår = Vilkår.BOSATT_I_RIKET,
                     vilkårRegelverk = Regelverk.EØS_FORORDNINGEN,
-                    behandlingId = 0L
+                    behandlingId = BehandlingId(0L)
                 )
             )
         )
         vilkårsvurdering.personResultater = setOf(personResultat)
-        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(defaultBehandling.id) } returns vilkårsvurdering
+        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(defaultBehandling.behandlingId.id) } returns vilkårsvurdering
 
         val kategori = behandlingstemaService.hentKategoriFraInneværendeBehandling(defaultFagsak.id)
 
@@ -128,16 +128,16 @@ class BehandlingstemaServiceTest {
             vilkårResultater = mutableSetOf(
                 lagVilkårResultat(
                     vilkår = Vilkår.UTVIDET_BARNETRYGD,
-                    behandlingId = defaultBehandling.id
+                    behandlingId = defaultBehandling.behandlingId
                 ),
                 lagVilkårResultat(
                     vilkår = Vilkår.UTVIDET_BARNETRYGD,
-                    behandlingId = defaultBehandling.id
+                    behandlingId = defaultBehandling.behandlingId
                 )
             )
         )
         vilkårsvurdering.personResultater = setOf(personResultat)
-        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(defaultBehandling.id) } returns vilkårsvurdering
+        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(defaultBehandling.behandlingId.id) } returns vilkårsvurdering
 
         val underkategori = behandlingstemaService.hentUnderkategoriFraInneværendeBehandling(defaultFagsak.id)
 
@@ -157,12 +157,12 @@ class BehandlingstemaServiceTest {
                 lagVilkårResultat(
                     vilkår = Vilkår.UTVIDET_BARNETRYGD,
                     vilkårRegelverk = Regelverk.NASJONALE_REGLER,
-                    behandlingId = 0L
+                    behandlingId = BehandlingId(0L)
                 )
             )
         )
         vilkårsvurdering.personResultater = setOf(personResultat)
-        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(defaultBehandling.id) } returns vilkårsvurdering
+        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(defaultBehandling.behandlingId.id) } returns vilkårsvurdering
 
         val underkategori = behandlingstemaService.hentUnderkategoriFraInneværendeBehandling(defaultFagsak.id)
 
@@ -174,10 +174,14 @@ class BehandlingstemaServiceTest {
         val søkerFnr = randomFnr()
         val barnFnr = listOf(randomFnr())
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(defaultFagsak.id) } returns defaultBehandling
-        every { tidslinjeService.hentTidslinjer(BehandlingId(defaultBehandling.id)) } returns
+        every { tidslinjeService.hentTidslinjer(defaultBehandling.behandlingId) } returns
             VilkårsvurderingTidslinjer(
                 vilkårsvurdering = lagVilkårsvurdering(tilAktør(søkerFnr), defaultBehandling, Resultat.OPPFYLT),
-                personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(defaultBehandling.id, randomFnr(), barnFnr)
+                personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
+                    defaultBehandling.behandlingId,
+                    randomFnr(),
+                    barnFnr
+                )
             )
         assertEquals(BehandlingKategori.NASJONAL, behandlingstemaService.hentLøpendeKategori(defaultFagsak.id))
     }
@@ -200,10 +204,14 @@ class BehandlingstemaServiceTest {
             LocalDate.now().minusMonths(1),
             LocalDate.now().plusYears(2)
         )
-        every { tidslinjeService.hentTidslinjer(BehandlingId(defaultBehandling.id)) } returns
+        every { tidslinjeService.hentTidslinjer(defaultBehandling.behandlingId) } returns
             VilkårsvurderingTidslinjer(
                 vilkårsvurdering = vilkårsvurdering,
-                personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(defaultBehandling.id, søkerFnr, barnaFnr)
+                personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
+                    defaultBehandling.behandlingId,
+                    søkerFnr,
+                    barnaFnr
+                )
             )
         assertEquals(BehandlingKategori.EØS, behandlingstemaService.hentLøpendeKategori(defaultFagsak.id))
     }
@@ -226,10 +234,14 @@ class BehandlingstemaServiceTest {
             LocalDate.now().minusMonths(3),
             LocalDate.now().minusMonths(2)
         )
-        every { tidslinjeService.hentTidslinjer(BehandlingId(defaultBehandling.id)) } returns
+        every { tidslinjeService.hentTidslinjer(defaultBehandling.behandlingId) } returns
             VilkårsvurderingTidslinjer(
                 vilkårsvurdering = vilkårsvurdering,
-                personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(defaultBehandling.id, søkerFnr, barnaFnr)
+                personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
+                    defaultBehandling.behandlingId,
+                    søkerFnr,
+                    barnaFnr
+                )
             )
         assertEquals(BehandlingKategori.NASJONAL, behandlingstemaService.hentLøpendeKategori(defaultFagsak.id))
     }

@@ -28,7 +28,7 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
         val behandling = lagBehandling()
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
-            behandlingId = behandling.id,
+            behandlingId = behandling.behandlingId,
             barnasIdenter = listOf(barn1.aktør.aktivFødselsnummer(), barn2.aktør.aktivFødselsnummer()),
             søkerPersonIdent = søker.aktør.aktivFødselsnummer(),
             søkerAktør = søker.aktør,
@@ -39,7 +39,7 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
         val tom = YearMonth.of(2018, 8)
 
         val endretUtbetalingAndel = lagEndretUtbetalingAndel(
-            behandlingId = behandling.id,
+            behandlingId = behandling.behandlingId,
             fom = fom,
             tom = tom,
             person = barn2

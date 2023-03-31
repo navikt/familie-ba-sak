@@ -1,4 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.behandlingsresultat
+
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
@@ -7,6 +8,7 @@ import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagPersonResultat
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatSøknadUtils.kombinerSøknadsresultater
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatSøknadUtils.utledSøknadResultatFraAndelerTilkjentYtelse
@@ -147,7 +149,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
             fom = jan22,
             tom = aug22,
             prosent = BigDecimal(100),
-            behandlingId = 123L,
+            behandlingId = BehandlingId(123L),
             årsak = Årsak.DELT_BOSTED
         )
 
@@ -186,7 +188,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
             fom = jan22,
             tom = aug22,
             prosent = BigDecimal(100),
-            behandlingId = 123L,
+            behandlingId = BehandlingId(123L),
             årsak = årsak
         )
 
@@ -224,7 +226,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
             fom = jan22,
             tom = aug22,
             prosent = BigDecimal(100),
-            behandlingId = 123L,
+            behandlingId = BehandlingId(123L),
             årsak = årsak
         )
 
@@ -306,7 +308,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
             fom = jan22,
             tom = aug22,
             prosent = BigDecimal(100),
-            behandlingId = 123L,
+            behandlingId = BehandlingId(123L),
             årsak = Årsak.ALLEREDE_UTBETALT
         )
 
@@ -374,7 +376,8 @@ internal class BehandlingsresultatSøknadUtilsTest {
     fun `kombinerSøknadsresultater skal kaste feil dersom lista ikke inneholder noe som helst`() {
         val listeMedIngenSøknadsresultat = listOf<Søknadsresultat>()
 
-        val feil = assertThrows<FunksjonellFeil> { listeMedIngenSøknadsresultat.kombinerSøknadsresultater(behandlingÅrsak = BehandlingÅrsak.SØKNAD) }
+        val feil =
+            assertThrows<FunksjonellFeil> { listeMedIngenSøknadsresultat.kombinerSøknadsresultater(behandlingÅrsak = BehandlingÅrsak.SØKNAD) }
 
         assertThat(feil.message, Is("Klarer ikke utlede søknadsresultat. Finner ingen resultater."))
     }
@@ -386,7 +389,8 @@ internal class BehandlingsresultatSøknadUtilsTest {
     ) {
         val listeMedSøknadsresultat = listOf(søknadsresultat)
 
-        val kombinertResultat = listeMedSøknadsresultat.kombinerSøknadsresultater(behandlingÅrsak = BehandlingÅrsak.SØKNAD)
+        val kombinertResultat =
+            listeMedSøknadsresultat.kombinerSøknadsresultater(behandlingÅrsak = BehandlingÅrsak.SØKNAD)
 
         assertThat(kombinertResultat, Is(søknadsresultat))
     }
@@ -399,7 +403,8 @@ internal class BehandlingsresultatSøknadUtilsTest {
         val listeMedSøknadsresultat =
             listOf(Søknadsresultat.INGEN_RELEVANTE_ENDRINGER, søknadsresultat)
 
-        val kombinertResultat = listeMedSøknadsresultat.kombinerSøknadsresultater(behandlingÅrsak = BehandlingÅrsak.SØKNAD)
+        val kombinertResultat =
+            listeMedSøknadsresultat.kombinerSøknadsresultater(behandlingÅrsak = BehandlingÅrsak.SØKNAD)
 
         assertThat(kombinertResultat, Is(søknadsresultat))
     }
@@ -412,7 +417,8 @@ internal class BehandlingsresultatSøknadUtilsTest {
             Søknadsresultat.INGEN_RELEVANTE_ENDRINGER
         )
 
-        val kombinertResultat = listeMedSøknadsresultat.kombinerSøknadsresultater(behandlingÅrsak = BehandlingÅrsak.SØKNAD)
+        val kombinertResultat =
+            listeMedSøknadsresultat.kombinerSøknadsresultater(behandlingÅrsak = BehandlingÅrsak.SØKNAD)
 
         assertThat(kombinertResultat, Is(Søknadsresultat.DELVIS_INNVILGET))
     }
@@ -480,7 +486,9 @@ internal class BehandlingsresultatSøknadUtilsTest {
 
     @ParameterizedTest
     @EnumSource(value = Resultat::class, names = ["IKKE_OPPFYLT", "IKKE_VURDERT"])
-    fun `utledResultatPåSøknad - skal returnere AVSLÅTT dersom behandlingen er en fødselshendelse og det finnes vilkårsvurdering som ikke er oppfylt eller vurdert`(resultat: Resultat) {
+    fun `utledResultatPåSøknad - skal returnere AVSLÅTT dersom behandlingen er en fødselshendelse og det finnes vilkårsvurdering som ikke er oppfylt eller vurdert`(
+        resultat: Resultat
+    ) {
         val behandling = lagBehandling(årsak = BehandlingÅrsak.FØDSELSHENDELSE)
         val vikårsvurdering = Vilkårsvurdering(behandling = behandling)
 

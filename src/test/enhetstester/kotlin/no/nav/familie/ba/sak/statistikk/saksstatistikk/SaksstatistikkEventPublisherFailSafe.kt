@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.statistikk.saksstatistikk
 
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
@@ -13,7 +14,7 @@ class SaksstatistikkEventPublisherFailSafe : SaksstatistikkEventPublisher() {
         return this
     }
 
-    override fun publiserBehandlingsstatistikk(behandlingId: Long) {
+    override fun publiserBehandlingsstatistikk(behandlingId: BehandlingId) {
         runCatching {
             super.publiserBehandlingsstatistikk(behandlingId)
         }.onFailure { it.printStackTrace() }

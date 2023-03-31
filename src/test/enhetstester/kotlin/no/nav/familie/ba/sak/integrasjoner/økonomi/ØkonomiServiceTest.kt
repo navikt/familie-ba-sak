@@ -94,6 +94,6 @@ internal class ØkonomiServiceTest {
             BigDecimal(1054),
             Utbetalingsperiode.SatsType.MND,
             søker,
-            behandling.id
+            behandling.behandlingId.id
         )
 }

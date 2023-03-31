@@ -8,6 +8,7 @@ import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.statistikk.producer.KafkaProducer
 import no.nav.familie.ba.sak.statistikk.stønadsstatistikk.StønadsstatistikkService
 import no.nav.familie.eksterne.kontrakter.VedtakDVHV2
@@ -42,7 +43,7 @@ class PubliserVedtakV2TaskTest {
 
     @Test
     fun skalOppretteTask() {
-        val task = PubliserVedtakV2Task.opprettTask("ident", 42)
+        val task = PubliserVedtakV2Task.opprettTask("ident", BehandlingId(42))
 
         Assertions.assertThat(task.payload).isEqualTo("42")
         Assertions.assertThat(task.metadata["personIdent"]).isEqualTo("ident")
@@ -54,7 +55,7 @@ class PubliserVedtakV2TaskTest {
         every { kafkaProducerMock.sendMessageForTopicVedtakV2(ofType(VedtakDVHV2::class)) }.returns(100)
         every { taskRepositoryMock.save(any()) } returns Task(type = "test", payload = "")
 
-        val task = PubliserVedtakV2Task.opprettTask("ident", 42)
+        val task = PubliserVedtakV2Task.opprettTask("ident", BehandlingId(42))
         publiserVedtakV2Task.doTask(task)
         taskRepositoryMock.save(task)
 

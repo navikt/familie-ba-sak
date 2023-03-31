@@ -44,7 +44,7 @@ fun lagPersonResultatAvOverstyrteResultater(
                 vilkårType = vilkårType,
                 resultat = Resultat.OPPFYLT,
                 begrunnelse = "",
-                behandlingId = vilkårsvurdering.behandling.id,
+                behandlingId = vilkårsvurdering.behandling.behandlingId,
                 utdypendeVilkårsvurderinger = emptyList()
             )
     }.toSet()

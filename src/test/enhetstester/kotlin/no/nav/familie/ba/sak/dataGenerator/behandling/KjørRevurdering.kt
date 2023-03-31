@@ -213,7 +213,7 @@ private fun håndterDistribuertVedtakSteg(
         stegService.håndterDistribuerVedtaksbrev(
             behandling,
             DistribuerDokumentDTO(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId.id,
                 journalpostId = "1234",
                 personEllerInstitusjonIdent = søkerFnr,
                 brevmal = brevmalService.hentBrevmal(behandling),
@@ -228,7 +228,7 @@ private fun håndterJournalførtVedtakSteg(
     behandlingEtterIverksetteMotTilbake: Behandling,
     vedtakService: VedtakService
 ): Behandling {
-    val vedtak = vedtakService.hentAktivForBehandling(behandlingEtterIverksetteMotTilbake.id)
+    val vedtak = vedtakService.hentAktivForBehandling(behandlingEtterIverksetteMotTilbake.behandlingId)
     return stegService.håndterJournalførVedtaksbrev(
         behandlingEtterIverksetteMotTilbake,
         JournalførVedtaksbrevDTO(
@@ -244,7 +244,7 @@ private fun håndterStatusFraOppdragSteg(
     søkerFnr: String,
     vedtakService: VedtakService
 ): Behandling {
-    val vedtak = vedtakService.hentAktivForBehandling(behandlingEtterIverksetteVedtak.id)
+    val vedtak = vedtakService.hentAktivForBehandling(behandlingEtterIverksetteVedtak.behandlingId)
     return stegService.håndterStatusFraØkonomi(
         behandlingEtterIverksetteVedtak,
         StatusFraOppdragMedTask(
@@ -252,7 +252,7 @@ private fun håndterStatusFraOppdragSteg(
                 fagsystem = FAGSYSTEM,
                 personIdent = søkerFnr,
                 aktørId = behandlingEtterIverksetteVedtak.fagsak.aktør.aktørId,
-                behandlingsId = behandlingEtterIverksetteVedtak.id,
+                behandlingsId = behandlingEtterIverksetteVedtak.behandlingId.id,
                 vedtaksId = vedtak!!.id
             ),
             task = Task(type = StatusFraOppdragTask.TASK_STEP_TYPE, payload = "")
@@ -265,11 +265,11 @@ private fun håndterIverksetteVedtakSteg(
     behandlingEtterBeslutteVedtak: Behandling,
     vedtakService: VedtakService
 ): Behandling {
-    val vedtak = vedtakService.hentAktivForBehandling(behandlingEtterBeslutteVedtak.id)
+    val vedtak = vedtakService.hentAktivForBehandling(behandlingEtterBeslutteVedtak.behandlingId)
     return stegService.håndterIverksettMotØkonomi(
         behandlingEtterBeslutteVedtak,
         IverksettingTaskDTO(
-            behandlingsId = behandlingEtterBeslutteVedtak.id,
+            behandlingsId = behandlingEtterBeslutteVedtak.behandlingId.id,
             vedtaksId = vedtak!!.id,
             saksbehandlerId = "System",
             personIdent = behandlingEtterBeslutteVedtak.fagsak.aktør.aktivFødselsnummer()
@@ -312,7 +312,8 @@ private fun håndterVilkårsvurderingSteg(
     nyVilkårsvurdering: Vilkårsvurdering,
     stegService: StegService
 ): Behandling {
-    val vilkårsvurderingForBehandling = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)!!
+    val vilkårsvurderingForBehandling =
+        vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.behandlingId)!!
     vilkårsvurderingForBehandling.oppdaterMedDataFra(nyVilkårsvurdering)
 
     vilkårsvurderingService.oppdater(vilkårsvurderingForBehandling)
@@ -350,7 +351,7 @@ fun leggTilAlleGyldigeBegrunnelserPåVedtaksperiodeIBehandling(
     sanityBegrunnelser: List<SanityBegrunnelse>,
     vilkårsvurdering: Vilkårsvurdering
 ) {
-    val aktivtVedtak = vedtakService.hentAktivForBehandling(behandling.id)!!
+    val aktivtVedtak = vedtakService.hentAktivForBehandling(behandling.behandlingId)!!
 
     val perisisterteVedtaksperioder =
         vedtaksperiodeService.hentPersisterteVedtaksperioder(aktivtVedtak)

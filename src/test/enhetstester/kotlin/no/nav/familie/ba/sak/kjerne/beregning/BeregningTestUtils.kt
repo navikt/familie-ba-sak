@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.kontrakter.felles.oppdrag.Opphør
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
@@ -11,7 +12,7 @@ import java.util.UUID
 fun lagTestUtbetalingsoppdragForFGBMedToBarn(
     personIdent: String,
     fagsakId: String,
-    behandlingId: Long,
+    behandlingId: BehandlingId,
     vedtakDato: LocalDate,
     datoFomBarn1: LocalDate,
     datoFomBarn2: LocalDate,
@@ -38,7 +39,7 @@ fun lagTestUtbetalingsoppdragForFGBMedToBarn(
                 BigDecimal(1054),
                 Utbetalingsperiode.SatsType.MND,
                 personIdent,
-                behandlingId
+                behandlingId.id
             ),
             Utbetalingsperiode(
                 false,
@@ -52,7 +53,7 @@ fun lagTestUtbetalingsoppdragForFGBMedToBarn(
                 BigDecimal(1054),
                 Utbetalingsperiode.SatsType.MND,
                 personIdent,
-                behandlingId
+                behandlingId.id
             )
         )
     )
@@ -61,7 +62,7 @@ fun lagTestUtbetalingsoppdragForFGBMedToBarn(
 fun lagTestUtbetalingsoppdragForOpphørMedToBarn(
     personIdent: String,
     fagsakId: String,
-    behandlingId: Long,
+    behandlingId: BehandlingId,
     vedtakDato: LocalDate,
     datoFomBarn1: LocalDate,
     datoFomBarn2: LocalDate,
@@ -89,7 +90,7 @@ fun lagTestUtbetalingsoppdragForOpphørMedToBarn(
                 BigDecimal(1054),
                 Utbetalingsperiode.SatsType.MND,
                 personIdent,
-                behandlingId
+                behandlingId.id
             ),
             Utbetalingsperiode(
                 true,
@@ -103,7 +104,7 @@ fun lagTestUtbetalingsoppdragForOpphørMedToBarn(
                 BigDecimal(1054),
                 Utbetalingsperiode.SatsType.MND,
                 personIdent,
-                behandlingId
+                behandlingId.id
             )
         )
     )
@@ -112,8 +113,8 @@ fun lagTestUtbetalingsoppdragForOpphørMedToBarn(
 fun lagTestUtbetalingsoppdragForRevurderingMedToBarn(
     personIdent: String,
     fagsakId: String,
-    behandlingId: Long,
-    forrigeBehandlingId: Long,
+    behandlingId: BehandlingId,
+    forrigeBehandlingId: BehandlingId,
     vedtakDato: LocalDate,
     opphørFomBarn1: LocalDate,
     revurderingFomBarn1: LocalDate,
@@ -144,7 +145,7 @@ fun lagTestUtbetalingsoppdragForRevurderingMedToBarn(
                 BigDecimal(1054),
                 Utbetalingsperiode.SatsType.MND,
                 personIdent,
-                forrigeBehandlingId
+                forrigeBehandlingId.id
             ),
             Utbetalingsperiode(
                 false,
@@ -158,7 +159,7 @@ fun lagTestUtbetalingsoppdragForRevurderingMedToBarn(
                 BigDecimal(1054),
                 Utbetalingsperiode.SatsType.MND,
                 personIdent,
-                behandlingId
+                behandlingId.id
             ),
             Utbetalingsperiode(
                 true,
@@ -172,7 +173,7 @@ fun lagTestUtbetalingsoppdragForRevurderingMedToBarn(
                 BigDecimal(1054),
                 Utbetalingsperiode.SatsType.MND,
                 personIdent,
-                forrigeBehandlingId
+                forrigeBehandlingId.id
             ),
             Utbetalingsperiode(
                 false,
@@ -186,7 +187,7 @@ fun lagTestUtbetalingsoppdragForRevurderingMedToBarn(
                 BigDecimal(1054),
                 Utbetalingsperiode.SatsType.MND,
                 personIdent,
-                behandlingId
+                behandlingId.id
             )
         )
     )

@@ -75,8 +75,7 @@ internal class Autobrev6og18ÅrServiceTest {
         andelerTilkjentYtelseOgEndreteUtbetalingerService = AndelerTilkjentYtelseOgEndreteUtbetalingerService(
             andelTilkjentYtelseRepository,
             endretUtbetalingAndelRepository,
-            mockk(),
-            featureToggleService
+            mockk()
         ),
         startSatsendring = startSatsendring
     )
@@ -197,7 +196,7 @@ internal class Autobrev6og18ÅrServiceTest {
 
         every {
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
-                behandling.id
+                behandling.behandlingId.id
             )
         } returns listOf(
             lagAndelTilkjentYtelse(
@@ -244,7 +243,7 @@ internal class Autobrev6og18ÅrServiceTest {
 
         every {
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
-                behandling.id
+                behandling.behandlingId.id
             )
         } returns listOf(
             lagAndelTilkjentYtelse(
@@ -337,7 +336,7 @@ internal class Autobrev6og18ÅrServiceTest {
             }
             every {
                 andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
-                    behandling.id
+                    behandling.behandlingId.id
                 )
             } returns listOfNotNull(
                 lagAndelTilkjentYtelse(
@@ -368,7 +367,7 @@ internal class Autobrev6og18ÅrServiceTest {
             }
             every {
                 andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
-                    behandling.id
+                    behandling.behandlingId.id
                 )
             } returns listOfNotNull(
                 lagAndelTilkjentYtelse(
@@ -389,8 +388,8 @@ internal class Autobrev6og18ÅrServiceTest {
 
         val personer =
             if (medSøsken) arrayOf(søker, barnIBrytningsalder, søsken) else arrayOf(søker, barnIBrytningsalder)
-        every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.id) } returns lagTestPersonopplysningGrunnlag(
-            behandling.id,
+        every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.behandlingId.id) } returns lagTestPersonopplysningGrunnlag(
+            behandling.behandlingId,
             *personer
         )
         return Triple(behandling, søker, barnIBrytningsalder)

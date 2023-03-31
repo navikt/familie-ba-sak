@@ -98,7 +98,7 @@ class FiltreringsregelForFlereBarnTest {
         val personInfo = generePersonInfoMedBarn(setOf(barnAktør0, barnAktør1))
 
         every { personopplysningGrunnlagRepositoryMock.findByBehandlingAndAktiv(any()) } returns
-            PersonopplysningGrunnlag(behandlingId = behandling.id, aktiv = true).apply {
+            PersonopplysningGrunnlag(behandlingId = behandling.behandlingId, aktiv = true).apply {
                 personer.addAll(
                     listOf(
                         genererPerson(
@@ -166,7 +166,7 @@ class FiltreringsregelForFlereBarnTest {
         val personInfo = generePersonInfoMedBarn(setOf(barnAktør0, barnAktør1))
 
         every { personopplysningGrunnlagRepositoryMock.findByBehandlingAndAktiv(any()) } returns
-            PersonopplysningGrunnlag(behandlingId = behandling.id, aktiv = true).apply {
+            PersonopplysningGrunnlag(behandlingId = behandling.behandlingId, aktiv = true).apply {
                 personer.addAll(
                     listOf(
                         genererPerson(
@@ -244,7 +244,15 @@ class FiltreringsregelForFlereBarnTest {
             .apply {
                 this.sivilstander = mutableListOf(GrSivilstand(type = sivilstand, person = this))
                 if (dødsfallDato != null) {
-                    this.dødsfall = lagDødsfall(person = this, dødsfallDatoFraPdl = dødsfallDato, dødsfallAdresseFraPdl = PdlKontaktinformasjonForDødsboAdresse(adresselinje1 = "Gate 1", postnummer = "1234", poststedsnavn = "Oslo"))
+                    this.dødsfall = lagDødsfall(
+                        person = this,
+                        dødsfallDatoFraPdl = dødsfallDato,
+                        dødsfallAdresseFraPdl = PdlKontaktinformasjonForDødsboAdresse(
+                            adresselinje1 = "Gate 1",
+                            postnummer = "1234",
+                            poststedsnavn = "Oslo"
+                        )
+                    )
                 }
             }
     }

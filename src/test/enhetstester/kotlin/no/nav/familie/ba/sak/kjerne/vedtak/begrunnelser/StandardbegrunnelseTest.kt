@@ -48,7 +48,7 @@ internal class StandardbegrunnelseTest {
     )
     private val vilkårsvurdering =
         lagVilkårsvurdering(søker.aktør, lagBehandling(), Resultat.OPPFYLT)
-    val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn)
+    val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.behandlingId, søker, barn)
 
     private val aktørerMedUtbetaling = listOf(søker.aktør, barn.aktør)
 
@@ -182,7 +182,7 @@ internal class StandardbegrunnelseTest {
 
     @Test
     fun `Oppfyller ikke vilkår for person skal gi false`() {
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, barn)
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.behandlingId, barn)
 
         assertFalse(
             Standardbegrunnelse.INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER
@@ -202,7 +202,7 @@ internal class StandardbegrunnelseTest {
 
     @Test
     fun `Oppfyller vilkår for person skal gi true`() {
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker)
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.behandlingId, søker)
 
         assertTrue(
             Standardbegrunnelse.INNVILGET_LOVLIG_OPPHOLD_EØS_BORGER
@@ -222,7 +222,7 @@ internal class StandardbegrunnelseTest {
 
     @Test
     fun `Oppfyller etter endringsperiode skal gi true`() {
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, barn)
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.behandlingId, barn)
 
         assertTrue(
             Standardbegrunnelse.ETTER_ENDRET_UTBETALING_AVTALE_DELT_BOSTED_FØLGES
@@ -240,7 +240,7 @@ internal class StandardbegrunnelseTest {
                     minimerteEndredeUtbetalingAndeler = listOf(
                         lagEndretUtbetalingAndel(
                             prosent = BigDecimal.ZERO,
-                            behandlingId = behandling.id,
+                            behandlingId = behandling.behandlingId,
                             person = barn,
                             fom = YearMonth.of(2021, 6),
                             tom = YearMonth.of(2021, 9),
@@ -256,7 +256,7 @@ internal class StandardbegrunnelseTest {
 
     @Test
     fun `Oppfyller ikke etter endringsperiode skal gi false`() {
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, barn)
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.behandlingId, barn)
 
         assertFalse(
             Standardbegrunnelse.ETTER_ENDRET_UTBETALING_AVTALE_DELT_BOSTED_FØLGES
@@ -274,7 +274,7 @@ internal class StandardbegrunnelseTest {
                     minimerteEndredeUtbetalingAndeler = listOf(
                         lagEndretUtbetalingAndel(
                             prosent = BigDecimal.ZERO,
-                            behandlingId = behandling.id,
+                            behandlingId = behandling.behandlingId,
                             person = barn,
                             fom = YearMonth.of(2021, 10),
                             tom = YearMonth.of(2021, 10),
@@ -345,7 +345,7 @@ internal class StandardbegrunnelseTest {
             dødsfallDatoFraPdl = LocalDate.now().minusMonths(1).withDayOfMonth(15).toString(),
             dødsfallAdresseFraPdl = null
         )
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, dødtBarn)
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.behandlingId, dødtBarn)
 
         val reduksjonBarnDødBegrunnelse = listOf(
             SanityBegrunnelse(
@@ -388,7 +388,7 @@ internal class StandardbegrunnelseTest {
         val dødsfallDato = LocalDate.now().minusMonths(1).withDayOfMonth(15)
         dødtBarn.dødsfall =
             lagDødsfall(dødtBarn, dødsfallDatoFraPdl = dødsfallDato.toString(), dødsfallAdresseFraPdl = null)
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, dødtBarn)
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.behandlingId, dødtBarn)
 
         val reduksjonBarnDødBegrunnelse = listOf(
             SanityBegrunnelse(
@@ -431,7 +431,7 @@ internal class StandardbegrunnelseTest {
         val dødsfallDato = LocalDate.now().minusMonths(1).withDayOfMonth(15)
         dødtBarn.dødsfall =
             lagDødsfall(dødtBarn, dødsfallDatoFraPdl = dødsfallDato.toString(), dødsfallAdresseFraPdl = null)
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, dødtBarn)
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.behandlingId, dødtBarn)
 
         val reduksjonBarnDødBegrunnelse = listOf(
             SanityBegrunnelse(

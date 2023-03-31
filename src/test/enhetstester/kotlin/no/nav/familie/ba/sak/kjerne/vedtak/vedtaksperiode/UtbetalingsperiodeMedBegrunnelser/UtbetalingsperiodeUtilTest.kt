@@ -229,7 +229,7 @@ class UtbetalingsperiodeUtilTest {
             vilkårType = Vilkår.BOR_MED_SØKER,
             resultat = Resultat.OPPFYLT,
             begrunnelse = "",
-            behandlingId = vilkårsvurdering.behandling.id,
+            behandlingId = vilkårsvurdering.behandling.behandlingId,
             utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BARN_BOR_I_STORBRITANNIA_MED_SØKER)
         )
         val vilkårResultatBorMedSøkerUtenUtdypendeVilkårsvurderingBarn1 = VilkårResultat(
@@ -239,11 +239,17 @@ class UtbetalingsperiodeUtilTest {
             vilkårType = Vilkår.BOR_MED_SØKER,
             resultat = Resultat.OPPFYLT,
             begrunnelse = "",
-            behandlingId = vilkårsvurdering.behandling.id,
+            behandlingId = vilkårsvurdering.behandling.behandlingId,
             utdypendeVilkårsvurderinger = emptyList()
         )
 
-        val resterendeVilkårForBarn = Vilkår.hentVilkårFor(PersonType.BARN, fagsakType = FagsakType.NORMAL).mapNotNull { if (it == Vilkår.BOR_MED_SØKER) null else lagVilkårResultat(vilkår = it, fom = mars2020.minusMonths(1), tom = juli2020) }
+        val resterendeVilkårForBarn = Vilkår.hentVilkårFor(PersonType.BARN, fagsakType = FagsakType.NORMAL).mapNotNull {
+            if (it == Vilkår.BOR_MED_SØKER) null else lagVilkårResultat(
+                vilkår = it,
+                fom = mars2020.minusMonths(1),
+                tom = juli2020
+            )
+        }
 
         val vilkårResultaterBarn1 = listOf(
             vilkårResultatBorMedSøkerMedUtdypendeVilkårsvurderingBarn1,
@@ -266,7 +272,7 @@ class UtbetalingsperiodeUtilTest {
             vilkårType = Vilkår.BOR_MED_SØKER,
             resultat = Resultat.OPPFYLT,
             begrunnelse = "",
-            behandlingId = vilkårsvurdering.behandling.id,
+            behandlingId = vilkårsvurdering.behandling.behandlingId,
             utdypendeVilkårsvurderinger = emptyList()
         )
         val vilkårResultatBorMedSøkerUtenUtdypendeVilkårsvurderingBarn2 = VilkårResultat(
@@ -276,7 +282,7 @@ class UtbetalingsperiodeUtilTest {
             vilkårType = Vilkår.BOR_MED_SØKER,
             resultat = Resultat.OPPFYLT,
             begrunnelse = "",
-            behandlingId = vilkårsvurdering.behandling.id,
+            behandlingId = vilkårsvurdering.behandling.behandlingId,
             utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BARN_BOR_I_STORBRITANNIA_MED_SØKER)
         )
 
@@ -419,7 +425,7 @@ class UtbetalingsperiodeUtilTest {
             vilkårType = vilkårType,
             resultat = Resultat.OPPFYLT,
             begrunnelse = "",
-            behandlingId = vilkårsvurdering.behandling.id,
+            behandlingId = vilkårsvurdering.behandling.behandlingId,
             utdypendeVilkårsvurderinger = emptyList(),
             vurderesEtter = Regelverk.NASJONALE_REGLER
         )
@@ -432,7 +438,7 @@ class UtbetalingsperiodeUtilTest {
                 vilkårType = vilkårType,
                 resultat = Resultat.OPPFYLT,
                 begrunnelse = "",
-                behandlingId = vilkårsvurdering.behandling.id,
+                behandlingId = vilkårsvurdering.behandling.behandlingId,
                 utdypendeVilkårsvurderinger = emptyList(),
                 vurderesEtter = Regelverk.EØS_FORORDNINGEN
             )

@@ -55,7 +55,7 @@ class PersonoGrunnlagServiceTest {
 
         val forrigeBehandlingPersongrunnlag =
             lagTestPersonopplysningGrunnlag(
-                behandlingId = forrigeBehandling.id,
+                behandlingId = forrigeBehandling.behandlingId,
                 personer = arrayOf(søker, barnFraForrigeBehanlding)
             )
 
@@ -67,11 +67,11 @@ class PersonoGrunnlagServiceTest {
         every { personidentService.hentOgLagreAktør(søkerFnr, true) } returns søker.aktør
         every { personidentService.hentOgLagreAktør(barnFnr, true) } returns barn.aktør
 
-        every { persongrunnlagService.hentAktiv(forrigeBehandling.id) } returns forrigeBehandlingPersongrunnlag
+        every { persongrunnlagService.hentAktiv(forrigeBehandling.behandlingId) } returns forrigeBehandlingPersongrunnlag
 
         every {
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(
-                forrigeBehandling.id,
+                forrigeBehandling.behandlingId.id,
                 barnFraForrigeBehanlding.aktør
             )
         } returns listOf(lagAndelTilkjentYtelse(fom = YearMonth.now(), tom = YearMonth.now()))
@@ -84,7 +84,7 @@ class PersonoGrunnlagServiceTest {
                 any(),
                 any()
             )
-        } returns PersonopplysningGrunnlag(behandlingId = behandling.id)
+        } returns PersonopplysningGrunnlag(behandlingId = behandling.behandlingId)
 
         persongrunnlagService.registrerBarnFraSøknad(
             søknadDTO = søknadDTO,
@@ -109,7 +109,7 @@ class PersonoGrunnlagServiceTest {
             lagBehandling(fagsak = defaultFagsak().copy(type = fagsakType))
         }
         behandlinger.forEach { behandling ->
-            val nyttGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id)
+            val nyttGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.behandlingId)
 
             every {
                 persongrunnlagService.lagreOgDeaktiverGammel(any())

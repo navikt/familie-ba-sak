@@ -20,7 +20,7 @@ internal class EndretUtbetalingAndelTest {
     @Test
     fun `Sjekk validering med tomme felt`() {
         val behandling = lagBehandling()
-        val endretUtbetalingAndel = EndretUtbetalingAndel(behandlingId = behandling.id)
+        val endretUtbetalingAndel = EndretUtbetalingAndel(behandlingId = behandling.behandlingId)
         endretUtbetalingAndel.begrunnelse = ""
 
         assertThrows<RuntimeException> {
@@ -31,7 +31,7 @@ internal class EndretUtbetalingAndelTest {
     @Test
     fun `Sjekk validering for delt bosted med tomt felt avtaletidpunkt`() {
         val behandling = lagBehandling()
-        val endretUtbetalingAndel = EndretUtbetalingAndel(behandlingId = behandling.id)
+        val endretUtbetalingAndel = EndretUtbetalingAndel(behandlingId = behandling.behandlingId)
 
         endretUtbetalingAndel.person = tilfeldigPerson()
         endretUtbetalingAndel.prosent = BigDecimal(0)
@@ -49,7 +49,7 @@ internal class EndretUtbetalingAndelTest {
     @Test
     fun `Sjekk validering for delt bosted med ikke tomt felt avtaletidpunkt`() {
         val behandling = lagBehandling()
-        val endretUtbetalingAndel = EndretUtbetalingAndel(behandlingId = behandling.id)
+        val endretUtbetalingAndel = EndretUtbetalingAndel(behandlingId = behandling.behandlingId)
 
         endretUtbetalingAndel.person = tilfeldigPerson()
         endretUtbetalingAndel.prosent = BigDecimal(0)
@@ -68,7 +68,7 @@ internal class EndretUtbetalingAndelTest {
         val behandling = lagBehandling()
         val barn = lagPerson(type = PersonType.BARN)
         val endretUtbetalingAndel = lagEndretUtbetalingAndel(
-            behandlingId = behandling.id,
+            behandlingId = behandling.behandlingId,
             person = barn,
             fom = YearMonth.now(),
             tom = null,
@@ -108,7 +108,7 @@ internal class EndretUtbetalingAndelTest {
         val behandling = lagBehandling()
         val barn = lagPerson(type = PersonType.BARN)
         val endretUtbetalingAndel = lagEndretUtbetalingAndel(
-            behandlingId = behandling.id,
+            behandlingId = behandling.behandlingId,
             person = barn,
             fom = YearMonth.now(),
             tom = null,
@@ -116,7 +116,7 @@ internal class EndretUtbetalingAndelTest {
         )
 
         val annenEndretAndel = lagEndretUtbetalingAndel(
-            behandlingId = behandling.id,
+            behandlingId = behandling.behandlingId,
             person = barn,
             fom = YearMonth.now().plusMonths(5),
             tom = YearMonth.now().plusMonths(8),

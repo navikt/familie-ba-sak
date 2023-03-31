@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -19,7 +20,7 @@ class OpphørsperiodeTest {
     val barn2 = tilfeldigPerson()
 
     val personopplysningGrunnlag = PersonopplysningGrunnlag(
-        behandlingId = 0L,
+        behandlingId = BehandlingId(0L),
         personer = mutableSetOf(søker, barn1, barn2)
     )
 

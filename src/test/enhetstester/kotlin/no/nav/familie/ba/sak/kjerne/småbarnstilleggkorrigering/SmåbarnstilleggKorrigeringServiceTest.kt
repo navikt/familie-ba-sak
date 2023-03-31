@@ -38,12 +38,12 @@ internal class SmåbarnstilleggKorrigeringServiceTest {
         val behandling = lagBehandling()
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling = behandling)
 
-        every { tilkjentYtelseRepository.findByBehandling(behandling.id) } returns tilkjentYtelse
+        every { tilkjentYtelseRepository.findByBehandling(behandling.behandlingId.id) } returns tilkjentYtelse
 
         val småbarnsTillegg =
             småbarnstilleggKorrigeringService.leggTilSmåbarnstilleggPåBehandling(YearMonth.of(2020, 10), behandling)
 
-        verify(exactly = 1) { tilkjentYtelseRepository.findByBehandling(behandling.id) }
+        verify(exactly = 1) { tilkjentYtelseRepository.findByBehandling(behandling.behandlingId.id) }
         verify(exactly = 1) {
             loggService.opprettSmåbarnstilleggLogg(
                 behandling,
@@ -68,7 +68,7 @@ internal class SmåbarnstilleggKorrigeringServiceTest {
             ytelseType = YtelseType.SMÅBARNSTILLEGG
         )
 
-        every { tilkjentYtelseRepository.findByBehandling(behandling.id) } returns tilkjentYtelseMock
+        every { tilkjentYtelseRepository.findByBehandling(behandling.behandlingId.id) } returns tilkjentYtelseMock
         every { tilkjentYtelseMock.andelerTilkjentYtelse } returns mutableSetOf(andelTilkjentYtelse)
 
         val feil = assertThrows<FunksjonellFeil> {
@@ -94,7 +94,7 @@ internal class SmåbarnstilleggKorrigeringServiceTest {
             )
         )
 
-        every { tilkjentYtelseRepository.findByBehandling(behandling.id) } returns tilkjentYtelse
+        every { tilkjentYtelseRepository.findByBehandling(behandling.behandlingId.id) } returns tilkjentYtelse
         every { tilkjentYtelseRepository.saveAndFlush(any()) } returns tilkjentYtelse
 
         val oppsplittetSmåbarnstillegg =
@@ -129,7 +129,7 @@ internal class SmåbarnstilleggKorrigeringServiceTest {
             )
         )
 
-        every { tilkjentYtelseRepository.findByBehandling(behandling.id) } returns tilkjentYtelse
+        every { tilkjentYtelseRepository.findByBehandling(behandling.behandlingId.id) } returns tilkjentYtelse
 
         val feil = assertThrows<FunksjonellFeil> {
             småbarnstilleggKorrigeringService.fjernSmåbarnstilleggPåBehandling(YearMonth.of(2025, 5), behandling)

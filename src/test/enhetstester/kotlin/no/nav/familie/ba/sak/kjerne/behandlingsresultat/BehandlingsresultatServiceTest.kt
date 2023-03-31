@@ -218,9 +218,9 @@ internal class BehandlingsresultatServiceTest {
         )
         val eksisterendeBarn = lagPerson()
         val eksisterendePersonpplysningGrunnlag =
-            PersonopplysningGrunnlag(behandlingId = behandling.id, personer = mutableSetOf(eksisterendeBarn))
+            PersonopplysningGrunnlag(behandlingId = behandling.behandlingId, personer = mutableSetOf(eksisterendeBarn))
 
-        every { persongrunnlagService.hentAktivThrows(behandling.id) } returns eksisterendePersonpplysningGrunnlag
+        every { persongrunnlagService.hentAktivThrows(behandling.behandlingId) } returns eksisterendePersonpplysningGrunnlag
 
         val personerFramstiltForKrav =
             behandlingsresultatService.finnPersonerFremstiltKravFor(
@@ -231,7 +231,7 @@ internal class BehandlingsresultatServiceTest {
 
         assertThat(personerFramstiltForKrav.single(), Is(eksisterendeBarn.aktør))
 
-        verify(exactly = 1) { persongrunnlagService.hentAktivThrows(behandling.id) }
+        verify(exactly = 1) { persongrunnlagService.hentAktivThrows(behandling.behandlingId) }
     }
 
     @Test

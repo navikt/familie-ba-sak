@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.common.lagPersonResultat
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -57,7 +58,7 @@ class EndretUtbetalingAndelValideringTest {
         val barn1 = tilfeldigPerson()
         val barn2 = tilfeldigPerson()
         val endretUtbetalingAndel = EndretUtbetalingAndel(
-            behandlingId = 1,
+            behandlingId = BehandlingId(1),
             person = barn1,
             fom = YearMonth.of(2020, 2),
             tom = YearMonth.of(2020, 6),
@@ -132,7 +133,7 @@ class EndretUtbetalingAndelValideringTest {
         )
 
         val endretUtbetalingAndel = EndretUtbetalingAndel(
-            behandlingId = 1,
+            behandlingId = BehandlingId(1),
             person = barn1,
             fom = YearMonth.of(2020, 2),
             tom = YearMonth.of(2020, 6),
@@ -179,7 +180,7 @@ class EndretUtbetalingAndelValideringTest {
     @Test
     fun `Skal kaste feil hvis endringsperiode med årsak delt bosted ikke overlapper helt med delt bosted periode`() {
         val endretUtbetalingAndel = EndretUtbetalingAndel(
-            behandlingId = 1,
+            behandlingId = BehandlingId(1),
             person = tilfeldigPerson(),
             fom = YearMonth.of(2020, 2),
             tom = YearMonth.of(2020, 6),
@@ -217,7 +218,7 @@ class EndretUtbetalingAndelValideringTest {
     @Test
     fun `Skal kaste feil hvis endringsårsak er delt bosted og det ikke eksisterer delt bosted perioder`() {
         val endretUtbetalingAndel = EndretUtbetalingAndel(
-            behandlingId = 1,
+            behandlingId = BehandlingId(1),
             person = tilfeldigPerson(),
             fom = YearMonth.of(2020, 2),
             tom = YearMonth.of(2020, 6),
@@ -238,7 +239,7 @@ class EndretUtbetalingAndelValideringTest {
     @Test
     fun `Skal ikke kaste feil hvis endringsperiode med årsak delt bosted overlapper helt med delt bosted periode`() {
         val endretUtbetalingAndel = EndretUtbetalingAndel(
-            behandlingId = 1,
+            behandlingId = BehandlingId(1),
             person = tilfeldigPerson(),
             fom = YearMonth.of(2020, 2),
             tom = YearMonth.of(2020, 6),
@@ -342,7 +343,7 @@ class EndretUtbetalingAndelValideringTest {
                             vilkårType = it,
                             resultat = Resultat.OPPFYLT,
                             begrunnelse = "",
-                            behandlingId = vilkårsvurdering.behandling.id,
+                            behandlingId = vilkårsvurdering.behandling.behandlingId,
                             utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED)
                         ),
                         VilkårResultat(
@@ -352,7 +353,7 @@ class EndretUtbetalingAndelValideringTest {
                             vilkårType = it,
                             resultat = Resultat.OPPFYLT,
                             begrunnelse = "",
-                            behandlingId = vilkårsvurdering.behandling.id,
+                            behandlingId = vilkårsvurdering.behandling.behandlingId,
                             utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED)
                         )
                     )
@@ -365,7 +366,7 @@ class EndretUtbetalingAndelValideringTest {
                     vilkårType = it,
                     resultat = Resultat.OPPFYLT,
                     begrunnelse = "",
-                    behandlingId = vilkårsvurdering.behandling.id,
+                    behandlingId = vilkårsvurdering.behandling.behandlingId,
                     utdypendeVilkårsvurderinger = emptyList()
                 )
             }
@@ -420,7 +421,7 @@ class EndretUtbetalingAndelValideringTest {
                             vilkårType = it,
                             resultat = Resultat.OPPFYLT,
                             begrunnelse = "",
-                            behandlingId = vilkårsvurdering.behandling.id,
+                            behandlingId = vilkårsvurdering.behandling.behandlingId,
                             utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED)
                         ),
                         VilkårResultat(
@@ -430,7 +431,7 @@ class EndretUtbetalingAndelValideringTest {
                             vilkårType = it,
                             resultat = Resultat.OPPFYLT,
                             begrunnelse = "",
-                            behandlingId = vilkårsvurdering.behandling.id,
+                            behandlingId = vilkårsvurdering.behandling.behandlingId,
                             utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED)
                         )
                     )
@@ -443,7 +444,7 @@ class EndretUtbetalingAndelValideringTest {
                     vilkårType = it,
                     resultat = Resultat.OPPFYLT,
                     begrunnelse = "",
-                    behandlingId = vilkårsvurdering.behandling.id,
+                    behandlingId = vilkårsvurdering.behandling.behandlingId,
                     utdypendeVilkårsvurderinger = emptyList()
                 )
             }
@@ -505,7 +506,7 @@ class EndretUtbetalingAndelValideringTest {
                             vilkårType = it,
                             resultat = Resultat.OPPFYLT,
                             begrunnelse = "",
-                            behandlingId = vilkårsvurdering.behandling.id,
+                            behandlingId = vilkårsvurdering.behandling.behandlingId,
                             utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED)
                         ),
                         VilkårResultat(
@@ -515,7 +516,7 @@ class EndretUtbetalingAndelValideringTest {
                             vilkårType = it,
                             resultat = Resultat.OPPFYLT,
                             begrunnelse = "",
-                            behandlingId = vilkårsvurdering.behandling.id,
+                            behandlingId = vilkårsvurdering.behandling.behandlingId,
                             utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED)
                         )
                     )
@@ -528,7 +529,7 @@ class EndretUtbetalingAndelValideringTest {
                     vilkårType = it,
                     resultat = Resultat.OPPFYLT,
                     begrunnelse = "",
-                    behandlingId = vilkårsvurdering.behandling.id,
+                    behandlingId = vilkårsvurdering.behandling.behandlingId,
                     utdypendeVilkårsvurderinger = emptyList()
                 )
             }
@@ -584,7 +585,7 @@ class EndretUtbetalingAndelValideringTest {
                             vilkårType = it,
                             resultat = Resultat.OPPFYLT,
                             begrunnelse = "",
-                            behandlingId = vilkårsvurdering.behandling.id,
+                            behandlingId = vilkårsvurdering.behandling.behandlingId,
                             utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED)
                         ),
                         VilkårResultat(
@@ -594,7 +595,7 @@ class EndretUtbetalingAndelValideringTest {
                             vilkårType = it,
                             resultat = Resultat.OPPFYLT,
                             begrunnelse = "",
-                            behandlingId = vilkårsvurdering.behandling.id,
+                            behandlingId = vilkårsvurdering.behandling.behandlingId,
                             utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED)
                         )
                     )
@@ -607,7 +608,7 @@ class EndretUtbetalingAndelValideringTest {
                     vilkårType = it,
                     resultat = Resultat.OPPFYLT,
                     begrunnelse = "",
-                    behandlingId = vilkårsvurdering.behandling.id,
+                    behandlingId = vilkårsvurdering.behandling.behandlingId,
                     utdypendeVilkårsvurderinger = emptyList()
                 )
             }

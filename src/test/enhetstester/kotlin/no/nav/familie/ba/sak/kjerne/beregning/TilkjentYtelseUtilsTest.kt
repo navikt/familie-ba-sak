@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils.beregnTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndeler
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
@@ -43,7 +44,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers.not
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -381,7 +381,7 @@ internal class TilkjentYtelseUtilsTest {
                         periodeFom = barnFødselsdato,
                         periodeTom = backToBackTom,
                         begrunnelse = "",
-                        behandlingId = vilkårsvurdering.behandling.id
+                        behandlingId = vilkårsvurdering.behandling.behandlingId
                     ),
                     VilkårResultat(
                         personResultat = personResultat,
@@ -390,15 +390,15 @@ internal class TilkjentYtelseUtilsTest {
                         periodeFom = backToBackFom,
                         periodeTom = null,
                         begrunnelse = "",
-                        behandlingId = vilkårsvurdering.behandling.id
+                        behandlingId = vilkårsvurdering.behandling.behandlingId
                     )
                 )
         )
 
         vilkårsvurdering.personResultater =
             vilkårsvurdering.personResultater.filter { it.aktør != personResultat.aktør }.toSet() + setOf(
-            personResultat
-        )
+                personResultat
+            )
 
         return vilkårsvurdering
     }
@@ -437,7 +437,7 @@ internal class TilkjentYtelseUtilsTest {
                     periodeFom = vilkårOppfyltFom,
                     periodeTom = vilkårOppfyltTom,
                     begrunnelse = "",
-                    behandlingId = behandling.id
+                    behandlingId = behandling.behandlingId
                 ),
                 VilkårResultat(
                     personResultat = barnResultat,
@@ -446,7 +446,7 @@ internal class TilkjentYtelseUtilsTest {
                     periodeFom = barnFødselsdato,
                     periodeTom = under18ÅrVilkårOppfyltTom,
                     begrunnelse = "",
-                    behandlingId = behandling.id
+                    behandlingId = behandling.behandlingId
                 ),
                 VilkårResultat(
                     personResultat = barnResultat,
@@ -455,7 +455,7 @@ internal class TilkjentYtelseUtilsTest {
                     periodeFom = barnFødselsdato,
                     periodeTom = null,
                     begrunnelse = "",
-                    behandlingId = behandling.id
+                    behandlingId = behandling.behandlingId
                 ),
                 VilkårResultat(
                     personResultat = barnResultat,
@@ -464,7 +464,7 @@ internal class TilkjentYtelseUtilsTest {
                     periodeFom = barnFødselsdato,
                     periodeTom = null,
                     begrunnelse = "",
-                    behandlingId = behandling.id
+                    behandlingId = behandling.behandlingId
                 ),
                 VilkårResultat(
                     personResultat = barnResultat,
@@ -473,7 +473,7 @@ internal class TilkjentYtelseUtilsTest {
                     periodeFom = barnFødselsdato,
                     periodeTom = null,
                     begrunnelse = "",
-                    behandlingId = behandling.id,
+                    behandlingId = behandling.behandlingId,
                     utdypendeVilkårsvurderinger = listOfNotNull(
                         if (erDeltBosted) UtdypendeVilkårsvurdering.DELT_BOSTED else null
                     )
@@ -483,7 +483,7 @@ internal class TilkjentYtelseUtilsTest {
 
         vilkårsvurdering.personResultater = setOf(vilkårsvurdering.personResultater.first(), barnResultat)
 
-        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id)
+        val personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.behandlingId)
 
         val barn = Person(
             aktør = tilAktør(barnFnr),
@@ -535,7 +535,7 @@ internal class TilkjentYtelseUtilsTest {
                 fom = fom,
                 tom = tom,
                 prosent = endretProsent,
-                behandlingId = behandling.id
+                behandlingId = behandling.behandlingId
             )
         )
 
@@ -581,7 +581,7 @@ internal class TilkjentYtelseUtilsTest {
             fom = fom1,
             tom = tom2,
             prosent = endretProsent,
-            behandlingId = behandling.id
+            behandlingId = behandling.behandlingId
         )
 
         val endretUtbetalingAndeler = listOf(
@@ -590,7 +590,7 @@ internal class TilkjentYtelseUtilsTest {
                 person = person,
                 fom = tom2.nesteMåned(),
                 prosent = endretProsent,
-                behandlingId = behandling.id
+                behandlingId = behandling.behandlingId
             )
         )
 
@@ -1250,7 +1250,7 @@ internal class TilkjentYtelseUtilsTest {
 
         val endretUtbetalingAndeler = endretAndeler.map {
             lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
-                behandlingId = vilkårsvurdering.behandling.id,
+                behandlingId = vilkårsvurdering.behandling.behandlingId,
                 person = it.person,
                 prosent = if (it.skalUtbetales) BigDecimal(100) else BigDecimal.ZERO,
                 årsak = it.årsak,
@@ -1263,7 +1263,7 @@ internal class TilkjentYtelseUtilsTest {
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = lagPersonopplysningsgrunnlag(
                 personer = barna.plus(søker),
-                behandlingId = vilkårsvurdering.behandling.id
+                behandlingId = vilkårsvurdering.behandling.behandlingId
             ),
             behandling = vilkårsvurdering.behandling,
             endretUtbetalingAndeler = endretUtbetalingAndeler,
@@ -1278,7 +1278,10 @@ internal class TilkjentYtelseUtilsTest {
         return tilkjentYtelse
     }
 
-    private fun lagPersonopplysningsgrunnlag(personer: List<Person>, behandlingId: Long): PersonopplysningGrunnlag {
+    private fun lagPersonopplysningsgrunnlag(
+        personer: List<Person>,
+        behandlingId: BehandlingId
+    ): PersonopplysningGrunnlag {
         return PersonopplysningGrunnlag(
             personer = personer.toMutableSet(),
             behandlingId = behandlingId
@@ -1322,7 +1325,7 @@ internal class TilkjentYtelseUtilsTest {
             periodeFom = fom,
             periodeTom = tom,
             begrunnelse = "",
-            behandlingId = personResultat.vilkårsvurdering.behandling.id,
+            behandlingId = personResultat.vilkårsvurdering.behandling.behandlingId,
             utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger
         )
     }
@@ -1372,7 +1375,8 @@ internal class TilkjentYtelseUtilsTest {
             aktør = person.aktør
         )
 
-        val vilkårForPersonType = Vilkår.hentVilkårFor(personType = person.type, ytelseType = ytelseType, fagsakType = FagsakType.NORMAL)
+        val vilkårForPersonType =
+            Vilkår.hentVilkårFor(personType = person.type, ytelseType = ytelseType, fagsakType = FagsakType.NORMAL)
 
         val ordinæreVilkårResultater = vilkårForPersonType.map { vilkår ->
             lagVilkårResultat(

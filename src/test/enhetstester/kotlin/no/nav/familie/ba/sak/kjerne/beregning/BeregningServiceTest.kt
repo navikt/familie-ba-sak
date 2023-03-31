@@ -75,8 +75,7 @@ class BeregningServiceTest {
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService = AndelerTilkjentYtelseOgEndreteUtbetalingerService(
         andelTilkjentYtelseRepository,
         endretUtbetalingAndelRepository,
-        vilkårsvurderingRepository,
-        featureToggleService
+        vilkårsvurderingRepository
     )
 
     private lateinit var beregningService: BeregningService
@@ -158,7 +157,7 @@ class BeregningServiceTest {
         vilkårsvurdering.personResultater = setOf(personResultatBarn, personResultatSøker)
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
-            behandlingId = behandling.id,
+            behandlingId = behandling.behandlingId,
             søkerPersonIdent = søker.aktør.aktivFødselsnummer(),
             barnasIdenter = listOf(barn.aktør.aktivFødselsnummer()),
             barnasFødselsdatoer = listOf(barn.fødselsdato)
@@ -219,7 +218,7 @@ class BeregningServiceTest {
         vilkårsvurdering.personResultater = setOf(personResultatBarn, personResultatSøker)
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
-            behandlingId = behandling.id,
+            behandlingId = behandling.behandlingId,
             søkerPersonIdent = søker.aktør.aktivFødselsnummer(),
             barnasIdenter = listOf(barn.aktør.aktivFødselsnummer()),
             barnasFødselsdatoer = listOf(barn.fødselsdato)
@@ -269,7 +268,7 @@ class BeregningServiceTest {
         val søknadstidspunkt = LocalDate.of(2018, 9, 1)
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
-            behandlingId = behandling.id,
+            behandlingId = behandling.behandlingId,
             søkerPersonIdent = søker.aktør.aktivFødselsnummer(),
             barnasFødselsdatoer = listOf(barn.fødselsdato),
             barnasIdenter = listOf(barn.aktør.aktivFødselsnummer()),
@@ -315,10 +314,10 @@ class BeregningServiceTest {
                 person = barn
             )
         )
-        every { endretUtbetalingAndelRepository.findByBehandlingId(behandlingId = behandling.id) } returns
+        every { endretUtbetalingAndelRepository.findByBehandlingId(behandlingId = behandling.behandlingId.id) } returns
             listOf(
                 EndretUtbetalingAndel(
-                    behandlingId = behandling.id,
+                    behandlingId = behandling.behandlingId,
                     person = barn,
                     prosent = BigDecimal(50),
                     fom = periodeFom.toYearMonth(),
@@ -330,7 +329,7 @@ class BeregningServiceTest {
                 )
             )
 
-        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id) } returns
+        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.behandlingId.id) } returns
             andelTilkjentYtelser
 
         beregningService.oppdaterBehandlingMedBeregning(
@@ -377,7 +376,7 @@ class BeregningServiceTest {
         vilkårsvurdering.personResultater = setOf(personResultatBarn, personResultatSøker)
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
-            behandlingId = behandling.id,
+            behandlingId = behandling.behandlingId,
             søkerPersonIdent = søker.aktør.aktivFødselsnummer(),
             barnasIdenter = listOf(barn.aktør.aktivFødselsnummer())
         )
@@ -471,7 +470,7 @@ class BeregningServiceTest {
         vilkårsvurdering.personResultater = personResultatBarna + personResultatSøker
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
-            behandlingId = behandling.id,
+            behandlingId = behandling.behandlingId,
             søkerPersonIdent = søker.aktør.aktivFødselsnummer(),
             barnasIdenter = listOf(barn1.aktør.aktivFødselsnummer(), barn2.aktør.aktivFødselsnummer())
         )
@@ -855,8 +854,8 @@ class BeregningServiceTest {
         )
 
         every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(nåværendeBehandling) } returns forrigeBehandling
-        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) } returns nåværendeAndeler
-        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns forrigeAndeler
+        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.behandlingId.id) } returns nåværendeAndeler
+        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.behandlingId.id) } returns forrigeAndeler
 
         val erEndringIUtbetaling =
             beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(nåværendeBehandling)
@@ -864,8 +863,8 @@ class BeregningServiceTest {
         Assertions.assertEquals(erEndringIUtbetaling, EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING)
 
         verify { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(nåværendeBehandling) }
-        verify { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) }
-        verify { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) }
+        verify { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.behandlingId.id) }
+        verify { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.behandlingId.id) }
     }
 
     @Test
@@ -891,8 +890,8 @@ class BeregningServiceTest {
         )
 
         every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(nåværendeBehandling) } returns forrigeBehandling
-        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) } returns emptyList()
-        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns forrigeAndeler
+        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.behandlingId.id) } returns emptyList()
+        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.behandlingId.id) } returns forrigeAndeler
 
         val erEndringIUtbetaling =
             beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(nåværendeBehandling)
@@ -900,8 +899,8 @@ class BeregningServiceTest {
         Assertions.assertEquals(erEndringIUtbetaling, EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING)
 
         verify { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(nåværendeBehandling) }
-        verify { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) }
-        verify { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) }
+        verify { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.behandlingId.id) }
+        verify { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.behandlingId.id) }
     }
 
     @Test
@@ -927,8 +926,8 @@ class BeregningServiceTest {
         )
 
         every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(nåværendeBehandling) } returns forrigeBehandling
-        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) } returns nåværendeAndeler
-        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns emptyList()
+        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.behandlingId.id) } returns nåværendeAndeler
+        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.behandlingId.id) } returns emptyList()
 
         val erEndringIUtbetaling =
             beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(nåværendeBehandling)
@@ -936,8 +935,8 @@ class BeregningServiceTest {
         Assertions.assertEquals(erEndringIUtbetaling, EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING)
 
         verify { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(nåværendeBehandling) }
-        verify { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) }
-        verify { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) }
+        verify { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.behandlingId.id) }
+        verify { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.behandlingId.id) }
     }
 
     @Test
@@ -963,8 +962,8 @@ class BeregningServiceTest {
         )
 
         every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(nåværendeBehandling) } returns forrigeBehandling
-        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) } returns nåværendeAndeler
-        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns emptyList()
+        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.behandlingId.id) } returns nåværendeAndeler
+        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.behandlingId.id) } returns emptyList()
 
         val erEndringIUtbetaling =
             beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(nåværendeBehandling)
@@ -972,8 +971,8 @@ class BeregningServiceTest {
         Assertions.assertEquals(erEndringIUtbetaling, EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING)
 
         verify { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(nåværendeBehandling) }
-        verify { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) }
-        verify { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) }
+        verify { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.behandlingId.id) }
+        verify { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.behandlingId.id) }
     }
 
     @Test
@@ -1014,8 +1013,8 @@ class BeregningServiceTest {
         )
 
         every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(nåværendeBehandling) } returns forrigeBehandling
-        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) } returns nåværendeAndeler
-        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) } returns forrigeAndeler
+        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.behandlingId.id) } returns nåværendeAndeler
+        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.behandlingId.id) } returns forrigeAndeler
 
         val erEndringIUtbetaling =
             beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(nåværendeBehandling)
@@ -1023,8 +1022,8 @@ class BeregningServiceTest {
         Assertions.assertEquals(erEndringIUtbetaling, EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING)
 
         verify { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(nåværendeBehandling) }
-        verify { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.id) }
-        verify { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.id) }
+        verify { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(nåværendeBehandling.behandlingId.id) }
+        verify { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(forrigeBehandling.behandlingId.id) }
     }
 
     private fun kjørScenarioForBack2Backtester(
@@ -1086,7 +1085,7 @@ class BeregningServiceTest {
         vilkårsvurdering.personResultater = setOf(personResultatSøker, personResultatBarn)
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
-            behandlingId = behandling.id,
+            behandlingId = behandling.behandlingId,
             søkerPersonIdent = søker.aktør.aktivFødselsnummer(),
             barnasIdenter = listOf(barn.aktør.aktivFødselsnummer()),
             barnasFødselsdatoer = listOf(barnFødselsdato)
@@ -1203,7 +1202,7 @@ class BeregningServiceTest {
                     periodeFom = generellFom,
                     periodeTom = generellTom,
                     begrunnelse = "",
-                    behandlingId = behandling.id
+                    behandlingId = behandling.behandlingId
                 ),
                 VilkårResultat(
                     personResultat = søkerPersonResultat,
@@ -1212,7 +1211,7 @@ class BeregningServiceTest {
                     periodeFom = generellFom,
                     periodeTom = generellTom,
                     begrunnelse = "",
-                    behandlingId = behandling.id
+                    behandlingId = behandling.behandlingId
                 ),
                 VilkårResultat(
                     personResultat = søkerPersonResultat,
@@ -1221,7 +1220,7 @@ class BeregningServiceTest {
                     periodeFom = utvidetFom,
                     periodeTom = utvidetTom,
                     begrunnelse = "",
-                    behandlingId = behandling.id
+                    behandlingId = behandling.behandlingId
                 )
             )
         )
@@ -1241,7 +1240,7 @@ class BeregningServiceTest {
                         periodeFom = generellFom,
                         periodeTom = generellTom,
                         begrunnelse = "",
-                        behandlingId = behandling.id
+                        behandlingId = behandling.behandlingId
                     ),
                     VilkårResultat(
                         personResultat = barnPersonResultat,
@@ -1250,7 +1249,7 @@ class BeregningServiceTest {
                         periodeFom = generellFom,
                         periodeTom = generellTom,
                         begrunnelse = "",
-                        behandlingId = behandling.id
+                        behandlingId = behandling.behandlingId
                     ),
                     VilkårResultat(
                         personResultat = barnPersonResultat,
@@ -1259,7 +1258,7 @@ class BeregningServiceTest {
                         periodeFom = generellFom,
                         periodeTom = generellTom,
                         begrunnelse = "",
-                        behandlingId = behandling.id,
+                        behandlingId = behandling.behandlingId,
                         utdypendeVilkårsvurderinger = if (endretUtbetalingÅrsak == Årsak.DELT_BOSTED) {
                             listOf(
                                 UtdypendeVilkårsvurdering.DELT_BOSTED
@@ -1275,7 +1274,7 @@ class BeregningServiceTest {
                         periodeFom = generellFom,
                         periodeTom = generellTom,
                         begrunnelse = "",
-                        behandlingId = behandling.id
+                        behandlingId = behandling.behandlingId
                     ),
                     VilkårResultat(
                         personResultat = barnPersonResultat,
@@ -1284,7 +1283,7 @@ class BeregningServiceTest {
                         periodeFom = barn.fødselsdato,
                         periodeTom = barn.fødselsdato.plusYears(18),
                         begrunnelse = "",
-                        behandlingId = behandling.id
+                        behandlingId = behandling.behandlingId
                     )
                 )
             )
@@ -1295,7 +1294,7 @@ class BeregningServiceTest {
 
         val endretUtbetalingAndel =
             EndretUtbetalingAndel(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId,
                 person = endretUtbetalingPerson,
                 fom = endretUtbetalingFom,
                 tom = endretUtbetalingTom,
@@ -1307,18 +1306,18 @@ class BeregningServiceTest {
             )
 
         val personopplysningGrunnlag = PersonopplysningGrunnlag(
-            behandlingId = behandling.id,
+            behandlingId = behandling.behandlingId,
             personer = (barna + søker).toMutableSet()
         )
 
         val slot = slot<TilkjentYtelse>()
 
-        every { endretUtbetalingAndelRepository.findByBehandlingId(behandlingId = behandling.id) } answers {
+        every { endretUtbetalingAndelRepository.findByBehandlingId(behandlingId = behandling.behandlingId.id) } answers {
             listOf(
                 endretUtbetalingAndel
             )
         }
-        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = behandling.id) } answers { vilkårsvurdering }
+        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = behandling.behandlingId.id) } answers { vilkårsvurdering }
         every { tilkjentYtelseRepository.save(any()) } returns lagInitiellTilkjentYtelse(behandling)
         every { småbarnstilleggService.hentOgLagrePerioderMedFullOvergangsstønad(any(), any()) } answers {
             listOf(

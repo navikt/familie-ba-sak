@@ -386,13 +386,13 @@ internal class KompetanseServiceTest {
         assertEqualsUnordered(kompetanser, kompetanserBehandling2)
 
         kompetanserBehandling2.forEach {
-            assertEquals(behandlingId2.id, it.behandlingId)
+            assertEquals(behandlingId2, it.behandlingId)
         }
 
         val kompetanserBehandling1 = kompetanseService.hentKompetanser(behandlingId1)
 
         kompetanserBehandling1.forEach {
-            assertEquals(behandlingId1.id, it.behandlingId)
+            assertEquals(behandlingId1, it.behandlingId)
         }
 
         assertEqualsUnordered(kompetanser, kompetanserBehandling1)
@@ -423,7 +423,7 @@ internal class KompetanseServiceTest {
         assertEqualsUnordered(kompetanser1, kompetanserBehandling2EtterEndring)
 
         kompetanserBehandling2EtterEndring.forEach {
-            assertEquals(behandlingId2.id, it.behandlingId)
+            assertEquals(behandlingId2, it.behandlingId)
         }
 
         val kompetanserBehandling1EtterEndring = kompetanseService.hentKompetanser(behandlingId1)
@@ -431,7 +431,7 @@ internal class KompetanseServiceTest {
         assertEqualsUnordered(kompetanser1, kompetanserBehandling1EtterEndring)
 
         kompetanserBehandling1EtterEndring.forEach {
-            assertEquals(behandlingId1.id, it.behandlingId)
+            assertEquals(behandlingId1, it.behandlingId)
         }
     }
 }

@@ -109,7 +109,7 @@ internal class TidTest {
             periodeFom = LocalDate.of(2020, 1, 1),
             periodeTom = LocalDate.of(2020, 3, 25),
             begrunnelse = "",
-            behandlingId = personResultat.vilkårsvurdering.behandling.id
+            behandlingId = personResultat.vilkårsvurdering.behandling.behandlingId
         )
         val etterfølgendeVilkårResultat = VilkårResultat(
             personResultat = personResultat,
@@ -118,7 +118,7 @@ internal class TidTest {
             periodeFom = LocalDate.of(2020, 3, 31),
             periodeTom = LocalDate.of(2020, 6, 1),
             begrunnelse = "",
-            behandlingId = personResultat.vilkårsvurdering.behandling.id
+            behandlingId = personResultat.vilkårsvurdering.behandling.behandlingId
         )
         val ikkeEtterfølgendeVilkårResultat = VilkårResultat(
             personResultat = personResultat,
@@ -127,7 +127,7 @@ internal class TidTest {
             periodeFom = LocalDate.of(2020, 5, 1),
             periodeTom = LocalDate.of(2020, 6, 1),
             begrunnelse = "",
-            behandlingId = personResultat.vilkårsvurdering.behandling.id
+            behandlingId = personResultat.vilkårsvurdering.behandling.behandlingId
         )
 
         assertTrue(førsteVilkårResultat.erEtterfølgendePeriode(etterfølgendeVilkårResultat))

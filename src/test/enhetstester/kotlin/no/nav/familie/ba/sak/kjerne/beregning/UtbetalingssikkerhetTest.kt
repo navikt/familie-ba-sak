@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
@@ -27,7 +28,7 @@ class UtbetalingssikkerhetTest {
     fun `Skal kaste feil når en periode har flere andeler enn det som er tillatt`() {
         val person = tilfeldigPerson(personType = PersonType.SØKER)
         val personopplysningGrunnlag = PersonopplysningGrunnlag(
-            behandlingId = 1,
+            behandlingId = BehandlingId(0),
             personer = mutableSetOf(person)
         )
 
@@ -73,7 +74,7 @@ class UtbetalingssikkerhetTest {
     fun `Skal ikke kaste feil når en periode har like mange andeler som er tillatt`() {
         val person = tilfeldigPerson(personType = PersonType.SØKER)
         val personopplysningGrunnlag = PersonopplysningGrunnlag(
-            behandlingId = 1,
+            behandlingId = BehandlingId(1),
             personer = mutableSetOf(person)
         )
 
@@ -110,7 +111,7 @@ class UtbetalingssikkerhetTest {
     fun `Skal kaste feil når en periode har større totalbeløp enn det som er tillatt`() {
         val person = tilfeldigPerson(personType = PersonType.SØKER)
         val personopplysningGrunnlag = PersonopplysningGrunnlag(
-            behandlingId = 1,
+            behandlingId = BehandlingId(1),
             personer = mutableSetOf(person)
         )
 
@@ -149,7 +150,7 @@ class UtbetalingssikkerhetTest {
     fun `Skal ikke kaste feil når en periode har gyldig totalbeløp`() {
         val person = tilfeldigPerson(personType = PersonType.SØKER)
         val personopplysningGrunnlag = PersonopplysningGrunnlag(
-            behandlingId = 1,
+            behandlingId = BehandlingId(1),
             personer = mutableSetOf(person)
         )
 
@@ -202,7 +203,7 @@ class UtbetalingssikkerhetTest {
 
         val far = tilfeldigPerson(personType = PersonType.SØKER)
         val personopplysningGrunnlag2 = PersonopplysningGrunnlag(
-            behandlingId = 1,
+            behandlingId = BehandlingId(1),
             personer = mutableSetOf(far, barn)
         )
 
@@ -239,9 +240,9 @@ class UtbetalingssikkerhetTest {
         assertTrue(
             feil.frontendFeilmelding?.contains(
                 "Du kan ikke godkjenne dette vedtaket fordi det vil betales ut mer enn 100% for barn født ${
-                listOf(
-                    barn.fødselsdato
-                ).tilBrevTekst()
+                    listOf(
+                        barn.fødselsdato
+                    ).tilBrevTekst()
                 }"
             )!!
         )
@@ -267,7 +268,7 @@ class UtbetalingssikkerhetTest {
 
         val far = tilfeldigPerson(personType = PersonType.SØKER)
         val personopplysningGrunnlag2 = PersonopplysningGrunnlag(
-            behandlingId = 1,
+            behandlingId = BehandlingId(1),
             personer = mutableSetOf(far, barn)
         )
 
@@ -320,7 +321,7 @@ class UtbetalingssikkerhetTest {
         val far = tilfeldigPerson(personType = PersonType.SØKER)
         val barn2 = tilfeldigPerson()
         val personopplysningGrunnlag2 = PersonopplysningGrunnlag(
-            behandlingId = 1,
+            behandlingId = BehandlingId(1),
             personer = mutableSetOf(far, barn2)
         )
 
@@ -353,10 +354,25 @@ class UtbetalingssikkerhetTest {
         val småbarnstillegg = SatsService.finnSisteSatsFor(SatsType.SMA).beløp
         val tilleggOrdinærBarnetrygd = SatsService.finnSisteSatsFor(SatsType.TILLEGG_ORBA).beløp
 
-        assertEquals(utvidetBarnetrygd + småbarnstillegg, TilkjentYtelseValidering.maksBeløp(personType = PersonType.SØKER, fagsakType = FagsakType.NORMAL))
-        assertEquals(tilleggOrdinærBarnetrygd, TilkjentYtelseValidering.maksBeløp(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL))
-        assertEquals(tilleggOrdinærBarnetrygd, TilkjentYtelseValidering.maksBeløp(personType = PersonType.BARN, fagsakType = FagsakType.INSTITUSJON))
-        assertEquals(tilleggOrdinærBarnetrygd + utvidetBarnetrygd, TilkjentYtelseValidering.maksBeløp(personType = PersonType.BARN, fagsakType = FagsakType.BARN_ENSLIG_MINDREÅRIG))
+        assertEquals(
+            utvidetBarnetrygd + småbarnstillegg,
+            TilkjentYtelseValidering.maksBeløp(personType = PersonType.SØKER, fagsakType = FagsakType.NORMAL)
+        )
+        assertEquals(
+            tilleggOrdinærBarnetrygd,
+            TilkjentYtelseValidering.maksBeløp(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL)
+        )
+        assertEquals(
+            tilleggOrdinærBarnetrygd,
+            TilkjentYtelseValidering.maksBeløp(personType = PersonType.BARN, fagsakType = FagsakType.INSTITUSJON)
+        )
+        assertEquals(
+            tilleggOrdinærBarnetrygd + utvidetBarnetrygd,
+            TilkjentYtelseValidering.maksBeløp(
+                personType = PersonType.BARN,
+                fagsakType = FagsakType.BARN_ENSLIG_MINDREÅRIG
+            )
+        )
         assertThrows<Feil> { TilkjentYtelseValidering.maksBeløp(personType = PersonType.ANNENPART, FagsakType.NORMAL) }
     }
 

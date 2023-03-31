@@ -36,7 +36,7 @@ class UtgjørendePersonerTest {
 
         val behandling = lagBehandling()
         val personopplysningGrunnlag =
-            lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr, listOf(barn1Fnr, barn2Fnr))
+            lagTestPersonopplysningGrunnlag(behandling.behandlingId, søkerFnr, listOf(barn1Fnr, barn2Fnr))
 
         val vilkårsvurdering = Vilkårsvurdering(
             behandling = behandling
@@ -53,7 +53,7 @@ class UtgjørendePersonerTest {
                     periodeFom = LocalDate.of(2009, 12, 24),
                     periodeTom = LocalDate.of(2010, 6, 1),
                     begrunnelse = "",
-                    behandlingId = vilkårsvurdering.behandling.id
+                    behandlingId = vilkårsvurdering.behandling.behandlingId
                 ),
                 VilkårResultat(
                     personResultat = søkerPersonResultat,
@@ -62,7 +62,7 @@ class UtgjørendePersonerTest {
                     periodeFom = LocalDate.of(2008, 12, 24),
                     periodeTom = LocalDate.of(2010, 6, 1),
                     begrunnelse = "",
-                    behandlingId = vilkårsvurdering.behandling.id
+                    behandlingId = vilkårsvurdering.behandling.behandlingId
                 )
             )
         )
@@ -79,7 +79,7 @@ class UtgjørendePersonerTest {
                     periodeFom = LocalDate.of(2009, 12, 24),
                     periodeTom = LocalDate.of(2010, 6, 1),
                     begrunnelse = "",
-                    behandlingId = vilkårsvurdering.behandling.id
+                    behandlingId = vilkårsvurdering.behandling.behandlingId
                 ),
                 VilkårResultat(
                     personResultat = barn1PersonResultat,
@@ -88,7 +88,7 @@ class UtgjørendePersonerTest {
                     periodeFom = LocalDate.of(2009, 11, 24),
                     periodeTom = LocalDate.of(2010, 6, 1),
                     begrunnelse = "",
-                    behandlingId = vilkårsvurdering.behandling.id
+                    behandlingId = vilkårsvurdering.behandling.behandlingId
                 ),
                 VilkårResultat(
                     personResultat = søkerPersonResultat,
@@ -97,7 +97,7 @@ class UtgjørendePersonerTest {
                     periodeFom = LocalDate.of(2009, 12, 24),
                     periodeTom = LocalDate.of(2010, 6, 1),
                     begrunnelse = "",
-                    behandlingId = vilkårsvurdering.behandling.id
+                    behandlingId = vilkårsvurdering.behandling.behandlingId
                 )
             )
         )
@@ -114,7 +114,7 @@ class UtgjørendePersonerTest {
                     periodeFom = LocalDate.of(2010, 2, 24),
                     periodeTom = LocalDate.of(2010, 6, 1),
                     begrunnelse = "",
-                    behandlingId = vilkårsvurdering.behandling.id
+                    behandlingId = vilkårsvurdering.behandling.behandlingId
                 ),
                 VilkårResultat(
                     personResultat = barn1PersonResultat,
@@ -123,7 +123,7 @@ class UtgjørendePersonerTest {
                     periodeFom = LocalDate.of(2009, 11, 24),
                     periodeTom = LocalDate.of(2010, 6, 1),
                     begrunnelse = "",
-                    behandlingId = vilkårsvurdering.behandling.id
+                    behandlingId = vilkårsvurdering.behandling.behandlingId
                 )
             )
         )
@@ -179,7 +179,7 @@ class UtgjørendePersonerTest {
         val behandling = lagBehandling()
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
-                behandling.id,
+                behandling.behandlingId,
                 søkerFnr,
                 listOf(barnFnr, barn2Fnr),
                 barnasFødselsdatoer = listOf(LocalDate.of(2010, 12, 24), LocalDate.of(2010, 12, 24))
@@ -201,7 +201,7 @@ class UtgjørendePersonerTest {
                     periodeFom = LocalDate.of(2010, 12, 24),
                     periodeTom = LocalDate.of(2021, 3, 31),
                     begrunnelse = "",
-                    behandlingId = vilkårsvurdering.behandling.id
+                    behandlingId = vilkårsvurdering.behandling.behandlingId
                 )
             )
         )
@@ -218,7 +218,7 @@ class UtgjørendePersonerTest {
                     periodeFom = LocalDate.of(2010, 12, 24),
                     periodeTom = LocalDate.of(2021, 1, 31),
                     begrunnelse = "",
-                    behandlingId = vilkårsvurdering.behandling.id
+                    behandlingId = vilkårsvurdering.behandling.behandlingId
                 )
             )
         )
@@ -278,7 +278,7 @@ class UtgjørendePersonerTest {
         val behandling = lagBehandling()
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(
-                behandling.id,
+                behandling.behandlingId,
                 søkerFnr,
                 listOf(barn1Fnr, barn2Fnr)
             )

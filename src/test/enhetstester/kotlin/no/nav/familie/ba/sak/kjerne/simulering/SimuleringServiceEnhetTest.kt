@@ -85,8 +85,8 @@ internal class SimuleringServiceEnhetTest {
         val simuleringMottaker =
             listOf(mockØkonomiSimuleringMottaker(behandling = behandling, økonomiSimuleringPostering = posteringer))
 
-        every { øknomiSimuleringMottakerRepository.findByBehandlingId(behandling.id) } returns simuleringMottaker
-        every { persongrunnlagService.hentBarna(behandling.id) } returns listOf(lagPerson(), lagPerson())
+        every { øknomiSimuleringMottakerRepository.findByBehandlingId(behandling.behandlingId.id) } returns simuleringMottaker
+        every { persongrunnlagService.hentBarna(behandling.behandlingId) } returns listOf(lagPerson(), lagPerson())
         every { featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ) } returns true
 
         val behandlingHarAvvikInnenforBeløpsgrenser =
@@ -106,7 +106,7 @@ internal class SimuleringServiceEnhetTest {
             førsteSteg = StegType.VURDER_TILBAKEKREVING
         )
         every { featureToggleService.isEnabled(FeatureToggleConfig.IKKE_STOPP_MIGRERINGSBEHANDLING) } returns false
-        every { simuleringService.hentFeilutbetaling(behandling.id) } returns BigDecimal(4)
+        every { simuleringService.hentFeilutbetaling(behandling.behandlingId) } returns BigDecimal(4)
 
         val fom = LocalDate.of(2021, 1, 1)
         val tom = LocalDate.of(2021, 1, 31)
@@ -115,15 +115,25 @@ internal class SimuleringServiceEnhetTest {
 
         // feilutbetaling 1 KR per barn i hver periode
         val posteringer = listOf(
-            mockVedtakSimuleringPostering(fom = fom, tom = tom, beløp = 2, posteringType = PosteringType.FEILUTBETALING),
-            mockVedtakSimuleringPostering(fom = fom2, tom = tom2, beløp = 2, posteringType = PosteringType.FEILUTBETALING)
+            mockVedtakSimuleringPostering(
+                fom = fom,
+                tom = tom,
+                beløp = 2,
+                posteringType = PosteringType.FEILUTBETALING
+            ),
+            mockVedtakSimuleringPostering(
+                fom = fom2,
+                tom = tom2,
+                beløp = 2,
+                posteringType = PosteringType.FEILUTBETALING
+            )
         )
 
         val simuleringMottaker =
             listOf(mockØkonomiSimuleringMottaker(behandling = behandling, økonomiSimuleringPostering = posteringer))
 
-        every { øknomiSimuleringMottakerRepository.findByBehandlingId(behandling.id) } returns simuleringMottaker
-        every { persongrunnlagService.hentBarna(behandling.id) } returns listOf(lagPerson(), lagPerson())
+        every { øknomiSimuleringMottakerRepository.findByBehandlingId(behandling.behandlingId.id) } returns simuleringMottaker
+        every { persongrunnlagService.hentBarna(behandling.behandlingId) } returns listOf(lagPerson(), lagPerson())
         every { featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ) } returns true
 
         val behandlingHarAvvikInnenforBeløpsgrenser =
@@ -134,14 +144,16 @@ internal class SimuleringServiceEnhetTest {
 
     @ParameterizedTest
     @EnumSource(value = BehandlingÅrsak::class, names = ["HELMANUELL_MIGRERING", "ENDRE_MIGRERINGSDATO"])
-    fun `harMigreringsbehandlingAvvikInnenforBeløpsgrenser skal returnere false dersom det finnes avvik i form av feilutbetaling som er utenfor beløpsgrense`(behandlingÅrsak: BehandlingÅrsak) {
+    fun `harMigreringsbehandlingAvvikInnenforBeløpsgrenser skal returnere false dersom det finnes avvik i form av feilutbetaling som er utenfor beløpsgrense`(
+        behandlingÅrsak: BehandlingÅrsak
+    ) {
         val behandling: Behandling = no.nav.familie.ba.sak.common.lagBehandling(
             behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
             årsak = behandlingÅrsak,
             førsteSteg = StegType.VURDER_TILBAKEKREVING
         )
         every { featureToggleService.isEnabled(FeatureToggleConfig.IKKE_STOPP_MIGRERINGSBEHANDLING) } returns false
-        every { simuleringService.hentFeilutbetaling(behandling.id) } returns BigDecimal.ZERO
+        every { simuleringService.hentFeilutbetaling(behandling.behandlingId) } returns BigDecimal.ZERO
 
         // etterbetaling 200 KR
         val posteringer = listOf(
@@ -152,8 +164,8 @@ internal class SimuleringServiceEnhetTest {
         val simuleringMottaker =
             listOf(mockØkonomiSimuleringMottaker(behandling = behandling, økonomiSimuleringPostering = posteringer))
 
-        every { øknomiSimuleringMottakerRepository.findByBehandlingId(behandling.id) } returns simuleringMottaker
-        every { persongrunnlagService.hentBarna(behandling.id) } returns listOf(lagPerson(), lagPerson())
+        every { øknomiSimuleringMottakerRepository.findByBehandlingId(behandling.behandlingId.id) } returns simuleringMottaker
+        every { persongrunnlagService.hentBarna(behandling.behandlingId) } returns listOf(lagPerson(), lagPerson())
         every { featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ) } returns true
 
         val behandlingHarAvvikInnenforBeløpsgrenser =
@@ -163,8 +175,14 @@ internal class SimuleringServiceEnhetTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = BehandlingÅrsak::class, mode = EnumSource.Mode.EXCLUDE, names = ["HELMANUELL_MIGRERING", "ENDRE_MIGRERINGSDATO"])
-    fun `harMigreringsbehandlingAvvikInnenforBeløpsgrenser skal kaste feil dersom behandlingen ikke er en manuell migrering`(behandlingÅrsak: BehandlingÅrsak) {
+    @EnumSource(
+        value = BehandlingÅrsak::class,
+        mode = EnumSource.Mode.EXCLUDE,
+        names = ["HELMANUELL_MIGRERING", "ENDRE_MIGRERINGSDATO"]
+    )
+    fun `harMigreringsbehandlingAvvikInnenforBeløpsgrenser skal kaste feil dersom behandlingen ikke er en manuell migrering`(
+        behandlingÅrsak: BehandlingÅrsak
+    ) {
         val behandling: Behandling = no.nav.familie.ba.sak.common.lagBehandling(
             behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
             årsak = behandlingÅrsak,

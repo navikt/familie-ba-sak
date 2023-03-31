@@ -242,7 +242,7 @@ internal class AutobrevOpphørSmåbarnstilleggServiceTest {
         assertFalse(overgangstønadOpphørteForrigeMåned)
     }
 
-    val behandlingId: Long = 1
+    val behandlingId: BehandlingId = BehandlingId(1)
 
     @Test
     fun `minsteBarnFylteTreÅrForrigeMåned - et barn som fylte tre forrige måned gir true`() {

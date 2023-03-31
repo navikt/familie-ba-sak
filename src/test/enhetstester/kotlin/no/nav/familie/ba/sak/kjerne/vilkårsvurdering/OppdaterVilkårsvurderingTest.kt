@@ -478,8 +478,9 @@ class OppdaterVilkårsvurderingTest {
             aktivVilkårsvurdering = aktivVilkårsvurdering
         )
 
-        val nyInitInnholderOpplysningspliktVilkår = nyInit.personResultater.find { it.erSøkersResultater() }!!.andreVurderinger
-            .any { it.type == AnnenVurderingType.OPPLYSNINGSPLIKT }
+        val nyInitInnholderOpplysningspliktVilkår =
+            nyInit.personResultater.find { it.erSøkersResultater() }!!.andreVurderinger
+                .any { it.type == AnnenVurderingType.OPPLYSNINGSPLIKT }
 
         Assertions.assertTrue(nyInitInnholderOpplysningspliktVilkår)
         Assertions.assertTrue(nyAktiv.personResultater.isEmpty())
@@ -520,7 +521,7 @@ class OppdaterVilkårsvurderingTest {
                         periodeFom = LocalDate.now(),
                         periodeTom = LocalDate.now(),
                         begrunnelse = "",
-                        behandlingId = behandling.id
+                        behandlingId = behandling.behandlingId
                     ),
                     VilkårResultat(
                         personResultat = personResultat,
@@ -529,7 +530,7 @@ class OppdaterVilkårsvurderingTest {
                         periodeFom = LocalDate.now(),
                         periodeTom = LocalDate.now(),
                         begrunnelse = "",
-                        behandlingId = behandling.id
+                        behandlingId = behandling.behandlingId
                     )
                 )
             )
@@ -560,7 +561,7 @@ class OppdaterVilkårsvurderingTest {
                         periodeFom = LocalDate.now(),
                         periodeTom = LocalDate.now(),
                         begrunnelse = "",
-                        behandlingId = behandling.id
+                        behandlingId = behandling.behandlingId
                     ),
                     VilkårResultat(
                         personResultat = personResultat,
@@ -569,7 +570,7 @@ class OppdaterVilkårsvurderingTest {
                         periodeFom = LocalDate.now(),
                         periodeTom = LocalDate.now(),
                         begrunnelse = "",
-                        behandlingId = behandling.id
+                        behandlingId = behandling.behandlingId
                     ),
                     VilkårResultat(
                         personResultat = personResultat,
@@ -578,7 +579,7 @@ class OppdaterVilkårsvurderingTest {
                         periodeFom = LocalDate.now(),
                         periodeTom = LocalDate.now(),
                         begrunnelse = "",
-                        behandlingId = behandling.id
+                        behandlingId = behandling.behandlingId
                     )
                 )
             )

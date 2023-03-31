@@ -86,7 +86,7 @@ class RegistrerInstitusjonOgVergeStegTest {
             tssEksternId = "cool tsr"
         )
         every { loggServiceMock.lagre(any()) } returns Logg(
-            behandlingId = behandling.id,
+            behandlingId = behandling.behandlingId,
             type = LoggType.VERGE_REGISTRERT,
             tittel = "tittel",
             rolle = BehandlerRolle.SYSTEM,
@@ -131,7 +131,7 @@ class RegistrerInstitusjonOgVergeStegTest {
         every { loggServiceMock.opprettRegistrerInstitusjonLogg(any()) } just runs
         every { institusjonRepositoryMock.findByOrgNummer("12345") } returns behandling.fagsak.institusjon
         every { loggServiceMock.lagre(any()) } returns Logg(
-            behandlingId = behandling.id,
+            behandlingId = behandling.behandlingId,
             type = LoggType.VERGE_REGISTRERT,
             tittel = "tittel",
             rolle = BehandlerRolle.SYSTEM,

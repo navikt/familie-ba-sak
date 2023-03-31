@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatEndringUtils.erEndringIBeløp
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatEndringUtils.erEndringIEndretUtbetalingAndeler
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatEndringUtils.erEndringIKompetanse
@@ -116,7 +117,7 @@ class BehandlingsresultatEndringUtilsTest {
                 periodeFom = LocalDate.of(2015, 1, 1),
                 periodeTom = LocalDate.of(2020, 1, 1),
                 begrunnelse = "begrunnelse",
-                behandlingId = 0,
+                behandlingId = BehandlingId(0),
                 utdypendeVilkårsvurderinger = listOf(
                     UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
                     UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP
@@ -133,7 +134,7 @@ class BehandlingsresultatEndringUtilsTest {
                 periodeFom = LocalDate.of(2015, 1, 1),
                 periodeTom = LocalDate.of(2020, 1, 1),
                 begrunnelse = "begrunnelse",
-                behandlingId = 0,
+                behandlingId = BehandlingId(0),
                 utdypendeVilkårsvurderinger = listOf(
                     UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
                     UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP
@@ -178,7 +179,7 @@ class BehandlingsresultatEndringUtilsTest {
         val nåværendeBehandling = lagBehandling()
         val forrigeKompetanse =
             lagKompetanse(
-                behandlingId = forrigeBehandling.id,
+                behandlingId = forrigeBehandling.behandlingId,
                 barnAktører = setOf(barn1Aktør),
                 barnetsBostedsland = "NO",
                 søkersAktivitet = SøkersAktivitet.ARBEIDER,
@@ -195,7 +196,9 @@ class BehandlingsresultatEndringUtilsTest {
             forrigeAndeler = emptyList(),
             personerFremstiltKravFor = emptyList(),
             forrigeKompetanser = listOf(forrigeKompetanse),
-            nåværendeKompetanser = listOf(forrigeKompetanse.copy(søkersAktivitet = SøkersAktivitet.ARBEIDER_PÅ_NORSK_SOKKEL).apply { behandlingId = nåværendeBehandling.id }),
+            nåværendeKompetanser = listOf(
+                forrigeKompetanse.copy(søkersAktivitet = SøkersAktivitet.ARBEIDER_PÅ_NORSK_SOKKEL)
+                    .apply { behandlingId = nåværendeBehandling.behandlingId }),
             nåværendePersonResultat = emptySet(),
             forrigePersonResultat = emptySet(),
             nåværendeEndretAndeler = emptyList(),
@@ -714,33 +717,7 @@ class BehandlingsresultatEndringUtilsTest {
         val nåværendeBehandling = lagBehandling()
         val forrigeKompetanse =
             lagKompetanse(
-                behandlingId = forrigeBehandling.id,
-                barnAktører = setOf(barn1Aktør),
-                barnetsBostedsland = "NO",
-                søkersAktivitet = SøkersAktivitet.ARBEIDER,
-                søkersAktivitetsland = "NO",
-                annenForeldersAktivitet = AnnenForeldersAktivitet.INAKTIV,
-                annenForeldersAktivitetsland = "PO",
-                kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
-                fom = YearMonth.now().minusMonths(6),
-                tom = null
-            )
-
-        val endring = erEndringIKompetanse(
-            nåværendeKompetanser = listOf(forrigeKompetanse.copy().apply { behandlingId = nåværendeBehandling.id }),
-            forrigeKompetanser = listOf(forrigeKompetanse)
-        )
-
-        assertEquals(false, endring)
-    }
-
-    @Test
-    fun `Endring i kompetanse - skal returnere true når søkers aktivitetsland endrer seg`() {
-        val forrigeBehandling = lagBehandling()
-        val nåværendeBehandling = lagBehandling()
-        val forrigeKompetanse =
-            lagKompetanse(
-                behandlingId = forrigeBehandling.id,
+                behandlingId = forrigeBehandling.behandlingId,
                 barnAktører = setOf(barn1Aktør),
                 barnetsBostedsland = "NO",
                 søkersAktivitet = SøkersAktivitet.ARBEIDER,
@@ -754,7 +731,35 @@ class BehandlingsresultatEndringUtilsTest {
 
         val endring = erEndringIKompetanse(
             nåværendeKompetanser = listOf(
-                forrigeKompetanse.copy(søkersAktivitetsland = "DK").apply { behandlingId = nåværendeBehandling.id }
+                forrigeKompetanse.copy().apply { behandlingId = nåværendeBehandling.behandlingId }),
+            forrigeKompetanser = listOf(forrigeKompetanse)
+        )
+
+        assertEquals(false, endring)
+    }
+
+    @Test
+    fun `Endring i kompetanse - skal returnere true når søkers aktivitetsland endrer seg`() {
+        val forrigeBehandling = lagBehandling()
+        val nåværendeBehandling = lagBehandling()
+        val forrigeKompetanse =
+            lagKompetanse(
+                behandlingId = forrigeBehandling.behandlingId,
+                barnAktører = setOf(barn1Aktør),
+                barnetsBostedsland = "NO",
+                søkersAktivitet = SøkersAktivitet.ARBEIDER,
+                søkersAktivitetsland = "NO",
+                annenForeldersAktivitet = AnnenForeldersAktivitet.INAKTIV,
+                annenForeldersAktivitetsland = "PO",
+                kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
+                fom = YearMonth.now().minusMonths(6),
+                tom = null
+            )
+
+        val endring = erEndringIKompetanse(
+            nåværendeKompetanser = listOf(
+                forrigeKompetanse.copy(søkersAktivitetsland = "DK")
+                    .apply { behandlingId = nåværendeBehandling.behandlingId }
             ),
             forrigeKompetanser = listOf(forrigeKompetanse)
         )
@@ -768,7 +773,7 @@ class BehandlingsresultatEndringUtilsTest {
         val nåværendeBehandling = lagBehandling()
         val forrigeKompetanse =
             lagKompetanse(
-                behandlingId = forrigeBehandling.id,
+                behandlingId = forrigeBehandling.behandlingId,
                 barnAktører = setOf(barn1Aktør),
                 barnetsBostedsland = "NO",
                 søkersAktivitet = SøkersAktivitet.ARBEIDER,
@@ -783,7 +788,7 @@ class BehandlingsresultatEndringUtilsTest {
         val endring = erEndringIKompetanse(
             nåværendeKompetanser = listOf(
                 forrigeKompetanse.copy(søkersAktivitet = SøkersAktivitet.ARBEIDER_PÅ_NORSK_SOKKEL)
-                    .apply { behandlingId = nåværendeBehandling.id }
+                    .apply { behandlingId = nåværendeBehandling.behandlingId }
             ),
             forrigeKompetanser = listOf(forrigeKompetanse)
         )
@@ -797,7 +802,7 @@ class BehandlingsresultatEndringUtilsTest {
         val nåværendeBehandling = lagBehandling()
         val forrigeKompetanse =
             lagKompetanse(
-                behandlingId = forrigeBehandling.id,
+                behandlingId = forrigeBehandling.behandlingId,
                 barnAktører = setOf(barn1Aktør),
                 barnetsBostedsland = "NO",
                 søkersAktivitet = SøkersAktivitet.ARBEIDER,
@@ -812,7 +817,7 @@ class BehandlingsresultatEndringUtilsTest {
         val endring = erEndringIKompetanse(
             nåværendeKompetanser = listOf(
                 forrigeKompetanse.copy(annenForeldersAktivitetsland = "DK")
-                    .apply { behandlingId = nåværendeBehandling.id }
+                    .apply { behandlingId = nåværendeBehandling.behandlingId }
             ),
             forrigeKompetanser = listOf(forrigeKompetanse)
         )
@@ -826,7 +831,7 @@ class BehandlingsresultatEndringUtilsTest {
         val nåværendeBehandling = lagBehandling()
         val forrigeKompetanse =
             lagKompetanse(
-                behandlingId = forrigeBehandling.id,
+                behandlingId = forrigeBehandling.behandlingId,
                 barnAktører = setOf(barn1Aktør),
                 barnetsBostedsland = "NO",
                 søkersAktivitet = SøkersAktivitet.ARBEIDER,
@@ -841,7 +846,7 @@ class BehandlingsresultatEndringUtilsTest {
         val endring = erEndringIKompetanse(
             nåværendeKompetanser = listOf(
                 forrigeKompetanse.copy(annenForeldersAktivitet = AnnenForeldersAktivitet.FORSIKRET_I_BOSTEDSLAND)
-                    .apply { behandlingId = nåværendeBehandling.id }
+                    .apply { behandlingId = nåværendeBehandling.behandlingId }
             ),
             forrigeKompetanser = listOf(forrigeKompetanse)
         )
@@ -855,7 +860,7 @@ class BehandlingsresultatEndringUtilsTest {
         val nåværendeBehandling = lagBehandling()
         val forrigeKompetanse =
             lagKompetanse(
-                behandlingId = forrigeBehandling.id,
+                behandlingId = forrigeBehandling.behandlingId,
                 barnAktører = setOf(barn1Aktør),
                 barnetsBostedsland = "NO",
                 søkersAktivitet = SøkersAktivitet.ARBEIDER,
@@ -869,7 +874,8 @@ class BehandlingsresultatEndringUtilsTest {
 
         val endring = erEndringIKompetanse(
             nåværendeKompetanser = listOf(
-                forrigeKompetanse.copy(barnetsBostedsland = "DK").apply { behandlingId = nåværendeBehandling.id }
+                forrigeKompetanse.copy(barnetsBostedsland = "DK")
+                    .apply { behandlingId = nåværendeBehandling.behandlingId }
             ),
             forrigeKompetanser = listOf(forrigeKompetanse)
         )
@@ -883,7 +889,7 @@ class BehandlingsresultatEndringUtilsTest {
         val nåværendeBehandling = lagBehandling()
         val forrigeKompetanse =
             lagKompetanse(
-                behandlingId = forrigeBehandling.id,
+                behandlingId = forrigeBehandling.behandlingId,
                 barnAktører = setOf(barn1Aktør),
                 barnetsBostedsland = "NO",
                 søkersAktivitet = SøkersAktivitet.ARBEIDER,
@@ -898,7 +904,7 @@ class BehandlingsresultatEndringUtilsTest {
         val endring = erEndringIKompetanse(
             nåværendeKompetanser = listOf(
                 forrigeKompetanse.copy(resultat = KompetanseResultat.NORGE_ER_SEKUNDÆRLAND)
-                    .apply { behandlingId = nåværendeBehandling.id }
+                    .apply { behandlingId = nåværendeBehandling.behandlingId }
             ),
             forrigeKompetanser = listOf(forrigeKompetanse)
         )
@@ -912,7 +918,7 @@ class BehandlingsresultatEndringUtilsTest {
         val nåværendeBehandling = lagBehandling()
         val forrigeKompetanse =
             lagKompetanse(
-                behandlingId = forrigeBehandling.id,
+                behandlingId = forrigeBehandling.behandlingId,
                 barnAktører = setOf(barn1Aktør),
                 barnetsBostedsland = "NO",
                 søkersAktivitet = SøkersAktivitet.ARBEIDER,
@@ -927,7 +933,7 @@ class BehandlingsresultatEndringUtilsTest {
         val endring = erEndringIKompetanse(
             nåværendeKompetanser = listOf(
                 forrigeKompetanse.copy(fom = YearMonth.now().minusMonths(10))
-                    .apply { behandlingId = nåværendeBehandling.id }
+                    .apply { behandlingId = nåværendeBehandling.behandlingId }
             ),
             forrigeKompetanser = listOf(forrigeKompetanse)
         )
@@ -945,7 +951,7 @@ class BehandlingsresultatEndringUtilsTest {
                 periodeFom = LocalDate.of(2015, 1, 1),
                 periodeTom = LocalDate.of(2020, 1, 1),
                 begrunnelse = "begrunnelse",
-                behandlingId = 0,
+                behandlingId = BehandlingId(0),
                 utdypendeVilkårsvurderinger = listOf(
                     UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
                     UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP
@@ -959,7 +965,7 @@ class BehandlingsresultatEndringUtilsTest {
                 periodeFom = LocalDate.of(2020, 1, 2),
                 periodeTom = LocalDate.of(2022, 1, 1),
                 begrunnelse = "begrunnelse",
-                behandlingId = 0,
+                behandlingId = BehandlingId(0),
                 utdypendeVilkårsvurderinger = listOf(
                     UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP,
                     UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE
@@ -976,7 +982,7 @@ class BehandlingsresultatEndringUtilsTest {
                 periodeFom = LocalDate.of(2015, 1, 1),
                 periodeTom = LocalDate.of(2020, 1, 1),
                 begrunnelse = "begrunnelse",
-                behandlingId = 0,
+                behandlingId = BehandlingId(0),
                 utdypendeVilkårsvurderinger = listOf(
                     UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
                     UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP
@@ -990,7 +996,7 @@ class BehandlingsresultatEndringUtilsTest {
                 periodeFom = LocalDate.of(2020, 1, 2),
                 periodeTom = LocalDate.of(2022, 1, 1),
                 begrunnelse = "begrunnelse",
-                behandlingId = 0,
+                behandlingId = BehandlingId(0),
                 utdypendeVilkårsvurderinger = listOf(
                     UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP,
                     UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE
@@ -1019,7 +1025,7 @@ class BehandlingsresultatEndringUtilsTest {
                 periodeFom = LocalDate.of(2015, 1, 1),
                 periodeTom = LocalDate.of(2020, 1, 1),
                 begrunnelse = "begrunnelse",
-                behandlingId = 0,
+                behandlingId = BehandlingId(0),
                 utdypendeVilkårsvurderinger = listOf(
                     UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
                     UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP
@@ -1036,7 +1042,7 @@ class BehandlingsresultatEndringUtilsTest {
                 periodeFom = LocalDate.of(2015, 1, 1),
                 periodeTom = LocalDate.of(2020, 1, 1),
                 begrunnelse = "begrunnelse",
-                behandlingId = 0,
+                behandlingId = BehandlingId(0),
                 utdypendeVilkårsvurderinger = listOf(
                     UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
                     UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP
@@ -1065,7 +1071,7 @@ class BehandlingsresultatEndringUtilsTest {
                 periodeFom = LocalDate.of(2015, 1, 1),
                 periodeTom = LocalDate.of(2020, 1, 1),
                 begrunnelse = "begrunnelse",
-                behandlingId = 0,
+                behandlingId = BehandlingId(0),
                 utdypendeVilkårsvurderinger = listOf(
                     UtdypendeVilkårsvurdering.VURDERING_ANNET_GRUNNLAG
                 ),
@@ -1081,7 +1087,7 @@ class BehandlingsresultatEndringUtilsTest {
                 periodeFom = LocalDate.of(2015, 1, 1),
                 periodeTom = LocalDate.of(2020, 1, 1),
                 begrunnelse = "begrunnelse",
-                behandlingId = 0,
+                behandlingId = BehandlingId(0),
                 utdypendeVilkårsvurderinger = listOf(
                     UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
                     UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP
@@ -1110,7 +1116,7 @@ class BehandlingsresultatEndringUtilsTest {
                 periodeFom = jan22.førsteDagIInneværendeMåned(),
                 periodeTom = null,
                 begrunnelse = "",
-                behandlingId = 0,
+                behandlingId = BehandlingId(0),
                 utdypendeVilkårsvurderinger = listOf(),
                 vurderesEtter = Regelverk.NASJONALE_REGLER
             )
@@ -1124,7 +1130,7 @@ class BehandlingsresultatEndringUtilsTest {
                 periodeFom = jan22.førsteDagIInneværendeMåned(),
                 periodeTom = mai22.atDay(7),
                 begrunnelse = "",
-                behandlingId = 0,
+                behandlingId = BehandlingId(0),
                 utdypendeVilkårsvurderinger = listOf(),
                 vurderesEtter = Regelverk.NASJONALE_REGLER
             ),
@@ -1135,7 +1141,7 @@ class BehandlingsresultatEndringUtilsTest {
                 periodeFom = mai22.atDay(8),
                 periodeTom = null,
                 begrunnelse = "",
-                behandlingId = 0,
+                behandlingId = BehandlingId(0),
                 utdypendeVilkårsvurderinger = listOf(),
                 vurderesEtter = Regelverk.NASJONALE_REGLER
             )
@@ -1161,7 +1167,7 @@ class BehandlingsresultatEndringUtilsTest {
                 periodeFom = LocalDate.of(2015, 1, 1),
                 periodeTom = LocalDate.of(2020, 1, 1),
                 begrunnelse = "begrunnelse",
-                behandlingId = 0,
+                behandlingId = BehandlingId(0),
                 utdypendeVilkårsvurderinger = listOf(
                     UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
                     UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP
@@ -1178,7 +1184,7 @@ class BehandlingsresultatEndringUtilsTest {
                 periodeFom = LocalDate.of(2015, 1, 1),
                 periodeTom = null,
                 begrunnelse = "begrunnelse",
-                behandlingId = 0,
+                behandlingId = BehandlingId(0),
                 utdypendeVilkårsvurderinger = listOf(
                     UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
                     UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP
@@ -1197,8 +1203,12 @@ class BehandlingsresultatEndringUtilsTest {
         assertThat(erEndringIVilkårvurderingForPerson, Is(false))
     }
 
-    private fun lagPersonResultatFraVilkårResultater(vilkårResultater: Set<VilkårResultat>, aktør: Aktør): PersonResultat {
-        val vilkårsvurdering = lagVilkårsvurdering(behandling = lagBehandling(), resultat = Resultat.OPPFYLT, søkerAktør = randomAktør())
+    private fun lagPersonResultatFraVilkårResultater(
+        vilkårResultater: Set<VilkårResultat>,
+        aktør: Aktør
+    ): PersonResultat {
+        val vilkårsvurdering =
+            lagVilkårsvurdering(behandling = lagBehandling(), resultat = Resultat.OPPFYLT, søkerAktør = randomAktør())
         val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = aktør)
 
         personResultat.setSortedVilkårResultater(vilkårResultater)

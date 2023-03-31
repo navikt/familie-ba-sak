@@ -13,7 +13,6 @@ import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
@@ -65,8 +64,8 @@ class VilkårsvurderingStegTest {
 
     @BeforeEach
     fun setup() {
-        every { persongrunnlagService.hentAktivThrows(behandling.id) } returns lagTestPersonopplysningGrunnlag(
-            behandlingId = behandling.id,
+        every { persongrunnlagService.hentAktivThrows(behandling.behandlingId) } returns lagTestPersonopplysningGrunnlag(
+            behandlingId = behandling.behandlingId,
             søkerPersonIdent = søker.aktør.aktivFødselsnummer(),
             barnasIdenter = listOf(barn.aktør.aktivFødselsnummer())
         )
@@ -80,7 +79,7 @@ class VilkårsvurderingStegTest {
             behandling
         )
 
-        every { tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(BehandlingId(behandling.id)) } just Runs
+        every { tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(behandling.behandlingId) } just Runs
     }
 
     @Test
@@ -107,7 +106,7 @@ class VilkårsvurderingStegTest {
             erDeltBosted = true
         )
         vikårsvurdering.personResultater = setOf(søkerPersonResultat, barnPersonResultat)
-        every { vilkårService.hentVilkårsvurderingThrows(behandling.id) } returns vikårsvurdering
+        every { vilkårService.hentVilkårsvurderingThrows(behandling.behandlingId) } returns vikårsvurdering
 
         assertDoesNotThrow { vilkårsvurderingSteg.utførStegOgAngiNeste(behandling, "") }
     }
@@ -128,10 +127,10 @@ class VilkårsvurderingStegTest {
             .byggPerson()
 
         val vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering()
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1)
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.behandlingId, søker, barn1)
 
-        every { vilkårService.hentVilkårsvurdering(behandling.id) } returns vilkårsvurdering
-        every { persongrunnlagService.hentAktivThrows(behandling.id) } returns personopplysningGrunnlag
+        every { vilkårService.hentVilkårsvurdering(behandling.behandlingId) } returns vilkårsvurdering
+        every { persongrunnlagService.hentAktivThrows(behandling.behandlingId) } returns personopplysningGrunnlag
 
         assertDoesNotThrow { vilkårsvurderingSteg.preValiderSteg(behandling, null) }
     }
@@ -154,10 +153,10 @@ class VilkårsvurderingStegTest {
             .byggPerson()
 
         val vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering()
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1)
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.behandlingId, søker, barn1)
 
-        every { vilkårService.hentVilkårsvurdering(behandling.id) } returns vilkårsvurdering
-        every { persongrunnlagService.hentAktivThrows(behandling.id) } returns personopplysningGrunnlag
+        every { vilkårService.hentVilkårsvurdering(behandling.behandlingId) } returns vilkårsvurdering
+        every { persongrunnlagService.hentAktivThrows(behandling.behandlingId) } returns personopplysningGrunnlag
 
         val exception = assertThrows<RuntimeException> { vilkårsvurderingSteg.preValiderSteg(behandling, null) }
         assertEquals(

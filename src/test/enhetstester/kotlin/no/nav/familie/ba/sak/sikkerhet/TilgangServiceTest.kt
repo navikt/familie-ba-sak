@@ -57,7 +57,7 @@ class TilgangServiceTest {
     private val behandling = lagBehandling(fagsak)
     private val aktør = fagsak.aktør
     private val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
-        behandlingId = behandling.id,
+        behandlingId = behandling.behandlingId,
         søkerPersonIdent = aktør.aktivFødselsnummer(),
         barnasIdenter = emptyList()
     )
@@ -102,7 +102,7 @@ class TilgangServiceTest {
 
         assertThrows<RolleTilgangskontrollFeil> {
             tilgangService.validerTilgangTilBehandling(
-                behandling.id,
+                behandling.behandlingId,
                 AuditLoggerEvent.ACCESS
             )
         }
@@ -112,7 +112,7 @@ class TilgangServiceTest {
     internal fun `skal ikke feile når saksbehandler har tilgang til behandling`() {
         every { mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(any()) } returns Tilgang(true)
 
-        tilgangService.validerTilgangTilBehandling(behandling.id, AuditLoggerEvent.ACCESS)
+        tilgangService.validerTilgangTilBehandling(behandling.behandlingId, AuditLoggerEvent.ACCESS)
     }
 
     @Test
@@ -147,8 +147,8 @@ class TilgangServiceTest {
 
         mockBrukerContext("A")
 
-        tilgangService.validerTilgangTilBehandling(behandling.id, AuditLoggerEvent.ACCESS)
-        tilgangService.validerTilgangTilBehandling(behandling.id, AuditLoggerEvent.ACCESS)
+        tilgangService.validerTilgangTilBehandling(behandling.behandlingId, AuditLoggerEvent.ACCESS)
+        tilgangService.validerTilgangTilBehandling(behandling.behandlingId, AuditLoggerEvent.ACCESS)
 
         verify(exactly = 1) {
             mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(any())
@@ -160,9 +160,9 @@ class TilgangServiceTest {
         every { mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(any()) } returns Tilgang(true)
 
         mockBrukerContext("A")
-        tilgangService.validerTilgangTilBehandling(behandling.id, AuditLoggerEvent.ACCESS)
+        tilgangService.validerTilgangTilBehandling(behandling.behandlingId, AuditLoggerEvent.ACCESS)
         mockBrukerContext("B")
-        tilgangService.validerTilgangTilBehandling(behandling.id, AuditLoggerEvent.ACCESS)
+        tilgangService.validerTilgangTilBehandling(behandling.behandlingId, AuditLoggerEvent.ACCESS)
 
         verify(exactly = 2) {
             mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(any())
@@ -173,17 +173,67 @@ class TilgangServiceTest {
     fun `validerTilgangTilFagsak - skal kaste feil dersom søker eller et eller flere av barna har diskresjonskode og saksbehandler mangler tilgang`() {
         every { fagsakService.hentAktør(fagsak.id) }.returns(aktør)
         every { behandlingHentOgPersisterService.hentBehandlinger(fagsak.id) }.returns(listOf(behandling))
-        every { persongrunnlagService.hentAktiv(behandling.id) }.returns(
+        every { persongrunnlagService.hentAktiv(behandling.behandlingId) }.returns(
             PersonopplysningGrunnlag(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId,
                 personer = mutableSetOf<Person>(
-                    Person(aktør = Aktør(aktørId = "6543456372112", personidenter = mutableSetOf(Personident(fødselsnummer = "65434563721", aktiv = true, aktør = Aktør("6543456372112", mutableSetOf())))), type = PersonType.SØKER, fødselsdato = LocalDate.now(), kjønn = Kjønn.MANN, personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id, personer = mutableSetOf(), aktiv = true)),
-                    Person(aktør = Aktør(aktørId = "1234567891012", personidenter = mutableSetOf(Personident(fødselsnummer = "12345678910", aktiv = true, aktør = Aktør("1234567891012", mutableSetOf())))), type = PersonType.BARN, fødselsdato = LocalDate.now(), kjønn = Kjønn.MANN, personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id, personer = mutableSetOf(), aktiv = true))
+                    Person(
+                        aktør = Aktør(
+                            aktørId = "6543456372112",
+                            personidenter = mutableSetOf(
+                                Personident(
+                                    fødselsnummer = "65434563721",
+                                    aktiv = true,
+                                    aktør = Aktør("6543456372112", mutableSetOf())
+                                )
+                            )
+                        ),
+                        type = PersonType.SØKER,
+                        fødselsdato = LocalDate.now(),
+                        kjønn = Kjønn.MANN,
+                        personopplysningGrunnlag = PersonopplysningGrunnlag(
+                            behandlingId = behandling.behandlingId,
+                            personer = mutableSetOf(),
+                            aktiv = true
+                        )
+                    ),
+                    Person(
+                        aktør = Aktør(
+                            aktørId = "1234567891012",
+                            personidenter = mutableSetOf(
+                                Personident(
+                                    fødselsnummer = "12345678910",
+                                    aktiv = true,
+                                    aktør = Aktør("1234567891012", mutableSetOf())
+                                )
+                            )
+                        ),
+                        type = PersonType.BARN,
+                        fødselsdato = LocalDate.now(),
+                        kjønn = Kjønn.MANN,
+                        personopplysningGrunnlag = PersonopplysningGrunnlag(
+                            behandlingId = behandling.behandlingId,
+                            personer = mutableSetOf(),
+                            aktiv = true
+                        )
+                    )
                 )
             )
         )
-        every { mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(listOf("65434563721", "12345678910")) }.returns(Tilgang(false, null))
+        every {
+            mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(
+                listOf(
+                    "65434563721",
+                    "12345678910"
+                )
+            )
+        }.returns(Tilgang(false, null))
         mockBrukerContext("A")
-        assertThrows<RolleTilgangskontrollFeil> { tilgangService.validerTilgangTilFagsak(fagsak.id, AuditLoggerEvent.ACCESS) }
+        assertThrows<RolleTilgangskontrollFeil> {
+            tilgangService.validerTilgangTilFagsak(
+                fagsak.id,
+                AuditLoggerEvent.ACCESS
+            )
+        }
     }
 }

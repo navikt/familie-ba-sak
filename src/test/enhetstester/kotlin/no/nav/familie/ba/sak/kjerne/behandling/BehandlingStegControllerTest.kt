@@ -41,7 +41,7 @@ class BehandlingStegControllerTest {
 
         assertThrows<FunksjonellFeil> {
             behandlingStegController.henleggBehandlingOgSendBrev(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId.id,
                 henleggInfo = RestHenleggBehandlingInfo(
                     begrunnelse = "dette er en begrunnelse",
                     årsak = HenleggÅrsak.FEILAKTIG_OPPRETTET

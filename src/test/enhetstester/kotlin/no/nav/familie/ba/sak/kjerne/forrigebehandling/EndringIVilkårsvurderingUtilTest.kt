@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Uendelighet
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
@@ -36,7 +37,7 @@ class EndringIVilkårsvurderingUtilTest {
                 periodeFom = LocalDate.of(2015, 1, 1),
                 periodeTom = LocalDate.of(2020, 1, 1),
                 begrunnelse = "begrunnelse",
-                behandlingId = 0,
+                behandlingId = BehandlingId(0),
                 utdypendeVilkårsvurderinger = listOf(
                     UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
                     UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP
@@ -50,7 +51,7 @@ class EndringIVilkårsvurderingUtilTest {
                 periodeFom = LocalDate.of(2020, 1, 2),
                 periodeTom = LocalDate.of(2022, 1, 1),
                 begrunnelse = "begrunnelse",
-                behandlingId = 0,
+                behandlingId = BehandlingId(0),
                 utdypendeVilkårsvurderinger = listOf(
                     UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP,
                     UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE
@@ -86,7 +87,7 @@ class EndringIVilkårsvurderingUtilTest {
                 periodeFom = jan22.førsteDagIInneværendeMåned(),
                 periodeTom = mai22.sisteDagIInneværendeMåned(),
                 begrunnelse = "begrunnelse",
-                behandlingId = 0,
+                behandlingId = BehandlingId(0),
                 utdypendeVilkårsvurderinger = listOf(
                     UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
                     UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP
@@ -103,7 +104,7 @@ class EndringIVilkårsvurderingUtilTest {
                 periodeFom = jan22.førsteDagIInneværendeMåned(),
                 periodeTom = mai22.sisteDagIInneværendeMåned(),
                 begrunnelse = "begrunnelse",
-                behandlingId = 0,
+                behandlingId = BehandlingId(0),
                 utdypendeVilkårsvurderinger = listOf(
                     UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
                     UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP
@@ -141,7 +142,7 @@ class EndringIVilkårsvurderingUtilTest {
                 periodeFom = jan22.førsteDagIInneværendeMåned(),
                 periodeTom = null,
                 begrunnelse = "",
-                behandlingId = 0,
+                behandlingId = BehandlingId(0),
                 utdypendeVilkårsvurderinger = listOf(),
                 vurderesEtter = Regelverk.NASJONALE_REGLER
             )
@@ -155,7 +156,7 @@ class EndringIVilkårsvurderingUtilTest {
                 periodeFom = jan22.førsteDagIInneværendeMåned(),
                 periodeTom = mai22.atDay(7),
                 begrunnelse = "",
-                behandlingId = 0,
+                behandlingId = BehandlingId(0),
                 utdypendeVilkårsvurderinger = listOf(),
                 vurderesEtter = Regelverk.NASJONALE_REGLER
             ),
@@ -166,7 +167,7 @@ class EndringIVilkårsvurderingUtilTest {
                 periodeFom = mai22.atDay(8),
                 periodeTom = null,
                 begrunnelse = "",
-                behandlingId = 0,
+                behandlingId = BehandlingId(0),
                 utdypendeVilkårsvurderinger = listOf(),
                 vurderesEtter = Regelverk.NASJONALE_REGLER
             )
@@ -201,7 +202,7 @@ class EndringIVilkårsvurderingUtilTest {
                 periodeFom = LocalDate.of(2015, 1, 1),
                 periodeTom = LocalDate.of(2020, 1, 1),
                 begrunnelse = "begrunnelse",
-                behandlingId = 0,
+                behandlingId = BehandlingId(0),
                 utdypendeVilkårsvurderinger = listOf(
                     UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
                     UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP
@@ -218,7 +219,7 @@ class EndringIVilkårsvurderingUtilTest {
                 periodeFom = LocalDate.of(2015, 1, 1),
                 periodeTom = null,
                 begrunnelse = "begrunnelse",
-                behandlingId = 0,
+                behandlingId = BehandlingId(0),
                 utdypendeVilkårsvurderinger = listOf(
                     UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
                     UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP
@@ -254,7 +255,7 @@ class EndringIVilkårsvurderingUtilTest {
                 periodeFom = LocalDate.of(2015, 1, 1),
                 periodeTom = null,
                 begrunnelse = "migrering",
-                behandlingId = 0,
+                behandlingId = BehandlingId(0),
                 utdypendeVilkårsvurderinger = listOf(),
                 vurderesEtter = Regelverk.EØS_FORORDNINGEN
             )
@@ -268,7 +269,7 @@ class EndringIVilkårsvurderingUtilTest {
                 periodeFom = LocalDate.of(2015, 1, 1),
                 periodeTom = null,
                 begrunnelse = "migrering",
-                behandlingId = 0,
+                behandlingId = BehandlingId(0),
                 utdypendeVilkårsvurderinger = listOf(
                     UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE
                 ),
@@ -293,8 +294,12 @@ class EndringIVilkårsvurderingUtilTest {
         Assertions.assertNull(endringstidspunkt)
     }
 
-    private fun lagPersonResultatFraVilkårResultater(vilkårResultater: Set<VilkårResultat>, aktør: Aktør): PersonResultat {
-        val vilkårsvurdering = lagVilkårsvurdering(behandling = lagBehandling(), resultat = Resultat.OPPFYLT, søkerAktør = randomAktør())
+    private fun lagPersonResultatFraVilkårResultater(
+        vilkårResultater: Set<VilkårResultat>,
+        aktør: Aktør
+    ): PersonResultat {
+        val vilkårsvurdering =
+            lagVilkårsvurdering(behandling = lagBehandling(), resultat = Resultat.OPPFYLT, søkerAktør = randomAktør())
         val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = aktør)
 
         personResultat.setSortedVilkårResultater(vilkårResultater)

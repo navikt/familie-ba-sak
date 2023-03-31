@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityVilkår
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -42,7 +43,7 @@ class VilkårsvurderingUtilsTest {
             vilkårType = Vilkår.LOVLIG_OPPHOLD,
             resultat = Resultat.OPPFYLT,
             begrunnelse = "",
-            behandlingId = 0
+            behandlingId = BehandlingId(0)
         )
         personResultat.vilkårResultater.add(løpendeOppfylt)
 
@@ -80,7 +81,7 @@ class VilkårsvurderingUtilsTest {
             vilkårType = Vilkår.LOVLIG_OPPHOLD,
             resultat = Resultat.IKKE_OPPFYLT,
             begrunnelse = "",
-            behandlingId = 0,
+            behandlingId = BehandlingId(0),
             erEksplisittAvslagPåSøknad = true
         )
         personResultat.vilkårResultater.add(avslagUtenPeriode)
@@ -118,7 +119,7 @@ class VilkårsvurderingUtilsTest {
             vilkårType = Vilkår.BOR_MED_SØKER,
             resultat = Resultat.OPPFYLT,
             begrunnelse = "",
-            behandlingId = 0
+            behandlingId = BehandlingId(0)
         )
         personResultat.vilkårResultater.add(løpendeOppfylt)
 
@@ -156,7 +157,7 @@ class VilkårsvurderingUtilsTest {
             vilkårType = Vilkår.BOR_MED_SØKER,
             resultat = Resultat.IKKE_OPPFYLT,
             begrunnelse = "",
-            behandlingId = 0,
+            behandlingId = BehandlingId(0),
             erEksplisittAvslagPåSøknad = true
         )
         personResultat.vilkårResultater.add(avslagUtenPeriode)
