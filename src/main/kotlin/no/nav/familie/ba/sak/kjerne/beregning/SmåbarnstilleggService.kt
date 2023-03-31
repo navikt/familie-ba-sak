@@ -13,7 +13,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.PeriodeOvergangsstønadGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.tilPeriodeOvergangsstønadGrunnlag
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
+import no.nav.familie.kontrakter.felles.ef.EksternPeriode
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -102,7 +102,7 @@ class SmåbarnstilleggService(
         )
     }
 
-    private fun hentPerioderMedFullOvergangsstønad(aktør: Aktør): List<PeriodeOvergangsstønad> {
+    private fun hentPerioderMedFullOvergangsstønad(aktør: Aktør): List<EksternPeriode> {
         return efSakRestClient.hentPerioderMedFullOvergangsstønad(
             aktør.aktivFødselsnummer()
         ).perioder
