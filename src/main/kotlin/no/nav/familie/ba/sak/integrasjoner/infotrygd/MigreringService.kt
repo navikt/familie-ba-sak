@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner.infotrygd
 
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
+import jakarta.validation.ConstraintViolationException
 import no.nav.commons.foedselsnummer.FoedselsNr
 import no.nav.familie.ba.sak.common.EnvService
 import no.nav.familie.ba.sak.common.Feil
@@ -67,7 +68,6 @@ import java.time.Month.NOVEMBER
 import java.time.Month.OCTOBER
 import java.time.Month.SEPTEMBER
 import java.time.YearMonth
-import jakarta.validation.ConstraintViolationException
 
 private const val NULLDATO = "000000"
 private val SISTE_DATO_FORRIGE_SATS = LocalDate.of(2023, 2, 28)

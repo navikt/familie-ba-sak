@@ -1,9 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.gdpr.domene
 
-import no.nav.familie.ba.sak.common.BaseEntitet
-import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
-import java.util.Objects
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
@@ -14,6 +10,10 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.OneToOne
 import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
+import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
+import java.util.Objects
 
 /**
  * Ikke i bruk, men tar vare på den i tilfelle vi trenger dataene som ligger i prod for perioden

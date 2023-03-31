@@ -1,14 +1,14 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse
 
+import jakarta.persistence.Column
+import jakarta.persistence.DiscriminatorValue
+import jakarta.persistence.Entity
+import jakarta.persistence.EntityListeners
 import no.nav.familie.ba.sak.common.Utils.nullableTilString
 import no.nav.familie.ba.sak.common.Utils.storForbokstav
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.personopplysning.Vegadresse
 import java.util.Objects
-import jakarta.persistence.Column
-import jakarta.persistence.DiscriminatorValue
-import jakarta.persistence.Entity
-import jakarta.persistence.EntityListeners
 
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "GrVegadresse")
@@ -51,8 +51,8 @@ data class GrVegadresse(
     }
 
     override fun tilFrontendString() = """${
-        adressenavn.nullableTilString()
-            .storForbokstav()
+    adressenavn.nullableTilString()
+        .storForbokstav()
     } ${husnummer.nullableTilString()}${husbokstav.nullableTilString()}${postnummer.let { ", $it" }}""".trimMargin()
 
     override fun equals(other: Any?): Boolean {

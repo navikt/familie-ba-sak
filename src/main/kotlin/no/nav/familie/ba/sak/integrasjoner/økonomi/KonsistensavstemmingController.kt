@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
+import jakarta.transaction.Transactional
 import no.nav.familie.ba.sak.task.KonsistensavstemMotOppdragStartTask
 import no.nav.familie.ba.sak.task.dto.KonsistensavstemmingStartTaskDTO
 import no.nav.familie.kontrakter.felles.Ressurs
@@ -17,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.UUID
-import jakarta.transaction.Transactional
 
 @RestController
 @RequestMapping("/api/konsistensavstemming")

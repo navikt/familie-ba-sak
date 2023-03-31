@@ -1,8 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta
 
-import no.nav.familie.ba.sak.common.BaseEntitet
-import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
-import java.time.LocalDate
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
@@ -11,6 +8,9 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
+import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
+import java.time.LocalDate
 
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "FeilutbetaltValuta")

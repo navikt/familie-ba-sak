@@ -134,7 +134,6 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
 
         kafkaAivenTemplate.send(OPPHOER_BARNETRYGD_BISYS_TOPIC, behandlingId, opphørBarnetrygdBisysMelding)
             .thenAccept {
-
                 logger.info(
                     "Melding på topic $OPPHOER_BARNETRYGD_BISYS_TOPIC for " +
                         "$behandlingId er sendt. " +
@@ -143,7 +142,6 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
                 secureLogger.info("Send barnetrygd bisys melding $opphørBarnetrygdBisysMelding")
             }
             .exceptionally {
-
                 val feilmelding =
                     "Melding på topic $OPPHOER_BARNETRYGD_BISYS_TOPIC kan ikke sendes for " +
                         "$behandlingId. Feiler med ${it.message}"

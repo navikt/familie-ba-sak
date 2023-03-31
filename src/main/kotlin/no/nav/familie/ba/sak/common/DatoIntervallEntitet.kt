@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.common
 
-import java.time.LocalDate
 import jakarta.persistence.Column
 import jakarta.persistence.Embeddable
+import java.time.LocalDate
 
 @Embeddable
 data class DatoIntervallEntitet(

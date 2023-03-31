@@ -1,12 +1,12 @@
 package no.nav.familie.ba.sak.ekstern.restDomene
 
+import jakarta.validation.constraints.DecimalMin
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.konverterBeløpTilMånedlig
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import java.math.BigDecimal
 import java.time.YearMonth
-import jakarta.validation.constraints.DecimalMin
 
 data class RestUtenlandskPeriodebeløp(
     val id: Long,

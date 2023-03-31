@@ -1,12 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.eøs.valutakurs
 
-import no.nav.familie.ba.sak.common.YearMonthConverter
-import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEntitet
-import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
-import java.math.BigDecimal
-import java.time.LocalDate
-import java.time.YearMonth
 import jakarta.persistence.Column
 import jakarta.persistence.Convert
 import jakarta.persistence.Entity
@@ -20,6 +13,13 @@ import jakarta.persistence.JoinTable
 import jakarta.persistence.ManyToMany
 import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
+import no.nav.familie.ba.sak.common.YearMonthConverter
+import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEntitet
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
+import java.math.BigDecimal
+import java.time.LocalDate
+import java.time.YearMonth
 
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "Valutakurs")

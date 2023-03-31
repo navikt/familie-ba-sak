@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.småbarnstilleggkorrigering
 
+import jakarta.transaction.Transactional
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.opprettBooleanTidslinje
 import no.nav.familie.ba.sak.common.tilMånedÅr
@@ -21,7 +22,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullMed
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.YearMonth
-import jakarta.transaction.Transactional
 
 @Service
 class SmåbarnstilleggKorrigeringService(

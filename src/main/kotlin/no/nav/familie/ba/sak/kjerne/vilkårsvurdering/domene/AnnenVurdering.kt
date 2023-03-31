@@ -1,9 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene
 
-import no.nav.familie.ba.sak.common.BaseEntitet
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
-import java.util.Objects
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
@@ -16,6 +12,10 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
+import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
+import java.util.Objects
 
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "AnnenVurdering")

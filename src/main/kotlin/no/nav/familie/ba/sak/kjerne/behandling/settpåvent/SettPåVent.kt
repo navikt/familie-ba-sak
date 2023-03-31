@@ -1,8 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.behandling.settpåvent
 
-import no.nav.familie.ba.sak.common.BaseEntitet
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import java.time.LocalDate
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
@@ -14,6 +11,9 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
+import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import java.time.LocalDate
 
 @Entity(name = "sett_paa_vent")
 @Table(name = "sett_paa_vent")

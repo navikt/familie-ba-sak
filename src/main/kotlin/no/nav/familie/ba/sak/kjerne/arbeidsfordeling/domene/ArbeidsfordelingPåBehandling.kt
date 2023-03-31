@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene
 
-import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EntityListeners
@@ -9,6 +8,7 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
+import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "ArbeidsfordelingPåBehandling")

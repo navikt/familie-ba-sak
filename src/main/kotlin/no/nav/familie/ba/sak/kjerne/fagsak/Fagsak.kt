@@ -1,9 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
-import no.nav.familie.ba.sak.common.BaseEntitet
-import no.nav.familie.ba.sak.kjerne.institusjon.Institusjon
-import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import java.util.Objects
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
@@ -16,6 +12,10 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToOne
 import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
+import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.kjerne.institusjon.Institusjon
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import java.util.Objects
 
 @Entity(name = "Fagsak")
 @Table(name = "FAGSAK")
