@@ -34,13 +34,13 @@ class KompetanseRepositoryTest(
         val kompetanse = kompetanseRepository.save(
             lagKompetanse(
                 barnAktører = setOf(barn1, barn2)
-            ).also { it.behandlingId = behandling.id }
+            ).also { it.behandlingId = behandling.behandlingId }
         )
 
         val kompetanse2 = kompetanseRepository.save(
             lagKompetanse(
                 barnAktører = setOf(barn1, barn2)
-            ).also { it.behandlingId = behandling.id }
+            ).also { it.behandlingId = behandling.behandlingId }
         )
 
         assertEquals(kompetanse.barnAktører, kompetanse2.barnAktører)
@@ -56,7 +56,7 @@ class KompetanseRepositoryTest(
 
         val kompetanse = kompetanseRepository.save(
             lagKompetanse(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId,
                 barnAktører = setOf(barn1),
                 fom = YearMonth.of(2020, 1),
                 tom = YearMonth.of(2021, 12),
@@ -67,7 +67,7 @@ class KompetanseRepositoryTest(
             )
         )
 
-        val hentedeKompetanser = kompetanseRepository.finnFraBehandlingId(behandlingId = behandling.id)
+        val hentedeKompetanser = kompetanseRepository.finnFraBehandlingId(behandlingId = behandling.behandlingId.id)
 
         assertEquals(1, hentedeKompetanser.size)
         assertEquals(kompetanse, hentedeKompetanser.first())

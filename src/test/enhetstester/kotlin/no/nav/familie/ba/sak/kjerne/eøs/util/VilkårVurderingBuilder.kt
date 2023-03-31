@@ -42,7 +42,7 @@ data class VilkårsvurderingBuilder<T : Tidsenhet>(
     }
 
     fun byggPersonopplysningGrunnlag(): PersonopplysningGrunnlag {
-        return lagTestPersonopplysningGrunnlag(behandling.id, *personer.toTypedArray())
+        return lagTestPersonopplysningGrunnlag(behandling.behandlingId, *personer.toTypedArray())
     }
 
     data class PersonResultatBuilder<T : Tidsenhet>(
@@ -108,7 +108,7 @@ internal fun <T : Tidsenhet> Periode<UtdypendeVilkårRegelverkResultat, T>.tilVi
             periodeFom = this.fraOgMed.tilDagEllerFørsteDagIPerioden().tilLocalDateEllerNull(),
             periodeTom = this.tilOgMed.tilDagEllerSisteDagIPerioden().tilLocalDateEllerNull(),
             begrunnelse = "En begrunnelse",
-            behandlingId = personResultat.vilkårsvurdering.behandling.id,
+            behandlingId = personResultat.vilkårsvurdering.behandling.behandlingId,
             utdypendeVilkårsvurderinger = this.innhold?.utdypendeVilkårsvurderinger ?: emptyList()
         )
     )

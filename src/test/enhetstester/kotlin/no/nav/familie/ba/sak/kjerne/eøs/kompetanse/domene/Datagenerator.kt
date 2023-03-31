@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene
 
 import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
 import no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp.UtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.eøs.valutakurs.Valutakurs
@@ -10,7 +11,7 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 fun lagKompetanse(
-    behandlingId: Long = lagBehandling().id,
+    behandlingId: BehandlingId = lagBehandling().behandlingId,
     fom: YearMonth? = null,
     tom: YearMonth? = null,
     barnAktører: Set<Aktør> = emptySet(),
@@ -33,7 +34,7 @@ fun lagKompetanse(
 ).also { it.behandlingId = behandlingId }
 
 fun lagValutakurs(
-    behandlingId: Long = lagBehandling().id,
+    behandlingId: BehandlingId = lagBehandling().behandlingId,
     fom: YearMonth? = null,
     tom: YearMonth? = null,
     barnAktører: Set<Aktør> = emptySet(),
@@ -50,7 +51,7 @@ fun lagValutakurs(
 ).also { it.behandlingId = behandlingId }
 
 fun lagUtenlandskPeriodebeløp(
-    behandlingId: Long = lagBehandling().id,
+    behandlingId: BehandlingId = lagBehandling().behandlingId,
     fom: YearMonth? = null,
     tom: YearMonth? = null,
     barnAktører: Set<Aktør> = emptySet(),

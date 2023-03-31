@@ -40,7 +40,7 @@ internal class RestTidslinjerTest {
 
         val vilkårsvurderingTidslinjer = VilkårsvurderingTidslinjer(
             vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
-            personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1)
+            personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.behandlingId, søker, barn1)
         )
 
         val restTidslinjer = vilkårsvurderingTidslinjer.tilRestTidslinjer()
@@ -95,7 +95,7 @@ internal class RestTidslinjerTest {
 
         val vilkårsvurderingTidslinjer = VilkårsvurderingTidslinjer(
             vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
-            personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1, barn2)
+            personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.behandlingId, søker, barn1, barn2)
         )
 
         val restTidslinjer = vilkårsvurderingTidslinjer.tilRestTidslinjer()

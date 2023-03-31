@@ -48,7 +48,7 @@ abstract class SkjemaBuilder<S, B>(
     }
 
     fun bygg(): Collection<S> = skjemaer
-        .map { skjema -> skjema.also { it.behandlingId = behandlingId.id } }
+        .map { skjema -> skjema.also { it.behandlingId = behandlingId } }
 
     fun lagreTil(repository: PeriodeOgBarnSkjemaRepository<S>): List<S> {
         return repository.saveAll(bygg())

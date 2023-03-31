@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.util
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEntitet
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaRepository
 import java.util.concurrent.atomic.AtomicLong
@@ -15,7 +16,7 @@ fun <S : PeriodeOgBarnSkjemaEntitet<S>> mockPeriodeBarnSkjemaRepository(): Perio
     val skjemaListeSlot = slot<Iterable<S>>()
 
     every { mockSkjemaRepository.finnFraBehandlingId(capture(idSlot)) } answers {
-        minnebasertSkjemaRepository.hentSkjemaer(idSlot.captured)
+        minnebasertSkjemaRepository.hentSkjemaer(BehandlingId(idSlot.captured))
     }
 
     every { mockSkjemaRepository.getById(capture(idSlot)) } answers {
@@ -44,7 +45,7 @@ private class MinnebasertSkjemaRepository<S> where S : PeriodeOgBarnSkjemaEntite
 
     private val skjemaer = mutableMapOf<Long, S>()
 
-    fun hentSkjemaer(behandlingId: Long): List<S> {
+    fun hentSkjemaer(behandlingId: BehandlingId): List<S> {
         return skjemaer.values
             .filter { it.behandlingId == behandlingId }
     }

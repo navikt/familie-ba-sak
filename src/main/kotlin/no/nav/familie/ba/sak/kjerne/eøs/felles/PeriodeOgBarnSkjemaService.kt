@@ -33,7 +33,7 @@ class PeriodeOgBarnSkjemaService<S : PeriodeOgBarnSkjemaEntitet<S>>(
 
     fun slettSkjema(skjemaId: Long) {
         val skjemaTilSletting = periodeOgBarnSkjemaRepository.getById(skjemaId)
-        val behandlingId = BehandlingId(skjemaTilSletting.behandlingId)
+        val behandlingId = skjemaTilSletting.behandlingId
         val gjeldendeSkjemaer = hentMedBehandlingId(behandlingId)
         val blanktSkjema = skjemaTilSletting.utenInnhold()
 
@@ -72,6 +72,6 @@ class PeriodeOgBarnSkjemaService<S : PeriodeOgBarnSkjemaEntitet<S>>(
 }
 
 fun <T : PeriodeOgBarnSkjemaEntitet<T>> Collection<T>.medBehandlingId(behandlingId: BehandlingId): Collection<T> {
-    this.forEach { it.behandlingId = behandlingId.id }
+    this.forEach { it.behandlingId = behandlingId }
     return this
 }

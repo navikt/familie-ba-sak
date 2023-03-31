@@ -34,13 +34,13 @@ class UtenlandskPeriodebeløpRepositoryTest(
         val utenlandskPeriodebeløp = utenlandskPeriodebeløpRepository.save(
             lagUtenlandskPeriodebeløp(
                 barnAktører = setOf(barn1, barn2)
-            ).also { it.behandlingId = behandling.id }
+            ).also { it.behandlingId = behandling.behandlingId }
         )
 
         val utenlandskPeriodebeløp2 = utenlandskPeriodebeløpRepository.save(
             lagUtenlandskPeriodebeløp(
                 barnAktører = setOf(barn1, barn2)
-            ).also { it.behandlingId = behandling.id }
+            ).also { it.behandlingId = behandling.behandlingId }
         )
 
         assertEquals(utenlandskPeriodebeløp.barnAktører, utenlandskPeriodebeløp2.barnAktører)
@@ -56,7 +56,7 @@ class UtenlandskPeriodebeløpRepositoryTest(
 
         val utenlandskPeriodebeløp = utenlandskPeriodebeløpRepository.save(
             lagUtenlandskPeriodebeløp(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId,
                 barnAktører = setOf(barn1),
                 fom = YearMonth.of(2020, 1),
                 tom = YearMonth.of(2021, 12),
@@ -67,7 +67,7 @@ class UtenlandskPeriodebeløpRepositoryTest(
         )
 
         val hentedeUtenlandskePeriodebeløp =
-            utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId = behandling.id)
+            utenlandskPeriodebeløpRepository.finnFraBehandlingId(behandlingId = behandling.behandlingId.id)
 
         assertEquals(1, hentedeUtenlandskePeriodebeløp.size)
         assertEquals(utenlandskPeriodebeløp, hentedeUtenlandskePeriodebeløp.first())

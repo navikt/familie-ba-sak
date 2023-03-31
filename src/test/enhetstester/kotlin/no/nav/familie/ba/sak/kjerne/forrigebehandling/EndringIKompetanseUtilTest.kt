@@ -23,7 +23,7 @@ class EndringIKompetanseUtilTest {
         val nåværendeBehandling = lagBehandling()
         val forrigeKompetanse =
             lagKompetanse(
-                behandlingId = forrigeBehandling.id,
+                behandlingId = forrigeBehandling.behandlingId,
                 barnAktører = setOf(barn1Aktør),
                 barnetsBostedsland = "NO",
                 søkersAktivitet = SøkersAktivitet.ARBEIDER,
@@ -35,7 +35,7 @@ class EndringIKompetanseUtilTest {
                 tom = mai22
             )
 
-        val nåværendeKompetanse = forrigeKompetanse.copy().apply { behandlingId = nåværendeBehandling.id }
+        val nåværendeKompetanse = forrigeKompetanse.copy().apply { behandlingId = nåværendeBehandling.behandlingId }
 
         val perioderMedEndring = EndringIKompetanseUtil.lagEndringIKompetanseTidslinje(
             nåværendeKompetanser = listOf(nåværendeKompetanse),
@@ -58,7 +58,7 @@ class EndringIKompetanseUtilTest {
         val nåværendeBehandling = lagBehandling()
         val forrigeKompetanse =
             lagKompetanse(
-                behandlingId = forrigeBehandling.id,
+                behandlingId = forrigeBehandling.behandlingId,
                 barnAktører = setOf(barn1Aktør),
                 barnetsBostedsland = "NO",
                 søkersAktivitet = SøkersAktivitet.ARBEIDER,
@@ -70,7 +70,8 @@ class EndringIKompetanseUtilTest {
                 tom = mai22
             )
 
-        val nåværendeKompetanse = forrigeKompetanse.copy(søkersAktivitetsland = "DK").apply { behandlingId = nåværendeBehandling.id }
+        val nåværendeKompetanse = forrigeKompetanse.copy(søkersAktivitetsland = "DK")
+            .apply { behandlingId = nåværendeBehandling.behandlingId }
 
         val perioderMedEndring = EndringIKompetanseUtil.lagEndringIKompetanseTidslinje(
             nåværendeKompetanser = listOf(
@@ -99,7 +100,7 @@ class EndringIKompetanseUtilTest {
         val nåværendeBehandling = lagBehandling()
         val forrigeKompetanse =
             lagKompetanse(
-                behandlingId = forrigeBehandling.id,
+                behandlingId = forrigeBehandling.behandlingId,
                 barnAktører = setOf(barn1Aktør),
                 barnetsBostedsland = "NO",
                 søkersAktivitet = SøkersAktivitet.ARBEIDER,
@@ -112,7 +113,7 @@ class EndringIKompetanseUtilTest {
             )
 
         val nåværendeKompetanse = forrigeKompetanse.copy(fom = YearMonth.now().minusMonths(10))
-            .apply { behandlingId = nåværendeBehandling.id }
+            .apply { behandlingId = nåværendeBehandling.behandlingId }
 
         val perioderMedEndring = EndringIKompetanseUtil.lagEndringIKompetanseTidslinje(
             nåværendeKompetanser = listOf(
@@ -139,7 +140,7 @@ class EndringIKompetanseUtilTest {
         val nåværendeBehandling = lagBehandling()
         val forrigeKompetanse =
             lagKompetanse(
-                behandlingId = forrigeBehandling.id,
+                behandlingId = forrigeBehandling.behandlingId,
                 barnAktører = setOf(barn1Aktør),
                 barnetsBostedsland = null,
                 søkersAktivitet = null,
@@ -153,7 +154,7 @@ class EndringIKompetanseUtilTest {
 
         val nåværendeKompetanse =
             lagKompetanse(
-                behandlingId = nåværendeBehandling.id,
+                behandlingId = nåværendeBehandling.behandlingId,
                 barnAktører = setOf(barn1Aktør),
                 barnetsBostedsland = "NO",
                 søkersAktivitet = SøkersAktivitet.ARBEIDER,

@@ -37,14 +37,14 @@ class UtenlandskPeriodebeløpTestController(
         @PathVariable behandlingId: Long,
         @RequestBody restUtenlandskePeriodebeløp: Map<LocalDate, String>
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
-        val behandlingIdObjekt = BehandlingId(behandlingId)
+        val parsetBehandlingId = BehandlingId(behandlingId)
         val personopplysningGrunnlag =
-            personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingIdObjekt.id)!!
-        restUtenlandskePeriodebeløp.tilUtenlandskePeriodebeløp(behandlingIdObjekt, personopplysningGrunnlag).forEach {
-            utenlandskPeriodebeløpService.oppdaterUtenlandskPeriodebeløp(behandlingIdObjekt, it)
+            personopplysningGrunnlagRepository.findByBehandlingAndAktiv(parsetBehandlingId.id)!!
+        restUtenlandskePeriodebeløp.tilUtenlandskePeriodebeløp(parsetBehandlingId, personopplysningGrunnlag).forEach {
+            utenlandskPeriodebeløpService.oppdaterUtenlandskPeriodebeløp(parsetBehandlingId, it)
         }
 
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingIdObjekt.id)))
+        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = parsetBehandlingId)))
     }
 }
 

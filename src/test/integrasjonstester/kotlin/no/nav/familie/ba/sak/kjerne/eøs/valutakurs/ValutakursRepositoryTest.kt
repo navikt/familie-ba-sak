@@ -34,13 +34,13 @@ class ValutakursRepositoryTest(
         val valutakurs = valutakursRepository.save(
             lagValutakurs(
                 barnAktører = setOf(barn1, barn2)
-            ).also { it.behandlingId = behandling.id }
+            ).also { it.behandlingId = behandling.behandlingId }
         )
 
         val valutakurs2 = valutakursRepository.save(
             lagValutakurs(
                 barnAktører = setOf(barn1, barn2)
-            ).also { it.behandlingId = behandling.id }
+            ).also { it.behandlingId = behandling.behandlingId }
         )
 
         assertEquals(valutakurs.barnAktører, valutakurs2.barnAktører)
@@ -56,7 +56,7 @@ class ValutakursRepositoryTest(
 
         val valutakurs = valutakursRepository.save(
             lagValutakurs(
-                behandlingId = behandling.id,
+                behandlingId = behandling.behandlingId,
                 barnAktører = setOf(barn1),
                 fom = YearMonth.of(2020, 1),
                 tom = YearMonth.of(2021, 12),
@@ -67,7 +67,7 @@ class ValutakursRepositoryTest(
         )
 
         val hentedeValutakurser =
-            valutakursRepository.finnFraBehandlingId(behandlingId = behandling.id)
+            valutakursRepository.finnFraBehandlingId(behandlingId = behandling.behandlingId.id)
 
         assertEquals(1, hentedeValutakurser.size)
         assertEquals(valutakurs, hentedeValutakurser.first())

@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
@@ -48,7 +49,7 @@ internal class VilkårsvurderingTidslinjerTest {
                     id = 1000,
                     personResultat = it,
                     vilkårType = Vilkår.BOR_MED_SØKER,
-                    behandlingId = defaultBehandling.id,
+                    behandlingId = defaultBehandling.behandlingId,
                     periodeFom = null, // uendelig lenge siden
                     periodeTom = null, // uendelig lenge til
                     resultat = Resultat.IKKE_OPPFYLT
@@ -59,7 +60,11 @@ internal class VilkårsvurderingTidslinjerTest {
         assertDoesNotThrow {
             VilkårsvurderingTidslinjer(
                 vilkårsvurdering = vilkårsvurdering,
-                personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(defaultBehandling.id, søkerFnr, barnaFnr)
+                personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
+                    defaultBehandling.behandlingId,
+                    søkerFnr,
+                    barnaFnr
+                )
             )
         }
     }
@@ -92,7 +97,7 @@ internal class VilkårsvurderingTidslinjerTest {
                     id = 500,
                     personResultat = it,
                     vilkårType = Vilkår.BOSATT_I_RIKET,
-                    behandlingId = defaultBehandling.id,
+                    behandlingId = defaultBehandling.behandlingId,
                     periodeTom = null,
                     resultat = Resultat.OPPFYLT
                 )
@@ -102,7 +107,11 @@ internal class VilkårsvurderingTidslinjerTest {
         assertThrows<Tidslinje.Companion.TidslinjeFeilException> {
             VilkårsvurderingTidslinjer(
                 vilkårsvurdering = vilkårsvurdering,
-                personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(defaultBehandling.id, søkerFnr, barnaFnr)
+                personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
+                    defaultBehandling.behandlingId,
+                    søkerFnr,
+                    barnaFnr
+                )
             )
         }
     }
@@ -115,7 +124,7 @@ internal class VilkårsvurderingTidslinjerTest {
         periodeFom: LocalDate? = LocalDate.of(2009, 12, 24),
         periodeTom: LocalDate? = LocalDate.of(2010, 1, 31),
         begrunnelse: String = "",
-        behandlingId: Long = lagBehandling().id,
+        behandlingId: BehandlingId = lagBehandling().behandlingId,
         utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering> = emptyList()
     ) = VilkårResultat(
         id = id,

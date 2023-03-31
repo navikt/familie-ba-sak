@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp
 
 import no.nav.familie.ba.sak.common.YearMonthConverter
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingIdConverter
 import no.nav.familie.ba.sak.kjerne.eøs.differanseberegning.domene.Intervall
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEntitet
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -69,7 +71,8 @@ data class UtenlandskPeriodebeløp(
     override var id: Long = 0
 
     @Column(name = "fk_behandling_id", updatable = false, nullable = false)
-    override var behandlingId: Long = 0
+    @Convert(converter = BehandlingIdConverter::class)
+    override var behandlingId: BehandlingId = BehandlingId(0)
 
     override fun utenInnhold(): UtenlandskPeriodebeløp = copy(
         beløp = null,
