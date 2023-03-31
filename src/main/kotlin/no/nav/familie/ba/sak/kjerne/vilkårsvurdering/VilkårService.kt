@@ -162,7 +162,7 @@ class VilkårService(
 
         val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandling.behandlingId)
         if (personopplysningGrunnlag.søkerOgBarn
-                .single { it.aktør == personidentService.hentAktør(restNyttVilkår.personIdent) }.type != PersonType.SØKER
+            .single { it.aktør == personidentService.hentAktør(restNyttVilkår.personIdent) }.type != PersonType.SØKER
         ) {
             throw FunksjonellFeil(
                 melding = "${Vilkår.UTVIDET_BARNETRYGD.beskrivelse} kan ikke legges til for BARN",

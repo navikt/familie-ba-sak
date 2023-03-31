@@ -150,44 +150,44 @@ private fun hentAlleTyperHjemler(
     if (hjemlerSeparasjonsavtaleStorbritannia.isNotEmpty()) {
         alleHjemlerForBegrunnelser.add(
             "${
-                when (målform) {
-                    Målform.NB -> "Separasjonsavtalen mellom Storbritannia og Norge artikkel"
-                    Målform.NN -> "Separasjonsavtalen mellom Storbritannia og Noreg artikkel"
-                }
+            when (målform) {
+                Målform.NB -> "Separasjonsavtalen mellom Storbritannia og Norge artikkel"
+                Målform.NN -> "Separasjonsavtalen mellom Storbritannia og Noreg artikkel"
+            }
             } ${
-                Utils.slåSammen(
-                    hjemlerSeparasjonsavtaleStorbritannia
-                )
+            Utils.slåSammen(
+                hjemlerSeparasjonsavtaleStorbritannia
+            )
             }"
         )
     }
     if (ordinæreHjemler.isNotEmpty()) {
         alleHjemlerForBegrunnelser.add(
             "${
-                when (målform) {
-                    Målform.NB -> "barnetrygdloven"
-                    Målform.NN -> "barnetrygdlova"
-                }
+            when (målform) {
+                Målform.NB -> "barnetrygdloven"
+                Målform.NN -> "barnetrygdlova"
+            }
             } ${
-                hjemlerTilHjemmeltekst(
-                    hjemler = ordinæreHjemler,
-                    lovForHjemmel = "barnetrygdloven"
-                )
+            hjemlerTilHjemmeltekst(
+                hjemler = ordinæreHjemler,
+                lovForHjemmel = "barnetrygdloven"
+            )
             }"
         )
     }
     if (hjemlerFraFolketrygdloven.isNotEmpty()) {
         alleHjemlerForBegrunnelser.add(
             "${
-                when (målform) {
-                    Målform.NB -> "folketrygdloven"
-                    Målform.NN -> "folketrygdlova"
-                }
+            when (målform) {
+                Målform.NB -> "folketrygdloven"
+                Målform.NN -> "folketrygdlova"
+            }
             } ${
-                hjemlerTilHjemmeltekst(
-                    hjemler = hjemlerFraFolketrygdloven,
-                    lovForHjemmel = "folketrygdloven"
-                )
+            hjemlerTilHjemmeltekst(
+                hjemler = hjemlerFraFolketrygdloven,
+                lovForHjemmel = "folketrygdloven"
+            )
             }"
         )
     }
@@ -200,12 +200,12 @@ private fun hentAlleTyperHjemler(
     if (hjemlerFraForvaltningsloven.isNotEmpty()) {
         alleHjemlerForBegrunnelser.add(
             "${
-                when (målform) {
-                    Målform.NB -> "forvaltningsloven"
-                    Målform.NN -> "forvaltningslova"
-                }
+            when (målform) {
+                Målform.NB -> "forvaltningsloven"
+                Målform.NN -> "forvaltningslova"
+            }
             } ${
-                hjemlerTilHjemmeltekst(hjemler = hjemlerFraForvaltningsloven, lovForHjemmel = "forvaltningsloven")
+            hjemlerTilHjemmeltekst(hjemler = hjemlerFraForvaltningsloven, lovForHjemmel = "forvaltningsloven")
             }"
         )
     }

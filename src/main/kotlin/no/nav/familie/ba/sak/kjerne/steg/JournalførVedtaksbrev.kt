@@ -147,7 +147,7 @@ class JournalførVedtaksbrev(
         )
         logger.info(
             "Journalfører vedtaksbrev for behandling ${vedtak.behandling.behandlingId} med tittel ${
-                hentOverstyrtDokumenttittel(vedtak.behandling)
+            hentOverstyrtDokumenttittel(vedtak.behandling)
             }"
         )
         val vedlegg = listOf(

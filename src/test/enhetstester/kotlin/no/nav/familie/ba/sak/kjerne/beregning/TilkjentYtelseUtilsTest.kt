@@ -397,8 +397,8 @@ internal class TilkjentYtelseUtilsTest {
 
         vilkårsvurdering.personResultater =
             vilkårsvurdering.personResultater.filter { it.aktør != personResultat.aktør }.toSet() + setOf(
-                personResultat
-            )
+            personResultat
+        )
 
         return vilkårsvurdering
     }

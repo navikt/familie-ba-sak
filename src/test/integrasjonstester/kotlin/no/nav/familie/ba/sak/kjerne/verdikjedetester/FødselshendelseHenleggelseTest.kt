@@ -300,8 +300,8 @@ class FødselshendelseHenleggelseTest(
                 behandlingId = behandling!!.behandlingId,
                 oppgavetype = Oppgavetype.VurderLivshendelse,
                 beskrivelse = "Fødselshendelse: Barnet (fødselsdato: ${
-                    LocalDate.parse(scenario.barna.first().fødselsdato)
-                        .tilKortString()
+                LocalDate.parse(scenario.barna.first().fødselsdato)
+                    .tilKortString()
                 }) er ikke bosatt med mor."
             )
         }

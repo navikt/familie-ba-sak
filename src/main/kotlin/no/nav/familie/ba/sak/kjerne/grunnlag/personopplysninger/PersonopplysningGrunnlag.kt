@@ -57,7 +57,7 @@ data class PersonopplysningGrunnlag(
 
     val søker: Person
         get() = personer.singleOrNull { it.type == PersonType.SØKER }
-        // Vil returnere barnet på EM-saker, som da i prinsippet også er søkeren. Vil også returnere barnet på inst. saker
+            // Vil returnere barnet på EM-saker, som da i prinsippet også er søkeren. Vil også returnere barnet på inst. saker
             ?: personer.singleOrNull()?.takeIf { it.type == PersonType.BARN }
             ?: error("Persongrunnlag mangler søker eller det finnes flere personer i grunnlaget med type=SØKER")
 

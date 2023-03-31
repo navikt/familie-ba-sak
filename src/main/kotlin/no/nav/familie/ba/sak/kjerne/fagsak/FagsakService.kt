@@ -355,8 +355,8 @@ class FagsakService(
                     relasjon.relasjonsrolle == FORELDERBARNRELASJONROLLE.MEDMOR
             }.forEach { relasjon ->
                 if (assosierteFagsakDeltagere.find { fagsakDeltager ->
-                        fagsakDeltager.ident == relasjon.aktør.aktivFødselsnummer()
-                    } == null
+                    fagsakDeltager.ident == relasjon.aktør.aktivFødselsnummer()
+                } == null
                 ) {
                     val maskertForelder =
                         hentMaskertFagsakdeltakerVedManglendeTilgang(relasjon.aktør)

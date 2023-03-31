@@ -198,7 +198,8 @@ class BehandlingsresultatEndringUtilsTest {
             forrigeKompetanser = listOf(forrigeKompetanse),
             nåværendeKompetanser = listOf(
                 forrigeKompetanse.copy(søkersAktivitet = SøkersAktivitet.ARBEIDER_PÅ_NORSK_SOKKEL)
-                    .apply { behandlingId = nåværendeBehandling.behandlingId }),
+                    .apply { behandlingId = nåværendeBehandling.behandlingId }
+            ),
             nåværendePersonResultat = emptySet(),
             forrigePersonResultat = emptySet(),
             nåværendeEndretAndeler = emptyList(),
@@ -731,7 +732,8 @@ class BehandlingsresultatEndringUtilsTest {
 
         val endring = erEndringIKompetanse(
             nåværendeKompetanser = listOf(
-                forrigeKompetanse.copy().apply { behandlingId = nåværendeBehandling.behandlingId }),
+                forrigeKompetanse.copy().apply { behandlingId = nåværendeBehandling.behandlingId }
+            ),
             forrigeKompetanser = listOf(forrigeKompetanse)
         )
 

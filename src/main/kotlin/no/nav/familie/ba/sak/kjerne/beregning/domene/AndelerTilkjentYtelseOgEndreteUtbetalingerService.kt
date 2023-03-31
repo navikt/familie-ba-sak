@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional
 class AndelerTilkjentYtelseOgEndreteUtbetalingerService(
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
-    private val vilkårsvurderingRepository: VilkårsvurderingRepository,
+    private val vilkårsvurderingRepository: VilkårsvurderingRepository
 ) {
     @Transactional
     fun finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId: BehandlingId): List<AndelTilkjentYtelseMedEndreteUtbetalinger> {

@@ -240,9 +240,9 @@ class UtbetalingssikkerhetTest {
         assertTrue(
             feil.frontendFeilmelding?.contains(
                 "Du kan ikke godkjenne dette vedtaket fordi det vil betales ut mer enn 100% for barn født ${
-                    listOf(
-                        barn.fødselsdato
-                    ).tilBrevTekst()
+                listOf(
+                    barn.fødselsdato
+                ).tilBrevTekst()
                 }"
             )!!
         )

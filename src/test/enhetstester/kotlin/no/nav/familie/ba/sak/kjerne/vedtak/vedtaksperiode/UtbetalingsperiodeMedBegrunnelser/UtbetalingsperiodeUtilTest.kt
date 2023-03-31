@@ -244,11 +244,15 @@ class UtbetalingsperiodeUtilTest {
         )
 
         val resterendeVilkårForBarn = Vilkår.hentVilkårFor(PersonType.BARN, fagsakType = FagsakType.NORMAL).mapNotNull {
-            if (it == Vilkår.BOR_MED_SØKER) null else lagVilkårResultat(
-                vilkår = it,
-                fom = mars2020.minusMonths(1),
-                tom = juli2020
-            )
+            if (it == Vilkår.BOR_MED_SØKER) {
+                null
+            } else {
+                lagVilkårResultat(
+                    vilkår = it,
+                    fom = mars2020.minusMonths(1),
+                    tom = juli2020
+                )
+            }
         }
 
         val vilkårResultaterBarn1 = listOf(

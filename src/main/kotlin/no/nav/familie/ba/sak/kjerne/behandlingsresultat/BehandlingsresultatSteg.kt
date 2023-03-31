@@ -119,11 +119,11 @@ class BehandlingsresultatSteg(
         if (behandlingMedOppdatertBehandlingsresultat.skalRettFraBehandlingsresultatTilIverksetting(
                 endringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi == ENDRING_I_UTBETALING
             ) || beregningService.kanAutomatiskIverksetteSmåbarnstilleggEndring(
-                behandling = behandlingMedOppdatertBehandlingsresultat,
-                sistIverksatteBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(
-                    behandling = behandlingMedOppdatertBehandlingsresultat
+                    behandling = behandlingMedOppdatertBehandlingsresultat,
+                    sistIverksatteBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(
+                            behandling = behandlingMedOppdatertBehandlingsresultat
+                        )
                 )
-            )
         ) {
             behandlingService.oppdaterStatusPåBehandling(
                 behandlingMedOppdatertBehandlingsresultat.behandlingId,

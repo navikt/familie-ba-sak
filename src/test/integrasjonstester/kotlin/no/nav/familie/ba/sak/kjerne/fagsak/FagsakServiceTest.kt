@@ -588,7 +588,8 @@ class FagsakServiceTest(
             listOf(
                 person.aktør.aktivFødselsnummer(),
                 barn.aktør.aktivFødselsnummer()
-            ), lagre = true
+            ),
+            lagre = true
         )
 
         val fagsakHvorPersonErSøker = opprettFagsakForPersonMedStatus(randomFnr(), FagsakStatus.LØPENDE)
@@ -637,7 +638,8 @@ class FagsakServiceTest(
             listOf(
                 person.aktør.aktivFødselsnummer(),
                 barn.aktør.aktivFødselsnummer()
-            ), lagre = true
+            ),
+            lagre = true
         )
 
         val fagsakHvorPersonErSøker = opprettFagsakForPersonMedStatus(randomFnr(), FagsakStatus.LØPENDE)
@@ -722,7 +724,8 @@ class FagsakServiceTest(
             listOf(
                 person.aktør.aktivFødselsnummer(),
                 barn.aktør.aktivFødselsnummer()
-            ), lagre = true
+            ),
+            lagre = true
         )
 
         val fagsakHvorPersonErBarn = opprettFagsakForPersonMedStatus(randomFnr(), FagsakStatus.LØPENDE)
