@@ -20,7 +20,8 @@ import org.springframework.web.bind.annotation.RestController
 class ForvalterController(
     private val oppgaveRepository: OppgaveRepository,
     private val integrasjonClient: IntegrasjonClient,
-    private val restartAvSmåbarnstilleggService: RestartAvSmåbarnstilleggService
+    private val restartAvSmåbarnstilleggService: RestartAvSmåbarnstilleggService,
+    private val forvalterService: ForvalterService
 
 ) {
     private val logger: Logger = LoggerFactory.getLogger(ForvalterController::class.java)
@@ -66,5 +67,14 @@ class ForvalterController(
                 oppgaveRepository.saveAndFlush(it)
             }
         }
+    }
+
+    @PostMapping(path = ["/lag-og-send-utbetalingsoppdrag-til-økonomi"])
+    fun lagOgSendUtbetalingsoppdragTilØkonomi(@RequestBody behandlinger: Set<Long>): ResponseEntity<String> {
+        behandlinger.forEach {
+            forvalterService.lagOgSendUtbetalingsoppdragTilØkonomiForBehandling(it)
+        }
+
+        return ResponseEntity.ok("OK")
     }
 }
