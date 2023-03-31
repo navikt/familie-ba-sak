@@ -173,7 +173,7 @@ class AvstemmingService(
                         }
                         PerioderForBehandling(
                             behandlingId = kildeBehandlingId!!.id.toString(),
-                            aktivFødselsnummer = aktiveFødselsnummere[kildeBehandlingId!!.id]
+                            aktivFødselsnummer = aktiveFødselsnummere[kildeBehandlingId.id]
                                 ?: error("Finnes ikke et aktivt fødselsnummer for behandling $kildeBehandlingId"),
                             perioder = andeler
                                 .map {
@@ -181,7 +181,7 @@ class AvstemmingService(
                                         ?: error("Andel ${it.id} på iverksatt behandling på løpende fagsak mangler periodeOffset")
                                 }
                                 .toSet(),
-                            utebetalesTil = tssEksternIdForBehandlinger[kildeBehandlingId!!.id]
+                            utebetalesTil = tssEksternIdForBehandlinger[kildeBehandlingId.id]
                         )
                     }
             }.flatten()
