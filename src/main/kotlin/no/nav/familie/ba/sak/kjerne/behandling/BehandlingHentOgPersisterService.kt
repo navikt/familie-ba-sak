@@ -115,8 +115,8 @@ class BehandlingHentOgPersisterService(
             .flatMap { funksjon(it) }
     }
 
-    fun hentSisteIverksatteBehandlingerFraLøpendeFagsaker(): List<Long> =
-        behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker()
+    fun hentSisteIverksatteBehandlingerFraLøpendeFagsaker(): List<BehandlingId> =
+        behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker().map { BehandlingId(it) }
 
     fun hentBehandlinger(fagsakId: Long): List<Behandling> {
         return behandlingRepository.finnBehandlinger(fagsakId)
