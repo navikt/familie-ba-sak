@@ -314,7 +314,7 @@ class StegServiceTest(
         val behandling = kjørGjennomStegInkludertVurderTilbakekreving()
         oppgaveRepository.saveAll(
             listOf(
-                DbOppgave(behandling = behandling, type = Oppgavetype.GodkjenneVedtak, gsakId = "1"),
+                DbOppgave(behandling = behandling, type = Oppgavetype.Journalføring, gsakId = "1"),
                 DbOppgave(behandling = behandling, type = Oppgavetype.BehandleSak, gsakId = "2"),
                 DbOppgave(behandling = behandling, type = Oppgavetype.BehandleUnderkjentVedtak, gsakId = "3")
             )
@@ -329,7 +329,15 @@ class StegServiceTest(
         assertEquals(StegType.BEHANDLING_AVSLUTTET, henlagtBehandling.steg)
         assertTrue {
             oppgaveRepository.findByBehandlingAndIkkeFerdigstilt(henlagtBehandling)
-                .single().type == Oppgavetype.BehandleSak
+                .filter { it.type == Oppgavetype.BehandleSak }.isNotEmpty()
+        }
+        assertTrue {
+            oppgaveRepository.findByBehandlingAndIkkeFerdigstilt(henlagtBehandling)
+                .filter { it.type == Oppgavetype.BehandleUnderkjentVedtak }.isNotEmpty()
+        }
+        assertTrue {
+            oppgaveRepository.findByBehandlingAndIkkeFerdigstilt(henlagtBehandling)
+                .filter { it.type == Oppgavetype.Journalføring }.isEmpty()
         }
     }
 
