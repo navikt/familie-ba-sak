@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.beregning
+package no.nav.familie.ba.sak.kjerne.beregning.endringstidspunkt
 
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
