@@ -56,8 +56,9 @@ import no.nav.familie.ba.sak.util.sisteSmåbarnstilleggSatsTilTester
 import no.nav.familie.ba.sak.util.sisteUtvidetSatsTilTester
 import no.nav.familie.ba.sak.util.tilleggOrdinærSatsTilTester
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
-import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadResponse
+import no.nav.familie.kontrakter.felles.ef.Datakilde
+import no.nav.familie.kontrakter.felles.ef.EksternPeriode
+import no.nav.familie.kontrakter.felles.ef.EksternePerioderResponse
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import org.junit.jupiter.api.AfterEach
@@ -129,13 +130,13 @@ class BehandleSmåbarnstilleggTest(
     }
 
     private fun settOppefSakMockForDeFørste2Testene(søkersIdent: String) {
-        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns PerioderOvergangsstønadResponse(
+        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns EksternePerioderResponse(
             perioder = listOf(
-                PeriodeOvergangsstønad(
+                EksternPeriode(
                     personIdent = søkersIdent,
                     fomDato = periodeMedFullOvergangsstønadFom,
                     tomDato = barnFødselsdato.plusYears(18),
-                    datakilde = PeriodeOvergangsstønad.Datakilde.EF
+                    datakilde = Datakilde.EF
                 )
             )
         )
@@ -329,13 +330,13 @@ class BehandleSmåbarnstilleggTest(
         val søkersAktør = personidentService.hentAktør(scenario.søker.aktørId!!)
 
         val periodeOvergangsstønadTom = LocalDate.now().minusMonths(3)
-        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns PerioderOvergangsstønadResponse(
+        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns EksternePerioderResponse(
             perioder = listOf(
-                PeriodeOvergangsstønad(
+                EksternPeriode(
                     personIdent = søkersAktør.aktivFødselsnummer(),
                     fomDato = periodeMedFullOvergangsstønadFom,
                     tomDato = periodeOvergangsstønadTom,
-                    datakilde = PeriodeOvergangsstønad.Datakilde.EF
+                    datakilde = Datakilde.EF
                 )
             )
         )
@@ -385,13 +386,13 @@ class BehandleSmåbarnstilleggTest(
         val søkersAktør = personidentService.hentAktør(søkersIdent)
 
         val periodeOvergangsstønadTom = LocalDate.now()
-        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns PerioderOvergangsstønadResponse(
+        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns EksternePerioderResponse(
             perioder = listOf(
-                PeriodeOvergangsstønad(
+                EksternPeriode(
                     personIdent = søkersIdent,
                     fomDato = periodeMedFullOvergangsstønadFom,
                     tomDato = periodeOvergangsstønadTom,
-                    datakilde = PeriodeOvergangsstønad.Datakilde.EF
+                    datakilde = Datakilde.EF
                 )
             )
         )
@@ -444,19 +445,19 @@ class BehandleSmåbarnstilleggTest(
         val søkersIdent = scenario.søker.ident!!
         val søkersAktør = personidentService.hentAktør(søkersIdent)
 
-        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns PerioderOvergangsstønadResponse(
+        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns EksternePerioderResponse(
             perioder = listOf(
-                PeriodeOvergangsstønad(
+                EksternPeriode(
                     personIdent = søkersIdent,
                     fomDato = periodeMedFullOvergangsstønadFom,
                     tomDato = LocalDate.now(),
-                    datakilde = PeriodeOvergangsstønad.Datakilde.EF
+                    datakilde = Datakilde.EF
                 ),
-                PeriodeOvergangsstønad(
+                EksternPeriode(
                     personIdent = søkersIdent,
                     fomDato = LocalDate.now().nesteMåned().førsteDagIInneværendeMåned(),
                     tomDato = LocalDate.now().plusMonths(3),
-                    datakilde = PeriodeOvergangsstønad.Datakilde.EF
+                    datakilde = Datakilde.EF
                 )
             )
         )
@@ -502,13 +503,13 @@ class BehandleSmåbarnstilleggTest(
         val søkersAktør = personidentService.hentAktør(søkersIdent)
 
         every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns
-            PerioderOvergangsstønadResponse(
+            EksternePerioderResponse(
                 perioder = listOf(
-                    PeriodeOvergangsstønad(
+                    EksternPeriode(
                         personIdent = søkersIdent,
                         fomDato = fomDato,
                         tomDato = tomDato1,
-                        datakilde = PeriodeOvergangsstønad.Datakilde.EF
+                        datakilde = Datakilde.EF
                     )
                 )
             )
@@ -517,13 +518,13 @@ class BehandleSmåbarnstilleggTest(
             LocalDate.parse(testScenario.barna.single().fødselsdato)
         )
 
-        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns PerioderOvergangsstønadResponse(
+        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns EksternePerioderResponse(
             perioder = listOf(
-                PeriodeOvergangsstønad(
+                EksternPeriode(
                     personIdent = søkersIdent,
                     fomDato = fomDato,
                     tomDato = tomDato2,
-                    datakilde = PeriodeOvergangsstønad.Datakilde.EF
+                    datakilde = Datakilde.EF
                 )
             )
         )

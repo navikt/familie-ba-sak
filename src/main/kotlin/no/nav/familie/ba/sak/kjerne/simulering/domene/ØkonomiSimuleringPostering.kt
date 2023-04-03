@@ -95,5 +95,8 @@ data class ØkonomiSimuleringPostering(
             ")"
     }
 
-    val erManuellPostering get() = this.fagOmrådeKode == FagOmrådeKode.BARNETRYGD_INFOTRYGD_MANUELT
+    val erManuellPostering: Boolean
+        get() {
+            return this.fagOmrådeKode == FagOmrådeKode.BARNETRYGD_INFOTRYGD_MANUELT || this.fagOmrådeKode == FagOmrådeKode.BARNETRYGD_MANUELT
+        }
 }
