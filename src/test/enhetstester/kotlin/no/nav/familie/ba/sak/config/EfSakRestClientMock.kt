@@ -5,8 +5,9 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
 import no.nav.familie.ba.sak.integrasjoner.`ef-sak`.EfSakRestClient
-import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
-import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadResponse
+import no.nav.familie.kontrakter.felles.ef.Datakilde
+import no.nav.familie.kontrakter.felles.ef.EksternPeriode
+import no.nav.familie.kontrakter.felles.ef.EksternePerioderResponse
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Primary
@@ -31,12 +32,12 @@ class EfSakRestClientMock {
 
             val hentPerioderMedFullOvergangsstønadSlot = slot<String>()
             every { efSakRestClient.hentPerioderMedFullOvergangsstønad(capture(hentPerioderMedFullOvergangsstønadSlot)) } answers {
-                PerioderOvergangsstønadResponse(
+                EksternePerioderResponse(
                     perioder = listOf(
-                        PeriodeOvergangsstønad(
+                        EksternPeriode(
                             personIdent = hentPerioderMedFullOvergangsstønadSlot.captured,
                             fomDato = LocalDate.now().minusYears(2),
-                            datakilde = PeriodeOvergangsstønad.Datakilde.EF,
+                            datakilde = Datakilde.EF,
                             tomDato = LocalDate.now().minusMonths(3)
                         )
                     )

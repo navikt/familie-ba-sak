@@ -4,7 +4,8 @@ import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
-import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
+import no.nav.familie.kontrakter.felles.ef.Datakilde
+import no.nav.familie.kontrakter.felles.ef.EksternPeriode
 import java.time.LocalDate
 import javax.persistence.Column
 import javax.persistence.Entity
@@ -51,7 +52,7 @@ class PeriodeOvergangsstønadGrunnlag(
 
     @Enumerated(EnumType.STRING)
     @Column(name = "datakilde", nullable = false)
-    val datakilde: PeriodeOvergangsstønad.Datakilde
+    val datakilde: Datakilde
 ) : BaseEntitet() {
     fun tilInternPeriodeOvergangsstønad() = InternPeriodeOvergangsstønad(
         personIdent = this.aktør.aktivFødselsnummer(),
@@ -60,7 +61,7 @@ class PeriodeOvergangsstønadGrunnlag(
     )
 }
 
-fun PeriodeOvergangsstønad.tilPeriodeOvergangsstønadGrunnlag(behandlingId: Long, aktør: Aktør) =
+fun EksternPeriode.tilPeriodeOvergangsstønadGrunnlag(behandlingId: Long, aktør: Aktør) =
     PeriodeOvergangsstønadGrunnlag(
         behandlingId = behandlingId,
         aktør = aktør,
