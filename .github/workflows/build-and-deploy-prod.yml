@@ -92,6 +92,8 @@ jobs:
           CLUSTER: dev-gcp
           RESOURCE: .deploy/nais/app-preprod.yaml
           IMAGE: ${{ needs.bygg.outputs.image }}
+    outputs:
+      image: ${{ needs.bygg.outputs.image }}
   deploy-to-prod:
     name: Deploy til prod-gcp
     runs-on: ubuntu-latest
@@ -109,4 +111,4 @@ jobs:
           APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
           CLUSTER: prod-gcp
           RESOURCE: .deploy/nais/app-prod.yaml
-          IMAGE: ${{ needs.bygg.outputs.image }}
+          IMAGE: ${{ needs.deploy-preprod.outputs.image }}
