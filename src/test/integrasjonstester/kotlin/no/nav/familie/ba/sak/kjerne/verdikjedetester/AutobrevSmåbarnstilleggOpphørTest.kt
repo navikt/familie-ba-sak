@@ -21,8 +21,9 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
-import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadResponse
+import no.nav.familie.kontrakter.felles.ef.Datakilde
+import no.nav.familie.kontrakter.felles.ef.EksternPeriode
+import no.nav.familie.kontrakter.felles.ef.EksternePerioderResponse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -120,7 +121,7 @@ class AutobrevSmåbarnstilleggOpphørTest(
         barnFødselsdato: LocalDate
     ): Behandling {
         val behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
-        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns PerioderOvergangsstønadResponse(
+        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns EksternePerioderResponse(
             perioder = emptyList()
         )
 
@@ -170,13 +171,13 @@ class AutobrevSmåbarnstilleggOpphørTest(
         val behandlingType = BehandlingType.REVURDERING
         val behandlingÅrsak = BehandlingÅrsak.SMÅBARNSTILLEGG
 
-        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns PerioderOvergangsstønadResponse(
+        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns EksternePerioderResponse(
             perioder = listOf(
-                PeriodeOvergangsstønad(
+                EksternPeriode(
                     personIdent = personScenario.søker.ident!!,
                     fomDato = barnFødselsdato.plusYears(1),
                     tomDato = LocalDate.now().minusMonths(1).førsteDagIInneværendeMåned(),
-                    datakilde = PeriodeOvergangsstønad.Datakilde.EF
+                    datakilde = Datakilde.EF
                 )
             )
         )
@@ -213,13 +214,13 @@ class AutobrevSmåbarnstilleggOpphørTest(
         val behandlingType = BehandlingType.REVURDERING
         val behandlingÅrsak = BehandlingÅrsak.SMÅBARNSTILLEGG
 
-        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns PerioderOvergangsstønadResponse(
+        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns EksternePerioderResponse(
             perioder = listOf(
-                PeriodeOvergangsstønad(
+                EksternPeriode(
                     personIdent = personScenario.søker.ident!!,
                     fomDato = barnFødselsdato.plusYears(1),
                     tomDato = LocalDate.now().minusMonths(1).førsteDagIInneværendeMåned(),
-                    datakilde = PeriodeOvergangsstønad.Datakilde.EF
+                    datakilde = Datakilde.EF
                 )
             )
         )

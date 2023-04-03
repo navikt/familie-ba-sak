@@ -26,8 +26,9 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
-import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadResponse
+import no.nav.familie.kontrakter.felles.ef.Datakilde
+import no.nav.familie.kontrakter.felles.ef.EksternPeriode
+import no.nav.familie.kontrakter.felles.ef.EksternePerioderResponse
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -71,11 +72,11 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
             personScenario = personScenario,
             barnFødselsdato = barnFødselsdato,
             overgangsstønadPerioder = listOf(
-                PeriodeOvergangsstønad(
+                EksternPeriode(
                     personIdent = personScenario.søker.ident!!,
                     fomDato = osFom,
                     tomDato = osTom,
-                    datakilde = PeriodeOvergangsstønad.Datakilde.EF
+                    datakilde = Datakilde.EF
                 )
             )
         )
@@ -131,10 +132,10 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
         fagsak: RestMinimalFagsak,
         personScenario: RestScenario,
         barnFødselsdato: LocalDate,
-        overgangsstønadPerioder: List<PeriodeOvergangsstønad>
+        overgangsstønadPerioder: List<EksternPeriode>
     ): Behandling {
         val behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
-        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns PerioderOvergangsstønadResponse(
+        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns EksternePerioderResponse(
             perioder = overgangsstønadPerioder
         )
 
@@ -184,7 +185,7 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
         val behandlingType = BehandlingType.REVURDERING
         val behandlingÅrsak = BehandlingÅrsak.SMÅBARNSTILLEGG
 
-        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns PerioderOvergangsstønadResponse(
+        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns EksternePerioderResponse(
             perioder = emptyList()
         )
 
