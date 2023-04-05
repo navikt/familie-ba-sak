@@ -10,10 +10,8 @@ import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.log.mdc.MDCConstants
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.LoggerFactory
-import org.slf4j.MDC
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -125,14 +123,9 @@ class SatsendringController(
     @PostMapping(path = ["/saker-uten-sats"])
     fun finnSakerUtenSisteSats(): ResponseEntity<Pair<String, String>> {
         val callId = UUID.randomUUID().toString()
-        try {
-            MDC.put(MDCConstants.MDC_CALL_ID, callId)
-            val scope = CoroutineScope(SupervisorJob())
-            scope.launch {
-                satsendringService.finnLøpendeFagsakerUtenSisteSats()
-            }
-        } finally {
-            MDC.clear()
+        val scope = CoroutineScope(SupervisorJob())
+        scope.launch {
+            satsendringService.finnLøpendeFagsakerUtenSisteSats(callId)
         }
         return ResponseEntity.ok(Pair("callId", callId))
     }

@@ -5,7 +5,9 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringÅ
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
+import no.nav.familie.log.mdc.MDCConstants
 import org.slf4j.LoggerFactory
+import org.slf4j.MDC
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Slice
 import org.springframework.stereotype.Service
@@ -31,7 +33,8 @@ class SatsendringService(
                 .erOppdatertMedSisteSatser()
     }
 
-    fun finnLøpendeFagsakerUtenSisteSats(): List<Long> {
+    fun finnLøpendeFagsakerUtenSisteSats(callId: String) {
+        MDC.put(MDCConstants.MDC_CALL_ID, callId)
         val fagsakerUtenSisteSats = mutableListOf<Long>()
         var slice: Slice<Long> = fagsakRepository.finnLøpendeFagsaker(PageRequest.of(0, 10000))
         val løpendeFagsaker: List<Long> = slice.getContent()
@@ -58,7 +61,6 @@ class SatsendringService(
         fagsakerUtenSisteSats.chunked(1000) {
             logger.warn("$it")
         }
-        return fagsakerUtenSisteSats
     }
 
     fun finnSatskjøringerSomHarStoppetPgaÅpenBehandling(): List<SatskjøringÅpenBehandling> =
