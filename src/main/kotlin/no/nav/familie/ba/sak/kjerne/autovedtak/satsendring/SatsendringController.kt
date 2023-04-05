@@ -1,5 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.satsendring
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import no.nav.familie.ba.sak.common.RessursUtils.badRequest
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
@@ -7,8 +10,10 @@ import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.kontrakter.felles.Ressurs
+import no.nav.familie.log.mdc.MDCConstants
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.LoggerFactory
+import org.slf4j.MDC
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -19,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
+import java.util.UUID
 
 const val SATSENDRING = "Satsendring"
 
@@ -98,8 +104,7 @@ class SatsendringController(
         @RequestParam(value = "antall", required = true) antall: Int
     ) {
         val åpneBehandlinger = satsendringService.finnSatskjøringerSomHarStoppetPgaÅpenBehandling()
-        åpneBehandlinger.take(antall).forEach { it ->
-
+        åpneBehandlinger.take(antall).forEach {
             if (!satsendringService.erFagsakOppdatertMedSisteSatser(it.fagsakId)) {
                 if (opprettTask) {
                     opprettTaskService.opprettHenleggBehandlingTask(
@@ -115,5 +120,20 @@ class SatsendringController(
                 logger.info("Henlegger ikke behandling. ${it.fagsakId} har alt siste sats")
             }
         }
+    }
+
+    @PostMapping(path = ["/saker-uten-sats"])
+    fun finnSakerUtenSisteSats(): ResponseEntity<Pair<String, String>> {
+        val callId = UUID.randomUUID().toString()
+        try {
+            MDC.put(MDCConstants.MDC_CALL_ID, callId)
+            val scope = CoroutineScope(SupervisorJob())
+            scope.launch {
+                satsendringService.finnLøpendeFagsakerUtenSisteSats()
+            }
+        } finally {
+            MDC.clear()
+        }
+        return ResponseEntity.ok(Pair("callId", callId))
     }
 }

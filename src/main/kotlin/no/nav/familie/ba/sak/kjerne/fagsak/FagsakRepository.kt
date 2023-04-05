@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.ekstern.skatteetaten.UtvidetSkatt
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import org.springframework.data.domain.Slice
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Lock
 import org.springframework.data.jpa.repository.Modifying
@@ -44,6 +45,10 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
     @Lock(LockModeType.NONE)
     @Query(value = "SELECT f from Fagsak f WHERE f.status = 'LØPENDE'  AND f.arkivert = false")
     fun finnLøpendeFagsaker(): List<Fagsak>
+
+    @Lock(LockModeType.NONE)
+    @Query(value = "SELECT f.id from Fagsak f WHERE f.status = 'LØPENDE'  AND f.arkivert = false")
+    fun finnLøpendeFagsaker(page: Pageable): Slice<Long>
 
     @Query(
         value = """SELECT f.*
