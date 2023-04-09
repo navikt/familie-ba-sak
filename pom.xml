@@ -43,7 +43,7 @@
 
         <medeia-validator-jackson.version>1.1.1</medeia-validator-jackson.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
-        <postgresql.version>42.5.4</postgresql.version>
+        <postgresql.version>42.6.0</postgresql.version>
         <testcontainers.postgresql.version>1.17.6</testcontainers.postgresql.version>
         <unleash.version>7.1.0</unleash.version>
         <maven.model.version>3.9.1</maven.model.version>
@@ -432,8 +432,7 @@
                             <phase>verify</phase>
                             <configuration>
                                 <target name="ktlint">
-                                    <java taskname="ktlint" dir="${basedir}" fork="true" failonerror="true"
-                                          classpathref="maven.plugin.classpath" classname="com.pinterest.ktlint.Main">
+                                    <java taskname="ktlint" dir="${basedir}" fork="true" failonerror="true" classpathref="maven.plugin.classpath" classname="com.pinterest.ktlint.Main">
                                         <arg value="src/**/*.kt"/>
                                     </java>
                                 </target>
@@ -446,8 +445,7 @@
                             <id>ktlint-format</id>
                             <configuration>
                                 <target name="ktlint">
-                                    <java taskname="ktlint" dir="${basedir}" fork="true" failonerror="true"
-                                          classpathref="maven.plugin.classpath" classname="com.pinterest.ktlint.Main">
+                                    <java taskname="ktlint" dir="${basedir}" fork="true" failonerror="true" classpathref="maven.plugin.classpath" classname="com.pinterest.ktlint.Main">
                                         <arg value="-F"/>
                                         <arg value="src/**/*.kt"/>
                                         <!-- Trenger dette for å kjøre ktlint med java 17 -->
