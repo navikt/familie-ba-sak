@@ -48,7 +48,11 @@ class DistribuerDokumentPåJournalpostIdTask(
         }
 
     override fun doTask(task: Task) {
-        val taskData = objectMapper.readValue(task.payload, DistribuerDokumentDTO::class.java)
+        val taskData = if (task.payload.contains("personEllerInstitusjonIdent")) {
+            objectMapper.readValue(task.payload, DistribuerDokumentDTO::class.java)
+        } else {
+            fraGammelTilNyKontrakt(task)
+        }
         val brevmal = taskData.brevmal
         val erTaskEldreEnn6Mnd = task.opprettetTid.isBefore(LocalDateTime.now().minusMonths(6))
 
@@ -76,6 +80,19 @@ class DistribuerDokumentPåJournalpostIdTask(
         }
     }
 
+    @Deprecated("TODO kan slettes når alle tasker med gammel kontrakt er ferdig kjørt. Siste ble opprettet 2023-02-08 11:46:12.218, så senest 2023-08-09")
+    private fun fraGammelTilNyKontrakt(task: Task): DistribuerDokumentDTO {
+        val dto = objectMapper.readValue(task.payload, GammelDistribuerDokumentDTO::class.java)
+        return DistribuerDokumentDTO(
+            behandlingId = dto.behandlingId,
+            journalpostId = dto.journalpostId,
+            personEllerInstitusjonIdent = "",
+            brevmal = dto.brevmal,
+            erManueltSendt = false,
+            manuellAdresseInfo = null
+        )
+    }
+
     companion object {
         fun opprettTask(distribuerDokumentDTO: DistribuerDokumentDTO): Task {
             check(distribuerDokumentDTO.behandlingId == null)
@@ -98,3 +115,10 @@ class DistribuerDokumentPåJournalpostIdTask(
         val logger: Logger = LoggerFactory.getLogger(this::class.java)
     }
 }
+
+@Deprecated("Kan slettes når alle tasker med gammel kontrakt er ferdig kjørt. Siste ble opprettet 2023-02-08 11:46:12.218, så senest 2023-08-09")
+data class GammelDistribuerDokumentDTO(
+    val behandlingId: Long?,
+    val journalpostId: String,
+    val brevmal: Brevmal
+)
