@@ -17,7 +17,7 @@
 
     <properties>
         <java.version>17</java.version>
-        <kotlin.version>1.8.10</kotlin.version>
+        <kotlin.version>1.8.20</kotlin.version>
         <revision>1</revision>
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
@@ -25,15 +25,15 @@
         <prosessering.version>1.20230228091402_e6ac3c2</prosessering.version>
         <felles.version>1.20230116145510_2afcc20</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20221118130052_e2abd9f</eksterne-kontrakter-bisys.version>
-        <felles-kontrakter.version>2.0_20230313155154_f9438bd</felles-kontrakter.version>
+        <felles-kontrakter.version>2.0_20230331160555_be6ec7e</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20220216121145_5a268ac</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20230223155122_2e81c44</familie.kontrakter.stønadsstatistikk>
         <familie.kontrakter.skatteetaten>2.0_20210920094114_9c74239</familie.kontrakter.skatteetaten>
         <mockk.version>1.13.4</mockk.version>
         <token-validation-spring.version>2.1.9</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
-        <springdoc.version>1.6.15</springdoc.version>
-        <sentry.version>6.16.0</sentry.version>
+        <springdoc.version>1.7.0</springdoc.version>
+        <sentry.version>6.17.0</sentry.version>
         <kotlinx.version>1.6.4</kotlinx.version>
 
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
@@ -420,7 +420,7 @@
                 <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>0.8.8</version>
+                    <version>0.8.9</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>

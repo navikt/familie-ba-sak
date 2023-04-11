@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
-import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
+import no.nav.familie.kontrakter.felles.ef.EksternPeriode
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.LocalDate
@@ -17,7 +17,7 @@ data class InternPeriodeOvergangsstønad(
     val tomDato: LocalDate
 )
 
-fun PeriodeOvergangsstønad.tilInternPeriodeOvergangsstønad() = InternPeriodeOvergangsstønad(
+fun EksternPeriode.tilInternPeriodeOvergangsstønad() = InternPeriodeOvergangsstønad(
     personIdent = this.personIdent,
     fomDato = this.fomDato,
     tomDato = this.tomDato
@@ -61,7 +61,8 @@ fun List<InternPeriodeOvergangsstønad>.splitFramtidigePerioderFraForrigeBehandl
     val framtidigePerioder = this.minus(tidligerePerioder)
     val nyeOvergangsstønadTidslinje = InternPeriodeOvergangsstønadTidslinje(framtidigePerioder)
 
-    val gammelOvergangsstønadTidslinje = InternPeriodeOvergangsstønadTidslinje(overgangsstønadPerioderFraForrigeBehandling)
+    val gammelOvergangsstønadTidslinje =
+        InternPeriodeOvergangsstønadTidslinje(overgangsstønadPerioderFraForrigeBehandling)
 
     val oppsplittedeFramtigigePerioder = gammelOvergangsstønadTidslinje
         .kombinerMed(nyeOvergangsstønadTidslinje) { gammelOvergangsstønadPeriode, nyOvergangsstønadPeriode ->

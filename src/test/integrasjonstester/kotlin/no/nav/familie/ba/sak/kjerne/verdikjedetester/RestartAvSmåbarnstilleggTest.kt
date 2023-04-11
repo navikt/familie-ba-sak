@@ -34,8 +34,9 @@ import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScena
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
 import no.nav.familie.ba.sak.task.SatsendringTaskDto
 import no.nav.familie.kontrakter.felles.Ressurs
-import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
-import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadResponse
+import no.nav.familie.kontrakter.felles.ef.Datakilde
+import no.nav.familie.kontrakter.felles.ef.EksternPeriode
+import no.nav.familie.kontrakter.felles.ef.EksternePerioderResponse
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
@@ -81,17 +82,17 @@ class RestartAvSmåbarnstilleggTest(
             personScenario = personScenario1,
             barnFødselsdato = barnFødselsdato,
             mockPerioderMedOvergangsstønad = listOf(
-                PeriodeOvergangsstønad(
+                EksternPeriode(
                     personIdent = personScenario1.søker.ident!!,
                     fomDato = barnFødselsdato.plusYears(1),
                     tomDato = LocalDate.now().minusMonths(1).førsteDagIInneværendeMåned(),
-                    datakilde = PeriodeOvergangsstønad.Datakilde.EF
+                    datakilde = Datakilde.EF
                 ),
-                PeriodeOvergangsstønad(
+                EksternPeriode(
                     personIdent = personScenario1.søker.ident,
                     fomDato = restartSmåbarnstilleggMåned.førsteDagIInneværendeMåned(),
                     tomDato = LocalDate.now().plusYears(3).førsteDagIInneværendeMåned(),
-                    datakilde = PeriodeOvergangsstønad.Datakilde.EF
+                    datakilde = Datakilde.EF
                 )
             )
         )
@@ -114,17 +115,17 @@ class RestartAvSmåbarnstilleggTest(
             personScenario = personScenario2,
             barnFødselsdato = barnFødselsdato,
             mockPerioderMedOvergangsstønad = listOf(
-                PeriodeOvergangsstønad(
+                EksternPeriode(
                     personIdent = personScenario2.søker.ident!!,
                     fomDato = barnFødselsdato.plusYears(1),
                     tomDato = LocalDate.now().minusMonths(1).førsteDagIInneværendeMåned(),
-                    datakilde = PeriodeOvergangsstønad.Datakilde.EF
+                    datakilde = Datakilde.EF
                 ),
-                PeriodeOvergangsstønad(
+                EksternPeriode(
                     personIdent = personScenario2.søker.ident,
                     fomDato = restartSmåbarnstilleggMåned.førsteDagIInneværendeMåned(),
                     tomDato = LocalDate.now().plusYears(3).førsteDagIInneværendeMåned(),
-                    datakilde = PeriodeOvergangsstønad.Datakilde.EF
+                    datakilde = Datakilde.EF
                 )
             )
         )
@@ -143,17 +144,17 @@ class RestartAvSmåbarnstilleggTest(
             barnFødselsdato = barnFødselsdato,
             skalBegrunneSmåbarnstillegg = true,
             mockPerioderMedOvergangsstønad = listOf(
-                PeriodeOvergangsstønad(
+                EksternPeriode(
                     personIdent = personScenario3.søker.ident!!,
                     fomDato = barnFødselsdato.plusYears(1),
                     tomDato = LocalDate.now().minusMonths(1).førsteDagIInneværendeMåned(),
-                    datakilde = PeriodeOvergangsstønad.Datakilde.EF
+                    datakilde = Datakilde.EF
                 ),
-                PeriodeOvergangsstønad(
+                EksternPeriode(
                     personIdent = personScenario3.søker.ident,
                     fomDato = restartSmåbarnstilleggMåned.førsteDagIInneværendeMåned(),
                     tomDato = LocalDate.now().plusYears(3).førsteDagIInneværendeMåned(),
-                    datakilde = PeriodeOvergangsstønad.Datakilde.EF
+                    datakilde = Datakilde.EF
                 )
             )
         )
@@ -190,17 +191,17 @@ class RestartAvSmåbarnstilleggTest(
             personScenario = personScenario,
             barnFødselsdato = barnFødselsdato,
             mockPerioderMedOvergangsstønad = listOf(
-                PeriodeOvergangsstønad(
+                EksternPeriode(
                     personIdent = personScenario.søker.ident!!,
                     fomDato = barnFødselsdato.plusYears(1),
                     tomDato = LocalDate.now().minusMonths(4).førsteDagIInneværendeMåned(),
-                    datakilde = PeriodeOvergangsstønad.Datakilde.EF
+                    datakilde = Datakilde.EF
                 ),
-                PeriodeOvergangsstønad(
+                EksternPeriode(
                     personIdent = personScenario.søker.ident,
                     fomDato = satsendringDato.førsteDagIInneværendeMåned(),
                     tomDato = LocalDate.now().plusYears(3).førsteDagIInneværendeMåned(),
-                    datakilde = PeriodeOvergangsstønad.Datakilde.EF
+                    datakilde = Datakilde.EF
                 )
             )
         )
@@ -238,11 +239,11 @@ class RestartAvSmåbarnstilleggTest(
             personScenario = personScenario2,
             barnFødselsdato = barnFødselsdato,
             mockPerioderMedOvergangsstønad = listOf(
-                PeriodeOvergangsstønad(
+                EksternPeriode(
                     personIdent = personScenario2.søker.ident!!,
                     fomDato = barnFødselsdato.plusYears(1),
                     tomDato = LocalDate.now().plusYears(3).førsteDagIInneværendeMåned(),
-                    datakilde = PeriodeOvergangsstønad.Datakilde.EF
+                    datakilde = Datakilde.EF
                 )
             )
         )
@@ -280,7 +281,7 @@ class RestartAvSmåbarnstilleggTest(
         barnFødselsdato: LocalDate
     ): Behandling {
         val behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
-        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns PerioderOvergangsstønadResponse(
+        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns EksternePerioderResponse(
             perioder = emptyList()
         )
 
@@ -318,12 +319,12 @@ class RestartAvSmåbarnstilleggTest(
         fagsak: RestMinimalFagsak,
         personScenario: RestScenario,
         barnFødselsdato: LocalDate,
-        mockPerioderMedOvergangsstønad: List<PeriodeOvergangsstønad> = listOf(
-            PeriodeOvergangsstønad(
+        mockPerioderMedOvergangsstønad: List<EksternPeriode> = listOf(
+            EksternPeriode(
                 personIdent = personScenario.søker.ident!!,
                 fomDato = barnFødselsdato.plusYears(1),
                 tomDato = LocalDate.now().minusMonths(1).førsteDagIInneværendeMåned(),
-                datakilde = PeriodeOvergangsstønad.Datakilde.EF
+                datakilde = Datakilde.EF
             )
         ),
         skalBegrunneSmåbarnstillegg: Boolean = false
@@ -331,7 +332,7 @@ class RestartAvSmåbarnstilleggTest(
         val behandlingType = BehandlingType.REVURDERING
         val behandlingÅrsak = BehandlingÅrsak.SMÅBARNSTILLEGG
 
-        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns PerioderOvergangsstønadResponse(
+        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns EksternePerioderResponse(
             perioder = mockPerioderMedOvergangsstønad
         )
 
@@ -398,13 +399,13 @@ class RestartAvSmåbarnstilleggTest(
         val behandlingType = BehandlingType.REVURDERING
         val behandlingÅrsak = BehandlingÅrsak.SMÅBARNSTILLEGG
 
-        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns PerioderOvergangsstønadResponse(
+        every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns EksternePerioderResponse(
             perioder = listOf(
-                PeriodeOvergangsstønad(
+                EksternPeriode(
                     personIdent = personScenario.søker.ident!!,
                     fomDato = barnFødselsdato.plusYears(1),
                     tomDato = LocalDate.now().minusMonths(1).førsteDagIInneværendeMåned(),
-                    datakilde = PeriodeOvergangsstønad.Datakilde.EF
+                    datakilde = Datakilde.EF
                 )
             )
         )
