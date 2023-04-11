@@ -111,9 +111,8 @@ spec:
   resources:
     limits:
       memory: 4096Mi
-      cpu: "4"
     requests:
-      memory: 512Mi
+      memory: 4096Mi
       cpu: 500m
   ingresses:
     - https://familie-ba-sak.intern.nav.no
