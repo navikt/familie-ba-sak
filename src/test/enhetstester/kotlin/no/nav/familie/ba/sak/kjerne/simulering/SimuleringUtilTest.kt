@@ -384,6 +384,54 @@ class SimuleringUtilTest {
     }
 
     @Test
+    fun `ytelse med manuellt trekk av valutajustering trukket på fagområdekode MBA`() {
+        val YtelsefraBA = listOf(
+            mockVedtakSimuleringPostering(
+                beløp = 305,
+                posteringType = PosteringType.YTELSE
+            ),
+            mockVedtakSimuleringPostering(
+                beløp = -198,
+                posteringType = PosteringType.JUSTERING,
+                fagOmrådeKode = FagOmrådeKode.BARNETRYGD
+            ),
+            mockVedtakSimuleringPostering(
+                beløp = 305,
+                posteringType = PosteringType.JUSTERING,
+                fagOmrådeKode = FagOmrådeKode.BARNETRYGD_MANUELT
+            ),
+            mockVedtakSimuleringPostering(
+                beløp = -305,
+                posteringType = PosteringType.YTELSE,
+                fagOmrådeKode = FagOmrådeKode.BARNETRYGD_INFOTRYGD
+            ),
+            mockVedtakSimuleringPostering(
+                beløp = -107,
+                posteringType = PosteringType.JUSTERING,
+                fagOmrådeKode = FagOmrådeKode.BARNETRYGD_MANUELT
+            ),
+            mockVedtakSimuleringPostering(
+                beløp = 165,
+                posteringType = PosteringType.YTELSE,
+                fagOmrådeKode = FagOmrådeKode.BARNETRYGD_MANUELT
+            )
+        )
+
+        val økonomiSimuleringMottakere =
+            listOf(mockØkonomiSimuleringMottaker(økonomiSimuleringPostering = YtelsefraBA))
+        val simuleringsperioder = vedtakSimuleringMottakereTilSimuleringPerioder(økonomiSimuleringMottakere, true)
+        val oppsummering = vedtakSimuleringMottakereTilRestSimulering(økonomiSimuleringMottakere, true)
+
+        assertThat(simuleringsperioder.size).isEqualTo(1)
+        assertThat(simuleringsperioder[0].nyttBeløp).isEqualTo(305.toBigDecimal())
+        assertThat(simuleringsperioder[0].manuellPostering).isEqualTo((-165).toBigDecimal())
+        assertThat(simuleringsperioder[0].tidligereUtbetalt).isEqualTo(140.toBigDecimal())
+        assertThat(simuleringsperioder[0].resultat).isEqualTo(165.toBigDecimal())
+        assertThat(simuleringsperioder[0].feilutbetaling).isEqualTo(0.toBigDecimal())
+        assertThat(oppsummering.etterbetaling).isEqualTo(165.toBigDecimal())
+    }
+
+    @Test
     fun `ytelse med manuellt trekk av valutajustering alt er trukket`() {
         val YtelsefraBA = listOf(
             mockVedtakSimuleringPostering(

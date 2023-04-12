@@ -1,5 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.satsendring
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import no.nav.familie.ba.sak.common.RessursUtils.badRequest
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
@@ -19,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
+import java.util.UUID
 
 const val SATSENDRING = "Satsendring"
 
@@ -98,8 +102,7 @@ class SatsendringController(
         @RequestParam(value = "antall", required = true) antall: Int
     ) {
         val åpneBehandlinger = satsendringService.finnSatskjøringerSomHarStoppetPgaÅpenBehandling()
-        åpneBehandlinger.take(antall).forEach { it ->
-
+        åpneBehandlinger.take(antall).forEach {
             if (!satsendringService.erFagsakOppdatertMedSisteSatser(it.fagsakId)) {
                 if (opprettTask) {
                     opprettTaskService.opprettHenleggBehandlingTask(
@@ -115,5 +118,15 @@ class SatsendringController(
                 logger.info("Henlegger ikke behandling. ${it.fagsakId} har alt siste sats")
             }
         }
+    }
+
+    @PostMapping(path = ["/saker-uten-sats"])
+    fun finnSakerUtenSisteSats(): ResponseEntity<Pair<String, String>> {
+        val callId = UUID.randomUUID().toString()
+        val scope = CoroutineScope(SupervisorJob())
+        scope.launch {
+            satsendringService.finnLøpendeFagsakerUtenSisteSats(callId)
+        }
+        return ResponseEntity.ok(Pair("callId", callId))
     }
 }

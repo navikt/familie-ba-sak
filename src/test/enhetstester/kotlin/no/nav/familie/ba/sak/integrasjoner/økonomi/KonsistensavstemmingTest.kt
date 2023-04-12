@@ -191,11 +191,11 @@ class KonsistensavstemmingTest {
         every { dataChunkRepository.findByTransaksjonsIdAndChunkNr(transaksjonsId, 2) } returns datachunks[1]
         every { dataChunkRepository.findByTransaksjonsIdAndChunkNr(transaksjonsId, 3) } returns null
 
-        val page = mockk<Page<BigInteger>>()
+        val page = mockk<Page<Long>>()
         val pageable = Pageable.ofSize(KonsistensavstemMotOppdragStartTask.ANTALL_BEHANDLINGER)
         every { behandlingHentOgPersisterService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(pageable) } returns page
         every { page.totalPages } returns 1
-        every { page.content } returns (1..1450).toList().map { it.toBigInteger() }
+        every { page.content } returns (1..1450).toList().map { it.toLong() }
         every { page.nextPageable() } returns pageable
 
         konistensavstemmingStartTask.doTask(
@@ -458,8 +458,8 @@ class KonsistensavstemmingTest {
     }
 
     private fun lagMockForStartTaskHappCase(transaksjonsId: UUID): CapturingSlot<LocalDateTime> {
-        val behandlingId = BigInteger.ONE
-        val page = mockk<Page<BigInteger>>()
+        val behandlingId = 1L
+        val page = mockk<Page<Long>>()
         val pageable = Pageable.ofSize(KonsistensavstemMotOppdragStartTask.ANTALL_BEHANDLINGER)
         every { behandlingHentOgPersisterService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(pageable) } returns page
         every { page.totalPages } returns 1

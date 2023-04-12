@@ -33,6 +33,7 @@ class ForvalterController(
     private val oppgaveRepository: OppgaveRepository,
     private val integrasjonClient: IntegrasjonClient,
     private val restartAvSmåbarnstilleggService: RestartAvSmåbarnstilleggService,
+    private val forvalterService: ForvalterService,
     private val oppgaveService: OppgaveService
 
 ) {
@@ -157,6 +158,22 @@ class ForvalterController(
                 oppgaveRepository.saveAndFlush(it)
             }
         }
+    }
+
+    @PostMapping(path = ["/lag-og-send-utbetalingsoppdrag-til-økonomi"])
+    fun lagOgSendUtbetalingsoppdragTilØkonomi(@RequestBody behandlinger: Set<Long>): ResponseEntity<String> {
+        behandlinger.forEach {
+            try {
+                forvalterService.lagOgSendUtbetalingsoppdragTilØkonomiForBehandling(it)
+            } catch (exception: Exception) {
+                secureLogger.info(
+                    "Kunne ikke sende behandling med id $it til økonomi" +
+                        "\n$exception"
+                )
+            }
+        }
+
+        return ResponseEntity.ok("OK")
     }
 }
 
