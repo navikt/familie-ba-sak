@@ -12,15 +12,15 @@ import org.springframework.transaction.annotation.Transactional
 class ForvalterService(
     private val økonomiService: ØkonomiService,
     private val vedtakService: VedtakService,
-    private val beregningService: BeregningService,
+    private val beregningService: BeregningService
 ) {
 
     @Transactional
-    fun lagOgSendUtbetalingsoppdragTilØkonomiForBehandling(behandlingId: Long){
+    fun lagOgSendUtbetalingsoppdragTilØkonomiForBehandling(behandlingId: Long) {
         val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId)
         val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId)
 
-        if (tilkjentYtelse.utbetalingsoppdrag != null){
+        if (tilkjentYtelse.utbetalingsoppdrag != null) {
             throw Feil("Behandling $behandlingId har allerede opprettet utbetalingsoppdrag")
         }
 

@@ -165,9 +165,11 @@ class ForvalterController(
         behandlinger.forEach {
             try {
                 forvalterService.lagOgSendUtbetalingsoppdragTilØkonomiForBehandling(it)
-            } catch (exception: Exception){
-                secureLogger.info("Kunne ikke sende behandling med id $it til økonomi" +
-                    "\n$exception")
+            } catch (exception: Exception) {
+                secureLogger.info(
+                    "Kunne ikke sende behandling med id $it til økonomi" +
+                        "\n$exception"
+                )
             }
         }
 
