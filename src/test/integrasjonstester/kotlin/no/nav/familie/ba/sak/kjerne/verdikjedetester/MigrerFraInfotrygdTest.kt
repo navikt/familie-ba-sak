@@ -19,8 +19,9 @@ import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScena
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
-import no.nav.familie.kontrakter.felles.ef.PeriodeOvergangsstønad
-import no.nav.familie.kontrakter.felles.ef.PerioderOvergangsstønadResponse
+import no.nav.familie.kontrakter.felles.ef.Datakilde
+import no.nav.familie.kontrakter.felles.ef.EksternPeriode
+import no.nav.familie.kontrakter.felles.ef.EksternePerioderResponse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
@@ -451,12 +452,12 @@ class MigrerFraInfotrygdTest(
         EfSakRestClientMock.clearEfSakRestMocks(efSakRestClient)
         val hentPerioderMedFullOvergangsstønadSlot = slot<String>()
         every { efSakRestClient.hentPerioderMedFullOvergangsstønad(capture(hentPerioderMedFullOvergangsstønadSlot)) } answers {
-            PerioderOvergangsstønadResponse(
+            EksternePerioderResponse(
                 perioder = listOf(
-                    PeriodeOvergangsstønad(
+                    EksternPeriode(
                         personIdent = hentPerioderMedFullOvergangsstønadSlot.captured,
                         fomDato = LocalDate.now().minusYears(2),
-                        datakilde = PeriodeOvergangsstønad.Datakilde.EF,
+                        datakilde = Datakilde.EF,
                         tomDato = LocalDate.now().plusMonths(3)
                     )
                 )

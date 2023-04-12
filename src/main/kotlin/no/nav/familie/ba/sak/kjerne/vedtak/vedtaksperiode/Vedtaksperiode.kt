@@ -82,7 +82,10 @@ enum class Vedtaksperiodetype(val tillatteBegrunnelsestyper: List<VedtakBegrunne
             VedtakBegrunnelseType.INSTITUSJON_FORTSATT_INNVILGET,
             VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
         )
-    )
+    ),
+
+    @Deprecated("Legacy. Kan ikke fjernes uten at det ryddes opp i Vedtaksperioder-tabellen")
+    ENDRET_UTBETALING(emptyList())
 }
 
 fun Vedtaksperiode.tilVedtaksperiodeMedBegrunnelse(

@@ -1,15 +1,15 @@
 package no.nav.familie.ba.sak.config
 
+import jakarta.persistence.EntityManager
+import jakarta.persistence.Table
+import jakarta.persistence.metamodel.Metamodel
+import jakarta.transaction.Transactional
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Profile
 import org.springframework.core.env.Environment
 import org.springframework.data.relational.core.mapping.RelationalMappingContext
 import org.springframework.data.relational.core.sql.IdentifierProcessing
 import org.springframework.stereotype.Service
-import javax.persistence.EntityManager
-import javax.persistence.Table
-import javax.persistence.metamodel.Metamodel
-import javax.transaction.Transactional
 import kotlin.reflect.full.findAnnotation
 import org.springframework.data.relational.core.mapping.Table as JdbcTable
 

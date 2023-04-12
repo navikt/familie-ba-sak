@@ -1,18 +1,18 @@
 package no.nav.familie.ba.sak.kjerne.personident
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.EntityListeners
+import jakarta.persistence.Id
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.Table
+import jakarta.validation.constraints.Pattern
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDateTime
 import java.util.Objects
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.EntityListeners
-import javax.persistence.Id
-import javax.persistence.JoinColumn
-import javax.persistence.ManyToOne
-import javax.persistence.Table
-import javax.validation.constraints.Pattern
 
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "Personident")

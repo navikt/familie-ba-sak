@@ -1,6 +1,18 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.domene
 
 import com.fasterxml.jackson.annotation.JsonIgnore
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.EntityListeners
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.SequenceGenerator
+import jakarta.persistence.Table
 import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
@@ -29,18 +41,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilBrevTekst
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.RestVedtaksbegrunnelse
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.EntityListeners
-import javax.persistence.EnumType
-import javax.persistence.Enumerated
-import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType
-import javax.persistence.Id
-import javax.persistence.JoinColumn
-import javax.persistence.ManyToOne
-import javax.persistence.SequenceGenerator
-import javax.persistence.Table
 
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "Vedtaksbegrunnelse")
@@ -258,6 +258,7 @@ private fun finnUtOmSøkerFårUtbetaltEllerHarRettPåUtvidet(minimerteUtbetaling
         utvidetUtbetalingsdetaljerPåSøker.any { it.utbetaltPerMnd > 0 } -> SøkersRettTilUtvidet.SØKER_FÅR_UTVIDET
         utvidetUtbetalingsdetaljerPåSøker.isNotEmpty() &&
             utvidetUtbetalingsdetaljerPåSøker.all { it.utbetaltPerMnd == 0 } -> SøkersRettTilUtvidet.SØKER_HAR_RETT_MEN_FÅR_IKKE
+
         else -> SøkersRettTilUtvidet.SØKER_HAR_IKKE_RETT
     }
 }
@@ -284,9 +285,11 @@ fun IVedtakBegrunnelse.hentRelevanteEndringsperioderForBegrunnelse(
                 ?.erDagenFør(vedtaksperiode.fom?.førsteDagIInneværendeMåned()) == true
         }
     }
+
     VedtakBegrunnelseType.ENDRET_UTBETALING -> {
         minimerteRestEndredeAndeler.filter { it.erOverlappendeMed(vedtaksperiode.tilNullableMånedPeriode()) }
     }
+
     else -> emptyList()
 }
 
