@@ -163,7 +163,12 @@ class ForvalterController(
     @PostMapping(path = ["/lag-og-send-utbetalingsoppdrag-til-økonomi"])
     fun lagOgSendUtbetalingsoppdragTilØkonomi(@RequestBody behandlinger: Set<Long>): ResponseEntity<String> {
         behandlinger.forEach {
-            forvalterService.lagOgSendUtbetalingsoppdragTilØkonomiForBehandling(it)
+            try {
+                forvalterService.lagOgSendUtbetalingsoppdragTilØkonomiForBehandling(it)
+            } catch (exception: Exception){
+                secureLogger.info("Kunne ikke sende behandling med id $it til økonomi" +
+                    "\n$exception")
+            }
         }
 
         return ResponseEntity.ok("OK")
