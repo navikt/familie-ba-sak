@@ -15,12 +15,12 @@ import java.time.LocalDate
 class EndringstidspunktController(
     val endringstidspunktService: EndringstidspunktService
 ) {
-    @GetMapping("/behandlinger/{behanldingId}/endringstidspunkt")
+    @GetMapping("/behandlinger/{behandlingId}/endringstidspunkt")
     fun hentEndringstidspunkt(
-        @PathVariable behanldingId: Long
+        @PathVariable behandlingId: Long
     ): ResponseEntity<Ressurs<LocalDate>> = ResponseEntity.ok(
         Ressurs.success(
-            endringstidspunktService.finnEndringstidspunktForBehandling(behanldingId)
+            endringstidspunktService.finnEndringstidspunktForBehandling(behandlingId)
         )
     )
 }
