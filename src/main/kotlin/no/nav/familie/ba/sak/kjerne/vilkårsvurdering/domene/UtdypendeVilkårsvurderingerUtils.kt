@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene
 
-import jakarta.persistence.AttributeConverter
-import jakarta.persistence.Converter
 import no.nav.familie.ba.sak.common.Utils
+import javax.persistence.AttributeConverter
+import javax.persistence.Converter
 
 enum class UtdypendeVilkårsvurdering {
     VURDERING_ANNET_GRUNNLAG,

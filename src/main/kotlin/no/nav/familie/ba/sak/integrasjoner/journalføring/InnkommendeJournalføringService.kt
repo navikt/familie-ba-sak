@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.integrasjoner.journalføring
 
-import jakarta.transaction.Transactional
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonInfo
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFerdigstillOppgaveKnyttJournalpost
@@ -39,6 +38,7 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
+import javax.transaction.Transactional
 
 @Service
 class InnkommendeJournalføringService(
@@ -240,7 +240,6 @@ class InnkommendeJournalføringService(
                         frontendFeilmelding = "Oppslag på fagsak feilet med behandlingene som ble sendt inn."
                     )
             }
-
             false -> null
         }
 

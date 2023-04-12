@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.simulering
 
 import io.micrometer.core.instrument.Metrics
-import jakarta.transaction.Transactional
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.common.secureLogger
@@ -31,6 +30,7 @@ import no.nav.familie.kontrakter.felles.simulering.SimuleringMottaker
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 import java.time.LocalDate
+import javax.transaction.Transactional
 
 @Service
 class SimuleringService(

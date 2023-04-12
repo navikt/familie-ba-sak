@@ -1,7 +1,5 @@
 package no.nav.familie.ba.sak.common.http.interceptor
 
-import jakarta.servlet.http.HttpServletRequest
-import jakarta.servlet.http.HttpServletResponse
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -9,6 +7,8 @@ import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Import
 import org.springframework.stereotype.Component
 import org.springframework.web.servlet.HandlerInterceptor
+import javax.servlet.http.HttpServletRequest
+import javax.servlet.http.HttpServletResponse
 
 @Component
 @Import(RolleConfig::class)

@@ -11,6 +11,7 @@ import no.nav.familie.prosessering.domene.Task
 import org.junit.jupiter.api.Test
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
+import java.math.BigInteger
 import java.time.LocalDateTime
 import java.util.UUID
 
@@ -101,12 +102,12 @@ internal class KonsistensavstemMotOppdragStartTaskTest {
     }
 
     private fun mockTreSiderMedSisteBehandlinger() {
-        val page = mockk<Page<Long>>()
+        val page = mockk<Page<BigInteger>>()
         val pageable = mockk<Pageable>()
         val nrOfPages = 3
         every { page.totalPages } returns nrOfPages
         every { page.nextPageable() } returns pageable
-        every { page.content } returns listOf(42L)
+        every { page.content } returns listOf(BigInteger.valueOf(42))
         every { avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(any()) } returns page
     }
 

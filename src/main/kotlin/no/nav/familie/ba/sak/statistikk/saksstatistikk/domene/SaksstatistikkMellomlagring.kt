@@ -1,20 +1,19 @@
 package no.nav.familie.ba.sak.statistikk.saksstatistikk.domene
 
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.EnumType
-import jakarta.persistence.Enumerated
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.SequenceGenerator
-import jakarta.persistence.Table
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.sakstatistikkObjectMapper
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.BehandlingDVH
 import no.nav.familie.eksterne.kontrakter.saksstatistikk.SakDVH
-import org.hibernate.annotations.JdbcTypeCode
-import org.hibernate.type.SqlTypes
+import org.hibernate.annotations.Type
 import java.time.LocalDateTime
+import javax.persistence.Column
+import javax.persistence.Entity
+import javax.persistence.EnumType
+import javax.persistence.Enumerated
+import javax.persistence.GeneratedValue
+import javax.persistence.GenerationType
+import javax.persistence.Id
+import javax.persistence.SequenceGenerator
+import javax.persistence.Table
 
 @Entity(name = "SaksstatistikkMellomlagring")
 @Table(name = "SAKSSTATISTIKK_MELLOMLAGRING")
@@ -44,7 +43,7 @@ data class SaksstatistikkMellomlagring(
     @Column(name = "kontrakt_versjon")
     val kontraktVersjon: String,
 
-    @JdbcTypeCode(SqlTypes.JSON)
+    @Type(type = "org.hibernate.type.TextType")
     @Column(name = "json")
     val json: String,
 

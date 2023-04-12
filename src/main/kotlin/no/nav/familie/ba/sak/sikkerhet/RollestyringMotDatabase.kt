@@ -1,13 +1,13 @@
 package no.nav.familie.ba.sak.sikkerhet
 
-import jakarta.persistence.PrePersist
-import jakarta.persistence.PreRemove
-import jakarta.persistence.PreUpdate
 import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+import javax.persistence.PrePersist
+import javax.persistence.PreRemove
+import javax.persistence.PreUpdate
 
 @Component
 class RollestyringMotDatabase {

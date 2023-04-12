@@ -25,7 +25,6 @@ import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.Ressurs
 import org.springframework.http.HttpHeaders
 import org.springframework.web.client.RestOperations
-import org.springframework.web.util.UriUtils.encodePath
 import java.net.URI
 import java.time.LocalDate
 
@@ -73,7 +72,7 @@ class FamilieBaSakKlient(
         restJournalføring: RestJournalføring
     ): Ressurs<String> {
         val uri =
-            URI.create(encodePath("$baSakUrl/api/journalpost/$journalpostId/journalfør/$oppgaveId") + "?journalfoerendeEnhet=$journalførendeEnhet")
+            URI.create("$baSakUrl/api/journalpost/$journalpostId/journalfør/$oppgaveId?journalfoerendeEnhet=$journalførendeEnhet")
         return postForEntity(
             uri,
             restJournalføring,
@@ -128,8 +127,7 @@ class FamilieBaSakKlient(
         behandlingId: Long,
         restRegistrerSøknad: RestRegistrerSøknad
     ): Ressurs<RestUtvidetBehandling> {
-        val uri =
-            URI.create(encodePath("$baSakUrl/api/behandlinger/$behandlingId/steg/registrer-søknad", "UTF-8"))
+        val uri = URI.create("$baSakUrl/api/behandlinger/$behandlingId/steg/registrer-søknad")
 
         return postForEntity(uri, restRegistrerSøknad, headers)
     }
@@ -139,13 +137,13 @@ class FamilieBaSakKlient(
         vilkårId: Long,
         restPersonResultat: RestPersonResultat
     ): Ressurs<RestUtvidetBehandling> {
-        val uri = URI.create(encodePath("$baSakUrl/api/vilkaarsvurdering/$behandlingId/$vilkårId"))
+        val uri = URI.create("$baSakUrl/api/vilkaarsvurdering/$behandlingId/$vilkårId")
 
         return putForEntity(uri, restPersonResultat, headers)
     }
 
     fun validerVilkårsvurdering(behandlingId: Long): Ressurs<RestUtvidetBehandling> {
-        val uri = URI.create(encodePath("$baSakUrl/api/behandlinger/$behandlingId/steg/vilkårsvurdering"))
+        val uri = URI.create("$baSakUrl/api/behandlinger/$behandlingId/steg/vilkårsvurdering")
         return postForEntity(uri, "", headers)
     }
 
@@ -210,9 +208,5 @@ class FamilieBaSakKlient(
     fun forhaandsvisHenleggelseBrev(behandlingId: Long, manueltBrevRequest: ManueltBrevRequest): Ressurs<ByteArray> {
         val uri = URI.create("$baSakUrl/api/dokument/forhaandsvis-brev/$behandlingId")
         return postForEntity(uri, manueltBrevRequest, headers)
-    }
-
-    fun encodePath(path: String): String {
-        return encodePath(path, "UTF-8")
     }
 }

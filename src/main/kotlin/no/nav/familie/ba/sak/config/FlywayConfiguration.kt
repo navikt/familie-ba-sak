@@ -3,10 +3,12 @@ package no.nav.familie.ba.sak.config
 import org.flywaydb.core.api.configuration.FluentConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.boot.autoconfigure.flyway.FlywayConfigurationCustomizer
+import org.springframework.boot.context.properties.ConstructorBinding
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Profile
 
 @Profile("!dev")
+@ConstructorBinding
 @ConditionalOnProperty("spring.flyway.enabled")
 data class FlywayConfiguration(private val role: String) {
 
