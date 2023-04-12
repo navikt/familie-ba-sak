@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForIverksettingFactory
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingId
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
@@ -62,7 +63,7 @@ internal class UtbetalingsoppdragServiceTest {
         } returns lagTilkjentYtelse(utbetalingsoppdrag)
         val vedtak = mockk<Vedtak> {
             every { behandling } returns mockk {
-                every { id } returns 1L
+                every { behandlingId } returns BehandlingId(1L)
             }
         }
         service.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(
@@ -85,7 +86,7 @@ internal class UtbetalingsoppdragServiceTest {
         } returns lagTilkjentYtelse(utbetalingsoppdrag)
         val vedtak = mockk<Vedtak> {
             every { behandling } returns mockk {
-                every { id } returns 1L
+                every { behandlingId } returns BehandlingId(1L)
             }
         }
         service.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(

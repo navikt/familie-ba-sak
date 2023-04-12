@@ -212,7 +212,7 @@ class DokumentService(
         DistribuerDokumentTask.opprettDistribuerDokumentTask(
             distribuerDokumentDTO = DistribuerDokumentDTO(
                 personEllerInstitusjonIdent = journalPostTilDistribusjon.value.brukerId,
-                behandlingId = behandling?.behandlingId!!.id,
+                behandlingId = behandling?.behandlingId?.id,
                 journalpostId = journalPostTilDistribusjon.key,
                 brevmal = manueltBrevRequest.brevmal,
                 erManueltSendt = true
@@ -222,7 +222,7 @@ class DokumentService(
                 this["fagsakIdent"] = fagsak.aktør.aktivFødselsnummer()
                 this["mottakerIdent"] = journalPostTilDistribusjon.value.brukerId
                 this["journalpostId"] = journalPostTilDistribusjon.key
-                this["behandlingId"] = behandling?.behandlingId!!.id.toString()
+                this["behandlingId"] = behandling?.behandlingId?.id.toString()
                 this["fagsakId"] = fagsak.id.toString()
             }
         ).also { taskRepository.save(it) }
