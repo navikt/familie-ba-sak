@@ -1,13 +1,13 @@
 package no.nav.familie.ba.sak.common
 
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.MappedSuperclass
+import jakarta.persistence.PreUpdate
+import jakarta.persistence.Version
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import java.io.Serializable
 import java.time.LocalDateTime
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.MappedSuperclass
-import javax.persistence.PreUpdate
-import javax.persistence.Version
 
 /**
  * En basis [Entity] klasse som håndtere felles standarder for utformign av tabeller (eks. sporing av hvem som har

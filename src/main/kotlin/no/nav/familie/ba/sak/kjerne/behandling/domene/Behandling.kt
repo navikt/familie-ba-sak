@@ -1,5 +1,21 @@
 package no.nav.familie.ba.sak.kjerne.behandling.domene
 
+import jakarta.persistence.CascadeType
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.EntityListeners
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
+import jakarta.persistence.FetchType
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToMany
+import jakarta.persistence.OneToOne
+import jakarta.persistence.SequenceGenerator
+import jakarta.persistence.Table
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
@@ -16,22 +32,6 @@ import no.nav.familie.kontrakter.felles.Regelverk
 import org.hibernate.annotations.SortComparator
 import java.time.LocalDate
 import java.time.LocalDateTime
-import javax.persistence.CascadeType
-import javax.persistence.Column
-import javax.persistence.Entity
-import javax.persistence.EntityListeners
-import javax.persistence.EnumType
-import javax.persistence.Enumerated
-import javax.persistence.FetchType
-import javax.persistence.GeneratedValue
-import javax.persistence.GenerationType
-import javax.persistence.Id
-import javax.persistence.JoinColumn
-import javax.persistence.ManyToOne
-import javax.persistence.OneToMany
-import javax.persistence.OneToOne
-import javax.persistence.SequenceGenerator
-import javax.persistence.Table
 import no.nav.familie.kontrakter.felles.Behandlingstema as OppgaveBehandlingTema
 import no.nav.familie.kontrakter.felles.oppgave.Behandlingstype as OppgaveBehandlingType
 
@@ -204,6 +204,7 @@ data class Behandling(
         return when {
             skalBehandlesAutomatisk && erOmregning() &&
                 resultat in listOf(Behandlingsresultat.FORTSATT_INNVILGET, Behandlingsresultat.FORTSATT_OPPHØRT) -> true
+
             skalBehandlesAutomatisk && erMigrering() && resultat == Behandlingsresultat.INNVILGET -> true
             skalBehandlesAutomatisk && erFødselshendelse() && resultat == Behandlingsresultat.INNVILGET -> true
             skalBehandlesAutomatisk && erSatsendring() && erEndringFraForrigeBehandlingSendtTilØkonomi -> true
@@ -268,7 +269,8 @@ data class Behandling(
 
     fun erManuellMigrering() = erManuellMigreringForEndreMigreringsdato() || erHelmanuellMigrering()
 
-    fun erAutomatiskEøsMigrering() = erMigrering() && opprettetÅrsak == BehandlingÅrsak.MIGRERING && kategori == BehandlingKategori.EØS
+    fun erAutomatiskEøsMigrering() =
+        erMigrering() && opprettetÅrsak == BehandlingÅrsak.MIGRERING && kategori == BehandlingKategori.EØS
 
     fun erTekniskEndring() = opprettetÅrsak == BehandlingÅrsak.TEKNISK_ENDRING
 

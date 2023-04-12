@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
 import io.micrometer.core.annotation.Timed
+import jakarta.persistence.LockModeType
 import no.nav.familie.ba.sak.ekstern.skatteetaten.UtvidetSkatt
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import org.springframework.data.domain.Page
@@ -15,7 +16,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.util.Optional
-import javax.persistence.LockModeType
 
 @Repository
 interface FagsakRepository : JpaRepository<Fagsak, Long> {
