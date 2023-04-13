@@ -105,7 +105,7 @@ class BehandlingsresultatSteg(
 
         if (behandlingMedOppdatertBehandlingsresultat.erBehandlingMedVedtaksbrevutsending()) {
             behandlingService.nullstillEndringstidspunkt(behandling.id)
-            vedtaksperiodeService.oppdaterVedtakMedVedtaksperioderGammel(
+            vedtaksperiodeService.oppdaterVedtakMedVedtaksperioder(
                 vedtak = vedtakService.hentAktivForBehandlingThrows(
                     behandlingId = behandling.id
                 )
