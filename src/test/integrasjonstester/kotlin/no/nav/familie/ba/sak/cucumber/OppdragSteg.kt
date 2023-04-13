@@ -29,14 +29,14 @@ import org.assertj.core.api.Assertions.assertThat
 class OppdragSteg {
 
     private val utbetalingsoppdragGenerator = UtbetalingsoppdragGenerator(mockk(relaxed = true))
-    private var behandlinger = mutableMapOf<Long, Behandling>()
-    private var tilkjenteYtelser = mutableListOf<TilkjentYtelse>()
+    private var behandlinger = mapOf<Long, Behandling>()
+    private var tilkjenteYtelser = listOf<TilkjentYtelse>()
     private var beregnetUtbetalingsoppdrag = mutableMapOf<Long, Utbetalingsoppdrag>()
 
     @Gitt("følgende tilkjente ytelser")
     fun følgendeTilkjenteYtelser(dataTable: DataTable) {
-        settBehandlinger(dataTable)
-        tilkjenteYtelser = mapTilkjentYtelse(dataTable, behandlinger).toMutableList()
+        genererBehandlinger(dataTable)
+        tilkjenteYtelser = mapTilkjentYtelse(dataTable, behandlinger)
     }
 
     @Når("beregner utbetalingsoppdrag")
@@ -83,19 +83,16 @@ class OppdragSteg {
     }
 
     private fun tilKjeder(tilkjentYtelse: TilkjentYtelse?): Map<String, List<AndelTilkjentYtelseForUtbetalingsoppdrag>> {
-        val andeler = tilkjentYtelse?.andelerTilkjentYtelse ?: emptyList()
-        return andeler
+        return (tilkjentYtelse?.andelerTilkjentYtelse ?: emptyList())
             .pakkInnForUtbetaling(AndelTilkjentYtelseForIverksettingFactory())
             .let { kjedeinndelteAndeler(it) }
     }
 
-    private fun settBehandlinger(dataTable: DataTable) {
-        val groupByBehandlingId = dataTable.groupByBehandlingId()
+    private fun genererBehandlinger(dataTable: DataTable) {
         val fagsak = defaultFagsak()
-        behandlinger = groupByBehandlingId
+        behandlinger = dataTable.groupByBehandlingId()
             .map { lagBehandling(fagsak = fagsak).copy(id = it.key) }
             .associateBy { it.id }
-            .toMutableMap()
     }
 
     // @Gitt("følgende tilkjente ytelser uten andel for {}")

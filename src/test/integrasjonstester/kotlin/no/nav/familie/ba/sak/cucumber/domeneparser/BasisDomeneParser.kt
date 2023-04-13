@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.cucumber.domeneparser
 
-import io.cucumber.datatable.DataTable
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
@@ -193,13 +192,4 @@ inline fun <reified T : Enum<T>> parseValgfriEnum(domenebegrep: Domenenøkkel, r
 
 inline fun <reified T : Enum<T>> parseEnum(domenebegrep: Domenenøkkel, rad: Map<String, String>): T {
     return parseValgfriEnum<T>(domenebegrep, rad)!!
-}
-
-fun <T> mapDataTable(dataTable: DataTable, radMapper: RadMapper<T>): List<T> {
-    return dataTable.asMaps().map { radMapper.mapRad(it) }
-}
-
-interface RadMapper<T> {
-
-    fun mapRad(rad: Map<String, String>): T
 }

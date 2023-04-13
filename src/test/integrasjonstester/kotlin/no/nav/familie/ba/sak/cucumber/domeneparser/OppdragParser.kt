@@ -54,7 +54,7 @@ object OppdragParser {
         }
     }
 
-    private fun mapForventetUtbetalingsperiode(it: MutableMap<String, String>) =
+    private fun mapForventetUtbetalingsperiode(it: Map<String, String>) =
         ForventetUtbetalingsperiode(
             erEndringPåEksisterendePeriode = parseBoolean(DomenebegrepUtbetalingsoppdrag.ER_ENDRING, it),
             periodeId = parseInt(DomenebegrepUtbetalingsoppdrag.PERIODE_ID, it).toLong(),
@@ -67,7 +67,7 @@ object OppdragParser {
             opphør = parseValgfriÅrMåned(DomenebegrepUtbetalingsoppdrag.OPPHØRSDATO, it)?.atDay(1),
         )
 
-    private fun validerAlleKodeEndringerLike(rader: List<MutableMap<String, String>>) {
+    private fun validerAlleKodeEndringerLike(rader: List<Map<String, String>>) {
         rader.map { parseEnum<Utbetalingsoppdrag.KodeEndring>(DomenebegrepUtbetalingsoppdrag.KODE_ENDRING, it) }
             .zipWithNext().forEach {
                 assertThat(it.first).isEqualTo(it.second)
