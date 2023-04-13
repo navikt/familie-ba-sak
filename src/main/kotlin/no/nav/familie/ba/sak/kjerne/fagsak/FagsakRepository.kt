@@ -54,7 +54,7 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
         value = """SELECT f.*
             FROM   Fagsak f
             WHERE  NOT EXISTS (
-                    SELECT  -- SELECT list mostly irrelevant; can just be empty in Postgres
+                    SELECT *
                     FROM   satskjoering
                     WHERE  fk_fagsak_id = f.id
                 ) AND f.status = 'LØPENDE' AND f.arkivert = false""",
