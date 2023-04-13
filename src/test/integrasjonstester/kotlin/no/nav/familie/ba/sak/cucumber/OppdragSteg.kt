@@ -5,6 +5,8 @@ import io.cucumber.java.no.Gitt
 import io.cucumber.java.no.Når
 import io.cucumber.java.no.Så
 import io.mockk.mockk
+import no.nav.familie.ba.sak.common.defaultFagsak
+import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.cucumber.domeneparser.DomeneparserUtil.groupByBehandlingId
 import no.nav.familie.ba.sak.cucumber.domeneparser.ForventetUtbetalingsoppdrag
@@ -19,7 +21,6 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.gjeldendeForri
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.kjedeinndelteAndeler
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.simulering.lagBehandling
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
@@ -42,15 +43,20 @@ class OppdragSteg {
     fun `beregner utbetalingsoppdrag`() {
         tilkjenteYtelser.fold(emptyList<TilkjentYtelse>()) { acc, tilkjentYtelse ->
             val forrigeTilkjentYtelse = acc.lastOrNull()
+
+            val vedtak = lagVedtak(behandling = tilkjentYtelse.behandling)
             val forrigeKjeder = tilKjeder(forrigeTilkjentYtelse)
             val oppdaterteKjeder = tilKjeder(tilkjentYtelse)
+            val sisteOffsetPåFagsak =
+                acc.flatMap { it.andelerTilkjentYtelse.map { it.periodeOffset } }.maxByOrNull { it!! }
+            val sisteOffsetPerIdent = gjeldendeForrigeOffsetForKjede(forrigeKjeder)
             val utbetalingsoppdrag = utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOppdaterTilkjentYtelse(
                 saksbehandlerId = "saksbehandlerId",
-                vedtak = lagVedtak(behandling = tilkjentYtelse.behandling),
+                vedtak = vedtak,
                 erFørsteBehandlingPåFagsak = forrigeTilkjentYtelse == null,
                 forrigeKjeder = forrigeKjeder,
-                sisteOffsetPerIdent = gjeldendeForrigeOffsetForKjede(forrigeKjeder),
-                sisteOffsetPåFagsak = null,
+                sisteOffsetPerIdent = sisteOffsetPerIdent,
+                sisteOffsetPåFagsak = sisteOffsetPåFagsak?.toInt(),
                 oppdaterteKjeder = oppdaterteKjeder,
                 erSimulering = false,
                 endretMigreringsDato = null
@@ -63,7 +69,10 @@ class OppdragSteg {
 
     @Så("forvent følgende utbetalingsoppdrag")
     fun `forvent følgende utbetalingsoppdrag`(dataTable: DataTable) {
-        val forventedeUtbetalingsoppdrag = OppdragParser.mapForventetUtbetalingsoppdrag(dataTable, medUtbetalingsperiode = true) // TODO medUtbetalingsperiode
+        val forventedeUtbetalingsoppdrag = OppdragParser.mapForventetUtbetalingsoppdrag(
+            dataTable,
+            medUtbetalingsperiode = true
+        ) // TODO medUtbetalingsperiode
         // assertSjekkBehandlingIder(forventedeUtbetalingsoppdrag.map { it.behandlingId }, false) // verifiser at alle behandlinger er verifisert
         forventedeUtbetalingsoppdrag.forEach { forventetUtbetalingsoppdrag ->
             val behandlingId = forventetUtbetalingsoppdrag.behandlingId
@@ -82,8 +91,9 @@ class OppdragSteg {
 
     private fun settBehandlinger(dataTable: DataTable) {
         val groupByBehandlingId = dataTable.groupByBehandlingId()
+        val fagsak = defaultFagsak()
         behandlinger = groupByBehandlingId
-            .map { lagBehandling().copy(id = it.key) }
+            .map { lagBehandling(fagsak = fagsak).copy(id = it.key) }
             .associateBy { it.id }
             .toMutableMap()
     }

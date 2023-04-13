@@ -7,12 +7,12 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.personident.Personident
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
-import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import java.time.LocalDate
-import java.util.UUID
 
 object OppdragParser {
 
@@ -48,7 +48,7 @@ object OppdragParser {
             validerAlleKodeEndringerLike(rader)
             ForventetUtbetalingsoppdrag(
                 behandlingId = behandlingId,
-                kodeEndring = parseEnum(UtbetalingsoppdragDomenebegrep.KODE_ENDRING, rad),
+                kodeEndring = parseEnum(DomenebegrepUtbetalingsoppdrag.KODE_ENDRING, rad),
                 utbetalingsperiode = if (medUtbetalingsperiode) rader.map { mapForventetUtbetalingsperiode(it) } else listOf(),
             )
         }
@@ -56,21 +56,23 @@ object OppdragParser {
 
     private fun mapForventetUtbetalingsperiode(it: MutableMap<String, String>) =
         ForventetUtbetalingsperiode(
-            erEndringPåEksisterendePeriode = parseBoolean(UtbetalingsoppdragDomenebegrep.ER_ENDRING, it),
-            periodeId = parseInt(UtbetalingsoppdragDomenebegrep.PERIODE_ID, it).toLong(),
-            forrigePeriodeId = parseValgfriInt(UtbetalingsoppdragDomenebegrep.FORRIGE_PERIODE_ID, it)?.toLong(),
-            sats = parseInt(UtbetalingsoppdragDomenebegrep.BELØP, it),
-            satsType = parseValgfriEnum<Utbetalingsperiode.SatsType>(UtbetalingsoppdragDomenebegrep.TYPE, it) ?: Utbetalingsperiode.SatsType.MND,
+            erEndringPåEksisterendePeriode = parseBoolean(DomenebegrepUtbetalingsoppdrag.ER_ENDRING, it),
+            periodeId = parseInt(DomenebegrepUtbetalingsoppdrag.PERIODE_ID, it).toLong(),
+            forrigePeriodeId = parseValgfriInt(DomenebegrepUtbetalingsoppdrag.FORRIGE_PERIODE_ID, it)?.toLong(),
+            sats = parseInt(DomenebegrepUtbetalingsoppdrag.BELØP, it),
+            satsType = parseValgfriEnum<Utbetalingsperiode.SatsType>(DomenebegrepUtbetalingsoppdrag.TYPE, it)
+                ?: Utbetalingsperiode.SatsType.MND,
             fom = parseÅrMåned(Domenebegrep.FRA_DATO, it).atDay(1),
             tom = parseÅrMåned(Domenebegrep.TIL_DATO, it).atEndOfMonth(),
-            opphør = parseValgfriÅrMåned(UtbetalingsoppdragDomenebegrep.OPPHØRSDATO, it)?.atDay(1),
+            opphør = parseValgfriÅrMåned(DomenebegrepUtbetalingsoppdrag.OPPHØRSDATO, it)?.atDay(1),
         )
 
     private fun validerAlleKodeEndringerLike(rader: List<MutableMap<String, String>>) {
-        rader.map { parseEnum<Utbetalingsoppdrag.KodeEndring>(UtbetalingsoppdragDomenebegrep.KODE_ENDRING, it) }.zipWithNext().forEach {
-            assertThat(it.first).isEqualTo(it.second)
-                .withFailMessage("Alle kodeendringer for en og samme oppdrag må være lik ${it.first} -> ${it.second}")
-        }
+        rader.map { parseEnum<Utbetalingsoppdrag.KodeEndring>(DomenebegrepUtbetalingsoppdrag.KODE_ENDRING, it) }
+            .zipWithNext().forEach {
+                assertThat(it.first).isEqualTo(it.second)
+                    .withFailMessage("Alle kodeendringer for en og samme oppdrag må være lik ${it.first} -> ${it.second}")
+            }
     }
 
     private fun mapAndelTilkjentYtelse(
@@ -78,26 +80,37 @@ object OppdragParser {
         behandling: Behandling
     ): AndelTilkjentYtelse {
         val ytelseType =
-            parseValgfriEnum(DomenebegrepOppdrag.YTELSE_TYPE, rad) ?: YtelseType.ORDINÆR_BARNETRYGD
+            parseValgfriEnum(DomenebegrepTilkjentYtelse.YTELSE_TYPE, rad) ?: YtelseType.ORDINÆR_BARNETRYGD
         return lagAndelTilkjentYtelse(
             fom = parseÅrMåned(Domenebegrep.FRA_DATO, rad),
             tom = parseÅrMåned(Domenebegrep.TIL_DATO, rad),
             ytelseType = ytelseType,
-            beløp = parseInt(DomenebegrepOppdrag.BELØP, rad),
+            beløp = parseInt(DomenebegrepTilkjentYtelse.BELØP, rad),
             behandling = behandling,
             tilkjentYtelse = null,
-            kildeBehandlingId = parseInt(DomenebegrepOppdrag.KILDEBEHANDLING_ID, rad).toLong()
+            kildeBehandlingId = parseInt(DomenebegrepTilkjentYtelse.KILDEBEHANDLING_ID, rad).toLong(),
+            aktør = parseAktør(rad)
         )
+    }
+
+    private fun parseAktør(rad: Map<String, String>): Aktør {
+        val id = (parseValgfriInt(DomenebegrepTilkjentYtelse.IDENT, rad) ?: 1).toString()
+        val aktørId = id.padStart(13, '0')
+        val fødselsnummer = id.padStart(11, '0')
+        return Aktør(aktørId).also {
+            it.personidenter.add(Personident(fødselsnummer, it))
+        }
     }
 }
 
-enum class DomenebegrepOppdrag(override val nøkkel: String) : Domenenøkkel {
+enum class DomenebegrepTilkjentYtelse(override val nøkkel: String) : Domenenøkkel {
     YTELSE_TYPE("Ytelse"),
     BELØP("Beløp"),
     KILDEBEHANDLING_ID("Kildebehandling"),
+    IDENT("Ident")
 }
 
-enum class UtbetalingsoppdragDomenebegrep(override val nøkkel: String) : Domenenøkkel {
+enum class DomenebegrepUtbetalingsoppdrag(override val nøkkel: String) : Domenenøkkel {
     KODE_ENDRING("Kode endring"),
     ER_ENDRING("Er endring"),
     PERIODE_ID("Periode id"),
