@@ -104,6 +104,7 @@ spec:
         - host: familie-ba-statistikk.dev-fss-pub.nais.io
         - host: familie-ba-infotrygd.dev-fss-pub.nais.io
         - host: familie-ba-infotrygd-feed.dev-fss-pub.nais.io
+        - host: sdw-wsrest.ecb.europa.eu
   replicas:
     min: 2
     max: 2
