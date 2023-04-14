@@ -290,6 +290,51 @@ class VedtaksperiodeService(
         override val vilkårResultaterForVedtaksPeriode: List<VilkårResultatForVedtaksPeriode>
     ) : VedtaksPeriodeResultatForPerson
 
+    @Transactional
+    fun oppdaterVedtakMedVedtaksperioder(vedtak: Vedtak) {
+        vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(vedtak)
+        val behandling = vedtak.behandling
+
+        // Rent fortsatt innvilget-resultat er det eneste som kun skal gi én vedtaksperiode
+        if (behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET) {
+            val vedtaksbrevmal = brevmalService.hentVedtaksbrevmal(
+                behandling
+            )
+
+            val erAutobrevFor6Og18ÅrOgSmåbarnstillegg =
+                vedtaksbrevmal == Brevmal.AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG
+
+            val fom = if (erAutobrevFor6Og18ÅrOgSmåbarnstillegg) {
+                YearMonth.now().førsteDagIInneværendeMåned()
+            } else {
+                null
+            }
+
+            val tom = if (erAutobrevFor6Og18ÅrOgSmåbarnstillegg) {
+                finnTomDatoIFørsteUtbetalingsintervallFraInneværendeMåned(behandling.id)
+            } else {
+                null
+            }
+
+            vedtaksperiodeHentOgPersisterService.lagre(
+                VedtaksperiodeMedBegrunnelser(
+                    fom = fom,
+                    tom = tom,
+                    vedtak = vedtak,
+                    type = Vedtaksperiodetype.FORTSATT_INNVILGET
+                )
+            )
+        } else {
+            vedtaksperiodeHentOgPersisterService.lagre(
+                if (featureToggleService.isEnabled(FeatureToggleConfig.VEDTAKSPERIODE_NY)) {
+                    genererVedtaksperioderMedBegrunnelser(vedtak)
+                } else {
+                    genererVedtaksperioderMedBegrunnelserGammel(vedtak)
+                }
+            )
+        }
+    }
+
     fun genererVedtaksperioderMedBegrunnelser(vedtak: Vedtak): List<VedtaksperiodeMedBegrunnelser> {
         /*
         hent personResultat
@@ -425,49 +470,6 @@ class VedtaksperiodeService(
         }
     }
 
-    @Transactional
-    fun oppdaterVedtakMedVedtaksperioder(vedtak: Vedtak) {
-        vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(vedtak)
-        val behandling = vedtak.behandling
-
-        // Rent fortsatt innvilget-resultat er det eneste som kun skal gi én vedtaksperiode
-        if (behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET) {
-            val vedtaksbrevmal = brevmalService.hentVedtaksbrevmal(
-                behandling
-            )
-
-            val erAutobrevFor6Og18ÅrOgSmåbarnstillegg =
-                vedtaksbrevmal == Brevmal.AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG
-
-            val fom = if (erAutobrevFor6Og18ÅrOgSmåbarnstillegg) {
-                YearMonth.now().førsteDagIInneværendeMåned()
-            } else {
-                null
-            }
-
-            val tom = if (erAutobrevFor6Og18ÅrOgSmåbarnstillegg) {
-                finnTomDatoIFørsteUtbetalingsintervallFraInneværendeMåned(behandling.id)
-            } else {
-                null
-            }
-
-            vedtaksperiodeHentOgPersisterService.lagre(
-                VedtaksperiodeMedBegrunnelser(
-                    fom = fom,
-                    tom = tom,
-                    vedtak = vedtak,
-                    type = Vedtaksperiodetype.FORTSATT_INNVILGET
-                )
-            )
-        } else {
-            vedtaksperiodeHentOgPersisterService.lagre(
-                genererVedtaksperioderMedBegrunnelserGammel(
-                    vedtak
-                )
-            )
-        }
-    }
-
     @Deprecated("skal bruke oppdaterVedtakMedVedtaksperioder når den er klar")
     fun genererVedtaksperioderMedBegrunnelserGammel(
         vedtak: Vedtak,
@@ -520,10 +522,14 @@ class VedtaksperiodeService(
         } else {
             vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(vedtak)
             val vedtaksperioder =
-                genererVedtaksperioderMedBegrunnelserGammel(
-                    vedtak = vedtak,
-                    manueltOverstyrtEndringstidspunkt = overstyrtEndringstidspunkt
-                )
+                if (featureToggleService.isEnabled(FeatureToggleConfig.VEDTAKSPERIODE_NY)) {
+                    genererVedtaksperioderMedBegrunnelser(vedtak)
+                } else {
+                    genererVedtaksperioderMedBegrunnelserGammel(
+                        vedtak = vedtak,
+                        manueltOverstyrtEndringstidspunkt = overstyrtEndringstidspunkt
+                    )
+                }
             vedtaksperiodeHentOgPersisterService.lagre(vedtaksperioder.sortedBy { it.fom })
         }
         lagreNedOverstyrtEndringstidspunkt(vedtak.behandling.id, overstyrtEndringstidspunkt)
