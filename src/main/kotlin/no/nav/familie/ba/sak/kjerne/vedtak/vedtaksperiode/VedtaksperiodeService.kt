@@ -18,7 +18,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestGenererVedtaksperioderForOverstyrtEndringstidspunkt
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedFritekster
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
@@ -40,21 +39,11 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform.NB
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform.NN
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
-import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.slåSammenLike
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilLocalDate
-import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
@@ -70,13 +59,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta.FeilutbetaltValuta
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeMedBegrunnelser.UtbetalingsperiodeMedBegrunnelserService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilUtvidetVedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.alleOrdinæreVilkårErOppfylt
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilForskjøvetTidslinjerForHvertOppfylteVilkår
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilTidslinjeForSplittForPerson
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -264,31 +247,7 @@ class VedtaksperiodeService(
         }
     }
 
-    data class VilkårResultatForVedtaksPeriode(
-        val vilkårType: Vilkår,
-        val resultat: Resultat,
-        val utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering>,
-        val vurderesEtter: Regelverk?
-    )
 
-    sealed interface VedtaksPeriodeResultatForPerson {
-        val person: Person
-        val vilkårResultaterForVedtaksPeriode: List<VilkårResultatForVedtaksPeriode>
-    }
-
-    data class VedtaksPeriodeResultatForPersonHarRett(
-        override val person: Person,
-        override val vilkårResultaterForVedtaksPeriode: List<VilkårResultatForVedtaksPeriode>
-        // endringsperiode
-        // kompentanse,
-        // beløp
-        // diffberegning?
-    ) : VedtaksPeriodeResultatForPerson
-
-    data class VedtaksPeriodeResultatForPersonHarIkkeRett(
-        override val person: Person,
-        override val vilkårResultaterForVedtaksPeriode: List<VilkårResultatForVedtaksPeriode>
-    ) : VedtaksPeriodeResultatForPerson
 
     @Transactional
     fun oppdaterVedtakMedVedtaksperioder(vedtak: Vedtak) {
@@ -336,139 +295,15 @@ class VedtaksperiodeService(
     }
 
     fun genererVedtaksperioderMedBegrunnelser(vedtak: Vedtak): List<VedtaksperiodeMedBegrunnelser> {
-        /*
-        hent personResultat
-        lag ja/nei-tidslinje for søker
-        for hver person, lag tidslinjer og slå sammen hvis like etterfølgende perioder for
-            * vilkårsvurdering
-            * endringsperiode
-            * kompetanse
-            * kalkulert beløp (bruk andel tilkjent ytelse og ta med beløpstype)
-            * differansebereginig?
-            * ja/nei (avslag/opphørt)
-            Trenger vi endringsperiode, kompetanse og kalkulert beløp i nei-perioder?
-
-        kombiner ja og andre kontekster til en tidslinje
-        behold nei for seg
-
-        kombiner peroide uten rett med ja hvis fom og tom er like på tvers av personer
-        kombiner nei hvis fom og tom er like på tvers av personer
-        behold enkeltstående nei
-         */
-
         val behandlingId = vedtak.behandling.id
-        val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId)
-        val personResultater = vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId).personResultater
 
-        val søker = persongrunnlag.søker
-        val søkerPersonResultater = personResultater.single { it.aktør == søker.aktør }
-
-        val erObligatoriskeVilkårOppfyltForSøkerTidslinje =
-            søkerPersonResultater.tilTidslinjeForSplittForPerson(
-                personType = søker.type,
-                fagsakType = vedtak.behandling.fagsak.type
-            ).map { it != null }
-
-        val vedtaksPeriodeResultatForPersoner =
-            personResultater.map { personResultat ->
-                val person = persongrunnlag.personer.single { it.aktør == personResultat.aktør }
-
-                val forskjøvedeVilkårResultater =
-                    personResultat.vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår().kombiner { it }
-
-                val harRettTidslinje: Tidslinje<Boolean, Måned> = forskjøvedeVilkårResultater
-                    .kombinerMed(erObligatoriskeVilkårOppfyltForSøkerTidslinje) { oppfylteVilkårNullable, erObligatoriskeVilkårOppfyltForSøker ->
-                        val oppfylteVilkår = (oppfylteVilkårNullable ?: emptyList())
-
-                        erObligatoriskeVilkårOppfyltForSøker ?: false && oppfylteVilkår.alleOrdinæreVilkårErOppfylt(
-                            personType = person.type,
-                            fagsakType = vedtak.behandling.fagsak.type
-                        )
-                    }
-
-                val vilkårResultaterTidslinje = forskjøvedeVilkårResultater.map { vilkårResultater ->
-                    vilkårResultater?.map {
-                        VilkårResultatForVedtaksPeriode(
-                            it.vilkårType,
-                            it.resultat,
-                            it.utdypendeVilkårsvurderinger,
-                            it.vurderesEtter
-                        )
-                    }
-                }
-
-                harRettTidslinje.kombinerMed(vilkårResultaterTidslinje) { harRett, vilkårResultater ->
-                    if (harRett == true) {
-                        VedtaksPeriodeResultatForPersonHarRett(
-                            vilkårResultaterForVedtaksPeriode = vilkårResultater
-                                ?: error("vilkårResultatene burde alltid finnes om vi har rett"),
-                            person = person
-                        )
-                    } else {
-                        VedtaksPeriodeResultatForPersonHarIkkeRett(
-                            vilkårResultaterForVedtaksPeriode = vilkårResultater
-                                ?: emptyList(),
-                            person = person
-                        )
-                    }
-                }.slåSammenLike()
-            }
-
-        val harRett: List<Tidslinje<VedtaksPeriodeResultatForPersonHarRett, Måned>> = vedtaksPeriodeResultatForPersoner
-            .map {
-                it.perioder().filterIsInstance<Periode<VedtaksPeriodeResultatForPersonHarRett, Måned>>().tilTidslinje()
-            }
-
-        val harIkkeRett: List<List<Periode<VedtaksPeriodeResultatForPersonHarIkkeRett, Måned>>> =
-            vedtaksPeriodeResultatForPersoner
-                .map { it.perioder().filterIsInstance<Periode<VedtaksPeriodeResultatForPersonHarIkkeRett, Måned>>() }
-
-        val harRettSammenslått = harRett.kombiner { it }
-
-        val (harIkkeRettPerioderOverlapperHarRett, harIkkeRettEnkeltstående) = harIkkeRett.flatten()
-            .partition { harIkkeRettPeriode ->
-                harRettSammenslått.perioder().any { harRettPeriode ->
-                    harRettPeriode.fraOgMed == harIkkeRettPeriode.fraOgMed &&
-                        harRettPeriode.tilOgMed == harIkkeRettPeriode.tilOgMed
-                }
-            }
-
-        val plussminusliste = harRettSammenslått.perioder().map { harRettPeriode ->
-            val harIkkeRettPeriodeOverlapper =
-                harIkkeRettPerioderOverlapperHarRett.find { harIkkeRettPeriode -> harRettPeriode.fraOgMed == harIkkeRettPeriode }
-            if (harIkkeRettPeriodeOverlapper != null) {
-                Periode(
-                    fraOgMed = harRettPeriode.fraOgMed,
-                    tilOgMed = harRettPeriode.tilOgMed,
-                    innhold = (
-                        (
-                            harRettPeriode.innhold
-                                ?: emptyList()
-                            ) + harIkkeRettPeriodeOverlapper.innhold
-                        ).filterNotNull()
-                )
-            } else {
-                harRettPeriode
-            }
-        }
-
-        val minusMinusListe = harIkkeRettEnkeltstående.groupBy { Pair(it.fraOgMed, it.tilOgMed) }.map {
-            Periode(it.key.first, it.key.second, it.value.map { it.innhold })
-        }
-
-        return (plussminusliste + minusMinusListe).map { periode ->
-            VedtaksperiodeMedBegrunnelser(
-                vedtak = vedtak,
-                fom = periode.fraOgMed.tilLocalDate(),
-                tom = periode.tilOgMed.tilLocalDate(),
-                type = if (periode.innhold?.any { it is VedtaksPeriodeResultatForPersonHarRett } == true) {
-                    Vedtaksperiodetype.UTBETALING
-                } else {
-                    Vedtaksperiodetype.OPPHØR
-                }
-            )
-        }
+        return utledVedtaksPerioderMedBegrunnelser(
+            persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId),
+            personResultater = vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId).personResultater,
+            vedtak = vedtak
+        )
     }
+
 
     @Deprecated("skal bruke oppdaterVedtakMedVedtaksperioder når den er klar")
     fun genererVedtaksperioderMedBegrunnelserGammel(
