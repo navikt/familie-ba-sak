@@ -285,11 +285,7 @@ class VedtaksperiodeService(
             )
         } else {
             vedtaksperiodeHentOgPersisterService.lagre(
-                if (featureToggleService.isEnabled(FeatureToggleConfig.VEDTAKSPERIODE_NY)) {
-                    genererVedtaksperioderMedBegrunnelser(vedtak)
-                } else {
-                    genererVedtaksperioderMedBegrunnelserGammel(vedtak)
-                }
+                genererVedtaksperioderMedBegrunnelserGammel(vedtak)
             )
         }
     }
@@ -357,14 +353,10 @@ class VedtaksperiodeService(
         } else {
             vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(vedtak)
             val vedtaksperioder =
-                if (featureToggleService.isEnabled(FeatureToggleConfig.VEDTAKSPERIODE_NY)) {
-                    genererVedtaksperioderMedBegrunnelser(vedtak)
-                } else {
                     genererVedtaksperioderMedBegrunnelserGammel(
                         vedtak = vedtak,
                         manueltOverstyrtEndringstidspunkt = overstyrtEndringstidspunkt
                     )
-                }
             vedtaksperiodeHentOgPersisterService.lagre(vedtaksperioder.sortedBy { it.fom })
         }
         lagreNedOverstyrtEndringstidspunkt(vedtak.behandling.id, overstyrtEndringstidspunkt)
