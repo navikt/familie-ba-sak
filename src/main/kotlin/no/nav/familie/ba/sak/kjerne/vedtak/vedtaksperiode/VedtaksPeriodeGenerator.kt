@@ -122,9 +122,7 @@ private fun Periode<List<GrunnlagForPerson?>, Måned>.tilVedtaksperiodeMedBegrun
  *
  * Se src/test/resources/kjerne/vedtak.vedtaksperiode/VilkårPerBarnBlirSlåttSammenTilPerioderSomSkalBegrunnesIVedtak.png
  *
- * I eksempelet kan man se at alle innvilgede perioder blir slått sammen. I tillegg blir også de ikke-innvilgede 
- * periodene med samme fom og tom slått sammen med de innvilgede periodene, men de resterende ikke-innvilgede blir 
- * stående for seg.
+ * I eksempelet kan man se at alle innvilgede perioder blir slått sammen. I tillegg blir også de ikke-innvilgede * periodene med samme fom og tom slått sammen med de innvilgede periodene, men de resterende ikke-innvilgede blir * stående for seg.
  **/
 private fun List<Tidslinje<GrunnlagForPerson, Måned>>.tilPerioderSomSkalBegrunnesIVedtak(): List<Periode<List<GrunnlagForPerson?>, Måned>> {
     val sammenslåtteInnvilgedePerioder = map { it.filtrerHarInnholdstype<GrunnlagForPersonInnvilget>() }
@@ -145,7 +143,8 @@ private fun List<Periode<out Iterable<GrunnlagForPerson?>, Måned>>.slåSammenPe
             Periode(
                 fraOgMed = it.key.first,
                 tilOgMed = it.key.second,
-                innhold = it.value.flatMap { periode -> periode.innhold ?: emptyList() })
+                innhold = it.value.flatMap { periode -> periode.innhold ?: emptyList() }
+            )
         }
 
 @Suppress("UNCHECKED_CAST")
@@ -168,7 +167,7 @@ private fun PersonResultat.tilGrunnlagForPersonTidslinje(
         .tilErVilkårsvurderingOppfyltTidslinje(
             erObligatoriskeVilkårOppfyltForSøkerTidslinje = erObligatoriskeVilkårOppfyltForSøkerTidslinje,
             fagsakType = vedtak.behandling.fagsak.type,
-            personType = person.type,
+            personType = person.type
         )
 
     val vilkårResultaterTidslinje = forskjøvedeVilkårResultater.tilVilkårResultaterForVedtaksPeriodeTidslinje()
@@ -213,7 +212,7 @@ private fun Tidslinje<Iterable<VilkårResultat>, Måned>.tilVilkårResultaterFor
 private fun Tidslinje<Iterable<VilkårResultat>, Måned>.tilErVilkårsvurderingOppfyltTidslinje(
     erObligatoriskeVilkårOppfyltForSøkerTidslinje: Tidslinje<Boolean, Måned>,
     fagsakType: FagsakType,
-    personType: PersonType,
+    personType: PersonType
 ) =
     kombinerMed(erObligatoriskeVilkårOppfyltForSøkerTidslinje) { oppfylteVilkårNullable, erObligatoriskeVilkårOppfyltForSøker ->
         val oppfylteVilkår = (oppfylteVilkårNullable ?: emptyList())

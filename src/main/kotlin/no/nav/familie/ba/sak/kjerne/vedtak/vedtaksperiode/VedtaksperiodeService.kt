@@ -247,8 +247,6 @@ class VedtaksperiodeService(
         }
     }
 
-
-
     @Transactional
     fun oppdaterVedtakMedVedtaksperioder(vedtak: Vedtak) {
         vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(vedtak)
@@ -299,7 +297,6 @@ class VedtaksperiodeService(
             vedtak = vedtak
         )
     }
-
 
     @Deprecated("skal bruke oppdaterVedtakMedVedtaksperioder når den er klar")
     fun genererVedtaksperioderMedBegrunnelserGammel(
@@ -353,10 +350,10 @@ class VedtaksperiodeService(
         } else {
             vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(vedtak)
             val vedtaksperioder =
-                    genererVedtaksperioderMedBegrunnelserGammel(
-                        vedtak = vedtak,
-                        manueltOverstyrtEndringstidspunkt = overstyrtEndringstidspunkt
-                    )
+                genererVedtaksperioderMedBegrunnelserGammel(
+                    vedtak = vedtak,
+                    manueltOverstyrtEndringstidspunkt = overstyrtEndringstidspunkt
+                )
             vedtaksperiodeHentOgPersisterService.lagre(vedtaksperioder.sortedBy { it.fom })
         }
         lagreNedOverstyrtEndringstidspunkt(vedtak.behandling.id, overstyrtEndringstidspunkt)
