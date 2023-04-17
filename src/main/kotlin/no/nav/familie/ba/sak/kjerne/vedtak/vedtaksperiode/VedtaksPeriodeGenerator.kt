@@ -11,7 +11,8 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.slåSammenLike
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilLocalDate
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilDagEllerFørsteDagIPerioden
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilLocalDateEllerNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
@@ -102,8 +103,8 @@ private fun Periode<List<GrunnlagForPerson?>, Måned>.tilVedtaksperiodeMedBegrun
     vedtak: Vedtak
 ) = VedtaksperiodeMedBegrunnelser(
     vedtak = vedtak,
-    fom = fraOgMed.tilLocalDate(),
-    tom = tilOgMed.tilLocalDate(),
+    fom = fraOgMed.tilDagEllerFørsteDagIPerioden().tilLocalDate(),
+    tom = tilOgMed.tilLocalDateEllerNull(),
     type = if (innhold?.any { it is GrunnlagForPersonInnvilget } == true) {
         Vedtaksperiodetype.UTBETALING
     } else {
@@ -147,10 +148,11 @@ private fun List<Periode<out Iterable<GrunnlagForPerson?>, Måned>>.slåSammenPe
                 innhold = it.value.flatMap { periode -> periode.innhold ?: emptyList() })
         }
 
-private fun <T : GrunnlagForPerson> Tidslinje<GrunnlagForPerson, Måned>.filtrerHarInnholdstype(): Tidslinje<T, Måned> =
+@Suppress("UNCHECKED_CAST")
+private inline fun <reified T : GrunnlagForPerson> Tidslinje<GrunnlagForPerson, Måned>.filtrerHarInnholdstype(): Tidslinje<T, Måned> =
     this.perioder()
-        .filterIsInstance<Periode<T, Måned>>()
-        .tilTidslinje()
+        .filter { it.innhold is T }
+        .tilTidslinje() as Tidslinje<T, Måned>
 
 private fun PersonResultat.tilGrunnlagForPersonTidslinje(
     persongrunnlag: PersonopplysningGrunnlag,
