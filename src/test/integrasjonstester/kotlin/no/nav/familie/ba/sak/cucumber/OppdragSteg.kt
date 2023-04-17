@@ -101,7 +101,7 @@ class OppdragSteg {
 private fun assertUtbetalingsoppdrag(
     forventetUtbetalingsoppdrag: ForventetUtbetalingsoppdrag,
     utbetalingsoppdrag: Utbetalingsoppdrag,
-    medUtbetalingsperiode: Boolean = true,
+    medUtbetalingsperiode: Boolean = true
 ) {
     assertThat(utbetalingsoppdrag.kodeEndring).isEqualTo(forventetUtbetalingsoppdrag.kodeEndring)
     assertThat(utbetalingsoppdrag.utbetalingsperiode).hasSize(forventetUtbetalingsoppdrag.utbetalingsperiode.size)
@@ -115,7 +115,7 @@ private fun assertUtbetalingsoppdrag(
 
 private fun assertUtbetalingsperiode(
     utbetalingsperiode: Utbetalingsperiode,
-    forventetUtbetalingsperiode: ForventetUtbetalingsperiode,
+    forventetUtbetalingsperiode: ForventetUtbetalingsperiode
 ) {
     assertThat(utbetalingsperiode.erEndringPåEksisterendePeriode)
         .isEqualTo(forventetUtbetalingsperiode.erEndringPåEksisterendePeriode)

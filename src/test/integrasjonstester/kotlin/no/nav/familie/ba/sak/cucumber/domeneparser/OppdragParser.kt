@@ -49,7 +49,7 @@ object OppdragParser {
             ForventetUtbetalingsoppdrag(
                 behandlingId = behandlingId,
                 kodeEndring = parseEnum(DomenebegrepUtbetalingsoppdrag.KODE_ENDRING, rad),
-                utbetalingsperiode = if (medUtbetalingsperiode) rader.map { mapForventetUtbetalingsperiode(it) } else listOf(),
+                utbetalingsperiode = if (medUtbetalingsperiode) rader.map { mapForventetUtbetalingsperiode(it) } else listOf()
             )
         }
     }
@@ -64,7 +64,7 @@ object OppdragParser {
                 ?: Utbetalingsperiode.SatsType.MND,
             fom = parseÅrMåned(Domenebegrep.FRA_DATO, it).atDay(1),
             tom = parseÅrMåned(Domenebegrep.TIL_DATO, it).atEndOfMonth(),
-            opphør = parseValgfriÅrMåned(DomenebegrepUtbetalingsoppdrag.OPPHØRSDATO, it)?.atDay(1),
+            opphør = parseValgfriÅrMåned(DomenebegrepUtbetalingsoppdrag.OPPHØRSDATO, it)?.atDay(1)
         )
 
     private fun validerAlleKodeEndringerLike(rader: List<Map<String, String>>) {
@@ -117,13 +117,13 @@ enum class DomenebegrepUtbetalingsoppdrag(override val nøkkel: String) : Domene
     FORRIGE_PERIODE_ID("Forrige periode id"),
     BELØP("Beløp"),
     TYPE("Type"),
-    OPPHØRSDATO("Opphørsdato"),
+    OPPHØRSDATO("Opphørsdato")
 }
 
 data class ForventetUtbetalingsoppdrag(
     val behandlingId: Long,
     val kodeEndring: Utbetalingsoppdrag.KodeEndring,
-    val utbetalingsperiode: List<ForventetUtbetalingsperiode>,
+    val utbetalingsperiode: List<ForventetUtbetalingsperiode>
 )
 
 data class ForventetUtbetalingsperiode(
@@ -134,5 +134,5 @@ data class ForventetUtbetalingsperiode(
     val satsType: Utbetalingsperiode.SatsType,
     val fom: LocalDate,
     val tom: LocalDate,
-    val opphør: LocalDate?,
+    val opphør: LocalDate?
 )

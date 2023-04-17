@@ -181,7 +181,7 @@ fun parseValgfriIntRange(domenebegrep: Domenenøkkel, rad: Map<String, String>):
 
     return Pair(
         Integer.parseInt(verdi.split("-").first()),
-        Integer.parseInt(verdi.split("-").last()),
+        Integer.parseInt(verdi.split("-").last())
     )
 }
 
