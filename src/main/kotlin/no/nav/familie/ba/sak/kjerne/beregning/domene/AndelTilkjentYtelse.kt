@@ -300,3 +300,10 @@ fun List<AndelTilkjentYtelse>.tilTidslinjerPerPersonOgType(): Map<Pair<Aktør, Y
             andelerTilkjentYtelsePåPerson
         )
     }
+
+fun List<AndelTilkjentYtelse>.tilTidslinjerPerBeløpOgType(): Map<Pair<Aktør, YtelseType>, AndelTilkjentYtelseTidslinje> =
+    groupBy { Pair(it.aktør, it.type) }.mapValues { (_, andelerTilkjentYtelsePåPerson) ->
+        AndelTilkjentYtelseTidslinje(
+            andelerTilkjentYtelsePåPerson
+        )
+    }
