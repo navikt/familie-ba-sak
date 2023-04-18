@@ -8,6 +8,7 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVedtak
+import no.nav.familie.ba.sak.cucumber.ValideringUtil.assertSjekkBehandlingIder
 import no.nav.familie.ba.sak.cucumber.domeneparser.DomeneparserUtil.groupByBehandlingId
 import no.nav.familie.ba.sak.cucumber.domeneparser.ForventetUtbetalingsoppdrag
 import no.nav.familie.ba.sak.cucumber.domeneparser.ForventetUtbetalingsperiode
@@ -98,7 +99,6 @@ class OppdragSteg {
             dataTable,
             medUtbetalingsperiode = true
         ) // TODO medUtbetalingsperiode
-        // assertSjekkBehandlingIder(forventedeUtbetalingsoppdrag.map { it.behandlingId }, false) // verifiser at alle behandlinger er verifisert
         forventedeUtbetalingsoppdrag.forEach { forventetUtbetalingsoppdrag ->
             val behandlingId = forventetUtbetalingsoppdrag.behandlingId
             val utbetalingsoppdrag = beregnetUtbetalingsoppdrag[behandlingId]
@@ -110,6 +110,7 @@ class OppdragSteg {
                 throw e
             }
         }
+        assertSjekkBehandlingIder(dataTable, beregnetUtbetalingsoppdrag.keys)
     }
 
     private fun tilKjeder(tilkjentYtelse: TilkjentYtelse?): Map<String, List<AndelTilkjentYtelseForUtbetalingsoppdrag>> {
