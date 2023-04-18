@@ -20,7 +20,7 @@ object OppdragParser {
         return dataTable.groupByBehandlingId().map { (behandlingId, rader) ->
 
             val behandling = behandlinger.getValue(behandlingId)
-            val andeler = rader.map { mapAndelTilkjentYtelse(it, behandling) }.toMutableSet()
+            val andeler = parseAndelder(behandling, rader)
 
             val tilkjentYtelse = TilkjentYtelse(
                 id = behandlingId,
@@ -36,6 +36,18 @@ object OppdragParser {
             andeler.forEach { it.tilkjentYtelse = tilkjentYtelse }
 
             tilkjentYtelse
+        }
+    }
+
+    private fun parseAndelder(
+        behandling: Behandling,
+        rader: List<Map<String, String>>
+    ): MutableSet<AndelTilkjentYtelse> {
+        val erUtenAndeler = (parseValgfriBoolean(DomenebegrepTilkjentYtelse.UTEN_ANDELER, rader.first()) ?: false)
+        return if (erUtenAndeler) {
+            emptySet<AndelTilkjentYtelse>().toMutableSet()
+        } else {
+            rader.map { mapAndelTilkjentYtelse(it, behandling) }.toMutableSet()
         }
     }
 
@@ -107,6 +119,7 @@ object OppdragParser {
 
 enum class DomenebegrepTilkjentYtelse(override val nøkkel: String) : Domenenøkkel {
     YTELSE_TYPE("Ytelse"),
+    UTEN_ANDELER("Uten andeler"),
     BELØP("Beløp"),
     KILDEBEHANDLING_ID("Kildebehandling"),
     IDENT("Ident")

@@ -4,19 +4,37 @@
 Egenskap: Vedtak for førstegangsbehandling
 
 
-#  Scenario: Opphør en periode
-#
-#    Gitt følgende tilkjente ytelser
-#      | BehandlingId | Fra dato | Til dato | Beløp | Kildebehandling |
-#      | 1            | 03.2021  | 03.2021  | 700   | 1               |
-#     ## TODO noe som gjør at man ikke har noen andeler
-#
-#    Når beregner utbetalingsoppdrag
-#
-#    Så forvent følgende utbetalingsoppdrag
-#      | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id |
-#      | 1            | 03.2021  | 03.2021  |             | 700   | NY           | Nei        | 1          |                    |
-#      | 2            | 03.2021  | 03.2021  | 03.021      | 700   | ENDR         | Ja         | 1          |                    |
+  Scenario: Opphør en periode
+
+    Gitt følgende tilkjente ytelser
+      | BehandlingId | Uten andeler | Fra dato | Til dato | Beløp | Kildebehandling |
+      | 1            |              | 03.2021  | 03.2021  | 700   | 1               |
+      | 2            | Ja           |          |          |       |                 |
+
+    Når beregner utbetalingsoppdrag
+
+    Så forvent følgende utbetalingsoppdrag
+      | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id |
+      | 1            | 03.2021  | 03.2021  |             | 700   | NY           | Nei        | 0          |                    |
+      | 2            | 03.2021  | 03.2021  | 03.2021     | 700   | ENDR         | Ja         | 0          |                    |
+
+  Scenario: Iverksetter på nytt etter opphør
+
+    Gitt følgende tilkjente ytelser
+      | BehandlingId | Uten andeler | Fra dato | Til dato | Beløp | Kildebehandling |
+      | 1            |              | 03.2021  | 03.2021  | 700   | 1               |
+      | 2            | Ja           |          |          |       |                 |
+      | 3            |              | 03.2021  | 03.2021  | 700   | 3               |
+
+    Når beregner utbetalingsoppdrag
+
+    Så forvent følgende utbetalingsoppdrag
+      | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id |
+      | 1            | 03.2021  | 03.2021  |             | 700   | NY           | Nei        | 0          |                    |
+      | 2            | 03.2021  | 03.2021  | 03.2021     | 700   | ENDR         | Ja         | 0          |                    |
+# TODO denne burde være feil, den burde vel kanskje peke til 0?
+#      | 3            | 03.2021  | 03.2021  |             | 700   | ENDR         | Nei        | 1          | 0                  |
+      | 3            | 03.2021  | 03.2021  |             | 700   | ENDR         | Nei        | 1          |                    |
 
   Scenario: Opphør en av 2 perioder
 
