@@ -21,9 +21,9 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.gjeldendeForri
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.kjedeinndelteAndeler
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
-import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import org.assertj.core.api.Assertions.assertThat
 
 class OppdragSteg {
@@ -78,7 +78,7 @@ class OppdragSteg {
             val behandlingId = forventetUtbetalingsoppdrag.behandlingId
             val utbetalingsoppdrag = beregnetUtbetalingsoppdrag[behandlingId]
                 ?: error("Mangler utbetalingsoppdrag for $behandlingId")
-            assertUtbetalingsoppdrag(forventetUtbetalingsoppdrag, utbetalingsoppdrag, false)
+            assertUtbetalingsoppdrag(forventetUtbetalingsoppdrag, utbetalingsoppdrag, true)
         }
     }
 
@@ -119,7 +119,7 @@ private fun assertUtbetalingsperiode(
 ) {
     assertThat(utbetalingsperiode.erEndringPåEksisterendePeriode)
         .isEqualTo(forventetUtbetalingsperiode.erEndringPåEksisterendePeriode)
-    assertThat(utbetalingsperiode.klassifisering).isEqualTo(Ytelsestype.BARNETRYGD.kode)
+    assertThat(utbetalingsperiode.klassifisering).isEqualTo(YtelseType.ORDINÆR_BARNETRYGD.klassifisering)
     assertThat(utbetalingsperiode.periodeId).isEqualTo(forventetUtbetalingsperiode.periodeId)
     assertThat(utbetalingsperiode.forrigePeriodeId).isEqualTo(forventetUtbetalingsperiode.forrigePeriodeId)
     assertThat(utbetalingsperiode.sats.toInt()).isEqualTo(forventetUtbetalingsperiode.sats)
