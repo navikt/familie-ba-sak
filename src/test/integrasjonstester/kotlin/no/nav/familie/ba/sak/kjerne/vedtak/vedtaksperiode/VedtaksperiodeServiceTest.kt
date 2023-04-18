@@ -148,7 +148,7 @@ class VedtaksperiodeServiceTest(
 
         val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandlingEtterNySøknadsregistrering.id)
 
-        val vedtaksperioder = vedtaksperiodeService.genererVedtaksperioderMedBegrunnelser(vedtak)
+        val vedtaksperioder = vedtaksperiodeService.genererVedtaksperioderMedBegrunnelserGammel(vedtak)
 
         assertEquals(1, vedtaksperioder.size)
         assertEquals(1, vedtaksperioder.flatMap { it.begrunnelser }.size)
@@ -198,7 +198,7 @@ class VedtaksperiodeServiceTest(
 
         val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandlingEtterNySøknadsregistrering.id)
 
-        val vedtaksperioder = vedtaksperiodeService.genererVedtaksperioderMedBegrunnelser(vedtak)
+        val vedtaksperioder = vedtaksperiodeService.genererVedtaksperioderMedBegrunnelserGammel(vedtak)
 
         assertEquals(1, vedtaksperioder.size)
         assertEquals(1, vedtaksperioder.flatMap { it.eøsBegrunnelser }.size)

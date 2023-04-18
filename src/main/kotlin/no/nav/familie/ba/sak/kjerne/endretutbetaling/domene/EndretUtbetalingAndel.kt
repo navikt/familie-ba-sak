@@ -24,6 +24,9 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestEndretAndel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelseListConverter
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
@@ -89,13 +92,7 @@ data class EndretUtbetalingAndel(
         }
 
     fun validerUtfyltEndring(): Boolean {
-        if (person == null ||
-            prosent == null ||
-            fom == null ||
-            tom == null ||
-            årsak == null ||
-            søknadstidspunkt == null ||
-            (begrunnelse == null || begrunnelse!!.isEmpty())
+        if (manglerObligatoriskFelt()
         ) {
             val feilmelding =
                 "Person, prosent, fom, tom, årsak, begrunnese og søknadstidspunkt skal være utfylt: $this.tostring()"
@@ -115,6 +112,14 @@ data class EndretUtbetalingAndel(
 
         return true
     }
+
+    fun manglerObligatoriskFelt() = person == null ||
+        prosent == null ||
+        fom == null ||
+        tom == null ||
+        årsak == null ||
+        søknadstidspunkt == null ||
+        (begrunnelse == null || begrunnelse!!.isEmpty())
 
     fun årsakErDeltBosted() = this.årsak == Årsak.DELT_BOSTED
 }
@@ -164,3 +169,98 @@ fun hentPersonerForEtterEndretUtbetalingsperiode(
         .erDagenFør(fom) &&
         endringsaarsaker.contains(endretUtbetalingAndel.årsak)
 }.map { it.personIdent }
+
+sealed interface IEndretUtbetalingAndel
+
+data class TomEndretUtbetalingAndel(
+    val id: Long,
+    val behandlingId: Long
+) : IEndretUtbetalingAndel
+
+sealed interface IUtfyltEndretUtbetalingAndel : IEndretUtbetalingAndel {
+    val id: Long
+    val behandlingId: Long
+    val person: Person
+    val prosent: BigDecimal
+    val fom: YearMonth
+    val tom: YearMonth
+    val årsak: Årsak
+    val søknadstidspunkt: LocalDate
+    val begrunnelse: String
+    val standardbegrunnelser: List<IVedtakBegrunnelse>
+}
+
+data class UtfyltEndretUtbetalingAndel(
+    override val id: Long,
+    override val behandlingId: Long,
+    override val person: Person,
+    override val prosent: BigDecimal,
+    override val fom: YearMonth,
+    override val tom: YearMonth,
+    override val årsak: Årsak,
+    override val søknadstidspunkt: LocalDate,
+    override val begrunnelse: String,
+    override val standardbegrunnelser: List<IVedtakBegrunnelse>
+) : IUtfyltEndretUtbetalingAndel
+
+data class UtfyltEndretUtbetalingAndelDeltBosted(
+    override val id: Long,
+    override val behandlingId: Long,
+    override val person: Person,
+    override val prosent: BigDecimal,
+    override val fom: YearMonth,
+    override val tom: YearMonth,
+    override val årsak: Årsak,
+    override val søknadstidspunkt: LocalDate,
+    override val begrunnelse: String,
+    override val standardbegrunnelser: List<IVedtakBegrunnelse>,
+
+    val avtaletidspunktDeltBosted: LocalDate
+) : IUtfyltEndretUtbetalingAndel
+
+fun EndretUtbetalingAndel.tilIEndretUtbetalingAndel(): IEndretUtbetalingAndel {
+    return if (this.manglerObligatoriskFelt()) {
+        TomEndretUtbetalingAndel(
+            this.id,
+            this.behandlingId
+        )
+    } else {
+        if (this.årsakErDeltBosted()) {
+            UtfyltEndretUtbetalingAndelDeltBosted(
+                id = this.id,
+                behandlingId = this.behandlingId,
+                person = this.person!!,
+                prosent = this.prosent!!,
+                fom = this.fom!!,
+                tom = this.tom!!,
+                årsak = this.årsak!!,
+                avtaletidspunktDeltBosted = this.avtaletidspunktDeltBosted!!,
+                søknadstidspunkt = this.søknadstidspunkt!!,
+                begrunnelse = this.begrunnelse!!,
+                standardbegrunnelser = this.standardbegrunnelser
+            )
+        }
+
+        UtfyltEndretUtbetalingAndel(
+            id = this.id,
+            behandlingId = this.behandlingId,
+            person = this.person!!,
+            prosent = this.prosent!!,
+            fom = this.fom!!,
+            tom = this.tom!!,
+            årsak = this.årsak!!,
+            søknadstidspunkt = this.søknadstidspunkt!!,
+            begrunnelse = this.begrunnelse!!,
+            standardbegrunnelser = this.standardbegrunnelser
+        )
+    }
+}
+
+fun List<IUtfyltEndretUtbetalingAndel>.tilTidslinje() =
+    this.map { betalingAndel ->
+        Periode(
+            fraOgMed = betalingAndel.fom.tilTidspunkt(),
+            tilOgMed = betalingAndel.tom.tilTidspunkt(),
+            innhold = betalingAndel
+        )
+    }.tilTidslinje()
