@@ -57,8 +57,8 @@ object OppdragParser {
     private fun mapForventetUtbetalingsperiode(it: Map<String, String>) =
         ForventetUtbetalingsperiode(
             erEndringPåEksisterendePeriode = parseBoolean(DomenebegrepUtbetalingsoppdrag.ER_ENDRING, it),
-            periodeId = parseInt(DomenebegrepUtbetalingsoppdrag.PERIODE_ID, it).toLong(),
-            forrigePeriodeId = parseValgfriInt(DomenebegrepUtbetalingsoppdrag.FORRIGE_PERIODE_ID, it)?.toLong(),
+            periodeId = parseLong(DomenebegrepUtbetalingsoppdrag.PERIODE_ID, it),
+            forrigePeriodeId = parseValgfriLong(DomenebegrepUtbetalingsoppdrag.FORRIGE_PERIODE_ID, it),
             sats = parseInt(DomenebegrepUtbetalingsoppdrag.BELØP, it),
             satsType = parseValgfriEnum<Utbetalingsperiode.SatsType>(DomenebegrepUtbetalingsoppdrag.TYPE, it)
                 ?: Utbetalingsperiode.SatsType.MND,
@@ -88,8 +88,10 @@ object OppdragParser {
             beløp = parseInt(DomenebegrepTilkjentYtelse.BELØP, rad),
             behandling = behandling,
             tilkjentYtelse = null,
-            kildeBehandlingId = parseInt(DomenebegrepTilkjentYtelse.KILDEBEHANDLING_ID, rad).toLong(),
-            aktør = parseAktør(rad)
+            kildeBehandlingId = parseLong(DomenebegrepTilkjentYtelse.KILDEBEHANDLING_ID, rad),
+            aktør = parseAktør(rad),
+            periodeIdOffset = parseValgfriLong(DomenebegrepUtbetalingsoppdrag.PERIODE_ID, rad),
+            forrigeperiodeIdOffset = parseValgfriLong(DomenebegrepUtbetalingsoppdrag.FORRIGE_PERIODE_ID, rad)
         )
     }
 

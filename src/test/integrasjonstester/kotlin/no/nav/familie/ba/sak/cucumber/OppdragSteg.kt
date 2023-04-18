@@ -19,6 +19,7 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGenerator
 import no.nav.familie.ba.sak.integrasjoner.økonomi.pakkInnForUtbetaling
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.gjeldendeForrigeOffsetForKjede
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.kjedeinndelteAndeler
+import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.oppdaterBeståendeAndelerMedOffset
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -67,6 +68,7 @@ class OppdragSteg {
         val oppdaterteKjeder = tilKjeder(tilkjentYtelse)
         val sisteOffsetPåFagsak = maxOffsetPåFagsak(acc)
         val sisteOffsetPerIdent = gjeldendeForrigeOffsetForKjede(forrigeKjeder)
+        oppdaterBeståendeAndelerMedOffset(oppdaterteKjeder, forrigeKjeder)
         return utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOppdaterTilkjentYtelse(
             saksbehandlerId = "saksbehandlerId",
             vedtak = vedtak,
@@ -124,19 +126,24 @@ class OppdragSteg {
     }
 
     // @Gitt("følgende tilkjente ytelser uten andel for {}")
-}
 
-private fun assertUtbetalingsoppdrag(
-    forventetUtbetalingsoppdrag: ForventetUtbetalingsoppdrag,
-    utbetalingsoppdrag: Utbetalingsoppdrag,
-    medUtbetalingsperiode: Boolean = true
-) {
-    assertThat(utbetalingsoppdrag.kodeEndring).isEqualTo(forventetUtbetalingsoppdrag.kodeEndring)
-    assertThat(utbetalingsoppdrag.utbetalingsperiode).hasSize(forventetUtbetalingsoppdrag.utbetalingsperiode.size)
-    if (medUtbetalingsperiode) {
-        forventetUtbetalingsoppdrag.utbetalingsperiode.forEachIndexed { index, forventetUtbetalingsperiode ->
-            val utbetalingsperiode = utbetalingsoppdrag.utbetalingsperiode[index]
-            assertUtbetalingsperiode(utbetalingsperiode, forventetUtbetalingsperiode)
+    private fun assertUtbetalingsoppdrag(
+        forventetUtbetalingsoppdrag: ForventetUtbetalingsoppdrag,
+        utbetalingsoppdrag: Utbetalingsoppdrag,
+        medUtbetalingsperiode: Boolean = true
+    ) {
+        assertThat(utbetalingsoppdrag.kodeEndring).isEqualTo(forventetUtbetalingsoppdrag.kodeEndring)
+        assertThat(utbetalingsoppdrag.utbetalingsperiode).hasSize(forventetUtbetalingsoppdrag.utbetalingsperiode.size)
+        if (medUtbetalingsperiode) {
+            forventetUtbetalingsoppdrag.utbetalingsperiode.forEachIndexed { index, forventetUtbetalingsperiode ->
+                val utbetalingsperiode = utbetalingsoppdrag.utbetalingsperiode[index]
+                try {
+                    assertUtbetalingsperiode(utbetalingsperiode, forventetUtbetalingsperiode)
+                } catch (e: Throwable) {
+                    logger.error("Feilet validering av rad $index for oppdrag=${forventetUtbetalingsoppdrag.behandlingId}")
+                    throw e
+                }
+            }
         }
     }
 }
