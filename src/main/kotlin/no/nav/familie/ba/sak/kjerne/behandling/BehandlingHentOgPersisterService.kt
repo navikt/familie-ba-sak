@@ -5,8 +5,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 
 @Service
@@ -104,9 +102,6 @@ class BehandlingHentOgPersisterService(
         val behandlinger = behandlingRepository.finnBehandlinger(behandling.fagsak.id)
         return Behandlingutils.hentForrigeBehandlingSomErVedtatt(behandlinger, behandling)
     }
-
-    fun hentSisteIverksatteBehandlingerFraLøpendeFagsaker(page: Pageable): Page<Long> =
-        behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker(page)
 
     fun <T> partitionByIverksatteBehandlinger(funksjon: (iverksatteBehandlinger: List<Long>) -> List<T>): List<T> {
         return behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker().chunked(10000)
