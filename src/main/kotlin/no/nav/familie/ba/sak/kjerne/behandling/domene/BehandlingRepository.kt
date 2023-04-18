@@ -185,39 +185,4 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
             "where b.id in (:behandlingIder) AND f.institusjon IS NOT NULL AND f.status = 'LØPENDE' "
     )
     fun finnTssEksternIdForBehandlinger(behandlingIder: List<Long>): List<Pair<Long, String>>
-
-    @Query(
-        """select distinct b.id from AndelTilkjentYtelse aty
-            inner join Behandling b on b.id = aty.behandlingId
-            where b.resultat not in (:ugyldigeResultater)
-            group by(b.id, aty.periodeOffset)
-            having count(aty.periodeOffset) > 1"""
-    )
-    fun finnBehandlingerMedDuplikateOffsetsForAndelTilkjentYtelse(ugyldigeResultater: List<Behandlingsresultat>): List<Long>
-
-    @Query(
-        """select distinct b.id from AndelTilkjentYtelse aty
-            inner join Behandling b on aty.behandlingId = b.id
-            where aty.kalkulertUtbetalingsbeløp > 0
-                and aty.periodeOffset is null
-                and b.status = 'AVSLUTTET'
-                and b.resultat not in (:ugyldigeResultater)
-                and aty.endretTidspunkt > '2022-09-04'"""
-    )
-    fun finnBehandlingerMedFeilNullOffsetsForAndelTilkjentYtelse(ugyldigeResultater: List<Behandlingsresultat>): List<Long>
-
-    @Query(
-        """
-            select distinct b.id from Behandling b
-            where b.resultat not in (:ugyldigeResultater)
-                and b.opprettetÅrsak not in (:ugyldigeÅrsaker)
-                and b.status = 'AVSLUTTET'
-                and b.endretTidspunkt >= :startDato
-        """
-    )
-    fun finnBehandlingerOpprettetEtterDatoForOffsetFeil(
-        ugyldigeResultater: List<Behandlingsresultat>,
-        ugyldigeÅrsaker: List<BehandlingÅrsak> = listOf(BehandlingÅrsak.ENDRE_MIGRERINGSDATO),
-        startDato: LocalDateTime
-    ): List<Long>
 }
