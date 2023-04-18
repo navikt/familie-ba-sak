@@ -21,10 +21,14 @@ object VedtaksperiodeMedBegrunnelserParser {
     }
 
     enum class DomenebegrepPersongrunnlag(override val nøkkel: String) : Domenenøkkel {
-        PERSON_TYPE("Persontype")
+        PERSON_TYPE("Persontype"),
+        FØDSELSDATO("Fødselsdato"),
+        PERSON_ID("PersonId")
     }
 
     enum class DomenebegrepVedtaksperiodeMedBegrunnelser(override val nøkkel: String) : Domenenøkkel {
-        VEDTAKSPERIODE_TYPE("Vedtaksperiodetype")
+        VEDTAKSPERIODE_TYPE("Vedtaksperiodetype"),
+        VILKÅR("Vilkår"),
+        RESULTAT("Resultat")
     }
 }
