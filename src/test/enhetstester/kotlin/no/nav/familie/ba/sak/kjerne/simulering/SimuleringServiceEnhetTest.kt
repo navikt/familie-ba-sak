@@ -221,7 +221,7 @@ internal class SimuleringServiceEnhetTest {
         every { øknomiSimuleringMottakerRepository.findByBehandlingId(behandling.id) } returns simuleringMottaker
 
         val behandlingHarManuellePosteringerFørMars2023 =
-            simuleringService.harMigreringsbehandlingManuellePosteringerFørMars2023(behandling)
+            simuleringService.harMigreringsbehandlingManuellePosteringer(behandling)
 
         assertThat(behandlingHarManuellePosteringerFørMars2023, Is(true))
     }
@@ -254,7 +254,7 @@ internal class SimuleringServiceEnhetTest {
         every { øknomiSimuleringMottakerRepository.findByBehandlingId(behandling.id) } returns simuleringMottaker
 
         val behandlingHarManuellePosteringerFørMars2023 =
-            simuleringService.harMigreringsbehandlingManuellePosteringerFørMars2023(behandling)
+            simuleringService.harMigreringsbehandlingManuellePosteringer(behandling)
 
         assertThat(behandlingHarManuellePosteringerFørMars2023, Is(false))
     }
@@ -274,7 +274,7 @@ internal class SimuleringServiceEnhetTest {
             førsteSteg = StegType.VURDER_TILBAKEKREVING
         )
 
-        assertThrows<Feil> { simuleringService.harMigreringsbehandlingManuellePosteringerFørMars2023(behandling) }
+        assertThrows<Feil> { simuleringService.harMigreringsbehandlingManuellePosteringer(behandling) }
     }
 
     private fun mockØkonomiSimuleringMottaker(

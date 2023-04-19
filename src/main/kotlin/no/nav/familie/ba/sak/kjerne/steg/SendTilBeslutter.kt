@@ -68,7 +68,7 @@ class SendTilBeslutter(
         totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandling)
 
         // oppretter ikke GodkjenneVedtak task for manuell migrering som har avvik innenfor beløpsgrenser eller manuelle posteringer
-        if (!behandling.erManuellMigrering() || simuleringService.harMigreringsbehandlingManuellePosteringerFørMars2023(
+        if (!behandling.erManuellMigrering() || simuleringService.harMigreringsbehandlingManuellePosteringer(
                 behandling
             ) || !simuleringService.harMigreringsbehandlingAvvikInnenforBeløpsgrenser(behandling)
         ) {
