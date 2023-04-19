@@ -24,8 +24,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
-import org.springframework.data.domain.Page
-import org.springframework.data.domain.Pageable
 import java.math.BigInteger
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -166,7 +164,7 @@ class KonsistensavstemmingTest {
             )
         )
 
-        verify(exactly = 0) { avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(any()) }
+        verify(exactly = 0) { avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker() }
     }
 
     @Test
@@ -191,12 +189,8 @@ class KonsistensavstemmingTest {
         every { dataChunkRepository.findByTransaksjonsIdAndChunkNr(transaksjonsId, 2) } returns datachunks[1]
         every { dataChunkRepository.findByTransaksjonsIdAndChunkNr(transaksjonsId, 3) } returns null
 
-        val page = mockk<Page<Long>>()
-        val pageable = Pageable.ofSize(KonsistensavstemMotOppdragStartTask.ANTALL_BEHANDLINGER)
-        every { behandlingHentOgPersisterService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(pageable) } returns page
-        every { page.totalPages } returns 1
-        every { page.content } returns (1..1450).toList().map { it.toLong() }
-        every { page.nextPageable() } returns pageable
+        every { behandlingHentOgPersisterService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker() } returns (1..1450).toList()
+            .map { it.toLong() }
 
         konistensavstemmingStartTask.doTask(
             Task(
@@ -211,7 +205,7 @@ class KonsistensavstemmingTest {
             )
         )
 
-        verify(exactly = 2) { avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(any()) }
+        verify(exactly = 1) { avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker() }
         val taskSlots = mutableListOf<Task>()
         verify(exactly = 2) { taskService.save(capture(taskSlots)) }
 
@@ -459,12 +453,9 @@ class KonsistensavstemmingTest {
 
     private fun lagMockForStartTaskHappCase(transaksjonsId: UUID): CapturingSlot<LocalDateTime> {
         val behandlingId = 1L
-        val page = mockk<Page<Long>>()
-        val pageable = Pageable.ofSize(KonsistensavstemMotOppdragStartTask.ANTALL_BEHANDLINGER)
-        every { behandlingHentOgPersisterService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(pageable) } returns page
-        every { page.totalPages } returns 1
-        every { page.content } returns listOf(behandlingId)
-        every { page.nextPageable() } returns pageable
+        every { behandlingHentOgPersisterService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker() } returns listOf(
+            behandlingId
+        )
 
         every { batchRepository.getReferenceById(batchId) } returns Batch(id = batchId, kjøreDato = LocalDate.now())
         every { dataChunkRepository.save(any()) } returns DataChunk(

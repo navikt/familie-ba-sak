@@ -9,7 +9,6 @@ import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
 import org.slf4j.LoggerFactory
-import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 
@@ -46,36 +45,32 @@ class KonsistensavstemMotOppdragStartTask(val avstemmingService: AvstemmingServi
             }
         }
 
-        var relevanteBehandlinger =
-            avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(Pageable.ofSize(ANTALL_BEHANDLINGER))
+        val relevanteBehandlinger =
+            avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker().toSet().sorted()
 
         var chunkNr = 1
-        for (pageNumber in 1..relevanteBehandlinger.totalPages) {
-            relevanteBehandlinger.content.chunked(AvstemmingService.KONSISTENSAVSTEMMING_DATA_CHUNK_STORLEK)
-                .forEach { oppstykketRelevanteBehandlinger ->
-                    if (avstemmingService.skalOppretteFinnPerioderForRelevanteBehandlingerTask(
-                            konsistensavstemmingTask.transaksjonsId,
-                            chunkNr
+        relevanteBehandlinger.chunked(AvstemmingService.KONSISTENSAVSTEMMING_DATA_CHUNK_STORLEK)
+            .forEach { oppstykketRelevanteBehandlinger ->
+                if (avstemmingService.skalOppretteFinnPerioderForRelevanteBehandlingerTask(
+                        konsistensavstemmingTask.transaksjonsId,
+                        chunkNr
+                    )
+                ) {
+                    avstemmingService.opprettKonsistensavstemmingFinnPerioderForRelevanteBehandlingerTask(
+                        KonsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO(
+                            transaksjonsId = konsistensavstemmingTask.transaksjonsId,
+                            chunkNr = chunkNr,
+                            avstemmingsdato = avstemmingsdato,
+                            batchId = konsistensavstemmingTask.batchId,
+                            relevanteBehandlinger = oppstykketRelevanteBehandlinger.map { it.toLong() },
+                            sendTilØkonomi = konsistensavstemmingTask.sendTilØkonomi
                         )
-                    ) {
-                        avstemmingService.opprettKonsistensavstemmingFinnPerioderForRelevanteBehandlingerTask(
-                            KonsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO(
-                                transaksjonsId = konsistensavstemmingTask.transaksjonsId,
-                                chunkNr = chunkNr,
-                                avstemmingsdato = avstemmingsdato,
-                                batchId = konsistensavstemmingTask.batchId,
-                                relevanteBehandlinger = oppstykketRelevanteBehandlinger.map { it.toLong() },
-                                sendTilØkonomi = konsistensavstemmingTask.sendTilØkonomi
-                            )
-                        )
-                    } else {
-                        logger.info("Finn perioder for avstemming task alt kjørt for ${konsistensavstemmingTask.transaksjonsId} og chunkNr $chunkNr")
-                    }
-                    chunkNr = chunkNr.inc()
+                    )
+                } else {
+                    logger.info("Finn perioder for avstemming task alt kjørt for ${konsistensavstemmingTask.transaksjonsId} og chunkNr $chunkNr")
                 }
-            relevanteBehandlinger =
-                avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(relevanteBehandlinger.nextPageable())
-        }
+                chunkNr = chunkNr.inc()
+            }
 
         avstemmingService.opprettKonsistensavstemmingAvsluttTask(
             KonsistensavstemmingAvsluttTaskDTO(
@@ -89,7 +84,6 @@ class KonsistensavstemMotOppdragStartTask(val avstemmingService: AvstemmingServi
 
     companion object {
         const val TASK_STEP_TYPE = "konsistensavstemMotOppdragStart"
-        const val ANTALL_BEHANDLINGER = 10000
         private val logger = LoggerFactory.getLogger(KonsistensavstemMotOppdragStartTask::class.java)
     }
 }
