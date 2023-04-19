@@ -13,7 +13,6 @@ import no.nav.familie.prosessering.domene.Task
 import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
@@ -110,10 +109,8 @@ class AvstemmingService(
         taskService.save(konsistensavstemmingAvsluttTask)
     }
 
-    fun hentSisteIverksatteBehandlingerFraLøpendeFagsaker(
-        pageable: Pageable = Pageable.ofSize(KONSISTENSAVSTEMMING_DATA_CHUNK_STORLEK)
-    ) =
-        behandlingHentOgPersisterService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker(pageable)
+    fun hentSisteIverksatteBehandlingerFraLøpendeFagsaker() =
+        behandlingHentOgPersisterService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker()
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun opprettKonsistensavstemmingFinnPerioderForRelevanteBehandlingerTask(
