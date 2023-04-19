@@ -10,9 +10,10 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.beregning.domene.hentTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjeMedAndeler
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
+import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil
+import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringUtil.tilFørsteEndringstidspunkt
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -43,7 +44,7 @@ fun hentBarnasAndeler(andeler: List<AndelTilkjentYtelse>, barna: List<Person>) =
 object TilkjentYtelseValidering {
 
     fun finnAktørIderMedUgyldigEtterbetalingsperiode(
-        forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>?,
+        forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
         andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
         kravDato: LocalDateTime
     ): List<String> {
@@ -56,7 +57,7 @@ object TilkjentYtelseValidering {
             aktørIder.mapNotNull { aktørId ->
                 val andelerTilkjentYtelseForPerson = andelerTilkjentYtelse.filter { it.aktør.aktørId == aktørId }
                 val forrigeAndelerTilkjentYtelseForPerson =
-                    forrigeAndelerTilkjentYtelse?.filter { it.aktør.aktørId == aktørId }
+                    forrigeAndelerTilkjentYtelse.filter { it.aktør.aktørId == aktørId }
 
                 val etterbetalingErUgyldig = erUgyldigEtterbetalingPåPerson(
                     forrigeAndelerTilkjentYtelseForPerson,
@@ -84,29 +85,22 @@ object TilkjentYtelseValidering {
     }
 
     fun erUgyldigEtterbetalingPåPerson(
-        forrigeAndelerForPerson: List<AndelTilkjentYtelse>?,
+        forrigeAndelerForPerson: List<AndelTilkjentYtelse>,
         andelerForPerson: List<AndelTilkjentYtelse>,
-        gyldigEtterbetalingFom: YearMonth?
+        gyldigEtterbetalingFom: YearMonth
     ): Boolean {
         return YtelseType.values().any { ytelseType ->
-            val forrigeAndelerForPersonOgType = forrigeAndelerForPerson?.filter { it.type == ytelseType }
+            val forrigeAndelerForPersonOgType = forrigeAndelerForPerson.filter { it.type == ytelseType }
             val andelerForPersonOgType = andelerForPerson.filter { it.type == ytelseType }
 
-            val forrigeAndelerTidslinje = forrigeAndelerForPersonOgType?.toList().hentTidslinje()
-            val andelerTidslinje = andelerForPersonOgType.toList().hentTidslinje()
+            val etterbetalingTidslinje = EndringIUtbetalingUtil.lagEtterbetalingstidslinjeForPersonOgType(
+                nåværendeAndeler = andelerForPersonOgType,
+                forrigeAndeler = forrigeAndelerForPersonOgType
+            )
 
-            val erAndelMedØktBeløpFørGyldigEtterbetalingsdato =
-                erAndelMedØktBeløpFørDato(
-                    forrigeAndeler = forrigeAndelerForPersonOgType,
-                    andeler = andelerForPersonOgType,
-                    måned = gyldigEtterbetalingFom
-                )
+            val førsteMånedMedEtterbetaling = etterbetalingTidslinje.tilFørsteEndringstidspunkt()
 
-            val segmenterLagtTil = andelerTidslinje.disjoint(forrigeAndelerTidslinje)
-            val erLagtTilSegmentFørGyldigEtterbetalingsdato =
-                segmenterLagtTil.any { it.value.stønadFom < gyldigEtterbetalingFom && it.value.kalkulertUtbetalingsbeløp > 0 }
-
-            erAndelMedØktBeløpFørGyldigEtterbetalingsdato || erLagtTilSegmentFørGyldigEtterbetalingsdato
+            førsteMånedMedEtterbetaling != null && førsteMånedMedEtterbetaling < gyldigEtterbetalingFom
         }
     }
 
