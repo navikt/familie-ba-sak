@@ -68,7 +68,10 @@ class SendTilBeslutter(
         totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandling)
 
         // oppretter ikke GodkjenneVedtak task for manuell migrering som har avvik innenfor beløpsgrenser
-        if (!behandling.erManuellMigrering() || !simuleringService.harMigreringsbehandlingAvvikInnenforBeløpsgrenser(behandling)) {
+        if (!behandling.erManuellMigrering() || simuleringService.harMigreringsbehandlingManuellePosteringerFørMars2023(
+                behandling
+            )
+        ) {
             val godkjenneVedtakTask = OpprettOppgaveTask.opprettTask(
                 behandlingId = behandling.id,
                 oppgavetype = Oppgavetype.GodkjenneVedtak,

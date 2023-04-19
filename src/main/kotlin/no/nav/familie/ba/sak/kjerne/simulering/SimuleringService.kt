@@ -176,6 +176,17 @@ class SimuleringService(
             sjekkOmBehandlingHarFeilutbetalingInnenforBeløpsgrenser(behandling, antallBarn)
     }
 
+    fun harMigreringsbehandlingManuellePosteringerFørMars2023(behandling: Behandling): Boolean {
+        if (!behandling.erManuellMigrering()) throw Feil("Sjekk for manuelle posteringer skal bare gjøres for manuelle migreringsbehandlinger")
+
+        val februar2023 = LocalDate.of(2023, 2, 1)
+
+        return filterBortUrelevanteVedtakSimuleringPosteringer(hentSimuleringPåBehandling(behandling.id))
+            .flatMap { it.økonomiSimuleringPostering }
+            .filter { it.fom.isSameOrBefore(februar2023) }
+            .any { it.erManuellPostering }
+    }
+
     private fun sjekkOmBehandlingHarEtterbetalingInnenforBeløpsgrenser(
         behandling: Behandling,
         antallBarn: Int
