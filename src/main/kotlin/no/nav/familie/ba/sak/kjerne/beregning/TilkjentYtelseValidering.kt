@@ -3,7 +3,6 @@ package no.nav.familie.ba.sak.kjerne.beregning
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.KONTAKT_TEAMET_SUFFIX
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
-import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.maksBeløp
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -196,19 +195,6 @@ object TilkjentYtelseValidering {
             }
         }
     }
-
-    private fun erAndelMedØktBeløpFørDato(
-        forrigeAndeler: List<AndelTilkjentYtelse>?,
-        andeler: List<AndelTilkjentYtelse>,
-        måned: YearMonth?
-    ): Boolean = andeler
-        .filter { it.stønadFom < måned }
-        .any { andel ->
-            forrigeAndeler?.any {
-                it.periode.overlapperHeltEllerDelvisMed(andel.periode) &&
-                    it.kalkulertUtbetalingsbeløp < andel.kalkulertUtbetalingsbeløp
-            } ?: false
-        }
 }
 
 private fun validerAtBeløpForPartStemmerMedSatser(
