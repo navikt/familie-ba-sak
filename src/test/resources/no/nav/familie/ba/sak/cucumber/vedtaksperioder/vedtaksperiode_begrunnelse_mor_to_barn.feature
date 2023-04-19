@@ -28,14 +28,14 @@ Egenskap: Vedtaksperioder med mor og to barn
     Når vedtaksperioder med begrunnelser genereres for behandling 1
 
     Så forvent følgende vedtaksperioder med begrunnelser
-      | Fra dato   | Til dato   | Vedtaksperiodetype | Oppfylt for              |
-      | 01.02.1970 | 30.04.2020 | Utbetaling         | Kun søker                |
-      | 01.05.2020 | 31.12.2022 | Utbetaling         | Barn1 og søker           |
-      | 01.01.2023 | 31.03.2038 | Utbetaling         | Begge barn og søker      |
-      | 01.04.2038 | 30.11.2040 | Utbetaling         | Barn2 og søker           |
-      | 01.12.2040 |            | Utbetaling         | Kun søker                |
-      | 01.02.1970 | 31.12.2022 | Opphør             | Ikke innvilget for barn2 |
-      | 01.04.2038 |            | Opphør             | Opphørt for første barn  |
+      | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar                                  |
+      | 01.02.1970 | 30.04.2020 | Utbetaling         | Kun søker                                  |
+      | 01.05.2020 | 31.12.2022 | Utbetaling         | Barn1 og søker                             |
+      | 01.01.2023 | 31.03.2038 | Utbetaling         | Begge barn og søker                        |
+      | 01.04.2038 | 30.11.2040 | Utbetaling         | Barn2 og søker                             |
+      | 01.12.2040 |            | Utbetaling         | Kun søker                                  |
+      | 01.02.1970 | 31.12.2022 | Opphør             | Skjønner ikke denne. TODO: Prat med Halvor |
+      | 01.04.2038 |            | Opphør             | Opphørt for første barn                    |
 
 
 

@@ -24,7 +24,7 @@ Egenskap: Vedtaksperioder med mor og et barn
     Når vedtaksperioder med begrunnelser genereres for behandling 1
 
     Så forvent følgende vedtaksperioder med begrunnelser
-      | Fra dato   | Til dato   | Vedtaksperiodetype | Oppfylt for   |
+      | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar   |
       | 01.02.1970 | 30.04.2020 | Utbetaling         | Kun søker     |
       | 01.05.2020 | 31.03.2038 | Utbetaling         | Barn og søker |
       | 01.04.2038 |            | Utbetaling         | Kun søker     |
@@ -43,9 +43,9 @@ Egenskap: Vedtaksperioder med mor og et barn
     Når vedtaksperioder med begrunnelser genereres for behandling 1
 
     Så forvent følgende vedtaksperioder med begrunnelser
-      | Fra dato   | Til dato   | Vedtaksperiodetype | Oppfylt for                                       |
+      | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar                                       |
       | 01.02.1970 | 31.08.2021 | Utbetaling         | Kun søker                                         |
-      | 01.02.1970 | 30.04.2020 | OPPHØR             | Skjønner ikke helt denne?                         |
+      | 01.02.1970 | 30.04.2020 | OPPHØR             | Skjønner ikke denne? TODO: Prat med Halvor        |
       | 01.05.2020 | 31.08.2021 | OPPHØR             | Barn har vilkår som er oppfylt her, men ikke alle |
       | 01.09.2021 | 31.03.2038 | Utbetaling         | Barn og søker                                     |
       | 01.04.2038 |            | Utbetaling         | Kun søker                                         |
@@ -64,7 +64,7 @@ Egenskap: Vedtaksperioder med mor og et barn
     Når vedtaksperioder med begrunnelser genereres for behandling 1
 
     Så forvent følgende vedtaksperioder med begrunnelser
-      | Fra dato   | Til dato   | Vedtaksperiodetype | Oppfylt for                                                     |
+      | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar                                                     |
       | 01.02.1970 | 30.04.2020 | Utbetaling         | Kun søker                                                       |
       | 01.05.2020 | 31.07.2029 | Utbetaling         | Barn og søker                                                   |
       | 01.08.2029 |            | Utbetaling         | Kun søker                                                       |
@@ -90,7 +90,7 @@ Egenskap: Vedtaksperioder med mor og et barn
     Når vedtaksperioder med begrunnelser genereres for behandling 1
 
     Så forvent følgende vedtaksperioder med begrunnelser
-      | Fra dato   | Til dato   | Vedtaksperiodetype | Oppfylt for   |
+      | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar   |
       | 01.02.1970 | 30.04.2020 | Utbetaling         | Kun søker     |
       | 01.05.2020 | 31.07.2029 | Utbetaling         | Barn og søker |
       | 01.08.2029 | 31.05.2030 | Utbetaling         | Kun søker     |
