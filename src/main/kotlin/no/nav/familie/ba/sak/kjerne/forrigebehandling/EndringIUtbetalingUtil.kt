@@ -67,4 +67,20 @@ object EndringIUtbetalingUtil {
 
         return endringIBeløpTidslinje
     }
+    fun lagEtterbetalingstidslinjeForPersonOgType(
+        nåværendeAndeler: List<AndelTilkjentYtelse>,
+        forrigeAndeler: List<AndelTilkjentYtelse>
+    ): Tidslinje<Boolean, Måned> {
+        val nåværendeTidslinje = AndelTilkjentYtelseTidslinje(nåværendeAndeler)
+        val forrigeTidslinje = AndelTilkjentYtelseTidslinje(forrigeAndeler)
+
+        val etterbetaling = nåværendeTidslinje.kombinerMed(forrigeTidslinje) { nåværende, forrige ->
+            val nåværendeBeløp = nåværende?.kalkulertUtbetalingsbeløp ?: 0
+            val forrigeBeløp = forrige?.kalkulertUtbetalingsbeløp ?: 0
+
+            nåværendeBeløp > forrigeBeløp
+        }
+
+        return etterbetaling
+    }
 }
