@@ -64,7 +64,7 @@ for hver person, lag tidslinjer og slå sammen hvis like etterfølgende perioder
     * endringsperiode
     * kompetanse
     * kalkulert beløp (bruk andel tilkjent ytelse og ta med beløpstype)
-        * differansebereigning, ønsker ikke splitt hvis ikke forskjell i beløp
+        * differanseberegning, ønsker ikke splitt hvis ikke forskjell i beløp
         * overgangsstønad
         * satsendring
         * endring i alder

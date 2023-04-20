@@ -95,7 +95,7 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
             Kompetanse(
                 fom = parseValgfriDato(Domenebegrep.FRA_DATO, kompetanse)?.toYearMonth(),
                 tom = parseValgfriDato(Domenebegrep.TIL_DATO, kompetanse)?.toYearMonth(),
-                barnAktører = persongrunnlag[behandlingId]!!.personer
+                barnAktører = persongrunnlagForBehandling(behandlingId).personer
                     .filter { aktørerForKompetane.contains(it.id) }
                     .map { it.aktør }
                     .toSet()
@@ -175,8 +175,7 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
             ).contains(vilkårResultat.vilkårType)
         }
         if (overstyringForVilkår != null) {
-            vilkårResultat.resultat =
-                parseEnum<Resultat>(DomenebegrepVedtaksperiodeMedBegrunnelser.RESULTAT, overstyringForVilkår)
+            vilkårResultat.resultat = parseEnum(DomenebegrepVedtaksperiodeMedBegrunnelser.RESULTAT, overstyringForVilkår)
             vilkårResultat.periodeFom = parseValgfriDato(Domenebegrep.FRA_DATO, overstyringForVilkår)
             vilkårResultat.periodeTom = parseValgfriDato(Domenebegrep.TIL_DATO, overstyringForVilkår)
         }
