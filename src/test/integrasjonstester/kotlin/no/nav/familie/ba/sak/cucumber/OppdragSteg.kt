@@ -8,23 +8,27 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagVedtak
+import no.nav.familie.ba.sak.cucumber.ValideringUtil.assertSjekkBehandlingIder
 import no.nav.familie.ba.sak.cucumber.domeneparser.DomeneparserUtil.groupByBehandlingId
 import no.nav.familie.ba.sak.cucumber.domeneparser.ForventetUtbetalingsoppdrag
 import no.nav.familie.ba.sak.cucumber.domeneparser.ForventetUtbetalingsperiode
 import no.nav.familie.ba.sak.cucumber.domeneparser.OppdragParser
 import no.nav.familie.ba.sak.cucumber.domeneparser.OppdragParser.mapTilkjentYtelse
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForIverksettingFactory
+import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForSimuleringFactory
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForUtbetalingsoppdrag
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGenerator
 import no.nav.familie.ba.sak.integrasjoner.økonomi.pakkInnForUtbetaling
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.gjeldendeForrigeOffsetForKjede
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.kjedeinndelteAndeler
+import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.oppdaterBeståendeAndelerMedOffset
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
-import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import org.assertj.core.api.Assertions.assertThat
+import org.slf4j.LoggerFactory
 
 class OppdragSteg {
 
@@ -32,6 +36,9 @@ class OppdragSteg {
     private var behandlinger = mapOf<Long, Behandling>()
     private var tilkjenteYtelser = listOf<TilkjentYtelse>()
     private var beregnetUtbetalingsoppdrag = mutableMapOf<Long, Utbetalingsoppdrag>()
+    private var beregnetUtbetalingsoppdragSimulering = mutableMapOf<Long, Utbetalingsoppdrag>()
+
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     @Gitt("følgende tilkjente ytelser")
     fun følgendeTilkjenteYtelser(dataTable: DataTable) {
@@ -42,49 +49,102 @@ class OppdragSteg {
     @Når("beregner utbetalingsoppdrag")
     fun `beregner utbetalingsoppdrag`() {
         tilkjenteYtelser.fold(emptyList<TilkjentYtelse>()) { acc, tilkjentYtelse ->
-            val forrigeTilkjentYtelse = acc.lastOrNull()
-
-            val vedtak = lagVedtak(behandling = tilkjentYtelse.behandling)
-            val forrigeKjeder = tilKjeder(forrigeTilkjentYtelse)
-            val oppdaterteKjeder = tilKjeder(tilkjentYtelse)
-            val sisteOffsetPåFagsak =
-                acc.flatMap { it.andelerTilkjentYtelse.map { it.periodeOffset } }.maxByOrNull { it!! }
-            val sisteOffsetPerIdent = gjeldendeForrigeOffsetForKjede(forrigeKjeder)
-            val utbetalingsoppdrag = utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOppdaterTilkjentYtelse(
-                saksbehandlerId = "saksbehandlerId",
-                vedtak = vedtak,
-                erFørsteBehandlingPåFagsak = forrigeTilkjentYtelse == null,
-                forrigeKjeder = forrigeKjeder,
-                sisteOffsetPerIdent = sisteOffsetPerIdent,
-                sisteOffsetPåFagsak = sisteOffsetPåFagsak?.toInt(),
-                oppdaterteKjeder = oppdaterteKjeder,
-                erSimulering = false,
-                endretMigreringsDato = null
-            )
-            beregnetUtbetalingsoppdrag[tilkjentYtelse.behandling.id] = utbetalingsoppdrag
-
+            val behandlingId = tilkjentYtelse.behandling.id
+            try {
+                beregnetUtbetalingsoppdragSimulering[behandlingId] =
+                    beregnUtbetalingsoppdrag(acc, tilkjentYtelse, erSimulering = true)
+                beregnetUtbetalingsoppdrag[behandlingId] = beregnUtbetalingsoppdrag(acc, tilkjentYtelse)
+            } catch (e: Throwable) {
+                logger.error("Feilet beregning av oppdrag for behandling=$behandlingId")
+                throw e
+            }
             acc + tilkjentYtelse
         }
     }
 
+    private fun beregnUtbetalingsoppdrag(
+        acc: List<TilkjentYtelse>,
+        tilkjentYtelse: TilkjentYtelse,
+        erSimulering: Boolean = false
+    ): Utbetalingsoppdrag {
+        val forrigeTilkjentYtelse = acc.lastOrNull()
+
+        val vedtak = lagVedtak(behandling = tilkjentYtelse.behandling)
+        val forrigeKjeder = tilKjeder(forrigeTilkjentYtelse, erSimulering)
+        val oppdaterteKjeder = tilKjeder(tilkjentYtelse, erSimulering)
+        val sisteOffsetPåFagsak = maxOffsetPåFagsak(acc)
+        val sisteOffsetPerIdent = gjeldendeForrigeOffsetForKjede(forrigeKjeder)
+        oppdaterBeståendeAndelerMedOffset(oppdaterteKjeder, forrigeKjeder)
+        return utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+            saksbehandlerId = "saksbehandlerId",
+            vedtak = vedtak,
+            erFørsteBehandlingPåFagsak = forrigeTilkjentYtelse == null,
+            forrigeKjeder = forrigeKjeder,
+            sisteOffsetPerIdent = sisteOffsetPerIdent,
+            sisteOffsetPåFagsak = sisteOffsetPåFagsak?.toInt(),
+            oppdaterteKjeder = oppdaterteKjeder,
+            erSimulering = erSimulering,
+            endretMigreringsDato = null
+        )
+    }
+
+    private fun maxOffsetPåFagsak(acc: List<TilkjentYtelse>) =
+        acc.maxOfOrNull { ty ->
+            ty.andelerTilkjentYtelse.maxOfOrNull {
+                it.periodeOffset ?: error(
+                    "Mangler offset for behandling=${it.behandlingId} " +
+                        "andel=${it.id} fom=${it.stønadFom} tom=${it.stønadTom}"
+                )
+            } ?: 0
+        }
+
     @Så("forvent følgende utbetalingsoppdrag")
     fun `forvent følgende utbetalingsoppdrag`(dataTable: DataTable) {
+        validerForventetUtbetalingsoppdrag(dataTable, beregnetUtbetalingsoppdrag)
+        assertSjekkBehandlingIder(dataTable, beregnetUtbetalingsoppdrag.keys)
+    }
+
+    @Så("forvent følgende simulering")
+    fun `forvent følgende simulering`(dataTable: DataTable) {
+        validerForventetUtbetalingsoppdrag(dataTable, beregnetUtbetalingsoppdragSimulering)
+        assertSjekkBehandlingIder(dataTable, beregnetUtbetalingsoppdragSimulering.keys)
+    }
+
+    private fun validerForventetUtbetalingsoppdrag(
+        dataTable: DataTable,
+        beregnetUtbetalingsoppdrag: MutableMap<Long, Utbetalingsoppdrag>
+    ) {
+        val medUtbetalingsperiode = true // TODO? Burde denne kunne sendes med som et flagg? Hva gjør den?
         val forventedeUtbetalingsoppdrag = OppdragParser.mapForventetUtbetalingsoppdrag(
             dataTable,
-            medUtbetalingsperiode = true
-        ) // TODO medUtbetalingsperiode
-        // assertSjekkBehandlingIder(forventedeUtbetalingsoppdrag.map { it.behandlingId }, false) // verifiser at alle behandlinger er verifisert
+            medUtbetalingsperiode = medUtbetalingsperiode
+        )
         forventedeUtbetalingsoppdrag.forEach { forventetUtbetalingsoppdrag ->
             val behandlingId = forventetUtbetalingsoppdrag.behandlingId
             val utbetalingsoppdrag = beregnetUtbetalingsoppdrag[behandlingId]
                 ?: error("Mangler utbetalingsoppdrag for $behandlingId")
-            assertUtbetalingsoppdrag(forventetUtbetalingsoppdrag, utbetalingsoppdrag, false)
+            try {
+                assertUtbetalingsoppdrag(forventetUtbetalingsoppdrag, utbetalingsoppdrag, medUtbetalingsperiode)
+            } catch (e: Throwable) {
+                logger.error("Feilet validering av behandling $behandlingId")
+                throw e
+            }
         }
     }
 
-    private fun tilKjeder(tilkjentYtelse: TilkjentYtelse?): Map<String, List<AndelTilkjentYtelseForUtbetalingsoppdrag>> {
+    private fun tilKjeder(
+        tilkjentYtelse: TilkjentYtelse?,
+        erSimulering: Boolean = false
+    ): Map<String, List<AndelTilkjentYtelseForUtbetalingsoppdrag>> {
+        val andelFactory = if (erSimulering) {
+            AndelTilkjentYtelseForSimuleringFactory()
+        } else {
+            AndelTilkjentYtelseForIverksettingFactory()
+        }
+
         return (tilkjentYtelse?.andelerTilkjentYtelse ?: emptyList())
-            .pakkInnForUtbetaling(AndelTilkjentYtelseForIverksettingFactory())
+            .filter { it.erAndelSomSkalSendesTilOppdrag() }
+            .pakkInnForUtbetaling(andelFactory)
             .let { kjedeinndelteAndeler(it) }
     }
 
@@ -96,19 +156,24 @@ class OppdragSteg {
     }
 
     // @Gitt("følgende tilkjente ytelser uten andel for {}")
-}
 
-private fun assertUtbetalingsoppdrag(
-    forventetUtbetalingsoppdrag: ForventetUtbetalingsoppdrag,
-    utbetalingsoppdrag: Utbetalingsoppdrag,
-    medUtbetalingsperiode: Boolean = true
-) {
-    assertThat(utbetalingsoppdrag.kodeEndring).isEqualTo(forventetUtbetalingsoppdrag.kodeEndring)
-    assertThat(utbetalingsoppdrag.utbetalingsperiode).hasSize(forventetUtbetalingsoppdrag.utbetalingsperiode.size)
-    if (medUtbetalingsperiode) {
-        forventetUtbetalingsoppdrag.utbetalingsperiode.forEachIndexed { index, forventetUtbetalingsperiode ->
-            val utbetalingsperiode = utbetalingsoppdrag.utbetalingsperiode[index]
-            assertUtbetalingsperiode(utbetalingsperiode, forventetUtbetalingsperiode)
+    private fun assertUtbetalingsoppdrag(
+        forventetUtbetalingsoppdrag: ForventetUtbetalingsoppdrag,
+        utbetalingsoppdrag: Utbetalingsoppdrag,
+        medUtbetalingsperiode: Boolean = true
+    ) {
+        assertThat(utbetalingsoppdrag.kodeEndring).isEqualTo(forventetUtbetalingsoppdrag.kodeEndring)
+        assertThat(utbetalingsoppdrag.utbetalingsperiode).hasSize(forventetUtbetalingsoppdrag.utbetalingsperiode.size)
+        if (medUtbetalingsperiode) {
+            forventetUtbetalingsoppdrag.utbetalingsperiode.forEachIndexed { index, forventetUtbetalingsperiode ->
+                val utbetalingsperiode = utbetalingsoppdrag.utbetalingsperiode[index]
+                try {
+                    assertUtbetalingsperiode(utbetalingsperiode, forventetUtbetalingsperiode)
+                } catch (e: Throwable) {
+                    logger.error("Feilet validering av rad $index for oppdrag=${forventetUtbetalingsoppdrag.behandlingId}")
+                    throw e
+                }
+            }
         }
     }
 }
@@ -119,7 +184,7 @@ private fun assertUtbetalingsperiode(
 ) {
     assertThat(utbetalingsperiode.erEndringPåEksisterendePeriode)
         .isEqualTo(forventetUtbetalingsperiode.erEndringPåEksisterendePeriode)
-    assertThat(utbetalingsperiode.klassifisering).isEqualTo(Ytelsestype.BARNETRYGD.kode)
+    assertThat(utbetalingsperiode.klassifisering).isEqualTo(YtelseType.ORDINÆR_BARNETRYGD.klassifisering)
     assertThat(utbetalingsperiode.periodeId).isEqualTo(forventetUtbetalingsperiode.periodeId)
     assertThat(utbetalingsperiode.forrigePeriodeId).isEqualTo(forventetUtbetalingsperiode.forrigePeriodeId)
     assertThat(utbetalingsperiode.sats.toInt()).isEqualTo(forventetUtbetalingsperiode.sats)

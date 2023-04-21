@@ -20,7 +20,7 @@ object OppdragParser {
         return dataTable.groupByBehandlingId().map { (behandlingId, rader) ->
 
             val behandling = behandlinger.getValue(behandlingId)
-            val andeler = rader.map { mapAndelTilkjentYtelse(it, behandling) }.toMutableSet()
+            val andeler = parseAndelder(behandling, rader)
 
             val tilkjentYtelse = TilkjentYtelse(
                 id = behandlingId,
@@ -36,6 +36,18 @@ object OppdragParser {
             andeler.forEach { it.tilkjentYtelse = tilkjentYtelse }
 
             tilkjentYtelse
+        }
+    }
+
+    private fun parseAndelder(
+        behandling: Behandling,
+        rader: List<Map<String, String>>
+    ): MutableSet<AndelTilkjentYtelse> {
+        val erUtenAndeler = (parseValgfriBoolean(DomenebegrepTilkjentYtelse.UTEN_ANDELER, rader.first()) ?: false)
+        return if (erUtenAndeler) {
+            emptySet<AndelTilkjentYtelse>().toMutableSet()
+        } else {
+            rader.map { mapAndelTilkjentYtelse(it, behandling) }.toMutableSet()
         }
     }
 
@@ -57,8 +69,8 @@ object OppdragParser {
     private fun mapForventetUtbetalingsperiode(it: Map<String, String>) =
         ForventetUtbetalingsperiode(
             erEndringPåEksisterendePeriode = parseBoolean(DomenebegrepUtbetalingsoppdrag.ER_ENDRING, it),
-            periodeId = parseInt(DomenebegrepUtbetalingsoppdrag.PERIODE_ID, it).toLong(),
-            forrigePeriodeId = parseValgfriInt(DomenebegrepUtbetalingsoppdrag.FORRIGE_PERIODE_ID, it)?.toLong(),
+            periodeId = parseLong(DomenebegrepUtbetalingsoppdrag.PERIODE_ID, it),
+            forrigePeriodeId = parseValgfriLong(DomenebegrepUtbetalingsoppdrag.FORRIGE_PERIODE_ID, it),
             sats = parseInt(DomenebegrepUtbetalingsoppdrag.BELØP, it),
             satsType = parseValgfriEnum<Utbetalingsperiode.SatsType>(DomenebegrepUtbetalingsoppdrag.TYPE, it)
                 ?: Utbetalingsperiode.SatsType.MND,
@@ -88,8 +100,10 @@ object OppdragParser {
             beløp = parseInt(DomenebegrepTilkjentYtelse.BELØP, rad),
             behandling = behandling,
             tilkjentYtelse = null,
-            kildeBehandlingId = parseInt(DomenebegrepTilkjentYtelse.KILDEBEHANDLING_ID, rad).toLong(),
-            aktør = parseAktør(rad)
+            kildeBehandlingId = parseLong(DomenebegrepTilkjentYtelse.KILDEBEHANDLING_ID, rad),
+            aktør = parseAktør(rad),
+            periodeIdOffset = parseValgfriLong(DomenebegrepUtbetalingsoppdrag.PERIODE_ID, rad),
+            forrigeperiodeIdOffset = parseValgfriLong(DomenebegrepUtbetalingsoppdrag.FORRIGE_PERIODE_ID, rad)
         )
     }
 
@@ -105,6 +119,7 @@ object OppdragParser {
 
 enum class DomenebegrepTilkjentYtelse(override val nøkkel: String) : Domenenøkkel {
     YTELSE_TYPE("Ytelse"),
+    UTEN_ANDELER("Uten andeler"),
     BELØP("Beløp"),
     KILDEBEHANDLING_ID("Kildebehandling"),
     IDENT("Ident")
