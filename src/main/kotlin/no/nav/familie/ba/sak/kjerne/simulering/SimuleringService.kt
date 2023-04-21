@@ -176,6 +176,14 @@ class SimuleringService(
             sjekkOmBehandlingHarFeilutbetalingInnenforBeløpsgrenser(behandling, antallBarn)
     }
 
+    fun harMigreringsbehandlingManuellePosteringer(behandling: Behandling): Boolean {
+        if (!behandling.erManuellMigrering()) throw Feil("Sjekk for manuelle posteringer skal bare gjøres for manuelle migreringsbehandlinger. Fagsak: ${behandling.fagsak.id} Behandling: ${behandling.id}")
+
+        return filterBortUrelevanteVedtakSimuleringPosteringer(hentSimuleringPåBehandling(behandling.id))
+            .flatMap { it.økonomiSimuleringPostering }
+            .any { it.erManuellPostering }
+    }
+
     private fun sjekkOmBehandlingHarEtterbetalingInnenforBeløpsgrenser(
         behandling: Behandling,
         antallBarn: Int

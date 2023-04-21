@@ -192,10 +192,11 @@ fun tilfeldigPerson(
     fødselsdato: LocalDate = LocalDate.now(),
     personType: PersonType = PersonType.BARN,
     kjønn: Kjønn = Kjønn.MANN,
-    aktør: Aktør = randomAktør()
+    aktør: Aktør = randomAktør(),
+    personId: Long = nestePersonId()
 ) =
     Person(
-        id = nestePersonId(),
+        id = personId,
         aktør = aktør,
         fødselsdato = fødselsdato,
         type = personType,

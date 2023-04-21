@@ -291,10 +291,13 @@ class VedtaksperiodeService(
     fun genererVedtaksperioderMedBegrunnelser(vedtak: Vedtak): List<VedtaksperiodeMedBegrunnelser> {
         val behandlingId = vedtak.behandling.id
 
+        val kompetanser = kompetanseRepository.finnFraBehandlingId(behandlingId)
+
         return utledVedtaksPerioderMedBegrunnelser(
             persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId),
             personResultater = vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId).personResultater,
-            vedtak = vedtak
+            vedtak = vedtak,
+            kompetanser = kompetanser.toList()
         )
     }
 

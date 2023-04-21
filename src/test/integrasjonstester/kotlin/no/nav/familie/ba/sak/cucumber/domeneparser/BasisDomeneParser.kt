@@ -159,6 +159,16 @@ fun parseInt(domenebegrep: Domenenøkkel, rad: Map<String, String>): Int {
     return Integer.parseInt(verdi)
 }
 
+fun parseLong(domenebegrep: Domenenøkkel, rad: Map<String, String>): Long {
+    val verdi = verdi(domenebegrep.nøkkel, rad).replace("_", "")
+
+    return verdi.toLong()
+}
+
+fun parseList(domenebegrep: Domenenøkkel, rad: Map<String, String>): List<Long> {
+    return verdi(domenebegrep.nøkkel, rad).split(",").map { it.trim().toLong() }
+}
+
 fun parseBigDecimal(domenebegrep: Domenenøkkel, rad: Map<String, String>): BigDecimal {
     val verdi = verdi(domenebegrep.nøkkel, rad)
     return verdi.toBigDecimal()
@@ -198,4 +208,11 @@ inline fun <reified T : Enum<T>> parseValgfriEnum(domenebegrep: Domenenøkkel, r
 
 inline fun <reified T : Enum<T>> parseEnum(domenebegrep: Domenenøkkel, rad: Map<String, String>): T {
     return parseValgfriEnum<T>(domenebegrep, rad)!!
+}
+
+inline fun <reified T : Enum<T>> parseEnumListe(domenebegrep: Domenenøkkel, rad: Map<String, String>): List<T> {
+    val stringVerdier = valgfriVerdi(domenebegrep.nøkkel, rad)?.split(",")?.map { it.trim() } ?: return emptyList()
+    return stringVerdier.map {
+        enumValueOf<T>(it.uppercase())
+    }
 }
