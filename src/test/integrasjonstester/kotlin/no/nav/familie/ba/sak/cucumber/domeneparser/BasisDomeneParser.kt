@@ -150,9 +150,6 @@ fun valgfriVerdi(nøkkel: String, rad: Map<String, String>): String? {
     return rad[nøkkel]
 }
 
-fun parseLong(domenebegrep: Domenenøkkel, rad: Map<String, String>) =
-    parseInt(domenebegrep, rad).toLong()
-
 fun parseInt(domenebegrep: Domenenøkkel, rad: Map<String, String>): Int {
     val verdi = verdi(domenebegrep.nøkkel, rad).replace("_", "")
 
