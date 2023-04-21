@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.common.kanSplitte
 import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.toPeriode
-import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVedtakBegrunnelseTilknyttetVilkår
 import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -292,9 +291,7 @@ object VilkårsvurderingUtils {
                 ?.vilkårResultater
                 ?.any {
                     it.vilkårType == Vilkår.UTVIDET_BARNETRYGD &&
-                        it.resultat == Resultat.OPPFYLT &&
-                        // forrige behandling har minst et måned ubetalt utvidet barnetrygd
-                        it.periodeFom?.toYearMonth() != it.periodeTom?.toYearMonth()
+                        it.resultat == Resultat.OPPFYLT
                 } ?: false
 
         // Hvis forrige behandling inneholdt utvidet-vilkåret eller underkategorien er utvidet skal
