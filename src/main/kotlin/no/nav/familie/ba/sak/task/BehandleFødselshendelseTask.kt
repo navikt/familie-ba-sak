@@ -94,7 +94,7 @@ class BehandleFødselshendelseTask(
                     this["morsIdent"] = behandleFødselshendelseTaskDTO.nyBehandling.morsIdent
                 }
             ).copy(
-                triggerTid = if (erKlokkenMellom21Og06()) kl06IdagEllerNesteDag() else LocalDateTime.now()
+                triggerTid = (if (erKlokkenMellom21Og06()) kl06IdagEllerNesteDag() else LocalDateTime.now()).plusDays(7)
             )
         }
     }
