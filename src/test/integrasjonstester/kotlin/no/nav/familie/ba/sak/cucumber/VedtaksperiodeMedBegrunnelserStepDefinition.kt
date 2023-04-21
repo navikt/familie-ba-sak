@@ -22,9 +22,12 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.parseEnum
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseEnumListe
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseInt
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseList
+import no.nav.familie.ba.sak.cucumber.domeneparser.parseLong
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriDato
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
@@ -34,6 +37,8 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import org.assertj.core.api.Assertions
+import java.math.BigDecimal
+import java.time.LocalDate
 
 class VedtaksperiodeMedBegrunnelserStepDefinition {
 
@@ -43,6 +48,7 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
     private var personResultater = mutableMapOf<Long, Set<PersonResultat>>()
     private var vedtaksperioderMedBegrunnelser = listOf<VedtaksperiodeMedBegrunnelser>()
     private var kompetanser = mutableMapOf<Long, List<Kompetanse>>()
+    private var endredeUtbetalinger = mutableMapOf<Long, List<EndretUtbetalingAndel>>()
 
     @Gitt("følgende vedtak")
     fun `følgende vedtak`(dataTable: DataTable) {
@@ -103,6 +109,24 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
         }
     }
 
+    @Og("med endrede utbetalinger for behandling {}")
+    fun `med endrede utbetalinger for behandling`(behandlingId: Long, dataTable: DataTable) {
+        val nyeEndredeUtbetalingAndeler = dataTable.asMaps()
+        endredeUtbetalinger[behandlingId] = nyeEndredeUtbetalingAndeler.map { endretUtbetaling ->
+            val personId = parseLong(DomenebegrepPersongrunnlag.PERSON_ID, endretUtbetaling)
+            EndretUtbetalingAndel(
+                behandlingId = behandlingId,
+                fom = parseValgfriDato(Domenebegrep.FRA_DATO, endretUtbetaling)?.toYearMonth(),
+                tom = parseValgfriDato(Domenebegrep.TIL_DATO, endretUtbetaling)?.toYearMonth(),
+                person = persongrunnlagForBehandling(behandlingId).personer.find { personId == it.id },
+                prosent = BigDecimal.ZERO,
+                årsak = Årsak.ALLEREDE_UTBETALT,
+                søknadstidspunkt = LocalDate.now(),
+                begrunnelse = "Fordi at..."
+            )
+        }
+    }
+
     @Og("med overstyring av vilkår for behandling {}")
     fun overstyrPersonResultater(behandlingId: Long, dataTable: DataTable) {
         val overstyringerPerPerson = dataTable.asMaps().groupBy { parseInt(DomenebegrepPersongrunnlag.PERSON_ID, it) }
@@ -130,7 +154,8 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
             persongrunnlag = persongrunnlagForBehandling(behandlingId),
             personResultater = personResultater[behandlingId] ?: error("Finner ikke personresultater"),
             vedtak = vedtaksliste.find { it.behandling.id == behandlingId && it.aktiv } ?: error("Finner ikke vedtak"),
-            kompetanser = kompetanser[behandlingId] ?: emptyList()
+            kompetanser = kompetanser[behandlingId] ?: emptyList(),
+            endredeUtbetalinger = endredeUtbetalinger[behandlingId] ?: emptyList()
         )
     }
 

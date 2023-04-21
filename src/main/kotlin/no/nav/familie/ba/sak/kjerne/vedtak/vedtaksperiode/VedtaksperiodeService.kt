@@ -297,7 +297,8 @@ class VedtaksperiodeService(
             persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId),
             personResultater = vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId).personResultater,
             vedtak = vedtak,
-            kompetanser = kompetanser.toList()
+            kompetanser = kompetanser.toList(),
+            endredeUtbetalinger = endretUtbetalingAndelRepository.findByBehandlingId(behandlingId)
         )
     }
 
