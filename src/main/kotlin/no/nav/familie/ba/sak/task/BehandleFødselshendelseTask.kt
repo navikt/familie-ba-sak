@@ -87,6 +87,7 @@ class BehandleFødselshendelseTask(
         private val secureLogger = LoggerFactory.getLogger("secureLogger")
 
         fun opprettTask(behandleFødselshendelseTaskDTO: BehandleFødselshendelseTaskDTO): Task {
+            val triggerTid = if (erKlokkenMellom21Og06()) kl06IdagEllerNesteDag() else LocalDateTime.now()
             return Task(
                 type = TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(behandleFødselshendelseTaskDTO),
@@ -94,7 +95,7 @@ class BehandleFødselshendelseTask(
                     this["morsIdent"] = behandleFødselshendelseTaskDTO.nyBehandling.morsIdent
                 }
             ).copy(
-                triggerTid = if (erKlokkenMellom21Og06()) kl06IdagEllerNesteDag() else LocalDateTime.now()
+                triggerTid = triggerTid.plusDays(7)
             )
         }
     }
