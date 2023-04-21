@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.ForventetUtbetalingsperiode
 import no.nav.familie.ba.sak.cucumber.domeneparser.OppdragParser
 import no.nav.familie.ba.sak.cucumber.domeneparser.OppdragParser.mapTilkjentYtelse
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForIverksettingFactory
+import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForSimuleringFactory
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForUtbetalingsoppdrag
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGenerator
 import no.nav.familie.ba.sak.integrasjoner.økonomi.pakkInnForUtbetaling
@@ -35,6 +36,7 @@ class OppdragSteg {
     private var behandlinger = mapOf<Long, Behandling>()
     private var tilkjenteYtelser = listOf<TilkjentYtelse>()
     private var beregnetUtbetalingsoppdrag = mutableMapOf<Long, Utbetalingsoppdrag>()
+    private var beregnetUtbetalingsoppdragSimulering = mutableMapOf<Long, Utbetalingsoppdrag>()
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -47,11 +49,13 @@ class OppdragSteg {
     @Når("beregner utbetalingsoppdrag")
     fun `beregner utbetalingsoppdrag`() {
         tilkjenteYtelser.fold(emptyList<TilkjentYtelse>()) { acc, tilkjentYtelse ->
+            val behandlingId = tilkjentYtelse.behandling.id
             try {
-                val utbetalingsoppdrag = beregnUtbetalingsoppdrag(acc, tilkjentYtelse)
-                beregnetUtbetalingsoppdrag[tilkjentYtelse.behandling.id] = utbetalingsoppdrag
+                beregnetUtbetalingsoppdragSimulering[behandlingId] =
+                    beregnUtbetalingsoppdrag(acc, tilkjentYtelse, erSimulering = true)
+                beregnetUtbetalingsoppdrag[behandlingId] = beregnUtbetalingsoppdrag(acc, tilkjentYtelse)
             } catch (e: Throwable) {
-                logger.error("Feilet beregning av oppdrag for behandling=${tilkjentYtelse.behandling.id}")
+                logger.error("Feilet beregning av oppdrag for behandling=$behandlingId")
                 throw e
             }
             acc + tilkjentYtelse
@@ -60,13 +64,14 @@ class OppdragSteg {
 
     private fun beregnUtbetalingsoppdrag(
         acc: List<TilkjentYtelse>,
-        tilkjentYtelse: TilkjentYtelse
+        tilkjentYtelse: TilkjentYtelse,
+        erSimulering: Boolean = false
     ): Utbetalingsoppdrag {
         val forrigeTilkjentYtelse = acc.lastOrNull()
 
         val vedtak = lagVedtak(behandling = tilkjentYtelse.behandling)
-        val forrigeKjeder = tilKjeder(forrigeTilkjentYtelse)
-        val oppdaterteKjeder = tilKjeder(tilkjentYtelse)
+        val forrigeKjeder = tilKjeder(forrigeTilkjentYtelse, erSimulering)
+        val oppdaterteKjeder = tilKjeder(tilkjentYtelse, erSimulering)
         val sisteOffsetPåFagsak = maxOffsetPåFagsak(acc)
         val sisteOffsetPerIdent = gjeldendeForrigeOffsetForKjede(forrigeKjeder)
         oppdaterBeståendeAndelerMedOffset(oppdaterteKjeder, forrigeKjeder)
@@ -78,7 +83,7 @@ class OppdragSteg {
             sisteOffsetPerIdent = sisteOffsetPerIdent,
             sisteOffsetPåFagsak = sisteOffsetPåFagsak?.toInt(),
             oppdaterteKjeder = oppdaterteKjeder,
-            erSimulering = false,
+            erSimulering = erSimulering,
             endretMigreringsDato = null
         )
     }
@@ -95,27 +100,51 @@ class OppdragSteg {
 
     @Så("forvent følgende utbetalingsoppdrag")
     fun `forvent følgende utbetalingsoppdrag`(dataTable: DataTable) {
+        validerForventetUtbetalingsoppdrag(dataTable, beregnetUtbetalingsoppdrag)
+        assertSjekkBehandlingIder(dataTable, beregnetUtbetalingsoppdrag.keys)
+    }
+
+    @Så("forvent følgende simulering")
+    fun `forvent følgende simulering`(dataTable: DataTable) {
+        validerForventetUtbetalingsoppdrag(dataTable, beregnetUtbetalingsoppdragSimulering)
+        assertSjekkBehandlingIder(dataTable, beregnetUtbetalingsoppdragSimulering.keys)
+    }
+
+    private fun validerForventetUtbetalingsoppdrag(
+        dataTable: DataTable,
+        beregnetUtbetalingsoppdrag: MutableMap<Long, Utbetalingsoppdrag>
+    ) {
+        val medUtbetalingsperiode = true // TODO? Burde denne kunne sendes med som et flagg? Hva gjør den?
         val forventedeUtbetalingsoppdrag = OppdragParser.mapForventetUtbetalingsoppdrag(
             dataTable,
-            medUtbetalingsperiode = true
-        ) // TODO medUtbetalingsperiode
+            medUtbetalingsperiode = medUtbetalingsperiode
+        )
         forventedeUtbetalingsoppdrag.forEach { forventetUtbetalingsoppdrag ->
             val behandlingId = forventetUtbetalingsoppdrag.behandlingId
             val utbetalingsoppdrag = beregnetUtbetalingsoppdrag[behandlingId]
                 ?: error("Mangler utbetalingsoppdrag for $behandlingId")
             try {
-                assertUtbetalingsoppdrag(forventetUtbetalingsoppdrag, utbetalingsoppdrag, true)
+                assertUtbetalingsoppdrag(forventetUtbetalingsoppdrag, utbetalingsoppdrag, medUtbetalingsperiode)
             } catch (e: Throwable) {
                 logger.error("Feilet validering av behandling $behandlingId")
                 throw e
             }
         }
-        assertSjekkBehandlingIder(dataTable, beregnetUtbetalingsoppdrag.keys)
     }
 
-    private fun tilKjeder(tilkjentYtelse: TilkjentYtelse?): Map<String, List<AndelTilkjentYtelseForUtbetalingsoppdrag>> {
+    private fun tilKjeder(
+        tilkjentYtelse: TilkjentYtelse?,
+        erSimulering: Boolean = false
+    ): Map<String, List<AndelTilkjentYtelseForUtbetalingsoppdrag>> {
+        val andelFactory = if (erSimulering) {
+            AndelTilkjentYtelseForSimuleringFactory()
+        } else {
+            AndelTilkjentYtelseForIverksettingFactory()
+        }
+
         return (tilkjentYtelse?.andelerTilkjentYtelse ?: emptyList())
-            .pakkInnForUtbetaling(AndelTilkjentYtelseForIverksettingFactory())
+            .filter { it.erAndelSomSkalSendesTilOppdrag() }
+            .pakkInnForUtbetaling(andelFactory)
             .let { kjedeinndelteAndeler(it) }
     }
 
