@@ -67,7 +67,7 @@ object EndringIUtbetalingUtil {
 
         return endringIBeløpTidslinje
     }
-    fun lagEtterbetalingstidslinjeForPersonOgType(
+    internal fun lagEtterbetalingstidslinjeForPersonOgType(
         nåværendeAndeler: List<AndelTilkjentYtelse>,
         forrigeAndeler: List<AndelTilkjentYtelse>
     ): Tidslinje<Boolean, Måned> {
