@@ -28,7 +28,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import java.time.LocalDate
-import java.time.Period
 
 object VilkårsvurderingUtils {
 
@@ -292,9 +291,7 @@ object VilkårsvurderingUtils {
                 ?.vilkårResultater
                 ?.any {
                     it.vilkårType == Vilkår.UTVIDET_BARNETRYGD &&
-                        it.resultat == Resultat.OPPFYLT &&
-                        // forrige behandling har minst et måned ubetalt utvidet barnetrygd
-                        it.differanseIPeriode().toTotalMonths() >= Period.ofMonths(1).months
+                        it.resultat == Resultat.OPPFYLT
                 } ?: false
 
         // Hvis forrige behandling inneholdt utvidet-vilkåret eller underkategorien er utvidet skal
