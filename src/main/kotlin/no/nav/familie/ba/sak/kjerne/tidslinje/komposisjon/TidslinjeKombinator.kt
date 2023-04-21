@@ -172,3 +172,8 @@ fun <V, H, T : Tidsenhet> Tidslinje<V, T>.harOverlappMed(tidslinje: Tidslinje<H,
 
 fun <V, H, T : Tidsenhet> Tidslinje<V, T>.harIkkeOverlappMed(tidslinje: Tidslinje<H, T>) =
     !this.harOverlappMed(tidslinje)
+
+fun <V, H, T : Tidsenhet> Tidslinje<V, T>.kombinerMedNullable(
+    høyreTidslinje: Tidslinje<H, T>?,
+    kombinator: (V?, H?) -> V?
+): Tidslinje<V, T> = if (høyreTidslinje != null) { kombinerMed(høyreTidslinje, kombinator) } else this
