@@ -180,6 +180,9 @@ fun parseValgfriDouble(domenebegrep: Domenenøkkel, rad: Map<String, String>): D
     return valgfriVerdi(domenebegrep.nøkkel, rad)?.toDouble() ?: return null
 }
 
+fun parseValgfriLong(domenebegrep: Domenenøkkel, rad: Map<String, String>): Long? =
+    parseValgfriInt(domenebegrep, rad)?.toLong()
+
 fun parseValgfriInt(domenebegrep: Domenenøkkel, rad: Map<String, String>): Int? {
     valgfriVerdi(domenebegrep.nøkkel, rad) ?: return null
 
