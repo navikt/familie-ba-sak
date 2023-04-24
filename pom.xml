@@ -29,8 +29,10 @@
         <familie.kontrakter.saksstatistikk>2.0_20220216121145_5a268ac</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20230223155122_2e81c44</familie.kontrakter.stønadsstatistikk>
         <familie.kontrakter.skatteetaten>2.0_20210920094114_9c74239</familie.kontrakter.skatteetaten>
+        <cucumber.version>7.11.2</cucumber.version>
         <mockk.version>1.13.5</mockk.version>
-        <token-validation-spring.version>3.0.3</token-validation-spring.version>
+        <wiremock.version>2.35.0</wiremock.version>
+        <token-validation-spring.version>3.0.8</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
         <springdoc.version>2.1.0</springdoc.version>
         <sentry.version>6.17.0</sentry.version>
@@ -43,12 +45,12 @@
 
         <medeia-validator-jackson.version>1.1.1</medeia-validator-jackson.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
-        <testcontainers.postgresql.version>1.17.6</testcontainers.postgresql.version>
+        <testcontainers.postgresql.version>1.18.0</testcontainers.postgresql.version>
         <unleash.version>7.1.0</unleash.version>
         <maven.model.version>3.9.1</maven.model.version>
         <jackson.module.kotlin.version>2.14.2</jackson.module.kotlin.version>
         <token-validation-test-support.version>2.0.5</token-validation-test-support.version>
-        <fpsak-tidslinje.version>2.6.6</fpsak-tidslinje.version>
+        <fpsak-tidslinje.version>2.6.7</fpsak-tidslinje.version>
         <awaitility-kotlin.version>4.2.0</awaitility-kotlin.version>
 
         <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
@@ -137,12 +139,6 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-contract-wiremock</artifactId>
-            <version>${spring.cloud.version}</version>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.springframework.kafka</groupId>
@@ -341,9 +337,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.awaitility</groupId>
-            <artifactId>awaitility-kotlin</artifactId>
-            <version>${awaitility-kotlin.version}</version>
+            <groupId>com.github.tomakehurst</groupId>
+            <artifactId>wiremock-jre8-standalone</artifactId>
+            <version>${wiremock.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -356,6 +352,24 @@
             <groupId>com.worldturner.medeia</groupId>
             <artifactId>medeia-validator-jackson</artifactId>
             <version>${medeia-validator-jackson.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>io.cucumber</groupId>
+            <artifactId>cucumber-java</artifactId>
+            <version>${cucumber.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.cucumber</groupId>
+            <artifactId>cucumber-junit-platform-engine</artifactId>
+            <version>${cucumber.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-suite</artifactId>
             <scope>test</scope>
         </dependency>
 
@@ -436,8 +450,7 @@
                             <phase>verify</phase>
                             <configuration>
                                 <target name="ktlint">
-                                    <java taskname="ktlint" dir="${basedir}" fork="true" failonerror="true"
-                                          classpathref="maven.plugin.classpath" classname="com.pinterest.ktlint.Main">
+                                    <java taskname="ktlint" dir="${basedir}" fork="true" failonerror="true" classpathref="maven.plugin.classpath" classname="com.pinterest.ktlint.Main">
                                         <arg value="src/**/*.kt"/>
                                     </java>
                                 </target>
@@ -450,8 +463,7 @@
                             <id>ktlint-format</id>
                             <configuration>
                                 <target name="ktlint">
-                                    <java taskname="ktlint" dir="${basedir}" fork="true" failonerror="true"
-                                          classpathref="maven.plugin.classpath" classname="com.pinterest.ktlint.Main">
+                                    <java taskname="ktlint" dir="${basedir}" fork="true" failonerror="true" classpathref="maven.plugin.classpath" classname="com.pinterest.ktlint.Main">
                                         <arg value="-F"/>
                                         <arg value="src/**/*.kt"/>
                                         <!-- Trenger dette for å kjøre ktlint med java 17 -->
@@ -539,7 +551,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.2.1</version>
+                <version>3.3.0</version>
                 <executions>
                     <execution>
                         <id>enforce-banned-dependencies</id>

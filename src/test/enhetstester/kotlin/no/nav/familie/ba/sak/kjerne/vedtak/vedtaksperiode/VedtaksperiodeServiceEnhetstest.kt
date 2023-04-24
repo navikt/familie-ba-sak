@@ -47,7 +47,7 @@ class VedtaksperiodeServiceEnhetstest {
         andelTilkjentYtelseRepository = mockk(),
         vedtaksperiodeHentOgPersisterService = vedtaksperiodeHentOgPersisterService,
         vedtakRepository = mockk(),
-        vilkårsvurderingRepository = mockk(relaxed = true),
+        vilkårsvurderingService = mockk(relaxed = true),
         sanityService = mockk(),
         søknadGrunnlagService = mockk(relaxed = true),
         endretUtbetalingAndelRepository = mockk(),
@@ -109,7 +109,7 @@ class VedtaksperiodeServiceEnhetstest {
         every { featureToggleService.isEnabled(FeatureToggleConfig.BRUKE_TIDSLINJE_I_STEDET_FOR) } returns true
 
         val returnerteVedtaksperioderNårUtledetEndringstidspunktErLikSisteOpphørFom = vedtaksperiodeService
-            .genererVedtaksperioderMedBegrunnelser(vedtak)
+            .genererVedtaksperioderMedBegrunnelserGammel(vedtak)
             .filter { it.type == Vedtaksperiodetype.OPPHØR }
 
         val førsteOpphørFomDato =
@@ -119,10 +119,10 @@ class VedtaksperiodeServiceEnhetstest {
                 .last().tom
 
         val returnerteVedtaksperioderNårOverstyrtEndringstidspunktErFørsteOpphørFom = vedtaksperiodeService
-            .genererVedtaksperioderMedBegrunnelser(vedtak, manueltOverstyrtEndringstidspunkt = førsteOpphørFomDato)
+            .genererVedtaksperioderMedBegrunnelserGammel(vedtak, manueltOverstyrtEndringstidspunkt = førsteOpphørFomDato)
             .filter { it.type == Vedtaksperiodetype.OPPHØR }
         val returnerteVedtaksperioderNårOverstyrtEndringstidspunktErFørFørsteOpphør = vedtaksperiodeService
-            .genererVedtaksperioderMedBegrunnelser(
+            .genererVedtaksperioderMedBegrunnelserGammel(
                 vedtak,
                 manueltOverstyrtEndringstidspunkt = førsteOpphørFomDato.minusMonths(1)
             )

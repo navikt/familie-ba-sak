@@ -59,8 +59,8 @@ import no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta.FeilutbetaltValuta
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeMedBegrunnelser.UtbetalingsperiodeMedBegrunnelserService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilUtvidetVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -74,7 +74,6 @@ class VedtaksperiodeService(
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService,
     private val vedtakRepository: VedtakRepository,
-    private val vilkårsvurderingRepository: VilkårsvurderingRepository,
     private val sanityService: SanityService,
     private val søknadGrunnlagService: SøknadGrunnlagService,
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
@@ -85,7 +84,8 @@ class VedtaksperiodeService(
     private val featureToggleService: FeatureToggleService,
     private val feilutbetaltValutaRepository: FeilutbetaltValutaRepository,
     private val brevmalService: BrevmalService,
-    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
+    private val vilkårsvurderingService: VilkårsvurderingService
 ) {
     fun oppdaterVedtaksperiodeMedFritekster(
         vedtaksperiodeId: Long,
@@ -199,7 +199,7 @@ class VedtaksperiodeService(
 
             if (vedtaksperiodeMedBegrunnelser == null) {
                 val vilkårsvurdering =
-                    vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = vedtak.behandling.id)
+                    vilkårsvurderingService.hentAktivForBehandling(behandlingId = vedtak.behandling.id)
                 secureLogger.info(
                     vilkårsvurdering?.personResultater?.map {
                         "Fødselsnummer: ${it.aktør.aktivFødselsnummer()}.  Resultater: ${it.vilkårResultater}"
@@ -283,14 +283,26 @@ class VedtaksperiodeService(
             )
         } else {
             vedtaksperiodeHentOgPersisterService.lagre(
-                genererVedtaksperioderMedBegrunnelser(
-                    vedtak
-                )
+                genererVedtaksperioderMedBegrunnelserGammel(vedtak)
             )
         }
     }
 
-    fun genererVedtaksperioderMedBegrunnelser(
+    fun genererVedtaksperioderMedBegrunnelser(vedtak: Vedtak): List<VedtaksperiodeMedBegrunnelser> {
+        val behandlingId = vedtak.behandling.id
+
+        val kompetanser = kompetanseRepository.finnFraBehandlingId(behandlingId)
+
+        return utledVedtaksPerioderMedBegrunnelser(
+            persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId),
+            personResultater = vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId).personResultater,
+            vedtak = vedtak,
+            kompetanser = kompetanser.toList()
+        )
+    }
+
+    @Deprecated("skal bruke oppdaterVedtakMedVedtaksperioder når den er klar")
+    fun genererVedtaksperioderMedBegrunnelserGammel(
         vedtak: Vedtak,
         manueltOverstyrtEndringstidspunkt: LocalDate? = null
     ): List<VedtaksperiodeMedBegrunnelser> {
@@ -306,7 +318,11 @@ class VedtaksperiodeService(
             ?: endringstidspunktService.finnEndringstidspunktForBehandling(behandlingId = vedtak.behandling.id)
 
         val opphørsperioder: List<VedtaksperiodeMedBegrunnelser> =
-            hentOpphørsperioder(vedtak.behandling, endringstidspunkt).map { it.tilVedtaksperiodeMedBegrunnelse(vedtak) }
+            hentOpphørsperioder(vedtak.behandling, endringstidspunkt).map {
+                it.tilVedtaksperiodeMedBegrunnelse(
+                    vedtak
+                )
+            }
 
         val utbetalingsperioder: List<VedtaksperiodeMedBegrunnelser> =
             utbetalingsperiodeMedBegrunnelserService.hentUtbetalingsperioder(vedtak, opphørsperioder)
@@ -337,7 +353,7 @@ class VedtaksperiodeService(
         } else {
             vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(vedtak)
             val vedtaksperioder =
-                genererVedtaksperioderMedBegrunnelser(
+                genererVedtaksperioderMedBegrunnelserGammel(
                     vedtak = vedtak,
                     manueltOverstyrtEndringstidspunkt = overstyrtEndringstidspunkt
                 )
@@ -433,8 +449,7 @@ class VedtaksperiodeService(
         andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
         endretUtbetalingAndeler: List<EndretUtbetalingAndel>
     ): List<UtvidetVedtaksperiodeMedBegrunnelser> {
-        val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
-            ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
+        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandlingThrows(behandling.id)
 
         val sanityBegrunnelser = sanityService.hentSanityBegrunnelser()
         val sanityEØSBegrunnelser = sanityService.hentSanityEØSBegrunnelser()
@@ -587,11 +602,7 @@ class VedtaksperiodeService(
 
     private fun hentAvslagsperioderMedBegrunnelser(vedtak: Vedtak): List<VedtaksperiodeMedBegrunnelser> {
         val behandling = vedtak.behandling
-        val vilkårsvurdering =
-            vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
-                ?: throw Feil(
-                    "Fant ikke vilkårsvurdering for behandling ${behandling.id} ved generering av avslagsperioder"
-                )
+        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId = behandling.id)
 
         val periodegrupperteAvslagsvilkår: Map<NullablePeriode, List<VilkårResultat>> =
             vilkårsvurdering.personResultater.flatMap { it.vilkårResultater }

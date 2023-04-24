@@ -19,6 +19,9 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEntitet
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.YearMonth
 
@@ -40,7 +43,7 @@ data class Kompetanse(
         joinColumns = [JoinColumn(name = "fk_kompetanse_id")],
         inverseJoinColumns = [JoinColumn(name = "fk_aktoer_id")]
     )
-    override val barnAktører: Set<Aktør> = emptySet(),
+    override val barnAktører: Set<Aktør> = emptySet(), // kan ikke være tom
 
     @Enumerated(EnumType.STRING)
     @Column(name = "soekers_aktivitet")
@@ -143,3 +146,59 @@ enum class KompetanseResultat {
     NORGE_ER_SEKUNDÆRLAND,
     TO_PRIMÆRLAND
 }
+
+sealed interface IKompetanse {
+    val id: Long
+    val behandlingId: Long
+}
+
+data class TomKompetanse(
+    override val id: Long,
+    override val behandlingId: Long
+) : IKompetanse
+
+data class UtfyltKompetanse(
+    override val id: Long,
+    override val behandlingId: Long,
+    val fom: YearMonth,
+    val tom: YearMonth,
+    val barnAktører: Set<Aktør>,
+    val søkersAktivitet: SøkersAktivitet,
+    val annenForeldersAktivitet: AnnenForeldersAktivitet,
+    val annenForeldersAktivitetsland: String,
+    val søkersAktivitetsland: String,
+    val barnetsBostedsland: String,
+    val resultat: KompetanseResultat
+) : IKompetanse
+
+fun Kompetanse.tilIKompetanse(): IKompetanse {
+    return if (this.erObligatoriskeFelterSatt()) {
+        UtfyltKompetanse(
+            id = this.id,
+            behandlingId = this.behandlingId,
+            fom = this.fom!!,
+            tom = this.tom!!,
+            barnAktører = this.barnAktører,
+            søkersAktivitet = this.søkersAktivitet!!,
+            annenForeldersAktivitet = this.annenForeldersAktivitet!!,
+            annenForeldersAktivitetsland = this.annenForeldersAktivitetsland!!,
+            søkersAktivitetsland = this.søkersAktivitetsland!!,
+            barnetsBostedsland = this.barnetsBostedsland!!,
+            resultat = this.resultat!!
+        )
+    } else {
+        TomKompetanse(
+            id = this.id,
+            behandlingId = this.behandlingId
+        )
+    }
+}
+
+fun List<UtfyltKompetanse>.tilTidslinje() =
+    this.map {
+        Periode(
+            fraOgMed = it.fom.tilTidspunkt(),
+            tilOgMed = it.tom.tilTidspunkt(),
+            innhold = it
+        )
+    }.tilTidslinje()
