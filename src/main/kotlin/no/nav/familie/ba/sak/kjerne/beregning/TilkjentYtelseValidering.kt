@@ -58,16 +58,12 @@ object TilkjentYtelseValidering {
                 val forrigeAndelerTilkjentYtelseForPerson =
                     forrigeAndelerTilkjentYtelse.filter { it.aktør.aktørId == aktørId }
 
-                val etterbetalingErUgyldig = erUgyldigEtterbetalingPåPerson(
-                    forrigeAndelerTilkjentYtelseForPerson,
-                    andelerTilkjentYtelseForPerson,
-                    gyldigEtterbetalingFom
-                )
-
-                if (etterbetalingErUgyldig) {
-                    aktørId
-                } else {
-                    null
+                aktørId.takeIf {
+                    erUgyldigEtterbetalingPåPerson(
+                        forrigeAndelerTilkjentYtelseForPerson,
+                        andelerTilkjentYtelseForPerson,
+                        gyldigEtterbetalingFom
+                    )
                 }
             }
 
@@ -202,7 +198,8 @@ private fun validerAtBeløpForPartStemmerMedSatser(
     andeler: List<AndelTilkjentYtelse>,
     fagsakType: FagsakType
 ) {
-    val maksAntallAndeler = if (fagsakType == FagsakType.BARN_ENSLIG_MINDREÅRIG) 2 else if (person.type == PersonType.BARN) 1 else 2
+    val maksAntallAndeler =
+        if (fagsakType == FagsakType.BARN_ENSLIG_MINDREÅRIG) 2 else if (person.type == PersonType.BARN) 1 else 2
     val maksTotalBeløp = maksBeløp(personType = person.type, fagsakType = fagsakType)
 
     if (andeler.size > maksAntallAndeler) {
