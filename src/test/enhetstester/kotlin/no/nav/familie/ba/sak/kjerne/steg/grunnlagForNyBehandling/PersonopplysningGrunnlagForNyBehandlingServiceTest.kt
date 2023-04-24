@@ -30,7 +30,7 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
     @Test
     fun `Skal sende med barna fra forrige behandling ved førstegangsbehandling nummer to`() {
         val søker = lagPerson()
-        val barnFraForrigeBehanlding = lagPerson(type = PersonType.BARN)
+        val barnFraForrigeBehandling = lagPerson(type = PersonType.BARN)
         val barn = lagPerson(type = PersonType.BARN)
 
         val barnFnr = barn.aktør.aktivFødselsnummer()
@@ -43,7 +43,7 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
         every { personidentService.hentOgLagreAktørIder(listOf(barnFnr), true) } returns listOf(barn.aktør)
 
         every { beregningService.finnBarnFraBehandlingMedTilkjentYtelse(forrigeBehandling.id) } returns
-            listOf(barnFraForrigeBehanlding.aktør)
+            listOf(barnFraForrigeBehandling.aktør)
 
         every { persongrunnlagService.hentSøkersMålform(forrigeBehandling.id) } returns søker.målform
 
@@ -67,7 +67,7 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
             persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
                 aktør = søker.aktør,
                 barnFraInneværendeBehandling = listOf(barn.aktør),
-                barnFraForrigeBehandling = listOf(barnFraForrigeBehanlding.aktør),
+                barnFraForrigeBehandling = listOf(barnFraForrigeBehandling.aktør),
                 behandling = behandling,
                 målform = søker.målform
             )

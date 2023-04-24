@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.endretutbetaling
 
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.Periode
@@ -338,7 +337,7 @@ fun validerBarnasVilkår(barna: List<Person>, vilkårsvurdering: Vilkårsvurderi
     }
 
     if (listeAvFeil.isNotEmpty()) {
-        throw Feil(listeAvFeil.joinToString(separator = "\n"))
+        throw FunksjonellFeil(listeAvFeil.joinToString(separator = "\n"))
     }
 }
 
