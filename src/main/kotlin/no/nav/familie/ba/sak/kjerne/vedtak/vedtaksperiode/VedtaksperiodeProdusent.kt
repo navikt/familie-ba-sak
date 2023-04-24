@@ -63,7 +63,7 @@ data class EndretUtbetalingAndelForVedtaksperiode(
 
 data class AndelForVedtaksperiode(
     val kalkulertUtbetalingsbeløp: Int,
-    val type: YtelseType,
+    val type: YtelseType
 )
 
 data class KompetanseForVedtaksperiode(
@@ -85,7 +85,7 @@ private data class GrunnlagForPersonInnvilget(
     override val vilkårResultaterForVedtaksPeriode: List<VilkårResultatForVedtaksperiode>,
     val kompetanse: KompetanseForVedtaksperiode? = null,
     val endretUtbetalingAndel: EndretUtbetalingAndelForVedtaksperiode? = null,
-    val andeler: Iterable<AndelForVedtaksperiode>,
+    val andeler: Iterable<AndelForVedtaksperiode>
 ) : GrunnlagForPerson
 
 private data class GrunnlagForPersonIkkeInnvilget(
@@ -131,6 +131,16 @@ fun utledVedtaksPerioderMedBegrunnelser(
         fagsakType = vedtak.behandling.fagsak.type
     ).map { it != null }
 
+    // Hva skjer når søker er et barn?
+    val erObligatoriskeVilkårOppfyltForMinstEttBarnTidslinje = personResultater
+        .filter { it.aktør != søker.aktør }
+        .map { personResultat ->
+            personResultat.tilTidslinjeForSplittForPerson(
+                personType = PersonType.BARN,
+                fagsakType = vedtak.behandling.fagsak.type
+            ).map { it != null }
+        }.kombiner { it.any() }
+
     val utfylteEndredeUtbetalinger = endredeUtbetalinger
         .map { it.tilIEndretUtbetalingAndel() }
         .filterIsInstance<IUtfyltEndretUtbetalingAndel>()
@@ -154,8 +164,6 @@ fun utledVedtaksPerioderMedBegrunnelser(
         }
 
     val perioderSomSkalBegrunnesIVedtak = grunnlagForPersonTidslinjer.tilPerioderSomSkalBegrunnesIVedtak()
-
-
 
     return perioderSomSkalBegrunnesIVedtak.map {
         it.tilVedtaksperiodeMedBegrunnelser(vedtak)
