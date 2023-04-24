@@ -46,27 +46,6 @@ fun <S : PeriodeOgBarnSkjema<S>> Iterable<S>.tilSeparateTidslinjerForBarna(): Ma
     }
 }
 
-fun <S : PeriodeOgBarnSkjema<S>> Iterable<S>.tilSeparateTidslinjerForBarnaUtenNullFomTomInnhold(): Map<Aktør, Tidslinje<S, Måned>> {
-    val skjemaer = this
-    if (skjemaer.toList().isEmpty()) return emptyMap()
-
-    val alleBarnAktørIder = skjemaer.map { it.barnAktører }.reduce { akk, neste -> akk + neste }
-
-    return alleBarnAktørIder.associateWith { aktør ->
-        tidslinje {
-            skjemaer
-                .filter { it.barnAktører.contains(aktør) }
-                .map {
-                    Periode(
-                        fraOgMed = it.fom.tilTidspunktEllerTidligereEnn(it.tom),
-                        tilOgMed = it.tom.tilTidspunktEllerSenereEnn(it.fom),
-                        innhold = it.kopier(barnAktører = setOf(aktør))
-                    )
-                }
-        }
-    }
-}
-
 fun <S : PeriodeOgBarnSkjemaEntitet<S>> Map<Aktør, Tidslinje<S, Måned>>.tilSkjemaer() =
     this.flatMap { (aktør, tidslinjer) -> tidslinjer.tilSkjemaer(aktør) }
         .slåSammen()
