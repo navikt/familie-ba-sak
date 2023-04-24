@@ -2,9 +2,9 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
-import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerBeløpOgType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.IUtfyltEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.tilIEndretUtbetalingAndel
@@ -85,7 +85,7 @@ private data class GrunnlagForPersonInnvilget(
     override val vilkårResultaterForVedtaksPeriode: List<VilkårResultatForVedtaksperiode>,
     val kompetanse: KompetanseForVedtaksperiode? = null,
     val endretUtbetalingAndel: EndretUtbetalingAndelForVedtaksperiode? = null,
-    val andel: AndelForVedtaksperiode,
+    val andeler: Iterable<AndelForVedtaksperiode>,
 ) : GrunnlagForPerson
 
 private data class GrunnlagForPersonIkkeInnvilget(
@@ -244,16 +244,19 @@ private fun PersonResultat.tilGrunnlagForPersonTidslinje(
     val endredeUtbetalingerTidslinje = endredeUtbetalinger.tilTidslinje()
         .mapIkkeNull { it.tilEndretUtbetalingAndelForVedtaksPeriode() }
 
-    val andelTidslinje = AndelTilkjentYtelseTidslinje(andelerTilkjentYtelse)
-        .mapIkkeNull { it.tilAndelForVedtaksperiode() }
+    val andelerTidslinje =
+        andelerTilkjentYtelse.tilTidslinjerPerBeløpOgType()
+            .values
+            .map { tidslinje -> tidslinje.mapIkkeNull { it.tilAndelForVedtaksperiode() } }
+            .kombiner { it }
 
     val grunnlagTidslinje = erVilkårsvurderingOppfyltTidslinje
-        .kombinerMed(vilkårResultaterTidslinje, andelTidslinje) { erVilkårsvurderingOppfylt, vilkårResultater, andel ->
+        .kombinerMed(vilkårResultaterTidslinje, andelerTidslinje) { erVilkårsvurderingOppfylt, vilkårResultater, andeler ->
             lagGrunnlagForVilkårOgAndel(
                 erVilkårsvurderingOppfylt = erVilkårsvurderingOppfylt,
                 vilkårResultater = vilkårResultater,
                 person = person,
-                andel = andel
+                andeler = andeler
             )
         }.kombinerMedNullable(kompetanseTidslinje) { grunnlagForPerson, kompetanse ->
             lagGrunnlagMedKompetanse(grunnlagForPerson, kompetanse)
@@ -291,13 +294,13 @@ private fun lagGrunnlagForVilkårOgAndel(
     erVilkårsvurderingOppfylt: Boolean?,
     vilkårResultater: List<VilkårResultatForVedtaksperiode>?,
     person: Person,
-    andel: AndelForVedtaksperiode?
+    andeler: Iterable<AndelForVedtaksperiode>?
 ) = if (erVilkårsvurderingOppfylt == true) {
     GrunnlagForPersonInnvilget(
         vilkårResultaterForVedtaksPeriode = vilkårResultater
             ?: error("vilkårResultatene burde alltid finnes om vi har rett"),
         person = person,
-        andel = andel ?: error("andel burde alltid finnes om vi har rett")
+        andeler = andeler ?: error("andel burde alltid finnes om vi har rett")
     )
 } else {
     GrunnlagForPersonIkkeInnvilget(
