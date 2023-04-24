@@ -125,9 +125,9 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
                 parseValgfriEnum<AnnenForeldersAktivitet>(ANNEN_FORELDERS_AKTIVITET, kompetanse)
                     ?: AnnenForeldersAktivitet.I_ARBEID,
                 søkersAktivitetsland = parseValgfriString(SØKERS_AKTIVITETSLAND, kompetanse) ?: "PL",
-                annenForeldersAktivitetsland = parseValgfriString(ANNEN_FORELDERS_AKTIVITETSLAND, kompetanse)?: "NO",
+                annenForeldersAktivitetsland = parseValgfriString(ANNEN_FORELDERS_AKTIVITETSLAND, kompetanse) ?: "NO",
                 barnetsBostedsland = parseValgfriString(BARNETS_BOSTEDSLAND, kompetanse) ?: "NO",
-                resultat = parseEnum<KompetanseResultat>(RESULTAT, kompetanse),
+                resultat = parseEnum<KompetanseResultat>(RESULTAT, kompetanse)
             )
         }
     }
