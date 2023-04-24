@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.beregning.AndelTilkjentYtelseTidslinje
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.IUtfyltEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.tilIEndretUtbetalingAndel
@@ -51,8 +53,8 @@ private data class GrunnlagForPersonInnvilget(
     override val person: Person,
     override val vilkårResultaterForVedtaksPeriode: List<VilkårResultatForVedtaksPeriode>,
     val kompetanse: Kompetanse? = null,
-    val endretUtbetalingAndel: IUtfyltEndretUtbetalingAndel? = null
-    // beløp
+    val endretUtbetalingAndel: IUtfyltEndretUtbetalingAndel? = null,
+    val andelTilkjentYtelse: AndelTilkjentYtelse? = null
 ) : GrunnlagForPerson
 
 private data class GrunnlagForPersonIkkeInnvilget(
@@ -87,7 +89,8 @@ fun utledVedtaksPerioderMedBegrunnelser(
     personResultater: Set<PersonResultat>,
     vedtak: Vedtak,
     kompetanser: List<Kompetanse>,
-    endredeUtbetalinger: List<EndretUtbetalingAndel>
+    endredeUtbetalinger: List<EndretUtbetalingAndel>,
+    andelerTilkjentYtelse: List<AndelTilkjentYtelse>
 ): List<VedtaksperiodeMedBegrunnelser> {
     val søker = persongrunnlag.søker
     val søkerPersonResultater = personResultater.single { it.aktør == søker.aktør }
@@ -101,14 +104,15 @@ fun utledVedtaksPerioderMedBegrunnelser(
         .map { it.tilIEndretUtbetalingAndel() }
         .filterIsInstance<IUtfyltEndretUtbetalingAndel>()
 
-    val grunnlagForPersonTidslinjer = personResultater.map {
-        it.tilGrunnlagForPersonTidslinje(
+    val grunnlagForPersonTidslinjer = personResultater.map { personResultat ->
+        personResultat.tilGrunnlagForPersonTidslinje(
             persongrunnlag = persongrunnlag,
             erObligatoriskeVilkårOppfyltForSøkerTidslinje = erObligatoriskeVilkårOppfyltForSøkerTidslinje,
             vedtak = vedtak,
-            kompetanser.filter { kompetanse -> kompetanse.barnAktører.contains(it.aktør) },
+            kompetanser.filter { kompetanse -> kompetanse.barnAktører.contains(personResultat.aktør) },
             endredeUtbetalinger = utfylteEndredeUtbetalinger
-                .filter { endretUtbetaling -> endretUtbetaling.person.aktør == it.aktør }
+                .filter { endretUtbetaling -> endretUtbetaling.person.aktør == personResultat.aktør },
+            andelerTilkjentYtelse = andelerTilkjentYtelse.filter { andelTilkjentYtelse -> andelTilkjentYtelse.aktør == personResultat.aktør }
         )
     }
 
@@ -178,7 +182,8 @@ private fun PersonResultat.tilGrunnlagForPersonTidslinje(
     erObligatoriskeVilkårOppfyltForSøkerTidslinje: Tidslinje<Boolean, Måned>,
     vedtak: Vedtak,
     kompetanser: List<Kompetanse>,
-    endredeUtbetalinger: List<IUtfyltEndretUtbetalingAndel>
+    endredeUtbetalinger: List<IUtfyltEndretUtbetalingAndel>,
+    andelerTilkjentYtelse: List<AndelTilkjentYtelse>
 ): Tidslinje<GrunnlagForPerson, Måned> {
     val person = persongrunnlag.personer.single { person -> this.aktør == person.aktør }
 
@@ -196,6 +201,8 @@ private fun PersonResultat.tilGrunnlagForPersonTidslinje(
     val kompetanseTidslinje = kompetanser.tilSeparateTidslinjerForBarnaUtenNullFomTomInnhold()
     val endredeUtbetalingerTidslinje = endredeUtbetalinger.tilTidslinje()
 
+    val andelerTilkjentYtelseTidslinje = AndelTilkjentYtelseTidslinje(andelerTilkjentYtelse)
+
     val grunnlagTidslinje = erVilkårsvurderingOppfyltTidslinje
         .kombinerMed(vilkårResultaterTidslinje) { erVilkårsvurderingOppfylt, vilkårResultater ->
             lagGrunnlagForVilkår(erVilkårsvurderingOppfylt, vilkårResultater, person)
@@ -204,6 +211,9 @@ private fun PersonResultat.tilGrunnlagForPersonTidslinje(
         }.filtrerIkkeNull()
         .kombinerMedNullable(endredeUtbetalingerTidslinje) { grunnlagForPerson, endretUtbetalingAndel ->
             lagGrunnlagMedEndretUtbetalingAndel(grunnlagForPerson, endretUtbetalingAndel)
+        }.filtrerIkkeNull()
+        .kombinerMedNullable(andelerTilkjentYtelseTidslinje) { grunnlagForPerson, andelTilkjentYtelse ->
+            lagGrunnlagMedAndelTilkjentYtelse(grunnlagForPerson, andelTilkjentYtelse)
         }.filtrerIkkeNull()
 
     return grunnlagTidslinje.slåSammenLike()
@@ -244,6 +254,21 @@ private fun lagGrunnlagMedKompetanse(
 /**
  * TODO: Dersom dette er riktig, lag en generisk funksjon som gjør det samme som kompetanse: lagGrunnlagMedT -> T
  */
+private fun lagGrunnlagMedAndelTilkjentYtelse(
+    grunnlagForPerson: GrunnlagForPerson?,
+    andelTilkjentYtelse: AndelTilkjentYtelse?
+) = when (grunnlagForPerson) {
+    is GrunnlagForPersonInnvilget -> grunnlagForPerson.copy(andelTilkjentYtelse = andelTilkjentYtelse)
+    is GrunnlagForPersonIkkeInnvilget -> {
+        if (andelTilkjentYtelse != null) {
+            throw Feil("GrunnlagForPersonIkkeInnvilget for aktør ${grunnlagForPerson.person.aktør} kan ikke ha andelTilkjentYtelse siden den ikke er innvilget")
+        }
+        grunnlagForPerson
+    }
+
+    null -> null
+}
+
 private fun lagGrunnlagMedEndretUtbetalingAndel(
     grunnlagForPerson: GrunnlagForPerson?,
     endretUtbetalingAndel: IUtfyltEndretUtbetalingAndel?
