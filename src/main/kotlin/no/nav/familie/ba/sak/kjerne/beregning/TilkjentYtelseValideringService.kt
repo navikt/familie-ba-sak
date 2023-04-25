@@ -89,7 +89,7 @@ class TilkjentYtelseValideringService(
             forrigeBehandling?.let { beregningService.hentOptionalTilkjentYtelseForBehandling(behandlingId = it.id) }?.andelerTilkjentYtelse?.toList()
 
         val aktørIderMedUgyldigEtterbetaling = finnAktørIderMedUgyldigEtterbetalingsperiode(
-            forrigeAndelerTilkjentYtelse = forrigeAndelerTilkjentYtelse,
+            forrigeAndelerTilkjentYtelse = forrigeAndelerTilkjentYtelse ?: emptyList(),
             andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.toList(),
             kravDato = tilkjentYtelse.behandling.opprettetTidspunkt
         )
