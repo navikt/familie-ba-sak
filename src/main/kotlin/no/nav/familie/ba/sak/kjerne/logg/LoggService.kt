@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.korrigertvedtak.KorrigertVedtak
 import no.nav.familie.ba.sak.kjerne.personident.Identkonverterer
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta.FeilutbetaltValuta
+import no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs.RefusjonEøs
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.Fødselsnummer
 import org.springframework.stereotype.Service
@@ -142,10 +143,10 @@ class LoggService(
                     BehandlerRolle.SAKSBEHANDLER
                 ),
                 tekst = "Behandlingstema er manuelt endret fra ${
-                tilBehandlingstema(
-                    underkategori = forrigeUnderkategori,
-                    kategori = forrigeKategori
-                )
+                    tilBehandlingstema(
+                        underkategori = forrigeUnderkategori,
+                        kategori = forrigeKategori
+                    )
                 } til ${tilBehandlingstema(underkategori = nyUnderkategori, kategori = nyKategori)}"
             )
         )
@@ -255,8 +256,14 @@ class LoggService(
         )
     }
 
-    fun opprettBeslutningOmVedtakLogg(behandling: Behandling, beslutning: Beslutning, begrunnelse: String? = null, behandlingErAutomatiskBesluttet: Boolean) {
-        val behandlingErManuellMigreringSomBleAutomatiskBesluttet = behandling.erManuellMigrering() && behandlingErAutomatiskBesluttet
+    fun opprettBeslutningOmVedtakLogg(
+        behandling: Behandling,
+        beslutning: Beslutning,
+        begrunnelse: String? = null,
+        behandlingErAutomatiskBesluttet: Boolean
+    ) {
+        val behandlingErManuellMigreringSomBleAutomatiskBesluttet =
+            behandling.erManuellMigrering() && behandlingErAutomatiskBesluttet
 
         lagre(
             Logg(
@@ -544,6 +551,38 @@ class LoggService(
                 tekst = """
                 Periode: ${feilutbetaltValuta.fom.tilKortString()} - ${feilutbetaltValuta.tom.tilKortString()}
                 Beløp: ${feilutbetaltValuta.feilutbetaltBeløp} kr
+                """.trimIndent()
+            )
+        )
+
+    fun loggRefusjonEøsPeriodeLagtTil(behandlingId: Long, refusjonEøs: RefusjonEøs) =
+        lagre(
+            Logg(
+                behandlingId = behandlingId,
+                type = LoggType.REFUSJON_EØS_LAGT_TIL,
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
+                    rolleConfig,
+                    BehandlerRolle.SAKSBEHANDLER
+                ),
+                tekst = """
+                Periode: ${refusjonEøs.fom.tilKortString()} - ${refusjonEøs.tom.tilKortString()}
+                Beløp: ${refusjonEøs.refusjonsbeløp} kr
+                """.trimIndent()
+            )
+        )
+
+    fun loggRefusjonEøsPeriodeFjernet(behandlingId: Long, refusjonEøs: RefusjonEøs) =
+        lagre(
+            Logg(
+                behandlingId = behandlingId,
+                type = LoggType.REFUSJON_EØS_FJERNET,
+                rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
+                    rolleConfig,
+                    BehandlerRolle.SAKSBEHANDLER
+                ),
+                tekst = """
+                Periode: ${refusjonEøs.fom.tilKortString()} - ${refusjonEøs.tom.tilKortString()}
+                Beløp: ${refusjonEøs.refusjonsbeløp} kr
                 """.trimIndent()
             )
         )
