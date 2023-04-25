@@ -68,8 +68,6 @@ class PeriodeOffsetIntegrasjonTest(
     @Test
     @Tag("integration")
     fun `Sjekk at offset settes på andel tilkjent ytelse når behandlingen iverksettes`() {
-        every { featureToggleService.isEnabled(FeatureToggleConfig.KAN_GENERERE_UTBETALINGSOPPDRAG_NY) } returns false
-
         val fnr = randomFnr()
         val barnFnr = randomFnr()
         val stønadFom = LocalDate.now()
@@ -134,8 +132,6 @@ class PeriodeOffsetIntegrasjonTest(
     @Test
     @Tag("integration")
     fun `Sjekk at offset IKKE settes på andel tilkjent ytelse når behandlingen simuleres`() {
-        every { featureToggleService.isEnabled(FeatureToggleConfig.KAN_GENERERE_UTBETALINGSOPPDRAG_NY) } returns false
-
         val fnr = randomFnr()
         val barnFnr = randomFnr()
         val stønadFom = LocalDate.now()
