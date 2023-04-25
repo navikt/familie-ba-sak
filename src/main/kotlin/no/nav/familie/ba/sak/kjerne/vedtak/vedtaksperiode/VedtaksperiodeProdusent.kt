@@ -90,7 +90,7 @@ private data class GrunnlagForPersonInnvilget(
     override val vilkårResultaterForVedtaksPeriode: List<VilkårResultatForVedtaksperiode>,
     val kompetanse: KompetanseForVedtaksperiode? = null,
     val endretUtbetalingAndel: EndretUtbetalingAndelForVedtaksperiode? = null,
-    val andeler: Iterable<AndelForVedtaksperiode>? // kan være null for søker
+    val andeler: Iterable<AndelForVedtaksperiode>?
 ) : GrunnlagForPerson
 
 private data class GrunnlagForPersonIkkeInnvilget(
