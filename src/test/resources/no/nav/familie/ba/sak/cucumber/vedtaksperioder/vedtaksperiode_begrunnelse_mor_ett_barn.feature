@@ -16,10 +16,17 @@ Egenskap: Vedtaksperioder med mor og et barn
   Scenario: Skal lage vedtaksperioder med begrunnelser for mor med et barn - normaltilfelle
     Og lag personresultater for behandling 1
     Og med overstyring av vilkår for behandling 1
-      | PersonId | Vilkår                                                          | Fra dato   | Til dato   | Resultat |
-      | 1234     | BOSATT_I_RIKET, LOVLIG_OPPHOLD                                  | 11.01.1970 |            | Oppfylt  |
-      | 3456     | UNDER_18_ÅR                                                     | 13.04.2020 | 12.04.2038 | Oppfylt  |
-      | 3456     | BOR_MED_SØKER, GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD | 13.04.2020 |            | Oppfylt  |
+      | PersonId | Vilkår                                           | Fra dato   | Til dato   | Resultat |
+      | 1234     | BOSATT_I_RIKET                                   | 11.01.1970 | 01.01.2021 | Oppfylt  |
+      | 1234     | LOVLIG_OPPHOLD                                   | 11.01.1970 |            | Oppfylt  |
+      | 3456     | UNDER_18_ÅR                                      | 13.04.2020 | 12.04.2038 | Oppfylt  |
+      | 3456     | GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD | 13.04.2020 |            | Oppfylt  |
+      | 3456     | BOR_MED_SØKER                                    | 13.04.2020 | 01.03.2021 | Oppfylt  |
+
+    Og legg til nye vilkårresultater for behandling 1
+      | PersonId | Vilkår         | Fra dato   | Til dato | Resultat |
+      | 1234     | BOSATT_I_RIKET | 02.01.2021 |          | Oppfylt  |
+      | 3456     | BOR_MED_SØKER  | 02.03.2021 |          | Oppfylt  |
 
     Og med andeler tilkjent ytelse for behandling 1
       | PersonId | Fra dato   | Til dato   | Beløp |
@@ -29,7 +36,9 @@ Egenskap: Vedtaksperioder med mor og et barn
 
     Så forvent følgende vedtaksperioder med begrunnelser
       | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar     |
-      | 01.05.2020 | 31.03.2038 | Utbetaling         | Barn og søker |
+      | 01.05.2020 | 31.01.2021 | Utbetaling         | Barn og søker |
+      | 01.02.2021 | 31.03.2021 | Utbetaling         | Barn og søker |
+      | 01.04.2021 | 31.03.2038 | Utbetaling         | Barn og søker |
       | 01.04.2038 |            | Opphør             | Kun søker     |
 
 
@@ -55,6 +64,27 @@ Egenskap: Vedtaksperioder med mor og et barn
       | 01.09.2021 | 31.03.2038 | Utbetaling         | Barn og søker                                     |
       | 01.04.2038 |            | Opphør             | Kun søker                                         |
 
+
+  Scenario: Skal lage vedtaksperioder med begrunnelser for mor med et barn - barn har vilkår fra tidenes morgen
+
+    Og lag personresultater for behandling 1
+    Og med overstyring av vilkår for behandling 1
+      | PersonId | Vilkår                                           | Fra dato   | Til dato   | Resultat     |
+      | 1234     | BOSATT_I_RIKET, LOVLIG_OPPHOLD                   | 11.01.1970 |            | Oppfylt      |
+      | 3456     | UNDER_18_ÅR                                      | 13.04.2020 | 12.04.2038 | Oppfylt      |
+      | 3456     | BOR_MED_SØKER                                    |            |            | Ikke_oppfylt |
+      | 3456     | GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD | 13.04.2020 |            | Oppfylt      |
+
+    Og med andeler tilkjent ytelse for behandling 1
+      | PersonId | Fra dato   | Til dato   | Beløp |
+      | 3456     | 01.05.2020 | 31.03.2038 | 1354  |
+
+    Når vedtaksperioder med begrunnelser genereres for behandling 1
+
+    Så forvent følgende vedtaksperioder med begrunnelser
+      | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar                                         |
+      | 01.05.2020 | 31.03.2038 | OPPHØR             | Barn har vilkår som er oppfylt her, men ikke alle |
+      | 01.04.2038 |            | Opphør             | Kun søker                                         |
 
   Scenario: Skal lage vedtaksperioder med begrunnelser for mor når barnet flytter ut
 
