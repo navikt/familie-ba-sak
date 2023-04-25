@@ -13,8 +13,8 @@ import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
 
 @EntityListeners(RollestyringMotDatabase::class)
-@Entity(name = "RefusjonEøs")
-@Table(name = "REFUSJON_EØS")
+@Entity(name = "RefusjonEos")
+@Table(name = "REFUSJON_EOS")
 data class RefusjonEøs(
     @Column(name = "fk_behandling_id", updatable = false, nullable = false)
     val behandlingId: Long,
