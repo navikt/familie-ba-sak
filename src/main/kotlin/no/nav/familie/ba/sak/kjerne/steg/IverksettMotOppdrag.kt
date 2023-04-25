@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.steg
 
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForIverksettingFactory
@@ -16,7 +15,6 @@ import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.task.SendVedtakTilInfotrygdTask
 import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
-import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.stereotype.Service
 
 @Service
@@ -59,13 +57,11 @@ class IverksettMotOppdrag(
         behandling: Behandling,
         data: IverksettingTaskDTO
     ): StegType {
-        val utbetalingsoppdrag = økonomiService.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(
+        økonomiService.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(
             vedtak = vedtakService.hent(data.vedtaksId),
             saksbehandlerId = data.saksbehandlerId,
             andelTilkjentYtelseForUtbetalingsoppdragFactory = AndelTilkjentYtelseForIverksettingFactory()
         )
-        val gammelUtbetalingsoppdrag = objectMapper.writeValueAsString(utbetalingsoppdrag)
-        secureLogger.info("Generert utbetalingsoppdrag under iverksettelse på gamle måte=$gammelUtbetalingsoppdrag")
         iverksattOppdrag.increment()
         val forrigeIverksatteBehandling =
             behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling)
