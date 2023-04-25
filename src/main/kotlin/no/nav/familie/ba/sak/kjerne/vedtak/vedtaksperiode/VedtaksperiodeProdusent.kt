@@ -54,6 +54,8 @@ private data class VilkårResultatForVedtaksperiode(
     val resultat: Resultat,
     val utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering>,
     val vurderesEtter: Regelverk?,
+    val erEksplisittAvslagPåSøknad: Boolean?,
+    val standardbegrunnelser: List<IVedtakBegrunnelse>,
     val fom: LocalDate?,
     val tom: LocalDate?
 )
@@ -385,6 +387,8 @@ private fun Tidslinje<Iterable<VilkårResultat>, Måned>.tilVilkårResultaterFor
                 resultat = it.resultat,
                 utdypendeVilkårsvurderinger = it.utdypendeVilkårsvurderinger,
                 vurderesEtter = it.vurderesEtter,
+                erEksplisittAvslagPåSøknad = it.erEksplisittAvslagPåSøknad,
+                standardbegrunnelser = it.standardbegrunnelser,
                 fom = it.periodeFom,
                 tom = it.periodeTom
             )
