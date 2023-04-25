@@ -131,7 +131,6 @@ fun utledVedtaksPerioderMedBegrunnelser(
         fagsakType = vedtak.behandling.fagsak.type
     ).map { it != null }
 
-
     val utfylteEndredeUtbetalinger = endredeUtbetalinger
         .map { it.tilIEndretUtbetalingAndel() }
         .filterIsInstance<IUtfyltEndretUtbetalingAndel>()
