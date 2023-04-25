@@ -47,12 +47,15 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvu
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import java.math.BigDecimal
+import java.time.LocalDate
 
 private data class VilkårResultatForVedtaksperiode(
     val vilkårType: Vilkår,
     val resultat: Resultat,
     val utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering>,
-    val vurderesEtter: Regelverk?
+    val vurderesEtter: Regelverk?,
+    val fom: LocalDate?,
+    val tom: LocalDate?
 )
 
 data class EndretUtbetalingAndelForVedtaksperiode(
@@ -341,10 +344,12 @@ private fun Tidslinje<Iterable<VilkårResultat>, Måned>.tilVilkårResultaterFor
     map { vilkårResultater ->
         vilkårResultater?.map {
             VilkårResultatForVedtaksperiode(
-                it.vilkårType,
-                it.resultat,
-                it.utdypendeVilkårsvurderinger,
-                it.vurderesEtter
+                vilkårType = it.vilkårType,
+                resultat = it.resultat,
+                utdypendeVilkårsvurderinger = it.utdypendeVilkårsvurderinger,
+                vurderesEtter = it.vurderesEtter,
+                fom = it.periodeFom,
+                tom = it.periodeTom
             )
         }
     }
