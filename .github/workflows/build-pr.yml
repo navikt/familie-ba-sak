@@ -1,11 +1,9 @@
 name: Pull request
 on:
+  workflow_dispatch:
   merge_group:
   pull_request:
     types: [ opened, synchronize, reopened, ready_for_review ]
-
-env:
-  IMAGE: ghcr.io/navikt/familie-ba-sak:${{ github.sha }}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
