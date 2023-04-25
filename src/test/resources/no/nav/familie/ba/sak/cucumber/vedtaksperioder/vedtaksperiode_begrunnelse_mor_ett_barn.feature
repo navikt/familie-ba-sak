@@ -65,6 +65,27 @@ Egenskap: Vedtaksperioder med mor og et barn
       | 01.04.2038 |            | Opphør             | Kun søker                                         |
 
 
+  Scenario: Skal lage vedtaksperioder med begrunnelser for mor med et barn - barn har vilkår fra tidenes morgen
+
+    Og lag personresultater for behandling 1
+    Og med overstyring av vilkår for behandling 1
+      | PersonId | Vilkår                                           | Fra dato   | Til dato   | Resultat     |
+      | 1234     | BOSATT_I_RIKET, LOVLIG_OPPHOLD                   | 11.01.1970 |            | Oppfylt      |
+      | 3456     | UNDER_18_ÅR                                      | 13.04.2020 | 12.04.2038 | Oppfylt      |
+      | 3456     | BOR_MED_SØKER                                    |            |            | Ikke_oppfylt |
+      | 3456     | GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD | 13.04.2020 |            | Oppfylt      |
+
+    Og med andeler tilkjent ytelse for behandling 1
+      | PersonId | Fra dato   | Til dato   | Beløp |
+      | 3456     | 01.05.2020 | 31.03.2038 | 1354  |
+
+    Når vedtaksperioder med begrunnelser genereres for behandling 1
+
+    Så forvent følgende vedtaksperioder med begrunnelser
+      | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar                                         |
+      | 01.05.2020 | 31.03.2038 | OPPHØR             | Barn har vilkår som er oppfylt her, men ikke alle |
+      | 01.04.2038 |            | Opphør             | Kun søker                                         |
+
   Scenario: Skal lage vedtaksperioder med begrunnelser for mor når barnet flytter ut
 
     Og lag personresultater for behandling 1
