@@ -22,15 +22,14 @@ Egenskap: Vedtaksperioder med andeler tilkjent ytelse
       | 3456     | BOR_MED_SØKER, GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD | 13.04.2020 |            | Oppfylt  |
 
     Og med andeler tilkjent ytelse for behandling 1
-      | PersonId | Fra dato   | Til dato   |
-      | 1234     | 01.05.2020 | 30.04.2021 |
-      | 3456     | 01.05.2021 | 31.03.2038 |
+      | PersonId | Fra dato   | Til dato   | Beløp |
+      | 3456     | 01.05.2020 | 30.04.2021 | 1054  |
+      | 3456     | 01.05.2021 | 31.03.2038 | 1354  |
 
     Når vedtaksperioder med begrunnelser genereres for behandling 1
 
     Så forvent følgende vedtaksperioder med begrunnelser
       | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar     |
-      | 01.02.1970 | 30.04.2020 | Utbetaling         | Kun søker     |
       | 01.05.2020 | 30.04.2021 | Utbetaling         | Barn og søker |
       | 01.05.2021 | 31.03.2038 | Utbetaling         | Barn og søker |
-      | 01.04.2038 |            | Utbetaling         | Kun søker     |
+      | 01.04.2038 |            | Opphør             | Kun søker     |
