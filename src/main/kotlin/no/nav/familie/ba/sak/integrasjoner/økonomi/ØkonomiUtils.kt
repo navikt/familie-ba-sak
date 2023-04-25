@@ -1,6 +1,10 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
+import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
+import java.math.BigDecimal
+import java.time.LocalDate
 import java.time.YearMonth
 
 object ØkonomiUtils {
@@ -214,3 +218,10 @@ private fun AndelTilkjentYtelseForUtbetalingsoppdrag.erTilsvarendeForUtbetaling(
             this.type == other.type
         )
 }
+
+fun Utbetalingsoppdrag.harLøpendeUtbetaling() =
+    this.utbetalingsperiode.any {
+        it.opphør == null &&
+            it.sats > BigDecimal.ZERO &&
+            it.vedtakdatoTom > LocalDate.now().sisteDagIMåned()
+    }
