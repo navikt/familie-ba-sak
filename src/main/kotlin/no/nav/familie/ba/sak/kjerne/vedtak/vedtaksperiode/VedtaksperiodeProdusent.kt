@@ -131,15 +131,6 @@ fun utledVedtaksPerioderMedBegrunnelser(
         fagsakType = vedtak.behandling.fagsak.type
     ).map { it != null }
 
-    // Hva skjer når søker er et barn?
-    val erObligatoriskeVilkårOppfyltForMinstEttBarnTidslinje = personResultater
-        .filter { it.aktør != søker.aktør }
-        .map { personResultat ->
-            personResultat.tilTidslinjeForSplittForPerson(
-                personType = PersonType.BARN,
-                fagsakType = vedtak.behandling.fagsak.type
-            ).map { it != null }
-        }.kombiner { it.any() }
 
     val utfylteEndredeUtbetalinger = endredeUtbetalinger
         .map { it.tilIEndretUtbetalingAndel() }

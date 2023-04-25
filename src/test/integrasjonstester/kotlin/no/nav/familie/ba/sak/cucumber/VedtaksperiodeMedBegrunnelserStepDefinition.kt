@@ -208,8 +208,8 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
         )
 
         val vedtaksperioderComparator = compareBy<VedtaksperiodeMedBegrunnelser>({ it.type }, { it.fom }, { it.tom })
-        Assertions.assertThat(forventedeVedtaksperioder.sortedWith(vedtaksperioderComparator))
-            .isEqualTo(vedtaksperioderMedBegrunnelser.sortedWith(vedtaksperioderComparator))
+        Assertions.assertThat(vedtaksperioderMedBegrunnelser.sortedWith(vedtaksperioderComparator))
+            .isEqualTo(forventedeVedtaksperioder.sortedWith(vedtaksperioderComparator))
     }
 
     private fun tilVilkårResultater(
