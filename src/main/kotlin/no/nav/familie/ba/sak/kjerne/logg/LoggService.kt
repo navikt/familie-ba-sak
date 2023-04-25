@@ -143,10 +143,10 @@ class LoggService(
                     BehandlerRolle.SAKSBEHANDLER
                 ),
                 tekst = "Behandlingstema er manuelt endret fra ${
-                    tilBehandlingstema(
-                        underkategori = forrigeUnderkategori,
-                        kategori = forrigeKategori
-                    )
+                tilBehandlingstema(
+                    underkategori = forrigeUnderkategori,
+                    kategori = forrigeKategori
+                )
                 } til ${tilBehandlingstema(underkategori = nyUnderkategori, kategori = nyKategori)}"
             )
         )
