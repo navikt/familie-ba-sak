@@ -555,10 +555,10 @@ class LoggService(
             )
         )
 
-    fun loggRefusjonEøsPeriodeLagtTil(behandlingId: Long, refusjonEøs: RefusjonEøs) =
+    fun loggRefusjonEøsPeriodeLagtTil(refusjonEøs: RefusjonEøs) =
         lagre(
             Logg(
-                behandlingId = behandlingId,
+                behandlingId = refusjonEøs.behandlingId,
                 type = LoggType.REFUSJON_EØS_LAGT_TIL,
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                     rolleConfig,
@@ -571,10 +571,10 @@ class LoggService(
             )
         )
 
-    fun loggRefusjonEøsPeriodeFjernet(behandlingId: Long, refusjonEøs: RefusjonEøs) =
+    fun loggRefusjonEøsPeriodeFjernet(refusjonEøs: RefusjonEøs) =
         lagre(
             Logg(
-                behandlingId = behandlingId,
+                behandlingId = refusjonEøs.behandlingId,
                 type = LoggType.REFUSJON_EØS_FJERNET,
                 rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(
                     rolleConfig,

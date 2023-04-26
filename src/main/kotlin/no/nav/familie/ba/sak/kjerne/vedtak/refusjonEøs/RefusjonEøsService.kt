@@ -32,14 +32,13 @@ class RefusjonEøsService(
                 refusjonAvklart = refusjonEøs.refusjonAvklart
             )
         )
-        loggService.loggRefusjonEøsPeriodeLagtTil(behandlingId = behandlingId, refusjonEøs = lagret)
+        loggService.loggRefusjonEøsPeriodeLagtTil(refusjonEøs = lagret)
         return lagret.id
     }
 
     @Transactional
     fun fjernRefusjonEøsPeriode(id: Long, behandlingId: Long) {
         loggService.loggRefusjonEøsPeriodeFjernet(
-            behandlingId = behandlingId,
             refusjonEøs = finnRefusjonEøsThrows(id)
         )
         refusjonEøsRepository.deleteById(id)
