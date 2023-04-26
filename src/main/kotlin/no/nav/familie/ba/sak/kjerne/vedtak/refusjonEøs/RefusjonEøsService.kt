@@ -15,14 +15,14 @@ class RefusjonEøsService(
     private val loggService: LoggService
 ) {
 
-    private fun finnRefusjonEøsThrows(id: Long): RefusjonEøs {
+    private fun hentRefusjonEøs(id: Long): RefusjonEøs {
         return refusjonEøsRepository.finnRefusjonEøs(id)
             ?: throw Feil("Finner ikke refusjon eøs med id=$id")
     }
 
     @Transactional
     fun leggTilRefusjonEøsPeriode(refusjonEøs: RestRefusjonEøs, behandlingId: Long): Long {
-        val lagret = refusjonEøsRepository.save(
+        val lagretPeriode = refusjonEøsRepository.save(
             RefusjonEøs(
                 behandlingId = behandlingId,
                 fom = refusjonEøs.fom,
@@ -32,14 +32,14 @@ class RefusjonEøsService(
                 refusjonAvklart = refusjonEøs.refusjonAvklart
             )
         )
-        loggService.loggRefusjonEøsPeriodeLagtTil(refusjonEøs = lagret)
-        return lagret.id
+        loggService.loggRefusjonEøsPeriodeLagtTil(refusjonEøs = lagretPeriode)
+        return lagretPeriode.id
     }
 
     @Transactional
     fun fjernRefusjonEøsPeriode(id: Long, behandlingId: Long) {
         loggService.loggRefusjonEøsPeriodeFjernet(
-            refusjonEøs = finnRefusjonEøsThrows(id)
+            refusjonEøs = hentRefusjonEøs(id)
         )
         refusjonEøsRepository.deleteById(id)
     }
@@ -59,14 +59,13 @@ class RefusjonEøsService(
         )
 
     @Transactional
-    fun oppdaterRefusjonEøsPeriode(refusjonEøs: RestRefusjonEøs, id: Long) {
-        val periode = refusjonEøsRepository.findById(id)
-            .orElseThrow { Feil("Finner ikke refusjon eøs med id=${refusjonEøs.id}") }
+    fun oppdaterRefusjonEøsPeriode(restRefusjonEøs: RestRefusjonEøs, id: Long) {
+        val refusjonEøs = hentRefusjonEøs(id)
 
-        periode.fom = refusjonEøs.fom
-        periode.tom = refusjonEøs.tom
-        periode.refusjonsbeløp = refusjonEøs.refusjonsbeløp
-        periode.land = refusjonEøs.land
-        periode.refusjonAvklart = refusjonEøs.refusjonAvklart
+        refusjonEøs.fom = restRefusjonEøs.fom
+        refusjonEøs.tom = restRefusjonEøs.tom
+        refusjonEøs.refusjonsbeløp = restRefusjonEøs.refusjonsbeløp
+        refusjonEøs.land = restRefusjonEøs.land
+        refusjonEøs.refusjonAvklart = restRefusjonEøs.refusjonAvklart
     }
 }

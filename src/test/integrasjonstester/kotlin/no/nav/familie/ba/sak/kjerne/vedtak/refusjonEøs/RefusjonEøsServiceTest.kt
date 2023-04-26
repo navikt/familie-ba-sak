@@ -43,7 +43,7 @@ class RefusjonEøsServiceTest(
             .also { Assertions.assertThat(it[0].tom).isNotNull() }
 
         refusjonEøsService.oppdaterRefusjonEøsPeriode(
-            refusjonEøs = RestRefusjonEøs(
+            restRefusjonEøs = RestRefusjonEøs(
                 id = id,
                 fom = LocalDate.of(2020, Month.JANUARY, 1),
                 tom = LocalDate.of(2020, Month.MAY, 31),
