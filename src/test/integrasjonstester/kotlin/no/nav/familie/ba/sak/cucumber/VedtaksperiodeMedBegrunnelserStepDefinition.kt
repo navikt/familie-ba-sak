@@ -5,6 +5,7 @@ import io.cucumber.java.no.Gitt
 import io.cucumber.java.no.Når
 import io.cucumber.java.no.Og
 import io.cucumber.java.no.Så
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
@@ -32,6 +33,7 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.parseList
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseLong
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriDato
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriEnum
+import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriLong
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriString
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -45,7 +47,8 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.SøkersAktivitet
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.utledVedtaksPerioderMedBegrunnelser
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForVedtaksperioder
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.genererVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
@@ -56,6 +59,7 @@ import java.time.LocalDate
 class VedtaksperiodeMedBegrunnelserStepDefinition {
 
     private var behandlinger = mapOf<Long, Behandling>()
+    private var behandlingTilForrigeBehandling = mapOf<Long, Long?>()
     private var vedtaksliste = listOf<Vedtak>()
     private var persongrunnlag = mapOf<Long, PersonopplysningGrunnlag>()
     private var personResultater = mutableMapOf<Long, Set<PersonResultat>>()
@@ -63,6 +67,8 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
     private var kompetanser = mutableMapOf<Long, List<Kompetanse>>()
     private var endredeUtbetalinger = mutableMapOf<Long, List<EndretUtbetalingAndel>>()
     private var andelerTilkjentYtelse = mutableMapOf<Long, List<AndelTilkjentYtelse>>()
+
+    private var gjeldendeBehandlingId: Long? = null
 
     @Gitt("følgende vedtak")
     fun `følgende vedtak`(dataTable: DataTable) {
@@ -190,21 +196,46 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
 
     @Når("vedtaksperioder med begrunnelser genereres for behandling {}")
     fun `generer vedtaksperiode med begrunnelse`(behandlingId: Long) {
-        vedtaksperioderMedBegrunnelser = utledVedtaksPerioderMedBegrunnelser(
+        gjeldendeBehandlingId = behandlingId
+
+        val vedtak = vedtaksliste.find { it.behandling.id == behandlingId && it.aktiv } ?: error("Finner ikke vedtak")
+
+        val grunnlagForVedtaksperiode = GrunnlagForVedtaksperioder(
             persongrunnlag = persongrunnlagForBehandling(behandlingId),
             personResultater = personResultater[behandlingId] ?: error("Finner ikke personresultater"),
-            vedtak = vedtaksliste.find { it.behandling.id == behandlingId && it.aktiv } ?: error("Finner ikke vedtak"),
+            fagsakType = vedtak.behandling.fagsak.type,
             kompetanser = kompetanser[behandlingId] ?: emptyList(),
             endredeUtbetalinger = endredeUtbetalinger[behandlingId] ?: emptyList(),
             andelerTilkjentYtelse = andelerTilkjentYtelse[behandlingId] ?: emptyList()
+        )
+        val forrigeBehandlingId = behandlingTilForrigeBehandling[behandlingId]
+
+        val grunnlagForVedtaksperiodeForrigeBehandling = forrigeBehandlingId?.let {
+            val forrigeVedtak = vedtaksliste.find { it.behandling.id == forrigeBehandlingId && it.aktiv } ?: error("Finner ikke vedtak")
+            GrunnlagForVedtaksperioder(
+                persongrunnlag = persongrunnlagForBehandling(forrigeBehandlingId),
+                personResultater = personResultater[forrigeBehandlingId] ?: error("Finner ikke personresultater"),
+                fagsakType = forrigeVedtak.behandling.fagsak.type,
+                kompetanser = kompetanser[forrigeBehandlingId] ?: emptyList(),
+                endredeUtbetalinger = endredeUtbetalinger[forrigeBehandlingId] ?: emptyList(),
+                andelerTilkjentYtelse = andelerTilkjentYtelse[forrigeBehandlingId] ?: emptyList()
+            )
+        }
+
+        vedtaksperioderMedBegrunnelser = genererVedtaksperioder(
+            vedtak = vedtaksliste.find { it.behandling.id == behandlingId && it.aktiv } ?: error("Finner ikke vedtak"),
+            grunnlagForVedtakPerioder = grunnlagForVedtaksperiode,
+            grunnlagForVedtakPerioderForrigeBehandling = grunnlagForVedtaksperiodeForrigeBehandling
+
         )
     }
 
     @Så("forvent følgende vedtaksperioder med begrunnelser")
     fun `forvent følgende vedtaksperioder med begrunnelser`(dataTable: DataTable) {
         val forventedeVedtaksperioder = mapForventetVedtaksperioderMedBegrunnelser(
-            dataTable,
-            vedtak = vedtaksliste.last()
+            dataTable = dataTable,
+            vedtak = vedtaksliste.find { it.behandling.id == gjeldendeBehandlingId }
+                ?: throw Feil("Fant ingen vedtak for behandling $gjeldendeBehandlingId")
         )
 
         val vedtaksperioderComparator = compareBy<VedtaksperiodeMedBegrunnelser>({ it.type }, { it.fom }, { it.tom })
@@ -262,6 +293,9 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
         behandlinger = dataTable.groupByBehandlingId()
             .map { lagBehandling(fagsak = fagsak).copy(id = it.key) }
             .associateBy { it.id }
+        behandlingTilForrigeBehandling = dataTable.asMaps().associate { rad ->
+            parseLong(Domenebegrep.BEHANDLING_ID, rad) to parseValgfriLong(Domenebegrep.FORRIGE_BEHANDLING_ID, rad)
+        }
         vedtaksliste = dataTable.groupByBehandlingId()
             .map { lagVedtak(behandlinger[it.key] ?: error("Finner ikke behandling")) }
     }
