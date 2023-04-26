@@ -285,7 +285,11 @@ class VedtaksperiodeService(
             )
         } else {
             vedtaksperiodeHentOgPersisterService.lagre(
-                genererVedtaksperioderMedBegrunnelserGammel(vedtak)
+                if (featureToggleService.isEnabled(FeatureToggleConfig.VEDTAKSPERIODE_NY)) {
+                    finnVedtaksperioderForBehandling(vedtak.behandling.id)
+                } else {
+                    genererVedtaksperioderMedBegrunnelserGammel(vedtak)
+                }
             )
         }
     }
@@ -311,7 +315,7 @@ class VedtaksperiodeService(
             andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
         )
 
-    @Deprecated("skal bruke oppdaterVedtakMedVedtaksperioder når den er klar")
+    @Deprecated("skal bruke genererVedtaksperioderMedBegrunnelser når den er klar")
     fun genererVedtaksperioderMedBegrunnelserGammel(
         vedtak: Vedtak,
         manueltOverstyrtEndringstidspunkt: LocalDate? = null
@@ -362,11 +366,14 @@ class VedtaksperiodeService(
             oppdaterVedtakMedVedtaksperioder(vedtak)
         } else {
             vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(vedtak)
-            val vedtaksperioder =
+            val vedtaksperioder = if (featureToggleService.isEnabled(FeatureToggleConfig.VEDTAKSPERIODE_NY)) {
+                finnVedtaksperioderForBehandling(vedtak.behandling.id)
+            } else {
                 genererVedtaksperioderMedBegrunnelserGammel(
                     vedtak = vedtak,
                     manueltOverstyrtEndringstidspunkt = overstyrtEndringstidspunkt
                 )
+            }
             vedtaksperiodeHentOgPersisterService.lagre(vedtaksperioder.sortedBy { it.fom })
         }
         lagreNedOverstyrtEndringstidspunkt(vedtak.behandling.id, overstyrtEndringstidspunkt)
