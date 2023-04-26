@@ -59,6 +59,8 @@ import no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta.FeilutbetaltValuta
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeMedBegrunnelser.UtbetalingsperiodeMedBegrunnelserService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilUtvidetVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForVedtaksperioder
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.genererVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import org.slf4j.LoggerFactory
@@ -288,20 +290,26 @@ class VedtaksperiodeService(
         }
     }
 
-    fun genererVedtaksperioderMedBegrunnelser(vedtak: Vedtak): List<VedtaksperiodeMedBegrunnelser> {
-        val behandlingId = vedtak.behandling.id
+    fun finnVedtaksperioderForBehandling(behandlingId: Long): List<VedtaksperiodeMedBegrunnelser> {
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
 
-        val kompetanser = kompetanseRepository.finnFraBehandlingId(behandlingId)
-
-        return utledVedtaksPerioderMedBegrunnelser(
-            persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId),
-            personResultater = vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId).personResultater,
-            vedtak = vedtak,
-            kompetanser = kompetanser.toList(),
-            endredeUtbetalinger = endretUtbetalingAndelRepository.findByBehandlingId(behandlingId),
-            andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId)
+        return genererVedtaksperioder(
+            grunnlagForVedtakPerioder = hentGrunnlagForVedtaksperioder(behandling),
+            grunnlagForVedtakPerioderForrigeBehandling = forrigeBehandling?.let { hentGrunnlagForVedtaksperioder(it) },
+            vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId)
         )
     }
+
+    fun hentGrunnlagForVedtaksperioder(behandling: Behandling): GrunnlagForVedtaksperioder =
+        GrunnlagForVedtaksperioder(
+            persongrunnlag = persongrunnlagService.hentAktivThrows(behandling.id),
+            personResultater = vilkårsvurderingService.hentAktivForBehandlingThrows(behandling.id).personResultater,
+            fagsakType = behandling.fagsak.type,
+            kompetanser = kompetanseRepository.finnFraBehandlingId(behandling.id).toList(),
+            endredeUtbetalinger = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id),
+            andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
+        )
 
     @Deprecated("skal bruke oppdaterVedtakMedVedtaksperioder når den er klar")
     fun genererVedtaksperioderMedBegrunnelserGammel(
