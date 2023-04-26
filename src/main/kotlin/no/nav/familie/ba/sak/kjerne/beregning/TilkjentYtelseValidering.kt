@@ -3,16 +3,16 @@ package no.nav.familie.ba.sak.kjerne.beregning
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.KONTAKT_TEAMET_SUFFIX
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
-import no.nav.familie.ba.sak.common.overlapperHeltEllerDelvisMed
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.maksBeløp
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.beregning.domene.hentTidslinje
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjeMedAndeler
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
+import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil
+import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringUtil.tilFørsteEndringstidspunkt
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -43,7 +43,7 @@ fun hentBarnasAndeler(andeler: List<AndelTilkjentYtelse>, barna: List<Person>) =
 object TilkjentYtelseValidering {
 
     fun finnAktørIderMedUgyldigEtterbetalingsperiode(
-        forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>?,
+        forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
         andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
         kravDato: LocalDateTime
     ): List<String> {
@@ -56,18 +56,14 @@ object TilkjentYtelseValidering {
             aktørIder.mapNotNull { aktørId ->
                 val andelerTilkjentYtelseForPerson = andelerTilkjentYtelse.filter { it.aktør.aktørId == aktørId }
                 val forrigeAndelerTilkjentYtelseForPerson =
-                    forrigeAndelerTilkjentYtelse?.filter { it.aktør.aktørId == aktørId }
+                    forrigeAndelerTilkjentYtelse.filter { it.aktør.aktørId == aktørId }
 
-                val etterbetalingErUgyldig = erUgyldigEtterbetalingPåPerson(
-                    forrigeAndelerTilkjentYtelseForPerson,
-                    andelerTilkjentYtelseForPerson,
-                    gyldigEtterbetalingFom
-                )
-
-                if (etterbetalingErUgyldig) {
-                    aktørId
-                } else {
-                    null
+                aktørId.takeIf {
+                    erUgyldigEtterbetalingPåPerson(
+                        forrigeAndelerTilkjentYtelseForPerson,
+                        andelerTilkjentYtelseForPerson,
+                        gyldigEtterbetalingFom
+                    )
                 }
             }
 
@@ -84,29 +80,22 @@ object TilkjentYtelseValidering {
     }
 
     fun erUgyldigEtterbetalingPåPerson(
-        forrigeAndelerForPerson: List<AndelTilkjentYtelse>?,
+        forrigeAndelerForPerson: List<AndelTilkjentYtelse>,
         andelerForPerson: List<AndelTilkjentYtelse>,
-        gyldigEtterbetalingFom: YearMonth?
+        gyldigEtterbetalingFom: YearMonth
     ): Boolean {
         return YtelseType.values().any { ytelseType ->
-            val forrigeAndelerForPersonOgType = forrigeAndelerForPerson?.filter { it.type == ytelseType }
+            val forrigeAndelerForPersonOgType = forrigeAndelerForPerson.filter { it.type == ytelseType }
             val andelerForPersonOgType = andelerForPerson.filter { it.type == ytelseType }
 
-            val forrigeAndelerTidslinje = forrigeAndelerForPersonOgType?.toList().hentTidslinje()
-            val andelerTidslinje = andelerForPersonOgType.toList().hentTidslinje()
+            val etterbetalingTidslinje = EndringIUtbetalingUtil.lagEtterbetalingstidslinjeForPersonOgType(
+                nåværendeAndeler = andelerForPersonOgType,
+                forrigeAndeler = forrigeAndelerForPersonOgType
+            )
 
-            val erAndelMedØktBeløpFørGyldigEtterbetalingsdato =
-                erAndelMedØktBeløpFørDato(
-                    forrigeAndeler = forrigeAndelerForPersonOgType,
-                    andeler = andelerForPersonOgType,
-                    måned = gyldigEtterbetalingFom
-                )
+            val førsteMånedMedEtterbetaling = etterbetalingTidslinje.tilFørsteEndringstidspunkt()
 
-            val segmenterLagtTil = andelerTidslinje.disjoint(forrigeAndelerTidslinje)
-            val erLagtTilSegmentFørGyldigEtterbetalingsdato =
-                segmenterLagtTil.any { it.value.stønadFom < gyldigEtterbetalingFom && it.value.kalkulertUtbetalingsbeløp > 0 }
-
-            erAndelMedØktBeløpFørGyldigEtterbetalingsdato || erLagtTilSegmentFørGyldigEtterbetalingsdato
+            førsteMånedMedEtterbetaling != null && førsteMånedMedEtterbetaling < gyldigEtterbetalingFom
         }
     }
 
@@ -202,19 +191,6 @@ object TilkjentYtelseValidering {
             }
         }
     }
-
-    private fun erAndelMedØktBeløpFørDato(
-        forrigeAndeler: List<AndelTilkjentYtelse>?,
-        andeler: List<AndelTilkjentYtelse>,
-        måned: YearMonth?
-    ): Boolean = andeler
-        .filter { it.stønadFom < måned }
-        .any { andel ->
-            forrigeAndeler?.any {
-                it.periode.overlapperHeltEllerDelvisMed(andel.periode) &&
-                    it.kalkulertUtbetalingsbeløp < andel.kalkulertUtbetalingsbeløp
-            } ?: false
-        }
 }
 
 private fun validerAtBeløpForPartStemmerMedSatser(
@@ -222,7 +198,8 @@ private fun validerAtBeløpForPartStemmerMedSatser(
     andeler: List<AndelTilkjentYtelse>,
     fagsakType: FagsakType
 ) {
-    val maksAntallAndeler = if (fagsakType == FagsakType.BARN_ENSLIG_MINDREÅRIG) 2 else if (person.type == PersonType.BARN) 1 else 2
+    val maksAntallAndeler =
+        if (fagsakType == FagsakType.BARN_ENSLIG_MINDREÅRIG) 2 else if (person.type == PersonType.BARN) 1 else 2
     val maksTotalBeløp = maksBeløp(personType = person.type, fagsakType = fagsakType)
 
     if (andeler.size > maksAntallAndeler) {

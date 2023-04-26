@@ -44,7 +44,7 @@ class PersonoGrunnlagServiceTest {
     @Test
     fun `Skal sende med barna fra forrige behandling ved førstegangsbehandling nummer to`() {
         val søker = lagPerson()
-        val barnFraForrigeBehanlding = lagPerson(type = PersonType.BARN)
+        val barnFraForrigeBehandling = lagPerson(type = PersonType.BARN)
         val barn = lagPerson(type = PersonType.BARN)
 
         val barnFnr = barn.aktør.aktivFødselsnummer()
@@ -56,7 +56,7 @@ class PersonoGrunnlagServiceTest {
         val forrigeBehandlingPersongrunnlag =
             lagTestPersonopplysningGrunnlag(
                 behandlingId = forrigeBehandling.id,
-                personer = arrayOf(søker, barnFraForrigeBehanlding)
+                personer = arrayOf(søker, barnFraForrigeBehandling)
             )
 
         val søknadDTO = lagSøknadDTO(
@@ -72,7 +72,7 @@ class PersonoGrunnlagServiceTest {
         every {
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(
                 forrigeBehandling.id,
-                barnFraForrigeBehanlding.aktør
+                barnFraForrigeBehandling.aktør
             )
         } returns listOf(lagAndelTilkjentYtelse(fom = YearMonth.now(), tom = YearMonth.now()))
 
@@ -95,7 +95,7 @@ class PersonoGrunnlagServiceTest {
             persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
                 aktør = søker.aktør,
                 barnFraInneværendeBehandling = listOf(barn.aktør),
-                barnFraForrigeBehandling = listOf(barnFraForrigeBehanlding.aktør),
+                barnFraForrigeBehandling = listOf(barnFraForrigeBehandling.aktør),
                 behandling = behandling,
                 målform = søknadDTO.søkerMedOpplysninger.målform
             )

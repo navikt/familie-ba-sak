@@ -23,10 +23,10 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
-import no.nav.familie.ba.sak.kjerne.beregning.EndringstidspunktService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
+import no.nav.familie.ba.sak.kjerne.beregning.endringstidspunkt.EndringstidspunktService
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
@@ -297,7 +297,9 @@ class VedtaksperiodeService(
             persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId),
             personResultater = vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId).personResultater,
             vedtak = vedtak,
-            kompetanser = kompetanser.toList()
+            kompetanser = kompetanser.toList(),
+            endredeUtbetalinger = endretUtbetalingAndelRepository.findByBehandlingId(behandlingId),
+            andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId)
         )
     }
 

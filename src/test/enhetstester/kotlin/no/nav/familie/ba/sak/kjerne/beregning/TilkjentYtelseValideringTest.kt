@@ -42,7 +42,7 @@ class TilkjentYtelseValideringTest {
         )
         Assertions.assertTrue(
             TilkjentYtelseValidering.erUgyldigEtterbetalingPåPerson(
-                forrigeAndelerForPerson = null,
+                forrigeAndelerForPerson = emptyList(),
                 andelerForPerson = andeler1,
                 gyldigEtterbetalingFom = gyldigEtterbetalingFom
             )
@@ -80,7 +80,7 @@ class TilkjentYtelseValideringTest {
         )
         Assertions.assertTrue(
             TilkjentYtelseValidering.erUgyldigEtterbetalingPåPerson(
-                forrigeAndelerForPerson = null,
+                forrigeAndelerForPerson = emptyList(),
                 andelerForPerson = andeler2,
                 gyldigEtterbetalingFom = gyldigEtterbetalingFom
             )
@@ -194,7 +194,7 @@ class TilkjentYtelseValideringTest {
 
         Assertions.assertFalse(
             TilkjentYtelseValidering.erUgyldigEtterbetalingPåPerson(
-                forrigeAndelerForPerson = null,
+                forrigeAndelerForPerson = emptyList(),
                 andelerForPerson = andeler,
                 gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(LocalDateTime.now().minusYears(2))
             )

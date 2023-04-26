@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.beregning
+package no.nav.familie.ba.sak.kjerne.beregning.endringstidspunkt
 
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import org.junit.jupiter.api.Assertions.assertEquals

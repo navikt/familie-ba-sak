@@ -6,6 +6,7 @@ import io.cucumber.java.no.Når
 import io.cucumber.java.no.Og
 import io.cucumber.java.no.Så
 import no.nav.familie.ba.sak.common.defaultFagsak
+import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPersonResultat
 import no.nav.familie.ba.sak.common.lagVedtak
@@ -14,6 +15,12 @@ import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.cucumber.domeneparser.Domenebegrep
 import no.nav.familie.ba.sak.cucumber.domeneparser.DomeneparserUtil.groupByBehandlingId
+import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser.DomenebegrepKompetanse.ANNEN_FORELDERS_AKTIVITET
+import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser.DomenebegrepKompetanse.ANNEN_FORELDERS_AKTIVITETSLAND
+import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser.DomenebegrepKompetanse.BARNETS_BOSTEDSLAND
+import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser.DomenebegrepKompetanse.RESULTAT
+import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser.DomenebegrepKompetanse.SØKERS_AKTIVITET
+import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser.DomenebegrepKompetanse.SØKERS_AKTIVITETSLAND
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser.DomenebegrepPersongrunnlag
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser.mapForventetVedtaksperioderMedBegrunnelser
@@ -22,10 +29,19 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.parseEnum
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseEnumListe
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseInt
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseList
+import no.nav.familie.ba.sak.cucumber.domeneparser.parseLong
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriDato
+import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriEnum
+import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriString
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.SøkersAktivitet
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
@@ -34,6 +50,8 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import org.assertj.core.api.Assertions
+import java.math.BigDecimal
+import java.time.LocalDate
 
 class VedtaksperiodeMedBegrunnelserStepDefinition {
 
@@ -43,6 +61,8 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
     private var personResultater = mutableMapOf<Long, Set<PersonResultat>>()
     private var vedtaksperioderMedBegrunnelser = listOf<VedtaksperiodeMedBegrunnelser>()
     private var kompetanser = mutableMapOf<Long, List<Kompetanse>>()
+    private var endredeUtbetalinger = mutableMapOf<Long, List<EndretUtbetalingAndel>>()
+    private var andelerTilkjentYtelse = mutableMapOf<Long, List<AndelTilkjentYtelse>>()
 
     @Gitt("følgende vedtak")
     fun `følgende vedtak`(dataTable: DataTable) {
@@ -98,7 +118,51 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
                 barnAktører = persongrunnlagForBehandling(behandlingId).personer
                     .filter { aktørerForKompetane.contains(it.id) }
                     .map { it.aktør }
-                    .toSet()
+                    .toSet(),
+                søkersAktivitet = parseValgfriEnum<SøkersAktivitet>(SØKERS_AKTIVITET, kompetanse)
+                    ?: SøkersAktivitet.ARBEIDER,
+                annenForeldersAktivitet =
+                parseValgfriEnum<AnnenForeldersAktivitet>(ANNEN_FORELDERS_AKTIVITET, kompetanse)
+                    ?: AnnenForeldersAktivitet.I_ARBEID,
+                søkersAktivitetsland = parseValgfriString(SØKERS_AKTIVITETSLAND, kompetanse) ?: "PL",
+                annenForeldersAktivitetsland = parseValgfriString(ANNEN_FORELDERS_AKTIVITETSLAND, kompetanse) ?: "NO",
+                barnetsBostedsland = parseValgfriString(BARNETS_BOSTEDSLAND, kompetanse) ?: "NO",
+                resultat = parseEnum<KompetanseResultat>(RESULTAT, kompetanse)
+            )
+        }
+    }
+
+    @Og("med endrede utbetalinger for behandling {}")
+    fun `med endrede utbetalinger for behandling`(behandlingId: Long, dataTable: DataTable) {
+        val nyeEndredeUtbetalingAndeler = dataTable.asMaps()
+        endredeUtbetalinger[behandlingId] = nyeEndredeUtbetalingAndeler.map { endretUtbetaling ->
+            val personId = parseLong(DomenebegrepPersongrunnlag.PERSON_ID, endretUtbetaling)
+            EndretUtbetalingAndel(
+                behandlingId = behandlingId,
+                fom = parseValgfriDato(Domenebegrep.FRA_DATO, endretUtbetaling)?.toYearMonth(),
+                tom = parseValgfriDato(Domenebegrep.TIL_DATO, endretUtbetaling)?.toYearMonth(),
+                person = persongrunnlagForBehandling(behandlingId).personer.find { personId == it.id },
+                prosent = BigDecimal.ZERO,
+                årsak = Årsak.ALLEREDE_UTBETALT,
+                søknadstidspunkt = LocalDate.now(),
+                begrunnelse = "Fordi at..."
+            )
+        }
+    }
+
+    @Og("med andeler tilkjent ytelse for behandling {}")
+    fun `med andeler tilkjent ytelse for behandling`(behandlingId: Long, dataTable: DataTable) {
+        val nyeAndelerTilkjentYtelse = dataTable.asMaps()
+        andelerTilkjentYtelse[behandlingId] = nyeAndelerTilkjentYtelse.map { andelerTilkjentYtelse ->
+            val personId = parseLong(DomenebegrepPersongrunnlag.PERSON_ID, andelerTilkjentYtelse)
+            lagAndelTilkjentYtelse(
+                fom = parseValgfriDato(Domenebegrep.FRA_DATO, andelerTilkjentYtelse)?.toYearMonth()
+                    ?: LocalDate.MIN.toYearMonth(),
+                tom = parseValgfriDato(Domenebegrep.TIL_DATO, andelerTilkjentYtelse)?.toYearMonth()
+                    ?: LocalDate.MAX.toYearMonth(),
+                behandling = finnBehandling(behandlingId),
+                person = persongrunnlagForBehandling(behandlingId).personer.find { personId == it.id }!!,
+                beløp = parseInt(DomenebegrepVedtaksperiodeMedBegrunnelser.BELØP, andelerTilkjentYtelse)
             )
         }
     }
@@ -130,7 +194,9 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
             persongrunnlag = persongrunnlagForBehandling(behandlingId),
             personResultater = personResultater[behandlingId] ?: error("Finner ikke personresultater"),
             vedtak = vedtaksliste.find { it.behandling.id == behandlingId && it.aktiv } ?: error("Finner ikke vedtak"),
-            kompetanser = kompetanser[behandlingId] ?: emptyList()
+            kompetanser = kompetanser[behandlingId] ?: emptyList(),
+            endredeUtbetalinger = endredeUtbetalinger[behandlingId] ?: emptyList(),
+            andelerTilkjentYtelse = andelerTilkjentYtelse[behandlingId] ?: emptyList()
         )
     }
 
@@ -142,8 +208,8 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
         )
 
         val vedtaksperioderComparator = compareBy<VedtaksperiodeMedBegrunnelser>({ it.type }, { it.fom }, { it.tom })
-        Assertions.assertThat(forventedeVedtaksperioder.sortedWith(vedtaksperioderComparator))
-            .isEqualTo(vedtaksperioderMedBegrunnelser.sortedWith(vedtaksperioderComparator))
+        Assertions.assertThat(vedtaksperioderMedBegrunnelser.sortedWith(vedtaksperioderComparator))
+            .isEqualTo(forventedeVedtaksperioder.sortedWith(vedtaksperioderComparator))
     }
 
     private fun tilVilkårResultater(
@@ -152,7 +218,6 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
         personResultat: PersonResultat
     ) =
         nyeVilkårForPerson?.map {
-            it
             VilkårResultat(
                 vilkårType = parseEnum(DomenebegrepVedtaksperiodeMedBegrunnelser.VILKÅR, it),
                 resultat = parseEnum(DomenebegrepVedtaksperiodeMedBegrunnelser.RESULTAT, it),
@@ -175,7 +240,8 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
             ).contains(vilkårResultat.vilkårType)
         }
         if (overstyringForVilkår != null) {
-            vilkårResultat.resultat = parseEnum(DomenebegrepVedtaksperiodeMedBegrunnelser.RESULTAT, overstyringForVilkår)
+            vilkårResultat.resultat =
+                parseEnum(DomenebegrepVedtaksperiodeMedBegrunnelser.RESULTAT, overstyringForVilkår)
             vilkårResultat.periodeFom = parseValgfriDato(Domenebegrep.FRA_DATO, overstyringForVilkår)
             vilkårResultat.periodeTom = parseValgfriDato(Domenebegrep.TIL_DATO, overstyringForVilkår)
         }
