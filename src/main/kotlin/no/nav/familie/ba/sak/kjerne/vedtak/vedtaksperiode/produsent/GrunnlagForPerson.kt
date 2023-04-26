@@ -1,0 +1,99 @@
+package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent
+
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.IUtfyltEndretUtbetalingAndel
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.SøkersAktivitet
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.UtfyltKompetanse
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
+import java.math.BigDecimal
+import java.time.LocalDate
+
+sealed interface GrunnlagForPerson {
+    val person: Person
+    val vilkårResultaterForVedtaksPeriode: List<VilkårResultatForVedtaksperiode>
+}
+
+data class GrunnlagForPersonInnvilget(
+    override val person: Person,
+    override val vilkårResultaterForVedtaksPeriode: List<VilkårResultatForVedtaksperiode>,
+    val kompetanse: KompetanseForVedtaksperiode? = null,
+    val endretUtbetalingAndel: EndretUtbetalingAndelForVedtaksperiode? = null,
+    val andeler: Iterable<AndelForVedtaksperiode>?
+) : GrunnlagForPerson
+
+data class GrunnlagForPersonIkkeInnvilget(
+    override val person: Person,
+    override val vilkårResultaterForVedtaksPeriode: List<VilkårResultatForVedtaksperiode>
+) : GrunnlagForPerson
+
+data class VilkårResultatForVedtaksperiode(
+    val vilkårType: Vilkår,
+    val resultat: Resultat,
+    val utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering>,
+    val vurderesEtter: Regelverk?,
+    val erEksplisittAvslagPåSøknad: Boolean?,
+    val standardbegrunnelser: List<IVedtakBegrunnelse>,
+    val fom: LocalDate?,
+    val tom: LocalDate?
+) {
+    constructor(vilkårResultat: VilkårResultat) : this (
+        vilkårType = vilkårResultat.vilkårType,
+        resultat = vilkårResultat.resultat,
+        utdypendeVilkårsvurderinger = vilkårResultat.utdypendeVilkårsvurderinger,
+        vurderesEtter = vilkårResultat.vurderesEtter,
+        erEksplisittAvslagPåSøknad = vilkårResultat.erEksplisittAvslagPåSøknad,
+        standardbegrunnelser = vilkårResultat.standardbegrunnelser,
+        fom = vilkårResultat.periodeFom,
+        tom = vilkårResultat.periodeTom
+    )
+}
+
+data class EndretUtbetalingAndelForVedtaksperiode(
+    val prosent: BigDecimal,
+    val årsak: Årsak,
+    val standardbegrunnelse: List<IVedtakBegrunnelse>
+) {
+    constructor(endretUtbetalingAndel: IUtfyltEndretUtbetalingAndel) : this(
+        prosent = endretUtbetalingAndel.prosent,
+        årsak = endretUtbetalingAndel.årsak,
+        standardbegrunnelse = endretUtbetalingAndel.standardbegrunnelser
+    )
+}
+
+data class AndelForVedtaksperiode(
+    val kalkulertUtbetalingsbeløp: Int,
+    val type: YtelseType
+) {
+    constructor(andelTilkjentYtelse: AndelTilkjentYtelse) : this(
+        kalkulertUtbetalingsbeløp = andelTilkjentYtelse.kalkulertUtbetalingsbeløp,
+        type = andelTilkjentYtelse.type
+    )
+}
+
+data class KompetanseForVedtaksperiode(
+    val søkersAktivitet: SøkersAktivitet,
+    val annenForeldersAktivitet: AnnenForeldersAktivitet,
+    val annenForeldersAktivitetsland: String,
+    val søkersAktivitetsland: String,
+    val barnetsBostedsland: String,
+    val resultat: KompetanseResultat
+) {
+    constructor(kompetanse: UtfyltKompetanse) : this(
+        søkersAktivitet = kompetanse.søkersAktivitet,
+        annenForeldersAktivitet = kompetanse.annenForeldersAktivitet,
+        annenForeldersAktivitetsland = kompetanse.annenForeldersAktivitetsland,
+        søkersAktivitetsland = kompetanse.søkersAktivitetsland,
+        barnetsBostedsland = kompetanse.barnetsBostedsland,
+        resultat = kompetanse.resultat
+    )
+}

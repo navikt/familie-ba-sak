@@ -1,26 +1,17 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
-import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerBeløpOgType
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.IUtfyltEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.tilIEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.tilTidslinje
-import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.SøkersAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.UtfyltKompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.tilIKompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
@@ -37,82 +28,13 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærEtter
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.mapIkkeNull
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.alleOrdinæreVilkårErOppfylt
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilForskjøvetTidslinjerForHvertOppfylteVilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilTidslinjeForSplittForPerson
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
-import java.math.BigDecimal
-import java.time.LocalDate
-
-data class VilkårResultatForVedtaksperiode(
-    val vilkårType: Vilkår,
-    val resultat: Resultat,
-    val utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering>,
-    val vurderesEtter: Regelverk?,
-    val erEksplisittAvslagPåSøknad: Boolean?,
-    val standardbegrunnelser: List<IVedtakBegrunnelse>,
-    val fom: LocalDate?,
-    val tom: LocalDate?
-)
-
-data class EndretUtbetalingAndelForVedtaksperiode(
-    val prosent: BigDecimal,
-    val årsak: Årsak,
-    val standardbegrunnelse: List<IVedtakBegrunnelse>
-)
-
-data class AndelForVedtaksperiode(
-    val kalkulertUtbetalingsbeløp: Int,
-    val type: YtelseType
-)
-
-data class KompetanseForVedtaksperiode(
-    val søkersAktivitet: SøkersAktivitet,
-    val annenForeldersAktivitet: AnnenForeldersAktivitet,
-    val annenForeldersAktivitetsland: String,
-    val søkersAktivitetsland: String,
-    val barnetsBostedsland: String,
-    val resultat: KompetanseResultat
-)
-
-sealed interface GrunnlagForPerson {
-    val person: Person
-    val vilkårResultaterForVedtaksPeriode: List<VilkårResultatForVedtaksperiode>
-}
-
-data class GrunnlagForPersonInnvilget(
-    override val person: Person,
-    override val vilkårResultaterForVedtaksPeriode: List<VilkårResultatForVedtaksperiode>,
-    val kompetanse: KompetanseForVedtaksperiode? = null,
-    val endretUtbetalingAndel: EndretUtbetalingAndelForVedtaksperiode? = null,
-    val andeler: Iterable<AndelForVedtaksperiode>?
-) : GrunnlagForPerson
-
-data class GrunnlagForPersonIkkeInnvilget(
-    override val person: Person,
-    override val vilkårResultaterForVedtaksPeriode: List<VilkårResultatForVedtaksperiode>
-) : GrunnlagForPerson
-
-data class GrunnlagForVedtaksperioder(
-    val persongrunnlag: PersonopplysningGrunnlag,
-    val personResultater: Set<PersonResultat>,
-    val fagsakType: FagsakType,
-    val kompetanser: List<Kompetanse>,
-    val endredeUtbetalinger: List<EndretUtbetalingAndel>,
-    val andelerTilkjentYtelse: List<AndelTilkjentYtelse>
-)
-
-data class GrunnlagForGjeldendeOgForrigeBehandling(
-    val gjeldende: GrunnlagForPerson?,
-    val forrige: GrunnlagForPerson?
-)
 
 /**
  * Vi ønsker å ha en kombinert tidslinje med alle innvilgede perioder og ikke-innvilgede som sammenfaller på dato.
@@ -141,12 +63,11 @@ fun finnPerioderSomSkalBegrunnes(
     return (ikkeInnvilgedePerioder + sammenslåtteInnvilgedePerioder).slåSammenPerioderMedSammeFomOgTom()
 }
 
-private fun List<Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned>>.utledSammenslåttePerioder() =
-    map { grunnlagForDenneOgForrigeBehandlingTidslinje ->
+private fun List<Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned>>.utledSammenslåttePerioder() = this
+    .map { grunnlagForDenneOgForrigeBehandlingTidslinje ->
         grunnlagForDenneOgForrigeBehandlingTidslinje.filtrer { it?.gjeldende is GrunnlagForPersonInnvilget }
-    }
-        .kombiner { it }
-        .perioder()
+    }.kombiner { it }
+    .perioder()
 
 private fun List<Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned>>.utledIkkeinnvilgedePerioder() = this
     .map { grunnlagForDenneOgForrigeBehandlingTidslinje ->
@@ -221,7 +142,7 @@ kombiner peroide uten rett med ja hvis fom og tom er like på tvers av personer
 kombiner nei hvis fom og tom er like på tvers av personer
 behold enkeltstående nei
 */
-fun utledGrunnlagTidslinjePerPerson(
+private fun utledGrunnlagTidslinjePerPerson(
     grunnlagForVedtaksperioder: GrunnlagForVedtaksperioder
 ): Map<Person, Tidslinje<GrunnlagForPerson, Måned>> {
     val (persongrunnlag, personResultater, fagsakType, kompetanser, endredeUtbetalinger, andelerTilkjentYtelse) = grunnlagForVedtaksperioder
@@ -338,16 +259,17 @@ private fun PersonResultat.tilGrunnlagForPersonTidslinje(
         )
 
     val vilkårResultaterTidslinje = forskjøvedeVilkårResultaterForPerson.tilVilkårResultaterForVedtaksPeriodeTidslinje()
+
     val kompetanseTidslinje = kompetanser.tilTidslinje()
-        .mapIkkeNull { it.tilKompetanseForVedtaksPeriode() }
+        .mapIkkeNull { KompetanseForVedtaksperiode(it) }
 
     val endredeUtbetalingerTidslinje = endredeUtbetalinger.tilTidslinje()
-        .mapIkkeNull { it.tilEndretUtbetalingAndelForVedtaksPeriode() }
+        .mapIkkeNull { EndretUtbetalingAndelForVedtaksperiode(it) }
 
     val andelerTidslinje =
         andelerTilkjentYtelse.tilTidslinjerPerBeløpOgType()
             .values
-            .map { tidslinje -> tidslinje.mapIkkeNull { it.tilAndelForVedtaksperiode() } }
+            .map { tidslinje -> tidslinje.mapIkkeNull { AndelForVedtaksperiode(it) } }
             .kombiner { it }
 
     val grunnlagTidslinje = erVilkårsvurderingOppfyltTidslinje
@@ -369,29 +291,6 @@ private fun PersonResultat.tilGrunnlagForPersonTidslinje(
 
     return grunnlagTidslinje.slåSammenLike()
 }
-
-private fun AndelTilkjentYtelse.tilAndelForVedtaksperiode() =
-    AndelForVedtaksperiode(
-        kalkulertUtbetalingsbeløp = kalkulertUtbetalingsbeløp,
-        type = type
-    )
-
-private fun IUtfyltEndretUtbetalingAndel.tilEndretUtbetalingAndelForVedtaksPeriode() =
-    EndretUtbetalingAndelForVedtaksperiode(
-        prosent = prosent,
-        årsak = årsak,
-        standardbegrunnelse = standardbegrunnelser
-    )
-
-private fun UtfyltKompetanse.tilKompetanseForVedtaksPeriode() =
-    KompetanseForVedtaksperiode(
-        søkersAktivitet = søkersAktivitet,
-        annenForeldersAktivitet = annenForeldersAktivitet,
-        annenForeldersAktivitetsland = annenForeldersAktivitetsland,
-        søkersAktivitetsland = søkersAktivitetsland,
-        barnetsBostedsland = barnetsBostedsland,
-        resultat = resultat
-    )
 
 private fun lagGrunnlagForVilkårOgAndel(
     erVilkårsvurderingOppfylt: Boolean?,
@@ -443,31 +342,19 @@ private fun lagGrunnlagMedEndretUtbetalingAndel(
 }
 
 private fun Tidslinje<Iterable<VilkårResultat>, Måned>.tilVilkårResultaterForVedtaksPeriodeTidslinje() =
-    map { vilkårResultater ->
-        vilkårResultater?.map {
-            VilkårResultatForVedtaksperiode(
-                vilkårType = it.vilkårType,
-                resultat = it.resultat,
-                utdypendeVilkårsvurderinger = it.utdypendeVilkårsvurderinger,
-                vurderesEtter = it.vurderesEtter,
-                erEksplisittAvslagPåSøknad = it.erEksplisittAvslagPåSøknad,
-                standardbegrunnelser = it.standardbegrunnelser,
-                fom = it.periodeFom,
-                tom = it.periodeTom
-            )
-        }
-    }
+    this.map { vilkårResultater -> vilkårResultater?.map { VilkårResultatForVedtaksperiode(it) } }
 
 private fun Tidslinje<Iterable<VilkårResultat>, Måned>.tilErVilkårsvurderingOppfyltTidslinje(
     erObligatoriskeVilkårOppfyltForAnnenRelevantPersonTidslinje: Tidslinje<Boolean, Måned>,
     fagsakType: FagsakType,
     personType: PersonType
-) =
-    kombinerMed(erObligatoriskeVilkårOppfyltForAnnenRelevantPersonTidslinje) { oppfylteVilkårNullable, erObligatoriskeVilkårOppfyltForAnnenRelevantPerson ->
-        val oppfylteVilkår = (oppfylteVilkårNullable ?: emptyList())
+) = this.kombinerMed(
+    erObligatoriskeVilkårOppfyltForAnnenRelevantPersonTidslinje
+) { oppfylteVilkårNullable, erObligatoriskeVilkårOppfyltForAnnenRelevantPerson ->
+    val oppfylteVilkår = (oppfylteVilkårNullable ?: emptyList())
 
-        erObligatoriskeVilkårOppfyltForAnnenRelevantPerson ?: false && oppfylteVilkår.alleOrdinæreVilkårErOppfylt(
-            personType = personType,
-            fagsakType = fagsakType
-        )
-    }
+    erObligatoriskeVilkårOppfyltForAnnenRelevantPerson ?: false && oppfylteVilkår.alleOrdinæreVilkårErOppfylt(
+        personType = personType,
+        fagsakType = fagsakType
+    )
+}
