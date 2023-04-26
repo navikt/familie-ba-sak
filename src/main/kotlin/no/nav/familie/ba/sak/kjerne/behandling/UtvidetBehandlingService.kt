@@ -71,7 +71,7 @@ class UtvidetBehandlingService(
     private val korrigertVedtakService: KorrigertVedtakService,
     private val feilutbetaltValutaService: FeilutbetaltValutaService,
     private val brevmottakerService: BrevmottakerService,
-    private val refusjonEøsService: RefusjonEøsService,
+    private val refusjonEøsService: RefusjonEøsService
 ) {
     fun lagRestUtvidetBehandling(behandlingId: Long): RestUtvidetBehandling {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
