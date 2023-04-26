@@ -32,7 +32,8 @@ at måten vi genererer utbetalingsoppdrag på er feil. Jobber nå med å finne u
   feilutbetalinger og etterbetalinger per periode?
 * Blir det mest riktig å inkludere manuelle posteringer i alle summeringer/beregninger på vår side? Vil det skape et
   riktigere bilde i flertallet av saker?
-* Hva er forskjellen på beløp og sats på linjene/posteringene?
+* Hva er forskjellen på `beløp` og `sats` på linjene/posteringene?
+* Hva betyr feltet `tilbakeforing`?
 * Finnes det noe dokumentasjon/forklaring på simulerings API og tolkning av resultat?
 
 ## Dagens utregning av simuleringsoppsummering
