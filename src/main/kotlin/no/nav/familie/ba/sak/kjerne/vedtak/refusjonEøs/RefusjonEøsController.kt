@@ -28,7 +28,7 @@ class RefusjonEøsController(
     private val utvidetBehandlingService: UtvidetBehandlingService
 ) {
     @PostMapping(
-        path = ["behandling/{behandlingId}"],
+        path = ["behandlinger/{behandlingId}"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
         consumes = [MediaType.APPLICATION_JSON_VALUE]
     )
@@ -51,7 +51,7 @@ class RefusjonEøsController(
     }
 
     @PutMapping(
-        path = ["behandling/{behandlingId}/periode/{id}"],
+        path = ["behandlinger/{behandlingId}/perioder/{id}"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
         consumes = [MediaType.APPLICATION_JSON_VALUE]
     )
@@ -70,7 +70,7 @@ class RefusjonEøsController(
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
 
-    @DeleteMapping(path = ["behandling/{behandlingId}/periode/{id}"])
+    @DeleteMapping(path = ["behandlinger/{behandlingId}/perioder/{id}"])
     fun fjernRefusjonEøsPeriode(
         @PathVariable behandlingId: Long,
         @PathVariable id: Long
@@ -84,7 +84,7 @@ class RefusjonEøsController(
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
 
-    @GetMapping(path = ["behandling/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    @GetMapping(path = ["behandlinger/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentRefusjonEøsPerioder(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<List<RestRefusjonEøs>?>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
