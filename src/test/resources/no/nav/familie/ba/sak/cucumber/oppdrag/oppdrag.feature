@@ -16,6 +16,10 @@ Egenskap: Vedtak for førstegangsbehandling
       | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id |
       | 1            | 03.2021  | 03.2021  |             | 700   | NY           | Nei        | 0          |                    |
 
+    Så forvent følgende utbetalingsoppdrag med ny utbetalingsgenerator
+      | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id |
+      | 1            | 03.2021  | 03.2021  |             | 700   | NY           | Nei        | 0          |                    |
+
 
   Scenario: Vedtak med to perioder
 
@@ -27,6 +31,11 @@ Egenskap: Vedtak for førstegangsbehandling
     Når beregner utbetalingsoppdrag
 
     Så forvent følgende utbetalingsoppdrag
+      | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id |
+      | 1            | 03.2021  | 03.2021  |             | 700   | NY           | Nei        | 0          |                    |
+      | 1            | 04.2021  | 05.2021  |             | 800   | NY           | Nei        | 1          | 0                  |
+
+    Så forvent følgende utbetalingsoppdrag med ny utbetalingsgenerator
       | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id |
       | 1            | 03.2021  | 03.2021  |             | 700   | NY           | Nei        | 0          |                    |
       | 1            | 04.2021  | 05.2021  |             | 800   | NY           | Nei        | 1          | 0                  |
@@ -47,6 +56,11 @@ Egenskap: Vedtak for førstegangsbehandling
       | 1            | 03.2021  | 03.2021  |             | 700   | NY           | Nei        | 0          |                    |
       | 2            | 04.2021  | 04.2021  |             | 800   | ENDR         | Nei        | 1          | 0                  |
 
+    Så forvent følgende utbetalingsoppdrag med ny utbetalingsgenerator
+      | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id |
+      | 1            | 03.2021  | 03.2021  |             | 700   | NY           | Nei        | 0          |                    |
+      | 2            | 04.2021  | 04.2021  |             | 800   | ENDR         | Nei        | 1          | 0                  |
+
     Så forvent følgende simulering
       | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id |
       | 1            | 03.2021  | 03.2021  |             | 700   | NY           | Nei        | 0          |                    |
@@ -54,13 +68,16 @@ Egenskap: Vedtak for førstegangsbehandling
       | 2            | 03.2021  | 03.2021  |             | 700   | ENDR         | Nei        | 1          | 0                  |
       | 2            | 04.2021  | 04.2021  |             | 800   | ENDR         | Nei        | 2          | 1                  |
 
+
   Scenario: 2 revurderinger som legger til en periode
 
     Gitt følgende tilkjente ytelser
       | BehandlingId | Fra dato | Til dato | Beløp | Kildebehandling |
       | 1            | 03.2021  | 03.2021  | 700   | 1               |
+
       | 2            | 03.2021  | 03.2021  | 700   | 1               |
       | 2            | 04.2021  | 04.2021  | 800   | 2               |
+
       | 3            | 03.2021  | 03.2021  | 700   | 1               |
       | 3            | 04.2021  | 04.2021  | 800   | 2               |
       | 3            | 05.2021  | 05.2021  | 900   | 3               |
@@ -72,3 +89,55 @@ Egenskap: Vedtak for førstegangsbehandling
       | 1            | 03.2021  | 03.2021  |             | 700   | NY           | Nei        | 0          |                    |
       | 2            | 04.2021  | 04.2021  |             | 800   | ENDR         | Nei        | 1          | 0                  |
       | 3            | 05.2021  | 05.2021  |             | 900   | ENDR         | Nei        | 2          | 1                  |
+
+    Så forvent følgende utbetalingsoppdrag med ny utbetalingsgenerator
+      | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id |
+      | 1            | 03.2021  | 03.2021  |             | 700   | NY           | Nei        | 0          |                    |
+      | 2            | 04.2021  | 04.2021  |             | 800   | ENDR         | Nei        | 1          | 0                  |
+      | 3            | 05.2021  | 05.2021  |             | 900   | ENDR         | Nei        | 2          | 1                  |
+
+  Scenario: Endrer beløp fra april
+
+    Gitt følgende tilkjente ytelser
+      | BehandlingId | Fra dato | Til dato | Beløp | Kildebehandling |
+      | 1            | 03.2021  | 06.2021  | 700   | 1               |
+
+      | 2            | 03.2021  | 03.2021  | 700   | 1               |
+      | 2            | 04.2021  | 06.2021  | 800   | 1               |
+
+    Så forvent følgende utbetalingsoppdrag
+      | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id |
+      | 1            | 03.2021  | 06.2021  |             | 700   | NY           | Nei        | 0          |                    |
+      | 2            | 03.2021  | 06.2021  | 03.2021     | 700   | ENDR         | Ja         | 0          |                    |
+      | 2            | 03.2021  | 03.2021  |             | 700   | ENDR         | Nei        | 1          | 0                  |
+      | 2            | 04.2021  | 06.2021  |             | 800   | ENDR         | Nei        | 2          | 1                  |
+
+
+    Så forvent følgende utbetalingsoppdrag med ny utbetalingsgenerator
+      | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id |
+      | 1            | 03.2021  | 06.2021  |             | 700   | NY           | Nei        | 0          |                    |
+      | 2            | 04.2021  | 06.2021  |             | 800   | ENDR         | Nei        | 1          | 0                  |
+
+
+  Scenario: Endrer beløp fra start
+
+    Gitt følgende tilkjente ytelser
+      | BehandlingId | Fra dato | Til dato | Beløp | Kildebehandling |
+      | 1            | 03.2021  | 06.2021  | 700   | 1               |
+
+      | 2            | 03.2021  | 03.2021  | 800   | 1               |
+      | 2            | 04.2021  | 06.2021  | 700   | 1               |
+
+    Så forvent følgende utbetalingsoppdrag
+      | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id |
+      | 1            | 03.2021  | 06.2021  |             | 700   | NY           | Nei        | 0          |                    |
+      | 2            | 03.2021  | 06.2021  | 03.2021     | 700   | ENDR         | Ja         | 0          |                    |
+      | 2            | 03.2021  | 03.2021  |             | 800   | ENDR         | Nei        | 1          | 0                  |
+      | 2            | 04.2021  | 06.2021  |             | 700   | ENDR         | Nei        | 2          | 1                  |
+
+
+    Så forvent følgende utbetalingsoppdrag med ny utbetalingsgenerator
+      | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id |
+      | 1            | 03.2021  | 06.2021  |             | 700   | NY           | Nei        | 0          |                    |
+      | 2            | 03.2021  | 03.2021  |             | 800   | ENDR         | Nei        | 1          | 0                  |
+      | 2            | 04.2021  | 06.2021  |             | 700   | ENDR         | Nei        | 2          | 1                  |

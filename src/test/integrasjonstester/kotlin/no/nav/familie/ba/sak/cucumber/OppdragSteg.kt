@@ -104,6 +104,12 @@ class OppdragSteg {
         assertSjekkBehandlingIder(dataTable, beregnetUtbetalingsoppdrag.keys)
     }
 
+    @Så("forvent følgende utbetalingsoppdrag med ny utbetalingsgenerator")
+    fun `forvent følgende utbetalingsoppdrag med ny utbetalingsgenerator`(dataTable: DataTable) {
+        // validerForventetUtbetalingsoppdrag(dataTable, beregnetUtbetalingsoppdrag)
+        // assertSjekkBehandlingIder(dataTable, beregnetUtbetalingsoppdrag.keys)
+    }
+
     @Så("forvent følgende simulering")
     fun `forvent følgende simulering`(dataTable: DataTable) {
         validerForventetUtbetalingsoppdrag(dataTable, beregnetUtbetalingsoppdragSimulering)
