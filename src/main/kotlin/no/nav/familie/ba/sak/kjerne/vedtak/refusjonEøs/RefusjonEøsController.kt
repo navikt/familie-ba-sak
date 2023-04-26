@@ -65,7 +65,7 @@ class RefusjonEøsController(
             handling = "oppdater periode med refusjon EØS"
         )
 
-        refusjonEøsService.oppdatertRefusjonEøsPeriode(refusjonEøs = refusjonEøs, id = id)
+        refusjonEøsService.oppdaterRefusjonEøsPeriode(refusjonEøs = refusjonEøs, id = id)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }

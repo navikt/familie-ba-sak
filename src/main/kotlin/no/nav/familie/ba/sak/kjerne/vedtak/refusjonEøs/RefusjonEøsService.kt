@@ -60,7 +60,7 @@ class RefusjonEøsService(
         )
 
     @Transactional
-    fun oppdatertRefusjonEøsPeriode(refusjonEøs: RestRefusjonEøs, id: Long) {
+    fun oppdaterRefusjonEøsPeriode(refusjonEøs: RestRefusjonEøs, id: Long) {
         val periode = refusjonEøsRepository.findById(id)
             .orElseThrow { Feil("Finner ikke refusjon eøs med id=${refusjonEøs.id}") }
 
