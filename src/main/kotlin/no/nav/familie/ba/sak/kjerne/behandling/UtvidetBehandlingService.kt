@@ -40,6 +40,7 @@ import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.TilbakekrevingReposito
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta.FeilutbetaltValutaService
+import no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs.RefusjonEøsService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilRestUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -69,7 +70,8 @@ class UtvidetBehandlingService(
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     private val korrigertVedtakService: KorrigertVedtakService,
     private val feilutbetaltValutaService: FeilutbetaltValutaService,
-    private val brevmottakerService: BrevmottakerService
+    private val brevmottakerService: BrevmottakerService,
+    private val refusjonEøsService: RefusjonEøsService,
 ) {
     fun lagRestUtvidetBehandling(behandlingId: Long): RestUtvidetBehandling {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
@@ -104,6 +106,8 @@ class UtvidetBehandlingService(
             .finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandlingId)
 
         val feilutbetaltValuta = feilutbetaltValutaService.hentFeilutbetaltValutaPerioder(behandlingId)
+
+        val refusjonEøs = refusjonEøsService.hentRefusjonEøsPerioder(behandlingId)
 
         val brevmottakere = brevmottakerService.hentRestBrevmottakere(behandlingId)
 
@@ -157,7 +161,8 @@ class UtvidetBehandlingService(
             korrigertVedtak = korrigertVedtakService.finnAktivtKorrigertVedtakPåBehandling(behandlingId)
                 ?.tilRestKorrigertVedtak(),
             feilutbetaltValuta = feilutbetaltValuta,
-            brevmottakere = brevmottakere
+            brevmottakere = brevmottakere,
+            refusjonEøs = refusjonEøs
         )
     }
 
