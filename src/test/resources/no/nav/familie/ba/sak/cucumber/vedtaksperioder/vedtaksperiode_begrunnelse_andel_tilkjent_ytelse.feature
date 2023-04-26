@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Vedtaksperioder med kompetanser
+Egenskap: Vedtaksperioder med andeler tilkjent ytelse
 
   Bakgrunn:
     Gitt følgende vedtak
@@ -20,11 +20,6 @@ Egenskap: Vedtaksperioder med kompetanser
       | 1234     | BOSATT_I_RIKET, LOVLIG_OPPHOLD                                  | 11.01.1970 |            | Oppfylt  |
       | 3456     | UNDER_18_ÅR                                                     | 13.04.2020 | 12.04.2038 | Oppfylt  |
       | 3456     | BOR_MED_SØKER, GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD | 13.04.2020 |            | Oppfylt  |
-
-    Og med kompetanser for behandling 1
-      | PersonId | Fra dato   | Til dato   | Resultat |
-      | 3456     | 01.05.2020 | 30.04.2021 |NORGE_ER_PRIMÆRLAND|
-      | 3456     | 01.05.2021 | 31.03.2038 |NORGE_ER_SEKUNDÆRLAND|
 
     Og med andeler tilkjent ytelse for behandling 1
       | PersonId | Fra dato   | Til dato   | Beløp |

@@ -29,6 +29,16 @@ object VedtaksperiodeMedBegrunnelserParser {
     enum class DomenebegrepVedtaksperiodeMedBegrunnelser(override val nøkkel: String) : Domenenøkkel {
         VEDTAKSPERIODE_TYPE("Vedtaksperiodetype"),
         VILKÅR("Vilkår"),
+        RESULTAT("Resultat"),
+        BELØP("Beløp")
+    }
+
+    enum class DomenebegrepKompetanse(override val nøkkel: String) : Domenenøkkel {
+        SØKERS_AKTIVITET("Søkers aktivitet"),
+        ANNEN_FORELDERS_AKTIVITET("Annen forelders aktivitet"),
+        SØKERS_AKTIVITETSLAND("Søkers aktivitetsland"),
+        ANNEN_FORELDERS_AKTIVITETSLAND("Annen forelders aktivitetsland"),
+        BARNETS_BOSTEDSLAND("Barnets bostedsland"),
         RESULTAT("Resultat")
     }
 }

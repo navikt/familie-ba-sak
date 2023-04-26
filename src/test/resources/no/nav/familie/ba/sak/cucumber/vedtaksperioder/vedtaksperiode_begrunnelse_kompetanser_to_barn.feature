@@ -14,7 +14,7 @@ Egenskap: Vedtaksperioder med kompetanser
       | 1            | 3456     | BARN       | 13.04.2020  |
       | 1            | 7890     | BARN       | 07.12.2022  |
 
-  Scenario: Skal lage vedtaksperioder med begrunnelser for mor med et barn - normaltilfelle
+  Scenario: Skal lage vedtaksperioder med begrunnelser for mor med to barn - normaltilfelle
     Og lag personresultater for behandling 1
     Og med overstyring av vilkår for behandling 1
       | PersonId | Vilkår                                                          | Fra dato   | Til dato   | Resultat |
@@ -25,22 +25,25 @@ Egenskap: Vedtaksperioder med kompetanser
       | 7890     | BOR_MED_SØKER, GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD | 07.12.2022 |            | Oppfylt  |
 
     Og med kompetanser for behandling 1
-      | PersonId   | Fra dato   | Til dato   |
-      | 3456       | 01.05.2020 | 31.12.2022 |
-      | 3456, 7890 | 01.01.2023 | 30.04.2023 |
-      | 3456, 7890 | 01.05.2023 | 31.03.2038 |
-      | 7890       | 01.04.2038 | 30.11.2040 |
+      | PersonId   | Fra dato   | Til dato   | Resultat              |
+      | 3456       | 01.05.2020 | 31.12.2022 | NORGE_ER_PRIMÆRLAND   |
+      | 3456, 7890 | 01.01.2023 | 30.04.2023 | NORGE_ER_SEKUNDÆRLAND |
+      | 3456, 7890 | 01.05.2023 | 31.03.2038 | NORGE_ER_PRIMÆRLAND   |
+      | 7890       | 01.04.2038 | 30.11.2040 | NORGE_ER_SEKUNDÆRLAND |
+
+    Og med andeler tilkjent ytelse for behandling 1
+      | PersonId | Fra dato   | Til dato   | Beløp |
+      | 3456     | 01.05.2020 | 31.03.2038 | 1054  |
+      | 7890     | 01.01.2023 | 30.11.2040 | 1354  |
 
 
     Når vedtaksperioder med begrunnelser genereres for behandling 1
 
     Så forvent følgende vedtaksperioder med begrunnelser
-      | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar              |
-      | 01.02.1970 | 30.04.2020 | Utbetaling         | Kun søker              |
-      | 01.05.2020 | 31.12.2022 | Utbetaling         | Barn og søker          |
-      | 01.01.2023 | 30.04.2023 | Utbetaling         | Barna og søker         |
-      | 01.05.2023 | 31.03.2038 | Utbetaling         | Barna og søker         |
-      | 01.04.2038 | 30.11.2040 | Utbetaling         | Barn og søker          |
-      | 01.12.2040 |            | Utbetaling         | Kun søker              |
-      | 01.02.1970 | 31.12.2022 | Opphør             | Why? TODO: Spør Halvor |
-      | 01.04.2038 |            | Opphør             | Første barn opphører   |
+      | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar            |
+      | 01.05.2020 | 31.12.2022 | Utbetaling         | Barn og søker        |
+      | 01.01.2023 | 30.04.2023 | Utbetaling         | Barna og søker       |
+      | 01.05.2023 | 31.03.2038 | Utbetaling         | Barna og søker       |
+      | 01.04.2038 | 30.11.2040 | Utbetaling         | Barn og søker        |
+      | 01.12.2040 |            | Opphør             | Kun søker            |
+      | 01.04.2038 |            | Opphør             | Første barn opphører |
