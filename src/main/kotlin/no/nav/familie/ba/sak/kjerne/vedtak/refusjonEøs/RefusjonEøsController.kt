@@ -38,7 +38,7 @@ class RefusjonEøsController(
     ):
         ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.VEILEDER,
+            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "legg til periode med refusjon EØS"
         )
 
@@ -61,7 +61,7 @@ class RefusjonEøsController(
         @RequestBody refusjonEøs: RestRefusjonEøs
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.VEILEDER,
+            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "oppdater periode med refusjon EØS"
         )
 
@@ -76,7 +76,7 @@ class RefusjonEøsController(
         @PathVariable id: Long
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.VEILEDER,
+            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "fjerner periode med refusjon EØS"
         )
         refusjonEøsService.fjernRefusjonEøsPeriode(id = id, behandlingId = behandlingId)
