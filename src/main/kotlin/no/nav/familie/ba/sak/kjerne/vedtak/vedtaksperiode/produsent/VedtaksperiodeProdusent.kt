@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.PeriodeOvergangsstønadGrunnlag
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
@@ -22,8 +23,10 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMedNullable
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.slåSammenLike
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilMånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilDagEllerFørsteDagIPerioden
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilLocalDateEllerNull
+import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærEtter
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.mapIkkeNull
@@ -145,7 +148,7 @@ behold enkeltstående nei
 private fun utledGrunnlagTidslinjePerPerson(
     grunnlagForVedtaksperioder: GrunnlagForVedtaksperioder
 ): Map<Person, Tidslinje<GrunnlagForPerson, Måned>> {
-    val (persongrunnlag, personResultater, fagsakType, kompetanser, endredeUtbetalinger, andelerTilkjentYtelse) = grunnlagForVedtaksperioder
+    val (persongrunnlag, personResultater, fagsakType, kompetanser, endredeUtbetalinger, andelerTilkjentYtelse, perioderOvergangsstønad) = grunnlagForVedtaksperioder
 
     val søker = persongrunnlag.søker
     val søkerPersonResultater = personResultater.single { it.aktør == søker.aktør }
@@ -178,7 +181,8 @@ private fun utledGrunnlagTidslinjePerPerson(
                 kompetanser = utfylteKompetanser.filter { kompetanse -> kompetanse.barnAktører.contains(personResultat.aktør) },
                 endredeUtbetalinger = utfylteEndredeUtbetalinger
                     .filter { endretUtbetaling -> endretUtbetaling.person.aktør == personResultat.aktør },
-                andelerTilkjentYtelse = andelerTilkjentYtelse.filter { andelTilkjentYtelse -> andelTilkjentYtelse.aktør == personResultat.aktør }
+                andelerTilkjentYtelse = andelerTilkjentYtelse.filter { andelTilkjentYtelse -> andelTilkjentYtelse.aktør == personResultat.aktør },
+                perioderOvergangsstønad = perioderOvergangsstønad.filter { it.aktør == person.aktør }
             )
         }
 
@@ -229,7 +233,8 @@ private fun PersonResultat.tilGrunnlagForPersonTidslinje(
     fagsakType: FagsakType,
     kompetanser: List<UtfyltKompetanse>,
     endredeUtbetalinger: List<IUtfyltEndretUtbetalingAndel>,
-    andelerTilkjentYtelse: List<AndelTilkjentYtelse>
+    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+    perioderOvergangsstønad: List<PeriodeOvergangsstønadGrunnlag>
 ): Tidslinje<GrunnlagForPerson, Måned> {
     val forskjøvedeVilkårResultater = vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår().kombiner { it }
     val forskjøvedeVilkårResultaterForPerson = when (person.type) {
@@ -272,6 +277,8 @@ private fun PersonResultat.tilGrunnlagForPersonTidslinje(
             .map { tidslinje -> tidslinje.mapIkkeNull { AndelForVedtaksperiode(it) } }
             .kombiner { it }
 
+    val overgangsstønadTidslinje = perioderOvergangsstønad.tilPeriodeOvergangsstønadForVedtaksperiodeTidslinje()
+
     val grunnlagTidslinje = erVilkårsvurderingOppfyltTidslinje
         .kombinerMed(
             vilkårResultaterTidslinje,
@@ -287,10 +294,17 @@ private fun PersonResultat.tilGrunnlagForPersonTidslinje(
             lagGrunnlagMedKompetanse(grunnlagForPerson, kompetanse)
         }.kombinerMedNullable(endredeUtbetalingerTidslinje) { grunnlagForPerson, endretUtbetalingAndel ->
             lagGrunnlagMedEndretUtbetalingAndel(grunnlagForPerson, endretUtbetalingAndel)
+        }.kombinerMedNullable(overgangsstønadTidslinje) { grunnlagForPerson, overgangsstønad ->
+            lagGrunnlagMedOvergangsstønad(grunnlagForPerson, overgangsstønad)
         }.filtrerIkkeNull()
 
     return grunnlagTidslinje.slåSammenLike()
 }
+
+private fun List<PeriodeOvergangsstønadGrunnlag>.tilPeriodeOvergangsstønadForVedtaksperiodeTidslinje() = this
+    .map { OvergangsstønadForVedtaksperiode(it) }
+    .map { Periode(it.fom.tilMånedTidspunkt(), it.fom.tilMånedTidspunkt(), it) }
+    .tilTidslinje()
 
 private fun lagGrunnlagForVilkårOgAndel(
     erVilkårsvurderingOppfylt: Boolean?,
@@ -338,6 +352,15 @@ private fun lagGrunnlagMedEndretUtbetalingAndel(
         grunnlagForPerson
     }
 
+    null -> null
+}
+
+private fun lagGrunnlagMedOvergangsstønad(
+    grunnlagForPerson: GrunnlagForPerson?,
+    overgangsstønad: OvergangsstønadForVedtaksperiode?
+) = when (grunnlagForPerson) {
+    is GrunnlagForPersonInnvilget -> grunnlagForPerson.copy(overgangsstønad = overgangsstønad)
+    is GrunnlagForPersonIkkeInnvilget -> grunnlagForPerson
     null -> null
 }
 

@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAnde
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.PeriodeOvergangsstønadGrunnlag
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 
 data class GrunnlagForVedtaksperioder(
@@ -13,5 +14,6 @@ data class GrunnlagForVedtaksperioder(
     val fagsakType: FagsakType,
     val kompetanser: List<Kompetanse>,
     val endredeUtbetalinger: List<EndretUtbetalingAndel>,
-    val andelerTilkjentYtelse: List<AndelTilkjentYtelse>
+    val andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+    val perioderOvergangsstønad: List<PeriodeOvergangsstønadGrunnlag>
 )

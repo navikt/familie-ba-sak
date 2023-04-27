@@ -41,6 +41,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform.NB
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform.NN
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.PeriodeOvergangsstønadGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -87,7 +88,8 @@ class VedtaksperiodeService(
     private val feilutbetaltValutaRepository: FeilutbetaltValutaRepository,
     private val brevmalService: BrevmalService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    private val vilkårsvurderingService: VilkårsvurderingService
+    private val vilkårsvurderingService: VilkårsvurderingService,
+    private val periodeOvergangsstønadGrunnlagRepository: PeriodeOvergangsstønadGrunnlagRepository
 ) {
     fun oppdaterVedtaksperiodeMedFritekster(
         vedtaksperiodeId: Long,
@@ -312,7 +314,8 @@ class VedtaksperiodeService(
             fagsakType = behandling.fagsak.type,
             kompetanser = kompetanseRepository.finnFraBehandlingId(behandling.id).toList(),
             endredeUtbetalinger = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id),
-            andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
+            andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id),
+            perioderOvergangsstønad = periodeOvergangsstønadGrunnlagRepository.findByBehandlingId(behandling.id)
         )
 
     @Deprecated("skal bruke genererVedtaksperioderMedBegrunnelser når den er klar")
