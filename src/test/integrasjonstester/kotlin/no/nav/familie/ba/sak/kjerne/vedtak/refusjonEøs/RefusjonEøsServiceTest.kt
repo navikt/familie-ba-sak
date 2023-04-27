@@ -40,8 +40,8 @@ class RefusjonEøsServiceTest(
 
         refusjonEøsService.hentRefusjonEøsPerioder(behandlingId = behandling.id)
             .also { Assertions.assertThat(it[0].id).isEqualTo(id) }
-            .also { Assertions.assertThat(it[0].fom).isNotNull() }
-            .also { Assertions.assertThat(it[0].tom).isNotNull() }
+            .also { Assertions.assertThat(it[0].fom).isEqualTo("2020-01-01") }
+            .also { Assertions.assertThat(it[0].tom).isEqualTo("2021-05-31") }
 
         refusjonEøsService.oppdaterRefusjonEøsPeriode(
             restRefusjonEøs = RestRefusjonEøs(
@@ -58,6 +58,9 @@ class RefusjonEøsServiceTest(
         refusjonEøsService.hentRefusjonEøsPerioder(behandlingId = behandling.id)
             .also { Assertions.assertThat(it[0].id).isEqualTo(id) }
             .also { Assertions.assertThat(it[0].tom).isEqualTo("2020-05-31") }
+            .also { Assertions.assertThat(it[0].refusjonsbeløp).isEqualTo(1) }
+            .also { Assertions.assertThat(it[0].land).isEqualTo("NL") }
+            .also { Assertions.assertThat(it[0].refusjonAvklart).isEqualTo(false) }
 
         val refusjonEøs2 = RestRefusjonEøs(
             id = 0,
