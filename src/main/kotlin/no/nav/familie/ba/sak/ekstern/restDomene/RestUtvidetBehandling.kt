@@ -6,8 +6,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.steg.StegType
-import no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta.RestFeilutbetaltValuta
-import no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs.RestRefusjonEøs
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Utbetalingsperiode
 import java.time.LocalDate
 import java.time.LocalDateTime

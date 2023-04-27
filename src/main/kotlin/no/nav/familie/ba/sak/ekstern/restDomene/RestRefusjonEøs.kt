@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs
+package no.nav.familie.ba.sak.ekstern.restDomene
 
 import java.time.LocalDate
 

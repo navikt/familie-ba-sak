@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta
 
+import no.nav.familie.ba.sak.ekstern.restDomene.RestFeilutbetaltValuta
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle

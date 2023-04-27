@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.ekstern.restDomene.RestRefusjonEøs
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
