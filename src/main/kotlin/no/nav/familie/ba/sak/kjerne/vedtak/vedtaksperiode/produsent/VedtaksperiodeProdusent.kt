@@ -305,7 +305,7 @@ private fun PersonResultat.tilGrunnlagForPersonTidslinje(
 
 private fun List<PeriodeOvergangsstønadGrunnlag>.tilPeriodeOvergangsstønadForVedtaksperiodeTidslinje() = this
     .map { OvergangsstønadForVedtaksperiode(it) }
-    .map { Periode(it.fom.tilMånedTidspunkt(), it.fom.tilMånedTidspunkt(), it) }
+    .map { Periode(it.fom.tilMånedTidspunkt(), it.tom.tilMånedTidspunkt(), it) }
     .tilTidslinje()
 
 private fun lagGrunnlagForVilkårOgAndel(
