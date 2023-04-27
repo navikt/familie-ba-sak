@@ -183,7 +183,9 @@ private fun utledGrunnlagTidslinjePerPerson(
                     .filter { endretUtbetaling -> endretUtbetaling.person.aktør == personResultat.aktør },
                 andelerTilkjentYtelse = andelerTilkjentYtelse.filter { andelTilkjentYtelse -> andelTilkjentYtelse.aktør == personResultat.aktør },
                 perioderOvergangsstønad = perioderOvergangsstønad.filter { it.aktør == person.aktør }
-            )
+            ).perioder()
+                .dropWhile { it.innhold !is GrunnlagForPersonInnvilget }
+                .tilTidslinje()
         }
 
     return grunnlagForPersonTidslinjer
