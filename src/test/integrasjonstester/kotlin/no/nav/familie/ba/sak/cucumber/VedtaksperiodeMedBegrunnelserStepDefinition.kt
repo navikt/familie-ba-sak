@@ -113,64 +113,70 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
         }.toSet()
     }
 
-    @Og("med kompetanser for behandling {}")
-    fun `med kompetanser for behandling`(behandlingId: Long, dataTable: DataTable) {
+    @Og("med kompetanser")
+    fun `med kompetanser`(dataTable: DataTable) {
         val nyeKompetanserPerBarn = dataTable.asMaps()
-        kompetanser[behandlingId] = nyeKompetanserPerBarn.map { kompetanse ->
-            val aktørerForKompetane = parseList(DomenebegrepPersongrunnlag.PERSON_ID, kompetanse)
+        kompetanser = nyeKompetanserPerBarn.map { rad ->
+            val aktørerForKompetane = parseList(DomenebegrepPersongrunnlag.PERSON_ID, rad)
+            val behandlingId = parseLong(Domenebegrep.BEHANDLING_ID, rad)
             Kompetanse(
-                fom = parseValgfriDato(Domenebegrep.FRA_DATO, kompetanse)?.toYearMonth(),
-                tom = parseValgfriDato(Domenebegrep.TIL_DATO, kompetanse)?.toYearMonth(),
+                fom = parseValgfriDato(Domenebegrep.FRA_DATO, rad)?.toYearMonth(),
+                tom = parseValgfriDato(Domenebegrep.TIL_DATO, rad)?.toYearMonth(),
                 barnAktører = persongrunnlagForBehandling(behandlingId).personer
                     .filter { aktørerForKompetane.contains(it.id) }
                     .map { it.aktør }
                     .toSet(),
-                søkersAktivitet = parseValgfriEnum<SøkersAktivitet>(SØKERS_AKTIVITET, kompetanse)
+                søkersAktivitet = parseValgfriEnum<SøkersAktivitet>(SØKERS_AKTIVITET, rad)
                     ?: SøkersAktivitet.ARBEIDER,
                 annenForeldersAktivitet =
-                parseValgfriEnum<AnnenForeldersAktivitet>(ANNEN_FORELDERS_AKTIVITET, kompetanse)
+                parseValgfriEnum<AnnenForeldersAktivitet>(ANNEN_FORELDERS_AKTIVITET, rad)
                     ?: AnnenForeldersAktivitet.I_ARBEID,
-                søkersAktivitetsland = parseValgfriString(SØKERS_AKTIVITETSLAND, kompetanse) ?: "PL",
-                annenForeldersAktivitetsland = parseValgfriString(ANNEN_FORELDERS_AKTIVITETSLAND, kompetanse) ?: "NO",
-                barnetsBostedsland = parseValgfriString(BARNETS_BOSTEDSLAND, kompetanse) ?: "NO",
-                resultat = parseEnum<KompetanseResultat>(RESULTAT, kompetanse)
-            )
-        }
+                søkersAktivitetsland = parseValgfriString(SØKERS_AKTIVITETSLAND, rad) ?: "PL",
+                annenForeldersAktivitetsland = parseValgfriString(ANNEN_FORELDERS_AKTIVITETSLAND, rad) ?: "NO",
+                barnetsBostedsland = parseValgfriString(BARNETS_BOSTEDSLAND, rad) ?: "NO",
+                resultat = parseEnum<KompetanseResultat>(RESULTAT, rad)
+            ).also { it.behandlingId = behandlingId }
+        }.groupBy { it.behandlingId }
+            .toMutableMap()
     }
 
-    @Og("med endrede utbetalinger for behandling {}")
-    fun `med endrede utbetalinger for behandling`(behandlingId: Long, dataTable: DataTable) {
+    @Og("med endrede utbetalinger")
+    fun `med endrede utbetalinger`(dataTable: DataTable) {
         val nyeEndredeUtbetalingAndeler = dataTable.asMaps()
-        endredeUtbetalinger[behandlingId] = nyeEndredeUtbetalingAndeler.map { endretUtbetaling ->
-            val personId = parseLong(DomenebegrepPersongrunnlag.PERSON_ID, endretUtbetaling)
+        endredeUtbetalinger = nyeEndredeUtbetalingAndeler.map { rad ->
+            val personId = parseLong(DomenebegrepPersongrunnlag.PERSON_ID, rad)
+            val behandlingId = parseLong(Domenebegrep.BEHANDLING_ID, rad)
             EndretUtbetalingAndel(
                 behandlingId = behandlingId,
-                fom = parseValgfriDato(Domenebegrep.FRA_DATO, endretUtbetaling)?.toYearMonth(),
-                tom = parseValgfriDato(Domenebegrep.TIL_DATO, endretUtbetaling)?.toYearMonth(),
+                fom = parseValgfriDato(Domenebegrep.FRA_DATO, rad)?.toYearMonth(),
+                tom = parseValgfriDato(Domenebegrep.TIL_DATO, rad)?.toYearMonth(),
                 person = persongrunnlagForBehandling(behandlingId).personer.find { personId == it.id },
                 prosent = BigDecimal.ZERO,
                 årsak = Årsak.ALLEREDE_UTBETALT,
                 søknadstidspunkt = LocalDate.now(),
                 begrunnelse = "Fordi at..."
             )
-        }
+        }.groupBy { it.behandlingId }
+            .toMutableMap()
     }
 
-    @Og("med andeler tilkjent ytelse for behandling {}")
-    fun `med andeler tilkjent ytelse for behandling`(behandlingId: Long, dataTable: DataTable) {
+    @Og("med andeler tilkjent ytelse")
+    fun `med andeler tilkjent ytelse`(dataTable: DataTable) {
         val nyeAndelerTilkjentYtelse = dataTable.asMaps()
-        andelerTilkjentYtelse[behandlingId] = nyeAndelerTilkjentYtelse.map { andelerTilkjentYtelse ->
-            val personId = parseLong(DomenebegrepPersongrunnlag.PERSON_ID, andelerTilkjentYtelse)
+        andelerTilkjentYtelse = nyeAndelerTilkjentYtelse.map { rad ->
+            val personId = parseLong(DomenebegrepPersongrunnlag.PERSON_ID, rad)
+            val behandlingId = parseLong(Domenebegrep.BEHANDLING_ID, rad)
             lagAndelTilkjentYtelse(
-                fom = parseValgfriDato(Domenebegrep.FRA_DATO, andelerTilkjentYtelse)?.toYearMonth()
+                fom = parseValgfriDato(Domenebegrep.FRA_DATO, rad)?.toYearMonth()
                     ?: LocalDate.MIN.toYearMonth(),
-                tom = parseValgfriDato(Domenebegrep.TIL_DATO, andelerTilkjentYtelse)?.toYearMonth()
+                tom = parseValgfriDato(Domenebegrep.TIL_DATO, rad)?.toYearMonth()
                     ?: LocalDate.MAX.toYearMonth(),
                 behandling = finnBehandling(behandlingId),
                 person = persongrunnlagForBehandling(behandlingId).personer.find { personId == it.id }!!,
-                beløp = parseInt(DomenebegrepVedtaksperiodeMedBegrunnelser.BELØP, andelerTilkjentYtelse)
+                beløp = parseInt(DomenebegrepVedtaksperiodeMedBegrunnelser.BELØP, rad)
             )
-        }
+        }.groupBy { it.behandlingId }
+            .toMutableMap()
     }
 
     @Og("med overstyring av vilkår for behandling {}")
@@ -211,7 +217,8 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
         val forrigeBehandlingId = behandlingTilForrigeBehandling[behandlingId]
 
         val grunnlagForVedtaksperiodeForrigeBehandling = forrigeBehandlingId?.let {
-            val forrigeVedtak = vedtaksliste.find { it.behandling.id == forrigeBehandlingId && it.aktiv } ?: error("Finner ikke vedtak")
+            val forrigeVedtak =
+                vedtaksliste.find { it.behandling.id == forrigeBehandlingId && it.aktiv } ?: error("Finner ikke vedtak")
             GrunnlagForVedtaksperioder(
                 persongrunnlag = persongrunnlagForBehandling(forrigeBehandlingId),
                 personResultater = personResultater[forrigeBehandlingId] ?: error("Finner ikke personresultater"),
@@ -301,21 +308,24 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
     }
 
     private fun lagPersonGrunnlag(dataTable: DataTable) {
-        persongrunnlag = dataTable.groupByBehandlingId()
-            .map { behandlingMedPersongrunnlag ->
+        persongrunnlag = dataTable.asMaps().map { rad ->
+            val behandlingsIder = parseList(Domenebegrep.BEHANDLING_ID, rad)
+            behandlingsIder.map { id ->
+                id to tilfeldigPerson(
+                    personType = parseEnum(
+                        DomenebegrepPersongrunnlag.PERSON_TYPE,
+                        rad
+                    ),
+                    fødselsdato = parseDato(DomenebegrepPersongrunnlag.FØDSELSDATO, rad),
+                    personId = parseInt(DomenebegrepPersongrunnlag.PERSON_ID, rad).toLong()
+                )
+            }
+        }.flatten()
+            .groupBy({ it.first }, { it.second })
+            .map { (behandlingId, personer) ->
                 PersonopplysningGrunnlag(
-                    behandlingId = behandlingMedPersongrunnlag.key,
-                    personer = behandlingMedPersongrunnlag.value.map {
-                        tilfeldigPerson(
-                            personType = parseEnum(
-                                DomenebegrepPersongrunnlag.PERSON_TYPE,
-                                it
-                            ),
-                            fødselsdato = parseDato(DomenebegrepPersongrunnlag.FØDSELSDATO, it),
-                            personId = parseInt(DomenebegrepPersongrunnlag.PERSON_ID, it).toLong()
-
-                        )
-                    }.toMutableSet()
+                    behandlingId = behandlingId,
+                    personer = personer.toMutableSet()
                 )
             }.associateBy { it.behandlingId }
     }

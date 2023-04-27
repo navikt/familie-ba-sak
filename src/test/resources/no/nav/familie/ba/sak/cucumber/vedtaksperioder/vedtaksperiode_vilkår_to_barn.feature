@@ -14,7 +14,7 @@ Egenskap: Vedtaksperioder med mor og to barn
       | 1            | 3456     | BARN       | 13.04.2020  |
       | 1            | 7890     | BARN       | 07.12.2022  |
 
-  Scenario: Skal lage vedtaksperioder med begrunnelser for mor, og to barn - nytt barn kommer til
+  Scenario: Skal lage vedtaksperioder for mor, og to barn med vilkår - nytt barn kommer til
 
     Og lag personresultater for behandling 1
     Og med overstyring av vilkår for behandling 1
@@ -25,10 +25,10 @@ Egenskap: Vedtaksperioder med mor og to barn
       | 7890     | UNDER_18_ÅR                                                     | 07.12.2022 | 06.12.2040 | Oppfylt  |
       | 7890     | BOR_MED_SØKER, GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD | 07.12.2022 |            | Oppfylt  |
 
-    Og med andeler tilkjent ytelse for behandling 1
-      | PersonId | Fra dato   | Til dato   | Beløp |
-      | 3456     | 01.05.2020 | 31.03.2038 | 1054  |
-      | 7890     | 01.01.2023 | 30.11.2040 | 1354  |
+    Og med andeler tilkjent ytelse
+      | PersonId | Fra dato   | Til dato   | Beløp | BehandlingId |
+      | 3456     | 01.05.2020 | 31.03.2038 | 1054  | 1            |
+      | 7890     | 01.01.2023 | 30.11.2040 | 1354  | 1            |
 
     Når vedtaksperioder med begrunnelser genereres for behandling 1
 
