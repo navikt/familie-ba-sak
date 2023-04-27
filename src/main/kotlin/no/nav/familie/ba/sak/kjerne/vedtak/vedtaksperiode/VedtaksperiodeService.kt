@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.erSenereEnnInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.toYearMonth
@@ -27,6 +26,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndre
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.endringstidspunkt.EndringstidspunktService
+import no.nav.familie.ba.sak.kjerne.beregning.endringstidspunkt.filtrerPåEndringstidspunkt
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
@@ -300,11 +300,14 @@ class VedtaksperiodeService(
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
 
+        val endringstidspunkt = behandling.overstyrtEndringstidspunkt
+            ?: endringstidspunktService.finnEndringstidspunktForBehandling(behandlingId = behandling.id)
+
         return genererVedtaksperioder(
             grunnlagForVedtakPerioder = hentGrunnlagForVedtaksperioder(behandling),
             grunnlagForVedtakPerioderForrigeBehandling = forrigeBehandling?.let { hentGrunnlagForVedtaksperioder(it) },
             vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId)
-        )
+        ).filtrerPåEndringstidspunkt(endringstidspunkt)
     }
 
     fun hentGrunnlagForVedtaksperioder(behandling: Behandling): GrunnlagForVedtaksperioder =
@@ -346,17 +349,9 @@ class VedtaksperiodeService(
 
         val avslagsperioder = hentAvslagsperioderMedBegrunnelser(vedtak)
 
-        return filtrerUtPerioderBasertPåEndringstidspunkt(
-            vedtaksperioderMedBegrunnelser = (utbetalingsperioder + opphørsperioder),
+        return (utbetalingsperioder + opphørsperioder).filtrerPåEndringstidspunkt(
             endringstidspunkt = endringstidspunkt
         ) + avslagsperioder
-    }
-
-    fun filtrerUtPerioderBasertPåEndringstidspunkt(
-        vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>,
-        endringstidspunkt: LocalDate
-    ): List<VedtaksperiodeMedBegrunnelser> {
-        return vedtaksperioderMedBegrunnelser.filter { (it.tom ?: TIDENES_ENDE).isSameOrAfter(endringstidspunkt) }
     }
 
     @Transactional
