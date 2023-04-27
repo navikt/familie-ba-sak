@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 import java.time.Month
 
-class FeilutbetaltValutaControllerTest(
+class FeilutbetaltValutaServiceTest(
     @Autowired val feilutbetaltValutaService: FeilutbetaltValutaService,
     @Autowired val aktørIdRepository: AktørIdRepository,
     @Autowired val fagsakRepository: FagsakRepository,
