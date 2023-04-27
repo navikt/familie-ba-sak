@@ -24,6 +24,13 @@ class EndringstidspunktService(
     private val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
     private val vilkårsvurderingService: VilkårsvurderingService
 ) {
+    fun hentEndringstidspunktEllerOverstyrtEndringstidspunkt(behandlingId: Long): LocalDate {
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        val overstyrtEndringstidspunkt = behandling.overstyrtEndringstidspunkt
+
+        return overstyrtEndringstidspunkt ?: finnEndringstidspunktForBehandling(behandlingId)
+    }
+
     fun finnEndringstidspunktForBehandling(behandlingId: Long): LocalDate {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 

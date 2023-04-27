@@ -18,9 +18,10 @@ class EndringstidspunktController(
     @GetMapping("/behandlinger/{behandlingId}/endringstidspunkt")
     fun hentEndringstidspunkt(
         @PathVariable behandlingId: Long
-    ): ResponseEntity<Ressurs<LocalDate>> = ResponseEntity.ok(
-        Ressurs.success(
-            endringstidspunktService.finnEndringstidspunktForBehandling(behandlingId)
-        )
-    )
+    ): ResponseEntity<Ressurs<LocalDate>> {
+        val endringstidspunkt =
+            endringstidspunktService.hentEndringstidspunktEllerOverstyrtEndringstidspunkt(behandlingId)
+
+        return ResponseEntity.ok(Ressurs.success(endringstidspunkt))
+    }
 }
