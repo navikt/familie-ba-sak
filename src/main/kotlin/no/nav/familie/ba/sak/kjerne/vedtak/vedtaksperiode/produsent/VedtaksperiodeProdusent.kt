@@ -49,8 +49,8 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
  * I eksempelet kan man se at alle innvilgede perioder blir slått sammen. I tillegg blir også de ikke-innvilgede * periodene med samme fom og tom slått sammen med de innvilgede periodene, men de resterende ikke-innvilgede blir * stående for seg.
  **/
 fun finnPerioderSomSkalBegrunnes(
-    grunnlagTidslinjePerPerson: Map<Person, Tidslinje<GrunnlagForPerson, Måned>>,
-    grunnlagTidslinjePerPersonForrigeBehandling: Map<Person, Tidslinje<GrunnlagForPerson, Måned>>
+    grunnlagTidslinjePerPerson: Map<String, Tidslinje<GrunnlagForPerson, Måned>>,
+    grunnlagTidslinjePerPersonForrigeBehandling: Map<String, Tidslinje<GrunnlagForPerson, Måned>>
 ): List<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling?>, Måned>> {
     val gjeldendeOgForrigeGrunnlagKombinert = kombinerGjeldendeOgForrigeGrunnlag(
         grunnlagTidslinjePerPerson = grunnlagTidslinjePerPerson,
@@ -85,11 +85,11 @@ private fun List<Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned>>.utl
  * ikke er det.
  **/
 private fun kombinerGjeldendeOgForrigeGrunnlag(
-    grunnlagTidslinjePerPerson: Map<Person, Tidslinje<GrunnlagForPerson, Måned>>,
-    grunnlagTidslinjePerPersonForrigeBehandling: Map<Person, Tidslinje<GrunnlagForPerson, Måned>>
+    grunnlagTidslinjePerPerson: Map<String, Tidslinje<GrunnlagForPerson, Måned>>,
+    grunnlagTidslinjePerPersonForrigeBehandling: Map<String, Tidslinje<GrunnlagForPerson, Måned>>
 ): List<Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned>> =
-    grunnlagTidslinjePerPerson.map { (person, grunnlagstidslinje) ->
-        val grunnlagForrigeBehandling = grunnlagTidslinjePerPersonForrigeBehandling[person]
+    grunnlagTidslinjePerPerson.map { (aktørId, grunnlagstidslinje) ->
+        val grunnlagForrigeBehandling = grunnlagTidslinjePerPersonForrigeBehandling[aktørId]
 
         grunnlagstidslinje.kombinerMed(grunnlagForrigeBehandling ?: TomTidslinje()) { gjeldende, forrige ->
             val gjeldendeErIkkeOppfylt = gjeldende !is GrunnlagForPersonInnvilget
@@ -144,7 +144,7 @@ behold enkeltstående nei
 */
 private fun utledGrunnlagTidslinjePerPerson(
     grunnlagForVedtaksperioder: GrunnlagForVedtaksperioder
-): Map<Person, Tidslinje<GrunnlagForPerson, Måned>> {
+): Map<String, Tidslinje<GrunnlagForPerson, Måned>> {
     val (persongrunnlag, personResultater, fagsakType, kompetanser, endredeUtbetalinger, andelerTilkjentYtelse) = grunnlagForVedtaksperioder
 
     val søker = persongrunnlag.søker
@@ -170,7 +170,7 @@ private fun utledGrunnlagTidslinjePerPerson(
         .associate { personResultat ->
             val person = persongrunnlag.personer.single { person -> personResultat.aktør == person.aktør }
 
-            person to personResultat.tilGrunnlagForPersonTidslinje(
+            person.aktør.aktørId to personResultat.tilGrunnlagForPersonTidslinje(
                 person = person,
                 erObligatoriskeVilkårOppfyltForSøkerTidslinje = erObligatoriskeVilkårOppfyltForSøkerTidslinje,
                 erObligatoriskeVilkårOppfyltForMinstEttBarnTidslinje = erObligatoriskeVilkårOppfyltForMinstEttBarnTidslinje,

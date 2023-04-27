@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPersonResultat
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
+import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.cucumber.domeneparser.Domenebegrep
@@ -25,6 +26,8 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser.DomenebegrepPersongrunnlag
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser.mapForventetVedtaksperioderMedBegrunnelser
+import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser.parseAktørId
+import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser.parseAktørIdListe
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseDato
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseEnum
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseEnumListe
@@ -97,15 +100,11 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
 
     @Og("legg til nye vilkårresultater for behandling {}")
     fun `legg til nye vilkårresultater for behandling`(behandlingId: Long, dataTable: DataTable) {
-        val nyeVilkårPerPerson = dataTable.asMaps().groupBy { parseInt(DomenebegrepPersongrunnlag.PERSON_ID, it) }
+        val nyeVilkårPerPerson = dataTable.asMaps().groupBy { parseAktørId(it) }
         val personResultatForBehandling =
             personResultater[behandlingId] ?: error("Finner ikke personresultater for behandling med id $behandlingId")
         personResultater[behandlingId] = personResultatForBehandling.map { personResultat ->
-            val nyeVilkårForPerson = finnVilkårForPerson(
-                personResultat = personResultat,
-                overstyringerPerPerson = nyeVilkårPerPerson,
-                personopplysningGrunnlag = persongrunnlagForBehandling(behandlingId)
-            )
+            val nyeVilkårForPerson = nyeVilkårPerPerson[personResultat.aktør.aktørId]
 
             val nyeVilkårResultater = tilVilkårResultater(nyeVilkårForPerson, behandlingId, personResultat)
             personResultat.vilkårResultater.addAll(nyeVilkårResultater)
@@ -117,13 +116,13 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
     fun `med kompetanser`(dataTable: DataTable) {
         val nyeKompetanserPerBarn = dataTable.asMaps()
         kompetanser = nyeKompetanserPerBarn.map { rad ->
-            val aktørerForKompetane = parseList(DomenebegrepPersongrunnlag.PERSON_ID, rad)
+            val aktørerForKompetanse = parseAktørIdListe(rad)
             val behandlingId = parseLong(Domenebegrep.BEHANDLING_ID, rad)
             Kompetanse(
                 fom = parseValgfriDato(Domenebegrep.FRA_DATO, rad)?.toYearMonth(),
                 tom = parseValgfriDato(Domenebegrep.TIL_DATO, rad)?.toYearMonth(),
                 barnAktører = persongrunnlagForBehandling(behandlingId).personer
-                    .filter { aktørerForKompetane.contains(it.id) }
+                    .filter { aktørerForKompetanse.contains(it.aktør.aktørId) }
                     .map { it.aktør }
                     .toSet(),
                 søkersAktivitet = parseValgfriEnum<SøkersAktivitet>(SØKERS_AKTIVITET, rad)
@@ -144,13 +143,13 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
     fun `med endrede utbetalinger`(dataTable: DataTable) {
         val nyeEndredeUtbetalingAndeler = dataTable.asMaps()
         endredeUtbetalinger = nyeEndredeUtbetalingAndeler.map { rad ->
-            val personId = parseLong(DomenebegrepPersongrunnlag.PERSON_ID, rad)
+            val aktørId = parseAktørId(rad)
             val behandlingId = parseLong(Domenebegrep.BEHANDLING_ID, rad)
             EndretUtbetalingAndel(
                 behandlingId = behandlingId,
                 fom = parseValgfriDato(Domenebegrep.FRA_DATO, rad)?.toYearMonth(),
                 tom = parseValgfriDato(Domenebegrep.TIL_DATO, rad)?.toYearMonth(),
-                person = persongrunnlagForBehandling(behandlingId).personer.find { personId == it.id },
+                person = persongrunnlagForBehandling(behandlingId).personer.find { aktørId == it.aktør.aktørId },
                 prosent = BigDecimal.ZERO,
                 årsak = Årsak.ALLEREDE_UTBETALT,
                 søknadstidspunkt = LocalDate.now(),
@@ -164,7 +163,7 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
     fun `med andeler tilkjent ytelse`(dataTable: DataTable) {
         val nyeAndelerTilkjentYtelse = dataTable.asMaps()
         andelerTilkjentYtelse = nyeAndelerTilkjentYtelse.map { rad ->
-            val personId = parseLong(DomenebegrepPersongrunnlag.PERSON_ID, rad)
+            val aktørId = parseAktørId(rad)
             val behandlingId = parseLong(Domenebegrep.BEHANDLING_ID, rad)
             lagAndelTilkjentYtelse(
                 fom = parseValgfriDato(Domenebegrep.FRA_DATO, rad)?.toYearMonth()
@@ -172,7 +171,7 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
                 tom = parseValgfriDato(Domenebegrep.TIL_DATO, rad)?.toYearMonth()
                     ?: LocalDate.MAX.toYearMonth(),
                 behandling = finnBehandling(behandlingId),
-                person = persongrunnlagForBehandling(behandlingId).personer.find { personId == it.id }!!,
+                person = persongrunnlagForBehandling(behandlingId).personer.find { aktørId == it.aktør.aktørId }!!,
                 beløp = parseInt(DomenebegrepVedtaksperiodeMedBegrunnelser.BELØP, rad)
             )
         }.groupBy { it.behandlingId }
@@ -181,15 +180,12 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
 
     @Og("med overstyring av vilkår for behandling {}")
     fun overstyrPersonResultater(behandlingId: Long, dataTable: DataTable) {
-        val overstyringerPerPerson = dataTable.asMaps().groupBy { parseInt(DomenebegrepPersongrunnlag.PERSON_ID, it) }
+        val overstyringerPerPerson = dataTable.asMaps().groupBy { parseAktørId(it) }
         val personResultatForBehandling =
             personResultater[behandlingId] ?: error("Finner ikke personresultater for behandling med id $behandlingId")
         personResultater[behandlingId] = personResultatForBehandling.map { personResultat ->
-            val overstyringerForPerson = finnVilkårForPerson(
-                personResultat = personResultat,
-                overstyringerPerPerson = overstyringerPerPerson,
-                personopplysningGrunnlag = persongrunnlagForBehandling(behandlingId)
-            )
+            val overstyringerForPerson = overstyringerPerPerson[personResultat.aktør.aktørId]
+
             personResultat.vilkårResultater.forEach { vilkårResultat ->
                 oppdaterVilkårResultat(
                     vilkårResultat,
@@ -285,16 +281,6 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
         }
     }
 
-    private fun finnVilkårForPerson(
-        personResultat: PersonResultat,
-        overstyringerPerPerson: Map<Int, List<MutableMap<String, String>>>,
-        personopplysningGrunnlag: PersonopplysningGrunnlag
-    ): List<MutableMap<String, String>>? {
-        val aktørId = personResultat.aktør.aktørId
-        val personId = personopplysningGrunnlag.personer.find { it.aktør.aktørId == aktørId }?.id?.toInt()
-        return overstyringerPerPerson[personId]
-    }
-
     private fun genererVedtak(dataTable: DataTable) {
         val fagsak = defaultFagsak()
         behandlinger = dataTable.groupByBehandlingId()
@@ -317,7 +303,7 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
                         rad
                     ),
                     fødselsdato = parseDato(DomenebegrepPersongrunnlag.FØDSELSDATO, rad),
-                    personId = parseInt(DomenebegrepPersongrunnlag.PERSON_ID, rad).toLong()
+                    aktør = randomAktør().copy(aktørId = parseAktørId(rad))
                 )
             }
         }.flatten()

@@ -9,14 +9,14 @@ Egenskap: Vedtaksperioder med mor og et barn
       | 1            |
 
     Og følgende persongrunnlag
-      | BehandlingId | PersonId | Persontype | Fødselsdato |
+      | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1            | 1234     | SØKER      | 11.01.1970  |
       | 1            | 3456     | BARN       | 13.04.2020  |
 
   Scenario: Skal lage vedtaksperioder for mor med et barn med vilkår
     Og lag personresultater for behandling 1
     Og med overstyring av vilkår for behandling 1
-      | PersonId | Vilkår                                           | Fra dato   | Til dato   | Resultat |
+      | AktørId | Vilkår                                           | Fra dato   | Til dato   | Resultat |
       | 1234     | BOSATT_I_RIKET                                   | 11.01.1970 | 01.01.2021 | Oppfylt  |
       | 1234     | LOVLIG_OPPHOLD                                   | 11.01.1970 |            | Oppfylt  |
       | 3456     | UNDER_18_ÅR                                      | 13.04.2020 | 12.04.2038 | Oppfylt  |
@@ -24,12 +24,12 @@ Egenskap: Vedtaksperioder med mor og et barn
       | 3456     | BOR_MED_SØKER                                    | 13.04.2020 | 01.03.2021 | Oppfylt  |
 
     Og legg til nye vilkårresultater for behandling 1
-      | PersonId | Vilkår         | Fra dato   | Til dato | Resultat |
+      | AktørId | Vilkår         | Fra dato   | Til dato | Resultat |
       | 1234     | BOSATT_I_RIKET | 02.01.2021 |          | Oppfylt  |
       | 3456     | BOR_MED_SØKER  | 02.03.2021 |          | Oppfylt  |
 
     Og med andeler tilkjent ytelse
-      | PersonId | Fra dato   | Til dato   | Beløp | BehandlingId |
+      | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
       | 3456     | 01.05.2020 | 31.03.2038 | 1354  | 1            |
 
     Når vedtaksperioder med begrunnelser genereres for behandling 1
@@ -46,14 +46,14 @@ Egenskap: Vedtaksperioder med mor og et barn
 
     Og lag personresultater for behandling 1
     Og med overstyring av vilkår for behandling 1
-      | PersonId | Vilkår                                           | Fra dato   | Til dato   | Resultat |
+      | AktørId | Vilkår                                           | Fra dato   | Til dato   | Resultat |
       | 1234     | BOSATT_I_RIKET, LOVLIG_OPPHOLD                   | 11.01.1970 |            | Oppfylt  |
       | 3456     | UNDER_18_ÅR                                      | 13.04.2020 | 12.04.2038 | Oppfylt  |
       | 3456     | BOR_MED_SØKER                                    | 20.08.2021 |            | Oppfylt  |
       | 3456     | GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD | 13.04.2020 |            | Oppfylt  |
 
     Og med andeler tilkjent ytelse
-      | PersonId | Fra dato   | Til dato   | Beløp | BehandlingId |
+      | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
       | 3456     | 01.05.2020 | 31.03.2038 | 1354  | 1            |
 
     Når vedtaksperioder med begrunnelser genereres for behandling 1
@@ -69,14 +69,14 @@ Egenskap: Vedtaksperioder med mor og et barn
 
     Og lag personresultater for behandling 1
     Og med overstyring av vilkår for behandling 1
-      | PersonId | Vilkår                                           | Fra dato   | Til dato   | Resultat     |
+      | AktørId | Vilkår                                           | Fra dato   | Til dato   | Resultat     |
       | 1234     | BOSATT_I_RIKET, LOVLIG_OPPHOLD                   | 11.01.1970 |            | Oppfylt      |
       | 3456     | UNDER_18_ÅR                                      | 13.04.2020 | 12.04.2038 | Oppfylt      |
       | 3456     | BOR_MED_SØKER                                    |            |            | Ikke_oppfylt |
       | 3456     | GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD | 13.04.2020 |            | Oppfylt      |
 
     Og med andeler tilkjent ytelse
-      | PersonId | Fra dato   | Til dato   | Beløp | BehandlingId |
+      | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
       | 3456     | 01.05.2020 | 31.03.2038 | 1354  | 1            |
 
     Når vedtaksperioder med begrunnelser genereres for behandling 1
@@ -90,14 +90,14 @@ Egenskap: Vedtaksperioder med mor og et barn
 
     Og lag personresultater for behandling 1
     Og med overstyring av vilkår for behandling 1
-      | PersonId | Vilkår                                           | Fra dato   | Til dato   | Resultat |
+      | AktørId | Vilkår                                           | Fra dato   | Til dato   | Resultat |
       | 1234     | BOSATT_I_RIKET, LOVLIG_OPPHOLD                   | 11.01.1970 |            | Oppfylt  |
       | 3456     | UNDER_18_ÅR                                      | 13.04.2020 | 12.04.2038 | Oppfylt  |
       | 3456     | GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD | 13.04.2020 |            | Oppfylt  |
       | 3456     | BOR_MED_SØKER                                    | 13.04.2020 | 21.07.2029 | Oppfylt  |
 
     Og med andeler tilkjent ytelse
-      | PersonId | Fra dato   | Til dato   | Beløp | BehandlingId |
+      | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
       | 3456     | 01.05.2020 | 31.03.2038 | 1354  | 1            |
 
     Når vedtaksperioder med begrunnelser genereres for behandling 1
@@ -113,19 +113,19 @@ Egenskap: Vedtaksperioder med mor og et barn
 
     Og lag personresultater for behandling 1
     Og med overstyring av vilkår for behandling 1
-      | PersonId | Vilkår                                           | Fra dato   | Til dato   | Resultat |
+      | AktørId | Vilkår                                           | Fra dato   | Til dato   | Resultat |
       | 1234     | BOSATT_I_RIKET, LOVLIG_OPPHOLD                   | 11.01.1970 |            | Oppfylt  |
       | 3456     | UNDER_18_ÅR                                      | 13.04.2020 | 12.04.2038 | Oppfylt  |
       | 3456     | GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD | 13.04.2020 |            | Oppfylt  |
       | 3456     | BOR_MED_SØKER                                    | 13.04.2020 | 21.07.2029 | Oppfylt  |
 
     Og legg til nye vilkårresultater for behandling 1
-      | PersonId | Vilkår        | Fra dato   | Til dato   | Resultat     |
+      | AktørId | Vilkår        | Fra dato   | Til dato   | Resultat     |
       | 3456     | BOR_MED_SØKER | 22.07.2029 | 16.05.2030 | Ikke_oppfylt |
       | 3456     | BOR_MED_SØKER | 17.05.2030 |            | Oppfylt      |
 
     Og med andeler tilkjent ytelse
-      | PersonId | Fra dato   | Til dato   | Beløp | BehandlingId |
+      | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
       | 3456     | 01.05.2020 | 31.03.2038 | 1354  | 1            |
 
     Når vedtaksperioder med begrunnelser genereres for behandling 1
