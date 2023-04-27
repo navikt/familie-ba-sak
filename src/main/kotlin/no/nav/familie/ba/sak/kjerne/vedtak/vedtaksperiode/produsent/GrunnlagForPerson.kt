@@ -106,9 +106,9 @@ data class OvergangsstønadForVedtaksperiode(
     val tom: LocalDate,
     val datakilde: Datakilde
 ) {
-    constructor(periodeOvergangsstønad: PeriodeOvergangsstønadGrunnlag): this(
+    constructor(periodeOvergangsstønad: PeriodeOvergangsstønadGrunnlag) : this(
         fom = periodeOvergangsstønad.fom,
         tom = periodeOvergangsstønad.tom,
-        datakilde = periodeOvergangsstønad.datakilde,
+        datakilde = periodeOvergangsstønad.datakilde
     )
 }
