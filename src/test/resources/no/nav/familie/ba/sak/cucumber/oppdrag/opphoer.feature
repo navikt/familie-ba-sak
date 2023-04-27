@@ -198,3 +198,30 @@ Egenskap: Opphør
       | 1            | 03.2021  | 08.2021  |             | 700   | NY           | Nei        | 0          |                    |
       | 2            | 03.2021  | 08.2021  | 05.2021     | 700   | ENDR         | Ja         | 0          |                    |
       | 2            | 07.2021  | 08.2021  |             | 700   | ENDR         | Nei        | 1          | 0                  |
+
+  Scenario: Avkorter en periode, som man sen opphører. Her må opphøret ha peiling på siste andelen med riktig tom
+
+    Gitt følgende tilkjente ytelser
+      | BehandlingId | Fra dato | Til dato | Beløp | Kildebehandling |
+      | 1            | 03.2021  | 03.2021  | 700   | 1               |
+      | 1            | 04.2021  | 08.2021  | 700   | 1               |
+      | 2            | 03.2021  | 03.2021  | 700   | 1               |
+      | 2            | 04.2021  | 05.2021  | 700   | 1               |
+      | 3            | 03.2021  | 03.2021  | 700   | 1               |
+
+    Når beregner utbetalingsoppdrag
+
+    Så forvent følgende utbetalingsoppdrag
+      | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id |
+      | 1            | 03.2021  | 03.2021  |             | 700   | NY           | Nei        | 0          |                    |
+      | 1            | 04.2021  | 08.2021  |             | 700   | NY           | Nei        | 1          | 0                  |
+      | 2            | 04.2021  | 08.2021  | 04.2021     | 700   | ENDR         | Ja         | 1          | 0                  |
+      | 2            | 04.2021  | 05.2021  |             | 700   | ENDR         | Nei        | 2          | 1                  |
+      | 3            | 04.2021  | 05.2021  | 04.2021     | 700   | ENDR         | Ja         | 2          | 1                  |
+
+    Så forvent følgende utbetalingsoppdrag med ny utbetalingsgenerator
+      | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id |
+      | 1            | 03.2021  | 03.2021  |             | 700   | NY           | Nei        | 0          |                    |
+      | 1            | 04.2021  | 08.2021  |             | 700   | NY           | Nei        | 1          | 0                  |
+      | 2            | 04.2021  | 05.2021  |             | 700   | ENDR         | Nei        | 1          | 0                  |
+      | 3            | 04.2021  | 05.2021  | 04.2021     | 700   | ENDR         | Ja         | 1          | 0                  |
