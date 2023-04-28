@@ -6,6 +6,8 @@ import io.mockk.unmockkObject
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagSøknadDTO
 import no.nav.familie.ba.sak.common.sisteDagIMåned
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
@@ -32,7 +34,6 @@ import no.nav.familie.kontrakter.felles.ef.EksternePerioderResponse
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
@@ -44,7 +45,8 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
     @Autowired private val stegService: StegService,
     @Autowired private val efSakRestClient: EfSakRestClient,
-    @Autowired private val brevmalService: BrevmalService
+    @Autowired private val brevmalService: BrevmalService,
+    @Autowired private val featureToggleService: FeatureToggleService
 ) : AbstractVerdikjedetest() {
 
     private val barnFødselsdato: LocalDate = LocalDate.now().minusYears(2)
@@ -61,8 +63,9 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
     }
 
     @Test
-    @Disabled // TODO må skru på denne igjen når vi er ferdi med ny vedtaksperiodeløsning.
     fun `Skal lage reduksjon fra sist iverksatte behandling-periode når småbarnstillegg blir borte`() {
+        every { featureToggleService.isEnabled(FeatureToggleConfig.VEDTAKSPERIODE_NY) } returns false
+
         val personScenario: RestScenario = lagScenario(barnFødselsdato)
         val fagsak: RestMinimalFagsak = lagFagsak(personScenario)
 
