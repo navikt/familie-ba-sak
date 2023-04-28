@@ -23,30 +23,43 @@ object NyUtbetalingsoppdragGenerator {
         val nyeKjeder = nyeAndeler.groupByIdentOgType()
         val forrigeKjeder = (forrigeAndeler ?: emptyList()).groupByIdentOgType()
 
-        val identerMedType = nyeKjeder.keys + forrigeKjeder.keys
+        return lagUtbetalingsoppdrag(
+            nyeKjeder = nyeKjeder,
+            forrigeKjeder = forrigeKjeder,
+            sisteAndelPerKjede = sisteAndelPerKjede,
+            behandlingsinformasjon = behandlingsinformasjon,
+            forrigeAndeler = forrigeAndeler,
+        )
+    }
+
+    private fun lagUtbetalingsoppdrag(
+        nyeKjeder: Map<IdentOgType, List<AndelData>>,
+        forrigeKjeder: Map<IdentOgType, List<AndelData>>,
+        sisteAndelPerKjede: Map<IdentOgType, AndelData>,
+        behandlingsinformasjon: Behandlingsinformasjon,
+        forrigeAndeler: List<AndelData>?,
+    ): UtbetalingsoppdragOgAndelerMedOffset {
+        val alleIdentOgTyper = nyeKjeder.keys + forrigeKjeder.keys
         var sisteOffset = sisteAndelPerKjede.values.mapNotNull { it.offset }.maxOrNull()
         val resultat = mutableListOf<AndelMedOffset>()
-        val opphørsandeler = mutableListOf<Pair<AndelData, YearMonth>>()
-        val nyeAndeler2 = mutableListOf<AndelData>()
+        val andelerSomOpphør = mutableListOf<Pair<AndelData, YearMonth>>()
+        val andelerTilOpprettelse = mutableListOf<AndelData>()
         /*
         TODO validering av endretSimuleringsdato, burde ikke kunne være etter min fom på nye andeler
         TODO erSimulering
          */
-        identerMedType.forEach { identOgType ->
+        alleIdentOgTyper.forEach { identOgType ->
             val forrigeAndeler = forrigeKjeder[identOgType] ?: emptyList()
             val nyeAndeler = nyeKjeder[identOgType] ?: emptyList()
             val sisteAndel = sisteAndelPerKjede[identOgType]
             // TODO må nog sende med endretMigreringsDato/erSimulering? her og
             val nyKjede = beregnNyKjede(forrigeAndeler, nyeAndeler, sisteAndel, sisteOffset)
             sisteOffset = nyKjede.sisteOffset
-            resultat.addAll(
-                nyKjede.beståendeAndeler.map { AndelMedOffset(it) } +
-                    nyKjede.nyeAndeler.map { AndelMedOffset(it, behandlingsinformasjon.behandlingId) },
-            )
-            nyeAndeler2.addAll(nyKjede.nyeAndeler)
+            resultat.addAll(andelerMedOffset(nyKjede, behandlingsinformasjon))
+            andelerTilOpprettelse.addAll(nyKjede.nyeAndeler)
 
             if (nyKjede.opphør != null && sisteAndel != null) {
-                opphørsandeler.add(Pair(sisteAndel, nyKjede.opphør))
+                andelerSomOpphør.add(Pair(sisteAndel, nyKjede.opphør))
             }
         }
 
@@ -57,13 +70,19 @@ object NyUtbetalingsoppdragGenerator {
             saksnummer = behandlingsinformasjon.fagsakId.toString(),
             aktoer = behandlingsinformasjon.aktør.aktivFødselsnummer(),
             utbetalingsperiode = listOf(
-                lagUtbetalingsperioderForOpphør(behandlingsinformasjon, opphørsandeler),
-                lagUtbetalingsperioderForOpprettelseOgOppdaterTilkjentYtelse(behandlingsinformasjon, nyeAndeler2),
+                lagUtbetalingsperioderForOpphør(behandlingsinformasjon, andelerSomOpphør),
+                lagUtbetalingsperioderForOpprettelseOgOppdaterTilkjentYtelse(behandlingsinformasjon, andelerTilOpprettelse),
             ).flatten(),
         )
 
         return UtbetalingsoppdragOgAndelerMedOffset(utbetalingsoppdrag, resultat)
     }
+
+    private fun andelerMedOffset(
+        nyKjede: ResultatForKjede,
+        behandlingsinformasjon: Behandlingsinformasjon,
+    ) = nyKjede.beståendeAndeler.map { AndelMedOffset(it) } +
+        nyKjede.nyeAndeler.map { AndelMedOffset(it, behandlingsinformasjon.behandlingId) }
 
     // Hos økonomi skiller man på endring på oppdragsnivå 110 og på linjenivå 150 (periodenivå).
     // Da de har opplevd å motta
