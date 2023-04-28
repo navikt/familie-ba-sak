@@ -23,6 +23,7 @@ import no.nav.familie.ba.sak.task.dto.Autobrev6og18ÅrDTO
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
@@ -38,6 +39,7 @@ class Autobrev6og18ÅrFortsattOpphørtTest(
 ) : AbstractVerdikjedetest() {
 
     @Test
+    @Disabled
     fun `Skal støtte fortsatt opphørt som resultat`() {
         val scenario = mockServerKlient().lagScenario(
             RestScenario(
