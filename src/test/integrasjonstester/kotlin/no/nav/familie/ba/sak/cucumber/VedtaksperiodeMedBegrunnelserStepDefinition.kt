@@ -206,7 +206,8 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
             fagsakType = vedtak.behandling.fagsak.type,
             kompetanser = kompetanser[behandlingId] ?: emptyList(),
             endredeUtbetalinger = endredeUtbetalinger[behandlingId] ?: emptyList(),
-            andelerTilkjentYtelse = andelerTilkjentYtelse[behandlingId] ?: emptyList()
+            andelerTilkjentYtelse = andelerTilkjentYtelse[behandlingId] ?: emptyList(),
+            perioderOvergangsstønad = emptyList() // todo
         )
         val forrigeBehandlingId = behandlingTilForrigeBehandling[behandlingId]
 
@@ -218,7 +219,8 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
                 fagsakType = forrigeVedtak.behandling.fagsak.type,
                 kompetanser = kompetanser[forrigeBehandlingId] ?: emptyList(),
                 endredeUtbetalinger = endredeUtbetalinger[forrigeBehandlingId] ?: emptyList(),
-                andelerTilkjentYtelse = andelerTilkjentYtelse[forrigeBehandlingId] ?: emptyList()
+                andelerTilkjentYtelse = andelerTilkjentYtelse[forrigeBehandlingId] ?: emptyList(),
+                perioderOvergangsstønad = emptyList()
             )
         }
 
