@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerBeløpOgType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.IUtfyltEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.tilIEndretUtbetalingAndel
@@ -12,7 +13,6 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.PeriodeOvergangsstønadGrunnlag
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
@@ -184,7 +184,7 @@ private fun utledGrunnlagTidslinjePerPerson(
                 endredeUtbetalinger = utfylteEndredeUtbetalinger
                     .filter { endretUtbetaling -> endretUtbetaling.person.aktør == personResultat.aktør },
                 andelerTilkjentYtelse = andelerTilkjentYtelse.filter { andelTilkjentYtelse -> andelTilkjentYtelse.aktør == personResultat.aktør },
-                perioderOvergangsstønad = perioderOvergangsstønad.filter { it.aktør == person.aktør }
+                perioderOvergangsstønad = perioderOvergangsstønad.filter { it.personIdent == person.aktør.aktivFødselsnummer() }
             ).perioder()
                 .dropWhile { it.innhold !is GrunnlagForPersonInnvilget }
                 .tilTidslinje()
@@ -238,7 +238,7 @@ private fun PersonResultat.tilGrunnlagForPersonTidslinje(
     kompetanser: List<UtfyltKompetanse>,
     endredeUtbetalinger: List<IUtfyltEndretUtbetalingAndel>,
     andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-    perioderOvergangsstønad: List<PeriodeOvergangsstønadGrunnlag>
+    perioderOvergangsstønad: List<InternPeriodeOvergangsstønad>
 ): Tidslinje<GrunnlagForPerson, Måned> {
     val forskjøvedeVilkårResultater = vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår().kombiner { it }
     val forskjøvedeVilkårResultaterForPerson = when (person.type) {
@@ -305,7 +305,7 @@ private fun PersonResultat.tilGrunnlagForPersonTidslinje(
     return grunnlagTidslinje.slåSammenLike()
 }
 
-private fun List<PeriodeOvergangsstønadGrunnlag>.tilPeriodeOvergangsstønadForVedtaksperiodeTidslinje() = this
+private fun List<InternPeriodeOvergangsstønad>.tilPeriodeOvergangsstønadForVedtaksperiodeTidslinje() = this
     .map { OvergangsstønadForVedtaksperiode(it) }
     .map { Periode(it.fom.tilMånedTidspunkt(), it.tom.tilMånedTidspunkt(), it) }
     .tilTidslinje()

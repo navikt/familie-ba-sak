@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.beregning.domene
 import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.PeriodeOvergangsstønadGrunnlag
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.kontrakter.felles.ef.EksternPeriode
 import org.slf4j.Logger
@@ -15,7 +16,13 @@ data class InternPeriodeOvergangsstønad(
     val personIdent: String,
     val fomDato: LocalDate,
     val tomDato: LocalDate
-)
+) {
+    constructor(periodeOvergangsstønadGrunnlag: PeriodeOvergangsstønadGrunnlag): this(
+        personIdent = periodeOvergangsstønadGrunnlag.aktør.aktivFødselsnummer(),
+        fomDato = periodeOvergangsstønadGrunnlag.fom,
+        tomDato = periodeOvergangsstønadGrunnlag.tom
+    )
+}
 
 fun EksternPeriode.tilInternPeriodeOvergangsstønad() = InternPeriodeOvergangsstønad(
     personIdent = this.personIdent,

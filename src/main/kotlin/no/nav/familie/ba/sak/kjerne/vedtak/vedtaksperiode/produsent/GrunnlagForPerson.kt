@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent
 
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.IUtfyltEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
@@ -10,13 +11,11 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.SøkersAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.UtfyltKompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.PeriodeOvergangsstønadGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
-import no.nav.familie.kontrakter.felles.ef.Datakilde
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -49,7 +48,7 @@ data class VilkårResultatForVedtaksperiode(
     val fom: LocalDate?,
     val tom: LocalDate?
 ) {
-    constructor(vilkårResultat: VilkårResultat) : this (
+    constructor(vilkårResultat: VilkårResultat) : this(
         vilkårType = vilkårResultat.vilkårType,
         resultat = vilkårResultat.resultat,
         utdypendeVilkårsvurderinger = vilkårResultat.utdypendeVilkårsvurderinger,
@@ -104,11 +103,9 @@ data class KompetanseForVedtaksperiode(
 data class OvergangsstønadForVedtaksperiode(
     val fom: LocalDate,
     val tom: LocalDate,
-    val datakilde: Datakilde
 ) {
-    constructor(periodeOvergangsstønad: PeriodeOvergangsstønadGrunnlag) : this(
-        fom = periodeOvergangsstønad.fom,
-        tom = periodeOvergangsstønad.tom,
-        datakilde = periodeOvergangsstønad.datakilde
+    constructor(periodeOvergangsstønad: InternPeriodeOvergangsstønad) : this(
+        fom = periodeOvergangsstønad.fomDato,
+        tom = periodeOvergangsstønad.tomDato,
     )
 }

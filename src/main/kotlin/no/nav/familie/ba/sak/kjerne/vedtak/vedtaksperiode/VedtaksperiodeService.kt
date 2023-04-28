@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
+import no.nav.familie.ba.sak.kjerne.beregning.SmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
@@ -41,7 +42,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform.NB
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform.NN
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.PeriodeOvergangsstønadGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -89,7 +89,7 @@ class VedtaksperiodeService(
     private val brevmalService: BrevmalService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val vilkårsvurderingService: VilkårsvurderingService,
-    private val periodeOvergangsstønadGrunnlagRepository: PeriodeOvergangsstønadGrunnlagRepository
+    private val småbarnstilleggService: SmåbarnstilleggService,
 ) {
     fun oppdaterVedtaksperiodeMedFritekster(
         vedtaksperiodeId: Long,
@@ -318,7 +318,7 @@ class VedtaksperiodeService(
             kompetanser = kompetanseRepository.finnFraBehandlingId(behandling.id).toList(),
             endredeUtbetalinger = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id),
             andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id),
-            perioderOvergangsstønad = periodeOvergangsstønadGrunnlagRepository.findByBehandlingId(behandling.id)
+            perioderOvergangsstønad = småbarnstilleggService.hentPerioderMedFullOvergangsstønad(behandling.id)
         )
 
     @Deprecated("skal bruke genererVedtaksperioderMedBegrunnelser når den er klar")

@@ -425,7 +425,11 @@ class BeregningServiceTest {
 
         val tilleggFom = SatsService.hentDatoForSatsendring(satstype = SatsType.TILLEGG_ORBA, oppdatertBeløp = 1354)
 
-        val søkerVilkår = Vilkår.hentVilkårFor(personType = PersonType.SØKER, fagsakType = FagsakType.NORMAL, behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR)
+        val søkerVilkår = Vilkår.hentVilkårFor(
+            personType = PersonType.SØKER,
+            fagsakType = FagsakType.NORMAL,
+            behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR
+        )
         val vilkårResultaterSøker = søkerVilkår.map {
             lagVilkårResultat(
                 vilkårType = it,
@@ -1071,7 +1075,11 @@ class BeregningServiceTest {
             aktør = barn.aktør
         )
 
-        val vilkårForBarn = Vilkår.hentVilkårFor(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL, behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR)
+        val vilkårForBarn = Vilkår.hentVilkårFor(
+            personType = PersonType.BARN,
+            fagsakType = FagsakType.NORMAL,
+            behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR
+        )
         val vilkårResultaterBarn =
             vilkårForBarn.lagVilkårResultaterForPerson(
                 fom = førstePeriodeFomForBarnet,
@@ -1321,7 +1329,8 @@ class BeregningServiceTest {
         }
         every { vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = behandling.id) } answers { vilkårsvurdering }
         every { tilkjentYtelseRepository.save(any()) } returns lagInitiellTilkjentYtelse(behandling)
-        every { småbarnstilleggService.hentOgLagrePerioderMedFullOvergangsstønad(any(), any()) } answers {
+        every { småbarnstilleggService.hentOgLagrePerioderMedFullOvergangsstønadFraEf(any(), any()) } just Runs
+        every { småbarnstilleggService.hentPerioderMedFullOvergangsstønad(any()) } answers {
             listOf(
                 InternPeriodeOvergangsstønad(
                     personIdent = søker.aktør.aktivFødselsnummer(),
