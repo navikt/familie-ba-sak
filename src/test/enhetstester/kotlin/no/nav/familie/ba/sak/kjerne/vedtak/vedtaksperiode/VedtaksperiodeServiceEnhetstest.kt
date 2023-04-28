@@ -14,11 +14,11 @@ import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
+import no.nav.familie.ba.sak.kjerne.beregning.SmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.endringstidspunkt.EndringstidspunktService
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.PeriodeOvergangsstønadGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta.FeilutbetaltValuta
@@ -41,7 +41,7 @@ class VedtaksperiodeServiceEnhetstest {
     private val feilutbetaltValutaRepository: FeilutbetaltValutaRepository = mockk()
     private val brevmalService: BrevmalService = mockk()
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
-    private val periodeOvergangsstønadGrunnlagRepository: PeriodeOvergangsstønadGrunnlagRepository = mockk()
+    private val småbarnstilleggService: SmåbarnstilleggService = mockk()
 
     private val vedtaksperiodeService = VedtaksperiodeService(
         personidentService = mockk(),
@@ -61,7 +61,7 @@ class VedtaksperiodeServiceEnhetstest {
         feilutbetaltValutaRepository = feilutbetaltValutaRepository,
         brevmalService = brevmalService,
         behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-        periodeOvergangsstønadGrunnlagRepository = periodeOvergangsstønadGrunnlagRepository
+        småbarnstilleggService = småbarnstilleggService
     )
 
     private val person = lagPerson()
@@ -105,7 +105,7 @@ class VedtaksperiodeServiceEnhetstest {
             )
         } returns true
         every { feilutbetaltValutaRepository.finnFeilutbetaltValutaForBehandling(any()) } returns emptyList()
-        every { periodeOvergangsstønadGrunnlagRepository.findByBehandlingId(any()) } returns emptyList()
+        every { småbarnstilleggService.hentPerioderMedFullOvergangsstønad(any()) } returns emptyList()
     }
 
     @Test
@@ -123,7 +123,10 @@ class VedtaksperiodeServiceEnhetstest {
                 .last().tom
 
         val returnerteVedtaksperioderNårOverstyrtEndringstidspunktErFørsteOpphørFom = vedtaksperiodeService
-            .genererVedtaksperioderMedBegrunnelserGammel(vedtak, manueltOverstyrtEndringstidspunkt = førsteOpphørFomDato)
+            .genererVedtaksperioderMedBegrunnelserGammel(
+                vedtak,
+                manueltOverstyrtEndringstidspunkt = førsteOpphørFomDato
+            )
             .filter { it.type == Vedtaksperiodetype.OPPHØR }
         val returnerteVedtaksperioderNårOverstyrtEndringstidspunktErFørFørsteOpphør = vedtaksperiodeService
             .genererVedtaksperioderMedBegrunnelserGammel(
