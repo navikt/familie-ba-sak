@@ -43,7 +43,7 @@ class Autobrev6og18ÅrFortsattOpphørtTest(
 
     @Test
     fun `Skal støtte fortsatt opphørt som resultat`() {
-        every { featureToggleService.isEnabled(FeatureToggleConfig.VEDTAKSPERIODE_NY)} returns false
+        every { featureToggleService.isEnabled(FeatureToggleConfig.VEDTAKSPERIODE_NY) } returns false
 
         val scenario = mockServerKlient().lagScenario(
             RestScenario(
