@@ -36,6 +36,8 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvni
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 
+typealias AktørId = String
+
 /**
  * Vi ønsker å ha en kombinert tidslinje med alle innvilgede perioder og ikke-innvilgede som sammenfaller på dato.
  *
@@ -49,8 +51,8 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
  * I eksempelet kan man se at alle innvilgede perioder blir slått sammen. I tillegg blir også de ikke-innvilgede * periodene med samme fom og tom slått sammen med de innvilgede periodene, men de resterende ikke-innvilgede blir * stående for seg.
  **/
 fun finnPerioderSomSkalBegrunnes(
-    grunnlagTidslinjePerPerson: Map<String, Tidslinje<GrunnlagForPerson, Måned>>,
-    grunnlagTidslinjePerPersonForrigeBehandling: Map<String, Tidslinje<GrunnlagForPerson, Måned>>
+    grunnlagTidslinjePerPerson: Map<AktørId, Tidslinje<GrunnlagForPerson, Måned>>,
+    grunnlagTidslinjePerPersonForrigeBehandling: Map<AktørId, Tidslinje<GrunnlagForPerson, Måned>>
 ): List<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling?>, Måned>> {
     val gjeldendeOgForrigeGrunnlagKombinert = kombinerGjeldendeOgForrigeGrunnlag(
         grunnlagTidslinjePerPerson = grunnlagTidslinjePerPerson,
@@ -66,7 +68,7 @@ fun finnPerioderSomSkalBegrunnes(
 private fun List<Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned>>.utledSammenslåttePerioder() = this
     .map { grunnlagForDenneOgForrigeBehandlingTidslinje ->
         grunnlagForDenneOgForrigeBehandlingTidslinje.filtrer { it?.gjeldende is GrunnlagForPersonInnvilget }
-    }.kombiner { it }
+    }.kombiner { if (it.toList().isNotEmpty()) it else null }
     .perioder()
 
 private fun List<Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned>>.utledIkkeinnvilgedePerioder() = this
@@ -85,8 +87,8 @@ private fun List<Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned>>.utl
  * ikke er det.
  **/
 private fun kombinerGjeldendeOgForrigeGrunnlag(
-    grunnlagTidslinjePerPerson: Map<String, Tidslinje<GrunnlagForPerson, Måned>>,
-    grunnlagTidslinjePerPersonForrigeBehandling: Map<String, Tidslinje<GrunnlagForPerson, Måned>>
+    grunnlagTidslinjePerPerson: Map<AktørId, Tidslinje<GrunnlagForPerson, Måned>>,
+    grunnlagTidslinjePerPersonForrigeBehandling: Map<AktørId, Tidslinje<GrunnlagForPerson, Måned>>
 ): List<Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned>> =
     grunnlagTidslinjePerPerson.map { (aktørId, grunnlagstidslinje) ->
         val grunnlagForrigeBehandling = grunnlagTidslinjePerPersonForrigeBehandling[aktørId]
@@ -144,7 +146,7 @@ behold enkeltstående nei
 */
 private fun utledGrunnlagTidslinjePerPerson(
     grunnlagForVedtaksperioder: GrunnlagForVedtaksperioder
-): Map<String, Tidslinje<GrunnlagForPerson, Måned>> {
+): Map<AktørId, Tidslinje<GrunnlagForPerson, Måned>> {
     val (persongrunnlag, personResultater, fagsakType, kompetanser, endredeUtbetalinger, andelerTilkjentYtelse) = grunnlagForVedtaksperioder
 
     val søker = persongrunnlag.søker
