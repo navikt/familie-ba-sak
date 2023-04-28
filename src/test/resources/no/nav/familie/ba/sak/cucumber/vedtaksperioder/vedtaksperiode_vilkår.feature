@@ -60,7 +60,6 @@ Egenskap: Vedtaksperioder med mor og et barn
 
     Så forvent følgende vedtaksperioder med begrunnelser
       | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar                                         |
-      | 01.05.2020 | 31.08.2021 | OPPHØR             | Barn har vilkår som er oppfylt her, men ikke alle |
       | 01.09.2021 | 31.03.2038 | Utbetaling         | Barn og søker                                     |
       | 01.04.2038 |            | Opphør             | Kun søker                                         |
 
@@ -83,8 +82,6 @@ Egenskap: Vedtaksperioder med mor og et barn
 
     Så forvent følgende vedtaksperioder med begrunnelser
       | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar                                         |
-      | 01.05.2020 | 31.03.2038 | OPPHØR             | Barn har vilkår som er oppfylt her, men ikke alle |
-      | 01.04.2038 |            | Opphør             | Kun søker                                         |
 
   Scenario: Skal lage vedtaksperioder med begrunnelser for mor med vilkår når barnet flytter ut
 

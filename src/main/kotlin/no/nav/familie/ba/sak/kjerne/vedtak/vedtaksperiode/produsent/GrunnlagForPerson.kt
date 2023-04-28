@@ -10,11 +10,13 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.SøkersAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.UtfyltKompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.PeriodeOvergangsstønadGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
+import no.nav.familie.kontrakter.felles.ef.Datakilde
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -26,9 +28,10 @@ sealed interface GrunnlagForPerson {
 data class GrunnlagForPersonInnvilget(
     override val person: Person,
     override val vilkårResultaterForVedtaksPeriode: List<VilkårResultatForVedtaksperiode>,
+    val andeler: Iterable<AndelForVedtaksperiode>?,
     val kompetanse: KompetanseForVedtaksperiode? = null,
     val endretUtbetalingAndel: EndretUtbetalingAndelForVedtaksperiode? = null,
-    val andeler: Iterable<AndelForVedtaksperiode>?
+    val overgangsstønad: OvergangsstønadForVedtaksperiode? = null
 ) : GrunnlagForPerson
 
 data class GrunnlagForPersonIkkeInnvilget(
@@ -95,5 +98,17 @@ data class KompetanseForVedtaksperiode(
         søkersAktivitetsland = kompetanse.søkersAktivitetsland,
         barnetsBostedsland = kompetanse.barnetsBostedsland,
         resultat = kompetanse.resultat
+    )
+}
+
+data class OvergangsstønadForVedtaksperiode(
+    val fom: LocalDate,
+    val tom: LocalDate,
+    val datakilde: Datakilde
+) {
+    constructor(periodeOvergangsstønad: PeriodeOvergangsstønadGrunnlag) : this(
+        fom = periodeOvergangsstønad.fom,
+        tom = periodeOvergangsstønad.tom,
+        datakilde = periodeOvergangsstønad.datakilde
     )
 }
