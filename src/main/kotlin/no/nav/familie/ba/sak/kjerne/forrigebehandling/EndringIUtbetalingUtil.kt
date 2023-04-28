@@ -51,7 +51,7 @@ object EndringIUtbetalingUtil {
     // 1. Vi har fått nye andeler som har 0 i utbetalingsbeløp
     // 2. Vi har mistet andeler som har hatt 0 i utbetalingsbeløp
     // 3. Vi har lik utbetalingsbeløp mellom nåværende og forrige andeler
-    private fun lagEndringIUtbetalingForPersonOgTypeTidslinje(
+    internal fun lagEndringIUtbetalingForPersonOgTypeTidslinje(
         nåværendeAndeler: List<AndelTilkjentYtelse>,
         forrigeAndeler: List<AndelTilkjentYtelse>
     ): Tidslinje<Boolean, Måned> {
