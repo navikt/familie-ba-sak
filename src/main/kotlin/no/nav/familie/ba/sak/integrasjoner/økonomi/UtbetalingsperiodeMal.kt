@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.integrasjoner.økonomi.oppdrag.AndelData
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
@@ -58,6 +59,32 @@ data class UtbetalingsperiodeMal(
             vedtakdatoFom = andel.stønadFom.førsteDagIInneværendeMåned(),
             vedtakdatoTom = andel.stønadTom.sisteDagIInneværendeMåned(),
             sats = BigDecimal(andel.kalkulertUtbetalingsbeløp),
+            satsType = Utbetalingsperiode.SatsType.MND,
+            utbetalesTil = hentUtebetalesTil(vedtak.behandling.fagsak),
+            behandlingId = vedtak.behandling.id
+        )
+
+    fun lagPeriodeFraAndel(
+        andel: AndelData,
+        opphørKjedeFom: YearMonth? = null
+    ): Utbetalingsperiode =
+        Utbetalingsperiode(
+            erEndringPåEksisterendePeriode = erEndringPåEksisterendePeriode,
+            opphør = if (erEndringPåEksisterendePeriode) {
+                Opphør(
+                    opphørKjedeFom?.førsteDagIInneværendeMåned()
+                        ?: error("Mangler opphørsdato for kjede")
+                )
+            } else {
+                null
+            },
+            forrigePeriodeId = andel.forrigeOffset,
+            periodeId = andel.offset ?: error("Mangler offset på andel=${andel.id}"),
+            datoForVedtak = vedtak.vedtaksdato?.toLocalDate() ?: now(),
+            klassifisering = andel.type.klassifisering,
+            vedtakdatoFom = andel.fom.førsteDagIInneværendeMåned(),
+            vedtakdatoTom = andel.tom.sisteDagIInneværendeMåned(),
+            sats = BigDecimal(andel.beløp),
             satsType = Utbetalingsperiode.SatsType.MND,
             utbetalesTil = hentUtebetalesTil(vedtak.behandling.fagsak),
             behandlingId = vedtak.behandling.id

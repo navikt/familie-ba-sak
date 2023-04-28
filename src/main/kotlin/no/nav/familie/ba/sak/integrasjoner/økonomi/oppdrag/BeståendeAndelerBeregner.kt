@@ -9,16 +9,25 @@ private class AvkortAndel(val andel: AndelData, val opphør: YearMonth? = null) 
 
 data class BeståendeAndeler(
     val andeler: List<AndelData>,
-    val opphørFra: YearMonth? = null
+    val opphørFra: YearMonth? = null,
 )
+
 object BeståendeAndelerBeregner {
 
     // TODO på en eller annen måte så skal de som beholdes ha riktig ID, men få oppdatert offset/forrigeOffset/kildeBehandlingId fra forrige beandling
     fun finnBeståendeAndeler(
         forrige: List<AndelData>,
-        nye: List<AndelData>
+        nye: List<AndelData>,
     ): BeståendeAndeler {
         val index = finnIndexPåFørsteDiff(forrige, nye)
+        // TODO for å oppdatere id på forrige sånn at bestående fortsatt har riktig id på nytt
+        val forrige = forrige.mapIndexed { index, andelData ->
+            if (nye.size > index) {
+                andelData.copy(id = nye[index]!!.id)
+            } else {
+                andelData
+            }
+        }
 
         val beståendeAndeler = index?.let {
             val opphørsdato = finnBeståendeAndelOgOpphør(it, forrige, nye)
@@ -26,10 +35,12 @@ object BeståendeAndelerBeregner {
                 is Opphørsdato -> {
                     BeståendeAndeler(forrige.subList(0, index), opphørsdato.opphør)
                 }
+
                 is AvkortAndel -> {
-                    val avkortetAndeler = forrige.subList(0, maxOf(0, index - 1))
+                    val avkortetAndeler = forrige.subList(0, maxOf(0, index))
                     BeståendeAndeler(avkortetAndeler + opphørsdato.andel, opphørsdato.opphør)
                 }
+
                 is NyAndelSkriverOver -> {
                     BeståendeAndeler(forrige.subList(0, maxOf(0, index)))
                 }
@@ -42,12 +53,20 @@ object BeståendeAndelerBeregner {
     private fun finnBeståendeAndelOgOpphør(
         index: Int,
         forrige: List<AndelData>,
-        nye: List<AndelData>
+        nye: List<AndelData>,
     ): BeståendeAndelResultat {
         val forrige = forrige[index]
         val ny = if (nye.size > index) nye[index] else null
         val nyNeste = if (nye.size > index + 1) nye[index + 1] else null
 
+        return finnBeståendeAndelOgOpphør(ny, forrige, nyNeste)
+    }
+
+    private fun finnBeståendeAndelOgOpphør(
+        ny: AndelData?,
+        forrige: AndelData,
+        nyNeste: AndelData?,
+    ): BeståendeAndelResultat {
         if (ny == null || forrige.fom < ny.fom) {
             return Opphørsdato(forrige.fom)
         }
@@ -67,7 +86,7 @@ object BeståendeAndelerBeregner {
 
     private fun finnIndexPåFørsteDiff(
         forrige: List<AndelData>,
-        nye: List<AndelData>
+        nye: List<AndelData>,
     ): Int? {
         forrige.forEachIndexed { index, andelData ->
             if (nye.size > index) {

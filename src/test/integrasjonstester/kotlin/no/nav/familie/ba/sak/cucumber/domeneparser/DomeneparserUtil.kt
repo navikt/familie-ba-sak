@@ -7,6 +7,7 @@ interface Domenenøkkel {
 }
 
 enum class Domenebegrep(override val nøkkel: String) : Domenenøkkel {
+    ID("Id"),
     BEHANDLING_ID("BehandlingId"),
     FORRIGE_BEHANDLING_ID("ForrigeBehandlingId"),
     FRA_DATO("Fra dato"),

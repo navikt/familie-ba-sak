@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.beregning.domene
 
+import no.nav.familie.ba.sak.integrasjoner.økonomi.oppdrag.IdentOgType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
@@ -18,4 +19,11 @@ interface TilkjentYtelseRepository : JpaRepository<TilkjentYtelse, Long> {
 
     @Query("SELECT ty FROM TilkjentYtelse ty JOIN ty.behandling b WHERE b.id = :behandlingId AND ty.utbetalingsoppdrag is not null")
     fun findByBehandlingAndHasUtbetalingsoppdrag(behandlingId: Long): TilkjentYtelse?
+
+    @Query(
+        """
+        ...
+    """,
+    )
+    fun sisteAndelPerKjedeForFagsak(fagsakId: Long): Map<IdentOgType, AndelTilkjentYtelse>
 }

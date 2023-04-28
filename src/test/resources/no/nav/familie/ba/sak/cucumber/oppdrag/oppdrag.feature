@@ -105,6 +105,8 @@ Egenskap: Vedtak for førstegangsbehandling
       | 2            | 03.2021  | 03.2021  | 700   | 1               |
       | 2            | 04.2021  | 06.2021  | 800   | 1               |
 
+    Når beregner utbetalingsoppdrag
+
     Så forvent følgende utbetalingsoppdrag
       | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id |
       | 1            | 03.2021  | 06.2021  |             | 700   | NY           | Nei        | 0          |                    |
@@ -127,6 +129,8 @@ Egenskap: Vedtak for førstegangsbehandling
 
       | 2            | 03.2021  | 03.2021  | 800   | 1               |
       | 2            | 04.2021  | 06.2021  | 700   | 1               |
+
+    Når beregner utbetalingsoppdrag
 
     Så forvent følgende utbetalingsoppdrag
       | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id |
