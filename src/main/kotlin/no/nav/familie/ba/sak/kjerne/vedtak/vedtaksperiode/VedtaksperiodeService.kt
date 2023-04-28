@@ -89,7 +89,7 @@ class VedtaksperiodeService(
     private val brevmalService: BrevmalService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val vilkårsvurderingService: VilkårsvurderingService,
-    private val småbarnstilleggService: SmåbarnstilleggService,
+    private val småbarnstilleggService: SmåbarnstilleggService
 ) {
     fun oppdaterVedtaksperiodeMedFritekster(
         vedtaksperiodeId: Long,

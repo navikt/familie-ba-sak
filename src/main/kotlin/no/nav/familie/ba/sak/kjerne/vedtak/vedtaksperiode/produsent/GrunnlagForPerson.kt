@@ -102,10 +102,10 @@ data class KompetanseForVedtaksperiode(
 
 data class OvergangsstønadForVedtaksperiode(
     val fom: LocalDate,
-    val tom: LocalDate,
+    val tom: LocalDate
 ) {
     constructor(periodeOvergangsstønad: InternPeriodeOvergangsstønad) : this(
         fom = periodeOvergangsstønad.fomDato,
-        tom = periodeOvergangsstønad.tomDato,
+        tom = periodeOvergangsstønad.tomDato
     )
 }

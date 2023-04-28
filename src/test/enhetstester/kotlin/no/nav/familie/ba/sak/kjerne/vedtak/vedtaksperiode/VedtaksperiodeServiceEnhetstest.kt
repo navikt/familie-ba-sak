@@ -105,7 +105,7 @@ class VedtaksperiodeServiceEnhetstest {
             )
         } returns true
         every { feilutbetaltValutaRepository.finnFeilutbetaltValutaForBehandling(any()) } returns emptyList()
-        every { småbarnstilleggService.hentPerioderMedFullOvergangsstønad(any())} returns emptyList()
+        every { småbarnstilleggService.hentPerioderMedFullOvergangsstønad(any()) } returns emptyList()
     }
 
     @Test

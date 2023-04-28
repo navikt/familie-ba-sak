@@ -17,7 +17,7 @@ data class InternPeriodeOvergangsstønad(
     val fomDato: LocalDate,
     val tomDato: LocalDate
 ) {
-    constructor(periodeOvergangsstønadGrunnlag: PeriodeOvergangsstønadGrunnlag): this(
+    constructor(periodeOvergangsstønadGrunnlag: PeriodeOvergangsstønadGrunnlag) : this(
         personIdent = periodeOvergangsstønadGrunnlag.aktør.aktivFødselsnummer(),
         fomDato = periodeOvergangsstønadGrunnlag.fom,
         tomDato = periodeOvergangsstønadGrunnlag.tom
