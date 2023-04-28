@@ -165,7 +165,9 @@ class OppdragSteg {
     @Så("forvent følgende utbetalingsoppdrag med ny utbetalingsgenerator")
     fun `forvent følgende utbetalingsoppdrag med ny utbetalingsgenerator`(dataTable: DataTable) {
         validerForventetUtbetalingsoppdrag(dataTable, beregnetUtbetalingsoppdragNy)
-        assertSjekkBehandlingIder(dataTable, beregnetUtbetalingsoppdragNy.keys)
+        assertSjekkBehandlingIder(dataTable, beregnetUtbetalingsoppdragNy.filter {
+            it.value.utbetalingsperiode.isNotEmpty()
+        }.keys)
     }
 
     @Så("forvent følgende simulering")
