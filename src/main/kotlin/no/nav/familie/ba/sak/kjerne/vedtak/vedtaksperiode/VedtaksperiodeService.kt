@@ -26,7 +26,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndre
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.endringstidspunkt.EndringstidspunktService
-import no.nav.familie.ba.sak.kjerne.beregning.endringstidspunkt.filtrerPåEndringstidspunkt
+import no.nav.familie.ba.sak.kjerne.beregning.endringstidspunkt.filtrerLikEllerEtterEndringstidspunkt
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
@@ -307,7 +307,7 @@ class VedtaksperiodeService(
             grunnlagForVedtakPerioder = hentGrunnlagForVedtaksperioder(behandling),
             grunnlagForVedtakPerioderForrigeBehandling = forrigeBehandling?.let { hentGrunnlagForVedtaksperioder(it) },
             vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId)
-        ).filtrerPåEndringstidspunkt(endringstidspunkt)
+        ).filtrerLikEllerEtterEndringstidspunkt(endringstidspunkt)
     }
 
     fun hentGrunnlagForVedtaksperioder(behandling: Behandling): GrunnlagForVedtaksperioder =
@@ -349,7 +349,7 @@ class VedtaksperiodeService(
 
         val avslagsperioder = hentAvslagsperioderMedBegrunnelser(vedtak)
 
-        return (utbetalingsperioder + opphørsperioder).filtrerPåEndringstidspunkt(
+        return (utbetalingsperioder + opphørsperioder).filtrerLikEllerEtterEndringstidspunkt(
             endringstidspunkt = endringstidspunkt
         ) + avslagsperioder
     }

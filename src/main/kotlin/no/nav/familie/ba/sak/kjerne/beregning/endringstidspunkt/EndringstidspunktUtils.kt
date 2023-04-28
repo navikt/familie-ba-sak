@@ -170,7 +170,7 @@ private fun kombinerOverlappendeAndelerForSøker(
     )
 }
 
-fun List<VedtaksperiodeMedBegrunnelser>.filtrerPåEndringstidspunkt(
+fun List<VedtaksperiodeMedBegrunnelser>.filtrerLikEllerEtterEndringstidspunkt(
     endringstidspunkt: LocalDate
 ): List<VedtaksperiodeMedBegrunnelser> {
     return filter { (it.tom ?: TIDENES_ENDE).isSameOrAfter(endringstidspunkt) }

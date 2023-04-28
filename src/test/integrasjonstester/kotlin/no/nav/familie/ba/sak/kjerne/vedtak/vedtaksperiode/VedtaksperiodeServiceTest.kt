@@ -24,7 +24,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
-import no.nav.familie.ba.sak.kjerne.beregning.endringstidspunkt.filtrerPåEndringstidspunkt
+import no.nav.familie.ba.sak.kjerne.beregning.endringstidspunkt.filtrerLikEllerEtterEndringstidspunkt
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -646,7 +646,7 @@ class VedtaksperiodeServiceTest(
                 Vedtaksperiodetype.UTBETALING
             )
         )
-        val vedtaksperioder = utbetalingsperioder.filtrerPåEndringstidspunkt(
+        val vedtaksperioder = utbetalingsperioder.filtrerLikEllerEtterEndringstidspunkt(
             endringstidspunkt = LocalDate.of(2021, 3, 1)
         ) + avslagsperioder
 
