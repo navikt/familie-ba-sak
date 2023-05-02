@@ -157,8 +157,6 @@ data class VedtaksperiodeMedBegrunnelser(
                 localDateSegment.tom.isSameOrAfter(this.tom ?: TIDENES_ENDE)
         }
         ?: throw Feil("Finner ikke segment for vedtaksperiode (${this.fom}, ${this.tom}) blant segmenter ${andelerTilkjentYtelse.utledSegmenter()}")
-
-
 }
 
 fun List<VedtaksperiodeMedBegrunnelser>.erAlleredeBegrunnetMedBegrunnelse(

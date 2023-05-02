@@ -58,7 +58,7 @@ enum class Vilkår(
     companion object {
 
         fun hentObligatoriskeVilkårFor(
-            personType: PersonType,
+            personType: PersonType
         ): List<Vilkår> = when (personType) {
             SØKER -> listOf(BOSATT_I_RIKET, LOVLIG_OPPHOLD)
             ANNENPART -> TODO()
