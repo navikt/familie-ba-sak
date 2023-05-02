@@ -289,14 +289,11 @@ private fun Tidslinje<List<VilkårResultat>, Måned>.tilVilkårResultaterForVedt
 private fun List<InternPeriodeOvergangsstønad>.filtrerPåAktør(aktør: Aktør) =
     this.filter { it.personIdent == aktør.aktivFødselsnummer() }
 
-private fun List<AndelTilkjentYtelse>.filtrerPåAktør(
-    aktør: Aktør
-) = filter { andelTilkjentYtelse -> andelTilkjentYtelse.aktør == aktør }
+private fun List<AndelTilkjentYtelse>.filtrerPåAktør(aktør: Aktør) =
+    this.filter { andelTilkjentYtelse -> andelTilkjentYtelse.aktør == aktør }
 
-private fun List<IUtfyltEndretUtbetalingAndel>.filtrerPåAktør(
-    aktør: Aktør
-) = filter { endretUtbetaling -> endretUtbetaling.person.aktør == aktør }
+private fun List<IUtfyltEndretUtbetalingAndel>.filtrerPåAktør(aktør: Aktør) =
+    this.filter { endretUtbetaling -> endretUtbetaling.person.aktør == aktør }
 
-private fun List<UtfyltKompetanse>.filtrerPåAktør(
-    aktør: Aktør
-) = this.filter { it.barnAktører.contains(aktør) }
+private fun List<UtfyltKompetanse>.filtrerPåAktør(aktør: Aktør) =
+    this.filter { it.barnAktører.contains(aktør) }
