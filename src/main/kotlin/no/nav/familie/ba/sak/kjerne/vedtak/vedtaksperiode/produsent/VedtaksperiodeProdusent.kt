@@ -211,13 +211,12 @@ private fun List<VilkårResultat>.filtrerVilkårErOrdinærtFor(
         .takeIf { it.isNotEmpty() }
 }
 
-// TODO: hva gjør vi hvis søker er et barn?
 private fun hentErOrdinæreVilkårOppfyltForMinstEttBarnTidslinje(
     personResultater: Set<PersonResultat>,
     søker: Person,
     fagsakType: FagsakType
 ): Tidslinje<Boolean, Måned> = personResultater
-    .filter { it.aktør != søker.aktør }
+    .filter { it.aktør != søker.aktør || søker.type == PersonType.BARN }
     .map { personResultat ->
         personResultat.tilTidslinjeForSplittForPerson(
             personType = PersonType.BARN,
