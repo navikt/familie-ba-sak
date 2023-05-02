@@ -156,12 +156,12 @@ private fun utledGrunnlagTidslinjePerPerson(
     val søker = persongrunnlag.søker
     val søkerPersonResultater = personResultater.single { it.aktør == søker.aktør }
 
-    val obligatoriskeVilkårForSøkerTidslinje = søkerPersonResultater.tilTidslinjeForSplittForPerson(
+    val ordinæreVilkårForSøkerForskjøvetTidslinje = søkerPersonResultater.tilTidslinjeForSplittForPerson(
         personType = søker.type,
         fagsakType = fagsakType
     ).map { vilkårResultater ->
         vilkårResultater?.filter {
-            Vilkår.hentObligatoriskeVilkårFor(søker.type).contains(it.vilkårType)
+            Vilkår.hentOrdinæreVilkårFor(søker.type).contains(it.vilkårType)
         }?.takeIf { it.isNotEmpty() }
     }
 
@@ -173,8 +173,8 @@ private fun utledGrunnlagTidslinjePerPerson(
         .map { it.tilIKompetanse() }
         .filterIsInstance<UtfyltKompetanse>()
 
-    val erObligatoriskeVilkårOppfyltForMinstEttBarnTidslinje =
-        hentErObligatoriskeVilkårOppfyltForMinstEttBarnTidslinje(personResultater, søker, fagsakType)
+    val erOrdinæreVilkårOppfyltForMinstEttBarnTidslinje =
+        hentErOrdinæreVilkårOppfyltForMinstEttBarnTidslinje(personResultater, søker, fagsakType)
 
     val grunnlagForPersonTidslinjer = personResultater
         .associate { personResultat ->
@@ -182,9 +182,9 @@ private fun utledGrunnlagTidslinjePerPerson(
 
             val forskjøvedeVilkårResultaterForPersonsAndelerTidslinje: Tidslinje<List<VilkårResultat>, Måned> =
                 personResultat.hentForskjøvedeVilkårResultaterForPersonsAndelerTidslinje(
-                    person,
-                    erObligatoriskeVilkårOppfyltForMinstEttBarnTidslinje,
-                    obligatoriskeVilkårForSøkerTidslinje
+                    person = person,
+                    erOrdinæreVilkårOppfyltForMinstEttBarnTidslinje = erOrdinæreVilkårOppfyltForMinstEttBarnTidslinje,
+                    ordinæreVilkårForSøkerTidslinje = ordinæreVilkårForSøkerForskjøvetTidslinje
                 )
 
             person.aktør.aktørId to forskjøvedeVilkårResultaterForPersonsAndelerTidslinje.tilGrunnlagForPersonTidslinje(
@@ -204,7 +204,7 @@ private fun utledGrunnlagTidslinjePerPerson(
 }
 
 // TODO: hva gjør vi hvis søker er et barn?
-private fun hentErObligatoriskeVilkårOppfyltForMinstEttBarnTidslinje(
+private fun hentErOrdinæreVilkårOppfyltForMinstEttBarnTidslinje(
     personResultater: Set<PersonResultat>,
     søker: Person,
     fagsakType: FagsakType
@@ -308,19 +308,19 @@ private fun List<AndelTilkjentYtelse>.tilAndelerForVedtaksPeriodeTidslinje() =
 
 private fun PersonResultat.hentForskjøvedeVilkårResultaterForPersonsAndelerTidslinje(
     person: Person,
-    erObligatoriskeVilkårOppfyltForMinstEttBarnTidslinje: Tidslinje<Boolean, Måned>,
-    obligatoriskeVilkårForSøkerTidslinje: Tidslinje<List<VilkårResultat>, Måned>
+    erOrdinæreVilkårOppfyltForMinstEttBarnTidslinje: Tidslinje<Boolean, Måned>,
+    ordinæreVilkårForSøkerTidslinje: Tidslinje<List<VilkårResultat>, Måned>
 ): Tidslinje<List<VilkårResultat>, Måned> {
     val forskjøvedeVilkårResultaterForPerson =
         vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår().kombiner { it }
 
     return when (person.type) {
         PersonType.SØKER -> forskjøvedeVilkårResultaterForPerson.map { vilkårResultater ->
-            vilkårResultater.filtrerErIkkeObligatoriskFor(person)
-        }.beskjærEtter(erObligatoriskeVilkårOppfyltForMinstEttBarnTidslinje)
+            vilkårResultater.filtrerErIkkeOrdinærtFor(person)
+        }.beskjærEtter(erOrdinæreVilkårOppfyltForMinstEttBarnTidslinje)
 
         PersonType.BARN -> forskjøvedeVilkårResultaterForPerson.kombinerMed(
-            obligatoriskeVilkårForSøkerTidslinje.beskjærEtter(forskjøvedeVilkårResultaterForPerson)
+            ordinæreVilkårForSøkerTidslinje.beskjærEtter(forskjøvedeVilkårResultaterForPerson)
         ) { vilkårResultaterBarn, vilkårResultaterSøker ->
             slåSammenHvisMulig(vilkårResultaterBarn, vilkårResultaterSøker)?.toList()
         }
@@ -329,8 +329,8 @@ private fun PersonResultat.hentForskjøvedeVilkårResultaterForPersonsAndelerTid
     }
 }
 
-private fun Iterable<VilkårResultat>?.filtrerErIkkeObligatoriskFor(person: Person) = this?.filterNot {
-    Vilkår.hentObligatoriskeVilkårFor(person.type).contains(it.vilkårType)
+private fun Iterable<VilkårResultat>?.filtrerErIkkeOrdinærtFor(person: Person) = this?.filterNot {
+    Vilkår.hentOrdinæreVilkårFor(person.type).contains(it.vilkårType)
 }?.takeIf { it.isNotEmpty() }
 
 private fun slåSammenHvisMulig(
