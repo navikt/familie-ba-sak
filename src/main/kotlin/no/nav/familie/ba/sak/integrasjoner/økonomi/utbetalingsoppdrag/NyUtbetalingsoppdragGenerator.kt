@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag
 
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForUtbetalingsoppdrag
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForUtbetalingsoppdragFactory
+import no.nav.familie.ba.sak.integrasjoner.økonomi.IdentOgType
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsperiodeMal
 import no.nav.familie.ba.sak.integrasjoner.økonomi.opprettAdvarselLoggVedForstattInnvilgetMedUtbetaling
 import no.nav.familie.ba.sak.integrasjoner.økonomi.pakkInnForUtbetaling
@@ -51,7 +52,7 @@ class NyUtbetalingsoppdragGenerator {
 
         // grupperer andeler basert på personIdent.
         // Markerte Småbarnstilegg med spesielt suffix SMÅBARNSTILLEGG_SUFFIX
-        val oppdaterteKjeder: Map<String, List<AndelTilkjentYtelseForUtbetalingsoppdrag>> =
+        val oppdaterteKjeder: Map<IdentOgType, List<AndelTilkjentYtelseForUtbetalingsoppdrag>> =
             kjedeinndelteAndeler(andelerTilkjentYtelse)
 
         // grupperer forrige andeler basert på personIdent.
@@ -61,7 +62,7 @@ class NyUtbetalingsoppdragGenerator {
                 ?.pakkInnForUtbetaling(andelTilkjentYtelseForUtbetalingsoppdragFactory)
                 ?: emptyList()
 
-        val forrigeKjeder: Map<String, List<AndelTilkjentYtelseForUtbetalingsoppdrag>> =
+        val forrigeKjeder: Map<IdentOgType, List<AndelTilkjentYtelseForUtbetalingsoppdrag>> =
             kjedeinndelteAndeler(forrigeAndeler)
 
         val erEndretMigreringsDato = vedtakMedTilkjentYtelse.endretMigreringsdato != null

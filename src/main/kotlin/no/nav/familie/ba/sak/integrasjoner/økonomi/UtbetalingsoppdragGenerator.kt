@@ -46,10 +46,10 @@ class UtbetalingsoppdragGenerator(
         saksbehandlerId: String,
         vedtak: Vedtak,
         erFørsteBehandlingPåFagsak: Boolean,
-        forrigeKjeder: Map<String, List<AndelTilkjentYtelseForUtbetalingsoppdrag>> = emptyMap(),
-        sisteOffsetPerIdent: Map<String, Int> = emptyMap(),
+        forrigeKjeder: Map<IdentOgType, List<AndelTilkjentYtelseForUtbetalingsoppdrag>> = emptyMap(),
+        sisteOffsetPerIdent: Map<IdentOgType, Int> = emptyMap(),
         sisteOffsetPåFagsak: Int? = null,
-        oppdaterteKjeder: Map<String, List<AndelTilkjentYtelseForUtbetalingsoppdrag>> = emptyMap(),
+        oppdaterteKjeder: Map<IdentOgType, List<AndelTilkjentYtelseForUtbetalingsoppdrag>> = emptyMap(),
         erSimulering: Boolean = false,
         endretMigreringsDato: YearMonth? = null
     ): Utbetalingsoppdrag {
@@ -135,7 +135,7 @@ class UtbetalingsoppdragGenerator(
         andeler: List<List<AndelTilkjentYtelseForUtbetalingsoppdrag>>,
         vedtak: Vedtak,
         erFørsteBehandlingPåFagsak: Boolean,
-        sisteOffsetIKjedeOversikt: Map<String, Int>,
+        sisteOffsetIKjedeOversikt: Map<IdentOgType, Int>,
         sisteOffsetPåFagsak: Int? = null,
         skalOppdatereTilkjentYtelse: Boolean
     ): List<Utbetalingsperiode> {
@@ -155,14 +155,7 @@ class UtbetalingsoppdragGenerator(
             .flatMap { kjede: List<AndelTilkjentYtelseForUtbetalingsoppdrag> ->
                 val ident = kjede.first().aktør.aktivFødselsnummer()
                 val ytelseType = kjede.first().type
-                var forrigeOffsetIKjede: Int? = null
-                if (!erFørsteBehandlingPåFagsak) {
-                    forrigeOffsetIKjede = if (ytelseType == YtelseType.SMÅBARNSTILLEGG) {
-                        sisteOffsetIKjedeOversikt[ident + SMÅBARNSTILLEGG_SUFFIX]
-                    } else {
-                        sisteOffsetIKjedeOversikt[ident]
-                    }
-                }
+                var forrigeOffsetIKjede: Int? = sisteOffsetIKjedeOversikt[IdentOgType(ident, ytelseType)]
                 kjede.sortedBy { it.stønadFom }.mapIndexed { index, andel ->
                     val forrigeOffset = if (index == 0) forrigeOffsetIKjede else offset - 1
                     utbetalingsperiodeMal.lagPeriodeFraAndel(andel, offset, forrigeOffset).also {

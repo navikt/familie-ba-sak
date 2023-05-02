@@ -68,7 +68,7 @@ interface AndelTilkjentYtelseRepository : JpaRepository<AndelTilkjentYtelse, Lon
 
     @Query(
         """
-        WITH andeler AS (SELECT aty.*,
+        WITH andeler AS (SELECT aty.id,
                         row_number()
                         OVER (PARTITION BY aty.type, aty.fk_aktoer_id ORDER BY aty.periode_offset DESC) rn
                  FROM andel_tilkjent_ytelse aty
@@ -77,21 +77,9 @@ interface AndelTilkjentYtelseRepository : JpaRepository<AndelTilkjentYtelse, Lon
                  WHERE b.fk_fagsak_id = :fagsakId
                    AND ty.utbetalingsoppdrag IS NOT NULL
                    AND aty.periode_offset IS NOT NULL)
-        SELECT id,
-               aty.type                 AS type,
-               p.foedselsnummer         AS ident,
-               aty.stonad_fom           AS fom,
-               aty.stonad_fom           AS tom,
-               periode_offset           AS periodeOffset,
-               forrige_periode_offset   AS forrigePeriodeOffset,
-               kilde_behandling_id      AS kildeBehandlingId
-        FROM andeler aty
-         JOIN aktoer a ON a.aktoer_id = aty.fk_aktoer_id
-         JOIN personident p ON aty.fk_aktoer_id = p.fk_aktoer_id
-        WHERE rn = 1
-          AND p.aktiv = TRUE
+        SELECT id FROM andeler aty WHERE rn = 1
     """,
         nativeQuery = true
     )
-    fun hentSisteAndelPerIdent(fagsakId: Long): List<SisteAndelTilkjentYtelse>
+    fun hentSisteAndelPerIdent(fagsakId: Long): List<Long>
 }

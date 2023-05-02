@@ -103,7 +103,7 @@ class ØkonomiService(
         val oppdaterteKjeder = kjedeinndelteAndeler(oppdatertTilstand)
 
         val erFørsteIverksatteBehandlingPåFagsak =
-            beregningService.hentSisteOffsetPerIdent(fagsakId = oppdatertBehandling.fagsak.id)
+            beregningService.hentSisteAndelPerIdent(fagsakId = oppdatertBehandling.fagsak.id)
                 .isEmpty()
 
         val utbetalingsoppdrag = if (erFørsteIverksatteBehandlingPåFagsak) {
@@ -125,7 +125,7 @@ class ØkonomiService(
 
             val forrigeKjeder = kjedeinndelteAndeler(forrigeTilstand)
 
-            val sisteOffsetPerIdent = beregningService.hentSisteOffsetPerIdent(forrigeBehandling.fagsak.id)
+            val sisteOffsetPerIdent = beregningService.hentSisteAndelPerIdent(forrigeBehandling.fagsak.id)
 
             if (oppdatertTilstand.isNotEmpty()) {
                 oppdaterBeståendeAndelerMedOffset(oppdaterteKjeder = oppdaterteKjeder, forrigeKjeder = forrigeKjeder)
