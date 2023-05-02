@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
@@ -18,6 +19,7 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValide
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.validerBarnasVilkår
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlingSteg
@@ -82,6 +84,8 @@ class BehandlingsresultatSteg(
             vilkårService.hentVilkårsvurdering(behandling.id)
         )
 
+        validerBehandlingsresultatErGyldigForFagsaktype(behandling)
+
         if (behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO) {
             validerIngenEndringIUtbetalingEtterMigreringsdatoenTilForrigeIverksatteBehandling(behandling)
         }
@@ -118,11 +122,11 @@ class BehandlingsresultatSteg(
         if (behandlingMedOppdatertBehandlingsresultat.skalRettFraBehandlingsresultatTilIverksetting(
                 endringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi == ENDRING_I_UTBETALING
             ) || beregningService.kanAutomatiskIverksetteSmåbarnstilleggEndring(
-                    behandling = behandlingMedOppdatertBehandlingsresultat,
-                    sistIverksatteBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(
-                            behandling = behandlingMedOppdatertBehandlingsresultat
-                        )
+                behandling = behandlingMedOppdatertBehandlingsresultat,
+                sistIverksatteBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(
+                    behandling = behandlingMedOppdatertBehandlingsresultat
                 )
+            )
         ) {
             behandlingService.oppdaterStatusPåBehandling(
                 behandlingMedOppdatertBehandlingsresultat.id,
@@ -132,11 +136,22 @@ class BehandlingsresultatSteg(
             simuleringService.oppdaterSimuleringPåBehandling(behandlingMedOppdatertBehandlingsresultat)
         }
 
-        return hentNesteStegGittEndringerIUtbetaling(behandling, endringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi)
+        return hentNesteStegGittEndringerIUtbetaling(
+            behandling,
+            endringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi
+        )
     }
 
     override fun stegType(): StegType {
         return StegType.BEHANDLINGSRESULTAT
+    }
+
+    private fun validerBehandlingsresultatErGyldigForFagsaktype(behandling: Behandling) {
+        val fagsakType = behandling.fagsak.type
+
+        if (fagsakType == FagsakType.BARN_ENSLIG_MINDREÅRIG && behandling.underkategori == BehandlingUnderkategori.UTVIDET) {
+            throw FunksjonellFeil("Utvidet barnetrygd for enslig mindreårig er ikke støttet ennå.")
+        }
     }
 
     private fun validerBehandlingsresultatErGyldigForÅrsak(behandlingMedOppdatertBehandlingsresultat: Behandling) {
