@@ -167,7 +167,6 @@ class BehandlingsresultatStegTest {
 
     @Test
     fun `skal kaste feil om behandlingstema er utvidet for fagsaktype enslig mindreårig`() {
-
         val ensligMindreårigBehandling = behandling.copy(
             resultat = Behandlingsresultat.INNVILGET,
             fagsak = behandling.fagsak.copy(type = FagsakType.BARN_ENSLIG_MINDREÅRIG),
