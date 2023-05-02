@@ -190,7 +190,9 @@ Egenskap: Vedtaksperioder med mor og et barn
 
     Og med andeler tilkjent ytelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
-      | 3456    | 01.05.2020 | 31.03.2038 | 1354  | 1            |
+      | 1234    | 01.05.2020 | 01.03.2021 | 678   | 1            |
+      | 3456    | 01.05.2020 | 31.07.2021 | 1245  | 1            |
+      | 3456    | 01.06.2030 | 31.03.2038 | 1245  | 1            |
 
     Når vedtaksperioder med begrunnelser genereres for behandling 1
 
