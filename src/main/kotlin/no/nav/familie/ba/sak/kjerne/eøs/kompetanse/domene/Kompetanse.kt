@@ -161,7 +161,7 @@ data class TomKompetanse(
 data class UtfyltKompetanse(
     override val id: Long,
     override val behandlingId: Long,
-    val fom: YearMonth,
+    val fom: YearMonth?,
     val tom: YearMonth?,
     val barnAktører: Set<Aktør>,
     val søkersAktivitet: SøkersAktivitet,
@@ -177,7 +177,7 @@ fun Kompetanse.tilIKompetanse(): IKompetanse {
         UtfyltKompetanse(
             id = this.id,
             behandlingId = this.behandlingId,
-            fom = this.fom!!,
+            fom = this.fom,
             tom = this.tom,
             barnAktører = this.barnAktører,
             søkersAktivitet = this.søkersAktivitet!!,
@@ -198,7 +198,7 @@ fun Kompetanse.tilIKompetanse(): IKompetanse {
 fun List<UtfyltKompetanse>.tilTidslinje() =
     this.map {
         Periode(
-            fraOgMed = it.fom.tilTidspunkt(),
+            fraOgMed = it.fom?.tilTidspunkt() ?: MånedTidspunkt.uendeligLengeSiden(),
             tilOgMed = it.tom?.tilTidspunkt() ?: MånedTidspunkt.uendeligLengeTil(),
             innhold = it
         )
