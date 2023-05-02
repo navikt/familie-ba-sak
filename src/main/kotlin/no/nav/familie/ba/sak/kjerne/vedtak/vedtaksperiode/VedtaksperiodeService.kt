@@ -57,6 +57,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilVedtaksbegrunnelseFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta.FeilutbetaltValutaRepository
+import no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs.RefusjonEøsRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeMedBegrunnelser.UtbetalingsperiodeMedBegrunnelserService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilUtvidetVedtaksperiodeMedBegrunnelser
@@ -89,7 +90,8 @@ class VedtaksperiodeService(
     private val brevmalService: BrevmalService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val vilkårsvurderingService: VilkårsvurderingService,
-    private val småbarnstilleggService: SmåbarnstilleggService
+    private val småbarnstilleggService: SmåbarnstilleggService,
+    private val refusjonEøsRepository: RefusjonEøsRepository
 ) {
     fun oppdaterVedtaksperiodeMedFritekster(
         vedtaksperiodeId: Long,
@@ -287,7 +289,7 @@ class VedtaksperiodeService(
             )
         } else {
             vedtaksperiodeHentOgPersisterService.lagre(
-                if (featureToggleService.isEnabled(FeatureToggleConfig.VEDTAKSPERIODE_NY)) {
+                if (false) {
                     finnVedtaksperioderForBehandling(vedtak.behandling.id)
                 } else {
                     genererVedtaksperioderMedBegrunnelserGammel(vedtak)
@@ -588,7 +590,7 @@ class VedtaksperiodeService(
         val andelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService
             .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.id)
 
-        return if (featureToggleService.isEnabled(BRUKE_TIDSLINJE_I_STEDET_FOR)) {
+        return if (false) {
             val alleOpphørsperioder = mapTilOpphørsperioder(
                 forrigePersonopplysningGrunnlag = forrigePersonopplysningGrunnlag,
                 forrigeAndelerTilkjentYtelse = forrigeAndelerMedEndringer,
@@ -731,6 +733,30 @@ class VedtaksperiodeService(
         return feilutbetaltValutaRepository.finnFeilutbetaltValutaForBehandling(vedtak.behandling.id).map {
             val (fom, tom) = it.fom.tilDagMånedÅr() to it.tom.tilDagMånedÅr()
             "$fra $fom til $tom er det utbetalt ${it.feilutbetaltBeløp} kroner for $mye."
+        }.toSet().takeIf { it.isNotEmpty() }
+    }
+
+    fun beskrivPerioderMedAvklartRefusjonEøs(vedtak: Vedtak): Set<String>? {
+        val målform = persongrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id)?.søker?.målform
+        val fra = mapOf(NB to "Fra", NN to "Frå").getOrDefault(målform, "Fra")
+
+        return refusjonEøsRepository.finnRefusjonEøsForBehandling(vedtak.behandling.id).filter { it.refusjonAvklart }.map {
+            val (fom, tom) = it.fom.tilDagMånedÅr() to it.tom.tilDagMånedÅr()
+            val land = it.land
+
+            "$fra $fom til $tom blir ikke etterbetalingen på ${it.refusjonsbeløp} utbetalt nå siden det er utbetalt barnetrygd i $land"
+        }.toSet().takeIf { it.isNotEmpty() }
+    }
+
+    fun beskrivPerioderMedUAvklartRefusjonEøs(vedtak: Vedtak): Set<String>? {
+        val målform = persongrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id)?.søker?.målform
+        val fra = mapOf(NB to "Fra", NN to "Frå").getOrDefault(målform, "Fra")
+
+        return refusjonEøsRepository.finnRefusjonEøsForBehandling(vedtak.behandling.id).filter { !it.refusjonAvklart }.map {
+            val (fom, tom) = it.fom.tilDagMånedÅr() to it.tom.tilDagMånedÅr()
+            val land = it.land
+
+            "$fra $fom til $tom blir ${it.refusjonsbeløp} kroner av etterbetalingen din utbetalt til myndighetene i $land."
         }.toSet().takeIf { it.isNotEmpty() }
     }
 

@@ -30,6 +30,8 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.KorreksjonVedtaksbrevData
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.KorrigertVedtakData
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.OpphørMedEndring
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Opphørt
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.RefusjonEøsAvklart
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.RefusjonEøsUavklart
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.SignaturVedtak
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VedtakEndring
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.VedtakFellesfelter
@@ -82,7 +84,13 @@ class BrevService(
             Brevmal.VEDTAK_FØRSTEGANGSVEDTAK -> Førstegangsvedtak(
                 vedtakFellesfelter = vedtakFellesfelter,
                 etterbetaling = hentEtterbetaling(vedtak),
-                informasjonOmAarligKontroll = vedtaksperiodeService.skalHaÅrligKontroll(vedtak)
+                informasjonOmAarligKontroll = vedtaksperiodeService.skalHaÅrligKontroll(vedtak),
+                refusjonEosAvklart = vedtaksperiodeService.beskrivPerioderMedAvklartRefusjonEøs(vedtak)?.let {
+                    RefusjonEøsAvklart(perioderAvklart = it)
+                },
+                refusjonEosUavklart = vedtaksperiodeService.beskrivPerioderMedUAvklartRefusjonEøs(vedtak)?.let {
+                    RefusjonEøsUavklart(perioderUavklart = it)
+                }
             )
 
             Brevmal.VEDTAK_FØRSTEGANGSVEDTAK_INSTITUSJON -> Førstegangsvedtak(

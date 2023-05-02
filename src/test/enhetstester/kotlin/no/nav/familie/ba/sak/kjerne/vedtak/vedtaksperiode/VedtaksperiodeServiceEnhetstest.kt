@@ -61,7 +61,8 @@ class VedtaksperiodeServiceEnhetstest {
         feilutbetaltValutaRepository = feilutbetaltValutaRepository,
         brevmalService = brevmalService,
         behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-        småbarnstilleggService = småbarnstilleggService
+        småbarnstilleggService = småbarnstilleggService,
+        refusjonEøsRepository = mockk()
     )
 
     private val person = lagPerson()
