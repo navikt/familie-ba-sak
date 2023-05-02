@@ -107,9 +107,9 @@ data class GrunnlagForVedtaksperioder(
             .kombinerMed(
                 this.tilVilkårResultaterForVedtaksPeriodeTidslinje(),
                 andelerTilkjentYtelse.filtrerPåAktør(person.aktør).tilAndelerForVedtaksPeriodeTidslinje()
-            ) { erVilkårsvurderingOppfylt, vilkårResultater, andeler ->
+            ) { personHarRettPåUtbetalingIPeriode, vilkårResultater, andeler ->
                 lagGrunnlagForVilkårOgAndel(
-                    erVilkårsvurderingOppfylt = erVilkårsvurderingOppfylt,
+                    personHarRettPåUtbetalingIPeriode = personHarRettPåUtbetalingIPeriode,
                     vilkårResultater = vilkårResultater,
                     person = person,
                     andeler = andeler
@@ -194,11 +194,11 @@ private fun Iterable<VilkårResultat>.filtrerErIkkeOrdinærtFor(person: Person):
 }
 
 private fun lagGrunnlagForVilkårOgAndel(
-    erVilkårsvurderingOppfylt: Boolean?,
+    personHarRettPåUtbetalingIPeriode: Boolean?,
     vilkårResultater: List<VilkårResultatForVedtaksperiode>?,
     person: Person,
     andeler: Iterable<AndelForVedtaksperiode>?
-) = if (erVilkårsvurderingOppfylt == true) {
+) = if (personHarRettPåUtbetalingIPeriode == true) {
     GrunnlagForPersonInnvilget(
         vilkårResultaterForVedtaksPeriode = vilkårResultater
             ?: error("vilkårResultatene burde alltid finnes om vi har rett"),
