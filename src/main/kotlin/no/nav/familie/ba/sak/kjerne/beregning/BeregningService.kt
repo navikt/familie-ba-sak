@@ -1,9 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForUtbetalingsoppdragFactory
-import no.nav.familie.ba.sak.integrasjoner.økonomi.pakkInnForUtbetaling
-import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -12,6 +9,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.SisteAndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
@@ -75,18 +73,8 @@ class BeregningService(
     fun hentOptionalTilkjentYtelseForBehandling(behandlingId: Long) =
         tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)
 
-    fun hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(fagsakId: Long): List<TilkjentYtelse> {
-        val avsluttedeBehandlingerSomIkkeErHenlagtPåFagsak = behandlingHentOgPersisterService.finnAvsluttedeBehandlingerPåFagsak(
-            fagsakId = fagsakId
-        ).filter { !it.erHenlagt() }
-
-        return avsluttedeBehandlingerSomIkkeErHenlagtPåFagsak.mapNotNull {
-            tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(
-                it.id
-            )?.takeIf { tilkjentYtelse ->
-                tilkjentYtelse.andelerTilkjentYtelse.any { aty -> aty.erAndelSomSkalSendesTilOppdrag() }
-            }
-        }
+    fun hentSisteOffsetPerIdent(fagsakId: Long): List<SisteAndelTilkjentYtelse> {
+        return andelTilkjentYtelseRepository.hentSisteAndelPerIdent(fagsakId)
     }
 
     /**
@@ -288,32 +276,6 @@ class BeregningService(
                 andelerTilkjentYtelse.any { aty -> aty.aktør == it }
             } ?: emptyList()
     }
-
-    fun hentSisteOffsetPerIdent(
-        fagsakId: Long,
-        andelTilkjentYtelseForUtbetalingsoppdragFactory: AndelTilkjentYtelseForUtbetalingsoppdragFactory
-    ): Map<String, Int> {
-        val alleAndelerTilkjentYtelserIverksattMotØkonomi =
-            hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(fagsakId)
-                .flatMap { it.andelerTilkjentYtelse }
-                .filter { it.erAndelSomSkalSendesTilOppdrag() }
-                .pakkInnForUtbetaling(andelTilkjentYtelseForUtbetalingsoppdragFactory)
-
-        val alleTideligereKjederIverksattMotØkonomi =
-            ØkonomiUtils.kjedeinndelteAndeler(alleAndelerTilkjentYtelserIverksattMotØkonomi)
-
-        return ØkonomiUtils.gjeldendeForrigeOffsetForKjede(alleTideligereKjederIverksattMotØkonomi)
-    }
-
-    fun hentSisteOffsetPåFagsak(behandling: Behandling): Int? =
-        behandlingHentOgPersisterService.hentBehandlingerSomErIverksatt(behandling = behandling)
-            .mapNotNull { iverksattBehandling ->
-                hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(iverksattBehandling.id)
-                    .takeIf { it.isNotEmpty() }
-                    ?.let { andelerTilkjentYtelse ->
-                        andelerTilkjentYtelse.maxByOrNull { it.periodeOffset!! }?.periodeOffset?.toInt()
-                    }
-            }.maxByOrNull { it }
 
     fun populerTilkjentYtelse(
         behandling: Behandling,

@@ -65,4 +65,33 @@ interface AndelTilkjentYtelseRepository : JpaRepository<AndelTilkjentYtelse, Lon
         fom: LocalDateTime,
         tom: LocalDateTime
     ): List<AndelTilkjentYtelsePeriode>
+
+    @Query(
+        """
+        WITH andeler AS (SELECT aty.*,
+                        row_number()
+                        OVER (PARTITION BY aty.type, aty.fk_aktoer_id ORDER BY aty.periode_offset DESC) rn
+                 FROM andel_tilkjent_ytelse aty
+                  JOIN tilkjent_ytelse ty ON ty.id = aty.tilkjent_ytelse_id
+                  JOIN Behandling b ON b.id = aty.fk_behandling_id
+                 WHERE b.fk_fagsak_id = :fagsakId
+                   AND ty.utbetalingsoppdrag IS NOT NULL
+                   AND aty.periode_offset IS NOT NULL)
+        SELECT id,
+               aty.type                 AS type,
+               p.foedselsnummer         AS ident,
+               aty.stonad_fom           AS fom,
+               aty.stonad_fom           AS tom,
+               periode_offset           AS periodeOffset,
+               forrige_periode_offset   AS forrigePeriodeOffset,
+               kilde_behandling_id      AS kildeBehandlingId
+        FROM andeler aty
+         JOIN aktoer a ON a.aktoer_id = aty.fk_aktoer_id
+         JOIN personident p ON aty.fk_aktoer_id = p.fk_aktoer_id
+        WHERE rn = 1
+          AND p.aktiv = TRUE
+    """,
+        nativeQuery = true
+    )
+    fun hentSisteAndelPerIdent(fagsakId: Long): List<SisteAndelTilkjentYtelse>
 }

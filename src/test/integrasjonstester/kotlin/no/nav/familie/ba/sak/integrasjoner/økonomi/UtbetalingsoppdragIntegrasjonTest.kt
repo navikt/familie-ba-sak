@@ -16,19 +16,23 @@ import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonInfo
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.kontrakter.felles.oppdrag.Opphør
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -1186,9 +1190,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             "Z123",
             AndelTilkjentYtelseForIverksettingFactory()
         )
-        førsteBehandling.status = BehandlingStatus.AVSLUTTET
-        førsteBehandling.leggTilBehandlingStegTilstand(StegType.BEHANDLING_AVSLUTTET)
-        behandlingHentOgPersisterService.lagreEllerOppdater(førsteBehandling, false)
+        avsluttOgLagreBehandling(førsteBehandling)
 
         val andreBehandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
             lagBehandling(
@@ -1290,6 +1292,213 @@ class UtbetalingsoppdragIntegrasjonTest(
         )
     }
 
+    @Test
+    fun `Skal hente siste andelene per ident og ytelsestype`() {
+        val søker = tilfeldigPerson()
+
+        val fagsak =
+            fagsakService.hentEllerOpprettFagsakForPersonIdent(søker.aktør.aktivFødselsnummer())
+        val førsteBehandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        val førsteVedtak = lagVedtak(behandling = førsteBehandling)
+
+        val førsteTilkjentYtelse = lagInitiellTilkjentYtelse(førsteBehandling)
+        val aktør = personidentService.hentOgLagreAktør(søker.aktør.aktivFødselsnummer(), true)
+        val førsteAndelerTilkjentYtelse = listOf(
+            lagAndelTilkjentYtelse(
+                årMnd("2019-04"),
+                årMnd("2023-03"),
+                YtelseType.SMÅBARNSTILLEGG,
+                1345,
+                førsteBehandling,
+                person = søker,
+                aktør = aktør,
+                tilkjentYtelse = førsteTilkjentYtelse
+            ),
+            lagAndelTilkjentYtelse(
+                årMnd("2019-04"),
+                årMnd("2023-03"),
+                YtelseType.UTVIDET_BARNETRYGD,
+                1054,
+                førsteBehandling,
+                person = søker,
+                aktør = aktør,
+                tilkjentYtelse = førsteTilkjentYtelse
+            )
+        )
+        førsteTilkjentYtelse.andelerTilkjentYtelse.addAll(førsteAndelerTilkjentYtelse)
+        førsteTilkjentYtelse.utbetalingsoppdrag = "utbetalingsoppdrg"
+        tilkjentYtelseRepository.saveAndFlush(førsteTilkjentYtelse)
+
+        økonomiService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+            førsteVedtak,
+            "Z123",
+            AndelTilkjentYtelseForIverksettingFactory()
+        )
+        avsluttOgLagreBehandling(førsteBehandling)
+
+        val andreBehandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
+            lagBehandling(fagsak, behandlingType = BehandlingType.REVURDERING)
+        )
+        val andreVedtak = lagVedtak(behandling = andreBehandling)
+
+        val andreTilkjentYtelse = lagInitiellTilkjentYtelse(andreBehandling)
+        val andreAndelerTilkjentYtelse = listOf(
+            lagAndelTilkjentYtelse(
+                årMnd("2019-04"),
+                årMnd("2023-03"),
+                YtelseType.SMÅBARNSTILLEGG,
+                1345,
+                andreBehandling,
+                person = søker,
+                aktør = aktør,
+                tilkjentYtelse = andreTilkjentYtelse
+            ),
+            lagAndelTilkjentYtelse(
+                årMnd("2023-04"),
+                årMnd("2024-03"),
+                YtelseType.SMÅBARNSTILLEGG,
+                1345,
+                andreBehandling,
+                person = søker,
+                aktør = aktør,
+                tilkjentYtelse = andreTilkjentYtelse
+            ),
+            lagAndelTilkjentYtelse(
+                årMnd("2019-04"),
+                årMnd("2023-03"),
+                YtelseType.UTVIDET_BARNETRYGD,
+                1054,
+                andreBehandling,
+                person = søker,
+                aktør = aktør,
+                tilkjentYtelse = andreTilkjentYtelse
+            ),
+            lagAndelTilkjentYtelse(
+                årMnd("2023-04"),
+                årMnd("2024-03"),
+                YtelseType.UTVIDET_BARNETRYGD,
+                1054,
+                andreBehandling,
+                person = søker,
+                aktør = aktør,
+                tilkjentYtelse = andreTilkjentYtelse
+            )
+
+        )
+        andreTilkjentYtelse.andelerTilkjentYtelse.addAll(andreAndelerTilkjentYtelse)
+        tilkjentYtelseRepository.saveAndFlush(andreTilkjentYtelse)
+
+        val utbetalingsoppdrag = økonomiService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+            andreVedtak,
+            "Z123",
+            AndelTilkjentYtelseForIverksettingFactory()
+        )
+        assertThat(utbetalingsoppdrag.kodeEndring).isEqualTo(Utbetalingsoppdrag.KodeEndring.ENDR)
+        assertThat(utbetalingsoppdrag.utbetalingsperiode).hasSize(2)
+        assertThat(utbetalingsoppdrag.utbetalingsperiode.map { it.erEndringPåEksisterendePeriode }).containsOnly(false)
+        with(utbetalingsoppdrag.utbetalingsperiode[0]) {
+            assertThat(periodeId).isEqualTo(2)
+            assertThat(forrigePeriodeId).isEqualTo(0)
+            assertThat(sats.toInt()).isEqualTo(1345)
+        }
+        with(utbetalingsoppdrag.utbetalingsperiode[1]) {
+            assertThat(periodeId).isEqualTo(3)
+            assertThat(forrigePeriodeId).isEqualTo(1)
+            assertThat(sats.toInt()).isEqualTo(1054)
+        }
+    }
+
+    @Test
+    fun `skal alltid peke til siste andelen i kjeden ved opphør, selv opphør etter opphør`() {
+        val søker = tilfeldigPerson()
+        val fom = årMnd("2019-04")
+        val tom = årMnd("2019-05")
+        val fom2 = årMnd("2019-06")
+        val tom2 = årMnd("2020-05")
+        val fagsak =
+            fagsakService.hentEllerOpprettFagsakForPersonIdent(søker.aktør.aktivFødselsnummer())
+        val førsteBehandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+
+        val aktør = personidentService.hentOgLagreAktør(søker.aktør.aktivFødselsnummer(), true)
+        fun lagAndel(tilkjentYtelse: TilkjentYtelse, fom: YearMonth, tom: YearMonth): AndelTilkjentYtelse =
+            lagAndelTilkjentYtelse(
+                fom,
+                tom,
+                YtelseType.SMÅBARNSTILLEGG,
+                1345,
+                tilkjentYtelse.behandling,
+                person = søker,
+                aktør = aktør,
+                tilkjentYtelse = tilkjentYtelse
+            )
+
+        fun assertHarKunOpphør(utbetalingsoppdrag: Utbetalingsoppdrag, opphørFom: YearMonth) {
+            assertThat(utbetalingsoppdrag.kodeEndring).isEqualTo(Utbetalingsoppdrag.KodeEndring.ENDR)
+            assertThat(utbetalingsoppdrag.utbetalingsperiode).hasSize(1)
+            with(utbetalingsoppdrag.utbetalingsperiode[0]) {
+                assertThat(erEndringPåEksisterendePeriode).isTrue()
+                assertThat(opphør!!.opphørDatoFom).isEqualTo(opphørFom.atDay(1))
+                assertThat(periodeId).isEqualTo(1L)
+                assertThat(forrigePeriodeId).isEqualTo(0L)
+                assertThat(vedtakdatoFom).isEqualTo(fom2.atDay(1))
+                assertThat(vedtakdatoTom).isEqualTo(tom2.atEndOfMonth())
+                assertThat(sats.toInt()).isEqualTo(1345)
+            }
+        }
+
+        with(lagInitiellTilkjentYtelse(førsteBehandling, utbetalingsoppdrag = "utbetalingsoppdrag")) {
+            val andeler = listOf(
+                lagAndel(this, fom = fom, tom = tom),
+                lagAndel(this, fom = fom2, tom = tom2)
+            )
+            andelerTilkjentYtelse.addAll(andeler)
+            tilkjentYtelseRepository.saveAndFlush(this)
+        }
+
+        genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(lagVedtak(behandling = førsteBehandling))
+        avsluttOgLagreBehandling(førsteBehandling)
+
+        val andreBehandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
+            lagBehandling(fagsak, behandlingType = BehandlingType.REVURDERING)
+        )
+
+        with(lagInitiellTilkjentYtelse(andreBehandling, utbetalingsoppdrag = "utbetalingsoppdrag")) {
+            andelerTilkjentYtelse.add(lagAndel(this, fom = fom, tom = tom))
+            tilkjentYtelseRepository.saveAndFlush(this)
+        }
+
+        assertHarKunOpphør(
+            genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(lagVedtak(behandling = andreBehandling)),
+            fom2
+        )
+
+        avsluttOgLagreBehandling(andreBehandling)
+        val tredjeBehandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
+            lagBehandling(fagsak, behandlingType = BehandlingType.REVURDERING)
+        )
+        with(lagInitiellTilkjentYtelse(tredjeBehandling, utbetalingsoppdrag = "utbetalingsoppdrag")) {
+            tilkjentYtelseRepository.saveAndFlush(this)
+        }
+        assertHarKunOpphør(
+            genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(lagVedtak(behandling = tredjeBehandling)),
+            fom
+        )
+    }
+
+    private fun genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(vedtak: Vedtak): Utbetalingsoppdrag {
+        return økonomiService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+            vedtak,
+            "Z123",
+            AndelTilkjentYtelseForIverksettingFactory()
+        )
+    }
+
+    private fun avsluttOgLagreBehandling(behandling: Behandling) {
+        behandling.status = BehandlingStatus.AVSLUTTET
+        behandling.leggTilBehandlingStegTilstand(StegType.BEHANDLING_AVSLUTTET)
+        behandlingHentOgPersisterService.lagreEllerOppdater(behandling, false)
+    }
+
     private fun assertUtbetalingsperiode(
         utbetalingsperiode: Utbetalingsperiode,
         periodeId: Long,
@@ -1299,7 +1508,6 @@ class UtbetalingsoppdragIntegrasjonTest(
         fom: String,
         tom: String,
         opphørFom: LocalDate? = null
-
     ) {
         assertEquals(periodeId, utbetalingsperiode.periodeId)
         assertEquals(forrigePeriodeId, utbetalingsperiode.forrigePeriodeId)

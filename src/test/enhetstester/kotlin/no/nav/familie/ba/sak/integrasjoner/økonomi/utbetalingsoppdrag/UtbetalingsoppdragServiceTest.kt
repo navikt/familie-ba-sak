@@ -35,7 +35,7 @@ internal class UtbetalingsoppdragServiceTest {
     }
     val beregningService = mockk<BeregningService> {
         every { hentTilkjentYtelseForBehandling(any()) } returns mockk()
-        every { hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(any()) } returns mockk()
+        every { hentSisteOffsetPerIdent(any()) } returns mockk()
         every { lagreTilkjentYtelseMedOppdaterteAndeler(any()) } returns mockk()
         every { populerTilkjentYtelse(any(), any()) } returns mockk()
     }

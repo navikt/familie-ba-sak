@@ -103,17 +103,13 @@ class UtbetalingsoppdragService(
         val endretMigreringsdato =
             beregnOmMigreringsDatoErEndret(behandling, forrigeAndeler?.minByOrNull { it.stønadFom }?.stønadFom)
 
-        val sisteOffsetPerIdent = beregningService.hentSisteOffsetPerIdent(
-            behandling.fagsak.id,
-            andelTilkjentYtelseForUtbetalingsoppdragFactory
-        )
         val sisteOffsetPåFagsak = beregningService.hentSisteOffsetPåFagsak(behandling)
 
         val vedtakMedTilkjentYtelse = VedtakMedTilkjentYtelse(
             tilkjentYtelse = tilkjentYtelse,
             vedtak = vedtak,
             saksbehandlerId = saksbehandlerId,
-            sisteOffsetPerIdent = sisteOffsetPerIdent,
+            sisteOffsetPerIdent = emptyMap(),
             sisteOffsetPåFagsak = sisteOffsetPåFagsak,
             erSimulering = erSimulering,
             endretMigreringsdato = endretMigreringsdato
