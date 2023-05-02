@@ -162,7 +162,7 @@ private fun utledGrunnlagTidslinjePerPerson(
     ).map { vilkårResultater ->
         vilkårResultater?.filter {
             Vilkår.hentObligatoriskeVilkårFor(søker.type).contains(it.vilkårType)
-        }
+        }?.takeIf { it.isNotEmpty() }
     }
 
     val utfylteEndredeUtbetalinger = endredeUtbetalinger
@@ -317,7 +317,7 @@ private fun PersonResultat.hentForskjøvedeVilkårResultaterForPersonsAndelerTid
         PersonType.SØKER -> forskjøvedeVilkårResultaterKunForPerson.map { vilkårResultater ->
             vilkårResultater?.filterNot {
                 Vilkår.hentObligatoriskeVilkårFor(person.type).contains(it.vilkårType)
-            }
+            }?.takeIf { it.isNotEmpty() }
         }.beskjærEtter(erObligatoriskeVilkårOppfyltForMinstEttBarnTidslinje)
 
         PersonType.BARN -> forskjøvedeVilkårResultaterKunForPerson.kombinerMed(
