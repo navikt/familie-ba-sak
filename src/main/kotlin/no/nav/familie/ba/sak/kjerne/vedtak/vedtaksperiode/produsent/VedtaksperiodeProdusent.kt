@@ -193,9 +193,7 @@ private fun utledGrunnlagTidslinjePerPerson(
                     .filter { endretUtbetaling -> endretUtbetaling.person.aktør == personResultat.aktør },
                 andelerTilkjentYtelse = andelerTilkjentYtelse.filter { andelTilkjentYtelse -> andelTilkjentYtelse.aktør == personResultat.aktør },
                 perioderOvergangsstønad = perioderOvergangsstønad.filter { it.personIdent == person.aktør.aktivFødselsnummer() }
-            ).perioder()
-                .dropWhile { it.innhold !is GrunnlagForPersonInnvilget }
-                .tilTidslinje()
+            )
         }
 
     return grunnlagForPersonTidslinjer
@@ -283,7 +281,11 @@ private fun Tidslinje<List<VilkårResultat>, Måned>.tilGrunnlagForPersonTidslin
             lagGrunnlagMedOvergangsstønad(grunnlagForPerson, overgangsstønad)
         }.filtrerIkkeNull()
 
-    return grunnlagTidslinje.slåSammenLike()
+    return grunnlagTidslinje
+        .slåSammenLike()
+        .perioder()
+        .dropWhile { it.innhold !is GrunnlagForPersonInnvilget }
+        .tilTidslinje()
 }
 
 // TODO: Kan dette erstattes ved å se på hvorvidt det er andeler eller ikke i stedet?
@@ -319,7 +321,7 @@ private fun PersonResultat.hentForskjøvedeVilkårResultaterForPersonsAndelerTid
     ordinæreVilkårForSøkerTidslinje: Tidslinje<List<VilkårResultat>, Måned>
 ): Tidslinje<List<VilkårResultat>, Måned> {
     val forskjøvedeVilkårResultaterForPerson =
-        vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår().kombiner { it }
+        this.vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår().kombiner { it }
 
     return when (person.type) {
         PersonType.SØKER -> forskjøvedeVilkårResultaterForPerson.map { vilkårResultater ->
