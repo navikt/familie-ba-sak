@@ -17,6 +17,24 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 
 typealias AktørId = String
 
+fun genererVedtaksperioder(
+    grunnlagForVedtakPerioder: GrunnlagForVedtaksperioder,
+    grunnlagForVedtakPerioderForrigeBehandling: GrunnlagForVedtaksperioder?,
+    vedtak: Vedtak
+): List<VedtaksperiodeMedBegrunnelser> {
+    val grunnlagTidslinjePerPerson = grunnlagForVedtakPerioder.utledGrunnlagTidslinjePerPerson()
+
+    val grunnlagTidslinjePerPersonForrigeBehandling =
+        grunnlagForVedtakPerioderForrigeBehandling
+            ?.let { grunnlagForVedtakPerioderForrigeBehandling.utledGrunnlagTidslinjePerPerson() }
+            ?: emptyMap()
+
+    val perioderSomSkalBegrunnesBasertPåDenneOgForrigeBehandling =
+        finnPerioderSomSkalBegrunnes(grunnlagTidslinjePerPerson, grunnlagTidslinjePerPersonForrigeBehandling)
+
+    return perioderSomSkalBegrunnesBasertPåDenneOgForrigeBehandling.map { it.tilVedtaksperiodeMedBegrunnelser(vedtak) }
+}
+
 /**
  * Vi ønsker å ha en kombinert tidslinje med alle innvilgede perioder og ikke-innvilgede som sammenfaller på dato.
  *
@@ -83,24 +101,6 @@ private fun kombinerGjeldendeOgForrigeGrunnlag(
             }
         }.slåSammenLike()
     }
-
-fun genererVedtaksperioder(
-    grunnlagForVedtakPerioder: GrunnlagForVedtaksperioder,
-    grunnlagForVedtakPerioderForrigeBehandling: GrunnlagForVedtaksperioder?,
-    vedtak: Vedtak
-): List<VedtaksperiodeMedBegrunnelser> {
-    val grunnlagTidslinjePerPerson = grunnlagForVedtakPerioder.utledGrunnlagTidslinjePerPerson()
-
-    val grunnlagTidslinjePerPersonForrigeBehandling =
-        grunnlagForVedtakPerioderForrigeBehandling
-            ?.let { grunnlagForVedtakPerioderForrigeBehandling.utledGrunnlagTidslinjePerPerson() }
-            ?: emptyMap()
-
-    val perioderSomSkalBegrunnesBasertPåDenneOgForrigeBehandling =
-        finnPerioderSomSkalBegrunnes(grunnlagTidslinjePerPerson, grunnlagTidslinjePerPersonForrigeBehandling)
-
-    return perioderSomSkalBegrunnesBasertPåDenneOgForrigeBehandling.map { it.tilVedtaksperiodeMedBegrunnelser(vedtak) }
-}
 
 fun Periode<List<GrunnlagForGjeldendeOgForrigeBehandling?>, Måned>.tilVedtaksperiodeMedBegrunnelser(
     vedtak: Vedtak
