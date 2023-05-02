@@ -182,7 +182,7 @@ fun Kompetanse.tilIKompetanse(): IKompetanse {
             barnAktører = this.barnAktører,
             søkersAktivitet = this.søkersAktivitet!!,
             annenForeldersAktivitet = this.annenForeldersAktivitet!!,
-            annenForeldersAktivitetsland = this.annenForeldersAktivitetsland!!,
+            annenForeldersAktivitetsland = this.annenForeldersAktivitetsland,
             søkersAktivitetsland = this.søkersAktivitetsland!!,
             barnetsBostedsland = this.barnetsBostedsland!!,
             resultat = this.resultat!!
