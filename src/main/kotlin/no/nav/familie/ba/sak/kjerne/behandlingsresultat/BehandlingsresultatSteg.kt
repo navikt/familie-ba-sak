@@ -50,6 +50,8 @@ class BehandlingsresultatSteg(
     override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
         if (behandling.skalBehandlesAutomatisk) return
 
+        validerBehandlingsresultatErGyldigForFagsaktype(behandling)
+
         if (behandling.type != BehandlingType.TEKNISK_ENDRING && behandling.type != BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT) {
             val vilkårsvurdering = vilkårService.hentVilkårsvurderingThrows(behandlingId = behandling.id)
             val barna = persongrunnlagService.hentBarna(behandling)
@@ -83,8 +85,6 @@ class BehandlingsresultatSteg(
             endreteUtbetalingerMedAndeler.map { it.endretUtbetalingAndel },
             vilkårService.hentVilkårsvurdering(behandling.id)
         )
-
-        validerBehandlingsresultatErGyldigForFagsaktype(behandling)
 
         if (behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO) {
             validerIngenEndringIUtbetalingEtterMigreringsdatoenTilForrigeIverksatteBehandling(behandling)

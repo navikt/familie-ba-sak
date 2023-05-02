@@ -8,10 +8,12 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
@@ -161,6 +163,27 @@ class BehandlingsresultatStegTest {
         assertDoesNotThrow {
             endringTidslinje.kastFeilVedEndringEtter(treMånederEtterStartdato, lagBehandling())
         }
+    }
+
+    @Test
+    fun `skal kaste feil om behandlingstema er utvidet for fagsaktype enslig mindreårig`() {
+
+        val ensligMindreårigBehandling = behandling.copy(
+            resultat = Behandlingsresultat.INNVILGET,
+            fagsak = behandling.fagsak.copy(type = FagsakType.BARN_ENSLIG_MINDREÅRIG),
+            underkategori = BehandlingUnderkategori.UTVIDET,
+            type = BehandlingType.FØRSTEGANGSBEHANDLING
+        )
+
+        val exception = assertThrows<RuntimeException> {
+            behandlingsresultatSteg.preValiderSteg(
+                ensligMindreårigBehandling
+            )
+        }
+        assertEquals(
+            "Utvidet barnetrygd for enslig mindreårig er ikke støttet ennå.",
+            exception.message
+        )
     }
 
     fun String.tilBoolskTidslinje(startdato: YearMonth): Tidslinje<Boolean, Måned> {
