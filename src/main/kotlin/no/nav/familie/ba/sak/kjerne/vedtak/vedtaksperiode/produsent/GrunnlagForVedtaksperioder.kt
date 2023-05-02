@@ -37,6 +37,8 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 
+typealias AktørId = String
+
 data class GrunnlagForVedtaksperioder(
     val persongrunnlag: PersonopplysningGrunnlag,
     val personResultater: Set<PersonResultat>,

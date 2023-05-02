@@ -15,8 +15,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 
-typealias AktørId = String
-
 fun genererVedtaksperioder(
     grunnlagForVedtakPerioder: GrunnlagForVedtaksperioder,
     grunnlagForVedtakPerioderForrigeBehandling: GrunnlagForVedtaksperioder?,
