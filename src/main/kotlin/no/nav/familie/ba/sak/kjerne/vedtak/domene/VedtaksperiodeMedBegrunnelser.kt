@@ -94,6 +94,10 @@ data class VedtaksperiodeMedBegrunnelser(
 
 ) : BaseEntitet() {
 
+    override fun toString(): String {
+        return "fom=$fom, tom=$tom, type=$type, begrunnelser=$begrunnelser, eøsBegrunnelser=$eøsBegrunnelser, fritekster=$fritekster"
+    }
+
     fun settBegrunnelser(nyeBegrunnelser: List<Vedtaksbegrunnelse>) {
         begrunnelser.clear()
         begrunnelser.addAll(nyeBegrunnelser)
@@ -153,6 +157,8 @@ data class VedtaksperiodeMedBegrunnelser(
                 localDateSegment.tom.isSameOrAfter(this.tom ?: TIDENES_ENDE)
         }
         ?: throw Feil("Finner ikke segment for vedtaksperiode (${this.fom}, ${this.tom}) blant segmenter ${andelerTilkjentYtelse.utledSegmenter()}")
+
+
 }
 
 fun List<VedtaksperiodeMedBegrunnelser>.erAlleredeBegrunnetMedBegrunnelse(

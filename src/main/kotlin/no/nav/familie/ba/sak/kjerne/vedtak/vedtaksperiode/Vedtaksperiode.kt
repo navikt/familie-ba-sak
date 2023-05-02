@@ -18,6 +18,7 @@ interface Vedtaksperiode {
     val periodeFom: LocalDate?
     val periodeTom: LocalDate?
     val vedtaksperiodetype: Vedtaksperiodetype
+
 }
 
 enum class Vedtaksperiodetype(val tillatteBegrunnelsestyper: List<VedtakBegrunnelseType>) {

@@ -20,7 +20,11 @@ import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEntitet
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerSenereEnn
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.somUendeligLengeTil
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.YearMonth
@@ -161,7 +165,7 @@ data class UtfyltKompetanse(
     override val id: Long,
     override val behandlingId: Long,
     val fom: YearMonth,
-    val tom: YearMonth,
+    val tom: YearMonth?,
     val barnAktører: Set<Aktør>,
     val søkersAktivitet: SøkersAktivitet,
     val annenForeldersAktivitet: AnnenForeldersAktivitet,
@@ -177,7 +181,7 @@ fun Kompetanse.tilIKompetanse(): IKompetanse {
             id = this.id,
             behandlingId = this.behandlingId,
             fom = this.fom!!,
-            tom = this.tom!!,
+            tom = this.tom,
             barnAktører = this.barnAktører,
             søkersAktivitet = this.søkersAktivitet!!,
             annenForeldersAktivitet = this.annenForeldersAktivitet!!,
@@ -198,7 +202,7 @@ fun List<UtfyltKompetanse>.tilTidslinje() =
     this.map {
         Periode(
             fraOgMed = it.fom.tilTidspunkt(),
-            tilOgMed = it.tom.tilTidspunkt(),
+            tilOgMed = it.tom?.tilTidspunkt() ?: MånedTidspunkt.uendeligLengeTil(),
             innhold = it
         )
     }.tilTidslinje()
