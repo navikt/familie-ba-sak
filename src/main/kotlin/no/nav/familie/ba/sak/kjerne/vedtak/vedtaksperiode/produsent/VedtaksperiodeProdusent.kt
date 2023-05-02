@@ -311,25 +311,27 @@ private fun PersonResultat.hentForskjøvedeVilkårResultaterForPersonsAndelerTid
     erObligatoriskeVilkårOppfyltForMinstEttBarnTidslinje: Tidslinje<Boolean, Måned>,
     obligatoriskeVilkårForSøkerTidslinje: Tidslinje<List<VilkårResultat>, Måned>
 ): Tidslinje<List<VilkårResultat>, Måned> {
-    val forskjøvedeVilkårResultaterKunForPerson =
+    val forskjøvedeVilkårResultaterForPerson =
         vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår().kombiner { it }
-    val forskjøvedeVilkårResultater: Tidslinje<List<VilkårResultat>, Måned> = when (person.type) {
-        PersonType.SØKER -> forskjøvedeVilkårResultaterKunForPerson.map { vilkårResultater ->
-            vilkårResultater?.filterNot {
-                Vilkår.hentObligatoriskeVilkårFor(person.type).contains(it.vilkårType)
-            }?.takeIf { it.isNotEmpty() }
+
+    return when (person.type) {
+        PersonType.SØKER -> forskjøvedeVilkårResultaterForPerson.map { vilkårResultater ->
+            vilkårResultater.filtrerErIkkeObligatoriskFor(person)
         }.beskjærEtter(erObligatoriskeVilkårOppfyltForMinstEttBarnTidslinje)
 
-        PersonType.BARN -> forskjøvedeVilkårResultaterKunForPerson.kombinerMed(
-            obligatoriskeVilkårForSøkerTidslinje.beskjærEtter(forskjøvedeVilkårResultaterKunForPerson)
+        PersonType.BARN -> forskjøvedeVilkårResultaterForPerson.kombinerMed(
+            obligatoriskeVilkårForSøkerTidslinje.beskjærEtter(forskjøvedeVilkårResultaterForPerson)
         ) { vilkårResultaterBarn, vilkårResultaterSøker ->
             slåSammenHvisMulig(vilkårResultaterBarn, vilkårResultaterSøker)?.toList()
         }
 
         PersonType.ANNENPART -> throw Feil("Ikke implementert for annenpart")
     }
-    return forskjøvedeVilkårResultater
 }
+
+private fun Iterable<VilkårResultat>?.filtrerErIkkeObligatoriskFor(person: Person) = this?.filterNot {
+    Vilkår.hentObligatoriskeVilkårFor(person.type).contains(it.vilkårType)
+}?.takeIf { it.isNotEmpty() }
 
 private fun slåSammenHvisMulig(
     venstre: Iterable<VilkårResultat>?,
