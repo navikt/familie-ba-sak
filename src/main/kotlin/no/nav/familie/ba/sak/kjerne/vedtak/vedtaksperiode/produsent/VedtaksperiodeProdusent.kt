@@ -159,10 +159,8 @@ private fun utledGrunnlagTidslinjePerPerson(
     val ordinæreVilkårForSøkerForskjøvetTidslinje = søkerPersonResultater.tilTidslinjeForSplittForPerson(
         personType = søker.type,
         fagsakType = fagsakType
-    ).map { vilkårResultater ->
-        vilkårResultater?.filter {
-            Vilkår.hentOrdinæreVilkårFor(søker.type).contains(it.vilkårType)
-        }?.takeIf { it.isNotEmpty() }
+    ).map {
+        it?.filtrerVilkårErOrdinærtFor(søker)
     }
 
     val utfylteEndredeUtbetalinger = endredeUtbetalinger
@@ -201,6 +199,16 @@ private fun utledGrunnlagTidslinjePerPerson(
         }
 
     return grunnlagForPersonTidslinjer
+}
+
+private fun List<VilkårResultat>.filtrerVilkårErOrdinærtFor(
+    søker: Person
+): List<VilkårResultat>? {
+    val ordinæreVilkårForSøker = Vilkår.hentOrdinæreVilkårFor(søker.type)
+
+    return this
+        .filter { ordinæreVilkårForSøker.contains(it.vilkårType) }
+        .takeIf { it.isNotEmpty() }
 }
 
 // TODO: hva gjør vi hvis søker er et barn?
@@ -316,7 +324,7 @@ private fun PersonResultat.hentForskjøvedeVilkårResultaterForPersonsAndelerTid
 
     return when (person.type) {
         PersonType.SØKER -> forskjøvedeVilkårResultaterForPerson.map { vilkårResultater ->
-            vilkårResultater.filtrerErIkkeOrdinærtFor(person)
+            vilkårResultater?.filtrerErIkkeOrdinærtFor(person)
         }.beskjærEtter(erOrdinæreVilkårOppfyltForMinstEttBarnTidslinje)
 
         PersonType.BARN -> forskjøvedeVilkårResultaterForPerson.kombinerMed(
@@ -329,9 +337,13 @@ private fun PersonResultat.hentForskjøvedeVilkårResultaterForPersonsAndelerTid
     }
 }
 
-private fun Iterable<VilkårResultat>?.filtrerErIkkeOrdinærtFor(person: Person) = this?.filterNot {
-    Vilkår.hentOrdinæreVilkårFor(person.type).contains(it.vilkårType)
-}?.takeIf { it.isNotEmpty() }
+private fun Iterable<VilkårResultat>.filtrerErIkkeOrdinærtFor(person: Person): List<VilkårResultat>? {
+    val ordinæreVilkårForPerson = Vilkår.hentOrdinæreVilkårFor(person.type)
+
+    return this
+        .filterNot { ordinæreVilkårForPerson.contains(it.vilkårType) }
+        .takeIf { it.isNotEmpty() }
+}
 
 private fun slåSammenHvisMulig(
     venstre: Iterable<VilkårResultat>?,
