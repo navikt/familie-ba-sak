@@ -103,12 +103,13 @@ data class Kompetanse(
         }
     }
 
-    fun erObligatoriskeFelterSatt() = søkersAktivitet != null &&
-        annenForeldersAktivitet != null &&
-        søkersAktivitetsland != null &&
-        barnetsBostedsland != null &&
-        resultat != null &&
-        barnAktører.isNotEmpty()
+    fun erObligatoriskeFelterSatt() = fom != null &&
+        this.søkersAktivitet != null &&
+        this.annenForeldersAktivitet != null &&
+        this.søkersAktivitetsland != null &&
+        this.barnetsBostedsland != null &&
+        this.resultat != null &&
+        this.barnAktører.isNotEmpty()
 
     companion object {
         val NULL = Kompetanse(null, null, emptySet())
@@ -161,12 +162,12 @@ data class TomKompetanse(
 data class UtfyltKompetanse(
     override val id: Long,
     override val behandlingId: Long,
-    val fom: YearMonth?,
+    val fom: YearMonth,
     val tom: YearMonth?,
     val barnAktører: Set<Aktør>,
     val søkersAktivitet: SøkersAktivitet,
     val annenForeldersAktivitet: AnnenForeldersAktivitet,
-    val annenForeldersAktivitetsland: String,
+    val annenForeldersAktivitetsland: String?,
     val søkersAktivitetsland: String,
     val barnetsBostedsland: String,
     val resultat: KompetanseResultat
@@ -177,7 +178,7 @@ fun Kompetanse.tilIKompetanse(): IKompetanse {
         UtfyltKompetanse(
             id = this.id,
             behandlingId = this.behandlingId,
-            fom = this.fom,
+            fom = this.fom!!,
             tom = this.tom,
             barnAktører = this.barnAktører,
             søkersAktivitet = this.søkersAktivitet!!,
@@ -198,7 +199,7 @@ fun Kompetanse.tilIKompetanse(): IKompetanse {
 fun List<UtfyltKompetanse>.tilTidslinje() =
     this.map {
         Periode(
-            fraOgMed = it.fom?.tilTidspunkt() ?: MånedTidspunkt.uendeligLengeSiden(),
+            fraOgMed = it.fom.tilTidspunkt(),
             tilOgMed = it.tom?.tilTidspunkt() ?: MånedTidspunkt.uendeligLengeTil(),
             innhold = it
         )
