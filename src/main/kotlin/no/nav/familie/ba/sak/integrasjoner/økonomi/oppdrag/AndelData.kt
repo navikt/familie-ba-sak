@@ -64,3 +64,10 @@ data class IdentOgType(
     val ident: String,
     val type: YtelseType
 )
+
+data class ResultatForKjede(
+    val beståendeAndeler: List<AndelData>,
+    val nyeAndeler: List<AndelData>,
+    val opphørsandel: Pair<AndelData, YearMonth>?,
+    val sisteOffset: Long,
+)

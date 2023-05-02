@@ -1,7 +1,8 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi.oppdrag
 
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsperiodeMal
-import no.nav.familie.ba.sak.integrasjoner.økonomi.oppdrag.BeståendeAndelerBeregner.finnBeståendeAndeler
+import no.nav.familie.ba.sak.integrasjoner.økonomi.oppdrag.Bestående2.beregnNyeKjeder
+import no.nav.familie.ba.sak.integrasjoner.økonomi.oppdrag.BeståendeAndelerBeregner.erLik
 import no.nav.familie.ba.sak.integrasjoner.økonomi.oppdrag.OppdragBeregnerUtil.validerAndeler
 import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
@@ -9,7 +10,7 @@ import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag.KodeEndring
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import java.time.YearMonth
 
-object NyUtbetalingsoppdragGenerator {
+object NyUtbetalingsoppdragGenerator2 {
 
     fun lagUtbetalingsoppdrag(
         behandlingsinformasjon: Behandlingsinformasjon,
@@ -72,7 +73,7 @@ object NyUtbetalingsoppdragGenerator {
             val nyeAndeler = nyeKjeder[identOgType] ?: emptyList()
             val sisteAndel = sisteAndelPerKjede[identOgType]
             // TODO må nog sende med endretMigreringsDato/erSimulering? her og
-            val nyKjede = beregnNyKjede(forrigeAndeler, nyeAndeler, sisteAndel, sisteOffset)
+            val nyKjede = beregnNyeKjeder(forrigeAndeler, nyeAndeler, sisteAndel, sisteOffset)
             sisteOffset = nyKjede.sisteOffset
             nyKjede
         }
@@ -102,36 +103,6 @@ object NyUtbetalingsoppdragGenerator {
     private fun kodeEndring(forrigeAndeler: List<AndelData>?) =
         if (forrigeAndeler == null) KodeEndring.NY else KodeEndring.ENDR
 
-    private fun beregnNyKjede(
-        forrige: List<AndelData>,
-        nye: List<AndelData>,
-        sisteAndel: AndelData?,
-        offset: Long?,
-    ): ResultatForKjede {
-        val beståendeAndeler = finnBeståendeAndeler(forrige, nye)
-        val nyeAndeler = nye.subList(beståendeAndeler.andeler.size, nye.size)
-        var gjeldendeOffset = offset ?: -1
-        var forrigeOffset = sisteAndel?.offset
-        val nyeAndelerMedOffset = nyeAndeler.mapIndexed { index, andelData ->
-            gjeldendeOffset += 1
-            val nyAndel = andelData.copy(offset = gjeldendeOffset, forrigeOffset = forrigeOffset)
-            forrigeOffset = gjeldendeOffset
-            nyAndel
-        }
-        // TODO på en eller annen måte verifisere at offset har blitt satt?
-        if (gjeldendeOffset < 0) {
-            // gjeldendeOffset =
-        }
-        return ResultatForKjede(
-            beståendeAndeler = beståendeAndeler.andeler,
-            nyeAndeler = nyeAndelerMedOffset,
-            opphørsandel = beståendeAndeler.opphørFra?.let {
-                Pair(sisteAndel ?: error("Må ha siste andel for å kunne opphøre"), it)
-            },
-            sisteOffset = gjeldendeOffset,
-        )
-    }
-
     private fun List<AndelData>.groupByIdentOgType(): Map<IdentOgType, List<AndelData>> =
         groupBy { IdentOgType(it.ident, it.type) }
 
@@ -158,4 +129,87 @@ object NyUtbetalingsoppdragGenerator {
         )
         return andeler.map { utbetalingsperiodeMal.lagPeriodeFraAndel(it) }
     }
+}
+
+object Bestående2 {
+
+    fun beregnNyeKjeder(
+        forrige: List<AndelData>,
+        nye: List<AndelData>,
+        sisteAndel: AndelData?,
+        offset: Long?,
+    ): ResultatForKjede {
+        var gjeldendeOffset = offset
+        var forrigeOffset = sisteAndel?.offset
+        val (bestående, opphørsdato) = beregnNyeKjeder(forrige, nye)
+        val fraIndex = bestående.size
+        val nyKjede = nye.subList(fraIndex, nye.size).mapIndexed { index, andelData ->
+            gjeldendeOffset = (gjeldendeOffset ?: -1) + 1
+            val nyAndel = andelData.copy(offset = gjeldendeOffset, forrigeOffset = forrigeOffset)
+            forrigeOffset = gjeldendeOffset
+            nyAndel
+        }
+        return ResultatForKjede(
+            bestående,
+            nyKjede,
+            getOpphørsandel(opphørsdato, sisteAndel),
+            gjeldendeOffset ?: error("Mangler offset"),
+        )
+    }
+
+    private fun getOpphørsandel(
+        opphørsdato: YearMonth?,
+        sisteAndel: AndelData?,
+    ): Pair<AndelData, YearMonth>? {
+        return opphørsdato?.let { Pair(sisteAndel ?: error("Kan ikke opphøre når det ikke finnes en siste andel"), it) }
+    }
+
+    fun beregnNyeKjeder(
+        forrige: List<AndelData>,
+        nye: List<AndelData>,
+    ): Pair<List<AndelData>, YearMonth?> {
+        val beståendeAndeler = mutableListOf<AndelData>()
+        var opphørsdato: YearMonth? = null
+        for (index in 0 until forrige.size) {
+            val forrige = forrige[index]
+            val ny = if (nye.size > index) nye[index] else null
+            val nyNeste = if (nye.size > index + 1) nye[index + 1] else null
+
+            if (ny != null && forrige.erLik(ny)) {
+                beståendeAndeler.add(ny.medOffsetOgKildebehandlingFra(forrige))
+                continue
+            }
+
+            if (ny == null || forrige.fom < ny.fom) {
+                opphørsdato = forrige.fom
+            } else if (forrige.fom > ny.fom || forrige.beløp != ny.beløp) {
+                // Ny andel skriver over
+            } else if (forrige.tom > ny.tom) {
+                opphørsdato = utledOpphørsdatoForAvkortetAndel(nyNeste, ny)
+                beståendeAndeler.add(ny.medOffsetOgKildebehandlingFra(forrige))
+            }
+            break
+        }
+        return beståendeAndeler to opphørsdato
+    }
+
+    /**
+     * Utleder opphørsdato når en tidligere andel blir avkortet.
+     * Hvis neste andel begynner direkt etterpå så sender man ikke et opphør
+     */
+    private fun utledOpphørsdatoForAvkortetAndel(
+        nyNeste: AndelData?,
+        ny: AndelData,
+    ) = if (nyNeste == null || nyNeste.fom != ny.tom.plusMonths(1)) {
+        ny.tom.plusMonths(1)
+    } else {
+        null
+    }
+
+    fun AndelData.medOffsetOgKildebehandlingFra(forrige: AndelData): AndelData =
+        this.copy(
+            offset = forrige.offset,
+            forrigeOffset = forrige.forrigeOffset,
+            kildeBehandlingId = forrige.kildeBehandlingId,
+        )
 }
