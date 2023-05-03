@@ -75,7 +75,6 @@ internal class BrevUtilsTest {
         Assertions.assertEquals(
             "barnetrygdloven §§ 2, 4, 10 og 11",
             hentHjemmeltekst(
-                målform = Målform.NB,
                 minimerteVedtaksperioder = utvidetVedtaksperioderMedBegrunnelser.map {
                     it.tilMinimertVedtaksperiode(
                         hentBegrunnelser(),
@@ -91,7 +90,9 @@ internal class BrevUtilsTest {
                         apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
                         hjemler = listOf("10")
                     )
-                )
+                ),
+                målform = Målform.NB,
+                refusjonEøsHjemmelSkalMedIBrev = false
             )
         )
     }
@@ -120,7 +121,6 @@ internal class BrevUtilsTest {
         Assertions.assertEquals(
             "barnetrygdloven §§ 2, 4, 10 og 11",
             hentHjemmeltekst(
-                målform = Målform.NB,
                 minimerteVedtaksperioder = utvidetVedtaksperioderMedBegrunnelser.map {
                     it.tilMinimertVedtaksperiode(
                         sanityBegrunnelser = hentBegrunnelser(),
@@ -137,7 +137,9 @@ internal class BrevUtilsTest {
                         hjemler = listOf("10")
                     )
                 ),
-                opplysningspliktHjemlerSkalMedIBrev = false
+                opplysningspliktHjemlerSkalMedIBrev = false,
+                målform = Målform.NB,
+                refusjonEøsHjemmelSkalMedIBrev = false
             )
         )
     }
@@ -166,7 +168,6 @@ internal class BrevUtilsTest {
         Assertions.assertEquals(
             "barnetrygdloven §§ 2, 4, 10, 11, 17 og 18",
             hentHjemmeltekst(
-                målform = Målform.NB,
                 minimerteVedtaksperioder = utvidetVedtaksperioderMedBegrunnelser.map {
                     it.tilMinimertVedtaksperiode(
                         sanityBegrunnelser = hentBegrunnelser(),
@@ -183,7 +184,23 @@ internal class BrevUtilsTest {
                         hjemler = listOf("10")
                     )
                 ),
-                opplysningspliktHjemlerSkalMedIBrev = true
+                opplysningspliktHjemlerSkalMedIBrev = true,
+                målform = Målform.NB,
+                refusjonEøsHjemmelSkalMedIBrev = false
+            )
+        )
+    }
+
+    @Test
+    fun `hentHjemmeltekst skal inkludere EØS-forordning 987 artikkel 60 hvis det eksisterer eøs refusjon på behandlingen`() {
+        Assertions.assertEquals(
+            "EØS-forordning 987/2009 artikkel 60",
+            hentHjemmeltekst(
+                minimerteVedtaksperioder = emptyList(),
+                sanityBegrunnelser = emptyList(),
+                opplysningspliktHjemlerSkalMedIBrev = false,
+                målform = Målform.NB,
+                refusjonEøsHjemmelSkalMedIBrev = true
             )
         )
     }
@@ -224,7 +241,6 @@ internal class BrevUtilsTest {
         Assertions.assertEquals(
             "barnetrygdloven §§ 4, 10 og 11 og folketrygdloven §§ 2-5 og 2-8",
             hentHjemmeltekst(
-                målform = Målform.NB,
                 minimerteVedtaksperioder = utvidetVedtaksperioderMedBegrunnelser.map {
                     it.tilMinimertVedtaksperiode(
                         sanityBegrunnelser = sanityBegrunnelser,
@@ -232,7 +248,9 @@ internal class BrevUtilsTest {
                     )
                 },
                 sanityBegrunnelser = sanityBegrunnelser,
-                opplysningspliktHjemlerSkalMedIBrev = false
+                opplysningspliktHjemlerSkalMedIBrev = false,
+                målform = Målform.NB,
+                refusjonEøsHjemmelSkalMedIBrev = false
             )
         )
     }
@@ -297,7 +315,6 @@ internal class BrevUtilsTest {
         Assertions.assertEquals(
             "barnetrygdloven §§ 4, 10 og 11, EØS-forordning 883/2004 artikkel 11-16 og EØS-forordning 987/2009 artikkel 58 og 60",
             hentHjemmeltekst(
-                målform = Målform.NB,
                 minimerteVedtaksperioder = utvidetVedtaksperioderMedBegrunnelser.map {
                     it.tilMinimertVedtaksperiode(
                         sanityBegrunnelser = sanityBegrunnelser,
@@ -305,7 +322,9 @@ internal class BrevUtilsTest {
                     )
                 },
                 sanityBegrunnelser = sanityBegrunnelser,
-                opplysningspliktHjemlerSkalMedIBrev = false
+                opplysningspliktHjemlerSkalMedIBrev = false,
+                målform = Målform.NB,
+                refusjonEøsHjemmelSkalMedIBrev = false
             )
         )
     }
@@ -371,7 +390,6 @@ internal class BrevUtilsTest {
         Assertions.assertEquals(
             "Separasjonsavtalen mellom Storbritannia og Norge artikkel 29, barnetrygdloven §§ 4, 10 og 11, EØS-forordning 883/2004 artikkel 11-16 og EØS-forordning 987/2009 artikkel 58 og 60",
             hentHjemmeltekst(
-                målform = Målform.NB,
                 minimerteVedtaksperioder = utvidetVedtaksperioderMedBegrunnelser.map {
                     it.tilMinimertVedtaksperiode(
                         sanityBegrunnelser = sanityBegrunnelser,
@@ -379,7 +397,9 @@ internal class BrevUtilsTest {
                     )
                 },
                 sanityBegrunnelser = sanityBegrunnelser,
-                opplysningspliktHjemlerSkalMedIBrev = false
+                opplysningspliktHjemlerSkalMedIBrev = false,
+                målform = Målform.NB,
+                refusjonEøsHjemmelSkalMedIBrev = false
             )
         )
     }
@@ -445,7 +465,6 @@ internal class BrevUtilsTest {
         Assertions.assertEquals(
             "Separasjonsavtalen mellom Storbritannia og Noreg artikkel 29, barnetrygdlova §§ 4, 10 og 11, EØS-forordning 883/2004 artikkel 11-16 og EØS-forordning 987/2009 artikkel 58 og 60",
             hentHjemmeltekst(
-                målform = Målform.NN,
                 minimerteVedtaksperioder = utvidetVedtaksperioderMedBegrunnelser.map {
                     it.tilMinimertVedtaksperiode(
                         sanityBegrunnelser = sanityBegrunnelser,
@@ -453,7 +472,9 @@ internal class BrevUtilsTest {
                     )
                 },
                 sanityBegrunnelser = sanityBegrunnelser,
-                opplysningspliktHjemlerSkalMedIBrev = false
+                opplysningspliktHjemlerSkalMedIBrev = false,
+                målform = Målform.NN,
+                refusjonEøsHjemmelSkalMedIBrev = false
             )
         )
     }
@@ -518,7 +539,6 @@ internal class BrevUtilsTest {
         Assertions.assertEquals(
             "Separasjonsavtalen mellom Storbritannia og Noreg artikkel 29, barnetrygdlova §§ 4, 10 og 11 og EØS-forordning 883/2004 artikkel 2, 11-16, 67 og 68",
             hentHjemmeltekst(
-                målform = Målform.NN,
                 minimerteVedtaksperioder = utvidetVedtaksperioderMedBegrunnelser.map {
                     it.tilMinimertVedtaksperiode(
                         sanityBegrunnelser = sanityBegrunnelser,
@@ -526,7 +546,9 @@ internal class BrevUtilsTest {
                     )
                 },
                 sanityBegrunnelser = sanityBegrunnelser,
-                opplysningspliktHjemlerSkalMedIBrev = false
+                opplysningspliktHjemlerSkalMedIBrev = false,
+                målform = Målform.NN,
+                refusjonEøsHjemmelSkalMedIBrev = false
             )
         )
     }
@@ -596,7 +618,6 @@ internal class BrevUtilsTest {
         Assertions.assertEquals(
             "Separasjonsavtalen mellom Storbritannia og Noreg artikkel 29, barnetrygdlova §§ 4, 10 og 11, EØS-forordning 883/2004 artikkel 2, 11-16, 67 og 68 og EØS-forordning 987/2009 artikkel 58",
             hentHjemmeltekst(
-                målform = Målform.NN,
                 minimerteVedtaksperioder = utvidetVedtaksperioderMedBegrunnelser.map {
                     it.tilMinimertVedtaksperiode(
                         sanityBegrunnelser = sanityBegrunnelser,
@@ -604,7 +625,9 @@ internal class BrevUtilsTest {
                     )
                 },
                 sanityBegrunnelser = sanityBegrunnelser,
-                opplysningspliktHjemlerSkalMedIBrev = false
+                opplysningspliktHjemlerSkalMedIBrev = false,
+                målform = Målform.NN,
+                refusjonEøsHjemmelSkalMedIBrev = false
             )
         )
     }

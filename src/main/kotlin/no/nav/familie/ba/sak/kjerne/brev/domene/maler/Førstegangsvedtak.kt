@@ -37,8 +37,8 @@ data class Førstegangsvedtak(
                 ),
                 perioder = vedtakFellesfelter.perioder,
                 flettefelter = object : FlettefelterForDokument {
-                    val perioderAvklart: Flettefelt = refusjonEosAvklart?.perioderAvklart
-                    val perioderUavklart: Flettefelt = refusjonEosUavklart?.perioderUavklart
+                    val perioderMedRefusjonEosAvklart: Flettefelt = refusjonEosAvklart?.perioderMedRefusjonEøsAvklart
+                    val perioderMedRefusjonEosUavklart: Flettefelt = refusjonEosUavklart?.perioderMedRefusjonEøsUavklart
                     override val brevOpprettetDato = flettefelt(LocalDate.now().tilDagMånedÅr())
                     override val navn = flettefelt(vedtakFellesfelter.søkerNavn)
                     override val fodselsnummer = flettefelt(vedtakFellesfelter.søkerFødselsnummer)

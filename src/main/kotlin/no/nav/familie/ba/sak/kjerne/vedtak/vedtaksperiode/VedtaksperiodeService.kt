@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
+import no.nav.familie.ba.sak.common.Utils.storForbokstav
 import no.nav.familie.ba.sak.common.erSenereEnnInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
@@ -16,6 +17,7 @@ import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestGenererVedtaksperioderForOverstyrtEndringstidspunkt
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedFritekster
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -91,7 +93,8 @@ class VedtaksperiodeService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val småbarnstilleggService: SmåbarnstilleggService,
-    private val refusjonEøsRepository: RefusjonEøsRepository
+    private val refusjonEøsRepository: RefusjonEøsRepository,
+    private val integrasjonClient: IntegrasjonClient
 ) {
     fun oppdaterVedtaksperiodeMedFritekster(
         vedtaksperiodeId: Long,
@@ -736,27 +739,31 @@ class VedtaksperiodeService(
         }.toSet().takeIf { it.isNotEmpty() }
     }
 
-    fun beskrivPerioderMedAvklartRefusjonEøs(vedtak: Vedtak): Set<String>? {
-        val målform = persongrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id)?.søker?.målform
-        val fra = mapOf(NB to "Fra", NN to "Frå").getOrDefault(målform, "Fra")
+    fun beskrivPerioderMedRefusjonEøs(behandling: Behandling, avklart: Boolean): Set<String>? {
+        val målform = persongrunnlagService.hentAktiv(behandlingId = behandling.id)?.søker?.målform
+        val landkoderISO2 = integrasjonClient.hentLandkoderISO2()
 
-        return refusjonEøsRepository.finnRefusjonEøsForBehandling(vedtak.behandling.id).filter { it.refusjonAvklart }.map {
+        return refusjonEøsRepository.finnRefusjonEøsForBehandling(behandling.id).filter { it.refusjonAvklart == avklart }.map {
             val (fom, tom) = it.fom.tilDagMånedÅr() to it.tom.tilDagMånedÅr()
-            val land = it.land
+            val land = landkoderISO2[it.land]?.storForbokstav() ?: throw Feil("Fant ikke navn for landkode ${it.land} ")
+            val beløp = it.refusjonsbeløp
 
-            "$fra $fom til $tom blir ikke etterbetalingen på ${it.refusjonsbeløp} utbetalt nå siden det er utbetalt barnetrygd i $land"
-        }.toSet().takeIf { it.isNotEmpty() }
-    }
-
-    fun beskrivPerioderMedUAvklartRefusjonEøs(vedtak: Vedtak): Set<String>? {
-        val målform = persongrunnlagService.hentAktiv(behandlingId = vedtak.behandling.id)?.søker?.målform
-        val fra = mapOf(NB to "Fra", NN to "Frå").getOrDefault(målform, "Fra")
-
-        return refusjonEøsRepository.finnRefusjonEøsForBehandling(vedtak.behandling.id).filter { !it.refusjonAvklart }.map {
-            val (fom, tom) = it.fom.tilDagMånedÅr() to it.tom.tilDagMånedÅr()
-            val land = it.land
-
-            "$fra $fom til $tom blir ${it.refusjonsbeløp} kroner av etterbetalingen din utbetalt til myndighetene i $land."
+            when (målform) {
+                NN -> {
+                    if (avklart) {
+                        "Frå $fom til $tom blir $beløp kroner av etterbetalinga di utbetalt til myndighetene i $land"
+                    } else {
+                        "Fra $fom til $tom blir ikkje etterbetalinga på $beløp kroner utbetalt no sidan det er utbetalt barnetrygd i $land"
+                    }
+                }
+                else -> {
+                    if (avklart) {
+                        "Fra $fom til $tom blir $beløp kroner av etterbetalingen din utbetalt til myndighetene i $land"
+                    } else {
+                        "Fra $fom til $tom blir ikke etterbetalingen på ${it.refusjonsbeløp} kroner utbetalt nå siden det er utbetalt barnetrygd i $land"
+                    }
+                }
+            }
         }.toSet().takeIf { it.isNotEmpty() }
     }
 

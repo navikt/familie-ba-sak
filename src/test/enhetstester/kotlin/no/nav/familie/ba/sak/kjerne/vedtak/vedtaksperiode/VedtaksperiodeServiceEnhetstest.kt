@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
@@ -23,6 +24,8 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta.FeilutbetaltValuta
 import no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta.FeilutbetaltValutaRepository
+import no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs.RefusjonEøs
+import no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs.RefusjonEøsRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -42,6 +45,8 @@ class VedtaksperiodeServiceEnhetstest {
     private val brevmalService: BrevmalService = mockk()
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
     private val småbarnstilleggService: SmåbarnstilleggService = mockk()
+    private val refusjonEøsRepository = mockk<RefusjonEøsRepository>()
+    private val integrasjonClient = mockk<IntegrasjonClient>()
 
     private val vedtaksperiodeService = VedtaksperiodeService(
         personidentService = mockk(),
@@ -62,7 +67,8 @@ class VedtaksperiodeServiceEnhetstest {
         brevmalService = brevmalService,
         behandlingHentOgPersisterService = behandlingHentOgPersisterService,
         småbarnstilleggService = småbarnstilleggService,
-        refusjonEøsRepository = mockk()
+        refusjonEøsRepository = refusjonEøsRepository,
+        integrasjonClient = integrasjonClient
     )
 
     private val person = lagPerson()
@@ -107,6 +113,8 @@ class VedtaksperiodeServiceEnhetstest {
         } returns true
         every { feilutbetaltValutaRepository.finnFeilutbetaltValutaForBehandling(any()) } returns emptyList()
         every { småbarnstilleggService.hentPerioderMedFullOvergangsstønad(any()) } returns emptyList()
+        every { refusjonEøsRepository.finnRefusjonEøsForBehandling(any()) } returns emptyList()
+        every { integrasjonClient.hentLandkoderISO2() } returns mapOf(Pair("NO", "NORGE"))
     }
 
     @Test
@@ -212,5 +220,49 @@ class VedtaksperiodeServiceEnhetstest {
             assertThat(periodebeskrivelser!!.find { it.contains("${periode.first.year}") })
                 .contains("Fra", "til", "${periode.second.year}", "er det utbetalt 200 kroner for mye.")
         }
+    }
+
+    @Test
+    fun `skal beskrive perioder med eøs refusjoner for behandlinger med avklarte refusjon eøs`() {
+        val behandling = lagBehandling(behandlingKategori = BehandlingKategori.EØS)
+        assertThat(vedtaksperiodeService.beskrivPerioderMedRefusjonEøs(behandling = behandling, avklart = true)).isNull()
+
+        every { refusjonEøsRepository.finnRefusjonEøsForBehandling(behandling.id) } returns listOf(
+            RefusjonEøs(
+                behandlingId = 1L,
+                fom = LocalDate.of(2020, 1, 1),
+                tom = LocalDate.of(2022, 1, 1),
+                refusjonsbeløp = 200,
+                land = "NO",
+                refusjonAvklart = true
+            )
+        )
+
+        val perioder = vedtaksperiodeService.beskrivPerioderMedRefusjonEøs(behandling = behandling, avklart = true)
+
+        assertThat(perioder?.size).isEqualTo(1)
+        assertThat(perioder?.single()).isEqualTo("Fra 1. januar 2020 til 1. januar 2022 blir 200 kroner av etterbetalingen din utbetalt til myndighetene i Norge")
+    }
+
+    @Test
+    fun `skal beskrive perioder med eøs refusjoner for behandlinger med uavklarte refusjon eøs`() {
+        val behandling = lagBehandling(behandlingKategori = BehandlingKategori.EØS)
+        assertThat(vedtaksperiodeService.beskrivPerioderMedRefusjonEøs(behandling = behandling, avklart = false)).isNull()
+
+        every { refusjonEøsRepository.finnRefusjonEøsForBehandling(behandling.id) } returns listOf(
+            RefusjonEøs(
+                behandlingId = 1L,
+                fom = LocalDate.of(2020, 1, 1),
+                tom = LocalDate.of(2022, 1, 1),
+                refusjonsbeløp = 200,
+                land = "NO",
+                refusjonAvklart = false
+            )
+        )
+
+        val perioder = vedtaksperiodeService.beskrivPerioderMedRefusjonEøs(behandling = behandling, avklart = false)
+
+        assertThat(perioder?.size).isEqualTo(1)
+        assertThat(perioder?.single()).isEqualTo("Fra 1. januar 2020 til 1. januar 2022 blir ikke etterbetalingen på 200 kroner utbetalt nå siden det er utbetalt barnetrygd i Norge")
     }
 }

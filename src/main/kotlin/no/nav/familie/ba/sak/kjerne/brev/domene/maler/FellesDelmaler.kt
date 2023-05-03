@@ -79,17 +79,17 @@ data class FeilutbetaltValuta(
 }
 
 data class RefusjonEøsAvklart(
-    val perioderAvklart: Flettefelt
+    val perioderMedRefusjonEøsAvklart: Flettefelt
 ) {
-    constructor(perioderAvklart: Set<String>) : this(
-        flettefelt(perioderAvklart.toList())
+    constructor(perioderMedRefusjonEøsAvklart: Set<String>) : this(
+        flettefelt(perioderMedRefusjonEøsAvklart.toList())
     )
 }
 
 data class RefusjonEøsUavklart(
-    val perioderUavklart: Flettefelt
+    val perioderMedRefusjonEøsUavklart: Flettefelt
 ) {
-    constructor(perioderUavklart: Set<String>) : this(
-        flettefelt(perioderUavklart.toList())
+    constructor(perioderMedRefusjonEøsUavklart: Set<String>) : this(
+        flettefelt(perioderMedRefusjonEøsUavklart.toList())
     )
 }
