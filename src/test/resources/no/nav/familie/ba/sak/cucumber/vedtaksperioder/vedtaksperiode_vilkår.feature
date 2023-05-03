@@ -200,10 +200,11 @@ Egenskap: Vedtaksperioder med mor og et barn
       | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar                             |
       | 01.05.2020 | 28.02.2021 | Utbetaling         | Barn og søker. Søker har utvidet      |
       | 01.03.2021 | 31.07.2021 | Utbetaling         | Barn og søker. Søker har ikke utvidet |
-      | 01.03.2021 | 31.03.2038 | Opphør             | Kun søker                             |
+      | 01.03.2021 | 31.05.2030 | Opphør             | Kun søker                             |
       | 01.08.2021 | 31.07.2022 | Opphør             | Kun søker                             |
       | 01.08.2022 | 31.05.2030 | Opphør             | Kun søker                             |
       | 01.06.2030 | 31.03.2038 | Utbetaling         | Barn og søker                         |
+      | 01.06.2030 |            | Opphør             | Kun søker                             |
       | 01.04.2038 |            | Opphør             | Kun søker                             |
 
 
