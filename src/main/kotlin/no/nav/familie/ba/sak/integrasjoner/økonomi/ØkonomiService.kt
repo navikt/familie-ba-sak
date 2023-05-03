@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.UtbetalingsoppdragService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.kjedeinndelteAndeler
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.oppdaterBeståendeAndelerMedOffset
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -59,7 +58,7 @@ class ØkonomiService(
 
     private fun iverksettOppdrag(utbetalingsoppdrag: Utbetalingsoppdrag, behandlingId: Long) {
         if (!utbetalingsoppdrag.skalIverksettesMotOppdrag()) {
-            UtbetalingsoppdragService.logger.warn(
+            logger.warn(
                 "Iverksetter ikke noe mot oppdrag. " +
                     "Ingen utbetalingsperioder for behandlingId=$behandlingId"
             )
