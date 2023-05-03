@@ -57,7 +57,6 @@ data class GrunnlagForVedtaksperioder(
         .filterIsInstance<UtfyltKompetanse>()
 
     fun utledGrunnlagTidslinjePerPerson(): Map<AktørId, Tidslinje<GrunnlagForPerson, Måned>> {
-
         val søker = persongrunnlag.søker
         val søkerPersonResultater = personResultater.single { it.aktør == søker.aktør }
 

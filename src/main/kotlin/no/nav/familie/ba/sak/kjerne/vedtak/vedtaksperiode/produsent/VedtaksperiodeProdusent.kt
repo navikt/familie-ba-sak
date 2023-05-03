@@ -122,9 +122,3 @@ private fun <T> List<Periode<out Iterable<T>, Måned>>.slåSammenPerioderMedSamm
                 innhold = it.value.mapNotNull { periode -> periode.innhold }.flatten()
             )
         }
-
-
-
-
-
-
