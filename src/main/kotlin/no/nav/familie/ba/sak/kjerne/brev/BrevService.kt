@@ -87,10 +87,16 @@ class BrevService(
                 vedtakFellesfelter = vedtakFellesfelter,
                 etterbetaling = hentEtterbetaling(vedtak),
                 informasjonOmAarligKontroll = vedtaksperiodeService.skalHaÅrligKontroll(vedtak),
-                refusjonEosAvklart = vedtaksperiodeService.beskrivPerioderMedRefusjonEøs(behandling = vedtak.behandling, avklart = true)?.let {
+                refusjonEosAvklart = vedtaksperiodeService.beskrivPerioderMedRefusjonEøs(
+                    behandling = vedtak.behandling,
+                    avklart = true
+                )?.let {
                     RefusjonEøsAvklart(perioderMedRefusjonEøsAvklart = it)
                 },
-                refusjonEosUavklart = vedtaksperiodeService.beskrivPerioderMedRefusjonEøs(behandling = vedtak.behandling, avklart = false)?.let {
+                refusjonEosUavklart = vedtaksperiodeService.beskrivPerioderMedRefusjonEøs(
+                    behandling = vedtak.behandling,
+                    avklart = false
+                )?.let {
                     RefusjonEøsUavklart(perioderMedRefusjonEøsUavklart = it)
                 }
             )
@@ -109,6 +115,18 @@ class BrevService(
                 informasjonOmAarligKontroll = vedtaksperiodeService.skalHaÅrligKontroll(vedtak),
                 feilutbetaltValuta = vedtaksperiodeService.beskrivPerioderMedFeilutbetaltValuta(vedtak)?.let {
                     FeilutbetaltValuta(perioderMedForMyeUtbetalt = it)
+                },
+                refusjonEosAvklart = vedtaksperiodeService.beskrivPerioderMedRefusjonEøs(
+                    behandling = vedtak.behandling,
+                    avklart = true
+                )?.let {
+                    RefusjonEøsAvklart(perioderMedRefusjonEøsAvklart = it)
+                },
+                refusjonEosUavklart = vedtaksperiodeService.beskrivPerioderMedRefusjonEøs(
+                    behandling = vedtak.behandling,
+                    avklart = false
+                )?.let {
+                    RefusjonEøsUavklart(perioderMedRefusjonEøsUavklart = it)
                 }
             )
 
@@ -135,7 +153,19 @@ class BrevService(
             Brevmal.VEDTAK_OPPHØR_MED_ENDRING -> OpphørMedEndring(
                 vedtakFellesfelter = vedtakFellesfelter,
                 etterbetaling = hentEtterbetaling(vedtak),
-                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = behandling.id)
+                erFeilutbetalingPåBehandling = erFeilutbetalingPåBehandling(behandlingId = behandling.id),
+                refusjonEosAvklart = vedtaksperiodeService.beskrivPerioderMedRefusjonEøs(
+                    behandling = vedtak.behandling,
+                    avklart = true
+                )?.let {
+                    RefusjonEøsAvklart(perioderMedRefusjonEøsAvklart = it)
+                },
+                refusjonEosUavklart = vedtaksperiodeService.beskrivPerioderMedRefusjonEøs(
+                    behandling = vedtak.behandling,
+                    avklart = false
+                )?.let {
+                    RefusjonEøsUavklart(perioderMedRefusjonEøsUavklart = it)
+                }
             )
 
             Brevmal.VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON -> OpphørMedEndring(
@@ -154,7 +184,19 @@ class BrevService(
             Brevmal.VEDTAK_FORTSATT_INNVILGET -> ForsattInnvilget(
                 vedtakFellesfelter = vedtakFellesfelter,
                 etterbetaling = hentEtterbetaling(vedtak),
-                informasjonOmAarligKontroll = vedtaksperiodeService.skalHaÅrligKontroll(vedtak)
+                informasjonOmAarligKontroll = vedtaksperiodeService.skalHaÅrligKontroll(vedtak),
+                refusjonEosAvklart = vedtaksperiodeService.beskrivPerioderMedRefusjonEøs(
+                    behandling = vedtak.behandling,
+                    avklart = true
+                )?.let {
+                    RefusjonEøsAvklart(perioderMedRefusjonEøsAvklart = it)
+                },
+                refusjonEosUavklart = vedtaksperiodeService.beskrivPerioderMedRefusjonEøs(
+                    behandling = vedtak.behandling,
+                    avklart = false
+                )?.let {
+                    RefusjonEøsUavklart(perioderMedRefusjonEøsUavklart = it)
+                }
             )
 
             Brevmal.VEDTAK_FORTSATT_INNVILGET_INSTITUSJON -> ForsattInnvilget(
