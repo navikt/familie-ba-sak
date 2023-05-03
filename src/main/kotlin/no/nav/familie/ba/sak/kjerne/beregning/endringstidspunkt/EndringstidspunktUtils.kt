@@ -2,10 +2,12 @@ package no.nav.familie.ba.sak.kjerne.beregning.endringstidspunkt
 
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.hentUtbetalingstidslinjeForSøker
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.fpsak.tidsserie.StandardCombinators
@@ -166,4 +168,10 @@ private fun kombinerOverlappendeAndelerForSøker(
             )
         }
     )
+}
+
+fun List<VedtaksperiodeMedBegrunnelser>.filtrerLikEllerEtterEndringstidspunkt(
+    endringstidspunkt: LocalDate
+): List<VedtaksperiodeMedBegrunnelser> {
+    return filter { (it.tom ?: TIDENES_ENDE).isSameOrAfter(endringstidspunkt) }
 }

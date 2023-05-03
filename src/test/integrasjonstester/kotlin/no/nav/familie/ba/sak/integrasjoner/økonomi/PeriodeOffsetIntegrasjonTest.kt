@@ -1,13 +1,11 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
-import io.mockk.every
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagPersonResultat
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -68,8 +66,6 @@ class PeriodeOffsetIntegrasjonTest(
     @Test
     @Tag("integration")
     fun `Sjekk at offset settes på andel tilkjent ytelse når behandlingen iverksettes`() {
-        every { featureToggleService.isEnabled(FeatureToggleConfig.KAN_GENERERE_UTBETALINGSOPPDRAG_NY) } returns false
-
         val fnr = randomFnr()
         val barnFnr = randomFnr()
         val stønadFom = LocalDate.now()
@@ -134,8 +130,6 @@ class PeriodeOffsetIntegrasjonTest(
     @Test
     @Tag("integration")
     fun `Sjekk at offset IKKE settes på andel tilkjent ytelse når behandlingen simuleres`() {
-        every { featureToggleService.isEnabled(FeatureToggleConfig.KAN_GENERERE_UTBETALINGSOPPDRAG_NY) } returns false
-
         val fnr = randomFnr()
         val barnFnr = randomFnr()
         val stønadFom = LocalDate.now()

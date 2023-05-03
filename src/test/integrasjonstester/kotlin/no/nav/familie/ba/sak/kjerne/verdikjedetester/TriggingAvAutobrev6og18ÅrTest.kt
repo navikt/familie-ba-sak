@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenario
 import no.nav.familie.ba.sak.kjerne.verdikjedetester.mockserver.domene.RestScenarioPerson
 import no.nav.familie.ba.sak.task.dto.Autobrev6og18ÅrDTO
@@ -149,7 +150,7 @@ class TriggingAvAutobrev6og18ÅrTest(
         )
         val reduksjonVedtaksperiodeId =
             restUtvidetBehandlingEtterVurderTilbakekreving.data!!.vedtak!!.vedtaksperioderMedBegrunnelser.single {
-                it.fom!!.isEqual(LocalDate.now().førsteDagIInneværendeMåned())
+                it.fom!!.isEqual(LocalDate.now().førsteDagIInneværendeMåned()) && it.type == Vedtaksperiodetype.UTBETALING
             }
         familieBaSakKlient().oppdaterVedtaksperiodeMedStandardbegrunnelser(
             vedtaksperiodeId = reduksjonVedtaksperiodeId.id,

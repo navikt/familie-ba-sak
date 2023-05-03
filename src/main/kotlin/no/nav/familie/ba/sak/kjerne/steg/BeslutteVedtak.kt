@@ -67,10 +67,14 @@ class BeslutteVedtak(
         }
 
         val behandlingErAutomatiskBesluttet =
-            behandling.erManuellMigrering() && simuleringService.harMigreringsbehandlingAvvikInnenforBeløpsgrenser(behandling)
+            behandling.erManuellMigrering() && simuleringService.harMigreringsbehandlingAvvikInnenforBeløpsgrenser(
+                behandling
+            ) && !simuleringService.harMigreringsbehandlingManuellePosteringer(behandling)
 
-        val beslutter = if (behandlingErAutomatiskBesluttet) SikkerhetContext.SYSTEM_NAVN else saksbehandlerContext.hentSaksbehandlerSignaturTilBrev()
-        val beslutterId = if (behandlingErAutomatiskBesluttet) SikkerhetContext.SYSTEM_FORKORTELSE else SikkerhetContext.hentSaksbehandler()
+        val beslutter =
+            if (behandlingErAutomatiskBesluttet) SikkerhetContext.SYSTEM_NAVN else saksbehandlerContext.hentSaksbehandlerSignaturTilBrev()
+        val beslutterId =
+            if (behandlingErAutomatiskBesluttet) SikkerhetContext.SYSTEM_FORKORTELSE else SikkerhetContext.hentSaksbehandler()
 
         val totrinnskontroll = totrinnskontrollService.besluttTotrinnskontroll(
             behandling = behandling,

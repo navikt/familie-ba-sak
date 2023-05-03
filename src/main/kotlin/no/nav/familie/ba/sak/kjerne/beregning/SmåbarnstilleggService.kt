@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndr
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.slåSammenTidligerePerioder
-import no.nav.familie.ba.sak.kjerne.beregning.domene.splitFramtidigePerioderFraForrigeBehandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilInternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -27,13 +26,14 @@ class SmåbarnstilleggService(
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
 ) {
 
-    fun hentOgLagrePerioderMedFullOvergangsstønad(
+    fun hentOgLagrePerioderMedFullOvergangsstønadFraEf(
         søkerAktør: Aktør,
         behandlingId: Long
-    ): List<InternPeriodeOvergangsstønad> {
+    ) {
         val periodeOvergangsstønad = hentPerioderMedFullOvergangsstønad(aktør = søkerAktør)
 
         periodeOvergangsstønadGrunnlagRepository.deleteByBehandlingId(behandlingId = behandlingId)
+
         periodeOvergangsstønadGrunnlagRepository.saveAll(
             periodeOvergangsstønad.map {
                 it.tilPeriodeOvergangsstønadGrunnlag(
@@ -42,15 +42,16 @@ class SmåbarnstilleggService(
                 )
             }
         )
+    }
 
-        return periodeOvergangsstønad
-            .map { it.tilInternPeriodeOvergangsstønad() }
-            .slåSammenTidligerePerioder()
-            .splitFramtidigePerioderFraForrigeBehandling(
-                overgangsstønadPerioderFraForrigeBehandling = hentPerioderMedOvergangsstønadFraForrigeIverksatteBehandling(
-                    behandlingId
-                )
-            )
+    fun hentPerioderMedFullOvergangsstønad(
+        behandlingId: Long
+    ): List<InternPeriodeOvergangsstønad> {
+        val perioderOvergangsstønad = periodeOvergangsstønadGrunnlagRepository.findByBehandlingId(behandlingId)
+        val overgangsstønadPerioderFraForrigeBehandling =
+            hentPerioderMedOvergangsstønadFraForrigeIverksatteBehandling(behandlingId)
+
+        return perioderOvergangsstønad.splittOgSlåSammen(overgangsstønadPerioderFraForrigeBehandling)
     }
 
     private fun hentPerioderMedOvergangsstønadFraForrigeIverksatteBehandling(behandlingId: Long): List<InternPeriodeOvergangsstønad> {

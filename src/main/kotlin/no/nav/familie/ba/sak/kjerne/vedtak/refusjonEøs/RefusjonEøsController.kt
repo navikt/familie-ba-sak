@@ -1,6 +1,6 @@
-package no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta
+package no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs
 
-import no.nav.familie.ba.sak.ekstern.restDomene.RestFeilutbetaltValuta
+import no.nav.familie.ba.sak.ekstern.restDomene.RestRefusjonEøs
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
@@ -20,31 +20,31 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/api/feilutbetalt-valuta")
+@RequestMapping("/api/refusjon-eøs")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class FeilutbetaltValutaController(
+class RefusjonEøsController(
     private val tilgangService: TilgangService,
-    private val feilutbetaltValutaService: FeilutbetaltValutaService,
+    private val refusjonEøsService: RefusjonEøsService,
     private val utvidetBehandlingService: UtvidetBehandlingService
 ) {
     @PostMapping(
-        path = ["behandling/{behandlingId}"],
+        path = ["behandlinger/{behandlingId}"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
         consumes = [MediaType.APPLICATION_JSON_VALUE]
     )
-    fun leggTilFeilutbetaltValutaPeriode(
+    fun leggTilRefusjonEøsPeriode(
         @PathVariable behandlingId: Long,
-        @RequestBody feilutbetaltValuta: RestFeilutbetaltValuta
+        @RequestBody refusjonEøs: RestRefusjonEøs
     ):
         ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "legg til periode med feilutbetalt valuta"
+            handling = "legg til periode med refusjon EØS"
         )
 
-        feilutbetaltValutaService.leggTilFeilutbetaltValutaPeriode(
-            feilutbetaltValuta = feilutbetaltValuta,
+        refusjonEøsService.leggTilRefusjonEøsPeriode(
+            refusjonEøs = refusjonEøs,
             behandlingId = behandlingId
         )
 
@@ -52,45 +52,45 @@ class FeilutbetaltValutaController(
     }
 
     @PutMapping(
-        path = ["behandling/{behandlingId}/periode/{id}"],
+        path = ["behandlinger/{behandlingId}/perioder/{id}"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
         consumes = [MediaType.APPLICATION_JSON_VALUE]
     )
-    fun oppdaterFeilutbetaltValutaPeriode(
+    fun oppdaterRefusjonEøsPeriode(
         @PathVariable behandlingId: Long,
         @PathVariable id: Long,
-        @RequestBody feilutbetaltValuta: RestFeilutbetaltValuta
+        @RequestBody refusjonEøs: RestRefusjonEøs
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "oppdater periode med feilutbetalt valuta"
+            handling = "oppdater periode med refusjon EØS"
         )
 
-        feilutbetaltValutaService.oppdatertFeilutbetaltValutaPeriode(feilutbetaltValuta = feilutbetaltValuta, id = id)
+        refusjonEøsService.oppdaterRefusjonEøsPeriode(restRefusjonEøs = refusjonEøs, id = id)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
 
-    @DeleteMapping(path = ["behandling/{behandlingId}/periode/{id}"])
-    fun fjernFeilutbetaltValutaPeriode(
+    @DeleteMapping(path = ["behandlinger/{behandlingId}/perioder/{id}"])
+    fun fjernRefusjonEøsPeriode(
         @PathVariable behandlingId: Long,
         @PathVariable id: Long
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "Fjerner periode med feilutbetalt valuta"
+            handling = "fjerner periode med refusjon EØS"
         )
-        feilutbetaltValutaService.fjernFeilutbetaltValutaPeriode(id = id, behandlingId = behandlingId)
+        refusjonEøsService.fjernRefusjonEøsPeriode(id = id, behandlingId = behandlingId)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
 
-    @GetMapping(path = ["behandling/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun hentFeilutbetaltValutaPerioder(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<List<RestFeilutbetaltValuta>?>> {
+    @GetMapping(path = ["behandlinger/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun hentRefusjonEøsPerioder(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<List<RestRefusjonEøs>>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
-            handling = "hente feilutbetalt valuta for behandling"
+            handling = "hente refusjon EØS for behandling"
         )
-        return ResponseEntity.ok(Ressurs.success(feilutbetaltValutaService.hentFeilutbetaltValutaPerioder(behandlingId = behandlingId)))
+        return ResponseEntity.ok(Ressurs.success(refusjonEøsService.hentRefusjonEøsPerioder(behandlingId = behandlingId)))
     }
 }
