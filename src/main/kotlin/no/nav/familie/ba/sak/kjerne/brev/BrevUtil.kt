@@ -121,16 +121,17 @@ fun hentHjemmeltekst(
 }
 
 private fun hentHjemlerForEøsForordningen987(sanityEøsBegrunnelser: List<SanityEØSBegrunnelse>, refusjonEøsHjemmelSkalMedIBrev: Boolean): List<String> {
-    val hjemler: MutableList<String> = mutableListOf()
+    val hjemler = mutableListOf<String>()
+
+    hjemler.addAll(sanityEøsBegrunnelser.flatMap { it.hjemlerEØSForordningen987 })
 
     if (refusjonEøsHjemmelSkalMedIBrev) {
         hjemler.add("60")
     }
 
-    hjemler.addAll(sanityEøsBegrunnelser.flatMap { it.hjemlerEØSForordningen987 })
-
     return hjemler.distinct()
 }
+
 private fun slåSammenHjemlerAvUlikeTyper(hjemler: List<String>) = when (hjemler.size) {
     0 -> throw FunksjonellFeil("Ingen hjemler var knyttet til begrunnelsen(e) som er valgt. Du må velge minst én begrunnelse som er knyttet til en hjemmel.")
     1 -> hjemler.single()

@@ -292,7 +292,7 @@ class VedtaksperiodeService(
             )
         } else {
             vedtaksperiodeHentOgPersisterService.lagre(
-                if (false) {
+                if (featureToggleService.isEnabled(FeatureToggleConfig.VEDTAKSPERIODE_NY)) {
                     finnVedtaksperioderForBehandling(vedtak.behandling.id)
                 } else {
                     genererVedtaksperioderMedBegrunnelserGammel(vedtak)
@@ -593,7 +593,7 @@ class VedtaksperiodeService(
         val andelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService
             .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.id)
 
-        return if (false) {
+        return if (featureToggleService.isEnabled(BRUKE_TIDSLINJE_I_STEDET_FOR)) {
             val alleOpphørsperioder = mapTilOpphørsperioder(
                 forrigePersonopplysningGrunnlag = forrigePersonopplysningGrunnlag,
                 forrigeAndelerTilkjentYtelse = forrigeAndelerMedEndringer,
