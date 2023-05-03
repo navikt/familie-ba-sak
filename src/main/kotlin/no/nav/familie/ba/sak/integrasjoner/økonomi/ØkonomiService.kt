@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.kjedeinndelteAndeler
+import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.grupperAndeler
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.oppdaterBeståendeAndelerMedOffset
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -99,7 +99,7 @@ class ØkonomiService(
             beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(behandlingId = oppdatertBehandling.id)
                 .pakkInnForUtbetaling(andelTilkjentYtelseForUtbetalingsoppdragFactory)
 
-        val oppdaterteKjeder = kjedeinndelteAndeler(oppdatertTilstand)
+        val oppdaterteKjeder = grupperAndeler(oppdatertTilstand)
 
         val erFørsteIverksatteBehandlingPåFagsak =
             beregningService.hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(fagsakId = oppdatertBehandling.fagsak.id)
@@ -122,7 +122,7 @@ class ØkonomiService(
                 beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(forrigeBehandling.id)
                     .pakkInnForUtbetaling(andelTilkjentYtelseForUtbetalingsoppdragFactory)
 
-            val forrigeKjeder = kjedeinndelteAndeler(forrigeTilstand)
+            val forrigeKjeder = grupperAndeler(forrigeTilstand)
 
             val sisteOffsetPerIdent = beregningService.hentSisteOffsetPerIdent(
                 forrigeBehandling.fagsak.id,

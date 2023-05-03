@@ -7,31 +7,26 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 
+data class IdentOgYtelse(
+    val ident: String,
+    val type: YtelseType
+)
 object ØkonomiUtils {
 
     /**
-     * Deler andeler inn i gruppene de skal kjedes i. Utbetalingsperioder kobles i kjeder per person, bortsett fra
-     * småbarnstillegg og utvidet barnetrygd som separeres i to kjeder for søker. På grunn av dette legges et suffix
-     * på småbarnstillegg når vi arbeider med map.
+     * Deler andeler inn i gruppene de skal kjedes i. Utbetalingsperioder kobles i kjeder per person, per type.
      *
-     * @param[andelerForInndeling] andeler som skal sorteres i grupper for kjeding
+     * @param[andeler] andeler som skal sorteres i grupper for kjeding
      * @return ident med kjedegruppe.
      */
-    fun kjedeinndelteAndeler(andelerForInndeling: List<AndelTilkjentYtelseForUtbetalingsoppdrag>): Map<String, List<AndelTilkjentYtelseForUtbetalingsoppdrag>> {
-        val (personMedSmåbarnstilleggAndeler, personerMedAndeler) =
-            andelerForInndeling.partition { it.type == YtelseType.SMÅBARNSTILLEGG }.toList().map {
-                it.groupBy { andel -> andel.aktør.aktivFødselsnummer() }
-            }
-        val andelerForKjeding = mutableMapOf<String, List<AndelTilkjentYtelseForUtbetalingsoppdrag>>()
-        andelerForKjeding.putAll(personerMedAndeler)
+    fun grupperAndeler(andeler: List<AndelTilkjentYtelseForUtbetalingsoppdrag>): Map<IdentOgYtelse, List<AndelTilkjentYtelseForUtbetalingsoppdrag>> {
+        val grupperteAndeler = andeler
+            .groupBy { IdentOgYtelse(it.aktør.aktivFødselsnummer(), it.type) }
 
-        if (personMedSmåbarnstilleggAndeler.size > 1) {
+        if (grupperteAndeler.keys.count { it.type == YtelseType.SMÅBARNSTILLEGG } > 1) {
             throw IllegalArgumentException("Finnes flere personer med småbarnstillegg")
-        } else if (personMedSmåbarnstilleggAndeler.size == 1) {
-            val søkerIdent = personMedSmåbarnstilleggAndeler.keys.first()
-            andelerForKjeding[søkerIdent + SMÅBARNSTILLEGG_SUFFIX] = personMedSmåbarnstilleggAndeler[søkerIdent]!!
         }
-        return andelerForKjeding
+        return grupperteAndeler
     }
 
     /**
@@ -45,9 +40,9 @@ object ØkonomiUtils {
      * @return map med personident og siste bestående andel. Bestående andel=null dersom alle opphøres eller ny person.
      */
     fun sisteBeståendeAndelPerKjede(
-        forrigeKjeder: Map<String, List<AndelTilkjentYtelseForUtbetalingsoppdrag>>,
-        oppdaterteKjeder: Map<String, List<AndelTilkjentYtelseForUtbetalingsoppdrag>>
-    ): Map<String, AndelTilkjentYtelseForUtbetalingsoppdrag?> {
+        forrigeKjeder: Map<IdentOgYtelse, List<AndelTilkjentYtelseForUtbetalingsoppdrag>>,
+        oppdaterteKjeder: Map<IdentOgYtelse, List<AndelTilkjentYtelseForUtbetalingsoppdrag>>
+    ): Map<IdentOgYtelse, AndelTilkjentYtelseForUtbetalingsoppdrag?> {
         val allePersoner = forrigeKjeder.keys.union(oppdaterteKjeder.keys)
         return allePersoner.associateWith { kjedeIdentifikator ->
             beståendeAndelerIKjede(
@@ -67,9 +62,9 @@ object ØkonomiUtils {
      * @return map med personident og andel=null som markerer at alle andeler skal opphøres.
      */
     fun sisteAndelPerKjede(
-        forrigeKjeder: Map<String, List<AndelTilkjentYtelseForUtbetalingsoppdrag>>,
-        oppdaterteKjeder: Map<String, List<AndelTilkjentYtelseForUtbetalingsoppdrag>>
-    ): Map<String, AndelTilkjentYtelseForUtbetalingsoppdrag?> =
+        forrigeKjeder: Map<IdentOgYtelse, List<AndelTilkjentYtelseForUtbetalingsoppdrag>>,
+        oppdaterteKjeder: Map<IdentOgYtelse, List<AndelTilkjentYtelseForUtbetalingsoppdrag>>
+    ): Map<IdentOgYtelse, AndelTilkjentYtelseForUtbetalingsoppdrag?> =
         forrigeKjeder.keys.union(oppdaterteKjeder.keys).associateWith { null }
 
     private fun beståendeAndelerIKjede(
@@ -95,9 +90,9 @@ object ØkonomiUtils {
      * @return map med personident og oppdaterte kjeder
      */
     fun oppdaterBeståendeAndelerMedOffset(
-        oppdaterteKjeder: Map<String, List<AndelTilkjentYtelseForUtbetalingsoppdrag>>,
-        forrigeKjeder: Map<String, List<AndelTilkjentYtelseForUtbetalingsoppdrag>>
-    ): Map<String, List<AndelTilkjentYtelseForUtbetalingsoppdrag>> {
+        oppdaterteKjeder: Map<IdentOgYtelse, List<AndelTilkjentYtelseForUtbetalingsoppdrag>>,
+        forrigeKjeder: Map<IdentOgYtelse, List<AndelTilkjentYtelseForUtbetalingsoppdrag>>
+    ): Map<IdentOgYtelse, List<AndelTilkjentYtelseForUtbetalingsoppdrag>> {
         oppdaterteKjeder
             .filter { forrigeKjeder.containsKey(it.key) }
             .forEach { (kjedeIdentifikator, oppdatertKjede) ->
@@ -125,8 +120,8 @@ object ØkonomiUtils {
      * @return andeler som må bygges fordelt på kjeder
      */
     fun andelerTilOpprettelse(
-        oppdaterteKjeder: Map<String, List<AndelTilkjentYtelseForUtbetalingsoppdrag>>,
-        sisteBeståendeAndelIHverKjede: Map<String, AndelTilkjentYtelseForUtbetalingsoppdrag?>
+        oppdaterteKjeder: Map<IdentOgYtelse, List<AndelTilkjentYtelseForUtbetalingsoppdrag>>,
+        sisteBeståendeAndelIHverKjede: Map<IdentOgYtelse, AndelTilkjentYtelseForUtbetalingsoppdrag?>
     ): List<List<AndelTilkjentYtelseForUtbetalingsoppdrag>> =
         oppdaterteKjeder.map { (kjedeIdentifikator, oppdatertKjedeTilstand) ->
             if (sisteBeståendeAndelIHverKjede[kjedeIdentifikator] != null) {
@@ -145,8 +140,8 @@ object ØkonomiUtils {
      * @return map av siste andel og opphørsdato fra kjeder med opphør
      */
     fun andelerTilOpphørMedDato(
-        forrigeKjeder: Map<String, List<AndelTilkjentYtelseForUtbetalingsoppdrag>>,
-        sisteBeståendeAndelIHverKjede: Map<String, AndelTilkjentYtelseForUtbetalingsoppdrag?>,
+        forrigeKjeder: Map<IdentOgYtelse, List<AndelTilkjentYtelseForUtbetalingsoppdrag>>,
+        sisteBeståendeAndelIHverKjede: Map<IdentOgYtelse, AndelTilkjentYtelseForUtbetalingsoppdrag?>,
         endretMigreringsDato: YearMonth? = null
     ): List<Pair<AndelTilkjentYtelseForUtbetalingsoppdrag, YearMonth>> =
         forrigeKjeder
@@ -159,13 +154,10 @@ object ØkonomiUtils {
             .filter { (_, andelerSomOpphøres) -> andelerSomOpphøres.isNotEmpty() }
             .mapValues { andelForKjede -> andelForKjede.value.sortedBy { it.stønadFom } }
             .map { (_, kjedeEtterFørsteEndring) ->
-                kjedeEtterFørsteEndring.last() to (
-                    endretMigreringsDato
-                        ?: kjedeEtterFørsteEndring.first().stønadFom
-                    )
+                kjedeEtterFørsteEndring.last() to (endretMigreringsDato ?: kjedeEtterFørsteEndring.first().stønadFom)
             }
 
-    fun gjeldendeForrigeOffsetForKjede(andelerFraForrigeBehandling: Map<String, List<AndelTilkjentYtelseForUtbetalingsoppdrag>>): Map<String, Int> =
+    fun gjeldendeForrigeOffsetForKjede(andelerFraForrigeBehandling: Map<IdentOgYtelse, List<AndelTilkjentYtelseForUtbetalingsoppdrag>>): Map<IdentOgYtelse, Int> =
         andelerFraForrigeBehandling.map { (personIdent, forrigeKjede) ->
             personIdent to (
                 forrigeKjede.filter { it.kalkulertUtbetalingsbeløp > 0 }
@@ -175,14 +167,14 @@ object ØkonomiUtils {
         }.toMap()
 
     private fun altIKjedeOpphøres(
-        kjedeidentifikator: String,
-        sisteBeståendeAndelIHverKjede: Map<String, AndelTilkjentYtelseForUtbetalingsoppdrag?>
+        kjedeidentifikator: IdentOgYtelse,
+        sisteBeståendeAndelIHverKjede: Map<IdentOgYtelse, AndelTilkjentYtelseForUtbetalingsoppdrag?>
     ): Boolean = sisteBeståendeAndelIHverKjede[kjedeidentifikator] == null
 
     private fun andelOpphøres(
-        kjedeidentifikator: String,
+        kjedeidentifikator: IdentOgYtelse,
         andel: AndelTilkjentYtelseForUtbetalingsoppdrag,
-        sisteBeståendeAndelIHverKjede: Map<String, AndelTilkjentYtelseForUtbetalingsoppdrag?>
+        sisteBeståendeAndelIHverKjede: Map<IdentOgYtelse, AndelTilkjentYtelseForUtbetalingsoppdrag?>
     ): Boolean = andel.stønadFom > sisteBeståendeAndelIHverKjede[kjedeidentifikator]!!.stønadTom
 
     const val SMÅBARNSTILLEGG_SUFFIX = "_SMÅBARNSTILLEGG"
