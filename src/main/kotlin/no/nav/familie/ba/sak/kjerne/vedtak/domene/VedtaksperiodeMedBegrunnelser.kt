@@ -94,6 +94,10 @@ data class VedtaksperiodeMedBegrunnelser(
 
 ) : BaseEntitet() {
 
+    override fun toString(): String {
+        return "VedtaksperiodeMedBegrunnelser(id=$id, fom=$fom, tom=$tom, type=$type, begrunnelser=$begrunnelser, eøsBegrunnelser=$eøsBegrunnelser, fritekster=$fritekster)"
+    }
+
     fun settBegrunnelser(nyeBegrunnelser: List<Vedtaksbegrunnelse>) {
         begrunnelser.clear()
         begrunnelser.addAll(nyeBegrunnelser)

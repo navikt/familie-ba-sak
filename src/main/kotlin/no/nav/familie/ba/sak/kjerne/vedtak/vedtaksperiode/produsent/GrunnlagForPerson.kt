@@ -85,7 +85,7 @@ data class AndelForVedtaksperiode(
 data class KompetanseForVedtaksperiode(
     val søkersAktivitet: SøkersAktivitet,
     val annenForeldersAktivitet: AnnenForeldersAktivitet,
-    val annenForeldersAktivitetsland: String,
+    val annenForeldersAktivitetsland: String?,
     val søkersAktivitetsland: String,
     val barnetsBostedsland: String,
     val resultat: KompetanseResultat
