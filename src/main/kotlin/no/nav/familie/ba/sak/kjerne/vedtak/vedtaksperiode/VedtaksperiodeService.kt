@@ -745,7 +745,7 @@ class VedtaksperiodeService(
 
         return refusjonEøsRepository.finnRefusjonEøsForBehandling(behandling.id).filter { it.refusjonAvklart == avklart }.map {
             val (fom, tom) = it.fom.tilDagMånedÅr() to it.tom.tilDagMånedÅr()
-            val land = landkoderISO2[it.land]?.storForbokstav() ?: throw Feil("Fant ikke navn for landkode ${it.land} ")
+            val land = landkoderISO2[it.land]?.storForbokstav() ?: throw Feil("Fant ikke navn for landkode ${it.land}")
             val beløp = it.refusjonsbeløp
 
             when (målform) {
@@ -753,7 +753,7 @@ class VedtaksperiodeService(
                     if (avklart) {
                         "Frå $fom til $tom blir $beløp kroner av etterbetalinga di utbetalt til myndighetene i $land"
                     } else {
-                        "Fra $fom til $tom blir ikkje etterbetalinga på $beløp kroner utbetalt no sidan det er utbetalt barnetrygd i $land"
+                        "Frå $fom til $tom blir ikkje etterbetalinga på $beløp kroner utbetalt no sidan det er utbetalt barnetrygd i $land"
                     }
                 }
                 else -> {
