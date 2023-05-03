@@ -285,14 +285,18 @@ private fun List<InternPeriodeOvergangsstønad>.tilPeriodeOvergangsstønadForVed
 private fun Tidslinje<List<VilkårResultat>, Måned>.tilVilkårResultaterForVedtaksPeriodeTidslinje() =
     this.map { vilkårResultater -> vilkårResultater?.map { VilkårResultatForVedtaksperiode(it) } }
 
+@JvmName("internPeriodeOvergangsstønaderFiltrerPåAktør")
 private fun List<InternPeriodeOvergangsstønad>.filtrerPåAktør(aktør: Aktør) =
     this.filter { it.personIdent == aktør.aktivFødselsnummer() }
 
+@JvmName("andelerTilkjentYtelseerFiltrerPåAktør")
 private fun List<AndelTilkjentYtelse>.filtrerPåAktør(aktør: Aktør) =
     this.filter { andelTilkjentYtelse -> andelTilkjentYtelse.aktør == aktør }
 
+@JvmName("endredeUtbetalingerFiltrerPåAktør")
 private fun List<IUtfyltEndretUtbetalingAndel>.filtrerPåAktør(aktør: Aktør) =
     this.filter { endretUtbetaling -> endretUtbetaling.person.aktør == aktør }
 
+@JvmName("utfyltKompetanseFiltrerPåAktør")
 private fun List<UtfyltKompetanse>.filtrerPåAktør(aktør: Aktør) =
     this.filter { it.barnAktører.contains(aktør) }
