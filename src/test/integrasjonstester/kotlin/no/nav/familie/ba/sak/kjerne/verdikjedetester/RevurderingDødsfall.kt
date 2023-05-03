@@ -55,7 +55,6 @@ class RevurderingDødsfall(
     fun `Dødsfall bruker skal kjøre gjennom`() {
         every { featureToggleService.isEnabled(FeatureToggleConfig.VEDTAKSPERIODE_NY) } returns false
 
-
         val scenario = mockServerKlient().lagScenario(
             RestScenario(
                 søker = RestScenarioPerson(
