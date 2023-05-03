@@ -144,7 +144,7 @@ private fun hentErMinstEttBarnMedUtbetalingTidslinje(
     søker: Person,
     fagsakType: FagsakType
 ): Tidslinje<Boolean, Måned> {
-    val søkerSinerOrdinereVilkårErOppfylt =
+    val søkerSinerOrdinæreVilkårErOppfyltTidslinje =
         personResultater.single { it.erSøkersResultater() }.tilTidslinjeForSplittForPerson(
             personType = PersonType.SØKER,
             fagsakType = fagsakType
@@ -158,9 +158,10 @@ private fun hentErMinstEttBarnMedUtbetalingTidslinje(
                 fagsakType = fagsakType
             ).map { it != null }
         }
+
     return barnSineVilkårErOppfyltTidslinjer
         .map {
-            it.kombinerMed(søkerSinerOrdinereVilkårErOppfylt) { barnetHarAlleOrdinæreVilkårOppfylt, søkerHarAlleOrdinæreVilkårOppfylt ->
+            it.kombinerMed(søkerSinerOrdinæreVilkårErOppfyltTidslinje) { barnetHarAlleOrdinæreVilkårOppfylt, søkerHarAlleOrdinæreVilkårOppfylt ->
                 barnetHarAlleOrdinæreVilkårOppfylt == true && søkerHarAlleOrdinæreVilkårOppfylt == true
             }
         }
