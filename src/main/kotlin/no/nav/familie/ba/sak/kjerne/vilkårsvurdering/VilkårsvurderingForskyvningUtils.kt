@@ -139,11 +139,7 @@ object VilkårsvurderingForskyvningUtils {
         personType: PersonType,
         fagsakType: FagsakType
     ): List<VilkårResultat>? {
-        return if (vilkårResultater.alleOrdinæreVilkårErOppfylt(
-                personType,
-                fagsakType
-            )
-        ) {
+        return if (vilkårResultater.alleOrdinæreVilkårErOppfylt(personType, fagsakType)) {
             vilkårResultater.filterNotNull()
         } else {
             null
