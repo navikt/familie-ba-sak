@@ -104,12 +104,15 @@ data class Kompetanse(
     }
 
     fun erObligatoriskeFelterSatt() = fom != null &&
+        erObligatoriskeFelterUtenomTidsperioderSatt()
+
+    fun erObligatoriskeFelterUtenomTidsperioderSatt() =
         this.søkersAktivitet != null &&
-        this.annenForeldersAktivitet != null &&
-        this.søkersAktivitetsland != null &&
-        this.barnetsBostedsland != null &&
-        this.resultat != null &&
-        this.barnAktører.isNotEmpty()
+            this.annenForeldersAktivitet != null &&
+            this.søkersAktivitetsland != null &&
+            this.barnetsBostedsland != null &&
+            this.resultat != null &&
+            this.barnAktører.isNotEmpty()
 
     companion object {
         val NULL = Kompetanse(null, null, emptySet())
