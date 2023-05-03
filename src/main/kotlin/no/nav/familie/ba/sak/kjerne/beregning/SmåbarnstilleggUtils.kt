@@ -12,7 +12,10 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønadTidslinje
+import no.nav.familie.ba.sak.kjerne.beregning.domene.slåSammenTidligerePerioder
+import no.nav.familie.ba.sak.kjerne.beregning.domene.splitFramtidigePerioderFraForrigeBehandling
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil
+import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.PeriodeOvergangsstønadGrunnlag
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
@@ -32,6 +35,12 @@ import org.springframework.http.HttpStatus
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
+
+fun List<PeriodeOvergangsstønadGrunnlag>.splittOgSlåSammen(
+    overgangsstønadPerioderFraForrigeBehandling: List<InternPeriodeOvergangsstønad>
+) = map { InternPeriodeOvergangsstønad(it) }
+    .slåSammenTidligerePerioder()
+    .splitFramtidigePerioderFraForrigeBehandling(overgangsstønadPerioderFraForrigeBehandling)
 
 class VedtaksperiodefinnerSmåbarnstilleggFeil(
     melding: String,

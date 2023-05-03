@@ -1,7 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.verdikjedetester
 
+import io.mockk.every
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.lagSøknadDTO
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedStandardbegrunnelser
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
@@ -34,11 +37,14 @@ class Autobrev6og18ÅrFortsattOpphørtTest(
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val stegService: StegService,
     @Autowired private val autobrev6og18ÅrService: Autobrev6og18ÅrService,
-    @Autowired private val brevmalService: BrevmalService
+    @Autowired private val brevmalService: BrevmalService,
+    @Autowired private val featureToggleService: FeatureToggleService
 ) : AbstractVerdikjedetest() {
 
     @Test
     fun `Skal støtte fortsatt opphørt som resultat`() {
+        every { featureToggleService.isEnabled(FeatureToggleConfig.VEDTAKSPERIODE_NY) } returns false
+
         val scenario = mockServerKlient().lagScenario(
             RestScenario(
                 søker = RestScenarioPerson(fødselsdato = "1996-11-12", fornavn = "Mor", etternavn = "Søker"),
