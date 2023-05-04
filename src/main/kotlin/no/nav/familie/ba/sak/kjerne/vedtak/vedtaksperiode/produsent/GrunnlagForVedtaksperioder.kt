@@ -83,8 +83,8 @@ data class GrunnlagForVedtaksperioder(
                     )
 
                 aktør.aktørId to forskjøvedeVilkårResultaterForPersonsAndeler.tilGrunnlagForPersonTidslinje(
-                    person,
-                    søker
+                    person = person,
+                    søker = søker
                 )
             }
 
@@ -169,7 +169,9 @@ private fun hentErMinstEttBarnMedUtbetalingTidslinje(
                 barnetHarAlleOrdinæreVilkårOppfylt == true && søkerHarAlleOrdinæreVilkårOppfylt == true
             }
         }
-        .kombiner { it.any() }
+        .kombiner { erOrdinæreVilkårOppfyltForSøkerOgBarn ->
+            erOrdinæreVilkårOppfyltForSøkerOgBarn.any { it }
+        }
 }
 
 private fun PersonResultat.hentForskjøvedeVilkårResultaterForPersonsAndelerTidslinje(
@@ -183,7 +185,11 @@ private fun PersonResultat.hentForskjøvedeVilkårResultaterForPersonsAndelerTid
     return when (person.type) {
         PersonType.SØKER -> forskjøvedeVilkårResultaterForPerson.map { vilkårResultater ->
             vilkårResultater?.filtrerErIkkeOrdinærtFor(person)
-        }.beskjærEtter(erMinstEttBarnMedUtbetalingTidslinje)
+        }.kombinerMed(erMinstEttBarnMedUtbetalingTidslinje) { vilkårResultaterForSøker, erMinstEttBarnMedUtbetaling ->
+            if (erMinstEttBarnMedUtbetaling == true) {
+                vilkårResultaterForSøker
+            } else null
+        }
 
         PersonType.BARN -> forskjøvedeVilkårResultaterForPerson.kombinerMed(
             ordinæreVilkårForSøkerTidslinje.beskjærEtter(forskjøvedeVilkårResultaterForPerson)
