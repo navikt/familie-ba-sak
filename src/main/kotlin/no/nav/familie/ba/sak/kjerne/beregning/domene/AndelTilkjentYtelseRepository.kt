@@ -68,15 +68,17 @@ interface AndelTilkjentYtelseRepository : JpaRepository<AndelTilkjentYtelse, Lon
 
     @Query(
         """
-        WITH andeler AS (SELECT aty.id,
-                        row_number()
-                        OVER (PARTITION BY aty.type, aty.fk_aktoer_id ORDER BY aty.periode_offset DESC) rn
-                 FROM andel_tilkjent_ytelse aty
-                  JOIN tilkjent_ytelse ty ON ty.id = aty.tilkjent_ytelse_id
-                  JOIN Behandling b ON b.id = aty.fk_behandling_id
-                 WHERE b.fk_fagsak_id = :fagsakId
-                   AND ty.utbetalingsoppdrag IS NOT NULL
-                   AND aty.periode_offset IS NOT NULL)
+        WITH andeler AS (
+            SELECT
+             aty.id,
+             row_number() OVER (PARTITION BY aty.type, aty.fk_aktoer_id ORDER BY aty.periode_offset DESC) rn
+             FROM andel_tilkjent_ytelse aty
+              JOIN tilkjent_ytelse ty ON ty.id = aty.tilkjent_ytelse_id
+              JOIN Behandling b ON b.id = aty.fk_behandling_id
+             WHERE b.fk_fagsak_id = :fagsakId
+               AND ty.utbetalingsoppdrag IS NOT NULL
+               AND aty.periode_offset IS NOT NULL
+               AND b.status = 'AVSLUTTET')
         SELECT id FROM andeler aty WHERE rn = 1
     """,
         nativeQuery = true
