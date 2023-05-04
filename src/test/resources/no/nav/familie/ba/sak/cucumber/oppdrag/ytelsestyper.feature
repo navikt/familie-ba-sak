@@ -38,7 +38,7 @@ Egenskap: Ulike ytelsestyper på andelene
       | 2            | 03.2021  | 03.2021  |             | 800   | SMÅBARNSTILLEGG    | ENDR         | Nei        | 2          | 1                  |
       | 2            | 04.2021  | 05.2021  |             | 800   | SMÅBARNSTILLEGG    | ENDR         | Nei        | 3          | 2                  |
 
-  Scenario: Forelder og barn har flere stønadstyper, øver hvert beløp med 100kr
+  Scenario: Forelder og barn har flere stønadstyper som alle blir egne kjeder. Øker hvert beløp med 100kr i revurderingen for å verifisere at det fortsatt blir 4 ulike kjeder
 
     Gitt følgende tilkjente ytelser
       | BehandlingId | Fra dato | Til dato | Beløp | Ytelse             | Kildebehandling | Ident |
