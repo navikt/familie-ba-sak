@@ -82,16 +82,19 @@ data class GrunnlagForVedtaksperioder(
                         ordinæreVilkårForSøkerTidslinje = ordinæreVilkårForSøkerForskjøvetTidslinje
                     )
 
-                aktør.aktørId to forskjøvedeVilkårResultaterForPersonsAndeler.tilGrunnlagForPersonTidslinje(person)
+                aktør.aktørId to forskjøvedeVilkårResultaterForPersonsAndeler.tilGrunnlagForPersonTidslinje(
+                    person,
+                    søker
+                )
             }
 
         return grunnlagForPersonTidslinjer
     }
 
     private fun Tidslinje<List<VilkårResultat>, Måned>.tilGrunnlagForPersonTidslinje(
-        person: Person
+        person: Person, søker: Person
     ): Tidslinje<GrunnlagForPerson, Måned> {
-        val harRettPåUtbetalingTidslinje = this.tilHarRettPåUtbetalingTidslinje(person, fagsakType)
+        val harRettPåUtbetalingTidslinje = this.tilHarRettPåUtbetalingTidslinje(person, fagsakType, søker)
 
         val kompetanseTidslinje = utfylteKompetanser.filtrerPåAktør(person.aktør)
             .tilTidslinje().mapIkkeNull { KompetanseForVedtaksperiode(it) }
@@ -269,28 +272,33 @@ private fun lagGrunnlagMedOvergangsstønad(
 // TODO: Kan dette erstattes ved å se på hvorvidt det er andeler eller ikke i stedet?
 private fun Tidslinje<List<VilkårResultat>, Måned>.tilHarRettPåUtbetalingTidslinje(
     person: Person,
-    fagsakType: FagsakType
-) = when (person.type) {
-    PersonType.SØKER -> map { vilkårResultater ->
-        if (vilkårResultater.isNullOrEmpty()) {
-            null
-        } else {
-            vilkårResultater.all { it.erOppfylt() }
+    fagsakType: FagsakType,
+    søker: Person
+): Tidslinje<Boolean, Måned> = this.map { vilkårResultater ->
+    if (vilkårResultater.isNullOrEmpty()) {
+        null
+    } else {
+        when (person.type) {
+            PersonType.SØKER -> vilkårResultater.filtrerPåAktør(søker.aktør).all { it.erOppfylt() }
+
+            PersonType.BARN -> {
+                val barnSineVilkårErOppfylt = vilkårResultater.filtrerPåAktør(person.aktør)
+                    .alleOrdinæreVilkårErOppfylt(
+                        PersonType.BARN,
+                        fagsakType
+                    )
+                val søkerSineVilkårErOppfylt = vilkårResultater.filtrerPåAktør(søker.aktør)
+                    .alleOrdinæreVilkårErOppfylt(
+                        PersonType.SØKER,
+                        fagsakType
+                    )
+
+                barnSineVilkårErOppfylt && søkerSineVilkårErOppfylt
+            }
+
+            PersonType.ANNENPART -> throw Feil("Ikke implementert for annenpart")
         }
     }
-
-    PersonType.BARN -> map {
-        it != null &&
-            it.alleOrdinæreVilkårErOppfylt(
-                PersonType.BARN,
-                fagsakType
-            ) && it.alleOrdinæreVilkårErOppfylt(
-            PersonType.SØKER,
-            fagsakType
-        )
-    }
-
-    PersonType.ANNENPART -> throw Feil("Ikke implementert for annenpart")
 }
 
 private fun List<AndelTilkjentYtelse>.tilAndelerForVedtaksPeriodeTidslinje() =
@@ -322,3 +330,7 @@ private fun List<IUtfyltEndretUtbetalingAndel>.filtrerPåAktør(aktør: Aktør) 
 @JvmName("utfyltKompetanseFiltrerPåAktør")
 private fun List<UtfyltKompetanse>.filtrerPåAktør(aktør: Aktør) =
     this.filter { it.barnAktører.contains(aktør) }
+
+@JvmName("vilkårResultatFiltrerPåAktør")
+private fun List<VilkårResultat>.filtrerPåAktør(aktør: Aktør) =
+    filter { it.personResultat?.aktør == aktør }

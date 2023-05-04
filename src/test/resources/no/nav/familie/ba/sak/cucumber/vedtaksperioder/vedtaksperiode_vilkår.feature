@@ -208,5 +208,34 @@ Egenskap: Vedtaksperioder med mor og et barn
       | 01.04.2038 |            | Opphør             | Kun søker                             |
 
 
+  Scenario: Skal gi opphør i periode barn ikke har lovlig opphold selv om mor har lovlig opphold
+
+    Og lag personresultater for behandling 1
+    Og med overstyring av vilkår for behandling 1
+      | AktørId | Vilkår                                          | Fra dato   | Til dato   | Resultat |
+      | 1234    | BOSATT_I_RIKET, LOVLIG_OPPHOLD                  | 11.01.1970 |            | Oppfylt  |
+      | 3456    | UNDER_18_ÅR                                     | 13.04.2020 | 12.04.2038 | Oppfylt  |
+      | 3456    | GIFT_PARTNERSKAP, BOSATT_I_RIKET, BOR_MED_SØKER | 13.04.2020 |            | Oppfylt  |
+      | 3456    | LOVLIG_OPPHOLD                                  | 13.04.2020 | 21.07.2021 | Oppfylt  |
+
+    Og legg til nye vilkårresultater for behandling 1
+      | AktørId | Vilkår         | Fra dato   | Til dato | Resultat |
+      | 3456    | LOVLIG_OPPHOLD | 17.05.2023 |          | Oppfylt  |
+
+    Og med andeler tilkjent ytelse
+      | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
+      | 3456    | 01.05.2020 | 31.07.2021 | 1245  | 1            |
+      | 3456    | 01.06.2023 | 31.03.2038 | 1245  | 1            |
+
+    Når vedtaksperioder med begrunnelser genereres for behandling 1
+
+    Så forvent følgende vedtaksperioder med begrunnelser
+      | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar                             |
+      | 01.05.2020 | 31.07.2021 | Utbetaling         | Barn og søker. Søker har ikke utvidet |
+      | 01.08.2021 | 31.05.2023 | Opphør             | Kun søker                             |
+      | 01.06.2023 | 31.03.2038 | Utbetaling         | Barn og søker                         |
+      | 01.04.2038 |            | Opphør             | Kun søker                             |
+
+
 
 
