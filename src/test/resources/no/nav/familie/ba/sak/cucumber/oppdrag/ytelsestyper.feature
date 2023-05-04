@@ -7,9 +7,9 @@ Egenskap: Ulike ytelsestyper på andelene
   Scenario: Søker med utvidet og småbarnstillegg
 
     Gitt følgende tilkjente ytelser
-      | BehandlingId | Fra dato | Til dato | Beløp | Kildebehandling | Ident | Ytelse             |
-      | 1            | 03.2021  | 03.2021  | 700   | 1               | 1     | UTVIDET_BARNETRYGD |
-      | 1            | 03.2021  | 03.2021  | 800   | 1               | 1     | SMÅBARNSTILLEGG    |
+      | BehandlingId | Fra dato | Til dato | Beløp | Ident | Ytelse             |
+      | 1            | 03.2021  | 03.2021  | 700   | 1     | UTVIDET_BARNETRYGD |
+      | 1            | 03.2021  | 03.2021  | 800   | 1     | SMÅBARNSTILLEGG    |
 
     Når beregner utbetalingsoppdrag
 
@@ -21,12 +21,12 @@ Egenskap: Ulike ytelsestyper på andelene
   Scenario: Revurdering endrer beløp på småbarnstillegg fra april
 
     Gitt følgende tilkjente ytelser
-      | BehandlingId | Fra dato | Til dato | Beløp | Kildebehandling | Ident | Ytelse             |
-      | 1            | 03.2021  | 05.2021  | 700   | 1               | 1     | UTVIDET_BARNETRYGD |
-      | 1            | 03.2021  | 05.2021  | 800   | 1               | 1     | SMÅBARNSTILLEGG    |
-      | 2            | 03.2021  | 05.2021  | 700   | 1               | 1     | UTVIDET_BARNETRYGD |
-      | 2            | 03.2021  | 03.2021  | 800   | 1               | 1     | SMÅBARNSTILLEGG    |
-      | 2            | 04.2021  | 05.2021  | 800   | 1               | 1     | SMÅBARNSTILLEGG    |
+      | BehandlingId | Fra dato | Til dato | Beløp | Ident | Ytelse             |
+      | 1            | 03.2021  | 05.2021  | 700   | 1     | UTVIDET_BARNETRYGD |
+      | 1            | 03.2021  | 05.2021  | 800   | 1     | SMÅBARNSTILLEGG    |
+      | 2            | 03.2021  | 05.2021  | 700   | 1     | UTVIDET_BARNETRYGD |
+      | 2            | 03.2021  | 03.2021  | 800   | 1     | SMÅBARNSTILLEGG    |
+      | 2            | 04.2021  | 05.2021  | 800   | 1     | SMÅBARNSTILLEGG    |
 
     Når beregner utbetalingsoppdrag
 
