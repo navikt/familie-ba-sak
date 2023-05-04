@@ -5,6 +5,8 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForUtbetalingsoppdrag
+import no.nav.familie.ba.sak.integrasjoner.økonomi.IdentOgYtelse
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -15,7 +17,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import java.time.LocalDate
 import java.time.YearMonth
 
 class AndelTilkjentYtelseRepositoryTest(
@@ -32,7 +33,7 @@ class AndelTilkjentYtelseRepositoryTest(
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
 
     @Autowired
-    private val beregningService: BeregningService,
+    private val beregningService: BeregningService
 ) : AbstractSpringIntegrationTest() {
 
     @Nested
@@ -65,8 +66,8 @@ class AndelTilkjentYtelseRepositoryTest(
                         person = barn1,
                         fom = YearMonth.of(2020, 1),
                         tom = YearMonth.of(2020, 2),
-                        offset = 0,
-                    ),
+                        offset = 0
+                    )
                 )
                 andelerTilkjentYtelse.addAll(andeler)
                 tilkjentYtelseRepository.saveAndFlush(this)
@@ -85,7 +86,7 @@ class AndelTilkjentYtelseRepositoryTest(
                         person = barn1,
                         fom = YearMonth.of(2020, 1),
                         tom = YearMonth.of(2020, 2),
-                        offset = 0,
+                        offset = 0
                     ),
                     lagAndel(
                         tilkjentYtelse = this,
@@ -93,25 +94,25 @@ class AndelTilkjentYtelseRepositoryTest(
                         person = barn2,
                         fom = YearMonth.of(2020, 3),
                         tom = YearMonth.of(2020, 5),
-                        offset = 1,
-                    ),
+                        offset = 1
+                    )
                 )
                 andelerTilkjentYtelse.addAll(andeler)
                 tilkjentYtelseRepository.saveAndFlush(this)
             }
             val sisteAndelPerIdent = hentSisteAndelPerIdent()
             assertThat(sisteAndelPerIdent).hasSize(2)
-            with(sisteAndelPerIdent[Pair(barn1.aktør.aktivFødselsnummer(), YtelseType.SMÅBARNSTILLEGG)]!!) {
+            with(sisteAndelPerIdent[IdentOgYtelse(barn1.aktør.aktivFødselsnummer(), YtelseType.SMÅBARNSTILLEGG)]!!) {
                 assertThat(periodeOffset).isEqualTo(0L)
                 assertThat(forrigePeriodeOffset).isNull()
-                assertThat(stønadFom).isEqualTo(LocalDate.of(2020, 1, 1))
-                assertThat(stønadTom).isEqualTo(LocalDate.of(2020, 1, 31))
+                assertThat(stønadFom).isEqualTo(YearMonth.of(2020, 1))
+                assertThat(stønadTom).isEqualTo(YearMonth.of(2020, 2))
             }
-            with(sisteAndelPerIdent[Pair(barn2.aktør.aktivFødselsnummer(), YtelseType.SMÅBARNSTILLEGG)]!!) {
+            with(sisteAndelPerIdent[IdentOgYtelse(barn2.aktør.aktivFødselsnummer(), YtelseType.SMÅBARNSTILLEGG)]!!) {
                 assertThat(periodeOffset).isEqualTo(1L)
                 assertThat(forrigePeriodeOffset).isNull()
-                assertThat(stønadFom).isEqualTo(LocalDate.of(2020, 3, 1))
-                assertThat(stønadTom).isEqualTo(LocalDate.of(2020, 5, 31))
+                assertThat(stønadFom).isEqualTo(YearMonth.of(2020, 3))
+                assertThat(stønadTom).isEqualTo(YearMonth.of(2020, 5))
             }
         }
 
@@ -123,14 +124,14 @@ class AndelTilkjentYtelseRepositoryTest(
                         tilkjentYtelse = this,
                         fom = YearMonth.of(2020, 1),
                         tom = YearMonth.of(2020, 2),
-                        offset = 0,
+                        offset = 0
                     ),
                     lagAndel(
                         tilkjentYtelse = this,
                         fom = YearMonth.of(2020, 3),
                         tom = YearMonth.of(2020, 5),
                         offset = 1,
-                        forrigeOffset = 0,
+                        forrigeOffset = 0
                     ),
                     lagAndel(
                         tilkjentYtelse = this,
@@ -138,8 +139,8 @@ class AndelTilkjentYtelseRepositoryTest(
                         fom = YearMonth.of(2020, 3),
                         tom = YearMonth.of(2020, 3),
                         offset = 2,
-                        forrigeOffset = null,
-                    ),
+                        forrigeOffset = null
+                    )
                 )
                 andelerTilkjentYtelse.addAll(andeler)
                 tilkjentYtelseRepository.saveAndFlush(this)
@@ -147,17 +148,17 @@ class AndelTilkjentYtelseRepositoryTest(
             val sisteAndelPerIdent = hentSisteAndelPerIdent()
             assertThat(sisteAndelPerIdent).hasSize(2)
             val fødselsnummer = aktørSøker.aktivFødselsnummer()
-            with(sisteAndelPerIdent[Pair(fødselsnummer, YtelseType.SMÅBARNSTILLEGG)]!!) {
+            with(sisteAndelPerIdent[IdentOgYtelse(fødselsnummer, YtelseType.SMÅBARNSTILLEGG)]!!) {
                 assertThat(periodeOffset).isEqualTo(1L)
                 assertThat(forrigePeriodeOffset).isEqualTo(0L)
-                assertThat(stønadFom).isEqualTo(LocalDate.of(2020, 3, 1))
-                assertThat(stønadTom).isEqualTo(LocalDate.of(2020, 5, 31))
+                assertThat(stønadFom).isEqualTo(YearMonth.of(2020, 3))
+                assertThat(stønadTom).isEqualTo(YearMonth.of(2020, 5))
             }
-            with(sisteAndelPerIdent[Pair(fødselsnummer, YtelseType.UTVIDET_BARNETRYGD)]!!) {
+            with(sisteAndelPerIdent[IdentOgYtelse(fødselsnummer, YtelseType.UTVIDET_BARNETRYGD)]!!) {
                 assertThat(periodeOffset).isEqualTo(2L)
                 assertThat(forrigePeriodeOffset).isNull()
-                assertThat(stønadFom).isEqualTo(LocalDate.of(2020, 3, 1))
-                assertThat(stønadTom).isEqualTo(LocalDate.of(2020, 5, 31))
+                assertThat(stønadFom).isEqualTo(YearMonth.of(2020, 3))
+                assertThat(stønadTom).isEqualTo(YearMonth.of(2020, 3))
             }
         }
 
@@ -169,8 +170,8 @@ class AndelTilkjentYtelseRepositoryTest(
                         tilkjentYtelse = this,
                         fom = YearMonth.of(2020, 1),
                         tom = YearMonth.of(2020, 2),
-                        offset = 0,
-                    ),
+                        offset = 0
+                    )
                 )
                 andelerTilkjentYtelse.addAll(andeler)
                 tilkjentYtelseRepository.saveAndFlush(this)
@@ -182,8 +183,8 @@ class AndelTilkjentYtelseRepositoryTest(
                         fom = YearMonth.of(2020, 1),
                         tom = YearMonth.of(2020, 3),
                         offset = 1,
-                        forrigeOffset = 0,
-                    ),
+                        forrigeOffset = 0
+                    )
                 )
                 andelerTilkjentYtelse.addAll(andeler)
                 tilkjentYtelseRepository.saveAndFlush(this)
@@ -192,11 +193,11 @@ class AndelTilkjentYtelseRepositoryTest(
             val sisteAndelPerIdent = hentSisteAndelPerIdent()
             assertThat(sisteAndelPerIdent).hasSize(1)
             val fødselsnummer = aktørSøker.aktivFødselsnummer()
-            with(sisteAndelPerIdent[Pair(fødselsnummer, YtelseType.SMÅBARNSTILLEGG)]!!) {
+            with(sisteAndelPerIdent[IdentOgYtelse(fødselsnummer, YtelseType.SMÅBARNSTILLEGG)]!!) {
                 assertThat(periodeOffset).isEqualTo(1L)
                 assertThat(forrigePeriodeOffset).isEqualTo(0L)
-                assertThat(stønadFom).isEqualTo(LocalDate.of(2020, 1, 1))
-                assertThat(stønadTom).isEqualTo(LocalDate.of(2020, 3, 31))
+                assertThat(stønadFom).isEqualTo(YearMonth.of(2020, 1))
+                assertThat(stønadTom).isEqualTo(YearMonth.of(2020, 3))
                 assertThat(kildeBehandlingId).isEqualTo(andreBehandling.id)
             }
         }
@@ -209,15 +210,15 @@ class AndelTilkjentYtelseRepositoryTest(
                         tilkjentYtelse = this,
                         fom = YearMonth.of(2020, 1),
                         tom = YearMonth.of(2020, 3),
-                        offset = 0,
+                        offset = 0
                     ),
                     lagAndel(
                         tilkjentYtelse = this,
                         fom = YearMonth.of(2020, 4),
                         tom = YearMonth.of(2020, 5),
                         offset = 1,
-                        forrigeOffset = 0,
-                    ),
+                        forrigeOffset = 0
+                    )
                 )
                 andelerTilkjentYtelse.addAll(andeler)
                 tilkjentYtelseRepository.saveAndFlush(this)
@@ -228,8 +229,8 @@ class AndelTilkjentYtelseRepositoryTest(
                         tilkjentYtelse = this,
                         fom = YearMonth.of(2020, 1),
                         tom = YearMonth.of(2020, 3),
-                        offset = 0,
-                    ),
+                        offset = 0
+                    )
                 )
                 andelerTilkjentYtelse.addAll(andeler)
                 tilkjentYtelseRepository.saveAndFlush(this)
@@ -238,16 +239,16 @@ class AndelTilkjentYtelseRepositoryTest(
             val sisteAndelPerIdent = hentSisteAndelPerIdent()
             assertThat(sisteAndelPerIdent).hasSize(1)
             val fødselsnummer = aktørSøker.aktivFødselsnummer()
-            with(sisteAndelPerIdent[Pair(fødselsnummer, YtelseType.SMÅBARNSTILLEGG)]!!) {
+            with(sisteAndelPerIdent[IdentOgYtelse(fødselsnummer, YtelseType.SMÅBARNSTILLEGG)]!!) {
                 assertThat(periodeOffset).isEqualTo(1L)
                 assertThat(forrigePeriodeOffset).isEqualTo(0L)
-                assertThat(stønadFom).isEqualTo(LocalDate.of(2020, 4, 1))
-                assertThat(stønadTom).isEqualTo(LocalDate.of(2020, 5, 31))
+                assertThat(stønadFom).isEqualTo(YearMonth.of(2020, 4))
+                assertThat(stønadTom).isEqualTo(YearMonth.of(2020, 5))
                 assertThat(kildeBehandlingId).isEqualTo(førsteBehandling.id)
             }
         }
 
-        fun hentSisteAndelPerIdent(): Map<Pair<String, YtelseType>, AndelTilkjentYtelse> {
+        fun hentSisteAndelPerIdent(): Map<IdentOgYtelse, AndelTilkjentYtelseForUtbetalingsoppdrag> {
             return beregningService.hentSisteAndelPerIdent(fagsak.id)
         }
 
@@ -259,7 +260,7 @@ class AndelTilkjentYtelseRepositoryTest(
             fom: YearMonth,
             tom: YearMonth,
             offset: Long,
-            forrigeOffset: Long? = null,
+            forrigeOffset: Long? = null
         ): AndelTilkjentYtelse =
             lagAndelTilkjentYtelse(
                 fom,
@@ -271,7 +272,7 @@ class AndelTilkjentYtelseRepositoryTest(
                 aktør = aktør ?: aktørSøker,
                 tilkjentYtelse = tilkjentYtelse,
                 periodeIdOffset = offset,
-                forrigeperiodeIdOffset = forrigeOffset,
+                forrigeperiodeIdOffset = forrigeOffset
             )
     }
 }

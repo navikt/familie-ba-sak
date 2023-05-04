@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForSimuleringFactory
+import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForUtbetalingsoppdrag
 import no.nav.familie.ba.sak.integrasjoner.økonomi.IdentOgYtelse
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -73,11 +75,15 @@ class BeregningService(
     fun hentOptionalTilkjentYtelseForBehandling(behandlingId: Long) =
         tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)
 
-    fun hentSisteAndelPerIdent(fagsakId: Long): Map<IdentOgYtelse, AndelTilkjentYtelse> {
+    fun hentSisteAndelPerIdent(fagsakId: Long): Map<IdentOgYtelse, AndelTilkjentYtelseForUtbetalingsoppdrag> {
+        return sisteAndelerPerIdentOgType(fagsakId)
+            .groupBy { IdentOgYtelse(it.aktør.aktivFødselsnummer(), it.type) }
+            .mapValues { AndelTilkjentYtelseForSimuleringFactory().pakkInnForUtbetaling(it.value).single() }
+    }
+
+    private fun sisteAndelerPerIdentOgType(fagsakId: Long): MutableList<AndelTilkjentYtelse> {
         val sisteAndelIdPerIdent = andelTilkjentYtelseRepository.hentSisteAndelPerIdent(fagsakId)
         return andelTilkjentYtelseRepository.findAllById(sisteAndelIdPerIdent)
-            .groupBy { IdentOgYtelse(it.aktør.aktivFødselsnummer(), it.type) }
-            .mapValues { it.value.single() }
     }
 
     /**
