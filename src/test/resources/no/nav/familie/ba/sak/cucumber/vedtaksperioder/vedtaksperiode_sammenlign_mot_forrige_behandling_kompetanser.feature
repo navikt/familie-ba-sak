@@ -54,9 +54,7 @@ Egenskap: Vedtaksperiode for behandling som opphører perioder fra forrige behan
 
     Og med endrede utbetalinger
       | AktørId | Fra dato   | Til dato   | BehandlingId |
-      | 1234    | 01.06.2020 | 30.04.2021 | 1            |
       | 3456    | 01.05.2021 | 31.03.2038 | 1            |
-      | 1234    | 01.05.2020 | 30.06.2021 | 2            |
       | 3456    | 01.07.2021 | 31.03.2038 | 2            |
 
     Når vedtaksperioder med begrunnelser genereres for behandling 2
