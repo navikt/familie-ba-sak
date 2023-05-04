@@ -57,6 +57,14 @@ enum class Vilkår(
 
     companion object {
 
+        fun hentOrdinæreVilkårFor(
+            personType: PersonType
+        ): List<Vilkår> = when (personType) {
+            SØKER -> listOf(BOSATT_I_RIKET, LOVLIG_OPPHOLD)
+            ANNENPART -> throw Feil("Ikke implementert for $ANNENPART")
+            BARN -> listOf(BOSATT_I_RIKET, LOVLIG_OPPHOLD, UNDER_18_ÅR, BOR_MED_SØKER, GIFT_PARTNERSKAP)
+        }
+
         fun hentVilkårFor(
             personType: PersonType,
             fagsakType: FagsakType,

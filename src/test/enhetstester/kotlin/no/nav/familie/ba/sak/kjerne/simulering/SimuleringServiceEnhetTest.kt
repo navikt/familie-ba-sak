@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
-import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.UtbetalingsoppdragService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -38,7 +37,6 @@ internal class SimuleringServiceEnhetTest {
 
     private val økonomiKlient: ØkonomiKlient = mockk()
     private val økonomiService: ØkonomiService = mockk()
-    private val utbetalingsoppdragService: UtbetalingsoppdragService = mockk()
     private val beregningService: BeregningService = mockk()
     private val øknomiSimuleringMottakerRepository: ØknomiSimuleringMottakerRepository = mockk()
     private val tilgangService: TilgangService = mockk()
@@ -50,7 +48,6 @@ internal class SimuleringServiceEnhetTest {
     private val simuleringService: SimuleringService = SimuleringService(
         økonomiKlient,
         økonomiService,
-        utbetalingsoppdragService,
         beregningService,
         øknomiSimuleringMottakerRepository,
         tilgangService,

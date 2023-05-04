@@ -2,12 +2,9 @@ package no.nav.familie.ba.sak.kjerne.steg
 
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.common.secureLogger
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForIverksettingFactory
-import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.UtbetalingsoppdragService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -18,14 +15,12 @@ import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.task.SendVedtakTilInfotrygdTask
 import no.nav.familie.ba.sak.task.dto.IverksettingTaskDTO
-import no.nav.familie.kontrakter.felles.objectMapper
 import org.springframework.stereotype.Service
 
 @Service
 class IverksettMotOppdrag(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val økonomiService: ØkonomiService,
-    private val utbetalingsoppdragService: UtbetalingsoppdragService,
     private val totrinnskontrollService: TotrinnskontrollService,
     private val vedtakService: VedtakService,
     private val featureToggleService: FeatureToggleService,
@@ -62,22 +57,11 @@ class IverksettMotOppdrag(
         behandling: Behandling,
         data: IverksettingTaskDTO
     ): StegType {
-        if (featureToggleService.isEnabled(FeatureToggleConfig.KAN_GENERERE_UTBETALINGSOPPDRAG_NY)) {
-            val tilkjentYtelse = utbetalingsoppdragService.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(
-                vedtak = vedtakService.hent(data.vedtaksId),
-                saksbehandlerId = data.saksbehandlerId,
-                andelTilkjentYtelseForUtbetalingsoppdragFactory = AndelTilkjentYtelseForIverksettingFactory()
-            )
-            secureLogger.info("Generert utbetalingsoppdrag under iverksettelse på ny måte=${tilkjentYtelse.utbetalingsoppdrag}")
-        } else {
-            val utbetalingsoppdrag = økonomiService.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(
-                vedtak = vedtakService.hent(data.vedtaksId),
-                saksbehandlerId = data.saksbehandlerId,
-                andelTilkjentYtelseForUtbetalingsoppdragFactory = AndelTilkjentYtelseForIverksettingFactory()
-            )
-            val gammelUtbetalingsoppdrag = objectMapper.writeValueAsString(utbetalingsoppdrag)
-            secureLogger.info("Generert utbetalingsoppdrag under iverksettelse på gamle måte=$gammelUtbetalingsoppdrag")
-        }
+        økonomiService.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(
+            vedtak = vedtakService.hent(data.vedtaksId),
+            saksbehandlerId = data.saksbehandlerId,
+            andelTilkjentYtelseForUtbetalingsoppdragFactory = AndelTilkjentYtelseForIverksettingFactory()
+        )
         iverksattOppdrag.increment()
         val forrigeIverksatteBehandling =
             behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling)

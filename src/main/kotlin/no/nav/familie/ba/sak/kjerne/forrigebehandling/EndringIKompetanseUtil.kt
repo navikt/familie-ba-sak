@@ -51,7 +51,7 @@ object EndringIKompetanseUtil {
         val forrigeTidslinje = forrigeKompetanserForPerson.tilTidslinje()
 
         val endringerTidslinje = nåværendeTidslinje.kombinerUtenNullMed(forrigeTidslinje) { nåværende, forrige ->
-            forrige.erObligatoriskeFelterSatt() && nåværende.felterHarEndretSegSidenForrigeBehandling(forrigeKompetanse = forrige)
+            forrige.erObligatoriskeFelterUtenomTidsperioderSatt() && nåværende.felterHarEndretSegSidenForrigeBehandling(forrigeKompetanse = forrige)
         }
 
         return endringerTidslinje

@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.Personident
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
-import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import org.assertj.core.api.Assertions.assertThat
 import java.time.LocalDate
 
@@ -72,8 +71,8 @@ object OppdragParser {
             periodeId = parseLong(DomenebegrepUtbetalingsoppdrag.PERIODE_ID, it),
             forrigePeriodeId = parseValgfriLong(DomenebegrepUtbetalingsoppdrag.FORRIGE_PERIODE_ID, it),
             sats = parseInt(DomenebegrepUtbetalingsoppdrag.BELØP, it),
-            satsType = parseValgfriEnum<Utbetalingsperiode.SatsType>(DomenebegrepUtbetalingsoppdrag.TYPE, it)
-                ?: Utbetalingsperiode.SatsType.MND,
+            ytelse = parseValgfriEnum<YtelseType>(DomenebegrepUtbetalingsoppdrag.YTELSE_TYPE, it)
+                ?: YtelseType.ORDINÆR_BARNETRYGD,
             fom = parseÅrMåned(Domenebegrep.FRA_DATO, it).atDay(1),
             tom = parseÅrMåned(Domenebegrep.TIL_DATO, it).atEndOfMonth(),
             opphør = parseValgfriÅrMåned(DomenebegrepUtbetalingsoppdrag.OPPHØRSDATO, it)?.atDay(1)
@@ -131,7 +130,7 @@ enum class DomenebegrepUtbetalingsoppdrag(override val nøkkel: String) : Domene
     PERIODE_ID("Periode id"),
     FORRIGE_PERIODE_ID("Forrige periode id"),
     BELØP("Beløp"),
-    TYPE("Type"),
+    YTELSE_TYPE("Ytelse"),
     OPPHØRSDATO("Opphørsdato")
 }
 
@@ -146,7 +145,7 @@ data class ForventetUtbetalingsperiode(
     val periodeId: Long,
     val forrigePeriodeId: Long?,
     val sats: Int,
-    val satsType: Utbetalingsperiode.SatsType,
+    val ytelse: YtelseType,
     val fom: LocalDate,
     val tom: LocalDate,
     val opphør: LocalDate?

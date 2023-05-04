@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.KONTAKT_TEAMET_SUFFIX
-import no.nav.familie.ba.sak.integrasjoner.økonomi.utbetalingsoppdrag.harLøpendeUtbetaling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat

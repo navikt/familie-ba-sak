@@ -11,7 +11,7 @@ import java.time.YearMonth
 
 fun lagKompetanse(
     behandlingId: Long = lagBehandling().id,
-    fom: YearMonth? = null,
+    fom: YearMonth? = YearMonth.now(),
     tom: YearMonth? = null,
     barnAktører: Set<Aktør> = emptySet(),
     søkersAktivitet: SøkersAktivitet? = null,

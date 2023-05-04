@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.integrasjoner.økonomi.IdentOgType
+import no.nav.familie.ba.sak.integrasjoner.økonomi.IdentOgYtelse
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndr
 import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil
@@ -74,10 +73,10 @@ class BeregningService(
     fun hentOptionalTilkjentYtelseForBehandling(behandlingId: Long) =
         tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)
 
-    fun hentSisteAndelPerIdent(fagsakId: Long): Map<IdentOgType, AndelTilkjentYtelse> {
+    fun hentSisteAndelPerIdent(fagsakId: Long): Map<IdentOgYtelse, AndelTilkjentYtelse> {
         val sisteAndelIdPerIdent = andelTilkjentYtelseRepository.hentSisteAndelPerIdent(fagsakId)
         return andelTilkjentYtelseRepository.findAllById(sisteAndelIdPerIdent)
-            .groupBy { IdentOgType(it.aktør.aktivFødselsnummer(), it.type) }
+            .groupBy { IdentOgYtelse(it.aktør.aktivFødselsnummer(), it.type) }
             .mapValues { it.value.single() }
     }
 
