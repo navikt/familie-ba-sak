@@ -92,7 +92,8 @@ data class GrunnlagForVedtaksperioder(
     }
 
     private fun Tidslinje<List<VilkårResultat>, Måned>.tilGrunnlagForPersonTidslinje(
-        person: Person, søker: Person
+        person: Person,
+        søker: Person
     ): Tidslinje<GrunnlagForPerson, Måned> {
         val harRettPåUtbetalingTidslinje = this.tilHarRettPåUtbetalingTidslinje(person, fagsakType, søker)
 
