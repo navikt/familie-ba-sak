@@ -188,7 +188,9 @@ private fun PersonResultat.hentForskjøvedeVilkårResultaterForPersonsAndelerTid
         }.kombinerMed(erMinstEttBarnMedUtbetalingTidslinje) { vilkårResultaterForSøker, erMinstEttBarnMedUtbetaling ->
             if (erMinstEttBarnMedUtbetaling == true) {
                 vilkårResultaterForSøker
-            } else null
+            } else {
+                null
+            }
         }
 
         PersonType.BARN -> forskjøvedeVilkårResultaterForPerson.kombinerMed(
