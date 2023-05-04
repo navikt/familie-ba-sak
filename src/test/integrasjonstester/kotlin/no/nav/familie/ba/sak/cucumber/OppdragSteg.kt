@@ -67,7 +67,7 @@ class OppdragSteg {
     private fun beregnUtbetalingsoppdrag(
         acc: List<TilkjentYtelse>,
         tilkjentYtelse: TilkjentYtelse,
-        erSimulering: Boolean = false,
+        erSimulering: Boolean = false
     ): Utbetalingsoppdrag {
         val forrigeTilkjentYtelse = acc.lastOrNull()
 
@@ -86,7 +86,7 @@ class OppdragSteg {
             sisteOffsetPåFagsak = sisteOffsetPåFagsak?.toInt(),
             oppdaterteKjeder = oppdaterteKjeder,
             erSimulering = erSimulering,
-            endretMigreringsDato = null,
+            endretMigreringsDato = null
         )
     }
 
@@ -95,7 +95,7 @@ class OppdragSteg {
             ty.andelerTilkjentYtelse.maxOfOrNull {
                 it.periodeOffset ?: error(
                     "Mangler offset for behandling=${it.behandlingId} " +
-                        "andel=${it.id} fom=${it.stønadFom} tom=${it.stønadTom}",
+                        "andel=${it.id} fom=${it.stønadFom} tom=${it.stønadTom}"
                 )
             } ?: 0
         }
@@ -114,12 +114,12 @@ class OppdragSteg {
 
     private fun validerForventetUtbetalingsoppdrag(
         dataTable: DataTable,
-        beregnetUtbetalingsoppdrag: MutableMap<Long, Utbetalingsoppdrag>,
+        beregnetUtbetalingsoppdrag: MutableMap<Long, Utbetalingsoppdrag>
     ) {
         val medUtbetalingsperiode = true // TODO? Burde denne kunne sendes med som et flagg? Hva gjør den?
         val forventedeUtbetalingsoppdrag = OppdragParser.mapForventetUtbetalingsoppdrag(
             dataTable,
-            medUtbetalingsperiode = medUtbetalingsperiode,
+            medUtbetalingsperiode = medUtbetalingsperiode
         )
         forventedeUtbetalingsoppdrag.forEach { forventetUtbetalingsoppdrag ->
             val behandlingId = forventetUtbetalingsoppdrag.behandlingId
@@ -136,7 +136,7 @@ class OppdragSteg {
 
     private fun tilKjeder(
         tilkjentYtelse: TilkjentYtelse?,
-        erSimulering: Boolean = false,
+        erSimulering: Boolean = false
     ): Map<String, List<AndelTilkjentYtelseForUtbetalingsoppdrag>> {
         val andelFactory = if (erSimulering) {
             AndelTilkjentYtelseForSimuleringFactory()
@@ -162,7 +162,7 @@ class OppdragSteg {
     private fun assertUtbetalingsoppdrag(
         forventetUtbetalingsoppdrag: ForventetUtbetalingsoppdrag,
         utbetalingsoppdrag: Utbetalingsoppdrag,
-        medUtbetalingsperiode: Boolean = true,
+        medUtbetalingsperiode: Boolean = true
     ) {
         assertThat(utbetalingsoppdrag.kodeEndring).isEqualTo(forventetUtbetalingsoppdrag.kodeEndring)
         assertThat(utbetalingsoppdrag.utbetalingsperiode).hasSize(forventetUtbetalingsoppdrag.utbetalingsperiode.size)
@@ -182,7 +182,7 @@ class OppdragSteg {
 
 private fun assertUtbetalingsperiode(
     utbetalingsperiode: Utbetalingsperiode,
-    forventetUtbetalingsperiode: ForventetUtbetalingsperiode,
+    forventetUtbetalingsperiode: ForventetUtbetalingsperiode
 ) {
     assertThat(utbetalingsperiode.erEndringPåEksisterendePeriode)
         .isEqualTo(forventetUtbetalingsperiode.erEndringPåEksisterendePeriode)
