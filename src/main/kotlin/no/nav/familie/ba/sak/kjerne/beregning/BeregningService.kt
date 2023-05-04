@@ -231,6 +231,24 @@ class BeregningService(
         return oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
     }
 
+    fun genererOgLagreTilkjentYtelseForSatsendring(
+        behandling: Behandling,
+        personopplysningGrunnlag: PersonopplysningGrunnlag
+    ): TilkjentYtelse {
+        val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
+        val forrigeAndeler = if (forrigeBehandling != null) { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = forrigeBehandling.id) } else emptyList()
+
+        val tilkjentYtelse = TilkjentYtelseUtils.lagTilkjentYtelseMedNySatsForSatsendring(
+            behandling = behandling,
+            forrigeAndelerTilkjentYtelse = forrigeAndeler,
+            personopplysningGrunnlag = personopplysningGrunnlag
+        )
+
+        val lagretTilkjentYtelse = tilkjentYtelseRepository.save(tilkjentYtelse)
+        tilkjentYtelseEndretAbonnenter.forEach { it.endretTilkjentYtelse(lagretTilkjentYtelse) }
+        return lagretTilkjentYtelse
+    }
+
     fun oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
         behandling: Behandling,
         utbetalingsoppdrag: Utbetalingsoppdrag

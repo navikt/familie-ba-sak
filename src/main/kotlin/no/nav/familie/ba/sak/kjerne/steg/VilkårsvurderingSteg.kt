@@ -70,7 +70,12 @@ class VilkårsvurderingSteg(
         }
 
         tilbakestillBehandlingService.tilbakestillDataTilVilkårsvurderingssteg(behandling)
-        beregningService.genererTilkjentYtelseFraVilkårsvurdering(behandling, personopplysningGrunnlag)
+
+        if (behandling.opprettetÅrsak == BehandlingÅrsak.SATSENDRING) {
+            beregningService.genererOgLagreTilkjentYtelseForSatsendring(behandling, personopplysningGrunnlag)
+        } else {
+            beregningService.genererTilkjentYtelseFraVilkårsvurdering(behandling, personopplysningGrunnlag)
+        }
 
         tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(BehandlingId(behandling.id))
 

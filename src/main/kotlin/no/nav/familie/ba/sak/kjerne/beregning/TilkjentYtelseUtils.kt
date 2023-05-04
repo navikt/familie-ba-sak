@@ -7,20 +7,24 @@ import no.nav.familie.ba.sak.common.erDagenFør
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inkluderer
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.UtvidetBarnetrygdUtil.finnUtvidetVilkår
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.EndretUtbetalingAndelMedAndelerTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
+import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.medEndring
+import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerPersonOgType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -119,6 +123,64 @@ object TilkjentYtelseUtils {
         barnasAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
     ): Boolean = utvidetAndeler.isNotEmpty() && barnasAndeler.isNotEmpty()
 
+    internal fun lagTilkjentYtelseMedNySatsForSatsendring(
+        forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+        behandling: Behandling,
+        personopplysningGrunnlag: PersonopplysningGrunnlag
+    ): TilkjentYtelse {
+        val tilkjentYtelse = TilkjentYtelse(
+            behandling = behandling,
+            opprettetDato = LocalDate.now(),
+            endretDato = LocalDate.now()
+        )
+
+        val mapMedTidslinjerPerPersonOgTypeFraForrigeBehandling = forrigeAndelerTilkjentYtelse.tilTidslinjerPerPersonOgType()
+
+        val nyeAndelerTilkjentYtelse = mapMedTidslinjerPerPersonOgTypeFraForrigeBehandling.flatMap { (aktørOgYtelse, tidlinje) ->
+            val person = personopplysningGrunnlag.personer.find { it.aktør == aktørOgYtelse.first } ?: throw Feil("Må finnes")
+            val satsTidslinje = when (aktørOgYtelse.second) {
+                YtelseType.ORDINÆR_BARNETRYGD -> lagOrdinærTidslinje(barn = person)
+                YtelseType.UTVIDET_BARNETRYGD -> satstypeTidslinje(SatsType.UTVIDET_BARNETRYGD)
+                YtelseType.SMÅBARNSTILLEGG -> satstypeTidslinje(SatsType.SMA)
+                YtelseType.MANUELL_VURDERING -> throw Feil("Ingen satstype for manuell vurdering")
+            }
+
+            val kombinertTidslinje = tidlinje.kombinerMed(satsTidslinje) { forrigeAndel, sats ->
+                when {
+                    forrigeAndel == null -> null
+                    sats == null -> throw Feil("Finner ikke sats i periode")
+                    else -> AndelSats(forrigeAndel, sats)
+                }
+            }
+
+            kombinertTidslinje.perioder().map {
+                val forrigeAndel = it.innhold?.andel ?: throw Feil("")
+                val sats = it.innhold.sats
+
+                val utbetaltBeløp = sats.avrundetHeltallAvProsent(forrigeAndel.prosent)
+                AndelTilkjentYtelse(
+                    behandlingId = behandling.id,
+                    tilkjentYtelse = tilkjentYtelse,
+                    aktør = forrigeAndel.aktør,
+                    stønadFom = forrigeAndel.stønadFom,
+                    stønadTom = forrigeAndel.stønadTom,
+                    kalkulertUtbetalingsbeløp = utbetaltBeløp,
+                    nasjonaltPeriodebeløp = utbetaltBeløp,
+                    type = forrigeAndel.type,
+                    sats = sats,
+                    prosent = forrigeAndel.prosent
+                )
+            }
+        }
+
+        tilkjentYtelse.andelerTilkjentYtelse.addAll(nyeAndelerTilkjentYtelse)
+        return tilkjentYtelse
+    }
+
+    private data class AndelSats(
+        val andel: AndelTilkjentYtelse,
+        val sats: Int
+    )
     fun oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
         andelTilkjentYtelserUtenEndringer: Collection<AndelTilkjentYtelse>,
         endretUtbetalingAndeler: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>
