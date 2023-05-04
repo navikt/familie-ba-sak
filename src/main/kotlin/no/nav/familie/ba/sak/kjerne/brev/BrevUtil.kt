@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hjemlerTilhørendeFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Opphørsperiode
@@ -79,7 +80,8 @@ fun hentHjemmeltekst(
     sanityBegrunnelser: List<SanityBegrunnelse>,
     opplysningspliktHjemlerSkalMedIBrev: Boolean = false,
     målform: Målform,
-    vedtakKorrigertHjemmelSkalMedIBrev: Boolean = false
+    vedtakKorrigertHjemmelSkalMedIBrev: Boolean = false,
+    refusjonEøsHjemmelSkalMedIBrev: Boolean = false
 ): String {
     val sanityStandardbegrunnelser = minimerteVedtaksperioder.flatMap { vedtaksperiode ->
         vedtaksperiode.begrunnelser.mapNotNull { begrunnelse ->
@@ -110,12 +112,24 @@ fun hentHjemmeltekst(
         hjemlerFraFolketrygdloven = (sanityStandardbegrunnelser.flatMap { it.hjemlerFolketrygdloven } + sanityEøsBegrunnelser.flatMap { it.hjemlerFolketrygdloven })
             .distinct(),
         hjemlerEØSForordningen883 = sanityEøsBegrunnelser.flatMap { it.hjemlerEØSForordningen883 }.distinct(),
-        hjemlerEØSForordningen987 = sanityEøsBegrunnelser.flatMap { it.hjemlerEØSForordningen987 }.distinct(),
+        hjemlerEØSForordningen987 = hentHjemlerForEøsForordningen987(sanityEøsBegrunnelser, refusjonEøsHjemmelSkalMedIBrev),
         målform = målform,
         hjemlerFraForvaltningsloven = forvaltningsloverHjemler
     )
 
     return slåSammenHjemlerAvUlikeTyper(alleHjemlerForBegrunnelser)
+}
+
+private fun hentHjemlerForEøsForordningen987(sanityEøsBegrunnelser: List<SanityEØSBegrunnelse>, refusjonEøsHjemmelSkalMedIBrev: Boolean): List<String> {
+    val hjemler = mutableListOf<String>()
+
+    hjemler.addAll(sanityEøsBegrunnelser.flatMap { it.hjemlerEØSForordningen987 })
+
+    if (refusjonEøsHjemmelSkalMedIBrev) {
+        hjemler.add("60")
+    }
+
+    return hjemler.distinct()
 }
 
 private fun slåSammenHjemlerAvUlikeTyper(hjemler: List<String>) = when (hjemler.size) {
