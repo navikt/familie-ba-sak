@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
+import no.nav.familie.ba.sak.common.Utils.storForbokstav
 import no.nav.familie.ba.sak.common.erSenereEnnInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
@@ -16,6 +17,7 @@ import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestGenererVedtaksperioderForOverstyrtEndringstidspunkt
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedFritekster
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -57,6 +59,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilVedtaksbegrunnelseFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta.FeilutbetaltValutaRepository
+import no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs.RefusjonEøsRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeMedBegrunnelser.UtbetalingsperiodeMedBegrunnelserService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilUtvidetVedtaksperiodeMedBegrunnelser
@@ -89,7 +92,9 @@ class VedtaksperiodeService(
     private val brevmalService: BrevmalService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val vilkårsvurderingService: VilkårsvurderingService,
-    private val småbarnstilleggService: SmåbarnstilleggService
+    private val småbarnstilleggService: SmåbarnstilleggService,
+    private val refusjonEøsRepository: RefusjonEøsRepository,
+    private val integrasjonClient: IntegrasjonClient
 ) {
     fun oppdaterVedtaksperiodeMedFritekster(
         vedtaksperiodeId: Long,
@@ -731,6 +736,34 @@ class VedtaksperiodeService(
         return feilutbetaltValutaRepository.finnFeilutbetaltValutaForBehandling(vedtak.behandling.id).map {
             val (fom, tom) = it.fom.tilDagMånedÅr() to it.tom.tilDagMånedÅr()
             "$fra $fom til $tom er det utbetalt ${it.feilutbetaltBeløp} kroner for $mye."
+        }.toSet().takeIf { it.isNotEmpty() }
+    }
+
+    fun beskrivPerioderMedRefusjonEøs(behandling: Behandling, avklart: Boolean): Set<String>? {
+        val målform = persongrunnlagService.hentAktiv(behandlingId = behandling.id)?.søker?.målform
+        val landkoderISO2 = integrasjonClient.hentLandkoderISO2()
+
+        return refusjonEøsRepository.finnRefusjonEøsForBehandling(behandling.id).filter { it.refusjonAvklart == avklart }.map {
+            val (fom, tom) = it.fom.tilDagMånedÅr() to it.tom.tilDagMånedÅr()
+            val land = landkoderISO2[it.land]?.storForbokstav() ?: throw Feil("Fant ikke navn for landkode ${it.land}")
+            val beløp = it.refusjonsbeløp
+
+            when (målform) {
+                NN -> {
+                    if (avklart) {
+                        "Frå $fom til $tom blir $beløp kroner av etterbetalinga di utbetalt til myndighetene i $land"
+                    } else {
+                        "Frå $fom til $tom blir ikkje etterbetalinga på $beløp kroner utbetalt no sidan det er utbetalt barnetrygd i $land"
+                    }
+                }
+                else -> {
+                    if (avklart) {
+                        "Fra $fom til $tom blir $beløp kroner av etterbetalingen din utbetalt til myndighetene i $land"
+                    } else {
+                        "Fra $fom til $tom blir ikke etterbetalingen på ${it.refusjonsbeløp} kroner utbetalt nå siden det er utbetalt barnetrygd i $land"
+                    }
+                }
+            }
         }.toSet().takeIf { it.isNotEmpty() }
     }
 
