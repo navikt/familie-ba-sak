@@ -1299,7 +1299,6 @@ class UtbetalingsoppdragIntegrasjonTest(
         }
 
         @Test
-        @Disabled // Denne virker ikke ennå, men skal bli fikset
         fun `skal alltid peke til siste andelen i kjeden ved opphør, selv opphør etter opphør`() {
             fun assertHarKunOpphør(utbetalingsoppdrag: Utbetalingsoppdrag, opphørFom: YearMonth) {
                 assertThat(utbetalingsoppdrag.kodeEndring).isEqualTo(Utbetalingsoppdrag.KodeEndring.ENDR)
