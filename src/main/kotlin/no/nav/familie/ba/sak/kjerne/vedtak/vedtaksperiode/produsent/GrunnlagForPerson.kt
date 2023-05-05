@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent
 
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.IUtfyltEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
@@ -26,9 +27,10 @@ sealed interface GrunnlagForPerson {
 data class GrunnlagForPersonInnvilget(
     override val person: Person,
     override val vilkårResultaterForVedtaksPeriode: List<VilkårResultatForVedtaksperiode>,
+    val andeler: Iterable<AndelForVedtaksperiode>,
     val kompetanse: KompetanseForVedtaksperiode? = null,
     val endretUtbetalingAndel: EndretUtbetalingAndelForVedtaksperiode? = null,
-    val andeler: Iterable<AndelForVedtaksperiode>?
+    val overgangsstønad: OvergangsstønadForVedtaksperiode? = null
 ) : GrunnlagForPerson
 
 data class GrunnlagForPersonIkkeInnvilget(
@@ -46,7 +48,7 @@ data class VilkårResultatForVedtaksperiode(
     val fom: LocalDate?,
     val tom: LocalDate?
 ) {
-    constructor(vilkårResultat: VilkårResultat) : this (
+    constructor(vilkårResultat: VilkårResultat) : this(
         vilkårType = vilkårResultat.vilkårType,
         resultat = vilkårResultat.resultat,
         utdypendeVilkårsvurderinger = vilkårResultat.utdypendeVilkårsvurderinger,
@@ -83,7 +85,7 @@ data class AndelForVedtaksperiode(
 data class KompetanseForVedtaksperiode(
     val søkersAktivitet: SøkersAktivitet,
     val annenForeldersAktivitet: AnnenForeldersAktivitet,
-    val annenForeldersAktivitetsland: String,
+    val annenForeldersAktivitetsland: String?,
     val søkersAktivitetsland: String,
     val barnetsBostedsland: String,
     val resultat: KompetanseResultat
@@ -95,5 +97,15 @@ data class KompetanseForVedtaksperiode(
         søkersAktivitetsland = kompetanse.søkersAktivitetsland,
         barnetsBostedsland = kompetanse.barnetsBostedsland,
         resultat = kompetanse.resultat
+    )
+}
+
+data class OvergangsstønadForVedtaksperiode(
+    val fom: LocalDate,
+    val tom: LocalDate
+) {
+    constructor(periodeOvergangsstønad: InternPeriodeOvergangsstønad) : this(
+        fom = periodeOvergangsstønad.fomDato,
+        tom = periodeOvergangsstønad.tomDato
     )
 }

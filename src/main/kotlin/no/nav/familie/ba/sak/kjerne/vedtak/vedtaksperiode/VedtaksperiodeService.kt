@@ -5,9 +5,9 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
+import no.nav.familie.ba.sak.common.Utils.storForbokstav
 import no.nav.familie.ba.sak.common.erSenereEnnInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
-import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.toYearMonth
@@ -17,16 +17,19 @@ import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.ekstern.restDomene.RestGenererVedtaksperioderForOverstyrtEndringstidspunkt
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPutVedtaksperiodeMedFritekster
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
+import no.nav.familie.ba.sak.kjerne.beregning.SmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.endringstidspunkt.EndringstidspunktService
+import no.nav.familie.ba.sak.kjerne.beregning.endringstidspunkt.filtrerLikEllerEtterEndringstidspunkt
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
@@ -56,6 +59,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilVedtaksbegrunnelseFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta.FeilutbetaltValutaRepository
+import no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs.RefusjonEøsRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeMedBegrunnelser.UtbetalingsperiodeMedBegrunnelserService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilUtvidetVedtaksperiodeMedBegrunnelser
@@ -87,7 +91,10 @@ class VedtaksperiodeService(
     private val feilutbetaltValutaRepository: FeilutbetaltValutaRepository,
     private val brevmalService: BrevmalService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    private val vilkårsvurderingService: VilkårsvurderingService
+    private val vilkårsvurderingService: VilkårsvurderingService,
+    private val småbarnstilleggService: SmåbarnstilleggService,
+    private val refusjonEøsRepository: RefusjonEøsRepository,
+    private val integrasjonClient: IntegrasjonClient
 ) {
     fun oppdaterVedtaksperiodeMedFritekster(
         vedtaksperiodeId: Long,
@@ -285,7 +292,11 @@ class VedtaksperiodeService(
             )
         } else {
             vedtaksperiodeHentOgPersisterService.lagre(
-                genererVedtaksperioderMedBegrunnelserGammel(vedtak)
+                if (featureToggleService.isEnabled(FeatureToggleConfig.VEDTAKSPERIODE_NY)) {
+                    finnVedtaksperioderForBehandling(vedtak.behandling.id)
+                } else {
+                    genererVedtaksperioderMedBegrunnelserGammel(vedtak)
+                }
             )
         }
     }
@@ -294,11 +305,14 @@ class VedtaksperiodeService(
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
 
+        val endringstidspunkt = behandling.overstyrtEndringstidspunkt
+            ?: endringstidspunktService.finnEndringstidspunktForBehandling(behandlingId = behandling.id)
+
         return genererVedtaksperioder(
             grunnlagForVedtakPerioder = hentGrunnlagForVedtaksperioder(behandling),
             grunnlagForVedtakPerioderForrigeBehandling = forrigeBehandling?.let { hentGrunnlagForVedtaksperioder(it) },
             vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId)
-        )
+        ).filtrerLikEllerEtterEndringstidspunkt(endringstidspunkt)
     }
 
     fun hentGrunnlagForVedtaksperioder(behandling: Behandling): GrunnlagForVedtaksperioder =
@@ -308,10 +322,11 @@ class VedtaksperiodeService(
             fagsakType = behandling.fagsak.type,
             kompetanser = kompetanseRepository.finnFraBehandlingId(behandling.id).toList(),
             endredeUtbetalinger = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id),
-            andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id)
+            andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id),
+            perioderOvergangsstønad = småbarnstilleggService.hentPerioderMedFullOvergangsstønad(behandling.id)
         )
 
-    @Deprecated("skal bruke oppdaterVedtakMedVedtaksperioder når den er klar")
+    @Deprecated("skal bruke genererVedtaksperioderMedBegrunnelser når den er klar")
     fun genererVedtaksperioderMedBegrunnelserGammel(
         vedtak: Vedtak,
         manueltOverstyrtEndringstidspunkt: LocalDate? = null
@@ -339,17 +354,9 @@ class VedtaksperiodeService(
 
         val avslagsperioder = hentAvslagsperioderMedBegrunnelser(vedtak)
 
-        return filtrerUtPerioderBasertPåEndringstidspunkt(
-            vedtaksperioderMedBegrunnelser = (utbetalingsperioder + opphørsperioder),
+        return (utbetalingsperioder + opphørsperioder).filtrerLikEllerEtterEndringstidspunkt(
             endringstidspunkt = endringstidspunkt
         ) + avslagsperioder
-    }
-
-    fun filtrerUtPerioderBasertPåEndringstidspunkt(
-        vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>,
-        endringstidspunkt: LocalDate
-    ): List<VedtaksperiodeMedBegrunnelser> {
-        return vedtaksperioderMedBegrunnelser.filter { (it.tom ?: TIDENES_ENDE).isSameOrAfter(endringstidspunkt) }
     }
 
     @Transactional
@@ -362,11 +369,14 @@ class VedtaksperiodeService(
             oppdaterVedtakMedVedtaksperioder(vedtak)
         } else {
             vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(vedtak)
-            val vedtaksperioder =
+            val vedtaksperioder = if (featureToggleService.isEnabled(FeatureToggleConfig.VEDTAKSPERIODE_NY)) {
+                finnVedtaksperioderForBehandling(vedtak.behandling.id)
+            } else {
                 genererVedtaksperioderMedBegrunnelserGammel(
                     vedtak = vedtak,
                     manueltOverstyrtEndringstidspunkt = overstyrtEndringstidspunkt
                 )
+            }
             vedtaksperiodeHentOgPersisterService.lagre(vedtaksperioder.sortedBy { it.fom })
         }
         lagreNedOverstyrtEndringstidspunkt(vedtak.behandling.id, overstyrtEndringstidspunkt)
@@ -726,6 +736,34 @@ class VedtaksperiodeService(
         return feilutbetaltValutaRepository.finnFeilutbetaltValutaForBehandling(vedtak.behandling.id).map {
             val (fom, tom) = it.fom.tilDagMånedÅr() to it.tom.tilDagMånedÅr()
             "$fra $fom til $tom er det utbetalt ${it.feilutbetaltBeløp} kroner for $mye."
+        }.toSet().takeIf { it.isNotEmpty() }
+    }
+
+    fun beskrivPerioderMedRefusjonEøs(behandling: Behandling, avklart: Boolean): Set<String>? {
+        val målform = persongrunnlagService.hentAktiv(behandlingId = behandling.id)?.søker?.målform
+        val landkoderISO2 = integrasjonClient.hentLandkoderISO2()
+
+        return refusjonEøsRepository.finnRefusjonEøsForBehandling(behandling.id).filter { it.refusjonAvklart == avklart }.map {
+            val (fom, tom) = it.fom.tilDagMånedÅr() to it.tom.tilDagMånedÅr()
+            val land = landkoderISO2[it.land]?.storForbokstav() ?: throw Feil("Fant ikke navn for landkode ${it.land}")
+            val beløp = it.refusjonsbeløp
+
+            when (målform) {
+                NN -> {
+                    if (avklart) {
+                        "Frå $fom til $tom blir $beløp kroner av etterbetalinga di utbetalt til myndighetene i $land"
+                    } else {
+                        "Frå $fom til $tom blir ikkje etterbetalinga på $beløp kroner utbetalt no sidan det er utbetalt barnetrygd i $land"
+                    }
+                }
+                else -> {
+                    if (avklart) {
+                        "Fra $fom til $tom blir $beløp kroner av etterbetalingen din utbetalt til myndighetene i $land"
+                    } else {
+                        "Fra $fom til $tom blir ikke etterbetalingen på ${it.refusjonsbeløp} kroner utbetalt nå siden det er utbetalt barnetrygd i $land"
+                    }
+                }
+            }
         }.toSet().takeIf { it.isNotEmpty() }
     }
 

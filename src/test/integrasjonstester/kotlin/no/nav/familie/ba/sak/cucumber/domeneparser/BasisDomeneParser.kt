@@ -166,6 +166,10 @@ fun parseList(domenebegrep: Domenenøkkel, rad: Map<String, String>): List<Long>
     return verdi(domenebegrep.nøkkel, rad).split(",").map { it.trim().toLong() }
 }
 
+fun parseStringList(domenebegrep: Domenenøkkel, rad: Map<String, String>): List<String> {
+    return verdi(domenebegrep.nøkkel, rad).split(",").map { it.trim() }
+}
+
 fun parseBigDecimal(domenebegrep: Domenenøkkel, rad: Map<String, String>): BigDecimal {
     val verdi = verdi(domenebegrep.nøkkel, rad)
     return verdi.toBigDecimal()

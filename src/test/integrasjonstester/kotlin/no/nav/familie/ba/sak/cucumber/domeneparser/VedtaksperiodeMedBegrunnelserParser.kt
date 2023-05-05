@@ -20,10 +20,15 @@ object VedtaksperiodeMedBegrunnelserParser {
         }
     }
 
+    fun parseAktørId(rad: MutableMap<String, String>) =
+        parseString(DomenebegrepPersongrunnlag.AKTØR_ID, rad).padEnd(13, '0')
+    fun parseAktørIdListe(rad: MutableMap<String, String>) =
+        parseStringList(DomenebegrepPersongrunnlag.AKTØR_ID, rad).map { it.padEnd(13, '0') }
+
     enum class DomenebegrepPersongrunnlag(override val nøkkel: String) : Domenenøkkel {
         PERSON_TYPE("Persontype"),
         FØDSELSDATO("Fødselsdato"),
-        PERSON_ID("PersonId")
+        AKTØR_ID("AktørId")
     }
 
     enum class DomenebegrepVedtaksperiodeMedBegrunnelser(override val nøkkel: String) : Domenenøkkel {
