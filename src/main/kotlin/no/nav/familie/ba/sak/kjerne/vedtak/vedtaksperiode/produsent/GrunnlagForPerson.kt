@@ -27,7 +27,7 @@ sealed interface GrunnlagForPerson {
 data class GrunnlagForPersonInnvilget(
     override val person: Person,
     override val vilkårResultaterForVedtaksPeriode: List<VilkårResultatForVedtaksperiode>,
-    val andeler: Iterable<AndelForVedtaksperiode>?,
+    val andeler: Iterable<AndelForVedtaksperiode>,
     val kompetanse: KompetanseForVedtaksperiode? = null,
     val endretUtbetalingAndel: EndretUtbetalingAndelForVedtaksperiode? = null,
     val overgangsstønad: OvergangsstønadForVedtaksperiode? = null

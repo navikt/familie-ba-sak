@@ -228,9 +228,9 @@ private fun lagGrunnlagForVilkårOgAndel(
 ) = if (personHarRettPåUtbetalingIPeriode == true) {
     GrunnlagForPersonInnvilget(
         vilkårResultaterForVedtaksPeriode = vilkårResultater
-            ?: error("vilkårResultatene burde alltid finnes om vi har rett"),
+            ?: error("vilkårResultatene burde alltid finnes om vi har innvilget vedtaksperiode."),
         person = person,
-        andeler = andeler
+        andeler = andeler ?: error("andeler må finnes for innvilgede vedtaksperioder.")
     )
 } else {
     GrunnlagForPersonIkkeInnvilget(
