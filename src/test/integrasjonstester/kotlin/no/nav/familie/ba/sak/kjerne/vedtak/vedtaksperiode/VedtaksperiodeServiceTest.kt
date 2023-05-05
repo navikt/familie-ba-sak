@@ -24,6 +24,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.SøknadDTO
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
+import no.nav.familie.ba.sak.kjerne.beregning.endringstidspunkt.filtrerLikEllerEtterEndringstidspunkt
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -79,13 +80,14 @@ class VedtaksperiodeServiceTest(
     val søkerFnr = randomFnr()
     val barnFnr = ClientMocks.barnFnr[0]
     val barn2Fnr = ClientMocks.barnFnr[1]
-    var førstegangsbehandling: Behandling? = null
-    var revurdering: Behandling? = null
 
     @BeforeEach
     fun init() {
         databaseCleanupService.truncate()
-        førstegangsbehandling = kjørStegprosessForFGB(
+    }
+
+    private fun kjørFørstegangsbehandlingOgRevurderingÅrligKontroll(): Behandling {
+        val førstegangsbehandling = kjørStegprosessForFGB(
             tilSteg = StegType.BEHANDLING_AVSLUTTET,
             søkerFnr = søkerFnr,
             barnasIdenter = listOf(barnFnr, barn2Fnr),
@@ -98,13 +100,13 @@ class VedtaksperiodeServiceTest(
             brevmalService = brevmalService
         )
 
-        revurdering = kjørStegprosessForRevurderingÅrligKontroll(
+        return kjørStegprosessForRevurderingÅrligKontroll(
             tilSteg = StegType.BEHANDLINGSRESULTAT,
             søkerFnr = søkerFnr,
             barnasIdenter = listOf(barnFnr, barn2Fnr),
             vedtakService = vedtakService,
             stegService = stegService,
-            fagsakId = førstegangsbehandling!!.fagsak.id,
+            fagsakId = førstegangsbehandling.fagsak.id,
             brevmalService = brevmalService
         )
     }
@@ -249,9 +251,10 @@ class VedtaksperiodeServiceTest(
 
     @Test
     fun `Skal validere at vedtaksperioder blir lagret ved fortsatt innvilget som resultat`() {
-        assertEquals(Behandlingsresultat.FORTSATT_INNVILGET, revurdering?.resultat)
+        val revurdering = kjørFørstegangsbehandlingOgRevurderingÅrligKontroll()
+        assertEquals(Behandlingsresultat.FORTSATT_INNVILGET, revurdering.resultat)
 
-        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = revurdering!!.id)
+        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = revurdering.id)
         val vedtaksperioder = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
 
         assertEquals(1, vedtaksperioder.size)
@@ -260,7 +263,8 @@ class VedtaksperiodeServiceTest(
 
     @Test
     fun `Skal legge til og overskrive begrunnelser og fritekst på vedtaksperiode`() {
-        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = revurdering!!.id)
+        val revurdering = kjørFørstegangsbehandlingOgRevurderingÅrligKontroll()
+        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = revurdering.id)
         val vedtaksperioder = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
 
         vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
@@ -295,7 +299,8 @@ class VedtaksperiodeServiceTest(
 
     @Test
     fun `Skal kaste feil når feil type blir valgt`() {
-        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = revurdering!!.id)
+        val revurdering = kjørFørstegangsbehandlingOgRevurderingÅrligKontroll()
+        val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = revurdering.id)
         val vedtaksperioder = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
 
         val feil = assertThrows<Feil> {
@@ -641,8 +646,7 @@ class VedtaksperiodeServiceTest(
                 Vedtaksperiodetype.UTBETALING
             )
         )
-        val vedtaksperioder = vedtaksperiodeService.filtrerUtPerioderBasertPåEndringstidspunkt(
-            vedtaksperioderMedBegrunnelser = utbetalingsperioder,
+        val vedtaksperioder = utbetalingsperioder.filtrerLikEllerEtterEndringstidspunkt(
             endringstidspunkt = LocalDate.of(2021, 3, 1)
         ) + avslagsperioder
 

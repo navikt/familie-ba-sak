@@ -300,7 +300,11 @@ class StegService(
             simuleringService.harMigreringsbehandlingAvvikInnenforBeløpsgrenser(behandling)
         }
 
-        if (behandlingEtterBeslutterSteg.erManuellMigrering() && harMigreringsbehandlingAvvikInnenforbeløpsgrenser) {
+        val harMigreringsbehandlingManuellePosteringer by lazy {
+            simuleringService.harMigreringsbehandlingManuellePosteringer(behandling)
+        }
+
+        if (behandlingEtterBeslutterSteg.erManuellMigrering() && harMigreringsbehandlingAvvikInnenforbeløpsgrenser && !harMigreringsbehandlingManuellePosteringer) {
             return håndterBeslutningForVedtak(
                 behandlingEtterBeslutterSteg,
                 RestBeslutningPåVedtak(Beslutning.GODKJENT)

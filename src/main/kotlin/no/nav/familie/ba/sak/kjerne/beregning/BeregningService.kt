@@ -202,10 +202,12 @@ class BeregningService(
                 endretUtbetalingAndeler = endreteUtbetalingAndeler,
                 fagsakType = behandling.fagsak.type
             ) { søkerAktør ->
-                småbarnstilleggService.hentOgLagrePerioderMedFullOvergangsstønad(
+                småbarnstilleggService.hentOgLagrePerioderMedFullOvergangsstønadFraEf(
                     søkerAktør = søkerAktør,
                     behandlingId = behandling.id
                 )
+
+                småbarnstilleggService.hentPerioderMedFullOvergangsstønad(behandling.id)
             }
 
         val lagretTilkjentYtelse = tilkjentYtelseRepository.save(tilkjentYtelse)
