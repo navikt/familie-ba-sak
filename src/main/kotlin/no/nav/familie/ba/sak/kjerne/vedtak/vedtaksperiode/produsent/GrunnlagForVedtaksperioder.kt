@@ -244,13 +244,7 @@ private fun lagGrunnlagMedKompetanse(
     kompetanse: KompetanseForVedtaksperiode?
 ) = when (grunnlagForPerson) {
     is GrunnlagForPersonInnvilget -> grunnlagForPerson.copy(kompetanse = kompetanse)
-    is GrunnlagForPersonIkkeInnvilget -> {
-        if (kompetanse != null) {
-            throw Feil("GrunnlagForPersonIkkeInnvilget for aktør ${grunnlagForPerson.person.aktør} kan ikke ha kompetanse siden den ikke er innvilget")
-        }
-        grunnlagForPerson
-    }
-
+    is GrunnlagForPersonIkkeInnvilget -> grunnlagForPerson
     null -> null
 }
 
