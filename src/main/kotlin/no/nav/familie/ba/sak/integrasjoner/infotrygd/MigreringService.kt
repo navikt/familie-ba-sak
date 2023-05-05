@@ -119,8 +119,14 @@ class MigreringService(
             val barnasIdenter = finnBarnMedLøpendeStønad(løpendeInfotrygdsak)
 
             secureLog.info("barnasIdenter=$barnasIdenter")
-            if (løpendeInfotrygdsak.erEnslingMindreårig(personIdent, barnasIdenter) && kanMigrereEnsligMindreårig() && !erOverAlder(personIdent, 16)) { // starter med EM over 16
-                secureLog.info("Migrering: $personIdent er lik barn registert på stønad=${løpendeInfotrygdsak.stønad?.id}")
+            if (løpendeInfotrygdsak.erEnslingMindreårig(personIdent, barnasIdenter) && !kanMigrereEnsligMindreårig()) {
+                secureLog.info("Migrering enslig mindreårog er skrudd av")
+                kastOgTellMigreringsFeil(MigreringsfeilType.ENSLIG_MINDREÅRIG)
+            } else if (løpendeInfotrygdsak.erEnslingMindreårig(personIdent, barnasIdenter) && kanMigrereEnsligMindreårig() && !erOverAlder(personIdent, 16)) {
+                secureLog.info("Migrering av enslig mindreårig for ident=$personIdent hvor stønadeier er under 16 år. stønad=${løpendeInfotrygdsak.stønad?.id}")
+                kastOgTellMigreringsFeil(MigreringsfeilType.ENSLIG_MINDREÅRIG)
+            } else if (løpendeInfotrygdsak.erEnslingMindreårig(personIdent, barnasIdenter) && kanMigrereEnsligMindreårig() && underkategori == BehandlingUnderkategori.UTVIDET) {
+                secureLog.info("Migrering av enslig mindreårig for ident=$personIdent hvor stønadstype er utvidet. stønad=${løpendeInfotrygdsak.stønad?.id}")
                 kastOgTellMigreringsFeil(MigreringsfeilType.ENSLIG_MINDREÅRIG)
             }
 

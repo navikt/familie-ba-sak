@@ -867,6 +867,41 @@ class MigrerFraInfotrygdTest(
         assertThat(exception.feiltype).isEqualTo(MigreringsfeilType.ENSLIG_MINDREÅRIG)
     }
 
+    @Test
+    @DisabledIfSystemProperty(named = "mockFeatureToggleAnswer", matches = "false")
+    fun `skal ikke migrere Enslig mindreårig sak hvor stønaden er utvidet`() {
+        val fnrBarnet = fødselsnummerGenerator.foedselsnummer(foedselsdato = LocalDate.now().minusYears(16))
+
+        every { featureToggleService.isEnabled(FeatureToggleConfig.KAN_MIGRERE_ENSLIG_MINDREÅRIG, false) } returns true
+
+        mockServerKlient().lagScenario(
+            RestScenario(
+                søker = RestScenarioPerson(
+                    ident = fnrBarnet.asString,
+                    fødselsdato = fnrBarnet.foedselsdato.toString(),
+                    fornavn = "Barn2",
+                    etternavn = "Barnesen2",
+                    infotrygdSaker = InfotrygdSøkResponse(
+                        bruker = listOf(
+                            lagInfotrygdSak(
+                                1054.0,
+                                listOf(fnrBarnet.asString),
+                                "UT",
+                                "EF" // Enslig mindreårig har OR OS hvor de er både barn og stønadseier
+                            )
+                        ),
+                        barn = emptyList()
+                    )
+                ),
+                barna = emptyList()
+            )
+        )
+
+        val exception =
+            assertThrows<KanIkkeMigrereException> { migreringService.migrer(fnrBarnet.asString) }
+        assertThat(exception.feiltype).isEqualTo(MigreringsfeilType.ENSLIG_MINDREÅRIG)
+    }
+
     private fun kjørOgAssertEØS(
         ident: String,
         behandlingUnderkategori: BehandlingUnderkategori
