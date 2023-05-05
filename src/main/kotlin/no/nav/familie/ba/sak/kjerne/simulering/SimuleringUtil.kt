@@ -23,13 +23,11 @@ fun filterBortUrelevanteVedtakSimuleringPosteringer(
 }
 
 fun vedtakSimuleringMottakereTilRestSimulering(
-    økonomiSimuleringMottakere: List<ØkonomiSimuleringMottaker>,
-    erManuellPosteringTogglePå: Boolean
+    økonomiSimuleringMottakere: List<ØkonomiSimuleringMottaker>
 ): RestSimulering {
     val perioder =
         vedtakSimuleringMottakereTilSimuleringPerioder(
-            økonomiSimuleringMottakere,
-            erManuellPosteringTogglePå
+            økonomiSimuleringMottakere
         )
     val tidSimuleringHentet = økonomiSimuleringMottakere.firstOrNull()?.opprettetTidspunkt?.toLocalDate()
 
@@ -58,8 +56,7 @@ fun vedtakSimuleringMottakereTilRestSimulering(
 }
 
 fun vedtakSimuleringMottakereTilSimuleringPerioder(
-    økonomiSimuleringMottakere: List<ØkonomiSimuleringMottaker>,
-    erManuelPosteringTogglePå: Boolean
+    økonomiSimuleringMottakere: List<ØkonomiSimuleringMottaker>
 ): List<SimuleringsPeriode> {
     val simuleringPerioder = filterBortUrelevanteVedtakSimuleringPosteringer(økonomiSimuleringMottakere)
         .flatMap { it.økonomiSimuleringPostering }
@@ -73,39 +70,14 @@ fun vedtakSimuleringMottakereTilSimuleringPerioder(
             fom = fom,
             tom = posteringListe[0].tom,
             forfallsdato = posteringListe[0].forfallsdato,
-            nyttBeløp = if (erManuelPosteringTogglePå) {
-                hentNyttBeløpIPeriode(posteringListe)
-            } else {
-                hentNyttBeløpIPeriodeGammel(posteringListe)
-            },
-            tidligereUtbetalt = if (erManuelPosteringTogglePå) {
-                hentTidligereUtbetaltIPeriode(posteringListe)
-            } else {
-                hentTidligereUtbetaltIPeriodeGammel(posteringListe)
-            },
-            resultat = if (erManuelPosteringTogglePå) {
-                hentResultatIPeriode(posteringListe)
-            } else {
-                hentResultatIPeriodeGammel(posteringListe)
-            },
-            manuellPostering = if (erManuelPosteringTogglePå) {
-                hentManuellPosteringIPeriode(posteringListe)
-            } else {
-                BigDecimal.ZERO
-            },
+            nyttBeløp = hentNyttBeløpIPeriode(posteringListe),
+            tidligereUtbetalt = hentTidligereUtbetaltIPeriode(posteringListe),
+            resultat = hentResultatIPeriode(posteringListe),
+            manuellPostering = hentManuellPosteringIPeriode(posteringListe),
             feilutbetaling = hentPositivFeilbetalingIPeriode(posteringListe),
             etterbetaling = hentEtterbetalingIPeriode(posteringListe, tidSimuleringHentet)
         )
     }
-}
-
-@Deprecated("Skal bruke hentNyttBeløpIPeriode når manuelle posteringer er tester ferdig")
-fun hentNyttBeløpIPeriodeGammel(periode: List<ØkonomiSimuleringPostering>): BigDecimal {
-    val sumPositiveYtelser = periode.filter { postering ->
-        postering.posteringType == PosteringType.YTELSE && postering.beløp > BigDecimal.ZERO
-    }.sumOf { it.beløp }
-    val feilutbetaling = hentFeilbetalingIPeriodeGammel(periode)
-    return if (feilutbetaling > BigDecimal.ZERO) sumPositiveYtelser - feilutbetaling else sumPositiveYtelser
 }
 
 fun hentNyttBeløpIPeriode(periode: List<ØkonomiSimuleringPostering>): BigDecimal {
@@ -114,7 +86,7 @@ fun hentNyttBeløpIPeriode(periode: List<ØkonomiSimuleringPostering>): BigDecim
         .filter { it.beløp > BigDecimal.ZERO }
         .filter { !it.erManuellPostering }
         .sumOf { it.beløp }
-    val feilutbetaling = hentFeilutbetalingIPeriode(periode)
+    val feilutbetaling = hentFeilutbetalingIPeriode(periode, false)
 
     return if ((feilutbetaling + feilutbetaling) > BigDecimal.ZERO) {
         sumPositiveYtelser - feilutbetaling
@@ -123,52 +95,55 @@ fun hentNyttBeløpIPeriode(periode: List<ØkonomiSimuleringPostering>): BigDecim
     }
 }
 
-@Deprecated("Skal bruke hentFeilutbetalingIPeriode når manuelle posteringer er tester ferdig")
-fun hentFeilbetalingIPeriodeGammel(periode: List<ØkonomiSimuleringPostering>) =
-    periode.filter { postering ->
-        postering.posteringType == PosteringType.FEILUTBETALING &&
-            !postering.erManuellPostering
-    }.sumOf { it.beløp }
-
 fun hentPositivFeilbetalingIPeriode(periode: List<ØkonomiSimuleringPostering>) =
     periode.filter { postering ->
         postering.posteringType == PosteringType.FEILUTBETALING &&
             postering.beløp > BigDecimal.ZERO
     }.sumOf { it.beløp }
 
-fun hentFeilutbetalingIPeriode(periode: List<ØkonomiSimuleringPostering>) = periode
-    .filter { it.posteringType == PosteringType.FEILUTBETALING }
-    .filter { !it.erManuellPostering }
-    .sumOf { it.beløp }
-
-fun hentFeilutbetalingIPeriodeKorrigertMedManuellPostering(periode: List<ØkonomiSimuleringPostering>): BigDecimal {
-    val feilutbetaling = hentFeilutbetalingIPeriode(periode) + hentManuellFeilutbetalingIPeriode(periode)
-    val sumManuellePosteringer = hentManuellPosteringIPeriode(periode)
-
-    return feilutbetaling - maxOf(sumManuellePosteringer, BigDecimal.ZERO)
-}
-
-@Deprecated("Skal bruke hentTidligereUtbetaltIPeriode når manuelle posteringer er tester ferdig")
-fun hentTidligereUtbetaltIPeriodeGammel(periode: List<ØkonomiSimuleringPostering>): BigDecimal {
-    val sumNegativeYtelser = periode.filter { postering ->
-        (postering.posteringType == PosteringType.YTELSE && postering.beløp < BigDecimal.ZERO)
+fun hentNegativFeilutbetalingForPeriode(periode: List<ØkonomiSimuleringPostering>) =
+    periode.filter { postering ->
+        postering.posteringType == PosteringType.FEILUTBETALING &&
+            postering.beløp < BigDecimal.ZERO
     }.sumOf { it.beløp }
-    val feilutbetaling = hentFeilbetalingIPeriodeGammel(periode)
-    return if (feilutbetaling < BigDecimal.ZERO) -(sumNegativeYtelser - feilutbetaling) else -sumNegativeYtelser
-}
+
+fun hentFeilutbetalingIPeriode(periode: List<ØkonomiSimuleringPostering>, inkluderManuellePosteringer: Boolean) =
+    periode
+        .filter { it.posteringType == PosteringType.FEILUTBETALING }
+        .filter { inkluderManuellePosteringer || !it.erManuellPostering }
+        .sumOf { it.beløp }
 
 fun hentTidligereUtbetaltIPeriode(periode: List<ØkonomiSimuleringPostering>): BigDecimal {
     val sumNegativeYtelser = periode
         .filter { it.posteringType == PosteringType.YTELSE }
-        .filter { !it.erManuellPostering }
         .filter { it.beløp < BigDecimal.ZERO }
         .sumOf { it.beløp }
-    val feilutbetaling = hentFeilutbetalingIPeriode(periode)
+
+    val feilutbetaling = hentFeilutbetalingIPeriode(periode, true)
+
+    // Positive manuelle posteringer brukes for å justere hva som faktisk skal bli betalt ut
+    val sumPositiveManuelle = hentPositiveManuellePosteringerIPeriode(periode)
 
     return if (feilutbetaling < BigDecimal.ZERO) {
         -(sumNegativeYtelser - feilutbetaling)
     } else {
-        -sumNegativeYtelser + hentManuellPosteringIPeriode(periode)
+        -(sumNegativeYtelser + sumPositiveManuelle)
+    }
+}
+
+fun hentPositiveManuellePosteringerIPeriode(periode: List<ØkonomiSimuleringPostering>): BigDecimal {
+    val sumPositiveManuelleYtelser = periode
+        .filter { it.posteringType == PosteringType.YTELSE }
+        .filter { it.erManuellPostering }
+        .filter { it.beløp > BigDecimal.ZERO }
+        .sumOf { it.beløp }
+
+    val manuellFeilutbetaling = hentManuellFeilutbetalingIPeriode(periode)
+
+    return if (manuellFeilutbetaling > BigDecimal.ZERO) {
+        sumPositiveManuelleYtelser - manuellFeilutbetaling
+    } else {
+        sumPositiveManuelleYtelser
     }
 }
 
@@ -178,9 +153,9 @@ fun hentManuellPosteringIPeriode(periode: List<ØkonomiSimuleringPostering>): Bi
         .filter { it.erManuellPostering }
         .sumOf { it.beløp }
 
-    val sumManuellFeilutbetaling = hentManuellFeilutbetalingIPeriode(periode)
+    val manuellFeilutbetaling = hentManuellFeilutbetalingIPeriode(periode)
 
-    return -(sumManuellePosteringer - sumManuellFeilutbetaling)
+    return -(sumManuellePosteringer - manuellFeilutbetaling)
 }
 
 private fun hentManuellFeilutbetalingIPeriode(periode: List<ØkonomiSimuleringPostering>) =
@@ -189,19 +164,8 @@ private fun hentManuellFeilutbetalingIPeriode(periode: List<ØkonomiSimuleringPo
         .filter { it.erManuellPostering }
         .sumOf { it.beløp }
 
-@Deprecated("Skal bruke hentResultatIPeriode når manuelle posteringer er tester ferdig")
-fun hentResultatIPeriodeGammel(periode: List<ØkonomiSimuleringPostering>): BigDecimal {
-    val feilutbetaling = hentFeilbetalingIPeriodeGammel(periode)
-
-    return if (feilutbetaling > BigDecimal.ZERO) {
-        -feilutbetaling
-    } else {
-        hentNyttBeløpIPeriode(periode) - hentTidligereUtbetaltIPeriodeGammel(periode)
-    }
-}
-
 fun hentResultatIPeriode(periode: List<ØkonomiSimuleringPostering>): BigDecimal {
-    val feilutbetaling = hentFeilutbetalingIPeriode(periode) + hentManuellFeilutbetalingIPeriode(periode)
+    val feilutbetaling = hentFeilutbetalingIPeriode(periode, true)
 
     return if (feilutbetaling > BigDecimal.ZERO) {
         -feilutbetaling
@@ -215,14 +179,17 @@ fun hentEtterbetalingIPeriode(
     periode: List<ØkonomiSimuleringPostering>,
     tidSimuleringHentet: LocalDate?
 ): BigDecimal {
+    val periodeMedForfallFørTidSimuleringHentet = periode.filter { it.forfallsdato <= tidSimuleringHentet }
     val periodeHarPositivFeilutbetaling =
-        periode.any { it.posteringType == PosteringType.FEILUTBETALING && it.beløp > BigDecimal.ZERO }
-    val sumYtelser =
-        periode.filter { it.posteringType == PosteringType.YTELSE && it.forfallsdato <= tidSimuleringHentet }
-            .sumOf { it.beløp }
+        hentFeilutbetalingIPeriode(periodeMedForfallFørTidSimuleringHentet, true) > BigDecimal.ZERO
+    val resultat = hentResultatIPeriode(periodeMedForfallFørTidSimuleringHentet)
+
     return when {
         periodeHarPositivFeilutbetaling -> BigDecimal.ZERO
-        else -> maxOf(BigDecimal.ZERO, sumYtelser)
+        else -> maxOf(
+            BigDecimal.ZERO,
+            (resultat + hentNegativFeilutbetalingForPeriode(periodeMedForfallFørTidSimuleringHentet))
+        )
     }
 }
 

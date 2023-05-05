@@ -109,7 +109,6 @@ class SimuleringService(
         val simulering = hentSimuleringPåBehandling(behandlingId)
         val restSimulering = vedtakSimuleringMottakereTilRestSimulering(
             økonomiSimuleringMottakere = simulering,
-            erManuellPosteringTogglePå = featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ)
         )
 
         return if (!behandlingErFerdigBesluttet && simuleringErUtdatert(restSimulering)) {
@@ -155,15 +154,13 @@ class SimuleringService(
 
     fun hentEtterbetaling(økonomiSimuleringMottakere: List<ØkonomiSimuleringMottaker>): BigDecimal {
         return vedtakSimuleringMottakereTilRestSimulering(
-            økonomiSimuleringMottakere = økonomiSimuleringMottakere,
-            erManuellPosteringTogglePå = featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ)
+            økonomiSimuleringMottakere = økonomiSimuleringMottakere
         ).etterbetaling
     }
 
     fun hentFeilutbetaling(økonomiSimuleringMottakere: List<ØkonomiSimuleringMottaker>): BigDecimal {
         return vedtakSimuleringMottakereTilRestSimulering(
-            økonomiSimuleringMottakere,
-            featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ)
+            økonomiSimuleringMottakere
         ).feilutbetaling
     }
 
@@ -226,8 +223,7 @@ class SimuleringService(
         val februar2023 = LocalDate.of(2023, 2, 1)
 
         return vedtakSimuleringMottakereTilSimuleringPerioder(
-            økonomiSimuleringMottakere = hentSimuleringPåBehandling(behandlingId),
-            erManuelPosteringTogglePå = featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ)
+            økonomiSimuleringMottakere = hentSimuleringPåBehandling(behandlingId)
         ).filter {
             it.fom.isSameOrBefore(februar2023)
         }
