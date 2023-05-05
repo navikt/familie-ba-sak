@@ -968,6 +968,7 @@ class MigrerFraInfotrygdTest(
                 assertThat(behandling.fagsak.institusjon).isNull()
             }
         }
+        assertThat(behandling.fagsak.type).isEqualTo(fagsakType)
 
         generellAssertFagsak(
             restFagsak = restFagsakEtterBehandlingAvsluttet,
