@@ -68,6 +68,7 @@ class PdlIdentRestClient(
             contentType = MediaType.APPLICATION_JSON
             accept = listOf(MediaType.APPLICATION_JSON)
             add("Tema", PDL_TEMA)
+            add("behandlingsnummer", PDL_BEHANDLINGSNUMMER)
         }
     }
 
@@ -75,5 +76,6 @@ class PdlIdentRestClient(
 
         private const val PATH_GRAPHQL = "graphql"
         private const val PDL_TEMA = "BAR"
+        private const val PDL_BEHANDLINGSNUMMER = "B284"
     }
 }
