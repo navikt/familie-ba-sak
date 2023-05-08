@@ -102,7 +102,7 @@ class ØkonomiService(
         val oppdaterteKjeder = grupperAndeler(oppdatertTilstand)
 
         val erFørsteIverksatteBehandlingPåFagsak =
-            beregningService.hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(fagsakId = oppdatertBehandling.fagsak.id)
+            beregningService.hentSisteAndelPerIdent(fagsakId = oppdatertBehandling.fagsak.id)
                 .isEmpty()
 
         val utbetalingsoppdrag = if (erFørsteIverksatteBehandlingPåFagsak) {
@@ -124,12 +124,7 @@ class ØkonomiService(
 
             val forrigeKjeder = grupperAndeler(forrigeTilstand)
 
-            val sisteOffsetPerIdent = beregningService.hentSisteOffsetPerIdent(
-                forrigeBehandling.fagsak.id,
-                andelTilkjentYtelseForUtbetalingsoppdragFactory
-            )
-
-            val sisteOffsetPåFagsak = beregningService.hentSisteOffsetPåFagsak(behandling = oppdatertBehandling)
+            val sisteAndelPerIdent = beregningService.hentSisteAndelPerIdent(forrigeBehandling.fagsak.id)
 
             if (oppdatertTilstand.isNotEmpty()) {
                 oppdaterBeståendeAndelerMedOffset(oppdaterteKjeder = oppdaterteKjeder, forrigeKjeder = forrigeKjeder)
@@ -142,8 +137,7 @@ class ØkonomiService(
                 vedtak = vedtak,
                 erFørsteBehandlingPåFagsak = erFørsteIverksatteBehandlingPåFagsak,
                 forrigeKjeder = forrigeKjeder,
-                sisteOffsetPerIdent = sisteOffsetPerIdent,
-                sisteOffsetPåFagsak = sisteOffsetPåFagsak,
+                sisteAndelPerIdent = sisteAndelPerIdent,
                 oppdaterteKjeder = oppdaterteKjeder,
                 erSimulering = erSimulering,
                 endretMigreringsDato = beregnOmMigreringsDatoErEndret(

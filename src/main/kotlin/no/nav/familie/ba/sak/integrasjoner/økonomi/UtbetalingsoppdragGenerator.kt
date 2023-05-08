@@ -30,7 +30,7 @@ class UtbetalingsoppdragGenerator(
      * @param[vedtak] for å hente fagsakid, behandlingid, vedtaksdato, ident, og evt opphørsdato
      * @param[erFørsteBehandlingPåFagsak] for å sette aksjonskode på oppdragsnivå og bestemme om vi skal telle fra start
      * @param[forrigeKjeder] Et sett med kjeder som var gjeldende for forrige behandling på fagsaken
-     * @param[sisteOffsetPerIdent] Siste iverksatte offset mot økonomi per ident.
+     * @param[sisteAndelPerIdent] Siste iverksatte offset mot økonomi per ident.
      * @param[oppdaterteKjeder] Et sett med andeler knyttet til en person (dvs en kjede), hvor andeler er helt nye,
      * @param[erSimulering] flag for om beregnet er en simulering, da skal komplett nytt betlaingsoppdrag generes
      *                      og ny tilkjentytelse skal ikke persisteres,
@@ -46,8 +46,7 @@ class UtbetalingsoppdragGenerator(
         vedtak: Vedtak,
         erFørsteBehandlingPåFagsak: Boolean,
         forrigeKjeder: Map<IdentOgYtelse, List<AndelTilkjentYtelseForUtbetalingsoppdrag>> = emptyMap(),
-        sisteOffsetPerIdent: Map<IdentOgYtelse, Int> = emptyMap(),
-        sisteOffsetPåFagsak: Int? = null,
+        sisteAndelPerIdent: Map<IdentOgYtelse, AndelTilkjentYtelseForUtbetalingsoppdrag> = emptyMap(),
         oppdaterteKjeder: Map<IdentOgYtelse, List<AndelTilkjentYtelseForUtbetalingsoppdrag>> = emptyMap(),
         erSimulering: Boolean = false,
         endretMigreringsDato: YearMonth? = null
@@ -75,17 +74,18 @@ class UtbetalingsoppdragGenerator(
         }
 
         val andelerTilOpphør =
-            andelerTilOpphørMedDato(forrigeKjeder, sisteBeståenAndelIHverKjede, endretMigreringsDato)
+            andelerTilOpphørMedDato(forrigeKjeder, sisteBeståenAndelIHverKjede, endretMigreringsDato, sisteAndelPerIdent)
         val andelerTilOpprettelse: List<List<AndelTilkjentYtelseForUtbetalingsoppdrag>> =
             andelerTilOpprettelse(oppdaterteKjeder, sisteBeståenAndelIHverKjede)
 
         val opprettes: List<Utbetalingsperiode> = if (andelerTilOpprettelse.isNotEmpty()) {
+            val sisteOffsetIKjedeOversikt = sisteAndelPerIdent.map { it.key to it.value.periodeOffset!!.toInt() }.toMap()
             lagUtbetalingsperioderForOpprettelseOgOppdaterTilkjentYtelse(
                 andeler = andelerTilOpprettelse,
                 erFørsteBehandlingPåFagsak = erFørsteBehandlingPåFagsak,
                 vedtak = vedtak,
-                sisteOffsetIKjedeOversikt = sisteOffsetPerIdent,
-                sisteOffsetPåFagsak = sisteOffsetPåFagsak,
+                sisteOffsetIKjedeOversikt = sisteOffsetIKjedeOversikt,
+                sisteOffsetPåFagsak = sisteOffsetIKjedeOversikt.maxOfOrNull { it.value },
                 skalOppdatereTilkjentYtelse = !erSimulering
             )
         } else {

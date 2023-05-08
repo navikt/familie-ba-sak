@@ -133,12 +133,21 @@ object ØkonomiUtils {
      * @param[forrigeKjeder] ny tilstand
      * @param[sisteBeståendeAndelIHverKjede] andeler man må bygge opp etter
      * @param[endretMigreringsDato] Satt betyr at opphørsdato skal settes fra før tidligeste dato i eksisterende kjede.
+     * @param[sisteAndelPerIdent] Vi skal alltid opphøre mot siste andelen i en kjede.
+     * I de tillfeller der man har en førstegångsbehandling med 2 andeler
+     * <---->       lid 0
+     *       <----> lid 1
+     * Og man i en revurdering opphør den siste andelen
+     * <---->       lid 0
+     * Så skal man i en ny revurdering fortsatt peke til lid 0, og ikke mot 1
+     *
      * @return map av siste andel og opphørsdato fra kjeder med opphør
      */
     fun andelerTilOpphørMedDato(
         forrigeKjeder: Map<IdentOgYtelse, List<AndelTilkjentYtelseForUtbetalingsoppdrag>>,
         sisteBeståendeAndelIHverKjede: Map<IdentOgYtelse, AndelTilkjentYtelseForUtbetalingsoppdrag?>,
-        endretMigreringsDato: YearMonth? = null
+        endretMigreringsDato: YearMonth? = null,
+        sisteAndelPerIdent: Map<IdentOgYtelse, AndelTilkjentYtelseForUtbetalingsoppdrag>
     ): List<Pair<AndelTilkjentYtelseForUtbetalingsoppdrag, YearMonth>> =
         forrigeKjeder
             .mapValues { (person, forrigeAndeler) ->
@@ -148,19 +157,11 @@ object ØkonomiUtils {
                 }
             }
             .filter { (_, andelerSomOpphøres) -> andelerSomOpphøres.isNotEmpty() }
-            .mapValues { andelForKjede -> andelForKjede.value.sortedBy { it.stønadFom } }
-            .map { (_, kjedeEtterFørsteEndring) ->
-                kjedeEtterFørsteEndring.last() to (endretMigreringsDato ?: kjedeEtterFørsteEndring.first().stønadFom)
+            .map { (identOgYtelse, kjedeEtterFørsteEndring) ->
+                val sisteAndel =
+                    sisteAndelPerIdent[identOgYtelse] ?: error("Finner ikke siste andel for $identOgYtelse")
+                sisteAndel to (endretMigreringsDato ?: kjedeEtterFørsteEndring.first().stønadFom)
             }
-
-    fun gjeldendeForrigeOffsetForKjede(andelerFraForrigeBehandling: Map<IdentOgYtelse, List<AndelTilkjentYtelseForUtbetalingsoppdrag>>): Map<IdentOgYtelse, Int> =
-        andelerFraForrigeBehandling.map { (personIdent, forrigeKjede) ->
-            personIdent to (
-                forrigeKjede.filter { it.kalkulertUtbetalingsbeløp > 0 }
-                    .maxByOrNull { andel -> andel.periodeOffset!! }?.periodeOffset?.toInt()
-                    ?: throw IllegalStateException("Andel i kjede skal ha offset")
-                )
-        }.toMap()
 
     private fun altIKjedeOpphøres(
         kjedeidentifikator: IdentOgYtelse,
