@@ -126,7 +126,5 @@ Egenskap: Vedtak for førstegangsbehandling
 
       | 2            | 05.2021  | 05.2021  | 05.2021     | 700   | ENDR         | Ja         | 2          | 1                  |
 
-# TODO denne er egentligen feil? Det burde være den kommenterte koden som er riktig. Den burde peke til sen siste i kjeden, men opphøre fom 04.2021
-#      | 3            | 05.2021  | 05.2021  | 04.2021     | 700   | ENDR         | Ja         | 2          | 1                  |
-      | 3            | 04.2021  | 04.2021  | 04.2021     | 700   | ENDR         | Ja         | 1          | 0                  |
+      | 3            | 05.2021  | 05.2021  | 04.2021     | 700   | ENDR         | Ja         | 2          | 1                  |
 
