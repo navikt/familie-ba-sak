@@ -70,7 +70,7 @@ private fun List<Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned>>.utl
     .map { grunnlagForDenneOgForrigeBehandlingTidslinje ->
         grunnlagForDenneOgForrigeBehandlingTidslinje.filtrer {
             val gjeldendeErIkkeInnvilget = it?.gjeldende is GrunnlagForPersonIkkeInnvilget
-            val gjeldendeErNullForrigeErInnvilget = it?.gjeldende == null && it?.forrige is GrunnlagForPersonInnvilget
+            val gjeldendeErNullForrigeErInnvilget = it?.gjeldende == null && it?.personHarRettIForrigeBehandling == true
 
             gjeldendeErIkkeInnvilget || gjeldendeErNullForrigeErInnvilget
         }
@@ -93,9 +93,9 @@ private fun kombinerGjeldendeOgForrigeGrunnlag(
             val forrigeErOppfylt = forrige is GrunnlagForPersonInnvilget
 
             if (gjeldendeErIkkeOppfylt && forrigeErOppfylt) {
-                GrunnlagForGjeldendeOgForrigeBehandling(gjeldende, forrige)
+                GrunnlagForGjeldendeOgForrigeBehandling(gjeldende, true)
             } else {
-                GrunnlagForGjeldendeOgForrigeBehandling(gjeldende, null)
+                gjeldende?.let { GrunnlagForGjeldendeOgForrigeBehandling(gjeldende, false) }
             }
         }.slåSammenLike()
     }

@@ -35,7 +35,8 @@ object VedtaksperiodeMedBegrunnelserParser {
         VEDTAKSPERIODE_TYPE("Vedtaksperiodetype"),
         VILKÅR("Vilkår"),
         RESULTAT("Resultat"),
-        BELØP("Beløp")
+        BELØP("Beløp"),
+        ER_EKSPLISITT_AVSLAG("Er eksplisitt avslag")
     }
 
     enum class DomenebegrepKompetanse(override val nøkkel: String) : Domenenøkkel {
