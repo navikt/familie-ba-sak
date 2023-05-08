@@ -166,10 +166,8 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
             val aktørId = parseAktørId(rad)
             val behandlingId = parseLong(Domenebegrep.BEHANDLING_ID, rad)
             lagAndelTilkjentYtelse(
-                fom = parseValgfriDato(Domenebegrep.FRA_DATO, rad)?.toYearMonth()
-                    ?: LocalDate.MIN.toYearMonth(),
-                tom = parseValgfriDato(Domenebegrep.TIL_DATO, rad)?.toYearMonth()
-                    ?: LocalDate.MAX.toYearMonth(),
+                fom = parseDato(Domenebegrep.FRA_DATO, rad).toYearMonth(),
+                tom = parseDato(Domenebegrep.TIL_DATO, rad).toYearMonth(),
                 behandling = finnBehandling(behandlingId),
                 person = persongrunnlagForBehandling(behandlingId).personer.find { aktørId == it.aktør.aktørId }!!,
                 beløp = parseInt(DomenebegrepVedtaksperiodeMedBegrunnelser.BELØP, rad)
