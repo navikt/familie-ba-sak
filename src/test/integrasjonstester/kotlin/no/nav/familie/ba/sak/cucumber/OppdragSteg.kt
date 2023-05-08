@@ -17,10 +17,11 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.OppdragParser.mapTilkjentYtel
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForIverksettingFactory
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForSimuleringFactory
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForUtbetalingsoppdrag
+import no.nav.familie.ba.sak.integrasjoner.økonomi.IdentOgYtelse
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGenerator
 import no.nav.familie.ba.sak.integrasjoner.økonomi.pakkInnForUtbetaling
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.gjeldendeForrigeOffsetForKjede
-import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.kjedeinndelteAndeler
+import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.grupperAndeler
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.oppdaterBeståendeAndelerMedOffset
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
@@ -137,7 +138,7 @@ class OppdragSteg {
     private fun tilKjeder(
         tilkjentYtelse: TilkjentYtelse?,
         erSimulering: Boolean = false
-    ): Map<String, List<AndelTilkjentYtelseForUtbetalingsoppdrag>> {
+    ): Map<IdentOgYtelse, List<AndelTilkjentYtelseForUtbetalingsoppdrag>> {
         val andelFactory = if (erSimulering) {
             AndelTilkjentYtelseForSimuleringFactory()
         } else {
@@ -147,7 +148,7 @@ class OppdragSteg {
         return (tilkjentYtelse?.andelerTilkjentYtelse ?: emptyList())
             .filter { it.erAndelSomSkalSendesTilOppdrag() }
             .pakkInnForUtbetaling(andelFactory)
-            .let { kjedeinndelteAndeler(it) }
+            .let { grupperAndeler(it) }
     }
 
     private fun genererBehandlinger(dataTable: DataTable) {

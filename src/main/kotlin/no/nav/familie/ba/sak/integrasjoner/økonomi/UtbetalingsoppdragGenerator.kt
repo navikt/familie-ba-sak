@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi
 
 import no.nav.familie.ba.sak.common.Feil
-import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.SMÅBARNSTILLEGG_SUFFIX
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.andelerTilOpphørMedDato
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.andelerTilOpprettelse
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.sisteAndelPerKjede
@@ -46,10 +45,10 @@ class UtbetalingsoppdragGenerator(
         saksbehandlerId: String,
         vedtak: Vedtak,
         erFørsteBehandlingPåFagsak: Boolean,
-        forrigeKjeder: Map<String, List<AndelTilkjentYtelseForUtbetalingsoppdrag>> = emptyMap(),
-        sisteOffsetPerIdent: Map<String, Int> = emptyMap(),
+        forrigeKjeder: Map<IdentOgYtelse, List<AndelTilkjentYtelseForUtbetalingsoppdrag>> = emptyMap(),
+        sisteOffsetPerIdent: Map<IdentOgYtelse, Int> = emptyMap(),
         sisteOffsetPåFagsak: Int? = null,
-        oppdaterteKjeder: Map<String, List<AndelTilkjentYtelseForUtbetalingsoppdrag>> = emptyMap(),
+        oppdaterteKjeder: Map<IdentOgYtelse, List<AndelTilkjentYtelseForUtbetalingsoppdrag>> = emptyMap(),
         erSimulering: Boolean = false,
         endretMigreringsDato: YearMonth? = null
     ): Utbetalingsoppdrag {
@@ -135,7 +134,7 @@ class UtbetalingsoppdragGenerator(
         andeler: List<List<AndelTilkjentYtelseForUtbetalingsoppdrag>>,
         vedtak: Vedtak,
         erFørsteBehandlingPåFagsak: Boolean,
-        sisteOffsetIKjedeOversikt: Map<String, Int>,
+        sisteOffsetIKjedeOversikt: Map<IdentOgYtelse, Int>,
         sisteOffsetPåFagsak: Int? = null,
         skalOppdatereTilkjentYtelse: Boolean
     ): List<Utbetalingsperiode> {
@@ -157,11 +156,7 @@ class UtbetalingsoppdragGenerator(
                 val ytelseType = kjede.first().type
                 var forrigeOffsetIKjede: Int? = null
                 if (!erFørsteBehandlingPåFagsak) {
-                    forrigeOffsetIKjede = if (ytelseType == YtelseType.SMÅBARNSTILLEGG) {
-                        sisteOffsetIKjedeOversikt[ident + SMÅBARNSTILLEGG_SUFFIX]
-                    } else {
-                        sisteOffsetIKjedeOversikt[ident]
-                    }
+                    forrigeOffsetIKjede = sisteOffsetIKjedeOversikt[IdentOgYtelse(ident, ytelseType)]
                 }
                 kjede.sortedBy { it.stønadFom }.mapIndexed { index, andel ->
                     val forrigeOffset = if (index == 0) forrigeOffsetIKjede else offset - 1
