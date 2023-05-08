@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.brev.domene.maler
 
+import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
+import java.time.LocalDate
 
 data class ForsattInnvilget(
     override val mal: Brevmal,
@@ -12,7 +14,9 @@ data class ForsattInnvilget(
         vedtakFellesfelter: VedtakFellesfelter,
         etterbetaling: Etterbetaling? = null,
         etterbetalingInstitusjon: EtterbetalingInstitusjon? = null,
-        informasjonOmAarligKontroll: Boolean = false
+        informasjonOmAarligKontroll: Boolean = false,
+        refusjonEosAvklart: RefusjonEøsAvklart? = null,
+        refusjonEosUavklart: RefusjonEøsUavklart? = null
     ) :
         this(
             mal = mal,
@@ -27,14 +31,19 @@ data class ForsattInnvilget(
                     etterbetaling = etterbetaling,
                     etterbetalingInstitusjon = etterbetalingInstitusjon,
                     korrigertVedtak = vedtakFellesfelter.korrigertVedtakData,
-                    informasjonOmAarligKontroll = informasjonOmAarligKontroll
+                    informasjonOmAarligKontroll = informasjonOmAarligKontroll,
+                    refusjonEosAvklart = refusjonEosAvklart != null,
+                    refusjonEosUavklart = refusjonEosUavklart != null
                 ),
-                flettefelter = FlettefelterForDokumentImpl(
-                    navn = vedtakFellesfelter.søkerNavn,
-                    fodselsnummer = vedtakFellesfelter.søkerFødselsnummer,
-                    organisasjonsnummer = vedtakFellesfelter.organisasjonsnummer,
-                    gjelder = vedtakFellesfelter.gjelder
-                ),
+                flettefelter = object : FlettefelterForDokument {
+                    val perioderMedRefusjonEosAvklart: Flettefelt = refusjonEosAvklart?.perioderMedRefusjonEøsAvklart
+                    val perioderMedRefusjonEosUavklart: Flettefelt = refusjonEosUavklart?.perioderMedRefusjonEøsUavklart
+                    override val brevOpprettetDato = flettefelt(LocalDate.now().tilDagMånedÅr())
+                    override val navn = flettefelt(vedtakFellesfelter.søkerNavn)
+                    override val fodselsnummer = flettefelt(vedtakFellesfelter.søkerFødselsnummer)
+                    override val organisasjonsnummer = flettefelt(vedtakFellesfelter.organisasjonsnummer)
+                    override val gjelder = flettefelt(vedtakFellesfelter.gjelder)
+                },
                 perioder = vedtakFellesfelter.perioder
             )
         )
@@ -42,7 +51,7 @@ data class ForsattInnvilget(
 
 data class ForsattInnvilgetData(
     override val delmalData: Delmaler,
-    override val flettefelter: FlettefelterForDokumentImpl,
+    override val flettefelter: FlettefelterForDokument,
     override val perioder: List<BrevPeriode>
 ) : VedtaksbrevData {
 
@@ -52,6 +61,8 @@ data class ForsattInnvilgetData(
         val etterbetaling: Etterbetaling?,
         val etterbetalingInstitusjon: EtterbetalingInstitusjon?,
         val korrigertVedtak: KorrigertVedtakData?,
-        val informasjonOmAarligKontroll: Boolean
+        val informasjonOmAarligKontroll: Boolean,
+        val refusjonEosAvklart: Boolean,
+        val refusjonEosUavklart: Boolean
     )
 }

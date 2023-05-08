@@ -26,7 +26,8 @@ class BrevServiceTest {
         organisasjonService = mockk(),
         korrigertVedtakService = mockk(),
         saksbehandlerContext = saksbehandlerContext,
-        brevmalService = brevmalService
+        brevmalService = brevmalService,
+        refusjonEøsRepository = mockk()
     )
 
     @BeforeEach

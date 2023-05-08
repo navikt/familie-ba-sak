@@ -22,6 +22,7 @@ import org.springframework.kafka.core.DefaultKafkaProducerFactory
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.kafka.core.ProducerFactory
 import org.springframework.kafka.listener.ContainerProperties
+import org.springframework.kafka.support.LoggingProducerListener
 
 @Configuration
 class KafkaAivenConfig(val environment: Environment) {
@@ -33,7 +34,11 @@ class KafkaAivenConfig(val environment: Environment) {
 
     @Bean
     fun kafkaAivenTemplate(): KafkaTemplate<String, String> {
-        return KafkaTemplate(producerFactory())
+        val producerListener = LoggingProducerListener<String, String>()
+        producerListener.setIncludeContents(false)
+        return KafkaTemplate(producerFactory()).apply<KafkaTemplate<String, String>> {
+            setProducerListener(producerListener)
+        }
     }
 
     @Bean
