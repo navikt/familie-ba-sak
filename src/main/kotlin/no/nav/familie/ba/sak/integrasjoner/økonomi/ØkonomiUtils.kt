@@ -7,10 +7,6 @@ import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
 
-data class IdentOgYtelse(
-    val ident: String,
-    val type: YtelseType
-)
 object ØkonomiUtils {
 
     /**
