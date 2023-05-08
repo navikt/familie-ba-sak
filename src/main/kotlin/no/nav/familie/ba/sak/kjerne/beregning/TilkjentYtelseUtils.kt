@@ -145,10 +145,11 @@ object TilkjentYtelseUtils {
         }
 
         val nyeAndeler = andelOgNySatsTidslinje.perioder().map {
-            val forrigeAndel = it.innhold?.andel ?: throw Feil("Finner ikke forrige andel i utledningen av nye andeler for satsendring")
-            val sats = it.innhold.sats
+            val forrigeAndel = it.innhold?.tidligereAndel ?: throw Feil("Finner ikke forrige andel i utledningen av nye andeler for satsendring")
+            val nySats = it.innhold.nySats
 
-            val utbetaltBeløp = sats.avrundetHeltallAvProsent(forrigeAndel.prosent)
+            val utbetaltBeløp = nySats.avrundetHeltallAvProsent(forrigeAndel.prosent)
+
             AndelTilkjentYtelse(
                 behandlingId = behandlingId,
                 tilkjentYtelse = tilkjentYtelse,
@@ -158,7 +159,7 @@ object TilkjentYtelseUtils {
                 kalkulertUtbetalingsbeløp = utbetaltBeløp,
                 nasjonaltPeriodebeløp = utbetaltBeløp,
                 type = forrigeAndel.type,
-                sats = sats,
+                sats = nySats,
                 prosent = forrigeAndel.prosent
             )
         }
@@ -167,8 +168,8 @@ object TilkjentYtelseUtils {
     }
 
     private data class AndelOgSats(
-        val andel: AndelTilkjentYtelse,
-        val sats: Int
+        val tidligereAndel: AndelTilkjentYtelse,
+        val nySats: Int
     )
 
     fun oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
