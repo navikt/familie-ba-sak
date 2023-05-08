@@ -60,12 +60,8 @@ data class GrunnlagForVedtaksperioder(
         val søker = persongrunnlag.søker
         val søkerPersonResultater = personResultater.single { it.aktør == søker.aktør }
 
-        val ordinæreVilkårForSøkerForskjøvetTidslinje = søkerPersonResultater.tilTidslinjeForSplittForPerson(
-            personType = søker.type,
-            fagsakType = fagsakType
-        ).map {
-            it?.filtrerVilkårErOrdinærtFor(søker)
-        }
+        val ordinæreVilkårForSøkerForskjøvetTidslinje =
+            hentOrdinæreVilkårForSøkerForskjøvetTidslinje(søkerPersonResultater, søker)
 
         val erMinstEttBarnMedUtbetalingTidslinje =
             hentErMinstEttBarnMedUtbetalingTidslinje(personResultater, søker, fagsakType)
@@ -90,6 +86,13 @@ data class GrunnlagForVedtaksperioder(
 
         return grunnlagForPersonTidslinjer
     }
+
+    private fun hentOrdinæreVilkårForSøkerForskjøvetTidslinje(
+        søkerPersonResultater: PersonResultat,
+        søker: Person
+    ) = søkerPersonResultater.vilkårResultater.tilForskjøvedeVilkårTidslinjer()
+        .kombiner { vilkårResultater -> vilkårResultater.toList().takeIf { it.isNotEmpty() } }
+        .map { it?.toList()?.filtrerVilkårErOrdinærtFor(søker) }
 
     private fun Tidslinje<List<VilkårResultat>, Måned>.tilGrunnlagForPersonTidslinje(
         person: Person,
@@ -128,7 +131,7 @@ data class GrunnlagForVedtaksperioder(
         return grunnlagTidslinje
             .slåSammenLike()
             .perioder()
-            .dropWhile { it.innhold !is GrunnlagForPersonInnvilget }
+            .dropWhile { !it.erInnvilgetEllerEksplisittAvslag() }
             .tilTidslinje()
     }
 }
@@ -337,3 +340,13 @@ private fun List<UtfyltKompetanse>.filtrerPåAktør(aktør: Aktør) =
 @JvmName("vilkårResultatFiltrerPåAktør")
 private fun List<VilkårResultat>.filtrerPåAktør(aktør: Aktør) =
     filter { it.personResultat?.aktør == aktør }
+
+private fun Periode<GrunnlagForPerson, Måned>.erInnvilgetEllerEksplisittAvslag(): Boolean {
+    val grunnlagForPerson = innhold ?: return false
+
+    val erInnvilget = grunnlagForPerson is GrunnlagForPersonInnvilget
+    val erEksplisittAvslag =
+        grunnlagForPerson.vilkårResultaterForVedtaksPeriode.any { it.erEksplisittAvslagPåSøknad == true }
+
+    return erInnvilget || erEksplisittAvslag
+}
