@@ -228,9 +228,9 @@ private fun lagGrunnlagForVilkårOgAndel(
 ) = if (personHarRettPåUtbetalingIPeriode == true) {
     GrunnlagForPersonInnvilget(
         vilkårResultaterForVedtaksPeriode = vilkårResultater
-            ?: error("vilkårResultatene burde alltid finnes om vi har rett"),
+            ?: error("vilkårResultatene burde alltid finnes om vi har innvilget vedtaksperiode."),
         person = person,
-        andeler = andeler
+        andeler = andeler ?: error("andeler må finnes for innvilgede vedtaksperioder.")
     )
 } else {
     GrunnlagForPersonIkkeInnvilget(
@@ -244,13 +244,7 @@ private fun lagGrunnlagMedKompetanse(
     kompetanse: KompetanseForVedtaksperiode?
 ) = when (grunnlagForPerson) {
     is GrunnlagForPersonInnvilget -> grunnlagForPerson.copy(kompetanse = kompetanse)
-    is GrunnlagForPersonIkkeInnvilget -> {
-        if (kompetanse != null) {
-            throw Feil("GrunnlagForPersonIkkeInnvilget for aktør ${grunnlagForPerson.person.aktør} kan ikke ha kompetanse siden den ikke er innvilget")
-        }
-        grunnlagForPerson
-    }
-
+    is GrunnlagForPersonIkkeInnvilget -> grunnlagForPerson
     null -> null
 }
 
