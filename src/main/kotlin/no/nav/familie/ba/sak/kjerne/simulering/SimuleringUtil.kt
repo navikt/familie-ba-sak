@@ -101,7 +101,7 @@ fun hentPositivFeilbetalingIPeriode(periode: List<ØkonomiSimuleringPostering>) 
             postering.beløp > BigDecimal.ZERO
     }.sumOf { it.beløp }
 
-fun hentNegativFeilutbetalingForPeriode(periode: List<ØkonomiSimuleringPostering>) =
+fun hentNegativFeilutbetalingIPeriode(periode: List<ØkonomiSimuleringPostering>) =
     periode.filter { postering ->
         postering.posteringType == PosteringType.FEILUTBETALING &&
             postering.beløp < BigDecimal.ZERO
@@ -116,34 +116,19 @@ fun hentFeilutbetalingIPeriode(periode: List<ØkonomiSimuleringPostering>, inklu
 fun hentTidligereUtbetaltIPeriode(periode: List<ØkonomiSimuleringPostering>): BigDecimal {
     val sumNegativeYtelser = periode
         .filter { it.posteringType == PosteringType.YTELSE }
+        .filter { !it.erManuellPostering }
         .filter { it.beløp < BigDecimal.ZERO }
         .sumOf { it.beløp }
 
-    val feilutbetaling = hentFeilutbetalingIPeriode(periode, true)
+    val feilutbetaling = hentFeilutbetalingIPeriode(periode, false)
 
-    // Positive manuelle posteringer brukes for å justere hva som faktisk skal bli betalt ut
-    val sumPositiveManuelle = hentPositiveManuellePosteringerIPeriode(periode)
+    // Manuelle posteringer brukes for å justere hva som faktisk skal bli betalt ut i en periode
+    val sumManuellePosteringer = hentManuellPosteringIPeriode(periode)
 
     return if (feilutbetaling < BigDecimal.ZERO) {
         -(sumNegativeYtelser - feilutbetaling)
     } else {
-        -(sumNegativeYtelser + sumPositiveManuelle)
-    }
-}
-
-fun hentPositiveManuellePosteringerIPeriode(periode: List<ØkonomiSimuleringPostering>): BigDecimal {
-    val sumPositiveManuelleYtelser = periode
-        .filter { it.posteringType == PosteringType.YTELSE }
-        .filter { it.erManuellPostering }
-        .filter { it.beløp > BigDecimal.ZERO }
-        .sumOf { it.beløp }
-
-    val manuellFeilutbetaling = hentManuellFeilutbetalingIPeriode(periode)
-
-    return if (manuellFeilutbetaling > BigDecimal.ZERO) {
-        sumPositiveManuelleYtelser - manuellFeilutbetaling
-    } else {
-        sumPositiveManuelleYtelser
+        -sumNegativeYtelser + sumManuellePosteringer
     }
 }
 
@@ -188,7 +173,7 @@ fun hentEtterbetalingIPeriode(
         periodeHarPositivFeilutbetaling -> BigDecimal.ZERO
         else -> maxOf(
             BigDecimal.ZERO,
-            (resultat + hentNegativFeilutbetalingForPeriode(periodeMedForfallFørTidSimuleringHentet))
+            (resultat + hentNegativFeilutbetalingIPeriode(periodeMedForfallFørTidSimuleringHentet))
         )
     }
 }
