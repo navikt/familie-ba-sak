@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.erDagenFør
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.inkluderer
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.UtvidetBarnetrygdUtil.finnUtvidetVilkår
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
@@ -16,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.medEndring
+import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerPersonOgType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
@@ -122,6 +124,32 @@ object TilkjentYtelseUtils {
         utvidetAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
         barnasAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
     ): Boolean = utvidetAndeler.isNotEmpty() && barnasAndeler.isNotEmpty()
+
+    internal fun beregnTilkjentYtelseMedNySatsForSatsendring(
+        forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+        behandling: Behandling,
+        personopplysningGrunnlag: PersonopplysningGrunnlag
+    ): TilkjentYtelse {
+        val tilkjentYtelse = TilkjentYtelse(
+            behandling = behandling,
+            opprettetDato = LocalDate.now(),
+            endretDato = LocalDate.now()
+        )
+
+        val tidlinjerMedForrigeAndelerPerPersonOgType = forrigeAndelerTilkjentYtelse.tilTidslinjerPerPersonOgType()
+
+        val nyeAndeler = tidlinjerMedForrigeAndelerPerPersonOgType.flatMap { (aktørOgYtelse, tidlinje) ->
+            tidlinje.lagAndelerMedNySatsForPersonOgYtelsetype(
+                ytelseType = aktørOgYtelse.second,
+                person = personopplysningGrunnlag.personer.find { it.aktør == aktørOgYtelse.first } ?: throw Feil("Må finnes"),
+                behandlingId = behandling.id,
+                tilkjentYtelse = tilkjentYtelse
+            )
+        }
+
+        tilkjentYtelse.andelerTilkjentYtelse.addAll(nyeAndeler)
+        return tilkjentYtelse
+    }
 
     private fun Tidslinje<AndelTilkjentYtelse, Måned>.lagAndelerMedNySatsForPersonOgYtelsetype(
         ytelseType: YtelseType,
