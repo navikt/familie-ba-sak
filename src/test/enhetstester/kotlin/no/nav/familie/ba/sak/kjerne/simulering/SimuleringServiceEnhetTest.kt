@@ -51,7 +51,6 @@ internal class SimuleringServiceEnhetTest {
         beregningService,
         øknomiSimuleringMottakerRepository,
         tilgangService,
-        featureToggleService,
         vedtakRepository,
         behandlingHentOgPersisterService,
         persongrunnlagService
