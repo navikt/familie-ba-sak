@@ -32,9 +32,7 @@ Egenskap: Vedtak for førstegangsbehandling
       | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id |
       | 1            | 03.2021  | 03.2021  |             | 700   | NY           | Nei        | 0          |                    |
       | 2            | 03.2021  | 03.2021  | 03.2021     | 700   | ENDR         | Ja         | 0          |                    |
-# TODO denne burde være feil, den burde vel kanskje peke til 0?
-#      | 3            | 03.2021  | 03.2021  |             | 700   | ENDR         | Nei        | 1          | 0                  |
-      | 3            | 03.2021  | 03.2021  |             | 700   | ENDR         | Nei        | 1          |                    |
+      | 3            | 03.2021  | 03.2021  |             | 700   | ENDR         | Nei        | 1          | 0                  |
 
   Scenario: Opphør en av 2 perioder
 
