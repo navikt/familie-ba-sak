@@ -4,8 +4,6 @@ import io.micrometer.core.instrument.Metrics
 import jakarta.transaction.Transactional
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.isSameOrBefore
-import no.nav.familie.ba.sak.config.FeatureToggleConfig
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForSimuleringFactory
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
@@ -36,7 +34,6 @@ class SimuleringService(
     private val beregningService: BeregningService,
     private val øknomiSimuleringMottakerRepository: ØknomiSimuleringMottakerRepository,
     private val tilgangService: TilgangService,
-    private val featureToggleService: FeatureToggleService,
     private val vedtakRepository: VedtakRepository,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val persongrunnlagService: PersongrunnlagService
