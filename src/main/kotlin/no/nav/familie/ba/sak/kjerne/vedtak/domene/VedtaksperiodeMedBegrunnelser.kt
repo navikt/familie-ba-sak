@@ -32,6 +32,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.slåSammenLike
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilFørsteDagIMåneden
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilSisteDagIMåneden
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
@@ -187,19 +188,40 @@ fun VedtaksperiodeMedBegrunnelser.hentUtbetalingsperiodeDetaljerNy(
     andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
     personopplysningGrunnlag: PersonopplysningGrunnlag
 ): List<UtbetalingsperiodeDetalj> {
-    if (this.type == Vedtaksperiodetype.OPPHØR) return emptyList()
-
     val utbetalingsperiodeDetaljer = andelerTilkjentYtelse.tilUtbetalingerTidslinje(personopplysningGrunnlag)
 
-    val utbetalingsperioderRelevantForVedtaksperiode =
-        utbetalingsperiodeDetaljer.perioder().find { andelerVertikal ->
-            andelerVertikal.fraOgMed.tilFørsteDagIMåneden().tilLocalDate().isSameOrBefore(this.fom ?: TIDENES_MORGEN) &&
-                andelerVertikal.tilOgMed.tilSisteDagIMåneden().tilLocalDate().isSameOrAfter(this.tom ?: TIDENES_ENDE)
-        }?.innhold ?: throw Feil(
-            "Finner ikke segment for vedtaksperiode (${this.fom}, ${this.tom}) blant segmenter ${andelerTilkjentYtelse.utledSegmenter()}"
-        )
+    return when (this.type) {
+        Vedtaksperiodetype.OPPHØR -> emptyList()
 
-    return utbetalingsperioderRelevantForVedtaksperiode.toList()
+        Vedtaksperiodetype.FORTSATT_INNVILGET -> {
+            val løpendeUtbetalingsperiode =
+                (
+                    utbetalingsperiodeDetaljer.perioder()
+                        .lastOrNull { it.fraOgMed.tilYearMonth() <= inneværendeMåned() }
+                        ?: utbetalingsperiodeDetaljer.perioder().firstOrNull()
+                    )
+
+            løpendeUtbetalingsperiode?.innhold?.toList()
+                ?: throw Feil("Finner ikke gjeldende segment ved fortsatt innvilget")
+        }
+
+        Vedtaksperiodetype.UTBETALING,
+        Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING,
+        Vedtaksperiodetype.AVSLAG,
+        Vedtaksperiodetype.ENDRET_UTBETALING -> {
+            val utbetalingsperioderRelevantForVedtaksperiode =
+                utbetalingsperiodeDetaljer.perioder().find { andelerVertikal ->
+                    andelerVertikal.fraOgMed.tilFørsteDagIMåneden().tilLocalDate()
+                        .isSameOrBefore(this.fom ?: TIDENES_MORGEN) &&
+                        andelerVertikal.tilOgMed.tilSisteDagIMåneden().tilLocalDate()
+                            .isSameOrAfter(this.tom ?: TIDENES_ENDE)
+                }?.innhold ?: throw Feil(
+                    "Finner ikke segment for vedtaksperiode (${this.fom}, ${this.tom}) blant segmenter ${andelerTilkjentYtelse.utledSegmenter()}"
+                )
+
+            utbetalingsperioderRelevantForVedtaksperiode.toList()
+        }
+    }
 }
 
 private fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.tilUtbetalingerTidslinje(
