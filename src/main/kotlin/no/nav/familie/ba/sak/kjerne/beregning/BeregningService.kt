@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForUtbetalingsoppdragFactory
+import no.nav.familie.ba.sak.integrasjoner.økonomi.IdentOgYtelse
 import no.nav.familie.ba.sak.integrasjoner.økonomi.pakkInnForUtbetaling
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -202,10 +203,12 @@ class BeregningService(
                 endretUtbetalingAndeler = endreteUtbetalingAndeler,
                 fagsakType = behandling.fagsak.type
             ) { søkerAktør ->
-                småbarnstilleggService.hentOgLagrePerioderMedFullOvergangsstønad(
+                småbarnstilleggService.hentOgLagrePerioderMedFullOvergangsstønadFraEf(
                     søkerAktør = søkerAktør,
                     behandlingId = behandling.id
                 )
+
+                småbarnstilleggService.hentPerioderMedFullOvergangsstønad(behandling.id)
             }
 
         val lagretTilkjentYtelse = tilkjentYtelseRepository.save(tilkjentYtelse)
@@ -290,7 +293,7 @@ class BeregningService(
     fun hentSisteOffsetPerIdent(
         fagsakId: Long,
         andelTilkjentYtelseForUtbetalingsoppdragFactory: AndelTilkjentYtelseForUtbetalingsoppdragFactory
-    ): Map<String, Int> {
+    ): Map<IdentOgYtelse, Int> {
         val alleAndelerTilkjentYtelserIverksattMotØkonomi =
             hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(fagsakId)
                 .flatMap { it.andelerTilkjentYtelse }
@@ -298,7 +301,7 @@ class BeregningService(
                 .pakkInnForUtbetaling(andelTilkjentYtelseForUtbetalingsoppdragFactory)
 
         val alleTideligereKjederIverksattMotØkonomi =
-            ØkonomiUtils.kjedeinndelteAndeler(alleAndelerTilkjentYtelserIverksattMotØkonomi)
+            ØkonomiUtils.grupperAndeler(alleAndelerTilkjentYtelserIverksattMotØkonomi)
 
         return ØkonomiUtils.gjeldendeForrigeOffsetForKjede(alleTideligereKjederIverksattMotØkonomi)
     }

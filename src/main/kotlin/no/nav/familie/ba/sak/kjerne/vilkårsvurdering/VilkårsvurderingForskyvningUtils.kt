@@ -23,7 +23,10 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.tilTidslinje
 import java.time.LocalDate
 
 object VilkårsvurderingForskyvningUtils {
-    fun Set<PersonResultat>.tilTidslinjeForSplitt(personerIPersongrunnlag: List<Person>, fagsakType: FagsakType): Tidslinje<List<VilkårResultat>, Måned> {
+    fun Set<PersonResultat>.tilTidslinjeForSplitt(
+        personerIPersongrunnlag: List<Person>,
+        fagsakType: FagsakType
+    ): Tidslinje<List<VilkårResultat>, Måned> {
         val tidslinjerPerPerson = this.map { personResultat ->
             val person = personerIPersongrunnlag.find { it.aktør == personResultat.aktør }
                 ?: throw Feil("Finner ikke person med aktørId=${personResultat.aktør.aktørId} i persongrunnlaget ved generering av tidslinje for splitt")
@@ -39,7 +42,13 @@ object VilkårsvurderingForskyvningUtils {
     ): Tidslinje<List<VilkårResultat>, Måned> {
         val tidslinjer = this.vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår()
 
-        return tidslinjer.kombiner { alleOrdinæreVilkårErOppfyltEllerNull(vilkårResultater = it, personType = personType, fagsakType = fagsakType) }
+        return tidslinjer.kombiner {
+            alleOrdinæreVilkårErOppfyltEllerNull(
+                vilkårResultater = it,
+                personType = personType,
+                fagsakType = fagsakType
+            )
+        }
             .filtrerIkkeNull().slåSammenLike()
     }
 
@@ -50,6 +59,12 @@ object VilkårsvurderingForskyvningUtils {
     fun Collection<VilkårResultat>.tilForskjøvetTidslinjerForHvertOppfylteVilkår(): List<Tidslinje<VilkårResultat, Måned>> {
         return this.groupBy { it.vilkårType }.map { (vilkår, vilkårResultater) ->
             vilkårResultater.tilForskjøvetTidslinjeForOppfyltVilkår(vilkår)
+        }
+    }
+
+    fun Collection<VilkårResultat>.tilForskjøvedeVilkårTidslinjer(): List<Tidslinje<VilkårResultat, Måned>> {
+        return this.groupBy { it.vilkårType }.map { (vilkår, vilkårResultater) ->
+            vilkårResultater.tilForskjøvetTidslinje(vilkår)
         }
     }
 
@@ -74,9 +89,35 @@ object VilkårsvurderingForskyvningUtils {
             }
     }
 
-    private fun Tidslinje<VilkårResultat, Måned>.beskjærPå18ÅrHvisUnder18ÅrVilkår(vilkår: Vilkår, vilkårResultater: Iterable<VilkårResultat>): Tidslinje<VilkårResultat, Måned> {
+    fun Collection<VilkårResultat>.tilForskjøvetTidslinje(vilkår: Vilkår): Tidslinje<VilkårResultat, Måned> {
+        if (this.isEmpty()) return tidslinje { emptyList() }
+
+        val tidslinje = this.lagForskjøvetTidslinje(vilkår)
+
+        return tidslinje.beskjærPå18ÅrHvisUnder18ÅrVilkår(vilkår = vilkår, vilkårResultater = this)
+    }
+
+    private fun Collection<VilkårResultat>.lagForskjøvetTidslinje(vilkår: Vilkår): Tidslinje<VilkårResultat, Måned> {
+        return this
+            .filter { it.vilkårType == vilkår }
+            .tilTidslinje()
+            .tilMånedFraMånedsskifteIkkeNull { innholdSisteDagForrigeMåned, innholdFørsteDagDenneMåned ->
+                when {
+                    vilkår == Vilkår.BOR_MED_SØKER && innholdFørsteDagDenneMåned.erDeltBosted() -> innholdSisteDagForrigeMåned
+                    !innholdSisteDagForrigeMåned.erOppfylt() -> innholdSisteDagForrigeMåned
+                    else -> innholdFørsteDagDenneMåned
+                }
+            }
+    }
+
+    private fun Tidslinje<VilkårResultat, Måned>.beskjærPå18ÅrHvisUnder18ÅrVilkår(
+        vilkår: Vilkår,
+        vilkårResultater: Iterable<VilkårResultat>
+    ): Tidslinje<VilkårResultat, Måned> {
         return if (vilkår == Vilkår.UNDER_18_ÅR) {
-            val minstePeriodeFom = vilkårResultater.minOf { it.periodeFom ?: throw Feil("Finner ikke fra og med dato på 'under 18 år'-vilkåret") } // Fra og med dato skal være lik fødselsdato for under 18-vilkåret
+            val minstePeriodeFom = vilkårResultater.minOf {
+                it.periodeFom ?: throw Feil("Finner ikke fra og med dato på 'under 18 år'-vilkåret")
+            } // Fra og med dato skal være lik fødselsdato for under 18-vilkåret
             this.beskjærPå18År(fødselsdato = minstePeriodeFom)
         } else {
             this
@@ -98,7 +139,11 @@ object VilkårsvurderingForskyvningUtils {
         personType: PersonType,
         fagsakType: FagsakType
     ): List<VilkårResultat>? {
-        return if (vilkårResultater.alleOrdinæreVilkårErOppfylt(personType, fagsakType)) vilkårResultater.filterNotNull() else null
+        return if (vilkårResultater.alleOrdinæreVilkårErOppfylt(personType, fagsakType)) {
+            vilkårResultater.filterNotNull()
+        } else {
+            null
+        }
     }
 
     fun Iterable<VilkårResultat>.alleOrdinæreVilkårErOppfylt(personType: PersonType, fagsakType: FagsakType): Boolean {
