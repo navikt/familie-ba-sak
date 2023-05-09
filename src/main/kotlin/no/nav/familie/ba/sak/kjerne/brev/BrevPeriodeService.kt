@@ -52,7 +52,7 @@ class BrevPeriodeService(
     private val kompetanseService: KompetanseService,
     private val integrasjonClient: IntegrasjonClient,
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
-    private val featureToggleService: FeatureToggleService,
+    private val featureToggleService: FeatureToggleService
 ) {
 
     fun hentBrevperioderData(
