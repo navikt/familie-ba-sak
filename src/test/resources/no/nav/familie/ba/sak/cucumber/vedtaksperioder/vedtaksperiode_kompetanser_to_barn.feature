@@ -46,4 +46,3 @@ Egenskap: Vedtaksperioder med kompetanser
       | 01.05.2023 | 31.03.2038 | Utbetaling         | Barna og søker       |
       | 01.04.2038 | 30.11.2040 | Utbetaling         | Barn og søker        |
       | 01.12.2040 |            | Opphør             | Kun søker            |
-      | 01.04.2038 |            | Opphør             | Første barn opphører |

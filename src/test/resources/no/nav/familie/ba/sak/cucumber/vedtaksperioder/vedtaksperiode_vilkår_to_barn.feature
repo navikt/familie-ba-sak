@@ -38,7 +38,6 @@ Egenskap: Vedtaksperioder med mor og to barn
       | 01.01.2023 | 31.03.2038 | Utbetaling         | Begge barn og søker     |
       | 01.04.2038 | 30.11.2040 | Utbetaling         | Barn2 og søker          |
       | 01.12.2040 |            | Opphør             | Kun søker               |
-      | 01.04.2038 |            | Opphør             | Opphørt for første barn |
 
 
 
