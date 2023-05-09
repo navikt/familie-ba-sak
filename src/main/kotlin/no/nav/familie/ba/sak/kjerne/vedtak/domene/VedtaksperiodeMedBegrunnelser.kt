@@ -204,9 +204,9 @@ fun VedtaksperiodeMedBegrunnelser.hentUtbetalingsperiodeDetaljerNy(
 
 private fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.tilUtbetalingerTidslinje(
     personopplysningGrunnlag: PersonopplysningGrunnlag
-) = groupBy { it.aktør }
-    .map { (_, andelerForAktør) ->
-        andelerForAktør.map {
+) = groupBy { Pair(it.aktør, it.type) }
+    .map { (_, andelerForAktørOgType) ->
+        andelerForAktørOgType.map {
             TidslinjePeriode(
                 fraOgMed = it.stønadFom.tilTidspunkt(),
                 tilOgMed = it.stønadTom.tilTidspunkt(),
