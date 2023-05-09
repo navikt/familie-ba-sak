@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonRequest
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonRequestVariables
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.http.util.UriUtil
+import no.nav.familie.kontrakter.felles.Tema
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.annotation.Cacheable
@@ -68,7 +69,7 @@ class PdlIdentRestClient(
             contentType = MediaType.APPLICATION_JSON
             accept = listOf(MediaType.APPLICATION_JSON)
             add("Tema", PDL_TEMA)
-            add("behandlingsnummer", PDL_BEHANDLINGSNUMMER)
+            add("behandlingsnummer", Tema.BAR.behandlingsnummer)
         }
     }
 
@@ -76,6 +77,5 @@ class PdlIdentRestClient(
 
         private const val PATH_GRAPHQL = "graphql"
         private const val PDL_TEMA = "BAR"
-        private const val PDL_BEHANDLINGSNUMMER = "B284"
     }
 }

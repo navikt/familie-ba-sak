@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.http.util.UriUtil
+import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.personopplysning.Opphold
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
 import org.apache.commons.lang3.StringUtils
@@ -223,7 +224,7 @@ class PdlRestClient(
             contentType = MediaType.APPLICATION_JSON
             accept = listOf(MediaType.APPLICATION_JSON)
             add("Tema", PDL_TEMA)
-            add("behandlingsnummer", PDL_BEHANDLINGSNUMMER)
+            add("behandlingsnummer", Tema.BAR.behandlingsnummer)
         }
     }
 
@@ -231,7 +232,6 @@ class PdlRestClient(
 
         private const val PATH_GRAPHQL = "graphql"
         private const val PDL_TEMA = "BAR"
-        private const val PDL_BEHANDLINGSNUMMER = "B284"
     }
 }
 
