@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.common.erSenereEnnInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
+import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.BRUKE_TIDSLINJE_I_STEDET_FOR
@@ -744,23 +745,23 @@ class VedtaksperiodeService(
         val landkoderISO2 = integrasjonClient.hentLandkoderISO2()
 
         return refusjonEøsRepository.finnRefusjonEøsForBehandling(behandling.id).filter { it.refusjonAvklart == avklart }.map {
-            val (fom, tom) = it.fom.tilDagMånedÅr() to it.tom.tilDagMånedÅr()
+            val (fom, tom) = it.fom.tilMånedÅr() to it.tom.tilMånedÅr()
             val land = landkoderISO2[it.land]?.storForbokstav() ?: throw Feil("Fant ikke navn for landkode ${it.land}")
             val beløp = it.refusjonsbeløp
 
             when (målform) {
                 NN -> {
                     if (avklart) {
-                        "Frå $fom til $tom blir $beløp kroner av etterbetalinga di utbetalt til myndighetene i $land"
+                        "Frå $fom til $tom blir ikkje etterbetaling på $beløp kroner per måned utbetalt til myndighetene i $land."
                     } else {
-                        "Frå $fom til $tom blir ikkje etterbetalinga på $beløp kroner utbetalt no sidan det er utbetalt barnetrygd i $land"
+                        "Frå $fom til $tom blir ikkje etterbetaling på $beløp kroner per månad utbetalt no sidan det er utbetalt barnetrygd i $land."
                     }
                 }
                 else -> {
                     if (avklart) {
-                        "Fra $fom til $tom blir $beløp kroner av etterbetalingen din utbetalt til myndighetene i $land"
+                        "Fra $fom til $tom blir ikke etterbetaling på $beløp kroner per måned utbetalt til myndighetene i $land."
                     } else {
-                        "Fra $fom til $tom blir ikke etterbetalingen på ${it.refusjonsbeløp} kroner utbetalt nå siden det er utbetalt barnetrygd i $land"
+                        "Fra $fom til $tom blir ikke etterbetaling på $beløp kroner per måned utbetalt nå siden det er utbetalt barnetrygd i $land."
                     }
                 }
             }
