@@ -31,7 +31,6 @@ import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.Regelverk
 import org.hibernate.annotations.SortComparator
 import java.time.LocalDate
-import java.time.LocalDateTime
 import no.nav.familie.kontrakter.felles.Behandlingstema as OppgaveBehandlingTema
 import no.nav.familie.kontrakter.felles.oppgave.Behandlingstype as OppgaveBehandlingType
 
