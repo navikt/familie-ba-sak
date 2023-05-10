@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerPersonOgTyp
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import java.time.LocalDate
 
@@ -43,7 +43,7 @@ object TilkjentYtelseSatsendringUtils {
         return tilkjentYtelse
     }
 
-    private fun Tidslinje<AndelTilkjentYtelse, Måned>.lagAndelerMedNySatsForPersonOgYtelsetype(
+    internal fun Tidslinje<AndelTilkjentYtelse, Måned>.lagAndelerMedNySatsForPersonOgYtelsetype(
         ytelseType: YtelseType,
         person: Person,
         behandlingId: Long,
@@ -56,12 +56,8 @@ object TilkjentYtelseSatsendringUtils {
             YtelseType.MANUELL_VURDERING -> throw Feil("Ingen satstype for manuell vurdering")
         }
 
-        val andelOgNySatsTidslinje = this.kombinerMed(satsTidslinje) { forrigeAndel, sats ->
-            when {
-                forrigeAndel == null -> null // Hvis det ikke fantes andel i periode forrige gang ønsker vi ikke lage ny andel nå
-                sats == null -> throw Feil("Finner ikke sats i periode")
-                else -> AndelOgSats(forrigeAndel, sats)
-            }
+        val andelOgNySatsTidslinje = this.kombinerUtenNullMed(satsTidslinje) { forrigeAndel, sats ->
+            AndelOgSats(forrigeAndel, sats)
         }
 
         val nyeAndeler = andelOgNySatsTidslinje.perioder().map {
