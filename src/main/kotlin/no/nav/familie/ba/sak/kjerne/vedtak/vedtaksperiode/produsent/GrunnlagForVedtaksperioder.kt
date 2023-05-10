@@ -58,10 +58,8 @@ data class GrunnlagForVedtaksperioder(
 
     fun utledGrunnlagTidslinjePerPerson(): Map<AktørId, Tidslinje<GrunnlagForPerson, Måned>> {
         val søker = persongrunnlag.søker
-        val søkerPersonResultater = personResultater.single { it.aktør == søker.aktør }
-
         val ordinæreVilkårForSøkerForskjøvetTidslinje =
-            hentOrdinæreVilkårForSøkerForskjøvetTidslinje(søkerPersonResultater, søker)
+            hentOrdinæreVilkårForSøkerForskjøvetTidslinje(søker, personResultater)
 
         val erMinstEttBarnMedUtbetalingTidslinje =
             hentErMinstEttBarnMedUtbetalingTidslinje(personResultater, søker, fagsakType)
@@ -86,13 +84,6 @@ data class GrunnlagForVedtaksperioder(
 
         return grunnlagForPersonTidslinjer
     }
-
-    private fun hentOrdinæreVilkårForSøkerForskjøvetTidslinje(
-        søkerPersonResultater: PersonResultat,
-        søker: Person
-    ) = søkerPersonResultater.vilkårResultater.tilForskjøvedeVilkårTidslinjer()
-        .kombiner { vilkårResultater -> vilkårResultater.toList().takeIf { it.isNotEmpty() } }
-        .map { it?.toList()?.filtrerVilkårErOrdinærtFor(søker) }
 
     private fun Tidslinje<List<VilkårResultat>, Måned>.tilGrunnlagForPersonTidslinje(
         person: Person,
@@ -144,6 +135,14 @@ private fun List<VilkårResultat>.filtrerVilkårErOrdinærtFor(
     return this
         .filter { ordinæreVilkårForSøker.contains(it.vilkårType) }
         .takeIf { it.isNotEmpty() }
+}
+
+fun hentOrdinæreVilkårForSøkerForskjøvetTidslinje(søker: Person, personResultater: Set<PersonResultat>): Tidslinje<List<VilkårResultat>, Måned> {
+    val søkerPersonResultater = personResultater.single { it.aktør == søker.aktør }
+
+    return søkerPersonResultater.vilkårResultater.tilForskjøvedeVilkårTidslinjer()
+        .kombiner { vilkårResultater -> vilkårResultater.toList().takeIf { it.isNotEmpty() } }
+        .map { it?.toList()?.filtrerVilkårErOrdinærtFor(søker) }
 }
 
 private fun hentErMinstEttBarnMedUtbetalingTidslinje(

@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
@@ -24,6 +25,16 @@ sealed interface GrunnlagForPerson {
     val vilkårResultaterForVedtaksperiode: List<VilkårResultatForVedtaksperiode>
 
     fun erEksplisittAvslag(): Boolean = this is GrunnlagForPersonIkkeInnvilget && this.erEksplisittAvslag
+
+    fun kopier(
+        person: Person = this.person,
+        vilkårResultaterForVedtaksperiode: List<VilkårResultatForVedtaksperiode> = this.vilkårResultaterForVedtaksperiode
+    ): GrunnlagForPerson {
+        return when (this) {
+            is GrunnlagForPersonIkkeInnvilget -> this.copy(person, vilkårResultaterForVedtaksperiode)
+            is GrunnlagForPersonInnvilget -> this.copy(person, vilkårResultaterForVedtaksperiode)
+        }
+    }
 }
 
 data class GrunnlagForPersonInnvilget(
@@ -41,7 +52,7 @@ data class GrunnlagForPersonIkkeInnvilget(
 ) : GrunnlagForPerson {
     val erEksplisittAvslag: Boolean = vilkårResultaterForVedtaksperiode.inneholderEksplisittAvslag()
 
-    private fun List<VilkårResultatForVedtaksperiode>.inneholderEksplisittAvslag() =
+    fun List<VilkårResultatForVedtaksperiode>.inneholderEksplisittAvslag() =
         this.any { it.erEksplisittAvslagPåSøknad == true }
 }
 
@@ -52,6 +63,7 @@ data class VilkårResultatForVedtaksperiode(
     val vurderesEtter: Regelverk?,
     val erEksplisittAvslagPåSøknad: Boolean?,
     val standardbegrunnelser: List<IVedtakBegrunnelse>,
+    val aktørId: AktørId,
     val fom: LocalDate?,
     val tom: LocalDate?
 ) {
@@ -63,7 +75,9 @@ data class VilkårResultatForVedtaksperiode(
         erEksplisittAvslagPåSøknad = vilkårResultat.erEksplisittAvslagPåSøknad,
         standardbegrunnelser = vilkårResultat.standardbegrunnelser,
         fom = vilkårResultat.periodeFom,
-        tom = vilkårResultat.periodeTom
+        tom = vilkårResultat.periodeTom,
+        aktørId = vilkårResultat.personResultat?.aktør?.aktørId
+            ?: throw Feil("$vilkårResultat er ikke knyttet til personResultat")
     )
 }
 

@@ -13,7 +13,7 @@ object VedtaksperiodeMedBegrunnelserParser {
         return dataTable.asMaps().map { rad ->
             VedtaksperiodeMedBegrunnelser(
                 vedtak = vedtak,
-                fom = parseDato(Domenebegrep.FRA_DATO, rad),
+                fom = parseValgfriDato(Domenebegrep.FRA_DATO, rad),
                 tom = parseValgfriDato(Domenebegrep.TIL_DATO, rad),
                 type = parseEnum(DomenebegrepVedtaksperiodeMedBegrunnelser.VEDTAKSPERIODE_TYPE, rad)
             )
