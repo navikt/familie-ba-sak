@@ -5,6 +5,8 @@ import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.tilddMMyyyy
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
@@ -31,7 +33,8 @@ import java.time.LocalDateTime
 @Service
 class LoggService(
     private val loggRepository: LoggRepository,
-    private val rolleConfig: RolleConfig
+    private val rolleConfig: RolleConfig,
+    private val featureToggleService: FeatureToggleService
 ) {
 
     private val metrikkPerLoggType: Map<LoggType, Counter> = LoggType.values().associateWith {
@@ -534,7 +537,7 @@ class LoggService(
                 ),
                 tekst = """
                 Periode: ${feilutbetaltValuta.fom.tilKortString()} - ${feilutbetaltValuta.tom.tilKortString()}
-                Beløp: ${feilutbetaltValuta.feilutbetaltBeløp} kr
+                Beløp: ${feilutbetaltValuta.feilutbetaltBeløp} ${if (featureToggleService.isEnabled(FeatureToggleConfig.FEILUTBETALT_VALUTA_PR_MND)) "kr/mnd" else "kr"}
                 """.trimIndent()
             )
         )
@@ -550,7 +553,7 @@ class LoggService(
                 ),
                 tekst = """
                 Periode: ${feilutbetaltValuta.fom.tilKortString()} - ${feilutbetaltValuta.tom.tilKortString()}
-                Beløp: ${feilutbetaltValuta.feilutbetaltBeløp} kr
+                Beløp: ${feilutbetaltValuta.feilutbetaltBeløp} ${if (featureToggleService.isEnabled(FeatureToggleConfig.FEILUTBETALT_VALUTA_PR_MND)) "kr/mnd" else "kr"}
                 """.trimIndent()
             )
         )
