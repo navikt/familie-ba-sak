@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Personopplysning
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
 import java.time.LocalDate
 
 object TilkjentYtelseSatsendringUtils {
@@ -70,8 +71,8 @@ object TilkjentYtelseSatsendringUtils {
                 behandlingId = behandlingId,
                 tilkjentYtelse = tilkjentYtelse,
                 aktør = forrigeAndel.aktør,
-                stønadFom = forrigeAndel.stønadFom,
-                stønadTom = forrigeAndel.stønadTom,
+                stønadFom = it.fraOgMed.tilYearMonth(),
+                stønadTom = it.tilOgMed.tilYearMonth(),
                 kalkulertUtbetalingsbeløp = utbetaltBeløp,
                 nasjonaltPeriodebeløp = utbetaltBeløp,
                 type = forrigeAndel.type,
