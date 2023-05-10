@@ -30,8 +30,8 @@ Egenskap: Vedtaksperioder med mor og to barn
 
     Så forvent følgende vedtaksperioder med begrunnelser
       | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar |
-      | 2017-01-01 | 2034-11-30 | Opphør             | Kun søker |
-      | 2034-12-01 |            | Opphør             | Kun søker |
+      | 2017-01-01 | 2034-11-30 | AVSLAG             | Kun søker |
+      | 2034-12-01 |            | AVSLAG             | Kun søker |
 
 
 
