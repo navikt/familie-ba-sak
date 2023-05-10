@@ -455,11 +455,12 @@ fun initStatus(): BehandlingStatus {
 }
 
 enum class BehandlingStatus {
-    OPPRETTET,
+    OPPRETTET, // Denne brukes ikke
     UTREDES,
     FATTER_VEDTAK,
     IVERKSETTER_VEDTAK,
-    AVSLUTTET;
+    AVSLUTTET,
+    SATT_PÅ_VENT;
 
     fun erLåstMenIkkeAvsluttet() = this == FATTER_VEDTAK || this == IVERKSETTER_VEDTAK
 }

@@ -25,6 +25,7 @@ fun validerBehandlingKanSettesPåVent(
         )
     }
 
+    // Burde denne validere at den ikke er iverksetter og?
     if (behandling.status == BehandlingStatus.AVSLUTTET) {
         throw FunksjonellFeil(
             melding = "Behandling ${behandling.id} er avsluttet og kan ikke settes på vent.",
