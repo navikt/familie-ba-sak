@@ -50,6 +50,9 @@ object TilkjentYtelseSatsendringUtils {
         behandlingId: Long,
         tilkjentYtelse: TilkjentYtelse
     ): List<AndelTilkjentYtelse> {
+        if (this.perioder().any { it.innhold?.type != ytelseType }) throw Feil("Prøver å oppdatere en andel med $ytelseType sats, som ikke har denne satsen fra før ")
+        if (this.perioder().any { it.innhold?.aktør != person.aktør }) throw Feil("Prøver å oppdatere sats på en andel som ikke er knyttet til aktørId ${person.aktør.aktørId}")
+
         val satsTidslinje = when (ytelseType) {
             YtelseType.ORDINÆR_BARNETRYGD -> lagOrdinærTidslinje(barn = person)
             YtelseType.UTVIDET_BARNETRYGD -> satstypeTidslinje(SatsType.UTVIDET_BARNETRYGD)

@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
@@ -12,6 +13,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.YearMonth
@@ -323,6 +325,99 @@ class TilkjentYtelseSatsendringUtilsTest {
             ),
             faktiskAndel = nyeAndeler[1]
         )
+    }
+
+    @Test
+    fun `skal kaste feil hvis det finnes andeler som har feil ytelsetype`() {
+        val søker = lagPerson(type = PersonType.SØKER, fødselsdato = LocalDate.of(2001, 1, 1))
+        val satsendringsbehandling = lagBehandling()
+        val småbarnstilleggAndel = listOf(
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(2022, 5),
+                tom = YearMonth.of(2023, 5),
+                ytelseType = YtelseType.SMÅBARNSTILLEGG,
+                beløp = 660,
+                prosent = BigDecimal(100),
+                person = søker
+            ),
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(2022, 1),
+                tom = YearMonth.of(2022, 4),
+                ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                beløp = 1054,
+                prosent = BigDecimal(100),
+                person = søker
+            )
+        )
+
+        val nyTilkjentYtelse = lagInitiellTilkjentYtelse(behandling = satsendringsbehandling)
+
+        val småbarnstilleggTidslinje = AndelTilkjentYtelseTidslinje(småbarnstilleggAndel)
+
+        assertThrows<Feil> {
+            småbarnstilleggTidslinje.lagAndelerMedNySatsForPersonOgYtelsetype(
+                ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                person = søker,
+                behandlingId = satsendringsbehandling.id,
+                tilkjentYtelse = nyTilkjentYtelse
+            )
+        }
+    }
+
+    @Test
+    fun `skal kaste feil hvis det finnes andeler som er knyttet til feil person`() {
+        val søker = lagPerson(type = PersonType.SØKER, fødselsdato = LocalDate.of(2001, 1, 1))
+        val satsendringsbehandling = lagBehandling()
+        val småbarnstilleggAndel = listOf(
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(2022, 5),
+                tom = YearMonth.of(2023, 5),
+                ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                beløp = 660,
+                prosent = BigDecimal(100),
+                person = lagPerson(type = PersonType.SØKER)
+            ),
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(2022, 1),
+                tom = YearMonth.of(2022, 4),
+                ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                beløp = 1054,
+                prosent = BigDecimal(100),
+                person = søker
+            )
+        )
+
+        val nyTilkjentYtelse = lagInitiellTilkjentYtelse(behandling = satsendringsbehandling)
+
+        val småbarnstilleggTidslinje = AndelTilkjentYtelseTidslinje(småbarnstilleggAndel)
+
+        assertThrows<Feil> {
+            småbarnstilleggTidslinje.lagAndelerMedNySatsForPersonOgYtelsetype(
+                ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                person = søker,
+                behandlingId = satsendringsbehandling.id,
+                tilkjentYtelse = nyTilkjentYtelse
+            )
+        }
+    }
+
+    @Test
+    fun `skal returnere tom liste hvis det ikke finnes noen forrige andeler`() {
+        val søker = lagPerson(type = PersonType.SØKER, fødselsdato = LocalDate.of(2001, 1, 1))
+        val satsendringsbehandling = lagBehandling()
+        val forrigeAndeler = emptyList<AndelTilkjentYtelse>()
+        val nyTilkjentYtelse = lagInitiellTilkjentYtelse(behandling = satsendringsbehandling)
+
+        val forrigeAndelerTidslinje = AndelTilkjentYtelseTidslinje(forrigeAndeler)
+
+        val nyeAndeler = forrigeAndelerTidslinje.lagAndelerMedNySatsForPersonOgYtelsetype(
+            ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+            person = søker,
+            behandlingId = satsendringsbehandling.id,
+            tilkjentYtelse = nyTilkjentYtelse
+        )
+
+        Assertions.assertEquals(0, nyeAndeler.size)
     }
 
     private fun assertAndel(forventetAndel: ForventetAndel, faktiskAndel: AndelTilkjentYtelse) {
