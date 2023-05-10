@@ -194,12 +194,9 @@ fun VedtaksperiodeMedBegrunnelser.hentUtbetalingsperiodeDetaljerNy(
         Vedtaksperiodetype.OPPHØR -> emptyList()
 
         Vedtaksperiodetype.FORTSATT_INNVILGET -> {
-            val løpendeUtbetalingsperiode =
-                (
-                    utbetalingsperiodeDetaljer.perioder()
-                        .lastOrNull { it.fraOgMed.tilYearMonth() <= inneværendeMåned() }
-                        ?: utbetalingsperiodeDetaljer.perioder().firstOrNull()
-                    )
+            val løpendeUtbetalingsperiode = utbetalingsperiodeDetaljer.perioder()
+                .lastOrNull { it.fraOgMed.tilYearMonth() <= inneværendeMåned() }
+                ?: utbetalingsperiodeDetaljer.perioder().firstOrNull()
 
             løpendeUtbetalingsperiode?.innhold?.toList()
                 ?: throw Feil("Finner ikke gjeldende segment ved fortsatt innvilget")
