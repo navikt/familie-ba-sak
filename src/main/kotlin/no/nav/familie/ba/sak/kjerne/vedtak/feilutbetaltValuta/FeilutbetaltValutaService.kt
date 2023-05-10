@@ -17,7 +17,8 @@ class FeilutbetaltValutaService(
 ) {
 
     private fun finnFeilutbetaltValutaThrows(id: Long): FeilutbetaltValuta {
-        return feilutbetaltValutaRepository.finnFeilutbetaltValuta(id) ?: throw Feil("Finner ikke feilutbetalt valuta med id=$id")
+        return feilutbetaltValutaRepository.finnFeilutbetaltValuta(id)
+            ?: throw Feil("Finner ikke feilutbetalt valuta med id=$id")
     }
 
     @Transactional
@@ -43,8 +44,9 @@ class FeilutbetaltValutaService(
         feilutbetaltValutaRepository.deleteById(id)
     }
 
-    fun hentFeilutbetaltValutaPerioder(behandlingId: Long) =
-        feilutbetaltValutaRepository.finnFeilutbetaltValutaForBehandling(behandlingId = behandlingId).map { tilRest(it) }
+    fun hentRestFeilutbetaltValutaPerioder(behandlingId: Long) =
+        feilutbetaltValutaRepository.finnFeilutbetaltValutaForBehandling(behandlingId = behandlingId)
+            .map { tilRest(it) }
 
     private fun tilRest(it: FeilutbetaltValuta) =
         RestFeilutbetaltValuta(
@@ -56,7 +58,8 @@ class FeilutbetaltValutaService(
 
     @Transactional
     fun oppdatertFeilutbetaltValutaPeriode(feilutbetaltValuta: RestFeilutbetaltValuta, id: Long) {
-        val periode = feilutbetaltValutaRepository.findById(id).orElseThrow { Feil("Finner ikke feilutbetalt valuta med id=${feilutbetaltValuta.id}") }
+        val periode = feilutbetaltValutaRepository.findById(id)
+            .orElseThrow { Feil("Finner ikke feilutbetalt valuta med id=${feilutbetaltValuta.id}") }
 
         periode.fom = feilutbetaltValuta.fom
         periode.tom = feilutbetaltValuta.tom

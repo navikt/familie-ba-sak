@@ -105,7 +105,7 @@ class UtvidetBehandlingService(
         val endreteUtbetalingerMedAndeler = andelerTilkjentYtelseOgEndreteUtbetalingerService
             .finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandlingId)
 
-        val feilutbetaltValuta = feilutbetaltValutaService.hentFeilutbetaltValutaPerioder(behandlingId)
+        val feilutbetaltValuta = feilutbetaltValutaService.hentRestFeilutbetaltValutaPerioder(behandlingId)
 
         val refusjonEøs = refusjonEøsService.hentRefusjonEøsPerioder(behandlingId)
 

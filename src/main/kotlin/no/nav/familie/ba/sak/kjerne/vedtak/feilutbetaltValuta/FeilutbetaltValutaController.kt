@@ -91,6 +91,12 @@ class FeilutbetaltValutaController(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
             handling = "hente feilutbetalt valuta for behandling"
         )
-        return ResponseEntity.ok(Ressurs.success(feilutbetaltValutaService.hentFeilutbetaltValutaPerioder(behandlingId = behandlingId)))
+        return ResponseEntity.ok(
+            Ressurs.success(
+                feilutbetaltValutaService.hentRestFeilutbetaltValutaPerioder(
+                    behandlingId = behandlingId
+                )
+            )
+        )
     }
 }
