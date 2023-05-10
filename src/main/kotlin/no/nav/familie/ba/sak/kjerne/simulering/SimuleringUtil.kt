@@ -88,7 +88,7 @@ fun hentNyttBeløpIPeriode(periode: List<ØkonomiSimuleringPostering>): BigDecim
         .sumOf { it.beløp }
     val feilutbetaling = hentFeilutbetalingIPeriode(periode, false)
 
-    return if ((feilutbetaling + feilutbetaling) > BigDecimal.ZERO) {
+    return if (feilutbetaling > BigDecimal.ZERO) {
         sumPositiveYtelser - feilutbetaling
     } else {
         sumPositiveYtelser
@@ -173,6 +173,10 @@ fun hentEtterbetalingIPeriode(
         periodeHarPositivFeilutbetaling -> BigDecimal.ZERO
         else -> maxOf(
             BigDecimal.ZERO,
+            // Vi justerer etterbetalingsbeløp med negativ feilutbetaling i periode (redusert feilutbetaling).
+            // Negative feilutbetalinger oppstår når man øker ytelsen i en periode det er registrert feilutbetaling på tidligere og tilbakekrevingsbehandlingen ikke er avsluttet.
+            // Ved overførig til Oppdrag/økonomi vil registrert feilutbetaling bli redusert.
+            // https://confluence.adeo.no/display/TFA/Tolkning+av+simulerte+posteringer+fra+oppdragsystemet
             (resultat + hentNegativFeilutbetalingIPeriode(periodeMedForfallFørTidSimuleringHentet))
         )
     }
