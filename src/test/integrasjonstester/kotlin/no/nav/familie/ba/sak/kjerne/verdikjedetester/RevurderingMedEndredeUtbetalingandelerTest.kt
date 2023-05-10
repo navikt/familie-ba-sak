@@ -4,14 +4,12 @@ import no.nav.familie.ba.sak.common.lagSøknadDTO
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.nyOrdinærBehandling
 import no.nav.familie.ba.sak.common.nyRevurdering
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.writeValueAsString
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
@@ -45,9 +43,6 @@ import java.time.YearMonth
 
 class RevurderingMedEndredeUtbetalingandelerTest(
     @Autowired
-    private val behandlingService: BehandlingService,
-
-    @Autowired
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 
     @Autowired
@@ -78,17 +73,18 @@ class RevurderingMedEndredeUtbetalingandelerTest(
     private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService,
 
     @Autowired
-    private val søknadGrunnlagRepository: SøknadGrunnlagRepository,
-
-    @Autowired
-    private val featureToggleService: FeatureToggleService
+    private val søknadGrunnlagRepository: SøknadGrunnlagRepository
 
 ) : AbstractVerdikjedetest() {
     @Test
     fun `Endrede utbetalingsandeler fra forrige behandling kopieres riktig og oppdaterer andel med riktig beløp`() {
         val scenario = mockServerKlient().lagScenario(
             RestScenario(
-                søker = RestScenarioPerson(fødselsdato = "1993-01-12", fornavn = "Mor", etternavn = "Søker"),
+                søker = RestScenarioPerson(
+                    fødselsdato = "${LocalDate.now().minusYears(28)}",
+                    fornavn = "Mor",
+                    etternavn = "Søker"
+                ),
                 barna = listOf(
                     RestScenarioPerson(
                         fødselsdato = LocalDate.now().minusYears(4).toString(),
@@ -104,8 +100,8 @@ class RevurderingMedEndredeUtbetalingandelerTest(
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
 
-        val endretAndelFom = YearMonth.of(2019, 6)
-        val endretAndelTom = YearMonth.of(2020, 10)
+        val endretAndelFom = YearMonth.now().minusYears(3).minusMonths(4)
+        val endretAndelTom = YearMonth.now().minusYears(3)
 
         // Behandling 1 - førstegangsbehandling
         val iverksattFørstegangsbehandling =
@@ -177,7 +173,11 @@ class RevurderingMedEndredeUtbetalingandelerTest(
                         vilkårResultater = listOf(
                             it.copy(
                                 resultat = Resultat.OPPFYLT,
-                                periodeFom = barnetsFødselsdato,
+                                periodeFom = if (it.vilkårType == Vilkår.UNDER_18_ÅR) {
+                                    barnetsFødselsdato
+                                } else {
+                                    LocalDate.now().minusYears(3).minusMonths(5).withDayOfMonth(8)
+                                },
                                 utdypendeVilkårsvurderinger = listOfNotNull(
                                     if (it.vilkårType == Vilkår.BOR_MED_SØKER) UtdypendeVilkårsvurdering.DELT_BOSTED else null
                                 )
@@ -247,8 +247,8 @@ class RevurderingMedEndredeUtbetalingandelerTest(
             id = endretUtbetalingAndel.id,
             fom = endretAndelFom,
             tom = endretAndelTom,
-            avtaletidspunktDeltBosted = LocalDate.of(2019, 5, 8),
-            søknadstidspunkt = LocalDate.of(2019, 5, 8),
+            avtaletidspunktDeltBosted = LocalDate.now().minusYears(3).withDayOfMonth(8),
+            søknadstidspunkt = LocalDate.now().minusYears(3).withDayOfMonth(8),
             begrunnelse = "begrunnelse",
             personIdent = barnFnr,
             årsak = Årsak.DELT_BOSTED,

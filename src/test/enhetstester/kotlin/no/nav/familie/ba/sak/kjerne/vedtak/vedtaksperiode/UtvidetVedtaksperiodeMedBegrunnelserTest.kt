@@ -78,7 +78,8 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
         val utvidetVedtaksperiodeMedBegrunnelser =
             vedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
                 personopplysningGrunnlag = personopplysningGrunnlag,
-                andelerTilkjentYtelse = andelerTilkjentYtelse
+                andelerTilkjentYtelse = andelerTilkjentYtelse,
+                skalBrukeNyVedtaksperiodeLøsning = false
             )
 
         Assertions.assertEquals(1, utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer.size)

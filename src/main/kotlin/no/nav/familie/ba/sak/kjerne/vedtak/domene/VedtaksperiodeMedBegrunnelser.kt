@@ -27,6 +27,13 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.hentAndelerForSegment
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.slåSammenLike
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilFørsteDagIMåneden
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilSisteDagIMåneden
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
+import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.EØSBegrunnelse
@@ -38,6 +45,7 @@ import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.time.LocalDate
 import java.time.YearMonth
+import no.nav.familie.ba.sak.kjerne.tidslinje.Periode as TidslinjePeriode
 
 @EntityListeners(RollestyringMotDatabase::class)
 @Entity(name = "Vedtaksperiode")
@@ -121,6 +129,7 @@ data class VedtaksperiodeMedBegrunnelser(
         return fritekster.isNotEmpty() && begrunnelser.isNotEmpty()
     }
 
+    @Deprecated("Skal bruke hentUtbetalingsperiodeDetaljerNy når den er klar")
     fun hentUtbetalingsperiodeDetaljer(
         andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
         personopplysningGrunnlag: PersonopplysningGrunnlag
@@ -174,3 +183,57 @@ private fun hentLøpendeAndelForVedtaksperiode(andelerTilkjentYtelse: List<Andel
         ?: sorterteSegmenter.firstOrNull()
         ?: throw Feil("Finner ikke gjeldende segment ved fortsatt innvilget")
 }
+
+fun VedtaksperiodeMedBegrunnelser.hentUtbetalingsperiodeDetaljerNy(
+    andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+    personopplysningGrunnlag: PersonopplysningGrunnlag
+): List<UtbetalingsperiodeDetalj> {
+    val utbetalingsperiodeDetaljer = andelerTilkjentYtelse.tilUtbetalingerTidslinje(personopplysningGrunnlag)
+
+    return when (this.type) {
+        Vedtaksperiodetype.OPPHØR -> emptyList()
+
+        Vedtaksperiodetype.FORTSATT_INNVILGET -> {
+            val løpendeUtbetalingsperiode = utbetalingsperiodeDetaljer.perioder()
+                .lastOrNull { it.fraOgMed.tilYearMonth() <= inneværendeMåned() }
+                ?: utbetalingsperiodeDetaljer.perioder().firstOrNull()
+
+            løpendeUtbetalingsperiode?.innhold?.toList()
+                ?: throw Feil("Finner ikke gjeldende segment ved fortsatt innvilget")
+        }
+
+        Vedtaksperiodetype.UTBETALING,
+        Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING,
+        Vedtaksperiodetype.AVSLAG,
+        Vedtaksperiodetype.ENDRET_UTBETALING -> {
+            val utbetalingsperioderRelevantForVedtaksperiode =
+                utbetalingsperiodeDetaljer.perioder().find { andelerVertikal ->
+                    andelerVertikal.fraOgMed.tilFørsteDagIMåneden().tilLocalDate()
+                        .isSameOrBefore(this.fom ?: TIDENES_MORGEN) &&
+                        andelerVertikal.tilOgMed.tilSisteDagIMåneden().tilLocalDate()
+                            .isSameOrAfter(this.tom ?: TIDENES_ENDE)
+                }?.innhold ?: throw Feil(
+                    "Finner ikke segment for vedtaksperiode (${this.fom}, ${this.tom}) blant segmenter ${andelerTilkjentYtelse.utledSegmenter()}"
+                )
+
+            utbetalingsperioderRelevantForVedtaksperiode.toList()
+        }
+    }
+}
+
+private fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.tilUtbetalingerTidslinje(
+    personopplysningGrunnlag: PersonopplysningGrunnlag
+) = groupBy { Pair(it.aktør, it.type) }
+    .map { (_, andelerForAktørOgType) ->
+        andelerForAktørOgType.map {
+            TidslinjePeriode(
+                fraOgMed = it.stønadFom.tilTidspunkt(),
+                tilOgMed = it.stønadTom.tilTidspunkt(),
+                innhold = UtbetalingsperiodeDetalj(
+                    andel = it,
+                    personopplysningGrunnlag = personopplysningGrunnlag
+                )
+            )
+        }.tilTidslinje()
+    }.kombiner { it.takeIf { it.toList().isNotEmpty() } }
+    .slåSammenLike()

@@ -41,7 +41,19 @@ data class UtbetalingsperiodeDetalj(
     val utbetaltPerMnd: Int,
     val erPåvirketAvEndring: Boolean,
     val prosent: BigDecimal
-)
+) {
+    constructor(
+        andel: AndelTilkjentYtelseMedEndreteUtbetalinger,
+        personopplysningGrunnlag: PersonopplysningGrunnlag
+    ) : this(
+        person = personopplysningGrunnlag.søkerOgBarn.find { person -> andel.aktør == person.aktør }?.tilRestPerson()
+            ?: throw IllegalStateException("Fant ikke personopplysningsgrunnlag for andel"),
+        ytelseType = andel.type,
+        utbetaltPerMnd = andel.kalkulertUtbetalingsbeløp,
+        erPåvirketAvEndring = andel.endreteUtbetalinger.isNotEmpty(),
+        prosent = andel.prosent
+    )
+}
 
 fun List<UtbetalingsperiodeDetalj>.totaltUtbetalt(): Int =
     this.sumOf { it.utbetaltPerMnd }
