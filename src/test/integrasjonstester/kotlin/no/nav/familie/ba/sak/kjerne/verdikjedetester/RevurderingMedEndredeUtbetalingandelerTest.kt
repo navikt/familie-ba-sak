@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.writeValueAsString
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
@@ -167,7 +166,6 @@ class RevurderingMedEndredeUtbetalingandelerTest(
         behandling: Behandling,
         barnetsFødselsdato: LocalDate
     ) {
-
         vilkårsvurdering.personResultater.map { personResultat ->
             personResultat.tilRestPersonResultat().vilkårResultater.map {
                 vilkårService.endreVilkår(
@@ -179,8 +177,11 @@ class RevurderingMedEndredeUtbetalingandelerTest(
                         vilkårResultater = listOf(
                             it.copy(
                                 resultat = Resultat.OPPFYLT,
-                                periodeFom = if (it.vilkårType == Vilkår.UNDER_18_ÅR) barnetsFødselsdato else
-                                    LocalDate.now().minusYears(3).minusMonths(5).withDayOfMonth(8),
+                                periodeFom = if (it.vilkårType == Vilkår.UNDER_18_ÅR) {
+                                    barnetsFødselsdato
+                                } else {
+                                    LocalDate.now().minusYears(3).minusMonths(5).withDayOfMonth(8)
+                                },
                                 utdypendeVilkårsvurderinger = listOfNotNull(
                                     if (it.vilkårType == Vilkår.BOR_MED_SØKER) UtdypendeVilkårsvurdering.DELT_BOSTED else null
                                 )
