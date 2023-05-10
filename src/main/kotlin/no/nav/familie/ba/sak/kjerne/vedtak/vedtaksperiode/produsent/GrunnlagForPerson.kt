@@ -21,12 +21,14 @@ import java.time.LocalDate
 
 sealed interface GrunnlagForPerson {
     val person: Person
-    val vilkårResultaterForVedtaksPeriode: List<VilkårResultatForVedtaksperiode>
+    val vilkårResultaterForVedtaksperiode: List<VilkårResultatForVedtaksperiode>
+
+    fun erEksplisittAvslag(): Boolean = this is GrunnlagForPersonIkkeInnvilget && this.erEksplisittAvslag
 }
 
 data class GrunnlagForPersonInnvilget(
     override val person: Person,
-    override val vilkårResultaterForVedtaksPeriode: List<VilkårResultatForVedtaksperiode>,
+    override val vilkårResultaterForVedtaksperiode: List<VilkårResultatForVedtaksperiode>,
     val andeler: Iterable<AndelForVedtaksperiode>,
     val kompetanse: KompetanseForVedtaksperiode? = null,
     val endretUtbetalingAndel: EndretUtbetalingAndelForVedtaksperiode? = null,
@@ -35,8 +37,13 @@ data class GrunnlagForPersonInnvilget(
 
 data class GrunnlagForPersonIkkeInnvilget(
     override val person: Person,
-    override val vilkårResultaterForVedtaksPeriode: List<VilkårResultatForVedtaksperiode>
-) : GrunnlagForPerson
+    override val vilkårResultaterForVedtaksperiode: List<VilkårResultatForVedtaksperiode>
+) : GrunnlagForPerson {
+    val erEksplisittAvslag: Boolean = vilkårResultaterForVedtaksperiode.inneholderEksplisittAvslag()
+
+    private fun List<VilkårResultatForVedtaksperiode>.inneholderEksplisittAvslag() =
+        this.any { it.erEksplisittAvslagPåSøknad == true }
+}
 
 data class VilkårResultatForVedtaksperiode(
     val vilkårType: Vilkår,

@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.common.lagSøknadDTO
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.nyOrdinærBehandling
 import no.nav.familie.ba.sak.common.nyRevurdering
-import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonResultat
@@ -74,10 +73,7 @@ class RevurderingMedEndredeUtbetalingandelerTest(
     private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService,
 
     @Autowired
-    private val søknadGrunnlagRepository: SøknadGrunnlagRepository,
-
-    @Autowired
-    private val featureToggleService: FeatureToggleService
+    private val søknadGrunnlagRepository: SøknadGrunnlagRepository
 
 ) : AbstractVerdikjedetest() {
     @Test
@@ -177,11 +173,7 @@ class RevurderingMedEndredeUtbetalingandelerTest(
                         vilkårResultater = listOf(
                             it.copy(
                                 resultat = Resultat.OPPFYLT,
-                                periodeFom = if (it.vilkårType == Vilkår.UNDER_18_ÅR) {
-                                    barnetsFødselsdato
-                                } else {
-                                    LocalDate.now().minusYears(3).minusMonths(5).withDayOfMonth(8)
-                                },
+                                periodeFom = barnetsFødselsdato,
                                 utdypendeVilkårsvurderinger = listOfNotNull(
                                     if (it.vilkårType == Vilkår.BOR_MED_SØKER) UtdypendeVilkårsvurdering.DELT_BOSTED else null
                                 )
