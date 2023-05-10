@@ -14,7 +14,6 @@ Egenskap: Vedtaksperioder med mor og to barn
       | 1            | 1234    | SØKER      | 24.12.1987  |
       | 1            | 3456    | BARN       | 01.02.2016  |
 
-
   Scenario: Skal lage en avslagsperiode når det er avslag
 
     Og lag personresultater for behandling 1
@@ -30,10 +29,9 @@ Egenskap: Vedtaksperioder med mor og to barn
 
     Så forvent følgende vedtaksperioder med begrunnelser
       | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar |
+      | 1988-01-01 | 2016-12-31 | AVSLAG             | Kun søker |
       | 2017-01-01 | 2034-11-30 | AVSLAG             | Kun søker |
       | 2034-12-01 |            | AVSLAG             | Kun søker |
-
-
 
 
 
