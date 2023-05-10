@@ -54,7 +54,6 @@ internal class StartSatsendringTest {
         val taskSlot = slot<Task>()
         every { taskRepository.save(capture(taskSlot)) } answers { taskSlot.captured }
         val opprettTaskService = OpprettTaskService(taskRepository)
-        every { featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_SJEKK_UTBETALING, true) } returns false
         every { satsendringService.erFagsakOppdatertMedSisteSatser(any()) } returns true
 
         startSatsendring = spyk(
@@ -166,7 +165,6 @@ internal class StartSatsendringTest {
     fun `finnLøpendeFagsaker har totalt antall sider 3, så den skal kalle finnLøpendeFagsaker 3 ganger for å få 5 satsendringer`() {
         every { featureToggleService.isEnabled(any(), any()) } returns true
         every { featureToggleService.isEnabled(any()) } returns true
-        every { featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_SJEKK_UTBETALING, true) } returns false
 
         val behandling = lagBehandling()
 

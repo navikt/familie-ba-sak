@@ -230,14 +230,14 @@ private fun lagGrunnlagForVilkårOgAndel(
     andeler: Iterable<AndelForVedtaksperiode>?
 ) = if (personHarRettPåUtbetalingIPeriode == true) {
     GrunnlagForPersonInnvilget(
-        vilkårResultaterForVedtaksPeriode = vilkårResultater
+        vilkårResultaterForVedtaksperiode = vilkårResultater
             ?: error("vilkårResultatene burde alltid finnes om vi har innvilget vedtaksperiode."),
         person = person,
         andeler = andeler ?: error("andeler må finnes for innvilgede vedtaksperioder.")
     )
 } else {
     GrunnlagForPersonIkkeInnvilget(
-        vilkårResultaterForVedtaksPeriode = vilkårResultater ?: emptyList(),
+        vilkårResultaterForVedtaksperiode = vilkårResultater ?: emptyList(),
         person = person
     )
 }
@@ -325,7 +325,7 @@ private fun Tidslinje<List<VilkårResultat>, Måned>.tilVilkårResultaterForVedt
 private fun List<InternPeriodeOvergangsstønad>.filtrerPåAktør(aktør: Aktør) =
     this.filter { it.personIdent == aktør.aktivFødselsnummer() }
 
-@JvmName("andelerTilkjentYtelseerFiltrerPåAktør")
+@JvmName("andelerTilkjentYtelserFiltrerPåAktør")
 private fun List<AndelTilkjentYtelse>.filtrerPåAktør(aktør: Aktør) =
     this.filter { andelTilkjentYtelse -> andelTilkjentYtelse.aktør == aktør }
 
@@ -346,7 +346,7 @@ private fun Periode<GrunnlagForPerson, Måned>.erInnvilgetEllerEksplisittAvslag(
 
     val erInnvilget = grunnlagForPerson is GrunnlagForPersonInnvilget
     val erEksplisittAvslag =
-        grunnlagForPerson.vilkårResultaterForVedtaksPeriode.any { it.erEksplisittAvslagPåSøknad == true }
+        grunnlagForPerson.vilkårResultaterForVedtaksperiode.any { it.erEksplisittAvslagPåSøknad == true }
 
     return erInnvilget || erEksplisittAvslag
 }
