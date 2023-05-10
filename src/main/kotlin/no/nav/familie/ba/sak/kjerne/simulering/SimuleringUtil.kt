@@ -29,7 +29,7 @@ fun vedtakSimuleringMottakereTilRestSimulering(
         vedtakSimuleringMottakereTilSimuleringPerioder(
             økonomiSimuleringMottakere
         )
-    val tidSimuleringHentet = økonomiSimuleringMottakere.firstOrNull()?.opprettetTidspunkt?.toLocalDate()
+    val tidSimuleringHentet = økonomiSimuleringMottakere.first().opprettetTidspunkt.toLocalDate()
 
     val framtidigePerioder =
         perioder.filter {
@@ -62,7 +62,7 @@ fun vedtakSimuleringMottakereTilSimuleringPerioder(
         .flatMap { it.økonomiSimuleringPostering }
         .groupBy { it.fom }
 
-    val tidSimuleringHentet = økonomiSimuleringMottakere.firstOrNull()?.opprettetTidspunkt?.toLocalDate()
+    val tidSimuleringHentet = økonomiSimuleringMottakere.first().opprettetTidspunkt.toLocalDate()
 
     return simuleringPerioder.map { (fom, posteringListe) ->
 
@@ -162,7 +162,7 @@ fun hentResultatIPeriode(periode: List<ØkonomiSimuleringPostering>): BigDecimal
 
 fun hentEtterbetalingIPeriode(
     periode: List<ØkonomiSimuleringPostering>,
-    tidSimuleringHentet: LocalDate?
+    tidSimuleringHentet: LocalDate
 ): BigDecimal {
     val periodeMedForfallFørTidSimuleringHentet = periode.filter { it.forfallsdato <= tidSimuleringHentet }
     val periodeHarPositivFeilutbetaling =
