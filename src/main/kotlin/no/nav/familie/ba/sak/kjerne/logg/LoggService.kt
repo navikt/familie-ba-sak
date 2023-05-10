@@ -569,7 +569,7 @@ class LoggService(
                 ),
                 tekst = """
                 Periode: ${refusjonEøs.fom.tilKortString()} - ${refusjonEøs.tom.tilKortString()}
-                Beløp: ${refusjonEøs.refusjonsbeløp} kr
+                Beløp: ${refusjonEøs.refusjonsbeløp} kr/mnd
                 """.trimIndent()
             )
         )
@@ -585,7 +585,7 @@ class LoggService(
                 ),
                 tekst = """
                 Periode: ${refusjonEøs.fom.tilKortString()} - ${refusjonEøs.tom.tilKortString()}
-                Beløp: ${refusjonEøs.refusjonsbeløp} kr
+                Beløp: ${refusjonEøs.refusjonsbeløp} kr/mnd
                 """.trimIndent()
             )
         )
