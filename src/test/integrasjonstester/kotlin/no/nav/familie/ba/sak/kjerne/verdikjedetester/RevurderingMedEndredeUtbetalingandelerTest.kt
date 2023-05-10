@@ -45,9 +45,6 @@ import java.time.YearMonth
 
 class RevurderingMedEndredeUtbetalingandelerTest(
     @Autowired
-    private val behandlingService: BehandlingService,
-
-    @Autowired
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 
     @Autowired
@@ -78,10 +75,7 @@ class RevurderingMedEndredeUtbetalingandelerTest(
     private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService,
 
     @Autowired
-    private val søknadGrunnlagRepository: SøknadGrunnlagRepository,
-
-    @Autowired
-    private val featureToggleService: FeatureToggleService
+    private val søknadGrunnlagRepository: SøknadGrunnlagRepository
 
 ) : AbstractVerdikjedetest() {
     @Test
@@ -164,7 +158,7 @@ class RevurderingMedEndredeUtbetalingandelerTest(
                         vilkårResultater = listOf(
                             it.copy(
                                 resultat = Resultat.OPPFYLT,
-                                periodeFom = if (it.vilkårType == Vilkår.UNDER_18_ÅR) barnetsFødselsdato else LocalDate.of(2019, 5, 8),
+                                periodeFom = barnetsFødselsdato,
                                 utdypendeVilkårsvurderinger = listOfNotNull(
                                     if (it.vilkårType == Vilkår.BOR_MED_SØKER) UtdypendeVilkårsvurdering.DELT_BOSTED else null
                                 )
