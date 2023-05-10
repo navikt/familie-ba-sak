@@ -34,6 +34,7 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.parseEnumListe
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseInt
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseList
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseLong
+import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriBoolean
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriDato
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriEnum
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriLong
@@ -259,7 +260,12 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
                 periodeTom = parseValgfriDato(Domenebegrep.TIL_DATO, it),
                 begrunnelse = "",
                 behandlingId = behandlingId,
-                personResultat = personResultat
+                personResultat = personResultat,
+                erEksplisittAvslagPåSøknad = parseValgfriBoolean(
+                    DomenebegrepVedtaksperiodeMedBegrunnelser.ER_EKSPLISITT_AVSLAG,
+                    it
+                )
+
             )
         } ?: emptyList()
 
@@ -278,6 +284,10 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
                 parseEnum(DomenebegrepVedtaksperiodeMedBegrunnelser.RESULTAT, overstyringForVilkår)
             vilkårResultat.periodeFom = parseValgfriDato(Domenebegrep.FRA_DATO, overstyringForVilkår)
             vilkårResultat.periodeTom = parseValgfriDato(Domenebegrep.TIL_DATO, overstyringForVilkår)
+            vilkårResultat.erEksplisittAvslagPåSøknad = parseValgfriBoolean(
+                DomenebegrepVedtaksperiodeMedBegrunnelser.ER_EKSPLISITT_AVSLAG,
+                overstyringForVilkår
+            )
         }
     }
 
