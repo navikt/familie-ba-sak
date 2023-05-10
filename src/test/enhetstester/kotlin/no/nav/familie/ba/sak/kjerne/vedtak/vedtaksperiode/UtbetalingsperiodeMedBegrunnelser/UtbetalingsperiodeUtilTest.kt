@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeMedBegrunnelser
+package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.utbetalingsperiodemedbegrunnelser
 
 import hentPerioderMedUtbetaling
 import no.nav.familie.ba.sak.common.Periode
