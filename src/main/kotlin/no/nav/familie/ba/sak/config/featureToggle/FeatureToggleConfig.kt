@@ -14,6 +14,7 @@ class FeatureToggleConfig {
         const val EØS_INFORMASJON_OM_ÅRLIG_KONTROLL = "familie-ba-sak.eos-informasjon-om-aarlig-kontroll"
         const val ER_MANUEL_POSTERING_TOGGLE_PÅ = "familie-ba-sak.manuell-postering"
         const val VEDTAKSPERIODE_NY = "familie-ba-sak.vedtaksperiode-ny"
+        const val SATSENDRING_KUN_OPPDATERE_SATS = "familie-ba-sak.behandling.satsendring-oppdater-andeler"
 
         // unleash toggles for satsendring, kan slettes etter at satsendring er skrudd på for alle satstyper
         const val SATSENDRING_ENABLET: String = "familie-ba-sak.satsendring-enablet"

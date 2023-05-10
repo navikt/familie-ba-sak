@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForUtbetalingsoppdragFactory
 import no.nav.familie.ba.sak.integrasjoner.økonomi.pakkInnForUtbetaling
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils
@@ -45,7 +47,8 @@ class BeregningService(
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     private val småbarnstilleggService: SmåbarnstilleggService,
     private val tilkjentYtelseEndretAbonnenter: List<TilkjentYtelseEndretAbonnent> = emptyList(),
-    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
+    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
+    private val featureToggleService: FeatureToggleService
 ) {
     fun slettTilkjentYtelseForBehandling(behandlingId: Long) =
         tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)
@@ -196,7 +199,7 @@ class BeregningService(
     ): TilkjentYtelse {
         tilkjentYtelseRepository.slettTilkjentYtelseFor(behandling)
 
-        val tilkjentYtelse = if (behandling.opprettetÅrsak == BehandlingÅrsak.SATSENDRING) {
+        val tilkjentYtelse = if (behandling.opprettetÅrsak == BehandlingÅrsak.SATSENDRING && featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_KUN_OPPDATERE_SATS)) {
             val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
             val andelerFraForrigeBehandling = if (forrigeBehandling != null) andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = forrigeBehandling.id) else throw FunksjonellFeil("Kan ikke kjøre satsendring når det ikke finnes en tidligere behandling på fagsaken")
 
