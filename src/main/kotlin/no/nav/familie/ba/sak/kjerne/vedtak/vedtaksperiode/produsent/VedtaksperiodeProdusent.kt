@@ -138,7 +138,8 @@ private fun List<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>>
         GrupperingskriterierForVedtaksperioder(
             fom = periode.fraOgMed,
             tom = periode.tilOgMed,
-            periodeInneholderInnvilgelse = periode.innhold?.any { it.gjeldende is GrunnlagForPersonInnvilget } == true)
+            periodeInneholderInnvilgelse = periode.innhold?.any { it.gjeldende is GrunnlagForPersonInnvilget } == true
+        )
     }.map { (grupperingskriterier, verdi) ->
         Periode(
             fraOgMed = grupperingskriterier.fom,
