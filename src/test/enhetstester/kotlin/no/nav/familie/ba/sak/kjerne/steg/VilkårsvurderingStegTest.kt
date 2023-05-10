@@ -72,7 +72,7 @@ class VilkårsvurderingStegTest {
             barnasIdenter = listOf(barn.aktør.aktivFødselsnummer())
         )
         every { tilbakestillBehandlingService.tilbakestillDataTilVilkårsvurderingssteg(behandling) } returns Unit
-        every { beregningService.genererTilkjentYtelseFraVilkårsvurdering(any(), any()) } returns lagInitiellTilkjentYtelse(
+        every { beregningService.genererTilkjentYtelseFraVilkårsvurderingSteg(any(), any()) } returns lagInitiellTilkjentYtelse(
             behandling
         )
 
