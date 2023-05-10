@@ -173,7 +173,11 @@ class RevurderingMedEndredeUtbetalingandelerTest(
                         vilkårResultater = listOf(
                             it.copy(
                                 resultat = Resultat.OPPFYLT,
-                                periodeFom = barnetsFødselsdato,
+                                periodeFom = if (it.vilkårType == Vilkår.UNDER_18_ÅR) {
+                                    barnetsFødselsdato
+                                } else {
+                                    LocalDate.now().minusYears(3).minusMonths(5).withDayOfMonth(8)
+                                },
                                 utdypendeVilkårsvurderinger = listOfNotNull(
                                     if (it.vilkårType == Vilkår.BOR_MED_SØKER) UtdypendeVilkårsvurdering.DELT_BOSTED else null
                                 )
