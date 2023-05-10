@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagPerson
+import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseSatsendringUtils.lagAndelerMedNySatsForPersonOgYtelsetype
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
@@ -19,6 +20,64 @@ import java.time.LocalDate
 import java.time.YearMonth
 
 class TilkjentYtelseSatsendringUtilsTest {
+
+    @Test
+    fun `skal oppdatere satsen på ordinære andeler for barna, og utvidet og småbarnstillegg for søker`() {
+        val barnOver6 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2010, 1, 1))
+        val barnUnder6 = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2020, 8, 1))
+        val søker = lagPerson(type = PersonType.SØKER, fødselsdato = LocalDate.of(2000, 1, 1))
+        val satsendringsbehandling = lagBehandling()
+
+        val forrigeAndeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(2022, 1),
+                tom = YearMonth.of(2023, 5),
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                beløp = 527,
+                prosent = BigDecimal(50),
+                person = barnOver6
+            ),
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(2022, 1),
+                tom = YearMonth.of(2023, 5),
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                beløp = 1676,
+                prosent = BigDecimal(100),
+                person = barnUnder6
+            ),
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(2022, 5),
+                tom = YearMonth.of(2023, 5),
+                ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+                beløp = 1054,
+                prosent = BigDecimal(100),
+                person = søker
+            ),
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(2023, 1),
+                tom = YearMonth.of(2023, 4),
+                ytelseType = YtelseType.SMÅBARNSTILLEGG,
+                beløp = 660,
+                prosent = BigDecimal(100),
+                person = barnUnder6
+            )
+        )
+
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(satsendringsbehandling.id, søker, barnOver6, barnUnder6)
+
+        val nyTilkjentYtelse = TilkjentYtelseSatsendringUtils.beregnTilkjentYtelseMedNySatsForSatsendring(
+            forrigeAndelerTilkjentYtelse = forrigeAndeler,
+            behandling = satsendringsbehandling,
+            personopplysningGrunnlag = personopplysningGrunnlag
+        )
+
+        val nyeAndeler = nyTilkjentYtelse.andelerTilkjentYtelse
+
+        Assertions.assertEquals(8, nyeAndeler.size)
+
+        val andelerPerAktørOgType = nyeAndeler.groupBy { Pair(it.aktør, it.type) }
+        andelerPerAktørOgType.map { (_, v) -> Assertions.assertEquals(2, v.size) }
+    }
 
     @Test
     fun `skal oppdatere satsen på ordinær andel for barn over 6 år`() {
