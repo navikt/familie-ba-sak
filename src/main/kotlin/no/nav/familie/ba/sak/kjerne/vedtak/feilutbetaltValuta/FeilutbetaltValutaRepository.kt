@@ -9,4 +9,7 @@ interface FeilutbetaltValutaRepository : JpaRepository<FeilutbetaltValuta, Long>
 
     @Query(value = "SELECT f FROM FeilutbetaltValuta f WHERE f.id= :id")
     fun finnFeilutbetaltValuta(id: Long): FeilutbetaltValuta?
+
+    @Query(value = "DELETE FROM FeilutbetaltValuta f WHERE f.behandlingId = :behandlingId")
+    fun slettFeilutbetaltValutaForBehandling(behandlingId: Long)
 }

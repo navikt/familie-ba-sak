@@ -65,4 +65,9 @@ class FeilutbetaltValutaService(
         periode.tom = feilutbetaltValuta.tom
         periode.feilutbetaltBeløp = feilutbetaltValuta.feilutbetaltBeløp
     }
+
+    @Transactional
+    fun slettFeilutbetaltValutaPerioderForBehandling(behandlingId: Long) {
+        feilutbetaltValutaRepository.slettFeilutbetaltValutaForBehandling(behandlingId)
+    }
 }

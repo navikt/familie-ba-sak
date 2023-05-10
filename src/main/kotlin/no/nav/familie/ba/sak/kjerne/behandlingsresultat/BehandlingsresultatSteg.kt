@@ -25,6 +25,7 @@ import no.nav.familie.ba.sak.kjerne.steg.EndringerIUtbetalingForBehandlingSteg.E
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta.FeilutbetaltValutaService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
 import org.slf4j.LoggerFactory
@@ -42,7 +43,8 @@ class BehandlingsresultatSteg(
     private val vilkårService: VilkårService,
     private val persongrunnlagService: PersongrunnlagService,
     private val beregningService: BeregningService,
-    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
+    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
+    private val feilutbetaltValutaService: FeilutbetaltValutaService
 ) : BehandlingSteg<String> {
 
     override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
@@ -132,7 +134,12 @@ class BehandlingsresultatSteg(
             simuleringService.oppdaterSimuleringPåBehandling(behandlingMedOppdatertBehandlingsresultat)
         }
 
-        return hentNesteStegGittEndringerIUtbetaling(behandling, endringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi)
+        feilutbetaltValutaService.slettFeilutbetaltValutaPerioderForBehandling(behandlingMedOppdatertBehandlingsresultat.id)
+
+        return hentNesteStegGittEndringerIUtbetaling(
+            behandling,
+            endringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi
+        )
     }
 
     override fun stegType(): StegType {
