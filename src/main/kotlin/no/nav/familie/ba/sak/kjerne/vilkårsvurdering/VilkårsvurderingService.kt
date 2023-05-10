@@ -76,17 +76,6 @@ class VilkårsvurderingService(
         return vilkårsvurderingRepository.save(vilkårsvurdering)
     }
 
-    fun opprettOglagreBlankAnnenVurdering(annenVurderingType: AnnenVurderingType, behandlingId: Long) {
-        val vilkårVurdering = hentAktivForBehandling(behandlingId = behandlingId)
-
-        if (vilkårVurdering != null) {
-            val søkersResultater = vilkårVurdering.personResultater.single { it.erSøkersResultater() }
-            søkersResultater.leggTilBlankAnnenVurdering(annenVurderingType = AnnenVurderingType.OPPLYSNINGSPLIKT)
-
-            oppdater(vilkårVurdering)
-        }
-    }
-
     fun hentVilkårsbegrunnelser(): Map<VedtakBegrunnelseType, List<RestVedtakBegrunnelseTilknyttetVilkår>> =
         standardbegrunnelserTilNedtrekksmenytekster(sanityService.hentSanityBegrunnelser()) + eøsStandardbegrunnelserTilNedtrekksmenytekster(
             sanityService.hentSanityEØSBegrunnelser()

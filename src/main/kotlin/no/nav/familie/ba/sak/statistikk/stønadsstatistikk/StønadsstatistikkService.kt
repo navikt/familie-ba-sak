@@ -184,7 +184,6 @@ class StønadsstatistikkService(
                         YtelseType.ORDINÆR_BARNETRYGD -> ORDINÆR_BARNETRYGD
                         YtelseType.UTVIDET_BARNETRYGD -> UTVIDET_BARNETRYGD
                         YtelseType.SMÅBARNSTILLEGG -> SMÅBARNSTILLEGG
-                        YtelseType.MANUELL_VURDERING -> MANUELL_VURDERING
                     },
                     utbetaltPrMnd = andel.kalkulertUtbetalingsbeløp,
                     delytelseId = behandling.fagsak.id.toString() + andel.periodeOffset

@@ -250,8 +250,7 @@ fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.lagVertikaleSegmenter(): Map
 enum class YtelseType(val klassifisering: String) {
     ORDINÆR_BARNETRYGD("BATR"),
     UTVIDET_BARNETRYGD("BATR"),
-    SMÅBARNSTILLEGG("BATRSMA"),
-    MANUELL_VURDERING("BATR");
+    SMÅBARNSTILLEGG("BATRSMA");
 
     fun erKnyttetTilSøker() = this == SMÅBARNSTILLEGG || this == UTVIDET_BARNETRYGD
 
@@ -259,7 +258,6 @@ enum class YtelseType(val klassifisering: String) {
         ORDINÆR_BARNETRYGD -> listOf(SatsType.ORBA, SatsType.TILLEGG_ORBA)
         UTVIDET_BARNETRYGD -> listOf(SatsType.UTVIDET_BARNETRYGD)
         SMÅBARNSTILLEGG -> listOf(SatsType.SMA)
-        MANUELL_VURDERING -> throw Feil("Ingen satstype for manuell vurdering")
     }
 }
 
