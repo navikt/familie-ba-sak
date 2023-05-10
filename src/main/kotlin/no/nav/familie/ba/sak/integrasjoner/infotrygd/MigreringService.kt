@@ -10,6 +10,8 @@ import no.nav.familie.ba.sak.common.del
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.isSameOrBefore
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonInfo
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerInstitusjonOgVerge
@@ -89,7 +91,8 @@ class MigreringService(
     private val migreringRestClient: MigreringRestClient,
     private val kompetanseService: KompetanseService,
     private val persongrunnlagService: PersongrunnlagService,
-    private val institusjonService: InstitusjonService
+    private val institusjonService: InstitusjonService,
+    private val featureToggleService: FeatureToggleService
 ) {
 
     private val logger = LoggerFactory.getLogger(MigreringService::class.java)
@@ -116,8 +119,14 @@ class MigreringService(
             val barnasIdenter = finnBarnMedLøpendeStønad(løpendeInfotrygdsak)
 
             secureLog.info("barnasIdenter=$barnasIdenter")
-            if (løpendeInfotrygdsak.erEnslingMindreårig(personIdent, barnasIdenter)) {
-                secureLog.info("Migrering: $personIdent er lik barn registert på stønad=${løpendeInfotrygdsak.stønad?.id}")
+            if (løpendeInfotrygdsak.erEnslingMindreårig(personIdent, barnasIdenter) && !kanMigrereEnsligMindreårig()) {
+                secureLog.info("Migrering enslig mindreårog er skrudd av")
+                kastOgTellMigreringsFeil(MigreringsfeilType.ENSLIG_MINDREÅRIG)
+            } else if (løpendeInfotrygdsak.erEnslingMindreårig(personIdent, barnasIdenter) && kanMigrereEnsligMindreårig() && !erOverAlder(personIdent, 16)) {
+                secureLog.info("Migrering av enslig mindreårig for ident=$personIdent hvor stønadeier er under 16 år. stønad=${løpendeInfotrygdsak.stønad?.id}")
+                kastOgTellMigreringsFeil(MigreringsfeilType.ENSLIG_MINDREÅRIG)
+            } else if (løpendeInfotrygdsak.erEnslingMindreårig(personIdent, barnasIdenter) && kanMigrereEnsligMindreårig() && underkategori == BehandlingUnderkategori.UTVIDET) {
+                secureLog.info("Migrering av enslig mindreårig for ident=$personIdent hvor stønadstype er utvidet. stønad=${løpendeInfotrygdsak.stønad?.id}")
                 kastOgTellMigreringsFeil(MigreringsfeilType.ENSLIG_MINDREÅRIG)
             }
 
@@ -144,10 +153,15 @@ class MigreringService(
                         institusjon = institusjonInfo,
                         fagsakType = FagsakType.INSTITUSJON
                     )
-                        .also { kastFeilDersomAlleredeMigrert(it) }
                 } else {
-                    fagsakService.hentEllerOpprettFagsakForPersonIdent(fødselsnummer = personIdent)
-                        .also { kastFeilDersomAlleredeMigrert(it) }
+                    if (løpendeInfotrygdsak.erEnslingMindreårig(personIdent, barnasIdenter)) {
+                        fagsakService.hentEllerOpprettFagsakForPersonIdent(
+                            fødselsnummer = personIdent,
+                            fagsakType = FagsakType.BARN_ENSLIG_MINDREÅRIG
+                        )
+                    } else {
+                        fagsakService.hentEllerOpprettFagsakForPersonIdent(fødselsnummer = personIdent)
+                    }.also { kastFeilDersomAlleredeMigrert(it) }
                 }
             } catch (exception: Exception) {
                 if (exception is ConstraintViolationException) {
@@ -626,6 +640,10 @@ class MigreringService(
         val task = IverksettMotOppdragTask.opprettTask(behandling, vedtak, SikkerhetContext.hentSaksbehandler())
         taskRepository.save(task)
     }
+
+    private fun kanMigrereEnsligMindreårig(): Boolean {
+        return featureToggleService.isEnabled(FeatureToggleConfig.KAN_MIGRERE_ENSLIG_MINDREÅRIG, false)
+    }
 }
 
 private val List<AndelTilkjentYtelse>.personidenter: List<String>
@@ -685,12 +703,14 @@ fun kastOgTellMigreringsFeil(
         migreringsFeilCounter[feiltype.name]?.increment()
     }
 
-fun Sak.erInstitusjon() = this.valg == "OR" && this.undervalg == "IB"
-fun Sak.validerInstitusjonSak() {
+private fun Sak.erInstitusjon() = this.valg == "OR" && this.undervalg == "IB"
+private fun Sak.validerInstitusjonSak() {
     if (this.stønad?.mottakerNummer == null || this.stønad?.status != "04") { // I følge Infotrygd-Tore så skal Institusjonsstønader ha status 04
         kastOgTellMigreringsFeil(feiltype = MigreringsfeilType.INSTITUSJON_MANGLER_INFO)
     }
 }
 
-fun Sak.erEnslingMindreårig(personIdent: String, barnasIdenter: List<String>) =
+private fun Sak.erEnslingMindreårig(personIdent: String, barnasIdenter: List<String>) =
     personIdent in barnasIdenter && !this.erInstitusjon()
+
+private fun erOverAlder(ident: String, alder: Int): Boolean = FoedselsNr(ident).foedselsdato.isSameOrBefore(LocalDate.now().minusYears(alder.toLong()))
