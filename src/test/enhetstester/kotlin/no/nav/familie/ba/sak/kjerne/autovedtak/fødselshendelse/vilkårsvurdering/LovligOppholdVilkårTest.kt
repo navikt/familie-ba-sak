@@ -2,7 +2,7 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurderi
 
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
 import no.nav.familie.ba.sak.common.tilfeldigPerson
-import no.nav.familie.ba.sak.dataGenerator.grunnlag.opprettAdresse
+import no.nav.familie.ba.sak.datagenerator.grunnlag.opprettAdresse
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårOppfyltÅrsak
