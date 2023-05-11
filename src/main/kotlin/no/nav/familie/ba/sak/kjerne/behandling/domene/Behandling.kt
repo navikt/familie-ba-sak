@@ -31,7 +31,6 @@ import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.Regelverk
 import org.hibernate.annotations.SortComparator
 import java.time.LocalDate
-import java.time.LocalDateTime
 import no.nav.familie.kontrakter.felles.Behandlingstema as OppgaveBehandlingTema
 import no.nav.familie.kontrakter.felles.oppgave.Behandlingstype as OppgaveBehandlingType
 
@@ -113,10 +112,6 @@ data class Behandling(
             "steg=$steg)"
     }
 
-    fun låstForEndringerTidspunkt(): LocalDateTime? = this.behandlingStegTilstand
-        .filter { it.behandlingSteg.rekkefølge >= StegType.BESLUTTE_VEDTAK.rekkefølge }
-        .minOfOrNull { it.opprettetTidspunkt }
-
     // Skal kun brukes på gamle behandlinger
     fun erTekniskOpphør(): Boolean {
         return if (type == BehandlingType.TEKNISK_OPPHØR ||
@@ -177,8 +172,6 @@ data class Behandling(
             resultat == Behandlingsresultat.HENLAGT_TEKNISK_VEDLIKEHOLD
 
     fun erVedtatt() = status == BehandlingStatus.AVSLUTTET && !erHenlagt()
-
-    fun erSøknad() = opprettetÅrsak == BehandlingÅrsak.SØKNAD
 
     fun leggTilBehandlingStegTilstand(nesteSteg: StegType): Behandling {
         if (nesteSteg != StegType.HENLEGG_BEHANDLING) {
@@ -400,10 +393,6 @@ enum class BehandlingÅrsak(val visningsnavn: String) {
     fun erManuellMigreringsårsak(): Boolean = this == HELMANUELL_MIGRERING || this == ENDRE_MIGRERINGSDATO
 
     fun erFørstegangMigreringsårsak(): Boolean = this == HELMANUELL_MIGRERING || this == MIGRERING
-
-    fun årsakSomKanEndreBehandlingKategori(): Boolean =
-        this == SØKNAD || this == ÅRLIG_KONTROLL || this == NYE_OPPLYSNINGER ||
-            this == KLAGE || this == ENDRE_MIGRERINGSDATO || this == MIGRERING || this == HELMANUELL_MIGRERING
 }
 
 enum class BehandlingType(val visningsnavn: String) {
@@ -451,15 +440,11 @@ enum class BehandlingUnderkategori(val visningsnavn: String, val nivå: Int) {
     }
 }
 
-fun List<BehandlingUnderkategori?>.finnHøyesteKategori(): BehandlingUnderkategori? =
-    this.filterNotNull().maxByOrNull { it.nivå }
-
 fun initStatus(): BehandlingStatus {
     return BehandlingStatus.UTREDES
 }
 
 enum class BehandlingStatus {
-    OPPRETTET,
     UTREDES,
     FATTER_VEDTAK,
     IVERKSETTER_VEDTAK,
@@ -467,10 +452,6 @@ enum class BehandlingStatus {
     ;
 
     fun erLåstMenIkkeAvsluttet() = this == FATTER_VEDTAK || this == IVERKSETTER_VEDTAK
-}
-
-fun BehandlingStatus.erÅpen(): Boolean {
-    return this != BehandlingStatus.AVSLUTTET
 }
 
 class BehandlingStegComparator : Comparator<BehandlingStegTilstand> {

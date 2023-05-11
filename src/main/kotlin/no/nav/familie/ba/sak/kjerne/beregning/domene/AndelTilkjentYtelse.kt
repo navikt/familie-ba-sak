@@ -16,7 +16,6 @@ import jakarta.persistence.OneToOne
 import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 import no.nav.familie.ba.sak.common.BaseEntitet
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.YearMonthConverter
@@ -251,8 +250,7 @@ enum class YtelseType(val klassifisering: String) {
     ORDINÆR_BARNETRYGD("BATR"),
     UTVIDET_BARNETRYGD("BATR"),
     SMÅBARNSTILLEGG("BATRSMA"),
-    MANUELL_VURDERING("BATR"),
-    ;
+  ;
 
     fun erKnyttetTilSøker() = this == SMÅBARNSTILLEGG || this == UTVIDET_BARNETRYGD
 
@@ -260,7 +258,6 @@ enum class YtelseType(val klassifisering: String) {
         ORDINÆR_BARNETRYGD -> listOf(SatsType.ORBA, SatsType.TILLEGG_ORBA)
         UTVIDET_BARNETRYGD -> listOf(SatsType.UTVIDET_BARNETRYGD)
         SMÅBARNSTILLEGG -> listOf(SatsType.SMA)
-        MANUELL_VURDERING -> throw Feil("Ingen satstype for manuell vurdering")
     }
 }
 
