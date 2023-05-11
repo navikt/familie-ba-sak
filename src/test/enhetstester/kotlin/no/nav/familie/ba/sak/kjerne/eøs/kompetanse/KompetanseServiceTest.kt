@@ -92,7 +92,7 @@ internal class KompetanseServiceTest {
         assertEqualsUnordered(forventedeKompetanser, kompetanseService.hentKompetanser(behandlingId))
 
         val kompetanseSomSkalSlettes = kompetanseService.finnKompetanse(behandlingId, oppdatertKompetanse)
-        kompetanseService.slettKompetanse(kompetanseSomSkalSlettes.id)
+        kompetanseService.slettKompetanse(behandlingId, kompetanseSomSkalSlettes.id)
 
         assertEqualsUnordered(listOf(lagretKompetanse), kompetanseService.hentKompetanser(behandlingId))
     }
