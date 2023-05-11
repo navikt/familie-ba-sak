@@ -44,6 +44,9 @@ class OppdragSteg {
     fun følgendeTilkjenteYtelser(dataTable: DataTable) {
         genererBehandlinger(dataTable)
         tilkjenteYtelser = mapTilkjentYtelse(dataTable, behandlinger)
+        if (tilkjenteYtelser.flatMap { it.andelerTilkjentYtelse }.any { it.kildeBehandlingId != null }) {
+            error("Kildebehandling skal ikke settes på input, denne settes fra utbetalingsgeneratorn")
+        }
     }
 
     @Når("beregner utbetalingsoppdrag")
@@ -192,4 +195,7 @@ private fun assertUtbetalingsperiode(
     assertThat(utbetalingsperiode.vedtakdatoFom).isEqualTo(forventetUtbetalingsperiode.fom)
     assertThat(utbetalingsperiode.vedtakdatoTom).isEqualTo(forventetUtbetalingsperiode.tom)
     assertThat(utbetalingsperiode.opphør?.opphørDatoFom).isEqualTo(forventetUtbetalingsperiode.opphør)
+    forventetUtbetalingsperiode.kildebehandlingId?.let {
+        assertThat(utbetalingsperiode.behandlingId).isEqualTo(forventetUtbetalingsperiode.kildebehandlingId)
+    }
 }
