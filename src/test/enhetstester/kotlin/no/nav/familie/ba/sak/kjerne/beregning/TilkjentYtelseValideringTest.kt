@@ -1,11 +1,18 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
+import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
+import org.junit.jupiter.api.assertThrows
 import java.time.LocalDateTime
+import java.time.YearMonth
 
 class TilkjentYtelseValideringTest {
 
@@ -207,5 +214,112 @@ class TilkjentYtelseValideringTest {
                 gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(LocalDateTime.now().minusYears(2)),
             ),
         )
+    }
+
+    @Test
+    fun `Skal kaste feil for satsendring hvis person har fått fjernet andel som hadde utbetaling i forrige behandling`() {
+        val person = lagPerson(type = PersonType.BARN)
+        val forrigeAndeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(2022, 1),
+                tom = YearMonth.of(2023, 5),
+                beløp = 1054,
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                aktør = person.aktør,
+            ),
+        )
+
+        val nåværendeAndeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(2020, 1),
+                tom = YearMonth.of(2023, 2),
+                beløp = 1054,
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                aktør = person.aktør,
+            ),
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(2023, 3),
+                tom = YearMonth.of(2023, 5),
+                beløp = 1083,
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                aktør = person.aktør,
+            ),
+        )
+
+        assertThrows<Feil> {
+            TilkjentYtelseValidering.validerAtSatsendringKunOppdatererSatsPåEksisterendePerioder(
+                forrigeAndelerTilkjentYtelse = forrigeAndeler,
+                andelerTilkjentYtelse = nåværendeAndeler,
+            )
+        }
+    }
+
+    @Test
+    fun `Skal kaste feil for satsendring hvis person har fått lagt til ny andel i periode som ikke hadde utbetaling før`() {
+        val person = lagPerson(type = PersonType.BARN)
+        val forrigeAndeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(2020, 1),
+                tom = YearMonth.of(2023, 2),
+                beløp = 1054,
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                aktør = person.aktør,
+            ),
+        )
+
+        val nåværendeAndeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(2022, 1),
+                tom = YearMonth.of(2023, 2),
+                beløp = 1054,
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                aktør = person.aktør,
+            ),
+        )
+
+        assertThrows<Feil> {
+            TilkjentYtelseValidering.validerAtSatsendringKunOppdatererSatsPåEksisterendePerioder(
+                forrigeAndelerTilkjentYtelse = forrigeAndeler,
+                andelerTilkjentYtelse = nåværendeAndeler,
+            )
+        }
+    }
+
+    @Test
+    fun `Skal kaste ikke kaste feil hvis det eneste som er gjort er å oppdatere sats`() {
+        val person = lagPerson(type = PersonType.BARN)
+        val forrigeAndeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(2022, 1),
+                tom = YearMonth.of(2023, 5),
+                beløp = 1054,
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                aktør = person.aktør,
+            ),
+        )
+
+        val nåværendeAndeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(2022, 1),
+                tom = YearMonth.of(2023, 2),
+                beløp = 1054,
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                aktør = person.aktør,
+            ),
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(2023, 3),
+                tom = YearMonth.of(2023, 5),
+                beløp = 1083,
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                aktør = person.aktør,
+            ),
+        )
+
+        assertDoesNotThrow {
+            TilkjentYtelseValidering.validerAtSatsendringKunOppdatererSatsPåEksisterendePerioder(
+                forrigeAndelerTilkjentYtelse = forrigeAndeler,
+                andelerTilkjentYtelse = nåværendeAndeler,
+            )
+        }
     }
 }
