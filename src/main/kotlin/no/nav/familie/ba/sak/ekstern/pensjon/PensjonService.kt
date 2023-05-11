@@ -25,7 +25,7 @@ class PensjonService(
     private val personidentService: PersonidentService,
     private val vedtakService: VedtakService,
     private val kompetanseService: KompetanseService,
-    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository
 ) {
     fun hentBarnetrygd(personIdent: String, fraDato: LocalDate): List<BarnetrygdTilPensjon> {
         val barnetrygdTilPensjon = hentBarnetrygdTilPensjon(personIdent, fraDato)
@@ -68,13 +68,13 @@ class PensjonService(
             barnetrygdPerioder = perioder,
             kompetanseperioder = hentKompetanse(BehandlingId(behandling.id)),
             fagsakEiersIdent = personIdent,
-            tidspunktSisteVedtak = datoVedtak!!.atZone(TIMEZONE),
+            tidspunktSisteVedtak = datoVedtak!!.atZone(TIMEZONE)
         )
     }
 
     private fun hentPerioder(
         behandling: Behandling,
-        fraDato: LocalDate,
+        fraDato: LocalDate
     ): List<BarnetrygdPeriode> {
         val perioder =
             tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandling.id)?.andelerTilkjentYtelse
@@ -88,7 +88,7 @@ class PensjonService(
                         stønadFom = it.stønadFom,
                         stønadTom = it.stønadTom,
                         utbetaltPerMnd = it.kalkulertUtbetalingsbeløp,
-                        delingsprosentYtelse = it.prosent.toInt(),
+                        delingsprosentYtelse = it.prosent.toInt()
                     )
                 } ?: emptyList()
         return perioder
@@ -102,7 +102,7 @@ class PensjonService(
                 barnsIdenter = kompetanse.barnAktører.map { aktør -> aktør.aktivFødselsnummer() },
                 annenForeldersAktivitet = if (kompetanse.annenForeldersAktivitet != null) {
                     AnnenForeldersAktivitet.valueOf(
-                        kompetanse.annenForeldersAktivitet.name,
+                        kompetanse.annenForeldersAktivitet.name
                     )
                 } else {
                     null
@@ -113,7 +113,7 @@ class PensjonService(
                 tom = kompetanse.tom,
                 resultat = KompetanseResultat.valueOf(kompetanse.resultat!!.name),
                 sokersaktivitet = if (kompetanse.søkersAktivitet != null) SøkersAktivitet.valueOf(kompetanse.søkersAktivitet.name) else null,
-                sokersAktivitetsland = kompetanse.søkersAktivitetsland,
+                sokersAktivitetsland = kompetanse.søkersAktivitetsland
             )
         }
     }

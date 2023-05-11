@@ -12,7 +12,7 @@ data class BarnetrygdTilPensjon(
     val tidspunktSisteVedtak: ZonedDateTime,
     val fagsakEiersIdent: String,
     val barnetrygdPerioder: List<BarnetrygdPeriode>,
-    val kompetanseperioder: List<Kompetanse>? = null,
+    val kompetanseperioder: List<Kompetanse>? = null
 )
 
 data class BarnetrygdPeriode(
@@ -21,7 +21,7 @@ data class BarnetrygdPeriode(
     val ytelseType: YtelseType?,
     val utbetaltPerMnd: Int,
     val stønadFom: YearMonth,
-    val stønadTom: YearMonth,
+    val stønadTom: YearMonth
 )
 
 data class Kompetanse(
@@ -33,7 +33,7 @@ data class Kompetanse(
     val annenForeldersAktivitet: AnnenForeldersAktivitet? = null,
     val annenForeldersAktivitetsland: String? = null,
     val barnetsBostedsland: String? = null,
-    val resultat: KompetanseResultat? = null,
+    val resultat: KompetanseResultat? = null
 )
 
 enum class SøkersAktivitet {
@@ -50,7 +50,7 @@ enum class SøkersAktivitet {
     MOTTAR_UTBETALING_FRA_NAV_UNDER_OPPHOLD_I_UTLANDET,
     MOTTAR_UFØRETRYGD_FRA_NAV_UNDER_OPPHOLD_I_UTLANDET,
     MOTTAR_PENSJON_FRA_NAV_UNDER_OPPHOLD_I_UTLANDET,
-    INAKTIV,
+    INAKTIV
 }
 
 enum class AnnenForeldersAktivitet {
@@ -60,18 +60,18 @@ enum class AnnenForeldersAktivitet {
     MOTTAR_PENSJON,
     INAKTIV,
     IKKE_AKTUELT,
-    UTSENDT_ARBEIDSTAKER,
+    UTSENDT_ARBEIDSTAKER
 }
 
 enum class KompetanseResultat {
     NORGE_ER_PRIMÆRLAND,
     NORGE_ER_SEKUNDÆRLAND,
-    TO_PRIMÆRLAND,
+    TO_PRIMÆRLAND
 }
 
 enum class YtelseType {
     ORDINÆR_BARNETRYGD,
     UTVIDET_BARNETRYGD,
     SMÅBARNSTILLEGG,
-    MANUELL_VURDERING,
+    MANUELL_VURDERING
 }

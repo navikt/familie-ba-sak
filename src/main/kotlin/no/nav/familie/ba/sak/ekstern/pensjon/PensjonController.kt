@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController
 class PensjonController(private val pensjonService: PensjonService) {
 
     @Operation(
-        description = "Tjeneste for Pensjon for å hente barnetrygd og relaterte saker for en gitt person.",
+        description = "Tjeneste for Pensjon for å hente barnetrygd og relaterte saker for en gitt person."
 
     )
     @ApiResponses(
@@ -43,27 +43,27 @@ class PensjonController(private val pensjonService: PensjonService) {
                             mediaType = "application/json",
                             array = (
                                 ArraySchema(schema = Schema(implementation = BarnetrygdTilPensjon::class))
-                                ),
+                                )
                         )
-                        ),
-                ],
+                        )
+                ]
             ),
             ApiResponse(
                 responseCode = "400",
                 description = "Ugyldig input. fraDato maks tilbake 5 år",
-                content = [Content()],
+                content = [Content()]
             ),
-            ApiResponse(responseCode = "500", description = "Uventet feil", content = [Content()]),
-        ],
+            ApiResponse(responseCode = "500", description = "Uventet feil", content = [Content()])
+        ]
     )
     @PostMapping(
         path = ["/hent-barnetrygd"],
         consumes = [MediaType.APPLICATION_JSON_VALUE],
-        produces = [MediaType.APPLICATION_JSON_VALUE],
+        produces = [MediaType.APPLICATION_JSON_VALUE]
     )
     fun hentUtvidetBarnetrygd(
         @RequestBody
-        request: BarnetrygdTilPensjonRequest,
+        request: BarnetrygdTilPensjonRequest
     ): ResponseEntity<BarnetrygdTilPensjonResponse> {
         return ResponseEntity.ok(BarnetrygdTilPensjonResponse(pensjonService.hentBarnetrygd(request.ident, request.fom.toLocalDate())))
     }
