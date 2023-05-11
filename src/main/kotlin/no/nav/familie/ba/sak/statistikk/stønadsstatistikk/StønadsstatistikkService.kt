@@ -31,7 +31,6 @@ import no.nav.familie.eksterne.kontrakter.UnderkategoriV2
 import no.nav.familie.eksterne.kontrakter.UtbetalingsDetaljDVHV2
 import no.nav.familie.eksterne.kontrakter.UtbetalingsperiodeDVHV2
 import no.nav.familie.eksterne.kontrakter.VedtakDVHV2
-import no.nav.familie.eksterne.kontrakter.YtelseType.MANUELL_VURDERING
 import no.nav.familie.eksterne.kontrakter.YtelseType.ORDINÆR_BARNETRYGD
 import no.nav.familie.eksterne.kontrakter.YtelseType.SMÅBARNSTILLEGG
 import no.nav.familie.eksterne.kontrakter.YtelseType.UTVIDET_BARNETRYGD
@@ -184,7 +183,6 @@ class StønadsstatistikkService(
                         YtelseType.ORDINÆR_BARNETRYGD -> ORDINÆR_BARNETRYGD
                         YtelseType.UTVIDET_BARNETRYGD -> UTVIDET_BARNETRYGD
                         YtelseType.SMÅBARNSTILLEGG -> SMÅBARNSTILLEGG
-                        YtelseType.MANUELL_VURDERING -> MANUELL_VURDERING
                     },
                     utbetaltPrMnd = andel.kalkulertUtbetalingsbeløp,
                     delytelseId = behandling.fagsak.id.toString() + andel.periodeOffset
