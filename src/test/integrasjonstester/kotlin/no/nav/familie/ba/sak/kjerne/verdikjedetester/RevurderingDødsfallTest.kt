@@ -6,8 +6,8 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
-import no.nav.familie.ba.sak.dataGenerator.behandling.kjørStegprosessForBehandling
-import no.nav.familie.ba.sak.dataGenerator.vilkårsvurdering.lagVilkårsvurderingFraRestScenario
+import no.nav.familie.ba.sak.datagenerator.behandling.kjørStegprosessForBehandling
+import no.nav.familie.ba.sak.datagenerator.vilkårsvurdering.lagVilkårsvurderingFraRestScenario
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType

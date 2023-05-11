@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.dataGenerator.behandling
+package no.nav.familie.ba.sak.datagenerator.behandling
 
 import no.nav.familie.ba.sak.common.lagSøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
