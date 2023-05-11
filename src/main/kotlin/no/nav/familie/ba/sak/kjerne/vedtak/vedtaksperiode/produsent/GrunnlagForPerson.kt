@@ -28,7 +28,7 @@ sealed interface GrunnlagForPerson {
 
     fun kopier(
         person: Person = this.person,
-        vilkårResultaterForVedtaksperiode: List<VilkårResultatForVedtaksperiode> = this.vilkårResultaterForVedtaksperiode
+        vilkårResultaterForVedtaksperiode: List<VilkårResultatForVedtaksperiode> = this.vilkårResultaterForVedtaksperiode,
     ): GrunnlagForPerson {
         return when (this) {
             is GrunnlagForPersonIkkeInnvilget -> this.copy(person, vilkårResultaterForVedtaksperiode)
@@ -77,7 +77,7 @@ data class VilkårResultatForVedtaksperiode(
         fom = vilkårResultat.periodeFom,
         tom = vilkårResultat.periodeTom,
         aktørId = vilkårResultat.personResultat?.aktør?.aktørId
-            ?: throw Feil("$vilkårResultat er ikke knyttet til personResultat")
+            ?: throw Feil("$vilkårResultat er ikke knyttet til personResultat"),
     )
 }
 

@@ -190,10 +190,11 @@ private fun PersonResultat.hentForskjøvedeVilkårResultaterForPersonsAndelerTid
             vilkårResultaterForSøker.takeIf { erMinstEttBarnMedUtbetaling == true }
         }
 
-        PersonType.BARN -> forskjøvedeVilkårResultaterForPerson
-            .kombinerMed(ordinæreVilkårForSøkerTidslinje) { vilkårResultaterBarn, vilkårResultaterSøker ->
-                slåSammenHvisMulig(vilkårResultaterBarn, vilkårResultaterSøker)?.toList()
-            }
+        PersonType.BARN ->
+            forskjøvedeVilkårResultaterForPerson
+                .kombinerMed(ordinæreVilkårForSøkerTidslinje) { vilkårResultaterBarn, vilkårResultaterSøker ->
+                    slåSammenHvisMulig(vilkårResultaterBarn, vilkårResultaterSøker)?.toList()
+                }
 
         PersonType.ANNENPART -> throw Feil("Ikke implementert for annenpart")
     }
