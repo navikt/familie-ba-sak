@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.integrasjoner.`ef-sak`
+package no.nav.familie.ba.sak.integrasjoner.ef
 
 import no.nav.familie.ba.sak.common.kallEksternTjeneste
 import no.nav.familie.http.client.AbstractRestClient

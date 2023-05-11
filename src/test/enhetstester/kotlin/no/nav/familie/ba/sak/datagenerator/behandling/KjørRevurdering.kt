@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.dataGenerator.behandling
+package no.nav.familie.ba.sak.datagenerator.behandling
 
 import no.nav.familie.ba.sak.common.lagSøknadDTO
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
@@ -359,7 +359,8 @@ fun leggTilAlleGyldigeBegrunnelserPåVedtaksperiodeIBehandling(
 
     val utvidetVedtaksperiodeMedBegrunnelser = vedtaksperiode.tilUtvidetVedtaksperiodeMedBegrunnelser(
         personopplysningGrunnlag = personopplysningGrunnlag,
-        andelerTilkjentYtelse = andelerTilkjentYtelse
+        andelerTilkjentYtelse = andelerTilkjentYtelse,
+        skalBrukeNyVedtaksperiodeLøsning = false
     )
 
     val aktørerMedUtbetaling =

@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonRequest
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonRequestVariables
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.http.util.UriUtil
+import no.nav.familie.kontrakter.felles.Tema
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.annotation.Cacheable
@@ -68,6 +69,7 @@ class PdlIdentRestClient(
             contentType = MediaType.APPLICATION_JSON
             accept = listOf(MediaType.APPLICATION_JSON)
             add("Tema", PDL_TEMA)
+            add("behandlingsnummer", Tema.BAR.behandlingsnummer)
         }
     }
 

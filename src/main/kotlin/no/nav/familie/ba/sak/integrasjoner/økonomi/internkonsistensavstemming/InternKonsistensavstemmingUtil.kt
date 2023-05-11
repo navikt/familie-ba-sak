@@ -29,17 +29,17 @@ fun erForskjellMellomAndelerOgOppdrag(
         hentForskjellIAndelerOgUtbetalingsoppdrag(utbetalingsperioder, andeler)
 
     when (forskjellMellomAndeleneOgUtbetalingsoppdraget) {
-        is UTBETALINGSPERIODER_UTEN_TILSVARENDE_ANDEL -> secureLogger.info(
+        is UtbetalingsperioderUtenTilsvarendeAndel -> secureLogger.info(
             "Fagsak $fagsakId har sendt utbetalingsperiode(r) til økonomi som ikke har tilsvarende andel tilkjent ytelse." +
                 "\nDet er differanse i perioden(e) ${forskjellMellomAndeleneOgUtbetalingsoppdraget.utbetalingsperioder.tilTidStrenger()}." +
                 "\n\nSiste utbetalingsoppdrag som er sendt til familie-øknonomi på fagsaken er:" +
                 "\n$utbetalingsoppdrag"
         )
 
-        is INGEN_FORSKJELL -> Unit
+        is IngenForskjell -> Unit
     }
 
-    return forskjellMellomAndeleneOgUtbetalingsoppdraget !is INGEN_FORSKJELL
+    return forskjellMellomAndeleneOgUtbetalingsoppdraget !is IngenForskjell
 }
 
 private fun hentForskjellIAndelerOgUtbetalingsoppdrag(
@@ -51,9 +51,9 @@ private fun hentForskjellIAndelerOgUtbetalingsoppdrag(
     }
 
     return if (utbetalingsperioderUtenTilsvarendeAndel.isEmpty()) {
-        INGEN_FORSKJELL
+        IngenForskjell
     } else {
-        UTBETALINGSPERIODER_UTEN_TILSVARENDE_ANDEL(utbetalingsperioderUtenTilsvarendeAndel)
+        UtbetalingsperioderUtenTilsvarendeAndel(utbetalingsperioderUtenTilsvarendeAndel)
     }
 }
 
@@ -105,7 +105,7 @@ private fun List<Utbetalingsperiode>.tilTidStrenger() =
 
 private sealed interface AndelOgOppdragForskjell
 
-private data class UTBETALINGSPERIODER_UTEN_TILSVARENDE_ANDEL(val utbetalingsperioder: List<Utbetalingsperiode>) :
+private data class UtbetalingsperioderUtenTilsvarendeAndel(val utbetalingsperioder: List<Utbetalingsperiode>) :
     AndelOgOppdragForskjell
 
-private object INGEN_FORSKJELL : AndelOgOppdragForskjell
+private object IngenForskjell : AndelOgOppdragForskjell
