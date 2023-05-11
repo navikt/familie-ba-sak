@@ -115,6 +115,7 @@ class AvstemmingService(
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun opprettKonsistensavstemmingFinnPerioderForRelevanteBehandlingerTask(
         konsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO: KonsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO,
+        triggerTid: LocalDateTime,
     ) {
         val batch =
             batchRepository.getReferenceById(konsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO.batchId)
@@ -137,7 +138,7 @@ class AvstemmingService(
                     konsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO.transaksjonsId.toString()
                 this["chunkNr"] = konsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO.chunkNr.toString()
             },
-        )
+        ).medTriggerTid(triggerTid)
         taskService.save(task)
     }
 

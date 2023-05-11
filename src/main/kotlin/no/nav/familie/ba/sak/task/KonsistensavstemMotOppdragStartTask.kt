@@ -49,8 +49,10 @@ class KonsistensavstemMotOppdragStartTask(val avstemmingService: AvstemmingServi
             avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker().toSet().sorted()
 
         var chunkNr = 1
+        val startTid = LocalDateTime.now()
         relevanteBehandlinger.chunked(AvstemmingService.KONSISTENSAVSTEMMING_DATA_CHUNK_STORLEK)
-            .forEach { oppstykketRelevanteBehandlinger ->
+            .forEachIndexed { index, oppstykketRelevanteBehandlinger ->
+                val triggerTidForChunk = startTid.plusSeconds(3 * index.toLong())
                 if (avstemmingService.skalOppretteFinnPerioderForRelevanteBehandlingerTask(
                         konsistensavstemmingTask.transaksjonsId,
                         chunkNr,
@@ -62,9 +64,10 @@ class KonsistensavstemMotOppdragStartTask(val avstemmingService: AvstemmingServi
                             chunkNr = chunkNr,
                             avstemmingsdato = avstemmingsdato,
                             batchId = konsistensavstemmingTask.batchId,
-                            relevanteBehandlinger = oppstykketRelevanteBehandlinger.map { it.toLong() },
+                            relevanteBehandlinger = oppstykketRelevanteBehandlinger.map { it },
                             sendTilØkonomi = konsistensavstemmingTask.sendTilØkonomi,
                         ),
+                        triggerTidForChunk,
                     )
                 } else {
                     logger.info("Finn perioder for avstemming task alt kjørt for ${konsistensavstemmingTask.transaksjonsId} og chunkNr $chunkNr")
