@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 
+import no.nav.familie.ba.sak.common.BehandlingValidering.validerBehandlingKanRedigeres
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils.storForbokstav
@@ -12,7 +13,6 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.secureLogger
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.BARN_ENSLIG_MINDREÅRIG
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType.INSTITUSJON
@@ -90,7 +90,8 @@ class PersongrunnlagService(
         val nåværendeGrunnlag = hentAktivThrows(behandlingId = behandlingId)
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
 
-        if (behandling.status != BehandlingStatus.UTREDES) throw Feil("BehandlingStatus må være UTREDES for å manuelt oppdatere registeropplysninger")
+        validerBehandlingKanRedigeres(behandling)
+
         return hentOgLagreSøkerOgBarnINyttGrunnlag(
             aktør = nåværendeGrunnlag.søker.aktør,
             barnFraInneværendeBehandling = nåværendeGrunnlag.barna.map { it.aktør },

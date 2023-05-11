@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.søknad
 
+import no.nav.familie.ba.sak.common.BehandlingValidering.validerBehandlingKanRedigeres
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -41,6 +42,8 @@ class GrunnlagController(
         )
 
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
+        validerBehandlingKanRedigeres(behandling)
+
         persongrunnlagService.leggTilBarnIPersonopplysningsgrunnlag(
             behandling = behandling,
             nyttBarnIdent = leggTilBarnDto.barnIdent,

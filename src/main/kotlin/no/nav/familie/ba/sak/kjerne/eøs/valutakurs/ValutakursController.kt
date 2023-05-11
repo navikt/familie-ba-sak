@@ -1,10 +1,12 @@
 package no.nav.familie.ba.sak.kjerne.eøs.valutakurs
 
+import no.nav.familie.ba.sak.common.BehandlingValidering.validerBehandlingKanRedigeres
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.RestValutakurs
 import no.nav.familie.ba.sak.ekstern.restDomene.tilValutakurs
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -30,6 +32,7 @@ import java.time.LocalDate
 class ValutakursController(
     private val tilgangService: TilgangService,
     private val valutakursService: ValutakursService,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val personidentService: PersonidentService,
     private val utvidetBehandlingService: UtvidetBehandlingService,
     private val ecbService: ECBService,
@@ -46,6 +49,7 @@ class ValutakursController(
         )
 
         val barnAktører = restValutakurs.barnIdenter.map { personidentService.hentAktør(it) }
+        validerBehandlingKanRedigeres(behandlingHentOgPersisterService.hentStatus(behandlingId))
 
         val valutaKurs = if (skalManueltSetteValutakurs(restValutakurs)) {
             restValutakurs.tilValutakurs(barnAktører)
@@ -72,6 +76,7 @@ class ValutakursController(
         valutakursService.slettValutakurs(BehandlingId(behandlingId), valutakursId)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
+        validerBehandlingKanRedigeres(behandlingHentOgPersisterService.hentStatus(behandlingId))
     }
 
     private fun oppdaterValutakursMedKursFraECB(restValutakurs: RestValutakurs, valutakurs: Valutakurs) =

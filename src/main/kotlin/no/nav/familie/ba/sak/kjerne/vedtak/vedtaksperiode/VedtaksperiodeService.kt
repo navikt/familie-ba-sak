@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
+import no.nav.familie.ba.sak.common.BehandlingValidering.validerBehandlingKanRedigeres
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.NullablePeriode
@@ -103,6 +104,8 @@ class VedtaksperiodeService(
     ): Vedtak {
         val vedtaksperiodeMedBegrunnelser =
             vedtaksperiodeHentOgPersisterService.hentVedtaksperiodeThrows(vedtaksperiodeId)
+        val behandling = vedtaksperiodeMedBegrunnelser.vedtak.behandling
+        validerBehandlingKanRedigeres(behandling)
 
         vedtaksperiodeMedBegrunnelser.settFritekster(
             restPutVedtaksperiodeMedFritekster.fritekster.map {
@@ -127,6 +130,7 @@ class VedtaksperiodeService(
             vedtaksperiodeHentOgPersisterService.hentVedtaksperiodeThrows(vedtaksperiodeId)
 
         val behandling = vedtaksperiodeMedBegrunnelser.vedtak.behandling
+        validerBehandlingKanRedigeres(behandling)
 
         val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandling.id)
 
@@ -191,6 +195,7 @@ class VedtaksperiodeService(
     }
 
     fun oppdaterVedtaksperioderForBarnVurdertIFødselshendelse(vedtak: Vedtak, barnaSomVurderes: List<String>) {
+        validerBehandlingKanRedigeres(vedtak.behandling)
         val barnaAktørSomVurderes = personidentService.hentAktørIder(barnaSomVurderes)
 
         val vedtaksperioderMedBegrunnelser =
@@ -365,6 +370,8 @@ class VedtaksperiodeService(
         restGenererVedtaksperioder: RestGenererVedtaksperioderForOverstyrtEndringstidspunkt,
     ) {
         val vedtak = vedtakRepository.findByBehandlingAndAktiv(restGenererVedtaksperioder.behandlingId)
+        validerBehandlingKanRedigeres(vedtak.behandling)
+
         val overstyrtEndringstidspunkt = restGenererVedtaksperioder.overstyrtEndringstidspunkt
         if (vedtak.behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET) {
             oppdaterVedtakMedVedtaksperioder(vedtak)

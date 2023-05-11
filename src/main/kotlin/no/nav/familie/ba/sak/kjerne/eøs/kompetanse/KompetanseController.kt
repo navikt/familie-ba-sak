@@ -1,10 +1,12 @@
 package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 
+import no.nav.familie.ba.sak.common.BehandlingValidering.validerBehandlingKanRedigeres
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestKompetanse
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilKompetanse
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
@@ -33,6 +35,7 @@ class KompetanseController(
     private val kompetanseService: KompetanseService,
     private val personidentService: PersonidentService,
     private val utvidetBehandlingService: UtvidetBehandlingService,
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService
 ) {
 
     @PutMapping(path = ["{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -50,6 +53,7 @@ class KompetanseController(
         val kompetanse = restKompetanse.tilKompetanse(barnAktører = barnAktører)
 
         validerOppdatering(kompetanse)
+        validerBehandlingKanRedigeres(behandlingHentOgPersisterService.hentStatus(behandlingId))
 
         kompetanseService.oppdaterKompetanse(BehandlingId(behandlingId), kompetanse)
 
@@ -66,7 +70,7 @@ class KompetanseController(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Sletter kompetanse",
         )
-
+        validerBehandlingKanRedigeres(behandlingHentOgPersisterService.hentStatus(behandlingId))
 
         kompetanseService.slettKompetanse(BehandlingId(behandlingId), kompetanseId)
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))

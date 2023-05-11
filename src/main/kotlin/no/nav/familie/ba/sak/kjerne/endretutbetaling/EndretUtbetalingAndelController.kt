@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.endretutbetaling
 
+import no.nav.familie.ba.sak.common.BehandlingValidering.validerBehandlingKanRedigeres
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestEndretUtbetalingAndel
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
@@ -45,6 +46,7 @@ class EndretUtbetalingAndelController(
         )
 
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        validerBehandlingKanRedigeres(behandling)
 
         endretUtbetalingAndelService.oppdaterEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
             behandling,
@@ -75,6 +77,7 @@ class EndretUtbetalingAndelController(
         )
 
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        validerBehandlingKanRedigeres(behandling)
 
         endretUtbetalingAndelService.fjernEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
             behandling,
@@ -102,6 +105,7 @@ class EndretUtbetalingAndelController(
         )
 
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        validerBehandlingKanRedigeres(behandling)
         endretUtbetalingAndelService.opprettTomEndretUtbetalingAndelOgOppdaterTilkjentYtelse(behandling)
 
         tilbakestillBehandlingTilBehandlingsresultatService
@@ -115,6 +119,7 @@ class EndretUtbetalingAndelController(
         )
     }
 
+    // Denne er ikke i bruk?
     @PostMapping(path = ["/{behandlingId}/tilbakestill"])
     fun tilbakestillBehandlingTilBehandlingsresultat(
         @PathVariable behandlingId: Long,
@@ -125,6 +130,7 @@ class EndretUtbetalingAndelController(
             handling = "Opprett endretutbetalingandel",
         )
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        validerBehandlingKanRedigeres(behandling)
 
         tilbakestillBehandlingTilBehandlingsresultatService
             .tilbakestillBehandlingTilBehandlingsresultat(behandlingId = behandling.id)
