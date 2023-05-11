@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.behandling.behandlingstema
 
+import jakarta.transaction.Transactional
+import no.nav.familie.ba.sak.common.BehandlingValidering.validerBehandlingKanRedigeres
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -26,12 +28,14 @@ class BehandlingstemaService(
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
 ) {
 
+    @Transactional
     fun oppdaterBehandlingstema(
         behandling: Behandling,
         overstyrtKategori: BehandlingKategori? = null,
         overstyrtUnderkategori: BehandlingUnderkategori? = null,
         manueltOppdatert: Boolean = false,
     ): Behandling {
+        validerBehandlingKanRedigeres(behandling)
         if (behandling.skalBehandlesAutomatisk) return behandling
         if (manueltOppdatert && (overstyrtKategori == null || overstyrtUnderkategori == null)) {
             throw FunksjonellFeil("Du må velge behandlingstema.")

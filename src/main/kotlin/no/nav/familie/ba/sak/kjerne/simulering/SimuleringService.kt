@@ -87,9 +87,8 @@ class SimuleringService(
 
     fun oppdaterSimuleringPåBehandlingVedBehov(behandlingId: Long): List<ØkonomiSimuleringMottaker> {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
-        val behandlingErFerdigBesluttet =
-            behandling.status == BehandlingStatus.IVERKSETTER_VEDTAK ||
-                behandling.status == BehandlingStatus.AVSLUTTET
+
+        val behandlingErFerdigBesluttet = behandling.status != BehandlingStatus.UTREDES
 
         val simulering = hentSimuleringPåBehandling(behandlingId)
         val restSimulering = vedtakSimuleringMottakereTilRestSimulering(

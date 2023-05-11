@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.småbarnstilleggkorrigering
 
 import io.swagger.v3.oas.annotations.media.Schema
+import no.nav.familie.ba.sak.common.BehandlingValidering.validerBehandlingKanRedigeres
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
@@ -22,6 +23,7 @@ import java.time.YearMonth
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class SmåbarnstilleggController(
+    private val tilgangService: TilgangService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val småbarnstilleggKorrigeringService: SmåbarnstilleggKorrigeringService,
     private val utvidetBehandlingService: UtvidetBehandlingService,
@@ -32,6 +34,7 @@ class SmåbarnstilleggController(
         @RequestBody småbarnstilleggKorrigeringRequest: SmåbarnstilleggKorrigeringRequest,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        validerBehandlingKanRedigeres(behandling)
 
         småbarnstilleggKorrigeringService.leggTilSmåbarnstilleggPåBehandling(småbarnstilleggKorrigeringRequest.årMåned, behandling)
 
@@ -44,6 +47,7 @@ class SmåbarnstilleggController(
         @RequestBody småBarnstilleggKorrigeringRequest: SmåbarnstilleggKorrigeringRequest,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        validerBehandlingKanRedigeres(behandling)
 
         småbarnstilleggKorrigeringService.fjernSmåbarnstilleggPåBehandling(småBarnstilleggKorrigeringRequest.årMåned, behandling)
 

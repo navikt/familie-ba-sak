@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
+import no.nav.familie.ba.sak.common.BehandlingValidering.validerBehandlingKanRedigeres
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestAnnenVurdering
 import no.nav.familie.ba.sak.ekstern.restDomene.RestNyttVilkår
@@ -55,6 +56,8 @@ class VilkårController(
         )
 
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        validerBehandlingKanRedigeres(behandling)
+
         vilkårService.endreVilkår(
             behandlingId = behandling.id,
             vilkårId = vilkaarId,
@@ -75,6 +78,7 @@ class VilkårController(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Annen vurdering",
         )
+        validerBehandlingKanRedigeres(behandlingHentOgPersisterService.hentStatus(behandlingId))
 
         annenVurderingService.endreAnnenVurdering(
             behandlingId = behandlingId,
@@ -99,6 +103,8 @@ class VilkårController(
 
         val aktør = personidentService.hentAktør(personIdent)
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        validerBehandlingKanRedigeres(behandling)
+
         vilkårService.deleteVilkårsperiode(
             behandlingId = behandling.id,
             vilkårId = vilkaarId,
@@ -119,6 +125,7 @@ class VilkårController(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "slette vilkår",
         )
+        validerBehandlingKanRedigeres(behandlingHentOgPersisterService.hentStatus(behandlingId))
 
         vilkårService.deleteVilkår(behandlingId, restSlettVilkår)
 
@@ -133,6 +140,7 @@ class VilkårController(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "legge til vilkår",
         )
+        validerBehandlingKanRedigeres(behandlingHentOgPersisterService.hentStatus(behandlingId))
 
         vilkårService.postVilkår(behandlingId, restNyttVilkår)
 

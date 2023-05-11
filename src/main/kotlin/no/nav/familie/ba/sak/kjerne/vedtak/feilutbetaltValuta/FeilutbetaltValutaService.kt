@@ -1,7 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta
 
+import no.nav.familie.ba.sak.common.BehandlingValidering.validerBehandlingKanRedigeres
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFeilutbetaltValuta
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -14,6 +16,9 @@ class FeilutbetaltValutaService(
 
     @Autowired
     private val loggService: LoggService,
+
+    @Autowired
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 ) {
 
     private fun finnFeilutbetaltValutaThrows(id: Long): FeilutbetaltValuta {
@@ -22,6 +27,7 @@ class FeilutbetaltValutaService(
 
     @Transactional
     fun leggTilFeilutbetaltValutaPeriode(feilutbetaltValuta: RestFeilutbetaltValuta, behandlingId: Long): Long {
+        validerBehandlingKanRedigeres(behandlingHentOgPersisterService.hentStatus(behandlingId))
         val lagret = feilutbetaltValutaRepository.save(
             FeilutbetaltValuta(
                 behandlingId = behandlingId,
@@ -36,6 +42,7 @@ class FeilutbetaltValutaService(
 
     @Transactional
     fun fjernFeilutbetaltValutaPeriode(id: Long, behandlingId: Long) {
+        validerBehandlingKanRedigeres(behandlingHentOgPersisterService.hentStatus(behandlingId))
         loggService.loggFeilutbetaltValutaPeriodeFjernet(
             behandlingId = behandlingId,
             feilutbetaltValuta = finnFeilutbetaltValutaThrows(id),
@@ -57,6 +64,7 @@ class FeilutbetaltValutaService(
     @Transactional
     fun oppdatertFeilutbetaltValutaPeriode(feilutbetaltValuta: RestFeilutbetaltValuta, id: Long) {
         val periode = feilutbetaltValutaRepository.findById(id).orElseThrow { Feil("Finner ikke feilutbetalt valuta med id=${feilutbetaltValuta.id}") }
+        validerBehandlingKanRedigeres(behandlingHentOgPersisterService.hentStatus(periode.behandlingId))
 
         periode.fom = feilutbetaltValuta.fom
         periode.tom = feilutbetaltValuta.tom

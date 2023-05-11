@@ -1,10 +1,13 @@
 package no.nav.familie.ba.sak.kjerne.korrigertetterbetaling
 
+import no.nav.familie.ba.sak.common.BehandlingValidering.validerBehandlingKanRedigeres
 import no.nav.familie.ba.sak.ekstern.restDomene.RestKorrigertEtterbetaling
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestKorrigertEtterbetaling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
+import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
+import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
@@ -23,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class KorrigertEtterbetalingController(
+    private val tilgangService: TilgangService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val korrigertEtterbetalingService: KorrigertEtterbetalingService,
     private val utvidetBehandlingService: UtvidetBehandlingService,
@@ -33,6 +37,8 @@ class KorrigertEtterbetalingController(
         @RequestBody korrigertEtterbetalingRequest: KorrigertEtterbetalingRequest,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        validerBehandlingKanRedigeres(behandling)
+
         val korrigertEtterbetaling = korrigertEtterbetalingRequest.tilKorrigertEtterbetaling(behandling)
 
         korrigertEtterbetalingService.lagreKorrigertEtterbetaling(korrigertEtterbetaling)
@@ -55,6 +61,8 @@ class KorrigertEtterbetalingController(
         @PathVariable behandlingId: Long,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        validerBehandlingKanRedigeres(behandling)
+
         korrigertEtterbetalingService.settKorrigeringPåBehandlingTilInaktiv(behandling)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
