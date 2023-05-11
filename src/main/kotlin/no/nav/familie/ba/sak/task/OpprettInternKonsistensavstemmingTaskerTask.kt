@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.task.InternKonsistensavstemming
+package no.nav.familie.ba.sak.task.internkonsistensavstemming
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ba.sak.integrasjoner.økonomi.internkonsistensavstemming.InternKonsistensavstemmingService
