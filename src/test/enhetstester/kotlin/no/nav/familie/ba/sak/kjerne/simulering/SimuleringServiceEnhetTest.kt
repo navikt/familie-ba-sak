@@ -15,8 +15,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.simulering.domene.ØknomiSimuleringMottakerRepository
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottaker
+import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottakerRepository
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringPostering
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
@@ -38,7 +38,7 @@ internal class SimuleringServiceEnhetTest {
     private val økonomiKlient: ØkonomiKlient = mockk()
     private val økonomiService: ØkonomiService = mockk()
     private val beregningService: BeregningService = mockk()
-    private val øknomiSimuleringMottakerRepository: ØknomiSimuleringMottakerRepository = mockk()
+    private val økonomiSimuleringMottakerRepository: ØkonomiSimuleringMottakerRepository = mockk()
     private val tilgangService: TilgangService = mockk()
     private val featureToggleService: FeatureToggleService = mockk()
     private val vedtakRepository: VedtakRepository = mockk()
@@ -49,7 +49,7 @@ internal class SimuleringServiceEnhetTest {
         økonomiKlient,
         økonomiService,
         beregningService,
-        øknomiSimuleringMottakerRepository,
+        økonomiSimuleringMottakerRepository,
         tilgangService,
         featureToggleService,
         vedtakRepository,
@@ -82,7 +82,7 @@ internal class SimuleringServiceEnhetTest {
         val simuleringMottaker =
             listOf(mockØkonomiSimuleringMottaker(behandling = behandling, økonomiSimuleringPostering = posteringer))
 
-        every { øknomiSimuleringMottakerRepository.findByBehandlingId(behandling.id) } returns simuleringMottaker
+        every { økonomiSimuleringMottakerRepository.findByBehandlingId(behandling.id) } returns simuleringMottaker
         every { persongrunnlagService.hentBarna(behandling.id) } returns listOf(lagPerson(), lagPerson())
         every { featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ) } returns true
 
@@ -129,7 +129,7 @@ internal class SimuleringServiceEnhetTest {
         val simuleringMottaker =
             listOf(mockØkonomiSimuleringMottaker(behandling = behandling, økonomiSimuleringPostering = posteringer))
 
-        every { øknomiSimuleringMottakerRepository.findByBehandlingId(behandling.id) } returns simuleringMottaker
+        every { økonomiSimuleringMottakerRepository.findByBehandlingId(behandling.id) } returns simuleringMottaker
         every { persongrunnlagService.hentBarna(behandling.id) } returns listOf(lagPerson(), lagPerson())
         every { featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ) } returns true
 
@@ -161,7 +161,7 @@ internal class SimuleringServiceEnhetTest {
         val simuleringMottaker =
             listOf(mockØkonomiSimuleringMottaker(behandling = behandling, økonomiSimuleringPostering = posteringer))
 
-        every { øknomiSimuleringMottakerRepository.findByBehandlingId(behandling.id) } returns simuleringMottaker
+        every { økonomiSimuleringMottakerRepository.findByBehandlingId(behandling.id) } returns simuleringMottaker
         every { persongrunnlagService.hentBarna(behandling.id) } returns listOf(lagPerson(), lagPerson())
         every { featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ) } returns true
 
@@ -215,7 +215,7 @@ internal class SimuleringServiceEnhetTest {
         val simuleringMottaker =
             listOf(mockØkonomiSimuleringMottaker(behandling = behandling, økonomiSimuleringPostering = posteringer))
 
-        every { øknomiSimuleringMottakerRepository.findByBehandlingId(behandling.id) } returns simuleringMottaker
+        every { økonomiSimuleringMottakerRepository.findByBehandlingId(behandling.id) } returns simuleringMottaker
 
         val behandlingHarManuellePosteringerFørMars2023 =
             simuleringService.harMigreringsbehandlingManuellePosteringer(behandling)
@@ -248,7 +248,7 @@ internal class SimuleringServiceEnhetTest {
         val simuleringMottaker =
             listOf(mockØkonomiSimuleringMottaker(behandling = behandling, økonomiSimuleringPostering = posteringer))
 
-        every { øknomiSimuleringMottakerRepository.findByBehandlingId(behandling.id) } returns simuleringMottaker
+        every { økonomiSimuleringMottakerRepository.findByBehandlingId(behandling.id) } returns simuleringMottaker
 
         val behandlingHarManuellePosteringerFørMars2023 =
             simuleringService.harMigreringsbehandlingManuellePosteringer(behandling)
