@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.brev.mottaker
 
+import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestBrevmottaker
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
@@ -33,6 +34,7 @@ class BrevmottakerController(
         @PathVariable behandlingId: Long,
         @RequestBody brevmottaker: RestBrevmottaker,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "legge til brevmottaker",
@@ -48,6 +50,7 @@ class BrevmottakerController(
         @PathVariable mottakerId: Long,
         @RequestBody brevmottaker: RestBrevmottaker,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "oppdatere brevmottaker",
@@ -62,6 +65,7 @@ class BrevmottakerController(
         @PathVariable behandlingId: Long,
         @PathVariable mottakerId: Long,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.DELETE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "fjerne brevmottaker",
@@ -73,6 +77,7 @@ class BrevmottakerController(
 
     @GetMapping(path = ["{behandlingId}"], produces = [APPLICATION_JSON_VALUE])
     fun hentBrevmottakere(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<List<RestBrevmottaker>>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
             handling = "hente brevmottakere",
