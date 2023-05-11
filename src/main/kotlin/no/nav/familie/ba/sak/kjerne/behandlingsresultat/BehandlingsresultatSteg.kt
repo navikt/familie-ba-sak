@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.SATSENDRING
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -9,7 +10,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.validerAtSatsendringKunOppdatererSatsPåEksisterendePerioder
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtAlleOpprettedeEndringerErUtfylt
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtEndringerErTilknyttetAndelTilkjentYtelse
@@ -43,6 +46,7 @@ class BehandlingsresultatSteg(
     private val persongrunnlagService: PersongrunnlagService,
     private val beregningService: BeregningService,
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
+    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
 ) : BehandlingSteg<String> {
 
     override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
@@ -62,6 +66,16 @@ class BehandlingsresultatSteg(
             tilkjentYtelse = tilkjentYtelse,
             personopplysningGrunnlag = personopplysningGrunnlag,
         )
+
+        if (behandling.opprettetÅrsak == BehandlingÅrsak.SATSENDRING) {
+            val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
+            val forrigeAndelerTilkjentYtelse = if (forrigeBehandling != null) andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = forrigeBehandling.id) else throw FunksjonellFeil("Kan ikke kjøre satsendring når det ikke finnes en tidligere behandling på fagsaken")
+
+            validerAtSatsendringKunOppdatererSatsPåEksisterendePerioder(
+                forrigeAndelerTilkjentYtelse = forrigeAndelerTilkjentYtelse,
+                andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse
+            )
+        }
 
         val endreteUtbetalingerMedAndeler = andelerTilkjentYtelseOgEndreteUtbetalingerService
             .finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandling.id)
