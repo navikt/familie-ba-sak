@@ -73,7 +73,7 @@ class BehandlingsresultatSteg(
 
             validerAtSatsendringKunOppdatererSatsPåEksisterendePerioder(
                 forrigeAndelerTilkjentYtelse = forrigeAndelerTilkjentYtelse,
-                andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse
+                andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.toList(),
             )
         }
 

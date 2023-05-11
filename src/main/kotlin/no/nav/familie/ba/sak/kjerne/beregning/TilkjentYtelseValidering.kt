@@ -45,16 +45,16 @@ object TilkjentYtelseValidering {
 
     internal fun validerAtSatsendringKunOppdatererSatsPåEksisterendePerioder(
         forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-        andelerTilkjentYtelse: Set<AndelTilkjentYtelse>
+        andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
     ) {
         val allePersonerMedAndeler =
             (andelerTilkjentYtelse.map { it.aktør } + forrigeAndelerTilkjentYtelse.map { it.aktør }).distinct()
 
-        allePersonerMedAndeler.forEach { aktør ->
+        val listeMedFeil = allePersonerMedAndeler.flatMap { aktør ->
             val ytelseTyperForPerson =
                 (andelerTilkjentYtelse.map { it.type } + forrigeAndelerTilkjentYtelse.map { it.type }).distinct()
 
-            ytelseTyperForPerson.forEach { ytelseType ->
+            ytelseTyperForPerson.map { ytelseType ->
                 val forrigeTidslinje =
                     AndelTilkjentYtelseTidslinje(forrigeAndelerTilkjentYtelse.filter { it.type == ytelseType && it.aktør == aktør })
                 val nåværendeTidslinje =
@@ -62,21 +62,16 @@ object TilkjentYtelseValidering {
 
                 forrigeTidslinje.kombinerMed(nåværendeTidslinje) { forrigeAndel, nåværendeAndel ->
                     when {
-                        forrigeAndel != null && nåværendeAndel != null -> validerAtAndelHarSammeProsentSomTidligere(forrigeAndel = forrigeAndel, nåværendeAndel = nåværendeAndel)
-                        forrigeAndel == null && nåværendeAndel != null -> throw Feil("Satsendring kan ikke legge til en andel som ikke var der forrigeAndel gang")
-                        forrigeAndel != null && nåværendeAndel == null -> throw Feil("Satsendring kan ikke fjerne en andel som fantes i forrigeAndel behandling")
-                        else -> null
+                        forrigeAndel == null && nåværendeAndel != null -> true
+                        forrigeAndel != null && nåværendeAndel == null -> true
+                        forrigeAndel != null && nåværendeAndel != null -> forrigeAndel.prosent != nåværendeAndel.prosent
+                        else -> false
                     }
-                }
+                }.perioder().any { it.innhold == true }
             }
         }
-    }
 
-    private fun validerAtAndelHarSammeProsentSomTidligere(
-        forrigeAndel: AndelTilkjentYtelse,
-        nåværendeAndel: AndelTilkjentYtelse
-    ) {
-        if (forrigeAndel.prosent != nåværendeAndel.prosent) throw Feil("Satsendring har endret på prosenten")
+        if (listeMedFeil.any { it }) throw Feil("Satsendringsbehandling har endret mer på andelene enn den skal")
     }
 
     fun finnAktørIderMedUgyldigEtterbetalingsperiode(
