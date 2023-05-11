@@ -45,7 +45,7 @@ class InfotrygdBarnetrygdClientTest : AbstractSpringIntegrationTest() {
     fun setUp() {
         client = InfotrygdBarnetrygdClient(
             URI.create(wireMockServer.baseUrl() + "/api"),
-            restOperations
+            restOperations,
         )
     }
 
@@ -60,28 +60,28 @@ class InfotrygdBarnetrygdClientTest : AbstractSpringIntegrationTest() {
             post(løpendeBarnetrygdURL).willReturn(
                 okJson(
                     objectMapper.writeValueAsString(
-                        InfotrygdLøpendeBarnetrygdResponse(false)
-                    )
-                )
-            )
+                        InfotrygdLøpendeBarnetrygdResponse(false),
+                    ),
+                ),
+            ),
         )
         wireMockServer.stubFor(
             post(sakerURL).willReturn(
                 okJson(
                     objectMapper.writeValueAsString(
-                        InfotrygdSøkResponse(listOf(Sak(status = "IP")), emptyList())
-                    )
-                )
-            )
+                        InfotrygdSøkResponse(listOf(Sak(status = "IP")), emptyList()),
+                    ),
+                ),
+            ),
         )
         wireMockServer.stubFor(
             post(stønaderURL).willReturn(
                 okJson(
                     objectMapper.writeValueAsString(
-                        InfotrygdSøkResponse(listOf(Stønad()), emptyList())
-                    )
-                )
-            )
+                        InfotrygdSøkResponse(listOf(Stønad()), emptyList()),
+                    ),
+                ),
+            ),
         )
 
         val søkersIdenter = ClientMocks.søkerFnr.toList()
@@ -96,28 +96,28 @@ class InfotrygdBarnetrygdClientTest : AbstractSpringIntegrationTest() {
             anyRequestedFor(urlEqualTo(løpendeBarnetrygdURL)).withRequestBody(
                 equalToJson(
                     objectMapper.writeValueAsString(
-                        infotrygdSøkRequest
-                    )
-                )
-            )
+                        infotrygdSøkRequest,
+                    ),
+                ),
+            ),
         )
         wireMockServer.verify(
             anyRequestedFor(urlEqualTo(sakerURL)).withRequestBody(
                 equalToJson(
                     objectMapper.writeValueAsString(
-                        infotrygdSøkRequest
-                    )
-                )
-            )
+                        infotrygdSøkRequest,
+                    ),
+                ),
+            ),
         )
         wireMockServer.verify(
             anyRequestedFor(urlEqualTo(stønaderURL)).withRequestBody(
                 equalToJson(
                     objectMapper.writeValueAsString(
-                        infotrygdSøkRequest
-                    )
-                )
-            )
+                        infotrygdSøkRequest,
+                    ),
+                ),
+            ),
         )
         Assertions.assertEquals(false, finnesIkkeHosInfotrygd)
         Assertions.assertEquals(hentsakerResponse.bruker[0].status, "IP")
@@ -130,10 +130,10 @@ class InfotrygdBarnetrygdClientTest : AbstractSpringIntegrationTest() {
             post(løpendeBarnetrygdURL).willReturn(
                 okJson(
                     objectMapper.writeValueAsString(
-                        InfotrygdLøpendeBarnetrygdResponse(false)
-                    )
-                )
-            )
+                        InfotrygdLøpendeBarnetrygdResponse(false),
+                    ),
+                ),
+            ),
         )
 
         val søkersIdenter = ClientMocks.søkerFnr.toList()
@@ -145,10 +145,10 @@ class InfotrygdBarnetrygdClientTest : AbstractSpringIntegrationTest() {
             anyRequestedFor(urlEqualTo(løpendeBarnetrygdURL)).withRequestBody(
                 equalToJson(
                     objectMapper.writeValueAsString(
-                        infotrygdSøkRequest
-                    )
-                )
-            )
+                        infotrygdSøkRequest,
+                    ),
+                ),
+            ),
         )
         Assertions.assertEquals(false, finnesIkkeHosInfotrygd)
     }
@@ -166,15 +166,15 @@ class InfotrygdBarnetrygdClientTest : AbstractSpringIntegrationTest() {
     fun `harNyligSendtBrevFor skal returnerer true for personIdent`() {
         wireMockServer.stubFor(
             post(brevURL).willReturn(
-                okJson(objectMapper.writeValueAsString(InfotrygdBarnetrygdClient.SendtBrevResponse(true, emptyList())))
-            )
+                okJson(objectMapper.writeValueAsString(InfotrygdBarnetrygdClient.SendtBrevResponse(true, emptyList()))),
+            ),
         )
 
         val søkersIdenter = ClientMocks.søkerFnr.toList()
 
         val harNyligSendtBrev = client.harNyligSendtBrevFor(
             søkersIdenter,
-            listOf(InfotrygdBrevkode.BREV_BATCH_INNVILGET_SMÅBARNSTILLEGG)
+            listOf(InfotrygdBrevkode.BREV_BATCH_INNVILGET_SMÅBARNSTILLEGG),
         )
 
         Assertions.assertEquals(true, harNyligSendtBrev.harSendtBrev)

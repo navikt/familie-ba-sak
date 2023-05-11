@@ -6,7 +6,7 @@ import java.time.LocalDate
 
 data class ForsattInnvilget(
     override val mal: Brevmal,
-    override val data: ForsattInnvilgetData
+    override val data: ForsattInnvilgetData,
 ) : Vedtaksbrev {
 
     constructor(
@@ -16,7 +16,7 @@ data class ForsattInnvilget(
         etterbetalingInstitusjon: EtterbetalingInstitusjon? = null,
         informasjonOmAarligKontroll: Boolean = false,
         refusjonEosAvklart: RefusjonEøsAvklart? = null,
-        refusjonEosUavklart: RefusjonEøsUavklart? = null
+        refusjonEosUavklart: RefusjonEøsUavklart? = null,
     ) :
         this(
             mal = mal,
@@ -25,7 +25,7 @@ data class ForsattInnvilget(
                     signaturVedtak = SignaturVedtak(
                         enhet = vedtakFellesfelter.enhet,
                         saksbehandler = vedtakFellesfelter.saksbehandler,
-                        beslutter = vedtakFellesfelter.beslutter
+                        beslutter = vedtakFellesfelter.beslutter,
                     ),
                     hjemmeltekst = vedtakFellesfelter.hjemmeltekst,
                     etterbetaling = etterbetaling,
@@ -33,7 +33,7 @@ data class ForsattInnvilget(
                     korrigertVedtak = vedtakFellesfelter.korrigertVedtakData,
                     informasjonOmAarligKontroll = informasjonOmAarligKontroll,
                     refusjonEosAvklart = refusjonEosAvklart != null,
-                    refusjonEosUavklart = refusjonEosUavklart != null
+                    refusjonEosUavklart = refusjonEosUavklart != null,
                 ),
                 flettefelter = object : FlettefelterForDokument {
                     val perioderMedRefusjonEosAvklart: Flettefelt = refusjonEosAvklart?.perioderMedRefusjonEøsAvklart
@@ -44,15 +44,15 @@ data class ForsattInnvilget(
                     override val organisasjonsnummer = flettefelt(vedtakFellesfelter.organisasjonsnummer)
                     override val gjelder = flettefelt(vedtakFellesfelter.gjelder)
                 },
-                perioder = vedtakFellesfelter.perioder
-            )
+                perioder = vedtakFellesfelter.perioder,
+            ),
         )
 }
 
 data class ForsattInnvilgetData(
     override val delmalData: Delmaler,
     override val flettefelter: FlettefelterForDokument,
-    override val perioder: List<BrevPeriode>
+    override val perioder: List<BrevPeriode>,
 ) : VedtaksbrevData {
 
     data class Delmaler(
@@ -63,6 +63,6 @@ data class ForsattInnvilgetData(
         val korrigertVedtak: KorrigertVedtakData?,
         val informasjonOmAarligKontroll: Boolean,
         val refusjonEosAvklart: Boolean,
-        val refusjonEosUavklart: Boolean
+        val refusjonEosUavklart: Boolean,
     )
 }

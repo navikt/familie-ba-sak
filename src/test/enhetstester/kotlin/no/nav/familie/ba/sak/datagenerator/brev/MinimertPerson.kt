@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.dataGenerator.brev
+package no.nav.familie.ba.sak.datagenerator.brev
 
 import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.randomFnr
@@ -11,11 +11,11 @@ fun lagMinimertPerson(
     fødselsdato: LocalDate = LocalDate.now().minusYears(if (type == PersonType.BARN) 2 else 30),
     aktivPersonIdent: String = randomFnr(),
     aktørId: String = randomAktør(aktivPersonIdent).aktørId,
-    dødsfallsdato: LocalDate? = null
+    dødsfallsdato: LocalDate? = null,
 ) = MinimertPerson(
     type = type,
     fødselsdato = fødselsdato,
     aktivPersonIdent = aktivPersonIdent,
     aktørId = aktørId,
-    dødsfallsdato = dødsfallsdato
+    dødsfallsdato = dødsfallsdato,
 )

@@ -47,7 +47,7 @@ class LoggServiceTest(
     private val aktørIdRepository: AktørIdRepository,
 
     @Autowired
-    private val fagsakRepository: FagsakRepository
+    private val fagsakRepository: FagsakRepository,
 ) : AbstractSpringIntegrationTest() {
 
     @Test
@@ -60,7 +60,7 @@ class LoggServiceTest(
             type = LoggType.BEHANDLING_OPPRETTET,
             tittel = "Førstegangsbehandling opprettet",
             rolle = BehandlerRolle.SYSTEM,
-            tekst = ""
+            tekst = "",
         )
         loggService.lagre(logg1)
 
@@ -69,7 +69,7 @@ class LoggServiceTest(
             type = LoggType.BEHANDLING_OPPRETTET,
             tittel = "Revurdering opprettet",
             rolle = BehandlerRolle.SYSTEM,
-            tekst = ""
+            tekst = "",
         )
         loggService.lagre(logg2)
 
@@ -78,7 +78,7 @@ class LoggServiceTest(
             type = LoggType.BEHANDLING_OPPRETTET,
             tittel = "Førstegangsbehandling opprettet",
             rolle = BehandlerRolle.SYSTEM,
-            tekst = ""
+            tekst = "",
         )
         loggService.lagre(logg3)
 
@@ -99,8 +99,8 @@ class LoggServiceTest(
         val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForFødselhendelse(
             NyBehandlingHendelse(
                 morsIdent = morsIdent,
-                barnasIdenter = listOf(barnetsIdent)
-            )
+                barnasIdenter = listOf(barnetsIdent),
+            ),
         )
 
         val loggForBehandling = loggService.hentLoggForBehandling(behandlingId = behandling.id)
@@ -116,7 +116,7 @@ class LoggServiceTest(
         val vilkårsvurderingLogg = loggService.opprettVilkårsvurderingLogg(
             behandling = behandling,
             forrigeBehandlingsresultat = behandling.resultat,
-            nyttBehandlingsresultat = Behandlingsresultat.INNVILGET
+            nyttBehandlingsresultat = Behandlingsresultat.INNVILGET,
         )
 
         assertNotNull(vilkårsvurderingLogg)
@@ -127,7 +127,7 @@ class LoggServiceTest(
             loggService.opprettVilkårsvurderingLogg(
                 behandling = behandling,
                 forrigeBehandlingsresultat = behandling.resultat,
-                nyttBehandlingsresultat = Behandlingsresultat.AVSLÅTT
+                nyttBehandlingsresultat = Behandlingsresultat.AVSLÅTT,
             )
 
         assertNotNull(nyVilkårsvurderingLogg)
@@ -142,7 +142,7 @@ class LoggServiceTest(
         val vilkårsvurderingLogg = loggService.opprettVilkårsvurderingLogg(
             behandling = lagBehandling(),
             forrigeBehandlingsresultat = Behandlingsresultat.FORTSATT_INNVILGET,
-            nyttBehandlingsresultat = Behandlingsresultat.FORTSATT_INNVILGET
+            nyttBehandlingsresultat = Behandlingsresultat.FORTSATT_INNVILGET,
         )
 
         assertNull(vilkårsvurderingLogg)
@@ -152,7 +152,7 @@ class LoggServiceTest(
     fun `Skal lage noen logginnslag på helmanuell migrering ved avvik innenfor beløpsgrenser`() {
         val behandling = lagBehandling(
             behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-            årsak = BehandlingÅrsak.HELMANUELL_MIGRERING
+            årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
         )
         loggService.opprettBehandlingLogg(BehandlingLoggRequest(behandling))
         loggService.opprettVilkårsvurderingLogg(behandling, behandling.resultat, Behandlingsresultat.INNVILGET)
@@ -161,7 +161,7 @@ class LoggServiceTest(
             behandling = behandling,
             beslutning = Beslutning.GODKJENT,
             begrunnelse = "begrunnelse",
-            behandlingErAutomatiskBesluttet = true
+            behandlingErAutomatiskBesluttet = true,
         )
         loggService.opprettFerdigstillBehandling(behandling)
 
@@ -203,7 +203,7 @@ class LoggServiceTest(
     fun `Skal lage noen logginnslag på helmanuell migrering ved avvik utenfor beløpsgrenser`() {
         val behandling = lagBehandling(
             behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-            årsak = BehandlingÅrsak.HELMANUELL_MIGRERING
+            årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
         )
         loggService.opprettBehandlingLogg(BehandlingLoggRequest(behandling))
         loggService.opprettVilkårsvurderingLogg(behandling, behandling.resultat, Behandlingsresultat.INNVILGET)
@@ -212,7 +212,7 @@ class LoggServiceTest(
             behandling = behandling,
             beslutning = Beslutning.GODKJENT,
             begrunnelse = "begrunnelse",
-            behandlingErAutomatiskBesluttet = false
+            behandlingErAutomatiskBesluttet = false,
         )
         loggService.opprettFerdigstillBehandling(behandling)
 
@@ -254,7 +254,7 @@ class LoggServiceTest(
     fun `Om to logginnslag blir oppretta i samme sekund skal vi sortere med den første først`() {
         val behandlingId = lagBehandling(
             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-            årsak = BehandlingÅrsak.SØKNAD
+            årsak = BehandlingÅrsak.SØKNAD,
         ).id
         val tidspunkt = LocalDateTime.now()
         val logg1 = loggService.lagre(
@@ -264,8 +264,8 @@ class LoggServiceTest(
                 tittel = "Mottok fødselshendelse",
                 rolle = BehandlerRolle.SAKSBEHANDLER,
                 tekst = "",
-                opprettetTidspunkt = tidspunkt
-            )
+                opprettetTidspunkt = tidspunkt,
+            ),
         )
         val logg2 = loggService.lagre(
             Logg(
@@ -274,8 +274,8 @@ class LoggServiceTest(
                 tittel = "Førstegangbehandling opprettet",
                 rolle = BehandlerRolle.SAKSBEHANDLER,
                 tekst = "",
-                opprettetTidspunkt = tidspunkt
-            )
+                opprettetTidspunkt = tidspunkt,
+            ),
         )
 
         val logginnslag = loggService.hentLoggForBehandling(behandlingId)
@@ -286,7 +286,7 @@ class LoggServiceTest(
     fun `eldste logginnslag skal komme sist og nyaste først`() {
         val behandlingId = lagBehandling(
             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-            årsak = BehandlingÅrsak.SØKNAD
+            årsak = BehandlingÅrsak.SØKNAD,
         ).id
         val eldst = loggService.lagre(
             Logg(
@@ -294,8 +294,8 @@ class LoggServiceTest(
                 type = LoggType.BEHANDLING_OPPRETTET,
                 tittel = "Førstegangbehandling opprettet",
                 rolle = BehandlerRolle.SAKSBEHANDLER,
-                tekst = ""
-            )
+                tekst = "",
+            ),
         )
         val mellomst = loggService.lagre(
             Logg(
@@ -303,8 +303,8 @@ class LoggServiceTest(
                 type = LoggType.LIVSHENDELSE,
                 tittel = "Søknaden ble registrert",
                 rolle = BehandlerRolle.SAKSBEHANDLER,
-                tekst = ""
-            )
+                tekst = "",
+            ),
         )
         val nyast = loggService.lagre(
             Logg(
@@ -312,8 +312,8 @@ class LoggServiceTest(
                 type = LoggType.LIVSHENDELSE,
                 tittel = "Vilkårsvurdering gjennomført",
                 rolle = BehandlerRolle.SAKSBEHANDLER,
-                tekst = ""
-            )
+                tekst = "",
+            ),
         )
 
         val logginnslag = loggService.hentLoggForBehandling(behandlingId)
@@ -322,7 +322,7 @@ class LoggServiceTest(
 
     fun lagBehandling(
         behandlingType: BehandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-        årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD
+        årsak: BehandlingÅrsak = BehandlingÅrsak.SØKNAD,
     ): Behandling {
         val aktør = randomAktør().also { aktørIdRepository.save(it) }
         val fagsak = Fagsak(aktør = aktør).also { fagsakRepository.save(it) }
@@ -334,7 +334,7 @@ class LoggServiceTest(
             kategori = BehandlingKategori.NASJONAL,
             underkategori = BehandlingUnderkategori.ORDINÆR,
             opprettetÅrsak = årsak,
-            resultat = Behandlingsresultat.IKKE_VURDERT
+            resultat = Behandlingsresultat.IKKE_VURDERT,
         ).also {
             it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, FØRSTE_STEG))
         }.also { behandlingRepository.save(it) }

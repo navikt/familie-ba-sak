@@ -39,7 +39,7 @@ class InnkommendeJournalføringServiceTest(
     private val innkommendeJournalføringService: InnkommendeJournalføringService,
 
     @Autowired
-    private val journalføringRepository: JournalføringRepository
+    private val journalføringRepository: JournalføringRepository,
 ) : AbstractSpringIntegrationTest() {
 
     @Test
@@ -122,7 +122,7 @@ class InnkommendeJournalføringServiceTest(
                 request,
                 "123",
                 "mockEnhet",
-                "1"
+                "1",
             )
         }
         assertEquals("Du må sette søknads mottatt dato før du kan fortsette videre", exception.message)

@@ -78,7 +78,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                 infotrygdBarnetrygdClientMock,
                 fagsakRepository,
                 andelTilkjentYtelseRepository,
-                behandlingHentOgPersisterService
+                behandlingHentOgPersisterService,
             )
     }
 
@@ -86,7 +86,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
         val fnr: String,
         val aktør: Aktør,
         val endretDato: LocalDateTime,
-        val perioder: List<Triple<LocalDateTime, LocalDateTime?, SkatteetatenPeriode.Delingsprosent>>
+        val perioder: List<Triple<LocalDateTime, LocalDateTime?, SkatteetatenPeriode.Delingsprosent>>,
     )
 
     @Test
@@ -107,9 +107,9 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                     Triple(
                         LocalDateTime.of(2020, 9, 1, 12, 0),
                         LocalDateTime.of(2020, 10, 8, 12, 0),
-                        SkatteetatenPeriode.Delingsprosent._0
-                    )
-                )
+                        SkatteetatenPeriode.Delingsprosent._0,
+                    ),
+                ),
             ),
             // Included
             PerioderTestData(
@@ -120,14 +120,14 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                     Triple(
                         LocalDateTime.of(2019, 9, 1, 12, 0),
                         LocalDateTime.of(2020, 7, 31, 12, 0),
-                        SkatteetatenPeriode.Delingsprosent._0
+                        SkatteetatenPeriode.Delingsprosent._0,
                     ),
                     Triple(
                         LocalDateTime.of(2020, 8, 1, 12, 0),
                         LocalDateTime.of(2020, 12, 8, 12, 0),
-                        SkatteetatenPeriode.Delingsprosent._50
-                    )
-                )
+                        SkatteetatenPeriode.Delingsprosent._50,
+                    ),
+                ),
             ),
             // Excluded because the stonad period is earlier than the specified year
             PerioderTestData(
@@ -138,9 +138,9 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                     Triple(
                         LocalDateTime.of(2019, 3, 1, 12, 0),
                         LocalDateTime.of(2019, 12, 31, 23, 59),
-                        SkatteetatenPeriode.Delingsprosent._0
-                    )
-                )
+                        SkatteetatenPeriode.Delingsprosent._0,
+                    ),
+                ),
             ),
             // Excluded because the stonad period is later than the specified year
             PerioderTestData(
@@ -151,9 +151,9 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                     Triple(
                         LocalDateTime.of(2021, 1, 1, 1, 0),
                         LocalDateTime.of(2022, 12, 31, 23, 59),
-                        SkatteetatenPeriode.Delingsprosent._0
-                    )
-                )
+                        SkatteetatenPeriode.Delingsprosent._0,
+                    ),
+                ),
             ),
             // Excluded because the person ident is not in the provided list
             PerioderTestData(
@@ -164,10 +164,10 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                     Triple(
                         LocalDateTime.of(2020, 1, 1, 1, 0),
                         LocalDateTime.of(2022, 12, 31, 23, 59),
-                        SkatteetatenPeriode.Delingsprosent._0
-                    )
-                )
-            )
+                        SkatteetatenPeriode.Delingsprosent._0,
+                    ),
+                ),
+            ),
         )
 
         // result from Infotrygd
@@ -181,9 +181,9 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                     Triple(
                         LocalDateTime.of(2020, 8, 1, 12, 0),
                         LocalDateTime.of(2020, 9, 8, 12, 0),
-                        SkatteetatenPeriode.Delingsprosent._0
-                    )
-                )
+                        SkatteetatenPeriode.Delingsprosent._0,
+                    ),
+                ),
             ),
             // Included
             PerioderTestData(
@@ -194,10 +194,10 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                     Triple(
                         LocalDateTime.of(2020, 3, 1, 12, 0),
                         LocalDateTime.of(2020, 4, 8, 12, 0),
-                        SkatteetatenPeriode.Delingsprosent._0
-                    )
-                )
-            )
+                        SkatteetatenPeriode.Delingsprosent._0,
+                    ),
+                ),
+            ),
         )
 
         testDataBaSak.forEach {
@@ -213,17 +213,17 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                         SkatteetatenPeriode(
                             fraMaaned = p.first.tilMaaned(),
                             tomMaaned = p.second?.tilMaaned(),
-                            delingsprosent = p.third
+                            delingsprosent = p.third,
                         )
-                    }
-                )
+                    },
+                ),
             )
         }
 
         every {
             infotrygdBarnetrygdClientMock.hentPerioderMedUtvidetBarnetrygdForPersoner(
                 eq(listOf("00000000001", "00000000002", "00000000003", "00000000010")),
-                any()
+                any(),
             )
         } returns result
 
@@ -232,7 +232,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                 testDataBaSak.filter { it.fnr != excludedFnr }
                     .map { it.fnr } +
                     testDataInfotrygd.map { it.fnr },
-                "2020"
+                "2020",
             )
 
         assertThat(samletResultat.brukere).hasSize(2)
@@ -240,16 +240,16 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
         assertThat(
             samletResultat.brukere.find { it.ident == duplicatedFnr }!!.perioder.find {
                 it.fraMaaned == "2020-08"
-            }!!.delingsprosent
+            }!!.delingsprosent,
         ).isEqualTo(
-            SkatteetatenPeriode.Delingsprosent._50
+            SkatteetatenPeriode.Delingsprosent._50,
         )
         assertThat(
             samletResultat.brukere.find { it.ident == duplicatedFnr }!!.perioder.find {
                 it.tomMaaned == "2020-09"
-            }!!.delingsprosent
+            }!!.delingsprosent,
         ).isEqualTo(
-            SkatteetatenPeriode.Delingsprosent._0
+            SkatteetatenPeriode.Delingsprosent._0,
         )
         assertThat(samletResultat.brukere.find { it.ident == testDataInfotrygd[1].fnr }!!.perioder).hasSize(1)
     }
@@ -270,10 +270,10 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                     Triple(
                         LocalDateTime.of(2022, 3, 1, 12, 0),
                         LocalDateTime.of(2027, 7, 31, 12, 0),
-                        SkatteetatenPeriode.Delingsprosent._0
-                    )
-                )
-            )
+                        SkatteetatenPeriode.Delingsprosent._0,
+                    ),
+                ),
+            ),
         )
 
         // result from Infotrygd
@@ -287,10 +287,10 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                     Triple(
                         LocalDateTime.of(2019, 9, 1, 12, 0),
                         LocalDateTime.of(2022, 2, 8, 12, 0),
-                        SkatteetatenPeriode.Delingsprosent._0
-                    )
-                )
-            )
+                        SkatteetatenPeriode.Delingsprosent._0,
+                    ),
+                ),
+            ),
         )
 
         testDataBaSak.forEach {
@@ -300,7 +300,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
         every {
             infotrygdBarnetrygdClientMock.hentPerioderMedUtvidetBarnetrygdForPersoner(
                 eq(listOf("00000000001")),
-                any()
+                any(),
             )
         } returns testDataInfotrygd.flatMap {
             listOf(
@@ -311,10 +311,10 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                         SkatteetatenPeriode(
                             fraMaaned = p.first.tilMaaned(),
                             tomMaaned = p.second?.tilMaaned(),
-                            delingsprosent = p.third
+                            delingsprosent = p.third,
                         )
-                    }
-                )
+                    },
+                ),
             )
         }
 
@@ -345,10 +345,10 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                     Triple(
                         LocalDateTime.of(2022, 3, 1, 12, 0),
                         LocalDateTime.of(2027, 7, 31, 12, 0),
-                        SkatteetatenPeriode.Delingsprosent._0
-                    )
-                )
-            )
+                        SkatteetatenPeriode.Delingsprosent._0,
+                    ),
+                ),
+            ),
         )
 
         // result from Infotrygd
@@ -362,10 +362,10 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                     Triple(
                         LocalDateTime.of(2019, 9, 1, 12, 0),
                         null,
-                        SkatteetatenPeriode.Delingsprosent._0
-                    )
-                )
-            )
+                        SkatteetatenPeriode.Delingsprosent._0,
+                    ),
+                ),
+            ),
         )
 
         testDataBaSak.forEach {
@@ -375,7 +375,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
         every {
             infotrygdBarnetrygdClientMock.hentPerioderMedUtvidetBarnetrygdForPersoner(
                 eq(listOf("00000000001")),
-                any()
+                any(),
             )
         } returns testDataInfotrygd.flatMap {
             listOf(
@@ -386,10 +386,10 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                         SkatteetatenPeriode(
                             fraMaaned = p.first.tilMaaned(),
                             tomMaaned = p.second?.tilMaaned(),
-                            delingsprosent = p.third
+                            delingsprosent = p.third,
                         )
-                    }
-                )
+                    },
+                ),
             )
         }
 
@@ -420,10 +420,10 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                     Triple(
                         LocalDateTime.of(2021, 9, 1, 12, 0),
                         LocalDateTime.of(2027, 7, 31, 12, 0),
-                        SkatteetatenPeriode.Delingsprosent._0
-                    )
-                )
-            )
+                        SkatteetatenPeriode.Delingsprosent._0,
+                    ),
+                ),
+            ),
         )
 
         // result from Infotrygd
@@ -437,10 +437,10 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                     Triple(
                         LocalDateTime.of(2019, 9, 1, 12, 0),
                         LocalDateTime.of(2022, 3, 1, 12, 0),
-                        SkatteetatenPeriode.Delingsprosent._0
-                    )
-                )
-            )
+                        SkatteetatenPeriode.Delingsprosent._0,
+                    ),
+                ),
+            ),
         )
 
         testDataBaSak.forEach {
@@ -450,7 +450,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
         every {
             infotrygdBarnetrygdClientMock.hentPerioderMedUtvidetBarnetrygdForPersoner(
                 eq(listOf("00000000001")),
-                any()
+                any(),
             )
         } returns testDataInfotrygd.flatMap {
             listOf(
@@ -461,10 +461,10 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                         SkatteetatenPeriode(
                             fraMaaned = p.first.tilMaaned(),
                             tomMaaned = p.second?.tilMaaned(),
-                            delingsprosent = p.third
+                            delingsprosent = p.third,
                         )
-                    }
-                )
+                    },
+                ),
             )
         }
 
@@ -495,37 +495,37 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                     Triple(
                         LocalDateTime.of(2019, 9, 1, 12, 0),
                         LocalDateTime.of(2020, 2, 11, 12, 0),
-                        SkatteetatenPeriode.Delingsprosent._0
+                        SkatteetatenPeriode.Delingsprosent._0,
                     ),
                     Triple(
                         LocalDateTime.of(2020, 3, 1, 12, 0),
                         LocalDateTime.of(2020, 4, 8, 12, 0),
-                        SkatteetatenPeriode.Delingsprosent._0
+                        SkatteetatenPeriode.Delingsprosent._0,
                     ),
                     Triple(
                         LocalDateTime.of(2020, 5, 1, 12, 0),
                         LocalDateTime.of(2020, 6, 8, 12, 0),
-                        SkatteetatenPeriode.Delingsprosent._0
+                        SkatteetatenPeriode.Delingsprosent._0,
                     ),
                     Triple(
                         LocalDateTime.of(2020, 7, 1, 12, 0),
                         LocalDateTime.of(2020, 8, 8, 12, 0),
-                        SkatteetatenPeriode.Delingsprosent._50
+                        SkatteetatenPeriode.Delingsprosent._50,
                     ),
                     Triple(
                         LocalDateTime.of(2020, 9, 1, 12, 0),
                         LocalDateTime.of(2020, 11, 8, 12, 0),
-                        SkatteetatenPeriode.Delingsprosent._0
-                    )
-                )
-            )
+                        SkatteetatenPeriode.Delingsprosent._0,
+                    ),
+                ),
+            ),
         )
 
         testDataBaSak.forEach {
             every {
                 infotrygdBarnetrygdClientMock.hentPerioderMedUtvidetBarnetrygdForPersoner(
                     eq(listOf(it.fnr)),
-                    any()
+                    any(),
                 )
             } returns emptyList()
 
@@ -536,38 +536,38 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
             skatteetatenService.finnPerioderMedUtvidetBarnetrygd(
                 testDataBaSak.filter { it.fnr != excludedFnr }
                     .map { it.fnr },
-                "2020"
+                "2020",
             )
 
         assertThat(samletResultat.brukere).hasSize(1)
         assertThat(samletResultat.brukere.find { it.ident == fnr }!!.perioder).hasSize(3)
         val sortertePerioder = samletResultat.brukere.find { it.ident == fnr }!!.perioder.sortedBy { it.fraMaaned }
         assertThat(sortertePerioder[0].delingsprosent).isEqualTo(
-            SkatteetatenPeriode.Delingsprosent._0
+            SkatteetatenPeriode.Delingsprosent._0,
         )
         assertThat(sortertePerioder[0].fraMaaned).isEqualTo(
-            "2019-09"
+            "2019-09",
         )
         assertThat(sortertePerioder[0].tomMaaned).isEqualTo(
-            "2020-06"
+            "2020-06",
         )
 
         assertThat(sortertePerioder[1].delingsprosent).isEqualTo(
-            SkatteetatenPeriode.Delingsprosent._50
+            SkatteetatenPeriode.Delingsprosent._50,
         )
         assertThat(sortertePerioder[1].fraMaaned).isEqualTo("2020-07")
         assertThat(sortertePerioder[1].tomMaaned).isEqualTo(
-            "2020-08"
+            "2020-08",
         )
 
         assertThat(sortertePerioder[2].delingsprosent).isEqualTo(
-            SkatteetatenPeriode.Delingsprosent._0
+            SkatteetatenPeriode.Delingsprosent._0,
         )
         assertThat(sortertePerioder[2].fraMaaned).isEqualTo(
-            "2020-09"
+            "2020-09",
         )
         assertThat(sortertePerioder[2].tomMaaned).isEqualTo(
-            "2020-11"
+            "2020-11",
         )
     }
 
@@ -585,9 +585,9 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                     Triple(
                         LocalDateTime.of(2019, 9, 1, 12, 0),
                         LocalDateTime.of(2029, 7, 31, 12, 0),
-                        SkatteetatenPeriode.Delingsprosent._0
-                    )
-                )
+                        SkatteetatenPeriode.Delingsprosent._0,
+                    ),
+                ),
             )
 
         lagerTilkjentYtelse(testDataBaSak)
@@ -595,14 +595,14 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
         every {
             infotrygdBarnetrygdClientMock.hentPerioderMedUtvidetBarnetrygdForPersoner(
                 eq(listOf(fnr)),
-                any()
+                any(),
             )
         } returns emptyList()
 
         var resultat =
             skatteetatenService.finnPerioderMedUtvidetBarnetrygd(
                 listOf(testDataBaSak.fnr),
-                "2021"
+                "2021",
             )
 
         assertThat(resultat.brukere).hasSize(1)
@@ -612,7 +612,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
         resultat =
             skatteetatenService.finnPerioderMedUtvidetBarnetrygd(
                 listOf(testDataBaSak.fnr),
-                "2021"
+                "2021",
             )
 
         assertThat(resultat.brukere).hasSize(0)
@@ -633,22 +633,22 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                     Triple(
                         LocalDateTime.of(2019, 9, 1, 12, 0),
                         LocalDateTime.of(2029, 7, 31, 12, 0),
-                        SkatteetatenPeriode.Delingsprosent._0
-                    )
-                )
+                        SkatteetatenPeriode.Delingsprosent._0,
+                    ),
+                ),
             )
 
         lagerTilkjentYtelse(testDataBaSak)
 
         every {
             infotrygdBarnetrygdClientMock.hentPersonerMedUtvidetBarnetrygd(
-                any()
+                any(),
             )
         } returns SkatteetatenPersonerResponse()
 
         val resultat =
             skatteetatenService.finnPersonerMedUtvidetBarnetrygd(
-                "2021"
+                "2021",
             )
 
         assertThat(resultat.brukere).hasSize(1)
@@ -671,7 +671,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
             kategori = BehandlingKategori.NASJONAL,
             underkategori = BehandlingUnderkategori.UTVIDET,
             status = BehandlingStatus.AVSLUTTET,
-            aktiv = false
+            aktiv = false,
         )
         behandlingHentOgPersisterService.lagreOgFlush(behandling)
 
@@ -679,7 +679,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
             behandling = behandling,
             opprettetDato = perioderTestData.endretDato.toLocalDate(),
             endretDato = perioderTestData.endretDato.toLocalDate(),
-            utbetalingsoppdrag = "utbetalt"
+            utbetalingsoppdrag = "utbetalt",
         ).also {
             it.andelerTilkjentYtelse.addAll(
                 perioderTestData.perioder.map { p ->
@@ -693,9 +693,9 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                         stønadTom = YearMonth.of(p.second!!.year, p.second!!.month),
                         type = YtelseType.UTVIDET_BARNETRYGD,
                         sats = 1,
-                        prosent = p.third.tilBigDecimal()
+                        prosent = p.third.tilBigDecimal(),
                     )
-                }.toMutableSet()
+                }.toMutableSet(),
             )
         }
         tilkjentYtelseRepository.saveAndFlush(ty)
@@ -714,8 +714,8 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                 type = BehandlingType.REVURDERING,
                 opprettetÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
                 kategori = BehandlingKategori.NASJONAL,
-                underkategori = BehandlingUnderkategori.UTVIDET
-            )
+                underkategori = BehandlingUnderkategori.UTVIDET,
+            ),
         )
 
         val ty = TilkjentYtelse(
@@ -723,7 +723,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
             behandling = behandling,
             opprettetDato = perioderTestData.endretDato.toLocalDate(),
             endretDato = perioderTestData.endretDato.toLocalDate(),
-            utbetalingsoppdrag = "utbetalt"
+            utbetalingsoppdrag = "utbetalt",
         ).also {
             it.andelerTilkjentYtelse.addAll(
                 perioderTestData.perioder.map { p ->
@@ -737,9 +737,9 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
                         stønadTom = stønadTom,
                         type = YtelseType.UTVIDET_BARNETRYGD,
                         sats = 1,
-                        prosent = p.third.tilBigDecimal()
+                        prosent = p.third.tilBigDecimal(),
                     )
-                }.toMutableSet()
+                }.toMutableSet(),
             )
         }
         tilkjentYtelseRepository.saveAndFlush(ty)

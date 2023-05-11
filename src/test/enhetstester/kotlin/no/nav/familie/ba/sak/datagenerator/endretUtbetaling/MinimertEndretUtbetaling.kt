@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.dataGenerator.endretUtbetaling
+package no.nav.familie.ba.sak.datagenerator.endretUtbetaling
 
 import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.randomFnr
@@ -12,11 +12,11 @@ fun lagMinimertEndretUtbetalingAndel(
     fom: YearMonth? = YearMonth.now(),
     tom: YearMonth? = YearMonth.now(),
     årsak: Årsak? = Årsak.DELT_BOSTED,
-    prosent: BigDecimal? = BigDecimal.valueOf(100)
+    prosent: BigDecimal? = BigDecimal.valueOf(100),
 ) = MinimertEndretAndel(
     aktørId = aktørId,
     fom = fom,
     tom = tom,
     årsak = årsak,
-    prosent = prosent
+    prosent = prosent,
 )

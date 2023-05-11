@@ -40,7 +40,7 @@ class KlageService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val stegService: StegService,
     private val vedtakService: VedtakService,
-    private val tilbakekrevingKlient: TilbakekrevingKlient
+    private val tilbakekrevingKlient: TilbakekrevingKlient,
 
 ) {
 
@@ -68,8 +68,8 @@ class KlageService(
                 eksternFagsakId = fagsak.id.toString(),
                 fagsystem = Fagsystem.BA,
                 klageMottatt = kravMottattDato,
-                behandlendeEnhet = enhetId
-            )
+                behandlendeEnhet = enhetId,
+            ),
         )
     }
 
@@ -90,7 +90,7 @@ class KlageService(
             is KanOppretteRevurdering -> KanOppretteRevurderingResponse(true, null)
             is KanIkkeOppretteRevurdering -> KanOppretteRevurderingResponse(
                 false,
-                resultat.årsak.kanIkkeOppretteRevurderingÅrsak
+                resultat.årsak.kanIkkeOppretteRevurderingÅrsak,
             )
         }
     }
@@ -122,7 +122,7 @@ class KlageService(
             // barnasIdenter hentes fra forrige behandling i håndterNyBehandling() ved revurdering
             barnasIdenter = emptyList(),
 
-            fagsakId = forrigeBehandling.fagsak.id
+            fagsakId = forrigeBehandling.fagsak.id,
         )
 
         val revurdering = stegService.håndterNyBehandling(nyBehandling)
@@ -166,7 +166,7 @@ class KlageService(
             resultat = this.resultat.displayName,
             vedtakstidspunkt = vedtak.vedtaksdato ?: error("Mangler vedtakstidspunkt for behandling=$id"),
             fagsystemType = FagsystemType.ORDNIÆR,
-            regelverk = this.kategori.tilRegelverk()
+            regelverk = this.kategori.tilRegelverk(),
         )
     }
 }
@@ -177,9 +177,9 @@ private data class KanIkkeOppretteRevurdering(val årsak: Årsak) : KanOppretteR
 
 private enum class Årsak(
     val ikkeOpprettetÅrsak: IkkeOpprettetÅrsak,
-    val kanIkkeOppretteRevurderingÅrsak: KanIkkeOppretteRevurderingÅrsak
+    val kanIkkeOppretteRevurderingÅrsak: KanIkkeOppretteRevurderingÅrsak,
 ) {
 
     ÅPEN_BEHANDLING(IkkeOpprettetÅrsak.ÅPEN_BEHANDLING, KanIkkeOppretteRevurderingÅrsak.ÅPEN_BEHANDLING),
-    INGEN_BEHANDLING(IkkeOpprettetÅrsak.INGEN_BEHANDLING, KanIkkeOppretteRevurderingÅrsak.INGEN_BEHANDLING)
+    INGEN_BEHANDLING(IkkeOpprettetÅrsak.INGEN_BEHANDLING, KanIkkeOppretteRevurderingÅrsak.INGEN_BEHANDLING),
 }

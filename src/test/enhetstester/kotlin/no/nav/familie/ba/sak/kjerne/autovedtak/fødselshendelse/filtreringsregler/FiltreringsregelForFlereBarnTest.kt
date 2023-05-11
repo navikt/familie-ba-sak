@@ -59,7 +59,7 @@ class FiltreringsregelForFlereBarnTest {
         localDateService = localDateServiceMock,
         fødselshendelsefiltreringResultatRepository = fødselshendelsefiltreringResultatRepository,
         behandlingService = behandlingServiceMock,
-        tilkjentYtelseValideringService = tilkjentYtelseValideringServiceMock
+        tilkjentYtelseValideringService = tilkjentYtelseValideringServiceMock,
     )
 
     init {
@@ -72,21 +72,21 @@ class FiltreringsregelForFlereBarnTest {
     @Test
     fun `Regelevaluering skal resultere i NEI når det har gått mellom fem dager og fem måneder siden forrige minst ett barn ble født`() {
         val evalueringer = evaluerFiltreringsregler(
-            genererFaktaMedTidligereBarn(1, 3, 7, 0)
+            genererFaktaMedTidligereBarn(1, 3, 7, 0),
         )
 
         Assertions.assertThat(evalueringer.erOppfylt()).isFalse
         Assertions.assertThat(
             evalueringer
                 .filter { it.resultat == Resultat.IKKE_OPPFYLT }
-                .any { it.identifikator == Filtreringsregel.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.name }
+                .any { it.identifikator == Filtreringsregel.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.name },
         )
     }
 
     @Test
     fun `Regelevaluering skal resultere i JA når det har ikke gått mellom fem dager og fem måneder siden forrige minst ett barn ble født`() {
         val evalueringer = evaluerFiltreringsregler(
-            genererFaktaMedTidligereBarn(0, 0, 0, 5)
+            genererFaktaMedTidligereBarn(0, 0, 0, 5),
         )
 
         Assertions.assertThat(evalueringer.erOppfylt()).isTrue
@@ -104,22 +104,22 @@ class FiltreringsregelForFlereBarnTest {
                         genererPerson(
                             type = PersonType.SØKER,
                             personopplysningGrunnlag = this,
-                            aktør = gyldigAktør
+                            aktør = gyldigAktør,
                         ),
                         genererPerson(
                             type = PersonType.BARN,
                             personopplysningGrunnlag = this,
                             aktør = barnAktør0,
                             fødselsDato = LocalDate.now().minusMonths(1),
-                            dødsfallDato = LocalDate.now().toString()
+                            dødsfallDato = LocalDate.now().toString(),
                         ),
                         genererPerson(
                             type = PersonType.BARN,
                             personopplysningGrunnlag = this,
                             aktør = barnAktør1,
-                            fødselsDato = LocalDate.now().minusMonths(1)
-                        )
-                    )
+                            fødselsDato = LocalDate.now().minusMonths(1),
+                        ),
+                    ),
                 )
             }
 
@@ -134,8 +134,8 @@ class FiltreringsregelForFlereBarnTest {
             personidentService.hentAktørIder(
                 listOf(
                     barnAktør0.aktivFødselsnummer(),
-                    barnAktør1.aktivFødselsnummer()
-                )
+                    barnAktør1.aktivFødselsnummer(),
+                ),
             )
         } returns listOf(barnAktør0, barnAktør1)
 
@@ -146,17 +146,17 @@ class FiltreringsregelForFlereBarnTest {
                 morsIdent = gyldigAktør.aktivFødselsnummer(),
                 barnasIdenter = listOf(
                     barnAktør0.aktivFødselsnummer(),
-                    barnAktør1.aktivFødselsnummer()
-                )
+                    barnAktør1.aktivFødselsnummer(),
+                ),
             ),
-            behandling
+            behandling,
         )
 
         Assertions.assertThat(fødselshendelsefiltreringResultater.erOppfylt()).isFalse
         Assertions.assertThat(
             fødselshendelsefiltreringResultater
                 .filter { it.resultat == Resultat.IKKE_OPPFYLT }
-                .any { it.filtreringsregel == Filtreringsregel.BARN_LEVER }
+                .any { it.filtreringsregel == Filtreringsregel.BARN_LEVER },
         )
     }
 
@@ -172,21 +172,21 @@ class FiltreringsregelForFlereBarnTest {
                         genererPerson(
                             type = PersonType.SØKER,
                             personopplysningGrunnlag = this,
-                            aktør = gyldigAktør
+                            aktør = gyldigAktør,
                         ),
                         genererPerson(
                             type = PersonType.BARN,
                             personopplysningGrunnlag = this,
                             aktør = barnAktør0,
-                            fødselsDato = LocalDate.now().minusMonths(1)
+                            fødselsDato = LocalDate.now().minusMonths(1),
                         ),
                         genererPerson(
                             type = PersonType.BARN,
                             personopplysningGrunnlag = this,
                             aktør = barnAktør1,
-                            fødselsDato = LocalDate.now().minusMonths(1)
-                        )
-                    )
+                            fødselsDato = LocalDate.now().minusMonths(1),
+                        ),
+                    ),
                 )
             }
 
@@ -201,8 +201,8 @@ class FiltreringsregelForFlereBarnTest {
             personidentService.hentAktørIder(
                 listOf(
                     barnAktør0.aktivFødselsnummer(),
-                    barnAktør1.aktivFødselsnummer()
-                )
+                    barnAktør1.aktivFødselsnummer(),
+                ),
             )
         } returns listOf(barnAktør0, barnAktør1)
 
@@ -213,10 +213,10 @@ class FiltreringsregelForFlereBarnTest {
                 morsIdent = gyldigAktør.aktivFødselsnummer(),
                 barnasIdenter = listOf(
                     barnAktør0.aktivFødselsnummer(),
-                    barnAktør1.aktivFødselsnummer()
-                )
+                    barnAktør1.aktivFødselsnummer(),
+                ),
             ),
-            behandling
+            behandling,
         )
 
         Assertions.assertThat(fødselshendelsefiltreringResultater.erOppfylt()).isTrue
@@ -230,7 +230,7 @@ class FiltreringsregelForFlereBarnTest {
         grBostedsadresse: GrBostedsadresse? = null,
         kjønn: Kjønn = Kjønn.KVINNE,
         sivilstand: SIVILSTAND = SIVILSTAND.UGIFT,
-        dødsfallDato: String? = null
+        dødsfallDato: String? = null,
     ): Person {
         return Person(
             aktør = aktør,
@@ -239,7 +239,7 @@ class FiltreringsregelForFlereBarnTest {
             fødselsdato = fødselsDato ?: LocalDate.of(1991, 1, 1),
             navn = "navn",
             kjønn = kjønn,
-            bostedsadresser = grBostedsadresse?.let { mutableListOf(grBostedsadresse) } ?: mutableListOf()
+            bostedsadresser = grBostedsadresse?.let { mutableListOf(grBostedsadresse) } ?: mutableListOf(),
         )
             .apply {
                 this.sivilstander = mutableListOf(GrSivilstand(type = sivilstand, person = this))
@@ -255,7 +255,7 @@ class FiltreringsregelForFlereBarnTest {
         fødselsDato: LocalDate? = null,
         adressebeskyttelsegradering: ADRESSEBESKYTTELSEGRADERING = ADRESSEBESKYTTELSEGRADERING.UGRADERT,
         bostedsadresse: Bostedsadresse? = null,
-        sivilstand: SIVILSTAND = SIVILSTAND.UGIFT
+        sivilstand: SIVILSTAND = SIVILSTAND.UGIFT,
     ): PersonInfo {
         return PersonInfo(
             fødselsdato = fødselsDato ?: LocalDate.now().minusYears(20),
@@ -267,9 +267,9 @@ class FiltreringsregelForFlereBarnTest {
                 ForelderBarnRelasjon(
                     aktør = it,
                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                    navn = "navn $it"
+                    navn = "navn $it",
                 )
-            }?.toSet() ?: emptySet()
+            }?.toSet() ?: emptySet(),
         )
     }
 
@@ -277,16 +277,16 @@ class FiltreringsregelForFlereBarnTest {
         manaderFodselEtt: Long,
         manaderFodselTo: Long,
         manaderFodselForrigeFodsel: Long,
-        dagerFodselForrigeFodsel: Long
+        dagerFodselForrigeFodsel: Long,
     ): FiltreringsreglerFakta {
         val mor = tilfeldigPerson(LocalDate.now().minusYears(20)).copy(aktør = gyldigAktør)
         val barn = listOf(
             tilfeldigPerson(LocalDate.now().minusMonths(manaderFodselEtt)).copy(aktør = barnAktør0),
-            tilfeldigPerson(LocalDate.now().minusMonths(manaderFodselTo)).copy(aktør = barnAktør1)
+            tilfeldigPerson(LocalDate.now().minusMonths(manaderFodselTo)).copy(aktør = barnAktør1),
         )
 
         val restenAvBarna: List<PersonInfo> = listOf(
-            PersonInfo(LocalDate.now().minusMonths(manaderFodselForrigeFodsel).minusDays(dagerFodselForrigeFodsel))
+            PersonInfo(LocalDate.now().minusMonths(manaderFodselForrigeFodsel).minusDays(dagerFodselForrigeFodsel)),
         )
 
         return FiltreringsreglerFakta(
@@ -298,7 +298,7 @@ class FiltreringsregelForFlereBarnTest {
             morHarVerge = false,
             dagensDato = LocalDate.now(),
             erFagsakenMigrertEtterBarnFødt = false,
-            løperBarnetrygdForBarnetPåAnnenForelder = false
+            løperBarnetrygdForBarnetPåAnnenForelder = false,
         )
     }
 }

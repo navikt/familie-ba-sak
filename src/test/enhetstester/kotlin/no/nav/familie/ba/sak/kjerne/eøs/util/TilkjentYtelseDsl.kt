@@ -30,8 +30,8 @@ infix fun TilkjentYtelse.der(andelTilkjentYtelse: AndelTilkjentYtelse): Tilkjent
     this.andelerTilkjentYtelse.add(
         andelTilkjentYtelse.copy(
             tilkjentYtelse = this,
-            behandlingId = this.behandling.id
-        )
+            behandlingId = this.behandling.id,
+        ),
     )
     return this
 }
@@ -48,7 +48,7 @@ infix fun Person.har(sats: Int) = AndelTilkjentYtelse(
     stønadTom = YearMonth.now(),
     type = YtelseType.ORDINÆR_BARNETRYGD,
     prosent = BigDecimal.valueOf(100),
-    nasjonaltPeriodebeløp = sats
+    nasjonaltPeriodebeløp = sats,
 )
 
 infix fun AndelTilkjentYtelse.fom(tidspunkt: Tidspunkt<Måned>) = this.copy(stønadFom = tidspunkt.tilYearMonth())
@@ -56,7 +56,7 @@ infix fun AndelTilkjentYtelse.tom(tidspunkt: Tidspunkt<Måned>) = this.copy(stø
 infix fun AndelTilkjentYtelse.i(ytelseType: YtelseType) = this.copy(type = ytelseType)
 infix fun AndelTilkjentYtelse.og(utenlandskBeløp: Int) = this.copy(
     differanseberegnetPeriodebeløp = sats - utenlandskBeløp,
-    kalkulertUtbetalingsbeløp = maxOf(sats - utenlandskBeløp, 0)
+    kalkulertUtbetalingsbeløp = maxOf(sats - utenlandskBeløp, 0),
 )
 
 infix fun AndelTilkjentYtelse.minus(utenlandskBeløp: Int) = this.og(utenlandskBeløp)

@@ -28,5 +28,5 @@ data class Batch(
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    var status: KjøreStatus = KjøreStatus.LEDIG
+    var status: KjøreStatus = KjøreStatus.LEDIG,
 )

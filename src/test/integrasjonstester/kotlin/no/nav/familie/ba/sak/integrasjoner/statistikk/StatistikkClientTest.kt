@@ -24,7 +24,7 @@ internal class StatistikkClientTest : AbstractSpringIntegrationTest() {
     fun setUp() {
         client = StatistikkClient(
             URI.create(wireMockServer.baseUrl() + "/api"),
-            restOperations
+            restOperations,
         )
     }
 
@@ -39,15 +39,15 @@ internal class StatistikkClientTest : AbstractSpringIntegrationTest() {
             WireMock.get("/api/vedtak/123").willReturn(
                 WireMock.okJson(
                     objectMapper.writeValueAsString(
-                        Ressurs.success(true)
-                    )
-                )
-            )
+                        Ressurs.success(true),
+                    ),
+                ),
+            ),
         )
 
         assertEquals(
             client.harSendtVedtaksmeldingForBehandling(123),
-            true
+            true,
         )
     }
 }

@@ -40,7 +40,7 @@ internal class PersonidentServiceTest {
         personidentRepository,
         aktørIdRepository,
         pdlIdentRestClient,
-        mockk()
+        mockk(),
     )
 
     @BeforeAll
@@ -48,13 +48,13 @@ internal class PersonidentServiceTest {
         every { pdlIdentRestClient.hentIdenter(personidentAktiv, false) } answers {
             listOf(
                 IdentInformasjon(aktørIdAktiv.aktørId, false, "AKTORID"),
-                IdentInformasjon(personidentAktiv, false, "FOLKEREGISTERIDENT")
+                IdentInformasjon(personidentAktiv, false, "FOLKEREGISTERIDENT"),
             )
         }
         every { pdlIdentRestClient.hentIdenter(personidentHistorisk, false) } answers {
             listOf(
                 IdentInformasjon(aktørIdAktiv.aktørId, false, "AKTORID"),
-                IdentInformasjon(personidentAktiv, false, "FOLKEREGISTERIDENT")
+                IdentInformasjon(personidentAktiv, false, "FOLKEREGISTERIDENT"),
             )
         }
     }
@@ -81,21 +81,21 @@ internal class PersonidentServiceTest {
         aktørIdSomFinnes.personidenter.add(
             Personident(
                 fødselsnummer = personIdentSomFinnes,
-                aktør = aktørIdSomFinnes
-            )
+                aktør = aktørIdSomFinnes,
+            ),
         )
 
         every { pdlIdentRestClient.hentIdenter(personIdentSomFinnes, false) } answers {
             listOf(
                 IdentInformasjon(aktørIdSomFinnes.aktørId, false, "AKTORID"),
-                IdentInformasjon(personIdentSomFinnes, false, "FOLKEREGISTERIDENT")
+                IdentInformasjon(personIdentSomFinnes, false, "FOLKEREGISTERIDENT"),
             )
         }
 
         every { pdlIdentRestClient.hentIdenter(personIdentSomSkalLeggesTil, false) } answers {
             listOf(
                 IdentInformasjon(aktørIdSomFinnes.aktørId, false, "AKTORID"),
-                IdentInformasjon(personIdentSomSkalLeggesTil, false, "FOLKEREGISTERIDENT")
+                IdentInformasjon(personIdentSomSkalLeggesTil, false, "FOLKEREGISTERIDENT"),
             )
         }
 
@@ -114,7 +114,7 @@ internal class PersonidentServiceTest {
             personidentRepository,
             aktørIdRepository,
             pdlIdentRestClient,
-            mockk()
+            mockk(),
         )
 
         val aktør = personidentService.håndterNyIdent(nyIdent = PersonIdent(personIdentSomSkalLeggesTil))
@@ -134,8 +134,8 @@ internal class PersonidentServiceTest {
         aktørIdSomFinnes.personidenter.add(
             Personident(
                 fødselsnummer = personIdentSomFinnes,
-                aktør = aktørIdSomFinnes
-            )
+                aktør = aktørIdSomFinnes,
+            ),
         )
 
         val taskRepositoryMock = mockk<TaskRepositoryWrapper>(relaxed = true)
@@ -143,20 +143,20 @@ internal class PersonidentServiceTest {
             personidentRepository,
             aktørIdRepository,
             pdlIdentRestClient,
-            taskRepositoryMock
+            taskRepositoryMock,
         )
 
         every { pdlIdentRestClient.hentIdenter(personIdentSomFinnes, false) } answers {
             listOf(
                 IdentInformasjon(aktørIdSomFinnes.aktørId, false, "AKTORID"),
-                IdentInformasjon(personIdentSomFinnes, false, "FOLKEREGISTERIDENT")
+                IdentInformasjon(personIdentSomFinnes, false, "FOLKEREGISTERIDENT"),
             )
         }
 
         every { pdlIdentRestClient.hentIdenter(personIdentSomSkalLeggesTil, false) } answers {
             listOf(
                 IdentInformasjon(aktørIdSomFinnes.aktørId, false, "AKTORID"),
-                IdentInformasjon(personIdentSomSkalLeggesTil, false, "FOLKEREGISTERIDENT")
+                IdentInformasjon(personIdentSomSkalLeggesTil, false, "FOLKEREGISTERIDENT"),
             )
         }
         every { aktørIdRepository.findByAktørIdOrNull(aktørIdSomFinnes.aktørId) }.answers {
@@ -182,8 +182,8 @@ internal class PersonidentServiceTest {
         aktørIdSomFinnes.personidenter.add(
             Personident(
                 fødselsnummer = personIdentSomFinnes,
-                aktør = aktørIdSomFinnes
-            )
+                aktør = aktørIdSomFinnes,
+            ),
         )
 
         val taskRepositoryMock = mockk<TaskRepositoryWrapper>(relaxed = true)
@@ -191,20 +191,20 @@ internal class PersonidentServiceTest {
             personidentRepository,
             aktørIdRepository,
             pdlIdentRestClient,
-            taskRepositoryMock
+            taskRepositoryMock,
         )
 
         every { pdlIdentRestClient.hentIdenter(personIdentSomFinnes, false) } answers {
             listOf(
                 IdentInformasjon(aktørIdSomFinnes.aktørId, false, "AKTORID"),
-                IdentInformasjon(personIdentSomFinnes, false, "FOLKEREGISTERIDENT")
+                IdentInformasjon(personIdentSomFinnes, false, "FOLKEREGISTERIDENT"),
             )
         }
 
         every { pdlIdentRestClient.hentIdenter(personIdentSomSkalLeggesTil, false) } answers {
             listOf(
                 IdentInformasjon(aktørIdIkkeIBaSak.aktørId, false, "AKTORID"),
-                IdentInformasjon(personIdentSomSkalLeggesTil, false, "FOLKEREGISTERIDENT")
+                IdentInformasjon(personIdentSomSkalLeggesTil, false, "FOLKEREGISTERIDENT"),
             )
         }
         every { aktørIdRepository.findByAktørIdOrNull(aktørIdIkkeIBaSak.aktørId) }.answers {
@@ -227,21 +227,21 @@ internal class PersonidentServiceTest {
         aktørIdSomFinnes.personidenter.add(
             Personident(
                 fødselsnummer = personIdentSomFinnes,
-                aktør = aktørIdSomFinnes
-            )
+                aktør = aktørIdSomFinnes,
+            ),
         )
 
         every { pdlIdentRestClient.hentIdenter(personIdentSomFinnes, false) } answers {
             listOf(
                 IdentInformasjon(aktørIdSomFinnes.aktørId, false, "AKTORID"),
-                IdentInformasjon(personIdentSomFinnes, false, "FOLKEREGISTERIDENT")
+                IdentInformasjon(personIdentSomFinnes, false, "FOLKEREGISTERIDENT"),
             )
         }
 
         every { aktørIdRepository.findByAktørIdOrNull(aktørIdSomFinnes.aktørId) }.answers { aktørIdSomFinnes }
         every { personidentRepository.findByFødselsnummerOrNull(personIdentSomFinnes) }.answers {
             tilAktør(
-                personIdentSomFinnes
+                personIdentSomFinnes,
             ).personidenter.first()
         }
 
@@ -249,7 +249,7 @@ internal class PersonidentServiceTest {
             personidentRepository,
             aktørIdRepository,
             pdlIdentRestClient,
-            mockk()
+            mockk(),
         )
 
         val aktør = personidentService.håndterNyIdent(nyIdent = PersonIdent(personIdentSomFinnes))
@@ -294,7 +294,7 @@ internal class PersonidentServiceTest {
         every { personidentRepository.findByFødselsnummerOrNull(personidentAktiv) } answers {
             Personident(
                 personidentAktiv,
-                aktørIdAktiv
+                aktørIdAktiv,
             )
         }
 
@@ -362,7 +362,7 @@ internal class PersonidentServiceTest {
         every { pdlIdentRestClient.hentIdenter(mergedPersonident, false) } answers {
             listOf(
                 IdentInformasjon(mergetTilAktørId.aktørId, false, "AKTORID"),
-                IdentInformasjon(mergedPersonident, false, "FOLKEREGISTERIDENT")
+                IdentInformasjon(mergedPersonident, false, "FOLKEREGISTERIDENT"),
             )
         }
 
@@ -370,7 +370,7 @@ internal class PersonidentServiceTest {
         every { personidentRepository.findByFødselsnummerOrNull(mergedPersonident) }.answers {
             tilAktør(
                 mergedPersonident,
-                "11"
+                "11",
             ).personidenter.first()
         }
 
@@ -378,7 +378,7 @@ internal class PersonidentServiceTest {
             personidentRepository,
             aktørIdRepository,
             pdlIdentRestClient,
-            mockk()
+            mockk(),
         )
 
         assertThrows<Feil> { personidentService.håndterNyIdent(nyIdent = PersonIdent(mergedPersonident)) }

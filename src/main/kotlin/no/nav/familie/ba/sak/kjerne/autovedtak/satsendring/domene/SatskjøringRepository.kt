@@ -21,7 +21,7 @@ interface SatskjøringRepository : JpaRepository<Satskjøring, Long> {
                 ) AND f.status = 'LØPENDE' AND f.arkivert = false AND b.status <> 'AVSLUTTET'
             ORDER BY b.opprettet_tid
         """,
-        nativeQuery = true
+        nativeQuery = true,
     )
     fun finnSatskjøringerSomHarStoppetPgaÅpenBehandling(): List<SatskjøringÅpenBehandling>
 }

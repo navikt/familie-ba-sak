@@ -15,7 +15,7 @@ data class BrevperiodeData(
     val barnMedReduksjonFraForrigeBehandlingIdent: List<String> = emptyList(),
     val minimerteKompetanserForPeriode: List<MinimertKompetanse>,
     val minimerteKompetanserSomStopperRettFørPeriode: List<MinimertKompetanse>,
-    val dødeBarnForrigePeriode: List<String>
+    val dødeBarnForrigePeriode: List<String>,
 ) : Comparable<BrevperiodeData> {
 
     fun tilBrevPeriodeGenerator() = BrevPeriodeGenerator(
@@ -27,14 +27,14 @@ data class BrevperiodeData(
         barnMedReduksjonFraForrigeBehandlingIdent = barnMedReduksjonFraForrigeBehandlingIdent,
         minimerteKompetanserForPeriode = minimerteKompetanserForPeriode,
         minimerteKompetanserSomStopperRettFørPeriode = minimerteKompetanserSomStopperRettFørPeriode,
-        dødeBarnForrigePeriode = dødeBarnForrigePeriode
+        dødeBarnForrigePeriode = dødeBarnForrigePeriode,
     )
 
     fun hentBegrunnelserOgFritekster(): List<Begrunnelse> {
         val brevPeriodeGenereator = this.tilBrevPeriodeGenerator()
         return brevPeriodeGenereator.byggBegrunnelserOgFritekster(
             begrunnelserGrunnlagMedPersoner = brevPeriodeGenereator.hentBegrunnelsegrunnlagMedPersoner(),
-            eøsBegrunnelserMedKompetanser = brevPeriodeGenereator.hentEøsBegrunnelserMedKompetanser()
+            eøsBegrunnelserMedKompetanser = brevPeriodeGenereator.hentEøsBegrunnelserMedKompetanser(),
         )
     }
 
@@ -43,7 +43,7 @@ data class BrevperiodeData(
             restBehandlingsgrunnlagForBrev = this.restBehandlingsgrunnlagForBrev,
             uregistrerteBarn = this.uregistrerteBarn,
             brevMålform = this.brevMålform,
-            barnMedReduksjonFraForrigeBehandlingIdent = this.barnMedReduksjonFraForrigeBehandlingIdent
+            barnMedReduksjonFraForrigeBehandlingIdent = this.barnMedReduksjonFraForrigeBehandlingIdent,
         )
 
     override fun compareTo(other: BrevperiodeData): Int {

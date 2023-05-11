@@ -68,7 +68,7 @@ class VedtaksperiodeServiceEnhetstest {
         behandlingHentOgPersisterService = behandlingHentOgPersisterService,
         småbarnstilleggService = småbarnstilleggService,
         refusjonEøsRepository = refusjonEøsRepository,
-        integrasjonClient = integrasjonClient
+        integrasjonClient = integrasjonClient,
     )
 
     private val person = lagPerson()
@@ -82,12 +82,12 @@ class VedtaksperiodeServiceEnhetstest {
     private val ytelseOpphørtFørEndringstidspunkt = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
         fom = YearMonth.from(endringstidspunkt).minusMonths(3),
         tom = YearMonth.from(endringstidspunkt).minusMonths(2),
-        person = person
+        person = person,
     )
     private val ytelseOpphørtSammeMåned = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
         fom = YearMonth.from(endringstidspunkt),
         tom = YearMonth.from(endringstidspunkt).plusYears(18),
-        person = person
+        person = person,
     )
 
     @BeforeEach
@@ -98,7 +98,7 @@ class VedtaksperiodeServiceEnhetstest {
             lagTestPersonopplysningGrunnlag(vedtak.behandling.id, person)
         every {
             andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
-                forrigeBehandling.id
+                forrigeBehandling.id,
             )
         } returns listOf(ytelseOpphørtSammeMåned)
 
@@ -108,7 +108,7 @@ class VedtaksperiodeServiceEnhetstest {
         every {
             featureToggleService.isEnabled(
                 FeatureToggleConfig.EØS_INFORMASJON_OM_ÅRLIG_KONTROLL,
-                any()
+                any(),
             )
         } returns true
         every { feilutbetaltValutaRepository.finnFeilutbetaltValutaForBehandling(any()) } returns emptyList()
@@ -134,13 +134,13 @@ class VedtaksperiodeServiceEnhetstest {
         val returnerteVedtaksperioderNårOverstyrtEndringstidspunktErFørsteOpphørFom = vedtaksperiodeService
             .genererVedtaksperioderMedBegrunnelserGammel(
                 vedtak,
-                manueltOverstyrtEndringstidspunkt = førsteOpphørFomDato
+                manueltOverstyrtEndringstidspunkt = førsteOpphørFomDato,
             )
             .filter { it.type == Vedtaksperiodetype.OPPHØR }
         val returnerteVedtaksperioderNårOverstyrtEndringstidspunktErFørFørsteOpphør = vedtaksperiodeService
             .genererVedtaksperioderMedBegrunnelserGammel(
                 vedtak,
-                manueltOverstyrtEndringstidspunkt = førsteOpphørFomDato.minusMonths(1)
+                manueltOverstyrtEndringstidspunkt = førsteOpphørFomDato.minusMonths(1),
             )
             .filter { it.type == Vedtaksperiodetype.OPPHØR }
 
@@ -164,7 +164,7 @@ class VedtaksperiodeServiceEnhetstest {
     fun `EØS med periode med utløpt tom skal ikke ha årlig kontroll`() {
         val vedtak = Vedtak(behandling = lagBehandling(behandlingKategori = BehandlingKategori.EØS))
         every { vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(any()) } returns listOf(
-            lagVedtaksperiodeMedBegrunnelser(vedtak = vedtak, tom = LocalDate.now())
+            lagVedtaksperiodeMedBegrunnelser(vedtak = vedtak, tom = LocalDate.now()),
         )
         assertFalse { vedtaksperiodeService.skalHaÅrligKontroll(vedtak) }
     }
@@ -173,7 +173,7 @@ class VedtaksperiodeServiceEnhetstest {
     fun `EØS med periode med løpende tom skal ha årlig kontroll`() {
         val vedtak = Vedtak(behandling = lagBehandling(behandlingKategori = BehandlingKategori.EØS))
         every { vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(any()) } returns listOf(
-            lagVedtaksperiodeMedBegrunnelser(vedtak = vedtak, tom = LocalDate.now().plusMonths(1))
+            lagVedtaksperiodeMedBegrunnelser(vedtak = vedtak, tom = LocalDate.now().plusMonths(1)),
         )
         assertTrue { vedtaksperiodeService.skalHaÅrligKontroll(vedtak) }
     }
@@ -182,7 +182,7 @@ class VedtaksperiodeServiceEnhetstest {
     fun `EØS med periode uten tom skal ha årlig kontroll`() {
         val vedtak = Vedtak(behandling = lagBehandling(behandlingKategori = BehandlingKategori.EØS))
         every { vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(any()) } returns listOf(
-            lagVedtaksperiodeMedBegrunnelser(vedtak = vedtak, tom = null)
+            lagVedtaksperiodeMedBegrunnelser(vedtak = vedtak, tom = null),
         )
         assertTrue { vedtaksperiodeService.skalHaÅrligKontroll(vedtak) }
     }
@@ -195,7 +195,7 @@ class VedtaksperiodeServiceEnhetstest {
 
         val vedtak = Vedtak(behandling = lagBehandling(behandlingKategori = BehandlingKategori.EØS))
         every { vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(any()) } returns listOf(
-            lagVedtaksperiodeMedBegrunnelser(vedtak = vedtak, tom = null)
+            lagVedtaksperiodeMedBegrunnelser(vedtak = vedtak, tom = null),
         )
         assertFalse { vedtaksperiodeService.skalHaÅrligKontroll(vedtak) }
     }
@@ -205,7 +205,7 @@ class VedtaksperiodeServiceEnhetstest {
         val vedtak = Vedtak(behandling = lagBehandling(behandlingKategori = BehandlingKategori.EØS))
         val perioder = listOf(
             LocalDate.now() to LocalDate.now().plusYears(1),
-            LocalDate.now().plusYears(2) to LocalDate.now().plusYears(3)
+            LocalDate.now().plusYears(2) to LocalDate.now().plusYears(3),
         )
         assertThat(vedtaksperiodeService.beskrivPerioderMedFeilutbetaltValuta(vedtak)).isNull()
 
@@ -234,14 +234,14 @@ class VedtaksperiodeServiceEnhetstest {
                 tom = LocalDate.of(2022, 1, 1),
                 refusjonsbeløp = 200,
                 land = "NO",
-                refusjonAvklart = true
-            )
+                refusjonAvklart = true,
+            ),
         )
 
         val perioder = vedtaksperiodeService.beskrivPerioderMedRefusjonEøs(behandling = behandling, avklart = true)
 
         assertThat(perioder?.size).isEqualTo(1)
-        assertThat(perioder?.single()).isEqualTo("Fra 1. januar 2020 til 1. januar 2022 blir 200 kroner av etterbetalingen din utbetalt til myndighetene i Norge")
+        assertThat(perioder?.single()).isEqualTo("Fra januar 2020 til januar 2022 blir etterbetaling på 200 kroner per måned utbetalt til myndighetene i Norge.")
     }
 
     @Test
@@ -256,13 +256,13 @@ class VedtaksperiodeServiceEnhetstest {
                 tom = LocalDate.of(2022, 1, 1),
                 refusjonsbeløp = 200,
                 land = "NO",
-                refusjonAvklart = false
-            )
+                refusjonAvklart = false,
+            ),
         )
 
         val perioder = vedtaksperiodeService.beskrivPerioderMedRefusjonEøs(behandling = behandling, avklart = false)
 
         assertThat(perioder?.size).isEqualTo(1)
-        assertThat(perioder?.single()).isEqualTo("Fra 1. januar 2020 til 1. januar 2022 blir ikke etterbetalingen på 200 kroner utbetalt nå siden det er utbetalt barnetrygd i Norge")
+        assertThat(perioder?.single()).isEqualTo("Fra januar 2020 til januar 2022 blir ikke etterbetaling på 200 kroner per måned utbetalt nå siden det er utbetalt barnetrygd i Norge.")
     }
 }

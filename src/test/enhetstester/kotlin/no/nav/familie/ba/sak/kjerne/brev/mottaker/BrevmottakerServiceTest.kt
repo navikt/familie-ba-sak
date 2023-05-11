@@ -63,8 +63,8 @@ internal class BrevmottakerServiceTest {
             lagBrevMottaker(
                 mottakerType = MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE,
                 poststed = "Munchen",
-                landkode = "DE"
-            )
+                landkode = "DE",
+            ),
         )
         every { brevmottakerRepository.finnBrevMottakereForBehandling(any()) } returns brevmottakere
 
@@ -86,8 +86,8 @@ internal class BrevmottakerServiceTest {
             lagBrevMottaker(
                 mottakerType = MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE,
                 poststed = "Munchen",
-                landkode = "DE"
-            )
+                landkode = "DE",
+            ),
         )
         every { brevmottakerRepository.finnBrevMottakereForBehandling(any()) } returns brevmottakere
 
@@ -108,8 +108,8 @@ internal class BrevmottakerServiceTest {
             lagBrevMottaker(
                 mottakerType = MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE,
                 poststed = "Munchen",
-                landkode = "DE"
-            )
+                landkode = "DE",
+            ),
         )
         every { brevmottakerRepository.finnBrevMottakereForBehandling(any()) } returns brevmottakere
 
@@ -127,8 +127,8 @@ internal class BrevmottakerServiceTest {
             lagBrevMottaker(
                 mottakerType = MottakerType.DØDSBO,
                 poststed = "Munchen",
-                landkode = "DE"
-            )
+                landkode = "DE",
+            ),
         )
         every { brevmottakerRepository.finnBrevMottakereForBehandling(any()) } returns brevmottakere
 
@@ -188,6 +188,6 @@ internal class BrevmottakerServiceTest {
             adresselinje2 = "adresse 2",
             postnummer = "000",
             poststed = poststed,
-            landkode = landkode
+            landkode = landkode,
         )
 }

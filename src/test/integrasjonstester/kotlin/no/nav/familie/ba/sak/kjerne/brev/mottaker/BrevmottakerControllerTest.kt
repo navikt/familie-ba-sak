@@ -18,13 +18,13 @@ internal class BrevmottakerControllerTest(
     @Autowired private val brevmottakerService: BrevmottakerService,
     @Autowired private val aktørIdRepository: AktørIdRepository,
     @Autowired private val fagsakRepository: FagsakRepository,
-    @Autowired private val behandlingRepository: BehandlingRepository
+    @Autowired private val behandlingRepository: BehandlingRepository,
 ) : AbstractSpringIntegrationTest() {
 
     val brevmottakerController = BrevmottakerController(
         brevmottakerService = brevmottakerService,
         tilgangService = mockk(relaxed = true),
-        utvidetBehandlingService = mockk(relaxed = true)
+        utvidetBehandlingService = mockk(relaxed = true),
     )
 
     @Test
@@ -42,7 +42,7 @@ internal class BrevmottakerControllerTest(
             null,
             "postnummer",
             "poststed",
-            "NO"
+            "NO",
 
         )
         brevmottakerController.leggTilBrevmottaker(behandling.id, brevmottaker)
@@ -50,7 +50,7 @@ internal class BrevmottakerControllerTest(
             brevmottakerController.oppdaterBrevmottaker(
                 behandlingId = behandling.id,
                 mottakerId = first().id!!,
-                brevmottaker = brevmottaker.copy(navn = "endret navn")
+                brevmottaker = brevmottaker.copy(navn = "endret navn"),
             )
         }
         Assertions.assertThat(brevmottakerController.hentBrevmottakere(behandling.id).body?.data!!)

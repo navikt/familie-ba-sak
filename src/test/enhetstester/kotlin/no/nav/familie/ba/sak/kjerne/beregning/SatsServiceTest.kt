@@ -31,24 +31,24 @@ class SatsServiceTest {
 
     private fun assertPeriode(
         forventet: TestKrPeriode,
-        faktisk: no.nav.familie.ba.sak.kjerne.tidslinje.Periode<Int, Måned>
+        faktisk: no.nav.familie.ba.sak.kjerne.tidslinje.Periode<Int, Måned>,
     ) {
         Assertions.assertEquals(forventet.beløp, faktisk.innhold, "Forskjell i beløp")
         Assertions.assertEquals(
             forventet.fom?.let { årMnd(it) },
             faktisk.fraOgMed.tilYearMonthEllerNull(),
-            "Forskjell i fra-og-med"
+            "Forskjell i fra-og-med",
         )
         Assertions.assertEquals(
             forventet.tom?.let { årMnd(it) },
             faktisk.tilOgMed.tilYearMonthEllerNull(),
-            "Forskjell i til-og-med"
+            "Forskjell i til-og-med",
         )
     }
 
     private data class TestKrPeriode(
         val beløp: Int,
         val fom: String?,
-        val tom: String?
+        val tom: String?,
     )
 }

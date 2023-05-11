@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.integrasjoner.`ef-sak`
+package no.nav.familie.ba.sak.integrasjoner.ef
 
 import no.nav.familie.ba.sak.common.kallEksternTjeneste
 import no.nav.familie.http.client.AbstractRestClient
@@ -17,7 +17,7 @@ import java.net.URI
 @Component
 class EfSakRestClient(
     @Value("\${FAMILIE_EF_SAK_API_URL}") private val efSakBaseUrl: URI,
-    @Qualifier("jwtBearer") restTemplate: RestOperations
+    @Qualifier("jwtBearer") restTemplate: RestOperations,
 ) : AbstractRestClient(restTemplate, "ef-sak") {
 
     fun hentPerioderMedFullOvergangsstønad(personIdent: String): EksternePerioderResponse {
@@ -26,7 +26,7 @@ class EfSakRestClient(
         return kallEksternTjeneste<Ressurs<EksternePerioderResponse>>(
             tjeneste = "ef-sak overgangsstønad",
             uri = uri,
-            formål = "Hente perioder med full overgangsstønad"
+            formål = "Hente perioder med full overgangsstønad",
         ) { postForEntity(uri, PersonIdent(personIdent)) }.getDataOrThrow()
     }
 

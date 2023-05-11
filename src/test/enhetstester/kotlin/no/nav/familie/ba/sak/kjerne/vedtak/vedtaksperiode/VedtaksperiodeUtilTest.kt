@@ -30,25 +30,25 @@ class VedtaksperiodeUtilTest {
                 vedtak = vedtak,
                 fom = LocalDate.now().minusYears(2).førsteDagIInneværendeMåned(),
                 tom = LocalDate.now().minusYears(1).minusMonths(1).sisteDagIMåned(),
-                type = Vedtaksperiodetype.UTBETALING
+                type = Vedtaksperiodetype.UTBETALING,
             ),
             VedtaksperiodeMedBegrunnelser(
                 vedtak = vedtak,
                 fom = LocalDate.now().minusYears(1).førsteDagIInneværendeMåned(),
                 tom = LocalDate.now().sisteDagIMåned(),
-                type = Vedtaksperiodetype.UTBETALING
+                type = Vedtaksperiodetype.UTBETALING,
             ),
             VedtaksperiodeMedBegrunnelser(
                 vedtak = vedtak,
                 fom = LocalDate.now().plusMonths(1).førsteDagIInneværendeMåned(),
                 tom = LocalDate.now().plusYears(3).sisteDagIMåned(),
-                type = Vedtaksperiodetype.UTBETALING
-            )
+                type = Vedtaksperiodetype.UTBETALING,
+            ),
         )
 
         val oppdaterteUtbetalingsperioder = oppdaterUtbetalingsperioderMedReduksjonFraForrigeBehandling(
             utbetalingsperioder = utbetalingsperioder,
-            reduksjonsperioder = emptyList()
+            reduksjonsperioder = emptyList(),
         )
 
         Assertions.assertEquals(3, oppdaterteUtbetalingsperioder.size)
@@ -63,18 +63,18 @@ class VedtaksperiodeUtilTest {
             vedtak = vedtak,
             fom = LocalDate.now().minusYears(1).førsteDagIInneværendeMåned(),
             tom = LocalDate.now().plusYears(1).sisteDagIMåned(),
-            type = Vedtaksperiodetype.UTBETALING
+            type = Vedtaksperiodetype.UTBETALING,
         )
         val reduksjonsperiode = VedtaksperiodeMedBegrunnelser(
             vedtak = vedtak,
             fom = LocalDate.now().minusYears(1).plusMonths(1).førsteDagIInneværendeMåned(),
             tom = LocalDate.now().minusYears(1).plusMonths(6).sisteDagIMåned(),
-            type = Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING
+            type = Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING,
         )
 
         val oppdaterteUtbetalingsperioder = oppdaterUtbetalingsperioderMedReduksjonFraForrigeBehandling(
             utbetalingsperioder = listOf(utbetalingsperiode),
-            reduksjonsperioder = listOf(reduksjonsperiode)
+            reduksjonsperioder = listOf(reduksjonsperiode),
         )
 
         Assertions.assertEquals(3, oppdaterteUtbetalingsperioder.size)
@@ -89,7 +89,7 @@ class VedtaksperiodeUtilTest {
 
         Assertions.assertEquals(
             Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING,
-            periode2.type
+            periode2.type,
         )
         Assertions.assertEquals(reduksjonsperiode.fom, periode2.fom)
         Assertions.assertEquals(reduksjonsperiode.tom, periode2.tom)
@@ -108,13 +108,13 @@ class VedtaksperiodeUtilTest {
             vedtak = vedtak,
             fom = LocalDate.now().minusYears(3).førsteDagIInneværendeMåned(),
             tom = b2bFomUtbetalingsperiode.minusMonths(1).sisteDagIMåned(),
-            type = Vedtaksperiodetype.UTBETALING
+            type = Vedtaksperiodetype.UTBETALING,
         )
         val utbetalingsperiode2 = VedtaksperiodeMedBegrunnelser(
             vedtak = vedtak,
             fom = b2bFomUtbetalingsperiode,
             tom = LocalDate.now().plusYears(1).sisteDagIMåned(),
-            type = Vedtaksperiodetype.UTBETALING
+            type = Vedtaksperiodetype.UTBETALING,
         )
 
         val b2bFom1 = LocalDate.now().minusMonths(6).førsteDagIInneværendeMåned()
@@ -124,24 +124,24 @@ class VedtaksperiodeUtilTest {
             vedtak = vedtak,
             fom = LocalDate.now().minusYears(1).plusMonths(1).førsteDagIInneværendeMåned(),
             tom = b2bFom1.minusMonths(1).sisteDagIMåned(),
-            type = Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING
+            type = Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING,
         )
         val reduksjonsperiode2 = VedtaksperiodeMedBegrunnelser(
             vedtak = vedtak,
             fom = b2bFom1,
             tom = b2bFom2.minusMonths(1).sisteDagIMåned(),
-            type = Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING
+            type = Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING,
         )
         val reduksjonsperiode3 = VedtaksperiodeMedBegrunnelser(
             vedtak = vedtak,
             fom = b2bFom2,
             tom = LocalDate.now().plusMonths(6).sisteDagIMåned(),
-            type = Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING
+            type = Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING,
         )
 
         val oppdaterteUtbetalingsperioder = oppdaterUtbetalingsperioderMedReduksjonFraForrigeBehandling(
             utbetalingsperioder = listOf(utbetalingsperiode1, utbetalingsperiode2),
-            reduksjonsperioder = listOf(reduksjonsperiode1, reduksjonsperiode2, reduksjonsperiode3)
+            reduksjonsperioder = listOf(reduksjonsperiode1, reduksjonsperiode2, reduksjonsperiode3),
         )
 
         Assertions.assertEquals(4, oppdaterteUtbetalingsperioder.size)
@@ -161,7 +161,7 @@ class VedtaksperiodeUtilTest {
 
         Assertions.assertEquals(
             Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING,
-            periode3.type
+            periode3.type,
         )
         Assertions.assertEquals(reduksjonsperiode1.fom, periode3.fom)
         Assertions.assertEquals(reduksjonsperiode3.tom, periode3.tom)
@@ -186,45 +186,45 @@ class VedtaksperiodeUtilTest {
                 vedtak = vedtak,
                 fom = fom1,
                 tom = fom2.minusMonths(1).sisteDagIMåned(),
-                type = Vedtaksperiodetype.UTBETALING
+                type = Vedtaksperiodetype.UTBETALING,
             ),
             VedtaksperiodeMedBegrunnelser(
                 vedtak = vedtak,
                 fom = fom2,
                 tom = fom3.minusMonths(1).sisteDagIMåned(),
-                type = Vedtaksperiodetype.UTBETALING
+                type = Vedtaksperiodetype.UTBETALING,
             ),
             VedtaksperiodeMedBegrunnelser(
                 vedtak = vedtak,
                 fom = fom3,
                 tom = sisteTom,
-                type = Vedtaksperiodetype.UTBETALING
-            )
+                type = Vedtaksperiodetype.UTBETALING,
+            ),
         )
         val reduksjonsperioder = listOf(
             VedtaksperiodeMedBegrunnelser(
                 vedtak = vedtak,
                 fom = fomReduksjon,
                 tom = fom2.minusMonths(1).sisteDagIMåned(),
-                type = Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING
+                type = Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING,
             ),
             VedtaksperiodeMedBegrunnelser(
                 vedtak = vedtak,
                 fom = fom2,
                 tom = fom3.minusMonths(1).sisteDagIMåned(),
-                type = Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING
+                type = Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING,
             ),
             VedtaksperiodeMedBegrunnelser(
                 vedtak = vedtak,
                 fom = fom3,
                 tom = sisteTom,
-                type = Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING
-            )
+                type = Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING,
+            ),
         )
 
         val oppdaterteUtbetalingsperioder = oppdaterUtbetalingsperioderMedReduksjonFraForrigeBehandling(
             utbetalingsperioder = utbetalingsperioder,
-            reduksjonsperioder = reduksjonsperioder
+            reduksjonsperioder = reduksjonsperioder,
         )
 
         Assertions.assertEquals(4, oppdaterteUtbetalingsperioder.size)
@@ -240,21 +240,21 @@ class VedtaksperiodeUtilTest {
 
         Assertions.assertEquals(
             Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING,
-            periode2.type
+            periode2.type,
         )
         Assertions.assertEquals(fomReduksjon, periode2.fom)
         Assertions.assertEquals(fom2.minusDays(1), periode2.tom)
 
         Assertions.assertEquals(
             Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING,
-            periode3.type
+            periode3.type,
         )
         Assertions.assertEquals(fom2, periode3.fom)
         Assertions.assertEquals(fom3.minusDays(1), periode3.tom)
 
         Assertions.assertEquals(
             Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING,
-            periode4.type
+            periode4.type,
         )
         Assertions.assertEquals(fom3, periode4.fom)
         Assertions.assertEquals(sisteTom, periode4.tom)
@@ -271,28 +271,28 @@ class VedtaksperiodeUtilTest {
                     søkersAktivitetsland = "NO",
                     søkersAktivitet = SøkersAktivitet.ARBEIDER,
                     annenForeldersAktivitetsland = "SE",
-                    barnAktører = setOf(Aktør("1234567891011", mutableSetOf()))
+                    barnAktører = setOf(Aktør("1234567891011", mutableSetOf())),
 
-                )
+                ),
             )
 
         val forventedeBegrunnelser =
             listOf(
                 EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_STANDARD,
                 EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_UK_STANDARD,
-                EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_UK_OG_UTLAND_STANDARD
+                EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_UK_OG_UTLAND_STANDARD,
             )
 
         val gyldigeEØSBegrunnelserForPeriode = hentGyldigeEØSBegrunnelserForPeriode(
             sanityEØSBegrunnelser = sanityEØSBegrunnelser,
             kompetanserIPeriode = kompetanserIPeriode,
             kompetanserSomStopperRettFørPeriode = emptyList(),
-            minimertVedtaksperiode = lagUtvidetVedtaksperiodeMedBegrunnelser(type = Vedtaksperiodetype.UTBETALING).tilMinimertVedtaksperiode()
+            minimertVedtaksperiode = lagUtvidetVedtaksperiodeMedBegrunnelser(type = Vedtaksperiodetype.UTBETALING).tilMinimertVedtaksperiode(),
         )
         Assertions.assertTrue(
             forventedeBegrunnelser.all {
                 gyldigeEØSBegrunnelserForPeriode.contains(it)
-            }
+            },
         )
     }
 
@@ -307,28 +307,28 @@ class VedtaksperiodeUtilTest {
                     søkersAktivitetsland = "NO",
                     søkersAktivitet = SøkersAktivitet.ARBEIDER,
                     annenForeldersAktivitetsland = "SE",
-                    barnAktører = setOf(Aktør("1234567891011", mutableSetOf()))
+                    barnAktører = setOf(Aktør("1234567891011", mutableSetOf())),
 
-                )
+                ),
             )
 
         val forventedeBegrunnelser =
             listOf(
                 EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BARNET_FLYTTET_TIL_NORGE,
-                EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BARNET_BOR_I_NORGE
+                EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BARNET_BOR_I_NORGE,
             )
 
         val gyldigeEØSBegrunnelserForPeriode = hentGyldigeEØSBegrunnelserForPeriode(
             sanityEØSBegrunnelser = sanityEØSBegrunnelser,
             kompetanserIPeriode = kompetanserIPeriode,
             kompetanserSomStopperRettFørPeriode = emptyList(),
-            minimertVedtaksperiode = lagUtvidetVedtaksperiodeMedBegrunnelser(type = Vedtaksperiodetype.UTBETALING).tilMinimertVedtaksperiode()
+            minimertVedtaksperiode = lagUtvidetVedtaksperiodeMedBegrunnelser(type = Vedtaksperiodetype.UTBETALING).tilMinimertVedtaksperiode(),
         )
 
         Assertions.assertTrue(
             forventedeBegrunnelser.all {
                 gyldigeEØSBegrunnelserForPeriode.contains(it)
-            }
+            },
         )
     }
 
@@ -340,19 +340,19 @@ class VedtaksperiodeUtilTest {
         val minimumForventedeBegrunnelser = listOf(
             EØSStandardbegrunnelse.AVSLAG_EØS_IKKE_EØS_BORGER,
             EØSStandardbegrunnelse.AVSLAG_EØS_IKKE_ANSVAR_FOR_BARN,
-            EØSStandardbegrunnelse.AVSLAG_EØS_SEPARASJONSAVTALEN_GJELDER_IKKE
+            EØSStandardbegrunnelse.AVSLAG_EØS_SEPARASJONSAVTALEN_GJELDER_IKKE,
         )
         val gyldigeEØSBegrunnelserForPeriode = hentGyldigeEØSBegrunnelserForPeriode(
             sanityEØSBegrunnelser = sanityEØSBegrunnelser,
             kompetanserIPeriode = emptyList(),
             kompetanserSomStopperRettFørPeriode = emptyList(),
-            minimertVedtaksperiode = minimertVedtaksperiode
+            minimertVedtaksperiode = minimertVedtaksperiode,
         )
 
         Assertions.assertTrue(
             minimumForventedeBegrunnelser.all {
                 gyldigeEØSBegrunnelserForPeriode.contains(it)
-            }
+            },
         )
     }
 

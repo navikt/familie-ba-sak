@@ -17,10 +17,11 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.OppdragParser.mapTilkjentYtel
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForIverksettingFactory
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForSimuleringFactory
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForUtbetalingsoppdrag
+import no.nav.familie.ba.sak.integrasjoner.økonomi.IdentOgYtelse
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGenerator
 import no.nav.familie.ba.sak.integrasjoner.økonomi.pakkInnForUtbetaling
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.gjeldendeForrigeOffsetForKjede
-import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.kjedeinndelteAndeler
+import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.grupperAndeler
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.oppdaterBeståendeAndelerMedOffset
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
@@ -64,7 +65,7 @@ class OppdragSteg {
     private fun beregnUtbetalingsoppdrag(
         acc: List<TilkjentYtelse>,
         tilkjentYtelse: TilkjentYtelse,
-        erSimulering: Boolean = false
+        erSimulering: Boolean = false,
     ): Utbetalingsoppdrag {
         val forrigeTilkjentYtelse = acc.lastOrNull()
 
@@ -83,7 +84,7 @@ class OppdragSteg {
             sisteOffsetPåFagsak = sisteOffsetPåFagsak?.toInt(),
             oppdaterteKjeder = oppdaterteKjeder,
             erSimulering = erSimulering,
-            endretMigreringsDato = null
+            endretMigreringsDato = null,
         )
     }
 
@@ -92,7 +93,7 @@ class OppdragSteg {
             ty.andelerTilkjentYtelse.maxOfOrNull {
                 it.periodeOffset ?: error(
                     "Mangler offset for behandling=${it.behandlingId} " +
-                        "andel=${it.id} fom=${it.stønadFom} tom=${it.stønadTom}"
+                        "andel=${it.id} fom=${it.stønadFom} tom=${it.stønadTom}",
                 )
             } ?: 0
         }
@@ -111,12 +112,12 @@ class OppdragSteg {
 
     private fun validerForventetUtbetalingsoppdrag(
         dataTable: DataTable,
-        beregnetUtbetalingsoppdrag: MutableMap<Long, Utbetalingsoppdrag>
+        beregnetUtbetalingsoppdrag: MutableMap<Long, Utbetalingsoppdrag>,
     ) {
         val medUtbetalingsperiode = true // TODO? Burde denne kunne sendes med som et flagg? Hva gjør den?
         val forventedeUtbetalingsoppdrag = OppdragParser.mapForventetUtbetalingsoppdrag(
             dataTable,
-            medUtbetalingsperiode = medUtbetalingsperiode
+            medUtbetalingsperiode = medUtbetalingsperiode,
         )
         forventedeUtbetalingsoppdrag.forEach { forventetUtbetalingsoppdrag ->
             val behandlingId = forventetUtbetalingsoppdrag.behandlingId
@@ -133,8 +134,8 @@ class OppdragSteg {
 
     private fun tilKjeder(
         tilkjentYtelse: TilkjentYtelse?,
-        erSimulering: Boolean = false
-    ): Map<String, List<AndelTilkjentYtelseForUtbetalingsoppdrag>> {
+        erSimulering: Boolean = false,
+    ): Map<IdentOgYtelse, List<AndelTilkjentYtelseForUtbetalingsoppdrag>> {
         val andelFactory = if (erSimulering) {
             AndelTilkjentYtelseForSimuleringFactory()
         } else {
@@ -144,7 +145,7 @@ class OppdragSteg {
         return (tilkjentYtelse?.andelerTilkjentYtelse ?: emptyList())
             .filter { it.erAndelSomSkalSendesTilOppdrag() }
             .pakkInnForUtbetaling(andelFactory)
-            .let { kjedeinndelteAndeler(it) }
+            .let { grupperAndeler(it) }
     }
 
     private fun genererBehandlinger(dataTable: DataTable) {
@@ -159,7 +160,7 @@ class OppdragSteg {
     private fun assertUtbetalingsoppdrag(
         forventetUtbetalingsoppdrag: ForventetUtbetalingsoppdrag,
         utbetalingsoppdrag: Utbetalingsoppdrag,
-        medUtbetalingsperiode: Boolean = true
+        medUtbetalingsperiode: Boolean = true,
     ) {
         assertThat(utbetalingsoppdrag.kodeEndring).isEqualTo(forventetUtbetalingsoppdrag.kodeEndring)
         assertThat(utbetalingsoppdrag.utbetalingsperiode).hasSize(forventetUtbetalingsoppdrag.utbetalingsperiode.size)
@@ -179,7 +180,7 @@ class OppdragSteg {
 
 private fun assertUtbetalingsperiode(
     utbetalingsperiode: Utbetalingsperiode,
-    forventetUtbetalingsperiode: ForventetUtbetalingsperiode
+    forventetUtbetalingsperiode: ForventetUtbetalingsperiode,
 ) {
     assertThat(utbetalingsperiode.erEndringPåEksisterendePeriode)
         .isEqualTo(forventetUtbetalingsperiode.erEndringPåEksisterendePeriode)

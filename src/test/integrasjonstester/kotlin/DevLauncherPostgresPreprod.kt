@@ -13,7 +13,7 @@ fun main(args: Array<String>) {
         "mock-tilbakekreving-klient",
         "task-scheduling",
         "mock-infotrygd-barnetrygd",
-        "mock-leader-client"
+        "mock-leader-client",
     )
 
     if (args.contains("--dbcontainer")) {

@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class InternStatistikkController(
-    private val internStatistikkService: InternStatistikkService
+    private val internStatistikkService: InternStatistikkService,
 ) {
 
     @GetMapping(path = ["internstatistikk"], produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -28,7 +28,7 @@ class InternStatistikkController(
             antallFagsakerTotalt = internStatistikkService.finnAntallFagsakerTotalt(),
             antallFagsakerLøpende = internStatistikkService.finnAntallFagsakerLøpende(),
             antallBehandlingerIkkeFerdigstilt = internStatistikkService.finnAntallBehandlingerIkkeErAvsluttet(),
-            antallBehandlingerPerÅrsak = internStatistikkService.finnAntallBehandlingerPerÅrsak()
+            antallBehandlingerPerÅrsak = internStatistikkService.finnAntallBehandlingerPerÅrsak(),
         )
         return ResponseEntity.ok(Ressurs.Companion.success(internstatistikk))
     }
@@ -43,5 +43,5 @@ data class InternStatistikkResponse(
     val antallFagsakerTotalt: Long,
     val antallFagsakerLøpende: Long,
     val antallBehandlingerIkkeFerdigstilt: Long,
-    val antallBehandlingerPerÅrsak: Map<BehandlingÅrsak, Long>
+    val antallBehandlingerPerÅrsak: Map<BehandlingÅrsak, Long>,
 )

@@ -14,7 +14,7 @@ class AutovedtakSatsendringScheduler(private val startSatsendring: StartSatsendr
             logger.info("Satsendring trigges av schedulert jobb")
             startSatsendring.startSatsendring(
                 antallFagsaker = 700,
-                satsTidspunkt = StartSatsendring.SATSENDRINGMÅNED_2023
+                satsTidspunkt = StartSatsendring.SATSENDRINGMÅNED_2023,
             )
         }
     }

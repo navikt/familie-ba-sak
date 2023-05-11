@@ -58,7 +58,7 @@ val simulertPosteringMock = listOf(
         posteringType = PosteringType.YTELSE,
         forfallsdato = LocalDate.parse("2021-02-23"),
         utenInntrekk = false,
-        erFeilkonto = null
+        erFeilkonto = null,
     ),
     SimulertPostering(
         fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
@@ -69,7 +69,7 @@ val simulertPosteringMock = listOf(
         posteringType = PosteringType.YTELSE,
         forfallsdato = LocalDate.parse("2021-02-23"),
         utenInntrekk = false,
-        erFeilkonto = null
+        erFeilkonto = null,
     ),
     SimulertPostering(
         fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
@@ -80,7 +80,7 @@ val simulertPosteringMock = listOf(
         posteringType = PosteringType.FEILUTBETALING,
         forfallsdato = LocalDate.parse("2021-02-23"),
         utenInntrekk = false,
-        erFeilkonto = null
+        erFeilkonto = null,
     ),
     SimulertPostering(
         fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
@@ -91,7 +91,7 @@ val simulertPosteringMock = listOf(
         posteringType = PosteringType.MOTP,
         forfallsdato = LocalDate.parse("2021-02-23"),
         utenInntrekk = false,
-        erFeilkonto = null
+        erFeilkonto = null,
     ),
     SimulertPostering(
         fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
@@ -102,7 +102,7 @@ val simulertPosteringMock = listOf(
         posteringType = PosteringType.YTELSE,
         forfallsdato = LocalDate.parse("2021-02-23"),
         utenInntrekk = false,
-        erFeilkonto = null
+        erFeilkonto = null,
     ),
     SimulertPostering(
         fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
@@ -113,7 +113,7 @@ val simulertPosteringMock = listOf(
         posteringType = PosteringType.YTELSE,
         forfallsdato = LocalDate.parse("2021-02-23"),
         utenInntrekk = false,
-        erFeilkonto = null
+        erFeilkonto = null,
     ),
     SimulertPostering(
         fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
@@ -124,7 +124,7 @@ val simulertPosteringMock = listOf(
         posteringType = PosteringType.YTELSE,
         forfallsdato = LocalDate.parse("2021-02-23"),
         utenInntrekk = false,
-        erFeilkonto = null
+        erFeilkonto = null,
     ),
     SimulertPostering(
         fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
@@ -135,7 +135,7 @@ val simulertPosteringMock = listOf(
         posteringType = PosteringType.FEILUTBETALING,
         forfallsdato = LocalDate.parse("2021-02-23"),
         utenInntrekk = false,
-        erFeilkonto = null
+        erFeilkonto = null,
     ),
     SimulertPostering(
         fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
@@ -146,7 +146,7 @@ val simulertPosteringMock = listOf(
         posteringType = PosteringType.MOTP,
         forfallsdato = LocalDate.parse("2021-02-23"),
         utenInntrekk = false,
-        erFeilkonto = null
+        erFeilkonto = null,
     ),
     SimulertPostering(
         fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
@@ -157,7 +157,7 @@ val simulertPosteringMock = listOf(
         posteringType = PosteringType.YTELSE,
         forfallsdato = LocalDate.parse("2021-02-23"),
         utenInntrekk = false,
-        erFeilkonto = null
+        erFeilkonto = null,
     ),
     SimulertPostering(
         fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
@@ -168,14 +168,14 @@ val simulertPosteringMock = listOf(
         posteringType = PosteringType.YTELSE,
         forfallsdato = LocalDate.parse("2024-05-10"),
         utenInntrekk = false,
-        erFeilkonto = null
-    )
+        erFeilkonto = null,
+    ),
 )
 
 val simuleringMottakerMock = listOf(
     SimuleringMottaker(
         simulertPostering = simulertPosteringMock,
         mottakerType = MottakerType.BRUKER,
-        mottakerNummer = "12345678910"
-    )
+        mottakerNummer = "12345678910",
+    ),
 )

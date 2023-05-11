@@ -46,7 +46,7 @@ class SaksstatistikkService(
     private val personopplysningerService: PersonopplysningerService,
     private val persongrunnlagService: PersongrunnlagService,
     private val vedtaksperiodeService: VedtaksperiodeService,
-    private val settPåVentService: SettPåVentService
+    private val settPåVentService: SettPåVentService,
 ) {
 
     fun mapTilBehandlingDVH(behandlingId: Long): BehandlingDVH? {
@@ -114,7 +114,7 @@ class SaksstatistikkService(
             behandlingOpprettetTypeBeskrivelse = "saksbehandlerId. VL ved automatisk behandling",
             beslutter = totrinnskontroll?.beslutterId,
             saksbehandler = totrinnskontroll?.saksbehandlerId,
-            settPaaVent = hentSettPåVentDVH(behandlingId)
+            settPaaVent = hentSettPåVentDVH(behandlingId),
         )
     }
 
@@ -123,7 +123,7 @@ class SaksstatistikkService(
         return SettPåVent(
             frist = settPåVent.frist.atStartOfDay(TIMEZONE),
             tidSattPaaVent = settPåVent.tidSattPåVent.atStartOfDay(TIMEZONE),
-            aarsak = settPåVent.årsak.name
+            aarsak = settPåVent.årsak.name,
         )
     }
 
@@ -141,7 +141,7 @@ class SaksstatistikkService(
                 }
                 AktørDVH(
                     it.aktør.aktørId.toLong(),
-                    it.type.name
+                    it.type.name,
                 )
             }
         } else {
@@ -160,7 +160,7 @@ class SaksstatistikkService(
             sakStatus = fagsak.status.name,
             avsender = "familie-ba-sak",
             versjon = hentPropertyFraMaven("familie.kontrakter.saksstatistikk") ?: "2",
-            bostedsland = landkodeSøker
+            bostedsland = landkodeSøker,
         )
     }
 
@@ -169,7 +169,7 @@ class SaksstatistikkService(
             "NO"
         } else {
             personopplysningerService.hentLandkodeAlpha2UtenlandskBostedsadresse(
-                person.aktør
+                person.aktør,
             )
         }
     }
@@ -181,7 +181,7 @@ class SaksstatistikkService(
             "NO"
         } else {
             personopplysningerService.hentLandkodeAlpha2UtenlandskBostedsadresse(
-                aktør
+                aktør,
             )
         }
     }
@@ -207,7 +207,7 @@ class SaksstatistikkService(
                             fom = vedtaksperiode.fom,
                             tom = vedtaksperiode.tom,
                             type = it.standardbegrunnelse.vedtakBegrunnelseType.name,
-                            vedtakBegrunnelse = it.standardbegrunnelse.name
+                            vedtakBegrunnelse = it.standardbegrunnelse.name,
                         )
                     }
             }

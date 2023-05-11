@@ -34,5 +34,5 @@ data class DataChunk(
     val chunkNr: Int,
 
     @Column(name = "er_sendt", nullable = false)
-    var erSendt: Boolean = false
+    var erSendt: Boolean = false,
 )

@@ -54,12 +54,12 @@ class VilkårsvurderingStegTest {
         persongrunnlagService,
         tilbakestillBehandlingService,
         tilpassKompetanserTilRegelverkService,
-        vilkårsvurderingForNyBehandlingService
+        vilkårsvurderingForNyBehandlingService,
     )
 
     val behandling = lagBehandling(
         behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-        årsak = BehandlingÅrsak.HELMANUELL_MIGRERING
+        årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
     )
     val søker = lagPerson(type = PersonType.SØKER, fødselsdato = LocalDate.of(1984, 1, 1))
     val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 1, 1))
@@ -69,11 +69,11 @@ class VilkårsvurderingStegTest {
         every { persongrunnlagService.hentAktivThrows(behandling.id) } returns lagTestPersonopplysningGrunnlag(
             behandlingId = behandling.id,
             søkerPersonIdent = søker.aktør.aktivFødselsnummer(),
-            barnasIdenter = listOf(barn.aktør.aktivFødselsnummer())
+            barnasIdenter = listOf(barn.aktør.aktivFødselsnummer()),
         )
         every { tilbakestillBehandlingService.tilbakestillDataTilVilkårsvurderingssteg(behandling) } returns Unit
-        every { beregningService.genererTilkjentYtelseFraVilkårsvurderingSteg(any(), any()) } returns lagInitiellTilkjentYtelse(
-            behandling
+        every { beregningService.genererTilkjentYtelseFraVilkårsvurdering(any(), any()) } returns lagInitiellTilkjentYtelse(
+            behandling,
         )
 
         every { tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(BehandlingId(behandling.id)) } just Runs
@@ -90,7 +90,7 @@ class VilkårsvurderingStegTest {
             periodeTom = LocalDate.now(),
             lagFullstendigVilkårResultat = true,
             personType = PersonType.SØKER,
-            erDeltBosted = false
+            erDeltBosted = false,
         )
         val barnPersonResultat = lagPersonResultat(
             vilkårsvurdering = vikårsvurdering,
@@ -100,7 +100,7 @@ class VilkårsvurderingStegTest {
             periodeTom = LocalDate.now(),
             lagFullstendigVilkårResultat = true,
             personType = PersonType.BARN,
-            erDeltBosted = true
+            erDeltBosted = true,
         )
         vikårsvurdering.personResultater = setOf(søkerPersonResultat, barnPersonResultat)
         every { vilkårService.hentVilkårsvurderingThrows(behandling.id) } returns vikårsvurdering
@@ -158,7 +158,7 @@ class VilkårsvurderingStegTest {
         val exception = assertThrows<RuntimeException> { vilkårsvurderingSteg.preValiderSteg(behandling, null) }
         assertEquals(
             "Det er forskjellig regelverk for en eller flere perioder for søker eller barna",
-            exception.message
+            exception.message,
         )
     }
 }

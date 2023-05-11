@@ -15,11 +15,12 @@ class FeatureToggleConfig {
         const val ER_MANUEL_POSTERING_TOGGLE_PÅ = "familie-ba-sak.manuell-postering"
         const val VEDTAKSPERIODE_NY = "familie-ba-sak.vedtaksperiode-ny"
         const val SATSENDRING_KUN_OPPDATERE_SATS = "familie-ba-sak.behandling.satsendring-oppdater-andeler"
+        const val KAN_MIGRERE_ENSLIG_MINDREÅRIG = "familie-ba-sak.migrer-enslig-mindreaarig"
+        const val FEILUTBETALT_VALUTA_PR_MND = "familie-ba-sak.feilutbetalt-valuta-pr-mnd"
 
         // unleash toggles for satsendring, kan slettes etter at satsendring er skrudd på for alle satstyper
         const val SATSENDRING_ENABLET: String = "familie-ba-sak.satsendring-enablet"
         const val SATSENDRING_OPPRETT_TASKER = "familie-ba-sak.satsendring-opprett-satsendring-task"
-        const val SATSENDRING_SJEKK_UTBETALING = "familie-ba-sak.satsendring-sjekk-utbetaling"
     }
 }
 

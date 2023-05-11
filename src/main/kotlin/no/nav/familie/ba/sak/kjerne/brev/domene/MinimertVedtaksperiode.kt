@@ -15,12 +15,12 @@ data class MinimertVedtaksperiode(
     val begrunnelser: List<BegrunnelseMedTriggere>,
     val eøsBegrunnelser: List<EØSBegrunnelseMedTriggere>,
     val fritekster: List<String> = emptyList(),
-    val minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj> = emptyList()
+    val minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj> = emptyList(),
 )
 
 fun UtvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(
     sanityBegrunnelser: List<SanityBegrunnelse>,
-    sanityEØSBegrunnelser: List<SanityEØSBegrunnelse>
+    sanityEØSBegrunnelser: List<SanityEØSBegrunnelse>,
 ): MinimertVedtaksperiode {
     return MinimertVedtaksperiode(
         fom = this.fom,
@@ -31,9 +31,9 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(
         begrunnelser = this.begrunnelser.map { it.tilBegrunnelseMedTriggere(sanityBegrunnelser) },
         eøsBegrunnelser = this.eøsBegrunnelser.mapNotNull {
             it.begrunnelse.tilEØSBegrunnelseMedTriggere(
-                sanityEØSBegrunnelser
+                sanityEØSBegrunnelser,
             )
-        }
+        },
     )
 }
 
@@ -42,7 +42,7 @@ fun MinimertVedtaksperiode.tilBrevPeriodeForLogging(
     uregistrerteBarn: List<MinimertUregistrertBarn> = emptyList(),
     erFørsteVedtaksperiodePåFagsak: Boolean = false,
     brevMålform: Målform,
-    barnMedReduksjonFraForrigeBehandlingIdent: List<String> = emptyList()
+    barnMedReduksjonFraForrigeBehandlingIdent: List<String> = emptyList(),
 ): BrevPeriodeForLogging {
     return BrevPeriodeForLogging(
         fom = this.fom,
@@ -54,11 +54,11 @@ fun MinimertVedtaksperiode.tilBrevPeriodeForLogging(
             it.tilBrevPeriodeTestPerson(
                 brevPeriodeGrunnlag = this,
                 restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
-                barnMedReduksjonFraForrigeBehandlingIdent = barnMedReduksjonFraForrigeBehandlingIdent
+                barnMedReduksjonFraForrigeBehandlingIdent = barnMedReduksjonFraForrigeBehandlingIdent,
             )
         },
         uregistrerteBarn = uregistrerteBarn.map { it.copy(personIdent = "", navn = "") },
         erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
-        brevMålform = brevMålform
+        brevMålform = brevMålform,
     )
 }

@@ -24,7 +24,7 @@ data class RestFinnOppgaveRequest(
     val aktivFomDato: LocalDate? = null,
     val aktivTomDato: LocalDate? = null,
     val limit: Long? = null,
-    val offset: Long? = null
+    val offset: Long? = null,
 ) {
 
     fun tilFinnOppgaveRequest(): FinnOppgaveRequest = FinnOppgaveRequest(
@@ -44,6 +44,6 @@ data class RestFinnOppgaveRequest(
         aktivFomDato = this.aktivFomDato,
         aktivTomDato = this.aktivTomDato,
         limit = this.limit,
-        offset = this.offset
+        offset = this.offset,
     )
 }

@@ -48,7 +48,7 @@ class SaksstatistikkTest(
     private val databaseCleanupService: DatabaseCleanupService,
 
     @Autowired
-    private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository
+    private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
 ) : AbstractSpringIntegrationTest() {
 
     private lateinit var saksstatistikkScheduler: SaksstatistikkScheduler
@@ -82,7 +82,7 @@ class SaksstatistikkTest(
         assertNull(mellomlagredeStatistikkHendelser.first().sendtTidspunkt)
         assertEquals(
             hentPropertyFraMaven("familie.kontrakter.saksstatistikk"),
-            mellomlagredeStatistikkHendelser.first().kontraktVersjon
+            mellomlagredeStatistikkHendelser.first().kontraktVersjon,
         )
 
         val lagretJsonSomSakDVH: SakDVH =
@@ -117,8 +117,8 @@ class SaksstatistikkTest(
         val behandling = behandlingService.opprettBehandling(
             nyOrdinærBehandling(
                 søkersIdent = fnr,
-                fagsakId = fagsak.id
-            )
+                fagsakId = fagsak.id,
+            ),
         )
 
         behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.id, BehandlingStatus.AVSLUTTET)
@@ -130,7 +130,7 @@ class SaksstatistikkTest(
         assertNull(mellomlagretBehandling.first().sendtTidspunkt)
         assertEquals(
             hentPropertyFraMaven("familie.kontrakter.saksstatistikk"),
-            mellomlagretBehandling.first().kontraktVersjon
+            mellomlagretBehandling.first().kontraktVersjon,
         )
         assertEquals("UTREDES", mellomlagretBehandling.first().jsonToBehandlingDVH().behandlingStatus)
         assertEquals("AVSLUTTET", mellomlagretBehandling.last().jsonToBehandlingDVH().behandlingStatus)
