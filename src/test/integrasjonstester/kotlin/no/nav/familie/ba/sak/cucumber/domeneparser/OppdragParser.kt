@@ -76,6 +76,7 @@ object OppdragParser {
             fom = parseÅrMåned(Domenebegrep.FRA_DATO, it).atDay(1),
             tom = parseÅrMåned(Domenebegrep.TIL_DATO, it).atEndOfMonth(),
             opphør = parseValgfriÅrMåned(DomenebegrepUtbetalingsoppdrag.OPPHØRSDATO, it)?.atDay(1),
+            kildebehandlingId = parseValgfriLong(DomenebegrepTilkjentYtelse.KILDEBEHANDLING_ID, it),
         )
 
     private fun validerAlleKodeEndringerLike(rader: List<Map<String, String>>) {
@@ -99,7 +100,7 @@ object OppdragParser {
             beløp = parseInt(DomenebegrepTilkjentYtelse.BELØP, rad),
             behandling = behandling,
             tilkjentYtelse = null,
-            kildeBehandlingId = parseLong(DomenebegrepTilkjentYtelse.KILDEBEHANDLING_ID, rad),
+            kildeBehandlingId = parseValgfriLong(DomenebegrepTilkjentYtelse.KILDEBEHANDLING_ID, rad),
             aktør = parseAktør(rad),
             periodeIdOffset = parseValgfriLong(DomenebegrepUtbetalingsoppdrag.PERIODE_ID, rad),
             forrigeperiodeIdOffset = parseValgfriLong(DomenebegrepUtbetalingsoppdrag.FORRIGE_PERIODE_ID, rad),
@@ -149,4 +150,5 @@ data class ForventetUtbetalingsperiode(
     val fom: LocalDate,
     val tom: LocalDate,
     val opphør: LocalDate?,
+    val kildebehandlingId: Long?,
 )
