@@ -67,6 +67,8 @@ class KompetanseController(
             handling = "Sletter kompetanse",
         )
 
+
+        kompetanseService.slettKompetanse(BehandlingId(behandlingId), kompetanseId)
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
 

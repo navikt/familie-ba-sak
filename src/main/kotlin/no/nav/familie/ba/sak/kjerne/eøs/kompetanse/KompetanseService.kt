@@ -29,8 +29,8 @@ class KompetanseService(
         skjemaService.endreSkjemaer(behandlingId, oppdatering)
 
     @Transactional
-    fun slettKompetanse(kompetanseId: Long) =
-        skjemaService.slettSkjema(kompetanseId)
+    fun slettKompetanse(behandlingId: BehandlingId, kompetanseId: Long) =
+        skjemaService.slettSkjema(behandlingId, kompetanseId)
 
     @Transactional
     fun kopierOgErstattKompetanser(fraBehandlingId: BehandlingId, tilBehandlingId: BehandlingId) =

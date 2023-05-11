@@ -69,7 +69,7 @@ class UtenlandskPeriodebeløpController(
             handling = "Sletter utenlandsk periodebeløp",
         )
 
-        utenlandskPeriodebeløpService.slettUtenlandskPeriodebeløp(utenlandskPeriodebeløpId)
+        utenlandskPeriodebeløpService.slettUtenlandskPeriodebeløp(BehandlingId(behandlingId), utenlandskPeriodebeløpId)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }

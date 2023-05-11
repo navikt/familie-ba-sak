@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
+import no.nav.familie.ba.sak.common.feilHvis
 import no.nav.familie.ba.sak.ekstern.restDomene.RestAnnenVurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingRepository
@@ -24,18 +25,24 @@ class AnnenVurderingService(
 
     @Transactional
     fun endreAnnenVurdering(
+        behandlingId: Long,
         annenVurderingId: Long,
         restAnnenVurdering: RestAnnenVurdering,
     ) {
-        hent(annenVurderingId = annenVurderingId).let {
-            annenVurderingRepository.save(
-                it.also {
-                    it.resultat = restAnnenVurdering.resultat
-                    it.begrunnelse = restAnnenVurdering.begrunnelse
-                    it.type = restAnnenVurdering.type
-                },
-            )
+        val vurdering = hent(annenVurderingId = annenVurderingId)
+        val behandling = vurdering.personResultat.vilkårsvurdering.behandling
+
+        val behandlingIdForVurdering = behandling.id
+        feilHvis(behandlingIdForVurdering != behandlingId) {
+            "Prøver å oppdatere en vurdering=$annenVurderingId koblet til en annen($behandlingIdForVurdering) behandling enn $behandlingId"
         }
+        annenVurderingRepository.save(
+            vurdering.also {
+                it.resultat = restAnnenVurdering.resultat
+                it.begrunnelse = restAnnenVurdering.begrunnelse
+                it.type = restAnnenVurdering.type
+            },
+        )
     }
 }
 

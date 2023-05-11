@@ -69,7 +69,7 @@ class ValutakursController(
             handling = "Sletter valutakurs",
         )
 
-        valutakursService.slettValutakurs(valutakursId)
+        valutakursService.slettValutakurs(BehandlingId(behandlingId), valutakursId)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }

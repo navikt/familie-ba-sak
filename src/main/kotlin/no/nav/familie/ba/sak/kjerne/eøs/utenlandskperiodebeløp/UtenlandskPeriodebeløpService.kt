@@ -23,8 +23,8 @@ class UtenlandskPeriodebeløpService(
     fun oppdaterUtenlandskPeriodebeløp(behandlingId: BehandlingId, utenlandskPeriodebeløp: UtenlandskPeriodebeløp) =
         skjemaService.endreSkjemaer(behandlingId, utenlandskPeriodebeløp)
 
-    fun slettUtenlandskPeriodebeløp(utenlandskPeriodebeløpId: Long) =
-        skjemaService.slettSkjema(utenlandskPeriodebeløpId)
+    fun slettUtenlandskPeriodebeløp(behandlingId: BehandlingId, utenlandskPeriodebeløpId: Long) =
+        skjemaService.slettSkjema(behandlingId, utenlandskPeriodebeløpId)
 
     @Transactional
     fun kopierOgErstattUtenlandskPeriodebeløp(fraBehandlingId: BehandlingId, tilBehandlingId: BehandlingId) =
