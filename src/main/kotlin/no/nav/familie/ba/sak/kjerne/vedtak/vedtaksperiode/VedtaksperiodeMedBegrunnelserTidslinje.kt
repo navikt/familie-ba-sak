@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilSisteDagIMåneden
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 
 open class VedtaksperiodeMedBegrunnelserTidslinje(
-    private val vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>
+    private val vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>,
 ) : Tidslinje<VedtaksperiodeMedBegrunnelser, Dag>() {
 
     override fun lagPerioder(): List<Periode<VedtaksperiodeMedBegrunnelser, Dag>> =
@@ -18,7 +18,7 @@ open class VedtaksperiodeMedBegrunnelserTidslinje(
             Periode(
                 fraOgMed = it.fom.tilTidspunktEllerTidligereEnn(it.tom),
                 tilOgMed = it.tom.tilTidspunktEllerSenereEnn(it.fom),
-                innhold = it
+                innhold = it,
             )
         }
 }
@@ -27,6 +27,6 @@ fun Tidslinje<VedtaksperiodeMedBegrunnelser, Dag>.lagVedtaksperioderMedBegrunnel
     this.perioder().mapNotNull {
         it.innhold?.copy(
             fom = it.fraOgMed.tilFørsteDagIMåneden().tilLocalDateEllerNull(),
-            tom = it.tilOgMed.tilSisteDagIMåneden().tilLocalDateEllerNull()
+            tom = it.tilOgMed.tilSisteDagIMåneden().tilLocalDateEllerNull(),
         )
     }

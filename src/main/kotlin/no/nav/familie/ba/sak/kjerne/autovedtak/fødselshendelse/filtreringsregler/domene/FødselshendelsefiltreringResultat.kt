@@ -26,7 +26,7 @@ class FødselshendelsefiltreringResultat(
     @SequenceGenerator(
         name = "foedselshendelsefiltrering_resultat_seq_generator",
         sequenceName = "foedselshendelsefiltrering_resultat_seq",
-        allocationSize = 50
+        allocationSize = 50,
     )
     val id: Long = 0,
 
@@ -49,7 +49,7 @@ class FødselshendelsefiltreringResultat(
     val evalueringsårsaker: List<String> = emptyList(),
 
     @Column(name = "regel_input", columnDefinition = "TEXT")
-    val regelInput: String? = null
+    val regelInput: String? = null,
 ) : BaseEntitet() {
 
     override fun toString(): String {

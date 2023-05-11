@@ -25,19 +25,19 @@ internal class AutobrevTaskTest {
     private val autobrevTask = AutobrevTask(
         fagsakRepository = fagsakRepository,
         behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-        opprettTaskService = opprettTaskService
+        opprettTaskService = opprettTaskService,
     )
 
     private val autoBrevTask = Task(
         type = AutobrevTask.TASK_STEP_TYPE,
-        payload = ""
+        payload = "",
     )
 
     @Test
     fun `oppretter autobrev tasker for 6 år, 2 for 18 år og 1 for småbarnstillegg`() {
         val fagsaker = setOf(
             Fagsak(1, aktør = tilAktør(randomFnr())),
-            Fagsak(2, aktør = tilAktør(randomFnr()))
+            Fagsak(2, aktør = tilAktør(randomFnr())),
         )
 
         every { fagsakRepository.finnLøpendeFagsakMedBarnMedFødselsdatoInnenfor(any(), any()) } answers { fagsaker }

@@ -25,13 +25,13 @@ import org.springframework.stereotype.Service
 @TaskStepBeskrivelse(
     taskStepType = TASK_STEP_TYPE,
     beskrivelse = "Henter status fra oppdrag",
-    maxAntallFeil = 100
+    maxAntallFeil = 100,
 )
 class StatusFraOppdragTask(
     private val stegService: StegService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val personidentService: PersonidentService,
-    private val taskRepository: TaskRepositoryWrapper
+    private val taskRepository: TaskRepositoryWrapper,
 ) : AsyncTaskStep {
 
     /**
@@ -43,7 +43,7 @@ class StatusFraOppdragTask(
 
         stegService.håndterStatusFraØkonomi(
             behandling = behandlingHentOgPersisterService.hent(behandlingId = statusFraOppdragDTO.behandlingsId),
-            statusFraOppdragMedTask = StatusFraOppdragMedTask(statusFraOppdragDTO = statusFraOppdragDTO, task = task)
+            statusFraOppdragMedTask = StatusFraOppdragMedTask(statusFraOppdragDTO = statusFraOppdragDTO, task = task),
         )
     }
 

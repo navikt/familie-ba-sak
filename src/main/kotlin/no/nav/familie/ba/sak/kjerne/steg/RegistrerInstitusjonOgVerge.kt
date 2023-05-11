@@ -16,32 +16,32 @@ class RegistrerInstitusjonOgVerge(
     val vergeService: VergeService,
     val loggService: LoggService,
     val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    val fagsakService: FagsakService
+    val fagsakService: FagsakService,
 ) : BehandlingSteg<RestRegistrerInstitusjonOgVerge> {
 
     override fun utførStegOgAngiNeste(
         behandling: Behandling,
-        data: RestRegistrerInstitusjonOgVerge
+        data: RestRegistrerInstitusjonOgVerge,
     ): StegType {
         val verge = data.tilVerge(behandling)
         val institusjon = data.tilInstitusjon()
         if (verge != null) {
             vergeService.oppdaterVergeForBehandling(behandling, verge)
             loggService.opprettRegistrerVergeLogg(
-                behandling
+                behandling,
             )
         }
         if (institusjon != null) {
             institusjonService.hentEllerOpprettInstitusjon(
                 orgNummer = institusjon.orgNummer,
-                tssEksternId = institusjon.tssEksternId
+                tssEksternId = institusjon.tssEksternId,
             ).apply {
                 val fagsak = behandling.fagsak
                 fagsak.institusjon = this
                 fagsakService.lagre(fagsak)
             }
             loggService.opprettRegistrerInstitusjonLogg(
-                behandling
+                behandling,
             )
         }
 

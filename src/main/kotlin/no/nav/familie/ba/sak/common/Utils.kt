@@ -28,9 +28,9 @@ object Utils {
             reader.read(
                 InputStreamReader(
                     ClassPathResource(
-                        "META-INF/maven/no.nav.familie.ba.sak/familie-ba-sak/pom.xml"
-                    ).inputStream
-                )
+                        "META-INF/maven/no.nav.familie.ba.sak/familie-ba-sak/pom.xml",
+                    ).inputStream,
+                ),
             )
         }
 

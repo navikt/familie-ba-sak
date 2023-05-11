@@ -22,7 +22,7 @@ import java.math.BigDecimal
 import java.time.LocalDate
 
 class EndretUtbetalingAndelMedUtvidetAndelTest(
-    @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
+    @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
 ) : AbstractVerdikjedetest() {
 
     @Test
@@ -37,10 +37,10 @@ class EndretUtbetalingAndelMedUtvidetAndelTest(
                         fødselsdato = barnFødselsdato.toString(),
                         fornavn = "Barn",
                         etternavn = "Barnesen",
-                        bostedsadresser = emptyList()
-                    )
-                )
-            )
+                        bostedsadresser = emptyList(),
+                    ),
+                ),
+            ),
         )
 
         val søkersIdent = scenario.søker.ident!!
@@ -49,7 +49,7 @@ class EndretUtbetalingAndelMedUtvidetAndelTest(
         val restUtvidetBehandling = familieBaSakKlient().opprettBehandling(
             søkersIdent = søkersIdent,
             behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
-            fagsakId = fagsak.data!!.id
+            fagsakId = fagsak.data!!.id,
         ).data!!
 
         val restRegistrerSøknad =
@@ -57,14 +57,14 @@ class EndretUtbetalingAndelMedUtvidetAndelTest(
                 søknad = lagSøknadDTO(
                     søkerIdent = scenario.søker.ident,
                     barnasIdenter = scenario.barna.map { it.ident!! },
-                    underkategori = BehandlingUnderkategori.UTVIDET
+                    underkategori = BehandlingUnderkategori.UTVIDET,
                 ),
-                bekreftEndringerViaFrontend = false
+                bekreftEndringerViaFrontend = false,
             )
         val restBehandlingEtterRegistrertSøknad: Ressurs<RestUtvidetBehandling> =
             familieBaSakKlient().registrererSøknad(
                 behandlingId = restUtvidetBehandling.behandlingId,
-                restRegistrerSøknad = restRegistrerSøknad
+                restRegistrerSøknad = restRegistrerSøknad,
             )
 
         restBehandlingEtterRegistrertSøknad.data!!.personResultater.forEach { restPersonResultat ->
@@ -80,17 +80,17 @@ class EndretUtbetalingAndelMedUtvidetAndelTest(
                                 resultat = Resultat.OPPFYLT,
                                 periodeFom = barnFødselsdato,
                                 utdypendeVilkårsvurderinger = listOfNotNull(
-                                    if (it.vilkårType == Vilkår.BOR_MED_SØKER) UtdypendeVilkårsvurdering.DELT_BOSTED else null
-                                )
-                            )
-                        )
-                    )
+                                    if (it.vilkårType == Vilkår.BOR_MED_SØKER) UtdypendeVilkårsvurdering.DELT_BOSTED else null,
+                                ),
+                            ),
+                        ),
+                    ),
                 )
             }
         }
 
         val restBehandlingEtterBehandlingsresultat = familieBaSakKlient().validerVilkårsvurdering(
-            behandlingId = restBehandlingEtterRegistrertSøknad.data?.behandlingId!!
+            behandlingId = restBehandlingEtterRegistrertSøknad.data?.behandlingId!!,
         ).data!!
 
         val endretFom = barnFødselsdato.nesteMåned()
@@ -106,12 +106,12 @@ class EndretUtbetalingAndelMedUtvidetAndelTest(
             avtaletidspunktDeltBosted = LocalDate.now(),
             søknadstidspunkt = LocalDate.now(),
             begrunnelse = "begrunnelse",
-            erTilknyttetAndeler = true
+            erTilknyttetAndeler = true,
         )
 
         familieBaSakKlient().leggTilEndretUtbetalingAndel(
             restBehandlingEtterBehandlingsresultat.behandlingId,
-            restEndretUtbetalingAndelUtvidetBarnetrygd
+            restEndretUtbetalingAndelUtvidetBarnetrygd,
         )
 
         val restEndretUtbetalingAndelOrdinærBarnetrygd = RestEndretUtbetalingAndel(
@@ -124,16 +124,16 @@ class EndretUtbetalingAndelMedUtvidetAndelTest(
             avtaletidspunktDeltBosted = LocalDate.now(),
             søknadstidspunkt = LocalDate.now(),
             begrunnelse = "begrunnelse",
-            erTilknyttetAndeler = true
+            erTilknyttetAndeler = true,
         )
 
         familieBaSakKlient().leggTilEndretUtbetalingAndel(
             restBehandlingEtterBehandlingsresultat.behandlingId,
-            restEndretUtbetalingAndelOrdinærBarnetrygd
+            restEndretUtbetalingAndelOrdinærBarnetrygd,
         )
 
         familieBaSakKlient().behandlingsresultatStegOgGåVidereTilNesteSteg(
-            behandlingId = restBehandlingEtterBehandlingsresultat.behandlingId
+            behandlingId = restBehandlingEtterBehandlingsresultat.behandlingId,
         )
 
         val andelerTilkjentYtelseMedEndretPeriode =
@@ -144,22 +144,22 @@ class EndretUtbetalingAndelMedUtvidetAndelTest(
 
         Assertions.assertEquals(
             endredeAndelerTilkjentYtelse.single { it.aktør.aktivFødselsnummer() == scenario.barna.first().ident }.stønadFom,
-            endretFom
+            endretFom,
         )
 
         Assertions.assertEquals(
             endredeAndelerTilkjentYtelse.single { it.aktør.aktivFødselsnummer() == scenario.barna.first().ident }.stønadTom,
-            endretTom
+            endretTom,
         )
 
         Assertions.assertEquals(
             endredeAndelerTilkjentYtelse.single { it.aktør.aktivFødselsnummer() == scenario.søker.ident }.stønadFom,
-            endretFom
+            endretFom,
         )
 
         Assertions.assertEquals(
             endredeAndelerTilkjentYtelse.single { it.aktør.aktivFødselsnummer() == scenario.søker.ident }.stønadTom,
-            endretTom
+            endretTom,
         )
     }
 }

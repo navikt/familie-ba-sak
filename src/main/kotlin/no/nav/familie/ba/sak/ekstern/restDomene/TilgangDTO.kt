@@ -4,5 +4,5 @@ import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADE
 
 data class TilgangDTO(
     val saksbehandlerHarTilgang: Boolean,
-    val adressebeskyttelsegradering: ADRESSEBESKYTTELSEGRADERING
+    val adressebeskyttelsegradering: ADRESSEBESKYTTELSEGRADERING,
 )

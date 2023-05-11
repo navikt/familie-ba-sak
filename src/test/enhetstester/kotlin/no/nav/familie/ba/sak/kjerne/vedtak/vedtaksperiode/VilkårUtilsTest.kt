@@ -16,7 +16,7 @@ class VilkårUtilsTest {
 
     val vedtaksperiode: Periode = Periode(
         fom = LocalDate.now().minusMonths(2),
-        tom = LocalDate.now().plusMonths(4)
+        tom = LocalDate.now().plusMonths(4),
     )
 
     val triggesAv = lagTriggesAv(deltbosted = false, vurderingAnnetGrunnlag = false, medlemskap = false)
@@ -24,26 +24,26 @@ class VilkårUtilsTest {
         resultat = Resultat.IKKE_OPPFYLT,
         periodeFom = vedtaksperiode.fom,
         periodeTom = vedtaksperiode.tom,
-        personResultat = mockk(relaxed = true)
+        personResultat = mockk(relaxed = true),
     )
     val vilkårResultatIkkeOppfyltDelvisOverlapp: VilkårResultat = lagVilkårResultat(
         resultat = Resultat.IKKE_OPPFYLT,
         periodeFom = vedtaksperiode.fom.minusMonths(1),
         periodeTom = vedtaksperiode.tom.plusMonths(1),
-        personResultat = mockk(relaxed = true)
+        personResultat = mockk(relaxed = true),
     )
     val vilkårResultatUtenforPeriode: VilkårResultat = lagVilkårResultat(
         resultat = Resultat.IKKE_OPPFYLT,
         periodeFom = vedtaksperiode.tom.plusMonths(1),
         periodeTom = vedtaksperiode.tom.plusMonths(3),
-        personResultat = mockk(relaxed = true)
+        personResultat = mockk(relaxed = true),
     )
 
     val vilkårResultatOppfylt: VilkårResultat = lagVilkårResultat(
         resultat = Resultat.OPPFYLT,
         periodeFom = vedtaksperiode.fom,
         periodeTom = vedtaksperiode.tom,
-        personResultat = mockk(relaxed = true)
+        personResultat = mockk(relaxed = true),
     )
 
     @Test
@@ -53,18 +53,18 @@ class VilkårUtilsTest {
                 erFørsteVedtaksperiodePåFagsak = true,
                 vilkårResultat = vilkårResultatIkkeOppfylt.tilMinimertVilkårResultat(),
                 vedtaksperiode = vedtaksperiode,
-                triggesAv = triggesAv
+                triggesAv = triggesAv,
 
-            )
+            ),
         )
         Assertions.assertTrue(
             erFørstePeriodeOgVilkårIkkeOppfylt(
                 erFørsteVedtaksperiodePåFagsak = true,
                 vilkårResultat = vilkårResultatIkkeOppfyltDelvisOverlapp.tilMinimertVilkårResultat(),
                 vedtaksperiode = vedtaksperiode,
-                triggesAv = triggesAv
+                triggesAv = triggesAv,
 
-            )
+            ),
         )
     }
 
@@ -75,9 +75,9 @@ class VilkårUtilsTest {
                 erFørsteVedtaksperiodePåFagsak = false,
                 vilkårResultat = vilkårResultatIkkeOppfylt.tilMinimertVilkårResultat(),
                 vedtaksperiode = vedtaksperiode,
-                triggesAv = triggesAv
+                triggesAv = triggesAv,
 
-            )
+            ),
         )
     }
 
@@ -88,9 +88,9 @@ class VilkårUtilsTest {
                 erFørsteVedtaksperiodePåFagsak = true,
                 vilkårResultat = vilkårResultatOppfylt.tilMinimertVilkårResultat(),
                 vedtaksperiode = vedtaksperiode,
-                triggesAv = triggesAv
+                triggesAv = triggesAv,
 
-            )
+            ),
         )
     }
 
@@ -101,9 +101,9 @@ class VilkårUtilsTest {
                 erFørsteVedtaksperiodePåFagsak = true,
                 vilkårResultat = vilkårResultatUtenforPeriode.tilMinimertVilkårResultat(),
                 vedtaksperiode = vedtaksperiode,
-                triggesAv = triggesAv
+                triggesAv = triggesAv,
 
-            )
+            ),
         )
     }
 }

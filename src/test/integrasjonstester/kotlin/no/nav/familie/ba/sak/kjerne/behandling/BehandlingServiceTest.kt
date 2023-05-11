@@ -65,7 +65,7 @@ class BehandlingServiceTest(
     private val stegService: StegService,
 
     @Autowired
-    private val mockPersonopplysningerService: PersonopplysningerService
+    private val mockPersonopplysningerService: PersonopplysningerService,
 ) : AbstractSpringIntegrationTest() {
 
     @BeforeAll
@@ -80,7 +80,7 @@ class BehandlingServiceTest(
         val feilmelding = "Feil ved henting av personinformasjon"
         every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(any()) } answers {
             throw Feil(
-                feilmelding
+                feilmelding,
             )
         }
 
@@ -91,8 +91,8 @@ class BehandlingServiceTest(
             stegService.håndterNyBehandlingOgSendInfotrygdFeed(
                 nyOrdinærBehandling(
                     søkersIdent = fnr,
-                    fagsakId = fagsak.id
-                )
+                    fagsakId = fagsak.id,
+                ),
             )
         }
 
@@ -127,7 +127,7 @@ class BehandlingServiceTest(
         tilkjentYtelseRepository.save(
             lagInitiellTilkjentYtelse(behandling).also {
                 it.utbetalingsoppdrag = "Utbetalingsoppdrag()"
-            }
+            },
         )
         ferdigstillBehandling(behandling)
 
@@ -135,8 +135,8 @@ class BehandlingServiceTest(
             behandlingService.lagreNyOgDeaktiverGammelBehandling(
                 lagBehandling(
                     fagsak = fagsak,
-                    behandlingType = BehandlingType.REVURDERING
-                )
+                    behandlingType = BehandlingType.REVURDERING,
+                ),
             )
 
         val forrigeBehandling =
@@ -158,8 +158,8 @@ class BehandlingServiceTest(
                 behandling = behandling,
                 opprettetDato = LocalDate.now(),
                 endretDato = LocalDate.now(),
-                andelerTilkjentYtelse = mutableSetOf()
-            )
+                andelerTilkjentYtelse = mutableSetOf(),
+            ),
         )
 
         val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barn), true)
@@ -168,13 +168,13 @@ class BehandlingServiceTest(
             søkerPersonIdent = søker,
             barnasIdenter = listOf(barn),
             søkerAktør = fagsak.aktør,
-            barnAktør = barnAktør
+            barnAktør = barnAktør,
         )
         personopplysningGrunnlagRepository.save(testPersonopplysningsGrunnlag)
 
         assertEquals(
             0,
-            beregningService.finnBarnFraBehandlingMedTilkjentYtelse(behandlingId = behandling.id).size
+            beregningService.finnBarnFraBehandlingMedTilkjentYtelse(behandlingId = behandling.id).size,
         )
     }
 
@@ -182,7 +182,7 @@ class BehandlingServiceTest(
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.AVSLUTTET)
         behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(
             behandling.id,
-            StegType.BEHANDLING_AVSLUTTET
+            StegType.BEHANDLING_AVSLUTTET,
         )
     }
 }

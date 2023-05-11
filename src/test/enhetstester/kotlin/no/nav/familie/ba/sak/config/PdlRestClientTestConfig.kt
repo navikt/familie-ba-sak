@@ -33,13 +33,13 @@ class PdlRestClientTestConfig {
             forelderBarnRelasjon = setOf(
                 ForelderBarnRelasjon(
                     aktør = tilAktør("12345678910"),
-                    relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN
-                )
+                    relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
+                ),
             ),
             adressebeskyttelseGradering = null,
             sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT)),
             dødsfall = null,
-            kontaktinformasjonForDoedsbo = null
+            kontaktinformasjonForDoedsbo = null,
         )
         return klient
     }

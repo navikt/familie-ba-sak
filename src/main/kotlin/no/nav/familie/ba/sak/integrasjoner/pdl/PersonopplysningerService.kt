@@ -21,7 +21,7 @@ import org.springframework.stereotype.Service
 class PersonopplysningerService(
     private val pdlRestClient: PdlRestClient,
     private val systemOnlyPdlRestClient: SystemOnlyPdlRestClient,
-    private val familieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient
+    private val familieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient,
 ) {
 
     fun hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør: Aktør): PersonInfo {
@@ -39,7 +39,7 @@ class PersonopplysningerService(
                         relasjonsrolle = it.relasjonsrolle,
                         fødselsdato = relasjonsinfo.fødselsdato,
                         navn = relasjonsinfo.navn,
-                        adressebeskyttelseGradering = relasjonsinfo.adressebeskyttelseGradering
+                        adressebeskyttelseGradering = relasjonsinfo.adressebeskyttelseGradering,
                     )
                 } catch (pdlPersonKanIkkeBehandlesIFagsystem: PdlPersonKanIkkeBehandlesIFagsystem) {
                     logger.warn("Ignorerer relasjon: ${pdlPersonKanIkkeBehandlesIFagsystem.årsak}")
@@ -55,12 +55,12 @@ class PersonopplysningerService(
         val forelderBarnRelasjonMaskert = identerMedAdressebeskyttelse.map {
             ForelderBarnRelasjonMaskert(
                 relasjonsrolle = it.second,
-                adressebeskyttelseGradering = hentAdressebeskyttelseSomSystembruker(it.first)
+                adressebeskyttelseGradering = hentAdressebeskyttelseSomSystembruker(it.first),
             )
         }.toSet()
         return personinfo.copy(
             forelderBarnRelasjon = forelderBarnRelasjon,
-            forelderBarnRelasjonMaskert = forelderBarnRelasjonMaskert
+            forelderBarnRelasjonMaskert = forelderBarnRelasjonMaskert,
         )
     }
 
@@ -94,7 +94,7 @@ class PersonopplysningerService(
     fun hentGjeldendeOpphold(aktør: Aktør): Opphold = pdlRestClient.hentOppholdUtenHistorikk(aktør).firstOrNull()
         ?: throw Feil(
             message = "Bruker mangler opphold",
-            frontendFeilmelding = "Person (${aktør.aktivFødselsnummer()}) mangler opphold."
+            frontendFeilmelding = "Person (${aktør.aktivFødselsnummer()}) mangler opphold.",
         )
 
     fun hentLandkodeAlpha2UtenlandskBostedsadresse(aktør: Aktør): String {
@@ -125,7 +125,7 @@ class PersonopplysningerService(
                 land = PDL_UKJENT_LANDKODE,
                 bekreftelsesdato = null,
                 gyldigFraOgMed = null,
-                gyldigTilOgMed = null
+                gyldigTilOgMed = null,
             )
         private val logger: Logger =
             LoggerFactory.getLogger(PersonopplysningerService::class.java)

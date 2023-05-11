@@ -22,15 +22,15 @@ class AndelTilkjentYtelseUtledRegelverkTest {
         behandling = behandling,
         person = barnPerson,
         fom = YearMonth.now().minusMonths(4),
-        tom = YearMonth.now().plusMonths(1)
+        tom = YearMonth.now().plusMonths(1),
     )
 
     val vilkårsvurdering = Vilkårsvurdering(
-        behandling = behandling
+        behandling = behandling,
     )
     val personResultat = PersonResultat(
         vilkårsvurdering = vilkårsvurdering,
-        aktør = barnPerson.aktør
+        aktør = barnPerson.aktør,
     )
 
     @Test
@@ -63,15 +63,15 @@ class AndelTilkjentYtelseUtledRegelverkTest {
     private fun genererPersonresultat(
         regelVerkBosattIRiket: Regelverk = Regelverk.EØS_FORORDNINGEN,
         regelVerkLovligOpphold: Regelverk = Regelverk.EØS_FORORDNINGEN,
-        regelVerkBorMedSøker: Regelverk = Regelverk.EØS_FORORDNINGEN
+        regelVerkBorMedSøker: Regelverk = Regelverk.EØS_FORORDNINGEN,
     ): PersonResultat {
         val vilkårsvurdering = Vilkårsvurdering(
-            behandling = behandling
+            behandling = behandling,
         )
 
         val barnPersonResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            aktør = barnPerson.aktør
+            aktør = barnPerson.aktør,
         )
 
         val vilkårResultat = listOf(
@@ -82,8 +82,8 @@ class AndelTilkjentYtelseUtledRegelverkTest {
                 Vilkår.UNDER_18_ÅR,
                 Regelverk.NASJONALE_REGLER,
                 YearMonth.now().minusYears(1),
-                YearMonth.now().plusYears(17)
-            )
+                YearMonth.now().plusYears(17),
+            ),
         )
         barnPersonResultat.vilkårResultater.addAll(vilkårResultat)
         return barnPersonResultat

@@ -74,7 +74,7 @@ class FagsakServiceTest(
     private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
 
     @Autowired
-    private val mockFamilieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient
+    private val mockFamilieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient,
 ) : AbstractSpringIntegrationTest() {
 
     @BeforeAll
@@ -132,15 +132,15 @@ class FagsakServiceTest(
                     søker1Aktør,
                     FORELDERBARNRELASJONROLLE.MEDMOR,
                     "søker1",
-                    LocalDate.of(1990, 2, 19)
+                    LocalDate.of(1990, 2, 19),
                 ),
                 ForelderBarnRelasjon(
                     søker3Aktør,
                     FORELDERBARNRELASJONROLLE.MEDMOR,
                     "søker3",
-                    LocalDate.of(1990, 1, 10)
-                )
-            )
+                    LocalDate.of(1990, 1, 10),
+                ),
+            ),
         )
 
         every {
@@ -173,14 +173,14 @@ class FagsakServiceTest(
 
         val fagsak0 = fagsakService.hentEllerOpprettFagsak(
             FagsakRequest(
-                søker1Fnr
-            )
+                søker1Fnr,
+            ),
         )
 
         val fagsak1 = fagsakService.hentEllerOpprettFagsak(
             FagsakRequest(
-                søker2Fnr
-            )
+                søker2Fnr,
+            ),
         )
 
         val førsteBehandling = stegService.håndterNyBehandling(
@@ -190,12 +190,12 @@ class FagsakServiceTest(
                 søkersIdent = søker1Fnr,
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                 søknadMottattDato = LocalDate.now(),
-                fagsakId = fagsak0.data!!.id
-            )
+                fagsakId = fagsak0.data!!.id,
+            ),
         )
         stegService.håndterPersongrunnlag(
             førsteBehandling,
-            RegistrerPersongrunnlagDTO(ident = søker1Fnr, barnasIdenter = listOf(barn1Fnr))
+            RegistrerPersongrunnlagDTO(ident = søker1Fnr, barnasIdenter = listOf(barn1Fnr)),
         )
 
         behandlingService.oppdaterStatusPåBehandling(førsteBehandling.id, BehandlingStatus.AVSLUTTET)
@@ -207,15 +207,15 @@ class FagsakServiceTest(
                 søkersIdent = søker1Fnr,
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                 søknadMottattDato = LocalDate.now(),
-                fagsakId = fagsak0.data!!.id
-            )
+                fagsakId = fagsak0.data!!.id,
+            ),
         )
         stegService.håndterPersongrunnlag(
             andreBehandling,
             RegistrerPersongrunnlagDTO(
                 ident = søker1Fnr,
-                barnasIdenter = listOf(barn1Fnr, barn2Fnr)
-            )
+                barnasIdenter = listOf(barn1Fnr, barn2Fnr),
+            ),
         )
 
         val tredjeBehandling = stegService.håndterNyBehandling(
@@ -225,12 +225,12 @@ class FagsakServiceTest(
                 søkersIdent = søker2Fnr,
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                 søknadMottattDato = LocalDate.now(),
-                fagsakId = fagsak1.data!!.id
-            )
+                fagsakId = fagsak1.data!!.id,
+            ),
         )
         stegService.håndterPersongrunnlag(
             tredjeBehandling,
-            RegistrerPersongrunnlagDTO(ident = søker2Fnr, barnasIdenter = listOf(barn1Fnr))
+            RegistrerPersongrunnlagDTO(ident = søker2Fnr, barnasIdenter = listOf(barn1Fnr)),
         )
 
         val søkeresultat1 = fagsakService.hentFagsakDeltager(søker1Fnr)
@@ -262,7 +262,7 @@ class FagsakServiceTest(
         assertEquals(
             FagsakStatus.OPPRETTET.name,
             saksstatistikkMellomlagringRepository.findByTypeAndTypeId(SAK, fagsak.id)
-                .last().jsonToSakDVH().sakStatus
+                .last().jsonToSakDVH().sakStatus,
         )
     }
 
@@ -281,8 +281,8 @@ class FagsakServiceTest(
 
         val fagsak = fagsakService.hentEllerOpprettFagsak(
             FagsakRequest(
-                søker1Fnr
-            )
+                søker1Fnr,
+            ),
         )
 
         stegService.håndterNyBehandling(
@@ -292,12 +292,12 @@ class FagsakServiceTest(
                 søkersIdent = søker1Fnr,
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                 søknadMottattDato = LocalDate.now(),
-                fagsakId = fagsak.data!!.id
-            )
+                fagsakId = fagsak.data!!.id,
+            ),
         )
 
         fagsakService.lagre(
-            fagsakService.hentFagsakPåPerson(søker1Aktør).also { it?.arkivert = true }!!
+            fagsakService.hentFagsakPåPerson(søker1Aktør).also { it?.arkivert = true }!!,
         )
 
         val søkeresultat1 = fagsakService.hentFagsakDeltager(søker1Fnr)
@@ -321,12 +321,12 @@ class FagsakServiceTest(
 
         fagsakService.hentEllerOpprettFagsak(
             FagsakRequest(
-                søker1Fnr
-            )
+                søker1Fnr,
+            ),
         )
 
         fagsakService.lagre(
-            fagsakService.hentFagsakPåPerson(søker1Aktør).also { it?.arkivert = true }!!
+            fagsakService.hentFagsakPåPerson(søker1Aktør).also { it?.arkivert = true }!!,
         )
 
         val søkeresultat1 = fagsakService.hentFagsakDeltager(søker1Fnr)
@@ -349,7 +349,7 @@ class FagsakServiceTest(
             mor,
             listOf(barnFnr),
             søkerAktør = fagsakMor.aktør,
-            barnAktør = barnAktør
+            barnAktør = barnAktør,
         )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
@@ -363,7 +363,7 @@ class FagsakServiceTest(
             far,
             listOf(barnFnr),
             søkerAktør = fagsakFar.aktør,
-            barnAktør = barnAktør
+            barnAktør = barnAktør,
         )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlagFar)
 
@@ -379,7 +379,7 @@ class FagsakServiceTest(
         } answers {
             throw HttpServerErrorException(
                 HttpStatus.INTERNAL_SERVER_ERROR,
-                "[PdlRestClient][Feil ved oppslag på person: Fant ikke person]"
+                "[PdlRestClient][Feil ved oppslag på person: Fant ikke person]",
             )
         }
         assertEquals(emptyList<RestFagsakDeltager>(), fagsakService.hentFagsakDeltager(randomFnr()))
@@ -427,13 +427,13 @@ class FagsakServiceTest(
             PeriodeForAktør(
                 fom = YearMonth.now().minusMonths(10),
                 tom = YearMonth.now().minusMonths(3),
-                aktør = barn.aktør
+                aktør = barn.aktør,
             ),
             PeriodeForAktør(
                 fom = YearMonth.now().minusMonths(2),
                 tom = YearMonth.now().plusMonths(6),
-                aktør = barn.aktør
-            )
+                aktør = barn.aktør,
+            ),
         )
 
         opprettAndelerOgBehandling(fagsak = fagsak, barnasIdenter = listOf(barn.aktør.aktivFødselsnummer()), perioderTilAndeler = perioderTilAndeler)
@@ -456,8 +456,8 @@ class FagsakServiceTest(
             PeriodeForAktør(
                 fom = YearMonth.now().minusMonths(10),
                 tom = YearMonth.now().minusMonths(3),
-                aktør = barn.aktør
-            )
+                aktør = barn.aktør,
+            ),
         )
         opprettAndelerOgBehandling(fagsak = fagsak, barnasIdenter = listOf(barn.aktør.aktivFødselsnummer()), perioderTilAndeler = perioderTilAndeler)
 
@@ -479,13 +479,13 @@ class FagsakServiceTest(
             PeriodeForAktør(
                 fom = YearMonth.now().minusMonths(10),
                 tom = YearMonth.now().minusMonths(3),
-                aktør = person.aktør
+                aktør = person.aktør,
             ),
             PeriodeForAktør(
                 fom = YearMonth.now().minusMonths(2),
                 tom = YearMonth.now().plusMonths(6),
-                aktør = person.aktør
-            )
+                aktør = person.aktør,
+            ),
         )
 
         opprettAndelerOgBehandling(fagsak = fagsakHvorPersonErBarn, barnasIdenter = listOf(person.aktør.aktivFødselsnummer()), perioderTilAndeler = perioderTilAndeler)
@@ -509,21 +509,21 @@ class FagsakServiceTest(
             PeriodeForAktør(
                 fom = YearMonth.now().minusMonths(10),
                 tom = YearMonth.now().minusMonths(3),
-                aktør = person.aktør
+                aktør = person.aktør,
             ),
             PeriodeForAktør(
                 fom = YearMonth.now().minusMonths(2),
                 tom = YearMonth.now().plusMonths(6),
-                aktør = person.aktør
-            )
+                aktør = person.aktør,
+            ),
         )
 
         val nyePerioder = listOf(
             PeriodeForAktør(
                 fom = YearMonth.now().minusMonths(10),
                 tom = YearMonth.now().minusMonths(3),
-                aktør = person.aktør
-            )
+                aktør = person.aktør,
+            ),
         )
 
         opprettAndelerOgBehandling(fagsak = fagsakHvorPersonErBarn, barnasIdenter = listOf(person.aktør.aktivFødselsnummer()), perioderTilAndeler = gamlePerioder) // gammel behandling
@@ -547,20 +547,20 @@ class FagsakServiceTest(
                 fom = YearMonth.now().minusMonths(10),
                 tom = YearMonth.now().minusMonths(3),
                 aktør = person.aktør,
-                ytelseType = YtelseType.UTVIDET_BARNETRYGD
+                ytelseType = YtelseType.UTVIDET_BARNETRYGD,
             ),
             PeriodeForAktør(
                 fom = YearMonth.now().minusMonths(2),
                 tom = YearMonth.now().plusMonths(6),
                 aktør = person.aktør,
-                ytelseType = YtelseType.UTVIDET_BARNETRYGD
+                ytelseType = YtelseType.UTVIDET_BARNETRYGD,
             ),
             PeriodeForAktør(
                 fom = YearMonth.now().minusMonths(10),
                 tom = YearMonth.now().plusMonths(6),
                 aktør = barn.aktør,
-                ytelseType = YtelseType.ORDINÆR_BARNETRYGD
-            )
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+            ),
         )
 
         opprettAndelerOgBehandling(fagsak = fagsakHvorPersonErSøker, barnasIdenter = listOf(barn.aktør.aktivFødselsnummer()), perioderTilAndeler = perioder)
@@ -584,14 +584,14 @@ class FagsakServiceTest(
                 fom = YearMonth.now().minusMonths(10),
                 tom = YearMonth.now().minusMonths(3),
                 aktør = person.aktør,
-                ytelseType = YtelseType.UTVIDET_BARNETRYGD
+                ytelseType = YtelseType.UTVIDET_BARNETRYGD,
             ),
             PeriodeForAktør(
                 fom = YearMonth.now().minusMonths(10),
                 tom = YearMonth.now().plusMonths(6),
                 aktør = barn.aktør,
-                ytelseType = YtelseType.ORDINÆR_BARNETRYGD
-            )
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+            ),
         )
 
         opprettAndelerOgBehandling(fagsak = fagsakHvorPersonErSøker, barnasIdenter = listOf(barn.aktør.aktivFødselsnummer()), perioderTilAndeler = perioder)
@@ -614,13 +614,13 @@ class FagsakServiceTest(
             PeriodeForAktør(
                 fom = YearMonth.now().minusMonths(10),
                 tom = YearMonth.now().minusMonths(3),
-                aktør = person.aktør
+                aktør = person.aktør,
             ),
             PeriodeForAktør(
                 fom = YearMonth.now().minusMonths(2),
                 tom = YearMonth.now().plusMonths(6),
-                aktør = person.aktør
-            )
+                aktør = person.aktør,
+            ),
         )
 
         opprettAndelerOgBehandling(fagsak = fagsakHvorPersonErBarn, barnasIdenter = listOf(person.aktør.aktivFødselsnummer()), perioderTilAndeler = perioderTilAndeler)
@@ -645,13 +645,13 @@ class FagsakServiceTest(
             PeriodeForAktør(
                 fom = YearMonth.now().minusMonths(10),
                 tom = YearMonth.now().minusMonths(3),
-                aktør = person.aktør
+                aktør = person.aktør,
             ),
             PeriodeForAktør(
                 fom = YearMonth.now().minusMonths(2),
                 tom = YearMonth.now().plusMonths(6),
-                aktør = person.aktør
-            )
+                aktør = person.aktør,
+            ),
         )
 
         val perioderTilFagsakSøker = listOf(
@@ -659,14 +659,14 @@ class FagsakServiceTest(
                 fom = YearMonth.now().minusMonths(10),
                 tom = YearMonth.now().minusMonths(3),
                 aktør = person.aktør,
-                ytelseType = YtelseType.UTVIDET_BARNETRYGD
+                ytelseType = YtelseType.UTVIDET_BARNETRYGD,
             ),
             PeriodeForAktør(
                 fom = YearMonth.now().minusMonths(2),
                 tom = YearMonth.now().plusMonths(6),
                 aktør = person.aktør,
-                ytelseType = YtelseType.UTVIDET_BARNETRYGD
-            )
+                ytelseType = YtelseType.UTVIDET_BARNETRYGD,
+            ),
         )
 
         opprettAndelerOgBehandling(fagsak = fagsakHvorPersonErBarn, barnasIdenter = listOf(person.aktør.aktivFødselsnummer()), perioderTilAndeler = perioderTilFagsakBarn)
@@ -683,7 +683,7 @@ class FagsakServiceTest(
         val fom: YearMonth,
         val tom: YearMonth,
         val aktør: Aktør,
-        val ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD
+        val ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD,
     )
 
     private fun opprettFagsakForPersonMedStatus(personIdent: String, fagsakStatus: FagsakStatus, fagsakType: FagsakType = FagsakType.NORMAL): Fagsak {
@@ -702,7 +702,7 @@ class FagsakServiceTest(
             navIdent = randomFnr(),
             barnasIdenter = barnasIdenter,
             søknadMottattDato = LocalDate.now().minusMonths(1),
-            fagsakId = fagsak.id
+            fagsakId = fagsak.id,
         )
         val behandling = behandlingService.opprettBehandling(nyBehandling = nyBehandling)
         val tilkjentYtelse = TilkjentYtelse(behandling = behandling, endretDato = LocalDate.now(), opprettetDato = LocalDate.now())
@@ -713,7 +713,7 @@ class FagsakServiceTest(
                 aktør = it.aktør,
                 behandling = behandling,
                 tilkjentYtelse = tilkjentYtelse,
-                ytelseType = it.ytelseType
+                ytelseType = it.ytelseType,
             )
         }
 

@@ -12,7 +12,7 @@ data class MinimertUtbetalingsperiodeDetalj(
     val ytelseType: YtelseType,
     val utbetaltPerMnd: Int,
     val erPåvirketAvEndring: Boolean,
-    val prosent: BigDecimal
+    val prosent: BigDecimal,
 )
 
 fun UtbetalingsperiodeDetalj.tilMinimertUtbetalingsperiodeDetalj() = MinimertUtbetalingsperiodeDetalj(
@@ -20,7 +20,7 @@ fun UtbetalingsperiodeDetalj.tilMinimertUtbetalingsperiodeDetalj() = MinimertUtb
     ytelseType = this.ytelseType,
     utbetaltPerMnd = this.utbetaltPerMnd,
     erPåvirketAvEndring = this.erPåvirketAvEndring,
-    prosent = this.prosent
+    prosent = this.prosent,
 )
 
 fun List<MinimertUtbetalingsperiodeDetalj>.antallBarn(): Int =
@@ -30,7 +30,7 @@ fun List<MinimertUtbetalingsperiodeDetalj>.totaltUtbetalt(): Int =
     this.sumOf { it.utbetaltPerMnd }
 
 fun List<MinimertUtbetalingsperiodeDetalj>.beløpUtbetaltFor(
-    personIdenter: List<String>
+    personIdenter: List<String>,
 ) = this
     .filter { utbetalingsperiodeDetalj -> personIdenter.contains(utbetalingsperiodeDetalj.person.personIdent) }
     .totaltUtbetalt()

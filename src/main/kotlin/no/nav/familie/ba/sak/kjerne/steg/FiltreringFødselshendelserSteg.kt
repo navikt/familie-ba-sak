@@ -9,18 +9,18 @@ import org.springframework.stereotype.Service
 
 @Service
 class FiltreringFødselshendelserSteg(
-    private val filtreringsreglerService: FiltreringsreglerService
+    private val filtreringsreglerService: FiltreringsreglerService,
 ) : BehandlingSteg<NyBehandlingHendelse> {
 
     override fun utførStegOgAngiNeste(
         behandling: Behandling,
-        data: NyBehandlingHendelse
+        data: NyBehandlingHendelse,
     ): StegType {
         logger.info("Kjører filtreringsregler for behandling ${behandling.id}")
 
         val fødselshendelsefiltreringResultat = filtreringsreglerService.kjørFiltreringsregler(
             data,
-            behandling
+            behandling,
         )
 
         return if (!fødselshendelsefiltreringResultat.erOppfylt()) {

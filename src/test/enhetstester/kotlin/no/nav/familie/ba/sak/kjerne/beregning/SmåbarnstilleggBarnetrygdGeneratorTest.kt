@@ -47,8 +47,8 @@ class SmåbarnstilleggBarnetrygdGeneratorTest {
             InternPeriodeOvergangsstønad(
                 personIdent = søker.aktør.aktivFødselsnummer(),
                 fomDato = LocalDate.now().minusYears(2),
-                tomDato = LocalDate.now()
-            )
+                tomDato = LocalDate.now(),
+            ),
         )
 
         val utvidetAndeler = listOf(
@@ -56,8 +56,8 @@ class SmåbarnstilleggBarnetrygdGeneratorTest {
                 fom = YearMonth.now().minusYears(3),
                 tom = YearMonth.now().plusYears(1),
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
-                person = søker
-            )
+                person = søker,
+            ),
         )
 
         val barnasAndeler = listOf(
@@ -65,8 +65,8 @@ class SmåbarnstilleggBarnetrygdGeneratorTest {
                 fom = barn3.fødselsdato.toYearMonth().plusMonths(1),
                 tom = YearMonth.now().plusYears(2),
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                person = barn3
-            )
+                person = barn3,
+            ),
         )
 
         val småbarnstilleggAndeler =
@@ -75,7 +75,7 @@ class SmåbarnstilleggBarnetrygdGeneratorTest {
                     perioderMedFullOvergangsstønad = overgangsstønadPerioder,
                     utvidetAndeler = utvidetAndeler,
                     barnasAndeler = barnasAndeler,
-                    barnasAktørerOgFødselsdatoer = listOf(Pair(barn3.aktør, barn3.fødselsdato))
+                    barnasAktørerOgFødselsdatoer = listOf(Pair(barn3.aktør, barn3.fødselsdato)),
                 )
 
         Assertions.assertEquals(1, småbarnstilleggAndeler.size)
@@ -90,8 +90,8 @@ class SmåbarnstilleggBarnetrygdGeneratorTest {
             InternPeriodeOvergangsstønad(
                 personIdent = søker.aktør.aktivFødselsnummer(),
                 fomDato = LocalDate.now().minusYears(4),
-                tomDato = LocalDate.now().plusYears(1)
-            )
+                tomDato = LocalDate.now().plusYears(1),
+            ),
         )
 
         val utvidetAndeler = listOf(
@@ -99,21 +99,21 @@ class SmåbarnstilleggBarnetrygdGeneratorTest {
                 fom = YearMonth.now().minusYears(4),
                 tom = YearMonth.now().minusYears(3),
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
-                person = søker
+                person = søker,
             ),
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = YearMonth.now().minusYears(3).plusMonths(1),
                 tom = YearMonth.now().minusYears(2),
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                 person = søker,
-                prosent = BigDecimal.ZERO
+                prosent = BigDecimal.ZERO,
             ),
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = YearMonth.now().minusYears(2).plusMonths(1),
                 tom = YearMonth.now(),
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
-                person = søker
-            )
+                person = søker,
+            ),
         )
 
         val barnasAndeler = listOf(
@@ -122,14 +122,14 @@ class SmåbarnstilleggBarnetrygdGeneratorTest {
                 tom = YearMonth.now().minusYears(3),
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                 person = barn3,
-                prosent = BigDecimal.ZERO
+                prosent = BigDecimal.ZERO,
             ),
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = YearMonth.now().minusYears(3).plusMonths(1),
                 tom = YearMonth.now().plusYears(2),
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                person = barn3
-            )
+                person = barn3,
+            ),
         )
 
         val småbarnstilleggAndeler =
@@ -138,7 +138,7 @@ class SmåbarnstilleggBarnetrygdGeneratorTest {
                     perioderMedFullOvergangsstønad = overgangsstønadPerioder,
                     utvidetAndeler = utvidetAndeler,
                     barnasAndeler = barnasAndeler,
-                    barnasAktørerOgFødselsdatoer = listOf(Pair(barn3.aktør, barn3.fødselsdato))
+                    barnasAktørerOgFødselsdatoer = listOf(Pair(barn3.aktør, barn3.fødselsdato)),
                 )
 
         Assertions.assertEquals(2, småbarnstilleggAndeler.size)
@@ -157,8 +157,8 @@ class SmåbarnstilleggBarnetrygdGeneratorTest {
             InternPeriodeOvergangsstønad(
                 personIdent = søker.aktør.aktivFødselsnummer(),
                 fomDato = LocalDate.now().minusYears(3),
-                tomDato = LocalDate.now().plusYears(3)
-            )
+                tomDato = LocalDate.now().plusYears(3),
+            ),
         )
 
         val utvidetAndeler = listOf(
@@ -166,8 +166,8 @@ class SmåbarnstilleggBarnetrygdGeneratorTest {
                 fom = YearMonth.now().minusYears(3),
                 tom = YearMonth.now().plusYears(2),
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
-                person = søker
-            )
+                person = søker,
+            ),
         )
 
         val barnasAndeler = listOf(
@@ -176,20 +176,20 @@ class SmåbarnstilleggBarnetrygdGeneratorTest {
                 tom = YearMonth.now().minusYears(1),
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                 person = barn1,
-                prosent = BigDecimal.ZERO
+                prosent = BigDecimal.ZERO,
             ),
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = YearMonth.now().minusYears(1).plusMonths(1),
                 tom = YearMonth.now().plusYears(5),
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                person = barn1
+                person = barn1,
             ),
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = barn2.fødselsdato.toYearMonth().plusMonths(1),
                 tom = YearMonth.now().plusYears(6),
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                person = barn2
-            )
+                person = barn2,
+            ),
         )
 
         val småbarnstilleggAndeler =
@@ -200,8 +200,8 @@ class SmåbarnstilleggBarnetrygdGeneratorTest {
                     barnasAndeler = barnasAndeler,
                     barnasAktørerOgFødselsdatoer = listOf(
                         Pair(barn1.aktør, barn1.fødselsdato),
-                        Pair(barn2.aktør, barn2.fødselsdato)
-                    )
+                        Pair(barn2.aktør, barn2.fødselsdato),
+                    ),
                 )
 
         Assertions.assertEquals(2, småbarnstilleggAndeler.size)
@@ -220,8 +220,8 @@ class SmåbarnstilleggBarnetrygdGeneratorTest {
             InternPeriodeOvergangsstønad(
                 personIdent = søker.aktør.aktivFødselsnummer(),
                 fomDato = LocalDate.now().minusYears(3),
-                tomDato = LocalDate.now().plusYears(3)
-            )
+                tomDato = LocalDate.now().plusYears(3),
+            ),
         )
 
         val utvidetAndeler = listOf(
@@ -230,14 +230,14 @@ class SmåbarnstilleggBarnetrygdGeneratorTest {
                 tom = YearMonth.now().minusYears(1),
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                 person = søker,
-                prosent = BigDecimal.ZERO
+                prosent = BigDecimal.ZERO,
             ),
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = YearMonth.now().minusYears(1).plusMonths(1),
                 tom = YearMonth.now().plusYears(2),
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
-                person = søker
-            )
+                person = søker,
+            ),
         )
 
         val barnasAndeler = listOf(
@@ -245,14 +245,14 @@ class SmåbarnstilleggBarnetrygdGeneratorTest {
                 fom = barn1.fødselsdato.toYearMonth().plusMonths(1),
                 tom = YearMonth.now().plusYears(5),
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                person = barn1
+                person = barn1,
             ),
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 fom = barn2.fødselsdato.toYearMonth().plusMonths(1),
                 tom = YearMonth.now().plusYears(6),
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
-                person = barn2
-            )
+                person = barn2,
+            ),
         )
 
         val småbarnstilleggAndeler =
@@ -263,8 +263,8 @@ class SmåbarnstilleggBarnetrygdGeneratorTest {
                     barnasAndeler = barnasAndeler,
                     barnasAktørerOgFødselsdatoer = listOf(
                         Pair(barn1.aktør, barn1.fødselsdato),
-                        Pair(barn2.aktør, barn2.fødselsdato)
-                    )
+                        Pair(barn2.aktør, barn2.fødselsdato),
+                    ),
                 )
 
         Assertions.assertEquals(2, småbarnstilleggAndeler.size)

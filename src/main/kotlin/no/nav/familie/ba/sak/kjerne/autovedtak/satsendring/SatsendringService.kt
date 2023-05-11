@@ -18,7 +18,7 @@ class SatsendringService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     private val satskjøringRepository: SatskjøringRepository,
-    private val fagsakRepository: FagsakRepository
+    private val fagsakRepository: FagsakRepository,
 ) {
     private val logger = LoggerFactory.getLogger(SatsendringService::class.java)
     fun erFagsakOppdatertMedSisteSatser(fagsakId: Long): Boolean {
@@ -42,8 +42,8 @@ class SatsendringService(
             løpendeFagsaker.parallelStream().filter {
                 !erFagsakOppdatertMedSisteSatser(it)
             }.collect(
-                Collectors.toList()
-            )
+                Collectors.toList(),
+            ),
         )
 
         while (slice.hasNext()) {
@@ -53,8 +53,8 @@ class SatsendringService(
                 slice.get().toList().parallelStream().filter {
                     !erFagsakOppdatertMedSisteSatser(it)
                 }.collect(
-                    Collectors.toList()
-                )
+                    Collectors.toList(),
+                ),
             )
         }
         logger.warn("Følgende saker mangler satsendring:")

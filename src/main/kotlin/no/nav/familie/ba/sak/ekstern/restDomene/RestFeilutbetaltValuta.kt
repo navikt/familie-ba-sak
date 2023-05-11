@@ -6,5 +6,5 @@ data class RestFeilutbetaltValuta(
     val id: Long?,
     val fom: LocalDate,
     val tom: LocalDate,
-    val feilutbetaltBeløp: Int
+    val feilutbetaltBeløp: Int,
 )

@@ -8,5 +8,5 @@ data class OpprettOppgaveTaskDTO(
     val oppgavetype: Oppgavetype,
     val fristForFerdigstillelse: LocalDate,
     val tilordnetRessurs: String? = null,
-    val beskrivelse: String?
+    val beskrivelse: String?,
 )

@@ -7,12 +7,12 @@ class RestKorrigertVedtak(
     val id: Long,
     val vedtaksdato: LocalDate?,
     val begrunnelse: String?,
-    val aktiv: Boolean
+    val aktiv: Boolean,
 )
 
 fun KorrigertVedtak.tilRestKorrigertVedtak(): RestKorrigertVedtak = RestKorrigertVedtak(
     id = id,
     vedtaksdato = vedtaksdato,
     begrunnelse = begrunnelse,
-    aktiv = aktiv
+    aktiv = aktiv,
 )

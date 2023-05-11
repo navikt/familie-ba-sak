@@ -29,12 +29,12 @@ import java.time.LocalDate
 
 class TilkjentYtelseBuilder(
     private val startMåned: Tidspunkt<Måned>,
-    private val behandling: Behandling = lagBehandling()
+    private val behandling: Behandling = lagBehandling(),
 ) {
     private val tilkjentYtelse = TilkjentYtelse(
         behandling = behandling,
         opprettetDato = LocalDate.now(),
-        endretDato = LocalDate.now()
+        endretDato = LocalDate.now(),
     )
 
     var gjeldendePersoner: List<Person> = emptyList()
@@ -48,13 +48,13 @@ class TilkjentYtelseBuilder(
         s: String,
         nasjonalt: (Int) -> Int? = { null },
         differanse: (Int) -> Int? = { null },
-        kalkulert: (Int) -> Int = { it }
+        kalkulert: (Int) -> Int = { it },
     ) = medYtelse(
         s = s,
         type = YtelseType.SMÅBARNSTILLEGG,
         kalkulert = kalkulert,
         differanse = differanse,
-        nasjonalt = nasjonalt
+        nasjonalt = nasjonalt,
     ) {
         satstypeTidslinje(SatsType.SMA)
     }
@@ -64,13 +64,13 @@ class TilkjentYtelseBuilder(
         s: String,
         nasjonalt: (Int) -> Int? = { null },
         differanse: (Int) -> Int? = { null },
-        kalkulert: (Int) -> Int = { it }
+        kalkulert: (Int) -> Int = { it },
     ) = medYtelse(
         s = s,
         type = YtelseType.UTVIDET_BARNETRYGD,
         kalkulert = kalkulert,
         nasjonalt = nasjonalt,
-        differanse = differanse
+        differanse = differanse,
     ) {
         satstypeTidslinje(SatsType.UTVIDET_BARNETRYGD)
     }
@@ -81,14 +81,14 @@ class TilkjentYtelseBuilder(
         prosent: Long = 100,
         nasjonalt: (Int) -> Int? = { null },
         differanse: (Int) -> Int? = { null },
-        kalkulert: (Int) -> Int = { it }
+        kalkulert: (Int) -> Int = { it },
     ) = medYtelse(
         s,
         YtelseType.ORDINÆR_BARNETRYGD,
         prosent,
         nasjonalt,
         differanse,
-        kalkulert
+        kalkulert,
     ) {
         val orbaTidslinje = satstypeTidslinje(SatsType.ORBA)
         val tilleggOrbaTidslinje = satstypeTidslinje(SatsType.TILLEGG_ORBA)
@@ -103,7 +103,7 @@ class TilkjentYtelseBuilder(
         nasjonalt: (Int) -> Int? = { null },
         differanse: (Int) -> Int? = { null },
         kalkulert: (Int) -> Int = { it },
-        satsTidslinje: (Person) -> Tidslinje<Int, Måned>
+        satsTidslinje: (Person) -> Tidslinje<Int, Måned>,
     ): TilkjentYtelseBuilder {
         val andeler = gjeldendePersoner
             .map { person ->
@@ -121,13 +121,13 @@ class TilkjentYtelseBuilder(
                             differanseberegnetPeriodebeløp = null, // Overskrives under
                             prosent = BigDecimal.valueOf(prosent),
                             sats = 0, // Overskrives under
-                            type = type
+                            type = type,
                         )
                     }
 
                 val begrensetAndelTilkjentYtelseTidslinje = when (type) {
                     YtelseType.ORDINÆR_BARNETRYGD -> andelTilkjentYtelseTidslinje.beskjærEtter(
-                        erUnder18ÅrVilkårTidslinje(person.fødselsdato)
+                        erUnder18ÅrVilkårTidslinje(person.fødselsdato),
                     )
                     else -> andelTilkjentYtelseTidslinje
                 }
@@ -137,7 +137,7 @@ class TilkjentYtelseBuilder(
                         sats = nasjonalt(sats) ?: kalkulert(sats),
                         kalkulertUtbetalingsbeløp = kalkulert(sats),
                         nasjonaltPeriodebeløp = nasjonalt(sats) ?: kalkulert(sats),
-                        differanseberegnetPeriodebeløp = differanse(sats)
+                        differanseberegnetPeriodebeløp = differanse(sats),
                     )
                 }
             }.tilAndelerTilkjentYtelse()

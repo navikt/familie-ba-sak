@@ -20,7 +20,7 @@ data class RestOppdaterJournalpost(
     val tilknyttedeBehandlingIder: List<String>,
     val eksisterendeLogiskeVedlegg: List<LogiskVedlegg>,
     val logiskeVedlegg: List<LogiskVedlegg>,
-    val navIdent: String
+    val navIdent: String,
 ) {
     fun oppdaterMedDokumentOgSak(sak: Sak): OppdaterJournalpostRequest {
         val dokument = DokumentInfo(
@@ -29,27 +29,27 @@ data class RestOppdaterJournalpost(
             brevkode = null,
             dokumentstatus = Dokumentstatus.FERDIGSTILT,
             dokumentvarianter = null,
-            logiskeVedlegg = null
+            logiskeVedlegg = null,
         )
 
         return OppdaterJournalpostRequest(
             avsenderMottaker = AvsenderMottaker(
                 id = this.avsender.id,
                 idType = if (this.avsender.id != "") BrukerIdType.FNR else null,
-                navn = this.avsender.navn
+                navn = this.avsender.navn,
             ),
             bruker = Bruker(
                 this.bruker.id,
-                navn = this.bruker.navn
+                navn = this.bruker.navn,
             ),
             sak = sak,
             tittel = this.dokumentTittel,
-            dokumenter = listOf(dokument)
+            dokumenter = listOf(dokument),
         )
     }
 }
 
 data class NavnOgIdent(
     val navn: String,
-    val id: String
+    val id: String,
 )

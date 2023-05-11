@@ -14,7 +14,7 @@ data class RestPersonMedAndeler(
     val beløp: Int,
     val stønadFom: YearMonth,
     val stønadTom: YearMonth,
-    val ytelsePerioder: List<RestYtelsePeriode>
+    val ytelsePerioder: List<RestYtelsePeriode>,
 )
 
 data class RestYtelsePeriode(
@@ -22,7 +22,7 @@ data class RestYtelsePeriode(
     val stønadFom: YearMonth,
     val stønadTom: YearMonth,
     val ytelseType: YtelseType,
-    val skalUtbetales: Boolean
+    val skalUtbetales: Boolean,
 )
 
 fun PersonopplysningGrunnlag.tilRestPersonerMedAndeler(andelerKnyttetTilPersoner: List<AndelTilkjentYtelse>): List<RestPersonMedAndeler> =
@@ -46,8 +46,8 @@ fun PersonopplysningGrunnlag.tilRestPersonerMedAndeler(andelerKnyttetTilPersoner
                         stønadFom = it1.stønadFom,
                         stønadTom = it1.stønadTom,
                         ytelseType = it1.type,
-                        skalUtbetales = it1.prosent > BigDecimal.ZERO
+                        skalUtbetales = it1.prosent > BigDecimal.ZERO,
                     )
-                }
+                },
             )
         }

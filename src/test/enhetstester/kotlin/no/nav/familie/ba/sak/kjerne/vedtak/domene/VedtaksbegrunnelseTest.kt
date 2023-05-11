@@ -23,7 +23,7 @@ class VedtaksbegrunnelseTest {
     val barn3 = lagPerson(type = PersonType.BARN)
 
     val restVedtaksbegrunnelse = lagVedtaksbegrunnelse(
-        standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET
+        standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
     )
 
     val vedtaksperiode = NullablePeriode(LocalDate.now().minusMonths(1), LocalDate.now())
@@ -39,7 +39,7 @@ class VedtaksbegrunnelseTest {
         val brevBegrunnelseGrunnlagMedPersoner = lagBrevBegrunnelseGrunnlagMedPersoner(
             standardbegrunnelse = Standardbegrunnelse.AVSLAG_BOR_HOS_SØKER,
             personIdenter = listOf(søker).map { it.aktør.aktivFødselsnummer() },
-            vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+            vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG,
         )
 
         val brevbegrunnelse = brevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
@@ -48,13 +48,13 @@ class VedtaksbegrunnelseTest {
             brevMålform = målform,
             uregistrerteBarn = emptyList(),
             minimerteUtbetalingsperiodeDetaljer = emptyList(),
-            minimerteRestEndredeAndeler = emptyList()
+            minimerteRestEndredeAndeler = emptyList(),
         ) as BegrunnelseData
 
         Assertions.assertEquals(true, brevbegrunnelse.gjelderSoker)
         Assertions.assertEquals(
             listOf(barn1, barn2, barn3).map { it.fødselsdato }.tilBrevTekst(),
-            brevbegrunnelse.barnasFodselsdatoer
+            brevbegrunnelse.barnasFodselsdatoer,
         )
         Assertions.assertEquals(0, brevbegrunnelse.antallBarn)
         Assertions.assertEquals(målform.tilSanityFormat(), brevbegrunnelse.maalform)
@@ -65,18 +65,18 @@ class VedtaksbegrunnelseTest {
     fun `skal ta med uregistrerte barn`() {
         val uregistrerteBarn = listOf(
             lagPerson(type = PersonType.BARN),
-            lagPerson(type = PersonType.BARN)
+            lagPerson(type = PersonType.BARN),
         ).map {
             BarnMedOpplysninger(
                 ident = it.aktør.aktivFødselsnummer(),
-                fødselsdato = it.fødselsdato
+                fødselsdato = it.fødselsdato,
             ).tilMinimertUregistrertBarn()
         }
 
         val brevBegrunnelseGrunnlagMedPersoner = lagBrevBegrunnelseGrunnlagMedPersoner(
             standardbegrunnelse = Standardbegrunnelse.AVSLAG_UREGISTRERT_BARN,
             personIdenter = emptyList(),
-            vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
+            vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG,
         )
 
         val brevbegrunnelse = brevBegrunnelseGrunnlagMedPersoner.tilBrevBegrunnelse(
@@ -85,13 +85,13 @@ class VedtaksbegrunnelseTest {
             brevMålform = målform,
             uregistrerteBarn = uregistrerteBarn,
             minimerteUtbetalingsperiodeDetaljer = emptyList(),
-            minimerteRestEndredeAndeler = emptyList()
+            minimerteRestEndredeAndeler = emptyList(),
         ) as BegrunnelseData
 
         Assertions.assertEquals(false, brevbegrunnelse.gjelderSoker)
         Assertions.assertEquals(
             uregistrerteBarn.map { it.fødselsdato!! }.tilBrevTekst(),
-            brevbegrunnelse.barnasFodselsdatoer
+            brevbegrunnelse.barnasFodselsdatoer,
         )
         Assertions.assertEquals(2, brevbegrunnelse.antallBarn)
         Assertions.assertEquals(målform.tilSanityFormat(), brevbegrunnelse.maalform)

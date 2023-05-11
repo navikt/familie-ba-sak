@@ -18,7 +18,7 @@ class FeilutbetaltValutaServiceTest(
     @Autowired val feilutbetaltValutaService: FeilutbetaltValutaService,
     @Autowired val aktørIdRepository: AktørIdRepository,
     @Autowired val fagsakRepository: FagsakRepository,
-    @Autowired val behandlingHentOgPersisterService: BehandlingHentOgPersisterService
+    @Autowired val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 ) : AbstractSpringIntegrationTest() {
 
     @Test
@@ -30,7 +30,7 @@ class FeilutbetaltValutaServiceTest(
             id = 0,
             fom = LocalDate.of(2020, Month.JANUARY, 1),
             tom = LocalDate.of(2021, Month.MAY, 31),
-            feilutbetaltBeløp = 1234
+            feilutbetaltBeløp = 1234,
         )
 
         val id = feilutbetaltValutaService.leggTilFeilutbetaltValutaPeriode(feilutbetaltValuta = feilutbetaltValuta, behandlingId = behandling.id)
@@ -45,9 +45,9 @@ class FeilutbetaltValutaServiceTest(
                 id = id,
                 fom = LocalDate.of(2020, Month.JANUARY, 1),
                 tom = LocalDate.of(2020, Month.MAY, 31),
-                feilutbetaltBeløp = 1
+                feilutbetaltBeløp = 1,
             ),
-            id = id
+            id = id,
         )
 
         feilutbetaltValutaService.hentFeilutbetaltValutaPerioder(behandlingId = behandling.id)
@@ -58,7 +58,7 @@ class FeilutbetaltValutaServiceTest(
             id = 0,
             fom = LocalDate.of(2019, Month.DECEMBER, 1),
             tom = LocalDate.of(2019, Month.DECEMBER, 31),
-            feilutbetaltBeløp = 100
+            feilutbetaltBeløp = 100,
         )
 
         val id2 = feilutbetaltValutaService.leggTilFeilutbetaltValutaPeriode(feilutbetaltValuta = feilutbetaltValuta2, behandlingId = behandling.id)

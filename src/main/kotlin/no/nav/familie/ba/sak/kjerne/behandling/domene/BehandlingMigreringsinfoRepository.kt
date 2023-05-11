@@ -10,7 +10,7 @@ interface BehandlingMigreringsinfoRepository : JpaRepository<BehandlingMigrering
         """SELECT MIN(bm.migreringsdato) FROM BehandlingMigreringsinfo bm 
             INNER JOIN Behandling b ON bm.behandling.id = b.id 
             INNER JOIN Fagsak f ON b.fagsak.id = f.id 
-            WHERE f.id=:fagsakId"""
+            WHERE f.id=:fagsakId""",
     )
     fun finnSisteMigreringsdatoPåFagsak(fagsakId: Long): LocalDate?
 

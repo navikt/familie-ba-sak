@@ -27,7 +27,7 @@ class UtbetalingsperiodeMedBegrunnelserUtilsTest {
         val utbetalingsperiode1 = lagVedtaksperiodeMedBegrunnelser(
             type = Vedtaksperiodetype.UTBETALING,
             fom = periode1.fom.førsteDagIInneværendeMåned(),
-            tom = periode2.tom.sisteDagIInneværendeMåned()
+            tom = periode2.tom.sisteDagIInneværendeMåned(),
         )
 
         val kompetanse1 = lagKompetanse(fom = periode2.fom, tom = periode2.tom, barnAktører = setOf(barnAktør1))
@@ -35,7 +35,7 @@ class UtbetalingsperiodeMedBegrunnelserUtilsTest {
         val utbetalingsperiode2 = lagVedtaksperiodeMedBegrunnelser(
             type = Vedtaksperiodetype.UTBETALING,
             fom = periode3.fom.førsteDagIInneværendeMåned(),
-            tom = periode4.tom.sisteDagIInneværendeMåned()
+            tom = periode4.tom.sisteDagIInneværendeMåned(),
         )
 
         val kompetanse2 = lagKompetanse(fom = periode4.fom, tom = periode5.tom, barnAktører = setOf(barnAktør1))
@@ -43,16 +43,16 @@ class UtbetalingsperiodeMedBegrunnelserUtilsTest {
         val utbetalingsperiodeMedReduksjonFraSistIverksatteBehandling = lagVedtaksperiodeMedBegrunnelser(
             type = Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING,
             fom = periode5.fom.førsteDagIInneværendeMåned(),
-            tom = periode5.tom.sisteDagIInneværendeMåned()
+            tom = periode5.tom.sisteDagIInneværendeMåned(),
         )
 
         val utbetalingsperiodeMedKompetanseSplitter = splittUtbetalingsperioderPåKompetanser(
             utbetalingsperioder = listOf(
                 utbetalingsperiode1,
                 utbetalingsperiode2,
-                utbetalingsperiodeMedReduksjonFraSistIverksatteBehandling
+                utbetalingsperiodeMedReduksjonFraSistIverksatteBehandling,
             ),
-            kompetanser = listOf(kompetanse1, kompetanse2)
+            kompetanser = listOf(kompetanse1, kompetanse2),
         )
 
         val forventedePerioder =
@@ -75,12 +75,12 @@ class UtbetalingsperiodeMedBegrunnelserUtilsTest {
             MånedPeriode(YearMonth.of(2021, 5), YearMonth.of(2021, 8)),
             MånedPeriode(YearMonth.of(2021, 9), YearMonth.of(2021, 12)),
             MånedPeriode(YearMonth.of(2022, 1), YearMonth.of(2022, 3)),
-            MånedPeriode(YearMonth.of(2022, 4), YearMonth.of(2038, 3))
+            MånedPeriode(YearMonth.of(2022, 4), YearMonth.of(2038, 3)),
         ).mapIndexed { _, it ->
             lagVedtaksperiodeMedBegrunnelser(
                 type = Vedtaksperiodetype.UTBETALING,
                 fom = it.fom.førsteDagIInneværendeMåned(),
-                tom = it.tom.sisteDagIInneværendeMåned()
+                tom = it.tom.sisteDagIInneværendeMåned(),
             )
         }
 
@@ -89,7 +89,7 @@ class UtbetalingsperiodeMedBegrunnelserUtilsTest {
 
         val utbetalingsperiodeMedKompetanseSplitter = splittUtbetalingsperioderPåKompetanser(
             utbetalingsperioder = utbetalingsperioder,
-            kompetanser = listOf(kompetanse)
+            kompetanser = listOf(kompetanse),
         )
 
         Assertions.assertEquals(7, utbetalingsperiodeMedKompetanseSplitter.size)
@@ -104,7 +104,7 @@ class UtbetalingsperiodeMedBegrunnelserUtilsTest {
         val utbetalingsperiode1 = lagVedtaksperiodeMedBegrunnelser(
             type = Vedtaksperiodetype.UTBETALING,
             fom = periode1.fom.førsteDagIInneværendeMåned(),
-            tom = periode3.tom.sisteDagIInneværendeMåned()
+            tom = periode3.tom.sisteDagIInneværendeMåned(),
         )
 
         val kompetanse1 =
@@ -117,7 +117,7 @@ class UtbetalingsperiodeMedBegrunnelserUtilsTest {
 
         val utbetalingsperiodeMedKompetanseSplitter = splittUtbetalingsperioderPåKompetanser(
             utbetalingsperioder = listOf(utbetalingsperiode1),
-            kompetanser = listOf(kompetanse1, kompetanse2)
+            kompetanser = listOf(kompetanse1, kompetanse2),
         )
 
         Assertions.assertEquals(3, utbetalingsperiodeMedKompetanseSplitter.size)

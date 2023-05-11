@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
 
 class AndelTilkjentYtelseMedEndreteUtbetalingerTidslinje(
-    private val andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
+    private val andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
 ) : Tidslinje<AndelTilkjentYtelseMedEndreteUtbetalinger, Måned>() {
 
     override fun lagPerioder(): List<Periode<AndelTilkjentYtelseMedEndreteUtbetalinger, Måned>> {
@@ -15,7 +15,7 @@ class AndelTilkjentYtelseMedEndreteUtbetalingerTidslinje(
             Periode(
                 fraOgMed = it.stønadFom.tilTidspunkt(),
                 tilOgMed = it.stønadTom.tilTidspunkt(),
-                innhold = it
+                innhold = it,
             )
         }
     }

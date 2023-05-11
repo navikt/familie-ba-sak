@@ -48,7 +48,7 @@ class InnkommendeJournalføringService(
     private val journalføringRepository: JournalføringRepository,
     private val loggService: LoggService,
     private val stegService: StegService,
-    private val journalføringMetrikk: JournalføringMetrikk
+    private val journalføringMetrikk: JournalføringMetrikk,
 ) {
 
     fun hentDokument(journalpostId: String, dokumentInfoId: String): ByteArray {
@@ -64,8 +64,8 @@ class InnkommendeJournalføringService(
             JournalposterForBrukerRequest(
                 antall = 1000,
                 brukerId = Bruker(id = brukerId, type = BrukerIdType.FNR),
-                tema = listOf(Tema.BAR)
-            )
+                tema = listOf(Tema.BAR),
+            ),
         )
     }
 
@@ -74,11 +74,11 @@ class InnkommendeJournalføringService(
         request: RestOppdaterJournalpost,
         journalpostId: String,
         behandlendeEnhet: String,
-        oppgaveId: String
+        oppgaveId: String,
     ): String {
         val (sak, behandlinger) = lagreJournalpostOgKnyttFagsakTilJournalpost(
             request.tilknyttedeBehandlingIder,
-            journalpostId
+            journalpostId,
         )
 
         håndterLogiskeVedlegg(request, journalpostId)
@@ -88,7 +88,7 @@ class InnkommendeJournalføringService(
             journalpostId = journalpostId,
             behandlendeEnhet = behandlendeEnhet,
             oppgaveId = oppgaveId,
-            behandlinger = behandlinger
+            behandlinger = behandlinger,
         )
 
         when (val aktivBehandling = behandlinger.find { it.aktiv }) {
@@ -124,7 +124,7 @@ class InnkommendeJournalføringService(
         underkategori: BehandlingUnderkategori? = null,
         søknadMottattDato: LocalDate? = null,
         fagsakType: FagsakType = FagsakType.NORMAL,
-        institusjon: InstitusjonInfo? = null
+        institusjon: InstitusjonInfo? = null,
     ): Behandling {
         val fagsak = fagsakService.hentEllerOpprettFagsak(personIdent, type = fagsakType, institusjon = institusjon)
         return stegService.håndterNyBehandlingOgSendInfotrygdFeed(
@@ -136,8 +136,8 @@ class InnkommendeJournalføringService(
                 behandlingÅrsak = årsak,
                 navIdent = navIdent,
                 søknadMottattDato = søknadMottattDato,
-                fagsakId = fagsak.id
-            )
+                fagsakId = fagsak.id,
+            ),
         )
     }
 
@@ -146,7 +146,7 @@ class InnkommendeJournalføringService(
         request: RestJournalføring,
         journalpostId: String,
         behandlendeEnhet: String,
-        oppgaveId: String
+        oppgaveId: String,
     ): String {
         val tilknyttedeBehandlingIder: MutableList<String> = request.tilknyttedeBehandlingIder.toMutableList()
 
@@ -161,7 +161,7 @@ class InnkommendeJournalføringService(
                     underkategori = request.underkategori,
                     søknadMottattDato = request.datoMottatt?.toLocalDate(),
                     fagsakType = request.fagsakType,
-                    institusjon = request.institusjon
+                    institusjon = request.institusjon,
                 )
             tilknyttedeBehandlingIder.add(nyBehandling.id.toString())
         }
@@ -176,7 +176,7 @@ class InnkommendeJournalføringService(
             journalpostId = journalpostId,
             behandlendeEnhet = behandlendeEnhet,
             oppgaveId = oppgaveId,
-            behandlinger = behandlinger
+            behandlinger = behandlinger,
         )
 
         journalføringMetrikk.tellManuellJournalføringsmetrikker(journalpost, request, behandlinger)
@@ -185,7 +185,7 @@ class InnkommendeJournalføringService(
 
     fun knyttJournalpostTilFagsakOgFerdigstillOppgave(
         request: RestFerdigstillOppgaveKnyttJournalpost,
-        oppgaveId: Long
+        oppgaveId: Long,
     ): String {
         val tilknyttedeBehandlingIder: MutableList<String> = request.tilknyttedeBehandlingIder.toMutableList()
 
@@ -201,7 +201,7 @@ class InnkommendeJournalføringService(
                     årsak = request.nyBehandlingsårsak,
                     kategori = request.kategori,
                     underkategori = request.underkategori,
-                    søknadMottattDato = request.datoMottatt?.toLocalDate()
+                    søknadMottattDato = request.datoMottatt?.toLocalDate(),
                 )
             tilknyttedeBehandlingIder.add(nyBehandling.id.toString())
         }
@@ -215,7 +215,7 @@ class InnkommendeJournalføringService(
 
     fun lagreJournalpostOgKnyttFagsakTilJournalpost(
         tilknyttedeBehandlingIder: List<String>,
-        journalpostId: String
+        journalpostId: String,
     ): Pair<Sak, List<Behandling>> {
         val behandlinger = tilknyttedeBehandlingIder.map {
             behandlingHentOgPersisterService.hent(it.toLong())
@@ -227,8 +227,8 @@ class InnkommendeJournalføringService(
                 DbJournalpost(
                     behandling = it,
                     journalpostId = journalpostId,
-                    type = DbJournalpostType.valueOf(journalpost.journalposttype.name)
-                )
+                    type = DbJournalpostType.valueOf(journalpost.journalposttype.name),
+                ),
             )
         }
 
@@ -237,7 +237,7 @@ class InnkommendeJournalføringService(
                 behandlinger.map { it.fagsak }.toSet().firstOrNull()
                     ?: throw FunksjonellFeil(
                         melding = "Behandlings'idene tilhørerer ikke samme fagsak, eller vi fant ikke fagsaken.",
-                        frontendFeilmelding = "Oppslag på fagsak feilet med behandlingene som ble sendt inn."
+                        frontendFeilmelding = "Oppslag på fagsak feilet med behandlingene som ble sendt inn.",
                     )
             }
 
@@ -249,7 +249,7 @@ class InnkommendeJournalføringService(
             fagsaksystem = fagsak?.let { FagsakSystem.BA.name },
             sakstype = fagsak?.let { FAGSAK.type } ?: GENERELL_SAK.type,
             arkivsaksystem = null,
-            arkivsaksnummer = null
+            arkivsaksnummer = null,
         )
 
         return Pair(sak, behandlinger)
@@ -277,7 +277,7 @@ class InnkommendeJournalføringService(
         journalpostId: String,
         behandlendeEnhet: String,
         oppgaveId: String,
-        behandlinger: List<Behandling>
+        behandlinger: List<Behandling>,
     ) {
         runCatching {
             secureLogger.info("Oppdaterer journalpost $journalpostId med $request")
@@ -286,7 +286,7 @@ class InnkommendeJournalføringService(
             secureLogger.info("Ferdigstiller journalpost $journalpostId")
             integrasjonClient.ferdigstillJournalpost(
                 journalpostId = journalpostId,
-                journalførendeEnhet = behandlendeEnhet
+                journalførendeEnhet = behandlendeEnhet,
             )
             integrasjonClient.ferdigstillOppgave(oppgaveId = oppgaveId.toLong())
         }.onFailure {
@@ -305,7 +305,7 @@ class InnkommendeJournalføringService(
             behandlingId = behandling.id,
             oppgavetype = Oppgavetype.BehandleSak,
             fristForFerdigstillelse = LocalDate.now(),
-            tilordnetRessurs = navIdent
+            tilordnetRessurs = navIdent,
         )
     }
 
@@ -320,18 +320,18 @@ class InnkommendeJournalføringService(
                 } + "\n"
         } ?: throw FunksjonellFeil(
             "Fant ingen dokumenter",
-            frontendFeilmelding = "Noe gikk galt. Prøv igjen eller kontakt brukerstøtte hvis problemet vedvarer."
+            frontendFeilmelding = "Noe gikk galt. Prøv igjen eller kontakt brukerstøtte hvis problemet vedvarer.",
         )
 
         val datoMottatt = journalpost.datoMottatt ?: throw FunksjonellFeil(
             "Fant ingen dokumenter",
-            frontendFeilmelding = "Noe gikk galt. Prøv igjen eller kontakt brukerstøtte hvis problemet vedvarer."
+            frontendFeilmelding = "Noe gikk galt. Prøv igjen eller kontakt brukerstøtte hvis problemet vedvarer.",
         )
         behandlinger.forEach {
             loggService.opprettMottattDokument(
                 behandling = it,
                 tekst = loggTekst,
-                mottattDato = datoMottatt
+                mottattDato = datoMottatt,
             )
         }
     }

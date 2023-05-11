@@ -5,7 +5,7 @@ import java.time.LocalDate
 
 data class ForlengetSvartidsbrev(
     override val mal: Brevmal,
-    override val data: ForlengetSvartidsbrevData
+    override val data: ForlengetSvartidsbrevData,
 ) : Brev {
     constructor(
         navn: String,
@@ -16,15 +16,15 @@ data class ForlengetSvartidsbrev(
         antallUkerSvarfrist: Int,
         organisasjonsnummer: String? = null,
         gjelder: String? = null,
-        saksbehandlerNavn: String
+        saksbehandlerNavn: String,
     ) : this(
         mal = mal,
         data = ForlengetSvartidsbrevData(
             delmalData = ForlengetSvartidsbrevData.DelmalData(
                 signatur = SignaturDelmal(
                     enhet = enhetNavn,
-                    saksbehandlerNavn = saksbehandlerNavn
-                )
+                    saksbehandlerNavn = saksbehandlerNavn,
+                ),
             ),
             flettefelter = ForlengetSvartidsbrevData.Flettefelter(
                 navn = flettefelt(navn),
@@ -32,15 +32,15 @@ data class ForlengetSvartidsbrev(
                 antallUkerSvarfrist = flettefelt(antallUkerSvarfrist.toString()),
                 aarsakerSvartidsbrev = flettefelt(årsaker),
                 organisasjonsnummer = flettefelt(organisasjonsnummer),
-                gjelder = flettefelt(gjelder)
-            )
-        )
+                gjelder = flettefelt(gjelder),
+            ),
+        ),
     )
 }
 
 data class ForlengetSvartidsbrevData(
     override val delmalData: DelmalData,
-    override val flettefelter: Flettefelter
+    override val flettefelter: Flettefelter,
 ) : BrevData {
     data class Flettefelter(
         override val navn: Flettefelt,
@@ -49,10 +49,10 @@ data class ForlengetSvartidsbrevData(
         val antallUkerSvarfrist: Flettefelt,
         val aarsakerSvartidsbrev: Flettefelt,
         override val organisasjonsnummer: Flettefelt,
-        override val gjelder: Flettefelt
+        override val gjelder: Flettefelt,
     ) : FlettefelterForDokument
 
     data class DelmalData(
-        val signatur: SignaturDelmal
+        val signatur: SignaturDelmal,
     )
 }

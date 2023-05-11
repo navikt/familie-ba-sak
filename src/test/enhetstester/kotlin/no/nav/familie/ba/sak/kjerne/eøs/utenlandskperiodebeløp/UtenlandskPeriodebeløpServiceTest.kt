@@ -29,13 +29,13 @@ internal class UtenlandskPeriodebeløpServiceTest {
 
     val utenlandskPeriodebeløpService = UtenlandskPeriodebeløpService(
         utenlandskPeriodebeløpRepository,
-        emptyList()
+        emptyList(),
     )
 
     val tilpassUtenlandskePeriodebeløpTilKompetanserService = TilpassUtenlandskePeriodebeløpTilKompetanserService(
         utenlandskPeriodebeløpRepository,
         emptyList(),
-        kompetanseRepository
+        kompetanseRepository,
     )
 
     @BeforeEach

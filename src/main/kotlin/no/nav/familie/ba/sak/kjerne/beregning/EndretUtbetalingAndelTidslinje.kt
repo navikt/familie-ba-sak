@@ -8,7 +8,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
 
 class EndretUtbetalingAndelTidslinje(
-    private val endretUtbetalingAndeler: List<EndretUtbetalingAndel>
+    private val endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
 ) : Tidslinje<EndretUtbetalingAndel, Måned>() {
 
     override fun lagPerioder(): Collection<Periode<EndretUtbetalingAndel, Måned>> {
@@ -16,7 +16,7 @@ class EndretUtbetalingAndelTidslinje(
             Periode(
                 fraOgMed = it.fom?.tilTidspunkt() ?: throw Feil("Endret utbetaling andel har ingen fom-dato: $it"),
                 tilOgMed = it.tom?.tilTidspunkt() ?: throw Feil("Endret utbetaling andel har ingen tom-dato: $it"),
-                innhold = it
+                innhold = it,
             )
         }
     }
