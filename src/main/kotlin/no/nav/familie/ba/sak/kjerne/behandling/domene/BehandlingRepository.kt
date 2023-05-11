@@ -186,6 +186,6 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
     )
     fun finnTssEksternIdForBehandlinger(behandlingIder: List<Long>): List<Pair<Long, String>>
 
-    @Query(value = "SELECT b.status FROM behandling WHERE b.id = :behandlingId")
+    @Query(value = "SELECT b.status FROM Behandling b WHERE b.id = :behandlingId")
     fun finnStatus(behandlingId: Long): BehandlingStatus
 }
