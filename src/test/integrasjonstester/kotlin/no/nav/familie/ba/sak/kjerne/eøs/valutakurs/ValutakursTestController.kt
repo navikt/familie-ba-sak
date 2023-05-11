@@ -29,13 +29,13 @@ import java.time.LocalDate
 class ValutakursTestController(
     private val utvidetBehandlingService: UtvidetBehandlingService,
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-    private val valutakursService: ValutakursService
+    private val valutakursService: ValutakursService,
 ) {
 
     @PutMapping(path = ["{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun endreValutakurser(
         @PathVariable behandlingId: Long,
-        @RequestBody restValutakurser: Map<LocalDate, String>
+        @RequestBody restValutakurser: Map<LocalDate, String>,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         val behandlingIdObjekt = BehandlingId(behandlingId)
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingIdObjekt.id)!!
@@ -49,7 +49,7 @@ class ValutakursTestController(
 
 private fun Map<LocalDate, String>.tilValutakurser(
     behandlingId: BehandlingId,
-    personopplysningGrunnlag: PersonopplysningGrunnlag
+    personopplysningGrunnlag: PersonopplysningGrunnlag,
 ): Collection<Valutakurs> {
     return this.map { (dato, tidslinje) ->
         val person = personopplysningGrunnlag.personer.first { it.fødselsdato == dato }

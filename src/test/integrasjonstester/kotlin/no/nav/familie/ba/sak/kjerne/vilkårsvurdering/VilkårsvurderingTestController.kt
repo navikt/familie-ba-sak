@@ -57,12 +57,12 @@ class VilkårsvurderingTestController(
     private val behandlingRepository: BehandlingRepository,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val aktørIdRepository: AktørIdRepository,
-    private val tilpassKompetanserTilRegelverkService: TilpassKompetanserTilRegelverkService
+    private val tilpassKompetanserTilRegelverkService: TilpassKompetanserTilRegelverkService,
 ) {
 
     @PostMapping()
     fun opprettBehandlingMedVilkårsvurdering(
-        @RequestBody personresultater: Map<LocalDate, Map<Vilkår, String>>
+        @RequestBody personresultater: Map<LocalDate, Map<Vilkår, String>>,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         val personer = personresultater.tilPersoner()
             .map { it.copy(aktør = aktørIdRepository.saveAndFlush(it.aktør)) }
@@ -80,23 +80,23 @@ class VilkårsvurderingTestController(
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                 søknadMottattDato = LocalDate.now(),
                 barnasIdenter = barn.map { it.aktør.aktivFødselsnummer() },
-                fagsakId = fagsak.id
-            )
+                fagsakId = fagsak.id,
+            ),
         )
 
         // Opprett persongrunnlag
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.save(
-            lagTestPersonopplysningGrunnlag(behandling.id, *personer.toTypedArray())
+            lagTestPersonopplysningGrunnlag(behandling.id, *personer.toTypedArray()),
         )
 
         // Opprett og lagre vilkårsvurdering
         val vilkårsvurdering = personresultater.tilVilkårsvurdering(
             behandling,
-            personopplysningGrunnlag
+            personopplysningGrunnlag,
         )
 
         vilkårsvurderingService.lagreInitielt(
-            vilkårsvurdering
+            vilkårsvurdering,
         )
 
         beregningService.oppdaterBehandlingMedBeregning(behandling, personopplysningGrunnlag)
@@ -108,14 +108,14 @@ class VilkårsvurderingTestController(
     @PostMapping("/{behandlingId}")
     fun oppdaterVilkårsvurderingIBehandling(
         @PathVariable behandlingId: Long,
-        @RequestBody personresultater: Map<LocalDate, Map<Vilkår, String>>
+        @RequestBody personresultater: Map<LocalDate, Map<Vilkår, String>>,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)
         val behandling = behandlingRepository.finnBehandling(behandlingId)
 
         val nyVilkårsvurdering = personresultater.tilVilkårsvurdering(
             behandling,
-            personopplysningGrunnlag!!
+            personopplysningGrunnlag!!,
         )
 
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(nyVilkårsvurdering)
@@ -140,7 +140,7 @@ private fun Map<LocalDate, Map<Vilkår, String>>.tilPersoner(): List<Person> {
 
 fun Map<LocalDate, Map<Vilkår, String>>.tilVilkårsvurdering(
     behandling: Behandling,
-    personopplysningGrunnlag: PersonopplysningGrunnlag
+    personopplysningGrunnlag: PersonopplysningGrunnlag,
 ): Vilkårsvurdering {
     val builder = VilkårsvurderingBuilder<Måned>(behandling)
 

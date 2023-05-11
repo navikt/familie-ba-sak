@@ -262,6 +262,7 @@ Egenskap: Vedtaksperioder med mor og et barn
       | 01.05.2020 | 30.04.2021 | Utbetaling         | Barn og søker                     |
       | 01.05.2021 | 30.04.2022 | Opphør             | Søker har ikke oppfylt vilkårene  |
       | 01.05.2022 | 31.03.2038 | Opphør             | Barnet har ikke oppfylt vilkårene |
+      | 01.04.2038 |            | Opphør             |                                   |
 
   Scenario: Skal ikke dra med splitter fra forrige behandling inn i behandlingen
     Gitt følgende vedtak
@@ -307,12 +308,12 @@ Egenskap: Vedtaksperioder med mor og et barn
     Når vedtaksperioder med begrunnelser genereres for behandling 2
 
     Så forvent følgende vedtaksperioder med begrunnelser
-      | Fra dato   | Til dato   | Vedtaksperiodetype | 
-      | 2021-02-01 | 2021-08-31 | UTBETALING         | 
-      | 2021-09-01 | 2021-12-31 | UTBETALING         | 
-      | 2022-01-01 | 2023-01-31 | UTBETALING         | 
-      | 2023-02-01 | 2023-03-31 | OPPHØR             | 
-      | 2023-04-01 | 2038-12-31 | OPPHØR             | 
+      | Fra dato   | Til dato   | Vedtaksperiodetype |
+      | 2021-02-01 | 2021-08-31 | UTBETALING         |
+      | 2021-09-01 | 2021-12-31 | UTBETALING         |
+      | 2022-01-01 | 2023-01-31 | UTBETALING         |
+      | 2023-02-01 | 2023-03-31 | OPPHØR             |
+      | 2023-04-01 | 2038-12-31 | OPPHØR             |
       | 2039-01-01 |            | OPPHØR             | 
 
 

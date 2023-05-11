@@ -25,13 +25,13 @@ class AutovedtakService(
     private val vedtakService: VedtakService,
     private val loggService: LoggService,
     private val totrinnskontrollService: TotrinnskontrollService,
-    private val tilbakestillBehandlingTilBehandlingsresultatService: TilbakestillBehandlingTilBehandlingsresultatService
+    private val tilbakestillBehandlingTilBehandlingsresultatService: TilbakestillBehandlingTilBehandlingsresultatService,
 ) {
     fun opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
         aktør: Aktør,
         behandlingType: BehandlingType,
         behandlingÅrsak: BehandlingÅrsak,
-        fagsakId: Long
+        fagsakId: Long,
     ): Behandling {
         val nyBehandling = stegService.håndterNyBehandling(
             NyBehandling(
@@ -39,8 +39,8 @@ class AutovedtakService(
                 behandlingÅrsak = behandlingÅrsak,
                 søkersIdent = aktør.aktivFødselsnummer(),
                 skalBehandlesAutomatisk = true,
-                fagsakId = fagsakId
-            )
+                fagsakId = fagsakId,
+            ),
         )
 
         val behandlingEtterBehandlingsresultat = stegService.håndterVilkårsvurdering(nyBehandling)
@@ -53,7 +53,7 @@ class AutovedtakService(
         loggService.opprettBeslutningOmVedtakLogg(
             behandling = behandling,
             beslutning = Beslutning.GODKJENT,
-            behandlingErAutomatiskBesluttet = true
+            behandlingErAutomatiskBesluttet = true,
         )
 
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id)

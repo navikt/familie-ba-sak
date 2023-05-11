@@ -32,7 +32,7 @@ class RegistrerPersongrunnlagTest(
     private val mockPersonopplysningerService: PersonopplysningerService,
 
     @Autowired
-    private val databaseCleanupService: DatabaseCleanupService
+    private val databaseCleanupService: DatabaseCleanupService,
 ) : AbstractSpringIntegrationTest() {
 
     @BeforeAll
@@ -54,8 +54,8 @@ class RegistrerPersongrunnlagTest(
             behandling = behandling1,
             registrerPersongrunnlagDTO = RegistrerPersongrunnlagDTO(
                 ident = morId,
-                barnasIdenter = listOf(barn1Id, barn2Id)
-            )
+                barnasIdenter = listOf(barn1Id, barn2Id),
+            ),
         )
 
         val grunnlag1 = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling1.id)
@@ -83,8 +83,8 @@ class RegistrerPersongrunnlagTest(
             behandling = behandling1,
             registrerPersongrunnlagDTO = RegistrerPersongrunnlagDTO(
                 ident = morId,
-                barnasIdenter = listOf(barn1Id)
-            )
+                barnasIdenter = listOf(barn1Id),
+            ),
         )
 
         val grunnlag1 = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling1.id)
@@ -99,9 +99,9 @@ class RegistrerPersongrunnlagTest(
                 ident = morId,
                 barnasIdenter = listOf(
                     barn1Id,
-                    barn2Id
-                )
-            )
+                    barn2Id,
+                ),
+            ),
         )
         val grunnlag2 = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling1.id)
 
@@ -117,9 +117,9 @@ class RegistrerPersongrunnlagTest(
                 ident = morId,
                 barnasIdenter = listOf(
                     barn1Id,
-                    barn2Id
-                )
-            )
+                    barn2Id,
+                ),
+            ),
         )
 
         val grunnlag3 = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling1.id)

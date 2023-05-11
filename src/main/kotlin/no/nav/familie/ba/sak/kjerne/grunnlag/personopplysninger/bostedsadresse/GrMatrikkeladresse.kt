@@ -25,14 +25,14 @@ data class GrMatrikkeladresse(
     val postnummer: String?,
 
     @Column(name = "kommunenummer")
-    val kommunenummer: String?
+    val kommunenummer: String?,
 
 ) : GrBostedsadresse() {
 
     override fun toSecureString(): String {
         return """MatrikkeladresseDao(matrikkelId=$matrikkelId,bruksenhetsnummer=$bruksenhetsnummer,tilleggsnavn=$tilleggsnavn,
 |               postnummer=$postnummer,kommunenummer=$kommunenummer
-        """.trimMargin()
+            """.trimMargin()
     }
 
     override fun toString(): String {
@@ -63,7 +63,7 @@ data class GrMatrikkeladresse(
                 bruksenhetsnummer = matrikkeladresse.bruksenhetsnummer,
                 tilleggsnavn = matrikkeladresse.tilleggsnavn,
                 postnummer = matrikkeladresse.postnummer,
-                kommunenummer = matrikkeladresse.kommunenummer
+                kommunenummer = matrikkeladresse.kommunenummer,
             )
     }
 }

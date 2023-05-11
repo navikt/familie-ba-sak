@@ -22,7 +22,7 @@ class EndringstidspunktService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
-    private val vilkårsvurderingService: VilkårsvurderingService
+    private val vilkårsvurderingService: VilkårsvurderingService,
 ) {
     fun finnEndringstidspunktForBehandling(behandlingId: Long): LocalDate {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
@@ -42,7 +42,7 @@ class EndringstidspunktService(
             endringstidspunktUtbetalingsbeløp = endringstidspunktUtbetalingsbeløp,
             endringstidspunktKompetanse = endringstidspunktKompetanse,
             endringstidspunktVilkårsvurdering = endringstidspunktVilkårsvurdering,
-            endringstidspunktEndretUtbetalingAndeler = endringstidspunktEndretUtbetalingAndeler
+            endringstidspunktEndretUtbetalingAndeler = endringstidspunktEndretUtbetalingAndeler,
         )
 
         logger.info(
@@ -50,7 +50,7 @@ class EndringstidspunktService(
                 "Endringstidspunkt utbetalingsbeløp: $endringstidspunktUtbetalingsbeløp" +
                 "Endringstidspunkt kompetanse: $endringstidspunktKompetanse" +
                 "Endringstidspunkt vilkårsvurdering: $endringstidspunktVilkårsvurdering" +
-                "Endringstidspunkt endret utbetaling andeler: $endringstidspunktEndretUtbetalingAndeler"
+                "Endringstidspunkt endret utbetaling andeler: $endringstidspunktEndretUtbetalingAndeler",
         )
 
         return tidligsteEndringstidspunkt
@@ -62,7 +62,7 @@ class EndringstidspunktService(
 
         return EndringIUtbetalingUtil.utledEndringstidspunktForUtbetalingsbeløp(
             nåværendeAndeler = nåværendeAndeler,
-            forrigeAndeler = forrigeAndeler
+            forrigeAndeler = forrigeAndeler,
         )
     }
     private fun finnEndringstidspunktForKompetanse(inneværendeBehandlingId: Long, forrigeBehandlingId: Long): YearMonth? {
@@ -71,7 +71,7 @@ class EndringstidspunktService(
 
         return EndringIKompetanseUtil.utledEndringstidspunktForKompetanse(
             nåværendeKompetanser = nåværendeKompetanser,
-            forrigeKompetanser = forrigeKompetanser
+            forrigeKompetanser = forrigeKompetanser,
         )
     }
     private fun finnEndringstidspunktForVilkårsvurdering(inneværendeBehandlingId: Long, forrigeBehandlingId: Long): YearMonth? {
@@ -80,7 +80,7 @@ class EndringstidspunktService(
 
         return EndringIVilkårsvurderingUtil.utledEndringstidspunktForVilkårsvurdering(
             nåværendePersonResultat = nåværendeVilkårsvurdering.personResultater,
-            forrigePersonResultat = forrigeVilkårsvurdering.personResultater
+            forrigePersonResultat = forrigeVilkårsvurdering.personResultater,
         )
     }
     private fun finnEndringstidspunktForEndretUtbetalingAndel(inneværendeBehandlingId: Long, forrigeBehandlingId: Long): YearMonth? {
@@ -89,7 +89,7 @@ class EndringstidspunktService(
 
         return EndringIEndretUtbetalingAndelUtil.utledEndringstidspunktForEndretUtbetalingAndel(
             nåværendeEndretAndeler = nåværendeEndretAndeler,
-            forrigeEndretAndeler = forrigeEndretAndeler
+            forrigeEndretAndeler = forrigeEndretAndeler,
         )
     }
 

@@ -52,5 +52,3 @@ Egenskap: Vedtaksperioder med mor og to barn
 
 
 
-
-

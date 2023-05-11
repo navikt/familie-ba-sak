@@ -62,16 +62,16 @@ class BrevperiodeTest {
                     eøsBegrunnelser = behandlingsresultatPersonTestConfig.eøsBegrunnelser?.map {
                         EØSBegrunnelseMedTriggere(
                             eøsBegrunnelse = it,
-                            sanityEØSBegrunnelse = sanityEØSBegrunnelser.finnBegrunnelse(it)!!
+                            sanityEØSBegrunnelse = sanityEØSBegrunnelser.finnBegrunnelse(it)!!,
                         )
-                    } ?: emptyList()
+                    } ?: emptyList(),
                 )
 
             val restBehandlingsgrunnlagForBrev = RestBehandlingsgrunnlagForBrev(
                 personerPåBehandling = behandlingsresultatPersonTestConfig.personerPåBehandling.map { it.tilMinimertPerson() },
                 minimertePersonResultater = behandlingsresultatPersonTestConfig.personerPåBehandling.map { it.tilMinimertePersonResultater() },
                 minimerteEndredeUtbetalingAndeler = behandlingsresultatPersonTestConfig.personerPåBehandling.flatMap { it.tilMinimerteEndredeUtbetalingAndeler() },
-                fagsakType = FagsakType.NORMAL
+                fagsakType = FagsakType.NORMAL,
             )
 
             val brevperiode = try {
@@ -85,29 +85,29 @@ class BrevperiodeTest {
                         .map { it.personIdent },
                     minimerteKompetanserForPeriode = behandlingsresultatPersonTestConfig.kompetanser?.map {
                         it.tilMinimertKompetanse(
-                            behandlingsresultatPersonTestConfig.personerPåBehandling
+                            behandlingsresultatPersonTestConfig.personerPåBehandling,
                         )
                     } ?: emptyList(),
                     minimerteKompetanserSomStopperRettFørPeriode = behandlingsresultatPersonTestConfig.kompetanserSomStopperRettFørPeriode?.map {
                         it.tilMinimertKompetanse(
-                            behandlingsresultatPersonTestConfig.personerPåBehandling
+                            behandlingsresultatPersonTestConfig.personerPåBehandling,
                         )
                     } ?: emptyList(),
-                    dødeBarnForrigePeriode = emptyList()
+                    dødeBarnForrigePeriode = emptyList(),
                 ).genererBrevPeriode()
             } catch (e: Exception) {
                 testReporter.publishEntry(
                     "Feil i test: $it" +
                         "\nFeilmelding: ${e.message}" +
                         "\nFil: ${e.stackTrace.first()}" +
-                        "\n-----------------------------------\n"
+                        "\n-----------------------------------\n",
                 )
                 return@fold acc + 1
             }
 
             val feil = erLike(
                 forventetOutput = behandlingsresultatPersonTestConfig.forventetOutput,
-                output = brevperiode
+                output = brevperiode,
             )
 
             if (feil.isNotEmpty()) {
@@ -115,7 +115,7 @@ class BrevperiodeTest {
                     it,
                     "${behandlingsresultatPersonTestConfig.beskrivelse}\n\n" +
                         feil.joinToString("\n\n") +
-                        "\n-----------------------------------\n"
+                        "\n-----------------------------------\n",
                 )
                 acc + 1
             } else {
@@ -128,14 +128,14 @@ class BrevperiodeTest {
 
     private fun erLike(
         forventetOutput: BrevPeriodeOutput?,
-        output: BrevPeriode?
+        output: BrevPeriode?,
     ): List<String> {
         val feil = mutableListOf<String>()
 
         fun validerFelt(forventet: String?, faktisk: String?, variabelNavn: String) {
             if (forventet != faktisk) {
                 feil.add(
-                    "Forventet $variabelNavn var: '$forventet', men fikk '$faktisk'"
+                    "Forventet $variabelNavn var: '$forventet', men fikk '$faktisk'",
                 )
             }
         }
@@ -160,7 +160,7 @@ class BrevperiodeTest {
                     null
                 },
                 output.belop?.single(),
-                "belop"
+                "belop",
             )
 
             val forventedeBegrunnelser = forventetOutput.begrunnelser.map {
@@ -177,7 +177,7 @@ class BrevperiodeTest {
                     "Forventet antall begrunnelser var ${forventedeBegrunnelser.size} begrunnelser, " +
                         "men fikk ${output.begrunnelser.size}." +
                         "\nForventede begrunnelser: $forventedeBegrunnelser" +
-                        "\nOutput: ${output.begrunnelser}"
+                        "\nOutput: ${output.begrunnelser}",
                 )
             } else {
                 forventedeBegrunnelser.forEachIndexed { index, _ ->
@@ -186,7 +186,7 @@ class BrevperiodeTest {
                             "Forventet begrunnelse nr. ${index + 1} var: " +
                                 "\n'${forventedeBegrunnelser[index]}', " +
                                 "\nmen fikk " +
-                                "\n'${output.begrunnelser[index]}'"
+                                "\n'${output.begrunnelser[index]}'",
                         )
                     }
                 }
@@ -198,6 +198,6 @@ class BrevperiodeTest {
     private fun Standardbegrunnelse.tilBrevBegrunnelseGrunnlag(sanityBegrunnelser: List<SanityBegrunnelse>) =
         BegrunnelseMedTriggere(
             standardbegrunnelse = this,
-            triggesAv = this.tilISanityBegrunnelse(sanityBegrunnelser)!!.tilTriggesAv()
+            triggesAv = this.tilISanityBegrunnelse(sanityBegrunnelser)!!.tilTriggesAv(),
         )
 }

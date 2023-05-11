@@ -11,7 +11,7 @@ import java.time.LocalDate
 @JsonSubTypes(
     JsonSubTypes.Type(value = Utbetalingsperiode::class, name = "UTBETALING"),
     JsonSubTypes.Type(value = Avslagsperiode::class, name = "AVSLAG"),
-    JsonSubTypes.Type(value = Opphørsperiode::class, name = "OPPHØR")
+    JsonSubTypes.Type(value = Opphørsperiode::class, name = "OPPHØR"),
 )
 interface Vedtaksperiode {
 
@@ -33,8 +33,8 @@ enum class Vedtaksperiodetype(val tillatteBegrunnelsestyper: List<VedtakBegrunne
             VedtakBegrunnelseType.INSTITUSJON_FORTSATT_INNVILGET,
             VedtakBegrunnelseType.EØS_INNVILGET,
             VedtakBegrunnelseType.EØS_REDUKSJON,
-            VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
-        )
+            VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET,
+        ),
     ),
 
     /***
@@ -58,43 +58,43 @@ enum class Vedtaksperiodetype(val tillatteBegrunnelsestyper: List<VedtakBegrunne
             VedtakBegrunnelseType.INSTITUSJON_REDUKSJON,
             VedtakBegrunnelseType.INSTITUSJON_INNVILGET,
             VedtakBegrunnelseType.EØS_INNVILGET,
-            VedtakBegrunnelseType.EØS_REDUKSJON
-        )
+            VedtakBegrunnelseType.EØS_REDUKSJON,
+        ),
     ),
     OPPHØR(
         listOf(
             VedtakBegrunnelseType.OPPHØR,
             VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING,
             VedtakBegrunnelseType.INSTITUSJON_OPPHØR,
-            VedtakBegrunnelseType.EØS_OPPHØR
-        )
+            VedtakBegrunnelseType.EØS_OPPHØR,
+        ),
     ),
     AVSLAG(
         listOf(
             VedtakBegrunnelseType.AVSLAG,
             VedtakBegrunnelseType.EØS_AVSLAG,
-            VedtakBegrunnelseType.INSTITUSJON_AVSLAG
-        )
+            VedtakBegrunnelseType.INSTITUSJON_AVSLAG,
+        ),
     ),
     FORTSATT_INNVILGET(
         listOf(
             VedtakBegrunnelseType.FORTSATT_INNVILGET,
             VedtakBegrunnelseType.INSTITUSJON_FORTSATT_INNVILGET,
-            VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET
-        )
+            VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET,
+        ),
     ),
 
     @Deprecated("Legacy. Kan ikke fjernes uten at det ryddes opp i Vedtaksperioder-tabellen")
-    ENDRET_UTBETALING(emptyList())
+    ENDRET_UTBETALING(emptyList()),
 }
 
 fun Vedtaksperiode.tilVedtaksperiodeMedBegrunnelse(
-    vedtak: Vedtak
+    vedtak: Vedtak,
 ): VedtaksperiodeMedBegrunnelser {
     return VedtaksperiodeMedBegrunnelser(
         fom = this.periodeFom,
         tom = this.periodeTom,
         vedtak = vedtak,
-        type = this.vedtaksperiodetype
+        type = this.vedtaksperiodetype,
     )
 }

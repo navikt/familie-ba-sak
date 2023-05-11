@@ -17,15 +17,15 @@ import org.springframework.web.bind.annotation.RestController
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class TidslinjeController(
-    private val tidslinjeService: VilkårsvurderingTidslinjeService
+    private val tidslinjeService: VilkårsvurderingTidslinjeService,
 ) {
 
     @GetMapping("/{behandlingId}")
     fun hentTidslinjer(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<RestTidslinjer>> {
         return ResponseEntity.ok(
             success(
-                tidslinjeService.hentTidslinjerThrows(BehandlingId(behandlingId)).tilRestTidslinjer()
-            )
+                tidslinjeService.hentTidslinjerThrows(BehandlingId(behandlingId)).tilRestTidslinjer(),
+            ),
         )
     }
 }

@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonRequest
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonRequestVariables
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.http.util.UriUtil
+import no.nav.familie.kontrakter.felles.Tema
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.annotation.Cacheable
@@ -21,7 +22,7 @@ import java.net.URI
 @Component
 class PdlIdentRestClient(
     @Value("\${PDL_URL}") pdlBaseUrl: URI,
-    @Qualifier("jwtBearer") val restTemplate: RestOperations
+    @Qualifier("jwtBearer") val restTemplate: RestOperations,
 ) : AbstractRestClient(restTemplate, "pdl.ident") {
     protected val pdlUri = UriUtil.uri(pdlBaseUrl, PATH_GRAPHQL)
 
@@ -41,23 +42,23 @@ class PdlIdentRestClient(
     private fun hentIdenter(personIdent: String): PdlIdenter {
         val pdlPersonRequest = PdlPersonRequest(
             variables = PdlPersonRequestVariables(personIdent),
-            query = hentIdenterQuery
+            query = hentIdenterQuery,
         )
         val pdlResponse: PdlBaseResponse<PdlHentIdenterResponse> = kallEksternTjeneste(
             tjeneste = "pdl",
             uri = pdlUri,
-            formål = "Hent identer"
+            formål = "Hent identer",
         ) {
             postForEntity(
                 pdlUri,
                 pdlPersonRequest,
-                httpHeaders()
+                httpHeaders(),
             )
         }
 
         return feilsjekkOgReturnerData(
             ident = personIdent,
-            pdlResponse = pdlResponse
+            pdlResponse = pdlResponse,
         ) {
             it.pdlIdenter
         }
@@ -68,6 +69,7 @@ class PdlIdentRestClient(
             contentType = MediaType.APPLICATION_JSON
             accept = listOf(MediaType.APPLICATION_JSON)
             add("Tema", PDL_TEMA)
+            add("behandlingsnummer", Tema.BAR.behandlingsnummer)
         }
     }
 

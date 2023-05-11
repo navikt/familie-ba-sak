@@ -12,10 +12,10 @@ import java.time.YearMonth
 @TaskStepBeskrivelse(
     taskStepType = SatsendringTask.TASK_STEP_TYPE,
     beskrivelse = "Utfør satsendring",
-    maxAntallFeil = 1
+    maxAntallFeil = 1,
 )
 class SatsendringTask(
-    val autovedtakSatsendringService: AutovedtakSatsendringService
+    val autovedtakSatsendringService: AutovedtakSatsendringService,
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
@@ -34,5 +34,5 @@ class SatsendringTask(
 
 data class SatsendringTaskDto(
     val fagsakId: Long,
-    val satstidspunkt: YearMonth
+    val satstidspunkt: YearMonth,
 )

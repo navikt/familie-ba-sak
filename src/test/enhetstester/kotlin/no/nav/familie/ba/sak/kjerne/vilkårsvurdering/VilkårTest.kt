@@ -17,14 +17,14 @@ class VilkårTest {
             val relevanteVilkår = Vilkår.hentVilkårFor(
                 personType = PersonType.BARN,
                 fagsakType = FagsakType.NORMAL,
-                behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR
+                behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
             )
             val vilkårForBarn = setOf(
                 Vilkår.UNDER_18_ÅR,
                 Vilkår.BOR_MED_SØKER,
                 Vilkår.GIFT_PARTNERSKAP,
                 Vilkår.BOSATT_I_RIKET,
-                Vilkår.LOVLIG_OPPHOLD
+                Vilkår.LOVLIG_OPPHOLD,
             )
             Assertions.assertEquals(vilkårForBarn, relevanteVilkår)
         }
@@ -34,14 +34,14 @@ class VilkårTest {
             val relevanteVilkår = Vilkår.hentVilkårFor(
                 personType = PersonType.BARN,
                 fagsakType = FagsakType.NORMAL,
-                behandlingUnderkategori = BehandlingUnderkategori.UTVIDET
+                behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
             )
             val vilkårForBarn = setOf(
                 Vilkår.UNDER_18_ÅR,
                 Vilkår.BOR_MED_SØKER,
                 Vilkår.GIFT_PARTNERSKAP,
                 Vilkår.BOSATT_I_RIKET,
-                Vilkår.LOVLIG_OPPHOLD
+                Vilkår.LOVLIG_OPPHOLD,
             )
             Assertions.assertEquals(vilkårForBarn, relevanteVilkår)
         }
@@ -51,14 +51,14 @@ class VilkårTest {
             val relevanteVilkår = Vilkår.hentVilkårFor(
                 personType = PersonType.BARN,
                 fagsakType = FagsakType.INSTITUSJON,
-                behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR
+                behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
             )
             val vilkårForBarn = setOf(
                 Vilkår.UNDER_18_ÅR,
                 Vilkår.BOR_MED_SØKER,
                 Vilkår.GIFT_PARTNERSKAP,
                 Vilkår.BOSATT_I_RIKET,
-                Vilkår.LOVLIG_OPPHOLD
+                Vilkår.LOVLIG_OPPHOLD,
             )
             Assertions.assertEquals(vilkårForBarn, relevanteVilkår)
         }
@@ -68,14 +68,14 @@ class VilkårTest {
             val relevanteVilkår = Vilkår.hentVilkårFor(
                 personType = PersonType.BARN,
                 fagsakType = FagsakType.INSTITUSJON,
-                behandlingUnderkategori = BehandlingUnderkategori.UTVIDET
+                behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
             )
             val vilkårForBarn = setOf(
                 Vilkår.UNDER_18_ÅR,
                 Vilkår.BOR_MED_SØKER,
                 Vilkår.GIFT_PARTNERSKAP,
                 Vilkår.BOSATT_I_RIKET,
-                Vilkår.LOVLIG_OPPHOLD
+                Vilkår.LOVLIG_OPPHOLD,
             )
             Assertions.assertEquals(vilkårForBarn, relevanteVilkår)
         }
@@ -85,14 +85,14 @@ class VilkårTest {
             val relevanteVilkår = Vilkår.hentVilkårFor(
                 personType = PersonType.BARN,
                 fagsakType = FagsakType.BARN_ENSLIG_MINDREÅRIG,
-                behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR
+                behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
             )
             val vilkårForBarn = setOf(
                 Vilkår.UNDER_18_ÅR,
                 Vilkår.BOR_MED_SØKER,
                 Vilkår.GIFT_PARTNERSKAP,
                 Vilkår.BOSATT_I_RIKET,
-                Vilkår.LOVLIG_OPPHOLD
+                Vilkår.LOVLIG_OPPHOLD,
             )
             Assertions.assertEquals(vilkårForBarn, relevanteVilkår)
         }
@@ -102,7 +102,7 @@ class VilkårTest {
             val relevanteVilkår = Vilkår.hentVilkårFor(
                 personType = PersonType.BARN,
                 fagsakType = FagsakType.BARN_ENSLIG_MINDREÅRIG,
-                behandlingUnderkategori = BehandlingUnderkategori.UTVIDET
+                behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
             )
             val vilkårForBarn = setOf(
                 Vilkår.UNDER_18_ÅR,
@@ -110,7 +110,7 @@ class VilkårTest {
                 Vilkår.GIFT_PARTNERSKAP,
                 Vilkår.BOSATT_I_RIKET,
                 Vilkår.LOVLIG_OPPHOLD,
-                Vilkår.UTVIDET_BARNETRYGD
+                Vilkår.UTVIDET_BARNETRYGD,
             )
             Assertions.assertEquals(vilkårForBarn, relevanteVilkår)
         }
@@ -123,11 +123,11 @@ class VilkårTest {
             val relevanteVilkår = Vilkår.hentVilkårFor(
                 personType = PersonType.SØKER,
                 fagsakType = FagsakType.NORMAL,
-                behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR
+                behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
             )
             val vilkårForBarn = setOf(
                 Vilkår.BOSATT_I_RIKET,
-                Vilkår.LOVLIG_OPPHOLD
+                Vilkår.LOVLIG_OPPHOLD,
             )
             Assertions.assertEquals(vilkårForBarn, relevanteVilkår)
         }
@@ -137,12 +137,12 @@ class VilkårTest {
             val relevanteVilkår = Vilkår.hentVilkårFor(
                 personType = PersonType.SØKER,
                 fagsakType = FagsakType.NORMAL,
-                behandlingUnderkategori = BehandlingUnderkategori.UTVIDET
+                behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
             )
             val vilkårForBarn = setOf(
                 Vilkår.BOSATT_I_RIKET,
                 Vilkår.LOVLIG_OPPHOLD,
-                Vilkår.UTVIDET_BARNETRYGD
+                Vilkår.UTVIDET_BARNETRYGD,
             )
             Assertions.assertEquals(vilkårForBarn, relevanteVilkår)
         }
@@ -152,7 +152,7 @@ class VilkårTest {
             val relevanteVilkår = Vilkår.hentVilkårFor(
                 personType = PersonType.SØKER,
                 fagsakType = FagsakType.INSTITUSJON,
-                behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR
+                behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
             )
             val vilkårForBarn = emptySet<Vilkår>()
             Assertions.assertEquals(vilkårForBarn, relevanteVilkår)
@@ -163,7 +163,7 @@ class VilkårTest {
             val relevanteVilkår = Vilkår.hentVilkårFor(
                 personType = PersonType.SØKER,
                 fagsakType = FagsakType.INSTITUSJON,
-                behandlingUnderkategori = BehandlingUnderkategori.UTVIDET
+                behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
             )
             val vilkårForBarn = emptySet<Vilkår>()
             Assertions.assertEquals(vilkårForBarn, relevanteVilkår)
@@ -174,7 +174,7 @@ class VilkårTest {
             val relevanteVilkår = Vilkår.hentVilkårFor(
                 personType = PersonType.SØKER,
                 fagsakType = FagsakType.BARN_ENSLIG_MINDREÅRIG,
-                behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR
+                behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
             )
             val vilkårForBarn = emptySet<Vilkår>()
             Assertions.assertEquals(vilkårForBarn, relevanteVilkår)
@@ -185,7 +185,7 @@ class VilkårTest {
             val relevanteVilkår = Vilkår.hentVilkårFor(
                 personType = PersonType.SØKER,
                 fagsakType = FagsakType.BARN_ENSLIG_MINDREÅRIG,
-                behandlingUnderkategori = BehandlingUnderkategori.UTVIDET
+                behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
             )
             val vilkårForBarn = emptySet<Vilkår>()
             Assertions.assertEquals(vilkårForBarn, relevanteVilkår)

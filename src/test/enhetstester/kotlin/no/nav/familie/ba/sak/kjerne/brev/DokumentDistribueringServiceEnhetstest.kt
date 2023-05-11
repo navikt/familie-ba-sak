@@ -41,12 +41,12 @@ internal class DokumentDistribueringServiceEnhetstest {
         } throws RessursException(
             httpStatus = HttpStatus.BAD_REQUEST,
             ressurs = Ressurs.failure(),
-            cause = RestClientResponseException("Mottaker har ukjent adresse", 400, "", null, null, null)
+            cause = RestClientResponseException("Mottaker har ukjent adresse", 400, "", null, null, null),
         )
 
         dokumentDistribueringService.prøvDistribuerBrevOgLoggHendelseFraBehandling(
             distribuerDokumentDTO = lagDistribuerDokumentDTO(),
-            loggBehandlerRolle = BehandlerRolle.BESLUTTER
+            loggBehandlerRolle = BehandlerRolle.BESLUTTER,
         )
 
         verify(exactly = 1) { loggService.opprettBrevIkkeDistribuertUkjentAdresseLogg(any(), any()) }
@@ -59,12 +59,12 @@ internal class DokumentDistribueringServiceEnhetstest {
         } throws RessursException(
             httpStatus = HttpStatus.GONE,
             ressurs = Ressurs.failure(),
-            cause = RestClientResponseException("", 410, "", null, null, null)
+            cause = RestClientResponseException("", 410, "", null, null, null),
         )
 
         dokumentDistribueringService.prøvDistribuerBrevOgLoggHendelseFraBehandling(
             distribuerDokumentDTO = lagDistribuerDokumentDTO(),
-            loggBehandlerRolle = BehandlerRolle.BESLUTTER
+            loggBehandlerRolle = BehandlerRolle.BESLUTTER,
         )
 
         verify(exactly = 1) {
@@ -79,13 +79,13 @@ internal class DokumentDistribueringServiceEnhetstest {
         } throws RessursException(
             httpStatus = HttpStatus.CONFLICT,
             ressurs = Ressurs.failure(),
-            cause = RestClientResponseException("", 409, "", null, null, null)
+            cause = RestClientResponseException("", 409, "", null, null, null),
         )
 
         assertDoesNotThrow {
             dokumentDistribueringService.prøvDistribuerBrevOgLoggHendelseFraBehandling(
                 distribuerDokumentDTO = lagDistribuerDokumentDTO(),
-                loggBehandlerRolle = BehandlerRolle.BESLUTTER
+                loggBehandlerRolle = BehandlerRolle.BESLUTTER,
             )
         }
     }
@@ -95,6 +95,6 @@ internal class DokumentDistribueringServiceEnhetstest {
         behandlingId = 1L,
         brevmal = Brevmal.SVARTIDSBREV,
         personEllerInstitusjonIdent = "test",
-        erManueltSendt = true
+        erManueltSendt = true,
     )
 }

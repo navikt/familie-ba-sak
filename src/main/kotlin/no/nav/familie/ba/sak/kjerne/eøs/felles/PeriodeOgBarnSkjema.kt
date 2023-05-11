@@ -14,7 +14,7 @@ interface PeriodeOgBarnSkjema<out T> where T : PeriodeOgBarnSkjema<T> {
     fun kopier(
         fom: YearMonth? = this.fom,
         tom: YearMonth? = this.tom,
-        barnAktører: Set<Aktør> = this.barnAktører.map { it.copy() }.toSet()
+        barnAktører: Set<Aktør> = this.barnAktører.map { it.copy() }.toSet(),
     ): T
 }
 
@@ -25,7 +25,7 @@ fun <T : PeriodeOgBarnSkjema<T>> T.medBarnOgPeriodeSomOverlapperMed(skjema: T): 
     val snitt = this.kopier(
         fom = if (fom == MIN_MÅNED) null else fom,
         tom = if (tom == MAX_MÅNED) null else tom,
-        barnAktører = this.barnAktører.intersect(skjema.barnAktører)
+        barnAktører = this.barnAktører.intersect(skjema.barnAktører),
     )
 
     return if (snitt.harBarnOgPeriode()) snitt else null
@@ -55,7 +55,7 @@ fun <T : PeriodeOgBarnSkjema<T>> T.utenPeriode(): T =
 fun <T : PeriodeOgBarnSkjema<T>> T.utenInnholdTilOgMed(tom: YearMonth?) =
     this.kopier(
         fom = this.tom?.plusMonths(1),
-        tom = tom
+        tom = tom,
     ).utenInnhold()
 
 fun <T : PeriodeOgBarnSkjema<T>> T.medBarnaSomForsvinnerFra(skjema: T): T =

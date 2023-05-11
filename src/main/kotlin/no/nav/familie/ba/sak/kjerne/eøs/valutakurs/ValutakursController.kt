@@ -28,12 +28,12 @@ class ValutakursController(
     private val valutakursService: ValutakursService,
     private val personidentService: PersonidentService,
     private val utvidetBehandlingService: UtvidetBehandlingService,
-    private val ecbService: ECBService
+    private val ecbService: ECBService,
 ) {
     @PutMapping(path = ["{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun oppdaterValutakurs(
         @PathVariable behandlingId: Long,
-        @RequestBody restValutakurs: RestValutakurs
+        @RequestBody restValutakurs: RestValutakurs,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         val barnAktører = restValutakurs.barnIdenter.map { personidentService.hentAktør(it) }
 
@@ -51,7 +51,7 @@ class ValutakursController(
     @DeleteMapping(path = ["{behandlingId}/{valutakursId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun slettValutakurs(
         @PathVariable behandlingId: Long,
-        @PathVariable valutakursId: Long
+        @PathVariable valutakursId: Long,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         valutakursService.slettValutakurs(valutakursId)
 
@@ -63,8 +63,8 @@ class ValutakursController(
             valutakurs.copy(
                 kurs = ecbService.hentValutakurs(
                     restValutakurs.valutakode!!,
-                    restValutakurs.valutakursdato!!
-                )
+                    restValutakurs.valutakursdato!!,
+                ),
             )
         } else {
             valutakurs
@@ -75,7 +75,7 @@ class ValutakursController(
      */
     private fun skalManueltSetteValutakurs(restValutakurs: RestValutakurs): Boolean {
         return restValutakurs.valutakursdato != null && restValutakurs.valutakode == "ISK" && restValutakurs.valutakursdato.isBefore(
-            LocalDate.of(2018, 2, 1)
+            LocalDate.of(2018, 2, 1),
         )
     }
 

@@ -21,20 +21,20 @@ class TilbakestillBehandlingService(
     private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService,
     private val vedtakRepository: VedtakRepository,
     private val tilbakekrevingService: TilbakekrevingService,
-    private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService
+    private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService,
 ) {
 
     @Transactional
     fun initierOgSettBehandlingTilVilkårsvurdering(
         behandling: Behandling,
-        bekreftEndringerViaFrontend: Boolean = true
+        bekreftEndringerViaFrontend: Boolean = true,
     ) {
         vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
             behandling = behandling,
             bekreftEndringerViaFrontend = bekreftEndringerViaFrontend,
             forrigeBehandlingSomErVedtatt = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(
-                behandling
-            )
+                behandling,
+            ),
         )
 
         val vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId = behandling.id)
@@ -44,7 +44,7 @@ class TilbakestillBehandlingService(
 
         behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(
             behandlingId = behandling.id,
-            steg = StegType.VILKÅRSVURDERING
+            steg = StegType.VILKÅRSVURDERING,
         )
         tilbakekrevingService.slettTilbakekrevingPåBehandling(behandling.id)
 
@@ -58,14 +58,14 @@ class TilbakestillBehandlingService(
         beregningService.slettTilkjentYtelseForBehandling(behandlingId = behandling.id)
         vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(
             vedtak = vedtakRepository.findByBehandlingAndAktiv(
-                behandlingId = behandling.id
-            )
+                behandlingId = behandling.id,
+            ),
         )
         tilbakekrevingService.slettTilbakekrevingPåBehandling(behandling.id)
 
         behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(
             behandlingId = behandling.id,
-            steg = StegType.VILKÅRSVURDERING
+            steg = StegType.VILKÅRSVURDERING,
         )
     }
 
@@ -73,8 +73,8 @@ class TilbakestillBehandlingService(
     fun tilbakestillDataTilVilkårsvurderingssteg(behandling: Behandling) {
         vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(
             vedtak = vedtakRepository.findByBehandlingAndAktiv(
-                behandlingId = behandling.id
-            )
+                behandlingId = behandling.id,
+            ),
         )
     }
 
@@ -85,13 +85,13 @@ class TilbakestillBehandlingService(
     fun resettStegVedEndringPåVilkår(behandlingId: Long): Behandling {
         vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(
             vedtak = vedtakRepository.findByBehandlingAndAktiv(
-                behandlingId
-            )
+                behandlingId,
+            ),
         )
         tilbakekrevingService.slettTilbakekrevingPåBehandling(behandlingId)
         return behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(
             behandlingId = behandlingId,
-            steg = StegType.VILKÅRSVURDERING
+            steg = StegType.VILKÅRSVURDERING,
         )
     }
 }

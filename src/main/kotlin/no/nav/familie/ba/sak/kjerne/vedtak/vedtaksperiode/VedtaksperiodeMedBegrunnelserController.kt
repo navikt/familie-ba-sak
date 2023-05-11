@@ -38,7 +38,7 @@ class VedtaksperiodeMedBegrunnelserController(
     private val tilgangService: TilgangService,
     private val brevKlient: BrevKlient,
     private val utvidetBehandlingService: UtvidetBehandlingService,
-    private val brevPeriodeService: BrevPeriodeService
+    private val brevPeriodeService: BrevPeriodeService,
 ) {
 
     @PutMapping("/standardbegrunnelser/{vedtaksperiodeId}")
@@ -46,11 +46,11 @@ class VedtaksperiodeMedBegrunnelserController(
         @PathVariable
         vedtaksperiodeId: Long,
         @RequestBody
-        restPutVedtaksperiodeMedStandardbegrunnelser: RestPutVedtaksperiodeMedStandardbegrunnelser
+        restPutVedtaksperiodeMedStandardbegrunnelser: RestPutVedtaksperiodeMedStandardbegrunnelser,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = OPPDATERE_BEGRUNNELSER_HANDLING
+            handling = OPPDATERE_BEGRUNNELSER_HANDLING,
         )
 
         val standardbegrunnelser = restPutVedtaksperiodeMedStandardbegrunnelser.standardbegrunnelser.mapNotNull {
@@ -63,7 +63,7 @@ class VedtaksperiodeMedBegrunnelserController(
         val vedtak = vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
             vedtaksperiodeId = vedtaksperiodeId,
             standardbegrunnelserFraFrontend = nasjonalebegrunnelser,
-            eøsStandardbegrunnelserFraFrontend = eøsStandardbegrunnelser
+            eøsStandardbegrunnelserFraFrontend = eøsStandardbegrunnelser,
         )
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = vedtak.behandling.id)))
@@ -74,16 +74,16 @@ class VedtaksperiodeMedBegrunnelserController(
         @PathVariable
         vedtaksperiodeId: Long,
         @RequestBody
-        restPutVedtaksperiodeMedFritekster: RestPutVedtaksperiodeMedFritekster
+        restPutVedtaksperiodeMedFritekster: RestPutVedtaksperiodeMedFritekster,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = OPPDATERE_BEGRUNNELSER_HANDLING
+            handling = OPPDATERE_BEGRUNNELSER_HANDLING,
         )
 
         val vedtak = vedtaksperiodeService.oppdaterVedtaksperiodeMedFritekster(
             vedtaksperiodeId,
-            restPutVedtaksperiodeMedFritekster
+            restPutVedtaksperiodeMedFritekster,
         )
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = vedtak.behandling.id)))
@@ -91,14 +91,14 @@ class VedtaksperiodeMedBegrunnelserController(
 
     @PutMapping("/endringstidspunkt")
     fun genererVedtaksperioderTilOgMedFørsteEndringstidspunkt(
-        @RequestBody restGenererVedtaksperioder: RestGenererVedtaksperioderForOverstyrtEndringstidspunkt
+        @RequestBody restGenererVedtaksperioder: RestGenererVedtaksperioderForOverstyrtEndringstidspunkt,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         vedtaksperiodeService.genererVedtaksperiodeForOverstyrtEndringstidspunkt(restGenererVedtaksperioder)
         return ResponseEntity.ok(
             Ressurs.success(
                 utvidetBehandlingService
-                    .lagRestUtvidetBehandling(behandlingId = restGenererVedtaksperioder.behandlingId)
-            )
+                    .lagRestUtvidetBehandling(behandlingId = restGenererVedtaksperioder.behandlingId),
+            ),
         )
     }
 
@@ -106,7 +106,7 @@ class VedtaksperiodeMedBegrunnelserController(
     fun genererBrevBegrunnelserForPeriode(@PathVariable vedtaksperiodeId: Long): ResponseEntity<Ressurs<Set<String>>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
-            handling = "hente genererte begrunnelser"
+            handling = "hente genererte begrunnelser",
         )
 
         val begrunnelser = brevPeriodeService.genererBrevBegrunnelserForPeriode(vedtaksperiodeId).map {

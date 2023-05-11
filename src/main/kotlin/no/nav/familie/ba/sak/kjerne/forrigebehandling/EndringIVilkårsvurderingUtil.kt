@@ -17,11 +17,11 @@ object EndringIVilkårsvurderingUtil {
 
     fun utledEndringstidspunktForVilkårsvurdering(
         nåværendePersonResultat: Set<PersonResultat>,
-        forrigePersonResultat: Set<PersonResultat>
+        forrigePersonResultat: Set<PersonResultat>,
     ): YearMonth? {
         val endringIVilkårsvurderingTidslinje = lagEndringIVilkårsvurderingTidslinje(
             nåværendePersonResultater = nåværendePersonResultat,
-            forrigePersonResultater = forrigePersonResultat
+            forrigePersonResultater = forrigePersonResultat,
         )
 
         return endringIVilkårsvurderingTidslinje.tilFørsteEndringstidspunkt()
@@ -29,7 +29,7 @@ object EndringIVilkårsvurderingUtil {
 
     fun lagEndringIVilkårsvurderingTidslinje(
         nåværendePersonResultater: Set<PersonResultat>,
-        forrigePersonResultater: Set<PersonResultat>
+        forrigePersonResultater: Set<PersonResultat>,
     ): Tidslinje<Boolean, Måned> {
         val allePersonerMedPersonResultat =
             (nåværendePersonResultater.map { it.aktør } + forrigePersonResultater.map { it.aktør }).distinct()
@@ -45,7 +45,7 @@ object EndringIVilkårsvurderingUtil {
                         .filter { it.aktør == aktør }
                         .flatMap { it.vilkårResultater }
                         .filter { it.vilkårType == vilkår && it.resultat == Resultat.OPPFYLT },
-                    vilkår = vilkår
+                    vilkår = vilkår,
                 )
             }
         }
@@ -54,7 +54,7 @@ object EndringIVilkårsvurderingUtil {
     }
 
     private fun finnesMinstEnEndringIPeriode(
-        endringer: Iterable<Boolean>
+        endringer: Iterable<Boolean>,
     ): Boolean = endringer.any { it }
 
     // Relevante endringer er
@@ -64,7 +64,7 @@ object EndringIVilkårsvurderingUtil {
     private fun lagEndringIVilkårsvurderingForPersonOgVilkårTidslinje(
         nåværendeOppfylteVilkårResultater: List<VilkårResultat>,
         forrigeOppfylteVilkårResultater: List<VilkårResultat>,
-        vilkår: Vilkår
+        vilkår: Vilkår,
     ): Tidslinje<Boolean, Måned> {
         val nåværendeVilkårResultatTidslinje = nåværendeOppfylteVilkårResultater.tilForskjøvetTidslinjeForOppfyltVilkår(vilkår)
         val tidligereVilkårResultatTidslinje = forrigeOppfylteVilkårResultater.tilForskjøvetTidslinjeForOppfyltVilkår(vilkår)
@@ -94,11 +94,13 @@ object EndringIVilkårsvurderingUtil {
         } else {
             when (this.vilkårType) {
                 Vilkår.BOSATT_I_RIKET,
-                Vilkår.BOR_MED_SØKER -> true
+                Vilkår.BOR_MED_SØKER,
+                -> true
                 Vilkår.UNDER_18_ÅR,
                 Vilkår.LOVLIG_OPPHOLD,
                 Vilkår.GIFT_PARTNERSKAP,
-                Vilkår.UTVIDET_BARNETRYGD -> false
+                Vilkår.UTVIDET_BARNETRYGD,
+                -> false
             }
         }
     }

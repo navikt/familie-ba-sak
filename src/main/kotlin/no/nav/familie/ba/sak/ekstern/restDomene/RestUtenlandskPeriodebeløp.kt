@@ -17,21 +17,21 @@ data class RestUtenlandskPeriodebeløp(
     val valutakode: String?,
     val intervall: Intervall?,
     val kalkulertMånedligBeløp: BigDecimal?,
-    override val status: UtfyltStatus = UtfyltStatus.IKKE_UTFYLT
+    override val status: UtfyltStatus = UtfyltStatus.IKKE_UTFYLT,
 ) : AbstractUtfyltStatus<RestUtenlandskPeriodebeløp>() {
     override fun medUtfyltStatus(): RestUtenlandskPeriodebeløp {
         return this.copy(
             status = utfyltStatus(
                 finnAntallUtfylt(listOf(this.beløp, this.valutakode, this.intervall)),
-                3
-            )
+                3,
+            ),
         )
     }
 }
 
 fun RestUtenlandskPeriodebeløp.tilUtenlandskPeriodebeløp(
     barnAktører: List<Aktør>,
-    eksisterendeUtenlandskPeriodebeløp: UtenlandskPeriodebeløp
+    eksisterendeUtenlandskPeriodebeløp: UtenlandskPeriodebeløp,
 ) = UtenlandskPeriodebeløp(
     fom = this.fom,
     tom = this.tom,
@@ -40,7 +40,7 @@ fun RestUtenlandskPeriodebeløp.tilUtenlandskPeriodebeløp(
     valutakode = this.valutakode,
     intervall = this.intervall,
     utbetalingsland = eksisterendeUtenlandskPeriodebeløp.utbetalingsland,
-    kalkulertMånedligBeløp = this.tilKalkulertMånedligBeløp()
+    kalkulertMånedligBeløp = this.tilKalkulertMånedligBeløp(),
 )
 
 fun RestUtenlandskPeriodebeløp.tilKalkulertMånedligBeløp(): BigDecimal? {
@@ -67,5 +67,5 @@ fun UtenlandskPeriodebeløp.tilRestUtenlandskPeriodebeløp() = RestUtenlandskPer
     beløp = this.beløp,
     valutakode = this.valutakode,
     intervall = this.intervall,
-    kalkulertMånedligBeløp = this.kalkulertMånedligBeløp
+    kalkulertMånedligBeløp = this.kalkulertMånedligBeløp,
 ).medUtfyltStatus()

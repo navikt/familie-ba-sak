@@ -61,7 +61,7 @@ class KonsistensavstemmingSchedulerTest : AbstractMockkSpringRunner() {
                 behandlingService,
                 fagsakService,
                 taskRepository,
-                featureToggleService
+                featureToggleService,
             )
         taskRepository = spyk(taskRepository)
     }

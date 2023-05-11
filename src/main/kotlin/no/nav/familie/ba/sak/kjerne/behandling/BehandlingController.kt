@@ -43,18 +43,18 @@ class BehandlingController(
     private val taskRepository: TaskRepositoryWrapper,
     private val tilgangService: TilgangService,
     private val utvidetBehandlingService: UtvidetBehandlingService,
-    private val tilkjentYtelseValideringService: TilkjentYtelseValideringService
+    private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
 ) {
 
     @PostMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
     fun opprettBehandling(@RequestBody nyBehandling: NyBehandling): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.validerTilgangTilPersoner(
             personIdenter = listOf(nyBehandling.søkersIdent),
-            event = AuditLoggerEvent.CREATE
+            event = AuditLoggerEvent.CREATE,
         )
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "opprette behandling"
+            handling = "opprette behandling",
         )
         // Basert på hvilke personer som ble hentet inn på behandlingen kan saksbehandler ha mistet tilgangen til behandlingen
         val behandling = stegService.håndterNyBehandlingOgSendInfotrygdFeed(nyBehandling)
@@ -64,19 +64,19 @@ class BehandlingController(
         return ResponseEntity.ok(
             Ressurs.success(
                 utvidetBehandlingService
-                    .lagRestUtvidetBehandling(behandlingId = behandling.id)
-            )
+                    .lagRestUtvidetBehandling(behandlingId = behandling.id),
+            ),
         )
     }
 
     @PutMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
     fun opprettEllerOppdaterBehandlingFraHendelse(
         @RequestBody
-        nyBehandling: NyBehandlingHendelse
+        nyBehandling: NyBehandlingHendelse,
     ): ResponseEntity<Ressurs<String>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SYSTEM,
-            handling = "opprette behandling fra hendelse"
+            handling = "opprette behandling fra hendelse",
         )
 
         return try {
@@ -92,42 +92,42 @@ class BehandlingController(
     fun endreBehandlingstema(
         @PathVariable behandlingId: Long,
         @RequestBody
-        endreBehandling: RestEndreBehandlingstema
+        endreBehandling: RestEndreBehandlingstema,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "endre behandlingstema"
+            handling = "endre behandlingstema",
         )
 
         val behandling = behandlingstemaService.oppdaterBehandlingstema(
             behandling = behandlingHentOgPersisterService.hent(behandlingId),
             overstyrtUnderkategori = endreBehandling.behandlingUnderkategori,
             overstyrtKategori = endreBehandling.behandlingKategori,
-            manueltOppdatert = true
+            manueltOppdatert = true,
         )
 
         return ResponseEntity.ok(
             Ressurs.success(
                 utvidetBehandlingService
-                    .lagRestUtvidetBehandling(behandlingId = behandling.id)
-            )
+                    .lagRestUtvidetBehandling(behandlingId = behandling.id),
+            ),
         )
     }
 
     @GetMapping(path = ["/{behandlingId}/personer-med-ugyldig-etterbetalingsperiode"])
     fun hentPersonerMedUgyldigEtterbetalingsperiode(
-        @PathVariable behandlingId: Long
+        @PathVariable behandlingId: Long,
     ): ResponseEntity<Ressurs<List<String>>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
-            handling = "hent gyldig etterbetaling"
+            handling = "hent gyldig etterbetaling",
         )
 
         val aktørerMedUgyldigEtterbetalingsperiode =
             tilkjentYtelseValideringService.finnAktørerMedUgyldigEtterbetalingsperiode(
-                behandlingId = behandlingId
+                behandlingId = behandlingId,
             )
         val personerMedUgyldigEtterbetalingsperiode =
             aktørerMedUgyldigEtterbetalingsperiode.map { it.aktivFødselsnummer() }
@@ -147,21 +147,21 @@ data class NyBehandling(
     val barnasIdenter: List<String> = emptyList(),
     val nyMigreringsdato: LocalDate? = null,
     val søknadMottattDato: LocalDate? = null,
-    val fagsakId: Long
+    val fagsakId: Long,
 ) {
 
     init { // Initiell validering på request
         when {
             søkersIdent.isBlank() -> throw Feil(
                 message = "Søkers ident kan ikke være blank",
-                frontendFeilmelding = "Klarte ikke å opprette behandling. Mangler ident på bruker."
+                frontendFeilmelding = "Klarte ikke å opprette behandling. Mangler ident på bruker.",
             )
             BehandlingType.MIGRERING_FRA_INFOTRYGD == behandlingType &&
                 behandlingÅrsak.erManuellMigreringsårsak() &&
                 nyMigreringsdato == null -> {
                 throw FunksjonellFeil(
                     melding = "Du må sette ny migreringsdato før du kan fortsette videre",
-                    frontendFeilmelding = "Du må sette ny migreringsdato før du kan fortsette videre"
+                    frontendFeilmelding = "Du må sette ny migreringsdato før du kan fortsette videre",
                 )
             }
             behandlingType in listOf(BehandlingType.FØRSTEGANGSBEHANDLING, BehandlingType.REVURDERING) &&
@@ -169,7 +169,7 @@ data class NyBehandling(
                 søknadMottattDato == null -> {
                 throw FunksjonellFeil(
                     melding = "Du må sette søknads mottatt dato før du kan fortsette videre",
-                    frontendFeilmelding = "Du må sette søknads mottatt dato før du kan fortsette videre"
+                    frontendFeilmelding = "Du må sette søknads mottatt dato før du kan fortsette videre",
                 )
             }
         }
@@ -178,10 +178,10 @@ data class NyBehandling(
 
 data class NyBehandlingHendelse(
     val morsIdent: String,
-    val barnasIdenter: List<String>
+    val barnasIdenter: List<String>,
 )
 
 data class RestEndreBehandlingstema(
     val behandlingUnderkategori: BehandlingUnderkategori,
-    val behandlingKategori: BehandlingKategori
+    val behandlingKategori: BehandlingKategori,
 )

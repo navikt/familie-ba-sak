@@ -34,8 +34,8 @@ class RegistrerPersongrunnlagEnhetTest {
         eøsSkjemaerForNyBehandlingService = EøsSkjemaerForNyBehandlingService(
             kompetanseService = kompetanseService,
             utenlandskPeriodebeløpService = utenlandskPeriodebeløpService,
-            valutakursService = valutakursService
-        )
+            valutakursService = valutakursService,
+        ),
     )
 
     @Test
@@ -54,33 +54,33 @@ class RegistrerPersongrunnlagEnhetTest {
                 behandling = behandling2,
                 forrigeBehandlingSomErVedtatt = behandling1,
                 søkerIdent = mor.aktør.aktivFødselsnummer(),
-                barnasIdenter = listOf(barn1.aktør.aktivFødselsnummer(), barn2.aktør.aktivFødselsnummer())
+                barnasIdenter = listOf(barn1.aktør.aktivFødselsnummer(), barn2.aktør.aktivFødselsnummer()),
             )
         } just runs
 
         every {
             vilkårsvurderingForNyBehandlingService.opprettVilkårsvurderingUtenomHovedflyt(
                 behandling = behandling2,
-                forrigeBehandlingSomErVedtatt = behandling1
+                forrigeBehandlingSomErVedtatt = behandling1,
             )
         } just runs
 
         every {
             kompetanseService.kopierOgErstattKompetanser(
                 BehandlingId(behandling1.id),
-                BehandlingId(behandling2.id)
+                BehandlingId(behandling2.id),
             )
         } just runs
         every {
             valutakursService.kopierOgErstattValutakurser(
                 BehandlingId(behandling1.id),
-                BehandlingId(behandling2.id)
+                BehandlingId(behandling2.id),
             )
         } just runs
         every {
             utenlandskPeriodebeløpService.kopierOgErstattUtenlandskPeriodebeløp(
                 BehandlingId(behandling1.id),
-                BehandlingId(behandling2.id)
+                BehandlingId(behandling2.id),
             )
         } just runs
 
@@ -88,22 +88,22 @@ class RegistrerPersongrunnlagEnhetTest {
             behandling = behandling2,
             data = RegistrerPersongrunnlagDTO(
                 ident = mor.aktør.aktivFødselsnummer(),
-                barnasIdenter = listOf(barn1.aktør.aktivFødselsnummer(), barn2.aktør.aktivFødselsnummer())
-            )
+                barnasIdenter = listOf(barn1.aktør.aktivFødselsnummer(), barn2.aktør.aktivFødselsnummer()),
+            ),
         )
 
         verify(exactly = 1) {
             kompetanseService.kopierOgErstattKompetanser(
                 BehandlingId(behandling1.id),
-                BehandlingId(behandling2.id)
+                BehandlingId(behandling2.id),
             )
             valutakursService.kopierOgErstattValutakurser(
                 BehandlingId(behandling1.id),
-                BehandlingId(behandling2.id)
+                BehandlingId(behandling2.id),
             )
             utenlandskPeriodebeløpService.kopierOgErstattUtenlandskPeriodebeløp(
                 BehandlingId(behandling1.id),
-                BehandlingId(behandling2.id)
+                BehandlingId(behandling2.id),
             )
         }
     }
