@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonPropertyOrder
 import org.springframework.http.HttpStatus
 import java.time.LocalDateTime
+import kotlin.contracts.ExperimentalContracts
+import kotlin.contracts.contract
 
 open class Feil(
     message: String,
@@ -83,5 +85,15 @@ open class EksternTjenesteFeilException(
             |   request=$request
             |   throwable=$throwable)
             """.trimMargin()
+    }
+}
+
+@OptIn(ExperimentalContracts::class)
+inline fun feilHvis(boolean: Boolean, httpStatus: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR, lazyMessage: () -> String) {
+    contract {
+        returns() implies !boolean
+    }
+    if (boolean) {
+        throw Feil(message = lazyMessage(), frontendFeilmelding = lazyMessage(), httpStatus)
     }
 }
