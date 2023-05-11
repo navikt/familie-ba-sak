@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -38,21 +37,6 @@ class BrevmottakerController(
             handling = "legge til brevmottaker",
         )
         brevmottakerService.leggTilBrevmottaker(brevmottaker, behandlingId)
-
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
-    }
-
-    @PutMapping(path = ["{behandlingId}/{mottakerId}"], produces = [APPLICATION_JSON_VALUE], consumes = [APPLICATION_JSON_VALUE])
-    fun oppdaterBrevmottaker(
-        @PathVariable behandlingId: Long,
-        @PathVariable mottakerId: Long,
-        @RequestBody brevmottaker: RestBrevmottaker,
-    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "oppdatere brevmottaker",
-        )
-        brevmottakerService.oppdaterBrevmottaker(brevmottaker, id = mottakerId)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
