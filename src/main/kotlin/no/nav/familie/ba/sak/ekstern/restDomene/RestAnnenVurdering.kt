@@ -8,12 +8,12 @@ data class RestAnnenVurdering(
     val id: Long,
     val resultat: Resultat,
     val type: AnnenVurderingType,
-    val begrunnelse: String?
+    val begrunnelse: String?,
 )
 
 fun AnnenVurdering.tilRestAnnenVurdering() = RestAnnenVurdering(
     id = this.id,
     resultat = this.resultat,
     type = this.type,
-    begrunnelse = this.begrunnelse
+    begrunnelse = this.begrunnelse,
 )

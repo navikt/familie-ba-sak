@@ -14,10 +14,10 @@ import org.springframework.stereotype.Service
     beskrivelse = "Send autobrev for opphør av småbarnstillegg",
     maxAntallFeil = 3,
     triggerTidVedFeilISekunder = (60 * 60 * 24).toLong(),
-    settTilManuellOppfølgning = true
+    settTilManuellOppfølgning = true,
 )
 class SendAutobrevOpphørSmåbarnstilleggTask(
-    private val autobrevOpphørSmåbarnstilleggService: AutobrevOpphørSmåbarnstilleggService
+    private val autobrevOpphørSmåbarnstilleggService: AutobrevOpphørSmåbarnstilleggService,
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {

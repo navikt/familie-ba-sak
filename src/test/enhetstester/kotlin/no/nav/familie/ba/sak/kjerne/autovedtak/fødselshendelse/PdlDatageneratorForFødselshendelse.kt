@@ -26,9 +26,9 @@ val konstantAdresse: List<Bostedsadresse> =
                 adressenavn = "Arnulv Eide -veien",
                 kommunenummer = "5422",
                 tilleggsnavn = null,
-                postnummer = "9050"
-            )
-        )
+                postnummer = "9050",
+            ),
+        ),
     )
 
 val alternaltivAdresse: List<Bostedsadresse> =
@@ -44,11 +44,11 @@ val alternaltivAdresse: List<Bostedsadresse> =
                 adressenavn = "IkkeSamme-veien",
                 kommunenummer = "5423",
                 tilleggsnavn = null,
-                postnummer = "9050"
+                postnummer = "9050",
             ),
             matrikkeladresse = null,
-            ukjentBosted = null
-        )
+            ukjentBosted = null,
+        ),
     )
 
 val mockBarnAutomatiskBehandlingFnr = "21131777001"
@@ -62,7 +62,7 @@ val mockBarnAutomatiskBehandling = PersonInfo(
     bostedsadresser = konstantAdresse,
     sivilstander = emptyList(),
     opphold = emptyList(),
-    statsborgerskap = emptyList()
+    statsborgerskap = emptyList(),
 )
 
 val mockBarnAutomatiskBehandling2Fnr = "21131777002"
@@ -76,7 +76,7 @@ val mockBarnAutomatiskBehandling2 = PersonInfo(
     bostedsadresser = konstantAdresse,
     sivilstander = emptyList(),
     opphold = emptyList(),
-    statsborgerskap = emptyList()
+    statsborgerskap = emptyList(),
 )
 
 val mockBarnAutomatiskBehandlingSkalFeileFnr = "21131777003"
@@ -90,7 +90,7 @@ val mockBarnAutomatiskBehandlingSkalFeile = PersonInfo(
     bostedsadresser = alternaltivAdresse,
     sivilstander = emptyList(),
     opphold = emptyList(),
-    statsborgerskap = emptyList()
+    statsborgerskap = emptyList(),
 )
 
 val mockSøkerAutomatiskBehandlingFnr = "04136226623"
@@ -107,22 +107,22 @@ val mockSøkerAutomatiskBehandling = PersonInfo(
             navn = null,
             fødselsdato = null,
             adressebeskyttelseGradering =
-            null
-        )
+            null,
+        ),
     ),
     forelderBarnRelasjonMaskert = emptySet(),
     adressebeskyttelseGradering = null,
     bostedsadresser = konstantAdresse,
     sivilstander = listOf(Sivilstand(type = SIVILSTAND.UGIFT, gyldigFraOgMed = null)),
     opphold = emptyList(),
-    statsborgerskap = emptyList()
+    statsborgerskap = emptyList(),
 )
 
 fun genererAutomatiskTestperson(
     fødselsdato: LocalDate = LocalDate.parse("1998-10-10"),
     forelderBarnRelasjon: Set<ForelderBarnRelasjon> = emptySet(),
     sivilstander: List<Sivilstand> = emptyList(),
-    bostedsadresser: List<Bostedsadresse> = konstantAdresse
+    bostedsadresser: List<Bostedsadresse> = konstantAdresse,
 ): PersonInfo {
     return PersonInfo(
         fødselsdato = fødselsdato,
@@ -134,11 +134,11 @@ fun genererAutomatiskTestperson(
                 navn = null,
                 fødselsdato = null,
                 adressebeskyttelseGradering =
-                null
+                null,
             )
         }.toSet(),
         sivilstander = sivilstander,
-        bostedsadresser = bostedsadresser
+        bostedsadresser = bostedsadresser,
     )
 }
 
@@ -147,7 +147,7 @@ val mockNåværendeBosted = GrMatrikkeladresse(
     bruksenhetsnummer = "H301",
     tilleggsnavn = "navn",
     postnummer = "0202",
-    kommunenummer = "2231"
+    kommunenummer = "2231",
 ).apply {
     periode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(1))
 }
@@ -157,7 +157,7 @@ val mockAnnetNåværendeBosted = GrMatrikkeladresse(
     bruksenhetsnummer = "H501",
     tilleggsnavn = "navn",
     postnummer = "0202",
-    kommunenummer = "2231"
+    kommunenummer = "2231",
 ).apply {
     periode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(1))
 }
@@ -167,7 +167,7 @@ val mockTidligereBosted = GrMatrikkeladresse(
     bruksenhetsnummer = "H301",
     tilleggsnavn = "navn",
     postnummer = "0202",
-    kommunenummer = "2231"
+    kommunenummer = "2231",
 ).apply {
     periode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(3), tom = LocalDate.now().minusYears(1))
 }

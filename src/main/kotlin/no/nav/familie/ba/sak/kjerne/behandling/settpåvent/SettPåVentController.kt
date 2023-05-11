@@ -21,16 +21,16 @@ import org.springframework.web.bind.annotation.RestController
 class SettPåVentController(
     private val tilgangService: TilgangService,
     private val settPåVentService: SettPåVentService,
-    private val utvidetBehandlingService: UtvidetBehandlingService
+    private val utvidetBehandlingService: UtvidetBehandlingService,
 ) {
     @PostMapping(path = ["{behandlingId}"])
     fun settBehandlingPåVent(
         @PathVariable behandlingId: Long,
-        @RequestBody restSettPåVent: RestSettPåVent
+        @RequestBody restSettPåVent: RestSettPåVent,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "Sett behandling på vent"
+            handling = "Sett behandling på vent",
         )
         settPåVentService.settBehandlingPåVent(behandlingId, restSettPåVent.frist, restSettPåVent.årsak)
 
@@ -40,11 +40,11 @@ class SettPåVentController(
     @PutMapping(path = ["{behandlingId}"])
     fun oppdaterSettBehandlingPåVent(
         @PathVariable behandlingId: Long,
-        @RequestBody restSettPåVent: RestSettPåVent
+        @RequestBody restSettPåVent: RestSettPåVent,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "Sett behandling på vent"
+            handling = "Sett behandling på vent",
         )
         settPåVentService.oppdaterSettBehandlingPåVent(behandlingId, restSettPåVent.frist, restSettPåVent.årsak)
 
@@ -55,7 +55,7 @@ class SettPåVentController(
     fun gjenopptaBehandling(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "Sett behandling på vent"
+            handling = "Sett behandling på vent",
         )
         settPåVentService.gjenopptaBehandling(behandlingId)
 

@@ -24,7 +24,7 @@ import org.springframework.test.context.ContextConfiguration
     "mock-pdl-test-søk",
     "mock-ident-client",
     "mock-infotrygd-barnetrygd",
-    "mock-brev-klient"
+    "mock-brev-klient",
 )
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)

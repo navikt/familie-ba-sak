@@ -32,7 +32,7 @@ class KlageServiceTest {
         behandlingHentOgPersisterService = behandlingHentOgPersisterService,
         stegService = stegService,
         vedtakService = mockk(),
-        tilbakekrevingKlient = mockk()
+        tilbakekrevingKlient = mockk(),
 
     )
 
@@ -44,7 +44,7 @@ class KlageServiceTest {
             every { fagsakService.hentPåFagsakId(any()) } returns Fagsak(aktør = mockk())
             every { behandlingHentOgPersisterService.erÅpenBehandlingPåFagsak(any()) } returns false
             every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns lagBehandling(
-                status = BehandlingStatus.AVSLUTTET
+                status = BehandlingStatus.AVSLUTTET,
             )
 
             val result = klageService.kanOppretteRevurdering(0L)
@@ -58,7 +58,7 @@ class KlageServiceTest {
             every { fagsakService.hentPåFagsakId(any()) } returns Fagsak(aktør = mockk())
             every { behandlingHentOgPersisterService.erÅpenBehandlingPåFagsak(any()) } returns true
             every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns lagBehandling(
-                status = BehandlingStatus.UTREDES
+                status = BehandlingStatus.UTREDES,
             )
 
             val result = klageService.kanOppretteRevurdering(0L)
@@ -93,7 +93,7 @@ class KlageServiceTest {
                 fagsak = fagsak,
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                 årsak = BehandlingÅrsak.OMREGNING_SMÅBARNSTILLEGG,
-                status = BehandlingStatus.AVSLUTTET
+                status = BehandlingStatus.AVSLUTTET,
             )
 
             every { fagsakService.hentPåFagsakId(any()) } returns fagsak
@@ -108,7 +108,7 @@ class KlageServiceTest {
                 behandlingÅrsak = BehandlingÅrsak.KLAGE,
                 navIdent = SikkerhetContext.hentSaksbehandler(),
                 barnasIdenter = emptyList(),
-                fagsakId = forrigeBehandling.fagsak.id
+                fagsakId = forrigeBehandling.fagsak.id,
             )
 
             klageService.validerOgOpprettRevurderingKlage(fagsak.id)
@@ -121,7 +121,7 @@ class KlageServiceTest {
             every { fagsakService.hentPåFagsakId(any()) } returns Fagsak(aktør = mockk())
             every { behandlingHentOgPersisterService.erÅpenBehandlingPåFagsak(any()) } returns true
             every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns lagBehandling(
-                status = BehandlingStatus.UTREDES
+                status = BehandlingStatus.UTREDES,
             )
 
             val result = klageService.validerOgOpprettRevurderingKlage(0L)

@@ -10,7 +10,7 @@ data class RestRegisterhistorikk(
     val oppholdstillatelse: List<RestRegisteropplysning>? = emptyList(),
     val statsborgerskap: List<RestRegisteropplysning>? = emptyList(),
     val bostedsadresse: List<RestRegisteropplysning>? = emptyList(),
-    val dødsboadresse: List<RestRegisteropplysning>? = emptyList()
+    val dødsboadresse: List<RestRegisteropplysning>? = emptyList(),
 )
 
 fun Person.tilRestRegisterhistorikk() = RestRegisterhistorikk(
@@ -19,13 +19,13 @@ fun Person.tilRestRegisterhistorikk() = RestRegisterhistorikk(
     statsborgerskap = statsborgerskap.map { it.tilRestRegisteropplysning() },
     bostedsadresse = this.bostedsadresser.map { it.tilRestRegisteropplysning() }.fyllInnTomDatoer(),
     sivilstand = this.sivilstander.map { it.tilRestRegisteropplysning() },
-    dødsboadresse = if (this.dødsfall == null) emptyList() else listOf(this.dødsfall!!.tilRestRegisteropplysning())
+    dødsboadresse = if (this.dødsfall == null) emptyList() else listOf(this.dødsfall!!.tilRestRegisteropplysning()),
 )
 
 data class RestRegisteropplysning(
     val fom: LocalDate?,
     val tom: LocalDate?,
-    var verdi: String
+    var verdi: String,
 )
 
 fun List<RestRegisteropplysning>.fyllInnTomDatoer(): List<RestRegisteropplysning> =

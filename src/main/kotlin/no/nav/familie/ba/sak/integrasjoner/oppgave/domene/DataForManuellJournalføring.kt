@@ -9,5 +9,5 @@ data class DataForManuellJournalføring(
     val oppgave: Oppgave,
     val person: RestPersonInfo?,
     val journalpost: Journalpost?,
-    val minimalFagsak: RestMinimalFagsak?
+    val minimalFagsak: RestMinimalFagsak?,
 )

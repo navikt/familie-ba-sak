@@ -17,7 +17,7 @@ class UtvidetBarnetrygdUtilTest {
             vilkårType = Vilkår.UTVIDET_BARNETRYGD,
             periodeFom = LocalDate.of(2022, 7, 1),
             periodeTom = LocalDate.of(2022, 7, 31),
-            resultat = Resultat.OPPFYLT
+            resultat = Resultat.OPPFYLT,
         )
 
         assertThrows<FunksjonellFeil> { validerUtvidetVilkårsresultat(vilkårResultat = vilkårResultat, utvidetVilkårResultater = listOf(vilkårResultat)) }
@@ -29,14 +29,14 @@ class UtvidetBarnetrygdUtilTest {
             vilkårType = Vilkår.UTVIDET_BARNETRYGD,
             periodeFom = LocalDate.of(2022, 7, 1),
             periodeTom = LocalDate.of(2022, 7, 31),
-            resultat = Resultat.OPPFYLT
+            resultat = Resultat.OPPFYLT,
         )
 
         val etterfølgendeVilkårResultat = lagVilkårResultat(
             vilkårType = Vilkår.UTVIDET_BARNETRYGD,
             periodeFom = LocalDate.of(2022, 8, 1),
             periodeTom = LocalDate.of(2022, 12, 10),
-            resultat = Resultat.OPPFYLT
+            resultat = Resultat.OPPFYLT,
         )
 
         assertDoesNotThrow { validerUtvidetVilkårsresultat(vilkårResultat = vilkårResultat, utvidetVilkårResultater = listOf(vilkårResultat, etterfølgendeVilkårResultat)) }

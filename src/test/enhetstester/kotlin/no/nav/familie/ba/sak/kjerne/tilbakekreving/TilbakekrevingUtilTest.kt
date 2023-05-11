@@ -25,9 +25,9 @@ class TilbakekrevingUtilTest {
             validerVerdierPåRestTilbakekreving(
                 restTilbakekreving = RestTilbakekreving(
                     valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
-                    begrunnelse = ""
+                    begrunnelse = "",
                 ),
-                feilutbetaling = BigDecimal.ZERO
+                feilutbetaling = BigDecimal.ZERO,
             )
         }
     }
@@ -37,7 +37,7 @@ class TilbakekrevingUtilTest {
         assertThrows<Exception> {
             validerVerdierPåRestTilbakekreving(
                 restTilbakekreving = null,
-                feilutbetaling = BigDecimal.ONE
+                feilutbetaling = BigDecimal.ONE,
             )
         }
     }
@@ -48,23 +48,23 @@ class TilbakekrevingUtilTest {
             opprettSimuleringsPeriode(
                 fom = fom1,
                 tom = tom1,
-                feilUtbetaling = BigDecimal.ONE
+                feilUtbetaling = BigDecimal.ONE,
             ),
             opprettSimuleringsPeriode(
                 fom = LocalDate.of(2020, 2, 1),
                 tom = tom2,
-                feilUtbetaling = BigDecimal.ONE
+                feilUtbetaling = BigDecimal.ONE,
             ),
             opprettSimuleringsPeriode(
                 fom = LocalDate.of(2020, 3, 1),
                 tom = LocalDate.of(2020, 3, 31),
-                feilUtbetaling = BigDecimal.ZERO
+                feilUtbetaling = BigDecimal.ZERO,
             ),
             opprettSimuleringsPeriode(
                 fom = fom4,
                 tom = tom4,
-                feilUtbetaling = BigDecimal.ONE
-            )
+                feilUtbetaling = BigDecimal.ONE,
+            ),
         )
 
         val sammenslåttePerioder = slåsammenNærliggendeFeilutbtalingPerioder(simuleringsPerioder)
@@ -82,23 +82,23 @@ class TilbakekrevingUtilTest {
             opprettSimuleringsPeriode(
                 fom = fom1,
                 tom = tom1,
-                feilUtbetaling = BigDecimal.ONE
+                feilUtbetaling = BigDecimal.ONE,
             ),
             opprettSimuleringsPeriode(
                 fom = LocalDate.of(2020, 2, 1),
                 tom = tom2,
-                feilUtbetaling = BigDecimal.ZERO
+                feilUtbetaling = BigDecimal.ZERO,
             ),
             opprettSimuleringsPeriode(
                 fom = fom3,
                 tom = tom3,
-                feilUtbetaling = BigDecimal.ONE
+                feilUtbetaling = BigDecimal.ONE,
             ),
             opprettSimuleringsPeriode(
                 fom = fom4,
                 tom = tom4,
-                feilUtbetaling = BigDecimal.ONE
-            )
+                feilUtbetaling = BigDecimal.ONE,
+            ),
         )
 
         val sammenslåttePerioder = slåsammenNærliggendeFeilutbtalingPerioder(simuleringsPerioder)
@@ -113,7 +113,7 @@ class TilbakekrevingUtilTest {
     private fun opprettSimuleringsPeriode(
         fom: LocalDate,
         tom: LocalDate,
-        feilUtbetaling: BigDecimal
+        feilUtbetaling: BigDecimal,
     ): SimuleringsPeriode = SimuleringsPeriode(
         fom = fom,
         tom = tom,
@@ -123,6 +123,6 @@ class TilbakekrevingUtilTest {
         nyttBeløp = BigDecimal.ZERO,
         tidligereUtbetalt = BigDecimal.ZERO,
         resultat = BigDecimal.ZERO,
-        etterbetaling = BigDecimal.ZERO
+        etterbetaling = BigDecimal.ZERO,
     )
 }

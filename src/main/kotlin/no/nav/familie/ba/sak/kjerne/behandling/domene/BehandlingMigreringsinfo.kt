@@ -22,7 +22,7 @@ data class BehandlingMigreringsinfo(
     @SequenceGenerator(
         name = "behandling_migreringsinfo_seq_generator",
         sequenceName = "behandling_migreringsinfo_seq",
-        allocationSize = 50
+        allocationSize = 50,
     )
     val id: Long = 0,
 
@@ -30,6 +30,6 @@ data class BehandlingMigreringsinfo(
     @JoinColumn(name = "fk_behandling_id", nullable = false, updatable = false)
     val behandling: Behandling,
 
-    val migreringsdato: LocalDate
+    val migreringsdato: LocalDate,
 
 ) : BaseEntitet()

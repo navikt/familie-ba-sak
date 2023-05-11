@@ -8,7 +8,7 @@ data class StatusFraOppdragDTO(
     val personIdent: String,
     val aktørId: String,
     val behandlingsId: Long,
-    val vedtaksId: Long
+    val vedtaksId: Long,
 ) {
 
     val oppdragId

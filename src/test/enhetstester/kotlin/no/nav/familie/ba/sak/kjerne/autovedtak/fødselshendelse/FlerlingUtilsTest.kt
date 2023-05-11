@@ -24,10 +24,10 @@ class FlerlingUtilsTest {
                 ForelderBarnRelasjon(
                     aktør = tilAktør(barn),
                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                    fødselsdato = LocalDate.now()
-                )
+                    fødselsdato = LocalDate.now(),
+                ),
             ),
-            barnaSomHarBlittBehandlet = emptyList()
+            barnaSomHarBlittBehandlet = emptyList(),
         )
 
         assertEquals(1, barnSomSkalBehandlesForMor.size)
@@ -45,15 +45,15 @@ class FlerlingUtilsTest {
                 ForelderBarnRelasjon(
                     aktør = tilAktør(barn),
                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                    fødselsdato = LocalDate.now()
+                    fødselsdato = LocalDate.now(),
                 ),
                 ForelderBarnRelasjon(
                     aktør = tilAktør(barn2),
                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                    fødselsdato = LocalDate.now().minusYears(2)
-                )
+                    fødselsdato = LocalDate.now().minusYears(2),
+                ),
             ),
-            barnaSomHarBlittBehandlet = listOf(barn2)
+            barnaSomHarBlittBehandlet = listOf(barn2),
         )
 
         assertEquals(1, barnSomSkalBehandlesForMor.size)
@@ -71,15 +71,15 @@ class FlerlingUtilsTest {
                 ForelderBarnRelasjon(
                     aktør = tilAktør(barn),
                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                    fødselsdato = LocalDate.now()
+                    fødselsdato = LocalDate.now(),
                 ),
                 ForelderBarnRelasjon(
                     aktør = tilAktør(barn2),
                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                    fødselsdato = LocalDate.now().minusYears(2)
-                )
+                    fødselsdato = LocalDate.now().minusYears(2),
+                ),
             ),
-            barnaSomHarBlittBehandlet = listOf(barn, barn2)
+            barnaSomHarBlittBehandlet = listOf(barn, barn2),
         )
 
         assertEquals(0, barnSomSkalBehandlesForMor.size)
@@ -94,21 +94,21 @@ class FlerlingUtilsTest {
         val (barnSomSkalBehandlesForMor, _) = finnBarnSomSkalBehandlesForMor(
             nyBehandlingHendelse = NyBehandlingHendelse(
                 morsIdent = morsIdent,
-                barnasIdenter = listOf(barn, barn2)
+                barnasIdenter = listOf(barn, barn2),
             ),
             barnaTilMor = listOf(
                 ForelderBarnRelasjon(
                     aktør = tilAktør(barn),
                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                    fødselsdato = LocalDate.now()
+                    fødselsdato = LocalDate.now(),
                 ),
                 ForelderBarnRelasjon(
                     aktør = tilAktør(barn2),
                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                    fødselsdato = LocalDate.now().minusYears(2)
-                )
+                    fødselsdato = LocalDate.now().minusYears(2),
+                ),
             ),
-            barnaSomHarBlittBehandlet = emptyList()
+            barnaSomHarBlittBehandlet = emptyList(),
         )
 
         assertEquals(2, barnSomSkalBehandlesForMor.size)
@@ -124,21 +124,21 @@ class FlerlingUtilsTest {
         val (barnSomSkalBehandlesForMor, _) = finnBarnSomSkalBehandlesForMor(
             nyBehandlingHendelse = NyBehandlingHendelse(
                 morsIdent = morsIdent,
-                barnasIdenter = listOf(barn)
+                barnasIdenter = listOf(barn),
             ),
             barnaTilMor = listOf(
                 ForelderBarnRelasjon(
                     aktør = tilAktør(barn),
                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                    fødselsdato = LocalDate.now()
+                    fødselsdato = LocalDate.now(),
                 ),
                 ForelderBarnRelasjon(
                     aktør = tilAktør(barn2),
                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                    fødselsdato = LocalDate.now()
-                )
+                    fødselsdato = LocalDate.now(),
+                ),
             ),
-            barnaSomHarBlittBehandlet = emptyList()
+            barnaSomHarBlittBehandlet = emptyList(),
         )
 
         assertEquals(2, barnSomSkalBehandlesForMor.size)
@@ -157,31 +157,31 @@ class FlerlingUtilsTest {
         val (barnSomSkalBehandlesForMor, _) = finnBarnSomSkalBehandlesForMor(
             nyBehandlingHendelse = NyBehandlingHendelse(
                 morsIdent = morsIdent,
-                barnasIdenter = listOf(barn)
+                barnasIdenter = listOf(barn),
             ),
             barnaTilMor = listOf(
                 ForelderBarnRelasjon(
                     aktør = tilAktør(barn),
                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                    fødselsdato = LocalDate.now()
+                    fødselsdato = LocalDate.now(),
                 ),
                 ForelderBarnRelasjon(
                     aktør = tilAktør(barn2),
                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                    fødselsdato = LocalDate.now()
+                    fødselsdato = LocalDate.now(),
                 ),
                 ForelderBarnRelasjon(
                     aktør = tilAktør(barn3),
                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                    fødselsdato = LocalDate.now()
+                    fødselsdato = LocalDate.now(),
                 ),
                 ForelderBarnRelasjon(
                     aktør = tilAktør(barn4),
                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                    fødselsdato = LocalDate.now()
-                )
+                    fødselsdato = LocalDate.now(),
+                ),
             ),
-            barnaSomHarBlittBehandlet = listOf(barn5)
+            barnaSomHarBlittBehandlet = listOf(barn5),
         )
 
         assertEquals(4, barnSomSkalBehandlesForMor.size)
@@ -199,21 +199,21 @@ class FlerlingUtilsTest {
         val (barnSomSkalBehandlesForMor, _) = finnBarnSomSkalBehandlesForMor(
             nyBehandlingHendelse = NyBehandlingHendelse(
                 morsIdent = morsIdent,
-                barnasIdenter = listOf(barn)
+                barnasIdenter = listOf(barn),
             ),
             barnaTilMor = listOf(
                 ForelderBarnRelasjon(
                     aktør = tilAktør(barn),
                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                    fødselsdato = LocalDate.now()
+                    fødselsdato = LocalDate.now(),
                 ),
                 ForelderBarnRelasjon(
                     aktør = tilAktør(barn2),
                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                    fødselsdato = LocalDate.now().minusDays(1)
-                )
+                    fødselsdato = LocalDate.now().minusDays(1),
+                ),
             ),
-            barnaSomHarBlittBehandlet = emptyList()
+            barnaSomHarBlittBehandlet = emptyList(),
         )
 
         assertEquals(2, barnSomSkalBehandlesForMor.size)
@@ -229,21 +229,21 @@ class FlerlingUtilsTest {
         val (barnSomSkalBehandlesForMor, _) = finnBarnSomSkalBehandlesForMor(
             nyBehandlingHendelse = NyBehandlingHendelse(
                 morsIdent = morsIdent,
-                barnasIdenter = listOf(barn)
+                barnasIdenter = listOf(barn),
             ),
             barnaTilMor = listOf(
                 ForelderBarnRelasjon(
                     aktør = tilAktør(barn),
                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                    fødselsdato = LocalDate.now()
+                    fødselsdato = LocalDate.now(),
                 ),
                 ForelderBarnRelasjon(
                     aktør = tilAktør(barn2),
                     relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN,
-                    fødselsdato = LocalDate.now().plusDays(1)
-                )
+                    fødselsdato = LocalDate.now().plusDays(1),
+                ),
             ),
-            barnaSomHarBlittBehandlet = emptyList()
+            barnaSomHarBlittBehandlet = emptyList(),
         )
 
         assertEquals(2, barnSomSkalBehandlesForMor.size)
@@ -259,8 +259,8 @@ class FlerlingUtilsTest {
         assertFalse(
             barnPåHendelseBlirAlleredeBehandletIÅpenBehandling(
                 barnaPåHendelse = listOf(barn),
-                barnaPåÅpenBehandling = listOf(barn2)
-            )
+                barnaPåÅpenBehandling = listOf(barn2),
+            ),
         )
     }
 
@@ -272,8 +272,8 @@ class FlerlingUtilsTest {
         assertTrue(
             barnPåHendelseBlirAlleredeBehandletIÅpenBehandling(
                 barnaPåHendelse = listOf(barn),
-                barnaPåÅpenBehandling = listOf(barn, barn2)
-            )
+                barnaPåÅpenBehandling = listOf(barn, barn2),
+            ),
         )
     }
 
@@ -286,8 +286,8 @@ class FlerlingUtilsTest {
         assertTrue(
             barnPåHendelseBlirAlleredeBehandletIÅpenBehandling(
                 barnaPåHendelse = listOf(barn, barn2),
-                barnaPåÅpenBehandling = listOf(barn, barn2, barn3)
-            )
+                barnaPåÅpenBehandling = listOf(barn, barn2, barn3),
+            ),
         )
     }
 
@@ -300,8 +300,8 @@ class FlerlingUtilsTest {
         assertFalse(
             barnPåHendelseBlirAlleredeBehandletIÅpenBehandling(
                 barnaPåHendelse = listOf(barn, barn2),
-                barnaPåÅpenBehandling = listOf(barn, barn3)
-            )
+                barnaPåÅpenBehandling = listOf(barn, barn3),
+            ),
         )
     }
 }

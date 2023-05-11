@@ -18,7 +18,7 @@ import java.time.LocalDateTime
         .TASK_STEP_TYPE,
     beskrivelse = "Start Konsistensavstemming mot oppdrag",
     maxAntallFeil = 1,
-    settTilManuellOppfølgning = true
+    settTilManuellOppfølgning = true,
 )
 class KonsistensavstemMotOppdragStartTask(val avstemmingService: AvstemmingService) : AsyncTaskStep {
 
@@ -38,7 +38,7 @@ class KonsistensavstemMotOppdragStartTask(val avstemmingService: AvstemmingServi
             if (konsistensavstemmingTask.sendTilØkonomi) {
                 avstemmingService.sendKonsistensavstemmingStart(
                     avstemmingsdato,
-                    konsistensavstemmingTask.transaksjonsId
+                    konsistensavstemmingTask.transaksjonsId,
                 )
             } else {
                 logger.info("Send startmelding til økonomi i dry-run modus for ${konsistensavstemmingTask.transaksjonsId}")
@@ -55,7 +55,7 @@ class KonsistensavstemMotOppdragStartTask(val avstemmingService: AvstemmingServi
                 val triggerTidForChunk = startTid.plusSeconds(3 * index.toLong())
                 if (avstemmingService.skalOppretteFinnPerioderForRelevanteBehandlingerTask(
                         konsistensavstemmingTask.transaksjonsId,
-                        chunkNr
+                        chunkNr,
                     )
                 ) {
                     avstemmingService.opprettKonsistensavstemmingFinnPerioderForRelevanteBehandlingerTask(
@@ -65,9 +65,9 @@ class KonsistensavstemMotOppdragStartTask(val avstemmingService: AvstemmingServi
                             avstemmingsdato = avstemmingsdato,
                             batchId = konsistensavstemmingTask.batchId,
                             relevanteBehandlinger = oppstykketRelevanteBehandlinger.map { it },
-                            sendTilØkonomi = konsistensavstemmingTask.sendTilØkonomi
+                            sendTilØkonomi = konsistensavstemmingTask.sendTilØkonomi,
                         ),
-                        triggerTidForChunk
+                        triggerTidForChunk,
                     )
                 } else {
                     logger.info("Finn perioder for avstemming task alt kjørt for ${konsistensavstemmingTask.transaksjonsId} og chunkNr $chunkNr")
@@ -80,8 +80,8 @@ class KonsistensavstemMotOppdragStartTask(val avstemmingService: AvstemmingServi
                 batchId = konsistensavstemmingTask.batchId,
                 transaksjonsId = konsistensavstemmingTask.transaksjonsId,
                 avstemmingsdato = avstemmingsdato,
-                sendTilØkonomi = konsistensavstemmingTask.sendTilØkonomi
-            )
+                sendTilØkonomi = konsistensavstemmingTask.sendTilØkonomi,
+            ),
         )
     }
 

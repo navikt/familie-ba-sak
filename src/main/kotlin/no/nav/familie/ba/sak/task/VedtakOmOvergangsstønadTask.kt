@@ -13,11 +13,11 @@ import java.util.Properties
 @TaskStepBeskrivelse(
     taskStepType = VedtakOmOvergangsstønadTask.TASK_STEP_TYPE,
     beskrivelse = "Håndterer vedtak om overgangsstønad",
-    maxAntallFeil = 3
+    maxAntallFeil = 3,
 )
 class VedtakOmOvergangsstønadTask(
     private val autovedtakStegService: AutovedtakStegService,
-    private val personidentService: PersonidentService
+    private val personidentService: PersonidentService,
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
@@ -29,7 +29,7 @@ class VedtakOmOvergangsstønadTask(
 
         val responseFraService = autovedtakStegService.kjørBehandlingSmåbarnstillegg(
             mottakersAktør = aktør,
-            behandlingsdata = aktør
+            behandlingsdata = aktør,
         )
         secureLogger.info("Håndterte vedtak om overgangsstønad for person $personIdent:\n$responseFraService")
     }
@@ -46,7 +46,7 @@ class VedtakOmOvergangsstønadTask(
                 payload = personIdent,
                 properties = Properties().apply {
                     this["personIdent"] = personIdent
-                }
+                },
             )
         }
     }

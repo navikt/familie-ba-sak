@@ -20,7 +20,7 @@ import java.time.YearMonth
  */
 data class UtbetalingsperiodeMal(
     val vedtak: Vedtak,
-    val erEndringPåEksisterendePeriode: Boolean = false
+    val erEndringPåEksisterendePeriode: Boolean = false,
 ) {
 
     /**
@@ -39,14 +39,14 @@ data class UtbetalingsperiodeMal(
         andel: AndelTilkjentYtelseForUtbetalingsoppdrag,
         periodeIdOffset: Int,
         forrigePeriodeIdOffset: Int?,
-        opphørKjedeFom: YearMonth? = null
+        opphørKjedeFom: YearMonth? = null,
     ): Utbetalingsperiode =
         Utbetalingsperiode(
             erEndringPåEksisterendePeriode = erEndringPåEksisterendePeriode,
             opphør = if (erEndringPåEksisterendePeriode) {
                 Opphør(
                     opphørKjedeFom?.førsteDagIInneværendeMåned()
-                        ?: error("Mangler opphørsdato for kjede")
+                        ?: error("Mangler opphørsdato for kjede"),
                 )
             } else {
                 null
@@ -60,7 +60,7 @@ data class UtbetalingsperiodeMal(
             sats = BigDecimal(andel.kalkulertUtbetalingsbeløp),
             satsType = Utbetalingsperiode.SatsType.MND,
             utbetalesTil = hentUtebetalesTil(vedtak.behandling.fagsak),
-            behandlingId = vedtak.behandling.id
+            behandlingId = vedtak.behandling.id,
         )
 
     private fun hentUtebetalesTil(fagsak: Fagsak): String {

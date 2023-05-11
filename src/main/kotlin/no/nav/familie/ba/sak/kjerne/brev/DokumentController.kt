@@ -40,7 +40,7 @@ class DokumentController(
     private val tilgangService: TilgangService,
     private val persongrunnlagService: PersongrunnlagService,
     private val arbeidsfordelingService: ArbeidsfordelingService,
-    private val utvidetBehandlingService: UtvidetBehandlingService
+    private val utvidetBehandlingService: UtvidetBehandlingService,
 ) {
 
     @PostMapping(path = ["vedtaksbrev/{vedtakId}"])
@@ -48,7 +48,7 @@ class DokumentController(
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} generer vedtaksbrev")
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "generere vedtaksbrev"
+            handling = "generere vedtaksbrev",
         )
 
         val vedtak = vedtakService.hent(vedtakId)
@@ -66,7 +66,7 @@ class DokumentController(
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter vedtaksbrev")
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
-            handling = "hente vedtaksbrev"
+            handling = "hente vedtaksbrev",
         )
 
         val vedtak = vedtakService.hent(vedtakId)
@@ -79,16 +79,16 @@ class DokumentController(
     @PostMapping(path = ["forhaandsvis-brev/{behandlingId}"])
     fun hentForhåndsvisning(
         @PathVariable behandlingId: Long,
-        @RequestBody manueltBrevRequest: ManueltBrevRequest
+        @RequestBody manueltBrevRequest: ManueltBrevRequest,
     ): Ressurs<ByteArray> {
         logger.info(
             "${SikkerhetContext.hentSaksbehandlerNavn()} henter forhåndsvisning av brev " +
-                "for mal: ${manueltBrevRequest.brevmal}"
+                "for mal: ${manueltBrevRequest.brevmal}",
         )
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "hente forhåndsvisning brev"
+            handling = "hente forhåndsvisning brev",
         )
 
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
@@ -97,22 +97,22 @@ class DokumentController(
             manueltBrevRequest = manueltBrevRequest.byggMottakerdata(
                 behandling,
                 persongrunnlagService,
-                arbeidsfordelingService
+                arbeidsfordelingService,
             ),
-            erForhåndsvisning = true
+            erForhåndsvisning = true,
         ).let { Ressurs.success(it) }
     }
 
     @PostMapping(path = ["send-brev/{behandlingId}"])
     fun sendBrev(
         @PathVariable behandlingId: Long,
-        @RequestBody manueltBrevRequest: ManueltBrevRequest
+        @RequestBody manueltBrevRequest: ManueltBrevRequest,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} genererer og sender brev: ${manueltBrevRequest.brevmal}")
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "sende brev"
+            handling = "sende brev",
         )
 
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
@@ -121,53 +121,53 @@ class DokumentController(
             manueltBrevRequest = manueltBrevRequest.byggMottakerdata(
                 behandling,
                 persongrunnlagService,
-                arbeidsfordelingService
+                arbeidsfordelingService,
             ),
             behandling = behandling,
-            fagsakId = behandling.fagsak.id
+            fagsakId = behandling.fagsak.id,
         )
         return ResponseEntity.ok(
             Ressurs.success(
                 utvidetBehandlingService
-                    .lagRestUtvidetBehandling(behandlingId = behandlingId)
-            )
+                    .lagRestUtvidetBehandling(behandlingId = behandlingId),
+            ),
         )
     }
 
     @PostMapping(path = ["/fagsak/{fagsakId}/forhaandsvis-brev"])
     fun hentForhåndsvisningPåFagsak(
         @PathVariable fagsakId: Long,
-        @RequestBody manueltBrevRequest: ManueltBrevRequest
+        @RequestBody manueltBrevRequest: ManueltBrevRequest,
     ): Ressurs<ByteArray> {
         logger.info(
             "${SikkerhetContext.hentSaksbehandlerNavn()} henter forhåndsvisning av brev på fagsak $fagsakId " +
-                "for mal: ${manueltBrevRequest.brevmal}"
+                "for mal: ${manueltBrevRequest.brevmal}",
         )
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "hente forhåndsvisning brev"
+            handling = "hente forhåndsvisning brev",
         )
 
         return dokumentGenereringService.genererManueltBrev(
             manueltBrevRequest = manueltBrevRequest.leggTilEnhet(arbeidsfordelingService),
-            erForhåndsvisning = true
+            erForhåndsvisning = true,
         ).let { Ressurs.success(it) }
     }
 
     @PostMapping(path = ["/fagsak/{fagsakId}/send-brev"])
     fun sendBrevPåFagsak(
         @PathVariable fagsakId: Long,
-        @RequestBody manueltBrevRequest: ManueltBrevRequest
+        @RequestBody manueltBrevRequest: ManueltBrevRequest,
     ): ResponseEntity<Ressurs<RestMinimalFagsak>> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} genererer og sender brev på fagsak $fagsakId: ${manueltBrevRequest.brevmal}")
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "sende brev"
+            handling = "sende brev",
         )
 
         dokumentService.sendManueltBrev(
             manueltBrevRequest = manueltBrevRequest.leggTilEnhet(arbeidsfordelingService),
-            fagsakId = fagsakId
+            fagsakId = fagsakId,
         )
         return ResponseEntity.ok(Ressurs.success(fagsakService.lagRestMinimalFagsak(fagsakId = fagsakId)))
     }

@@ -39,9 +39,9 @@ class EndringIVilkårsvurderingUtilTest {
                 behandlingId = 0,
                 utdypendeVilkårsvurderinger = listOf(
                     UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
-                    UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP
+                    UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP,
                 ),
-                vurderesEtter = Regelverk.NASJONALE_REGLER
+                vurderesEtter = Regelverk.NASJONALE_REGLER,
             ),
             VilkårResultat(
                 personResultat = null,
@@ -53,24 +53,24 @@ class EndringIVilkårsvurderingUtilTest {
                 behandlingId = 0,
                 utdypendeVilkårsvurderinger = listOf(
                     UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP,
-                    UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE
+                    UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
                 ),
-                vurderesEtter = Regelverk.NASJONALE_REGLER
-            )
+                vurderesEtter = Regelverk.NASJONALE_REGLER,
+            ),
         )
 
         val aktør = randomAktør()
 
         val perioderMedEndring = EndringIVilkårsvurderingUtil.lagEndringIVilkårsvurderingTidslinje(
             nåværendePersonResultater = setOf(lagPersonResultatFraVilkårResultater(vilkårResultater, aktør)),
-            forrigePersonResultater = setOf(lagPersonResultatFraVilkårResultater(vilkårResultater, aktør))
+            forrigePersonResultater = setOf(lagPersonResultatFraVilkårResultater(vilkårResultater, aktør)),
         ).perioder().filter { it.innhold == true }
 
         Assertions.assertTrue(perioderMedEndring.isEmpty())
 
         val endringstidspunkt = EndringIVilkårsvurderingUtil.utledEndringstidspunktForVilkårsvurdering(
             nåværendePersonResultat = setOf(lagPersonResultatFraVilkårResultater(vilkårResultater, aktør)),
-            forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(vilkårResultater, aktør))
+            forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(vilkårResultater, aktør)),
         )
 
         Assertions.assertNull(endringstidspunkt)
@@ -89,10 +89,10 @@ class EndringIVilkårsvurderingUtilTest {
                 behandlingId = 0,
                 utdypendeVilkårsvurderinger = listOf(
                     UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
-                    UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP
+                    UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP,
                 ),
-                vurderesEtter = Regelverk.NASJONALE_REGLER
-            )
+                vurderesEtter = Regelverk.NASJONALE_REGLER,
+            ),
         )
 
         val forrigeVilkårResultat = setOf(
@@ -106,17 +106,17 @@ class EndringIVilkårsvurderingUtilTest {
                 behandlingId = 0,
                 utdypendeVilkårsvurderinger = listOf(
                     UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
-                    UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP
+                    UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP,
                 ),
-                vurderesEtter = Regelverk.EØS_FORORDNINGEN
-            )
+                vurderesEtter = Regelverk.EØS_FORORDNINGEN,
+            ),
         )
 
         val aktør = randomAktør()
 
         val perioderMedEndring = EndringIVilkårsvurderingUtil.lagEndringIVilkårsvurderingTidslinje(
             nåværendePersonResultater = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
-            forrigePersonResultater = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør))
+            forrigePersonResultater = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
         ).perioder().filter { it.innhold == true }
 
         Assertions.assertEquals(1, perioderMedEndring.size)
@@ -125,7 +125,7 @@ class EndringIVilkårsvurderingUtilTest {
 
         val endringstidspunkt = EndringIVilkårsvurderingUtil.utledEndringstidspunktForVilkårsvurdering(
             nåværendePersonResultat = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
-            forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør))
+            forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
         )
 
         Assertions.assertEquals(feb22, endringstidspunkt)
@@ -143,8 +143,8 @@ class EndringIVilkårsvurderingUtilTest {
                 begrunnelse = "",
                 behandlingId = 0,
                 utdypendeVilkårsvurderinger = listOf(),
-                vurderesEtter = Regelverk.NASJONALE_REGLER
-            )
+                vurderesEtter = Regelverk.NASJONALE_REGLER,
+            ),
         )
 
         val nåværendeVilkårResultat = setOf(
@@ -157,7 +157,7 @@ class EndringIVilkårsvurderingUtilTest {
                 begrunnelse = "",
                 behandlingId = 0,
                 utdypendeVilkårsvurderinger = listOf(),
-                vurderesEtter = Regelverk.NASJONALE_REGLER
+                vurderesEtter = Regelverk.NASJONALE_REGLER,
             ),
             VilkårResultat(
                 personResultat = null,
@@ -168,15 +168,15 @@ class EndringIVilkårsvurderingUtilTest {
                 begrunnelse = "",
                 behandlingId = 0,
                 utdypendeVilkårsvurderinger = listOf(),
-                vurderesEtter = Regelverk.NASJONALE_REGLER
-            )
+                vurderesEtter = Regelverk.NASJONALE_REGLER,
+            ),
         )
 
         val aktør = randomAktør()
 
         val perioderMedEndring = EndringIVilkårsvurderingUtil.lagEndringIVilkårsvurderingTidslinje(
             nåværendePersonResultater = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
-            forrigePersonResultater = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør))
+            forrigePersonResultater = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
         ).perioder().filter { it.innhold == true }
 
         Assertions.assertEquals(1, perioderMedEndring.size)
@@ -185,7 +185,7 @@ class EndringIVilkårsvurderingUtilTest {
 
         val endringstidspunkt = EndringIVilkårsvurderingUtil.utledEndringstidspunktForVilkårsvurdering(
             nåværendePersonResultat = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
-            forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør))
+            forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
         )
 
         Assertions.assertEquals(jun22, endringstidspunkt)
@@ -204,10 +204,10 @@ class EndringIVilkårsvurderingUtilTest {
                 behandlingId = 0,
                 utdypendeVilkårsvurderinger = listOf(
                     UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
-                    UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP
+                    UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP,
                 ),
-                vurderesEtter = Regelverk.NASJONALE_REGLER
-            )
+                vurderesEtter = Regelverk.NASJONALE_REGLER,
+            ),
         )
 
         val forrigeVilkårResultat = setOf(
@@ -221,24 +221,24 @@ class EndringIVilkårsvurderingUtilTest {
                 behandlingId = 0,
                 utdypendeVilkårsvurderinger = listOf(
                     UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
-                    UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP
+                    UtdypendeVilkårsvurdering.VURDERT_MEDLEMSKAP,
                 ),
-                vurderesEtter = Regelverk.NASJONALE_REGLER
-            )
+                vurderesEtter = Regelverk.NASJONALE_REGLER,
+            ),
         )
 
         val aktør = randomAktør()
 
         val perioderMedEndring = EndringIVilkårsvurderingUtil.lagEndringIVilkårsvurderingTidslinje(
             nåværendePersonResultater = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
-            forrigePersonResultater = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør))
+            forrigePersonResultater = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
         ).perioder().filter { it.innhold == true }
 
         Assertions.assertTrue(perioderMedEndring.isEmpty())
 
         val endringstidspunkt = EndringIVilkårsvurderingUtil.utledEndringstidspunktForVilkårsvurdering(
             nåværendePersonResultat = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
-            forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør))
+            forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
         )
 
         Assertions.assertNull(endringstidspunkt)
@@ -256,8 +256,8 @@ class EndringIVilkårsvurderingUtilTest {
                 begrunnelse = "migrering",
                 behandlingId = 0,
                 utdypendeVilkårsvurderinger = listOf(),
-                vurderesEtter = Regelverk.EØS_FORORDNINGEN
-            )
+                vurderesEtter = Regelverk.EØS_FORORDNINGEN,
+            ),
         )
 
         val nåværendeVilkårResultat = setOf(
@@ -270,24 +270,24 @@ class EndringIVilkårsvurderingUtilTest {
                 begrunnelse = "migrering",
                 behandlingId = 0,
                 utdypendeVilkårsvurderinger = listOf(
-                    UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE
+                    UtdypendeVilkårsvurdering.BARN_BOR_I_NORGE,
                 ),
-                vurderesEtter = Regelverk.EØS_FORORDNINGEN
-            )
+                vurderesEtter = Regelverk.EØS_FORORDNINGEN,
+            ),
         )
 
         val aktør = randomAktør()
 
         val perioderMedEndring = EndringIVilkårsvurderingUtil.lagEndringIVilkårsvurderingTidslinje(
             nåværendePersonResultater = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
-            forrigePersonResultater = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør))
+            forrigePersonResultater = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
         ).perioder().filter { it.innhold == true }
 
         Assertions.assertTrue(perioderMedEndring.isEmpty())
 
         val endringstidspunkt = EndringIVilkårsvurderingUtil.utledEndringstidspunktForVilkårsvurdering(
             nåværendePersonResultat = setOf(lagPersonResultatFraVilkårResultater(nåværendeVilkårResultat, aktør)),
-            forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør))
+            forrigePersonResultat = setOf(lagPersonResultatFraVilkårResultater(forrigeVilkårResultat, aktør)),
         )
 
         Assertions.assertNull(endringstidspunkt)

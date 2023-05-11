@@ -23,14 +23,14 @@ class PersongrunnlagTest {
         val forrigeGrunnlag = lagTestPersonopplysningGrunnlag(
             behandlingId = forrigeBehandling.id,
             søkerPersonIdent = søker,
-            barnasIdenter = listOf(barn)
+            barnasIdenter = listOf(barn),
         )
 
         val behandling = lagBehandling()
         val grunnlag = lagTestPersonopplysningGrunnlag(
             behandlingId = behandling.id,
             søkerPersonIdent = søker,
-            barnasIdenter = listOf(barn, nyttbarn)
+            barnasIdenter = listOf(barn, nyttbarn),
         )
 
         every { persongrunnlagService.hentAktiv(forrigeBehandling.id) } returns forrigeGrunnlag

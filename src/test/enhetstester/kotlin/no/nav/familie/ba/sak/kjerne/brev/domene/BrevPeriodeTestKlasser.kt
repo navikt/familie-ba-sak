@@ -52,7 +52,7 @@ data class BrevPeriodeTestConfig(
     val kompetanser: List<BrevPeriodeTestKompetanse>? = null,
     val kompetanserSomStopperRettFørPeriode: List<BrevPeriodeTestKompetanse>? = null,
 
-    val forventetOutput: BrevPeriodeOutput?
+    val forventetOutput: BrevPeriodeOutput?,
 ) {
     fun hentPersonerMedReduksjonFraForrigeBehandling(): List<BrevPeriodeTestPerson> =
         this.personerPåBehandling.filter { it.harReduksjonFraForrigeBehandling }
@@ -68,7 +68,7 @@ data class BrevPeriodeTestKompetanse(
     val annenForeldersAktivitet: AnnenForeldersAktivitet,
     val annenForeldersAktivitetsland: String,
     val barnetsBostedsland: String,
-    val resultat: KompetanseResultat
+    val resultat: KompetanseResultat,
 ) {
     fun tilMinimertKompetanse(personer: List<BrevPeriodeTestPerson>): MinimertKompetanse {
         return MinimertKompetanse(
@@ -78,7 +78,7 @@ data class BrevPeriodeTestKompetanse(
             barnetsBostedslandNavn = LandNavn(this.barnetsBostedsland),
             resultat = this.resultat,
             personer = personer.filter { it.kompetanseIder?.contains(this.id) == true }.map { it.tilMinimertPerson() },
-            søkersAktivitetsland = this.søkersAktivitetsland?.let { LandNavn(this.søkersAktivitetsland) }
+            søkersAktivitetsland = this.søkersAktivitetsland?.let { LandNavn(this.søkersAktivitetsland) },
         )
     }
 }
@@ -92,7 +92,7 @@ data class BrevPeriodeTestPerson(
     val endredeUtbetalinger: List<EndretRestUtbetalingAndelPåPerson>,
     val utbetalinger: List<UtbetalingPåPerson>,
     val harReduksjonFraForrigeBehandling: Boolean = false,
-    val kompetanseIder: List<String>? = null
+    val kompetanseIder: List<String>? = null,
 ) {
     fun tilMinimertPerson() = MinimertRestPerson(personIdent = personIdent, fødselsdato = fødselsdato, type = type)
     fun tilUtbetalingsperiodeDetaljer() = utbetalinger.map {
@@ -106,7 +106,7 @@ data class BrevPeriodeTestPerson(
         return MinimertRestPersonResultat(
             personIdent = this.personIdent,
             minimerteVilkårResultater = hentVilkårForPerson(),
-            minimerteAndreVurderinger = this.andreVurderinger
+            minimerteAndreVurderinger = this.andreVurderinger,
         )
     }
 
@@ -115,7 +115,7 @@ data class BrevPeriodeTestPerson(
             Vilkår.hentVilkårFor(
                 personType = this.type,
                 fagsakType = FagsakType.NORMAL,
-                behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR
+                behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
             )
                 .filter { vilkår -> !this.overstyrteVilkårresultater.any { it.vilkårType == vilkår } }
                 .map { vilkår ->
@@ -126,7 +126,7 @@ data class BrevPeriodeTestPerson(
                         resultat = Resultat.OPPFYLT,
                         utdypendeVilkårsvurderinger = emptyList(),
                         erEksplisittAvslagPåSøknad = false,
-                        standardbegrunnelser = emptyList()
+                        standardbegrunnelser = emptyList(),
                     )
                 }
 }
@@ -135,7 +135,7 @@ data class UtbetalingPåPerson(
     val ytelseType: YtelseType,
     val utbetaltPerMnd: Int,
     val erPåvirketAvEndring: Boolean = false,
-    val prosent: BigDecimal = BigDecimal(100)
+    val prosent: BigDecimal = BigDecimal(100),
 ) {
     fun tilMinimertUtbetalingsperiodeDetalj(minimertRestPerson: MinimertRestPerson) =
         MinimertUtbetalingsperiodeDetalj(
@@ -143,7 +143,7 @@ data class UtbetalingPåPerson(
             utbetaltPerMnd = this.utbetaltPerMnd,
             prosent = this.prosent,
             erPåvirketAvEndring = this.erPåvirketAvEndring,
-            ytelseType = this.ytelseType
+            ytelseType = this.ytelseType,
         )
 }
 
@@ -151,7 +151,7 @@ data class EndretRestUtbetalingAndelPåPerson(
     val periode: MånedPeriode,
     val årsak: Årsak,
     val søknadstidspunkt: LocalDate = LocalDate.now(),
-    val avtaletidspunktDeltBosted: LocalDate? = null
+    val avtaletidspunktDeltBosted: LocalDate? = null,
 ) {
     fun tilMinimertRestEndretUtbetalingAndel(personIdent: String) =
         MinimertRestEndretAndel(
@@ -159,7 +159,7 @@ data class EndretRestUtbetalingAndelPåPerson(
             periode = periode,
             årsak = årsak,
             søknadstidspunkt = søknadstidspunkt,
-            avtaletidspunktDeltBosted = avtaletidspunktDeltBosted
+            avtaletidspunktDeltBosted = avtaletidspunktDeltBosted,
         )
 }
 
@@ -167,13 +167,13 @@ data class EndretRestUtbetalingAndelPåPerson(
     use = JsonTypeInfo.Id.NAME,
     include = JsonTypeInfo.As.PROPERTY,
     property = "type",
-    defaultImpl = BegrunnelseDataTestConfig::class
+    defaultImpl = BegrunnelseDataTestConfig::class,
 )
 @JsonSubTypes(
     value = [
         JsonSubTypes.Type(value = FritekstBegrunnelseTestConfig::class, name = "fritekst"),
-        JsonSubTypes.Type(value = EØSBegrunnelseTestConfig::class, name = "eøsbegrunnelse")
-    ]
+        JsonSubTypes.Type(value = EØSBegrunnelseTestConfig::class, name = "eøsbegrunnelse"),
+    ],
 )
 interface TestBegrunnelse
 
@@ -193,7 +193,7 @@ data class BegrunnelseDataTestConfig(
     val belop: Int,
     val soknadstidspunkt: String?,
     val avtaletidspunktDeltBosted: String?,
-    val sokersRettTilUtvidet: String?
+    val sokersRettTilUtvidet: String?,
 ) : TestBegrunnelse {
 
     fun tilBegrunnelseData() = BegrunnelseData(
@@ -214,7 +214,7 @@ data class BegrunnelseDataTestConfig(
             ?: SøkersRettTilUtvidet.SØKER_HAR_IKKE_RETT.tilSanityFormat(),
         vedtakBegrunnelseType = Standardbegrunnelse.values()
             .find { it.sanityApiNavn == this.apiNavn }?.vedtakBegrunnelseType
-            ?: throw Feil("Fant ikke Standardbegrunnelse med apiNavn ${this.apiNavn}")
+            ?: throw Feil("Fant ikke Standardbegrunnelse med apiNavn ${this.apiNavn}"),
     )
 }
 
@@ -227,7 +227,7 @@ data class EØSBegrunnelseTestConfig(
     val antallBarn: Int,
     val maalform: String,
     val sokersAktivitet: SøkersAktivitet,
-    val sokersAktivitetsland: String?
+    val sokersAktivitetsland: String?,
 ) : TestBegrunnelse {
     fun tilEØSBegrunnelseData(): EØSBegrunnelseDataMedKompetanse = EØSBegrunnelseDataMedKompetanse(
         apiNavn = this.apiNavn,
@@ -241,7 +241,7 @@ data class EØSBegrunnelseTestConfig(
             .find { it.sanityApiNavn == this.apiNavn }?.vedtakBegrunnelseType
             ?: throw Feil("Fant ikke EØSStandardbegrunnelse med apiNavn ${this.apiNavn}"),
         sokersAktivitet = this.sokersAktivitet,
-        sokersAktivitetsland = this.sokersAktivitetsland
+        sokersAktivitetsland = this.sokersAktivitetsland,
     )
 }
 
@@ -252,5 +252,5 @@ data class BrevPeriodeOutput(
     val antallBarn: String?,
     val barnasFodselsdager: String?,
     val begrunnelser: List<TestBegrunnelse>,
-    val type: String
+    val type: String,
 )

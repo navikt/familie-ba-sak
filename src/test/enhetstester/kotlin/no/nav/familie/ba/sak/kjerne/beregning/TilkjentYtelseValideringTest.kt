@@ -21,38 +21,38 @@ class TilkjentYtelseValideringTest {
                 fom = inneværendeMåned().minusYears(4),
                 tom = inneværendeMåned(),
                 beløp = 2108,
-                person = person1
-            )
+                person = person1,
+            ),
         )
         val forrigeAndeler1 = listOf(
             lagAndelTilkjentYtelse(
                 fom = inneværendeMåned().minusYears(4),
                 tom = inneværendeMåned(),
                 beløp = 2108,
-                person = person1
-            )
+                person = person1,
+            ),
         )
 
         Assertions.assertFalse(
             TilkjentYtelseValidering.erUgyldigEtterbetalingPåPerson(
                 forrigeAndelerForPerson = forrigeAndeler1,
                 andelerForPerson = andeler1,
-                gyldigEtterbetalingFom = gyldigEtterbetalingFom
-            )
+                gyldigEtterbetalingFom = gyldigEtterbetalingFom,
+            ),
         )
         Assertions.assertTrue(
             TilkjentYtelseValidering.erUgyldigEtterbetalingPåPerson(
                 forrigeAndelerForPerson = emptyList(),
                 andelerForPerson = andeler1,
-                gyldigEtterbetalingFom = gyldigEtterbetalingFom
-            )
+                gyldigEtterbetalingFom = gyldigEtterbetalingFom,
+            ),
         )
         Assertions.assertTrue(
             TilkjentYtelseValidering.erUgyldigEtterbetalingPåPerson(
                 forrigeAndelerForPerson = emptyList(),
                 andelerForPerson = andeler1,
-                gyldigEtterbetalingFom = gyldigEtterbetalingFom
-            )
+                gyldigEtterbetalingFom = gyldigEtterbetalingFom,
+            ),
         )
 
         val forrigeAndeler2 = listOf(
@@ -60,37 +60,37 @@ class TilkjentYtelseValideringTest {
                 fom = inneværendeMåned().minusYears(4),
                 tom = inneværendeMåned(),
                 beløp = 1054,
-                person = person2
-            )
+                person = person2,
+            ),
         )
         val andeler2 = listOf(
             lagAndelTilkjentYtelse(
                 fom = inneværendeMåned().minusYears(4),
                 tom = inneværendeMåned(),
                 beløp = 2108,
-                person = person2
-            )
+                person = person2,
+            ),
         )
         Assertions.assertTrue(
             TilkjentYtelseValidering.erUgyldigEtterbetalingPåPerson(
                 forrigeAndelerForPerson = forrigeAndeler2,
                 andelerForPerson = andeler2,
-                gyldigEtterbetalingFom = gyldigEtterbetalingFom
-            )
+                gyldigEtterbetalingFom = gyldigEtterbetalingFom,
+            ),
         )
         Assertions.assertTrue(
             TilkjentYtelseValidering.erUgyldigEtterbetalingPåPerson(
                 forrigeAndelerForPerson = emptyList(),
                 andelerForPerson = andeler2,
-                gyldigEtterbetalingFom = gyldigEtterbetalingFom
-            )
+                gyldigEtterbetalingFom = gyldigEtterbetalingFom,
+            ),
         )
         Assertions.assertTrue(
             TilkjentYtelseValidering.erUgyldigEtterbetalingPåPerson(
                 forrigeAndelerForPerson = emptyList(),
                 andelerForPerson = andeler2,
-                gyldigEtterbetalingFom = gyldigEtterbetalingFom
-            )
+                gyldigEtterbetalingFom = gyldigEtterbetalingFom,
+            ),
         )
     }
 
@@ -103,16 +103,16 @@ class TilkjentYtelseValideringTest {
                 fom = inneværendeMåned().minusYears(4),
                 tom = inneværendeMåned(),
                 beløp = 2108,
-                person = person1
-            )
+                person = person1,
+            ),
         )
 
         Assertions.assertFalse(
             TilkjentYtelseValidering.erUgyldigEtterbetalingPåPerson(
                 forrigeAndelerForPerson = andeler,
                 andelerForPerson = andeler,
-                gyldigEtterbetalingFom = gyldigEtterbetalingFom
-            )
+                gyldigEtterbetalingFom = gyldigEtterbetalingFom,
+            ),
         )
     }
 
@@ -125,8 +125,8 @@ class TilkjentYtelseValideringTest {
                 fom = inneværendeMåned().minusYears(4),
                 tom = inneværendeMåned(),
                 beløp = 2108,
-                person = person1
-            )
+                person = person1,
+            ),
         )
 
         val andeler = listOf(
@@ -134,23 +134,23 @@ class TilkjentYtelseValideringTest {
                 fom = inneværendeMåned().minusYears(4),
                 tom = inneværendeMåned(),
                 beløp = 1054,
-                person = person1
-            )
+                person = person1,
+            ),
         )
 
         Assertions.assertFalse(
             TilkjentYtelseValidering.erUgyldigEtterbetalingPåPerson(
                 forrigeAndelerForPerson = forrigeAndeler,
                 andelerForPerson = andeler,
-                gyldigEtterbetalingFom = gyldigEtterbetalingFom
-            )
+                gyldigEtterbetalingFom = gyldigEtterbetalingFom,
+            ),
         )
         Assertions.assertFalse(
             TilkjentYtelseValidering.erUgyldigEtterbetalingPåPerson(
                 forrigeAndelerForPerson = forrigeAndeler,
                 andelerForPerson = emptyList(),
-                gyldigEtterbetalingFom = gyldigEtterbetalingFom
-            )
+                gyldigEtterbetalingFom = gyldigEtterbetalingFom,
+            ),
         )
     }
 
@@ -163,8 +163,8 @@ class TilkjentYtelseValideringTest {
                 fom = inneværendeMåned().minusYears(4),
                 tom = inneværendeMåned().minusYears(2),
                 beløp = 2108,
-                person = person1
-            )
+                person = person1,
+            ),
         )
 
         val andeler = listOf(
@@ -172,40 +172,40 @@ class TilkjentYtelseValideringTest {
                 fom = inneværendeMåned().minusYears(4),
                 tom = inneværendeMåned().minusYears(2),
                 beløp = 2108,
-                person = person1
-            )
+                person = person1,
+            ),
         )
 
         Assertions.assertFalse(
             TilkjentYtelseValidering.erUgyldigEtterbetalingPåPerson(
                 forrigeAndelerForPerson = forrigeAndeler,
                 andelerForPerson = andeler,
-                gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(LocalDateTime.now().minusYears(2))
-            )
+                gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(LocalDateTime.now().minusYears(2)),
+            ),
         )
 
         Assertions.assertFalse(
             TilkjentYtelseValidering.erUgyldigEtterbetalingPåPerson(
                 forrigeAndelerForPerson = emptyList(),
                 andelerForPerson = andeler,
-                gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(LocalDateTime.now().minusYears(2))
-            )
+                gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(LocalDateTime.now().minusYears(2)),
+            ),
         )
 
         Assertions.assertFalse(
             TilkjentYtelseValidering.erUgyldigEtterbetalingPåPerson(
                 forrigeAndelerForPerson = emptyList(),
                 andelerForPerson = andeler,
-                gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(LocalDateTime.now().minusYears(2))
-            )
+                gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(LocalDateTime.now().minusYears(2)),
+            ),
         )
 
         Assertions.assertFalse(
             TilkjentYtelseValidering.erUgyldigEtterbetalingPåPerson(
                 forrigeAndelerForPerson = forrigeAndeler,
                 andelerForPerson = emptyList(),
-                gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(LocalDateTime.now().minusYears(2))
-            )
+                gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(LocalDateTime.now().minusYears(2)),
+            ),
         )
     }
 }

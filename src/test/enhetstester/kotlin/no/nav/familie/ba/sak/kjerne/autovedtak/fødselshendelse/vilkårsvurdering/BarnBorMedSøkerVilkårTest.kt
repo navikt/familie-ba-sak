@@ -55,16 +55,16 @@ class BarnBorMedSøkerVilkårTest {
 
     private fun opprettFaktaPerson(
         bostedsadresseSøker: GrBostedsadresse,
-        bostedsadresseBarn: GrBostedsadresse
+        bostedsadresseBarn: GrBostedsadresse,
     ): Person {
         val barnMedAdresse = barn.copy(bostedsadresser = mutableListOf(bostedsadresseBarn))
         barnMedAdresse.personopplysningGrunnlag.personer.clear()
         barnMedAdresse.personopplysningGrunnlag.personer.add(
             søker.copy(
                 bostedsadresser = mutableListOf(
-                    bostedsadresseSøker
-                )
-            )
+                    bostedsadresseSøker,
+                ),
+            ),
         )
 
         return barnMedAdresse

@@ -33,7 +33,7 @@ class SamhandlerTestConfig {
             every { samhandlerKlient.hentSamhandlerVedTssEksternId(any()) } returns samhandlereInfoMock.first()
             every { samhandlerKlient.søkSamhandlere(any(), any(), any(), any()) } returns SøkSamhandlerInfo(
                 false,
-                samhandlereInfoMock
+                samhandlereInfoMock,
             )
         }
     }
@@ -45,14 +45,14 @@ val samhandlereInfoMock = listOf(
         "INSTUTISJON 1",
         listOf(
             SamhandlerAdresse(listOf("Instutisjonsnsveien 1"), "0110", "Oslo", "Arbeidsadresse"),
-            SamhandlerAdresse(listOf("Postboks 123"), "0110", "Oslo", "Postadresse")
+            SamhandlerAdresse(listOf("Postboks 123"), "0110", "Oslo", "Postadresse"),
         ),
-        orgNummer = "974652269"
+        orgNummer = "974652269",
     ),
     SamhandlerInfo(
         "80000888888",
         "INSTUTISJON 2",
         listOf(SamhandlerAdresse(listOf("Instutisjonsnsveien 2"), "1892", "Degernes", "Arbeidsadresse")),
-        orgNummer = "974652269"
-    )
+        orgNummer = "974652269",
+    ),
 )
