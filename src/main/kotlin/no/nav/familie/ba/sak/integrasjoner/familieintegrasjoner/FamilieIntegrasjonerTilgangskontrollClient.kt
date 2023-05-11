@@ -21,7 +21,7 @@ import java.net.URI
 class FamilieIntegrasjonerTilgangskontrollClient(
     @Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val integrasjonUri: URI,
     @Qualifier("jwtBearer") restOperations: RestOperations,
-    private val systemOnlyPdlRestClient: SystemOnlyPdlRestClient
+    private val systemOnlyPdlRestClient: SystemOnlyPdlRestClient,
 ) : AbstractRestClient(restOperations, "integrasjon-tilgangskontroll") {
 
     val tilgangPersonUri: URI =
@@ -35,14 +35,14 @@ class FamilieIntegrasjonerTilgangskontrollClient(
         val tilganger = kallEksternTjeneste<List<Tilgang>>(
             tjeneste = "tilgangskontroll",
             uri = tilgangPersonUri,
-            formål = "Sjekk tilgang til personer"
+            formål = "Sjekk tilgang til personer",
         ) {
             postForEntity(
                 tilgangPersonUri,
                 personIdenter,
                 HttpHeaders().also {
                     it.set(HEADER_NAV_TEMA, HEADER_NAV_TEMA_BAR)
-                }
+                },
             )
         }
 
@@ -56,7 +56,7 @@ class FamilieIntegrasjonerTilgangskontrollClient(
             RestPersonInfo(
                 personIdent = aktør.aktivFødselsnummer(),
                 adressebeskyttelseGradering = adressebeskyttelse,
-                harTilgang = false
+                harTilgang = false,
             )
         } else {
             null

@@ -125,13 +125,13 @@ class ApiExceptionHandler {
         val ressurs: Ressurs<String> = Ressurs.failure<String>(
             errorMessage = feilmelding,
             frontendFeilmelding = feilmelding,
-            error = mostSpecificThrowable
+            error = mostSpecificThrowable,
         ).copy(data = feil.feiltype.name)
         secureLogger.warn("Feil ved migrering. feiltype=${feil.feiltype} melding=$feilmelding", feil.throwable)
         logger.warn("Feil ved migrering. feiltype=${feil.feiltype} melding=$feilmelding")
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-            ressurs
+            ressurs,
         )
     }
 

@@ -45,7 +45,7 @@ data class AndelTilkjentYtelse(
     @SequenceGenerator(
         name = "andel_tilkjent_ytelse_seq_generator",
         sequenceName = "andel_tilkjent_ytelse_seq",
-        allocationSize = 50
+        allocationSize = 50,
     )
     val id: Long = 0,
 
@@ -100,7 +100,7 @@ data class AndelTilkjentYtelse(
     val nasjonaltPeriodebeløp: Int?,
 
     @Column(name = "differanseberegnet_periodebelop")
-    val differanseberegnetPeriodebeløp: Int? = null
+    val differanseberegnetPeriodebeløp: Int? = null,
 
 ) : BaseEntitet() {
 
@@ -135,7 +135,7 @@ data class AndelTilkjentYtelse(
             stønadTom,
             aktør,
             nasjonaltPeriodebeløp,
-            differanseberegnetPeriodebeløp
+            differanseberegnetPeriodebeløp,
         )
     }
 
@@ -191,7 +191,7 @@ data class AndelTilkjentYtelse(
         this.differanseberegnetPeriodebeløp <= 0
 
     private fun finnRelevanteVilkårsresulaterForRegelverk(
-        personResultater: Set<PersonResultat>
+        personResultater: Set<PersonResultat>,
     ): List<VilkårResultat> =
         personResultater
             .filter { !it.erSøkersResultater() }
@@ -237,8 +237,8 @@ fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.lagVertikaleSegmenter(): Map
                 segment.localDateInterval.overlaps(
                     LocalDateInterval(
                         it.stønadFom.førsteDagIInneværendeMåned(),
-                        it.stønadTom.sisteDagIInneværendeMåned()
-                    )
+                        it.stønadTom.sisteDagIInneværendeMåned(),
+                    ),
                 )
             }
             acc[segment] = andelerForSegment
@@ -249,7 +249,8 @@ fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.lagVertikaleSegmenter(): Map
 enum class YtelseType(val klassifisering: String) {
     ORDINÆR_BARNETRYGD("BATR"),
     UTVIDET_BARNETRYGD("BATR"),
-    SMÅBARNSTILLEGG("BATRSMA");
+    SMÅBARNSTILLEGG("BATRSMA"),
+    ;
 
     fun erKnyttetTilSøker() = this == SMÅBARNSTILLEGG || this == UTVIDET_BARNETRYGD
 
@@ -264,31 +265,31 @@ private fun regelverkavhenigeVilkår(): List<Vilkår> {
     return listOf(
         Vilkår.BOR_MED_SØKER,
         Vilkår.BOSATT_I_RIKET,
-        Vilkår.LOVLIG_OPPHOLD
+        Vilkår.LOVLIG_OPPHOLD,
     )
 }
 
 fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.hentAndelerForSegment(
-    vertikaltSegmentForVedtaksperiode: LocalDateSegment<Int>
+    vertikaltSegmentForVedtaksperiode: LocalDateSegment<Int>,
 ) = this.filter {
     vertikaltSegmentForVedtaksperiode.localDateInterval.overlaps(
         LocalDateInterval(
             it.stønadFom.førsteDagIInneværendeMåned(),
-            it.stønadTom.sisteDagIInneværendeMåned()
-        )
+            it.stønadTom.sisteDagIInneværendeMåned(),
+        ),
     )
 }
 
 fun List<AndelTilkjentYtelse>.tilTidslinjerPerPersonOgType(): Map<Pair<Aktør, YtelseType>, AndelTilkjentYtelseTidslinje> =
     groupBy { Pair(it.aktør, it.type) }.mapValues { (_, andelerTilkjentYtelsePåPerson) ->
         AndelTilkjentYtelseTidslinje(
-            andelerTilkjentYtelsePåPerson
+            andelerTilkjentYtelsePåPerson,
         )
     }
 
 fun List<AndelTilkjentYtelse>.tilTidslinjerPerBeløpOgType(): Map<Pair<Aktør, YtelseType>, AndelTilkjentYtelseTidslinje> =
     groupBy { Pair(it.aktør, it.type) }.mapValues { (_, andelerTilkjentYtelsePåPerson) ->
         AndelTilkjentYtelseTidslinje(
-            andelerTilkjentYtelsePåPerson
+            andelerTilkjentYtelsePåPerson,
         )
     }

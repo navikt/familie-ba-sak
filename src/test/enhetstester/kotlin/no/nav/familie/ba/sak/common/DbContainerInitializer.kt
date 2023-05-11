@@ -15,7 +15,7 @@ class DbContainerInitializer : ApplicationContextInitializer<ConfigurableApplica
             TestPropertyValues.of(
                 "spring.datasource.url=${postgres.jdbcUrl}",
                 "spring.datasource.username=${postgres.username}",
-                "spring.datasource.password=${postgres.password}"
+                "spring.datasource.password=${postgres.password}",
             ).applyTo(applicationContext.environment)
         }
     }

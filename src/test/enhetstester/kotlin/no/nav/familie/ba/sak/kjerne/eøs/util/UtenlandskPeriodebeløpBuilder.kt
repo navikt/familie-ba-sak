@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 
 class UtenlandskPeriodebeløpBuilder(
     startMåned: Tidspunkt<Måned> = jan(2020),
-    behandlingId: BehandlingId = BehandlingId(1)
+    behandlingId: BehandlingId = BehandlingId(1),
 ) : SkjemaBuilder<UtenlandskPeriodebeløp, UtenlandskPeriodebeløpBuilder>(startMåned, behandlingId) {
     fun medBeløp(k: String, valutakode: String?, utbetalingsland: String?, vararg barn: Person) =
         medSkjema(k, barn.toList()) {
@@ -19,7 +19,7 @@ class UtenlandskPeriodebeløpBuilder(
                 it == '-' -> UtenlandskPeriodebeløp.NULL.copy(utbetalingsland = utbetalingsland)
                 it == '$' -> UtenlandskPeriodebeløp.NULL.copy(
                     valutakode = valutakode,
-                    utbetalingsland = utbetalingsland
+                    utbetalingsland = utbetalingsland,
                 )
                 it?.isDigit() ?: false -> {
                     UtenlandskPeriodebeløp.NULL.copy(
@@ -27,7 +27,7 @@ class UtenlandskPeriodebeløpBuilder(
                         valutakode = valutakode,
                         intervall = Intervall.MÅNEDLIG,
                         utbetalingsland = utbetalingsland,
-                        kalkulertMånedligBeløp = it?.digitToInt()?.toBigDecimal()
+                        kalkulertMånedligBeløp = it?.digitToInt()?.toBigDecimal(),
                     )
                 }
                 else -> null
@@ -37,7 +37,7 @@ class UtenlandskPeriodebeløpBuilder(
     fun medIntervall(intervall: Intervall) =
         medTransformasjon { utenlandskPeriodebeløp -> utenlandskPeriodebeløp.copy(intervall = intervall) }.medTransformasjon { utenlandskPeriodebeløp ->
             utenlandskPeriodebeløp.copy(
-                kalkulertMånedligBeløp = utenlandskPeriodebeløp.tilKalkulertMånedligBeløp()
+                kalkulertMånedligBeløp = utenlandskPeriodebeløp.tilKalkulertMånedligBeløp(),
             )
         }
 }

@@ -38,7 +38,7 @@ class AutovedtakSatsendringService(
     private val behandlingService: BehandlingService,
     private val beregningService: BeregningService,
     private val persongrunnlagService: PersongrunnlagService,
-    private val satsendringService: SatsendringService
+    private val satsendringService: SatsendringService,
 ) {
 
     private val satsendringAlleredeUtført = Metrics.counter("satsendring.allerede.utfort")
@@ -98,12 +98,12 @@ class AutovedtakSatsendringService(
                 aktør = søkerAktør,
                 behandlingType = BehandlingType.REVURDERING,
                 behandlingÅrsak = BehandlingÅrsak.SATSENDRING,
-                fagsakId = sisteIverksatteBehandling.fagsak.id
+                fagsakId = sisteIverksatteBehandling.fagsak.id,
             )
 
         val opprettetVedtak =
             autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(
-                behandlingEtterBehandlingsresultat
+                behandlingEtterBehandlingsresultat,
             )
 
         val task = when (behandlingEtterBehandlingsresultat.steg) {
@@ -111,18 +111,18 @@ class AutovedtakSatsendringService(
                 IverksettMotOppdragTask.opprettTask(
                     behandlingEtterBehandlingsresultat,
                     opprettetVedtak,
-                    SikkerhetContext.hentSaksbehandler()
+                    SikkerhetContext.hentSaksbehandler(),
                 )
             }
 
             StegType.FERDIGSTILLE_BEHANDLING -> {
                 behandlingService.oppdaterStatusPåBehandling(
                     behandlingEtterBehandlingsresultat.id,
-                    BehandlingStatus.IVERKSETTER_VEDTAK
+                    BehandlingStatus.IVERKSETTER_VEDTAK,
                 )
                 FerdigstillBehandlingTask.opprettTask(
                     søkerAktør.aktivFødselsnummer(),
-                    behandlingEtterBehandlingsresultat.id
+                    behandlingEtterBehandlingsresultat.id,
                 )
             }
 
@@ -138,7 +138,7 @@ class AutovedtakSatsendringService(
     }
 
     private fun hentBrukerHarÅpenBehandlingSvar(
-        aktivOgÅpenBehandling: Behandling
+        aktivOgÅpenBehandling: Behandling,
     ): SatsendringSvar {
         val brukerHarÅpenBehandlingSvar = if (satsendringService.erFagsakOppdatertMedSisteSatser(aktivOgÅpenBehandling.fagsak.id)) {
             SatsendringSvar.HAR_ALLEREDE_SISTE_SATS
@@ -162,7 +162,7 @@ class AutovedtakSatsendringService(
         val barnMedAndreRelevanteTilkjentYtelser = personopplysningGrunnlag.barna.map {
             Pair(
                 it,
-                beregningService.hentRelevanteTilkjentYtelserForBarn(it.aktør, sisteIverksatteBehandling.fagsak.id)
+                beregningService.hentRelevanteTilkjentYtelserForBarn(it.aktør, sisteIverksatteBehandling.fagsak.id),
             )
         }
 
@@ -170,7 +170,7 @@ class AutovedtakSatsendringService(
             TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
                 behandlendeBehandlingTilkjentYtelse = tilkjentYtelse,
                 barnMedAndreRelevanteTilkjentYtelser = barnMedAndreRelevanteTilkjentYtelser,
-                personopplysningGrunnlag = personopplysningGrunnlag
+                personopplysningGrunnlag = personopplysningGrunnlag,
             )
         } catch (e: UtbetalingsikkerhetFeil) {
             secureLogger.info("fagsakId=${sisteIverksatteBehandling.fagsak.id} har UtbetalingsikkerhetFeil. Skipper satsendring: ${e.frontendFeilmelding}")
@@ -190,10 +190,10 @@ enum class SatsendringSvar(val melding: String) {
     SATSENDRING_ER_ALLEREDE_UTFØRT(melding = "Satsendring allerede utført for fagsak"),
     HAR_ALLEREDE_SISTE_SATS(melding = "Åpen behandling har allerede siste sats og vi lar den ligge."),
     BEHANDLING_ER_LÅST_SATSENDRING_TRIGGES_NESTE_VIRKEDAG(
-        melding = "Behandlingen er låst for endringer og satsendring vil bli trigget neste virkedag."
+        melding = "Behandlingen er låst for endringer og satsendring vil bli trigget neste virkedag.",
     ),
     TILBAKESTILLER_BEHANDLINGEN_TIL_VILKÅRSVURDERINGEN(melding = "Tilbakestiller behandlingen til vilkårsvurderingen"),
     BEHANDLINGEN_ER_UNDER_UTREDNING_MEN_I_RIKTIG_TILSTAND(
-        melding = "Behandlingen er under utredning, men er allerede i riktig tilstand."
-    )
+        melding = "Behandlingen er under utredning, men er allerede i riktig tilstand.",
+    ),
 }

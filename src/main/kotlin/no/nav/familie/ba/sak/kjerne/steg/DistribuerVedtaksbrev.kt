@@ -11,24 +11,24 @@ import org.springframework.stereotype.Service
 @Service
 class DistribuerVedtaksbrev(
     private val dokumentDistribueringService: DokumentDistribueringService,
-    private val taskRepository: TaskRepositoryWrapper
+    private val taskRepository: TaskRepositoryWrapper,
 ) : BehandlingSteg<DistribuerDokumentDTO> {
 
     override fun utførStegOgAngiNeste(
         behandling: Behandling,
-        data: DistribuerDokumentDTO
+        data: DistribuerDokumentDTO,
     ): StegType {
         logger.info("Iverksetter distribusjon av vedtaksbrev med journalpostId ${data.journalpostId}")
         dokumentDistribueringService.prøvDistribuerBrevOgLoggHendelseFraBehandling(
             distribuerDokumentDTO = data,
-            loggBehandlerRolle = BehandlerRolle.SYSTEM
+            loggBehandlerRolle = BehandlerRolle.SYSTEM,
         )
 
         val søkerIdent = behandling.fagsak.aktør.aktivFødselsnummer()
 
         val ferdigstillBehandlingTask = FerdigstillBehandlingTask.opprettTask(
             søkerIdent = søkerIdent,
-            behandlingsId = data.behandlingId!!
+            behandlingsId = data.behandlingId!!,
         )
         taskRepository.save(ferdigstillBehandlingTask)
 

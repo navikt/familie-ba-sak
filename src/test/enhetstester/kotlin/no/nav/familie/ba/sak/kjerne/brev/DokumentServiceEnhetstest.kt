@@ -63,8 +63,8 @@ internal class DokumentServiceEnhetstest {
             organisasjonService = organisasjonService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             dokumentGenereringService = mockk(relaxed = true),
-            brevmottakerService = brevmottakerService
-        )
+            brevmottakerService = brevmottakerService,
+        ),
     )
 
     @Test
@@ -88,16 +88,16 @@ internal class DokumentServiceEnhetstest {
                     brev = any(),
                     førsteside = any(),
                     dokumenttype = any(),
-                    avsenderMottaker = capture(avsenderMottaker)
+                    avsenderMottaker = capture(avsenderMottaker),
                 )
             } returns "mockJournalpostId"
             every { journalføringRepository.save(any()) } returns DbJournalpost(
                 behandling = behandling,
-                journalpostId = "id"
+                journalpostId = "id",
             )
             every { organisasjonService.hentOrganisasjon(any()) } returns Organisasjon(
                 organisasjonsnummer = brukerId,
-                navn = "Testinstitusjon"
+                navn = "Testinstitusjon",
             )
 
             runCatching {
@@ -105,10 +105,10 @@ internal class DokumentServiceEnhetstest {
                     ManueltBrevRequest(
                         brevmal = Brevmal.INNHENTE_OPPLYSNINGER,
                         mottakerIdent = brukerId,
-                        enhet = Enhet("enhet", "enhetNavn")
+                        enhet = Enhet("enhet", "enhetNavn"),
                     ),
                     behandling = behandling,
-                    fagsakId = behandling.fagsak.id
+                    fagsakId = behandling.fagsak.id,
                 )
             }
             when (brukerId.length) {
@@ -140,7 +140,7 @@ internal class DokumentServiceEnhetstest {
                 vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
                     any(),
                     any(),
-                    null
+                    null,
                 )
             } returns
                 vilkårsvurdering
@@ -178,7 +178,7 @@ internal class DokumentServiceEnhetstest {
                 vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
                     any(),
                     any(),
-                    forrigeVedtatteBehandling
+                    forrigeVedtatteBehandling,
                 )
             } returns
                 vilkårsvurdering
@@ -197,7 +197,7 @@ internal class DokumentServiceEnhetstest {
                 vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
                     behandling,
                     any(),
-                    forrigeVedtatteBehandling
+                    forrigeVedtatteBehandling,
                 )
             }
         }
@@ -242,8 +242,8 @@ internal class DokumentServiceEnhetstest {
                 adresselinje1 = "Test adresse",
                 postnummer = "0000",
                 poststed = "Oslo",
-                landkode = "NO"
-            )
+                landkode = "NO",
+            ),
         )
         every { brevmottakerService.lagMottakereFraBrevMottakere(any(), any(), any()) } answers { callOriginal() }
         every { brevmottakerService.hentMottakerNavn(søkersident) } returns "søker"
@@ -256,7 +256,7 @@ internal class DokumentServiceEnhetstest {
                 førsteside = any(),
                 dokumenttype = any(),
                 avsenderMottaker = capture(avsenderMottakere),
-                tilManuellMottakerEllerVerge = any()
+                tilManuellMottakerEllerVerge = any(),
             )
         } returns "mockJournalPostId" andThen "mockJournalPostId1"
 
@@ -274,7 +274,7 @@ internal class DokumentServiceEnhetstest {
                 førsteside = any(),
                 dokumenttype = any(),
                 avsenderMottaker = any(),
-                tilManuellMottakerEllerVerge = any()
+                tilManuellMottakerEllerVerge = any(),
             )
         }
         verify(exactly = 2) { journalføringRepository.save(any()) }
@@ -300,7 +300,7 @@ internal class DokumentServiceEnhetstest {
                 førsteside = any(),
                 dokumenttype = any(),
                 avsenderMottaker = any(),
-                tilManuellMottakerEllerVerge = any()
+                tilManuellMottakerEllerVerge = any(),
             )
         } returns "mockJournalPostId"
 
@@ -317,7 +317,7 @@ internal class DokumentServiceEnhetstest {
                 førsteside = any(),
                 dokumenttype = any(),
                 avsenderMottaker = any(),
-                tilManuellMottakerEllerVerge = any()
+                tilManuellMottakerEllerVerge = any(),
             )
         }
         verify(exactly = 0) { journalføringRepository.save(any()) }
@@ -329,10 +329,10 @@ internal class DokumentServiceEnhetstest {
             ManueltBrevRequest(
                 brevmal = brevmal,
                 mottakerIdent = "123456789",
-                enhet = Enhet("enhet", "enhetNavn")
+                enhet = Enhet("enhet", "enhetNavn"),
             ),
             behandling = behandling,
-            fagsakId = behandling.fagsak.id
+            fagsakId = behandling.fagsak.id,
         )
     }
 }

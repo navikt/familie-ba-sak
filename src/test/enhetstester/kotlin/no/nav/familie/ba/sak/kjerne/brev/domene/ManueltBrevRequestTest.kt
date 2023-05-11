@@ -17,7 +17,7 @@ class ManueltBrevRequestTest {
         mottakerIdent = "testident",
         mottakerNavn = "testnavn",
         enhet = Enhet("testenhetId", "testenhet"),
-        antallUkerSvarfrist = 3
+        antallUkerSvarfrist = 3,
     )
 
     @Test
@@ -42,8 +42,8 @@ class ManueltBrevRequestTest {
             mottakerNavn = "Testorganisasjon",
             vedrørende = PersonITest(
                 fødselsnummer = "testident",
-                navn = "testnavn"
-            )
+                navn = "testnavn",
+            ),
         )
             .tilBrev("saksbehandlerNavn") { emptyMap() }
 
@@ -65,15 +65,15 @@ class ManueltBrevRequestTest {
         val fnr = "12345678910"
         val orgnr = "123456789"
         val brevRequestTilPerson = baseRequest.copy(
-            mottakerIdent = fnr
+            mottakerIdent = fnr,
         )
         val brevRequestTilInstitusjon = baseRequest.copy(
             brevmal = Brevmal.INNHENTE_OPPLYSNINGER_INSTITUSJON,
             mottakerIdent = orgnr,
             vedrørende = PersonITest(
                 fødselsnummer = fnr,
-                navn = "navn tilhørende $fnr"
-            )
+                navn = "navn tilhørende $fnr",
+            ),
         )
         brevRequestTilPerson.tilBrev("saksbehandlerNavn") { emptyMap() }.data.apply {
             assertThat(flettefelter.fodselsnummer).containsExactly(brevRequestTilPerson.mottakerIdent)
@@ -109,7 +109,7 @@ class ManueltBrevRequestTest {
         val brev = baseRequest.copy(
             brevmal = Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS_MED_INNHENTING_AV_OPPLYSNINGER,
             mottakerlandSed = listOf("SE"),
-            multiselectVerdier = dokumentliste
+            multiselectVerdier = dokumentliste,
         )
             .tilBrev("saksbehandlerNavn") { mapOf(Pair("SE", "Sverige")) }
 
@@ -142,7 +142,7 @@ class ManueltBrevRequestTest {
         val brevRequest =
             baseRequest.copy(
                 brevmal = Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS,
-                mottakerlandSed = listOf("SE", "NO")
+                mottakerlandSed = listOf("SE", "NO"),
             )
 
         assertThrows<FunksjonellFeil> {

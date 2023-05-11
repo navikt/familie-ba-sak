@@ -20,7 +20,7 @@ import java.util.Properties
 class DistribuerDokumentTask(
     private val stegService: StegService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    private val dokumentDistribueringService: DokumentDistribueringService
+    private val dokumentDistribueringService: DokumentDistribueringService,
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
@@ -34,17 +34,17 @@ class DistribuerDokumentTask(
         if (erManueltSendtOgIkkeVedtaksbrev && distribuerDokumentDTO.behandlingId == null) {
             dokumentDistribueringService.prøvDistribuerBrevOgLoggHendelse(
                 distribuerDokumentDTO = distribuerDokumentDTO,
-                loggBehandlerRolle = BehandlerRolle.SAKSBEHANDLER
+                loggBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             )
         } else if (erManueltSendtOgIkkeVedtaksbrev && distribuerDokumentDTO.behandlingId != null) {
             dokumentDistribueringService.prøvDistribuerBrevOgLoggHendelseFraBehandling(
                 distribuerDokumentDTO = distribuerDokumentDTO,
-                loggBehandlerRolle = BehandlerRolle.SAKSBEHANDLER
+                loggBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             )
         } else if (erVedtaksbrevOgIkkeManueltSent && distribuerDokumentDTO.behandlingId != null) {
             stegService.håndterDistribuerVedtaksbrev(
                 behandling = behandlingHentOgPersisterService.hent(distribuerDokumentDTO.behandlingId),
-                distribuerDokumentDTO = distribuerDokumentDTO
+                distribuerDokumentDTO = distribuerDokumentDTO,
             )
         } else {
             throw Feil("erManueltSendt=${distribuerDokumentDTO.erManueltSendt} ikke støttet for brev=${distribuerDokumentDTO.brevmal.visningsTekst}")
@@ -55,14 +55,14 @@ class DistribuerDokumentTask(
 
         fun opprettDistribuerDokumentTask(
             distribuerDokumentDTO: DistribuerDokumentDTO,
-            properties: Properties
+            properties: Properties,
         ): Task {
             return Task(
                 type = TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(distribuerDokumentDTO),
-                properties = properties
+                properties = properties,
             ).copy(
-                triggerTid = nesteGyldigeTriggertidForBehandlingIHverdager()
+                triggerTid = nesteGyldigeTriggertidForBehandlingIHverdager(),
             )
         }
 
@@ -76,5 +76,5 @@ data class DistribuerDokumentDTO(
     val personEllerInstitusjonIdent: String,
     val brevmal: Brevmal,
     val erManueltSendt: Boolean,
-    val manuellAdresseInfo: ManuellAdresseInfo? = null
+    val manuellAdresseInfo: ManuellAdresseInfo? = null,
 )

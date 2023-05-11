@@ -84,10 +84,10 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
     fun setUp() {
         integrasjonClient = IntegrasjonClient(
             URI.create(wireMockServer.baseUrl() + "/api"),
-            restOperations
+            restOperations,
         )
         utgåendeJournalføringService = UtgåendeJournalføringService(
-            integrasjonClient = integrasjonClient
+            integrasjonClient = integrasjonClient,
         )
     }
 
@@ -103,8 +103,8 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
         MDC.put("callId", "opprettOppgave")
         wireMockServer.stubFor(
             post("/api/oppgave/opprett").willReturn(
-                okJson(objectMapper.writeValueAsString(success(OppgaveResponse(oppgaveId = 1234))))
-            )
+                okJson(objectMapper.writeValueAsString(success(OppgaveResponse(oppgaveId = 1234)))),
+            ),
         )
 
         val request = lagTestOppgave()
@@ -116,7 +116,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
             anyRequestedFor(anyUrl())
                 .withHeader(NavHttpHeaders.NAV_CALL_ID.asString(), equalTo("opprettOppgave"))
                 .withHeader(NavHttpHeaders.NAV_CONSUMER_ID.asString(), equalTo("srvfamilie-ba-sak"))
-                .withRequestBody(equalToJson(objectMapper.writeValueAsString(request)))
+                .withRequestBody(equalToJson(objectMapper.writeValueAsString(request))),
         )
     }
 
@@ -127,8 +127,8 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
             post("/api/oppgave/opprett").willReturn(
                 aResponse()
                     .withStatus(500)
-                    .withBody(objectMapper.writeValueAsString(failure<String>("test")))
-            )
+                    .withBody(objectMapper.writeValueAsString(failure<String>("test"))),
+            ),
         )
 
         val feil = assertThrows<RessursException> { integrasjonClient.opprettOppgave(lagTestOppgave()) }
@@ -143,10 +143,10 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
             post("/api/oppgave/v4").willReturn(
                 okJson(
                     objectMapper.writeValueAsString(
-                        success(FinnOppgaveResponseDto(1, listOf(oppgave)))
-                    )
-                )
-            )
+                        success(FinnOppgaveResponseDto(1, listOf(oppgave))),
+                    ),
+                ),
+            ),
         )
 
         val oppgaverOgAntall = integrasjonClient.hentOppgaver(FinnOppgaveRequest(tema = Tema.BAR))
@@ -164,8 +164,8 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
                     aResponse()
                         .withStatus(201)
                         .withHeader("Content-Type", "application/json")
-                        .withBody(objectMapper.writeValueAsString(journalpostOkResponse()))
-                )
+                        .withBody(objectMapper.writeValueAsString(journalpostOkResponse())),
+                ),
         )
 
         val vedtak = lagVedtak(lagBehandling())
@@ -179,8 +179,8 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
                     Dokument(
                         dokument = mockPdf,
                         filtype = Filtype.PDFA,
-                        dokumenttype = Dokumenttype.BARNETRYGD_VEDTAK_INNVILGELSE
-                    )
+                        dokumenttype = Dokumenttype.BARNETRYGD_VEDTAK_INNVILGELSE,
+                    ),
                 ),
                 journalførendeEnhet = "1",
                 vedlegg = listOf(
@@ -188,10 +188,10 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
                         dokument = hentVedlegg(VEDTAK_VEDLEGG_FILNAVN)!!,
                         filtype = Filtype.PDFA,
                         dokumenttype = Dokumenttype.BARNETRYGD_VEDLEGG,
-                        tittel = VEDTAK_VEDLEGG_TITTEL
-                    )
+                        tittel = VEDTAK_VEDLEGG_TITTEL,
+                    ),
                 ),
-                behandlingId = vedtak.behandling.id
+                behandlingId = vedtak.behandling.id,
             )
 
         assertThat(journalPostId).isEqualTo(MOCK_JOURNALPOST_FOR_VEDTAK_ID)
@@ -204,11 +204,11 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
                         objectMapper.writeValueAsString(
                             forventetRequestArkiverDokument(
                                 fagsakId = vedtak.behandling.fagsak.id,
-                                behandlingId = vedtak.behandling.id
-                            )
-                        )
-                    )
-                )
+                                behandlingId = vedtak.behandling.id,
+                            ),
+                        ),
+                    ),
+                ),
         )
     }
 
@@ -219,7 +219,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
         wireMockServer.stubFor(
             post("/api/dist/v1")
                 .withHeader("Accept", containing("json"))
-                .willReturn(okJson(objectMapper.writeValueAsString(success("1234567"))))
+                .willReturn(okJson(objectMapper.writeValueAsString(success("1234567")))),
         )
 
         assertDoesNotThrow { integrasjonClient.distribuerBrev(lagDistribuerDokumentDTO()) }
@@ -235,9 +235,9 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
                             "\"distribusjonstype\" : \"VIKTIG\"," +
                             "\"distribusjonstidspunkt\" : \"KJERNETID\"}",
                         false,
-                        true
-                    )
-                )
+                        true,
+                    ),
+                ),
         )
     }
 
@@ -247,7 +247,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
         wireMockServer.stubFor(
             post("/api/dist/v1")
                 .withHeader("Accept", containing("json"))
-                .willReturn(okJson(objectMapper.writeValueAsString(success(""))))
+                .willReturn(okJson(objectMapper.writeValueAsString(success("")))),
         )
 
         assertThrows<IllegalStateException> { integrasjonClient.distribuerBrev(lagDistribuerDokumentDTO()) }
@@ -259,7 +259,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
         wireMockServer.stubFor(
             post("/api/dist/v1")
                 .withHeader("Accept", containing("json"))
-                .willReturn(okJson(objectMapper.writeValueAsString(failure<Any>(""))))
+                .willReturn(okJson(objectMapper.writeValueAsString(failure<Any>("")))),
         )
 
         val feil = assertThrows<IntegrasjonException> { integrasjonClient.distribuerBrev(lagDistribuerDokumentDTO()) }
@@ -275,8 +275,8 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
                 .willReturn(
                     aResponse()
                         .withStatus(400)
-                        .withHeader("Content-Type", "application/json")
-                )
+                        .withHeader("Content-Type", "application/json"),
+                ),
         )
 
         assertThrows<HttpClientErrorException.BadRequest> { integrasjonClient.distribuerBrev(lagDistribuerDokumentDTO()) }
@@ -289,7 +289,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
         wireMockServer.stubFor(
             patch(urlEqualTo("/api/oppgave/123/ferdigstill"))
                 .withHeader("Accept", containing("json"))
-                .willReturn(okJson(objectMapper.writeValueAsString(success(OppgaveResponse(1)))))
+                .willReturn(okJson(objectMapper.writeValueAsString(success(OppgaveResponse(1))))),
         )
 
         integrasjonClient.ferdigstillOppgave(123)
@@ -297,7 +297,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
         wireMockServer.verify(
             patchRequestedFor(urlEqualTo("/api/oppgave/123/ferdigstill"))
                 .withHeader(NavHttpHeaders.NAV_CALL_ID.asString(), equalTo("ferdigstillOppgave"))
-                .withHeader(NavHttpHeaders.NAV_CONSUMER_ID.asString(), equalTo("srvfamilie-ba-sak"))
+                .withHeader(NavHttpHeaders.NAV_CONSUMER_ID.asString(), equalTo("srvfamilie-ba-sak")),
         )
     }
 
@@ -312,8 +312,8 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
                     aResponse()
                         .withStatus(400)
                         .withHeader("Content-Type", "application/json")
-                        .withBody(objectMapper.writeValueAsString(failure<String>("test")))
-                )
+                        .withBody(objectMapper.writeValueAsString(failure<String>("test"))),
+                ),
         )
 
         val feil =
@@ -332,12 +332,12 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
                         objectMapper.writeValueAsString(
                             success(
                                 listOf(
-                                    Arbeidsfordelingsenhet("2", "foo")
-                                )
-                            )
-                        )
-                    )
-                )
+                                    Arbeidsfordelingsenhet("2", "foo"),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
         )
 
         val enhet = integrasjonClient.hentBehandlendeEnhet("1")
@@ -355,12 +355,12 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
                     objectMapper.writeValueAsString(
                         success(
                             lagTestOppgaveDTO(
-                                oppgaveId
-                            )
-                        )
-                    )
-                )
-            )
+                                oppgaveId,
+                            ),
+                        ),
+                    ),
+                ),
+            ),
         )
 
         val oppgave = integrasjonClient.finnOppgaveMedId(oppgaveId)
@@ -379,11 +379,11 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
                 okJson(
                     objectMapper.writeValueAsString(
                         success(
-                            lagTestJournalpost(fnr, journalpostId)
-                        )
-                    )
-                )
-            )
+                            lagTestJournalpost(fnr, journalpostId),
+                        ),
+                    ),
+                ),
+            ),
         )
 
         val oppgave = integrasjonClient.hentJournalpost(journalpostId)
@@ -404,8 +404,8 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
                 navArbeidsforholdId = Random.nextLong(),
                 arbeidstaker = Arbeidstaker("Person", fnr),
                 arbeidsgiver = Arbeidsgiver(ArbeidsgiverType.Organisasjon, "998877665"),
-                ansettelsesperiode = Ansettelsesperiode(Periode(fom = LocalDate.now().minusYears(1)))
-            )
+                ansettelsesperiode = Ansettelsesperiode(Periode(fom = LocalDate.now().minusYears(1))),
+            ),
         )
 
         wireMockServer.stubFor(
@@ -413,11 +413,11 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
                 okJson(
                     objectMapper.writeValueAsString(
                         success(
-                            arbeidsforhold
-                        )
-                    )
-                )
-            )
+                            arbeidsforhold,
+                        ),
+                    ),
+                ),
+            ),
         )
 
         val response = integrasjonClient.hentArbeidsforhold(fnr, LocalDate.now())
@@ -457,11 +457,11 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
                                 aktoerId = aktørId.aktørId,
                                 MOCK_FAGSAK_ID,
                                 "BAR",
-                                "BA"
-                            )
-                        )
-                    )
-                )
+                                "BA",
+                            ),
+                        ),
+                    ),
+                ),
         )
     }
 
@@ -487,16 +487,16 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
             Dokument(
                 dokument = mockPdf,
                 filtype = Filtype.PDFA,
-                dokumenttype = Dokumenttype.BARNETRYGD_VEDTAK_INNVILGELSE
-            )
+                dokumenttype = Dokumenttype.BARNETRYGD_VEDTAK_INNVILGELSE,
+            ),
         )
         val vedlegg = listOf(
             Dokument(
                 dokument = vedleggPdf!!,
                 filtype = Filtype.PDFA,
                 dokumenttype = Dokumenttype.BARNETRYGD_VEDLEGG,
-                tittel = VEDTAK_VEDLEGG_TITTEL
-            )
+                tittel = VEDTAK_VEDLEGG_TITTEL,
+            ),
         )
 
         return ArkiverDokumentRequest(
@@ -506,7 +506,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
             journalførendeEnhet = "1",
             hoveddokumentvarianter = brev,
             vedleggsdokumenter = vedlegg,
-            eksternReferanseId = "${fagsakId}_${behandlingId}_${MDCOperations.getCallId()}"
+            eksternReferanseId = "${fagsakId}_${behandlingId}_${MDCOperations.getCallId()}",
         )
     }
 
@@ -515,7 +515,7 @@ class IntergrasjonTjenesteTest : AbstractSpringIntegrationTest() {
         behandlingId = 1L,
         brevmal = Brevmal.VARSEL_OM_REVURDERING,
         personEllerInstitusjonIdent = "test",
-        erManueltSendt = true
+        erManueltSendt = true,
     )
 
     companion object {

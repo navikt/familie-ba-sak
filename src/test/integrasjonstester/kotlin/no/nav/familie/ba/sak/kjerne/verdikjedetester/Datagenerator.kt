@@ -49,20 +49,20 @@ fun lagMockRestJournalføring(bruker: NavnOgIdent): RestJournalføring = RestJou
             brevkode = "mock",
             dokumentInfoId = "1",
             logiskeVedlegg = listOf(LogiskVedlegg("123", "Oppholdstillatelse")),
-            eksisterendeLogiskeVedlegg = emptyList()
+            eksisterendeLogiskeVedlegg = emptyList(),
         ),
         RestJournalpostDokument(
             dokumentTittel = "Ekstra vedlegg",
             brevkode = "mock",
             dokumentInfoId = "2",
             logiskeVedlegg = listOf(LogiskVedlegg("123", "Pass")),
-            eksisterendeLogiskeVedlegg = emptyList()
-        )
+            eksisterendeLogiskeVedlegg = emptyList(),
+        ),
     ),
     navIdent = "09123",
     nyBehandlingstype = BehandlingType.FØRSTEGANGSBEHANDLING,
     nyBehandlingsårsak = BehandlingÅrsak.SØKNAD,
-    fagsakType = FagsakType.NORMAL
+    fagsakType = FagsakType.NORMAL,
 )
 
 fun lagInfotrygdSak(beløp: Double, identBarn: List<String>, valg: String? = "OR", undervalg: String? = "OS"): Sak {
@@ -75,23 +75,23 @@ fun lagInfotrygdSak(beløp: Double, identBarn: List<String>, valg: String? = "OR
                     tom = null,
                     beløp = beløp,
                     typeDelytelse = "MS",
-                    typeUtbetaling = "J"
-                )
+                    typeUtbetaling = "J",
+                ),
             ),
             opphørsgrunn = "0",
             antallBarn = identBarn.size,
             mottakerNummer = 80000123456,
-            status = "04"
+            status = "04",
         ),
         status = "FB",
         valg = valg,
-        undervalg = undervalg
+        undervalg = undervalg,
     )
 }
 
 fun lagInfotrygdSakMedSmåbarnstillegg(
     beløp: Double,
-    identBarn: List<String>
+    identBarn: List<String>,
 ): Sak {
     return Sak(
         stønad = Stønad(
@@ -102,22 +102,22 @@ fun lagInfotrygdSakMedSmåbarnstillegg(
                     tom = null,
                     beløp = beløp,
                     typeDelytelse = "MS",
-                    typeUtbetaling = "M"
+                    typeUtbetaling = "M",
                 ),
                 Delytelse(
                     fom = LocalDate.now(),
                     tom = null,
                     beløp = 660.0,
                     typeDelytelse = "SM",
-                    typeUtbetaling = "M"
-                )
+                    typeUtbetaling = "M",
+                ),
             ),
             opphørsgrunn = "0",
-            antallBarn = identBarn.size
+            antallBarn = identBarn.size,
         ),
         status = "FB",
         valg = "UT",
-        undervalg = "EF"
+        undervalg = "EF",
     )
 }
 
@@ -131,27 +131,27 @@ fun fullførBehandlingFraVilkårsvurderingAlleVilkårOppfylt(
     fagsakService: FagsakService,
     vedtakService: VedtakService,
     stegService: StegService,
-    brevmalService: BrevmalService
+    brevmalService: BrevmalService,
 ): Behandling {
     settAlleVilkårTilOppfylt(
         restUtvidetBehandling = restUtvidetBehandling,
         barnFødselsdato = personScenario.barna.maxOf { LocalDate.parse(it.fødselsdato) },
-        familieBaSakKlient = familieBaSakKlient
+        familieBaSakKlient = familieBaSakKlient,
     )
 
     familieBaSakKlient.validerVilkårsvurdering(
-        behandlingId = restUtvidetBehandling.behandlingId
+        behandlingId = restUtvidetBehandling.behandlingId,
     )
 
     val restUtvidetBehandlingEtterBehandlingsResultat =
         familieBaSakKlient.behandlingsresultatStegOgGåVidereTilNesteSteg(
-            behandlingId = restUtvidetBehandling.behandlingId
+            behandlingId = restUtvidetBehandling.behandlingId,
         )
 
     val restUtvidetBehandlingEtterVurderTilbakekreving =
         familieBaSakKlient.lagreTilbakekrevingOgGåVidereTilNesteSteg(
             restUtvidetBehandlingEtterBehandlingsResultat.data!!.behandlingId,
-            RestTilbakekreving(Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING, begrunnelse = "begrunnelse")
+            RestTilbakekreving(Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING, begrunnelse = "begrunnelse"),
         )
 
     val utvidetVedtaksperiodeMedBegrunnelser =
@@ -161,8 +161,8 @@ fun fullførBehandlingFraVilkårsvurderingAlleVilkårOppfylt(
     familieBaSakKlient.oppdaterVedtaksperiodeMedStandardbegrunnelser(
         vedtaksperiodeId = utvidetVedtaksperiodeMedBegrunnelser.id,
         restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
-            standardbegrunnelser = utvidetVedtaksperiodeMedBegrunnelser.gyldigeBegrunnelser.filter(String::isNotEmpty)
-        )
+            standardbegrunnelser = utvidetVedtaksperiodeMedBegrunnelser.gyldigeBegrunnelser.filter(String::isNotEmpty),
+        ),
     )
     val restUtvidetBehandlingEtterSendTilBeslutter =
         familieBaSakKlient.sendTilBeslutter(behandlingId = restUtvidetBehandlingEtterVurderTilbakekreving.data!!.behandlingId)
@@ -170,7 +170,7 @@ fun fullførBehandlingFraVilkårsvurderingAlleVilkårOppfylt(
     familieBaSakKlient.iverksettVedtak(
         behandlingId = restUtvidetBehandlingEtterSendTilBeslutter.data!!.behandlingId,
         restBeslutningPåVedtak = RestBeslutningPåVedtak(
-            Beslutning.GODKJENT
+            Beslutning.GODKJENT,
         ),
         beslutterHeaders = HttpHeaders().apply {
             setBearerAuth(
@@ -179,11 +179,11 @@ fun fullførBehandlingFraVilkårsvurderingAlleVilkårOppfylt(
                         "groups" to listOf("SAKSBEHANDLER", "BESLUTTER"),
                         "azp" to "azp-test",
                         "name" to "Mock McMockface Beslutter",
-                        "NAVident" to "Z0000"
-                    )
-                )
+                        "NAVident" to "Z0000",
+                    ),
+                ),
             )
-        }
+        },
     )
     return håndterIverksettingAvBehandling(
         behandlingEtterVurdering = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = fagsak.id)!!,
@@ -191,14 +191,14 @@ fun fullførBehandlingFraVilkårsvurderingAlleVilkårOppfylt(
         fagsakService = fagsakService,
         vedtakService = vedtakService,
         stegService = stegService,
-        brevmalService = brevmalService
+        brevmalService = brevmalService,
     )
 }
 
 fun settAlleVilkårTilOppfylt(
     restUtvidetBehandling: RestUtvidetBehandling,
     barnFødselsdato: LocalDate,
-    familieBaSakKlient: FamilieBaSakKlient
+    familieBaSakKlient: FamilieBaSakKlient,
 ) {
     restUtvidetBehandling.personResultater.forEach { restPersonResultat ->
         restPersonResultat.vilkårResultater.filter { it.resultat == Resultat.IKKE_VURDERT }.forEach {
@@ -211,10 +211,10 @@ fun settAlleVilkårTilOppfylt(
                     vilkårResultater = listOf(
                         it.copy(
                             resultat = Resultat.OPPFYLT,
-                            periodeFom = barnFødselsdato
-                        )
-                    )
-                )
+                            periodeFom = barnFødselsdato,
+                        ),
+                    ),
+                ),
             )
         }
     }

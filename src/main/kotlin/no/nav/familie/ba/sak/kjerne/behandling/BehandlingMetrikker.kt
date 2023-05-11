@@ -28,7 +28,7 @@ class BehandlingMetrikker(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val vedtakRepository: VedtakRepository,
     private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService,
-    private val sanityService: SanityService
+    private val sanityService: SanityService,
 ) {
     private var sanityBegrunnelser: List<SanityBegrunnelse> = emptyList()
     private var antallGangerBruktStandardbegrunnelse: Map<Standardbegrunnelse, Counter> = emptyMap()
@@ -54,7 +54,7 @@ class BehandlingMetrikker(
                 "type",
                 it.name,
                 "beskrivelse",
-                it.displayName
+                it.displayName,
             )
         }
 
@@ -75,7 +75,7 @@ class BehandlingMetrikker(
                 "type",
                 it.name,
                 "beskrivelse",
-                tittel
+                tittel,
             )
         }
 
@@ -93,7 +93,7 @@ class BehandlingMetrikker(
                 "type",
                 it.name,
                 "beskrivelse",
-                tittel
+                tittel,
             )
         }
     }
@@ -157,7 +157,7 @@ class BehandlingMetrikker(
                 "beskrivelse",
                 it.visningsnavn,
                 "saksbehandling",
-                type
+                type,
             )
         }
     }
@@ -169,7 +169,7 @@ class BehandlingMetrikker(
                 "aarsak",
                 it.name,
                 "beskrivelse",
-                it.visningsnavn
+                it.visningsnavn,
             )
         }
     }

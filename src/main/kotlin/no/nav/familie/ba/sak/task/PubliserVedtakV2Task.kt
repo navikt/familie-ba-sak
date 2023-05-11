@@ -16,7 +16,7 @@ import java.util.Properties
 class PubliserVedtakV2Task(
     val kafkaProducer: KafkaProducer,
     val stønadsstatistikkService: StønadsstatistikkService,
-    val env: EnvService
+    val env: EnvService,
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
@@ -37,7 +37,7 @@ class PubliserVedtakV2Task(
                 properties = Properties().apply {
                     this["personIdent"] = personIdent
                     this["behandlingsId"] = behandlingsId.toString()
-                }
+                },
             )
         }
     }

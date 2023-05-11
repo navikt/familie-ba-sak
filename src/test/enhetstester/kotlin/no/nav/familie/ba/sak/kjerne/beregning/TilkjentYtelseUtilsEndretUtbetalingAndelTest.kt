@@ -58,7 +58,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
 
         val andelTilkjentytelseForBarn1 = listOf(
             MånedPeriode(YearMonth.of(2018, 1), YearMonth.of(2018, 4)),
-            MånedPeriode(YearMonth.of(2018, 10), YearMonth.of(2021, 8))
+            MånedPeriode(YearMonth.of(2018, 10), YearMonth.of(2021, 8)),
         )
             .map {
                 lagAndelTilkjentYtelse(barn1, it.fom, it.tom)
@@ -66,7 +66,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
 
         val andelTilkjentytelseForBarn2 = listOf(
             MånedPeriode(YearMonth.of(2018, 2), YearMonth.of(2018, 8)),
-            MånedPeriode(YearMonth.of(2018, 11), YearMonth.of(2021, 9))
+            MånedPeriode(YearMonth.of(2018, 11), YearMonth.of(2021, 9)),
         )
             .map {
                 lagAndelTilkjentYtelse(barn2, it.fom, it.tom)
@@ -74,7 +74,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
 
         val endretUtbetalingerForBarn1 = listOf(
             MånedPeriode(YearMonth.of(2015, 1), YearMonth.of(2018, 3)),
-            MånedPeriode(YearMonth.of(2018, 4), YearMonth.of(2018, 4))
+            MånedPeriode(YearMonth.of(2018, 4), YearMonth.of(2018, 4)),
         )
             .map {
                 lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(behandling.id, barn1, it.fom, it.tom, 50)
@@ -83,7 +83,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
         val endretUtbetalingerForBarn2 = listOf(
             MånedPeriode(YearMonth.of(2018, 4), YearMonth.of(2018, 5)),
             MånedPeriode(YearMonth.of(2018, 7), YearMonth.of(2021, 9)),
-            MånedPeriode(YearMonth.of(2021, 11), YearMonth.of(2021, 12))
+            MånedPeriode(YearMonth.of(2021, 11), YearMonth.of(2021, 12)),
         )
             .map {
                 lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(behandling.id, barn2, it.fom, it.tom, 50)
@@ -92,7 +92,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
         val andelerTilkjentYtelserEtterEUA =
             TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
                 (andelTilkjentytelseForBarn1 + andelTilkjentytelseForBarn2),
-                endretUtbetalingerForBarn1 + endretUtbetalingerForBarn2
+                endretUtbetalingerForBarn1 + endretUtbetalingerForBarn2,
             )
 
         val andelerTilkjentYtelserEtterEUAList = andelerTilkjentYtelserEtterEUA.map { it.andel }.toList()
@@ -104,7 +104,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
             barn1.aktør.aktivFødselsnummer(),
             beløp / BigDecimal(2),
             YearMonth.of(2018, 1),
-            YearMonth.of(2018, 3)
+            YearMonth.of(2018, 3),
         )
 
         verifiserAndelTilkjentYtelse(
@@ -112,7 +112,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
             barn1.aktør.aktivFødselsnummer(),
             beløp / BigDecimal(2),
             YearMonth.of(2018, 4),
-            YearMonth.of(2018, 4)
+            YearMonth.of(2018, 4),
         )
 
         verifiserAndelTilkjentYtelse(
@@ -120,7 +120,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
             barn1.aktør.aktivFødselsnummer(),
             beløp,
             YearMonth.of(2018, 10),
-            YearMonth.of(2021, 8)
+            YearMonth.of(2021, 8),
         )
 
         verifiserAndelTilkjentYtelse(
@@ -128,7 +128,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
             barn2.aktør.aktivFødselsnummer(),
             beløp,
             YearMonth.of(2018, 2),
-            YearMonth.of(2018, 3)
+            YearMonth.of(2018, 3),
         )
 
         verifiserAndelTilkjentYtelse(
@@ -136,7 +136,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
             barn2.aktør.aktivFødselsnummer(),
             beløp / BigDecimal(2),
             YearMonth.of(2018, 4),
-            YearMonth.of(2018, 5)
+            YearMonth.of(2018, 5),
         )
 
         verifiserAndelTilkjentYtelse(
@@ -144,7 +144,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
             barn2.aktør.aktivFødselsnummer(),
             beløp,
             YearMonth.of(2018, 6),
-            YearMonth.of(2018, 6)
+            YearMonth.of(2018, 6),
         )
 
         verifiserAndelTilkjentYtelse(
@@ -152,7 +152,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
             barn2.aktør.aktivFødselsnummer(),
             beløp / BigDecimal(2),
             YearMonth.of(2018, 7),
-            YearMonth.of(2018, 8)
+            YearMonth.of(2018, 8),
         )
 
         verifiserAndelTilkjentYtelse(
@@ -160,7 +160,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
             barn2.aktør.aktivFødselsnummer(),
             beløp / BigDecimal(2),
             YearMonth.of(2018, 11),
-            YearMonth.of(2021, 9)
+            YearMonth.of(2021, 9),
         )
     }
 
@@ -177,8 +177,8 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
 
         perioder = periode.perioderMedOgUtenOverlapp(
             listOf(
-                MånedPeriode(YearMonth.of(2015, 1), YearMonth.of(2016, 3))
-            )
+                MånedPeriode(YearMonth.of(2015, 1), YearMonth.of(2016, 3)),
+            ),
         )
         perioderMedOverlapp = perioder.first
         perioderUtenOverlapp = perioder.second
@@ -188,8 +188,8 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
 
         perioder = periode.perioderMedOgUtenOverlapp(
             listOf(
-                periode
-            )
+                periode,
+            ),
         )
         perioderMedOverlapp = perioder.first
         perioderUtenOverlapp = perioder.second
@@ -199,8 +199,8 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
 
         perioder = periode.perioderMedOgUtenOverlapp(
             listOf(
-                MånedPeriode(YearMonth.of(2015, 1), YearMonth.of(2018, 3))
-            )
+                MånedPeriode(YearMonth.of(2015, 1), YearMonth.of(2018, 3)),
+            ),
         )
         perioderMedOverlapp = perioder.first
         perioderUtenOverlapp = perioder.second
@@ -212,8 +212,8 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
         perioder = periode.perioderMedOgUtenOverlapp(
             listOf(
                 MånedPeriode(YearMonth.of(2015, 1), YearMonth.of(2018, 3)),
-                MånedPeriode(YearMonth.of(2018, 6), YearMonth.of(2018, 6))
-            )
+                MånedPeriode(YearMonth.of(2018, 6), YearMonth.of(2018, 6)),
+            ),
         )
         perioderMedOverlapp = perioder.first
         perioderUtenOverlapp = perioder.second
@@ -226,8 +226,8 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
 
         perioder = periode.perioderMedOgUtenOverlapp(
             listOf(
-                MånedPeriode(YearMonth.of(2018, 2), YearMonth.of(2018, 11))
-            )
+                MånedPeriode(YearMonth.of(2018, 2), YearMonth.of(2018, 11)),
+            ),
         )
         perioderMedOverlapp = perioder.first
         perioderUtenOverlapp = perioder.second
@@ -243,7 +243,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
         forventetBarnIdent: String,
         forventetBeløp: BigDecimal,
         forventetStønadFom: YearMonth,
-        forventetStønadTom: YearMonth
+        forventetStønadTom: YearMonth,
     ) {
         assertEquals(forventetBarnIdent, andelTilkjentYtelse.aktør.aktivFødselsnummer())
         assertEquals(forventetBeløp, BigDecimal(andelTilkjentYtelse.kalkulertUtbetalingsbeløp))
@@ -261,6 +261,6 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
         stønadTom = tom,
         type = YtelseType.ORDINÆR_BARNETRYGD,
         sats = beløp.toInt(),
-        prosent = BigDecimal(100)
+        prosent = BigDecimal(100),
     )
 }

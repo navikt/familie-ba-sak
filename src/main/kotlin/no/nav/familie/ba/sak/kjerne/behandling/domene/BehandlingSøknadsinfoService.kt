@@ -7,14 +7,14 @@ import java.time.LocalDateTime
 
 @Service
 class BehandlingSøknadsinfoService(
-    private val behandlingSøknadsinfoRepository: BehandlingSøknadsinfoRepository
+    private val behandlingSøknadsinfoRepository: BehandlingSøknadsinfoRepository,
 ) {
 
     @Transactional
     fun lagreNedSøknadMottattDato(mottattDato: LocalDate, behandling: Behandling) {
         val behandlingSøknadsinfo = BehandlingSøknadsinfo(
             behandling = behandling,
-            mottattDato = mottattDato.atStartOfDay()
+            mottattDato = mottattDato.atStartOfDay(),
         )
         behandlingSøknadsinfoRepository.save(behandlingSøknadsinfo)
     }

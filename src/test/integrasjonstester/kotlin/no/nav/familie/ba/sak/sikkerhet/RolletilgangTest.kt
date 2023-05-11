@@ -34,11 +34,11 @@ import org.springframework.web.client.postForEntity
     "mock-infotrygd-feed",
     "mock-rest-template-config",
     "mock-task-repository",
-    "mock-task-service"
+    "mock-task-service",
 )
 class RolletilgangTest(
     @Autowired
-    private val fagsakService: FagsakService
+    private val fagsakService: FagsakService,
 ) : WebSpringAuthTestRunner() {
 
     @Test
@@ -52,23 +52,23 @@ class RolletilgangTest(
                 mapOf(
                     "groups" to listOf("VEILDER"),
                     "name" to "Mock McMockface",
-                    "NAVident" to "Z0000"
-                )
-            )
+                    "NAVident" to "Z0000",
+                ),
+            ),
         )
         val requestEntity = HttpEntity<String>(
             objectMapper.writeValueAsString(
                 FagsakRequest(
-                    personIdent = fnr
-                )
+                    personIdent = fnr,
+                ),
             ),
-            header
+            header,
         )
 
         val error = assertThrows<HttpClientErrorException> {
             restTemplate.postForEntity<Ressurs<Fagsak>>(
                 hentUrl("/api/fagsaker"),
-                requestEntity
+                requestEntity,
             )
         }
 
@@ -78,7 +78,7 @@ class RolletilgangTest(
         assertEquals(Ressurs.Status.IKKE_TILGANG, ressurs.status)
         assertEquals(
             "Mock McMockface med rolle VEILEDER har ikke tilgang til å opprette fagsak. Krever SAKSBEHANDLER.",
-            ressurs.melding
+            ressurs.melding,
         )
     }
 
@@ -93,17 +93,17 @@ class RolletilgangTest(
                 mapOf(
                     "groups" to listOf("VEILDER", "SAKSBEHANDLER"),
                     "name" to "Mock McMockface",
-                    "NAVident" to "Z0000"
-                )
-            )
+                    "NAVident" to "Z0000",
+                ),
+            ),
         )
         val requestEntity = HttpEntity<String>(
             objectMapper.writeValueAsString(
                 FagsakRequest(
-                    personIdent = fnr
-                )
+                    personIdent = fnr,
+                ),
             ),
-            header
+            header,
         )
 
         val response = restTemplate.postForEntity<Ressurs<Fagsak>>(hentUrl("/api/fagsaker"), requestEntity)
@@ -126,19 +126,19 @@ class RolletilgangTest(
                 mapOf(
                     "groups" to listOf("VEILDER"),
                     "name" to "Mock McMockface",
-                    "NAVident" to "Z0000"
-                )
-            )
+                    "NAVident" to "Z0000",
+                ),
+            ),
         )
         val requestEntity = HttpEntity<String>(
             objectMapper.writeValueAsString(nyOrdinærBehandling(søkersIdent = fnr, fagsakId = fagsak.data!!.id)),
-            header
+            header,
         )
 
         val error = assertThrows<HttpClientErrorException> {
             restTemplate.postForEntity<Ressurs<Behandling>>(
                 hentUrl("/rolletilgang/test-behandlinger"),
-                requestEntity
+                requestEntity,
             )
         }
 
@@ -148,7 +148,7 @@ class RolletilgangTest(
         assertEquals(Ressurs.Status.IKKE_TILGANG, ressurs.status)
         assertEquals(
             "Mock McMockface med rolle VEILEDER har ikke skrivetilgang til databasen.",
-            ressurs.melding
+            ressurs.melding,
         )
     }
 }

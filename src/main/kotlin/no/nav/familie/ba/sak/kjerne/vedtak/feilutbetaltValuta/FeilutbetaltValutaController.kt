@@ -26,26 +26,25 @@ import org.springframework.web.bind.annotation.RestController
 class FeilutbetaltValutaController(
     private val tilgangService: TilgangService,
     private val feilutbetaltValutaService: FeilutbetaltValutaService,
-    private val utvidetBehandlingService: UtvidetBehandlingService
+    private val utvidetBehandlingService: UtvidetBehandlingService,
 ) {
     @PostMapping(
         path = ["behandling/{behandlingId}"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
-        consumes = [MediaType.APPLICATION_JSON_VALUE]
+        consumes = [MediaType.APPLICATION_JSON_VALUE],
     )
     fun leggTilFeilutbetaltValutaPeriode(
         @PathVariable behandlingId: Long,
-        @RequestBody feilutbetaltValuta: RestFeilutbetaltValuta
-    ):
-        ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        @RequestBody feilutbetaltValuta: RestFeilutbetaltValuta,
+    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "legg til periode med feilutbetalt valuta"
+            handling = "legg til periode med feilutbetalt valuta",
         )
 
         feilutbetaltValutaService.leggTilFeilutbetaltValutaPeriode(
             feilutbetaltValuta = feilutbetaltValuta,
-            behandlingId = behandlingId
+            behandlingId = behandlingId,
         )
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
@@ -54,16 +53,16 @@ class FeilutbetaltValutaController(
     @PutMapping(
         path = ["behandling/{behandlingId}/periode/{id}"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
-        consumes = [MediaType.APPLICATION_JSON_VALUE]
+        consumes = [MediaType.APPLICATION_JSON_VALUE],
     )
     fun oppdaterFeilutbetaltValutaPeriode(
         @PathVariable behandlingId: Long,
         @PathVariable id: Long,
-        @RequestBody feilutbetaltValuta: RestFeilutbetaltValuta
+        @RequestBody feilutbetaltValuta: RestFeilutbetaltValuta,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "oppdater periode med feilutbetalt valuta"
+            handling = "oppdater periode med feilutbetalt valuta",
         )
 
         feilutbetaltValutaService.oppdatertFeilutbetaltValutaPeriode(feilutbetaltValuta = feilutbetaltValuta, id = id)
@@ -74,11 +73,11 @@ class FeilutbetaltValutaController(
     @DeleteMapping(path = ["behandling/{behandlingId}/periode/{id}"])
     fun fjernFeilutbetaltValutaPeriode(
         @PathVariable behandlingId: Long,
-        @PathVariable id: Long
+        @PathVariable id: Long,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "Fjerner periode med feilutbetalt valuta"
+            handling = "Fjerner periode med feilutbetalt valuta",
         )
         feilutbetaltValutaService.fjernFeilutbetaltValutaPeriode(id = id, behandlingId = behandlingId)
 
@@ -89,7 +88,7 @@ class FeilutbetaltValutaController(
     fun hentFeilutbetaltValutaPerioder(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<List<RestFeilutbetaltValuta>?>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
-            handling = "hente feilutbetalt valuta for behandling"
+            handling = "hente feilutbetalt valuta for behandling",
         )
         return ResponseEntity.ok(Ressurs.success(feilutbetaltValutaService.hentFeilutbetaltValutaPerioder(behandlingId = behandlingId)))
     }

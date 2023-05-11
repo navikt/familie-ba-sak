@@ -19,7 +19,7 @@ data class ArbeidsfordelingPåBehandling(
     @SequenceGenerator(
         name = "arbeidsfordeling_pa_behandling_seq_generator",
         sequenceName = "arbeidsfordeling_pa_behandling_seq",
-        allocationSize = 50
+        allocationSize = 50,
     )
     val id: Long = 0,
 
@@ -33,7 +33,7 @@ data class ArbeidsfordelingPåBehandling(
     var behandlendeEnhetNavn: String,
 
     @Column(name = "manuelt_overstyrt", nullable = false)
-    var manueltOverstyrt: Boolean = false
+    var manueltOverstyrt: Boolean = false,
 ) {
     override fun toString(): String {
         return "ArbeidsfordelingPåBehandling(id=$id, manueltOverstyrt=$manueltOverstyrt)"

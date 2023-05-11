@@ -12,12 +12,12 @@ fun lagSettPåVent(
     tidTattAvVent: LocalDate = LocalDate.now(),
     tidSattPåVent: LocalDate = LocalDate.now(),
     årsak: SettPåVentÅrsak = SettPåVentÅrsak.AVVENTER_DOKUMENTASJON,
-    aktiv: Boolean = true
+    aktiv: Boolean = true,
 ) = SettPåVent(
     behandling = behandling,
     frist = frist,
     tidTattAvVent = tidTattAvVent,
     tidSattPåVent = tidSattPåVent,
     årsak = årsak,
-    aktiv = aktiv
+    aktiv = aktiv,
 )

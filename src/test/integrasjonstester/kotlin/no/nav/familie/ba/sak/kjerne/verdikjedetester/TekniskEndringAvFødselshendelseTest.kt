@@ -39,7 +39,7 @@ class TekniskEndringAvFødselshendelseTest(
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val stegService: StegService,
     @Autowired private val featureToggleService: FeatureToggleService,
-    @Autowired private val brevmalService: BrevmalService
+    @Autowired private val brevmalService: BrevmalService,
 ) : AbstractVerdikjedetest() {
 
     @Test
@@ -53,15 +53,15 @@ class TekniskEndringAvFødselshendelseTest(
                     RestScenarioPerson(
                         fødselsdato = LocalDate.now().minusDays(2).toString(),
                         fornavn = "Barn",
-                        etternavn = "Barnesen"
-                    )
-                )
-            )
+                        etternavn = "Barnesen",
+                    ),
+                ),
+            ),
         )
         val behandling = behandleFødselshendelse(
             nyBehandlingHendelse = NyBehandlingHendelse(
                 morsIdent = scenario.søker.ident!!,
-                barnasIdenter = listOf(scenario.barna.first().ident!!)
+                barnasIdenter = listOf(scenario.barna.first().ident!!),
             ),
             behandleFødselshendelseTask = behandleFødselshendelseTask,
             fagsakService = fagsakService,
@@ -69,7 +69,7 @@ class TekniskEndringAvFødselshendelseTest(
             personidentService = personidentService,
             vedtakService = vedtakService,
             stegService = stegService,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
 
         )!!
 
@@ -77,12 +77,12 @@ class TekniskEndringAvFødselshendelseTest(
             søkersIdent = scenario.søker.ident,
             behandlingType = BehandlingType.TEKNISK_ENDRING,
             behandlingÅrsak = BehandlingÅrsak.TEKNISK_ENDRING,
-            fagsakId = behandling.fagsak.id
+            fagsakId = behandling.fagsak.id,
         )
         generellAssertRestUtvidetBehandling(
             restUtvidetBehandling = restUtvidetBehandling,
             behandlingStatus = BehandlingStatus.UTREDES,
-            behandlingStegType = StegType.VILKÅRSVURDERING
+            behandlingStegType = StegType.VILKÅRSVURDERING,
         )
 
         val minimalFagsak = familieBaSakKlient().hentMinimalFagsakPåPerson(personIdent = scenario.søker.ident)
@@ -99,39 +99,39 @@ class TekniskEndringAvFødselshendelseTest(
                         personIdent = restPersonResultat.personIdent,
                         vilkårResultater = listOf(
                             it.copy(
-                                resultat = Resultat.IKKE_OPPFYLT
-                            )
-                        )
-                    )
+                                resultat = Resultat.IKKE_OPPFYLT,
+                            ),
+                        ),
+                    ),
                 )
             }
         }
 
         familieBaSakKlient().validerVilkårsvurdering(
-            behandlingId = restUtvidetBehandling.data!!.behandlingId
+            behandlingId = restUtvidetBehandling.data!!.behandlingId,
         )
 
         val restUtvidetBehandlingEtterBehandlingsresultat =
             familieBaSakKlient().behandlingsresultatStegOgGåVidereTilNesteSteg(
-                behandlingId = restUtvidetBehandling.data!!.behandlingId
+                behandlingId = restUtvidetBehandling.data!!.behandlingId,
             )
         generellAssertRestUtvidetBehandling(
             restUtvidetBehandling = restUtvidetBehandlingEtterBehandlingsresultat,
             behandlingStatus = BehandlingStatus.UTREDES,
             behandlingStegType = StegType.VURDER_TILBAKEKREVING,
-            behandlingsresultat = Behandlingsresultat.OPPHØRT
+            behandlingsresultat = Behandlingsresultat.OPPHØRT,
         )
 
         val restUtvidetBehandlingEtterVurderTilbakekreving =
             familieBaSakKlient().lagreTilbakekrevingOgGåVidereTilNesteSteg(
                 restUtvidetBehandlingEtterBehandlingsresultat.data!!.behandlingId,
-                RestTilbakekreving(Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING, begrunnelse = "begrunnelse")
+                RestTilbakekreving(Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING, begrunnelse = "begrunnelse"),
             )
         generellAssertRestUtvidetBehandling(
             restUtvidetBehandling = restUtvidetBehandlingEtterVurderTilbakekreving,
             behandlingStatus = BehandlingStatus.UTREDES,
             behandlingStegType = StegType.SEND_TIL_BESLUTTER,
-            behandlingsresultat = Behandlingsresultat.OPPHØRT
+            behandlingsresultat = Behandlingsresultat.OPPHØRT,
         )
 
         val restUtvidetBehandlingEtterSendTilBeslutter =
@@ -140,14 +140,14 @@ class TekniskEndringAvFødselshendelseTest(
         generellAssertRestUtvidetBehandling(
             restUtvidetBehandling = restUtvidetBehandlingEtterSendTilBeslutter,
             behandlingStatus = BehandlingStatus.FATTER_VEDTAK,
-            behandlingStegType = StegType.BESLUTTE_VEDTAK
+            behandlingStegType = StegType.BESLUTTE_VEDTAK,
         )
 
         val restUtvidetBehandlingEtterIverksetting =
             familieBaSakKlient().iverksettVedtak(
                 behandlingId = restUtvidetBehandlingEtterSendTilBeslutter.data!!.behandlingId,
                 restBeslutningPåVedtak = RestBeslutningPåVedtak(
-                    Beslutning.GODKJENT
+                    Beslutning.GODKJENT,
                 ),
                 beslutterHeaders = HttpHeaders().apply {
                     setBearerAuth(
@@ -156,17 +156,17 @@ class TekniskEndringAvFødselshendelseTest(
                                 "groups" to listOf("SAKSBEHANDLER", "BESLUTTER"),
                                 "azp" to "azp-test",
                                 "name" to "Mock McMockface Beslutter",
-                                "NAVident" to "Z0000"
-                            )
-                        )
+                                "NAVident" to "Z0000",
+                            ),
+                        ),
                     )
-                }
+                },
             )
 
         generellAssertRestUtvidetBehandling(
             restUtvidetBehandling = restUtvidetBehandlingEtterIverksetting,
             behandlingStatus = BehandlingStatus.IVERKSETTER_VEDTAK,
-            behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG
+            behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG,
         )
 
         håndterIverksettingAvBehandling(
@@ -176,7 +176,7 @@ class TekniskEndringAvFødselshendelseTest(
             fagsakService = fagsakService,
             vedtakService = vedtakService,
             stegService = stegService,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
 
         )
     }

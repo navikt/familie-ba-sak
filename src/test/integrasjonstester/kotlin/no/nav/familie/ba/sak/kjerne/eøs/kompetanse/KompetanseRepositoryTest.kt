@@ -19,7 +19,7 @@ class KompetanseRepositoryTest(
     @Autowired private val aktørIdRepository: AktørIdRepository,
     @Autowired private val fagsakRepository: FagsakRepository,
     @Autowired private val behandlingRepository: BehandlingRepository,
-    @Autowired private val kompetanseRepository: KompetanseRepository
+    @Autowired private val kompetanseRepository: KompetanseRepository,
 ) : AbstractSpringIntegrationTest() {
 
     @Test
@@ -33,14 +33,14 @@ class KompetanseRepositoryTest(
 
         val kompetanse = kompetanseRepository.save(
             lagKompetanse(
-                barnAktører = setOf(barn1, barn2)
-            ).also { it.behandlingId = behandling.id }
+                barnAktører = setOf(barn1, barn2),
+            ).also { it.behandlingId = behandling.id },
         )
 
         val kompetanse2 = kompetanseRepository.save(
             lagKompetanse(
-                barnAktører = setOf(barn1, barn2)
-            ).also { it.behandlingId = behandling.id }
+                barnAktører = setOf(barn1, barn2),
+            ).also { it.behandlingId = behandling.id },
         )
 
         assertEquals(kompetanse.barnAktører, kompetanse2.barnAktører)
@@ -63,8 +63,8 @@ class KompetanseRepositoryTest(
                 søkersAktivitet = SøkersAktivitet.ARBEIDER,
                 annenForeldersAktivitet = AnnenForeldersAktivitet.MOTTAR_PENSJON,
                 annenForeldersAktivitetsland = "pl",
-                barnetsBostedsland = "sl"
-            )
+                barnetsBostedsland = "sl",
+            ),
         )
 
         val hentedeKompetanser = kompetanseRepository.finnFraBehandlingId(behandlingId = behandling.id)

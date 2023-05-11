@@ -19,19 +19,19 @@ private fun personTilTimeline(it: AndelTilkjentYtelseMedEndreteUtbetalinger) =
             LocalDateSegment(
                 it.stønadFom.førsteDagIInneværendeMåned(),
                 it.stønadTom.sisteDagIInneværendeMåned(),
-                it.kalkulertUtbetalingsbeløp
-            )
-        )
+                it.kalkulertUtbetalingsbeløp,
+            ),
+        ),
     )
 
 private fun reducer(
     sammenlagtTidslinje: LocalDateTimeline<Int>,
-    tidslinje: LocalDateTimeline<Int>
+    tidslinje: LocalDateTimeline<Int>,
 ): LocalDateTimeline<Int> {
     sammenlagtTidslinje.disjoint(tidslinje)
     return sammenlagtTidslinje.combine(
         tidslinje,
         StandardCombinators::sum,
-        LocalDateTimeline.JoinStyle.CROSS_JOIN
+        LocalDateTimeline.JoinStyle.CROSS_JOIN,
     )
 }

@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired
 
 class BehandlingHentOgPersisterServiceTest(
     @Autowired private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    @Autowired private val fagsakService: FagsakService
+    @Autowired private val fagsakService: FagsakService,
 ) : AbstractSpringIntegrationTest() {
 
     @Test
@@ -28,8 +28,8 @@ class BehandlingHentOgPersisterServiceTest(
         val aktivFødselsnummere = behandlingHentOgPersisterService.hentAktivtFødselsnummerForBehandlinger(
             listOf(
                 behandling1.id,
-                behandling2.id
-            )
+                behandling2.id,
+            ),
         )
         assertEquals(fødselsnummere[0], aktivFødselsnummere[behandling1.id])
         assertEquals(fødselsnummere[1], aktivFødselsnummere[behandling2.id])

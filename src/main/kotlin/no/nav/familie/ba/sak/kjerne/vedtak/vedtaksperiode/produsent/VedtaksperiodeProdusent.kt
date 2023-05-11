@@ -19,7 +19,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 fun genererVedtaksperioder(
     grunnlagForVedtakPerioder: GrunnlagForVedtaksperioder,
     grunnlagForVedtakPerioderForrigeBehandling: GrunnlagForVedtaksperioder?,
-    vedtak: Vedtak
+    vedtak: Vedtak,
 ): List<VedtaksperiodeMedBegrunnelser> {
     val grunnlagTidslinjePerPerson = grunnlagForVedtakPerioder.utledGrunnlagTidslinjePerPerson()
 
@@ -48,11 +48,11 @@ fun genererVedtaksperioder(
  **/
 fun finnPerioderSomSkalBegrunnes(
     grunnlagTidslinjePerPerson: Map<AktørId, Tidslinje<GrunnlagForPerson, Måned>>,
-    grunnlagTidslinjePerPersonForrigeBehandling: Map<AktørId, Tidslinje<GrunnlagForPerson, Måned>>
+    grunnlagTidslinjePerPersonForrigeBehandling: Map<AktørId, Tidslinje<GrunnlagForPerson, Måned>>,
 ): List<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>> {
     val gjeldendeOgForrigeGrunnlagKombinert = kombinerGjeldendeOgForrigeGrunnlag(
         grunnlagTidslinjePerPerson = grunnlagTidslinjePerPerson,
-        grunnlagTidslinjePerPersonForrigeBehandling = grunnlagTidslinjePerPersonForrigeBehandling
+        grunnlagTidslinjePerPersonForrigeBehandling = grunnlagTidslinjePerPersonForrigeBehandling,
     )
 
     val sammenslåttePerioderUtenEksplisittAvslag =
@@ -93,7 +93,7 @@ private fun List<Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned>>.utl
  **/
 private fun kombinerGjeldendeOgForrigeGrunnlag(
     grunnlagTidslinjePerPerson: Map<AktørId, Tidslinje<GrunnlagForPerson, Måned>>,
-    grunnlagTidslinjePerPersonForrigeBehandling: Map<AktørId, Tidslinje<GrunnlagForPerson, Måned>>
+    grunnlagTidslinjePerPersonForrigeBehandling: Map<AktørId, Tidslinje<GrunnlagForPerson, Måned>>,
 ): List<Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned>> =
     grunnlagTidslinjePerPerson.map { (aktørId, grunnlagstidslinje) ->
         val grunnlagForrigeBehandling = grunnlagTidslinjePerPersonForrigeBehandling[aktørId]
@@ -111,7 +111,7 @@ private fun kombinerGjeldendeOgForrigeGrunnlag(
     }
 
 fun Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>.tilVedtaksperiodeMedBegrunnelser(
-    vedtak: Vedtak
+    vedtak: Vedtak,
 ) = VedtaksperiodeMedBegrunnelser(
     vedtak = vedtak,
     fom = fraOgMed.tilDagEllerFørsteDagIPerioden().tilLocalDate(),
@@ -124,13 +124,13 @@ fun Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>.tilVedtaksper
         Vedtaksperiodetype.AVSLAG
     } else {
         Vedtaksperiodetype.OPPHØR
-    }
+    },
 )
 
 data class GrupperingskriterierForVedtaksperioder(
     val fom: Tidspunkt<Måned>,
     val tom: Tidspunkt<Måned>,
-    val periodeInneholderInnvilgelse: Boolean
+    val periodeInneholderInnvilgelse: Boolean,
 )
 
 private fun List<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>>.slåSammenAvslagOgReduksjonsperioderMedSammeFomOgTom() =
@@ -138,12 +138,12 @@ private fun List<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>>
         GrupperingskriterierForVedtaksperioder(
             fom = periode.fraOgMed,
             tom = periode.tilOgMed,
-            periodeInneholderInnvilgelse = periode.innhold?.any { it.gjeldende is GrunnlagForPersonInnvilget } == true
+            periodeInneholderInnvilgelse = periode.innhold?.any { it.gjeldende is GrunnlagForPersonInnvilget } == true,
         )
     }.map { (grupperingskriterier, verdi) ->
         Periode(
             fraOgMed = grupperingskriterier.fom,
             tilOgMed = grupperingskriterier.tom,
-            innhold = verdi.mapNotNull { periode -> periode.innhold }.flatten()
+            innhold = verdi.mapNotNull { periode -> periode.innhold }.flatten(),
         )
     }

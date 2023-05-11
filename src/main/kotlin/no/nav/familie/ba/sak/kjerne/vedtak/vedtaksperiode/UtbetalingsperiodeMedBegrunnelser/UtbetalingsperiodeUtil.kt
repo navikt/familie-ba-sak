@@ -19,7 +19,7 @@ fun hentPerioderMedUtbetaling(
     vedtak: Vedtak,
     personResultater: Set<PersonResultat>,
     personerIPersongrunnlag: List<Person>,
-    fagsakType: FagsakType
+    fagsakType: FagsakType,
 ): List<VedtaksperiodeMedBegrunnelser> {
     val tidslinjeForSplitt = personResultater.tilTidslinjeForSplitt(personerIPersongrunnlag, fagsakType)
 
@@ -43,7 +43,7 @@ fun hentPerioderMedUtbetaling(
                 fom = it.fraOgMed.tilFørsteDagIMåneden().tilLocalDateEllerNull(),
                 tom = it.tilOgMed.tilSisteDagIMåneden().tilLocalDateEllerNull(),
                 vedtak = vedtak,
-                type = Vedtaksperiodetype.UTBETALING
+                type = Vedtaksperiodetype.UTBETALING,
             )
         }
 }

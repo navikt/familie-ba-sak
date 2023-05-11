@@ -43,7 +43,7 @@ internal class OppdaterSkjemaTest {
             "---SSS                               PPP------",
             barn1,
             barn2,
-            barn3
+            barn3,
         )
 
         val faktiskeKompetanser = oppdaterSkjemaerRekursivt(kompetanser, kompetanse)

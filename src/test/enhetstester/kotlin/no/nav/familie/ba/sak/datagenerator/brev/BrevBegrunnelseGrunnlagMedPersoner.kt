@@ -10,12 +10,12 @@ fun lagBrevBegrunnelseGrunnlagMedPersoner(
     standardbegrunnelse: Standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
     vedtakBegrunnelseType: VedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET,
     triggesAv: TriggesAv = lagTriggesAv(),
-    personIdenter: List<String> = emptyList()
+    personIdenter: List<String> = emptyList(),
 ): BrevBegrunnelseGrunnlagMedPersoner {
     return BrevBegrunnelseGrunnlagMedPersoner(
         standardbegrunnelse = standardbegrunnelse,
         vedtakBegrunnelseType = vedtakBegrunnelseType,
         triggesAv = triggesAv,
-        personIdenter = personIdenter
+        personIdenter = personIdenter,
     )
 }

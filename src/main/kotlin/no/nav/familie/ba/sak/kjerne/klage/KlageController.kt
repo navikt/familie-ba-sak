@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController
 @ProtectedWithClaims(issuer = "azuread")
 class KlageController(
     private val tilgangService: TilgangService,
-    private val klageService: KlageService
+    private val klageService: KlageService,
 ) {
 
     @PostMapping("/{fagsakId}/opprett-klagebehandling")
@@ -29,7 +29,7 @@ class KlageController(
             fagsakId = fagsakId,
             event = AuditLoggerEvent.CREATE,
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "Opprett klagebehandling"
+            handling = "Opprett klagebehandling",
         )
         klageService.opprettKlage(fagsakId, opprettKlageDto)
         return Ressurs.success(fagsakId)
@@ -41,7 +41,7 @@ class KlageController(
             fagsakId = fagsakId,
             event = AuditLoggerEvent.ACCESS,
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
-            handling = "Hent klagebehandlinger på fagsak"
+            handling = "Hent klagebehandlinger på fagsak",
         )
         return Ressurs.success(klageService.hentKlagebehandlingerPåFagsak(fagsakId))
     }

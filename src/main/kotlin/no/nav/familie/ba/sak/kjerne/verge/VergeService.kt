@@ -6,7 +6,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class VergeService(
-    val vergeRepository: VergeRepository
+    val vergeRepository: VergeRepository,
 ) {
 
     @Transactional

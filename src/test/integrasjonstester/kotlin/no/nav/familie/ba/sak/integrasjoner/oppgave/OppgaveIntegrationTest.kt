@@ -55,7 +55,7 @@ class OppgaveIntegrationTest : AbstractSpringIntegrationTest() {
             SØKER_FNR,
             listOf(BARN_FNR),
             søkerAktør = fagsak.aktør,
-            barnAktør = barnAktør
+            barnAktør = barnAktør,
         )
 
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
@@ -72,11 +72,11 @@ class OppgaveIntegrationTest : AbstractSpringIntegrationTest() {
         Assertions.assertEquals(behandling.status, opprettetOppgave.behandling.status)
         Assertions.assertEquals(
             behandling.behandlingStegTilstand.first().behandlingSteg,
-            opprettetOppgave.behandling.behandlingStegTilstand.first().behandlingSteg
+            opprettetOppgave.behandling.behandlingStegTilstand.first().behandlingSteg,
         )
         Assertions.assertEquals(
             behandling.behandlingStegTilstand.first().behandlingStegStatus,
-            opprettetOppgave.behandling.behandlingStegTilstand.first().behandlingStegStatus
+            opprettetOppgave.behandling.behandlingStegTilstand.first().behandlingStegStatus,
         )
         Assertions.assertFalse(opprettetOppgave.erFerdigstilt)
         Assertions.assertEquals(godkjenneVedtakOppgaveId, opprettetOppgave.gsakId)
@@ -86,8 +86,8 @@ class OppgaveIntegrationTest : AbstractSpringIntegrationTest() {
         Assertions.assertNull(
             oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(
                 Oppgavetype.GodkjenneVedtak,
-                behandling
-            )
+                behandling,
+            ),
         )
     }
 
@@ -106,7 +106,7 @@ class OppgaveIntegrationTest : AbstractSpringIntegrationTest() {
             SØKER_FNR,
             listOf(BARN_FNR),
             søkerAktør = fagsak.aktør,
-            barnAktør = barnAktør
+            barnAktør = barnAktør,
         )
 
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
@@ -132,7 +132,7 @@ class OppgaveIntegrationTest : AbstractSpringIntegrationTest() {
             SØKER_FNR,
             listOf(BARN_FNR),
             søkerAktør = fagsak.aktør,
-            barnAktør = barnAktør
+            barnAktør = barnAktør,
         )
 
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
