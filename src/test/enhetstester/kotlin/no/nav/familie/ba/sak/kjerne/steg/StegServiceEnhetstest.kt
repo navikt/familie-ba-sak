@@ -42,7 +42,7 @@ internal class StegServiceEnhetstest {
         infotrygdFeedService = mockk(),
         settPåVentService = settPåVentService,
         satsendringService = satsendringService,
-        simuleringService = simuleringService
+        simuleringService = simuleringService,
     )
 
     @BeforeEach
@@ -69,8 +69,8 @@ internal class StegServiceEnhetstest {
                     søkersIdent = randomFnr(),
                     barnasIdenter = listOf(randomFnr()),
                     nyMigreringsdato = LocalDate.now().minusMonths(6),
-                    fagsakId = 1L
-                )
+                    fagsakId = 1L,
+                ),
             )
         }
     }
@@ -91,8 +91,8 @@ internal class StegServiceEnhetstest {
                         søkersIdent = randomFnr(),
                         barnasIdenter = listOf(randomFnr()),
                         nyMigreringsdato = LocalDate.now().minusMonths(6),
-                        fagsakId = 1L
-                    )
+                        fagsakId = 1L,
+                    ),
                 )
             }
         }
@@ -110,7 +110,7 @@ internal class StegServiceEnhetstest {
             søkersIdent = randomFnr(),
             barnasIdenter = listOf(randomFnr()),
             nyMigreringsdato = LocalDate.now().minusMonths(6),
-            fagsakId = 1L
+            fagsakId = 1L,
         )
 
         assertThrows<FunksjonellFeil> { stegService.håndterNyBehandling(nyBehandling) }

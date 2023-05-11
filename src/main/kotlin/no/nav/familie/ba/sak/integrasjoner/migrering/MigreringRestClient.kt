@@ -17,7 +17,7 @@ import java.net.URI
 @Component
 class MigreringRestClient(
     @Value("\${FAMILIE_BA_MIGRERING_API_URL}") private val clientUri: URI,
-    @Qualifier("jwtBearerClientCredentials") restOperations: RestOperations
+    @Qualifier("jwtBearerClientCredentials") restOperations: RestOperations,
 ) : AbstractRestClient(restOperations, "migrering") {
 
     fun migrertAvSaksbehandler(personIdent: String, migreringResponseDto: MigreringResponseDto): String {
@@ -31,14 +31,14 @@ class MigreringRestClient(
             when (ex) {
                 is HttpClientErrorException -> secureLogger.error(
                     "Http feil mot ${uri.path}: httpkode=${ex.statusCode}, feilmelding=${ex.message}, body=$bodyAsString",
-                    ex
+                    ex,
                 )
                 else -> secureLogger.error("Feil mot ${uri.path}, melding=${ex.message}, body=$bodyAsString", ex)
             }
             logger.warn("Feil ved kall mot ba-migrering ${uri.path}")
             throw RuntimeException(
                 "Feil ved oppdatering av migrering trigget av saksbehandler. Gav feil: ${ex.message}",
-                ex
+                ex,
             )
         }
     }

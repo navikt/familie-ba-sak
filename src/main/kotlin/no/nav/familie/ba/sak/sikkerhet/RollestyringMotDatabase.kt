@@ -24,7 +24,7 @@ class RollestyringMotDatabase {
         if (!harSkrivetilgang(høyesteRolletilgang)) {
             throw RolleTilgangskontrollFeil(
                 melding = "${SikkerhetContext.hentSaksbehandlerNavn()} med rolle $høyesteRolletilgang har ikke skrivetilgang til databasen.",
-                frontendFeilmelding = "Du har ikke tilgang til å gjøre denne handlingen."
+                frontendFeilmelding = "Du har ikke tilgang til å gjøre denne handlingen.",
             )
         }
     }

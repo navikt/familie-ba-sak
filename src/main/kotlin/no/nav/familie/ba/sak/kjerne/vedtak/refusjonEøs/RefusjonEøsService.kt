@@ -13,7 +13,7 @@ class RefusjonEøsService(
     private val refusjonEøsRepository: RefusjonEøsRepository,
 
     @Autowired
-    private val loggService: LoggService
+    private val loggService: LoggService,
 ) {
 
     private fun hentRefusjonEøs(id: Long): RefusjonEøs {
@@ -30,8 +30,8 @@ class RefusjonEøsService(
                 tom = refusjonEøs.tom,
                 refusjonsbeløp = refusjonEøs.refusjonsbeløp,
                 land = refusjonEøs.land,
-                refusjonAvklart = refusjonEøs.refusjonAvklart
-            )
+                refusjonAvklart = refusjonEøs.refusjonAvklart,
+            ),
         )
         loggService.loggRefusjonEøsPeriodeLagtTil(refusjonEøs = lagretPeriode)
         return lagretPeriode.id
@@ -40,7 +40,7 @@ class RefusjonEøsService(
     @Transactional
     fun fjernRefusjonEøsPeriode(id: Long, behandlingId: Long) {
         loggService.loggRefusjonEøsPeriodeFjernet(
-            refusjonEøs = hentRefusjonEøs(id)
+            refusjonEøs = hentRefusjonEøs(id),
         )
         refusjonEøsRepository.deleteById(id)
     }
@@ -56,7 +56,7 @@ class RefusjonEøsService(
             tom = it.tom,
             refusjonsbeløp = it.refusjonsbeløp,
             land = it.land,
-            refusjonAvklart = it.refusjonAvklart
+            refusjonAvklart = it.refusjonAvklart,
         )
 
     @Transactional

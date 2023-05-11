@@ -23,7 +23,7 @@ import org.springframework.data.relational.core.mapping.Table as JdbcTable
 class DatabaseCleanupService(
     private val entityManager: EntityManager,
     private val environment: Environment,
-    private val relationalMappingContext: RelationalMappingContext
+    private val relationalMappingContext: RelationalMappingContext,
 ) {
 
     private val logger = LoggerFactory.getLogger(DatabaseCleanupService::class.java)

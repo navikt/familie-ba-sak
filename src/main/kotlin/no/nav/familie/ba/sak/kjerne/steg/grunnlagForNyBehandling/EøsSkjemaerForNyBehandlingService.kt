@@ -10,22 +10,22 @@ import org.springframework.stereotype.Service
 class EøsSkjemaerForNyBehandlingService(
     private val kompetanseService: KompetanseService,
     private val utenlandskPeriodebeløpService: UtenlandskPeriodebeløpService,
-    private val valutakursService: ValutakursService
+    private val valutakursService: ValutakursService,
 ) {
 
     fun kopierEøsSkjemaer(behandlingId: BehandlingId, forrigeBehandlingSomErVedtattId: BehandlingId?) {
         if (forrigeBehandlingSomErVedtattId != null) {
             kompetanseService.kopierOgErstattKompetanser(
                 fraBehandlingId = forrigeBehandlingSomErVedtattId,
-                tilBehandlingId = behandlingId
+                tilBehandlingId = behandlingId,
             )
             utenlandskPeriodebeløpService.kopierOgErstattUtenlandskPeriodebeløp(
                 fraBehandlingId = forrigeBehandlingSomErVedtattId,
-                tilBehandlingId = behandlingId
+                tilBehandlingId = behandlingId,
             )
             valutakursService.kopierOgErstattValutakurser(
                 fraBehandlingId = forrigeBehandlingSomErVedtattId,
-                tilBehandlingId = behandlingId
+                tilBehandlingId = behandlingId,
             )
         }
     }

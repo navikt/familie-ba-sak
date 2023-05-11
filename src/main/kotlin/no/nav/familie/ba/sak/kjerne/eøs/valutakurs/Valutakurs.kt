@@ -37,7 +37,7 @@ data class Valutakurs(
     @JoinTable(
         name = "AKTOER_TIL_VALUTAKURS",
         joinColumns = [JoinColumn(name = "fk_valutakurs_id")],
-        inverseJoinColumns = [JoinColumn(name = "fk_aktoer_id")]
+        inverseJoinColumns = [JoinColumn(name = "fk_aktoer_id")],
     )
     override val barnAktører: Set<Aktør> = emptySet(),
 
@@ -48,14 +48,14 @@ data class Valutakurs(
     val valutakode: String? = null,
 
     @Column(name = "kurs", nullable = false)
-    val kurs: BigDecimal? = null
+    val kurs: BigDecimal? = null,
 ) : PeriodeOgBarnSkjemaEntitet<Valutakurs>() {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "valutakurs_seq_generator")
     @SequenceGenerator(
         name = "valutakurs_seq_generator",
         sequenceName = "valutakurs_seq",
-        allocationSize = 50
+        allocationSize = 50,
     )
     override var id: Long = 0
 
@@ -65,14 +65,14 @@ data class Valutakurs(
     // Valutakode skal alltid være satt (muligens til null), så den slettes ikke
     override fun utenInnhold() = copy(
         valutakursdato = null,
-        kurs = null
+        kurs = null,
     )
 
     override fun kopier(fom: YearMonth?, tom: YearMonth?, barnAktører: Set<Aktør>) =
         copy(
             fom = fom,
             tom = tom,
-            barnAktører = barnAktører
+            barnAktører = barnAktører,
         )
 
     companion object {

@@ -10,7 +10,7 @@ import java.time.LocalDateTime
 @Service
 class VedtakService(
     private val vedtakRepository: VedtakRepository,
-    private val dokumentGenereringService: DokumentGenereringService
+    private val dokumentGenereringService: DokumentGenereringService,
 ) {
 
     fun hent(vedtakId: Long): Vedtak {

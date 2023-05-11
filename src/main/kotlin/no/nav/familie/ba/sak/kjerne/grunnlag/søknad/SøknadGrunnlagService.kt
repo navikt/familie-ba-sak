@@ -5,7 +5,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class SøknadGrunnlagService(
-    private val søknadGrunnlagRepository: SøknadGrunnlagRepository
+    private val søknadGrunnlagRepository: SøknadGrunnlagRepository,
 ) {
 
     @Transactional

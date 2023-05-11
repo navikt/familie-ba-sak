@@ -28,13 +28,13 @@ import org.springframework.web.bind.annotation.RestController
 class KompetanseController(
     private val kompetanseService: KompetanseService,
     private val personidentService: PersonidentService,
-    private val utvidetBehandlingService: UtvidetBehandlingService
+    private val utvidetBehandlingService: UtvidetBehandlingService,
 ) {
 
     @PutMapping(path = ["{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun oppdaterKompetanse(
         @PathVariable behandlingId: Long,
-        @RequestBody restKompetanse: RestKompetanse
+        @RequestBody restKompetanse: RestKompetanse,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         val barnAktører = restKompetanse.barnIdenter.map { personidentService.hentAktør(it) }
         val kompetanse = restKompetanse.tilKompetanse(barnAktører = barnAktører)
@@ -49,7 +49,7 @@ class KompetanseController(
     @DeleteMapping(path = ["{behandlingId}/{kompetanseId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun slettKompetanse(
         @PathVariable behandlingId: Long,
-        @PathVariable kompetanseId: Long
+        @PathVariable kompetanseId: Long,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         kompetanseService.slettKompetanse(kompetanseId)
 

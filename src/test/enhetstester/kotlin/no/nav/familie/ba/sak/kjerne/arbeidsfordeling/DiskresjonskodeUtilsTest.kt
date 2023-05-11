@@ -8,15 +8,15 @@ import org.junit.jupiter.api.Test
 class DiskresjonskodeUtilsTest {
     val personUtenDiskresjonskode = IdentMedAdressebeskyttelse(
         ident = "IDENT_UTEN",
-        adressebeskyttelsegradering = null
+        adressebeskyttelsegradering = null,
     )
     val personFortrolig = IdentMedAdressebeskyttelse(
         ident = "IDENT_FORTROLIG",
-        adressebeskyttelsegradering = ADRESSEBESKYTTELSEGRADERING.FORTROLIG
+        adressebeskyttelsegradering = ADRESSEBESKYTTELSEGRADERING.FORTROLIG,
     ) // Kode 7
     val personStrengtFortrolig = IdentMedAdressebeskyttelse(
         ident = "IDENT_STRENGT_FORTROLIG",
-        adressebeskyttelsegradering = ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG
+        adressebeskyttelsegradering = ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG,
     ) // Kode 6
 
     @Test
@@ -26,9 +26,9 @@ class DiskresjonskodeUtilsTest {
             finnPersonMedStrengesteAdressebeskyttelse(
                 listOf(
                     personUtenDiskresjonskode,
-                    personUtenDiskresjonskode
-                )
-            )
+                    personUtenDiskresjonskode,
+                ),
+            ),
         )
     }
 
@@ -40,9 +40,9 @@ class DiskresjonskodeUtilsTest {
                 listOf(
                     personFortrolig,
                     personStrengtFortrolig,
-                    personUtenDiskresjonskode
-                )
-            )
+                    personUtenDiskresjonskode,
+                ),
+            ),
         )
     }
 
@@ -53,9 +53,9 @@ class DiskresjonskodeUtilsTest {
             finnPersonMedStrengesteAdressebeskyttelse(
                 listOf(
                     personUtenDiskresjonskode,
-                    personFortrolig
-                )
-            )
+                    personFortrolig,
+                ),
+            ),
         )
     }
 
@@ -63,7 +63,7 @@ class DiskresjonskodeUtilsTest {
     fun `tom liste - skal gi null`() {
         assertEquals(
             null,
-            finnPersonMedStrengesteAdressebeskyttelse(listOf())
+            finnPersonMedStrengesteAdressebeskyttelse(listOf()),
         )
     }
 }

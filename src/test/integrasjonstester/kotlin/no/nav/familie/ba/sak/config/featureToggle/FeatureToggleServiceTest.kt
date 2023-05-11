@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired
 @Tag("integration")
 class FeatureToggleServiceTest(
     @Autowired
-    private val featureToggleService: FeatureToggleService
+    private val featureToggleService: FeatureToggleService,
 ) : AbstractSpringIntegrationTest() {
 
     @Test

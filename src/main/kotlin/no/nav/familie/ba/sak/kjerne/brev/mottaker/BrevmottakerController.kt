@@ -26,16 +26,16 @@ import org.springframework.web.bind.annotation.RestController
 class BrevmottakerController(
     private val tilgangService: TilgangService,
     private val brevmottakerService: BrevmottakerService,
-    private val utvidetBehandlingService: UtvidetBehandlingService
+    private val utvidetBehandlingService: UtvidetBehandlingService,
 ) {
     @PostMapping(path = ["{behandlingId}"], produces = [APPLICATION_JSON_VALUE], consumes = [APPLICATION_JSON_VALUE])
     fun leggTilBrevmottaker(
         @PathVariable behandlingId: Long,
-        @RequestBody brevmottaker: RestBrevmottaker
+        @RequestBody brevmottaker: RestBrevmottaker,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "legge til brevmottaker"
+            handling = "legge til brevmottaker",
         )
         brevmottakerService.leggTilBrevmottaker(brevmottaker, behandlingId)
 
@@ -46,11 +46,11 @@ class BrevmottakerController(
     fun oppdaterBrevmottaker(
         @PathVariable behandlingId: Long,
         @PathVariable mottakerId: Long,
-        @RequestBody brevmottaker: RestBrevmottaker
+        @RequestBody brevmottaker: RestBrevmottaker,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "oppdatere brevmottaker"
+            handling = "oppdatere brevmottaker",
         )
         brevmottakerService.oppdaterBrevmottaker(brevmottaker, id = mottakerId)
 
@@ -60,11 +60,11 @@ class BrevmottakerController(
     @DeleteMapping(path = ["{behandlingId}/{mottakerId}"])
     fun fjernBrevmottaker(
         @PathVariable behandlingId: Long,
-        @PathVariable mottakerId: Long
+        @PathVariable mottakerId: Long,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "fjerne brevmottaker"
+            handling = "fjerne brevmottaker",
         )
         brevmottakerService.fjernBrevmottaker(id = mottakerId)
 
@@ -75,7 +75,7 @@ class BrevmottakerController(
     fun hentBrevmottakere(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<List<RestBrevmottaker>>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
-            handling = "hente brevmottakere"
+            handling = "hente brevmottakere",
         )
         return ResponseEntity.ok(Ressurs.success(brevmottakerService.hentRestBrevmottakere(behandlingId = behandlingId)))
     }

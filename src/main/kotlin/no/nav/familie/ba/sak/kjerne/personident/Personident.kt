@@ -34,7 +34,7 @@ data class Personident(
     var aktiv: Boolean = true,
 
     @Column(name = "gjelder_til", columnDefinition = "DATE")
-    var gjelderTil: LocalDateTime? = null
+    var gjelderTil: LocalDateTime? = null,
 
 ) : BaseEntitet() {
 
@@ -48,7 +48,7 @@ data class Personident(
         return """Personident(aktørId=${aktør.aktørId},
                         |aktiv=$aktiv
                         |gjelderTil=$gjelderTil)
-        """.trimMargin()
+            """.trimMargin()
     }
 
     override fun equals(other: Any?): Boolean {

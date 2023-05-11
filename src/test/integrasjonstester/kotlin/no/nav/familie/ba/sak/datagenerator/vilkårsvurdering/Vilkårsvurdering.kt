@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.dataGenerator.vilkårsvurdering
+package no.nav.familie.ba.sak.datagenerator.vilkårsvurdering
 
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.lagPerson
@@ -29,21 +29,21 @@ fun lagVilkårsvurderingMedOverstyrendeResultater(
     søker: Person,
     barna: List<Person>,
     behandling: Behandling? = null,
-    overstyrendeVilkårResultater: Map<AktørId, List<VilkårResultat>>
+    overstyrendeVilkårResultater: Map<AktørId, List<VilkårResultat>>,
 ): Vilkårsvurdering {
     val vilkårsvurdering = Vilkårsvurdering(behandling = behandling ?: mockk(relaxed = true))
 
     val søkerPersonResultater = lagPersonResultatAvOverstyrteResultater(
         person = søker,
         overstyrendeVilkårResultater = overstyrendeVilkårResultater[søker.aktør.aktørId] ?: emptyList(),
-        vilkårsvurdering = vilkårsvurdering
+        vilkårsvurdering = vilkårsvurdering,
     )
 
     val barnaPersonResultater = barna.map {
         lagPersonResultatAvOverstyrteResultater(
             person = it,
             overstyrendeVilkårResultater = overstyrendeVilkårResultater[it.aktør.aktørId] ?: emptyList(),
-            vilkårsvurdering = vilkårsvurdering
+            vilkårsvurdering = vilkårsvurdering,
         )
     }
 
@@ -53,30 +53,30 @@ fun lagVilkårsvurderingMedOverstyrendeResultater(
 
 fun lagVilkårsvurderingFraRestScenario(
     scenario: RestScenario,
-    overstyrendeVilkårResultater: Map<AktørId, List<VilkårResultat>>
+    overstyrendeVilkårResultater: Map<AktørId, List<VilkårResultat>>,
 ): Vilkårsvurdering {
     fun RestScenarioPerson.TilAktør() = Aktør(
         this.aktørId!!,
-        mutableSetOf(Personident(this.ident!!, mockk(relaxed = true)))
+        mutableSetOf(Personident(this.ident!!, mockk(relaxed = true))),
     )
 
     val søker =
         lagPerson(
             aktør = scenario.søker.TilAktør(),
             fødselsdato = LocalDate.parse(scenario.søker.fødselsdato),
-            type = PersonType.SØKER
+            type = PersonType.SØKER,
         )
     val barna = scenario.barna.map {
         lagPerson(
             aktør = it.TilAktør(),
             fødselsdato = LocalDate.parse(it.fødselsdato),
-            type = PersonType.BARN
+            type = PersonType.BARN,
         )
     }
     return lagVilkårsvurderingMedOverstyrendeResultater(
         søker = søker,
         barna = barna,
-        overstyrendeVilkårResultater = overstyrendeVilkårResultater
+        overstyrendeVilkårResultater = overstyrendeVilkårResultater,
     )
 }
 
@@ -84,7 +84,7 @@ fun lagSøkerVilkårResultat(
     søkerPersonResultat: PersonResultat,
     periodeFom: LocalDate,
     periodeTom: LocalDate? = null,
-    behandlingId: Long
+    behandlingId: Long,
 ): Set<VilkårResultat> {
     return setOf(
         lagVilkårResultat(
@@ -93,7 +93,7 @@ fun lagSøkerVilkårResultat(
             resultat = Resultat.OPPFYLT,
             periodeFom = periodeFom,
             periodeTom = periodeTom,
-            behandlingId = behandlingId
+            behandlingId = behandlingId,
         ),
         lagVilkårResultat(
             personResultat = søkerPersonResultat,
@@ -101,8 +101,8 @@ fun lagSøkerVilkårResultat(
             resultat = Resultat.OPPFYLT,
             periodeFom = periodeFom,
             periodeTom = periodeTom,
-            behandlingId = behandlingId
-        )
+            behandlingId = behandlingId,
+        ),
     )
 }
 
@@ -111,7 +111,7 @@ fun lagBarnVilkårResultat(
     barnetsFødselsdato: LocalDate,
     behandlingId: Long,
     periodeFom: LocalDate,
-    flytteSak: Boolean = false
+    flytteSak: Boolean = false,
 ): Set<VilkårResultat> {
     return setOf(
         lagVilkårResultat(
@@ -120,7 +120,7 @@ fun lagBarnVilkårResultat(
             resultat = Resultat.OPPFYLT,
             periodeFom = barnetsFødselsdato,
             periodeTom = barnetsFødselsdato.plusYears(18).minusMonths(1),
-            behandlingId = behandlingId
+            behandlingId = behandlingId,
         ),
         lagVilkårResultat(
             personResultat = barnPersonResultat,
@@ -128,7 +128,7 @@ fun lagBarnVilkårResultat(
             resultat = Resultat.OPPFYLT,
             periodeFom = barnetsFødselsdato,
             periodeTom = null,
-            behandlingId = behandlingId
+            behandlingId = behandlingId,
         ),
         lagVilkårResultat(
             personResultat = barnPersonResultat,
@@ -136,7 +136,7 @@ fun lagBarnVilkårResultat(
             resultat = Resultat.OPPFYLT,
             periodeFom = periodeFom,
             periodeTom = null,
-            behandlingId = behandlingId
+            behandlingId = behandlingId,
         ),
         lagVilkårResultat(
             personResultat = barnPersonResultat,
@@ -144,7 +144,7 @@ fun lagBarnVilkårResultat(
             resultat = Resultat.OPPFYLT,
             periodeFom = if (flytteSak) barnetsFødselsdato else periodeFom,
             periodeTom = null,
-            behandlingId = behandlingId
+            behandlingId = behandlingId,
         ),
         lagVilkårResultat(
             personResultat = barnPersonResultat,
@@ -152,7 +152,7 @@ fun lagBarnVilkårResultat(
             resultat = Resultat.OPPFYLT,
             periodeFom = if (flytteSak) barnetsFødselsdato else periodeFom,
             periodeTom = null,
-            behandlingId = behandlingId
-        )
+            behandlingId = behandlingId,
+        ),
     )
 }

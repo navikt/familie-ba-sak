@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service
 @Service
 class KorrigertEtterbetalingService(
     private val korrigertEtterbetalingRepository: KorrigertEtterbetalingRepository,
-    private val loggService: LoggService
+    private val loggService: LoggService,
 ) {
 
     fun finnAktivtKorrigeringPåBehandling(behandlingId: Long): KorrigertEtterbetaling? =

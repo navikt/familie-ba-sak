@@ -14,12 +14,12 @@ object VilkårResultatUtils {
         eldsteBarnSinFødselsdato: LocalDate,
         personResultat: PersonResultat,
         vilkår: Vilkår,
-        annenForelder: Person? = null
+        annenForelder: Person? = null,
     ): VilkårResultat {
         val automatiskVurderingResultat = vilkår.vurderVilkår(
             person = person,
             annenForelder = annenForelder,
-            vurderFra = eldsteBarnSinFødselsdato
+            vurderFra = eldsteBarnSinFødselsdato,
         )
 
         val fom = if (eldsteBarnSinFødselsdato >= person.fødselsdato) eldsteBarnSinFødselsdato else person.fødselsdato
@@ -41,7 +41,7 @@ object VilkårResultatUtils {
             periodeTom = tom,
             begrunnelse = "Vurdert og satt automatisk: ${automatiskVurderingResultat.evaluering.begrunnelse}",
             behandlingId = personResultat.vilkårsvurdering.behandling.id,
-            evalueringÅrsaker = automatiskVurderingResultat.evaluering.evalueringÅrsaker.map { it.toString() }
+            evalueringÅrsaker = automatiskVurderingResultat.evaluering.evalueringÅrsaker.map { it.toString() },
         )
     }
 }

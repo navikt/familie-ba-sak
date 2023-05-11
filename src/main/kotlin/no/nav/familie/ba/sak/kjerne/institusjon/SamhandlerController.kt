@@ -20,12 +20,12 @@ import org.springframework.web.client.HttpClientErrorException
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class SamhandlerController(
-    private val institusjonService: InstitusjonService
+    private val institusjonService: InstitusjonService,
 ) {
 
     @GetMapping(path = ["/orgnr/{orgnr}"])
     fun hentSamhandlerDataForOrganisasjon(
-        @PathVariable("orgnr") orgNummer: String
+        @PathVariable("orgnr") orgNummer: String,
     ): Ressurs<SamhandlerInfo> = try {
         Ressurs.success(institusjonService.hentSamhandler(orgNummer).copy(orgNummer = orgNummer))
     } catch (e: Exception) {
@@ -33,7 +33,7 @@ class SamhandlerController(
             throw FunksjonellFeil(
                 "Finner ikke institusjon. Kontakt NØS for å opprette TSS-ident.",
                 httpStatus = HttpStatus.NOT_FOUND,
-                throwable = e
+                throwable = e,
             )
         }
         throw e
@@ -44,20 +44,20 @@ class SamhandlerController(
 
     @PostMapping(path = ["/navn"])
     fun søkSamhandlerinfoFraNavn(
-        @RequestBody request: SøkSamhandlerInfoRequest
+        @RequestBody request: SøkSamhandlerInfoRequest,
     ): Ressurs<List<SamhandlerInfo>> {
         if (request.navn == null && request.postnummer == null && request.område == null) {
             throw FunksjonellFeil(
                 "Påkrevd variabel for søk er navn, postnummer eller område",
-                httpStatus = HttpStatus.BAD_REQUEST
+                httpStatus = HttpStatus.BAD_REQUEST,
             )
         }
         return Ressurs.success(
             institusjonService.søkSamhandlere(
                 request.navn?.uppercase(),
                 request.postnummer,
-                request.område
-            )
+                request.område,
+            ),
         )
     }
 }
@@ -65,5 +65,5 @@ class SamhandlerController(
 data class SøkSamhandlerInfoRequest(
     val navn: String?,
     val postnummer: String?,
-    val område: String?
+    val område: String?,
 )

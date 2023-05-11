@@ -11,7 +11,7 @@ data class RestBrevmottaker(
     val adresselinje2: String?,
     val postnummer: String,
     val poststed: String,
-    val landkode: String
+    val landkode: String,
 )
 
 fun RestBrevmottaker.tilBrevMottaker(behandlingId: Long) = Brevmottaker(
@@ -22,5 +22,5 @@ fun RestBrevmottaker.tilBrevMottaker(behandlingId: Long) = Brevmottaker(
     adresselinje2 = adresselinje2,
     postnummer = postnummer.trim(),
     poststed = poststed.trim(),
-    landkode = landkode
+    landkode = landkode,
 )

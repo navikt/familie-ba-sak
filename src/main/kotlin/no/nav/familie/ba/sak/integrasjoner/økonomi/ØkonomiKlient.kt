@@ -25,7 +25,7 @@ import java.util.UUID
 class ØkonomiKlient(
     @Value("\${FAMILIE_OPPDRAG_API_URL}")
     private val familieOppdragUri: String,
-    @Qualifier("jwtBearer") restOperations: RestOperations
+    @Qualifier("jwtBearer") restOperations: RestOperations,
 ) : AbstractRestClient(restOperations, "økonomi_barnetrygd") {
 
     fun iverksettOppdrag(utbetalingsoppdrag: Utbetalingsoppdrag): String {
@@ -33,7 +33,7 @@ class ØkonomiKlient(
         return kallEksternTjenesteRessurs(
             tjeneste = "familie-oppdrag",
             uri = uri,
-            formål = "Iverksetter mot oppdrag"
+            formål = "Iverksetter mot oppdrag",
         ) {
             postForEntity(uri = uri, utbetalingsoppdrag)
         }
@@ -42,7 +42,7 @@ class ØkonomiKlient(
     @Retryable(
         value = [Exception::class],
         maxAttempts = 3,
-        backoff = Backoff(delayExpression = RETRY_BACKOFF_500MS)
+        backoff = Backoff(delayExpression = RETRY_BACKOFF_500MS),
     )
     fun hentSimulering(utbetalingsoppdrag: Utbetalingsoppdrag): DetaljertSimuleringResultat {
         val uri = URI.create("$familieOppdragUri/simulering/v1")
@@ -50,7 +50,7 @@ class ØkonomiKlient(
         return kallEksternTjenesteRessurs(
             tjeneste = "familie-oppdrag",
             uri = uri,
-            formål = "Henter simulering på fagsak ${utbetalingsoppdrag.saksnummer} fra Økonomi"
+            formål = "Henter simulering på fagsak ${utbetalingsoppdrag.saksnummer} fra Økonomi",
         ) {
             postForEntity(uri = uri, utbetalingsoppdrag)
         }
@@ -61,7 +61,7 @@ class ØkonomiKlient(
         return kallEksternTjenesteRessurs(
             tjeneste = "familie-oppdrag",
             uri = uri,
-            formål = "Henter oppdragstatus fra Økonomi"
+            formål = "Henter oppdragstatus fra Økonomi",
         ) {
             postForEntity(uri = uri, oppdragId)
         }
@@ -72,40 +72,40 @@ class ØkonomiKlient(
         return kallEksternTjenesteRessurs(
             tjeneste = "familie-oppdrag",
             uri = uri,
-            formål = "Gjør grensesnittavstemming mot oppdrag"
+            formål = "Gjør grensesnittavstemming mot oppdrag",
         ) {
             postForEntity(
                 uri = uri,
                 GrensesnittavstemmingRequest(
                     fagsystem = FAGSYSTEM,
                     fra = fraDato,
-                    til = tilDato
-                )
+                    til = tilDato,
+                ),
             )
         }
     }
 
     fun konsistensavstemOppdragStart(
         avstemmingsdato: LocalDateTime,
-        transaksjonsId: UUID
+        transaksjonsId: UUID,
     ): String {
         val uri = URI.create(
             "$familieOppdragUri/v2/konsistensavstemming" +
-                "?sendStartmelding=true&sendAvsluttmelding=false&transaksjonsId=$transaksjonsId"
+                "?sendStartmelding=true&sendAvsluttmelding=false&transaksjonsId=$transaksjonsId",
         )
 
         return kallEksternTjenesteRessurs(
             tjeneste = "familie-oppdrag",
             uri = uri,
-            formål = "Start konsistensavstemming mot oppdrag i batch"
+            formål = "Start konsistensavstemming mot oppdrag i batch",
         ) {
             postForEntity(
                 uri = uri,
                 KonsistensavstemmingRequestV2(
                     fagsystem = FAGSYSTEM,
                     avstemmingstidspunkt = avstemmingsdato,
-                    perioderForBehandlinger = emptyList()
-                )
+                    perioderForBehandlinger = emptyList(),
+                ),
             )
         }
     }
@@ -113,62 +113,62 @@ class ØkonomiKlient(
     fun konsistensavstemOppdragData(
         avstemmingsdato: LocalDateTime,
         perioderTilAvstemming: List<PerioderForBehandling>,
-        transaksjonsId: UUID
+        transaksjonsId: UUID,
     ): String {
         val uri = URI.create(
             "$familieOppdragUri/v2/konsistensavstemming" +
-                "?sendStartmelding=false&sendAvsluttmelding=false&transaksjonsId=$transaksjonsId"
+                "?sendStartmelding=false&sendAvsluttmelding=false&transaksjonsId=$transaksjonsId",
         )
 
         return kallEksternTjenesteRessurs(
             tjeneste = "familie-oppdrag",
             uri = uri,
-            formål = "Konsistenstavstemmer chunk mot oppdrag"
+            formål = "Konsistenstavstemmer chunk mot oppdrag",
         ) {
             postForEntity(
                 uri = uri,
                 KonsistensavstemmingRequestV2(
                     fagsystem = FAGSYSTEM,
                     avstemmingstidspunkt = avstemmingsdato,
-                    perioderForBehandlinger = perioderTilAvstemming
-                )
+                    perioderForBehandlinger = perioderTilAvstemming,
+                ),
             )
         }
     }
 
     fun konsistensavstemOppdragAvslutt(
         avstemmingsdato: LocalDateTime,
-        transaksjonsId: UUID
+        transaksjonsId: UUID,
     ): String {
         val uri = URI.create(
             "$familieOppdragUri/v2/konsistensavstemming" +
-                "?sendStartmelding=false&sendAvsluttmelding=true&transaksjonsId=$transaksjonsId"
+                "?sendStartmelding=false&sendAvsluttmelding=true&transaksjonsId=$transaksjonsId",
         )
         return kallEksternTjenesteRessurs(
             tjeneste = "familie-oppdrag",
             uri = uri,
-            formål = "Avslutt konsistensavstemming mot oppdrag"
+            formål = "Avslutt konsistensavstemming mot oppdrag",
         ) {
             postForEntity(
                 uri = uri,
                 KonsistensavstemmingRequestV2(
                     fagsystem = FAGSYSTEM,
                     avstemmingstidspunkt = avstemmingsdato,
-                    perioderForBehandlinger = emptyList()
-                )
+                    perioderForBehandlinger = emptyList(),
+                ),
             )
         }
     }
 
     fun hentSisteUtbetalingsoppdragForFagsaker(
-        fagsakIder: Set<Long>
+        fagsakIder: Set<Long>,
     ): List<UtbetalingsoppdragMedBehandlingOgFagsak> {
         val uri = URI.create("$familieOppdragUri/$FAGSYSTEM/fagsaker/siste-utbetalingsoppdrag")
 
         return kallEksternTjenesteRessurs(
             tjeneste = "familie-oppdrag",
             uri = uri,
-            formål = "Hent utbetalingsoppdrag for fagsaker"
+            formål = "Hent utbetalingsoppdrag for fagsaker",
         ) { postForEntity(uri = uri, payload = fagsakIder) }
     }
 }
@@ -176,5 +176,5 @@ class ØkonomiKlient(
 data class UtbetalingsoppdragMedBehandlingOgFagsak(
     val fagsakId: Long,
     val behandlingId: Long,
-    val utbetalingsoppdrag: Utbetalingsoppdrag
+    val utbetalingsoppdrag: Utbetalingsoppdrag,
 )

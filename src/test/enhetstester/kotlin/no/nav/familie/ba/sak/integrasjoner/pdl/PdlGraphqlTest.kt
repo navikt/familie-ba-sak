@@ -47,10 +47,10 @@ class PdlGraphqlTest {
     @Test
     fun testForelderBarnRelasjon() {
         val resp = mapper.readValue<PdlBaseResponse<PdlHentPersonRelasjonerResponse>>(
-            File(getFile("pdl/pdlForelderBarnRelasjonResponse.json"))
+            File(getFile("pdl/pdlForelderBarnRelasjonResponse.json")),
         )
         assertThat(resp.data.person!!.forelderBarnRelasjon.first().relatertPersonsRolle).isEqualTo(
-            FORELDERBARNRELASJONROLLE.BARN
+            FORELDERBARNRELASJONROLLE.BARN,
         )
         assertThat(resp.data.person!!.forelderBarnRelasjon.first().relatertPersonsIdent).isEqualTo("32345678901")
     }
@@ -66,7 +66,7 @@ class PdlGraphqlTest {
     @Test
     fun testUkjentBostedAdresse() {
         val resp = mapper.readValue<PdlBaseResponse<PdlHentPersonResponse>>(
-            File(getFile("pdl/pdlUkjentBostedAdresseOkResponse.json"))
+            File(getFile("pdl/pdlUkjentBostedAdresseOkResponse.json")),
         )
         assertThat(resp.data.person!!.bostedsadresse.first().ukjentBosted?.bostedskommune).isEqualTo("Oslo")
     }
@@ -74,7 +74,7 @@ class PdlGraphqlTest {
     @Test
     fun testAdressebeskyttelse() {
         val resp = mapper.readValue<PdlBaseResponse<PdlAdressebeskyttelseResponse>>(
-            File(getFile("pdl/pdlAdressebeskyttelseResponse.json"))
+            File(getFile("pdl/pdlAdressebeskyttelseResponse.json")),
         )
         assertThat(resp.data.person!!.adressebeskyttelse.first().gradering).isEqualTo(ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG)
     }

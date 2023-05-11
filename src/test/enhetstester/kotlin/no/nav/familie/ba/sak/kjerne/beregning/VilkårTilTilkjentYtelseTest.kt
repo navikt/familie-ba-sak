@@ -49,7 +49,7 @@ class VilkårTilTilkjentYtelseTest {
     @CsvFileSource(
         resources = ["/beregning/vilkår_til_tilkjent_ytelse/søker_med_ett_barn_inntil_tre_perioder.csv"],
         numLinesToSkip = 1,
-        delimiter = ';'
+        delimiter = ';',
     )
     fun `test søker med ett barn, inntil tre perioder`(
         sakType: String,
@@ -68,7 +68,7 @@ class VilkårTilTilkjentYtelseTest {
         barn1Andel3Beløp: Int?,
         barn1Andel3Periode: String?,
         barn1Andel3Type: String?,
-        erDeltBosted: Boolean?
+        erDeltBosted: Boolean?,
     ) {
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = LocalDate.of(2021, 9, 1))
@@ -92,12 +92,12 @@ class VilkårTilTilkjentYtelseTest {
         val faktiskTilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            fagsakType = FagsakType.NORMAL
+            fagsakType = FagsakType.NORMAL,
         )
 
         Assertions.assertEquals(
             forventetTilkjentYtelse.andelerTilkjentYtelse,
-            faktiskTilkjentYtelse.andelerTilkjentYtelse
+            faktiskTilkjentYtelse.andelerTilkjentYtelse,
         )
     }
 
@@ -105,7 +105,7 @@ class VilkårTilTilkjentYtelseTest {
     @CsvFileSource(
         resources = ["/beregning/vilkår_til_tilkjent_ytelse/søker_med_utvidet_og_ett_barn_inntil_to_perioder.csv"],
         numLinesToSkip = 1,
-        delimiter = ';'
+        delimiter = ';',
     )
     fun `test søker med utvidet og ett barn, inntil to perioder`(
         sakType: String,
@@ -119,7 +119,7 @@ class VilkårTilTilkjentYtelseTest {
         barn1Vilkår1: String?,
         barn1Andel1Beløp: Int?,
         barn1Andel1Periode: String?,
-        barn1Andel1Type: String?
+        barn1Andel1Type: String?,
     ) {
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = LocalDate.of(2021, 9, 1))
@@ -140,7 +140,7 @@ class VilkårTilTilkjentYtelseTest {
                     søker,
                     sisteSmåbarnstilleggSatsTilTester(),
                     småbarnstilleggPeriode,
-                    YtelseType.SMÅBARNSTILLEGG.name
+                    YtelseType.SMÅBARNSTILLEGG.name,
                 )
                 .bygg()
         } else {
@@ -155,15 +155,15 @@ class VilkårTilTilkjentYtelseTest {
         val faktiskTilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            fagsakType = FagsakType.NORMAL
+            fagsakType = FagsakType.NORMAL,
         ) { aktør ->
             if (småbarnstilleggTestPeriode != null) {
                 listOf(
                     InternPeriodeOvergangsstønad(
                         personIdent = aktør.aktivFødselsnummer(),
                         fomDato = småbarnstilleggTestPeriode.fraOgMed,
-                        tomDato = småbarnstilleggTestPeriode.tilOgMed!!
-                    )
+                        tomDato = småbarnstilleggTestPeriode.tilOgMed!!,
+                    ),
                 )
             } else {
                 emptyList()
@@ -172,7 +172,7 @@ class VilkårTilTilkjentYtelseTest {
 
         Assertions.assertEquals(
             forventetTilkjentYtelse.andelerTilkjentYtelse,
-            faktiskTilkjentYtelse.andelerTilkjentYtelse
+            faktiskTilkjentYtelse.andelerTilkjentYtelse,
         )
     }
 
@@ -180,7 +180,7 @@ class VilkårTilTilkjentYtelseTest {
     @CsvFileSource(
         resources = ["/beregning/vilkår_til_tilkjent_ytelse/søker_med_to_barn_inntil_to_perioder.csv"],
         numLinesToSkip = 1,
-        delimiter = ';'
+        delimiter = ';',
     )
     fun `test søker med to barn, inntil to perioder`(
         søkerPeriode1: String?,
@@ -205,7 +205,7 @@ class VilkårTilTilkjentYtelseTest {
         barn2Andel1Type: String?,
         barn2Andel2Beløp: Int?,
         barn2Andel2Periode: String?,
-        barn2Andel2Type: String?
+        barn2Andel2Type: String?,
     ) {
         val søker = tilfeldigPerson(personType = PersonType.SØKER)
         val barn1 = tilfeldigPerson(personType = PersonType.BARN, fødselsdato = LocalDate.of(2020, 2, 1))
@@ -232,12 +232,12 @@ class VilkårTilTilkjentYtelseTest {
         val faktiskTilkjentYtelse = TilkjentYtelseUtils.beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            fagsakType = FagsakType.NORMAL
+            fagsakType = FagsakType.NORMAL,
         )
 
         Assertions.assertEquals(
             forventetTilkjentYtelse.andelerTilkjentYtelse,
-            faktiskTilkjentYtelse.andelerTilkjentYtelse
+            faktiskTilkjentYtelse.andelerTilkjentYtelse,
         )
     }
 }
@@ -248,15 +248,15 @@ class TestVilkårsvurderingBuilder(sakType: String) {
     private val vilkårsvurdering =
         Vilkårsvurdering(
             behandling = lagBehandling(
-                behandlingKategori = BehandlingKategori.valueOf(sakType)
-            )
+                behandlingKategori = BehandlingKategori.valueOf(sakType),
+            ),
         )
 
     fun medPersonVilkårPeriode(
         person: Person,
         vilkår: String?,
         periode: String?,
-        erDeltBosted: Boolean? = null
+        erDeltBosted: Boolean? = null,
     ): TestVilkårsvurderingBuilder {
         if (vilkår.isNullOrEmpty() || periode.isNullOrEmpty()) {
             return this
@@ -279,14 +279,14 @@ class TestVilkårsvurderingBuilder(sakType: String) {
                 begrunnelse = "",
                 behandlingId = vilkårsvurdering.behandling.id,
                 utdypendeVilkårsvurderinger = listOfNotNull(
-                    if (erDeltBosted == true) UtdypendeVilkårsvurdering.DELT_BOSTED else null
-                )
+                    if (erDeltBosted == true) UtdypendeVilkårsvurdering.DELT_BOSTED else null,
+                ),
             )
         }.toSet()
 
         personResultat.setSortedVilkårResultater(
             personResultat.vilkårResultater.plus(vilkårsresultater)
-                .toSet()
+                .toSet(),
         )
 
         return this
@@ -304,14 +304,14 @@ class TestTilkjentYtelseBuilder(val behandling: Behandling) {
     private val tilkjentYtelse = TilkjentYtelse(
         behandling = behandling,
         opprettetDato = LocalDate.now(),
-        endretDato = LocalDate.now()
+        endretDato = LocalDate.now(),
     )
 
     fun medAndelTilkjentYtelse(
         person: Person,
         beløp: Int?,
         periode: String?,
-        type: String?
+        type: String?,
     ): TestTilkjentYtelseBuilder {
         if (beløp == null || periode.isNullOrEmpty() || type.isNullOrEmpty()) {
             return this
@@ -330,8 +330,8 @@ class TestTilkjentYtelseBuilder(val behandling: Behandling) {
                 nasjonaltPeriodebeløp = beløp.toInt(),
                 type = YtelseType.valueOf(type),
                 sats = beløp.toInt(),
-                prosent = BigDecimal(100)
-            )
+                prosent = BigDecimal(100),
+            ),
         )
 
         return this

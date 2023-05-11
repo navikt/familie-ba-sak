@@ -12,10 +12,10 @@ import org.springframework.stereotype.Service
 @TaskStepBeskrivelse(
     taskStepType = KonsistensavstemMotOppdragDataTask.TASK_STEP_TYPE,
     beskrivelse = "Send batcher av Konsistensavstemming mot oppdrag",
-    maxAntallFeil = 3
+    maxAntallFeil = 3,
 )
 class KonsistensavstemMotOppdragDataTask(
-    val avstemmingService: AvstemmingService
+    val avstemmingService: AvstemmingService,
 ) :
     AsyncTaskStep {
 
@@ -28,7 +28,7 @@ class KonsistensavstemMotOppdragDataTask(
             perioderTilAvstemming = konsistensavstemmingDataTask.perioderForBehandling,
             transaksjonsId = konsistensavstemmingDataTask.transaksjonsId,
             chunkNr = konsistensavstemmingDataTask.chunkNr,
-            sendTilØkonomi = konsistensavstemmingDataTask.sendTilØkonomi
+            sendTilØkonomi = konsistensavstemmingDataTask.sendTilØkonomi,
         )
     }
 

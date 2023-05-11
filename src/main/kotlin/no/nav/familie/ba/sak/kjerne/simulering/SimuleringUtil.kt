@@ -12,24 +12,24 @@ import java.math.BigDecimal
 import java.time.LocalDate
 
 fun filterBortUrelevanteVedtakSimuleringPosteringer(
-    økonomiSimuleringMottakere: List<ØkonomiSimuleringMottaker>
+    økonomiSimuleringMottakere: List<ØkonomiSimuleringMottaker>,
 ): List<ØkonomiSimuleringMottaker> = økonomiSimuleringMottakere.map {
     it.copy(
         økonomiSimuleringPostering = it.økonomiSimuleringPostering.filter { postering ->
             postering.posteringType == PosteringType.FEILUTBETALING ||
                 postering.posteringType == PosteringType.YTELSE
-        }
+        },
     )
 }
 
 fun vedtakSimuleringMottakereTilRestSimulering(
     økonomiSimuleringMottakere: List<ØkonomiSimuleringMottaker>,
-    erManuellPosteringTogglePå: Boolean
+    erManuellPosteringTogglePå: Boolean,
 ): RestSimulering {
     val perioder =
         vedtakSimuleringMottakereTilSimuleringPerioder(
             økonomiSimuleringMottakere,
-            erManuellPosteringTogglePå
+            erManuellPosteringTogglePå,
         )
     val tidSimuleringHentet = økonomiSimuleringMottakere.firstOrNull()?.opprettetTidspunkt?.toLocalDate()
 
@@ -53,13 +53,13 @@ fun vedtakSimuleringMottakereTilRestSimulering(
         tomDatoNestePeriode = nestePeriode?.tom,
         forfallsdatoNestePeriode = nestePeriode?.forfallsdato,
         tidSimuleringHentet = tidSimuleringHentet,
-        tomSisteUtbetaling = tomSisteUtbetaling
+        tomSisteUtbetaling = tomSisteUtbetaling,
     )
 }
 
 fun vedtakSimuleringMottakereTilSimuleringPerioder(
     økonomiSimuleringMottakere: List<ØkonomiSimuleringMottaker>,
-    erManuelPosteringTogglePå: Boolean
+    erManuelPosteringTogglePå: Boolean,
 ): List<SimuleringsPeriode> {
     val simuleringPerioder = filterBortUrelevanteVedtakSimuleringPosteringer(økonomiSimuleringMottakere)
         .flatMap { it.økonomiSimuleringPostering }
@@ -94,7 +94,7 @@ fun vedtakSimuleringMottakereTilSimuleringPerioder(
                 BigDecimal.ZERO
             },
             feilutbetaling = hentPositivFeilbetalingIPeriode(posteringListe),
-            etterbetaling = hentEtterbetalingIPeriode(posteringListe, tidSimuleringHentet)
+            etterbetaling = hentEtterbetalingIPeriode(posteringListe, tidSimuleringHentet),
         )
     }
 }
@@ -213,7 +213,7 @@ fun hentResultatIPeriode(periode: List<ØkonomiSimuleringPostering>): BigDecimal
 
 fun hentEtterbetalingIPeriode(
     periode: List<ØkonomiSimuleringPostering>,
-    tidSimuleringHentet: LocalDate?
+    tidSimuleringHentet: LocalDate?,
 ): BigDecimal {
     val periodeHarPositivFeilutbetaling =
         periode.any { it.posteringType == PosteringType.FEILUTBETALING && it.beløp > BigDecimal.ZERO }
@@ -242,7 +242,7 @@ fun SimuleringMottaker.tilBehandlingSimuleringMottaker(behandling: Behandling): 
     val behandlingSimuleringMottaker = ØkonomiSimuleringMottaker(
         mottakerNummer = this.mottakerNummer,
         mottakerType = this.mottakerType,
-        behandling = behandling
+        behandling = behandling,
     )
 
     behandlingSimuleringMottaker.økonomiSimuleringPostering = this.simulertPostering.map {
@@ -262,5 +262,5 @@ fun SimulertPostering.tilVedtakSimuleringPostering(økonomiSimuleringMottaker: �
         posteringType = this.posteringType,
         forfallsdato = this.forfallsdato,
         utenInntrekk = this.utenInntrekk,
-        økonomiSimuleringMottaker = økonomiSimuleringMottaker
+        økonomiSimuleringMottaker = økonomiSimuleringMottaker,
     )

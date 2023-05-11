@@ -13,7 +13,7 @@ class FeilutbetaltValutaService(
     private val feilutbetaltValutaRepository: FeilutbetaltValutaRepository,
 
     @Autowired
-    private val loggService: LoggService
+    private val loggService: LoggService,
 ) {
 
     private fun finnFeilutbetaltValutaThrows(id: Long): FeilutbetaltValuta {
@@ -27,8 +27,8 @@ class FeilutbetaltValutaService(
                 behandlingId = behandlingId,
                 fom = feilutbetaltValuta.fom,
                 tom = feilutbetaltValuta.tom,
-                feilutbetaltBeløp = feilutbetaltValuta.feilutbetaltBeløp
-            )
+                feilutbetaltBeløp = feilutbetaltValuta.feilutbetaltBeløp,
+            ),
         )
         loggService.loggFeilutbetaltValutaPeriodeLagtTil(behandlingId = behandlingId, feilutbetaltValuta = lagret)
         return lagret.id
@@ -38,7 +38,7 @@ class FeilutbetaltValutaService(
     fun fjernFeilutbetaltValutaPeriode(id: Long, behandlingId: Long) {
         loggService.loggFeilutbetaltValutaPeriodeFjernet(
             behandlingId = behandlingId,
-            feilutbetaltValuta = finnFeilutbetaltValutaThrows(id)
+            feilutbetaltValuta = finnFeilutbetaltValutaThrows(id),
         )
         feilutbetaltValutaRepository.deleteById(id)
     }
@@ -51,7 +51,7 @@ class FeilutbetaltValutaService(
             id = it.id,
             fom = it.fom,
             tom = it.tom,
-            feilutbetaltBeløp = it.feilutbetaltBeløp
+            feilutbetaltBeløp = it.feilutbetaltBeløp,
         )
 
     @Transactional

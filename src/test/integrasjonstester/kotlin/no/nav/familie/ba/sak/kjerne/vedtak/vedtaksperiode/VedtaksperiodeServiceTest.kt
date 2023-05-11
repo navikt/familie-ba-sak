@@ -73,7 +73,7 @@ class VedtaksperiodeServiceTest(
     private val databaseCleanupService: DatabaseCleanupService,
 
     @Autowired
-    private val brevmalService: BrevmalService
+    private val brevmalService: BrevmalService,
 
 ) : AbstractSpringIntegrationTest() {
 
@@ -97,7 +97,7 @@ class VedtaksperiodeServiceTest(
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
         )
 
         return kjørStegprosessForRevurderingÅrligKontroll(
@@ -107,7 +107,7 @@ class VedtaksperiodeServiceTest(
             vedtakService = vedtakService,
             stegService = stegService,
             fagsakId = førstegangsbehandling.fagsak.id,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
         )
     }
 
@@ -124,7 +124,7 @@ class VedtaksperiodeServiceTest(
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
         )
 
         val behandlingEtterNySøknadsregistrering = stegService.håndterSøknad(
@@ -133,19 +133,19 @@ class VedtaksperiodeServiceTest(
                 søknad = SøknadDTO(
                     underkategori = BehandlingUnderkategoriDTO.ORDINÆR,
                     søkerMedOpplysninger = SøkerMedOpplysninger(
-                        ident = søkerFnr
+                        ident = søkerFnr,
                     ),
                     barnaMedOpplysninger = listOf(
                         BarnMedOpplysninger(
                             ident = "",
                             erFolkeregistrert = false,
-                            inkludertISøknaden = true
-                        )
+                            inkludertISøknaden = true,
+                        ),
                     ),
-                    endringAvOpplysningerBegrunnelse = ""
+                    endringAvOpplysningerBegrunnelse = "",
                 ),
-                bekreftEndringerViaFrontend = true
-            )
+                bekreftEndringerViaFrontend = true,
+            ),
         )
 
         val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandlingEtterNySøknadsregistrering.id)
@@ -156,7 +156,7 @@ class VedtaksperiodeServiceTest(
         assertEquals(1, vedtaksperioder.flatMap { it.begrunnelser }.size)
         assertEquals(
             Standardbegrunnelse.AVSLAG_UREGISTRERT_BARN,
-            vedtaksperioder.flatMap { it.begrunnelser }.first().standardbegrunnelse
+            vedtaksperioder.flatMap { it.begrunnelser }.first().standardbegrunnelse,
         )
     }
 
@@ -174,7 +174,7 @@ class VedtaksperiodeServiceTest(
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
             brevmalService = brevmalService,
-            behandlingKategori = BehandlingKategori.EØS
+            behandlingKategori = BehandlingKategori.EØS,
         )
 
         val behandlingEtterNySøknadsregistrering = stegService.håndterSøknad(
@@ -183,19 +183,19 @@ class VedtaksperiodeServiceTest(
                 søknad = SøknadDTO(
                     underkategori = BehandlingUnderkategoriDTO.ORDINÆR,
                     søkerMedOpplysninger = SøkerMedOpplysninger(
-                        ident = søkerFnr
+                        ident = søkerFnr,
                     ),
                     barnaMedOpplysninger = listOf(
                         BarnMedOpplysninger(
                             ident = "",
                             erFolkeregistrert = false,
-                            inkludertISøknaden = true
-                        )
+                            inkludertISøknaden = true,
+                        ),
                     ),
-                    endringAvOpplysningerBegrunnelse = ""
+                    endringAvOpplysningerBegrunnelse = "",
                 ),
-                bekreftEndringerViaFrontend = true
-            )
+                bekreftEndringerViaFrontend = true,
+            ),
         )
 
         val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandlingEtterNySøknadsregistrering.id)
@@ -206,7 +206,7 @@ class VedtaksperiodeServiceTest(
         assertEquals(1, vedtaksperioder.flatMap { it.eøsBegrunnelser }.size)
         assertEquals(
             EØSStandardbegrunnelse.AVSLAG_EØS_UREGISTRERT_BARN,
-            vedtaksperioder.flatMap { it.eøsBegrunnelser }.first().begrunnelse
+            vedtaksperioder.flatMap { it.eøsBegrunnelser }.first().begrunnelse,
         )
     }
 
@@ -222,7 +222,7 @@ class VedtaksperiodeServiceTest(
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
         )
         val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandling.id)
 
@@ -233,7 +233,7 @@ class VedtaksperiodeServiceTest(
             vedtak = vedtak,
             fom = fom,
             tom = tom,
-            type = type
+            type = type,
         )
         vedtaksperiodeRepository.save(vedtaksperiode)
 
@@ -241,7 +241,7 @@ class VedtaksperiodeServiceTest(
             vedtak = vedtak,
             fom = fom,
             tom = tom,
-            type = type
+            type = type,
         )
 
         Assertions.assertDoesNotThrow {
@@ -270,7 +270,7 @@ class VedtaksperiodeServiceTest(
         vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
             vedtaksperiodeId = vedtaksperioder.first().id,
             standardbegrunnelserFraFrontend = listOf(Standardbegrunnelse.FORTSATT_INNVILGET_BARN_OG_SØKER_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE),
-            eøsStandardbegrunnelserFraFrontend = emptyList()
+            eøsStandardbegrunnelserFraFrontend = emptyList(),
         )
 
         val vedtaksperioderMedUtfylteBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
@@ -278,13 +278,13 @@ class VedtaksperiodeServiceTest(
         assertEquals(1, vedtaksperioderMedUtfylteBegrunnelser.first().begrunnelser.size)
         assertEquals(
             Standardbegrunnelse.FORTSATT_INNVILGET_BARN_OG_SØKER_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE,
-            vedtaksperioderMedUtfylteBegrunnelser.first().begrunnelser.first().standardbegrunnelse
+            vedtaksperioderMedUtfylteBegrunnelser.first().begrunnelser.first().standardbegrunnelse,
         )
 
         vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
             vedtaksperiodeId = vedtaksperioder.first().id,
             standardbegrunnelserFraFrontend = listOf(Standardbegrunnelse.FORTSATT_INNVILGET_FAST_OMSORG),
-            eøsStandardbegrunnelserFraFrontend = emptyList()
+            eøsStandardbegrunnelserFraFrontend = emptyList(),
         )
 
         val vedtaksperioderMedOverskrevneBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(vedtak)
@@ -292,7 +292,7 @@ class VedtaksperiodeServiceTest(
         assertEquals(1, vedtaksperioderMedOverskrevneBegrunnelser.first().begrunnelser.size)
         assertEquals(
             Standardbegrunnelse.FORTSATT_INNVILGET_FAST_OMSORG,
-            vedtaksperioderMedOverskrevneBegrunnelser.first().begrunnelser.first().standardbegrunnelse
+            vedtaksperioderMedOverskrevneBegrunnelser.first().begrunnelser.first().standardbegrunnelse,
         )
         assertEquals(0, vedtaksperioderMedOverskrevneBegrunnelser.first().fritekster.size)
     }
@@ -307,13 +307,13 @@ class VedtaksperiodeServiceTest(
             vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(
                 vedtaksperiodeId = vedtaksperioder.first().id,
                 standardbegrunnelserFraFrontend = listOf(Standardbegrunnelse.INNVILGET_BARN_BOR_SAMMEN_MED_MOTTAKER),
-                eøsStandardbegrunnelserFraFrontend = emptyList()
+                eøsStandardbegrunnelserFraFrontend = emptyList(),
             )
         }
 
         assertEquals(
             "Begrunnelsestype INNVILGET passer ikke med typen 'FORTSATT_INNVILGET' som er satt på perioden.",
-            feil.message
+            feil.message,
         )
     }
 
@@ -328,25 +328,25 @@ class VedtaksperiodeServiceTest(
         val forrigeAndelTilkjentYtelse1 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = YearMonth.of(2021, 4),
             tom = YearMonth.of(2021, 8),
-            aktør = barn1
+            aktør = barn1,
         )
         val forrigeAndelTilkjentYtelse2 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = YearMonth.of(2021, 4),
             tom = YearMonth.of(2021, 8),
-            aktør = barn2
+            aktør = barn2,
         )
 
         val andelTilkjentYtelse1 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = YearMonth.of(2021, 5),
             tom = YearMonth.of(2021, 8),
             behandling = behandling,
-            aktør = barn1
+            aktør = barn1,
         )
         val andelTilkjentYtelse2 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = YearMonth.of(2021, 4),
             tom = YearMonth.of(2021, 8),
             behandling = behandling,
-            aktør = barn2
+            aktør = barn2,
         )
         val vedtak = lagVedtak()
         val utbetalingsperioder = listOf(
@@ -354,14 +354,14 @@ class VedtaksperiodeServiceTest(
                 vedtak = vedtak,
                 fom = LocalDate.of(2021, 4, 1),
                 tom = LocalDate.of(2021, 4, 30),
-                type = Vedtaksperiodetype.UTBETALING
+                type = Vedtaksperiodetype.UTBETALING,
             ),
             lagVedtaksperiodeMedBegrunnelser(
                 vedtak = vedtak,
                 fom = LocalDate.of(2021, 5, 1),
                 tom = LocalDate.of(2021, 8, 31),
-                type = Vedtaksperiodetype.UTBETALING
-            )
+                type = Vedtaksperiodetype.UTBETALING,
+            ),
         )
 
         val redusertePerioder = identifiserReduksjonsperioderFraSistIverksatteBehandling(
@@ -371,13 +371,13 @@ class VedtaksperiodeServiceTest(
             utbetalingsperioder = utbetalingsperioder,
             personopplysningGrunnlag = personopplysningGrunnlag,
             opphørsperioder = emptyList(),
-            aktørerIForrigePersonopplysningGrunnlag = listOf(barn1, barn2)
+            aktørerIForrigePersonopplysningGrunnlag = listOf(barn1, barn2),
         )
         assertTrue { redusertePerioder.isNotEmpty() }
         assertEquals(1, redusertePerioder.size)
         assertEquals(
             Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING,
-            redusertePerioder.first().type
+            redusertePerioder.first().type,
         )
         assertEquals(LocalDate.of(2021, 4, 1), redusertePerioder.first().fom)
         assertEquals(LocalDate.of(2021, 4, 30), redusertePerioder.first().tom)
@@ -394,31 +394,31 @@ class VedtaksperiodeServiceTest(
         val forrigeAndelTilkjentYtelse1 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = YearMonth.of(2021, 4),
             tom = YearMonth.of(2021, 8),
-            aktør = barn1
+            aktør = barn1,
         )
         val forrigeAndelTilkjentYtelse2 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = YearMonth.of(2021, 4),
             tom = YearMonth.of(2021, 8),
-            aktør = barn2
+            aktør = barn2,
         )
 
         val andelTilkjentYtelse1 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = YearMonth.of(2021, 4),
             tom = YearMonth.of(2021, 6),
             behandling = behandling,
-            aktør = barn1
+            aktør = barn1,
         )
         val andelTilkjentYtelse2 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = YearMonth.of(2021, 8),
             tom = YearMonth.of(2021, 8),
             behandling = behandling,
-            aktør = barn1
+            aktør = barn1,
         )
         val andelTilkjentYtelse3 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = YearMonth.of(2021, 4),
             tom = YearMonth.of(2021, 8),
             behandling = behandling,
-            aktør = barn2
+            aktør = barn2,
         )
 
         val vedtak = lagVedtak()
@@ -427,14 +427,14 @@ class VedtaksperiodeServiceTest(
                 vedtak = vedtak,
                 fom = LocalDate.of(2021, 4, 1),
                 tom = LocalDate.of(2021, 6, 30),
-                type = Vedtaksperiodetype.UTBETALING
+                type = Vedtaksperiodetype.UTBETALING,
             ),
             lagVedtaksperiodeMedBegrunnelser(
                 vedtak = vedtak,
                 fom = LocalDate.of(2021, 7, 1),
                 tom = LocalDate.of(2021, 8, 31),
-                type = Vedtaksperiodetype.UTBETALING
-            )
+                type = Vedtaksperiodetype.UTBETALING,
+            ),
         )
 
         val redusertePerioder = identifiserReduksjonsperioderFraSistIverksatteBehandling(
@@ -444,7 +444,7 @@ class VedtaksperiodeServiceTest(
             utbetalingsperioder = utbetalingsperioder,
             personopplysningGrunnlag = personopplysningGrunnlag,
             opphørsperioder = emptyList(),
-            aktørerIForrigePersonopplysningGrunnlag = listOf(barn1, barn2)
+            aktørerIForrigePersonopplysningGrunnlag = listOf(barn1, barn2),
         )
         assertTrue { redusertePerioder.isEmpty() }
     }
@@ -460,37 +460,37 @@ class VedtaksperiodeServiceTest(
         val forrigeAndelTilkjentYtelse1 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = YearMonth.of(2021, 4),
             tom = YearMonth.of(2021, 8),
-            aktør = barn1
+            aktør = barn1,
         )
         val forrigeAndelTilkjentYtelse2 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = YearMonth.of(2021, 4),
             tom = YearMonth.of(2021, 8),
-            aktør = barn2
+            aktør = barn2,
         )
 
         val andelTilkjentYtelse1 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = YearMonth.of(2021, 4),
             tom = YearMonth.of(2021, 4),
             behandling = behandling,
-            aktør = barn1
+            aktør = barn1,
         )
         val andelTilkjentYtelse2 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = YearMonth.of(2021, 8),
             tom = YearMonth.of(2021, 8),
             behandling = behandling,
-            aktør = barn1
+            aktør = barn1,
         )
         val andelTilkjentYtelse3 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = YearMonth.of(2021, 4),
             tom = YearMonth.of(2021, 4),
             behandling = behandling,
-            aktør = barn2
+            aktør = barn2,
         )
         val andelTilkjentYtelse4 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = YearMonth.of(2021, 6),
             tom = YearMonth.of(2021, 8),
             behandling = behandling,
-            aktør = barn2
+            aktør = barn2,
         )
 
         val vedtak = lagVedtak()
@@ -498,21 +498,21 @@ class VedtaksperiodeServiceTest(
             vedtak = vedtak,
             fom = LocalDate.of(2021, 5, 1),
             tom = LocalDate.of(2021, 5, 31),
-            type = Vedtaksperiodetype.OPPHØR
+            type = Vedtaksperiodetype.OPPHØR,
         )
         val utbetalingsperioder = listOf(
             lagVedtaksperiodeMedBegrunnelser(
                 vedtak = vedtak,
                 fom = LocalDate.of(2021, 4, 1),
                 tom = LocalDate.of(2021, 4, 30),
-                type = Vedtaksperiodetype.UTBETALING
+                type = Vedtaksperiodetype.UTBETALING,
             ),
             lagVedtaksperiodeMedBegrunnelser(
                 vedtak = vedtak,
                 fom = LocalDate.of(2021, 6, 1),
                 tom = LocalDate.of(2021, 8, 31),
-                type = Vedtaksperiodetype.UTBETALING
-            )
+                type = Vedtaksperiodetype.UTBETALING,
+            ),
         )
 
         val redusertePerioder = identifiserReduksjonsperioderFraSistIverksatteBehandling(
@@ -521,19 +521,19 @@ class VedtaksperiodeServiceTest(
                 andelTilkjentYtelse1,
                 andelTilkjentYtelse2,
                 andelTilkjentYtelse3,
-                andelTilkjentYtelse4
+                andelTilkjentYtelse4,
             ),
             vedtak = vedtak,
             utbetalingsperioder = utbetalingsperioder,
             personopplysningGrunnlag = personopplysningGrunnlag,
             opphørsperioder = listOf(opphørsperiode),
-            aktørerIForrigePersonopplysningGrunnlag = listOf(barn1, barn2)
+            aktørerIForrigePersonopplysningGrunnlag = listOf(barn1, barn2),
         )
         assertTrue { redusertePerioder.isNotEmpty() }
         assertEquals(1, redusertePerioder.size)
         assertEquals(
             Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING,
-            redusertePerioder.first().type
+            redusertePerioder.first().type,
         )
         assertEquals(LocalDate.of(2021, 6, 1), redusertePerioder.first().fom)
         assertEquals(LocalDate.of(2021, 7, 31), redusertePerioder.first().tom)
@@ -550,31 +550,31 @@ class VedtaksperiodeServiceTest(
         val forrigeAndelTilkjentYtelse1 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = YearMonth.of(2021, 4),
             tom = YearMonth.of(2021, 8),
-            aktør = barn1
+            aktør = barn1,
         )
         val forrigeAndelTilkjentYtelse2 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = YearMonth.of(2021, 4),
             tom = YearMonth.of(2021, 8),
-            aktør = barn2
+            aktør = barn2,
         )
 
         val andelTilkjentYtelse1 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = YearMonth.of(2021, 4),
             tom = YearMonth.of(2021, 4),
             behandling = behandling,
-            aktør = barn1
+            aktør = barn1,
         )
         val andelTilkjentYtelse2 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = YearMonth.of(2021, 8),
             tom = YearMonth.of(2021, 8),
             behandling = behandling,
-            aktør = barn1
+            aktør = barn1,
         )
         val andelTilkjentYtelse3 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
             fom = YearMonth.of(2021, 6),
             tom = YearMonth.of(2021, 8),
             behandling = behandling,
-            aktør = barn2
+            aktør = barn2,
         )
 
         val vedtak = lagVedtak()
@@ -582,21 +582,21 @@ class VedtaksperiodeServiceTest(
             vedtak = vedtak,
             fom = LocalDate.of(2021, 5, 1),
             tom = LocalDate.of(2021, 5, 31),
-            type = Vedtaksperiodetype.OPPHØR
+            type = Vedtaksperiodetype.OPPHØR,
         )
         val utbetalingsperioder = listOf(
             lagVedtaksperiodeMedBegrunnelser(
                 vedtak = vedtak,
                 fom = LocalDate.of(2021, 4, 1),
                 tom = LocalDate.of(2021, 4, 30),
-                type = Vedtaksperiodetype.UTBETALING
+                type = Vedtaksperiodetype.UTBETALING,
             ),
             lagVedtaksperiodeMedBegrunnelser(
                 vedtak = vedtak,
                 fom = LocalDate.of(2021, 6, 1),
                 tom = LocalDate.of(2021, 8, 31),
-                type = Vedtaksperiodetype.UTBETALING
-            )
+                type = Vedtaksperiodetype.UTBETALING,
+            ),
         )
 
         val redusertePerioder = identifiserReduksjonsperioderFraSistIverksatteBehandling(
@@ -604,13 +604,13 @@ class VedtaksperiodeServiceTest(
             andelerTilkjentYtelse = listOf(
                 andelTilkjentYtelse1,
                 andelTilkjentYtelse2,
-                andelTilkjentYtelse3
+                andelTilkjentYtelse3,
             ),
             vedtak = vedtak,
             utbetalingsperioder = utbetalingsperioder,
             personopplysningGrunnlag = personopplysningGrunnlag,
             opphørsperioder = listOf(opphørsperiode),
-            aktørerIForrigePersonopplysningGrunnlag = listOf(barn1, barn2)
+            aktørerIForrigePersonopplysningGrunnlag = listOf(barn1, barn2),
         )
         assertTrue { redusertePerioder.isNotEmpty() }
         assertEquals(2, redusertePerioder.size)
@@ -629,25 +629,25 @@ class VedtaksperiodeServiceTest(
                 vedtak,
                 LocalDate.of(2021, 1, 1),
                 LocalDate.of(2021, 4, 30),
-                Vedtaksperiodetype.AVSLAG
-            )
+                Vedtaksperiodetype.AVSLAG,
+            ),
         )
         val utbetalingsperioder = listOf(
             lagVedtaksperiodeMedBegrunnelser(
                 vedtak,
                 LocalDate.of(2021, 1, 1),
                 LocalDate.of(2021, 2, 28),
-                Vedtaksperiodetype.UTBETALING
+                Vedtaksperiodetype.UTBETALING,
             ),
             lagVedtaksperiodeMedBegrunnelser(
                 vedtak,
                 LocalDate.of(2021, 3, 1),
                 LocalDate.of(2021, 7, 31),
-                Vedtaksperiodetype.UTBETALING
-            )
+                Vedtaksperiodetype.UTBETALING,
+            ),
         )
         val vedtaksperioder = utbetalingsperioder.filtrerLikEllerEtterEndringstidspunkt(
-            endringstidspunkt = LocalDate.of(2021, 3, 1)
+            endringstidspunkt = LocalDate.of(2021, 3, 1),
         ) + avslagsperioder
 
         assertNotNull(vedtaksperioder)

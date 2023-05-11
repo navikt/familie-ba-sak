@@ -21,7 +21,7 @@ class KorrigertEtterbetalingRepositoryTest(
     @Autowired private val aktørIdRepository: AktørIdRepository,
     @Autowired private val fagsakRepository: FagsakRepository,
     @Autowired private val behandlingRepository: BehandlingRepository,
-    @Autowired private val korrigertEtterbetalingRepository: KorrigertEtterbetalingRepository
+    @Autowired private val korrigertEtterbetalingRepository: KorrigertEtterbetalingRepository,
 ) : AbstractSpringIntegrationTest() {
 
     @Test
@@ -34,7 +34,7 @@ class KorrigertEtterbetalingRepositoryTest(
             begrunnelse = "Test på inaktiv korrigering",
             beløp = 1000,
             behandling = behandling,
-            aktiv = false
+            aktiv = false,
         )
 
         korrigertEtterbetalingRepository.saveAndFlush(inaktivKorrigertEtterbetaling)
@@ -55,7 +55,7 @@ class KorrigertEtterbetalingRepositoryTest(
             begrunnelse = "Test på aktiv korrigering",
             beløp = 1000,
             behandling = behandling,
-            aktiv = true
+            aktiv = true,
         )
 
         korrigertEtterbetalingRepository.saveAndFlush(aktivKorrigertEtterbetaling)
@@ -77,7 +77,7 @@ class KorrigertEtterbetalingRepositoryTest(
             begrunnelse = "Test på aktiv korrigering",
             beløp = 1000,
             behandling = behandling,
-            aktiv = true
+            aktiv = true,
         )
 
         val aktivKorrigertEtterbetaling2 = KorrigertEtterbetaling(
@@ -86,7 +86,7 @@ class KorrigertEtterbetalingRepositoryTest(
             begrunnelse = "Test på aktiv korrigering",
             beløp = 1000,
             behandling = behandling,
-            aktiv = true
+            aktiv = true,
         )
 
         korrigertEtterbetalingRepository.saveAndFlush(aktivKorrigertEtterbetaling)
@@ -106,7 +106,7 @@ class KorrigertEtterbetalingRepositoryTest(
             begrunnelse = "1",
             beløp = 1000,
             behandling = behandling,
-            aktiv = true
+            aktiv = true,
         )
 
         val inaktivKorrigertEtterbetaling = KorrigertEtterbetaling(
@@ -115,7 +115,7 @@ class KorrigertEtterbetalingRepositoryTest(
             begrunnelse = "2",
             beløp = 1000,
             behandling = behandling,
-            aktiv = false
+            aktiv = false,
         )
 
         korrigertEtterbetalingRepository.saveAndFlush(aktivKorrigertEtterbetaling)

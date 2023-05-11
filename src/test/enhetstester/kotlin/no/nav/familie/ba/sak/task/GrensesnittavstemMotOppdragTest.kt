@@ -84,11 +84,11 @@ class GrensesnittavstemMotOppdragTest {
             payload = objectMapper.writeValueAsString(
                 GrensesnittavstemmingTaskDTO(
                     iDag.minusDays(1),
-                    iDag
-                )
-            )
+                    iDag,
+                ),
+            ),
         ).medTriggerTid(
-            iDag.toLocalDate().atTime(8, 0)
+            iDag.toLocalDate().atTime(8, 0),
         )
         val slot = slot<Task>()
         every { taskRepositoryMock.save(any()) } returns testTask

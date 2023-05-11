@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class TestVerktøyService(
     private val vilkårService: VilkårService,
-    private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
+    private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
 ) {
 
     @Transactional

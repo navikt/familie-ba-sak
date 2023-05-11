@@ -12,7 +12,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
  */
 fun TilkjentYtelseRepository.oppdaterTilkjentYtelse(
     tilkjentYtelse: TilkjentYtelse,
-    oppdaterteAndeler: Collection<AndelTilkjentYtelse>
+    oppdaterteAndeler: Collection<AndelTilkjentYtelse>,
 ): TilkjentYtelse {
     if (tilkjentYtelse.andelerTilkjentYtelse.erIPraksisLik(oppdaterteAndeler)) {
         return tilkjentYtelse
@@ -51,7 +51,7 @@ private fun Iterable<AndelTilkjentYtelse>.sjekkForDuplikater() {
     } catch (throwable: Throwable) {
         throw IllegalStateException(
             "Endring av andeler tilkjent ytelse i differanseberegning holder på å introdusere duplikater",
-            throwable
+            throwable,
         )
     }
 }

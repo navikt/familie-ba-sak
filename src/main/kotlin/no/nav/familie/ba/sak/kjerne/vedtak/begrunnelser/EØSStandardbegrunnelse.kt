@@ -412,16 +412,14 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
     REDUKSJON_IKKE_ANSVAR_FOR_BARN {
         override val sanityApiNavn = "reduksjonIkkeAnsvarForBarn"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_REDUKSJON
-    }
-
-    ;
+    }, ;
 
     override val kanDelesOpp: Boolean = false
 
     override fun delOpp(
         restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
         triggesAv: TriggesAv,
-        periode: NullablePeriode
+        periode: NullablePeriode,
     ): List<BrevBegrunnelseGrunnlagMedPersoner> {
         throw Feil("Begrunnelse $this kan ikke deles opp.")
     }
@@ -433,7 +431,7 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         val sanityEØSBegrunnelse = sanityEØSBegrunnelser.finnBegrunnelse(this) ?: return null
         return EØSBegrunnelseMedTriggere(
             eøsBegrunnelse = this,
-            sanityEØSBegrunnelse = sanityEØSBegrunnelse
+            sanityEØSBegrunnelse = sanityEØSBegrunnelse,
         )
     }
 }
