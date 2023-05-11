@@ -34,7 +34,7 @@ class TilbakekrevingController(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
             handling = "hent forhåndsvisning av varselbrev for tilbakekreving",
         )
-        
+
         return ResponseEntity.ok(
             Ressurs.success(
                 tilbakekrevingService.hentForhåndsvisningVarselbrev(
