@@ -14,7 +14,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilDagEllerFørsteDagIPerioden
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilLocalDateEllerNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.mapIkkeNull
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
@@ -77,13 +76,12 @@ fun finnPerioderSomSkalBegrunnes(
     val eksplisitteAvslagsperioder =
         gjeldendeOgForrigeGrunnlagKombinert.utledEksplisitteAvslagsperioder()
 
-    val perioderSomSkalBegrunnesUtenSøkerSineAvslag =
-        (eksplisitteAvslagsperioder + sammenslåttePerioderUtenEksplisittAvslag)
-            .slåSammenAvslagOgReduksjonsperioderMedSammeFomOgTom()
+    val perioderSomSkalBegrunnes =
+        (eksplisitteAvslagsperioder + sammenslåttePerioderUtenEksplisittAvslag).slåSammenAvslagOgReduksjonsperioderMedSammeFomOgTom()
 
     // slå sammen perioder dersom avslagene gjelder samme person
 
-    return perioderSomSkalBegrunnesUtenSøkerSineAvslag.fyllInnSøkerSineAvslag(vilkårResultaterSøker, søker)
+    return perioderSomSkalBegrunnes//.fyllInnSøkerSineAvslag(vilkårResultaterSøker, søker)
 }
 
 private fun List<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>>.fyllInnSøkerSineAvslag(
@@ -163,25 +161,22 @@ private fun List<Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned>>.sl�
 }
 
 private fun List<Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned>>.utledEksplisitteAvslagsperioder(): Collection<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>> {
-    val placeholder = this.map { grunnlagForDenneOgForrigeBehandlingTidslinje ->
-        grunnlagForDenneOgForrigeBehandlingTidslinje.filtrer {
-            it?.gjeldende?.erEksplisittAvslag() == true
-        }
-    }
-    return placeholder.kombiner { grunnlagPerPersonIPeriode ->
-        val explisitteAvslagIPeriode = grunnlagPerPersonIPeriode
-            .flatMap {
-                it.gjeldende?.vilkårResultaterForVedtaksperiode
-                    ?.filter { it.erEksplisittAvslagPåSøknad == true }
-                    ?: emptyList()
-            }
+    return kombiner { grunnlagPerPersonIPeriode ->
+        grunnlagPerPersonIPeriode.map { it.medVilkårSomHarEksplisitteAvslag() }
+            .filter { !it.gjeldende?.vilkårResultaterForVedtaksperiode.isNullOrEmpty() }
+            .takeIf { it.isNotEmpty() }
+    }.slåSammenLike().perioder()
+}
 
-        if (grunnlagPerPersonIPeriode.all { it.filter { it.gjeldende.vilkårResultaterForVedtaksperiode. } }) {
-        } else
-    }.map { grunnlagForPersonTidslinje ->
-        grunnlagForPersonTidslinje.map { it?.let { kotlin.collections.listOf(it) } }
-    }
-        .flatMap { it.perioder() }
+private fun GrunnlagForGjeldendeOgForrigeBehandling.medVilkårSomHarEksplisitteAvslag(): GrunnlagForGjeldendeOgForrigeBehandling {
+    return copy(
+        gjeldende = this.gjeldende
+            ?.kopier(
+                vilkårResultaterForVedtaksperiode = this.gjeldende
+                    .vilkårResultaterForVedtaksperiode
+                    .filter { it.erEksplisittAvslagPåSøknad == true }
+            )
+    )
 }
 
 /**
