@@ -27,7 +27,6 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.slåSammenLike
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilMånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærEtter
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.mapIkkeNull
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.alleOrdinæreVilkårErOppfylt
@@ -189,18 +188,13 @@ private fun PersonResultat.hentForskjøvedeVilkårResultaterForPersonsAndelerTid
         PersonType.SØKER -> forskjøvedeVilkårResultaterForPerson.map { vilkårResultater ->
             vilkårResultater?.filtrerErIkkeOrdinærtFor(person)
         }.kombinerMed(erMinstEttBarnMedUtbetalingTidslinje) { vilkårResultaterForSøker, erMinstEttBarnMedUtbetaling ->
-            if (erMinstEttBarnMedUtbetaling == true) {
-                vilkårResultaterForSøker
-            } else {
-                null
-            }
+            vilkårResultaterForSøker.takeIf { erMinstEttBarnMedUtbetaling == true }
         }
 
-        PersonType.BARN -> forskjøvedeVilkårResultaterForPerson.kombinerMed(
-            ordinæreVilkårForSøkerTidslinje.beskjærEtter(forskjøvedeVilkårResultaterForPerson),
-        ) { vilkårResultaterBarn, vilkårResultaterSøker ->
-            slåSammenHvisMulig(vilkårResultaterBarn, vilkårResultaterSøker)?.toList()
-        }
+        PersonType.BARN -> forskjøvedeVilkårResultaterForPerson
+            .kombinerMed(ordinæreVilkårForSøkerTidslinje) { vilkårResultaterBarn, vilkårResultaterSøker ->
+                slåSammenHvisMulig(vilkårResultaterBarn, vilkårResultaterSøker)?.toList()
+            }
 
         PersonType.ANNENPART -> throw Feil("Ikke implementert for annenpart")
     }
