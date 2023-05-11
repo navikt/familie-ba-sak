@@ -37,7 +37,7 @@ internal class KonsistensavstemMotOppdragStartTaskTest {
         justRun { avstemmingService.sendKonsistensavstemmingStart(any(), transaksjonsId) }
         mockTreSiderMedSisteBehandlinger()
         justRun {
-            avstemmingService.opprettKonsistensavstemmingFinnPerioderForRelevanteBehandlingerTask(any())
+            avstemmingService.opprettKonsistensavstemmingFinnPerioderForRelevanteBehandlingerTask(any(), any())
         }
         justRun { avstemmingService.opprettKonsistensavstemmingAvsluttTask(any()) }
 
@@ -46,6 +46,7 @@ internal class KonsistensavstemMotOppdragStartTaskTest {
         verify(exactly = 1) { avstemmingService.sendKonsistensavstemmingStart(any(), transaksjonsId) }
         verify(exactly = 3) {
             avstemmingService.opprettKonsistensavstemmingFinnPerioderForRelevanteBehandlingerTask(
+                any(),
                 any()
             )
         }
@@ -61,7 +62,12 @@ internal class KonsistensavstemMotOppdragStartTaskTest {
         startTask.doTask(task)
 
         verify(exactly = 0) { avstemmingService.sendKonsistensavstemmingStart(any(), transaksjonsId) }
-        verify(exactly = 0) { avstemmingService.opprettKonsistensavstemmingFinnPerioderForRelevanteBehandlingerTask(any()) }
+        verify(exactly = 0) {
+            avstemmingService.opprettKonsistensavstemmingFinnPerioderForRelevanteBehandlingerTask(
+                any(),
+                any()
+            )
+        }
         verify(exactly = 0) { avstemmingService.opprettKonsistensavstemmingAvsluttTask(any()) }
     }
 
@@ -87,14 +93,19 @@ internal class KonsistensavstemMotOppdragStartTaskTest {
         justRun { avstemmingService.sendKonsistensavstemmingStart(any(), transaksjonsId) }
         mockTreSiderMedSisteBehandlinger()
         justRun {
-            avstemmingService.opprettKonsistensavstemmingFinnPerioderForRelevanteBehandlingerTask(any())
+            avstemmingService.opprettKonsistensavstemmingFinnPerioderForRelevanteBehandlingerTask(any(), any())
         }
         justRun { avstemmingService.opprettKonsistensavstemmingAvsluttTask(any()) }
 
         startTask.doTask(task)
 
         verify(exactly = 0) { avstemmingService.sendKonsistensavstemmingStart(any(), transaksjonsId) }
-        verify(exactly = 1) { avstemmingService.opprettKonsistensavstemmingFinnPerioderForRelevanteBehandlingerTask(any()) }
+        verify(exactly = 1) {
+            avstemmingService.opprettKonsistensavstemmingFinnPerioderForRelevanteBehandlingerTask(
+                any(),
+                any()
+            )
+        }
         verify(exactly = 1) { avstemmingService.opprettKonsistensavstemmingAvsluttTask(any()) }
     }
 
