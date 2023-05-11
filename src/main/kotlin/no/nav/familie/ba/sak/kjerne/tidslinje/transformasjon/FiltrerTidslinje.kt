@@ -30,6 +30,7 @@ fun <I, T : Tidsenhet> Tidslinje<I, T>.filtrer(filter: (I?) -> Boolean): Tidslin
 }
 
 fun <I, T : Tidsenhet> Tidslinje<I, T>.filtrerIkkeNull(): Tidslinje<I, T> = filtrer { it != null }
+fun <I, T : Tidsenhet> Tidslinje<I, T>.filtrerIkkeNull(filter: (I) -> Boolean): Tidslinje<I, T> = filtrer { it != null && filter(it) }
 
 /**
  * Extension-metode for å filtrere tidslinjen mot en boolsk tidslinje
