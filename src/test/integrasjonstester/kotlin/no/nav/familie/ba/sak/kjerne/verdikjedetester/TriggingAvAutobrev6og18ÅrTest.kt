@@ -37,7 +37,7 @@ class TriggingAvAutobrev6og18ÅrTest(
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val stegService: StegService,
     @Autowired private val autobrev6og18ÅrService: Autobrev6og18ÅrService,
-    @Autowired private val brevmalService: BrevmalService
+    @Autowired private val brevmalService: BrevmalService,
 ) : AbstractVerdikjedetest() {
 
     @Test
@@ -65,22 +65,22 @@ class TriggingAvAutobrev6og18ÅrTest(
                         fødselsdato = LocalDate.now().minusYears(2).toString(),
                         fornavn = "Toåringen",
                         etternavn = "Barnesen",
-                        bostedsadresser = emptyList()
+                        bostedsadresser = emptyList(),
                     ),
                     RestScenarioPerson(
                         fødselsdato = LocalDate.now().minusYears(6).toString(),
                         fornavn = "Seksåringen",
                         etternavn = "Barnesen",
-                        bostedsadresser = emptyList()
+                        bostedsadresser = emptyList(),
                     ),
                     RestScenarioPerson(
                         fødselsdato = LocalDate.now().minusYears(18).toString(),
                         fornavn = "Attenåringen",
                         etternavn = "Barnesen",
-                        bostedsadresser = emptyList()
-                    )
-                )
-            )
+                        bostedsadresser = emptyList(),
+                    ),
+                ),
+            ),
         )
 
         val fagsakId = familieBaSakKlient().opprettFagsak(søkersIdent = scenario.søker.ident!!).data?.id!!
@@ -93,14 +93,14 @@ class TriggingAvAutobrev6og18ÅrTest(
             RestRegistrerSøknad(
                 søknad = lagSøknadDTO(
                     søkerIdent = scenario.søker.ident,
-                    barnasIdenter = scenario.barna.map { it.ident!! }
+                    barnasIdenter = scenario.barna.map { it.ident!! },
                 ),
-                bekreftEndringerViaFrontend = false
+                bekreftEndringerViaFrontend = false,
             )
         val restUtvidetBehandling: Ressurs<RestUtvidetBehandling> =
             familieBaSakKlient().registrererSøknad(
                 behandlingId = aktivBehandling.behandlingId,
-                restRegistrerSøknad = restRegistrerSøknad
+                restRegistrerSøknad = restRegistrerSøknad,
             )
 
         // Godkjenner alle vilkår på førstegangsbehandling.
@@ -114,27 +114,27 @@ class TriggingAvAutobrev6og18ÅrTest(
                         vilkårResultater = listOf(
                             it.copy(
                                 resultat = Resultat.OPPFYLT,
-                                periodeFom = LocalDate.now().minusMonths(2)
-                            )
-                        )
-                    )
+                                periodeFom = LocalDate.now().minusMonths(2),
+                            ),
+                        ),
+                    ),
                 )
             }
         }
 
         familieBaSakKlient().validerVilkårsvurdering(
-            behandlingId = restUtvidetBehandling.data!!.behandlingId
+            behandlingId = restUtvidetBehandling.data!!.behandlingId,
         )
 
         val restUtvidetBehandlingEtterBehandlingsresultat =
             familieBaSakKlient().behandlingsresultatStegOgGåVidereTilNesteSteg(
-                behandlingId = restUtvidetBehandling.data!!.behandlingId
+                behandlingId = restUtvidetBehandling.data!!.behandlingId,
             )
 
         val restUtvidetBehandlingEtterVurderTilbakekreving =
             familieBaSakKlient().lagreTilbakekrevingOgGåVidereTilNesteSteg(
                 restUtvidetBehandlingEtterBehandlingsresultat.data!!.behandlingId,
-                RestTilbakekreving(Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING, begrunnelse = "begrunnelse")
+                RestTilbakekreving(Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING, begrunnelse = "begrunnelse"),
             )
 
         val førsteVedtaksperiodeId =
@@ -144,9 +144,9 @@ class TriggingAvAutobrev6og18ÅrTest(
             vedtaksperiodeId = førsteVedtaksperiodeId.id,
             restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
                 standardbegrunnelser = listOf(
-                    Standardbegrunnelse.INNVILGET_BOR_HOS_SØKER.enumnavnTilString()
-                )
-            )
+                    Standardbegrunnelse.INNVILGET_BOR_HOS_SØKER.enumnavnTilString(),
+                ),
+            ),
         )
         val reduksjonVedtaksperiodeId =
             restUtvidetBehandlingEtterVurderTilbakekreving.data!!.vedtak!!.vedtaksperioderMedBegrunnelser.single {
@@ -155,8 +155,8 @@ class TriggingAvAutobrev6og18ÅrTest(
         familieBaSakKlient().oppdaterVedtaksperiodeMedStandardbegrunnelser(
             vedtaksperiodeId = reduksjonVedtaksperiodeId.id,
             restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
-                standardbegrunnelser = listOf(reduksjonsbegrunnelse.enumnavnTilString())
-            )
+                standardbegrunnelser = listOf(reduksjonsbegrunnelse.enumnavnTilString()),
+            ),
         )
 
         val restUtvidetBehandlingEtterSendTilBeslutter =
@@ -165,7 +165,7 @@ class TriggingAvAutobrev6og18ÅrTest(
         familieBaSakKlient().iverksettVedtak(
             behandlingId = restUtvidetBehandlingEtterSendTilBeslutter.data!!.behandlingId,
             restBeslutningPåVedtak = RestBeslutningPåVedtak(
-                Beslutning.GODKJENT
+                Beslutning.GODKJENT,
             ),
             beslutterHeaders = HttpHeaders().apply {
                 setBearerAuth(
@@ -174,11 +174,11 @@ class TriggingAvAutobrev6og18ÅrTest(
                             "groups" to listOf("SAKSBEHANDLER", "BESLUTTER"),
                             "azp" to "azp-test",
                             "name" to "Mock McMockface Beslutter",
-                            "NAVident" to "Z0000"
-                        )
-                    )
+                            "NAVident" to "Z0000",
+                        ),
+                    ),
                 )
-            }
+            },
         )
 
         håndterIverksettingAvBehandling(
@@ -187,7 +187,7 @@ class TriggingAvAutobrev6og18ÅrTest(
             fagsakService = fagsakService,
             vedtakService = vedtakService,
             stegService = stegService,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
 
         )
 
@@ -195,8 +195,8 @@ class TriggingAvAutobrev6og18ÅrTest(
             autobrev6og18ÅrDTO = Autobrev6og18ÅrDTO(
                 fagsakId = fagsakId,
                 alder = årMedReduksjonsbegrunnelse,
-                årMåned = YearMonth.now()
-            )
+                årMåned = YearMonth.now(),
+            ),
         )
 
         var behandlinger = behandlingHentOgPersisterService.hentBehandlinger(fagsakId)
@@ -207,8 +207,8 @@ class TriggingAvAutobrev6og18ÅrTest(
             autobrev6og18ÅrDTO = Autobrev6og18ÅrDTO(
                 fagsakId = fagsakId,
                 alder = if (årMedReduksjonsbegrunnelse == 6) 18 else 6,
-                årMåned = YearMonth.now()
-            )
+                årMåned = YearMonth.now(),
+            ),
         )
 
         behandlinger = behandlingHentOgPersisterService.hentBehandlinger(fagsakId)
@@ -225,8 +225,8 @@ class TriggingAvAutobrev6og18ÅrTest(
             autobrev6og18ÅrDTO = Autobrev6og18ÅrDTO(
                 fagsakId = fagsakId,
                 alder = if (årMedReduksjonsbegrunnelse == 6) 18 else 6,
-                årMåned = YearMonth.now()
-            )
+                årMåned = YearMonth.now(),
+            ),
         )
 
         behandlinger = behandlingHentOgPersisterService.hentBehandlinger(fagsakId)

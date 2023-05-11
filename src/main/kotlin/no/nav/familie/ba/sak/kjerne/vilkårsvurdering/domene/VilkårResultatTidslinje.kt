@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.DagTidspunkt.Companion.t
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.DagTidspunkt.Companion.tilTidspunktEllerTidligereEnn
 
 class VilkårResultatTidslinje(
-    private val vilkårResultater: Collection<VilkårResultat>
+    private val vilkårResultater: Collection<VilkårResultat>,
 ) : Tidslinje<VilkårResultat, Dag>() {
 
     override fun lagPerioder(): List<Periode<VilkårResultat, Dag>> =
@@ -15,7 +15,7 @@ class VilkårResultatTidslinje(
             Periode(
                 fraOgMed = it.periodeFom.tilTidspunktEllerTidligereEnn(it.periodeTom),
                 tilOgMed = it.periodeTom.tilTidspunktEllerSenereEnn(it.periodeFom),
-                innhold = it
+                innhold = it,
             )
         }
 }

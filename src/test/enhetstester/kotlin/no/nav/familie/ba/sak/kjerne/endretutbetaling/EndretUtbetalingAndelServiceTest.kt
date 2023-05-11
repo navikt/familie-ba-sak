@@ -51,7 +51,7 @@ class EndretUtbetalingAndelServiceTest {
             persongrunnlagService = mockPersongrunnlagService,
             andelTilkjentYtelseRepository = mockAndelTilkjentYtelseRepository,
             vilkårsvurderingService = mockVilkårsvurderingService,
-            endretUtbetalingAndelHentOgPersisterService = mockEndretUtbetalingAndelHentOgPersisterService
+            endretUtbetalingAndelHentOgPersisterService = mockEndretUtbetalingAndelHentOgPersisterService,
         )
     }
 
@@ -64,7 +64,7 @@ class EndretUtbetalingAndelServiceTest {
             person = barn,
             årsak = Årsak.DELT_BOSTED,
             fom = YearMonth.now().minusMonths(5),
-            tom = YearMonth.now().minusMonths(1)
+            tom = YearMonth.now().minusMonths(1),
         )
         val restEndretUtbetalingAndel = endretUtbetalingAndel.tilRestEndretUtbetalingAndel()
 
@@ -72,17 +72,17 @@ class EndretUtbetalingAndelServiceTest {
             lagAndelTilkjentYtelse(
                 person = barn,
                 fom = YearMonth.now().minusMonths(10),
-                tom = YearMonth.now().plusMonths(5)
+                tom = YearMonth.now().plusMonths(5),
             ),
             lagAndelTilkjentYtelse(
                 person = barn,
                 fom = YearMonth.now().plusMonths(6),
-                tom = YearMonth.now().plusMonths(11)
-            )
+                tom = YearMonth.now().plusMonths(11),
+            ),
         )
 
         val vilkårsvurderingUtenDeltBosted = Vilkårsvurdering(
-            behandling = behandling
+            behandling = behandling,
         )
         vilkårsvurderingUtenDeltBosted.personResultater = setOf(
             lagPersonResultat(
@@ -94,15 +94,15 @@ class EndretUtbetalingAndelServiceTest {
                 erDeltBosted = false,
                 lagFullstendigVilkårResultat = true,
                 personType = PersonType.BARN,
-                vilkårType = Vilkår.BOR_MED_SØKER
-            )
+                vilkårType = Vilkår.BOR_MED_SØKER,
+            ),
         )
 
         every { mockEndretUtbetalingAndelRepository.getById(any()) } returns endretUtbetalingAndel.endretUtbetalingAndel
         every { mockPersongrunnlagService.hentPersonerPåBehandling(any(), behandling) } returns listOf(barn)
         every { mockPersonopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id) } returns lagTestPersonopplysningGrunnlag(
             behandling.id,
-            barn
+            barn,
         )
         every { mockAndelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id) } returns andelerTilkjentYtelse
         every { mockEndretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandlingId = behandling.id) } returns emptyList()
@@ -112,12 +112,12 @@ class EndretUtbetalingAndelServiceTest {
             endretUtbetalingAndelService.oppdaterEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
                 behandling = behandling,
                 endretUtbetalingAndelId = endretUtbetalingAndel.id,
-                restEndretUtbetalingAndel = restEndretUtbetalingAndel
+                restEndretUtbetalingAndel = restEndretUtbetalingAndel,
             )
         }
         Assertions.assertEquals(
             "Du har valgt årsaken 'delt bosted', denne samstemmer ikke med vurderingene gjort på vilkårsvurderingssiden i perioden du har valgt.",
-            feil.frontendFeilmelding
+            feil.frontendFeilmelding,
         )
     }
 }

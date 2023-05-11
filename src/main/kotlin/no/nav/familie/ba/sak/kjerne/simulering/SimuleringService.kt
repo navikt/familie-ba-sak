@@ -39,7 +39,7 @@ class SimuleringService(
     private val featureToggleService: FeatureToggleService,
     private val vedtakRepository: VedtakRepository,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    private val persongrunnlagService: PersongrunnlagService
+    private val persongrunnlagService: PersongrunnlagService,
 ) {
     private val simulert = Metrics.counter("familie.ba.sak.oppdrag.simulert")
 
@@ -58,7 +58,7 @@ class SimuleringService(
             vedtak = vedtak,
             saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
             andelTilkjentYtelseForUtbetalingsoppdragFactory = AndelTilkjentYtelseForSimuleringFactory(),
-            erSimulering = true
+            erSimulering = true,
         )
 
         // Simulerer ikke mot økonomi når det ikke finnes utbetalingsperioder
@@ -71,7 +71,7 @@ class SimuleringService(
     @Transactional
     fun lagreSimuleringPåBehandling(
         simuleringMottakere: List<SimuleringMottaker>,
-        beahndling: Behandling
+        beahndling: Behandling,
     ): List<ØkonomiSimuleringMottaker> {
         val vedtakSimuleringMottakere = simuleringMottakere.map { it.tilBehandlingSimuleringMottaker(beahndling) }
         return øknomiSimuleringMottakerRepository.saveAll(vedtakSimuleringMottakere)
@@ -94,7 +94,7 @@ class SimuleringService(
         val simulering = hentSimuleringPåBehandling(behandlingId)
         val restSimulering = vedtakSimuleringMottakereTilRestSimulering(
             økonomiSimuleringMottakere = simulering,
-            erManuellPosteringTogglePå = featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ)
+            erManuellPosteringTogglePå = featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ),
         )
 
         return if (!behandlingErFerdigBesluttet && simuleringErUtdatert(restSimulering)) {
@@ -118,7 +118,7 @@ class SimuleringService(
             ?: throw Feil("Fant ikke aktivt vedtak på behandling${behandling.id}")
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "opprette simulering"
+            handling = "opprette simulering",
         )
 
         val simulering: List<SimuleringMottaker> =
@@ -141,14 +141,14 @@ class SimuleringService(
     fun hentEtterbetaling(økonomiSimuleringMottakere: List<ØkonomiSimuleringMottaker>): BigDecimal {
         return vedtakSimuleringMottakereTilRestSimulering(
             økonomiSimuleringMottakere = økonomiSimuleringMottakere,
-            erManuellPosteringTogglePå = featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ)
+            erManuellPosteringTogglePå = featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ),
         ).etterbetaling
     }
 
     fun hentFeilutbetaling(økonomiSimuleringMottakere: List<ØkonomiSimuleringMottaker>): BigDecimal {
         return vedtakSimuleringMottakereTilRestSimulering(
             økonomiSimuleringMottakere,
-            featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ)
+            featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ),
         ).feilutbetaling
     }
 
@@ -171,7 +171,7 @@ class SimuleringService(
 
     private fun sjekkOmBehandlingHarEtterbetalingInnenforBeløpsgrenser(
         behandling: Behandling,
-        antallBarn: Int
+        antallBarn: Int,
     ): Boolean {
         val finnesEtterBetaling = hentTotalEtterbetalingFørMars2023(behandling.id) != BigDecimal.ZERO
         if (!finnesEtterBetaling) return true
@@ -190,7 +190,7 @@ class SimuleringService(
 
     private fun sjekkOmBehandlingHarFeilutbetalingInnenforBeløpsgrenser(
         behandling: Behandling,
-        antallBarn: Int
+        antallBarn: Int,
     ): Boolean {
         val finnesFeilutbetaling = hentFeilutbetaling(behandling.id) != BigDecimal.ZERO
         if (!finnesFeilutbetaling) return true
@@ -212,7 +212,7 @@ class SimuleringService(
 
         return vedtakSimuleringMottakereTilSimuleringPerioder(
             økonomiSimuleringMottakere = hentSimuleringPåBehandling(behandlingId),
-            erManuelPosteringTogglePå = featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ)
+            erManuelPosteringTogglePå = featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ),
         ).filter {
             it.fom.isSameOrBefore(februar2023)
         }

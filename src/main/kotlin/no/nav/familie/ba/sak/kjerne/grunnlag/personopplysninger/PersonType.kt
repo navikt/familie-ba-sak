@@ -6,7 +6,8 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 enum class PersonType {
     SØKER,
     ANNENPART,
-    BARN;
+    BARN,
+    ;
 
     fun ytelseType() = when (this) {
         SØKER -> YtelseType.UTVIDET_BARNETRYGD

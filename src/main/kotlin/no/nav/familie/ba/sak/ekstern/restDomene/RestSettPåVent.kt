@@ -6,10 +6,10 @@ import java.time.LocalDate
 
 data class RestSettPåVent(
     val frist: LocalDate,
-    val årsak: SettPåVentÅrsak
+    val årsak: SettPåVentÅrsak,
 )
 
 fun SettPåVent.tilRestSettPåVent(): RestSettPåVent = RestSettPåVent(
     frist = this.frist,
-    årsak = this.årsak
+    årsak = this.årsak,
 )

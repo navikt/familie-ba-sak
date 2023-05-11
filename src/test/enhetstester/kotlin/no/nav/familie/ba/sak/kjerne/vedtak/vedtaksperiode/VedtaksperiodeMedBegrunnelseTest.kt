@@ -23,28 +23,28 @@ class VedtaksperiodeMedBegrunnelseTest {
             VedtaksperiodeMedBegrunnelser(
                 fom = fom.førsteDagIInneværendeMåned(),
                 vedtak = vedtak,
-                type = Vedtaksperiodetype.UTBETALING
+                type = Vedtaksperiodetype.UTBETALING,
             ).apply {
                 begrunnelser.addAll(
                     listOf(
                         Standardbegrunnelse.INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN,
-                        Standardbegrunnelse.REDUKSJON_UNDER_6_ÅR
+                        Standardbegrunnelse.REDUKSJON_UNDER_6_ÅR,
                     ).map { begrunnelse ->
                         Vedtaksbegrunnelse(
                             vedtaksperiodeMedBegrunnelser = this,
-                            standardbegrunnelse = begrunnelse
+                            standardbegrunnelse = begrunnelse,
                         )
-                    }
+                    },
                 )
-            }
+            },
         )
 
         val fagsakErBegrunnet = vedtaksperioder.erAlleredeBegrunnetMedBegrunnelse(
             standardbegrunnelser = listOf(
                 Standardbegrunnelse.REDUKSJON_UNDER_6_ÅR,
-                Standardbegrunnelse.REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK
+                Standardbegrunnelse.REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK,
             ),
-            måned = fom
+            måned = fom,
         )
 
         assertTrue(fagsakErBegrunnet)
@@ -59,25 +59,25 @@ class VedtaksperiodeMedBegrunnelseTest {
             VedtaksperiodeMedBegrunnelser(
                 fom = fom.minusYears(1).førsteDagIInneværendeMåned(),
                 vedtak = vedtak,
-                type = Vedtaksperiodetype.UTBETALING
+                type = Vedtaksperiodetype.UTBETALING,
             ).apply {
                 begrunnelser.addAll(
                     listOf(
                         Standardbegrunnelse.INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN,
-                        Standardbegrunnelse.REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK
+                        Standardbegrunnelse.REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK,
                     ).map { begrunnelse ->
                         Vedtaksbegrunnelse(
                             vedtaksperiodeMedBegrunnelser = this,
-                            standardbegrunnelse = begrunnelse
+                            standardbegrunnelse = begrunnelse,
                         )
-                    }
+                    },
                 )
-            }
+            },
         )
 
         val fagsakErBegrunnet = vedtaksperioder.erAlleredeBegrunnetMedBegrunnelse(
             standardbegrunnelser = listOf(Standardbegrunnelse.REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK),
-            måned = fom
+            måned = fom,
         )
 
         assertFalse(fagsakErBegrunnet)
@@ -92,24 +92,24 @@ class VedtaksperiodeMedBegrunnelseTest {
             VedtaksperiodeMedBegrunnelser(
                 fom = fom.minusYears(1).førsteDagIInneværendeMåned(),
                 vedtak = vedtak,
-                type = Vedtaksperiodetype.UTBETALING
+                type = Vedtaksperiodetype.UTBETALING,
             ).apply {
                 begrunnelser.addAll(
                     listOf(
-                        Standardbegrunnelse.INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN
+                        Standardbegrunnelse.INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN,
                     ).map { begrunnelse ->
                         Vedtaksbegrunnelse(
                             vedtaksperiodeMedBegrunnelser = this,
-                            standardbegrunnelse = begrunnelse
+                            standardbegrunnelse = begrunnelse,
                         )
-                    }
+                    },
                 )
-            }
+            },
         )
 
         val fagsakErBegrunnet = vedtaksperioder.erAlleredeBegrunnetMedBegrunnelse(
             standardbegrunnelser = listOf(Standardbegrunnelse.REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK),
-            måned = fom
+            måned = fom,
         )
 
         assertFalse(fagsakErBegrunnet)
@@ -123,24 +123,24 @@ class VedtaksperiodeMedBegrunnelseTest {
             VedtaksperiodeMedBegrunnelser(
                 fom = LocalDate.now().førsteDagIInneværendeMåned(),
                 vedtak = vedtak,
-                type = Vedtaksperiodetype.UTBETALING
+                type = Vedtaksperiodetype.UTBETALING,
             ).apply {
                 begrunnelser.addAll(
                     listOf(
-                        Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_BARN_UNDER_TRE_ÅR
+                        Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_BARN_UNDER_TRE_ÅR,
                     ).map { begrunnelse ->
                         Vedtaksbegrunnelse(
                             vedtaksperiodeMedBegrunnelser = this,
-                            standardbegrunnelse = begrunnelse
+                            standardbegrunnelse = begrunnelse,
                         )
-                    }
+                    },
                 )
-            }
+            },
         )
 
         val fagsakErBegrunnet = vedtaksperioder.erAlleredeBegrunnetMedBegrunnelse(
             standardbegrunnelser = listOf(Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_BARN_UNDER_TRE_ÅR),
-            måned = YearMonth.now()
+            måned = YearMonth.now(),
         )
 
         assertTrue(fagsakErBegrunnet)
@@ -154,24 +154,24 @@ class VedtaksperiodeMedBegrunnelseTest {
             VedtaksperiodeMedBegrunnelser(
                 fom = LocalDate.now().minusYears(1).førsteDagIInneværendeMåned(),
                 vedtak = vedtak,
-                type = Vedtaksperiodetype.UTBETALING
+                type = Vedtaksperiodetype.UTBETALING,
             ).apply {
                 begrunnelser.addAll(
                     listOf(
-                        Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_BARN_UNDER_TRE_ÅR
+                        Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_BARN_UNDER_TRE_ÅR,
                     ).map { begrunnelse ->
                         Vedtaksbegrunnelse(
                             vedtaksperiodeMedBegrunnelser = this,
-                            standardbegrunnelse = begrunnelse
+                            standardbegrunnelse = begrunnelse,
                         )
-                    }
+                    },
                 )
-            }
+            },
         )
 
         val fagsakErBegrunnet = vedtaksperioder.erAlleredeBegrunnetMedBegrunnelse(
             standardbegrunnelser = listOf(Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_BARN_UNDER_TRE_ÅR),
-            måned = YearMonth.now()
+            måned = YearMonth.now(),
         )
 
         assertFalse(fagsakErBegrunnet)
@@ -185,24 +185,24 @@ class VedtaksperiodeMedBegrunnelseTest {
             VedtaksperiodeMedBegrunnelser(
                 fom = LocalDate.now().førsteDagIInneværendeMåned(),
                 vedtak = vedtak,
-                type = Vedtaksperiodetype.UTBETALING
+                type = Vedtaksperiodetype.UTBETALING,
             ).apply {
                 begrunnelser.addAll(
                     listOf(
-                        Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD
+                        Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD,
                     ).map { begrunnelse ->
                         Vedtaksbegrunnelse(
                             vedtaksperiodeMedBegrunnelser = this,
-                            standardbegrunnelse = begrunnelse
+                            standardbegrunnelse = begrunnelse,
                         )
-                    }
+                    },
                 )
-            }
+            },
         )
 
         val fagsakErBegrunnet = vedtaksperioder.erAlleredeBegrunnetMedBegrunnelse(
             standardbegrunnelser = listOf(Standardbegrunnelse.REDUKSJON_SMÅBARNSTILLEGG_IKKE_LENGER_FULL_OVERGANGSSTØNAD),
-            måned = YearMonth.now()
+            måned = YearMonth.now(),
         )
 
         assertTrue(fagsakErBegrunnet)

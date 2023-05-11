@@ -2,8 +2,8 @@ package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPerson
-import no.nav.familie.ba.sak.dataGenerator.vilkårsvurdering.lagBarnVilkårResultat
-import no.nav.familie.ba.sak.dataGenerator.vilkårsvurdering.lagSøkerVilkårResultat
+import no.nav.familie.ba.sak.datagenerator.vilkårsvurdering.lagBarnVilkårResultat
+import no.nav.familie.ba.sak.datagenerator.vilkårsvurdering.lagSøkerVilkårResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Dødsfall
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -38,7 +38,7 @@ class VilkårsvurderingForNyBehandlingUtilsTest {
                 periodeTom = tomPåFørsteUtvidetVilkår,
                 begrunnelse = "",
                 behandlingId = vilkårsvurdering.behandling.id,
-                utdypendeVilkårsvurderinger = emptyList()
+                utdypendeVilkårsvurderinger = emptyList(),
             ),
             VilkårResultat(
                 personResultat = søkerPersonResultat,
@@ -48,8 +48,8 @@ class VilkårsvurderingForNyBehandlingUtilsTest {
                 periodeTom = null,
                 begrunnelse = "",
                 behandlingId = vilkårsvurdering.behandling.id,
-                utdypendeVilkårsvurderinger = emptyList()
-            )
+                utdypendeVilkårsvurderinger = emptyList(),
+            ),
         )
 
         val barnPersonResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = barn.aktør)
@@ -57,7 +57,7 @@ class VilkårsvurderingForNyBehandlingUtilsTest {
             barnPersonResultat = barnPersonResultat,
             barnetsFødselsdato = barn.fødselsdato,
             periodeFom = LocalDate.now().minusYears(2),
-            behandlingId = behandling.id
+            behandlingId = behandling.id,
         )
 
         søkerPersonResultat.setSortedVilkårResultater(søkerVilkårResultater)
@@ -66,7 +66,7 @@ class VilkårsvurderingForNyBehandlingUtilsTest {
         vilkårsvurdering.personResultater = setOf(søkerPersonResultat, barnPersonResultat)
 
         val nyVilkårsvurdering = VilkårsvurderingForNyBehandlingUtils(personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id, personer = mutableSetOf(barn, søker))).hentVilkårsvurderingMedDødsdatoSomTomDato(
-            vilkårsvurdering = vilkårsvurdering
+            vilkårsvurdering = vilkårsvurdering,
         )
         val søkersVilkårResultater = nyVilkårsvurdering.personResultater.find { it.erSøkersResultater() }?.vilkårResultater
         val søkersUtvidetVilkår = søkersVilkårResultater?.filter { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }

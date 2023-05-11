@@ -33,8 +33,8 @@ class BehandlingUtilsTest {
             BehandlingUnderkategori.ORDINÆR,
             bestemUnderkategori(
                 overstyrtUnderkategori = BehandlingUnderkategori.ORDINÆR,
-                underkategoriFraLøpendeBehandling = null
-            )
+                underkategoriFraLøpendeBehandling = null,
+            ),
         )
     }
 
@@ -44,8 +44,8 @@ class BehandlingUtilsTest {
             BehandlingUnderkategori.UTVIDET,
             bestemUnderkategori(
                 overstyrtUnderkategori = BehandlingUnderkategori.UTVIDET,
-                underkategoriFraLøpendeBehandling = null
-            )
+                underkategoriFraLøpendeBehandling = null,
+            ),
         )
     }
 
@@ -56,8 +56,8 @@ class BehandlingUtilsTest {
             bestemUnderkategori(
                 overstyrtUnderkategori = null,
                 underkategoriFraLøpendeBehandling = BehandlingUnderkategori.ORDINÆR,
-                underkategoriFraInneværendeBehandling = BehandlingUnderkategori.UTVIDET
-            )
+                underkategoriFraInneværendeBehandling = BehandlingUnderkategori.UTVIDET,
+            ),
         )
     }
 
@@ -68,8 +68,8 @@ class BehandlingUtilsTest {
             bestemUnderkategori(
                 overstyrtUnderkategori = BehandlingUnderkategori.ORDINÆR,
                 underkategoriFraLøpendeBehandling = BehandlingUnderkategori.UTVIDET,
-                underkategoriFraInneværendeBehandling = BehandlingUnderkategori.ORDINÆR
-            )
+                underkategoriFraInneværendeBehandling = BehandlingUnderkategori.ORDINÆR,
+            ),
         )
     }
 
@@ -79,8 +79,8 @@ class BehandlingUtilsTest {
             BehandlingUnderkategori.UTVIDET,
             bestemUnderkategori(
                 overstyrtUnderkategori = BehandlingUnderkategori.ORDINÆR,
-                underkategoriFraLøpendeBehandling = BehandlingUnderkategori.UTVIDET
-            )
+                underkategoriFraLøpendeBehandling = BehandlingUnderkategori.UTVIDET,
+            ),
         )
     }
 
@@ -90,8 +90,8 @@ class BehandlingUtilsTest {
             BehandlingUnderkategori.ORDINÆR,
             bestemUnderkategori(
                 overstyrtUnderkategori = BehandlingUnderkategori.ORDINÆR,
-                underkategoriFraLøpendeBehandling = BehandlingUnderkategori.ORDINÆR
-            )
+                underkategoriFraLøpendeBehandling = BehandlingUnderkategori.ORDINÆR,
+            ),
         )
     }
 
@@ -101,8 +101,8 @@ class BehandlingUtilsTest {
             BehandlingUnderkategori.UTVIDET,
             bestemUnderkategori(
                 overstyrtUnderkategori = BehandlingUnderkategori.UTVIDET,
-                underkategoriFraLøpendeBehandling = BehandlingUnderkategori.ORDINÆR
-            )
+                underkategoriFraLøpendeBehandling = BehandlingUnderkategori.ORDINÆR,
+            ),
         )
     }
 
@@ -112,15 +112,15 @@ class BehandlingUtilsTest {
             BehandlingUnderkategori.UTVIDET,
             bestemUnderkategori(
                 overstyrtUnderkategori = null,
-                underkategoriFraLøpendeBehandling = BehandlingUnderkategori.UTVIDET
-            )
+                underkategoriFraLøpendeBehandling = BehandlingUnderkategori.UTVIDET,
+            ),
         )
         assertEquals(
             BehandlingUnderkategori.ORDINÆR,
             bestemUnderkategori(
                 overstyrtUnderkategori = null,
-                underkategoriFraLøpendeBehandling = BehandlingUnderkategori.ORDINÆR
-            )
+                underkategoriFraLøpendeBehandling = BehandlingUnderkategori.ORDINÆR,
+            ),
         )
     }
 
@@ -133,7 +133,7 @@ class BehandlingUtilsTest {
         val tilkjentYtelse = TilkjentYtelse(
             behandling = behandling,
             opprettetDato = LocalDate.now(),
-            endretDato = LocalDate.now()
+            endretDato = LocalDate.now(),
         )
 
         val andelTilkjentYtelse = listOf(
@@ -147,8 +147,8 @@ class BehandlingUtilsTest {
                 sats = 123,
                 stønadFom = YearMonth.of(2015, 6),
                 stønadTom = YearMonth.now().plusYears(5),
-                prosent = BigDecimal(2)
-            )
+                prosent = BigDecimal(2),
+            ),
         )
 
         val løpendeUndekategori = utledLøpendeUnderkategori(andelTilkjentYtelse)
@@ -165,7 +165,7 @@ class BehandlingUtilsTest {
         val tilkjentYtelse = TilkjentYtelse(
             behandling = behandling,
             opprettetDato = LocalDate.now(),
-            endretDato = LocalDate.now()
+            endretDato = LocalDate.now(),
         )
 
         val andelTilkjentYtelse = listOf(
@@ -179,8 +179,8 @@ class BehandlingUtilsTest {
                 sats = 123,
                 stønadFom = YearMonth.of(2015, 6),
                 stønadTom = YearMonth.now().minusYears(1),
-                prosent = BigDecimal(2)
-            )
+                prosent = BigDecimal(2),
+            ),
         )
 
         val løpendeUndekategori = utledLøpendeUnderkategori(andelTilkjentYtelse)
@@ -197,7 +197,7 @@ class BehandlingUtilsTest {
         val tilkjentYtelse = TilkjentYtelse(
             behandling = behandling,
             opprettetDato = LocalDate.now(),
-            endretDato = LocalDate.now()
+            endretDato = LocalDate.now(),
         )
 
         val andelTilkjentYtelse = listOf(
@@ -211,8 +211,8 @@ class BehandlingUtilsTest {
                 sats = 123,
                 stønadFom = YearMonth.of(2015, 6),
                 stønadTom = YearMonth.now().plusYears(2),
-                prosent = BigDecimal(2)
-            )
+                prosent = BigDecimal(2),
+            ),
         )
 
         val løpendeUndekategori = utledLøpendeUnderkategori(andelTilkjentYtelse)
@@ -224,12 +224,12 @@ class BehandlingUtilsTest {
     fun `Skal finne ut at omregningsbehandling allerede har kjørt inneværende måned`() {
         val fgb = lagBehandling()
         val omregning6År = lagBehandling(
-            årsak = BehandlingÅrsak.OMREGNING_6ÅR
+            årsak = BehandlingÅrsak.OMREGNING_6ÅR,
         )
         val behandlingsårsakHarAlleredeKjørt = Behandlingutils.harBehandlingsårsakAlleredeKjørt(
             behandlingÅrsak = BehandlingÅrsak.OMREGNING_6ÅR,
             behandlinger = listOf(fgb, omregning6År),
-            måned = YearMonth.now()
+            måned = YearMonth.now(),
         )
 
         assertTrue(behandlingsårsakHarAlleredeKjørt)
@@ -241,7 +241,7 @@ class BehandlingUtilsTest {
         val behandlingsårsakHarAlleredeKjørt = Behandlingutils.harBehandlingsårsakAlleredeKjørt(
             behandlingÅrsak = BehandlingÅrsak.OMREGNING_6ÅR,
             behandlinger = listOf(fgb),
-            måned = YearMonth.now()
+            måned = YearMonth.now(),
         )
 
         assertFalse(behandlingsårsakHarAlleredeKjørt)
@@ -255,8 +255,8 @@ class BehandlingUtilsTest {
             BehandlingStegTilstand(
                 behandlingSteg = StegType.DISTRIBUER_VEDTAKSBREV,
                 behandlingStegStatus = BehandlingStegStatus.UTFØRT,
-                behandling = fgb
-            )
+                behandling = fgb,
+            ),
         )
 
         assertThrows<FunksjonellFeil> { validerBehandlingIkkeSendtTilEksterneTjenester(fgb) }
@@ -270,8 +270,8 @@ class BehandlingUtilsTest {
             BehandlingStegTilstand(
                 behandlingSteg = StegType.IVERKSETT_MOT_OPPDRAG,
                 behandlingStegStatus = BehandlingStegStatus.UTFØRT,
-                behandling = fgb
-            )
+                behandling = fgb,
+            ),
         )
 
         assertThrows<FunksjonellFeil> { validerBehandlingIkkeSendtTilEksterneTjenester(fgb) }
@@ -285,8 +285,8 @@ class BehandlingUtilsTest {
             BehandlingStegTilstand(
                 behandlingSteg = StegType.JOURNALFØR_VEDTAKSBREV,
                 behandlingStegStatus = BehandlingStegStatus.UTFØRT,
-                behandling = fgb
-            )
+                behandling = fgb,
+            ),
         )
 
         assertThrows<FunksjonellFeil> { validerBehandlingIkkeSendtTilEksterneTjenester(fgb) }
@@ -300,8 +300,8 @@ class BehandlingUtilsTest {
                 overstyrtKategori = BehandlingKategori.EØS,
                 behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
                 behandlingÅrsak = BehandlingÅrsak.SØKNAD,
-                kategoriFraLøpendeBehandling = BehandlingKategori.NASJONAL // default verdi
-            )
+                kategoriFraLøpendeBehandling = BehandlingKategori.NASJONAL, // default verdi
+            ),
         )
     }
 
@@ -313,8 +313,8 @@ class BehandlingUtilsTest {
                 overstyrtKategori = BehandlingKategori.EØS,
                 behandlingType = BehandlingType.REVURDERING,
                 behandlingÅrsak = BehandlingÅrsak.SØKNAD,
-                kategoriFraLøpendeBehandling = BehandlingKategori.NASJONAL // default verdi
-            )
+                kategoriFraLøpendeBehandling = BehandlingKategori.NASJONAL, // default verdi
+            ),
         )
     }
 
@@ -327,8 +327,8 @@ class BehandlingUtilsTest {
                 overstyrtKategori = overstyrtKategori,
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 behandlingÅrsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
-                kategoriFraLøpendeBehandling = BehandlingKategori.NASJONAL // default verdi
-            )
+                kategoriFraLøpendeBehandling = BehandlingKategori.NASJONAL, // default verdi
+            ),
         )
     }
 
@@ -340,8 +340,8 @@ class BehandlingUtilsTest {
                 overstyrtKategori = BehandlingKategori.NASJONAL,
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 behandlingÅrsak = BehandlingÅrsak.MIGRERING,
-                kategoriFraLøpendeBehandling = BehandlingKategori.NASJONAL // default verdi
-            )
+                kategoriFraLøpendeBehandling = BehandlingKategori.NASJONAL, // default verdi
+            ),
         )
     }
 
@@ -353,8 +353,8 @@ class BehandlingUtilsTest {
                 overstyrtKategori = BehandlingKategori.EØS,
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                 behandlingÅrsak = BehandlingÅrsak.MIGRERING,
-                kategoriFraLøpendeBehandling = BehandlingKategori.NASJONAL // default verdi
-            )
+                kategoriFraLøpendeBehandling = BehandlingKategori.NASJONAL, // default verdi
+            ),
         )
     }
 
@@ -366,8 +366,8 @@ class BehandlingUtilsTest {
                 overstyrtKategori = null,
                 behandlingType = BehandlingType.REVURDERING,
                 behandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
-                kategoriFraLøpendeBehandling = BehandlingKategori.EØS
-            )
+                kategoriFraLøpendeBehandling = BehandlingKategori.EØS,
+            ),
         )
     }
 
@@ -379,8 +379,8 @@ class BehandlingUtilsTest {
                 overstyrtKategori = null,
                 behandlingType = BehandlingType.REVURDERING,
                 behandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
-                kategoriFraLøpendeBehandling = BehandlingKategori.NASJONAL
-            )
+                kategoriFraLøpendeBehandling = BehandlingKategori.NASJONAL,
+            ),
         )
     }
 }

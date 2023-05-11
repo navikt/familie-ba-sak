@@ -24,12 +24,12 @@ import java.util.Properties
 @TaskStepBeskrivelse(
     taskStepType = SendMeldingTilBisysTask.TASK_STEP_TYPE,
     beskrivelse = "Send melding til Bisys om opphør eller reduksjon",
-    maxAntallFeil = 3
+    maxAntallFeil = 3,
 )
 class SendMeldingTilBisysTask(
     private val kafkaProducer: KafkaProducer,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
-    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 ) : AsyncTaskStep {
 
     private val logger = LoggerFactory.getLogger(SendMeldingTilBisysTask::class.java)
@@ -46,7 +46,7 @@ class SendMeldingTilBisysTask(
             val barnEndretOpplysning = finnBarnEndretOpplysning(behandling)
             val barnetrygdBisysMelding = BarnetrygdBisysMelding(
                 søker = behandling.fagsak.aktør.aktivFødselsnummer(),
-                barn = barnEndretOpplysning.filter { it.value.isNotEmpty() }.map { it.value.first() }
+                barn = barnEndretOpplysning.filter { it.value.isNotEmpty() }.map { it.value.first() },
             )
 
             if (barnetrygdBisysMelding.barn.isEmpty()) {
@@ -58,7 +58,7 @@ class SendMeldingTilBisysTask(
 
             kafkaProducer.sendBarnetrygdBisysMelding(
                 behandling.id.toString(),
-                barnetrygdBisysMelding
+                barnetrygdBisysMelding,
             )
             meldingsTeller.increment()
         } else {
@@ -93,8 +93,8 @@ class SendMeldingTilBisysTask(
                                 BarnEndretOpplysning(
                                     ident = barnIdent,
                                     fom = forblePeriode!!.fom,
-                                    årsakskode = BarnetrygdEndretType.RO
-                                )
+                                    årsakskode = BarnetrygdEndretType.RO,
+                                ),
                             )
                         }
                         if (intersectPerioder.second != null && it.prosent < prosent) {
@@ -102,8 +102,8 @@ class SendMeldingTilBisysTask(
                                 BarnEndretOpplysning(
                                     ident = barnIdent,
                                     fom = latest(it.periode.fom, forblePeriode!!.fom),
-                                    årsakskode = BarnetrygdEndretType.RR
-                                )
+                                    årsakskode = BarnetrygdEndretType.RR,
+                                ),
                             )
                         }
                         forblePeriode = intersectPerioder.third
@@ -117,8 +117,8 @@ class SendMeldingTilBisysTask(
                         BarnEndretOpplysning(
                             ident = barnIdent,
                             fom = forblePeriode!!.fom,
-                            årsakskode = BarnetrygdEndretType.RO
-                        )
+                            årsakskode = BarnetrygdEndretType.RO,
+                        ),
                     )
                 }
             }
@@ -135,7 +135,7 @@ class SendMeldingTilBisysTask(
                 payload = behandlingsId.toString(),
                 properties = Properties().apply {
                     this["behandlingsId"] = behandlingsId.toString()
-                }
+                },
             )
         }
     }
@@ -155,7 +155,7 @@ fun MånedPeriode.intersect(periode: MånedPeriode): Triple<MånedPeriode?, Mån
     return Triple(
         if (this.fom.isSameOrAfter(periode.fom)) null else MånedPeriode(this.fom, periode.fom.minusMonths(1)),
         if (overlappetTom.isBefore(overlappetFom)) null else MånedPeriode(overlappetFom, overlappetTom),
-        if (this.tom.isSameOrBefore(periode.tom)) null else MånedPeriode(periode.tom.plusMonths(1), this.tom)
+        if (this.tom.isSameOrBefore(periode.tom)) null else MånedPeriode(periode.tom.plusMonths(1), this.tom),
     )
 }
 

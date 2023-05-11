@@ -17,10 +17,10 @@ import java.util.Properties
 @Service
 @TaskStepBeskrivelse(
     taskStepType = SendFødselsmeldingTilInfotrygdTask.TASK_STEP_TYPE,
-    beskrivelse = "Send fødselshendelse til Infotrygd feed."
+    beskrivelse = "Send fødselshendelse til Infotrygd feed.",
 )
 class SendFødselsmeldingTilInfotrygdTask(
-    private val infotrygdFeedClient: InfotrygdFeedClient
+    private val infotrygdFeedClient: InfotrygdFeedClient,
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
@@ -50,10 +50,10 @@ class SendFødselsmeldingTilInfotrygdTask(
                 type = TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(
                     InfotrygdFødselhendelsesFeedTaskDto(
-                        fnrBarn = fnrBarn
-                    )
+                        fnrBarn = fnrBarn,
+                    ),
                 ),
-                properties = metadata
+                properties = metadata,
             )
         }
     }

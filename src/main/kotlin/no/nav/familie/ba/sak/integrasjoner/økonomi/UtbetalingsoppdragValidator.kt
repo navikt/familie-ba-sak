@@ -12,19 +12,19 @@ import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 
 fun Utbetalingsoppdrag.validerNullutbetaling(
     behandlingskategori: BehandlingKategori,
-    andelerTilkjentYtelse: List<AndelTilkjentYtelse>
+    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
 ) {
     if (this.utbetalingsperiode.isEmpty() && !kanHaNullutbetaling(behandlingskategori, andelerTilkjentYtelse)) {
         throw FunksjonellFeil(
             "Utbetalingsoppdraget inneholder ingen utbetalingsperioder " +
-                "og det er grunn til å tro at denne ikke bør simuleres eller iverksettes. $KONTAKT_TEAMET_SUFFIX"
+                "og det er grunn til å tro at denne ikke bør simuleres eller iverksettes. $KONTAKT_TEAMET_SUFFIX",
         )
     }
 }
 
 fun opprettAdvarselLoggVedForstattInnvilgetMedUtbetaling(
     utbetalingsoppdrag: Utbetalingsoppdrag,
-    behandling: Behandling
+    behandling: Behandling,
 ) {
     if (utbetalingsoppdrag.utbetalingsperiode.isNotEmpty() &&
         behandling.resultat == Behandlingsresultat.FORTSATT_INNVILGET &&
@@ -32,7 +32,7 @@ fun opprettAdvarselLoggVedForstattInnvilgetMedUtbetaling(
     ) {
         logger.warn(
             "Behandling=$behandling med resultat fortsatt innvilget har utbetalingsperioder. " +
-                "Dette kan tyde på at noe er galt og burde sjekkes opp."
+                "Dette kan tyde på at noe er galt og burde sjekkes opp.",
         )
     }
 }
@@ -49,6 +49,6 @@ fun Utbetalingsoppdrag.validerOpphørsoppdrag() {
 
 private fun kanHaNullutbetaling(
     behandlingskategori: BehandlingKategori,
-    andelerTilkjentYtelse: List<AndelTilkjentYtelse>
+    andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
 ) = behandlingskategori == BehandlingKategori.EØS &&
     andelerTilkjentYtelse.any { it.erAndelSomharNullutbetaling() }

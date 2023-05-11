@@ -11,7 +11,6 @@ fun sats(ytelseType: YtelseType) =
         YtelseType.ORDINÆR_BARNETRYGD -> 1054
         YtelseType.UTVIDET_BARNETRYGD -> 1054
         YtelseType.SMÅBARNSTILLEGG -> 660
-        YtelseType.MANUELL_VURDERING -> 0
     }
 
 fun lagUtbetalingsoppdrag(utbetalingsperiode: List<Utbetalingsperiode>) = Utbetalingsoppdrag(
@@ -21,5 +20,5 @@ fun lagUtbetalingsoppdrag(utbetalingsperiode: List<Utbetalingsperiode>) = Utbeta
     aktoer = UUID.randomUUID().toString(),
     saksbehandlerId = "",
     avstemmingTidspunkt = LocalDateTime.now(),
-    utbetalingsperiode = utbetalingsperiode
+    utbetalingsperiode = utbetalingsperiode,
 )

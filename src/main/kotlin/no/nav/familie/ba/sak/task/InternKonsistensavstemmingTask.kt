@@ -21,10 +21,10 @@ import kotlin.system.measureTimeMillis
     taskStepType = InternKonsistensavstemmingTask.TASK_STEP_TYPE,
     beskrivelse = "Kjør intern konsistensavstemming",
     maxAntallFeil = 3,
-    triggerTidVedFeilISekunder = 600
+    triggerTidVedFeilISekunder = 600,
 )
 class InternKonsistensavstemmingTask(
-    val internKonsistensavstemmingService: InternKonsistensavstemmingService
+    val internKonsistensavstemmingService: InternKonsistensavstemmingService,
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
@@ -36,7 +36,7 @@ class InternKonsistensavstemmingTask(
 
         logger.info(
             "Fullført intern konsistensavstemming på fagsak ${fagsakIder.min()} til ${fagsakIder.max()}. " +
-                "Tid brukt = $tidBrukt millisekunder"
+                "Tid brukt = $tidBrukt millisekunder",
         )
     }
 
@@ -51,7 +51,7 @@ class InternKonsistensavstemmingTask(
                 type = this.TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(fagsakIder),
                 triggerTid = startTid,
-                metadataWrapper = PropertiesWrapper(metadata)
+                metadataWrapper = PropertiesWrapper(metadata),
             )
         }
 

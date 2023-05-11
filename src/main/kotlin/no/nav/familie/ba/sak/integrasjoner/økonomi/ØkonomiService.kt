@@ -33,7 +33,7 @@ class ØkonomiService(
     private val utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator,
     private val behandlingService: BehandlingService,
     private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
-    private val tilkjentYtelseRepository: TilkjentYtelseRepository
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
 
 ) {
     private val sammeOppdragSendtKonflikt = Metrics.counter("familie.ba.sak.samme.oppdrag.sendt.konflikt")
@@ -41,13 +41,13 @@ class ØkonomiService(
     fun oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(
         vedtak: Vedtak,
         saksbehandlerId: String,
-        andelTilkjentYtelseForUtbetalingsoppdragFactory: AndelTilkjentYtelseForUtbetalingsoppdragFactory
+        andelTilkjentYtelseForUtbetalingsoppdragFactory: AndelTilkjentYtelseForUtbetalingsoppdragFactory,
     ): Utbetalingsoppdrag {
         val oppdatertBehandling = vedtak.behandling
         val utbetalingsoppdrag = genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
             vedtak,
             saksbehandlerId,
-            andelTilkjentYtelseForUtbetalingsoppdragFactory
+            andelTilkjentYtelseForUtbetalingsoppdragFactory,
         )
         beregningService.oppdaterTilkjentYtelseMedUtbetalingsoppdrag(oppdatertBehandling, utbetalingsoppdrag)
 
@@ -60,7 +60,7 @@ class ØkonomiService(
         if (!utbetalingsoppdrag.skalIverksettesMotOppdrag()) {
             logger.warn(
                 "Iverksetter ikke noe mot oppdrag. " +
-                    "Ingen utbetalingsperioder for behandlingId=$behandlingId"
+                    "Ingen utbetalingsperioder for behandlingId=$behandlingId",
             )
             return
         }
@@ -92,7 +92,7 @@ class ØkonomiService(
         saksbehandlerId: String,
         andelTilkjentYtelseForUtbetalingsoppdragFactory: AndelTilkjentYtelseForUtbetalingsoppdragFactory,
         erSimulering: Boolean = false,
-        skalValideres: Boolean = true
+        skalValideres: Boolean = true,
     ): Utbetalingsoppdrag {
         val oppdatertBehandling = vedtak.behandling
         val oppdatertTilstand =
@@ -111,7 +111,7 @@ class ØkonomiService(
                 vedtak = vedtak,
                 erFørsteBehandlingPåFagsak = erFørsteIverksatteBehandlingPåFagsak,
                 oppdaterteKjeder = oppdaterteKjeder,
-                erSimulering = erSimulering
+                erSimulering = erSimulering,
             )
         } else {
             val forrigeBehandling =
@@ -126,7 +126,7 @@ class ØkonomiService(
 
             val sisteOffsetPerIdent = beregningService.hentSisteOffsetPerIdent(
                 forrigeBehandling.fagsak.id,
-                andelTilkjentYtelseForUtbetalingsoppdragFactory
+                andelTilkjentYtelseForUtbetalingsoppdragFactory,
             )
 
             val sisteOffsetPåFagsak = beregningService.hentSisteOffsetPåFagsak(behandling = oppdatertBehandling)
@@ -148,15 +148,15 @@ class ØkonomiService(
                 erSimulering = erSimulering,
                 endretMigreringsDato = beregnOmMigreringsDatoErEndret(
                     vedtak.behandling,
-                    forrigeTilstand.minByOrNull { it.stønadFom }?.stønadFom
-                )
+                    forrigeTilstand.minByOrNull { it.stønadFom }?.stønadFom,
+                ),
             )
 
             if (!erSimulering && (
-                oppdatertBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT || behandlingHentOgPersisterService.hent(
-                        oppdatertBehandling.id
+                    oppdatertBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT || behandlingHentOgPersisterService.hent(
+                        oppdatertBehandling.id,
                     ).resultat == Behandlingsresultat.OPPHØRT
-                )
+                    )
             ) {
                 utbetalingsoppdrag.validerOpphørsoppdrag()
             }
@@ -167,7 +167,7 @@ class ØkonomiService(
         if (skalValideres) {
             utbetalingsoppdrag.validerNullutbetaling(
                 behandlingskategori = vedtak.behandling.kategori,
-                andelerTilkjentYtelse = beregningService.hentAndelerTilkjentYtelseForBehandling(vedtak.behandling.id)
+                andelerTilkjentYtelse = beregningService.hentAndelerTilkjentYtelseForBehandling(vedtak.behandling.id),
             )
         }
 

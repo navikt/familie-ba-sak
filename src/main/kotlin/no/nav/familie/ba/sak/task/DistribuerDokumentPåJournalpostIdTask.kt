@@ -32,10 +32,10 @@ const val ANTALL_SEKUNDER_I_EN_UKE = 604800L
     // ~8 måneder dersom vi prøver én gang i uka.
     // Tasken skal stoppe etter 6 måneder, så om vi kommer hit har det skjedd noe galt.
     maxAntallFeil = 4 * 8,
-    settTilManuellOppfølgning = true
+    settTilManuellOppfølgning = true,
 )
 class DistribuerDokumentPåJournalpostIdTask(
-    private val dokumentDistribueringService: DokumentDistribueringService
+    private val dokumentDistribueringService: DokumentDistribueringService,
 ) : AsyncTaskStep {
 
     private val antallBrevIkkeDistribuertUkjentDødsboadresse: Map<Brevmal, Counter> =
@@ -43,7 +43,7 @@ class DistribuerDokumentPåJournalpostIdTask(
             Metrics.counter(
                 "brev.ikke.sendt.ukjent.dodsbo",
                 "brevtype",
-                it.visningsTekst
+                it.visningsTekst,
             )
         }
 
@@ -63,13 +63,13 @@ class DistribuerDokumentPåJournalpostIdTask(
             try {
                 dokumentDistribueringService.prøvDistribuerBrevOgLoggHendelse(
                     distribuerDokumentDTO = taskData,
-                    loggBehandlerRolle = BehandlerRolle.SYSTEM
+                    loggBehandlerRolle = BehandlerRolle.SYSTEM,
                 )
             } catch (e: Exception) {
                 if (e is RessursException && mottakerErDødUtenDødsboadresse(e)) {
                     logger.info(
                         "Klarte ikke å distribuere \"${brevmal.visningsTekst}\" på journalpost " +
-                            "${taskData.journalpostId}. Prøver igjen om 7 dager."
+                            "${taskData.journalpostId}. Prøver igjen om 7 dager.",
                     )
                     throw e
                 } else {
@@ -89,7 +89,7 @@ class DistribuerDokumentPåJournalpostIdTask(
             personEllerInstitusjonIdent = "",
             brevmal = dto.brevmal,
             erManueltSendt = false,
-            manuellAdresseInfo = null
+            manuellAdresseInfo = null,
         )
     }
 
@@ -107,7 +107,7 @@ class DistribuerDokumentPåJournalpostIdTask(
                 type = this.TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(distribuerDokumentDTO),
                 triggerTid = LocalDateTime.now().plusMinutes(5),
-                metadataWrapper = PropertiesWrapper(metadata)
+                metadataWrapper = PropertiesWrapper(metadata),
             )
         }
 
@@ -120,5 +120,5 @@ class DistribuerDokumentPåJournalpostIdTask(
 data class GammelDistribuerDokumentDTO(
     val behandlingId: Long?,
     val journalpostId: String,
-    val brevmal: Brevmal
+    val brevmal: Brevmal,
 )

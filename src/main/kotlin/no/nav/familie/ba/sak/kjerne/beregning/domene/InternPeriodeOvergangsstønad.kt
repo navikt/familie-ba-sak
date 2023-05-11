@@ -15,19 +15,19 @@ val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
 data class InternPeriodeOvergangsstønad(
     val personIdent: String,
     val fomDato: LocalDate,
-    val tomDato: LocalDate
+    val tomDato: LocalDate,
 ) {
     constructor(periodeOvergangsstønadGrunnlag: PeriodeOvergangsstønadGrunnlag) : this(
         personIdent = periodeOvergangsstønadGrunnlag.aktør.aktivFødselsnummer(),
         fomDato = periodeOvergangsstønadGrunnlag.fom,
-        tomDato = periodeOvergangsstønadGrunnlag.tom
+        tomDato = periodeOvergangsstønadGrunnlag.tom,
     )
 }
 
 fun EksternPeriode.tilInternPeriodeOvergangsstønad() = InternPeriodeOvergangsstønad(
     personIdent = this.personIdent,
     fomDato = this.fomDato,
-    tomDato = this.tomDato
+    tomDato = this.tomDato,
 )
 
 fun List<InternPeriodeOvergangsstønad>.slåSammenTidligerePerioder(): List<InternPeriodeOvergangsstønad> {
@@ -62,7 +62,7 @@ fun List<InternPeriodeOvergangsstønad>.slåSammenSammenhengendePerioder(): List
  *
  ***/
 fun List<InternPeriodeOvergangsstønad>.splitFramtidigePerioderFraForrigeBehandling(
-    overgangsstønadPerioderFraForrigeBehandling: List<InternPeriodeOvergangsstønad>
+    overgangsstønadPerioderFraForrigeBehandling: List<InternPeriodeOvergangsstønad>,
 ): List<InternPeriodeOvergangsstønad> {
     val tidligerePerioder = this.filter { it.tomDato.isSameOrBefore(LocalDate.now()) }
     val framtidigePerioder = this.minus(tidligerePerioder)

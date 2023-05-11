@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.dataGenerator.SettPåVent
+package no.nav.familie.ba.sak.datagenerator.settpåvent
 
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -12,12 +12,12 @@ fun lagSettPåVent(
     tidTattAvVent: LocalDate = LocalDate.now(),
     tidSattPåVent: LocalDate = LocalDate.now(),
     årsak: SettPåVentÅrsak = SettPåVentÅrsak.AVVENTER_DOKUMENTASJON,
-    aktiv: Boolean = true
+    aktiv: Boolean = true,
 ) = SettPåVent(
     behandling = behandling,
     frist = frist,
     tidTattAvVent = tidTattAvVent,
     tidSattPåVent = tidSattPåVent,
     årsak = årsak,
-    aktiv = aktiv
+    aktiv = aktiv,
 )

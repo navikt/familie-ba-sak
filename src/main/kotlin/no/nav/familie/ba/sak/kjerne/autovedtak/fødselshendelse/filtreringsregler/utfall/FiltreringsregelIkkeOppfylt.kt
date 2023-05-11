@@ -15,20 +15,21 @@ enum class FiltreringsregelIkkeOppfylt(val beskrivelse: String, private val filt
     BARNET_LEVER_IKKE("Det er registrert dødsdato på barnet.", Filtreringsregel.BARN_LEVER),
     MINDRE_ENN_5_MND_SIDEN_FORRIGE_BARN_UTFALL(
         "Det har gått mindre enn fem måneder siden forrige barn ble født.",
-        Filtreringsregel.MER_ENN_5_MND_SIDEN_FORRIGE_BARN
+        Filtreringsregel.MER_ENN_5_MND_SIDEN_FORRIGE_BARN,
     ),
     FAGSAK_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT(
         "Fagsaken ble migrert fra infotrygd etter barn ble født.",
-        Filtreringsregel.FAGSAK_IKKE_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT
+        Filtreringsregel.FAGSAK_IKKE_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT,
     ),
     LØPER_ALLEREDE_FOR_ANNEN_FORELDER(
         "Annen mottaker har barnetrygd for barnet",
-        Filtreringsregel.LØPER_IKKE_BARNETRYGD_FOR_BARNET
+        Filtreringsregel.LØPER_IKKE_BARNETRYGD_FOR_BARNET,
     ),
     MOR_HAR_LØPENDE_EØS_BARNETRYGD(
         "Mor har EØS-barnetrygd",
-        Filtreringsregel.MOR_HAR_IKKE_LØPENDE_EØS_BARNETRYGD
-    );
+        Filtreringsregel.MOR_HAR_IKKE_LØPENDE_EØS_BARNETRYGD,
+    ),
+    ;
 
     override fun hentBeskrivelse(): String {
         return beskrivelse

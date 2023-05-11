@@ -41,7 +41,7 @@ fun VilkårsvurderingTidslinjer.tilRestTidslinjer(): RestTidslinjer {
                 regelverkTidslinje = it.value.regelverkResultatTidslinje
                     .map { it?.regelverk }
                     .beskjærEtter(erUnder18årTidslinje)
-                    .tilRestTidslinje()
+                    .tilRestTidslinje(),
             )
         },
         søkersTidslinjer = RestTidslinjerForSøker(
@@ -52,8 +52,8 @@ fun VilkårsvurderingTidslinjer.tilRestTidslinjer(): RestTidslinjer {
             oppfyllerEgneVilkårTidslinje = søkersTidslinjer
                 .regelverkResultatTidslinje.map { it?.resultat }
                 .beskjærTilOgMedEtter(erNoenAvBarnaMellom0Og18ÅrTidslinje)
-                .tilRestTidslinje()
-        )
+                .tilRestTidslinje(),
+        ),
     )
 }
 
@@ -62,28 +62,28 @@ fun <I, T : Tidsenhet> Tidslinje<I, T>.tilRestTidslinje(): List<RestTidslinjePer
         RestTidslinjePeriode(
             fraOgMed = periode.fraOgMed.tilFørsteDagIMåneden().tilLocalDate(),
             tilOgMed = periode.tilOgMed.tilSisteDagIMåneden().tilLocalDate(),
-            innhold = periode.innhold!!
+            innhold = periode.innhold!!,
         )
     }
 
 data class RestTidslinjer(
     val barnasTidslinjer: Map<String, RestTidslinjerForBarn>,
-    val søkersTidslinjer: RestTidslinjerForSøker
+    val søkersTidslinjer: RestTidslinjerForSøker,
 )
 
 data class RestTidslinjerForBarn(
     val vilkårTidslinjer: List<List<RestTidslinjePeriode<VilkårRegelverkResultat>>>,
     val oppfyllerEgneVilkårIKombinasjonMedSøkerTidslinje: List<RestTidslinjePeriode<Resultat>>,
-    val regelverkTidslinje: List<RestTidslinjePeriode<Regelverk>>
+    val regelverkTidslinje: List<RestTidslinjePeriode<Regelverk>>,
 )
 
 data class RestTidslinjerForSøker(
     val vilkårTidslinjer: List<List<RestTidslinjePeriode<VilkårRegelverkResultat>>>,
-    val oppfyllerEgneVilkårTidslinje: List<RestTidslinjePeriode<Resultat>>
+    val oppfyllerEgneVilkårTidslinje: List<RestTidslinjePeriode<Resultat>>,
 )
 
 data class RestTidslinjePeriode<T>(
     val fraOgMed: LocalDate,
     val tilOgMed: LocalDate?,
-    val innhold: T
+    val innhold: T,
 )

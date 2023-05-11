@@ -22,12 +22,12 @@ class RegistrereSøknad(
     private val persongrunnlagService: PersongrunnlagService,
     private val loggService: LoggService,
     private val vedtakService: VedtakService,
-    private val tilbakestillBehandlingService: TilbakestillBehandlingService
+    private val tilbakestillBehandlingService: TilbakestillBehandlingService,
 ) : BehandlingSteg<RestRegistrerSøknad> {
 
     override fun utførStegOgAngiNeste(
         behandling: Behandling,
-        data: RestRegistrerSøknad
+        data: RestRegistrerSøknad,
     ): StegType {
         val aktivSøknadGrunnlagFinnes = søknadGrunnlagService.hentAktiv(behandlingId = behandling.id) != null
         val søknadDTO: SøknadDTO = data.søknad
@@ -36,7 +36,7 @@ class RegistrereSøknad(
         if (behandling.underkategori != søknadDTO.underkategori.tilDomene()) {
             behandlingstemaService.oppdaterBehandlingstema(
                 behandling = behandlingHentOgPersisterService.hent(behandlingId = behandling.id),
-                overstyrtUnderkategori = søknadDTO.underkategori.tilDomene()
+                overstyrtUnderkategori = søknadDTO.underkategori.tilDomene(),
             )
         }
 
@@ -44,8 +44,8 @@ class RegistrereSøknad(
         søknadGrunnlagService.lagreOgDeaktiverGammel(
             søknadGrunnlag = SøknadGrunnlag(
                 behandlingId = behandling.id,
-                søknad = innsendtSøknad
-            )
+                søknad = innsendtSøknad,
+            ),
         )
 
         val forrigeBehandlingSomErVedtatt =
@@ -53,12 +53,12 @@ class RegistrereSøknad(
         persongrunnlagService.registrerBarnFraSøknad(
             behandling = behandlingHentOgPersisterService.hent(behandlingId = behandling.id),
             forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErVedtatt,
-            søknadDTO = søknadDTO
+            søknadDTO = søknadDTO,
         )
 
         tilbakestillBehandlingService.initierOgSettBehandlingTilVilkårsvurdering(
             behandling = behandlingHentOgPersisterService.hent(behandlingId = behandling.id),
-            bekreftEndringerViaFrontend = data.bekreftEndringerViaFrontend
+            bekreftEndringerViaFrontend = data.bekreftEndringerViaFrontend,
         )
 
         val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandling.id)

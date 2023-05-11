@@ -7,13 +7,13 @@ import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADE
 
 data class RestSøkParam(
     val personIdent: String,
-    val barnasIdenter: List<String> = emptyList()
+    val barnasIdenter: List<String> = emptyList(),
 )
 
 enum class FagsakDeltagerRolle {
     BARN,
     FORELDER,
-    UKJENT
+    UKJENT,
 }
 
 data class RestFagsakDeltager(
@@ -25,7 +25,7 @@ data class RestFagsakDeltager(
     val fagsakId: Long? = null,
     val fagsakStatus: FagsakStatus? = null,
     val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING? = null,
-    val harTilgang: Boolean = true
+    val harTilgang: Boolean = true,
 ) {
 
     override fun toString(): String {

@@ -24,7 +24,7 @@ class AutobrevOpphørSmåbarnstilleggService(
     private val autovedtakStegService: AutovedtakStegService,
     private val persongrunnlagService: PersongrunnlagService,
     private val periodeOvergangsstønadGrunnlagRepository: PeriodeOvergangsstønadGrunnlagRepository,
-    private val startSatsendring: StartSatsendring
+    private val startSatsendring: StartSatsendring,
 ) {
     @Transactional
     fun kjørBehandlingOgSendBrevForOpphørAvSmåbarnstillegg(fagsakId: Long) {
@@ -48,7 +48,7 @@ class AutobrevOpphørSmåbarnstilleggService(
             } else {
                 logger.info(
                     "For fagsak $fagsakId ble verken yngste barn 3 år forrige måned eller har overgangsstønad som utløper denne måneden. " +
-                        "Avbryter sending av autobrev for opphør av småbarnstillegg."
+                        "Avbryter sending av autobrev for opphør av småbarnstillegg.",
                 )
                 return
             }
@@ -56,7 +56,7 @@ class AutobrevOpphørSmåbarnstilleggService(
         if (!autovedtakBrevService.skalAutobrevBehandlingOpprettes(
                 fagsakId = fagsakId,
                 behandlingsårsak = behandlingsårsak,
-                standardbegrunnelser = listOf(standardbegrunnelse)
+                standardbegrunnelser = listOf(standardbegrunnelse),
             )
         ) {
             return
@@ -65,7 +65,7 @@ class AutobrevOpphørSmåbarnstilleggService(
         if (startSatsendring.sjekkOgOpprettSatsendringVedGammelSats(fagsakId)) {
             throw RekjørSenereException(
                 "Satsedring skal kjøre ferdig før man behandler autobrev småbarnstillegg",
-                LocalDateTime.now().plusHours(1)
+                LocalDateTime.now().plusHours(1),
             )
         }
 
@@ -75,8 +75,8 @@ class AutobrevOpphørSmåbarnstilleggService(
                 aktør = behandling.fagsak.aktør,
                 behandlingsårsak = behandlingsårsak,
                 standardbegrunnelse = standardbegrunnelse,
-                fagsakId = fagsakId
-            )
+                fagsakId = fagsakId,
+            ),
         )
     }
 

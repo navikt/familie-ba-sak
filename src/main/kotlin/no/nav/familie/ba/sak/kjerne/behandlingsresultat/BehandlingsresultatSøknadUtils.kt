@@ -18,7 +18,7 @@ internal enum class Søknadsresultat {
     INNVILGET,
     AVSLÅTT,
     DELVIS_INNVILGET,
-    INGEN_RELEVANTE_ENDRINGER
+    INGEN_RELEVANTE_ENDRINGER,
 }
 
 object BehandlingsresultatSøknadUtils {
@@ -32,18 +32,18 @@ object BehandlingsresultatSøknadUtils {
         personerFremstiltKravFor: List<Aktør>,
         endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
         behandlingÅrsak: BehandlingÅrsak,
-        finnesUregistrerteBarn: Boolean
+        finnesUregistrerteBarn: Boolean,
     ): Søknadsresultat {
         val resultaterFraAndeler = utledSøknadResultatFraAndelerTilkjentYtelse(
             forrigeAndeler = forrigeAndeler,
             nåværendeAndeler = nåværendeAndeler,
             personerFremstiltKravFor = personerFremstiltKravFor,
-            endretUtbetalingAndeler = endretUtbetalingAndeler
+            endretUtbetalingAndeler = endretUtbetalingAndeler,
         )
 
         val erEksplisittAvslagPåMinstEnPersonFremstiltKravFor = erEksplisittAvslagPåMinstEnPersonFremstiltKravForEllerSøker(
             nåværendePersonResultater = nåværendePersonResultater,
-            personerFremstiltKravFor = personerFremstiltKravFor
+            personerFremstiltKravFor = personerFremstiltKravFor,
         )
 
         val erFødselshendelseMedAvslag = if (behandlingÅrsak == BehandlingÅrsak.FØDSELSHENDELSE) {
@@ -70,7 +70,7 @@ object BehandlingsresultatSøknadUtils {
         forrigeAndeler: List<AndelTilkjentYtelse>,
         nåværendeAndeler: List<AndelTilkjentYtelse>,
         personerFremstiltKravFor: List<Aktør>,
-        endretUtbetalingAndeler: List<EndretUtbetalingAndel>
+        endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
     ): List<Søknadsresultat> {
         val alleSøknadsresultater = personerFremstiltKravFor.flatMap { aktør ->
             val ytelseTyper = (forrigeAndeler.map { it.type } + nåværendeAndeler.map { it.type }).distinct()
@@ -79,7 +79,7 @@ object BehandlingsresultatSøknadUtils {
                 utledSøknadResultatFraAndelerTilkjentYtelsePerPersonOgType(
                     forrigeAndelerForPerson = forrigeAndeler.filter { it.aktør == aktør && it.type == ytelseType },
                     nåværendeAndelerForPerson = nåværendeAndeler.filter { it.aktør == aktør && it.type == ytelseType },
-                    endretUtbetalingAndelerForPerson = endretUtbetalingAndeler.filter { it.person?.aktør == aktør }
+                    endretUtbetalingAndelerForPerson = endretUtbetalingAndeler.filter { it.person?.aktør == aktør },
                 )
             }
         }
@@ -90,7 +90,7 @@ object BehandlingsresultatSøknadUtils {
     private fun utledSøknadResultatFraAndelerTilkjentYtelsePerPersonOgType(
         forrigeAndelerForPerson: List<AndelTilkjentYtelse>,
         nåværendeAndelerForPerson: List<AndelTilkjentYtelse>,
-        endretUtbetalingAndelerForPerson: List<EndretUtbetalingAndel>
+        endretUtbetalingAndelerForPerson: List<EndretUtbetalingAndel>,
     ): List<Søknadsresultat> {
         val forrigeTidslinje = AndelTilkjentYtelseTidslinje(forrigeAndelerForPerson)
         val nåværendeTidslinje = AndelTilkjentYtelseTidslinje(nåværendeAndelerForPerson)
@@ -110,14 +110,15 @@ object BehandlingsresultatSøknadUtils {
                             secureLogger.info(
                                 "Andel $nåværende er satt til 0kr, men det skyldes verken differanseberegning eller endret utbetaling andel." +
                                     "\nNåværende andeler: $nåværendeAndelerForPerson" +
-                                    "\nEndret utbetaling andeler: $endretUtbetalingAndelerForPerson"
+                                    "\nEndret utbetaling andeler: $endretUtbetalingAndelerForPerson",
                             )
                             throw Feil("Andel er satt til 0 kr, men det skyldes verken differanseberegning eller endret utbetaling andel")
                         }
                         Årsak.DELT_BOSTED -> Søknadsresultat.INNVILGET
                         Årsak.ALLEREDE_UTBETALT,
                         Årsak.ENDRE_MOTTAKER,
-                        Årsak.ETTERBETALING_3ÅR -> Søknadsresultat.AVSLÅTT
+                        Årsak.ETTERBETALING_3ÅR,
+                        -> Søknadsresultat.AVSLÅTT
                     }
                 }
                 forrigeBeløp != nåværendeBeløp && nåværendeBeløp > 0 -> Søknadsresultat.INNVILGET // Innvilget beløp som er annerledes enn forrige
@@ -130,7 +131,7 @@ object BehandlingsresultatSøknadUtils {
 
     private fun erEksplisittAvslagPåMinstEnPersonFremstiltKravForEllerSøker(
         nåværendePersonResultater: Set<PersonResultat>,
-        personerFremstiltKravFor: List<Aktør>
+        personerFremstiltKravFor: List<Aktør>,
     ): Boolean =
         nåværendePersonResultater
             .filter { personerFremstiltKravFor.contains(it.aktør) || it.erSøkersResultater() }
@@ -144,12 +145,12 @@ object BehandlingsresultatSøknadUtils {
         val ingenSøknadsresultatFeil = if (behandlingÅrsak == BehandlingÅrsak.KLAGE) {
             FunksjonellFeil(
                 frontendFeilmelding = "Du har opprettet en revurdering med årsak klage, men ikke innvilget noen perioder. Denne behandlingen kan kun brukes til full omgjøring.",
-                melding = "Klarer ikke utlede søknadsresultat for behandling med årsak klage. Det er ikke innvilget noen perioder."
+                melding = "Klarer ikke utlede søknadsresultat for behandling med årsak klage. Det er ikke innvilget noen perioder.",
             )
         } else {
             FunksjonellFeil(
                 frontendFeilmelding = "Du har opprettet en behandling som følge av søknad, men har enten ikke krysset av for noen barn det er søkt for eller avslått/innvilget noen perioder.",
-                melding = "Klarer ikke utlede søknadsresultat. Finner ingen resultater."
+                melding = "Klarer ikke utlede søknadsresultat. Finner ingen resultater.",
             )
         }
 
@@ -160,8 +161,8 @@ object BehandlingsresultatSøknadUtils {
             resultaterUtenIngenEndringer.size == 2 && resultaterUtenIngenEndringer.containsAll(
                 listOf(
                     Søknadsresultat.INNVILGET,
-                    Søknadsresultat.AVSLÅTT
-                )
+                    Søknadsresultat.AVSLÅTT,
+                ),
             ) -> Søknadsresultat.DELVIS_INNVILGET
             else -> throw Feil("Klarer ikke kombinere søknadsresultater: $this")
         }
