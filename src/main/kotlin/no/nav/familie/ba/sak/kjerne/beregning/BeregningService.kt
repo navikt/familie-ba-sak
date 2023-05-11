@@ -49,7 +49,7 @@ class BeregningService(
     private val småbarnstilleggService: SmåbarnstilleggService,
     private val tilkjentYtelseEndretAbonnenter: List<TilkjentYtelseEndretAbonnent> = emptyList(),
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
-    private val featureToggleService: FeatureToggleService
+    private val featureToggleService: FeatureToggleService,
 ) {
     fun slettTilkjentYtelseForBehandling(behandlingId: Long) =
         tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)
@@ -206,7 +206,7 @@ class BeregningService(
             TilkjentYtelseSatsendringUtils.beregnTilkjentYtelseMedNySatsForSatsendring(
                 forrigeAndelerTilkjentYtelse = andelerFraForrigeBehandling,
                 behandling = behandling,
-                personopplysningGrunnlag = personopplysningGrunnlag
+                personopplysningGrunnlag = personopplysningGrunnlag,
             )
         } else {
             val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)

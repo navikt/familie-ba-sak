@@ -35,7 +35,7 @@ class TilkjentYtelseSatsendringUtilsTest {
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                 beløp = 527,
                 prosent = BigDecimal(50),
-                person = barnOver6
+                person = barnOver6,
             ),
             lagAndelTilkjentYtelse(
                 fom = YearMonth.of(2022, 1),
@@ -43,7 +43,7 @@ class TilkjentYtelseSatsendringUtilsTest {
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                 beløp = 1676,
                 prosent = BigDecimal(100),
-                person = barnUnder6
+                person = barnUnder6,
             ),
             lagAndelTilkjentYtelse(
                 fom = YearMonth.of(2022, 5),
@@ -51,7 +51,7 @@ class TilkjentYtelseSatsendringUtilsTest {
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                 beløp = 1054,
                 prosent = BigDecimal(100),
-                person = søker
+                person = søker,
             ),
             lagAndelTilkjentYtelse(
                 fom = YearMonth.of(2023, 1),
@@ -59,8 +59,8 @@ class TilkjentYtelseSatsendringUtilsTest {
                 ytelseType = YtelseType.SMÅBARNSTILLEGG,
                 beløp = 660,
                 prosent = BigDecimal(100),
-                person = barnUnder6
-            )
+                person = barnUnder6,
+            ),
         )
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(satsendringsbehandling.id, søker, barnOver6, barnUnder6)
@@ -68,7 +68,7 @@ class TilkjentYtelseSatsendringUtilsTest {
         val nyTilkjentYtelse = TilkjentYtelseSatsendringUtils.beregnTilkjentYtelseMedNySatsForSatsendring(
             forrigeAndelerTilkjentYtelse = forrigeAndeler,
             behandling = satsendringsbehandling,
-            personopplysningGrunnlag = personopplysningGrunnlag
+            personopplysningGrunnlag = personopplysningGrunnlag,
         )
 
         val nyeAndeler = nyTilkjentYtelse.andelerTilkjentYtelse
@@ -90,8 +90,8 @@ class TilkjentYtelseSatsendringUtilsTest {
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                 beløp = 1054,
                 prosent = BigDecimal(100),
-                person = barn
-            )
+                person = barn,
+            ),
         )
 
         val nyTilkjentYtelse = lagInitiellTilkjentYtelse(behandling = satsendringsbehandling)
@@ -102,7 +102,7 @@ class TilkjentYtelseSatsendringUtilsTest {
             ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
             person = barn,
             behandlingId = satsendringsbehandling.id,
-            tilkjentYtelse = nyTilkjentYtelse
+            tilkjentYtelse = nyTilkjentYtelse,
         )
 
         Assertions.assertEquals(2, nyeAndeler.size)
@@ -116,9 +116,9 @@ class TilkjentYtelseSatsendringUtilsTest {
                 sats = 1054,
                 aktør = barn.aktør,
                 behandlingId = satsendringsbehandling.id,
-                tilkjentYtelse = nyTilkjentYtelse
+                tilkjentYtelse = nyTilkjentYtelse,
             ),
-            faktiskAndel = nyeAndeler[0]
+            faktiskAndel = nyeAndeler[0],
         )
         assertAndel(
             forventetAndel = ForventetAndel(
@@ -130,9 +130,9 @@ class TilkjentYtelseSatsendringUtilsTest {
                 sats = 1083,
                 aktør = barn.aktør,
                 behandlingId = satsendringsbehandling.id,
-                tilkjentYtelse = nyTilkjentYtelse
+                tilkjentYtelse = nyTilkjentYtelse,
             ),
-            faktiskAndel = nyeAndeler[1]
+            faktiskAndel = nyeAndeler[1],
         )
     }
 
@@ -147,8 +147,8 @@ class TilkjentYtelseSatsendringUtilsTest {
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                 beløp = 1676,
                 prosent = BigDecimal(100),
-                person = barn
-            )
+                person = barn,
+            ),
         )
 
         val nyTilkjentYtelse = lagInitiellTilkjentYtelse(behandling = satsendringsbehandling)
@@ -159,7 +159,7 @@ class TilkjentYtelseSatsendringUtilsTest {
             ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
             person = barn,
             behandlingId = satsendringsbehandling.id,
-            tilkjentYtelse = nyTilkjentYtelse
+            tilkjentYtelse = nyTilkjentYtelse,
         )
 
         Assertions.assertEquals(2, nyeAndeler.size)
@@ -173,9 +173,9 @@ class TilkjentYtelseSatsendringUtilsTest {
                 sats = 1676,
                 aktør = barn.aktør,
                 behandlingId = satsendringsbehandling.id,
-                tilkjentYtelse = nyTilkjentYtelse
+                tilkjentYtelse = nyTilkjentYtelse,
             ),
-            faktiskAndel = nyeAndeler[0]
+            faktiskAndel = nyeAndeler[0],
         )
         assertAndel(
             forventetAndel = ForventetAndel(
@@ -187,9 +187,9 @@ class TilkjentYtelseSatsendringUtilsTest {
                 sats = 1723,
                 aktør = barn.aktør,
                 behandlingId = satsendringsbehandling.id,
-                tilkjentYtelse = nyTilkjentYtelse
+                tilkjentYtelse = nyTilkjentYtelse,
             ),
-            faktiskAndel = nyeAndeler[1]
+            faktiskAndel = nyeAndeler[1],
         )
     }
 
@@ -204,7 +204,7 @@ class TilkjentYtelseSatsendringUtilsTest {
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                 beløp = 1676,
                 prosent = BigDecimal(100),
-                person = barn
+                person = barn,
             ),
             lagAndelTilkjentYtelse(
                 fom = YearMonth.of(2022, 5),
@@ -212,8 +212,8 @@ class TilkjentYtelseSatsendringUtilsTest {
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                 beløp = 838,
                 prosent = BigDecimal(50),
-                person = barn
-            )
+                person = barn,
+            ),
         )
 
         val nyTilkjentYtelse = lagInitiellTilkjentYtelse(behandling = satsendringsbehandling)
@@ -224,7 +224,7 @@ class TilkjentYtelseSatsendringUtilsTest {
             ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
             person = barn,
             behandlingId = satsendringsbehandling.id,
-            tilkjentYtelse = nyTilkjentYtelse
+            tilkjentYtelse = nyTilkjentYtelse,
         )
 
         Assertions.assertEquals(3, nyeAndeler.size)
@@ -238,9 +238,9 @@ class TilkjentYtelseSatsendringUtilsTest {
                 sats = 1676,
                 aktør = barn.aktør,
                 behandlingId = satsendringsbehandling.id,
-                tilkjentYtelse = nyTilkjentYtelse
+                tilkjentYtelse = nyTilkjentYtelse,
             ),
-            faktiskAndel = nyeAndeler[0]
+            faktiskAndel = nyeAndeler[0],
         )
         assertAndel(
             forventetAndel = ForventetAndel(
@@ -252,9 +252,9 @@ class TilkjentYtelseSatsendringUtilsTest {
                 sats = 1676,
                 aktør = barn.aktør,
                 behandlingId = satsendringsbehandling.id,
-                tilkjentYtelse = nyTilkjentYtelse
+                tilkjentYtelse = nyTilkjentYtelse,
             ),
-            faktiskAndel = nyeAndeler[1]
+            faktiskAndel = nyeAndeler[1],
         )
         assertAndel(
             forventetAndel = ForventetAndel(
@@ -266,9 +266,9 @@ class TilkjentYtelseSatsendringUtilsTest {
                 sats = 1723,
                 aktør = barn.aktør,
                 behandlingId = satsendringsbehandling.id,
-                tilkjentYtelse = nyTilkjentYtelse
+                tilkjentYtelse = nyTilkjentYtelse,
             ),
-            faktiskAndel = nyeAndeler[2]
+            faktiskAndel = nyeAndeler[2],
         )
     }
 
@@ -283,8 +283,8 @@ class TilkjentYtelseSatsendringUtilsTest {
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                 beløp = 1054,
                 prosent = BigDecimal(100),
-                person = søker
-            )
+                person = søker,
+            ),
         )
 
         val nyTilkjentYtelse = lagInitiellTilkjentYtelse(behandling = satsendringsbehandling)
@@ -295,7 +295,7 @@ class TilkjentYtelseSatsendringUtilsTest {
             ytelseType = YtelseType.UTVIDET_BARNETRYGD,
             person = søker,
             behandlingId = satsendringsbehandling.id,
-            tilkjentYtelse = nyTilkjentYtelse
+            tilkjentYtelse = nyTilkjentYtelse,
         )
 
         Assertions.assertEquals(2, nyeAndeler.size)
@@ -309,9 +309,9 @@ class TilkjentYtelseSatsendringUtilsTest {
                 sats = 1054,
                 aktør = søker.aktør,
                 behandlingId = satsendringsbehandling.id,
-                tilkjentYtelse = nyTilkjentYtelse
+                tilkjentYtelse = nyTilkjentYtelse,
             ),
-            faktiskAndel = nyeAndeler[0]
+            faktiskAndel = nyeAndeler[0],
         )
         assertAndel(
             forventetAndel = ForventetAndel(
@@ -323,9 +323,9 @@ class TilkjentYtelseSatsendringUtilsTest {
                 sats = 2489,
                 aktør = søker.aktør,
                 behandlingId = satsendringsbehandling.id,
-                tilkjentYtelse = nyTilkjentYtelse
+                tilkjentYtelse = nyTilkjentYtelse,
             ),
-            faktiskAndel = nyeAndeler[1]
+            faktiskAndel = nyeAndeler[1],
         )
     }
 
@@ -340,8 +340,8 @@ class TilkjentYtelseSatsendringUtilsTest {
                 ytelseType = YtelseType.SMÅBARNSTILLEGG,
                 beløp = 660,
                 prosent = BigDecimal(100),
-                person = søker
-            )
+                person = søker,
+            ),
         )
 
         val nyTilkjentYtelse = lagInitiellTilkjentYtelse(behandling = satsendringsbehandling)
@@ -352,7 +352,7 @@ class TilkjentYtelseSatsendringUtilsTest {
             ytelseType = YtelseType.SMÅBARNSTILLEGG,
             person = søker,
             behandlingId = satsendringsbehandling.id,
-            tilkjentYtelse = nyTilkjentYtelse
+            tilkjentYtelse = nyTilkjentYtelse,
         )
 
         Assertions.assertEquals(2, nyeAndeler.size)
@@ -366,9 +366,9 @@ class TilkjentYtelseSatsendringUtilsTest {
                 sats = 660,
                 aktør = søker.aktør,
                 behandlingId = satsendringsbehandling.id,
-                tilkjentYtelse = nyTilkjentYtelse
+                tilkjentYtelse = nyTilkjentYtelse,
             ),
-            faktiskAndel = nyeAndeler[0]
+            faktiskAndel = nyeAndeler[0],
         )
         assertAndel(
             forventetAndel = ForventetAndel(
@@ -380,9 +380,9 @@ class TilkjentYtelseSatsendringUtilsTest {
                 sats = 678,
                 aktør = søker.aktør,
                 behandlingId = satsendringsbehandling.id,
-                tilkjentYtelse = nyTilkjentYtelse
+                tilkjentYtelse = nyTilkjentYtelse,
             ),
-            faktiskAndel = nyeAndeler[1]
+            faktiskAndel = nyeAndeler[1],
         )
     }
 
@@ -397,7 +397,7 @@ class TilkjentYtelseSatsendringUtilsTest {
                 ytelseType = YtelseType.SMÅBARNSTILLEGG,
                 beløp = 660,
                 prosent = BigDecimal(100),
-                person = søker
+                person = søker,
             ),
             lagAndelTilkjentYtelse(
                 fom = YearMonth.of(2022, 1),
@@ -405,8 +405,8 @@ class TilkjentYtelseSatsendringUtilsTest {
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                 beløp = 1054,
                 prosent = BigDecimal(100),
-                person = søker
-            )
+                person = søker,
+            ),
         )
 
         val nyTilkjentYtelse = lagInitiellTilkjentYtelse(behandling = satsendringsbehandling)
@@ -418,7 +418,7 @@ class TilkjentYtelseSatsendringUtilsTest {
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                 person = søker,
                 behandlingId = satsendringsbehandling.id,
-                tilkjentYtelse = nyTilkjentYtelse
+                tilkjentYtelse = nyTilkjentYtelse,
             )
         }
     }
@@ -434,7 +434,7 @@ class TilkjentYtelseSatsendringUtilsTest {
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                 beløp = 660,
                 prosent = BigDecimal(100),
-                person = lagPerson(type = PersonType.SØKER)
+                person = lagPerson(type = PersonType.SØKER),
             ),
             lagAndelTilkjentYtelse(
                 fom = YearMonth.of(2022, 1),
@@ -442,8 +442,8 @@ class TilkjentYtelseSatsendringUtilsTest {
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                 beløp = 1054,
                 prosent = BigDecimal(100),
-                person = søker
-            )
+                person = søker,
+            ),
         )
 
         val nyTilkjentYtelse = lagInitiellTilkjentYtelse(behandling = satsendringsbehandling)
@@ -455,7 +455,7 @@ class TilkjentYtelseSatsendringUtilsTest {
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                 person = søker,
                 behandlingId = satsendringsbehandling.id,
-                tilkjentYtelse = nyTilkjentYtelse
+                tilkjentYtelse = nyTilkjentYtelse,
             )
         }
     }
@@ -473,7 +473,7 @@ class TilkjentYtelseSatsendringUtilsTest {
             ytelseType = YtelseType.UTVIDET_BARNETRYGD,
             person = søker,
             behandlingId = satsendringsbehandling.id,
-            tilkjentYtelse = nyTilkjentYtelse
+            tilkjentYtelse = nyTilkjentYtelse,
         )
 
         Assertions.assertEquals(0, nyeAndeler.size)
@@ -500,6 +500,6 @@ class TilkjentYtelseSatsendringUtilsTest {
         val tilkjentYtelse: TilkjentYtelse,
         val aktør: Aktør,
         val sats: Int,
-        val prosent: BigDecimal
+        val prosent: BigDecimal,
     )
 }
