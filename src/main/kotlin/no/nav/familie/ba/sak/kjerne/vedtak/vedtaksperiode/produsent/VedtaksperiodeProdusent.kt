@@ -81,6 +81,8 @@ fun finnPerioderSomSkalBegrunnes(
         (eksplisitteAvslagsperioder + sammenslåttePerioderUtenEksplisittAvslag)
             .slåSammenAvslagOgReduksjonsperioderMedSammeFomOgTom()
 
+    // slå sammen perioder dersom avslagene gjelder samme person
+
     return perioderSomSkalBegrunnesUtenSøkerSineAvslag.fyllInnSøkerSineAvslag(vilkårResultaterSøker, søker)
 }
 
@@ -160,14 +162,27 @@ private fun List<Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned>>.sl�
     return kombinerteAvslagOgReduksjonsperioder.kombiner { it.toList().takeIf { it.isNotEmpty() } }.perioder()
 }
 
-private fun List<Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned>>.utledEksplisitteAvslagsperioder(): Collection<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>> =
-    this.map { grunnlagForDenneOgForrigeBehandlingTidslinje ->
+private fun List<Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned>>.utledEksplisitteAvslagsperioder(): Collection<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>> {
+    val placeholder = this.map { grunnlagForDenneOgForrigeBehandlingTidslinje ->
         grunnlagForDenneOgForrigeBehandlingTidslinje.filtrer {
             it?.gjeldende?.erEksplisittAvslag() == true
         }
+    }
+    return placeholder.kombiner { grunnlagPerPersonIPeriode ->
+        val explisitteAvslagIPeriode = grunnlagPerPersonIPeriode
+            .flatMap {
+                it.gjeldende?.vilkårResultaterForVedtaksperiode
+                    ?.filter { it.erEksplisittAvslagPåSøknad == true }
+                    ?: emptyList()
+            }
+
+        if (grunnlagPerPersonIPeriode.all { it.filter { it.gjeldende.vilkårResultaterForVedtaksperiode. } }) {
+        } else
     }.map { grunnlagForPersonTidslinje ->
-        grunnlagForPersonTidslinje.map { it?.let { listOf(it) } }
-    }.flatMap { it.perioder() }
+        grunnlagForPersonTidslinje.map { it?.let { kotlin.collections.listOf(it) } }
+    }
+        .flatMap { it.perioder() }
+}
 
 /**
  * Ønsker å dra med informasjon om forrige behandling i perioder der forrige behandling var oppfylt, men gjeldende
