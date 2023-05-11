@@ -185,4 +185,7 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
             "where b.id in (:behandlingIder) AND f.institusjon IS NOT NULL AND f.status = 'LØPENDE' ",
     )
     fun finnTssEksternIdForBehandlinger(behandlingIder: List<Long>): List<Pair<Long, String>>
+
+    @Query(value = "SELECT b.status FROM behandling WHERE b.id = :behandlingId")
+    fun finnStatus(behandlingId: Long): BehandlingStatus
 }
