@@ -16,7 +16,7 @@ import org.springframework.context.annotation.Configuration
 class SwaggerConfig(
     @Value("\${AUTHORIZATION_URL}")
     val authorizationUrl: String,
-    @Value("\${TOKEN_URL}")
+    @Value("\${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}")
     val tokenUrl: String,
     @Value("\${API_SCOPE}")
     val apiScope: String

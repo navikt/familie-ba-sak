@@ -52,6 +52,9 @@ spec:
           - id: "7a271f87-39fb-468b-a9ee-6cf3c070f548"  # BESLUTTER_ROLLE
           - id: "ad7b87a6-9180-467c-affc-20a566b0fec0"  # 0000-GA-Strengt_Fortrolig_Adresse
           - id: "9ec6487d-f37a-4aad-a027-cd221c1ac32b"  # 0000-GA-Fortrolig_Adresse
+      replyURLs:
+        - "https://familie-ba-sak.intern.nav.no/swagger-ui/oauth2-redirect.html"
+      singlePageApplication: true
   accessPolicy:
     inbound:
       rules:
