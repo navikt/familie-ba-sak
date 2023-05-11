@@ -37,8 +37,8 @@ class PersonoGrunnlagServiceTest {
             behandlingHentOgPersisterService = mockk(),
             andelTilkjentYtelseRepository = andelTilkjentYtelseRepository,
             loggService = mockk(),
-            arbeidsforholdService = mockk()
-        )
+            arbeidsforholdService = mockk(),
+        ),
     )
 
     @Test
@@ -56,12 +56,12 @@ class PersonoGrunnlagServiceTest {
         val forrigeBehandlingPersongrunnlag =
             lagTestPersonopplysningGrunnlag(
                 behandlingId = forrigeBehandling.id,
-                personer = arrayOf(søker, barnFraForrigeBehandling)
+                personer = arrayOf(søker, barnFraForrigeBehandling),
             )
 
         val søknadDTO = lagSøknadDTO(
             søkerIdent = søkerFnr,
-            barnasIdenter = listOf(barnFnr)
+            barnasIdenter = listOf(barnFnr),
         )
 
         every { personidentService.hentOgLagreAktør(søkerFnr, true) } returns søker.aktør
@@ -72,7 +72,7 @@ class PersonoGrunnlagServiceTest {
         every {
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandlingOgBarn(
                 forrigeBehandling.id,
-                barnFraForrigeBehandling.aktør
+                barnFraForrigeBehandling.aktør,
             )
         } returns listOf(lagAndelTilkjentYtelse(fom = YearMonth.now(), tom = YearMonth.now()))
 
@@ -82,14 +82,14 @@ class PersonoGrunnlagServiceTest {
                 any(),
                 any(),
                 any(),
-                any()
+                any(),
             )
         } returns PersonopplysningGrunnlag(behandlingId = behandling.id)
 
         persongrunnlagService.registrerBarnFraSøknad(
             søknadDTO = søknadDTO,
             behandling = behandling,
-            forrigeBehandlingSomErVedtatt = forrigeBehandling
+            forrigeBehandlingSomErVedtatt = forrigeBehandling,
         )
         verify(exactly = 1) {
             persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
@@ -97,7 +97,7 @@ class PersonoGrunnlagServiceTest {
                 barnFraInneværendeBehandling = listOf(barn.aktør),
                 barnFraForrigeBehandling = listOf(barnFraForrigeBehandling.aktør),
                 behandling = behandling,
-                målform = søknadDTO.søkerMedOpplysninger.målform
+                målform = søknadDTO.søkerMedOpplysninger.målform,
             )
         }
     }
@@ -126,7 +126,7 @@ class PersonoGrunnlagServiceTest {
                 barnFraInneværendeBehandling = listOf(barnet.aktør),
                 barnFraForrigeBehandling = listOf(barnet.aktør),
                 behandling = behandling,
-                målform = Målform.NB
+                målform = Målform.NB,
             ).apply {
                 Assertions.assertThat(this.personer)
                     .hasSize(1)

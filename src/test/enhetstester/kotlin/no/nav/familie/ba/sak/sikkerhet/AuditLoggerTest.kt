@@ -56,8 +56,8 @@ internal class AuditLoggerTest {
                 personIdent = "12345678901",
                 custom1 = CustomKeyValue("k", "v"),
                 custom2 = CustomKeyValue("k2", "v2"),
-                custom3 = CustomKeyValue("k3", "v3")
-            )
+                custom3 = CustomKeyValue("k3", "v3"),
+            ),
         )
         assertThat(listAppender.list).hasSize(1)
         assertThat(getMessage())

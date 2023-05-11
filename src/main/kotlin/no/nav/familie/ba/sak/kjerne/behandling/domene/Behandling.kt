@@ -85,7 +85,7 @@ data class Behandling(
     var overstyrtEndringstidspunkt: LocalDate? = null,
 
     @OneToOne(mappedBy = "behandling", optional = true)
-    val verge: Verge? = null
+    val verge: Verge? = null,
 ) : BaseEntitet() {
 
     val steg: StegType
@@ -129,7 +129,7 @@ data class Behandling(
             } else {
                 throw Feil(
                     "Behandling er teknisk opphør, men årsak $opprettetÅrsak " +
-                        "og type $type samsvarer ikke."
+                        "og type $type samsvarer ikke.",
                 )
             }
         } else {
@@ -141,7 +141,7 @@ data class Behandling(
         if (type == BehandlingType.TEKNISK_OPPHØR) {
             throw FunksjonellFeil(
                 melding = "Kan ikke lage teknisk opphør behandling.",
-                frontendFeilmelding = "Kan ikke lage teknisk opphør behandling, bruk heller teknisk endring."
+                frontendFeilmelding = "Kan ikke lage teknisk opphør behandling, bruk heller teknisk endring.",
             )
         }
 
@@ -222,8 +222,8 @@ data class Behandling(
                         BehandlingStegStatus.UTFØRT
                     } else {
                         BehandlingStegStatus.IKKE_UTFØRT
-                    }
-                )
+                    },
+                ),
             )
         }
     }
@@ -247,8 +247,8 @@ data class Behandling(
         behandlingStegTilstand.add(
             BehandlingStegTilstand(
                 behandling = this,
-                behandlingSteg = FØRSTE_STEG
-            )
+                behandlingSteg = FØRSTE_STEG,
+            ),
         )
         return this
     }
@@ -350,7 +350,8 @@ enum class Behandlingsresultat(val displayName: String) {
     HENLAGT_AUTOMATISK_FØDSELSHENDELSE(displayName = "Henlagt avslått i automatisk vilkårsvurdering"),
     HENLAGT_TEKNISK_VEDLIKEHOLD(displayName = "Henlagt teknisk vedlikehold"),
 
-    IKKE_VURDERT(displayName = "Ikke vurdert");
+    IKKE_VURDERT(displayName = "Ikke vurdert"),
+    ;
 
     fun kanIkkeSendesTilOppdrag(): Boolean =
         this in listOf(FORTSATT_INNVILGET, AVSLÅTT, FORTSATT_OPPHØRT, ENDRET_UTEN_UTBETALING)
@@ -381,7 +382,8 @@ enum class BehandlingÅrsak(val visningsnavn: String) {
     SMÅBARNSTILLEGG("Småbarnstillegg"),
     MIGRERING("Migrering"),
     ENDRE_MIGRERINGSDATO("Endre migreringsdato"),
-    HELMANUELL_MIGRERING("Manuell migrering");
+    HELMANUELL_MIGRERING("Manuell migrering"),
+    ;
 
     fun erOmregningsårsak(): Boolean =
         this == OMREGNING_6ÅR || this == OMREGNING_18ÅR || this == OMREGNING_SMÅBARNSTILLEGG
@@ -410,12 +412,13 @@ enum class BehandlingType(val visningsnavn: String) {
     MIGRERING_FRA_INFOTRYGD("Migrering fra infotrygd"),
     MIGRERING_FRA_INFOTRYGD_OPPHØRT("Opphør migrering fra infotrygd"),
     TEKNISK_OPPHØR("Teknisk opphør"), // Ikke lenger i bruk. Bruk heller teknisk endring
-    TEKNISK_ENDRING("Teknisk endring")
+    TEKNISK_ENDRING("Teknisk endring"),
 }
 
 enum class BehandlingKategori(val visningsnavn: String, val nivå: Int) {
     EØS("EØS", 2),
-    NASJONAL("Nasjonal", 1);
+    NASJONAL("Nasjonal", 1),
+    ;
 
     fun tilOppgavebehandlingType(): OppgaveBehandlingType {
         return when (this) {
@@ -436,7 +439,8 @@ fun List<BehandlingKategori>.finnHøyesteKategori(): BehandlingKategori? = this.
 enum class BehandlingUnderkategori(val visningsnavn: String, val nivå: Int) {
     INSTITUSJON("Institusjon", 3),
     UTVIDET("Utvidet", 2),
-    ORDINÆR("Ordinær", 1);
+    ORDINÆR("Ordinær", 1),
+    ;
 
     fun tilOppgaveBehandlingTema(): OppgaveBehandlingTema {
         return when (this) {
@@ -459,7 +463,8 @@ enum class BehandlingStatus {
     UTREDES,
     FATTER_VEDTAK,
     IVERKSETTER_VEDTAK,
-    AVSLUTTET;
+    AVSLUTTET,
+    ;
 
     fun erLåstMenIkkeAvsluttet() = this == FATTER_VEDTAK || this == IVERKSETTER_VEDTAK
 }

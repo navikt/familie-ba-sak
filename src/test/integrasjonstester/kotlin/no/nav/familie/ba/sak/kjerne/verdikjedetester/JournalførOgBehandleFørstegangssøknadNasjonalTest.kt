@@ -47,7 +47,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val stegService: StegService,
     @Autowired private val featureToggleService: FeatureToggleService,
-    @Autowired private val brevmalService: BrevmalService
+    @Autowired private val brevmalService: BrevmalService,
 ) : AbstractVerdikjedetest() {
 
     @BeforeEach
@@ -71,10 +71,10 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
                         fødselsdato = LocalDate.now().minusMonths(6).toString(),
                         fornavn = "Barn",
                         etternavn = "Barnesen",
-                        bostedsadresser = emptyList()
-                    )
-                )
-            )
+                        bostedsadresser = emptyList(),
+                    ),
+                ),
+            ),
         )
 
         val fagsakId: Ressurs<String> = familieBaSakKlient().journalfør(
@@ -84,9 +84,9 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
             restJournalføring = lagMockRestJournalføring(
                 bruker = NavnOgIdent(
                     navn = scenario.søker.navn,
-                    id = scenario.søker.ident!!
-                )
-            )
+                    id = scenario.søker.ident!!,
+                ),
+            ),
         )
 
         assertEquals(Ressurs.Status.SUKSESS, fagsakId.status)
@@ -95,7 +95,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
         generellAssertFagsak(
             restFagsak = restFagsakEtterJournalføring,
             fagsakStatus = FagsakStatus.OPPRETTET,
-            behandlingStegType = StegType.REGISTRERE_SØKNAD
+            behandlingStegType = StegType.REGISTRERE_SØKNAD,
         )
 
         val aktivBehandling = hentAktivBehandling(restFagsak = restFagsakEtterJournalføring.data!!)
@@ -103,19 +103,19 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
             RestRegistrerSøknad(
                 søknad = lagSøknadDTO(
                     søkerIdent = scenario.søker.ident,
-                    barnasIdenter = scenario.barna.map { it.ident!! }
+                    barnasIdenter = scenario.barna.map { it.ident!! },
                 ),
-                bekreftEndringerViaFrontend = false
+                bekreftEndringerViaFrontend = false,
             )
         val restUtvidetBehandling: Ressurs<RestUtvidetBehandling> =
             familieBaSakKlient().registrererSøknad(
                 behandlingId = aktivBehandling.behandlingId,
-                restRegistrerSøknad = restRegistrerSøknad
+                restRegistrerSøknad = restRegistrerSøknad,
             )
         generellAssertRestUtvidetBehandling(
             restUtvidetBehandling = restUtvidetBehandling,
             behandlingStatus = BehandlingStatus.UTREDES,
-            behandlingStegType = StegType.VILKÅRSVURDERING
+            behandlingStegType = StegType.VILKÅRSVURDERING,
         )
 
         // Godkjenner alle vilkår på førstegangsbehandling.
@@ -130,45 +130,45 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
                         vilkårResultater = listOf(
                             it.copy(
                                 resultat = Resultat.OPPFYLT,
-                                periodeFom = LocalDate.now().minusMonths(2)
-                            )
-                        )
-                    )
+                                periodeFom = LocalDate.now().minusMonths(2),
+                            ),
+                        ),
+                    ),
                 )
             }
         }
 
         familieBaSakKlient().validerVilkårsvurdering(
-            behandlingId = restUtvidetBehandling.data!!.behandlingId
+            behandlingId = restUtvidetBehandling.data!!.behandlingId,
         )
 
         val restUtvidetBehandlingEtterBehandlingsresultat =
             familieBaSakKlient().behandlingsresultatStegOgGåVidereTilNesteSteg(
-                behandlingId = restUtvidetBehandling.data!!.behandlingId
+                behandlingId = restUtvidetBehandling.data!!.behandlingId,
             )
 
         assertEquals(
             tilleggOrdinærSatsTilTester(),
             hentNåværendeEllerNesteMånedsUtbetaling(
-                behandling = restUtvidetBehandlingEtterBehandlingsresultat.data!!
-            )
+                behandling = restUtvidetBehandlingEtterBehandlingsresultat.data!!,
+            ),
         )
 
         generellAssertRestUtvidetBehandling(
             restUtvidetBehandling = restUtvidetBehandlingEtterBehandlingsresultat,
             behandlingStatus = BehandlingStatus.UTREDES,
-            behandlingStegType = StegType.VURDER_TILBAKEKREVING
+            behandlingStegType = StegType.VURDER_TILBAKEKREVING,
         )
 
         val restUtvidetBehandlingEtterVurderTilbakekreving =
             familieBaSakKlient().lagreTilbakekrevingOgGåVidereTilNesteSteg(
                 restUtvidetBehandlingEtterBehandlingsresultat.data!!.behandlingId,
-                RestTilbakekreving(Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING, begrunnelse = "begrunnelse")
+                RestTilbakekreving(Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING, begrunnelse = "begrunnelse"),
             )
         generellAssertRestUtvidetBehandling(
             restUtvidetBehandling = restUtvidetBehandlingEtterVurderTilbakekreving,
             behandlingStatus = BehandlingStatus.UTREDES,
-            behandlingStegType = StegType.SEND_TIL_BESLUTTER
+            behandlingStegType = StegType.SEND_TIL_BESLUTTER,
         )
 
         val vedtaksperiodeId =
@@ -178,9 +178,9 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
             vedtaksperiodeId = vedtaksperiodeId.id,
             restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
                 standardbegrunnelser = listOf(
-                    Standardbegrunnelse.INNVILGET_BOR_HOS_SØKER.enumnavnTilString()
-                )
-            )
+                    Standardbegrunnelse.INNVILGET_BOR_HOS_SØKER.enumnavnTilString(),
+                ),
+            ),
         )
 
         val restUtvidetBehandlingEtterSendTilBeslutter =
@@ -189,14 +189,14 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
         generellAssertRestUtvidetBehandling(
             restUtvidetBehandling = restUtvidetBehandlingEtterSendTilBeslutter,
             behandlingStatus = BehandlingStatus.FATTER_VEDTAK,
-            behandlingStegType = StegType.BESLUTTE_VEDTAK
+            behandlingStegType = StegType.BESLUTTE_VEDTAK,
         )
 
         val restUtvidetBehandlingEtterIverksetting =
             familieBaSakKlient().iverksettVedtak(
                 behandlingId = restUtvidetBehandlingEtterSendTilBeslutter.data!!.behandlingId,
                 restBeslutningPåVedtak = RestBeslutningPåVedtak(
-                    Beslutning.GODKJENT
+                    Beslutning.GODKJENT,
                 ),
                 beslutterHeaders = HttpHeaders().apply {
                     setBearerAuth(
@@ -205,16 +205,16 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
                                 "groups" to listOf("SAKSBEHANDLER", "BESLUTTER"),
                                 "azp" to "azp-test",
                                 "name" to "Mock McMockface Beslutter",
-                                "NAVident" to "Z0000"
-                            )
-                        )
+                                "NAVident" to "Z0000",
+                            ),
+                        ),
                     )
-                }
+                },
             )
         generellAssertRestUtvidetBehandling(
             restUtvidetBehandling = restUtvidetBehandlingEtterIverksetting,
             behandlingStatus = BehandlingStatus.IVERKSETTER_VEDTAK,
-            behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG
+            behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG,
         )
 
         håndterIverksettingAvBehandling(
@@ -223,7 +223,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
             fagsakService = fagsakService,
             vedtakService = vedtakService,
             stegService = stegService,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
 
         )
     }
@@ -240,10 +240,10 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
                         fødselsdato = LocalDate.now().minusMonths(6).toString(),
                         fornavn = "Barn",
                         etternavn = "Barnesen",
-                        bostedsadresser = emptyList()
-                    )
-                )
-            )
+                        bostedsadresser = emptyList(),
+                    ),
+                ),
+            ),
         )
 
         val fagsakId: Ressurs<String> = familieBaSakKlient().journalfør(
@@ -253,12 +253,12 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
             restJournalføring = lagMockRestJournalføring(
                 bruker = NavnOgIdent(
                     navn = scenario.søker.navn,
-                    id = scenario.søker.ident!!
-                )
+                    id = scenario.søker.ident!!,
+                ),
             ).copy(
                 journalpostTittel = "Søknad om utvidet barnetrygd",
-                underkategori = BehandlingUnderkategori.UTVIDET
-            )
+                underkategori = BehandlingUnderkategori.UTVIDET,
+            ),
         )
 
         assertEquals(Ressurs.Status.SUKSESS, fagsakId.status)
@@ -267,7 +267,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
         generellAssertFagsak(
             restFagsak = restFagsakEtterJournalføring,
             fagsakStatus = FagsakStatus.OPPRETTET,
-            behandlingStegType = StegType.REGISTRERE_SØKNAD
+            behandlingStegType = StegType.REGISTRERE_SØKNAD,
         )
 
         val aktivBehandling = hentAktivBehandling(restFagsak = restFagsakEtterJournalføring.data!!)
@@ -279,25 +279,25 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
                 søknad = lagSøknadDTO(
                     søkerIdent = scenario.søker.ident,
                     barnasIdenter = scenario.barna.map { it.ident!! },
-                    underkategori = BehandlingUnderkategori.UTVIDET
+                    underkategori = BehandlingUnderkategori.UTVIDET,
                 ),
-                bekreftEndringerViaFrontend = false
+                bekreftEndringerViaFrontend = false,
             )
         val restUtvidetBehandling: Ressurs<RestUtvidetBehandling> =
             familieBaSakKlient().registrererSøknad(
                 behandlingId = aktivBehandling.behandlingId,
-                restRegistrerSøknad = restRegistrerSøknad
+                restRegistrerSøknad = restRegistrerSøknad,
             )
         generellAssertRestUtvidetBehandling(
             restUtvidetBehandling = restUtvidetBehandling,
             behandlingStatus = BehandlingStatus.UTREDES,
-            behandlingStegType = StegType.VILKÅRSVURDERING
+            behandlingStegType = StegType.VILKÅRSVURDERING,
         )
 
         // Godkjenner alle vilkår på førstegangsbehandling.
         assertEquals(
             3,
-            restUtvidetBehandling.data!!.personResultater.find { it.personIdent == scenario.søker.ident }?.vilkårResultater?.size
+            restUtvidetBehandling.data!!.personResultater.find { it.personIdent == scenario.søker.ident }?.vilkårResultater?.size,
         )
 
         restUtvidetBehandling.data!!.personResultater.forEach { restPersonResultat ->
@@ -311,45 +311,45 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
                         vilkårResultater = listOf(
                             it.copy(
                                 resultat = Resultat.OPPFYLT,
-                                periodeFom = LocalDate.now().minusMonths(2)
-                            )
-                        )
-                    )
+                                periodeFom = LocalDate.now().minusMonths(2),
+                            ),
+                        ),
+                    ),
                 )
             }
         }
 
         familieBaSakKlient().validerVilkårsvurdering(
-            behandlingId = restUtvidetBehandling.data!!.behandlingId
+            behandlingId = restUtvidetBehandling.data!!.behandlingId,
         )
 
         val restUtvidetBehandlingEtterBehandlingsresultat =
             familieBaSakKlient().behandlingsresultatStegOgGåVidereTilNesteSteg(
-                behandlingId = restUtvidetBehandling.data!!.behandlingId
+                behandlingId = restUtvidetBehandling.data!!.behandlingId,
             )
 
         assertEquals(
             tilleggOrdinærSatsTilTester() + sisteUtvidetSatsTilTester(),
             hentNåværendeEllerNesteMånedsUtbetaling(
-                behandling = restUtvidetBehandlingEtterBehandlingsresultat.data!!
-            )
+                behandling = restUtvidetBehandlingEtterBehandlingsresultat.data!!,
+            ),
         )
 
         generellAssertRestUtvidetBehandling(
             restUtvidetBehandling = restUtvidetBehandlingEtterBehandlingsresultat,
             behandlingStatus = BehandlingStatus.UTREDES,
-            behandlingStegType = StegType.VURDER_TILBAKEKREVING
+            behandlingStegType = StegType.VURDER_TILBAKEKREVING,
         )
 
         val restUtvidetBehandlingEtterVurderTilbakekreving =
             familieBaSakKlient().lagreTilbakekrevingOgGåVidereTilNesteSteg(
                 restUtvidetBehandlingEtterBehandlingsresultat.data!!.behandlingId,
-                RestTilbakekreving(Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING, begrunnelse = "begrunnelse")
+                RestTilbakekreving(Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING, begrunnelse = "begrunnelse"),
             )
         generellAssertRestUtvidetBehandling(
             restUtvidetBehandling = restUtvidetBehandlingEtterVurderTilbakekreving,
             behandlingStatus = BehandlingStatus.UTREDES,
-            behandlingStegType = StegType.SEND_TIL_BESLUTTER
+            behandlingStegType = StegType.SEND_TIL_BESLUTTER,
         )
 
         val vedtaksperiodeId =
@@ -360,9 +360,9 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
             vedtaksperiodeId = vedtaksperiodeId.id,
             restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
                 standardbegrunnelser = listOf(
-                    Standardbegrunnelse.INNVILGET_BOR_HOS_SØKER.enumnavnTilString()
-                )
-            )
+                    Standardbegrunnelse.INNVILGET_BOR_HOS_SØKER.enumnavnTilString(),
+                ),
+            ),
         )
 
         val restUtvidetBehandlingEtterSendTilBeslutter =
@@ -371,14 +371,14 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
         generellAssertRestUtvidetBehandling(
             restUtvidetBehandling = restUtvidetBehandlingEtterSendTilBeslutter,
             behandlingStatus = BehandlingStatus.FATTER_VEDTAK,
-            behandlingStegType = StegType.BESLUTTE_VEDTAK
+            behandlingStegType = StegType.BESLUTTE_VEDTAK,
         )
 
         val restUtvidetBehandlingEtterIverksetting =
             familieBaSakKlient().iverksettVedtak(
                 behandlingId = restUtvidetBehandlingEtterSendTilBeslutter.data!!.behandlingId,
                 restBeslutningPåVedtak = RestBeslutningPåVedtak(
-                    Beslutning.GODKJENT
+                    Beslutning.GODKJENT,
                 ),
                 beslutterHeaders = HttpHeaders().apply {
                     setBearerAuth(
@@ -387,16 +387,16 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
                                 "groups" to listOf("SAKSBEHANDLER", "BESLUTTER"),
                                 "azp" to "azp-test",
                                 "name" to "Mock McMockface Beslutter",
-                                "NAVident" to "Z0000"
-                            )
-                        )
+                                "NAVident" to "Z0000",
+                            ),
+                        ),
                     )
-                }
+                },
             )
         generellAssertRestUtvidetBehandling(
             restUtvidetBehandling = restUtvidetBehandlingEtterIverksetting,
             behandlingStatus = BehandlingStatus.IVERKSETTER_VEDTAK,
-            behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG
+            behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG,
         )
 
         håndterIverksettingAvBehandling(
@@ -405,7 +405,7 @@ class JournalførOgBehandleFørstegangssøknadNasjonalTest(
             fagsakService = fagsakService,
             vedtakService = vedtakService,
             stegService = stegService,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
 
         )
     }

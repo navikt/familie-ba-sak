@@ -28,12 +28,12 @@ class BehandlingsresultatUtilsTest {
         søknadsresultat: Søknadsresultat?,
         endringsresultat: Endringsresultat,
         opphørsresultat: Opphørsresultat,
-        behandlingsresultat: Behandlingsresultat
+        behandlingsresultat: Behandlingsresultat,
     ) {
         val kombinertResultat = BehandlingsresultatUtils.kombinerResultaterTilBehandlingsresultat(
             søknadsresultat,
             endringsresultat,
-            opphørsresultat
+            opphørsresultat,
         )
 
         assertEquals(kombinertResultat, behandlingsresultat)
@@ -44,13 +44,13 @@ class BehandlingsresultatUtilsTest {
     internal fun `Kombiner resultater - skal kaste feil ved ugyldige kombinasjoner av resultat`(
         søknadsresultat: Søknadsresultat?,
         endringsresultat: Endringsresultat,
-        opphørsresultat: Opphørsresultat
+        opphørsresultat: Opphørsresultat,
     ) {
         assertThrows<FunksjonellFeil> {
             BehandlingsresultatUtils.kombinerResultaterTilBehandlingsresultat(
                 søknadsresultat,
                 endringsresultat,
-                opphørsresultat
+                opphørsresultat,
             )
         }
     }
@@ -84,7 +84,7 @@ class BehandlingsresultatUtilsTest {
                 Arguments.of(null, Endringsresultat.ENDRING, Opphørsresultat.IKKE_OPPHØRT, Behandlingsresultat.ENDRET_UTBETALING),
                 Arguments.of(null, Endringsresultat.INGEN_ENDRING, Opphørsresultat.OPPHØRT, Behandlingsresultat.OPPHØRT),
                 Arguments.of(null, Endringsresultat.INGEN_ENDRING, Opphørsresultat.FORTSATT_OPPHØRT, Behandlingsresultat.FORTSATT_OPPHØRT),
-                Arguments.of(null, Endringsresultat.INGEN_ENDRING, Opphørsresultat.IKKE_OPPHØRT, Behandlingsresultat.FORTSATT_INNVILGET)
+                Arguments.of(null, Endringsresultat.INGEN_ENDRING, Opphørsresultat.IKKE_OPPHØRT, Behandlingsresultat.FORTSATT_INNVILGET),
             )
 
         @JvmStatic
@@ -93,7 +93,7 @@ class BehandlingsresultatUtilsTest {
                 Arguments.of(Søknadsresultat.INGEN_RELEVANTE_ENDRINGER, Endringsresultat.INGEN_ENDRING, Opphørsresultat.OPPHØRT),
                 Arguments.of(Søknadsresultat.INGEN_RELEVANTE_ENDRINGER, Endringsresultat.INGEN_ENDRING, Opphørsresultat.FORTSATT_OPPHØRT),
                 Arguments.of(Søknadsresultat.INGEN_RELEVANTE_ENDRINGER, Endringsresultat.ENDRING, Opphørsresultat.OPPHØRT),
-                Arguments.of(Søknadsresultat.INGEN_RELEVANTE_ENDRINGER, Endringsresultat.ENDRING, Opphørsresultat.FORTSATT_OPPHØRT)
+                Arguments.of(Søknadsresultat.INGEN_RELEVANTE_ENDRINGER, Endringsresultat.ENDRING, Opphørsresultat.FORTSATT_OPPHØRT),
             )
     }
 }

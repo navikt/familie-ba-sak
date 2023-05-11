@@ -21,7 +21,7 @@ import java.time.YearMonth
 @Service
 class VilkårsvurderingService(
     private val vilkårsvurderingRepository: VilkårsvurderingRepository,
-    private val sanityService: SanityService
+    private val sanityService: SanityService,
 ) {
 
     fun hentAktivForBehandling(behandlingId: Long): Vilkårsvurdering? {
@@ -89,12 +89,12 @@ class VilkårsvurderingService(
 
     fun hentVilkårsbegrunnelser(): Map<VedtakBegrunnelseType, List<RestVedtakBegrunnelseTilknyttetVilkår>> =
         standardbegrunnelserTilNedtrekksmenytekster(sanityService.hentSanityBegrunnelser()) + eøsStandardbegrunnelserTilNedtrekksmenytekster(
-            sanityService.hentSanityEØSBegrunnelser()
+            sanityService.hentSanityEØSBegrunnelser(),
         )
 
     fun hentTidligsteVilkårsvurderingKnyttetTilMigrering(behandlingId: Long): YearMonth? {
         val vilkårsvurdering = hentAktivForBehandling(
-            behandlingId = behandlingId
+            behandlingId = behandlingId,
         )
 
         return vilkårsvurdering?.personResultater
@@ -112,7 +112,7 @@ class VilkårsvurderingService(
 
         fun matchVilkårResultater(
             vilkårsvurdering1: Vilkårsvurdering,
-            vilkårsvurdering2: Vilkårsvurdering
+            vilkårsvurdering2: Vilkårsvurdering,
         ): List<Pair<VilkårResultat?, VilkårResultat?>> {
             val vilkårResultater =
                 (vilkårsvurdering1.personResultater.map { it.vilkårResultater } + vilkårsvurdering2.personResultater.map { it.vilkårResultater }).flatten()
@@ -124,7 +124,7 @@ class VilkårsvurderingService(
                 val periodeFom: LocalDate?,
                 val periodeTom: LocalDate?,
                 val begrunnelse: String,
-                val erEksplisittAvslagPåSøknad: Boolean?
+                val erEksplisittAvslagPåSøknad: Boolean?,
             )
 
             val gruppert = vilkårResultater.groupBy {
@@ -135,7 +135,7 @@ class VilkårsvurderingService(
                     periodeFom = it.periodeFom,
                     periodeTom = it.periodeTom,
                     begrunnelse = it.begrunnelse,
-                    erEksplisittAvslagPåSøknad = it.erEksplisittAvslagPåSøknad
+                    erEksplisittAvslagPåSøknad = it.erEksplisittAvslagPåSøknad,
                 )
             }
             return gruppert.map { (_, gruppe) ->

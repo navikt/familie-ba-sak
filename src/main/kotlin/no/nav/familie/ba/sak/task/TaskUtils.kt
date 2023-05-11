@@ -14,7 +14,7 @@ import java.time.temporal.TemporalAdjusters
  */
 fun nesteGyldigeTriggertidForBehandlingIHverdager(
     minutesToAdd: Long = 0,
-    triggerTid: LocalDateTime = LocalDateTime.now()
+    triggerTid: LocalDateTime = LocalDateTime.now(),
 ): LocalDateTime {
     var date = triggerTid.plusMinutes(minutesToAdd)
 

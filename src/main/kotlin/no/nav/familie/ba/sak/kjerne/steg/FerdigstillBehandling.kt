@@ -21,12 +21,12 @@ class FerdigstillBehandling(
     private val beregningService: BeregningService,
     private val behandlingService: BehandlingService,
     private val behandlingMetrikker: BehandlingMetrikker,
-    private val loggService: LoggService
+    private val loggService: LoggService,
 ) : BehandlingSteg<String> {
 
     override fun utførStegOgAngiNeste(
         behandling: Behandling,
-        data: String
+        data: String,
     ): StegType {
         logger.info("Forsøker å ferdigstille behandling ${behandling.id}")
 

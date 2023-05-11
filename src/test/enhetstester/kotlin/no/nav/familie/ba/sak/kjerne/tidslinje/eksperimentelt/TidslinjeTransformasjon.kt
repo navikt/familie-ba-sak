@@ -16,7 +16,7 @@ fun <I, T : Tidsenhet, R> Tidslinje<I, T>.windowed(
     size: Int,
     step: Int = 1,
     partialWindows: Boolean = false,
-    mapper: (List<Periode<I, T>>) -> Periode<R, T>
+    mapper: (List<Periode<I, T>>) -> Periode<R, T>,
 ): Tidslinje<R, T> {
     val tidslinje = this
 

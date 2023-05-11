@@ -1467,9 +1467,7 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
     FORTSATT_INNVILGET_NORSK_STATSBORGER_INSTITUSJON {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INSTITUSJON_FORTSATT_INNVILGET
         override val sanityApiNavn = "fortsattInnvilgetNorskStatsborgerInstitusjon"
-    }
-
-    ;
+    }, ;
 
     override val kanDelesOpp: Boolean = false
 
@@ -1480,7 +1478,7 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
     override fun delOpp(
         restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
         triggesAv: TriggesAv,
-        periode: NullablePeriode
+        periode: NullablePeriode,
     ): List<BrevBegrunnelseGrunnlagMedPersoner> {
         if (!this.kanDelesOpp) {
             throw Feil("Begrunnelse $this kan ikke deles opp.")
@@ -1489,13 +1487,13 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
             Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_ENDRET_UTBETALING -> {
                 val deltBostedEndringsperioder = this.hentRelevanteEndringsperioderForBegrunnelse(
                     minimerteRestEndredeAndeler = restBehandlingsgrunnlagForBrev.minimerteEndredeUtbetalingAndeler,
-                    vedtaksperiode = periode
+                    vedtaksperiode = periode,
                 )
                     .filter { it.årsak == Årsak.DELT_BOSTED }
                     .filter { endringsperiode ->
                         endringsperiodeGjelderBarn(
                             personerPåBehandling = restBehandlingsgrunnlagForBrev.personerPåBehandling,
-                            personIdentFraEndringsperiode = endringsperiode.personIdent
+                            personIdentFraEndringsperiode = endringsperiode.personIdent,
                         )
                     }
                 val deltBostedEndringsperioderGruppertPåAvtaledato =
@@ -1507,7 +1505,7 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
                         vedtakBegrunnelseType = this.vedtakBegrunnelseType,
                         triggesAv = triggesAv,
                         personIdenter = it.value.map { endringsperiode -> endringsperiode.personIdent },
-                        avtaletidspunktDeltBosted = it.key
+                        avtaletidspunktDeltBosted = it.key,
                     )
                 }
             }
@@ -1519,7 +1517,7 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
 
 private fun endringsperiodeGjelderBarn(
     personerPåBehandling: List<MinimertRestPerson>,
-    personIdentFraEndringsperiode: String
+    personIdentFraEndringsperiode: String,
 ) = personerPåBehandling.find { person -> person.personIdent == personIdentFraEndringsperiode }?.type == PersonType.BARN
 
 val endretUtbetalingsperiodeBegrunnelser: List<Standardbegrunnelse> = listOf(
@@ -1529,5 +1527,5 @@ val endretUtbetalingsperiodeBegrunnelser: List<Standardbegrunnelse> = listOf(
     Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_MOTTATT_FULL_ORDINÆR_ETTERBETALT_UTVIDET_NY,
     Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_ENDRET_UTBETALING,
     Standardbegrunnelse.ENDRET_UTBETALING_SEKUNDÆR_DELT_BOSTED_FULL_UTBETALING_FØR_SØKNAD,
-    Standardbegrunnelse.ENDRET_UTBETALING_ETTERBETALT_UTVIDET_DEL_FRA_AVTALETIDSPUNKT_SØKT_FOR_PRAKTISERT_DELT
+    Standardbegrunnelse.ENDRET_UTBETALING_ETTERBETALT_UTVIDET_DEL_FRA_AVTALETIDSPUNKT_SØKT_FOR_PRAKTISERT_DELT,
 )

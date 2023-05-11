@@ -39,7 +39,7 @@ class TotrinnskontrollTest(
     private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
 
     @Autowired
-    private val databaseCleanupService: DatabaseCleanupService
+    private val databaseCleanupService: DatabaseCleanupService,
 ) : AbstractSpringIntegrationTest() {
 
     @BeforeAll
@@ -61,16 +61,16 @@ class TotrinnskontrollTest(
         assertThat(
             saksstatistikkMellomlagringRepository.findByTypeAndTypeId(
                 SaksstatistikkMellomlagringType.BEHANDLING,
-                behandling.id
-            )
+                behandling.id,
+            ),
         )
             .hasSize(2)
         assertThat(
             saksstatistikkMellomlagringRepository.findByTypeAndTypeId(
                 SaksstatistikkMellomlagringType.BEHANDLING,
-                behandling.id
+                behandling.id,
             )
-                .last().jsonToBehandlingDVH().behandlingStatus
+                .last().jsonToBehandlingDVH().behandlingStatus,
         ).isEqualTo(BehandlingStatus.FATTER_VEDTAK.name)
 
         totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandling = behandling)
@@ -82,16 +82,16 @@ class TotrinnskontrollTest(
         assertThat(
             saksstatistikkMellomlagringRepository.findByTypeAndTypeId(
                 SaksstatistikkMellomlagringType.BEHANDLING,
-                behandling.id
-            )
+                behandling.id,
+            ),
         )
             .hasSize(3)
         assertThat(
             saksstatistikkMellomlagringRepository.findByTypeAndTypeId(
                 SaksstatistikkMellomlagringType.BEHANDLING,
-                behandling.id
+                behandling.id,
             )
-                .last().jsonToBehandlingDVH().behandlingStatus
+                .last().jsonToBehandlingDVH().behandlingStatus,
         ).isEqualTo(BehandlingStatus.IVERKSETTER_VEDTAK.name)
 
         val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandlingId = behandling.id)!!
@@ -116,16 +116,16 @@ class TotrinnskontrollTest(
         assertThat(
             saksstatistikkMellomlagringRepository.findByTypeAndTypeId(
                 SaksstatistikkMellomlagringType.BEHANDLING,
-                behandling.id
-            )
+                behandling.id,
+            ),
         )
             .hasSize(3)
         assertThat(
             saksstatistikkMellomlagringRepository.findByTypeAndTypeId(
                 SaksstatistikkMellomlagringType.BEHANDLING,
-                behandling.id
+                behandling.id,
             )
-                .last().jsonToBehandlingDVH().behandlingStatus
+                .last().jsonToBehandlingDVH().behandlingStatus,
         ).isEqualTo(BehandlingStatus.UTREDES.name)
 
         val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandlingId = behandling.id)!!
@@ -140,7 +140,7 @@ class TotrinnskontrollTest(
             saksbehandlerId = "Mock.Saksbehandler",
             beslutter = "Mock Saksbehandler",
             beslutterId = "Mock.Saksbehandler",
-            godkjent = true
+            godkjent = true,
         )
 
         assertTrue(totrinnskontroll.erUgyldig())
@@ -154,7 +154,7 @@ class TotrinnskontrollTest(
             saksbehandlerId = "Mock.Saksbehandler",
             beslutter = "Mock Saksbehandler",
             beslutterId = "Mock.Saksbehandler",
-            godkjent = false
+            godkjent = false,
         )
 
         assertFalse(totrinnskontroll.erUgyldig())

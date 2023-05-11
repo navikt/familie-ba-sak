@@ -9,5 +9,5 @@ class PdlUtenlandskAdresssePersonBostedsadresse(val utenlandskAdresse: PdlUtenla
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 class PdlUtenlandskAdresssePersonUtenlandskAdresse(
-    val landkode: String
+    val landkode: String,
 )

@@ -29,7 +29,7 @@ data class ØkonomiSimuleringMottaker(
     @SequenceGenerator(
         name = "okonomi_simulering_mottaker_seq_generator",
         sequenceName = "okonomi_simulering_mottaker_seq",
-        allocationSize = 50
+        allocationSize = 50,
     )
     val id: Long = 0,
 
@@ -48,9 +48,9 @@ data class ØkonomiSimuleringMottaker(
         mappedBy = "økonomiSimuleringMottaker",
         cascade = [CascadeType.ALL],
         fetch = FetchType.EAGER,
-        orphanRemoval = true
+        orphanRemoval = true,
     )
-    var økonomiSimuleringPostering: List<ØkonomiSimuleringPostering> = emptyList()
+    var økonomiSimuleringPostering: List<ØkonomiSimuleringPostering> = emptyList(),
 ) : BaseEntitet() {
 
     override fun hashCode() = id.hashCode()

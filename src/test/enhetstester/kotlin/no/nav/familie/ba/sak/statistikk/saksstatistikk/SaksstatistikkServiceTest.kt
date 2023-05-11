@@ -109,7 +109,7 @@ internal class SaksstatistikkServiceTest(
     private val vedtaksperiodeService: VedtaksperiodeService,
 
     @MockK
-    private val settPåVentService: SettPåVentService
+    private val settPåVentService: SettPåVentService,
 
 ) {
 
@@ -123,7 +123,7 @@ internal class SaksstatistikkServiceTest(
         personopplysningerService,
         persongrunnlagService,
         vedtaksperiodeService,
-        settPåVentService
+        settPåVentService,
     )
 
     @BeforeAll
@@ -133,11 +133,11 @@ internal class SaksstatistikkServiceTest(
         every { arbeidsfordelingService.hentArbeidsfordelingPåBehandling(any()) } returns ArbeidsfordelingPåBehandling(
             behandlendeEnhetId = "4820",
             behandlendeEnhetNavn = "Nav",
-            behandlingId = 1
+            behandlingId = 1,
         )
         every { arbeidsfordelingService.hentArbeidsfordelingsenhet(any()) } returns Arbeidsfordelingsenhet(
             "4821",
-            "NAV"
+            "NAV",
         )
 
         every { settPåVentService.finnAktivSettPåVentPåBehandling(any()) } returns lagSettPåVent()
@@ -178,7 +178,7 @@ internal class SaksstatistikkServiceTest(
         every { behandlingHentOgPersisterService.hent(any()) } returns behandling
         every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
         every { vedtaksperiodeService.hentPersisterteVedtaksperioder(any()) } returns listOf(
-            vedtaksperiodeMedBegrunnelser
+            vedtaksperiodeMedBegrunnelser,
         )
         every { totrinnskontrollService.hentAktivForBehandling(any()) } returns Totrinnskontroll(
             saksbehandler = SYSTEM_NAVN,
@@ -186,7 +186,7 @@ internal class SaksstatistikkServiceTest(
             beslutter = SYSTEM_NAVN,
             beslutterId = SYSTEM_FORKORTELSE,
             godkjent = true,
-            behandling = behandling
+            behandling = behandling,
         )
 
         val behandlingDvh = sakstatistikkService.mapTilBehandlingDVH(2)
@@ -197,14 +197,14 @@ internal class SaksstatistikkServiceTest(
         assertThat(behandlingDvh?.mottattDato).isEqualTo(
             ZonedDateTime.of(
                 behandling.opprettetTidspunkt,
-                SaksstatistikkService.TIMEZONE
-            )
+                SaksstatistikkService.TIMEZONE,
+            ),
         )
         assertThat(behandlingDvh?.registrertDato).isEqualTo(
             ZonedDateTime.of(
                 behandling.opprettetTidspunkt,
-                SaksstatistikkService.TIMEZONE
-            )
+                SaksstatistikkService.TIMEZONE,
+            ),
         )
         assertThat(behandlingDvh?.vedtaksDato).isEqualTo(vedtak.vedtaksdato?.toLocalDate())
         assertThat(behandlingDvh?.behandlingId).isEqualTo(behandling.id.toString())
@@ -235,7 +235,7 @@ internal class SaksstatistikkServiceTest(
             beslutter = "Beslutter",
             beslutterId = "beslutterId",
             godkjent = true,
-            behandling = behandling
+            behandling = behandling,
         )
 
         val vedtak = lagVedtak(behandling)
@@ -249,12 +249,12 @@ internal class SaksstatistikkServiceTest(
         every { persongrunnlagService.hentSøker(any()) } returns tilfeldigSøker()
         every { persongrunnlagService.hentBarna(any<Behandling>()) } returns listOf(
             tilfeldigPerson()
-                .copy(aktør = randomAktør("01010000001"))
+                .copy(aktør = randomAktør("01010000001")),
         )
 
         every { vedtakService.hentAktivForBehandling(any()) } returns vedtak
         every { vedtaksperiodeService.hentPersisterteVedtaksperioder(any()) } returns listOf(
-            vedtaksperiodeMedBegrunnelser
+            vedtaksperiodeMedBegrunnelser,
         )
 
         val mottattDato = LocalDateTime.now()
@@ -265,7 +265,7 @@ internal class SaksstatistikkServiceTest(
         every { settPåVentService.finnAktivSettPåVentPåBehandling(any()) } returns lagSettPåVent(
             tidSattPåVent = tidSattPåVent,
             årsak = SettPåVentÅrsak.AVVENTER_DOKUMENTASJON,
-            frist = frist
+            frist = frist,
         )
 
         val behandlingDvh = sakstatistikkService.mapTilBehandlingDVH(2)
@@ -274,10 +274,10 @@ internal class SaksstatistikkServiceTest(
         assertThat(behandlingDvh?.funksjonellTid).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.MINUTES))
         assertThat(behandlingDvh?.tekniskTid).isCloseTo(ZonedDateTime.now(), within(1, ChronoUnit.MINUTES))
         assertThat(behandlingDvh?.mottattDato).isEqualTo(
-            mottattDato.atZone(SaksstatistikkService.TIMEZONE)
+            mottattDato.atZone(SaksstatistikkService.TIMEZONE),
         )
         assertThat(behandlingDvh?.registrertDato).isEqualTo(
-            behandling.opprettetTidspunkt.atZone(SaksstatistikkService.TIMEZONE)
+            behandling.opprettetTidspunkt.atZone(SaksstatistikkService.TIMEZONE),
         )
         assertThat(behandlingDvh?.vedtaksDato).isEqualTo(vedtak.vedtaksdato?.toLocalDate())
         assertThat(behandlingDvh?.behandlingId).isEqualTo(behandling.id.toString())
@@ -327,7 +327,7 @@ internal class SaksstatistikkServiceTest(
             fødselsdato = LocalDate.of(
                 2017,
                 3,
-                1
+                1,
             ),
             bostedsadresser = mutableListOf(
                 Bostedsadresse(
@@ -339,10 +339,10 @@ internal class SaksstatistikkServiceTest(
                         adressenavn = null,
                         kommunenummer = null,
                         tilleggsnavn = null,
-                        postnummer = "2222"
-                    )
-                )
-            )
+                        postnummer = "2222",
+                    ),
+                ),
+            ),
         )
 
         every { behandlingHentOgPersisterService.finnAktivForFagsak(any()) } returns null
@@ -370,8 +370,8 @@ internal class SaksstatistikkServiceTest(
             fødselsdato = LocalDate.of(
                 2017,
                 3,
-                1
-            )
+                1,
+            ),
         )
         every { personopplysningerService.hentLandkodeAlpha2UtenlandskBostedsadresse(tilAktør("12345678910")) } returns "SE"
 
@@ -399,7 +399,7 @@ internal class SaksstatistikkServiceTest(
         every { persongrunnlagService.hentAktiv(any()) } returns lagTestPersonopplysningGrunnlag(
             1,
             tilfeldigPerson(personType = PersonType.BARN),
-            tilfeldigPerson(personType = PersonType.SØKER)
+            tilfeldigPerson(personType = PersonType.SØKER),
         )
 
         every { behandlingHentOgPersisterService.finnAktivForFagsak(any()) } returns lagBehandling()
@@ -423,7 +423,7 @@ internal class SaksstatistikkServiceTest(
             BehandlingÅrsak.values(),
             BehandlingKategori.values(),
             Behandlingsresultat.values(),
-            SettPåVentÅrsak.values()
+            SettPåVentÅrsak.values(),
         )
 
         val alleMuligeResultatBegrunnelser = Standardbegrunnelse.values().map {
@@ -476,18 +476,18 @@ internal class SaksstatistikkServiceTest(
                 settPaaVent = SettPåVent(
                     frist = now().atStartOfDay(SaksstatistikkService.TIMEZONE),
                     tidSattPaaVent = now().atStartOfDay(SaksstatistikkService.TIMEZONE),
-                    aarsak = settPåVentÅrsak
-                )
+                    aarsak = settPåVentÅrsak,
+                ),
             )
             try {
                 validerJsonMotSchema(
                     sakstatistikkObjectMapper.writeValueAsString(behandlingDVH),
-                    "/schema/behandling-schema.json"
+                    "/schema/behandling-schema.json",
                 )
             } catch (e: Exception) {
                 throw IllegalStateException(
                     "Skjema til saksstatistikk validerer ikke etter endringer blant enum-verdier. Sjekk feilmelding og oppdater enten enum til å passe skjema eller skjema til å passe enum.",
-                    e
+                    e,
                 )
             }
         }
@@ -510,17 +510,17 @@ internal class SaksstatistikkServiceTest(
                 sakStatus = it.name,
                 avsender = "familie-ba-sak",
                 versjon = Utils.hentPropertyFraMaven("familie.kontrakter.saksstatistikk") ?: "2",
-                bostedsland = "NO"
+                bostedsland = "NO",
             )
             try {
                 validerJsonMotSchema(
                     sakstatistikkObjectMapper.writeValueAsString(sakDvh),
-                    "/schema/sak-schema.json"
+                    "/schema/sak-schema.json",
                 )
             } catch (e: Exception) {
                 throw IllegalStateException(
                     "Skjema til saksstatistikk validerer ikke etter endringer blant enum-verdier. Sjekk feilmelding og oppdater enten enum til å passe skjema eller skjema til å passe enum.",
-                    e
+                    e,
                 )
             }
         }
@@ -530,12 +530,12 @@ internal class SaksstatistikkServiceTest(
         val api = MedeiaJacksonApi()
         val behandlingSchemaValidator = api.loadSchema(
             UrlSchemaSource(
-                object {}::class.java.getResource(schemaPath)!!
-            )
+                object {}::class.java.getResource(schemaPath)!!,
+            ),
         )
         val validatedParser = api.decorateJsonParser(
             behandlingSchemaValidator,
-            JsonFactory().createParser(json.toByteArray(Charset.defaultCharset()))
+            JsonFactory().createParser(json.toByteArray(Charset.defaultCharset())),
         )
         api.parseAll(validatedParser)
     }

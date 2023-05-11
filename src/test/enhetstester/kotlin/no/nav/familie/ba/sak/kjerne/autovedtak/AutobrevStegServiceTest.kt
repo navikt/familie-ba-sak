@@ -31,7 +31,7 @@ class AutobrevStegServiceTest {
         oppgaveService = oppgaveService,
         autovedtakFødselshendelseService = autovedtakFødselshendelseService,
         autovedtakBrevService = autovedtakBrevService,
-        autovedtakSmåbarnstilleggService = autovedtakSmåbarnstilleggService
+        autovedtakSmåbarnstilleggService = autovedtakSmåbarnstilleggService,
     )
 
     @Test
@@ -49,7 +49,7 @@ class AutobrevStegServiceTest {
 
         autovedtakStegService.kjørBehandlingSmåbarnstillegg(
             mottakersAktør = aktør,
-            behandlingsdata = aktør
+            behandlingsdata = aktør,
         )
 
         verify(exactly = 1) { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any()) }
@@ -70,7 +70,7 @@ class AutobrevStegServiceTest {
 
         autovedtakStegService.kjørBehandlingSmåbarnstillegg(
             mottakersAktør = aktør,
-            behandlingsdata = aktør
+            behandlingsdata = aktør,
         )
 
         verify(exactly = 1) { oppgaveService.opprettOppgaveForManuellBehandling(any(), any(), any()) }
@@ -92,7 +92,7 @@ class AutobrevStegServiceTest {
         assertThrows<RekjørSenereException> {
             autovedtakStegService.kjørBehandlingSmåbarnstillegg(
                 mottakersAktør = aktør,
-                behandlingsdata = aktør
+                behandlingsdata = aktør,
             )
         }
     }

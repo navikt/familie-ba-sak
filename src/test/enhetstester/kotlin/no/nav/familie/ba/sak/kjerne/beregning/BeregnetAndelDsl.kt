@@ -29,7 +29,7 @@ internal infix fun Person.får(prosent: Prosent) = BeregnetAndel(
     stønadFom = YearMonth.now(),
     stønadTom = YearMonth.now(),
     beløp = 0,
-    sats = 0
+    sats = 0,
 )
 
 internal infix fun Person.får(sats: Int) = BeregnetAndel(
@@ -38,24 +38,24 @@ internal infix fun Person.får(sats: Int) = BeregnetAndel(
     stønadFom = YearMonth.now(),
     stønadTom = YearMonth.now(),
     beløp = sats,
-    sats = sats
+    sats = sats,
 )
 
 @Suppress("ktlint:enum-entry-name-case")
 enum class Prosent {
     alt,
     halvparten,
-    ingenting
+    ingenting,
 }
 
 internal infix fun BeregnetAndel.av(sats: Int) = this.copy(
     sats = sats,
-    beløp = sats.avrundetHeltallAvProsent(prosent)
+    beløp = sats.avrundetHeltallAvProsent(prosent),
 )
 
 internal infix fun BeregnetAndel.i(tidsrom: TidspunktClosedRange<Måned>) = this.copy(
     stønadFom = tidsrom.start.tilYearMonth(),
-    stønadTom = tidsrom.endInclusive.tilYearMonth()
+    stønadTom = tidsrom.endInclusive.tilYearMonth(),
 )
 
 class BeregnetAndelDslTest {

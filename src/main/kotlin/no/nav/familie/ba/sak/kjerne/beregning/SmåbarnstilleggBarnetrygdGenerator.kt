@@ -17,14 +17,14 @@ import java.time.LocalDate
 
 data class SmåbarnstilleggBarnetrygdGenerator(
     val behandlingId: Long,
-    val tilkjentYtelse: TilkjentYtelse
+    val tilkjentYtelse: TilkjentYtelse,
 ) {
 
     fun lagSmåbarnstilleggAndeler(
         perioderMedFullOvergangsstønad: List<InternPeriodeOvergangsstønad>,
         utvidetAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
         barnasAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
-        barnasAktørerOgFødselsdatoer: List<Pair<Aktør, LocalDate>>
+        barnasAktørerOgFødselsdatoer: List<Pair<Aktør, LocalDate>>,
     ): List<AndelTilkjentYtelseMedEndreteUtbetalinger> {
         if (perioderMedFullOvergangsstønad.isEmpty() || utvidetAndeler.isEmpty() || barnasAndeler.isEmpty()) return emptyList()
 
@@ -39,22 +39,22 @@ data class SmåbarnstilleggBarnetrygdGenerator(
 
         val barnSomGirRettTilSmåbarnstilleggTidslinje = lagTidslinjeForPerioderMedBarnSomGirRettTilSmåbarnstillegg(
             barnasAndeler = barnasAndeler,
-            barnasAktørerOgFødselsdatoer = barnasAktørerOgFødselsdatoer
+            barnasAktørerOgFødselsdatoer = barnasAktørerOgFødselsdatoer,
         )
 
         val kombinertProsentTidslinje = kombinerAlleTidslinjerTilProsentTidslinje(
             perioderMedFullOvergangsstønadTidslinje,
             utvidetBarnetrygdTidslinje,
-            barnSomGirRettTilSmåbarnstilleggTidslinje
+            barnSomGirRettTilSmåbarnstilleggTidslinje,
         )
 
         return kombinertProsentTidslinje.filtrerIkkeNull().lagSmåbarnstilleggAndeler(
-            søkerAktør = søkerAktør
+            søkerAktør = søkerAktør,
         )
     }
 
     private fun Tidslinje<SmåbarnstilleggPeriode, Måned>.lagSmåbarnstilleggAndeler(
-        søkerAktør: Aktør
+        søkerAktør: Aktør,
     ): List<AndelTilkjentYtelseMedEndreteUtbetalinger> {
         return this.kombinerUtenNullMed(satstypeTidslinje(SatsType.SMA)) { småbarnstilleggPeriode, sats ->
             val prosentIPeriode = småbarnstilleggPeriode.prosent
@@ -68,7 +68,7 @@ data class SmåbarnstilleggBarnetrygdGenerator(
                 beløp = beløpIPeriode,
                 ytelseType = YtelseType.SMÅBARNSTILLEGG,
                 sats = sats,
-                prosent = prosentIPeriode
+                prosent = prosentIPeriode,
             )
         }.tilAndelerTilkjentYtelse(tilkjentYtelse)
             .map { AndelTilkjentYtelseMedEndreteUtbetalinger.utenEndringer(it) }

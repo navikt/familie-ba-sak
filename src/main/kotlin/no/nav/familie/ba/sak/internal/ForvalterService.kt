@@ -14,7 +14,7 @@ class ForvalterService(
     private val økonomiService: ØkonomiService,
     private val vedtakService: VedtakService,
     private val beregningService: BeregningService,
-    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 ) {
 
     @Transactional
@@ -37,7 +37,7 @@ class ForvalterService(
         økonomiService.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(
             vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId),
             saksbehandlerId = "VL",
-            andelTilkjentYtelseForUtbetalingsoppdragFactory = AndelTilkjentYtelseForIverksettingFactory()
+            andelTilkjentYtelseForUtbetalingsoppdragFactory = AndelTilkjentYtelseForIverksettingFactory(),
         )
     }
 }

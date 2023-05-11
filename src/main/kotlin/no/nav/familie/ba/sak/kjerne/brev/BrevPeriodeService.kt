@@ -52,13 +52,13 @@ class BrevPeriodeService(
     private val kompetanseService: KompetanseService,
     private val integrasjonClient: IntegrasjonClient,
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
-    private val featureToggleService: FeatureToggleService
+    private val featureToggleService: FeatureToggleService,
 ) {
 
     fun hentBrevperioderData(
         vedtaksperioderId: List<Long>,
         behandlingId: BehandlingId,
-        skalLogge: Boolean = true
+        skalLogge: Boolean = true,
     ): List<BrevperiodeData> {
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandlingId.id)
             ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
@@ -93,7 +93,7 @@ class BrevPeriodeService(
         val restBehandlingsgrunnlagForBrev = hentRestBehandlingsgrunnlagForBrev(
             vilkårsvurdering = vilkårsvurdering,
             endredeUtbetalingAndeler = endredeUtbetalingAndeler,
-            persongrunnlag = personopplysningGrunnlag
+            persongrunnlag = personopplysningGrunnlag,
         )
 
         return vedtaksperioderId.map {
@@ -106,7 +106,7 @@ class BrevPeriodeService(
                 skalLogge = skalLogge,
                 kompetanser = kompetanser.toList(),
                 sanityBegrunnelser = sanityBegrunnelser,
-                sanityEØSBegrunnelser = sanityEØSBegrunnelser
+                sanityEØSBegrunnelser = sanityEØSBegrunnelser,
             )
         }
     }
@@ -121,7 +121,7 @@ class BrevPeriodeService(
         sanityBegrunnelser: List<SanityBegrunnelse>,
         sanityEØSBegrunnelser: List<SanityEØSBegrunnelse>,
 
-        skalLogge: Boolean = true
+        skalLogge: Boolean = true,
     ): BrevperiodeData {
         val vedtaksperiodeMedBegrunnelser =
             vedtaksperiodeHentOgPersisterService.hentVedtaksperiodeThrows(vedtaksperiodeId)
@@ -131,7 +131,7 @@ class BrevPeriodeService(
         val utvidetVedtaksperiodeMedBegrunnelse = vedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
             personopplysningGrunnlag = personopplysningGrunnlag,
             andelerTilkjentYtelse = andelerTilkjentYtelse,
-            skalBrukeNyVedtaksperiodeLøsning = featureToggleService.isEnabled(FeatureToggleConfig.VEDTAKSPERIODE_NY)
+            skalBrukeNyVedtaksperiodeLøsning = featureToggleService.isEnabled(FeatureToggleConfig.VEDTAKSPERIODE_NY),
         )
 
         val ytelserForrigePeriode =
@@ -143,7 +143,7 @@ class BrevPeriodeService(
         val minimertVedtaksperiode =
             utvidetVedtaksperiodeMedBegrunnelse.tilMinimertVedtaksperiode(
                 sanityBegrunnelser = sanityBegrunnelser,
-                sanityEØSBegrunnelser = sanityEØSBegrunnelser
+                sanityEØSBegrunnelser = sanityEØSBegrunnelser,
             )
 
         val landkoderISO2 = integrasjonClient.hentLandkoderISO2()
@@ -155,37 +155,37 @@ class BrevPeriodeService(
             brevMålform = personopplysningGrunnlag.søker.målform,
             erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak(
                 andelerTilkjentYtelse = andelerTilkjentYtelse,
-                periodeFom = utvidetVedtaksperiodeMedBegrunnelse.fom
+                periodeFom = utvidetVedtaksperiodeMedBegrunnelse.fom,
             ),
             barnMedReduksjonFraForrigeBehandlingIdent = hentBarnsPersonIdentMedRedusertPeriode(
                 vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-                andelerTilkjentYtelse = andelerTilkjentYtelse
+                andelerTilkjentYtelse = andelerTilkjentYtelse,
             ),
             minimerteKompetanserForPeriode = hentMinimerteKompetanserForPeriode(
                 kompetanser = kompetanser,
                 fom = vedtaksperiodeMedBegrunnelser.fom?.toYearMonth(),
                 tom = vedtaksperiodeMedBegrunnelser.tom?.toYearMonth(),
                 personopplysningGrunnlag = personopplysningGrunnlag,
-                landkoderISO2 = landkoderISO2
+                landkoderISO2 = landkoderISO2,
             ),
             minimerteKompetanserSomStopperRettFørPeriode = hentKompetanserSomStopperRettFørPeriode(
                 kompetanser = kompetanser,
-                periodeFom = minimertVedtaksperiode.fom?.toYearMonth()
+                periodeFom = minimertVedtaksperiode.fom?.toYearMonth(),
             ).filter {
                 it.erObligatoriskeFelterSatt()
             }.map {
                 it.tilMinimertKompetanse(
                     personopplysningGrunnlag = personopplysningGrunnlag,
-                    landkoderISO2 = landkoderISO2
+                    landkoderISO2 = landkoderISO2,
                 )
             },
-            dødeBarnForrigePeriode = dødeBarnForrigePeriode
+            dødeBarnForrigePeriode = dødeBarnForrigePeriode,
         )
 
         if (skalLogge) {
             secureLogger.info(
                 "Data for brevperiode på behandling ${vedtaksperiodeMedBegrunnelser.vedtak.behandling}: \n" +
-                    brevperiodeData.tilBrevperiodeForLogging().convertDataClassToJson()
+                    brevperiodeData.tilBrevperiodeForLogging().convertDataClassToJson(),
             )
         }
 
@@ -194,7 +194,7 @@ class BrevPeriodeService(
 
     private fun hentBarnsPersonIdentMedRedusertPeriode(
         vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
-        andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
+        andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
     ): List<String> {
         val forrigeBehandling =
             behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(vedtaksperiodeMedBegrunnelser.vedtak.behandling)
@@ -209,8 +209,8 @@ class BrevPeriodeService(
                         LocalDateSegment(
                             vedtaksperiodeMedBegrunnelser.fom,
                             vedtaksperiodeMedBegrunnelser.tom,
-                            null
-                        )
+                            null,
+                        ),
                     )
                 }
             }.mapNotNull { barn ->
@@ -233,7 +233,7 @@ class BrevPeriodeService(
         val begrunnelseDataForVedtaksperiode =
             hentBrevperioderData(
                 vedtaksperioderId = listOf(vedtaksperiodeId),
-                behandlingId = BehandlingId(vedtaksperiodeMedBegrunnelser.vedtak.behandling.id)
+                behandlingId = BehandlingId(vedtaksperiodeMedBegrunnelser.vedtak.behandling.id),
             ).single()
         return begrunnelseDataForVedtaksperiode.hentBegrunnelserOgFritekster()
     }

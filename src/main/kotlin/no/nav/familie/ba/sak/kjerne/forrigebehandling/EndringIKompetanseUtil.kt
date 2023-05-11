@@ -13,11 +13,11 @@ object EndringIKompetanseUtil {
 
     fun utledEndringstidspunktForKompetanse(
         nåværendeKompetanser: List<Kompetanse>,
-        forrigeKompetanser: List<Kompetanse>
+        forrigeKompetanser: List<Kompetanse>,
     ): YearMonth? {
         val endringIKompetanseTidslinje = lagEndringIKompetanseTidslinje(
             nåværendeKompetanser = nåværendeKompetanser,
-            forrigeKompetanser = forrigeKompetanser
+            forrigeKompetanser = forrigeKompetanser,
         )
 
         return endringIKompetanseTidslinje.tilFørsteEndringstidspunkt()
@@ -25,14 +25,14 @@ object EndringIKompetanseUtil {
 
     fun lagEndringIKompetanseTidslinje(
         nåværendeKompetanser: List<Kompetanse>,
-        forrigeKompetanser: List<Kompetanse>
+        forrigeKompetanser: List<Kompetanse>,
     ): Tidslinje<Boolean, Måned> {
         val allePersonerMedKompetanser = (nåværendeKompetanser.flatMap { it.barnAktører } + forrigeKompetanser.flatMap { it.barnAktører }).distinct()
 
         val endringstidslinjerPrPerson = allePersonerMedKompetanser.map { aktør ->
             lagEndringIKompetanseForPersonTidslinje(
                 nåværendeKompetanserForPerson = nåværendeKompetanser.filter { it.barnAktører.contains(aktør) },
-                forrigeKompetanserForPerson = forrigeKompetanser.filter { it.barnAktører.contains(aktør) }
+                forrigeKompetanserForPerson = forrigeKompetanser.filter { it.barnAktører.contains(aktør) },
             )
         }
 
@@ -40,12 +40,12 @@ object EndringIKompetanseUtil {
     }
 
     private fun finnesMinstEnEndringIPeriode(
-        endringer: Iterable<Boolean>
+        endringer: Iterable<Boolean>,
     ): Boolean = endringer.any { it }
 
     private fun lagEndringIKompetanseForPersonTidslinje(
         nåværendeKompetanserForPerson: List<Kompetanse>,
-        forrigeKompetanserForPerson: List<Kompetanse>
+        forrigeKompetanserForPerson: List<Kompetanse>,
     ): Tidslinje<Boolean, Måned> {
         val nåværendeTidslinje = nåværendeKompetanserForPerson.tilTidslinje()
         val forrigeTidslinje = forrigeKompetanserForPerson.tilTidslinje()

@@ -28,13 +28,13 @@ internal class SkatteetatenServiceTest {
         val nyesteVedtaksdato = LocalDate.now()
         every { fagsakRepository.finnFagsakerMedUtvidetBarnetrygdInnenfor(any(), any()) } returns listOf(
             TestUtvidetSkatt(fagsak.aktør.aktivFødselsnummer(), nyesteVedtaksdato),
-            TestUtvidetSkatt(fagsak2.aktør.aktivFødselsnummer(), nyesteVedtaksdato.plusDays(2))
+            TestUtvidetSkatt(fagsak2.aktør.aktivFødselsnummer(), nyesteVedtaksdato.plusDays(2)),
         )
 
         every { infotrygdBarnetrygdClient.hentPersonerMedUtvidetBarnetrygd(any()) } returns SkatteetatenPersonerResponse(
             listOf(
-                SkatteetatenPerson(fagsak.aktør.aktivFødselsnummer(), nyesteVedtaksdato.atStartOfDay().minusYears(1))
-            )
+                SkatteetatenPerson(fagsak.aktør.aktivFødselsnummer(), nyesteVedtaksdato.atStartOfDay().minusYears(1)),
+            ),
         )
 
         val skatteetatenService =
@@ -42,22 +42,22 @@ internal class SkatteetatenServiceTest {
                 infotrygdBarnetrygdClient,
                 fagsakRepository,
                 andelTilkjentYtelseRepository,
-                behandlingHentOgPersisterService
+                behandlingHentOgPersisterService,
             )
 
         assertThat(skatteetatenService.finnPersonerMedUtvidetBarnetrygd(nyesteVedtaksdato.year.toString()).brukere).hasSize(
-            2
+            2,
         )
 
         assertThat(
             skatteetatenService.finnPersonerMedUtvidetBarnetrygd(nyesteVedtaksdato.year.toString()).brukere
-                .find { it.ident == fagsak.aktør.aktivFødselsnummer() }!!.sisteVedtakPaaIdent
+                .find { it.ident == fagsak.aktør.aktivFødselsnummer() }!!.sisteVedtakPaaIdent,
         )
             .isEqualTo(nyesteVedtaksdato.atStartOfDay())
 
         assertThat(
             skatteetatenService.finnPersonerMedUtvidetBarnetrygd(nyesteVedtaksdato.year.toString()).brukere
-                .find { it.ident == fagsak2.aktør.aktivFødselsnummer() }!!.sisteVedtakPaaIdent
+                .find { it.ident == fagsak2.aktør.aktivFødselsnummer() }!!.sisteVedtakPaaIdent,
         )
             .isEqualTo(nyesteVedtaksdato.plusDays(2).atStartOfDay())
     }
@@ -74,7 +74,7 @@ internal class SkatteetatenServiceTest {
 
         every { fagsakRepository.finnFagsakerMedUtvidetBarnetrygdInnenfor(any(), any()) } returns listOf(
             TestUtvidetSkatt(fagsak.aktør.aktivFødselsnummer(), vedtaksdato),
-            TestUtvidetSkatt(fagsak2.aktør.aktivFødselsnummer(), vedtaksdato.plusDays(2))
+            TestUtvidetSkatt(fagsak2.aktør.aktivFødselsnummer(), vedtaksdato.plusDays(2)),
         )
 
         val skatteetatenService =
@@ -82,7 +82,7 @@ internal class SkatteetatenServiceTest {
                 infotrygdBarnetrygdClient,
                 fagsakRepository,
                 andelTilkjentYtelseRepository,
-                behandlingHentOgPersisterService
+                behandlingHentOgPersisterService,
             )
         val personerMedUtvidetBarnetrygd =
             skatteetatenService.finnPersonerMedUtvidetBarnetrygd(vedtaksdato.year.toString())
@@ -91,13 +91,13 @@ internal class SkatteetatenServiceTest {
 
         assertThat(
             personerMedUtvidetBarnetrygd.brukere
-                .find { it.ident == fagsak.aktør.aktivFødselsnummer() }!!.sisteVedtakPaaIdent
+                .find { it.ident == fagsak.aktør.aktivFødselsnummer() }!!.sisteVedtakPaaIdent,
         )
             .isEqualTo(vedtaksdato.atStartOfDay())
 
         assertThat(
             personerMedUtvidetBarnetrygd.brukere
-                .find { it.ident == fagsak2.aktør.aktivFødselsnummer() }!!.sisteVedtakPaaIdent
+                .find { it.ident == fagsak2.aktør.aktivFødselsnummer() }!!.sisteVedtakPaaIdent,
         )
             .isEqualTo(vedtaksdato.plusDays(2).atStartOfDay())
     }
@@ -114,9 +114,9 @@ internal class SkatteetatenServiceTest {
                 brukere = listOf(
                     SkatteetatenPerson(
                         fagsak.aktør.aktivFødselsnummer(),
-                        vedtaksdato.atStartOfDay()
-                    )
-                )
+                        vedtaksdato.atStartOfDay(),
+                    ),
+                ),
             )
 
         val skatteetatenService =
@@ -124,7 +124,7 @@ internal class SkatteetatenServiceTest {
                 infotrygdBarnetrygdClient,
                 fagsakRepository,
                 andelTilkjentYtelseRepository,
-                behandlingHentOgPersisterService
+                behandlingHentOgPersisterService,
             )
         val personerMedUtvidetBarnetrygd =
             skatteetatenService.finnPersonerMedUtvidetBarnetrygd(vedtaksdato.year.toString())
@@ -133,7 +133,7 @@ internal class SkatteetatenServiceTest {
 
         assertThat(
             personerMedUtvidetBarnetrygd.brukere
-                .find { it.ident == fagsak.aktør.aktivFødselsnummer() }!!.sisteVedtakPaaIdent
+                .find { it.ident == fagsak.aktør.aktivFødselsnummer() }!!.sisteVedtakPaaIdent,
         )
             .isEqualTo(vedtaksdato.atStartOfDay())
     }

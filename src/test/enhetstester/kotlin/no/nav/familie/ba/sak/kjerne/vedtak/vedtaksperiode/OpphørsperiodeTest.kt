@@ -28,7 +28,7 @@ class OpphørsperiodeTest {
 
     val personopplysningGrunnlag = PersonopplysningGrunnlag(
         behandlingId = 0L,
-        personer = mutableSetOf(søker, barn1, barn2)
+        personer = mutableSetOf(søker, barn1, barn2),
     )
 
     @Test
@@ -42,7 +42,7 @@ class OpphørsperiodeTest {
             periodeTomFørsteAndel,
             YtelseType.ORDINÆR_BARNETRYGD,
             1054,
-            person = barn1
+            person = barn1,
         )
 
         val andel2Barn1 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
@@ -50,7 +50,7 @@ class OpphørsperiodeTest {
             periodeTomAndreAndel,
             YtelseType.ORDINÆR_BARNETRYGD,
             1054,
-            person = barn1
+            person = barn1,
         )
 
         val andel3Barn1 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
@@ -58,12 +58,12 @@ class OpphørsperiodeTest {
             inneværendeMåned().plusMonths(12),
             YtelseType.ORDINÆR_BARNETRYGD,
             1054,
-            person = barn1
+            person = barn1,
         )
 
         val opphørsperioder = mapTilOpphørsperioder(
             andelerTilkjentYtelse = listOf(andelBarn1, andel2Barn1, andel3Barn1),
-            personopplysningGrunnlag = personopplysningGrunnlag
+            personopplysningGrunnlag = personopplysningGrunnlag,
         )
 
         assertEquals(2, opphørsperioder.size)
@@ -82,12 +82,12 @@ class OpphørsperiodeTest {
             periodeTomFørsteAndel,
             YtelseType.ORDINÆR_BARNETRYGD,
             1054,
-            person = barn1
+            person = barn1,
         )
 
         val opphørsperioder = mapTilOpphørsperioder(
             andelerTilkjentYtelse = listOf(andelBarn1),
-            personopplysningGrunnlag = personopplysningGrunnlag
+            personopplysningGrunnlag = personopplysningGrunnlag,
         )
 
         assertEquals(1, opphørsperioder.size)
@@ -103,12 +103,12 @@ class OpphørsperiodeTest {
             periodeTomFørsteAndel,
             YtelseType.ORDINÆR_BARNETRYGD,
             1054,
-            person = barn1
+            person = barn1,
         )
 
         val opphørsperioder = mapTilOpphørsperioder(
             andelerTilkjentYtelse = listOf(andelBarn1),
-            personopplysningGrunnlag = personopplysningGrunnlag
+            personopplysningGrunnlag = personopplysningGrunnlag,
         )
 
         assertEquals(1, opphørsperioder.size)
@@ -125,7 +125,7 @@ class OpphørsperiodeTest {
             inneværendeMåned().plusMonths(12),
             YtelseType.ORDINÆR_BARNETRYGD,
             1054,
-            person = barn1
+            person = barn1,
         )
 
         val andelBarn1 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
@@ -133,14 +133,14 @@ class OpphørsperiodeTest {
             inneværendeMåned().plusMonths(12),
             YtelseType.ORDINÆR_BARNETRYGD,
             1054,
-            person = barn1
+            person = barn1,
         )
 
         val opphørsperioder = mapTilOpphørsperioder(
             forrigeAndelerTilkjentYtelse = listOf(forrigeAndelBarn1),
             andelerTilkjentYtelse = listOf(andelBarn1),
             personopplysningGrunnlag = personopplysningGrunnlag,
-            forrigePersonopplysningGrunnlag = personopplysningGrunnlag
+            forrigePersonopplysningGrunnlag = personopplysningGrunnlag,
         )
 
         assertEquals(1, opphørsperioder.size)
@@ -155,7 +155,7 @@ class OpphørsperiodeTest {
             februar2023,
             YtelseType.ORDINÆR_BARNETRYGD,
             1054,
-            person = barn1
+            person = barn1,
         )
 
         val forrigeAndel2Barn1 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
@@ -163,7 +163,7 @@ class OpphørsperiodeTest {
             april2023,
             YtelseType.ORDINÆR_BARNETRYGD,
             1054,
-            person = barn1
+            person = barn1,
         )
 
         val andelBarn1 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
@@ -171,14 +171,14 @@ class OpphørsperiodeTest {
             mai2024,
             YtelseType.ORDINÆR_BARNETRYGD,
             1054,
-            person = barn1
+            person = barn1,
         )
 
         val opphørsperioder = mapTilOpphørsperioder(
             forrigeAndelerTilkjentYtelse = listOf(forrigeAndel1Barn1, forrigeAndel2Barn1),
             andelerTilkjentYtelse = listOf(andelBarn1),
             personopplysningGrunnlag = personopplysningGrunnlag,
-            forrigePersonopplysningGrunnlag = personopplysningGrunnlag
+            forrigePersonopplysningGrunnlag = personopplysningGrunnlag,
         )
 
         assertEquals(1, opphørsperioder.size)
@@ -194,7 +194,7 @@ class OpphørsperiodeTest {
             inneværendeMåned().plusMonths(12),
             YtelseType.ORDINÆR_BARNETRYGD,
             1054,
-            person = barn1
+            person = barn1,
         )
 
         val andelBarn1 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
@@ -202,14 +202,14 @@ class OpphørsperiodeTest {
             reduksjonFom,
             YtelseType.ORDINÆR_BARNETRYGD,
             1054,
-            person = barn1
+            person = barn1,
         )
 
         val opphørsperioder = mapTilOpphørsperioder(
             forrigeAndelerTilkjentYtelse = listOf(forrigeAndelBarn1),
             andelerTilkjentYtelse = listOf(andelBarn1),
             personopplysningGrunnlag = personopplysningGrunnlag,
-            forrigePersonopplysningGrunnlag = personopplysningGrunnlag
+            forrigePersonopplysningGrunnlag = personopplysningGrunnlag,
         ).run(::slåSammenOpphørsperioder)
 
         assertEquals(1, opphørsperioder.size)
@@ -224,12 +224,12 @@ class OpphørsperiodeTest {
         val toLikePerioder = listOf(
             Opphørsperiode(
                 periodeFom = periode12MånederFraInneværendeMåned,
-                periodeTom = inneværendeMåned().toLocalDate()
+                periodeTom = inneværendeMåned().toLocalDate(),
             ),
             Opphørsperiode(
                 periodeFom = periode12MånederFraInneværendeMåned,
-                periodeTom = inneværendeMåned().toLocalDate()
-            )
+                periodeTom = inneværendeMåned().toLocalDate(),
+            ),
         )
 
         assertEquals(1, slåSammenOpphørsperioder(toLikePerioder).size)
@@ -240,12 +240,12 @@ class OpphørsperiodeTest {
         val toPerioderMedUlikSluttdato = listOf(
             Opphørsperiode(
                 periodeFom = inneværendeMåned().minusMonths(12).toLocalDate(),
-                periodeTom = inneværendeMåned().toLocalDate()
+                periodeTom = inneværendeMåned().toLocalDate(),
             ),
             Opphørsperiode(
                 periodeFom = inneværendeMåned().minusMonths(12).toLocalDate(),
-                periodeTom = inneværendeMåned().nesteMåned().toLocalDate()
-            )
+                periodeTom = inneværendeMåned().nesteMåned().toLocalDate(),
+            ),
         )
         val enPeriodeMedSluttDatoNesteMåned = slåSammenOpphørsperioder(toPerioderMedUlikSluttdato)
 
@@ -258,19 +258,19 @@ class OpphørsperiodeTest {
         val toPerioderMedUlikStartdato = listOf(
             Opphørsperiode(
                 periodeFom = inneværendeMåned().minusMonths(12).toLocalDate(),
-                periodeTom = inneværendeMåned().toLocalDate()
+                periodeTom = inneværendeMåned().toLocalDate(),
             ),
             Opphørsperiode(
                 periodeFom = inneværendeMåned().minusMonths(13).toLocalDate(),
-                periodeTom = inneværendeMåned().toLocalDate()
-            )
+                periodeTom = inneværendeMåned().toLocalDate(),
+            ),
         )
         val enPeriodeMedStartDato13MånederTilbake = slåSammenOpphørsperioder(toPerioderMedUlikStartdato)
 
         assertEquals(1, enPeriodeMedStartDato13MånederTilbake.size)
         assertEquals(
             inneværendeMåned().minusMonths(13).toLocalDate(),
-            enPeriodeMedStartDato13MånederTilbake.first().periodeFom
+            enPeriodeMedStartDato13MånederTilbake.first().periodeFom,
         )
     }
 
@@ -281,12 +281,12 @@ class OpphørsperiodeTest {
         val toPerioderMedUlikStartdato = listOf(
             Opphørsperiode(
                 periodeFom = førsteOpphørsperiodeFom,
-                periodeTom = inneværendeMåned().minusMonths(2).toLocalDate()
+                periodeTom = inneværendeMåned().minusMonths(2).toLocalDate(),
             ),
             Opphørsperiode(
                 periodeFom = inneværendeMåned().minusMonths(6).toLocalDate(),
-                periodeTom = sisteOpphørsperiodeTom
-            )
+                periodeTom = sisteOpphørsperiodeTom,
+            ),
         )
         val enOpphørsperiodeMedFørsteFomOgSisteTom = slåSammenOpphørsperioder(toPerioderMedUlikStartdato)
 
@@ -302,7 +302,7 @@ class OpphørsperiodeTest {
             februar2023,
             YtelseType.ORDINÆR_BARNETRYGD,
             1054,
-            person = barn1
+            person = barn1,
         )
 
         val forrigeAndel2Barn1 = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
@@ -310,14 +310,14 @@ class OpphørsperiodeTest {
             april2023,
             YtelseType.ORDINÆR_BARNETRYGD,
             1054,
-            person = barn1
+            person = barn1,
         )
 
         val opphørsperioder = mapTilOpphørsperioder(
             forrigeAndelerTilkjentYtelse = listOf(forrigeAndel1Barn1, forrigeAndel2Barn1),
             andelerTilkjentYtelse = emptyList(),
             personopplysningGrunnlag = personopplysningGrunnlag,
-            forrigePersonopplysningGrunnlag = personopplysningGrunnlag
+            forrigePersonopplysningGrunnlag = personopplysningGrunnlag,
         )
 
         assertEquals(1, opphørsperioder.size)
@@ -331,7 +331,7 @@ class OpphørsperiodeTest {
             forrigeAndelerTilkjentYtelse = emptyList(),
             andelerTilkjentYtelse = emptyList(),
             personopplysningGrunnlag = personopplysningGrunnlag,
-            forrigePersonopplysningGrunnlag = personopplysningGrunnlag
+            forrigePersonopplysningGrunnlag = personopplysningGrunnlag,
         )
 
         assertEquals(0, opphørsperioder.size)

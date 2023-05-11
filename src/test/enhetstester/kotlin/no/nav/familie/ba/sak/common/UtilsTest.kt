@@ -37,7 +37,7 @@ internal class UtilsTest {
             tilleggsnavn = null,
             adressenavn = "TEST",
             husbokstav = null,
-            postnummer = "1234"
+            postnummer = "1234",
         )
 
         assertEquals("Test 1, 1234", adresse.tilFrontendString())
@@ -61,7 +61,7 @@ internal class UtilsTest {
 
         assertEquals(
             førsteBarn.fødselsdato.tilKortString(),
-            listOf(førsteBarn.fødselsdato).tilBrevTekst()
+            listOf(førsteBarn.fødselsdato).tilBrevTekst(),
         )
     }
 
@@ -72,7 +72,7 @@ internal class UtilsTest {
 
         assertEquals(
             "${førsteBarn.fødselsdato.tilKortString()} og ${andreBarn.fødselsdato.tilKortString()}",
-            listOf(førsteBarn.fødselsdato, andreBarn.fødselsdato).tilBrevTekst()
+            listOf(førsteBarn.fødselsdato, andreBarn.fødselsdato).tilBrevTekst(),
         )
     }
 
@@ -84,7 +84,7 @@ internal class UtilsTest {
 
         assertEquals(
             "${førsteBarn.fødselsdato.tilKortString()}, ${andreBarn.fødselsdato.tilKortString()} og ${tredjeBarn.fødselsdato.tilKortString()}",
-            listOf(førsteBarn.fødselsdato, andreBarn.fødselsdato, tredjeBarn.fødselsdato).tilBrevTekst()
+            listOf(førsteBarn.fødselsdato, andreBarn.fødselsdato, tredjeBarn.fødselsdato).tilBrevTekst(),
         )
     }
 

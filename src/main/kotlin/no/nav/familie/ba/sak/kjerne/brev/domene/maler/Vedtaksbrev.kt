@@ -25,13 +25,13 @@ enum class BrevPeriodeType(val apiNavn: String) {
     OPPHOR_INSTITUSJON("opphorInstitusjon"),
     AVSLAG_INSTITUSJON("avslagInstitusjon"),
     AVSLAG_UTEN_PERIODE_INSTITUSJON("avslagUtenPeriodeInstitusjon"),
-    FORTSATT_INNVILGET_INSTITUSJON("fortsattInnvilgetInstitusjon")
+    FORTSATT_INNVILGET_INSTITUSJON("fortsattInnvilgetInstitusjon"),
 }
 
 enum class EndretUtbetalingBrevPeriodeType(val apiNavn: String) {
     ENDRET_UTBETALINGSPERIODE("endretUtbetalingsperiode"),
     ENDRET_UTBETALINGSPERIODE_DELVIS_UTBETALING("endretUtbetalingsperiodeDelvisUtbetaling"),
-    ENDRET_UTBETALINGSPERIODE_INGEN_UTBETALING("endretUtbetalingsperiodeIngenUtbetaling")
+    ENDRET_UTBETALINGSPERIODE_INGEN_UTBETALING("endretUtbetalingsperiodeIngenUtbetaling"),
 }
 
 data class VedtakFellesfelter(
@@ -44,5 +44,5 @@ data class VedtakFellesfelter(
     val perioder: List<BrevPeriode>,
     val organisasjonsnummer: String? = null,
     val gjelder: String? = null,
-    val korrigertVedtakData: KorrigertVedtakData? = null
+    val korrigertVedtakData: KorrigertVedtakData? = null,
 )

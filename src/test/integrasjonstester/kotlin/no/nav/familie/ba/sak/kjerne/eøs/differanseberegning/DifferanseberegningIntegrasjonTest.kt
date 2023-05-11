@@ -42,31 +42,31 @@ class DifferanseberegningIntegrasjonTest : AbstractSpringIntegrationTest() {
         val vilkårsvurderingRequest = mapOf(
             søkerStartdato to mapOf(
                 Vilkår.BOSATT_I_RIKET /*    */ to "EEEEEEEEEEEEEEEE",
-                Vilkår.LOVLIG_OPPHOLD /*    */ to "EEEEEEEEEEEEEEEE"
+                Vilkår.LOVLIG_OPPHOLD /*    */ to "EEEEEEEEEEEEEEEE",
             ),
             barnStartdato to mapOf(
                 Vilkår.UNDER_18_ÅR /*       */ to "++++++++++++++++",
                 Vilkår.GIFT_PARTNERSKAP /*  */ to "++++++++++++++++",
                 Vilkår.BOSATT_I_RIKET /*    */ to "EEEEEEEEEEEEEEEE",
                 Vilkår.LOVLIG_OPPHOLD /*    */ to "EEEEEEEEEEEEEEEE",
-                Vilkår.BOR_MED_SØKER /*     */ to "ÉÉÉÉÉÉÉÉÉÉÉÉÉÉÉÉ"
-            )
+                Vilkår.BOR_MED_SØKER /*     */ to "ÉÉÉÉÉÉÉÉÉÉÉÉÉÉÉÉ",
+            ),
         )
 
         val deltBosteRequest = mapOf(
-            barnStartdato /*                */ to "/////00000011111"
+            barnStartdato /*                */ to "/////00000011111",
         )
 
         val kompetanseRequest = mapOf(
-            barnStartdato /*                */ to "PPPSSSSSSPPSSS--"
+            barnStartdato /*                */ to "PPPSSSSSSPPSSS--",
         )
 
         val utenlandskPeriodebeløpRequest = mapOf(
-            barnStartdato /*                */ to "3333444566677777"
+            barnStartdato /*                */ to "3333444566677777",
         )
 
         val valutakursRequest = mapOf(
-            barnStartdato /*                */ to "5555566644234489"
+            barnStartdato /*                */ to "5555566644234489",
         )
 
         val utvidetBehandlingFørsteGang =
@@ -83,7 +83,7 @@ class DifferanseberegningIntegrasjonTest : AbstractSpringIntegrationTest() {
         kompetanseTestController.endreKompetanser(utvidetBehandlingFørsteGang.behandlingId, kompetanseRequest)
         utenlandskPeriodebeløpTestController.endreUtenlandskePeriodebeløp(
             utvidetBehandlingFørsteGang.behandlingId,
-            utenlandskPeriodebeløpRequest
+            utenlandskPeriodebeløpRequest,
         )
 
         val utvidetbehandlingDifferanseberegnet = valutakursTestController
@@ -99,21 +99,21 @@ class DifferanseberegningIntegrasjonTest : AbstractSpringIntegrationTest() {
         val vilkårsvurderingRequest2 = mapOf(
             søkerStartdato to mapOf(
                 Vilkår.BOSATT_I_RIKET /*    */ to "NNNNNNNNNNNNNNNN",
-                Vilkår.LOVLIG_OPPHOLD /*    */ to "EEEEEEEEEEEEEEEE"
+                Vilkår.LOVLIG_OPPHOLD /*    */ to "EEEEEEEEEEEEEEEE",
             ),
             barnStartdato to mapOf(
                 Vilkår.UNDER_18_ÅR /*       */ to "++++++++++++++++",
                 Vilkår.GIFT_PARTNERSKAP /*  */ to "++++++++++++++++",
                 Vilkår.BOSATT_I_RIKET /*    */ to "EEEEEEEEEEEEEEEE",
                 Vilkår.LOVLIG_OPPHOLD /*    */ to "EEEEEEEEEEEEEEEE",
-                Vilkår.BOR_MED_SØKER /*     */ to "ÉÉÉÉÉÉÉÉÉÉÉÉÉÉÉÉ"
-            )
+                Vilkår.BOR_MED_SØKER /*     */ to "ÉÉÉÉÉÉÉÉÉÉÉÉÉÉÉÉ",
+            ),
         )
 
         val utvidetBehandlingTilbakestilt = vilkårsvurderingTestController
             .oppdaterVilkårsvurderingIBehandling(
                 utvidetbehandlingDifferanseberegnet.behandlingId,
-                vilkårsvurderingRequest2
+                vilkårsvurderingRequest2,
             )
             .body?.data!!
 
@@ -136,7 +136,7 @@ fun Iterable<Utbetalingsperiode>.sumUtbetaling(): Int {
             Periode(
                 it.periodeFom.tilMånedTidspunkt(),
                 it.periodeTom.tilMånedTidspunkt(),
-                it.utbetaltPerMnd
+                it.utbetaltPerMnd,
             )
         }
     }

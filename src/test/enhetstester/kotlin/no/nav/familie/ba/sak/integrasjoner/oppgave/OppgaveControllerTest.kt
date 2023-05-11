@@ -73,7 +73,7 @@ class OppgaveControllerTest {
     @Test
     fun `Tilbakestilling av tildeling på oppgave skal returnere OK og sende med Oppgave i respons`() {
         val oppgave = Oppgave(
-            id = 1234
+            id = 1234,
         )
         every { oppgaveService.tilbakestillFordelingPåOppgave(oppgave.id!!) } returns oppgave
 
@@ -90,14 +90,14 @@ class OppgaveControllerTest {
         every {
             oppgaveService.fordelOppgave(
                 any(),
-                any()
+                any(),
             )
         } throws IntegrasjonException("Kall mot integrasjon feilet ved fordel oppgave")
 
         val exception = assertThrows<IntegrasjonException> {
             oppgaveController.fordelOppgave(
                 OPPGAVE_ID.toLong(),
-                SAKSBEHANDLER_ID
+                SAKSBEHANDLER_ID,
             )
         }
 

@@ -14,7 +14,7 @@ fun main(args: Array<String>) {
         "mock-pdl",
         "mock-ident-client",
         "mock-tilbakekreving-klient",
-        "task-scheduling"
+        "task-scheduling",
     )
 
     if (args.contains("--dbcontainer")) {

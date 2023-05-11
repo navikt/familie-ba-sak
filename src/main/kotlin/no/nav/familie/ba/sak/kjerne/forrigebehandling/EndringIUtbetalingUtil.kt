@@ -13,11 +13,11 @@ object EndringIUtbetalingUtil {
 
     fun utledEndringstidspunktForUtbetalingsbeløp(
         nåværendeAndeler: List<AndelTilkjentYtelse>,
-        forrigeAndeler: List<AndelTilkjentYtelse>
+        forrigeAndeler: List<AndelTilkjentYtelse>,
     ): YearMonth? {
         val endringIUtbetalingTidslinje = lagEndringIUtbetalingTidslinje(
             nåværendeAndeler = nåværendeAndeler,
-            forrigeAndeler = forrigeAndeler
+            forrigeAndeler = forrigeAndeler,
         )
 
         return endringIUtbetalingTidslinje.tilFørsteEndringstidspunkt()
@@ -25,7 +25,7 @@ object EndringIUtbetalingUtil {
 
     internal fun lagEndringIUtbetalingTidslinje(
         nåværendeAndeler: List<AndelTilkjentYtelse>,
-        forrigeAndeler: List<AndelTilkjentYtelse>
+        forrigeAndeler: List<AndelTilkjentYtelse>,
     ): Tidslinje<Boolean, Måned> {
         val allePersonerMedAndeler = (nåværendeAndeler.map { it.aktør } + forrigeAndeler.map { it.aktør }).distinct()
 
@@ -35,7 +35,7 @@ object EndringIUtbetalingUtil {
             ytelseTyperForPerson.map { ytelseType ->
                 lagEndringIUtbetalingForPersonOgTypeTidslinje(
                     nåværendeAndeler = nåværendeAndeler.filter { it.aktør == aktør && it.type == ytelseType },
-                    forrigeAndeler = forrigeAndeler.filter { it.aktør == aktør && it.type == ytelseType }
+                    forrigeAndeler = forrigeAndeler.filter { it.aktør == aktør && it.type == ytelseType },
                 )
             }
         }
@@ -44,7 +44,7 @@ object EndringIUtbetalingUtil {
     }
 
     private fun finnesMinstEnEndringIPeriode(
-        endringer: Iterable<Boolean>
+        endringer: Iterable<Boolean>,
     ): Boolean = endringer.any { it }
 
     // Det regnes ikke ut som en endring dersom
@@ -53,7 +53,7 @@ object EndringIUtbetalingUtil {
     // 3. Vi har lik utbetalingsbeløp mellom nåværende og forrige andeler
     private fun lagEndringIUtbetalingForPersonOgTypeTidslinje(
         nåværendeAndeler: List<AndelTilkjentYtelse>,
-        forrigeAndeler: List<AndelTilkjentYtelse>
+        forrigeAndeler: List<AndelTilkjentYtelse>,
     ): Tidslinje<Boolean, Måned> {
         val nåværendeTidslinje = AndelTilkjentYtelseTidslinje(nåværendeAndeler)
         val forrigeTidslinje = AndelTilkjentYtelseTidslinje(forrigeAndeler)
@@ -69,7 +69,7 @@ object EndringIUtbetalingUtil {
     }
     internal fun lagEtterbetalingstidslinjeForPersonOgType(
         nåværendeAndeler: List<AndelTilkjentYtelse>,
-        forrigeAndeler: List<AndelTilkjentYtelse>
+        forrigeAndeler: List<AndelTilkjentYtelse>,
     ): Tidslinje<Boolean, Måned> {
         val nåværendeTidslinje = AndelTilkjentYtelseTidslinje(nåværendeAndeler)
         val forrigeTidslinje = AndelTilkjentYtelseTidslinje(forrigeAndeler)

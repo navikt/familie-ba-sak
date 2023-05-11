@@ -9,7 +9,7 @@ import org.springframework.core.env.Environment
 
 class EnvServiceTest(
     @Autowired
-    private val environment: Environment
+    private val environment: Environment,
 ) : AbstractSpringIntegrationTest() {
 
     @Test

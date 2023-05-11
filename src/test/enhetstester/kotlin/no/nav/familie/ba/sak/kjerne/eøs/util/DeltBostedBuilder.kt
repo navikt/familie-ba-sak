@@ -15,7 +15,7 @@ import java.time.YearMonth
 
 class DeltBostedBuilder(
     startMåned: Tidspunkt<Måned> = jan(2020),
-    internal val tilkjentYtelse: TilkjentYtelse
+    internal val tilkjentYtelse: TilkjentYtelse,
 ) : SkjemaBuilder<DeltBosted, DeltBostedBuilder>(startMåned, BehandlingId(tilkjentYtelse.behandling.id)) {
 
     fun medDeltBosted(k: String, vararg barn: Person) = medSkjema(k, barn.toList()) {
@@ -33,7 +33,7 @@ data class DeltBosted(
     override val tom: YearMonth? = null,
     override val barnAktører: Set<Aktør> = emptySet(),
     val prosent: Int?,
-    internal val barnPersoner: List<Person> = emptyList()
+    internal val barnPersoner: List<Person> = emptyList(),
 ) : PeriodeOgBarnSkjemaEntitet<DeltBosted>() {
     override fun utenInnhold() = copy(prosent = null)
     override fun kopier(fom: YearMonth?, tom: YearMonth?, barnAktører: Set<Aktør>) =
@@ -41,7 +41,7 @@ data class DeltBosted(
             fom = fom,
             tom = tom,
             barnAktører = barnAktører.map { it.copy() }.toSet(),
-            barnPersoner = this.barnPersoner.filter { barnAktører.contains(it.aktør) }
+            barnPersoner = this.barnPersoner.filter { barnAktører.contains(it.aktør) },
         ).also {
             if (barnAktører.size != barnPersoner.size) {
                 throw Error("Ikke samsvar mellom antall aktører og barn lenger")
@@ -56,7 +56,7 @@ fun DeltBostedBuilder.oppdaterTilkjentYtelse(): TilkjentYtelse {
     val andelerTilkjentYtelserEtterEUA =
         TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
             tilkjentYtelse.andelerTilkjentYtelse.toList(),
-            bygg().tilEndreteUtebetalingAndeler()
+            bygg().tilEndreteUtebetalingAndeler(),
         )
 
     tilkjentYtelse.andelerTilkjentYtelse.clear()
@@ -74,7 +74,7 @@ fun Iterable<DeltBosted>.tilEndreteUtebetalingAndeler(): List<EndretUtbetalingAn
                     it,
                     deltBosted.fom!!,
                     deltBosted.tom!!,
-                    deltBosted.prosent!!
+                    deltBosted.prosent!!,
                 )
             }
         }

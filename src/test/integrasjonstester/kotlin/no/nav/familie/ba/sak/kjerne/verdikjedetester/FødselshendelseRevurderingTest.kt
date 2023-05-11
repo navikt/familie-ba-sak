@@ -31,7 +31,7 @@ class FødselshendelseRevurderingTest(
     @Autowired private val vedtakService: VedtakService,
     @Autowired private val stegService: StegService,
     @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
-    @Autowired private val brevmalService: BrevmalService
+    @Autowired private val brevmalService: BrevmalService,
 ) : AbstractVerdikjedetest() {
 
     @Test
@@ -44,21 +44,21 @@ class FødselshendelseRevurderingTest(
                     RestScenarioPerson(
                         fødselsdato = now().minusMonths(12).toString(),
                         fornavn = "Barn",
-                        etternavn = "Barnesen"
+                        etternavn = "Barnesen",
                     ),
                     RestScenarioPerson(
                         fødselsdato = revurderingsbarnSinFødselsdato.toString(),
                         fornavn = "Barn2",
-                        etternavn = "Barnesen2"
-                    )
-                )
-            )
+                        etternavn = "Barnesen2",
+                    ),
+                ),
+            ),
         )
 
         behandleFødselshendelse(
             nyBehandlingHendelse = NyBehandlingHendelse(
                 morsIdent = scenario.søker.ident!!,
-                barnasIdenter = listOf(scenario.barna.minByOrNull { it.fødselsdato }!!.ident!!)
+                barnasIdenter = listOf(scenario.barna.minByOrNull { it.fødselsdato }!!.ident!!),
             ),
             behandleFødselshendelseTask = behandleFødselshendelseTask,
             fagsakService = fagsakService,
@@ -66,7 +66,7 @@ class FødselshendelseRevurderingTest(
             vedtakService = vedtakService,
             stegService = stegService,
             personidentService = personidentService,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
 
         )
 
@@ -75,7 +75,7 @@ class FødselshendelseRevurderingTest(
         val behandling = behandleFødselshendelse(
             nyBehandlingHendelse = NyBehandlingHendelse(
                 morsIdent = søkerIdent,
-                barnasIdenter = listOf(vurdertBarn)
+                barnasIdenter = listOf(vurdertBarn),
             ),
             fagsakStatusEtterVurdering = FagsakStatus.LØPENDE,
             behandleFødselshendelseTask = behandleFødselshendelseTask,
@@ -84,7 +84,7 @@ class FødselshendelseRevurderingTest(
             personidentService = personidentService,
             vedtakService = vedtakService,
             stegService = stegService,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
 
         )
 
@@ -95,14 +95,14 @@ class FødselshendelseRevurderingTest(
             restFagsak = restFagsakEtterBehandlingAvsluttet,
             fagsakStatus = FagsakStatus.LØPENDE,
             behandlingStegType = StegType.BEHANDLING_AVSLUTTET,
-            aktivBehandlingId = behandling.id
+            aktivBehandlingId = behandling.id,
         )
 
         val aktivBehandling =
             restFagsakEtterBehandlingAvsluttet.getDataOrThrow().behandlinger
                 .single {
                     it.behandlingId == behandlingHentOgPersisterService.finnAktivForFagsak(
-                        restFagsakEtterBehandlingAvsluttet.data!!.id
+                        restFagsakEtterBehandlingAvsluttet.data!!.id,
                     )?.id
                 }
 
@@ -120,7 +120,7 @@ class FødselshendelseRevurderingTest(
         assertUtbetalingsperiode(
             nesteMånedUtbetalingsperiode,
             2,
-            tilleggOrdinærSatsNesteMånedTilTester().beløp * 2
+            tilleggOrdinærSatsNesteMånedTilTester().beløp * 2,
         )
     }
 }
