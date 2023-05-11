@@ -13,13 +13,11 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
-import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.Tilbakekreving
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.TilbakekrevingRepository
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
-import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Fagsystem
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.tilbakekreving.Behandlingstype
@@ -47,7 +45,6 @@ class TilbakekrevingService(
     private val totrinnskontrollRepository: TotrinnskontrollRepository,
     private val brevmottakerRepository: BrevmottakerRepository,
     private val simuleringService: SimuleringService,
-    private val tilgangService: TilgangService,
     private val persongrunnlagService: PersongrunnlagService,
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val tilbakekrevingKlient: TilbakekrevingKlient,
@@ -58,11 +55,6 @@ class TilbakekrevingService(
 ) {
 
     fun validerRestTilbakekreving(restTilbakekreving: RestTilbakekreving?, behandlingId: Long) {
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "opprette tilbakekreving",
-        )
-
         val feilutbetaling = simuleringService.hentFeilutbetaling(behandlingId)
         validerVerdierPåRestTilbakekreving(restTilbakekreving, feilutbetaling)
     }
@@ -95,11 +87,6 @@ class TilbakekrevingService(
         behandlingId: Long,
         forhåndsvisTilbakekrevingsvarselbrevRequest: ForhåndsvisTilbakekrevingsvarselbrevRequest,
     ): ByteArray {
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.VEILEDER,
-            handling = "hent forhåndsvisning av varselbrev for tilbakekreving",
-        )
-
         val vedtak = vedtakRepository.findByBehandlingAndAktivOptional(behandlingId)
             ?: throw Feil(
                 "Fant ikke vedtak for behandling $behandlingId ved forhåndsvisning av varselbrev" +
