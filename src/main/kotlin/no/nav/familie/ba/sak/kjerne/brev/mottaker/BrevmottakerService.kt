@@ -22,7 +22,7 @@ class BrevmottakerService(
     private val loggService: LoggService,
     private val personidentService: PersonidentService,
     private val personopplysningerService: PersonopplysningerService,
-    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 ) {
 
     @Transactional
