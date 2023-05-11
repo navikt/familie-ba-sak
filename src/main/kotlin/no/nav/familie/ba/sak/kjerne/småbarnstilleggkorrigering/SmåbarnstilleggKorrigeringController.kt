@@ -23,7 +23,6 @@ import java.time.YearMonth
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class SmåbarnstilleggController(
-    private val tilgangService: TilgangService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val småbarnstilleggKorrigeringService: SmåbarnstilleggKorrigeringService,
     private val utvidetBehandlingService: UtvidetBehandlingService,
