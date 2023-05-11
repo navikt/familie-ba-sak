@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.dataGenerator.vilkårsvurdering
+package no.nav.familie.ba.sak.datagenerator.vilkårsvurdering
 
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.lagPerson
