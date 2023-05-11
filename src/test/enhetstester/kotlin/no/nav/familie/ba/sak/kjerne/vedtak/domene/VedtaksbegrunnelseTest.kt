@@ -3,8 +3,8 @@ package no.nav.familie.ba.sak.kjerne.vedtak.domene
 import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.lagPerson
-import no.nav.familie.ba.sak.dataGenerator.brev.lagBrevBegrunnelseGrunnlagMedPersoner
-import no.nav.familie.ba.sak.dataGenerator.vedtak.lagVedtaksbegrunnelse
+import no.nav.familie.ba.sak.datagenerator.brev.lagBrevBegrunnelseGrunnlagMedPersoner
+import no.nav.familie.ba.sak.datagenerator.vedtak.lagVedtaksbegrunnelse
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform

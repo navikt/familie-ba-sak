@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.dataGenerator.SettPåVent
+package no.nav.familie.ba.sak.datagenerator.settpåvent
 
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling

@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.dataGenerator.brev
+package no.nav.familie.ba.sak.datagenerator.brev
 
 import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.randomFnr

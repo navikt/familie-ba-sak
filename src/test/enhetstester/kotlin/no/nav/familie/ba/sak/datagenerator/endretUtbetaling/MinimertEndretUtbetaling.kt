@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.dataGenerator.endretUtbetaling
+package no.nav.familie.ba.sak.datagenerator.endretUtbetaling
 
 import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.randomFnr
