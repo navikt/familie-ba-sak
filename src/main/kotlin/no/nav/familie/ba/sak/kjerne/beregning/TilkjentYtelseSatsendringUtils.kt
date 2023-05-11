@@ -21,12 +21,12 @@ object TilkjentYtelseSatsendringUtils {
     internal fun beregnTilkjentYtelseMedNySatsForSatsendring(
         forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
         behandling: Behandling,
-        personopplysningGrunnlag: PersonopplysningGrunnlag
+        personopplysningGrunnlag: PersonopplysningGrunnlag,
     ): TilkjentYtelse {
         val tilkjentYtelse = TilkjentYtelse(
             behandling = behandling,
             opprettetDato = LocalDate.now(),
-            endretDato = LocalDate.now()
+            endretDato = LocalDate.now(),
         )
 
         val tidlinjerMedForrigeAndelerPerPersonOgType = forrigeAndelerTilkjentYtelse.tilTidslinjerPerPersonOgType()
@@ -36,7 +36,7 @@ object TilkjentYtelseSatsendringUtils {
                 ytelseType = aktørOgYtelse.second,
                 person = personopplysningGrunnlag.personer.find { it.aktør == aktørOgYtelse.first } ?: throw Feil("Må finnes"),
                 behandlingId = behandling.id,
-                tilkjentYtelse = tilkjentYtelse
+                tilkjentYtelse = tilkjentYtelse,
             )
         }
 
@@ -48,7 +48,7 @@ object TilkjentYtelseSatsendringUtils {
         ytelseType: YtelseType,
         person: Person,
         behandlingId: Long,
-        tilkjentYtelse: TilkjentYtelse
+        tilkjentYtelse: TilkjentYtelse,
     ): List<AndelTilkjentYtelse> {
         if (this.perioder().any { it.innhold?.type != ytelseType }) throw Feil("Prøver å oppdatere en andel med $ytelseType sats, som ikke har denne satsen fra før ")
         if (this.perioder().any { it.innhold?.aktør != person.aktør }) throw Feil("Prøver å oppdatere sats på en andel som ikke er knyttet til aktørId ${person.aktør.aktørId}")
@@ -57,7 +57,6 @@ object TilkjentYtelseSatsendringUtils {
             YtelseType.ORDINÆR_BARNETRYGD -> lagOrdinærTidslinje(barn = person)
             YtelseType.UTVIDET_BARNETRYGD -> satstypeTidslinje(SatsType.UTVIDET_BARNETRYGD)
             YtelseType.SMÅBARNSTILLEGG -> satstypeTidslinje(SatsType.SMA)
-            YtelseType.MANUELL_VURDERING -> throw Feil("Ingen satstype for manuell vurdering")
         }
 
         val andelOgNySatsTidslinje = this.kombinerUtenNullMed(satsTidslinje) { forrigeAndel, sats ->
@@ -80,7 +79,7 @@ object TilkjentYtelseSatsendringUtils {
                 nasjonaltPeriodebeløp = utbetaltBeløp,
                 type = forrigeAndel.type,
                 sats = nySats,
-                prosent = forrigeAndel.prosent
+                prosent = forrigeAndel.prosent,
             )
         }
 
@@ -89,6 +88,6 @@ object TilkjentYtelseSatsendringUtils {
 
     private data class AndelOgSats(
         val tidligereAndel: AndelTilkjentYtelse,
-        val nySats: Int
+        val nySats: Int,
     )
 }

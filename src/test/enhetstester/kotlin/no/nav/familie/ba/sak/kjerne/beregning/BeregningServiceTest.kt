@@ -110,6 +110,7 @@ class BeregningServiceTest {
             personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
             småbarnstilleggService = småbarnstilleggService,
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
+            featureToggleService = featureToggleService,
         )
 
         every { tilkjentYtelseRepository.slettTilkjentYtelseFor(any()) } just Runs
