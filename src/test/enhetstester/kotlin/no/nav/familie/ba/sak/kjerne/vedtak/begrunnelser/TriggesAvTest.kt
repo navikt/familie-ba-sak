@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser
 
 import no.nav.familie.ba.sak.common.lagTriggesAv
-import no.nav.familie.ba.sak.dataGenerator.brev.lagMinimertUtbetalingsperiodeDetalj
-import no.nav.familie.ba.sak.dataGenerator.endretUtbetaling.lagMinimertEndretUtbetalingAndel
+import no.nav.familie.ba.sak.datagenerator.brev.lagMinimertUtbetalingsperiodeDetalj
+import no.nav.familie.ba.sak.datagenerator.endretUtbetaling.lagMinimertEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeDeltBostedTriggere
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak

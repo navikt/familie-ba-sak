@@ -37,7 +37,7 @@ class KlageServiceTest {
     )
 
     @Nested
-    inner class kanOppretteRevurdering {
+    inner class KanOppretteRevurdering {
 
         @Test
         internal fun `kan opprette revurdering hvis det finnes en ferdigstilt behandling`() {
@@ -81,7 +81,7 @@ class KlageServiceTest {
     }
 
     @Nested
-    inner class opprettRevurderingKlage {
+    inner class OpprettRevurderingKlage {
 
         @Test
         internal fun `kan opprette revurdering hvis det finnes en ferdigstilt behandling`() {

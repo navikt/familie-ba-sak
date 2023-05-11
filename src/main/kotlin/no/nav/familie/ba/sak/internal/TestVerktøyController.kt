@@ -13,10 +13,10 @@ import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottaker
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
-import no.nav.familie.ba.sak.task.InternKonsistensavstemming.OpprettInternKonsistensavstemmingTaskerTask
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.TaBehandlingerEtterVentefristAvVentTask
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
+import no.nav.familie.ba.sak.task.internkonsistensavstemming.OpprettInternKonsistensavstemmingTaskerTask
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.prosessering.domene.Task
