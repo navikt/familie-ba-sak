@@ -47,7 +47,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 import java.time.YearMonth
 
-class VedtaksperiodeServiceTest(
+class VedtaksperiodeServiceIntegrationTest(
     @Autowired
     private val stegService: StegService,
 
