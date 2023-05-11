@@ -53,7 +53,7 @@ class UtenlandskPeriodebeløpController(
         @PathVariable behandlingId: Long,
         @PathVariable utenlandskPeriodebeløpId: Long,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
-        utenlandskPeriodebeløpService.slettUtenlandskPeriodebeløp(utenlandskPeriodebeløpId)
+        utenlandskPeriodebeløpService.slettUtenlandskPeriodebeløp(BehandlingId(behandlingId), utenlandskPeriodebeløpId)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }

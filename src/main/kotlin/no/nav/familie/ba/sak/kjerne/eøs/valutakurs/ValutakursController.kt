@@ -53,7 +53,7 @@ class ValutakursController(
         @PathVariable behandlingId: Long,
         @PathVariable valutakursId: Long,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
-        valutakursService.slettValutakurs(valutakursId)
+        valutakursService.slettValutakurs(BehandlingId(behandlingId), valutakursId)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }

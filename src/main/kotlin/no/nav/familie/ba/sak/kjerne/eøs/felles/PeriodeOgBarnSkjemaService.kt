@@ -30,9 +30,11 @@ class PeriodeOgBarnSkjemaService<S : PeriodeOgBarnSkjemaEntitet<S>>(
         )
     }
 
-    fun slettSkjema(skjemaId: Long) {
+    fun slettSkjema(behandlingId: BehandlingId, skjemaId: Long) {
         val skjemaTilSletting = periodeOgBarnSkjemaRepository.getById(skjemaId)
-        val behandlingId = BehandlingId(skjemaTilSletting.behandlingId)
+        feilHvis(skjemaTilSletting.behandlingId != behandlingId.id) {
+            "Prøver å slette et skjema som ikke er koblet til behandlingen man sender inn"
+        }
         val gjeldendeSkjemaer = hentMedBehandlingId(behandlingId)
         val blanktSkjema = skjemaTilSletting.utenInnhold()
 

@@ -77,6 +77,7 @@ class VilkårController(
         )
 
         annenVurderingService.endreAnnenVurdering(
+            behandlingId = behandlingId,
             annenVurderingId = annenVurderingId,
             restAnnenVurdering = restAnnenVurdering,
         )
