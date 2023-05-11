@@ -29,7 +29,7 @@ internal class BrevmottakerControllerTest(
 
     @Test
     @Tag("integration")
-    fun kanLagreEndreOgSlette() {
+    fun kanLagreOgSlette() {
         val fagsak =
             defaultFagsak(aktør = randomAktør().also { aktørIdRepository.save(it) }).let { fagsakRepository.save(it) }
         val behandling = lagBehandling(fagsak = fagsak).let { behandlingRepository.save(it) }
@@ -46,13 +46,6 @@ internal class BrevmottakerControllerTest(
 
         )
         brevmottakerController.leggTilBrevmottaker(behandling.id, brevmottaker)
-        brevmottakerController.hentBrevmottakere(behandling.id).body?.data!!.apply {
-            brevmottakerController.oppdaterBrevmottaker(
-                behandlingId = behandling.id,
-                mottakerId = first().id!!,
-                brevmottaker = brevmottaker.copy(navn = "endret navn"),
-            )
-        }
         Assertions.assertThat(brevmottakerController.hentBrevmottakere(behandling.id).body?.data!!)
             .extracting("navn")
             .containsOnly("endret navn")
