@@ -136,7 +136,10 @@ private fun List<VilkårResultat>.filtrerVilkårErOrdinærtFor(
         .takeIf { it.isNotEmpty() }
 }
 
-fun hentOrdinæreVilkårForSøkerForskjøvetTidslinje(søker: Person, personResultater: Set<PersonResultat>): Tidslinje<List<VilkårResultat>, Måned> {
+fun hentOrdinæreVilkårForSøkerForskjøvetTidslinje(
+    søker: Person,
+    personResultater: Set<PersonResultat>,
+): Tidslinje<List<VilkårResultat>, Måned> {
     val søkerPersonResultater = personResultater.single { it.aktør == søker.aktør }
 
     return søkerPersonResultater.vilkårResultater.tilForskjøvedeVilkårTidslinjer()
