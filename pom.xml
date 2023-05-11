@@ -525,6 +525,9 @@
                 <configuration>
                     <!-- exclude tags -->
                     <!--suppress UnresolvedMavenProperty -->
+                    <includes>
+                        <include>**/*Enhetstest.*</include>
+                    </includes>
                     <excludedGroups>${excludedGroups}</excludedGroups>
                     <threadCount>1</threadCount>
                 </configuration>
