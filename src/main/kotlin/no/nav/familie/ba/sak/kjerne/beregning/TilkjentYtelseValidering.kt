@@ -50,7 +50,7 @@ object TilkjentYtelseValidering {
         val allePersonerMedAndeler =
             (andelerTilkjentYtelse.map { it.aktør } + forrigeAndelerTilkjentYtelse.map { it.aktør }).distinct()
 
-        val listeMedFeil = allePersonerMedAndeler.flatMap { aktør ->
+        allePersonerMedAndeler.flatMap { aktør ->
             val ytelseTyperForPerson =
                 (andelerTilkjentYtelse.map { it.type } + forrigeAndelerTilkjentYtelse.map { it.type }).distinct()
 
@@ -62,16 +62,14 @@ object TilkjentYtelseValidering {
 
                 forrigeTidslinje.kombinerMed(nåværendeTidslinje) { forrigeAndel, nåværendeAndel ->
                     when {
-                        forrigeAndel == null && nåværendeAndel != null -> true
-                        forrigeAndel != null && nåværendeAndel == null -> true
+                        forrigeAndel == null && nåværendeAndel != null -> throw Feil("Fuck it")
+                        forrigeAndel != null && nåværendeAndel == null -> throw Feil("Fuck it")
                         forrigeAndel != null && nåværendeAndel != null -> forrigeAndel.prosent != nåværendeAndel.prosent
                         else -> false
                     }
                 }.perioder().any { it.innhold == true }
             }
         }
-
-        if (listeMedFeil.any { it }) throw Feil("Satsendringsbehandling har endret mer på andelene enn den skal")
     }
 
     fun finnAktørIderMedUgyldigEtterbetalingsperiode(
