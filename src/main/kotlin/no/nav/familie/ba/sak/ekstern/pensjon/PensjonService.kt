@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -22,7 +21,6 @@ class PensjonService(
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val personidentService: PersonidentService,
     private val vedtakService: VedtakService,
-    private val kompetanseService: KompetanseService,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository
 ) {
     fun hentBarnetrygd(personIdent: String, fraDato: LocalDate): List<BarnetrygdTilPensjon> {
@@ -34,7 +32,8 @@ class PensjonService(
             ?.filter { it.personIdent != barnetrygdTilPensjon.fagsakEiersIdent }
             ?.map { barnetrygdPeriode -> hentBarnetrygdForRelatertPersonTilPensjon(barnetrygdPeriode.personIdent, fraDato) }
             ?.flatten()
-        return barnetrygdMedRelaterteSaker?.plus(barnetrygdTilPensjon) ?: emptyList()
+        return barnetrygdMedRelaterteSaker?.plus(barnetrygdTilPensjon)
+            ?.toSet()?.toList() ?: emptyList()
     }
     private fun hentBarnetrygdForRelatertPersonTilPensjon(personIdent: String, fraDato: LocalDate): List<BarnetrygdTilPensjon> {
         val aktør = personidentService.hentAktør(personIdent)
