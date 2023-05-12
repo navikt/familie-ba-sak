@@ -51,7 +51,7 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
-class DokumentServiceTest(
+class DokumentServiceIntegrationTest(
     @Autowired
     private val fagsakService: FagsakService,
 

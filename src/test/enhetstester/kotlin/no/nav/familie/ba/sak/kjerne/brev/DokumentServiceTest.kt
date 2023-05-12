@@ -38,7 +38,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class DokumentServiceEnhetstest {
+internal class DokumentServiceTest {
     val integrasjonClient = mockk<IntegrasjonClient>(relaxed = true)
     val vilkårsvurderingService = mockk<VilkårsvurderingService>(relaxed = true)
     val vilkårsvurderingForNyBehandlingService = mockk<VilkårsvurderingForNyBehandlingService>(relaxed = true)
