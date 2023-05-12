@@ -34,7 +34,7 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 import java.time.YearMonth
 
-class VedtaksperiodeServiceEnhetstest {
+class VedtaksperiodeServiceTest {
     private val persongrunnlagService: PersongrunnlagService = mockk()
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService =
         mockk()
