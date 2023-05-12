@@ -37,7 +37,7 @@ data class TilkjentYtelse(
     @SequenceGenerator(
         name = "tilkjent_ytelse_seq_generator",
         sequenceName = "tilkjent_ytelse_seq",
-        allocationSize = 50
+        allocationSize = 50,
     )
     val id: Long = 0,
 
@@ -70,14 +70,14 @@ data class TilkjentYtelse(
         fetch = FetchType.EAGER,
         mappedBy = "tilkjentYtelse",
         cascade = [CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.MERGE, CascadeType.REMOVE],
-        orphanRemoval = true
+        orphanRemoval = true,
     )
-    val andelerTilkjentYtelse: MutableSet<AndelTilkjentYtelse> = mutableSetOf()
+    val andelerTilkjentYtelse: MutableSet<AndelTilkjentYtelse> = mutableSetOf(),
 )
 
 private fun kombinerAndeler(
     lhs: LocalDateTimeline<List<AndelTilkjentYtelse>>,
-    rhs: LocalDateTimeline<AndelTilkjentYtelse>
+    rhs: LocalDateTimeline<AndelTilkjentYtelse>,
 ): LocalDateTimeline<List<AndelTilkjentYtelse>> {
     return lhs.combine(
         rhs,
@@ -85,10 +85,10 @@ private fun kombinerAndeler(
             StandardCombinators.allValues(
                 datoIntervall,
                 sammenlagt,
-                neste
+                neste,
             )
         },
-        LocalDateTimeline.JoinStyle.CROSS_JOIN
+        LocalDateTimeline.JoinStyle.CROSS_JOIN,
     )
 }
 
@@ -112,9 +112,9 @@ fun TilkjentYtelse.tilTidslinjeMedAndeler(): LocalDateTimeline<List<AndelTilkjen
                 LocalDateSegment(
                     andelTilkjentYtelse.stønadFom.førsteDagIInneværendeMåned(),
                     andelTilkjentYtelse.stønadTom.sisteDagIInneværendeMåned(),
-                    andelTilkjentYtelse
-                )
-            )
+                    andelTilkjentYtelse,
+                ),
+            ),
         )
     }
 

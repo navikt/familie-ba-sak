@@ -25,12 +25,12 @@ import org.springframework.web.bind.annotation.RestController
 class KorrigertEtterbetalingController(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val korrigertEtterbetalingService: KorrigertEtterbetalingService,
-    private val utvidetBehandlingService: UtvidetBehandlingService
+    private val utvidetBehandlingService: UtvidetBehandlingService,
 ) {
     @PostMapping(path = ["/behandling/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun opprettKorrigertEtterbetalingPåBehandling(
         @PathVariable behandlingId: Long,
-        @RequestBody korrigertEtterbetalingRequest: KorrigertEtterbetalingRequest
+        @RequestBody korrigertEtterbetalingRequest: KorrigertEtterbetalingRequest,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         val korrigertEtterbetaling = korrigertEtterbetalingRequest.tilKorrigertEtterbetaling(behandling)
@@ -42,7 +42,7 @@ class KorrigertEtterbetalingController(
 
     @GetMapping(path = ["/behandling/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentAlleKorrigerteEtterbetalingPåBehandling(
-        @PathVariable behandlingId: Long
+        @PathVariable behandlingId: Long,
     ): ResponseEntity<Ressurs<List<RestKorrigertEtterbetaling>>> {
         val korrigerteEtterbetalinger = korrigertEtterbetalingService.finnAlleKorrigeringerPåBehandling(behandlingId)
             .map { it.tilRestKorrigertEtterbetaling() }
@@ -52,7 +52,7 @@ class KorrigertEtterbetalingController(
 
     @PatchMapping(path = ["/behandling/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun settKorrigertEtterbetalingTilInaktivPåBehandling(
-        @PathVariable behandlingId: Long
+        @PathVariable behandlingId: Long,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         korrigertEtterbetalingService.settKorrigeringPåBehandlingTilInaktiv(behandling)

@@ -58,7 +58,7 @@ class ValutakursControllerTest {
         assertThrows<MockKException> {
             valutakursController.oppdaterValutakurs(
                 1,
-                restValutakurs.copy(valutakursdato = valutakursDato, valutakode = valuta)
+                restValutakurs.copy(valutakursdato = valutakursDato, valutakode = valuta),
             )
         }
         verify(exactly = 1) { ecbService.hentValutakurs("SEK", valutakursDato) }
@@ -71,7 +71,7 @@ class ValutakursControllerTest {
         assertThrows<MockKException> {
             valutakursController.oppdaterValutakurs(
                 1,
-                restValutakurs.copy(valutakode = "SEK")
+                restValutakurs.copy(valutakode = "SEK"),
             )
         }
         verify(exactly = 0) { ecbService.hentValutakurs("SEK", valutakursDato) }
@@ -84,7 +84,7 @@ class ValutakursControllerTest {
         assertThrows<MockKException> {
             valutakursController.oppdaterValutakurs(
                 1,
-                restValutakurs.copy(valutakursdato = valutakursDato)
+                restValutakurs.copy(valutakursdato = valutakursDato),
             )
         }
         verify(exactly = 0) { ecbService.hentValutakurs("SEK", valutakursDato) }
@@ -97,7 +97,7 @@ class ValutakursControllerTest {
         assertThrows<MockKException> {
             valutakursController.oppdaterValutakurs(
                 1,
-                restValutakurs.copy(valutakursdato = valutakursDato, valutakode = "ISK")
+                restValutakurs.copy(valutakursdato = valutakursDato, valutakode = "ISK"),
             )
         }
         verify(exactly = 0) { ecbService.hentValutakurs("ISK", valutakursDato) }
@@ -110,7 +110,7 @@ class ValutakursControllerTest {
         assertThrows<MockKException> {
             valutakursController.oppdaterValutakurs(
                 1,
-                restValutakurs.copy(valutakursdato = valutakursDato, valutakode = "ISK")
+                restValutakurs.copy(valutakursdato = valutakursDato, valutakode = "ISK"),
             )
         }
         verify(exactly = 1) { ecbService.hentValutakurs("ISK", valutakursDato) }

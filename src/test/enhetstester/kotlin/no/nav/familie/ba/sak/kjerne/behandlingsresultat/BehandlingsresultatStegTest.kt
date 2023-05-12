@@ -68,12 +68,12 @@ class BehandlingsresultatStegTest {
             vilkårService,
             persongrunnlagService,
             beregningService,
-            andelerTilkjentYtelseOgEndreteUtbetalingerService
+            andelerTilkjentYtelseOgEndreteUtbetalingerService,
         )
 
         behandling = lagBehandling(
             behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-            årsak = BehandlingÅrsak.HELMANUELL_MIGRERING
+            årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
         )
     }
 
@@ -84,7 +84,7 @@ class BehandlingsresultatStegTest {
         every {
             behandlingService.oppdaterBehandlingsresultat(
                 any(),
-                any()
+                any(),
             )
         } returns behandling.copy(resultat = Behandlingsresultat.AVSLÅTT)
 
@@ -93,7 +93,7 @@ class BehandlingsresultatStegTest {
             "Du har fått behandlingsresultatet Avslått. " +
                 "Dette er ikke støttet på migreringsbehandlinger. " +
                 "Meld sak i Porten om du er uenig i resultatet.",
-            exception.message
+            exception.message,
         )
     }
 
@@ -104,7 +104,7 @@ class BehandlingsresultatStegTest {
         every {
             behandlingService.oppdaterBehandlingsresultat(
                 any(),
-                any()
+                any(),
             )
         } returns behandling.copy(resultat = Behandlingsresultat.DELVIS_INNVILGET)
 
@@ -113,7 +113,7 @@ class BehandlingsresultatStegTest {
             "Du har fått behandlingsresultatet Delvis innvilget. " +
                 "Dette er ikke støttet på migreringsbehandlinger. " +
                 "Meld sak i Porten om du er uenig i resultatet.",
-            exception.message
+            exception.message,
         )
     }
 
@@ -124,7 +124,7 @@ class BehandlingsresultatStegTest {
         every {
             behandlingService.oppdaterBehandlingsresultat(
                 any(),
-                any()
+                any(),
             )
         } returns behandling.copy(resultat = Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT)
 
@@ -133,7 +133,7 @@ class BehandlingsresultatStegTest {
             "Du har fått behandlingsresultatet Avslått, endret og opphørt. " +
                 "Dette er ikke støttet på migreringsbehandlinger. " +
                 "Meld sak i Porten om du er uenig i resultatet.",
-            exception.message
+            exception.message,
         )
     }
 
@@ -141,7 +141,7 @@ class BehandlingsresultatStegTest {
     fun `skal kaste feil om det er endring etter migreringsdatoen til første behandling`() {
         val startdato = YearMonth.of(2023, 2)
         val endringTidslinje = "TTTFFFF".tilBoolskTidslinje(
-            startdato
+            startdato,
         )
 
         assertThrows<Feil> {
@@ -155,7 +155,7 @@ class BehandlingsresultatStegTest {
         val treMånederEtterStartdato = startdato.plusMonths(3)
 
         val endringTidslinje = "TTTFFFF".tilBoolskTidslinje(
-            startdato
+            startdato,
         )
 
         assertDoesNotThrow {
@@ -173,7 +173,7 @@ class BehandlingsresultatStegTest {
                         'T' -> true
                         'F' -> false
                         else -> throw Feil("Klarer ikke å konvertere \"$it\" til Boolean")
-                    }
+                    },
                 )
             }
         }

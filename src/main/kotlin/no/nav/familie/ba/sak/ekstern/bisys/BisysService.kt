@@ -19,7 +19,7 @@ class BisysService(
     private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
     private val fagsakRepository: FagsakRepository,
     private val personidentService: PersonidentService,
-    private val tilkjentYtelseRepository: TilkjentYtelseRepository
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
 ) {
     fun hentUtvidetBarnetrygd(personIdent: String, fraDato: LocalDate): BisysUtvidetBarnetrygdResponse {
         val aktør = personidentService.hentAktør(personIdent)
@@ -39,22 +39,22 @@ class BisysService(
         sammenslåttePerioder.addAll(
             samledeUtvidetBarnetrygdPerioder.filter { it.stønadstype == BisysStønadstype.SMÅBARNSTILLEGG }
                 .groupBy { it.beløp }.values
-                .flatMap(::slåSammenSammenhengendePerioder)
+                .flatMap(::slåSammenSammenhengendePerioder),
         )
 
         return BisysUtvidetBarnetrygdResponse(
             sammenslåttePerioder.sortedWith(
                 compareBy(
                     { it.stønadstype },
-                    { it.fomMåned }
-                )
-            )
+                    { it.fomMåned },
+                ),
+            ),
         )
     }
 
     private fun hentBisysPerioderFraInfotrygd(
         aktør: Aktør,
-        fraDato: LocalDate
+        fraDato: LocalDate,
     ): List<UtvidetBarnetrygdPeriode> =
         personidentService.hentAlleFødselsnummerForEnAktør(aktør).flatMap {
             infotrygdBarnetrygdClient.hentUtvidetBarnetrygd(it, fraDato.toYearMonth()).perioder
@@ -62,7 +62,7 @@ class BisysService(
 
     private fun hentBisysPerioderFraBaSak(
         aktør: Aktør,
-        fraDato: LocalDate
+        fraDato: LocalDate,
     ): List<UtvidetBarnetrygdPeriode> {
         val fagsak = fagsakRepository.finnFagsakForAktør(aktør)
         val behandling = fagsak?.let { behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(it.id) }
@@ -82,7 +82,7 @@ class BisysService(
                     tomMåned = it.stønadTom,
                     beløp = it.kalkulertUtbetalingsbeløp.toDouble(),
                     manueltBeregnet = false,
-                    deltBosted = it.erDeltBosted()
+                    deltBosted = it.erDeltBosted(),
                 )
             } ?: emptyList()
     }

@@ -8,13 +8,14 @@ enum class VilkårKanskjeOppfyltÅrsak(val beskrivelse: String, val vilkår: Vil
     // Lovlig opphold
     LOVLIG_OPPHOLD_MÅ_VURDERE_LENGDEN_PÅ_OPPHOLDSTILLATELSEN(
         "Må vurdere lengden på oppholdstillatelsen.",
-        Vilkår.LOVLIG_OPPHOLD
+        Vilkår.LOVLIG_OPPHOLD,
     ),
     LOVLIG_OPPHOLD_IKKE_MULIG_Å_FASTSETTE("Kan ikke avgjøre om personen har lovlig opphold.", Vilkår.LOVLIG_OPPHOLD),
     LOVLIG_OPPHOLD_ANNEN_FORELDER_IKKE_MULIG_Å_FASTSETTE(
         "Kan ikke avgjøre om annen har lovlig opphold.",
-        Vilkår.LOVLIG_OPPHOLD
-    );
+        Vilkår.LOVLIG_OPPHOLD,
+    ),
+    ;
 
     override fun hentBeskrivelse(): String {
         return beskrivelse

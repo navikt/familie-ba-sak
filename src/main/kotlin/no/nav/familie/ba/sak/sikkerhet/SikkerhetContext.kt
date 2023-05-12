@@ -28,7 +28,7 @@ object SikkerhetContext {
         return Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
             .fold(
                 onSuccess = { it.getClaims("azuread")?.get("NAVident")?.toString() ?: SYSTEM_FORKORTELSE },
-                onFailure = { SYSTEM_FORKORTELSE }
+                onFailure = { SYSTEM_FORKORTELSE },
             )
     }
 
@@ -36,7 +36,7 @@ object SikkerhetContext {
         return Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
             .fold(
                 onSuccess = { it.getClaims("azuread")?.get("preferred_username")?.toString() ?: SYSTEM_FORKORTELSE },
-                onFailure = { SYSTEM_FORKORTELSE }
+                onFailure = { SYSTEM_FORKORTELSE },
             )
     }
 
@@ -44,13 +44,13 @@ object SikkerhetContext {
         return Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
             .fold(
                 onSuccess = { it.getClaims("azuread")?.get("name")?.toString() ?: SYSTEM_NAVN },
-                onFailure = { SYSTEM_NAVN }
+                onFailure = { SYSTEM_NAVN },
             )
     }
 
     fun hentRolletilgangFraSikkerhetscontext(
         rolleConfig: RolleConfig,
-        lavesteSikkerhetsnivå: BehandlerRolle?
+        lavesteSikkerhetsnivå: BehandlerRolle?,
     ): BehandlerRolle {
         if (hentSaksbehandler() == SYSTEM_FORKORTELSE) return BehandlerRolle.SYSTEM
 
@@ -89,7 +89,7 @@ object SikkerhetContext {
                     @Suppress("UNCHECKED_CAST")
                     it.getClaims("azuread")?.get("groups") as List<String>? ?: emptyList()
                 },
-                onFailure = { emptyList() }
+                onFailure = { emptyList() },
             )
     }
 

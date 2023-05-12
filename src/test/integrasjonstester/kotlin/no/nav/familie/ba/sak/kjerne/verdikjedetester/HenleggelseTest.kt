@@ -22,7 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
 class HenleggelseTest(
-    @Autowired private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService
+    @Autowired private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 ) : AbstractVerdikjedetest() {
 
     val restScenario = RestScenario(
@@ -31,9 +31,9 @@ class HenleggelseTest(
             RestScenarioPerson(
                 fødselsdato = LocalDate.now().minusMonths(2).toString(),
                 fornavn = "Barn",
-                etternavn = "Barnesen"
-            )
-        )
+                etternavn = "Barnesen",
+            ),
+        ),
     )
 
     @Test
@@ -46,14 +46,14 @@ class HenleggelseTest(
             førsteBehandling.behandlingId,
             RestHenleggBehandlingInfo(
                 årsak = HenleggÅrsak.FEILAKTIG_OPPRETTET,
-                begrunnelse = "feilaktig opprettet"
-            )
+                begrunnelse = "feilaktig opprettet",
+            ),
         )
 
         generellAssertRestUtvidetBehandling(
             restUtvidetBehandling = responseHenlagtSøknad,
             behandlingStatus = BehandlingStatus.AVSLUTTET,
-            behandlingStegType = StegType.BEHANDLING_AVSLUTTET
+            behandlingStegType = StegType.BEHANDLING_AVSLUTTET,
         )
 
         val ferdigstiltBehandling =
@@ -84,8 +84,8 @@ class HenleggelseTest(
             behandlingId = førsteBehandling.behandlingId,
             manueltBrevRequest = ManueltBrevRequest(
                 mottakerIdent = scenario.søker.ident!!,
-                brevmal = Brevmal.HENLEGGE_TRUKKET_SØKNAD
-            )
+                brevmal = Brevmal.HENLEGGE_TRUKKET_SØKNAD,
+            ),
         )
         assertThat(responseForhandsvis.status == Ressurs.Status.SUKSESS)
 
@@ -93,14 +93,14 @@ class HenleggelseTest(
             førsteBehandling.behandlingId,
             RestHenleggBehandlingInfo(
                 årsak = HenleggÅrsak.SØKNAD_TRUKKET,
-                begrunnelse = "Søknad trukket"
-            )
+                begrunnelse = "Søknad trukket",
+            ),
         )
 
         generellAssertRestUtvidetBehandling(
             restUtvidetBehandling = responseHenlagtSøknad,
             behandlingStatus = BehandlingStatus.AVSLUTTET,
-            behandlingStegType = StegType.BEHANDLING_AVSLUTTET
+            behandlingStegType = StegType.BEHANDLING_AVSLUTTET,
         )
 
         val ferdigstiltBehandling =
@@ -121,20 +121,20 @@ class HenleggelseTest(
         val fagsak = familieBaSakKlient().opprettFagsak(søkersIdent = søkersIdent)
         val restFagsakMedBehandling = familieBaSakKlient().opprettBehandling(
             søkersIdent = søkersIdent,
-            fagsakId = fagsak.data!!.id
+            fagsakId = fagsak.data!!.id,
         )
 
         val behandling = behandlingHentOgPersisterService.hent(restFagsakMedBehandling.data!!.behandlingId)
         val restRegistrerSøknad = RestRegistrerSøknad(
             søknad = lagSøknadDTO(
                 søkerIdent = søkersIdent,
-                barnasIdenter = listOf(barn1)
+                barnasIdenter = listOf(barn1),
             ),
-            bekreftEndringerViaFrontend = false
+            bekreftEndringerViaFrontend = false,
         )
         return familieBaSakKlient().registrererSøknad(
             behandlingId = behandling.id,
-            restRegistrerSøknad = restRegistrerSøknad
+            restRegistrerSøknad = restRegistrerSøknad,
         ).data!!
     }
 }

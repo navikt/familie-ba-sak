@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidsenhet
 
 fun <K, V, H, R, T : Tidsenhet> Map<K, Tidslinje<V, T>>.outerJoin(
     høyreTidslinjer: Map<K, Tidslinje<H, T>>,
-    kombinator: (V?, H?) -> R?
+    kombinator: (V?, H?) -> R?,
 ): Map<K, Tidslinje<R, T>> {
     val venstreTidslinjer = this
     val alleNøkler = venstreTidslinjer.keys + høyreTidslinjer.keys
@@ -20,7 +20,7 @@ fun <K, V, H, R, T : Tidsenhet> Map<K, Tidslinje<V, T>>.outerJoin(
 
 fun <K, V, H, R, T : Tidsenhet> Map<K, Tidslinje<V, T>>.leftJoin(
     høyreTidslinjer: Map<K, Tidslinje<H, T>>,
-    kombinator: (V?, H?) -> R?
+    kombinator: (V?, H?) -> R?,
 ): Map<K, Tidslinje<R, T>> {
     val venstreTidslinjer = this
     val venstreNøkler = venstreTidslinjer.keys
@@ -45,7 +45,7 @@ fun <K, V, H, R, T : Tidsenhet> Map<K, Tidslinje<V, T>>.leftJoin(
  */
 fun <K, V, H, R, T : Tidsenhet> Map<K, Tidslinje<V, T>>.join(
     høyreTidslinjer: Map<K, Tidslinje<H, T>>,
-    kombinator: (V?, H?) -> R?
+    kombinator: (V?, H?) -> R?,
 ): Map<K, Tidslinje<R, T>> {
     val venstreTidslinjer = this
     val alleNøkler = venstreTidslinjer.keys.intersect(høyreTidslinjer.keys)
@@ -70,7 +70,7 @@ fun <K, V, H, R, T : Tidsenhet> Map<K, Tidslinje<V, T>>.join(
  */
 fun <K, V, H, R, T : Tidsenhet> Map<K, Tidslinje<V, T>>.joinIkkeNull(
     høyreTidslinjer: Map<K, Tidslinje<H, T>>,
-    kombinator: (V, H) -> R?
+    kombinator: (V, H) -> R?,
 ): Map<K, Tidslinje<R, T>> {
     val venstreTidslinjer = this
     val alleNøkler = venstreTidslinjer.keys.intersect(høyreTidslinjer.keys)
@@ -94,7 +94,7 @@ fun <K, V, H, R, T : Tidsenhet> Map<K, Tidslinje<V, T>>.joinIkkeNull(
  */
 fun <K, V, H, R, T : Tidsenhet> Map<K, Tidslinje<V, T>>.kombinerKunVerdiMed(
     høyreTidslinje: Tidslinje<H, T>,
-    kombinator: (V, H) -> R?
+    kombinator: (V, H) -> R?,
 ): Map<K, Tidslinje<R, T>> {
     val venstreTidslinjer = this
 

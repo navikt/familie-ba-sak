@@ -71,7 +71,7 @@ class UtbetalingsoppdragIntegrasjonTest(
     private val økonomiService: ØkonomiService,
 
     @Autowired
-    private val tilkjentYtelseRepository: TilkjentYtelseRepository
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
 ) : AbstractSpringIntegrationTest() {
 
     lateinit var utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator
@@ -100,7 +100,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 behandling,
                 person = personMedFlerePerioder,
                 aktør = personidentService.hentOgLagreAktør(personMedFlerePerioder.aktør.aktivFødselsnummer(), true),
-                tilkjentYtelse = tilkjentYtelse
+                tilkjentYtelse = tilkjentYtelse,
             ),
             lagAndelTilkjentYtelse(
                 årMnd("2026-05"),
@@ -110,7 +110,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 behandling,
                 person = personMedFlerePerioder,
                 aktør = personidentService.hentOgLagreAktør(personMedFlerePerioder.aktør.aktivFødselsnummer(), true),
-                tilkjentYtelse = tilkjentYtelse
+                tilkjentYtelse = tilkjentYtelse,
             ),
             lagAndelTilkjentYtelse(
                 årMnd("2019-03"),
@@ -120,8 +120,8 @@ class UtbetalingsoppdragIntegrasjonTest(
                 behandling,
                 tilkjentYtelse = tilkjentYtelse,
                 person = tilfeldigPerson,
-                aktør = personidentService.hentOgLagreAktør(tilfeldigPerson.aktør.aktivFødselsnummer(), true)
-            )
+                aktør = personidentService.hentOgLagreAktør(tilfeldigPerson.aktør.aktivFødselsnummer(), true),
+            ),
         )
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelse)
 
@@ -131,8 +131,8 @@ class UtbetalingsoppdragIntegrasjonTest(
                 vedtak,
                 true,
                 oppdaterteKjeder = ØkonomiUtils.grupperAndeler(
-                    andelerTilkjentYtelse.forIverksetting()
-                )
+                    andelerTilkjentYtelse.forIverksetting(),
+                ),
             )
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.NY, utbetalingsoppdrag.kodeEndring)
@@ -146,7 +146,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             fagsak.aktør.aktivFødselsnummer(),
             1054,
             "2019-03-01",
-            "2037-02-28"
+            "2037-02-28",
         )
         assertUtbetalingsperiode(
             utbetalingsperioderPerKlasse.getValue("BATRSMA")[0],
@@ -155,7 +155,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             fagsak.aktør.aktivFødselsnummer(),
             660,
             "2019-04-01",
-            "2023-03-31"
+            "2023-03-31",
         )
         assertUtbetalingsperiode(
             utbetalingsperioderPerKlasse.getValue("BATRSMA")[1],
@@ -164,7 +164,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             fagsak.aktør.aktivFødselsnummer(),
             660,
             "2026-05-01",
-            "2027-06-30"
+            "2027-06-30",
         )
     }
 
@@ -186,7 +186,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 behandling,
                 person = personMedFlerePerioder,
                 aktør = personidentService.hentOgLagreAktør(personMedFlerePerioder.aktør.aktivFødselsnummer(), true),
-                periodeIdOffset = 0
+                periodeIdOffset = 0,
             ),
             lagAndelTilkjentYtelse(
                 årMnd("2026-05"),
@@ -196,7 +196,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 behandling,
                 person = personMedFlerePerioder,
                 aktør = personidentService.hentOgLagreAktør(personMedFlerePerioder.aktør.aktivFødselsnummer(), true),
-                periodeIdOffset = 1
+                periodeIdOffset = 1,
             ),
             lagAndelTilkjentYtelse(
                 førsteDatoKjede2,
@@ -204,8 +204,8 @@ class UtbetalingsoppdragIntegrasjonTest(
                 YtelseType.ORDINÆR_BARNETRYGD,
                 1054,
                 behandling,
-                periodeIdOffset = 2
-            )
+                periodeIdOffset = 2,
+            ),
         )
 
         val vedtak = lagVedtak(behandling = behandling)
@@ -216,13 +216,13 @@ class UtbetalingsoppdragIntegrasjonTest(
                 vedtak = vedtak,
                 erFørsteBehandlingPåFagsak = false,
                 forrigeKjeder = ØkonomiUtils.grupperAndeler(
-                    andelerTilkjentYtelse.forIverksetting()
+                    andelerTilkjentYtelse.forIverksetting(),
                 ),
                 sisteOffsetPerIdent = ØkonomiUtils.gjeldendeForrigeOffsetForKjede(
                     ØkonomiUtils.grupperAndeler(
-                        andelerTilkjentYtelse.forIverksetting()
-                    )
-                )
+                        andelerTilkjentYtelse.forIverksetting(),
+                    ),
+                ),
             )
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.ENDR, utbetalingsoppdrag.kodeEndring)
@@ -237,7 +237,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             660,
             "2026-05-01",
             "2027-06-30",
-            førsteDatoKjede1.førsteDagIInneværendeMåned()
+            førsteDatoKjede1.førsteDagIInneværendeMåned(),
         )
         assertUtbetalingsperiode(
             utbetalingsperioderPerKlasse.getValue("BATR")[0],
@@ -247,7 +247,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             1054,
             "2019-03-01",
             "2037-02-28",
-            førsteDatoKjede2.førsteDagIInneværendeMåned()
+            førsteDatoKjede2.førsteDagIInneværendeMåned(),
         )
     }
 
@@ -257,8 +257,8 @@ class UtbetalingsoppdragIntegrasjonTest(
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
             lagBehandling(
                 fagsak,
-                førsteSteg = StegType.BEHANDLING_AVSLUTTET
-            )
+                førsteSteg = StegType.BEHANDLING_AVSLUTTET,
+            ),
         )
 
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling)
@@ -275,7 +275,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 periodeIdOffset = 0,
                 person = person,
                 aktør = personidentService.hentOgLagreAktør(person.aktør.aktivFødselsnummer(), true),
-                tilkjentYtelse = tilkjentYtelse
+                tilkjentYtelse = tilkjentYtelse,
             ),
             lagAndelTilkjentYtelse(
                 dato(fomDatoSomEndres).toYearMonth(),
@@ -286,7 +286,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 periodeIdOffset = 1,
                 person = person,
                 aktør = personidentService.hentOgLagreAktør(person.aktør.aktivFødselsnummer(), true),
-                tilkjentYtelse = tilkjentYtelse
+                tilkjentYtelse = tilkjentYtelse,
             ),
             lagAndelTilkjentYtelse(
                 årMnd("2037-01"),
@@ -297,8 +297,8 @@ class UtbetalingsoppdragIntegrasjonTest(
                 periodeIdOffset = 2,
                 person = person,
                 aktør = personidentService.hentOgLagreAktør(person.aktør.aktivFødselsnummer(), true),
-                tilkjentYtelse = tilkjentYtelse
-            )
+                tilkjentYtelse = tilkjentYtelse,
+            ),
         )
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerFørstegangsbehandling)
         tilkjentYtelse.utbetalingsoppdrag = "Oppdrag"
@@ -308,8 +308,8 @@ class UtbetalingsoppdragIntegrasjonTest(
             vedtak,
             true,
             oppdaterteKjeder = ØkonomiUtils.grupperAndeler(
-                andelerFørstegangsbehandling.forIverksetting()
-            )
+                andelerFørstegangsbehandling.forIverksetting(),
+            ),
         )
 
         val behandling2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
@@ -325,7 +325,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 periodeIdOffset = 0,
                 person = person,
                 aktør = personidentService.hentOgLagreAktør(person.aktør.aktivFødselsnummer(), true),
-                tilkjentYtelse = tilkjentYtelse
+                tilkjentYtelse = tilkjentYtelse,
             ),
             lagAndelTilkjentYtelse(
                 årMnd("2034-01"),
@@ -336,7 +336,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 periodeIdOffset = 3,
                 person = person,
                 aktør = personidentService.hentOgLagreAktør(person.aktør.aktivFødselsnummer(), true),
-                tilkjentYtelse = tilkjentYtelse2
+                tilkjentYtelse = tilkjentYtelse2,
             ),
             lagAndelTilkjentYtelse(
                 årMnd("2037-01"),
@@ -347,8 +347,8 @@ class UtbetalingsoppdragIntegrasjonTest(
                 periodeIdOffset = 4,
                 person = person,
                 aktør = personidentService.hentOgLagreAktør(person.aktør.aktivFødselsnummer(), true),
-                tilkjentYtelse = tilkjentYtelse2
-            )
+                tilkjentYtelse = tilkjentYtelse2,
+            ),
         )
         tilkjentYtelse2.andelerTilkjentYtelse.addAll(andelerRevurdering)
         val sisteOffsetPåFagsak = beregningService.hentSisteOffsetPåFagsak(behandling = behandling2)
@@ -359,17 +359,17 @@ class UtbetalingsoppdragIntegrasjonTest(
                 vedtak2,
                 false,
                 forrigeKjeder = ØkonomiUtils.grupperAndeler(
-                    andelerFørstegangsbehandling.forIverksetting()
+                    andelerFørstegangsbehandling.forIverksetting(),
                 ),
                 sisteOffsetPerIdent = ØkonomiUtils.gjeldendeForrigeOffsetForKjede(
                     ØkonomiUtils.grupperAndeler(
-                        andelerFørstegangsbehandling.forIverksetting()
-                    )
+                        andelerFørstegangsbehandling.forIverksetting(),
+                    ),
                 ),
                 sisteOffsetPåFagsak = sisteOffsetPåFagsak,
                 oppdaterteKjeder = ØkonomiUtils.grupperAndeler(
-                    andelerRevurdering.forIverksetting()
-                )
+                    andelerRevurdering.forIverksetting(),
+                ),
             )
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.ENDR, utbetalingsoppdrag.kodeEndring)
@@ -389,7 +389,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             1054,
             "2037-01-01",
             "2039-12-31",
-            dato(fomDatoSomEndres)
+            dato(fomDatoSomEndres),
         )
         assertUtbetalingsperiode(
             nyeUtbetalingsPerioderSortert.first(),
@@ -398,7 +398,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             fagsak.aktør.aktivFødselsnummer(),
             1054,
             "2034-01-01",
-            "2034-12-31"
+            "2034-12-31",
         )
         assertUtbetalingsperiode(
             nyeUtbetalingsPerioderSortert.last(),
@@ -407,7 +407,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             fagsak.aktør.aktivFødselsnummer(),
             1054,
             "2037-01-01",
-            "2039-12-31"
+            "2039-12-31",
         )
     }
 
@@ -417,8 +417,8 @@ class UtbetalingsoppdragIntegrasjonTest(
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
             lagBehandling(
                 fagsak,
-                førsteSteg = StegType.BEHANDLING_AVSLUTTET
-            )
+                førsteSteg = StegType.BEHANDLING_AVSLUTTET,
+            ),
         )
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling)
         val aktør = personidentService.hentOgLagreAktør(randomFnr(), true)
@@ -434,7 +434,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 periodeIdOffset = 0,
                 person = person,
                 aktør = aktør,
-                tilkjentYtelse = tilkjentYtelse
+                tilkjentYtelse = tilkjentYtelse,
             ),
             lagAndelTilkjentYtelse(
                 årMnd("2033-01"),
@@ -445,8 +445,8 @@ class UtbetalingsoppdragIntegrasjonTest(
                 periodeIdOffset = 1,
                 person = person,
                 aktør = aktør,
-                tilkjentYtelse = tilkjentYtelse
-            )
+                tilkjentYtelse = tilkjentYtelse,
+            ),
         )
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerFørstegangsbehandling)
         tilkjentYtelse.utbetalingsoppdrag = "Oppdrag"
@@ -456,8 +456,8 @@ class UtbetalingsoppdragIntegrasjonTest(
             vedtak,
             true,
             oppdaterteKjeder = ØkonomiUtils.grupperAndeler(
-                andelerFørstegangsbehandling.forIverksetting()
-            )
+                andelerFørstegangsbehandling.forIverksetting(),
+            ),
         )
 
         val behandling2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
@@ -475,7 +475,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 periodeIdOffset = 2,
                 person = nyPerson,
                 aktør = nyAktør,
-                tilkjentYtelse = tilkjentYtelse2
+                tilkjentYtelse = tilkjentYtelse2,
             ),
             lagAndelTilkjentYtelse(
                 årMnd("2037-01"),
@@ -486,8 +486,8 @@ class UtbetalingsoppdragIntegrasjonTest(
                 periodeIdOffset = 3,
                 person = nyPerson,
                 aktør = personidentService.hentOgLagreAktør(nyPerson.aktør.aktørId, true),
-                tilkjentYtelse = tilkjentYtelse2
-            )
+                tilkjentYtelse = tilkjentYtelse2,
+            ),
         )
         tilkjentYtelse2.andelerTilkjentYtelse.addAll(andelerRevurdering)
         val sisteOffsetPåFagsak = beregningService.hentSisteOffsetPåFagsak(behandling = behandling2)
@@ -498,17 +498,17 @@ class UtbetalingsoppdragIntegrasjonTest(
                 vedtak2,
                 false,
                 forrigeKjeder = ØkonomiUtils.grupperAndeler(
-                    andelerFørstegangsbehandling.forIverksetting()
+                    andelerFørstegangsbehandling.forIverksetting(),
                 ),
                 sisteOffsetPerIdent = ØkonomiUtils.gjeldendeForrigeOffsetForKjede(
                     ØkonomiUtils.grupperAndeler(
-                        andelerFørstegangsbehandling.forIverksetting()
-                    )
+                        andelerFørstegangsbehandling.forIverksetting(),
+                    ),
                 ),
                 sisteOffsetPåFagsak = sisteOffsetPåFagsak,
                 oppdaterteKjeder = ØkonomiUtils.grupperAndeler(
-                    andelerRevurdering.forIverksetting()
-                )
+                    andelerRevurdering.forIverksetting(),
+                ),
             )
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.ENDR, utbetalingsoppdrag.kodeEndring)
@@ -521,7 +521,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             fagsak.aktør.aktivFødselsnummer(),
             1054,
             "2033-01-01",
-            "2034-12-31"
+            "2034-12-31",
         )
         assertUtbetalingsperiode(
             sorterteUtbetalingsperioder[1],
@@ -530,7 +530,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             fagsak.aktør.aktivFødselsnummer(),
             1054,
             "2022-01-01",
-            "2034-12-31"
+            "2034-12-31",
         )
         assertUtbetalingsperiode(
             sorterteUtbetalingsperioder[2],
@@ -539,7 +539,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             fagsak.aktør.aktivFødselsnummer(),
             1054,
             "2037-01-01",
-            "2039-12-31"
+            "2039-12-31",
         )
     }
 
@@ -558,7 +558,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 660,
                 behandling,
                 person = personMedFlerePerioder,
-                aktør = personidentService.hentOgLagreAktør(personMedFlerePerioder.aktør.aktørId, true)
+                aktør = personidentService.hentOgLagreAktør(personMedFlerePerioder.aktør.aktørId, true),
             ),
             lagAndelTilkjentYtelse(
                 årMnd("2026-05"),
@@ -567,7 +567,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 660,
                 behandling,
                 person = personMedFlerePerioder,
-                aktør = personidentService.hentOgLagreAktør(personMedFlerePerioder.aktør.aktørId, true)
+                aktør = personidentService.hentOgLagreAktør(personMedFlerePerioder.aktør.aktørId, true),
             ),
             lagAndelTilkjentYtelse(
                 årMnd("2019-03"),
@@ -576,8 +576,8 @@ class UtbetalingsoppdragIntegrasjonTest(
                 1054,
                 behandling,
                 person = personMedFlerePerioder,
-                aktør = personidentService.hentOgLagreAktør(personMedFlerePerioder.aktør.aktørId, true)
-            )
+                aktør = personidentService.hentOgLagreAktør(personMedFlerePerioder.aktør.aktørId, true),
+            ),
         )
 
         val utbetalingsoppdrag = utbetalingsoppdragGenerator.lagUtbetalingsoppdragOgOppdaterTilkjentYtelse(
@@ -585,8 +585,8 @@ class UtbetalingsoppdragIntegrasjonTest(
             vedtak,
             true,
             oppdaterteKjeder = ØkonomiUtils.grupperAndeler(
-                andelerTilkjentYtelse.forIverksetting()
-            )
+                andelerTilkjentYtelse.forIverksetting(),
+            ),
         )
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.NY, utbetalingsoppdrag.kodeEndring)
@@ -600,7 +600,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             fagsak.aktør.aktivFødselsnummer(),
             1054,
             "2019-03-01",
-            "2037-02-28"
+            "2037-02-28",
         )
         assertUtbetalingsperiode(
             utbetalingsperioderPerKlasse.getValue("BATRSMA")[0],
@@ -609,7 +609,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             fagsak.aktør.aktivFødselsnummer(),
             660,
             "2019-04-01",
-            "2023-03-31"
+            "2023-03-31",
         )
         assertUtbetalingsperiode(
             utbetalingsperioderPerKlasse.getValue("BATRSMA")[1],
@@ -618,7 +618,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             fagsak.aktør.aktivFødselsnummer(),
             660,
             "2026-05-01",
-            "2027-06-30"
+            "2027-06-30",
         )
     }
 
@@ -628,7 +628,7 @@ class UtbetalingsoppdragIntegrasjonTest(
         val vedtak = lagVedtak(behandling = behandling)
         val andelerTilkjentYtelse = listOf(
             lagAndelTilkjentYtelse(årMnd("2019-04"), årMnd("2023-03"), YtelseType.SMÅBARNSTILLEGG, 660, behandling),
-            lagAndelTilkjentYtelse(årMnd("2026-05"), årMnd("2027-06"), YtelseType.SMÅBARNSTILLEGG, 660, behandling)
+            lagAndelTilkjentYtelse(årMnd("2026-05"), årMnd("2027-06"), YtelseType.SMÅBARNSTILLEGG, 660, behandling),
         )
 
         assertThrows<java.lang.IllegalArgumentException> {
@@ -637,8 +637,8 @@ class UtbetalingsoppdragIntegrasjonTest(
                 vedtak,
                 true,
                 oppdaterteKjeder = ØkonomiUtils.grupperAndeler(
-                    andelerTilkjentYtelse.forIverksetting()
-                )
+                    andelerTilkjentYtelse.forIverksetting(),
+                ),
             )
         }
     }
@@ -649,8 +649,8 @@ class UtbetalingsoppdragIntegrasjonTest(
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
             lagBehandling(
                 fagsak,
-                førsteSteg = StegType.BEHANDLING_AVSLUTTET
-            )
+                førsteSteg = StegType.BEHANDLING_AVSLUTTET,
+            ),
         )
 
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling)
@@ -666,7 +666,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 periodeIdOffset = 0,
                 person = person,
                 aktør = personidentService.hentOgLagreAktør(person.aktør.aktivFødselsnummer(), true),
-                tilkjentYtelse = tilkjentYtelse
+                tilkjentYtelse = tilkjentYtelse,
             ),
             lagAndelTilkjentYtelse(
                 årMnd("2030-01"),
@@ -677,7 +677,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 periodeIdOffset = 1,
                 person = person,
                 aktør = personidentService.hentOgLagreAktør(person.aktør.aktivFødselsnummer(), true),
-                tilkjentYtelse = tilkjentYtelse
+                tilkjentYtelse = tilkjentYtelse,
             ),
             lagAndelTilkjentYtelse(
                 årMnd("2035-01"),
@@ -688,8 +688,8 @@ class UtbetalingsoppdragIntegrasjonTest(
                 periodeIdOffset = 2,
                 person = person,
                 aktør = personidentService.hentOgLagreAktør(person.aktør.aktivFødselsnummer(), true),
-                tilkjentYtelse = tilkjentYtelse
-            )
+                tilkjentYtelse = tilkjentYtelse,
+            ),
         )
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerFørstegangsbehandling)
 
@@ -700,8 +700,8 @@ class UtbetalingsoppdragIntegrasjonTest(
             vedtak,
             true,
             oppdaterteKjeder = ØkonomiUtils.grupperAndeler(
-                andelerFørstegangsbehandling.forIverksetting()
-            )
+                andelerFørstegangsbehandling.forIverksetting(),
+            ),
         )
 
         val behandling2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
@@ -717,7 +717,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 periodeIdOffset = 0,
                 person = person,
                 aktør = personidentService.hentOgLagreAktør(person.aktør.aktivFødselsnummer(), true),
-                tilkjentYtelse = tilkjentYtelse
+                tilkjentYtelse = tilkjentYtelse,
             ),
             lagAndelTilkjentYtelse(
                 årMnd("2030-01"),
@@ -728,7 +728,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 periodeIdOffset = 3,
                 person = person,
                 aktør = personidentService.hentOgLagreAktør(person.aktør.aktivFødselsnummer(), true),
-                tilkjentYtelse = tilkjentYtelse2
+                tilkjentYtelse = tilkjentYtelse2,
             ),
             lagAndelTilkjentYtelse(
                 årMnd("2035-01"),
@@ -739,8 +739,8 @@ class UtbetalingsoppdragIntegrasjonTest(
                 periodeIdOffset = 4,
                 person = person,
                 aktør = personidentService.hentOgLagreAktør(person.aktør.aktivFødselsnummer(), true),
-                tilkjentYtelse = tilkjentYtelse2
-            )
+                tilkjentYtelse = tilkjentYtelse2,
+            ),
         )
         tilkjentYtelse2.andelerTilkjentYtelse.addAll(andelerRevurdering)
         val sisteOffsetPåFagsak = beregningService.hentSisteOffsetPåFagsak(behandling = behandling2)
@@ -751,18 +751,18 @@ class UtbetalingsoppdragIntegrasjonTest(
                 vedtak2,
                 false,
                 forrigeKjeder = ØkonomiUtils.grupperAndeler(
-                    andelerFørstegangsbehandling.forIverksetting()
+                    andelerFørstegangsbehandling.forIverksetting(),
                 ),
                 sisteOffsetPerIdent = ØkonomiUtils.gjeldendeForrigeOffsetForKjede(
                     ØkonomiUtils.grupperAndeler(
-                        andelerFørstegangsbehandling.forIverksetting()
-                    )
+                        andelerFørstegangsbehandling.forIverksetting(),
+                    ),
                 ),
                 sisteOffsetPåFagsak = sisteOffsetPåFagsak,
                 oppdaterteKjeder = ØkonomiUtils.grupperAndeler(
-                    andelerRevurdering.forIverksetting()
+                    andelerRevurdering.forIverksetting(),
                 ),
-                erSimulering = true
+                erSimulering = true,
             )
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.ENDR, utbetalingsoppdrag.kodeEndring)
@@ -782,7 +782,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             1054,
             "2035-01-01",
             "2039-12-31",
-            dato("2020-01-01")
+            dato("2020-01-01"),
         )
         assertUtbetalingsperiode(
             nyeUtbetalingsPerioderSortert.first(),
@@ -791,7 +791,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             fagsak.aktør.aktivFødselsnummer(),
             1054,
             "2020-01-01",
-            "2029-12-31"
+            "2029-12-31",
         )
         assertUtbetalingsperiode(
             nyeUtbetalingsPerioderSortert[1],
@@ -800,7 +800,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             fagsak.aktør.aktivFødselsnummer(),
             1054,
             "2030-01-01",
-            "2034-12-31"
+            "2034-12-31",
         )
         assertUtbetalingsperiode(
             nyeUtbetalingsPerioderSortert.last(),
@@ -809,7 +809,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             fagsak.aktør.aktivFødselsnummer(),
             1054,
             "2035-01-01",
-            "2039-12-31"
+            "2039-12-31",
         )
     }
 
@@ -819,8 +819,8 @@ class UtbetalingsoppdragIntegrasjonTest(
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
             lagBehandling(
                 fagsak,
-                førsteSteg = StegType.BEHANDLING_AVSLUTTET
-            )
+                førsteSteg = StegType.BEHANDLING_AVSLUTTET,
+            ),
         )
 
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling)
@@ -836,7 +836,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 periodeIdOffset = 0,
                 person = person,
                 aktør = personidentService.hentOgLagreAktør(person.aktør.aktivFødselsnummer(), true),
-                tilkjentYtelse = tilkjentYtelse
+                tilkjentYtelse = tilkjentYtelse,
             ),
             lagAndelTilkjentYtelse(
                 årMnd("2030-01"),
@@ -847,7 +847,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 periodeIdOffset = 1,
                 person = person,
                 aktør = personidentService.hentOgLagreAktør(person.aktør.aktivFødselsnummer(), true),
-                tilkjentYtelse = tilkjentYtelse
+                tilkjentYtelse = tilkjentYtelse,
             ),
             lagAndelTilkjentYtelse(
                 årMnd("2035-01"),
@@ -858,8 +858,8 @@ class UtbetalingsoppdragIntegrasjonTest(
                 periodeIdOffset = 2,
                 person = person,
                 aktør = personidentService.hentOgLagreAktør(person.aktør.aktivFødselsnummer(), true),
-                tilkjentYtelse = tilkjentYtelse
-            )
+                tilkjentYtelse = tilkjentYtelse,
+            ),
         )
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerFørstegangsbehandling)
         tilkjentYtelse.utbetalingsoppdrag = "Oppdrag"
@@ -869,8 +869,8 @@ class UtbetalingsoppdragIntegrasjonTest(
             vedtak,
             true,
             oppdaterteKjeder = ØkonomiUtils.grupperAndeler(
-                andelerFørstegangsbehandling.forIverksetting()
-            )
+                andelerFørstegangsbehandling.forIverksetting(),
+            ),
         )
 
         val behandling2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
@@ -886,7 +886,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 periodeIdOffset = 0,
                 person = person,
                 aktør = personidentService.hentOgLagreAktør(person.aktør.aktivFødselsnummer(), true),
-                tilkjentYtelse = tilkjentYtelse
+                tilkjentYtelse = tilkjentYtelse,
             ),
             lagAndelTilkjentYtelse(
                 årMnd("2030-01"),
@@ -897,7 +897,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 periodeIdOffset = 3,
                 person = person,
                 aktør = personidentService.hentOgLagreAktør(person.aktør.aktivFødselsnummer(), true),
-                tilkjentYtelse = tilkjentYtelse2
+                tilkjentYtelse = tilkjentYtelse2,
             ),
             lagAndelTilkjentYtelse(
                 årMnd("2035-01"),
@@ -908,8 +908,8 @@ class UtbetalingsoppdragIntegrasjonTest(
                 periodeIdOffset = 4,
                 person = person,
                 aktør = personidentService.hentOgLagreAktør(person.aktør.aktivFødselsnummer(), true),
-                tilkjentYtelse = tilkjentYtelse2
-            )
+                tilkjentYtelse = tilkjentYtelse2,
+            ),
         )
         tilkjentYtelse2.andelerTilkjentYtelse.addAll(andelerRevurdering)
 
@@ -921,18 +921,18 @@ class UtbetalingsoppdragIntegrasjonTest(
                 vedtak2,
                 false,
                 forrigeKjeder = ØkonomiUtils.grupperAndeler(
-                    andelerFørstegangsbehandling.forIverksetting()
+                    andelerFørstegangsbehandling.forIverksetting(),
                 ),
                 sisteOffsetPerIdent = ØkonomiUtils.gjeldendeForrigeOffsetForKjede(
                     ØkonomiUtils.grupperAndeler(
-                        andelerFørstegangsbehandling.forIverksetting()
-                    )
+                        andelerFørstegangsbehandling.forIverksetting(),
+                    ),
                 ),
                 sisteOffsetPåFagsak = sisteOffsetPåFagsak,
                 oppdaterteKjeder = ØkonomiUtils.grupperAndeler(
-                    andelerRevurdering.forIverksetting()
+                    andelerRevurdering.forIverksetting(),
                 ),
-                erSimulering = true
+                erSimulering = true,
             )
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.ENDR, utbetalingsoppdrag.kodeEndring)
@@ -952,7 +952,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             1054,
             "2035-01-01",
             "2039-12-31",
-            dato("2020-01-01")
+            dato("2020-01-01"),
         )
         assertUtbetalingsperiode(
             nyeUtbetalingsPerioderSortert.first(),
@@ -961,7 +961,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             fagsak.aktør.aktivFødselsnummer(),
             1054,
             "2020-01-01",
-            "2029-12-31"
+            "2029-12-31",
         )
         assertUtbetalingsperiode(
             nyeUtbetalingsPerioderSortert[1],
@@ -970,7 +970,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             fagsak.aktør.aktivFødselsnummer(),
             1054,
             "2030-01-01",
-            "2034-12-31"
+            "2034-12-31",
         )
         assertUtbetalingsperiode(
             nyeUtbetalingsPerioderSortert.last(),
@@ -979,7 +979,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             fagsak.aktør.aktivFødselsnummer(),
             1054,
             "2035-01-01",
-            "2038-12-31"
+            "2038-12-31",
         )
     }
 
@@ -989,8 +989,8 @@ class UtbetalingsoppdragIntegrasjonTest(
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
             lagBehandling(
                 fagsak,
-                førsteSteg = StegType.BEHANDLING_AVSLUTTET
-            )
+                førsteSteg = StegType.BEHANDLING_AVSLUTTET,
+            ),
         )
 
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling)
@@ -1006,7 +1006,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 periodeIdOffset = 0,
                 person = person,
                 aktør = personidentService.hentOgLagreAktør(person.aktør.aktivFødselsnummer(), true),
-                tilkjentYtelse = tilkjentYtelse
+                tilkjentYtelse = tilkjentYtelse,
             ),
             lagAndelTilkjentYtelse(
                 årMnd("2025-01"),
@@ -1018,8 +1018,8 @@ class UtbetalingsoppdragIntegrasjonTest(
                 forrigeperiodeIdOffset = 0,
                 person = person,
                 aktør = personidentService.hentOgLagreAktør(person.aktør.aktivFødselsnummer(), true),
-                tilkjentYtelse = tilkjentYtelse
-            )
+                tilkjentYtelse = tilkjentYtelse,
+            ),
         )
 
         val andelerAndregangsbehandling = listOf(
@@ -1032,8 +1032,8 @@ class UtbetalingsoppdragIntegrasjonTest(
                 periodeIdOffset = 0,
                 person = person,
                 aktør = personidentService.hentOgLagreAktør(person.aktør.aktivFødselsnummer(), true),
-                tilkjentYtelse = tilkjentYtelse
-            )
+                tilkjentYtelse = tilkjentYtelse,
+            ),
         )
         val andelerRevurderingsbehandling = listOf(
             lagAndelTilkjentYtelse(
@@ -1044,8 +1044,8 @@ class UtbetalingsoppdragIntegrasjonTest(
                 behandling,
                 person = person,
                 aktør = personidentService.hentOgLagreAktør(person.aktør.aktivFødselsnummer(), true),
-                tilkjentYtelse = tilkjentYtelse
-            )
+                tilkjentYtelse = tilkjentYtelse,
+            ),
         )
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerRevurderingsbehandling)
         tilkjentYtelse.utbetalingsoppdrag = "Oppdrag"
@@ -1056,16 +1056,16 @@ class UtbetalingsoppdragIntegrasjonTest(
             false,
             sisteOffsetPåFagsak = 1,
             forrigeKjeder = ØkonomiUtils.grupperAndeler(
-                andelerAndregangsbehandling.forIverksetting()
+                andelerAndregangsbehandling.forIverksetting(),
             ),
             sisteOffsetPerIdent = ØkonomiUtils.gjeldendeForrigeOffsetForKjede(
                 ØkonomiUtils.grupperAndeler(
-                    (andelerFørstegangsbehandling + andelerAndregangsbehandling).forIverksetting()
-                )
+                    (andelerFørstegangsbehandling + andelerAndregangsbehandling).forIverksetting(),
+                ),
             ),
             oppdaterteKjeder = ØkonomiUtils.grupperAndeler(
-                andelerRevurderingsbehandling.forIverksetting()
-            )
+                andelerRevurderingsbehandling.forIverksetting(),
+            ),
         )
 
         assertEquals(1, utbetalingsoppdrag.utbetalingsperiode.single() { it.opphør == null }.forrigePeriodeId)
@@ -1078,8 +1078,8 @@ class UtbetalingsoppdragIntegrasjonTest(
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
             lagBehandling(
                 fagsak,
-                førsteSteg = StegType.BEHANDLING_AVSLUTTET
-            )
+                førsteSteg = StegType.BEHANDLING_AVSLUTTET,
+            ),
         )
 
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling)
@@ -1095,8 +1095,8 @@ class UtbetalingsoppdragIntegrasjonTest(
                 periodeIdOffset = 0,
                 person = person,
                 aktør = personidentService.hentOgLagreAktør(person.aktør.aktivFødselsnummer(), true),
-                tilkjentYtelse = tilkjentYtelse
-            )
+                tilkjentYtelse = tilkjentYtelse,
+            ),
         )
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerFørstegangsbehandling)
         tilkjentYtelse.utbetalingsoppdrag = "Oppdrag"
@@ -1106,17 +1106,17 @@ class UtbetalingsoppdragIntegrasjonTest(
             vedtak,
             true,
             oppdaterteKjeder = ØkonomiUtils.grupperAndeler(
-                andelerFørstegangsbehandling.forIverksetting()
-            )
+                andelerFørstegangsbehandling.forIverksetting(),
+            ),
         )
 
         val behandling2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(
             (
                 lagBehandling(
                     fagsak,
-                    førsteSteg = StegType.BEHANDLING_AVSLUTTET
+                    førsteSteg = StegType.BEHANDLING_AVSLUTTET,
                 )
-                )
+                ),
         )
         val tilkjentYtelse2 = lagInitiellTilkjentYtelse(behandling2)
         val andelerRevurdering = emptyList<AndelTilkjentYtelse>()
@@ -1128,8 +1128,8 @@ class UtbetalingsoppdragIntegrasjonTest(
             vedtak,
             false,
             oppdaterteKjeder = ØkonomiUtils.grupperAndeler(
-                andelerRevurdering.forIverksetting()
-            )
+                andelerRevurdering.forIverksetting(),
+            ),
         )
 
         val behandling3 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
@@ -1144,8 +1144,8 @@ class UtbetalingsoppdragIntegrasjonTest(
                 periodeIdOffset = 0,
                 person = person,
                 aktør = personidentService.hentOgLagreAktør(person.aktør.aktivFødselsnummer(), true),
-                tilkjentYtelse = tilkjentYtelse
-            )
+                tilkjentYtelse = tilkjentYtelse,
+            ),
         )
         tilkjentYtelse3.andelerTilkjentYtelse.addAll(andelerRevurdering2)
 
@@ -1173,7 +1173,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 førsteBehandling,
                 person = førsteBarnet,
                 aktør = personidentService.hentOgLagreAktør(førsteBarnet.aktør.aktivFødselsnummer(), true),
-                tilkjentYtelse = førsteTilkjentYtelse
+                tilkjentYtelse = førsteTilkjentYtelse,
             ),
             lagAndelTilkjentYtelse(
                 årMnd("2023-04"),
@@ -1183,8 +1183,8 @@ class UtbetalingsoppdragIntegrasjonTest(
                 førsteBehandling,
                 person = førsteBarnet,
                 aktør = personidentService.hentOgLagreAktør(førsteBarnet.aktør.aktivFødselsnummer(), true),
-                tilkjentYtelse = førsteTilkjentYtelse
-            )
+                tilkjentYtelse = førsteTilkjentYtelse,
+            ),
         )
         førsteTilkjentYtelse.andelerTilkjentYtelse.addAll(førsteAndelerTilkjentYtelse)
         førsteTilkjentYtelse.utbetalingsoppdrag = "utbetalingsoppdrg"
@@ -1193,15 +1193,15 @@ class UtbetalingsoppdragIntegrasjonTest(
         økonomiService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
             førsteVedtak,
             "Z123",
-            AndelTilkjentYtelseForIverksettingFactory()
+            AndelTilkjentYtelseForIverksettingFactory(),
         )
         avsluttOgLagreBehandling(førsteBehandling)
 
         val andreBehandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
             lagBehandling(
                 fagsak,
-                behandlingType = BehandlingType.REVURDERING
-            )
+                behandlingType = BehandlingType.REVURDERING,
+            ),
         )
         val andreVedtak = lagVedtak(behandling = andreBehandling)
 
@@ -1215,7 +1215,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 andreBehandling,
                 person = andreBarnet,
                 aktør = personidentService.hentOgLagreAktør(andreBarnet.aktør.aktivFødselsnummer(), true),
-                tilkjentYtelse = andreTilkjentYtelse
+                tilkjentYtelse = andreTilkjentYtelse,
             ),
             lagAndelTilkjentYtelse(
                 årMnd("2023-04"),
@@ -1225,8 +1225,8 @@ class UtbetalingsoppdragIntegrasjonTest(
                 andreBehandling,
                 person = andreBarnet,
                 aktør = personidentService.hentOgLagreAktør(andreBarnet.aktør.aktivFødselsnummer(), true),
-                tilkjentYtelse = andreTilkjentYtelse
-            )
+                tilkjentYtelse = andreTilkjentYtelse,
+            ),
         )
         andreTilkjentYtelse.andelerTilkjentYtelse.addAll(andreAndelerTilkjentYtelse)
         tilkjentYtelseRepository.saveAndFlush(andreTilkjentYtelse)
@@ -1234,7 +1234,7 @@ class UtbetalingsoppdragIntegrasjonTest(
         val utbetalingsoppdrag = økonomiService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
             andreVedtak,
             "Z123",
-            AndelTilkjentYtelseForIverksettingFactory()
+            AndelTilkjentYtelseForIverksettingFactory(),
         )
         assertEquals(Utbetalingsoppdrag.KodeEndring.ENDR, utbetalingsoppdrag.kodeEndring)
         assertEquals(3, utbetalingsoppdrag.utbetalingsperiode.size)
@@ -1253,7 +1253,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             fagsakService.hentEllerOpprettFagsakForPersonIdent(
                 tilfeldigPerson.aktør.aktivFødselsnummer(),
                 fagsakType = FagsakType.INSTITUSJON,
-                institusjon = InstitusjonInfo(ORGNUMMER, TSS_ID_INSTITUSJON)
+                institusjon = InstitusjonInfo(ORGNUMMER, TSS_ID_INSTITUSJON),
             )
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         val vedtak = lagVedtak(behandling = behandling)
@@ -1267,8 +1267,8 @@ class UtbetalingsoppdragIntegrasjonTest(
                 behandling,
                 tilkjentYtelse = tilkjentYtelse,
                 person = tilfeldigPerson,
-                aktør = personidentService.hentOgLagreAktør(tilfeldigPerson.aktør.aktivFødselsnummer(), true)
-            )
+                aktør = personidentService.hentOgLagreAktør(tilfeldigPerson.aktør.aktivFødselsnummer(), true),
+            ),
         )
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelse)
 
@@ -1278,8 +1278,8 @@ class UtbetalingsoppdragIntegrasjonTest(
                 vedtak,
                 true,
                 oppdaterteKjeder = ØkonomiUtils.grupperAndeler(
-                    andelerTilkjentYtelse.forIverksetting()
-                )
+                    andelerTilkjentYtelse.forIverksetting(),
+                ),
             )
 
         assertEquals(Utbetalingsoppdrag.KodeEndring.NY, utbetalingsoppdrag.kodeEndring)
@@ -1293,7 +1293,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             TSS_ID_INSTITUSJON,
             1054,
             "2019-03-01",
-            "2037-02-28"
+            "2037-02-28",
         )
     }
 
@@ -1325,7 +1325,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             with(lagInitiellTilkjentYtelse(førsteBehandling, utbetalingsoppdrag = "utbetalingsoppdrag")) {
                 val andeler = listOf(
                     lagAndel(this, fom, tom),
-                    lagAndel(this, fom, tom, YtelseType.UTVIDET_BARNETRYGD, 1054)
+                    lagAndel(this, fom, tom, YtelseType.UTVIDET_BARNETRYGD, 1054),
                 )
                 andelerTilkjentYtelse.addAll(andeler)
                 tilkjentYtelseRepository.saveAndFlush(this)
@@ -1342,7 +1342,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                     lagAndel(this, fom, tom),
                     lagAndel(this, fom2, tom2),
                     lagAndel(this, fom, tom, YtelseType.UTVIDET_BARNETRYGD, 1054),
-                    lagAndel(this, fom2, tom2, YtelseType.UTVIDET_BARNETRYGD, 1054)
+                    lagAndel(this, fom2, tom2, YtelseType.UTVIDET_BARNETRYGD, 1054),
                 )
                 andelerTilkjentYtelse.addAll(andeler)
                 tilkjentYtelseRepository.saveAndFlush(this)
@@ -1375,7 +1375,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                     lagAndelTilkjentYtelse(fom, tom, YtelseType.SMÅBARNSTILLEGG, 1, behandling, søker, aktørSøker, tilkjentYtelse = this),
                     lagAndelTilkjentYtelse(fom, tom, YtelseType.UTVIDET_BARNETRYGD, 2, behandling, søker, aktørSøker, tilkjentYtelse = this),
                     lagAndelTilkjentYtelse(fom, tom, YtelseType.ORDINÆR_BARNETRYGD, 3, behandling, barn, aktørBarn, tilkjentYtelse = this),
-                    lagAndelTilkjentYtelse(fom, tom, YtelseType.UTVIDET_BARNETRYGD, 4, behandling, barn, aktørBarn, tilkjentYtelse = this)
+                    lagAndelTilkjentYtelse(fom, tom, YtelseType.UTVIDET_BARNETRYGD, 4, behandling, barn, aktørBarn, tilkjentYtelse = this),
                 )
                 andelerTilkjentYtelse.addAll(andeler)
                 tilkjentYtelseRepository.saveAndFlush(this)
@@ -1394,7 +1394,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                     lagAndelTilkjentYtelse(fom, tom, YtelseType.SMÅBARNSTILLEGG, 2, revurdering, søker, aktørSøker, tilkjentYtelse = this),
                     lagAndelTilkjentYtelse(fom, tom, YtelseType.UTVIDET_BARNETRYGD, 3, revurdering, søker, aktørSøker, tilkjentYtelse = this),
                     lagAndelTilkjentYtelse(fom, tom, YtelseType.ORDINÆR_BARNETRYGD, 4, revurdering, barn, aktørBarn, tilkjentYtelse = this),
-                    lagAndelTilkjentYtelse(fom, tom, YtelseType.UTVIDET_BARNETRYGD, 5, revurdering, barn, aktørBarn, tilkjentYtelse = this)
+                    lagAndelTilkjentYtelse(fom, tom, YtelseType.UTVIDET_BARNETRYGD, 5, revurdering, barn, aktørBarn, tilkjentYtelse = this),
                 )
                 andelerTilkjentYtelse.addAll(andeler)
                 tilkjentYtelseRepository.saveAndFlush(this)
@@ -1430,7 +1430,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             with(lagInitiellTilkjentYtelse(førsteBehandling, utbetalingsoppdrag = "utbetalingsoppdrag")) {
                 val andeler = listOf(
                     lagAndel(this, fom = fom, tom = tom),
-                    lagAndel(this, fom = fom2, tom = tom2)
+                    lagAndel(this, fom = fom2, tom = tom2),
                 )
                 andelerTilkjentYtelse.addAll(andeler)
                 tilkjentYtelseRepository.saveAndFlush(this)
@@ -1464,7 +1464,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             with(lagInitiellTilkjentYtelse(førsteBehandling, utbetalingsoppdrag = "utbetalingsoppdrag")) {
                 val andeler = listOf(
                     lagAndel(this, fom = fom, tom = tom),
-                    lagAndel(this, fom = fom2, tom = tom2)
+                    lagAndel(this, fom = fom2, tom = tom2),
                 )
                 andelerTilkjentYtelse.addAll(andeler)
                 tilkjentYtelseRepository.saveAndFlush(this)
@@ -1486,7 +1486,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             with(lagInitiellTilkjentYtelse(tredjeBehandling, utbetalingsoppdrag = "utbetalingsoppdrag")) {
                 val andeler = listOf(
                     lagAndel(this, fom = fom, tom = tom),
-                    lagAndel(this, fom = fom2, tom = tom2)
+                    lagAndel(this, fom = fom2, tom = tom2),
                 )
                 andelerTilkjentYtelse.addAll(andeler)
                 tilkjentYtelseRepository.saveAndFlush(this)
@@ -1513,7 +1513,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             type: YtelseType = YtelseType.SMÅBARNSTILLEGG,
             beløp: Int = 1345,
             aktør: Aktør? = null,
-            person: Person? = null
+            person: Person? = null,
         ): AndelTilkjentYtelse =
             lagAndelTilkjentYtelse(
                 fom = fom,
@@ -1523,11 +1523,11 @@ class UtbetalingsoppdragIntegrasjonTest(
                 behandling = tilkjentYtelse.behandling,
                 person = person ?: søker,
                 aktør = aktør ?: aktørSøker,
-                tilkjentYtelse = tilkjentYtelse
+                tilkjentYtelse = tilkjentYtelse,
             )
         private fun opprettRevurdering() =
             behandlingService.lagreNyOgDeaktiverGammelBehandling(
-                lagBehandling(fagsak, behandlingType = BehandlingType.REVURDERING)
+                lagBehandling(fagsak, behandlingType = BehandlingType.REVURDERING),
             )
     }
 
@@ -1535,7 +1535,7 @@ class UtbetalingsoppdragIntegrasjonTest(
         return økonomiService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
             vedtak,
             "Z123",
-            AndelTilkjentYtelseForIverksettingFactory()
+            AndelTilkjentYtelseForIverksettingFactory(),
         )
     }
 
@@ -1553,7 +1553,7 @@ class UtbetalingsoppdragIntegrasjonTest(
         sats: Int,
         fom: YearMonth,
         tom: YearMonth,
-        opphørFom: LocalDate? = null
+        opphørFom: LocalDate? = null,
     ) = assertUtbetalingsperiode(
         utbetalingsperiode,
         periodeId,
@@ -1562,7 +1562,7 @@ class UtbetalingsoppdragIntegrasjonTest(
         sats,
         fom.atDay(1).toString(),
         tom.atEndOfMonth().toString(),
-        opphørFom
+        opphørFom,
     )
 
     private fun assertUtbetalingsperiode(
@@ -1573,7 +1573,7 @@ class UtbetalingsoppdragIntegrasjonTest(
         sats: Int,
         fom: String,
         tom: String,
-        opphørFom: LocalDate? = null
+        opphørFom: LocalDate? = null,
     ) {
         assertEquals(periodeId, utbetalingsperiode.periodeId)
         assertEquals(forrigePeriodeId, utbetalingsperiode.forrigePeriodeId)

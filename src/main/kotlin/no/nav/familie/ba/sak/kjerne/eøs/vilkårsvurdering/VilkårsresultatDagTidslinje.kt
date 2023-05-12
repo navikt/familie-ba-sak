@@ -29,7 +29,7 @@ fun VilkårResultat.tilPeriode(): Periode<VilkårRegelverkResultat, Dag> {
         tom,
         VilkårRegelverkResultat(
             vilkår = vilkårType,
-            regelverkResultat = this.tilRegelverkResultat()
-        )
+            regelverkResultat = this.tilRegelverkResultat(),
+        ),
     )
 }

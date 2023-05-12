@@ -6,7 +6,7 @@ import java.time.LocalDate
 
 data class VedtakEndring(
     override val mal: Brevmal,
-    override val data: EndringVedtakData
+    override val data: EndringVedtakData,
 ) : Vedtaksbrev {
 
     constructor(
@@ -19,7 +19,7 @@ data class VedtakEndring(
         informasjonOmAarligKontroll: Boolean,
         feilutbetaltValuta: FeilutbetaltValuta? = null,
         refusjonEosAvklart: RefusjonEøsAvklart? = null,
-        refusjonEosUavklart: RefusjonEøsUavklart? = null
+        refusjonEosUavklart: RefusjonEøsUavklart? = null,
     ) :
         this(
             mal = mal,
@@ -28,7 +28,7 @@ data class VedtakEndring(
                     signaturVedtak = SignaturVedtak(
                         enhet = vedtakFellesfelter.enhet,
                         saksbehandler = vedtakFellesfelter.saksbehandler,
-                        beslutter = vedtakFellesfelter.beslutter
+                        beslutter = vedtakFellesfelter.beslutter,
                     ),
                     etterbetaling = etterbetaling,
                     hjemmeltekst = vedtakFellesfelter.hjemmeltekst,
@@ -40,7 +40,7 @@ data class VedtakEndring(
                     informasjonOmAarligKontroll = informasjonOmAarligKontroll,
                     forMyeUtbetaltBarnetrygd = feilutbetaltValuta != null,
                     refusjonEosAvklart = refusjonEosAvklart != null,
-                    refusjonEosUavklart = refusjonEosUavklart != null
+                    refusjonEosUavklart = refusjonEosUavklart != null,
                 ),
                 flettefelter = object : FlettefelterForDokument {
                     val perioderMedForMyeUtbetalt: Flettefelt = feilutbetaltValuta?.perioderMedForMyeUtbetalt
@@ -52,15 +52,15 @@ data class VedtakEndring(
                     override val organisasjonsnummer = flettefelt(vedtakFellesfelter.organisasjonsnummer)
                     override val gjelder = flettefelt(vedtakFellesfelter.gjelder)
                 },
-                perioder = vedtakFellesfelter.perioder
-            )
+                perioder = vedtakFellesfelter.perioder,
+            ),
         )
 }
 
 data class EndringVedtakData(
     override val delmalData: Delmaler,
     override val flettefelter: FlettefelterForDokument,
-    override val perioder: List<BrevPeriode>
+    override val perioder: List<BrevPeriode>,
 ) : VedtaksbrevData {
 
     data class Delmaler(
@@ -75,6 +75,6 @@ data class EndringVedtakData(
         val informasjonOmAarligKontroll: Boolean,
         val forMyeUtbetaltBarnetrygd: Boolean,
         val refusjonEosAvklart: Boolean,
-        val refusjonEosUavklart: Boolean
+        val refusjonEosUavklart: Boolean,
     )
 }

@@ -90,7 +90,7 @@ class OppgaveServiceTest {
         every {
             oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(
                 any(),
-                any()
+                any(),
             )
         } returns null
         every { personidentService.hentAktør(any()) } returns Aktør(AKTØR_ID_FAGSAK)
@@ -98,13 +98,13 @@ class OppgaveServiceTest {
         every { arbeidsfordelingService.hentArbeidsfordelingPåBehandling(any()) } returns ArbeidsfordelingPåBehandling(
             behandlingId = 1,
             behandlendeEnhetId = ENHETSNUMMER,
-            behandlendeEnhetNavn = "enhet"
+            behandlendeEnhetNavn = "enhet",
         )
 
         every { arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(any()) } returns ArbeidsfordelingPåBehandling(
             behandlingId = 1,
             behandlendeEnhetId = ENHETSNUMMER,
-            behandlendeEnhetNavn = "enhet"
+            behandlendeEnhetNavn = "enhet",
         )
 
         val slot = slot<OpprettOppgaveRequest>()
@@ -117,8 +117,8 @@ class OppgaveServiceTest {
         assertThat(slot.captured.ident).isEqualTo(
             OppgaveIdentV2(
                 ident = AKTØR_ID_FAGSAK,
-                gruppe = IdentGruppe.AKTOERID
-            )
+                gruppe = IdentGruppe.AKTOERID,
+            ),
         )
         assertThat(slot.captured.behandlingstema).isEqualTo(Behandlingstema.OrdinærBarnetrygd.value)
         assertThat(slot.captured.fristFerdigstillelse).isEqualTo(LocalDate.now().plusDays(1))
@@ -133,7 +133,7 @@ class OppgaveServiceTest {
         every {
             oppgaveRepository.finnOppgaverSomSkalFerdigstilles(
                 any(),
-                any()
+                any(),
             )
         } returns listOf(lagTestOppgave())
         every { oppgaveRepository.saveAndFlush(any()) } returns lagTestOppgave()
@@ -152,7 +152,7 @@ class OppgaveServiceTest {
         every {
             integrasjonClient.fordelOppgave(
                 capture(oppgaveSlot),
-                capture(saksbehandlerSlot)
+                capture(saksbehandlerSlot),
             )
         } returns OppgaveResponse(OPPGAVE_ID.toLong())
         every { integrasjonClient.finnOppgaveMedId(any()) } returns Oppgave()
@@ -171,7 +171,7 @@ class OppgaveServiceTest {
         every {
             integrasjonClient.fordelOppgave(
                 capture(oppgaveSlot),
-                capture(saksbehandlerSlot)
+                capture(saksbehandlerSlot),
             )
         } returns OppgaveResponse(OPPGAVE_ID.toLong())
         every { integrasjonClient.finnOppgaveMedId(any()) } returns Oppgave(tilordnetRessurs = saksbehandler)
@@ -189,7 +189,7 @@ class OppgaveServiceTest {
         every {
             integrasjonClient.fordelOppgave(
                 capture(fordelOppgaveSlot),
-                any()
+                any(),
             )
         } returns OppgaveResponse(OPPGAVE_ID.toLong())
         every { integrasjonClient.finnOppgaveMedId(capture(finnOppgaveSlot)) } returns Oppgave()
@@ -205,7 +205,7 @@ class OppgaveServiceTest {
     fun `hent oppgavefrister for åpne utvidtet barnetrygd behandlinger`() {
         every { behandlingRepository.finnÅpneUtvidetBarnetrygdBehandlinger() } returns listOf(
             lagTestBehandling().copy(underkategori = BehandlingUnderkategori.UTVIDET, id = 1002602L),
-            lagTestBehandling().copy(underkategori = BehandlingUnderkategori.UTVIDET, id = 1002602L)
+            lagTestBehandling().copy(underkategori = BehandlingUnderkategori.UTVIDET, id = 1002602L),
         )
         every { oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(any(), any()) } returns lagTestOppgave()
 
@@ -215,7 +215,7 @@ class OppgaveServiceTest {
             "behandlingId;oppgaveId;frist\n" +
                 "1002602;10018798;21.01.23\n" +
                 "1002602;10018798;21.01.23\n",
-            oppgaveService.hentFristerForÅpneUtvidetBarnetrygdBehandlinger()
+            oppgaveService.hentFristerForÅpneUtvidetBarnetrygdBehandlinger(),
         )
     }
 
@@ -225,7 +225,7 @@ class OppgaveServiceTest {
             type = BehandlingType.FØRSTEGANGSBEHANDLING,
             kategori = BehandlingKategori.NASJONAL,
             underkategori = BehandlingUnderkategori.ORDINÆR,
-            opprettetÅrsak = BehandlingÅrsak.SØKNAD
+            opprettetÅrsak = BehandlingÅrsak.SØKNAD,
         ).also {
             it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, FØRSTE_STEG))
         }

@@ -5,33 +5,33 @@ import java.time.LocalDate
 
 data class InformasjonsbrevDeltBostedBrev(
     override val mal: Brevmal = Brevmal.INFORMASJONSBREV_DELT_BOSTED,
-    override val data: InformasjonsbrevDeltBostedData
+    override val data: InformasjonsbrevDeltBostedData,
 ) : Brev
 
 data class InformasjonsbrevDeltBostedData(
     override val delmalData: DelmalData,
-    override val flettefelter: Flettefelter
+    override val flettefelter: Flettefelter,
 ) : BrevData {
 
     data class Flettefelter(
         override val navn: Flettefelt,
         override val fodselsnummer: Flettefelt,
         override val brevOpprettetDato: Flettefelt = flettefelt(LocalDate.now().tilDagMånedÅr()),
-        val barnMedDeltBostedAvtale: Flettefelt
+        val barnMedDeltBostedAvtale: Flettefelt,
     ) : FlettefelterForDokument {
 
         constructor(
             navn: String,
             fodselsnummer: String,
-            barnMedDeltBostedAvtale: List<String>
+            barnMedDeltBostedAvtale: List<String>,
         ) : this(
             navn = flettefelt(navn),
             fodselsnummer = flettefelt(fodselsnummer),
-            barnMedDeltBostedAvtale = flettefelt(barnMedDeltBostedAvtale)
+            barnMedDeltBostedAvtale = flettefelt(barnMedDeltBostedAvtale),
         )
     }
 
     data class DelmalData(
-        val signatur: SignaturDelmal
+        val signatur: SignaturDelmal,
     )
 }

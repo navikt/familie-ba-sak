@@ -19,7 +19,7 @@ class TilkjentYtelseValideringService(
     private val beregningService: BeregningService,
     private val persongrunnlagService: PersongrunnlagService,
     private val personidentService: PersonidentService,
-    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 ) {
     fun validerAtIngenUtbetalingerOverstiger100Prosent(behandling: Behandling) {
         if (behandling.erMigrering() || behandling.erTekniskEndring() || behandling.erSatsendring()) return
@@ -33,7 +33,7 @@ class TilkjentYtelseValideringService(
             val barnMedAndreRelevanteTilkjentYtelser = personopplysningGrunnlag.barna.map {
                 Pair(
                     it,
-                    beregningService.hentRelevanteTilkjentYtelserForBarn(it.aktør, behandling.fagsak.id)
+                    beregningService.hentRelevanteTilkjentYtelserForBarn(it.aktør, behandling.fagsak.id),
                 )
             }
 
@@ -41,13 +41,13 @@ class TilkjentYtelseValideringService(
             secureLogger.info(
                 "Barn og deres andeler tilkjent ytelse fra andre fagsaker: " + barnMedAndreRelevanteTilkjentYtelser.map {
                     "${it.first} -> ${it.second}"
-                }
+                },
             )
 
             TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
                 behandlendeBehandlingTilkjentYtelse = tilkjentYtelse,
                 barnMedAndreRelevanteTilkjentYtelser = barnMedAndreRelevanteTilkjentYtelser,
-                personopplysningGrunnlag = personopplysningGrunnlag
+                personopplysningGrunnlag = personopplysningGrunnlag,
             )
         }
     }
@@ -75,15 +75,15 @@ class TilkjentYtelseValideringService(
     }
 
     fun finnAktørerMedUgyldigEtterbetalingsperiode(
-        behandlingId: Long
+        behandlingId: Long,
     ): List<Aktør> {
         val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandlingId)
 
         val forrigeBehandling =
             behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(
                 behandling = behandlingHentOgPersisterService.hent(
-                    behandlingId
-                )
+                    behandlingId,
+                ),
             )
         val forrigeAndelerTilkjentYtelse =
             forrigeBehandling?.let { beregningService.hentOptionalTilkjentYtelseForBehandling(behandlingId = it.id) }?.andelerTilkjentYtelse?.toList()
@@ -91,7 +91,7 @@ class TilkjentYtelseValideringService(
         val aktørIderMedUgyldigEtterbetaling = finnAktørIderMedUgyldigEtterbetalingsperiode(
             forrigeAndelerTilkjentYtelse = forrigeAndelerTilkjentYtelse ?: emptyList(),
             andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.toList(),
-            kravDato = tilkjentYtelse.behandling.opprettetTidspunkt
+            kravDato = tilkjentYtelse.behandling.opprettetTidspunkt,
         )
 
         return aktørIderMedUgyldigEtterbetaling.map { aktørId -> personidentService.hentAktør(identEllerAktørId = aktørId) }

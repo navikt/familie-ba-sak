@@ -27,13 +27,13 @@ class UtenlandskPeriodebeløpController(
     private val utenlandskPeriodebeløpService: UtenlandskPeriodebeløpService,
     private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository,
     private val personidentService: PersonidentService,
-    private val utvidetBehandlingService: UtvidetBehandlingService
+    private val utvidetBehandlingService: UtvidetBehandlingService,
 ) {
     @PutMapping(path = ["{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun oppdaterUtenlandskPeriodebeløp(
         @PathVariable behandlingId: Long,
         @Valid @RequestBody
-        restUtenlandskPeriodebeløp: RestUtenlandskPeriodebeløp
+        restUtenlandskPeriodebeløp: RestUtenlandskPeriodebeløp,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         val barnAktører = restUtenlandskPeriodebeløp.barnIdenter.map { personidentService.hentAktør(it) }
 
@@ -51,7 +51,7 @@ class UtenlandskPeriodebeløpController(
     @DeleteMapping(path = ["{behandlingId}/{utenlandskPeriodebeløpId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun slettUtenlandskPeriodebeløp(
         @PathVariable behandlingId: Long,
-        @PathVariable utenlandskPeriodebeløpId: Long
+        @PathVariable utenlandskPeriodebeløpId: Long,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         utenlandskPeriodebeløpService.slettUtenlandskPeriodebeløp(utenlandskPeriodebeløpId)
 

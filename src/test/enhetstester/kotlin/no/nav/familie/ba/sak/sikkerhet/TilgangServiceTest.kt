@@ -50,7 +50,7 @@ class TilgangServiceTest {
             fagsakService = fagsakService,
             rolleConfig = rolleConfig,
             cacheManager = cacheManager,
-            auditLogger = auditLogger
+            auditLogger = auditLogger,
         )
 
     private val fagsak = defaultFagsak()
@@ -59,7 +59,7 @@ class TilgangServiceTest {
     private val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
         behandlingId = behandling.id,
         søkerPersonIdent = aktør.aktivFødselsnummer(),
-        barnasIdenter = emptyList()
+        barnasIdenter = emptyList(),
     )
     private val olaIdent = "4567"
 
@@ -84,7 +84,7 @@ class TilgangServiceTest {
         assertThrows<RolleTilgangskontrollFeil> {
             tilgangService.validerTilgangTilPersoner(
                 listOf(aktør.aktivFødselsnummer()),
-                AuditLoggerEvent.ACCESS
+                AuditLoggerEvent.ACCESS,
             )
         }
     }
@@ -103,7 +103,7 @@ class TilgangServiceTest {
         assertThrows<RolleTilgangskontrollFeil> {
             tilgangService.validerTilgangTilBehandling(
                 behandling.id,
-                AuditLoggerEvent.ACCESS
+                AuditLoggerEvent.ACCESS,
             )
         }
     }
@@ -178,9 +178,9 @@ class TilgangServiceTest {
                 behandlingId = behandling.id,
                 personer = mutableSetOf<Person>(
                     Person(aktør = Aktør(aktørId = "6543456372112", personidenter = mutableSetOf(Personident(fødselsnummer = "65434563721", aktiv = true, aktør = Aktør("6543456372112", mutableSetOf())))), type = PersonType.SØKER, fødselsdato = LocalDate.now(), kjønn = Kjønn.MANN, personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id, personer = mutableSetOf(), aktiv = true)),
-                    Person(aktør = Aktør(aktørId = "1234567891012", personidenter = mutableSetOf(Personident(fødselsnummer = "12345678910", aktiv = true, aktør = Aktør("1234567891012", mutableSetOf())))), type = PersonType.BARN, fødselsdato = LocalDate.now(), kjønn = Kjønn.MANN, personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id, personer = mutableSetOf(), aktiv = true))
-                )
-            )
+                    Person(aktør = Aktør(aktørId = "1234567891012", personidenter = mutableSetOf(Personident(fødselsnummer = "12345678910", aktiv = true, aktør = Aktør("1234567891012", mutableSetOf())))), type = PersonType.BARN, fødselsdato = LocalDate.now(), kjønn = Kjønn.MANN, personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id, personer = mutableSetOf(), aktiv = true)),
+                ),
+            ),
         )
         every { mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(listOf("65434563721", "12345678910")) }.returns(Tilgang(false, null))
         mockBrukerContext("A")

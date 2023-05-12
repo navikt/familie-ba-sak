@@ -19,7 +19,7 @@ class ValutakursRepositoryTest(
     @Autowired private val aktørIdRepository: AktørIdRepository,
     @Autowired private val fagsakRepository: FagsakRepository,
     @Autowired private val behandlingRepository: BehandlingRepository,
-    @Autowired private val valutakursRepository: ValutakursRepository
+    @Autowired private val valutakursRepository: ValutakursRepository,
 ) : AbstractSpringIntegrationTest() {
 
     @Test
@@ -33,14 +33,14 @@ class ValutakursRepositoryTest(
 
         val valutakurs = valutakursRepository.save(
             lagValutakurs(
-                barnAktører = setOf(barn1, barn2)
-            ).also { it.behandlingId = behandling.id }
+                barnAktører = setOf(barn1, barn2),
+            ).also { it.behandlingId = behandling.id },
         )
 
         val valutakurs2 = valutakursRepository.save(
             lagValutakurs(
-                barnAktører = setOf(barn1, barn2)
-            ).also { it.behandlingId = behandling.id }
+                barnAktører = setOf(barn1, barn2),
+            ).also { it.behandlingId = behandling.id },
         )
 
         assertEquals(valutakurs.barnAktører, valutakurs2.barnAktører)
@@ -62,8 +62,8 @@ class ValutakursRepositoryTest(
                 tom = YearMonth.of(2021, 12),
                 valutakode = "EUR",
                 valutakursdato = LocalDate.of(2020, 2, 17),
-                kurs = BigDecimal.valueOf(10.453)
-            )
+                kurs = BigDecimal.valueOf(10.453),
+            ),
         )
 
         val hentedeValutakurser =

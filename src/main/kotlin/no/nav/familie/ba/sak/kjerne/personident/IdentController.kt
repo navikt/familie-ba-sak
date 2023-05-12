@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class IdentController(
-    private val personidentService: PersonidentService
+    private val personidentService: PersonidentService,
 ) {
 
     @PostMapping

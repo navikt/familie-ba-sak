@@ -13,7 +13,7 @@ import java.time.YearMonth
 internal enum class Opphørsresultat {
     OPPHØRT,
     FORTSATT_OPPHØRT,
-    IKKE_OPPHØRT
+    IKKE_OPPHØRT,
 }
 
 object BehandlingsresultatOpphørUtils {
@@ -22,12 +22,12 @@ object BehandlingsresultatOpphørUtils {
         nåværendeAndeler: List<AndelTilkjentYtelse>,
         forrigeAndeler: List<AndelTilkjentYtelse>,
         nåværendeEndretAndeler: List<EndretUtbetalingAndel>,
-        forrigeEndretAndeler: List<EndretUtbetalingAndel>
+        forrigeEndretAndeler: List<EndretUtbetalingAndel>,
     ): Opphørsresultat {
         val nåværendeBehandlingOpphørsdato =
             nåværendeAndeler.utledOpphørsdatoForNåværendeBehandlingMedFallback(
                 forrigeAndeler = forrigeAndeler,
-                nåværendeEndretAndeler = nåværendeEndretAndeler
+                nåværendeEndretAndeler = nåværendeEndretAndeler,
             )
 
         val forrigeBehandlingOpphørsdato =
@@ -54,7 +54,7 @@ object BehandlingsresultatOpphørUtils {
      */
     internal fun List<AndelTilkjentYtelse>.utledOpphørsdatoForNåværendeBehandlingMedFallback(
         forrigeAndeler: List<AndelTilkjentYtelse>,
-        nåværendeEndretAndeler: List<EndretUtbetalingAndel>
+        nåværendeEndretAndeler: List<EndretUtbetalingAndel>,
     ): YearMonth? {
         return this.filtrerBortIrrelevanteAndeler(endretAndeler = nåværendeEndretAndeler).finnOpphørsdato()
             ?: forrigeAndeler.minOfOrNull { it.stønadFom }
@@ -87,7 +87,7 @@ object BehandlingsresultatOpphørUtils {
 
     private fun filtrerBortIrrelevanteAndelerPerPersonOgType(
         andelerPåPersonFiltrertPåType: List<AndelTilkjentYtelse>,
-        endretAndelerPåPerson: List<EndretUtbetalingAndel>
+        endretAndelerPåPerson: List<EndretUtbetalingAndel>,
     ): List<AndelTilkjentYtelse> {
         val andelTilkjentYtelseTidslinje = AndelTilkjentYtelseTidslinje(andelerPåPersonFiltrertPåType)
         val endretUtbetalingAndelTidslinje = EndretUtbetalingAndelTidslinje(endretAndelerPåPerson)
@@ -99,7 +99,8 @@ object BehandlingsresultatOpphørUtils {
             when (endringsperiodeÅrsak) {
                 Årsak.ALLEREDE_UTBETALT,
                 Årsak.ENDRE_MOTTAKER,
-                Årsak.ETTERBETALING_3ÅR ->
+                Årsak.ETTERBETALING_3ÅR,
+                ->
                     // Vi ønsker å filtrere bort andeler som har 0 i kalkulertUtbetalingsbeløp
                     if (kalkulertUtbetalingsbeløp == 0) null else andelTilkjentYtelse
 

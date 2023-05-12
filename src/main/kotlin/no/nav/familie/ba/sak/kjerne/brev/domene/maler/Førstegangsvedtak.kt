@@ -6,7 +6,7 @@ import java.time.LocalDate
 
 data class Førstegangsvedtak(
     override val mal: Brevmal,
-    override val data: FørstegangsvedtakData
+    override val data: FørstegangsvedtakData,
 ) : Vedtaksbrev {
 
     constructor(
@@ -16,7 +16,7 @@ data class Førstegangsvedtak(
         etterbetalingInstitusjon: EtterbetalingInstitusjon? = null,
         informasjonOmAarligKontroll: Boolean = false,
         refusjonEosAvklart: RefusjonEøsAvklart? = null,
-        refusjonEosUavklart: RefusjonEøsUavklart? = null
+        refusjonEosUavklart: RefusjonEøsUavklart? = null,
     ) :
         this(
             mal = mal,
@@ -25,7 +25,7 @@ data class Førstegangsvedtak(
                     signaturVedtak = SignaturVedtak(
                         enhet = vedtakFellesfelter.enhet,
                         saksbehandler = vedtakFellesfelter.saksbehandler,
-                        beslutter = vedtakFellesfelter.beslutter
+                        beslutter = vedtakFellesfelter.beslutter,
                     ),
                     etterbetaling = etterbetaling,
                     hjemmeltekst = vedtakFellesfelter.hjemmeltekst,
@@ -33,7 +33,7 @@ data class Førstegangsvedtak(
                     korrigertVedtak = vedtakFellesfelter.korrigertVedtakData,
                     informasjonOmAarligKontroll = informasjonOmAarligKontroll,
                     refusjonEosAvklart = refusjonEosAvklart != null,
-                    refusjonEosUavklart = refusjonEosUavklart != null
+                    refusjonEosUavklart = refusjonEosUavklart != null,
                 ),
                 perioder = vedtakFellesfelter.perioder,
                 flettefelter = object : FlettefelterForDokument {
@@ -44,15 +44,15 @@ data class Førstegangsvedtak(
                     override val fodselsnummer = flettefelt(vedtakFellesfelter.søkerFødselsnummer)
                     override val organisasjonsnummer = flettefelt(vedtakFellesfelter.organisasjonsnummer)
                     override val gjelder = flettefelt(vedtakFellesfelter.gjelder)
-                }
-            )
+                },
+            ),
         )
 }
 
 data class FørstegangsvedtakData(
     override val delmalData: Delmaler,
     override val flettefelter: FlettefelterForDokument,
-    override val perioder: List<BrevPeriode>
+    override val perioder: List<BrevPeriode>,
 ) : VedtaksbrevData {
 
     data class Delmaler(
@@ -63,6 +63,6 @@ data class FørstegangsvedtakData(
         val korrigertVedtak: KorrigertVedtakData?,
         val informasjonOmAarligKontroll: Boolean,
         val refusjonEosAvklart: Boolean,
-        val refusjonEosUavklart: Boolean
+        val refusjonEosUavklart: Boolean,
     )
 }

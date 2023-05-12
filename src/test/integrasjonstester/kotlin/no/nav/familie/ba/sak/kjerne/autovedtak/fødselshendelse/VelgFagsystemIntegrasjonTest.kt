@@ -32,7 +32,7 @@ class VelgFagsystemIntegrasjonTest(
     @Autowired val infotrygdService: InfotrygdService,
     @Autowired val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
     @Autowired val databaseCleanupService: DatabaseCleanupService,
-    @Autowired val featureToggleService: FeatureToggleService
+    @Autowired val featureToggleService: FeatureToggleService,
 ) : AbstractSpringIntegrationTest() {
 
     val søkerFnr = randomFnr()
@@ -56,7 +56,7 @@ class VelgFagsystemIntegrasjonTest(
 
         every { infotrygdBarnetrygdClient.hentStønader(any(), any(), any()) } returns InfotrygdSøkResponse(
             listOf(Stønad(opphørtFom = "012020")),
-            emptyList()
+            emptyList(),
         ) andThen InfotrygdSøkResponse(emptyList(), emptyList())
 
         val (fagsystemRegelVurdering, faktiskFagsystemUtfall) = velgFagSystemService.velgFagsystem(nyBehandling)
@@ -72,7 +72,7 @@ class VelgFagsystemIntegrasjonTest(
             land = "POL",
             gyldigFraOgMed = LocalDate.now().minusYears(2),
             gyldigTilOgMed = null,
-            bekreftelsesdato = null
+            bekreftelsesdato = null,
         )
         val (fagsystemRegelVurdering, faktiskFagsystemUtfall) = velgFagSystemService.velgFagsystem(nyBehandling)
         assertEquals(FagsystemRegelVurdering.SEND_TIL_BA, fagsystemRegelVurdering)
@@ -88,7 +88,7 @@ class VelgFagsystemIntegrasjonTest(
             land = "USA",
             gyldigFraOgMed = LocalDate.now().minusYears(2),
             gyldigTilOgMed = null,
-            bekreftelsesdato = null
+            bekreftelsesdato = null,
         )
         val (fagsystemRegelVurdering, faktiskFagsystemUtfall) = velgFagSystemService.velgFagsystem(nyBehandling)
         assertEquals(FagsystemRegelVurdering.SEND_TIL_BA, fagsystemRegelVurdering)
