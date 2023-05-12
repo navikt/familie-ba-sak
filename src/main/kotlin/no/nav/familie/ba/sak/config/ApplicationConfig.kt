@@ -43,7 +43,7 @@ class ApplicationConfig {
 
     @Bean
     fun requestTimeFilter(): FilterRegistrationBean<RequestTimeFilter> {
-        log.info("Registering RequestTimeFilter filter")
+        log.info("Registering RequestTimeFilter")
         val filterRegistration = FilterRegistrationBean<RequestTimeFilter>()
         filterRegistration.filter = RequestTimeFilter()
         filterRegistration.order = 2
