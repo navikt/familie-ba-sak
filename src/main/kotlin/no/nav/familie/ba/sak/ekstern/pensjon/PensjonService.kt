@@ -7,7 +7,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -15,7 +14,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
-import java.time.ZoneId
 
 @Service
 class PensjonService(
@@ -66,9 +64,7 @@ class PensjonService(
         return BarnetrygdTilPensjon(
             fagsakId = fagsak.id.toString(),
             barnetrygdPerioder = perioder,
-            kompetanseperioder = hentKompetanse(BehandlingId(behandling.id)),
             fagsakEiersIdent = personIdent,
-            tidspunktSisteVedtak = datoVedtak!!.atZone(TIMEZONE)
         )
     }
 
@@ -94,40 +90,14 @@ class PensjonService(
         return perioder
     }
 
-    private fun hentKompetanse(behandlingId: BehandlingId): List<Kompetanse> {
-        val kompetanser = kompetanseService.hentKompetanser(behandlingId)
-
-        return kompetanser.filter { it.resultat != null }.map { kompetanse ->
-            Kompetanse(
-                barnsIdenter = kompetanse.barnAktører.map { aktør -> aktør.aktivFødselsnummer() },
-                annenForeldersAktivitet = if (kompetanse.annenForeldersAktivitet != null) {
-                    AnnenForeldersAktivitet.valueOf(
-                        kompetanse.annenForeldersAktivitet.name
-                    )
-                } else {
-                    null
-                },
-                annenForeldersAktivitetsland = kompetanse.annenForeldersAktivitetsland,
-                barnetsBostedsland = kompetanse.barnetsBostedsland,
-                fom = kompetanse.fom!!,
-                tom = kompetanse.tom,
-                resultat = KompetanseResultat.valueOf(kompetanse.resultat!!.name),
-                sokersaktivitet = if (kompetanse.søkersAktivitet != null) SøkersAktivitet.valueOf(kompetanse.søkersAktivitet.name) else null,
-                sokersAktivitetsland = kompetanse.søkersAktivitetsland
-            )
-        }
-    }
-
     fun no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.tilPensjonYtelsesType(): YtelseType {
         return when (this) {
             no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.ORDINÆR_BARNETRYGD -> YtelseType.ORDINÆR_BARNETRYGD
             no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.SMÅBARNSTILLEGG -> YtelseType.SMÅBARNSTILLEGG
             no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.UTVIDET_BARNETRYGD -> YtelseType.UTVIDET_BARNETRYGD
-            no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.MANUELL_VURDERING -> YtelseType.MANUELL_VURDERING
         }
     }
     companion object {
         private val logger = LoggerFactory.getLogger(BisysService::class.java)
-        private val TIMEZONE = ZoneId.of("Europe/Paris")
     }
 }
