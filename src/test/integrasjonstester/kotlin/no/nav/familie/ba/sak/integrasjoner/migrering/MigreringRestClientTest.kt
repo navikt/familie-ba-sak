@@ -25,7 +25,7 @@ internal class MigreringRestClientTest : AbstractSpringIntegrationTest() {
     fun setUp() {
         client = MigreringRestClient(
             URI.create(wireMockServer.baseUrl() + "/api"),
-            restOperations
+            restOperations,
         )
     }
 
@@ -40,15 +40,15 @@ internal class MigreringRestClientTest : AbstractSpringIntegrationTest() {
             WireMock.post("/api/migrer/migrert-av-saksbehandler").willReturn(
                 WireMock.okJson(
                     objectMapper.writeValueAsString(
-                        Ressurs.success("OK")
-                    )
-                )
-            )
+                        Ressurs.success("OK"),
+                    ),
+                ),
+            ),
         )
 
         assertEquals(
             client.migrertAvSaksbehandler("123", MigreringResponseDto(fagsakId = 123, behandlingId = 456)),
-            "OK"
+            "OK",
         )
     }
 }

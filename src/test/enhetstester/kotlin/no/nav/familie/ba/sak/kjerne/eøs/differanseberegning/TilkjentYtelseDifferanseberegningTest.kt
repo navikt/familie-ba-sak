@@ -71,7 +71,7 @@ class TilkjentYtelseDifferanseberegningTest {
         assertEquals(8, tilkjentYtelse.andelerTilkjentYtelse.size)
         assertEqualsUnordered(
             forventetTilkjentYtelseMedDelt.andelerTilkjentYtelse,
-            tilkjentYtelse.andelerTilkjentYtelse
+            tilkjentYtelse.andelerTilkjentYtelse,
         )
 
         val utenlandskePeriodebeløp = UtenlandskPeriodebeløpBuilder(startMåned, behandlingId)
@@ -98,7 +98,7 @@ class TilkjentYtelseDifferanseberegningTest {
         assertEquals(14, andelerMedDifferanse.size)
         assertEqualsUnordered(
             forventetTilkjentYtelseMedDiff.andelerTilkjentYtelse,
-            andelerMedDifferanse
+            andelerMedDifferanse,
         )
     }
 
@@ -131,7 +131,7 @@ class TilkjentYtelseDifferanseberegningTest {
         assertEquals(3, tilkjentYtelse.andelerTilkjentYtelse.size)
         assertEqualsUnordered(
             forventetTilkjentYtelseKunSats.andelerTilkjentYtelse,
-            tilkjentYtelse.andelerTilkjentYtelse
+            tilkjentYtelse.andelerTilkjentYtelse,
         )
 
         val utenlandskePeriodebeløp = UtenlandskPeriodebeløpBuilder(startMåned, behandlingId)
@@ -156,7 +156,7 @@ class TilkjentYtelseDifferanseberegningTest {
         assertEquals(6, andelerMedDiff.size)
         assertEqualsUnordered(
             forventetTilkjentYtelseMedDiff.andelerTilkjentYtelse,
-            andelerMedDiff
+            andelerMedDiff,
         )
 
         val blanktUtenlandskPeridebeløp = UtenlandskPeriodebeløpBuilder(startMåned, behandlingId)
@@ -169,7 +169,7 @@ class TilkjentYtelseDifferanseberegningTest {
         assertEquals(3, andelerUtenDiff.size)
         assertEqualsUnordered(
             forventetTilkjentYtelseKunSats.andelerTilkjentYtelse,
-            andelerUtenDiff
+            andelerUtenDiff,
         )
 
         val andelerMedDiffIgjen =
@@ -178,7 +178,7 @@ class TilkjentYtelseDifferanseberegningTest {
         assertEquals(6, andelerMedDiffIgjen.size)
         assertEqualsUnordered(
             forventetTilkjentYtelseMedDiff.andelerTilkjentYtelse,
-            andelerMedDiffIgjen
+            andelerMedDiffIgjen,
         )
     }
 }

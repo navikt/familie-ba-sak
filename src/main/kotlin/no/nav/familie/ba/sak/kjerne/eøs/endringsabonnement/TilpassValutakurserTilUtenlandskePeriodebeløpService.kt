@@ -18,11 +18,11 @@ import org.springframework.transaction.annotation.Transactional
 class TilpassValutakurserTilUtenlandskePeriodebeløpService(
     valutakursRepository: PeriodeOgBarnSkjemaRepository<Valutakurs>,
     private val utenlandskPeriodebeløpRepository: FinnPeriodeOgBarnSkjemaRepository<UtenlandskPeriodebeløp>,
-    endringsabonnenter: Collection<PeriodeOgBarnSkjemaEndringAbonnent<Valutakurs>>
+    endringsabonnenter: Collection<PeriodeOgBarnSkjemaEndringAbonnent<Valutakurs>>,
 ) : PeriodeOgBarnSkjemaEndringAbonnent<UtenlandskPeriodebeløp> {
     val skjemaService = PeriodeOgBarnSkjemaService(
         valutakursRepository,
-        endringsabonnenter
+        endringsabonnenter,
     )
 
     @Transactional
@@ -35,20 +35,20 @@ class TilpassValutakurserTilUtenlandskePeriodebeløpService(
     @Transactional
     override fun skjemaerEndret(
         behandlingId: BehandlingId,
-        endretTil: Collection<UtenlandskPeriodebeløp>
+        endretTil: Collection<UtenlandskPeriodebeløp>,
     ) {
         tilpassValutakursTilUtenlandskPeriodebeløp(behandlingId, endretTil)
     }
 
     private fun tilpassValutakursTilUtenlandskPeriodebeløp(
         behandlingId: BehandlingId,
-        gjeldendeUtenlandskePeriodebeløp: Collection<UtenlandskPeriodebeløp>
+        gjeldendeUtenlandskePeriodebeløp: Collection<UtenlandskPeriodebeløp>,
     ) {
         val forrigeValutakurser = skjemaService.hentMedBehandlingId(behandlingId)
 
         val oppdaterteValutakurser = tilpassValutakurserTilUtenlandskePeriodebeløp(
             forrigeValutakurser,
-            gjeldendeUtenlandskePeriodebeløp
+            gjeldendeUtenlandskePeriodebeløp,
         ).medBehandlingId(behandlingId)
 
         skjemaService.lagreDifferanseOgVarsleAbonnenter(behandlingId, forrigeValutakurser, oppdaterteValutakurser)
@@ -57,7 +57,7 @@ class TilpassValutakurserTilUtenlandskePeriodebeløpService(
 
 internal fun tilpassValutakurserTilUtenlandskePeriodebeløp(
     forrigeValutakurser: Collection<Valutakurs>,
-    gjeldendeUtenlandskePeriodebeløp: Collection<UtenlandskPeriodebeløp>
+    gjeldendeUtenlandskePeriodebeløp: Collection<UtenlandskPeriodebeløp>,
 ): Collection<Valutakurs> {
     val barnasUtenlandskePeriodebeløpTidslinjer = gjeldendeUtenlandskePeriodebeløp
         .tilSeparateTidslinjerForBarna()

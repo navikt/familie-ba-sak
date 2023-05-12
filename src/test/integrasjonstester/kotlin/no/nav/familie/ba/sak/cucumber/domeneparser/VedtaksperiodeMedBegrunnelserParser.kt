@@ -8,14 +8,14 @@ object VedtaksperiodeMedBegrunnelserParser {
 
     fun mapForventetVedtaksperioderMedBegrunnelser(
         dataTable: DataTable,
-        vedtak: Vedtak
+        vedtak: Vedtak,
     ): List<VedtaksperiodeMedBegrunnelser> {
         return dataTable.asMaps().map { rad ->
             VedtaksperiodeMedBegrunnelser(
                 vedtak = vedtak,
-                fom = parseDato(Domenebegrep.FRA_DATO, rad),
+                fom = parseValgfriDato(Domenebegrep.FRA_DATO, rad),
                 tom = parseValgfriDato(Domenebegrep.TIL_DATO, rad),
-                type = parseEnum(DomenebegrepVedtaksperiodeMedBegrunnelser.VEDTAKSPERIODE_TYPE, rad)
+                type = parseEnum(DomenebegrepVedtaksperiodeMedBegrunnelser.VEDTAKSPERIODE_TYPE, rad),
             )
         }
     }
@@ -28,7 +28,7 @@ object VedtaksperiodeMedBegrunnelserParser {
     enum class DomenebegrepPersongrunnlag(override val nøkkel: String) : Domenenøkkel {
         PERSON_TYPE("Persontype"),
         FØDSELSDATO("Fødselsdato"),
-        AKTØR_ID("AktørId")
+        AKTØR_ID("AktørId"),
     }
 
     enum class DomenebegrepVedtaksperiodeMedBegrunnelser(override val nøkkel: String) : Domenenøkkel {
@@ -36,7 +36,7 @@ object VedtaksperiodeMedBegrunnelserParser {
         VILKÅR("Vilkår"),
         RESULTAT("Resultat"),
         BELØP("Beløp"),
-        ER_EKSPLISITT_AVSLAG("Er eksplisitt avslag")
+        ER_EKSPLISITT_AVSLAG("Er eksplisitt avslag"),
     }
 
     enum class DomenebegrepKompetanse(override val nøkkel: String) : Domenenøkkel {
@@ -45,6 +45,6 @@ object VedtaksperiodeMedBegrunnelserParser {
         SØKERS_AKTIVITETSLAND("Søkers aktivitetsland"),
         ANNEN_FORELDERS_AKTIVITETSLAND("Annen forelders aktivitetsland"),
         BARNETS_BOSTEDSLAND("Barnets bostedsland"),
-        RESULTAT("Resultat")
+        RESULTAT("Resultat"),
     }
 }

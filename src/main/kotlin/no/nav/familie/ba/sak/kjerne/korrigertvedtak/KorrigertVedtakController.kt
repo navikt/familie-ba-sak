@@ -22,13 +22,13 @@ import org.springframework.web.bind.annotation.RestController
 class KorrigertVedtakController(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val korrigertVedtakService: KorrigertVedtakService,
-    private val utvidetBehandlingService: UtvidetBehandlingService
+    private val utvidetBehandlingService: UtvidetBehandlingService,
 ) {
 
     @PostMapping(path = ["/behandling/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun opprettKorrigertVedtakPåBehandling(
         @PathVariable behandlingId: Long,
-        @RequestBody korrigerVedtakRequest: KorrigerVedtakRequest
+        @RequestBody korrigerVedtakRequest: KorrigerVedtakRequest,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         val korrigertVedtak = korrigerVedtakRequest.tilKorrigerVedtak(behandling)
@@ -40,7 +40,7 @@ class KorrigertVedtakController(
 
     @PatchMapping(path = ["/behandling/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun settKorrigertVedtakTilInaktivPåBehandling(
-        @PathVariable behandlingId: Long
+        @PathVariable behandlingId: Long,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         korrigertVedtakService.settKorrigertVedtakPåBehandlingTilInaktiv(behandling)

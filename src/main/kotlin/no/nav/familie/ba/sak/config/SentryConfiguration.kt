@@ -14,7 +14,7 @@ import org.springframework.core.NestedExceptionUtils
 class SentryConfiguration(
     @Value("\${sentry.environment}") val environment: String,
     @Value("\${sentry.dsn}") val dsn: String,
-    @Value("\${sentry.logging.enabled}") val enabled: Boolean
+    @Value("\${sentry.logging.enabled}") val enabled: Boolean,
 ) {
     init {
         Sentry.init { options ->
@@ -43,12 +43,12 @@ class SentryConfiguration(
                     "{{ default }}",
                     prosess,
                     event.transaction,
-                    mostSpecificThrowable?.message
+                    mostSpecificThrowable?.message,
                 )
 
                 if (metodeSomFeiler != UKJENT_METODE_SOM_FEILER) {
                     event.fingerprints = (event.fingerprints ?: emptyList()) + listOf(
-                        metodeSomFeiler
+                        metodeSomFeiler,
                     )
                 }
 

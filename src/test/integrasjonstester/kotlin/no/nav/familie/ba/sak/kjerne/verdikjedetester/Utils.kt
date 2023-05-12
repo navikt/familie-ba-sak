@@ -38,7 +38,7 @@ fun generellAssertRestUtvidetBehandling(
     restUtvidetBehandling: Ressurs<RestUtvidetBehandling>,
     behandlingStatus: BehandlingStatus,
     behandlingStegType: StegType? = null,
-    behandlingsresultat: Behandlingsresultat? = null
+    behandlingsresultat: Behandlingsresultat? = null,
 ) {
     if (restUtvidetBehandling.status != Ressurs.Status.SUKSESS) {
         throw IllegalStateException("generellAssertRestUtvidetBehandling feilet. status: ${restUtvidetBehandling.status.name},  melding: ${restUtvidetBehandling.melding}")
@@ -60,7 +60,7 @@ fun generellAssertFagsak(
     fagsakStatus: FagsakStatus,
     behandlingStegType: StegType? = null,
     behandlingsresultat: Behandlingsresultat? = null,
-    aktivBehandlingId: Long? = null
+    aktivBehandlingId: Long? = null,
 ) {
     if (restFagsak.status != Ressurs.Status.SUKSESS) throw IllegalStateException("generellAssertFagsak feilet. status: ${restFagsak.status.name},  melding: ${restFagsak.melding}")
     assertEquals(fagsakStatus, restFagsak.data?.status)
@@ -112,7 +112,7 @@ fun behandleFødselshendelse(
     personidentService: PersonidentService,
     vedtakService: VedtakService,
     stegService: StegService,
-    brevmalService: BrevmalService
+    brevmalService: BrevmalService,
 ): Behandling? {
     val søkerFnr = nyBehandlingHendelse.morsIdent
     val søkerAktør = personidentService.hentAktør(søkerFnr)
@@ -120,9 +120,9 @@ fun behandleFødselshendelse(
     behandleFødselshendelseTask.doTask(
         BehandleFødselshendelseTask.opprettTask(
             BehandleFødselshendelseTaskDTO(
-                nyBehandling = nyBehandlingHendelse
-            )
-        )
+                nyBehandling = nyBehandlingHendelse,
+            ),
+        ),
     )
 
     val restMinimalFagsakEtterVurdering = fagsakService.hentMinimalFagsakForPerson(aktør = søkerAktør)
@@ -141,7 +141,7 @@ fun behandleFødselshendelse(
         restFagsak = fagsakService.hentRestFagsak(restMinimalFagsakEtterVurdering.data!!.id),
         fagsakStatus = fagsakStatusEtterVurdering,
         behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG,
-        aktivBehandlingId = behandlingEtterVurdering.id
+        aktivBehandlingId = behandlingEtterVurdering.id,
     )
 
     return håndterIverksettingAvBehandling(
@@ -150,7 +150,7 @@ fun behandleFødselshendelse(
         fagsakService = fagsakService,
         vedtakService = vedtakService,
         stegService = stegService,
-        brevmalService = brevmalService
+        brevmalService = brevmalService,
     )
 }
 
@@ -161,7 +161,7 @@ fun håndterIverksettingAvBehandling(
     fagsakService: FagsakService,
     vedtakService: VedtakService,
     stegService: StegService,
-    brevmalService: BrevmalService
+    brevmalService: BrevmalService,
 ): Behandling {
     val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = behandlingEtterVurdering.id)
     val behandlingEtterIverksetteVedtak =
@@ -171,8 +171,8 @@ fun håndterIverksettingAvBehandling(
                 behandlingsId = behandlingEtterVurdering.id,
                 vedtaksId = vedtak.id,
                 saksbehandlerId = "System",
-                personIdent = behandlingEtterVurdering.fagsak.aktør.aktivFødselsnummer()
-            )
+                personIdent = behandlingEtterVurdering.fagsak.aktør.aktivFødselsnummer(),
+            ),
         )
 
     val behandlingEtterStatusFraOppdrag =
@@ -184,17 +184,17 @@ fun håndterIverksettingAvBehandling(
                     personIdent = søkerFnr,
                     aktørId = behandlingEtterVurdering.fagsak.aktør.aktørId,
                     behandlingsId = behandlingEtterIverksetteVedtak.id,
-                    vedtaksId = vedtak.id
+                    vedtaksId = vedtak.id,
                 ),
-                task = Task(type = StatusFraOppdragTask.TASK_STEP_TYPE, payload = "")
-            )
+                task = Task(type = StatusFraOppdragTask.TASK_STEP_TYPE, payload = ""),
+            ),
         )
 
     val behandlingEtterIverksettTilbakekreving =
         if (behandlingEtterStatusFraOppdrag.steg == StegType.IVERKSETT_MOT_FAMILIE_TILBAKE) {
             stegService.håndterIverksettMotFamilieTilbake(
                 behandling = behandlingEtterStatusFraOppdrag,
-                metadata = Properties()
+                metadata = Properties(),
             )
         } else {
             behandlingEtterStatusFraOppdrag
@@ -207,8 +207,8 @@ fun håndterIverksettingAvBehandling(
                     behandlingEtterStatusFraOppdrag,
                     JournalførVedtaksbrevDTO(
                         vedtakId = vedtak.id,
-                        task = Task(type = JournalførVedtaksbrevTask.TASK_STEP_TYPE, payload = "")
-                    )
+                        task = Task(type = JournalførVedtaksbrevTask.TASK_STEP_TYPE, payload = ""),
+                    ),
                 )
 
             val behandlingEtterDistribuertVedtak =
@@ -219,10 +219,10 @@ fun håndterIverksettingAvBehandling(
                         journalpostId = "1234",
                         personEllerInstitusjonIdent = søkerFnr,
                         brevmal = brevmalService.hentBrevmal(
-                            behandlingEtterJournalførtVedtak
+                            behandlingEtterJournalførtVedtak,
                         ),
-                        erManueltSendt = false
-                    )
+                        erManueltSendt = false,
+                    ),
                 )
             behandlingEtterDistribuertVedtak
         } else {
@@ -238,8 +238,8 @@ fun håndterIverksettingAvBehandling(
         fagsakStatus = fagsakStatusEtterIverksetting,
         behandlingStegType = StegType.BEHANDLING_AVSLUTTET,
         aktivBehandlingId = hentAktivBehandling(
-            restMinimalFagsakEtterAvsluttetBehandling.data!!
-        ).behandlingId
+            restMinimalFagsakEtterAvsluttetBehandling.data!!,
+        ).behandlingId,
     )
 
     return ferdigstiltBehandling

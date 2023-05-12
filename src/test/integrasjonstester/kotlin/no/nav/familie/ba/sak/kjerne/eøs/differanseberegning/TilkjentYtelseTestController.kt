@@ -35,12 +35,12 @@ class TilkjentYtelseTestController(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val beregningService: BeregningService,
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-    private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository
+    private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
 ) {
     @PutMapping(path = ["{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun oppdaterEndretUtebetalingAndeler(
         @PathVariable behandlingId: Long,
-        @RequestBody restDeltBosted: Map<LocalDate, String>
+        @RequestBody restDeltBosted: Map<LocalDate, String>,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)!!
@@ -53,7 +53,7 @@ class TilkjentYtelseTestController(
             beregningService.oppdaterBehandlingMedBeregning(
                 behandling,
                 personopplysningGrunnlag,
-                lagretEndretUtbetalingAndel
+                lagretEndretUtbetalingAndel,
             )
         }
 
@@ -63,7 +63,7 @@ class TilkjentYtelseTestController(
 
 private fun Map<LocalDate, String>.tilEndretUtbetalingAndeler(
     personopplysningGrunnlag: PersonopplysningGrunnlag,
-    tilkjentYtelse: TilkjentYtelse
+    tilkjentYtelse: TilkjentYtelse,
 ): Collection<EndretUtbetalingAndelMedAndelerTilkjentYtelse> {
     return this.map { (dato, tidslinje) ->
         val person = personopplysningGrunnlag.personer.first { it.fødselsdato == dato }

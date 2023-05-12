@@ -39,7 +39,7 @@ data class UtenlandskPeriodebeløp(
     @JoinTable(
         name = "AKTOER_TIL_UTENLANDSK_PERIODEBELOEP",
         joinColumns = [JoinColumn(name = "fk_utenlandsk_periodebeloep_id")],
-        inverseJoinColumns = [JoinColumn(name = "fk_aktoer_id")]
+        inverseJoinColumns = [JoinColumn(name = "fk_aktoer_id")],
     )
     override val barnAktører: Set<Aktør> = emptySet(),
 
@@ -57,14 +57,14 @@ data class UtenlandskPeriodebeløp(
     val utbetalingsland: String? = null,
 
     @Column(name = "kalkulert_maanedlig_beloep")
-    val kalkulertMånedligBeløp: BigDecimal? = null
+    val kalkulertMånedligBeløp: BigDecimal? = null,
 ) : PeriodeOgBarnSkjemaEntitet<UtenlandskPeriodebeløp>() {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "utenlandsk_periodebeloep_seq_generator")
     @SequenceGenerator(
         name = "utenlandsk_periodebeloep_seq_generator",
         sequenceName = "utenlandsk_periodebeloep_seq",
-        allocationSize = 50
+        allocationSize = 50,
     )
     override var id: Long = 0
 
@@ -75,13 +75,13 @@ data class UtenlandskPeriodebeløp(
         beløp = null,
         valutakode = null,
         intervall = null,
-        kalkulertMånedligBeløp = null
+        kalkulertMånedligBeløp = null,
     )
 
     override fun kopier(fom: YearMonth?, tom: YearMonth?, barnAktører: Set<Aktør>) = copy(
         fom = fom,
         tom = tom,
-        barnAktører = barnAktører
+        barnAktører = barnAktører,
     )
 
     companion object {

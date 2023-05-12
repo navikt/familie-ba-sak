@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service
 @Service
 class BehandlingHentOgPersisterService(
     private val behandlingRepository: BehandlingRepository,
-    private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher
+    private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
 ) {
     fun lagreEllerOppdater(behandling: Behandling, sendTilDvh: Boolean = true): Behandling {
         return behandlingRepository.save(behandling).also {

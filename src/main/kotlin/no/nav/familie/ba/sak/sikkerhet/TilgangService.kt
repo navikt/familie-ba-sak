@@ -19,7 +19,7 @@ class TilgangService(
     private val rolleConfig: RolleConfig,
     private val familieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient,
     private val cacheManager: CacheManager,
-    private val auditLogger: AuditLogger
+    private val auditLogger: AuditLogger,
 ) {
 
     /**
@@ -35,7 +35,7 @@ class TilgangService(
             throw RolleTilgangskontrollFeil(
                 melding = "${SikkerhetContext.hentSaksbehandlerNavn()} med rolle $høyesteRolletilgang " +
                     "har ikke tilgang til å $handling. Krever $minimumBehandlerRolle.",
-                frontendFeilmelding = "Du har ikke tilgang til å $handling."
+                frontendFeilmelding = "Du har ikke tilgang til å $handling.",
             )
         }
     }
@@ -47,7 +47,7 @@ class TilgangService(
                 melding = "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
                     "har ikke tilgang.",
                 frontendFeilmelding = "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
-                    "har ikke tilgang til $personIdenter"
+                    "har ikke tilgang til $personIdenter",
             )
         }
     }
@@ -69,8 +69,8 @@ class TilgangService(
                     Sporingsdata(
                         event = event,
                         personIdent = it,
-                        custom1 = CustomKeyValue("behandling", behandlingId.toString())
-                    )
+                        custom1 = CustomKeyValue("behandling", behandlingId.toString()),
+                    ),
                 )
             }
             harTilgangTilPersoner(personIdenter)
@@ -78,7 +78,7 @@ class TilgangService(
         if (!harTilgang) {
             throw RolleTilgangskontrollFeil(
                 "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
-                    "har ikke tilgang til behandling=$behandlingId"
+                    "har ikke tilgang til behandling=$behandlingId",
             )
         }
     }
@@ -89,7 +89,7 @@ class TilgangService(
             Sporingsdata(
                 event = event,
                 personIdent = it.fødselsnummer,
-                custom1 = CustomKeyValue("fagsak", fagsakId.toString())
+                custom1 = CustomKeyValue("fagsak", fagsakId.toString()),
             )
         }
         val behandlinger = behandlingHentOgPersisterService.hentBehandlinger(fagsakId)
@@ -106,7 +106,7 @@ class TilgangService(
                 melding = "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
                     "har ikke tilgang til fagsak=$fagsakId.",
                 frontendFeilmelding = "Saksbehandler ${SikkerhetContext.hentSaksbehandler()} " +
-                    "har ikke tilgang til fagsak=$fagsakId."
+                    "har ikke tilgang til fagsak=$fagsakId.",
             )
         }
     }
@@ -122,7 +122,7 @@ class TilgangService(
         fagsakId: Long,
         event: AuditLoggerEvent,
         minimumBehandlerRolle: BehandlerRolle,
-        handling: String
+        handling: String,
     ) {
         verifiserHarTilgangTilHandling(minimumBehandlerRolle, handling)
         validerTilgangTilFagsak(fagsakId, event)

@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class EndretUtbetalingAndelHentOgPersisterService(
-    private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository
+    private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
 ) {
 
     fun hentForBehandling(behandlingId: Long) = endretUtbetalingAndelRepository.findByBehandlingId(behandlingId)

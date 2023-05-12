@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.UtbetalingsperiodeMedBegrunnelser
+package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.utbetalingsperiodemedbegrunnelser
 
 import no.nav.familie.ba.sak.kjerne.eøs.felles.beregning.tilSeparateTidslinjerForBarna
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
@@ -14,7 +14,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperioderMedUnik
 
 fun splittUtbetalingsperioderPåKompetanser(
     utbetalingsperioder: List<VedtaksperiodeMedBegrunnelser>,
-    kompetanser: List<Kompetanse>
+    kompetanser: List<Kompetanse>,
 ): List<VedtaksperiodeMedBegrunnelser> {
     if (kompetanser.isEmpty()) return utbetalingsperioder
 
@@ -28,7 +28,7 @@ fun splittUtbetalingsperioderPåKompetanser(
             vedtaksperiodeOgUnikId?.let {
                 UtbetalingsperiodeMedOverlappendeKompetanse(
                     vedtaksperiodeOgUnikId,
-                    kompetanserIPeriode ?: emptyList()
+                    kompetanserIPeriode ?: emptyList(),
                 )
             }
         }.lagVedtaksperioderMedBegrunnelser()
@@ -36,13 +36,13 @@ fun splittUtbetalingsperioderPåKompetanser(
 
 data class UtbetalingsperiodeMedOverlappendeKompetanse(
     val vedtaksperiodeOgUnikId: VedtaksperiodeOgUnikId,
-    val kompetanser: List<Kompetanse>
+    val kompetanser: List<Kompetanse>,
 )
 
 fun Tidslinje<UtbetalingsperiodeMedOverlappendeKompetanse, Måned>.lagVedtaksperioderMedBegrunnelser(): List<VedtaksperiodeMedBegrunnelser> =
     this.perioder().mapNotNull {
         it.innhold?.vedtaksperiodeOgUnikId?.vedtaksperiode?.copy(
             fom = it.fraOgMed.tilFørsteDagIMåneden().tilLocalDateEllerNull(),
-            tom = it.tilOgMed.tilSisteDagIMåneden().tilLocalDateEllerNull()
+            tom = it.tilOgMed.tilSisteDagIMåneden().tilLocalDateEllerNull(),
         )
     }

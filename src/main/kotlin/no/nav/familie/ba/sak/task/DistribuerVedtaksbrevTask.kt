@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service
 class DistribuerVedtaksbrevTask(
     private val stegService: StegService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    private val brevmalService: BrevmalService
+    private val brevmalService: BrevmalService,
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
@@ -28,11 +28,11 @@ class DistribuerVedtaksbrevTask(
             journalpostId = distribuerVedtaksbrevDTO.journalpostId,
             personEllerInstitusjonIdent = distribuerVedtaksbrevDTO.personIdent,
             brevmal = brevmalService.hentBrevmal(behandling),
-            erManueltSendt = false
+            erManueltSendt = false,
         )
         stegService.håndterDistribuerVedtaksbrev(
             behandling = behandlingHentOgPersisterService.hent(distribuerVedtaksbrevDTO.behandlingId),
-            distribuerDokumentDTO = distribuerDokumentDTO
+            distribuerDokumentDTO = distribuerDokumentDTO,
         )
     }
 
@@ -45,5 +45,5 @@ class DistribuerVedtaksbrevTask(
 data class DistribuerVedtaksbrevDTO(
     val behandlingId: Long,
     val journalpostId: String,
-    val personIdent: String
+    val personIdent: String,
 )

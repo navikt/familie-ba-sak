@@ -56,7 +56,7 @@ data class VedtaksperiodeMedBegrunnelser(
     @SequenceGenerator(
         name = "vedtaksperiode_seq_generator",
         sequenceName = "vedtaksperiode_seq",
-        allocationSize = 50
+        allocationSize = 50,
     )
     val id: Long = 0,
 
@@ -79,7 +79,7 @@ data class VedtaksperiodeMedBegrunnelser(
         fetch = FetchType.EAGER,
         mappedBy = "vedtaksperiodeMedBegrunnelser",
         cascade = [CascadeType.ALL],
-        orphanRemoval = true
+        orphanRemoval = true,
     )
     val begrunnelser: MutableSet<Vedtaksbegrunnelse> = mutableSetOf(),
 
@@ -87,7 +87,7 @@ data class VedtaksperiodeMedBegrunnelser(
         fetch = FetchType.EAGER,
         mappedBy = "vedtaksperiodeMedBegrunnelser",
         cascade = [CascadeType.ALL],
-        orphanRemoval = true
+        orphanRemoval = true,
     )
     val eøsBegrunnelser: MutableSet<EØSBegrunnelse> = mutableSetOf(),
 
@@ -96,9 +96,9 @@ data class VedtaksperiodeMedBegrunnelser(
         fetch = FetchType.EAGER,
         mappedBy = "vedtaksperiodeMedBegrunnelser",
         cascade = [CascadeType.ALL],
-        orphanRemoval = true
+        orphanRemoval = true,
     )
-    val fritekster: MutableList<VedtaksbegrunnelseFritekst> = mutableListOf()
+    val fritekster: MutableList<VedtaksbegrunnelseFritekst> = mutableListOf(),
 
 ) : BaseEntitet() {
 
@@ -132,7 +132,7 @@ data class VedtaksperiodeMedBegrunnelser(
     @Deprecated("Skal bruke hentUtbetalingsperiodeDetaljerNy når den er klar")
     fun hentUtbetalingsperiodeDetaljer(
         andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
-        personopplysningGrunnlag: PersonopplysningGrunnlag
+        personopplysningGrunnlag: PersonopplysningGrunnlag,
     ): List<UtbetalingsperiodeDetalj> =
         if (andelerTilkjentYtelse.isEmpty()) {
             emptyList()
@@ -145,7 +145,7 @@ data class VedtaksperiodeMedBegrunnelser(
                     hentLøpendeAndelForVedtaksperiode(andelerTilkjentYtelse)
                 } else {
                     hentVertikaltSegmentForVedtaksperiode(
-                        andelerTilkjentYtelse = andelerTilkjentYtelse
+                        andelerTilkjentYtelse = andelerTilkjentYtelse,
                     )
                 }
 
@@ -158,7 +158,7 @@ data class VedtaksperiodeMedBegrunnelser(
         }
 
     private fun hentVertikaltSegmentForVedtaksperiode(
-        andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
+        andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
     ) = andelerTilkjentYtelse
         .utledSegmenter()
         .find { localDateSegment ->
@@ -170,7 +170,7 @@ data class VedtaksperiodeMedBegrunnelser(
 
 fun List<VedtaksperiodeMedBegrunnelser>.erAlleredeBegrunnetMedBegrunnelse(
     standardbegrunnelser: List<Standardbegrunnelse>,
-    måned: YearMonth
+    måned: YearMonth,
 ): Boolean {
     return this.any {
         it.fom?.toYearMonth() == måned && it.begrunnelser.any { standardbegrunnelse -> standardbegrunnelse.standardbegrunnelse in standardbegrunnelser }
@@ -186,7 +186,7 @@ private fun hentLøpendeAndelForVedtaksperiode(andelerTilkjentYtelse: List<Andel
 
 fun VedtaksperiodeMedBegrunnelser.hentUtbetalingsperiodeDetaljerNy(
     andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
-    personopplysningGrunnlag: PersonopplysningGrunnlag
+    personopplysningGrunnlag: PersonopplysningGrunnlag,
 ): List<UtbetalingsperiodeDetalj> {
     val utbetalingsperiodeDetaljer = andelerTilkjentYtelse.tilUtbetalingerTidslinje(personopplysningGrunnlag)
 
@@ -205,7 +205,8 @@ fun VedtaksperiodeMedBegrunnelser.hentUtbetalingsperiodeDetaljerNy(
         Vedtaksperiodetype.UTBETALING,
         Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING,
         Vedtaksperiodetype.AVSLAG,
-        Vedtaksperiodetype.ENDRET_UTBETALING -> {
+        Vedtaksperiodetype.ENDRET_UTBETALING,
+        -> {
             val utbetalingsperioderRelevantForVedtaksperiode =
                 utbetalingsperiodeDetaljer.perioder().find { andelerVertikal ->
                     andelerVertikal.fraOgMed.tilFørsteDagIMåneden().tilLocalDate()
@@ -213,7 +214,7 @@ fun VedtaksperiodeMedBegrunnelser.hentUtbetalingsperiodeDetaljerNy(
                         andelerVertikal.tilOgMed.tilSisteDagIMåneden().tilLocalDate()
                             .isSameOrAfter(this.tom ?: TIDENES_ENDE)
                 }?.innhold ?: throw Feil(
-                    "Finner ikke segment for vedtaksperiode (${this.fom}, ${this.tom}) blant segmenter ${andelerTilkjentYtelse.utledSegmenter()}"
+                    "Finner ikke segment for vedtaksperiode (${this.fom}, ${this.tom}) blant segmenter ${andelerTilkjentYtelse.utledSegmenter()}",
                 )
 
             utbetalingsperioderRelevantForVedtaksperiode.toList()
@@ -222,7 +223,7 @@ fun VedtaksperiodeMedBegrunnelser.hentUtbetalingsperiodeDetaljerNy(
 }
 
 private fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.tilUtbetalingerTidslinje(
-    personopplysningGrunnlag: PersonopplysningGrunnlag
+    personopplysningGrunnlag: PersonopplysningGrunnlag,
 ) = groupBy { Pair(it.aktør, it.type) }
     .map { (_, andelerForAktørOgType) ->
         andelerForAktørOgType.map {
@@ -231,8 +232,8 @@ private fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.tilUtbetalingerTidsl
                 tilOgMed = it.stønadTom.tilTidspunkt(),
                 innhold = UtbetalingsperiodeDetalj(
                     andel = it,
-                    personopplysningGrunnlag = personopplysningGrunnlag
-                )
+                    personopplysningGrunnlag = personopplysningGrunnlag,
+                ),
             )
         }.tilTidslinje()
     }.kombiner { it.takeIf { it.toList().isNotEmpty() } }

@@ -24,12 +24,12 @@ import java.time.YearMonth
 class SmåbarnstilleggController(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val småbarnstilleggKorrigeringService: SmåbarnstilleggKorrigeringService,
-    private val utvidetBehandlingService: UtvidetBehandlingService
+    private val utvidetBehandlingService: UtvidetBehandlingService,
 ) {
     @PostMapping(path = ["/behandling/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun leggTilSmåBarnstilleggPåBehandling(
         @PathVariable behandlingId: Long,
-        @RequestBody småbarnstilleggKorrigeringRequest: SmåbarnstilleggKorrigeringRequest
+        @RequestBody småbarnstilleggKorrigeringRequest: SmåbarnstilleggKorrigeringRequest,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 
@@ -41,7 +41,7 @@ class SmåbarnstilleggController(
     @DeleteMapping(path = ["/behandling/{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun fjernSmåbarnstilleggFraMåned(
         @PathVariable behandlingId: Long,
-        @RequestBody småBarnstilleggKorrigeringRequest: SmåbarnstilleggKorrigeringRequest
+        @RequestBody småBarnstilleggKorrigeringRequest: SmåbarnstilleggKorrigeringRequest,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 
@@ -54,6 +54,6 @@ class SmåbarnstilleggController(
 data class SmåbarnstilleggKorrigeringRequest(
     @Schema(
         implementation = String::class,
-        example = "2020-12"
-    ) val årMåned: YearMonth
+        example = "2020-12",
+    ) val årMåned: YearMonth,
 )

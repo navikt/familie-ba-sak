@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class UtgåendeJournalføringService(
-    private val integrasjonClient: IntegrasjonClient
+    private val integrasjonClient: IntegrasjonClient,
 ) {
 
     fun journalførManueltBrev(
@@ -30,7 +30,7 @@ class UtgåendeJournalføringService(
         dokumenttype: Dokumenttype,
         førsteside: Førsteside?,
         avsenderMottaker: AvsenderMottaker? = null,
-        tilManuellMottakerEllerVerge: Boolean = false
+        tilManuellMottakerEllerVerge: Boolean = false,
     ): String {
         return journalførDokument(
             fnr = fnr,
@@ -40,12 +40,12 @@ class UtgåendeJournalføringService(
                 Dokument(
                     dokument = brev,
                     filtype = Filtype.PDFA,
-                    dokumenttype = dokumenttype
-                )
+                    dokumenttype = dokumenttype,
+                ),
             ),
             førsteside = førsteside,
             avsenderMottaker = avsenderMottaker,
-            tilManuellMottakerEllerVerge = tilManuellMottakerEllerVerge
+            tilManuellMottakerEllerVerge = tilManuellMottakerEllerVerge,
         )
     }
 
@@ -58,7 +58,7 @@ class UtgåendeJournalføringService(
         førsteside: Førsteside? = null,
         behandlingId: Long? = null,
         avsenderMottaker: AvsenderMottaker? = null,
-        tilManuellMottakerEllerVerge: Boolean = false
+        tilManuellMottakerEllerVerge: Boolean = false,
     ): String {
         if (journalførendeEnhet == DEFAULT_JOURNALFØRENDE_ENHET) {
             logger.warn("Informasjon om enhet mangler på bruker og er satt til fallback-verdi, $DEFAULT_JOURNALFØRENDE_ENHET")
@@ -78,8 +78,8 @@ class UtgåendeJournalføringService(
                     fagsakId = fagsakId,
                     journalførendeEnhet = journalførendeEnhet,
                     førsteside = førsteside,
-                    eksternReferanseId = eksternReferanseId
-                )
+                    eksternReferanseId = eksternReferanseId,
+                ),
             )
 
             if (!journalpost.ferdigstilt) {
@@ -92,7 +92,7 @@ class UtgåendeJournalføringService(
                 HttpStatus.CONFLICT -> {
                     logger.warn(
                         "Klarte ikke journalføre dokument på fagsak=$fagsakId fordi det allerede finnes en journalpost " +
-                            "med eksternReferanseId=$eksternReferanseId. Bruker eksisterende journalpost."
+                            "med eksternReferanseId=$eksternReferanseId. Bruker eksisterende journalpost.",
                     )
 
                     hentEksisterendeJournalpost(eksternReferanseId, fnr)
@@ -106,12 +106,12 @@ class UtgåendeJournalføringService(
 
     private fun hentEksisterendeJournalpost(
         eksternReferanseId: String,
-        fnr: String
+        fnr: String,
     ): String = integrasjonClient.hentJournalposterForBruker(
         JournalposterForBrukerRequest(
             brukerId = Bruker(id = fnr, type = BrukerIdType.FNR),
-            antall = 50
-        )
+            antall = 50,
+        ),
     ).single { it.eksternReferanseId == eksternReferanseId }.journalpostId
 
     fun genererEksternReferanseIdForJournalpost(fagsakId: String, behandlingId: Long?, tilVerge: Boolean) =

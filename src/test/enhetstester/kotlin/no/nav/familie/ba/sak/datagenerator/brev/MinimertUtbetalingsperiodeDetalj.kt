@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.dataGenerator.brev
+package no.nav.familie.ba.sak.datagenerator.brev
 
 import no.nav.familie.ba.sak.common.tilfeldigSøker
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPerson
@@ -14,5 +14,5 @@ fun lagMinimertUtbetalingsperiodeDetalj(
     ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD,
     utbetaltPerMnd: Int = sats(YtelseType.ORDINÆR_BARNETRYGD),
     prosent: BigDecimal = BigDecimal.valueOf(100),
-    erPåvirketAvEndring: Boolean = false
+    erPåvirketAvEndring: Boolean = false,
 ) = MinimertUtbetalingsperiodeDetalj(person, ytelseType, utbetaltPerMnd, erPåvirketAvEndring, prosent)

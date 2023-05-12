@@ -13,7 +13,7 @@ import org.springframework.web.filter.OncePerRequestFilter
 class BisysConfig(
     private val oidcUtil: OIDCUtil,
     @Value("\${BISYS_CLIENT_ID:dummy}")
-    private val bisysClientId: String
+    private val bisysClientId: String,
 ) {
 
     @Bean
@@ -21,7 +21,7 @@ class BisysConfig(
         override fun doFilterInternal(
             request: HttpServletRequest,
             response: HttpServletResponse,
-            filterChain: FilterChain
+            filterChain: FilterChain,
         ) {
             val clientId: String? = try {
                 oidcUtil.getClaim("azp")

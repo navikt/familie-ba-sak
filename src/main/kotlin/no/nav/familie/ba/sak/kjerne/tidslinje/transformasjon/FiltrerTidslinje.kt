@@ -30,6 +30,7 @@ fun <I, T : Tidsenhet> Tidslinje<I, T>.filtrer(filter: (I?) -> Boolean): Tidslin
 }
 
 fun <I, T : Tidsenhet> Tidslinje<I, T>.filtrerIkkeNull(): Tidslinje<I, T> = filtrer { it != null }
+fun <I, T : Tidsenhet> Tidslinje<I, T>.filtrerIkkeNull(filter: (I) -> Boolean): Tidslinje<I, T> = filtrer { it != null && filter(it) }
 
 /**
  * Extension-metode for å filtrere tidslinjen mot en boolsk tidslinje
@@ -50,5 +51,5 @@ fun <I, T : Tidsenhet> Tidslinje<I, T>.filtrerMed(boolskTidslinje: Tidslinje<Boo
  * Extension-metode for å filtrere innholdet i en map av tidslinjer
  */
 fun <K, I, T : Tidsenhet> Map<K, Tidslinje<I, T>>.filtrerHverKunVerdi(
-    filter: (I) -> Boolean
+    filter: (I) -> Boolean,
 ) = mapValues { (_, tidslinje) -> tidslinje.filtrer { if (it != null) filter(it) else false } }

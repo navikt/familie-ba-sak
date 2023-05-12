@@ -61,7 +61,7 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
-class StegServiceTest(
+class StegServiceIntegrationTest(
     @Autowired
     private val stegService: StegService,
 
@@ -105,7 +105,7 @@ class StegServiceTest(
     private val brevmalService: BrevmalService,
 
     @Autowired
-    private val økonomiKlient: ØkonomiKlient
+    private val økonomiKlient: ØkonomiKlient,
 
 ) : AbstractSpringIntegrationTest() {
 
@@ -131,19 +131,19 @@ class StegServiceTest(
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
         )
 
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)!!
         assertEquals(
             Resultat.OPPFYLT,
             vilkårsvurdering.personResultater.first { it.aktør.aktivFødselsnummer() == barnFnr1 }.vilkårResultater
-                .single { it.vilkårType == Vilkår.GIFT_PARTNERSKAP }.resultat
+                .single { it.vilkårType == Vilkår.GIFT_PARTNERSKAP }.resultat,
         )
         assertEquals(
             Resultat.IKKE_VURDERT,
             vilkårsvurdering.personResultater.first { it.aktør.aktivFødselsnummer() == barnFnr2 }.vilkårResultater
-                .single { it.vilkårType == Vilkår.GIFT_PARTNERSKAP }.resultat
+                .single { it.vilkårType == Vilkår.GIFT_PARTNERSKAP }.resultat,
         )
     }
 
@@ -160,7 +160,7 @@ class StegServiceTest(
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
         )
 
         // Venter med å kjøre gjennom til avsluttet til brev er støttet for fortsatt innvilget.
@@ -171,7 +171,7 @@ class StegServiceTest(
             vedtakService = vedtakService,
             stegService = stegService,
             fagsakId = behandling.fagsak.id,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
         )
     }
 
@@ -209,7 +209,7 @@ class StegServiceTest(
         }
         assertEquals(
             "Behandling med id ${behandling.id} er avsluttet og stegprosessen kan ikke gjenåpnes",
-            feil.message
+            feil.message,
         )
     }
 
@@ -245,7 +245,7 @@ class StegServiceTest(
         assertThrows<FunksjonellFeil> {
             stegService.håndterBeslutningForVedtak(
                 behandling,
-                RestBeslutningPåVedtak(beslutning = Beslutning.GODKJENT, begrunnelse = null)
+                RestBeslutningPåVedtak(beslutning = Beslutning.GODKJENT, begrunnelse = null),
             )
         }
     }
@@ -265,8 +265,8 @@ class StegServiceTest(
             lagVilkårsvurdering(
                 søkerAktørId,
                 behandling,
-                Resultat.OPPFYLT
-            )
+                Resultat.OPPFYLT,
+            ),
         )
         behandling.endretAv = "1234"
         assertEquals(FØRSTE_STEG, behandling.steg)
@@ -277,7 +277,7 @@ class StegServiceTest(
         behandling.status = BehandlingStatus.FATTER_VEDTAK
         stegService.håndterBeslutningForVedtak(
             behandling,
-            RestBeslutningPåVedtak(beslutning = Beslutning.UNDERKJENT, begrunnelse = "Feil")
+            RestBeslutningPåVedtak(beslutning = Beslutning.UNDERKJENT, begrunnelse = "Feil"),
         )
 
         val behandlingEtterPersongrunnlagSteg = behandlingHentOgPersisterService.hent(behandlingId = behandling.id)
@@ -292,18 +292,18 @@ class StegServiceTest(
             vilkårsvurdertBehandling,
             RestHenleggBehandlingInfo(
                 årsak = HenleggÅrsak.FEILAKTIG_OPPRETTET,
-                begrunnelse = ""
-            )
+                begrunnelse = "",
+            ),
         )
         assertTrue(
             henlagtBehandling.behandlingStegTilstand.firstOrNull {
                 it.behandlingSteg == StegType.HENLEGG_BEHANDLING && it.behandlingStegStatus == BehandlingStegStatus.UTFØRT
-            } != null
+            } != null,
         )
         assertTrue(
             henlagtBehandling.behandlingStegTilstand.firstOrNull {
                 it.behandlingSteg == StegType.FERDIGSTILLE_BEHANDLING && it.behandlingStegStatus == BehandlingStegStatus.UTFØRT
-            } != null
+            } != null,
         )
 
         assertEquals(StegType.BEHANDLING_AVSLUTTET, henlagtBehandling.steg)
@@ -316,15 +316,15 @@ class StegServiceTest(
             listOf(
                 DbOppgave(behandling = behandling, type = Oppgavetype.Journalføring, gsakId = "1"),
                 DbOppgave(behandling = behandling, type = Oppgavetype.BehandleSak, gsakId = "2"),
-                DbOppgave(behandling = behandling, type = Oppgavetype.BehandleUnderkjentVedtak, gsakId = "3")
-            )
+                DbOppgave(behandling = behandling, type = Oppgavetype.BehandleUnderkjentVedtak, gsakId = "3"),
+            ),
         )
         val henlagtBehandling = stegService.håndterHenleggBehandling(
             behandling,
             RestHenleggBehandlingInfo(
                 årsak = HenleggÅrsak.TEKNISK_VEDLIKEHOLD,
-                begrunnelse = "Satsendring"
-            )
+                begrunnelse = "Satsendring",
+            ),
         )
         assertEquals(StegType.BEHANDLING_AVSLUTTET, henlagtBehandling.steg)
         assertTrue {
@@ -354,8 +354,8 @@ class StegServiceTest(
                 behandlingEtterSendTilBeslutter,
                 RestHenleggBehandlingInfo(
                     årsak = HenleggÅrsak.FEILAKTIG_OPPRETTET,
-                    begrunnelse = ""
-                )
+                    begrunnelse = "",
+                ),
             )
         }
     }
@@ -372,16 +372,16 @@ class StegServiceTest(
                 posteringType = PosteringType.FEILUTBETALING,
                 forfallsdato = LocalDate.parse("2021-02-23"),
                 utenInntrekk = false,
-                erFeilkonto = null
-            )
+                erFeilkonto = null,
+            ),
         )
 
         val simuleringMottakerMock = listOf(
             SimuleringMottaker(
                 simulertPostering = simulertPosteringMock,
                 mottakerType = MottakerType.BRUKER,
-                mottakerNummer = "12345678910"
-            )
+                mottakerNummer = "12345678910",
+            ),
         )
 
         every { økonomiKlient.hentSimulering(any()) } returns DetaljertSimuleringResultat(simuleringMottakerMock)
@@ -400,7 +400,7 @@ class StegServiceTest(
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
         )
 
         val nyMigreringsdato = LocalDate.now().minusMonths(6)
@@ -414,8 +414,8 @@ class StegServiceTest(
                 søkersIdent = søkerFnr,
                 barnasIdenter = barnasIdenter,
                 nyMigreringsdato = nyMigreringsdato,
-                fagsakId = fagsak.id
-            )
+                fagsakId = fagsak.id,
+            ),
         )
         assertEquals(StegType.VILKÅRSVURDERING, behandling.steg)
         assertTrue {
@@ -438,14 +438,14 @@ class StegServiceTest(
             behandlingEtterBehandlingsresultatSteg,
             RestTilbakekreving(
                 valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
-                begrunnelse = "ignorer tilbakekreving"
-            )
+                begrunnelse = "ignorer tilbakekreving",
+            ),
         )
         assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterTilbakekrevingSteg.steg)
 
         val behandlingEtterBeslutterSteg = stegService.håndterSendTilBeslutter(
             behandlingEtterTilbakekrevingSteg,
-            "1234"
+            "1234",
         )
         assertEquals(StegType.FERDIGSTILLE_BEHANDLING, behandlingEtterBeslutterSteg.steg)
         assertTrue {
@@ -481,16 +481,16 @@ class StegServiceTest(
                 posteringType = PosteringType.FEILUTBETALING,
                 forfallsdato = LocalDate.parse("2021-02-23"),
                 utenInntrekk = false,
-                erFeilkonto = null
-            )
+                erFeilkonto = null,
+            ),
         )
 
         val simuleringMottakerMock = listOf(
             SimuleringMottaker(
                 simulertPostering = simulertPosteringMock,
                 mottakerType = MottakerType.BRUKER,
-                mottakerNummer = "12345678910"
-            )
+                mottakerNummer = "12345678910",
+            ),
         )
 
         every { økonomiKlient.hentSimulering(any()) } returns DetaljertSimuleringResultat(simuleringMottakerMock)
@@ -509,7 +509,7 @@ class StegServiceTest(
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
         )
 
         val nyMigreringsdato = LocalDate.now().minusMonths(6)
@@ -523,8 +523,8 @@ class StegServiceTest(
                 søkersIdent = søkerFnr,
                 barnasIdenter = barnasIdenter,
                 nyMigreringsdato = nyMigreringsdato,
-                fagsakId = fagsak.id
-            )
+                fagsakId = fagsak.id,
+            ),
         )
         assertEquals(StegType.VILKÅRSVURDERING, behandling.steg)
         assertTrue {
@@ -547,15 +547,15 @@ class StegServiceTest(
             behandlingEtterBehandlingsresultatSteg,
             RestTilbakekreving(
                 valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
-                begrunnelse = "ignorer tilbakekreving"
-            )
+                begrunnelse = "ignorer tilbakekreving",
+            ),
         )
 
         assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterTilbakekrevingSteg.steg)
 
         val behandlingEtterSendTilBeslutterSteg = stegService.håndterSendTilBeslutter(
             behandlingEtterTilbakekrevingSteg,
-            "1234"
+            "1234",
         )
 
         assertEquals(StegType.BESLUTTE_VEDTAK, behandlingEtterSendTilBeslutterSteg.steg)
@@ -564,8 +564,8 @@ class StegServiceTest(
             behandlingEtterSendTilBeslutterSteg,
             RestBeslutningPåVedtak(
                 Beslutning.GODKJENT,
-                "godkjent manuelt"
-            )
+                "godkjent manuelt",
+            ),
         )
 
         assertEquals(StegType.FERDIGSTILLE_BEHANDLING, behandlingEtterBesluttVedtakSteg.steg)
@@ -591,16 +591,16 @@ class StegServiceTest(
                 posteringType = PosteringType.FEILUTBETALING,
                 forfallsdato = LocalDate.parse("2021-02-23"),
                 utenInntrekk = false,
-                erFeilkonto = null
-            )
+                erFeilkonto = null,
+            ),
         )
 
         val simuleringMottakerMock = listOf(
             SimuleringMottaker(
                 simulertPostering = simulertPosteringMock,
                 mottakerType = MottakerType.BRUKER,
-                mottakerNummer = "12345678910"
-            )
+                mottakerNummer = "12345678910",
+            ),
         )
 
         every { økonomiKlient.hentSimulering(any()) } returns DetaljertSimuleringResultat(simuleringMottakerMock)
@@ -620,8 +620,8 @@ class StegServiceTest(
                 søkersIdent = søkerFnr,
                 barnasIdenter = barnasIdenter,
                 nyMigreringsdato = migreringsdato,
-                fagsakId = fagsak.id
-            )
+                fagsakId = fagsak.id,
+            ),
         )
         assertEquals(StegType.VILKÅRSVURDERING, behandling.steg)
         assertTrue {
@@ -653,14 +653,14 @@ class StegServiceTest(
             behandlingEtterBehandlingsresultatSteg,
             RestTilbakekreving(
                 valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
-                begrunnelse = "ignorer tilbakekreving"
-            )
+                begrunnelse = "ignorer tilbakekreving",
+            ),
         )
         assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterTilbakekrevingSteg.steg)
 
         val behandlingEtterBesultterSteg = stegService.håndterSendTilBeslutter(
             behandlingEtterTilbakekrevingSteg,
-            "1234"
+            "1234",
         )
         assertEquals(StegType.IVERKSETT_MOT_OPPDRAG, behandlingEtterBesultterSteg.steg)
         assertTrue {
@@ -696,16 +696,16 @@ class StegServiceTest(
                 posteringType = PosteringType.FEILUTBETALING,
                 forfallsdato = LocalDate.parse("2021-02-23"),
                 utenInntrekk = false,
-                erFeilkonto = null
-            )
+                erFeilkonto = null,
+            ),
         )
 
         val simuleringMottakerMock = listOf(
             SimuleringMottaker(
                 simulertPostering = simulertPosteringMock,
                 mottakerType = MottakerType.BRUKER,
-                mottakerNummer = "12345678910"
-            )
+                mottakerNummer = "12345678910",
+            ),
         )
 
         every { økonomiKlient.hentSimulering(any()) } returns DetaljertSimuleringResultat(simuleringMottakerMock)
@@ -725,8 +725,8 @@ class StegServiceTest(
                 søkersIdent = søkerFnr,
                 barnasIdenter = barnasIdenter,
                 nyMigreringsdato = migreringsdato,
-                fagsakId = fagsak.id
-            )
+                fagsakId = fagsak.id,
+            ),
         )
         assertEquals(StegType.VILKÅRSVURDERING, behandling.steg)
         assertTrue {
@@ -758,14 +758,14 @@ class StegServiceTest(
             behandlingEtterBehandlingsresultatSteg,
             RestTilbakekreving(
                 valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
-                begrunnelse = "ignorer tilbakekreving"
-            )
+                begrunnelse = "ignorer tilbakekreving",
+            ),
         )
         assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterTilbakekrevingSteg.steg)
 
         val behandlingEtterSendTilBeslutterSteg = stegService.håndterSendTilBeslutter(
             behandlingEtterTilbakekrevingSteg,
-            "1234"
+            "1234",
         )
 
         assertEquals(StegType.BESLUTTE_VEDTAK, behandlingEtterSendTilBeslutterSteg.steg)
@@ -774,8 +774,8 @@ class StegServiceTest(
             behandlingEtterSendTilBeslutterSteg,
             RestBeslutningPåVedtak(
                 Beslutning.GODKJENT,
-                "godkjent manuelt"
-            )
+                "godkjent manuelt",
+            ),
         )
 
         assertEquals(StegType.IVERKSETT_MOT_OPPDRAG, behandlingEtterBesluttVedtakSteg.steg)
@@ -814,16 +814,16 @@ class StegServiceTest(
                 posteringType = PosteringType.FEILUTBETALING,
                 forfallsdato = LocalDate.parse("2021-02-23"),
                 utenInntrekk = false,
-                erFeilkonto = null
-            )
+                erFeilkonto = null,
+            ),
         )
 
         val simuleringMottakerMock = listOf(
             SimuleringMottaker(
                 simulertPostering = simulertPosteringMock,
                 mottakerType = MottakerType.BRUKER,
-                mottakerNummer = "12345678910"
-            )
+                mottakerNummer = "12345678910",
+            ),
         )
 
         every { økonomiKlient.hentSimulering(any()) } returns DetaljertSimuleringResultat(simuleringMottakerMock)
@@ -843,8 +843,8 @@ class StegServiceTest(
                 søkersIdent = søkerFnr,
                 barnasIdenter = barnasIdenter,
                 nyMigreringsdato = migreringsdato,
-                fagsakId = fagsak.id
-            )
+                fagsakId = fagsak.id,
+            ),
         )
         assertEquals(StegType.VILKÅRSVURDERING, behandling.steg)
         assertTrue {
@@ -876,14 +876,14 @@ class StegServiceTest(
             behandlingEtterBehandlingsresultatSteg,
             RestTilbakekreving(
                 valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
-                begrunnelse = "ignorer tilbakekreving"
-            )
+                begrunnelse = "ignorer tilbakekreving",
+            ),
         )
         assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterTilbakekrevingSteg.steg)
 
         val behandlingEtterSendTilBeslutterSteg = stegService.håndterSendTilBeslutter(
             behandlingEtterTilbakekrevingSteg,
-            "1234"
+            "1234",
         )
 
         assertEquals(StegType.BESLUTTE_VEDTAK, behandlingEtterSendTilBeslutterSteg.steg)
@@ -893,8 +893,8 @@ class StegServiceTest(
             behandlingEtterSendTilBeslutterSteg,
             RestBeslutningPåVedtak(
                 Beslutning.GODKJENT,
-                "godkjent manuelt"
-            )
+                "godkjent manuelt",
+            ),
         )
 
         assertEquals(StegType.IVERKSETT_MOT_OPPDRAG, behandlingEtterBesluttVedtakSteg.steg)
@@ -935,7 +935,7 @@ class StegServiceTest(
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
         )
     }
 

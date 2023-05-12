@@ -4,7 +4,7 @@ import java.time.LocalDate
 
 data class DagTidspunkt internal constructor(
     internal val dato: LocalDate,
-    override val uendelighet: Uendelighet
+    override val uendelighet: Uendelighet,
 ) : Tidspunkt<Dag>(uendelighet) {
 
     fun tilLocalDateEllerNull(): LocalDate? {
@@ -62,7 +62,7 @@ data class DagTidspunkt internal constructor(
         private fun LocalDate?.tilTidspunktEllerUendelig(default: LocalDate?, uendelighet: Uendelighet) =
             this?.let { DagTidspunkt(it, Uendelighet.INGEN) } ?: DagTidspunkt(
                 default ?: LocalDate.now(),
-                uendelighet
+                uendelighet,
             )
     }
 }
