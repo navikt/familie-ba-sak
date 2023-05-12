@@ -61,7 +61,7 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
-class StegServiceTest(
+class StegServiceIntegrationTest(
     @Autowired
     private val stegService: StegService,
 
