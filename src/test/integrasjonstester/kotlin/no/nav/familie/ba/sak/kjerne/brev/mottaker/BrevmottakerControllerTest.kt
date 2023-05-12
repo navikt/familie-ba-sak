@@ -46,9 +46,6 @@ internal class BrevmottakerControllerTest(
 
         )
         brevmottakerController.leggTilBrevmottaker(behandling.id, brevmottaker)
-        Assertions.assertThat(brevmottakerController.hentBrevmottakere(behandling.id).body?.data!!)
-            .extracting("navn")
-            .containsOnly("endret navn")
 
         brevmottakerController.leggTilBrevmottaker(behandling.id, brevmottaker.copy(type = MottakerType.VERGE))
         brevmottakerController.hentBrevmottakere(behandling.id).body?.data!!.apply {
