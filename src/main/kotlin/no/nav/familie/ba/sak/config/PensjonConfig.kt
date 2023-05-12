@@ -21,7 +21,7 @@ class PensjonConfig(
     fun pensjonFilter() = object : OncePerRequestFilter() {
         override fun doFilterInternal(request: HttpServletRequest, response: HttpServletResponse, filterChain: FilterChain) {
             val clientNavn = oidcUtil.getClaim("azp_name")
-            val erKallerPensjon = clientNavn.contains("pensjon")
+            val erKallerPensjon = clientNavn.contains("popp")
             val harForvalterRolle = SikkerhetContext.harInnloggetBrukerForvalterRolle(rolleConfig)
             val erPensjonRequest = request.requestURI.startsWith("/api/pensjon")
 
