@@ -80,6 +80,9 @@ spec:
         - application: bidrag-grunnlag
           namespace: bidrag
           cluster: dev-gcp
+        - application: popp
+          namespace: pensjonopptjening
+          cluster: dev-gcp
     outbound:
       rules:
         - application: familie-brev
