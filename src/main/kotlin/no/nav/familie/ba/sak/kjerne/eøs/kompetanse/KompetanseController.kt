@@ -66,6 +66,7 @@ class KompetanseController(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Sletter kompetanse",
         )
+        kompetanseService.slettKompetanse(kompetanseId)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
