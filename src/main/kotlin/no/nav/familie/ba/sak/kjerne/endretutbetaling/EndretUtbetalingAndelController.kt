@@ -119,7 +119,6 @@ class EndretUtbetalingAndelController(
         )
     }
 
-    // Denne er ikke i bruk?
     @PostMapping(path = ["/{behandlingId}/tilbakestill"])
     fun tilbakestillBehandlingTilBehandlingsresultat(
         @PathVariable behandlingId: Long,
