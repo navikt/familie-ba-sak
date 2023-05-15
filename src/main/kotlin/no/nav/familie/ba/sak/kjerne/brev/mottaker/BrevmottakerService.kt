@@ -1,11 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.brev.mottaker
 
-import no.nav.familie.ba.sak.common.BehandlingValidering.validerBehandlingKanRedigeres
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.ekstern.restDomene.RestBrevmottaker
 import no.nav.familie.ba.sak.ekstern.restDomene.tilBrevMottaker
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.domene.ManuellAdresseInfo
@@ -22,13 +20,11 @@ class BrevmottakerService(
     private val loggService: LoggService,
     private val personidentService: PersonidentService,
     private val personopplysningerService: PersonopplysningerService,
-    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 ) {
 
     @Transactional
     fun leggTilBrevmottaker(restBrevMottaker: RestBrevmottaker, behandlingId: Long) {
         val brevmottaker = restBrevMottaker.tilBrevMottaker(behandlingId)
-        validerBehandlingKanRedigeres(behandlingHentOgPersisterService.hentStatus(behandlingId))
 
         loggService.opprettBrevmottakerLogg(
             brevmottaker = brevmottaker,
@@ -42,7 +38,6 @@ class BrevmottakerService(
     fun fjernBrevmottaker(id: Long) {
         val brevmottaker =
             brevmottakerRepository.findByIdOrNull(id) ?: throw Feil("Finner ikke brevmottaker med id=$id")
-        validerBehandlingKanRedigeres(behandlingHentOgPersisterService.hentStatus(brevmottaker.behandlingId))
 
         loggService.opprettBrevmottakerLogg(
             brevmottaker = brevmottaker,

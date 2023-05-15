@@ -1,12 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp
 
 import jakarta.validation.Valid
-import no.nav.familie.ba.sak.common.BehandlingValidering.validerBehandlingKanRedigeres
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilUtenlandskPeriodebeløp
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -31,7 +29,6 @@ import org.springframework.web.bind.annotation.RestController
 class UtenlandskPeriodebeløpController(
     private val tilgangService: TilgangService,
     private val utenlandskPeriodebeløpService: UtenlandskPeriodebeløpService,
-    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository,
     private val personidentService: PersonidentService,
     private val utvidetBehandlingService: UtvidetBehandlingService,
@@ -47,9 +44,9 @@ class UtenlandskPeriodebeløpController(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Oppdaterer utenlandsk periodebeløp",
         )
+        tilgangService.validerKanRedigereBehandling(behandlingId)
 
         val barnAktører = restUtenlandskPeriodebeløp.barnIdenter.map { personidentService.hentAktør(it) }
-        validerBehandlingKanRedigeres(behandlingHentOgPersisterService.hentStatus(behandlingId))
 
         val eksisterendeUtenlandskPeriodeBeløp = utenlandskPeriodebeløpRepository.getById(restUtenlandskPeriodebeløp.id)
 
@@ -72,7 +69,7 @@ class UtenlandskPeriodebeløpController(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Sletter utenlandsk periodebeløp",
         )
-        validerBehandlingKanRedigeres(behandlingHentOgPersisterService.hentStatus(behandlingId))
+        tilgangService.validerKanRedigereBehandling(behandlingId)
 
         utenlandskPeriodebeløpService.slettUtenlandskPeriodebeløp(BehandlingId(behandlingId), utenlandskPeriodebeløpId)
 

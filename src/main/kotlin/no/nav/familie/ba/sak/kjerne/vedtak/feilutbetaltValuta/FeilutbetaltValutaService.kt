@@ -27,7 +27,6 @@ class FeilutbetaltValutaService(
 
     @Transactional
     fun leggTilFeilutbetaltValutaPeriode(feilutbetaltValuta: RestFeilutbetaltValuta, behandlingId: Long): Long {
-        validerBehandlingKanRedigeres(behandlingHentOgPersisterService.hentStatus(behandlingId))
         val lagret = feilutbetaltValutaRepository.save(
             FeilutbetaltValuta(
                 behandlingId = behandlingId,
@@ -42,7 +41,6 @@ class FeilutbetaltValutaService(
 
     @Transactional
     fun fjernFeilutbetaltValutaPeriode(id: Long, behandlingId: Long) {
-        validerBehandlingKanRedigeres(behandlingHentOgPersisterService.hentStatus(behandlingId))
         loggService.loggFeilutbetaltValutaPeriodeFjernet(
             behandlingId = behandlingId,
             feilutbetaltValuta = finnFeilutbetaltValutaThrows(id),
@@ -64,7 +62,6 @@ class FeilutbetaltValutaService(
     @Transactional
     fun oppdatertFeilutbetaltValutaPeriode(feilutbetaltValuta: RestFeilutbetaltValuta, id: Long) {
         val periode = feilutbetaltValutaRepository.findById(id).orElseThrow { Feil("Finner ikke feilutbetalt valuta med id=${feilutbetaltValuta.id}") }
-        validerBehandlingKanRedigeres(behandlingHentOgPersisterService.hentStatus(periode.behandlingId))
 
         periode.fom = feilutbetaltValuta.fom
         periode.tom = feilutbetaltValuta.tom

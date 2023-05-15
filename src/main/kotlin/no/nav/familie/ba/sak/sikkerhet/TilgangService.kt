@@ -1,5 +1,7 @@
 package no.nav.familie.ba.sak.sikkerhet
 
+import no.nav.familie.ba.sak.common.BehandlingValidering
+import no.nav.familie.ba.sak.common.BehandlingValidering.validerBehandlingKanRedigeres
 import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.RolleConfig
@@ -127,6 +129,11 @@ class TilgangService(
         verifiserHarTilgangTilHandling(minimumBehandlerRolle, handling)
         validerTilgangTilFagsak(fagsakId, event)
     }
+
+    fun validerKanRedigereBehandling(behandlingId: Long) {
+        validerBehandlingKanRedigeres(behandlingHentOgPersisterService.hentStatus(behandlingId))
+    }
+
 
     /**
      * Sjekker cache om tilgangen finnes siden tidligere, hvis ikke hentes verdiet med [hentVerdi]

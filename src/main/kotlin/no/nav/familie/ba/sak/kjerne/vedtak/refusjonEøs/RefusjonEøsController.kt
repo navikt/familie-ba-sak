@@ -1,9 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs
 
-import no.nav.familie.ba.sak.common.BehandlingValidering.validerBehandlingKanRedigeres
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRefusjonEøs
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
@@ -27,7 +25,6 @@ import org.springframework.web.bind.annotation.RestController
 @Validated
 class RefusjonEøsController(
     private val tilgangService: TilgangService,
-    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val refusjonEøsService: RefusjonEøsService,
     private val utvidetBehandlingService: UtvidetBehandlingService,
 ) {
@@ -44,7 +41,7 @@ class RefusjonEøsController(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "legg til periode med refusjon EØS",
         )
-        validerBehandlingKanRedigeres(behandlingHentOgPersisterService.hentStatus(behandlingId))
+        tilgangService.validerKanRedigereBehandling(behandlingId)
 
         refusjonEøsService.leggTilRefusjonEøsPeriode(
             refusjonEøs = refusjonEøs,
@@ -69,7 +66,7 @@ class RefusjonEøsController(
             handling = "oppdater periode med refusjon EØS",
         )
 
-        validerBehandlingKanRedigeres(behandlingHentOgPersisterService.hentStatus(behandlingId))
+        tilgangService.validerKanRedigereBehandling(behandlingId)
 
         refusjonEøsService.oppdaterRefusjonEøsPeriode(restRefusjonEøs = refusjonEøs, id = id)
 
@@ -85,7 +82,7 @@ class RefusjonEøsController(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "fjerner periode med refusjon EØS",
         )
-        validerBehandlingKanRedigeres(behandlingHentOgPersisterService.hentStatus(behandlingId))
+        tilgangService.validerKanRedigereBehandling(behandlingId)
 
         refusjonEøsService.fjernRefusjonEøsPeriode(id = id, behandlingId = behandlingId)
 

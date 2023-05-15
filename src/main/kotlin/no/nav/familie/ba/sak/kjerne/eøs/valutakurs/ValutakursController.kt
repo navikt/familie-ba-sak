@@ -1,12 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.eøs.valutakurs
 
-import no.nav.familie.ba.sak.common.BehandlingValidering.validerBehandlingKanRedigeres
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.RestValutakurs
 import no.nav.familie.ba.sak.ekstern.restDomene.tilValutakurs
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -32,7 +30,6 @@ import java.time.LocalDate
 class ValutakursController(
     private val tilgangService: TilgangService,
     private val valutakursService: ValutakursService,
-    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val personidentService: PersonidentService,
     private val utvidetBehandlingService: UtvidetBehandlingService,
     private val ecbService: ECBService,
@@ -47,9 +44,9 @@ class ValutakursController(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Oppdaterer valutakurs",
         )
+        tilgangService.validerKanRedigereBehandling(behandlingId)
 
         val barnAktører = restValutakurs.barnIdenter.map { personidentService.hentAktør(it) }
-        validerBehandlingKanRedigeres(behandlingHentOgPersisterService.hentStatus(behandlingId))
 
         val valutaKurs = if (skalManueltSetteValutakurs(restValutakurs)) {
             restValutakurs.tilValutakurs(barnAktører)
@@ -72,8 +69,7 @@ class ValutakursController(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Sletter valutakurs",
         )
-
-        validerBehandlingKanRedigeres(behandlingHentOgPersisterService.hentStatus(behandlingId))
+        tilgangService.validerKanRedigereBehandling(behandlingId)
 
         valutakursService.slettValutakurs(BehandlingId(behandlingId), valutakursId)
 
