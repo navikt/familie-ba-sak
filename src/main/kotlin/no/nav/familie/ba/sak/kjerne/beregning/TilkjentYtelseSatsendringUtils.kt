@@ -34,7 +34,7 @@ object TilkjentYtelseSatsendringUtils {
         val nyeAndeler = tidlinjerMedForrigeAndelerPerPersonOgType.flatMap { (aktørOgYtelse, tidlinje) ->
             tidlinje.lagAndelerMedNySatsForPersonOgYtelsetype(
                 ytelseType = aktørOgYtelse.second,
-                person = personopplysningGrunnlag.personer.find { it.aktør == aktørOgYtelse.first } ?: throw Feil("Må finnes"),
+                person = personopplysningGrunnlag.personer.find { it.aktør == aktørOgYtelse.first } ?: throw Feil("Finner ikke person ved oppdatering av sats på andeler for satsendring"),
                 behandlingId = behandling.id,
                 tilkjentYtelse = tilkjentYtelse,
             )
