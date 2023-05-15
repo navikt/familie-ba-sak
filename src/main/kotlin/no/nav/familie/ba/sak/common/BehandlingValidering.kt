@@ -11,7 +11,17 @@ object BehandlingValidering {
 
     fun validerBehandlingKanRedigeres(status: BehandlingStatus) {
         feilHvis(status.erLåstForVidereRedigering()) {
-            "Behandlingen er låst for videre redigering"
+            "Behandlingen er låst for videre redigering ($status)"
+        }
+    }
+
+    fun validerBehandlingIkkeErAvsluttet(behandling: Behandling) {
+        validerBehandlingIkkeErAvsluttet(behandling.status)
+    }
+
+    fun validerBehandlingIkkeErAvsluttet(status: BehandlingStatus) {
+        feilHvis(status == BehandlingStatus.AVSLUTTET) {
+            "Behandlingen er avsluttet ($status)"
         }
     }
 }
