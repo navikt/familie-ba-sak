@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
-import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.SATSENDRING
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -69,10 +68,14 @@ class BehandlingsresultatSteg(
 
         if (behandling.opprettetÅrsak == BehandlingÅrsak.SATSENDRING) {
             val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
-            val forrigeAndelerTilkjentYtelse = if (forrigeBehandling != null) andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = forrigeBehandling.id) else throw FunksjonellFeil("Kan ikke kjøre satsendring når det ikke finnes en tidligere behandling på fagsaken")
+            val andelerFraForrigeBehandling = if (forrigeBehandling != null) {
+                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = forrigeBehandling.id)
+            } else {
+                throw FunksjonellFeil("Kan ikke kjøre satsendring når det ikke finnes en tidligere behandling på fagsaken")
+            }
 
             validerAtSatsendringKunOppdatererSatsPåEksisterendePerioder(
-                forrigeAndelerTilkjentYtelse = forrigeAndelerTilkjentYtelse,
+                forrigeAndelerTilkjentYtelse = andelerFraForrigeBehandling,
                 andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.toList(),
             )
         }
