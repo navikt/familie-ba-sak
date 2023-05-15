@@ -16,4 +16,14 @@ interface VedtaksperiodeRepository : JpaRepository<VedtaksperiodeMedBegrunnelser
 
     @Query("SELECT vp FROM Vedtaksperiode vp JOIN vp.vedtak v WHERE v.id = :vedtakId")
     fun finnVedtaksperioderFor(vedtakId: Long): List<VedtaksperiodeMedBegrunnelser>
+
+    @Query(
+        """SELECT v.fk_behandling_id 
+           FROM vedtaksperiode vp 
+           JOIN vedtak v ON v.id = vp.fk_vedtak_id 
+           WHERE vp.id = :vedtaksperiodeId
+        """,
+        nativeQuery = true,
+    )
+    fun finnBehandlingIdForVedtaksperiode(vedtaksperiodeId: Long): Long
 }
