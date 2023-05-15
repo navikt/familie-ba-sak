@@ -20,13 +20,13 @@ data class BarnetrygdTilPensjon(
 data class BarnetrygdPeriode(
     val personIdent: String,
     val delingsprosentYtelse: Int,
-    val ytelseType: YtelseType?,
+    val ytelseTypeEkstern: YtelseTypeEkstern?,
     val utbetaltPerMnd: Int,
     val stønadFom: YearMonth,
     val stønadTom: YearMonth
 )
 
-enum class YtelseType {
+enum class YtelseTypeEkstern {
     ORDINÆR_BARNETRYGD,
     UTVIDET_BARNETRYGD,
     SMÅBARNSTILLEGG

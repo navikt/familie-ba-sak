@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -21,19 +22,19 @@ class PensjonService(
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val personidentService: PersonidentService,
     private val vedtakService: VedtakService,
-    private val tilkjentYtelseRepository: TilkjentYtelseRepository
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
 ) {
     fun hentBarnetrygd(personIdent: String, fraDato: LocalDate): List<BarnetrygdTilPensjon> {
-        val barnetrygdTilPensjon = hentBarnetrygdTilPensjon(personIdent, fraDato)
+        val barnetrygdTilPensjon = hentBarnetrygdTilPensjon(personIdent, fraDato) ?: return emptyList()
 
         // Sjekk om det finnes relaterte saker, dvs om barna finnes i andre behandlinger
 
-        val barnetrygdMedRelaterteSaker = barnetrygdTilPensjon?.barnetrygdPerioder
-            ?.filter { it.personIdent != barnetrygdTilPensjon.fagsakEiersIdent }
-            ?.map { barnetrygdPeriode -> hentBarnetrygdForRelatertPersonTilPensjon(barnetrygdPeriode.personIdent, fraDato) }
-            ?.flatten()
-        return barnetrygdMedRelaterteSaker?.plus(barnetrygdTilPensjon)
-            ?.toSet()?.toList() ?: emptyList()
+        val barnetrygdMedRelaterteSaker = barnetrygdTilPensjon.barnetrygdPerioder
+            .map { it.personIdent }.distinct()
+            .filter { it != barnetrygdTilPensjon.fagsakEiersIdent }
+            .map { hentBarnetrygdForRelatertPersonTilPensjon(it, fraDato) }
+            .flatten()
+        return barnetrygdMedRelaterteSaker.plus(barnetrygdTilPensjon).distinct()
     }
     private fun hentBarnetrygdForRelatertPersonTilPensjon(personIdent: String, fraDato: LocalDate): List<BarnetrygdTilPensjon> {
         val aktør = personidentService.hentAktør(personIdent)
@@ -54,10 +55,6 @@ class PensjonService(
         }
         logger.info("Henter perioder med barnetrygd til pensjon for fagsakId=${fagsak.id}, behandlingId=${behandling.id}")
 
-        val vedtak = vedtakService.hentAktivForBehandling(behandling.id)
-
-        var datoVedtak = vedtak?.vedtaksdato
-
         val perioder = hentPerioder(behandling, fraDato)
 
         return BarnetrygdTilPensjon(
@@ -69,31 +66,29 @@ class PensjonService(
 
     private fun hentPerioder(
         behandling: Behandling,
-        fraDato: LocalDate
+        fraDato: LocalDate,
     ): List<BarnetrygdPeriode> {
-        val perioder =
-            tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandling.id)?.andelerTilkjentYtelse
-                ?.filter {
-                    it.stønadTom.isSameOrAfter(fraDato.toYearMonth())
-                }
-                ?.map {
-                    BarnetrygdPeriode(
-                        ytelseType = it.type.tilPensjonYtelsesType(),
-                        personIdent = it.aktør.aktivFødselsnummer(),
-                        stønadFom = it.stønadFom,
-                        stønadTom = it.stønadTom,
-                        utbetaltPerMnd = it.kalkulertUtbetalingsbeløp,
-                        delingsprosentYtelse = it.prosent.toInt()
-                    )
-                } ?: emptyList()
-        return perioder
+        val tilkjentYtelse = tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(behandling.id)
+            ?: error("Finner ikke tilkjent ytelse for behandling=${behandling.id}")
+        return tilkjentYtelse.andelerTilkjentYtelse
+            .filter { it.stønadTom.isSameOrAfter(fraDato.toYearMonth()) }
+            .map {
+                BarnetrygdPeriode(
+                    ytelseTypeEkstern = it.type.tilPensjonYtelsesType(),
+                    personIdent = it.aktør.aktivFødselsnummer(),
+                    stønadFom = it.stønadFom,
+                    stønadTom = it.stønadTom,
+                    utbetaltPerMnd = it.kalkulertUtbetalingsbeløp,
+                    delingsprosentYtelse = it.prosent.toInt(),
+                )
+            }
     }
 
-    fun no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.tilPensjonYtelsesType(): YtelseType {
+    fun YtelseType.tilPensjonYtelsesType(): YtelseTypeEkstern {
         return when (this) {
-            no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.ORDINÆR_BARNETRYGD -> YtelseType.ORDINÆR_BARNETRYGD
-            no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.SMÅBARNSTILLEGG -> YtelseType.SMÅBARNSTILLEGG
-            no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.UTVIDET_BARNETRYGD -> YtelseType.UTVIDET_BARNETRYGD
+            YtelseType.ORDINÆR_BARNETRYGD -> YtelseTypeEkstern.ORDINÆR_BARNETRYGD
+            YtelseType.SMÅBARNSTILLEGG -> YtelseTypeEkstern.SMÅBARNSTILLEGG
+            YtelseType.UTVIDET_BARNETRYGD -> YtelseTypeEkstern.UTVIDET_BARNETRYGD
         }
     }
     companion object {
