@@ -1,12 +1,15 @@
 package no.nav.familie.ba.sak.kjerne.eøs.utenlandskperiodebeløp
 
 import jakarta.validation.Valid
+import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilUtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
+import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
@@ -24,6 +27,7 @@ import org.springframework.web.bind.annotation.RestController
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class UtenlandskPeriodebeløpController(
+    private val tilgangService: TilgangService,
     private val utenlandskPeriodebeløpService: UtenlandskPeriodebeløpService,
     private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository,
     private val personidentService: PersonidentService,
@@ -35,6 +39,12 @@ class UtenlandskPeriodebeløpController(
         @Valid @RequestBody
         restUtenlandskPeriodebeløp: RestUtenlandskPeriodebeløp,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+            handling = "Oppdaterer utenlandsk periodebeløp",
+        )
+
         val barnAktører = restUtenlandskPeriodebeløp.barnIdenter.map { personidentService.hentAktør(it) }
 
         val eksisterendeUtenlandskPeriodeBeløp = utenlandskPeriodebeløpRepository.getById(restUtenlandskPeriodebeløp.id)
@@ -53,6 +63,12 @@ class UtenlandskPeriodebeløpController(
         @PathVariable behandlingId: Long,
         @PathVariable utenlandskPeriodebeløpId: Long,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.DELETE)
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+            handling = "Sletter utenlandsk periodebeløp",
+        )
+
         utenlandskPeriodebeløpService.slettUtenlandskPeriodebeløp(utenlandskPeriodebeløpId)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))

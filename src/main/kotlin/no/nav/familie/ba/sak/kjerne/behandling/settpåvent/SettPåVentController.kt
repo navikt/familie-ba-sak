@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.behandling.settpåvent
 
+import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSettPåVent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
@@ -28,6 +29,7 @@ class SettPåVentController(
         @PathVariable behandlingId: Long,
         @RequestBody restSettPåVent: RestSettPåVent,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Sett behandling på vent",
@@ -42,6 +44,7 @@ class SettPåVentController(
         @PathVariable behandlingId: Long,
         @RequestBody restSettPåVent: RestSettPåVent,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Sett behandling på vent",
@@ -53,6 +56,7 @@ class SettPåVentController(
 
     @PutMapping(path = ["{behandlingId}/fortsettbehandling"])
     fun gjenopptaBehandling(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Sett behandling på vent",

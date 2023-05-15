@@ -1,9 +1,12 @@
 package no.nav.familie.ba.sak.kjerne.småbarnstilleggkorrigering
 
 import io.swagger.v3.oas.annotations.media.Schema
+import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
+import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
+import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
@@ -22,6 +25,7 @@ import java.time.YearMonth
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class SmåbarnstilleggController(
+    private val tilgangService: TilgangService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val småbarnstilleggKorrigeringService: SmåbarnstilleggKorrigeringService,
     private val utvidetBehandlingService: UtvidetBehandlingService,
@@ -31,6 +35,11 @@ class SmåbarnstilleggController(
         @PathVariable behandlingId: Long,
         @RequestBody småbarnstilleggKorrigeringRequest: SmåbarnstilleggKorrigeringRequest,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+            handling = "Legger til småbarnstillegg",
+        )
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 
         småbarnstilleggKorrigeringService.leggTilSmåbarnstilleggPåBehandling(småbarnstilleggKorrigeringRequest.årMåned, behandling)
@@ -43,6 +52,11 @@ class SmåbarnstilleggController(
         @PathVariable behandlingId: Long,
         @RequestBody småBarnstilleggKorrigeringRequest: SmåbarnstilleggKorrigeringRequest,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.DELETE)
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+            handling = "Fjerner småbarnstillegg",
+        )
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 
         småbarnstilleggKorrigeringService.fjernSmåbarnstilleggPåBehandling(småBarnstilleggKorrigeringRequest.årMåned, behandling)
