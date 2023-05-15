@@ -44,11 +44,11 @@ fun hentBarnasAndeler(andeler: List<AndelTilkjentYtelse>, barna: List<Person>) =
 object TilkjentYtelseValidering {
 
     internal fun validerAtSatsendringKunOppdatererSatsPåEksisterendePerioder(
-        forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+        andelerFraForrigeBehandling: List<AndelTilkjentYtelse>,
         andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
     ) {
         val andelerGruppert = andelerTilkjentYtelse.groupBy { Pair(it.aktør, it.type) }
-        val forrigeAndelerGruppert = forrigeAndelerTilkjentYtelse.groupBy { Pair(it.aktør, it.type) }
+        val forrigeAndelerGruppert = andelerFraForrigeBehandling.groupBy { Pair(it.aktør, it.type) }
 
         (andelerGruppert.keys + forrigeAndelerGruppert.keys).distinct().forEach {
             val nåværendeTidslinje = AndelTilkjentYtelseTidslinje(andelerGruppert[it] ?: emptyList())

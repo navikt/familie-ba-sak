@@ -249,7 +249,7 @@ class TilkjentYtelseValideringTest {
 
         assertThrows<Feil> {
             TilkjentYtelseValidering.validerAtSatsendringKunOppdatererSatsPåEksisterendePerioder(
-                forrigeAndelerTilkjentYtelse = forrigeAndeler,
+                andelerFraForrigeBehandling = forrigeAndeler,
                 andelerTilkjentYtelse = nåværendeAndeler,
             )
         }
@@ -280,7 +280,7 @@ class TilkjentYtelseValideringTest {
 
         assertThrows<Feil> {
             TilkjentYtelseValidering.validerAtSatsendringKunOppdatererSatsPåEksisterendePerioder(
-                forrigeAndelerTilkjentYtelse = forrigeAndeler,
+                andelerFraForrigeBehandling = forrigeAndeler,
                 andelerTilkjentYtelse = nåværendeAndeler,
             )
         }
@@ -318,7 +318,7 @@ class TilkjentYtelseValideringTest {
 
         assertDoesNotThrow {
             TilkjentYtelseValidering.validerAtSatsendringKunOppdatererSatsPåEksisterendePerioder(
-                forrigeAndelerTilkjentYtelse = forrigeAndeler,
+                andelerFraForrigeBehandling = forrigeAndeler,
                 andelerTilkjentYtelse = nåværendeAndeler,
             )
         }
@@ -348,7 +348,7 @@ class TilkjentYtelseValideringTest {
 
         assertThrows<Feil> {
             TilkjentYtelseValidering.validerAtSatsendringKunOppdatererSatsPåEksisterendePerioder(
-                forrigeAndelerTilkjentYtelse = forrigeAndeler,
+                andelerFraForrigeBehandling = forrigeAndeler,
                 andelerTilkjentYtelse = nåværendeAndeler,
             )
         }
@@ -378,7 +378,7 @@ class TilkjentYtelseValideringTest {
 
         assertThrows<Feil> {
             TilkjentYtelseValidering.validerAtSatsendringKunOppdatererSatsPåEksisterendePerioder(
-                forrigeAndelerTilkjentYtelse = forrigeAndeler,
+                andelerFraForrigeBehandling = forrigeAndeler,
                 andelerTilkjentYtelse = nåværendeAndeler,
             )
         }
