@@ -47,30 +47,27 @@ object TilkjentYtelseValidering {
         forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
         andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
     ) {
-        val allePersonerMedAndeler =
-            (andelerTilkjentYtelse.map { it.aktør } + forrigeAndelerTilkjentYtelse.map { it.aktør }).distinct()
+        val andelerGruppert = andelerTilkjentYtelse.groupBy { Pair(it.aktør, it.type) }
+        val forrigeAndelerGruppert = forrigeAndelerTilkjentYtelse.groupBy { Pair(it.aktør, it.type) }
 
-        allePersonerMedAndeler.flatMap { aktør ->
-            val ytelseTyperForPerson =
-                (andelerTilkjentYtelse.map { it.type } + forrigeAndelerTilkjentYtelse.map { it.type }).distinct()
-
-            ytelseTyperForPerson.map { ytelseType ->
-                val forrigeTidslinje =
-                    AndelTilkjentYtelseTidslinje(forrigeAndelerTilkjentYtelse.filter { it.type == ytelseType && it.aktør == aktør })
-                val nåværendeTidslinje =
-                    AndelTilkjentYtelseTidslinje(andelerTilkjentYtelse.filter { it.type == ytelseType && it.aktør == aktør })
-
-                forrigeTidslinje.kombinerMed(nåværendeTidslinje) { forrigeAndel, nåværendeAndel ->
-                    when {
-                        forrigeAndel == null && nåværendeAndel != null -> throw Feil("Satsendring kan ikke legge til en andel som ikke var der i forrige behandling")
-                        forrigeAndel != null && nåværendeAndel == null -> throw Feil("Satsendring kan ikke fjerne en andel som fantes i forrige behandling")
-                        forrigeAndel != null && nåværendeAndel != null -> if (forrigeAndel.prosent != nåværendeAndel.prosent) throw Feil("Satsendring kan ikke endre på prosenten til en andel") else false
-                        else -> false
-                    }
-                }.perioder()
-            }
+        (andelerGruppert.keys + forrigeAndelerGruppert.keys).distinct().forEach {
+            val nåværendeTidslinje = AndelTilkjentYtelseTidslinje(andelerGruppert[it] ?: emptyList())
+            val forrigeTidslinje = AndelTilkjentYtelseTidslinje(forrigeAndelerGruppert[it] ?: emptyList())
+            validerTidslinjer(forrigeTidslinje, nåværendeTidslinje)
         }
     }
+
+    private fun validerTidslinjer(
+        forrigeAndelerTidslinje: AndelTilkjentYtelseTidslinje,
+        nåværendeAndelerTidslinje: AndelTilkjentYtelseTidslinje,
+    ) = forrigeAndelerTidslinje.kombinerMed(nåværendeAndelerTidslinje) { forrigeAndel, nåværendeAndel ->
+        when {
+            forrigeAndel == null && nåværendeAndel != null -> throw Feil("Satsendring kan ikke legge til en andel som ikke var der i forrige behandling")
+            forrigeAndel != null && nåværendeAndel == null -> throw Feil("Satsendring kan ikke fjerne en andel som fantes i forrige behandling")
+            forrigeAndel != null && nåværendeAndel != null -> if (forrigeAndel.prosent != nåværendeAndel.prosent) throw Feil("Satsendring kan ikke endre på prosenten til en andel") else false
+            else -> false
+        }
+    }.perioder() // Må kalle på .perioder() for at feilene faktisk skal bli kastet
 
     fun finnAktørIderMedUgyldigEtterbetalingsperiode(
         forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
