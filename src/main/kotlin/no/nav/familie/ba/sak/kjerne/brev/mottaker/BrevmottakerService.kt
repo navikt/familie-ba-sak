@@ -112,7 +112,6 @@ class BrevmottakerService(
             }
         }.flatten()
 
-    // burde denne ta i bruk aktør?
     fun hentMottakerNavn(personIdent: String): String {
         val aktør = personidentService.hentAktør(personIdent)
         return personopplysningerService.hentPersoninfoNavnOgAdresse(aktør).let {
