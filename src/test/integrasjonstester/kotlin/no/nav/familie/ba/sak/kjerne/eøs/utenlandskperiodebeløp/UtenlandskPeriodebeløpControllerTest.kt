@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestUtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -90,4 +91,7 @@ class TestConfig {
 
     @Bean
     fun utvidetBehandlingService(): UtvidetBehandlingService = mockk(relaxed = true)
+
+    @Bean
+    fun tilgangService(): TilgangService = mockk(relaxed = true)
 }
