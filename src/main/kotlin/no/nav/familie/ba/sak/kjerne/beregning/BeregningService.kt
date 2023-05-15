@@ -204,7 +204,7 @@ class BeregningService(
             val andelerFraForrigeBehandling = if (forrigeBehandling != null) andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = forrigeBehandling.id) else throw FunksjonellFeil("Kan ikke kjøre satsendring når det ikke finnes en tidligere behandling på fagsaken")
 
             TilkjentYtelseSatsendringUtils.beregnTilkjentYtelseMedNySatsForSatsendring(
-                forrigeAndelerTilkjentYtelse = andelerFraForrigeBehandling,
+                andelerFraForrigeBehandling = andelerFraForrigeBehandling,
                 behandling = behandling,
                 personopplysningGrunnlag = personopplysningGrunnlag,
             )

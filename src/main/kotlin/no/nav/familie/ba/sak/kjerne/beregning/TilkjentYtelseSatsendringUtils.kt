@@ -19,7 +19,7 @@ import java.time.LocalDate
 object TilkjentYtelseSatsendringUtils {
 
     internal fun beregnTilkjentYtelseMedNySatsForSatsendring(
-        forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+        andelerFraForrigeBehandling: List<AndelTilkjentYtelse>,
         behandling: Behandling,
         personopplysningGrunnlag: PersonopplysningGrunnlag,
     ): TilkjentYtelse {
@@ -29,7 +29,7 @@ object TilkjentYtelseSatsendringUtils {
             endretDato = LocalDate.now(),
         )
 
-        val tidlinjerMedForrigeAndelerPerPersonOgType = forrigeAndelerTilkjentYtelse.tilTidslinjerPerPersonOgType()
+        val tidlinjerMedForrigeAndelerPerPersonOgType = andelerFraForrigeBehandling.tilTidslinjerPerPersonOgType()
 
         val nyeAndeler = tidlinjerMedForrigeAndelerPerPersonOgType.flatMap { (aktørOgYtelse, tidlinje) ->
             tidlinje.lagAndelerMedNySatsForPersonOgYtelsetype(

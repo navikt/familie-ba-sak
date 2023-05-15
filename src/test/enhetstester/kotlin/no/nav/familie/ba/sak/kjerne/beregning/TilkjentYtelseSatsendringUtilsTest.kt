@@ -66,7 +66,7 @@ class TilkjentYtelseSatsendringUtilsTest {
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(satsendringsbehandling.id, søker, barnOver6, barnUnder6)
 
         val nyTilkjentYtelse = TilkjentYtelseSatsendringUtils.beregnTilkjentYtelseMedNySatsForSatsendring(
-            forrigeAndelerTilkjentYtelse = forrigeAndeler,
+            andelerFraForrigeBehandling = forrigeAndeler,
             behandling = satsendringsbehandling,
             personopplysningGrunnlag = personopplysningGrunnlag,
         )
