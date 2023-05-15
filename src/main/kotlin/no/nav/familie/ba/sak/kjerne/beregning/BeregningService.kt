@@ -201,7 +201,11 @@ class BeregningService(
 
         val tilkjentYtelse = if (behandling.opprettetÅrsak == BehandlingÅrsak.SATSENDRING && featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_KUN_OPPDATERE_SATS)) {
             val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
-            val andelerFraForrigeBehandling = if (forrigeBehandling != null) andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = forrigeBehandling.id) else throw FunksjonellFeil("Kan ikke kjøre satsendring når det ikke finnes en tidligere behandling på fagsaken")
+            val andelerFraForrigeBehandling = if (forrigeBehandling != null) {
+                andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = forrigeBehandling.id)
+            } else {
+                throw FunksjonellFeil("Kan ikke kjøre satsendring når det ikke finnes en tidligere behandling på fagsaken")
+            }
 
             TilkjentYtelseSatsendringUtils.beregnTilkjentYtelseMedNySatsForSatsendring(
                 andelerFraForrigeBehandling = andelerFraForrigeBehandling,
