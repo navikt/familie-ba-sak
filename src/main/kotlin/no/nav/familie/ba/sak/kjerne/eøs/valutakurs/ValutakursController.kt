@@ -74,6 +74,7 @@ class ValutakursController(
         )
 
         validerBehandlingKanRedigeres(behandlingHentOgPersisterService.hentStatus(behandlingId))
+
         valutakursService.slettValutakurs(BehandlingId(behandlingId), valutakursId)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))

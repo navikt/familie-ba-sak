@@ -39,19 +39,6 @@ class BrevmottakerService(
     }
 
     @Transactional
-    fun oppdaterBrevmottaker(restBrevmottaker: RestBrevmottaker, id: Long) {
-        brevmottakerRepository.findById(id).orElseThrow { Feil("Finner ikke brevmottaker med id=$id") }.apply {
-            type = restBrevmottaker.type
-            navn = restBrevmottaker.navn
-            adresselinje1 = restBrevmottaker.adresselinje1
-            adresselinje2 = restBrevmottaker.adresselinje2
-            postnummer = restBrevmottaker.postnummer
-            poststed = restBrevmottaker.poststed
-            landkode = restBrevmottaker.landkode
-        }
-    }
-
-    @Transactional
     fun fjernBrevmottaker(id: Long) {
         val brevmottaker =
             brevmottakerRepository.findByIdOrNull(id) ?: throw Feil("Finner ikke brevmottaker med id=$id")

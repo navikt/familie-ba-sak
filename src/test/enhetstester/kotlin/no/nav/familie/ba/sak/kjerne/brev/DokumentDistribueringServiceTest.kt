@@ -20,7 +20,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.client.RestClientResponseException
 
 @ExtendWith(MockKExtension::class)
-internal class DokumentDistribueringServiceEnhetstest {
+internal class DokumentDistribueringServiceTest {
 
     @MockK(relaxed = true)
     private lateinit var taskService: TaskService

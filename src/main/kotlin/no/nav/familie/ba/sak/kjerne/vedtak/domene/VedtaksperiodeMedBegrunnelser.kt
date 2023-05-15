@@ -191,7 +191,9 @@ fun VedtaksperiodeMedBegrunnelser.hentUtbetalingsperiodeDetaljerNy(
     val utbetalingsperiodeDetaljer = andelerTilkjentYtelse.tilUtbetalingerTidslinje(personopplysningGrunnlag)
 
     return when (this.type) {
-        Vedtaksperiodetype.OPPHØR -> emptyList()
+        Vedtaksperiodetype.AVSLAG,
+        Vedtaksperiodetype.OPPHØR,
+        -> emptyList()
 
         Vedtaksperiodetype.FORTSATT_INNVILGET -> {
             val løpendeUtbetalingsperiode = utbetalingsperiodeDetaljer.perioder()
@@ -204,7 +206,6 @@ fun VedtaksperiodeMedBegrunnelser.hentUtbetalingsperiodeDetaljerNy(
 
         Vedtaksperiodetype.UTBETALING,
         Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING,
-        Vedtaksperiodetype.AVSLAG,
         Vedtaksperiodetype.ENDRET_UTBETALING,
         -> {
             val utbetalingsperioderRelevantForVedtaksperiode =

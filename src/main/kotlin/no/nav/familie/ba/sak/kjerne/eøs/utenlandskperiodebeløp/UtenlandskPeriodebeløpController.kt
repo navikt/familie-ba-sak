@@ -72,8 +72,8 @@ class UtenlandskPeriodebeløpController(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Sletter utenlandsk periodebeløp",
         )
-
         validerBehandlingKanRedigeres(behandlingHentOgPersisterService.hentStatus(behandlingId))
+
         utenlandskPeriodebeløpService.slettUtenlandskPeriodebeløp(BehandlingId(behandlingId), utenlandskPeriodebeløpId)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
