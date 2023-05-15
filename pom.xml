@@ -29,7 +29,7 @@
         <familie.kontrakter.saksstatistikk>2.0_20220216121145_5a268ac</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20230223155122_2e81c44</familie.kontrakter.stønadsstatistikk>
         <familie.kontrakter.skatteetaten>2.0_20210920094114_9c74239</familie.kontrakter.skatteetaten>
-        <cucumber.version>7.11.2</cucumber.version>
+        <cucumber.version>7.12.0</cucumber.version>
         <mockk.version>1.13.5</mockk.version>
         <wiremock.version>2.35.0</wiremock.version>
         <token-validation-spring.version>3.0.11</token-validation-spring.version>
@@ -47,7 +47,7 @@
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
         <testcontainers.postgresql.version>1.18.1</testcontainers.postgresql.version>
         <unleash.version>7.1.0</unleash.version>
-        <maven.model.version>3.9.1</maven.model.version>
+        <maven.model.version>3.9.2</maven.model.version>
         <jackson.module.kotlin.version>2.15.0</jackson.module.kotlin.version>
         <token-validation-test-support.version>2.0.5</token-validation-test-support.version>
         <fpsak-tidslinje.version>2.6.7</fpsak-tidslinje.version>
