@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta
 
-import no.nav.familie.ba.sak.common.BehandlingValidering.validerBehandlingKanRedigeres
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFeilutbetaltValuta
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
