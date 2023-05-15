@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.tilfeldigPerson
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import org.junit.jupiter.api.Assertions
@@ -286,7 +287,7 @@ class TilkjentYtelseValideringTest {
     }
 
     @Test
-    fun `Skal kaste ikke kaste feil hvis det eneste som er gjort er å oppdatere sats`() {
+    fun `Skal ikke kaste feil hvis det eneste som er gjort er å oppdatere sats`() {
         val person = lagPerson(type = PersonType.BARN)
         val forrigeAndeler = listOf(
             lagAndelTilkjentYtelse(
@@ -316,6 +317,66 @@ class TilkjentYtelseValideringTest {
         )
 
         assertDoesNotThrow {
+            TilkjentYtelseValidering.validerAtSatsendringKunOppdatererSatsPåEksisterendePerioder(
+                forrigeAndelerTilkjentYtelse = forrigeAndeler,
+                andelerTilkjentYtelse = nåværendeAndeler,
+            )
+        }
+    }
+
+    @Test
+    fun `Skal kaste feil hvis det ikke eksisterte andeler forrige gang men gjør det nå`() {
+        val person = lagPerson(type = PersonType.BARN)
+        val forrigeAndeler = emptyList<AndelTilkjentYtelse>()
+
+        val nåværendeAndeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(2022, 1),
+                tom = YearMonth.of(2023, 2),
+                beløp = 1054,
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                aktør = person.aktør,
+            ),
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(2023, 3),
+                tom = YearMonth.of(2023, 5),
+                beløp = 1083,
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                aktør = person.aktør,
+            ),
+        )
+
+        assertThrows<Feil> {
+            TilkjentYtelseValidering.validerAtSatsendringKunOppdatererSatsPåEksisterendePerioder(
+                forrigeAndelerTilkjentYtelse = forrigeAndeler,
+                andelerTilkjentYtelse = nåværendeAndeler,
+            )
+        }
+    }
+
+    @Test
+    fun `Skal kaste feil hvis det eksisterte andeler forrige gang men ikke gjør det nå`() {
+        val person = lagPerson(type = PersonType.BARN)
+        val nåværendeAndeler = emptyList<AndelTilkjentYtelse>()
+
+        val forrigeAndeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(2022, 1),
+                tom = YearMonth.of(2023, 2),
+                beløp = 1054,
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                aktør = person.aktør,
+            ),
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(2023, 3),
+                tom = YearMonth.of(2023, 5),
+                beløp = 1083,
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                aktør = person.aktør,
+            ),
+        )
+
+        assertThrows<Feil> {
             TilkjentYtelseValidering.validerAtSatsendringKunOppdatererSatsPåEksisterendePerioder(
                 forrigeAndelerTilkjentYtelse = forrigeAndeler,
                 andelerTilkjentYtelse = nåværendeAndeler,
