@@ -185,7 +185,6 @@ class StartSatsendring(
             SatsendringSvar.SATSENDRING_ER_ALLEREDE_UTFØRT ->
                 throw FunksjonellFeil("Satsendring er allerede gjennomført på fagsaken. Last inn siden på nytt for å få opp siste behandling.")
 
-            SatsendringSvar.HAR_ALLEREDE_SISTE_SATS,
             SatsendringSvar.BEHANDLING_ER_LÅST_SATSENDRING_TRIGGES_NESTE_VIRKEDAG,
             SatsendringSvar.TILBAKESTILLER_BEHANDLINGEN_TIL_VILKÅRSVURDERINGEN,
             SatsendringSvar.BEHANDLINGEN_ER_UNDER_UTREDNING_MEN_I_RIKTIG_TILSTAND,
