@@ -25,11 +25,10 @@ fun validerBehandlingKanSettesPåVent(
         )
     }
 
-    // Burde denne validere at den kun har status utredes?
-    if (behandling.status == BehandlingStatus.AVSLUTTET) {
+    if (behandling.status != BehandlingStatus.UTREDES) {
         throw FunksjonellFeil(
-            melding = "Behandling ${behandling.id} er avsluttet og kan ikke settes på vent.",
-            frontendFeilmelding = "Kan ikke sette en avsluttet behandling på vent.",
+            melding = "Behandling ${behandling.id} har status=${behandling.status} og kan ikke settes på vent.",
+            frontendFeilmelding = "Kan ikke sette en behandling som har status ${behandling.status} på vent",
         )
     }
 
