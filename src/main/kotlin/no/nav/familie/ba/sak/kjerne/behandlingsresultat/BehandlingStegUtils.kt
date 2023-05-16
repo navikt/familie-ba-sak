@@ -21,7 +21,8 @@ fun Tidslinje<Boolean, Måned>.kastFeilVedEndringEtter(
         BehandlingsresultatSteg.logger.warn("Feil i behandling $behandling.\n\nEndring i måned ${endringIUtbetalingEtterDato.first { it.innhold == true }.fraOgMed.tilYearMonth()}.")
         throw FunksjonellFeil(
             "Det finnes endringer i behandlingen som har økonomisk konsekvens for bruker." +
-                "Det skal ikke skje for endre migreringsdatobehandlinger."
+                "Det skal ikke skje for endre migreringsdatobehandlinger." +
+                "Endringer må gjøres i en separat behandling."
         )
     }
 }
