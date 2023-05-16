@@ -23,7 +23,7 @@ class PensjonConfig(
             val clientNavn = oidcUtil.getClaim("azp_name")
             val erKallerPensjon = clientNavn.contains("popp")
             val harForvalterRolle = SikkerhetContext.harInnloggetBrukerForvalterRolle(rolleConfig)
-            val erPensjonRequest = request.requestURI.startsWith("/api/pensjon")
+            val erPensjonRequest = request.requestURI.startsWith("/api/ekstern/pensjon")
 
             when {
                 erKallerPensjon && !erPensjonRequest -> {

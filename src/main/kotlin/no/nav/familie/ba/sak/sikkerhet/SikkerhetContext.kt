@@ -22,7 +22,7 @@ object SikkerhetContext {
     }
 
     fun harInnloggetBrukerForvalterRolle(rolleConfig: RolleConfig): Boolean =
-        hentSaksbehandler() == SYSTEM_FORKORTELSE || hentGrupper().contains(rolleConfig.FORVALTER_ROLLE)
+        hentGrupper().contains(rolleConfig.FORVALTER_ROLLE)
 
     fun hentSaksbehandler(): String {
         return Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }

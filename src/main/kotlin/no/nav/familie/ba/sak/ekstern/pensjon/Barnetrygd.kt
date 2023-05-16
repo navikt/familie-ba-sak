@@ -23,11 +23,11 @@ data class BarnetrygdPeriode(
     val ytelseTypeEkstern: YtelseTypeEkstern?,
     val utbetaltPerMnd: Int,
     val stønadFom: YearMonth,
-    val stønadTom: YearMonth
+    val stønadTom: YearMonth,
 )
 
 enum class YtelseTypeEkstern {
     ORDINÆR_BARNETRYGD,
     UTVIDET_BARNETRYGD,
-    SMÅBARNSTILLEGG
+    SMÅBARNSTILLEGG,
 }
