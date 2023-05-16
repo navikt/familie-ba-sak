@@ -12,7 +12,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import org.junit.jupiter.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
@@ -73,10 +73,10 @@ class TilkjentYtelseSatsendringUtilsTest {
 
         val nyeAndeler = nyTilkjentYtelse.andelerTilkjentYtelse
 
-        Assertions.assertEquals(8, nyeAndeler.size)
+        assertThat(nyeAndeler).hasSize(8)
 
         val andelerPerAktørOgType = nyeAndeler.groupBy { Pair(it.aktør, it.type) }
-        andelerPerAktørOgType.map { (_, v) -> Assertions.assertEquals(2, v.size) }
+        andelerPerAktørOgType.map { (_, v) -> assertThat(v).hasSize(2) }
     }
 
     @Test
@@ -105,7 +105,7 @@ class TilkjentYtelseSatsendringUtilsTest {
             tilkjentYtelse = nyTilkjentYtelse,
         )
 
-        Assertions.assertEquals(2, nyeAndeler.size)
+        assertThat(nyeAndeler).hasSize(2)
         assertAndel(
             forventetAndel = ForventetAndel(
                 fom = YearMonth.of(2022, 5),
@@ -162,7 +162,7 @@ class TilkjentYtelseSatsendringUtilsTest {
             tilkjentYtelse = nyTilkjentYtelse,
         )
 
-        Assertions.assertEquals(2, nyeAndeler.size)
+        assertThat(nyeAndeler).hasSize(2)
         assertAndel(
             forventetAndel = ForventetAndel(
                 fom = YearMonth.of(2022, 5),
@@ -227,7 +227,7 @@ class TilkjentYtelseSatsendringUtilsTest {
             tilkjentYtelse = nyTilkjentYtelse,
         )
 
-        Assertions.assertEquals(3, nyeAndeler.size)
+        assertThat(nyeAndeler).hasSize(3)
         assertAndel(
             forventetAndel = ForventetAndel(
                 fom = YearMonth.of(2022, 2),
@@ -298,7 +298,7 @@ class TilkjentYtelseSatsendringUtilsTest {
             tilkjentYtelse = nyTilkjentYtelse,
         )
 
-        Assertions.assertEquals(2, nyeAndeler.size)
+        assertThat(nyeAndeler).hasSize(2)
         assertAndel(
             forventetAndel = ForventetAndel(
                 fom = YearMonth.of(2022, 5),
@@ -355,7 +355,7 @@ class TilkjentYtelseSatsendringUtilsTest {
             tilkjentYtelse = nyTilkjentYtelse,
         )
 
-        Assertions.assertEquals(2, nyeAndeler.size)
+        assertThat(nyeAndeler).hasSize(2)
         assertAndel(
             forventetAndel = ForventetAndel(
                 fom = YearMonth.of(2022, 5),
@@ -476,19 +476,19 @@ class TilkjentYtelseSatsendringUtilsTest {
             tilkjentYtelse = nyTilkjentYtelse,
         )
 
-        Assertions.assertEquals(0, nyeAndeler.size)
+        assertThat(nyeAndeler).isEmpty()
     }
 
     private fun assertAndel(forventetAndel: ForventetAndel, faktiskAndel: AndelTilkjentYtelse) {
-        Assertions.assertEquals(forventetAndel.fom, faktiskAndel.stønadFom)
-        Assertions.assertEquals(forventetAndel.tom, faktiskAndel.stønadTom)
-        Assertions.assertEquals(forventetAndel.ytelseType, faktiskAndel.type)
-        Assertions.assertEquals(forventetAndel.beløp, faktiskAndel.kalkulertUtbetalingsbeløp)
-        Assertions.assertEquals(forventetAndel.sats, faktiskAndel.sats)
-        Assertions.assertEquals(forventetAndel.prosent, faktiskAndel.prosent)
-        Assertions.assertEquals(forventetAndel.behandlingId, faktiskAndel.behandlingId)
-        Assertions.assertEquals(forventetAndel.tilkjentYtelse, faktiskAndel.tilkjentYtelse)
-        Assertions.assertEquals(forventetAndel.aktør, faktiskAndel.aktør)
+        assertThat(faktiskAndel.stønadFom).isEqualTo(forventetAndel.fom)
+        assertThat(faktiskAndel.stønadTom).isEqualTo(forventetAndel.tom)
+        assertThat(faktiskAndel.type).isEqualTo(forventetAndel.ytelseType)
+        assertThat(faktiskAndel.kalkulertUtbetalingsbeløp).isEqualTo(forventetAndel.beløp)
+        assertThat(faktiskAndel.sats).isEqualTo(forventetAndel.sats)
+        assertThat(faktiskAndel.prosent).isEqualTo(forventetAndel.prosent)
+        assertThat(faktiskAndel.behandlingId).isEqualTo(forventetAndel.behandlingId)
+        assertThat(faktiskAndel.tilkjentYtelse).isEqualTo(forventetAndel.tilkjentYtelse)
+        assertThat(faktiskAndel.aktør).isEqualTo(forventetAndel.aktør)
     }
 
     private data class ForventetAndel(
