@@ -218,7 +218,7 @@ class TilkjentYtelseValideringTest {
     }
 
     @Test
-    fun `Skal kaste feil for satsendring hvis person har fått fjernet andel som hadde utbetaling i forrige behandling`() {
+    fun `Skal kaste feil for satsendring hvis person har lagt til andel som ikke hadde utbetaling i forrige behandling`() {
         val person = lagPerson(type = PersonType.BARN)
         val forrigeAndeler = listOf(
             lagAndelTilkjentYtelse(
@@ -256,7 +256,7 @@ class TilkjentYtelseValideringTest {
     }
 
     @Test
-    fun `Skal kaste feil for satsendring hvis person har fått lagt til ny andel i periode som ikke hadde utbetaling før`() {
+    fun `Skal kaste feil for satsendring hvis person har fått fjernet andel i periode som hadde utbetaling før`() {
         val person = lagPerson(type = PersonType.BARN)
         val forrigeAndeler = listOf(
             lagAndelTilkjentYtelse(
@@ -357,7 +357,6 @@ class TilkjentYtelseValideringTest {
     @Test
     fun `Skal kaste feil hvis det eksisterte andeler forrige gang men ikke gjør det nå`() {
         val person = lagPerson(type = PersonType.BARN)
-        val nåværendeAndeler = emptyList<AndelTilkjentYtelse>()
 
         val forrigeAndeler = listOf(
             lagAndelTilkjentYtelse(
@@ -375,6 +374,8 @@ class TilkjentYtelseValideringTest {
                 aktør = person.aktør,
             ),
         )
+
+        val nåværendeAndeler = emptyList<AndelTilkjentYtelse>()
 
         assertThrows<Feil> {
             TilkjentYtelseValidering.validerAtSatsendringKunOppdatererSatsPåEksisterendePerioder(
