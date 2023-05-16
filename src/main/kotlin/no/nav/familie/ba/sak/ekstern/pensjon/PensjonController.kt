@@ -6,7 +6,6 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
-import no.nav.familie.ba.sak.common.toLocalDate
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.MediaType
@@ -35,7 +34,6 @@ class PensjonController(private val pensjonService: PensjonService) {
                    fagsakId:                unik id for fagsaken
                    fagsakEiersIdent:        Fnr for eier av fagsaken
                    barnetrygdPerioder:      Liste over perioder med barnetrygd
-                   kompetanseperioder:      Liste med kompetanseperioder som sier hvilket regelverk perioden er vurdert etter(kun EØS saker)
                    
                 """,
                 content = [
@@ -75,6 +73,6 @@ class PensjonController(private val pensjonService: PensjonService) {
         @RequestBody
         request: BarnetrygdTilPensjonRequest,
     ): ResponseEntity<BarnetrygdTilPensjonResponse> {
-        return ResponseEntity.ok(BarnetrygdTilPensjonResponse(pensjonService.hentBarnetrygd(request.ident, request.fom.toLocalDate())))
+        return ResponseEntity.ok(BarnetrygdTilPensjonResponse(pensjonService.hentBarnetrygd(request.ident, request.fraDato)))
     }
 }

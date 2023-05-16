@@ -1,8 +1,14 @@
 package no.nav.familie.ba.sak.ekstern.pensjon
 
+import io.swagger.v3.oas.annotations.media.Schema
+import java.time.LocalDate
 import java.time.YearMonth
 
-data class BarnetrygdTilPensjonRequest(val ident: String, val fom: YearMonth)
+data class BarnetrygdTilPensjonRequest(
+    val ident: String,
+    @Schema(implementation = String::class, example = "2020-12-01")
+    val fraDato: LocalDate,
+)
 
 /*
  * Finnes barna til personen det spørres på i flere fagsaker vil det være flere elementer i listen
