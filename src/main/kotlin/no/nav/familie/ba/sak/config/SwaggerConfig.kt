@@ -19,7 +19,7 @@ class SwaggerConfig(
     @Value("\${AZURE_OPENID_CONFIG_TOKEN_ENDPOINT}")
     val tokenUrl: String,
     @Value("\${API_SCOPE}")
-    val apiScope: String
+    val apiScope: String,
 ) {
 
     @Bean
@@ -52,8 +52,8 @@ class SwaggerConfig(
                     .authorizationCode(
                         OAuthFlow().authorizationUrl(authorizationUrl)
                             .tokenUrl(tokenUrl)
-                            .scopes(Scopes().addString(apiScope, "read,write"))
-                    )
+                            .scopes(Scopes().addString(apiScope, "read,write")),
+                    ),
             )
     }
 }
