@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestKompetanse
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilKompetanse
@@ -8,6 +9,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
+import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.HttpStatus
@@ -26,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class KompetanseController(
+    private val tilgangService: TilgangService,
     private val kompetanseService: KompetanseService,
     private val personidentService: PersonidentService,
     private val utvidetBehandlingService: UtvidetBehandlingService,
@@ -36,6 +40,12 @@ class KompetanseController(
         @PathVariable behandlingId: Long,
         @RequestBody restKompetanse: RestKompetanse,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+            handling = "Oppdaterer kompetanse",
+        )
+
         val barnAktører = restKompetanse.barnIdenter.map { personidentService.hentAktør(it) }
         val kompetanse = restKompetanse.tilKompetanse(barnAktører = barnAktører)
 
@@ -51,6 +61,11 @@ class KompetanseController(
         @PathVariable behandlingId: Long,
         @PathVariable kompetanseId: Long,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.DELETE)
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
+            handling = "Sletter kompetanse",
+        )
         kompetanseService.slettKompetanse(kompetanseId)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))

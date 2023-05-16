@@ -33,4 +33,7 @@ class VedtaksperiodeHentOgPersisterService(
 
     fun finnVedtaksperioderFor(vedtakId: Long): List<VedtaksperiodeMedBegrunnelser> =
         vedtaksperiodeRepository.finnVedtaksperioderFor(vedtakId)
+
+    fun finnBehandlingIdFor(vedtaksperiodeId: Long): Long =
+        vedtaksperiodeRepository.finnBehandlingIdForVedtaksperiode(vedtaksperiodeId)
 }
