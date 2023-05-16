@@ -173,8 +173,9 @@ fun hentTidligereUtbetaltIPeriode(periode: List<ØkonomiSimuleringPostering>): B
 
     val feilutbetaling = hentFeilutbetalingIPeriode(periode, false)
 
-    // Manuelle posteringer brukes for å justere hva som faktisk skal bli betalt ut i en periode
-    val sumManuellePosteringer = hentManuellPosteringIPeriode(periode)
+    // Manuelle posteringer brukes for å justere hva som faktisk skal bli betalt ut i en periode.
+    // Endrer fortegn da en negativ sum skal øke tidligere utbetalt og en positiv sum redusere tidligere utbetalt.
+    val sumManuellePosteringer = -hentManuellPosteringIPeriode(periode)
 
     return if (feilutbetaling < BigDecimal.ZERO) {
         -(sumNegativeYtelser - feilutbetaling)
@@ -191,7 +192,7 @@ fun hentManuellPosteringIPeriode(periode: List<ØkonomiSimuleringPostering>): Bi
 
     val manuellFeilutbetaling = hentManuellFeilutbetalingIPeriode(periode)
 
-    return -(sumManuellePosteringer - manuellFeilutbetaling)
+    return sumManuellePosteringer - manuellFeilutbetaling
 }
 
 private fun hentManuellFeilutbetalingIPeriode(periode: List<ØkonomiSimuleringPostering>) =

@@ -48,7 +48,7 @@ data class Personident(
         return """Personident(aktørId=${aktør.aktørId},
                         |aktiv=$aktiv
                         |gjelderTil=$gjelderTil)
-            """.trimMargin()
+        """.trimMargin()
     }
 
     override fun equals(other: Any?): Boolean {
