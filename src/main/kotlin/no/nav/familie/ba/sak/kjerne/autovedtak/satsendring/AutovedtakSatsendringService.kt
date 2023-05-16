@@ -140,7 +140,7 @@ class AutovedtakSatsendringService(
     private fun hentBrukerHarÅpenBehandlingSvar(
         aktivOgÅpenBehandling: Behandling,
     ): SatsendringSvar {
-        val brukerHarÅpenBehandlingSvar = if (aktivOgÅpenBehandling.status.erLåstMenIkkeAvsluttet()) {
+        val brukerHarÅpenBehandlingSvar = if (aktivOgÅpenBehandling.status != BehandlingStatus.UTREDES) {
             SatsendringSvar.BEHANDLING_ER_LÅST_SATSENDRING_TRIGGES_NESTE_VIRKEDAG
         } else if (aktivOgÅpenBehandling.steg.rekkefølge > StegType.VILKÅRSVURDERING.rekkefølge) {
             tilbakestillBehandlingService.tilbakestillBehandlingTilVilkårsvurdering(aktivOgÅpenBehandling)
