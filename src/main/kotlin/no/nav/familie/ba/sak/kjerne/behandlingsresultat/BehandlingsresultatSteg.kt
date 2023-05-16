@@ -66,7 +66,7 @@ class BehandlingsresultatSteg(
             personopplysningGrunnlag = personopplysningGrunnlag,
         )
 
-        if (behandling.opprettetÅrsak == BehandlingÅrsak.SATSENDRING) {
+        if (behandling.erSatsendring()) {
             val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
             val andelerFraForrigeBehandling = if (forrigeBehandling != null) {
                 andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = forrigeBehandling.id)

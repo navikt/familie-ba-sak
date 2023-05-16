@@ -12,7 +12,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
@@ -199,7 +198,7 @@ class BeregningService(
     ): TilkjentYtelse {
         tilkjentYtelseRepository.slettTilkjentYtelseFor(behandling)
 
-        val tilkjentYtelse = if (behandling.opprettetÅrsak == BehandlingÅrsak.SATSENDRING && featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_KUN_OPPDATERE_SATS)) {
+        val tilkjentYtelse = if (behandling.erSatsendring() && featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_KUN_OPPDATERE_SATS)) {
             val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
             val andelerFraForrigeBehandling = if (forrigeBehandling != null) {
                 andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = forrigeBehandling.id)
