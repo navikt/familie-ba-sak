@@ -12,14 +12,14 @@ import org.springframework.stereotype.Service
 class PersonopplysningGrunnlagForNyBehandlingService(
     private val personidentService: PersonidentService,
     private val beregningService: BeregningService,
-    private val persongrunnlagService: PersongrunnlagService
+    private val persongrunnlagService: PersongrunnlagService,
 ) {
 
     fun opprettPersonopplysningGrunnlag(
         behandling: Behandling,
         forrigeBehandlingSomErVedtatt: Behandling?,
         søkerIdent: String,
-        barnasIdenter: List<String>
+        barnasIdenter: List<String>,
     ) {
         val aktør = personidentService.hentOgLagreAktør(søkerIdent, true)
         val barnaAktør = personidentService.hentOgLagreAktørIder(barnasIdenter, true)
@@ -40,7 +40,7 @@ class PersonopplysningGrunnlagForNyBehandlingService(
             barnFraInneværendeBehandling = barnaAktør,
             barnFraForrigeBehandling = barnMedTilkjentYtelseIForrigeBehandling,
             behandling = behandling,
-            målform = målform
+            målform = målform,
         )
     }
 }

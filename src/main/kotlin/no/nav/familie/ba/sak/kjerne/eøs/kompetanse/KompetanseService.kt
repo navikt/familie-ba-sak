@@ -11,11 +11,11 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class KompetanseService(
     kompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse>,
-    endringsabonnenter: Collection<PeriodeOgBarnSkjemaEndringAbonnent<Kompetanse>>
+    endringsabonnenter: Collection<PeriodeOgBarnSkjemaEndringAbonnent<Kompetanse>>,
 ) {
     val skjemaService = PeriodeOgBarnSkjemaService(
         kompetanseRepository,
-        endringsabonnenter
+        endringsabonnenter,
     )
 
     fun hentKompetanser(behandlingId: BehandlingId) =

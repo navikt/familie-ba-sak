@@ -59,7 +59,7 @@ class PeriodeOffsetIntegrasjonTest(
     private val iverksettMotOppdrag: IverksettMotOppdrag,
 
     @Autowired
-    private val featureToggleService: FeatureToggleService
+    private val featureToggleService: FeatureToggleService,
 
 ) : AbstractSpringIntegrationTest() {
 
@@ -88,7 +88,7 @@ class PeriodeOffsetIntegrasjonTest(
                 fnr,
                 listOf(barnFnr),
                 søkerAktør = fagsak.aktør,
-                barnAktør = barnAktør
+                barnAktør = barnAktør,
             )
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
@@ -115,8 +115,8 @@ class PeriodeOffsetIntegrasjonTest(
                     behandlingsId = behandling.id,
                     vedtaksId = vedtak.id,
                     saksbehandlerId = "ansvarligSaksbehandler",
-                    personIdent = fagsak.aktør.aktivFødselsnummer()
-                )
+                    personIdent = fagsak.aktør.aktivFødselsnummer(),
+                ),
             )
         }
 
@@ -152,7 +152,7 @@ class PeriodeOffsetIntegrasjonTest(
                 fnr,
                 listOf(barnFnr),
                 søkerAktør = fagsak.aktør,
-                barnAktør = barnAktør
+                barnAktør = barnAktør,
             )
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
@@ -189,7 +189,7 @@ class PeriodeOffsetIntegrasjonTest(
         søkerAktør: Aktør,
         barnAktør: Aktør,
         stønadFom: LocalDate,
-        stønadTom: LocalDate
+        stønadTom: LocalDate,
     ): Vilkårsvurdering {
         val vilkårsvurdering =
             Vilkårsvurdering(behandling = behandling)
@@ -201,7 +201,7 @@ class PeriodeOffsetIntegrasjonTest(
                 periodeFom = stønadFom,
                 periodeTom = stønadTom,
                 lagFullstendigVilkårResultat = true,
-                personType = PersonType.SØKER
+                personType = PersonType.SØKER,
             ),
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
@@ -210,8 +210,8 @@ class PeriodeOffsetIntegrasjonTest(
                 periodeFom = stønadFom,
                 periodeTom = stønadTom,
                 lagFullstendigVilkårResultat = true,
-                personType = PersonType.BARN
-            )
+                personType = PersonType.BARN,
+            ),
         )
         return vilkårsvurdering
     }

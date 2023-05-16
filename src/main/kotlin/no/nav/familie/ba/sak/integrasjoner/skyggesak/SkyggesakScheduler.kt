@@ -17,7 +17,7 @@ import java.util.UUID
 class SkyggesakScheduler(
     val skyggesakRepository: SkyggesakRepository,
     val fagsakRepository: FagsakRepository,
-    val integrasjonClient: IntegrasjonClient
+    val integrasjonClient: IntegrasjonClient,
 ) {
 
     @Scheduled(fixedDelay = 60000)

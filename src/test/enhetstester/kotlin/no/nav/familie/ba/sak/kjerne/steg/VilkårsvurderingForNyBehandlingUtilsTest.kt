@@ -38,7 +38,7 @@ class VilkårsvurderingForNyBehandlingUtilsTest {
                 periodeTom = tomPåFørsteUtvidetVilkår,
                 begrunnelse = "",
                 behandlingId = vilkårsvurdering.behandling.id,
-                utdypendeVilkårsvurderinger = emptyList()
+                utdypendeVilkårsvurderinger = emptyList(),
             ),
             VilkårResultat(
                 personResultat = søkerPersonResultat,
@@ -48,8 +48,8 @@ class VilkårsvurderingForNyBehandlingUtilsTest {
                 periodeTom = null,
                 begrunnelse = "",
                 behandlingId = vilkårsvurdering.behandling.id,
-                utdypendeVilkårsvurderinger = emptyList()
-            )
+                utdypendeVilkårsvurderinger = emptyList(),
+            ),
         )
 
         val barnPersonResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = barn.aktør)
@@ -57,7 +57,7 @@ class VilkårsvurderingForNyBehandlingUtilsTest {
             barnPersonResultat = barnPersonResultat,
             barnetsFødselsdato = barn.fødselsdato,
             periodeFom = LocalDate.now().minusYears(2),
-            behandlingId = behandling.id
+            behandlingId = behandling.id,
         )
 
         søkerPersonResultat.setSortedVilkårResultater(søkerVilkårResultater)
@@ -66,7 +66,7 @@ class VilkårsvurderingForNyBehandlingUtilsTest {
         vilkårsvurdering.personResultater = setOf(søkerPersonResultat, barnPersonResultat)
 
         val nyVilkårsvurdering = VilkårsvurderingForNyBehandlingUtils(personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id, personer = mutableSetOf(barn, søker))).hentVilkårsvurderingMedDødsdatoSomTomDato(
-            vilkårsvurdering = vilkårsvurdering
+            vilkårsvurdering = vilkårsvurdering,
         )
         val søkersVilkårResultater = nyVilkårsvurdering.personResultater.find { it.erSøkersResultater() }?.vilkårResultater
         val søkersUtvidetVilkår = søkersVilkårResultater?.filter { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }

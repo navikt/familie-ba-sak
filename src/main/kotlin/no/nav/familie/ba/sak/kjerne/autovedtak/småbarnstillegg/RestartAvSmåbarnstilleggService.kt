@@ -29,7 +29,7 @@ class RestartAvSmåbarnstilleggService(
     private val vedtakService: VedtakService,
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val behandlingMigreringsinfoRepository: BehandlingMigreringsinfoRepository,
-    private val andelerTilkjentYtelseRepository: AndelTilkjentYtelseRepository
+    private val andelerTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
 ) {
 
     /**
@@ -58,7 +58,7 @@ class RestartAvSmåbarnstilleggService(
                     opprettTaskService.opprettOppgaveTask(
                         behandlingId = sisteIverksatteBehandling.id,
                         oppgavetype = Oppgavetype.VurderLivshendelse,
-                        beskrivelse = "Småbarnstillegg: endring i overgangsstønad må behandles manuelt"
+                        beskrivelse = "Småbarnstillegg: endring i overgangsstønad må behandles manuelt",
                     )
                 } else {
                     logger.info("DryRun av RestartAvSmåbarnstilleggService. Ville ha opprettet en VurderLivshendelse for behandling=${sisteIverksatteBehandling.id}, fagsakId=$fagsakId")
@@ -81,11 +81,11 @@ class RestartAvSmåbarnstilleggService(
 
     private fun finnAlleFagsakerMedOppstartSmåbarnstilleggIMåned(
         iverksatteLøpendeBehandlinger: List<Long>,
-        måned: YearMonth
+        måned: YearMonth,
     ): List<Long> {
         val fagsaker = fagsakRepository.finnAlleFagsakerMedOppstartSmåbarnstilleggIMåned(
             iverksatteLøpendeBehandlinger = iverksatteLøpendeBehandlinger,
-            stønadFom = måned
+            stønadFom = måned,
         )
         if (SatsService.finnSisteSatsFor(SatsType.SMA).gyldigFom.toYearMonth() == måned) {
             return fagsaker.mapNotNull { fagsakId ->
@@ -126,7 +126,7 @@ class RestartAvSmåbarnstilleggService(
 
         return vedtaksperioderForVedtatteBehandlinger.erAlleredeBegrunnetMedBegrunnelse(
             standardbegrunnelser = standardbegrunnelser,
-            måned = måned
+            måned = måned,
         )
     }
 

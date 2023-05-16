@@ -16,7 +16,7 @@ import java.util.concurrent.CountDownLatch
 @ConditionalOnProperty(
     value = ["funksjonsbrytere.kafka.producer.enabled"],
     havingValue = "true",
-    matchIfMissing = false
+    matchIfMissing = false,
 )
 class HentFagsystemsbehandlingRequestConsumer(private val fagsystemsbehandlingService: FagsystemsbehandlingService) {
 
@@ -28,7 +28,7 @@ class HentFagsystemsbehandlingRequestConsumer(private val fagsystemsbehandlingSe
     @KafkaListener(
         id = "familie-ba-sak",
         topics = ["teamfamilie.privat-tbk-hentfagsystemsbehandling-request-topic"],
-        containerFactory = "concurrentKafkaListenerContainerFactory"
+        containerFactory = "concurrentKafkaListenerContainerFactory",
     )
     fun listen(consumerRecord: ConsumerRecord<String, String>, ack: Acknowledgment) {
         val data: String = consumerRecord.value()
@@ -47,7 +47,7 @@ class HentFagsystemsbehandlingRequestConsumer(private val fagsystemsbehandlingSe
         } catch (e: Exception) {
             logger.warn(
                 "Noe gikk galt mens sender HentFagsystemsbehandlingRespons for behandling=${request.eksternId}. " +
-                    "Feiler med ${e.message}"
+                    "Feiler med ${e.message}",
             )
             HentFagsystemsbehandlingRespons(feilMelding = e.message)
         }

@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class EndretUtbetalingAndelTidslinjeService(
-    val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService
+    val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
 ) {
     fun hentBarnasHarEtterbetaling3ÅrTidslinjer(behandlingId: BehandlingId) =
         endretUtbetalingAndelHentOgPersisterService
@@ -37,5 +37,5 @@ internal fun Iterable<EndretUtbetalingAndel>.tilBarnasHarEtterbetaling3ÅrTidsli
 private fun <I> EndretUtbetalingAndel.tilPeriode(mapper: (EndretUtbetalingAndel) -> I?) = Periode(
     this.fom.tilTidspunktEllerTidligereEnn(this.tom),
     this.tom.tilTidspunktEllerSenereEnn(this.fom),
-    mapper(this)
+    mapper(this),
 )

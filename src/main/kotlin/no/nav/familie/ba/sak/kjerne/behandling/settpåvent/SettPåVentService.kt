@@ -20,7 +20,7 @@ class SettPåVentService(
     private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
     private val settPåVentRepository: SettPåVentRepository,
     private val loggService: LoggService,
-    private val oppgaveService: OppgaveService
+    private val oppgaveService: OppgaveService,
 ) {
     fun finnAktivSettPåVentPåBehandling(behandlingId: Long): SettPåVent? {
         return settPåVentRepository.findByBehandlingIdAndAktiv(behandlingId, true)
@@ -54,7 +54,7 @@ class SettPåVentService(
         behandlingHentOgPersisterService.lagreEllerOppdater(behandling, false)
         oppgaveService.forlengFristÅpneOppgaverPåBehandling(
             behandlingId = behandling.id,
-            forlengelse = Period.between(LocalDate.now(), frist)
+            forlengelse = Period.between(LocalDate.now(), frist),
         )
 
         return settPåVent
@@ -72,7 +72,7 @@ class SettPåVentService(
         loggService.opprettOppdaterVentingLogg(
             behandling = behandling,
             endretÅrsak = if (årsak != aktivSettPåVent.årsak) årsak.visningsnavn else null,
-            endretFrist = if (frist != aktivSettPåVent.frist) frist else null
+            endretFrist = if (frist != aktivSettPåVent.frist) frist else null,
         )
         logger.info("Oppdater sett på vent behandling $behandlingId med frist $frist og årsak $årsak")
 
@@ -83,7 +83,7 @@ class SettPåVentService(
 
         oppgaveService.forlengFristÅpneOppgaverPåBehandling(
             behandlingId = behandlingId,
-            forlengelse = Period.between(gammelFrist, frist)
+            forlengelse = Period.between(gammelFrist, frist),
         )
 
         return settPåVent
@@ -95,7 +95,7 @@ class SettPåVentService(
             finnAktivSettPåVentPåBehandling(behandlingId)
                 ?: throw FunksjonellFeil(
                     melding = "Behandling $behandlingId er ikke satt på vent.",
-                    frontendFeilmelding = "Behandlingen er ikke på vent og det er ikke mulig å gjenoppta behandling."
+                    frontendFeilmelding = "Behandlingen er ikke på vent og det er ikke mulig å gjenoppta behandling.",
                 )
 
         loggService.gjenopptaBehandlingLogg(behandling)
@@ -110,7 +110,7 @@ class SettPåVentService(
 
         oppgaveService.settFristÅpneOppgaverPåBehandlingTil(
             behandlingId = behandlingId,
-            nyFrist = LocalDate.now().plusDays(1)
+            nyFrist = LocalDate.now().plusDays(1),
         )
 
         return settPåVent

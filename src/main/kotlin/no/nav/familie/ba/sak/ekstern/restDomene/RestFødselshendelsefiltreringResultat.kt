@@ -7,12 +7,12 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregle
 data class RestFødselshendelsefiltreringResultat(
     val filtreringsregel: Filtreringsregel,
     val resultat: Resultat,
-    val begrunnelse: String
+    val begrunnelse: String,
 )
 
 fun FødselshendelsefiltreringResultat.tilRestFødselshendelsefiltreringResultat() =
     RestFødselshendelsefiltreringResultat(
         filtreringsregel = this.filtreringsregel,
         resultat = this.resultat,
-        begrunnelse = this.begrunnelse
+        begrunnelse = this.begrunnelse,
     )

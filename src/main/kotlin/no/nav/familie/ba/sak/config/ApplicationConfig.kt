@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.config
 import com.fasterxml.jackson.databind.ObjectMapper
 import no.nav.familie.http.client.RetryOAuth2HttpClient
 import no.nav.familie.log.filter.LogFilter
+import no.nav.familie.log.filter.RequestTimeFilter
 import no.nav.security.token.support.client.core.http.OAuth2HttpClient
 import no.nav.security.token.support.client.core.oauth2.OAuth2AccessTokenResponse
 import no.nav.security.token.support.client.spring.oauth2.EnableOAuth2Client
@@ -40,6 +41,15 @@ class ApplicationConfig {
         return filterRegistration
     }
 
+    @Bean
+    fun requestTimeFilter(): FilterRegistrationBean<RequestTimeFilter> {
+        log.info("Registering RequestTimeFilter")
+        val filterRegistration = FilterRegistrationBean<RequestTimeFilter>()
+        filterRegistration.filter = RequestTimeFilter()
+        filterRegistration.order = 2
+        return filterRegistration
+    }
+
     /**
      * Overskriver felles sin som bruker proxy, som ikke skal brukes på gcp.
      */
@@ -64,7 +74,7 @@ class ApplicationConfig {
         return RetryOAuth2HttpClient(
             RestTemplateBuilder()
                 .setConnectTimeout(Duration.of(2, ChronoUnit.SECONDS))
-                .setReadTimeout(Duration.of(4, ChronoUnit.SECONDS))
+                .setReadTimeout(Duration.of(4, ChronoUnit.SECONDS)),
         )
     }
 

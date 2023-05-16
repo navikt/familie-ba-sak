@@ -24,7 +24,7 @@ internal class KompetanseMappingTest {
             annenForeldersAktivitet = AnnenForeldersAktivitet.FORSIKRET_I_BOSTEDSLAND,
             annenForeldersAktivitetsland = "pl",
             barnetsBostedsland = "dk",
-            resultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND
+            resultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
         )
 
         val restKompetanse = kompetanse.tilRestKompetanse()

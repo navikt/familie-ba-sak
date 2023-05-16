@@ -23,14 +23,14 @@ class BehandlingstemaService(
     private val loggService: LoggService,
     private val oppgaveService: OppgaveService,
     private val vilkårsvurderingTidslinjeService: VilkårsvurderingTidslinjeService,
-    private val vilkårsvurderingRepository: VilkårsvurderingRepository
+    private val vilkårsvurderingRepository: VilkårsvurderingRepository,
 ) {
 
     fun oppdaterBehandlingstema(
         behandling: Behandling,
         overstyrtKategori: BehandlingKategori? = null,
         overstyrtUnderkategori: BehandlingUnderkategori? = null,
-        manueltOppdatert: Boolean = false
+        manueltOppdatert: Boolean = false,
     ): Behandling {
         if (behandling.skalBehandlesAutomatisk) return behandling
         if (manueltOppdatert && (overstyrtKategori == null || overstyrtUnderkategori == null)) {
@@ -40,13 +40,13 @@ class BehandlingstemaService(
         val utledetKategori = bestemKategori(
             overstyrtKategori = overstyrtKategori,
             kategoriFraSisteIverksattBehandling = hentLøpendeKategori(behandling.fagsak.id),
-            kategoriFraInneværendeBehandling = hentKategoriFraInneværendeBehandling(behandling.fagsak.id)
+            kategoriFraInneværendeBehandling = hentKategoriFraInneværendeBehandling(behandling.fagsak.id),
         )
 
         val utledetUnderkategori = bestemUnderkategori(
             overstyrtUnderkategori = overstyrtUnderkategori,
             underkategoriFraLøpendeBehandling = hentLøpendeUnderkategori(fagsakId = behandling.fagsak.id),
-            underkategoriFraInneværendeBehandling = hentUnderkategoriFraInneværendeBehandling(fagsakId = behandling.fagsak.id)
+            underkategoriFraInneværendeBehandling = hentUnderkategoriFraInneværendeBehandling(fagsakId = behandling.fagsak.id),
         )
 
         val forrigeUnderkategori = behandling.underkategori
@@ -70,7 +70,7 @@ class BehandlingstemaService(
                                 BehandlingUnderkategori.ORDINÆR, BehandlingUnderkategori.UTVIDET, BehandlingUnderkategori.INSTITUSJON ->
                                     behandling.underkategori.tilOppgaveBehandlingTema().value
                             },
-                            behandlingstype = lagretBehandling.kategori.tilOppgavebehandlingType().value
+                            behandlingstype = lagretBehandling.kategori.tilOppgavebehandlingType().value,
                         )
                     } else {
                         null
@@ -83,7 +83,7 @@ class BehandlingstemaService(
                         forrigeKategori = forrigeKategori,
                         forrigeUnderkategori = forrigeUnderkategori,
                         nyKategori = utledetKategori,
-                        nyUnderkategori = utledetUnderkategori
+                        nyUnderkategori = utledetUnderkategori,
                     )
                 }
             }

@@ -69,8 +69,8 @@ internal class HentFagsystemsbehandlingRequestConsumerTest {
                 arbeidsfordelingService,
                 vedtakService,
                 tilbakekrevingService,
-                kafkaProducer
-            )
+                kafkaProducer,
+            ),
         )
         hentFagsystemsbehandlingRequestConsumer = HentFagsystemsbehandlingRequestConsumer(fagsystemsbehandlingService)
 
@@ -81,12 +81,12 @@ internal class HentFagsystemsbehandlingRequestConsumerTest {
         every { persongrunnlagService.hentAktivThrows(any()) } returns lagTestPersonopplysningGrunnlag(
             behandling.id,
             tilfeldigPerson(personType = PersonType.BARN),
-            tilfeldigPerson(personType = PersonType.SØKER)
+            tilfeldigPerson(personType = PersonType.SØKER),
         )
         every { arbeidsfordelingService.hentArbeidsfordelingPåBehandling(any()) } returns ArbeidsfordelingPåBehandling(
             behandlendeEnhetId = "4820",
             behandlendeEnhetNavn = "Nav",
-            behandlingId = behandling.id
+            behandlingId = behandling.id,
         )
         every { vedtakService.hentAktivForBehandlingThrows(any()) } returns lagVedtak(behandling)
         every { tilbakekrevingService.hentTilbakekrevingsvalg(any()) } returns Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING
@@ -109,7 +109,7 @@ internal class HentFagsystemsbehandlingRequestConsumerTest {
             fagsystemsbehandlingService.sendFagsystemsbehandling(
                 capture(responsSlot),
                 capture(keySlot),
-                capture(behandlingIdSlot)
+                capture(behandlingIdSlot),
             )
         }
 
@@ -137,8 +137,8 @@ internal class HentFagsystemsbehandlingRequestConsumerTest {
             HentFagsystemsbehandlingRequest(
                 eksternFagsakId = behandling.fagsak.id.toString(),
                 eksternId = behandling.id.toString(),
-                ytelsestype = Ytelsestype.BARNETRYGD
-            )
+                ytelsestype = Ytelsestype.BARNETRYGD,
+            ),
         )
     }
 }

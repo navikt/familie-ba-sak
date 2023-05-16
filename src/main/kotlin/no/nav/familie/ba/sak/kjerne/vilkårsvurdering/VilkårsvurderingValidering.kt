@@ -13,7 +13,7 @@ import java.time.LocalDate
 
 fun validerIngenVilkårSattEtterSøkersDød(
     personopplysningGrunnlag: PersonopplysningGrunnlag,
-    vilkårsvurdering: Vilkårsvurdering
+    vilkårsvurdering: Vilkårsvurdering,
 
 ) {
     val vilkårResultaterSøker =
@@ -36,33 +36,33 @@ fun validerIngenVilkårSattEtterSøkersDød(
             "Ved behandlingsårsak \"Dødsfall Bruker\" må vilkårene på søker avsluttes " +
                 "senest dagen søker døde, men " +
                 Utils.slåSammen(vilkårSomEnderEtterSøkersDød.map { "\"" + it.beskrivelse + "\"" }) +
-                " vilkåret til søker slutter etter søkers død."
+                " vilkåret til søker slutter etter søkers død.",
         )
     }
 }
 
 fun validerIkkeBlandetRegelverk(
     personopplysningGrunnlag: PersonopplysningGrunnlag,
-    vilkårsvurdering: Vilkårsvurdering
+    vilkårsvurdering: Vilkårsvurdering,
 ) {
     val vilkårsvurderingTidslinjer = VilkårsvurderingTidslinjer(vilkårsvurdering, personopplysningGrunnlag)
     if (vilkårsvurderingTidslinjer.harBlandetRegelverk()) {
         throw FunksjonellFeil(
-            melding = "Det er forskjellig regelverk for en eller flere perioder for søker eller barna"
+            melding = "Det er forskjellig regelverk for en eller flere perioder for søker eller barna",
         )
     }
 }
 
 fun valider18ÅrsVilkårEksistererFraFødselsdato(
     personopplysningGrunnlag: PersonopplysningGrunnlag,
-    vilkårsvurdering: Vilkårsvurdering
+    vilkårsvurdering: Vilkårsvurdering,
 ) {
     vilkårsvurdering.personResultater.forEach { personResultat ->
         val person = personopplysningGrunnlag.personer.find { it.aktør == personResultat.aktør }
         if (person?.type == PersonType.BARN && !personResultat.vilkårResultater.finnesUnder18VilkårFraFødselsdato(person.fødselsdato)) {
             throw FunksjonellFeil(
                 melding = "Barn født ${person.fødselsdato} har ikke fått under 18-vilkåret vurdert fra fødselsdato",
-                frontendFeilmelding = "Det må være en periode på 18-års vilkåret som starter på barnets fødselsdato"
+                frontendFeilmelding = "Det må være en periode på 18-års vilkåret som starter på barnets fødselsdato",
             )
         }
     }

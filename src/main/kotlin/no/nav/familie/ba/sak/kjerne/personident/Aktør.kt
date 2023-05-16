@@ -31,9 +31,9 @@ data class Aktør(
     @OneToMany(
         fetch = FetchType.EAGER,
         mappedBy = "aktør",
-        cascade = [CascadeType.ALL]
+        cascade = [CascadeType.ALL],
     )
-    val personidenter: MutableSet<Personident> = mutableSetOf()
+    val personidenter: MutableSet<Personident> = mutableSetOf(),
 ) : BaseEntitet() {
 
     init {

@@ -53,7 +53,7 @@ class InfotrygdControllerTest {
         every {
             infotrygdBarnetrygdClient.hentSaker(
                 any(),
-                any()
+                any(),
             )
         } returns InfotrygdSøkResponse(listOf(Sak(status = "IP")), emptyList())
         val respons = infotrygdController.hentInfotrygdsakerForSøker(Personident(fnr))

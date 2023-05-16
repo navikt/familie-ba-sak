@@ -18,13 +18,13 @@ import org.springframework.web.bind.annotation.RestController
 @Validated
 class LoggController(
     private val tilgangService: TilgangService,
-    private val loggService: LoggService
+    private val loggService: LoggService,
 ) {
 
     @GetMapping(path = ["/{behandlingId}"])
     fun hentLoggForBehandling(
         @PathVariable
-        behandlingId: Long
+        behandlingId: Long,
     ): ResponseEntity<Ressurs<List<Logg>>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
         return Result.runCatching { loggService.hentLoggForBehandling(behandlingId) }
@@ -32,7 +32,7 @@ class LoggController(
                 onSuccess = { ResponseEntity.ok(Ressurs.success(it)) },
                 onFailure = {
                     badRequest("Henting av logg feilet", it)
-                }
+                },
             )
     }
 }

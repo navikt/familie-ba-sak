@@ -52,7 +52,7 @@ class BehandlingSatsendringTest(
     @Autowired private val autovedtakSatsendringService: AutovedtakSatsendringService,
     @Autowired private val andelTilkjentYtelseMedEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     @Autowired private val satskjøringRepository: SatskjøringRepository,
-    @Autowired private val brevmalService: BrevmalService
+    @Autowired private val brevmalService: BrevmalService,
 ) : AbstractVerdikjedetest() {
 
     @Test
@@ -77,17 +77,17 @@ class BehandlingSatsendringTest(
                                 bruksenhetsnummer = "H301",
                                 tilleggsnavn = "navn",
                                 postnummer = "0202",
-                                kommunenummer = "2231"
-                            )
-                        )
-                    )
+                                kommunenummer = "2231",
+                            ),
+                        ),
+                    ),
                 ),
                 barna = listOf(
                     RestScenarioPerson(
                         fødselsdato = LocalDate.of(2023, 1, 1)
                             .toString(),
                         fornavn = "Barn",
-                        etternavn = "Barnesen"
+                        etternavn = "Barnesen",
                     ).copy(
                         bostedsadresser = mutableListOf(
                             Bostedsadresse(
@@ -98,18 +98,18 @@ class BehandlingSatsendringTest(
                                     bruksenhetsnummer = "H301",
                                     tilleggsnavn = "navn",
                                     postnummer = "0202",
-                                    kommunenummer = "2231"
-                                )
-                            )
-                        )
-                    )
-                )
-            )
+                                    kommunenummer = "2231",
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            ),
         )
         val behandling = behandleFødselshendelse(
             nyBehandlingHendelse = NyBehandlingHendelse(
                 morsIdent = scenario.søker.ident!!,
-                barnasIdenter = listOf(scenario.barna.first().ident!!)
+                barnasIdenter = listOf(scenario.barna.first().ident!!),
             ),
             behandleFødselshendelseTask = behandleFødselshendelseTask,
             fagsakService = fagsakService,
@@ -117,7 +117,7 @@ class BehandlingSatsendringTest(
             vedtakService = vedtakService,
             stegService = stegService,
             personidentService = personidentService,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
 
         )!!
         satskjøringRepository.saveAndFlush(Satskjøring(fagsakId = behandling.fagsak.id))
@@ -138,7 +138,7 @@ class BehandlingSatsendringTest(
         assertNull(satsendingsvedtak!!.stønadBrevPdF)
 
         val aty = andelTilkjentYtelseMedEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
-            satsendringBehandling.id
+            satsendringBehandling.id,
         )
 
         val atyMedSenesteTilleggOrbaSats =
@@ -175,17 +175,17 @@ class BehandlingSatsendringTest(
                                 bruksenhetsnummer = "H301",
                                 tilleggsnavn = "navn",
                                 postnummer = "0202",
-                                kommunenummer = "2231"
-                            )
-                        )
-                    )
+                                kommunenummer = "2231",
+                            ),
+                        ),
+                    ),
                 ),
                 barna = listOf(
                     RestScenarioPerson(
                         fødselsdato = LocalDate.of(2023, 1, 1)
                             .toString(),
                         fornavn = "Barn",
-                        etternavn = "Barnesen"
+                        etternavn = "Barnesen",
                     ).copy(
                         bostedsadresser = mutableListOf(
                             Bostedsadresse(
@@ -196,18 +196,18 @@ class BehandlingSatsendringTest(
                                     bruksenhetsnummer = "H301",
                                     tilleggsnavn = "navn",
                                     postnummer = "0202",
-                                    kommunenummer = "2231"
-                                )
-                            )
-                        )
-                    )
-                )
-            )
+                                    kommunenummer = "2231",
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            ),
         )
         val behandling = behandleFødselshendelse(
             nyBehandlingHendelse = NyBehandlingHendelse(
                 morsIdent = scenario.søker.ident!!,
-                barnasIdenter = listOf(scenario.barna.first().ident!!)
+                barnasIdenter = listOf(scenario.barna.first().ident!!),
             ),
             behandleFødselshendelseTask = behandleFødselshendelseTask,
             fagsakService = fagsakService,
@@ -215,7 +215,7 @@ class BehandlingSatsendringTest(
             vedtakService = vedtakService,
             stegService = stegService,
             personidentService = personidentService,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
 
         )!!
         satskjøringRepository.saveAndFlush(Satskjøring(fagsakId = behandling.fagsak.id))
@@ -225,7 +225,7 @@ class BehandlingSatsendringTest(
             søkersIdent = scenario.søker.ident,
             behandlingType = BehandlingType.REVURDERING,
             behandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
-            fagsakId = behandling.fagsak.id
+            fagsakId = behandling.fagsak.id,
         )
         val revurderingEtterVilkårsvurdering =
             familieBaSakKlient().validerVilkårsvurdering(behandlingId = revurdering.data!!.behandlingId)
@@ -260,17 +260,17 @@ class BehandlingSatsendringTest(
                                 bruksenhetsnummer = "H301",
                                 tilleggsnavn = "navn",
                                 postnummer = "0202",
-                                kommunenummer = "2231"
-                            )
-                        )
-                    )
+                                kommunenummer = "2231",
+                            ),
+                        ),
+                    ),
                 ),
                 barna = listOf(
                     RestScenarioPerson(
                         fødselsdato = LocalDate.of(2023, 1, 1)
                             .toString(),
                         fornavn = "Barn",
-                        etternavn = "Barnesen"
+                        etternavn = "Barnesen",
                     ).copy(
                         bostedsadresser = mutableListOf(
                             Bostedsadresse(
@@ -281,18 +281,18 @@ class BehandlingSatsendringTest(
                                     bruksenhetsnummer = "H301",
                                     tilleggsnavn = "navn",
                                     postnummer = "0202",
-                                    kommunenummer = "2231"
-                                )
-                            )
-                        )
-                    )
-                )
-            )
+                                    kommunenummer = "2231",
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+            ),
         )
         val behandling = behandleFødselshendelse(
             nyBehandlingHendelse = NyBehandlingHendelse(
                 morsIdent = scenario.søker.ident!!,
-                barnasIdenter = listOf(scenario.barna.first().ident!!)
+                barnasIdenter = listOf(scenario.barna.first().ident!!),
             ),
             behandleFødselshendelseTask = behandleFødselshendelseTask,
             fagsakService = fagsakService,
@@ -300,7 +300,7 @@ class BehandlingSatsendringTest(
             vedtakService = vedtakService,
             stegService = stegService,
             personidentService = personidentService,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
 
         )!!
         satskjøringRepository.saveAndFlush(Satskjøring(fagsakId = behandling.fagsak.id))

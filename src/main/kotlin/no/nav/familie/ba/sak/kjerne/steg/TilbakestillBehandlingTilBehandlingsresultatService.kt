@@ -15,7 +15,7 @@ class TilbakestillBehandlingTilBehandlingsresultatService(
     private val behandlingService: BehandlingService,
     private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService,
     private val vedtakRepository: VedtakRepository,
-    private val tilbakekrevingService: TilbakekrevingService
+    private val tilbakekrevingService: TilbakekrevingService,
 ) {
     /**
      * Når en andel vurderes (endres) vil vi resette steget og slette data som blir generert senere i løypa
@@ -30,13 +30,13 @@ class TilbakestillBehandlingTilBehandlingsresultatService(
 
         vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(
             vedtak = vedtakRepository.findByBehandlingAndAktiv(
-                behandlingId
-            )
+                behandlingId,
+            ),
         )
         tilbakekrevingService.slettTilbakekrevingPåBehandling(behandlingId)
         return behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(
             behandlingId = behandlingId,
-            steg = StegType.BEHANDLINGSRESULTAT
+            steg = StegType.BEHANDLINGSRESULTAT,
         )
     }
 }

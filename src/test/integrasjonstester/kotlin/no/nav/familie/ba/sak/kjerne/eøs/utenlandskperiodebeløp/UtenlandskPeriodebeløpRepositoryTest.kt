@@ -19,7 +19,7 @@ class UtenlandskPeriodebeløpRepositoryTest(
     @Autowired private val aktørIdRepository: AktørIdRepository,
     @Autowired private val fagsakRepository: FagsakRepository,
     @Autowired private val behandlingRepository: BehandlingRepository,
-    @Autowired private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository
+    @Autowired private val utenlandskPeriodebeløpRepository: UtenlandskPeriodebeløpRepository,
 ) : AbstractSpringIntegrationTest() {
 
     @Test
@@ -33,14 +33,14 @@ class UtenlandskPeriodebeløpRepositoryTest(
 
         val utenlandskPeriodebeløp = utenlandskPeriodebeløpRepository.save(
             lagUtenlandskPeriodebeløp(
-                barnAktører = setOf(barn1, barn2)
-            ).also { it.behandlingId = behandling.id }
+                barnAktører = setOf(barn1, barn2),
+            ).also { it.behandlingId = behandling.id },
         )
 
         val utenlandskPeriodebeløp2 = utenlandskPeriodebeløpRepository.save(
             lagUtenlandskPeriodebeløp(
-                barnAktører = setOf(barn1, barn2)
-            ).also { it.behandlingId = behandling.id }
+                barnAktører = setOf(barn1, barn2),
+            ).also { it.behandlingId = behandling.id },
         )
 
         assertEquals(utenlandskPeriodebeløp.barnAktører, utenlandskPeriodebeløp2.barnAktører)
@@ -62,8 +62,8 @@ class UtenlandskPeriodebeløpRepositoryTest(
                 tom = YearMonth.of(2021, 12),
                 beløp = BigDecimal.valueOf(1_234),
                 valutakode = "EUR",
-                intervall = Intervall.UKENTLIG
-            )
+                intervall = Intervall.UKENTLIG,
+            ),
         )
 
         val hentedeUtenlandskePeriodebeløp =

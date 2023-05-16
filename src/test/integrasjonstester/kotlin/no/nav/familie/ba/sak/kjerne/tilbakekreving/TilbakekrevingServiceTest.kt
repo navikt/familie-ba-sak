@@ -47,7 +47,7 @@ class TilbakekrevingServiceTest(
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
     @Autowired private val databaseCleanupService: DatabaseCleanupService,
     @Autowired private val brevmalService: BrevmalService,
-    @Autowired private val brevmottakerRepository: BrevmottakerRepository
+    @Autowired private val brevmottakerRepository: BrevmottakerRepository,
 ) : AbstractSpringIntegrationTest() {
 
     @BeforeEach
@@ -68,7 +68,7 @@ class TilbakekrevingServiceTest(
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
         )
 
         val restTilbakekreving = opprettRestTilbakekreving()
@@ -98,7 +98,7 @@ class TilbakekrevingServiceTest(
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
             institusjon = InstitusjonInfo(orgNummer = "998765432", tssEksternId = "8000000"),
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
         )
 
         val restTilbakekreving = opprettRestTilbakekreving()
@@ -128,7 +128,7 @@ class TilbakekrevingServiceTest(
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
             verge = VergeInfo("04068203010"),
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
         )
 
         val restTilbakekreving = opprettRestTilbakekreving()
@@ -160,7 +160,7 @@ class TilbakekrevingServiceTest(
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
             brevmalService = brevmalService,
-            verge = arguments.first
+            verge = arguments.first,
         )
 
         val brevmottaker = Brevmottaker(
@@ -170,7 +170,7 @@ class TilbakekrevingServiceTest(
             adresselinje1 = "Andebyveien 1",
             postnummer = "0000",
             poststed = "OSLO",
-            landkode = "NO"
+            landkode = "NO",
         )
         brevmottakerRepository.saveAndFlush(brevmottaker)
 
@@ -197,7 +197,7 @@ class TilbakekrevingServiceTest(
                 Arguments.of(Triple(null, MottakerType.FULLMEKTIG, Vergetype.ANNEN_FULLMEKTIG)),
                 Arguments.of(Triple(null, MottakerType.VERGE, Vergetype.VERGE_FOR_VOKSEN)),
                 Arguments.of(Triple(VergeInfo("12345678910"), MottakerType.VERGE, Vergetype.VERGE_FOR_BARN)),
-                Arguments.of(Triple(null, MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE, null))
+                Arguments.of(Triple(null, MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE, null)),
             )
         }
     }

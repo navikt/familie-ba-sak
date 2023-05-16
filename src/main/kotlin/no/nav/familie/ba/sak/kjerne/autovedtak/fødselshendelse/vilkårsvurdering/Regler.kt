@@ -32,7 +32,7 @@ interface Vilkårsregel {
 
 data class VurderPersonErBosattIRiket(
     val adresser: List<GrBostedsadresse>,
-    val vurderFra: LocalDate
+    val vurderFra: LocalDate,
 ) : Vilkårsregel {
 
     override fun vurder(): Evaluering {
@@ -40,9 +40,9 @@ data class VurderPersonErBosattIRiket(
             val person = adresser.first().person
             secureLogger.info(
                 "Har ugyldige adresser på person (${person?.aktør?.aktivFødselsnummer()}, ${person?.type}): ${
-                adresser.filter { !it.harGyldigFom() }
-                    .map { "(${it.periode?.fom}, ${it.periode?.tom}): ${it.toSecureString()}" }
-                }"
+                    adresser.filter { !it.harGyldigFom() }
+                        .map { "(${it.periode?.fom}, ${it.periode?.tom}): ${it.toSecureString()}" }
+                }",
             )
         }
 
@@ -51,7 +51,7 @@ data class VurderPersonErBosattIRiket(
             return Evaluering.oppfylt(VilkårOppfyltÅrsak.BOR_I_RIKET_KUN_ADRESSER_UTEN_FOM)
         } else if (harPersonBoddPåSisteAdresseMinstFraVurderingstidspunkt(adresser, vurderFra)) {
             return Evaluering.oppfylt(
-                VilkårOppfyltÅrsak.BOR_I_RIKET
+                VilkårOppfyltÅrsak.BOR_I_RIKET,
             )
         } else if (adresser.filter { !it.harGyldigFom() }.size > 1) return Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.BOR_IKKE_I_RIKET_FLERE_ADRESSER_UTEN_FOM)
 
@@ -64,7 +64,7 @@ data class VurderPersonErBosattIRiket(
          */
         return if (adresserMedGyldigFom.isNotEmpty() && erPersonBosattFraVurderingstidspunktet(
                 adresserMedGyldigFom,
-                vurderFra
+                vurderFra,
             )
         ) {
             Evaluering.oppfylt(VilkårOppfyltÅrsak.BOR_I_RIKET)
@@ -82,7 +82,7 @@ data class VurderPersonErBosattIRiket(
 
     private fun harPersonBoddPåSisteAdresseMinstFraVurderingstidspunkt(
         adresser: List<GrBostedsadresse>,
-        vurderFra: LocalDate
+        vurderFra: LocalDate,
     ): Boolean {
         val sisteAdresse = adresser
             .filter { it.harGyldigFom() }
@@ -96,7 +96,7 @@ data class VurderPersonErBosattIRiket(
         hentMaxAvstandAvDagerMellomPerioder(
             adresser.mapNotNull { it.periode },
             vurderFra,
-            LocalDate.now()
+            LocalDate.now(),
         ) == 0L
 
     companion object {
@@ -106,7 +106,7 @@ data class VurderPersonErBosattIRiket(
 }
 
 data class VurderBarnErUnder18(
-    val alder: Int
+    val alder: Int,
 ) : Vilkårsregel {
 
     override fun vurder(): Evaluering =
@@ -119,13 +119,13 @@ data class VurderBarnErUnder18(
 
 data class VurderBarnErBosattMedSøker(
     val søkerAdresser: List<GrBostedsadresse>,
-    val barnAdresser: List<GrBostedsadresse>
+    val barnAdresser: List<GrBostedsadresse>,
 ) : Vilkårsregel {
 
     override fun vurder(): Evaluering {
         return if (vurderOmPersonerBorSammen(
                 adresser = barnAdresser,
-                andreAdresser = søkerAdresser
+                andreAdresser = søkerAdresser,
             )
         ) {
             Evaluering.oppfylt(VilkårOppfyltÅrsak.BARNET_BOR_MED_MOR)
@@ -136,7 +136,7 @@ data class VurderBarnErBosattMedSøker(
 }
 
 data class VurderBarnErUgift(
-    val sivilstander: List<GrSivilstand>
+    val sivilstander: List<GrSivilstand>,
 ) : Vilkårsregel {
 
     override fun vurder(): Evaluering {
@@ -153,7 +153,7 @@ data class VurderBarnErUgift(
 }
 
 data class VurderBarnHarLovligOpphold(
-    val aktør: Aktør
+    val aktør: Aktør,
 ) : Vilkårsregel {
     override fun vurder(): Evaluering {
         return Evaluering.oppfylt(VilkårOppfyltÅrsak.AUTOMATISK_VURDERING_BARN_LOVLIG_OPPHOLD)
@@ -163,13 +163,13 @@ data class VurderBarnHarLovligOpphold(
 data class LovligOppholdFaktaEØS(
     val arbeidsforhold: List<GrArbeidsforhold>,
     val bostedsadresser: List<GrBostedsadresse>,
-    val statsborgerskap: List<GrStatsborgerskap>
+    val statsborgerskap: List<GrStatsborgerskap>,
 )
 
 data class VurderPersonHarLovligOpphold(
     val morLovligOppholdFaktaEØS: LovligOppholdFaktaEØS,
     val annenForelderLovligOppholdFaktaEØS: LovligOppholdFaktaEØS?,
-    val opphold: List<GrOpphold>
+    val opphold: List<GrOpphold>,
 ) : Vilkårsregel {
 
     override fun vurder(): Evaluering {
@@ -188,7 +188,7 @@ data class VurderPersonHarLovligOpphold(
             }
             Medlemskap.EØS -> vurderLovligOppholdForEØSBorger(
                 morLovligOppholdFaktaEØS,
-                annenForelderLovligOppholdFaktaEØS
+                annenForelderLovligOppholdFaktaEØS,
             )
             Medlemskap.STATSLØS, Medlemskap.UKJENT -> {
                 if (opphold.gyldigGjeldendeOppholdstillatelseFødselshendelse()) {
@@ -204,7 +204,7 @@ data class VurderPersonHarLovligOpphold(
 
 private fun vurderLovligOppholdForEØSBorger(
     morLovligOppholdFaktaEØS: LovligOppholdFaktaEØS,
-    annenForelderLovligOppholdFaktaEØS: LovligOppholdFaktaEØS?
+    annenForelderLovligOppholdFaktaEØS: LovligOppholdFaktaEØS?,
 ): Evaluering {
     if (morLovligOppholdFaktaEØS.arbeidsforhold.harLøpendeArbeidsforhold()) {
         return Evaluering.oppfylt(VilkårOppfyltÅrsak.EØS_MED_LØPENDE_ARBEIDSFORHOLD)
@@ -216,7 +216,7 @@ private fun vurderLovligOppholdForEØSBorger(
 
     if (!vurderOmPersonerBorSammen(
             adresser = morLovligOppholdFaktaEØS.bostedsadresser.filtrerGjeldendeNå(),
-            andreAdresser = annenForelderLovligOppholdFaktaEØS.bostedsadresser.filtrerGjeldendeNå()
+            andreAdresser = annenForelderLovligOppholdFaktaEØS.bostedsadresser.filtrerGjeldendeNå(),
         )
     ) {
         return Evaluering.ikkeOppfylt(VilkårIkkeOppfyltÅrsak.EØS_BOR_IKKE_SAMMEN_MED_ANNEN_FORELDER)
@@ -240,14 +240,14 @@ private fun vurderLovligOppholdForEØSBorger(
 private fun hentMaxAvstandAvDagerMellomPerioder(
     perioder: List<DatoIntervallEntitet>,
     fom: LocalDate,
-    tom: LocalDate
+    tom: LocalDate,
 ): Long {
     val perioderMedTilkobletTom =
         perioder.sortedBy { it.fom }
             .fold(mutableListOf()) { acc: MutableList<DatoIntervallEntitet>, datoIntervallEntitet: DatoIntervallEntitet ->
                 if (acc.isNotEmpty() && acc.last().tom == null) {
                     val sisteDatoIntervall = acc.last().copy(
-                        tom = datoIntervallEntitet.fom?.minusDays(1)
+                        tom = datoIntervallEntitet.fom?.minusDays(1),
                     )
 
                     acc.removeLast()
@@ -266,14 +266,14 @@ private fun hentMaxAvstandAvDagerMellomPerioder(
                 fom.isBetween(
                     Periode(
                         fom = it.fom!!,
-                        tom = it.tom
-                    )
+                        tom = it.tom,
+                    ),
                 ) ||
                 tom.isBetween(
                     Periode(
                         fom = it.fom,
-                        tom = it.tom
-                    )
+                        tom = it.tom,
+                    ),
                 ) ||
                 it.fom >= fom && it.tom <= tom
         }
@@ -283,13 +283,13 @@ private fun hentMaxAvstandAvDagerMellomPerioder(
     val defaultAvstand = if (perioderInnenAngittTidsrom.first().fom!!.isAfter(fom)) {
         Duration.between(
             fom.atStartOfDay(),
-            perioderInnenAngittTidsrom.first().fom!!.atStartOfDay()
+            perioderInnenAngittTidsrom.first().fom!!.atStartOfDay(),
         )
             .toDays()
     } else if (perioderInnenAngittTidsrom.last().tom != null && perioderInnenAngittTidsrom.last().tom!!.isBefore(tom)) {
         Duration.between(
             perioderInnenAngittTidsrom.last().tom!!.atStartOfDay(),
-            tom.atStartOfDay()
+            tom.atStartOfDay(),
         ).toDays()
     } else {
         0L

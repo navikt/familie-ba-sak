@@ -28,7 +28,7 @@ class UtbetalingssikkerhetTest {
         val person = tilfeldigPerson(personType = PersonType.SØKER)
         val personopplysningGrunnlag = PersonopplysningGrunnlag(
             behandlingId = 1,
-            personer = mutableSetOf(person)
+            personer = mutableSetOf(person),
         )
 
         val tilkjentYtelse = lagInitiellTilkjentYtelse()
@@ -40,29 +40,29 @@ class UtbetalingssikkerhetTest {
                     inneværendeMåned().minusMonths(6),
                     YtelseType.UTVIDET_BARNETRYGD,
                     1054,
-                    person = person
+                    person = person,
                 ),
                 lagAndelTilkjentYtelse(
                     inneværendeMåned().minusYears(1),
                     inneværendeMåned().minusMonths(6),
                     YtelseType.UTVIDET_BARNETRYGD,
                     1054,
-                    person = person
+                    person = person,
                 ),
                 lagAndelTilkjentYtelse(
                     inneværendeMåned().minusYears(1),
                     inneværendeMåned().minusMonths(6),
                     YtelseType.SMÅBARNSTILLEGG,
                     660,
-                    person = person
-                )
-            )
+                    person = person,
+                ),
+            ),
         )
 
         val feil = assertThrows<UtbetalingsikkerhetFeil> {
             TilkjentYtelseValidering.validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
                 tilkjentYtelse,
-                personopplysningGrunnlag
+                personopplysningGrunnlag,
             )
         }
 
@@ -74,7 +74,7 @@ class UtbetalingssikkerhetTest {
         val person = tilfeldigPerson(personType = PersonType.SØKER)
         val personopplysningGrunnlag = PersonopplysningGrunnlag(
             behandlingId = 1,
-            personer = mutableSetOf(person)
+            personer = mutableSetOf(person),
         )
 
         val tilkjentYtelse = lagInitiellTilkjentYtelse()
@@ -86,22 +86,22 @@ class UtbetalingssikkerhetTest {
                     inneværendeMåned().minusMonths(6),
                     YtelseType.UTVIDET_BARNETRYGD,
                     1054,
-                    person = person
+                    person = person,
                 ),
                 lagAndelTilkjentYtelse(
                     inneværendeMåned().minusYears(1),
                     inneværendeMåned().minusMonths(6),
                     YtelseType.SMÅBARNSTILLEGG,
                     660,
-                    person = person
-                )
-            )
+                    person = person,
+                ),
+            ),
         )
 
         assertDoesNotThrow {
             TilkjentYtelseValidering.validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
                 tilkjentYtelse,
-                personopplysningGrunnlag
+                personopplysningGrunnlag,
             )
         }
     }
@@ -111,7 +111,7 @@ class UtbetalingssikkerhetTest {
         val person = tilfeldigPerson(personType = PersonType.SØKER)
         val personopplysningGrunnlag = PersonopplysningGrunnlag(
             behandlingId = 1,
-            personer = mutableSetOf(person)
+            personer = mutableSetOf(person),
         )
 
         val tilkjentYtelse = lagInitiellTilkjentYtelse()
@@ -123,22 +123,22 @@ class UtbetalingssikkerhetTest {
                     inneværendeMåned().minusMonths(6),
                     YtelseType.ORDINÆR_BARNETRYGD,
                     SatsService.finnSisteSatsFor(SatsType.ORBA).beløp,
-                    person = person
+                    person = person,
                 ),
                 lagAndelTilkjentYtelse(
                     inneværendeMåned().minusYears(1),
                     inneværendeMåned().minusMonths(6),
                     YtelseType.UTVIDET_BARNETRYGD,
                     SatsService.finnSisteSatsFor(SatsType.UTVIDET_BARNETRYGD).beløp + 1,
-                    person = person
-                )
-            )
+                    person = person,
+                ),
+            ),
         )
 
         val feil = assertThrows<UtbetalingsikkerhetFeil> {
             TilkjentYtelseValidering.validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
                 tilkjentYtelse,
-                personopplysningGrunnlag
+                personopplysningGrunnlag,
             )
         }
 
@@ -150,7 +150,7 @@ class UtbetalingssikkerhetTest {
         val person = tilfeldigPerson(personType = PersonType.SØKER)
         val personopplysningGrunnlag = PersonopplysningGrunnlag(
             behandlingId = 1,
-            personer = mutableSetOf(person)
+            personer = mutableSetOf(person),
         )
 
         val tilkjentYtelse = lagInitiellTilkjentYtelse()
@@ -162,22 +162,22 @@ class UtbetalingssikkerhetTest {
                     inneværendeMåned().minusMonths(6),
                     YtelseType.UTVIDET_BARNETRYGD,
                     1054,
-                    person = person
+                    person = person,
                 ),
                 lagAndelTilkjentYtelse(
                     inneværendeMåned().minusYears(1),
                     inneværendeMåned().minusMonths(6),
                     YtelseType.SMÅBARNSTILLEGG,
                     660,
-                    person = person
-                )
-            )
+                    person = person,
+                ),
+            ),
         )
 
         assertDoesNotThrow {
             TilkjentYtelseValidering.validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
                 tilkjentYtelse,
-                personopplysningGrunnlag
+                personopplysningGrunnlag,
             )
         }
     }
@@ -195,15 +195,15 @@ class UtbetalingssikkerhetTest {
                     YtelseType.ORDINÆR_BARNETRYGD,
                     1054,
                     person = barn,
-                    prosent = BigDecimal(100)
-                )
-            )
+                    prosent = BigDecimal(100),
+                ),
+            ),
         )
 
         val far = tilfeldigPerson(personType = PersonType.SØKER)
         val personopplysningGrunnlag2 = PersonopplysningGrunnlag(
             behandlingId = 1,
-            personer = mutableSetOf(far, barn)
+            personer = mutableSetOf(far, barn),
         )
 
         val tilkjentYtelse2 = lagInitiellTilkjentYtelse()
@@ -216,34 +216,34 @@ class UtbetalingssikkerhetTest {
                     YtelseType.ORDINÆR_BARNETRYGD,
                     1054,
                     person = barn,
-                    prosent = BigDecimal(100)
+                    prosent = BigDecimal(100),
                 ),
                 lagAndelTilkjentYtelse(
                     barn.fødselsdato.nesteMåned(),
                     barn.fødselsdato.plusYears(18).forrigeMåned(),
                     YtelseType.SMÅBARNSTILLEGG,
                     660,
-                    person = barn
-                )
-            )
+                    person = barn,
+                ),
+            ),
         )
 
         val feil = assertThrows<UtbetalingsikkerhetFeil> {
             TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
                 behandlendeBehandlingTilkjentYtelse = tilkjentYtelse2,
                 barnMedAndreRelevanteTilkjentYtelser = listOf(Pair(barn, listOf(tilkjentYtelse))),
-                personopplysningGrunnlag = personopplysningGrunnlag2
+                personopplysningGrunnlag = personopplysningGrunnlag2,
             )
         }
 
         assertTrue(
             feil.frontendFeilmelding?.contains(
                 "Du kan ikke godkjenne dette vedtaket fordi det vil betales ut mer enn 100% for barn født ${
-                listOf(
-                    barn.fødselsdato
-                ).tilBrevTekst()
-                }"
-            )!!
+                    listOf(
+                        barn.fødselsdato,
+                    ).tilBrevTekst()
+                }",
+            )!!,
         )
     }
 
@@ -260,15 +260,15 @@ class UtbetalingssikkerhetTest {
                     YtelseType.ORDINÆR_BARNETRYGD,
                     1054,
                     person = barn,
-                    prosent = BigDecimal(50)
-                )
-            )
+                    prosent = BigDecimal(50),
+                ),
+            ),
         )
 
         val far = tilfeldigPerson(personType = PersonType.SØKER)
         val personopplysningGrunnlag2 = PersonopplysningGrunnlag(
             behandlingId = 1,
-            personer = mutableSetOf(far, barn)
+            personer = mutableSetOf(far, barn),
         )
 
         val tilkjentYtelse2 = lagInitiellTilkjentYtelse()
@@ -281,22 +281,22 @@ class UtbetalingssikkerhetTest {
                     YtelseType.ORDINÆR_BARNETRYGD,
                     1054,
                     person = barn,
-                    prosent = BigDecimal(50)
+                    prosent = BigDecimal(50),
                 ),
                 lagAndelTilkjentYtelse(
                     barn.fødselsdato.nesteMåned(),
                     barn.fødselsdato.plusYears(18).forrigeMåned(),
                     YtelseType.SMÅBARNSTILLEGG,
                     660,
-                    person = barn
-                )
-            )
+                    person = barn,
+                ),
+            ),
         )
 
         TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
             behandlendeBehandlingTilkjentYtelse = tilkjentYtelse2,
             barnMedAndreRelevanteTilkjentYtelser = listOf(Pair(barn, listOf(tilkjentYtelse))),
-            personopplysningGrunnlag = personopplysningGrunnlag2
+            personopplysningGrunnlag = personopplysningGrunnlag2,
         )
     }
 
@@ -312,16 +312,16 @@ class UtbetalingssikkerhetTest {
                     barn.fødselsdato.plusYears(18).forrigeMåned(),
                     YtelseType.ORDINÆR_BARNETRYGD,
                     1054,
-                    person = barn
-                )
-            )
+                    person = barn,
+                ),
+            ),
         )
 
         val far = tilfeldigPerson(personType = PersonType.SØKER)
         val barn2 = tilfeldigPerson()
         val personopplysningGrunnlag2 = PersonopplysningGrunnlag(
             behandlingId = 1,
-            personer = mutableSetOf(far, barn2)
+            personer = mutableSetOf(far, barn2),
         )
 
         val tilkjentYtelse2 = lagInitiellTilkjentYtelse()
@@ -333,16 +333,16 @@ class UtbetalingssikkerhetTest {
                     barn2.fødselsdato.plusYears(18).forrigeMåned(),
                     YtelseType.ORDINÆR_BARNETRYGD,
                     1054,
-                    person = barn2
-                )
-            )
+                    person = barn2,
+                ),
+            ),
         )
 
         assertDoesNotThrow {
             TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
                 behandlendeBehandlingTilkjentYtelse = tilkjentYtelse2,
                 barnMedAndreRelevanteTilkjentYtelser = listOf(Pair(barn, listOf(tilkjentYtelse))),
-                personopplysningGrunnlag = personopplysningGrunnlag2
+                personopplysningGrunnlag = personopplysningGrunnlag2,
             )
         }
     }
@@ -370,7 +370,7 @@ class UtbetalingssikkerhetTest {
             SatsType.TILLEGG_ORBA,
             SatsType.FINN_SVAL,
             SatsType.ORBA,
-            SatsType.UTVIDET_BARNETRYGD
+            SatsType.UTVIDET_BARNETRYGD,
         )
         assertTrue(støttedeSatstyper.containsAll(SatsType.values().toSet()))
         assertEquals(støttedeSatstyper.size, SatsType.values().size)

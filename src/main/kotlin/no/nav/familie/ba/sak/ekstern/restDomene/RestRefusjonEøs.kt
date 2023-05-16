@@ -8,5 +8,5 @@ data class RestRefusjonEøs(
     val tom: LocalDate,
     val refusjonsbeløp: Int,
     val land: String,
-    val refusjonAvklart: Boolean
+    val refusjonAvklart: Boolean,
 )

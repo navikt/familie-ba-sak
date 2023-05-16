@@ -13,20 +13,20 @@ import org.springframework.stereotype.Service
 class SanityService(
     private val cachedSanityKlient: CachedSanityKlient,
     private val brevKlient: BrevKlient,
-    private val environment: Environment
+    private val environment: Environment,
 ) {
 
     @Retryable(
         value = [Exception::class],
         maxAttempts = 3,
-        backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS)
+        backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS),
     )
     fun hentSanityBegrunnelser(): List<SanityBegrunnelse> = cachedSanityKlient.hentSanityBegrunnelserCached()
 
     @Retryable(
         value = [Exception::class],
         maxAttempts = 3,
-        backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS)
+        backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS),
     )
     fun hentSanityEØSBegrunnelser(): List<SanityEØSBegrunnelse> =
         cachedSanityKlient.hentEØSBegrunnelserCached()

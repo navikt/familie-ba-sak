@@ -99,7 +99,7 @@ internal class TidTest {
 
         val personResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            aktør = personAktørId
+            aktør = personAktørId,
         )
 
         val førsteVilkårResultat = VilkårResultat(
@@ -109,7 +109,7 @@ internal class TidTest {
             periodeFom = LocalDate.of(2020, 1, 1),
             periodeTom = LocalDate.of(2020, 3, 25),
             begrunnelse = "",
-            behandlingId = personResultat.vilkårsvurdering.behandling.id
+            behandlingId = personResultat.vilkårsvurdering.behandling.id,
         )
         val etterfølgendeVilkårResultat = VilkårResultat(
             personResultat = personResultat,
@@ -118,7 +118,7 @@ internal class TidTest {
             periodeFom = LocalDate.of(2020, 3, 31),
             periodeTom = LocalDate.of(2020, 6, 1),
             begrunnelse = "",
-            behandlingId = personResultat.vilkårsvurdering.behandling.id
+            behandlingId = personResultat.vilkårsvurdering.behandling.id,
         )
         val ikkeEtterfølgendeVilkårResultat = VilkårResultat(
             personResultat = personResultat,
@@ -127,7 +127,7 @@ internal class TidTest {
             periodeFom = LocalDate.of(2020, 5, 1),
             periodeTom = LocalDate.of(2020, 6, 1),
             begrunnelse = "",
-            behandlingId = personResultat.vilkårsvurdering.behandling.id
+            behandlingId = personResultat.vilkårsvurdering.behandling.id,
         )
 
         assertTrue(førsteVilkårResultat.erEtterfølgendePeriode(etterfølgendeVilkårResultat))
@@ -171,8 +171,8 @@ internal class TidTest {
                 DatoIntervallEntitet(LocalDate.of(2004, 1, 1), LocalDate.of(2004, 2, 1)),
                 DatoIntervallEntitet(LocalDate.of(2004, 1, 1), LocalDate.of(2004, 3, 1)),
                 DatoIntervallEntitet(LocalDate.of(2005, 1, 1), LocalDate.of(2005, 3, 1)),
-                DatoIntervallEntitet(LocalDate.of(2005, 1, 1), LocalDate.of(2005, 2, 1))
-            )
+                DatoIntervallEntitet(LocalDate.of(2005, 1, 1), LocalDate.of(2005, 2, 1)),
+            ),
         )
 
         Assertions.assertThat(result)
@@ -186,8 +186,8 @@ internal class TidTest {
         val result = slåSammenOverlappendePerioder(
             listOf(
                 DatoIntervallEntitet(LocalDate.of(2004, 1, 1), LocalDate.of(2004, 1, 31)),
-                DatoIntervallEntitet(LocalDate.of(2004, 2, 1), LocalDate.of(2004, 2, 28))
-            )
+                DatoIntervallEntitet(LocalDate.of(2004, 2, 1), LocalDate.of(2004, 2, 28)),
+            ),
         )
 
         Assertions.assertThat(result)
@@ -240,8 +240,8 @@ internal class TidTest {
                 DatoIntervallEntitet(LocalDate.of(2005, 1, 1), null),
                 DatoIntervallEntitet(LocalDate.of(2005, 5, 1), LocalDate.of(2005, 6, 1)),
                 DatoIntervallEntitet(LocalDate.of(2006, 1, 1), null),
-                DatoIntervallEntitet(LocalDate.of(2006, 5, 1), LocalDate.of(2006, 6, 1))
-            )
+                DatoIntervallEntitet(LocalDate.of(2006, 5, 1), LocalDate.of(2006, 6, 1)),
+            ),
         )
         Assertions.assertThat(result).hasSize(2)
         Assertions.assertThat(result.filter { it.tom != null }).hasSize(1)

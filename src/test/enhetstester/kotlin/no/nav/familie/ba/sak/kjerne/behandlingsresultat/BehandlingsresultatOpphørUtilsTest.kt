@@ -47,14 +47,14 @@ class BehandlingsresultatOpphørUtilsTest {
                 fom = jan22,
                 tom = mai22,
                 beløp = 1054,
-                aktør = barn1Aktør
+                aktør = barn1Aktør,
             ),
             lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = mai22,
                 beløp = 1054,
-                aktør = barn2Aktør
-            )
+                aktør = barn2Aktør,
+            ),
         )
 
         val nåværendeAndeler = listOf(
@@ -62,21 +62,21 @@ class BehandlingsresultatOpphørUtilsTest {
                 fom = jan22,
                 tom = mai22,
                 beløp = 1054,
-                aktør = barn1Aktør
+                aktør = barn1Aktør,
             ),
             lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
                 beløp = 1054,
-                aktør = barn2Aktør
-            )
+                aktør = barn2Aktør,
+            ),
         )
 
         val opphørsresultat = hentOpphørsresultatPåBehandling(
             nåværendeAndeler = nåværendeAndeler,
             forrigeAndeler = forrigeAndeler,
             nåværendeEndretAndeler = emptyList(),
-            forrigeEndretAndeler = emptyList()
+            forrigeEndretAndeler = emptyList(),
         )
 
         assertEquals(Opphørsresultat.IKKE_OPPHØRT, opphørsresultat)
@@ -95,14 +95,14 @@ class BehandlingsresultatOpphørUtilsTest {
                 fom = jan22,
                 tom = aug22,
                 beløp = 1054,
-                aktør = barn1Aktør
+                aktør = barn1Aktør,
             ),
             lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
                 beløp = 1054,
-                aktør = barn2Aktør
-            )
+                aktør = barn2Aktør,
+            ),
         )
 
         val nåværendeAndeler = listOf(
@@ -110,21 +110,21 @@ class BehandlingsresultatOpphørUtilsTest {
                 fom = jan22,
                 tom = feb22,
                 beløp = 1054,
-                aktør = barn1Aktør
+                aktør = barn1Aktør,
             ),
             lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = feb22,
                 beløp = 1054,
-                aktør = barn2Aktør
-            )
+                aktør = barn2Aktør,
+            ),
         )
 
         val opphørsresultat = hentOpphørsresultatPåBehandling(
             nåværendeAndeler = nåværendeAndeler,
             forrigeAndeler = forrigeAndeler,
             nåværendeEndretAndeler = emptyList(),
-            forrigeEndretAndeler = emptyList()
+            forrigeEndretAndeler = emptyList(),
         )
 
         assertEquals(Opphørsresultat.OPPHØRT, opphørsresultat)
@@ -144,14 +144,14 @@ class BehandlingsresultatOpphørUtilsTest {
                 fom = jan22,
                 tom = mar22,
                 beløp = 1054,
-                aktør = barn1Aktør
+                aktør = barn1Aktør,
             ),
             lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = mar22,
                 beløp = 1054,
-                aktør = barn2Aktør
-            )
+                aktør = barn2Aktør,
+            ),
         )
 
         val nåværendeAndeler = listOf(
@@ -159,21 +159,21 @@ class BehandlingsresultatOpphørUtilsTest {
                 fom = jan22,
                 tom = feb22,
                 beløp = 1054,
-                aktør = barn1Aktør
+                aktør = barn1Aktør,
             ),
             lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = feb22,
                 beløp = 1054,
-                aktør = barn2Aktør
-            )
+                aktør = barn2Aktør,
+            ),
         )
 
         val opphørsresultat = hentOpphørsresultatPåBehandling(
             nåværendeAndeler = nåværendeAndeler,
             forrigeAndeler = forrigeAndeler,
             nåværendeEndretAndeler = emptyList(),
-            forrigeEndretAndeler = emptyList()
+            forrigeEndretAndeler = emptyList(),
         )
 
         assertEquals(Opphørsresultat.OPPHØRT, opphørsresultat)
@@ -192,15 +192,15 @@ class BehandlingsresultatOpphørUtilsTest {
                 fom = jan22,
                 tom = mar22,
                 beløp = 1054,
-                aktør = barn1Aktør
-            )
+                aktør = barn1Aktør,
+            ),
         )
 
         val opphørsresultat = hentOpphørsresultatPåBehandling(
             nåværendeAndeler = emptyList(),
             forrigeAndeler = forrigeAndeler,
             nåværendeEndretAndeler = emptyList(),
-            forrigeEndretAndeler = emptyList()
+            forrigeEndretAndeler = emptyList(),
         )
 
         assertEquals(Opphørsresultat.OPPHØRT, opphørsresultat)
@@ -220,14 +220,14 @@ class BehandlingsresultatOpphørUtilsTest {
                 fom = jan22,
                 tom = mar22,
                 beløp = 1054,
-                aktør = barn1Aktør
+                aktør = barn1Aktør,
             ),
             lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = mar22,
                 beløp = 1054,
-                aktør = barn2Aktør
-            )
+                aktør = barn2Aktør,
+            ),
         )
 
         val nåværendeAndeler = listOf(
@@ -235,21 +235,21 @@ class BehandlingsresultatOpphørUtilsTest {
                 fom = jan22,
                 tom = mar22,
                 beløp = 1054,
-                aktør = barn1Aktør
+                aktør = barn1Aktør,
             ),
             lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = mar22,
                 beløp = 1054,
-                aktør = barn2Aktør
-            )
+                aktør = barn2Aktør,
+            ),
         )
 
         val opphørsresultat = hentOpphørsresultatPåBehandling(
             nåværendeAndeler = nåværendeAndeler,
             forrigeAndeler = forrigeAndeler,
             nåværendeEndretAndeler = emptyList(),
-            forrigeEndretAndeler = emptyList()
+            forrigeEndretAndeler = emptyList(),
         )
 
         assertEquals(Opphørsresultat.FORTSATT_OPPHØRT, opphørsresultat)
@@ -269,14 +269,14 @@ class BehandlingsresultatOpphørUtilsTest {
                 fom = jan22,
                 tom = aug22,
                 beløp = 1054,
-                aktør = barn1Aktør
+                aktør = barn1Aktør,
             ),
             lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = mar22,
                 beløp = 1054,
-                aktør = barn2Aktør
-            )
+                aktør = barn2Aktør,
+            ),
         )
 
         val nåværendeAndeler = listOf(
@@ -284,21 +284,21 @@ class BehandlingsresultatOpphørUtilsTest {
                 fom = jan22,
                 tom = aug22,
                 beløp = 1054,
-                aktør = barn1Aktør
+                aktør = barn1Aktør,
             ),
             lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = mar22,
                 beløp = 1054,
-                aktør = barn2Aktør
-            )
+                aktør = barn2Aktør,
+            ),
         )
 
         val opphørsresultat = hentOpphørsresultatPåBehandling(
             nåværendeAndeler = nåværendeAndeler,
             forrigeAndeler = forrigeAndeler,
             nåværendeEndretAndeler = emptyList(),
-            forrigeEndretAndeler = emptyList()
+            forrigeEndretAndeler = emptyList(),
         )
 
         assertEquals(Opphørsresultat.IKKE_OPPHØRT, opphørsresultat)
@@ -315,20 +315,20 @@ class BehandlingsresultatOpphørUtilsTest {
                 fom = jan22,
                 tom = feb22,
                 beløp = 0,
-                aktør = barnAktør
+                aktør = barnAktør,
             ),
             lagAndelTilkjentYtelse(
                 fom = mar22,
                 tom = mai22,
                 beløp = 1400,
-                aktør = barnAktør
+                aktør = barnAktør,
             ),
             lagAndelTilkjentYtelse(
                 fom = aug22,
                 tom = aug22,
                 beløp = 0,
-                aktør = barnAktør
-            )
+                aktør = barnAktør,
+            ),
         )
 
         val endretUtBetalingAndeler =
@@ -338,15 +338,15 @@ class BehandlingsresultatOpphørUtilsTest {
                     prosent = BigDecimal.ZERO,
                     fom = jan22,
                     tom = feb22,
-                    årsak = årsak
+                    årsak = årsak,
                 ),
                 lagEndretUtbetalingAndel(
                     person = barn,
                     prosent = BigDecimal.ZERO,
                     fom = aug22,
                     tom = aug22,
-                    årsak = årsak
-                )
+                    årsak = årsak,
+                ),
             )
 
         val andelerEtterFiltrering = andeler.filtrerBortIrrelevanteAndeler(endretUtBetalingAndeler)
@@ -365,20 +365,20 @@ class BehandlingsresultatOpphørUtilsTest {
                 fom = jan22,
                 tom = feb22,
                 beløp = 0,
-                aktør = barnAktør
+                aktør = barnAktør,
             ),
             lagAndelTilkjentYtelse(
                 fom = mar22,
                 tom = mai22,
                 beløp = 1400,
-                aktør = barnAktør
+                aktør = barnAktør,
             ),
             lagAndelTilkjentYtelse(
                 fom = aug22,
                 tom = aug22,
                 beløp = 0,
-                aktør = barnAktør
-            )
+                aktør = barnAktør,
+            ),
         )
 
         val endretUtBetalingAndeler =
@@ -388,15 +388,15 @@ class BehandlingsresultatOpphørUtilsTest {
                     prosent = BigDecimal.ZERO,
                     fom = jan22,
                     tom = feb22,
-                    årsak = Årsak.DELT_BOSTED
+                    årsak = Årsak.DELT_BOSTED,
                 ),
                 lagEndretUtbetalingAndel(
                     person = barn,
                     prosent = BigDecimal.ZERO,
                     fom = aug22,
                     tom = aug22,
-                    årsak = Årsak.DELT_BOSTED
-                )
+                    årsak = Årsak.DELT_BOSTED,
+                ),
             )
 
         val andelerEtterFiltrering = andeler.filtrerBortIrrelevanteAndeler(endretUtBetalingAndeler)
@@ -418,22 +418,22 @@ class BehandlingsresultatOpphørUtilsTest {
                 tom = feb22,
                 beløp = 0,
                 differanseberegnetPeriodebeløp = 50,
-                aktør = søkerAktør
+                aktør = søkerAktør,
             ),
             lagAndelTilkjentYtelse(
                 fom = mar22,
                 tom = mai22,
                 beløp = 0,
                 differanseberegnetPeriodebeløp = 50,
-                aktør = barnAktør
+                aktør = barnAktør,
             ),
             lagAndelTilkjentYtelse(
                 fom = aug22,
                 tom = aug22,
                 beløp = 0,
                 differanseberegnetPeriodebeløp = 50,
-                aktør = barnAktør
-            )
+                aktør = barnAktør,
+            ),
         )
 
         val andelerEtterFiltrering = andeler.filtrerBortIrrelevanteAndeler(endretAndeler = emptyList())

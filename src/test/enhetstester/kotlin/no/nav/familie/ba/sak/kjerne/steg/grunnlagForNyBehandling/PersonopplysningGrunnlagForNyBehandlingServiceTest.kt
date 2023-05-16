@@ -23,8 +23,8 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
         PersonopplysningGrunnlagForNyBehandlingService(
             personidentService = personidentService,
             beregningService = beregningService,
-            persongrunnlagService = persongrunnlagService
-        )
+            persongrunnlagService = persongrunnlagService,
+        ),
     )
 
     @Test
@@ -53,7 +53,7 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
                 any(),
                 any(),
                 any(),
-                any()
+                any(),
             )
         } returns PersonopplysningGrunnlag(behandlingId = behandling.id)
 
@@ -61,7 +61,7 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
             behandling = behandling,
             forrigeBehandlingSomErVedtatt = forrigeBehandling,
             søkerIdent = søkerFnr,
-            barnasIdenter = listOf(barnFnr)
+            barnasIdenter = listOf(barnFnr),
         )
         verify(exactly = 1) {
             persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
@@ -69,7 +69,7 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
                 barnFraInneværendeBehandling = listOf(barn.aktør),
                 barnFraForrigeBehandling = listOf(barnFraForrigeBehandling.aktør),
                 behandling = behandling,
-                målform = søker.målform
+                målform = søker.målform,
             )
         }
     }

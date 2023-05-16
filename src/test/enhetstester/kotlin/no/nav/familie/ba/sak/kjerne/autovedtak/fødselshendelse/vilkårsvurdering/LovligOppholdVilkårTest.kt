@@ -53,7 +53,7 @@ class LovligOppholdVilkårTest {
             statsløsPerson.copy().apply {
                 opphold =
                     mutableListOf(GrOpphold(gyldigPeriode = null, type = OPPHOLDSTILLATELSE.MIDLERTIDIG, person = this))
-            }
+            },
         ).evaluering
         assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
 
@@ -61,7 +61,7 @@ class LovligOppholdVilkårTest {
             ukjentStatsborger.copy().apply {
                 opphold =
                     mutableListOf(GrOpphold(gyldigPeriode = null, type = OPPHOLDSTILLATELSE.MIDLERTIDIG, person = this))
-            }
+            },
         ).evaluering
         assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
 
@@ -72,10 +72,10 @@ class LovligOppholdVilkårTest {
                         GrOpphold(
                             gyldigPeriode = null,
                             type = OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER,
-                            person = this
-                        )
+                            person = this,
+                        ),
                     )
-            }
+            },
         ).evaluering
         assertThat(evaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
     }
@@ -88,20 +88,20 @@ class LovligOppholdVilkårTest {
                     GrStatsborgerskap(
                         landkode = "ANG",
                         medlemskap = Medlemskap.TREDJELANDSBORGER,
-                        person = tredjelandsborger
-                    )
+                        person = tredjelandsborger,
+                    ),
                 ),
                 opphold = mutableListOf(
                     GrOpphold(
                         gyldigPeriode = DatoIntervallEntitet(
                             fom = LocalDate.now().minusYears(10),
-                            tom = LocalDate.now().minusYears(5)
+                            tom = LocalDate.now().minusYears(5),
                         ),
                         type = OPPHOLDSTILLATELSE.MIDLERTIDIG,
-                        person = tredjelandsborger
-                    )
-                )
-            )
+                        person = tredjelandsborger,
+                    ),
+                ),
+            ),
         ).evaluering
         assertThat(evaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
 
@@ -111,13 +111,13 @@ class LovligOppholdVilkårTest {
                     GrOpphold(
                         gyldigPeriode = DatoIntervallEntitet(
                             fom = LocalDate.now().minusYears(10),
-                            tom = LocalDate.now().minusYears(5)
+                            tom = LocalDate.now().minusYears(5),
                         ),
                         type = OPPHOLDSTILLATELSE.MIDLERTIDIG,
-                        person = this
-                    )
+                        person = this,
+                    ),
                 )
-            }
+            },
         ).evaluering
         assertThat(evaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
     }
@@ -130,28 +130,28 @@ class LovligOppholdVilkårTest {
                     GrStatsborgerskap(
                         landkode = "ANG",
                         medlemskap = Medlemskap.TREDJELANDSBORGER,
-                        person = tredjelandsborger
-                    )
+                        person = tredjelandsborger,
+                    ),
                 ),
                 opphold = mutableListOf(
                     GrOpphold(
                         gyldigPeriode = DatoIntervallEntitet(
                             fom = LocalDate.now().minusYears(10),
-                            tom = LocalDate.now().minusYears(5)
+                            tom = LocalDate.now().minusYears(5),
                         ),
                         type = OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER,
-                        person = tredjelandsborger
+                        person = tredjelandsborger,
                     ),
                     GrOpphold(
                         gyldigPeriode = DatoIntervallEntitet(
                             fom = LocalDate.now().minusYears(5),
-                            tom = null
+                            tom = null,
                         ),
                         type = OPPHOLDSTILLATELSE.MIDLERTIDIG,
-                        person = tredjelandsborger
-                    )
-                )
-            )
+                        person = tredjelandsborger,
+                    ),
+                ),
+            ),
         ).evaluering
         assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
 
@@ -161,21 +161,21 @@ class LovligOppholdVilkårTest {
                     GrOpphold(
                         gyldigPeriode = DatoIntervallEntitet(
                             fom = LocalDate.now().minusYears(10),
-                            tom = LocalDate.now().minusYears(5)
+                            tom = LocalDate.now().minusYears(5),
                         ),
                         type = OPPHOLDSTILLATELSE.OPPLYSNING_MANGLER,
-                        person = this
+                        person = this,
                     ),
                     GrOpphold(
                         gyldigPeriode = DatoIntervallEntitet(
                             fom = LocalDate.now().minusYears(5),
-                            tom = null
+                            tom = null,
                         ),
                         type = OPPHOLDSTILLATELSE.MIDLERTIDIG,
-                        person = this
-                    )
+                        person = this,
+                    ),
                 )
-            }
+            },
         ).evaluering
         assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
     }
@@ -189,10 +189,10 @@ class LovligOppholdVilkårTest {
                         periode = DatoIntervallEntitet(fom = null, tom = LocalDate.now().plusMonths(6)),
                         arbeidsgiverId = null,
                         arbeidsgiverType = null,
-                        person = this
-                    )
+                        person = this,
+                    ),
                 )
-            }
+            },
         ).evaluering
         assertEquals(Resultat.OPPFYLT, evaluering.resultat)
         assertEquals(listOf(VilkårOppfyltÅrsak.EØS_MED_LØPENDE_ARBEIDSFORHOLD), evaluering.evalueringÅrsaker)
@@ -204,7 +204,7 @@ class LovligOppholdVilkårTest {
             person = eøsBorger.copy().apply {
                 arbeidsforhold = mutableListOf()
             },
-            annenForelder = null
+            annenForelder = null,
         ).evaluering
         assertEquals(Resultat.IKKE_OPPFYLT, evaluering.resultat)
         assertEquals(listOf(VilkårIkkeOppfyltÅrsak.EØS_STATSBORGERSKAP_ANNEN_FORELDER_UKLART), evaluering.evalueringÅrsaker)
@@ -223,15 +223,15 @@ class LovligOppholdVilkårTest {
                     opprettAdresse(
                         adressenavn = "Fågelveien",
                         husnummer = "123",
-                        postnummer = "0245"
-                    )
-                )
-            )
+                        postnummer = "0245",
+                    ),
+                ),
+            ),
         ).evaluering
         assertEquals(Resultat.IKKE_OPPFYLT, evaluering.resultat)
         assertEquals(
             listOf(VilkårIkkeOppfyltÅrsak.EØS_BOR_IKKE_SAMMEN_MED_ANNEN_FORELDER),
-            evaluering.evalueringÅrsaker
+            evaluering.evalueringÅrsaker,
         )
     }
 
@@ -240,7 +240,7 @@ class LovligOppholdVilkårTest {
         val tidligereAdresse = opprettAdresse(adressenavn = "Uteveien", husnummer = "123", postnummer = "0245").also {
             it.periode = DatoIntervallEntitet(
                 fom = LocalDate.now().minusYears(2),
-                tom = LocalDate.now().minusYears(1)
+                tom = LocalDate.now().minusYears(1),
             )
         }
 
@@ -250,7 +250,7 @@ class LovligOppholdVilkårTest {
                 bostedsadresser =
                     mutableListOf(
                         tidligereAdresse,
-                        opprettAdresse(adressenavn = "Osloveien", husnummer = "123", postnummer = "0245")
+                        opprettAdresse(adressenavn = "Osloveien", husnummer = "123", postnummer = "0245"),
                     )
             },
             annenForelder = annenForelderNordiskBorger.copy(
@@ -259,15 +259,15 @@ class LovligOppholdVilkårTest {
                     opprettAdresse(
                         adressenavn = "Fågelveien",
                         husnummer = "123",
-                        postnummer = "0245"
-                    )
-                )
-            )
+                        postnummer = "0245",
+                    ),
+                ),
+            ),
         ).evaluering
         assertEquals(Resultat.IKKE_OPPFYLT, evaluering.resultat)
         assertEquals(
             listOf(VilkårIkkeOppfyltÅrsak.EØS_BOR_IKKE_SAMMEN_MED_ANNEN_FORELDER),
-            evaluering.evalueringÅrsaker
+            evaluering.evalueringÅrsaker,
         )
     }
 
@@ -282,14 +282,14 @@ class LovligOppholdVilkårTest {
             },
             annenForelder = annenForelderNordiskBorger.copy(
                 bostedsadresser = mutableListOf(
-                    adresse
-                )
-            )
+                    adresse,
+                ),
+            ),
         ).evaluering
         assertEquals(Resultat.OPPFYLT, evaluering.resultat)
         assertEquals(
             listOf(VilkårOppfyltÅrsak.ANNEN_FORELDER_NORDISK),
-            evaluering.evalueringÅrsaker
+            evaluering.evalueringÅrsaker,
         )
     }
 
@@ -304,15 +304,15 @@ class LovligOppholdVilkårTest {
             },
             annenForelder = annenForelderEØS.copy(
                 bostedsadresser = mutableListOf(
-                    adresse
+                    adresse,
                 ),
-                arbeidsforhold = mutableListOf()
-            )
+                arbeidsforhold = mutableListOf(),
+            ),
         ).evaluering
         assertEquals(Resultat.IKKE_OPPFYLT, evaluering.resultat)
         assertEquals(
             listOf(VilkårIkkeOppfyltÅrsak.EØS_ANNEN_FORELDER_EØS_MEN_IKKE_MED_LØPENDE_ARBEIDSFORHOLD),
-            evaluering.evalueringÅrsaker
+            evaluering.evalueringÅrsaker,
         )
     }
 
@@ -327,22 +327,22 @@ class LovligOppholdVilkårTest {
             },
             annenForelder = annenForelderEØS.copy().apply {
                 bostedsadresser = mutableListOf(
-                    adresse
+                    adresse,
                 )
                 arbeidsforhold = mutableListOf(
                     GrArbeidsforhold(
                         periode = DatoIntervallEntitet(fom = null, tom = LocalDate.now().plusMonths(6)),
                         arbeidsgiverId = null,
                         arbeidsgiverType = null,
-                        person = this
-                    )
+                        person = this,
+                    ),
                 )
-            }
+            },
         ).evaluering
         assertEquals(Resultat.OPPFYLT, evaluering.resultat)
         assertEquals(
             listOf(VilkårOppfyltÅrsak.ANNEN_FORELDER_EØS_MEN_MED_LØPENDE_ARBEIDSFORHOLD),
-            evaluering.evalueringÅrsaker
+            evaluering.evalueringÅrsaker,
         )
     }
 
@@ -358,12 +358,12 @@ class LovligOppholdVilkårTest {
             annenForelder = tredjelandsborger.copy().apply {
                 bostedsadresser =
                     mutableListOf(adresse)
-            }
+            },
         ).evaluering
         assertEquals(Resultat.IKKE_OPPFYLT, evaluering.resultat)
         assertEquals(
             listOf(VilkårIkkeOppfyltÅrsak.EØS_MEDFORELDER_TREDJELANDSBORGER),
-            evaluering.evalueringÅrsaker
+            evaluering.evalueringÅrsaker,
         )
     }
 
@@ -379,12 +379,12 @@ class LovligOppholdVilkårTest {
             annenForelder = statsløsPerson.copy().apply {
                 bostedsadresser =
                     mutableListOf(adresse)
-            }
+            },
         ).evaluering
         assertEquals(Resultat.IKKE_OPPFYLT, evaluering.resultat)
         assertEquals(
             listOf(VilkårIkkeOppfyltÅrsak.EØS_MEDFORELDER_STATSLØS),
-            evaluering.evalueringÅrsaker
+            evaluering.evalueringÅrsaker,
         )
     }
 
@@ -400,16 +400,16 @@ class LovligOppholdVilkårTest {
                 GrStatsborgerskap(
                     landkode = "ANG",
                     medlemskap = Medlemskap.TREDJELANDSBORGER,
-                    person = tredjelandsborger
-                )
+                    person = tredjelandsborger,
+                ),
             ),
             opphold = mutableListOf(
                 GrOpphold(
                     gyldigPeriode = periode,
                     type = oppholdstillatelse,
-                    person = tredjelandsborger
-                )
-            )
+                    person = tredjelandsborger,
+                ),
+            ),
         )
     }
 
@@ -421,8 +421,8 @@ class LovligOppholdVilkårTest {
                 GrStatsborgerskap(
                     landkode = "ANG",
                     medlemskap = Medlemskap.TREDJELANDSBORGER,
-                    person = this
-                )
+                    person = this,
+                ),
             )
         }
         val eøsBorger = tilfeldigPerson(personType = PersonType.SØKER).apply {
@@ -430,8 +430,8 @@ class LovligOppholdVilkårTest {
                 GrStatsborgerskap(
                     landkode = "POL",
                     medlemskap = Medlemskap.EØS,
-                    person = this
-                )
+                    person = this,
+                ),
             )
         }
         val annenForelderNordiskBorger = tilfeldigPerson(personType = PersonType.SØKER).apply {
@@ -439,8 +439,8 @@ class LovligOppholdVilkårTest {
                 GrStatsborgerskap(
                     landkode = "NOR",
                     medlemskap = Medlemskap.NORDEN,
-                    person = this
-                )
+                    person = this,
+                ),
             )
         }
         val annenForelderEØS = tilfeldigPerson(personType = PersonType.SØKER).apply {
@@ -448,8 +448,8 @@ class LovligOppholdVilkårTest {
                 GrStatsborgerskap(
                     landkode = "POL",
                     medlemskap = Medlemskap.EØS,
-                    person = this
-                )
+                    person = this,
+                ),
             )
         }
         val statsløsPerson = tilfeldigPerson(personType = PersonType.SØKER).apply {
@@ -457,8 +457,8 @@ class LovligOppholdVilkårTest {
                 GrStatsborgerskap(
                     landkode = "XXX",
                     medlemskap = Medlemskap.STATSLØS,
-                    person = this
-                )
+                    person = this,
+                ),
             )
         }
         val ukjentStatsborger = tilfeldigPerson(personType = PersonType.SØKER).apply {
@@ -466,8 +466,8 @@ class LovligOppholdVilkårTest {
                 GrStatsborgerskap(
                     landkode = "XUK",
                     medlemskap = Medlemskap.UKJENT,
-                    person = this
-                )
+                    person = this,
+                ),
             )
         }
 

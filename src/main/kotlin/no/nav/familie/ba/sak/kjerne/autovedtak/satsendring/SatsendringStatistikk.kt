@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit
 @Component
 class SatsendringStatistikk(
     private val fagsakRepository: FagsakRepository,
-    private val satskjøringRepository: SatskjøringRepository
+    private val satskjøringRepository: SatskjøringRepository,
 ) {
 
     val satsendringGauge =
@@ -25,7 +25,7 @@ class SatsendringStatistikk(
     @Scheduled(
         fixedDelay = 60,
         timeUnit = TimeUnit.MINUTES,
-        initialDelay = 5
+        initialDelay = 5,
     )
     fun antallSatsendringerKjørt() {
         try {
@@ -39,31 +39,31 @@ class SatsendringStatistikk(
                 MultiGauge.Row.of(
                     Tags.of(
                         "satsendring",
-                        "totalt"
+                        "totalt",
                     ),
-                    antallTriggetTotalt
+                    antallTriggetTotalt,
                 ),
                 MultiGauge.Row.of(
                     Tags.of(
                         "satsendring",
-                        "antallkjort"
+                        "antallkjort",
                     ),
-                    antallKjørt
+                    antallKjørt,
                 ),
                 MultiGauge.Row.of(
                     Tags.of(
                         "satsendring",
-                        "antallfagsaker"
+                        "antallfagsaker",
                     ),
-                    antallLøpendeFagsakerTotalt
+                    antallLøpendeFagsakerTotalt,
                 ),
                 MultiGauge.Row.of(
                     Tags.of(
                         "satsendring",
-                        "antallgjenstaaende"
+                        "antallgjenstaaende",
                     ),
-                    antallLøpendeFagsakerTotalt - antallKjørt
-                )
+                    antallLøpendeFagsakerTotalt - antallKjørt,
+                ),
             )
 
             satsendringGauge.register(rows)

@@ -27,10 +27,10 @@ internal class BehandleFødselshendelseTaskTest {
                 BehandleFødselshendelseTaskDTO(
                     nyBehandling = NyBehandlingHendelse(
                         morsIdent = randomFnr(),
-                        barnasIdenter = listOf("61031999277")
-                    )
-                )
-            )
+                        barnasIdenter = listOf("61031999277"),
+                    ),
+                ),
+            ),
         )
         verify { autovedtakStegService.kjørBehandlingFødselshendelse(any(), any()) }
     }
@@ -44,10 +44,10 @@ internal class BehandleFødselshendelseTaskTest {
                 BehandleFødselshendelseTaskDTO(
                     nyBehandling = NyBehandlingHendelse(
                         morsIdent = randomFnr(),
-                        barnasIdenter = listOf("31018721832")
-                    )
-                )
-            )
+                        barnasIdenter = listOf("31018721832"),
+                    ),
+                ),
+            ),
         )
         verify { autovedtakStegService.kjørBehandlingFødselshendelse(any(), any()) }
     }
@@ -60,14 +60,14 @@ internal class BehandleFødselshendelseTaskTest {
                     every {
                         kjørBehandlingFødselshendelse(
                             any(),
-                            any()
+                            any(),
                         )
                     } returns ""
                 },
                 velgFagsystemService = mockk<VelgFagSystemService>().apply {
                     every<Pair<FagsystemRegelVurdering, FagsystemUtfall>> { velgFagsystem(any()) } returns Pair(
                         FagsystemRegelVurdering.SEND_TIL_BA,
-                        FagsystemUtfall.IVERKSATTE_BEHANDLINGER_I_BA_SAK
+                        FagsystemUtfall.IVERKSATTE_BEHANDLINGER_I_BA_SAK,
                     )
                 },
                 infotrygdFeedService = mockk(),
@@ -75,32 +75,32 @@ internal class BehandleFødselshendelseTaskTest {
                 startSatsendring = mockk<StartSatsendring>().apply {
                     every {
                         sjekkOgOpprettSatsendringVedGammelSats(
-                            any<String>()
+                            any<String>(),
                         )
                     } returns true
-                }
+                },
             ).doTask(
                 BehandleFødselshendelseTask.opprettTask(
                     BehandleFødselshendelseTaskDTO(
                         nyBehandling = NyBehandlingHendelse(
                             morsIdent = randomFnr(),
-                            barnasIdenter = listOf("31018721832")
-                        )
-                    )
-                )
+                            barnasIdenter = listOf("31018721832"),
+                        ),
+                    ),
+                ),
             )
         }
     }
 
     private fun settOppBehandleFødselshendelseTask(
-        autovedtakStegService: AutovedtakStegService
+        autovedtakStegService: AutovedtakStegService,
     ): BehandleFødselshendelseTask =
         BehandleFødselshendelseTask(
             autovedtakStegService = autovedtakStegService,
             velgFagsystemService = mockk<VelgFagSystemService>().apply {
                 every<Pair<FagsystemRegelVurdering, FagsystemUtfall>> { velgFagsystem(any()) } returns Pair(
                     FagsystemRegelVurdering.SEND_TIL_BA,
-                    FagsystemUtfall.IVERKSATTE_BEHANDLINGER_I_BA_SAK
+                    FagsystemUtfall.IVERKSATTE_BEHANDLINGER_I_BA_SAK,
                 )
             },
             infotrygdFeedService = mockk(),
@@ -108,9 +108,9 @@ internal class BehandleFødselshendelseTaskTest {
             startSatsendring = mockk<StartSatsendring>().apply {
                 every {
                     sjekkOgOpprettSatsendringVedGammelSats(
-                        any<String>()
+                        any<String>(),
                     )
                 } returns false
-            }
+            },
         )
 }

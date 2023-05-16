@@ -10,7 +10,7 @@ open class Feil(
     open val frontendFeilmelding: String? = null,
     open val httpStatus: HttpStatus = HttpStatus.OK,
     open val throwable: Throwable? = null,
-    override val cause: Throwable? = throwable
+    override val cause: Throwable? = throwable,
 
 ) : RuntimeException(message)
 
@@ -19,7 +19,7 @@ open class FunksjonellFeil(
     open val frontendFeilmelding: String? = melding,
     open val httpStatus: HttpStatus = HttpStatus.OK,
     open val throwable: Throwable? = null,
-    override val cause: Throwable? = throwable
+    override val cause: Throwable? = throwable,
 ) : RuntimeException(melding)
 
 class UtbetalingsikkerhetFeil(
@@ -27,12 +27,12 @@ class UtbetalingsikkerhetFeil(
     override val frontendFeilmelding: String? = null,
     override val httpStatus: HttpStatus = HttpStatus.OK,
     override val throwable: Throwable? = null,
-    override val cause: Throwable? = throwable
+    override val cause: Throwable? = throwable,
 ) : FunksjonellFeil(
     melding,
     frontendFeilmelding,
     httpStatus,
-    throwable
+    throwable,
 )
 
 class RolleTilgangskontrollFeil(
@@ -40,12 +40,12 @@ class RolleTilgangskontrollFeil(
     override val frontendFeilmelding: String = melding,
     override val httpStatus: HttpStatus = HttpStatus.OK,
     override val throwable: Throwable? = null,
-    override val cause: Throwable? = throwable
+    override val cause: Throwable? = throwable,
 ) : FunksjonellFeil(
     melding,
     frontendFeilmelding,
     httpStatus,
-    throwable
+    throwable,
 )
 
 class PdlRequestException(message: String) : Feil(message)
@@ -60,7 +60,7 @@ data class EksternTjenesteFeil(
     val status: HttpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
     var exception: String? = null,
     val timestamp: LocalDateTime = LocalDateTime.now(),
-    var stackTrace: String? = null
+    var stackTrace: String? = null,
 ) {
     lateinit var melding: String
 }
@@ -69,7 +69,7 @@ open class EksternTjenesteFeilException(
     val eksternTjenesteFeil: EksternTjenesteFeil,
     val melding: String,
     val request: Any?,
-    val throwable: Throwable? = null
+    val throwable: Throwable? = null,
 ) : RuntimeException(melding, throwable) {
 
     init {
@@ -82,6 +82,6 @@ open class EksternTjenesteFeilException(
             |   eksternTjeneste=$eksternTjenesteFeil
             |   request=$request
             |   throwable=$throwable)
-        """.trimMargin()
+            """.trimMargin()
     }
 }

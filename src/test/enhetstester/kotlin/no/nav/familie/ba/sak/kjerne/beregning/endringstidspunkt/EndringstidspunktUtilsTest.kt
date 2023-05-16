@@ -14,7 +14,7 @@ class EndringstidspunktUtilsTest {
             endringstidspunktUtbetalingsbeløp = YearMonth.of(2020, 1),
             endringstidspunktKompetanse = YearMonth.of(2019, 12),
             endringstidspunktVilkårsvurdering = YearMonth.of(2017, 5),
-            endringstidspunktEndretUtbetalingAndeler = null
+            endringstidspunktEndretUtbetalingAndeler = null,
         )
 
         assertEquals(LocalDate.of(2017, 5, 1), endringstidspunkt)
@@ -26,7 +26,7 @@ class EndringstidspunktUtilsTest {
             endringstidspunktUtbetalingsbeløp = null,
             endringstidspunktKompetanse = null,
             endringstidspunktVilkårsvurdering = null,
-            endringstidspunktEndretUtbetalingAndeler = null
+            endringstidspunktEndretUtbetalingAndeler = null,
         )
 
         assertEquals(TIDENES_ENDE, endringstidspunkt)

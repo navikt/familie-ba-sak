@@ -25,7 +25,7 @@ class SkatteetatenService(
     private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
     private val fagsakRepository: FagsakRepository,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
-    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 ) {
     @Cacheable("skatt_personer", cacheManager = "skattPersonerCache", unless = "#result == null")
     fun finnPersonerMedUtvidetBarnetrygd(år: String): SkatteetatenPersonerResponse {
@@ -72,8 +72,8 @@ class SkatteetatenService(
                         ident = personIdent,
                         perioder = perioder,
                         sisteVedtakPaaIdent = resultatBaSakForPerson?.sisteVedtakPaaIdent
-                            ?: resultatInfotrygdForPerson!!.sisteVedtakPaaIdent
-                    )
+                            ?: resultatInfotrygdForPerson!!.sisteVedtakPaaIdent,
+                    ),
                 )
             }
         }
@@ -85,14 +85,14 @@ class SkatteetatenService(
     private fun hentPersonerMedUtvidetBarnetrygd(år: String): List<SkatteetatenPerson> {
         return fagsakRepository.finnFagsakerMedUtvidetBarnetrygdInnenfor(
             fom = LocalDate.of(år.toInt(), 1, 1).atStartOfDay(),
-            tom = LocalDate.of(år.toInt() + 1, 1, 1).atStartOfDay()
+            tom = LocalDate.of(år.toInt() + 1, 1, 1).atStartOfDay(),
         )
             .map { SkatteetatenPerson(it.fnr, it.sisteVedtaksdato.atStartOfDay()) }
     }
 
     private fun hentPerioderMedUtvidetBarnetrygdFraBaSak(
         personer: List<String>,
-        år: String
+        år: String,
     ): List<SkatteetatenPerioder> {
         val stonadPerioder = hentUtvidetStonadPerioderForPersoner(personer, år)
         val aktivAndelTilkjentYtelsePeriode = mutableListOf<AndelTilkjentYtelsePeriode>()
@@ -116,8 +116,8 @@ class SkatteetatenService(
                     SkatteetatenPeriode(
                         fraMaaned = period.getFom().format(DateTimeFormatter.ofPattern("yyyy-MM")),
                         delingsprosent = period.getProsent().tilDelingsprosent(),
-                        tomMaaned = period.getTom().format(DateTimeFormatter.ofPattern("yyyy-MM"))
-                    )
+                        tomMaaned = period.getTom().format(DateTimeFormatter.ofPattern("yyyy-MM")),
+                    ),
                 )
                 val samletPerioder = if (perioderMap.containsKey(ident)) {
                     perioderMap[ident]!!.perioder + nyList
@@ -134,21 +134,21 @@ class SkatteetatenService(
                 ident = it.second.ident,
                 sisteVedtakPaaIdent = it.second.sisteVedtakPaaIdent,
                 perioder = it.second.perioder.groupBy { periode -> periode.delingsprosent }.values
-                    .flatMap(::slåSammenSkatteetatenPeriode).toMutableList()
+                    .flatMap(::slåSammenSkatteetatenPeriode).toMutableList(),
             )
         }
     }
 
     private fun hentUtvidetStonadPerioderForPersoner(
         personIdenter: List<String>,
-        år: String
+        år: String,
     ): List<AndelTilkjentYtelsePeriode> {
         val yearStart = LocalDateTime.of(år.toInt(), 1, 1, 0, 0, 0)
         val yearEnd = LocalDateTime.of(år.toInt(), 12, 31, 23, 59, 59)
         return andelTilkjentYtelseRepository.finnPerioderMedUtvidetBarnetrygdForPersoner(
             personIdenter,
             yearStart,
-            yearEnd
+            yearEnd,
         )
     }
 

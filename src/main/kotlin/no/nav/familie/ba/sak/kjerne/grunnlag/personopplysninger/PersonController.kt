@@ -32,13 +32,13 @@ class PersonController(
     private val personidentService: PersonidentService,
     private val familieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient,
     private val utvidetBehandlingService: UtvidetBehandlingService,
-    private val tilgangService: TilgangService
+    private val tilgangService: TilgangService,
 ) {
 
     @GetMapping
     fun hentPerson(
         @RequestHeader personIdent: String,
-        @RequestBody personIdentBody: PersonIdent?
+        @RequestBody personIdentBody: PersonIdent?,
     ): ResponseEntity<Ressurs<RestPersonInfo>> {
         val aktør = personidentService.hentAktør(personIdent)
         val personinfo = familieIntegrasjonerTilgangskontrollClient.hentMaskertPersonInfoVedManglendeTilgang(aktør)
@@ -50,7 +50,7 @@ class PersonController(
     @GetMapping(path = ["/enkel"])
     fun hentPersonEnkel(
         @RequestHeader personIdent: String,
-        @RequestBody personIdentBody: PersonIdent?
+        @RequestBody personIdentBody: PersonIdent?,
     ): ResponseEntity<Ressurs<RestPersonInfo>> {
         val aktør = personidentService.hentAktør(personIdent)
         val personinfo = familieIntegrasjonerTilgangskontrollClient.hentMaskertPersonInfoVedManglendeTilgang(aktør)
@@ -61,7 +61,7 @@ class PersonController(
 
     @GetMapping(path = ["/adresse"])
     fun hentPersonAdresse(
-        @RequestHeader personIdent: String
+        @RequestHeader personIdent: String,
     ): ResponseEntity<Ressurs<RestPersonInfo>> {
         val aktør = personidentService.hentAktør(personIdent)
         val personinfo = familieIntegrasjonerTilgangskontrollClient.hentMaskertPersonInfoVedManglendeTilgang(aktør)
@@ -78,8 +78,8 @@ class PersonController(
         return ResponseEntity.ok(
             Ressurs.success(
                 utvidetBehandlingService
-                    .lagRestUtvidetBehandling(behandlingId = personopplysningGrunnlag.behandlingId)
-            )
+                    .lagRestUtvidetBehandling(behandlingId = personopplysningGrunnlag.behandlingId),
+            ),
         )
     }
 }

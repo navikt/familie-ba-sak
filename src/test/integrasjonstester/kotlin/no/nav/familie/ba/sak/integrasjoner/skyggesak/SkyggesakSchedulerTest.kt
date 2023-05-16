@@ -41,7 +41,7 @@ class SkyggesakSchedulerTest {
     fun `Skal sende skyggesak for fagsak med sendtTidspunkt null`() {
         val sendtTidspunkt = listOf(null, LocalDateTime.now())
         skyggesakRepository.saveAll(
-            sendtTidspunkt.mapIndexed { i, tid -> Skyggesak(i.toLong(), fagsakId = i.toLong(), sendtTidspunkt = tid) }
+            sendtTidspunkt.mapIndexed { i, tid -> Skyggesak(i.toLong(), fagsakId = i.toLong(), sendtTidspunkt = tid) },
         )
 
         every { skyggesakScheduler.fagsakRepository.finnFagsak(any()) } returns Fagsak(aktør = Aktør("1234567890123"))
@@ -60,7 +60,7 @@ class SkyggesakSchedulerTest {
         val sendtTidspunkt = listOf(now.minusDays(13), now.minusDays(14), null)
 
         skyggesakRepository.saveAll(
-            sendtTidspunkt.mapIndexed { i, tid -> Skyggesak(i.toLong(), fagsakId = i.toLong(), sendtTidspunkt = tid) }
+            sendtTidspunkt.mapIndexed { i, tid -> Skyggesak(i.toLong(), fagsakId = i.toLong(), sendtTidspunkt = tid) },
         )
 
         Assertions.assertEquals(2, skyggesakRepository.finnSkyggesakerSomErSendt().size)
@@ -69,11 +69,11 @@ class SkyggesakSchedulerTest {
         // Sjekker at usendt skyggesak ikke er slettet, samt skyggesak sendt for mindre enn 14 dager siden
         Assertions.assertEquals(
             null,
-            skyggesakRepository.finnSkyggesakerKlareForSending(Pageable.unpaged()).single().sendtTidspunkt
+            skyggesakRepository.finnSkyggesakerKlareForSending(Pageable.unpaged()).single().sendtTidspunkt,
         )
         Assertions.assertEquals(
             now.minusDays(13).toLocalDate(),
-            skyggesakRepository.finnSkyggesakerSomErSendt().single().sendtTidspunkt?.toLocalDate()
+            skyggesakRepository.finnSkyggesakerSomErSendt().single().sendtTidspunkt?.toLocalDate(),
         )
     }
 }

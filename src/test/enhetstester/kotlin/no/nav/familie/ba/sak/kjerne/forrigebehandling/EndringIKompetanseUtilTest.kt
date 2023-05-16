@@ -32,21 +32,21 @@ class EndringIKompetanseUtilTest {
                 annenForeldersAktivitetsland = "PO",
                 kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
                 fom = jan22,
-                tom = mai22
+                tom = mai22,
             )
 
         val nåværendeKompetanse = forrigeKompetanse.copy().apply { behandlingId = nåværendeBehandling.id }
 
         val perioderMedEndring = EndringIKompetanseUtil.lagEndringIKompetanseTidslinje(
             nåværendeKompetanser = listOf(nåværendeKompetanse),
-            forrigeKompetanser = listOf(forrigeKompetanse)
+            forrigeKompetanser = listOf(forrigeKompetanse),
         ).perioder().filter { it.innhold == true }
 
         Assertions.assertTrue(perioderMedEndring.isEmpty())
 
         val endringstidspunkt = EndringIKompetanseUtil.utledEndringstidspunktForKompetanse(
             nåværendeKompetanser = listOf(nåværendeKompetanse),
-            forrigeKompetanser = listOf(forrigeKompetanse)
+            forrigeKompetanser = listOf(forrigeKompetanse),
         )
 
         Assertions.assertNull(endringstidspunkt)
@@ -67,16 +67,16 @@ class EndringIKompetanseUtilTest {
                 annenForeldersAktivitetsland = "PO",
                 kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
                 fom = jan22,
-                tom = mai22
+                tom = mai22,
             )
 
         val nåværendeKompetanse = forrigeKompetanse.copy(søkersAktivitetsland = "DK").apply { behandlingId = nåværendeBehandling.id }
 
         val perioderMedEndring = EndringIKompetanseUtil.lagEndringIKompetanseTidslinje(
             nåværendeKompetanser = listOf(
-                nåværendeKompetanse
+                nåværendeKompetanse,
             ),
-            forrigeKompetanser = listOf(forrigeKompetanse)
+            forrigeKompetanser = listOf(forrigeKompetanse),
         ).perioder().filter { it.innhold == true }
 
         Assertions.assertEquals(1, perioderMedEndring.size)
@@ -85,9 +85,9 @@ class EndringIKompetanseUtilTest {
 
         val endringstidspunkt = EndringIKompetanseUtil.utledEndringstidspunktForKompetanse(
             nåværendeKompetanser = listOf(
-                nåværendeKompetanse
+                nåværendeKompetanse,
             ),
-            forrigeKompetanser = listOf(forrigeKompetanse)
+            forrigeKompetanser = listOf(forrigeKompetanse),
         )
 
         Assertions.assertEquals(jan22, endringstidspunkt)
@@ -108,7 +108,7 @@ class EndringIKompetanseUtilTest {
                 annenForeldersAktivitetsland = "PO",
                 kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
                 fom = YearMonth.now().minusMonths(6),
-                tom = null
+                tom = null,
             )
 
         val nåværendeKompetanse = forrigeKompetanse.copy(fom = YearMonth.now().minusMonths(10))
@@ -116,18 +116,18 @@ class EndringIKompetanseUtilTest {
 
         val perioderMedEndring = EndringIKompetanseUtil.lagEndringIKompetanseTidslinje(
             nåværendeKompetanser = listOf(
-                nåværendeKompetanse
+                nåværendeKompetanse,
             ),
-            forrigeKompetanser = listOf(forrigeKompetanse)
+            forrigeKompetanser = listOf(forrigeKompetanse),
         ).perioder().filter { it.innhold == true }
 
         Assertions.assertTrue(perioderMedEndring.isEmpty())
 
         val endringstidspunkt = EndringIKompetanseUtil.utledEndringstidspunktForKompetanse(
             nåværendeKompetanser = listOf(
-                nåværendeKompetanse
+                nåværendeKompetanse,
             ),
-            forrigeKompetanser = listOf(forrigeKompetanse)
+            forrigeKompetanser = listOf(forrigeKompetanse),
         )
 
         Assertions.assertNull(endringstidspunkt)
@@ -148,7 +148,7 @@ class EndringIKompetanseUtilTest {
                 annenForeldersAktivitetsland = null,
                 kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
                 fom = YearMonth.now().minusMonths(6),
-                tom = null
+                tom = null,
             )
 
         val nåværendeKompetanse =
@@ -162,23 +162,23 @@ class EndringIKompetanseUtilTest {
                 annenForeldersAktivitetsland = "PO",
                 kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
                 fom = YearMonth.now().minusMonths(6),
-                tom = null
+                tom = null,
             )
 
         val perioderMedEndring = EndringIKompetanseUtil.lagEndringIKompetanseTidslinje(
             nåværendeKompetanser = listOf(
-                nåværendeKompetanse
+                nåværendeKompetanse,
             ),
-            forrigeKompetanser = listOf(forrigeKompetanse)
+            forrigeKompetanser = listOf(forrigeKompetanse),
         ).perioder().filter { it.innhold == true }
 
         Assertions.assertTrue(perioderMedEndring.isEmpty())
 
         val endringstidspunkt = EndringIKompetanseUtil.utledEndringstidspunktForKompetanse(
             nåværendeKompetanser = listOf(
-                nåværendeKompetanse
+                nåværendeKompetanse,
             ),
-            forrigeKompetanser = listOf(forrigeKompetanse)
+            forrigeKompetanser = listOf(forrigeKompetanse),
         )
 
         Assertions.assertNull(endringstidspunkt)

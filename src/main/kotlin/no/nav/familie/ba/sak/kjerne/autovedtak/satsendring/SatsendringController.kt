@@ -33,7 +33,7 @@ class SatsendringController(
     private val startSatsendring: StartSatsendring,
     private val tilgangService: TilgangService,
     private val opprettTaskService: OpprettTaskService,
-    private val satsendringService: SatsendringService
+    private val satsendringService: SatsendringService,
 ) {
     private val logger = LoggerFactory.getLogger(SatsendringController::class.java)
 
@@ -55,7 +55,7 @@ class SatsendringController(
             fagsakId = fagsakId,
             handling = "Valider vi kan kjøre satsendring",
             event = AuditLoggerEvent.UPDATE,
-            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER
+            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
         )
 
         startSatsendring.gjennomførSatsendringManuelt(fagsakId)
@@ -78,7 +78,7 @@ class SatsendringController(
     @PostMapping(path = ["/henleggBehandlingerMedLangFristSenereEnn/{valideringsdato}"])
     fun henleggBehandlingerMedLangLiggetid(
         @RequestBody behandlinger: Set<String>,
-        @PathVariable valideringsdato: String
+        @PathVariable valideringsdato: String,
     ): ResponseEntity<Ressurs<String>> {
         val dato = try {
             LocalDate.parse(valideringsdato).also { assert(it.isAfter(LocalDate.now().plusMonths(1))) }
@@ -90,7 +90,7 @@ class SatsendringController(
                 behandlingId = it.toLong(),
                 årsak = HenleggÅrsak.TEKNISK_VEDLIKEHOLD,
                 begrunnelse = SATSENDRING,
-                validerOppgavefristErEtterDato = dato
+                validerOppgavefristErEtterDato = dato,
             )
         }
         return ResponseEntity.ok(Ressurs.Companion.success("Trigget henleggelse for ${behandlinger.size} behandlinger"))
@@ -99,7 +99,7 @@ class SatsendringController(
     @PostMapping(path = ["/lukkAapneBehandlingerSatsendring"])
     fun lukkÅpneBehandlingerDetIkkeErKjørtSatsendringPå(
         @RequestParam(value = "opprettTask", required = true) opprettTask: Boolean,
-        @RequestParam(value = "antall", required = true) antall: Int
+        @RequestParam(value = "antall", required = true) antall: Int,
     ) {
         val åpneBehandlinger = satsendringService.finnSatskjøringerSomHarStoppetPgaÅpenBehandling()
         åpneBehandlinger.take(antall).forEach {
@@ -109,7 +109,7 @@ class SatsendringController(
                         behandlingId = it.behandlingId,
                         årsak = HenleggÅrsak.TEKNISK_VEDLIKEHOLD,
                         begrunnelse = SATSENDRING,
-                        validerOppgavefristErEtterDato = null
+                        validerOppgavefristErEtterDato = null,
                     )
                 } else {
                     logger.info("Skulle ha trigget henleggBehandlingTask for fagsakIs=${it.fagsakId} behandlingId=${it.behandlingId}")

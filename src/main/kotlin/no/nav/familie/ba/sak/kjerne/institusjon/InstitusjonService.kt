@@ -9,15 +9,15 @@ import org.springframework.stereotype.Service
 class InstitusjonService(
     val fagsakRepository: FagsakRepository,
     val samhandlerKlient: SamhandlerKlient,
-    val institusjonRepository: InstitusjonRepository
+    val institusjonRepository: InstitusjonRepository,
 ) {
 
     fun hentEllerOpprettInstitusjon(orgNummer: String, tssEksternId: String?): Institusjon {
         return institusjonRepository.findByOrgNummer(orgNummer) ?: institusjonRepository.saveAndFlush(
             Institusjon(
                 orgNummer = orgNummer,
-                tssEksternId = tssEksternId
-            )
+                tssEksternId = tssEksternId,
+            ),
         )
     }
 

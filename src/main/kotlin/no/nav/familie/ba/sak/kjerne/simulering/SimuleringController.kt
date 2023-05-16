@@ -19,18 +19,18 @@ import org.springframework.web.bind.annotation.RestController
 class SimuleringController(
     private val simuleringService: SimuleringService,
     private val tilgangService: TilgangService,
-    private val featureToggleService: FeatureToggleService
+    private val featureToggleService: FeatureToggleService,
 ) {
 
     @GetMapping(path = ["/{behandlingId}/simulering"])
     fun hentSimulering(
-        @PathVariable behandlingId: Long
+        @PathVariable behandlingId: Long,
     ): ResponseEntity<Ressurs<RestSimulering>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
         val vedtakSimuleringMottaker = simuleringService.oppdaterSimuleringPåBehandlingVedBehov(behandlingId)
         val restSimulering = vedtakSimuleringMottakereTilRestSimulering(
             økonomiSimuleringMottakere = vedtakSimuleringMottaker,
-            erManuellPosteringTogglePå = featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ)
+            erManuellPosteringTogglePå = featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ),
         )
         return ResponseEntity.ok(Ressurs.success(restSimulering))
     }

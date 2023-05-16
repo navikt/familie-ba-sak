@@ -41,5 +41,5 @@ data class DbOppgave(
     val opprettetTidspunkt: LocalDateTime = LocalDateTime.now(),
 
     @Column(name = "ferdigstilt", nullable = false, updatable = true)
-    var erFerdigstilt: Boolean = false
+    var erFerdigstilt: Boolean = false,
 )

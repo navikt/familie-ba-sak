@@ -41,14 +41,14 @@ class OppgaveController(
     private val integrasjonClient: IntegrasjonClient,
     private val personopplysningerService: PersonopplysningerService,
     private val tilgangService: TilgangService,
-    private val innkommendeJournalføringService: InnkommendeJournalføringService
+    private val innkommendeJournalføringService: InnkommendeJournalføringService,
 ) {
     private val logger = LoggerFactory.getLogger(OppgaveController::class.java)
 
     @PostMapping(
         path = ["/hent-oppgaver"],
         consumes = [MediaType.APPLICATION_JSON_VALUE],
-        produces = [MediaType.APPLICATION_JSON_VALUE]
+        produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     fun hentOppgaver(@RequestBody restFinnOppgaveRequest: RestFinnOppgaveRequest): ResponseEntity<Ressurs<FinnOppgaveResponseDto>> =
         try {
@@ -62,18 +62,18 @@ class OppgaveController(
     @PostMapping(path = ["/{oppgaveId}/fordel"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun fordelOppgave(
         @PathVariable(name = "oppgaveId") oppgaveId: Long,
-        @RequestParam("saksbehandler") saksbehandler: String
+        @RequestParam("saksbehandler") saksbehandler: String,
     ): ResponseEntity<Ressurs<String>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "fordele oppgave"
+            handling = "fordele oppgave",
         )
 
         val oppgaveIdFraRespons =
             oppgaveService.fordelOppgave(
                 oppgaveId = oppgaveId,
                 saksbehandler = saksbehandler,
-                overstyrFordeling = false
+                overstyrFordeling = false,
             )
 
         return ResponseEntity.ok().body(Ressurs.success(oppgaveIdFraRespons))
@@ -83,14 +83,14 @@ class OppgaveController(
     fun tilbakestillFordelingPåOppgave(@PathVariable(name = "oppgaveId") oppgaveId: Long): ResponseEntity<Ressurs<Oppgave>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "tilbakestille fordeling på oppgave"
+            handling = "tilbakestille fordeling på oppgave",
         )
 
         Result.runCatching {
             oppgaveService.tilbakestillFordelingPåOppgave(oppgaveId)
         }.fold(
             onSuccess = { return ResponseEntity.ok().body(Ressurs.Companion.success(it)) },
-            onFailure = { return illegalState("Feil ved tilbakestilling av tildeling på oppgave", it) }
+            onFailure = { return illegalState("Feil ved tilbakestilling av tildeling på oppgave", it) },
         )
     }
 
@@ -106,7 +106,7 @@ class OppgaveController(
                 personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(it)
                     .tilRestPersonInfo(it.aktivFødselsnummer())
             },
-            minimalFagsak = if (aktør != null) fagsakService.hentMinimalFagsakForPerson(aktør).data else null
+            minimalFagsak = if (aktør != null) fagsakService.hentMinimalFagsakForPerson(aktør).data else null,
         )
 
         val journalpost: Journalpost? =
@@ -120,9 +120,9 @@ class OppgaveController(
             else -> ResponseEntity.ok(
                 Ressurs.success(
                     dataForManuellJournalføring.copy(
-                        journalpost = journalpost
-                    )
-                )
+                        journalpost = journalpost,
+                    ),
+                ),
             )
         }
     }
@@ -131,7 +131,7 @@ class OppgaveController(
     fun ferdigstillOppgave(@PathVariable oppgaveId: Long): ResponseEntity<Ressurs<String>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "ferdigstill oppgave"
+            handling = "ferdigstill oppgave",
         )
         val oppgave = oppgaveService.hentOppgave(oppgaveId)
         oppgaveService.ferdigstillOppgave(oppgave)
@@ -143,11 +143,11 @@ class OppgaveController(
     fun ferdigstillOppgaveOgKnyttJournalpostTilBehandling(
         @PathVariable oppgaveId: Long,
         @RequestBody @Valid
-        request: RestFerdigstillOppgaveKnyttJournalpost
+        request: RestFerdigstillOppgaveKnyttJournalpost,
     ): ResponseEntity<Ressurs<String?>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "ferdigstill oppgave og knytt journalpost"
+            handling = "ferdigstill oppgave og knytt journalpost",
         )
         // Validerer at oppgave med gitt oppgaveId eksisterer
         oppgaveService.hentOppgave(oppgaveId)
@@ -167,13 +167,13 @@ class OppgaveController(
     @PostMapping("/fjern-behandles-av-applikasjon")
     fun fjernBehandlesAvApplikasjonFor(@RequestBody oppgaver: List<Long>): ResponseEntity<Ressurs<String>> {
         val fjernetBehandlesAvApplikasjonForOppgaver = oppgaveService.fjernBehandlesAvApplikasjon(
-            oppgaver
+            oppgaver,
         )
         logger.info("Fjernet behandlesAvApplikasjon for oppgaver=$fjernetBehandlesAvApplikasjonForOppgaver")
         return ResponseEntity.ok(
             Ressurs.success(
-                "Fjernet behandlesAvApplikasjon for $fjernetBehandlesAvApplikasjonForOppgaver"
-            )
+                "Fjernet behandlesAvApplikasjon for $fjernetBehandlesAvApplikasjonForOppgaver",
+            ),
         )
     }
 }

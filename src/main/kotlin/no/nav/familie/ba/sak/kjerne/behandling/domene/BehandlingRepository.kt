@@ -47,7 +47,7 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
                         AND aty.fk_behandling_id in (SELECT b.id FROM sisteiverksattebehandlingfraløpendefagsak silp 
                                                      INNER JOIN behandling b ON b.fk_fagsak_id = silp.fagsakid
                                                      WHERE b.opprettet_tid = silp.opprettet_tid)""",
-        nativeQuery = true
+        nativeQuery = true,
     )
     fun hentTotalUtbetalingForMåned(måned: LocalDateTime): Long
 
@@ -69,7 +69,7 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
                         SELECT b.id FROM sisteiverksattebehandlingfraløpendefagsak silp 
                         INNER JOIN behandling b ON b.fk_fagsak_id = silp.fagsakid
                         WHERE silp.opprettet_tid = b.opprettet_tid""",
-        nativeQuery = true
+        nativeQuery = true,
     )
     fun finnSisteIverksatteBehandlingFraLøpendeFagsaker(): List<Long>
 
@@ -96,14 +96,14 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
                             GROUP BY fagsakid)
                         
                         SELECT count(b.id) FROM sisteiverksattebehandlingfraløpendefagsak silp JOIN behandling b ON b.fk_fagsak_id = silp.fagsakid WHERE b.opprettet_tid = silp.opprettet_tid""",
-        nativeQuery = true
+        nativeQuery = true,
     )
     fun finnSisteIverksatteBehandlingFraLøpendeFagsaker(page: Pageable): Page<Long>
 
     @Query(
         """select b from Behandling b
                            inner join TilkjentYtelse ty on b.id = ty.behandling.id
-                        where b.fagsak.id = :fagsakId AND ty.utbetalingsoppdrag IS NOT NULL"""
+                        where b.fagsak.id = :fagsakId AND ty.utbetalingsoppdrag IS NOT NULL""",
     )
     fun finnIverksatteBehandlinger(fagsakId: Long): List<Behandling>
 
@@ -119,7 +119,7 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
                     GROUP BY fagsakid)
                 
                 SELECT b.* FROM sisteiverksattebehandlingfraløpendefagsak silp JOIN behandling b ON b.fk_fagsak_id = silp.fagsakid WHERE b.opprettet_tid = silp.opprettet_tid""",
-        nativeQuery = true
+        nativeQuery = true,
     )
     fun finnSisteIverksatteBehandling(fagsakId: Long): Behandling?
 
@@ -127,14 +127,14 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
         """
             select b from Behandling b
                             where b.fagsak.id = :fagsakId and b.status = 'IVERKSETTER_VEDTAK'
-        """
+        """,
     )
     fun finnBehandlingerSomHolderPåÅIverksettes(fagsakId: Long): List<Behandling>
 
     @Query(
         """select b from Behandling b
                            inner join BehandlingStegTilstand bst on b.id = bst.behandling.id
-                        where b.fagsak.id = :fagsakId AND bst.behandlingSteg = 'BESLUTTE_VEDTAK' AND bst.behandlingStegStatus = 'IKKE_UTFØRT'"""
+                        where b.fagsak.id = :fagsakId AND bst.behandlingSteg = 'BESLUTTE_VEDTAK' AND bst.behandlingStegStatus = 'IKKE_UTFØRT'""",
     )
     fun finnBehandlingerSentTilGodkjenning(fagsakId: Long): List<Behandling>
 
@@ -161,7 +161,7 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
     fun finnBehandlingerForSatsendring(
         iverksatteLøpende: List<Long>,
         gammelSats: Int,
-        månedÅrForEndring: YearMonth
+        månedÅrForEndring: YearMonth,
     ): List<Long>
 
     @Query("SELECT new kotlin.Pair(b.opprettetÅrsak, count(*)) from Behandling b group by b.opprettetÅrsak")
@@ -174,7 +174,7 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
         "SELECT new kotlin.Pair(b.id, p.fødselsnummer) from Behandling b " +
             "INNER JOIN Fagsak f ON f.id = b.fagsak.id INNER JOIN Aktør a on f.aktør.aktørId = a.aktørId " +
             "INNER JOIN Personident p on p.aktør.aktørId = a.aktørId " +
-            "where b.id in (:behandlingIder) AND p.aktiv=true AND f.status = 'LØPENDE' "
+            "where b.id in (:behandlingIder) AND p.aktiv=true AND f.status = 'LØPENDE' ",
     )
     fun finnAktivtFødselsnummerForBehandlinger(behandlingIder: List<Long>): List<Pair<Long, String>>
 
@@ -182,7 +182,7 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
         "SELECT new kotlin.Pair(b.id, i.tssEksternId) from Behandling b " +
             "INNER JOIN Fagsak f ON f.id = b.fagsak.id " +
             "INNER JOIN Institusjon i on i.id = f.institusjon.id " +
-            "where b.id in (:behandlingIder) AND f.institusjon IS NOT NULL AND f.status = 'LØPENDE' "
+            "where b.id in (:behandlingIder) AND f.institusjon IS NOT NULL AND f.status = 'LØPENDE' ",
     )
     fun finnTssEksternIdForBehandlinger(behandlingIder: List<Long>): List<Pair<Long, String>>
 }

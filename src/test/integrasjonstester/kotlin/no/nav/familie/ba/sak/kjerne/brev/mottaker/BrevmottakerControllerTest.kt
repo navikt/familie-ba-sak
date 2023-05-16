@@ -18,18 +18,18 @@ internal class BrevmottakerControllerTest(
     @Autowired private val brevmottakerService: BrevmottakerService,
     @Autowired private val aktørIdRepository: AktørIdRepository,
     @Autowired private val fagsakRepository: FagsakRepository,
-    @Autowired private val behandlingRepository: BehandlingRepository
+    @Autowired private val behandlingRepository: BehandlingRepository,
 ) : AbstractSpringIntegrationTest() {
 
     val brevmottakerController = BrevmottakerController(
         brevmottakerService = brevmottakerService,
         tilgangService = mockk(relaxed = true),
-        utvidetBehandlingService = mockk(relaxed = true)
+        utvidetBehandlingService = mockk(relaxed = true),
     )
 
     @Test
     @Tag("integration")
-    fun kanLagreEndreOgSlette() {
+    fun kanLagreOgSlette() {
         val fagsak =
             defaultFagsak(aktør = randomAktør().also { aktørIdRepository.save(it) }).let { fagsakRepository.save(it) }
         val behandling = lagBehandling(fagsak = fagsak).let { behandlingRepository.save(it) }
@@ -42,20 +42,10 @@ internal class BrevmottakerControllerTest(
             null,
             "postnummer",
             "poststed",
-            "NO"
+            "NO",
 
         )
         brevmottakerController.leggTilBrevmottaker(behandling.id, brevmottaker)
-        brevmottakerController.hentBrevmottakere(behandling.id).body?.data!!.apply {
-            brevmottakerController.oppdaterBrevmottaker(
-                behandlingId = behandling.id,
-                mottakerId = first().id!!,
-                brevmottaker = brevmottaker.copy(navn = "endret navn")
-            )
-        }
-        Assertions.assertThat(brevmottakerController.hentBrevmottakere(behandling.id).body?.data!!)
-            .extracting("navn")
-            .containsOnly("endret navn")
 
         brevmottakerController.leggTilBrevmottaker(behandling.id, brevmottaker.copy(type = MottakerType.VERGE))
         brevmottakerController.hentBrevmottakere(behandling.id).body?.data!!.apply {

@@ -42,7 +42,7 @@ class AndelTilkjentYtelseOffsetTest(
     @Autowired private val efSakRestClient: EfSakRestClient,
     @Autowired private val beregningService: BeregningService,
     @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
-    @Autowired private val brevmalService: BrevmalService
+    @Autowired private val brevmalService: BrevmalService,
 ) : AbstractVerdikjedetest() {
     private val barnFødselsdato: LocalDate = LocalDate.now().minusYears(2)
 
@@ -64,14 +64,14 @@ class AndelTilkjentYtelseOffsetTest(
         val behandling1 = fullførBehandling(
             fagsak = fagsak1,
             personScenario = personScenario1,
-            barnFødselsdato = barnFødselsdato
+            barnFødselsdato = barnFødselsdato,
         )
 
         // Legger til småbarnstillegg på søker
         val behandling2: Behandling = fullførRevurderingMedOvergangstonad(
             fagsak = fagsak1,
             personScenario = personScenario1,
-            barnFødselsdato = barnFødselsdato
+            barnFødselsdato = barnFødselsdato,
         )
 
         val andelerBehandling1 = beregningService.hentAndelerTilkjentYtelseForBehandling(behandlingId = behandling1.id)
@@ -97,10 +97,10 @@ class AndelTilkjentYtelseOffsetTest(
                     fødselsdato = barnFødselsdato.toString(),
                     fornavn = "Barn",
                     etternavn = "Barnesen",
-                    bostedsadresser = emptyList()
-                )
-            )
-        )
+                    bostedsadresser = emptyList(),
+                ),
+            ),
+        ),
     )
 
     fun lagFagsak(personScenario: RestScenario): RestMinimalFagsak {
@@ -110,11 +110,11 @@ class AndelTilkjentYtelseOffsetTest(
     fun fullførBehandling(
         fagsak: RestMinimalFagsak,
         personScenario: RestScenario,
-        barnFødselsdato: LocalDate
+        barnFødselsdato: LocalDate,
     ): Behandling {
         val behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
         every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns EksternePerioderResponse(
-            perioder = emptyList()
+            perioder = emptyList(),
         )
 
         val restBehandling: Ressurs<RestUtvidetBehandling> =
@@ -122,7 +122,7 @@ class AndelTilkjentYtelseOffsetTest(
                 søkersIdent = fagsak.søkerFødselsnummer,
                 behandlingType = behandlingType,
                 behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
-                fagsakId = fagsak.id
+                fagsakId = fagsak.id,
             )
         val behandling = behandlingHentOgPersisterService.hent(restBehandling.data!!.behandlingId)
         val restRegistrerSøknad =
@@ -130,14 +130,14 @@ class AndelTilkjentYtelseOffsetTest(
                 søknad = lagSøknadDTO(
                     søkerIdent = fagsak.søkerFødselsnummer,
                     barnasIdenter = personScenario.barna.map { it.ident!! },
-                    underkategori = BehandlingUnderkategori.UTVIDET
+                    underkategori = BehandlingUnderkategori.UTVIDET,
                 ),
-                bekreftEndringerViaFrontend = false
+                bekreftEndringerViaFrontend = false,
             )
         val restUtvidetBehandling: Ressurs<RestUtvidetBehandling> =
             familieBaSakKlient().registrererSøknad(
                 behandlingId = behandling.id,
-                restRegistrerSøknad = restRegistrerSøknad
+                restRegistrerSøknad = restRegistrerSøknad,
             )
 
         return fullførBehandlingFraVilkårsvurderingAlleVilkårOppfylt(
@@ -150,7 +150,7 @@ class AndelTilkjentYtelseOffsetTest(
             stegService = stegService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             lagToken = ::token,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
 
         )
     }
@@ -158,7 +158,7 @@ class AndelTilkjentYtelseOffsetTest(
     fun fullførRevurderingMedOvergangstonad(
         fagsak: RestMinimalFagsak,
         personScenario: RestScenario,
-        barnFødselsdato: LocalDate
+        barnFødselsdato: LocalDate,
     ): Behandling {
         val behandlingType = BehandlingType.REVURDERING
         val behandlingÅrsak = BehandlingÅrsak.SMÅBARNSTILLEGG
@@ -169,9 +169,9 @@ class AndelTilkjentYtelseOffsetTest(
                     personIdent = personScenario.søker.ident!!,
                     fomDato = barnFødselsdato.plusYears(1),
                     tomDato = LocalDate.now().minusMonths(1).førsteDagIInneværendeMåned(),
-                    datakilde = Datakilde.EF
-                )
-            )
+                    datakilde = Datakilde.EF,
+                ),
+            ),
         )
 
         val restUtvidetBehandling: Ressurs<RestUtvidetBehandling> =
@@ -180,7 +180,7 @@ class AndelTilkjentYtelseOffsetTest(
                 behandlingType = behandlingType,
                 behandlingÅrsak = behandlingÅrsak,
                 behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
-                fagsakId = fagsak.id
+                fagsakId = fagsak.id,
             )
 
         return fullførBehandlingFraVilkårsvurderingAlleVilkårOppfylt(
@@ -193,7 +193,7 @@ class AndelTilkjentYtelseOffsetTest(
             stegService = stegService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             lagToken = ::token,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
 
         )
     }

@@ -18,7 +18,7 @@ import java.math.BigDecimal
 fun erForskjellMellomAndelerOgOppdrag(
     andeler: List<AndelTilkjentYtelse>,
     utbetalingsoppdrag: Utbetalingsoppdrag?,
-    fagsakId: Long
+    fagsakId: Long,
 ): Boolean {
     val utbetalingsperioder =
         utbetalingsoppdrag?.utbetalingsperiode
@@ -33,7 +33,7 @@ fun erForskjellMellomAndelerOgOppdrag(
             "Fagsak $fagsakId har sendt utbetalingsperiode(r) til økonomi som ikke har tilsvarende andel tilkjent ytelse." +
                 "\nDet er differanse i perioden(e) ${forskjellMellomAndeleneOgUtbetalingsoppdraget.utbetalingsperioder.tilTidStrenger()}." +
                 "\n\nSiste utbetalingsoppdrag som er sendt til familie-øknonomi på fagsaken er:" +
-                "\n$utbetalingsoppdrag"
+                "\n$utbetalingsoppdrag",
         )
 
         is IngenForskjell -> Unit
@@ -44,7 +44,7 @@ fun erForskjellMellomAndelerOgOppdrag(
 
 private fun hentForskjellIAndelerOgUtbetalingsoppdrag(
     utbetalingsperioder: List<Utbetalingsperiode>,
-    andeler: List<AndelTilkjentYtelse>
+    andeler: List<AndelTilkjentYtelse>,
 ): AndelOgOppdragForskjell {
     val utbetalingsperioderUtenTilsvarendeAndel = utbetalingsperioder.filter {
         it.erIngenPersonerMedTilsvarendeAndelITidsrommet(andeler)
@@ -58,7 +58,7 @@ private fun hentForskjellIAndelerOgUtbetalingsoppdrag(
 }
 
 private fun Utbetalingsperiode.erIngenPersonerMedTilsvarendeAndelITidsrommet(
-    andeler: List<AndelTilkjentYtelse>
+    andeler: List<AndelTilkjentYtelse>,
 ): Boolean {
     val andelsTidslinjerPerPersonOgYtelsetype = andeler
         .groupBy { Pair(it.aktør, it.type) }
@@ -70,7 +70,7 @@ private fun Utbetalingsperiode.erIngenPersonerMedTilsvarendeAndelITidsrommet(
 }
 
 private fun Utbetalingsperiode.harTilsvarendeAndelerForPersonOgYtelsetype(
-    andelerTidslinjeForEnPersonOgYtelsetype: Tidslinje<BigDecimal, Måned>
+    andelerTidslinjeForEnPersonOgYtelsetype: Tidslinje<BigDecimal, Måned>,
 ): Boolean {
     val erAndelLikUtbetalingTidslinje = this.tilBeløpstidslinje()
         .kombinerMed(andelerTidslinjeForEnPersonOgYtelsetype) { utbetalingsperiode, andel ->
@@ -85,8 +85,8 @@ private fun Utbetalingsperiode.tilBeløpstidslinje(): Tidslinje<BigDecimal, Mån
         Periode(
             fraOgMed = this.vedtakdatoFom.tilMånedTidspunkt(),
             tilOgMed = this.vedtakdatoTom.tilMånedTidspunkt(),
-            innhold = this.sats
-        )
+            innhold = this.sats,
+        ),
     )
 }
 
@@ -95,7 +95,7 @@ private fun List<AndelTilkjentYtelse>.tilBeløpstidslinje(): Tidslinje<BigDecima
         Periode(
             fraOgMed = it.stønadFom.tilTidspunkt(),
             tilOgMed = it.stønadTom.tilTidspunkt(),
-            innhold = it.kalkulertUtbetalingsbeløp.toBigDecimal()
+            innhold = it.kalkulertUtbetalingsbeløp.toBigDecimal(),
         )
     }
 }

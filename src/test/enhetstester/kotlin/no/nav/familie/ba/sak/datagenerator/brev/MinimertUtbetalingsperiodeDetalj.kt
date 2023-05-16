@@ -14,5 +14,5 @@ fun lagMinimertUtbetalingsperiodeDetalj(
     ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD,
     utbetaltPerMnd: Int = sats(YtelseType.ORDINÆR_BARNETRYGD),
     prosent: BigDecimal = BigDecimal.valueOf(100),
-    erPåvirketAvEndring: Boolean = false
+    erPåvirketAvEndring: Boolean = false,
 ) = MinimertUtbetalingsperiodeDetalj(person, ytelseType, utbetaltPerMnd, erPåvirketAvEndring, prosent)

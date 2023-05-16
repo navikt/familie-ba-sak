@@ -25,7 +25,7 @@ class IverksettMotOppdrag(
     private val vedtakService: VedtakService,
     private val featureToggleService: FeatureToggleService,
     private val taskRepository: TaskRepositoryWrapper,
-    private val tilkjentYtelseValideringService: TilkjentYtelseValideringService
+    private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
 ) : BehandlingSteg<IverksettingTaskDTO> {
     private val iverksattOppdrag = Metrics.counter("familie.ba.sak.oppdrag.iverksatt")
 
@@ -35,32 +35,32 @@ class IverksettMotOppdrag(
         val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandlingId = behandling.id)
             ?: throw Feil(
                 message = "Mangler totrinnskontroll ved iverksetting",
-                frontendFeilmelding = "Mangler totrinnskontroll ved iverksetting"
+                frontendFeilmelding = "Mangler totrinnskontroll ved iverksetting",
             )
 
         if (totrinnskontroll.erUgyldig()) {
             throw Feil(
                 message = "Totrinnskontroll($totrinnskontroll) er ugyldig ved iverksetting",
-                frontendFeilmelding = "Totrinnskontroll er ugyldig ved iverksetting"
+                frontendFeilmelding = "Totrinnskontroll er ugyldig ved iverksetting",
             )
         }
 
         if (!totrinnskontroll.godkjent) {
             throw Feil(
                 message = "Prøver å iverksette et underkjent vedtak",
-                frontendFeilmelding = ""
+                frontendFeilmelding = "",
             )
         }
     }
 
     override fun utførStegOgAngiNeste(
         behandling: Behandling,
-        data: IverksettingTaskDTO
+        data: IverksettingTaskDTO,
     ): StegType {
         økonomiService.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(
             vedtak = vedtakService.hent(data.vedtaksId),
             saksbehandlerId = data.saksbehandlerId,
-            andelTilkjentYtelseForUtbetalingsoppdragFactory = AndelTilkjentYtelseForIverksettingFactory()
+            andelTilkjentYtelseForUtbetalingsoppdragFactory = AndelTilkjentYtelseForIverksettingFactory(),
         )
         iverksattOppdrag.increment()
         val forrigeIverksatteBehandling =
@@ -71,8 +71,8 @@ class IverksettMotOppdrag(
             taskRepository.save(
                 SendVedtakTilInfotrygdTask.opprettTask(
                     hentFnrStoenadsmottaker(behandling.fagsak),
-                    behandling.id
-                )
+                    behandling.id,
+                ),
             )
         }
         return hentNesteStegForNormalFlyt(behandling)

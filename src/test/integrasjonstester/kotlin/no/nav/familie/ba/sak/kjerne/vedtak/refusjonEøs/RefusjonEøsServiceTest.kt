@@ -18,7 +18,7 @@ class RefusjonEøsServiceTest(
     @Autowired val refusjonEøsService: RefusjonEøsService,
     @Autowired val aktørIdRepository: AktørIdRepository,
     @Autowired val fagsakRepository: FagsakRepository,
-    @Autowired val behandlingHentOgPersisterService: BehandlingHentOgPersisterService
+    @Autowired val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 ) : AbstractSpringIntegrationTest() {
 
     @Test
@@ -33,7 +33,7 @@ class RefusjonEøsServiceTest(
             tom = LocalDate.of(2021, Month.MAY, 31),
             refusjonsbeløp = 1234,
             land = "SE",
-            refusjonAvklart = true
+            refusjonAvklart = true,
         )
 
         val id = refusjonEøsService.leggTilRefusjonEøsPeriode(refusjonEøs = refusjonEøs, behandlingId = behandling.id)
@@ -50,9 +50,9 @@ class RefusjonEøsServiceTest(
                 tom = LocalDate.of(2020, Month.MAY, 31),
                 refusjonsbeløp = 1,
                 land = "NL",
-                refusjonAvklart = false
+                refusjonAvklart = false,
             ),
-            id = id
+            id = id,
         )
 
         refusjonEøsService.hentRefusjonEøsPerioder(behandlingId = behandling.id)
@@ -68,7 +68,7 @@ class RefusjonEøsServiceTest(
             tom = LocalDate.of(2019, Month.DECEMBER, 31),
             refusjonsbeløp = 100,
             land = "DK",
-            refusjonAvklart = false
+            refusjonAvklart = false,
         )
 
         val id2 = refusjonEøsService.leggTilRefusjonEøsPeriode(refusjonEøs = refusjonEøs2, behandlingId = behandling.id)

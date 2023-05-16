@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class TilbakestillBehandlingFraKompetanseEndringService(
-    private val tilbakestillBehandlingTilBehandlingsresultatService: TilbakestillBehandlingTilBehandlingsresultatService
+    private val tilbakestillBehandlingTilBehandlingsresultatService: TilbakestillBehandlingTilBehandlingsresultatService,
 ) : PeriodeOgBarnSkjemaEndringAbonnent<Kompetanse> {
     override fun skjemaerEndret(behandlingId: BehandlingId, endretTil: Collection<Kompetanse>) {
         tilbakestillBehandlingTilBehandlingsresultatService
@@ -20,7 +20,7 @@ class TilbakestillBehandlingFraKompetanseEndringService(
 
 @Service
 class TilbakestillBehandlingFraUtenlandskPeriodebeløpEndringService(
-    private val tilbakestillBehandlingTilBehandlingsresultatService: TilbakestillBehandlingTilBehandlingsresultatService
+    private val tilbakestillBehandlingTilBehandlingsresultatService: TilbakestillBehandlingTilBehandlingsresultatService,
 ) : PeriodeOgBarnSkjemaEndringAbonnent<UtenlandskPeriodebeløp> {
     override fun skjemaerEndret(behandlingId: BehandlingId, endretTil: Collection<UtenlandskPeriodebeløp>) {
         tilbakestillBehandlingTilBehandlingsresultatService
@@ -30,7 +30,7 @@ class TilbakestillBehandlingFraUtenlandskPeriodebeløpEndringService(
 
 @Service
 class TilbakestillBehandlingFraValutakursEndringService(
-    private val tilbakestillBehandlingTilBehandlingsresultatService: TilbakestillBehandlingTilBehandlingsresultatService
+    private val tilbakestillBehandlingTilBehandlingsresultatService: TilbakestillBehandlingTilBehandlingsresultatService,
 ) : PeriodeOgBarnSkjemaEndringAbonnent<Valutakurs> {
     override fun skjemaerEndret(behandlingId: BehandlingId, endretTil: Collection<Valutakurs>) {
         tilbakestillBehandlingTilBehandlingsresultatService

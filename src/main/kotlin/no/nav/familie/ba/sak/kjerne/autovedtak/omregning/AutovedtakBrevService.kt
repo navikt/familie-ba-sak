@@ -28,7 +28,7 @@ data class AutovedtakBrevBehandlingsdata(
     val aktør: Aktør,
     val behandlingsårsak: BehandlingÅrsak,
     val standardbegrunnelse: Standardbegrunnelse,
-    val fagsakId: Long
+    val fagsakId: Long,
 )
 
 @Service
@@ -40,28 +40,28 @@ class AutovedtakBrevService(
     private val vedtakService: VedtakService,
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val taskRepository: TaskRepositoryWrapper,
-    private val infotrygdService: InfotrygdService
+    private val infotrygdService: InfotrygdService,
 ) : AutovedtakBehandlingService<AutovedtakBrevBehandlingsdata> {
 
     override fun kjørBehandling(
-        behandlingsdata: AutovedtakBrevBehandlingsdata
+        behandlingsdata: AutovedtakBrevBehandlingsdata,
     ): String {
         val behandlingEtterBehandlingsresultat =
             autovedtakService.opprettAutomatiskBehandlingOgKjørTilBehandlingsresultat(
                 aktør = behandlingsdata.aktør,
                 behandlingType = BehandlingType.REVURDERING,
                 behandlingÅrsak = behandlingsdata.behandlingsårsak,
-                fagsakId = behandlingsdata.fagsakId
+                fagsakId = behandlingsdata.fagsakId,
             )
 
         vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(
             vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingEtterBehandlingsresultat.id),
-            standardbegrunnelse = behandlingsdata.standardbegrunnelse
+            standardbegrunnelse = behandlingsdata.standardbegrunnelse,
         )
 
         val opprettetVedtak =
             autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(
-                behandlingEtterBehandlingsresultat
+                behandlingEtterBehandlingsresultat,
             )
 
         opprettTaskJournalførVedtaksbrev(vedtakId = opprettetVedtak.id)
@@ -72,7 +72,7 @@ class AutovedtakBrevService(
     fun skalAutobrevBehandlingOpprettes(
         fagsakId: Long,
         behandlingsårsak: BehandlingÅrsak,
-        standardbegrunnelser: List<Standardbegrunnelse>
+        standardbegrunnelser: List<Standardbegrunnelse>,
     ): Boolean {
         if (!behandlingsårsak.erOmregningsårsak()) {
             throw Feil("Sjekk om autobrevbehandling skal opprettes sjekker på årsak som ikke er omregning.")
@@ -85,7 +85,7 @@ class AutovedtakBrevService(
         if (behandlingService.harBehandlingsårsakAlleredeKjørt(
                 fagsakId = fagsakId,
                 behandlingÅrsak = behandlingsårsak,
-                måned = YearMonth.now()
+                måned = YearMonth.now(),
             )
         ) {
             logger.info("Brev for ${behandlingsårsak.visningsnavn} har allerede kjørt for $fagsakId")
@@ -104,7 +104,7 @@ class AutovedtakBrevService(
 
         if (barnAlleredeBegrunnet(
                 vedtaksperioderMedBegrunnelser = vedtaksperioderForVedtatteBehandlinger,
-                standardbegrunnelser = standardbegrunnelser
+                standardbegrunnelser = standardbegrunnelser,
             )
         ) {
             logger.info("Begrunnelser $standardbegrunnelser for ${behandlingsårsak.visningsnavn} har allerede kjørt for $fagsakId")
@@ -129,18 +129,18 @@ class AutovedtakBrevService(
 
     private fun barnAlleredeBegrunnet(
         vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>,
-        standardbegrunnelser: List<Standardbegrunnelse>
+        standardbegrunnelser: List<Standardbegrunnelse>,
     ): Boolean {
         return vedtaksperioderMedBegrunnelser.erAlleredeBegrunnetMedBegrunnelse(
             standardbegrunnelser = standardbegrunnelser,
-            måned = YearMonth.now()
+            måned = YearMonth.now(),
         )
     }
 
     private fun opprettTaskJournalførVedtaksbrev(vedtakId: Long) {
         val task = Task(
             JournalførVedtaksbrevTask.TASK_STEP_TYPE,
-            "$vedtakId"
+            "$vedtakId",
         )
         taskRepository.save(task)
     }
@@ -154,17 +154,17 @@ private fun BehandlingÅrsak.tilBrevkoder(): List<InfotrygdBrevkode> {
     return when (this) {
         BehandlingÅrsak.OMREGNING_6ÅR -> listOf(
             InfotrygdBrevkode.BREV_BATCH_OMREGNING_BARN_6_ÅR,
-            InfotrygdBrevkode.BREV_MANUELL_OMREGNING_BARN_6_ÅR
+            InfotrygdBrevkode.BREV_MANUELL_OMREGNING_BARN_6_ÅR,
         )
 
         BehandlingÅrsak.OMREGNING_18ÅR -> listOf(
             InfotrygdBrevkode.BREV_BATCH_OMREGNING_BARN_18_ÅR,
-            InfotrygdBrevkode.BREV_MANUELL_OMREGNING_BARN_18_ÅR
+            InfotrygdBrevkode.BREV_MANUELL_OMREGNING_BARN_18_ÅR,
         )
 
         BehandlingÅrsak.OMREGNING_SMÅBARNSTILLEGG -> listOf(
             InfotrygdBrevkode.BREV_BATCH_OPPHØR_SMÅBARNSTILLLEGG,
-            InfotrygdBrevkode.BREV_MANUELL_OPPHØR_SMÅBARNSTILLLEGG
+            InfotrygdBrevkode.BREV_MANUELL_OPPHØR_SMÅBARNSTILLLEGG,
         )
 
         else -> emptyList()

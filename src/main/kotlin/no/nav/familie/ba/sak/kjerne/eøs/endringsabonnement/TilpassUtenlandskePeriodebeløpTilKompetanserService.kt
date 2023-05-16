@@ -23,11 +23,11 @@ import org.springframework.transaction.annotation.Transactional
 class TilpassUtenlandskePeriodebeløpTilKompetanserService(
     utenlandskPeriodebeløpRepository: PeriodeOgBarnSkjemaRepository<UtenlandskPeriodebeløp>,
     endringsabonnenter: Collection<PeriodeOgBarnSkjemaEndringAbonnent<UtenlandskPeriodebeløp>>,
-    private val kompetanseRepository: FinnPeriodeOgBarnSkjemaRepository<Kompetanse>
+    private val kompetanseRepository: FinnPeriodeOgBarnSkjemaRepository<Kompetanse>,
 ) : PeriodeOgBarnSkjemaEndringAbonnent<Kompetanse> {
     val skjemaService = PeriodeOgBarnSkjemaService(
         utenlandskPeriodebeløpRepository,
-        endringsabonnenter
+        endringsabonnenter,
     )
 
     @Transactional
@@ -44,26 +44,26 @@ class TilpassUtenlandskePeriodebeløpTilKompetanserService(
 
     private fun tilpassUtenlandskPeriodebeløpTilKompetanser(
         behandlingId: BehandlingId,
-        gjeldendeKompetanser: Collection<Kompetanse>
+        gjeldendeKompetanser: Collection<Kompetanse>,
     ) {
         val forrigeUtenlandskePeriodebeløp = skjemaService.hentMedBehandlingId(behandlingId)
 
         val oppdaterteUtenlandskPeriodebeløp = tilpassUtenlandskePeriodebeløpTilKompetanser(
             forrigeUtenlandskePeriodebeløp,
-            gjeldendeKompetanser
+            gjeldendeKompetanser,
         ).medBehandlingId(behandlingId)
 
         skjemaService.lagreDifferanseOgVarsleAbonnenter(
             behandlingId,
             forrigeUtenlandskePeriodebeløp,
-            oppdaterteUtenlandskPeriodebeløp
+            oppdaterteUtenlandskPeriodebeløp,
         )
     }
 }
 
 internal fun tilpassUtenlandskePeriodebeløpTilKompetanser(
     forrigeUtenlandskePeriodebeløp: Iterable<UtenlandskPeriodebeløp>,
-    gjeldendeKompetanser: Iterable<Kompetanse>
+    gjeldendeKompetanser: Iterable<Kompetanse>,
 ): Collection<UtenlandskPeriodebeløp> {
     val barnasKompetanseTidslinjer = gjeldendeKompetanser
         .tilSeparateTidslinjerForBarna()

@@ -38,7 +38,7 @@ class Autobrev6og18ÅrFortsattOpphørtTest(
     @Autowired private val stegService: StegService,
     @Autowired private val autobrev6og18ÅrService: Autobrev6og18ÅrService,
     @Autowired private val brevmalService: BrevmalService,
-    @Autowired private val featureToggleService: FeatureToggleService
+    @Autowired private val featureToggleService: FeatureToggleService,
 ) : AbstractVerdikjedetest() {
 
     @Test
@@ -53,16 +53,16 @@ class Autobrev6og18ÅrFortsattOpphørtTest(
                         fødselsdato = LocalDate.now().minusYears(18).toString(),
                         fornavn = "AttenåringEn",
                         etternavn = "Barnesen",
-                        bostedsadresser = emptyList()
+                        bostedsadresser = emptyList(),
                     ),
                     RestScenarioPerson(
                         fødselsdato = LocalDate.now().minusYears(18).plusMonths(1).toString(),
                         fornavn = "AttenåringTo",
                         etternavn = "Barnesen",
-                        bostedsadresser = emptyList()
-                    )
-                )
-            )
+                        bostedsadresser = emptyList(),
+                    ),
+                ),
+            ),
         )
 
         val fagsakId = familieBaSakKlient().opprettFagsak(søkersIdent = scenario.søker.ident!!).data?.id!!
@@ -75,14 +75,14 @@ class Autobrev6og18ÅrFortsattOpphørtTest(
             RestRegistrerSøknad(
                 søknad = lagSøknadDTO(
                     søkerIdent = scenario.søker.ident,
-                    barnasIdenter = scenario.barna.map { it.ident!! }
+                    barnasIdenter = scenario.barna.map { it.ident!! },
                 ),
-                bekreftEndringerViaFrontend = false
+                bekreftEndringerViaFrontend = false,
             )
         val restUtvidetBehandling: Ressurs<RestUtvidetBehandling> =
             familieBaSakKlient().registrererSøknad(
                 behandlingId = aktivBehandling.behandlingId,
-                restRegistrerSøknad = restRegistrerSøknad
+                restRegistrerSøknad = restRegistrerSøknad,
             )
 
         // Godkjenner alle vilkår på førstegangsbehandling.
@@ -96,27 +96,27 @@ class Autobrev6og18ÅrFortsattOpphørtTest(
                         vilkårResultater = listOf(
                             it.copy(
                                 resultat = Resultat.OPPFYLT,
-                                periodeFom = LocalDate.now().minusMonths(2)
-                            )
-                        )
-                    )
+                                periodeFom = LocalDate.now().minusMonths(2),
+                            ),
+                        ),
+                    ),
                 )
             }
         }
 
         familieBaSakKlient().validerVilkårsvurdering(
-            behandlingId = restUtvidetBehandling.data!!.behandlingId
+            behandlingId = restUtvidetBehandling.data!!.behandlingId,
         )
 
         val restUtvidetBehandlingEtterBehandlingsresultat =
             familieBaSakKlient().behandlingsresultatStegOgGåVidereTilNesteSteg(
-                behandlingId = restUtvidetBehandling.data!!.behandlingId
+                behandlingId = restUtvidetBehandling.data!!.behandlingId,
             )
 
         val restUtvidetBehandlingEtterVurderTilbakekreving =
             familieBaSakKlient().lagreTilbakekrevingOgGåVidereTilNesteSteg(
                 restUtvidetBehandlingEtterBehandlingsresultat.data!!.behandlingId,
-                RestTilbakekreving(Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING, begrunnelse = "begrunnelse")
+                RestTilbakekreving(Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING, begrunnelse = "begrunnelse"),
             )
 
         val førsteVedtaksperiodeId =
@@ -126,9 +126,9 @@ class Autobrev6og18ÅrFortsattOpphørtTest(
             vedtaksperiodeId = førsteVedtaksperiodeId.id,
             restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
                 standardbegrunnelser = listOf(
-                    Standardbegrunnelse.INNVILGET_BOR_HOS_SØKER.enumnavnTilString()
-                )
-            )
+                    Standardbegrunnelse.INNVILGET_BOR_HOS_SØKER.enumnavnTilString(),
+                ),
+            ),
         )
 
         val restUtvidetBehandlingEtterSendTilBeslutter =
@@ -137,7 +137,7 @@ class Autobrev6og18ÅrFortsattOpphørtTest(
         familieBaSakKlient().iverksettVedtak(
             behandlingId = restUtvidetBehandlingEtterSendTilBeslutter.data!!.behandlingId,
             restBeslutningPåVedtak = RestBeslutningPåVedtak(
-                Beslutning.GODKJENT
+                Beslutning.GODKJENT,
             ),
             beslutterHeaders = HttpHeaders().apply {
                 setBearerAuth(
@@ -146,11 +146,11 @@ class Autobrev6og18ÅrFortsattOpphørtTest(
                             "groups" to listOf("SAKSBEHANDLER", "BESLUTTER"),
                             "azp" to "azp-test",
                             "name" to "Mock McMockface Beslutter",
-                            "NAVident" to "Z0000"
-                        )
-                    )
+                            "NAVident" to "Z0000",
+                        ),
+                    ),
                 )
-            }
+            },
         )
 
         håndterIverksettingAvBehandling(
@@ -159,7 +159,7 @@ class Autobrev6og18ÅrFortsattOpphørtTest(
             fagsakService = fagsakService,
             vedtakService = vedtakService,
             stegService = stegService,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
 
         )
 
@@ -167,8 +167,8 @@ class Autobrev6og18ÅrFortsattOpphørtTest(
             autobrev6og18ÅrDTO = Autobrev6og18ÅrDTO(
                 fagsakId = fagsakId,
                 alder = 18,
-                årMåned = inneværendeMåned()
-            )
+                årMåned = inneværendeMåned(),
+            ),
         )
 
         val behandlinger = behandlingHentOgPersisterService.hentBehandlinger(fagsakId)

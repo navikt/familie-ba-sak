@@ -45,13 +45,13 @@ class ECBServiceTest {
         val ecbExchangeRatesData = createECBResponse(
             Frequency.Daily,
             listOf(Pair("NOK", BigDecimal.valueOf(10.337)), Pair("SEK", BigDecimal.valueOf(10.6543))),
-            valutakursDato.toString()
+            valutakursDato.toString(),
         )
         every {
             ecbClient.hentValutakurs(
                 Frequency.Daily,
                 listOf("NOK", "SEK"),
-                valutakursDato
+                valutakursDato,
             )
         } returns ecbExchangeRatesData.toExchangeRates()
         val SEKtilNOKValutakurs = ecbService.hentValutakurs("SEK", valutakursDato)
@@ -64,13 +64,13 @@ class ECBServiceTest {
         val ecbExchangeRatesData = createECBResponse(
             Frequency.Daily,
             listOf(Pair("NOK", BigDecimal.valueOf(10.337))),
-            valutakursDato.toString()
+            valutakursDato.toString(),
         )
         every {
             ecbClient.hentValutakurs(
                 Frequency.Daily,
                 listOf("NOK", "SEK"),
-                valutakursDato
+                valutakursDato,
             )
         } returns ecbExchangeRatesData.toExchangeRates()
         assertThrows<ECBServiceException> { ecbService.hentValutakurs("SEK", valutakursDato) }
@@ -82,13 +82,13 @@ class ECBServiceTest {
         val ecbExchangeRatesData = createECBResponse(
             Frequency.Daily,
             listOf(Pair("NOK", BigDecimal.valueOf(10.337)), Pair("SEK", BigDecimal.valueOf(10.6543))),
-            valutakursDato.minusDays(1).toString()
+            valutakursDato.minusDays(1).toString(),
         )
         every {
             ecbClient.hentValutakurs(
                 Frequency.Daily,
                 listOf("NOK", "SEK"),
-                valutakursDato
+                valutakursDato,
             )
         } returns ecbExchangeRatesData.toExchangeRates()
         assertThrows<ECBServiceException> { ecbService.hentValutakurs("SEK", valutakursDato) }
@@ -101,13 +101,13 @@ class ECBServiceTest {
         val ecbExchangeRatesData = createECBResponse(
             Frequency.Daily,
             listOf(Pair("NOK", BigDecimal.valueOf(9.4567))),
-            valutakursDato.toString()
+            valutakursDato.toString(),
         )
         every {
             ecbClient.hentValutakurs(
                 Frequency.Daily,
                 listOf("NOK", "EUR"),
-                valutakursDato
+                valutakursDato,
             )
         } returns ecbExchangeRatesData.toExchangeRates()
         assertEquals(nokTilEur, ecbService.hentValutakurs("EUR", valutakursDato))
@@ -116,7 +116,7 @@ class ECBServiceTest {
     private fun createECBResponse(
         frequency: Frequency,
         exchangeRates: List<Pair<String, BigDecimal>>,
-        exchangeRateDate: String
+        exchangeRateDate: String,
     ): ECBExchangeRatesData {
         return ECBExchangeRatesData(
             ECBExchangeRatesDataSet(
@@ -124,17 +124,17 @@ class ECBServiceTest {
                     ECBExchangeRatesForCurrency(
                         listOf(
                             ECBExchangeRateKey("CURRENCY", it.first),
-                            ECBExchangeRateKey("FREQ", frequency.toFrequencyParam())
+                            ECBExchangeRateKey("FREQ", frequency.toFrequencyParam()),
                         ),
                         listOf(
                             ECBExchangeRate(
                                 ECBExchangeRateDate(exchangeRateDate),
-                                ECBExchangeRateValue((it.second))
-                            )
-                        )
+                                ECBExchangeRateValue((it.second)),
+                            ),
+                        ),
                     )
-                }
-            )
+                },
+            ),
         )
     }
 }

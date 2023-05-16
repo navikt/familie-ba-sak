@@ -30,7 +30,7 @@ object OppdragParser {
                 opprettetDato = LocalDate.now(),
                 endretDato = LocalDate.now(),
                 utbetalingsoppdrag = null,
-                andelerTilkjentYtelse = andeler
+                andelerTilkjentYtelse = andeler,
             )
             andeler.forEach { it.tilkjentYtelse = tilkjentYtelse }
 
@@ -40,7 +40,7 @@ object OppdragParser {
 
     private fun parseAndelder(
         behandling: Behandling,
-        rader: List<Map<String, String>>
+        rader: List<Map<String, String>>,
     ): MutableSet<AndelTilkjentYtelse> {
         val erUtenAndeler = (parseValgfriBoolean(DomenebegrepTilkjentYtelse.UTEN_ANDELER, rader.first()) ?: false)
         return if (erUtenAndeler) {
@@ -52,7 +52,7 @@ object OppdragParser {
 
     fun mapForventetUtbetalingsoppdrag(
         dataTable: DataTable,
-        medUtbetalingsperiode: Boolean = true
+        medUtbetalingsperiode: Boolean = true,
     ): List<ForventetUtbetalingsoppdrag> {
         return dataTable.groupByBehandlingId().map { (behandlingId, rader) ->
             val rad = rader.first()
@@ -60,7 +60,7 @@ object OppdragParser {
             ForventetUtbetalingsoppdrag(
                 behandlingId = behandlingId,
                 kodeEndring = parseEnum(DomenebegrepUtbetalingsoppdrag.KODE_ENDRING, rad),
-                utbetalingsperiode = if (medUtbetalingsperiode) rader.map { mapForventetUtbetalingsperiode(it) } else listOf()
+                utbetalingsperiode = if (medUtbetalingsperiode) rader.map { mapForventetUtbetalingsperiode(it) } else listOf(),
             )
         }
     }
@@ -75,7 +75,8 @@ object OppdragParser {
                 ?: YtelseType.ORDINÆR_BARNETRYGD,
             fom = parseÅrMåned(Domenebegrep.FRA_DATO, it).atDay(1),
             tom = parseÅrMåned(Domenebegrep.TIL_DATO, it).atEndOfMonth(),
-            opphør = parseValgfriÅrMåned(DomenebegrepUtbetalingsoppdrag.OPPHØRSDATO, it)?.atDay(1)
+            opphør = parseValgfriÅrMåned(DomenebegrepUtbetalingsoppdrag.OPPHØRSDATO, it)?.atDay(1),
+            kildebehandlingId = parseValgfriLong(DomenebegrepTilkjentYtelse.KILDEBEHANDLING_ID, it),
         )
 
     private fun validerAlleKodeEndringerLike(rader: List<Map<String, String>>) {
@@ -88,7 +89,7 @@ object OppdragParser {
 
     private fun mapAndelTilkjentYtelse(
         rad: Map<String, String>,
-        behandling: Behandling
+        behandling: Behandling,
     ): AndelTilkjentYtelse {
         val ytelseType =
             parseValgfriEnum(DomenebegrepTilkjentYtelse.YTELSE_TYPE, rad) ?: YtelseType.ORDINÆR_BARNETRYGD
@@ -99,10 +100,10 @@ object OppdragParser {
             beløp = parseInt(DomenebegrepTilkjentYtelse.BELØP, rad),
             behandling = behandling,
             tilkjentYtelse = null,
-            kildeBehandlingId = parseLong(DomenebegrepTilkjentYtelse.KILDEBEHANDLING_ID, rad),
+            kildeBehandlingId = parseValgfriLong(DomenebegrepTilkjentYtelse.KILDEBEHANDLING_ID, rad),
             aktør = parseAktør(rad),
             periodeIdOffset = parseValgfriLong(DomenebegrepUtbetalingsoppdrag.PERIODE_ID, rad),
-            forrigeperiodeIdOffset = parseValgfriLong(DomenebegrepUtbetalingsoppdrag.FORRIGE_PERIODE_ID, rad)
+            forrigeperiodeIdOffset = parseValgfriLong(DomenebegrepUtbetalingsoppdrag.FORRIGE_PERIODE_ID, rad),
         )
     }
 
@@ -121,7 +122,7 @@ enum class DomenebegrepTilkjentYtelse(override val nøkkel: String) : Domenenøk
     UTEN_ANDELER("Uten andeler"),
     BELØP("Beløp"),
     KILDEBEHANDLING_ID("Kildebehandling"),
-    IDENT("Ident")
+    IDENT("Ident"),
 }
 
 enum class DomenebegrepUtbetalingsoppdrag(override val nøkkel: String) : Domenenøkkel {
@@ -131,13 +132,13 @@ enum class DomenebegrepUtbetalingsoppdrag(override val nøkkel: String) : Domene
     FORRIGE_PERIODE_ID("Forrige periode id"),
     BELØP("Beløp"),
     YTELSE_TYPE("Ytelse"),
-    OPPHØRSDATO("Opphørsdato")
+    OPPHØRSDATO("Opphørsdato"),
 }
 
 data class ForventetUtbetalingsoppdrag(
     val behandlingId: Long,
     val kodeEndring: Utbetalingsoppdrag.KodeEndring,
-    val utbetalingsperiode: List<ForventetUtbetalingsperiode>
+    val utbetalingsperiode: List<ForventetUtbetalingsperiode>,
 )
 
 data class ForventetUtbetalingsperiode(
@@ -148,5 +149,6 @@ data class ForventetUtbetalingsperiode(
     val ytelse: YtelseType,
     val fom: LocalDate,
     val tom: LocalDate,
-    val opphør: LocalDate?
+    val opphør: LocalDate?,
+    val kildebehandlingId: Long?,
 )

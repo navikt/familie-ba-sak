@@ -16,7 +16,7 @@ class SwaggerConfig {
         return OpenAPI()
             .components(
                 Components()
-                    .addSecuritySchemes("bearer", bearerTokenSecurityScheme())
+                    .addSecuritySchemes("bearer", bearerTokenSecurityScheme()),
             )
             .addSecurityItem(SecurityRequirement().addList("bearer", listOf("read", "write")))
     }

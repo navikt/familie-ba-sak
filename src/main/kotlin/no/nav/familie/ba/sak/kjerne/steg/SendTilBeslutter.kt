@@ -34,12 +34,12 @@ class SendTilBeslutter(
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val vedtakService: VedtakService,
     private val vedtaksperiodeService: VedtaksperiodeService,
-    private val simuleringService: SimuleringService
+    private val simuleringService: SimuleringService,
 ) : BehandlingSteg<String> {
 
     override fun preValiderSteg(
         behandling: Behandling,
-        stegService: StegService?
+        stegService: StegService?,
     ) {
         vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
             ?.validerAtAlleAnndreVurderingerErVurdert()
@@ -56,26 +56,26 @@ class SendTilBeslutter(
             val utvidetVedtaksperioder = vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(vedtak)
             utvidetVedtaksperioder.validerPerioderInneholderBegrunnelser(
                 behandlingId = behandling.id,
-                fagsakId = behandling.fagsak.id
+                fagsakId = behandling.fagsak.id,
             )
         }
     }
 
     override fun utførStegOgAngiNeste(
         behandling: Behandling,
-        data: String
+        data: String,
     ): StegType {
         totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandling)
 
         // oppretter ikke GodkjenneVedtak task for manuell migrering som har avvik innenfor beløpsgrenser eller manuelle posteringer
         if (!behandling.erManuellMigrering() || simuleringService.harMigreringsbehandlingManuellePosteringer(
-                behandling
+                behandling,
             ) || !simuleringService.harMigreringsbehandlingAvvikInnenforBeløpsgrenser(behandling)
         ) {
             val godkjenneVedtakTask = OpprettOppgaveTask.opprettTask(
                 behandlingId = behandling.id,
                 oppgavetype = Oppgavetype.GodkjenneVedtak,
-                fristForFerdigstillelse = LocalDate.now()
+                fristForFerdigstillelse = LocalDate.now(),
             )
             loggService.opprettSendTilBeslutterLogg(behandling = behandling, skalAutomatiskBesluttes = false)
             taskRepository.save(godkjenneVedtakTask)
@@ -94,7 +94,7 @@ class SendTilBeslutter(
         listOf(
             Oppgavetype.BehandleSak,
             Oppgavetype.BehandleUnderkjentVedtak,
-            Oppgavetype.VurderLivshendelse
+            Oppgavetype.VurderLivshendelse,
         ).forEach { oppgavetype ->
             oppgaveService.hentOppgaverSomIkkeErFerdigstilt(oppgavetype, behandling).also {
                 if (it.isNotEmpty()) {
@@ -147,7 +147,7 @@ fun Vilkårsvurdering.validerAtAlleAnndreVurderingerErVurdert() {
         ?.let {
             throw FunksjonellFeil(
                 melding = "Forsøker å ferdigstille uten å ha fylt ut påkrevde vurderinger",
-                frontendFeilmelding = "Andre vurderinger må tas stilling til før behandling kan sendes til beslutter."
+                frontendFeilmelding = "Andre vurderinger må tas stilling til før behandling kan sendes til beslutter.",
             )
         }
 }

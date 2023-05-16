@@ -54,7 +54,7 @@ const val DEFAULT_JOURNALFØRENDE_ENHET = "9999"
 @Component
 class IntegrasjonClient(
     @Value("\${FAMILIE_INTEGRASJONER_API_URL}") private val integrasjonUri: URI,
-    @Qualifier("jwtBearer") restOperations: RestOperations
+    @Qualifier("jwtBearer") restOperations: RestOperations,
 ) : AbstractRestClient(restOperations, "integrasjon") {
 
     @Cacheable("alle-eøs-land", cacheManager = "dailyCache")
@@ -64,7 +64,7 @@ class IntegrasjonClient(
         return kallEksternTjenesteRessurs(
             tjeneste = "kodeverk",
             uri = uri,
-            formål = "Hent EØS land"
+            formål = "Hent EØS land",
         ) {
             getForEntity(uri)
         }
@@ -81,7 +81,7 @@ class IntegrasjonClient(
         return kallEksternTjenesteRessurs(
             tjeneste = "kodeverk",
             uri = uri,
-            formål = "Hent landkoder for $landkode"
+            formål = "Hent landkoder for $landkode",
         ) {
             getForEntity(uri)
         }
@@ -90,7 +90,7 @@ class IntegrasjonClient(
     @Retryable(
         value = [Exception::class],
         maxAttempts = 3,
-        backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS)
+        backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS),
     )
     @Cacheable("behandlendeEnhet", cacheManager = "shortCache")
     fun hentBehandlendeEnhet(ident: String): List<Arbeidsfordelingsenhet> {
@@ -101,7 +101,7 @@ class IntegrasjonClient(
         return kallEksternTjenesteRessurs(
             tjeneste = "arbeidsfordeling",
             uri = uri,
-            formål = "Hent behandlende enhet"
+            formål = "Hent behandlende enhet",
         ) {
             postForEntity(uri, mapOf("ident" to ident))
         }
@@ -117,7 +117,7 @@ class IntegrasjonClient(
         return kallEksternTjenesteRessurs<List<Arbeidsfordelingsenhet>>(
             tjeneste = "arbeidsfordeling",
             uri = uri,
-            formål = "Hent strengeste behandlende enhet for person og alle relasjoner til personen"
+            formål = "Hent strengeste behandlende enhet for person og alle relasjoner til personen",
         ) {
             postForEntity(uri, PersonIdent(ident))
         }.single()
@@ -126,7 +126,7 @@ class IntegrasjonClient(
     @Retryable(
         value = [Exception::class],
         maxAttempts = 3,
-        backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS)
+        backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS),
     )
     fun hentArbeidsforhold(ident: String, ansettelsesperiodeFom: LocalDate): List<Arbeidsforhold> {
         val uri = UriComponentsBuilder.fromUri(integrasjonUri)
@@ -136,7 +136,7 @@ class IntegrasjonClient(
         return kallEksternTjenesteRessurs(
             tjeneste = "aareg",
             uri = uri,
-            formål = "Hent arbeidsforhold"
+            formål = "Hent arbeidsforhold",
         ) {
             postForEntity(uri, ArbeidsforholdRequest(ident, ansettelsesperiodeFom))
         }
@@ -148,7 +148,7 @@ class IntegrasjonClient(
         val resultat: String = kallEksternTjenesteRessurs(
             tjeneste = "dokdist",
             uri = uri,
-            formål = "Distribuer brev"
+            formål = "Distribuer brev",
         ) {
             val journalpostRequest = DistribuerJournalpostRequest(
                 journalpostId = distribuerDokumentDTO.journalpostId,
@@ -156,7 +156,7 @@ class IntegrasjonClient(
                 dokumentProdApp = "FAMILIE_BA_SAK",
                 distribusjonstidspunkt = Distribusjonstidspunkt.KJERNETID,
                 distribusjonstype = distribuerDokumentDTO.brevmal.distribusjonstype,
-                adresse = distribuerDokumentDTO.manuellAdresseInfo?.let { lagManuellAdresse(it) }
+                adresse = distribuerDokumentDTO.manuellAdresseInfo?.let { lagManuellAdresse(it) },
             )
             postForEntity(uri, journalpostRequest, HttpHeaders().medContentTypeJsonUTF8())
         }
@@ -175,7 +175,7 @@ class IntegrasjonClient(
             adresselinje2 = manuellAdresseInfo.adresselinje2,
             postnummer = manuellAdresseInfo.postnummer,
             poststed = manuellAdresseInfo.poststed,
-            land = manuellAdresseInfo.landkode
+            land = manuellAdresseInfo.landkode,
         )
 
     fun ferdigstillOppgave(oppgaveId: Long) {
@@ -184,7 +184,7 @@ class IntegrasjonClient(
         kallEksternTjenesteUtenRespons(
             tjeneste = "oppgave",
             uri = uri,
-            formål = "Ferdigstill oppgave"
+            formål = "Ferdigstill oppgave",
         ) {
             patchForEntity<Ressurs<OppgaveResponse>>(uri, "")
         }
@@ -196,7 +196,7 @@ class IntegrasjonClient(
         kallEksternTjenesteUtenRespons(
             tjeneste = "oppgave",
             uri = uri,
-            formål = "Oppdater oppgave"
+            formål = "Oppdater oppgave",
         ) {
             patchForEntity<Ressurs<OppgaveResponse>>(uri, oppdatertOppgave)
         }
@@ -209,7 +209,7 @@ class IntegrasjonClient(
         return kallEksternTjenesteRessurs(
             tjeneste = "arbeidsfordeling",
             uri = uri,
-            formål = "Hent nav kontor for enhet $enhetId"
+            formål = "Hent nav kontor for enhet $enhetId",
         ) {
             getForEntity(uri)
         }
@@ -221,12 +221,12 @@ class IntegrasjonClient(
         return kallEksternTjenesteRessurs(
             tjeneste = "oppgave",
             uri = uri,
-            formål = "Opprett oppgave"
+            formål = "Opprett oppgave",
         ) {
             postForEntity(
                 uri,
                 opprettOppgave,
-                HttpHeaders().medContentTypeJsonUTF8()
+                HttpHeaders().medContentTypeJsonUTF8(),
             )
         }
     }
@@ -237,12 +237,12 @@ class IntegrasjonClient(
         return kallEksternTjenesteRessurs(
             tjeneste = "oppgave",
             uri = uri,
-            formål = "Patch oppgave"
+            formål = "Patch oppgave",
         ) {
             patchForEntity(
                 uri,
                 patchOppgave,
-                HttpHeaders().medContentTypeJsonUTF8()
+                HttpHeaders().medContentTypeJsonUTF8(),
             )
         }
     }
@@ -258,11 +258,11 @@ class IntegrasjonClient(
         return kallEksternTjenesteRessurs(
             tjeneste = "oppgave",
             uri = uri,
-            formål = "Fordel oppgave"
+            formål = "Fordel oppgave",
         ) {
             postForEntity(
                 uri,
-                HttpHeaders().medContentTypeJsonUTF8()
+                HttpHeaders().medContentTypeJsonUTF8(),
             )
         }
     }
@@ -275,11 +275,11 @@ class IntegrasjonClient(
         return kallEksternTjenesteRessurs(
             tjeneste = "oppgave",
             uri = uri,
-            formål = "Bytt enhet"
+            formål = "Bytt enhet",
         ) {
             patchForEntity(
                 uri,
-                HttpHeaders().medContentTypeJsonUTF8()
+                HttpHeaders().medContentTypeJsonUTF8(),
             )
         }
     }
@@ -287,7 +287,7 @@ class IntegrasjonClient(
     @Retryable(
         value = [Exception::class],
         maxAttempts = 3,
-        backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS)
+        backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS),
     )
     fun fjernBehandlesAvApplikasjon(oppgaveId: Long): OppgaveResponse {
         val oppgave = finnOppgaveMedId(oppgaveId)
@@ -303,11 +303,11 @@ class IntegrasjonClient(
         return kallEksternTjenesteRessurs(
             tjeneste = "oppgave",
             uri = uri,
-            formål = "fjern behandlesAvApplikasjon"
+            formål = "fjern behandlesAvApplikasjon",
         ) {
             patchForEntity(
                 uri,
-                HttpHeaders().medContentTypeJsonUTF8()
+                HttpHeaders().medContentTypeJsonUTF8(),
             )
         }
     }
@@ -318,7 +318,7 @@ class IntegrasjonClient(
         return kallEksternTjenesteRessurs(
             tjeneste = "oppgave",
             uri = uri,
-            formål = "Finn oppgave med id $oppgaveId"
+            formål = "Finn oppgave med id $oppgaveId",
         ) {
             getForEntity(uri)
         }
@@ -327,7 +327,7 @@ class IntegrasjonClient(
     @Retryable(
         value = [Exception::class],
         maxAttempts = 3,
-        backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS)
+        backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS),
     )
     fun hentJournalpost(journalpostId: String): Journalpost {
         val uri = URI.create("$integrasjonUri/journalpost?journalpostId=$journalpostId")
@@ -335,7 +335,7 @@ class IntegrasjonClient(
         return kallEksternTjenesteRessurs(
             tjeneste = "dokarkiv",
             uri = uri,
-            formål = "Hent journalpost id $journalpostId"
+            formål = "Hent journalpost id $journalpostId",
         ) {
             getForEntity(uri)
         }
@@ -344,7 +344,7 @@ class IntegrasjonClient(
     @Retryable(
         value = [Exception::class],
         maxAttempts = 3,
-        backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS)
+        backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS),
     )
     fun hentJournalposterForBruker(journalposterForBrukerRequest: JournalposterForBrukerRequest): List<Journalpost> {
         val uri = URI.create("$integrasjonUri/journalpost")
@@ -352,7 +352,7 @@ class IntegrasjonClient(
         return kallEksternTjenesteRessurs(
             tjeneste = "dokarkiv",
             uri = uri,
-            formål = "Hent journalposter for bruker"
+            formål = "Hent journalposter for bruker",
         ) {
             postForEntity(uri, journalposterForBrukerRequest)
         }
@@ -364,12 +364,12 @@ class IntegrasjonClient(
         return kallEksternTjenesteRessurs(
             tjeneste = "oppgave",
             uri = uri,
-            formål = "Hent oppgaver"
+            formål = "Hent oppgaver",
         ) {
             postForEntity(
                 uri,
                 finnOppgaveRequest,
-                HttpHeaders().medContentTypeJsonUTF8()
+                HttpHeaders().medContentTypeJsonUTF8(),
             )
         }
     }
@@ -381,7 +381,7 @@ class IntegrasjonClient(
         kallEksternTjenesteUtenRespons(
             tjeneste = "dokarkiv",
             uri = uri,
-            formål = "Hent journalposter for bruker"
+            formål = "Hent journalposter for bruker",
         ) {
             putForEntity<Ressurs<Any>>(uri, "")
         }
@@ -393,7 +393,7 @@ class IntegrasjonClient(
         return kallEksternTjenesteRessurs(
             tjeneste = "dokarkiv",
             uri = uri,
-            formål = "Oppdater journalpost"
+            formål = "Oppdater journalpost",
         ) {
             putForEntity(uri, request)
         }
@@ -405,7 +405,7 @@ class IntegrasjonClient(
         return kallEksternTjenesteRessurs(
             tjeneste = "dokarkiv",
             uri = uri,
-            formål = "Legg til logisk vedlegg på dokument $dokumentinfoId"
+            formål = "Legg til logisk vedlegg på dokument $dokumentinfoId",
         ) {
             postForEntity(uri, request)
         }
@@ -416,7 +416,7 @@ class IntegrasjonClient(
         return kallEksternTjenesteRessurs(
             tjeneste = "dokarkiv",
             uri = uri,
-            formål = "Slett logisk vedlegg på dokument $dokumentinfoId"
+            formål = "Slett logisk vedlegg på dokument $dokumentinfoId",
         ) {
             deleteForEntity(uri)
         }
@@ -428,21 +428,21 @@ class IntegrasjonClient(
         return kallEksternTjenesteRessurs(
             tjeneste = "dokarkiv",
             uri = uri,
-            formål = "Hent dokument $dokumentInfoId"
+            formål = "Hent dokument $dokumentInfoId",
         ) {
             getForEntity(uri)
         }
     }
 
     fun journalførDokument(
-        arkiverDokumentRequest: ArkiverDokumentRequest
+        arkiverDokumentRequest: ArkiverDokumentRequest,
     ): ArkiverDokumentResponse {
         val uri = URI.create("$integrasjonUri/arkiv/v4")
 
         return kallEksternTjenesteRessurs(
             tjeneste = "dokarkiv",
             uri = uri,
-            formål = "Journalfør dokument på fagsak ${arkiverDokumentRequest.fagsakId}"
+            formål = "Journalfør dokument på fagsak ${arkiverDokumentRequest.fagsakId}",
         ) {
             postForEntity(uri, arkiverDokumentRequest)
         }
@@ -454,7 +454,7 @@ class IntegrasjonClient(
         kallEksternTjenesteUtenRespons<Unit>(
             tjeneste = "skyggesak",
             uri = uri,
-            formål = "Opprett skyggesak på fagsak $fagsakId"
+            formål = "Opprett skyggesak på fagsak $fagsakId",
         ) {
             postForEntity(uri, Skyggesak(aktør.aktørId, fagsakId.toString()))
         }
@@ -467,7 +467,7 @@ class IntegrasjonClient(
         return kallEksternTjenesteRessurs(
             tjeneste = "kodeverk",
             uri = uri,
-            formål = "Hent landkoderISO2"
+            formål = "Hent landkoderISO2",
         ) {
             getForEntity(uri)
         }
@@ -478,7 +478,7 @@ class IntegrasjonClient(
         return kallEksternTjenesteRessurs(
             tjeneste = "organisasjon",
             uri = uri,
-            formål = "Hent organisasjon $organisasjonsnummer"
+            formål = "Hent organisasjon $organisasjonsnummer",
         ) {
             getForEntity(uri)
         }

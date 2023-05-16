@@ -43,7 +43,7 @@ class PersongrunnlagService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val loggService: LoggService,
-    private val arbeidsforholdService: ArbeidsforholdService
+    private val arbeidsforholdService: ArbeidsforholdService,
 ) {
 
     fun mapTilRestPersonMedStatsborgerskapLand(person: Person): RestPerson {
@@ -95,7 +95,7 @@ class PersongrunnlagService(
             aktør = nåværendeGrunnlag.søker.aktør,
             barnFraInneværendeBehandling = nåværendeGrunnlag.barna.map { it.aktør },
             behandling = behandling,
-            målform = nåværendeGrunnlag.søker.målform
+            målform = nåværendeGrunnlag.søker.målform,
         )
     }
 
@@ -105,7 +105,7 @@ class PersongrunnlagService(
     @Transactional
     fun leggTilBarnIPersonopplysningsgrunnlag(
         nyttBarnIdent: String,
-        behandling: Behandling
+        behandling: Behandling,
     ) {
         val nyttbarnAktør = personidentService.hentOgLagreAktør(nyttBarnIdent, true)
 
@@ -116,7 +116,7 @@ class PersongrunnlagService(
         if (barnIGrunnlag.contains(nyttbarnAktør)) {
             throw FunksjonellFeil(
                 melding = "Forsøker å legge til barn som allerede finnes i personopplysningsgrunnlag ${personopplysningGrunnlag.id}",
-                frontendFeilmelding = "Barn finnes allerede på behandling og er derfor ikke lagt til."
+                frontendFeilmelding = "Barn finnes allerede på behandling og er derfor ikke lagt til.",
             )
         }
 
@@ -124,7 +124,7 @@ class PersongrunnlagService(
             aktør = personopplysningGrunnlag.søker.aktør,
             barnFraInneværendeBehandling = barnIGrunnlag.plus(nyttbarnAktør).toList(),
             behandling = behandling,
-            målform = personopplysningGrunnlag.søker.målform
+            målform = personopplysningGrunnlag.søker.målform,
         )
 
         oppdatertGrunnlag.barna.singleOrNull { nyttbarnAktør == it.aktør }
@@ -148,7 +148,7 @@ class PersongrunnlagService(
     fun registrerBarnFraSøknad(
         søknadDTO: SøknadDTO,
         behandling: Behandling,
-        forrigeBehandlingSomErVedtatt: Behandling? = null
+        forrigeBehandlingSomErVedtatt: Behandling? = null,
     ) {
         val søkerAktør = personidentService.hentOgLagreAktør(søknadDTO.søkerMedOpplysninger.ident, true)
         val valgteBarnsAktør =
@@ -167,7 +167,7 @@ class PersongrunnlagService(
             barnFraInneværendeBehandling = valgteBarnsAktør,
             barnFraForrigeBehandling = barnMedTilkjentYtelseIForrigeBehandling,
             behandling = behandling,
-            målform = søknadDTO.søkerMedOpplysninger.målform
+            målform = søknadDTO.søkerMedOpplysninger.målform,
         )
     }
 
@@ -185,7 +185,7 @@ class PersongrunnlagService(
         barnFraInneværendeBehandling: List<Aktør>,
         behandling: Behandling,
         målform: Målform,
-        barnFraForrigeBehandling: List<Aktør> = emptyList()
+        barnFraForrigeBehandling: List<Aktør> = emptyList(),
     ): PersonopplysningGrunnlag {
         val personopplysningGrunnlag = lagreOgDeaktiverGammel(PersonopplysningGrunnlag(behandlingId = behandling.id))
 
@@ -199,7 +199,7 @@ class PersongrunnlagService(
                 BARN_ENSLIG_MINDREÅRIG, INSTITUSJON -> PersonType.BARN
             },
             enkelPersonInfo = enkelPersonInfo,
-            hentArbeidsforhold = behandling.skalBehandlesAutomatisk
+            hentArbeidsforhold = behandling.skalBehandlesAutomatisk,
         )
         personopplysningGrunnlag.personer.add(søker)
 
@@ -210,8 +210,8 @@ class PersongrunnlagService(
                     personopplysningGrunnlag = personopplysningGrunnlag,
                     målform = målform,
                     personType = PersonType.BARN,
-                    enkelPersonInfo = enkelPersonInfo
-                )
+                    enkelPersonInfo = enkelPersonInfo,
+                ),
             )
         }
 
@@ -224,8 +224,8 @@ class PersongrunnlagService(
                         målform = målform,
                         personType = PersonType.ANNENPART,
                         enkelPersonInfo = enkelPersonInfo,
-                        hentArbeidsforhold = true
-                    )
+                        hentArbeidsforhold = true,
+                    ),
                 )
             }
         }
@@ -246,7 +246,7 @@ class PersongrunnlagService(
         målform: Målform,
         personType: PersonType,
         enkelPersonInfo: Boolean = false,
-        hentArbeidsforhold: Boolean = false
+        hentArbeidsforhold: Boolean = false,
     ): Person {
         val personinfo =
             if (enkelPersonInfo) {
@@ -262,7 +262,7 @@ class PersongrunnlagService(
             aktør = aktør,
             navn = personinfo.navn ?: "",
             kjønn = personinfo.kjønn ?: Kjønn.UKJENT,
-            målform = målform
+            målform = målform,
         ).also { person ->
             person.opphold =
                 personinfo.opphold?.map { GrOpphold.fraOpphold(it, person) }?.toMutableList() ?: mutableListOf()
@@ -275,17 +275,17 @@ class PersongrunnlagService(
                 personinfo.statsborgerskap?.flatMap {
                     statsborgerskapService.hentStatsborgerskapMedMedlemskap(
                         statsborgerskap = it,
-                        person = person
+                        person = person,
                     )
                 }?.sortedBy { it.gyldigPeriode?.fom }?.toMutableList() ?: mutableListOf()
             person.dødsfall = lagDødsfall(
                 person = person,
                 dødsfallDatoFraPdl = personinfo.dødsfall?.dødsdato,
-                dødsfallAdresseFraPdl = personinfo.kontaktinformasjonForDoedsbo?.adresse
+                dødsfallAdresseFraPdl = personinfo.kontaktinformasjonForDoedsbo?.adresse,
             )
             if (person.hentSterkesteMedlemskap() == Medlemskap.EØS && hentArbeidsforhold) {
                 person.arbeidsforhold = arbeidsforholdService.hentArbeidsforhold(
-                    person = person
+                    person = person,
                 ).toMutableList()
             }
         }

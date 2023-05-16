@@ -21,7 +21,7 @@ class VilkårUtilsTest {
             fom = LocalDate.now().minusMonths(6),
             tom = LocalDate.now(),
             type = Vedtaksperiodetype.AVSLAG,
-            utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
+            utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
 
         )
         val avslagUtenTomDato =
@@ -29,27 +29,27 @@ class VilkårUtilsTest {
                 fom = LocalDate.now().minusMonths(5),
                 tom = null,
                 type = Vedtaksperiodetype.AVSLAG,
-                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
+                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
             )
         val opphørsperiode = lagUtvidetVedtaksperiodeMedBegrunnelser(
             fom = LocalDate.now().minusMonths(4),
             tom = LocalDate.now().minusMonths(1),
             type = Vedtaksperiodetype.OPPHØR,
-            utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
+            utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
         )
 
         val utbetalingsperiode = lagUtvidetVedtaksperiodeMedBegrunnelser(
             fom = LocalDate.now().minusMonths(3),
             tom = LocalDate.now().minusMonths(1),
             type = Vedtaksperiodetype.UTBETALING,
-            utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
+            utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
         )
 
         val avslagUtenDatoer = lagUtvidetVedtaksperiodeMedBegrunnelser(
             fom = null,
             tom = null,
             type = Vedtaksperiodetype.AVSLAG,
-            utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
+            utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
         )
 
         val sorterteVedtaksperioder =
@@ -58,7 +58,7 @@ class VilkårUtilsTest {
                 opphørsperiode,
                 avslagMedTomDatoInneværendeMåned,
                 avslagUtenDatoer,
-                avslagUtenTomDato
+                avslagUtenTomDato,
             ).shuffled().sorter()
 
         // Utbetalingsperiode, opphørspersiode og avslagsperiode med fom-dato sorteres kronologisk

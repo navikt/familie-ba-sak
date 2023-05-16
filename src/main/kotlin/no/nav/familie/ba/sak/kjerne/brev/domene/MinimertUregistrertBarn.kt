@@ -6,11 +6,11 @@ import java.time.LocalDate
 data class MinimertUregistrertBarn(
     val personIdent: String,
     val navn: String,
-    val fødselsdato: LocalDate? = null
+    val fødselsdato: LocalDate? = null,
 )
 
 fun BarnMedOpplysninger.tilMinimertUregistrertBarn() = MinimertUregistrertBarn(
     personIdent = this.ident,
     navn = this.navn,
-    fødselsdato = this.fødselsdato
+    fødselsdato = this.fødselsdato,
 )

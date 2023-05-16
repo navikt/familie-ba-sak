@@ -73,7 +73,7 @@ class RevurderingMedEndredeUtbetalingandelerTest(
     private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService,
 
     @Autowired
-    private val søknadGrunnlagRepository: SøknadGrunnlagRepository
+    private val søknadGrunnlagRepository: SøknadGrunnlagRepository,
 
 ) : AbstractVerdikjedetest() {
     @Test
@@ -83,16 +83,16 @@ class RevurderingMedEndredeUtbetalingandelerTest(
                 søker = RestScenarioPerson(
                     fødselsdato = "${LocalDate.now().minusYears(28)}",
                     fornavn = "Mor",
-                    etternavn = "Søker"
+                    etternavn = "Søker",
                 ),
                 barna = listOf(
                     RestScenarioPerson(
                         fødselsdato = LocalDate.now().minusYears(4).toString(),
                         fornavn = "Barn",
-                        etternavn = "Barnesen"
-                    )
-                )
-            )
+                        etternavn = "Barnesen",
+                    ),
+                ),
+            ),
         )
         val fnr = scenario.søker.ident!!
         val barnFnr = scenario.barna[0].ident!!
@@ -111,7 +111,7 @@ class RevurderingMedEndredeUtbetalingandelerTest(
                 søkersIdent = fnr,
                 barnFnr = barnFnr,
                 fagsak = fagsak,
-                barnetsFødselsdato = barnetsFødselsdato
+                barnetsFødselsdato = barnetsFødselsdato,
             )
 
         // Behandling 2 - revurdering
@@ -125,27 +125,27 @@ class RevurderingMedEndredeUtbetalingandelerTest(
                 barnasIdenter = listOf(barnFnr),
                 søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
                 barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true),
-                barnasFødselsdatoer = listOf(barnetsFødselsdato)
-            )
+                barnasFødselsdatoer = listOf(barnetsFødselsdato),
+            ),
         )
 
         val vilkårsvurderingRevurdering = vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
             behandling = behandlingRevurdering,
             bekreftEndringerViaFrontend = true,
-            forrigeBehandlingSomErVedtatt = iverksattFørstegangsbehandling
+            forrigeBehandlingSomErVedtatt = iverksattFørstegangsbehandling,
         )
 
         gjennomførVilkårsvurdering(
             vilkårsvurdering = vilkårsvurderingRevurdering,
             behandling = behandlingRevurdering,
-            barnetsFødselsdato = barnetsFødselsdato
+            barnetsFødselsdato = barnetsFødselsdato,
         )
 
         val kopierteEndredeUtbetalingAndeler =
             endretUtbetalingAndelHentOgPersisterService.hentForBehandling(behandlingRevurdering.id)
         val andelerTilkjentYtelse =
             andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
-                behandlingRevurdering.id
+                behandlingRevurdering.id,
             )
         val andelPåvirketAvEndringer = andelerTilkjentYtelse.first()
 
@@ -160,7 +160,7 @@ class RevurderingMedEndredeUtbetalingandelerTest(
     private fun gjennomførVilkårsvurdering(
         vilkårsvurdering: Vilkårsvurdering,
         behandling: Behandling,
-        barnetsFødselsdato: LocalDate
+        barnetsFødselsdato: LocalDate,
     ) {
         vilkårsvurdering.personResultater.map { personResultat ->
             personResultat.tilRestPersonResultat().vilkårResultater.map {
@@ -179,16 +179,16 @@ class RevurderingMedEndredeUtbetalingandelerTest(
                                     LocalDate.now().minusYears(3).minusMonths(5).withDayOfMonth(8)
                                 },
                                 utdypendeVilkårsvurderinger = listOfNotNull(
-                                    if (it.vilkårType == Vilkår.BOR_MED_SØKER) UtdypendeVilkårsvurdering.DELT_BOSTED else null
-                                )
-                            )
-                        )
-                    )
+                                    if (it.vilkårType == Vilkår.BOR_MED_SØKER) UtdypendeVilkårsvurdering.DELT_BOSTED else null,
+                                ),
+                            ),
+                        ),
+                    ),
                 )
             }
         }
         behandling.behandlingStegTilstand.add(
-            BehandlingStegTilstand(behandling = behandling, behandlingSteg = StegType.VILKÅRSVURDERING)
+            BehandlingStegTilstand(behandling = behandling, behandlingSteg = StegType.VILKÅRSVURDERING),
         )
 
         stegService.håndterVilkårsvurdering(behandling)
@@ -200,7 +200,7 @@ class RevurderingMedEndredeUtbetalingandelerTest(
         søkersIdent: String,
         barnFnr: String,
         fagsak: Fagsak,
-        barnetsFødselsdato: LocalDate
+        barnetsFødselsdato: LocalDate,
     ): Behandling {
         val førstegangsbehandling =
             stegService.håndterNyBehandling(nyOrdinærBehandling(søkersIdent = søkersIdent, fagsakId = fagsak.id))
@@ -211,8 +211,8 @@ class RevurderingMedEndredeUtbetalingandelerTest(
             søknad = lagSøknadDTO(
                 søkersIdent,
                 barnasIdenter = listOf(barnFnr),
-                underkategori = BehandlingUnderkategori.ORDINÆR
-            ).writeValueAsString()
+                underkategori = BehandlingUnderkategori.ORDINÆR,
+            ).writeValueAsString(),
         )
 
         søknadGrunnlagRepository.save(søknadGrunnlag)
@@ -224,20 +224,20 @@ class RevurderingMedEndredeUtbetalingandelerTest(
                 barnasIdenter = listOf(barnFnr),
                 søkerAktør = personidentService.hentOgLagreAktør(søkersIdent, true),
                 barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true),
-                barnasFødselsdatoer = listOf(barnetsFødselsdato)
-            )
+                barnasFødselsdatoer = listOf(barnetsFødselsdato),
+            ),
         )
 
         val vilkårsvurdering = vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
             behandling = førstegangsbehandling,
             bekreftEndringerViaFrontend = true,
-            forrigeBehandlingSomErVedtatt = null
+            forrigeBehandlingSomErVedtatt = null,
         )
 
         gjennomførVilkårsvurdering(
             vilkårsvurdering = vilkårsvurdering,
             behandling = førstegangsbehandling,
-            barnetsFødselsdato = barnetsFødselsdato
+            barnetsFødselsdato = barnetsFødselsdato,
         )
 
         val endretUtbetalingAndel =
@@ -253,25 +253,25 @@ class RevurderingMedEndredeUtbetalingandelerTest(
             personIdent = barnFnr,
             årsak = Årsak.DELT_BOSTED,
             prosent = BigDecimal.ZERO,
-            erTilknyttetAndeler = false
+            erTilknyttetAndeler = false,
         )
 
         endretUtbetalingAndelService.oppdaterEndretUtbetalingAndelOgOppdaterTilkjentYtelse(
             førstegangsbehandling,
             endretUtbetalingAndel.id,
-            restEndretUtbetalingAndel
+            restEndretUtbetalingAndel,
         )
 
         førstegangsbehandling.behandlingStegTilstand.add(
-            BehandlingStegTilstand(behandling = førstegangsbehandling, behandlingSteg = StegType.BEHANDLINGSRESULTAT)
+            BehandlingStegTilstand(behandling = førstegangsbehandling, behandlingSteg = StegType.BEHANDLINGSRESULTAT),
         )
         val behandlingEtterHåndterBehandlingsresultat = stegService.håndterBehandlingsresultat(førstegangsbehandling)
 
         behandlingEtterHåndterBehandlingsresultat.behandlingStegTilstand.add(
             BehandlingStegTilstand(
                 behandling = førstegangsbehandling,
-                behandlingSteg = StegType.BEHANDLING_AVSLUTTET
-            )
+                behandlingSteg = StegType.BEHANDLING_AVSLUTTET,
+            ),
         )
         behandlingEtterHåndterBehandlingsresultat.status = BehandlingStatus.AVSLUTTET
 

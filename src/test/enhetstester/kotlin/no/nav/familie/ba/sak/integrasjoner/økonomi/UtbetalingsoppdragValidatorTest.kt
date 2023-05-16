@@ -28,9 +28,9 @@ internal class UtbetalingsoppdragValidatorTest {
                     lagAndelTilkjentYtelse(
                         fom = inneværendeMåned().minusYears(4),
                         tom = inneværendeMåned(),
-                        beløp = 1054
-                    )
-                )
+                        beløp = 1054,
+                    ),
+                ),
             )
         }
     }
@@ -45,9 +45,9 @@ internal class UtbetalingsoppdragValidatorTest {
                     lagAndelTilkjentYtelse(
                         fom = inneværendeMåned().minusYears(4),
                         tom = inneværendeMåned(),
-                        beløp = 0
-                    ).medDifferanseberegning(BigDecimal("10"))
-                )
+                        beløp = 0,
+                    ).medDifferanseberegning(BigDecimal("10")),
+                ),
             )
         }
     }
@@ -62,9 +62,9 @@ internal class UtbetalingsoppdragValidatorTest {
                     lagAndelTilkjentYtelse(
                         fom = inneværendeMåned().minusYears(4),
                         tom = inneværendeMåned(),
-                        beløp = 1054
-                    )
-                )
+                        beløp = 1054,
+                    ),
+                ),
             )
         }
     }
@@ -83,9 +83,9 @@ internal class UtbetalingsoppdragValidatorTest {
                     sats = BigDecimal(100),
                     satsType = Utbetalingsperiode.SatsType.MND,
                     utbetalesTil = "",
-                    behandlingId = 123
-                )
-            )
+                    behandlingId = 123,
+                ),
+            ),
         )
         assertDoesNotThrow {
             utbetalingsoppdrag.validerNullutbetaling(
@@ -94,9 +94,9 @@ internal class UtbetalingsoppdragValidatorTest {
                     lagAndelTilkjentYtelse(
                         fom = inneværendeMåned().minusYears(4),
                         tom = inneværendeMåned(),
-                        beløp = 1024
-                    ).medDifferanseberegning(BigDecimal("10"))
-                )
+                        beløp = 1024,
+                    ).medDifferanseberegning(BigDecimal("10")),
+                ),
             )
         }
     }
@@ -108,6 +108,6 @@ internal class UtbetalingsoppdragValidatorTest {
         aktoer = UUID.randomUUID().toString(),
         saksbehandlerId = "",
         avstemmingTidspunkt = LocalDateTime.now(),
-        utbetalingsperiode = utbetalingsperioder
+        utbetalingsperiode = utbetalingsperioder,
     )
 }

@@ -22,7 +22,7 @@ class VerdikjedetesterPropertyOverrideContextInitializer :
         TestPropertySourceUtils.addInlinedPropertiesToEnvironment(
             configurableApplicationContext,
             "FAMILIE_BA_INFOTRYGD_API_URL: http://localhost:1337/rest/api/infotrygd/ba",
-            "PDL_URL: http://localhost:1337/rest/api/pdl"
+            "PDL_URL: http://localhost:1337/rest/api/pdl",
         )
         mockServer.start()
     }
@@ -50,7 +50,7 @@ class VerdikjedetesterPropertyOverrideContextInitializer :
     "mock-infotrygd-feed",
     "mock-rest-template-config",
     "mock-task-repository",
-    "mock-task-service"
+    "mock-task-service",
 )
 @ContextConfiguration(initializers = [VerdikjedetesterPropertyOverrideContextInitializer::class])
 @Tag("verdikjedetest")
@@ -62,12 +62,12 @@ abstract class AbstractVerdikjedetest : WebSpringAuthTestRunner() {
     fun familieBaSakKlient(): FamilieBaSakKlient = FamilieBaSakKlient(
         baSakUrl = hentUrl(""),
         restOperations = restOperations,
-        headers = hentHeadersForSystembruker()
+        headers = hentHeadersForSystembruker(),
     )
 
     fun mockServerKlient(): MockserverKlient = MockserverKlient(
         mockServerUrl = "http://localhost:1337",
-        restOperations = restOperations
+        restOperations = restOperations,
     )
 }
 

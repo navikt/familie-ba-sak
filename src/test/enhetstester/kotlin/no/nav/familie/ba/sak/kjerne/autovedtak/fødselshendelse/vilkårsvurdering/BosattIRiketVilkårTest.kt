@@ -22,8 +22,8 @@ class BosattIRiketVilkårTest {
             bruksenhetsnummer = "H301",
             tilleggsnavn = "navn",
             postnummer = "0202",
-            kommunenummer = "2231"
-        )
+            kommunenummer = "2231",
+        ),
     )
 
     @Test
@@ -34,71 +34,71 @@ class BosattIRiketVilkårTest {
             bostedsadresser = mutableListOf(
                 GrBostedsadresse.fraBostedsadresse(
                     defaultAdresse.copy(
-                        angittFlyttedato = LocalDate.parse("2019-01-19")
+                        angittFlyttedato = LocalDate.parse("2019-01-19"),
                     ),
-                    søker
+                    søker,
                 ),
                 GrBostedsadresse.fraBostedsadresse(
                     defaultAdresse.copy(
-                        angittFlyttedato = LocalDate.parse("2011-06-02")
+                        angittFlyttedato = LocalDate.parse("2011-06-02"),
                     ),
-                    søker
+                    søker,
                 ),
                 GrBostedsadresse.fraBostedsadresse(
                     defaultAdresse.copy(
                         angittFlyttedato = LocalDate.parse("1988-06-23"),
-                        gyldigTilOgMed = LocalDate.parse("2006-01-01")
+                        gyldigTilOgMed = LocalDate.parse("2006-01-01"),
                     ),
-                    søker
+                    søker,
                 ),
                 GrBostedsadresse.fraBostedsadresse(
                     defaultAdresse.copy(
-                        angittFlyttedato = LocalDate.parse("2013-09-22")
+                        angittFlyttedato = LocalDate.parse("2013-09-22"),
                     ),
-                    søker
+                    søker,
                 ),
                 GrBostedsadresse.fraBostedsadresse(
                     defaultAdresse.copy(
-                        angittFlyttedato = LocalDate.parse("2016-10-01")
+                        angittFlyttedato = LocalDate.parse("2016-10-01"),
                     ),
-                    søker
+                    søker,
                 ),
                 GrBostedsadresse.fraBostedsadresse(
                     defaultAdresse.copy(
-                        angittFlyttedato = LocalDate.parse("2012-07-11")
+                        angittFlyttedato = LocalDate.parse("2012-07-11"),
                     ),
-                    søker
+                    søker,
                 ),
                 GrBostedsadresse.fraBostedsadresse(
                     defaultAdresse.copy(
-                        angittFlyttedato = LocalDate.parse("2006-06-04")
+                        angittFlyttedato = LocalDate.parse("2006-06-04"),
                     ),
-                    søker
+                    søker,
                 ),
                 GrBostedsadresse.fraBostedsadresse(
                     defaultAdresse.copy(
-                        angittFlyttedato = LocalDate.parse("2011-06-01")
+                        angittFlyttedato = LocalDate.parse("2011-06-01"),
                     ),
-                    søker
+                    søker,
                 ),
                 GrBostedsadresse.fraBostedsadresse(
                     defaultAdresse.copy(
-                        angittFlyttedato = LocalDate.parse("2020-07-13")
+                        angittFlyttedato = LocalDate.parse("2020-07-13"),
                     ),
-                    søker
+                    søker,
                 ),
                 GrBostedsadresse.fraBostedsadresse(
                     defaultAdresse.copy(
-                        angittFlyttedato = LocalDate.parse("2020-06-08")
+                        angittFlyttedato = LocalDate.parse("2020-06-08"),
                     ),
-                    søker
-                )
+                    søker,
+                ),
             )
         }
 
         val evaluering = VurderPersonErBosattIRiket(
             adresser = søker.bostedsadresser,
-            vurderFra = LocalDate.now().minusDays(1)
+            vurderFra = LocalDate.now().minusDays(1),
         ).vurder()
 
         assertEquals(Resultat.OPPFYLT, evaluering.resultat)
@@ -113,22 +113,22 @@ class BosattIRiketVilkårTest {
                 GrBostedsadresse.fraBostedsadresse(
                     defaultAdresse.copy(
                         angittFlyttedato = LocalDate.parse("2019-01-19"),
-                        gyldigTilOgMed = LocalDate.parse("2021-05-01")
+                        gyldigTilOgMed = LocalDate.parse("2021-05-01"),
                     ),
-                    søker
+                    søker,
                 ),
                 GrBostedsadresse.fraBostedsadresse(
                     defaultAdresse.copy(
-                        angittFlyttedato = LocalDate.parse("2011-06-02")
+                        angittFlyttedato = LocalDate.parse("2011-06-02"),
                     ),
-                    søker
-                )
+                    søker,
+                ),
             )
         }
 
         val evaluering = VurderPersonErBosattIRiket(
             adresser = søker.bostedsadresser,
-            vurderFra = LocalDate.now().minusDays(1)
+            vurderFra = LocalDate.now().minusDays(1),
         ).vurder()
 
         assertEquals(Resultat.IKKE_OPPFYLT, evaluering.resultat)
@@ -143,22 +143,22 @@ class BosattIRiketVilkårTest {
                 GrBostedsadresse.fraBostedsadresse(
                     defaultAdresse.copy(
                         angittFlyttedato = LocalDate.now().minusMonths(3),
-                        gyldigTilOgMed = LocalDate.now().minusMonths(2)
+                        gyldigTilOgMed = LocalDate.now().minusMonths(2),
                     ),
-                    søker
+                    søker,
                 ),
                 GrBostedsadresse.fraBostedsadresse(
                     defaultAdresse.copy(
-                        angittFlyttedato = LocalDate.now().minusMonths(1)
+                        angittFlyttedato = LocalDate.now().minusMonths(1),
                     ),
-                    søker
-                )
+                    søker,
+                ),
             )
         }
 
         val evaluering = VurderPersonErBosattIRiket(
             adresser = søker.bostedsadresser,
-            vurderFra = LocalDate.now().minusMonths(4)
+            vurderFra = LocalDate.now().minusMonths(4),
         ).vurder()
 
         assertEquals(Resultat.IKKE_OPPFYLT, evaluering.resultat)
@@ -172,16 +172,16 @@ class BosattIRiketVilkårTest {
             bostedsadresser = mutableListOf(
                 GrBostedsadresse.fraBostedsadresse(
                     defaultAdresse.copy(
-                        angittFlyttedato = LocalDate.now().minusMonths(3)
+                        angittFlyttedato = LocalDate.now().minusMonths(3),
                     ),
-                    søker
-                )
+                    søker,
+                ),
             )
         }
 
         val evaluering = VurderPersonErBosattIRiket(
             adresser = søker.bostedsadresser,
-            vurderFra = LocalDate.now().minusMonths(4)
+            vurderFra = LocalDate.now().minusMonths(4),
         ).vurder()
 
         assertEquals(Resultat.IKKE_OPPFYLT, evaluering.resultat)
@@ -196,16 +196,16 @@ class BosattIRiketVilkårTest {
                 GrBostedsadresse.fraBostedsadresse(
                     defaultAdresse.copy(
                         angittFlyttedato = LocalDate.now().minusMonths(7),
-                        gyldigTilOgMed = LocalDate.now().minusMonths(2)
+                        gyldigTilOgMed = LocalDate.now().minusMonths(2),
                     ),
-                    søker
-                )
+                    søker,
+                ),
             )
         }
 
         val evaluering = VurderPersonErBosattIRiket(
             adresser = søker.bostedsadresser,
-            vurderFra = LocalDate.now().minusMonths(4)
+            vurderFra = LocalDate.now().minusMonths(4),
         ).vurder()
 
         assertEquals(Resultat.IKKE_OPPFYLT, evaluering.resultat)
@@ -219,22 +219,22 @@ class BosattIRiketVilkårTest {
             bostedsadresser = mutableListOf(
                 GrBostedsadresse.fraBostedsadresse(
                     defaultAdresse.copy(
-                        angittFlyttedato = null
+                        angittFlyttedato = null,
                     ),
-                    søker
+                    søker,
                 ),
                 GrBostedsadresse.fraBostedsadresse(
                     defaultAdresse.copy(
-                        angittFlyttedato = LocalDate.now().minusMonths(7)
+                        angittFlyttedato = LocalDate.now().minusMonths(7),
                     ),
-                    søker
-                )
+                    søker,
+                ),
             )
         }
 
         val evaluering = VurderPersonErBosattIRiket(
             adresser = søker.bostedsadresser,
-            vurderFra = LocalDate.now().minusMonths(4)
+            vurderFra = LocalDate.now().minusMonths(4),
         ).vurder()
 
         assertEquals(Resultat.OPPFYLT, evaluering.resultat)
@@ -248,16 +248,16 @@ class BosattIRiketVilkårTest {
             bostedsadresser = mutableListOf(
                 GrBostedsadresse.fraBostedsadresse(
                     defaultAdresse.copy(
-                        angittFlyttedato = null
+                        angittFlyttedato = null,
                     ),
-                    søker
-                )
+                    søker,
+                ),
             )
         }
 
         val evaluering = VurderPersonErBosattIRiket(
             adresser = søker.bostedsadresser,
-            vurderFra = LocalDate.now().minusMonths(4)
+            vurderFra = LocalDate.now().minusMonths(4),
         ).vurder()
 
         assertEquals(Resultat.OPPFYLT, evaluering.resultat)
@@ -272,34 +272,34 @@ class BosattIRiketVilkårTest {
             bostedsadresser = mutableListOf(
                 GrBostedsadresse.fraBostedsadresse(
                     defaultAdresse.copy(
-                        angittFlyttedato = null
+                        angittFlyttedato = null,
                     ),
-                    søker
+                    søker,
                 ),
                 GrBostedsadresse.fraBostedsadresse(
                     defaultAdresse.copy(
-                        angittFlyttedato = null
+                        angittFlyttedato = null,
                     ),
-                    søker
+                    søker,
                 ),
                 GrBostedsadresse.fraBostedsadresse(
                     defaultAdresse.copy(
-                        angittFlyttedato = LocalDate.now().minusMonths(3)
+                        angittFlyttedato = LocalDate.now().minusMonths(3),
                     ),
-                    søker
-                )
+                    søker,
+                ),
             )
         }
 
         val evaluering = VurderPersonErBosattIRiket(
             adresser = søker.bostedsadresser,
-            vurderFra = LocalDate.now().minusMonths(4)
+            vurderFra = LocalDate.now().minusMonths(4),
         ).vurder()
 
         assertEquals(Resultat.IKKE_OPPFYLT, evaluering.resultat)
         assertEquals(
             VilkårIkkeOppfyltÅrsak.BOR_IKKE_I_RIKET_FLERE_ADRESSER_UTEN_FOM,
-            evaluering.evalueringÅrsaker.single()
+            evaluering.evalueringÅrsaker.single(),
         )
     }
 }

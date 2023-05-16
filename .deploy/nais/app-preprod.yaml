@@ -105,6 +105,7 @@ spec:
         - host: familie-ba-infotrygd.dev-fss-pub.nais.io
         - host: familie-ba-infotrygd-feed.dev-fss-pub.nais.io
         - host: sdw-wsrest.ecb.europa.eu
+        - host: sentry.gc.nav.no
   replicas:
     min: 2
     max: 2

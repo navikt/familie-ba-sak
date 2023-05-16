@@ -8,7 +8,7 @@ fun finnPersonMedStrengesteAdressebeskyttelse(personer: List<IdentMedAdressebesk
         null,
         fun(
             person: IdentMedAdressebeskyttelse?,
-            neste: IdentMedAdressebeskyttelse
+            neste: IdentMedAdressebeskyttelse,
         ): IdentMedAdressebeskyttelse? {
             return when {
                 person?.adressebeskyttelsegradering == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG -> {
@@ -32,6 +32,6 @@ fun finnPersonMedStrengesteAdressebeskyttelse(personer: List<IdentMedAdressebesk
                 }
                 else -> null
             }
-        }
+        },
     )?.ident
 }

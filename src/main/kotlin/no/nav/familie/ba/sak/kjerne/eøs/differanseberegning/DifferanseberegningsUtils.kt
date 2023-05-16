@@ -31,7 +31,7 @@ fun Intervall.konverterBeløpTilMånedlig(beløp: BigDecimal): BigDecimal =
  * Hvis [utenlandskPeriodebeløpINorskeKroner] er <null>, så skal utbetalingsbeløpet reverteres til det originale nasjonale beløpet
  */
 fun AndelTilkjentYtelse?.oppdaterDifferanseberegning(
-    utenlandskPeriodebeløpINorskeKroner: BigDecimal?
+    utenlandskPeriodebeløpINorskeKroner: BigDecimal?,
 ): AndelTilkjentYtelse? {
     val nyAndelTilkjentYtelse = when {
         this == null -> null
@@ -43,7 +43,7 @@ fun AndelTilkjentYtelse?.oppdaterDifferanseberegning(
 }
 
 fun AndelTilkjentYtelse.medDifferanseberegning(
-    utenlandskPeriodebeløpINorskeKroner: BigDecimal
+    utenlandskPeriodebeløpINorskeKroner: BigDecimal,
 ): AndelTilkjentYtelse {
     val avrundetUtenlandskPeriodebeløp = utenlandskPeriodebeløpINorskeKroner
         .toBigInteger().intValueExact() // Fjern desimaler for å gi fordel til søker
@@ -56,7 +56,7 @@ fun AndelTilkjentYtelse.medDifferanseberegning(
     return copy(
         id = 0,
         kalkulertUtbetalingsbeløp = maxOf(nyttDifferanseberegnetBeløp, 0),
-        differanseberegnetPeriodebeløp = nyttDifferanseberegnetBeløp
+        differanseberegnetPeriodebeløp = nyttDifferanseberegnetBeløp,
     )
 }
 
@@ -64,7 +64,7 @@ private fun AndelTilkjentYtelse.utenDifferanseberegning(): AndelTilkjentYtelse {
     return copy(
         id = 0,
         kalkulertUtbetalingsbeløp = nasjonaltPeriodebeløp ?: this.kalkulertUtbetalingsbeløp,
-        differanseberegnetPeriodebeløp = null
+        differanseberegnetPeriodebeløp = null,
     )
 }
 
@@ -87,7 +87,7 @@ fun <T : Tidsenhet> Tidslinje<AndelTilkjentYtelse, T>.utenDifferanseberegning() 
     }.mapIkkeNull { it.utenDifferanseberegning() }
 
 fun Tidslinje<AndelTilkjentYtelse, Måned>.oppdaterDifferanseberegning(
-    utenlandskBeløpINorskeKronerTidslinje: Tidslinje<BigDecimal, Måned>
+    utenlandskBeløpINorskeKronerTidslinje: Tidslinje<BigDecimal, Måned>,
 ): Tidslinje<AndelTilkjentYtelse, Måned> {
     return this.kombinerMed(utenlandskBeløpINorskeKronerTidslinje) { andel, utenlandskBeløpINorskeKroner ->
         andel.oppdaterDifferanseberegning(utenlandskBeløpINorskeKroner)

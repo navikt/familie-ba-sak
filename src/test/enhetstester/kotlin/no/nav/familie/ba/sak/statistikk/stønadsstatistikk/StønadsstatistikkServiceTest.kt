@@ -66,7 +66,7 @@ internal class StønadsstatistikkServiceTest(
     private val vedtakRepository: VedtakRepository,
 
     @MockK
-    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
+    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
 ) {
 
     private val stønadsstatistikkService =
@@ -77,7 +77,7 @@ internal class StønadsstatistikkServiceTest(
             personopplysningerService,
             vedtakRepository,
             kompetanseService,
-            andelerTilkjentYtelseOgEndreteUtbetalingerService
+            andelerTilkjentYtelseOgEndreteUtbetalingerService,
         )
     private val behandling = lagBehandling()
     private val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søkerFnr[0], barnFnr.toList())
@@ -97,7 +97,7 @@ internal class StønadsstatistikkServiceTest(
             behandling = behandling,
             person = barn1,
             aktør = barn1.aktør,
-            periodeIdOffset = 1
+            periodeIdOffset = 1,
 
         )
         val andelTilkjentYtelseBarn2PeriodeMed0Beløp = lagAndelTilkjentYtelseMedEndreteUtbetalinger(
@@ -109,7 +109,7 @@ internal class StønadsstatistikkServiceTest(
             beløp = 0,
             aktør = barn2.aktør,
             prosent = BigDecimal(0),
-            periodeIdOffset = null
+            periodeIdOffset = null,
         )
 
         val kompetanseperioder = setOf<no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse>(
@@ -121,7 +121,7 @@ internal class StønadsstatistikkServiceTest(
                 annenForeldersAktivitet = AnnenForeldersAktivitet.I_ARBEID,
                 annenForeldersAktivitetsland = "PL",
                 barnetsBostedsland = "PL",
-                resultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND
+                resultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
             ),
             no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse(
                 fom = null,
@@ -131,8 +131,8 @@ internal class StønadsstatistikkServiceTest(
                 annenForeldersAktivitet = null,
                 annenForeldersAktivitetsland = null,
                 barnetsBostedsland = null,
-                resultat = null
-            )
+                resultat = null,
+            ),
         )
 
         val andelTilkjentYtelseSøker = lagAndelTilkjentYtelseUtvidet(
@@ -141,13 +141,13 @@ internal class StønadsstatistikkServiceTest(
             YtelseType.UTVIDET_BARNETRYGD,
             behandling = behandling,
             person = personopplysningGrunnlag.søker,
-            periodeIdOffset = 3
+            periodeIdOffset = 3,
         )
 
         val andelerTilkjentYtelse = listOf(
             andelTilkjentYtelseBarn1,
             andelTilkjentYtelseBarn2PeriodeMed0Beløp,
-            AndelTilkjentYtelseMedEndreteUtbetalinger.utenEndringer(andelTilkjentYtelseSøker)
+            AndelTilkjentYtelseMedEndreteUtbetalinger.utenEndringer(andelTilkjentYtelseSøker),
         )
 
         every { behandlingHentOgPersisterService.hent(any()) } returns behandling
@@ -167,7 +167,7 @@ internal class StønadsstatistikkServiceTest(
         assertEquals(2, vedtak.utbetalingsperioderV2[0].utbetalingsDetaljer.size)
         assertEquals(
             1 * sats(YtelseType.ORDINÆR_BARNETRYGD) + sats(YtelseType.UTVIDET_BARNETRYGD),
-            vedtak.utbetalingsperioderV2[0].utbetaltPerMnd
+            vedtak.utbetalingsperioderV2[0].utbetaltPerMnd,
         )
 
         assertThat(vedtak.kompetanseperioder).hasSize(1).contains(
@@ -179,8 +179,8 @@ internal class StønadsstatistikkServiceTest(
                 annenForeldersAktivitet = no.nav.familie.eksterne.kontrakter.AnnenForeldersAktivitet.I_ARBEID,
                 annenForeldersAktivitetsland = "PL",
                 barnetsBostedsland = "PL",
-                resultat = no.nav.familie.eksterne.kontrakter.KompetanseResultat.NORGE_ER_PRIMÆRLAND
-            )
+                resultat = no.nav.familie.eksterne.kontrakter.KompetanseResultat.NORGE_ER_PRIMÆRLAND,
+            ),
         )
 
         vedtak.utbetalingsperioderV2

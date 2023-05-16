@@ -70,7 +70,7 @@ internal class BeregnAndelerTilkjentYtelseMedGjeldendeSatserTest {
             barn får alt av 1654 i sep(2021)..des(2021),
             barn får alt av 1676 i jan(2022)..feb(2023),
             barn får alt av 1723 i mar(2023)..okt(2023),
-            barn får alt av 1083 i nov(2023)..okt(2035)
+            barn får alt av 1083 i nov(2023)..okt(2035),
         )
 
         assertEquals(forventedeAndeler, vurdering.beregnAndelerTilkjentYtelseForBarna())
@@ -104,7 +104,7 @@ internal class BeregnAndelerTilkjentYtelseMedGjeldendeSatserTest {
             // barn 2
             barn2 får alt av 970 i jun(2013)..feb(2019),
             barn2 får alt av 1054 i mar(2019)..feb(2023),
-            barn2 får alt av 1083 i mar(2023)..apr(2031)
+            barn2 får alt av 1083 i mar(2023)..apr(2031),
         )
 
         assertEquals(forventedeAndeler, vurdering.beregnAndelerTilkjentYtelseForBarna())
@@ -197,7 +197,7 @@ internal class BeregnAndelerTilkjentYtelseMedGjeldendeSatserTest {
             barn får halvparten av 1676 i jan(2022)..feb(2023),
             barn får halvparten av 1723 i mar(2023)..feb(2024),
             barn får alt av 1723 i mar(2024)..nov(2025),
-            barn får alt av 1083 i des(2025)..nov(2037)
+            barn får alt av 1083 i des(2025)..nov(2037),
         )
 
         assertEquals(forventedeAndeler, vurdering.beregnAndelerTilkjentYtelseForBarna())
@@ -227,7 +227,7 @@ internal class BeregnAndelerTilkjentYtelseMedGjeldendeSatserTest {
         val forventedeAndeler = listOf(
             barn får alt av 1054 i feb(2020)..aug(2020),
             barn får alt av 1354 i sep(2020)..aug(2021),
-            barn får alt av 1654 i sep(2021)..nov(2021)
+            barn får alt av 1654 i sep(2021)..nov(2021),
         )
 
         assertEquals(forventedeAndeler, vurdering.beregnAndelerTilkjentYtelseForBarna())
@@ -254,7 +254,7 @@ internal class BeregnAndelerTilkjentYtelseMedGjeldendeSatserTest {
             barn får alt av 1354 i sep(2020)..aug(2021),
             barn får alt av 1654 i sep(2021)..des(2021),
             barn får alt av 1676 i jan(2022)..feb(2023),
-            barn får alt av 1723 i mar(2023)..des(2024)
+            barn får alt av 1723 i mar(2023)..des(2024),
         )
 
         assertEquals(forventedeAndeler, vurdering.beregnAndelerTilkjentYtelseForBarna())
@@ -282,7 +282,7 @@ internal class BeregnAndelerTilkjentYtelseMedGjeldendeSatserTest {
             barn får alt av 1654 i sep(2021)..des(2021),
             barn får alt av 1676 i jan(2022)..feb(2023),
             barn får alt av 1723 i mar(2023)..nov(2025),
-            barn får alt av 1083 i des(2025)..nov(2037)
+            barn får alt av 1083 i des(2025)..nov(2037),
         )
 
         assertEquals(forventedeAndeler, vurdering.beregnAndelerTilkjentYtelseForBarna())
@@ -316,7 +316,7 @@ internal class BeregnAndelerTilkjentYtelseMedGjeldendeSatserTest {
 
             søker får 970 i jan(2019)..feb(2019),
             søker får 1054 i mar(2019)..feb(2023),
-            søker får 2489 i mar(2023)..nov(2036)
+            søker får 2489 i mar(2023)..nov(2036),
         )
 
         assertEquals(forventedeAndeler, vurdering.beregnAndelerTilkjentYteldse())
@@ -328,7 +328,7 @@ private fun <T : Tidsenhet> VilkårsvurderingBuilder.PersonResultatBuilder<T>.be
     return TilkjentYtelseUtils.beregnTilkjentYtelse(
         vilkårsvurdering = this.byggVilkårsvurdering(),
         personopplysningGrunnlag = personopplysningGrunnlag,
-        fagsakType = FagsakType.NORMAL
+        fagsakType = FagsakType.NORMAL,
     ).andelerTilkjentYtelse.map {
         BeregnetAndel(
             person = personopplysningGrunnlag.personer.first { person -> person.aktør == it.aktør },
@@ -336,7 +336,7 @@ private fun <T : Tidsenhet> VilkårsvurderingBuilder.PersonResultatBuilder<T>.be
             stønadTom = it.stønadTom,
             beløp = it.kalkulertUtbetalingsbeløp,
             sats = it.sats,
-            prosent = it.prosent
+            prosent = it.prosent,
         )
     }
 }
@@ -345,12 +345,12 @@ internal fun <T : Tidsenhet> VilkårsvurderingBuilder<T>.beregnAndelerTilkjentYt
     OrdinærBarnetrygdUtil.beregnAndelerTilkjentYtelseForBarna(
         personopplysningGrunnlag = this.byggPersonopplysningGrunnlag(),
         personResultater = this.byggVilkårsvurdering().personResultater,
-        fagsakType = FagsakType.NORMAL
+        fagsakType = FagsakType.NORMAL,
     )
 
 internal fun <T : Tidsenhet> VilkårsvurderingBuilder.PersonResultatBuilder<T>.beregnAndelerTilkjentYtelseForBarna(): List<BeregnetAndel> =
     OrdinærBarnetrygdUtil.beregnAndelerTilkjentYtelseForBarna(
         personopplysningGrunnlag = this.byggPersonopplysningGrunnlag(),
         personResultater = this.byggVilkårsvurdering().personResultater,
-        fagsakType = FagsakType.NORMAL
+        fagsakType = FagsakType.NORMAL,
     )

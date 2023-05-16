@@ -25,7 +25,7 @@ class VilkårsvurderingSteg(
     private val persongrunnlagService: PersongrunnlagService,
     private val tilbakestillBehandlingService: TilbakestillBehandlingService,
     private val tilpassKompetanserTilRegelverkService: TilpassKompetanserTilRegelverkService,
-    private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService
+    private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService,
 ) : BehandlingSteg<String> {
 
     override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
@@ -35,19 +35,19 @@ class VilkårsvurderingSteg(
             val vilkårsvurdering = vilkårService.hentVilkårsvurderingThrows(behandling.id)
             validerIngenVilkårSattEtterSøkersDød(
                 personopplysningGrunnlag = personopplysningGrunnlag,
-                vilkårsvurdering = vilkårsvurdering
+                vilkårsvurdering = vilkårsvurdering,
             )
         }
 
         vilkårService.hentVilkårsvurdering(behandling.id)?.apply {
             validerIkkeBlandetRegelverk(
                 personopplysningGrunnlag = personopplysningGrunnlag,
-                vilkårsvurdering = this
+                vilkårsvurdering = this,
             )
 
             valider18ÅrsVilkårEksistererFraFødselsdato(
                 personopplysningGrunnlag = personopplysningGrunnlag,
-                vilkårsvurdering = this
+                vilkårsvurdering = this,
             )
         }
     }
@@ -55,7 +55,7 @@ class VilkårsvurderingSteg(
     @Transactional
     override fun utførStegOgAngiNeste(
         behandling: Behandling,
-        data: String
+        data: String,
     ): StegType {
         val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandling.id)
 
@@ -64,8 +64,8 @@ class VilkårsvurderingSteg(
                 behandling = behandling,
                 bekreftEndringerViaFrontend = true,
                 forrigeBehandlingSomErVedtatt = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(
-                    behandling
-                )
+                    behandling,
+                ),
             )
         }
 
@@ -75,7 +75,7 @@ class VilkårsvurderingSteg(
         tilpassKompetanserTilRegelverkService.tilpassKompetanserTilRegelverk(BehandlingId(behandling.id))
 
         behandlingstemaService.oppdaterBehandlingstema(
-            behandling = behandlingHentOgPersisterService.hent(behandlingId = behandling.id)
+            behandling = behandlingHentOgPersisterService.hent(behandlingId = behandling.id),
         )
 
         return hentNesteStegForNormalFlyt(behandling)

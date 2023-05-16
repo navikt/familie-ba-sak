@@ -47,7 +47,7 @@ internal class SmåbarnstilleggKorrigeringServiceTest {
         verify(exactly = 1) {
             loggService.opprettSmåbarnstilleggLogg(
                 behandling,
-                "Småbarnstillegg for oktober 2020 lagt til"
+                "Småbarnstillegg for oktober 2020 lagt til",
             )
         }
 
@@ -65,7 +65,7 @@ internal class SmåbarnstilleggKorrigeringServiceTest {
         val andelTilkjentYtelse = lagAndelTilkjentYtelse(
             fom = YearMonth.of(2010, 10),
             tom = YearMonth.of(2020, 10),
-            ytelseType = YtelseType.SMÅBARNSTILLEGG
+            ytelseType = YtelseType.SMÅBARNSTILLEGG,
         )
 
         every { tilkjentYtelseRepository.findByBehandling(behandling.id) } returns tilkjentYtelseMock
@@ -77,7 +77,7 @@ internal class SmåbarnstilleggKorrigeringServiceTest {
 
         assertThat(
             feil.melding,
-            Is("Det er ikke mulig å legge til småbarnstillegg for oktober 2020 fordi det allerede finnes småbarnstillegg for denne perioden")
+            Is("Det er ikke mulig å legge til småbarnstillegg for oktober 2020 fordi det allerede finnes småbarnstillegg for denne perioden"),
         )
     }
 
@@ -90,8 +90,8 @@ internal class SmåbarnstilleggKorrigeringServiceTest {
             lagAndelTilkjentYtelse(
                 fom = YearMonth.of(2010, 10),
                 tom = YearMonth.of(2020, 10),
-                ytelseType = YtelseType.SMÅBARNSTILLEGG
-            )
+                ytelseType = YtelseType.SMÅBARNSTILLEGG,
+            ),
         )
 
         every { tilkjentYtelseRepository.findByBehandling(behandling.id) } returns tilkjentYtelse
@@ -103,7 +103,7 @@ internal class SmåbarnstilleggKorrigeringServiceTest {
         verify(exactly = 1) {
             loggService.opprettSmåbarnstilleggLogg(
                 behandling,
-                "Småbarnstillegg for mai 2020 fjernet"
+                "Småbarnstillegg for mai 2020 fjernet",
             )
         }
 
@@ -125,8 +125,8 @@ internal class SmåbarnstilleggKorrigeringServiceTest {
             lagAndelTilkjentYtelse(
                 fom = YearMonth.of(2010, 10),
                 tom = YearMonth.of(2020, 10),
-                ytelseType = YtelseType.SMÅBARNSTILLEGG
-            )
+                ytelseType = YtelseType.SMÅBARNSTILLEGG,
+            ),
         )
 
         every { tilkjentYtelseRepository.findByBehandling(behandling.id) } returns tilkjentYtelse
@@ -137,7 +137,7 @@ internal class SmåbarnstilleggKorrigeringServiceTest {
 
         assertThat(
             feil.melding,
-            Is("Det er ikke mulig å fjerne småbarnstillegg for mai 2025 fordi det ikke finnes småbarnstillegg for denne perioden")
+            Is("Det er ikke mulig å fjerne småbarnstillegg for mai 2025 fordi det ikke finnes småbarnstillegg for denne perioden"),
         )
     }
 }

@@ -22,7 +22,7 @@ class VedtaksbegrunnelseFritekst(
     @SequenceGenerator(
         name = "vedtaksbegrunnelse_fritekst_seq_generator",
         sequenceName = "vedtaksbegrunnelse_fritekst_seq",
-        allocationSize = 50
+        allocationSize = 50,
     )
     val id: Long = 0,
 
@@ -32,13 +32,13 @@ class VedtaksbegrunnelseFritekst(
     val vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
 
     @Column(name = "fritekst", updatable = false)
-    val fritekst: String
+    val fritekst: String,
 ) {
 
     fun kopier(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser): VedtaksbegrunnelseFritekst =
         VedtaksbegrunnelseFritekst(
             vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-            fritekst = this.fritekst
+            fritekst = this.fritekst,
         )
 
     override fun toString(): String {
@@ -48,8 +48,8 @@ class VedtaksbegrunnelseFritekst(
 
 fun tilVedtaksbegrunnelseFritekst(
     vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
-    fritekst: String
+    fritekst: String,
 ) = VedtaksbegrunnelseFritekst(
     vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-    fritekst = fritekst
+    fritekst = fritekst,
 )

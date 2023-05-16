@@ -15,7 +15,7 @@ class InfotrygdService(
     private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
     private val familieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient,
     private val personidentService: PersonidentService,
-    private val personopplysningerService: PersonopplysningerService
+    private val personopplysningerService: PersonopplysningerService,
 ) {
 
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -30,7 +30,7 @@ class InfotrygdService(
         return if (!harTilgang) {
             RestInfotrygdsaker(
                 adressebeskyttelsegradering = personopplysningerService.hentAdressebeskyttelseSomSystembruker(aktør),
-                harTilgang = false
+                harTilgang = false,
             )
         } else {
             null
@@ -50,9 +50,9 @@ class InfotrygdService(
         return if (!harTilgang) {
             RestInfotrygdstønader(
                 adressebeskyttelsegradering = personopplysningerService.hentAdressebeskyttelseSomSystembruker(
-                    aktør
+                    aktør,
                 ),
-                harTilgang = false
+                harTilgang = false,
             )
         } else {
             null

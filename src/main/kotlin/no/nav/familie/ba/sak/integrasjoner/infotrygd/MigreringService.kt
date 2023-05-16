@@ -92,7 +92,7 @@ class MigreringService(
     private val kompetanseService: KompetanseService,
     private val persongrunnlagService: PersongrunnlagService,
     private val institusjonService: InstitusjonService,
-    private val featureToggleService: FeatureToggleService
+    private val featureToggleService: FeatureToggleService,
 ) {
 
     private val logger = LoggerFactory.getLogger(MigreringService::class.java)
@@ -151,13 +151,13 @@ class MigreringService(
                     fagsakService.hentEllerOpprettFagsakForPersonIdent(
                         fødselsnummer = personIdent,
                         institusjon = institusjonInfo,
-                        fagsakType = FagsakType.INSTITUSJON
+                        fagsakType = FagsakType.INSTITUSJON,
                     )
                 } else {
                     if (løpendeInfotrygdsak.erEnslingMindreårig(personIdent, barnasIdenter)) {
                         fagsakService.hentEllerOpprettFagsakForPersonIdent(
                             fødselsnummer = personIdent,
-                            fagsakType = FagsakType.BARN_ENSLIG_MINDREÅRIG
+                            fagsakType = FagsakType.BARN_ENSLIG_MINDREÅRIG,
                         )
                     } else {
                         fagsakService.hentEllerOpprettFagsakForPersonIdent(fødselsnummer = personIdent)
@@ -182,8 +182,8 @@ class MigreringService(
                         underkategori = underkategori,
                         barnasIdenter = barnasIdenter,
                         kategori = if (erEøsSak(løpendeInfotrygdsak)) BehandlingKategori.EØS else BehandlingKategori.NASJONAL,
-                        fagsakId = fagsak.id
-                    )
+                        fagsakId = fagsak.id,
+                    ),
                 )
             }.getOrElse {
                 secureLog.info("Kan ikke opprette behandling ${it.message}", it)
@@ -202,7 +202,7 @@ class MigreringService(
             if (løpendeInfotrygdsak.erInstitusjon()) {
                 stegService.håndterRegistrerVerge(
                     behandling,
-                    RestRegistrerInstitusjonOgVerge(institusjonInfo = institusjonInfo, vergeInfo = null)
+                    RestRegistrerInstitusjonOgVerge(institusjonInfo = institusjonInfo, vergeInfo = null),
                 )
             }
 
@@ -215,14 +215,14 @@ class MigreringService(
                 førsteAndelerTilkjentYtelse,
                 løpendeInfotrygdsak,
                 personIdent,
-                barnasIdenter
+                barnasIdenter,
             )
 
             if (løpendeInfotrygdsak.undervalg == "EU") {
                 kompetanseService.hentKompetanser(BehandlingId(behandling.id)).forEach { kompetanse ->
                     kompetanseService.oppdaterKompetanse(
                         BehandlingId(behandling.id),
-                        kompetanse.copy(resultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND)
+                        kompetanse.copy(resultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND),
                     )
                 }
             }
@@ -245,7 +245,7 @@ class MigreringService(
                 infotrygdTkNr = løpendeInfotrygdsak.tkNr,
                 infotrygdIverksattFom = løpendeInfotrygdsak.stønad?.iverksattFom,
                 infotrygdVirkningFom = løpendeInfotrygdsak.stønad?.virkningFom,
-                infotrygdRegion = løpendeInfotrygdsak.region
+                infotrygdRegion = løpendeInfotrygdsak.region,
             )
             secureLog.info("Ferdig migrert $personIdent. Response til familie-ba-migrering: $migreringResponseDto")
 
@@ -272,7 +272,7 @@ class MigreringService(
     fun sammenlingBarnInfotrygdMedBarnBAsak(
         behandling: Behandling,
         barnasIdenterInfotrygd: List<String>,
-        søkersIdent: String
+        søkersIdent: String,
     ) {
         val barna = persongrunnlagService.hentBarna(behandling).map { it.aktør.aktivFødselsnummer() }
 
@@ -303,7 +303,7 @@ class MigreringService(
         if (dobbeltforekomster.isNotEmpty()) {
             secureLog.warn(
                 "Kan ikke migrere fordi barnasIdenter $barnasIdenter inneholder en eller flere historiske identer tilhørende samme barn" +
-                    " som en annen ident. Fant følgende dobbeltforekomster: $dobbeltforekomster"
+                    " som en annen ident. Fant følgende dobbeltforekomster: $dobbeltforekomster",
             )
             kastOgTellMigreringsFeil(MigreringsfeilType.HISTORISK_IDENT_REGNET_SOM_EKSTRA_BARN_I_INFOTRYGD)
         }
@@ -441,7 +441,7 @@ class MigreringService(
         } else if (barnUnder18.distinct().size != løpendeSak.stønad!!.antallBarn) {
             secureLog.info(
                 "${MigreringsfeilType.OPPGITT_ANTALL_BARN_ULIKT_ANTALL_BARNIDENTER.beskrivelse}: " +
-                    "barnasIdenter.size=${barnUnder18.size} stønad.antallBarn=${løpendeSak.stønad!!.antallBarn}"
+                    "barnasIdenter.size=${barnUnder18.size} stønad.antallBarn=${løpendeSak.stønad!!.antallBarn}",
             )
             kastOgTellMigreringsFeil(MigreringsfeilType.OPPGITT_ANTALL_BARN_ULIKT_ANTALL_BARNIDENTER)
         }
@@ -451,7 +451,7 @@ class MigreringService(
 
     private fun forsøkSettPerioderFomTilpassetInfotrygdKjøreplan(
         vilkårsvurdering: Vilkårsvurdering,
-        migreringsdato: LocalDate
+        migreringsdato: LocalDate,
     ) {
         vilkårsvurdering.personResultater.forEach { personResultat ->
             personResultat.vilkårResultater.forEach {
@@ -470,7 +470,7 @@ class MigreringService(
                 else -> {
                     kastOgTellMigreringsFeil(
                         MigreringsfeilType.IKKE_GYLDIG_KJØREDATO,
-                        "Kjøring pågår. Vent med migrering til etter ${kjøredato.plusDays(2)}"
+                        "Kjøring pågår. Vent med migrering til etter ${kjøredato.plusDays(2)}",
                     )
                 }
             }.minusMonths(1)
@@ -514,7 +514,7 @@ class MigreringService(
         }
         kastOgTellMigreringsFeil(
             MigreringsfeilType.IKKE_GYLDIG_KJØREDATO,
-            "Kopien av Infotrygds kjøreplan er utdatert."
+            "Kopien av Infotrygds kjøreplan er utdatert.",
         )
     }
 
@@ -539,7 +539,7 @@ class MigreringService(
         førsteAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
         infotrygdSak: Sak,
         fnr: String,
-        barnasIdenter: List<String>
+        barnasIdenter: List<String>,
     ) {
         val delytelserInfotrygd = infotrygdSak.stønad!!.delytelse.filter { it.tom == null }
         val beløpFraInfotrygd = delytelserInfotrygd.sumOf { it.beløp }.toInt()
@@ -549,7 +549,7 @@ class MigreringService(
         if (barnasIdenter.size != barnasAndeler.groupBy { it.aktør.aktørId }.size) {
             secureLog.info(
                 "Migrering ble stoppet fordi det var barn på stønaden i Infotrygd det ikke ble tilkjent ytelse for:\n" +
-                    "${barnasIdenter.filterNot { barnasAndeler.personidenter.contains(it) }}"
+                    "${barnasIdenter.filterNot { barnasAndeler.personidenter.contains(it) }}",
             )
             kastOgTellMigreringsFeil(MigreringsfeilType.DIFF_BARN_INFOTRYGD_OG_BA_SAK)
         }
@@ -571,7 +571,7 @@ class MigreringService(
             }
             secureLog.info(
                 "Ulikt beløp ba-sak og infotrygd migrering. Andeler fra og med ${førsteAndelerTilkjentYtelse.first().stønadFom}: " +
-                    "$førsteAndelerTilkjentYtelse"
+                    "$førsteAndelerTilkjentYtelse",
             )
             secureLog.info("Beløp fra infotrygd sammsvarer ikke med beløp fra ba-sak for ${infotrygdSak.valg} ${infotrygdSak.undervalg} fnr=$fnr baSak=$førsteUtbetalingsbeløp infotrygd=$beløpFraInfotrygd")
             kastOgTellMigreringsFeil(beløpfeilType)
@@ -630,7 +630,7 @@ class MigreringService(
     private fun iverksett(behandling: Behandling) {
         totrinnskontrollService.opprettAutomatiskTotrinnskontroll(behandling)
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId = behandling.id) ?: kastOgTellMigreringsFeil(
-            MigreringsfeilType.IVERKSETT_BEHANDLING_UTEN_VEDTAK
+            MigreringsfeilType.IVERKSETT_BEHANDLING_UTEN_VEDTAK,
         )
         if (env.erPreprod()) {
             vedtak.vedtaksdato = LocalDate.of(2022, 1, 1).atStartOfDay()
@@ -680,20 +680,20 @@ enum class MigreringsfeilType(val beskrivelse: String) {
     UGYLDIG_ANTALL_DELYTELSER_I_INFOTRYGD("Saken kan ikke migreres. Meld saken i Porten. Velg \"Meld sak om Infotrygd\"."),
     UKJENT("Saken kan ikke migreres. Meld saken i Porten. Velg \"Meld sak om Infotrygd\"."),
     ÅPEN_SAK_INFOTRYGD("Personen har en åpen behandling i Infotrygd som må lukkes før migrering"),
-    DELYTELSE_OG_ANTALLBARN_NULL("Saken trenger ikke å migreres da den ikke har aktiv ytelse med barn i Infotrygd") // Disse kan man nok la være å migrere
+    DELYTELSE_OG_ANTALLBARN_NULL("Saken trenger ikke å migreres da den ikke har aktiv ytelse med barn i Infotrygd"), // Disse kan man nok la være å migrere
 }
 
 open class KanIkkeMigrereException(
     open val feiltype: MigreringsfeilType = MigreringsfeilType.UKJENT,
     open val melding: String? = null,
-    open val throwable: Throwable? = null
+    open val throwable: Throwable? = null,
 ) : RuntimeException(melding, throwable)
 
 val migreringsFeilCounter = mutableMapOf<String, Counter>()
 fun kastOgTellMigreringsFeil(
     feiltype: MigreringsfeilType,
     melding: String? = null,
-    throwable: Throwable? = null
+    throwable: Throwable? = null,
 ): Nothing =
     throw KanIkkeMigrereException(feiltype, melding, throwable).also {
         if (migreringsFeilCounter[feiltype.name] == null) {

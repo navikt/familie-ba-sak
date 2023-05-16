@@ -31,7 +31,7 @@ class StartSatsendring(
     private val featureToggleService: FeatureToggleService,
     private val personidentService: PersonidentService,
     private val autovedtakSatsendringService: AutovedtakSatsendringService,
-    private val satsendringService: SatsendringService
+    private val satsendringService: SatsendringService,
 ) {
 
     private val ignorerteFagsaker = mutableSetOf<Long>()
@@ -39,7 +39,7 @@ class StartSatsendring(
     @Transactional
     fun startSatsendring(
         antallFagsaker: Int,
-        satsTidspunkt: YearMonth = YearMonth.of(2023, 3)
+        satsTidspunkt: YearMonth = YearMonth.of(2023, 3),
     ) {
         if (!featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_ENABLET, false)) {
             logger.info("Skipper satsendring da toggle er skrudd av.")
@@ -59,7 +59,7 @@ class StartSatsendring(
                         fagsakerForSatsendring,
                         antallSatsendringerStartet,
                         antallFagsaker,
-                        satsTidspunkt
+                        satsTidspunkt,
                     )
             }
 
@@ -71,7 +71,7 @@ class StartSatsendring(
         fagsakForSatsendring: List<Fagsak>,
         antallAlleredeTriggetSatsendring: Int,
         antallFagsakerTilSatsendring: Int,
-        satsTidspunkt: YearMonth
+        satsTidspunkt: YearMonth,
     ): Int {
         var antallFagsakerSatsendring = antallAlleredeTriggetSatsendring
 
@@ -96,15 +96,15 @@ class StartSatsendring(
         if (sisteIverksatteBehandling != null) {
             val andelerTilkjentYtelseMedEndreteUtbetalinger =
                 andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
-                    sisteIverksatteBehandling.id
+                    sisteIverksatteBehandling.id,
                 )
 
             if (andelerTilkjentYtelseMedEndreteUtbetalinger.erOppdatertMedSisteSatser()) {
                 satskjøringRepository.save(
                     Satskjøring(
                         fagsakId = fagsak.id,
-                        ferdigTidspunkt = sisteIverksatteBehandling.endretTidspunkt
-                    )
+                        ferdigTidspunkt = sisteIverksatteBehandling.endretTidspunkt,
+                    ),
                 )
                 logger.info("Fagsak=${fagsak.id} har alt siste satser")
                 return true
@@ -175,8 +175,8 @@ class StartSatsendring(
         val resultatSatsendringBehandling = autovedtakSatsendringService.kjørBehandling(
             SatsendringTaskDto(
                 fagsakId = fagsakId,
-                satstidspunkt = SATSENDRINGMÅNED_2023
-            )
+                satstidspunkt = SATSENDRINGMÅNED_2023,
+            ),
         )
 
         when (resultatSatsendringBehandling) {
@@ -188,7 +188,8 @@ class StartSatsendring(
             SatsendringSvar.HAR_ALLEREDE_SISTE_SATS,
             SatsendringSvar.BEHANDLING_ER_LÅST_SATSENDRING_TRIGGES_NESTE_VIRKEDAG,
             SatsendringSvar.TILBAKESTILLER_BEHANDLINGEN_TIL_VILKÅRSVURDERINGEN,
-            SatsendringSvar.BEHANDLINGEN_ER_UNDER_UTREDNING_MEN_I_RIKTIG_TILSTAND ->
+            SatsendringSvar.BEHANDLINGEN_ER_UNDER_UTREDNING_MEN_I_RIKTIG_TILSTAND,
+            ->
                 throw FunksjonellFeil("Det finnes en åpen behandling på fagsaken som må avsluttes før satsendring kan gjennomføres.")
         }
     }

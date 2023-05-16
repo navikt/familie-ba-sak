@@ -16,7 +16,7 @@ import java.time.LocalDate
 @TaskStepBeskrivelse(
     taskStepType = GrensesnittavstemMotOppdrag.TASK_STEP_TYPE,
     beskrivelse = "Grensesnittavstemming mot oppdrag",
-    maxAntallFeil = 3
+    maxAntallFeil = 3,
 )
 class GrensesnittavstemMotOppdrag(val avstemmingService: AvstemmingService, val taskRepository: TaskRepositoryWrapper) :
     AsyncTaskStep {
@@ -33,9 +33,9 @@ class GrensesnittavstemMotOppdrag(val avstemmingService: AvstemmingService, val 
 
         val nesteAvstemmingTask = Task(
             type = TASK_STEP_TYPE,
-            payload = objectMapper.writeValueAsString(nesteAvstemmingTaskDTO)
+            payload = objectMapper.writeValueAsString(nesteAvstemmingTaskDTO),
         ).medTriggerTid(
-            nesteAvstemmingTaskDTO.tomDato.toLocalDate().atTime(8, 0)
+            nesteAvstemmingTaskDTO.tomDato.toLocalDate().atTime(8, 0),
         )
 
         taskRepository.save(nesteAvstemmingTask)
@@ -45,7 +45,7 @@ class GrensesnittavstemMotOppdrag(val avstemmingService: AvstemmingService, val 
         GrensesnittavstemmingTaskDTO(
             tideligereTriggerDato.atStartOfDay(),
             nesteGyldigeTriggertidForBehandlingIHverdager((24 * 60).toLong(), tideligereTriggerDato.atStartOfDay())
-                .toLocalDate().atStartOfDay()
+                .toLocalDate().atStartOfDay(),
         )
 
     companion object {

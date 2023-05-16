@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 
 class ValutakursBuilder(
     startMåned: Tidspunkt<Måned> = jan(2020),
-    behandlingId: BehandlingId = BehandlingId(1)
+    behandlingId: BehandlingId = BehandlingId(1),
 ) : SkjemaBuilder<Valutakurs, ValutakursBuilder>(startMåned, behandlingId) {
     fun medKurs(k: String, valutakode: String?, vararg barn: Person) = medSkjema(k, barn.toList()) {
         when {
@@ -19,7 +19,7 @@ class ValutakursBuilder(
                 Valutakurs.NULL.copy(
                     kurs = it?.digitToInt()?.toBigDecimal(),
                     valutakode = valutakode,
-                    valutakursdato = null
+                    valutakursdato = null,
                 )
             }
             else -> null

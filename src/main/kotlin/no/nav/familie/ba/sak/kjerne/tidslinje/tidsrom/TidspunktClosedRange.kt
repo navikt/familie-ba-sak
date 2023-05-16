@@ -44,7 +44,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.somUendeligLengeTil
  */
 data class TidspunktClosedRange<T : Tidsenhet>(
     override val start: Tidspunkt<T>,
-    override val endInclusive: Tidspunkt<T>
+    override val endInclusive: Tidspunkt<T>,
 ) : Iterable<Tidspunkt<T>>,
     ClosedRange<Tidspunkt<T>> {
 

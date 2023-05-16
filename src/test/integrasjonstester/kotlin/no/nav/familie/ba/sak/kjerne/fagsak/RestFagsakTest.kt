@@ -52,7 +52,7 @@ class RestFagsakTest(
     private val vedtaksperiodeService: VedtaksperiodeService,
 
     @Autowired
-    private val brevmalService: BrevmalService
+    private val brevmalService: BrevmalService,
 
 ) : AbstractSpringIntegrationTest() {
 
@@ -87,7 +87,7 @@ class RestFagsakTest(
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
             vedtaksperiodeService,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
         )
 
         kjørStegprosessForRevurderingÅrligKontroll(
@@ -97,7 +97,7 @@ class RestFagsakTest(
             vedtakService = vedtakService,
             stegService = stegService,
             fagsakId = førstegangsbehandling.fagsak.id,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
         )
 
         val restfagsak = fagsakService.hentRestFagsak(fagsakId = førstegangsbehandling.fagsak.id)

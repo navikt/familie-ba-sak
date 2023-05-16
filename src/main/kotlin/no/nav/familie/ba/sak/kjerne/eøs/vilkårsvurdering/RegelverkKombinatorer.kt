@@ -16,12 +16,12 @@ fun kombinerVilkårResultaterTilRegelverkResultat(
     personType: PersonType,
     alleVilkårResultater: Iterable<VilkårRegelverkResultat>,
     fagsakType: FagsakType,
-    behandlingUnderkategori: BehandlingUnderkategori
+    behandlingUnderkategori: BehandlingUnderkategori,
 ): RegelverkResultat? {
     val nødvendigeVilkår = Vilkår.hentVilkårFor(
         personType = personType,
         fagsakType = fagsakType,
-        behandlingUnderkategori = behandlingUnderkategori
+        behandlingUnderkategori = behandlingUnderkategori,
     )
         .filter { it != Vilkår.UTVIDET_BARNETRYGD }
 

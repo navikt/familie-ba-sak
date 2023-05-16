@@ -45,7 +45,7 @@ object SatsService {
 
         Sats(SatsType.UTVIDET_BARNETRYGD, 970, LocalDate.MIN, LocalDate.of(2019, 2, 28)),
         Sats(SatsType.UTVIDET_BARNETRYGD, 1054, LocalDate.of(2019, 3, 1), LocalDate.of(2023, 2, 28)),
-        Sats(SatsType.UTVIDET_BARNETRYGD, 2489, LocalDate.of(2023, 3, 1), LocalDate.MAX)
+        Sats(SatsType.UTVIDET_BARNETRYGD, 2489, LocalDate.of(2023, 3, 1), LocalDate.MAX),
     )
 
     fun finnSisteSatsFor(satstype: SatsType) = finnAlleSatserFor(satstype).maxBy { it.gyldigTom }
@@ -70,7 +70,7 @@ object SatsService {
 
     fun hentDatoForSatsendring(
         satstype: SatsType,
-        oppdatertBeløp: Int
+        oppdatertBeløp: Int,
     ): LocalDate? = hentAllesatser().find { it.type == satstype && it.beløp == oppdatertBeløp }?.gyldigFom
 }
 
@@ -88,7 +88,7 @@ fun satstypeTidslinje(satsType: SatsType) =
                 Periode(
                     fraOgMed = fom.tilTidspunktEllerTidligereEnn(tom),
                     tilOgMed = tom.tilTidspunktEllerSenereEnn(fom),
-                    it.beløp
+                    it.beløp,
                 )
             }
     }
@@ -103,5 +103,5 @@ fun lagOrdinærTidslinje(barn: Person): Tidslinje<Int, Måned> {
 
 private fun Tidslinje<Int, Måned>.klippBortPerioderFørBarnetBleFødt(fødselsdato: LocalDate) = this.beskjær(
     fraOgMed = fødselsdato.tilMånedTidspunkt(),
-    tilOgMed = MånedTidspunkt.uendeligLengeTil(fødselsdato.toYearMonth())
+    tilOgMed = MånedTidspunkt.uendeligLengeTil(fødselsdato.toYearMonth()),
 )

@@ -31,7 +31,7 @@ class SaksstatistikkControllerTest {
             offset = 45635,
             type = SaksstatistikkMellomlagringType.SAK,
             sendtTidspunkt = LocalDateTime.now(),
-            json = """{"sakId": 123456789, "versjon": "1.0", "funksjonellId": "aaa-bbb-ccc"}"""
+            json = """{"sakId": 123456789, "versjon": "1.0", "funksjonellId": "aaa-bbb-ccc"}""",
         )
 
         val slot = slot<SaksstatistikkMellomlagring>()
@@ -42,7 +42,7 @@ class SaksstatistikkControllerTest {
         assertThat(slot.captured.type).isEqualTo(SaksstatistikkMellomlagringType.SAK)
         assertThat(slot.captured.sendtTidspunkt).isCloseTo(
             LocalDateTime.now(),
-            within(10, ChronoUnit.SECONDS)
+            within(10, ChronoUnit.SECONDS),
         )
         assertThat(slot.captured.funksjonellId).isEqualTo("aaa-bbb-ccc")
         assertThat(slot.captured.typeId).isEqualTo(123456789)
@@ -55,7 +55,7 @@ class SaksstatistikkControllerTest {
             offset = 45635,
             type = SaksstatistikkMellomlagringType.BEHANDLING,
             sendtTidspunkt = LocalDateTime.now(),
-            json = """{"behandlingId": 123456789, "versjon": "1.0", "funksjonellId": "aaa-bbb-ccc"}"""
+            json = """{"behandlingId": 123456789, "versjon": "1.0", "funksjonellId": "aaa-bbb-ccc"}""",
         )
 
         val slot = slot<SaksstatistikkMellomlagring>()
@@ -67,7 +67,7 @@ class SaksstatistikkControllerTest {
         assertThat(slot.captured.type).isEqualTo(SaksstatistikkMellomlagringType.BEHANDLING)
         assertThat(slot.captured.sendtTidspunkt).isCloseTo(
             LocalDateTime.now(),
-            within(10, ChronoUnit.SECONDS)
+            within(10, ChronoUnit.SECONDS),
         )
         assertThat(slot.captured.funksjonellId).isEqualTo("aaa-bbb-ccc")
         assertThat(slot.captured.typeId).isEqualTo(123456789)

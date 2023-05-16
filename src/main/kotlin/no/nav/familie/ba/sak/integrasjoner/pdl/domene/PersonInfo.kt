@@ -30,7 +30,7 @@ data class PersonInfo(
     val opphold: List<Opphold>? = emptyList(),
     val statsborgerskap: List<Statsborgerskap>? = emptyList(),
     val dødsfall: DødsfallData? = null,
-    val kontaktinformasjonForDoedsbo: PdlKontaktinformasjonForDødsbo? = null
+    val kontaktinformasjonForDoedsbo: PdlKontaktinformasjonForDødsbo? = null,
 )
 
 fun List<Bostedsadresse>.filtrerUtKunNorskeBostedsadresser() =
@@ -41,7 +41,7 @@ data class ForelderBarnRelasjon(
     val relasjonsrolle: FORELDERBARNRELASJONROLLE,
     val navn: String? = null,
     val fødselsdato: LocalDate? = null,
-    val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING? = null
+    val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING? = null,
 ) {
     override fun toString(): String {
         return "ForelderBarnRelasjon(personIdent=XXX, relasjonsrolle=$relasjonsrolle, navn=XXX, fødselsdato=$fødselsdato)"
@@ -54,7 +54,7 @@ data class ForelderBarnRelasjon(
 
 data class ForelderBarnRelasjonMaskert(
     val relasjonsrolle: FORELDERBARNRELASJONROLLE,
-    val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING
+    val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING,
 ) {
     override fun toString(): String {
         return "ForelderBarnRelasjonMaskert(relasjonsrolle=$relasjonsrolle)"
@@ -62,23 +62,23 @@ data class ForelderBarnRelasjonMaskert(
 }
 
 data class Personident(
-    val id: String
+    val id: String,
 )
 
 data class DødsfallData(
     val erDød: Boolean,
-    val dødsdato: String?
+    val dødsdato: String?,
 )
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class PdlKontaktinformasjonForDødsbo(
-    val adresse: PdlKontaktinformasjonForDødsboAdresse
+    val adresse: PdlKontaktinformasjonForDødsboAdresse,
 )
 
 data class PdlKontaktinformasjonForDødsboAdresse(
     val adresselinje1: String,
     val poststedsnavn: String,
-    val postnummer: String
+    val postnummer: String,
 )
 
 data class VergeData(val harVerge: Boolean)

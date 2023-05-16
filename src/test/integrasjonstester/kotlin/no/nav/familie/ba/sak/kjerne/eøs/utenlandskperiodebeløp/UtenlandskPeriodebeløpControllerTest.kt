@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestUtenlandskPeriodebeløp
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -46,7 +47,7 @@ class UtenlandskPeriodebeløpControllerTest {
         val exception = assertThrows<ConstraintViolationException> {
             utenlandskPeriodebeløpController.oppdaterUtenlandskPeriodebeløp(
                 1,
-                RestUtenlandskPeriodebeløp(1, null, null, emptyList(), beløp = (-1.0).toBigDecimal(), null, null, null)
+                RestUtenlandskPeriodebeløp(1, null, null, emptyList(), beløp = (-1.0).toBigDecimal(), null, null, null),
             )
         }
 
@@ -67,7 +68,7 @@ class UtenlandskPeriodebeløpControllerTest {
 
         val response = utenlandskPeriodebeløpController.oppdaterUtenlandskPeriodebeløp(
             1,
-            RestUtenlandskPeriodebeløp(1, null, null, emptyList(), beløp = 1.0.toBigDecimal(), null, null, null)
+            RestUtenlandskPeriodebeløp(1, null, null, emptyList(), beløp = 1.0.toBigDecimal(), null, null, null),
         )
 
         assertEquals(HttpStatus.OK, response.statusCode)
@@ -90,4 +91,7 @@ class TestConfig {
 
     @Bean
     fun utvidetBehandlingService(): UtvidetBehandlingService = mockk(relaxed = true)
+
+    @Bean
+    fun tilgangService(): TilgangService = mockk(relaxed = true)
 }

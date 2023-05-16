@@ -26,12 +26,12 @@ data class Utbetalingsperiode(
     val utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj>,
     val ytelseTyper: List<YtelseType>,
     val antallBarn: Int,
-    val utbetaltPerMnd: Int
+    val utbetaltPerMnd: Int,
 ) : Vedtaksperiode {
     fun tilTomtSegment() = LocalDateSegment(
         this.periodeFom,
         this.periodeTom,
-        null
+        null,
     )
 }
 
@@ -40,18 +40,18 @@ data class UtbetalingsperiodeDetalj(
     val ytelseType: YtelseType,
     val utbetaltPerMnd: Int,
     val erPåvirketAvEndring: Boolean,
-    val prosent: BigDecimal
+    val prosent: BigDecimal,
 ) {
     constructor(
         andel: AndelTilkjentYtelseMedEndreteUtbetalinger,
-        personopplysningGrunnlag: PersonopplysningGrunnlag
+        personopplysningGrunnlag: PersonopplysningGrunnlag,
     ) : this(
         person = personopplysningGrunnlag.søkerOgBarn.find { person -> andel.aktør == person.aktør }?.tilRestPerson()
             ?: throw IllegalStateException("Fant ikke personopplysningsgrunnlag for andel"),
         ytelseType = andel.type,
         utbetaltPerMnd = andel.kalkulertUtbetalingsbeløp,
         erPåvirketAvEndring = andel.endreteUtbetalinger.isNotEmpty(),
-        prosent = andel.prosent
+        prosent = andel.prosent,
     )
 }
 
@@ -60,7 +60,7 @@ fun List<UtbetalingsperiodeDetalj>.totaltUtbetalt(): Int =
 
 fun hentUtbetalingsperiodeForVedtaksperiode(
     utbetalingsperioder: List<Utbetalingsperiode>,
-    fom: LocalDate?
+    fom: LocalDate?,
 ): Utbetalingsperiode {
     if (utbetalingsperioder.isEmpty()) {
         throw Feil("Det finnes ingen utbetalingsperioder ved utledning av utbetalingsperiode.")
@@ -75,7 +75,7 @@ fun hentUtbetalingsperiodeForVedtaksperiode(
 }
 
 fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.mapTilUtbetalingsperioder(
-    personopplysningGrunnlag: PersonopplysningGrunnlag
+    personopplysningGrunnlag: PersonopplysningGrunnlag,
 ): List<Utbetalingsperiode> {
     val andelerTidslinjePerAktørOgType = this.tilKombinertTidslinjePerAktørOgType()
 
@@ -90,7 +90,7 @@ fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.mapTilUtbetalingsperioder(
                 antallBarn = periode.innhold
                     .map { it.aktør }.toSet()
                     .count { aktør -> personopplysningGrunnlag.barna.any { barn -> barn.aktør == aktør } },
-                utbetalingsperiodeDetaljer = periode.innhold.lagUtbetalingsperiodeDetaljer(personopplysningGrunnlag)
+                utbetalingsperiodeDetaljer = periode.innhold.lagUtbetalingsperiodeDetaljer(personopplysningGrunnlag),
             )
         }
 
@@ -108,7 +108,7 @@ internal fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.utledSegmenter(): L
 }
 
 fun Collection<AndelTilkjentYtelseMedEndreteUtbetalinger>.lagUtbetalingsperiodeDetaljer(
-    personopplysningGrunnlag: PersonopplysningGrunnlag
+    personopplysningGrunnlag: PersonopplysningGrunnlag,
 ): List<UtbetalingsperiodeDetalj> =
     this.map { andel ->
         val personForAndel =
@@ -120,6 +120,6 @@ fun Collection<AndelTilkjentYtelseMedEndreteUtbetalinger>.lagUtbetalingsperiodeD
             ytelseType = andel.type,
             utbetaltPerMnd = andel.kalkulertUtbetalingsbeløp,
             erPåvirketAvEndring = andel.endreteUtbetalinger.isNotEmpty(),
-            prosent = andel.prosent
+            prosent = andel.prosent,
         )
     }

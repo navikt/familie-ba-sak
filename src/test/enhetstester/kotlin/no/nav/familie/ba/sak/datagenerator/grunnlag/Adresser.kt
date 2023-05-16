@@ -8,7 +8,7 @@ fun opprettAdresse(
     adressenavn: String? = null,
     husnummer: String? = null,
     husbokstav: String? = null,
-    postnummer: String? = null
+    postnummer: String? = null,
 ) = GrVegadresse(
     matrikkelId = matrikkelId,
     husnummer = husnummer,
@@ -17,5 +17,5 @@ fun opprettAdresse(
     adressenavn = adressenavn,
     kommunenummer = null,
     tilleggsnavn = null,
-    postnummer = postnummer
+    postnummer = postnummer,
 )

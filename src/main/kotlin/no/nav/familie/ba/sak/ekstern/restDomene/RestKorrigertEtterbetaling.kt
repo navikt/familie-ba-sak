@@ -10,7 +10,7 @@ data class RestKorrigertEtterbetaling(
     val begrunnelse: String?,
     val opprettetTidspunkt: LocalDateTime,
     val beløp: Int,
-    val aktiv: Boolean
+    val aktiv: Boolean,
 )
 
 fun KorrigertEtterbetaling.tilRestKorrigertEtterbetaling(): RestKorrigertEtterbetaling =
@@ -20,5 +20,5 @@ fun KorrigertEtterbetaling.tilRestKorrigertEtterbetaling(): RestKorrigertEtterbe
         begrunnelse = begrunnelse,
         opprettetTidspunkt = opprettetTidspunkt,
         beløp = beløp,
-        aktiv = aktiv
+        aktiv = aktiv,
     )

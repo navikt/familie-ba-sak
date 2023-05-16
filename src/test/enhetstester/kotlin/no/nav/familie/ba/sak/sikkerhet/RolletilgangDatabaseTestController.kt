@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController
 @Validated
 class RolletilgangDatabaseTestController(
     private val behandlingService: BehandlingService,
-    private val environment: Environment
+    private val environment: Environment,
 ) {
 
     @PostMapping(path = ["test-behandlinger"], produces = [MediaType.APPLICATION_JSON_VALUE])

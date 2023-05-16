@@ -58,7 +58,7 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
                     FROM   satskjoering
                     WHERE  fk_fagsak_id = f.id
                 ) AND f.status = 'LØPENDE' AND f.arkivert = false""",
-        nativeQuery = true
+        nativeQuery = true,
     )
     fun finnLøpendeFagsakerForSatsendring(page: Pageable): Page<Fagsak>
 
@@ -81,7 +81,7 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
                                      INNER JOIN behandling b ON b.fk_fagsak_id = silp.fagsakid
                                      INNER JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
                             WHERE b.opprettet_tid = silp.opprettet_tid AND ty.stonad_tom < DATE_TRUNC('month', NOW()))""",
-        nativeQuery = true
+        nativeQuery = true,
     )
     fun finnFagsakerSomSkalAvsluttes(): List<Long>
 
@@ -105,7 +105,7 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
                 )
             )
         )
-        """
+        """,
     )
     fun finnLøpendeFagsakMedBarnMedFødselsdatoInnenfor(fom: LocalDate, tom: LocalDate): Set<Fagsak>
 
@@ -135,7 +135,7 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
           AND p.aktiv = TRUE
         GROUP BY p.foedselsnummer
     """,
-        nativeQuery = true
+        nativeQuery = true,
     )
     @Timed
     fun finnFagsakerMedUtvidetBarnetrygdInnenfor(fom: LocalDateTime, tom: LocalDateTime): List<UtvidetSkatt>
@@ -152,12 +152,12 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
                 AND NOT EXISTS (SELECT aty2 from AndelTilkjentYtelse aty2 where aty2.behandlingId = b.id AND aty2.type = 'SMÅBARNSTILLEGG' AND aty.stønadFom = :innværendeMåned)
                 AND aty.type = 'SMÅBARNSTILLEGG'
                 AND aty.stønadTom = :stønadTom
-        """
+        """,
     )
     fun finnAlleFagsakerMedOpphørSmåbarnstilleggIMåned(
         iverksatteLøpendeBehandlinger: List<Long>,
         stønadTom: YearMonth = YearMonth.now().minusMonths(1),
-        innværendeMåned: YearMonth = YearMonth.now()
+        innværendeMåned: YearMonth = YearMonth.now(),
     ): List<Long>
 
     @Query(
@@ -171,10 +171,10 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
                 AND NOT EXISTS (SELECT b2 from Behandling b2 where b2.fagsak.id = b.fagsak.id AND b2.status <> 'AVSLUTTET')
                 AND aty.type = 'SMÅBARNSTILLEGG'
                 AND aty.stønadFom = :stønadFom
-        """
+        """,
     )
     fun finnAlleFagsakerMedOppstartSmåbarnstilleggIMåned(
         iverksatteLøpendeBehandlinger: List<Long>,
-        stønadFom: YearMonth = YearMonth.now()
+        stønadFom: YearMonth = YearMonth.now(),
     ): List<Long>
 }

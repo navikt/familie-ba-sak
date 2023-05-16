@@ -18,12 +18,12 @@ import org.springframework.stereotype.Service
 class DokumentDistribueringService(
     private val taskService: TaskService,
     private val integrasjonClient: IntegrasjonClient,
-    private val loggService: LoggService
+    private val loggService: LoggService,
 ) {
 
     fun prøvDistribuerBrevOgLoggHendelse(
         distribuerDokumentDTO: DistribuerDokumentDTO,
-        loggBehandlerRolle: BehandlerRolle
+        loggBehandlerRolle: BehandlerRolle,
     ) = try {
         distribuerBrevOgLoggHendelse(distribuerDokumentDTO, loggBehandlerRolle)
     } catch (ressursException: RessursException) {
@@ -32,12 +32,12 @@ class DokumentDistribueringService(
 
         logger.info(
             "Klarte ikke å distribuere brev til journalpost $journalpostId på behandling $behandlingId. " +
-                "Httpstatus ${ressursException.httpStatus}"
+                "Httpstatus ${ressursException.httpStatus}",
         )
         secureLogger.info(
             "Klarte ikke å distribuere brev til journalpost $journalpostId på behandling $behandlingId.\n" +
                 "Httpstatus: ${ressursException.httpStatus}\n" +
-                "Melding: ${ressursException.cause?.message}"
+                "Melding: ${ressursException.cause?.message}",
         )
 
         if (dokumentetErAlleredeDistribuert(ressursException)) {
@@ -49,7 +49,7 @@ class DokumentDistribueringService(
 
     fun prøvDistribuerBrevOgLoggHendelseFraBehandling(
         distribuerDokumentDTO: DistribuerDokumentDTO,
-        loggBehandlerRolle: BehandlerRolle
+        loggBehandlerRolle: BehandlerRolle,
     ) {
         try {
             prøvDistribuerBrevOgLoggHendelse(distribuerDokumentDTO, loggBehandlerRolle)
@@ -76,31 +76,31 @@ class DokumentDistribueringService(
 
         logger.info(
             "Klarte ikke å distribuere brev for journalpostId ${distribuerDokumentDTO.journalpostId} " +
-                "på behandling ${distribuerDokumentDTO.behandlingId}. Bruker har ukjent dødsboadresse."
+                "på behandling ${distribuerDokumentDTO.behandlingId}. Bruker har ukjent dødsboadresse.",
         )
 
         loggService.opprettBrevIkkeDistribuertUkjentDødsboadresseLogg(
             behandlingId = checkNotNull(distribuerDokumentDTO.behandlingId),
-            brevnavn = distribuerDokumentDTO.brevmal.visningsTekst
+            brevnavn = distribuerDokumentDTO.brevmal.visningsTekst,
         )
     }
 
     internal fun loggBrevIkkeDistribuertUkjentAdresse(
         journalpostId: String,
         behandlingId: Long,
-        brevMal: Brevmal
+        brevMal: Brevmal,
     ) {
         logger.info("Klarte ikke å distribuere brev for journalpostId $journalpostId på behandling $behandlingId. Bruker har ukjent adresse.")
         loggService.opprettBrevIkkeDistribuertUkjentAdresseLogg(
             behandlingId = behandlingId,
-            brevnavn = brevMal.visningsTekst
+            brevnavn = brevMal.visningsTekst,
         )
         antallBrevIkkeDistribuertUkjentAndresse[brevMal]?.increment()
     }
 
     private fun distribuerBrevOgLoggHendelse(
         distribuerDokumentDTO: DistribuerDokumentDTO,
-        loggBehandlerRolle: BehandlerRolle
+        loggBehandlerRolle: BehandlerRolle,
     ) {
         val brevmal = distribuerDokumentDTO.brevmal
         integrasjonClient.distribuerBrev(distribuerDokumentDTO)
@@ -109,7 +109,7 @@ class DokumentDistribueringService(
             loggService.opprettDistribuertBrevLogg(
                 behandlingId = distribuerDokumentDTO.behandlingId,
                 tekst = brevmal.visningsTekst,
-                rolle = loggBehandlerRolle
+                rolle = loggBehandlerRolle,
             )
         }
 
@@ -120,7 +120,7 @@ class DokumentDistribueringService(
         Metrics.counter(
             "brev.sendt",
             "brevtype",
-            it.visningsTekst
+            it.visningsTekst,
         )
     }
 
@@ -129,7 +129,7 @@ class DokumentDistribueringService(
             Metrics.counter(
                 "brev.ikke.sendt.ukjent.andresse",
                 "brevtype",
-                it.visningsTekst
+                it.visningsTekst,
             )
         }
 

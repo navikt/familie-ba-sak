@@ -17,12 +17,12 @@ data class MinimertKompetanse(
     val annenForeldersAktivitetslandNavn: LandNavn?,
     val barnetsBostedslandNavn: LandNavn,
     val resultat: KompetanseResultat,
-    val personer: List<MinimertRestPerson>
+    val personer: List<MinimertRestPerson>,
 )
 
 fun Kompetanse.tilMinimertKompetanse(
     personopplysningGrunnlag: PersonopplysningGrunnlag,
-    landkoderISO2: Map<String, String>
+    landkoderISO2: Map<String, String>,
 ): MinimertKompetanse {
     this.validerFelterErSatt()
 
@@ -43,9 +43,9 @@ fun Kompetanse.tilMinimertKompetanse(
             MinimertRestPerson(
                 personIdent = aktør.aktivFødselsnummer(),
                 fødselsdato = fødselsdato,
-                type = PersonType.BARN
+                type = PersonType.BARN,
             )
-        }
+        },
     )
 }
 

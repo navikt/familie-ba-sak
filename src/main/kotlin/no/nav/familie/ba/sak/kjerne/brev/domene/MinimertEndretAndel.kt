@@ -16,7 +16,7 @@ class MinimertEndretAndel(
     val fom: YearMonth?,
     val tom: YearMonth?,
     val årsak: Årsak?,
-    val prosent: BigDecimal?
+    val prosent: BigDecimal?,
 ) {
     fun månedPeriode() = MånedPeriode(fom!!, tom!!)
 
@@ -27,12 +27,12 @@ class MinimertEndretAndel(
 
         return MånedPeriode(
             this.fom!!,
-            this.tom!!
+            this.tom!!,
         ).overlapperHeltEllerDelvisMed(
             MånedPeriode(
                 nullableMånedPeriode.fom,
-                nullableMånedPeriode.tom ?: TIDENES_ENDE.toYearMonth()
-            )
+                nullableMånedPeriode.tom ?: TIDENES_ENDE.toYearMonth(),
+            ),
         )
     }
 }
@@ -45,12 +45,12 @@ fun EndretUtbetalingAndel.tilMinimertEndretUtbetalingAndel(): MinimertEndretAnde
         tom = this.tom!!,
         aktørId = this.person?.aktør?.aktørId ?: throw Feil(
             "Finner ikke aktørId på endretUtbetalingsandel ${this.id} " +
-                "ved konvertering til minimertEndretUtbetalingsandel"
+                "ved konvertering til minimertEndretUtbetalingsandel",
         ),
         årsak = this.årsak ?: throw Feil(
             "Har ikke årsak på endretUtbetalingsandel ${this.id} " +
-                "ved konvertering til minimertEndretUtbetalingsandel"
+                "ved konvertering til minimertEndretUtbetalingsandel",
         ),
-        prosent = this.prosent
+        prosent = this.prosent,
     )
 }

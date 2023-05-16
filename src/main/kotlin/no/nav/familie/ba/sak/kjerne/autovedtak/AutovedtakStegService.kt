@@ -28,7 +28,7 @@ interface AutovedtakBehandlingService<Behandlingsdata> {
 enum class Autovedtaktype(val displayName: String) {
     FØDSELSHENDELSE("Fødselshendelse"),
     SMÅBARNSTILLEGG("Småbarnstillegg"),
-    OMREGNING_BREV("Omregning")
+    OMREGNING_BREV("Omregning"),
 }
 
 @Service
@@ -38,7 +38,7 @@ class AutovedtakStegService(
     private val oppgaveService: OppgaveService,
     private val autovedtakFødselshendelseService: AutovedtakFødselshendelseService,
     private val autovedtakBrevService: AutovedtakBrevService,
-    private val autovedtakSmåbarnstilleggService: AutovedtakSmåbarnstilleggService
+    private val autovedtakSmåbarnstilleggService: AutovedtakSmåbarnstilleggService,
 ) {
 
     private val antallAutovedtak: Map<Autovedtaktype, Counter> = Autovedtaktype.values().associateWith {
@@ -52,7 +52,7 @@ class AutovedtakStegService(
         return kjørBehandling(
             mottakersAktør = mottakersAktør,
             autovedtaktype = Autovedtaktype.FØDSELSHENDELSE,
-            behandlingsdata = behandlingsdata
+            behandlingsdata = behandlingsdata,
         )
     }
 
@@ -60,7 +60,7 @@ class AutovedtakStegService(
         return kjørBehandling(
             mottakersAktør = mottakersAktør,
             autovedtaktype = Autovedtaktype.OMREGNING_BREV,
-            behandlingsdata = behandlingsdata
+            behandlingsdata = behandlingsdata,
         )
     }
 
@@ -68,14 +68,14 @@ class AutovedtakStegService(
         return kjørBehandling(
             mottakersAktør = mottakersAktør,
             autovedtaktype = Autovedtaktype.SMÅBARNSTILLEGG,
-            behandlingsdata = behandlingsdata
+            behandlingsdata = behandlingsdata,
         )
     }
 
     private fun <Behandlingsdata> kjørBehandling(
         mottakersAktør: Aktør,
         autovedtaktype: Autovedtaktype,
-        behandlingsdata: Behandlingsdata
+        behandlingsdata: Behandlingsdata,
     ): String {
         secureLoggAutovedtakBehandling(autovedtaktype, mottakersAktør, BEHANDLING_STARTER)
         antallAutovedtak[autovedtaktype]?.increment()
@@ -96,7 +96,7 @@ class AutovedtakStegService(
             secureLoggAutovedtakBehandling(
                 autovedtaktype,
                 mottakersAktør,
-                "Skal ikke behandles"
+                "Skal ikke behandles",
             )
             return "${autovedtaktype.displayName}: Skal ikke behandles"
         }
@@ -104,13 +104,13 @@ class AutovedtakStegService(
         if (håndterÅpenBehandlingOgAvbrytAutovedtak(
                 aktør = mottakersAktør,
                 autovedtaktype = autovedtaktype,
-                fagsakId = hentFagsakIdFraBehandlingsdata(autovedtaktype, behandlingsdata)
+                fagsakId = hentFagsakIdFraBehandlingsdata(autovedtaktype, behandlingsdata),
             )
         ) {
             secureLoggAutovedtakBehandling(
                 autovedtaktype,
                 mottakersAktør,
-                "Bruker har åpen behandling"
+                "Bruker har åpen behandling",
             )
             return "${autovedtaktype.displayName}: Bruker har åpen behandling"
         }
@@ -130,7 +130,7 @@ class AutovedtakStegService(
         secureLoggAutovedtakBehandling(
             autovedtaktype,
             mottakersAktør,
-            resultatAvKjøring
+            resultatAvKjøring,
         )
 
         return resultatAvKjøring
@@ -138,7 +138,7 @@ class AutovedtakStegService(
 
     private fun <Behandlingsdata> hentFagsakIdFraBehandlingsdata(
         autovedtaktype: Autovedtaktype,
-        behandlingsdata: Behandlingsdata
+        behandlingsdata: Behandlingsdata,
     ): Long? {
         return if (autovedtaktype == Autovedtaktype.OMREGNING_BREV) {
             (behandlingsdata as AutovedtakBrevBehandlingsdata).fagsakId
@@ -150,7 +150,7 @@ class AutovedtakStegService(
     private fun håndterÅpenBehandlingOgAvbrytAutovedtak(
         aktør: Aktør,
         autovedtaktype: Autovedtaktype,
-        fagsakId: Long?
+        fagsakId: Long?,
     ): Boolean {
         val fagsak = if (fagsakId != null) {
             fagsakService.hentPåFagsakId(fagsakId)
@@ -169,14 +169,14 @@ class AutovedtakStegService(
             oppgaveService.opprettOppgaveForManuellBehandling(
                 behandling = åpenBehandling,
                 begrunnelse = "${autovedtaktype.displayName}: Bruker har åpen behandling",
-                oppgavetype = Oppgavetype.VurderLivshendelse
+                oppgavetype = Oppgavetype.VurderLivshendelse,
             )
 
             true
         } else if (åpenBehandling.status == BehandlingStatus.IVERKSETTER_VEDTAK) {
             throw RekjørSenereException(
                 årsak = "Åpen behandling iverksettes, prøver igjen om 1 time",
-                triggerTid = LocalDateTime.now().plusHours(1)
+                triggerTid = LocalDateTime.now().plusHours(1),
             )
         } else {
             throw Feil("Ikke håndtert feilsituasjon på $åpenBehandling")
@@ -186,7 +186,7 @@ class AutovedtakStegService(
     private fun secureLoggAutovedtakBehandling(
         autovedtaktype: Autovedtaktype,
         aktør: Aktør,
-        melding: String
+        melding: String,
     ) {
         secureLogger.info("$autovedtaktype(${aktør.aktivFødselsnummer()}): $melding")
     }

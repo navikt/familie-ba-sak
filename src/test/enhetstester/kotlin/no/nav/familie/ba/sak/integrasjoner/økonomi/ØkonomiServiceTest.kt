@@ -28,16 +28,16 @@ internal class ØkonomiServiceTest {
             lagEksternUtbetalingsperiode(
                 opphør = Opphør(opphørDato),
                 fom = fom.minusMonths(10),
-                tom = tom.minusMonths(8)
+                tom = tom.minusMonths(8),
             ),
             lagEksternUtbetalingsperiode(
                 fom = fom.minusMonths(7),
-                tom = tom.minusMonths(6)
+                tom = tom.minusMonths(6),
             ),
             lagEksternUtbetalingsperiode(
                 fom = fom.minusMonths(5),
-                tom = tom.minusMonths(4)
-            )
+                tom = tom.minusMonths(4),
+            ),
         )
 
         // Test at validering ikke feiler.
@@ -54,16 +54,16 @@ internal class ØkonomiServiceTest {
             lagEksternUtbetalingsperiode(
                 opphør = Opphør(opphørDato),
                 fom = fom.minusMonths(10),
-                tom = tom.minusMonths(8)
+                tom = tom.minusMonths(8),
             ),
             lagEksternUtbetalingsperiode(
                 fom = fom.minusMonths(7),
-                tom = tom.minusMonths(6)
+                tom = tom.minusMonths(6),
             ),
             lagEksternUtbetalingsperiode(
                 fom = fom.minusMonths(5),
-                tom = tom.plusMonths(1)
-            )
+                tom = tom.plusMonths(1),
+            ),
         )
         assertThrows<IllegalStateException> {
             lagEksternUtbetalingsoppdrag(utbetalingsPeriode).validerOpphørsoppdrag()
@@ -78,7 +78,7 @@ internal class ØkonomiServiceTest {
             "123",
             "123",
             avstemmingTidspunkt = LocalDateTime.now(),
-            utbetalingsperiode = utbetalingsPeriode
+            utbetalingsperiode = utbetalingsPeriode,
         )
 
     private fun lagEksternUtbetalingsperiode(opphør: Opphør? = null, fom: LocalDate, tom: LocalDate) =
@@ -94,6 +94,6 @@ internal class ØkonomiServiceTest {
             BigDecimal(1054),
             Utbetalingsperiode.SatsType.MND,
             søker,
-            behandling.id
+            behandling.id,
         )
 }

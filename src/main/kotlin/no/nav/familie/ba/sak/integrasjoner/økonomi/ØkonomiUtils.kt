@@ -37,13 +37,13 @@ object ØkonomiUtils {
      */
     fun sisteBeståendeAndelPerKjede(
         forrigeKjeder: Map<IdentOgYtelse, List<AndelTilkjentYtelseForUtbetalingsoppdrag>>,
-        oppdaterteKjeder: Map<IdentOgYtelse, List<AndelTilkjentYtelseForUtbetalingsoppdrag>>
+        oppdaterteKjeder: Map<IdentOgYtelse, List<AndelTilkjentYtelseForUtbetalingsoppdrag>>,
     ): Map<IdentOgYtelse, AndelTilkjentYtelseForUtbetalingsoppdrag?> {
         val allePersoner = forrigeKjeder.keys.union(oppdaterteKjeder.keys)
         return allePersoner.associateWith { kjedeIdentifikator ->
             beståendeAndelerIKjede(
                 forrigeKjede = forrigeKjeder[kjedeIdentifikator],
-                oppdatertKjede = oppdaterteKjeder[kjedeIdentifikator]
+                oppdatertKjede = oppdaterteKjeder[kjedeIdentifikator],
             )
                 ?.sortedBy { it.periodeOffset }?.lastOrNull()
         }
@@ -59,13 +59,13 @@ object ØkonomiUtils {
      */
     fun sisteAndelPerKjede(
         forrigeKjeder: Map<IdentOgYtelse, List<AndelTilkjentYtelseForUtbetalingsoppdrag>>,
-        oppdaterteKjeder: Map<IdentOgYtelse, List<AndelTilkjentYtelseForUtbetalingsoppdrag>>
+        oppdaterteKjeder: Map<IdentOgYtelse, List<AndelTilkjentYtelseForUtbetalingsoppdrag>>,
     ): Map<IdentOgYtelse, AndelTilkjentYtelseForUtbetalingsoppdrag?> =
         forrigeKjeder.keys.union(oppdaterteKjeder.keys).associateWith { null }
 
     private fun beståendeAndelerIKjede(
         forrigeKjede: List<AndelTilkjentYtelseForUtbetalingsoppdrag>?,
-        oppdatertKjede: List<AndelTilkjentYtelseForUtbetalingsoppdrag>?
+        oppdatertKjede: List<AndelTilkjentYtelseForUtbetalingsoppdrag>?,
     ): List<AndelTilkjentYtelseForUtbetalingsoppdrag>? {
         val forrige = forrigeKjede?.toSet() ?: emptySet()
         val oppdatert = oppdatertKjede?.toSet() ?: emptySet()
@@ -87,7 +87,7 @@ object ØkonomiUtils {
      */
     fun oppdaterBeståendeAndelerMedOffset(
         oppdaterteKjeder: Map<IdentOgYtelse, List<AndelTilkjentYtelseForUtbetalingsoppdrag>>,
-        forrigeKjeder: Map<IdentOgYtelse, List<AndelTilkjentYtelseForUtbetalingsoppdrag>>
+        forrigeKjeder: Map<IdentOgYtelse, List<AndelTilkjentYtelseForUtbetalingsoppdrag>>,
     ): Map<IdentOgYtelse, List<AndelTilkjentYtelseForUtbetalingsoppdrag>> {
         oppdaterteKjeder
             .filter { forrigeKjeder.containsKey(it.key) }
@@ -95,7 +95,7 @@ object ØkonomiUtils {
                 val beståendeFraForrige =
                     beståendeAndelerIKjede(
                         forrigeKjede = forrigeKjeder.getValue(kjedeIdentifikator),
-                        oppdatertKjede = oppdatertKjede
+                        oppdatertKjede = oppdatertKjede,
                     )
                 beståendeFraForrige?.forEach { bestående ->
                     val beståendeIOppdatert = oppdatertKjede.find { it.erTilsvarendeForUtbetaling(bestående) }
@@ -117,7 +117,7 @@ object ØkonomiUtils {
      */
     fun andelerTilOpprettelse(
         oppdaterteKjeder: Map<IdentOgYtelse, List<AndelTilkjentYtelseForUtbetalingsoppdrag>>,
-        sisteBeståendeAndelIHverKjede: Map<IdentOgYtelse, AndelTilkjentYtelseForUtbetalingsoppdrag?>
+        sisteBeståendeAndelIHverKjede: Map<IdentOgYtelse, AndelTilkjentYtelseForUtbetalingsoppdrag?>,
     ): List<List<AndelTilkjentYtelseForUtbetalingsoppdrag>> =
         oppdaterteKjeder.map { (kjedeIdentifikator, oppdatertKjedeTilstand) ->
             if (sisteBeståendeAndelIHverKjede[kjedeIdentifikator] != null) {
@@ -138,7 +138,7 @@ object ØkonomiUtils {
     fun andelerTilOpphørMedDato(
         forrigeKjeder: Map<IdentOgYtelse, List<AndelTilkjentYtelseForUtbetalingsoppdrag>>,
         sisteBeståendeAndelIHverKjede: Map<IdentOgYtelse, AndelTilkjentYtelseForUtbetalingsoppdrag?>,
-        endretMigreringsDato: YearMonth? = null
+        endretMigreringsDato: YearMonth? = null,
     ): List<Pair<AndelTilkjentYtelseForUtbetalingsoppdrag, YearMonth>> =
         forrigeKjeder
             .mapValues { (person, forrigeAndeler) ->
@@ -164,13 +164,13 @@ object ØkonomiUtils {
 
     private fun altIKjedeOpphøres(
         kjedeidentifikator: IdentOgYtelse,
-        sisteBeståendeAndelIHverKjede: Map<IdentOgYtelse, AndelTilkjentYtelseForUtbetalingsoppdrag?>
+        sisteBeståendeAndelIHverKjede: Map<IdentOgYtelse, AndelTilkjentYtelseForUtbetalingsoppdrag?>,
     ): Boolean = sisteBeståendeAndelIHverKjede[kjedeidentifikator] == null
 
     private fun andelOpphøres(
         kjedeidentifikator: IdentOgYtelse,
         andel: AndelTilkjentYtelseForUtbetalingsoppdrag,
-        sisteBeståendeAndelIHverKjede: Map<IdentOgYtelse, AndelTilkjentYtelseForUtbetalingsoppdrag?>
+        sisteBeståendeAndelIHverKjede: Map<IdentOgYtelse, AndelTilkjentYtelseForUtbetalingsoppdrag?>,
     ): Boolean = andel.stønadFom > sisteBeståendeAndelIHverKjede[kjedeidentifikator]!!.stønadTom
 
     const val SMÅBARNSTILLEGG_SUFFIX = "_SMÅBARNSTILLEGG"

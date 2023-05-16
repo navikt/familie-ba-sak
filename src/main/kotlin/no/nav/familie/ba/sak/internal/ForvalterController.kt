@@ -34,7 +34,7 @@ class ForvalterController(
     private val integrasjonClient: IntegrasjonClient,
     private val restartAvSmåbarnstilleggService: RestartAvSmåbarnstilleggService,
     private val forvalterService: ForvalterService,
-    private val oppgaveService: OppgaveService
+    private val oppgaveService: OppgaveService,
 
 ) {
     private val logger: Logger = LoggerFactory.getLogger(ForvalterController::class.java)
@@ -42,7 +42,7 @@ class ForvalterController(
     @PostMapping(
         path = ["/ferdigstill-oppgaver"],
         consumes = [MediaType.APPLICATION_JSON_VALUE],
-        produces = [MediaType.APPLICATION_JSON_VALUE]
+        produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     fun ferdigstillListeMedOppgaver(@RequestBody oppgaveListe: List<Long>): ResponseEntity<String> {
         var antallFeil = 0
@@ -54,7 +54,7 @@ class ForvalterController(
                 onFailure = {
                     logger.warn("Klarte ikke å ferdigstille oppgaveId=$oppgaveId", it)
                     antallFeil = antallFeil.inc()
-                }
+                },
             )
         }
         return ResponseEntity.ok("Ferdigstill oppgaver kjørt. Antall som ikke ble ferdigstilt: $antallFeil")
@@ -63,7 +63,7 @@ class ForvalterController(
     @PostMapping(
         path = ["/gjenåpne-oppgaver"],
         consumes = [MediaType.APPLICATION_JSON_VALUE],
-        produces = [MediaType.APPLICATION_JSON_VALUE]
+        produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     fun gjenåpneFeilaktigLukketOppgave(@RequestBody request: GjenåpneOppgaverRequest): ResponseEntity<Map<String, Set<Long>>> {
         val result = mutableSetOf<Long>()
@@ -71,7 +71,7 @@ class ForvalterController(
         request.behandlinger.forEach { behandlingId ->
             val lagretDbOppgave = oppgaveRepository.findByBehandlingAndTypeAndErFerdigstilt(
                 behandlingId,
-                request.oppgavetype
+                request.oppgavetype,
             ).maxBy { it.opprettetTidspunkt }
 
             if (lagretDbOppgave == null) {
@@ -83,20 +83,20 @@ class ForvalterController(
                 val ferdigstiltTid =
                     LocalDateTime.parse(
                         eksisterendeOppgave.ferdigstiltTidspunkt,
-                        DateTimeFormatter.ISO_DATE_TIME
+                        DateTimeFormatter.ISO_DATE_TIME,
                     ) // format "ferdigstiltTidspunkt": "2023-03-28T11:13:16.79+02:00",
                 if (eksisterendeOppgave.status == StatusEnum.FERDIGSTILT &&
                     ferdigstiltTid.isAfter(request.ferdigstiltFom) &&
                     ferdigstiltTid.isBefore(
-                            request.ferdigstiltTom
-                        ) &&
+                        request.ferdigstiltTom,
+                    ) &&
                     eksisterendeOppgave.tema == Tema.BAR &&
                     eksisterendeOppgave.oppgavetype == request.oppgavetype.value
                 ) {
                     val klonetOppgave = OpprettOppgaveRequest(
                         ident = OppgaveIdentV2(
                             ident = lagretDbOppgave.behandling.fagsak.aktør.aktørId,
-                            gruppe = IdentGruppe.AKTOERID
+                            gruppe = IdentGruppe.AKTOERID,
                         ),
                         saksId = eksisterendeOppgave.saksreferanse,
                         tema = Tema.BAR,
@@ -104,7 +104,7 @@ class ForvalterController(
                         fristFerdigstillelse = if (eksisterendeOppgave.fristFerdigstillelse != null) { // "fristFerdigstillelse": "2023-03-28",
                             LocalDate.parse(
                                 eksisterendeOppgave.fristFerdigstillelse,
-                                DateTimeFormatter.ISO_DATE
+                                DateTimeFormatter.ISO_DATE,
                             )
                         } else {
                             LocalDate.now()
@@ -115,7 +115,7 @@ class ForvalterController(
                         behandlingstype = eksisterendeOppgave.behandlingstype,
                         tilordnetRessurs = eksisterendeOppgave.tilordnetRessurs,
                         mappeId = eksisterendeOppgave.mappeId,
-                        prioritet = eksisterendeOppgave.prioritet ?: OppgavePrioritet.NORM
+                        prioritet = eksisterendeOppgave.prioritet ?: OppgavePrioritet.NORM,
                     )
 
                     val oppgaveOpprettet = integrasjonClient.opprettOppgave(klonetOppgave)
@@ -126,7 +126,7 @@ class ForvalterController(
                     logger.info(
                         "Ignorerer gjenoppretting av eksisterende oppgave: " +
                             "request=${request.oppgavetype}, oppgavetype=${request.oppgavetype}, behandlingId=$behandlingId, fom=${request.ferdigstiltFom}, tom=${request.ferdigstiltTom} \n" +
-                            "eksisterendeOppgave=${eksisterendeOppgave.id}, ${eksisterendeOppgave.tema}, ${eksisterendeOppgave.oppgavetype}, ${eksisterendeOppgave.ferdigstiltTidspunkt}, ${eksisterendeOppgave.status}"
+                            "eksisterendeOppgave=${eksisterendeOppgave.id}, ${eksisterendeOppgave.tema}, ${eksisterendeOppgave.oppgavetype}, ${eksisterendeOppgave.ferdigstiltTidspunkt}, ${eksisterendeOppgave.status}",
                     )
                 }
             }
@@ -141,11 +141,11 @@ class ForvalterController(
     @PostMapping(
         path = ["/start-manuell-restart-av-smaabarnstillegg-jobb/skalOppretteOppgaver/{skalOppretteOppgaver}"],
         consumes = [MediaType.APPLICATION_JSON_VALUE],
-        produces = [MediaType.APPLICATION_JSON_VALUE]
+        produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     fun triggManuellStartAvSmåbarnstillegg(@PathVariable skalOppretteOppgaver: Boolean = true): ResponseEntity<String> {
         restartAvSmåbarnstilleggService.finnOgOpprettetOppgaveForSmåbarnstilleggSomSkalRestartesIDenneMåned(
-            skalOppretteOppgaver
+            skalOppretteOppgaver,
         )
         return ResponseEntity.ok("OK")
     }
@@ -168,7 +168,7 @@ class ForvalterController(
             } catch (exception: Exception) {
                 secureLogger.info(
                     "Kunne ikke sende behandling med id $it til økonomi" +
-                        "\n$exception"
+                        "\n$exception",
                 )
             }
         }
@@ -181,5 +181,5 @@ data class GjenåpneOppgaverRequest(
     val behandlinger: List<Long>,
     val oppgavetype: Oppgavetype,
     val ferdigstiltFom: LocalDateTime,
-    val ferdigstiltTom: LocalDateTime
+    val ferdigstiltTom: LocalDateTime,
 )

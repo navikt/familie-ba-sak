@@ -16,7 +16,7 @@ val FAMILIE_BREV_TJENESTENAVN = "famile-brev"
 class BrevKlient(
     @Value("\${FAMILIE_BREV_API_URL}") private val familieBrevUri: String,
     @Value("\${SANITY_DATASET}") private val sanityDataset: String,
-    restTemplate: RestTemplate
+    restTemplate: RestTemplate,
 ) : AbstractRestClient(restTemplate, "familie-brev") {
 
     fun genererBrev(målform: String, brev: Brev): ByteArray {

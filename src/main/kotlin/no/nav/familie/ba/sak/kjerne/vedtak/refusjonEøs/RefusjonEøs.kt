@@ -34,7 +34,7 @@ data class RefusjonEøs(
     @SequenceGenerator(
         name = "refusjon_eos_seq_generator",
         sequenceName = "refusjon_eos_seq",
-        allocationSize = 50
+        allocationSize = 50,
     )
-    val id: Long = 0
+    val id: Long = 0,
 ) : BaseEntitet()

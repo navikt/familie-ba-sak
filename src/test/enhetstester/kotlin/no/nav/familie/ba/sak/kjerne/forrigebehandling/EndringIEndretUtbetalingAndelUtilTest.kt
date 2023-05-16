@@ -28,14 +28,14 @@ class EndringIEndretUtbetalingAndelUtilTest {
             fom = jan22,
             tom = aug22,
             årsak = Årsak.ETTERBETALING_3ÅR,
-            søknadstidspunkt = des22.førsteDagIInneværendeMåned()
+            søknadstidspunkt = des22.førsteDagIInneværendeMåned(),
         )
 
         val nåværendeEndretAndel = forrigeEndretAndel.copy(årsak = Årsak.ALLEREDE_UTBETALT)
 
         val perioderMedEndring = EndringIEndretUtbetalingAndelUtil.lagEndringIEndretUtbetalingAndelTidslinje(
             forrigeEndretAndeler = listOf(forrigeEndretAndel),
-            nåværendeEndretAndeler = listOf(nåværendeEndretAndel)
+            nåværendeEndretAndeler = listOf(nåværendeEndretAndel),
         ).perioder().filter { it.innhold == true }
 
         assertEquals(1, perioderMedEndring.size)
@@ -44,7 +44,7 @@ class EndringIEndretUtbetalingAndelUtilTest {
 
         val endringstidspunkt = EndringIEndretUtbetalingAndelUtil.utledEndringstidspunktForEndretUtbetalingAndel(
             forrigeEndretAndeler = listOf(forrigeEndretAndel),
-            nåværendeEndretAndeler = listOf(nåværendeEndretAndel)
+            nåværendeEndretAndeler = listOf(nåværendeEndretAndel),
         )
 
         assertEquals(jan22, endringstidspunkt)
@@ -60,21 +60,21 @@ class EndringIEndretUtbetalingAndelUtilTest {
             tom = aug22,
             årsak = Årsak.DELT_BOSTED,
             søknadstidspunkt = des22.førsteDagIInneværendeMåned(),
-            avtaletidspunktDeltBosted = jan22.førsteDagIInneværendeMåned()
+            avtaletidspunktDeltBosted = jan22.førsteDagIInneværendeMåned(),
         )
 
         val nåværendeEndretAndel = forrigeEndretAndel.copy(prosent = BigDecimal(100))
 
         val perioderMedEndring = EndringIEndretUtbetalingAndelUtil.lagEndringIEndretUtbetalingAndelTidslinje(
             forrigeEndretAndeler = listOf(forrigeEndretAndel),
-            nåværendeEndretAndeler = listOf(nåværendeEndretAndel)
+            nåværendeEndretAndeler = listOf(nåværendeEndretAndel),
         ).perioder().filter { it.innhold == true }
 
         assertTrue(perioderMedEndring.isEmpty())
 
         val endringstidspunkt = EndringIEndretUtbetalingAndelUtil.utledEndringstidspunktForEndretUtbetalingAndel(
             forrigeEndretAndeler = listOf(forrigeEndretAndel),
-            nåværendeEndretAndeler = listOf(nåværendeEndretAndel)
+            nåværendeEndretAndeler = listOf(nåværendeEndretAndel),
         )
 
         Assertions.assertNull(endringstidspunkt)
@@ -90,21 +90,21 @@ class EndringIEndretUtbetalingAndelUtilTest {
             tom = aug22,
             årsak = Årsak.DELT_BOSTED,
             søknadstidspunkt = des22.førsteDagIInneværendeMåned(),
-            avtaletidspunktDeltBosted = jan22.førsteDagIInneværendeMåned()
+            avtaletidspunktDeltBosted = jan22.førsteDagIInneværendeMåned(),
         )
 
         val nåværendeEndretAndel = forrigeEndretAndel.copy(tom = des22)
 
         val perioderMedEndring = EndringIEndretUtbetalingAndelUtil.lagEndringIEndretUtbetalingAndelTidslinje(
             forrigeEndretAndeler = listOf(forrigeEndretAndel),
-            nåværendeEndretAndeler = listOf(nåværendeEndretAndel)
+            nåværendeEndretAndeler = listOf(nåværendeEndretAndel),
         ).perioder().filter { it.innhold == true }
 
         assertTrue(perioderMedEndring.isEmpty())
 
         val endringstidspunkt = EndringIEndretUtbetalingAndelUtil.utledEndringstidspunktForEndretUtbetalingAndel(
             forrigeEndretAndeler = listOf(forrigeEndretAndel),
-            nåværendeEndretAndeler = listOf(nåværendeEndretAndel)
+            nåværendeEndretAndeler = listOf(nåværendeEndretAndel),
         )
 
         Assertions.assertNull(endringstidspunkt)
@@ -120,19 +120,19 @@ class EndringIEndretUtbetalingAndelUtilTest {
             tom = aug22,
             årsak = Årsak.DELT_BOSTED,
             søknadstidspunkt = des22.førsteDagIInneværendeMåned(),
-            avtaletidspunktDeltBosted = jan22.førsteDagIInneværendeMåned()
+            avtaletidspunktDeltBosted = jan22.førsteDagIInneværendeMåned(),
         )
 
         val perioderMedEndring = EndringIEndretUtbetalingAndelUtil.lagEndringIEndretUtbetalingAndelTidslinje(
             forrigeEndretAndeler = emptyList(),
-            nåværendeEndretAndeler = listOf(nåværendeEndretAndel)
+            nåværendeEndretAndeler = listOf(nåværendeEndretAndel),
         ).perioder().filter { it.innhold == true }
 
         assertTrue(perioderMedEndring.isEmpty())
 
         val endringstidspunkt = EndringIEndretUtbetalingAndelUtil.utledEndringstidspunktForEndretUtbetalingAndel(
             forrigeEndretAndeler = emptyList(),
-            nåværendeEndretAndeler = listOf(nåværendeEndretAndel)
+            nåværendeEndretAndeler = listOf(nåværendeEndretAndel),
         )
 
         Assertions.assertNull(endringstidspunkt)
@@ -150,7 +150,7 @@ class EndringIEndretUtbetalingAndelUtilTest {
             tom = aug22,
             årsak = Årsak.DELT_BOSTED,
             søknadstidspunkt = des22.førsteDagIInneværendeMåned(),
-            avtaletidspunktDeltBosted = jan22.førsteDagIInneværendeMåned()
+            avtaletidspunktDeltBosted = jan22.førsteDagIInneværendeMåned(),
         )
 
         val forrigeEndretAndelBarn2 = lagEndretUtbetalingAndel(
@@ -159,15 +159,15 @@ class EndringIEndretUtbetalingAndelUtilTest {
             fom = jan22,
             tom = aug22,
             årsak = Årsak.ETTERBETALING_3ÅR,
-            søknadstidspunkt = des22.førsteDagIInneværendeMåned()
+            søknadstidspunkt = des22.førsteDagIInneværendeMåned(),
         )
 
         val perioderMedEndring = EndringIEndretUtbetalingAndelUtil.lagEndringIEndretUtbetalingAndelTidslinje(
             forrigeEndretAndeler = listOf(forrigeEndretAndelBarn1, forrigeEndretAndelBarn2),
             nåværendeEndretAndeler = listOf(
                 forrigeEndretAndelBarn1,
-                forrigeEndretAndelBarn2.copy(årsak = Årsak.ALLEREDE_UTBETALT)
-            )
+                forrigeEndretAndelBarn2.copy(årsak = Årsak.ALLEREDE_UTBETALT),
+            ),
         ).perioder().filter { it.innhold == true }
 
         assertEquals(1, perioderMedEndring.size)
@@ -178,8 +178,8 @@ class EndringIEndretUtbetalingAndelUtilTest {
             forrigeEndretAndeler = listOf(forrigeEndretAndelBarn1, forrigeEndretAndelBarn2),
             nåværendeEndretAndeler = listOf(
                 forrigeEndretAndelBarn1,
-                forrigeEndretAndelBarn2.copy(årsak = Årsak.ALLEREDE_UTBETALT)
-            )
+                forrigeEndretAndelBarn2.copy(årsak = Årsak.ALLEREDE_UTBETALT),
+            ),
         )
 
         assertEquals(jan22, endringstidspunkt)

@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 
 enum class BarnetsBostedsland {
     NORGE,
-    IKKE_NORGE;
+    IKKE_NORGE,
 }
 
 fun landkodeTilBarnetsBostedsland(landkode: String): BarnetsBostedsland = when (landkode) {
@@ -26,7 +26,7 @@ data class RestSanityEØSBegrunnelse(
     val hjemlerEOSForordningen883: List<String>?,
     val hjemlerEOSForordningen987: List<String>?,
     val hjemlerSeperasjonsavtalenStorbritannina: List<String>?,
-    val eosVilkaar: List<String>? = null
+    val eosVilkaar: List<String>? = null,
 ) {
     fun tilSanityEØSBegrunnelse(): SanityEØSBegrunnelse? {
         if (apiNavn == null || navnISystem == null) return null
@@ -47,7 +47,7 @@ data class RestSanityEØSBegrunnelse(
             hjemlerEØSForordningen883 = hjemlerEOSForordningen883 ?: emptyList(),
             hjemlerEØSForordningen987 = hjemlerEOSForordningen987 ?: emptyList(),
             hjemlerSeperasjonsavtalenStorbritannina = hjemlerSeperasjonsavtalenStorbritannina ?: emptyList(),
-            vilkår = eosVilkaar?.mapNotNull { konverterTilEnumverdi<Vilkår>(it) } ?: emptyList()
+            vilkår = eosVilkaar?.mapNotNull { konverterTilEnumverdi<Vilkår>(it) } ?: emptyList(),
         )
     }
 
@@ -66,7 +66,7 @@ data class SanityEØSBegrunnelse(
     val hjemlerEØSForordningen883: List<String>,
     val hjemlerEØSForordningen987: List<String>,
     val hjemlerSeperasjonsavtalenStorbritannina: List<String>,
-    val vilkår: List<Vilkår>
+    val vilkår: List<Vilkår>,
 ) : ISanityBegrunnelse
 
 fun List<SanityEØSBegrunnelse>.finnBegrunnelse(eøsBegrunnelse: EØSStandardbegrunnelse): SanityEØSBegrunnelse? =

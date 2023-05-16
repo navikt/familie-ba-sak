@@ -25,7 +25,7 @@ class ArbeidsforholdService(private val integrasjonClient: IntegrasjonClient) {
                 periode = periode,
                 arbeidsgiverType = it.arbeidsgiver?.type?.name,
                 arbeidsgiverId = arbeidsgiverId,
-                person = person
+                person = person,
             )
         }
     }

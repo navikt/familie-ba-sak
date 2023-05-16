@@ -23,12 +23,12 @@ class SmåbarnstilleggService(
     private val periodeOvergangsstønadGrunnlagRepository: PeriodeOvergangsstønadGrunnlagRepository,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val persongrunnlagService: PersongrunnlagService,
-    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
+    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
 ) {
 
     fun hentOgLagrePerioderMedFullOvergangsstønadFraEf(
         søkerAktør: Aktør,
-        behandlingId: Long
+        behandlingId: Long,
     ) {
         val periodeOvergangsstønad = hentPerioderMedFullOvergangsstønad(aktør = søkerAktør)
 
@@ -38,14 +38,14 @@ class SmåbarnstilleggService(
             periodeOvergangsstønad.map {
                 it.tilPeriodeOvergangsstønadGrunnlag(
                     behandlingId = behandlingId,
-                    aktør = søkerAktør
+                    aktør = søkerAktør,
                 )
-            }
+            },
         )
     }
 
     fun hentPerioderMedFullOvergangsstønad(
-        behandlingId: Long
+        behandlingId: Long,
     ): List<InternPeriodeOvergangsstønad> {
         val perioderOvergangsstønad = periodeOvergangsstønadGrunnlagRepository.findByBehandlingId(behandlingId)
         val overgangsstønadPerioderFraForrigeBehandling =
@@ -60,7 +60,7 @@ class SmåbarnstilleggService(
 
         return if (forrigeIverksatteBehandling != null) {
             periodeOvergangsstønadGrunnlagRepository.findByBehandlingId(
-                behandlingId = forrigeIverksatteBehandling.id
+                behandlingId = forrigeIverksatteBehandling.id,
             ).map { it.tilInternPeriodeOvergangsstønad() }
         } else {
             emptyList()
@@ -90,22 +90,22 @@ class SmåbarnstilleggService(
         return vedtakOmOvergangsstønadPåvirkerFagsak(
             småbarnstilleggBarnetrygdGenerator = SmåbarnstilleggBarnetrygdGenerator(
                 behandlingId = sistIverksatteBehandling.id,
-                tilkjentYtelse = tilkjentYtelseFraSistIverksatteBehandling
+                tilkjentYtelse = tilkjentYtelseFraSistIverksatteBehandling,
             ),
             nyePerioderMedFullOvergangsstønad = nyePerioderMedFullOvergangsstønad,
             forrigeAndelerTilkjentYtelse = andelerMedEndringerFraSistIverksatteBehandling,
             barnasAktørerOgFødselsdatoer = persongrunnlagFraSistIverksatteBehandling.barna.map {
                 Pair(
                     it.aktør,
-                    it.fødselsdato
+                    it.fødselsdato,
                 )
-            }
+            },
         )
     }
 
     private fun hentPerioderMedFullOvergangsstønad(aktør: Aktør): List<EksternPeriode> {
         return efSakRestClient.hentPerioderMedFullOvergangsstønad(
-            aktør.aktivFødselsnummer()
+            aktør.aktivFødselsnummer(),
         ).perioder
     }
 

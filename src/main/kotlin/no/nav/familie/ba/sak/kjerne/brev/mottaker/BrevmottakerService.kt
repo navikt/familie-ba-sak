@@ -19,7 +19,7 @@ class BrevmottakerService(
     private val brevmottakerRepository: BrevmottakerRepository,
     private val loggService: LoggService,
     private val personidentService: PersonidentService,
-    private val personopplysningerService: PersonopplysningerService
+    private val personopplysningerService: PersonopplysningerService,
 ) {
 
     @Transactional
@@ -28,23 +28,10 @@ class BrevmottakerService(
 
         loggService.opprettBrevmottakerLogg(
             brevmottaker = brevmottaker,
-            brevmottakerFjernet = false
+            brevmottakerFjernet = false,
         )
 
         brevmottakerRepository.save(brevmottaker)
-    }
-
-    @Transactional
-    fun oppdaterBrevmottaker(restBrevmottaker: RestBrevmottaker, id: Long) {
-        brevmottakerRepository.findById(id).orElseThrow { Feil("Finner ikke brevmottaker med id=$id") }.apply {
-            type = restBrevmottaker.type
-            navn = restBrevmottaker.navn
-            adresselinje1 = restBrevmottaker.adresselinje1
-            adresselinje2 = restBrevmottaker.adresselinje2
-            postnummer = restBrevmottaker.postnummer
-            poststed = restBrevmottaker.poststed
-            landkode = restBrevmottaker.landkode
-        }
     }
 
     @Transactional
@@ -54,7 +41,7 @@ class BrevmottakerService(
 
         loggService.opprettBrevmottakerLogg(
             brevmottaker = brevmottaker,
-            brevmottakerFjernet = true
+            brevmottakerFjernet = true,
         )
 
         brevmottakerRepository.deleteById(id)
@@ -72,14 +59,14 @@ class BrevmottakerService(
                 adresselinje2 = it.adresselinje2,
                 postnummer = it.postnummer,
                 poststed = it.poststed,
-                landkode = it.landkode
+                landkode = it.landkode,
             )
         }
 
     fun lagMottakereFraBrevMottakere(
         brevMottakere: List<Brevmottaker>,
         søkersident: String,
-        søkersnavn: String = hentMottakerNavn(søkersident)
+        søkersnavn: String = hentMottakerNavn(søkersident),
     ): List<MottakerInfo> =
         brevMottakere.map { brevmottaker ->
             when (brevmottaker.type) {
@@ -92,7 +79,7 @@ class BrevmottakerService(
                             brukerIdType = BrukerIdType.FNR,
                             erInstitusjonVerge = false,
                             navn = brevmottaker.navn,
-                            manuellAdresseInfo = lagManuellAdresseInfo(brevmottaker)
+                            manuellAdresseInfo = lagManuellAdresseInfo(brevmottaker),
                         ).toList()
                     } else { // brev sendes til fullmektig adresse og bruker sin registerte adresse
                         listOf(
@@ -101,14 +88,14 @@ class BrevmottakerService(
                                 brukerIdType = BrukerIdType.FNR,
                                 erInstitusjonVerge = false,
                                 navn = brevmottaker.navn,
-                                manuellAdresseInfo = lagManuellAdresseInfo(brevmottaker)
+                                manuellAdresseInfo = lagManuellAdresseInfo(brevmottaker),
                             ),
                             MottakerInfo(
                                 brukerId = søkersident,
                                 brukerIdType = BrukerIdType.FNR,
                                 erInstitusjonVerge = false,
-                                navn = søkersnavn
-                            )
+                                navn = søkersnavn,
+                            ),
                         )
                     }
                 }
@@ -120,7 +107,7 @@ class BrevmottakerService(
                         brukerIdType = BrukerIdType.FNR,
                         erInstitusjonVerge = false,
                         navn = søkersnavn,
-                        manuellAdresseInfo = lagManuellAdresseInfo(brevmottaker)
+                        manuellAdresseInfo = lagManuellAdresseInfo(brevmottaker),
                     ).toList()
             }
         }.flatten()
@@ -137,6 +124,6 @@ class BrevmottakerService(
         adresselinje2 = brevmottaker.adresselinje2,
         postnummer = brevmottaker.postnummer,
         poststed = brevmottaker.poststed,
-        landkode = brevmottaker.landkode
+        landkode = brevmottaker.landkode,
     )
 }

@@ -13,12 +13,12 @@ data class BrevBegrunnelseGrunnlagMedPersoner(
     val vedtakBegrunnelseType: VedtakBegrunnelseType,
     val triggesAv: TriggesAv,
     val personIdenter: List<String>,
-    val avtaletidspunktDeltBosted: LocalDate? = null
+    val avtaletidspunktDeltBosted: LocalDate? = null,
 ) {
     fun hentAntallBarnForBegrunnelse(
         uregistrerteBarn: List<MinimertUregistrertBarn>,
         gjelderSøker: Boolean,
-        barnasFødselsdatoer: List<LocalDate>
+        barnasFødselsdatoer: List<LocalDate>,
     ): Int {
         val erAvslagUregistrerteBarn = standardbegrunnelse.erAvslagUregistrerteBarnBegrunnelse()
 
@@ -34,7 +34,7 @@ data class BrevBegrunnelseGrunnlagMedPersoner(
         gjelderSøker: Boolean,
         personerIBehandling: List<MinimertRestPerson>,
         personerPåBegrunnelse: List<MinimertRestPerson>,
-        personerMedUtbetaling: List<MinimertRestPerson>
+        personerMedUtbetaling: List<MinimertRestPerson>,
     ) = when {
         this.standardbegrunnelse.erAvslagUregistrerteBarnBegrunnelse() -> uregistrerteBarn.mapNotNull { it.fødselsdato }
 

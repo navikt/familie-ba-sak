@@ -26,7 +26,7 @@ data class FinnesBehandlingsresponsDto(val finnesÅpenBehandling: Boolean)
 @Component
 class TilbakekrevingKlient(
     @Value("\${FAMILIE_TILBAKE_API_URL}") private val familieTilbakeUri: URI,
-    @Qualifier("jwtBearer") restOperations: RestOperations
+    @Qualifier("jwtBearer") restOperations: RestOperations,
 ) : AbstractRestClient(restOperations, "Tilbakekreving") {
 
     fun hentForhåndsvisningVarselbrev(forhåndsvisVarselbrevRequest: ForhåndsvisVarselbrevRequest): ByteArray {
@@ -35,14 +35,14 @@ class TilbakekrevingKlient(
         return kallEksternTjeneste(
             tjeneste = "familie-tilbake",
             uri = uri,
-            formål = "Henter forhåndsvisning av varselbrev"
+            formål = "Henter forhåndsvisning av varselbrev",
         ) {
             postForEntity(
                 uri = uri,
                 payload = forhåndsvisVarselbrevRequest,
                 httpHeaders = HttpHeaders().apply {
                     accept = listOf(MediaType.APPLICATION_PDF)
-                }
+                },
             )
         }
     }
@@ -53,7 +53,7 @@ class TilbakekrevingKlient(
         return kallEksternTjenesteRessurs(
             tjeneste = "familie-tilbake",
             uri = uri,
-            formål = "Oppretter behandling for tilbakekreving"
+            formål = "Oppretter behandling for tilbakekreving",
         ) {
             postForEntity(uri, opprettTilbakekrevingRequest)
         }
@@ -65,7 +65,7 @@ class TilbakekrevingKlient(
         val finnesBehandlingsresponsDto: FinnesBehandlingsresponsDto = kallEksternTjenesteRessurs(
             tjeneste = "familie-tilbake",
             uri = uri,
-            formål = "Sjekker om en fagsak har åpen tilbakekrevingsbehandling"
+            formål = "Sjekker om en fagsak har åpen tilbakekrevingsbehandling",
         ) { getForEntity(uri) }
 
         return finnesBehandlingsresponsDto.finnesÅpenBehandling
@@ -77,7 +77,7 @@ class TilbakekrevingKlient(
         return kallEksternTjenesteRessurs(
             tjeneste = "familie-tilbake",
             uri = uri,
-            formål = "Henter tilbakekrevingsbehandlinger på fagsak"
+            formål = "Henter tilbakekrevingsbehandlinger på fagsak",
         ) { getForEntity(uri) }
     }
 
@@ -87,19 +87,19 @@ class TilbakekrevingKlient(
         return kallEksternTjenesteRessurs(
             tjeneste = "familie-tilbake",
             uri = uri,
-            formål = "Henter tilbakekrevingsvedtak på fagsak"
+            formål = "Henter tilbakekrevingsvedtak på fagsak",
         ) { getForEntity(uri) }
     }
 
     fun kanTilbakekrevingsbehandlingOpprettesManuelt(fagsakId: Long): KanBehandlingOpprettesManueltRespons {
         val uri = URI.create(
-            "$familieTilbakeUri/ytelsestype/${Ytelsestype.BARNETRYGD}/fagsak/$fagsakId/kanBehandlingOpprettesManuelt/v1"
+            "$familieTilbakeUri/ytelsestype/${Ytelsestype.BARNETRYGD}/fagsak/$fagsakId/kanBehandlingOpprettesManuelt/v1",
         )
 
         return kallEksternTjenesteRessurs(
             tjeneste = "familie-tilbake",
             uri = uri,
-            formål = "Sjekker om tilbakekrevingsbehandling kan opprettes manuelt"
+            formål = "Sjekker om tilbakekrevingsbehandling kan opprettes manuelt",
         ) { getForEntity(uri) }
     }
 
@@ -109,7 +109,7 @@ class TilbakekrevingKlient(
         return kallEksternTjenesteRessurs(
             tjeneste = "familie-tilbake",
             uri = uri,
-            formål = "Oppretter tilbakekrevingsbehandling manuelt"
+            formål = "Oppretter tilbakekrevingsbehandling manuelt",
         ) { postForEntity(uri, request) }
     }
 }

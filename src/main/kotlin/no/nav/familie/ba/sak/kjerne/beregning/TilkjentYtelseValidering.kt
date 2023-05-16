@@ -29,7 +29,7 @@ fun hentGyldigEtterbetalingFom(kravDato: LocalDateTime) =
 
 fun hentSøkersAndeler(
     andeler: List<AndelTilkjentYtelse>,
-    søker: Person
+    søker: Person,
 ) = andeler.filter { it.aktør == søker.aktør }
 
 fun hentBarnasAndeler(andeler: List<AndelTilkjentYtelse>, barna: List<Person>) = barna.map { barn ->
@@ -45,7 +45,7 @@ object TilkjentYtelseValidering {
     fun finnAktørIderMedUgyldigEtterbetalingsperiode(
         forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
         andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-        kravDato: LocalDateTime
+        kravDato: LocalDateTime,
     ): List<String> {
         val gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(kravDato)
 
@@ -62,7 +62,7 @@ object TilkjentYtelseValidering {
                     erUgyldigEtterbetalingPåPerson(
                         forrigeAndelerTilkjentYtelseForPerson,
                         andelerTilkjentYtelseForPerson,
-                        gyldigEtterbetalingFom
+                        gyldigEtterbetalingFom,
                     )
                 }
             }
@@ -72,7 +72,7 @@ object TilkjentYtelseValidering {
 
     fun hentAktørIderForDenneOgForrigeBehandling(
         andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-        forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>?
+        forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>?,
     ): Set<String> {
         val aktørIderFraAndeler = andelerTilkjentYtelse.map { it.aktør.aktørId }
         val aktøerIderFraForrigeAndeler = forrigeAndelerTilkjentYtelse?.map { it.aktør.aktørId } ?: emptyList()
@@ -82,7 +82,7 @@ object TilkjentYtelseValidering {
     fun erUgyldigEtterbetalingPåPerson(
         forrigeAndelerForPerson: List<AndelTilkjentYtelse>,
         andelerForPerson: List<AndelTilkjentYtelse>,
-        gyldigEtterbetalingFom: YearMonth
+        gyldigEtterbetalingFom: YearMonth,
     ): Boolean {
         return YtelseType.values().any { ytelseType ->
             val forrigeAndelerForPersonOgType = forrigeAndelerForPerson.filter { it.type == ytelseType }
@@ -90,7 +90,7 @@ object TilkjentYtelseValidering {
 
             val etterbetalingTidslinje = EndringIUtbetalingUtil.lagEtterbetalingstidslinjeForPersonOgType(
                 nåværendeAndeler = andelerForPersonOgType,
-                forrigeAndeler = forrigeAndelerForPersonOgType
+                forrigeAndeler = forrigeAndelerForPersonOgType,
             )
 
             val førsteMånedMedEtterbetaling = etterbetalingTidslinje.tilFørsteEndringstidspunkt()
@@ -101,7 +101,7 @@ object TilkjentYtelseValidering {
 
     fun validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
         tilkjentYtelse: TilkjentYtelse,
-        personopplysningGrunnlag: PersonopplysningGrunnlag
+        personopplysningGrunnlag: PersonopplysningGrunnlag,
     ) {
         val søker = personopplysningGrunnlag.søker
         val barna = personopplysningGrunnlag.barna
@@ -125,7 +125,7 @@ object TilkjentYtelseValidering {
     fun validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
         behandlendeBehandlingTilkjentYtelse: TilkjentYtelse,
         barnMedAndreRelevanteTilkjentYtelser: List<Pair<Person, List<TilkjentYtelse>>>,
-        personopplysningGrunnlag: PersonopplysningGrunnlag
+        personopplysningGrunnlag: PersonopplysningGrunnlag,
     ) {
         val barna = personopplysningGrunnlag.barna.sortedBy { it.fødselsdato }
 
@@ -141,7 +141,7 @@ object TilkjentYtelseValidering {
 
             if (erOverlappAvAndeler(
                     andeler = andeler,
-                    barnsAndelerFraAndreBehandlinger = barnsAndelerFraAndreBehandlinger
+                    barnsAndelerFraAndreBehandlinger = barnsAndelerFraAndreBehandlinger,
                 )
             ) {
                 barnMedUtbetalingsikkerhetFeil.add(barn)
@@ -150,11 +150,11 @@ object TilkjentYtelseValidering {
         if (barnMedUtbetalingsikkerhetFeil.isNotEmpty()) {
             throw UtbetalingsikkerhetFeil(
                 melding = "Vi finner utbetalinger som overstiger 100% på hvert av barna: ${
-                barnMedUtbetalingsikkerhetFeil.map { it.fødselsdato }.tilBrevTekst()
+                    barnMedUtbetalingsikkerhetFeil.map { it.fødselsdato }.tilBrevTekst()
                 }",
                 frontendFeilmelding = "Du kan ikke godkjenne dette vedtaket fordi det vil betales ut mer enn 100% for barn født ${
-                barnMedUtbetalingsikkerhetFeil.map { it.fødselsdato }.tilBrevTekst()
-                }. Reduksjonsvedtak til annen person må være sendt til godkjenning før du kan gå videre."
+                    barnMedUtbetalingsikkerhetFeil.map { it.fødselsdato }.tilBrevTekst()
+                }. Reduksjonsvedtak til annen person må være sendt til godkjenning før du kan gå videre.",
             )
         }
     }
@@ -182,7 +182,7 @@ object TilkjentYtelseValidering {
 
     private fun erOverlappAvAndeler(
         andeler: List<AndelTilkjentYtelse>,
-        barnsAndelerFraAndreBehandlinger: List<AndelTilkjentYtelse>
+        barnsAndelerFraAndreBehandlinger: List<AndelTilkjentYtelse>,
     ): Boolean {
         return andeler.any { andelTilkjentYtelse ->
             barnsAndelerFraAndreBehandlinger.any {
@@ -196,7 +196,7 @@ object TilkjentYtelseValidering {
 private fun validerAtBeløpForPartStemmerMedSatser(
     person: Person,
     andeler: List<AndelTilkjentYtelse>,
-    fagsakType: FagsakType
+    fagsakType: FagsakType,
 ) {
     val maksAntallAndeler =
         if (fagsakType == FagsakType.BARN_ENSLIG_MINDREÅRIG) 2 else if (person.type == PersonType.BARN) 1 else 2
@@ -205,7 +205,7 @@ private fun validerAtBeløpForPartStemmerMedSatser(
     if (andeler.size > maksAntallAndeler) {
         throw UtbetalingsikkerhetFeil(
             melding = "Validering av andeler for ${person.type} i perioden (${andeler.first().stønadFom} - ${andeler.first().stønadTom}) feilet: Tillatte andeler = $maksAntallAndeler, faktiske andeler = ${andeler.size}.",
-            frontendFeilmelding = "Det har skjedd en systemfeil, og beløpene stemmer ikke overens med dagens satser. $KONTAKT_TEAMET_SUFFIX"
+            frontendFeilmelding = "Det har skjedd en systemfeil, og beløpene stemmer ikke overens med dagens satser. $KONTAKT_TEAMET_SUFFIX",
         )
     }
 
@@ -214,7 +214,7 @@ private fun validerAtBeløpForPartStemmerMedSatser(
     if (totalbeløp > maksTotalBeløp) {
         throw UtbetalingsikkerhetFeil(
             melding = "Validering av andeler for ${person.type} i perioden (${andeler.first().stønadFom} - ${andeler.first().stønadTom}) feilet: Tillatt totalbeløp = $maksTotalBeløp, faktiske totalbeløp = $totalbeløp.",
-            frontendFeilmelding = "Det har skjedd en systemfeil, og beløpene stemmer ikke overens med dagens satser. $KONTAKT_TEAMET_SUFFIX"
+            frontendFeilmelding = "Det har skjedd en systemfeil, og beløpene stemmer ikke overens med dagens satser. $KONTAKT_TEAMET_SUFFIX",
         )
     }
 }

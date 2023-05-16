@@ -29,7 +29,7 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
     @Autowired val mockPersonopplysningerService: PersonopplysningerService,
     @Autowired val persongrunnlagService: PersongrunnlagService,
     @Autowired val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-    @Autowired val databaseCleanupService: DatabaseCleanupService
+    @Autowired val databaseCleanupService: DatabaseCleanupService,
 ) : AbstractSpringIntegrationTest() {
 
     @BeforeEach
@@ -81,10 +81,10 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
             setOf(
                 ForelderBarnRelasjon(
                     tilAktør(barnFnr),
-                    FORELDERBARNRELASJONROLLE.BARN
-                )
+                    FORELDERBARNRELASJONROLLE.BARN,
+                ),
             ),
-            emptyList()
+            emptyList(),
         )
         every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(tilAktør(barnFnr)) } returns barn
         every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(tilAktør(søkerFnr)) } returns søker
@@ -107,8 +107,8 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
             setOf(
                 ForelderBarnRelasjon(
                     tilAktør(barnFnr),
-                    FORELDERBARNRELASJONROLLE.BARN
-                )
+                    FORELDERBARNRELASJONROLLE.BARN,
+                ),
             ),
             emptyList(),
             bostedsadresser = listOf(
@@ -123,12 +123,12 @@ class AutomatiskVilkårsvurderingIntegrasjonTest(
                         adressenavn = "IkkeSamme -veien",
                         kommunenummer = "5423",
                         tilleggsnavn = null,
-                        postnummer = "9050"
+                        postnummer = "9050",
                     ),
                     matrikkeladresse = null,
-                    ukjentBosted = null
-                )
-            )
+                    ukjentBosted = null,
+                ),
+            ),
         )
 
         every { mockPersonopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(tilAktør(barnFnr)) } returns barn

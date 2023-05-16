@@ -5,7 +5,7 @@ import java.time.LocalDate
 
 data class VarselbrevÅrlegKontrollEøs(
     override val mal: Brevmal,
-    override val data: VarselbrevÅrlegKontrollEøsData
+    override val data: VarselbrevÅrlegKontrollEøsData,
 ) : Brev {
 
     constructor(
@@ -15,29 +15,29 @@ data class VarselbrevÅrlegKontrollEøs(
         enhet: String,
         mottakerlandSed: String,
         dokumentliste: List<String> = emptyList(),
-        saksbehandlerNavn: String
+        saksbehandlerNavn: String,
     ) : this(
         mal = mal,
         data = VarselbrevÅrlegKontrollEøsData(
             delmalData = VarselbrevÅrlegKontrollEøsData.DelmalData(
                 signatur = SignaturDelmal(
                     enhet = enhet,
-                    saksbehandlerNavn = saksbehandlerNavn
-                )
+                    saksbehandlerNavn = saksbehandlerNavn,
+                ),
             ),
             flettefelter = VarselbrevÅrlegKontrollEøsData.Flettefelter(
                 navn = navn,
                 fodselsnummer = fødselsnummer,
                 mottakerlandSed = mottakerlandSed,
-                dokumentliste = dokumentliste
-            )
-        )
+                dokumentliste = dokumentliste,
+            ),
+        ),
     )
 }
 
 data class VarselbrevÅrlegKontrollEøsData(
     override val delmalData: DelmalData,
-    override val flettefelter: Flettefelter
+    override val flettefelter: Flettefelter,
 ) : BrevData {
 
     data class Flettefelter(
@@ -45,23 +45,23 @@ data class VarselbrevÅrlegKontrollEøsData(
         override val fodselsnummer: Flettefelt,
         override val brevOpprettetDato: Flettefelt = flettefelt(LocalDate.now().tilDagMånedÅr()),
         val mottakerlandSed: Flettefelt,
-        val dokumentliste: Flettefelt
+        val dokumentliste: Flettefelt,
     ) : FlettefelterForDokument {
 
         constructor(
             navn: String,
             fodselsnummer: String,
             mottakerlandSed: String,
-            dokumentliste: List<String>
+            dokumentliste: List<String>,
         ) : this(
             navn = flettefelt(navn),
             fodselsnummer = flettefelt(fodselsnummer),
             mottakerlandSed = flettefelt(mottakerlandSed),
-            dokumentliste = flettefelt(dokumentliste)
+            dokumentliste = flettefelt(dokumentliste),
         )
     }
 
     data class DelmalData(
-        val signatur: SignaturDelmal
+        val signatur: SignaturDelmal,
     )
 }

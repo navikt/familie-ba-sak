@@ -20,7 +20,7 @@ data class UtvidetVedtaksperiodeMedBegrunnelser(
     val eøsBegrunnelser: List<EØSBegrunnelse>,
     val fritekster: List<String> = emptyList(),
     val gyldigeBegrunnelser: List<IVedtakBegrunnelse> = emptyList(),
-    val utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj> = emptyList()
+    val utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj> = emptyList(),
 )
 
 fun List<UtvidetVedtaksperiodeMedBegrunnelser>.sorter(): List<UtvidetVedtaksperiodeMedBegrunnelser> {
@@ -31,17 +31,17 @@ fun List<UtvidetVedtaksperiodeMedBegrunnelser>.sorter(): List<UtvidetVedtaksperi
 fun VedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
     personopplysningGrunnlag: PersonopplysningGrunnlag,
     andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
-    skalBrukeNyVedtaksperiodeLøsning: Boolean
+    skalBrukeNyVedtaksperiodeLøsning: Boolean,
 ): UtvidetVedtaksperiodeMedBegrunnelser {
     val utbetalingsperiodeDetaljer = if (skalBrukeNyVedtaksperiodeLøsning) {
         this.hentUtbetalingsperiodeDetaljerNy(
             andelerTilkjentYtelse = andelerTilkjentYtelse,
-            personopplysningGrunnlag = personopplysningGrunnlag
+            personopplysningGrunnlag = personopplysningGrunnlag,
         )
     } else {
         hentUtbetalingsperiodeDetaljer(
             andelerTilkjentYtelse = andelerTilkjentYtelse,
-            personopplysningGrunnlag = personopplysningGrunnlag
+            personopplysningGrunnlag = personopplysningGrunnlag,
         )
     }
 
@@ -53,6 +53,6 @@ fun VedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
         begrunnelser = this.begrunnelser.toList(),
         eøsBegrunnelser = this.eøsBegrunnelser.toList(),
         fritekster = this.fritekster.sortedBy { it.id }.map { it.fritekst },
-        utbetalingsperiodeDetaljer = utbetalingsperiodeDetaljer
+        utbetalingsperiodeDetaljer = utbetalingsperiodeDetaljer,
     )
 }

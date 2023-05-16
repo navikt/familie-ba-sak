@@ -7,5 +7,5 @@ data class RestBehandlingsgrunnlagForBrev(
     val personerPåBehandling: List<MinimertRestPerson>,
     val minimertePersonResultater: List<MinimertRestPersonResultat>,
     val minimerteEndredeUtbetalingAndeler: List<MinimertRestEndretAndel>,
-    val fagsakType: FagsakType
+    val fagsakType: FagsakType,
 )

@@ -13,12 +13,12 @@ import java.time.LocalDate
 fun lagPersonResultatAvOverstyrteResultater(
     person: Person,
     overstyrendeVilkårResultater: List<VilkårResultat>,
-    vilkårsvurdering: Vilkårsvurdering
+    vilkårsvurdering: Vilkårsvurdering,
 
 ): PersonResultat {
     val personResultat = PersonResultat(
         vilkårsvurdering = vilkårsvurdering,
-        aktør = person.aktør
+        aktør = person.aktør,
     )
 
     val erUtvidet = overstyrendeVilkårResultater.any { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
@@ -26,7 +26,7 @@ fun lagPersonResultatAvOverstyrteResultater(
     val vilkårResultater = Vilkår.hentVilkårFor(
         personType = person.type,
         fagsakType = FagsakType.NORMAL,
-        behandlingUnderkategori = if (erUtvidet) BehandlingUnderkategori.UTVIDET else BehandlingUnderkategori.ORDINÆR
+        behandlingUnderkategori = if (erUtvidet) BehandlingUnderkategori.UTVIDET else BehandlingUnderkategori.ORDINÆR,
     ).map { vilkårType ->
         overstyrendeVilkårResultater
             .find { it.vilkårType == vilkårType }
@@ -37,7 +37,7 @@ fun lagPersonResultatAvOverstyrteResultater(
                 } else {
                     maxOf(
                         person.fødselsdato,
-                        LocalDate.now().minusYears(3)
+                        LocalDate.now().minusYears(3),
                     )
                 },
                 periodeTom = if (vilkårType == Vilkår.UNDER_18_ÅR) person.fødselsdato.plusYears(18) else null,
@@ -45,7 +45,7 @@ fun lagPersonResultatAvOverstyrteResultater(
                 resultat = Resultat.OPPFYLT,
                 begrunnelse = "",
                 behandlingId = vilkårsvurdering.behandling.id,
-                utdypendeVilkårsvurderinger = emptyList()
+                utdypendeVilkårsvurderinger = emptyList(),
             )
     }.toSet()
 

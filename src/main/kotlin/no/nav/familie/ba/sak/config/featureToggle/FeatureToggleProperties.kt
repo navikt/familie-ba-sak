@@ -6,12 +6,12 @@ import java.net.URI
 @ConfigurationProperties("funksjonsbrytere")
 class FeatureToggleProperties(
     val enabled: Boolean,
-    val unleash: Unleash
+    val unleash: Unleash,
 ) {
 
     data class Unleash(
         val uri: URI,
         val cluster: String,
-        val applicationName: String
+        val applicationName: String,
     )
 }

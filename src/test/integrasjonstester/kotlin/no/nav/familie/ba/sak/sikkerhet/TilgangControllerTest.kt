@@ -19,7 +19,7 @@ class TilgangControllerTest(
     private val mockPersonopplysningerService: PersonopplysningerService,
 
     @Autowired
-    private val mockFamilieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient
+    private val mockFamilieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient,
 ) : AbstractSpringIntegrationTest() {
 
     @Test

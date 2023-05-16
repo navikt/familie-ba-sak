@@ -30,7 +30,7 @@ class TidslinjeFraTidspunktTest {
             Periode(sep(2019), jan(2020), "D"),
             Periode(feb(2020), okt(2020), null),
             Periode(nov(2020), feb(2021), "e"),
-            Periode(apr(2021), apr(2021), null)
+            Periode(apr(2021), apr(2021), null),
         )
     }
 

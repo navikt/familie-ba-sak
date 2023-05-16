@@ -23,13 +23,13 @@ fun validerVerdierPåRestTilbakekreving(restTilbakekreving: RestTilbakekreving?,
     if (feilutbetaling != BigDecimal.ZERO && restTilbakekreving == null) {
         throw FunksjonellFeil(
             "Simuleringen har en feilutbetaling, men restTilbakekreving var null",
-            frontendFeilmelding = "Du må velge en tilbakekrevingsstrategi siden det er en feilutbetaling."
+            frontendFeilmelding = "Du må velge en tilbakekrevingsstrategi siden det er en feilutbetaling.",
         )
     }
     if (feilutbetaling == BigDecimal.ZERO && restTilbakekreving != null) {
         throw FunksjonellFeil(
             "Simuleringen har ikke en feilutbetaling, men restTilbakekreving var ikke null",
-            frontendFeilmelding = "Du kan ikke opprette en tilbakekreving når det ikke er en feilutbetaling."
+            frontendFeilmelding = "Du kan ikke opprette en tilbakekreving når det ikke er en feilutbetaling.",
         )
     }
 }
@@ -55,31 +55,31 @@ fun slåsammenNærliggendeFeilutbtalingPerioder(simuleringsPerioder: List<Simule
 
 fun hentTilbakekrevingsperioderISimulering(
     simulering: List<ØkonomiSimuleringMottaker>,
-    erManuelPosteringTogglePå: Boolean
+    erManuelPosteringTogglePå: Boolean,
 ): List<Periode> =
     slåsammenNærliggendeFeilutbtalingPerioder(
         vedtakSimuleringMottakereTilRestSimulering(
             økonomiSimuleringMottakere = simulering,
-            erManuellPosteringTogglePå = erManuelPosteringTogglePå
-        ).perioder
+            erManuellPosteringTogglePå = erManuelPosteringTogglePå,
+        ).perioder,
     )
 
 fun opprettVarsel(
     tilbakekreving: Tilbakekreving?,
     simulering: List<ØkonomiSimuleringMottaker>,
-    erManuelPosteringTogglePå: Boolean
+    erManuelPosteringTogglePå: Boolean,
 ): Varsel? =
     if (tilbakekreving?.valg == Tilbakekrevingsvalg.OPPRETT_TILBAKEKREVING_MED_VARSEL) {
         val varseltekst = tilbakekreving.varsel ?: throw Feil("Varseltekst er ikke satt")
         val restSimulering = vedtakSimuleringMottakereTilRestSimulering(
             økonomiSimuleringMottakere = simulering,
-            erManuellPosteringTogglePå = erManuelPosteringTogglePå
+            erManuellPosteringTogglePå = erManuelPosteringTogglePå,
         )
 
         Varsel(
             varseltekst = varseltekst,
             sumFeilutbetaling = restSimulering.feilutbetaling,
-            perioder = slåsammenNærliggendeFeilutbtalingPerioder(restSimulering.perioder)
+            perioder = slåsammenNærliggendeFeilutbtalingPerioder(restSimulering.perioder),
         )
     } else {
         null
@@ -90,14 +90,14 @@ fun hentFaktainfoForTilbakekreving(behandling: Behandling, tilbakekreving: Tilba
         revurderingsårsak = behandling.opprettetÅrsak.visningsnavn,
         revurderingsresultat = behandling.resultat.displayName,
         tilbakekrevingsvalg = tilbakekreving.valg,
-        konsekvensForYtelser = emptySet()
+        konsekvensForYtelser = emptySet(),
     )
 
 fun hentTilbakekrevingInstitusjon(fagsak: Fagsak): Institusjon? {
     var institusjon: Institusjon? = null
     if (fagsak.type == FagsakType.INSTITUSJON) {
         requireNotNull(
-            fagsak.institusjon
+            fagsak.institusjon,
         ) { "Fagsaktype er institusjon, men institusjon finnes ikke på fagsak: ${fagsak.id}" }
         institusjon = Institusjon(organisasjonsnummer = fagsak.institusjon!!.orgNummer)
     }

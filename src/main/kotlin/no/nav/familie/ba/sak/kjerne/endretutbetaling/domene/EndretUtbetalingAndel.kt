@@ -43,7 +43,7 @@ data class EndretUtbetalingAndel(
     @SequenceGenerator(
         name = "endret_utbetaling_andel_seq_generator",
         sequenceName = "endret_utbetaling_andel_seq",
-        allocationSize = 50
+        allocationSize = 50,
     )
     val id: Long = 0,
 
@@ -80,7 +80,7 @@ data class EndretUtbetalingAndel(
 
     @Column(name = "vedtak_begrunnelse_spesifikasjoner")
     @Convert(converter = IVedtakBegrunnelseListConverter::class)
-    var standardbegrunnelser: List<IVedtakBegrunnelse> = emptyList()
+    var standardbegrunnelser: List<IVedtakBegrunnelse> = emptyList(),
 ) : BaseEntitet() {
 
     fun overlapperMed(periode: MånedPeriode) = periode.overlapperHeltEllerDelvisMed(this.periode)
@@ -102,7 +102,7 @@ data class EndretUtbetalingAndel(
         if (fom!! > tom!!) {
             throw FunksjonellFeil(
                 melding = "fom må være lik eller komme før tom",
-                frontendFeilmelding = "Du kan ikke sette en f.o.m. dato som er etter t.o.m. dato"
+                frontendFeilmelding = "Du kan ikke sette en f.o.m. dato som er etter t.o.m. dato",
             )
         }
 
@@ -128,7 +128,7 @@ enum class Årsak(val visningsnavn: String) {
     DELT_BOSTED("Delt bosted"),
     ETTERBETALING_3ÅR("Etterbetaling 3 år"),
     ENDRE_MOTTAKER("Foreldrene bor sammen, endret mottaker"),
-    ALLEREDE_UTBETALT("Allerede utbetalt")
+    ALLEREDE_UTBETALT("Allerede utbetalt"),
 }
 
 fun EndretUtbetalingAndelMedAndelerTilkjentYtelse.tilRestEndretUtbetalingAndel() =
@@ -142,12 +142,12 @@ fun EndretUtbetalingAndelMedAndelerTilkjentYtelse.tilRestEndretUtbetalingAndel()
         avtaletidspunktDeltBosted = this.avtaletidspunktDeltBosted,
         søknadstidspunkt = this.søknadstidspunkt,
         begrunnelse = this.begrunnelse,
-        erTilknyttetAndeler = this.andelerTilkjentYtelse.isNotEmpty()
+        erTilknyttetAndeler = this.andelerTilkjentYtelse.isNotEmpty(),
     )
 
 fun EndretUtbetalingAndel.fraRestEndretUtbetalingAndel(
     restEndretUtbetalingAndel: RestEndretUtbetalingAndel,
-    person: Person
+    person: Person,
 ): EndretUtbetalingAndel {
     this.fom = restEndretUtbetalingAndel.fom
     this.tom = restEndretUtbetalingAndel.tom
@@ -163,7 +163,7 @@ fun EndretUtbetalingAndel.fraRestEndretUtbetalingAndel(
 fun hentPersonerForEtterEndretUtbetalingsperiode(
     minimerteEndredeUtbetalingAndeler: List<MinimertRestEndretAndel>,
     fom: LocalDate?,
-    endringsaarsaker: Set<Årsak>
+    endringsaarsaker: Set<Årsak>,
 ) = minimerteEndredeUtbetalingAndeler.filter { endretUtbetalingAndel ->
     endretUtbetalingAndel.periode.tom.sisteDagIInneværendeMåned()
         .erDagenFør(fom) &&
@@ -174,7 +174,7 @@ sealed interface IEndretUtbetalingAndel
 
 data class TomEndretUtbetalingAndel(
     val id: Long,
-    val behandlingId: Long
+    val behandlingId: Long,
 ) : IEndretUtbetalingAndel
 
 sealed interface IUtfyltEndretUtbetalingAndel : IEndretUtbetalingAndel {
@@ -200,7 +200,7 @@ data class UtfyltEndretUtbetalingAndel(
     override val årsak: Årsak,
     override val søknadstidspunkt: LocalDate,
     override val begrunnelse: String,
-    override val standardbegrunnelser: List<IVedtakBegrunnelse>
+    override val standardbegrunnelser: List<IVedtakBegrunnelse>,
 ) : IUtfyltEndretUtbetalingAndel
 
 data class UtfyltEndretUtbetalingAndelDeltBosted(
@@ -215,14 +215,14 @@ data class UtfyltEndretUtbetalingAndelDeltBosted(
     override val begrunnelse: String,
     override val standardbegrunnelser: List<IVedtakBegrunnelse>,
 
-    val avtaletidspunktDeltBosted: LocalDate
+    val avtaletidspunktDeltBosted: LocalDate,
 ) : IUtfyltEndretUtbetalingAndel
 
 fun EndretUtbetalingAndel.tilIEndretUtbetalingAndel(): IEndretUtbetalingAndel {
     return if (this.manglerObligatoriskFelt()) {
         TomEndretUtbetalingAndel(
             this.id,
-            this.behandlingId
+            this.behandlingId,
         )
     } else {
         if (this.årsakErDeltBosted()) {
@@ -237,7 +237,7 @@ fun EndretUtbetalingAndel.tilIEndretUtbetalingAndel(): IEndretUtbetalingAndel {
                 avtaletidspunktDeltBosted = this.avtaletidspunktDeltBosted!!,
                 søknadstidspunkt = this.søknadstidspunkt!!,
                 begrunnelse = this.begrunnelse!!,
-                standardbegrunnelser = this.standardbegrunnelser
+                standardbegrunnelser = this.standardbegrunnelser,
             )
         }
 
@@ -251,7 +251,7 @@ fun EndretUtbetalingAndel.tilIEndretUtbetalingAndel(): IEndretUtbetalingAndel {
             årsak = this.årsak!!,
             søknadstidspunkt = this.søknadstidspunkt!!,
             begrunnelse = this.begrunnelse!!,
-            standardbegrunnelser = this.standardbegrunnelser
+            standardbegrunnelser = this.standardbegrunnelser,
         )
     }
 }
@@ -261,6 +261,6 @@ fun List<IUtfyltEndretUtbetalingAndel>.tilTidslinje() =
         Periode(
             fraOgMed = betalingAndel.fom.tilTidspunkt(),
             tilOgMed = betalingAndel.tom.tilTidspunkt(),
-            innhold = betalingAndel
+            innhold = betalingAndel,
         )
     }.tilTidslinje()

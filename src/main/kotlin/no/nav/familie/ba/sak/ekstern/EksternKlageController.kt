@@ -22,12 +22,12 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping(
     path = ["/api/klage/"],
-    produces = [MediaType.APPLICATION_JSON_VALUE]
+    produces = [MediaType.APPLICATION_JSON_VALUE],
 )
 @ProtectedWithClaims(issuer = "azuread")
 class EksternKlageController(
     private val tilgangService: TilgangService,
-    private val klageService: KlageService
+    private val klageService: KlageService,
 ) {
 
     @GetMapping("fagsaker/{fagsakId}/kan-opprette-revurdering-klage")
@@ -36,7 +36,7 @@ class EksternKlageController(
             fagsakId = fagsakId,
             handling = "Valider vi kan opprette revurdering med årsak klage på fagsak=$fagsakId",
             event = AuditLoggerEvent.CREATE,
-            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER
+            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
         )
 
         if (!SikkerhetContext.kallKommerFraKlage()) {
@@ -52,7 +52,7 @@ class EksternKlageController(
             fagsakId = fagsakId,
             handling = "Opprett revurdering med årask klage på fagsak=$fagsakId",
             event = AuditLoggerEvent.CREATE,
-            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER
+            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
         )
 
         if (!SikkerhetContext.kallKommerFraKlage()) {
@@ -60,8 +60,8 @@ class EksternKlageController(
         }
         return Ressurs.success(
             klageService.validerOgOpprettRevurderingKlage(
-                fagsakId
-            )
+                fagsakId,
+            ),
         )
     }
 
@@ -73,7 +73,7 @@ class EksternKlageController(
                 fagsakId = fagsakId,
                 handling = "Kan hente vedtak på fagsak=$fagsakId",
                 event = AuditLoggerEvent.ACCESS,
-                minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER
+                minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             )
         }
 

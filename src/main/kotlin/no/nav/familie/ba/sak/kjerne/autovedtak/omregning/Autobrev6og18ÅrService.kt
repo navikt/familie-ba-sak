@@ -27,7 +27,7 @@ class Autobrev6og18ÅrService(
     private val autovedtakBrevService: AutovedtakBrevService,
     private val autovedtakStegService: AutovedtakStegService,
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
-    private val startSatsendring: StartSatsendring
+    private val startSatsendring: StartSatsendring,
 ) {
 
     @Transactional
@@ -39,13 +39,13 @@ class Autobrev6og18ÅrService(
                 ?: error("Fant ikke aktiv behandling")
 
         val behandlingsårsak = finnBehandlingÅrsakForAlder(
-            autobrev6og18ÅrDTO.alder
+            autobrev6og18ÅrDTO.alder,
         )
 
         if (!autovedtakBrevService.skalAutobrevBehandlingOpprettes(
                 fagsakId = autobrev6og18ÅrDTO.fagsakId,
                 behandlingsårsak = behandlingsårsak,
-                standardbegrunnelser = AutobrevUtils.hentStandardbegrunnelserReduksjonForAlder(autobrev6og18ÅrDTO.alder)
+                standardbegrunnelser = AutobrevUtils.hentStandardbegrunnelserReduksjonForAlder(autobrev6og18ÅrDTO.alder),
             )
         ) {
             return
@@ -58,7 +58,7 @@ class Autobrev6og18ÅrService(
 
         if (!barnMedAngittAlderInneværendeMånedEksisterer(
                 behandlingId = behandling.id,
-                alder = autobrev6og18ÅrDTO.alder
+                alder = autobrev6og18ÅrDTO.alder,
             )
         ) {
             logger.warn("Fagsak ${behandling.fagsak.id} har ikke noe barn med alder ${autobrev6og18ÅrDTO.alder} ")
@@ -73,7 +73,7 @@ class Autobrev6og18ÅrService(
         if (!barnIBrytningsalderHarLøpendeYtelse(
                 alder = autobrev6og18ÅrDTO.alder,
                 behandlingId = behandling.id,
-                årMåned = autobrev6og18ÅrDTO.årMåned
+                årMåned = autobrev6og18ÅrDTO.årMåned,
 
             )
         ) {
@@ -84,7 +84,7 @@ class Autobrev6og18ÅrService(
         if (startSatsendring.sjekkOgOpprettSatsendringVedGammelSats(autobrev6og18ÅrDTO.fagsakId)) {
             throw RekjørSenereException(
                 "Satsedring skal kjøre ferdig før man behandler autobrev 6 og 18 år",
-                LocalDateTime.now().plusHours(1)
+                LocalDateTime.now().plusHours(1),
             )
         }
 
@@ -94,16 +94,16 @@ class Autobrev6og18ÅrService(
                 aktør = behandling.fagsak.aktør,
                 behandlingsårsak = behandlingsårsak,
                 standardbegrunnelse = AutobrevUtils.hentGjeldendeVedtakbegrunnelseReduksjonForAlder(
-                    autobrev6og18ÅrDTO.alder
+                    autobrev6og18ÅrDTO.alder,
                 ),
-                fagsakId = behandling.fagsak.id
-            )
+                fagsakId = behandling.fagsak.id,
+            ),
         )
     }
 
     private fun barnetrygdOpphører(
         autobrev6og18ÅrDTO: Autobrev6og18ÅrDTO,
-        behandling: Behandling
+        behandling: Behandling,
     ) =
         autobrev6og18ÅrDTO.alder == Alder.ATTEN.år &&
             !barnUnder18årInneværendeMånedEksisterer(behandlingId = behandling.id)
@@ -129,7 +129,7 @@ class Autobrev6og18ÅrService(
     private fun barnIBrytningsalderHarLøpendeYtelse(
         alder: Int,
         behandlingId: Long,
-        årMåned: YearMonth
+        årMåned: YearMonth,
     ): Boolean {
         val barnIBrytningsalder =
             barnMedAngittAlderInneværendeMåned(behandlingId = behandlingId, alder = alder).map { it.aktør }
@@ -140,7 +140,7 @@ class Autobrev6og18ÅrService(
 
         val andelerTilBarnIBrytningsalder =
             andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
-                behandlingId
+                behandlingId,
             ).filter { it.aktør in barnIBrytningsalder }
 
         return harBarnIBrytningsalderLøpendeAndeler(alder, andelerTilBarnIBrytningsalder, årMåned)
@@ -149,7 +149,7 @@ class Autobrev6og18ÅrService(
     private fun harBarnIBrytningsalderLøpendeAndeler(
         alder: Int,
         andelerTilBarnIBrytningsalder: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
-        årMåned: YearMonth
+        årMåned: YearMonth,
     ) = when (alder) {
         Alder.ATTEN.år -> andelerTilBarnIBrytningsalder.any { it.stønadTom.plusMonths(1) == årMåned }
         Alder.SEKS.år -> andelerTilBarnIBrytningsalder.any { it.stønadTom.plusMonths(1) == årMåned } && andelerTilBarnIBrytningsalder.any { it.stønadFom == årMåned }
@@ -164,5 +164,5 @@ class Autobrev6og18ÅrService(
 
 enum class Alder(val år: Int) {
     SEKS(år = 6),
-    ATTEN(år = 18)
+    ATTEN(år = 18),
 }

@@ -38,7 +38,7 @@ class VedtaksperiodeServiceUtilsTest {
         val vilkårsvurdering = lagVilkårsvurdering(
             søkerAktør = søker.aktør,
             behandling = behandling,
-            resultat = Resultat.OPPFYLT
+            resultat = Resultat.OPPFYLT,
         )
         val identerMedUtbetaling = listOf(barn.aktør.aktivFødselsnummer(), søker.aktør.aktivFødselsnummer())
 
@@ -51,17 +51,17 @@ class VedtaksperiodeServiceUtilsTest {
                 personerPåBehandling = persongrunnlag.personer.map { it.tilMinimertPerson() },
                 minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                 minimerteEndredeUtbetalingAndeler = emptyList(),
-                fagsakType = FagsakType.NORMAL
+                fagsakType = FagsakType.NORMAL,
             ),
             identerMedUtbetalingPåPeriode = identerMedUtbetaling,
             erFørsteVedtaksperiodePåFagsak = false,
             minimerteUtbetalingsperiodeDetaljer = listOf(),
-            dødeBarnForrigePeriode = emptyList()
+            dødeBarnForrigePeriode = emptyList(),
         )
 
         Assertions.assertEquals(
             setOf(barn.aktør.aktivFødselsnummer(), søker.aktør.aktivFødselsnummer()),
-            personidenterForBegrunnelse
+            personidenterForBegrunnelse,
         )
     }
 
@@ -83,7 +83,7 @@ class VedtaksperiodeServiceUtilsTest {
         val vilkårsvurdering = lagVilkårsvurdering(
             søkerAktør = søker.aktør,
             behandling = behandling,
-            resultat = Resultat.OPPFYLT
+            resultat = Resultat.OPPFYLT,
         )
 
         val identerMedUtbetaling = listOf(barn1.aktør.aktivFødselsnummer(), søker.aktør.aktivFødselsnummer())
@@ -91,8 +91,8 @@ class VedtaksperiodeServiceUtilsTest {
             lagEndretUtbetalingAndelMedAndelerTilkjentYtelse(
                 person = barn2,
                 fom = fom.toYearMonth(),
-                tom = tom.toYearMonth()
-            )
+                tom = tom.toYearMonth(),
+            ),
         )
 
         val personidenterForBegrunnelse = hentPersonidenterGjeldendeForBegrunnelse(
@@ -105,17 +105,17 @@ class VedtaksperiodeServiceUtilsTest {
                 minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
                 minimerteEndredeUtbetalingAndeler = endredeUtbetalingAndeler
                     .map { it.tilMinimertRestEndretUtbetalingAndel() },
-                fagsakType = FagsakType.NORMAL
+                fagsakType = FagsakType.NORMAL,
             ),
             identerMedUtbetalingPåPeriode = identerMedUtbetaling,
             erFørsteVedtaksperiodePåFagsak = false,
             minimerteUtbetalingsperiodeDetaljer = listOf(),
-            dødeBarnForrigePeriode = emptyList()
+            dødeBarnForrigePeriode = emptyList(),
         )
 
         Assertions.assertEquals(
             setOf(barn1.aktør.aktivFødselsnummer(), barn2.aktør.aktivFødselsnummer(), søker.aktør.aktivFødselsnummer()),
-            personidenterForBegrunnelse.toSet()
+            personidenterForBegrunnelse.toSet(),
         )
     }
 
@@ -133,8 +133,8 @@ class VedtaksperiodeServiceUtilsTest {
             VedtakBegrunnelseType.INNVILGET.periodeErOppyltForYtelseType(
                 ytelseType = YtelseType.SMÅBARNSTILLEGG,
                 ytelseTyperForPeriode = ytelseTyperSmåbarnstillegg,
-                ytelserGjeldeneForSøkerForrigeMåned = emptyList()
-            )
+                ytelserGjeldeneForSøkerForrigeMåned = emptyList(),
+            ),
         )
 
         Assertions.assertEquals(
@@ -142,8 +142,8 @@ class VedtaksperiodeServiceUtilsTest {
             VedtakBegrunnelseType.INNVILGET.periodeErOppyltForYtelseType(
                 ytelseType = YtelseType.SMÅBARNSTILLEGG,
                 ytelseTyperForPeriode = ytelseTyperUtvidetOgOrdinær,
-                ytelserGjeldeneForSøkerForrigeMåned = emptyList()
-            )
+                ytelserGjeldeneForSøkerForrigeMåned = emptyList(),
+            ),
         )
     }
 
@@ -154,8 +154,8 @@ class VedtaksperiodeServiceUtilsTest {
             VedtakBegrunnelseType.REDUKSJON.periodeErOppyltForYtelseType(
                 ytelseType = YtelseType.SMÅBARNSTILLEGG,
                 ytelseTyperForPeriode = ytelseTyperUtvidetOgOrdinær,
-                ytelserGjeldeneForSøkerForrigeMåned = listOf(YtelseType.SMÅBARNSTILLEGG)
-            )
+                ytelserGjeldeneForSøkerForrigeMåned = listOf(YtelseType.SMÅBARNSTILLEGG),
+            ),
         )
 
         Assertions.assertEquals(
@@ -163,8 +163,8 @@ class VedtaksperiodeServiceUtilsTest {
             VedtakBegrunnelseType.REDUKSJON.periodeErOppyltForYtelseType(
                 ytelseType = YtelseType.SMÅBARNSTILLEGG,
                 ytelseTyperForPeriode = ytelseTyperSmåbarnstillegg,
-                ytelserGjeldeneForSøkerForrigeMåned = listOf(YtelseType.SMÅBARNSTILLEGG)
-            )
+                ytelserGjeldeneForSøkerForrigeMåned = listOf(YtelseType.SMÅBARNSTILLEGG),
+            ),
         )
 
         Assertions.assertEquals(
@@ -172,8 +172,8 @@ class VedtaksperiodeServiceUtilsTest {
             VedtakBegrunnelseType.REDUKSJON.periodeErOppyltForYtelseType(
                 ytelseType = YtelseType.SMÅBARNSTILLEGG,
                 ytelseTyperForPeriode = ytelseTyperUtvidetOgOrdinær,
-                ytelserGjeldeneForSøkerForrigeMåned = listOf(YtelseType.ORDINÆR_BARNETRYGD)
-            )
+                ytelserGjeldeneForSøkerForrigeMåned = listOf(YtelseType.ORDINÆR_BARNETRYGD),
+            ),
         )
 
         Assertions.assertEquals(
@@ -181,8 +181,8 @@ class VedtaksperiodeServiceUtilsTest {
             VedtakBegrunnelseType.REDUKSJON.periodeErOppyltForYtelseType(
                 ytelseType = YtelseType.SMÅBARNSTILLEGG,
                 ytelseTyperForPeriode = ytelseTyperUtvidetOgOrdinær,
-                ytelserGjeldeneForSøkerForrigeMåned = listOf()
-            )
+                ytelserGjeldeneForSøkerForrigeMåned = listOf(),
+            ),
         )
     }
 
@@ -193,8 +193,8 @@ class VedtaksperiodeServiceUtilsTest {
             VedtakBegrunnelseType.AVSLAG.periodeErOppyltForYtelseType(
                 ytelseType = YtelseType.SMÅBARNSTILLEGG,
                 ytelseTyperForPeriode = ytelseTyperSmåbarnstillegg,
-                ytelserGjeldeneForSøkerForrigeMåned = emptyList()
-            )
+                ytelserGjeldeneForSøkerForrigeMåned = emptyList(),
+            ),
         )
     }
 
@@ -205,8 +205,8 @@ class VedtaksperiodeServiceUtilsTest {
             VedtakBegrunnelseType.INNVILGET.periodeErOppyltForYtelseType(
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                 ytelseTyperForPeriode = ytelseTyperUtvidetOgOrdinær,
-                ytelserGjeldeneForSøkerForrigeMåned = emptyList()
-            )
+                ytelserGjeldeneForSøkerForrigeMåned = emptyList(),
+            ),
         )
 
         Assertions.assertEquals(
@@ -214,8 +214,8 @@ class VedtaksperiodeServiceUtilsTest {
             VedtakBegrunnelseType.INNVILGET.periodeErOppyltForYtelseType(
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                 ytelseTyperForPeriode = ytelseTyperOrdinær,
-                ytelserGjeldeneForSøkerForrigeMåned = emptyList()
-            )
+                ytelserGjeldeneForSøkerForrigeMåned = emptyList(),
+            ),
         )
     }
 
@@ -226,8 +226,8 @@ class VedtaksperiodeServiceUtilsTest {
             VedtakBegrunnelseType.REDUKSJON.periodeErOppyltForYtelseType(
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                 ytelseTyperForPeriode = ytelseTyperOrdinær,
-                ytelserGjeldeneForSøkerForrigeMåned = listOf(YtelseType.UTVIDET_BARNETRYGD)
-            )
+                ytelserGjeldeneForSøkerForrigeMåned = listOf(YtelseType.UTVIDET_BARNETRYGD),
+            ),
         )
 
         Assertions.assertEquals(
@@ -235,8 +235,8 @@ class VedtaksperiodeServiceUtilsTest {
             VedtakBegrunnelseType.REDUKSJON.periodeErOppyltForYtelseType(
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                 ytelseTyperForPeriode = ytelseTyperUtvidetOgOrdinær,
-                ytelserGjeldeneForSøkerForrigeMåned = listOf(YtelseType.UTVIDET_BARNETRYGD)
-            )
+                ytelserGjeldeneForSøkerForrigeMåned = listOf(YtelseType.UTVIDET_BARNETRYGD),
+            ),
         )
 
         Assertions.assertEquals(
@@ -244,8 +244,8 @@ class VedtaksperiodeServiceUtilsTest {
             VedtakBegrunnelseType.REDUKSJON.periodeErOppyltForYtelseType(
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                 ytelseTyperForPeriode = ytelseTyperOrdinær,
-                ytelserGjeldeneForSøkerForrigeMåned = listOf(YtelseType.ORDINÆR_BARNETRYGD)
-            )
+                ytelserGjeldeneForSøkerForrigeMåned = listOf(YtelseType.ORDINÆR_BARNETRYGD),
+            ),
         )
 
         Assertions.assertEquals(
@@ -253,8 +253,8 @@ class VedtaksperiodeServiceUtilsTest {
             VedtakBegrunnelseType.REDUKSJON.periodeErOppyltForYtelseType(
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                 ytelseTyperForPeriode = ytelseTyperOrdinær,
-                ytelserGjeldeneForSøkerForrigeMåned = listOf()
-            )
+                ytelserGjeldeneForSøkerForrigeMåned = listOf(),
+            ),
         )
     }
 }

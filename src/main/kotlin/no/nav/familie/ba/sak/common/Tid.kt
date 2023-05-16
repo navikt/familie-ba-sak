@@ -163,20 +163,20 @@ fun VilkårResultat.erEtterfølgendePeriode(other: VilkårResultat): Boolean {
 fun lagOgValiderPeriodeFraVilkår(
     periodeFom: LocalDate?,
     periodeTom: LocalDate?,
-    erEksplisittAvslagPåSøknad: Boolean? = null
+    erEksplisittAvslagPåSøknad: Boolean? = null,
 ): Periode {
     return when {
         periodeFom !== null -> {
             Periode(
                 fom = periodeFom,
-                tom = periodeTom ?: TIDENES_ENDE
+                tom = periodeTom ?: TIDENES_ENDE,
             )
         }
 
         erEksplisittAvslagPåSøknad == true && periodeTom == null -> {
             Periode(
                 fom = TIDENES_MORGEN,
-                tom = TIDENES_ENDE
+                tom = TIDENES_ENDE,
             )
         }
 
@@ -189,13 +189,13 @@ fun lagOgValiderPeriodeFraVilkår(
 fun RestVilkårResultat.toPeriode(): Periode = lagOgValiderPeriodeFraVilkår(
     this.periodeFom,
     this.periodeTom,
-    this.erEksplisittAvslagPåSøknad
+    this.erEksplisittAvslagPåSøknad,
 )
 
 fun VilkårResultat.toPeriode(): Periode = lagOgValiderPeriodeFraVilkår(
     this.periodeFom,
     this.periodeTom,
-    this.erEksplisittAvslagPåSøknad
+    this.erEksplisittAvslagPåSøknad,
 )
 
 fun DatoIntervallEntitet.erInnenfor(dato: LocalDate): Boolean {
@@ -247,7 +247,7 @@ fun slåSammenOverlappendePerioder(input: Collection<DatoIntervallEntitet>): Lis
 class YearMonthIterator(
     startMåned: YearMonth,
     val tilOgMedMåned: YearMonth,
-    val hoppMåneder: Long
+    val hoppMåneder: Long,
 ) : Iterator<YearMonth> {
 
     private var gjeldendeMåned = startMåned
@@ -271,7 +271,7 @@ class YearMonthIterator(
 class YearMonthProgression(
     override val start: YearMonth,
     override val endInclusive: YearMonth,
-    val hoppMåneder: Long = 1
+    val hoppMåneder: Long = 1,
 ) : Iterable<YearMonth>,
     ClosedRange<YearMonth> {
 

@@ -25,7 +25,7 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
     INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED(
         false,
         "innhenteOpplysningerEtterSoknadISED",
-        "Innhente opplysninger etter søknad i SED"
+        "Innhente opplysninger etter søknad i SED",
     ),
     INNHENTE_OPPLYSNINGER_INSTITUSJON(false, "innhenteOpplysningerInstitusjon", "Innhente opplysninger institusjon"),
     HENLEGGE_TRUKKET_SØKNAD(false, "henleggeTrukketSoknad", "Henlegge trukket søknad"),
@@ -34,32 +34,32 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
     VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14(
         false,
         "varselOmRevurderingDeltBostedParagrafFjorten",
-        "Varsel om revurdering delt bosted § 14"
+        "Varsel om revurdering delt bosted § 14",
     ),
     VARSEL_OM_REVURDERING_SAMBOER(
         false,
         "varselOmRevurderingSamboer",
-        "Varsel om revurdering samboer"
+        "Varsel om revurdering samboer",
     ),
     VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED(
         false,
         "varselOmVedtakEtterSoknadISED",
-        "Varsel om vedtak etter søknad i SED"
+        "Varsel om vedtak etter søknad i SED",
     ),
     VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS(
         false,
         "varselOmRevurderingFraNasjonalTilEOS",
-        "Varsel om revurdering fra nasjonal til EØS"
+        "Varsel om revurdering fra nasjonal til EØS",
     ),
     VARSEL_OM_ÅRLIG_REVURDERING_EØS(
         false,
         "varselOmAarligRevurderingEos",
-        "Varsel om årlig revurdering EØS"
+        "Varsel om årlig revurdering EØS",
     ),
     VARSEL_OM_ÅRLIG_REVURDERING_EØS_MED_INNHENTING_AV_OPPLYSNINGER(
         false,
         "varselOmAarligRevurderingEosMedInnhentingAvOpplysninger",
-        "Varsel om årlig revurdering EØS med innhenting av opplysninger"
+        "Varsel om årlig revurdering EØS med innhenting av opplysninger",
     ),
 
     SVARTIDSBREV(false, "svartidsbrev", "Svartidsbrev"),
@@ -69,7 +69,7 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
     INFORMASJONSBREV_FØDSEL_MINDREÅRIG(
         false,
         "informasjonsbrevFodselMindreaarig",
-        "Informasjonsbrev fødsel mindreårig"
+        "Informasjonsbrev fødsel mindreårig",
     ),
 
     INFORMASJONSBREV_FØDSEL_VERGEMÅL(false, "informasjonsbrevFodselVergemaal", "Informasjonsbrev fødsel vergemål"),
@@ -95,10 +95,11 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
     AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG(
         true,
         "autovedtakBarn6AarOg18AarOgSmaabarnstillegg",
-        "Autovedtak - Barn 6 og 18 år og småbarnstillegg"
+        "Autovedtak - Barn 6 og 18 år og småbarnstillegg",
     ),
     AUTOVEDTAK_NYFØDT_FØRSTE_BARN(true, "autovedtakNyfodtForsteBarn", "Autovedtak nyfødt - første barn"),
-    AUTOVEDTAK_NYFØDT_BARN_FRA_FØR(true, "autovedtakNyfodtBarnFraFor", "Autovedtak nyfødt - barn fra før");
+    AUTOVEDTAK_NYFØDT_BARN_FRA_FØR(true, "autovedtakNyfodtBarnFraFor", "Autovedtak nyfødt - barn fra før"),
+    ;
 
     fun skalGenerereForside(): Boolean =
         when (this) {
@@ -112,7 +113,8 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED,
             VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS,
             VARSEL_OM_ÅRLIG_REVURDERING_EØS,
-            VARSEL_OM_ÅRLIG_REVURDERING_EØS_MED_INNHENTING_AV_OPPLYSNINGER -> true
+            VARSEL_OM_ÅRLIG_REVURDERING_EØS_MED_INNHENTING_AV_OPPLYSNINGER,
+            -> true
 
             INFORMASJONSBREV_DELT_BOSTED,
             HENLEGGE_TRUKKET_SØKNAD,
@@ -124,7 +126,8 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             INFORMASJONSBREV_FØDSEL_MINDREÅRIG,
             INFORMASJONSBREV_KAN_SØKE,
             INFORMASJONSBREV_FØDSEL_GENERELL,
-            INFORMASJONSBREV_KAN_SØKE_EØS -> false
+            INFORMASJONSBREV_KAN_SØKE_EØS,
+            -> false
 
             VEDTAK_FØRSTEGANGSVEDTAK,
             VEDTAK_ENDRING,
@@ -142,7 +145,8 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON,
             AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG,
             AUTOVEDTAK_NYFØDT_FØRSTE_BARN,
-            AUTOVEDTAK_NYFØDT_BARN_FRA_FØR -> throw Feil("Ikke avgjort om $this skal generere forside")
+            AUTOVEDTAK_NYFØDT_BARN_FRA_FØR,
+            -> throw Feil("Ikke avgjort om $this skal generere forside")
         }
 
     fun tilFamilieKontrakterDokumentType(): Dokumenttype =
@@ -186,7 +190,8 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON,
             AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG,
             AUTOVEDTAK_NYFØDT_FØRSTE_BARN,
-            AUTOVEDTAK_NYFØDT_BARN_FRA_FØR -> throw Feil("Ingen dokumenttype for $this")
+            AUTOVEDTAK_NYFØDT_BARN_FRA_FØR,
+            -> throw Feil("Ingen dokumenttype for $this")
         }
 
     val distribusjonstype: Distribusjonstype
@@ -234,7 +239,8 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             INNHENTE_OPPLYSNINGER,
             INNHENTE_OPPLYSNINGER_INSTITUSJON,
             VARSEL_OM_REVURDERING,
-            VARSEL_OM_REVURDERING_INSTITUSJON -> true
+            VARSEL_OM_REVURDERING_INSTITUSJON,
+            -> true
 
             else -> false
         }
@@ -254,7 +260,8 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             SVARTIDSBREV_INSTITUSJON,
             FORLENGET_SVARTIDSBREV_INSTITUSJON,
             VARSEL_OM_ÅRLIG_REVURDERING_EØS,
-            VARSEL_OM_ÅRLIG_REVURDERING_EØS_MED_INNHENTING_AV_OPPLYSNINGER -> true
+            VARSEL_OM_ÅRLIG_REVURDERING_EØS_MED_INNHENTING_AV_OPPLYSNINGER,
+            -> true
 
             else -> false
         }
@@ -268,7 +275,8 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             VARSEL_OM_REVURDERING_DELT_BOSTED_PARAGRAF_14,
             INNHENTE_OPPLYSNINGER_ETTER_SØKNAD_I_SED,
             VARSEL_OM_REVURDERING_FRA_NASJONAL_TIL_EØS,
-            VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED -> 3 * 7
+            VARSEL_OM_VEDTAK_ETTER_SØKNAD_I_SED,
+            -> 3 * 7
 
             SVARTIDSBREV -> when (behandlingKategori) {
                 BehandlingKategori.EØS -> 30 * 3
@@ -282,7 +290,8 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
                     ?: throw Feil("Ventefrist var ikke satt for $this")
 
             VARSEL_OM_ÅRLIG_REVURDERING_EØS,
-            VARSEL_OM_ÅRLIG_REVURDERING_EØS_MED_INNHENTING_AV_OPPLYSNINGER -> 30 * 2
+            VARSEL_OM_ÅRLIG_REVURDERING_EØS_MED_INNHENTING_AV_OPPLYSNINGER,
+            -> 30 * 2
 
             else -> throw Feil("Ventefrist ikke definert for brevtype $this")
         }
@@ -302,7 +311,8 @@ enum class Brevmal(val erVedtaksbrev: Boolean, val apiNavn: String, val visnings
             SVARTIDSBREV_INSTITUSJON,
             FORLENGET_SVARTIDSBREV_INSTITUSJON,
             VARSEL_OM_ÅRLIG_REVURDERING_EØS,
-            VARSEL_OM_ÅRLIG_REVURDERING_EØS_MED_INNHENTING_AV_OPPLYSNINGER -> SettPåVentÅrsak.AVVENTER_DOKUMENTASJON
+            VARSEL_OM_ÅRLIG_REVURDERING_EØS_MED_INNHENTING_AV_OPPLYSNINGER,
+            -> SettPåVentÅrsak.AVVENTER_DOKUMENTASJON
 
             else -> throw Feil("Venteårsak ikke definert for brevtype $this")
         }
@@ -331,19 +341,19 @@ data class FlettefelterForDokumentImpl(
     override val fodselsnummer: Flettefelt,
     override val brevOpprettetDato: Flettefelt = flettefelt(LocalDate.now().tilDagMånedÅr()),
     override val organisasjonsnummer: Flettefelt,
-    override val gjelder: Flettefelt
+    override val gjelder: Flettefelt,
 ) : FlettefelterForDokument {
 
     constructor(
         navn: String,
         fodselsnummer: String,
         organisasjonsnummer: String? = null,
-        gjelder: String? = null
+        gjelder: String? = null,
     ) : this(
         navn = flettefelt(navn),
         fodselsnummer = flettefelt(fodselsnummer),
         organisasjonsnummer = flettefelt(organisasjonsnummer),
-        gjelder = flettefelt(gjelder)
+        gjelder = flettefelt(gjelder),
     )
 }
 

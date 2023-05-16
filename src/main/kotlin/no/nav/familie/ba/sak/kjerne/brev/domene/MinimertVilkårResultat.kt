@@ -19,13 +19,13 @@ data class MinimertVilkårResultat(
     val utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering>,
     val erEksplisittAvslagPåSøknad: Boolean?,
     @JsonDeserialize(using = IVedtakBegrunnelseDeserializer::class)
-    val standardbegrunnelser: List<IVedtakBegrunnelse>
+    val standardbegrunnelser: List<IVedtakBegrunnelse>,
 ) {
 
     fun toPeriode(): Periode = lagOgValiderPeriodeFraVilkår(
         this.periodeFom,
         this.periodeTom,
-        this.erEksplisittAvslagPåSøknad
+        this.erEksplisittAvslagPåSøknad,
     )
 }
 
@@ -37,5 +37,5 @@ fun VilkårResultat.tilMinimertVilkårResultat() =
         resultat = this.resultat,
         utdypendeVilkårsvurderinger = this.utdypendeVilkårsvurderinger,
         erEksplisittAvslagPåSøknad = this.erEksplisittAvslagPåSøknad,
-        standardbegrunnelser = this.standardbegrunnelser
+        standardbegrunnelser = this.standardbegrunnelser,
     )

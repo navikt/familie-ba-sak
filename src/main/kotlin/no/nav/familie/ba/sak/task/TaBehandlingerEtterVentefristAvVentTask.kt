@@ -13,7 +13,7 @@ import java.time.LocalDate
     taskStepType = TaBehandlingerEtterVentefristAvVentTask.TASK_STEP_TYPE,
     beskrivelse = "Gjennopptar behandlinger der ventefristen har gått",
     maxAntallFeil = 3,
-    triggerTidVedFeilISekunder = 60
+    triggerTidVedFeilISekunder = 60,
 )
 class TaBehandlingerEtterVentefristAvVentTask(val settPåVentService: SettPåVentService) : AsyncTaskStep {
 

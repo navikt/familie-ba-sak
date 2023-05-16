@@ -35,7 +35,7 @@ import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
 
-class RevurderingDødsfall(
+class RevurderingDødsfallTest(
     @Autowired private val behandleFødselshendelseTask: BehandleFødselshendelseTask,
     @Autowired private val fagsakService: FagsakService,
     @Autowired private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
@@ -48,7 +48,7 @@ class RevurderingDødsfall(
     @Autowired private val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
     @Autowired private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     @Autowired private val brevmalService: BrevmalService,
-    @Autowired private val featureToggleService: FeatureToggleService
+    @Autowired private val featureToggleService: FeatureToggleService,
 ) : AbstractVerdikjedetest() {
 
     @Test
@@ -60,22 +60,22 @@ class RevurderingDødsfall(
                 søker = RestScenarioPerson(
                     fødselsdato = "1982-01-12",
                     fornavn = "Mor",
-                    etternavn = "Søker"
+                    etternavn = "Søker",
                 ),
                 barna = listOf(
                     RestScenarioPerson(
                         fødselsdato = LocalDate.now().minusMonths(2).toString(),
                         fornavn = "Barn",
-                        etternavn = "Barnesen"
-                    )
-                )
-            )
+                        etternavn = "Barnesen",
+                    ),
+                ),
+            ),
         )
 
         behandleFødselshendelse(
             nyBehandlingHendelse = NyBehandlingHendelse(
                 morsIdent = scenario.søker.ident!!,
-                barnasIdenter = listOf(scenario.barna.first().ident!!)
+                barnasIdenter = listOf(scenario.barna.first().ident!!),
             ),
             behandleFødselshendelseTask = behandleFødselshendelseTask,
             fagsakService = fagsakService,
@@ -83,7 +83,7 @@ class RevurderingDødsfall(
             vedtakService = vedtakService,
             stegService = stegService,
             personidentService = personidentService,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
 
         )
 
@@ -96,14 +96,14 @@ class RevurderingDødsfall(
                 vilkårType = Vilkår.BOSATT_I_RIKET,
                 periodeFom = LocalDate.parse(scenario.søker.fødselsdato),
                 periodeTom = LocalDate.now().minusMonths(1),
-                personResultat = mockk(relaxed = true)
+                personResultat = mockk(relaxed = true),
             ),
             lagVilkårResultat(
                 vilkårType = Vilkår.LOVLIG_OPPHOLD,
                 periodeFom = LocalDate.parse(scenario.søker.fødselsdato),
                 periodeTom = LocalDate.now().minusMonths(1),
-                personResultat = mockk(relaxed = true)
-            )
+                personResultat = mockk(relaxed = true),
+            ),
         )
 
         val behandlingDødsfall = kjørStegprosessForBehandling(
@@ -123,7 +123,7 @@ class RevurderingDødsfall(
             fagsakService = fagsakService,
             persongrunnlagService = persongrunnlagService,
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
 
         )
 
@@ -134,7 +134,7 @@ class RevurderingDødsfall(
             restFagsak = restFagsakEtterBehandlingAvsluttet,
             fagsakStatus = FagsakStatus.AVSLUTTET,
             behandlingStegType = StegType.BEHANDLING_AVSLUTTET,
-            aktivBehandlingId = behandlingDødsfall.id
+            aktivBehandlingId = behandlingDødsfall.id,
         )
     }
 
@@ -145,22 +145,22 @@ class RevurderingDødsfall(
                 søker = RestScenarioPerson(
                     fødselsdato = "1982-01-12",
                     fornavn = "Mor",
-                    etternavn = "Søker"
+                    etternavn = "Søker",
                 ),
                 barna = listOf(
                     RestScenarioPerson(
                         fødselsdato = LocalDate.now().minusMonths(2).toString(),
                         fornavn = "Barn",
-                        etternavn = "Barnesen"
-                    )
-                )
-            )
+                        etternavn = "Barnesen",
+                    ),
+                ),
+            ),
         )
 
         behandleFødselshendelse(
             nyBehandlingHendelse = NyBehandlingHendelse(
                 morsIdent = scenario.søker.ident!!,
-                barnasIdenter = listOf(scenario.barna.first().ident!!)
+                barnasIdenter = listOf(scenario.barna.first().ident!!),
             ),
             behandleFødselshendelseTask = behandleFødselshendelseTask,
             fagsakService = fagsakService,
@@ -168,7 +168,7 @@ class RevurderingDødsfall(
             vedtakService = vedtakService,
             stegService = stegService,
             personidentService = personidentService,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
 
         )
 
@@ -185,7 +185,7 @@ class RevurderingDødsfall(
                 behandlingÅrsak = BehandlingÅrsak.DØDSFALL_BRUKER,
                 overstyrendeVilkårsvurdering = lagVilkårsvurderingFraRestScenario(
                     scenario,
-                    overstyrendeVilkårResultater
+                    overstyrendeVilkårResultater,
                 ),
 
                 behandlingstype = BehandlingType.REVURDERING,
@@ -196,7 +196,7 @@ class RevurderingDødsfall(
                 fagsakService = fagsakService,
                 persongrunnlagService = persongrunnlagService,
                 andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
-                brevmalService = brevmalService
+                brevmalService = brevmalService,
 
             )
         }

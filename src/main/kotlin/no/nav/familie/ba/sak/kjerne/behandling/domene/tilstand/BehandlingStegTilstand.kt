@@ -29,7 +29,7 @@ data class BehandlingStegTilstand(
     @SequenceGenerator(
         name = "behandling_steg_tilstand_seq_generator",
         sequenceName = "behandling_steg_tilstand_seq",
-        allocationSize = 50
+        allocationSize = 50,
     )
     val id: Long = 0,
 
@@ -44,7 +44,7 @@ data class BehandlingStegTilstand(
 
     @Enumerated(EnumType.STRING)
     @Column(name = "behandling_steg_status", nullable = false)
-    var behandlingStegStatus: BehandlingStegStatus = BehandlingStegStatus.IKKE_UTFØRT
+    var behandlingStegStatus: BehandlingStegStatus = BehandlingStegStatus.IKKE_UTFØRT,
 ) : BaseEntitet() {
 
     override fun equals(other: Any?): Boolean {

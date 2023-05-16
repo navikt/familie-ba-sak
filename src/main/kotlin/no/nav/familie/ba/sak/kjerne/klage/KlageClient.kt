@@ -16,7 +16,7 @@ import java.net.URI
 @Component
 class KlageClient(
     @Qualifier("jwtBearer") restOperations: RestOperations,
-    @Value("\${FAMILIE_KLAGE_URL}") private val familieKlageUri: URI
+    @Value("\${FAMILIE_KLAGE_URL}") private val familieKlageUri: URI,
 ) : AbstractRestClient(restOperations, "integrasjon") {
     fun opprettKlage(opprettKlagebehandlingRequest: OpprettKlagebehandlingRequest) {
         val uri = UriComponentsBuilder
@@ -27,7 +27,7 @@ class KlageClient(
         return kallEksternTjenesteUtenRespons<Unit>(
             tjeneste = "klage",
             uri = uri,
-            formål = "Opprett klagebehandling"
+            formål = "Opprett klagebehandling",
         ) {
             postForEntity(uri, opprettKlagebehandlingRequest)
         }
@@ -43,7 +43,7 @@ class KlageClient(
         return kallEksternTjenesteRessurs(
             tjeneste = "klage",
             uri = uri,
-            formål = "Hent klagebehandlinger"
+            formål = "Hent klagebehandlinger",
         ) {
             getForEntity(uri)
         }

@@ -79,7 +79,7 @@ class DifferanseberegningsUtilsTest {
     @Test
     fun `Skal håndtere gjentakende endring og differanseberegning på andel tilkjent ytelse`() {
         val aty1 = lagAndelTilkjentYtelse(beløp = 50).oppdaterDifferanseberegning(
-            100.toBigDecimal()
+            100.toBigDecimal(),
         )
 
         Assertions.assertEquals(0, aty1?.kalkulertUtbetalingsbeløp)
@@ -87,7 +87,7 @@ class DifferanseberegningsUtilsTest {
         Assertions.assertEquals(50, aty1?.nasjonaltPeriodebeløp)
 
         val aty2 = aty1?.copy(nasjonaltPeriodebeløp = 1).oppdaterDifferanseberegning(
-            75.toBigDecimal()
+            75.toBigDecimal(),
         )
 
         Assertions.assertEquals(0, aty2?.kalkulertUtbetalingsbeløp)
@@ -95,7 +95,7 @@ class DifferanseberegningsUtilsTest {
         Assertions.assertEquals(1, aty2?.nasjonaltPeriodebeløp)
 
         val aty3 = aty2?.copy(nasjonaltPeriodebeløp = 250).oppdaterDifferanseberegning(
-            75.toBigDecimal()
+            75.toBigDecimal(),
         )
 
         Assertions.assertEquals(175, aty3?.kalkulertUtbetalingsbeløp)
@@ -106,7 +106,7 @@ class DifferanseberegningsUtilsTest {
     @Test
     fun `Skal fjerne desimaler i utenlandskperiodebeløp, effektivt øke den norske ytelsen med inntil én krone`() {
         val aty1 = lagAndelTilkjentYtelse(beløp = 50).oppdaterDifferanseberegning(
-            100.987654.toBigDecimal()
+            100.987654.toBigDecimal(),
         ) // Blir til rundet til 100
 
         Assertions.assertEquals(0, aty1?.kalkulertUtbetalingsbeløp)
@@ -117,7 +117,7 @@ class DifferanseberegningsUtilsTest {
     @Test
     fun `Skal beholde originalt nasjonaltPeriodebeløp når vi oppdatererDifferanseberegning gjentatte ganger`() {
         var aty1 = lagAndelTilkjentYtelse(beløp = 50).oppdaterDifferanseberegning(
-            100.987654.toBigDecimal()
+            100.987654.toBigDecimal(),
         )
 
         Assertions.assertEquals(0, aty1?.kalkulertUtbetalingsbeløp)
@@ -131,12 +131,12 @@ class DifferanseberegningsUtilsTest {
 fun lagAndelTilkjentYtelse(beløp: Int) = lagAndelTilkjentYtelse(
     fom = YearMonth.now(),
     tom = YearMonth.now().plusYears(1),
-    beløp = beløp
+    beløp = beløp,
 )
 
 fun Double.kronerPer(valuta: String) = KronerPerValutaenhet(
     valutakode = valuta,
-    kronerPerValutaenhet = this.toBigDecimal()
+    kronerPerValutaenhet = this.toBigDecimal(),
 )
 
 fun Double.i(valuta: String) = Valutabeløp(this.toBigDecimal(), valuta)
@@ -149,7 +149,7 @@ fun Valutabeløp.somUtenlandskPeriodebeløp(intervall: Intervall): UtenlandskPer
         beløp = this.beløp,
         valutakode = this.valutakode,
         intervall = intervall,
-        kalkulertMånedligBeløp = intervall.konverterBeløpTilMånedlig(this.beløp)
+        kalkulertMånedligBeløp = intervall.konverterBeløpTilMånedlig(this.beløp),
     )
 
 fun Valutabeløp.rundNed(presisjon: Int) =

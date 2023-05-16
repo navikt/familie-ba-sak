@@ -22,11 +22,11 @@ class UtbetalingsperiodeMedBegrunnelserService(
     private val kompetanseRepository: KompetanseRepository,
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
-    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
+    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
 ) {
     fun hentUtbetalingsperioder(
         vedtak: Vedtak,
-        opphørsperioder: List<VedtaksperiodeMedBegrunnelser>
+        opphørsperioder: List<VedtaksperiodeMedBegrunnelser>,
     ): List<VedtaksperiodeMedBegrunnelser> {
         val andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(vedtak.behandling.id)
 
@@ -39,33 +39,33 @@ class UtbetalingsperiodeMedBegrunnelserService(
             vedtak = vedtak,
             personResultater = vilkårsvurdering.personResultater,
             personerIPersongrunnlag = personopplysningGrunnlag.personer.toList(),
-            fagsakType = vedtak.behandling.fagsak.type
+            fagsakType = vedtak.behandling.fagsak.type,
         )
 
         val perioderMedReduksjonFraSistIverksatteBehandling =
             hentReduksjonsperioderFraInnvilgelsesTidspunkt(
                 vedtak = vedtak,
                 utbetalingsperioder = utbetalingsperioder,
-                opphørsperioder = opphørsperioder
+                opphørsperioder = opphørsperioder,
             )
 
         val utbetalingsperioderMedReduksjon =
             oppdaterUtbetalingsperioderMedReduksjonFraForrigeBehandling(
                 utbetalingsperioder = utbetalingsperioder,
-                reduksjonsperioder = perioderMedReduksjonFraSistIverksatteBehandling
+                reduksjonsperioder = perioderMedReduksjonFraSistIverksatteBehandling,
             )
 
         val kompetanser = kompetanseRepository.finnFraBehandlingId(vedtak.behandling.id)
         return splittUtbetalingsperioderPåKompetanser(
             utbetalingsperioder = utbetalingsperioderMedReduksjon,
-            kompetanser = kompetanser.toList()
+            kompetanser = kompetanser.toList(),
         )
     }
 
     fun hentReduksjonsperioderFraInnvilgelsesTidspunkt(
         vedtak: Vedtak,
         utbetalingsperioder: List<VedtaksperiodeMedBegrunnelser>,
-        opphørsperioder: List<VedtaksperiodeMedBegrunnelser>
+        opphørsperioder: List<VedtaksperiodeMedBegrunnelser>,
     ): List<VedtaksperiodeMedBegrunnelser> {
         val behandling = vedtak.behandling
         if (behandling.skalBehandlesAutomatisk) return emptyList()
@@ -92,7 +92,7 @@ class UtbetalingsperiodeMedBegrunnelserService(
             utbetalingsperioder = utbetalingsperioder,
             personopplysningGrunnlag = personopplysningGrunnlag,
             opphørsperioder = opphørsperioder,
-            aktørerIForrigePersonopplysningGrunnlag = forrigePersonopplysningGrunnlag.søkerOgBarn.map { it.aktør }
+            aktørerIForrigePersonopplysningGrunnlag = forrigePersonopplysningGrunnlag.søkerOgBarn.map { it.aktør },
         )
     }
 }

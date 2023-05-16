@@ -18,12 +18,12 @@ import java.time.LocalDate
 @TaskStepBeskrivelse(
     taskStepType = AutobrevTask.TASK_STEP_TYPE,
     beskrivelse = "Opprett oppgaver for sending av autobrev",
-    maxAntallFeil = 1
+    maxAntallFeil = 1,
 )
 class AutobrevTask(
     private val fagsakRepository: FagsakRepository,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    private val opprettTaskService: OpprettTaskService
+    private val opprettTaskService: OpprettTaskService,
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
@@ -38,7 +38,7 @@ class AutobrevTask(
             berørteFagsaker.forEach { fagsak ->
                 opprettTaskService.opprettAutovedtakFor6Og18ÅrBarn(
                     fagsakId = fagsak.id,
-                    alder = alder.toInt()
+                    alder = alder.toInt(),
                 )
             }
         }
@@ -47,13 +47,13 @@ class AutobrevTask(
     private fun opprettTaskerForReduksjonSmåbarnstillegg() {
         val berørteFagsaker = behandlingHentOgPersisterService.partitionByIverksatteBehandlinger {
             fagsakRepository.finnAlleFagsakerMedOpphørSmåbarnstilleggIMåned(
-                iverksatteLøpendeBehandlinger = it
+                iverksatteLøpendeBehandlinger = it,
             )
         }
         logger.info("Oppretter tasker for ${berørteFagsaker.size} fagsaker med opphør av småbarnstillegg.")
         berørteFagsaker.forEach { fagsakId ->
             opprettTaskService.opprettAutovedtakForOpphørSmåbarnstilleggTask(
-                fagsakId = fagsakId
+                fagsakId = fagsakId,
             )
         }
     }
@@ -62,7 +62,7 @@ class AutobrevTask(
         LocalDate.now().minusYears(alder).let {
             fagsakRepository.finnLøpendeFagsakMedBarnMedFødselsdatoInnenfor(
                 it.førsteDagIInneværendeMåned(),
-                it.sisteDagIMåned()
+                it.sisteDagIMåned(),
             )
         }
 

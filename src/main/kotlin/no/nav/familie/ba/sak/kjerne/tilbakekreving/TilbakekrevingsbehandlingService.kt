@@ -17,7 +17,7 @@ class TilbakekrevingsbehandlingService(private val tilbakekrevingKlient: Tilbake
                 type = it.type,
                 status = it.status,
                 resultat = it.resultat,
-                vedtaksdato = it.vedtaksdato
+                vedtaksdato = it.vedtaksdato,
             )
         }
     }

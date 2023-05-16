@@ -18,11 +18,11 @@ class JournalføringUtilsTest {
         assertEquals(
             BehandlingUnderkategori.ORDINÆR,
             lagMockRestJournalføring(
-                bruker = NavnOgIdent("Mock", søkerFnr)
+                bruker = NavnOgIdent("Mock", søkerFnr),
             ).copy(
                 journalpostTittel = "Søknad om ordinær barnetrygd",
-                opprettOgKnyttTilNyBehandling = true
-            ).hentUnderkategori()
+                opprettOgKnyttTilNyBehandling = true,
+            ).hentUnderkategori(),
         )
     }
 
@@ -32,12 +32,12 @@ class JournalføringUtilsTest {
         assertEquals(
             BehandlingUnderkategori.UTVIDET,
             lagMockRestJournalføring(
-                bruker = NavnOgIdent("Mock", søkerFnr)
+                bruker = NavnOgIdent("Mock", søkerFnr),
             ).copy(
                 journalpostTittel = utvidetJournalpostTittel,
                 underkategori = BehandlingUnderkategori.UTVIDET,
-                opprettOgKnyttTilNyBehandling = true
-            ).hentUnderkategori()
+                opprettOgKnyttTilNyBehandling = true,
+            ).hentUnderkategori(),
         )
     }
 
@@ -50,7 +50,7 @@ class JournalføringUtilsTest {
                     journalpostTittel = ordinærJournalpostTittel,
                     kategori = null,
                     underkategori = null,
-                    opprettOgKnyttTilNyBehandling = true
+                    opprettOgKnyttTilNyBehandling = true,
                 ).hentUnderkategori()
         assertEquals(BehandlingUnderkategori.ORDINÆR, underkategori)
     }
@@ -64,7 +64,7 @@ class JournalføringUtilsTest {
                     journalpostTittel = ordinærJournalpostTittel,
                     kategori = null,
                     underkategori = BehandlingUnderkategori.ORDINÆR,
-                    opprettOgKnyttTilNyBehandling = true
+                    opprettOgKnyttTilNyBehandling = true,
                 ).hentUnderkategori()
         assertEquals(BehandlingUnderkategori.ORDINÆR, underkategori)
     }
@@ -78,7 +78,7 @@ class JournalføringUtilsTest {
                     journalpostTittel = utvidetJournalpostTittel,
                     kategori = null,
                     underkategori = null,
-                    opprettOgKnyttTilNyBehandling = true
+                    opprettOgKnyttTilNyBehandling = true,
                 ).hentUnderkategori()
         assertEquals(BehandlingUnderkategori.UTVIDET, underkategori)
     }
@@ -92,7 +92,7 @@ class JournalføringUtilsTest {
                     journalpostTittel = utvidetJournalpostTittel,
                     kategori = null,
                     underkategori = BehandlingUnderkategori.UTVIDET,
-                    opprettOgKnyttTilNyBehandling = true
+                    opprettOgKnyttTilNyBehandling = true,
                 ).hentUnderkategori()
         assertEquals(BehandlingUnderkategori.UTVIDET, underkategori)
     }

@@ -5,7 +5,7 @@ import java.time.LocalDate
 
 data class VarselbrevMedÅrsaker(
     override val mal: Brevmal,
-    override val data: VarselOmRevurderingData
+    override val data: VarselOmRevurderingData,
 ) : Brev {
     constructor(
         mal: Brevmal,
@@ -15,30 +15,30 @@ data class VarselbrevMedÅrsaker(
         enhet: String,
         organisasjonsnummer: String? = null,
         gjelder: String? = null,
-        saksbehandlerNavn: String
+        saksbehandlerNavn: String,
     ) : this(
         mal = mal,
         data = VarselOmRevurderingData(
             delmalData = VarselOmRevurderingData.DelmalData(
                 signatur = SignaturDelmal(
                     enhet = enhet,
-                    saksbehandlerNavn = saksbehandlerNavn
-                )
+                    saksbehandlerNavn = saksbehandlerNavn,
+                ),
             ),
             flettefelter = VarselOmRevurderingData.Flettefelter(
                 navn = navn,
                 fodselsnummer = fødselsnummer,
                 varselÅrsaker = varselÅrsaker,
                 organisasjonsnummer = organisasjonsnummer,
-                gjelder = gjelder
-            )
-        )
+                gjelder = gjelder,
+            ),
+        ),
     )
 }
 
 data class VarselOmRevurderingData(
     override val delmalData: DelmalData,
-    override val flettefelter: Flettefelter
+    override val flettefelter: Flettefelter,
 ) : BrevData {
 
     data class Flettefelter(
@@ -47,7 +47,7 @@ data class VarselOmRevurderingData(
         override val brevOpprettetDato: Flettefelt = flettefelt(LocalDate.now().tilDagMånedÅr()),
         val varselAarsaker: Flettefelt,
         override val organisasjonsnummer: Flettefelt,
-        override val gjelder: Flettefelt
+        override val gjelder: Flettefelt,
     ) : FlettefelterForDokument {
 
         constructor(
@@ -55,17 +55,17 @@ data class VarselOmRevurderingData(
             fodselsnummer: String,
             varselÅrsaker: List<String>,
             organisasjonsnummer: String? = null,
-            gjelder: String? = null
+            gjelder: String? = null,
         ) : this(
             navn = flettefelt(navn),
             fodselsnummer = flettefelt(fodselsnummer),
             varselAarsaker = flettefelt(varselÅrsaker),
             organisasjonsnummer = flettefelt(organisasjonsnummer),
-            gjelder = flettefelt(gjelder)
+            gjelder = flettefelt(gjelder),
         )
     }
 
     data class DelmalData(
-        val signatur: SignaturDelmal
+        val signatur: SignaturDelmal,
     )
 }

@@ -17,12 +17,8 @@ import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonInfo
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
@@ -76,9 +72,6 @@ class UtbetalingsoppdragIntegrasjonTest(
 
     @Autowired
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
-
-    @Autowired
-    private val behandlingRepository: BehandlingRepository,
 ) : AbstractSpringIntegrationTest() {
 
     lateinit var utbetalingsoppdragGenerator: UtbetalingsoppdragGenerator
@@ -87,25 +80,6 @@ class UtbetalingsoppdragIntegrasjonTest(
     fun setUp() {
         databaseCleanupService.truncate()
         utbetalingsoppdragGenerator = UtbetalingsoppdragGenerator(beregningService)
-    }
-
-    @Test
-    fun abc() {
-        val tilfeldigPerson = tilfeldigPerson()
-        val fagsak =
-            fagsakService.hentEllerOpprettFagsakForPersonIdent(tilfeldigPerson.aktør.aktivFødselsnummer())
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        val behandling2 = Behandling(
-            fagsak = fagsak,
-            opprettetÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
-            type = BehandlingType.REVURDERING,
-            kategori = BehandlingKategori.NASJONAL,
-            underkategori = BehandlingUnderkategori.ORDINÆR,
-            skalBehandlesAutomatisk = false,
-        )
-            .initBehandlingStegTilstand()
-        val save = behandlingRepository.save(behandling2)
-        println()
     }
 
     @Test

@@ -7,5 +7,5 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
  */
 data class IdentOgYtelse(
     val ident: String,
-    val type: YtelseType
+    val type: YtelseType,
 )

@@ -13,7 +13,7 @@ import java.net.URI
 data class SanityBegrunnelserRespons(
     val ms: Int,
     val query: String,
-    val result: List<RestSanityBegrunnelse>
+    val result: List<RestSanityBegrunnelse>,
 )
 
 const val sanityBaseUrl = "https://xsrv1mh6.api.sanity.io/v2021-06-07/data/query"
@@ -28,7 +28,7 @@ fun hentBegrunnelser(datasett: String = "ba-brev"): List<SanityBegrunnelse> {
         kallEksternTjeneste(
             tjeneste = "Sanity",
             uri = uri,
-            formål = "Henter begrunnelser fra sanity"
+            formål = "Henter begrunnelser fra sanity",
         ) {
             restTemplate.getForEntity<SanityBegrunnelserRespons>(uri).body?.result
                 ?: throw Feil("Klarer ikke å hente begrunnelser fra sanity")
@@ -40,7 +40,7 @@ fun hentBegrunnelser(datasett: String = "ba-brev"): List<SanityBegrunnelse> {
 data class SanityEØSBegrunnelserRespons(
     val ms: Int,
     val query: String,
-    val result: List<RestSanityEØSBegrunnelse>
+    val result: List<RestSanityEØSBegrunnelse>,
 )
 
 fun hentEØSBegrunnelser(datasett: String = "ba-brev"): List<SanityEØSBegrunnelse> {
@@ -52,7 +52,7 @@ fun hentEØSBegrunnelser(datasett: String = "ba-brev"): List<SanityEØSBegrunnel
     return kallEksternTjeneste(
         tjeneste = "Sanity",
         uri = uri,
-        formål = "Henter EØS-begrunnelser fra sanity"
+        formål = "Henter EØS-begrunnelser fra sanity",
     ) {
         restTemplate.getForEntity<SanityEØSBegrunnelserRespons>(uri).body?.result
             ?.mapNotNull { it.tilSanityEØSBegrunnelse() }

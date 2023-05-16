@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 open class PdlBaseResponse<T>(
     val data: T,
     open val errors: List<PdlError>?,
-    open val extensions: PdlExtensions?
+    open val extensions: PdlExtensions?,
 ) {
 
     fun harFeil(): Boolean {
@@ -23,7 +23,7 @@ open class PdlBaseResponse<T>(
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class PdlError(
     val message: String,
-    val extensions: PdlErrorExtensions?
+    val extensions: PdlErrorExtensions?,
 )
 
 data class PdlErrorExtensions(val code: String?) {

@@ -23,33 +23,34 @@ import java.time.LocalDate
 
 enum class Vilkår(
     val beskrivelse: String,
-    val harRegelverk: Boolean
+    val harRegelverk: Boolean,
 ) {
 
     UNDER_18_ÅR(
         beskrivelse = "Er under 18 år",
-        harRegelverk = false
+        harRegelverk = false,
     ),
     BOR_MED_SØKER(
         beskrivelse = "Bor med søker",
-        harRegelverk = true
+        harRegelverk = true,
     ),
     GIFT_PARTNERSKAP(
         beskrivelse = "Gift/partnerskap",
-        harRegelverk = false
+        harRegelverk = false,
     ),
     BOSATT_I_RIKET(
         beskrivelse = "Bosatt i riket",
-        harRegelverk = true
+        harRegelverk = true,
     ),
     LOVLIG_OPPHOLD(
         beskrivelse = "Lovlig opphold",
-        harRegelverk = true
+        harRegelverk = true,
     ),
     UTVIDET_BARNETRYGD(
         beskrivelse = "Utvidet barnetrygd",
-        harRegelverk = false
-    );
+        harRegelverk = false,
+    ),
+    ;
 
     override fun toString(): String {
         return this.name
@@ -58,7 +59,7 @@ enum class Vilkår(
     companion object {
 
         fun hentOrdinæreVilkårFor(
-            personType: PersonType
+            personType: PersonType,
         ): List<Vilkår> = when (personType) {
             SØKER -> listOf(BOSATT_I_RIKET, LOVLIG_OPPHOLD)
             ANNENPART -> throw Feil("Ikke implementert for $ANNENPART")
@@ -68,7 +69,7 @@ enum class Vilkår(
         fun hentVilkårFor(
             personType: PersonType,
             fagsakType: FagsakType,
-            behandlingUnderkategori: BehandlingUnderkategori
+            behandlingUnderkategori: BehandlingUnderkategori,
         ): Set<Vilkår> {
             return when (fagsakType) {
                 FagsakType.NORMAL -> when (personType) {
@@ -93,7 +94,7 @@ enum class Vilkår(
                 BOR_MED_SØKER,
                 GIFT_PARTNERSKAP,
                 BOSATT_I_RIKET,
-                LOVLIG_OPPHOLD
+                LOVLIG_OPPHOLD,
             )
         }
     }
@@ -115,48 +116,48 @@ enum class Vilkår(
     fun vurderVilkår(
         person: Person,
         vurderFra: LocalDate = LocalDate.now(),
-        annenForelder: Person? = null
+        annenForelder: Person? = null,
     ): AutomatiskVurdering {
         val vilkårsregel = when (this) {
             UNDER_18_ÅR -> VurderBarnErUnder18(
-                alder = person.hentAlder()
+                alder = person.hentAlder(),
             )
 
             BOR_MED_SØKER -> VurderBarnErBosattMedSøker(
                 søkerAdresser = person.personopplysningGrunnlag.søker.bostedsadresser,
-                barnAdresser = person.bostedsadresser
+                barnAdresser = person.bostedsadresser,
             )
 
             GIFT_PARTNERSKAP -> VurderBarnErUgift(
-                sivilstander = person.sivilstander
+                sivilstander = person.sivilstander,
             )
 
             BOSATT_I_RIKET -> VurderPersonErBosattIRiket(
                 adresser = person.bostedsadresser,
-                vurderFra = vurderFra
+                vurderFra = vurderFra,
             )
 
             LOVLIG_OPPHOLD -> if (person.type == BARN) {
                 VurderBarnHarLovligOpphold(
-                    aktør = person.aktør
+                    aktør = person.aktør,
                 )
             } else {
                 VurderPersonHarLovligOpphold(
                     morLovligOppholdFaktaEØS = LovligOppholdFaktaEØS(
                         arbeidsforhold = person.arbeidsforhold,
                         bostedsadresser = person.bostedsadresser,
-                        statsborgerskap = person.statsborgerskap
+                        statsborgerskap = person.statsborgerskap,
                     ),
                     annenForelderLovligOppholdFaktaEØS = if (annenForelder != null) {
                         LovligOppholdFaktaEØS(
                             arbeidsforhold = annenForelder.arbeidsforhold,
                             bostedsadresser = annenForelder.bostedsadresser,
-                            statsborgerskap = annenForelder.statsborgerskap
+                            statsborgerskap = annenForelder.statsborgerskap,
                         )
                     } else {
                         null
                     },
-                    opphold = person.opphold
+                    opphold = person.opphold,
                 )
             }
 
@@ -165,7 +166,7 @@ enum class Vilkår(
 
         return AutomatiskVurdering(
             evaluering = vilkårsregel.vurder(),
-            regelInput = vilkårsregel.convertDataClassToJson()
+            regelInput = vilkårsregel.convertDataClassToJson(),
         )
     }
 }
@@ -173,12 +174,12 @@ enum class Vilkår(
 data class AutomatiskVurdering(
     val regelInput: String,
     val evaluering: Evaluering,
-    val resultat: Resultat = evaluering.resultat
+    val resultat: Resultat = evaluering.resultat,
 )
 
 data class GyldigVilkårsperiode(
     val gyldigFom: LocalDate = LocalDate.MIN,
-    val gyldigTom: LocalDate = LocalDate.MAX
+    val gyldigTom: LocalDate = LocalDate.MAX,
 ) {
 
     fun gyldigFor(dato: LocalDate): Boolean {

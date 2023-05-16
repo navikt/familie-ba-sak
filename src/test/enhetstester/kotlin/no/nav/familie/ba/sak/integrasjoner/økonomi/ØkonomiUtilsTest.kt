@@ -27,16 +27,16 @@ internal class ØkonomiUtilsTest {
                     årMnd("2025-01"),
                     SMÅBARNSTILLEGG,
                     1054,
-                    person = person
+                    person = person,
                 ),
                 lagAndelTilkjentYtelse(
                     årMnd("2027-10"),
                     årMnd("2028-01"),
                     ORDINÆR_BARNETRYGD,
                     1054,
-                    person = person
-                )
-            ).forIverksetting()
+                    person = person,
+                ),
+            ).forIverksetting(),
         )
 
         assertEquals(2, kjederBehandling.size)
@@ -54,30 +54,30 @@ internal class ØkonomiUtilsTest {
                     årMnd("2020-01"),
                     ORDINÆR_BARNETRYGD,
                     1054,
-                    person = person
+                    person = person,
                 ),
                 lagAndelTilkjentYtelse(
                     årMnd("2022-01"),
                     årMnd("2023-01"),
                     ORDINÆR_BARNETRYGD,
                     1054,
-                    person = person
+                    person = person,
                 ),
                 lagAndelTilkjentYtelse(
                     årMnd("2019-04"),
                     årMnd("2020-01"),
                     ORDINÆR_BARNETRYGD,
                     1054,
-                    person = person2
+                    person = person2,
                 ),
                 lagAndelTilkjentYtelse(
                     årMnd("2022-01"),
                     årMnd("2023-01"),
                     ORDINÆR_BARNETRYGD,
                     1054,
-                    person = person2
-                )
-            ).forIverksetting()
+                    person = person2,
+                ),
+            ).forIverksetting(),
         )
         val kjederBehandling2 = grupperAndeler(
             listOf(
@@ -86,30 +86,30 @@ internal class ØkonomiUtilsTest {
                     årMnd("2020-01"),
                     ORDINÆR_BARNETRYGD,
                     1054,
-                    person = person
+                    person = person,
                 ),
                 lagAndelTilkjentYtelse(
                     årMnd("2022-01"),
                     årMnd("2022-10"),
                     ORDINÆR_BARNETRYGD,
                     1054,
-                    person = person
+                    person = person,
                 ),
                 lagAndelTilkjentYtelse(
                     årMnd("2019-04"),
                     årMnd("2020-01"),
                     ORDINÆR_BARNETRYGD,
                     1054,
-                    person = person2
+                    person = person2,
                 ),
                 lagAndelTilkjentYtelse(
                     årMnd("2022-01"),
                     årMnd("2023-01"),
                     ORDINÆR_BARNETRYGD,
                     1054,
-                    person = person2
-                )
-            ).forIverksetting()
+                    person = person2,
+                ),
+            ).forIverksetting(),
         )
 
         val sisteBeståendePerKjede =
@@ -131,16 +131,16 @@ internal class ØkonomiUtilsTest {
                     årMnd("2020-01"),
                     ORDINÆR_BARNETRYGD,
                     1054,
-                    person = person
+                    person = person,
                 ),
                 lagAndelTilkjentYtelse(
                     årMnd("2022-01"),
                     årMnd("2023-01"),
                     ORDINÆR_BARNETRYGD,
                     1054,
-                    person = person
-                )
-            ).forIverksetting()
+                    person = person,
+                ),
+            ).forIverksetting(),
         )
         val kjederBehandling2 = grupperAndeler(
             listOf(
@@ -149,16 +149,16 @@ internal class ØkonomiUtilsTest {
                     årMnd("2020-01"),
                     ORDINÆR_BARNETRYGD,
                     1054,
-                    person = person
+                    person = person,
                 ),
                 lagAndelTilkjentYtelse(
                     årMnd("2022-01"),
                     årMnd("2023-01"),
                     ORDINÆR_BARNETRYGD,
                     1054,
-                    person = person
-                )
-            ).forIverksetting()
+                    person = person,
+                ),
+            ).forIverksetting(),
         )
 
         val sisteBeståendePerKjede =
@@ -176,16 +176,16 @@ internal class ØkonomiUtilsTest {
                     årMnd("2025-01"),
                     ORDINÆR_BARNETRYGD,
                     1054,
-                    person = person
+                    person = person,
                 ),
                 lagAndelTilkjentYtelse(
                     årMnd("2027-10"),
                     årMnd("2028-01"),
                     ORDINÆR_BARNETRYGD,
                     1054,
-                    person = person
-                )
-            ).forIverksetting()
+                    person = person,
+                ),
+            ).forIverksetting(),
         )
 
         val sisteBeståendePerKjede =
@@ -204,16 +204,16 @@ internal class ØkonomiUtilsTest {
                     årMnd("2025-01"),
                     ORDINÆR_BARNETRYGD,
                     1054,
-                    person = person
+                    person = person,
                 ),
                 lagAndelTilkjentYtelse(
                     årMnd("2027-10"),
                     årMnd("2028-01"),
                     ORDINÆR_BARNETRYGD,
                     1054,
-                    person = person
-                )
-            ).forIverksetting()
+                    person = person,
+                ),
+            ).forIverksetting(),
         )
 
         val sisteBeståendePerKjede =
@@ -236,7 +236,7 @@ internal class ØkonomiUtilsTest {
                     ORDINÆR_BARNETRYGD,
                     1054,
                     person = person,
-                    aktør = person.aktør
+                    aktør = person.aktør,
                 ),
                 lagAndelTilkjentYtelse(
                     årMnd(datoSomSkalOppdateres),
@@ -244,7 +244,7 @@ internal class ØkonomiUtilsTest {
                     ORDINÆR_BARNETRYGD,
                     1054,
                     person = person,
-                    aktør = person.aktør
+                    aktør = person.aktør,
                 ),
                 lagAndelTilkjentYtelse(
                     årMnd("2025-04"),
@@ -252,9 +252,9 @@ internal class ØkonomiUtilsTest {
                     ORDINÆR_BARNETRYGD,
                     1054,
                     person = person,
-                    aktør = person.aktør
-                )
-            ).forIverksetting()
+                    aktør = person.aktør,
+                ),
+            ).forIverksetting(),
         )
         val kjederBehandling2 = grupperAndeler(
             listOf(
@@ -264,7 +264,7 @@ internal class ØkonomiUtilsTest {
                     ORDINÆR_BARNETRYGD,
                     1054,
                     person = person,
-                    aktør = person.aktør
+                    aktør = person.aktør,
                 ),
                 lagAndelTilkjentYtelse(
                     årMnd(datoSomErOppdatert),
@@ -272,7 +272,7 @@ internal class ØkonomiUtilsTest {
                     ORDINÆR_BARNETRYGD,
                     1054,
                     person = person,
-                    aktør = person.aktør
+                    aktør = person.aktør,
                 ),
                 lagAndelTilkjentYtelse(
                     årMnd("2025-04"),
@@ -280,25 +280,25 @@ internal class ØkonomiUtilsTest {
                     ORDINÆR_BARNETRYGD,
                     1054,
                     person = person,
-                    aktør = person.aktør
-                )
-            ).forIverksetting()
+                    aktør = person.aktør,
+                ),
+            ).forIverksetting(),
         )
 
         val sisteBeståendePerKjede =
             sisteBeståendeAndelPerKjede(
                 forrigeKjeder = kjederBehandling1,
-                oppdaterteKjeder = kjederBehandling2
+                oppdaterteKjeder = kjederBehandling2,
             )
         val andelerTilOpprettelse =
             andelerTilOpprettelse(
                 oppdaterteKjeder = kjederBehandling2,
-                sisteBeståendeAndelIHverKjede = sisteBeståendePerKjede
+                sisteBeståendeAndelIHverKjede = sisteBeståendePerKjede,
             )
         val andelerTilOpphørMedDato =
             andelerTilOpphørMedDato(
                 forrigeKjeder = kjederBehandling1,
-                sisteBeståendeAndelIHverKjede = sisteBeståendePerKjede
+                sisteBeståendeAndelIHverKjede = sisteBeståendePerKjede,
             )
 
         assertEquals(1, andelerTilOpprettelse.size)
@@ -320,7 +320,7 @@ internal class ØkonomiUtilsTest {
                     ORDINÆR_BARNETRYGD,
                     1054,
                     person = førsteBarn,
-                    aktør = førsteBarn.aktør
+                    aktør = førsteBarn.aktør,
                 ),
                 lagAndelTilkjentYtelse(
                     årMnd("2020-02"),
@@ -328,7 +328,7 @@ internal class ØkonomiUtilsTest {
                     ORDINÆR_BARNETRYGD,
                     1345,
                     person = førsteBarn,
-                    aktør = førsteBarn.aktør
+                    aktør = førsteBarn.aktør,
                 ),
                 lagAndelTilkjentYtelse(
                     årMnd("2023-02"),
@@ -336,9 +336,9 @@ internal class ØkonomiUtilsTest {
                     ORDINÆR_BARNETRYGD,
                     1654,
                     person = førsteBarn,
-                    aktør = førsteBarn.aktør
-                )
-            ).forIverksetting()
+                    aktør = førsteBarn.aktør,
+                ),
+            ).forIverksetting(),
         )
         val kjederBehandling2 = grupperAndeler(
             listOf(
@@ -348,7 +348,7 @@ internal class ØkonomiUtilsTest {
                     ORDINÆR_BARNETRYGD,
                     1054,
                     person = andreBarn,
-                    aktør = andreBarn.aktør
+                    aktør = andreBarn.aktør,
                 ),
                 lagAndelTilkjentYtelse(
                     årMnd("2021-02"),
@@ -356,7 +356,7 @@ internal class ØkonomiUtilsTest {
                     ORDINÆR_BARNETRYGD,
                     1054,
                     person = andreBarn,
-                    aktør = andreBarn.aktør
+                    aktør = andreBarn.aktør,
                 ),
                 lagAndelTilkjentYtelse(
                     årMnd("2025-04"),
@@ -364,25 +364,25 @@ internal class ØkonomiUtilsTest {
                     ORDINÆR_BARNETRYGD,
                     1054,
                     person = andreBarn,
-                    aktør = andreBarn.aktør
-                )
-            ).forIverksetting()
+                    aktør = andreBarn.aktør,
+                ),
+            ).forIverksetting(),
         )
 
         val sisteBeståendePerKjede =
             sisteBeståendeAndelPerKjede(
                 forrigeKjeder = kjederBehandling1,
-                oppdaterteKjeder = kjederBehandling2
+                oppdaterteKjeder = kjederBehandling2,
             )
         val andelerTilOpprettelse =
             andelerTilOpprettelse(
                 oppdaterteKjeder = kjederBehandling2,
-                sisteBeståendeAndelIHverKjede = sisteBeståendePerKjede
+                sisteBeståendeAndelIHverKjede = sisteBeståendePerKjede,
             )
         val andelerTilOpphørMedDato =
             andelerTilOpphørMedDato(
                 forrigeKjeder = kjederBehandling1,
-                sisteBeståendeAndelIHverKjede = sisteBeståendePerKjede
+                sisteBeståendeAndelIHverKjede = sisteBeståendePerKjede,
             )
 
         assertEquals(1, andelerTilOpphørMedDato.size)
@@ -406,9 +406,9 @@ internal class ØkonomiUtilsTest {
                     årMnd("2020-01"),
                     ORDINÆR_BARNETRYGD,
                     1054,
-                    person = person
-                )
-            ).forIverksetting()
+                    person = person,
+                ),
+            ).forIverksetting(),
         )
         val kjederBehandling2 = grupperAndeler(
             listOf(
@@ -417,39 +417,39 @@ internal class ØkonomiUtilsTest {
                     årMnd("2019-06"),
                     ORDINÆR_BARNETRYGD,
                     1054,
-                    person = person
+                    person = person,
                 ),
                 lagAndelTilkjentYtelse(
                     årMnd("2022-01"),
                     årMnd("2023-01"),
                     ORDINÆR_BARNETRYGD,
                     1054,
-                    person = person
+                    person = person,
                 ),
                 lagAndelTilkjentYtelse(
                     årMnd("2019-04"),
                     årMnd("2020-01"),
                     SMÅBARNSTILLEGG,
                     1054,
-                    person = person
-                )
-            ).forIverksetting()
+                    person = person,
+                ),
+            ).forIverksetting(),
         )
 
         val sisteBeståendePerKjede =
             sisteBeståendeAndelPerKjede(
                 forrigeKjeder = kjederBehandling1,
-                oppdaterteKjeder = kjederBehandling2
+                oppdaterteKjeder = kjederBehandling2,
             )
         val andelerTilOpprettelse =
             andelerTilOpprettelse(
                 oppdaterteKjeder = kjederBehandling2,
-                sisteBeståendeAndelIHverKjede = sisteBeståendePerKjede
+                sisteBeståendeAndelIHverKjede = sisteBeståendePerKjede,
             )
         val andelerTilOpphørMedDato =
             andelerTilOpphørMedDato(
                 forrigeKjeder = kjederBehandling1,
-                sisteBeståendeAndelIHverKjede = sisteBeståendePerKjede
+                sisteBeståendeAndelIHverKjede = sisteBeståendePerKjede,
             )
 
         assertEquals(2, andelerTilOpprettelse.size)
@@ -471,7 +471,7 @@ internal class ØkonomiUtilsTest {
                     1054,
                     periodeIdOffset = 1,
                     forrigeperiodeIdOffset = 0,
-                    person = person
+                    person = person,
                 ),
                 lagAndelTilkjentYtelse(
                     årMnd("2019-04"),
@@ -480,9 +480,9 @@ internal class ØkonomiUtilsTest {
                     1054,
                     periodeIdOffset = 3,
                     forrigeperiodeIdOffset = 2,
-                    person = person2
-                )
-            ).forIverksetting()
+                    person = person2,
+                ),
+            ).forIverksetting(),
         )
         val kjederBehandling2 = grupperAndeler(
             listOf(
@@ -491,22 +491,22 @@ internal class ØkonomiUtilsTest {
                     årMnd("2020-01"),
                     ORDINÆR_BARNETRYGD,
                     1054,
-                    person = person
+                    person = person,
                 ),
                 lagAndelTilkjentYtelse(
                     årMnd("2019-12"),
                     årMnd("2020-01"),
                     ORDINÆR_BARNETRYGD,
                     1054,
-                    person = person2
-                )
-            ).forIverksetting()
+                    person = person2,
+                ),
+            ).forIverksetting(),
         )
 
         val oppdaterte =
             oppdaterBeståendeAndelerMedOffset(
                 forrigeKjeder = kjederBehandling1,
-                oppdaterteKjeder = kjederBehandling2
+                oppdaterteKjeder = kjederBehandling2,
             )
 
         val identOgYtelse = IdentOgYtelse(person.aktør.aktivFødselsnummer(), ORDINÆR_BARNETRYGD)

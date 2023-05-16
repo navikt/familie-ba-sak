@@ -43,7 +43,7 @@ class TestVerktøyController(
     private val simuleringService: SimuleringService,
     private val opprettTaskService: OpprettTaskService,
     private val satskjøringRepository: SatskjøringRepository,
-    private val taskService: TaskService
+    private val taskService: TaskService,
 
 ) {
 
@@ -77,7 +77,7 @@ class TestVerktøyController(
             val aktør = personidentService.hentAktør(personIdent.ident)
             val melding = autovedtakStegService.kjørBehandlingSmåbarnstillegg(
                 mottakersAktør = aktør,
-                behandlingsdata = aktør
+                behandlingsdata = aktør,
             )
             ResponseEntity.ok(Ressurs.success(melding))
         } else {

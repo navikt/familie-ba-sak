@@ -20,17 +20,17 @@ data class MinimertRestEndretAndel(
     val personIdent: String,
     val årsak: Årsak,
     val søknadstidspunkt: LocalDate,
-    val avtaletidspunktDeltBosted: LocalDate?
+    val avtaletidspunktDeltBosted: LocalDate?,
 ) {
     fun erOverlappendeMed(nullableMånedPeriode: NullableMånedPeriode): Boolean {
         return MånedPeriode(
             this.periode.fom,
-            this.periode.tom
+            this.periode.tom,
         ).overlapperHeltEllerDelvisMed(
             MånedPeriode(
                 nullableMånedPeriode.fom ?: TIDENES_MORGEN.toYearMonth(),
-                nullableMånedPeriode.tom ?: TIDENES_ENDE.toYearMonth()
-            )
+                nullableMånedPeriode.tom ?: TIDENES_ENDE.toYearMonth(),
+            ),
         )
     }
 }
@@ -42,24 +42,24 @@ fun EndretUtbetalingAndelMedAndelerTilkjentYtelse.tilMinimertRestEndretUtbetalin
     periode = this.periode,
     personIdent = this.person?.aktør?.aktivFødselsnummer() ?: throw Feil(
         "Har ikke ident på endretUtbetalingsandel ${this.id} " +
-            "ved konvertering til minimertRestEndretUtbetalingsandel"
+            "ved konvertering til minimertRestEndretUtbetalingsandel",
     ),
     årsak = this.årsak ?: throw Feil(
         "Har ikke årsak på endretUtbetalingsandel ${this.id} " +
-            "ved konvertering til minimertRestEndretUtbetalingsandel"
+            "ved konvertering til minimertRestEndretUtbetalingsandel",
     ),
     søknadstidspunkt = this.søknadstidspunkt ?: throw Feil(
         "Har ikke søknadstidspunk på endretUtbetalingsandel  ${this.id} " +
-            "ved konvertering til minimertRestEndretUtbetalingsandel"
+            "ved konvertering til minimertRestEndretUtbetalingsandel",
     ),
     avtaletidspunktDeltBosted = this.avtaletidspunktDeltBosted ?: (
         if (this.årsakErDeltBosted()) {
             throw Feil(
                 "Har ikke avtaletidspunktDeltBosted på endretUtbetalingsandel  ${this.id} " +
-                    "ved konvertering til minimertRestEndretUtbetalingsandel"
+                    "ved konvertering til minimertRestEndretUtbetalingsandel",
             )
         } else {
             null
         }
-        )
+        ),
 )

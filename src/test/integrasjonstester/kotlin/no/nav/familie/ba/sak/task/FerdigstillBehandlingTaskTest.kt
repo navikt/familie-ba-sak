@@ -86,7 +86,7 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
 
         )
 
@@ -98,11 +98,11 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
 
             behandlingService.oppdaterStatusPåBehandling(
                 behandlingEtterVilkårsvurdering.id,
-                BehandlingStatus.IVERKSETTER_VEDTAK
+                BehandlingStatus.IVERKSETTER_VEDTAK,
             )
             behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(
                 behandlingId = behandlingEtterVilkårsvurdering.id,
-                steg = StegType.FERDIGSTILLE_BEHANDLING
+                steg = StegType.FERDIGSTILLE_BEHANDLING,
             )
         } else {
             behandling
@@ -120,9 +120,9 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
             FagsakStatus.AVSLUTTET.name,
             saksstatistikkMellomlagringRepository.findByTypeAndTypeId(
                 SaksstatistikkMellomlagringType.BEHANDLING,
-                ferdigstiltBehandling.id
+                ferdigstiltBehandling.id,
             )
-                .last().jsonToBehandlingDVH().behandlingStatus
+                .last().jsonToBehandlingDVH().behandlingStatus,
         )
 
         val ferdigstiltFagsak = ferdigstiltBehandling.fagsak
@@ -132,9 +132,9 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
             FagsakStatus.LØPENDE.name,
             saksstatistikkMellomlagringRepository.findByTypeAndTypeId(
                 SaksstatistikkMellomlagringType.SAK,
-                ferdigstiltFagsak.id
+                ferdigstiltFagsak.id,
             )
-                .last().jsonToSakDVH().sakStatus
+                .last().jsonToSakDVH().sakStatus,
         )
     }
 
@@ -151,9 +151,9 @@ class FerdigstillBehandlingTaskTest : AbstractSpringIntegrationTest() {
             FagsakStatus.AVSLUTTET.name,
             saksstatistikkMellomlagringRepository.findByTypeAndTypeId(
                 SaksstatistikkMellomlagringType.SAK,
-                ferdigstiltFagsak.id
+                ferdigstiltFagsak.id,
             )
-                .last().jsonToSakDVH().sakStatus
+                .last().jsonToSakDVH().sakStatus,
         )
     }
 }

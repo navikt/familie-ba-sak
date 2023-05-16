@@ -55,7 +55,7 @@ class MigreringServiceTest() {
             mockk(),
             mockPersongrunnlagService,
             mockk(),
-            mockk()
+            mockk(),
         ) // => env.erDev() = env.erE2E() = false
     }
 
@@ -83,7 +83,7 @@ class MigreringServiceTest() {
         LocalDate.now().run {
             val kjøredato = this.plusDays(1)
             assertThat(virkningsdatoFra.invoke(migreringServiceMock, kjøredato)).isEqualTo(
-                this.førsteDagIInneværendeMåned().minusMonths(1)
+                this.førsteDagIInneværendeMåned().minusMonths(1),
             )
         }
     }
@@ -99,8 +99,8 @@ class MigreringServiceTest() {
                 assertThat(
                     virkningsdatoFra.invoke(
                         migreringServiceMock,
-                        kjøredato
-                    )
+                        kjøredato,
+                    ),
                 ).isEqualTo(this.førsteDagIInneværendeMåned())
             }
         }
@@ -114,7 +114,7 @@ class MigreringServiceTest() {
         every { mockPersonidentService.hentIdenter(historiskFnr, true) } returns listOf(
             IdentInformasjon(aktivFnr, false, "FOLKEREGISTERIDENT"),
             IdentInformasjon(historiskFnr, true, "FOLKEREGISTERIDENT"),
-            IdentInformasjon("112244", false, "AKTOERID")
+            IdentInformasjon("112244", false, "AKTOERID"),
         )
 
         assertThatThrownBy {
@@ -130,15 +130,15 @@ class MigreringServiceTest() {
             LocalDate.of(
                 2022,
                 Month.NOVEMBER,
-                17
-            )
+                17,
+            ),
         )
         assertThat(migreringServiceMock.infotrygdKjøredato(YearMonth.of(2023, Month.SEPTEMBER))).isEqualTo(
             LocalDate.of(
                 2023,
                 Month.SEPTEMBER,
-                18
-            )
+                18,
+            ),
         )
         assertThrows<KanIkkeMigrereException> { migreringServiceMock.infotrygdKjøredato(YearMonth.now().plusYears(2)) }
     }
@@ -158,20 +158,20 @@ class MigreringServiceTest() {
         every { mockPersongrunnlagService.hentBarna(behandling) } returns listOf(
             lagPerson(
                 PersonIdent(
-                    barnetsAktiveIdent
-                )
-            )
+                    barnetsAktiveIdent,
+                ),
+            ),
         )
 
         every { mockPersonidentService.hentIdenter(barnetsAktiveIdent, false) } returns listOf(
-            IdentInformasjon(barnetsAktiveIdent, false, "FOLKEREGISTERIDENT")
+            IdentInformasjon(barnetsAktiveIdent, false, "FOLKEREGISTERIDENT"),
         )
         every { mockPersonidentService.hentIdenter(barnetsHistoriskeIdent, true) } returns listOf(
             IdentInformasjon(barnetsAktiveIdent, false, "FOLKEREGISTERIDENT"),
-            IdentInformasjon(barnetsHistoriskeIdent, true, "FOLKEREGISTERIDENT")
+            IdentInformasjon(barnetsHistoriskeIdent, true, "FOLKEREGISTERIDENT"),
         )
         every { mockPersonidentService.hentIdenter(barnetsHistoriskeIdent, false) } returns listOf(
-            IdentInformasjon(barnetsAktiveIdent, false, "FOLKEREGISTERIDENT")
+            IdentInformasjon(barnetsAktiveIdent, false, "FOLKEREGISTERIDENT"),
         )
 
         migreringServiceMock.sammenlingBarnInfotrygdMedBarnBAsak(behandling, listOf(barnetsHistoriskeIdent), "123")
@@ -187,32 +187,32 @@ class MigreringServiceTest() {
         every { mockPersongrunnlagService.hentBarna(behandling) } returns listOf(
             lagPerson(
                 PersonIdent(
-                    barn1AktivIdent
-                )
+                    barn1AktivIdent,
+                ),
             ),
             lagPerson(
                 PersonIdent(
-                    barn2AktivIdent
-                )
-            )
+                    barn2AktivIdent,
+                ),
+            ),
         )
 
         every { mockPersonidentService.hentIdenter(barn1AktivIdent, true) } returns listOf(
-            IdentInformasjon(barn1AktivIdent, false, "FOLKEREGISTERIDENT")
+            IdentInformasjon(barn1AktivIdent, false, "FOLKEREGISTERIDENT"),
         )
 
         every { mockPersonidentService.hentIdenter(barn2historiskIdent, true) } returns listOf(
             IdentInformasjon(barn2AktivIdent, false, "FOLKEREGISTERIDENT"),
-            IdentInformasjon(barn2historiskIdent, true, "FOLKEREGISTERIDENT")
+            IdentInformasjon(barn2historiskIdent, true, "FOLKEREGISTERIDENT"),
         )
         every { mockPersonidentService.hentIdenter(barn2historiskIdent, false) } returns listOf(
-            IdentInformasjon(barn2AktivIdent, false, "FOLKEREGISTERIDENT")
+            IdentInformasjon(barn2AktivIdent, false, "FOLKEREGISTERIDENT"),
         )
 
         migreringServiceMock.sammenlingBarnInfotrygdMedBarnBAsak(
             behandling,
             listOf(barn1AktivIdent, barn2historiskIdent),
-            "123"
+            "123",
         )
     }
 
@@ -227,17 +227,17 @@ class MigreringServiceTest() {
         every { mockPersongrunnlagService.hentBarna(behandling) } returns listOf(
             lagPerson(
                 PersonIdent(
-                    aktivIdentPåBaSak
-                )
-            )
+                    aktivIdentPåBaSak,
+                ),
+            ),
         )
 
         every { mockPersonidentService.hentIdenter(barnetsHistoriskeIdent, false) } returns listOf(
-            IdentInformasjon(barnetsAktiveIdent, false, "FOLKEREGISTERIDENT")
+            IdentInformasjon(barnetsAktiveIdent, false, "FOLKEREGISTERIDENT"),
         )
         every { mockPersonidentService.hentIdenter(barnetsHistoriskeIdent, true) } returns listOf(
             IdentInformasjon(barnetsAktiveIdent, false, "FOLKEREGISTERIDENT"),
-            IdentInformasjon(barnetsHistoriskeIdent, true, "FOLKEREGISTERIDENT")
+            IdentInformasjon(barnetsHistoriskeIdent, true, "FOLKEREGISTERIDENT"),
         )
 
         assertThat(
@@ -245,9 +245,9 @@ class MigreringServiceTest() {
                 migreringServiceMock.sammenlingBarnInfotrygdMedBarnBAsak(
                     behandling,
                     listOf(barnetsHistoriskeIdent),
-                    "123"
+                    "123",
                 )
-            }.feiltype
+            }.feiltype,
         ).isEqualTo(MigreringsfeilType.DIFF_BARN_INFOTRYGD_OG_BA_SAK)
     }
 }

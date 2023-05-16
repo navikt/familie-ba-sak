@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class BrevmalService(
-    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
+    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
 ) {
 
     fun hentBrevmal(behandling: Behandling): Brevmal =
@@ -37,7 +37,7 @@ class BrevmalService(
     }
 
     fun hentManuellVedtaksbrevtype(
-        behandling: Behandling
+        behandling: Behandling,
     ): Brevmal {
         val behandlingType = behandling.type
         val behandlingsresultat = behandling.resultat
@@ -69,7 +69,8 @@ class BrevmalService(
                         Behandlingsresultat.DELVIS_INNVILGET_ENDRET_OG_OPPHØRT,
                         Behandlingsresultat.AVSLÅTT_OG_ENDRET,
                         Behandlingsresultat.AVSLÅTT_OG_OPPHØRT,
-                        Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT -> Brevmal.VEDTAK_FØRSTEGANGSVEDTAK_INSTITUSJON
+                        Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT,
+                        -> Brevmal.VEDTAK_FØRSTEGANGSVEDTAK_INSTITUSJON
 
                         Behandlingsresultat.AVSLÅTT -> Brevmal.VEDTAK_AVSLAG_INSTITUSJON
 
@@ -84,9 +85,10 @@ class BrevmalService(
                         Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET,
                         Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE,
                         Behandlingsresultat.HENLAGT_TEKNISK_VEDLIKEHOLD,
-                        Behandlingsresultat.IKKE_VURDERT -> throw FunksjonellFeil(
+                        Behandlingsresultat.IKKE_VURDERT,
+                        -> throw FunksjonellFeil(
                             melding = feilmeldingBehandlingTypeOgResultat,
-                            frontendFeilmelding = frontendFeilmelding
+                            frontendFeilmelding = frontendFeilmelding,
                         )
                     }
                 } else {
@@ -101,7 +103,8 @@ class BrevmalService(
                         Behandlingsresultat.DELVIS_INNVILGET_ENDRET_OG_OPPHØRT,
                         Behandlingsresultat.AVSLÅTT_OG_ENDRET,
                         Behandlingsresultat.AVSLÅTT_OG_OPPHØRT,
-                        Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT -> Brevmal.VEDTAK_FØRSTEGANGSVEDTAK
+                        Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT,
+                        -> Brevmal.VEDTAK_FØRSTEGANGSVEDTAK
 
                         Behandlingsresultat.AVSLÅTT -> Brevmal.VEDTAK_AVSLAG
 
@@ -116,9 +119,10 @@ class BrevmalService(
                         Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET,
                         Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE,
                         Behandlingsresultat.HENLAGT_TEKNISK_VEDLIKEHOLD,
-                        Behandlingsresultat.IKKE_VURDERT -> throw FunksjonellFeil(
+                        Behandlingsresultat.IKKE_VURDERT,
+                        -> throw FunksjonellFeil(
                             melding = feilmeldingBehandlingTypeOgResultat,
-                            frontendFeilmelding = frontendFeilmelding
+                            frontendFeilmelding = frontendFeilmelding,
                         )
                     }
                 }
@@ -138,13 +142,16 @@ class BrevmalService(
                         Behandlingsresultat.AVSLÅTT_OG_OPPHØRT,
                         Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT,
                         Behandlingsresultat.ENDRET_UTBETALING,
-                        Behandlingsresultat.ENDRET_OG_OPPHØRT -> if (ytelseErLøpende) Brevmal.VEDTAK_ENDRING_INSTITUSJON else Brevmal.VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON
+                        Behandlingsresultat.ENDRET_OG_OPPHØRT,
+                        -> if (ytelseErLøpende) Brevmal.VEDTAK_ENDRING_INSTITUSJON else Brevmal.VEDTAK_OPPHØR_MED_ENDRING_INSTITUSJON
 
                         Behandlingsresultat.OPPHØRT,
-                        Behandlingsresultat.FORTSATT_OPPHØRT -> Brevmal.VEDTAK_OPPHØRT_INSTITUSJON
+                        Behandlingsresultat.FORTSATT_OPPHØRT,
+                        -> Brevmal.VEDTAK_OPPHØRT_INSTITUSJON
 
                         Behandlingsresultat.FORTSATT_INNVILGET,
-                        Behandlingsresultat.ENDRET_OG_FORTSATT_INNVILGET -> Brevmal.VEDTAK_FORTSATT_INNVILGET_INSTITUSJON
+                        Behandlingsresultat.ENDRET_OG_FORTSATT_INNVILGET,
+                        -> Brevmal.VEDTAK_FORTSATT_INNVILGET_INSTITUSJON
 
                         Behandlingsresultat.AVSLÅTT -> Brevmal.VEDTAK_AVSLAG_INSTITUSJON
 
@@ -153,9 +160,10 @@ class BrevmalService(
                         Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET,
                         Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE,
                         Behandlingsresultat.HENLAGT_TEKNISK_VEDLIKEHOLD,
-                        Behandlingsresultat.IKKE_VURDERT -> throw FunksjonellFeil(
+                        Behandlingsresultat.IKKE_VURDERT,
+                        -> throw FunksjonellFeil(
                             melding = feilmeldingBehandlingTypeOgResultat,
-                            frontendFeilmelding = frontendFeilmelding
+                            frontendFeilmelding = frontendFeilmelding,
                         )
                     }
                 } else {
@@ -172,13 +180,16 @@ class BrevmalService(
                         Behandlingsresultat.AVSLÅTT_OG_OPPHØRT,
                         Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT,
                         Behandlingsresultat.ENDRET_UTBETALING,
-                        Behandlingsresultat.ENDRET_OG_OPPHØRT -> if (ytelseErLøpende) Brevmal.VEDTAK_ENDRING else Brevmal.VEDTAK_OPPHØR_MED_ENDRING
+                        Behandlingsresultat.ENDRET_OG_OPPHØRT,
+                        -> if (ytelseErLøpende) Brevmal.VEDTAK_ENDRING else Brevmal.VEDTAK_OPPHØR_MED_ENDRING
 
                         Behandlingsresultat.OPPHØRT,
-                        Behandlingsresultat.FORTSATT_OPPHØRT -> Brevmal.VEDTAK_OPPHØRT
+                        Behandlingsresultat.FORTSATT_OPPHØRT,
+                        -> Brevmal.VEDTAK_OPPHØRT
 
                         Behandlingsresultat.FORTSATT_INNVILGET,
-                        Behandlingsresultat.ENDRET_OG_FORTSATT_INNVILGET -> Brevmal.VEDTAK_FORTSATT_INNVILGET
+                        Behandlingsresultat.ENDRET_OG_FORTSATT_INNVILGET,
+                        -> Brevmal.VEDTAK_FORTSATT_INNVILGET
 
                         Behandlingsresultat.AVSLÅTT -> Brevmal.VEDTAK_AVSLAG
                         Behandlingsresultat.ENDRET_UTEN_UTBETALING,
@@ -186,9 +197,10 @@ class BrevmalService(
                         Behandlingsresultat.HENLAGT_SØKNAD_TRUKKET,
                         Behandlingsresultat.HENLAGT_AUTOMATISK_FØDSELSHENDELSE,
                         Behandlingsresultat.HENLAGT_TEKNISK_VEDLIKEHOLD,
-                        Behandlingsresultat.IKKE_VURDERT -> throw FunksjonellFeil(
+                        Behandlingsresultat.IKKE_VURDERT,
+                        -> throw FunksjonellFeil(
                             melding = feilmeldingBehandlingTypeOgResultat,
-                            frontendFeilmelding = frontendFeilmelding
+                            frontendFeilmelding = frontendFeilmelding,
                         )
                     }
                 }
@@ -196,9 +208,10 @@ class BrevmalService(
             BehandlingType.MIGRERING_FRA_INFOTRYGD,
             BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT,
             BehandlingType.TEKNISK_OPPHØR,
-            BehandlingType.TEKNISK_ENDRING -> throw FunksjonellFeil(
+            BehandlingType.TEKNISK_ENDRING,
+            -> throw FunksjonellFeil(
                 melding = feilmelidingBehandlingType,
-                frontendFeilmelding = frontendFeilmelding
+                frontendFeilmelding = frontendFeilmelding,
             )
         }
     }

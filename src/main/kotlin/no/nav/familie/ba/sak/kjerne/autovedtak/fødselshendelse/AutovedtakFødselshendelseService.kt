@@ -56,7 +56,7 @@ class AutovedtakFødselshendelseService(
     private val personopplysningerService: PersonopplysningerService,
     private val statsborgerskapService: StatsborgerskapService,
     private val opprettTaskService: OpprettTaskService,
-    private val oppgaveService: OppgaveService
+    private val oppgaveService: OppgaveService,
 ) : AutovedtakBehandlingService<NyBehandlingHendelse> {
 
     val stansetIAutomatiskFiltreringCounter =
@@ -76,13 +76,13 @@ class AutovedtakFødselshendelseService(
 
             if (barnPåHendelseBlirAlleredeBehandletIÅpenBehandling(
                     barnaPåHendelse = barnsAktører,
-                    barnaPåÅpenBehandling = barnaPåÅpenBehandling
+                    barnaPåÅpenBehandling = barnaPåÅpenBehandling,
                 )
             ) {
                 logger.info("Ignorerer fødselshendelse fordi åpen behandling inneholder alle barna i hendelsen.")
                 secureLogger.info(
                     "Ignorerer fødselshendelse fordi åpen behandling inneholder alle barna i hendelsen." +
-                        "Barn på hendelse=${behandlingsdata.barnasIdenter}, barn på åpen behandling=$barnaPåÅpenBehandling"
+                        "Barn på hendelse=${behandlingsdata.barnasIdenter}, barn på åpen behandling=$barnaPåÅpenBehandling",
                 )
                 return false
             }
@@ -90,14 +90,14 @@ class AutovedtakFødselshendelseService(
 
         val (barnSomSkalBehandlesForMor, alleBarnSomKanBehandles) = finnBarnSomSkalBehandlesForMor(
             fagsak = fagsakService.hentNormalFagsak(aktør = morsAktør),
-            nyBehandlingHendelse = behandlingsdata
+            nyBehandlingHendelse = behandlingsdata,
         )
 
         if (barnSomSkalBehandlesForMor.isEmpty()) {
             logger.info("Ignorere fødselshendelse, alle barna fra hendelse er allerede behandlet")
             secureLogger.info(
                 "Ignorere fødselshendelse, alle barna fra hendelse er allerede behandlet. " +
-                    "Alle barna som kan behandles=$alleBarnSomKanBehandles, "
+                    "Alle barna som kan behandles=$alleBarnSomKanBehandles, ",
             )
             return false
         }
@@ -110,13 +110,13 @@ class AutovedtakFødselshendelseService(
 
         val (barnSomSkalBehandlesForMor, _) = finnBarnSomSkalBehandlesForMor(
             fagsak = fagsakService.hentNormalFagsak(aktør = morsAktør),
-            nyBehandlingHendelse = nyBehandling
+            nyBehandlingHendelse = nyBehandling,
         )
 
         val behandling = stegService.opprettNyBehandlingOgRegistrerPersongrunnlagForFødselhendelse(
             nyBehandling.copy(
-                barnasIdenter = barnSomSkalBehandlesForMor
-            )
+                barnasIdenter = barnSomSkalBehandlesForMor,
+            ),
         )
 
         val behandlingEtterFiltrering =
@@ -128,7 +128,7 @@ class AutovedtakFødselshendelseService(
             henleggBehandlingOgOpprettManuellOppgave(
                 behandling = behandlingEtterFiltrering,
                 begrunnelse = filtreringsreglerService.hentFødselshendelsefiltreringResultater(behandlingId = behandling.id)
-                    .first { it.resultat == Resultat.IKKE_OPPFYLT }.begrunnelse
+                    .first { it.resultat == Resultat.IKKE_OPPFYLT }.begrunnelse,
             )
         } else {
             vurderVilkår(behandling = behandlingEtterFiltrering, barnaSomVurderes = barnSomSkalBehandlesForMor)
@@ -148,7 +148,7 @@ class AutovedtakFødselshendelseService(
             val task = IverksettMotOppdragTask.opprettTask(
                 behandling,
                 vedtakEtterToTrinn,
-                SikkerhetContext.hentSaksbehandler()
+                SikkerhetContext.hentSaksbehandler(),
             )
             taskRepository.save(task)
 
@@ -174,7 +174,7 @@ class AutovedtakFødselshendelseService(
                 behandlingId = behandling.id,
                 oppgavetype = Oppgavetype.Fremlegg,
                 beskrivelse = "Kontroller gyldig opphold",
-                fristForFerdigstillelse = LocalDate.now().plusYears(1)
+                fristForFerdigstillelse = LocalDate.now().plusYears(1),
             )
         }
     }
@@ -187,11 +187,11 @@ class AutovedtakFødselshendelseService(
 
     private fun finnBarnSomSkalBehandlesForMor(
         fagsak: Fagsak?,
-        nyBehandlingHendelse: NyBehandlingHendelse
+        nyBehandlingHendelse: NyBehandlingHendelse,
     ): Pair<List<String>, List<String>> {
         val morsAktør = personidentService.hentAktør(nyBehandlingHendelse.morsIdent)
         val barnaTilMor = personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(
-            aktør = morsAktør
+            aktør = morsAktør,
         ).forelderBarnRelasjon.filter { it.relasjonsrolle == FORELDERBARNRELASJONROLLE.BARN }
 
         val barnaSomHarBlittBehandlet =
@@ -207,13 +207,13 @@ class AutovedtakFødselshendelseService(
             nyBehandlingHendelse = nyBehandlingHendelse,
             barnaTilMor = barnaTilMor,
             barnaSomHarBlittBehandlet = barnaSomHarBlittBehandlet,
-            secureLogger = secureLogger
+            secureLogger = secureLogger,
         )
     }
 
     private fun henleggBehandlingOgOpprettManuellOppgave(
         behandling: Behandling,
-        begrunnelse: String = ""
+        begrunnelse: String = "",
     ): String {
         val begrunnelseForManuellOppgave = if (begrunnelse == "") {
             hentBegrunnelseFraVilkårsvurdering(behandlingId = behandling.id)
@@ -225,14 +225,14 @@ class AutovedtakFødselshendelseService(
             behandling = behandling,
             henleggBehandlingInfo = RestHenleggBehandlingInfo(
                 årsak = HenleggÅrsak.FØDSELSHENDELSE_UGYLDIG_UTFALL,
-                begrunnelse = begrunnelseForManuellOppgave
-            )
+                begrunnelse = begrunnelseForManuellOppgave,
+            ),
         )
 
         oppgaveService.opprettOppgaveForManuellBehandling(
             behandling = behandling,
             begrunnelse = "Fødselshendelse: $begrunnelseForManuellOppgave",
-            oppgavetype = Oppgavetype.VurderLivshendelse
+            oppgavetype = Oppgavetype.VurderLivshendelse,
         )
 
         return "Henlegger behandling $behandling automatisk på grunn av ugyldig resultat"
@@ -247,10 +247,10 @@ class AutovedtakFødselshendelseService(
         val bosattIRiketResultat = søkerResultat?.vilkårResultater?.find { it.vilkårType == Vilkår.BOSATT_I_RIKET }
         val lovligOppholdResultat = søkerResultat?.vilkårResultater?.find { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }
         if (bosattIRiketResultat?.resultat == Resultat.IKKE_OPPFYLT && bosattIRiketResultat.evalueringÅrsaker.any {
-            VilkårIkkeOppfyltÅrsak.valueOf(
-                    it
+                VilkårIkkeOppfyltÅrsak.valueOf(
+                    it,
                 ) == VilkårIkkeOppfyltÅrsak.BOR_IKKE_I_RIKET_FLERE_ADRESSER_UTEN_FOM
-        }
+            }
         ) {
             return "Mor har flere bostedsadresser uten fra- og med dato"
         } else if (bosattIRiketResultat?.resultat == Resultat.IKKE_OPPFYLT) {

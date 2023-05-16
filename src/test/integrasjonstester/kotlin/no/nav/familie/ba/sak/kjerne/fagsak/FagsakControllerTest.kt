@@ -71,7 +71,7 @@ class FagsakControllerTest(
     private val skyggesakRepository: SkyggesakRepository,
 
     @Autowired
-    private val institusjonService: InstitusjonService
+    private val institusjonService: InstitusjonService,
 ) : AbstractSpringIntegrationTest() {
 
     @BeforeEach
@@ -133,8 +133,8 @@ class FagsakControllerTest(
 
         val eksisterendeRestFagsak = fagsakController.hentEllerOpprettFagsak(
             FagsakRequest(
-                personIdent = fnr
-            )
+                personIdent = fnr,
+            ),
         )
         assertEquals(Ressurs.Status.SUKSESS, eksisterendeRestFagsak.body?.status)
         assertEquals(eksisterendeRestFagsak.body!!.data!!.id, nyRestFagsak.body!!.data!!.id)
@@ -156,14 +156,14 @@ class FagsakControllerTest(
         assertEquals(fnr, fagsakService.hentNormalFagsak(aktør)?.aktør?.aktivFødselsnummer())
 
         personidentRepository.save(
-            personidentRepository.getReferenceById(fnr).also { it.aktiv = false }
+            personidentRepository.getReferenceById(fnr).also { it.aktiv = false },
         )
         personidentRepository.save(Personident(fødselsnummer = nyttFnr, aktør = aktør, aktiv = true))
 
         val eksisterendeRestFagsak = fagsakController.hentEllerOpprettFagsak(
             FagsakRequest(
-                personIdent = nyttFnr
-            )
+                personIdent = nyttFnr,
+            ),
         )
         assertEquals(Ressurs.Status.SUKSESS, eksisterendeRestFagsak.body?.status)
         assertEquals(eksisterendeRestFagsak.body!!.data!!.id, nyRestFagsak.body!!.data!!.id)
@@ -176,15 +176,15 @@ class FagsakControllerTest(
         val aktørId = randomAktør()
 
         val nyRestFagsak = fagsakController.hentEllerOpprettFagsak(
-            FagsakRequest(personIdent = aktørId.aktivFødselsnummer(), aktørId = aktørId.aktørId)
+            FagsakRequest(personIdent = aktørId.aktivFødselsnummer(), aktørId = aktørId.aktørId),
         )
         assertEquals(Ressurs.Status.SUKSESS, nyRestFagsak.body?.status)
 
         val eksisterendeRestFagsak = fagsakController.hentEllerOpprettFagsak(
             FagsakRequest(
                 personIdent = aktørId.aktivFødselsnummer(),
-                aktørId = aktørId.aktørId
-            )
+                aktørId = aktørId.aktørId,
+            ),
         )
         assertEquals(Ressurs.Status.SUKSESS, eksisterendeRestFagsak.body?.status)
         assertEquals(eksisterendeRestFagsak.body!!.data!!.id, nyRestFagsak.body!!.data!!.id)
@@ -215,21 +215,21 @@ class FagsakControllerTest(
             behandlingService.opprettBehandling(
                 nyOrdinærBehandling(
                     søkersIdent = ClientMocks.søkerFnr[0],
-                    fagsakId = fagsak.id
-                )
+                    fagsakId = fagsak.id,
+                ),
             )
         persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
             personAktør,
             barnaAktør,
             behandling,
-            Målform.NB
+            Målform.NB,
         )
 
         fagsakController.oppgiFagsakdeltagere(
             RestSøkParam(
                 personAktør.aktivFødselsnummer(),
-                ClientMocks.barnFnr.toList()
-            )
+                ClientMocks.barnFnr.toList(),
+            ),
         )
             .apply {
                 assertEquals(ClientMocks.barnFnr.toList().subList(0, 1), body!!.data!!.map { it.ident })
@@ -246,8 +246,8 @@ class FagsakControllerTest(
             fagsakController.hentEllerOpprettFagsak(
                 FagsakRequest(
                     personIdent = fnr,
-                    fagsakType = FagsakType.INSTITUSJON
-                )
+                    fagsakType = FagsakType.INSTITUSJON,
+                ),
             )
         }
         val fagsaker = fagsakService.hentMinimalFagsakerForPerson(tilAktør(fnr))
@@ -264,8 +264,8 @@ class FagsakControllerTest(
             FagsakRequest(
                 personIdent = fnr,
                 fagsakType = FagsakType.INSTITUSJON,
-                institusjon = InstitusjonInfo("orgnr", "tss-id")
-            )
+                institusjon = InstitusjonInfo("orgnr", "tss-id"),
+            ),
         )
         val fagsakerRessurs = fagsakService.hentMinimalFagsakerForPerson(tilAktør(fnr))
         assert(fagsakerRessurs.status == Ressurs.Status.SUKSESS)

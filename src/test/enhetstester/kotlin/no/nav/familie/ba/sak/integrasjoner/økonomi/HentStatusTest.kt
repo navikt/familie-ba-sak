@@ -49,11 +49,11 @@ class HentStatusTest {
             utbetalingsoppdragGenerator = mockk(),
             behandlingService = mockk(),
             tilkjentYtelseValideringService = mockk(),
-            tilkjentYtelseRepository = tilkjentYtelseRepository
+            tilkjentYtelseRepository = tilkjentYtelseRepository,
         )
         statusFraOppdrag = StatusFraOppdrag(
             økonomiService = økonomiService,
-            taskRepository = mockk<TaskRepositoryWrapper>().also { every { it.save(any()) } returns mockk() }
+            taskRepository = mockk<TaskRepositoryWrapper>().also { every { it.save(any()) } returns mockk() },
         )
     }
 
@@ -65,7 +65,7 @@ class HentStatusTest {
 
         every {
             økonomiKlient.hentStatus(
-                match { it.behandlingsId == nyBehandling.id.toString() }
+                match { it.behandlingsId == nyBehandling.id.toString() },
             )
         } returns OppdragStatus.KVITTERT_OK
         val andelerTilkjentYtelse = listOf(
@@ -78,8 +78,8 @@ class HentStatusTest {
                 person = tilfeldigPerson,
                 aktør = mockk(),
                 tilkjentYtelse = mockk(),
-                kildeBehandlingId = null
-            )
+                kildeBehandlingId = null,
+            ),
         )
 
         every { beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(any()) } returns andelerTilkjentYtelse
@@ -98,7 +98,7 @@ class HentStatusTest {
 
         every {
             økonomiKlient.hentStatus(
-                match { it.behandlingsId == nyBehandling.id.toString() }
+                match { it.behandlingsId == nyBehandling.id.toString() },
             )
         } returns OppdragStatus.KVITTERT_OK
         val andelerTilkjentYtelse = listOf(
@@ -111,8 +111,8 @@ class HentStatusTest {
                 person = tilfeldigPerson,
                 aktør = mockk(),
                 tilkjentYtelse = mockk(),
-                kildeBehandlingId = null
-            )
+                kildeBehandlingId = null,
+            ),
         )
 
         every { beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(any()) } returns andelerTilkjentYtelse
@@ -126,26 +126,26 @@ class HentStatusTest {
     private fun lagTilkjentYtelse(behandling: Behandling, utbetalingsperiode: List<Utbetalingsperiode>) {
         val nyTilkjentYtelse = lagInitiellTilkjentYtelse(
             behandling = behandling,
-            utbetalingsoppdrag = objectMapper.writeValueAsString(lagUtbetalingsoppdrag(utbetalingsperiode = utbetalingsperiode))
+            utbetalingsoppdrag = objectMapper.writeValueAsString(lagUtbetalingsoppdrag(utbetalingsperiode = utbetalingsperiode)),
         )
         every { tilkjentYtelseRepository.findByBehandling(behandling.id) } returns nyTilkjentYtelse
     }
 
     private fun statusFraOppdragMedTask(
         tilfeldigPerson: Person,
-        nyBehandling: Behandling
+        nyBehandling: Behandling,
     ) = StatusFraOppdragMedTask(
         statusFraOppdragDTO = StatusFraOppdragDTO(
             fagsystem = "BA",
             personIdent = tilfeldigPerson.aktør.aktivFødselsnummer(),
             aktørId = "Søker1",
             behandlingsId = nyBehandling.id,
-            vedtaksId = 0L
+            vedtaksId = 0L,
         ),
         task = Task(
             type = StatusFraOppdragTask.TASK_STEP_TYPE,
-            payload = ""
-        )
+            payload = "",
+        ),
     )
 
     private fun lagUtbetalingsperiode(nyBehandling: Behandling) =
@@ -153,7 +153,7 @@ class HentStatusTest {
             vedtakdatoFom = LocalDate.of(
                 2019,
                 Month.APRIL,
-                1
+                1,
             ),
             vedtakdatoTom = LocalDate.of(2020, Month.MARCH, 31),
             erEndringPåEksisterendePeriode = false,
@@ -163,6 +163,6 @@ class HentStatusTest {
             klassifisering = "",
             sats = BigDecimal.ONE,
             satsType = Utbetalingsperiode.SatsType.MND,
-            utbetalesTil = ""
+            utbetalesTil = "",
         )
 }

@@ -16,10 +16,10 @@ import java.util.Properties
     taskStepType = IdentHendelseTask.TASK_STEP_TYPE,
     beskrivelse = "Sjekker om ident-hendelse berører person registert i BA-sak og oppdaterer",
     maxAntallFeil = 3,
-    triggerTidVedFeilISekunder = (60 * 60 * 24).toLong()
+    triggerTidVedFeilISekunder = (60 * 60 * 24).toLong(),
 )
 class IdentHendelseTask(
-    private val personidentService: PersonidentService
+    private val personidentService: PersonidentService,
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
@@ -38,9 +38,9 @@ class IdentHendelseTask(
                 payload = objectMapper.writeValueAsString(nyIdent),
                 properties = Properties().apply {
                     this["nyPersonIdent"] = nyIdent.ident
-                }
+                },
             ).medTriggerTid(
-                triggerTid = LocalDateTime.now().plusMinutes(1)
+                triggerTid = LocalDateTime.now().plusMinutes(1),
             )
         }
     }

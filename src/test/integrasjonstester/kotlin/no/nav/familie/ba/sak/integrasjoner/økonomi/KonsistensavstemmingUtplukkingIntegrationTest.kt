@@ -72,7 +72,7 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
             opprettOgLagreBehandlingMedAndeler(
                 personIdent = forelderIdent,
                 kildeOgOffsetPåAndeler = listOf(KildeOgOffsetPåAndel(null, 1L)),
-                fagsakId = fagsak.id
+                fagsakId = fagsak.id,
             )
         val iverksattOgLøpendeBehandlinger = avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker()
 
@@ -98,16 +98,16 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
                 personIdent = forelderIdent,
                 kildeOgOffsetPåAndeler = listOf(KildeOgOffsetPåAndel(null, 1L)),
                 medStatus = BehandlingStatus.AVSLUTTET,
-                fagsakId = fagsak.id
+                fagsakId = fagsak.id,
             )
         val revurdering =
             opprettOgLagreRevurderingMedAndeler(
                 personIdent = forelderIdent,
                 kildeOgOffsetPåAndeler = listOf(
                     KildeOgOffsetPåAndel(førstegangsbehandling.id, 1L),
-                    KildeOgOffsetPåAndel(null, 2L)
+                    KildeOgOffsetPåAndel(null, 2L),
                 ),
-                fagsakId = fagsak.id
+                fagsakId = fagsak.id,
             )
 
         val iverksattOgLøpendeBehandlinger = avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker()
@@ -133,13 +133,13 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
             personIdent = forelderIdent,
             kildeOgOffsetPåAndeler = listOf(KildeOgOffsetPåAndel(null, 1L)),
             medStatus = BehandlingStatus.AVSLUTTET,
-            fagsakId = fagsak.id
+            fagsakId = fagsak.id,
         )
         val revurdering =
             opprettOgLagreRevurderingMedAndeler(
                 personIdent = forelderIdent,
                 kildeOgOffsetPåAndeler = listOf(KildeOgOffsetPåAndel(null, 2L)),
-                fagsakId = fagsak.id
+                fagsakId = fagsak.id,
             )
 
         val iverksattOgLøpendeBehandlinger = avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker()
@@ -165,12 +165,12 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
             personIdent = forelderIdent,
             kildeOgOffsetPåAndeler = listOf(KildeOgOffsetPåAndel(null, 1L)),
             medStatus = BehandlingStatus.AVSLUTTET,
-            fagsakId = fagsak.id
+            fagsakId = fagsak.id,
         )
         opprettOgLagreRevurderingMedAndeler(
             personIdent = forelderIdent,
             kildeOgOffsetPåAndeler = emptyList(),
-            fagsakId = fagsak.id
+            fagsakId = fagsak.id,
         )
 
         val iverksattOgLøpendeBehandlinger = avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker()
@@ -195,14 +195,14 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
                 personIdent = forelderIdent,
                 kildeOgOffsetPåAndeler = listOf(KildeOgOffsetPåAndel(null, 1L)),
                 medStatus = BehandlingStatus.AVSLUTTET,
-                fagsakId = fagsak.id
+                fagsakId = fagsak.id,
             )
 
         opprettOgLagreRevurderingMedAndeler(
             personIdent = forelderIdent,
             kildeOgOffsetPåAndeler = listOf(KildeOgOffsetPåAndel(null, 2L)),
             erIverksatt = false,
-            fagsakId = fagsak.id
+            fagsakId = fagsak.id,
         )
 
         val iverksattOgLøpendeBehandlinger = avstemmingService.hentSisteIverksatteBehandlingerFraLøpendeFagsaker()
@@ -220,7 +220,7 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
         kildeOgOffsetPåAndeler: List<KildeOgOffsetPåAndel> = emptyList(),
         erIverksatt: Boolean = true,
         medStatus: BehandlingStatus = BehandlingStatus.UTREDES,
-        fagsakId: Long
+        fagsakId: Long,
     ): Behandling {
         val behandling =
             behandlingService.opprettBehandling(nyOrdinærBehandling(søkersIdent = personIdent, fagsakId = fagsakId))
@@ -236,8 +236,8 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
                     tilkjentYtelse = tilkjentYtelse,
                     kildeBehandlingId = it.kilde ?: behandling.id,
                     periodeOffset = it.offset,
-                    aktør = aktør
-                )
+                    aktør = aktør,
+                ),
             )
         }
         return behandling
@@ -247,7 +247,7 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
         personIdent: String,
         kildeOgOffsetPåAndeler: List<KildeOgOffsetPåAndel> = emptyList(),
         erIverksatt: Boolean = true,
-        fagsakId: Long
+        fagsakId: Long,
     ): Behandling {
         val behandling =
             behandlingService.opprettBehandling(nyRevurdering(søkersIdent = personIdent, fagsakId = fagsakId))
@@ -261,8 +261,8 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
                     tilkjentYtelse = tilkjentYtelse,
                     kildeBehandlingId = it.kilde ?: behandling.id,
                     periodeOffset = it.offset,
-                    aktør = aktør
-                )
+                    aktør = aktør,
+                ),
             )
         }
         return behandling
@@ -272,7 +272,7 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
         behandling = behandling,
         opprettetDato = LocalDate.now(),
         endretDato = LocalDate.now(),
-        utbetalingsoppdrag = if (erIverksatt) "Skal ikke være null" else null
+        utbetalingsoppdrag = if (erIverksatt) "Skal ikke være null" else null,
     )
 
     // Kun offset og kobling til behandling/tilkjent ytelse som er relevant når man skal plukke ut til konsistensavstemming
@@ -280,7 +280,7 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
         tilkjentYtelse: TilkjentYtelse,
         kildeBehandlingId: Long,
         periodeOffset: Long,
-        aktør: Aktør = randomAktør()
+        aktør: Aktør = randomAktør(),
     ) = AndelTilkjentYtelse(
         behandlingId = tilkjentYtelse.behandling.id,
         tilkjentYtelse = tilkjentYtelse,
@@ -298,11 +298,11 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
         forrigePeriodeOffset = null,
         sats = 1054,
         prosent = BigDecimal(100),
-        aktør = aktør
+        aktør = aktør,
     )
 }
 
 data class KildeOgOffsetPåAndel(
     val kilde: Long?, // Hvis denne er null setter vi til behandling som opprettes, for å unngå loop-avhengighet
-    val offset: Long
+    val offset: Long,
 )

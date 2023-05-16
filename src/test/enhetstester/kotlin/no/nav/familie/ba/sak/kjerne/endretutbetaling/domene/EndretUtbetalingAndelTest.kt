@@ -72,7 +72,7 @@ internal class EndretUtbetalingAndelTest {
             person = barn,
             fom = YearMonth.now(),
             tom = null,
-            årsak = Årsak.DELT_BOSTED
+            årsak = Årsak.DELT_BOSTED,
         )
 
         val sisteTomPåAndeler = YearMonth.now().plusMonths(10)
@@ -80,24 +80,24 @@ internal class EndretUtbetalingAndelTest {
             lagAndelTilkjentYtelse(
                 person = barn,
                 fom = YearMonth.now().minusYears(2),
-                tom = YearMonth.now().minusMonths(5)
+                tom = YearMonth.now().minusMonths(5),
             ),
             lagAndelTilkjentYtelse(
                 person = barn,
                 fom = YearMonth.now().minusMonths(4),
-                tom = YearMonth.now().plusMonths(4)
+                tom = YearMonth.now().plusMonths(4),
             ),
             lagAndelTilkjentYtelse(
                 person = barn,
                 fom = YearMonth.now().plusMonths(5),
-                tom = sisteTomPåAndeler
-            )
+                tom = sisteTomPåAndeler,
+            ),
         )
 
         val nyTom = beregnGyldigTomIFremtiden(
             andelTilkjentYtelser = andelTilkjentYtelser,
             endretUtbetalingAndel = endretUtbetalingAndel,
-            andreEndredeAndelerPåBehandling = emptyList()
+            andreEndredeAndelerPåBehandling = emptyList(),
         )
 
         assertEquals(sisteTomPåAndeler, nyTom)
@@ -112,7 +112,7 @@ internal class EndretUtbetalingAndelTest {
             person = barn,
             fom = YearMonth.now(),
             tom = null,
-            årsak = Årsak.DELT_BOSTED
+            årsak = Årsak.DELT_BOSTED,
         )
 
         val annenEndretAndel = lagEndretUtbetalingAndel(
@@ -120,31 +120,31 @@ internal class EndretUtbetalingAndelTest {
             person = barn,
             fom = YearMonth.now().plusMonths(5),
             tom = YearMonth.now().plusMonths(8),
-            årsak = Årsak.DELT_BOSTED
+            årsak = Årsak.DELT_BOSTED,
         )
 
         val andelTilkjentYtelser = listOf(
             lagAndelTilkjentYtelse(
                 person = barn,
                 fom = YearMonth.now().minusYears(2),
-                tom = YearMonth.now().minusMonths(5)
+                tom = YearMonth.now().minusMonths(5),
             ),
             lagAndelTilkjentYtelse(
                 person = barn,
                 fom = YearMonth.now().minusMonths(4),
-                tom = YearMonth.now().plusMonths(4)
+                tom = YearMonth.now().plusMonths(4),
             ),
             lagAndelTilkjentYtelse(
                 person = barn,
                 fom = YearMonth.now().plusMonths(5),
-                tom = YearMonth.now().plusMonths(10)
-            )
+                tom = YearMonth.now().plusMonths(10),
+            ),
         )
 
         val nyTom = beregnGyldigTomIFremtiden(
             andelTilkjentYtelser = andelTilkjentYtelser,
             endretUtbetalingAndel = endretUtbetalingAndel,
-            andreEndredeAndelerPåBehandling = listOf(annenEndretAndel)
+            andreEndredeAndelerPåBehandling = listOf(annenEndretAndel),
         )
 
         assertEquals(annenEndretAndel.fom!!.minusMonths(1), nyTom)

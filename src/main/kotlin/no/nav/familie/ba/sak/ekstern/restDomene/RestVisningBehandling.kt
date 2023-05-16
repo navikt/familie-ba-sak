@@ -19,7 +19,7 @@ class RestVisningBehandling(
     val type: BehandlingType,
     val status: BehandlingStatus,
     val resultat: Behandlingsresultat,
-    val vedtaksdato: LocalDateTime?
+    val vedtaksdato: LocalDateTime?,
 )
 
 fun Behandling.tilRestVisningBehandling(vedtaksdato: LocalDateTime?) = RestVisningBehandling(
@@ -32,13 +32,13 @@ fun Behandling.tilRestVisningBehandling(vedtaksdato: LocalDateTime?) = RestVisni
     type = this.type,
     status = this.status,
     resultat = this.resultat,
-    vedtaksdato = vedtaksdato
+    vedtaksdato = vedtaksdato,
 )
 
 enum class BehandlingUnderkategoriDTO {
     ORDINÆR,
     UTVIDET,
-    INSTITUSJON
+    INSTITUSJON,
 }
 
 fun BehandlingUnderkategoriDTO.tilDomene() = when (this) {

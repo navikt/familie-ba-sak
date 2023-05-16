@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.DagTidspunkt.Companion.t
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 
 class ReduksjonsperioderFraForrigeBehandlingTidslinje(
-    private val vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>
+    private val vedtaksperioderMedBegrunnelser: List<VedtaksperiodeMedBegrunnelser>,
 ) : VedtaksperiodeMedBegrunnelserTidslinje(vedtaksperioderMedBegrunnelser) {
 
     override fun lagPerioder(): List<Periode<VedtaksperiodeMedBegrunnelser, Dag>> =
@@ -15,7 +15,7 @@ class ReduksjonsperioderFraForrigeBehandlingTidslinje(
             Periode(
                 fraOgMed = it.fom.tilTidspunktEllerTidligereEnn(it.tom),
                 tilOgMed = it.tom.tilTidspunktEllerSenereEnn(it.fom),
-                innhold = it.copy(fom = null, tom = null) // Gjør at perioder med samme innhold blir slått sammen
+                innhold = it.copy(fom = null, tom = null), // Gjør at perioder med samme innhold blir slått sammen
             )
         }
 }

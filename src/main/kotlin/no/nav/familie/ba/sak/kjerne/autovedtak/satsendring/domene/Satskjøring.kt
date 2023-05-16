@@ -18,7 +18,7 @@ data class Satskjøring(
     @SequenceGenerator(
         name = "satskjoering_seq_generator",
         sequenceName = "satskjoering_seq",
-        allocationSize = 50
+        allocationSize = 50,
     )
     val id: Long = 0,
 
@@ -32,7 +32,7 @@ data class Satskjøring(
     var ferdigTidspunkt: LocalDateTime? = null,
 
     @Column(name = "feiltype")
-    var feiltype: String? = null
+    var feiltype: String? = null,
 ) {
 
     override fun equals(other: Any?): Boolean {

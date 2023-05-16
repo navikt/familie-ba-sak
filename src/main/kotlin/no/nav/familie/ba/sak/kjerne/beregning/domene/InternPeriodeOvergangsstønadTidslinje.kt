@@ -9,7 +9,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilFørsteDagIMåneden
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilSisteDagIMåneden
 
 open class InternPeriodeOvergangsstønadTidslinje(
-    private val internePeriodeOvergangsstønader: List<InternPeriodeOvergangsstønad>
+    private val internePeriodeOvergangsstønader: List<InternPeriodeOvergangsstønad>,
 ) : Tidslinje<InternPeriodeOvergangsstønad, Dag>() {
 
     override fun lagPerioder(): List<Periode<InternPeriodeOvergangsstønad, Dag>> {
@@ -17,7 +17,7 @@ open class InternPeriodeOvergangsstønadTidslinje(
             Periode(
                 fraOgMed = it.fomDato.tilTidspunktEllerTidligereEnn(it.tomDato),
                 tilOgMed = it.tomDato.tilTidspunktEllerSenereEnn(it.fomDato),
-                innhold = it
+                innhold = it,
             )
         }
     }
@@ -27,6 +27,6 @@ fun Tidslinje<InternPeriodeOvergangsstønad, Dag>.lagInternePerioderOvergangsst�
     this.perioder().mapNotNull {
         it.innhold?.copy(
             fomDato = it.fraOgMed.tilFørsteDagIMåneden().tilLocalDate(),
-            tomDato = it.tilOgMed.tilSisteDagIMåneden().tilLocalDate()
+            tomDato = it.tilOgMed.tilSisteDagIMåneden().tilLocalDate(),
         )
     }

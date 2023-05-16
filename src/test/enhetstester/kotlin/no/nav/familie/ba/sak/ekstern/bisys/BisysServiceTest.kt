@@ -38,7 +38,7 @@ internal class BisysServiceTest {
             mockInfotrygdClient,
             mockFagsakRepository,
             mockPersonidentService,
-            mockTilkjentYtelseRepository
+            mockTilkjentYtelseRepository,
         )
     }
 
@@ -51,7 +51,7 @@ internal class BisysServiceTest {
         every { mockPersonidentService.hentAlleFødselsnummerForEnAktør(any()) } answers { listOf(aktør.aktivFødselsnummer()) }
 
         every { mockInfotrygdClient.hentUtvidetBarnetrygd(fnr, any()) } returns BisysUtvidetBarnetrygdResponse(
-            perioder = emptyList()
+            perioder = emptyList(),
         )
 
         every { mockFagsakRepository.finnFagsakForAktør(aktør) } returns null
@@ -74,10 +74,10 @@ internal class BisysServiceTest {
             YearMonth.of(2019, 1),
             YearMonth.now(),
             500.0,
-            manueltBeregnet = true
+            manueltBeregnet = true,
         )
         every { mockInfotrygdClient.hentUtvidetBarnetrygd(fnr, any()) } returns BisysUtvidetBarnetrygdResponse(
-            perioder = listOf(periodeInfotrygd)
+            perioder = listOf(periodeInfotrygd),
         )
 
         every { mockFagsakRepository.finnFagsakForAktør(aktør) } returns null
@@ -100,12 +100,12 @@ internal class BisysServiceTest {
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                 behandling = behandling,
                 tilkjentYtelse = tilkjentYtelse,
-                beløp = 660
+                beløp = 660,
             )
         tilkjentYtelse.andelerTilkjentYtelse.add(andelTilkjentYtelse)
 
         every { mockInfotrygdClient.hentUtvidetBarnetrygd(any(), any()) } returns BisysUtvidetBarnetrygdResponse(
-            perioder = emptyList()
+            perioder = emptyList(),
         )
 
         every { mockFagsakRepository.finnFagsakForAktør(any()) } returns behandling.fagsak
@@ -138,7 +138,7 @@ internal class BisysServiceTest {
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                 behandling = behandling,
                 tilkjentYtelse = tilkjentYtelse,
-                beløp = kalkulertbeløp
+                beløp = kalkulertbeløp,
             ).copy(prosent = BigDecimal.valueOf(50), sats = 2 * kalkulertbeløp)
 
         tilkjentYtelse.andelerTilkjentYtelse.add(andelTilkjentYtelse)
@@ -151,15 +151,15 @@ internal class BisysServiceTest {
             YearMonth.of(2019, 12),
             660.0,
             manueltBeregnet = false,
-            deltBosted = true
+            deltBosted = true,
         )
         every {
             mockInfotrygdClient.hentUtvidetBarnetrygd(
                 andelTilkjentYtelse.aktør.aktivFødselsnummer(),
-                any()
+                any(),
             )
         } returns BisysUtvidetBarnetrygdResponse(
-            perioder = listOf(periodeInfotrygd)
+            perioder = listOf(periodeInfotrygd),
         )
 
         every { mockFagsakRepository.finnFagsakForAktør(any()) } returns behandling.fagsak
@@ -190,7 +190,7 @@ internal class BisysServiceTest {
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                 behandling = behandling,
                 tilkjentYtelse = tilkjentYtelse,
-                beløp = 1054
+                beløp = 1054,
             )
 
         tilkjentYtelse.andelerTilkjentYtelse.add(andelTilkjentYtelse)
@@ -203,15 +203,15 @@ internal class BisysServiceTest {
             YearMonth.of(2021, 12),
             1054.0,
             manueltBeregnet = false,
-            deltBosted = false
+            deltBosted = false,
         )
         every {
             mockInfotrygdClient.hentUtvidetBarnetrygd(
                 andelTilkjentYtelse.aktør.aktivFødselsnummer(),
-                any()
+                any(),
             )
         } returns BisysUtvidetBarnetrygdResponse(
-            perioder = listOf(periodeInfotrygd)
+            perioder = listOf(periodeInfotrygd),
         )
 
         every { mockFagsakRepository.finnFagsakForAktør(any()) } returns behandling.fagsak
@@ -242,7 +242,7 @@ internal class BisysServiceTest {
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                 behandling = behandling,
                 tilkjentYtelse = tilkjentYtelse,
-                beløp = 1054
+                beløp = 1054,
             )
 
         tilkjentYtelse.andelerTilkjentYtelse.add(andelTilkjentYtelse)
@@ -255,15 +255,15 @@ internal class BisysServiceTest {
             null,
             1054.0,
             manueltBeregnet = false,
-            deltBosted = false
+            deltBosted = false,
         )
         every {
             mockInfotrygdClient.hentUtvidetBarnetrygd(
                 andelTilkjentYtelse.aktør.aktivFødselsnummer(),
-                any()
+                any(),
             )
         } returns BisysUtvidetBarnetrygdResponse(
-            perioder = listOf(periodeInfotrygd)
+            perioder = listOf(periodeInfotrygd),
         )
 
         every { mockFagsakRepository.finnFagsakForAktør(any()) } returns behandling.fagsak
@@ -294,7 +294,7 @@ internal class BisysServiceTest {
                 ytelseType = YtelseType.UTVIDET_BARNETRYGD,
                 behandling = behandling,
                 tilkjentYtelse = tilkjentYtelse,
-                beløp = 660
+                beløp = 660,
             )
         tilkjentYtelse.andelerTilkjentYtelse.add(andelTilkjentYtelse)
 
@@ -307,15 +307,15 @@ internal class BisysServiceTest {
             YearMonth.of(2019, 12),
             660.0,
             manueltBeregnet = true,
-            deltBosted = false
+            deltBosted = false,
         )
         every {
             mockInfotrygdClient.hentUtvidetBarnetrygd(
                 andelTilkjentYtelse.aktør.aktivFødselsnummer(),
-                any()
+                any(),
             )
         } returns BisysUtvidetBarnetrygdResponse(
-            perioder = listOf(periodeInfotrygd)
+            perioder = listOf(periodeInfotrygd),
         )
 
         every { mockFagsakRepository.finnFagsakForAktør(any()) } returns behandling.fagsak

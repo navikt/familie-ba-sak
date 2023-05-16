@@ -25,15 +25,15 @@ class BehandlingStegTest {
             StegType.IVERKSETT_MOT_OPPDRAG,
             StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
             StegType.FERDIGSTILLE_BEHANDLING,
-            StegType.BEHANDLING_AVSLUTTET
+            StegType.BEHANDLING_AVSLUTTET,
         ).forEach {
             assertEquals(steg, it)
             steg = hentNesteSteg(
                 behandling = lagBehandling(
-                    årsak = BehandlingÅrsak.MIGRERING
+                    årsak = BehandlingÅrsak.MIGRERING,
                 ),
                 utførendeStegType = it,
-                endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
+                endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING,
             )
         }
     }
@@ -50,14 +50,14 @@ class BehandlingStegTest {
             StegType.SEND_TIL_BESLUTTER,
             StegType.BESLUTTE_VEDTAK,
             StegType.FERDIGSTILLE_BEHANDLING,
-            StegType.BEHANDLING_AVSLUTTET
+            StegType.BEHANDLING_AVSLUTTET,
         ).forEach {
             assertEquals(steg, it)
             steg = hentNesteSteg(
                 behandling = lagBehandling(
-                    årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO
+                    årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
                 ),
-                utførendeStegType = it
+                utførendeStegType = it,
             )
         }
     }
@@ -80,16 +80,16 @@ class BehandlingStegTest {
             StegType.JOURNALFØR_VEDTAKSBREV,
             StegType.DISTRIBUER_VEDTAKSBREV,
             StegType.FERDIGSTILLE_BEHANDLING,
-            StegType.BEHANDLING_AVSLUTTET
+            StegType.BEHANDLING_AVSLUTTET,
         ).forEach {
             assertEquals(steg, it)
             steg = hentNesteSteg(
                 behandling = lagBehandling(
                     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                    årsak = BehandlingÅrsak.SØKNAD
+                    årsak = BehandlingÅrsak.SØKNAD,
                 ),
                 utførendeStegType = it,
-                endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
+                endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING,
             )
         }
     }
@@ -109,16 +109,16 @@ class BehandlingStegTest {
             StegType.JOURNALFØR_VEDTAKSBREV,
             StegType.DISTRIBUER_VEDTAKSBREV,
             StegType.FERDIGSTILLE_BEHANDLING,
-            StegType.BEHANDLING_AVSLUTTET
+            StegType.BEHANDLING_AVSLUTTET,
         ).forEach {
             assertEquals(steg, it)
             steg = hentNesteSteg(
                 behandling = lagBehandling(
                     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                    årsak = BehandlingÅrsak.SØKNAD
+                    årsak = BehandlingÅrsak.SØKNAD,
                 ),
                 utførendeStegType = it,
-                endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING
+                endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING,
             )
         }
     }
@@ -137,16 +137,16 @@ class BehandlingStegTest {
             StegType.JOURNALFØR_VEDTAKSBREV,
             StegType.DISTRIBUER_VEDTAKSBREV,
             StegType.FERDIGSTILLE_BEHANDLING,
-            StegType.BEHANDLING_AVSLUTTET
+            StegType.BEHANDLING_AVSLUTTET,
         ).forEach {
             assertEquals(steg, it)
             steg = hentNesteSteg(
                 behandling = lagBehandling(
                     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                    årsak = BehandlingÅrsak.FØDSELSHENDELSE
+                    årsak = BehandlingÅrsak.FØDSELSHENDELSE,
                 ),
                 utførendeStegType = it,
-                endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
+                endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING,
             )
         }
     }
@@ -160,16 +160,16 @@ class BehandlingStegTest {
             StegType.FILTRERING_FØDSELSHENDELSER,
             StegType.VILKÅRSVURDERING,
             StegType.BEHANDLINGSRESULTAT,
-            StegType.HENLEGG_BEHANDLING
+            StegType.HENLEGG_BEHANDLING,
         ).forEach {
             assertEquals(steg, it)
             steg = hentNesteSteg(
                 behandling = lagBehandling(
                     behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
-                    årsak = BehandlingÅrsak.FØDSELSHENDELSE
+                    årsak = BehandlingÅrsak.FØDSELSHENDELSE,
                 ),
                 utførendeStegType = it,
-                endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING
+                endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING,
             )
         }
     }
@@ -185,16 +185,16 @@ class BehandlingStegTest {
             StegType.IVERKSETT_MOT_OPPDRAG,
             StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
             StegType.FERDIGSTILLE_BEHANDLING,
-            StegType.BEHANDLING_AVSLUTTET
+            StegType.BEHANDLING_AVSLUTTET,
         ).forEach {
             assertEquals(steg, it)
             assertNotEquals(StegType.JOURNALFØR_VEDTAKSBREV, it)
             steg = hentNesteSteg(
                 behandling = lagBehandling(
                     behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                    årsak = BehandlingÅrsak.MIGRERING
+                    årsak = BehandlingÅrsak.MIGRERING,
                 ),
-                utførendeStegType = it
+                utførendeStegType = it,
             )
         }
     }
@@ -210,16 +210,16 @@ class BehandlingStegTest {
             StegType.IVERKSETT_MOT_OPPDRAG,
             StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
             StegType.FERDIGSTILLE_BEHANDLING,
-            StegType.BEHANDLING_AVSLUTTET
+            StegType.BEHANDLING_AVSLUTTET,
         ).forEach {
             assertEquals(steg, it)
             assertNotEquals(StegType.JOURNALFØR_VEDTAKSBREV, it)
             steg = hentNesteSteg(
                 behandling = lagBehandling(
                     behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT,
-                    årsak = BehandlingÅrsak.MIGRERING
+                    årsak = BehandlingÅrsak.MIGRERING,
                 ),
-                utførendeStegType = it
+                utførendeStegType = it,
             )
         }
     }
@@ -238,17 +238,17 @@ class BehandlingStegTest {
             StegType.IVERKSETT_MOT_OPPDRAG,
             StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
             StegType.FERDIGSTILLE_BEHANDLING,
-            StegType.BEHANDLING_AVSLUTTET
+            StegType.BEHANDLING_AVSLUTTET,
         ).forEach {
             assertEquals(steg, it)
             assertNotEquals(StegType.JOURNALFØR_VEDTAKSBREV, it)
             steg = hentNesteSteg(
                 behandling = lagBehandling(
                     behandlingType = BehandlingType.TEKNISK_ENDRING,
-                    årsak = BehandlingÅrsak.TEKNISK_ENDRING
+                    årsak = BehandlingÅrsak.TEKNISK_ENDRING,
                 ),
                 utførendeStegType = it,
-                endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
+                endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING,
             )
         }
     }
@@ -265,17 +265,17 @@ class BehandlingStegTest {
             StegType.SEND_TIL_BESLUTTER,
             StegType.BESLUTTE_VEDTAK,
             StegType.FERDIGSTILLE_BEHANDLING,
-            StegType.BEHANDLING_AVSLUTTET
+            StegType.BEHANDLING_AVSLUTTET,
         ).forEach {
             assertEquals(steg, it)
             assertNotEquals(StegType.JOURNALFØR_VEDTAKSBREV, it)
             steg = hentNesteSteg(
                 behandling = lagBehandling(
                     behandlingType = BehandlingType.TEKNISK_ENDRING,
-                    årsak = BehandlingÅrsak.TEKNISK_ENDRING
+                    årsak = BehandlingÅrsak.TEKNISK_ENDRING,
                 ),
                 utførendeStegType = it,
-                endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING
+                endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING,
             )
         }
     }
@@ -291,14 +291,14 @@ class BehandlingStegTest {
             StegType.JOURNALFØR_VEDTAKSBREV,
             StegType.DISTRIBUER_VEDTAKSBREV,
             StegType.FERDIGSTILLE_BEHANDLING,
-            StegType.BEHANDLING_AVSLUTTET
+            StegType.BEHANDLING_AVSLUTTET,
         ).forEach {
             assertEquals(it, steg)
             steg = hentNesteSteg(
                 behandling = lagBehandling(
-                    årsak = BehandlingÅrsak.OMREGNING_18ÅR
+                    årsak = BehandlingÅrsak.OMREGNING_18ÅR,
                 ),
-                utførendeStegType = it
+                utførendeStegType = it,
             )
         }
     }
@@ -320,15 +320,15 @@ class BehandlingStegTest {
             StegType.JOURNALFØR_VEDTAKSBREV,
             StegType.DISTRIBUER_VEDTAKSBREV,
             StegType.FERDIGSTILLE_BEHANDLING,
-            StegType.BEHANDLING_AVSLUTTET
+            StegType.BEHANDLING_AVSLUTTET,
         ).forEach {
             assertEquals(it, steg)
             steg = hentNesteSteg(
                 behandling = lagBehandling(
-                    årsak = BehandlingÅrsak.SMÅBARNSTILLEGG
+                    årsak = BehandlingÅrsak.SMÅBARNSTILLEGG,
                 ),
                 utførendeStegType = it,
-                endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
+                endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING,
             )
         }
     }
@@ -350,15 +350,15 @@ class BehandlingStegTest {
             StegType.JOURNALFØR_VEDTAKSBREV,
             StegType.DISTRIBUER_VEDTAKSBREV,
             StegType.FERDIGSTILLE_BEHANDLING,
-            StegType.BEHANDLING_AVSLUTTET
+            StegType.BEHANDLING_AVSLUTTET,
         ).forEach {
             assertEquals(it, steg)
             steg = hentNesteSteg(
                 behandling = lagBehandling(
-                    årsak = BehandlingÅrsak.ÅRLIG_KONTROLL
+                    årsak = BehandlingÅrsak.ÅRLIG_KONTROLL,
                 ),
                 utførendeStegType = it,
-                endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
+                endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING,
             )
         }
     }
@@ -374,15 +374,15 @@ class BehandlingStegTest {
             StegType.IVERKSETT_MOT_OPPDRAG,
             StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
             StegType.FERDIGSTILLE_BEHANDLING,
-            StegType.BEHANDLING_AVSLUTTET
+            StegType.BEHANDLING_AVSLUTTET,
         ).forEach {
             assertEquals(it, steg)
             steg = hentNesteSteg(
                 behandling = lagBehandling(
-                    årsak = BehandlingÅrsak.SATSENDRING
+                    årsak = BehandlingÅrsak.SATSENDRING,
                 ),
                 utførendeStegType = it,
-                endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
+                endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING,
             )
         }
     }
@@ -394,26 +394,26 @@ class BehandlingStegTest {
         listOf(
             StegType.REGISTRERE_PERSONGRUNNLAG,
             StegType.VILKÅRSVURDERING,
-            StegType.BEHANDLINGSRESULTAT
+            StegType.BEHANDLINGSRESULTAT,
         ).forEach {
             assertEquals(it, steg)
             if (it == StegType.BEHANDLINGSRESULTAT) {
                 assertThrows<Feil> {
                     hentNesteSteg(
                         behandling = lagBehandling(
-                            årsak = BehandlingÅrsak.SATSENDRING
+                            årsak = BehandlingÅrsak.SATSENDRING,
                         ),
                         utførendeStegType = it,
-                        endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING
+                        endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING,
                     )
                 }
             } else {
                 steg = hentNesteSteg(
                     behandling = lagBehandling(
-                        årsak = BehandlingÅrsak.SATSENDRING
+                        årsak = BehandlingÅrsak.SATSENDRING,
                     ),
                     utførendeStegType = it,
-                    endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING
+                    endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING,
                 )
             }
         }
@@ -433,15 +433,15 @@ class BehandlingStegTest {
             StegType.JOURNALFØR_VEDTAKSBREV,
             StegType.DISTRIBUER_VEDTAKSBREV,
             StegType.FERDIGSTILLE_BEHANDLING,
-            StegType.BEHANDLING_AVSLUTTET
+            StegType.BEHANDLING_AVSLUTTET,
         ).forEach {
             assertEquals(it, steg)
             steg = hentNesteSteg(
                 behandling = lagBehandling(
-                    årsak = BehandlingÅrsak.ÅRLIG_KONTROLL
+                    årsak = BehandlingÅrsak.ÅRLIG_KONTROLL,
                 ),
                 utførendeStegType = it,
-                endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING
+                endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.INGEN_ENDRING_I_UTBETALING,
             )
         }
     }
@@ -451,10 +451,10 @@ class BehandlingStegTest {
         assertThrows<Feil> {
             hentNesteSteg(
                 lagBehandling(
-                    årsak = BehandlingÅrsak.SØKNAD
+                    årsak = BehandlingÅrsak.SØKNAD,
                 ),
                 utførendeStegType = StegType.BESLUTTE_VEDTAK,
-                endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.IKKE_RELEVANT
+                endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.IKKE_RELEVANT,
             )
         }
     }

@@ -28,12 +28,12 @@ data class TriggesAv(
     val småbarnstillegg: Boolean,
     val gjelderFørstePeriode: Boolean,
     val gjelderFraInnvilgelsestidspunkt: Boolean,
-    val barnDød: Boolean
+    val barnDød: Boolean,
 ) {
     fun erEndret() = endringsaarsaker.isNotEmpty()
 
     fun erUtdypendeVilkårsvurderingOppfylt(
-        vilkårResultat: MinimertVilkårResultat
+        vilkårResultat: MinimertVilkårResultat,
     ): Boolean {
         return erDeltBostedOppfylt(vilkårResultat) &&
             erSkjønnsmessigVurderingOppfylt(vilkårResultat) &&
@@ -43,11 +43,11 @@ data class TriggesAv(
 
     fun erUtdypendeVilkårsvurderingOppfyltReduksjon(
         vilkårSomAvsluttesRettFørDennePerioden: MinimertVilkårResultat,
-        vilkårSomStarterIDennePerioden: MinimertVilkårResultat?
+        vilkårSomStarterIDennePerioden: MinimertVilkårResultat?,
     ): Boolean {
         return erDeltBostedOppfyltReduksjon(
             vilkårSomAvsluttesRettFørDennePerioden = vilkårSomAvsluttesRettFørDennePerioden,
-            vilkårSomStarterIDennePerioden = vilkårSomStarterIDennePerioden
+            vilkårSomStarterIDennePerioden = vilkårSomStarterIDennePerioden,
         ) &&
             erSkjønnsmessigVurderingOppfylt(vilkårSomAvsluttesRettFørDennePerioden) &&
             erMedlemskapOppfylt(vilkårSomAvsluttesRettFørDennePerioden) &&
@@ -84,7 +84,7 @@ data class TriggesAv(
 
     private fun erDeltBostedOppfyltReduksjon(
         vilkårSomAvsluttesRettFørDennePerioden: MinimertVilkårResultat,
-        vilkårSomStarterIDennePerioden: MinimertVilkårResultat?
+        vilkårSomStarterIDennePerioden: MinimertVilkårResultat?,
     ): Boolean {
         val avsluttetVilkårInneholdtDeltBosted =
             vilkårSomAvsluttesRettFørDennePerioden.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED)
@@ -102,7 +102,7 @@ data class TriggesAv(
 
 fun TriggesAv.erTriggereOppfyltForEndretUtbetaling(
     minimertEndretAndel: MinimertEndretAndel,
-    minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>
+    minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>,
 ): Boolean {
     val hørerTilEtterEndretUtbetaling = this.etterEndretUtbetaling
 
@@ -112,7 +112,7 @@ fun TriggesAv.erTriggereOppfyltForEndretUtbetaling(
         this.endretUtbetalingSkalUtbetales == EndretUtbetalingsperiodeDeltBostedTriggere.UTBETALING_IKKE_RELEVANT ||
             endretUtbetalingBegrunnelseOppfyllerUtvidetScenario(
                 vilkårBegrunnelsenGjelderFor = this.vilkår,
-                minimerteUtbetalingsperiodeDetaljer = minimerteUtbetalingsperiodeDetaljer
+                minimerteUtbetalingsperiodeDetaljer = minimerteUtbetalingsperiodeDetaljer,
             )
 
     val erAvSammeÅrsak = this.endringsaarsaker.contains(minimertEndretAndel.årsak)
@@ -123,7 +123,7 @@ fun TriggesAv.erTriggereOppfyltForEndretUtbetaling(
 }
 
 fun MinimertEndretAndel.oppfyllerSkalUtbetalesTrigger(
-    triggesAv: TriggesAv
+    triggesAv: TriggesAv,
 ): Boolean {
     val inneholderAndelSomSkalUtbetales = this.prosent!! != BigDecimal.ZERO
     return when (triggesAv.endretUtbetalingSkalUtbetales) {
@@ -135,7 +135,7 @@ fun MinimertEndretAndel.oppfyllerSkalUtbetalesTrigger(
 
 private fun endretUtbetalingBegrunnelseOppfyllerUtvidetScenario(
     vilkårBegrunnelsenGjelderFor: Set<Vilkår>?,
-    minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>
+    minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>,
 ): Boolean {
     val begrunnelseGjelderUtvidet = vilkårBegrunnelsenGjelderFor?.contains(Vilkår.UTVIDET_BARNETRYGD) ?: false
 

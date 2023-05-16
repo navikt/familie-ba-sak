@@ -35,7 +35,7 @@ data class SanityBegrunnelse(
     val hjemlerFolketrygdloven: List<String> = emptyList(),
     val endretUtbetalingsperiodeDeltBostedUtbetalingTrigger: EndretUtbetalingsperiodeDeltBostedTriggere? = null,
     val endretUtbetalingsperiodeTriggere: List<EndretUtbetalingsperiodeTrigger>? = null,
-    val utvidetBarnetrygdTriggere: List<UtvidetBarnetrygdTrigger>? = null
+    val utvidetBarnetrygdTriggere: List<UtvidetBarnetrygdTrigger>? = null,
 ) : ISanityBegrunnelse
 
 data class RestSanityBegrunnelse(
@@ -53,7 +53,7 @@ data class RestSanityBegrunnelse(
     val hjemlerFolketrygdloven: List<String>?,
     val endretUtbetalingsperiodeDeltBostedUtbetalingTrigger: String?,
     val endretUtbetalingsperiodeTriggere: List<String>? = emptyList(),
-    val utvidetBarnetrygdTriggere: List<String>? = emptyList()
+    val utvidetBarnetrygdTriggere: List<String>? = emptyList(),
 ) {
     fun tilSanityBegrunnelse(): SanityBegrunnelse {
         return SanityBegrunnelse(
@@ -88,7 +88,7 @@ data class RestSanityBegrunnelse(
                 finnEnumverdi(
                     endretUtbetalingsperiodeDeltBostedUtbetalingTrigger,
                     EndretUtbetalingsperiodeDeltBostedTriggere.values(),
-                    apiNavn
+                    apiNavn,
                 )
             } else {
                 null
@@ -98,7 +98,7 @@ data class RestSanityBegrunnelse(
             },
             utvidetBarnetrygdTriggere = utvidetBarnetrygdTriggere?.mapNotNull {
                 finnEnumverdi(it, UtvidetBarnetrygdTrigger.values(), apiNavn)
-            }
+            },
         )
     }
 }
@@ -109,7 +109,7 @@ fun <T : Enum<T>> finnEnumverdi(verdi: String, enumverdier: Array<T>, apiNavn: S
     val enumverdi = enumverdier.firstOrNull { verdi == it.name }
     if (enumverdi == null) {
         logger.error(
-            "$verdi på begrunnelsen $apiNavn er ikke blant verdiene til enumen ${enumverdier.javaClass.simpleName}"
+            "$verdi på begrunnelsen $apiNavn er ikke blant verdiene til enumen ${enumverdier.javaClass.simpleName}",
         )
     }
     return enumverdi
@@ -121,7 +121,7 @@ enum class SanityVilkår {
     GIFT_PARTNERSKAP,
     BOSATT_I_RIKET,
     LOVLIG_OPPHOLD,
-    UTVIDET_BARNETRYGD
+    UTVIDET_BARNETRYGD,
 }
 
 fun SanityVilkår.tilVilkår() = when (this) {
@@ -141,14 +141,14 @@ fun VilkårRolle.tilPersonType() =
 
 enum class VilkårRolle {
     SOKER,
-    BARN
+    BARN,
 }
 
 enum class VilkårTrigger {
     VURDERING_ANNET_GRUNNLAG,
     MEDLEMSKAP,
     DELT_BOSTED,
-    DELT_BOSTED_SKAL_IKKE_DELES
+    DELT_BOSTED_SKAL_IKKE_DELES,
 }
 
 enum class ØvrigTrigger {
@@ -160,21 +160,21 @@ enum class ØvrigTrigger {
     ENDRET_UTBETALING,
     GJELDER_FØRSTE_PERIODE,
     GJELDER_FRA_INNVILGELSESTIDSPUNKT,
-    BARN_DØD
+    BARN_DØD,
 }
 
 enum class EndretUtbetalingsperiodeTrigger {
-    ETTER_ENDRET_UTBETALINGSPERIODE
+    ETTER_ENDRET_UTBETALINGSPERIODE,
 }
 
 enum class EndretUtbetalingsperiodeDeltBostedTriggere {
     SKAL_UTBETALES,
     SKAL_IKKE_UTBETALES,
-    UTBETALING_IKKE_RELEVANT
+    UTBETALING_IKKE_RELEVANT,
 }
 
 enum class UtvidetBarnetrygdTrigger {
-    SMÅBARNSTILLEGG
+    SMÅBARNSTILLEGG,
 }
 
 fun SanityBegrunnelse.tilTriggesAv(): TriggesAv {
@@ -213,7 +213,7 @@ fun SanityBegrunnelse.tilTriggesAv(): TriggesAv {
         småbarnstillegg = this.inneholderUtvidetBarnetrygdTrigger(UtvidetBarnetrygdTrigger.SMÅBARNSTILLEGG),
         gjelderFørstePeriode = this.inneholderØvrigTrigger(ØvrigTrigger.GJELDER_FØRSTE_PERIODE),
         gjelderFraInnvilgelsestidspunkt = this.inneholderØvrigTrigger(ØvrigTrigger.GJELDER_FRA_INNVILGELSESTIDSPUNKT),
-        barnDød = this.inneholderØvrigTrigger(ØvrigTrigger.BARN_DØD)
+        barnDød = this.inneholderØvrigTrigger(ØvrigTrigger.BARN_DØD),
     )
 }
 

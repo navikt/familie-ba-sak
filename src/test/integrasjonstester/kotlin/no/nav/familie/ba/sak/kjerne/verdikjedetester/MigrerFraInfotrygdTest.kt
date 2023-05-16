@@ -40,7 +40,7 @@ class MigrerFraInfotrygdTest(
     @Autowired private val kompetanseRepository: KompetanseRepository,
     @Autowired private val efSakRestClient: EfSakRestClient,
     @Autowired private val vilkårsvurderingRepository: VilkårsvurderingRepository,
-    @Autowired private val featureToggleService: FeatureToggleService
+    @Autowired private val featureToggleService: FeatureToggleService,
 ) : AbstractVerdikjedetest() {
     private val logger = LoggerFactory.getLogger(MigrerFraInfotrygdTest::class.java)
 
@@ -56,16 +56,16 @@ class MigrerFraInfotrygdTest(
                 søker = RestScenarioPerson(
                     fødselsdato = "1996-01-12",
                     fornavn = "Mor",
-                    etternavn = "Søker"
+                    etternavn = "Søker",
                 ),
                 barna = listOf(
                     RestScenarioPerson(
                         fødselsdato = LocalDate.now().minusYears(1).toString(),
                         fornavn = "Barn2",
-                        etternavn = "Barnesen2"
-                    )
-                )
-            )
+                        etternavn = "Barnesen2",
+                    ),
+                ),
+            ),
         )
 
         val sakKlarForMigreringScenario = mockServerKlient().lagScenario(
@@ -80,14 +80,14 @@ class MigrerFraInfotrygdTest(
                                 HALV_BARNETRYGD_SATS_UNDER_6_ÅR * 2,
                                 barnPåInfotrygdSøknadScenario.barna.map { it.ident.toString() },
                                 "OR",
-                                "OS"
-                            )
+                                "OS",
+                            ),
                         ),
-                        barn = emptyList()
-                    )
+                        barn = emptyList(),
+                    ),
                 ),
-                barna = emptyList()
-            )
+                barna = emptyList(),
+            ),
         )
 
         val migreringsresponse = migreringService.migrer(sakKlarForMigreringScenario.søker.ident!!)
@@ -97,7 +97,7 @@ class MigrerFraInfotrygdTest(
         generellAssertFagsak(
             restFagsak = restFagsakEtterBehandlingAvsluttet,
             fagsakStatus = FagsakStatus.OPPRETTET,
-            behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG
+            behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG,
         )
 
         val behandling = behandlingRepository.finnBehandling(migreringsresponse.behandlingId)
@@ -113,16 +113,16 @@ class MigrerFraInfotrygdTest(
                 søker = RestScenarioPerson(
                     fødselsdato = "1996-01-12",
                     fornavn = "Mor",
-                    etternavn = "Søker"
+                    etternavn = "Søker",
                 ),
                 barna = listOf(
                     RestScenarioPerson(
                         fødselsdato = LocalDate.now().minusYears(1).toString(),
                         fornavn = "Barn2",
-                        etternavn = "Barnesen2"
-                    )
-                )
-            )
+                        etternavn = "Barnesen2",
+                    ),
+                ),
+            ),
         )
 
         val sakKlarForMigreringScenario = mockServerKlient().lagScenario(
@@ -137,14 +137,14 @@ class MigrerFraInfotrygdTest(
                                 HALV_BARNETRYGD_SATS_UNDER_6_ÅR,
                                 barnPåInfotrygdSøknadScenario.barna.map { it.ident.toString() },
                                 "OR",
-                                "MD"
-                            )
+                                "MD",
+                            ),
                         ),
-                        barn = emptyList()
-                    )
+                        barn = emptyList(),
+                    ),
                 ),
-                barna = emptyList()
-            )
+                barna = emptyList(),
+            ),
         )
 
         val migreringsresponse = migreringService.migrer(sakKlarForMigreringScenario.søker.ident!!)
@@ -154,7 +154,7 @@ class MigrerFraInfotrygdTest(
         generellAssertFagsak(
             restFagsak = restFagsakEtterBehandlingAvsluttet,
             fagsakStatus = FagsakStatus.OPPRETTET,
-            behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG
+            behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG,
         )
 
         val behandling = behandlingRepository.finnBehandling(migreringsresponse.behandlingId)
@@ -170,16 +170,16 @@ class MigrerFraInfotrygdTest(
                 søker = RestScenarioPerson(
                     fødselsdato = "1996-01-12",
                     fornavn = "Mor",
-                    etternavn = "Søker"
+                    etternavn = "Søker",
                 ),
                 barna = listOf(
                     RestScenarioPerson(
                         fødselsdato = LocalDate.now().minusYears(8).toString(),
                         fornavn = "Barn2",
-                        etternavn = "Barnesen2"
-                    )
-                )
-            )
+                        etternavn = "Barnesen2",
+                    ),
+                ),
+            ),
         )
 
         val sakKlarForMigreringScenario = mockServerKlient().lagScenario(
@@ -194,14 +194,14 @@ class MigrerFraInfotrygdTest(
                                 HALV_BARNETRYGD_SATS_OVER_6_ÅR,
                                 barnPåInfotrygdSøknadScenario.barna.map { it.ident.toString() },
                                 "OR",
-                                "MD"
-                            )
+                                "MD",
+                            ),
                         ),
-                        barn = emptyList()
-                    )
+                        barn = emptyList(),
+                    ),
                 ),
-                barna = emptyList()
-            )
+                barna = emptyList(),
+            ),
         )
 
         val migreringsresponse = migreringService.migrer(sakKlarForMigreringScenario.søker.ident!!)
@@ -211,7 +211,7 @@ class MigrerFraInfotrygdTest(
         generellAssertFagsak(
             restFagsak = restFagsakEtterBehandlingAvsluttet,
             fagsakStatus = FagsakStatus.OPPRETTET,
-            behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG
+            behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG,
         )
 
         val behandling = behandlingRepository.finnBehandling(migreringsresponse.behandlingId)
@@ -227,26 +227,26 @@ class MigrerFraInfotrygdTest(
                 søker = RestScenarioPerson(
                     fødselsdato = "1996-01-12",
                     fornavn = "Mor",
-                    etternavn = "Søker"
+                    etternavn = "Søker",
                 ),
                 barna = listOf(
                     RestScenarioPerson(
                         fødselsdato = LocalDate.now().minusYears(8).toString(),
                         fornavn = "Trilling1",
-                        etternavn = "Barnesen2"
+                        etternavn = "Barnesen2",
                     ),
                     RestScenarioPerson(
                         fødselsdato = LocalDate.now().minusYears(8).toString(),
                         fornavn = "Trilling2",
-                        etternavn = "Barnesen2"
+                        etternavn = "Barnesen2",
                     ),
                     RestScenarioPerson(
                         fødselsdato = LocalDate.now().minusYears(8).toString(),
                         fornavn = "Trilling3",
-                        etternavn = "Barnesen2"
-                    )
-                )
-            )
+                        etternavn = "Barnesen2",
+                    ),
+                ),
+            ),
         )
 
         val sakKlarForMigreringScenario = mockServerKlient().lagScenario(
@@ -261,14 +261,14 @@ class MigrerFraInfotrygdTest(
                                 HALV_BARNETRYGD_SATS_OVER_6_ÅR * 3,
                                 barnPåInfotrygdSøknadScenario.barna.map { it.ident.toString() },
                                 "OR",
-                                "MD"
-                            )
+                                "MD",
+                            ),
                         ),
-                        barn = emptyList()
-                    )
+                        barn = emptyList(),
+                    ),
                 ),
-                barna = emptyList()
-            )
+                barna = emptyList(),
+            ),
         )
 
         val migreringsresponse = migreringService.migrer(sakKlarForMigreringScenario.søker.ident!!)
@@ -278,7 +278,7 @@ class MigrerFraInfotrygdTest(
         generellAssertFagsak(
             restFagsak = restFagsakEtterBehandlingAvsluttet,
             fagsakStatus = FagsakStatus.OPPRETTET,
-            behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG
+            behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG,
         )
 
         val behandling = behandlingRepository.finnBehandling(migreringsresponse.behandlingId)
@@ -294,26 +294,26 @@ class MigrerFraInfotrygdTest(
                 søker = RestScenarioPerson(
                     fødselsdato = "1996-01-12",
                     fornavn = "Mor",
-                    etternavn = "Søker"
+                    etternavn = "Søker",
                 ),
                 barna = listOf(
                     RestScenarioPerson(
                         fødselsdato = LocalDate.now().minusYears(2).toString(),
                         fornavn = "Trilling1",
-                        etternavn = "Barnesen2"
+                        etternavn = "Barnesen2",
                     ),
                     RestScenarioPerson(
                         fødselsdato = LocalDate.now().minusYears(8).toString(),
                         fornavn = "Trilling2",
-                        etternavn = "Barnesen2"
+                        etternavn = "Barnesen2",
                     ),
                     RestScenarioPerson(
                         fødselsdato = LocalDate.now().minusYears(8).toString(),
                         fornavn = "Trilling3",
-                        etternavn = "Barnesen2"
-                    )
-                )
-            )
+                        etternavn = "Barnesen2",
+                    ),
+                ),
+            ),
         )
 
         val sakKlarForMigreringScenario = mockServerKlient().lagScenario(
@@ -328,14 +328,14 @@ class MigrerFraInfotrygdTest(
                                 HALV_BARNETRYGD_SATS_UNDER_6_ÅR + (HALV_BARNETRYGD_SATS_OVER_6_ÅR * 2),
                                 barnPåInfotrygdSøknadScenario.barna.map { it.ident.toString() },
                                 "OR",
-                                "MD"
-                            )
+                                "MD",
+                            ),
                         ),
-                        barn = emptyList()
-                    )
+                        barn = emptyList(),
+                    ),
                 ),
-                barna = emptyList()
-            )
+                barna = emptyList(),
+            ),
         )
 
         val migreringsresponse = migreringService.migrer(sakKlarForMigreringScenario.søker.ident!!)
@@ -345,7 +345,7 @@ class MigrerFraInfotrygdTest(
         generellAssertFagsak(
             restFagsak = restFagsakEtterBehandlingAvsluttet,
             fagsakStatus = FagsakStatus.OPPRETTET,
-            behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG
+            behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG,
         )
         assertThat(kompetanseRepository.finnFraBehandlingId(migreringsresponse.behandlingId)).isEmpty()
     }
@@ -357,16 +357,16 @@ class MigrerFraInfotrygdTest(
                 søker = RestScenarioPerson(
                     fødselsdato = "1996-01-12",
                     fornavn = "Mor",
-                    etternavn = "Søker"
+                    etternavn = "Søker",
                 ),
                 barna = listOf(
                     RestScenarioPerson(
                         fødselsdato = LocalDate.now().minusYears(7).toString(),
                         fornavn = "Barn",
-                        etternavn = "Barnesen2"
-                    )
-                )
-            )
+                        etternavn = "Barnesen2",
+                    ),
+                ),
+            ),
         )
 
         val sakKlarForMigreringScenario = mockServerKlient().lagScenario(
@@ -381,14 +381,14 @@ class MigrerFraInfotrygdTest(
                                 HALV_BARNETRYGD_SATS_UNDER_6_ÅR,
                                 barnPåInfotrygdSøknadScenario.barna.map { it.ident.toString() },
                                 "OR",
-                                "MD"
-                            )
+                                "MD",
+                            ),
                         ),
-                        barn = emptyList()
-                    )
+                        barn = emptyList(),
+                    ),
                 ),
-                barna = emptyList()
-            )
+                barna = emptyList(),
+            ),
         )
 
         val exception =
@@ -403,16 +403,16 @@ class MigrerFraInfotrygdTest(
                 søker = RestScenarioPerson(
                     fødselsdato = "1996-01-12",
                     fornavn = "Mor",
-                    etternavn = "Søker"
+                    etternavn = "Søker",
                 ),
                 barna = listOf(
                     RestScenarioPerson(
                         fødselsdato = LocalDate.now().minusYears(8).toString(),
                         fornavn = "Barn2",
-                        etternavn = "Barnesen2"
-                    )
-                )
-            )
+                        etternavn = "Barnesen2",
+                    ),
+                ),
+            ),
         )
 
         val sakKlarForMigreringScenario = mockServerKlient().lagScenario(
@@ -427,14 +427,14 @@ class MigrerFraInfotrygdTest(
                                 HALV_UTVIDET_BARNETRYGD_SATS + HALV_BARNETRYGD_SATS_OVER_6_ÅR,
                                 barnPåInfotrygdSøknadScenario.barna.map { it.ident.toString() },
                                 "UT",
-                                "MD"
-                            )
+                                "MD",
+                            ),
                         ),
-                        barn = emptyList()
-                    )
+                        barn = emptyList(),
+                    ),
                 ),
-                barna = emptyList()
-            )
+                barna = emptyList(),
+            ),
         )
 
         val migreringsresponse = migreringService.migrer(sakKlarForMigreringScenario.søker.ident!!)
@@ -444,7 +444,7 @@ class MigrerFraInfotrygdTest(
         generellAssertFagsak(
             restFagsak = restFagsakEtterBehandlingAvsluttet,
             fagsakStatus = FagsakStatus.OPPRETTET,
-            behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG
+            behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG,
         )
 
         val behandling = behandlingRepository.finnBehandling(migreringsresponse.behandlingId)
@@ -463,9 +463,9 @@ class MigrerFraInfotrygdTest(
                         personIdent = hentPerioderMedFullOvergangsstønadSlot.captured,
                         fomDato = LocalDate.now().minusYears(2),
                         datakilde = Datakilde.EF,
-                        tomDato = LocalDate.now().plusMonths(3)
-                    )
-                )
+                        tomDato = LocalDate.now().plusMonths(3),
+                    ),
+                ),
             )
         }
 
@@ -474,16 +474,16 @@ class MigrerFraInfotrygdTest(
                 søker = RestScenarioPerson(
                     fødselsdato = "1996-01-12",
                     fornavn = "Mor",
-                    etternavn = "Søker"
+                    etternavn = "Søker",
                 ),
                 barna = listOf(
                     RestScenarioPerson(
                         fødselsdato = LocalDate.now().minusYears(1).toString(),
                         fornavn = "Barn2",
-                        etternavn = "Barnesen2"
-                    )
-                )
-            )
+                        etternavn = "Barnesen2",
+                    ),
+                ),
+            ),
         )
 
         val sakKlarForMigreringScenario = mockServerKlient().lagScenario(
@@ -496,14 +496,14 @@ class MigrerFraInfotrygdTest(
                         bruker = listOf(
                             lagInfotrygdSakMedSmåbarnstillegg(
                                 HALV_UTVIDET_BARNETRYGD_SATS * 2 + HALV_BARNETRYGD_SATS_UNDER_6_ÅR * 2,
-                                barnPåInfotrygdSøknadScenario.barna.map { it.ident.toString() }
-                            )
+                                barnPåInfotrygdSøknadScenario.barna.map { it.ident.toString() },
+                            ),
                         ),
-                        barn = emptyList()
-                    )
+                        barn = emptyList(),
+                    ),
                 ),
-                barna = emptyList()
-            )
+                barna = emptyList(),
+            ),
         )
 
         val migreringsresponse = migreringService.migrer(sakKlarForMigreringScenario.søker.ident!!)
@@ -513,7 +513,7 @@ class MigrerFraInfotrygdTest(
         generellAssertFagsak(
             restFagsak = restFagsakEtterBehandlingAvsluttet,
             fagsakStatus = FagsakStatus.OPPRETTET,
-            behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG
+            behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG,
         )
 
         val behandling = behandlingRepository.finnBehandling(migreringsresponse.behandlingId)
@@ -529,21 +529,21 @@ class MigrerFraInfotrygdTest(
                 søker = RestScenarioPerson(
                     fødselsdato = "1996-01-12",
                     fornavn = "Mor",
-                    etternavn = "Søker"
+                    etternavn = "Søker",
                 ),
                 barna = listOf(
                     RestScenarioPerson(
                         fødselsdato = LocalDate.now().minusYears(19).toString(),
                         fornavn = "Barn1",
-                        etternavn = "Barnesen1"
+                        etternavn = "Barnesen1",
                     ),
                     RestScenarioPerson(
                         fødselsdato = LocalDate.now().minusYears(8).toString(),
                         fornavn = "Barn2",
-                        etternavn = "Barnesen2"
-                    )
-                )
-            )
+                        etternavn = "Barnesen2",
+                    ),
+                ),
+            ),
         )
 
         val sakKlarForMigreringScenario = mockServerKlient().lagScenario(
@@ -558,14 +558,14 @@ class MigrerFraInfotrygdTest(
                                 HALV_UTVIDET_BARNETRYGD_SATS + HALV_BARNETRYGD_SATS_OVER_6_ÅR * 2,
                                 barnPåInfotrygdSøknadScenario.barna.map { it.ident.toString() },
                                 "UT",
-                                "MD"
-                            )
+                                "MD",
+                            ),
                         ),
-                        barn = emptyList()
-                    )
+                        barn = emptyList(),
+                    ),
                 ),
-                barna = emptyList()
-            )
+                barna = emptyList(),
+            ),
         )
 
         val exception =
@@ -580,21 +580,21 @@ class MigrerFraInfotrygdTest(
                 søker = RestScenarioPerson(
                     fødselsdato = "1996-01-12",
                     fornavn = "Mor",
-                    etternavn = "Søker"
+                    etternavn = "Søker",
                 ),
                 barna = listOf(
                     RestScenarioPerson(
                         fødselsdato = LocalDate.now().minusYears(11).toString(),
                         fornavn = "Barn1",
-                        etternavn = "Barnesen1"
+                        etternavn = "Barnesen1",
                     ),
                     RestScenarioPerson(
                         fødselsdato = LocalDate.now().minusYears(8).toString(),
                         fornavn = "Barn2",
-                        etternavn = "Barnesen2"
-                    )
-                )
-            )
+                        etternavn = "Barnesen2",
+                    ),
+                ),
+            ),
         )
 
         val sakKlarForMigreringScenario = mockServerKlient().lagScenario(
@@ -609,22 +609,22 @@ class MigrerFraInfotrygdTest(
                                 HALV_UTVIDET_BARNETRYGD_SATS + HALV_BARNETRYGD_SATS_OVER_6_ÅR * 2,
                                 barnPåInfotrygdSøknadScenario.barna.map { it.ident.toString() },
                                 "UT",
-                                "MD"
+                                "MD",
                             ).let {
                                 it.copy(
                                     stønad = it.stønad!!.copy(
                                         delytelse = listOf(
-                                            it.stønad!!.delytelse.first().copy(typeDelytelse = SMÅBARNSTILLEGG_KODE)
-                                        )
-                                    )
+                                            it.stønad!!.delytelse.first().copy(typeDelytelse = SMÅBARNSTILLEGG_KODE),
+                                        ),
+                                    ),
                                 )
-                            }
+                            },
                         ),
-                        barn = emptyList()
-                    )
+                        barn = emptyList(),
+                    ),
                 ),
-                barna = emptyList()
-            )
+                barna = emptyList(),
+            ),
         )
 
         val exception =
@@ -639,16 +639,16 @@ class MigrerFraInfotrygdTest(
                 søker = RestScenarioPerson(
                     fødselsdato = "1996-01-12",
                     fornavn = "Mor",
-                    etternavn = "Søker"
+                    etternavn = "Søker",
                 ),
                 barna = listOf(
                     RestScenarioPerson(
                         fødselsdato = LocalDate.now().minusYears(1).toString(),
                         fornavn = "Barn2",
-                        etternavn = "Barnesen2"
-                    )
-                )
-            )
+                        etternavn = "Barnesen2",
+                    ),
+                ),
+            ),
         )
 
         val sakKlarForMigreringScenario = mockServerKlient().lagScenario(
@@ -663,14 +663,14 @@ class MigrerFraInfotrygdTest(
                                 HALV_BARNETRYGD_SATS_UNDER_6_ÅR * 2,
                                 barnPåInfotrygdSøknadScenario.barna.map { it.ident.toString() },
                                 "OR",
-                                "EU"
-                            )
+                                "EU",
+                            ),
                         ),
-                        barn = emptyList()
-                    )
+                        barn = emptyList(),
+                    ),
                 ),
-                barna = emptyList()
-            )
+                barna = emptyList(),
+            ),
         )
 
         kjørOgAssertEØS(sakKlarForMigreringScenario.søker.ident!!, BehandlingUnderkategori.ORDINÆR)
@@ -683,21 +683,21 @@ class MigrerFraInfotrygdTest(
                 søker = RestScenarioPerson(
                     fødselsdato = "1996-01-12",
                     fornavn = "Mor",
-                    etternavn = "Søker"
+                    etternavn = "Søker",
                 ),
                 barna = listOf(
                     RestScenarioPerson(
                         fødselsdato = LocalDate.now().minusYears(8).toString(),
                         fornavn = "barn 1",
-                        etternavn = "Barnesen2"
+                        etternavn = "Barnesen2",
                     ),
                     RestScenarioPerson(
                         fødselsdato = LocalDate.now().minusYears(8).toString(),
                         fornavn = "barn 2",
-                        etternavn = "Barnesen2"
-                    )
-                )
-            )
+                        etternavn = "Barnesen2",
+                    ),
+                ),
+            ),
         )
 
         val sakKlarForMigreringScenario = mockServerKlient().lagScenario(
@@ -712,14 +712,14 @@ class MigrerFraInfotrygdTest(
                                 HALV_BARNETRYGD_SATS_OVER_6_ÅR * 2 * 2,
                                 barnPåInfotrygdSøknadScenario.barna.map { it.ident.toString() },
                                 "OR",
-                                "EU"
-                            )
+                                "EU",
+                            ),
                         ),
-                        barn = emptyList()
-                    )
+                        barn = emptyList(),
+                    ),
                 ),
-                barna = emptyList()
-            )
+                barna = emptyList(),
+            ),
         )
 
         kjørOgAssertEØS(sakKlarForMigreringScenario.søker.ident!!, BehandlingUnderkategori.ORDINÆR)
@@ -732,16 +732,16 @@ class MigrerFraInfotrygdTest(
                 søker = RestScenarioPerson(
                     fødselsdato = "1996-01-12",
                     fornavn = "Mor",
-                    etternavn = "Søker"
+                    etternavn = "Søker",
                 ),
                 barna = listOf(
                     RestScenarioPerson(
                         fødselsdato = LocalDate.now().minusYears(8).toString(),
                         fornavn = "Barn2",
-                        etternavn = "Barnesen2"
-                    )
-                )
-            )
+                        etternavn = "Barnesen2",
+                    ),
+                ),
+            ),
         )
 
         val sakKlarForMigreringScenario = mockServerKlient().lagScenario(
@@ -756,14 +756,14 @@ class MigrerFraInfotrygdTest(
                                 HALV_UTVIDET_BARNETRYGD_SATS * 2 + HALV_BARNETRYGD_SATS_OVER_6_ÅR * 2,
                                 barnPåInfotrygdSøknadScenario.barna.map { it.ident.toString() },
                                 "UT",
-                                "EU"
-                            )
+                                "EU",
+                            ),
                         ),
-                        barn = emptyList()
-                    )
+                        barn = emptyList(),
+                    ),
                 ),
-                barna = emptyList()
-            )
+                barna = emptyList(),
+            ),
         )
 
         kjørOgAssertEØS(sakKlarForMigreringScenario.søker.ident!!, BehandlingUnderkategori.UTVIDET)
@@ -786,14 +786,14 @@ class MigrerFraInfotrygdTest(
                                 1054.0,
                                 listOf(fnrBarnet.asString),
                                 "OR",
-                                "IB"
-                            )
+                                "IB",
+                            ),
                         ),
-                        barn = emptyList()
-                    )
+                        barn = emptyList(),
+                    ),
                 ),
-                barna = emptyList()
-            )
+                barna = emptyList(),
+            ),
         )
 
         kjørOgAssertInstitusjonEnsligMindreårig(fnrBarnet.asString, FagsakType.INSTITUSJON)
@@ -819,14 +819,14 @@ class MigrerFraInfotrygdTest(
                                 1054.0,
                                 listOf(fnrBarnet.asString),
                                 "OR",
-                                "OS" // Enslig mindreårig har OR OS hvor de er både barn og stønadseier
-                            )
+                                "OS", // Enslig mindreårig har OR OS hvor de er både barn og stønadseier
+                            ),
                         ),
-                        barn = emptyList()
-                    )
+                        barn = emptyList(),
+                    ),
                 ),
-                barna = emptyList()
-            )
+                barna = emptyList(),
+            ),
         )
 
         kjørOgAssertInstitusjonEnsligMindreårig(fnrBarnet.asString, FagsakType.BARN_ENSLIG_MINDREÅRIG)
@@ -852,14 +852,14 @@ class MigrerFraInfotrygdTest(
                                 1054.0,
                                 listOf(fnrBarnet.asString),
                                 "OR",
-                                "OS" // Enslig mindreårig har OR OS hvor de er både barn og stønadseier
-                            )
+                                "OS", // Enslig mindreårig har OR OS hvor de er både barn og stønadseier
+                            ),
                         ),
-                        barn = emptyList()
-                    )
+                        barn = emptyList(),
+                    ),
                 ),
-                barna = emptyList()
-            )
+                barna = emptyList(),
+            ),
         )
 
         val exception =
@@ -887,14 +887,14 @@ class MigrerFraInfotrygdTest(
                                 1054.0,
                                 listOf(fnrBarnet.asString),
                                 "UT",
-                                "EF" // Enslig mindreårig har OR OS hvor de er både barn og stønadseier
-                            )
+                                "EF", // Enslig mindreårig har OR OS hvor de er både barn og stønadseier
+                            ),
                         ),
-                        barn = emptyList()
-                    )
+                        barn = emptyList(),
+                    ),
                 ),
-                barna = emptyList()
-            )
+                barna = emptyList(),
+            ),
         )
 
         val exception =
@@ -904,7 +904,7 @@ class MigrerFraInfotrygdTest(
 
     private fun kjørOgAssertEØS(
         ident: String,
-        behandlingUnderkategori: BehandlingUnderkategori
+        behandlingUnderkategori: BehandlingUnderkategori,
     ) {
         val migreringsresponse = kotlin.runCatching { migreringService.migrer(ident) }
             .getOrElse {
@@ -924,7 +924,7 @@ class MigrerFraInfotrygdTest(
         generellAssertFagsak(
             restFagsak = restFagsakEtterBehandlingAvsluttet,
             fagsakStatus = FagsakStatus.OPPRETTET,
-            behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG
+            behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG,
         )
 
         assertThat(kompetanseRepository.finnFraBehandlingId(migreringsresponse.behandlingId)).hasSize(1)
@@ -941,7 +941,7 @@ class MigrerFraInfotrygdTest(
 
     private fun kjørOgAssertInstitusjonEnsligMindreårig(
         ident: String,
-        fagsakType: FagsakType
+        fagsakType: FagsakType,
     ) {
         val migreringsresponse = kotlin.runCatching { migreringService.migrer(ident) }
             .getOrElse {
@@ -973,7 +973,7 @@ class MigrerFraInfotrygdTest(
         generellAssertFagsak(
             restFagsak = restFagsakEtterBehandlingAvsluttet,
             fagsakStatus = FagsakStatus.OPPRETTET,
-            behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG
+            behandlingStegType = StegType.IVERKSETT_MOT_OPPDRAG,
         )
 
         assertThat(kompetanseRepository.finnFraBehandlingId(migreringsresponse.behandlingId)).hasSize(0)

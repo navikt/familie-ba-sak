@@ -21,14 +21,14 @@ import java.net.URI
 @Component
 class InfotrygdFeedClient(
     @Value("\${FAMILIE_BA_INFOTRYGD_FEED_API_URL}") private val clientUri: URI,
-    @Qualifier("jwtBearer") restOperations: RestOperations
+    @Qualifier("jwtBearer") restOperations: RestOperations,
 ) : AbstractRestClient(restOperations, "infotrygd_feed") {
 
     fun sendFødselhendelsesFeedTilInfotrygd(infotrygdFødselhendelsesFeedDto: InfotrygdFødselhendelsesFeedDto) {
         return try {
             sendFeedTilInfotrygd(
                 URI.create("$clientUri/barnetrygd/v1/feed/foedselsmelding"),
-                infotrygdFødselhendelsesFeedDto
+                infotrygdFødselhendelsesFeedDto,
             )
         } catch (e: Exception) {
             loggOgKastException(e)
@@ -47,7 +47,7 @@ class InfotrygdFeedClient(
         try {
             sendFeedTilInfotrygd(
                 URI.create("$clientUri/barnetrygd/v1/feed/startbehandlingsmelding"),
-                startBehandlingDto
+                startBehandlingDto,
             )
         } catch (e: Exception) {
             loggOgKastException(e)
@@ -67,7 +67,7 @@ class InfotrygdFeedClient(
     @Retryable(
         value = [IOException::class],
         maxAttempts = 3,
-        backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS)
+        backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS),
     )
     private fun sendFeedTilInfotrygd(endpoint: URI, feed: Any) {
         postForEntity<Ressurs<String>>(endpoint, feed)

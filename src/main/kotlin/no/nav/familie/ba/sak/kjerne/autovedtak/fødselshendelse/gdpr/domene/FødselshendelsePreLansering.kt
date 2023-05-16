@@ -28,7 +28,7 @@ data class FødselshendelsePreLansering(
     @SequenceGenerator(
         name = "foedselshendelse_pre_lansering_seq_generator",
         sequenceName = "foedselshendelse_pre_lansering_seq",
-        allocationSize = 50
+        allocationSize = 50,
     )
     val id: Long = 0,
 
@@ -49,7 +49,7 @@ data class FødselshendelsePreLansering(
     val filtreringsreglerOutput: String = "",
 
     @Column(name = "vilkaarsvurderinger_for_foedselshendelse", columnDefinition = "TEXT")
-    var vilkårsvurderingerForFødselshendelse: String = ""
+    var vilkårsvurderingerForFødselshendelse: String = "",
 ) : BaseEntitet() {
 
     override fun hashCode(): Int {

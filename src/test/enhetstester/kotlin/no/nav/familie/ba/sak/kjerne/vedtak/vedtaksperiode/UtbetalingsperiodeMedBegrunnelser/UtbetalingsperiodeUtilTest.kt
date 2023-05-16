@@ -50,21 +50,21 @@ class UtbetalingsperiodeUtilTest {
             fom = mars2020,
             tom = april2020,
             beløp = 1000,
-            person = person1
+            person = person1,
         )
 
         val andelPerson1MaiTilJuli = lagAndelTilkjentYtelse(
             fom = mai2020,
             tom = juli2020,
             beløp = 1000,
-            person = person1
+            person = person1,
         )
 
         val andelPerson2MarsTilJuli = lagAndelTilkjentYtelse(
             fom = mars2020,
             tom = juli2020,
             beløp = 1000,
-            person = person2
+            person = person2,
         )
 
         val forventetResultat = listOf(
@@ -73,21 +73,21 @@ class UtbetalingsperiodeUtilTest {
                 fom = mars2020.førsteDagIInneværendeMåned(),
                 tom = april2020.sisteDagIInneværendeMåned(),
                 type = Vedtaksperiodetype.UTBETALING,
-                begrunnelser = mutableSetOf()
+                begrunnelser = mutableSetOf(),
             ),
             lagVedtaksperiodeMedBegrunnelser(
                 vedtak = vedtak,
                 fom = mai2020.førsteDagIInneværendeMåned(),
                 tom = juli2020.sisteDagIInneværendeMåned(),
                 type = Vedtaksperiodetype.UTBETALING,
-                begrunnelser = mutableSetOf()
-            )
+                begrunnelser = mutableSetOf(),
+            ),
         )
 
         val vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling())
         val personResultater = setOf(
             vilkårsvurdering.lagGodkjentPersonResultatForBarn(person1),
-            vilkårsvurdering.lagGodkjentPersonResultatForBarn(person2)
+            vilkårsvurdering.lagGodkjentPersonResultatForBarn(person2),
         )
 
         val faktiskResultat = hentPerioderMedUtbetaling(
@@ -95,17 +95,17 @@ class UtbetalingsperiodeUtilTest {
             vedtak = vedtak,
             personResultater = personResultater,
             personerIPersongrunnlag = listOf(person1, person2),
-            fagsakType = FagsakType.NORMAL
+            fagsakType = FagsakType.NORMAL,
         )
 
         Assertions.assertEquals(
             forventetResultat.map { Periode(it.fom ?: TIDENES_MORGEN, it.tom ?: TIDENES_ENDE) },
-            faktiskResultat.map { Periode(it.fom ?: TIDENES_MORGEN, it.tom ?: TIDENES_ENDE) }
+            faktiskResultat.map { Periode(it.fom ?: TIDENES_MORGEN, it.tom ?: TIDENES_ENDE) },
         )
 
         Assertions.assertEquals(
             forventetResultat.map { it.type }.toSet(),
-            faktiskResultat.map { it.type }.toSet()
+            faktiskResultat.map { it.type }.toSet(),
         )
     }
 
@@ -126,14 +126,14 @@ class UtbetalingsperiodeUtilTest {
             fom = mars2020,
             tom = mai2020,
             beløp = 1000,
-            person = person1
+            person = person1,
         )
 
         val andelPerson2MaiTilJuli = lagAndelTilkjentYtelse(
             fom = mai2020,
             tom = juli2020,
             beløp = 1000,
-            person = person2
+            person = person2,
         )
 
         val forventetResultat = listOf(
@@ -142,28 +142,28 @@ class UtbetalingsperiodeUtilTest {
                 fom = mars2020.førsteDagIInneværendeMåned(),
                 tom = april2020.sisteDagIInneværendeMåned(),
                 type = Vedtaksperiodetype.UTBETALING,
-                begrunnelser = mutableSetOf()
+                begrunnelser = mutableSetOf(),
             ),
             lagVedtaksperiodeMedBegrunnelser(
                 vedtak = vedtak,
                 fom = mai2020.førsteDagIInneværendeMåned(),
                 tom = mai2020.sisteDagIInneværendeMåned(),
                 type = Vedtaksperiodetype.UTBETALING,
-                begrunnelser = mutableSetOf()
+                begrunnelser = mutableSetOf(),
             ),
             lagVedtaksperiodeMedBegrunnelser(
                 vedtak = vedtak,
                 fom = juni2020.førsteDagIInneværendeMåned(),
                 tom = juli2020.sisteDagIInneværendeMåned(),
                 type = Vedtaksperiodetype.UTBETALING,
-                begrunnelser = mutableSetOf()
-            )
+                begrunnelser = mutableSetOf(),
+            ),
         )
 
         val vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling())
         val personResultater = setOf(
             vilkårsvurdering.lagGodkjentPersonResultatForBarn(person1),
-            vilkårsvurdering.lagGodkjentPersonResultatForBarn(person2)
+            vilkårsvurdering.lagGodkjentPersonResultatForBarn(person2),
         )
 
         val faktiskResultat = hentPerioderMedUtbetaling(
@@ -171,17 +171,17 @@ class UtbetalingsperiodeUtilTest {
             vedtak = vedtak,
             personResultater = personResultater,
             personerIPersongrunnlag = listOf(person1, person2),
-            fagsakType = FagsakType.NORMAL
+            fagsakType = FagsakType.NORMAL,
         )
 
         Assertions.assertEquals(
             forventetResultat.map { Periode(it.fom ?: TIDENES_MORGEN, it.tom ?: TIDENES_ENDE) },
-            faktiskResultat.map { Periode(it.fom ?: TIDENES_MORGEN, it.tom ?: TIDENES_ENDE) }
+            faktiskResultat.map { Periode(it.fom ?: TIDENES_MORGEN, it.tom ?: TIDENES_ENDE) },
         )
 
         Assertions.assertEquals(
             forventetResultat.map { it.type }.toSet(),
-            faktiskResultat.map { it.type }.toSet()
+            faktiskResultat.map { it.type }.toSet(),
         )
     }
 
@@ -202,25 +202,25 @@ class UtbetalingsperiodeUtilTest {
             fom = mars2020,
             tom = juli2020,
             beløp = 1000,
-            person = barn1
+            person = barn1,
         )
 
         val andelBarn2MarsTilJuli = lagAndelTilkjentYtelse(
             fom = mars2020,
             tom = juli2020,
             beløp = 2000,
-            person = barn2
+            person = barn2,
         )
 
         val vilkårsvurdering = lagVilkårsvurdering(
             søkerAktør = søker.aktør,
             behandling = lagBehandling(),
-            resultat = Resultat.OPPFYLT
+            resultat = Resultat.OPPFYLT,
         )
 
         val personResultatBarn1 = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            aktør = barn1.aktør
+            aktør = barn1.aktør,
         )
 
         val vilkårResultatBorMedSøkerMedUtdypendeVilkårsvurderingBarn1 = VilkårResultat(
@@ -231,7 +231,7 @@ class UtbetalingsperiodeUtilTest {
             resultat = Resultat.OPPFYLT,
             begrunnelse = "",
             behandlingId = vilkårsvurdering.behandling.id,
-            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BARN_BOR_I_STORBRITANNIA_MED_SØKER)
+            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BARN_BOR_I_STORBRITANNIA_MED_SØKER),
         )
         val vilkårResultatBorMedSøkerUtenUtdypendeVilkårsvurderingBarn1 = VilkårResultat(
             personResultat = personResultatBarn1,
@@ -241,7 +241,7 @@ class UtbetalingsperiodeUtilTest {
             resultat = Resultat.OPPFYLT,
             begrunnelse = "",
             behandlingId = vilkårsvurdering.behandling.id,
-            utdypendeVilkårsvurderinger = emptyList()
+            utdypendeVilkårsvurderinger = emptyList(),
         )
 
         val resterendeVilkårForBarn = Vilkår.hentVilkårFor(PersonType.BARN, fagsakType = FagsakType.NORMAL, behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR).mapNotNull {
@@ -250,16 +250,16 @@ class UtbetalingsperiodeUtilTest {
 
         val vilkårResultaterBarn1 = listOf(
             vilkårResultatBorMedSøkerMedUtdypendeVilkårsvurderingBarn1,
-            vilkårResultatBorMedSøkerUtenUtdypendeVilkårsvurderingBarn1
+            vilkårResultatBorMedSøkerUtenUtdypendeVilkårsvurderingBarn1,
         ) + resterendeVilkårForBarn
 
         personResultatBarn1.setSortedVilkårResultater(
-            vilkårResultaterBarn1.toSet()
+            vilkårResultaterBarn1.toSet(),
         )
 
         val personResultatBarn2 = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            aktør = barn2.aktør
+            aktør = barn2.aktør,
         )
 
         val vilkårResultatBorMedSøkerMedUtdypendeVilkårsvurderingBarn2 = VilkårResultat(
@@ -270,7 +270,7 @@ class UtbetalingsperiodeUtilTest {
             resultat = Resultat.OPPFYLT,
             begrunnelse = "",
             behandlingId = vilkårsvurdering.behandling.id,
-            utdypendeVilkårsvurderinger = emptyList()
+            utdypendeVilkårsvurderinger = emptyList(),
         )
         val vilkårResultatBorMedSøkerUtenUtdypendeVilkårsvurderingBarn2 = VilkårResultat(
             personResultat = personResultatBarn2,
@@ -280,16 +280,16 @@ class UtbetalingsperiodeUtilTest {
             resultat = Resultat.OPPFYLT,
             begrunnelse = "",
             behandlingId = vilkårsvurdering.behandling.id,
-            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BARN_BOR_I_STORBRITANNIA_MED_SØKER)
+            utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.BARN_BOR_I_STORBRITANNIA_MED_SØKER),
         )
 
         val vilkårResultaterBarn2 = listOf(
             vilkårResultatBorMedSøkerMedUtdypendeVilkårsvurderingBarn2,
-            vilkårResultatBorMedSøkerUtenUtdypendeVilkårsvurderingBarn2
+            vilkårResultatBorMedSøkerUtenUtdypendeVilkårsvurderingBarn2,
         ) + resterendeVilkårForBarn
 
         personResultatBarn2.setSortedVilkårResultater(
-            vilkårResultaterBarn2.toSet()
+            vilkårResultaterBarn2.toSet(),
         )
 
         val forventetResultat = listOf(
@@ -298,15 +298,15 @@ class UtbetalingsperiodeUtilTest {
                 fom = mars2020.førsteDagIInneværendeMåned(),
                 tom = april2020.sisteDagIInneværendeMåned(),
                 type = Vedtaksperiodetype.UTBETALING,
-                begrunnelser = mutableSetOf()
+                begrunnelser = mutableSetOf(),
             ),
             lagVedtaksperiodeMedBegrunnelser(
                 vedtak = vedtak,
                 fom = mai2020.førsteDagIInneværendeMåned(),
                 tom = juli2020.sisteDagIInneværendeMåned(),
                 type = Vedtaksperiodetype.UTBETALING,
-                begrunnelser = mutableSetOf()
-            )
+                begrunnelser = mutableSetOf(),
+            ),
         )
 
         val faktiskResultat = hentPerioderMedUtbetaling(
@@ -314,17 +314,17 @@ class UtbetalingsperiodeUtilTest {
             vedtak = vedtak,
             personResultater = setOf(personResultatBarn1, personResultatBarn2),
             personerIPersongrunnlag = listOf(søker, barn1, barn2),
-            fagsakType = FagsakType.NORMAL
+            fagsakType = FagsakType.NORMAL,
         )
 
         Assertions.assertEquals(
             forventetResultat.map { Periode(it.fom ?: TIDENES_MORGEN, it.tom ?: TIDENES_ENDE) },
-            faktiskResultat.map { Periode(it.fom ?: TIDENES_MORGEN, it.tom ?: TIDENES_ENDE) }
+            faktiskResultat.map { Periode(it.fom ?: TIDENES_MORGEN, it.tom ?: TIDENES_ENDE) },
         )
 
         Assertions.assertEquals(
             forventetResultat.map { it.type }.toSet(),
-            faktiskResultat.map { it.type }.toSet()
+            faktiskResultat.map { it.type }.toSet(),
         )
     }
 
@@ -340,13 +340,13 @@ class UtbetalingsperiodeUtilTest {
             fom = mars2020,
             tom = april2020,
             beløp = 1000,
-            person = barn1
+            person = barn1,
         )
         val andelBarn1JuliTilJuli = lagAndelTilkjentYtelse(
             fom = juli2020,
             tom = juli2020,
             beløp = 1000,
-            person = barn1
+            person = barn1,
         )
 
         val faktiskResultat = hentPerioderMedUtbetaling(
@@ -354,7 +354,7 @@ class UtbetalingsperiodeUtilTest {
             vedtak = vedtak,
             personResultater = emptySet(),
             personerIPersongrunnlag = listOf(barn1),
-            fagsakType = FagsakType.NORMAL
+            fagsakType = FagsakType.NORMAL,
         )
 
         val forventetResultat = listOf(
@@ -363,25 +363,25 @@ class UtbetalingsperiodeUtilTest {
                 fom = mars2020.førsteDagIInneværendeMåned(),
                 tom = april2020.sisteDagIInneværendeMåned(),
                 type = Vedtaksperiodetype.UTBETALING,
-                begrunnelser = mutableSetOf()
+                begrunnelser = mutableSetOf(),
             ),
             lagVedtaksperiodeMedBegrunnelser(
                 vedtak = vedtak,
                 fom = juli2020.førsteDagIInneværendeMåned(),
                 tom = juli2020.sisteDagIInneværendeMåned(),
                 type = Vedtaksperiodetype.UTBETALING,
-                begrunnelser = mutableSetOf()
-            )
+                begrunnelser = mutableSetOf(),
+            ),
         )
 
         Assertions.assertEquals(
             forventetResultat.map { Periode(it.fom ?: TIDENES_MORGEN, it.tom ?: TIDENES_ENDE) },
-            faktiskResultat.map { Periode(it.fom ?: TIDENES_MORGEN, it.tom ?: TIDENES_ENDE) }
+            faktiskResultat.map { Periode(it.fom ?: TIDENES_MORGEN, it.tom ?: TIDENES_ENDE) },
         )
 
         Assertions.assertEquals(
             forventetResultat.map { it.type }.toSet(),
-            faktiskResultat.map { it.type }.toSet()
+            faktiskResultat.map { it.type }.toSet(),
         )
     }
 
@@ -401,18 +401,18 @@ class UtbetalingsperiodeUtilTest {
             fom = mars2020,
             tom = juli2020,
             beløp = 1000,
-            person = barn
+            person = barn,
         )
 
         val vilkårsvurdering = lagVilkårsvurdering(
             søkerAktør = søker.aktør,
             behandling = lagBehandling(),
-            resultat = Resultat.OPPFYLT
+            resultat = Resultat.OPPFYLT,
         )
 
         val personResultatBarn = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            aktør = barn.aktør
+            aktør = barn.aktør,
         )
 
         fun nasjonaltVilkår(vilkårType: Vilkår): VilkårResultat = VilkårResultat(
@@ -424,7 +424,7 @@ class UtbetalingsperiodeUtilTest {
             begrunnelse = "",
             behandlingId = vilkårsvurdering.behandling.id,
             utdypendeVilkårsvurderinger = emptyList(),
-            vurderesEtter = Regelverk.NASJONALE_REGLER
+            vurderesEtter = Regelverk.NASJONALE_REGLER,
         )
 
         fun eøsVilkår(vilkårType: Vilkår): VilkårResultat =
@@ -437,7 +437,7 @@ class UtbetalingsperiodeUtilTest {
                 begrunnelse = "",
                 behandlingId = vilkårsvurdering.behandling.id,
                 utdypendeVilkårsvurderinger = emptyList(),
-                vurderesEtter = Regelverk.EØS_FORORDNINGEN
+                vurderesEtter = Regelverk.EØS_FORORDNINGEN,
             )
 
         val vilkårForBarn = Vilkår.hentVilkårFor(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL, behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR)
@@ -445,7 +445,7 @@ class UtbetalingsperiodeUtilTest {
         val vilkårResultaterBarn1 = vilkårForBarn.map { nasjonaltVilkår(it) } + vilkårForBarn.map { eøsVilkår(it) }
 
         personResultatBarn.setSortedVilkårResultater(
-            vilkårResultaterBarn1.toSet()
+            vilkårResultaterBarn1.toSet(),
         )
 
         val forventetResultat = listOf(
@@ -454,15 +454,15 @@ class UtbetalingsperiodeUtilTest {
                 fom = mars2020.førsteDagIInneværendeMåned(),
                 tom = april2020.sisteDagIInneværendeMåned(),
                 type = Vedtaksperiodetype.UTBETALING,
-                begrunnelser = mutableSetOf()
+                begrunnelser = mutableSetOf(),
             ),
             lagVedtaksperiodeMedBegrunnelser(
                 vedtak = vedtak,
                 fom = mai2020.førsteDagIInneværendeMåned(),
                 tom = juli2020.sisteDagIInneværendeMåned(),
                 type = Vedtaksperiodetype.UTBETALING,
-                begrunnelser = mutableSetOf()
-            )
+                begrunnelser = mutableSetOf(),
+            ),
         )
 
         val faktiskResultat = hentPerioderMedUtbetaling(
@@ -470,17 +470,17 @@ class UtbetalingsperiodeUtilTest {
             vedtak = vedtak,
             personResultater = setOf(personResultatBarn),
             personerIPersongrunnlag = listOf(søker, barn),
-            fagsakType = FagsakType.NORMAL
+            fagsakType = FagsakType.NORMAL,
         )
 
         Assertions.assertEquals(
             forventetResultat.map { Periode(it.fom ?: TIDENES_MORGEN, it.tom ?: TIDENES_ENDE) },
-            faktiskResultat.map { Periode(it.fom ?: TIDENES_MORGEN, it.tom ?: TIDENES_ENDE) }
+            faktiskResultat.map { Periode(it.fom ?: TIDENES_MORGEN, it.tom ?: TIDENES_ENDE) },
         )
 
         Assertions.assertEquals(
             forventetResultat.map { it.type }.toSet(),
-            faktiskResultat.map { it.type }.toSet()
+            faktiskResultat.map { it.type }.toSet(),
         )
     }
 
@@ -491,6 +491,6 @@ class UtbetalingsperiodeUtilTest {
         periodeFom = person.fødselsdato,
         periodeTom = person.fødselsdato.til18ÅrsVilkårsdato(),
         lagFullstendigVilkårResultat = true,
-        personType = person.type
+        personType = person.type,
     )
 }

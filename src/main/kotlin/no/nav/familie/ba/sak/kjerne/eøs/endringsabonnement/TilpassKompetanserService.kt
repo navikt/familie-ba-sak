@@ -40,11 +40,11 @@ class TilpassKompetanserTilRegelverkService(
     private val vilkårsvurderingTidslinjeService: VilkårsvurderingTidslinjeService,
     private val endretUtbetalingAndelTidslinjeService: EndretUtbetalingAndelTidslinjeService,
     kompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse>,
-    endringsabonnenter: Collection<PeriodeOgBarnSkjemaEndringAbonnent<Kompetanse>>
+    endringsabonnenter: Collection<PeriodeOgBarnSkjemaEndringAbonnent<Kompetanse>>,
 ) {
     val skjemaService = PeriodeOgBarnSkjemaService(
         kompetanseRepository,
-        endringsabonnenter
+        endringsabonnenter,
     )
 
     @Transactional
@@ -59,7 +59,7 @@ class TilpassKompetanserTilRegelverkService(
         val oppdaterteKompetanser = tilpassKompetanserTilRegelverk(
             gjeldendeKompetanser,
             barnasRegelverkResultatTidslinjer,
-            barnasHarEtterbetaling3ÅrTidslinjer
+            barnasHarEtterbetaling3ÅrTidslinjer,
         ).medBehandlingId(behandlingId)
 
         skjemaService.lagreDifferanseOgVarsleAbonnenter(behandlingId, gjeldendeKompetanser, oppdaterteKompetanser)
@@ -70,17 +70,17 @@ class TilpassKompetanserTilRegelverkService(
 class TilpassKompetanserTilEndretUtebetalingAndelerService(
     private val vilkårsvurderingTidslinjeService: VilkårsvurderingTidslinjeService,
     kompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse>,
-    endringsabonnenter: Collection<PeriodeOgBarnSkjemaEndringAbonnent<Kompetanse>>
+    endringsabonnenter: Collection<PeriodeOgBarnSkjemaEndringAbonnent<Kompetanse>>,
 ) : EndretUtbetalingAndelerOppdatertAbonnent {
     val skjemaService = PeriodeOgBarnSkjemaService(
         kompetanseRepository,
-        endringsabonnenter
+        endringsabonnenter,
     )
 
     @Transactional
     override fun endretUtbetalingAndelerOppdatert(
         behandlingIdLong: Long,
-        endretUtbetalingAndeler: List<EndretUtbetalingAndel>
+        endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
     ) {
         val behandlingId = BehandlingId(behandlingIdLong)
         val gjeldendeKompetanser = skjemaService.hentMedBehandlingId(behandlingId)
@@ -93,7 +93,7 @@ class TilpassKompetanserTilEndretUtebetalingAndelerService(
         val oppdaterteKompetanser = tilpassKompetanserTilRegelverk(
             gjeldendeKompetanser,
             barnasRegelverkResultatTidslinjer,
-            barnasHarEtterbetaling3ÅrTidslinjer
+            barnasHarEtterbetaling3ÅrTidslinjer,
         ).medBehandlingId(behandlingId)
 
         skjemaService.lagreDifferanseOgVarsleAbonnenter(behandlingId, gjeldendeKompetanser, oppdaterteKompetanser)
@@ -103,7 +103,7 @@ class TilpassKompetanserTilEndretUtebetalingAndelerService(
 fun tilpassKompetanserTilRegelverk(
     gjeldendeKompetanser: Collection<Kompetanse>,
     barnaRegelverkTidslinjer: Map<Aktør, Tidslinje<RegelverkResultat, Måned>>,
-    barnasHarEtterbetaling3ÅrTidslinjer: Map<Aktør, Tidslinje<Boolean, Måned>>
+    barnasHarEtterbetaling3ÅrTidslinjer: Map<Aktør, Tidslinje<Boolean, Måned>>,
 ): Collection<Kompetanse> {
     val barnasEøsRegelverkTidslinjer = barnaRegelverkTidslinjer.tilBarnasEøsRegelverkTidslinjer()
         .leftJoin(barnasHarEtterbetaling3ÅrTidslinjer) { regelverk, harEtterbetaling3År ->

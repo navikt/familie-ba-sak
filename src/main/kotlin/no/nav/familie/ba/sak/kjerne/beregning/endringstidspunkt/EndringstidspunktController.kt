@@ -13,14 +13,14 @@ import java.time.LocalDate
 @RequestMapping("/api")
 @ProtectedWithClaims(issuer = "azuread")
 class EndringstidspunktController(
-    val endringstidspunktService: EndringstidspunktService
+    val endringstidspunktService: EndringstidspunktService,
 ) {
     @GetMapping("/behandlinger/{behandlingId}/endringstidspunkt")
     fun hentEndringstidspunkt(
-        @PathVariable behandlingId: Long
+        @PathVariable behandlingId: Long,
     ): ResponseEntity<Ressurs<LocalDate>> = ResponseEntity.ok(
         Ressurs.success(
-            endringstidspunktService.finnEndringstidspunktForBehandling(behandlingId)
-        )
+            endringstidspunktService.finnEndringstidspunktForBehandling(behandlingId),
+        ),
     )
 }

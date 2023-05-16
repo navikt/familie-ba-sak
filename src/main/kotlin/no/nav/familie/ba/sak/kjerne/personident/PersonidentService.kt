@@ -15,7 +15,7 @@ class PersonidentService(
     private val personidentRepository: PersonidentRepository,
     private val aktørIdRepository: AktørIdRepository,
     private val pdlIdentRestClient: PdlIdentRestClient,
-    private val taskRepository: TaskRepositoryWrapper
+    private val taskRepository: TaskRepositoryWrapper,
 ) {
 
     fun hentIdenter(personIdent: String, historikk: Boolean): List<IdentInformasjon> {
@@ -129,14 +129,14 @@ class PersonidentService(
         Fagsaken må arkiveres og personidenterne fjernes til aktøriden som er fjernet og
         En ny revurderingsbehandling må opprettes på fagsak til kvarvarende aktørid hvor
         barne fra den arkiverte fagsaken bli behandlet.
-        */
+         */
         val persistertAktør = personidentRepository.findByFødselsnummerOrNull(ident)?.aktør
 
         if (persistertAktør != null && persistertAktør.aktørId != aktørId) {
             throw Feil(
                 message = "Aktør med id $aktørId er merget med Aktør med id $persistertAktør. " +
                     "Arkiver fagsak og fjern personidenter til $aktørId. Revurder behandling for $persistertAktør" +
-                    " og legg til barna fra fagsak til $aktørId."
+                    " og legg til barna fra fagsak til $aktørId.",
             )
         }
     }
@@ -145,7 +145,7 @@ class PersonidentService(
         secureLogger.info("Oppretter aktør og personIdent. aktørIdStr=$aktørIdStr fødselsnummer=$fødselsnummer lagre=$lagre")
         val aktør = Aktør(aktørId = aktørIdStr).also {
             it.personidenter.add(
-                Personident(fødselsnummer = fødselsnummer, aktør = it)
+                Personident(fødselsnummer = fødselsnummer, aktør = it),
             )
         }
 
@@ -169,7 +169,7 @@ class PersonidentService(
             if (lagre) aktørIdRepository.saveAndFlush(aktør) // Må lagre her fordi unik index er en blanding av aktørid og gjelderTil, og hvis man ikke lagerer før man legger til ny, så feiler det pga indexen.
 
             aktør.personidenter.add(
-                Personident(fødselsnummer = fødselsnummer, aktør = aktør)
+                Personident(fødselsnummer = fødselsnummer, aktør = aktør),
             )
             if (lagre) aktørIdRepository.saveAndFlush(aktør)
         }

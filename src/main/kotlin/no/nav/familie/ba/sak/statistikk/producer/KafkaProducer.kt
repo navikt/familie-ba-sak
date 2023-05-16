@@ -30,12 +30,12 @@ interface KafkaProducer {
     fun sendFagsystemsbehandlingResponsForTopicTilbakekreving(
         melding: HentFagsystemsbehandlingRespons,
         key: String,
-        behandlingId: String
+        behandlingId: String,
     )
 
     fun sendBarnetrygdBisysMelding(
         behandlingId: String,
-        barnetrygdBisysMelding: BarnetrygdBisysMelding
+        barnetrygdBisysMelding: BarnetrygdBisysMelding,
     )
 }
 
@@ -43,7 +43,7 @@ interface KafkaProducer {
 @ConditionalOnProperty(
     value = ["funksjonsbrytere.kafka.producer.enabled"],
     havingValue = "true",
-    matchIfMissing = false
+    matchIfMissing = false,
 )
 @Primary
 @Profile("!preprod-gcp & !prod-gcp")
@@ -104,7 +104,7 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
     override fun sendFagsystemsbehandlingResponsForTopicTilbakekreving(
         melding: HentFagsystemsbehandlingRespons,
         key: String,
-        behandlingId: String
+        behandlingId: String,
     ) {
         val meldingIString: String = objectMapper.writeValueAsString(melding)
 
@@ -113,7 +113,7 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
                 logger.info(
                     "Melding på topic $FAGSYSTEMSBEHANDLING_RESPONS_TBK_TOPIC for " +
                         "$behandlingId med $key er sendt. " +
-                        "Fikk offset ${it?.recordMetadata?.offset()}"
+                        "Fikk offset ${it?.recordMetadata?.offset()}",
                 )
             }
             .exceptionally {
@@ -127,7 +127,7 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
 
     override fun sendBarnetrygdBisysMelding(
         behandlingId: String,
-        barnetrygdBisysMelding: BarnetrygdBisysMelding
+        barnetrygdBisysMelding: BarnetrygdBisysMelding,
     ) {
         val opphørBarnetrygdBisysMelding =
             objectMapper.writeValueAsString(barnetrygdBisysMelding)
@@ -137,7 +137,7 @@ class DefaultKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatis
                 logger.info(
                     "Melding på topic $OPPHOER_BARNETRYGD_BISYS_TOPIC for " +
                         "$behandlingId er sendt. " +
-                        "Fikk offset ${it?.recordMetadata?.offset()}"
+                        "Fikk offset ${it?.recordMetadata?.offset()}",
                 )
                 secureLogger.info("Send barnetrygd bisys melding $opphørBarnetrygdBisysMelding")
             }
@@ -198,14 +198,14 @@ class MockKafkaProducer(val saksstatistikkMellomlagringRepository: Saksstatistik
     override fun sendFagsystemsbehandlingResponsForTopicTilbakekreving(
         melding: HentFagsystemsbehandlingRespons,
         key: String,
-        behandlingId: String
+        behandlingId: String,
     ) {
         logger.info("Skipper sending av fagsystemsbehandling respons for $behandlingId fordi kafka ikke er enablet")
     }
 
     override fun sendBarnetrygdBisysMelding(
         behandlingId: String,
-        barnetrygdBisysMelding: BarnetrygdBisysMelding
+        barnetrygdBisysMelding: BarnetrygdBisysMelding,
     ) {
         logger.info("Skipper sending av sendOpphørBarnetrygdBisys respons for $behandlingId fordi kafka ikke er enablet")
     }

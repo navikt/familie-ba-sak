@@ -12,7 +12,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidsrom.rangeTo
 
 class StringTidslinje(
     val start: Tidspunkt<Måned>,
-    val s: List<String>
+    val s: List<String>,
 ) : Tidslinje<String, Måned>() {
 
     val fraOgMed = if (s.firstOrNull() == "<") start.somUendeligLengeSiden() else start
