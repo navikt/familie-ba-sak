@@ -320,7 +320,7 @@ class MigreringService(
         val aktivBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = fagsak.id)
         if (aktivBehandling != null) {
             val behandlinger = behandlingHentOgPersisterService.hentBehandlinger(fagsakId = fagsak.id)
-                .sortedBy { it.opprettetTidspunkt }
+                .sortedBy { it.aktivertTidspunkt }
 
             behandlinger.findLast { it.erMigrering() && !it.erHenlagt() }?.apply {
                 when (fagsak.status) {
@@ -333,7 +333,7 @@ class MigreringService(
                     }
 
                     FagsakStatus.AVSLUTTET -> {
-                        behandlinger.find { it.opprettetTidspunkt.isAfter(this.opprettetTidspunkt) }
+                        behandlinger.find { it.aktivertTidspunkt.isAfter(this.aktivertTidspunkt) }
                             ?: kastOgTellMigreringsFeil(MigreringsfeilType.FAGSAK_AVSLUTTET_UTEN_MIGRERING)
                     }
                 }
@@ -341,7 +341,7 @@ class MigreringService(
 
             // Ikke migrer hvis det er en annen dagsaktuell migreringsebehandling. Infotrygd leser ikke fra feed før om kvelden.
             // For å forhindre dobbelt migrerte saker, som at saksbehandler migrer og henlegger sak samme dag, og den automatisk migreres senere
-            if (behandlinger.any { it.type == BehandlingType.MIGRERING_FRA_INFOTRYGD && it.opprettetTidspunkt.toLocalDate() == LocalDate.now() }) {
+            if (behandlinger.any { it.type == BehandlingType.MIGRERING_FRA_INFOTRYGD && it.aktivertTidspunkt.toLocalDate() == LocalDate.now() }) {
                 kastOgTellMigreringsFeil(MigreringsfeilType.KUN_ETT_MIGRERINGFORSØK_PER_DAG)
             }
         }

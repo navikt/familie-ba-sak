@@ -86,6 +86,9 @@ data class Behandling(
 
     @OneToOne(mappedBy = "behandling", optional = true)
     val verge: Verge? = null,
+
+    @Column(name = "aktivert_tid", nullable = false)
+    val aktivertTidspunkt: LocalDateTime = LocalDateTime.now()
 ) : BaseEntitet() {
 
     // TODO kun for å finne bruk. Ulempen er at hvis behandlingen blir mappet videre så er det vanskelig å finne ut hvis det mappede objektet er sortert..

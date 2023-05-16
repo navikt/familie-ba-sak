@@ -25,7 +25,7 @@ class ForvalterService(
         val forrigeBehandlingSendtTilØkonomi =
             behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling)
         val erBehandlingOpprettetEtterDenneSomErSendtTilØkonomi = forrigeBehandlingSendtTilØkonomi != null &&
-            forrigeBehandlingSendtTilØkonomi.opprettetTidspunkt.isAfter(behandling.opprettetTidspunkt)
+            forrigeBehandlingSendtTilØkonomi.aktivertTidspunkt.isAfter(behandling.aktivertTidspunkt)
 
         if (tilkjentYtelse.utbetalingsoppdrag != null) {
             throw Feil("Behandling $behandlingId har allerede opprettet utbetalingsoppdrag")
