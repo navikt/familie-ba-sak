@@ -462,7 +462,7 @@ enum class BehandlingStatus {
     SATT_PÅ_VENT,
     ;
 
-    fun erLåstMenIkkeAvsluttet() = this == FATTER_VEDTAK || this == IVERKSETTER_VEDTAK
+    fun erLåstMenIkkeAvsluttet() = this == FATTER_VEDTAK || this == IVERKSETTER_VEDTAK || this == SATT_PÅ_VENT
 }
 
 class BehandlingStegComparator : Comparator<BehandlingStegTilstand> {
