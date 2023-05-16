@@ -14,7 +14,7 @@ import org.springframework.web.filter.OncePerRequestFilter
 @Profile("!integrasjonstest")
 class PensjonConfig(
     private val oidcUtil: OIDCUtil,
-    private val rolleConfig: RolleConfig
+    private val rolleConfig: RolleConfig,
 ) {
 
     @Bean
@@ -29,13 +29,13 @@ class PensjonConfig(
                 erKallerPensjon && !erPensjonRequest -> {
                     response.sendError(
                         HttpServletResponse.SC_UNAUTHORIZED,
-                        "Pensjon applikasjon kan ikke kalle andre tjenester"
+                        "Pensjon applikasjon kan ikke kalle andre tjenester",
                     )
                 }
                 erPensjonRequest && (!harForvalterRolle && !erKallerPensjon) -> {
                     response.sendError(
                         HttpServletResponse.SC_UNAUTHORIZED,
-                        "Pensjon tjeneste kan kun kalles av pensjon eller innlogget bruker med FORVALTER rolle"
+                        "Pensjon tjeneste kan kun kalles av pensjon eller innlogget bruker med FORVALTER rolle",
                     )
                 }
                 erPensjonRequest && (harForvalterRolle || erKallerPensjon) -> filterChain.doFilter(request, response)
