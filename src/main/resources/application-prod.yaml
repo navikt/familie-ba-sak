@@ -181,5 +181,6 @@ FAMILIE_STATISTIKK_URL: https://familie-ba-statistikk.prod-fss-pub.nais.io/api
 
 # Swagger
 AUTHORIZATION_URL: https://login.microsoftonline.com/navno.onmicrosoft.com/oauth2/v2.0/authorize
+TOKEN_URL: https://login.microsoftonline.com/navno.onmicrosoft.com/oauth2/v2.0/token
 
 ENVIRONMENT_NAME: p
