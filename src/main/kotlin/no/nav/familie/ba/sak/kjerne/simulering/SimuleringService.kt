@@ -87,8 +87,9 @@ class SimuleringService(
 
     fun oppdaterSimuleringPåBehandlingVedBehov(behandlingId: Long): List<ØkonomiSimuleringMottaker> {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
-
-        val behandlingUtredes = behandling.status == BehandlingStatus.UTREDES
+        val behandlingErFerdigBesluttet =
+            behandling.status == BehandlingStatus.IVERKSETTER_VEDTAK ||
+                behandling.status == BehandlingStatus.AVSLUTTET
 
         val simulering = hentSimuleringPåBehandling(behandlingId)
         val restSimulering = vedtakSimuleringMottakereTilRestSimulering(
@@ -96,7 +97,7 @@ class SimuleringService(
             erManuellPosteringTogglePå = featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ),
         )
 
-        return if (behandlingUtredes && simuleringErUtdatert(restSimulering)) {
+        return if (!behandlingErFerdigBesluttet && simuleringErUtdatert(restSimulering)) {
             oppdaterSimuleringPåBehandling(behandling)
         } else {
             simulering
