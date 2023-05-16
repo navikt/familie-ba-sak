@@ -23,6 +23,9 @@ fun Tidslinje<Boolean, Måned>.kastFeilVedEndringEtter(
             "Det finnes endringer i behandlingen som har økonomisk konsekvens for bruker." +
                 "Det skal ikke skje for endre migreringsdatobehandlinger." +
                 "Endringer må gjøres i en separat behandling.",
+            "Det finnes endringer i behandlingen som har økonomisk konsekvens for bruker." +
+                "Det skal ikke skje for endre migreringsdatobehandlinger." +
+                "Endringer må gjøres i en separat behandling.",
         )
     }
 }
