@@ -48,6 +48,14 @@ spring:
   kafka:
     client-id: familie-ba-sak
 
+springdoc:
+  swagger-ui:
+    oauth:
+      use-pkce-with-authorization-code-grant: true
+      client-id: ${AZURE_APP_CLIENT_ID}
+      scope-separator: ","
+    disable-swagger-default-url: true
+
 logging:
   config: "classpath:logback-spring.xml"
 sentry.dsn: https://dd9a6107bdda4edeb51ece7283f37af4@sentry.gc.nav.no/112
