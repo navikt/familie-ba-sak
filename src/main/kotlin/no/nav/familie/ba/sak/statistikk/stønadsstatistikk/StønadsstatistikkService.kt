@@ -31,7 +31,6 @@ import no.nav.familie.eksterne.kontrakter.UnderkategoriV2
 import no.nav.familie.eksterne.kontrakter.UtbetalingsDetaljDVHV2
 import no.nav.familie.eksterne.kontrakter.UtbetalingsperiodeDVHV2
 import no.nav.familie.eksterne.kontrakter.VedtakDVHV2
-import no.nav.familie.eksterne.kontrakter.YtelseType.MANUELL_VURDERING
 import no.nav.familie.eksterne.kontrakter.YtelseType.ORDINÆR_BARNETRYGD
 import no.nav.familie.eksterne.kontrakter.YtelseType.SMÅBARNSTILLEGG
 import no.nav.familie.eksterne.kontrakter.YtelseType.UTVIDET_BARNETRYGD
@@ -50,7 +49,7 @@ class StønadsstatistikkService(
     private val personopplysningerService: PersonopplysningerService,
     private val vedtakRepository: VedtakRepository,
     private val kompetanseService: KompetanseService,
-    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
+    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
 ) {
 
     fun hentVedtakV2(behandlingId: Long): VedtakDVHV2 {
@@ -85,7 +84,7 @@ class StønadsstatistikkService(
             utbetalingsperioderV2 = hentUtbetalingsperioderV2(behandlingId),
             funksjonellId = UUID.randomUUID().toString(),
             kompetanseperioder = hentKompetanse(BehandlingId(behandlingId)),
-            behandlingÅrsakV2 = BehandlingÅrsakV2.valueOf(behandling.opprettetÅrsak.name)
+            behandlingÅrsakV2 = BehandlingÅrsakV2.valueOf(behandling.opprettetÅrsak.name),
         )
     }
 
@@ -97,7 +96,7 @@ class StønadsstatistikkService(
                 barnsIdenter = kompetanse.barnAktører.map { aktør -> aktør.aktivFødselsnummer() },
                 annenForeldersAktivitet = if (kompetanse.annenForeldersAktivitet != null) {
                     AnnenForeldersAktivitet.valueOf(
-                        kompetanse.annenForeldersAktivitet.name
+                        kompetanse.annenForeldersAktivitet.name,
                     )
                 } else {
                     null
@@ -108,7 +107,7 @@ class StønadsstatistikkService(
                 tom = kompetanse.tom,
                 resultat = KompetanseResultat.valueOf(kompetanse.resultat!!.name),
                 sokersaktivitet = if (kompetanse.søkersAktivitet != null) SøkersAktivitet.valueOf(kompetanse.søkersAktivitet.name) else null,
-                sokersAktivitetsland = kompetanse.søkersAktivitetsland
+                sokersAktivitetsland = kompetanse.søkersAktivitetsland,
             )
         }
     }
@@ -136,15 +135,15 @@ class StønadsstatistikkService(
                     segment.localDateInterval.overlaps(
                         LocalDateInterval(
                             it.stønadFom.førsteDagIInneværendeMåned(),
-                            it.stønadTom.sisteDagIInneværendeMåned()
-                        )
+                            it.stønadTom.sisteDagIInneværendeMåned(),
+                        ),
                     )
                 }
                 mapTilUtbetalingsperiodeV2(
                     segment,
                     andelerForSegment,
                     behandling,
-                    persongrunnlag
+                    persongrunnlag,
                 )
             }
     }
@@ -163,7 +162,7 @@ class StønadsstatistikkService(
         segment: LocalDateSegment<Int>,
         andelerForSegment: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
         behandling: Behandling,
-        personopplysningGrunnlag: PersonopplysningGrunnlag
+        personopplysningGrunnlag: PersonopplysningGrunnlag,
     ): UtbetalingsperiodeDVHV2 {
         return UtbetalingsperiodeDVHV2(
             hjemmel = "Ikke implementert",
@@ -177,19 +176,18 @@ class StønadsstatistikkService(
                 UtbetalingsDetaljDVHV2(
                     person = lagPersonDVHV2(
                         personForAndel,
-                        andel.prosent.intValueExact()
+                        andel.prosent.intValueExact(),
                     ),
                     klassekode = andel.type.klassifisering,
                     ytelseType = when (andel.type) {
                         YtelseType.ORDINÆR_BARNETRYGD -> ORDINÆR_BARNETRYGD
                         YtelseType.UTVIDET_BARNETRYGD -> UTVIDET_BARNETRYGD
                         YtelseType.SMÅBARNSTILLEGG -> SMÅBARNSTILLEGG
-                        YtelseType.MANUELL_VURDERING -> MANUELL_VURDERING
                     },
                     utbetaltPrMnd = andel.kalkulertUtbetalingsbeløp,
-                    delytelseId = behandling.fagsak.id.toString() + andel.periodeOffset
+                    delytelseId = behandling.fagsak.id.toString() + andel.periodeOffset,
                 )
-            }
+            },
         )
     }
 
@@ -199,7 +197,7 @@ class StønadsstatistikkService(
             statsborgerskap = hentStatsborgerskap(person),
             bostedsland = hentLandkode(person),
             delingsprosentYtelse = if (delingsProsentYtelse == 50) delingsProsentYtelse else 0,
-            personIdent = person.aktør.aktivFødselsnummer()
+            personIdent = person.aktør.aktivFødselsnummer(),
         )
     }
 

@@ -42,7 +42,7 @@ class BehandlingsresultatSteg(
     private val vilkårService: VilkårService,
     private val persongrunnlagService: PersongrunnlagService,
     private val beregningService: BeregningService,
-    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
+    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
 ) : BehandlingSteg<String> {
 
     override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
@@ -60,7 +60,7 @@ class BehandlingsresultatSteg(
 
         validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
             tilkjentYtelse = tilkjentYtelse,
-            personopplysningGrunnlag = personopplysningGrunnlag
+            personopplysningGrunnlag = personopplysningGrunnlag,
         )
 
         val endreteUtbetalingerMedAndeler = andelerTilkjentYtelseOgEndreteUtbetalingerService
@@ -69,17 +69,17 @@ class BehandlingsresultatSteg(
         validerAtAlleOpprettedeEndringerErUtfylt(endreteUtbetalingerMedAndeler.map { it.endretUtbetalingAndel })
         validerAtEndringerErTilknyttetAndelTilkjentYtelse(endreteUtbetalingerMedAndeler)
         validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(
-            endretUtbetalingAndelerMedÅrsakDeltBosted = endreteUtbetalingerMedAndeler.filter { it.årsak == Årsak.DELT_BOSTED }
+            endretUtbetalingAndelerMedÅrsakDeltBosted = endreteUtbetalingerMedAndeler.filter { it.årsak == Årsak.DELT_BOSTED },
         )
 
         validerPeriodeInnenforTilkjentytelse(
             endreteUtbetalingerMedAndeler.map { it.endretUtbetalingAndel },
-            tilkjentYtelse.andelerTilkjentYtelse
+            tilkjentYtelse.andelerTilkjentYtelse,
         )
 
         validerÅrsak(
             endreteUtbetalingerMedAndeler.map { it.endretUtbetalingAndel },
-            vilkårService.hentVilkårsvurdering(behandling.id)
+            vilkårService.hentVilkårsvurdering(behandling.id),
         )
 
         if (behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO) {
@@ -97,7 +97,7 @@ class BehandlingsresultatSteg(
 
                 behandlingService.oppdaterBehandlingsresultat(
                     behandlingId = behandling.id,
-                    resultat = resultat
+                    resultat = resultat,
                 )
             }
 
@@ -107,8 +107,8 @@ class BehandlingsresultatSteg(
             behandlingService.nullstillEndringstidspunkt(behandling.id)
             vedtaksperiodeService.oppdaterVedtakMedVedtaksperioder(
                 vedtak = vedtakService.hentAktivForBehandlingThrows(
-                    behandlingId = behandling.id
-                )
+                    behandlingId = behandling.id,
+                ),
             )
         }
 
@@ -116,17 +116,17 @@ class BehandlingsresultatSteg(
             beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(behandling)
 
         if (behandlingMedOppdatertBehandlingsresultat.skalRettFraBehandlingsresultatTilIverksetting(
-                endringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi == ENDRING_I_UTBETALING
+                endringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi == ENDRING_I_UTBETALING,
             ) || beregningService.kanAutomatiskIverksetteSmåbarnstilleggEndring(
+                behandling = behandlingMedOppdatertBehandlingsresultat,
+                sistIverksatteBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(
                     behandling = behandlingMedOppdatertBehandlingsresultat,
-                    sistIverksatteBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(
-                            behandling = behandlingMedOppdatertBehandlingsresultat
-                        )
-                )
+                ),
+            )
         ) {
             behandlingService.oppdaterStatusPåBehandling(
                 behandlingMedOppdatertBehandlingsresultat.id,
-                BehandlingStatus.IVERKSETTER_VEDTAK
+                BehandlingStatus.IVERKSETTER_VEDTAK,
             )
         } else {
             simuleringService.oppdaterSimuleringPåBehandling(behandlingMedOppdatertBehandlingsresultat)
@@ -150,7 +150,7 @@ class BehandlingsresultatSteg(
                 "Du har fått behandlingsresultatet " +
                     "${behandlingMedOppdatertBehandlingsresultat.resultat.displayName}. " +
                     "Dette er ikke støttet på migreringsbehandlinger. " +
-                    "Meld sak i Porten om du er uenig i resultatet."
+                    "Meld sak i Porten om du er uenig i resultatet.",
             )
         }
     }

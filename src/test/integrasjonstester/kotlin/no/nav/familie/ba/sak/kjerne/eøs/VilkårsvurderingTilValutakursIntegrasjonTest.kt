@@ -24,20 +24,20 @@ class VilkårsvurderingTilValutakursIntegrasjonTest : AbstractSpringIntegrationT
 
         val vilkårsvurderingRequest = mapOf(
             søkerStartdato to mapOf(
-                Vilkår.BOSATT_I_RIKET /*    */ to "EEEEEEEEEEEEEEEE",
-                Vilkår.LOVLIG_OPPHOLD /*    */ to "EEEEEEEEEEEEEEEE"
+                Vilkår.BOSATT_I_RIKET to "EEEEEEEEEEEEEEEE",
+                Vilkår.LOVLIG_OPPHOLD to "EEEEEEEEEEEEEEEE",
             ),
             barnStartdato to mapOf(
-                Vilkår.UNDER_18_ÅR /*       */ to "++++++++++++++++",
-                Vilkår.GIFT_PARTNERSKAP /*  */ to "++++++++++++++++",
-                Vilkår.BOSATT_I_RIKET /*    */ to "EEEEEEEEEEEEEEEE",
-                Vilkår.LOVLIG_OPPHOLD /*    */ to "EEEEEEEEEEEEEEEE",
-                Vilkår.BOR_MED_SØKER /*     */ to "EEEEEEEEEEEEEEEE"
-            )
+                Vilkår.UNDER_18_ÅR to "++++++++++++++++",
+                Vilkår.GIFT_PARTNERSKAP to "++++++++++++++++",
+                Vilkår.BOSATT_I_RIKET to "EEEEEEEEEEEEEEEE",
+                Vilkår.LOVLIG_OPPHOLD to "EEEEEEEEEEEEEEEE",
+                Vilkår.BOR_MED_SØKER to "EEEEEEEEEEEEEEEE",
+            ),
         )
 
         val kompetanseRequest = mapOf(
-            barnStartdato /*                */ to "PPPSSSSSSPPSSS--"
+            barnStartdato to "PPPSSSSSSPPSSS--",
         )
 
         val utvidetBehandlingFør =

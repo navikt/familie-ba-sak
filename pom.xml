@@ -17,7 +17,7 @@
 
     <properties>
         <java.version>17</java.version>
-        <kotlin.version>1.8.20</kotlin.version>
+        <kotlin.version>1.8.21</kotlin.version>
         <revision>1</revision>
         <sha1/>
         <changelist>-SNAPSHOT</changelist>
@@ -25,18 +25,18 @@
         <prosessering.version>2.20230322091650_fb0187e-SPRING_BOOT_3</prosessering.version>
         <felles.version>2.20230210162649_a258d57-SPRING_BOOT_3</felles.version>
         <eksterne-kontrakter-bisys.version>2.0_20221118130052_e2abd9f</eksterne-kontrakter-bisys.version>
-        <felles-kontrakter.version>3.0_20230403093611_10cc82e-JAKARTA</felles-kontrakter.version>
+        <felles-kontrakter.version>3.0_20230509152247_36d24db</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20220216121145_5a268ac</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20230223155122_2e81c44</familie.kontrakter.stønadsstatistikk>
         <familie.kontrakter.skatteetaten>2.0_20210920094114_9c74239</familie.kontrakter.skatteetaten>
-        <cucumber.version>7.11.2</cucumber.version>
+        <cucumber.version>7.12.0</cucumber.version>
         <mockk.version>1.13.5</mockk.version>
         <wiremock.version>2.35.0</wiremock.version>
         <token-validation-spring.version>3.0.11</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
         <springdoc.version>2.1.0</springdoc.version>
-        <sentry.version>6.17.0</sentry.version>
-        <kotlinx.version>1.6.4</kotlinx.version>
+        <sentry.version>6.18.1</sentry.version>
+        <kotlinx.version>1.7.1</kotlinx.version>
 
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
         <okhttp3.version>4.9.0</okhttp3.version>
@@ -45,20 +45,13 @@
 
         <medeia-validator-jackson.version>1.1.1</medeia-validator-jackson.version>
         <logback-syslog4j.version>1.0.0</logback-syslog4j.version>
-        <testcontainers.postgresql.version>1.18.0</testcontainers.postgresql.version>
+        <testcontainers.postgresql.version>1.18.1</testcontainers.postgresql.version>
         <unleash.version>7.1.0</unleash.version>
-        <maven.model.version>3.9.1</maven.model.version>
-        <jackson.module.kotlin.version>2.14.2</jackson.module.kotlin.version>
+        <maven.model.version>3.9.2</maven.model.version>
+        <jackson.module.kotlin.version>2.15.0</jackson.module.kotlin.version>
         <token-validation-test-support.version>2.0.5</token-validation-test-support.version>
         <fpsak-tidslinje.version>2.6.7</fpsak-tidslinje.version>
         <awaitility-kotlin.version>4.2.0</awaitility-kotlin.version>
-
-        <!--suppress UnresolvedMavenProperty  Ligger som secret i github-->
-        <sonar.projectKey>${SONAR_PROJECTKEY}</sonar.projectKey>
-        <sonar.organization>navit</sonar.organization>
-        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-        <!--suppress UnresolvedMavenProperty Ligger som secret i github-->
-        <sonar.login>${SONAR_LOGIN}</sonar.login>
     </properties>
 
     <dependencyManagement>
@@ -388,41 +381,6 @@
         </repository>
     </repositories>
 
-    <profiles>
-        <profile>
-            <id>coverage</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.jacoco</groupId>
-                        <artifactId>jacoco-maven-plugin</artifactId>
-                        <configuration>
-                            <excludes>
-                                <exclude>**/*config.*</exclude>
-                            </excludes>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <id>prepare-agent</id>
-                                <goals>
-                                    <goal>prepare-agent</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>report</id>
-                                <goals>
-                                    <goal>report</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 
     <build>
         <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
@@ -430,16 +388,6 @@
 
         <pluginManagement>
             <plugins>
-                <plugin>
-                    <groupId>org.sonarsource.scanner.maven</groupId>
-                    <artifactId>sonar-maven-plugin</artifactId>
-                    <version>3.9.1.2184</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.jacoco</groupId>
-                    <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>0.8.9</version>
-                </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-antrun-plugin</artifactId>
@@ -481,7 +429,7 @@
                         <dependency>
                             <groupId>com.pinterest</groupId>
                             <artifactId>ktlint</artifactId>
-                            <version>0.47.1</version>
+                            <version>0.49.1</version>
                         </dependency>
                     </dependencies>
                 </plugin>
@@ -521,7 +469,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.0.0</version>
+                <version>3.1.0</version>
                 <configuration>
                     <!-- exclude tags -->
                     <!--suppress UnresolvedMavenProperty -->

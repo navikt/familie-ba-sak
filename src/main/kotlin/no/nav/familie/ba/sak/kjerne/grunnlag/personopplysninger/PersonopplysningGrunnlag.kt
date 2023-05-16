@@ -28,7 +28,7 @@ data class PersonopplysningGrunnlag(
     @SequenceGenerator(
         name = "GR_PERSONOPPLYSNINGER_SEQ_GENERATOR",
         sequenceName = "GR_PERSONOPPLYSNINGER_SEQ",
-        allocationSize = 50
+        allocationSize = 50,
     )
     val id: Long = 0,
 
@@ -38,12 +38,12 @@ data class PersonopplysningGrunnlag(
     @OneToMany(
         fetch = FetchType.EAGER,
         mappedBy = "personopplysningGrunnlag",
-        cascade = [CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH]
+        cascade = [CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH],
     )
     val personer: MutableSet<Person> = mutableSetOf(),
 
     @Column(name = "aktiv", nullable = false)
-    var aktiv: Boolean = true
+    var aktiv: Boolean = true,
 
 ) : BaseEntitet() {
 

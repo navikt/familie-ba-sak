@@ -4,7 +4,7 @@ import io.mockk.clearMocks
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
-import no.nav.familie.ba.sak.integrasjoner.`ef-sak`.EfSakRestClient
+import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
 import no.nav.familie.kontrakter.felles.ef.Datakilde
 import no.nav.familie.kontrakter.felles.ef.EksternPeriode
 import no.nav.familie.kontrakter.felles.ef.EksternePerioderResponse
@@ -38,9 +38,9 @@ class EfSakRestClientMock {
                             personIdent = hentPerioderMedFullOvergangsstønadSlot.captured,
                             fomDato = LocalDate.now().minusYears(2),
                             datakilde = Datakilde.EF,
-                            tomDato = LocalDate.now().minusMonths(3)
-                        )
-                    )
+                            tomDato = LocalDate.now().minusMonths(3),
+                        ),
+                    ),
                 )
             }
         }

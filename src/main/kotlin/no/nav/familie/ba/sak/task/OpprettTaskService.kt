@@ -21,22 +21,22 @@ import java.util.Properties
 
 @Service
 class OpprettTaskService(
-    val taskRepository: TaskRepositoryWrapper
+    val taskRepository: TaskRepositoryWrapper,
 ) {
 
     fun opprettOppgaveTask(
         behandlingId: Long,
         oppgavetype: Oppgavetype,
         beskrivelse: String? = null,
-        fristForFerdigstillelse: LocalDate = LocalDate.now()
+        fristForFerdigstillelse: LocalDate = LocalDate.now(),
     ) {
         taskRepository.save(
             OpprettOppgaveTask.opprettTask(
                 behandlingId = behandlingId,
                 oppgavetype = oppgavetype,
                 fristForFerdigstillelse = fristForFerdigstillelse,
-                beskrivelse = beskrivelse
-            )
+                beskrivelse = beskrivelse,
+            ),
         )
     }
 
@@ -57,13 +57,13 @@ class OpprettTaskService(
                         Autobrev6og18ÅrDTO(
                             fagsakId = fagsakId,
                             alder = alder,
-                            årMåned = inneværendeMåned()
-                        )
+                            årMåned = inneværendeMåned(),
+                        ),
                     ),
                     properties = Properties().apply {
                         this["fagsak"] = fagsakId.toString()
-                    }
-                )
+                    },
+                ),
             )
         }
     }
@@ -75,13 +75,13 @@ class OpprettTaskService(
                     type = SendAutobrevOpphørSmåbarnstilleggTask.TASK_STEP_TYPE,
                     payload = objectMapper.writeValueAsString(
                         AutobrevOpphørSmåbarnstilleggDTO(
-                            fagsakId = fagsakId
-                        )
+                            fagsakId = fagsakId,
+                        ),
                     ),
                     properties = Properties().apply {
                         this["fagsakId"] = fagsakId.toString()
-                    }
-                )
+                    },
+                ),
             )
         }
     }
@@ -95,8 +95,8 @@ class OpprettTaskService(
                     payload = objectMapper.writeValueAsString(SatsendringTaskDto(fagsakId, satstidspunkt)),
                     properties = Properties().apply {
                         this["fagsakId"] = fagsakId.toString()
-                    }
-                )
+                    },
+                ),
             )
         }
     }
@@ -106,7 +106,7 @@ class OpprettTaskService(
         behandlingId: Long,
         årsak: HenleggÅrsak,
         begrunnelse: String,
-        validerOppgavefristErEtterDato: LocalDate? = null
+        validerOppgavefristErEtterDato: LocalDate? = null,
     ) {
         taskRepository.save(
             Task(
@@ -116,13 +116,13 @@ class OpprettTaskService(
                         behandlingId = behandlingId,
                         årsak = årsak,
                         begrunnelse = begrunnelse,
-                        validerOppgavefristErEtterDato = validerOppgavefristErEtterDato
-                    )
+                        validerOppgavefristErEtterDato = validerOppgavefristErEtterDato,
+                    ),
                 ),
                 properties = Properties().apply {
                     this["behandlingId"] = behandlingId.toString()
-                }
-            )
+                },
+            ),
         )
     }
 

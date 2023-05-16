@@ -33,7 +33,7 @@ data class GrStatsborgerskap(
     @SequenceGenerator(
         name = "po_statsborgerskap_seq_generator",
         sequenceName = "po_statsborgerskap_seq",
-        allocationSize = 50
+        allocationSize = 50,
     )
     val id: Long = 0,
 
@@ -50,7 +50,7 @@ data class GrStatsborgerskap(
     @JsonIgnore
     @ManyToOne(optional = false)
     @JoinColumn(name = "fk_po_person_id", nullable = false, updatable = false)
-    val person: Person
+    val person: Person,
 ) : BaseEntitet() {
 
     fun gjeldendeNå(): Boolean {
@@ -79,7 +79,7 @@ data class GrStatsborgerskap(
     fun tilRestRegisteropplysning() = RestRegisteropplysning(
         fom = this.gyldigPeriode?.fom,
         tom = this.gyldigPeriode?.tom,
-        verdi = this.landkode
+        verdi = this.landkode,
     )
 }
 

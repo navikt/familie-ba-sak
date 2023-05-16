@@ -14,18 +14,18 @@ import java.util.Properties
 @TaskStepBeskrivelse(
     taskStepType = IverksettMotFamilieTilbakeTask.TASK_STEP_TYPE,
     beskrivelse = "Iverksett mot Familie tilbake",
-    maxAntallFeil = 3
+    maxAntallFeil = 3,
 )
 class IverksettMotFamilieTilbakeTask(
     val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
-    val stegService: StegService
+    val stegService: StegService,
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
         val iverksettMotFamilieTilbake = objectMapper.readValue(task.payload, IverksettMotFamilieTilbakeDTO::class.java)
         stegService.håndterIverksettMotFamilieTilbake(
             behandling = behandlingHentOgPersisterService.hent(iverksettMotFamilieTilbake.behandlingsId),
-            task.metadata
+            task.metadata,
         )
     }
 
@@ -38,7 +38,7 @@ class IverksettMotFamilieTilbakeTask(
                 payload = objectMapper.writeValueAsString(IverksettMotFamilieTilbakeDTO(behandlingsId)),
                 properties = metadata.apply {
                     this["behandlingId"] = behandlingsId.toString()
-                }
+                },
             )
         }
     }

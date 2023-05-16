@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component
 @Component
 class FagsakStatusScheduler(
     private val taskRepository: TaskRepositoryWrapper,
-    private val envService: EnvService
+    private val envService: EnvService,
 ) {
 
     /*

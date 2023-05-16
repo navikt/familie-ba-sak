@@ -20,7 +20,7 @@ internal fun <S : PeriodeOgBarnSkjema<S>> Iterable<S>.tilTidslinje() =
             Periode(
                 it.fom.tilTidspunktEllerTidligereEnn(it.tom),
                 it.tom.tilTidspunktEllerSenereEnn(it.fom),
-                it.utenPeriode()
+                it.utenPeriode(),
             )
         }
     }
@@ -39,7 +39,7 @@ fun <S : PeriodeOgBarnSkjema<S>> Iterable<S>.tilSeparateTidslinjerForBarna(): Ma
                     Periode(
                         fraOgMed = it.fom.tilTidspunktEllerTidligereEnn(it.tom),
                         tilOgMed = it.tom.tilTidspunktEllerSenereEnn(it.fom),
-                        innhold = it.kopier(fom = null, tom = null, barnAktører = setOf(aktør))
+                        innhold = it.kopier(fom = null, tom = null, barnAktører = setOf(aktør)),
                     )
                 }
         }
@@ -55,6 +55,6 @@ private fun <S : PeriodeOgBarnSkjema<S>> Tidslinje<S, Måned>.tilSkjemaer(aktør
         periode.innhold?.kopier(
             fom = periode.fraOgMed.tilYearMonthEllerNull(),
             tom = periode.tilOgMed.tilYearMonthEllerNull(),
-            barnAktører = setOf(aktør)
+            barnAktører = setOf(aktør),
         )
     }

@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController
 class InfotrygdController(
     private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
     private val personidentService: PersonidentService,
-    private val infotrygdService: InfotrygdService
+    private val infotrygdService: InfotrygdService,
 ) {
 
     @PostMapping(path = ["/hent-infotrygdsaker-for-soker"])
@@ -53,13 +53,13 @@ class Personident(val ident: String)
 class RestInfotrygdsaker(
     val saker: List<Sak> = emptyList(),
     val adressebeskyttelsegradering: ADRESSEBESKYTTELSEGRADERING? = null,
-    val harTilgang: Boolean = true
+    val harTilgang: Boolean = true,
 )
 
 class RestInfotrygdstønader(
     val stønader: List<Stønad> = emptyList(),
     val adressebeskyttelsegradering: ADRESSEBESKYTTELSEGRADERING? = null,
-    val harTilgang: Boolean = true
+    val harTilgang: Boolean = true,
 )
 
 class RestLøpendeSak(val harLøpendeSak: Boolean)

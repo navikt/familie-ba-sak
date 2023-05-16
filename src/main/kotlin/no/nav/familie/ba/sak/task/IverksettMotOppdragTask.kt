@@ -24,14 +24,14 @@ class IverksettMotOppdragTask(
     private val stegService: StegService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val personidentService: PersonidentService,
-    private val taskRepository: TaskRepositoryWrapper
+    private val taskRepository: TaskRepositoryWrapper,
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
         val iverksettingTask = objectMapper.readValue(task.payload, IverksettingTaskDTO::class.java)
         stegService.håndterIverksettMotØkonomi(
             behandling = behandlingHentOgPersisterService.hent(iverksettingTask.behandlingsId),
-            iverksettingTaskDTO = iverksettingTask
+            iverksettingTaskDTO = iverksettingTask,
         )
     }
 
@@ -46,15 +46,15 @@ class IverksettMotOppdragTask(
                     personIdent = personIdent,
                     fagsystem = FAGSYSTEM,
                     behandlingsId = iverksettingTask.behandlingsId,
-                    vedtaksId = iverksettingTask.vedtaksId
-                )
+                    vedtaksId = iverksettingTask.vedtaksId,
+                ),
             ),
-            properties = task.metadata
+            properties = task.metadata,
         )
 
         val sendMeldingTilBisysTask = Task(
             type = SendMeldingTilBisysTask.TASK_STEP_TYPE,
-            payload = iverksettingTask.behandlingsId.toString()
+            payload = iverksettingTask.behandlingsId.toString(),
         )
 
         taskRepository.save(statusFraOppdragTask)
@@ -70,7 +70,7 @@ class IverksettMotOppdragTask(
                 behandling.id,
                 vedtak.id,
                 saksbehandlerId,
-                behandling.fagsak.id
+                behandling.fagsak.id,
             )
         }
 
@@ -79,7 +79,7 @@ class IverksettMotOppdragTask(
             behandlingsId: Long,
             vedtaksId: Long,
             saksbehandlerId: String,
-            fagsakId: Long
+            fagsakId: Long,
         ): Task {
             return Task(
                 type = TASK_STEP_TYPE,
@@ -88,15 +88,15 @@ class IverksettMotOppdragTask(
                         personIdent = aktør.aktivFødselsnummer(),
                         behandlingsId = behandlingsId,
                         vedtaksId = vedtaksId,
-                        saksbehandlerId = saksbehandlerId
-                    )
+                        saksbehandlerId = saksbehandlerId,
+                    ),
                 ),
                 properties = Properties().apply {
                     this["personIdent"] = aktør.aktivFødselsnummer()
                     this["behandlingsId"] = behandlingsId.toString()
                     this["vedtakId"] = vedtaksId.toString()
                     this["fagsakId"] = fagsakId.toString()
-                }
+                },
             )
         }
     }

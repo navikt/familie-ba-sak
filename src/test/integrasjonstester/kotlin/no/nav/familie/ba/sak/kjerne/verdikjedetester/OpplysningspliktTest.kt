@@ -41,7 +41,7 @@ class OpplysningspliktTest(
     @Autowired private val dokumentService: DokumentService,
     @Autowired private val brevService: BrevService,
     @Autowired private val settPåVentService: SettPåVentService,
-    @Autowired private val brevmalService: BrevmalService
+    @Autowired private val brevmalService: BrevmalService,
 ) : AbstractVerdikjedetest() {
 
     @Test
@@ -53,10 +53,10 @@ class OpplysningspliktTest(
                     RestScenarioPerson(
                         fødselsdato = LocalDate.now().minusMonths(2).toString(),
                         fornavn = "Barn",
-                        etternavn = "Barnesen"
-                    )
-                )
-            )
+                        etternavn = "Barnesen",
+                    ),
+                ),
+            ),
         )
 
         val behandling = kjørStegprosessForFGB(
@@ -69,7 +69,7 @@ class OpplysningspliktTest(
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
 
         )
 
@@ -79,9 +79,9 @@ class OpplysningspliktTest(
             manueltBrevRequest = ManueltBrevRequest(
                 brevmal = Brevmal.INNHENTE_OPPLYSNINGER,
                 mottakerIdent = scenario.søker.ident,
-                enhet = Enhet(enhetId = "1234", enhetNavn = "Enhet Enhetesen")
+                enhet = Enhet(enhetId = "1234", enhetNavn = "Enhet Enhetesen"),
             ),
-            behandling = behandling
+            behandling = behandling,
         )
 
         settPåVentService.gjenopptaBehandling(behandling.id)
@@ -106,18 +106,18 @@ class OpplysningspliktTest(
         Assertions.assertTrue(vilkårsvurderingOppdatert?.personResultater?.single { it.erSøkersResultater() }?.andreVurderinger?.single { it.type == AnnenVurderingType.OPPLYSNINGSPLIKT }?.resultat == Resultat.IKKE_OPPFYLT)
 
         familieBaSakKlient().validerVilkårsvurdering(
-            behandlingId = behandling.id
+            behandlingId = behandling.id,
         )
 
         val behandlingEtterBehandlingsResultat =
             familieBaSakKlient().behandlingsresultatStegOgGåVidereTilNesteSteg(
-                behandlingId = behandling.id
+                behandlingId = behandling.id,
             )
 
         val behandlingEtterVurderTilbakekreving =
             familieBaSakKlient().lagreTilbakekrevingOgGåVidereTilNesteSteg(
                 behandlingEtterBehandlingsResultat.data!!.behandlingId,
-                RestTilbakekreving(Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING, begrunnelse = "begrunnelse")
+                RestTilbakekreving(Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING, begrunnelse = "begrunnelse"),
             )
 
         val vedtaksperiode =
@@ -127,9 +127,9 @@ class OpplysningspliktTest(
             vedtaksperiodeId = vedtaksperiode.id,
             restPutVedtaksperiodeMedStandardbegrunnelser = RestPutVedtaksperiodeMedStandardbegrunnelser(
                 standardbegrunnelser = listOf(
-                    Standardbegrunnelse.INNVILGET_BOR_HOS_SØKER.enumnavnTilString()
-                )
-            )
+                    Standardbegrunnelse.INNVILGET_BOR_HOS_SØKER.enumnavnTilString(),
+                ),
+            ),
         )
 
         val vedtak =

@@ -4,5 +4,5 @@ import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 
 data class FerdigstillOppgaveDTO(
     val behandlingId: Long,
-    val oppgavetype: Oppgavetype
+    val oppgavetype: Oppgavetype,
 )

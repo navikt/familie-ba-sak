@@ -14,7 +14,7 @@ class ValutakursUtfyltTest {
     fun `Skal sette UtfyltStatus til OK når alle felter er utfylt`() {
         val valutakurs = lagValutakurs(
             valutakursdato = LocalDate.now(),
-            kurs = BigDecimal.valueOf(10)
+            kurs = BigDecimal.valueOf(10),
         )
 
         val restValutakurs = valutakurs.tilRestValutakurs()
@@ -25,7 +25,7 @@ class ValutakursUtfyltTest {
     @Test
     fun `Skal sette UtfyltStatus til UFULLSTENDIG når ett felt er utfylt`() {
         var valutakurs = lagValutakurs(
-            valutakursdato = LocalDate.now()
+            valutakursdato = LocalDate.now(),
         )
 
         var restValutakurs = valutakurs.tilRestValutakurs()
@@ -33,7 +33,7 @@ class ValutakursUtfyltTest {
         Assertions.assertEquals(UtfyltStatus.UFULLSTENDIG, restValutakurs.status)
 
         valutakurs = lagValutakurs(
-            kurs = BigDecimal.valueOf(10)
+            kurs = BigDecimal.valueOf(10),
         )
 
         restValutakurs = valutakurs.tilRestValutakurs()

@@ -7,9 +7,9 @@ Egenskap: Ulike ytelsestyper på andelene
   Scenario: Søker med utvidet og småbarnstillegg
 
     Gitt følgende tilkjente ytelser
-      | BehandlingId | Fra dato | Til dato | Beløp | Kildebehandling | Ident | Ytelse             |
-      | 1            | 03.2021  | 03.2021  | 700   | 1               | 1     | UTVIDET_BARNETRYGD |
-      | 1            | 03.2021  | 03.2021  | 800   | 1               | 1     | SMÅBARNSTILLEGG    |
+      | BehandlingId | Fra dato | Til dato | Beløp | Ident | Ytelse             |
+      | 1            | 03.2021  | 03.2021  | 700   | 1     | UTVIDET_BARNETRYGD |
+      | 1            | 03.2021  | 03.2021  | 800   | 1     | SMÅBARNSTILLEGG    |
 
     Når beregner utbetalingsoppdrag
 
@@ -21,12 +21,12 @@ Egenskap: Ulike ytelsestyper på andelene
   Scenario: Revurdering endrer beløp på småbarnstillegg fra april
 
     Gitt følgende tilkjente ytelser
-      | BehandlingId | Fra dato | Til dato | Beløp | Kildebehandling | Ident | Ytelse             |
-      | 1            | 03.2021  | 05.2021  | 700   | 1               | 1     | UTVIDET_BARNETRYGD |
-      | 1            | 03.2021  | 05.2021  | 800   | 1               | 1     | SMÅBARNSTILLEGG    |
-      | 2            | 03.2021  | 05.2021  | 700   | 1               | 1     | UTVIDET_BARNETRYGD |
-      | 2            | 03.2021  | 03.2021  | 800   | 1               | 1     | SMÅBARNSTILLEGG    |
-      | 2            | 04.2021  | 05.2021  | 800   | 1               | 1     | SMÅBARNSTILLEGG    |
+      | BehandlingId | Fra dato | Til dato | Beløp | Ident | Ytelse             |
+      | 1            | 03.2021  | 05.2021  | 700   | 1     | UTVIDET_BARNETRYGD |
+      | 1            | 03.2021  | 05.2021  | 800   | 1     | SMÅBARNSTILLEGG    |
+      | 2            | 03.2021  | 05.2021  | 700   | 1     | UTVIDET_BARNETRYGD |
+      | 2            | 03.2021  | 03.2021  | 800   | 1     | SMÅBARNSTILLEGG    |
+      | 2            | 04.2021  | 05.2021  | 800   | 1     | SMÅBARNSTILLEGG    |
 
     Når beregner utbetalingsoppdrag
 
@@ -41,16 +41,16 @@ Egenskap: Ulike ytelsestyper på andelene
   Scenario: Forelder og barn har flere stønadstyper som alle blir egne kjeder. Øker hvert beløp med 100kr i revurderingen for å verifisere at det fortsatt blir 4 ulike kjeder
 
     Gitt følgende tilkjente ytelser
-      | BehandlingId | Fra dato | Til dato | Beløp | Ytelse             | Kildebehandling | Ident |
-      | 1            | 03.2021  | 03.2021  | 100   | UTVIDET_BARNETRYGD | 1               | 1     |
-      | 1            | 03.2021  | 03.2021  | 200   | SMÅBARNSTILLEGG    | 1               | 1     |
-      | 1            | 03.2021  | 03.2021  | 300   | ORDINÆR_BARNETRYGD | 1               | 2     |
-      | 1            | 03.2021  | 03.2021  | 400   | UTVIDET_BARNETRYGD | 1               | 2     |
+      | BehandlingId | Fra dato | Til dato | Beløp | Ytelse             | Ident |
+      | 1            | 03.2021  | 03.2021  | 100   | UTVIDET_BARNETRYGD | 1     |
+      | 1            | 03.2021  | 03.2021  | 200   | SMÅBARNSTILLEGG    | 1     |
+      | 1            | 03.2021  | 03.2021  | 300   | ORDINÆR_BARNETRYGD | 2     |
+      | 1            | 03.2021  | 03.2021  | 400   | UTVIDET_BARNETRYGD | 2     |
 
-      | 2            | 03.2021  | 03.2021  | 200   | UTVIDET_BARNETRYGD | 1               | 1     |
-      | 2            | 03.2021  | 03.2021  | 300   | SMÅBARNSTILLEGG    | 1               | 1     |
-      | 2            | 03.2021  | 03.2021  | 400   | ORDINÆR_BARNETRYGD | 1               | 2     |
-      | 2            | 03.2021  | 03.2021  | 500   | UTVIDET_BARNETRYGD | 1               | 2     |
+      | 2            | 03.2021  | 03.2021  | 200   | UTVIDET_BARNETRYGD | 1     |
+      | 2            | 03.2021  | 03.2021  | 300   | SMÅBARNSTILLEGG    | 1     |
+      | 2            | 03.2021  | 03.2021  | 400   | ORDINÆR_BARNETRYGD | 2     |
+      | 2            | 03.2021  | 03.2021  | 500   | UTVIDET_BARNETRYGD | 2     |
 
     Når beregner utbetalingsoppdrag
 

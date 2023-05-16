@@ -38,7 +38,7 @@ class SettPåVentServiceTest(
     @Autowired private val settPåVentRepository: SettPåVentRepository,
     @Autowired private val taBehandlingerEtterVentefristAvVentTask: TaBehandlingerEtterVentefristAvVentTask,
     @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
-    @Autowired private val brevmalService: BrevmalService
+    @Autowired private val brevmalService: BrevmalService,
 ) : AbstractSpringIntegrationTest() {
 
     @BeforeAll
@@ -56,15 +56,15 @@ class SettPåVentServiceTest(
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
         )
 
         settPåVentRepository.save(
             SettPåVent(
                 behandling = behandlingEtterVilkårsvurderingSteg,
                 frist = LocalDate.now().plusDays(21),
-                årsak = SettPåVentÅrsak.AVVENTER_DOKUMENTASJON
-            )
+                årsak = SettPåVentÅrsak.AVVENTER_DOKUMENTASJON,
+            ),
         )
 
         assertThrows<FunksjonellFeil> {
@@ -82,27 +82,27 @@ class SettPåVentServiceTest(
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
         )
 
         settPåVentRepository.save(
             SettPåVent(
                 behandling = behandlingEtterVilkårsvurderingSteg,
                 frist = LocalDate.now().plusDays(21),
-                årsak = SettPåVentÅrsak.AVVENTER_DOKUMENTASJON
-            )
+                årsak = SettPåVentÅrsak.AVVENTER_DOKUMENTASJON,
+            ),
         )
 
         val nå = LocalDate.now()
 
         val settPåVent = settPåVentService.gjenopptaBehandling(
             behandlingId = behandlingEtterVilkårsvurderingSteg.id,
-            nå = nå
+            nå = nå,
         )
 
         Assertions.assertEquals(
             nå,
-            settPåVentRepository.findByIdOrNull(settPåVent.id)!!.tidTattAvVent
+            settPåVentRepository.findByIdOrNull(settPåVent.id)!!.tidTattAvVent,
         )
 
         assertDoesNotThrow {
@@ -120,14 +120,14 @@ class SettPåVentServiceTest(
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
         )
 
         assertThrows<FunksjonellFeil> {
             settPåVentService.settBehandlingPåVent(
                 behandlingId = behandlingEtterVilkårsvurderingSteg.id,
                 frist = LocalDate.now().minusDays(1),
-                årsak = SettPåVentÅrsak.AVVENTER_DOKUMENTASJON
+                årsak = SettPåVentÅrsak.AVVENTER_DOKUMENTASJON,
             )
         }
     }
@@ -142,7 +142,7 @@ class SettPåVentServiceTest(
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
         )
 
         val behandlingId = behandlingEtterVilkårsvurderingSteg.id
@@ -153,8 +153,8 @@ class SettPåVentServiceTest(
             SettPåVent(
                 behandling = behandlingEtterVilkårsvurderingSteg,
                 frist = frist1,
-                årsak = SettPåVentÅrsak.AVVENTER_DOKUMENTASJON
-            )
+                årsak = SettPåVentÅrsak.AVVENTER_DOKUMENTASJON,
+            ),
         )
 
         Assertions.assertEquals(frist1, settPåVentService.finnAktivSettPåVentPåBehandlingThrows(behandlingId).frist)
@@ -177,7 +177,7 @@ class SettPåVentServiceTest(
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
         )
 
         val behandling2 = kjørStegprosessForFGB(
@@ -188,30 +188,30 @@ class SettPåVentServiceTest(
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
         )
 
         settPåVentRepository.save(
             SettPåVent(
                 behandling = behandling1,
                 frist = LocalDate.now().minusDays(1),
-                årsak = SettPåVentÅrsak.AVVENTER_DOKUMENTASJON
-            )
+                årsak = SettPåVentÅrsak.AVVENTER_DOKUMENTASJON,
+            ),
         )
 
         settPåVentRepository.save(
             SettPåVent(
                 behandling = behandling2,
                 frist = LocalDate.now().plusDays(21),
-                årsak = SettPåVentÅrsak.AVVENTER_DOKUMENTASJON
-            )
+                årsak = SettPåVentÅrsak.AVVENTER_DOKUMENTASJON,
+            ),
         )
 
         taBehandlingerEtterVentefristAvVentTask.doTask(
             Task(
                 type = TaBehandlingerEtterVentefristAvVentTask.TASK_STEP_TYPE,
-                payload = ""
-            )
+                payload = "",
+            ),
         )
 
         Assertions.assertNull(settPåVentRepository.findByBehandlingIdAndAktiv(behandling1.id, true))

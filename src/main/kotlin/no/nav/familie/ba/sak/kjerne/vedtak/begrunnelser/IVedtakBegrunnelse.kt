@@ -20,7 +20,7 @@ interface IVedtakBegrunnelse {
     fun delOpp(
         restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
         triggesAv: TriggesAv,
-        periode: NullablePeriode
+        periode: NullablePeriode,
     ): List<BrevBegrunnelseGrunnlagMedPersoner>
 
     fun enumnavnTilString(): String

@@ -101,7 +101,7 @@ data class Person(
     var sivilstander: MutableList<GrSivilstand> = mutableListOf(),
 
     @OneToOne(mappedBy = "person", cascade = [CascadeType.ALL], fetch = FetchType.EAGER, optional = true)
-    var dødsfall: Dødsfall? = null
+    var dødsfall: Dødsfall? = null,
 ) : BaseEntitet() {
 
     override fun toString(): String {
@@ -144,7 +144,7 @@ data class Person(
 enum class Kjønn {
     MANN,
     KVINNE,
-    UKJENT
+    UKJENT,
 }
 
 enum class Medlemskap {
@@ -152,12 +152,13 @@ enum class Medlemskap {
     EØS,
     TREDJELANDSBORGER,
     STATSLØS,
-    UKJENT
+    UKJENT,
 }
 
 enum class Målform {
     NB,
-    NN;
+    NN,
+    ;
 
     fun tilSanityFormat() = when (this) {
         NB -> "bokmaal"

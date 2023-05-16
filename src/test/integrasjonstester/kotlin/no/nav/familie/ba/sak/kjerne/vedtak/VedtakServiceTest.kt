@@ -117,7 +117,7 @@ class VedtakServiceTest(
     private val behandlingSøknadsinfoRepository: BehandlingSøknadsinfoRepository,
 
     @Autowired
-    private val vilkårsvurderingTidslinjeService: VilkårsvurderingTidslinjeService
+    private val vilkårsvurderingTidslinjeService: VilkårsvurderingTidslinjeService,
 
 ) : AbstractSpringIntegrationTest() {
 
@@ -147,7 +147,7 @@ class VedtakServiceTest(
             infotrygdService,
             vedtaksperiodeService,
             taskRepository,
-            vilkårsvurderingService
+            vilkårsvurderingService,
         )
 
         val personAktørId = randomAktør()
@@ -161,7 +161,7 @@ class VedtakServiceTest(
 
         personResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            aktør = personAktørId
+            aktør = personAktørId,
         )
 
         vilkårResultat1 = VilkårResultat(
@@ -172,7 +172,7 @@ class VedtakServiceTest(
             LocalDate.of(2010, 1, 1),
             LocalDate.of(2010, 6, 1),
             "",
-            vilkårsvurdering.behandling.id
+            vilkårsvurdering.behandling.id,
         )
         vilkårResultat2 = VilkårResultat(
             2,
@@ -182,7 +182,7 @@ class VedtakServiceTest(
             LocalDate.of(2010, 6, 2),
             LocalDate.of(2010, 8, 1),
             "",
-            vilkårsvurdering.behandling.id
+            vilkårsvurdering.behandling.id,
         )
         vilkårResultat3 = VilkårResultat(
             3,
@@ -192,14 +192,14 @@ class VedtakServiceTest(
             LocalDate.of(2010, 8, 2),
             LocalDate.of(2010, 12, 1),
             "",
-            vilkårsvurdering.behandling.id
+            vilkårsvurdering.behandling.id,
         )
         personResultat.setSortedVilkårResultater(
             setOf(
                 vilkårResultat1,
                 vilkårResultat2,
-                vilkårResultat3
-            ).toSortedSet(VilkårResultatComparator)
+                vilkårResultat3,
+            ).toSortedSet(VilkårResultatComparator),
         )
     }
 
@@ -226,7 +226,7 @@ class VedtakServiceTest(
                 fnr,
                 listOf(barnFnr),
                 søkerAktør = fagsak.aktør,
-                barnAktør = barnAktør
+                barnAktør = barnAktør,
             )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
@@ -235,13 +235,13 @@ class VedtakServiceTest(
         totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(
             behandling,
             "ansvarligSaksbehandler",
-            "saksbehandlerId"
+            "saksbehandlerId",
         )
         totrinnskontrollService.besluttTotrinnskontroll(
             behandling,
             "ansvarligBeslutter",
             "beslutterId",
-            Beslutning.GODKJENT
+            Beslutning.GODKJENT,
         )
 
         val hentetVedtak = vedtakService.hentAktivForBehandling(behandling.id)
@@ -269,8 +269,8 @@ class VedtakServiceTest(
             vedtakService.oppdater(
                 Vedtak(
                     behandling = behandling,
-                    vedtaksdato = LocalDateTime.now()
-                )
+                    vedtaksdato = LocalDateTime.now(),
+                ),
             )
         }
     }

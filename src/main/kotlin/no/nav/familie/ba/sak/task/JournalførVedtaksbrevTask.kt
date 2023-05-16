@@ -14,7 +14,7 @@ import java.util.Properties
 @TaskStepBeskrivelse(taskStepType = TASK_STEP_TYPE, beskrivelse = "Journalfør brev i Joark", maxAntallFeil = 3)
 class JournalførVedtaksbrevTask(
     private val vedtakService: VedtakService,
-    private val stegService: StegService
+    private val stegService: StegService,
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
@@ -32,7 +32,7 @@ class JournalførVedtaksbrevTask(
             personIdent: String,
             behandlingId: Long,
             vedtakId: Long,
-            gammelTask: Task? = null
+            gammelTask: Task? = null,
         ): Task {
             return Task(
                 TASK_STEP_TYPE,
@@ -41,7 +41,7 @@ class JournalførVedtaksbrevTask(
                     this["personIdent"] = personIdent
                     this["behandlingsId"] = behandlingId.toString()
                     this["vedtakId"] = vedtakId.toString()
-                }
+                },
             )
         }
     }

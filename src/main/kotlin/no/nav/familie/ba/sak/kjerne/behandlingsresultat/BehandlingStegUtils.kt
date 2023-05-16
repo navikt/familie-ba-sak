@@ -10,7 +10,7 @@ import java.time.YearMonth
 
 fun Tidslinje<Boolean, Måned>.kastFeilVedEndringEtter(
     migreringsdatoForrigeIverksatteBehandling: YearMonth,
-    behandling: Behandling
+    behandling: Behandling,
 ) {
     val endringIUtbetalingEtterDato = perioder()
         .filter { it.tilOgMed.tilYearMonth().isSameOrAfter(migreringsdatoForrigeIverksatteBehandling) }
@@ -22,7 +22,7 @@ fun Tidslinje<Boolean, Måned>.kastFeilVedEndringEtter(
         throw FunksjonellFeil(
             "Det finnes endringer i behandlingen som har økonomisk konsekvens for bruker." +
                 "Det skal ikke skje for endre migreringsdatobehandlinger." +
-                "Endringer må gjøres i en separat behandling."
+                "Endringer må gjøres i en separat behandling.",
         )
     }
 }

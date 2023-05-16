@@ -36,7 +36,7 @@ data class GrVegadresse(
     val tilleggsnavn: String?,
 
     @Column(name = "postnummer")
-    val postnummer: String?
+    val postnummer: String?,
 
 ) : GrBostedsadresse() {
 
@@ -51,8 +51,8 @@ data class GrVegadresse(
     }
 
     override fun tilFrontendString() = """${
-    adressenavn.nullableTilString()
-        .storForbokstav()
+        adressenavn.nullableTilString()
+            .storForbokstav()
     } ${husnummer.nullableTilString()}${husbokstav.nullableTilString()}${postnummer.let { ", $it" }}""".trimMargin()
 
     override fun equals(other: Any?): Boolean {
@@ -89,7 +89,7 @@ data class GrVegadresse(
                 adressenavn = vegadresse.adressenavn,
                 kommunenummer = vegadresse.kommunenummer,
                 tilleggsnavn = vegadresse.tilleggsnavn,
-                postnummer = vegadresse.postnummer
+                postnummer = vegadresse.postnummer,
             )
     }
 }

@@ -6,7 +6,7 @@ import java.time.YearMonth
 
 data class MånedTidspunkt internal constructor(
     internal val måned: YearMonth,
-    override val uendelighet: Uendelighet
+    override val uendelighet: Uendelighet,
 ) : Tidspunkt<Måned>(uendelighet) {
 
     fun tilYearMonthEllerNull(): YearMonth? =
@@ -67,7 +67,7 @@ data class MånedTidspunkt internal constructor(
         private fun YearMonth?.tilTidspunktEllerUendelig(default: YearMonth?, uendelighet: Uendelighet) =
             this?.let { MånedTidspunkt(it, Uendelighet.INGEN) } ?: MånedTidspunkt(
                 default ?: YearMonth.now(),
-                uendelighet
+                uendelighet,
             )
 
         fun LocalDate.tilMånedTidspunkt() = MånedTidspunkt(this.toYearMonth(), Uendelighet.INGEN)

@@ -4,37 +4,37 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
 
 data class Autovedtak6og18årOgSmåbarnstillegg(
     override val mal: Brevmal = Brevmal.AUTOVEDTAK_BARN_6_OG_18_ÅR_OG_SMÅBARNSTILLEGG,
-    override val data: Autovedtak6og18årData
+    override val data: Autovedtak6og18årData,
 ) : Vedtaksbrev {
 
     constructor(
-        vedtakFellesfelter: VedtakFellesfelter
+        vedtakFellesfelter: VedtakFellesfelter,
     ) :
         this(
             data = Autovedtak6og18årData(
                 delmalData = Autovedtak6og18årData.Delmaler(
                     hjemmeltekst = vedtakFellesfelter.hjemmeltekst,
                     autoUnderskrift = AutoUnderskrift(
-                        enhet = vedtakFellesfelter.enhet
-                    )
+                        enhet = vedtakFellesfelter.enhet,
+                    ),
                 ),
                 flettefelter = FlettefelterForDokumentImpl(
                     navn = vedtakFellesfelter.søkerNavn,
-                    fodselsnummer = vedtakFellesfelter.søkerFødselsnummer
+                    fodselsnummer = vedtakFellesfelter.søkerFødselsnummer,
                 ),
-                perioder = vedtakFellesfelter.perioder
-            )
+                perioder = vedtakFellesfelter.perioder,
+            ),
         )
 }
 
 data class Autovedtak6og18årData(
     override val delmalData: Delmaler,
     override val flettefelter: FlettefelterForDokumentImpl,
-    override val perioder: List<BrevPeriode>
+    override val perioder: List<BrevPeriode>,
 ) : VedtaksbrevData {
 
     data class Delmaler(
         val hjemmeltekst: Hjemmeltekst,
-        val autoUnderskrift: AutoUnderskrift
+        val autoUnderskrift: AutoUnderskrift,
     )
 }

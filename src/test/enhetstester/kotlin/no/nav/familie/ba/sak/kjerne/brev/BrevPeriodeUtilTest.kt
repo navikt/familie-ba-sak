@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
 import no.nav.familie.ba.sak.common.MånedPeriode
-import no.nav.familie.ba.sak.dataGenerator.brev.lagMinimertPerson
+import no.nav.familie.ba.sak.datagenerator.brev.lagMinimertPerson
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevperiodeData
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertVedtaksperiode
@@ -26,23 +26,23 @@ class BrevPeriodeUtilTest {
             lagBrevperiodeData(
                 fom = LocalDate.now().minusMonths(12),
                 tom = LocalDate.now().minusMonths(8),
-                type = Vedtaksperiodetype.UTBETALING
+                type = Vedtaksperiodetype.UTBETALING,
             ),
             lagBrevperiodeData(
                 fom = LocalDate.now().minusMonths(4),
                 tom = null,
-                type = Vedtaksperiodetype.AVSLAG
+                type = Vedtaksperiodetype.AVSLAG,
             ),
             lagBrevperiodeData(
                 fom = LocalDate.now().minusMonths(7),
                 tom = LocalDate.now().minusMonths(4),
-                type = Vedtaksperiodetype.OPPHØR
+                type = Vedtaksperiodetype.OPPHØR,
             ),
             lagBrevperiodeData(
                 fom = LocalDate.now().minusMonths(3),
                 tom = LocalDate.now(),
-                type = Vedtaksperiodetype.UTBETALING
-            )
+                type = Vedtaksperiodetype.UTBETALING,
+            ),
         )
 
         val sortertListe = liste.sorted()
@@ -79,14 +79,14 @@ class BrevPeriodeUtilTest {
                 fom = periode2.fom,
                 tom = periode2.tom,
                 barnAktører = setOf(barnAktør1),
-                søkersAktivitet = SøkersAktivitet.ARBEIDER
+                søkersAktivitet = SøkersAktivitet.ARBEIDER,
             )
         val kompetanse3 =
             lagKompetanse(
                 fom = periode2.fom,
                 tom = periode3.tom,
                 barnAktører = setOf(barnAktør2),
-                søkersAktivitet = SøkersAktivitet.INAKTIV
+                søkersAktivitet = SøkersAktivitet.INAKTIV,
             )
         val kompetanse4 =
             lagKompetanse(fom = periode3.fom, tom = periode3.tom, barnAktører = setOf(barnAktør1))
@@ -94,7 +94,7 @@ class BrevPeriodeUtilTest {
         Assertions.assertEquals(
             listOf(kompetanse1, kompetanse2, kompetanse3.copy(tom = periode2.tom)),
             listOf(kompetanse1, kompetanse2, kompetanse3, kompetanse4)
-                .hentIPeriode(periode1.fom, periode2.tom)
+                .hentIPeriode(periode1.fom, periode2.tom),
         )
     }
 
@@ -102,17 +102,17 @@ class BrevPeriodeUtilTest {
     fun `Skal kunne kombinere registrerte og uregistrerte barns fødselsdatoer til avslagsbegrunnelse`() {
         val barnIBegrunnelse = listOf(
             lagMinimertPerson(fødselsdato = LocalDate.of(2021, 1, 1), type = PersonType.BARN),
-            lagMinimertPerson(fødselsdato = LocalDate.of(2021, 2, 2), type = PersonType.BARN)
+            lagMinimertPerson(fødselsdato = LocalDate.of(2021, 2, 2), type = PersonType.BARN),
         ).map { it.tilMinimertRestPerson() }
         val barnPåBehandling = listOf(
             lagMinimertPerson(fødselsdato = LocalDate.of(2021, 1, 1), type = PersonType.BARN),
             lagMinimertPerson(fødselsdato = LocalDate.of(2021, 2, 2), type = PersonType.BARN),
-            lagMinimertPerson(fødselsdato = LocalDate.of(2021, 3, 3), type = PersonType.BARN)
+            lagMinimertPerson(fødselsdato = LocalDate.of(2021, 3, 3), type = PersonType.BARN),
         ).map { it.tilMinimertRestPerson() }
         val uregistrerteBarn = listOf(
             MinimertUregistrertBarn(personIdent = "", navn = "Ole", fødselsdato = LocalDate.of(2021, 4, 4)),
             MinimertUregistrertBarn(personIdent = "", navn = "Dole", fødselsdato = LocalDate.of(2021, 5, 5)),
-            MinimertUregistrertBarn(personIdent = "", navn = "Doffen", fødselsdato = LocalDate.of(2021, 6, 6))
+            MinimertUregistrertBarn(personIdent = "", navn = "Doffen", fødselsdato = LocalDate.of(2021, 6, 6)),
         )
 
         Assertions.assertEquals(
@@ -120,36 +120,36 @@ class BrevPeriodeUtilTest {
                 barnIBegrunnelse,
                 barnPåBehandling,
                 uregistrerteBarn,
-                gjelderSøker = true
+                gjelderSøker = true,
             ),
-            "01.01.21, 02.02.21, 03.03.21, 04.04.21, 05.05.21 og 06.06.21"
+            "01.01.21, 02.02.21, 03.03.21, 04.04.21, 05.05.21 og 06.06.21",
         )
         Assertions.assertEquals(
             hentBarnasFødselsdatoerForAvslagsbegrunnelse(
                 barnIBegrunnelse,
                 barnPåBehandling,
                 uregistrerteBarn,
-                gjelderSøker = false
+                gjelderSøker = false,
             ),
-            "01.01.21, 02.02.21, 04.04.21, 05.05.21 og 06.06.21"
+            "01.01.21, 02.02.21, 04.04.21, 05.05.21 og 06.06.21",
         )
         Assertions.assertEquals(
             hentBarnasFødselsdatoerForAvslagsbegrunnelse(
                 barnIBegrunnelse,
                 barnPåBehandling,
                 emptyList(),
-                gjelderSøker = true
+                gjelderSøker = true,
             ),
-            "01.01.21, 02.02.21 og 03.03.21"
+            "01.01.21, 02.02.21 og 03.03.21",
         )
         Assertions.assertEquals(
             hentBarnasFødselsdatoerForAvslagsbegrunnelse(
                 emptyList(),
                 emptyList(),
                 uregistrerteBarn,
-                gjelderSøker = true
+                gjelderSøker = true,
             ),
-            "04.04.21, 05.05.21 og 06.06.21"
+            "04.04.21, 05.05.21 og 06.06.21",
         )
     }
 }
@@ -159,7 +159,7 @@ private fun lagBrevperiodeData(fom: LocalDate?, tom: LocalDate?, type: Vedtakspe
         personerPåBehandling = emptyList(),
         minimertePersonResultater = emptyList(),
         minimerteEndredeUtbetalingAndeler = emptyList(),
-        fagsakType = FagsakType.NORMAL
+        fagsakType = FagsakType.NORMAL,
     )
     return BrevperiodeData(
         restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
@@ -170,11 +170,11 @@ private fun lagBrevperiodeData(fom: LocalDate?, tom: LocalDate?, type: Vedtakspe
             fom = fom,
             tom = tom,
             type = type,
-            eøsBegrunnelser = emptyList()
+            eøsBegrunnelser = emptyList(),
         ),
         uregistrerteBarn = emptyList(),
         minimerteKompetanserForPeriode = emptyList(),
         minimerteKompetanserSomStopperRettFørPeriode = emptyList(),
-        dødeBarnForrigePeriode = emptyList()
+        dødeBarnForrigePeriode = emptyList(),
     )
 }
