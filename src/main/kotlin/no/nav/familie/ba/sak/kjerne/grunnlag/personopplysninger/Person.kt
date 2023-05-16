@@ -108,7 +108,7 @@ data class Person(
         return """Person(aktørId=$aktør,
                         |type=$type
                         |fødselsdato=$fødselsdato)
-            """.trimMargin()
+        """.trimMargin()
     }
 
     override fun equals(other: Any?): Boolean {
