@@ -384,4 +384,36 @@ class TilkjentYtelseValideringTest {
             )
         }
     }
+
+    @Test
+    fun `Skal kaste feil hvis det eksisterer andeler i lik periode som forrige gang men av ulik type`() {
+        val barn = lagPerson(type = PersonType.BARN)
+
+        val forrigeAndeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(2023, 1),
+                tom = YearMonth.of(2023, 2),
+                beløp = 1054,
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                aktør = barn.aktør,
+            ),
+        )
+
+        val nåværendeAndeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = YearMonth.of(2023, 1),
+                tom = YearMonth.of(2023, 2),
+                beløp = 1054,
+                ytelseType = YtelseType.UTVIDET_BARNETRYGD, // barn kan ha utvidet på enslig mindreårig-saker
+                aktør = barn.aktør,
+            ),
+        )
+
+        assertThrows<Feil> {
+            TilkjentYtelseValidering.validerAtSatsendringKunOppdatererSatsPåEksisterendePerioder(
+                andelerFraForrigeBehandling = forrigeAndeler,
+                andelerTilkjentYtelse = nåværendeAndeler,
+            )
+        }
+    }
 }
