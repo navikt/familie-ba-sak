@@ -31,6 +31,9 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
+/**
+ * tilgangService.validerTilgangTilBehandling gjøres inne i stegService for hvert endepunkt
+ */
 @RestController
 @RequestMapping("/api/behandlinger/{behandlingId}/steg")
 @ProtectedWithClaims(issuer = "azuread")

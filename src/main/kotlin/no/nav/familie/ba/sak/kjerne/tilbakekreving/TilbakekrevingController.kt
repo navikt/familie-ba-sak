@@ -1,5 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.tilbakekreving
 
+import no.nav.familie.ba.sak.config.AuditLoggerEvent
+import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
+import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.springframework.http.ResponseEntity
@@ -15,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class TilbakekrevingController(
+    private val tilgangService: TilgangService,
     private val tilbakekrevingService: TilbakekrevingService,
 ) {
 
@@ -25,6 +29,12 @@ class TilbakekrevingController(
         @RequestBody
         forhåndsvisTilbakekrevingsvarselbrevRequest: ForhåndsvisTilbakekrevingsvarselbrevRequest,
     ): ResponseEntity<Ressurs<ByteArray>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
+        tilgangService.verifiserHarTilgangTilHandling(
+            minimumBehandlerRolle = BehandlerRolle.VEILEDER,
+            handling = "hent forhåndsvisning av varselbrev for tilbakekreving",
+        )
+
         return ResponseEntity.ok(
             Ressurs.success(
                 tilbakekrevingService.hentForhåndsvisningVarselbrev(

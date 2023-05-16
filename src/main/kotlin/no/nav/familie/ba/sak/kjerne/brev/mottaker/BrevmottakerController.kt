@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.brev.mottaker
 
+import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestBrevmottaker
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
@@ -14,7 +15,6 @@ import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -33,6 +33,7 @@ class BrevmottakerController(
         @PathVariable behandlingId: Long,
         @RequestBody brevmottaker: RestBrevmottaker,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "legge til brevmottaker",
@@ -42,26 +43,12 @@ class BrevmottakerController(
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }
 
-    @PutMapping(path = ["{behandlingId}/{mottakerId}"], produces = [APPLICATION_JSON_VALUE], consumes = [APPLICATION_JSON_VALUE])
-    fun oppdaterBrevmottaker(
-        @PathVariable behandlingId: Long,
-        @PathVariable mottakerId: Long,
-        @RequestBody brevmottaker: RestBrevmottaker,
-    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
-        tilgangService.verifiserHarTilgangTilHandling(
-            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "oppdatere brevmottaker",
-        )
-        brevmottakerService.oppdaterBrevmottaker(brevmottaker, id = mottakerId)
-
-        return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
-    }
-
     @DeleteMapping(path = ["{behandlingId}/{mottakerId}"])
     fun fjernBrevmottaker(
         @PathVariable behandlingId: Long,
         @PathVariable mottakerId: Long,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.DELETE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "fjerne brevmottaker",
@@ -73,6 +60,7 @@ class BrevmottakerController(
 
     @GetMapping(path = ["{behandlingId}"], produces = [APPLICATION_JSON_VALUE])
     fun hentBrevmottakere(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<List<RestBrevmottaker>>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.ACCESS)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
             handling = "hente brevmottakere",

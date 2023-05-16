@@ -5,6 +5,7 @@ import io.mockk.every
 import io.mockk.impl.annotations.InjectMockKs
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
+import io.mockk.justRun
 import io.mockk.verify
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.ekstern.restDomene.RestValutakurs
@@ -13,6 +14,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.tilValutakurs
 import no.nav.familie.ba.sak.integrasjoner.ecb.ECBService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -36,6 +38,9 @@ class ValutakursControllerTest {
     @MockK
     private lateinit var ecbService: ECBService
 
+    @MockK
+    private lateinit var tilgangService: TilgangService
+
     @InjectMockKs
     private lateinit var valutakursController: ValutakursController
 
@@ -49,6 +54,8 @@ class ValutakursControllerTest {
         every { personidentService.hentAktør(any()) } returns tilAktør(barnId)
         every { valutakursService.hentValutakurs(any()) } returns restValutakurs.tilValutakurs(listOf(tilAktør(barnId)))
         every { ecbService.hentValutakurs(any(), any()) } returns BigDecimal.valueOf(0.95)
+        justRun { tilgangService.validerTilgangTilBehandling(any(), any()) }
+        justRun { tilgangService.verifiserHarTilgangTilHandling(any(), any()) }
     }
 
     @Test
