@@ -140,9 +140,7 @@ class AutovedtakSatsendringService(
     private fun hentBrukerHarÅpenBehandlingSvar(
         aktivOgÅpenBehandling: Behandling,
     ): SatsendringSvar {
-        val brukerHarÅpenBehandlingSvar = if (satsendringService.erFagsakOppdatertMedSisteSatser(aktivOgÅpenBehandling.fagsak.id)) {
-            SatsendringSvar.HAR_ALLEREDE_SISTE_SATS
-        } else if (aktivOgÅpenBehandling.status.erLåstMenIkkeAvsluttet()) {
+        val brukerHarÅpenBehandlingSvar = if (aktivOgÅpenBehandling.status.erLåstMenIkkeAvsluttet()) {
             SatsendringSvar.BEHANDLING_ER_LÅST_SATSENDRING_TRIGGES_NESTE_VIRKEDAG
         } else if (aktivOgÅpenBehandling.steg.rekkefølge > StegType.VILKÅRSVURDERING.rekkefølge) {
             tilbakestillBehandlingService.tilbakestillBehandlingTilVilkårsvurdering(aktivOgÅpenBehandling)
@@ -188,7 +186,6 @@ class AutovedtakSatsendringService(
 enum class SatsendringSvar(val melding: String) {
     SATSENDRING_KJØRT_OK(melding = "Satsendring kjørt OK"),
     SATSENDRING_ER_ALLEREDE_UTFØRT(melding = "Satsendring allerede utført for fagsak"),
-    HAR_ALLEREDE_SISTE_SATS(melding = "Åpen behandling har allerede siste sats og vi lar den ligge."),
     BEHANDLING_ER_LÅST_SATSENDRING_TRIGGES_NESTE_VIRKEDAG(
         melding = "Behandlingen er låst for endringer og satsendring vil bli trigget neste virkedag.",
     ),
