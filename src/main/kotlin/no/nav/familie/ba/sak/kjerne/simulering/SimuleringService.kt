@@ -86,7 +86,7 @@ class SimuleringService(
                 aktoer = vedtak.behandling.fagsak.aktør.aktivFødselsnummer(),
                 utbetalingsperiode = AndelTilkjentYtelseForSimuleringFactory()
                     .pakkInnForUtbetaling(
-                        andelerTilkjentYtelse,
+                        andelerTilkjentYtelse.map { it.copy(kalkulertUtbetalingsbeløp = 1) },
                     )
                     .mapIndexed { index, andel ->
                         val forrigeIndex = if (index == 0) {
