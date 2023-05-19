@@ -13,7 +13,6 @@ Egenskap: Vedtaksperiode for behandling som opphører perioder fra forrige behan
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1,2          | 1234    | SØKER      | 11.01.1970  |
       | 1,2          | 3456    | BARN       | 13.04.2020  |
-      | 1,2          | 5678    | BARN       | 13.04.2021  |
 
   Scenario: Skal lage vedtaksperioder for revurdering mot forrige behandling hvor det viser seg at barnet ikke bodde hos mor det første året.
     Og lag personresultater for behandling 1
@@ -45,6 +44,13 @@ Egenskap: Vedtaksperiode for behandling som opphører perioder fra forrige behan
       | 01.04.2038 |            | Opphør             | Kun søker                                                |
 
   Scenario: Skal lage vedtaksperioder for revurdering mot forrige behandling hvor ett barn mister andel i perioden
+
+    Og følgende persongrunnlag
+      | BehandlingId | AktørId | Persontype | Fødselsdato |
+      | 1,2          | 1234    | SØKER      | 11.01.1970  |
+      | 1,2          | 3456    | BARN       | 13.04.2020  |
+      | 1,2          | 5678    | BARN       | 13.04.2021  |
+
     Og lag personresultater for behandling 1
     Og med overstyring av vilkår for behandling 1
       | AktørId | Vilkår                                                          | Fra dato   | Til dato   | Resultat |
