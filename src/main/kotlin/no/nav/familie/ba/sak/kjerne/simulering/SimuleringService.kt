@@ -78,30 +78,25 @@ class SimuleringService(
         val andelerTilkjentYtelse =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(vedtak.behandling.id)
         if (utbetalingsoppdrag.utbetalingsperiode.isEmpty() && andelerTilkjentYtelse.isNotEmpty() && vedtak.behandling.erManuellMigrering()) {
+            val andel = AndelTilkjentYtelseForSimuleringFactory()
+                .pakkInnForUtbetaling(
+                    andelerTilkjentYtelse,
+                ).first()
             utbetalingsoppdrag = Utbetalingsoppdrag(
                 saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
                 kodeEndring = Utbetalingsoppdrag.KodeEndring.NY,
                 fagSystem = FAGSYSTEM,
                 saksnummer = vedtak.behandling.fagsak.id.toString(),
                 aktoer = vedtak.behandling.fagsak.aktør.aktivFødselsnummer(),
-                utbetalingsperiode = AndelTilkjentYtelseForSimuleringFactory()
-                    .pakkInnForUtbetaling(
-                        andelerTilkjentYtelse.map { it.copy(kalkulertUtbetalingsbeløp = 1) },
-                    )
-                    .mapIndexed { index, andel ->
-                        val forrigeIndex = if (index == 0) {
-                            null
-                        } else {
-                            index - 1
-                        }
-                        UtbetalingsperiodeMal(vedtak, false)
-                            .lagPeriodeFraAndel(
-                                andel = andel,
-                                periodeIdOffset = index,
-                                forrigePeriodeIdOffset = forrigeIndex,
-                                opphørKjedeFom = null,
-                            )
-                    },
+                utbetalingsperiode = listOf(
+                    UtbetalingsperiodeMal(vedtak, false)
+                        .lagPeriodeFraAndel(
+                            andel = andel,
+                            periodeIdOffset = 0,
+                            forrigePeriodeIdOffset = null,
+                            opphørKjedeFom = andel.stønadFom,
+                        ),
+                ),
             )
         }
 
