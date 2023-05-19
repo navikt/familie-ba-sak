@@ -35,6 +35,7 @@ import no.nav.familie.kontrakter.felles.simulering.MottakerType
 import no.nav.familie.kontrakter.felles.simulering.PosteringType
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.hasSize
+import org.hamcrest.Matchers.nullValue
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
@@ -300,7 +301,9 @@ internal class SimuleringServiceEnhetTest {
         )
         val vedtak: Vedtak = lagVedtak(behandling = behandling)
 
-        every { beregningService.erEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(any()) } returns true
+        every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(any()) } returns null
+
+        every { beregningService.erEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(any()) } returns false
 
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(vedtak.behandling.id) } returns listOf(
             lagAndelTilkjentYtelse(YearMonth.of(2023, 1), YearMonth.of(2023, 2), beløp = 0),
@@ -331,6 +334,11 @@ internal class SimuleringServiceEnhetTest {
 
         assertThat(utbetalingsoppdrag.utbetalingsperiode, hasSize(2))
         assertThat(utbetalingsoppdrag.utbetalingsperiode[0].sats, Is(BigDecimal.ZERO))
+        assertThat(utbetalingsoppdrag.utbetalingsperiode[0].periodeId, Is(0L))
+        assertThat(utbetalingsoppdrag.utbetalingsperiode[0].forrigePeriodeId, Is(nullValue()))
+        assertThat(utbetalingsoppdrag.utbetalingsperiode[1].sats, Is(BigDecimal.ZERO))
+        assertThat(utbetalingsoppdrag.utbetalingsperiode[1].periodeId, Is(1L))
+        assertThat(utbetalingsoppdrag.utbetalingsperiode[1].forrigePeriodeId, Is(0L))
     }
 
     private fun mockØkonomiSimuleringMottaker(

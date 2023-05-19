@@ -88,9 +88,19 @@ class SimuleringService(
                     .pakkInnForUtbetaling(
                         andelerTilkjentYtelse,
                     )
-                    .map {
+                    .mapIndexed { index, andel ->
+                        val forrigeIndex = if (index == 0) {
+                            null
+                        } else {
+                            index - 1
+                        }
                         UtbetalingsperiodeMal(vedtak, false)
-                            .lagPeriodeFraAndel(it, 0, null, null)
+                            .lagPeriodeFraAndel(
+                                andel = andel,
+                                periodeIdOffset = index,
+                                forrigePeriodeIdOffset = forrigeIndex,
+                                opphørKjedeFom = null,
+                            )
                     },
             )
         }
