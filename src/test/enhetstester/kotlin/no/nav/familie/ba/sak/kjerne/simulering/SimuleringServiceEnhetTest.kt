@@ -2,8 +2,11 @@ package no.nav.familie.ba.sak.kjerne.simulering
 
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.slot
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagPerson
+import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
@@ -14,23 +17,30 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottaker
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottakerRepository
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringPostering
 import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
+import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
+import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.simulering.BetalingType
 import no.nav.familie.kontrakter.felles.simulering.FagOmrådeKode
 import no.nav.familie.kontrakter.felles.simulering.MottakerType
 import no.nav.familie.kontrakter.felles.simulering.PosteringType
 import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.hasSize
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.EnumSource
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.YearMonth
 import org.hamcrest.CoreMatchers.`is` as Is
 
 internal class SimuleringServiceEnhetTest {
@@ -42,6 +52,7 @@ internal class SimuleringServiceEnhetTest {
     private val tilgangService: TilgangService = mockk()
     private val featureToggleService: FeatureToggleService = mockk()
     private val vedtakRepository: VedtakRepository = mockk()
+    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository = mockk()
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
     private val persongrunnlagService: PersongrunnlagService = mockk()
 
@@ -53,6 +64,7 @@ internal class SimuleringServiceEnhetTest {
         tilgangService,
         featureToggleService,
         vedtakRepository,
+        andelTilkjentYtelseRepository,
         behandlingHentOgPersisterService,
         persongrunnlagService,
     )
@@ -272,6 +284,53 @@ internal class SimuleringServiceEnhetTest {
         )
 
         assertThrows<Feil> { simuleringService.harMigreringsbehandlingManuellePosteringer(behandling) }
+    }
+
+    @ParameterizedTest
+    @EnumSource(
+        value = BehandlingÅrsak::class,
+        names = ["HELMANUELL_MIGRERING", "ENDRE_MIGRERINGSDATO"],
+    )
+    fun `hentSimuleringFraFamilieOppdrag skal hente simulering selv om det bare finnes andeler med 0 kr i kalkulert utbetalingsbeløp`(
+        behandlingÅrsak: BehandlingÅrsak,
+    ) {
+        val behandling = lagBehandling(
+            behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+            årsak = behandlingÅrsak,
+        )
+        val vedtak: Vedtak = lagVedtak(behandling = behandling)
+
+        every { beregningService.erEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(any()) } returns true
+
+        every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(vedtak.behandling.id) } returns listOf(
+            lagAndelTilkjentYtelse(YearMonth.of(2023, 1), YearMonth.of(2023, 2), beløp = 0),
+            lagAndelTilkjentYtelse(YearMonth.of(2023, 2), YearMonth.of(2023, 4), beløp = 0),
+        )
+
+        every {
+            økonomiService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+                any(),
+                any(),
+                any(),
+                any(),
+            )
+        } returns Utbetalingsoppdrag(
+            saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
+            kodeEndring = Utbetalingsoppdrag.KodeEndring.NY,
+            fagSystem = FAGSYSTEM,
+            saksnummer = vedtak.behandling.fagsak.id.toString(),
+            aktoer = vedtak.behandling.fagsak.aktør.aktivFødselsnummer(),
+            utbetalingsperiode = emptyList(),
+        )
+        val utbetalingsoppdragSlot = slot<Utbetalingsoppdrag>()
+        every { økonomiKlient.hentSimulering(capture(utbetalingsoppdragSlot)) } returns mockk()
+
+        simuleringService.hentSimuleringFraFamilieOppdrag(vedtak)
+
+        val utbetalingsoppdrag = utbetalingsoppdragSlot.captured
+
+        assertThat(utbetalingsoppdrag.utbetalingsperiode, hasSize(2))
+        assertThat(utbetalingsoppdrag.utbetalingsperiode[0].sats, Is(BigDecimal.ZERO))
     }
 
     private fun mockØkonomiSimuleringMottaker(

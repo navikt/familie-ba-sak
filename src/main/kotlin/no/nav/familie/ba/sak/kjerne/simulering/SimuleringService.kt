@@ -7,12 +7,14 @@ import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForSimuleringFactory
+import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsperiodeMal
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.simulering.domene.RestSimulering
 import no.nav.familie.ba.sak.kjerne.simulering.domene.SimuleringsPeriode
@@ -23,6 +25,8 @@ import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
+import no.nav.familie.ba.sak.task.dto.FAGSYSTEM
+import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.simulering.DetaljertSimuleringResultat
 import no.nav.familie.kontrakter.felles.simulering.SimuleringMottaker
 import org.springframework.stereotype.Service
@@ -38,6 +42,7 @@ class SimuleringService(
     private val tilgangService: TilgangService,
     private val featureToggleService: FeatureToggleService,
     private val vedtakRepository: VedtakRepository,
+    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val persongrunnlagService: PersongrunnlagService,
 ) {
@@ -49,20 +54,48 @@ class SimuleringService(
         }
 
         /**
+         * Simulerer ikke mot økonomi dersom det ikke finnes noen andelerTilkjentYtelse
+         */
+        val andelerTilkjentYtelse =
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(vedtak.behandling.id)
+        if (andelerTilkjentYtelse.isEmpty()) {
+            return null
+        }
+
+        /**
          * SOAP integrasjonen støtter ikke full epost som MQ,
          * så vi bruker bare første 8 tegn av saksbehandlers epost for simulering.
          * Denne verdien brukes ikke til noe i simulering.
          */
 
-        val utbetalingsoppdrag = økonomiService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
+        var utbetalingsoppdrag = økonomiService.genererUtbetalingsoppdragOgOppdaterTilkjentYtelse(
             vedtak = vedtak,
             saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
             andelTilkjentYtelseForUtbetalingsoppdragFactory = AndelTilkjentYtelseForSimuleringFactory(),
             erSimulering = true,
         )
 
-        // Simulerer ikke mot økonomi når det ikke finnes utbetalingsperioder
-        if (utbetalingsoppdrag.utbetalingsperiode.isEmpty()) return null
+        /**
+         * Dersom det ikke finnes utbetalingsperioder, betyr det at vi kun har andeler med kalkulert utbetalingsbeløp lik 0 kr og det ikke finnes noen tidligere behandling.
+         * Dersom det er en manuell migreringsbehandling trenger vi allikevel å kjøre en simulering for å se om det er avvik mellom Infotrygd og BA-sak.
+         */
+        if (utbetalingsoppdrag.utbetalingsperiode.isEmpty() && vedtak.behandling.erManuellMigrering()) {
+            utbetalingsoppdrag = Utbetalingsoppdrag(
+                saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
+                kodeEndring = Utbetalingsoppdrag.KodeEndring.NY,
+                fagSystem = FAGSYSTEM,
+                saksnummer = vedtak.behandling.fagsak.id.toString(),
+                aktoer = vedtak.behandling.fagsak.aktør.aktivFødselsnummer(),
+                utbetalingsperiode = AndelTilkjentYtelseForSimuleringFactory()
+                    .pakkInnForUtbetaling(
+                        andelerTilkjentYtelse,
+                    )
+                    .map {
+                        UtbetalingsperiodeMal(vedtak, false)
+                            .lagPeriodeFraAndel(it, 0, null, null)
+                    },
+            )
+        }
 
         simulert.increment()
         return økonomiKlient.hentSimulering(utbetalingsoppdrag)
