@@ -49,7 +49,12 @@ class SimuleringService(
     private val simulert = Metrics.counter("familie.ba.sak.oppdrag.simulert")
 
     fun hentSimuleringFraFamilieOppdrag(vedtak: Vedtak): DetaljertSimuleringResultat? {
-        if (!beregningService.erEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(vedtak.behandling)) {
+        val forrigeIverksatteBehandling =
+            behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(vedtak.behandling)
+        if (forrigeIverksatteBehandling !== null && !beregningService.erEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(
+                vedtak.behandling,
+            )
+        ) {
             return null
         }
 
