@@ -7,20 +7,19 @@ som gjelder for de forskjellige periodene.
 
 ## Hvilke data ser vi på
 Den overordnede tanken er at dersom noe av følgende endrer seg, ønsker vi å formidle det til brukeren:
-* Vilkårene
+* Vilkår
 * Utbetalingsbeløp
 * Kompetanse
 * Endret utbetaling
 * Overgangsstønad
 
 ## Hvilke vilkår gjelder for persontypene
-SPØR
 I utgangspunktet er det fem vilkår for barn og to vilkår for søker som må være oppfylt for at en periode blir innvilget. 
 Det betyr at de to vilkårene på søker står felles for alle barn det er blitt søkt for siden andel tilkjent ytelse blir utbetalt
 for barna.
 
-For utvidet barnetrygd er det på søker andelene ligger og dermed blir det unaturlig å legge vilkåret på barna. Dette vilkåret 
-blir derfor ikke "bakt inn" for gjeldende barn.
+For utvidet barnetrygd er det på søker andelene blir utbetalt og dermed blir det unaturlig å legge vilkåret på barna. Dette vilkåret 
+blir derfor ikke "bakt inn" for gjeldende barn slik som de andre.
 ![Vilkår relevante for personer sine andeler.png](Vilk%C3%A5r%20relevante%20for%20personer%20sine%20andeler.png)
 
 ## Regler for sammenslåing av individuelle personers perioder til perioder for flere personer
@@ -32,21 +31,14 @@ hva som foregår når.
 * Dersom to personer har perioder med samme fom og tom skal periodene "slås sammen" slik at de begrunnes sammen i dokumentet.
 
 * Dersom to innvilgede perioder følger etter hverandre men andeler tilkjent ytelse er lik for begge periodene skal periodene 
-slås sammen, med mindre det er en endring i vilkår eller andre data. SPØR
+slås sammen, med mindre det er en endring i vilkår eller andre data. 
 
 * Dersom den første perioden i tidslinja ikke er innvilget ønsker vi å strippe denne (med mindre det er et avslag) siden det 
 ikke er interessant å snakke om at man ikke har innvilgete perioder f.eks. før barn er født eller dersom barnet ikke bodde
-hos søker i den første perioden. SPØR
+hos søker i den første perioden. 
 
 * Dersom det er eksplisitte avslag skal det "skrive over" ikke-innvilgede perioder. Dersom det er innvilgede perioder i samme 
 tidsspenn skal avslagene stå ved siden av. Se tegning under.
-
-
-_Kan denne slettes?_
-De innvilgede og de ikke-innvilgede periodene for enkeltpersoner i en periode alltid skal slås sammen når vi lager vedtaksperioder,
-med unntak av ikke-innvilgede perioder der vi har et eksplisitt avslag i vilkårene.
-Dersom vi har eksplisitte avslag skal de kun slås sammen med periodene til de andre personene dersom fra-og-med datoen er lik,
-til-og-med datoen er lik og det ikke er noen innvilgelser i samme periode. Se bildet under for eksempler:
 
 > I eksempelet under ser vi at i den første perioden for _barn1_ så slår vi sammen periodene til _barn1_ og _barn2_ til to 
 perioder siden begge er innvilget.
@@ -61,4 +53,4 @@ og vi slår de sammen.
 
 ## Sammenligning på tvers av behandlinger 
 Dersom det er en reduksjon, altså at en periode var innvilget i forrige behandling, men ikke er det nå lenger, skal dette 
-tydeliggjøres i dokumentet ved at perioden som nå ikke er godkjent kommer med selv hvis den kommer som første periode. SPØR 
+tydeliggjøres i dokumentet ved at perioden som nå ikke er godkjent kommer med selv hvis den kommer som første periode. 
