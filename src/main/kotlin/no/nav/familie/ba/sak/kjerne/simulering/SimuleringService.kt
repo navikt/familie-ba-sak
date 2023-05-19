@@ -54,15 +54,6 @@ class SimuleringService(
         }
 
         /**
-         * Simulerer ikke mot økonomi dersom det ikke finnes noen andelerTilkjentYtelse
-         */
-        val andelerTilkjentYtelse =
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(vedtak.behandling.id)
-        if (andelerTilkjentYtelse.isEmpty()) {
-            return null
-        }
-
-        /**
          * SOAP integrasjonen støtter ikke full epost som MQ,
          * så vi bruker bare første 8 tegn av saksbehandlers epost for simulering.
          * Denne verdien brukes ikke til noe i simulering.
@@ -76,10 +67,12 @@ class SimuleringService(
         )
 
         /**
-         * Dersom det ikke finnes utbetalingsperioder, betyr det at vi kun har andeler med kalkulert utbetalingsbeløp lik 0 kr og det ikke finnes noen tidligere behandling.
+         * Dersom det ikke finnes utbetalingsperioder og behandlingen har andeler, betyr det at vi kun har andeler med kalkulert utbetalingsbeløp lik 0 kr og det ikke finnes noen tidligere behandling.
          * Dersom det er en manuell migreringsbehandling trenger vi allikevel å kjøre en simulering for å se om det er avvik mellom Infotrygd og BA-sak.
          */
-        if (utbetalingsoppdrag.utbetalingsperiode.isEmpty() && vedtak.behandling.erManuellMigrering()) {
+        val andelerTilkjentYtelse =
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(vedtak.behandling.id)
+        if (utbetalingsoppdrag.utbetalingsperiode.isEmpty() && andelerTilkjentYtelse.isNotEmpty() && vedtak.behandling.erManuellMigrering()) {
             utbetalingsoppdrag = Utbetalingsoppdrag(
                 saksbehandlerId = SikkerhetContext.hentSaksbehandler().take(8),
                 kodeEndring = Utbetalingsoppdrag.KodeEndring.NY,
