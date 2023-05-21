@@ -43,6 +43,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.jdbc.core.JdbcTemplate
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -62,6 +63,7 @@ class BehandlingSatsendringTest(
     @Autowired private val satskjøringRepository: SatskjøringRepository,
     @Autowired private val brevmalService: BrevmalService,
     @Autowired private val settPåVentService: SettPåVentService,
+    @Autowired private val jdbcTemplate: JdbcTemplate,
 ) : AbstractVerdikjedetest() {
 
     @BeforeEach
@@ -141,6 +143,27 @@ class BehandlingSatsendringTest(
         // TODO test, men kanskje i "ta av vent"-service som fjerner vedtak/tilkjent ytelse etc hvis behandlingen har vært på maskinell vent
 
         @Test
+        fun `Kan ikke sette åpen behandling på vent når behandlingen akkurat er opprettet`() {
+            val scenario = mockServerKlient().lagScenario(restScenario)
+            val behandling = opprettBehandling(scenario)
+            satskjøringRepository.saveAndFlush(Satskjøring(fagsakId = behandling.fagsak.id))
+
+            // Opprett revurdering som blir liggende igjen som åpen og på behandlingsresultatsteget
+            opprettRevurdering(scenario, behandling)
+
+            // Fjerner mocking slik at den siste satsendringen vi fjernet via mocking nå skal komme med.
+            unmockkObject(SatsTidspunkt)
+
+            val satsendringTaskDto = SatsendringTaskDto(
+                behandling.fagsak.id,
+                YearMonth.of(2023, 3),
+            )
+            val satsendringResultat = autovedtakSatsendringService.kjørBehandling(satsendringTaskDto)
+
+            assertThat(satsendringResultat).isEqualTo(SatsendringSvar.BEHANDLING_KAN_IKKE_SETTES_PÅ_VENT)
+        }
+
+        @Test
         fun `Skal sette åpen behandling på maskinell vent hvis den er satt på vent av saksbehandler ved kjøring av satsendring`() {
             val scenario = mockServerKlient().lagScenario(restScenario)
             val behandling = opprettBehandling(scenario)
@@ -148,17 +171,16 @@ class BehandlingSatsendringTest(
 
             // Opprett revurdering som blir liggende igjen som åpen og på behandlingsresultatsteget
             val revurdering = opprettRevurdering(scenario, behandling)
+            justerLoggTidspunktForÅKunneSatsendreNårDetFinnesÅpenBehandling(revurdering)
 
             // Fjerner mocking slik at den siste satsendringen vi fjernet via mocking nå skal komme med.
             unmockkObject(SatsTidspunkt)
 
-            val satsendringResultat =
-                autovedtakSatsendringService.kjørBehandling(
-                    SatsendringTaskDto(
-                        behandling.fagsak.id,
-                        YearMonth.of(2023, 3),
-                    ),
-                )
+            val satsendringTaskDto = SatsendringTaskDto(
+                behandling.fagsak.id,
+                YearMonth.of(2023, 3),
+            )
+            val satsendringResultat = autovedtakSatsendringService.kjørBehandling(satsendringTaskDto)
 
             assertThat(satsendringResultat).isEqualTo(SatsendringSvar.SATSENDRING_KJØRT_OK)
 
@@ -191,13 +213,11 @@ class BehandlingSatsendringTest(
             // Fjerner mocking slik at den siste satsendringen vi fjernet via mocking nå skal komme med.
             unmockkObject(SatsTidspunkt)
 
-            val satsendringResultat =
-                autovedtakSatsendringService.kjørBehandling(
-                    SatsendringTaskDto(
-                        behandling.fagsak.id,
-                        YearMonth.of(2023, 3),
-                    ),
-                )
+            val satsendringTaskDto = SatsendringTaskDto(
+                behandling.fagsak.id,
+                YearMonth.of(2023, 3),
+            )
+            val satsendringResultat = autovedtakSatsendringService.kjørBehandling(satsendringTaskDto)
 
             assertThat(satsendringResultat).isEqualTo(SatsendringSvar.SATSENDRING_KJØRT_OK)
 
@@ -210,6 +230,13 @@ class BehandlingSatsendringTest(
             val åpenBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = behandling.fagsak.id)!!
             assertThat(åpenBehandling.id).isEqualTo(oppdatertRevurdering.id)
         }
+    }
+
+    private fun justerLoggTidspunktForÅKunneSatsendreNårDetFinnesÅpenBehandling(behandling: Behandling) {
+        jdbcTemplate.update(
+            "UPDATE logg SET opprettet_tid = opprettet_tid - interval '12 hours' WHERE fk_behandling_id = ?",
+            behandling.id,
+        )
     }
 
     private fun opprettRevurdering(

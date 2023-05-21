@@ -136,6 +136,9 @@ class AutovedtakSatsendringService(
         satskjøringForFagsak.ferdigTidspunkt = LocalDateTime.now()
         satskjøringRepository.save(satskjøringForFagsak)
         taskRepository.save(task)
+        // TODO opprett task som aktiverer behandling som er satt på vent på nytt
+
+        // TODO stoppe saksbehandler fra å opprette en ny behandling når en er satt på vent?
         satsendringIverksatt.increment()
 
         return SatsendringSvar.SATSENDRING_KJØRT_OK
