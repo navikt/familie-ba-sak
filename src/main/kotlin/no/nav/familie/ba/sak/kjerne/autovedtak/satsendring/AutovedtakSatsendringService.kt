@@ -150,8 +150,10 @@ class AutovedtakSatsendringService(
         }
 
         if (kanSetteÅpenBehandlingPåVent(aktivOgÅpenBehandling)) {
-            aktivOgÅpenBehandling.status = BehandlingStatus.FATTER_VEDTAK
-            // aktiv / ta behandling av vent og oppdater aktiv tidspunkt?
+            aktivOgÅpenBehandling.status = BehandlingStatus.SATT_PÅ_VENT
+            aktivOgÅpenBehandling.aktiv = false
+            loggService.opprettSettPåMaskinellVentSatsendring(aktivOgÅpenBehandling)
+            // TODO aktiv / ta behandling av vent og oppdater aktiv tidspunkt?
             behandlingRepository.save(aktivOgÅpenBehandling)
             return null
         }
