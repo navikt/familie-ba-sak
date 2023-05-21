@@ -92,11 +92,13 @@ data class Behandling(
 ) : BaseEntitet() {
 
     // TODO kun for å finne bruk. Ulempen er at hvis behandlingen blir mappet videre så er det vanskelig å finne ut hvis det mappede objektet er sortert..
+    /*
     override val opprettetTidspunkt: LocalDateTime
         get() = super.opprettetTidspunkt
     override var endretTidspunkt: LocalDateTime
         get() = super.endretTidspunkt
         set(value) { endretTidspunkt = value }
+     */
     val steg: StegType
         get() = behandlingStegTilstand.last().behandlingSteg
 

@@ -10,9 +10,13 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
+import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.SatsTidspunkt
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
@@ -36,6 +40,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
@@ -45,6 +50,7 @@ import java.time.temporal.ChronoUnit
 
 class BehandlingSatsendringTest(
     @Autowired private val mockLocalDateService: LocalDateService,
+    @Autowired private val behandlingRepository: BehandlingRepository,
     @Autowired private val behandleFødselshendelseTask: BehandleFødselshendelseTask,
     @Autowired private val fagsakService: FagsakService,
     @Autowired private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
@@ -55,6 +61,7 @@ class BehandlingSatsendringTest(
     @Autowired private val andelTilkjentYtelseMedEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     @Autowired private val satskjøringRepository: SatskjøringRepository,
     @Autowired private val brevmalService: BrevmalService,
+    @Autowired private val settPåVentService: SettPåVentService,
 ) : AbstractVerdikjedetest() {
 
     @BeforeEach
@@ -119,7 +126,6 @@ class BehandlingSatsendringTest(
         val behandling = opprettBehandling(scenario)
         satskjøringRepository.saveAndFlush(Satskjøring(fagsakId = behandling.fagsak.id))
 
-
         val satsendringResultat =
             autovedtakSatsendringService.kjørBehandling(SatsendringTaskDto(behandling.fagsak.id, YearMonth.of(2023, 3)))
 
@@ -129,6 +135,92 @@ class BehandlingSatsendringTest(
         assertThat(satskjøring?.ferdigTidspunkt)
             .isCloseTo(LocalDateTime.now(), Assertions.within(30, ChronoUnit.SECONDS))
     }
+
+    @Nested
+    inner class ÅpenBehandling {
+        // TODO test, men kanskje i "ta av vent"-service som fjerner vedtak/tilkjent ytelse etc hvis behandlingen har vært på maskinell vent
+
+        @Test
+        fun `Skal sette åpen behandling på maskinell vent hvis den er satt på vent av saksbehandler ved kjøring av satsendring`() {
+            val scenario = mockServerKlient().lagScenario(restScenario)
+            val behandling = opprettBehandling(scenario)
+            satskjøringRepository.saveAndFlush(Satskjøring(fagsakId = behandling.fagsak.id))
+
+            // Opprett revurdering som blir liggende igjen som åpen og på behandlingsresultatsteget
+            val revurdering = opprettRevurdering(scenario, behandling)
+
+            // Fjerner mocking slik at den siste satsendringen vi fjernet via mocking nå skal komme med.
+            unmockkObject(SatsTidspunkt)
+
+            val satsendringResultat =
+                autovedtakSatsendringService.kjørBehandling(
+                    SatsendringTaskDto(
+                        behandling.fagsak.id,
+                        YearMonth.of(2023, 3),
+                    ),
+                )
+
+            assertThat(satsendringResultat).isEqualTo(SatsendringSvar.SATSENDRING_KJØRT_OK)
+
+            val oppdatertRevurdering = behandlingRepository.finnBehandling(revurdering.id)
+            assertThat(oppdatertRevurdering.aktivertTidspunkt).isNotEqualTo(revurdering.aktivertTidspunkt)
+
+            val sisteIverksatteBehandling = behandlingRepository.finnSisteIverksatteBehandling(behandling.fagsak.id)!!
+            assertThat(sisteIverksatteBehandling.opprettetÅrsak).isEqualTo(BehandlingÅrsak.SATSENDRING)
+            assertThat(sisteIverksatteBehandling.aktivertTidspunkt).isBefore(oppdatertRevurdering.aktivertTidspunkt)
+
+            val åpenBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = behandling.fagsak.id)!!
+            assertThat(åpenBehandling.id).isEqualTo(oppdatertRevurdering.id)
+        }
+
+        @Test
+        fun `Skal sette behandling på vent på maskinell vent hvis den er satt på vent av saksbehandler ved kjøring av satsendring`() {
+            val scenario = mockServerKlient().lagScenario(restScenario)
+            val behandling = opprettBehandling(scenario)
+            satskjøringRepository.saveAndFlush(Satskjøring(fagsakId = behandling.fagsak.id))
+
+            // Opprett revurdering som blir liggende igjen som åpen og på behandlingsresultatsteget
+            val revurdering = opprettRevurdering(scenario, behandling)
+
+            settPåVentService.settBehandlingPåVent(
+                revurdering.id,
+                LocalDate.now(),
+                SettPåVentÅrsak.AVVENTER_DOKUMENTASJON,
+            )
+
+            // Fjerner mocking slik at den siste satsendringen vi fjernet via mocking nå skal komme med.
+            unmockkObject(SatsTidspunkt)
+
+            val satsendringResultat =
+                autovedtakSatsendringService.kjørBehandling(
+                    SatsendringTaskDto(
+                        behandling.fagsak.id,
+                        YearMonth.of(2023, 3),
+                    ),
+                )
+
+            assertThat(satsendringResultat).isEqualTo(SatsendringSvar.SATSENDRING_KJØRT_OK)
+
+            val oppdatertRevurdering = behandlingRepository.finnBehandling(revurdering.id)
+            assertThat(oppdatertRevurdering.aktivertTidspunkt).isNotEqualTo(revurdering.aktivertTidspunkt)
+            val sisteIverksatteBehandling = behandlingRepository.finnSisteIverksatteBehandling(behandling.fagsak.id)!!
+            assertThat(sisteIverksatteBehandling.opprettetÅrsak).isEqualTo(BehandlingÅrsak.SATSENDRING)
+            assertThat(sisteIverksatteBehandling.aktivertTidspunkt).isBefore(oppdatertRevurdering.aktivertTidspunkt)
+
+            val åpenBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = behandling.fagsak.id)!!
+            assertThat(åpenBehandling.id).isEqualTo(oppdatertRevurdering.id)
+        }
+    }
+
+    private fun opprettRevurdering(
+        scenario: RestScenario,
+        behandling: Behandling,
+    ) = familieBaSakKlient().opprettBehandling(
+        søkersIdent = scenario.søker.ident!!,
+        behandlingType = BehandlingType.REVURDERING,
+        behandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
+        fagsakId = behandling.fagsak.id,
+    ).data!!.let { behandlingRepository.getReferenceById(it.behandlingId) }
 
     private val restScenario = RestScenario(
         søker = RestScenarioPerson(fødselsdato = "1993-01-12", fornavn = "Mor", etternavn = "Søker").copy(
@@ -183,6 +275,5 @@ class BehandlingSatsendringTest(
             stegService = stegService,
             personidentService = personidentService,
             brevmalService = brevmalService,
-
         )!!
 }

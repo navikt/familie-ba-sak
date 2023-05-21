@@ -107,6 +107,7 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
     )
     fun finnIverksatteBehandlinger(fagsakId: Long): List<Behandling>
 
+    // TODO oppdater opprettet_tid her
     @Query(
         """WITH sisteiverksattebehandlingfraløpendefagsak AS (
                     SELECT f.id AS fagsakid, MAX(b.opprettet_tid) AS opprettet_tid
