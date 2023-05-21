@@ -1,0 +1,34 @@
+---
+title: Satsendring åpen behandling, sett på vent
+---
+
+flowchart LR
+    START{"Har åpen
+    behandling"}
+    START -->|Ja| ER_BEHANDLING_SATT_PÅ_VENT
+    START ---->|Nei| KJØR_SATSENDRING[Kjør satsendring]
+
+subgraph Åpen behandling
+    ER_BEHANDLING_SATT_PÅ_VENT{"Er behandling
+    satt på vent"}
+    ER_BEHANDLING_SATT_PÅ_VENT -->|Ja| SETT_AKTIV_BEHANDLING_PÅ_MASKINELL_VENT
+    ER_BEHANDLING_SATT_PÅ_VENT -->|Nei| AKTIV_BEHANDLING_OVER_4H
+
+    AKTIV_BEHANDLING_OVER_4H{"Siste hendelse
+    > 4h"}
+    AKTIV_BEHANDLING_OVER_4H -->|Nei| BEHANDLING_KAN_IKKE_SETTES_PÅ_VENT
+    AKTIV_BEHANDLING_OVER_4H -->|Ja| SETT_AKTIV_BEHANDLING_PÅ_MASKINELL_VENT
+end
+
+    SETT_AKTIV_BEHANDLING_PÅ_MASKINELL_VENT[Sett aktiv behandling på maskinell vent] --> KJØR_SATSENDRING
+    KJØR_SATSENDRING --> OPPRETT_REÅPNE_DEAKTIVERT_TASK
+
+subgraph Task for å reåpne deaktivert task
+    OPPRETT_REÅPNE_DEAKTIVERT_TASK["Opprett task
+    for å reåpne deaktivert task"]
+    OPPRETT_REÅPNE_DEAKTIVERT_TASK --> SJEKK_STATUS["Sjekk at behandling er i riktig
+    tilstand for å reaktiveres"]
+end
+
+
+
