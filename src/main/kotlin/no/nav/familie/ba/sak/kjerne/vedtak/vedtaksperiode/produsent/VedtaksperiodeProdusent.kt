@@ -11,6 +11,8 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilDagEllerFørsteDagIPerioden
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilLocalDateEllerNull
+import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
@@ -72,11 +74,17 @@ private fun List<Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned>>.sl�
     }.perioder()
 }
 
-private fun List<Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned>>.utledEksplisitteAvslagsperioder():
-    Collection<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>> =
-    this.map { it.filtrerErAvslagsperiode() }
+private fun List<Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned>>.utledEksplisitteAvslagsperioder(): Collection<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>> {
+    val avslagsperioderPerPerson = this.map { it.filtrerErAvslagsperiode() }
+        .map { tidslinje -> tidslinje.map { it?.medVilkårSomHarEksplisitteAvslag() } }
+        .flatMap { it.splittVilkårPerPerson() }
+        .map { it.slåSammenLike() }
+
+    val avslagsperioderMedSammeFomOgTom = avslagsperioderPerPerson
         .flatMap { it.perioder() }
         .groupBy { Pair(it.fraOgMed, it.tilOgMed) }
+
+    return avslagsperioderMedSammeFomOgTom
         .map { (fomTomPar, avslagMedSammeFomOgTom) ->
             Periode(
                 fraOgMed = fomTomPar.first,
@@ -84,9 +92,45 @@ private fun List<Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned>>.utl
                 innhold = avslagMedSammeFomOgTom.mapNotNull { it.innhold },
             )
         }
+}
+
+private fun Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned>.splittVilkårPerPerson(): List<Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned>> {
+    return perioder()
+        .mapNotNull { it.splittOppTilVilkårPerPerson() }
+        .flatten()
+        .groupBy({ it.first }, { it.second })
+        .map { it.value.tilTidslinje() }
+}
+
+private fun Periode<GrunnlagForGjeldendeOgForrigeBehandling, Måned>.splittOppTilVilkårPerPerson(): List<Pair<AktørId, Periode<GrunnlagForGjeldendeOgForrigeBehandling, Måned>>>? {
+    if (innhold?.gjeldende == null) return null
+
+    val vilkårPerPerson =
+        innhold.gjeldende.vilkårResultaterForVedtaksperiode.groupBy { it.aktørId }
+
+    return vilkårPerPerson.map { (aktørId, vilkårresultaterForPersonIPeriode) ->
+        aktørId to this.copy(
+            innhold = this.innhold.copy(
+                gjeldende = innhold.gjeldende.kopier(
+                    vilkårResultaterForVedtaksperiode = vilkårresultaterForPersonIPeriode,
+                ),
+            ),
+        )
+    }
+}
 
 private fun Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned>.filtrerErAvslagsperiode() =
     filtrer { it?.gjeldende?.erEksplisittAvslag() == true }
+
+private fun GrunnlagForGjeldendeOgForrigeBehandling.medVilkårSomHarEksplisitteAvslag(): GrunnlagForGjeldendeOgForrigeBehandling {
+    return copy(
+        gjeldende = this.gjeldende?.kopier(
+            vilkårResultaterForVedtaksperiode = this.gjeldende
+                .vilkårResultaterForVedtaksperiode
+                .filter { it.erEksplisittAvslagPåSøknad == true },
+        ),
+    )
+}
 
 /**
  * Ønsker å dra med informasjon om forrige behandling i perioder der forrige behandling var oppfylt, men gjeldende
