@@ -62,7 +62,7 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
     )
     fun finnLøpendeFagsakerForSatsendring(page: Pageable): Page<Fagsak>
 
-    @Modifying
+    // aktivert_tid
     @Query(
         value = """SELECT id FROM fagsak
                         WHERE fagsak.id IN (

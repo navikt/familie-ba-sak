@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.ReaktiverÅpenBehandlingTask
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -136,7 +137,14 @@ class AutovedtakSatsendringService(
         satskjøringForFagsak.ferdigTidspunkt = LocalDateTime.now()
         satskjøringRepository.save(satskjøringForFagsak)
         taskRepository.save(task)
-        // TODO opprett task som aktiverer behandling som er satt på vent på nytt
+        if (aktivOgÅpenBehandling != null) {
+            // Skal dette skje når man kaller på denne tjenesten fra frontend også?
+            val reaktiverBehandlingTask = ReaktiverÅpenBehandlingTask.opprettTask(
+                aktivOgÅpenBehandling,
+                behandlingEtterBehandlingsresultat,
+            )
+            taskRepository.save(reaktiverBehandlingTask)
+        }
 
         // TODO stoppe saksbehandler fra å opprette en ny behandling når en er satt på vent?
         satsendringIverksatt.increment()

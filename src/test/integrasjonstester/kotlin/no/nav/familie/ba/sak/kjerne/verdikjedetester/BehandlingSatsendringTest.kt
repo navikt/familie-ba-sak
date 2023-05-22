@@ -184,15 +184,11 @@ class BehandlingSatsendringTest(
 
             assertThat(satsendringResultat).isEqualTo(SatsendringSvar.SATSENDRING_KJØRT_OK)
 
-            val oppdatertRevurdering = behandlingRepository.finnBehandling(revurdering.id)
-            assertThat(oppdatertRevurdering.aktivertTidspunkt).isNotEqualTo(revurdering.aktivertTidspunkt)
-
             val sisteIverksatteBehandling = behandlingRepository.finnSisteIverksatteBehandling(behandling.fagsak.id)!!
             assertThat(sisteIverksatteBehandling.opprettetÅrsak).isEqualTo(BehandlingÅrsak.SATSENDRING)
-            assertThat(sisteIverksatteBehandling.aktivertTidspunkt).isBefore(oppdatertRevurdering.aktivertTidspunkt)
 
             val åpenBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = behandling.fagsak.id)!!
-            assertThat(åpenBehandling.id).isEqualTo(oppdatertRevurdering.id)
+            assertThat(åpenBehandling.id).isEqualTo(sisteIverksatteBehandling.id)
         }
 
         @Test
@@ -225,10 +221,9 @@ class BehandlingSatsendringTest(
             assertThat(oppdatertRevurdering.aktivertTidspunkt).isNotEqualTo(revurdering.aktivertTidspunkt)
             val sisteIverksatteBehandling = behandlingRepository.finnSisteIverksatteBehandling(behandling.fagsak.id)!!
             assertThat(sisteIverksatteBehandling.opprettetÅrsak).isEqualTo(BehandlingÅrsak.SATSENDRING)
-            assertThat(sisteIverksatteBehandling.aktivertTidspunkt).isBefore(oppdatertRevurdering.aktivertTidspunkt)
 
             val åpenBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = behandling.fagsak.id)!!
-            assertThat(åpenBehandling.id).isEqualTo(oppdatertRevurdering.id)
+            assertThat(åpenBehandling.id).isEqualTo(sisteIverksatteBehandling.id)
         }
     }
 
