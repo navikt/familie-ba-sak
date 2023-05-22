@@ -40,10 +40,13 @@ data class DagTidspunkt internal constructor(
         return dato.compareTo((tidspunkt as DagTidspunkt).dato)
     }
 
-    override fun equals(other: Any?): Boolean {
-        return when (other) {
-            is DagTidspunkt -> compareTo(other) == 0
-            else -> super.equals(other)
+    override fun equals(other: Any?): Boolean = other is DagTidspunkt && compareTo(other) == 0
+
+    override fun hashCode(): Int {
+        return if (uendelighet == Uendelighet.INGEN) {
+            dato.hashCode()
+        } else {
+            uendelighet.hashCode()
         }
     }
 
