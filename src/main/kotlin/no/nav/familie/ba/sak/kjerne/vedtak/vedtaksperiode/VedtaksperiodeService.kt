@@ -736,8 +736,14 @@ class VedtaksperiodeService(
         val mye = mapOf(NB to "mye", NN to "mykje").getOrDefault(målform, "mye")
 
         return feilutbetaltValutaRepository.finnFeilutbetaltValutaForBehandling(vedtak.behandling.id).map {
-            val (fom, tom) = it.fom.tilDagMånedÅr() to it.tom.tilDagMånedÅr()
-            "$fra $fom til $tom er det utbetalt ${it.feilutbetaltBeløp} kroner for $mye."
+            if (featureToggleService.isEnabled(FeatureToggleConfig.FEILUTBETALT_VALUTA_PR_MND, false)) {
+                val måned = mapOf(NB to "måned", NN to "månad").getOrDefault(målform, "måned")
+                val (fom, tom) = it.fom.tilMånedÅr() to it.tom.tilMånedÅr()
+                "$fra $fom til $tom er det utbetalt ${it.feilutbetaltBeløp} kroner for $mye per $måned."
+            } else {
+                val (fom, tom) = it.fom.tilDagMånedÅr() to it.tom.tilDagMånedÅr()
+                "$fra $fom til $tom er det utbetalt ${it.feilutbetaltBeløp} kroner for $mye."
+            }
         }.toSet().takeIf { it.isNotEmpty() }
     }
 
@@ -745,28 +751,31 @@ class VedtaksperiodeService(
         val målform = persongrunnlagService.hentAktiv(behandlingId = behandling.id)?.søker?.målform
         val landkoderISO2 = integrasjonClient.hentLandkoderISO2()
 
-        return refusjonEøsRepository.finnRefusjonEøsForBehandling(behandling.id).filter { it.refusjonAvklart == avklart }.map {
-            val (fom, tom) = it.fom.tilMånedÅr() to it.tom.tilMånedÅr()
-            val land = landkoderISO2[it.land]?.storForbokstav() ?: throw Feil("Fant ikke navn for landkode ${it.land}")
-            val beløp = it.refusjonsbeløp
+        return refusjonEøsRepository.finnRefusjonEøsForBehandling(behandling.id)
+            .filter { it.refusjonAvklart == avklart }.map {
+                val (fom, tom) = it.fom.tilMånedÅr() to it.tom.tilMånedÅr()
+                val land =
+                    landkoderISO2[it.land]?.storForbokstav() ?: throw Feil("Fant ikke navn for landkode ${it.land}")
+                val beløp = it.refusjonsbeløp
 
-            when (målform) {
-                NN -> {
-                    if (avklart) {
-                        "Frå $fom til $tom blir etterbetaling på $beløp kroner per måned utbetalt til myndighetene i $land."
-                    } else {
-                        "Frå $fom til $tom blir ikkje etterbetaling på $beløp kroner per månad utbetalt no sidan det er utbetalt barnetrygd i $land."
+                when (målform) {
+                    NN -> {
+                        if (avklart) {
+                            "Frå $fom til $tom blir etterbetaling på $beløp kroner per måned utbetalt til myndighetene i $land."
+                        } else {
+                            "Frå $fom til $tom blir ikkje etterbetaling på $beløp kroner per månad utbetalt no sidan det er utbetalt barnetrygd i $land."
+                        }
+                    }
+
+                    else -> {
+                        if (avklart) {
+                            "Fra $fom til $tom blir etterbetaling på $beløp kroner per måned utbetalt til myndighetene i $land."
+                        } else {
+                            "Fra $fom til $tom blir ikke etterbetaling på $beløp kroner per måned utbetalt nå siden det er utbetalt barnetrygd i $land."
+                        }
                     }
                 }
-                else -> {
-                    if (avklart) {
-                        "Fra $fom til $tom blir etterbetaling på $beløp kroner per måned utbetalt til myndighetene i $land."
-                    } else {
-                        "Fra $fom til $tom blir ikke etterbetaling på $beløp kroner per måned utbetalt nå siden det er utbetalt barnetrygd i $land."
-                    }
-                }
-            }
-        }.toSet().takeIf { it.isNotEmpty() }
+            }.toSet().takeIf { it.isNotEmpty() }
     }
 
     companion object {
