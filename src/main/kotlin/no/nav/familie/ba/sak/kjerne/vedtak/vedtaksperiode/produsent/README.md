@@ -18,8 +18,9 @@ I utgangspunktet er det fem vilkår for barn og to vilkår for søker som må v�
 Det betyr at de to vilkårene på søker står felles for alle barn det er blitt søkt for siden andel tilkjent ytelse blir utbetalt
 for barna.
 
-For utvidet barnetrygd er det på søker andelene blir utbetalt og dermed blir det unaturlig å legge vilkåret på barna. Dette vilkåret 
-blir derfor ikke "bakt inn" for gjeldende barn slik som de andre.
+For utvidet barnetrygd er det på søker andelene blir utbetalt og dermed blir det unaturlig å legge vilkåret på barna. Her 
+må derimot vilkår til minst ett av barna være oppfylt, så vi baker inn oppfylt-perioder for barna sammen med forelders 
+vilkår om utvidet barnetrygd.
 ![Vilkår relevante for personer sine andeler.png](Vilk%C3%A5r%20relevante%20for%20personer%20sine%20andeler.png)
 
 ## Regler for sammenslåing av individuelle personers perioder til perioder for flere personer
