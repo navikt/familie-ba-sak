@@ -8,9 +8,11 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
+import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.LocalDate
@@ -21,38 +23,34 @@ class PensjonService(
     private val fagsakRepository: FagsakRepository,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val personidentService: PersonidentService,
-    private val vedtakService: VedtakService,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
 ) {
     fun hentBarnetrygd(personIdent: String, fraDato: LocalDate): List<BarnetrygdTilPensjon> {
-        val barnetrygdTilPensjon = hentBarnetrygdTilPensjon(personIdent, fraDato) ?: return emptyList()
+        val aktør = personidentService.hentAktør(personIdent)
+        val fagsak = fagsakRepository.finnFagsakForAktør(aktør) ?: return emptyList()
+        val barnetrygdTilPensjon = hentBarnetrygdTilPensjon(fagsak, fraDato) ?: return emptyList()
 
         // Sjekk om det finnes relaterte saker, dvs om barna finnes i andre behandlinger
-
         val barnetrygdMedRelaterteSaker = barnetrygdTilPensjon.barnetrygdPerioder
+            .filter { it.personIdent != aktør.aktivFødselsnummer() }
             .map { it.personIdent }.distinct()
-            .filter { it != barnetrygdTilPensjon.fagsakEiersIdent }
-            .map { hentBarnetrygdForRelatertPersonTilPensjon(it, fraDato) }
+            .map { hentBarnetrygdForRelatertPersonTilPensjon(it, fraDato, aktør) }
             .flatten()
         return barnetrygdMedRelaterteSaker.plus(barnetrygdTilPensjon).distinct()
     }
-    private fun hentBarnetrygdForRelatertPersonTilPensjon(personIdent: String, fraDato: LocalDate): List<BarnetrygdTilPensjon> {
+
+    private fun hentBarnetrygdForRelatertPersonTilPensjon(personIdent: String, fraDato: LocalDate, forelderAktør: Aktør): List<BarnetrygdTilPensjon> {
         val aktør = personidentService.hentAktør(personIdent)
-        val andeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForAktør(aktør)
-        // finn alle behandlinger
-        val behandlinger = andeler.map { it.behandlingId }.toSet()
-        // finn alle fagsaker
-        val aktørerTilEierAvFagsaker = behandlinger.map { behandlingHentOgPersisterService.hent(it).fagsak.aktør }
-        // hent alle barnetrygdperiodene for de aktuelle fagsakene.
-        return aktørerTilEierAvFagsaker.map { aktør -> hentBarnetrygdTilPensjon(aktør.aktivFødselsnummer(), fraDato) }.filterNotNull()
+        val andeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForAktør(aktør) // denne henter egentlige veldig mye, og burde være tilstrekkelig å kun hente aktør fra disse andelene
+        val fagsaker = andeler.map { it.tilkjentYtelse.behandling.fagsak }
+            .filter { it.type == FagsakType.NORMAL } // skal kun ha normale fagsaker til med her
+            .filter { it.aktør != forelderAktør } // trenger ikke å hente data til forelderen på nytt
+            .distinct()
+        return fagsaker.mapNotNull { fagsak -> hentBarnetrygdTilPensjon(fagsak, fraDato) }
     }
-    private fun hentBarnetrygdTilPensjon(personIdent: String, fraDato: LocalDate): BarnetrygdTilPensjon? {
-        val aktør = personidentService.hentAktør(personIdent)
-        val fagsak = fagsakRepository.finnFagsakForAktør(aktør)
-        val behandling = fagsak?.let { behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(it.id) }
-        if (fagsak == null || behandling == null) {
-            return null
-        }
+    private fun hentBarnetrygdTilPensjon(fagsak: Fagsak, fraDato: LocalDate): BarnetrygdTilPensjon? {
+        val behandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsak.id)
+            ?: return null
         logger.info("Henter perioder med barnetrygd til pensjon for fagsakId=${fagsak.id}, behandlingId=${behandling.id}")
 
         val perioder = hentPerioder(behandling, fraDato)
@@ -60,7 +58,7 @@ class PensjonService(
         return BarnetrygdTilPensjon(
             fagsakId = fagsak.id.toString(),
             barnetrygdPerioder = perioder,
-            fagsakEiersIdent = personIdent,
+            fagsakEiersIdent = fagsak.aktør.aktivFødselsnummer(),
         )
     }
 

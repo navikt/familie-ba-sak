@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.ekstern.pensjon
 
-import no.nav.familie.ba.sak.common.convertDataClassToJson
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
@@ -19,7 +18,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
-import org.assertj.core.api.Assertions
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
@@ -57,7 +56,6 @@ class PensjonServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
     @Test
     fun `skal finne en relaterte fagsaker per barn`() {
-        // Koden krever egentlige vedtak også, men satte den til default i koden
         val søker = tilfeldigPerson()
         val barn1 = tilfeldigPerson()
         val søkerAktør = personidentService.hentOgLagreAktør(søker.aktør.aktivFødselsnummer(), true)
@@ -104,8 +102,7 @@ class PensjonServiceIntegrationTest : AbstractSpringIntegrationTest() {
         }
 
         val barnetrygdTilPensjon = pensjonService.hentBarnetrygd(søkerAktør.aktivFødselsnummer(), LocalDate.of(2023, 1, 1))
-        println(BarnetrygdTilPensjonResponse(barnetrygdTilPensjon).convertDataClassToJson())
-        Assertions.assertThat(barnetrygdTilPensjon).hasSize(2)
+        assertThat(barnetrygdTilPensjon).hasSize(2)
     }
 
     private fun avsluttOgLagreBehandling(behandling: Behandling) {
