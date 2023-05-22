@@ -314,7 +314,39 @@ Egenskap: Vedtaksperioder med mor og et barn
       | 2022-01-01 | 2023-01-31 | UTBETALING         |
       | 2023-02-01 | 2023-03-31 | OPPHØR             |
       | 2023-04-01 | 2038-12-31 | OPPHØR             |
-      | 2039-01-01 |            | OPPHØR             | 
+      | 2039-01-01 |            | OPPHØR             |
+
+
+  Scenario: Skal lage periode selv om det ikke finnes barn når det er eksplisitt avslag på søker
+    Og lag personresultater for behandling 1
+    Og med overstyring av vilkår for behandling 1
+      | AktørId | Vilkår                                                          | Fra dato   | Til dato   | Resultat |
+      | 1234    | LOVLIG_OPPHOLD                                                  | 11.01.1970 | 14.08.2022 | Oppfylt  |
+      | 1234    | BOSATT_I_RIKET                                                  | 11.01.1970 |            | Oppfylt  |
+      | 3456    | UNDER_18_ÅR                                                     | 13.04.2020 | 12.04.2038 | Oppfylt  |
+      | 3456    | GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD, BOR_MED_SØKER | 13.04.2020 |            | Oppfylt  |
+
+    Og legg til nye vilkårresultater for behandling 1
+      | AktørId | Vilkår             | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag |
+      | 1234    | UTVIDET_BARNETRYGD |            |            | Ikke_oppfylt | Ja                   |
+      | 1234    | LOVLIG_OPPHOLD     | 15.08.2022 | 02.02.2023 | Ikke_oppfylt | Ja                   |
+      | 1234    | LOVLIG_OPPHOLD     | 03.02.2023 |            | Oppfylt      |                      |
+
+    Og med andeler tilkjent ytelse
+      | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
+      | 3456    | 01.05.2020 | 31.08.2022 | 1354  | 1            |
+      | 3456    | 01.03.2023 | 31.03.2038 | 1354  | 1            |
+
+    Når vedtaksperioder med begrunnelser genereres for behandling 1
+
+    Så forvent følgende vedtaksperioder med begrunnelser
+      | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar                                 |
+      |            | 31.08.2022 | Avslag             | Søker avslag utvidet                      |
+      | 01.05.2020 | 31.08.2022 | Utbetaling         | Barn og søker har ordinære vilkår oppfylt |
+      | 01.09.2022 | 28.02.2023 | Avslag             | Søker avslag utvidet og lovlig opphold    |
+      | 01.03.2023 | 31.03.2038 | Utbetaling         | Barn og søker har ordinære vilkår oppfylt |
+      | 01.03.2023 |            | Avslag             | Søker avslag utvidet                      |
+      | 01.04.2038 |            | Opphør             | Barn over 18                              |
 
 
 

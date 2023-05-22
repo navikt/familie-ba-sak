@@ -280,6 +280,14 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
         override val sanityApiNavn = "avslagEosVurderingIkkeAnsvarForBarn"
     },
+    AVSLAG_FAAR_DAGPENGER_FRA_ANNET_EOS_LAND {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
+        override val sanityApiNavn = "avslagFaarDagpengerFraAnnetEosLand"
+    },
+    AVSLAG_SELVSTENDIG_NAERINGSDRIVENDE_NORGE_ARBEIDSTAKER_I_ANNET_EOS_LAND {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
+        override val sanityApiNavn = "avslagSelvstendigNaeringsdrivendeNorgeArbeidstakerIAnnetEosLand"
+    },
     AVSLAG_EØS_UREGISTRERT_BARN {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
         override val sanityApiNavn = "avslagEosUregistrertBarn"
