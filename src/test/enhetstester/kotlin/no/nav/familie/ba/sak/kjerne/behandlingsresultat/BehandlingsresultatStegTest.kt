@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
@@ -57,6 +58,8 @@ class BehandlingsresultatStegTest {
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService =
         mockk<AndelerTilkjentYtelseOgEndreteUtbetalingerService>()
 
+    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository = mockk()
+
     @BeforeEach
     fun init() {
         behandlingsresultatSteg = BehandlingsresultatSteg(
@@ -70,6 +73,7 @@ class BehandlingsresultatStegTest {
             persongrunnlagService,
             beregningService,
             andelerTilkjentYtelseOgEndreteUtbetalingerService,
+            andelTilkjentYtelseRepository,
         )
 
         behandling = lagBehandling(
