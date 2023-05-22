@@ -12,7 +12,7 @@ fun main(args: Array<String>) {
         "mock-infotrygd-feed",
         "mock-tilbakekreving-klient",
         "task-scheduling",
-        "mock-infotrygd-barnetrygd",
+        // "mock-infotrygd-barnetrygd",
         "mock-leader-client",
     )
 

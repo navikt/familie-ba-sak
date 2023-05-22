@@ -136,6 +136,7 @@ class BehandlingsresultatSteg(
                 behandlingMedOppdatertBehandlingsresultat.id,
                 BehandlingStatus.IVERKSETTER_VEDTAK,
             )
+            // simuleringService.oppdaterSimuleringPåBehandling(behandlingMedOppdatertBehandlingsresultat)
         } else {
             simuleringService.oppdaterSimuleringPåBehandling(behandlingMedOppdatertBehandlingsresultat)
         }

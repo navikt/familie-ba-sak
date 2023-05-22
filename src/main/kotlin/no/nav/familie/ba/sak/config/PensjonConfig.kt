@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Profile
 import org.springframework.web.filter.OncePerRequestFilter
 
 @Configuration
-@Profile("!integrasjonstest")
+@Profile("!integrasjonstest & !dev-postgres-preprod")
 class PensjonConfig(
     private val oidcUtil: OIDCUtil,
     private val rolleConfig: RolleConfig,
