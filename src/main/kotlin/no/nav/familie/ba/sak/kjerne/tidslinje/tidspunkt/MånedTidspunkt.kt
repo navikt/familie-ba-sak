@@ -42,7 +42,13 @@ data class MånedTidspunkt internal constructor(
         return måned.compareTo((tidspunkt as MånedTidspunkt).måned)
     }
 
-    override fun equals(other: Any?): Boolean = other is MånedTidspunkt && compareTo(other) == 0
+    override fun equals(other: Any?): Boolean {
+        return when (other) {
+            is MånedTidspunkt -> compareTo(other) == 0
+            is Tidspunkt<*> -> this.uendelighet != Uendelighet.INGEN && this.uendelighet == other.uendelighet
+            else -> false
+        }
+    }
 
     override fun hashCode(): Int {
         return if (uendelighet == Uendelighet.INGEN) {
