@@ -134,14 +134,12 @@ fun Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>.tilVedtaksper
 
     vedtaksperiode.begrunnelser.addAll(
         begrunnelser.filterIsInstance<Standardbegrunnelse>()
-            .map { Vedtaksbegrunnelse(vedtaksperiodeMedBegrunnelser = vedtaksperiode, standardbegrunnelse = it) }
-            .toMutableSet(),
+            .map { Vedtaksbegrunnelse(vedtaksperiodeMedBegrunnelser = vedtaksperiode, standardbegrunnelse = it) },
     )
 
     vedtaksperiode.eøsBegrunnelser.addAll(
         begrunnelser.filterIsInstance<EØSStandardbegrunnelse>()
-            .map { EØSBegrunnelse(vedtaksperiodeMedBegrunnelser = vedtaksperiode, begrunnelse = it) }
-            .toMutableSet(),
+            .map { EØSBegrunnelse(vedtaksperiodeMedBegrunnelser = vedtaksperiode, begrunnelse = it) },
     )
 
     vedtaksperiode
