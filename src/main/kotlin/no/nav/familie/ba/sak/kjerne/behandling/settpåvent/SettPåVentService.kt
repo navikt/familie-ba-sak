@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.SaksstatistikkEventPublisher
 import org.slf4j.Logger
@@ -88,6 +89,12 @@ class SettPåVentService(
 
     fun gjenopptaBehandling(behandlingId: Long, nå: LocalDate = LocalDate.now()): SettPåVent {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        if (behandling.status != BehandlingStatus.UTREDES) {
+            throw FunksjonellFeil(
+                melding = "Behandling=$behandlingId har status=${behandling.status} og kan ikke gjenopptas",
+                frontendFeilmelding = "Behandlingen har status=${behandling.status} og kan ikke gjenopptas",
+            )
+        }
         val aktivSettPåVent =
             finnAktivSettPåVentPåBehandling(behandlingId)
                 ?: throw FunksjonellFeil(
@@ -101,6 +108,8 @@ class SettPåVentService(
         aktivSettPåVent.aktiv = false
         aktivSettPåVent.tidTattAvVent = nå
         val settPåVent = lagreEllerOppdater(aktivSettPåVent)
+
+        // Hvis behandlingen har vært på vent maskinellt, så må vi fjerne ev tilkjent ytelse og annet
 
         oppgaveService.settFristÅpneOppgaverPåBehandlingTil(
             behandlingId = behandlingId,

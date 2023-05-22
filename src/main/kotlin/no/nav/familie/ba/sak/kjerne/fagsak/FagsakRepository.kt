@@ -9,7 +9,6 @@ import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Slice
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Lock
-import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 import java.time.LocalDate
@@ -62,12 +61,12 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
     )
     fun finnLøpendeFagsakerForSatsendring(page: Pageable): Page<Fagsak>
 
-    @Modifying
+    // aktivert_tid
     @Query(
         value = """SELECT id FROM fagsak
                         WHERE fagsak.id IN (
                             WITH sisteiverksatte AS (
-                                SELECT b.fk_fagsak_id AS fagsakid, MAX(b.opprettet_tid) AS opprettet_tid
+                                SELECT b.fk_fagsak_id AS fagsakid, MAX(b.aktivert_tid) AS aktivert_tid
                                 FROM behandling b
                                          INNER JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
                                          INNER JOIN fagsak f ON f.id = b.fk_fagsak_id
@@ -80,7 +79,7 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
                             FROM sisteiverksatte silp
                                      INNER JOIN behandling b ON b.fk_fagsak_id = silp.fagsakid
                                      INNER JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
-                            WHERE b.opprettet_tid = silp.opprettet_tid AND ty.stonad_tom < DATE_TRUNC('month', NOW()))""",
+                            WHERE b.aktivert_tid = silp.aktivert_tid AND ty.stonad_tom < DATE_TRUNC('month', NOW()))""",
         nativeQuery = true,
     )
     fun finnFagsakerSomSkalAvsluttes(): List<Long>
