@@ -48,10 +48,7 @@ fun finnPerioderSomSkalBegrunnes(
     val sammenslåttePerioderUtenEksplisittAvslag = gjeldendeOgForrigeGrunnlagKombinert.slåSammenUtenEksplisitteAvslag()
     val eksplisitteAvslagsperioder = gjeldendeOgForrigeGrunnlagKombinert.utledEksplisitteAvslagsperioder()
 
-    val perioderSomSkalBegrunnes =
-        (eksplisitteAvslagsperioder + sammenslåttePerioderUtenEksplisittAvslag).slåSammenAvslagOgReduksjonsperioderMedSammeFomOgTom()
-
-    return perioderSomSkalBegrunnes
+    return (eksplisitteAvslagsperioder + sammenslåttePerioderUtenEksplisittAvslag).slåSammenAvslagOgReduksjonsperioderMedSammeFomOgTom()
 }
 
 private fun List<Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned>>.slåSammenUtenEksplisitteAvslag(): Collection<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>> {
@@ -71,23 +68,21 @@ private fun List<Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned>>.sl�
     }.perioder()
 }
 
-private fun List<Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned>>.utledEksplisitteAvslagsperioder(): Collection<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>> {
-    return kombiner { grunnlagPerPersonIPeriode ->
-        grunnlagPerPersonIPeriode.map { it.medVilkårSomHarEksplisitteAvslag() }
-            .filter { !it.gjeldende?.vilkårResultaterForVedtaksperiode.isNullOrEmpty() }
-            .takeIf { it.isNotEmpty() }
-    }.slåSammenLike().perioder()
-}
+private fun List<Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned>>.utledEksplisitteAvslagsperioder():
+    Collection<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>> =
+    this.map { it.filtrerErAvslagsperiode() }
+        .flatMap { it.perioder() }
+        .groupBy { Pair(it.fraOgMed, it.tilOgMed) }
+        .map { (fomTomPar, avslagMedSammeFomOgTom) ->
+            Periode(
+                fraOgMed = fomTomPar.first,
+                tilOgMed = fomTomPar.second,
+                innhold = avslagMedSammeFomOgTom.mapNotNull { it.innhold },
+            )
+        }
 
-private fun GrunnlagForGjeldendeOgForrigeBehandling.medVilkårSomHarEksplisitteAvslag(): GrunnlagForGjeldendeOgForrigeBehandling {
-    return copy(
-        gjeldende = this.gjeldende?.kopier(
-            vilkårResultaterForVedtaksperiode = this.gjeldende
-                .vilkårResultaterForVedtaksperiode
-                .filter { it.erEksplisittAvslagPåSøknad == true },
-        ),
-    )
-}
+private fun Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned>.filtrerErAvslagsperiode() =
+    filtrer { it?.gjeldende?.erEksplisittAvslag() == true }
 
 /**
  * Ønsker å dra med informasjon om forrige behandling i perioder der forrige behandling var oppfylt, men gjeldende
