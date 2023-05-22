@@ -12,6 +12,10 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilDagEllerFørsteDagIPerioden
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilLocalDateEllerNull
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.EØSBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 
@@ -109,7 +113,7 @@ private fun kombinerGjeldendeOgForrigeGrunnlag(
 
 fun Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>.tilVedtaksperiodeMedBegrunnelser(
     vedtak: Vedtak,
-) = VedtaksperiodeMedBegrunnelser(
+): VedtaksperiodeMedBegrunnelser = VedtaksperiodeMedBegrunnelser(
     vedtak = vedtak,
     fom = fraOgMed.tilDagEllerFørsteDagIPerioden().tilLocalDateEllerNull(),
     tom = tilOgMed.tilLocalDateEllerNull(),
@@ -122,7 +126,26 @@ fun Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>.tilVedtaksper
     } else {
         Vedtaksperiodetype.OPPHØR
     },
-)
+).let { vedtaksperiode ->
+    val begrunnelser = this.innhold?.flatMap { grunnlagForGjeldendeOgForrigeBehandling ->
+        grunnlagForGjeldendeOgForrigeBehandling.gjeldende?.vilkårResultaterForVedtaksperiode
+            ?.flatMap { it.standardbegrunnelser } ?: emptyList()
+    } ?: emptyList()
+
+    vedtaksperiode.begrunnelser.addAll(
+        begrunnelser.filterIsInstance<Standardbegrunnelse>()
+            .map { Vedtaksbegrunnelse(vedtaksperiodeMedBegrunnelser = vedtaksperiode, standardbegrunnelse = it) }
+            .toMutableSet(),
+    )
+
+    vedtaksperiode.eøsBegrunnelser.addAll(
+        begrunnelser.filterIsInstance<EØSStandardbegrunnelse>()
+            .map { EØSBegrunnelse(vedtaksperiodeMedBegrunnelser = vedtaksperiode, begrunnelse = it) }
+            .toMutableSet(),
+    )
+
+    vedtaksperiode
+}
 
 data class GrupperingskriterierForVedtaksperioder(
     val fom: Tidspunkt<Måned>,
