@@ -16,6 +16,7 @@ import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringUtil.tilFørsteEndr
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilBrevTekst
 import java.math.BigDecimal
 import java.time.LocalDateTime
@@ -41,6 +42,32 @@ fun hentBarnasAndeler(andeler: List<AndelTilkjentYtelse>, barna: List<Person>) =
  * de respektive stegene SB håndterer slik at det er lettere for SB å rette feilene.
  */
 object TilkjentYtelseValidering {
+
+    internal fun validerAtSatsendringKunOppdatererSatsPåEksisterendePerioder(
+        andelerFraForrigeBehandling: List<AndelTilkjentYtelse>,
+        andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+    ) {
+        val andelerGruppert = andelerTilkjentYtelse.groupBy { Pair(it.aktør, it.type) }
+        val forrigeAndelerGruppert = andelerFraForrigeBehandling.groupBy { Pair(it.aktør, it.type) }
+
+        (andelerGruppert.keys + forrigeAndelerGruppert.keys).distinct().forEach {
+            val nåværendeTidslinje = AndelTilkjentYtelseTidslinje(andelerGruppert[it] ?: emptyList())
+            val forrigeTidslinje = AndelTilkjentYtelseTidslinje(forrigeAndelerGruppert[it] ?: emptyList())
+            validerTidslinjer(forrigeTidslinje, nåværendeTidslinje)
+        }
+    }
+
+    private fun validerTidslinjer(
+        forrigeAndelerTidslinje: AndelTilkjentYtelseTidslinje,
+        nåværendeAndelerTidslinje: AndelTilkjentYtelseTidslinje,
+    ) = forrigeAndelerTidslinje.kombinerMed(nåværendeAndelerTidslinje) { forrigeAndel, nåværendeAndel ->
+        when {
+            forrigeAndel == null && nåværendeAndel != null -> throw Feil("Satsendring kan ikke legge til en andel som ikke var der i forrige behandling")
+            forrigeAndel != null && nåværendeAndel == null -> throw Feil("Satsendring kan ikke fjerne en andel som fantes i forrige behandling")
+            forrigeAndel != null && nåværendeAndel != null -> if (forrigeAndel.prosent != nåværendeAndel.prosent) throw Feil("Satsendring kan ikke endre på prosenten til en andel") else false
+            else -> false
+        }
+    }.perioder() // Må kalle på .perioder() for at feilene i kombinerMed-funksjonen faktisk skal bli kastet
 
     fun finnAktørIderMedUgyldigEtterbetalingsperiode(
         forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
