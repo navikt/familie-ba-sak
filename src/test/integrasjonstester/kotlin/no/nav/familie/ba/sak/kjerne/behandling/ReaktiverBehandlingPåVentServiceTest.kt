@@ -34,9 +34,11 @@ class ReaktiverBehandlingPåVentServiceTest(
 ) : AbstractSpringIntegrationTest() {
 
     private lateinit var fagsak: Fagsak
+    private var skalVenteLitt = false // for å unngå at behandlingen opprettes med samme tidspunkt
 
     @BeforeEach
     fun setUp() {
+        skalVenteLitt = false
         databaseCleanupService.truncate()
         fagsak = opprettLøpendeFagsak()
     }
@@ -174,6 +176,11 @@ class ReaktiverBehandlingPåVentServiceTest(
         status: BehandlingStatus,
         aktiv: Boolean,
     ): Behandling {
+        if (skalVenteLitt) {
+            Thread.sleep(10)
+        } else {
+            skalVenteLitt = true
+        }
         val behandling = Behandling(
             fagsak = fagsak,
             opprettetÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
