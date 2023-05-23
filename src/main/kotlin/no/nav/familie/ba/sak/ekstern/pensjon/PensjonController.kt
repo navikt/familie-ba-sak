@@ -6,14 +6,18 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
+import no.nav.familie.ba.sak.common.EksternTjenesteFeil
+import no.nav.familie.ba.sak.common.EksternTjenesteFeilException
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
+import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import java.time.LocalDate
 
 @RestController
 @RequestMapping("/api/ekstern/pensjon")
@@ -47,7 +51,7 @@ class PensjonController(private val pensjonService: PensjonService) {
             ),
             ApiResponse(
                 responseCode = "400",
-                description = "Ugyldig input. fraDato maks tilbake 5 år",
+                description = "Ugyldig input. fraDato maks tilbake 2 år",
                 content = [Content()],
             ),
             ApiResponse(
@@ -69,10 +73,22 @@ class PensjonController(private val pensjonService: PensjonService) {
         consumes = [MediaType.APPLICATION_JSON_VALUE],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    fun hentUtvidetBarnetrygd(
+    fun hentBarnetrygd(
         @RequestBody
         request: BarnetrygdTilPensjonRequest,
     ): ResponseEntity<BarnetrygdTilPensjonResponse> {
+
+        if (LocalDate.now().minusYears(2).isAfter(request.fraDato)) {
+            throw EksternTjenesteFeilException(
+                EksternTjenesteFeil(
+                    "/api/ekstern/pensjon/hent-barnetrygd",
+                    HttpStatus.BAD_REQUEST,
+                ),
+                "fraDato kan ikke være lenger enn 2 år tilbake i tid",
+                request,
+            )
+        }
+
         return ResponseEntity.ok(BarnetrygdTilPensjonResponse(pensjonService.hentBarnetrygd(request.ident, request.fraDato)))
     }
 }
