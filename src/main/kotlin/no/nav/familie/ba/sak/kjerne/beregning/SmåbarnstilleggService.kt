@@ -66,7 +66,7 @@ class SmåbarnstilleggService(
         inneværendeBehandlingId: Long,
     ) {
         val perioderFraForrigeBehandling =
-            hentPerioderMedOvergangsstønadFraForrigeIverksatteBehandling(behandlingId = inneværendeBehandlingId)
+            hentPerioderMedOvergangsstønadFraForrigeVedtatteBehandling(behandlingId = inneværendeBehandlingId)
 
         periodeOvergangsstønadGrunnlagRepository.deleteByBehandlingId(behandlingId = inneværendeBehandlingId)
 
@@ -88,18 +88,18 @@ class SmåbarnstilleggService(
     ): List<InternPeriodeOvergangsstønad> {
         val perioderOvergangsstønad = periodeOvergangsstønadGrunnlagRepository.findByBehandlingId(behandlingId)
         val overgangsstønadPerioderFraForrigeBehandling =
-            hentPerioderMedOvergangsstønadFraForrigeIverksatteBehandling(behandlingId).map { it.tilInternPeriodeOvergangsstønad() }
+            hentPerioderMedOvergangsstønadFraForrigeVedtatteBehandling(behandlingId).map { it.tilInternPeriodeOvergangsstønad() }
 
         return perioderOvergangsstønad.splittOgSlåSammen(overgangsstønadPerioderFraForrigeBehandling)
     }
 
-    private fun hentPerioderMedOvergangsstønadFraForrigeIverksatteBehandling(behandlingId: Long): List<PeriodeOvergangsstønadGrunnlag> {
-        val forrigeIverksatteBehandling =
-            behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksattFraBehandlingsId(behandlingId = behandlingId)
+    private fun hentPerioderMedOvergangsstønadFraForrigeVedtatteBehandling(behandlingId: Long): List<PeriodeOvergangsstønadGrunnlag> {
+        val forrigeVedtatteBehandling =
+            behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtattFraBehandlingId(behandlingId = behandlingId)
 
-        return if (forrigeIverksatteBehandling != null) {
+        return if (forrigeVedtatteBehandling != null) {
             periodeOvergangsstønadGrunnlagRepository.findByBehandlingId(
-                behandlingId = forrigeIverksatteBehandling.id,
+                behandlingId = forrigeVedtatteBehandling.id,
             )
         } else {
             emptyList()
