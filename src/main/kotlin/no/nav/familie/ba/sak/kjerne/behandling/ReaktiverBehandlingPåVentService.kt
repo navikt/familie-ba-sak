@@ -22,14 +22,14 @@ class ReaktiverBehandlingPåVentService(
         val behandlingerForFagsak =
             behandlingRepository.finnBehandlinger(fagsakId).sortedByDescending { it.opprettetTidspunkt }
         if (behandlingerForFagsak.size < 2) {
-            error("Forventet å finne fler enn 2 behandlinger på fagsak")
+            error("Forventet å finne fler enn 2 behandlinger på fagsak=$fagsakId")
         }
         val sisteBehandling = behandlingerForFagsak[0]
         val åpenBehandling = behandlingerForFagsak[1]
 
         validerBehandlinger(sisteBehandling, åpenBehandling, åpenBehandlingId, behandlingSomSniketIKøenId)
 
-        logger.info("Deaktiverer ${sisteBehandling.id} og aktiverer ${åpenBehandling.id}")
+        logger.info("Deaktiverer sisteBehandling=${sisteBehandling.id} og aktiverer åpenBehandling=${åpenBehandling.id}")
         sisteBehandling.aktiv = false
 
         åpenBehandling.aktiv = true
