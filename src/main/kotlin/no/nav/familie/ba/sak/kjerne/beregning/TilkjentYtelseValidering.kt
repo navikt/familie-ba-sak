@@ -62,9 +62,12 @@ object TilkjentYtelseValidering {
         nåværendeAndelerTidslinje: AndelTilkjentYtelseTidslinje,
     ) = forrigeAndelerTidslinje.kombinerMed(nåværendeAndelerTidslinje) { forrigeAndel, nåværendeAndel ->
         when {
-            forrigeAndel == null && nåværendeAndel != null -> throw Feil("Satsendring kan ikke legge til en andel som ikke var der i forrige behandling")
-            forrigeAndel != null && nåværendeAndel == null -> throw Feil("Satsendring kan ikke fjerne en andel som fantes i forrige behandling")
-            forrigeAndel != null && nåværendeAndel != null -> if (forrigeAndel.prosent != nåværendeAndel.prosent) throw Feil("Satsendring kan ikke endre på prosenten til en andel") else false
+            forrigeAndel == null && nåværendeAndel != null ->
+                throw Feil("Satsendring kan ikke legge til en andel som ikke var der i forrige behandling")
+            forrigeAndel != null && nåværendeAndel == null ->
+                throw Feil("Satsendring kan ikke fjerne en andel som fantes i forrige behandling")
+            forrigeAndel != null && forrigeAndel.prosent != nåværendeAndel?.prosent ->
+                throw Feil("Satsendring kan ikke endre på prosenten til en andel")
             else -> false
         }
     }.perioder() // Må kalle på .perioder() for at feilene i kombinerMed-funksjonen faktisk skal bli kastet
