@@ -77,7 +77,6 @@ class PensjonController(private val pensjonService: PensjonService) {
         @RequestBody
         request: BarnetrygdTilPensjonRequest,
     ): ResponseEntity<BarnetrygdTilPensjonResponse> {
-
         if (LocalDate.now().minusYears(2).isAfter(request.fraDato)) {
             throw EksternTjenesteFeilException(
                 EksternTjenesteFeil(
