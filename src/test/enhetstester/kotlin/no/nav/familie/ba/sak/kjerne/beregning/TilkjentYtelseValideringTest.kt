@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
+import java.math.BigDecimal
 import java.time.LocalDateTime
 import java.time.YearMonth
 
@@ -290,6 +291,40 @@ class TilkjentYtelseValideringTest {
                 )
             }.isInstanceOf(Feil::class.java)
                 .hasMessageContaining("Satsendring kan ikke fjerne en andel som fantes i forrige behandling")
+        }
+
+        @Test
+        fun `Skal kaste feil hvis person har fått endret prosent på andel`() {
+            val person = lagPerson(type = PersonType.BARN)
+            val forrigeAndeler = listOf(
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.of(2022, 1),
+                    tom = YearMonth.of(2023, 2),
+                    beløp = 1054,
+                    prosent = BigDecimal(100),
+                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                    aktør = person.aktør,
+                ),
+            )
+
+            val nåværendeAndeler = listOf(
+                lagAndelTilkjentYtelse(
+                    fom = YearMonth.of(2022, 1),
+                    tom = YearMonth.of(2023, 2),
+                    beløp = 527,
+                    prosent = BigDecimal(50),
+                    ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+                    aktør = person.aktør,
+                ),
+            )
+
+            assertThatThrownBy {
+                TilkjentYtelseValidering.validerAtSatsendringKunOppdatererSatsPåEksisterendePerioder(
+                    andelerFraForrigeBehandling = forrigeAndeler,
+                    andelerTilkjentYtelse = nåværendeAndeler,
+                )
+            }.isInstanceOf(Feil::class.java)
+                .hasMessageContaining("Satsendring kan ikke endre på prosenten til en andel")
         }
 
         @Test
