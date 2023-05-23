@@ -35,12 +35,4 @@ abstract class Tidspunkt<T : Tidsenhet> internal constructor(
         }
 
     protected abstract fun sammenliknMed(tidspunkt: Tidspunkt<T>): Int
-
-    override fun equals(other: Any?): Boolean {
-        return if (other is Tidspunkt<*>) {
-            this.uendelighet != Uendelighet.INGEN && this.uendelighet == other.uendelighet
-        } else {
-            super.equals(other)
-        }
-    }
 }
