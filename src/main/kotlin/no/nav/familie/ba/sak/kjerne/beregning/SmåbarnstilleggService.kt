@@ -44,7 +44,7 @@ class SmåbarnstilleggService(
         }
     }
 
-    fun hentOgLagrePerioderMedFullOvergangsstønadFraEf(
+    private fun hentOgLagrePerioderMedFullOvergangsstønadFraEf(
         søkerAktør: Aktør,
         behandlingId: Long,
     ) {
@@ -62,7 +62,7 @@ class SmåbarnstilleggService(
         )
     }
 
-    fun kopierPerioderMedOvergangsstønadFraForrigeBehandling(
+    private fun kopierPerioderMedOvergangsstønadFraForrigeBehandling(
         inneværendeBehandlingId: Long,
     ) {
         val perioderFraForrigeBehandling =
