@@ -10,13 +10,14 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjeMedAndeler
+import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerPersonOgType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringUtil.tilFørsteEndringstidspunkt
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.outerJoin
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilBrevTekst
 import java.math.BigDecimal
 import java.time.LocalDateTime
@@ -47,30 +48,21 @@ object TilkjentYtelseValidering {
         andelerFraForrigeBehandling: List<AndelTilkjentYtelse>,
         andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
     ) {
-        val andelerGruppert = andelerTilkjentYtelse.groupBy { Pair(it.aktør, it.type) }
-        val forrigeAndelerGruppert = andelerFraForrigeBehandling.groupBy { Pair(it.aktør, it.type) }
+        val andelerGruppert = andelerTilkjentYtelse.tilTidslinjerPerPersonOgType()
+        val forrigeAndelerGruppert = andelerFraForrigeBehandling.tilTidslinjerPerPersonOgType()
 
-        (andelerGruppert.keys + forrigeAndelerGruppert.keys).distinct().forEach {
-            val nåværendeTidslinje = AndelTilkjentYtelseTidslinje(andelerGruppert[it] ?: emptyList())
-            val forrigeTidslinje = AndelTilkjentYtelseTidslinje(forrigeAndelerGruppert[it] ?: emptyList())
-            validerTidslinjer(forrigeTidslinje, nåværendeTidslinje)
-        }
+        andelerGruppert.outerJoin(forrigeAndelerGruppert) { nåværendeAndel, forrigeAndel ->
+            when {
+                forrigeAndel == null && nåværendeAndel != null ->
+                    throw Feil("Satsendring kan ikke legge til en andel som ikke var der i forrige behandling")
+                forrigeAndel != null && nåværendeAndel == null ->
+                    throw Feil("Satsendring kan ikke fjerne en andel som fantes i forrige behandling")
+                forrigeAndel != null && forrigeAndel.prosent != nåværendeAndel?.prosent ->
+                    throw Feil("Satsendring kan ikke endre på prosenten til en andel")
+                else -> false
+            }
+        }.values.map { it.perioder() } // Må kalle på .perioder() for at feilene over skal bli kastet
     }
-
-    private fun validerTidslinjer(
-        forrigeAndelerTidslinje: AndelTilkjentYtelseTidslinje,
-        nåværendeAndelerTidslinje: AndelTilkjentYtelseTidslinje,
-    ) = forrigeAndelerTidslinje.kombinerMed(nåværendeAndelerTidslinje) { forrigeAndel, nåværendeAndel ->
-        when {
-            forrigeAndel == null && nåværendeAndel != null ->
-                throw Feil("Satsendring kan ikke legge til en andel som ikke var der i forrige behandling")
-            forrigeAndel != null && nåværendeAndel == null ->
-                throw Feil("Satsendring kan ikke fjerne en andel som fantes i forrige behandling")
-            forrigeAndel != null && forrigeAndel.prosent != nåværendeAndel?.prosent ->
-                throw Feil("Satsendring kan ikke endre på prosenten til en andel")
-            else -> false
-        }
-    }.perioder() // Må kalle på .perioder() for at feilene i kombinerMed-funksjonen faktisk skal bli kastet
 
     fun finnAktørIderMedUgyldigEtterbetalingsperiode(
         forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
