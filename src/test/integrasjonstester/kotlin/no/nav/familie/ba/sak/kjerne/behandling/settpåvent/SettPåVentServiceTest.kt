@@ -13,7 +13,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -49,7 +48,6 @@ class SettPåVentServiceTest(
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
     @Autowired private val settPåVentRepository: SettPåVentRepository,
     @Autowired private val taBehandlingerEtterVentefristAvVentTask: TaBehandlingerEtterVentefristAvVentTask,
-    @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     @Autowired private val brevmalService: BrevmalService,
 ) : AbstractSpringIntegrationTest() {
 
@@ -91,7 +89,7 @@ class SettPåVentServiceTest(
         val gjenopptattSettPåVent = settPåVentService.gjenopptaBehandling(behandling.id)
 
         assertThat(gjenopptattSettPåVent.aktiv).isFalse()
-        assertThat(behandling).isEqualTo(BehandlingStatus.UTREDES)
+        assertThat(behandling.status).isEqualTo(BehandlingStatus.UTREDES)
         assertThat(behandlingEtterSattPåVent).isEqualTo(BehandlingStatus.SATT_PÅ_VENT)
         assertThat(behandlingRepository.finnBehandling(behandling.id).status).isEqualTo(BehandlingStatus.UTREDES)
     }
@@ -109,16 +107,15 @@ class SettPåVentServiceTest(
             brevmalService = brevmalService,
         )
 
-        settPåVentRepository.save(
-            SettPåVent(
-                behandling = behandlingEtterVilkårsvurderingSteg,
-                frist = LocalDate.now().plusDays(21),
-                årsak = SettPåVentÅrsak.AVVENTER_DOKUMENTASJON,
-            ),
+        val behandlingId = behandlingEtterVilkårsvurderingSteg.id
+        settPåVentService.settBehandlingPåVent(
+            behandlingId = behandlingId,
+            frist = LocalDate.now().plusDays(21),
+            årsak = SettPåVentÅrsak.AVVENTER_DOKUMENTASJON,
         )
 
         assertThrows<FunksjonellFeil> {
-            stegService.håndterBehandlingsresultat(behandlingEtterVilkårsvurderingSteg)
+            stegService.håndterBehandlingsresultat(behandlingRepository.finnBehandling(behandlingId))
         }
     }
 
@@ -135,12 +132,10 @@ class SettPåVentServiceTest(
             brevmalService = brevmalService,
         )
 
-        settPåVentRepository.save(
-            SettPåVent(
-                behandling = behandlingEtterVilkårsvurderingSteg,
-                frist = LocalDate.now().plusDays(21),
-                årsak = SettPåVentÅrsak.AVVENTER_DOKUMENTASJON,
-            ),
+        settPåVentService.settBehandlingPåVent(
+            behandlingId = behandlingEtterVilkårsvurderingSteg.id,
+            frist = LocalDate.now().plusDays(21),
+            årsak = SettPåVentÅrsak.AVVENTER_DOKUMENTASJON,
         )
 
         val nå = LocalDate.now()
@@ -207,14 +202,14 @@ class SettPåVentServiceTest(
             ),
         )
 
-        Assertions.assertEquals(frist1, settPåVentService.finnAktivSettPåVentPåBehandlingThrows(behandlingId).frist)
+        Assertions.assertEquals(frist1, settPåVentService.finnAktivSettPåVentPåBehandling(behandlingId)!!.frist)
 
         val frist2 = LocalDate.now().plusDays(9)
 
         settPåVent.frist = frist2
         settPåVentRepository.save(settPåVent)
 
-        Assertions.assertEquals(frist2, settPåVentService.finnAktivSettPåVentPåBehandlingThrows(behandlingId).frist)
+        Assertions.assertEquals(frist2, settPåVentService.finnAktivSettPåVentPåBehandling(behandlingId)!!.frist)
     }
 
     @Test
@@ -241,20 +236,18 @@ class SettPåVentServiceTest(
             brevmalService = brevmalService,
         )
 
-        settPåVentRepository.save(
-            SettPåVent(
-                behandling = behandling1,
-                frist = LocalDate.now().minusDays(1),
-                årsak = SettPåVentÅrsak.AVVENTER_DOKUMENTASJON,
-            ),
-        )
+        settPåVentService.settBehandlingPåVent(
+            behandlingId = behandling1.id,
+            frist = LocalDate.now(),
+            årsak = SettPåVentÅrsak.AVVENTER_DOKUMENTASJON,
+        ).let {
+            settPåVentRepository.save(it.copy(frist = LocalDate.now().minusDays(1)))
+        }
 
-        settPåVentRepository.save(
-            SettPåVent(
-                behandling = behandling2,
-                frist = LocalDate.now().plusDays(21),
-                årsak = SettPåVentÅrsak.AVVENTER_DOKUMENTASJON,
-            ),
+        settPåVentService.settBehandlingPåVent(
+            behandlingId = behandling2.id,
+            frist = LocalDate.now().plusDays(21),
+            årsak = SettPåVentÅrsak.AVVENTER_DOKUMENTASJON,
         )
 
         taBehandlingerEtterVentefristAvVentTask.doTask(

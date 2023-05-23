@@ -28,13 +28,12 @@ class SettPåVentService(
 
     fun finnAktiveSettPåVent(): List<SettPåVent> = settPåVentRepository.findByAktivTrue()
 
-    fun finnAktivSettPåVentPåBehandlingThrows(behandlingId: Long): SettPåVent {
+    private fun finnAktivSettPåVentPåBehandlingThrows(behandlingId: Long): SettPåVent {
         return finnAktivSettPåVentPåBehandling(behandlingId)
             ?: throw Feil("Behandling $behandlingId er ikke satt på vent.")
     }
 
-    @Transactional
-    fun lagreEllerOppdater(settPåVent: SettPåVent): SettPåVent {
+    private fun lagreEllerOppdater(settPåVent: SettPåVent): SettPåVent {
         saksstatistikkEventPublisher.publiserBehandlingsstatistikk(behandlingId = settPåVent.behandling.id)
         return settPåVentRepository.save(settPåVent)
     }
@@ -68,6 +67,7 @@ class SettPåVentService(
         if (frist == aktivSettPåVent.frist && årsak == aktivSettPåVent.årsak) {
             throw FunksjonellFeil("Behandlingen er allerede satt på vent med frist $frist og årsak $årsak.")
         }
+        validerFristErFremITiden(behandling, frist)
 
         loggService.opprettOppdaterVentingLogg(
             behandling = behandling,
@@ -92,6 +92,8 @@ class SettPåVentService(
     @Transactional
     fun gjenopptaBehandling(behandlingId: Long, nå: LocalDate = LocalDate.now()): SettPåVent {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        validerKanGjenopptaBehandling(behandling)
+
         val aktivSettPåVent =
             finnAktivSettPåVentPåBehandling(behandlingId)
                 ?: throw FunksjonellFeil(

@@ -18,12 +18,7 @@ fun validerBehandlingKanSettesPåVent(
         )
     }
 
-    if (frist.isBefore(LocalDate.now())) {
-        throw FunksjonellFeil(
-            melding = "Frist for å vente på behandling ${behandling.id} er satt før dagens dato.",
-            frontendFeilmelding = "Fristen er satt før dagens dato.",
-        )
-    }
+    validerFristErFremITiden(behandling, frist)
 
     if (behandling.status != BehandlingStatus.UTREDES) {
         throw FunksjonellFeil(
@@ -39,8 +34,23 @@ fun validerBehandlingKanSettesPåVent(
     }
 }
 
+fun validerOppdaterSettBehandlingPåVent() {
+}
+
+fun validerFristErFremITiden(
+    behandling: Behandling,
+    frist: LocalDate,
+) {
+    if (frist.isBefore(LocalDate.now())) {
+        throw FunksjonellFeil(
+            melding = "Frist for å vente på behandling ${behandling.id} er satt før dagens dato.",
+            frontendFeilmelding = "Fristen er satt før dagens dato.",
+        )
+    }
+}
+
 fun validerKanGjenopptaBehandling(behandling: Behandling) {
-    if(behandling.status != BehandlingStatus.SATT_PÅ_VENT) {
+    if (behandling.status != BehandlingStatus.SATT_PÅ_VENT) {
         throw FunksjonellFeil(
             melding = "Behandling ${behandling.id} har status=${behandling.status} og kan ikke gjenopptas.",
             frontendFeilmelding = "Behandlingen må ha status satt på vent for å kunne gjenopptas",
