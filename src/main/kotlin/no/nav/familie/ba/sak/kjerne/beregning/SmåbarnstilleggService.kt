@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
@@ -26,6 +27,22 @@ class SmåbarnstilleggService(
     private val persongrunnlagService: PersongrunnlagService,
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
 ) {
+
+    fun lagrePerioderMedOvergangsstønadForBehandling(
+        søkerAktør: Aktør,
+        behandling: Behandling,
+    ) {
+        if (behandling.erSatsendring()) {
+            kopierPerioderMedOvergangsstønadFraForrigeBehandling(
+                behandling.id,
+            )
+        } else {
+            hentOgLagrePerioderMedFullOvergangsstønadFraEf(
+                søkerAktør = søkerAktør,
+                behandlingId = behandling.id,
+            )
+        }
+    }
 
     fun hentOgLagrePerioderMedFullOvergangsstønadFraEf(
         søkerAktør: Aktør,
