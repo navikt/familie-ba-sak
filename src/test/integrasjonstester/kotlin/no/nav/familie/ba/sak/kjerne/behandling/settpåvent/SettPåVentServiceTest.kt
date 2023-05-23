@@ -2,8 +2,17 @@ package no.nav.familie.ba.sak.kjerne.behandling.settpåvent
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
+import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -15,6 +24,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.task.TaBehandlingerEtterVentefristAvVentTask
 import no.nav.familie.prosessering.domene.Task
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Tag
@@ -28,6 +38,8 @@ import java.time.LocalDate
 @Tag("integration")
 class SettPåVentServiceTest(
     @Autowired private val fagsakService: FagsakService,
+    @Autowired private val behandlingService: BehandlingService,
+    @Autowired private val behandlingRepository: BehandlingRepository,
     @Autowired private val databaseCleanupService: DatabaseCleanupService,
     @Autowired private val stegService: StegService,
     @Autowired private val settPåVentService: SettPåVentService,
@@ -44,6 +56,44 @@ class SettPåVentServiceTest(
     @BeforeAll
     fun init() {
         databaseCleanupService.truncate()
+    }
+
+    @Test
+    fun `Kan sette en behandling på vent hvis statusen er utredes`() {
+        val behandling = opprettBehandling()
+        val frist = LocalDate.now().plusDays(3)
+
+        val settBehandlingPåVent = settPåVentService.settBehandlingPåVent(
+            behandling.id,
+            frist,
+            SettPåVentÅrsak.AVVENTER_DOKUMENTASJON,
+        )
+
+        assertThat(settBehandlingPåVent.behandling.id).isEqualTo(behandling.id)
+        assertThat(settBehandlingPåVent.frist).isEqualTo(frist)
+        assertThat(settBehandlingPåVent.årsak).isEqualTo(SettPåVentÅrsak.AVVENTER_DOKUMENTASJON)
+        assertThat(settBehandlingPåVent.aktiv).isTrue()
+
+        assertThat(behandlingRepository.finnBehandling(behandling.id).status).isEqualTo(BehandlingStatus.SATT_PÅ_VENT)
+    }
+
+    @Test
+    fun `gjenopprett behandling skal sette status til utredes på nytt`() {
+        val behandling = opprettBehandling()
+        val frist = LocalDate.now().plusDays(3)
+
+        settPåVentService.settBehandlingPåVent(
+            behandling.id,
+            frist,
+            SettPåVentÅrsak.AVVENTER_DOKUMENTASJON,
+        )
+        val behandlingEtterSattPåVent = behandlingRepository.finnBehandling(behandling.id).status
+        val gjenopptattSettPåVent = settPåVentService.gjenopptaBehandling(behandling.id)
+
+        assertThat(gjenopptattSettPåVent.aktiv).isFalse()
+        assertThat(behandling).isEqualTo(BehandlingStatus.UTREDES)
+        assertThat(behandlingEtterSattPåVent).isEqualTo(BehandlingStatus.SATT_PÅ_VENT)
+        assertThat(behandlingRepository.finnBehandling(behandling.id).status).isEqualTo(BehandlingStatus.UTREDES)
     }
 
     @Test
@@ -216,5 +266,17 @@ class SettPåVentServiceTest(
 
         Assertions.assertNull(settPåVentRepository.findByBehandlingIdAndAktiv(behandling1.id, true))
         Assertions.assertNotNull(settPåVentRepository.findByBehandlingIdAndAktiv(behandling2.id, true))
+    }
+
+    private fun opprettBehandling(): Behandling {
+        val fagsak = fagsakService.hentEllerOpprettFagsak(randomFnr())
+        val behandling = Behandling(
+            fagsak = fagsak,
+            kategori = BehandlingKategori.NASJONAL,
+            underkategori = BehandlingUnderkategori.ORDINÆR,
+            type = BehandlingType.REVURDERING,
+            opprettetÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
+        ).initBehandlingStegTilstand()
+        return behandlingService.lagreNyOgDeaktiverGammelBehandling(behandling)
     }
 }

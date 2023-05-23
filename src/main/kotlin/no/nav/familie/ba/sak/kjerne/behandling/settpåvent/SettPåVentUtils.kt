@@ -25,16 +25,25 @@ fun validerBehandlingKanSettesPåVent(
         )
     }
 
-    if (behandling.status == BehandlingStatus.AVSLUTTET) {
+    if (behandling.status != BehandlingStatus.UTREDES) {
         throw FunksjonellFeil(
-            melding = "Behandling ${behandling.id} er avsluttet og kan ikke settes på vent.",
-            frontendFeilmelding = "Kan ikke sette en avsluttet behandling på vent.",
+            melding = "Behandling ${behandling.id} har status=${behandling.status} og kan ikke settes på vent.",
+            frontendFeilmelding = "Behandlingen må ha status utredes for å kunne settes på vent",
         )
     }
 
     if (!behandling.aktiv) {
         throw Feil(
             "Behandling ${behandling.id} er ikke aktiv og kan ikke settes på vent.",
+        )
+    }
+}
+
+fun validerKanGjenopptaBehandling(behandling: Behandling) {
+    if(behandling.status != BehandlingStatus.SATT_PÅ_VENT) {
+        throw FunksjonellFeil(
+            melding = "Behandling ${behandling.id} har status=${behandling.status} og kan ikke gjenopptas.",
+            frontendFeilmelding = "Behandlingen må ha status satt på vent for å kunne gjenopptas",
         )
     }
 }
