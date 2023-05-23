@@ -183,11 +183,8 @@ class BehandlingsresultatSteg(
 
     private fun validerSatsendring(tilkjentYtelse: TilkjentYtelse) {
         val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(tilkjentYtelse.behandling)
-        val andelerFraForrigeBehandling = if (forrigeBehandling != null) {
-            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = forrigeBehandling.id)
-        } else {
-            throw FunksjonellFeil("Kan ikke kjøre satsendring når det ikke finnes en tidligere behandling på fagsaken")
-        }
+            ?: throw FunksjonellFeil("Kan ikke kjøre satsendring når det ikke finnes en tidligere behandling på fagsaken")
+        val andelerFraForrigeBehandling = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = forrigeBehandling.id)
 
         validerAtSatsendringKunOppdatererSatsPåEksisterendePerioder(
             andelerFraForrigeBehandling = andelerFraForrigeBehandling,
