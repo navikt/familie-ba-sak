@@ -29,6 +29,13 @@ class ReaktiverBehandlingPåVentService(
 
         validerBehandlinger(sisteBehandling, åpenBehandling, åpenBehandlingId, behandlingSomSniketIKøenId)
 
+        aktiverBehandlingPåVent(sisteBehandling, åpenBehandling)
+    }
+
+    private fun aktiverBehandlingPåVent(
+        sisteBehandling: Behandling,
+        åpenBehandling: Behandling,
+    ) {
         logger.info("Deaktiverer sisteBehandling=${sisteBehandling.id} og aktiverer åpenBehandling=${åpenBehandling.id}")
         sisteBehandling.aktiv = false
 
