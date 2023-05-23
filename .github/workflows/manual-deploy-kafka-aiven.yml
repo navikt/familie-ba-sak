@@ -57,3 +57,12 @@ jobs:
           APIKEY: ${{ secrets.GITHUB_ACCESS_TOKEN }}
           CLUSTER: prod-gcp
           RESOURCE: .deploy/nais/kafka/prod/dvh_sakstatistikk_behandling_v1_topic.yaml
+  loggfeil:
+    name: Send logg til slack ved feil
+    runs-on: ubuntu-latest
+    needs: [deploy-to-prod]
+    if: failure()
+    run: |
+      curl -X POST --data "{\"text\": \"Deploy av kafka topics i $GITHUB_REPOSITORY feilet - $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID\"}" $WEBHOOK_URL
+    env:
+      WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
