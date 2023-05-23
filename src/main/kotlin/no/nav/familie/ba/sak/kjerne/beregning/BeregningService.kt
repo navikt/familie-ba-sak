@@ -203,10 +203,16 @@ class BeregningService(
                 endretUtbetalingAndeler = endreteUtbetalingAndeler,
                 fagsakType = behandling.fagsak.type,
             ) { søkerAktør ->
-                småbarnstilleggService.hentOgLagrePerioderMedFullOvergangsstønadFraEf(
-                    søkerAktør = søkerAktør,
-                    behandlingId = behandling.id,
-                )
+                if (behandling.erSatsendring()) {
+                    småbarnstilleggService.kopierPerioderMedOvergangsstønadFraForrigeBehandling(
+                        behandling.id,
+                    )
+                } else {
+                    småbarnstilleggService.hentOgLagrePerioderMedFullOvergangsstønadFraEf(
+                        søkerAktør = søkerAktør,
+                        behandlingId = behandling.id,
+                    )
+                }
 
                 småbarnstilleggService.hentPerioderMedFullOvergangsstønad(behandling.id)
             }
