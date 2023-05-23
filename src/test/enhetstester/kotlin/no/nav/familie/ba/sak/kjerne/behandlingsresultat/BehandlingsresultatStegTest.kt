@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -144,7 +145,7 @@ class BehandlingsresultatStegTest {
             startdato,
         )
 
-        assertThrows<Feil> {
+        assertThrows<FunksjonellFeil> {
             endringTidslinje.kastFeilVedEndringEtter(startdato, lagBehandling())
         }
     }
