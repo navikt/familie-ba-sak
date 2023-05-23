@@ -23,6 +23,7 @@ jobs:
           CLUSTER: prod-gcp
           RESOURCE: .deploy/nais/app-prod.yaml
           VAR: image=${{ env.IMAGE }}:${{ inputs.tag }}
+
   loggfeil:
     name: Send logg til slack ved feil
     runs-on: ubuntu-latest
