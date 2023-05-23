@@ -4,6 +4,8 @@ import io.mockk.every
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import no.nav.familie.ba.sak.common.LocalDateService
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.AutovedtakSatsendringService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.SatsendringSvar
@@ -68,6 +70,7 @@ class BehandlingSatsendringTest(
     @Autowired private val settPåVentService: SettPåVentService,
     @Autowired private val jdbcTemplate: JdbcTemplate,
     @Autowired private val taskRepositoryWrapper: TaskRepositoryWrapper,
+    @Autowired private val featureToggleService: FeatureToggleService,
 ) : AbstractVerdikjedetest() {
 
     private val opprettedeTasks = mutableListOf<Task>()
@@ -155,6 +158,7 @@ class BehandlingSatsendringTest(
 
         @Test
         fun `Kan ikke sette åpen behandling på vent når behandlingen akkurat er opprettet`() {
+            every { featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_SNIKE_I_KØEN) } returns true
             val scenario = mockServerKlient().lagScenario(restScenario)
             val behandling = opprettBehandling(scenario)
             satskjøringRepository.saveAndFlush(Satskjøring(fagsakId = behandling.fagsak.id))
@@ -177,6 +181,7 @@ class BehandlingSatsendringTest(
 
         @Test
         fun `Skal sette åpen behandling på maskinell vent hvis den er satt på vent av saksbehandler ved kjøring av satsendring`() {
+            every { featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_SNIKE_I_KØEN) } returns true
             val scenario = mockServerKlient().lagScenario(restScenario)
             val behandling = opprettBehandling(scenario)
             satskjøringRepository.saveAndFlush(Satskjøring(fagsakId = behandling.fagsak.id))
@@ -199,8 +204,35 @@ class BehandlingSatsendringTest(
             assertThat(opprettedeTasks.filter { it.type == ReaktiverÅpenBehandlingTask.TASK_STEP_TYPE }).hasSize(1)
         }
 
+        // Kan fjernes når feature toggle er fjernet
+        @Test
+        fun `Skal ikke sette behandling på vent hvis feature toggle er slått av`() {
+            every { featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_SNIKE_I_KØEN) } returns false
+            val scenario = mockServerKlient().lagScenario(restScenario)
+            val behandling = opprettBehandling(scenario)
+            satskjøringRepository.saveAndFlush(Satskjøring(fagsakId = behandling.fagsak.id))
+
+            // Opprett revurdering som blir liggende igjen som åpen og på behandlingsresultatsteget
+            val revurdering = opprettRevurdering(scenario, behandling)
+            justerLoggTidspunktForÅKunneSatsendreNårDetFinnesÅpenBehandling(revurdering)
+
+            // Fjerner mocking slik at den siste satsendringen vi fjernet via mocking nå skal komme med.
+            unmockkObject(SatsTidspunkt)
+
+            val satsendringTaskDto = SatsendringTaskDto(
+                behandling.fagsak.id,
+                YearMonth.of(2023, 3),
+            )
+            val satsendringResultat = autovedtakSatsendringService.kjørBehandling(satsendringTaskDto)
+
+            assertThat(satsendringResultat).isEqualTo(SatsendringSvar.BEHANDLING_KAN_SETTES_PÅ_VENT_MEN_TOGGLE_ER_SLÅTT_AV)
+
+            assertThat(opprettedeTasks.filter { it.type == ReaktiverÅpenBehandlingTask.TASK_STEP_TYPE }).isEmpty()
+        }
+
         @Test
         fun `Skal sette behandling på vent på maskinell vent hvis den er satt på vent av saksbehandler ved kjøring av satsendring`() {
+            every { featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_SNIKE_I_KØEN) } returns true
             val scenario = mockServerKlient().lagScenario(restScenario)
             val behandling = opprettBehandling(scenario)
             satskjøringRepository.saveAndFlush(Satskjøring(fagsakId = behandling.fagsak.id))
