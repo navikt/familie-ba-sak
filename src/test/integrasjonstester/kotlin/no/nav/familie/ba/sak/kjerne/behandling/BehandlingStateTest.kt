@@ -106,6 +106,6 @@ class BehandlingStateTest(
             status = status,
             aktiv = aktiv,
         ).initBehandlingStegTilstand()
-        return behandlingRepository.save(behandling)
+        return behandlingRepository.saveAndFlush(behandling)
     }
 }

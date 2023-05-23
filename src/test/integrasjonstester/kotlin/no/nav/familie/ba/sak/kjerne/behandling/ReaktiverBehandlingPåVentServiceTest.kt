@@ -161,7 +161,7 @@ class ReaktiverBehandlingPåVentServiceTest(
                 BehandlingStegTilstand(behandling = behandling, behandlingSteg = StegType.BEHANDLING_AVSLUTTET)
             behandling.behandlingStegTilstand.add(stegTilstand)
             behandling.status = BehandlingStatus.AVSLUTTET
-            behandlingRepository.save(behandling)
+            behandlingRepository.saveAndFlush(behandling)
         }
     }
 
@@ -183,6 +183,6 @@ class ReaktiverBehandlingPåVentServiceTest(
             status = status,
             aktiv = aktiv,
         ).initBehandlingStegTilstand()
-        return behandlingRepository.save(behandling)
+        return behandlingRepository.saveAndFlush(behandling)
     }
 }
