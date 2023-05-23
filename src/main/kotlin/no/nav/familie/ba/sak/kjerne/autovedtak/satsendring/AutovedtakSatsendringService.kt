@@ -3,6 +3,8 @@ package no.nav.familie.ba.sak.kjerne.autovedtak.satsendring
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.SATSENDRING_SNIKE_I_KØEN
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
@@ -44,6 +46,7 @@ class AutovedtakSatsendringService(
     private val satsendringService: SatsendringService,
     private val settPåVentService: SettPåVentService,
     private val loggService: LoggService,
+    private val featureToggleService: FeatureToggleService,
 ) {
 
     private val satsendringAlleredeUtført = Metrics.counter("satsendring.allerede.utfort")
@@ -160,10 +163,12 @@ class AutovedtakSatsendringService(
         }
 
         if (kanSetteÅpenBehandlingPåVent(aktivOgÅpenBehandling)) {
+            if (!featureToggleService.isEnabled(SATSENDRING_SNIKE_I_KØEN)) {
+                return SatsendringSvar.BEHANDLING_KAN_SETTES_PÅ_VENT_MEN_TOGGLE_ER_SLÅTT_AV
+            }
             aktivOgÅpenBehandling.status = BehandlingStatus.SATT_PÅ_VENT
             aktivOgÅpenBehandling.aktiv = false
             loggService.opprettSettPåMaskinellVentSatsendring(aktivOgÅpenBehandling)
-            // TODO aktiv / ta behandling av vent og oppdater aktiv tidspunkt?
             behandlingRepository.save(aktivOgÅpenBehandling)
             return null
         }
@@ -229,5 +234,6 @@ enum class SatsendringSvar(val melding: String) {
     BEHANDLING_ER_LÅST_SATSENDRING_TRIGGES_NESTE_VIRKEDAG(
         melding = "Behandlingen er låst for endringer og satsendring vil bli trigget neste virkedag.",
     ),
+    BEHANDLING_KAN_SETTES_PÅ_VENT_MEN_TOGGLE_ER_SLÅTT_AV("Behandling kan settes på vent men toggle er slått av"),
     BEHANDLING_KAN_IKKE_SETTES_PÅ_VENT("Behandlingen kan ikke settes på vent"),
 }
