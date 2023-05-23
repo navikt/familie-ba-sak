@@ -51,6 +51,7 @@ class TilbakestillBehandlingService(
         vedtakRepository.saveAndFlush(vedtak)
     }
 
+    // Denne blir ubrukt fra satsendringen, men kommer nog brukes i andre snike-i-køen-situasjoner, så fjerner ikke den
     @Transactional
     fun tilbakestillBehandlingTilVilkårsvurdering(behandling: Behandling) {
         if (behandling.status != BehandlingStatus.UTREDES) throw Feil("Prøver å tilbakestille $behandling, men den er avsluttet eller låst for endringer")

@@ -8,15 +8,18 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.ReaktiverÅpenBehandlingTask
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -39,6 +42,8 @@ class AutovedtakSatsendringService(
     private val beregningService: BeregningService,
     private val persongrunnlagService: PersongrunnlagService,
     private val satsendringService: SatsendringService,
+    private val settPåVentService: SettPåVentService,
+    private val loggService: LoggService,
 ) {
 
     private val satsendringAlleredeUtført = Metrics.counter("satsendring.allerede.utfort")
@@ -78,15 +83,15 @@ class AutovedtakSatsendringService(
         if (sisteIverksatteBehandling.fagsak.status != FagsakStatus.LØPENDE) throw Feil("Forsøker å utføre satsendring på ikke løpende fagsak ${sisteIverksatteBehandling.fagsak.id}")
 
         if (aktivOgÅpenBehandling != null) {
-            val brukerHarÅpenBehandlingSvar = hentBrukerHarÅpenBehandlingSvar(aktivOgÅpenBehandling)
+            hentBrukerHarÅpenBehandlingSvar(aktivOgÅpenBehandling)?.let { satsendringSvar ->
+                satskjøringForFagsak.feiltype = "ÅPEN_BEHANDLING"
+                satskjøringRepository.save(satskjøringForFagsak)
 
-            satskjøringForFagsak.feiltype = "ÅPEN_BEHANDLING"
-            satskjøringRepository.save(satskjøringForFagsak)
+                logger.info(satsendringSvar.melding)
+                satsendringIgnorertÅpenBehandling.increment()
 
-            logger.info(brukerHarÅpenBehandlingSvar.melding)
-            satsendringIgnorertÅpenBehandling.increment()
-
-            return brukerHarÅpenBehandlingSvar
+                return satsendringSvar
+            }
         }
 
         if (harUtbetalingerSomOverstiger100Prosent(sisteIverksatteBehandling)) {
@@ -132,6 +137,15 @@ class AutovedtakSatsendringService(
         satskjøringForFagsak.ferdigTidspunkt = LocalDateTime.now()
         satskjøringRepository.save(satskjøringForFagsak)
         taskRepository.save(task)
+        if (aktivOgÅpenBehandling != null) {
+            // Skal dette skje når man kaller på denne tjenesten fra frontend også?
+            val reaktiverBehandlingTask = ReaktiverÅpenBehandlingTask.opprettTask(
+                aktivOgÅpenBehandling,
+                behandlingEtterBehandlingsresultat,
+            )
+            taskRepository.save(reaktiverBehandlingTask)
+        }
+
         satsendringIverksatt.increment()
 
         return SatsendringSvar.SATSENDRING_KJØRT_OK
@@ -139,16 +153,42 @@ class AutovedtakSatsendringService(
 
     private fun hentBrukerHarÅpenBehandlingSvar(
         aktivOgÅpenBehandling: Behandling,
-    ): SatsendringSvar {
-        val brukerHarÅpenBehandlingSvar = if (aktivOgÅpenBehandling.status != BehandlingStatus.UTREDES) {
-            SatsendringSvar.BEHANDLING_ER_LÅST_SATSENDRING_TRIGGES_NESTE_VIRKEDAG
-        } else if (aktivOgÅpenBehandling.steg.rekkefølge > StegType.VILKÅRSVURDERING.rekkefølge) {
-            tilbakestillBehandlingService.tilbakestillBehandlingTilVilkårsvurdering(aktivOgÅpenBehandling)
-            SatsendringSvar.TILBAKESTILLER_BEHANDLINGEN_TIL_VILKÅRSVURDERINGEN
-        } else {
-            SatsendringSvar.BEHANDLINGEN_ER_UNDER_UTREDNING_MEN_I_RIKTIG_TILSTAND
+    ): SatsendringSvar? {
+        val status = aktivOgÅpenBehandling.status
+        if (status != BehandlingStatus.UTREDES && status != BehandlingStatus.SATT_PÅ_VENT) {
+            return SatsendringSvar.BEHANDLING_ER_LÅST_SATSENDRING_TRIGGES_NESTE_VIRKEDAG
         }
-        return brukerHarÅpenBehandlingSvar
+
+        if (kanSetteÅpenBehandlingPåVent(aktivOgÅpenBehandling)) {
+            aktivOgÅpenBehandling.status = BehandlingStatus.SATT_PÅ_VENT
+            aktivOgÅpenBehandling.aktiv = false
+            loggService.opprettSettPåMaskinellVentSatsendring(aktivOgÅpenBehandling)
+            // TODO aktiv / ta behandling av vent og oppdater aktiv tidspunkt?
+            behandlingRepository.save(aktivOgÅpenBehandling)
+            return null
+        }
+
+        return SatsendringSvar.BEHANDLING_KAN_IKKE_SETTES_PÅ_VENT
+    }
+
+    // burde vi sjekke steg?
+    // Burde man egentligen sette aktiv behandling på vent i egen transaction, for å unngå at noen gjør endringen på den mens man driver med satsendring?
+    private fun kanSetteÅpenBehandlingPåVent(aktivOgÅpenBehandling: Behandling): Boolean {
+        val behandlingId = aktivOgÅpenBehandling.id
+        val loggSuffix = "endrer status på behandling til på vent"
+        if (settPåVentService.finnAktivSettPåVentPåBehandling(behandlingId) != null) {
+            logger.info("Behandling=$behandlingId er satt på vent av saksbehandler, $loggSuffix")
+            return true
+        }
+        val sisteLogghendelse = loggService.hentLoggForBehandling(behandlingId).maxBy { it.opprettetTidspunkt }
+        if (sisteLogghendelse.opprettetTidspunkt.isBefore(LocalDateTime.now().minusHours(4))) {
+            logger.info(
+                "Behandling=$behandlingId siste logginslag er " +
+                    "type=${sisteLogghendelse.type} tid=${sisteLogghendelse.opprettetTidspunkt}, $loggSuffix",
+            )
+            return true
+        }
+        return false
     }
 
     private fun harUtbetalingerSomOverstiger100Prosent(sisteIverksatteBehandling: Behandling): Boolean {
@@ -189,8 +229,5 @@ enum class SatsendringSvar(val melding: String) {
     BEHANDLING_ER_LÅST_SATSENDRING_TRIGGES_NESTE_VIRKEDAG(
         melding = "Behandlingen er låst for endringer og satsendring vil bli trigget neste virkedag.",
     ),
-    TILBAKESTILLER_BEHANDLINGEN_TIL_VILKÅRSVURDERINGEN(melding = "Tilbakestiller behandlingen til vilkårsvurderingen"),
-    BEHANDLINGEN_ER_UNDER_UTREDNING_MEN_I_RIKTIG_TILSTAND(
-        melding = "Behandlingen er under utredning, men er allerede i riktig tilstand.",
-    ),
+    BEHANDLING_KAN_IKKE_SETTES_PÅ_VENT("Behandlingen kan ikke settes på vent"),
 }
