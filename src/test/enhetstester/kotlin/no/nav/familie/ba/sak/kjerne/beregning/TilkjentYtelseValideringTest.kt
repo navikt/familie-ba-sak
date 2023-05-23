@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
@@ -250,12 +251,13 @@ class TilkjentYtelseValideringTest {
                 ),
             )
 
-            assertThrows<Feil> {
+            assertThatThrownBy {
                 TilkjentYtelseValidering.validerAtSatsendringKunOppdatererSatsPåEksisterendePerioder(
                     andelerFraForrigeBehandling = forrigeAndeler,
                     andelerTilkjentYtelse = nåværendeAndeler,
                 )
-            }
+            }.isInstanceOf(Feil::class.java)
+                .hasMessageContaining("Satsendring kan ikke legge til en andel som ikke var der i forrige behandling")
         }
 
         @Test
@@ -281,12 +283,13 @@ class TilkjentYtelseValideringTest {
                 ),
             )
 
-            assertThrows<Feil> {
+            assertThatThrownBy {
                 TilkjentYtelseValidering.validerAtSatsendringKunOppdatererSatsPåEksisterendePerioder(
                     andelerFraForrigeBehandling = forrigeAndeler,
                     andelerTilkjentYtelse = nåværendeAndeler,
                 )
-            }
+            }.isInstanceOf(Feil::class.java)
+                .hasMessageContaining("Satsendring kan ikke fjerne en andel som fantes i forrige behandling")
         }
 
         @Test
@@ -349,12 +352,13 @@ class TilkjentYtelseValideringTest {
                 ),
             )
 
-            assertThrows<Feil> {
+            assertThatThrownBy {
                 TilkjentYtelseValidering.validerAtSatsendringKunOppdatererSatsPåEksisterendePerioder(
                     andelerFraForrigeBehandling = forrigeAndeler,
                     andelerTilkjentYtelse = nåværendeAndeler,
                 )
-            }
+            }.isInstanceOf(Feil::class.java)
+                .hasMessageContaining("Satsendring kan ikke legge til en andel som ikke var der i forrige behandling")
         }
 
         @Test
@@ -380,12 +384,13 @@ class TilkjentYtelseValideringTest {
 
             val nåværendeAndeler = emptyList<AndelTilkjentYtelse>()
 
-            assertThrows<Feil> {
+            assertThatThrownBy {
                 TilkjentYtelseValidering.validerAtSatsendringKunOppdatererSatsPåEksisterendePerioder(
                     andelerFraForrigeBehandling = forrigeAndeler,
                     andelerTilkjentYtelse = nåværendeAndeler,
                 )
-            }
+            }.isInstanceOf(Feil::class.java)
+                .hasMessageContaining("Satsendring kan ikke fjerne en andel som fantes i forrige behandling")
         }
 
         @Test
