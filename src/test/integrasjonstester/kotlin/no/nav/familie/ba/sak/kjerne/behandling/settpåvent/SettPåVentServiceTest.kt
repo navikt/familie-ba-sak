@@ -24,12 +24,15 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.task.TaBehandlingerEtterVentefristAvVentTask
 import no.nav.familie.prosessering.domene.Task
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
 import java.time.LocalDate
@@ -92,6 +95,22 @@ class SettPåVentServiceTest(
         assertThat(behandling.status).isEqualTo(BehandlingStatus.UTREDES)
         assertThat(behandlingEtterSattPåVent).isEqualTo(BehandlingStatus.SATT_PÅ_VENT)
         assertThat(behandlingRepository.finnBehandling(behandling.id).status).isEqualTo(BehandlingStatus.UTREDES)
+    }
+
+    @ParameterizedTest
+    @EnumSource(
+        value = BehandlingStatus::class,
+        names = ["UTREDES"],
+        mode = EnumSource.Mode.EXCLUDE,
+    )
+    fun `Skal ikke kunne sette en behandling på vent hvis den ikke har status utredes`(status: BehandlingStatus) {
+        assertThatThrownBy {
+            settPåVentService.settBehandlingPåVent(
+                opprettBehandling(status).id,
+                LocalDate.now().plusDays(3),
+                SettPåVentÅrsak.AVVENTER_DOKUMENTASJON,
+            )
+        }.hasMessageContaining("har status=$status og kan ikke settes på vent")
     }
 
     @Test
@@ -261,7 +280,7 @@ class SettPåVentServiceTest(
         Assertions.assertNotNull(settPåVentRepository.findByBehandlingIdAndAktiv(behandling2.id, true))
     }
 
-    private fun opprettBehandling(): Behandling {
+    private fun opprettBehandling(status: BehandlingStatus = BehandlingStatus.UTREDES): Behandling {
         val fagsak = fagsakService.hentEllerOpprettFagsak(randomFnr())
         val behandling = Behandling(
             fagsak = fagsak,
@@ -269,6 +288,7 @@ class SettPåVentServiceTest(
             underkategori = BehandlingUnderkategori.ORDINÆR,
             type = BehandlingType.REVURDERING,
             opprettetÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
+            status = status,
         ).initBehandlingStegTilstand()
         return behandlingService.lagreNyOgDeaktiverGammelBehandling(behandling)
     }
