@@ -21,6 +21,9 @@ object SikkerhetContext {
             claims.getAsList("roles").contains("access_as_application")
     }
 
+    fun harInnloggetBrukerForvalterRolle(rolleConfig: RolleConfig): Boolean =
+        hentGrupper().contains(rolleConfig.FORVALTER_ROLLE)
+
     fun hentSaksbehandler(): String {
         return Result.runCatching { SpringTokenValidationContextHolder().tokenValidationContext }
             .fold(
