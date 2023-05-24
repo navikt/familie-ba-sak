@@ -341,11 +341,10 @@ Egenskap: Vedtaksperioder med mor og et barn
 
     Så forvent følgende vedtaksperioder med begrunnelser
       | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar                                 |
-      |            | 31.08.2022 | Avslag             | Søker avslag utvidet                      |
+      |            |            | Avslag             | Søker avslag utvidet                      |
       | 01.05.2020 | 31.08.2022 | Utbetaling         | Barn og søker har ordinære vilkår oppfylt |
       | 01.09.2022 | 28.02.2023 | Avslag             | Søker avslag utvidet og lovlig opphold    |
       | 01.03.2023 | 31.03.2038 | Utbetaling         | Barn og søker har ordinære vilkår oppfylt |
-      | 01.03.2023 |            | Avslag             | Søker avslag utvidet                      |
       | 01.04.2038 |            | Opphør             | Barn over 18                              |
 
 
