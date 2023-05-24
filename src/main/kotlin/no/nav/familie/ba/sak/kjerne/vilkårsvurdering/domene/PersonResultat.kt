@@ -128,6 +128,21 @@ class PersonResultat(
         return nyttPersonResultat
     }
 
+    fun kopiertTilNyBehandling(
+        nyVilkårsvurdering: Vilkårsvurdering,
+    ): PersonResultat {
+        val nyttPersonResultat = PersonResultat(
+            vilkårsvurdering = nyVilkårsvurdering,
+            aktør = aktør,
+        )
+
+        val nyeVilkårResultater = vilkårResultater.map { it.kopierTilNyBehandling(nyttPersonResultat = nyttPersonResultat, nyBehandlingId = nyVilkårsvurdering.behandling.id) }.toSortedSet(VilkårResultatComparator)
+
+        nyttPersonResultat.setSortedVilkårResultater(nyeVilkårResultater)
+
+        return nyttPersonResultat
+    }
+
     fun erSøkersResultater() = vilkårResultater.none { it.vilkårType == Vilkår.UNDER_18_ÅR } ||
         vilkårsvurdering.behandling.fagsak.type in listOf(FagsakType.BARN_ENSLIG_MINDREÅRIG, FagsakType.INSTITUSJON)
 
