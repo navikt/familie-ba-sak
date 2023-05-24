@@ -40,7 +40,7 @@ class TilgangServiceTest {
     private val cacheManager = ConcurrentMapCacheManager()
     private val kode6Gruppe = "kode6"
     private val kode7Gruppe = "kode7"
-    private val rolleConfig = RolleConfig("", "", "", KODE6 = kode6Gruppe, KODE7 = kode7Gruppe)
+    private val rolleConfig = RolleConfig("", "", "", FORVALTER_ROLLE = "", KODE6 = kode6Gruppe, KODE7 = kode7Gruppe)
     private val auditLogger = AuditLogger("familie-ba-sak")
     private val tilgangService =
         TilgangService(
