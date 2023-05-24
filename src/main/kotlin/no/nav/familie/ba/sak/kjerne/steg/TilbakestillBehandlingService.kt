@@ -53,7 +53,7 @@ class TilbakestillBehandlingService(
 
     @Transactional
     fun tilbakestillBehandlingTilVilkårsvurdering(behandling: Behandling) {
-        if (behandling.status.erLåstMenIkkeAvsluttet() || behandling.status == BehandlingStatus.AVSLUTTET) throw Feil("Prøver å tilbakestille $behandling, men den er avsluttet eller låst for endringer")
+        if (behandling.status != BehandlingStatus.UTREDES) throw Feil("Prøver å tilbakestille $behandling, men den er avsluttet eller låst for endringer")
 
         beregningService.slettTilkjentYtelseForBehandling(behandlingId = behandling.id)
         vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(
