@@ -122,7 +122,7 @@ class VilkårsvurderingForNyBehandlingService(
     ): Vilkårsvurdering {
         val forrigeBehandlingVilkårsvurdering = hentVilkårsvurderingThrows(forrigeBehandlingSomErVedtatt.id)
 
-        val nyVilkårsvurdering = forrigeBehandlingVilkårsvurdering.kopierTilNyBehandling(nyBehandling = inneværendeBehandling)
+        val nyVilkårsvurdering = forrigeBehandlingVilkårsvurdering.tilKopiMedOppfylteVilkårForNyBehandling(nyBehandling = inneværendeBehandling)
 
         return vilkårsvurderingService.lagreNyOgDeaktiverGammel(nyVilkårsvurdering)
     }

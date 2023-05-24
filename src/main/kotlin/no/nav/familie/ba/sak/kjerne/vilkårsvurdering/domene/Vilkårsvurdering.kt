@@ -68,11 +68,11 @@ data class Vilkårsvurdering(
         return nyVilkårsvurdering
     }
 
-    fun kopierTilNyBehandling(nyBehandling: Behandling): Vilkårsvurdering {
+    fun tilKopiMedOppfylteVilkårForNyBehandling(nyBehandling: Behandling): Vilkårsvurdering {
         val nyVilkårsvurdering = Vilkårsvurdering(behandling = nyBehandling)
 
         nyVilkårsvurdering.personResultater = personResultater.map {
-            it.kopiertTilNyBehandling(nyVilkårsvurdering = nyVilkårsvurdering)
+            it.kopierOppfylteVilkårTilNyBehandling(nyVilkårsvurdering = nyVilkårsvurdering)
         }.toSet()
 
         return nyVilkårsvurdering
