@@ -1329,7 +1329,7 @@ class BeregningServiceTest {
         }
         every { vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = behandling.id) } answers { vilkårsvurdering }
         every { tilkjentYtelseRepository.save(any()) } returns lagInitiellTilkjentYtelse(behandling)
-        every { småbarnstilleggService.lagrePerioderMedOvergangsstønadForBehandling(any(), any()) } just Runs
+        every { småbarnstilleggService.hentOgLagrePerioderMedOvergangsstønadForBehandling(any(), any()) } just Runs
         every { småbarnstilleggService.hentPerioderMedFullOvergangsstønad(any()) } answers {
             listOf(
                 InternPeriodeOvergangsstønad(

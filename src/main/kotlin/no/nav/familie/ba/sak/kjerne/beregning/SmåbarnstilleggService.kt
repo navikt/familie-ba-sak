@@ -28,7 +28,7 @@ class SmåbarnstilleggService(
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
 ) {
 
-    fun lagrePerioderMedOvergangsstønadForBehandling(
+    fun hentOgLagrePerioderMedOvergangsstønadForBehandling(
         søkerAktør: Aktør,
         behandling: Behandling,
     ) {

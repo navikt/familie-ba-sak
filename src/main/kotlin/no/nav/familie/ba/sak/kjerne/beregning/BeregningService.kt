@@ -203,7 +203,7 @@ class BeregningService(
                 endretUtbetalingAndeler = endreteUtbetalingAndeler,
                 fagsakType = behandling.fagsak.type,
             ) { søkerAktør ->
-                småbarnstilleggService.lagrePerioderMedOvergangsstønadForBehandling(
+                småbarnstilleggService.hentOgLagrePerioderMedOvergangsstønadForBehandling(
                     søkerAktør = søkerAktør,
                     behandling = behandling,
                 )
