@@ -77,7 +77,11 @@ internal class StegServiceTest {
 
     @Test
     fun `skal IKKE feile validering av helmanuell migrering når fagsak har aktivt vedtak som var teknisk endring med opphør`() {
-        listOf(Behandlingsresultat.OPPHØRT, Behandlingsresultat.ENDRET_OG_OPPHØRT).forEach {
+        listOf(
+            Behandlingsresultat.OPPHØRT,
+            Behandlingsresultat.ENDRET_OG_OPPHØRT,
+            Behandlingsresultat.FORTSATT_OPPHØRT,
+        ).forEach {
             every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = any()) } returns
                 lagBehandling(årsak = BehandlingÅrsak.TEKNISK_ENDRING, resultat = it)
 
