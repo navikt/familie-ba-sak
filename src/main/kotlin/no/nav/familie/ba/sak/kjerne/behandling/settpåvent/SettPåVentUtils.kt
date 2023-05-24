@@ -34,9 +34,6 @@ fun validerBehandlingKanSettesPåVent(
     }
 }
 
-fun validerOppdaterSettBehandlingPåVent() {
-}
-
 fun validerFristErFremITiden(
     behandling: Behandling,
     frist: LocalDate,
