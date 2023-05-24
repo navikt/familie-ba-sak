@@ -268,7 +268,11 @@ data class Behandling(
     fun erTekniskEndring() = opprettetÅrsak == BehandlingÅrsak.TEKNISK_ENDRING
 
     fun erTekniskEndringMedOpphør() =
-        erTekniskEndring() && resultat in listOf(Behandlingsresultat.OPPHØRT, Behandlingsresultat.ENDRET_OG_OPPHØRT)
+        erTekniskEndring() && resultat in listOf(
+            Behandlingsresultat.OPPHØRT,
+            Behandlingsresultat.ENDRET_OG_OPPHØRT,
+            Behandlingsresultat.FORTSATT_OPPHØRT,
+        )
 
     fun erTekniskBehandling() = opprettetÅrsak == BehandlingÅrsak.TEKNISK_OPPHØR || erTekniskEndring()
 
