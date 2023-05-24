@@ -161,7 +161,7 @@ class VilkårResultat(
         )
     }
 
-    fun kopierTilNyBehandling(nyttPersonResultat: PersonResultat, nyBehandlingId: Long): VilkårResultat {
+    fun kopierTilNyBehandling(nyttPersonResultat: PersonResultat): VilkårResultat {
         return VilkårResultat(
             personResultat = nyttPersonResultat,
             erAutomatiskVurdert = erAutomatiskVurdert,
@@ -170,7 +170,7 @@ class VilkårResultat(
             periodeFom = periodeFom,
             periodeTom = periodeTom,
             begrunnelse = begrunnelse,
-            behandlingId = nyBehandlingId,
+            behandlingId = nyttPersonResultat.vilkårsvurdering.behandling.id,
             regelInput = regelInput,
             regelOutput = regelOutput,
             erEksplisittAvslagPåSøknad = erEksplisittAvslagPåSøknad,

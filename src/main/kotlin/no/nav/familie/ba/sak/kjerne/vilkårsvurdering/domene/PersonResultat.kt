@@ -136,7 +136,13 @@ class PersonResultat(
             aktør = aktør,
         )
 
-        val nyeVilkårResultater = vilkårResultater.map { it.kopierTilNyBehandling(nyttPersonResultat = nyttPersonResultat, nyBehandlingId = nyVilkårsvurdering.behandling.id) }.toSortedSet(VilkårResultatComparator)
+        val nyeVilkårResultater = vilkårResultater
+            .map {
+                it.kopierTilNyBehandling(
+                    nyttPersonResultat = nyttPersonResultat,
+                )
+            }
+            .toSortedSet(VilkårResultatComparator)
 
         nyttPersonResultat.setSortedVilkårResultater(nyeVilkårResultater)
 
