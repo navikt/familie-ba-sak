@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.kontrakter.felles.ef.EksternPeriode
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class SmåbarnstilleggService(
@@ -28,6 +29,7 @@ class SmåbarnstilleggService(
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
 ) {
 
+    @Transactional
     fun hentOgLagrePerioderMedOvergangsstønadForBehandling(
         søkerAktør: Aktør,
         behandling: Behandling,
