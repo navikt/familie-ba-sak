@@ -103,11 +103,6 @@ class BehandlingHentOgPersisterService(
         return Behandlingutils.hentForrigeBehandlingSomErVedtatt(behandlinger, behandling)
     }
 
-    fun hentForrigeBehandlingSomErVedtattFraBehandlingId(behandlingId: Long): Behandling? {
-        val behandling = hent(behandlingId)
-        return hentForrigeBehandlingSomErVedtatt(behandling)
-    }
-
     fun <T> partitionByIverksatteBehandlinger(funksjon: (iverksatteBehandlinger: List<Long>) -> List<T>): List<T> {
         return behandlingRepository.finnSisteIverksatteBehandlingFraLøpendeFagsaker().chunked(10000)
             .flatMap { funksjon(it) }

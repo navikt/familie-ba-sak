@@ -208,7 +208,7 @@ class BeregningService(
                     behandling = behandling,
                 )
 
-                småbarnstilleggService.hentPerioderMedFullOvergangsstønad(behandling.id)
+                småbarnstilleggService.hentPerioderMedFullOvergangsstønad(behandling)
             }
 
         val lagretTilkjentYtelse = tilkjentYtelseRepository.save(tilkjentYtelse)

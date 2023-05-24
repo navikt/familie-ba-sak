@@ -34,7 +34,7 @@ class SmåbarnstilleggService(
     ) {
         if (behandling.erSatsendring()) {
             kopierPerioderMedOvergangsstønadFraForrigeBehandling(
-                behandling.id,
+                behandling,
             )
         } else {
             hentOgLagrePerioderMedFullOvergangsstønadFraEf(
@@ -63,17 +63,17 @@ class SmåbarnstilleggService(
     }
 
     private fun kopierPerioderMedOvergangsstønadFraForrigeBehandling(
-        inneværendeBehandlingId: Long,
+        inneværendeBehandling: Behandling,
     ) {
         val perioderFraForrigeBehandling =
-            hentPerioderMedOvergangsstønadFraForrigeVedtatteBehandling(behandlingId = inneværendeBehandlingId)
+            hentPerioderMedOvergangsstønadFraForrigeVedtatteBehandling(behandling = inneværendeBehandling)
 
-        periodeOvergangsstønadGrunnlagRepository.deleteByBehandlingId(behandlingId = inneværendeBehandlingId)
+        periodeOvergangsstønadGrunnlagRepository.deleteByBehandlingId(behandlingId = inneværendeBehandling.id)
 
         periodeOvergangsstønadGrunnlagRepository.saveAll(
             perioderFraForrigeBehandling.map {
                 PeriodeOvergangsstønadGrunnlag(
-                    behandlingId = inneværendeBehandlingId,
+                    behandlingId = inneværendeBehandling.id,
                     aktør = it.aktør,
                     fom = it.fom,
                     tom = it.tom,
@@ -84,18 +84,18 @@ class SmåbarnstilleggService(
     }
 
     fun hentPerioderMedFullOvergangsstønad(
-        behandlingId: Long,
+        behandling: Behandling,
     ): List<InternPeriodeOvergangsstønad> {
-        val perioderOvergangsstønad = periodeOvergangsstønadGrunnlagRepository.findByBehandlingId(behandlingId)
+        val perioderOvergangsstønad = periodeOvergangsstønadGrunnlagRepository.findByBehandlingId(behandlingId = behandling.id)
         val overgangsstønadPerioderFraForrigeBehandling =
-            hentPerioderMedOvergangsstønadFraForrigeVedtatteBehandling(behandlingId).map { it.tilInternPeriodeOvergangsstønad() }
+            hentPerioderMedOvergangsstønadFraForrigeVedtatteBehandling(behandling).map { it.tilInternPeriodeOvergangsstønad() }
 
         return perioderOvergangsstønad.splittOgSlåSammen(overgangsstønadPerioderFraForrigeBehandling)
     }
 
-    private fun hentPerioderMedOvergangsstønadFraForrigeVedtatteBehandling(behandlingId: Long): List<PeriodeOvergangsstønadGrunnlag> {
+    private fun hentPerioderMedOvergangsstønadFraForrigeVedtatteBehandling(behandling: Behandling): List<PeriodeOvergangsstønadGrunnlag> {
         val forrigeVedtatteBehandling =
-            behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtattFraBehandlingId(behandlingId = behandlingId)
+            behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling = behandling)
 
         return if (forrigeVedtatteBehandling != null) {
             periodeOvergangsstønadGrunnlagRepository.findByBehandlingId(
