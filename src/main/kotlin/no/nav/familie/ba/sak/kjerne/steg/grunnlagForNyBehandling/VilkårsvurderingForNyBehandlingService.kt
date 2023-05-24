@@ -55,6 +55,13 @@ class VilkårsvurderingForNyBehandlingService(
                 // Lagre ned migreringsdato
                 behandlingService.lagreNedMigreringsdato(nyMigreringsdato, behandling)
             }
+            BehandlingÅrsak.SATSENDRING -> {
+                genererVilkårsvurderingForSatsendring(
+                    forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErVedtatt
+                        ?: throw Feil("Kan ikke opprette behandling med årsak 'Satsendring' hvis det ikke finnes en tidligere behandling"),
+                    inneværendeBehandling = behandling,
+                )
+            }
             !in listOf(BehandlingÅrsak.SØKNAD, BehandlingÅrsak.FØDSELSHENDELSE) -> {
                 initierVilkårsvurderingForBehandling(
                     behandling = behandling,
@@ -107,6 +114,17 @@ class VilkårsvurderingForNyBehandlingService(
             )
         }
         return vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
+    }
+
+    private fun genererVilkårsvurderingForSatsendring(
+        forrigeBehandlingSomErVedtatt: Behandling,
+        inneværendeBehandling: Behandling,
+    ): Vilkårsvurdering {
+        val forrigeBehandlingVilkårsvurdering = hentVilkårsvurderingThrows(forrigeBehandlingSomErVedtatt.id)
+
+        val nyVilkårsvurdering = forrigeBehandlingVilkårsvurdering.kopierTilNyBehandling(nyBehandling = inneværendeBehandling)
+
+        return vilkårsvurderingService.lagreNyOgDeaktiverGammel(nyVilkårsvurdering)
     }
 
     fun initierVilkårsvurderingForBehandling(
