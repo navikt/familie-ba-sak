@@ -135,6 +135,7 @@ class PersonResultat(
         val nyttPersonResultat = PersonResultat(
             vilkårsvurdering = nyVilkårsvurdering,
             aktør = aktør,
+            andreVurderinger = mutableSetOf(), // Vi kopierer ikke over andreVurderinger da den aldri skal være med i ny behandling
         )
 
         val nyeVilkårResultater = vilkårResultater
