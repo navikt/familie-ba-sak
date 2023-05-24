@@ -162,19 +162,7 @@ fun Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>.tilVedtaksper
     vedtak = vedtak,
     fom = fraOgMed.tilDagEllerFørsteDagIPerioden().tilLocalDateEllerNull(),
     tom = tilOgMed.tilLocalDateEllerNull(),
-    type = if (this.innhold == null) {
-        Vedtaksperiodetype.OPPHØR
-    } else if (this.innhold.any { it.gjeldende is GrunnlagForPersonInnvilget }) {
-        if (this.innhold.any { it.gjeldendeErNullForrigeErInnvilget }) {
-            Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING
-        } else {
-            Vedtaksperiodetype.UTBETALING
-        }
-    } else if (this.innhold.all { it.gjeldende?.erEksplisittAvslag() == true }) {
-        Vedtaksperiodetype.AVSLAG
-    } else {
-        Vedtaksperiodetype.OPPHØR
-    },
+    type = this.tilVedtaksperiodeType(),
 ).let { vedtaksperiode ->
     val begrunnelser = this.innhold?.flatMap { grunnlagForGjeldendeOgForrigeBehandling ->
         grunnlagForGjeldendeOgForrigeBehandling.gjeldende?.vilkårResultaterForVedtaksperiode
@@ -192,6 +180,23 @@ fun Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>.tilVedtaksper
     )
 
     vedtaksperiode
+}
+
+private fun Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>.tilVedtaksperiodeType(): Vedtaksperiodetype {
+    val erUtbetalingsperiode = this.innhold != null && this.innhold.any { it.gjeldende is GrunnlagForPersonInnvilget }
+    val erAvslagsperiode = this.innhold != null && this.innhold.all { it.gjeldende?.erEksplisittAvslag() == true }
+
+    return when {
+        erUtbetalingsperiode -> if (this.innhold?.any { it.gjeldendeErNullForrigeErInnvilget } == true) {
+            Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING
+        } else {
+            Vedtaksperiodetype.UTBETALING
+        }
+
+        erAvslagsperiode -> Vedtaksperiodetype.AVSLAG
+
+        else -> Vedtaksperiodetype.OPPHØR
+    }
 }
 
 data class GrupperingskriterierForVedtaksperioder(
