@@ -33,7 +33,7 @@ class BehandlingStateTest(
     }
 
     @Nested
-    inner class AktivBehand {
+    inner class AktivBehandling {
         @Test
         fun `kan ikke ha flere behandlinger med aktiv true`() {
             opprettBehandling(status = BehandlingStatus.AVSLUTTET, aktiv = true)
@@ -61,23 +61,23 @@ class BehandlingStateTest(
         }
 
         @Test
-        fun `kan ha en behandling på vent og en med status utredes`() {
+        fun `kan ha en behandling på maskinell vent og en med status utredes`() {
             opprettBehandling(status = BehandlingStatus.AVSLUTTET, aktiv = false)
-            opprettBehandling(status = BehandlingStatus.SATT_PÅ_VENT, aktiv = false)
+            opprettBehandling(status = BehandlingStatus.SATT_PÅ_MASKINELL_VENT, aktiv = false)
             opprettBehandling(status = BehandlingStatus.UTREDES, aktiv = true)
         }
 
         @Test
-        fun `kan ikke ha 2 behandlinger med status SATT_PÅ_VENT`() {
-            opprettBehandling(status = BehandlingStatus.SATT_PÅ_VENT, aktiv = false)
+        fun `kan ikke ha 2 behandlinger med status SATT_PÅ_VENTSATT_PÅ_MASKINELL_VENT`() {
+            opprettBehandling(status = BehandlingStatus.SATT_PÅ_MASKINELL_VENT, aktiv = false)
             assertThatThrownBy {
-                opprettBehandling(status = BehandlingStatus.SATT_PÅ_VENT, aktiv = true)
+                opprettBehandling(status = BehandlingStatus.SATT_PÅ_MASKINELL_VENT, aktiv = true)
             }.hasMessageContaining("uidx_behandling_03")
         }
 
         @Test
         fun `kan maks ha en parallell behandling i arbeid`() {
-            BehandlingStatus.values().filter { it != BehandlingStatus.AVSLUTTET && it != BehandlingStatus.SATT_PÅ_VENT }
+            BehandlingStatus.values().filter { it != BehandlingStatus.AVSLUTTET && it != BehandlingStatus.SATT_PÅ_MASKINELL_VENT }
                 .forEach {
                     behandlingRepository.deleteAll()
                     opprettBehandling(status = it, aktiv = false)
