@@ -259,7 +259,9 @@ fun hentNesteSteg(
                 BEHANDLINGSRESULTAT -> VURDER_TILBAKEKREVING
                 VURDER_TILBAKEKREVING -> if (!behandling.skalBehandlesAutomatisk) {
                     SEND_TIL_BESLUTTER
-                } else FERDIGSTILLE_BEHANDLING
+                } else {
+                    FERDIGSTILLE_BEHANDLING
+                }
                 SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
                 BESLUTTE_VEDTAK -> FERDIGSTILLE_BEHANDLING
                 FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET

@@ -21,10 +21,10 @@ import java.time.LocalDate
 
 fun validerVerdierPåRestTilbakekreving(restTilbakekreving: RestTilbakekreving?, feilutbetaling: BigDecimal) {
     if (feilutbetaling != BigDecimal.ZERO && restTilbakekreving == null) {
-        // throw FunksjonellFeil(
-        //     "Simuleringen har en feilutbetaling, men restTilbakekreving var null",
-        //     frontendFeilmelding = "Du må velge en tilbakekrevingsstrategi siden det er en feilutbetaling.",
-        // )
+        throw FunksjonellFeil(
+            "Simuleringen har en feilutbetaling, men restTilbakekreving var null",
+            frontendFeilmelding = "Du må velge en tilbakekrevingsstrategi siden det er en feilutbetaling.",
+        )
     }
     if (feilutbetaling == BigDecimal.ZERO && restTilbakekreving != null) {
         throw FunksjonellFeil(
