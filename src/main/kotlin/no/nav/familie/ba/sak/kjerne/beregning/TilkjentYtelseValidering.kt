@@ -10,12 +10,14 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjeMedAndeler
+import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerPersonOgType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringUtil.tilFørsteEndringstidspunkt
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.outerJoin
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilBrevTekst
 import java.math.BigDecimal
 import java.time.LocalDateTime
@@ -41,6 +43,26 @@ fun hentBarnasAndeler(andeler: List<AndelTilkjentYtelse>, barna: List<Person>) =
  * de respektive stegene SB håndterer slik at det er lettere for SB å rette feilene.
  */
 object TilkjentYtelseValidering {
+
+    internal fun validerAtSatsendringKunOppdatererSatsPåEksisterendePerioder(
+        andelerFraForrigeBehandling: List<AndelTilkjentYtelse>,
+        andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+    ) {
+        val andelerGruppert = andelerTilkjentYtelse.tilTidslinjerPerPersonOgType()
+        val forrigeAndelerGruppert = andelerFraForrigeBehandling.tilTidslinjerPerPersonOgType()
+
+        andelerGruppert.outerJoin(forrigeAndelerGruppert) { nåværendeAndel, forrigeAndel ->
+            when {
+                forrigeAndel == null && nåværendeAndel != null ->
+                    throw Feil("Satsendring kan ikke legge til en andel som ikke var der i forrige behandling")
+                forrigeAndel != null && nåværendeAndel == null ->
+                    throw Feil("Satsendring kan ikke fjerne en andel som fantes i forrige behandling")
+                forrigeAndel != null && forrigeAndel.prosent != nåværendeAndel?.prosent ->
+                    throw Feil("Satsendring kan ikke endre på prosenten til en andel")
+                else -> false
+            }
+        }.values.map { it.perioder() } // Må kalle på .perioder() for at feilene over skal bli kastet
+    }
 
     fun finnAktørIderMedUgyldigEtterbetalingsperiode(
         forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,

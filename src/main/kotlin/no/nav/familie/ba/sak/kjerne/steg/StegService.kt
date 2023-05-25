@@ -19,11 +19,11 @@ import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatSteg
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
@@ -56,7 +56,6 @@ class StegService(
     private val søknadGrunnlagService: SøknadGrunnlagService,
     private val tilgangService: TilgangService,
     private val infotrygdFeedService: InfotrygdFeedService,
-    private val settPåVentService: SettPåVentService,
     private val satsendringService: SatsendringService,
     private val simuleringService: SimuleringService,
 ) {
@@ -533,7 +532,7 @@ class StegService(
         behandling: Behandling,
         behandlingSteg: BehandlingSteg<*>,
     ) {
-        if (settPåVentService.finnAktivSettPåVentPåBehandling(behandlingId = behandling.id) != null) {
+        if (behandling.status == BehandlingStatus.SATT_PÅ_VENT) {
             throw FunksjonellFeil(
                 "${SikkerhetContext.hentSaksbehandlerNavn()} prøver å utføre steg " +
                     behandlingSteg.stegType() +

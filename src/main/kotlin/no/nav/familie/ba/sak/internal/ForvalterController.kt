@@ -2,9 +2,14 @@ package no.nav.familie.ba.sak.internal
 
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
+import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.RestartAvSmåbarnstilleggService
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfoRepository
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
@@ -24,7 +29,9 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.YearMonth
 import java.time.format.DateTimeFormatter
+import kotlin.collections.LinkedHashSet
 
 @RestController
 @RequestMapping("/api/forvalter")
@@ -35,7 +42,9 @@ class ForvalterController(
     private val restartAvSmåbarnstilleggService: RestartAvSmåbarnstilleggService,
     private val forvalterService: ForvalterService,
     private val oppgaveService: OppgaveService,
-
+    private val behandlingMigreringsinfoRepository: BehandlingMigreringsinfoRepository,
+    private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
+    private val hentOgPersisterService: BehandlingHentOgPersisterService,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(ForvalterController::class.java)
 
@@ -174,6 +183,66 @@ class ForvalterController(
         }
 
         return ResponseEntity.ok("OK")
+    }
+
+    @PostMapping(
+        path = ["/finn-mangelfull-migrering"],
+        consumes = [MediaType.APPLICATION_JSON_VALUE],
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+    )
+    fun identifiserMigreringUtenSatsAlleMåneder(): ResponseEntity<Set<Long>> {
+        val årMånedMedMuligMigreringsfeil = YearMonth.of(2023, 3)
+
+        val muligeMigreringerMedManglendeSats = behandlingMigreringsinfoRepository.finnMuligeMigreringerMedManglendeSats(årMånedMedMuligMigreringsfeil.atDay(1))
+        logger.info("Fant ${muligeMigreringerMedManglendeSats.size} saker med mulig manglende sats:  $muligeMigreringerMedManglendeSats")
+
+        val sakerSomKanFikses = muligeMigreringerMedManglendeSats.fold(LinkedHashSet<Long>()) { accumulator, fagsakId ->
+            try {
+                validerAtFagsakKanFiksesAutomatisk(fagsakId, årMånedMedMuligMigreringsfeil)
+                accumulator.add(fagsakId)
+            } catch (e: IllegalStateException) {
+                logger.info("Ignorerer automatisk fiks for fagsakId=$fagsakId pga: ${e.message}")
+            }
+            accumulator
+        }
+
+        return ResponseEntity.ok(sakerSomKanFikses)
+    }
+
+    private fun validerAtFagsakKanFiksesAutomatisk(fagsakId: Long, årMånedMedMuligMigreringsfeil: YearMonth) {
+        if (hentOgPersisterService.erÅpenBehandlingPåFagsak(fagsakId)) {
+            error("Fant åpen behandling")
+        }
+
+        val aktivBehandling =
+            hentOgPersisterService.finnAktivForFagsak(fagsakId) ?: error("Ingen aktiv behandling for fagsakId=$fagsakId")
+
+        if (aktivBehandling.fagsak.status != FagsakStatus.LØPENDE) {
+            error("Fagsak er ikke løpende")
+        }
+
+        if (aktivBehandling.opprettetÅrsak != BehandlingÅrsak.MIGRERING) {
+            error("Siste aktive behandling er ikke migreringsbehandling")
+        }
+
+        val infotrygdSak =
+            infotrygdBarnetrygdClient.hentSaker(listOf(aktivBehandling.fagsak.aktør.aktivFødselsnummer()))
+        val migrertStønad =
+            infotrygdSak.bruker.first { it.stønad?.opphørsgrunn == "5" }.stønad // Stønaden som er migrert er
+
+        if (migrertStønad != null) {
+            val virkningfom = 999999L - (
+                migrertStønad.virkningFom?.toLong()
+                    ?: error("Mangler virkningFom")
+                ) // seq dato: 999999-797790 - 202209
+
+            val yearMonthSeqFomatter = DateTimeFormatter.ofPattern("yyyyMM")
+            val virkningfomDate = YearMonth.parse(virkningfom.toString(), yearMonthSeqFomatter)
+
+            if (virkningfomDate.isAfter(årMånedMedMuligMigreringsfeil)) {
+                error("Virkningfom i Infotrygd er etter dato med mulig feil. Bør fikses manuelt")
+            }
+        }
     }
 }
 

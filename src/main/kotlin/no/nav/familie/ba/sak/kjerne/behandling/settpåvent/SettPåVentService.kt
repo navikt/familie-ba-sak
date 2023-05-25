@@ -28,13 +28,12 @@ class SettPåVentService(
 
     fun finnAktiveSettPåVent(): List<SettPåVent> = settPåVentRepository.findByAktivTrue()
 
-    fun finnAktivSettPåVentPåBehandlingThrows(behandlingId: Long): SettPåVent {
+    private fun finnAktivSettPåVentPåBehandlingThrows(behandlingId: Long): SettPåVent {
         return finnAktivSettPåVentPåBehandling(behandlingId)
             ?: throw Feil("Behandling $behandlingId er ikke satt på vent.")
     }
 
-    @Transactional
-    fun lagreEllerOppdater(settPåVent: SettPåVent): SettPåVent {
+    private fun lagreEllerOppdater(settPåVent: SettPåVent): SettPåVent {
         saksstatistikkEventPublisher.publiserBehandlingsstatistikk(behandlingId = settPåVent.behandling.id)
         return settPåVentRepository.save(settPåVent)
     }
@@ -50,6 +49,8 @@ class SettPåVentService(
 
         val settPåVent = lagreEllerOppdater(SettPåVent(behandling = behandling, frist = frist, årsak = årsak))
 
+        behandling.status = BehandlingStatus.SATT_PÅ_VENT
+        behandlingHentOgPersisterService.lagreOgFlush(behandling)
         oppgaveService.forlengFristÅpneOppgaverPåBehandling(
             behandlingId = behandling.id,
             forlengelse = Period.between(LocalDate.now(), frist),
@@ -66,6 +67,7 @@ class SettPåVentService(
         if (frist == aktivSettPåVent.frist && årsak == aktivSettPåVent.årsak) {
             throw FunksjonellFeil("Behandlingen er allerede satt på vent med frist $frist og årsak $årsak.")
         }
+        validerFristErFremITiden(behandling, frist)
 
         loggService.opprettOppdaterVentingLogg(
             behandling = behandling,
@@ -87,20 +89,17 @@ class SettPåVentService(
         return settPåVent
     }
 
+    @Transactional
     fun gjenopptaBehandling(behandlingId: Long, nå: LocalDate = LocalDate.now()): SettPåVent {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
-        if (behandling.status != BehandlingStatus.UTREDES) {
-            throw FunksjonellFeil(
-                melding = "Behandling=$behandlingId har status=${behandling.status} og kan ikke gjenopptas",
-                frontendFeilmelding = "Behandlingen har status=${behandling.status} og kan ikke gjenopptas",
-            )
-        }
+
         val aktivSettPåVent =
             finnAktivSettPåVentPåBehandling(behandlingId)
                 ?: throw FunksjonellFeil(
                     melding = "Behandling $behandlingId er ikke satt på vent.",
                     frontendFeilmelding = "Behandlingen er ikke på vent og det er ikke mulig å gjenoppta behandling.",
                 )
+        validerKanGjenopptaBehandling(behandling)
 
         loggService.gjenopptaBehandlingLogg(behandling)
         logger.info("Gjenopptar behandling $behandlingId")
@@ -109,12 +108,12 @@ class SettPåVentService(
         aktivSettPåVent.tidTattAvVent = nå
         val settPåVent = lagreEllerOppdater(aktivSettPåVent)
 
-        // Hvis behandlingen har vært på vent maskinellt, så må vi fjerne ev tilkjent ytelse og annet
-
         oppgaveService.settFristÅpneOppgaverPåBehandlingTil(
             behandlingId = behandlingId,
             nyFrist = LocalDate.now().plusDays(1),
         )
+        behandling.status = BehandlingStatus.UTREDES
+        behandlingHentOgPersisterService.lagreOgFlush(behandling)
 
         return settPåVent
     }
