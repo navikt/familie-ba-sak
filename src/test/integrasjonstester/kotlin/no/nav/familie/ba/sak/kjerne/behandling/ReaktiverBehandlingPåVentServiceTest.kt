@@ -50,7 +50,7 @@ class ReaktiverBehandlingPåVentServiceTest(
 
     @Test
     fun `siste behandlingen er den som er aktiv til at behandlingen som er satt på vent er aktivert på nytt`() {
-        opprettBehandling(status = BehandlingStatus.SATT_PÅ_VENT, aktiv = false)
+        opprettBehandling(status = BehandlingStatus.SATT_PÅ_MASKINELL_VENT, aktiv = false)
         val behandling2 = opprettBehandling(status = BehandlingStatus.AVSLUTTET, aktiv = true)
         lagUtbetalingsoppdragOgAvslutt(behandling2)
 
@@ -60,7 +60,7 @@ class ReaktiverBehandlingPåVentServiceTest(
 
     @Test
     fun `behandling som er satt på vent blir aktivert, men ennå ikke iverksatt, og er då siste aktive behandlingen`() {
-        val behandling1 = opprettBehandling(status = BehandlingStatus.SATT_PÅ_VENT, aktiv = false)
+        val behandling1 = opprettBehandling(status = BehandlingStatus.SATT_PÅ_MASKINELL_VENT, aktiv = false)
         val behandling2 = opprettBehandling(status = BehandlingStatus.AVSLUTTET, aktiv = true)
         lagUtbetalingsoppdragOgAvslutt(behandling2)
 
@@ -72,7 +72,7 @@ class ReaktiverBehandlingPåVentServiceTest(
 
     @Test
     fun `behandling som er satt på vent blir aktivert og iverksatt, og er då siste aktive behandlingen`() {
-        val behandling1 = opprettBehandling(status = BehandlingStatus.SATT_PÅ_VENT, aktiv = false)
+        val behandling1 = opprettBehandling(status = BehandlingStatus.SATT_PÅ_MASKINELL_VENT, aktiv = false)
         val behandling2 = opprettBehandling(status = BehandlingStatus.AVSLUTTET, aktiv = true)
         lagUtbetalingsoppdragOgAvslutt(behandling2)
 
@@ -88,7 +88,7 @@ class ReaktiverBehandlingPåVentServiceTest(
 
         @Test
         fun `skal feile når åpen behandling er aktiv`() {
-            val åpenBehandling = opprettBehandling(status = BehandlingStatus.SATT_PÅ_VENT, aktiv = true)
+            val åpenBehandling = opprettBehandling(status = BehandlingStatus.SATT_PÅ_MASKINELL_VENT, aktiv = true)
             val behandlingSomSniketIKøen = opprettBehandling(status = BehandlingStatus.AVSLUTTET, aktiv = false)
 
             assertThatThrownBy { reaktiverBehandling(åpenBehandling, behandlingSomSniketIKøen) }
@@ -96,8 +96,8 @@ class ReaktiverBehandlingPåVentServiceTest(
         }
 
         @Test
-        fun `skal feile når åpen behandling ikke har status SATT_PÅ_VENT`() {
-            BehandlingStatus.values().filter { it != BehandlingStatus.SATT_PÅ_VENT }.forEach {
+        fun `skal feile når åpen behandling ikke har status SATT_PÅ_MASKINELL_VENT`() {
+            BehandlingStatus.values().filter { it != BehandlingStatus.SATT_PÅ_MASKINELL_VENT }.forEach {
                 behandlingRepository.deleteAll()
                 val åpenBehandling = opprettBehandling(status = it, aktiv = false)
                 val behandlingSomSniketIKøen = opprettBehandling(status = BehandlingStatus.AVSLUTTET, aktiv = true)
@@ -109,7 +109,7 @@ class ReaktiverBehandlingPåVentServiceTest(
 
         @Test
         fun `skal feile når behandling som sniker i køen ikke er aktiv`() {
-            val åpenBehandling = opprettBehandling(status = BehandlingStatus.SATT_PÅ_VENT, aktiv = false)
+            val åpenBehandling = opprettBehandling(status = BehandlingStatus.SATT_PÅ_MASKINELL_VENT, aktiv = false)
             val behandlingSomSniketIKøen = opprettBehandling(status = BehandlingStatus.AVSLUTTET, aktiv = false)
 
             assertThatThrownBy { reaktiverBehandling(åpenBehandling, behandlingSomSniketIKøen) }
@@ -118,7 +118,7 @@ class ReaktiverBehandlingPåVentServiceTest(
 
         @Test
         fun `skal feile når behandling som sniker i køen har status satt på vent`() {
-            val åpenBehandling = opprettBehandling(status = BehandlingStatus.SATT_PÅ_VENT, aktiv = false)
+            val åpenBehandling = opprettBehandling(status = BehandlingStatus.SATT_PÅ_MASKINELL_VENT, aktiv = false)
             val behandlingSomSniketIKøen = opprettBehandling(status = BehandlingStatus.UTREDES, aktiv = true)
 
             assertThatThrownBy { reaktiverBehandling(åpenBehandling, behandlingSomSniketIKøen) }

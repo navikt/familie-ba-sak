@@ -539,6 +539,13 @@ class StegService(
                     " på behandling ${behandling.id} som er på vent.",
             )
         }
+        if (behandling.status == BehandlingStatus.SATT_PÅ_MASKINELL_VENT) {
+            throw FunksjonellFeil(
+                "${SikkerhetContext.hentSaksbehandlerNavn()} prøver å utføre steg " +
+                    behandlingSteg.stegType() +
+                    " på behandling ${behandling.id} som er på maskinell vent.",
+            )
+        }
     }
 
     private fun verifiserBeslutteVedtakForManuellMigrering(behandlingSteg: BehandlingSteg<*>) {

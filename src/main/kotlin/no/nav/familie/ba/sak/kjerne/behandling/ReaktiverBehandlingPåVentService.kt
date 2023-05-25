@@ -60,14 +60,14 @@ class ReaktiverBehandlingPåVentService(
         if (åpenBehandling.id != åpenBehandlingId) {
             error("Nest siste behandling=${åpenBehandling.id} for fagsak er ikke behandlingen som er satt på vent($åpenBehandlingId)")
         }
-        validerStatePåBehandlinger(åpenBehandling, sisteBehandling)
+        validerTilstandPåBehandlinger(åpenBehandling, sisteBehandling)
     }
 
-    private fun validerStatePåBehandlinger(
+    private fun validerTilstandPåBehandlinger(
         åpenBehandling: Behandling,
         behandlingSomSniketIKøen: Behandling,
     ) {
-        if (åpenBehandling.aktiv || åpenBehandling.status != BehandlingStatus.SATT_PÅ_VENT) {
+        if (åpenBehandling.aktiv || åpenBehandling.status != BehandlingStatus.SATT_PÅ_MASKINELL_VENT) {
             error("Åpen behandling har feil tilstand $åpenBehandling")
         }
         if (!behandlingSomSniketIKøen.aktiv) {

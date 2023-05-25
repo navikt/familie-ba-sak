@@ -457,10 +457,10 @@ fun initStatus(): BehandlingStatus {
 enum class BehandlingStatus {
     UTREDES,
     SATT_PÅ_VENT,
+    SATT_PÅ_MASKINELL_VENT,
     FATTER_VEDTAK,
     IVERKSETTER_VEDTAK,
     AVSLUTTET,
-    SATT_PÅ_VENT,
 }
 
 class BehandlingStegComparator : Comparator<BehandlingStegTilstand> {
