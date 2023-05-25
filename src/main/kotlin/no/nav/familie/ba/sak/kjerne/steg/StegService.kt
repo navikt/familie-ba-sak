@@ -138,7 +138,7 @@ class StegService(
     private fun validerHelmanuelMigrering(nyBehandling: NyBehandling) {
         val sisteBehandlingSomErVedtatt =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(nyBehandling.fagsakId)
-        if (sisteBehandlingSomErVedtatt != null && !sisteBehandlingSomErVedtatt.erTekniskEndringMedOpphør()) {
+        if (sisteBehandlingSomErVedtatt != null && !sisteBehandlingSomErVedtatt.resultat.erOpphør()) {
             throw FunksjonellFeil(
                 melding = "Det finnes allerede en vedtatt behandling på fagsak ${nyBehandling.fagsakId}." +
                     "Behandling kan ikke opprettes med årsak " +
