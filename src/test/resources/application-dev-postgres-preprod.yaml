@@ -170,10 +170,10 @@ spring:
 
 SANITY_DATASET: "ba-test"
 
-FAMILIE_INTEGRASJONER_API_URL: https://familie-integrasjoner-q1.dev.intern.nav.no/api
-FAMILIE_INTEGRASJONER_SCOPE: api://dev-fss.teamfamilie.familie-integrasjoner-q1/.default
-PDL_URL: https://pdl-api-q1.dev.intern.nav.no/
-PDL_SCOPE: api://dev-fss.pdl.pdl-api-q1/.default
+FAMILIE_INTEGRASJONER_API_URL: https://familie-integrasjoner.dev.intern.nav.no/api
+FAMILIE_INTEGRASJONER_SCOPE: api://dev-fss.teamfamilie.familie-integrasjoner/.default
+PDL_URL: https://pdl-api.dev.intern.nav.no/
+PDL_SCOPE: api://dev-fss.pdl.pdl-api/.default
 FAMILIE_OPPDRAG_API_URL: https://familie-oppdrag.dev.intern.nav.no/api
 FAMILIE_OPPDRAG_SCOPE: api://dev-fss.teamfamilie.familie-oppdrag/.default
 FAMILIE_BREV_API_URL: https://familie-brev.intern.dev.nav.no
