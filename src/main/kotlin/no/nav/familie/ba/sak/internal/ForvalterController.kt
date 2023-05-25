@@ -293,14 +293,6 @@ class ForvalterController(
                     ),
                 )
 
-                vilkårService.hentVilkårsvurdering(behandlingId = nyBehandling.id)?.apply {
-                    this.personResultater.forEach { personResultat ->
-                        personResultat.vilkårResultater.forEach {
-                            it.periodeFom = it.periodeFom ?: LocalDate.of(2023, 1, 1)
-                        }
-                    }
-                }
-
                 val behandlingEtterVilkårsvurdering =
                     stegService.håndterVilkårsvurdering(nyBehandling)
 
