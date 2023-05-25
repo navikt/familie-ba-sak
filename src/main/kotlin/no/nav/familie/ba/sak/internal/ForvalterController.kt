@@ -191,7 +191,7 @@ class ForvalterController(
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     fun identifiserMigreringUtenSatsAlleMåneder(): ResponseEntity<Set<Long>> {
-        val årMånedMedMuligMigreringsfeil = YearMonth.of(2023, 1)
+        val årMånedMedMuligMigreringsfeil = YearMonth.of(2023, 3)
 
         val muligeMigreringerMedManglendeSats = behandlingMigreringsinfoRepository.finnMuligeMigreringerMedManglendeSats(årMånedMedMuligMigreringsfeil.atDay(1))
         logger.info("Fant ${muligeMigreringerMedManglendeSats.size} saker med mulig manglende sats:  $muligeMigreringerMedManglendeSats")
