@@ -44,7 +44,15 @@ data class GrArbeidsforhold(
     @ManyToOne(optional = false)
     @JoinColumn(name = "fk_po_person_id", nullable = false, updatable = false)
     val person: Person,
-) : BaseEntitet()
+) : BaseEntitet() {
+    fun tilKopiForNyPerson(nyPerson: Person) =
+        GrArbeidsforhold(
+            periode = periode,
+            arbeidsgiverId = arbeidsgiverId,
+            arbeidsgiverType = arbeidsgiverType,
+            person = nyPerson,
+        )
+}
 
 fun List<GrArbeidsforhold>.harLøpendeArbeidsforhold(): Boolean = this.any {
     it.periode?.tom == null || it.periode.tom >= LocalDate.now()

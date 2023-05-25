@@ -42,6 +42,15 @@ data class GrMatrikkeladresse(
     override fun tilFrontendString() =
         """Matrikkel $matrikkelId, bruksenhet $bruksenhetsnummer, postnummer $postnummer""".trimMargin()
 
+    override fun tilKopiForNyPerson(): GrBostedsadresse =
+        GrMatrikkeladresse(
+            matrikkelId,
+            bruksenhetsnummer,
+            tilleggsnavn,
+            postnummer,
+            kommunenummer,
+        )
+
     override fun equals(other: Any?): Boolean {
         if (other == null || javaClass != other.javaClass) {
             return false

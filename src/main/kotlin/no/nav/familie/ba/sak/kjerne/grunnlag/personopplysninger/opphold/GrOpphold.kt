@@ -53,6 +53,9 @@ data class GrOpphold(
         return gyldigPeriode.erInnenfor(LocalDate.now())
     }
 
+    fun tilKopiForNyPerson(nyPerson: Person): GrOpphold =
+        GrOpphold(gyldigPeriode = gyldigPeriode, type = type, person = nyPerson)
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

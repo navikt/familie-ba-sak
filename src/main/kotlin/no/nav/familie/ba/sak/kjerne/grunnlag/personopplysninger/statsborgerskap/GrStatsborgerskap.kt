@@ -81,6 +81,14 @@ data class GrStatsborgerskap(
         tom = this.gyldigPeriode?.tom,
         verdi = this.landkode,
     )
+
+    fun tilKopiForNyPerson(nyPerson: Person): GrStatsborgerskap =
+        GrStatsborgerskap(
+            gyldigPeriode = gyldigPeriode,
+            landkode = landkode,
+            medlemskap = medlemskap,
+            person = nyPerson,
+        )
 }
 
 fun Statsborgerskap.fom() = this.gyldigFraOgMed ?: this.bekreftelsesdato

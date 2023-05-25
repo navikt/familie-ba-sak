@@ -52,6 +52,15 @@ data class Dødsfall(
         tom = null,
         verdi = if (dødsfallAdresse == null) "-" else hentAdresseToString(),
     )
+
+    fun tilKopiForNyPerson(nyPerson: Person): Dødsfall =
+        Dødsfall(
+            person = nyPerson,
+            dødsfallDato = dødsfallDato,
+            dødsfallAdresse = dødsfallAdresse,
+            dødsfallPostnummer = dødsfallPostnummer,
+            dødsfallPoststed = dødsfallPoststed,
+        )
 }
 
 fun lagDødsfall(

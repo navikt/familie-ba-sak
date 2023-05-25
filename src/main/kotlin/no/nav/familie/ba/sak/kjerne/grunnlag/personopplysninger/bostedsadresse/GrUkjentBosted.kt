@@ -21,6 +21,8 @@ data class GrUkjentBosted(
     }
 
     override fun tilFrontendString() = """Ukjent adresse, kommune $bostedskommune""".trimMargin()
+    override fun tilKopiForNyPerson(): GrBostedsadresse =
+        GrUkjentBosted(bostedskommune)
 
     override fun toString(): String {
         return "UkjentBostedAdresse(detaljer skjult)"

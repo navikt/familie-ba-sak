@@ -74,6 +74,9 @@ data class GrSivilstand(
 
     fun harGyldigFom() = this.fom != null
 
+    fun tilKopiForNyPerson(nyPerson: Person) =
+        GrSivilstand(fom = fom, type = type, person = nyPerson)
+
     companion object {
 
         fun List<GrSivilstand>.sisteSivilstand(): GrSivilstand? {

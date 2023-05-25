@@ -55,6 +55,18 @@ data class GrVegadresse(
             .storForbokstav()
     } ${husnummer.nullableTilString()}${husbokstav.nullableTilString()}${postnummer.let { ", $it" }}""".trimMargin()
 
+    override fun tilKopiForNyPerson(): GrBostedsadresse =
+        GrVegadresse(
+            matrikkelId,
+            husnummer,
+            husbokstav,
+            bruksenhetsnummer,
+            adressenavn,
+            kommunenummer,
+            tilleggsnavn,
+            postnummer,
+        )
+
     override fun equals(other: Any?): Boolean {
         if (other == null || javaClass != other.javaClass) {
             return false

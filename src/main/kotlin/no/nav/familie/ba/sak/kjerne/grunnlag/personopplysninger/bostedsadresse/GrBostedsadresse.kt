@@ -68,6 +68,14 @@ abstract class GrBostedsadresse(
         verdi = this.tilFrontendString(),
     )
 
+    fun tilKopiForNyPerson(nyPerson: Person): GrBostedsadresse =
+        tilKopiForNyPerson().also {
+            it.periode = periode
+            it.person = nyPerson
+        }
+
+    abstract fun tilKopiForNyPerson(): GrBostedsadresse
+
     fun harGyldigFom() = this.periode?.fom != null && this.periode?.fom != fregManglendeFlytteDato
 
     companion object {
