@@ -75,11 +75,34 @@ internal class StegServiceTest {
 
     @Test
     fun `skal IKKE feile validering av helmanuell migrering når fagsak har aktivt vedtak som var teknisk endring med opphør`() {
-        listOf(Behandlingsresultat.OPPHØRT, Behandlingsresultat.ENDRET_OG_OPPHØRT).forEach {
+        Behandlingsresultat.values().filter { it.erOpphør() }.forEach {
             every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = any()) } returns
                 lagBehandling(årsak = BehandlingÅrsak.TEKNISK_ENDRING, resultat = it)
 
             assertDoesNotThrow {
+                stegService.håndterNyBehandling(
+                    NyBehandling(
+                        kategori = BehandlingKategori.NASJONAL,
+                        underkategori = BehandlingUnderkategori.ORDINÆR,
+                        behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                        behandlingÅrsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
+                        søkersIdent = randomFnr(),
+                        barnasIdenter = listOf(randomFnr()),
+                        nyMigreringsdato = LocalDate.now().minusMonths(6),
+                        fagsakId = 1L,
+                    ),
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `skal feile validering av helmanuell migrering når fagsak har aktivt vedtak som er teknisk endring men ikke opphør`() {
+        Behandlingsresultat.values().filter { !it.erOpphør() }.forEach {
+            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = any()) } returns
+                lagBehandling(årsak = BehandlingÅrsak.TEKNISK_ENDRING, resultat = it)
+
+            assertThrows<FunksjonellFeil> {
                 stegService.håndterNyBehandling(
                     NyBehandling(
                         kategori = BehandlingKategori.NASJONAL,
