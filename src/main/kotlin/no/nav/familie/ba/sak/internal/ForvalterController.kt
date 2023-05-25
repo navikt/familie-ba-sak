@@ -209,12 +209,13 @@ class ForvalterController(
         return ResponseEntity.ok("OK")
     }
 
-    @PostMapping(
-        path = ["/finn-mangelfull-migrering"],
-        consumes = [MediaType.APPLICATION_JSON_VALUE],
-        produces = [MediaType.APPLICATION_JSON_VALUE],
-    )
-    fun identifiserMigreringUtenSatsAlleMåneder(): ResponseEntity<Set<Long>> {
+    /**
+     *   Steg 1 i å fikse NAV-12506. Denne identifiserer alle saker som man kan fikse automatisk.
+     *
+     *   Skal slettes etter opprydding ferdig
+     */
+    @PostMapping(path = ["/nav-12506/finn-mangelfull-migrering"])
+    fun identifiserMigreringUtenSatsAlleMåneder(): ResponseEntity<Map<String, Set<Long>>> {
         val årMånedMedMuligMigreringsfeil = YearMonth.of(2023, 3)
 
         val muligeMigreringerMedManglendeSats = behandlingMigreringsinfoRepository.finnMuligeMigreringerMedManglendeSats(årMånedMedMuligMigreringsfeil.atDay(1))
