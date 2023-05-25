@@ -33,8 +33,8 @@ class SmåbarnstilleggService(
     fun hentOgLagrePerioderMedOvergangsstønadForBehandling(
         søkerAktør: Aktør,
         behandling: Behandling,
-    ) {
-        if (behandling.erSatsendring()) {
+    ): List<InternPeriodeOvergangsstønad> {
+        val perioderMedOvergangsstønadGrunnlag = if (behandling.erSatsendring()) {
             kopierPerioderMedOvergangsstønadFraForrigeBehandling(
                 behandling,
             )
@@ -44,17 +44,19 @@ class SmåbarnstilleggService(
                 behandlingId = behandling.id,
             )
         }
+
+        return perioderMedOvergangsstønadGrunnlag.map { it.tilInternPeriodeOvergangsstønad() }
     }
 
     private fun hentOgLagrePerioderMedFullOvergangsstønadFraEf(
         søkerAktør: Aktør,
         behandlingId: Long,
-    ) {
+    ): List<PeriodeOvergangsstønadGrunnlag> {
         val periodeOvergangsstønad = hentPerioderMedFullOvergangsstønad(aktør = søkerAktør)
 
         periodeOvergangsstønadGrunnlagRepository.deleteByBehandlingId(behandlingId = behandlingId)
 
-        periodeOvergangsstønadGrunnlagRepository.saveAll(
+        return periodeOvergangsstønadGrunnlagRepository.saveAll(
             periodeOvergangsstønad.map {
                 it.tilPeriodeOvergangsstønadGrunnlag(
                     behandlingId = behandlingId,
@@ -66,13 +68,13 @@ class SmåbarnstilleggService(
 
     private fun kopierPerioderMedOvergangsstønadFraForrigeBehandling(
         inneværendeBehandling: Behandling,
-    ) {
+    ): List<PeriodeOvergangsstønadGrunnlag> {
         val perioderFraForrigeBehandling =
             hentPerioderMedOvergangsstønadFraForrigeVedtatteBehandling(behandling = inneværendeBehandling)
 
         periodeOvergangsstønadGrunnlagRepository.deleteByBehandlingId(behandlingId = inneværendeBehandling.id)
 
-        periodeOvergangsstønadGrunnlagRepository.saveAll(
+        return periodeOvergangsstønadGrunnlagRepository.saveAll(
             perioderFraForrigeBehandling.map {
                 PeriodeOvergangsstønadGrunnlag(
                     behandlingId = inneværendeBehandling.id,
