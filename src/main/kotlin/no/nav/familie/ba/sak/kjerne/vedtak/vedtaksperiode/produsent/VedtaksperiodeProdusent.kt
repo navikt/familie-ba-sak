@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent
 
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
@@ -128,7 +127,7 @@ private fun GrunnlagForGjeldendeOgForrigeBehandling.medVilkårSomHarEksplisitteA
         gjeldende = this.gjeldende?.kopier(
             vilkårResultaterForVedtaksperiode = this.gjeldende
                 .vilkårResultaterForVedtaksperiode
-                .filter { it.erEksplisittAvslagPåSøknad == true || it.resultat == Resultat.IKKE_OPPFYLT },
+                .filter { it.erEksplisittAvslagPåSøknad == true },
         ),
     )
 }
