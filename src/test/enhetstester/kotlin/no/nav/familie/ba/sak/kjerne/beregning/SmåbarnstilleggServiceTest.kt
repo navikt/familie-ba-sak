@@ -4,6 +4,7 @@ import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
+import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPerson
@@ -87,14 +88,15 @@ class SmåbarnstilleggServiceTest {
         every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling) } returns forrigeBehandling
         every { periodeOvergangsstønadGrunnlagRepository.findByBehandlingId(forrigeBehandling.id) } returns perioderForrigeBehandling
 
-        every { periodeOvergangsstønadGrunnlagRepository.saveAll(forventetNyePerioder) } returns forventetNyePerioder
+        val slot = slot<List<PeriodeOvergangsstønadGrunnlag>>()
+        every { periodeOvergangsstønadGrunnlagRepository.saveAll(capture(slot)) } returnsArgument 0
 
-        val nyeOsPerioder = småbarnstilleggService.hentOgLagrePerioderMedOvergangsstønadForBehandling(
+        småbarnstilleggService.hentOgLagrePerioderMedOvergangsstønadForBehandling(
             søkerAktør = søker.aktør,
             behandling = behandling,
         )
 
-        assertThat(nyeOsPerioder).containsAll(forventetNyePerioder.map { it.tilInternPeriodeOvergangsstønad() })
+        assertThat(slot.captured).containsAll(forventetNyePerioder)
         verify(exactly = 1) { periodeOvergangsstønadGrunnlagRepository.saveAll(forventetNyePerioder) }
     }
 
@@ -121,18 +123,17 @@ class SmåbarnstilleggServiceTest {
             aktør = søker.aktør,
         )
 
-        every { periodeOvergangsstønadGrunnlagRepository.saveAll(listOf(forventetPeriode)) } returns listOf(
-            forventetPeriode,
-        )
+        val slot = slot<List<PeriodeOvergangsstønadGrunnlag>>()
+        every { periodeOvergangsstønadGrunnlagRepository.saveAll(capture(slot)) } returnsArgument 0
 
-        val perioderMedOs = småbarnstilleggService.hentOgLagrePerioderMedOvergangsstønadForBehandling(
+        småbarnstilleggService.hentOgLagrePerioderMedOvergangsstønadForBehandling(
             søkerAktør = søker.aktør,
             behandling = behandling,
         )
 
         verify(exactly = 1) { efSakRestClient.hentPerioderMedFullOvergangsstønad(søker.aktør.aktivFødselsnummer()) }
-        assertThat(perioderMedOs).containsExactly(
-            forventetPeriode.tilInternPeriodeOvergangsstønad(),
+        assertThat(slot.captured).containsExactly(
+            forventetPeriode,
         )
     }
 }

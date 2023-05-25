@@ -33,8 +33,8 @@ class SmåbarnstilleggService(
     fun hentOgLagrePerioderMedOvergangsstønadForBehandling(
         søkerAktør: Aktør,
         behandling: Behandling,
-    ): List<InternPeriodeOvergangsstønad> {
-        val perioderMedOvergangsstønadGrunnlag = if (behandling.erSatsendring()) {
+    ) {
+        if (behandling.erSatsendring()) {
             kopierPerioderMedOvergangsstønadFraForrigeBehandling(
                 behandling,
             )
@@ -44,8 +44,6 @@ class SmåbarnstilleggService(
                 behandlingId = behandling.id,
             )
         }
-
-        return perioderMedOvergangsstønadGrunnlag.map { it.tilInternPeriodeOvergangsstønad() }
     }
 
     private fun hentOgLagrePerioderMedFullOvergangsstønadFraEf(

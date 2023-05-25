@@ -1320,14 +1320,6 @@ class BeregningServiceTest {
             personer = (barna + søker).toMutableSet(),
         )
 
-        val overgangsstønadPerioder = listOf(
-            InternPeriodeOvergangsstønad(
-                personIdent = søker.aktør.aktivFødselsnummer(),
-                fomDato = utvidetFom,
-                tomDato = utvidetTom,
-            ),
-        )
-
         val slot = slot<TilkjentYtelse>()
 
         every { endretUtbetalingAndelRepository.findByBehandlingId(behandlingId = behandling.id) } answers {
@@ -1337,9 +1329,15 @@ class BeregningServiceTest {
         }
         every { vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = behandling.id) } answers { vilkårsvurdering }
         every { tilkjentYtelseRepository.save(any()) } returns lagInitiellTilkjentYtelse(behandling)
-        every { småbarnstilleggService.hentOgLagrePerioderMedOvergangsstønadForBehandling(any(), any()) } returns overgangsstønadPerioder
+        every { småbarnstilleggService.hentOgLagrePerioderMedOvergangsstønadForBehandling(any(), any()) } just Runs
         every { småbarnstilleggService.hentPerioderMedFullOvergangsstønad(any()) } answers {
-            overgangsstønadPerioder
+            listOf(
+                InternPeriodeOvergangsstønad(
+                    personIdent = søker.aktør.aktivFødselsnummer(),
+                    fomDato = utvidetFom,
+                    tomDato = utvidetTom,
+                ),
+            )
         }
 
         beregningService.oppdaterBehandlingMedBeregning(
