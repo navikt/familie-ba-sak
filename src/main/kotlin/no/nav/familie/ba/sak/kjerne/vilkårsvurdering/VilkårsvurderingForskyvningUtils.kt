@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.erUnder18ÅrVilkårTidslinje
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
@@ -116,7 +117,7 @@ object VilkårsvurderingForskyvningUtils {
     ): Tidslinje<VilkårResultat, Måned> {
         return if (vilkår == Vilkår.UNDER_18_ÅR) {
             val minstePeriodeFom = vilkårResultater.minOf {
-                it.periodeFom ?: throw Feil("Finner ikke fra og med dato på 'under 18 år'-vilkåret")
+                it.periodeFom ?: throw FunksjonellFeil("Finner ikke fra og med dato på 'under 18 år'-vilkåret")
             } // Fra og med dato skal være lik fødselsdato for under 18-vilkåret
             this.beskjærPå18År(fødselsdato = minstePeriodeFom)
         } else {

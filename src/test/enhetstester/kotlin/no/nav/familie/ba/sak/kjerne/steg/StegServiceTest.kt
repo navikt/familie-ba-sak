@@ -11,12 +11,13 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertDoesNotThrow
@@ -27,7 +28,6 @@ internal class StegServiceTest {
 
     private val behandlingService: BehandlingService = mockk()
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
-    private val settPåVentService: SettPåVentService = mockk()
     private val satsendringService: SatsendringService = mockk()
     private val simuleringService: SimuleringService = mockk()
 
@@ -40,7 +40,6 @@ internal class StegServiceTest {
         søknadGrunnlagService = mockk(),
         tilgangService = mockk(relaxed = true),
         infotrygdFeedService = mockk(),
-        settPåVentService = settPåVentService,
         satsendringService = satsendringService,
         simuleringService = simuleringService,
     )
@@ -51,7 +50,6 @@ internal class StegServiceTest {
         every { behandlingService.opprettBehandling(any()) } returns behandling
         every { behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(any(), any()) } returns behandling
         every { behandlingHentOgPersisterService.hent(any()) } returns behandling
-        every { settPåVentService.finnAktivSettPåVentPåBehandling(any()) } returns null
     }
 
     @Test
@@ -116,6 +114,14 @@ internal class StegServiceTest {
         )
 
         assertThrows<FunksjonellFeil> { stegService.håndterNyBehandling(nyBehandling) }
+    }
+
+    @Test
+    fun `Skal feile dersom behandlingen er satt på vent`() {
+        val behandling = lagBehandling(status = BehandlingStatus.SATT_PÅ_VENT)
+        val grunnlag = RegistrerPersongrunnlagDTO("", emptyList())
+        assertThatThrownBy { stegService.håndterPersongrunnlag(behandling, grunnlag) }
+            .hasMessageContaining("er på vent")
     }
 
     private fun mockRegistrerPersongrunnlag() = object : RegistrerPersongrunnlag(mockk(), mockk(), mockk(), mockk()) {
