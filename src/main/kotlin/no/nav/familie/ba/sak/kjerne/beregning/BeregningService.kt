@@ -77,9 +77,10 @@ class BeregningService(
         tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)
 
     fun hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(fagsakId: Long): List<TilkjentYtelse> {
-        val avsluttedeBehandlingerSomIkkeErHenlagtPåFagsak = behandlingHentOgPersisterService.finnAvsluttedeBehandlingerPåFagsak(
-            fagsakId = fagsakId,
-        ).filter { !it.erHenlagt() }
+        val avsluttedeBehandlingerSomIkkeErHenlagtPåFagsak =
+            behandlingHentOgPersisterService.finnAvsluttedeBehandlingerPåFagsak(
+                fagsakId = fagsakId,
+            ).filter { !it.erHenlagt() }
 
         return avsluttedeBehandlingerSomIkkeErHenlagtPåFagsak.mapNotNull {
             tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(
@@ -117,7 +118,8 @@ class BeregningService(
                 if (godkjenteBehandlingerSomIkkeErIverksattEnda != null) {
                     godkjenteBehandlingerSomIkkeErIverksattEnda
                 } else {
-                    val sisteVedtatteBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsak.id)
+                    val sisteVedtatteBehandling =
+                        behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsak.id)
                     sisteVedtatteBehandling
                 }
             }

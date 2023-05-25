@@ -268,7 +268,7 @@ data class Behandling(
     fun erTekniskEndring() = opprettetÅrsak == BehandlingÅrsak.TEKNISK_ENDRING
 
     fun erTekniskEndringMedOpphør() =
-        erTekniskEndring() && resultat in listOf(Behandlingsresultat.OPPHØRT, Behandlingsresultat.ENDRET_OG_OPPHØRT)
+        erTekniskEndring() && resultat.erOpphør()
 
     fun erTekniskBehandling() = opprettetÅrsak == BehandlingÅrsak.TEKNISK_OPPHØR || erTekniskEndring()
 
@@ -352,6 +352,12 @@ enum class Behandlingsresultat(val displayName: String) {
     fun erAvslått(): Boolean = this in listOf(AVSLÅTT, AVSLÅTT_OG_OPPHØRT, AVSLÅTT_OG_ENDRET, AVSLÅTT_ENDRET_OG_OPPHØRT)
 
     fun erFortsattInnvilget(): Boolean = this in listOf(FORTSATT_INNVILGET, ENDRET_OG_FORTSATT_INNVILGET)
+
+    fun erOpphør(): Boolean = this in listOf(
+        OPPHØRT,
+        ENDRET_OG_OPPHØRT,
+        FORTSATT_OPPHØRT,
+    )
 }
 
 /**
@@ -446,6 +452,7 @@ fun initStatus(): BehandlingStatus {
 
 enum class BehandlingStatus {
     UTREDES,
+    SATT_PÅ_VENT,
     FATTER_VEDTAK,
     IVERKSETTER_VEDTAK,
     AVSLUTTET,
