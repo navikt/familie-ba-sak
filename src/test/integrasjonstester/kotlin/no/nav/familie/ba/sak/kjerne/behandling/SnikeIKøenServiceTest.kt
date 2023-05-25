@@ -12,6 +12,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
+import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
+import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -22,15 +24,19 @@ import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.LocalDate
 
-class ReaktiverBehandlingPåVentServiceTest(
+class SnikeIKøenServiceTest(
     @Autowired private val fagsakService: FagsakService,
     @Autowired private val behandlingRepository: BehandlingRepository,
     @Autowired private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     @Autowired private val hentOgPersisterService: BehandlingHentOgPersisterService,
     @Autowired private val databaseCleanupService: DatabaseCleanupService,
-    @Autowired private val reaktiverBehandlingPåVentService: ReaktiverBehandlingPåVentService,
+    @Autowired private val snikeIKøenService: SnikeIKøenService,
+    @Autowired private val settPåVentService: SettPåVentService,
 ) : AbstractSpringIntegrationTest() {
 
     private lateinit var fagsak: Fagsak
@@ -46,6 +52,47 @@ class ReaktiverBehandlingPåVentServiceTest(
     private fun opprettLøpendeFagsak(): Fagsak {
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(tilfeldigPerson().aktør.aktivFødselsnummer())
         return fagsakService.lagre(fagsak.copy(status = FagsakStatus.LØPENDE))
+    }
+
+    @ParameterizedTest
+    @EnumSource(BehandlingStatus::class, names = ["UTREDES", "SATT_PÅ_VENT"], mode = EnumSource.Mode.INCLUDE)
+    fun `skal kunne sette en behandling med status UTREDES eller SATT_PÅ_VENT på maskinell vent`(status: BehandlingStatus) {
+        val behandling = opprettBehandling(status = status)
+
+        snikeIKøenService.settAktivBehandlingTilPåVent(behandling.id)
+
+        val oppdatertBehandling = behandlingRepository.finnBehandling(behandling.id)
+        assertThat(behandling.status).isEqualTo(status)
+        assertThat(behandling.aktiv).isTrue()
+        assertThat(oppdatertBehandling.status).isEqualTo(BehandlingStatus.SATT_PÅ_MASKINELL_VENT)
+        assertThat(oppdatertBehandling.aktiv).isFalse()
+    }
+
+    @Test
+    fun `reaktivering av behandling skal sette status tilbake til UTREDES`() {
+        val behandling1 = opprettBehandling()
+        snikeIKøenService.settAktivBehandlingTilPåVent(behandling1.id)
+        val behandling2 = opprettBehandling(status = BehandlingStatus.AVSLUTTET, aktiv = true)
+
+        snikeIKøenService.reaktiverBehandlingPåVent(behandling1.fagsak.id, behandling1.id, behandling2.id)
+
+        val oppdatertBehandling = behandlingRepository.finnBehandling(behandling1.id)
+        assertThat(oppdatertBehandling.status).isEqualTo(BehandlingStatus.UTREDES)
+        assertThat(oppdatertBehandling.aktiv).isTrue()
+    }
+
+    @Test
+    fun `reaktivering av behandling som er på vent skal sette status tilbake til SATT_PÅ_VENT`() {
+        val behandling1 = opprettBehandling()
+        settPåVentService.settBehandlingPåVent(behandling1.id, LocalDate.now(), SettPåVentÅrsak.AVVENTER_DOKUMENTASJON)
+        snikeIKøenService.settAktivBehandlingTilPåVent(behandling1.id)
+        val behandling2 = opprettBehandling(status = BehandlingStatus.AVSLUTTET, aktiv = true)
+
+        snikeIKøenService.reaktiverBehandlingPåVent(behandling1.fagsak.id, behandling1.id, behandling2.id)
+
+        val oppdatertBehandling = behandlingRepository.finnBehandling(behandling1.id)
+        assertThat(oppdatertBehandling.status).isEqualTo(BehandlingStatus.SATT_PÅ_VENT)
+        assertThat(oppdatertBehandling.aktiv).isTrue()
     }
 
     @Test
@@ -64,7 +111,7 @@ class ReaktiverBehandlingPåVentServiceTest(
         val behandling2 = opprettBehandling(status = BehandlingStatus.AVSLUTTET, aktiv = true)
         lagUtbetalingsoppdragOgAvslutt(behandling2)
 
-        reaktiverBehandlingPåVentService.reaktiverBehandlingPåVent(fagsak.id, behandling1.id, behandling2.id)
+        snikeIKøenService.reaktiverBehandlingPåVent(fagsak.id, behandling1.id, behandling2.id)
 
         validerSisteBehandling(behandling2)
         validerErAktivBehandling(behandling1)
@@ -76,7 +123,7 @@ class ReaktiverBehandlingPåVentServiceTest(
         val behandling2 = opprettBehandling(status = BehandlingStatus.AVSLUTTET, aktiv = true)
         lagUtbetalingsoppdragOgAvslutt(behandling2)
 
-        reaktiverBehandlingPåVentService.reaktiverBehandlingPåVent(fagsak.id, behandling1.id, behandling2.id)
+        snikeIKøenService.reaktiverBehandlingPåVent(fagsak.id, behandling1.id, behandling2.id)
         lagUtbetalingsoppdragOgAvslutt(behandling1)
 
         validerSisteBehandling(behandling1)
@@ -84,14 +131,37 @@ class ReaktiverBehandlingPåVentServiceTest(
     }
 
     @Nested
-    inner class ValideringAvBehandlinger {
+    inner class ValideringAvSettPåVent {
+
+        @Test
+        fun `kan ikke sette en inaktiv behandling på vent`() {
+            val behandling = opprettBehandling(aktiv = false)
+
+            assertThatThrownBy {
+                snikeIKøenService.settAktivBehandlingTilPåVent(behandling.id)
+            }.hasMessageContaining("er ikke aktiv")
+        }
+
+        @ParameterizedTest
+        @EnumSource(BehandlingStatus::class, names = ["UTREDES", "SATT_PÅ_VENT"], mode = EnumSource.Mode.EXCLUDE)
+        fun `kan ikke sette en behandling på vent med annen status enn UTREDES eller SATT_PÅ_VENT`(status: BehandlingStatus) {
+            val behandling = opprettBehandling(status = status)
+
+            assertThatThrownBy {
+                snikeIKøenService.settAktivBehandlingTilPåVent(behandling.id)
+            }.hasMessageContaining("kan ikke settes på maskinell vent då status")
+        }
+    }
+
+    @Nested
+    inner class ValideringAvReaktiverBehandling {
 
         @Test
         fun `skal feile når åpen behandling er aktiv`() {
-            val åpenBehandling = opprettBehandling(status = BehandlingStatus.SATT_PÅ_MASKINELL_VENT, aktiv = true)
-            val behandlingSomSniketIKøen = opprettBehandling(status = BehandlingStatus.AVSLUTTET, aktiv = false)
+            val behandlingPåVent = opprettBehandling(status = BehandlingStatus.SATT_PÅ_MASKINELL_VENT, aktiv = true)
+            val behandlingSomSnekIKøen = opprettBehandling(status = BehandlingStatus.AVSLUTTET, aktiv = false)
 
-            assertThatThrownBy { reaktiverBehandling(åpenBehandling, behandlingSomSniketIKøen) }
+            assertThatThrownBy { reaktiverBehandling(behandlingPåVent, behandlingSomSnekIKøen) }
                 .hasMessageContaining("Åpen behandling har feil tilstand")
         }
 
@@ -99,41 +169,41 @@ class ReaktiverBehandlingPåVentServiceTest(
         fun `skal feile når åpen behandling ikke har status SATT_PÅ_MASKINELL_VENT`() {
             BehandlingStatus.values().filter { it != BehandlingStatus.SATT_PÅ_MASKINELL_VENT }.forEach {
                 behandlingRepository.deleteAll()
-                val åpenBehandling = opprettBehandling(status = it, aktiv = false)
-                val behandlingSomSniketIKøen = opprettBehandling(status = BehandlingStatus.AVSLUTTET, aktiv = true)
+                val behandlingPåVent = opprettBehandling(status = it, aktiv = false)
+                val behandlingSomSnekIKøen = opprettBehandling(status = BehandlingStatus.AVSLUTTET, aktiv = true)
 
-                assertThatThrownBy { reaktiverBehandling(åpenBehandling, behandlingSomSniketIKøen) }
+                assertThatThrownBy { reaktiverBehandling(behandlingPåVent, behandlingSomSnekIKøen) }
                     .hasMessageContaining("Åpen behandling har feil tilstand")
             }
         }
 
         @Test
-        fun `skal feile når behandling som sniker i køen ikke er aktiv`() {
-            val åpenBehandling = opprettBehandling(status = BehandlingStatus.SATT_PÅ_MASKINELL_VENT, aktiv = false)
-            val behandlingSomSniketIKøen = opprettBehandling(status = BehandlingStatus.AVSLUTTET, aktiv = false)
+        fun `skal feile når behandling som snek i køen ikke er aktiv`() {
+            val behandlingPåVent = opprettBehandling(status = BehandlingStatus.SATT_PÅ_MASKINELL_VENT, aktiv = false)
+            val behandlingSomSnekIKøen = opprettBehandling(status = BehandlingStatus.AVSLUTTET, aktiv = false)
 
-            assertThatThrownBy { reaktiverBehandling(åpenBehandling, behandlingSomSniketIKøen) }
-                .hasMessageContaining("Behandling som sniket i køen må være aktiv")
+            assertThatThrownBy { reaktiverBehandling(behandlingPåVent, behandlingSomSnekIKøen) }
+                .hasMessageContaining("som snek i køen må være aktiv")
         }
 
         @Test
-        fun `skal feile når behandling som sniker i køen har status satt på vent`() {
-            val åpenBehandling = opprettBehandling(status = BehandlingStatus.SATT_PÅ_MASKINELL_VENT, aktiv = false)
-            val behandlingSomSniketIKøen = opprettBehandling(status = BehandlingStatus.UTREDES, aktiv = true)
+        fun `skal feile når behandling som snek i køen har status satt på vent`() {
+            val behandlingPåVent = opprettBehandling(status = BehandlingStatus.SATT_PÅ_MASKINELL_VENT, aktiv = false)
+            val behandlingSomSnekIKøen = opprettBehandling(status = BehandlingStatus.UTREDES, aktiv = true)
 
-            assertThatThrownBy { reaktiverBehandling(åpenBehandling, behandlingSomSniketIKøen) }
+            assertThatThrownBy { reaktiverBehandling(behandlingPåVent, behandlingSomSnekIKøen) }
                 .hasMessageContaining("er ikke avsluttet")
         }
     }
 
     private fun reaktiverBehandling(
-        åpenBehandling: Behandling,
-        behandlingSomSniketIKøen: Behandling,
+        behandlingPåVent: Behandling,
+        behandlingSomSnekIKøen: Behandling,
     ) {
-        reaktiverBehandlingPåVentService.reaktiverBehandlingPåVent(
+        snikeIKøenService.reaktiverBehandlingPåVent(
             fagsak.id,
-            åpenBehandling.id,
-            behandlingSomSniketIKøen.id,
+            behandlingPåVent.id,
+            behandlingSomSnekIKøen.id,
         )
     }
 
@@ -167,9 +237,10 @@ class ReaktiverBehandlingPåVentServiceTest(
         }
     }
 
-    private fun opprettBehandling(status: BehandlingStatus, aktiv: Boolean): Behandling {
-        return opprettBehandling(fagsak, status, aktiv)
-    }
+    private fun opprettBehandling(
+        status: BehandlingStatus = BehandlingStatus.UTREDES,
+        aktiv: Boolean = true,
+    ): Behandling = opprettBehandling(fagsak, status, aktiv)
 
     private fun opprettBehandling(
         fagsak: Fagsak,
