@@ -164,14 +164,6 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
         assertThat(kopiertPersonopplysningGrunnlag.captured.behandlingId).isEqualTo(nyBehandling.id)
         assertThat(kopiertPersonopplysningGrunnlag.captured.personer.size).isEqualTo(2)
 
-        // Sjekk at kopierte personer har ny id og ellers er like
-        kopiertPersonopplysningGrunnlag.captured.personer.forEach {
-            it.id == 0L && when (it.aktør.personidenter.first().fødselsnummer) {
-                søker.ident -> it == søkerPerson
-                else -> it == barnPerson
-            }
-        }
-
         // Sjekk at sub-entiteter av Person har referanse til kopiert person med ny id og ellers er like
         kopiertPersonopplysningGrunnlag.captured.personer.filter {
             it.aktør.personidenter.first().fødselsnummer == søker.ident
