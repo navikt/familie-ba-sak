@@ -503,6 +503,7 @@ class VedtaksperiodeService(
                     sanityEØSBegrunnelser = sanityEØSBegrunnelser,
                     kompetanserIPeriode = kompetanserIPeriode,
                     kompetanserSomStopperRettFørPeriode = kompetanserSomStopperRettFørPeriode,
+                    featureToggleService = featureToggleService,
                 ),
             )
         }
