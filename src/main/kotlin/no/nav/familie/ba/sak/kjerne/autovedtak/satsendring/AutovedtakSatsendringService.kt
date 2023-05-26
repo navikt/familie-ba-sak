@@ -161,7 +161,7 @@ class AutovedtakSatsendringService(
         aktivOgÅpenBehandling: Behandling,
     ): SatsendringSvar? {
         val status = aktivOgÅpenBehandling.status
-        if (status != BehandlingStatus.UTREDES && status != BehandlingStatus.SATT_PÅ_VENT) {
+        if (status != BehandlingStatus.UTREDES && status != BehandlingStatus.SATT_PÅ_MASKINELL_VENT) {
             return SatsendringSvar.BEHANDLING_ER_LÅST_SATSENDRING_TRIGGES_NESTE_VIRKEDAG
         }
 

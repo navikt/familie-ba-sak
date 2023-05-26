@@ -112,7 +112,7 @@ class SnikeIKøenService(
 }
 
 enum class SettPåMaskinellVentÅrsak(val årsak: String) {
-    SATSENDRING("Satsendring")
+    SATSENDRING("Satsendring"),
 }
 
 class BehandlingErIkkeAvsluttetException(val behandling: Behandling) :

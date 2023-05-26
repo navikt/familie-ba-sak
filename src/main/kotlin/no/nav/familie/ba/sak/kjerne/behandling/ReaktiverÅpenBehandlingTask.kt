@@ -63,8 +63,8 @@ private fun validerStatePåBehandlinger(
     if (åpenBehandling.fagsak != behandlingSomSniketIKøen.fagsak) {
         error("Behandlinger er koblet til ulike fagsaker. åpenBehandling=$åpenBehandling behandlingSomSniketIKøen=$behandlingSomSniketIKøen")
     }
-    if (åpenBehandling.aktiv || åpenBehandling.status != BehandlingStatus.SATT_PÅ_VENT) {
-        error("Åpen behandling har feil state $åpenBehandling")
+    if (åpenBehandling.aktiv || åpenBehandling.status != BehandlingStatus.SATT_PÅ_MASKINELL_VENT) {
+        error("Åpen behandling har feil tilstand $åpenBehandling")
     }
     if (!behandlingSomSniketIKøen.aktiv) {
         error("Behandling som sniket i køen må være aktiv $behandlingSomSniketIKøen")
