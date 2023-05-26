@@ -182,6 +182,7 @@ class BehandlingService(
         return behandlingHentOgPersisterService.lagreEllerOppdater(behandling = behandling, sendTilDvh = true)
     }
 
+    @Transactional
     fun lagreNyOgDeaktiverGammelBehandling(behandling: Behandling): Behandling {
         val aktivBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = behandling.fagsak.id)
 

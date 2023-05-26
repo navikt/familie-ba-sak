@@ -10,7 +10,6 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.behandling.ReaktiverÅpenBehandlingTask
 import no.nav.familie.ba.sak.kjerne.behandling.SettPåMaskinellVentÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.SnikeIKøenService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -25,7 +24,6 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
-import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.FerdigstillBehandlingTask
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
@@ -40,7 +38,6 @@ class AutovedtakSatsendringService(
     private val taskRepository: TaskRepositoryWrapper,
     private val behandlingRepository: BehandlingRepository,
     private val autovedtakService: AutovedtakService,
-    private val tilbakestillBehandlingService: TilbakestillBehandlingService,
     private val satskjøringRepository: SatskjøringRepository,
     private val behandlingService: BehandlingService,
     private val beregningService: BeregningService,
@@ -143,14 +140,6 @@ class AutovedtakSatsendringService(
         satskjøringForFagsak.ferdigTidspunkt = LocalDateTime.now()
         satskjøringRepository.save(satskjøringForFagsak)
         taskRepository.save(task)
-        if (aktivOgÅpenBehandling != null) {
-            // Skal dette skje når man kaller på denne tjenesten fra frontend også?
-            val reaktiverBehandlingTask = ReaktiverÅpenBehandlingTask.opprettTask(
-                aktivOgÅpenBehandling,
-                behandlingEtterBehandlingsresultat,
-            )
-            taskRepository.save(reaktiverBehandlingTask)
-        }
 
         satsendringIverksatt.increment()
 

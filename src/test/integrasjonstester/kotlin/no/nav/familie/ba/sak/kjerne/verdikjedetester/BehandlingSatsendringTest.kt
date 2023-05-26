@@ -6,14 +6,12 @@ import io.mockk.unmockkObject
 import no.nav.familie.ba.sak.common.LocalDateService
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
-import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.AutovedtakSatsendringService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.SatsendringSvar
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
-import no.nav.familie.ba.sak.kjerne.behandling.ReaktiverÅpenBehandlingTask
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -38,7 +36,6 @@ import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.ba.sak.task.SatsendringTaskDto
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
-import no.nav.familie.prosessering.domene.Task
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -69,15 +66,11 @@ class BehandlingSatsendringTest(
     @Autowired private val brevmalService: BrevmalService,
     @Autowired private val settPåVentService: SettPåVentService,
     @Autowired private val jdbcTemplate: JdbcTemplate,
-    @Autowired private val taskRepositoryWrapper: TaskRepositoryWrapper,
     @Autowired private val featureToggleService: FeatureToggleService,
 ) : AbstractVerdikjedetest() {
 
-    private val opprettedeTasks = mutableListOf<Task>()
-
     @BeforeEach
     fun setUp() {
-        opprettedeTasks.clear()
         databaseCleanupService.truncate()
         mockkObject(SatsTidspunkt)
         // Grunnen til at denne mockes er egentlig at den indirekte påvirker hva SatsService.hentGyldigSatsFor
@@ -86,7 +79,6 @@ class BehandlingSatsendringTest(
         every { SatsTidspunkt.senesteSatsTidspunkt } returns LocalDate.of(2023, 2, 1)
 
         every { mockLocalDateService.now() } returns LocalDate.now().minusYears(6) andThen LocalDate.now()
-        every { taskRepositoryWrapper.save(capture(opprettedeTasks)) } answers { firstArg() }
     }
 
     @AfterEach
@@ -129,8 +121,6 @@ class BehandlingSatsendringTest(
         val satskjøring = satskjøringRepository.findByFagsakId(behandling.fagsak.id)
         assertThat(satskjøring?.ferdigTidspunkt)
             .isCloseTo(LocalDateTime.now(), Assertions.within(30, ChronoUnit.SECONDS))
-
-        assertThat(opprettedeTasks.filter { it.type == ReaktiverÅpenBehandlingTask.TASK_STEP_TYPE }).isEmpty()
     }
 
     @Test
@@ -154,7 +144,6 @@ class BehandlingSatsendringTest(
 
     @Nested
     inner class ÅpenBehandling {
-        // TODO hvor skal vi lage "ta av vent"-service som fjerner vedtak/tilkjent ytelse etc hvis behandlingen har vært på maskinell vent?
 
         @Test
         fun `Kan ikke sette åpen behandling på vent når behandlingen akkurat er opprettet`() {
@@ -176,7 +165,6 @@ class BehandlingSatsendringTest(
             val satsendringResultat = autovedtakSatsendringService.kjørBehandling(satsendringTaskDto)
 
             assertThat(satsendringResultat).isEqualTo(SatsendringSvar.BEHANDLING_KAN_IKKE_SETTES_PÅ_VENT)
-            assertThat(opprettedeTasks.filter { it.type == ReaktiverÅpenBehandlingTask.TASK_STEP_TYPE }).isEmpty()
         }
 
         @Test
@@ -200,8 +188,6 @@ class BehandlingSatsendringTest(
             val satsendringResultat = autovedtakSatsendringService.kjørBehandling(satsendringTaskDto)
 
             assertThat(satsendringResultat).isEqualTo(SatsendringSvar.SATSENDRING_KJØRT_OK)
-
-            assertThat(opprettedeTasks.filter { it.type == ReaktiverÅpenBehandlingTask.TASK_STEP_TYPE }).hasSize(1)
         }
 
         // Kan fjernes når feature toggle er fjernet
@@ -226,8 +212,6 @@ class BehandlingSatsendringTest(
             val satsendringResultat = autovedtakSatsendringService.kjørBehandling(satsendringTaskDto)
 
             assertThat(satsendringResultat).isEqualTo(SatsendringSvar.BEHANDLING_KAN_SETTES_PÅ_VENT_MEN_TOGGLE_ER_SLÅTT_AV)
-
-            assertThat(opprettedeTasks.filter { it.type == ReaktiverÅpenBehandlingTask.TASK_STEP_TYPE }).isEmpty()
         }
 
         @Test
@@ -256,8 +240,6 @@ class BehandlingSatsendringTest(
             val satsendringResultat = autovedtakSatsendringService.kjørBehandling(satsendringTaskDto)
 
             assertThat(satsendringResultat).isEqualTo(SatsendringSvar.SATSENDRING_KJØRT_OK)
-
-            assertThat(opprettedeTasks.filter { it.type == ReaktiverÅpenBehandlingTask.TASK_STEP_TYPE }).hasSize(1)
         }
     }
 
