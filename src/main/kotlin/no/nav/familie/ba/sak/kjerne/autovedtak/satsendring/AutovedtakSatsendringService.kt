@@ -17,7 +17,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
@@ -43,7 +42,6 @@ class AutovedtakSatsendringService(
     private val beregningService: BeregningService,
     private val persongrunnlagService: PersongrunnlagService,
     private val satsendringService: SatsendringService,
-    private val settPåVentService: SettPåVentService,
     private val loggService: LoggService,
     private val featureToggleService: FeatureToggleService,
     private val snikeIKøenService: SnikeIKøenService,
@@ -150,7 +148,7 @@ class AutovedtakSatsendringService(
         aktivOgÅpenBehandling: Behandling,
     ): SatsendringSvar? {
         val status = aktivOgÅpenBehandling.status
-        if (status != BehandlingStatus.UTREDES && status != BehandlingStatus.SATT_PÅ_MASKINELL_VENT) {
+        if (status != BehandlingStatus.UTREDES && status != BehandlingStatus.SATT_PÅ_VENT) {
             return SatsendringSvar.BEHANDLING_ER_LÅST_SATSENDRING_TRIGGES_NESTE_VIRKEDAG
         }
 
@@ -172,7 +170,7 @@ class AutovedtakSatsendringService(
     private fun kanSetteÅpenBehandlingPåVent(aktivOgÅpenBehandling: Behandling): Boolean {
         val behandlingId = aktivOgÅpenBehandling.id
         val loggSuffix = "endrer status på behandling til på vent"
-        if (settPåVentService.finnAktivSettPåVentPåBehandling(behandlingId) != null) {
+        if (aktivOgÅpenBehandling.status == BehandlingStatus.SATT_PÅ_VENT) {
             logger.info("Behandling=$behandlingId er satt på vent av saksbehandler, $loggSuffix")
             return true
         }
