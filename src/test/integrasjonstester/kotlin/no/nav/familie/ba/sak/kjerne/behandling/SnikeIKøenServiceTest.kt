@@ -59,7 +59,7 @@ class SnikeIKøenServiceTest(
     fun `skal kunne sette en behandling med status UTREDES eller SATT_PÅ_VENT på maskinell vent`(status: BehandlingStatus) {
         val behandling = opprettBehandling(status = status)
 
-        snikeIKøenService.settAktivBehandlingTilPåVent(behandling.id)
+        settAktivBehandlingTilPåMaskinellVent(behandling)
 
         val oppdatertBehandling = behandlingRepository.finnBehandling(behandling.id)
         assertThat(behandling.status).isEqualTo(status)
@@ -71,10 +71,10 @@ class SnikeIKøenServiceTest(
     @Test
     fun `reaktivering av behandling skal sette status tilbake til UTREDES`() {
         val behandling1 = opprettBehandling()
-        snikeIKøenService.settAktivBehandlingTilPåVent(behandling1.id)
+        settAktivBehandlingTilPåMaskinellVent(behandling1)
         val behandling2 = opprettBehandling(status = BehandlingStatus.AVSLUTTET, aktiv = true)
 
-        snikeIKøenService.reaktiverBehandlingPåVent(behandling1.fagsak.id, behandling1.id, behandling2.id)
+        snikeIKøenService.reaktiverBehandlingPåMaskinellVent(behandling1.fagsak.id, behandling1.id, behandling2.id)
 
         val oppdatertBehandling = behandlingRepository.finnBehandling(behandling1.id)
         assertThat(oppdatertBehandling.status).isEqualTo(BehandlingStatus.UTREDES)
@@ -85,10 +85,10 @@ class SnikeIKøenServiceTest(
     fun `reaktivering av behandling som er på vent skal sette status tilbake til SATT_PÅ_VENT`() {
         val behandling1 = opprettBehandling()
         settPåVentService.settBehandlingPåVent(behandling1.id, LocalDate.now(), SettPåVentÅrsak.AVVENTER_DOKUMENTASJON)
-        snikeIKøenService.settAktivBehandlingTilPåVent(behandling1.id)
+        settAktivBehandlingTilPåMaskinellVent(behandling1)
         val behandling2 = opprettBehandling(status = BehandlingStatus.AVSLUTTET, aktiv = true)
 
-        snikeIKøenService.reaktiverBehandlingPåVent(behandling1.fagsak.id, behandling1.id, behandling2.id)
+        snikeIKøenService.reaktiverBehandlingPåMaskinellVent(behandling1.fagsak.id, behandling1.id, behandling2.id)
 
         val oppdatertBehandling = behandlingRepository.finnBehandling(behandling1.id)
         assertThat(oppdatertBehandling.status).isEqualTo(BehandlingStatus.SATT_PÅ_VENT)
@@ -111,7 +111,7 @@ class SnikeIKøenServiceTest(
         val behandling2 = opprettBehandling(status = BehandlingStatus.AVSLUTTET, aktiv = true)
         lagUtbetalingsoppdragOgAvslutt(behandling2)
 
-        snikeIKøenService.reaktiverBehandlingPåVent(fagsak.id, behandling1.id, behandling2.id)
+        snikeIKøenService.reaktiverBehandlingPåMaskinellVent(fagsak.id, behandling1.id, behandling2.id)
 
         validerSisteBehandling(behandling2)
         validerErAktivBehandling(behandling1)
@@ -123,7 +123,7 @@ class SnikeIKøenServiceTest(
         val behandling2 = opprettBehandling(status = BehandlingStatus.AVSLUTTET, aktiv = true)
         lagUtbetalingsoppdragOgAvslutt(behandling2)
 
-        snikeIKøenService.reaktiverBehandlingPåVent(fagsak.id, behandling1.id, behandling2.id)
+        snikeIKøenService.reaktiverBehandlingPåMaskinellVent(fagsak.id, behandling1.id, behandling2.id)
         lagUtbetalingsoppdragOgAvslutt(behandling1)
 
         validerSisteBehandling(behandling1)
@@ -138,7 +138,7 @@ class SnikeIKøenServiceTest(
             val behandling = opprettBehandling(aktiv = false)
 
             assertThatThrownBy {
-                snikeIKøenService.settAktivBehandlingTilPåVent(behandling.id)
+                settAktivBehandlingTilPåMaskinellVent(behandling)
             }.hasMessageContaining("er ikke aktiv")
         }
 
@@ -148,7 +148,7 @@ class SnikeIKøenServiceTest(
             val behandling = opprettBehandling(status = status)
 
             assertThatThrownBy {
-                snikeIKøenService.settAktivBehandlingTilPåVent(behandling.id)
+                settAktivBehandlingTilPåMaskinellVent(behandling)
             }.hasMessageContaining("kan ikke settes på maskinell vent då status")
         }
     }
@@ -196,11 +196,15 @@ class SnikeIKøenServiceTest(
         }
     }
 
+    private fun settAktivBehandlingTilPåMaskinellVent(behandling: Behandling) {
+        snikeIKøenService.settAktivBehandlingTilPåMaskinellVent(behandling.id, SettPåMaskinellVentÅrsak.SATSENDRING)
+    }
+
     private fun reaktiverBehandling(
         behandlingPåVent: Behandling,
         behandlingSomSnekIKøen: Behandling,
     ) {
-        snikeIKøenService.reaktiverBehandlingPåVent(
+        snikeIKøenService.reaktiverBehandlingPåMaskinellVent(
             fagsak.id,
             behandlingPåVent.id,
             behandlingSomSnekIKøen.id,

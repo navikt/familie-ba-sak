@@ -375,13 +375,13 @@ class LoggService(
         )
     }
 
-    fun opprettSettPåMaskinellVentSatsendring(behandling: Behandling) {
+    fun opprettSettPåMaskinellVentSatsendring(behandling: Behandling, årsak: String) {
         val logg = Logg(
             behandling.id,
-            type = LoggType.BEHANDLING_SATT_PÅ_MASKINELL_VENT_SATSENDRING,
+            type = LoggType.BEHANDLING_SATT_PÅ_MASKINELL_VENT,
             // TODO FORVALTER_ROLLE
             rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.UKJENT),
-            tekst = "Årsak: Satsendring",
+            tekst = "Årsak: $årsak",
         )
         lagre(logg)
     }

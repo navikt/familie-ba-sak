@@ -19,13 +19,13 @@ import java.util.Properties
     maxAntallFeil = 1,
 )
 class ReaktiverÅpenBehandlingTask(
-    private val reaktiverBehandlingPåVentService: ReaktiverBehandlingPåVentService,
+    private val snikeIKøenService: SnikeIKøenService,
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
         val dto = objectMapper.readValue<ReaktiverÅpenBehandlingTaskDto>(task.payload)
         try {
-            reaktiverBehandlingPåVentService.reaktiverBehandlingPåVent(
+            snikeIKøenService.reaktiverBehandlingPåMaskinellVent(
                 dto.fagsakId,
                 dto.åpenBehandlingId,
                 dto.behandlingSomSniketIKøen,

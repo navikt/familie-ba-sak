@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
+import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -13,12 +14,13 @@ import java.time.LocalDateTime
 class SnikeIKøenService(
     private val behandlingRepository: BehandlingRepository,
     private val påVentService: SettPåVentService,
+    private val loggService: LoggService,
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @Transactional
-    fun settAktivBehandlingTilPåVent(behandlingId: Long) {
+    fun settAktivBehandlingTilPåMaskinellVent(behandlingId: Long, årsak: SettPåMaskinellVentÅrsak) {
         val behandling = behandlingRepository.finnBehandling(behandlingId)
         if (!behandling.aktiv) {
             error("Behandling=$behandlingId er ikke aktiv")
@@ -30,7 +32,7 @@ class SnikeIKøenService(
         behandling.status = BehandlingStatus.SATT_PÅ_MASKINELL_VENT
         behandling.aktiv = false
         behandlingRepository.saveAndFlush(behandling)
-        // TODO loggService.opprettSettPåMaskinellVentSatsendring() gjøres i PR som tar i bruk snikeIKøen
+        loggService.opprettSettPåMaskinellVentSatsendring(behandling, årsak.årsak)
     }
 
     /**
@@ -38,7 +40,7 @@ class SnikeIKøenService(
      * @param behandlingSomSnekIKøenId brukes for validering
      */
     @Transactional
-    fun reaktiverBehandlingPåVent(fagsakId: Long, behandlingPåVentId: Long, behandlingSomSnekIKøenId: Long) {
+    fun reaktiverBehandlingPåMaskinellVent(fagsakId: Long, behandlingPåVentId: Long, behandlingSomSnekIKøenId: Long) {
         val behandlingerForFagsak =
             behandlingRepository.finnBehandlinger(fagsakId).sortedByDescending { it.opprettetTidspunkt }
         if (behandlingerForFagsak.size < 2) {
@@ -64,6 +66,7 @@ class SnikeIKøenService(
         behandlingPåVent.aktivertTidspunkt = LocalDateTime.now()
         behandlingPåVent.status = utledStatusForBehandlingPåVent(behandlingPåVent)
 
+        // TODO burde det legges inn hendelse i loggService om at den er tatt av vent?
         // TODO tilbakestill vedtak/brev etc på åpen behandling ?
         behandlingRepository.saveAndFlush(behandlingPåVent)
     }
@@ -106,6 +109,10 @@ class SnikeIKøenService(
             throw BehandlingErIkkeAvsluttetException(behandlingSomSnekIKøen)
         }
     }
+}
+
+enum class SettPåMaskinellVentÅrsak(val årsak: String) {
+    SATSENDRING("Satsendring")
 }
 
 class BehandlingErIkkeAvsluttetException(val behandling: Behandling) :

@@ -11,6 +11,8 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.ReaktiverÅpenBehandlingTask
+import no.nav.familie.ba.sak.kjerne.behandling.SettPåMaskinellVentÅrsak
+import no.nav.familie.ba.sak.kjerne.behandling.SnikeIKøenService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
@@ -47,6 +49,7 @@ class AutovedtakSatsendringService(
     private val settPåVentService: SettPåVentService,
     private val loggService: LoggService,
     private val featureToggleService: FeatureToggleService,
+    private val snikeIKøenService: SnikeIKøenService,
 ) {
 
     private val satsendringAlleredeUtført = Metrics.counter("satsendring.allerede.utfort")
@@ -166,10 +169,10 @@ class AutovedtakSatsendringService(
             if (!featureToggleService.isEnabled(SATSENDRING_SNIKE_I_KØEN)) {
                 return SatsendringSvar.BEHANDLING_KAN_SETTES_PÅ_VENT_MEN_TOGGLE_ER_SLÅTT_AV
             }
-            aktivOgÅpenBehandling.status = BehandlingStatus.SATT_PÅ_VENT
-            aktivOgÅpenBehandling.aktiv = false
-            loggService.opprettSettPåMaskinellVentSatsendring(aktivOgÅpenBehandling)
-            behandlingRepository.save(aktivOgÅpenBehandling)
+            snikeIKøenService.settAktivBehandlingTilPåMaskinellVent(
+                aktivOgÅpenBehandling.id,
+                SettPåMaskinellVentÅrsak.SATSENDRING,
+            )
             return null
         }
 
@@ -177,7 +180,6 @@ class AutovedtakSatsendringService(
     }
 
     // burde vi sjekke steg?
-    // Burde man egentligen sette aktiv behandling på vent i egen transaction, for å unngå at noen gjør endringen på den mens man driver med satsendring?
     private fun kanSetteÅpenBehandlingPåVent(aktivOgÅpenBehandling: Behandling): Boolean {
         val behandlingId = aktivOgÅpenBehandling.id
         val loggSuffix = "endrer status på behandling til på vent"
