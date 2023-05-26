@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -176,9 +178,12 @@ class BehandlingsresultatSteg(
 
         val migreringsdatoForrigeIverksatteBehandling = beregningService
             .hentAndelerFraForrigeIverksattebehandling(behandling)
-            .minOf { it.stønadFom }
+            .minOfOrNull { it.stønadFom }
 
-        endringIUtbetalingTidslinje.kastFeilVedEndringEtter(migreringsdatoForrigeIverksatteBehandling, behandling)
+        endringIUtbetalingTidslinje.kastFeilVedEndringEtter(
+            migreringsdatoForrigeIverksatteBehandling = migreringsdatoForrigeIverksatteBehandling ?: TIDENES_ENDE.toYearMonth(),
+            behandling = behandling,
+        )
     }
 
     private fun validerSatsendring(tilkjentYtelse: TilkjentYtelse) {
