@@ -6,6 +6,7 @@ import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.DatoIntervallEntitet
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
@@ -13,18 +14,28 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Dødsfall
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold.GrArbeidsforhold
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrMatrikkeladresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrUkjentBosted
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrVegadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.opphold.GrOpphold
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.GrStatsborgerskap
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
-import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.core.IsEqual
+import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
+import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
+import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
+// import org.hamcrest.MatcherAssert.assertThat
+// import org.hamcrest.core.IsEqual
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -97,17 +108,48 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
         val søkerPerson = lagPerson(personIdent = søker, id = 1)
         val barnPerson = lagPerson(personIdent = barn, id = 2)
 
+        val periode = DatoIntervallEntitet(LocalDate.now(), LocalDate.now().plusMonths(4))
+
         val kopiertPersonopplysningGrunnlag = slot<PersonopplysningGrunnlag>()
+
+        val grVegadresse =
+            GrVegadresse(1, "2", null, "123", "Testgate", "23", null, "0682").medPeriodeOgPerson(periode, søkerPerson)
+        val grUkjentBosted = GrUkjentBosted("Oslo").medPeriodeOgPerson(periode, søkerPerson)
+        val grMatrikkeladresse = GrMatrikkeladresse(1, "2", null, "0682", "23").medPeriodeOgPerson(periode, søkerPerson)
+
+        val statsborgerskap = GrStatsborgerskap(
+            gyldigPeriode = periode,
+            landkode = "N",
+            medlemskap = Medlemskap.EØS,
+            person = søkerPerson,
+        )
+        val opphold = GrOpphold(gyldigPeriode = periode, type = OPPHOLDSTILLATELSE.PERMANENT, person = søkerPerson)
+        val arbeidsforhold =
+            GrArbeidsforhold(periode = periode, arbeidsgiverId = "1", arbeidsgiverType = "AS", person = søkerPerson)
+        val sivilstand = GrSivilstand(fom = LocalDate.now(), type = SIVILSTAND.REGISTRERT_PARTNER, person = søkerPerson)
+        val dødsfall = Dødsfall(
+            person = søkerPerson,
+            dødsfallDato = LocalDate.now(),
+            dødsfallAdresse = "Adresse",
+            dødsfallPostnummer = "1234",
+            dødsfallPoststed = "Oslo",
+        )
 
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(forrigeBehandling.id, søkerPerson, barnPerson).also {
                 it.personer.map { person ->
                     person.bostedsadresser.addAll(
-                        lagGrBostedsadresser(
-                            DatoIntervallEntitet(LocalDate.now(), LocalDate.now().plusMonths(4)),
-                            person,
+                        listOf(
+                            grVegadresse,
+                            grUkjentBosted,
+                            grMatrikkeladresse,
                         ),
                     )
+                    person.statsborgerskap.addAll(listOf(statsborgerskap))
+                    person.opphold.addAll(listOf(opphold))
+                    person.arbeidsforhold.addAll(listOf(arbeidsforhold))
+                    person.sivilstander.addAll(listOf(sivilstand))
+                    person.dødsfall = dødsfall
                 }
             }
         every { persongrunnlagService.hentAktivThrows(forrigeBehandling.id) } returns personopplysningGrunnlag
@@ -119,20 +161,81 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
             listOf(barn.ident),
         )
 
-        assertThat(kopiertPersonopplysningGrunnlag.captured.behandlingId, IsEqual(nyBehandling.id))
-        assertThat(kopiertPersonopplysningGrunnlag.captured.personer.size, IsEqual(2))
-        assertThat(kopiertPersonopplysningGrunnlag.captured.personer.all { it.id == 0L }, IsEqual(true))
+        assertThat(kopiertPersonopplysningGrunnlag.captured.behandlingId).isEqualTo(nyBehandling.id)
+        assertThat(kopiertPersonopplysningGrunnlag.captured.personer.size).isEqualTo(2)
+
+        // Sjekk at kopierte personer har ny id og ellers er like
+        kopiertPersonopplysningGrunnlag.captured.personer.forEach {
+            it.id == 0L && when (it.aktør.personidenter.first().fødselsnummer) {
+                søker.ident -> it == søkerPerson
+                else -> it == barnPerson
+            }
+        }
+
+        // Sjekk at sub-entiteter av Person har referanse til kopiert person med ny id og ellers er like
+        kopiertPersonopplysningGrunnlag.captured.personer.filter {
+            it.aktør.personidenter.first().fødselsnummer == søker.ident
+        }.forEach {
+            it.bostedsadresser.forEach { grBostedsadresse ->
+                assertThat(grBostedsadresse.person!!.id).isEqualTo(0L)
+                assertThat(grBostedsadresse.person).isEqualTo(søkerPerson)
+                when (grBostedsadresse) {
+                    is GrMatrikkeladresse ->
+                        assertThat(grBostedsadresse).isEqualTo(grMatrikkeladresse)
+
+                    is GrUkjentBosted -> assertThat(grBostedsadresse).isEqualTo(grUkjentBosted)
+                    else -> assertThat(grBostedsadresse).isEqualTo(grVegadresse)
+                }
+            }
+            it.sivilstander.forEach { grSivilstand ->
+                verifiserPersonOgSubEntitet(grSivilstand.person, søkerPerson, grSivilstand, sivilstand)
+            }
+
+            it.statsborgerskap.forEach { grStatsborgerskap ->
+                verifiserPersonOgSubEntitet(grStatsborgerskap.person, søkerPerson, grStatsborgerskap, statsborgerskap)
+            }
+
+            it.opphold.forEach { grOpphold ->
+                verifiserPersonOgSubEntitet(grOpphold.person, søkerPerson, grOpphold, opphold)
+            }
+
+            it.arbeidsforhold.forEach { grArbeidsforhold ->
+                verifiserPersonOgSubEntitet(grArbeidsforhold.person, søkerPerson, grArbeidsforhold, arbeidsforhold)
+            }
+
+            verifiserPersonOgSubEntitet(it.dødsfall!!.person, søkerPerson, it.dødsfall!!, dødsfall)
+        }
     }
 
-    private fun lagGrBostedsadresser(periode: DatoIntervallEntitet, person: Person): List<GrBostedsadresse> =
-        listOf(
-            GrVegadresse(1, "2", null, "123", "Testgate", "23", null, "0682"),
-            GrUkjentBosted("Oslo"),
-            GrMatrikkeladresse(1, "2", null, "0682", "23"),
-        ).map {
-            it.also {
-                it.periode = periode
-                it.person = person
-            }
+    private fun verifiserPersonOgSubEntitet(
+        kopiertPerson: Person,
+        originalPerson: Person,
+        kopiertSubEntitet: Any,
+        originalSubEntitet: Any,
+    ) {
+        assertThat(kopiertPerson.id).isEqualTo(0L)
+        assertThat(kopiertPerson).isEqualTo(originalPerson)
+        assertThat(kopiertSubEntitet).isEqualTo(originalSubEntitet)
+    }
+
+    @Test
+    fun `hentOgLagrePersonopplysningGrunnlag - skal kaste feil dersom behandling er satsendring og forrige behandling er null`() {
+        val nyBehandling = lagBehandling(årsak = BehandlingÅrsak.SATSENDRING)
+        val søker = PersonIdent(randomFnr())
+        val barn = PersonIdent(randomFnr())
+        assertThatThrownBy {
+            personopplysningGrunnlagForNyBehandlingService.opprettKopiEllerNyttPersonopplysningGrunnlag(
+                behandling = nyBehandling,
+                forrigeBehandlingSomErVedtatt = null,
+                søker.ident,
+                listOf(barn.ident),
+            )
+        }.isInstanceOf(Feil::class.java)
+    }
+
+    private fun GrBostedsadresse.medPeriodeOgPerson(periode: DatoIntervallEntitet, person: Person): GrBostedsadresse =
+        this.also {
+            it.periode = periode
+            it.person = person
         }
 }
