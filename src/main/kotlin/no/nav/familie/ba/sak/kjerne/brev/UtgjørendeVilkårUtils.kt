@@ -219,11 +219,12 @@ private fun vilkårResultatPasserForAvslagsperiode(
 ): Boolean {
     val erAvslagUtenFomDato = minimertVilkårResultat.periodeFom == null
 
+    // denne er forskjellig fra vedtaksperiode.fom
     val fomVilkår =
         if (erAvslagUtenFomDato) {
             TIDENES_MORGEN.toYearMonth()
         } else {
-            minimertVilkårResultat.periodeFom!!.toYearMonth()
+            minimertVilkårResultat.periodeFom!!.toYearMonth().plusMonths(1)
         }
 
     return fomVilkår == vedtaksperiode.fom.toYearMonth() &&
