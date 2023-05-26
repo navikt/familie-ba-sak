@@ -14,7 +14,9 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api/migrering")
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
-class MigreringController(private val migreringService: MigreringService) {
+class MigreringController(
+    private val migreringService: MigreringService,
+) {
 
     @PostMapping
     fun migrer(@RequestBody personIdent: Personident): ResponseEntity<Ressurs<MigreringResponseDto>> {
