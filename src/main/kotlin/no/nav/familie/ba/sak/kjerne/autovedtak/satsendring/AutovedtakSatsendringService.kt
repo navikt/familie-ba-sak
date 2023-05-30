@@ -166,7 +166,6 @@ class AutovedtakSatsendringService(
         return SatsendringSvar.BEHANDLING_KAN_IKKE_SETTES_PÅ_VENT
     }
 
-    // burde vi sjekke steg?
     private fun kanSetteÅpenBehandlingPåVent(aktivOgÅpenBehandling: Behandling): Boolean {
         val behandlingId = aktivOgÅpenBehandling.id
         val loggSuffix = "endrer status på behandling til på vent"
@@ -175,14 +174,22 @@ class AutovedtakSatsendringService(
             return true
         }
         val sisteLogghendelse = loggService.hentLoggForBehandling(behandlingId).maxBy { it.opprettetTidspunkt }
-        if (sisteLogghendelse.opprettetTidspunkt.isBefore(LocalDateTime.now().minusHours(4))) {
+        val tid4TimerSiden = LocalDateTime.now().minusHours(4)
+        if (aktivOgÅpenBehandling.endretTidspunkt.isAfter(tid4TimerSiden)) {
+            logger.info(
+                "Behandling=$behandlingId har endretTid=${aktivOgÅpenBehandling.endretTidspunkt} " +
+                    "kan ikke sette behandlingen på maskinell vent",
+            )
+            return false
+        }
+        if (sisteLogghendelse.opprettetTidspunkt.isAfter(tid4TimerSiden)) {
             logger.info(
                 "Behandling=$behandlingId siste logginslag er " +
                     "type=${sisteLogghendelse.type} tid=${sisteLogghendelse.opprettetTidspunkt}, $loggSuffix",
             )
-            return true
+            return false
         }
-        return false
+        return true
     }
 
     private fun harUtbetalingerSomOverstiger100Prosent(sisteIverksatteBehandling: Behandling): Boolean {

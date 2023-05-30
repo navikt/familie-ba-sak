@@ -32,7 +32,7 @@ class SnikeIKøenService(
         behandling.status = BehandlingStatus.SATT_PÅ_MASKINELL_VENT
         behandling.aktiv = false
         behandlingRepository.saveAndFlush(behandling)
-        loggService.opprettSettPåMaskinellVentSatsendring(behandling, årsak.årsak)
+        loggService.opprettSettPåMaskinellVent(behandling, årsak.årsak)
     }
 
     /**
@@ -48,6 +48,7 @@ class SnikeIKøenService(
         validerBehandlinger(aktivBehandling, behandlingPåVent)
 
         aktiverBehandlingPåVent(aktivBehandling, behandlingPåVent, behandlingSomFerdigstilles)
+        loggService.opprettSTattAvMaskinellVent(behandlingPåVent)
         return true
     }
 
