@@ -103,6 +103,7 @@ class SmåbarnstilleggServiceTest {
 
         assertThat(slot.captured).containsAll(forventetNyePerioder)
         verify(exactly = 1) { periodeOvergangsstønadGrunnlagRepository.saveAll(forventetNyePerioder) }
+        verify(exactly = 0) { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) }
     }
 
     @Test
