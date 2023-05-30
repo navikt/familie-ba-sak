@@ -137,7 +137,7 @@ class StegService(
     private fun validerHelmanuelMigrering(nyBehandling: NyBehandling) {
         val sisteBehandlingSomErVedtatt =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(nyBehandling.fagsakId)
-        if (sisteBehandlingSomErVedtatt != null && !sisteBehandlingSomErVedtatt.erTekniskEndringMedOpphør()) {
+        if (sisteBehandlingSomErVedtatt != null && !sisteBehandlingSomErVedtatt.resultat.erOpphør()) {
             throw FunksjonellFeil(
                 melding = "Det finnes allerede en vedtatt behandling på fagsak ${nyBehandling.fagsakId}." +
                     "Behandling kan ikke opprettes med årsak " +
@@ -537,6 +537,13 @@ class StegService(
                 "${SikkerhetContext.hentSaksbehandlerNavn()} prøver å utføre steg " +
                     behandlingSteg.stegType() +
                     " på behandling ${behandling.id} som er på vent.",
+            )
+        }
+        if (behandling.status == BehandlingStatus.SATT_PÅ_MASKINELL_VENT) {
+            throw FunksjonellFeil(
+                "${SikkerhetContext.hentSaksbehandlerNavn()} prøver å utføre steg " +
+                    behandlingSteg.stegType() +
+                    " på behandling ${behandling.id} som er på maskinell vent.",
             )
         }
     }
