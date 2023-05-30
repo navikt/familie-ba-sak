@@ -21,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagForNyBehandlingServiceTest.Companion.validerAtPersonerIGrunnlagErLike
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.arbeidsforhold.GrArbeidsforhold
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrBostedsadresse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.bostedsadresse.GrMatrikkeladresse
@@ -139,18 +140,20 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
         val personopplysningGrunnlag =
             lagTestPersonopplysningGrunnlag(forrigeBehandling.id, søkerPerson, barnPerson).also {
                 it.personer.map { person ->
-                    person.bostedsadresser.addAll(
-                        listOf(
-                            grVegadresse,
-                            grUkjentBosted,
-                            grMatrikkeladresse,
-                        ),
-                    )
-                    person.statsborgerskap.addAll(listOf(statsborgerskap))
-                    person.opphold.addAll(listOf(opphold))
-                    person.arbeidsforhold.addAll(listOf(arbeidsforhold))
-                    person.sivilstander.addAll(listOf(sivilstand))
-                    person.dødsfall = dødsfall
+                    if (person.aktør.aktivFødselsnummer() == søker.ident) {
+                        person.bostedsadresser.addAll(
+                            listOf(
+                                grVegadresse,
+                                grUkjentBosted,
+                                grMatrikkeladresse,
+                            ),
+                        )
+                        person.statsborgerskap.addAll(listOf(statsborgerskap))
+                        person.opphold.addAll(listOf(opphold))
+                        person.arbeidsforhold.addAll(listOf(arbeidsforhold))
+                        person.sivilstander.addAll(listOf(sivilstand))
+                        person.dødsfall = dødsfall
+                    }
                 }
             }
         every { featureToggleService.isEnabled(any(), any()) } returns true
@@ -166,50 +169,7 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
         assertThat(kopiertPersonopplysningGrunnlag.captured.behandlingId).isEqualTo(nyBehandling.id)
         assertThat(kopiertPersonopplysningGrunnlag.captured.personer.size).isEqualTo(2)
 
-        // Sjekk at sub-entiteter av Person har referanse til kopiert person med ny id og ellers er like
-        kopiertPersonopplysningGrunnlag.captured.personer.filter {
-            it.aktør.personidenter.first().fødselsnummer == søker.ident
-        }.forEach {
-            it.bostedsadresser.forEach { grBostedsadresse ->
-                assertThat(grBostedsadresse.person!!.id).isEqualTo(0L)
-                assertThat(grBostedsadresse.person).isEqualTo(søkerPerson)
-                when (grBostedsadresse) {
-                    is GrMatrikkeladresse ->
-                        assertThat(grBostedsadresse).isEqualTo(grMatrikkeladresse)
-
-                    is GrUkjentBosted -> assertThat(grBostedsadresse).isEqualTo(grUkjentBosted)
-                    else -> assertThat(grBostedsadresse).isEqualTo(grVegadresse)
-                }
-            }
-            it.sivilstander.forEach { grSivilstand ->
-                verifiserPersonOgSubEntitet(grSivilstand.person, søkerPerson, grSivilstand, sivilstand)
-            }
-
-            it.statsborgerskap.forEach { grStatsborgerskap ->
-                verifiserPersonOgSubEntitet(grStatsborgerskap.person, søkerPerson, grStatsborgerskap, statsborgerskap)
-            }
-
-            it.opphold.forEach { grOpphold ->
-                verifiserPersonOgSubEntitet(grOpphold.person, søkerPerson, grOpphold, opphold)
-            }
-
-            it.arbeidsforhold.forEach { grArbeidsforhold ->
-                verifiserPersonOgSubEntitet(grArbeidsforhold.person, søkerPerson, grArbeidsforhold, arbeidsforhold)
-            }
-
-            verifiserPersonOgSubEntitet(it.dødsfall!!.person, søkerPerson, it.dødsfall!!, dødsfall)
-        }
-    }
-
-    private fun verifiserPersonOgSubEntitet(
-        kopiertPerson: Person,
-        originalPerson: Person,
-        kopiertSubEntitet: Any,
-        originalSubEntitet: Any,
-    ) {
-        assertThat(kopiertPerson.id).isEqualTo(0L)
-        assertThat(kopiertPerson).isEqualTo(originalPerson)
-        assertThat(kopiertSubEntitet).isEqualTo(originalSubEntitet)
+        validerAtPersonerIGrunnlagErLike(personopplysningGrunnlag, kopiertPersonopplysningGrunnlag.captured)
     }
 
     @Test
