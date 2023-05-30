@@ -191,6 +191,10 @@ class AutovedtakSatsendringServiceTest(
             "UPDATE logg SET opprettet_tid = opprettet_tid - interval '12 hours' WHERE fk_behandling_id = ?",
             behandling.id,
         )
+        jdbcTemplate.update(
+            "UPDATE behandling SET endret_tid = endret_tid - interval '12 hours' WHERE id = ?",
+            behandling.id,
+        )
     }
 
     private fun opprettBehandling(): Behandling {

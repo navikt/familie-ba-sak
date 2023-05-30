@@ -1,9 +1,12 @@
 package no.nav.familie.ba.sak.kjerne.behandling
 
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
+import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
+import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -20,6 +23,10 @@ import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegType
+import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
@@ -38,6 +45,9 @@ class SnikeIKøenServiceTest(
     @Autowired private val databaseCleanupService: DatabaseCleanupService,
     @Autowired private val snikeIKøenService: SnikeIKøenService,
     @Autowired private val settPåVentService: SettPåVentService,
+    @Autowired private val vedtakRepository: VedtakRepository,
+    @Autowired private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService,
+    @Autowired private val arbeidsfordelingPåBehandlingRepository: ArbeidsfordelingPåBehandlingRepository,
 ) : AbstractSpringIntegrationTest() {
 
     private lateinit var fagsak: Fagsak
@@ -85,6 +95,7 @@ class SnikeIKøenServiceTest(
     @Test
     fun `reaktivering av behandling som er på vent skal sette status tilbake til SATT_PÅ_VENT`() {
         val behandling1 = opprettBehandling()
+        lagreArbeidsfordeling(behandling1)
         settPåVentService.settBehandlingPåVent(behandling1.id, LocalDate.now(), SettPåVentÅrsak.AVVENTER_DOKUMENTASJON)
         settAktivBehandlingTilPåMaskinellVent(behandling1)
         val behandling2 = opprettBehandling(status = BehandlingStatus.AVSLUTTET, aktiv = true)
@@ -129,6 +140,27 @@ class SnikeIKøenServiceTest(
 
         validerSisteBehandling(behandling1)
         validerErAktivBehandling(behandling1)
+    }
+
+    @Test
+    fun `reaktivering skal tilbakestille behandling på vent`() {
+        val behandling1 = opprettBehandling(status = BehandlingStatus.SATT_PÅ_MASKINELL_VENT, aktiv = false).let {
+            leggTilSteg(it, StegType.VURDER_TILBAKEKREVING)
+            behandlingRepository.saveAndFlush(it)
+        }
+        val vedtak = vedtakRepository.saveAndFlush(lagVedtak(behandling = behandling1))
+        vedtaksperiodeHentOgPersisterService.lagre(
+            VedtaksperiodeMedBegrunnelser(
+                vedtak = vedtak,
+                type = Vedtaksperiodetype.FORTSATT_INNVILGET,
+            ),
+        )
+        val behandling2 = opprettBehandling(status = BehandlingStatus.AVSLUTTET, aktiv = true)
+        lagUtbetalingsoppdragOgAvslutt(behandling2)
+
+        snikeIKøenService.reaktiverBehandlingPåMaskinellVent(behandling2)
+
+        assertThat(vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(vedtak.id)).isEmpty()
     }
 
     @Test
@@ -194,7 +226,7 @@ class SnikeIKøenServiceTest(
 
         @Test
         fun `skal feile når behandling som snek i køen har status satt på vent`() {
-            val behandlingPåVent = opprettBehandling(status = BehandlingStatus.SATT_PÅ_MASKINELL_VENT, aktiv = false)
+            opprettBehandling(status = BehandlingStatus.SATT_PÅ_MASKINELL_VENT, aktiv = false)
             val behandlingSomSnekIKøen = opprettBehandling(status = BehandlingStatus.UTREDES, aktiv = true)
 
             assertThatThrownBy { snikeIKøenService.reaktiverBehandlingPåMaskinellVent(behandlingSomSnekIKøen) }
@@ -228,12 +260,15 @@ class SnikeIKøenServiceTest(
         val tilkjentYtelse = lagInitiellTilkjentYtelse(behandling, utbetalingsoppdrag = "utbetalingsoppdrag")
         tilkjentYtelseRepository.saveAndFlush(tilkjentYtelse)
         behandlingRepository.finnBehandling(behandling.id).let { behandling ->
-            val stegTilstand =
-                BehandlingStegTilstand(behandling = behandling, behandlingSteg = StegType.BEHANDLING_AVSLUTTET)
-            behandling.behandlingStegTilstand.add(stegTilstand)
+            leggTilSteg(behandling, StegType.BEHANDLING_AVSLUTTET)
             behandling.status = BehandlingStatus.AVSLUTTET
             behandlingRepository.saveAndFlush(behandling)
         }
+    }
+
+    private fun leggTilSteg(behandling: Behandling, stegType: StegType) {
+        val stegTilstand = BehandlingStegTilstand(behandling = behandling, behandlingSteg = stegType)
+        behandling.behandlingStegTilstand.add(stegTilstand)
     }
 
     private fun opprettBehandling(
@@ -264,5 +299,14 @@ class SnikeIKøenServiceTest(
             resultat = resultat,
         ).initBehandlingStegTilstand()
         return behandlingRepository.saveAndFlush(behandling)
+    }
+
+    private fun lagreArbeidsfordeling(behandling1: Behandling) {
+        val arbeidsfordelingPåBehandling = ArbeidsfordelingPåBehandling(
+            behandlingId = behandling1.id,
+            behandlendeEnhetId = "4820",
+            behandlendeEnhetNavn = "Enhet",
+        )
+        arbeidsfordelingPåBehandlingRepository.saveAndFlush(arbeidsfordelingPåBehandling)
     }
 }

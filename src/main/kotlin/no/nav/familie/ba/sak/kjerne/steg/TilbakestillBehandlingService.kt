@@ -51,17 +51,15 @@ class TilbakestillBehandlingService(
         vedtakRepository.saveAndFlush(vedtak)
     }
 
-    // Denne blir ubrukt fra satsendringen, men kommer nog brukes i andre snike-i-køen-situasjoner, så fjerner ikke den
     @Transactional
     fun tilbakestillBehandlingTilVilkårsvurdering(behandling: Behandling) {
-        if (behandling.status != BehandlingStatus.UTREDES) throw Feil("Prøver å tilbakestille $behandling, men den er avsluttet eller låst for endringer")
+        if (behandling.status != BehandlingStatus.UTREDES && behandling.status != BehandlingStatus.SATT_PÅ_VENT) {
+            throw Feil("Prøver å tilbakestille $behandling, men den er avsluttet eller låst for endringer")
+        }
 
         beregningService.slettTilkjentYtelseForBehandling(behandlingId = behandling.id)
-        vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(
-            vedtak = vedtakRepository.findByBehandlingAndAktiv(
-                behandlingId = behandling.id,
-            ),
-        )
+        val vedtak = vedtakRepository.findByBehandlingAndAktivOptional(behandlingId = behandling.id)
+        vedtak?.let { vedtaksperiodeHentOgPersisterService.slettVedtaksperioderFor(vedtak = vedtak) }
         tilbakekrevingService.slettTilbakekrevingPåBehandling(behandling.id)
 
         behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(

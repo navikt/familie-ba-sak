@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
+import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -15,6 +16,7 @@ class SnikeIKøenService(
     private val behandlingRepository: BehandlingRepository,
     private val påVentService: SettPåVentService,
     private val loggService: LoggService,
+    private val tilbakestillBehandlingService: TilbakestillBehandlingService,
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
@@ -48,6 +50,7 @@ class SnikeIKøenService(
         validerBehandlinger(aktivBehandling, behandlingPåVent)
 
         aktiverBehandlingPåVent(aktivBehandling, behandlingPåVent, behandlingSomFerdigstilles)
+        tilbakestillBehandlingService.tilbakestillBehandlingTilVilkårsvurdering(behandlingPåVent)
         loggService.opprettSTattAvMaskinellVent(behandlingPåVent)
         return true
     }
