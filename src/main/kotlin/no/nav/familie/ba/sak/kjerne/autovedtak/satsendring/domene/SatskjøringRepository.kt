@@ -19,7 +19,7 @@ interface SatskjøringRepository : JpaRepository<Satskjøring, Long> {
                     FROM   satskjoering
                     WHERE  fk_fagsak_id = f.id
                 ) AND f.status = 'LØPENDE' AND f.arkivert = false AND b.status <> 'AVSLUTTET'
-            ORDER BY b.opprettet_tid
+            ORDER BY b.aktivert_tid
         """,
         nativeQuery = true,
     )

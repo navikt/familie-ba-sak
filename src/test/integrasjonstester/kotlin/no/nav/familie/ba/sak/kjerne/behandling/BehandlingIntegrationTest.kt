@@ -24,8 +24,10 @@ import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
@@ -222,6 +224,7 @@ class BehandlingIntegrationTest(
             ),
         )
         assertNotNull(vedtakService.hentAktivForBehandling(behandlingId = behandling.id))
+        markerBehandlingSomAvsluttet(behandling)
         assertDoesNotThrow {
             behandlingService.lagreNyOgDeaktiverGammelBehandling(
                 lagBehandling(
@@ -853,5 +856,11 @@ class BehandlingIntegrationTest(
 
         assertEquals(2, behandlingDvhMeldinger.size)
         assertThat(behandlingDvhMeldinger.last().resultat).isEqualTo("AVSLÅTT")
+    }
+
+    private fun markerBehandlingSomAvsluttet(behandling: Behandling): Behandling {
+        behandling.status = BehandlingStatus.AVSLUTTET
+        behandling.leggTilBehandlingStegTilstand(StegType.BEHANDLING_AVSLUTTET)
+        return behandlingHentOgPersisterService.lagreOgFlush(behandling)
     }
 }
