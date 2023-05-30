@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -27,6 +29,7 @@ class VilkårsvurderingForNyBehandlingService(
     private val behandlingstemaService: BehandlingstemaService,
     private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
     private val vilkårsvurderingMetrics: VilkårsvurderingMetrics,
+    private val featureToggleService: FeatureToggleService,
 ) {
 
     fun opprettVilkårsvurderingUtenomHovedflyt(
@@ -120,11 +123,19 @@ class VilkårsvurderingForNyBehandlingService(
         forrigeBehandlingSomErVedtatt: Behandling,
         inneværendeBehandling: Behandling,
     ): Vilkårsvurdering {
-        val forrigeBehandlingVilkårsvurdering = hentVilkårsvurderingThrows(forrigeBehandlingSomErVedtatt.id)
+        return if (featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_KOPIER_GRUNNLAG_FRA_FORRIGE_BEHANDLING)) {
+            val forrigeBehandlingVilkårsvurdering = hentVilkårsvurderingThrows(forrigeBehandlingSomErVedtatt.id)
 
-        val nyVilkårsvurdering = forrigeBehandlingVilkårsvurdering.tilKopiMedOppfylteVilkårForNyBehandling(nyBehandling = inneværendeBehandling)
+            val nyVilkårsvurdering = forrigeBehandlingVilkårsvurdering.tilKopiMedOppfylteVilkårForNyBehandling(nyBehandling = inneværendeBehandling)
 
-        return vilkårsvurderingService.lagreNyOgDeaktiverGammel(nyVilkårsvurdering)
+            return vilkårsvurderingService.lagreNyOgDeaktiverGammel(nyVilkårsvurdering)
+        } else {
+            initierVilkårsvurderingForBehandling(
+                behandling = inneværendeBehandling,
+                bekreftEndringerViaFrontend = true,
+                forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErVedtatt,
+            )
+        }
     }
 
     fun initierVilkårsvurderingForBehandling(
