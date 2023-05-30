@@ -312,6 +312,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             ),
         )
 
+        avsluttOgLagreBehandling(behandling)
         val behandling2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         val tilkjentYtelse2 = lagInitiellTilkjentYtelse(behandling2)
         val vedtak2 = lagVedtak(behandling2)
@@ -460,6 +461,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             ),
         )
 
+        avsluttOgLagreBehandling(behandling)
         val behandling2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         val tilkjentYtelse2 = lagInitiellTilkjentYtelse(behandling2)
         val nyAktør = personidentService.hentOgLagreAktør(randomFnr(), true)
@@ -704,6 +706,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             ),
         )
 
+        avsluttOgLagreBehandling(behandling)
         val behandling2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         val tilkjentYtelse2 = lagInitiellTilkjentYtelse(behandling2)
         val vedtak2 = lagVedtak(behandling2)
@@ -872,7 +875,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 andelerFørstegangsbehandling.forIverksetting(),
             ),
         )
-
+        avsluttOgLagreBehandling(behandling)
         val behandling2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         val tilkjentYtelse2 = lagInitiellTilkjentYtelse(behandling2)
         val vedtak2 = lagVedtak(behandling2)
@@ -1110,6 +1113,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             ),
         )
 
+        avsluttOgLagreBehandling(behandling)
         val behandling2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(
             (
                 lagBehandling(
@@ -1132,6 +1136,7 @@ class UtbetalingsoppdragIntegrasjonTest(
             ),
         )
 
+        avsluttOgLagreBehandling(behandling2)
         val behandling3 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         val tilkjentYtelse3 = lagInitiellTilkjentYtelse(behandling3)
         val andelerRevurdering2 = listOf(

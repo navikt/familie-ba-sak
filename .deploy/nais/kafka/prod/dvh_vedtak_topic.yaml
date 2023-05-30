@@ -27,3 +27,6 @@ spec:
     - team: dv-familie
       application: dvh-fambt-konsumer
       access: read
+    - team: dv-familie
+      application: dvh-familie-konsument
+      access: read

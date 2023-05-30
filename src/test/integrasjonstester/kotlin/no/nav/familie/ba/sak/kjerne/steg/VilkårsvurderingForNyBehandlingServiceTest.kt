@@ -10,7 +10,10 @@ import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.datagenerator.vilkårsvurdering.lagBarnVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.vilkårsvurdering.lagSøkerVilkårResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -34,6 +37,9 @@ class VilkårsvurderingForNyBehandlingServiceTest(
 
     @Autowired
     private val behandlingService: BehandlingService,
+
+    @Autowired
+    private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 
     @Autowired
     private val personidentService: PersonidentService,
@@ -114,6 +120,8 @@ class VilkårsvurderingForNyBehandlingServiceTest(
             )
         }
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(forrigeVilkårsvurdering)
+
+        markerBehandlingSomAvsluttet(forrigeBehandling)
 
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
             lagBehandling(
@@ -274,6 +282,8 @@ class VilkårsvurderingForNyBehandlingServiceTest(
             )
         }
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(forrigeVilkårsvurdering)
+
+        markerBehandlingSomAvsluttet(forrigeBehandling)
 
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
             lagBehandling(
@@ -471,5 +481,11 @@ class VilkårsvurderingForNyBehandlingServiceTest(
                     it.periodeFom == barnetsFødselsdato
             }
         }
+    }
+
+    private fun markerBehandlingSomAvsluttet(behandling: Behandling): Behandling {
+        behandling.status = BehandlingStatus.AVSLUTTET
+        behandling.leggTilBehandlingStegTilstand(StegType.BEHANDLING_AVSLUTTET)
+        return behandlingHentOgPersisterService.lagreOgFlush(behandling)
     }
 }
