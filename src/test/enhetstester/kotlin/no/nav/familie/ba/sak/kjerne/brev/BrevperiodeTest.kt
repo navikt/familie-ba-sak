@@ -11,8 +11,7 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.common.Utils.formaterBeløp
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
-import no.nav.familie.ba.sak.integrasjoner.sanity.hentBegrunnelser
-import no.nav.familie.ba.sak.integrasjoner.sanity.hentEØSBegrunnelser
+import no.nav.familie.ba.sak.config.TestSanityKlient
 import no.nav.familie.ba.sak.kjerne.brev.domene.BegrunnelseMedTriggere
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
@@ -40,8 +39,8 @@ class BrevperiodeTest {
 
         val testmappe = File("./src/test/resources/brevperiodeCaser")
 
-        val sanityBegrunnelser = hentBegrunnelser()
-        val sanityEØSBegrunnelser = hentEØSBegrunnelser()
+        val sanityBegrunnelser = TestSanityKlient.hentBegrunnelser()
+        val sanityEØSBegrunnelser = TestSanityKlient.hentEØSBegrunnelser()
 
         val antallFeil = testmappe.list()?.fold(0) { acc, it ->
 

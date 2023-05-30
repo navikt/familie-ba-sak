@@ -9,15 +9,16 @@ import org.springframework.stereotype.Component
 @Component
 class CachedSanityKlient(
     @Value("\${SANITY_DATASET}") private val sanityDatasett: String,
+    private val sanityKlient: SanityKlient,
 ) {
 
     @Cacheable("sanityBegrunnelser", cacheManager = "shortCache")
     fun hentSanityBegrunnelserCached(): List<SanityBegrunnelse> {
-        return hentBegrunnelser(datasett = sanityDatasett)
+        return sanityKlient.hentBegrunnelser(datasett = sanityDatasett)
     }
 
     @Cacheable("sanityEØSBegrunnelser", cacheManager = "shortCache")
     fun hentEØSBegrunnelserCached(): List<SanityEØSBegrunnelse> {
-        return hentEØSBegrunnelser(datasett = sanityDatasett)
+        return sanityKlient.hentEØSBegrunnelser(datasett = sanityDatasett)
     }
 }

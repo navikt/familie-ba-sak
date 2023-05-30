@@ -12,8 +12,8 @@ import no.nav.familie.ba.sak.common.lagUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.config.TestSanityKlient
 import no.nav.familie.ba.sak.datagenerator.brev.lagMinimertPerson
-import no.nav.familie.ba.sak.integrasjoner.sanity.hentBegrunnelser
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeDeltBostedTriggere
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
@@ -54,7 +54,7 @@ internal class StandardbegrunnelseTest {
 
     private val aktørerMedUtbetaling = listOf(søker.aktør, barn.aktør)
 
-    private val sanityBegrunnelser = hentBegrunnelser()
+    private val sanityBegrunnelser = TestSanityKlient.hentBegrunnelser()
     private val featureToggleService: FeatureToggleService = mockk()
 
     @Test

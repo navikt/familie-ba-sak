@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.sisteDagIMåned
-import no.nav.familie.ba.sak.integrasjoner.sanity.hentEØSBegrunnelser
+import no.nav.familie.ba.sak.config.TestSanityKlient
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
@@ -362,7 +362,7 @@ class VedtaksperiodeUtilTest {
         @BeforeAll
         @JvmStatic
         internal fun beforeAll() {
-            sanityEØSBegrunnelser = hentEØSBegrunnelser()
+            sanityEØSBegrunnelser = TestSanityKlient.hentEØSBegrunnelser()
         }
     }
 }
