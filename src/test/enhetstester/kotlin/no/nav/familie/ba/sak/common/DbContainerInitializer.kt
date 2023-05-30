@@ -23,7 +23,7 @@ class DbContainerInitializer : ApplicationContextInitializer<ConfigurableApplica
     companion object {
         // Lazy because we only want it to be initialized when accessed
         private val postgres: KPostgreSQLContainer by lazy {
-            KPostgreSQLContainer("postgres:12.10")
+            KPostgreSQLContainer("postgres:15.3")
                 .withDatabaseName("databasename")
                 .withUsername("postgres")
                 .withPassword("test")
