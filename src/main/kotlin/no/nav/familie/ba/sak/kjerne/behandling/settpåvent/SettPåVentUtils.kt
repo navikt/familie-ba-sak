@@ -47,10 +47,19 @@ fun validerFristErFremITiden(
 }
 
 fun validerKanGjenopptaBehandling(behandling: Behandling) {
-    if (behandling.status != BehandlingStatus.SATT_PÅ_VENT) {
-        throw FunksjonellFeil(
-            melding = "Behandling ${behandling.id} har status=${behandling.status} og kan ikke gjenopptas.",
-            frontendFeilmelding = "Behandlingen må ha status satt på vent for å kunne gjenopptas",
-        )
+    val status = behandling.status
+    if (status != BehandlingStatus.SATT_PÅ_VENT) {
+        val melding = "Behandling ${behandling.id} har status=$status og kan ikke gjenopptas."
+        if (status == BehandlingStatus.SATT_PÅ_MASKINELL_VENT) {
+            throw FunksjonellFeil(
+                melding = melding,
+                frontendFeilmelding = "Behandlingen er under maskinell vent, og kan gjenopptas senere.",
+            )
+        } else {
+            throw Feil(
+                message = melding,
+                frontendFeilmelding = "Behandlingen må ha status satt på vent for å kunne gjenopptas.",
+            )
+        }
     }
 }

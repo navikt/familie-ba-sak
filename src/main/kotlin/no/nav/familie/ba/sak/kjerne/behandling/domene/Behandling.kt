@@ -31,6 +31,7 @@ import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.Regelverk
 import org.hibernate.annotations.SortComparator
 import java.time.LocalDate
+import java.time.LocalDateTime
 import no.nav.familie.kontrakter.felles.Behandlingstema as OppgaveBehandlingTema
 import no.nav.familie.kontrakter.felles.oppgave.Behandlingstype as OppgaveBehandlingType
 
@@ -85,6 +86,9 @@ data class Behandling(
 
     @OneToOne(mappedBy = "behandling", optional = true)
     val verge: Verge? = null,
+
+    @Column(name = "aktivert_tid", nullable = false)
+    var aktivertTidspunkt: LocalDateTime = LocalDateTime.now(),
 ) : BaseEntitet() {
 
     val steg: StegType
@@ -453,6 +457,7 @@ fun initStatus(): BehandlingStatus {
 enum class BehandlingStatus {
     UTREDES,
     SATT_PÅ_VENT,
+    SATT_PÅ_MASKINELL_VENT,
     FATTER_VEDTAK,
     IVERKSETTER_VEDTAK,
     AVSLUTTET,

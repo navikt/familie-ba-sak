@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.SnikeIKøenService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -25,6 +26,7 @@ import no.nav.familie.ba.sak.task.TaBehandlingerEtterVentefristAvVentTask
 import no.nav.familie.prosessering.domene.Task
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.assertj.core.api.Assertions.catchThrowable
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Tag
@@ -52,6 +54,7 @@ class SettPåVentServiceTest(
     @Autowired private val settPåVentRepository: SettPåVentRepository,
     @Autowired private val taBehandlingerEtterVentefristAvVentTask: TaBehandlingerEtterVentefristAvVentTask,
     @Autowired private val brevmalService: BrevmalService,
+    @Autowired private val snikeIKøenService: SnikeIKøenService,
 ) : AbstractSpringIntegrationTest() {
 
     @BeforeAll
@@ -278,6 +281,26 @@ class SettPåVentServiceTest(
 
         Assertions.assertNull(settPåVentRepository.findByBehandlingIdAndAktiv(behandling1.id, true))
         Assertions.assertNotNull(settPåVentRepository.findByBehandlingIdAndAktiv(behandling2.id, true))
+    }
+
+    @Test
+    fun `Skal ikke kunne gjenoppta behandlingen hvis den er satt på maskinell vent`() {
+        val behandling = opprettBehandling()
+        val frist = LocalDate.now().plusDays(3)
+
+        settPåVentService.settBehandlingPåVent(
+            behandling.id,
+            frist,
+            SettPåVentÅrsak.AVVENTER_DOKUMENTASJON,
+        )
+        snikeIKøenService.settAktivBehandlingTilPåVent(behandling.id)
+
+        val throwable = catchThrowable {
+            settPåVentService.gjenopptaBehandling(behandling.id)
+        }
+        assertThat(throwable).isInstanceOf(FunksjonellFeil::class.java)
+        assertThat((throwable as FunksjonellFeil).frontendFeilmelding)
+            .isEqualTo("Behandlingen er under maskinell vent, og kan gjenopptas senere.")
     }
 
     private fun opprettBehandling(status: BehandlingStatus = BehandlingStatus.UTREDES): Behandling {
