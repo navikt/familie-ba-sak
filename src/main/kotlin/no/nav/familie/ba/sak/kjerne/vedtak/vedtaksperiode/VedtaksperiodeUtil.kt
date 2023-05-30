@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.erDagenFør
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
@@ -204,6 +205,7 @@ fun hentGyldigeBegrunnelserForPeriode(
     sanityEØSBegrunnelser: List<SanityEØSBegrunnelse>,
     kompetanserIPeriode: List<Kompetanse>,
     kompetanserSomStopperRettFørPeriode: List<Kompetanse>,
+    featureToggleService: FeatureToggleService,
 ): List<IVedtakBegrunnelse> {
     val standardbegrunnelser = hentGyldigeStandardbegrunnelserForVedtaksperiode(
         utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
@@ -213,6 +215,7 @@ fun hentGyldigeBegrunnelserForPeriode(
         aktørIderMedUtbetaling = aktørIderMedUtbetaling,
         endretUtbetalingAndeler = endretUtbetalingAndeler,
         andelerTilkjentYtelse = andelerTilkjentYtelse,
+        featureToggleService = featureToggleService,
     )
     val eøsBegrunnelser =
         hentGyldigeEØSBegrunnelserForPeriode(
@@ -233,6 +236,7 @@ fun hentGyldigeStandardbegrunnelserForVedtaksperiode(
     aktørIderMedUtbetaling: List<String>,
     endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
     andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+    featureToggleService: FeatureToggleService,
 ) = hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
     minimertVedtaksperiode = utvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(),
     sanityBegrunnelser = sanityBegrunnelser,
@@ -256,6 +260,7 @@ fun hentGyldigeStandardbegrunnelserForVedtaksperiode(
             utvidetVedtaksperiodeMedBegrunnelser,
         )
     },
+    featureToggleService = featureToggleService,
 )
 
 fun hentGyldigeEØSBegrunnelserForPeriode(
@@ -304,6 +309,7 @@ fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
     erFørsteVedtaksperiodePåFagsak: Boolean,
     ytelserForSøkerForrigeMåned: List<YtelseType>,
     ytelserForrigePerioder: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+    featureToggleService: FeatureToggleService,
 ): List<Standardbegrunnelse> {
     val tillateBegrunnelserForVedtakstype = Standardbegrunnelse.values()
         .filter {
@@ -335,6 +341,7 @@ fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
             erFørsteVedtaksperiodePåFagsak,
             ytelserForSøkerForrigeMåned,
             ytelserForrigePerioder,
+            featureToggleService,
         )
 
         else -> {
@@ -349,6 +356,7 @@ fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
                 erFørsteVedtaksperiodePåFagsak,
                 ytelserForSøkerForrigeMåned,
                 ytelserForrigePerioder,
+                featureToggleService,
             )
         }
     }
@@ -365,6 +373,7 @@ private fun velgRedusertBegrunnelser(
     erFørsteVedtaksperiodePåFagsak: Boolean,
     ytelserForSøkerForrigeMåned: List<YtelseType>,
     ytelserForrigePeriode: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+    featureToggleService: FeatureToggleService,
 ): List<Standardbegrunnelse> {
     val redusertBegrunnelser = tillateBegrunnelserForVedtakstype.filter {
         it.tilISanityBegrunnelse(sanityBegrunnelser)?.tilTriggesAv()?.gjelderFraInnvilgelsestidspunkt ?: false
@@ -381,6 +390,7 @@ private fun velgRedusertBegrunnelser(
             erFørsteVedtaksperiodePåFagsak,
             ytelserForSøkerForrigeMåned,
             ytelserForrigePeriode,
+            featureToggleService,
         )
         return redusertBegrunnelser + utbetalingsbegrunnelser
     }
@@ -398,6 +408,7 @@ private fun velgUtbetalingsbegrunnelser(
     erFørsteVedtaksperiodePåFagsak: Boolean,
     ytelserForSøkerForrigeMåned: List<YtelseType>,
     ytelserForrigePeriode: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
+    featureToggleService: FeatureToggleService,
 ): List<Standardbegrunnelse> {
     val standardbegrunnelser: MutableSet<Standardbegrunnelse> =
         tillateBegrunnelserForVedtakstype
@@ -414,6 +425,7 @@ private fun velgUtbetalingsbegrunnelser(
                         erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
                         ytelserForSøkerForrigeMåned = ytelserForSøkerForrigeMåned,
                         ytelserForrigePeriode = ytelserForrigePeriode,
+                        featureToggleService = featureToggleService,
                     )
                 ) {
                     acc.add(standardBegrunnelse)

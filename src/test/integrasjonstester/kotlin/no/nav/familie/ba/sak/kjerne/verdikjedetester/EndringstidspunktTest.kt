@@ -94,7 +94,7 @@ class EndringstidspunktTest(
             persongrunnlagService = persongrunnlagService,
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
             brevmalService = brevmalService,
-
+            featureToggleService = featureToggleService,
         )
 
         val sisteDagUtenDeltBostedOppfylt = barnFødselsdato.plusYears(1).sisteDagIMåned()
@@ -150,7 +150,7 @@ class EndringstidspunktTest(
             persongrunnlagService = persongrunnlagService,
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
             brevmalService = brevmalService,
-
+            featureToggleService = featureToggleService,
         )
 
         val vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId = revurdering.id)
