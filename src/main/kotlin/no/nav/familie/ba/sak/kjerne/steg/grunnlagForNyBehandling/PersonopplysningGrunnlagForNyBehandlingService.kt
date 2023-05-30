@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
@@ -14,6 +16,7 @@ class PersonopplysningGrunnlagForNyBehandlingService(
     private val personidentService: PersonidentService,
     private val beregningService: BeregningService,
     private val persongrunnlagService: PersongrunnlagService,
+    private val featureToggleService: FeatureToggleService,
 ) {
 
     fun opprettKopiEllerNyttPersonopplysningGrunnlag(
@@ -22,7 +25,11 @@ class PersonopplysningGrunnlagForNyBehandlingService(
         søkerIdent: String,
         barnasIdenter: List<String>,
     ) {
-        if (behandling.erSatsendring()) {
+        if (behandling.erSatsendring() && featureToggleService.isEnabled(
+                FeatureToggleConfig.SATSENDRING_KOPIER_GRUNNLAG_FRA_FORRIGE_BEHANDLING,
+                false,
+            )
+        ) {
             if (forrigeBehandlingSomErVedtatt == null) {
                 throw Feil("Vi kan ikke kjøre satsendring dersom det ikke finnes en tidligere behandling. Behandling: ${behandling.id}")
             }

@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
@@ -34,8 +35,6 @@ import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
 import no.nav.familie.kontrakter.felles.personopplysning.SIVILSTAND
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
-// import org.hamcrest.MatcherAssert.assertThat
-// import org.hamcrest.core.IsEqual
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
@@ -43,12 +42,14 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
     val personidentService = mockk<PersonidentService>()
     val beregningService = mockk<BeregningService>()
     val persongrunnlagService = mockk<PersongrunnlagService>()
+    val featureToggleService = mockk<FeatureToggleService>()
 
     private val personopplysningGrunnlagForNyBehandlingService = spyk(
         PersonopplysningGrunnlagForNyBehandlingService(
             personidentService = personidentService,
             beregningService = beregningService,
             persongrunnlagService = persongrunnlagService,
+            featureToggleService = featureToggleService,
         ),
     )
 
@@ -152,6 +153,7 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
                     person.dødsfall = dødsfall
                 }
             }
+        every { featureToggleService.isEnabled(any(), any()) } returns true
         every { persongrunnlagService.hentAktivThrows(forrigeBehandling.id) } returns personopplysningGrunnlag
         every { persongrunnlagService.lagreOgDeaktiverGammel(capture(kopiertPersonopplysningGrunnlag)) } returns mockk()
         personopplysningGrunnlagForNyBehandlingService.opprettKopiEllerNyttPersonopplysningGrunnlag(
@@ -215,6 +217,7 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
         val nyBehandling = lagBehandling(årsak = BehandlingÅrsak.SATSENDRING)
         val søker = PersonIdent(randomFnr())
         val barn = PersonIdent(randomFnr())
+        every { featureToggleService.isEnabled(any(), any()) } returns true
         assertThatThrownBy {
             personopplysningGrunnlagForNyBehandlingService.opprettKopiEllerNyttPersonopplysningGrunnlag(
                 behandling = nyBehandling,
