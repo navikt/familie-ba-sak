@@ -82,8 +82,6 @@ class SnikeIKøenService(
         behandlingPåVent.aktivertTidspunkt = LocalDateTime.now()
         behandlingPåVent.status = utledStatusForBehandlingPåVent(behandlingPåVent)
 
-        // TODO burde det legges inn hendelse i loggService om at den er tatt av vent?
-        // TODO tilbakestill vedtak/brev etc på åpen behandling ?
         behandlingRepository.saveAndFlush(behandlingPåVent)
     }
 
