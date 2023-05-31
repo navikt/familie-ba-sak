@@ -144,6 +144,7 @@ class BrevPeriodeService(
             utvidetVedtaksperiodeMedBegrunnelse.tilMinimertVedtaksperiode(
                 sanityBegrunnelser = sanityBegrunnelser,
                 sanityEØSBegrunnelser = sanityEØSBegrunnelser,
+                featureToggleService = featureToggleService,
             )
 
         val landkoderISO2 = integrasjonClient.hentLandkoderISO2()
@@ -180,6 +181,7 @@ class BrevPeriodeService(
                 )
             },
             dødeBarnForrigePeriode = dødeBarnForrigePeriode,
+            featureToggleService = featureToggleService,
         )
 
         if (skalLogge) {

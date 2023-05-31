@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.common.lagUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.common.lagUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.tilMånedÅr
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.vedtak.lagVedtaksbegrunnelse
 import no.nav.familie.ba.sak.integrasjoner.sanity.hentBegrunnelser
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -25,6 +26,9 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class BrevUtilsTest {
+
+    private val featureToggleService: FeatureToggleService = mockk()
+
     @Test
     fun `hent dokumenttittel dersom denne skal overstyres for behandlingen`() {
         assertNull(hentOverstyrtDokumenttittel(lagBehandling().copy(type = BehandlingType.FØRSTEGANGSBEHANDLING)))
@@ -79,6 +83,7 @@ internal class BrevUtilsTest {
                     it.tilMinimertVedtaksperiode(
                         hentBegrunnelser(),
                         emptyList(),
+                        featureToggleService,
                     )
                 },
                 sanityBegrunnelser = listOf(
@@ -125,6 +130,7 @@ internal class BrevUtilsTest {
                     it.tilMinimertVedtaksperiode(
                         sanityBegrunnelser = hentBegrunnelser(),
                         sanityEØSBegrunnelser = emptyList(),
+                        featureToggleService = featureToggleService,
                     )
                 },
                 sanityBegrunnelser = listOf(
@@ -172,6 +178,7 @@ internal class BrevUtilsTest {
                     it.tilMinimertVedtaksperiode(
                         sanityBegrunnelser = hentBegrunnelser(),
                         sanityEØSBegrunnelser = emptyList(),
+                        featureToggleService = featureToggleService,
                     )
                 },
                 sanityBegrunnelser = listOf(
@@ -245,6 +252,7 @@ internal class BrevUtilsTest {
                     it.tilMinimertVedtaksperiode(
                         sanityBegrunnelser = sanityBegrunnelser,
                         sanityEØSBegrunnelser = emptyList(),
+                        featureToggleService = featureToggleService,
                     )
                 },
                 sanityBegrunnelser = sanityBegrunnelser,
@@ -319,6 +327,7 @@ internal class BrevUtilsTest {
                     it.tilMinimertVedtaksperiode(
                         sanityBegrunnelser = sanityBegrunnelser,
                         sanityEØSBegrunnelser = sanityEøsBegrunnelser,
+                        featureToggleService = featureToggleService,
                     )
                 },
                 sanityBegrunnelser = sanityBegrunnelser,
@@ -394,6 +403,7 @@ internal class BrevUtilsTest {
                     it.tilMinimertVedtaksperiode(
                         sanityBegrunnelser = sanityBegrunnelser,
                         sanityEØSBegrunnelser = sanityEøsBegrunnelser,
+                        featureToggleService = featureToggleService,
                     )
                 },
                 sanityBegrunnelser = sanityBegrunnelser,
@@ -469,6 +479,7 @@ internal class BrevUtilsTest {
                     it.tilMinimertVedtaksperiode(
                         sanityBegrunnelser = sanityBegrunnelser,
                         sanityEØSBegrunnelser = sanityEøsBegrunnelser,
+                        featureToggleService = featureToggleService,
                     )
                 },
                 sanityBegrunnelser = sanityBegrunnelser,
@@ -543,6 +554,7 @@ internal class BrevUtilsTest {
                     it.tilMinimertVedtaksperiode(
                         sanityBegrunnelser = sanityBegrunnelser,
                         sanityEØSBegrunnelser = sanityEøsBegrunnelser,
+                        featureToggleService = featureToggleService,
                     )
                 },
                 sanityBegrunnelser = sanityBegrunnelser,
@@ -622,6 +634,7 @@ internal class BrevUtilsTest {
                     it.tilMinimertVedtaksperiode(
                         sanityBegrunnelser = sanityBegrunnelser,
                         sanityEØSBegrunnelser = sanityEøsBegrunnelser,
+                        featureToggleService = featureToggleService,
                     )
                 },
                 sanityBegrunnelser = sanityBegrunnelser,

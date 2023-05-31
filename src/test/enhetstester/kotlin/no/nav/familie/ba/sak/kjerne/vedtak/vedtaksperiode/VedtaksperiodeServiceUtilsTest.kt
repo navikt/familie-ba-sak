@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
+import io.mockk.mockk
 import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndelMedAndelerTilkjentYtelse
@@ -8,6 +9,7 @@ import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagTriggesAv
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
@@ -25,6 +27,8 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 class VedtaksperiodeServiceUtilsTest {
+
+    private val featureToggleService: FeatureToggleService = mockk()
 
     @Test
     fun `Skal legge til alle barn med utbetaling ved utvidet barnetrygd`() {
@@ -57,6 +61,7 @@ class VedtaksperiodeServiceUtilsTest {
             erFørsteVedtaksperiodePåFagsak = false,
             minimerteUtbetalingsperiodeDetaljer = listOf(),
             dødeBarnForrigePeriode = emptyList(),
+            featureToggleService = featureToggleService,
         )
 
         Assertions.assertEquals(
@@ -111,6 +116,7 @@ class VedtaksperiodeServiceUtilsTest {
             erFørsteVedtaksperiodePåFagsak = false,
             minimerteUtbetalingsperiodeDetaljer = listOf(),
             dødeBarnForrigePeriode = emptyList(),
+            featureToggleService = featureToggleService,
         )
 
         Assertions.assertEquals(
