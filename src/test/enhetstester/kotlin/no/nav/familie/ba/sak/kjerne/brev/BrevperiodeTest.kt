@@ -102,6 +102,7 @@ class BrevperiodeTest {
                         )
                     } ?: emptyList(),
                     dødeBarnForrigePeriode = emptyList(),
+                    featureToggleService = featureToggleService,
                 ).genererBrevPeriode()
             } catch (e: Exception) {
                 testReporter.publishEntry(
