@@ -25,7 +25,7 @@ data class UtvidetVedtaksperiodeMedBegrunnelser(
 
 fun List<UtvidetVedtaksperiodeMedBegrunnelser>.sorter(): List<UtvidetVedtaksperiodeMedBegrunnelser> {
     val (perioderMedFom, perioderUtenFom) = this.partition { it.fom != null }
-    return perioderMedFom.sortedWith(compareBy { it.fom }) + perioderUtenFom
+    return perioderMedFom.sortedWith(compareBy({ it.fom }, { it.type.sorteringsRekkefølge() })) + perioderUtenFom
 }
 
 fun VedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
