@@ -15,7 +15,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
-import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.sivilstand.GrSivilstand.Companion.sisteSivilstand
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
@@ -368,7 +367,7 @@ fun vedtakBegrunnelseTilRestVedtakBegrunnelseTilknyttetVilkår(
 ): List<RestVedtakBegrunnelseTilknyttetVilkår> {
     val sanityBegrunnelse = sanityBegrunnelser[vedtakBegrunnelse] ?: return emptyList()
 
-    val triggesAv = sanityBegrunnelse.tilTriggesAv()
+    val triggesAv = sanityBegrunnelse.triggesAv
     val visningsnavn = sanityBegrunnelse.navnISystem
 
     return if (triggesAv.vilkår.isEmpty()) {

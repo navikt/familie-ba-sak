@@ -36,7 +36,10 @@ data class SanityBegrunnelse(
     val endretUtbetalingsperiodeDeltBostedUtbetalingTrigger: EndretUtbetalingsperiodeDeltBostedTriggere? = null,
     val endretUtbetalingsperiodeTriggere: List<EndretUtbetalingsperiodeTrigger>? = null,
     val utvidetBarnetrygdTriggere: List<UtvidetBarnetrygdTrigger>? = null,
-) : ISanityBegrunnelse
+) : ISanityBegrunnelse {
+
+    val triggesAv: TriggesAv by lazy { this.tilTriggesAv() }
+}
 
 data class RestSanityBegrunnelse(
     val apiNavn: String?,
@@ -178,7 +181,7 @@ enum class UtvidetBarnetrygdTrigger {
     SMÅBARNSTILLEGG,
 }
 
-fun SanityBegrunnelse.tilTriggesAv(): TriggesAv {
+private fun SanityBegrunnelse.tilTriggesAv(): TriggesAv {
     return TriggesAv(
         vilkår = this.vilkaar?.map { it.tilVilkår() }?.toSet() ?: emptySet(),
         personTyper = if (this.rolle.isEmpty()) {

@@ -18,7 +18,6 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.eøs.EØSBegrunnelseMedTriggere
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
-import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.FritekstBegrunnelse
@@ -204,7 +203,7 @@ class BrevperiodeTest {
     private fun Standardbegrunnelse.tilBrevBegrunnelseGrunnlag(sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>) =
         BegrunnelseMedTriggere(
             standardbegrunnelse = this,
-            triggesAv = sanityBegrunnelser[this]!!.tilTriggesAv(),
+            triggesAv = sanityBegrunnelser[this]!!.triggesAv,
             featureToggleService = featureToggleService,
         )
 }

@@ -17,7 +17,6 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.eøs.erGyldigForKompetanseMedData
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertEndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertPersonResultat
-import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -375,7 +374,7 @@ private fun velgRedusertBegrunnelser(
     featureToggleService: FeatureToggleService,
 ): List<Standardbegrunnelse> {
     val redusertBegrunnelser = tillateBegrunnelserForVedtakstype.filter {
-        sanityBegrunnelser[it]?.tilTriggesAv()?.gjelderFraInnvilgelsestidspunkt ?: false
+        sanityBegrunnelser[it]?.triggesAv?.gjelderFraInnvilgelsestidspunkt ?: false
     }
     if (minimertVedtaksperiode.utbetalingsperioder.any { it.utbetaltPerMnd > 0 }) {
         val utbetalingsbegrunnelser = velgUtbetalingsbegrunnelser(
@@ -412,7 +411,7 @@ private fun velgUtbetalingsbegrunnelser(
     val standardbegrunnelser: MutableSet<Standardbegrunnelse> =
         tillateBegrunnelserForVedtakstype
             .filter { !it.vedtakBegrunnelseType.erFortsattInnvilget() }
-            .filter { sanityBegrunnelser[it]?.tilTriggesAv()?.valgbar ?: false }
+            .filter { sanityBegrunnelser[it]?.triggesAv?.valgbar ?: false }
             .fold(mutableSetOf()) { acc, standardBegrunnelse ->
                 if (standardBegrunnelse.triggesForPeriode(
                         minimertVedtaksperiode = minimertVedtaksperiode,

@@ -82,8 +82,7 @@ fun Vedtaksbegrunnelse.tilBegrunnelseMedTriggere(
         ?: throw Feil("Finner ikke sanityBegrunnelse med apiNavn=${this.standardbegrunnelse.sanityApiNavn}")
     return BegrunnelseMedTriggere(
         standardbegrunnelse = this.standardbegrunnelse,
-        triggesAv = sanityBegrunnelse
-            .tilTriggesAv(),
+        triggesAv = sanityBegrunnelse.triggesAv,
         featureToggleService = featureToggleService,
     )
 }
