@@ -11,10 +11,12 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.RestartAvSmåbar
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfoRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegService
@@ -67,6 +69,7 @@ class ForvalterController(
     private val vedtakService: VedtakService,
     private val taskRepository: TaskRepositoryWrapper,
     private val autovedtakService: AutovedtakService,
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(ForvalterController::class.java)
 
@@ -254,8 +257,13 @@ class ForvalterController(
     fun opprettEndreMigreringsdatoFor(@RequestBody fagsakListe: List<Long>) {
         fagsakListe.forEach { fagsakId ->
             try {
-                if (hentOgPersisterService.finnAktivForFagsak(fagsakId)?.opprettetÅrsak != BehandlingÅrsak.MIGRERING) {
-                    error("Siste aktive behandling er ikke MIGRERING")
+                hentOgPersisterService.finnAktivForFagsak(fagsakId).let {
+                    if (it == null) error("Fant ikke aktiv behandling")
+                    if (it.opprettetÅrsak != BehandlingÅrsak.MIGRERING) {
+                        error("Siste aktive behandling er ikke MIGRERING")
+                    }
+
+                    validerIkkeDeltBostedEllerSmåbarnstillegg(it)
                 }
                 opprettetEndreMigreringsdatobehandlingSimulerOgFerdistill(fagsakId)
             } catch (e: Exception) {
@@ -350,6 +358,8 @@ class ForvalterController(
             error("Siste aktive behandling er ikke migreringsbehandling")
         }
 
+        validerIkkeDeltBostedEllerSmåbarnstillegg(aktivBehandling)
+
         val infotrygdSak =
             infotrygdBarnetrygdClient.hentSaker(listOf(aktivBehandling.fagsak.aktør.aktivFødselsnummer()))
         val migrertStønad =
@@ -366,6 +376,18 @@ class ForvalterController(
         if (virkningfomDate.isAfter(årMånedMedMuligMigreringsfeil)) {
             error("Virkningfom i Infotrygd er etter dato med mulig feil. Bør fikses manuelt")
         }
+    }
+
+    private fun validerIkkeDeltBostedEllerSmåbarnstillegg(behandling: Behandling) {
+        val harDeltBosted = tilkjentYtelseRepository.findByBehandling(behandling.id).andelerTilkjentYtelse.any {
+            it.erDeltBosted()
+        }
+        if (harDeltBosted) error("Behandling har delt bosted")
+
+        val harSmåbarnstillegg = tilkjentYtelseRepository.findByBehandling(behandling.id).andelerTilkjentYtelse.any {
+            it.erSmåbarnstillegg()
+        }
+        if (harSmåbarnstillegg) error("Behandling har småbarnstillegg")
     }
 }
 
