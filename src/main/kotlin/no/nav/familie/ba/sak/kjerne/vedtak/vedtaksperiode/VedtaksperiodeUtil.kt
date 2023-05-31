@@ -35,7 +35,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.tilMinimertVedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.tilMinimertePersoner
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.endretUtbetalingsperiodeBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.landkodeTilBarnetsBostedsland
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.triggesForPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
@@ -196,13 +195,13 @@ private fun utledTom(
 
 fun hentGyldigeBegrunnelserForPeriode(
     utvidetVedtaksperiodeMedBegrunnelser: UtvidetVedtaksperiodeMedBegrunnelser,
-    sanityBegrunnelser: List<SanityBegrunnelse>,
+    sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
     persongrunnlag: PersonopplysningGrunnlag,
     vilkårsvurdering: Vilkårsvurdering,
     aktørIderMedUtbetaling: List<String>,
     endretUtbetalingAndeler: List<EndretUtbetalingAndel>,
     andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
-    sanityEØSBegrunnelser: List<SanityEØSBegrunnelse>,
+    sanityEØSBegrunnelser: Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse>,
     kompetanserIPeriode: List<Kompetanse>,
     kompetanserSomStopperRettFørPeriode: List<Kompetanse>,
     featureToggleService: FeatureToggleService,
@@ -230,7 +229,7 @@ fun hentGyldigeBegrunnelserForPeriode(
 
 fun hentGyldigeStandardbegrunnelserForVedtaksperiode(
     utvidetVedtaksperiodeMedBegrunnelser: UtvidetVedtaksperiodeMedBegrunnelser,
-    sanityBegrunnelser: List<SanityBegrunnelse>,
+    sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
     persongrunnlag: PersonopplysningGrunnlag,
     vilkårsvurdering: Vilkårsvurdering,
     aktørIderMedUtbetaling: List<String>,
@@ -264,7 +263,7 @@ fun hentGyldigeStandardbegrunnelserForVedtaksperiode(
 )
 
 fun hentGyldigeEØSBegrunnelserForPeriode(
-    sanityEØSBegrunnelser: List<SanityEØSBegrunnelse>,
+    sanityEØSBegrunnelser: Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse>,
     kompetanserIPeriode: List<Kompetanse>,
     kompetanserSomStopperRettFørPeriode: List<Kompetanse>,
     minimertVedtaksperiode: MinimertVedtaksperiode,
@@ -301,7 +300,7 @@ fun hentGyldigeEØSBegrunnelserForPeriode(
 
 fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
     minimertVedtaksperiode: MinimertVedtaksperiode,
-    sanityBegrunnelser: List<SanityBegrunnelse>,
+    sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
     minimertePersoner: List<MinimertPerson>,
     minimertePersonresultater: List<MinimertRestPersonResultat>,
     aktørIderMedUtbetaling: List<String>,
@@ -364,7 +363,7 @@ fun hentGyldigeBegrunnelserForVedtaksperiodeMinimert(
 
 private fun velgRedusertBegrunnelser(
     tillateBegrunnelserForVedtakstype: List<Standardbegrunnelse>,
-    sanityBegrunnelser: List<SanityBegrunnelse>,
+    sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
     minimertVedtaksperiode: MinimertVedtaksperiode,
     minimertePersonresultater: List<MinimertRestPersonResultat>,
     minimertePersoner: List<MinimertPerson>,
@@ -376,7 +375,7 @@ private fun velgRedusertBegrunnelser(
     featureToggleService: FeatureToggleService,
 ): List<Standardbegrunnelse> {
     val redusertBegrunnelser = tillateBegrunnelserForVedtakstype.filter {
-        it.tilISanityBegrunnelse(sanityBegrunnelser)?.tilTriggesAv()?.gjelderFraInnvilgelsestidspunkt ?: false
+        sanityBegrunnelser[it]?.tilTriggesAv()?.gjelderFraInnvilgelsestidspunkt ?: false
     }
     if (minimertVedtaksperiode.utbetalingsperioder.any { it.utbetaltPerMnd > 0 }) {
         val utbetalingsbegrunnelser = velgUtbetalingsbegrunnelser(
@@ -399,7 +398,7 @@ private fun velgRedusertBegrunnelser(
 
 private fun velgUtbetalingsbegrunnelser(
     tillateBegrunnelserForVedtakstype: List<Standardbegrunnelse>,
-    sanityBegrunnelser: List<SanityBegrunnelse>,
+    sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
     minimertVedtaksperiode: MinimertVedtaksperiode,
     minimertePersonresultater: List<MinimertRestPersonResultat>,
     minimertePersoner: List<MinimertPerson>,
@@ -413,7 +412,7 @@ private fun velgUtbetalingsbegrunnelser(
     val standardbegrunnelser: MutableSet<Standardbegrunnelse> =
         tillateBegrunnelserForVedtakstype
             .filter { !it.vedtakBegrunnelseType.erFortsattInnvilget() }
-            .filter { it.tilISanityBegrunnelse(sanityBegrunnelser)?.tilTriggesAv()?.valgbar ?: false }
+            .filter { sanityBegrunnelser[it]?.tilTriggesAv()?.valgbar ?: false }
             .fold(mutableSetOf()) { acc, standardBegrunnelse ->
                 if (standardBegrunnelse.triggesForPeriode(
                         minimertVedtaksperiode = minimertVedtaksperiode,

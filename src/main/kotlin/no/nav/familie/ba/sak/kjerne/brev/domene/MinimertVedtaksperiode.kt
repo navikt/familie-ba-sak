@@ -3,7 +3,9 @@ package no.nav.familie.ba.sak.kjerne.brev.domene
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.brev.domene.eøs.EØSBegrunnelseMedTriggere
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.SanityEØSBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilBrevPeriodeTestPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
@@ -20,8 +22,8 @@ data class MinimertVedtaksperiode(
 )
 
 fun UtvidetVedtaksperiodeMedBegrunnelser.tilMinimertVedtaksperiode(
-    sanityBegrunnelser: List<SanityBegrunnelse>,
-    sanityEØSBegrunnelser: List<SanityEØSBegrunnelse>,
+    sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
+    sanityEØSBegrunnelser: Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse>,
     featureToggleService: FeatureToggleService,
 ): MinimertVedtaksperiode {
     return MinimertVedtaksperiode(

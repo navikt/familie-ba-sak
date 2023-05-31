@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.brev.hentPersonidenterGjeldendeForBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
@@ -74,10 +75,10 @@ data class BegrunnelseMedTriggere(
 }
 
 fun Vedtaksbegrunnelse.tilBegrunnelseMedTriggere(
-    sanityBegrunnelser: List<SanityBegrunnelse>,
+    sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
     featureToggleService: FeatureToggleService,
 ): BegrunnelseMedTriggere {
-    val sanityBegrunnelse = sanityBegrunnelser.firstOrNull { it.apiNavn == this.standardbegrunnelse.sanityApiNavn }
+    val sanityBegrunnelse = sanityBegrunnelser[this.standardbegrunnelse]
         ?: throw Feil("Finner ikke sanityBegrunnelse med apiNavn=${this.standardbegrunnelse.sanityApiNavn}")
     return BegrunnelseMedTriggere(
         standardbegrunnelse = this.standardbegrunnelse,

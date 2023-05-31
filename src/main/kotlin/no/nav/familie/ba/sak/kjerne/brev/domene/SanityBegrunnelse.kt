@@ -16,12 +16,12 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 interface ISanityBegrunnelse {
-    val apiNavn: String?
+    val apiNavn: String
     val navnISystem: String
 }
 
 data class SanityBegrunnelse(
-    override val apiNavn: String?,
+    override val apiNavn: String,
     override val navnISystem: String,
     val vilkaar: List<SanityVilkår>? = null,
     val rolle: List<VilkårRolle> = emptyList(),
@@ -55,7 +55,8 @@ data class RestSanityBegrunnelse(
     val endretUtbetalingsperiodeTriggere: List<String>? = emptyList(),
     val utvidetBarnetrygdTriggere: List<String>? = emptyList(),
 ) {
-    fun tilSanityBegrunnelse(): SanityBegrunnelse {
+    fun tilSanityBegrunnelse(): SanityBegrunnelse? {
+        if (apiNavn == null) return null
         return SanityBegrunnelse(
             apiNavn = apiNavn,
             navnISystem = navnISystem,
@@ -105,7 +106,7 @@ data class RestSanityBegrunnelse(
 
 private val logger: Logger = LoggerFactory.getLogger(RestSanityBegrunnelse::class.java)
 
-fun <T : Enum<T>> finnEnumverdi(verdi: String, enumverdier: Array<T>, apiNavn: String?): T? {
+fun <T : Enum<T>> finnEnumverdi(verdi: String, enumverdier: Array<T>, apiNavn: String): T? {
     val enumverdi = enumverdier.firstOrNull { verdi == it.name }
     if (enumverdi == null) {
         logger.error(

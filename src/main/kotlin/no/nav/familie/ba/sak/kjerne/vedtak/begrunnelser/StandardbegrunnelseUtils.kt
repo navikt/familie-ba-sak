@@ -37,13 +37,13 @@ fun Standardbegrunnelse.triggesForPeriode(
     minimertePersoner: List<MinimertPerson>,
     aktørIderMedUtbetaling: List<String>,
     minimerteEndredeUtbetalingAndeler: List<MinimertEndretAndel> = emptyList(),
-    sanityBegrunnelser: List<SanityBegrunnelse>,
+    sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
     erFørsteVedtaksperiodePåFagsak: Boolean,
     ytelserForSøkerForrigeMåned: List<YtelseType>,
     ytelserForrigePeriode: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
     featureToggleService: FeatureToggleService,
 ): Boolean {
-    val triggesAv = this.tilISanityBegrunnelse(sanityBegrunnelser)?.tilTriggesAv() ?: return false
+    val triggesAv = sanityBegrunnelser[this]?.tilTriggesAv() ?: return false
 
     val aktuellePersoner = minimertePersoner
         .filter { person -> triggesAv.personTyper.contains(person.type) }
@@ -160,14 +160,6 @@ private fun erEtterEndretPeriodeAvSammeÅrsak(
 }
 
 private val logger = LoggerFactory.getLogger(Standardbegrunnelse::class.java)
-
-fun <T : ISanityBegrunnelse> IVedtakBegrunnelse.tilISanityBegrunnelse(sanityBegrunnelser: List<T>): T? {
-    val funnetBegrunnelse = sanityBegrunnelser.find { it.apiNavn == this.sanityApiNavn }
-    if (funnetBegrunnelse == null) {
-        logger.warn("Finner ikke begrunnelse med apinavn '${this.sanityApiNavn}' på '${this.enumnavnTilString()}' i Sanity")
-    }
-    return funnetBegrunnelse
-}
 
 fun List<LocalDate>.tilBrevTekst(): String = Utils.slåSammen(this.sorted().map { it.tilKortString() })
 

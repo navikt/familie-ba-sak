@@ -25,7 +25,9 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.SanityEØSBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.tilMinimertePersoner
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.dødeBarnForrigePeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
@@ -118,8 +120,8 @@ class BrevPeriodeService(
         andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
         uregistrerteBarn: List<BarnMedOpplysninger>,
         kompetanser: List<Kompetanse>,
-        sanityBegrunnelser: List<SanityBegrunnelse>,
-        sanityEØSBegrunnelser: List<SanityEØSBegrunnelse>,
+        sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
+        sanityEØSBegrunnelser: Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse>,
 
         skalLogge: Boolean = true,
     ): BrevperiodeData {
