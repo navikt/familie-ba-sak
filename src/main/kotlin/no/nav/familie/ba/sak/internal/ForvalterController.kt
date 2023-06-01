@@ -259,9 +259,6 @@ class ForvalterController(
             try {
                 hentOgPersisterService.finnAktivForFagsak(fagsakId).let {
                     if (it == null) error("Fant ikke aktiv behandling")
-                    if (it.opprettetÅrsak != BehandlingÅrsak.MIGRERING) {
-                        error("Siste aktive behandling er ikke MIGRERING")
-                    }
 
                     validerIkkeDeltBostedEllerSmåbarnstillegg(it)
                 }
