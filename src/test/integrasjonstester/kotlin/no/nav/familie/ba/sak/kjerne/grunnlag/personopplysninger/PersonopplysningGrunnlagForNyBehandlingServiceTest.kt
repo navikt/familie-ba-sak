@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 
 import io.mockk.every
+import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.randomFnr
@@ -20,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.Personopplysnin
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import kotlin.reflect.full.declaredMemberProperties
 
 class PersonopplysningGrunnlagForNyBehandlingServiceTest(
 
@@ -104,7 +106,8 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest(
         assertThat(grunnlagFraSatsendringBehandling.personer.any { it.aktør.aktivFødselsnummer() == barnId })
         assertThat(grunnlagFraSatsendringBehandling.id)
             .isNotEqualTo(grunnlagFraFørsteBehandling.id)
-        validerAtPersonerIGrunnlagErLike(grunnlagFraFørsteBehandling, grunnlagFraSatsendringBehandling)
+        assertThat(grunnlagFraSatsendringBehandling.behandlingId).isNotEqualTo(grunnlagFraFørsteBehandling.behandlingId)
+        validerAtPersonerIGrunnlagErLike(grunnlagFraFørsteBehandling, grunnlagFraSatsendringBehandling, false)
     }
 
     private fun avsluttOgLagreBehandling(behandling: Behandling) {
@@ -117,6 +120,7 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest(
         fun validerAtPersonerIGrunnlagErLike(
             personopplysningGrunnlagFørsteBehandling: PersonopplysningGrunnlag,
             personopplysningGrunnlagSatsendringBehandling: PersonopplysningGrunnlag,
+            erEnhetstest: Boolean,
         ) {
             personopplysningGrunnlagFørsteBehandling.personer.fold(mutableListOf<Pair<Person, Person>>()) { acc, person ->
                 acc.add(
@@ -132,6 +136,7 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest(
                     it.second.bostedsadresser,
                     it.first.bostedsadresser.firstOrNull()?.person,
                     it.second.bostedsadresser.firstOrNull()?.person,
+                    erEnhetstest,
                 )
                 validerAtSubEntiteterAvPersonErLike(
                     it.first.sivilstander,
@@ -163,12 +168,14 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest(
                     it.second.arbeidsforhold.firstOrNull()?.person,
                 )
 
-                validerAtSubEntiteterAvPersonErLike(
-                    listOf(it.first.dødsfall),
-                    listOf(it.second.dødsfall),
-                    it.first.dødsfall?.person,
-                    it.second.dødsfall?.person,
-                )
+                if (it.first.dødsfall != null) {
+                    validerAtSubEntiteterAvPersonErLike(
+                        listOf(it.first.dødsfall),
+                        listOf(it.second.dødsfall),
+                        it.first.dødsfall?.person,
+                        it.second.dødsfall?.person,
+                    )
+                }
             }
         }
 
@@ -177,11 +184,36 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest(
             kopiert: List<Any?>,
             forrigePerson: Person?,
             kopiertPerson: Person?,
+            erEnhetstestOgBostedsadresse: Boolean = false,
         ) {
-            assertThat(kopiert).containsExactlyInAnyOrderElementsOf(forrige)
+            val baseEntitetFelter =
+                BaseEntitet::class.declaredMemberProperties.map { it.name }.toTypedArray()
+
+            // Sammenligner ikke id, person og BaseEntitet-felter. id skal være ulik, person sjekkes separat og likhet med BaseEntitet-felter bryr vi oss ikke om.
+            assertThat(kopiert).usingRecursiveFieldByFieldElementComparatorIgnoringFields(
+                "id",
+                "person",
+                *baseEntitetFelter,
+            ).isEqualTo(forrige)
+
+            // Id skal alltid være ulik. Har ikke mulighet til å sette id til bostedsadresser i enhetstester
+            if (kopiert.isNotEmpty() && !erEnhetstestOgBostedsadresse) {
+                assertThat(kopiert).usingRecursiveFieldByFieldElementComparatorOnFields("id").isNotEqualTo(forrige)
+            }
 
             if (kopiertPerson != null) {
-                assertThat(kopiertPerson).isEqualTo(forrigePerson)
+                // Ignorerer sub-entiteter i sjekk da disse sjekkes hver for seg.
+                assertThat(kopiertPerson).usingRecursiveComparison().comparingOnlyFields(
+                    "id",
+                    "personopplysningGrunnlag",
+                    "bostedsadresser",
+                    "statsborgerskap",
+                    "opphold",
+                    "arbeidsforhold",
+                    "sivilstander",
+                    "dødsfall",
+                    *baseEntitetFelter,
+                ).isEqualTo(forrigePerson)
                 assertThat(kopiertPerson.id).isNotEqualTo(forrigePerson?.id)
             }
         }

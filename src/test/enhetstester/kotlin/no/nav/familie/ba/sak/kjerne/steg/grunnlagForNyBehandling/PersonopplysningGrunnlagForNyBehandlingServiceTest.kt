@@ -120,16 +120,26 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
         val grMatrikkeladresse = GrMatrikkeladresse(1, "2", null, "0682", "23").medPeriodeOgPerson(periode, søkerPerson)
 
         val statsborgerskap = GrStatsborgerskap(
+            id = 1,
             gyldigPeriode = periode,
             landkode = "N",
             medlemskap = Medlemskap.EØS,
             person = søkerPerson,
         )
-        val opphold = GrOpphold(gyldigPeriode = periode, type = OPPHOLDSTILLATELSE.PERMANENT, person = søkerPerson)
+        val opphold =
+            GrOpphold(id = 1, gyldigPeriode = periode, type = OPPHOLDSTILLATELSE.PERMANENT, person = søkerPerson)
         val arbeidsforhold =
-            GrArbeidsforhold(periode = periode, arbeidsgiverId = "1", arbeidsgiverType = "AS", person = søkerPerson)
-        val sivilstand = GrSivilstand(fom = LocalDate.now(), type = SIVILSTAND.REGISTRERT_PARTNER, person = søkerPerson)
+            GrArbeidsforhold(
+                id = 1,
+                periode = periode,
+                arbeidsgiverId = "1",
+                arbeidsgiverType = "AS",
+                person = søkerPerson,
+            )
+        val sivilstand =
+            GrSivilstand(id = 1, fom = LocalDate.now(), type = SIVILSTAND.REGISTRERT_PARTNER, person = søkerPerson)
         val dødsfall = Dødsfall(
+            id = 1,
             person = søkerPerson,
             dødsfallDato = LocalDate.now(),
             dødsfallAdresse = "Adresse",
@@ -169,7 +179,7 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
         assertThat(kopiertPersonopplysningGrunnlag.captured.behandlingId).isEqualTo(nyBehandling.id)
         assertThat(kopiertPersonopplysningGrunnlag.captured.personer.size).isEqualTo(2)
 
-        validerAtPersonerIGrunnlagErLike(personopplysningGrunnlag, kopiertPersonopplysningGrunnlag.captured)
+        validerAtPersonerIGrunnlagErLike(personopplysningGrunnlag, kopiertPersonopplysningGrunnlag.captured, true)
     }
 
     @Test
