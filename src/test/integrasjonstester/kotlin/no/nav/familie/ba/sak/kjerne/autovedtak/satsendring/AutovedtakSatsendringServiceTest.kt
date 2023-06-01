@@ -154,7 +154,7 @@ class AutovedtakSatsendringServiceTest(
             )
             val satsendringResultat = autovedtakSatsendringService.kjørBehandling(satsendringTaskDto)
 
-            assertThat(satsendringResultat).isEqualTo(SatsendringSvar.BEHANDLING_KAN_SETTES_PÅ_VENT_MEN_TOGGLE_ER_SLÅTT_AV)
+            assertThat(satsendringResultat).isEqualTo(SatsendringSvar.BEHANDLING_KAN_SNIKES_FORBI)
         }
 
         @Test

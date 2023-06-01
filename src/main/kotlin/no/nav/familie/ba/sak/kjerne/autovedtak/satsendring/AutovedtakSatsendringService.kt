@@ -84,14 +84,22 @@ class AutovedtakSatsendringService(
         if (sisteIverksatteBehandling.fagsak.status != FagsakStatus.LØPENDE) throw Feil("Forsøker å utføre satsendring på ikke løpende fagsak ${sisteIverksatteBehandling.fagsak.id}")
 
         if (aktivOgÅpenBehandling != null) {
-            hentBrukerHarÅpenBehandlingSvar(aktivOgÅpenBehandling)?.let { satsendringSvar ->
+            val brukerHarÅpenBehandlingSvar = hentBrukerHarÅpenBehandlingSvar(aktivOgÅpenBehandling)
+            if (brukerHarÅpenBehandlingSvar == SatsendringSvar.BEHANDLING_KAN_SNIKES_FORBI &&
+                featureToggleService.isEnabled(SATSENDRING_SNIKE_I_KØEN)
+            ) {
+                snikeIKøenService.settAktivBehandlingTilPåMaskinellVent(
+                    aktivOgÅpenBehandling.id,
+                    SettPåMaskinellVentÅrsak.SATSENDRING,
+                )
+            } else {
                 satskjøringForFagsak.feiltype = "ÅPEN_BEHANDLING"
                 satskjøringRepository.save(satskjøringForFagsak)
 
-                logger.info(satsendringSvar.melding)
+                logger.info(brukerHarÅpenBehandlingSvar.melding)
                 satsendringIgnorertÅpenBehandling.increment()
 
-                return satsendringSvar
+                return brukerHarÅpenBehandlingSvar
             }
         }
 
@@ -146,27 +154,17 @@ class AutovedtakSatsendringService(
 
     private fun hentBrukerHarÅpenBehandlingSvar(
         aktivOgÅpenBehandling: Behandling,
-    ): SatsendringSvar? {
+    ): SatsendringSvar {
         val status = aktivOgÅpenBehandling.status
-        if (status != BehandlingStatus.UTREDES && status != BehandlingStatus.SATT_PÅ_VENT) {
-            return SatsendringSvar.BEHANDLING_ER_LÅST_SATSENDRING_TRIGGES_NESTE_VIRKEDAG
+        return when {
+            status != BehandlingStatus.UTREDES && status != BehandlingStatus.SATT_PÅ_VENT ->
+                SatsendringSvar.BEHANDLING_ER_LÅST_SATSENDRING_TRIGGES_NESTE_VIRKEDAG
+            kanSnikeIKøen(aktivOgÅpenBehandling) -> SatsendringSvar.BEHANDLING_KAN_SNIKES_FORBI
+            else -> SatsendringSvar.BEHANDLING_KAN_IKKE_SETTES_PÅ_VENT
         }
-
-        if (kanSetteÅpenBehandlingPåVent(aktivOgÅpenBehandling)) {
-            if (!featureToggleService.isEnabled(SATSENDRING_SNIKE_I_KØEN)) {
-                return SatsendringSvar.BEHANDLING_KAN_SETTES_PÅ_VENT_MEN_TOGGLE_ER_SLÅTT_AV
-            }
-            snikeIKøenService.settAktivBehandlingTilPåMaskinellVent(
-                aktivOgÅpenBehandling.id,
-                SettPåMaskinellVentÅrsak.SATSENDRING,
-            )
-            return null
-        }
-
-        return SatsendringSvar.BEHANDLING_KAN_IKKE_SETTES_PÅ_VENT
     }
 
-    private fun kanSetteÅpenBehandlingPåVent(aktivOgÅpenBehandling: Behandling): Boolean {
+    private fun kanSnikeIKøen(aktivOgÅpenBehandling: Behandling): Boolean {
         val behandlingId = aktivOgÅpenBehandling.id
         val loggSuffix = "endrer status på behandling til på vent"
         if (aktivOgÅpenBehandling.status == BehandlingStatus.SATT_PÅ_VENT) {
@@ -230,6 +228,6 @@ enum class SatsendringSvar(val melding: String) {
     BEHANDLING_ER_LÅST_SATSENDRING_TRIGGES_NESTE_VIRKEDAG(
         melding = "Behandlingen er låst for endringer og satsendring vil bli trigget neste virkedag.",
     ),
-    BEHANDLING_KAN_SETTES_PÅ_VENT_MEN_TOGGLE_ER_SLÅTT_AV("Behandling kan settes på vent men toggle er slått av"),
+    BEHANDLING_KAN_SNIKES_FORBI("Behandling kan snikes forbi (toggle er slått av)"),
     BEHANDLING_KAN_IKKE_SETTES_PÅ_VENT("Behandlingen kan ikke settes på vent"),
 }

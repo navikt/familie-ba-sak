@@ -38,6 +38,9 @@ class SnikeIKøenService(
     }
 
     /**
+     * @param behandlingSomFerdigstilles er behandlingen som ferdigstilles i [no.nav.familie.ba.sak.kjerne.steg.FerdigstillBehandling]
+     *  Den er mest brukt for å logge hvilken behandling det er som ferdigstilles og hvilken som blir deaktivert
+     *
      * @return boolean som tilsier om en behandling er reaktivert eller ikke
      */
     @Transactional
