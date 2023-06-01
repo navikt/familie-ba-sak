@@ -203,7 +203,7 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest(
 
             if (kopiertPerson != null) {
                 // Ignorerer sub-entiteter i sjekk da disse sjekkes hver for seg.
-                assertThat(kopiertPerson).usingRecursiveComparison().comparingOnlyFields(
+                assertThat(kopiertPerson).usingRecursiveComparison().ignoringFields(
                     "id",
                     "personopplysningGrunnlag",
                     "bostedsadresser",

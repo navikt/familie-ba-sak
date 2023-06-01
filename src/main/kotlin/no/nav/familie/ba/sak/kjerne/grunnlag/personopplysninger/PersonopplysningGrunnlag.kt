@@ -73,7 +73,7 @@ data class PersonopplysningGrunnlag(
     }
 
     fun tilKopiForNyBehandling(behandling: Behandling): PersonopplysningGrunnlag =
-        PersonopplysningGrunnlag(behandlingId = behandling.id).also {
+        copy(id = 0, behandlingId = behandling.id, personer = mutableSetOf()).also {
             it.personer.addAll(
                 personer.map { person -> person.tilKopiForNyttPersonopplysningGrunnlag(it) },
             )

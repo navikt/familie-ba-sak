@@ -141,22 +141,35 @@ data class Person(
     }
 
     fun tilKopiForNyttPersonopplysningGrunnlag(nyttPersonopplysningGrunnlag: PersonopplysningGrunnlag): Person =
-        Person(
-            type = type,
-            fødselsdato = fødselsdato,
-            navn = navn,
-            kjønn = kjønn,
-            målform = målform,
+        copy(
+            id = 0,
             personopplysningGrunnlag = nyttPersonopplysningGrunnlag,
-            aktør = aktør,
-        ).also {
-            it.bostedsadresser.addAll(bostedsadresser.map { grBostedsadresse -> grBostedsadresse.tilKopiForNyPerson(it) })
-            it.statsborgerskap.addAll(statsborgerskap.map { grStatsborgerskap -> grStatsborgerskap.tilKopiForNyPerson(it) })
-            it.opphold.addAll(opphold.map { grOpphold -> grOpphold.tilKopiForNyPerson(it) })
-            it.arbeidsforhold.addAll(arbeidsforhold.map { grArbeidsforhold -> grArbeidsforhold.tilKopiForNyPerson(it) })
-            it.sivilstander.addAll(sivilstander.map { grSivilstand -> grSivilstand.tilKopiForNyPerson(it) })
-            it.dødsfall = dødsfall?.tilKopiForNyPerson(it)
-        }
+            bostedsadresser = mutableListOf(),
+            statsborgerskap = mutableListOf(),
+            opphold = mutableListOf(),
+            arbeidsforhold = mutableListOf(),
+            sivilstander = mutableListOf(),
+        )
+            .also {
+                it.bostedsadresser.addAll(
+                    bostedsadresser.map { grBostedsadresse ->
+                        grBostedsadresse.tilKopiForNyPerson(
+                            it,
+                        )
+                    },
+                )
+                it.statsborgerskap.addAll(
+                    statsborgerskap.map { grStatsborgerskap ->
+                        grStatsborgerskap.tilKopiForNyPerson(
+                            it,
+                        )
+                    },
+                )
+                it.opphold.addAll(opphold.map { grOpphold -> grOpphold.tilKopiForNyPerson(it) })
+                it.arbeidsforhold.addAll(arbeidsforhold.map { grArbeidsforhold -> grArbeidsforhold.tilKopiForNyPerson(it) })
+                it.sivilstander.addAll(sivilstander.map { grSivilstand -> grSivilstand.tilKopiForNyPerson(it) })
+                it.dødsfall = dødsfall?.tilKopiForNyPerson(it)
+            }
 }
 
 enum class Kjønn {
