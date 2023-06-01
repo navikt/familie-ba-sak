@@ -54,7 +54,7 @@ data class GrOpphold(
     }
 
     fun tilKopiForNyPerson(nyPerson: Person): GrOpphold =
-        GrOpphold(gyldigPeriode = gyldigPeriode, type = type, person = nyPerson)
+        copy(id = 0, person = nyPerson)
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

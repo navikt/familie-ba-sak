@@ -54,13 +54,7 @@ data class Dødsfall(
     )
 
     fun tilKopiForNyPerson(nyPerson: Person): Dødsfall =
-        Dødsfall(
-            person = nyPerson,
-            dødsfallDato = dødsfallDato,
-            dødsfallAdresse = dødsfallAdresse,
-            dødsfallPostnummer = dødsfallPostnummer,
-            dødsfallPoststed = dødsfallPoststed,
-        )
+        copy(id = 0, person = nyPerson)
 }
 
 fun lagDødsfall(

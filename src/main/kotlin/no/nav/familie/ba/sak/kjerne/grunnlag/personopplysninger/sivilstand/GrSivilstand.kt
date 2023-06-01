@@ -75,7 +75,7 @@ data class GrSivilstand(
     fun harGyldigFom() = this.fom != null
 
     fun tilKopiForNyPerson(nyPerson: Person) =
-        GrSivilstand(fom = fom, type = type, person = nyPerson)
+        copy(id = 0, person = nyPerson)
 
     companion object {
 

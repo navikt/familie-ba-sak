@@ -46,12 +46,7 @@ data class GrArbeidsforhold(
     val person: Person,
 ) : BaseEntitet() {
     fun tilKopiForNyPerson(nyPerson: Person) =
-        GrArbeidsforhold(
-            periode = periode,
-            arbeidsgiverId = arbeidsgiverId,
-            arbeidsgiverType = arbeidsgiverType,
-            person = nyPerson,
-        )
+        copy(id = 0, person = nyPerson)
 }
 
 fun List<GrArbeidsforhold>.harLøpendeArbeidsforhold(): Boolean = this.any {
