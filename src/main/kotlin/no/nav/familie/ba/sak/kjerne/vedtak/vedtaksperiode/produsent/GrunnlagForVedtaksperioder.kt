@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerBeløpOgType
@@ -226,6 +227,15 @@ private fun lagGrunnlagForVilkårOgAndel(
     person: Person,
     andeler: Iterable<AndelForVedtaksperiode>?,
 ) = if (personHarRettPåUtbetalingIPeriode == true) {
+    if (andeler == null) {
+        secureLogger.info(
+            "Vi har fått en innvilget vedtaksperiode, men det finnes ingen andeler.\n" +
+                "$person\n" +
+                "$vilkårResultater\n" +
+                "$andeler",
+        )
+    }
+
     GrunnlagForPersonInnvilget(
         vilkårResultaterForVedtaksperiode = vilkårResultater
             ?: error("vilkårResultatene burde alltid finnes om vi har innvilget vedtaksperiode."),
