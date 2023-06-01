@@ -24,12 +24,12 @@ class SanityService(
         logManglerSanityBegrunnelseForEnum(enumPåApiNavn, sanityBegrunnelser, "SanityBegrunnelse")
         return sanityBegrunnelser
             .mapNotNull {
-                val enum = enumPåApiNavn[it.apiNavn]
-                if (enum == null) {
+                val begrunnelseEnum = enumPåApiNavn[it.apiNavn]
+                if (begrunnelseEnum == null) {
                     logger.warn("Finner ikke Standardbegrunnelse for ${it.apiNavn}")
                     null
                 } else {
-                    enum to it
+                    begrunnelseEnum to it
                 }
             }.toMap()
     }
@@ -41,12 +41,12 @@ class SanityService(
         logManglerSanityBegrunnelseForEnum(enumPåApiNavn, sanityEØSBegrunnelser, "SanityEØSBegrunnelse")
         return sanityEØSBegrunnelser
             .mapNotNull {
-                val enum = enumPåApiNavn[it.apiNavn]
-                if (enum == null) {
+                val begrunnelseEnum = enumPåApiNavn[it.apiNavn]
+                if (begrunnelseEnum == null) {
                     logger.warn("Finner ikke EØSStandardbegrunnelse for ${it.apiNavn}")
                     null
                 } else {
-                    enum to it
+                    begrunnelseEnum to it
                 }
             }.toMap()
     }
