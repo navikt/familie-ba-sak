@@ -194,7 +194,7 @@ class RestartAvSmåbarnstilleggTest(
                 EksternPeriode(
                     personIdent = personScenario.søker.ident!!,
                     fomDato = barnFødselsdato.plusYears(1),
-                    tomDato = LocalDate.now().minusMonths(4).førsteDagIInneværendeMåned(),
+                    tomDato = satsendringDato.minusMonths(2),
                     datakilde = Datakilde.EF,
                 ),
                 EksternPeriode(
