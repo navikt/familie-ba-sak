@@ -12,8 +12,8 @@ import no.nav.familie.ba.sak.common.lagUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.config.testSanityKlient
 import no.nav.familie.ba.sak.datagenerator.brev.lagMinimertPerson
-import no.nav.familie.ba.sak.integrasjoner.sanity.hentBegrunnelser
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeDeltBostedTriggere
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
@@ -54,7 +54,7 @@ internal class StandardbegrunnelseTest {
 
     private val aktørerMedUtbetaling = listOf(søker.aktør, barn.aktør)
 
-    private val sanityBegrunnelser = hentBegrunnelser()
+    private val sanityBegrunnelser = testSanityKlient.hentBegrunnelserMap()
     private val featureToggleService: FeatureToggleService = mockk()
 
     @Test
@@ -360,8 +360,8 @@ internal class StandardbegrunnelseTest {
         )
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, dødtBarn)
 
-        val reduksjonBarnDødBegrunnelse = listOf(
-            SanityBegrunnelse(
+        val reduksjonBarnDødBegrunnelse = mapOf(
+            Standardbegrunnelse.REDUKSJON_BARN_DØD to SanityBegrunnelse(
                 apiNavn = "reduksjonBarnDod",
                 navnISystem = "barnDød",
                 ovrigeTriggere = listOf(ØvrigTrigger.BARN_DØD),
@@ -404,8 +404,8 @@ internal class StandardbegrunnelseTest {
             lagDødsfall(dødtBarn, dødsfallDatoFraPdl = dødsfallDato.toString(), dødsfallAdresseFraPdl = null)
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, dødtBarn)
 
-        val reduksjonBarnDødBegrunnelse = listOf(
-            SanityBegrunnelse(
+        val reduksjonBarnDødBegrunnelse = mapOf(
+            Standardbegrunnelse.REDUKSJON_BARN_DØD to SanityBegrunnelse(
                 apiNavn = "reduksjonBarnDod",
                 navnISystem = "barnDød",
                 ovrigeTriggere = listOf(ØvrigTrigger.BARN_DØD),
@@ -448,8 +448,8 @@ internal class StandardbegrunnelseTest {
             lagDødsfall(dødtBarn, dødsfallDatoFraPdl = dødsfallDato.toString(), dødsfallAdresseFraPdl = null)
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, dødtBarn)
 
-        val reduksjonBarnDødBegrunnelse = listOf(
-            SanityBegrunnelse(
+        val reduksjonBarnDødBegrunnelse = mapOf(
+            Standardbegrunnelse.REDUKSJON_BARN_DØD to SanityBegrunnelse(
                 apiNavn = "reduksjonBarnDod",
                 navnISystem = "barnDød",
                 ovrigeTriggere = listOf(ØvrigTrigger.BARN_DØD),

@@ -11,19 +11,15 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.common.Utils.formaterBeløp
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
-import no.nav.familie.ba.sak.integrasjoner.sanity.hentBegrunnelser
-import no.nav.familie.ba.sak.integrasjoner.sanity.hentEØSBegrunnelser
+import no.nav.familie.ba.sak.config.testSanityKlient
 import no.nav.familie.ba.sak.kjerne.brev.domene.BegrunnelseMedTriggere
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.eøs.EØSBegrunnelseMedTriggere
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
-import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.finnBegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.FritekstBegrunnelse
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.junit.jupiter.api.Test
@@ -40,8 +36,8 @@ class BrevperiodeTest {
 
         val testmappe = File("./src/test/resources/brevperiodeCaser")
 
-        val sanityBegrunnelser = hentBegrunnelser()
-        val sanityEØSBegrunnelser = hentEØSBegrunnelser()
+        val sanityBegrunnelser = testSanityKlient.hentBegrunnelserMap()
+        val sanityEØSBegrunnelser = testSanityKlient.hentEØSBegrunnelserMap()
 
         val antallFeil = testmappe.list()?.fold(0) { acc, it ->
 
@@ -70,7 +66,7 @@ class BrevperiodeTest {
                     eøsBegrunnelser = behandlingsresultatPersonTestConfig.eøsBegrunnelser?.map {
                         EØSBegrunnelseMedTriggere(
                             eøsBegrunnelse = it,
-                            sanityEØSBegrunnelse = sanityEØSBegrunnelser.finnBegrunnelse(it)!!,
+                            sanityEØSBegrunnelse = sanityEØSBegrunnelser[it]!!,
                         )
                     } ?: emptyList(),
                 )
@@ -102,6 +98,7 @@ class BrevperiodeTest {
                         )
                     } ?: emptyList(),
                     dødeBarnForrigePeriode = emptyList(),
+                    featureToggleService = featureToggleService,
                 ).genererBrevPeriode()
             } catch (e: Exception) {
                 testReporter.publishEntry(
@@ -203,10 +200,10 @@ class BrevperiodeTest {
         return feil
     }
 
-    private fun Standardbegrunnelse.tilBrevBegrunnelseGrunnlag(sanityBegrunnelser: List<SanityBegrunnelse>) =
+    private fun Standardbegrunnelse.tilBrevBegrunnelseGrunnlag(sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>) =
         BegrunnelseMedTriggere(
             standardbegrunnelse = this,
-            triggesAv = this.tilISanityBegrunnelse(sanityBegrunnelser)!!.tilTriggesAv(),
+            triggesAv = sanityBegrunnelser[this]!!.triggesAv,
             featureToggleService = featureToggleService,
         )
 }

@@ -25,6 +25,7 @@ import org.springframework.test.context.ContextConfiguration
     "mock-oauth",
     "mock-rest-template-config",
     "mock-localdate-service",
+    "mock-sanity-client",
 )
 @ContextConfiguration(initializers = [DbContainerInitializer::class])
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)

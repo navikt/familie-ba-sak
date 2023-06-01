@@ -183,8 +183,13 @@ class VilkårsvurderingUtilsTest {
 
     @Test
     fun `skal liste opp begrunnelser uten vilkår`() {
-        val sanityBegrunnelser =
-            listOf(SanityBegrunnelse(vilkaar = null, apiNavn = "innvilgetBosattIRiket", navnISystem = ""))
+        val sanityBegrunnelser = mapOf(
+            Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to SanityBegrunnelse(
+                vilkaar = null,
+                apiNavn = "innvilgetBosattIRiket",
+                navnISystem = "",
+            ),
+        )
         val vedtakBegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET
 
         val restVedtakBegrunnelserTilknyttetVilkår =
@@ -195,14 +200,13 @@ class VilkårsvurderingUtilsTest {
 
     @Test
     fun `skal liste opp begrunnelsene en gang per vilkår`() {
-        val sanityBegrunnelser =
-            listOf(
-                SanityBegrunnelse(
-                    vilkaar = listOf(SanityVilkår.BOSATT_I_RIKET, SanityVilkår.LOVLIG_OPPHOLD),
-                    apiNavn = "innvilgetBosattIRiket",
-                    navnISystem = "",
-                ),
-            )
+        val sanityBegrunnelser = mapOf(
+            Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to SanityBegrunnelse(
+                vilkaar = listOf(SanityVilkår.BOSATT_I_RIKET, SanityVilkår.LOVLIG_OPPHOLD),
+                apiNavn = "innvilgetBosattIRiket",
+                navnISystem = "",
+            ),
+        )
         val vedtakBegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET
 
         val restVedtakBegrunnelserTilknyttetVilkår =
