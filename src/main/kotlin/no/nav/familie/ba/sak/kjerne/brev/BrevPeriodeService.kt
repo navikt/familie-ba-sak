@@ -181,6 +181,7 @@ class BrevPeriodeService(
                 )
             },
             dødeBarnForrigePeriode = dødeBarnForrigePeriode,
+            featureToggleService = featureToggleService,
         )
 
         if (skalLogge) {
