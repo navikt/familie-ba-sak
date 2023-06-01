@@ -54,7 +54,7 @@ class SnikeIKøenService(
 
         aktiverBehandlingPåVent(aktivBehandling, behandlingPåVent, behandlingSomFerdigstilles)
         tilbakestillBehandlingService.tilbakestillBehandlingTilVilkårsvurdering(behandlingPåVent)
-        loggService.opprettSTattAvMaskinellVent(behandlingPåVent)
+        loggService.opprettTattAvMaskinellVent(behandlingPåVent)
         return true
     }
 

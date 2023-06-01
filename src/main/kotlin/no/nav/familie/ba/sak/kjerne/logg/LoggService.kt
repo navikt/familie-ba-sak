@@ -386,7 +386,7 @@ class LoggService(
         lagre(logg)
     }
 
-    fun opprettSTattAvMaskinellVent(behandling: Behandling) {
+    fun opprettTattAvMaskinellVent(behandling: Behandling) {
         val logg = Logg(
             behandling.id,
             type = LoggType.BEHANDLING_TATT_AV_MASKINELL_VENT,
