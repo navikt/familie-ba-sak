@@ -9,8 +9,8 @@ import no.nav.familie.ba.sak.common.lagUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.tilMånedÅr
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.config.TestSanityKlient
 import no.nav.familie.ba.sak.datagenerator.vedtak.lagVedtaksbegrunnelse
-import no.nav.familie.ba.sak.integrasjoner.sanity.hentBegrunnelser
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -81,7 +81,7 @@ internal class BrevUtilsTest {
             hentHjemmeltekst(
                 minimerteVedtaksperioder = utvidetVedtaksperioderMedBegrunnelser.map {
                     it.tilMinimertVedtaksperiode(
-                        hentBegrunnelser(),
+                        TestSanityKlient.hentBegrunnelser(),
                         emptyList(),
                         featureToggleService,
                     )
@@ -128,7 +128,7 @@ internal class BrevUtilsTest {
             hentHjemmeltekst(
                 minimerteVedtaksperioder = utvidetVedtaksperioderMedBegrunnelser.map {
                     it.tilMinimertVedtaksperiode(
-                        sanityBegrunnelser = hentBegrunnelser(),
+                        sanityBegrunnelser = TestSanityKlient.hentBegrunnelser(),
                         sanityEØSBegrunnelser = emptyList(),
                         featureToggleService = featureToggleService,
                     )
@@ -176,7 +176,7 @@ internal class BrevUtilsTest {
             hentHjemmeltekst(
                 minimerteVedtaksperioder = utvidetVedtaksperioderMedBegrunnelser.map {
                     it.tilMinimertVedtaksperiode(
-                        sanityBegrunnelser = hentBegrunnelser(),
+                        sanityBegrunnelser = TestSanityKlient.hentBegrunnelser(),
                         sanityEØSBegrunnelser = emptyList(),
                         featureToggleService = featureToggleService,
                     )
