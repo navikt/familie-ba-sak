@@ -169,43 +169,50 @@ class VilkårsvurderingForNyBehandlingServiceTest {
         validerKopiertVilkårsvurdering(slot.captured, forrigeVilkårsvurdering, forventetNåværendeVilkårsvurdering)
     }
 
-    private fun validerKopiertVilkårsvurdering(
-        kopiertVilkårsvurdering: Vilkårsvurdering,
-        forrigeVilkårsvurdering: Vilkårsvurdering,
-        forventetNåværendeVilkårsvurdering: Vilkårsvurdering,
-    ) {
-        assertThat(kopiertVilkårsvurdering.id).isNotEqualTo(forrigeVilkårsvurdering.id)
-        assertThat(kopiertVilkårsvurdering.behandling.id).isNotEqualTo(forrigeVilkårsvurdering.behandling.id)
+    companion object {
+        fun validerKopiertVilkårsvurdering(
+            kopiertVilkårsvurdering: Vilkårsvurdering,
+            forrigeVilkårsvurdering: Vilkårsvurdering,
+            forventetNåværendeVilkårsvurdering: Vilkårsvurdering,
+        ) {
+            assertThat(kopiertVilkårsvurdering.id).isNotEqualTo(forrigeVilkårsvurdering.id)
+            assertThat(kopiertVilkårsvurdering.behandling.id).isNotEqualTo(forrigeVilkårsvurdering.behandling.id)
 
-        assertThat(kopiertVilkårsvurdering.personResultater.flatMap { it.vilkårResultater }.size).isEqualTo(
-            forrigeVilkårsvurdering.personResultater.flatMap { it.vilkårResultater }.size,
-        )
-
-        val kopierteOgForrigeVilkårResultaterGruppertEtterVilkårType =
-            kopiertVilkårsvurdering.personResultater.fold(mutableListOf<Pair<List<VilkårResultat>, List<VilkårResultat>>>()) { acc, personResultat ->
-                val vilkårResultaterForrigeBehandlingForPerson =
-                    forventetNåværendeVilkårsvurdering.personResultater.filter { it.aktør.aktivFødselsnummer() == personResultat.aktør.aktivFødselsnummer() }
-                        .flatMap { it.vilkårResultater }
-                acc.addAll(
-                    personResultat.vilkårResultater.groupBy { it.vilkårType }
-                        .map { (vilkårType, vilkårResultater) ->
-                            Pair(
-                                vilkårResultater,
-                                vilkårResultaterForrigeBehandlingForPerson.filter { forrigeVilkårResultat -> forrigeVilkårResultat.vilkårType == vilkårType },
-                            )
-                        },
-                )
-                acc
+            kopiertVilkårsvurdering.personResultater.forEach {
+                assertThat(it.aktør).isEqualTo(forventetNåværendeVilkårsvurdering.personResultater.first { personResultat -> personResultat.aktør.aktivFødselsnummer() == it.aktør.aktivFødselsnummer() }.aktør)
             }
 
-        val baseEntitetFelter =
-            BaseEntitet::class.declaredMemberProperties.map { it.name }.toTypedArray()
-        kopierteOgForrigeVilkårResultaterGruppertEtterVilkårType.forEach {
-            assertThat(it.first).usingRecursiveFieldByFieldElementComparatorIgnoringFields(
-                "personResultat",
-                *baseEntitetFelter,
+            assertThat(kopiertVilkårsvurdering.personResultater.flatMap { it.vilkårResultater }.size).isEqualTo(
+                forrigeVilkårsvurdering.personResultater.flatMap { it.vilkårResultater }.size,
             )
-                .isEqualTo(it.second)
+
+            val kopierteOgForrigeVilkårResultaterGruppertEtterVilkårType =
+                kopiertVilkårsvurdering.personResultater.fold(mutableListOf<Pair<List<VilkårResultat>, List<VilkårResultat>>>()) { acc, personResultat ->
+                    val vilkårResultaterForrigeBehandlingForPerson =
+                        forventetNåværendeVilkårsvurdering.personResultater.filter { it.aktør.aktivFødselsnummer() == personResultat.aktør.aktivFødselsnummer() }
+                            .flatMap { it.vilkårResultater }
+                    acc.addAll(
+                        personResultat.vilkårResultater.groupBy { it.vilkårType }
+                            .map { (vilkårType, vilkårResultater) ->
+                                Pair(
+                                    vilkårResultater,
+                                    vilkårResultaterForrigeBehandlingForPerson.filter { forrigeVilkårResultat -> forrigeVilkårResultat.vilkårType == vilkårType },
+                                )
+                            },
+                    )
+                    acc
+                }
+
+            val baseEntitetFelter =
+                BaseEntitet::class.declaredMemberProperties.map { it.name }.toTypedArray()
+            kopierteOgForrigeVilkårResultaterGruppertEtterVilkårType.forEach {
+                assertThat(it.first).usingRecursiveFieldByFieldElementComparatorIgnoringFields(
+                    "id",
+                    "personResultat",
+                    *baseEntitetFelter,
+                )
+                    .isEqualTo(it.second)
+            }
         }
     }
 }

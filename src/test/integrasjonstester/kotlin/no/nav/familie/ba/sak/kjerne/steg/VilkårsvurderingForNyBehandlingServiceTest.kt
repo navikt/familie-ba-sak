@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
 import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
+import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.common.randomFnr
@@ -9,6 +11,7 @@ import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
 import no.nav.familie.ba.sak.datagenerator.vilkårsvurdering.lagBarnVilkårResultat
 import no.nav.familie.ba.sak.datagenerator.vilkårsvurdering.lagSøkerVilkårResultat
+import no.nav.familie.ba.sak.datagenerator.vilkårsvurdering.lagVilkårsvurderingMedOverstyrendeResultater
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -16,10 +19,13 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingService
+import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingServiceTest.Companion.validerKopiertVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -55,6 +61,9 @@ class VilkårsvurderingForNyBehandlingServiceTest(
 
     @Autowired
     private val databaseCleanupService: DatabaseCleanupService,
+
+    @Autowired
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
 
 ) : AbstractSpringIntegrationTest() {
     @BeforeAll
@@ -481,6 +490,68 @@ class VilkårsvurderingForNyBehandlingServiceTest(
                     it.periodeFom == barnetsFødselsdato
             }
         }
+    }
+
+    @Test
+    fun `skal kopiere vilkårsvurdering fra forrige behandling ved satsendring`() {
+        val søker = lagPerson(type = PersonType.SØKER)
+        val barn = lagPerson(type = PersonType.BARN)
+        val barnetsFødselsdato = LocalDate.of(2021, 8, 15)
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søker.aktør.aktivFødselsnummer())
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
+            lagBehandling(
+                fagsak = fagsak,
+                behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
+                årsak = BehandlingÅrsak.SØKNAD,
+            ),
+        )
+        val søkerAktør = personidentService.hentOgLagreAktør(søker.aktør.aktivFødselsnummer(), true)
+        val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barn.aktør.aktivFødselsnummer()), true)
+        // val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
+        //     behandlingId = behandling.id,
+        //     søkerPersonIdent = fnr,
+        //     barnasIdenter = listOf(barnFnr),
+        //     barnasFødselsdatoer = listOf(barnetsFødselsdato),
+        //     søkerAktør = søkerAktør,
+        //     barnAktør = barnAktør,
+        // )
+        // persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+
+        val vilkårsvurdering =
+            lagVilkårsvurderingMedOverstyrendeResultater(
+                søker = søker,
+                barna = listOf(barn),
+                behandling = behandling,
+                overstyrendeVilkårResultater = emptyMap(),
+            )
+
+        vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering)
+
+        tilkjentYtelseRepository.saveAndFlush(lagInitiellTilkjentYtelse(behandling, ""))
+
+        markerBehandlingSomAvsluttet(behandling)
+
+        val behandling2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(
+            lagBehandling(
+                fagsak = fagsak,
+                behandlingType = BehandlingType.REVURDERING,
+                årsak = BehandlingÅrsak.SATSENDRING,
+            ),
+        )
+
+        val forventetVilkårsvurdering =
+            lagVilkårsvurderingMedOverstyrendeResultater(
+                søker = søker,
+                barna = listOf(barn),
+                behandling = behandling2,
+                overstyrendeVilkårResultater = emptyMap(),
+            )
+
+        vilkårsvurderingForNyBehandlingService.opprettVilkårsvurderingUtenomHovedflyt(behandling2, behandling)
+
+        val kopiertVilkårsvurdering = vilkårsvurderingForNyBehandlingService.hentVilkårsvurderingThrows(behandling2.id)
+
+        validerKopiertVilkårsvurdering(kopiertVilkårsvurdering, vilkårsvurdering, forventetVilkårsvurdering)
     }
 
     private fun markerBehandlingSomAvsluttet(behandling: Behandling): Behandling {
