@@ -57,7 +57,7 @@ class PersongrunnlagService(
         return restPerson
     }
 
-    fun hentSøker(behandlingId: Long): Person? {
+    fun hentSøker(behandlingId: Long): Person {
         return personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId)!!.søker
     }
 
@@ -322,7 +322,7 @@ class PersongrunnlagService(
     }
 
     fun hentSøkersMålform(behandlingId: Long) =
-        hentSøker(behandlingId)?.målform ?: Målform.NB
+        hentSøkerOgBarnPåBehandlingOrThrows(behandlingId).søker().målform
 
     companion object {
         private val logger = LoggerFactory.getLogger(PersongrunnlagService::class.java)

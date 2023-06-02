@@ -426,7 +426,7 @@ fun lagTestPersonopplysningGrunnlag(
 }
 
 fun PersonopplysningGrunnlag.tilPersonPåBehandlingSøkerOgBarn() = this.søkerOgBarn.map {
-    PersonPåBehandling(it.type, it.aktør, it.fødselsdato, it.dødsfall?.dødsfallDato)
+    PersonPåBehandling(it.type, it.aktør, it.fødselsdato, it.dødsfall?.dødsfallDato, it.målform)
 }
 
 fun dato(s: String) = LocalDate.parse(s)

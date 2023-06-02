@@ -8,6 +8,7 @@ data class PersonPåBehandling(
     val aktør: Aktør,
     val fødselsdato: LocalDate,
     val dødsfallDato: LocalDate?,
+    val målform: Målform,
 )
 
 // Vil returnere barnet på EM-saker, som da i prinsippet også er søkeren. Vil også returnere barnet på inst. saker
