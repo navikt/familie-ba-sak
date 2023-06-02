@@ -182,21 +182,12 @@ class VedtaksperiodeService(
         standardbegrunnelserFraFrontend: List<Standardbegrunnelse>,
         eøsStandardbegrunnelserFraFrontend: List<EØSStandardbegrunnelse>,
     ) {
-        if (vedtaksperiodeMedBegrunnelser.begrunnelser.any { it.standardbegrunnelse.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG } &&
-            !standardbegrunnelserFraFrontend.any {
-                listOf(
-                    VedtakBegrunnelseType.AVSLAG,
-                    VedtakBegrunnelseType.EØS_AVSLAG,
-                    VedtakBegrunnelseType.INSTITUSJON_AVSLAG,
-                ).contains(it.vedtakBegrunnelseType)
-            } &&
-            !eøsStandardbegrunnelserFraFrontend.any {
-                listOf(
-                    VedtakBegrunnelseType.AVSLAG,
-                    VedtakBegrunnelseType.EØS_AVSLAG,
-                    VedtakBegrunnelseType.INSTITUSJON_AVSLAG,
-                ).contains(it.vedtakBegrunnelseType)
-            }
+        val erMinstEnNyBegrunnelseMedAvslag =
+            standardbegrunnelserFraFrontend.any { it.vedtakBegrunnelseType.erAvslag() } || eøsStandardbegrunnelserFraFrontend.any { it.vedtakBegrunnelseType.erAvslag() }
+        val eksisterendeBegrunnelser = vedtaksperiodeMedBegrunnelser.begrunnelser
+
+        if (eksisterendeBegrunnelser.any { it.standardbegrunnelse.vedtakBegrunnelseType.erAvslag() } &&
+            !erMinstEnNyBegrunnelseMedAvslag
         ) {
             throw FunksjonellFeil("Kan ikke fjerne avslags-begrunnelse fra vedtaksperiode som har blitt satt til avslag i vilkårsvurdering.")
         }
@@ -778,7 +769,8 @@ class VedtaksperiodeService(
         return refusjonEøsRepository.finnRefusjonEøsForBehandling(behandling.id)
             .filter { it.refusjonAvklart == avklart }.map {
                 val (fom, tom) = it.fom.tilMånedÅr() to it.tom.tilMånedÅr()
-                val land = landkoderISO2[it.land]?.storForbokstav() ?: throw Feil("Fant ikke navn for landkode ${it.land}")
+                val land =
+                    landkoderISO2[it.land]?.storForbokstav() ?: throw Feil("Fant ikke navn for landkode ${it.land}")
                 val beløp = it.refusjonsbeløp
 
                 when (målform) {
