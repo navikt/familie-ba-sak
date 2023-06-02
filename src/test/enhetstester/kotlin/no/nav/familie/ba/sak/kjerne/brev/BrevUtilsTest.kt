@@ -8,8 +8,9 @@ import no.nav.familie.ba.sak.common.lagUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.common.lagUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.tilMånedÅr
+import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.config.testSanityKlient
 import no.nav.familie.ba.sak.datagenerator.vedtak.lagVedtaksbegrunnelse
-import no.nav.familie.ba.sak.integrasjoner.sanity.hentBegrunnelser
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -25,6 +26,9 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class BrevUtilsTest {
+
+    private val featureToggleService: FeatureToggleService = mockk()
+
     @Test
     fun `hent dokumenttittel dersom denne skal overstyres for behandlingen`() {
         assertNull(hentOverstyrtDokumenttittel(lagBehandling().copy(type = BehandlingType.FØRSTEGANGSBEHANDLING)))
@@ -77,16 +81,17 @@ internal class BrevUtilsTest {
             hentHjemmeltekst(
                 minimerteVedtaksperioder = utvidetVedtaksperioderMedBegrunnelser.map {
                     it.tilMinimertVedtaksperiode(
-                        hentBegrunnelser(),
-                        emptyList(),
+                        testSanityKlient.hentBegrunnelserMap(),
+                        emptyMap(),
+                        featureToggleService,
                     )
                 },
-                sanityBegrunnelser = listOf(
-                    lagSanityBegrunnelse(
+                sanityBegrunnelser = mapOf(
+                    Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to lagSanityBegrunnelse(
                         apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
                         hjemler = listOf("11", "4", "2", "10"),
                     ),
-                    lagSanityBegrunnelse(
+                    Standardbegrunnelse.INNVILGET_SATSENDRING to lagSanityBegrunnelse(
                         apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
                         hjemler = listOf("10"),
                     ),
@@ -123,16 +128,17 @@ internal class BrevUtilsTest {
             hentHjemmeltekst(
                 minimerteVedtaksperioder = utvidetVedtaksperioderMedBegrunnelser.map {
                     it.tilMinimertVedtaksperiode(
-                        sanityBegrunnelser = hentBegrunnelser(),
-                        sanityEØSBegrunnelser = emptyList(),
+                        sanityBegrunnelser = testSanityKlient.hentBegrunnelserMap(),
+                        sanityEØSBegrunnelser = emptyMap(),
+                        featureToggleService = featureToggleService,
                     )
                 },
-                sanityBegrunnelser = listOf(
-                    lagSanityBegrunnelse(
+                sanityBegrunnelser = mapOf(
+                    Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to lagSanityBegrunnelse(
                         apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
                         hjemler = listOf("11", "4", "2", "10"),
                     ),
-                    lagSanityBegrunnelse(
+                    Standardbegrunnelse.INNVILGET_SATSENDRING to lagSanityBegrunnelse(
                         apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
                         hjemler = listOf("10"),
                     ),
@@ -170,16 +176,17 @@ internal class BrevUtilsTest {
             hentHjemmeltekst(
                 minimerteVedtaksperioder = utvidetVedtaksperioderMedBegrunnelser.map {
                     it.tilMinimertVedtaksperiode(
-                        sanityBegrunnelser = hentBegrunnelser(),
-                        sanityEØSBegrunnelser = emptyList(),
+                        sanityBegrunnelser = testSanityKlient.hentBegrunnelserMap(),
+                        sanityEØSBegrunnelser = emptyMap(),
+                        featureToggleService = featureToggleService,
                     )
                 },
-                sanityBegrunnelser = listOf(
-                    lagSanityBegrunnelse(
+                sanityBegrunnelser = mapOf(
+                    Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to lagSanityBegrunnelse(
                         apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
                         hjemler = listOf("11", "4", "2", "10"),
                     ),
-                    lagSanityBegrunnelse(
+                    Standardbegrunnelse.INNVILGET_SATSENDRING to lagSanityBegrunnelse(
                         apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
                         hjemler = listOf("10"),
                     ),
@@ -197,7 +204,7 @@ internal class BrevUtilsTest {
             "EØS-forordning 987/2009 artikkel 60",
             hentHjemmeltekst(
                 minimerteVedtaksperioder = emptyList(),
-                sanityBegrunnelser = emptyList(),
+                sanityBegrunnelser = emptyMap(),
                 opplysningspliktHjemlerSkalMedIBrev = false,
                 målform = Målform.NB,
                 refusjonEøsHjemmelSkalMedIBrev = true,
@@ -226,13 +233,13 @@ internal class BrevUtilsTest {
             ),
         )
 
-        val sanityBegrunnelser = listOf(
-            lagSanityBegrunnelse(
+        val sanityBegrunnelser = mapOf(
+            Standardbegrunnelse.INNVILGET_SØKER_OG_BARN_FRIVILLIG_MEDLEM to lagSanityBegrunnelse(
                 apiNavn = Standardbegrunnelse.INNVILGET_SØKER_OG_BARN_FRIVILLIG_MEDLEM.sanityApiNavn,
                 hjemler = listOf("11", "4"),
                 hjemlerFolketrygdloven = listOf("2-5", "2-8"),
             ),
-            lagSanityBegrunnelse(
+            Standardbegrunnelse.INNVILGET_SATSENDRING to lagSanityBegrunnelse(
                 apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
                 hjemler = listOf("10"),
             ),
@@ -244,7 +251,8 @@ internal class BrevUtilsTest {
                 minimerteVedtaksperioder = utvidetVedtaksperioderMedBegrunnelser.map {
                     it.tilMinimertVedtaksperiode(
                         sanityBegrunnelser = sanityBegrunnelser,
-                        sanityEØSBegrunnelser = emptyList(),
+                        sanityEØSBegrunnelser = emptyMap(),
+                        featureToggleService = featureToggleService,
                     )
                 },
                 sanityBegrunnelser = sanityBegrunnelser,
@@ -288,24 +296,24 @@ internal class BrevUtilsTest {
             ),
         )
 
-        val sanityBegrunnelser = listOf(
-            lagSanityBegrunnelse(
+        val sanityBegrunnelser = mapOf(
+            Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to lagSanityBegrunnelse(
                 apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
                 hjemler = listOf("11", "4"),
             ),
-            lagSanityBegrunnelse(
+            Standardbegrunnelse.INNVILGET_SATSENDRING to lagSanityBegrunnelse(
                 apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
                 hjemler = listOf("10"),
             ),
         )
 
-        val sanityEøsBegrunnelser = listOf(
-            lagSanityEøsBegrunnelse(
+        val sanityEøsBegrunnelser = mapOf(
+            EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR to lagSanityEøsBegrunnelse(
                 apiNavn = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR.sanityApiNavn,
                 hjemler = listOf("4"),
                 hjemlerEØSForordningen883 = listOf("11-16"),
             ),
-            lagSanityEøsBegrunnelse(
+            EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE to lagSanityEøsBegrunnelse(
                 apiNavn = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE.sanityApiNavn,
                 hjemler = listOf("11"),
                 hjemlerEØSForordningen987 = listOf("58", "60"),
@@ -319,6 +327,7 @@ internal class BrevUtilsTest {
                     it.tilMinimertVedtaksperiode(
                         sanityBegrunnelser = sanityBegrunnelser,
                         sanityEØSBegrunnelser = sanityEøsBegrunnelser,
+                        featureToggleService = featureToggleService,
                     )
                 },
                 sanityBegrunnelser = sanityBegrunnelser,
@@ -362,25 +371,25 @@ internal class BrevUtilsTest {
             ),
         )
 
-        val sanityBegrunnelser = listOf(
-            lagSanityBegrunnelse(
+        val sanityBegrunnelser = mapOf(
+            Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to lagSanityBegrunnelse(
                 apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
                 hjemler = listOf("11", "4"),
             ),
-            lagSanityBegrunnelse(
+            Standardbegrunnelse.INNVILGET_SATSENDRING to lagSanityBegrunnelse(
                 apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
                 hjemler = listOf("10"),
             ),
         )
 
-        val sanityEøsBegrunnelser = listOf(
-            lagSanityEøsBegrunnelse(
+        val sanityEøsBegrunnelser = mapOf(
+            EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR to lagSanityEøsBegrunnelse(
                 apiNavn = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR.sanityApiNavn,
                 hjemler = listOf("4"),
                 hjemlerEØSForordningen883 = listOf("11-16"),
                 hjemlerSeperasjonsavtalenStorbritannina = listOf("29"),
             ),
-            lagSanityEøsBegrunnelse(
+            EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE to lagSanityEøsBegrunnelse(
                 apiNavn = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE.sanityApiNavn,
                 hjemler = listOf("11"),
                 hjemlerEØSForordningen987 = listOf("58", "60"),
@@ -394,6 +403,7 @@ internal class BrevUtilsTest {
                     it.tilMinimertVedtaksperiode(
                         sanityBegrunnelser = sanityBegrunnelser,
                         sanityEØSBegrunnelser = sanityEøsBegrunnelser,
+                        featureToggleService = featureToggleService,
                     )
                 },
                 sanityBegrunnelser = sanityBegrunnelser,
@@ -437,25 +447,25 @@ internal class BrevUtilsTest {
             ),
         )
 
-        val sanityBegrunnelser = listOf(
-            lagSanityBegrunnelse(
+        val sanityBegrunnelser = mapOf(
+            Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to lagSanityBegrunnelse(
                 apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
                 hjemler = listOf("11", "4"),
             ),
-            lagSanityBegrunnelse(
+            Standardbegrunnelse.INNVILGET_SATSENDRING to lagSanityBegrunnelse(
                 apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
                 hjemler = listOf("10"),
             ),
         )
 
-        val sanityEøsBegrunnelser = listOf(
-            lagSanityEøsBegrunnelse(
+        val sanityEøsBegrunnelser = mapOf(
+            EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR to lagSanityEøsBegrunnelse(
                 apiNavn = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR.sanityApiNavn,
                 hjemler = listOf("4"),
                 hjemlerEØSForordningen883 = listOf("11-16"),
                 hjemlerSeperasjonsavtalenStorbritannina = listOf("29"),
             ),
-            lagSanityEøsBegrunnelse(
+            EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE to lagSanityEøsBegrunnelse(
                 apiNavn = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE.sanityApiNavn,
                 hjemler = listOf("11"),
                 hjemlerEØSForordningen987 = listOf("58", "60"),
@@ -469,6 +479,7 @@ internal class BrevUtilsTest {
                     it.tilMinimertVedtaksperiode(
                         sanityBegrunnelser = sanityBegrunnelser,
                         sanityEØSBegrunnelser = sanityEøsBegrunnelser,
+                        featureToggleService = featureToggleService,
                     )
                 },
                 sanityBegrunnelser = sanityBegrunnelser,
@@ -512,25 +523,25 @@ internal class BrevUtilsTest {
             ),
         )
 
-        val sanityBegrunnelser = listOf(
-            lagSanityBegrunnelse(
+        val sanityBegrunnelser = mapOf(
+            Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to lagSanityBegrunnelse(
                 apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
                 hjemler = listOf("11", "4"),
             ),
-            lagSanityBegrunnelse(
+            Standardbegrunnelse.INNVILGET_SATSENDRING to lagSanityBegrunnelse(
                 apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
                 hjemler = listOf("10"),
             ),
         )
 
-        val sanityEøsBegrunnelser = listOf(
-            lagSanityEøsBegrunnelse(
+        val sanityEøsBegrunnelser = mapOf(
+            EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR to lagSanityEøsBegrunnelse(
                 apiNavn = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR.sanityApiNavn,
                 hjemler = listOf("4"),
                 hjemlerEØSForordningen883 = listOf("2", "11-16", "67", "68"),
                 hjemlerSeperasjonsavtalenStorbritannina = listOf("29"),
             ),
-            lagSanityEøsBegrunnelse(
+            EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE to lagSanityEøsBegrunnelse(
                 apiNavn = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE.sanityApiNavn,
                 hjemler = listOf("11"),
             ),
@@ -543,6 +554,7 @@ internal class BrevUtilsTest {
                     it.tilMinimertVedtaksperiode(
                         sanityBegrunnelser = sanityBegrunnelser,
                         sanityEØSBegrunnelser = sanityEøsBegrunnelser,
+                        featureToggleService = featureToggleService,
                     )
                 },
                 sanityBegrunnelser = sanityBegrunnelser,
@@ -586,26 +598,26 @@ internal class BrevUtilsTest {
             ),
         )
 
-        val sanityBegrunnelser = listOf(
-            lagSanityBegrunnelse(
+        val sanityBegrunnelser = mapOf(
+            Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to lagSanityBegrunnelse(
                 apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
                 hjemler = listOf("11", "4"),
             ),
-            lagSanityBegrunnelse(
+            Standardbegrunnelse.INNVILGET_SATSENDRING to lagSanityBegrunnelse(
                 apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
                 hjemler = listOf("10"),
             ),
         )
 
-        val sanityEøsBegrunnelser = listOf(
-            lagSanityEøsBegrunnelse(
+        val sanityEøsBegrunnelser = mapOf(
+            EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR to lagSanityEøsBegrunnelse(
                 apiNavn = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR.sanityApiNavn,
                 hjemler = listOf("4"),
                 hjemlerEØSForordningen883 = listOf("2", "11-16", "67", "68"),
                 hjemlerSeperasjonsavtalenStorbritannina = listOf("29"),
                 hjemlerEØSForordningen987 = listOf("58"),
             ),
-            lagSanityEøsBegrunnelse(
+            EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE to lagSanityEøsBegrunnelse(
                 apiNavn = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE.sanityApiNavn,
                 hjemler = listOf("11"),
                 hjemlerEØSForordningen883 = listOf("2", "67", "68"),
@@ -622,6 +634,7 @@ internal class BrevUtilsTest {
                     it.tilMinimertVedtaksperiode(
                         sanityBegrunnelser = sanityBegrunnelser,
                         sanityEØSBegrunnelser = sanityEøsBegrunnelser,
+                        featureToggleService = featureToggleService,
                     )
                 },
                 sanityBegrunnelser = sanityBegrunnelser,

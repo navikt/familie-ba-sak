@@ -16,6 +16,9 @@ data class GrUkjentBosted(
 
 ) : GrBostedsadresse() {
 
+    override fun tilKopiForNyPerson(): GrBostedsadresse =
+        GrUkjentBosted(bostedskommune)
+
     override fun toSecureString(): String {
         return """UkjentadresseDao(bostedskommune=$bostedskommune""".trimMargin()
     }

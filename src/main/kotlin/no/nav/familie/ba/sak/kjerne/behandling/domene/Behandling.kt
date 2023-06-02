@@ -31,6 +31,7 @@ import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.Regelverk
 import org.hibernate.annotations.SortComparator
 import java.time.LocalDate
+import java.time.LocalDateTime
 import no.nav.familie.kontrakter.felles.Behandlingstema as OppgaveBehandlingTema
 import no.nav.familie.kontrakter.felles.oppgave.Behandlingstype as OppgaveBehandlingType
 
@@ -85,6 +86,9 @@ data class Behandling(
 
     @OneToOne(mappedBy = "behandling", optional = true)
     val verge: Verge? = null,
+
+    @Column(name = "aktivert_tid", nullable = false)
+    var aktivertTidspunkt: LocalDateTime = LocalDateTime.now(),
 ) : BaseEntitet() {
 
     val steg: StegType
@@ -198,7 +202,7 @@ data class Behandling(
             skalBehandlesAutomatisk && erOmregning() &&
                 resultat in listOf(Behandlingsresultat.FORTSATT_INNVILGET, Behandlingsresultat.FORTSATT_OPPHØRT) -> true
 
-            skalBehandlesAutomatisk && erMigrering() && resultat == Behandlingsresultat.INNVILGET -> true
+            skalBehandlesAutomatisk && erMigrering() && !erManuellMigreringForEndreMigreringsdato() && resultat == Behandlingsresultat.INNVILGET -> true
             skalBehandlesAutomatisk && erFødselshendelse() && resultat == Behandlingsresultat.INNVILGET -> true
             skalBehandlesAutomatisk && erSatsendring() && erEndringFraForrigeBehandlingSendtTilØkonomi -> true
             else -> false
@@ -268,7 +272,7 @@ data class Behandling(
     fun erTekniskEndring() = opprettetÅrsak == BehandlingÅrsak.TEKNISK_ENDRING
 
     fun erTekniskEndringMedOpphør() =
-        erTekniskEndring() && resultat in listOf(Behandlingsresultat.OPPHØRT, Behandlingsresultat.ENDRET_OG_OPPHØRT)
+        erTekniskEndring() && resultat.erOpphør()
 
     fun erTekniskBehandling() = opprettetÅrsak == BehandlingÅrsak.TEKNISK_OPPHØR || erTekniskEndring()
 
@@ -352,6 +356,12 @@ enum class Behandlingsresultat(val displayName: String) {
     fun erAvslått(): Boolean = this in listOf(AVSLÅTT, AVSLÅTT_OG_OPPHØRT, AVSLÅTT_OG_ENDRET, AVSLÅTT_ENDRET_OG_OPPHØRT)
 
     fun erFortsattInnvilget(): Boolean = this in listOf(FORTSATT_INNVILGET, ENDRET_OG_FORTSATT_INNVILGET)
+
+    fun erOpphør(): Boolean = this in listOf(
+        OPPHØRT,
+        ENDRET_OG_OPPHØRT,
+        FORTSATT_OPPHØRT,
+    )
 }
 
 /**
@@ -446,12 +456,11 @@ fun initStatus(): BehandlingStatus {
 
 enum class BehandlingStatus {
     UTREDES,
+    SATT_PÅ_VENT,
+    SATT_PÅ_MASKINELL_VENT,
     FATTER_VEDTAK,
     IVERKSETTER_VEDTAK,
     AVSLUTTET,
-    ;
-
-    fun erLåstMenIkkeAvsluttet() = this == FATTER_VEDTAK || this == IVERKSETTER_VEDTAK
 }
 
 class BehandlingStegComparator : Comparator<BehandlingStegTilstand> {

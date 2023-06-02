@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -44,6 +45,11 @@ class OppgaveIntegrationTest : AbstractSpringIntegrationTest() {
 
     @Autowired
     private lateinit var databaseCleanupService: DatabaseCleanupService
+
+    @BeforeEach
+    fun setUp() {
+        databaseCleanupService.truncate()
+    }
 
     @Test
     fun `Skal opprette oppgave og ferdigstille oppgave for behandling`() {
@@ -100,7 +106,7 @@ class OppgaveIntegrationTest : AbstractSpringIntegrationTest() {
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(SØKER_FNR)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
-        val barnAktør = personidentService.hentAktørIder(listOf(BARN_FNR))
+        val barnAktør = personidentService.hentOgLagreAktørIder(listOf(BARN_FNR), true)
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
             behandling.id,
             SØKER_FNR,

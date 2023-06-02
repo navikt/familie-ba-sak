@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.common.nesteMåned
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.config.EfSakRestClientMock
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.behandling.kjørStegprosessForBehandling
 import no.nav.familie.ba.sak.datagenerator.vilkårsvurdering.lagVilkårsvurderingFraRestScenario
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonResultat
@@ -94,6 +95,7 @@ class BehandleSmåbarnstilleggTest(
     @Autowired private val persongrunnlagService: PersongrunnlagService,
     @Autowired private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     @Autowired private val brevmalService: BrevmalService,
+    @Autowired private val featureToggleService: FeatureToggleService,
 ) : AbstractVerdikjedetest() {
 
     private val barnFødselsdato = LocalDate.now().minusYears(2)
@@ -584,6 +586,7 @@ class BehandleSmåbarnstilleggTest(
             persongrunnlagService = persongrunnlagService,
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
             brevmalService = brevmalService,
+            featureToggleService = featureToggleService,
         )
     }
 }

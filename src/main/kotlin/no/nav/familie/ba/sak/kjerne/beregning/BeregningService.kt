@@ -77,9 +77,10 @@ class BeregningService(
         tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)
 
     fun hentTilkjentYtelseForBehandlingerIverksattMotØkonomi(fagsakId: Long): List<TilkjentYtelse> {
-        val avsluttedeBehandlingerSomIkkeErHenlagtPåFagsak = behandlingHentOgPersisterService.finnAvsluttedeBehandlingerPåFagsak(
-            fagsakId = fagsakId,
-        ).filter { !it.erHenlagt() }
+        val avsluttedeBehandlingerSomIkkeErHenlagtPåFagsak =
+            behandlingHentOgPersisterService.finnAvsluttedeBehandlingerPåFagsak(
+                fagsakId = fagsakId,
+            ).filter { !it.erHenlagt() }
 
         return avsluttedeBehandlingerSomIkkeErHenlagtPåFagsak.mapNotNull {
             tilkjentYtelseRepository.findByBehandlingAndHasUtbetalingsoppdrag(
@@ -117,7 +118,8 @@ class BeregningService(
                 if (godkjenteBehandlingerSomIkkeErIverksattEnda != null) {
                     godkjenteBehandlingerSomIkkeErIverksattEnda
                 } else {
-                    val sisteVedtatteBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsak.id)
+                    val sisteVedtatteBehandling =
+                        behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsak.id)
                     sisteVedtatteBehandling
                 }
             }
@@ -203,12 +205,12 @@ class BeregningService(
                 endretUtbetalingAndeler = endreteUtbetalingAndeler,
                 fagsakType = behandling.fagsak.type,
             ) { søkerAktør ->
-                småbarnstilleggService.hentOgLagrePerioderMedFullOvergangsstønadFraEf(
+                småbarnstilleggService.hentOgLagrePerioderMedOvergangsstønadForBehandling(
                     søkerAktør = søkerAktør,
-                    behandlingId = behandling.id,
+                    behandling = behandling,
                 )
 
-                småbarnstilleggService.hentPerioderMedFullOvergangsstønad(behandling.id)
+                småbarnstilleggService.hentPerioderMedFullOvergangsstønad(behandling)
             }
 
         val lagretTilkjentYtelse = tilkjentYtelseRepository.save(tilkjentYtelse)

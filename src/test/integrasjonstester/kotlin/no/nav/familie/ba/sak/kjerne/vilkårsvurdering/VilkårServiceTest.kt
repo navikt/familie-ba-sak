@@ -24,6 +24,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.behandlingstema.BehandlingstemaService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -313,7 +314,7 @@ class VilkårServiceTest(
         val barnFnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling =
+        var behandling =
             behandlingService.opprettBehandling(nyOrdinærBehandling(søkersIdent = fnr, fagsakId = fagsak.id))
         val forrigeBehandlingSomErIverksatt =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
@@ -354,8 +355,7 @@ class VilkårServiceTest(
             }
         }
 
-        behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BEHANDLING_AVSLUTTET))
-        behandlingHentOgPersisterService.lagreEllerOppdater(behandling)
+        behandling = markerBehandlingSomAvsluttet(behandling)
 
         val barnFnr2 = randomFnr()
 
@@ -397,7 +397,7 @@ class VilkårServiceTest(
         val barnFnr = randomFnr()
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+        var behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         val forrigeBehandlingSomErIverksatt =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
 
@@ -421,8 +421,7 @@ class VilkårServiceTest(
         vurderVilkårsvurderingTilInnvilget(vilkårsvurdering, barn)
 
         vilkårsvurderingService.oppdater(vilkårsvurdering)
-        behandling.behandlingStegTilstand.add(BehandlingStegTilstand(0, behandling, StegType.BEHANDLING_AVSLUTTET))
-        behandlingHentOgPersisterService.lagreEllerOppdater(behandling)
+        behandling = markerBehandlingSomAvsluttet(behandling)
 
         val barnFnr2 = randomFnr()
 
@@ -1158,7 +1157,7 @@ class VilkårServiceTest(
         forrigeVilkårsdato: LocalDate,
     ): Pair<Behandling, Behandling> {
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        val forrigeBehandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
+        var forrigeBehandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
             lagBehandling(
                 fagsak = fagsak,
                 behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
@@ -1208,6 +1207,8 @@ class VilkårServiceTest(
         }
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(forrigeVilkårsvurdering)
 
+        forrigeBehandling = markerBehandlingSomAvsluttet(forrigeBehandling)
+
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
             lagBehandling(
                 fagsak = fagsak,
@@ -1225,6 +1226,12 @@ class VilkårServiceTest(
         )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
         return Pair(forrigeBehandling, behandling)
+    }
+
+    private fun markerBehandlingSomAvsluttet(behandling: Behandling): Behandling {
+        behandling.status = BehandlingStatus.AVSLUTTET
+        behandling.leggTilBehandlingStegTilstand(StegType.BEHANDLING_AVSLUTTET)
+        return behandlingHentOgPersisterService.lagreOgFlush(behandling)
     }
 
     fun Vilkår.påvirketVilkårForEndreMigreringsdato() = this in listOf(

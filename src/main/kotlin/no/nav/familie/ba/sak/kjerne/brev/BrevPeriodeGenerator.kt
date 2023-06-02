@@ -4,8 +4,11 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.NullablePeriode
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.erSenereEnnInneværendeMåned
+import no.nav.familie.ba.sak.common.førsteDagINesteMåned
 import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.common.tilKortString
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevBegrunnelseGrunnlagMedPersoner
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertKompetanse
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertUregistrertBarn
@@ -42,6 +45,7 @@ class BrevPeriodeGenerator(
     private val minimerteKompetanserForPeriode: List<MinimertKompetanse>,
     private val minimerteKompetanserSomStopperRettFørPeriode: List<MinimertKompetanse>,
     private val dødeBarnForrigePeriode: List<String>,
+    private val featureToggleService: FeatureToggleService,
 ) {
 
     fun genererBrevPeriode(): BrevPeriode? {
@@ -82,9 +86,15 @@ class BrevPeriodeGenerator(
                 val minimertePersonResultater =
                     restBehandlingsgrunnlagForBrev.minimertePersonResultater.filter { personResultat ->
                         personResultat.minimerteVilkårResultater.any {
-                            it.erEksplisittAvslagPåSøknad == true && it.periodeFom == minimertVedtaksperiode.fom && it.standardbegrunnelser.contains(
-                                begrunnelse,
-                            )
+                            if (featureToggleService.isEnabled(FeatureToggleConfig.VEDTAKSPERIODE_NY)) {
+                                it.erEksplisittAvslagPåSøknad == true && it.periodeFom?.førsteDagINesteMåned() == minimertVedtaksperiode.fom && it.standardbegrunnelser.contains(
+                                    begrunnelse,
+                                )
+                            } else {
+                                it.erEksplisittAvslagPåSøknad == true && it.periodeFom == minimertVedtaksperiode.fom && it.standardbegrunnelser.contains(
+                                    begrunnelse,
+                                )
+                            }
                         }
                     }
 

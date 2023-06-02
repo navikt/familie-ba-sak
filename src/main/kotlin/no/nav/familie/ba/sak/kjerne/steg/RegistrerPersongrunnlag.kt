@@ -27,7 +27,7 @@ class RegistrerPersongrunnlag(
             behandling,
         )
 
-        personopplysningGrunnlagForNyBehandlingService.opprettPersonopplysningGrunnlag(
+        personopplysningGrunnlagForNyBehandlingService.opprettKopiEllerNyttPersonopplysningGrunnlag(
             behandling = behandling,
             forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErVedtatt,
             søkerIdent = data.ident,

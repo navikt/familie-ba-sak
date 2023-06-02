@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.0.6</version>
+        <version>3.1.0</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -35,7 +35,7 @@
         <token-validation-spring.version>3.0.11</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
         <springdoc.version>2.1.0</springdoc.version>
-        <sentry.version>6.18.1</sentry.version>
+        <sentry.version>6.19.1</sentry.version>
         <kotlinx.version>1.7.1</kotlinx.version>
 
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
@@ -48,7 +48,7 @@
         <testcontainers.postgresql.version>1.18.1</testcontainers.postgresql.version>
         <unleash.version>7.1.0</unleash.version>
         <maven.model.version>3.9.2</maven.model.version>
-        <jackson.module.kotlin.version>2.15.0</jackson.module.kotlin.version>
+        <jackson.module.kotlin.version>2.15.1</jackson.module.kotlin.version>
         <token-validation-test-support.version>2.0.5</token-validation-test-support.version>
         <fpsak-tidslinje.version>2.6.7</fpsak-tidslinje.version>
         <awaitility-kotlin.version>4.2.0</awaitility-kotlin.version>
@@ -480,7 +480,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
-                <version>3.3.0</version>
+                <version>3.4.0</version>
                 <executions>
                     <execution>
                         <phase>generate-test-sources</phase>
