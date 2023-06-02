@@ -49,6 +49,9 @@ data class GrSivilstand(
     val person: Person,
 ) : BaseEntitet() {
 
+    fun tilKopiForNyPerson(nyPerson: Person) =
+        copy(id = 0, person = nyPerson)
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -73,9 +76,6 @@ data class GrSivilstand(
     )
 
     fun harGyldigFom() = this.fom != null
-
-    fun tilKopiForNyPerson(nyPerson: Person) =
-        copy(id = 0, person = nyPerson)
 
     companion object {
 

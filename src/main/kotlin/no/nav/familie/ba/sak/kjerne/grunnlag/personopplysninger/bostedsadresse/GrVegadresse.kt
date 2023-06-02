@@ -40,6 +40,18 @@ data class GrVegadresse(
 
 ) : GrBostedsadresse() {
 
+    override fun tilKopiForNyPerson(): GrBostedsadresse =
+        GrVegadresse(
+            matrikkelId,
+            husnummer,
+            husbokstav,
+            bruksenhetsnummer,
+            adressenavn,
+            kommunenummer,
+            tilleggsnavn,
+            postnummer,
+        )
+
     override fun toSecureString(): String {
         return """VegadresseDao(husnummer=$husnummer,husbokstav=$husbokstav,matrikkelId=$matrikkelId,bruksenhetsnummer=$bruksenhetsnummer,
 |           adressenavn=$adressenavn,kommunenummer=$kommunenummer,tilleggsnavn=$tilleggsnavn,postnummer=$postnummer
@@ -54,18 +66,6 @@ data class GrVegadresse(
         adressenavn.nullableTilString()
             .storForbokstav()
     } ${husnummer.nullableTilString()}${husbokstav.nullableTilString()}${postnummer.let { ", $it" }}""".trimMargin()
-
-    override fun tilKopiForNyPerson(): GrBostedsadresse =
-        GrVegadresse(
-            matrikkelId,
-            husnummer,
-            husbokstav,
-            bruksenhetsnummer,
-            adressenavn,
-            kommunenummer,
-            tilleggsnavn,
-            postnummer,
-        )
 
     override fun equals(other: Any?): Boolean {
         if (other == null || javaClass != other.javaClass) {

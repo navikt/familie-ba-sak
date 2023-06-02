@@ -53,6 +53,9 @@ data class GrStatsborgerskap(
     val person: Person,
 ) : BaseEntitet() {
 
+    fun tilKopiForNyPerson(nyPerson: Person): GrStatsborgerskap =
+        copy(id = 0, person = nyPerson)
+
     fun gjeldendeNå(): Boolean {
         if (gyldigPeriode == null) return true
         return gyldigPeriode.erInnenfor(LocalDate.now())
@@ -81,9 +84,6 @@ data class GrStatsborgerskap(
         tom = this.gyldigPeriode?.tom,
         verdi = this.landkode,
     )
-
-    fun tilKopiForNyPerson(nyPerson: Person): GrStatsborgerskap =
-        copy(id = 0, person = nyPerson)
 }
 
 fun Statsborgerskap.fom() = this.gyldigFraOgMed ?: this.bekreftelsesdato
