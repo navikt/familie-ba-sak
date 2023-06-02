@@ -49,7 +49,7 @@ class FagsystemsbehandlingService(
         val behandlingId = behandling.id
         val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandlingId)
         val arbeidsfordeling = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId)
-        val aktivVedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId)
+        val vedtaksdato = vedtakService.hentVedtaksdatoForBehandlingThrows(behandlingId)
 
         val faktainfo = Faktainfo(
             revurderingsårsak = behandling.opprettetÅrsak.visningsnavn,
@@ -66,7 +66,7 @@ class FagsystemsbehandlingService(
             språkkode = persongrunnlag.søker.målform.tilSpråkkode(),
             enhetId = arbeidsfordeling.behandlendeEnhetId,
             enhetsnavn = arbeidsfordeling.behandlendeEnhetNavn,
-            revurderingsvedtaksdato = aktivVedtak.vedtaksdato!!.toLocalDate(),
+            revurderingsvedtaksdato = vedtaksdato.toLocalDate(),
             faktainfo = faktainfo,
             institusjon = hentTilbakekrevingInstitusjon(behandling.fagsak),
         )

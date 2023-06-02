@@ -25,6 +25,11 @@ class VedtakService(
         return vedtakRepository.findByBehandlingAndAktiv(behandlingId)
     }
 
+    fun hentVedtaksdatoForBehandlingThrows(behandlingId: Long): LocalDateTime {
+        return vedtakRepository.finnVedtaksdato(behandlingId)
+            ?: error("Finner ikke vedtaksato for behandling=$behandlingId")
+    }
+
     fun oppdater(vedtak: Vedtak): Vedtak {
         return if (vedtakRepository.findByIdOrNull(vedtak.id) != null) {
             vedtakRepository.saveAndFlush(vedtak)
