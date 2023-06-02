@@ -54,7 +54,7 @@ class VilkårsvurderingForNyBehandlingServiceTest {
     }
 
     @Test
-    fun `skal kopiere vilkårsvurdering fra forrige behandling hvis satsendring`() {
+    fun `skal kopiere vilkårsvurdering fra forrige behandling hvis satsendring - alle vilkår for alle personer er oppfylt`() {
         val søker = lagPerson(type = PersonType.SØKER)
         val barn = lagPerson(type = PersonType.BARN)
         val fagsak = Fagsak(aktør = søker.aktør)
