@@ -40,6 +40,18 @@ data class GrVegadresse(
 
 ) : GrBostedsadresse() {
 
+    override fun tilKopiForNyPerson(): GrBostedsadresse =
+        GrVegadresse(
+            matrikkelId,
+            husnummer,
+            husbokstav,
+            bruksenhetsnummer,
+            adressenavn,
+            kommunenummer,
+            tilleggsnavn,
+            postnummer,
+        )
+
     override fun toSecureString(): String {
         return """VegadresseDao(husnummer=$husnummer,husbokstav=$husbokstav,matrikkelId=$matrikkelId,bruksenhetsnummer=$bruksenhetsnummer,
 |           adressenavn=$adressenavn,kommunenummer=$kommunenummer,tilleggsnavn=$tilleggsnavn,postnummer=$postnummer

@@ -104,6 +104,37 @@ data class Person(
     var dødsfall: Dødsfall? = null,
 ) : BaseEntitet() {
 
+    fun tilKopiForNyttPersonopplysningGrunnlag(nyttPersonopplysningGrunnlag: PersonopplysningGrunnlag): Person =
+        copy(
+            id = 0,
+            personopplysningGrunnlag = nyttPersonopplysningGrunnlag,
+            bostedsadresser = mutableListOf(),
+            statsborgerskap = mutableListOf(),
+            opphold = mutableListOf(),
+            arbeidsforhold = mutableListOf(),
+            sivilstander = mutableListOf(),
+        )
+            .also {
+                it.bostedsadresser.addAll(
+                    bostedsadresser.map { grBostedsadresse ->
+                        grBostedsadresse.tilKopiForNyPerson(
+                            it,
+                        )
+                    },
+                )
+                it.statsborgerskap.addAll(
+                    statsborgerskap.map { grStatsborgerskap ->
+                        grStatsborgerskap.tilKopiForNyPerson(
+                            it,
+                        )
+                    },
+                )
+                it.opphold.addAll(opphold.map { grOpphold -> grOpphold.tilKopiForNyPerson(it) })
+                it.arbeidsforhold.addAll(arbeidsforhold.map { grArbeidsforhold -> grArbeidsforhold.tilKopiForNyPerson(it) })
+                it.sivilstander.addAll(sivilstander.map { grSivilstand -> grSivilstand.tilKopiForNyPerson(it) })
+                it.dødsfall = dødsfall?.tilKopiForNyPerson(it)
+            }
+
     override fun toString(): String {
         return """Person(aktørId=$aktør,
                         |type=$type
