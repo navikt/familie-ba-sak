@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.oppfyltVilkår
 import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
+import no.nav.familie.ba.sak.common.tilPersonPåBehandlingSøkerOgBarn
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.tilpassKompetanserTilRegelverk
@@ -77,7 +78,8 @@ internal class TidslinjerTest {
 
         val vilkårsvurderingTidslinjer = VilkårsvurderingTidslinjer(
             vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
-            personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1, barn2),
+            søkerOgBarn = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1, barn2)
+                .tilPersonPåBehandlingSøkerOgBarn(),
         )
 
         assertEquals(søkerResult, vilkårsvurderingTidslinjer.søkersTidslinjer().regelverkResultatTidslinje)
@@ -112,7 +114,8 @@ internal class TidslinjerTest {
 
         val vilkårsvurderingTidslinjer = VilkårsvurderingTidslinjer(
             vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
-            personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1),
+            søkerOgBarn = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1)
+                .tilPersonPåBehandlingSøkerOgBarn(),
         )
 
         assertEquals(søkerResult, vilkårsvurderingTidslinjer.søkersTidslinjer().regelverkResultatTidslinje)
@@ -140,7 +143,8 @@ internal class TidslinjerTest {
 
         val vilkårsvurderingTidslinjer = VilkårsvurderingTidslinjer(
             vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
-            personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1),
+            søkerOgBarn = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1)
+                .tilPersonPåBehandlingSøkerOgBarn(),
         )
 
         assertEquals(

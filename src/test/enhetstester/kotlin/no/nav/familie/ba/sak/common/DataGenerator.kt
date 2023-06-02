@@ -57,6 +57,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonPåBehandling
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -422,6 +423,10 @@ fun lagTestPersonopplysningGrunnlag(
         )
     }
     return personopplysningGrunnlag
+}
+
+fun PersonopplysningGrunnlag.tilPersonPåBehandlingSøkerOgBarn() = this.søkerOgBarn.map {
+    PersonPåBehandling(it.type, it.aktør, it.fødselsdato, it.dødsfall?.dødsfallDato)
 }
 
 fun dato(s: String) = LocalDate.parse(s)

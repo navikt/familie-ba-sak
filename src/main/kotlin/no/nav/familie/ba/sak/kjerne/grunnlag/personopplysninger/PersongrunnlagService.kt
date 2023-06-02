@@ -65,9 +65,12 @@ class PersongrunnlagService(
         return hentBarna(behandling.id)
     }
 
+    fun hentSøkerOgBarnPåBehandlingOrThrows(behandlingId: Long): List<PersonPåBehandling> =
+        hentSøkerOgBarnPåBehandling(behandlingId)
+            ?: error("Finner ikke søker/barn på behandling=$behandlingId")
     fun hentSøkerOgBarnPåBehandling(behandlingId: Long): List<PersonPåBehandling>? =
         personopplysningGrunnlagRepository.finnSøkerOgBarnAktørerTilAktiv(behandlingId)
-            .tilPersonerPåBehandling()
+            .takeIf { it.isNotEmpty() }
 
     fun hentBarna(behandlingId: Long): List<Person> = personopplysningGrunnlagRepository
         .findByBehandlingAndAktiv(behandlingId)!!.barna

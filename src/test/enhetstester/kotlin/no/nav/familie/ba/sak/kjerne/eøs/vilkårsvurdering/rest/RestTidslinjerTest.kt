@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.rest
 
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.common.tilPersonPåBehandlingSøkerOgBarn
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjer
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -40,7 +41,8 @@ internal class RestTidslinjerTest {
 
         val vilkårsvurderingTidslinjer = VilkårsvurderingTidslinjer(
             vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
-            personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1),
+            søkerOgBarn = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1)
+                .tilPersonPåBehandlingSøkerOgBarn(),
         )
 
         val restTidslinjer = vilkårsvurderingTidslinjer.tilRestTidslinjer()
@@ -95,7 +97,8 @@ internal class RestTidslinjerTest {
 
         val vilkårsvurderingTidslinjer = VilkårsvurderingTidslinjer(
             vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
-            personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1, barn2),
+            søkerOgBarn = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1, barn2)
+                .tilPersonPåBehandlingSøkerOgBarn(),
         )
 
         val restTidslinjer = vilkårsvurderingTidslinjer.tilRestTidslinjer()

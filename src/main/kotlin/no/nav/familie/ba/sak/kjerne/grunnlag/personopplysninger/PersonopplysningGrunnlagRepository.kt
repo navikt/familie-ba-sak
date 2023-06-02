@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 
-import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 
@@ -11,13 +10,15 @@ interface PersonopplysningGrunnlagRepository : JpaRepository<PersonopplysningGru
 
     @Query(
         """
-        SELECT new kotlin.Pair(p.type, a) FROM Person p
+        SELECT new no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonPåBehandling(p.type, a, p.fødselsdato, d.dødsfallDato)
+        FROM Person p
         JOIN p.personopplysningGrunnlag gr
         JOIN p.aktør a
+        LEFT JOIN p.dødsfall d
         WHERE gr.behandlingId = :behandlingId 
         AND gr.aktiv = true
         AND p.type IN ('SØKER', 'BARN')
         """,
     )
-    fun finnSøkerOgBarnAktørerTilAktiv(behandlingId: Long): List<Pair<PersonType, Aktør>>
+    fun finnSøkerOgBarnAktørerTilAktiv(behandlingId: Long): List<PersonPåBehandling>
 }

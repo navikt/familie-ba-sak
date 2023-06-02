@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.tidslinje.util
 
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.common.tilPersonPåBehandlingSøkerOgBarn
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -115,7 +116,7 @@ internal fun <T : Tidsenhet> Periode<UtdypendeVilkårRegelverkResultat, T>.tilVi
 }
 
 fun <T : Tidsenhet> VilkårsvurderingBuilder<T>.byggVilkårsvurderingTidslinjer() =
-    VilkårsvurderingTidslinjer(this.byggVilkårsvurdering(), this.byggPersonopplysningGrunnlag())
+    VilkårsvurderingTidslinjer(this.byggVilkårsvurdering(), this.byggPersonopplysningGrunnlag().tilPersonPåBehandlingSøkerOgBarn())
 
 fun <T : Tidsenhet> VilkårsvurderingBuilder.PersonResultatBuilder<T>.byggVilkårsvurderingTidslinjer() =
     this.byggPerson().byggVilkårsvurderingTidslinjer()
