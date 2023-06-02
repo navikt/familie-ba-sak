@@ -18,7 +18,6 @@ import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.isSameOrBefore
-import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat.Companion.VilkårResultatComparator
@@ -129,7 +128,7 @@ class PersonResultat(
         return nyttPersonResultat
     }
 
-    fun kopierOppfylteVilkårTilNyBehandling(
+    fun tilKopiForNyVilkårsvurdering(
         nyVilkårsvurdering: Vilkårsvurdering,
     ): PersonResultat {
         val nyttPersonResultat = PersonResultat(
@@ -139,9 +138,8 @@ class PersonResultat(
         )
 
         val nyeVilkårResultater = vilkårResultater
-            .filter { it.resultat == Resultat.OPPFYLT }
             .map {
-                it.kopierTilNyBehandling(
+                it.tilKopiForNyttPersonResultat(
                     nyttPersonResultat = nyttPersonResultat,
                 )
             }

@@ -161,7 +161,7 @@ class VilkårResultat(
         )
     }
 
-    fun kopierTilNyBehandling(nyttPersonResultat: PersonResultat): VilkårResultat {
+    fun tilKopiForNyttPersonResultat(nyttPersonResultat: PersonResultat): VilkårResultat {
         return VilkårResultat(
             personResultat = nyttPersonResultat,
             erAutomatiskVurdert = erAutomatiskVurdert,

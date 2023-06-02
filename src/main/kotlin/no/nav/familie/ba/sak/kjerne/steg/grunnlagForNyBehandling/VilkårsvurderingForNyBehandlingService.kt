@@ -49,6 +49,7 @@ class VilkårsvurderingForNyBehandlingService(
                 // Lagre ned migreringsdato
                 behandlingService.lagreNedMigreringsdato(nyMigreringsdato, behandling)
             }
+
             BehandlingÅrsak.HELMANUELL_MIGRERING -> {
                 genererVilkårsvurderingForHelmanuellMigrering(
                     behandling = behandling,
@@ -58,6 +59,7 @@ class VilkårsvurderingForNyBehandlingService(
                 // Lagre ned migreringsdato
                 behandlingService.lagreNedMigreringsdato(nyMigreringsdato, behandling)
             }
+
             BehandlingÅrsak.SATSENDRING -> {
                 genererVilkårsvurderingForSatsendring(
                     forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErVedtatt
@@ -65,6 +67,7 @@ class VilkårsvurderingForNyBehandlingService(
                     inneværendeBehandling = behandling,
                 )
             }
+
             !in listOf(BehandlingÅrsak.SØKNAD, BehandlingÅrsak.FØDSELSHENDELSE) -> {
                 initierVilkårsvurderingForBehandling(
                     behandling = behandling,
@@ -72,6 +75,7 @@ class VilkårsvurderingForNyBehandlingService(
                     forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErVedtatt,
                 )
             }
+
             else -> logger.info(
                 "Perioder i vilkårsvurdering generer ikke automatisk for " +
                     behandling.opprettetÅrsak.visningsnavn,
@@ -126,7 +130,8 @@ class VilkårsvurderingForNyBehandlingService(
         return if (featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_KOPIER_GRUNNLAG_FRA_FORRIGE_BEHANDLING)) {
             val forrigeBehandlingVilkårsvurdering = hentVilkårsvurderingThrows(forrigeBehandlingSomErVedtatt.id)
 
-            val nyVilkårsvurdering = forrigeBehandlingVilkårsvurdering.tilKopiMedOppfylteVilkårForNyBehandling(nyBehandling = inneværendeBehandling)
+            val nyVilkårsvurdering =
+                forrigeBehandlingVilkårsvurdering.tilKopiForNyBehandling(nyBehandling = inneværendeBehandling)
 
             return vilkårsvurderingService.lagreNyOgDeaktiverGammel(nyVilkårsvurdering)
         } else {
