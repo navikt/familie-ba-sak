@@ -1,8 +1,11 @@
 package no.nav.familie.ba.sak.integrasjoner.pdl
 
 import no.nav.familie.ba.sak.common.kallEksternTjeneste
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdressebeskyttelseBolkResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdressebeskyttelseResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBaseResponse
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonBolkRequest
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonBolkRequestVariables
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonRequest
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonRequestVariables
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -24,7 +27,7 @@ class SystemOnlyPdlRestClient(
 ) : PdlRestClient(pdlBaseUrl, restTemplate, personidentService) {
 
     @Cacheable("adressebeskyttelse", cacheManager = "shortCache")
-    fun hentAdressebeskyttelse(aktør: Aktør): List<Adressebeskyttelse> {
+    fun hentAdressebeskyttelse(aktør: Aktør): List<no.nav.familie.kontrakter.felles.personopplysning.Adressebeskyttelse> {
         val pdlPersonRequest = PdlPersonRequest(
             variables = PdlPersonRequestVariables(aktør.aktivFødselsnummer()),
             query = hentGraphqlQuery("hent-adressebeskyttelse"),
@@ -45,7 +48,40 @@ class SystemOnlyPdlRestClient(
             it.person!!.adressebeskyttelse
         }
     }
+
+    @Cacheable("adressebeskyttelsebolk", cacheManager = "shortCache")
+    fun hentAdressebeskyttelseBolk(personIdentList: List<String>): List<AdressebeskyttelseBolk> {
+        val pdlPersonRequest = PdlPersonBolkRequest(
+            variables = PdlPersonBolkRequestVariables(personIdentList),
+            query = hentGraphqlQuery("hent-adressebeskyttelse-bolk"),
+        )
+
+        val pdlResponse: PdlBaseResponse<PdlAdressebeskyttelseBolkResponse> = kallEksternTjeneste(
+            tjeneste = "pdl",
+            uri = pdlUri,
+            formål = "Hent adressebeskyttelse i bolk",
+        ) {
+            postForEntity(pdlUri, pdlPersonRequest, httpHeaders())
+        }
+
+        return feilsjekkOgReturnerData(
+            ident = personIdentList.toString(),
+            pdlResponse = pdlResponse,
+        ) {
+            it.hentPersonBolk?.adressebeskyttelse
+        }
+    }
 }
+
+class AdressebeskyttelseBolk(
+    val ident: String,
+    val person: Adressebeskyttelse,
+    val code: String,
+)
+
+data class Adressebeskyttelse(
+    val gradering: ADRESSEBESKYTTELSEGRADERING?,
+)
 
 fun List<Adressebeskyttelse>.tilAdressebeskyttelse() =
     this.firstOrNull()?.gradering ?: ADRESSEBESKYTTELSEGRADERING.UGRADERT
