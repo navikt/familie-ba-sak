@@ -9,6 +9,8 @@ import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåB
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.barn
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.tilPersonerPåBehandling
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -176,13 +178,13 @@ class ArbeidsfordelingService(
         val søker = identMedAdressebeskyttelse(behandling.fagsak.aktør)
 
         val personinfoliste = when (
-            val personopplysningGrunnlag =
-                personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandling.id)
+            val barn =
+                personopplysningGrunnlagRepository.finnSøkerOgBarnAktørerTilAktiv(behandling.id)
+                    .tilPersonerPåBehandling()
+                    ?.barn()
         ) {
             null -> listOf(søker)
-            else -> personopplysningGrunnlag.barna.map { barn ->
-                identMedAdressebeskyttelse(barn.aktør)
-            }.plus(søker)
+            else -> barn.map { identMedAdressebeskyttelse(it) }.plus(søker)
         }
 
         val identMedStrengeste = finnPersonMedStrengesteAdressebeskyttelse(personinfoliste)
