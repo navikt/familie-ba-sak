@@ -1162,7 +1162,7 @@ fun lagPerson(
 )
 
 fun lagRestSanityBegrunnelse(
-    apiNavn: String? = "",
+    apiNavn: String = "",
     navnISystem: String = "",
     vilkaar: List<String>? = emptyList(),
     rolle: List<String>? = emptyList(),
@@ -1194,7 +1194,7 @@ fun lagRestSanityBegrunnelse(
 )
 
 fun lagSanityBegrunnelse(
-    apiNavn: String? = "",
+    apiNavn: String = "",
     navnISystem: String = "",
     vilkaar: List<SanityVilkår>? = null,
     rolle: List<VilkårRolle> = emptyList(),

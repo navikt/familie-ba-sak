@@ -6,6 +6,10 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.RestSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.RestSanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.SanityEØSBegrunnelse
+import no.nav.familie.ba.sak.task.OpprettTaskService
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.retry.annotation.Backoff
+import org.springframework.retry.annotation.Retryable
 import org.springframework.stereotype.Component
 import org.springframework.web.client.RestTemplate
 import org.springframework.web.client.getForEntity
@@ -15,9 +19,15 @@ const val sanityBaseUrl = "https://xsrv1mh6.api.sanity.io/v2021-06-07/data/query
 
 @Component
 class SanityKlient(
+    @Value("\${SANITY_DATASET}") private val datasett: String,
     private val restTemplate: RestTemplate,
 ) {
-    fun hentBegrunnelser(datasett: String = "ba-brev"): List<SanityBegrunnelse> {
+    @Retryable(
+        value = [Exception::class],
+        maxAttempts = 3,
+        backoff = Backoff(delayExpression = OpprettTaskService.RETRY_BACKOFF_5000MS),
+    )
+    fun hentBegrunnelser(): List<SanityBegrunnelse> {
         val sanityUrl = "$sanityBaseUrl/$datasett"
         val hentBegrunnelserQuery = java.net.URLEncoder.encode(hentBegrunnelser, "utf-8")
 
@@ -33,10 +43,15 @@ class SanityKlient(
                     ?: throw Feil("Klarer ikke å hente begrunnelser fra sanity")
             }
 
-        return restSanityBegrunnelser.map { it.tilSanityBegrunnelse() }
+        return restSanityBegrunnelser.mapNotNull { it.tilSanityBegrunnelse() }
     }
 
-    fun hentEØSBegrunnelser(datasett: String = "ba-brev"): List<SanityEØSBegrunnelse> {
+    @Retryable(
+        value = [Exception::class],
+        maxAttempts = 3,
+        backoff = Backoff(delayExpression = OpprettTaskService.RETRY_BACKOFF_5000MS),
+    )
+    fun hentEØSBegrunnelser(): List<SanityEØSBegrunnelse> {
         val sanityUrl = "$sanityBaseUrl/$datasett"
         val hentEØSBegrunnelserQuery = java.net.URLEncoder.encode(hentEØSBegrunnelser, "utf-8")
 
