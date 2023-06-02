@@ -19,8 +19,8 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.SanityEØSBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.hjemlerTilhørendeFritekst
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Opphørsperiode
 
 fun hentAutomatiskVedtaksbrevtype(behandling: Behandling): Brevmal {
@@ -78,7 +78,7 @@ fun hjemlerTilHjemmeltekst(hjemler: List<String>, lovForHjemmel: String): String
 
 fun hentHjemmeltekst(
     minimerteVedtaksperioder: List<MinimertVedtaksperiode>,
-    sanityBegrunnelser: List<SanityBegrunnelse>,
+    sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
     opplysningspliktHjemlerSkalMedIBrev: Boolean = false,
     målform: Målform,
     vedtakKorrigertHjemmelSkalMedIBrev: Boolean = false,
@@ -86,7 +86,7 @@ fun hentHjemmeltekst(
 ): String {
     val sanityStandardbegrunnelser = minimerteVedtaksperioder.flatMap { vedtaksperiode ->
         vedtaksperiode.begrunnelser.mapNotNull { begrunnelse ->
-            begrunnelse.standardbegrunnelse.tilISanityBegrunnelse(sanityBegrunnelser)
+            sanityBegrunnelser[begrunnelse.standardbegrunnelse]
         }
     }
 

@@ -14,8 +14,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.EØSBegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.finnBegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeHentOgPersisterService
 import org.slf4j.LoggerFactory
@@ -30,10 +28,10 @@ class BehandlingMetrikker(
     private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService,
     private val sanityService: SanityService,
 ) {
-    private var sanityBegrunnelser: List<SanityBegrunnelse> = emptyList()
+    private var sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse> = emptyMap()
     private var antallGangerBruktStandardbegrunnelse: Map<Standardbegrunnelse, Counter> = emptyMap()
 
-    private var sanityEØSBegrunnelser: List<SanityEØSBegrunnelse> = emptyList()
+    private var sanityEØSBegrunnelser: Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse> = emptyMap()
     private var antallGangerBruktEØSBegrunnelse: Map<EØSStandardbegrunnelse, Counter> = emptyMap()
 
     private val antallManuelleBehandlinger: Counter =
@@ -68,7 +66,7 @@ class BehandlingMetrikker(
         }
 
         antallGangerBruktEØSBegrunnelse = EØSStandardbegrunnelse.values().associateWith {
-            val tittel = sanityEØSBegrunnelser.finnBegrunnelse(it)?.navnISystem ?: it.name
+            val tittel = sanityEØSBegrunnelser[it]?.navnISystem ?: it.name
 
             Metrics.counter(
                 "eøs-begrunnelse",
@@ -86,7 +84,7 @@ class BehandlingMetrikker(
         }
 
         antallGangerBruktStandardbegrunnelse = Standardbegrunnelse.values().associateWith {
-            val tittel = it.tilISanityBegrunnelse(sanityBegrunnelser)?.navnISystem ?: it.name
+            val tittel = sanityBegrunnelser[it]?.navnISystem ?: it.name
 
             Metrics.counter(
                 "brevbegrunnelse",
