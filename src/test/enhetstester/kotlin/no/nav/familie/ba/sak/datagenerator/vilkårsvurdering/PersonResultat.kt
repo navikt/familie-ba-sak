@@ -14,9 +14,11 @@ fun lagPersonResultatAvOverstyrteResultater(
     person: Person,
     overstyrendeVilkårResultater: List<VilkårResultat>,
     vilkårsvurdering: Vilkårsvurdering,
+    id: Long = 0,
 
 ): PersonResultat {
     val personResultat = PersonResultat(
+        id = id,
         vilkårsvurdering = vilkårsvurdering,
         aktør = person.aktør,
     )
@@ -27,10 +29,11 @@ fun lagPersonResultatAvOverstyrteResultater(
         personType = person.type,
         fagsakType = FagsakType.NORMAL,
         behandlingUnderkategori = if (erUtvidet) BehandlingUnderkategori.UTVIDET else BehandlingUnderkategori.ORDINÆR,
-    ).map { vilkårType ->
+    ).mapIndexed { index, vilkårType ->
         overstyrendeVilkårResultater
             .find { it.vilkårType == vilkårType }
             ?: VilkårResultat(
+                id = if (id != 0L) index + 1L else 0L,
                 personResultat = personResultat,
                 periodeFom = if (vilkårType == Vilkår.UNDER_18_ÅR) {
                     person.fødselsdato
