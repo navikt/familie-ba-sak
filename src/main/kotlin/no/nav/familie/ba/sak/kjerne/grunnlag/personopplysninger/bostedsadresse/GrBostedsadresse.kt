@@ -57,6 +57,14 @@ abstract class GrBostedsadresse(
 
     abstract fun tilFrontendString(): String
 
+    protected abstract fun tilKopiForNyPerson(): GrBostedsadresse
+
+    fun tilKopiForNyPerson(nyPerson: Person): GrBostedsadresse =
+        tilKopiForNyPerson().also {
+            it.periode = periode
+            it.person = nyPerson
+        }
+
     fun gjeldendeNå(): Boolean {
         if (periode == null) return true
         return periode!!.erInnenfor(LocalDate.now())

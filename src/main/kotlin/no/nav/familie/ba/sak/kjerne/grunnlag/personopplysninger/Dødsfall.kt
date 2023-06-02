@@ -43,6 +43,10 @@ data class Dødsfall(
     @Column(name = "doedsfall_poststed", nullable = true)
     val dødsfallPoststed: String?,
 ) : BaseEntitet() {
+
+    fun tilKopiForNyPerson(nyPerson: Person): Dødsfall =
+        copy(id = 0, person = nyPerson)
+
     fun hentAdresseToString(): String {
         return """$dødsfallAdresse, $dødsfallPostnummer $dødsfallPoststed"""
     }
