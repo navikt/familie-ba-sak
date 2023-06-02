@@ -53,7 +53,7 @@ class TilgangService(
     }
 
     private fun harTilgangTilPersoner(personIdenter: List<String>): Boolean {
-        return harSaksbehandlerTilgang("validerTilgangTilPersoner", personIdenter) {
+        return harSaksbehandlerTilgang("validerTilgangTilPersoner", personIdenter.distinct()) {
             familieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(personIdenter).harTilgang
         }
     }
@@ -91,12 +91,12 @@ class TilgangService(
                 custom1 = CustomKeyValue("fagsak", fagsakId.toString()),
             )
         }
-        val behandlinger = behandlingHentOgPersisterService.hentBehandlinger(fagsakId)
-        val personIdenterIFagsak = behandlinger.flatMap { behandling ->
-            persongrunnlagService.hentSøkerOgBarnPåBehandling(behandling.id)
+        val personIdenterIFagsak = (
+            persongrunnlagService.hentSøkerOgBarnPåFagsak(fagsakId)
                 ?.map { it.aktør.aktivFødselsnummer() }
                 ?: emptyList()
-        }.distinct().ifEmpty { listOf(aktør.aktivFødselsnummer()) }
+            )
+            .ifEmpty { listOf(aktør.aktivFødselsnummer()) }
         val harTilgang = harTilgangTilPersoner(personIdenterIFagsak)
         if (!harTilgang) {
             throw RolleTilgangskontrollFeil(

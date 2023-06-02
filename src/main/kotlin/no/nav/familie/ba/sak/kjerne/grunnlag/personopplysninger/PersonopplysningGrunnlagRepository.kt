@@ -21,4 +21,19 @@ interface PersonopplysningGrunnlagRepository : JpaRepository<PersonopplysningGru
         """,
     )
     fun finnSøkerOgBarnAktørerTilAktiv(behandlingId: Long): List<PersonPåBehandling>
+
+    @Query(
+        """
+        SELECT new no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonPåBehandling(p.type, a, p.fødselsdato, d.dødsfallDato, p.målform)
+        FROM Person p
+        JOIN p.personopplysningGrunnlag gr
+        JOIN p.aktør a
+        JOIN Behandling b ON b.id = gr.behandlingId
+        LEFT JOIN p.dødsfall d
+        WHERE b.fagsak.id = :fagsakId 
+        AND gr.aktiv = true
+        AND p.type IN ('SØKER', 'BARN')
+        """,
+    )
+    fun finnSøkerOgBarnAktørerTilFagsak(fagsakId: Long): Set<PersonPåBehandling>
 }
