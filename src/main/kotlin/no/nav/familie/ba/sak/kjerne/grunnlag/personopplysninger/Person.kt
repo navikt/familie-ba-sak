@@ -201,3 +201,8 @@ enum class Målform {
         NN -> Språkkode.NN
     }
 }
+
+data class PersonPåBehandling(
+    val type: PersonType,
+    val aktør: Aktør,
+)

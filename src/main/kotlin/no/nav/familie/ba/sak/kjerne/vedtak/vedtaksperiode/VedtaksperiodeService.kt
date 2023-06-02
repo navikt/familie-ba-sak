@@ -549,9 +549,15 @@ class VedtaksperiodeService(
     fun hentUtbetalingsperioder(
         behandling: Behandling,
     ): List<Utbetalingsperiode> {
-        val personopplysningGrunnlag =
-            persongrunnlagService.hentAktiv(behandlingId = behandling.id)
-                ?: return emptyList()
+        val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
+        return hentUtbetalingsperioder(behandling, personopplysningGrunnlag)
+    }
+
+    fun hentUtbetalingsperioder(
+        behandling: Behandling,
+        personopplysningGrunnlag: PersonopplysningGrunnlag?,
+    ): List<Utbetalingsperiode> {
+        if (personopplysningGrunnlag == null) return emptyList()
 
         val andelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService
             .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.id)
