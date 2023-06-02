@@ -431,8 +431,8 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
     @JsonValue
     override fun enumnavnTilString(): String = EØSStandardbegrunnelse::class.simpleName + "$" + this.name
 
-    fun tilEØSBegrunnelseMedTriggere(sanityEØSBegrunnelser: List<SanityEØSBegrunnelse>): EØSBegrunnelseMedTriggere? {
-        val sanityEØSBegrunnelse = sanityEØSBegrunnelser.finnBegrunnelse(this) ?: return null
+    fun tilEØSBegrunnelseMedTriggere(sanityEØSBegrunnelser: Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse>): EØSBegrunnelseMedTriggere? {
+        val sanityEØSBegrunnelse = sanityEØSBegrunnelser[this] ?: return null
         return EØSBegrunnelseMedTriggere(
             eøsBegrunnelse = this,
             sanityEØSBegrunnelse = sanityEØSBegrunnelse,

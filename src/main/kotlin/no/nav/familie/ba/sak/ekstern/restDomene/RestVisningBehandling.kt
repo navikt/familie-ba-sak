@@ -12,6 +12,7 @@ import java.time.LocalDateTime
 class RestVisningBehandling(
     val behandlingId: Long,
     val opprettetTidspunkt: LocalDateTime,
+    val aktivertTidspunkt: LocalDateTime,
     val kategori: BehandlingKategori,
     val underkategori: BehandlingUnderkategoriDTO,
     val aktiv: Boolean,
@@ -25,6 +26,7 @@ class RestVisningBehandling(
 fun Behandling.tilRestVisningBehandling(vedtaksdato: LocalDateTime?) = RestVisningBehandling(
     behandlingId = this.id,
     opprettetTidspunkt = this.opprettetTidspunkt,
+    aktivertTidspunkt = this.aktivertTidspunkt,
     kategori = this.kategori,
     underkategori = this.underkategori.tilDto(),
     aktiv = this.aktiv,

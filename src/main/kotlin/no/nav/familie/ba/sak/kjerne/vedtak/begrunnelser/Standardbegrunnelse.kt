@@ -1524,7 +1524,7 @@ private fun endringsperiodeGjelderBarn(
     personIdentFraEndringsperiode: String,
 ) = personerPåBehandling.find { person -> person.personIdent == personIdentFraEndringsperiode }?.type == PersonType.BARN
 
-val endretUtbetalingsperiodeBegrunnelser: List<Standardbegrunnelse> = listOf(
+val endretUtbetalingsperiodeBegrunnelser: Set<Standardbegrunnelse> = setOf(
     Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_INGEN_UTBETALING_NY,
     Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_FULL_UTBETALING_FØR_SOKNAD_NY,
     Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_KUN_ETTERBETALT_UTVIDET_NY,
