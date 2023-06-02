@@ -201,6 +201,9 @@ fun tilfeldigPerson(
         målform = Målform.NB,
     ).apply { sivilstander = mutableListOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
 
+fun Person.tilPersonPåBehandling() =
+    PersonPåBehandling(this.type, this.aktør, this.fødselsdato, this.dødsfall?.dødsfallDato, this.målform)
+
 fun tilfeldigSøker(
     fødselsdato: LocalDate = LocalDate.now(),
     personType: PersonType = PersonType.SØKER,
@@ -425,9 +428,8 @@ fun lagTestPersonopplysningGrunnlag(
     return personopplysningGrunnlag
 }
 
-fun PersonopplysningGrunnlag.tilPersonPåBehandlingSøkerOgBarn() = this.søkerOgBarn.map {
-    PersonPåBehandling(it.type, it.aktør, it.fødselsdato, it.dødsfall?.dødsfallDato, it.målform)
-}
+fun PersonopplysningGrunnlag.tilPersonPåBehandlingSøkerOgBarn() =
+    this.søkerOgBarn.map { it.tilPersonPåBehandling() }
 
 fun dato(s: String) = LocalDate.parse(s)
 fun årMnd(s: String) = YearMonth.parse(s)
