@@ -133,7 +133,7 @@ class UtvidetBehandlingService(
             fødselshendelsefiltreringResultater = fødselshendelsefiltreringResultatRepository.finnFødselshendelsefiltreringResultater(
                 behandlingId = behandling.id,
             ).map { it.tilRestFødselshendelsefiltreringResultat() },
-            utbetalingsperioder = vedtaksperiodeService.hentUtbetalingsperioder(behandling),
+            utbetalingsperioder = vedtaksperiodeService.hentUtbetalingsperioder(behandling, personopplysningGrunnlag),
             personerMedAndelerTilkjentYtelse = personopplysningGrunnlag?.tilRestPersonerMedAndeler(andelerTilkjentYtelse)
                 ?: emptyList(),
             endretUtbetalingAndeler = endreteUtbetalingerMedAndeler
