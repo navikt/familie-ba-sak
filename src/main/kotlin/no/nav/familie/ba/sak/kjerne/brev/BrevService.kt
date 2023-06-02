@@ -266,7 +266,7 @@ class BrevService(
         val grunnlagOgSignaturData = hentGrunnlagOgSignaturData(vedtak)
         val brevPerioderData = brevPeriodeService.hentBrevperioderData(
             vedtaksperioderId = utvidetVedtaksperioderMedBegrunnelser.map { it.id },
-            behandlingId = BehandlingId(vedtak.behandling.id),
+            behandling = vedtak.behandling,
         )
         val brevperioder = brevPerioderData.sorted().mapNotNull {
             it.tilBrevPeriodeGenerator().genererBrevPeriode()
