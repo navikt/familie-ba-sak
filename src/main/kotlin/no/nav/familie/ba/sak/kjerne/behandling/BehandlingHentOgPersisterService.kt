@@ -45,8 +45,7 @@ class BehandlingHentOgPersisterService(
      * Henter siste iverksatte behandling på fagsak
      */
     fun hentSisteBehandlingSomErIverksatt(fagsakId: Long): Behandling? {
-        val iverksatteBehandlinger = hentIverksatteBehandlinger(fagsakId)
-        return Behandlingutils.hentSisteBehandlingSomErIverksatt(iverksatteBehandlinger)
+        return behandlingRepository.finnSisteIverksatteBehandling(fagsakId = fagsakId)
     }
 
     /**
