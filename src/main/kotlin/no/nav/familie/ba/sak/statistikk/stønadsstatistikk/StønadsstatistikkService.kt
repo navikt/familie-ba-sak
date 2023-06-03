@@ -53,9 +53,8 @@ class StønadsstatistikkService(
 ) {
 
     fun hentVedtakV2(behandlingId: Long): VedtakDVHV2 {
-        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
-
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId)
+        val behandling = vedtak?.behandling ?: behandlingHentOgPersisterService.hent(behandlingId)
         // DVH ønsker tidspunkt med klokkeslett
 
         var datoVedtak = vedtak?.vedtaksdato
@@ -81,7 +80,7 @@ class StønadsstatistikkService(
                 BehandlingUnderkategori.INSTITUSJON -> UnderkategoriV2.ORDINÆR // Institusjon er ordinær og ligger under fagsakType på stønadsstatistikk
             },
             behandlingTypeV2 = BehandlingTypeV2.valueOf(behandling.type.name),
-            utbetalingsperioderV2 = hentUtbetalingsperioderV2(behandlingId),
+            utbetalingsperioderV2 = hentUtbetalingsperioderV2(behandling),
             funksjonellId = UUID.randomUUID().toString(),
             kompetanseperioder = hentKompetanse(BehandlingId(behandlingId)),
             behandlingÅrsakV2 = BehandlingÅrsakV2.valueOf(behandling.opprettetÅrsak.name),
@@ -118,11 +117,10 @@ class StønadsstatistikkService(
         return lagPersonDVHV2(søker)
     }
 
-    private fun hentUtbetalingsperioderV2(behandlingId: Long): List<UtbetalingsperiodeDVHV2> {
+    private fun hentUtbetalingsperioderV2(behandling: Behandling): List<UtbetalingsperiodeDVHV2> {
         val andelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService
-            .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId)
-        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
-        val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId)
+            .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.id)
+        val persongrunnlag = persongrunnlagService.hentAktivThrows(behandling.id)
 
         if (andelerTilkjentYtelse.isEmpty()) return emptyList()
 
