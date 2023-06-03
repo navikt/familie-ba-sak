@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.barn
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
@@ -154,10 +155,10 @@ class AutovedtakSatsendringService(
     private fun harUtbetalingerSomOverstiger100Prosent(sisteIverksatteBehandling: Behandling): Boolean {
         val tilkjentYtelse =
             beregningService.hentTilkjentYtelseForBehandling(behandlingId = sisteIverksatteBehandling.id)
-        val personopplysningGrunnlag =
-            persongrunnlagService.hentAktivThrows(behandlingId = sisteIverksatteBehandling.id)
+        val søkerOgBarn =
+            persongrunnlagService.hentSøkerOgBarnPåBehandlingOrThrows(behandlingId = sisteIverksatteBehandling.id)
 
-        val barnMedAndreRelevanteTilkjentYtelser = personopplysningGrunnlag.barna.map {
+        val barnMedAndreRelevanteTilkjentYtelser = søkerOgBarn.barn().map {
             Pair(
                 it,
                 beregningService.hentRelevanteTilkjentYtelserForBarn(it.aktør, sisteIverksatteBehandling.fagsak.id),
@@ -168,7 +169,7 @@ class AutovedtakSatsendringService(
             TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
                 behandlendeBehandlingTilkjentYtelse = tilkjentYtelse,
                 barnMedAndreRelevanteTilkjentYtelser = barnMedAndreRelevanteTilkjentYtelser,
-                personopplysningGrunnlag = personopplysningGrunnlag,
+                søkerOgBarn = søkerOgBarn,
             )
         } catch (e: UtbetalingsikkerhetFeil) {
             secureLogger.info("fagsakId=${sisteIverksatteBehandling.fagsak.id} har UtbetalingsikkerhetFeil. Skipper satsendring: ${e.frontendFeilmelding}")

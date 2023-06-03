@@ -55,15 +55,14 @@ class BehandlingsresultatSteg(
     override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
         if (behandling.skalBehandlesAutomatisk) return
 
+        val søkerOgBarn = persongrunnlagService.hentSøkerOgBarnPåBehandlingOrThrows(behandling.id)
         if (behandling.type != BehandlingType.TEKNISK_ENDRING && behandling.type != BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT) {
             val vilkårsvurdering = vilkårService.hentVilkårsvurderingThrows(behandlingId = behandling.id)
-            val barna = persongrunnlagService.hentSøkerOgBarnPåBehandling(behandling.id)?.barn() ?: emptyList()
 
-            validerBarnasVilkår(barna, vilkårsvurdering)
+            validerBarnasVilkår(søkerOgBarn.barn(), vilkårsvurdering)
         }
 
         val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandling.id)
-        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandling.id)
 
         if (behandling.erSatsendring()) {
             validerSatsendring(tilkjentYtelse)
@@ -71,7 +70,7 @@ class BehandlingsresultatSteg(
 
         validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
             tilkjentYtelse = tilkjentYtelse,
-            personopplysningGrunnlag = personopplysningGrunnlag,
+            søkerOgBarn = søkerOgBarn,
         )
 
         val endreteUtbetalingerMedAndeler = andelerTilkjentYtelseOgEndreteUtbetalingerService
