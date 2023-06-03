@@ -425,7 +425,11 @@ class VedtaksperiodeService(
         return vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(vedtakId = vedtak.id)
     }
 
-    fun hentUtvidetVedtaksperiodeMedBegrunnelser(vedtak: Vedtak): List<UtvidetVedtaksperiodeMedBegrunnelser> {
+    fun hentUtvidetVedtaksperiodeMedBegrunnelser(
+        vedtak: Vedtak,
+        personopplysningGrunnlag: PersonopplysningGrunnlag? = null,
+    ): List<UtvidetVedtaksperiodeMedBegrunnelser> {
+        val persongrunnlag = personopplysningGrunnlag ?: persongrunnlagService.hentAktivThrows(vedtak.behandling.id)
         val vedtaksperioderMedBegrunnelser = hentPersisterteVedtaksperioder(vedtak)
 
         val behandling = vedtak.behandling
@@ -434,9 +438,6 @@ class VedtaksperiodeService(
 
         val andelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService
             .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.id)
-
-        val persongrunnlag =
-            persongrunnlagService.hentAktivThrows(behandling.id)
 
         val utvidetVedtaksperioderMedBegrunnelser = vedtaksperioderMedBegrunnelser.map {
             it.tilUtvidetVedtaksperiodeMedBegrunnelser(
