@@ -16,5 +16,5 @@ interface VedtakRepository : JpaRepository<Vedtak, Long> {
     fun findByBehandlingAndAktiv(behandlingId: Long): Vedtak
 
     @Query("SELECT v.vedtaksdato FROM Vedtak v WHERE v.behandling.id = :behandlingId AND v.aktiv = true")
-    fun finnVedtaksdato(behandlingId: Long): LocalDateTime?
+    fun finnVedtaksdatoForBehandling(behandlingId: Long): LocalDateTime?
 }

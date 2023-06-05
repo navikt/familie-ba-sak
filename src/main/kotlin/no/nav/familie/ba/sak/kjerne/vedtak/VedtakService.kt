@@ -26,7 +26,7 @@ class VedtakService(
     }
 
     fun hentVedtaksdatoForBehandlingThrows(behandlingId: Long): LocalDateTime {
-        return vedtakRepository.finnVedtaksdato(behandlingId)
+        return vedtakRepository.finnVedtaksdatoForBehandling(behandlingId)
             ?: error("Finner ikke vedtaksato for behandling=$behandlingId")
     }
 

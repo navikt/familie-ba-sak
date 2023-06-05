@@ -208,7 +208,7 @@ class FagsakService(
             tilbakekrevingsbehandlingService.hentRestTilbakekrevingsbehandlinger((fagsakId))
         val visningsbehandlinger = behandlingHentOgPersisterService.hentBehandlinger(fagsakId = fagsakId).map {
             it.tilRestVisningBehandling(
-                vedtaksdato = vedtakRepository.finnVedtaksdato(it.id),
+                vedtaksdato = vedtakRepository.finnVedtaksdatoForBehandling(it.id),
             )
         }
         val migreringsdato = behandlingService.hentMigreringsdatoPåFagsak(fagsakId)
