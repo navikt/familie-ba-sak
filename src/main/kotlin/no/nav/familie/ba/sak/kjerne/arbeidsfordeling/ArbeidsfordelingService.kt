@@ -176,14 +176,10 @@ class ArbeidsfordelingService(
     fun hentArbeidsfordelingsenhet(behandling: Behandling): Arbeidsfordelingsenhet {
         val søker = identMedAdressebeskyttelse(behandling.fagsak.aktør)
 
-        val personinfoliste = when (
-            val barn =
-                personopplysningGrunnlagRepository.finnSøkerOgBarnAktørerTilAktiv(behandling.id)
-                    ?.barn()
-        ) {
-            null -> listOf(søker)
-            else -> barn.map { identMedAdressebeskyttelse(it.aktør) }.plus(søker)
-        }
+        val personinfoliste = personopplysningGrunnlagRepository.finnSøkerOgBarnAktørerTilAktiv(behandling.id)
+            .barn()
+            .map { identMedAdressebeskyttelse(it.aktør) }
+            .plus(søker)
 
         val identMedStrengeste = finnPersonMedStrengesteAdressebeskyttelse(personinfoliste)
 
