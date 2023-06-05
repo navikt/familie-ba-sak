@@ -40,7 +40,7 @@ enum class VedtakBegrunnelseType(val sorteringsrekkefølge: Int) {
     }
 
     fun erAvslag(): Boolean {
-        return this == AVSLAG || this == INSTITUSJON_AVSLAG
+        return this == AVSLAG || this == INSTITUSJON_AVSLAG || this == EØS_AVSLAG
     }
 
     fun erOpphør(): Boolean {
