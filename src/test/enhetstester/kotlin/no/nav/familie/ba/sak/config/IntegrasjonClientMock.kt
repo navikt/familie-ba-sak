@@ -7,7 +7,6 @@ import io.mockk.isMockKMock
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
-import io.mockk.slot
 import no.nav.familie.ba.sak.config.ClientMocks.Companion.BARN_DET_IKKE_GIS_TILGANG_TIL_FNR
 import no.nav.familie.ba.sak.config.ClientMocks.Companion.søkerFnr
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
@@ -184,6 +183,25 @@ class IntegrasjonClientMock {
             } answers {
                 val identer = firstArg<List<String>>()
                 identer.map { Tilgang(personIdent = it, harTilgang = it != BARN_DET_IKKE_GIS_TILGANG_TIL_FNR) }
+            }
+        }
+
+        fun FamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(
+            map: Map<String, Boolean>,
+            slot: MutableList<List<String>> = mutableListOf(),
+        ) {
+            every { sjekkTilgangTilPersoner(capture(slot)) } answers {
+                val arg = firstArg<List<String>>()
+                map.entries.filter { arg.contains(it.key) }.map { Tilgang(personIdent = it.key, harTilgang = it.value) }
+            }
+        }
+
+        fun FamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(
+            harTilgang: Boolean = false,
+            slot: MutableList<List<String>> = mutableListOf(),
+        ) {
+            every { sjekkTilgangTilPersoner(capture(slot)) } answers {
+                firstArg<List<String>>().map { Tilgang(personIdent = it, harTilgang = harTilgang) }
             }
         }
 

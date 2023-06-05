@@ -4,11 +4,13 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
+import no.nav.familie.ba.sak.common.clearAllCaches
 import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
+import no.nav.familie.ba.sak.config.IntegrasjonClientMock.Companion.mockSjekkTilgang
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
@@ -23,7 +25,6 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.Personident
 import no.nav.familie.ba.sak.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ba.sak.util.BrukerContextUtil.mockBrukerContext
-import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import no.nav.familie.log.mdc.MDCConstants
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
@@ -77,7 +78,7 @@ class TilgangServiceTest {
         every { fagsakService.hentAktør(fagsak.id) } returns fagsak.aktør
         every { behandlingHentOgPersisterService.hent(any()) } returns behandling
         every { persongrunnlagService.hentAktiv(any()) } returns personopplysningGrunnlag
-        cacheManager.cacheNames.forEach { cacheManager.getCache(it)?.clear() }
+        cacheManager.clearAllCaches()
     }
 
     @AfterEach
@@ -87,7 +88,7 @@ class TilgangServiceTest {
 
     @Test
     internal fun `skal kaste RolleTilgangskontrollFeil dersom saksbehandler ikke har tilgang til person eller dets barn`() {
-        mockkSjekkTilgangTilPerson(false)
+        mockFamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(false)
 
         assertThrows<RolleTilgangskontrollFeil> {
             tilgangService.validerTilgangTilPersoner(
@@ -99,14 +100,14 @@ class TilgangServiceTest {
 
     @Test
     internal fun `skal ikke feile når saksbehandler har tilgang til person og dets barn`() {
-        mockkSjekkTilgangTilPerson(true)
+        mockFamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(true)
 
         tilgangService.validerTilgangTilPersoner(listOf(aktør.aktivFødselsnummer()), AuditLoggerEvent.ACCESS)
     }
 
     @Test
     internal fun `skal kaste RolleTilgangskontrollFeil dersom saksbehandler ikke har tilgang til behandling`() {
-        mockkSjekkTilgangTilPerson(false)
+        mockFamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(false)
 
         assertThrows<RolleTilgangskontrollFeil> {
             tilgangService.validerTilgangTilBehandling(
@@ -118,14 +119,14 @@ class TilgangServiceTest {
 
     @Test
     internal fun `skal ikke feile når saksbehandler har tilgang til behandling`() {
-        mockkSjekkTilgangTilPerson(true)
+        mockFamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(true)
 
         tilgangService.validerTilgangTilBehandling(behandling.id, AuditLoggerEvent.ACCESS)
     }
 
     @Test
     internal fun `validerTilgangTilPersoner - hvis samme saksbehandler kaller skal den ha cachet`() {
-        mockkSjekkTilgangTilPerson(true)
+        mockFamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(true)
 
         mockBrukerContext("A")
         tilgangService.validerTilgangTilPersoner(listOf(olaIdent), AuditLoggerEvent.ACCESS)
@@ -137,7 +138,7 @@ class TilgangServiceTest {
 
     @Test
     internal fun `validerTilgangTilPersoner - hvis to ulike saksbehandler kaller skal den sjekke tilgang på nytt`() {
-        mockkSjekkTilgangTilPerson(true)
+        mockFamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(true)
 
         mockBrukerContext("A")
         tilgangService.validerTilgangTilPersoner(listOf(olaIdent), AuditLoggerEvent.ACCESS)
@@ -151,7 +152,7 @@ class TilgangServiceTest {
 
     @Test
     internal fun `validerTilgangTilBehandling - hvis samme saksbehandler kaller skal den ha cachet`() {
-        mockkSjekkTilgangTilPerson(true)
+        mockFamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(true)
 
         mockBrukerContext("A")
 
@@ -165,7 +166,7 @@ class TilgangServiceTest {
 
     @Test
     internal fun `validerTilgangTilBehandling - hvis to ulike saksbehandler kaller skal den sjekke tilgang på nytt`() {
-        mockkSjekkTilgangTilPerson(true)
+        mockFamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(true)
 
         mockBrukerContext("A")
         tilgangService.validerTilgangTilBehandling(behandling.id, AuditLoggerEvent.ACCESS)
@@ -190,7 +191,7 @@ class TilgangServiceTest {
                 ),
             ),
         )
-        mockkSjekkTilgangTilPerson(false)
+        mockFamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(false)
         mockBrukerContext("A")
         assertThrows<RolleTilgangskontrollFeil> { tilgangService.validerTilgangTilFagsak(fagsak.id, AuditLoggerEvent.ACCESS) }
     }
@@ -200,19 +201,12 @@ class TilgangServiceTest {
         val fnr = randomFnr()
         val fnr2 = randomFnr()
         val fnr3 = randomFnr()
-        every { mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(any()) } returns
-            listOf(Tilgang(fnr, true), Tilgang(fnr2, false), Tilgang(fnr3, true))
+        mockFamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(mapOf(fnr to true, fnr2 to false, fnr3 to true))
         assertThrows<RolleTilgangskontrollFeil> {
             tilgangService.validerTilgangTilPersoner(
                 listOf(fnr, fnr2, fnr3),
                 AuditLoggerEvent.ACCESS,
             )
-        }
-    }
-
-    private fun mockkSjekkTilgangTilPerson(harTilgang: Boolean) {
-        every { mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(any()) } answers {
-            firstArg<List<String>>().map { Tilgang(it, harTilgang) }
         }
     }
 }

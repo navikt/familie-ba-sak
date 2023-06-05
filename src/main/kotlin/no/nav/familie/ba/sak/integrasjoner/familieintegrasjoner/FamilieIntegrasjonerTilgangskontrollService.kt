@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.tilAdressebeskyttelse
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import org.springframework.cache.CacheManager
 import org.springframework.stereotype.Service
@@ -36,11 +35,8 @@ class FamilieIntegrasjonerTilgangskontrollService(
     }
 
     fun sjekkTilgangTilPersoner(personIdenter: List<String>): Map<String, Tilgang> {
-        if (SikkerhetContext.erSystemKontekst()) {
-            return personIdenter.associateWith { Tilgang(personIdent = it, harTilgang = true, begrunnelse = null) }
-        }
         return cacheManager.getCachedOrLoad("sjekkTilgangTilPersoner", personIdenter, true) {
-            familieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(it).map { it.personIdent!! to it }.toMap()
+            familieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(it).map { it.personIdent to it }.toMap()
         }
     }
 }

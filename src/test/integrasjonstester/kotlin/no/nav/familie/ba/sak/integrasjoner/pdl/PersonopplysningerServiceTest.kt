@@ -1,15 +1,14 @@
 package no.nav.familie.ba.sak.integrasjoner.pdl
 
 import com.github.tomakehurst.wiremock.client.WireMock
-import io.mockk.every
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
+import no.nav.familie.ba.sak.config.IntegrasjonClientMock.Companion.mockSjekkTilgang
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.personopplysning.OPPHOLDSTILLATELSE
-import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import org.apache.commons.lang3.StringUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -58,12 +57,7 @@ internal class PersonopplysningerServiceTest(
 
     @Test
     fun `hentPersoninfoMedRelasjonerOgRegisterinformasjon() skal return riktig personinfo`() {
-        every {
-            mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(listOf(ID_BARN_1))
-        } returns listOf(Tilgang(ID_BARN_1, true))
-        every {
-            mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(listOf(ID_BARN_2))
-        } returns listOf(Tilgang(ID_BARN_2, false))
+        mockFamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(mapOf(ID_BARN_1 to true, ID_BARN_2 to false))
 
         val personInfo = personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(tilAktør(ID_MOR))
 
@@ -77,12 +71,7 @@ internal class PersonopplysningerServiceTest(
 
     @Test
     fun `hentPersoninfoMedRelasjonerOgRegisterinformasjon() skal returnere riktig personinfo for død person`() {
-        every {
-            mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(listOf(ID_BARN_1))
-        } returns listOf(Tilgang(ID_BARN_1, true))
-        every {
-            mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(listOf(ID_BARN_2))
-        } returns listOf(Tilgang(ID_BARN_2, false))
+        mockFamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(mapOf(ID_BARN_1 to true, ID_BARN_2 to false))
 
         val personInfo = personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(
             tilAktør(
@@ -97,9 +86,7 @@ internal class PersonopplysningerServiceTest(
 
     @Test
     fun `hentPersoninfoMedRelasjonerOgRegisterinformasjon() skal filtrere bort relasjoner med opphørte folkreregisteridenter eller uten fødselsdato`() {
-        every {
-            mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(any())
-        } returns listOf(Tilgang(ID_MOR_3BARN_1OPPHØRT_1UTENFØDSELSDATO, true))
+        mockFamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(true)
 
         val personInfo = personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(
             tilAktør(

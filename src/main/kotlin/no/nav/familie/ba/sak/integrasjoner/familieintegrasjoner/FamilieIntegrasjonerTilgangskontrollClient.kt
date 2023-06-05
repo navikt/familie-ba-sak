@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner
 
 import no.nav.familie.ba.sak.common.kallEksternTjeneste
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
@@ -22,6 +23,9 @@ class FamilieIntegrasjonerTilgangskontrollClient(
         UriComponentsBuilder.fromUri(integrasjonUri).pathSegment(PATH_TILGANG_PERSON).build().toUri()
 
     fun sjekkTilgangTilPersoner(personIdenter: List<String>): List<Tilgang> {
+        if (SikkerhetContext.erSystemKontekst()) {
+            return personIdenter.map { Tilgang(personIdent = it, harTilgang = true, begrunnelse = null) }
+        }
         return kallEksternTjeneste<List<Tilgang>>(
             tjeneste = "tilgangskontroll",
             uri = tilgangPersonUri,
