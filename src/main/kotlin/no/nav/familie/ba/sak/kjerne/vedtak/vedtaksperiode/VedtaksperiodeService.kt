@@ -182,13 +182,11 @@ class VedtaksperiodeService(
         standardbegrunnelserFraFrontend: List<Standardbegrunnelse>,
         eøsStandardbegrunnelserFraFrontend: List<EØSStandardbegrunnelse>,
     ) {
-        val erMinstEnNyBegrunnelseMedAvslag =
-            standardbegrunnelserFraFrontend.any { it.vedtakBegrunnelseType.erAvslag() } || eøsStandardbegrunnelserFraFrontend.any { it.vedtakBegrunnelseType.erAvslag() }
-        val eksisterendeBegrunnelser = vedtaksperiodeMedBegrunnelser.begrunnelser
+        val eksisterendeAvslagBegrunnelser = vedtaksperiodeMedBegrunnelser.begrunnelser.filter { it.standardbegrunnelse.vedtakBegrunnelseType.erAvslag() }.map { it.standardbegrunnelse.sanityApiNavn }
 
-        if (eksisterendeBegrunnelser.any { it.standardbegrunnelse.vedtakBegrunnelseType.erAvslag() } &&
-            !erMinstEnNyBegrunnelseMedAvslag
-        ) {
+        val nyeAvslagBegrunnelser = (standardbegrunnelserFraFrontend.filter { it.vedtakBegrunnelseType.erAvslag() } + eøsStandardbegrunnelserFraFrontend.filter { it.vedtakBegrunnelseType.erAvslag() }).map { it.sanityApiNavn }
+
+        if (!nyeAvslagBegrunnelser.containsAll(eksisterendeAvslagBegrunnelser)) {
             throw FunksjonellFeil("Kan ikke fjerne avslags-begrunnelse fra vedtaksperiode som har blitt satt til avslag i vilkårsvurdering.")
         }
     }
