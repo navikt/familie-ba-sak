@@ -77,7 +77,8 @@ class BrevPeriodeService(
             søknadGrunnlagService.hentAktiv(behandlingId = behandlingId.id)?.hentUregistrerteBarn()
                 ?: emptyList()
 
-        val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksattFraBehandlingsId(behandlingId = behandlingId.id)
+        val forrigeBehandling =
+            behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksattFraBehandlingsId(behandlingId = behandlingId.id)
         val inneværendeBehandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId.id)
 
         val kompetanser = kompetanseService.hentKompetanser(behandlingId = behandlingId)
@@ -239,7 +240,9 @@ class BrevPeriodeService(
                 vedtaksperioderId = listOf(vedtaksperiodeId),
                 behandlingId = BehandlingId(vedtaksperiodeMedBegrunnelser.vedtak.behandling.id),
             ).single()
-        return begrunnelseDataForVedtaksperiode.hentBegrunnelserOgFritekster()
+        return begrunnelseDataForVedtaksperiode.hentBegrunnelserOgFritekster(
+            skalBrukeNyVedtaksperiodeLøsning = featureToggleService.isEnabled(FeatureToggleConfig.VEDTAKSPERIODE_NY),
+        )
     }
 
     companion object {
