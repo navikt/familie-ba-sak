@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPersonResultaterForSøkerOgToBarn
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.common.tilPersonPåBehandlingSøkerOgBarn
+import no.nav.familie.ba.sak.common.tilPersonEnkelSøkerOgBarn
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
@@ -61,7 +61,7 @@ internal class VilkårsvurderingTidslinjerTest {
             VilkårsvurderingTidslinjer(
                 vilkårsvurdering = vilkårsvurdering,
                 søkerOgBarn = lagTestPersonopplysningGrunnlag(defaultBehandling.id, søkerFnr, barnaFnr)
-                    .tilPersonPåBehandlingSøkerOgBarn(),
+                    .tilPersonEnkelSøkerOgBarn(),
             )
         }
     }
@@ -105,7 +105,7 @@ internal class VilkårsvurderingTidslinjerTest {
             VilkårsvurderingTidslinjer(
                 vilkårsvurdering = vilkårsvurdering,
                 søkerOgBarn = lagTestPersonopplysningGrunnlag(defaultBehandling.id, søkerFnr, barnaFnr)
-                    .tilPersonPåBehandlingSøkerOgBarn(),
+                    .tilPersonEnkelSøkerOgBarn(),
             )
         }
     }

@@ -8,14 +8,14 @@ import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomAktør
-import no.nav.familie.ba.sak.common.tilPersonPåBehandlingSøkerOgBarn
+import no.nav.familie.ba.sak.common.tilPersonEnkelSøkerOgBarn
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.RolleConfig
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonPåBehandling
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonEnkel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.util.BrukerContextUtil.clearBrukerContext
@@ -69,7 +69,7 @@ class TilgangServiceTest {
         every { fagsakService.hentAktør(fagsak.id) } returns fagsak.aktør
         every { behandlingHentOgPersisterService.hent(any()) } returns behandling
         every { persongrunnlagService.hentSøkerOgBarnPåBehandling(behandling.id) } returns
-            personopplysningGrunnlag.tilPersonPåBehandlingSøkerOgBarn()
+            personopplysningGrunnlag.tilPersonEnkelSøkerOgBarn()
     }
 
     @AfterEach
@@ -177,14 +177,14 @@ class TilgangServiceTest {
         every { behandlingHentOgPersisterService.hentBehandlinger(fagsak.id) }.returns(listOf(behandling))
         every { persongrunnlagService.hentSøkerOgBarnPåFagsak(fagsak.id) }.returns(
             setOf(
-                PersonPåBehandling(
+                PersonEnkel(
                     aktør = søkerAktør,
                     type = PersonType.SØKER,
                     fødselsdato = LocalDate.now(),
                     dødsfallDato = null,
                     målform = Målform.NB,
                 ),
-                PersonPåBehandling(
+                PersonEnkel(
                     aktør = barnAktør,
                     type = PersonType.BARN,
                     fødselsdato = LocalDate.now(),

@@ -29,7 +29,7 @@ class VilkårsvurderingSteg(
 ) : BehandlingSteg<String> {
 
     override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
-        val søkerOgBarn = persongrunnlagService.hentSøkerOgBarnPåBehandlingOrThrows(behandling.id)
+        val søkerOgBarn = persongrunnlagService.hentSøkerOgBarnPåBehandlingThrows(behandling.id)
 
         if (behandling.opprettetÅrsak == BehandlingÅrsak.DØDSFALL_BRUKER) {
             val vilkårsvurdering = vilkårService.hentVilkårsvurderingThrows(behandling.id)

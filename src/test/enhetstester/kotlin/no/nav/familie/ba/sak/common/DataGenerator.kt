@@ -57,7 +57,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonPåBehandling
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonEnkel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -201,8 +201,8 @@ fun tilfeldigPerson(
         målform = Målform.NB,
     ).apply { sivilstander = mutableListOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
 
-fun Person.tilPersonPåBehandling() =
-    PersonPåBehandling(this.type, this.aktør, this.fødselsdato, this.dødsfall?.dødsfallDato, this.målform)
+fun Person.tilPersonEnkel() =
+    PersonEnkel(this.type, this.aktør, this.fødselsdato, this.dødsfall?.dødsfallDato, this.målform)
 
 fun tilfeldigSøker(
     fødselsdato: LocalDate = LocalDate.now(),
@@ -428,8 +428,8 @@ fun lagTestPersonopplysningGrunnlag(
     return personopplysningGrunnlag
 }
 
-fun PersonopplysningGrunnlag.tilPersonPåBehandlingSøkerOgBarn() =
-    this.søkerOgBarn.map { it.tilPersonPåBehandling() }
+fun PersonopplysningGrunnlag.tilPersonEnkelSøkerOgBarn() =
+    this.søkerOgBarn.map { it.tilPersonEnkel() }
 
 fun dato(s: String) = LocalDate.parse(s)
 fun årMnd(s: String) = YearMonth.parse(s)

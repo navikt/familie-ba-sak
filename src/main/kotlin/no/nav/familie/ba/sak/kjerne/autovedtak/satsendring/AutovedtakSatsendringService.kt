@@ -156,7 +156,7 @@ class AutovedtakSatsendringService(
         val tilkjentYtelse =
             beregningService.hentTilkjentYtelseForBehandling(behandlingId = sisteIverksatteBehandling.id)
         val søkerOgBarn =
-            persongrunnlagService.hentSøkerOgBarnPåBehandlingOrThrows(behandlingId = sisteIverksatteBehandling.id)
+            persongrunnlagService.hentSøkerOgBarnPåBehandlingThrows(behandlingId = sisteIverksatteBehandling.id)
 
         val barnMedAndreRelevanteTilkjentYtelser = søkerOgBarn.barn().map {
             Pair(

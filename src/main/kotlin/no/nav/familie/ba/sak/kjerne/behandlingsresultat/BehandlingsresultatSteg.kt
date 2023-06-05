@@ -55,7 +55,7 @@ class BehandlingsresultatSteg(
     override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
         if (behandling.skalBehandlesAutomatisk) return
 
-        val søkerOgBarn = persongrunnlagService.hentSøkerOgBarnPåBehandlingOrThrows(behandling.id)
+        val søkerOgBarn = persongrunnlagService.hentSøkerOgBarnPåBehandlingThrows(behandling.id)
         if (behandling.type != BehandlingType.TEKNISK_ENDRING && behandling.type != BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT) {
             val vilkårsvurdering = vilkårService.hentVilkårsvurderingThrows(behandlingId = behandling.id)
 

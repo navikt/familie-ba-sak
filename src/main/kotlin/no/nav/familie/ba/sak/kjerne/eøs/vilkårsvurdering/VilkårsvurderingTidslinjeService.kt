@@ -13,7 +13,7 @@ class VilkårsvurderingTidslinjeService(
 
     fun hentTidslinjerThrows(behandlingId: BehandlingId): VilkårsvurderingTidslinjer {
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = behandlingId.id)!!
-        val søkerOgBarn = persongrunnlagService.hentSøkerOgBarnPåBehandlingOrThrows(behandlingId = behandlingId.id)
+        val søkerOgBarn = persongrunnlagService.hentSøkerOgBarnPåBehandlingThrows(behandlingId = behandlingId.id)
 
         return VilkårsvurderingTidslinjer(
             vilkårsvurdering = vilkårsvurdering,

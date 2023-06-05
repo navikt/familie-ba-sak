@@ -20,7 +20,7 @@ interface PersonopplysningGrunnlagRepository : JpaRepository<PersonopplysningGru
         AND p.type IN ('SØKER', 'BARN')
         """,
     )
-    fun finnSøkerOgBarnAktørerTilAktiv(behandlingId: Long): List<PersonPåBehandling>
+    fun finnSøkerOgBarnAktørerTilAktiv(behandlingId: Long): List<PersonEnkel>
 
     @Query(
         """
@@ -35,5 +35,5 @@ interface PersonopplysningGrunnlagRepository : JpaRepository<PersonopplysningGru
         AND p.type IN ('SØKER', 'BARN')
         """,
     )
-    fun finnSøkerOgBarnAktørerTilFagsak(fagsakId: Long): Set<PersonPåBehandling>
+    fun finnSøkerOgBarnAktørerTilFagsak(fagsakId: Long): Set<PersonEnkel>
 }

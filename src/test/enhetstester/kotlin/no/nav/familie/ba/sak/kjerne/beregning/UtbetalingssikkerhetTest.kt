@@ -7,8 +7,8 @@ import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.nesteMåned
-import no.nav.familie.ba.sak.common.tilPersonPåBehandling
-import no.nav.familie.ba.sak.common.tilPersonPåBehandlingSøkerOgBarn
+import no.nav.familie.ba.sak.common.tilPersonEnkel
+import no.nav.familie.ba.sak.common.tilPersonEnkelSøkerOgBarn
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -60,7 +60,7 @@ class UtbetalingssikkerhetTest {
         val feil = assertThrows<UtbetalingsikkerhetFeil> {
             TilkjentYtelseValidering.validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
                 tilkjentYtelse,
-                listOf(person.tilPersonPåBehandling()),
+                listOf(person.tilPersonEnkel()),
             )
         }
 
@@ -95,7 +95,7 @@ class UtbetalingssikkerhetTest {
         assertDoesNotThrow {
             TilkjentYtelseValidering.validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
                 tilkjentYtelse,
-                listOf(person.tilPersonPåBehandling()),
+                listOf(person.tilPersonEnkel()),
             )
         }
     }
@@ -128,7 +128,7 @@ class UtbetalingssikkerhetTest {
         val feil = assertThrows<UtbetalingsikkerhetFeil> {
             TilkjentYtelseValidering.validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
                 tilkjentYtelse,
-                listOf(person.tilPersonPåBehandling()),
+                listOf(person.tilPersonEnkel()),
             )
         }
 
@@ -163,7 +163,7 @@ class UtbetalingssikkerhetTest {
         assertDoesNotThrow {
             TilkjentYtelseValidering.validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
                 tilkjentYtelse,
-                listOf(person.tilPersonPåBehandling()),
+                listOf(person.tilPersonEnkel()),
             )
         }
     }
@@ -217,8 +217,8 @@ class UtbetalingssikkerhetTest {
         val feil = assertThrows<UtbetalingsikkerhetFeil> {
             TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
                 behandlendeBehandlingTilkjentYtelse = tilkjentYtelse2,
-                barnMedAndreRelevanteTilkjentYtelser = listOf(Pair(barn.tilPersonPåBehandling(), listOf(tilkjentYtelse))),
-                søkerOgBarn = personopplysningGrunnlag2.tilPersonPåBehandlingSøkerOgBarn(),
+                barnMedAndreRelevanteTilkjentYtelser = listOf(Pair(barn.tilPersonEnkel(), listOf(tilkjentYtelse))),
+                søkerOgBarn = personopplysningGrunnlag2.tilPersonEnkelSøkerOgBarn(),
             )
         }
 
@@ -281,8 +281,8 @@ class UtbetalingssikkerhetTest {
 
         TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
             behandlendeBehandlingTilkjentYtelse = tilkjentYtelse2,
-            barnMedAndreRelevanteTilkjentYtelser = listOf(Pair(barn.tilPersonPåBehandling(), listOf(tilkjentYtelse))),
-            søkerOgBarn = personopplysningGrunnlag2.tilPersonPåBehandlingSøkerOgBarn(),
+            barnMedAndreRelevanteTilkjentYtelser = listOf(Pair(barn.tilPersonEnkel(), listOf(tilkjentYtelse))),
+            søkerOgBarn = personopplysningGrunnlag2.tilPersonEnkelSøkerOgBarn(),
         )
     }
 
@@ -327,8 +327,8 @@ class UtbetalingssikkerhetTest {
         assertDoesNotThrow {
             TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
                 behandlendeBehandlingTilkjentYtelse = tilkjentYtelse2,
-                barnMedAndreRelevanteTilkjentYtelser = listOf(Pair(barn.tilPersonPåBehandling(), listOf(tilkjentYtelse))),
-                søkerOgBarn = personopplysningGrunnlag2.tilPersonPåBehandlingSøkerOgBarn(),
+                barnMedAndreRelevanteTilkjentYtelser = listOf(Pair(barn.tilPersonEnkel(), listOf(tilkjentYtelse))),
+                søkerOgBarn = personopplysningGrunnlag2.tilPersonEnkelSøkerOgBarn(),
             )
         }
     }

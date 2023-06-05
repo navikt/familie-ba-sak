@@ -29,7 +29,7 @@ class TilkjentYtelseValideringService(
         if (totrinnskontroll?.godkjent == true) {
             val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandling.id)
 
-            val søkerOgBarn = persongrunnlagService.hentSøkerOgBarnPåBehandlingOrThrows(behandlingId = behandling.id)
+            val søkerOgBarn = persongrunnlagService.hentSøkerOgBarnPåBehandlingThrows(behandlingId = behandling.id)
 
             val barnMedAndreRelevanteTilkjentYtelser = søkerOgBarn.barn().map {
                 Pair(

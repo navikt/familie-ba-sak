@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.common.lagVilkårsvurdering
 import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.randomFnr
-import no.nav.familie.ba.sak.common.tilPersonPåBehandlingSøkerOgBarn
+import no.nav.familie.ba.sak.common.tilPersonEnkelSøkerOgBarn
 import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
@@ -179,7 +179,7 @@ class BehandlingstemaServiceTest {
             VilkårsvurderingTidslinjer(
                 vilkårsvurdering = lagVilkårsvurdering(tilAktør(søkerFnr), defaultBehandling, Resultat.OPPFYLT),
                 søkerOgBarn = lagTestPersonopplysningGrunnlag(defaultBehandling.id, randomFnr(), barnFnr)
-                    .tilPersonPåBehandlingSøkerOgBarn(),
+                    .tilPersonEnkelSøkerOgBarn(),
             )
         assertEquals(BehandlingKategori.NASJONAL, behandlingstemaService.hentLøpendeKategori(defaultFagsak.id))
     }
@@ -206,7 +206,7 @@ class BehandlingstemaServiceTest {
             VilkårsvurderingTidslinjer(
                 vilkårsvurdering = vilkårsvurdering,
                 søkerOgBarn = lagTestPersonopplysningGrunnlag(defaultBehandling.id, søkerFnr, barnaFnr)
-                    .tilPersonPåBehandlingSøkerOgBarn(),
+                    .tilPersonEnkelSøkerOgBarn(),
             )
         assertEquals(BehandlingKategori.EØS, behandlingstemaService.hentLøpendeKategori(defaultFagsak.id))
     }
@@ -233,7 +233,7 @@ class BehandlingstemaServiceTest {
             VilkårsvurderingTidslinjer(
                 vilkårsvurdering = vilkårsvurdering,
                 søkerOgBarn = lagTestPersonopplysningGrunnlag(defaultBehandling.id, søkerFnr, barnaFnr)
-                    .tilPersonPåBehandlingSøkerOgBarn(),
+                    .tilPersonEnkelSøkerOgBarn(),
             )
         assertEquals(BehandlingKategori.NASJONAL, behandlingstemaService.hentLøpendeKategori(defaultFagsak.id))
     }

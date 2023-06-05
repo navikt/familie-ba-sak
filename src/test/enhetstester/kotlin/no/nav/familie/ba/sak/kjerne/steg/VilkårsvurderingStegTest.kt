@@ -10,7 +10,7 @@ import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagPersonResultat
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.tilPersonPåBehandling
+import no.nav.familie.ba.sak.common.tilPersonEnkel
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
@@ -126,10 +126,10 @@ class VilkårsvurderingStegTest {
             .byggPerson()
 
         val vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering()
-        val søkerOgBarnPåBehandling = listOf(søker.tilPersonPåBehandling(), barn1.tilPersonPåBehandling())
+        val søkerOgBarnPåBehandling = listOf(søker.tilPersonEnkel(), barn1.tilPersonEnkel())
 
         every { vilkårService.hentVilkårsvurdering(behandling.id) } returns vilkårsvurdering
-        every { persongrunnlagService.hentSøkerOgBarnPåBehandlingOrThrows(behandling.id) } returns søkerOgBarnPåBehandling
+        every { persongrunnlagService.hentSøkerOgBarnPåBehandlingThrows(behandling.id) } returns søkerOgBarnPåBehandling
 
         assertDoesNotThrow { vilkårsvurderingSteg.preValiderSteg(behandling, null) }
     }
@@ -152,10 +152,10 @@ class VilkårsvurderingStegTest {
             .byggPerson()
 
         val vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering()
-        val søkerOgBarnPåBehandling = listOf(søker.tilPersonPåBehandling(), barn1.tilPersonPåBehandling())
+        val søkerOgBarnPåBehandling = listOf(søker.tilPersonEnkel(), barn1.tilPersonEnkel())
 
         every { vilkårService.hentVilkårsvurdering(behandling.id) } returns vilkårsvurdering
-        every { persongrunnlagService.hentSøkerOgBarnPåBehandlingOrThrows(behandling.id) } returns søkerOgBarnPåBehandling
+        every { persongrunnlagService.hentSøkerOgBarnPåBehandlingThrows(behandling.id) } returns søkerOgBarnPåBehandling
 
         val exception = assertThrows<FunksjonellFeil> { vilkårsvurderingSteg.preValiderSteg(behandling, null) }
         assertEquals(

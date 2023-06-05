@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårIkkeOppfyltÅrsak
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårKanskjeOppfyltÅrsak
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.vilkårsvurdering.utfall.VilkårOppfyltÅrsak
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonPåBehandling
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonEnkel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -133,7 +133,7 @@ class VilkårsvurderingMetrics(
     private fun mapVilkårTilVilkårResultater(
         vilkårsvurdering: Vilkårsvurdering,
         vilkår: Vilkår,
-    ): List<Pair<PersonPåBehandling, VilkårResultat?>> {
+    ): List<Pair<PersonEnkel, VilkårResultat?>> {
         val personer = persongrunnlagService.hentSøkerOgBarnPåBehandling(vilkårsvurdering.behandling.id)
             ?: error("Finner ikke aktivt persongrunnlag ved telling av metrikker")
 

@@ -14,7 +14,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerPersonOgTyp
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringUtil.tilFørsteEndringstidspunkt
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonPåBehandling
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonEnkel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.barn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.søker
@@ -32,10 +32,10 @@ fun hentGyldigEtterbetalingFom(kravDato: LocalDateTime) =
 
 fun hentSøkersAndeler(
     andeler: List<AndelTilkjentYtelse>,
-    søker: PersonPåBehandling,
+    søker: PersonEnkel,
 ) = andeler.filter { it.aktør == søker.aktør }
 
-fun hentBarnasAndeler(andeler: List<AndelTilkjentYtelse>, barna: List<PersonPåBehandling>) = barna.map { barn ->
+fun hentBarnasAndeler(andeler: List<AndelTilkjentYtelse>, barna: List<PersonEnkel>) = barna.map { barn ->
     barn to andeler.filter { it.aktør == barn.aktør }
 }
 
@@ -124,7 +124,7 @@ object TilkjentYtelseValidering {
 
     fun validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
         tilkjentYtelse: TilkjentYtelse,
-        søkerOgBarn: List<PersonPåBehandling>,
+        søkerOgBarn: List<PersonEnkel>,
     ) {
         val søker = søkerOgBarn.søker()
         val barna = søkerOgBarn.barn()
@@ -147,14 +147,14 @@ object TilkjentYtelseValidering {
 
     fun validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
         behandlendeBehandlingTilkjentYtelse: TilkjentYtelse,
-        barnMedAndreRelevanteTilkjentYtelser: List<Pair<PersonPåBehandling, List<TilkjentYtelse>>>,
-        søkerOgBarn: List<PersonPåBehandling>,
+        barnMedAndreRelevanteTilkjentYtelser: List<Pair<PersonEnkel, List<TilkjentYtelse>>>,
+        søkerOgBarn: List<PersonEnkel>,
     ) {
         val barna = søkerOgBarn.barn().sortedBy { it.fødselsdato }
 
         val barnasAndeler = hentBarnasAndeler(behandlendeBehandlingTilkjentYtelse.andelerTilkjentYtelse.toList(), barna)
 
-        val barnMedUtbetalingsikkerhetFeil = mutableListOf<PersonPåBehandling>()
+        val barnMedUtbetalingsikkerhetFeil = mutableListOf<PersonEnkel>()
         barnasAndeler.forEach { (barn, andeler) ->
             val barnsAndelerFraAndreBehandlinger =
                 barnMedAndreRelevanteTilkjentYtelser.filter { it.first.aktør == barn.aktør }
@@ -217,7 +217,7 @@ object TilkjentYtelseValidering {
 }
 
 private fun validerAtBeløpForPartStemmerMedSatser(
-    person: PersonPåBehandling,
+    person: PersonEnkel,
     andeler: List<AndelTilkjentYtelse>,
     fagsakType: FagsakType,
 ) {

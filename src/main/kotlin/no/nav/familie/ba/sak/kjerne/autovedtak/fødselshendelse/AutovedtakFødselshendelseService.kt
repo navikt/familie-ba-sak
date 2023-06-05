@@ -242,7 +242,7 @@ class AutovedtakFødselshendelseService(
     private fun hentBegrunnelseFraVilkårsvurdering(behandlingId: Long): String {
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId)
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
-        val søker = persongrunnlagService.hentSøkerOgBarnPåBehandlingOrThrows(behandling.id).søker()
+        val søker = persongrunnlagService.hentSøkerOgBarnPåBehandlingThrows(behandling.id).søker()
         val søkerResultat = vilkårsvurdering?.personResultater?.find { it.aktør == søker.aktør }
 
         val bosattIRiketResultat = søkerResultat?.vilkårResultater?.find { it.vilkårType == Vilkår.BOSATT_I_RIKET }

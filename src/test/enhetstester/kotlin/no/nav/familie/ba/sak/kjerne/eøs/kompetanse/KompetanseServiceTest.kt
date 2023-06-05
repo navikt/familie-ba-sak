@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.tilPersonPåBehandlingSøkerOgBarn
+import no.nav.familie.ba.sak.common.tilPersonEnkelSøkerOgBarn
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.eøs.assertEqualsUnordered
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.TilpassKompetanserTilRegelverkService
@@ -259,7 +259,7 @@ internal class KompetanseServiceTest {
         val vilkårsvurderingTidslinjer = VilkårsvurderingTidslinjer(
             vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
             søkerOgBarn = lagTestPersonopplysningGrunnlag(behandlingId.id, søker, barn1, barn2)
-                .tilPersonPåBehandlingSøkerOgBarn(),
+                .tilPersonEnkelSøkerOgBarn(),
         )
 
         every { vilkårsvurderingTidslinjeService.hentTidslinjerThrows(behandlingId) } returns vilkårsvurderingTidslinjer
@@ -306,7 +306,7 @@ internal class KompetanseServiceTest {
         val vilkårsvurderingTidslinjer = VilkårsvurderingTidslinjer(
             vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
             søkerOgBarn = lagTestPersonopplysningGrunnlag(behandlingId.id, søker, barn1, barn2)
-                .tilPersonPåBehandlingSøkerOgBarn(),
+                .tilPersonEnkelSøkerOgBarn(),
         )
 
         every { vilkårsvurderingTidslinjeService.hentTidslinjerThrows(behandlingId) } returns vilkårsvurderingTidslinjer
@@ -350,7 +350,7 @@ internal class KompetanseServiceTest {
         val vilkårsvurderingTidslinjer = VilkårsvurderingTidslinjer(
             vilkårsvurdering = vilkårsvurdering,
             søkerOgBarn = lagTestPersonopplysningGrunnlag(behandlingId.id, søker, barn1, barn2, barn3)
-                .tilPersonPåBehandlingSøkerOgBarn(),
+                .tilPersonEnkelSøkerOgBarn(),
         )
 
         every { vilkårsvurderingTidslinjeService.hentTidslinjerThrows(behandlingId) } returns vilkårsvurderingTidslinjer

@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.common.erUnder18ÅrVilkårTidslinje
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonPåBehandling
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonEnkel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.barn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.søker
@@ -21,9 +21,9 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 
 class VilkårsvurderingTidslinjer(
     vilkårsvurdering: Vilkårsvurdering,
-    søkerOgBarn: List<PersonPåBehandling>,
+    søkerOgBarn: List<PersonEnkel>,
 ) {
-    private val barna: List<PersonPåBehandling> = søkerOgBarn.barn()
+    private val barna: List<PersonEnkel> = søkerOgBarn.barn()
     private val søker: Aktør = søkerOgBarn.søker().aktør
 
     internal val barnOgFødselsdatoer = barna.associate { it.aktør to it.fødselsdato }

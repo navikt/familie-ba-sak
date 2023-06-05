@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjer
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.harBlandetRegelverk
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonPåBehandling
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonEnkel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.søker
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
@@ -13,7 +13,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import java.time.LocalDate
 
 fun validerIngenVilkårSattEtterSøkersDød(
-    søkerOgBarn: List<PersonPåBehandling>,
+    søkerOgBarn: List<PersonEnkel>,
     vilkårsvurdering: Vilkårsvurdering,
 ) {
     val søker = søkerOgBarn.søker()
@@ -43,7 +43,7 @@ fun validerIngenVilkårSattEtterSøkersDød(
 }
 
 fun validerIkkeBlandetRegelverk(
-    søkerOgBarn: List<PersonPåBehandling>,
+    søkerOgBarn: List<PersonEnkel>,
     vilkårsvurdering: Vilkårsvurdering,
 ) {
     val vilkårsvurderingTidslinjer = VilkårsvurderingTidslinjer(vilkårsvurdering, søkerOgBarn)
@@ -55,7 +55,7 @@ fun validerIkkeBlandetRegelverk(
 }
 
 fun valider18ÅrsVilkårEksistererFraFødselsdato(
-    søkerOgBarn: List<PersonPåBehandling>,
+    søkerOgBarn: List<PersonEnkel>,
     vilkårsvurdering: Vilkårsvurdering,
 ) {
     vilkårsvurdering.personResultater.forEach { personResultat ->

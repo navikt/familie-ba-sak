@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.oppfyltVilkår
 import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
-import no.nav.familie.ba.sak.common.tilPersonPåBehandlingSøkerOgBarn
+import no.nav.familie.ba.sak.common.tilPersonEnkelSøkerOgBarn
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.eøs.endringsabonnement.tilpassKompetanserTilRegelverk
@@ -79,7 +79,7 @@ internal class TidslinjerTest {
         val vilkårsvurderingTidslinjer = VilkårsvurderingTidslinjer(
             vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
             søkerOgBarn = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1, barn2)
-                .tilPersonPåBehandlingSøkerOgBarn(),
+                .tilPersonEnkelSøkerOgBarn(),
         )
 
         assertEquals(søkerResult, vilkårsvurderingTidslinjer.søkersTidslinjer().regelverkResultatTidslinje)
@@ -115,7 +115,7 @@ internal class TidslinjerTest {
         val vilkårsvurderingTidslinjer = VilkårsvurderingTidslinjer(
             vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
             søkerOgBarn = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1)
-                .tilPersonPåBehandlingSøkerOgBarn(),
+                .tilPersonEnkelSøkerOgBarn(),
         )
 
         assertEquals(søkerResult, vilkårsvurderingTidslinjer.søkersTidslinjer().regelverkResultatTidslinje)
@@ -144,7 +144,7 @@ internal class TidslinjerTest {
         val vilkårsvurderingTidslinjer = VilkårsvurderingTidslinjer(
             vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
             søkerOgBarn = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1)
-                .tilPersonPåBehandlingSøkerOgBarn(),
+                .tilPersonEnkelSøkerOgBarn(),
         )
 
         assertEquals(
