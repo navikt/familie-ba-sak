@@ -505,17 +505,9 @@ class VilkårsvurderingForNyBehandlingServiceTest(
                 årsak = BehandlingÅrsak.SØKNAD,
             ),
         )
-        val søkerAktør = personidentService.hentOgLagreAktør(søker.aktør.aktivFødselsnummer(), true)
-        val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barn.aktør.aktivFødselsnummer()), true)
-        // val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
-        //     behandlingId = behandling.id,
-        //     søkerPersonIdent = fnr,
-        //     barnasIdenter = listOf(barnFnr),
-        //     barnasFødselsdatoer = listOf(barnetsFødselsdato),
-        //     søkerAktør = søkerAktør,
-        //     barnAktør = barnAktør,
-        // )
-        // persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+
+        personidentService.hentOgLagreAktør(søker.aktør.aktivFødselsnummer(), true)
+        personidentService.hentOgLagreAktørIder(listOf(barn.aktør.aktivFødselsnummer()), true)
 
         val vilkårsvurdering =
             lagVilkårsvurderingMedOverstyrendeResultater(
