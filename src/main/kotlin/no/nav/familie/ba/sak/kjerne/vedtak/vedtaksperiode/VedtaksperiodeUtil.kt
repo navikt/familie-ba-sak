@@ -25,9 +25,8 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.periodeAv
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerSenereEnn
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerTidligereEnn
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
@@ -50,6 +49,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForV
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.time.LocalDate
+import java.time.YearMonth
 
 fun oppdaterUtbetalingsperioderMedReduksjonFraForrigeBehandling(
     utbetalingsperioder: List<VedtaksperiodeMedBegrunnelser>,
@@ -224,10 +224,10 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.finnGrunnlagMedForrigePeriodeOg
 ): Map<AktørId, Periode<GrunnlagMedForrigePeriodeOgBehandling, Måned>> {
     val tidslinjeMedVedtaksperioden =
         listOf(
-            Periode(
-                this.fom?.toYearMonth().tilTidspunktEllerTidligereEnn(),
-                this.tom?.toYearMonth().tilTidspunktEllerSenereEnn(),
-                this,
+            periodeAv(
+                fraOgMed = this.fom?.toYearMonth(),
+                tilOgMed = this.tom?.toYearMonth(),
+                innhold = this,
             ),
         ).tilTidslinje()
 
@@ -239,11 +239,11 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.finnGrunnlagMedForrigePeriodeOg
     return grunnlagTidslinjePerPerson.mapValues { (aktørId, grunnlagTidslinje) ->
         val grunnlagMedForrigePeriodeTidslinje = (
             listOf(
-                Periode(null.tilTidspunktEllerTidligereEnn(), null.tilTidspunktEllerSenereEnn(), null),
+                periodeAv(YearMonth.now(), YearMonth.now(), null),
             ) + grunnlagTidslinje.perioder()
             ).zipWithNext { forrige, denne ->
-                Periode(denne.fraOgMed, denne.tilOgMed, Pair(forrige.innhold, denne.innhold))
-            }.tilTidslinje()
+            periodeAv(denne.fraOgMed, denne.tilOgMed, Pair(forrige.innhold, denne.innhold))
+        }.tilTidslinje()
 
         val grunnlagForrigeBehandlingTidslinje = grunnlagTidslinjePerPersonForrigeBehandling[aktørId] ?: TomTidslinje()
 

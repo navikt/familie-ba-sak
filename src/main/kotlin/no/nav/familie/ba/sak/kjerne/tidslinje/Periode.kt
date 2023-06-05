@@ -28,6 +28,12 @@ fun <I> periodeAv(fraOgMed: LocalDate?, tilOgMed: LocalDate?, innhold: I): Perio
 fun <I> periodeAv(fraOgMed: YearMonth?, tilOgMed: YearMonth?, innhold: I): Periode<I, Måned> =
     Periode(fraOgMed.tilTidspunktEllerUendeligTidlig(), tilOgMed.tilTidspunktEllerUendeligSent(), innhold)
 
+fun <I, T : Tidsenhet> periodeAv(
+    fraOgMed: Tidspunkt<T>,
+    tilOgMed: Tidspunkt<T>,
+    innhold: I,
+): Periode<I, T> = Periode(fraOgMed, tilOgMed, innhold)
+
 fun <I, T : Tidsenhet> Tidspunkt<T>.tilPeriodeMedInnhold(innhold: I?) = Periode(this, this, innhold)
 
 fun <I, T : Tidsenhet> Tidspunkt<T>.tilPeriodeUtenInnhold() = tilPeriodeMedInnhold(null as I)
