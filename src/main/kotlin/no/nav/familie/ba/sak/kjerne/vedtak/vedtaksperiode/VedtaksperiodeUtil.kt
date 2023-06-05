@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.erDagenFør
@@ -21,7 +22,13 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAnde
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerSenereEnn
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerTidligereEnn
+import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
@@ -37,6 +44,8 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.landkodeTilBarnetsBosted
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.triggesForPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.AktørId
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.fpsak.tidsserie.LocalDateSegment
@@ -195,11 +204,74 @@ private fun utledTom(
 
 fun UtvidetVedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserForPeriode(
     grunnlagForVedtaksperioder: GrunnlagForVedtaksperioder,
-    grunnlagForVedtaksperioderForrigeBehandling: GrunnlagForVedtaksperioder?,
+
+    grunnlagForVedtaksperioderForrigeBehandling: GrunnlagForVedtaksperioder,
+
     sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
 ): List<IVedtakBegrunnelse> {
+    val grunnlagMedForrigePeriodeOgBehandlingPerPerson: Map<AktørId, Periode<GrunnlagMedForrigePeriodeOgBehandling, Måned>> =
+        finnGrunnlagMedForrigePeriodeOgBehandlingPerPerson(
+            grunnlagForVedtaksperioder,
+            grunnlagForVedtaksperioderForrigeBehandling,
+        )
+
     return emptyList()
 }
+
+private fun UtvidetVedtaksperiodeMedBegrunnelser.finnGrunnlagMedForrigePeriodeOgBehandlingPerPerson(
+    grunnlagForVedtaksperioder: GrunnlagForVedtaksperioder,
+    grunnlagForVedtaksperioderForrigeBehandling: GrunnlagForVedtaksperioder,
+): Map<AktørId, Periode<GrunnlagMedForrigePeriodeOgBehandling, Måned>> {
+    val tidslinjeMedVedtaksperioden =
+        listOf(
+            Periode(
+                this.fom?.toYearMonth().tilTidspunktEllerTidligereEnn(),
+                this.tom?.toYearMonth().tilTidspunktEllerSenereEnn(),
+                this,
+            ),
+        ).tilTidslinje()
+
+    val grunnlagTidslinjePerPerson = grunnlagForVedtaksperioder.utledGrunnlagTidslinjePerPerson()
+
+    val grunnlagTidslinjePerPersonForrigeBehandling =
+        grunnlagForVedtaksperioderForrigeBehandling.utledGrunnlagTidslinjePerPerson()
+
+    return grunnlagTidslinjePerPerson.mapValues { (aktørId, grunnlagTidslinje) ->
+        val grunnlagMedForrigePeriodeTidslinje = (
+            listOf(
+                Periode(null.tilTidspunktEllerTidligereEnn(), null.tilTidspunktEllerSenereEnn(), null),
+            ) + grunnlagTidslinje.perioder()
+            ).zipWithNext { forrige, denne ->
+                Periode(denne.fraOgMed, denne.tilOgMed, Pair(forrige.innhold, denne.innhold))
+            }.tilTidslinje()
+
+        val grunnlagForrigeBehandlingTidslinje = grunnlagTidslinjePerPersonForrigeBehandling[aktørId] ?: TomTidslinje()
+
+        val grunnlagMedForrigePeriodeOgBehandlingTidslinje = tidslinjeMedVedtaksperioden.kombinerMed(
+            grunnlagMedForrigePeriodeTidslinje,
+            grunnlagForrigeBehandlingTidslinje,
+        ) { vedtaksPerioden, forrigeOgDennePerioden, forrigeBehandling ->
+            if (vedtaksPerioden == null) {
+                null
+            } else {
+                GrunnlagMedForrigePeriodeOgBehandling(
+                    forrigeOgDennePerioden?.second
+                        ?: throw Feil("Denne perioden i denne behandlingen burde ikke kunne være null."),
+                    forrigeOgDennePerioden.first,
+                    forrigeBehandling,
+                )
+            }
+        }
+
+        grunnlagMedForrigePeriodeOgBehandlingTidslinje.perioder().filter { it.innhold != null }.first()
+    }
+}
+
+data class GrunnlagMedForrigePeriodeOgBehandling(
+    val grunnlagForVedtaksperiode: GrunnlagForPerson,
+    val grunnlagForForrigeVedtaksperiode: GrunnlagForPerson?,
+    val grunnlagForVedtaksperiodeForrigeBehandling: GrunnlagForPerson?,
+)
 
 @Deprecated("Skal byttes ut med hentGyldigeBegrunnelserForPeriode")
 fun hentGyldigeBegrunnelserForPeriodeGammel(
