@@ -180,18 +180,10 @@ class IntegrasjonClientMock {
             clearMocks(mockFamilieIntegrasjonerTilgangskontrollClient)
 
             every {
-                mockFamilieIntegrasjonerTilgangskontrollClient.hentMaskertPersonInfoVedManglendeTilgang(any())
-            } returns null
-
-            val idSlot = slot<List<String>>()
-            every {
-                mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(capture(idSlot))
+                mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(any())
             } answers {
-                if (idSlot.captured.isNotEmpty() && idSlot.captured.contains(BARN_DET_IKKE_GIS_TILGANG_TIL_FNR)) {
-                    Tilgang(false, null)
-                } else {
-                    Tilgang(true, null)
-                }
+                val identer = firstArg<List<String>>()
+                identer.map { Tilgang(personIdent = it, harTilgang = it != BARN_DET_IKKE_GIS_TILGANG_TIL_FNR) }
             }
         }
 

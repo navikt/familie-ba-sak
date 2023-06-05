@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.config
 
 import com.github.benmanes.caffeine.cache.Caffeine
+import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import org.springframework.cache.Cache
 import org.springframework.cache.CacheManager
 import org.springframework.cache.annotation.EnableCaching
@@ -64,4 +65,35 @@ class CacheConfig {
             return ConcurrentMapCache(name, concurrentMap, true)
         }
     }
+}
+
+fun CacheManager.getCacheOrThrow(cache: String) = this.getCache(cache) ?: error("Finner ikke cache=$cache")
+
+/**
+ * Henter tidligere cachet verdier, og henter ucachet verdier med [valueLoader]
+ */
+@Suppress("UNCHECKED_CAST", "NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
+fun <VALUE : Any, RESULT> CacheManager.getCachedOrLoad(
+    cacheName: String,
+    values: List<VALUE>,
+    saksbehandlerContext: Boolean,
+    valueLoader: (List<VALUE>) -> Map<VALUE, RESULT>,
+): Map<VALUE, RESULT> {
+    val cache = this.getCacheOrThrow(cacheName)
+    val saksbehandler = if (saksbehandlerContext) {
+        SikkerhetContext.hentSaksbehandler()
+    } else {
+        true
+    }
+    val previousValues: List<Pair<VALUE, RESULT?>> = values.distinct()
+        .map { it to cache.get(Pair(saksbehandler, it))?.get() as RESULT? }
+
+    val cachedValues = previousValues.mapNotNull { if (it.second == null) null else it }.toMap() as Map<VALUE, RESULT>
+    val valuesWithoutCache = previousValues.filter { it.second == null }.map { it.first }
+    val loadedValues: Map<VALUE, RESULT> = valuesWithoutCache
+        .takeIf { it.isNotEmpty() }
+        ?.let { valueLoader(it) } ?: emptyMap()
+    loadedValues.forEach { cache.put(Pair(saksbehandler, it.key), it.value) }
+
+    return cachedValues + loadedValues
 }
