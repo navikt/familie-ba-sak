@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.integrasjoner.pdl
 
 import no.nav.familie.ba.sak.common.kallEksternTjeneste
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdressebeskyttelseBolkResponse
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.AdressebeskyttelseBolk
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdressebeskyttelseResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBaseResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonBolkRequest
@@ -27,7 +28,7 @@ class SystemOnlyPdlRestClient(
 ) : PdlRestClient(pdlBaseUrl, restTemplate, personidentService) {
 
     @Cacheable("adressebeskyttelse", cacheManager = "shortCache")
-    fun hentAdressebeskyttelse(aktør: Aktør): List<no.nav.familie.kontrakter.felles.personopplysning.Adressebeskyttelse> {
+    fun hentAdressebeskyttelse(aktør: Aktør): List<Adressebeskyttelse> {
         val pdlPersonRequest = PdlPersonRequest(
             variables = PdlPersonRequestVariables(aktør.aktivFødselsnummer()),
             query = hentGraphqlQuery("hent-adressebeskyttelse"),
@@ -68,20 +69,10 @@ class SystemOnlyPdlRestClient(
             ident = personIdentList.toString(),
             pdlResponse = pdlResponse,
         ) {
-            it.hentPersonBolk?.adressebeskyttelse
+            it.hentPersonBolk
         }
     }
 }
-
-class AdressebeskyttelseBolk(
-    val ident: String,
-    val person: Adressebeskyttelse,
-    val code: String,
-)
-
-data class Adressebeskyttelse(
-    val gradering: ADRESSEBESKYTTELSEGRADERING?,
-)
 
 fun List<Adressebeskyttelse>.tilAdressebeskyttelse() =
     this.firstOrNull()?.gradering ?: ADRESSEBESKYTTELSEGRADERING.UGRADERT
