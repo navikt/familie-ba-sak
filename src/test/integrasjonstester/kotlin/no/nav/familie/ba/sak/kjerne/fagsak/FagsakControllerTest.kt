@@ -100,19 +100,6 @@ class FagsakControllerTest(
 
     @Test
     @Tag("integration")
-    fun `Skal opprette fagsak med aktørid`() {
-        val aktørId = randomAktør()
-
-        val response =
-            fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = null, aktørId = aktørId.aktørId))
-        val restFagsak = response.body?.data
-        assertEquals(HttpStatus.CREATED, response.statusCode)
-        assertEquals(FagsakStatus.OPPRETTET, restFagsak?.status)
-        assertNotNull(restFagsak?.søkerFødselsnummer)
-    }
-
-    @Test
-    @Tag("integration")
     fun `Skal opprette skyggesak i Sak`() {
         val fnr = randomFnr()
 
@@ -174,18 +161,12 @@ class FagsakControllerTest(
     @Tag("integration")
     fun `Skal returnere eksisterende fagsak på person som allerede finnes basert på aktørid`() {
         val aktørId = randomAktør()
-
-        val nyRestFagsak = fagsakController.hentEllerOpprettFagsak(
-            FagsakRequest(personIdent = aktørId.aktivFødselsnummer(), aktørId = aktørId.aktørId),
+        val fagsakRequest = FagsakRequest(personIdent = aktørId.aktivFødselsnummer())
+        val nyRestFagsak = fagsakController.hentEllerOpprettFagsak(fagsakRequest
         )
         assertEquals(Ressurs.Status.SUKSESS, nyRestFagsak.body?.status)
 
-        val eksisterendeRestFagsak = fagsakController.hentEllerOpprettFagsak(
-            FagsakRequest(
-                personIdent = aktørId.aktivFødselsnummer(),
-                aktørId = aktørId.aktørId,
-            ),
-        )
+        val eksisterendeRestFagsak = fagsakController.hentEllerOpprettFagsak(fagsakRequest)
         assertEquals(Ressurs.Status.SUKSESS, eksisterendeRestFagsak.body?.status)
         assertEquals(eksisterendeRestFagsak.body!!.data!!.id, nyRestFagsak.body!!.data!!.id)
     }

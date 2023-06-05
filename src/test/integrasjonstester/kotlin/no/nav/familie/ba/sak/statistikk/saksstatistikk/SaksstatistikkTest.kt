@@ -97,18 +97,6 @@ class SaksstatistikkTest(
     }
 
     @Test
-    fun `Skal utføre rollback på sak og saksstatistikk ved feil`() {
-        val feil = assertThrows<Feil> {
-            fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = null, aktørId = null))
-        }
-        assertTrue(feil.message?.contains("Hverken aktørid eller personident er satt på fagsak-requesten") == true)
-
-        val mellomlagredeStatistikkHendelser = saksstatistikkMellomlagringRepository.finnMeldingerKlarForSending()
-
-        assertEquals(0, mellomlagredeStatistikkHendelser.size)
-    }
-
-    @Test
     @Tag("integration")
     fun `Skal lagre saksstatistikk behandling til repository og sende meldinger`() {
         val fnr = randomFnr()
