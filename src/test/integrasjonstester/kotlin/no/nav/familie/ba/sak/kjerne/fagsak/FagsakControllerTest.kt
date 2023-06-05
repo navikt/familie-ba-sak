@@ -37,7 +37,6 @@ import org.junit.jupiter.api.assertThrows
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Pageable
-import org.springframework.http.HttpStatus
 
 class FagsakControllerTest(
     @Autowired
@@ -162,7 +161,8 @@ class FagsakControllerTest(
     fun `Skal returnere eksisterende fagsak på person som allerede finnes basert på aktørid`() {
         val aktørId = randomAktør()
         val fagsakRequest = FagsakRequest(personIdent = aktørId.aktivFødselsnummer())
-        val nyRestFagsak = fagsakController.hentEllerOpprettFagsak(fagsakRequest
+        val nyRestFagsak = fagsakController.hentEllerOpprettFagsak(
+            fagsakRequest,
         )
         assertEquals(Ressurs.Status.SUKSESS, nyRestFagsak.body?.status)
 
