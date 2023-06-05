@@ -182,9 +182,12 @@ class VedtaksperiodeService(
         standardbegrunnelserFraFrontend: List<Standardbegrunnelse>,
         eøsStandardbegrunnelserFraFrontend: List<EØSStandardbegrunnelse>,
     ) {
-        val eksisterendeAvslagBegrunnelser = vedtaksperiodeMedBegrunnelser.begrunnelser.filter { it.standardbegrunnelse.vedtakBegrunnelseType.erAvslag() }.map { it.standardbegrunnelse.sanityApiNavn }
+        val eksisterendeAvslagBegrunnelser =
+            vedtaksperiodeMedBegrunnelser.begrunnelser.filter { it.standardbegrunnelse.vedtakBegrunnelseType.erAvslag() }
+                .map { it.standardbegrunnelse.sanityApiNavn }
 
-        val nyeAvslagBegrunnelser = (standardbegrunnelserFraFrontend.filter { it.vedtakBegrunnelseType.erAvslag() } + eøsStandardbegrunnelserFraFrontend.filter { it.vedtakBegrunnelseType.erAvslag() }).map { it.sanityApiNavn }
+        val nyeAvslagBegrunnelser =
+            (standardbegrunnelserFraFrontend.filter { it.vedtakBegrunnelseType.erAvslag() } + eøsStandardbegrunnelserFraFrontend.filter { it.vedtakBegrunnelseType.erAvslag() }).map { it.sanityApiNavn }
 
         if (!nyeAvslagBegrunnelser.containsAll(eksisterendeAvslagBegrunnelser)) {
             throw FunksjonellFeil("Kan ikke fjerne avslags-begrunnelse fra vedtaksperiode som har blitt satt til avslag i vilkårsvurdering.")
@@ -510,19 +513,32 @@ class VedtaksperiodeService(
                 hentAktørerMedUtbetaling(utvidetVedtaksperiodeMedBegrunnelser, persongrunnlag).map { it.aktørId }
 
             utvidetVedtaksperiodeMedBegrunnelser.copy(
-                gyldigeBegrunnelser = hentGyldigeBegrunnelserForPeriode(
-                    utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
-                    sanityBegrunnelser = sanityBegrunnelser,
-                    persongrunnlag = persongrunnlag,
-                    vilkårsvurdering = vilkårsvurdering,
-                    aktørIderMedUtbetaling = aktørIderMedUtbetaling,
-                    endretUtbetalingAndeler = endretUtbetalingAndeler,
-                    andelerTilkjentYtelse = andelerTilkjentYtelse,
-                    sanityEØSBegrunnelser = sanityEØSBegrunnelser,
-                    kompetanserIPeriode = kompetanserIPeriode,
-                    kompetanserSomStopperRettFørPeriode = kompetanserSomStopperRettFørPeriode,
-                    featureToggleService = featureToggleService,
-                ),
+                gyldigeBegrunnelser = if (featureToggleService.isEnabled(FeatureToggleConfig.BEGRUNNELSER_NY)) {
+                    val forrigeBehandling =
+                        behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
+
+                    utvidetVedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserForPeriode(
+                        grunnlagForVedtaksperioder = hentGrunnlagForVedtaksperioder(behandling),
+                        grunnlagForVedtaksperioderForrigeBehandling = forrigeBehandling?.let {
+                            hentGrunnlagForVedtaksperioder(it)
+                        },
+                        sanityBegrunnelser = sanityBegrunnelser,
+                    )
+                } else {
+                    hentGyldigeBegrunnelserForPeriodeGammel(
+                        utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
+                        sanityBegrunnelser = sanityBegrunnelser,
+                        persongrunnlag = persongrunnlag,
+                        vilkårsvurdering = vilkårsvurdering,
+                        aktørIderMedUtbetaling = aktørIderMedUtbetaling,
+                        endretUtbetalingAndeler = endretUtbetalingAndeler,
+                        andelerTilkjentYtelse = andelerTilkjentYtelse,
+                        sanityEØSBegrunnelser = sanityEØSBegrunnelser,
+                        kompetanserIPeriode = kompetanserIPeriode,
+                        kompetanserSomStopperRettFørPeriode = kompetanserSomStopperRettFørPeriode,
+                        featureToggleService = featureToggleService,
+                    )
+                },
             )
         }
     }

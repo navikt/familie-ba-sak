@@ -37,6 +37,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.landkodeTilBarnetsBosted
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.triggesForPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.time.LocalDate
@@ -192,7 +193,16 @@ private fun utledTom(
     overlappendePeriode: LocalDateSegment<Int>,
 ) = if (gammeltSegment.tom > overlappendePeriode.tom) overlappendePeriode.tom else gammeltSegment.tom
 
-fun hentGyldigeBegrunnelserForPeriode(
+fun UtvidetVedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserForPeriode(
+    grunnlagForVedtaksperioder: GrunnlagForVedtaksperioder,
+    grunnlagForVedtaksperioderForrigeBehandling: GrunnlagForVedtaksperioder?,
+    sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
+): List<IVedtakBegrunnelse> {
+    return emptyList()
+}
+
+@Deprecated("Skal byttes ut med hentGyldigeBegrunnelserForPeriode")
+fun hentGyldigeBegrunnelserForPeriodeGammel(
     utvidetVedtaksperiodeMedBegrunnelser: UtvidetVedtaksperiodeMedBegrunnelser,
     sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
     persongrunnlag: PersonopplysningGrunnlag,

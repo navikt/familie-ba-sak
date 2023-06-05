@@ -39,3 +39,4 @@ target/
 !.idea/inspectionProfiles/profiles_settings.xml
 !.idea/inspectionProfiles/Project_Default.xml
 .DS_Store
+/.run/
