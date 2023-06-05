@@ -124,6 +124,12 @@ class VedtaksperiodeService(
         val vedtaksperiodeMedBegrunnelser =
             vedtaksperiodeHentOgPersisterService.hentVedtaksperiodeThrows(vedtaksperiodeId)
 
+        validerAvslagHarAvslagBegrunnelse(
+            vedtaksperiodeMedBegrunnelser,
+            standardbegrunnelserFraFrontend,
+            eøsStandardbegrunnelserFraFrontend,
+        )
+
         val behandling = vedtaksperiodeMedBegrunnelser.vedtak.behandling
 
         val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandling.id)
@@ -169,6 +175,20 @@ class VedtaksperiodeService(
         vedtaksperiodeHentOgPersisterService.lagre(vedtaksperiodeMedBegrunnelser)
 
         return vedtaksperiodeMedBegrunnelser.vedtak
+    }
+
+    private fun validerAvslagHarAvslagBegrunnelse(
+        vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
+        standardbegrunnelserFraFrontend: List<Standardbegrunnelse>,
+        eøsStandardbegrunnelserFraFrontend: List<EØSStandardbegrunnelse>,
+    ) {
+        val eksisterendeAvslagBegrunnelser = vedtaksperiodeMedBegrunnelser.begrunnelser.filter { it.standardbegrunnelse.vedtakBegrunnelseType.erAvslag() }.map { it.standardbegrunnelse.sanityApiNavn }
+
+        val nyeAvslagBegrunnelser = (standardbegrunnelserFraFrontend.filter { it.vedtakBegrunnelseType.erAvslag() } + eøsStandardbegrunnelserFraFrontend.filter { it.vedtakBegrunnelseType.erAvslag() }).map { it.sanityApiNavn }
+
+        if (!nyeAvslagBegrunnelser.containsAll(eksisterendeAvslagBegrunnelser)) {
+            throw FunksjonellFeil("Kan ikke fjerne avslags-begrunnelse fra vedtaksperiode som har blitt satt til avslag i vilkårsvurdering.")
+        }
     }
 
     private fun validerEndretUtbetalingsbegrunnelse(
@@ -744,28 +764,31 @@ class VedtaksperiodeService(
         val målform = persongrunnlagService.hentAktiv(behandlingId = behandling.id)?.søker?.målform
         val landkoderISO2 = integrasjonClient.hentLandkoderISO2()
 
-        return refusjonEøsRepository.finnRefusjonEøsForBehandling(behandling.id).filter { it.refusjonAvklart == avklart }.map {
-            val (fom, tom) = it.fom.tilMånedÅr() to it.tom.tilMånedÅr()
-            val land = landkoderISO2[it.land]?.storForbokstav() ?: throw Feil("Fant ikke navn for landkode ${it.land}")
-            val beløp = it.refusjonsbeløp
+        return refusjonEøsRepository.finnRefusjonEøsForBehandling(behandling.id)
+            .filter { it.refusjonAvklart == avklart }.map {
+                val (fom, tom) = it.fom.tilMånedÅr() to it.tom.tilMånedÅr()
+                val land =
+                    landkoderISO2[it.land]?.storForbokstav() ?: throw Feil("Fant ikke navn for landkode ${it.land}")
+                val beløp = it.refusjonsbeløp
 
-            when (målform) {
-                NN -> {
-                    if (avklart) {
-                        "Frå $fom til $tom blir etterbetaling på $beløp kroner per måned utbetalt til myndighetene i $land."
-                    } else {
-                        "Frå $fom til $tom blir ikkje etterbetaling på $beløp kroner per månad utbetalt no sidan det er utbetalt barnetrygd i $land."
+                when (målform) {
+                    NN -> {
+                        if (avklart) {
+                            "Frå $fom til $tom blir etterbetaling på $beløp kroner per måned utbetalt til myndighetene i $land."
+                        } else {
+                            "Frå $fom til $tom blir ikkje etterbetaling på $beløp kroner per månad utbetalt no sidan det er utbetalt barnetrygd i $land."
+                        }
+                    }
+
+                    else -> {
+                        if (avklart) {
+                            "Fra $fom til $tom blir etterbetaling på $beløp kroner per måned utbetalt til myndighetene i $land."
+                        } else {
+                            "Fra $fom til $tom blir ikke etterbetaling på $beløp kroner per måned utbetalt nå siden det er utbetalt barnetrygd i $land."
+                        }
                     }
                 }
-                else -> {
-                    if (avklart) {
-                        "Fra $fom til $tom blir etterbetaling på $beløp kroner per måned utbetalt til myndighetene i $land."
-                    } else {
-                        "Fra $fom til $tom blir ikke etterbetaling på $beløp kroner per måned utbetalt nå siden det er utbetalt barnetrygd i $land."
-                    }
-                }
-            }
-        }.toSet().takeIf { it.isNotEmpty() }
+            }.toSet().takeIf { it.isNotEmpty() }
     }
 
     companion object {
