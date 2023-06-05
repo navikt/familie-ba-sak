@@ -1,9 +1,10 @@
 package no.nav.familie.ba.sak.datagenerator.behandling
 
 import no.nav.familie.ba.sak.common.lagSøknadDTO
+import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.config.testSanityKlient
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
-import no.nav.familie.ba.sak.integrasjoner.sanity.hentBegrunnelser
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
@@ -29,6 +30,7 @@ import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.steg.domene.JournalførVedtaksbrevDTO
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.tilMinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.tilMinimertePersoner
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
@@ -68,6 +70,7 @@ fun kjørStegprosessForBehandling(
     persongrunnlagService: PersongrunnlagService,
     andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     brevmalService: BrevmalService,
+    featureToggleService: FeatureToggleService,
 ): Behandling {
     val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
 
@@ -119,8 +122,9 @@ fun kjørStegprosessForBehandling(
             persongrunnlagService = persongrunnlagService,
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
             endretUtbetalingAndelHentOgPersisterService = endretUtbetalingAndelHentOgPersisterService,
-            sanityBegrunnelser = hentBegrunnelser(),
+            sanityBegrunnelser = testSanityKlient.hentBegrunnelserMap(),
             vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingEtterSimuleringSteg.id)!!,
+            featureToggleService = featureToggleService,
         )
     if (tilSteg == StegType.SEND_TIL_BESLUTTER) return behandlingEtterSendTilBeslutter
 
@@ -177,8 +181,9 @@ private fun håndterSendtTilBeslutterSteg(
     persongrunnlagService: PersongrunnlagService,
     andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
-    sanityBegrunnelser: List<SanityBegrunnelse>,
+    sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
     vilkårsvurdering: Vilkårsvurdering,
+    featureToggleService: FeatureToggleService,
 ): Behandling {
     val andelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService
         .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId = behandlingEtterSimuleringSteg.id)
@@ -198,6 +203,7 @@ private fun håndterSendtTilBeslutterSteg(
         endredeUtbetalingAndeler = endredeUtbetalingAndeler,
         sanityBegrunnelser = sanityBegrunnelser,
         vilkårsvurdering = vilkårsvurdering,
+        featureToggleService = featureToggleService,
     )
     val behandlingEtterSendTilBeslutter = stegService.håndterSendTilBeslutter(behandlingEtterSimuleringSteg, "1234")
     return behandlingEtterSendTilBeslutter
@@ -347,8 +353,9 @@ fun leggTilAlleGyldigeBegrunnelserPåVedtaksperiodeIBehandling(
     personopplysningGrunnlag: PersonopplysningGrunnlag,
     andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
     endredeUtbetalingAndeler: List<EndretUtbetalingAndel>,
-    sanityBegrunnelser: List<SanityBegrunnelse>,
+    sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
     vilkårsvurdering: Vilkårsvurdering,
+    featureToggleService: FeatureToggleService,
 ) {
     val aktivtVedtak = vedtakService.hentAktivForBehandling(behandling.id)!!
 
@@ -395,6 +402,7 @@ fun leggTilAlleGyldigeBegrunnelserPåVedtaksperiodeIBehandling(
                 utvidetVedtaksperiodeMedBegrunnelser,
             )
         },
+        featureToggleService = featureToggleService,
     )
 
     vedtaksperiodeService.oppdaterVedtaksperiodeMedStandardbegrunnelser(

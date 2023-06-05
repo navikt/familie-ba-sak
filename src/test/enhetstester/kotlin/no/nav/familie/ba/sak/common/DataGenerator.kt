@@ -1149,6 +1149,7 @@ fun lagPerson(
     fødselsdato: LocalDate = LocalDate.now().minusYears(19),
     kjønn: Kjønn = Kjønn.KVINNE,
     dødsfall: Dødsfall? = null,
+    id: Long = 0,
 ) = Person(
     aktør = aktør,
     type = type,
@@ -1157,10 +1158,11 @@ fun lagPerson(
     navn = type.name,
     kjønn = kjønn,
     dødsfall = dødsfall,
+    id = id,
 )
 
 fun lagRestSanityBegrunnelse(
-    apiNavn: String? = "",
+    apiNavn: String = "",
     navnISystem: String = "",
     vilkaar: List<String>? = emptyList(),
     rolle: List<String>? = emptyList(),
@@ -1192,7 +1194,7 @@ fun lagRestSanityBegrunnelse(
 )
 
 fun lagSanityBegrunnelse(
-    apiNavn: String? = "",
+    apiNavn: String = "",
     navnISystem: String = "",
     vilkaar: List<SanityVilkår>? = null,
     rolle: List<VilkårRolle> = emptyList(),

@@ -81,9 +81,9 @@ Egenskap: Vedtaksperiode for behandling som opphører perioder fra forrige behan
     Når vedtaksperioder med begrunnelser genereres for behandling 2
 
     Så forvent følgende vedtaksperioder med begrunnelser
-      | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar                                                     |
-      | 01.05.2020 | 30.04.2021 | Utbetaling         | Barn 3456 og søker har ordinære vilkår oppfylt                |
-      | 01.05.2021 | 31.01.2022 | Utbetaling         | Reduksjon. Barn 5678 mister utbetaling fra forrige behandling |
-      | 01.02.2022 | 31.03.2038 | Utbetaling         | Utbetaling begge barn                                         |
-      | 01.04.2038 | 31.03.2039 | Utbetaling         | Kun barn 5678                                                 |
-      | 01.04.2039 |            | Opphør             | Kun søker har vilkår oppfylt                                  |
+      | Fra dato   | Til dato   | Vedtaksperiodetype                                      | Kommentar                                                                                                                          |
+      | 01.05.2020 | 30.04.2021 | Utbetaling                                              | Barn 3456 og søker har ordinære vilkår oppfylt                                                                                     |
+      | 01.05.2021 | 31.01.2022 | UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING | Reduksjon. Barn 5678 mister utbetaling fra forrige behandling. TODO: Typen skal være Utbetaling når ny begrunnelsesløsning er inne |
+      | 01.02.2022 | 31.03.2038 | Utbetaling                                              | Utbetaling begge barn                                                                                                              |
+      | 01.04.2038 | 31.03.2039 | Utbetaling                                              | Kun barn 5678                                                                                                                      |
+      | 01.04.2039 |            | Opphør                                                  | Kun søker har vilkår oppfylt                                                                                                       |

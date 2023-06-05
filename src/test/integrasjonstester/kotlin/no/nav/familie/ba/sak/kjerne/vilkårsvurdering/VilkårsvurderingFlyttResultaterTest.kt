@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.behandling.kjørStegprosessForBehandling
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -64,6 +65,9 @@ class VilkårsvurderingFlyttResultaterTest(
 
     @Autowired
     private val brevmalService: BrevmalService,
+
+    @Autowired
+    private val featureToggleService: FeatureToggleService,
 
 ) : AbstractSpringIntegrationTest() {
 
@@ -145,7 +149,7 @@ class VilkårsvurderingFlyttResultaterTest(
             persongrunnlagService = persongrunnlagService,
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
             brevmalService = brevmalService,
-
+            featureToggleService = featureToggleService,
         )
 
         val vilkårsvurderingFraForrigeBehandlingFørNyRevurdering =
@@ -169,7 +173,7 @@ class VilkårsvurderingFlyttResultaterTest(
             persongrunnlagService = persongrunnlagService,
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
             brevmalService = brevmalService,
-
+            featureToggleService = featureToggleService,
         )
 
         // Sjekker at vilkårsvurderingen fra forrige behandling ikke er endret

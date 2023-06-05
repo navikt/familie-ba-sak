@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
+import io.mockk.mockk
 import no.nav.familie.ba.sak.common.MånedPeriode
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.datagenerator.brev.lagMinimertPerson
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevperiodeData
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertUregistrertBarn
@@ -20,37 +22,50 @@ import java.time.YearMonth
 
 class BrevPeriodeUtilTest {
 
+    private val featureToggleService: FeatureToggleService = mockk()
+
     @Test
-    fun `Skal sortere perioder kronologisk, med avslag til slutt`() {
+    fun `Skal sortere perioder kronologisk, med generelle avslag til slutt`() {
         val liste = listOf(
             lagBrevperiodeData(
                 fom = LocalDate.now().minusMonths(12),
                 tom = LocalDate.now().minusMonths(8),
                 type = Vedtaksperiodetype.UTBETALING,
+                featureToggleService = featureToggleService,
             ),
             lagBrevperiodeData(
-                fom = LocalDate.now().minusMonths(4),
+                fom = LocalDate.now().minusMonths(3),
                 tom = null,
                 type = Vedtaksperiodetype.AVSLAG,
+                featureToggleService = featureToggleService,
+            ),
+            lagBrevperiodeData(
+                fom = null,
+                tom = null,
+                type = Vedtaksperiodetype.AVSLAG,
+                featureToggleService = featureToggleService,
             ),
             lagBrevperiodeData(
                 fom = LocalDate.now().minusMonths(7),
                 tom = LocalDate.now().minusMonths(4),
                 type = Vedtaksperiodetype.OPPHØR,
+                featureToggleService = featureToggleService,
             ),
             lagBrevperiodeData(
                 fom = LocalDate.now().minusMonths(3),
                 tom = LocalDate.now(),
                 type = Vedtaksperiodetype.UTBETALING,
+                featureToggleService = featureToggleService,
             ),
         )
 
         val sortertListe = liste.sorted()
 
-        Assertions.assertTrue(sortertListe.size == 4)
+        Assertions.assertTrue(sortertListe.size == 5)
         val førstePeriode = sortertListe.first()
         val andrePeriode = sortertListe[1]
         val tredjePeriode = sortertListe[2]
+        val fjerdePeriode = sortertListe[3]
         val sistePeriode = sortertListe.last()
 
         Assertions.assertEquals(Vedtaksperiodetype.UTBETALING, førstePeriode.minimertVedtaksperiode.type)
@@ -59,8 +74,10 @@ class BrevPeriodeUtilTest {
         Assertions.assertEquals(LocalDate.now().minusMonths(7), andrePeriode.minimertVedtaksperiode.fom)
         Assertions.assertEquals(Vedtaksperiodetype.UTBETALING, tredjePeriode.minimertVedtaksperiode.type)
         Assertions.assertEquals(LocalDate.now().minusMonths(3), tredjePeriode.minimertVedtaksperiode.fom)
+        Assertions.assertEquals(Vedtaksperiodetype.AVSLAG, fjerdePeriode.minimertVedtaksperiode.type)
+        Assertions.assertEquals(LocalDate.now().minusMonths(3), fjerdePeriode.minimertVedtaksperiode.fom)
         Assertions.assertEquals(Vedtaksperiodetype.AVSLAG, sistePeriode.minimertVedtaksperiode.type)
-        Assertions.assertEquals(LocalDate.now().minusMonths(4), sistePeriode.minimertVedtaksperiode.fom)
+        Assertions.assertNull(sistePeriode.minimertVedtaksperiode.fom)
     }
 
     @Test
@@ -154,7 +171,7 @@ class BrevPeriodeUtilTest {
     }
 }
 
-private fun lagBrevperiodeData(fom: LocalDate?, tom: LocalDate?, type: Vedtaksperiodetype): BrevperiodeData {
+private fun lagBrevperiodeData(fom: LocalDate?, tom: LocalDate?, type: Vedtaksperiodetype, featureToggleService: FeatureToggleService): BrevperiodeData {
     val restBehandlingsgrunnlagForBrev = RestBehandlingsgrunnlagForBrev(
         personerPåBehandling = emptyList(),
         minimertePersonResultater = emptyList(),
@@ -176,5 +193,6 @@ private fun lagBrevperiodeData(fom: LocalDate?, tom: LocalDate?, type: Vedtakspe
         minimerteKompetanserForPeriode = emptyList(),
         minimerteKompetanserSomStopperRettFørPeriode = emptyList(),
         dødeBarnForrigePeriode = emptyList(),
+        featureToggleService = featureToggleService,
     )
 }

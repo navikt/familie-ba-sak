@@ -124,7 +124,7 @@ class RevurderingDødsfallTest(
             persongrunnlagService = persongrunnlagService,
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
             brevmalService = brevmalService,
-
+            featureToggleService = featureToggleService,
         )
 
         val restFagsakEtterBehandlingAvsluttet =
@@ -197,7 +197,7 @@ class RevurderingDødsfallTest(
                 persongrunnlagService = persongrunnlagService,
                 andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
                 brevmalService = brevmalService,
-
+                featureToggleService = featureToggleService,
             )
         }
     }

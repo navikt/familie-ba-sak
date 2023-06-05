@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
+import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
@@ -59,11 +60,11 @@ fun finnPerioderSomSkalBegrunnes(
 
 private fun List<Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned>>.slåSammenUtenEksplisitteAvslag(): Collection<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>> {
     val kombinerteAvslagOgReduksjonsperioder = this.map { grunnlagForDenneOgForrigeBehandlingTidslinje ->
-        grunnlagForDenneOgForrigeBehandlingTidslinje.filtrer {
+        grunnlagForDenneOgForrigeBehandlingTidslinje.filtrerIkkeNull {
             val gjeldendeErIkkeInnvilgetIkkeAvslag =
-                it?.gjeldende is GrunnlagForPersonIkkeInnvilget && !it.gjeldende.erEksplisittAvslag
-            val gjeldendeErInnvilget = it?.gjeldende is GrunnlagForPersonInnvilget
-            val gjeldendeErNullForrigeErInnvilget = it?.gjeldende == null && it?.personHarRettIForrigeBehandling == true
+                it.gjeldende is GrunnlagForPersonIkkeInnvilget && !it.gjeldende.erEksplisittAvslag
+            val gjeldendeErInnvilget = it.gjeldende is GrunnlagForPersonInnvilget
+            val gjeldendeErNullForrigeErInnvilget = it.gjeldendeErNullForrigeErInnvilget
 
             gjeldendeErIkkeInnvilgetIkkeAvslag || gjeldendeErInnvilget || gjeldendeErNullForrigeErInnvilget
         }
@@ -161,15 +162,7 @@ fun Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>.tilVedtaksper
     vedtak = vedtak,
     fom = fraOgMed.tilDagEllerFørsteDagIPerioden().tilLocalDateEllerNull(),
     tom = tilOgMed.tilLocalDateEllerNull(),
-    type = if (this.innhold == null) {
-        Vedtaksperiodetype.OPPHØR
-    } else if (this.innhold.any { it.gjeldende is GrunnlagForPersonInnvilget }) {
-        Vedtaksperiodetype.UTBETALING
-    } else if (this.innhold.all { it.gjeldende?.erEksplisittAvslag() == true }) {
-        Vedtaksperiodetype.AVSLAG
-    } else {
-        Vedtaksperiodetype.OPPHØR
-    },
+    type = this.tilVedtaksperiodeType(),
 ).let { vedtaksperiode ->
     val begrunnelser = this.innhold?.flatMap { grunnlagForGjeldendeOgForrigeBehandling ->
         grunnlagForGjeldendeOgForrigeBehandling.gjeldende?.vilkårResultaterForVedtaksperiode
@@ -187,6 +180,23 @@ fun Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>.tilVedtaksper
     )
 
     vedtaksperiode
+}
+
+private fun Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>.tilVedtaksperiodeType(): Vedtaksperiodetype {
+    val erUtbetalingsperiode = this.innhold != null && this.innhold.any { it.gjeldende is GrunnlagForPersonInnvilget }
+    val erAvslagsperiode = this.innhold != null && this.innhold.all { it.gjeldende?.erEksplisittAvslag() == true }
+
+    return when {
+        erUtbetalingsperiode -> if (this.innhold?.any { it.gjeldendeErNullForrigeErInnvilget } == true) {
+            Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING
+        } else {
+            Vedtaksperiodetype.UTBETALING
+        }
+
+        erAvslagsperiode -> Vedtaksperiodetype.AVSLAG
+
+        else -> Vedtaksperiodetype.OPPHØR
+    }
 }
 
 data class GrupperingskriterierForVedtaksperioder(

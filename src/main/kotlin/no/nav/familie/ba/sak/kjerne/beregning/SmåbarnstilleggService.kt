@@ -1,7 +1,10 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
@@ -9,12 +12,14 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.slåSammenTidligerePerioder
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilInternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.PeriodeOvergangsstønadGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.PeriodeOvergangsstønadGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.tilPeriodeOvergangsstønadGrunnlag
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.kontrakter.felles.ef.EksternPeriode
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class SmåbarnstilleggService(
@@ -24,9 +29,27 @@ class SmåbarnstilleggService(
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val persongrunnlagService: PersongrunnlagService,
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
+    private val featureToggleService: FeatureToggleService,
 ) {
 
-    fun hentOgLagrePerioderMedFullOvergangsstønadFraEf(
+    @Transactional
+    fun hentOgLagrePerioderMedOvergangsstønadForBehandling(
+        søkerAktør: Aktør,
+        behandling: Behandling,
+    ) {
+        if (behandling.erSatsendring() && featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_KOPIER_GRUNNLAG_FRA_FORRIGE_BEHANDLING)) {
+            kopierPerioderMedOvergangsstønadFraForrigeBehandling(
+                behandling,
+            )
+        } else {
+            hentOgLagrePerioderMedFullOvergangsstønadFraEf(
+                søkerAktør = søkerAktør,
+                behandlingId = behandling.id,
+            )
+        }
+    }
+
+    private fun hentOgLagrePerioderMedFullOvergangsstønadFraEf(
         søkerAktør: Aktør,
         behandlingId: Long,
     ) {
@@ -44,24 +67,45 @@ class SmåbarnstilleggService(
         )
     }
 
+    private fun kopierPerioderMedOvergangsstønadFraForrigeBehandling(
+        inneværendeBehandling: Behandling,
+    ) {
+        val perioderFraForrigeBehandling =
+            hentPerioderMedOvergangsstønadFraForrigeVedtatteBehandling(behandling = inneværendeBehandling)
+
+        periodeOvergangsstønadGrunnlagRepository.deleteByBehandlingId(behandlingId = inneværendeBehandling.id)
+
+        periodeOvergangsstønadGrunnlagRepository.saveAll(
+            perioderFraForrigeBehandling.map {
+                PeriodeOvergangsstønadGrunnlag(
+                    behandlingId = inneværendeBehandling.id,
+                    aktør = it.aktør,
+                    fom = it.fom,
+                    tom = it.tom,
+                    datakilde = it.datakilde,
+                )
+            },
+        )
+    }
+
     fun hentPerioderMedFullOvergangsstønad(
-        behandlingId: Long,
+        behandling: Behandling,
     ): List<InternPeriodeOvergangsstønad> {
-        val perioderOvergangsstønad = periodeOvergangsstønadGrunnlagRepository.findByBehandlingId(behandlingId)
+        val perioderOvergangsstønad = periodeOvergangsstønadGrunnlagRepository.findByBehandlingId(behandlingId = behandling.id)
         val overgangsstønadPerioderFraForrigeBehandling =
-            hentPerioderMedOvergangsstønadFraForrigeIverksatteBehandling(behandlingId)
+            hentPerioderMedOvergangsstønadFraForrigeVedtatteBehandling(behandling).map { it.tilInternPeriodeOvergangsstønad() }
 
         return perioderOvergangsstønad.splittOgSlåSammen(overgangsstønadPerioderFraForrigeBehandling)
     }
 
-    private fun hentPerioderMedOvergangsstønadFraForrigeIverksatteBehandling(behandlingId: Long): List<InternPeriodeOvergangsstønad> {
-        val forrigeIverksatteBehandling =
-            behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksattFraBehandlingsId(behandlingId = behandlingId)
+    private fun hentPerioderMedOvergangsstønadFraForrigeVedtatteBehandling(behandling: Behandling): List<PeriodeOvergangsstønadGrunnlag> {
+        val forrigeVedtatteBehandling =
+            behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling = behandling)
 
-        return if (forrigeIverksatteBehandling != null) {
+        return if (forrigeVedtatteBehandling != null) {
             periodeOvergangsstønadGrunnlagRepository.findByBehandlingId(
-                behandlingId = forrigeIverksatteBehandling.id,
-            ).map { it.tilInternPeriodeOvergangsstønad() }
+                behandlingId = forrigeVedtatteBehandling.id,
+            )
         } else {
             emptyList()
         }

@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
@@ -71,6 +72,13 @@ data class PersonopplysningGrunnlag(
             .toYearMonth() == (fom?.toYearMonth() ?: TIDENES_ENDE.toYearMonth())
     }
 
+    fun tilKopiForNyBehandling(behandling: Behandling): PersonopplysningGrunnlag =
+        copy(id = 0, behandlingId = behandling.id, personer = mutableSetOf()).also {
+            it.personer.addAll(
+                personer.map { person -> person.tilKopiForNyttPersonopplysningGrunnlag(it) },
+            )
+        }
+
     override fun toString(): String {
         val sb = StringBuilder("PersonopplysningGrunnlagEntitet{")
         sb.append("id=").append(id)
@@ -81,8 +89,11 @@ data class PersonopplysningGrunnlag(
     }
 }
 
-fun Aktør.tilPerson(personopplysningGrunnlag: PersonopplysningGrunnlag): Person? = personopplysningGrunnlag.personer.find { it.aktør == this }
+fun Aktør.tilPerson(personopplysningGrunnlag: PersonopplysningGrunnlag): Person? =
+    personopplysningGrunnlag.personer.find { it.aktør == this }
+
 fun Aktør.erBarn(personopplysningGrunnlag: PersonopplysningGrunnlag): Boolean {
-    val person = this.tilPerson(personopplysningGrunnlag) ?: throw Feil("Fant ikke aktør på personopplysningsgrunnlaget")
+    val person =
+        this.tilPerson(personopplysningGrunnlag) ?: throw Feil("Fant ikke aktør på personopplysningsgrunnlaget")
     return person.type == PersonType.BARN
 }

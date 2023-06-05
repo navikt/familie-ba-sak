@@ -68,6 +68,3 @@ data class SanityEØSBegrunnelse(
     val hjemlerSeperasjonsavtalenStorbritannina: List<String>,
     val vilkår: List<Vilkår>,
 ) : ISanityBegrunnelse
-
-fun List<SanityEØSBegrunnelse>.finnBegrunnelse(eøsBegrunnelse: EØSStandardbegrunnelse): SanityEØSBegrunnelse? =
-    this.find { it.apiNavn == eøsBegrunnelse.sanityApiNavn }
