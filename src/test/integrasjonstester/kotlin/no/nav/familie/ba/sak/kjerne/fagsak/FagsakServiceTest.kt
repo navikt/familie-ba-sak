@@ -17,6 +17,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -28,6 +29,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.RegistrerPersongrunnlagDTO
@@ -35,6 +37,7 @@ import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringRepository
 import no.nav.familie.ba.sak.statistikk.saksstatistikk.domene.SaksstatistikkMellomlagringType.SAK
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeAll
@@ -63,6 +66,9 @@ class FagsakServiceTest(
 
     @Autowired
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
+
+    @Autowired
+    private val persongrunnlagRepository: PersonopplysningGrunnlagRepository,
 
     @Autowired
     private val persongrunnlagService: PersongrunnlagService,
@@ -337,38 +343,32 @@ class FagsakServiceTest(
 
     @Test
     fun `Skal teste at man henter alle fagsakene til barnet`() {
-        val mor = randomFnr()
         val barnFnr = randomFnr()
 
-        val fagsakMor = fagsakService.hentEllerOpprettFagsakForPersonIdent(mor)
-        val behandlingMor = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsakMor))
-
         val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true)
-        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
-            behandlingMor.id,
-            mor,
+        fun opprettGrunnlag(behandling: Behandling) = lagTestPersonopplysningGrunnlag(
+            behandling.id,
+            behandling.fagsak.aktør.aktivFødselsnummer(),
             listOf(barnFnr),
-            søkerAktør = fagsakMor.aktør,
+            søkerAktør = behandling.fagsak.aktør,
             barnAktør = barnAktør,
         )
-        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
 
-        val far = randomFnr()
+        val fagsakMor = fagsakService.hentEllerOpprettFagsakForPersonIdent(randomFnr())
+        val behandlingMor = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsakMor))
+        persongrunnlagService.lagreOgDeaktiverGammel(opprettGrunnlag(behandlingMor))
+        persongrunnlagService.lagreOgDeaktiverGammel(opprettGrunnlag(behandlingMor))
+        behandlingService.oppdaterStatusPåBehandling(behandlingMor.id, BehandlingStatus.AVSLUTTET)
+        val behandlingMor2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsakMor))
+        persongrunnlagService.lagreOgDeaktiverGammel(opprettGrunnlag(behandlingMor2))
 
-        val fagsakFar = fagsakService.hentEllerOpprettFagsakForPersonIdent(far)
+        val fagsakFar = fagsakService.hentEllerOpprettFagsakForPersonIdent(randomFnr())
         val behandlingFar = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsakFar))
-
-        val personopplysningGrunnlagFar = lagTestPersonopplysningGrunnlag(
-            behandlingFar.id,
-            far,
-            listOf(barnFnr),
-            søkerAktør = fagsakFar.aktør,
-            barnAktør = barnAktør,
-        )
-        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlagFar)
+        persongrunnlagService.lagreOgDeaktiverGammel(opprettGrunnlag(behandlingFar))
 
         val fagsaker = fagsakService.hentFagsakerPåPerson(barnAktør.first())
         assertEquals(2, fagsaker.size)
+        assertThat(persongrunnlagRepository.findAll()).hasSize(4)
     }
 
     // Satte XX for at dette testet skal kjøre sist.

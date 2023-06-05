@@ -140,7 +140,7 @@ class FagsakService(
     }
 
     fun hentFagsakerPåPerson(aktør: Aktør): List<Fagsak> {
-        return personRepository.findFagsakerByAktør(aktør).distinct()
+        return personRepository.findFagsakerByAktør(aktør)
     }
 
     @Transactional
