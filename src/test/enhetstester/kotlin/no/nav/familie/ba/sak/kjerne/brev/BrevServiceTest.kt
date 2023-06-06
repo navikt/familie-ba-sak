@@ -28,6 +28,7 @@ class BrevServiceTest {
         saksbehandlerContext = saksbehandlerContext,
         brevmalService = brevmalService,
         refusjonEøsRepository = mockk(),
+        featureToggleService = mockk(),
     )
 
     @BeforeEach
