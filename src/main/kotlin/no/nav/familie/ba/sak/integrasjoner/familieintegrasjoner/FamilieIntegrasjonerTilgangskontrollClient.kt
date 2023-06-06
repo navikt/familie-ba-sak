@@ -29,7 +29,7 @@ class FamilieIntegrasjonerTilgangskontrollClient(
 
     fun sjekkTilgangTilPersoner(personIdenter: List<String>): Tilgang {
         if (SikkerhetContext.erSystemKontekst()) {
-            return Tilgang(true, null)
+            return Tilgang(personIdent = personIdenter.first(), true, null)
         }
 
         val tilganger = kallEksternTjeneste<List<Tilgang>>(
