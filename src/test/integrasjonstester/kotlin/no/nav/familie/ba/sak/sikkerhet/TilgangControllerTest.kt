@@ -30,7 +30,7 @@ class TilgangControllerTest(
         } returns ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG
         every {
             mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(listOf(fnr))
-        } returns Tilgang(harTilgang = true)
+        } returns Tilgang(fnr, harTilgang = true)
 
         val response = tilgangController.hentTilgangOgDiskresjonskode(TilgangRequestDTO(fnr))
         val tilgangDTO = response.body?.data ?: error("Fikk ikke forventet respons")

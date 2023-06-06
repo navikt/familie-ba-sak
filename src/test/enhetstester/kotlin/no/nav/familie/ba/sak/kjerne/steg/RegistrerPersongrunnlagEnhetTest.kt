@@ -50,7 +50,7 @@ class RegistrerPersongrunnlagEnhetTest {
         every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling2) } returns behandling1
 
         every {
-            personopplysningGrunnlagForNyBehandlingService.opprettPersonopplysningGrunnlag(
+            personopplysningGrunnlagForNyBehandlingService.opprettKopiEllerNyttPersonopplysningGrunnlag(
                 behandling = behandling2,
                 forrigeBehandlingSomErVedtatt = behandling1,
                 søkerIdent = mor.aktør.aktivFødselsnummer(),

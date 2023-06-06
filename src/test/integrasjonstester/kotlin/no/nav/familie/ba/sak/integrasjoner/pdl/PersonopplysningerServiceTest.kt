@@ -56,10 +56,10 @@ internal class PersonopplysningerServiceTest(
     fun `hentPersoninfoMedRelasjonerOgRegisterinformasjon() skal return riktig personinfo`() {
         every {
             mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(listOf(ID_BARN_1))
-        } returns Tilgang(true, null)
+        } returns Tilgang(ID_BARN_1, true)
         every {
             mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(listOf(ID_BARN_2))
-        } returns Tilgang(false, null)
+        } returns Tilgang(ID_BARN_2, false)
 
         val personInfo = personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(tilAktør(ID_MOR))
 
@@ -75,10 +75,10 @@ internal class PersonopplysningerServiceTest(
     fun `hentPersoninfoMedRelasjonerOgRegisterinformasjon() skal returnere riktig personinfo for død person`() {
         every {
             mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(listOf(ID_BARN_1))
-        } returns Tilgang(true, null)
+        } returns Tilgang(ID_BARN_1, true)
         every {
             mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(listOf(ID_BARN_2))
-        } returns Tilgang(false, null)
+        } returns Tilgang(ID_BARN_2, false)
 
         val personInfo = personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(
             tilAktør(
@@ -95,7 +95,7 @@ internal class PersonopplysningerServiceTest(
     fun `hentPersoninfoMedRelasjonerOgRegisterinformasjon() skal filtrere bort relasjoner med opphørte folkreregisteridenter eller uten fødselsdato`() {
         every {
             mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(any())
-        } returns Tilgang(true, null)
+        } returns Tilgang(ID_MOR_3BARN_1OPPHØRT_1UTENFØDSELSDATO, true)
 
         val personInfo = personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(
             tilAktør(

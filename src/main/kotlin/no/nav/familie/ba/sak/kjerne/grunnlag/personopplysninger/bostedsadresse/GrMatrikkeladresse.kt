@@ -29,6 +29,15 @@ data class GrMatrikkeladresse(
 
 ) : GrBostedsadresse() {
 
+    override fun tilKopiForNyPerson(): GrBostedsadresse =
+        GrMatrikkeladresse(
+            matrikkelId,
+            bruksenhetsnummer,
+            tilleggsnavn,
+            postnummer,
+            kommunenummer,
+        )
+
     override fun toSecureString(): String {
         return """MatrikkeladresseDao(matrikkelId=$matrikkelId,bruksenhetsnummer=$bruksenhetsnummer,tilleggsnavn=$tilleggsnavn,
 |               postnummer=$postnummer,kommunenummer=$kommunenummer

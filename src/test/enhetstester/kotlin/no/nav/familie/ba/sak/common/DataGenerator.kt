@@ -1149,6 +1149,7 @@ fun lagPerson(
     fødselsdato: LocalDate = LocalDate.now().minusYears(19),
     kjønn: Kjønn = Kjønn.KVINNE,
     dødsfall: Dødsfall? = null,
+    id: Long = 0,
 ) = Person(
     aktør = aktør,
     type = type,
@@ -1157,6 +1158,7 @@ fun lagPerson(
     navn = type.name,
     kjønn = kjønn,
     dødsfall = dødsfall,
+    id = id,
 )
 
 fun lagRestSanityBegrunnelse(
