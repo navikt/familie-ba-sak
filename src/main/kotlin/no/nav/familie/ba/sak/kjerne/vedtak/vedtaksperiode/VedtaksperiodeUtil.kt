@@ -268,8 +268,8 @@ private fun Tidslinje<GrunnlagForPerson, Måned>.tilForrigeOgNåværendePeriodeT
             periodeAv(YearMonth.now(), YearMonth.now(), null),
         ) + this.perioder()
         ).zipWithNext { forrige, denne ->
-            periodeAv(denne.fraOgMed, denne.tilOgMed, Pair(forrige.innhold, denne.innhold))
-        }.tilTidslinje()
+        periodeAv(denne.fraOgMed, denne.tilOgMed, Pair(forrige.innhold, denne.innhold))
+    }.tilTidslinje()
 }
 
 data class GrunnlagMedForrigePeriodeOgBehandling(
