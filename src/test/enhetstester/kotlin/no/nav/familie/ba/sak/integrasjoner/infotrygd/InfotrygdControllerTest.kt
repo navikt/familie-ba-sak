@@ -49,7 +49,7 @@ class InfotrygdControllerTest {
         val fnr = "12345678910"
 
         every { personidentService.hentAktør(fnr) } returns tilAktør(fnr)
-        every { mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(any()) } returns Tilgang(true)
+        every { mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(any()) } returns Tilgang(fnr, true)
         every {
             infotrygdBarnetrygdClient.hentSaker(
                 any(),
@@ -68,7 +68,7 @@ class InfotrygdControllerTest {
         val fnr = "12345678910"
 
         every { personidentService.hentAktør(fnr) } returns tilAktør(fnr)
-        every { mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(any()) } returns Tilgang(false)
+        every { mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(any()) } returns Tilgang(fnr, false)
         every { personopplysningerService.hentAdressebeskyttelseSomSystembruker(any()) } returns ADRESSEBESKYTTELSEGRADERING.FORTROLIG
 
         val respons = infotrygdController.hentInfotrygdsakerForSøker(Personident(fnr))

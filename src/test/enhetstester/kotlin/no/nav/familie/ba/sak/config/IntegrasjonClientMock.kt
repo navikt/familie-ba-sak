@@ -188,9 +188,9 @@ class IntegrasjonClientMock {
                 mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(capture(idSlot))
             } answers {
                 if (idSlot.captured.isNotEmpty() && idSlot.captured.contains(BARN_DET_IKKE_GIS_TILGANG_TIL_FNR)) {
-                    Tilgang(false, null)
+                    Tilgang(idSlot.captured.first(), false, null)
                 } else {
-                    Tilgang(true, null)
+                    Tilgang(idSlot.captured.first(), true, null)
                 }
             }
         }
