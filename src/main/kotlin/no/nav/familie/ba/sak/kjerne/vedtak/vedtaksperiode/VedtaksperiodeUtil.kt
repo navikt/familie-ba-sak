@@ -21,13 +21,7 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAnde
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
-import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
-import no.nav.familie.ba.sak.kjerne.tidslinje.periodeAv
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
@@ -43,14 +37,9 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.landkodeTilBarnetsBosted
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.triggesForPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.AktørId
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPerson
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPersonInnvilget
-import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import java.time.LocalDate
-import java.time.YearMonth
 
 fun oppdaterUtbetalingsperioderMedReduksjonFraForrigeBehandling(
     utbetalingsperioder: List<VedtaksperiodeMedBegrunnelser>,
@@ -185,105 +174,6 @@ private fun utledTom(
     gammeltSegment: LocalDateSegment<Int>,
     overlappendePeriode: LocalDateSegment<Int>,
 ) = if (gammeltSegment.tom > overlappendePeriode.tom) overlappendePeriode.tom else gammeltSegment.tom
-
-fun UtvidetVedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserForPeriode(
-    grunnlagForVedtaksperioder: GrunnlagForVedtaksperioder,
-    grunnlagForVedtaksperioderForrigeBehandling: GrunnlagForVedtaksperioder?,
-    sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
-): List<IVedtakBegrunnelse> {
-    val grunnlagMedForrigePeriodeOgBehandlingPerPerson: Map<AktørId, Periode<GrunnlagMedForrigePeriodeOgBehandling, Måned>> =
-        finnGrunnlagMedForrigePeriodeOgBehandlingPerPerson(
-            grunnlagForVedtaksperioder,
-            grunnlagForVedtaksperioderForrigeBehandling,
-        )
-
-    return emptyList()
-}
-
-private fun UtvidetVedtaksperiodeMedBegrunnelser.finnGrunnlagMedForrigePeriodeOgBehandlingPerPerson(
-    grunnlagForVedtaksperioder: GrunnlagForVedtaksperioder,
-    grunnlagForVedtaksperioderForrigeBehandling: GrunnlagForVedtaksperioder?,
-): Map<AktørId, Periode<GrunnlagMedForrigePeriodeOgBehandling, Måned>> {
-    val tidslinjeMedVedtaksperioden = this.tilTidslinjeForAktuellPeriode()
-
-    val grunnlagTidslinjePerPerson = grunnlagForVedtaksperioder.utledGrunnlagTidslinjePerPerson()
-
-    val grunnlagTidslinjePerPersonForrigeBehandling =
-        grunnlagForVedtaksperioderForrigeBehandling?.utledGrunnlagTidslinjePerPerson()
-
-    return grunnlagTidslinjePerPerson.mapValues { (aktørId, grunnlagTidslinje) ->
-        val grunnlagMedForrigePeriodeTidslinje = grunnlagTidslinje.tilForrigeOgNåværendePeriodeTidslinje()
-
-        val grunnlagForrigeBehandlingTidslinje =
-            grunnlagTidslinjePerPersonForrigeBehandling?.get(aktørId) ?: TomTidslinje()
-
-        val grunnlagMedForrigePeriodeOgBehandlingTidslinje = tidslinjeMedVedtaksperioden.kombinerMed(
-            grunnlagMedForrigePeriodeTidslinje,
-            grunnlagForrigeBehandlingTidslinje,
-        ) { vedtaksPerioden, forrigeOgDennePerioden, forrigeBehandling ->
-            if (vedtaksPerioden == null) {
-                null
-            } else {
-                val forrigePeriode = forrigeOgDennePerioden?.first
-                val dennePerioden = forrigeOgDennePerioden?.second
-
-                lagGrunnlagMedForrigePeriodeOgBehandling(
-                    dennePerioden = dennePerioden,
-                    forrigePeriode = forrigeBehandling,
-                    sammePeriodeForrigeBehandling = forrigePeriode,
-                )
-            }
-        }
-
-        grunnlagMedForrigePeriodeOgBehandlingTidslinje.perioder().single { it.innhold != null }
-    }
-}
-
-private fun UtvidetVedtaksperiodeMedBegrunnelser.tilTidslinjeForAktuellPeriode(): Tidslinje<UtvidetVedtaksperiodeMedBegrunnelser, Måned> {
-    return listOf(
-        periodeAv(
-            fraOgMed = this.fom?.toYearMonth(),
-            tilOgMed = this.tom?.toYearMonth(),
-            innhold = this,
-        ),
-    ).tilTidslinje()
-}
-
-private fun Tidslinje<GrunnlagForPerson, Måned>.tilForrigeOgNåværendePeriodeTidslinje(): Tidslinje<Pair<GrunnlagForPerson?, GrunnlagForPerson?>, Måned> {
-    return (
-        listOf(
-            periodeAv(YearMonth.now(), YearMonth.now(), null),
-        ) + this.perioder()
-        ).zipWithNext { forrige, denne ->
-        periodeAv(denne.fraOgMed, denne.tilOgMed, Pair(forrige.innhold, denne.innhold))
-    }.tilTidslinje()
-}
-
-private sealed interface GrunnlagMedForrigePeriodeOgBehandling
-
-private data class GrunnlagDenneOgForrigePeriode(
-    val grunnlagForVedtaksperiode: GrunnlagForPerson,
-    val grunnlagForForrigeVedtaksperiode: GrunnlagForPerson?,
-) : GrunnlagMedForrigePeriodeOgBehandling
-
-private data class GrunnlagIngenVerdiIDenneBehandlingen(
-    val erInnvilgetForrigeBehandling: Boolean,
-) : GrunnlagMedForrigePeriodeOgBehandling
-
-private fun lagGrunnlagMedForrigePeriodeOgBehandling(
-    dennePerioden: GrunnlagForPerson?,
-    forrigePeriode: GrunnlagForPerson?,
-    sammePeriodeForrigeBehandling: GrunnlagForPerson?,
-) = if (dennePerioden == null) {
-    GrunnlagIngenVerdiIDenneBehandlingen(
-        erInnvilgetForrigeBehandling = sammePeriodeForrigeBehandling is GrunnlagForPersonInnvilget,
-    )
-} else {
-    GrunnlagDenneOgForrigePeriode(
-        grunnlagForVedtaksperiode = dennePerioden,
-        grunnlagForForrigeVedtaksperiode = forrigePeriode,
-    )
-}
 
 @Deprecated("Skal byttes ut med hentGyldigeBegrunnelserForPeriode")
 fun hentGyldigeBegrunnelserForPeriodeGammel(
