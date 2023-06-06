@@ -39,17 +39,17 @@ class StartSatsendring(
     @Transactional
     fun startSatsendring(
         antallFagsaker: Int,
-        satsTidspunkt: YearMonth = YearMonth.of(2023, 3),
     ) {
         if (!featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_ENABLET, false)) {
             logger.info("Skipper satsendring da toggle er skrudd av.")
             return
         }
+
         var antallSatsendringerStartet = 0
         var startSide = 0
         while (antallSatsendringerStartet < antallFagsaker) {
             val page =
-                fagsakRepository.finnLøpendeFagsakerForSatsendring(Pageable.ofSize(antallFagsaker).withPage(startSide))
+                fagsakRepository.finnLøpendeFagsakerForSatsendring(hentAktivSatsendringstidspunkt().atDay(1), Pageable.ofSize(antallFagsaker).withPage(startSide))
 
             val fagsakerForSatsendring = page.toList()
             logger.info("Fant ${fagsakerForSatsendring.size} personer for satsendring på side $startSide")
@@ -59,7 +59,7 @@ class StartSatsendring(
                         fagsakerForSatsendring,
                         antallSatsendringerStartet,
                         antallFagsaker,
-                        satsTidspunkt,
+                        hentAktivSatsendringstidspunkt(),
                     )
             }
 
@@ -104,6 +104,7 @@ class StartSatsendring(
                     Satskjøring(
                         fagsakId = fagsak.id,
                         ferdigTidspunkt = sisteIverksatteBehandling.endretTidspunkt,
+                        satsTidspunkt = satsTidspunkt,
                     ),
                 )
                 logger.info("Fagsak=${fagsak.id} har alt siste satser")
@@ -159,7 +160,7 @@ class StartSatsendring(
         }
 
     fun kanStarteSatsendringPåFagsak(fagsakId: Long): Boolean {
-        return satskjøringRepository.findByFagsakId(fagsakId) == null &&
+        return satskjøringRepository.findByFagsakIdAndSatsTidspunkt(fagsakId, hentAktivSatsendringstidspunkt()) == null &&
             !satsendringService.erFagsakOppdatertMedSisteSatser(fagsakId)
     }
 
@@ -173,10 +174,7 @@ class StartSatsendring(
         }
 
         val resultatSatsendringBehandling = autovedtakSatsendringService.kjørBehandling(
-            SatsendringTaskDto(
-                fagsakId = fagsakId,
-                satstidspunkt = SATSENDRINGMÅNED_2023,
-            ),
+            SatsendringTaskDto(fagsakId = fagsakId, hentAktivSatsendringstidspunkt()),
         )
 
         when (resultatSatsendringBehandling) {
@@ -193,12 +191,21 @@ class StartSatsendring(
         }
     }
 
+    fun hentAktivSatsendringstidspunkt(): YearMonth {
+        return if (featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_2023_07, false)) {
+            SATSENDRINGMÅNED_JULI_2023
+        } else {
+            SATSENDRINGMÅNED_MARS_2023
+        }
+    }
+
     fun opprettSatsendringForFagsak(fagsakId: Long) {
-        opprettTaskService.opprettSatsendringTask(fagsakId, SATSENDRINGMÅNED_2023)
+        opprettTaskService.opprettSatsendringTask(fagsakId, hentAktivSatsendringstidspunkt())
     }
 
     companion object {
         val logger: Logger = LoggerFactory.getLogger(StartSatsendring::class.java)
-        val SATSENDRINGMÅNED_2023: YearMonth = YearMonth.of(2023, 3)
+        val SATSENDRINGMÅNED_MARS_2023: YearMonth = YearMonth.of(2023, 3)
+        val SATSENDRINGMÅNED_JULI_2023: YearMonth = YearMonth.of(2023, 7)
     }
 }

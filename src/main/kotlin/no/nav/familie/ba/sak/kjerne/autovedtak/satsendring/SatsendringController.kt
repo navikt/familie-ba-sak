@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
 import java.util.UUID
@@ -94,30 +93,6 @@ class SatsendringController(
             )
         }
         return ResponseEntity.ok(Ressurs.Companion.success("Trigget henleggelse for ${behandlinger.size} behandlinger"))
-    }
-
-    @PostMapping(path = ["/lukkAapneBehandlingerSatsendring"])
-    fun lukkÅpneBehandlingerDetIkkeErKjørtSatsendringPå(
-        @RequestParam(value = "opprettTask", required = true) opprettTask: Boolean,
-        @RequestParam(value = "antall", required = true) antall: Int,
-    ) {
-        val åpneBehandlinger = satsendringService.finnSatskjøringerSomHarStoppetPgaÅpenBehandling()
-        åpneBehandlinger.take(antall).forEach {
-            if (!satsendringService.erFagsakOppdatertMedSisteSatser(it.fagsakId)) {
-                if (opprettTask) {
-                    opprettTaskService.opprettHenleggBehandlingTask(
-                        behandlingId = it.behandlingId,
-                        årsak = HenleggÅrsak.TEKNISK_VEDLIKEHOLD,
-                        begrunnelse = SATSENDRING,
-                        validerOppgavefristErEtterDato = null,
-                    )
-                } else {
-                    logger.info("Skulle ha trigget henleggBehandlingTask for fagsakIs=${it.fagsakId} behandlingId=${it.behandlingId}")
-                }
-            } else {
-                logger.info("Henlegger ikke behandling. ${it.fagsakId} har alt siste sats")
-            }
-        }
     }
 
     @PostMapping(path = ["/saker-uten-sats"])
