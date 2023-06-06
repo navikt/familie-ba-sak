@@ -71,20 +71,17 @@ fun CacheManager.getCacheOrThrow(cache: String) = this.getCache(cache) ?: error(
 
 /**
  * Henter tidligere cachet verdier, og henter ucachet verdier med [valueLoader]
+ * Caches per saksbehandler, sånn at man eks kan hente tilgang for gitt saksbehandler
  */
 @Suppress("UNCHECKED_CAST", "NULLABILITY_MISMATCH_BASED_ON_JAVA_ANNOTATIONS")
-fun <VALUE : Any, RESULT> CacheManager.getCachedOrLoad(
+fun <VALUE : Any, RESULT> CacheManager.hentCacheForSaksbehandler(
     cacheName: String,
     values: List<VALUE>,
-    saksbehandlerContext: Boolean,
     valueLoader: (List<VALUE>) -> Map<VALUE, RESULT>,
 ): Map<VALUE, RESULT> {
     val cache = this.getCacheOrThrow(cacheName)
-    val saksbehandler = if (saksbehandlerContext) {
-        SikkerhetContext.hentSaksbehandler()
-    } else {
-        true
-    }
+    val saksbehandler = SikkerhetContext.hentSaksbehandler()
+
     val previousValues: List<Pair<VALUE, RESULT?>> = values.distinct()
         .map { it to cache.get(Pair(saksbehandler, it))?.get() as RESULT? }
 

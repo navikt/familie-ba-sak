@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner
 
-import no.nav.familie.ba.sak.config.getCachedOrLoad
+import no.nav.familie.ba.sak.config.hentCacheForSaksbehandler
 import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.tilAdressebeskyttelse
@@ -35,8 +35,8 @@ class FamilieIntegrasjonerTilgangskontrollService(
     }
 
     fun sjekkTilgangTilPersoner(personIdenter: List<String>): Map<String, Tilgang> {
-        return cacheManager.getCachedOrLoad("sjekkTilgangTilPersoner", personIdenter, true) {
-            familieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(it).map { it.personIdent to it }.toMap()
+        return cacheManager.hentCacheForSaksbehandler("sjekkTilgangTilPersoner", personIdenter) {
+            familieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(it).associateBy { it.personIdent }
         }
     }
 }
