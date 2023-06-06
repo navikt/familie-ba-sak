@@ -60,11 +60,7 @@ fun VedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(periode: Periode, skalBr
             if (periode.fom == TIDENES_MORGEN && periode.tom == TIDENES_ENDE) {
                 ""
             } else {
-                if (periode.tom == TIDENES_ENDE) {
-                    fomTekst
-                } else {
-                    "$fomTekst til ${periode.tom.tilMånedÅr()}"
-                }
+                fomTekst
             }
         }
 
