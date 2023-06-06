@@ -143,7 +143,7 @@ class PersonResultat(
                     nyttPersonResultat = nyttPersonResultat,
                 )
             }
-            .toSortedSet(VilkårResultatComparator)
+            .toSet()
 
         nyttPersonResultat.setSortedVilkårResultater(nyeVilkårResultater)
 
