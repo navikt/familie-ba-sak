@@ -78,7 +78,8 @@ class BrevPeriodeService(
             søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)?.hentUregistrerteBarn()
                 ?: emptyList()
 
-        val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksattFraBehandlingsId(behandlingId = behandling.id)
+        val forrigeBehandling =
+            behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksattFraBehandlingsId(behandlingId = behandling.id)
 
         val kompetanser = kompetanseService.hentKompetanser(behandlingId = BehandlingId(behandling.id))
             .filter {
