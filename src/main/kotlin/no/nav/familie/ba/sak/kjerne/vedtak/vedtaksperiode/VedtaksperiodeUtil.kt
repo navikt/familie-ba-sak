@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.erDagenFør
@@ -23,6 +22,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
+import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.periodeAv
@@ -204,9 +204,7 @@ private fun utledTom(
 
 fun UtvidetVedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserForPeriode(
     grunnlagForVedtaksperioder: GrunnlagForVedtaksperioder,
-
-    grunnlagForVedtaksperioderForrigeBehandling: GrunnlagForVedtaksperioder,
-
+    grunnlagForVedtaksperioderForrigeBehandling: GrunnlagForVedtaksperioder?,
     sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
 ): List<IVedtakBegrunnelse> {
     val grunnlagMedForrigePeriodeOgBehandlingPerPerson: Map<AktørId, Periode<GrunnlagMedForrigePeriodeOgBehandling, Måned>> =
@@ -220,32 +218,20 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserForPeriode(
 
 private fun UtvidetVedtaksperiodeMedBegrunnelser.finnGrunnlagMedForrigePeriodeOgBehandlingPerPerson(
     grunnlagForVedtaksperioder: GrunnlagForVedtaksperioder,
-    grunnlagForVedtaksperioderForrigeBehandling: GrunnlagForVedtaksperioder,
+    grunnlagForVedtaksperioderForrigeBehandling: GrunnlagForVedtaksperioder?,
 ): Map<AktørId, Periode<GrunnlagMedForrigePeriodeOgBehandling, Måned>> {
-    val tidslinjeMedVedtaksperioden =
-        listOf(
-            periodeAv(
-                fraOgMed = this.fom?.toYearMonth(),
-                tilOgMed = this.tom?.toYearMonth(),
-                innhold = this,
-            ),
-        ).tilTidslinje()
+    val tidslinjeMedVedtaksperioden = this.tilTidslinjeForAktuellPeriode()
 
     val grunnlagTidslinjePerPerson = grunnlagForVedtaksperioder.utledGrunnlagTidslinjePerPerson()
 
     val grunnlagTidslinjePerPersonForrigeBehandling =
-        grunnlagForVedtaksperioderForrigeBehandling.utledGrunnlagTidslinjePerPerson()
+        grunnlagForVedtaksperioderForrigeBehandling?.utledGrunnlagTidslinjePerPerson()
 
     return grunnlagTidslinjePerPerson.mapValues { (aktørId, grunnlagTidslinje) ->
-        val grunnlagMedForrigePeriodeTidslinje = (
-            listOf(
-                periodeAv(YearMonth.now(), YearMonth.now(), null),
-            ) + grunnlagTidslinje.perioder()
-            ).zipWithNext { forrige, denne ->
-            periodeAv(denne.fraOgMed, denne.tilOgMed, Pair(forrige.innhold, denne.innhold))
-        }.tilTidslinje()
+        val grunnlagMedForrigePeriodeTidslinje = grunnlagTidslinje.tilForrigeOgNåværendePeriodeTidslinje()
 
-        val grunnlagForrigeBehandlingTidslinje = grunnlagTidslinjePerPersonForrigeBehandling[aktørId] ?: TomTidslinje()
+        val grunnlagForrigeBehandlingTidslinje =
+            grunnlagTidslinjePerPersonForrigeBehandling?.get(aktørId) ?: TomTidslinje()
 
         val grunnlagMedForrigePeriodeOgBehandlingTidslinje = tidslinjeMedVedtaksperioden.kombinerMed(
             grunnlagMedForrigePeriodeTidslinje,
@@ -255,9 +241,8 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.finnGrunnlagMedForrigePeriodeOg
                 null
             } else {
                 GrunnlagMedForrigePeriodeOgBehandling(
-                    forrigeOgDennePerioden?.second
-                        ?: throw Feil("Denne perioden i denne behandlingen burde ikke kunne være null."),
-                    forrigeOgDennePerioden.first,
+                    forrigeOgDennePerioden?.second,
+                    forrigeOgDennePerioden?.first,
                     forrigeBehandling,
                 )
             }
@@ -267,8 +252,28 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.finnGrunnlagMedForrigePeriodeOg
     }
 }
 
+private fun UtvidetVedtaksperiodeMedBegrunnelser.tilTidslinjeForAktuellPeriode(): Tidslinje<UtvidetVedtaksperiodeMedBegrunnelser, Måned> {
+    return listOf(
+        periodeAv(
+            fraOgMed = this.fom?.toYearMonth(),
+            tilOgMed = this.tom?.toYearMonth(),
+            innhold = this,
+        ),
+    ).tilTidslinje()
+}
+
+private fun Tidslinje<GrunnlagForPerson, Måned>.tilForrigeOgNåværendePeriodeTidslinje(): Tidslinje<Pair<GrunnlagForPerson?, GrunnlagForPerson?>, Måned> {
+    return (
+        listOf(
+            periodeAv(YearMonth.now(), YearMonth.now(), null),
+        ) + this.perioder()
+        ).zipWithNext { forrige, denne ->
+            periodeAv(denne.fraOgMed, denne.tilOgMed, Pair(forrige.innhold, denne.innhold))
+        }.tilTidslinje()
+}
+
 data class GrunnlagMedForrigePeriodeOgBehandling(
-    val grunnlagForVedtaksperiode: GrunnlagForPerson,
+    val grunnlagForVedtaksperiode: GrunnlagForPerson?,
     val grunnlagForForrigeVedtaksperiode: GrunnlagForPerson?,
     val grunnlagForVedtaksperiodeForrigeBehandling: GrunnlagForPerson?,
 )
