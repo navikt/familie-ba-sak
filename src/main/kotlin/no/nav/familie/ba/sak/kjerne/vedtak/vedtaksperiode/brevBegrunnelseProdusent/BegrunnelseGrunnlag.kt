@@ -5,12 +5,12 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForP
 
 sealed interface BegrunnelseGrunnlag
 
-private data class BegrunnelseGrunnlagDenneOgForrigePeriode(
+data class BegrunnelseGrunnlagMedVerdiIDennePerioden(
     val grunnlagForVedtaksperiode: GrunnlagForPerson,
     val grunnlagForForrigeVedtaksperiode: GrunnlagForPerson?,
 ) : BegrunnelseGrunnlag
 
-private data class BegrunnelseGrunnlagIngenVerdiIDenneBehandlingen(
+data class BegrunnelseGrunnlagIngenVerdiIDenneBehandlingen(
     val erInnvilgetForrigeBehandling: Boolean,
 ) : BegrunnelseGrunnlag
 
@@ -23,7 +23,7 @@ fun lagBegrunnelseGrunnlag(
         erInnvilgetForrigeBehandling = sammePeriodeForrigeBehandling is GrunnlagForPersonInnvilget,
     )
 } else {
-    BegrunnelseGrunnlagDenneOgForrigePeriode(
+    BegrunnelseGrunnlagMedVerdiIDennePerioden(
         grunnlagForVedtaksperiode = dennePerioden,
         grunnlagForForrigeVedtaksperiode = forrigePeriode,
     )

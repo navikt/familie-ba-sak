@@ -524,7 +524,9 @@ class VedtaksperiodeService(
                             hentGrunnlagForVedtaksperioder(it)
                         },
                         sanityBegrunnelser = sanityBegrunnelser,
-                    )
+                        behandlingUnderkategori = behandling.underkategori,
+                        fagsakType = behandling.fagsak.type,
+                    ).toList()
                 } else {
                     hentGyldigeBegrunnelserForPeriodeGammel(
                         utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
