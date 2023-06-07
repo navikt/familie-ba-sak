@@ -193,6 +193,8 @@ data class Behandling(
     }
 
     fun leggTilHenleggStegOmDetIkkeFinnesFraFør(): Behandling {
+        behandlingStegTilstand.filter { it.behandlingSteg == StegType.FERDIGSTILLE_BEHANDLING }
+            .forEach { behandlingStegTilstand.remove(it) }
         leggTilStegOmDetIkkeFinnesFraFør(StegType.HENLEGG_BEHANDLING)
         return this
     }
