@@ -7,7 +7,6 @@ import io.mockk.spyk
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
@@ -35,6 +34,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.kafka.support.Acknowledgment
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class HentFagsystemsbehandlingRequestConsumerTest {
@@ -88,7 +88,7 @@ internal class HentFagsystemsbehandlingRequestConsumerTest {
             behandlendeEnhetNavn = "Nav",
             behandlingId = behandling.id,
         )
-        every { vedtakService.hentAktivForBehandlingThrows(any()) } returns lagVedtak(behandling)
+        every { vedtakService.hentVedtaksdatoForBehandlingThrows(any()) } returns LocalDateTime.now()
         every { tilbakekrevingService.hentTilbakekrevingsvalg(any()) } returns Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING
         every { kafkaProducer.sendFagsystemsbehandlingResponsForTopicTilbakekreving(any(), any(), any()) } returns Unit
     }

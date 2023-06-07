@@ -99,7 +99,7 @@ class BrevperiodeTest {
                     } ?: emptyList(),
                     dødeBarnForrigePeriode = emptyList(),
                     featureToggleService = featureToggleService,
-                ).genererBrevPeriode()
+                ).genererBrevPeriode(false)
             } catch (e: Exception) {
                 testReporter.publishEntry(
                     "Feil i test: $it" +

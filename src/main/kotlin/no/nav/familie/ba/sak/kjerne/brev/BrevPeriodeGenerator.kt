@@ -48,7 +48,7 @@ class BrevPeriodeGenerator(
     private val featureToggleService: FeatureToggleService,
 ) {
 
-    fun genererBrevPeriode(): BrevPeriode? {
+    fun genererBrevPeriode(skalBrukeNyVedtaksperiodeLøsning: Boolean): BrevPeriode? {
         val begrunnelseGrunnlagMedPersoner = hentBegrunnelsegrunnlagMedPersoner()
         val eøsBegrunnelserMedKompetanser = hentEøsBegrunnelserMedKompetanser()
 
@@ -56,6 +56,7 @@ class BrevPeriodeGenerator(
             byggBegrunnelserOgFritekster(
                 begrunnelserGrunnlagMedPersoner = begrunnelseGrunnlagMedPersoner,
                 eøsBegrunnelserMedKompetanser = eøsBegrunnelserMedKompetanser,
+                skalBrukeNyVedtaksperiodeLøsning,
             )
 
         if (begrunnelserOgFritekster.isEmpty()) return null
@@ -188,6 +189,7 @@ class BrevPeriodeGenerator(
     fun byggBegrunnelserOgFritekster(
         begrunnelserGrunnlagMedPersoner: List<BrevBegrunnelseGrunnlagMedPersoner>,
         eøsBegrunnelserMedKompetanser: List<EØSBegrunnelseMedKompetanser>,
+        skalBrukeNyVedtaksperiodeLøsning: Boolean,
     ): List<Begrunnelse> {
         val brevBegrunnelser = begrunnelserGrunnlagMedPersoner
             .map {
@@ -198,6 +200,7 @@ class BrevPeriodeGenerator(
                     uregistrerteBarn = uregistrerteBarn,
                     minimerteUtbetalingsperiodeDetaljer = minimertVedtaksperiode.minimerteUtbetalingsperiodeDetaljer,
                     minimerteRestEndredeAndeler = restBehandlingsgrunnlagForBrev.minimerteEndredeUtbetalingAndeler,
+                    skalBrukeNyVedtaksperiodeLøsning,
                 )
             }
 

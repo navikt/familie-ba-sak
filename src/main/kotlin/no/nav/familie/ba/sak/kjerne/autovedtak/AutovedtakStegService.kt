@@ -84,9 +84,11 @@ class AutovedtakStegService(
             Autovedtaktype.FØDSELSHENDELSE -> {
                 autovedtakFødselshendelseService.skalAutovedtakBehandles(behandlingsdata as NyBehandlingHendelse)
             }
+
             Autovedtaktype.OMREGNING_BREV -> {
                 autovedtakBrevService.skalAutovedtakBehandles(behandlingsdata as AutovedtakBrevBehandlingsdata)
             }
+
             Autovedtaktype.SMÅBARNSTILLEGG -> {
                 autovedtakSmåbarnstilleggService.skalAutovedtakBehandles(behandlingsdata as Aktør)
             }
@@ -119,9 +121,11 @@ class AutovedtakStegService(
             Autovedtaktype.FØDSELSHENDELSE -> {
                 autovedtakFødselshendelseService.kjørBehandling(behandlingsdata as NyBehandlingHendelse)
             }
+
             Autovedtaktype.OMREGNING_BREV -> {
                 autovedtakBrevService.kjørBehandling(behandlingsdata as AutovedtakBrevBehandlingsdata)
             }
+
             Autovedtaktype.SMÅBARNSTILLEGG -> {
                 autovedtakSmåbarnstilleggService.kjørBehandling(behandlingsdata as Aktør)
             }
@@ -163,9 +167,8 @@ class AutovedtakStegService(
 
         return if (åpenBehandling == null) {
             false
-        } else if (åpenBehandling.status == BehandlingStatus.UTREDES || åpenBehandling.status == BehandlingStatus.FATTER_VEDTAK) {
+        } else if (åpenBehandling.status == BehandlingStatus.UTREDES || åpenBehandling.status == BehandlingStatus.FATTER_VEDTAK || åpenBehandling.status == BehandlingStatus.SATT_PÅ_VENT) {
             antallAutovedtakÅpenBehandling[autovedtaktype]?.increment()
-
             oppgaveService.opprettOppgaveForManuellBehandling(
                 behandling = åpenBehandling,
                 begrunnelse = "${autovedtaktype.displayName}: Bruker har åpen behandling",

@@ -124,6 +124,12 @@ class VedtaksperiodeService(
         val vedtaksperiodeMedBegrunnelser =
             vedtaksperiodeHentOgPersisterService.hentVedtaksperiodeThrows(vedtaksperiodeId)
 
+        validerAvslagHarAvslagBegrunnelse(
+            vedtaksperiodeMedBegrunnelser,
+            standardbegrunnelserFraFrontend,
+            eøsStandardbegrunnelserFraFrontend,
+        )
+
         val behandling = vedtaksperiodeMedBegrunnelser.vedtak.behandling
 
         val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandling.id)
@@ -169,6 +175,20 @@ class VedtaksperiodeService(
         vedtaksperiodeHentOgPersisterService.lagre(vedtaksperiodeMedBegrunnelser)
 
         return vedtaksperiodeMedBegrunnelser.vedtak
+    }
+
+    private fun validerAvslagHarAvslagBegrunnelse(
+        vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
+        standardbegrunnelserFraFrontend: List<Standardbegrunnelse>,
+        eøsStandardbegrunnelserFraFrontend: List<EØSStandardbegrunnelse>,
+    ) {
+        val eksisterendeAvslagBegrunnelser = vedtaksperiodeMedBegrunnelser.begrunnelser.filter { it.standardbegrunnelse.vedtakBegrunnelseType.erAvslag() }.map { it.standardbegrunnelse.sanityApiNavn }
+
+        val nyeAvslagBegrunnelser = (standardbegrunnelserFraFrontend.filter { it.vedtakBegrunnelseType.erAvslag() } + eøsStandardbegrunnelserFraFrontend.filter { it.vedtakBegrunnelseType.erAvslag() }).map { it.sanityApiNavn }
+
+        if (!nyeAvslagBegrunnelser.containsAll(eksisterendeAvslagBegrunnelser)) {
+            throw FunksjonellFeil("Kan ikke fjerne avslags-begrunnelse fra vedtaksperiode som har blitt satt til avslag i vilkårsvurdering.")
+        }
     }
 
     private fun validerEndretUtbetalingsbegrunnelse(
