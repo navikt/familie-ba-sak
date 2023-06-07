@@ -161,6 +161,25 @@ class VilkårResultat(
         )
     }
 
+    fun tilKopiForNyttPersonResultat(nyttPersonResultat: PersonResultat): VilkårResultat {
+        return VilkårResultat(
+            personResultat = nyttPersonResultat,
+            erAutomatiskVurdert = erAutomatiskVurdert,
+            vilkårType = vilkårType,
+            resultat = resultat,
+            periodeFom = periodeFom,
+            periodeTom = periodeTom,
+            begrunnelse = begrunnelse,
+            behandlingId = nyttPersonResultat.vilkårsvurdering.behandling.id,
+            regelInput = regelInput,
+            regelOutput = regelOutput,
+            erEksplisittAvslagPåSøknad = erEksplisittAvslagPåSøknad,
+            vurderesEtter = vurderesEtter,
+            utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger,
+            standardbegrunnelser = standardbegrunnelser,
+        )
+    }
+
     fun oppdaterPekerTilBehandling() {
         behandlingId = personResultat!!.vilkårsvurdering.behandling.id
     }
