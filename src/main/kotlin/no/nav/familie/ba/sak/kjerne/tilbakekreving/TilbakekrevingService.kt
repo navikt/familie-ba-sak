@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -211,10 +212,8 @@ class TilbakekrevingService(
         }
 
         val behandling = kanOpprettesRespons.kravgrunnlagsreferanse?.toLong()
-            ?.let {
-                behandlingHentOgPersisterService.finnAvsluttedeBehandlingerPåFagsak(fagsakId = fagsakId)
-                    .find { beh -> beh.id == it }
-            }
+            ?.let { behandlingHentOgPersisterService.hent(it) }
+            ?.takeIf { it.status == BehandlingStatus.AVSLUTTET }
         return if (behandling != null) {
             tilbakekrevingKlient.opprettTilbakekrevingsbehandlingManuelt(
                 OpprettManueltTilbakekrevingRequest(
