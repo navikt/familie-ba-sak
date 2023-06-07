@@ -361,8 +361,10 @@ class StegServiceIntegrationTest(
         }
     }
 
+    // I de fleste tilfeller vil det ikke være mulig å henlegge en behandling som har kommet forbi iverksett steget.
+    // Disse vil bli stoppet i BehandlingStegController.
     @Test
-    fun `Henlegge etter behandling er kommet til iverksett eller senere`() {
+    fun `Henlegge dersom behandling står på FERDIGSTILLE_BEHANDLING steget`() {
         val søkerFnr = randomFnr()
 
         mockHentPersoninfoForMedIdenter(mockPersonopplysningerService, søkerFnr, "98765432110")
@@ -386,6 +388,7 @@ class StegServiceIntegrationTest(
 
         assertThat(behandlingEtterHenleggelse.steg).isEqualTo(StegType.BEHANDLING_AVSLUTTET)
         assertThat(behandlingEtterHenleggelse.status).isEqualTo(BehandlingStatus.AVSLUTTET)
+        assertThat(behandlingEtterHenleggelse.behandlingStegTilstand.any { it.behandlingSteg == StegType.FERDIGSTILLE_BEHANDLING && it.behandlingStegStatus == BehandlingStegStatus.UTFØRT })
     }
 
     @Test
