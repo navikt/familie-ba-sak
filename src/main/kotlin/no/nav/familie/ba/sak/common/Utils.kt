@@ -11,6 +11,7 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 import java.text.NumberFormat
 import java.util.Locale
+import java.util.Properties
 
 val nbLocale = Locale("nb", "Norway")
 
@@ -20,7 +21,7 @@ object Utils {
 
     fun formaterBeløp(beløp: Int): String = NumberFormat.getNumberInstance(nbLocale).format(beløp)
 
-    fun hentPropertyFraMaven(key: String): String? {
+    val properties: Properties by lazy {
         val reader = MavenXpp3Reader()
         val model: Model = if (File("pom.xml").exists()) {
             reader.read(FileReader("pom.xml"))
@@ -33,9 +34,10 @@ object Utils {
                 ),
             )
         }
-
-        return model.properties[key]?.toString()
+        model.properties
     }
+
+    fun hentPropertyFraMaven(key: String): String? = this.properties[key]?.toString()
 
     fun BigDecimal.avrundetHeltallAvProsent(prosent: BigDecimal) = this.times(prosent)
         .divide(100.toBigDecimal()).setScale(0, RoundingMode.HALF_UP)
