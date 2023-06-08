@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.AutobrevScheduler
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring
-import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
@@ -41,7 +40,6 @@ class TestVerktøyController(
     private val tilgangService: TilgangService,
     private val simuleringService: SimuleringService,
     private val opprettTaskService: OpprettTaskService,
-    private val satskjøringRepository: SatskjøringRepository,
     private val taskService: TaskService,
     private val startSatsendring: StartSatsendring,
 ) {

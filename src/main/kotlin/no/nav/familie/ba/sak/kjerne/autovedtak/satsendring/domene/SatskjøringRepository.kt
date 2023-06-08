@@ -11,8 +11,3 @@ interface SatskjøringRepository : JpaRepository<Satskjøring, Long> {
     fun countBySatsTidspunkt(satsTidspunkt: YearMonth): Long
     fun findByFagsakIdAndSatsTidspunkt(fagsakId: Long, satsTidspunkt: YearMonth): Satskjøring?
 }
-
-interface SatskjøringÅpenBehandling {
-    val fagsakId: Long
-    val behandlingId: Long
-}
