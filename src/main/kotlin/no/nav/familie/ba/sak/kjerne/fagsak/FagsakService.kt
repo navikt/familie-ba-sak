@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
 import io.micrometer.core.instrument.Metrics
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.ekstern.restDomene.FagsakDeltagerRolle
 import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonInfo
@@ -12,7 +11,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestMinimalFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestVisningBehandling
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
@@ -56,7 +55,7 @@ class FagsakService(
     private val behandlingService: BehandlingService,
     private val vedtakRepository: VedtakRepository,
     private val personopplysningerService: PersonopplysningerService,
-    private val familieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient,
+    private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
     private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
     private val skyggesakService: SkyggesakService,
     private val vedtaksperiodeService: VedtaksperiodeService,
@@ -83,17 +82,8 @@ class FagsakService(
 
     @Transactional
     fun hentEllerOpprettFagsak(fagsakRequest: FagsakRequest): Ressurs<RestMinimalFagsak> {
-        val personident = when {
-            fagsakRequest.personIdent !== null -> fagsakRequest.personIdent
-            fagsakRequest.aktørId !== null -> fagsakRequest.aktørId
-            else -> throw Feil(
-                "Hverken aktørid eller personident er satt på fagsak-requesten. Klarer ikke opprette eller hente fagsak.",
-                "Fagsak er forsøkt opprettet uten ident. Dette er en systemfeil, vennligst ta kontakt med systemansvarlig.",
-                HttpStatus.BAD_REQUEST,
-            )
-        }
         val fagsak = hentEllerOpprettFagsak(
-            personident,
+            fagsakRequest.personIdent,
             type = fagsakRequest.fagsakType ?: FagsakType.NORMAL,
             institusjon = fagsakRequest.institusjon,
         )
@@ -208,7 +198,7 @@ class FagsakService(
             tilbakekrevingsbehandlingService.hentRestTilbakekrevingsbehandlinger((fagsakId))
         val visningsbehandlinger = behandlingHentOgPersisterService.hentBehandlinger(fagsakId = fagsakId).map {
             it.tilRestVisningBehandling(
-                vedtaksdato = vedtakRepository.findByBehandlingAndAktivOptional(it.id)?.vedtaksdato,
+                vedtaksdato = vedtakRepository.finnVedtaksdatoForBehandling(it.id),
             )
         }
         val migreringsdato = behandlingService.hentMigreringsdatoPåFagsak(fagsakId)
@@ -469,18 +459,14 @@ class FagsakService(
     }
 
     private fun hentMaskertFagsakdeltakerVedManglendeTilgang(aktør: Aktør): RestFagsakDeltager? {
-        val harTilgang =
-            familieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(listOf(aktør.aktivFødselsnummer())).harTilgang
-        return if (!harTilgang) {
-            val adressebeskyttelse = personopplysningerService.hentAdressebeskyttelseSomSystembruker(aktør)
-            RestFagsakDeltager(
-                rolle = FagsakDeltagerRolle.UKJENT,
-                adressebeskyttelseGradering = adressebeskyttelse,
-                harTilgang = false,
-            )
-        } else {
-            null
-        }
+        return familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(aktør)
+            ?.let {
+                RestFagsakDeltager(
+                    rolle = FagsakDeltagerRolle.UKJENT,
+                    adressebeskyttelseGradering = it.adressebeskyttelseGradering,
+                    harTilgang = false,
+                )
+            }
     }
 
     fun finnAlleFagsakerHvorAktørHarLøpendeYtelseAvType(aktør: Aktør, ytelseTyper: List<YtelseType>): List<Fagsak> {

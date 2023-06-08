@@ -52,6 +52,7 @@ import no.nav.familie.kontrakter.felles.simulering.PosteringType
 import no.nav.familie.kontrakter.felles.simulering.SimuleringMottaker
 import no.nav.familie.kontrakter.felles.simulering.SimulertPostering
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -358,6 +359,36 @@ class StegServiceIntegrationTest(
                 ),
             )
         }
+    }
+
+    // I de fleste tilfeller vil det ikke være mulig å henlegge en behandling som har kommet forbi iverksett steget.
+    // Disse vil bli stoppet i BehandlingStegController.
+    @Test
+    fun `Henlegge dersom behandling står på FERDIGSTILLE_BEHANDLING steget`() {
+        val søkerFnr = randomFnr()
+
+        mockHentPersoninfoForMedIdenter(mockPersonopplysningerService, søkerFnr, "98765432110")
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+
+        behandling.behandlingStegTilstand.add(
+            BehandlingStegTilstand(
+                0,
+                behandling,
+                StegType.FERDIGSTILLE_BEHANDLING,
+                BehandlingStegStatus.IKKE_UTFØRT,
+            ),
+        )
+
+        val behandlingEtterHenleggelse = stegService.håndterHenleggBehandling(
+            behandling,
+            RestHenleggBehandlingInfo(årsak = HenleggÅrsak.FEILAKTIG_OPPRETTET, begrunnelse = ""),
+        )
+
+        assertThat(behandlingEtterHenleggelse.steg).isEqualTo(StegType.BEHANDLING_AVSLUTTET)
+        assertThat(behandlingEtterHenleggelse.status).isEqualTo(BehandlingStatus.AVSLUTTET)
+        assertThat(behandlingEtterHenleggelse.behandlingStegTilstand.any { it.behandlingSteg == StegType.FERDIGSTILLE_BEHANDLING && it.behandlingStegStatus == BehandlingStegStatus.UTFØRT })
     }
 
     @Test
