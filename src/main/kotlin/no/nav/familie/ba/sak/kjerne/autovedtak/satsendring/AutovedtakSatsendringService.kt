@@ -93,7 +93,7 @@ class AutovedtakSatsendringService(
                     SettPåMaskinellVentÅrsak.SATSENDRING,
                 )
             } else {
-                satskjøringForFagsak.feiltype = "ÅPEN_BEHANDLING"
+                satskjøringForFagsak.feiltype = brukerHarÅpenBehandlingSvar.name
                 satskjøringRepository.save(satskjøringForFagsak)
 
                 logger.info(brukerHarÅpenBehandlingSvar.melding)
