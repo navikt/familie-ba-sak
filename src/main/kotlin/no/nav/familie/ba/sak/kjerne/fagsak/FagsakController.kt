@@ -132,10 +132,7 @@ class FagsakController(
             fagsakService.finnAlleFagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær(aktør)
 
         val fagsakIdOgTilknyttetAktørId = fagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær.map {
-            RestFagsakIdOgTilknyttetAktørId(
-                aktørId = it.aktør.aktørId,
-                fagsakId = it.id,
-            )
+            RestFagsakIdOgTilknyttetAktørId(aktørId = it.aktør.aktørId, fagsakId = it.id)
         }
 
         return ResponseEntity.ok().body(Ressurs.success(fagsakIdOgTilknyttetAktørId))
@@ -157,10 +154,7 @@ class FagsakController(
             )
 
         val fagsakIdOgTilknyttetAktørId = fagsakerHvorAktørMottarLøpendeUtvidetEllerOrdinær.map {
-            RestFagsakIdOgTilknyttetAktørId(
-                aktørId = it.aktør.aktørId,
-                fagsakId = it.id,
-            )
+            RestFagsakIdOgTilknyttetAktørId(aktørId = it.aktør.aktørId, fagsakId = it.id)
         }
 
         return ResponseEntity.ok().body(Ressurs.success(fagsakIdOgTilknyttetAktørId))
