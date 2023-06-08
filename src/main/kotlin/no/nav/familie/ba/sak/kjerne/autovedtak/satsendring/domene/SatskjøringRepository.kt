@@ -6,7 +6,9 @@ import java.time.YearMonth
 
 @Repository
 interface SatskjøringRepository : JpaRepository<Satskjøring, Long> {
-    fun countByFerdigTidspunktIsNotNull(): Long
+    fun countByFerdigTidspunktIsNotNullAndSatsTidspunkt(satsTidspunkt: YearMonth): Long
+
+    fun countBySatsTidspunkt(satsTidspunkt: YearMonth): Long
     fun findByFagsakIdAndSatsTidspunkt(fagsakId: Long, satsTidspunkt: YearMonth): Satskjøring?
 }
 

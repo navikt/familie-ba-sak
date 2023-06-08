@@ -17,6 +17,7 @@ import java.util.concurrent.TimeUnit
 class SatsendringStatistikk(
     private val fagsakRepository: FagsakRepository,
     private val satskjøringRepository: SatskjøringRepository,
+    private val startSatsendring: StartSatsendring,
 ) {
 
     val satsendringGauge =
@@ -31,22 +32,23 @@ class SatsendringStatistikk(
         try {
             MDC.put(MDCConstants.MDC_CALL_ID, UUID.randomUUID().toString())
             logger.info("Kjører statistikk satsendring")
-            val antallKjørt = satskjøringRepository.countByFerdigTidspunktIsNotNull()
-            val antallTriggetTotalt = satskjøringRepository.count()
+            val satsTidspunkt = startSatsendring.hentAktivSatsendringstidspunkt()
+            val antallKjørt = satskjøringRepository.countByFerdigTidspunktIsNotNullAndSatsTidspunkt(satsTidspunkt)
+            val antallTriggetTotalt = satskjøringRepository.countBySatsTidspunkt(satsTidspunkt)
             val antallLøpendeFagsakerTotalt = fagsakRepository.finnAntallFagsakerLøpende()
 
             val rows = listOf(
                 MultiGauge.Row.of(
                     Tags.of(
                         "satsendring",
-                        "totalt",
+                        "totalt-${satsTidspunkt.year}-${satsTidspunkt.month}",
                     ),
                     antallTriggetTotalt,
                 ),
                 MultiGauge.Row.of(
                     Tags.of(
                         "satsendring",
-                        "antallkjort",
+                        "antallkjort-${satsTidspunkt.year}-${satsTidspunkt.month}",
                     ),
                     antallKjørt,
                 ),
@@ -60,7 +62,7 @@ class SatsendringStatistikk(
                 MultiGauge.Row.of(
                     Tags.of(
                         "satsendring",
-                        "antallgjenstaaende",
+                        "antallgjenstaaende-${satsTidspunkt.year}-${satsTidspunkt.month}",
                     ),
                     antallLøpendeFagsakerTotalt - antallKjørt,
                 ),
