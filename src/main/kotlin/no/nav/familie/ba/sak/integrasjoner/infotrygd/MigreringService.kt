@@ -70,6 +70,7 @@ import java.time.Month.NOVEMBER
 import java.time.Month.OCTOBER
 import java.time.Month.SEPTEMBER
 import java.time.YearMonth
+import java.time.format.DateTimeFormatter
 
 private const val NULLDATO = "000000"
 private val SISTE_DATO_FORRIGE_SATS = LocalDate.of(2023, 2, 28)
@@ -129,6 +130,8 @@ class MigreringService(
                 secureLog.info("Migrering av enslig mindreårig for ident=$personIdent hvor stønadstype er utvidet. stønad=${løpendeInfotrygdsak.stønad?.id}")
                 kastOgTellMigreringsFeil(MigreringsfeilType.ENSLIG_MINDREÅRIG)
             }
+
+            sjekkIngenEndringerSidenMarsIInfotrygd(løpendeInfotrygdsak)
 
             // Vi ønsker at steg'ene selv lagrer aktører. De blir cachet i appen så det blir ikke gjort nytt kall mot PDL
             val barnasAktør = personidentService.hentOgLagreAktørIder(barnasIdenter, false)
@@ -375,7 +378,22 @@ class MigreringService(
         if (ikkeOpphørteSaker.isEmpty()) {
             kastOgTellMigreringsFeil(MigreringsfeilType.INGEN_LØPENDE_SAK_INFOTRYGD)
         }
+
         return ikkeOpphørteSaker.first()
+    }
+
+    private fun sjekkIngenEndringerSidenMarsIInfotrygd(løpendeSak: Sak) {
+        val virkningfom = 999999L - (
+            løpendeSak.stønad?.virkningFom?.toLong()
+                ?: kastOgTellMigreringsFeil(MigreringsfeilType.ENDRING_INFOTRYGD_SIDEN_SATS, "Mangler virkningfom")
+            ) // seq dato: 999999-797790 - 202209
+
+        val yearMonthSeqFomatter = DateTimeFormatter.ofPattern("yyyyMM")
+        val virkningfomDate = YearMonth.parse(virkningfom.toString(), yearMonthSeqFomatter)
+
+        if (virkningfomDate.isAfter(YearMonth.of(2023, 3))) {
+            kastOgTellMigreringsFeil(MigreringsfeilType.ENDRING_INFOTRYGD_SIDEN_SATS)
+        }
     }
 
     private fun kastFeilEllerHentUnderkategori(sak: Sak): BehandlingUnderkategori {
@@ -670,6 +688,7 @@ enum class MigreringsfeilType(val beskrivelse: String) {
     ENSLIG_MINDREÅRIG("Saken kan ikke migreres. Må behandles i Infotrygd"),
     IVERKSETT_BEHANDLING_UTEN_VEDTAK("Saken kan ikke migreres. Meld saken i Porten, velg \"Meld sak om Barnetrygd\"."),
     KAN_IKKE_OPPRETTE_BEHANDLING("Saken kan ikke migreres. Meld saken i Porten. Velg \"Meld sak om Infotrygd\"."),
+    ENDRING_INFOTRYGD_SIDEN_SATS("Denne saken må migreres manuelt."),
     KUN_ETT_MIGRERINGFORSØK_PER_DAG("Migrering allerede påbegynt. Vent minst en dag før du prøver igjen."),
     MANGLER_ANDEL_TILKJENT_YTELSE("Saken må migreres manuelt"),
     MANGLER_VILKÅRSVURDERING("Saken må migreres manuelt"),
