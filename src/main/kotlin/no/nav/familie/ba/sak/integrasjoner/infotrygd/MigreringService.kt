@@ -123,10 +123,18 @@ class MigreringService(
             if (løpendeInfotrygdsak.erEnslingMindreårig(personIdent, barnasIdenter) && !kanMigrereEnsligMindreårig()) {
                 secureLog.info("Migrering enslig mindreårog er skrudd av")
                 kastOgTellMigreringsFeil(MigreringsfeilType.ENSLIG_MINDREÅRIG)
-            } else if (løpendeInfotrygdsak.erEnslingMindreårig(personIdent, barnasIdenter) && kanMigrereEnsligMindreårig() && !erOverAlder(personIdent, 16)) {
+            } else if (løpendeInfotrygdsak.erEnslingMindreårig(
+                    personIdent,
+                    barnasIdenter,
+                ) && kanMigrereEnsligMindreårig() && !erOverAlder(personIdent, 16)
+            ) {
                 secureLog.info("Migrering av enslig mindreårig for ident=$personIdent hvor stønadeier er under 16 år. stønad=${løpendeInfotrygdsak.stønad?.id}")
                 kastOgTellMigreringsFeil(MigreringsfeilType.ENSLIG_MINDREÅRIG)
-            } else if (løpendeInfotrygdsak.erEnslingMindreårig(personIdent, barnasIdenter) && kanMigrereEnsligMindreårig() && underkategori == BehandlingUnderkategori.UTVIDET) {
+            } else if (løpendeInfotrygdsak.erEnslingMindreårig(
+                    personIdent,
+                    barnasIdenter,
+                ) && kanMigrereEnsligMindreårig() && underkategori == BehandlingUnderkategori.UTVIDET
+            ) {
                 secureLog.info("Migrering av enslig mindreårig for ident=$personIdent hvor stønadstype er utvidet. stønad=${løpendeInfotrygdsak.stønad?.id}")
                 kastOgTellMigreringsFeil(MigreringsfeilType.ENSLIG_MINDREÅRIG)
             }
@@ -600,16 +608,20 @@ class MigreringService(
         return atys.sumOf { aty ->
             when (aty.type) {
                 YtelseType.ORDINÆR_BARNETRYGD -> {
-                    val beløp = if (aty.sats == SatsService.finnSisteSatsFor(SatsType.TILLEGG_ORBA).beløp) {
-                        SatsService.finnAlleSatserFor(SatsType.TILLEGG_ORBA).find {
-                            it.gyldigTom == SISTE_DATO_FORRIGE_SATS
-                        }!!.beløp
-                    } else if (aty.sats == SatsService.finnSisteSatsFor(SatsType.ORBA).beløp) {
-                        SatsService.finnAlleSatserFor(SatsType.ORBA).find {
-                            it.gyldigTom == SISTE_DATO_FORRIGE_SATS
-                        }!!.beløp
-                    } else {
-                        aty.sats
+                    val orbaTilleggSats = SatsService.finnGjeldendeSatsForDato(
+                        SatsType.TILLEGG_ORBA,
+                        aty.stønadFom.førsteDagIInneværendeMåned(),
+                    )
+                    val orbaSats =
+                        SatsService.finnGjeldendeSatsForDato(SatsType.ORBA, aty.stønadFom.førsteDagIInneværendeMåned())
+                    val beløp = when (aty.sats) {
+                        orbaTilleggSats,
+                        -> SatsService.finnGjeldendeSatsForDato(SatsType.TILLEGG_ORBA, SISTE_DATO_FORRIGE_SATS)
+
+                        orbaSats ->
+                            SatsService.finnGjeldendeSatsForDato(SatsType.ORBA, SISTE_DATO_FORRIGE_SATS)
+
+                        else -> aty.sats
                     }
                     if (aty.prosent == BigDecimal(50)) {
                         beløp.toBigDecimal().del(2.toBigDecimal(), 0).toInt()
@@ -619,9 +631,7 @@ class MigreringService(
                 }
 
                 YtelseType.SMÅBARNSTILLEGG -> {
-                    val beløp = SatsService.finnAlleSatserFor(SatsType.SMA).find {
-                        it.gyldigTom == SISTE_DATO_FORRIGE_SATS
-                    }!!.beløp
+                    val beløp = SatsService.finnGjeldendeSatsForDato(SatsType.SMA, SISTE_DATO_FORRIGE_SATS)
                     if (aty.prosent == BigDecimal(50)) {
                         beløp.toBigDecimal().del(2.toBigDecimal(), 0).toInt()
                     } else {
@@ -630,17 +640,14 @@ class MigreringService(
                 }
 
                 YtelseType.UTVIDET_BARNETRYGD -> {
-                    val beløp = SatsService.finnAlleSatserFor(SatsType.UTVIDET_BARNETRYGD).find {
-                        it.gyldigTom == SISTE_DATO_FORRIGE_SATS
-                    }!!.beløp
+                    val beløp =
+                        SatsService.finnGjeldendeSatsForDato(SatsType.UTVIDET_BARNETRYGD, SISTE_DATO_FORRIGE_SATS)
                     if (aty.prosent == BigDecimal(50)) {
                         beløp.toBigDecimal().del(2.toBigDecimal(), 0).toInt()
                     } else {
                         beløp
                     }
                 }
-
-                else -> Integer.valueOf(0)
             }
         }
     }
@@ -732,4 +739,5 @@ private fun Sak.validerInstitusjonSak() {
 private fun Sak.erEnslingMindreårig(personIdent: String, barnasIdenter: List<String>) =
     personIdent in barnasIdenter && !this.erInstitusjon()
 
-private fun erOverAlder(ident: String, alder: Int): Boolean = FoedselsNr(ident).foedselsdato.isSameOrBefore(LocalDate.now().minusYears(alder.toLong()))
+private fun erOverAlder(ident: String, alder: Int): Boolean =
+    FoedselsNr(ident).foedselsdato.isSameOrBefore(LocalDate.now().minusYears(alder.toLong()))

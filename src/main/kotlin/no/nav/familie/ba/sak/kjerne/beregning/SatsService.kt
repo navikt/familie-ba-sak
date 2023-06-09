@@ -1,13 +1,15 @@
 package no.nav.familie.ba.sak.kjerne.beregning
 
+import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.erUnder6ÅrTidslinje
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.isBetween
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.Sats
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
-import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
@@ -19,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companio
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerTidligereEnn
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjær
 import java.time.LocalDate
+import no.nav.familie.ba.sak.kjerne.tidslinje.Periode as TidslinjePeriode
 
 object SatsTidspunkt {
     val senesteSatsTidspunkt: LocalDate = LocalDate.MAX
@@ -53,6 +56,13 @@ object SatsService {
     )
 
     fun finnSisteSatsFor(satstype: SatsType) = finnAlleSatserFor(satstype).maxBy { it.gyldigTom }
+
+    fun finnGjeldendeSatsForDato(satstype: SatsType, dato: LocalDate): Int {
+        val gjeldendeSatsForPeriode =
+            satser.find { it.type == satstype && dato.isBetween(Periode(it.gyldigFom, it.gyldigTom)) }
+                ?: throw Feil("Finnes ingen sats for SatsType: $satstype for dato: $dato")
+        return gjeldendeSatsForPeriode.beløp
+    }
 
     fun finnSatsendring(startDato: LocalDate): List<Sats> = hentAllesatser()
         .filter { it.gyldigFom == startDato }
@@ -89,7 +99,7 @@ fun satstypeTidslinje(satsType: SatsType) =
             .map {
                 val fom = if (it.gyldigFom == LocalDate.MIN) null else it.gyldigFom.toYearMonth()
                 val tom = if (it.gyldigTom == LocalDate.MAX) null else it.gyldigTom.toYearMonth()
-                Periode(
+                TidslinjePeriode(
                     fraOgMed = fom.tilTidspunktEllerTidligereEnn(tom),
                     tilOgMed = tom.tilTidspunktEllerSenereEnn(fom),
                     it.beløp,
