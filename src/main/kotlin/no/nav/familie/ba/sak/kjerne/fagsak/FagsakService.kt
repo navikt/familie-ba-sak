@@ -256,6 +256,7 @@ class FagsakService(
         )
     }
 
+    @Transactional
     fun hentEllerOpprettFagsakForPersonIdent(
         fødselsnummer: String,
         fraAutomatiskBehandling: Boolean = false,
