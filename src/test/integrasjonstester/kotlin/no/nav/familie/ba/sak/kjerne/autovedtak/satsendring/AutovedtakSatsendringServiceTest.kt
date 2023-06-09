@@ -94,7 +94,7 @@ class AutovedtakSatsendringServiceTest(
         fun `Kan ikke sette åpen behandling på vent når behandlingen akkurat er opprettet`() {
             val behandling = opprettBehandling()
             lagTilkjentAndelOgFerdigstillBehandling(behandling)
-            satskjøringRepository.saveAndFlush(Satskjøring(fagsakId = behandling.fagsak.id))
+            satskjøringRepository.saveAndFlush(Satskjøring(fagsakId = behandling.fagsak.id, satsTidspunkt = StartSatsendring.SATSENDRINGMÅNED_MARS_2023))
 
             // Opprett revurdering som blir liggende igjen som åpen og på behandlingsresultatsteget
             opprettBehandling()
@@ -115,7 +115,7 @@ class AutovedtakSatsendringServiceTest(
         fun `Skal sette åpen behandling på maskinell vent hvis den er satt på vent av saksbehandler ved kjøring av satsendring`() {
             val behandling = opprettBehandling()
             lagTilkjentAndelOgFerdigstillBehandling(behandling)
-            satskjøringRepository.saveAndFlush(Satskjøring(fagsakId = behandling.fagsak.id))
+            satskjøringRepository.saveAndFlush(Satskjøring(fagsakId = behandling.fagsak.id, satsTidspunkt = StartSatsendring.SATSENDRINGMÅNED_MARS_2023))
 
             // Opprett revurdering som blir liggende igjen som åpen og på behandlingsresultatsteget
             val revurdering = opprettBehandling()
@@ -139,7 +139,7 @@ class AutovedtakSatsendringServiceTest(
             every { featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_SNIKE_I_KØEN) } returns false
             val behandling = opprettBehandling()
             lagTilkjentAndelOgFerdigstillBehandling(behandling)
-            satskjøringRepository.saveAndFlush(Satskjøring(fagsakId = behandling.fagsak.id))
+            satskjøringRepository.saveAndFlush(Satskjøring(fagsakId = behandling.fagsak.id, satsTidspunkt = StartSatsendring.SATSENDRINGMÅNED_MARS_2023))
 
             // Opprett revurdering som blir liggende igjen som åpen og på behandlingsresultatsteget
             val revurdering = opprettBehandling()
@@ -161,7 +161,7 @@ class AutovedtakSatsendringServiceTest(
         fun `Skal sette behandling på vent på maskinell vent hvis den er satt på vent av saksbehandler ved kjøring av satsendring`() {
             val behandling = opprettBehandling()
             lagTilkjentAndelOgFerdigstillBehandling(behandling)
-            satskjøringRepository.saveAndFlush(Satskjøring(fagsakId = behandling.fagsak.id))
+            satskjøringRepository.saveAndFlush(Satskjøring(fagsakId = behandling.fagsak.id, satsTidspunkt = StartSatsendring.SATSENDRINGMÅNED_MARS_2023))
 
             // Opprett revurdering som blir liggende igjen som åpen og på behandlingsresultatsteget
             val revurdering = opprettBehandling()

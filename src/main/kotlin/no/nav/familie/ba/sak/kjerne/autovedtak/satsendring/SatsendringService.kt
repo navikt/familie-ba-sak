@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.satsendring
 
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
-import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringÅpenBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
@@ -62,7 +61,4 @@ class SatsendringService(
             logger.warn("$it")
         }
     }
-
-    fun finnSatskjøringerSomHarStoppetPgaÅpenBehandling(): List<SatskjøringÅpenBehandling> =
-        satskjøringRepository.finnSatskjøringerSomHarStoppetPgaÅpenBehandling()
 }
