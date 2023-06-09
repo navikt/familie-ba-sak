@@ -35,7 +35,7 @@ class VilkårResultat(
     @SequenceGenerator(
         name = "vilkar_resultat_seq_generator",
         sequenceName = "vilkar_resultat_seq",
-        allocationSize = 50
+        allocationSize = 50,
     )
     val id: Long = 0,
 
@@ -91,7 +91,7 @@ class VilkårResultat(
 
     @Column(name = "utdypende_vilkarsvurderinger")
     @Convert(converter = UtdypendeVilkårsvurderingerConverter::class)
-    var utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering> = emptyList()
+    var utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering> = emptyList(),
 ) : BaseEntitet() {
 
     override fun toString(): String {
@@ -139,7 +139,7 @@ class VilkårResultat(
             erEksplisittAvslagPåSøknad = erEksplisittAvslagPåSøknad,
             vurderesEtter = vurderesEtter,
             utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger,
-            standardbegrunnelser = standardbegrunnelser
+            standardbegrunnelser = standardbegrunnelser,
         )
     }
 
@@ -157,7 +157,26 @@ class VilkårResultat(
             behandlingId = behandlingId,
             erEksplisittAvslagPåSøknad = erEksplisittAvslagPåSøknad,
             vurderesEtter = vurderesEtter,
-            utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger
+            utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger,
+        )
+    }
+
+    fun tilKopiForNyttPersonResultat(nyttPersonResultat: PersonResultat): VilkårResultat {
+        return VilkårResultat(
+            personResultat = nyttPersonResultat,
+            erAutomatiskVurdert = erAutomatiskVurdert,
+            vilkårType = vilkårType,
+            resultat = resultat,
+            periodeFom = periodeFom,
+            periodeTom = periodeTom,
+            begrunnelse = begrunnelse,
+            behandlingId = nyttPersonResultat.vilkårsvurdering.behandling.id,
+            regelInput = regelInput,
+            regelOutput = regelOutput,
+            erEksplisittAvslagPåSøknad = erEksplisittAvslagPåSøknad,
+            vurderesEtter = vurderesEtter,
+            utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger,
+            standardbegrunnelser = standardbegrunnelser,
         )
     }
 

@@ -10,13 +10,13 @@ data class InstitusjonInfo(val orgNummer: String?, val tssEksternId: String?, va
 
 data class RestRegistrerInstitusjonOgVerge(
     val vergeInfo: VergeInfo?,
-    val institusjonInfo: InstitusjonInfo?
+    val institusjonInfo: InstitusjonInfo?,
 ) {
 
     fun tilVerge(behandling: Behandling): Verge? = if (vergeInfo != null) {
         Verge(
             ident = vergeInfo.ident,
-            behandling = behandling
+            behandling = behandling,
         )
     } else {
         null
@@ -27,7 +27,7 @@ data class RestRegistrerInstitusjonOgVerge(
     } else {
         Institusjon(
             orgNummer = institusjonInfo.orgNummer,
-            tssEksternId = institusjonInfo.tssEksternId
+            tssEksternId = institusjonInfo.tssEksternId,
         )
     }
 }

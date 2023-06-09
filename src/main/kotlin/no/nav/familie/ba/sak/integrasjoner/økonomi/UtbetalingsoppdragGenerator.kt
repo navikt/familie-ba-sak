@@ -19,7 +19,7 @@ import java.time.YearMonth
 
 @Component
 class UtbetalingsoppdragGenerator(
-    private val beregningService: BeregningService
+    private val beregningService: BeregningService,
 ) {
 
     /**
@@ -49,7 +49,7 @@ class UtbetalingsoppdragGenerator(
         sisteAndelPerIdent: Map<IdentOgYtelse, AndelTilkjentYtelseForUtbetalingsoppdrag> = emptyMap(),
         oppdaterteKjeder: Map<IdentOgYtelse, List<AndelTilkjentYtelseForUtbetalingsoppdrag>> = emptyMap(),
         erSimulering: Boolean = false,
-        endretMigreringsDato: YearMonth? = null
+        endretMigreringsDato: YearMonth? = null,
     ): Utbetalingsoppdrag {
         // Hos økonomi skiller man på endring på oppdragsnivå 110 og på linjenivå 150 (periodenivå).
         // Da de har opplevd å motta
@@ -86,7 +86,7 @@ class UtbetalingsoppdragGenerator(
                 vedtak = vedtak,
                 sisteOffsetIKjedeOversikt = sisteOffsetIKjedeOversikt,
                 sisteOffsetPåFagsak = sisteOffsetIKjedeOversikt.maxOfOrNull { it.value },
-                skalOppdatereTilkjentYtelse = !erSimulering
+                skalOppdatereTilkjentYtelse = !erSimulering,
             )
         } else {
             emptyList()
@@ -95,7 +95,7 @@ class UtbetalingsoppdragGenerator(
         val opphøres: List<Utbetalingsperiode> = if (andelerTilOpphør.isNotEmpty()) {
             lagUtbetalingsperioderForOpphør(
                 andeler = andelerTilOpphør,
-                vedtak = vedtak
+                vedtak = vedtak,
             )
         } else {
             emptyList()
@@ -107,17 +107,17 @@ class UtbetalingsoppdragGenerator(
             fagSystem = FAGSYSTEM,
             saksnummer = vedtak.behandling.fagsak.id.toString(),
             aktoer = vedtak.behandling.fagsak.aktør.aktivFødselsnummer(),
-            utbetalingsperiode = listOf(opphøres, opprettes).flatten()
+            utbetalingsperiode = listOf(opphøres, opprettes).flatten(),
         )
     }
 
     private fun lagUtbetalingsperioderForOpphør(
         andeler: List<Pair<AndelTilkjentYtelseForUtbetalingsoppdrag, YearMonth>>,
-        vedtak: Vedtak
+        vedtak: Vedtak,
     ): List<Utbetalingsperiode> {
         val utbetalingsperiodeMal = UtbetalingsperiodeMal(
             vedtak = vedtak,
-            erEndringPåEksisterendePeriode = true
+            erEndringPåEksisterendePeriode = true,
         )
 
         return andeler.map { (sisteAndelIKjede, opphørKjedeFom) ->
@@ -125,7 +125,7 @@ class UtbetalingsoppdragGenerator(
                 andel = sisteAndelIKjede,
                 periodeIdOffset = sisteAndelIKjede.periodeOffset!!.toInt(),
                 forrigePeriodeIdOffset = sisteAndelIKjede.forrigePeriodeOffset?.toInt(),
-                opphørKjedeFom = opphørKjedeFom
+                opphørKjedeFom = opphørKjedeFom,
             )
         }
     }
@@ -136,7 +136,7 @@ class UtbetalingsoppdragGenerator(
         erFørsteBehandlingPåFagsak: Boolean,
         sisteOffsetIKjedeOversikt: Map<IdentOgYtelse, Int>,
         sisteOffsetPåFagsak: Int? = null,
-        skalOppdatereTilkjentYtelse: Boolean
+        skalOppdatereTilkjentYtelse: Boolean,
     ): List<Utbetalingsperiode> {
         var offset =
             if (!erFørsteBehandlingPåFagsak) {
@@ -147,7 +147,7 @@ class UtbetalingsoppdragGenerator(
             }
 
         val utbetalingsperiodeMal = UtbetalingsperiodeMal(
-            vedtak = vedtak
+            vedtak = vedtak,
         )
 
         val utbetalingsperioder = andeler.filter { kjede -> kjede.isNotEmpty() }
@@ -173,7 +173,7 @@ class UtbetalingsoppdragGenerator(
         // TODO Vi bør se om vi kan flytte ut denne side effecten
         if (skalOppdatereTilkjentYtelse) {
             val oppdatertTilkjentYtelse = andeler.flatten().firstOrNull()?.tilkjentYtelse ?: throw Feil(
-                "Andeler mangler ved generering av utbetalingsperioder. Får tom liste."
+                "Andeler mangler ved generering av utbetalingsperioder. Får tom liste.",
             )
             beregningService.lagreTilkjentYtelseMedOppdaterteAndeler(oppdatertTilkjentYtelse)
         }
@@ -190,7 +190,6 @@ abstract class AndelTilkjentYtelseForUtbetalingsoppdrag(private val andelTilkjen
     val stønadTom: YearMonth = andelTilkjentYtelse.stønadTom
     val aktør: Aktør = andelTilkjentYtelse.aktør
     val type: YtelseType = andelTilkjentYtelse.type
-    fun erUtvidet() = andelTilkjentYtelse.erUtvidet()
     abstract var periodeOffset: Long?
     abstract var forrigePeriodeOffset: Long?
     abstract var kildeBehandlingId: Long?
@@ -217,7 +216,7 @@ class AndelTilkjentYtelseForSimuleringFactory : AndelTilkjentYtelseForUtbetaling
         andelerTilkjentYtelse.map { AndelTilkjentYtelseForSimulering(it) }
 
     private class AndelTilkjentYtelseForSimulering(
-        andelTilkjentYtelse: AndelTilkjentYtelse
+        andelTilkjentYtelse: AndelTilkjentYtelse,
     ) : AndelTilkjentYtelseForUtbetalingsoppdrag(andelTilkjentYtelse) {
         override var periodeOffset: Long? = andelTilkjentYtelse.periodeOffset
         override var forrigePeriodeOffset: Long? = andelTilkjentYtelse.forrigePeriodeOffset
@@ -230,7 +229,7 @@ class AndelTilkjentYtelseForIverksettingFactory : AndelTilkjentYtelseForUtbetali
         andelerTilkjentYtelse.map { AndelTilkjentYtelseForIverksetting(it) }
 
     private class AndelTilkjentYtelseForIverksetting(
-        private val andelTilkjentYtelse: AndelTilkjentYtelse
+        private val andelTilkjentYtelse: AndelTilkjentYtelse,
     ) : AndelTilkjentYtelseForUtbetalingsoppdrag(andelTilkjentYtelse) {
         override var periodeOffset: Long?
             get() = andelTilkjentYtelse.periodeOffset
@@ -253,5 +252,5 @@ class AndelTilkjentYtelseForIverksettingFactory : AndelTilkjentYtelseForUtbetali
 }
 
 fun Collection<AndelTilkjentYtelse>.pakkInnForUtbetaling(
-    andelTilkjentYtelseForUtbetalingsoppdragFactory: AndelTilkjentYtelseForUtbetalingsoppdragFactory
+    andelTilkjentYtelseForUtbetalingsoppdragFactory: AndelTilkjentYtelseForUtbetalingsoppdragFactory,
 ) = andelTilkjentYtelseForUtbetalingsoppdragFactory.pakkInnForUtbetaling(this)

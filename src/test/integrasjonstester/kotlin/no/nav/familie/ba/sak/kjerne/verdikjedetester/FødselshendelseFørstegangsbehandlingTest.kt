@@ -35,7 +35,7 @@ class FødselshendelseFørstegangsbehandlingTest(
     @Autowired private val stegService: StegService,
     @Autowired private val mockLocalDateService: LocalDateService,
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
-    @Autowired private val brevmalService: BrevmalService
+    @Autowired private val brevmalService: BrevmalService,
 ) : AbstractVerdikjedetest() {
 
     @Test
@@ -50,15 +50,15 @@ class FødselshendelseFørstegangsbehandlingTest(
                     RestScenarioPerson(
                         fødselsdato = LocalDate.of(2021, 11, 18).toString(),
                         fornavn = "Barn",
-                        etternavn = "Barnesen"
-                    )
-                )
-            )
+                        etternavn = "Barnesen",
+                    ),
+                ),
+            ),
         )
         val behandling = behandleFødselshendelse(
             nyBehandlingHendelse = NyBehandlingHendelse(
                 morsIdent = scenario.søker.ident!!,
-                barnasIdenter = listOf(scenario.barna.first().ident!!)
+                barnasIdenter = listOf(scenario.barna.first().ident!!),
             ),
             behandleFødselshendelseTask = behandleFødselshendelseTask,
             fagsakService = fagsakService,
@@ -66,7 +66,7 @@ class FødselshendelseFørstegangsbehandlingTest(
             vedtakService = vedtakService,
             stegService = stegService,
             personidentService = personidentService,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
 
         )
 
@@ -75,7 +75,7 @@ class FødselshendelseFørstegangsbehandlingTest(
         generellAssertFagsak(
             restFagsak = restFagsakEtterBehandlingAvsluttet,
             fagsakStatus = FagsakStatus.LØPENDE,
-            behandlingStegType = StegType.BEHANDLING_AVSLUTTET
+            behandlingStegType = StegType.BEHANDLING_AVSLUTTET,
         )
 
         val aktivBehandling = restFagsakEtterBehandlingAvsluttet.getDataOrThrow().behandlinger.single()
@@ -92,25 +92,25 @@ class FødselshendelseFørstegangsbehandlingTest(
             vedtaksperioder
                 .filter { it != desember2021Vedtaksperiode && it != januar2022Vedtaksperiode }
                 .flatMap { it.begrunnelser }
-                .size
+                .size,
         )
 
         assertEquals(
             1654,
-            desember2021Vedtaksperiode?.utbetalingsperiodeDetaljer?.totaltUtbetalt()
+            desember2021Vedtaksperiode?.utbetalingsperiodeDetaljer?.totaltUtbetalt(),
         )
         assertEquals(
             Standardbegrunnelse.INNVILGET_FØDSELSHENDELSE_NYFØDT_BARN_FØRSTE,
-            desember2021Vedtaksperiode?.begrunnelser?.first()?.standardbegrunnelse
+            desember2021Vedtaksperiode?.begrunnelser?.first()?.standardbegrunnelse,
         )
 
         assertEquals(
             1676,
-            januar2022Vedtaksperiode?.utbetalingsperiodeDetaljer?.totaltUtbetalt()
+            januar2022Vedtaksperiode?.utbetalingsperiodeDetaljer?.totaltUtbetalt(),
         )
         assertEquals(
             Standardbegrunnelse.INNVILGET_SATSENDRING,
-            januar2022Vedtaksperiode?.begrunnelser?.first()?.standardbegrunnelse
+            januar2022Vedtaksperiode?.begrunnelser?.first()?.standardbegrunnelse,
         )
     }
 
@@ -123,20 +123,20 @@ class FødselshendelseFørstegangsbehandlingTest(
                     RestScenarioPerson(
                         fødselsdato = LocalDate.now().minusDays(2).toString(),
                         fornavn = "Barn",
-                        etternavn = "Barnesen"
+                        etternavn = "Barnesen",
                     ),
                     RestScenarioPerson(
                         fødselsdato = LocalDate.now().minusDays(2).toString(),
                         fornavn = "Barn",
-                        etternavn = "Barnesen 2"
-                    )
-                )
-            )
+                        etternavn = "Barnesen 2",
+                    ),
+                ),
+            ),
         )
         val behandling = behandleFødselshendelse(
             nyBehandlingHendelse = NyBehandlingHendelse(
                 morsIdent = scenario.søker.ident!!,
-                barnasIdenter = scenario.barna.map { it.ident!! }
+                barnasIdenter = scenario.barna.map { it.ident!! },
             ),
             behandleFødselshendelseTask = behandleFødselshendelseTask,
             fagsakService = fagsakService,
@@ -144,7 +144,7 @@ class FødselshendelseFørstegangsbehandlingTest(
             personidentService = personidentService,
             vedtakService = vedtakService,
             stegService = stegService,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
 
         )
 
@@ -153,7 +153,7 @@ class FødselshendelseFørstegangsbehandlingTest(
         generellAssertFagsak(
             restFagsak = restFagsakEtterBehandlingAvsluttet,
             fagsakStatus = FagsakStatus.LØPENDE,
-            behandlingStegType = StegType.BEHANDLING_AVSLUTTET
+            behandlingStegType = StegType.BEHANDLING_AVSLUTTET,
         )
 
         val aktivBehandling = restFagsakEtterBehandlingAvsluttet.getDataOrThrow().behandlinger.single()
@@ -168,7 +168,7 @@ class FødselshendelseFørstegangsbehandlingTest(
         assertUtbetalingsperiode(
             gjeldendeUtbetalingsperiode,
             2,
-            tilleggOrdinærSatsNesteMånedTilTester().beløp * 2
+            tilleggOrdinærSatsNesteMånedTilTester().beløp * 2,
         )
     }
 }

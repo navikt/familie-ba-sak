@@ -280,13 +280,17 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
         override val sanityApiNavn = "avslagEosVurderingIkkeAnsvarForBarn"
     },
+    AVSLAG_FAAR_DAGPENGER_FRA_ANNET_EOS_LAND {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
+        override val sanityApiNavn = "avslagFaarDagpengerFraAnnetEosLand"
+    },
+    AVSLAG_SELVSTENDIG_NAERINGSDRIVENDE_NORGE_ARBEIDSTAKER_I_ANNET_EOS_LAND {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
+        override val sanityApiNavn = "avslagSelvstendigNaeringsdrivendeNorgeArbeidstakerIAnnetEosLand"
+    },
     AVSLAG_EØS_UREGISTRERT_BARN {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
         override val sanityApiNavn = "avslagEosUregistrertBarn"
-    },
-    AVSLAG_EØS_BOR_IKKE_FAST_MED_BARNET {
-        override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_AVSLAG
-        override val sanityApiNavn = "avslagEosBorIkkeFastMedBarnet"
     },
     FORTSATT_INNVILGET_PRIMÆRLAND_STANDARD {
         override val sanityApiNavn = "fortsattInnvilgetPrimaerlandStandard"
@@ -412,16 +416,14 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
     REDUKSJON_IKKE_ANSVAR_FOR_BARN {
         override val sanityApiNavn = "reduksjonIkkeAnsvarForBarn"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.EØS_REDUKSJON
-    }
-
-    ;
+    }, ;
 
     override val kanDelesOpp: Boolean = false
 
     override fun delOpp(
         restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
         triggesAv: TriggesAv,
-        periode: NullablePeriode
+        periode: NullablePeriode,
     ): List<BrevBegrunnelseGrunnlagMedPersoner> {
         throw Feil("Begrunnelse $this kan ikke deles opp.")
     }
@@ -429,11 +431,11 @@ enum class EØSStandardbegrunnelse : IVedtakBegrunnelse {
     @JsonValue
     override fun enumnavnTilString(): String = EØSStandardbegrunnelse::class.simpleName + "$" + this.name
 
-    fun tilEØSBegrunnelseMedTriggere(sanityEØSBegrunnelser: List<SanityEØSBegrunnelse>): EØSBegrunnelseMedTriggere? {
-        val sanityEØSBegrunnelse = sanityEØSBegrunnelser.finnBegrunnelse(this) ?: return null
+    fun tilEØSBegrunnelseMedTriggere(sanityEØSBegrunnelser: Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse>): EØSBegrunnelseMedTriggere? {
+        val sanityEØSBegrunnelse = sanityEØSBegrunnelser[this] ?: return null
         return EØSBegrunnelseMedTriggere(
             eøsBegrunnelse = this,
-            sanityEØSBegrunnelse = sanityEØSBegrunnelse
+            sanityEØSBegrunnelse = sanityEØSBegrunnelse,
         )
     }
 }

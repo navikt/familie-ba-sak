@@ -12,9 +12,12 @@ import no.nav.familie.kontrakter.felles.personopplysning.UkjentBosted
 @DiscriminatorValue("ukjentBosted")
 data class GrUkjentBosted(
     @Column(name = "bostedskommune")
-    val bostedskommune: String
+    val bostedskommune: String,
 
 ) : GrBostedsadresse() {
+
+    override fun tilKopiForNyPerson(): GrBostedsadresse =
+        GrUkjentBosted(bostedskommune)
 
     override fun toSecureString(): String {
         return """UkjentadresseDao(bostedskommune=$bostedskommune""".trimMargin()

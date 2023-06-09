@@ -10,5 +10,5 @@ data class DatoIntervallEntitet(
     val fom: LocalDate? = null,
 
     @Column(name = "tom")
-    val tom: LocalDate? = null
+    val tom: LocalDate? = null,
 )

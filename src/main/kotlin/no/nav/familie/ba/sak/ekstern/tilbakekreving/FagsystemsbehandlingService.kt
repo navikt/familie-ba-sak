@@ -22,7 +22,7 @@ class FagsystemsbehandlingService(
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val vedtakService: VedtakService,
     private val tilbakekrevingService: TilbakekrevingService,
-    private val kafkaProducer: KafkaProducer
+    private val kafkaProducer: KafkaProducer,
 ) {
 
     private val logger = LoggerFactory.getLogger(this::class.java)
@@ -37,24 +37,24 @@ class FagsystemsbehandlingService(
     fun sendFagsystemsbehandling(
         respons: HentFagsystemsbehandlingRespons,
         key: String,
-        behandlingId: String
+        behandlingId: String,
     ) {
         kafkaProducer.sendFagsystemsbehandlingResponsForTopicTilbakekreving(respons, key, behandlingId)
     }
 
     private fun lagRespons(
         request: HentFagsystemsbehandlingRequest,
-        behandling: Behandling
+        behandling: Behandling,
     ): HentFagsystemsbehandlingRespons {
         val behandlingId = behandling.id
         val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandlingId)
         val arbeidsfordeling = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId)
-        val aktivVedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId)
+        val vedtaksdato = vedtakService.hentVedtaksdatoForBehandlingThrows(behandlingId)
 
         val faktainfo = Faktainfo(
             revurderingsårsak = behandling.opprettetÅrsak.visningsnavn,
             revurderingsresultat = behandling.resultat.displayName,
-            tilbakekrevingsvalg = tilbakekrevingService.hentTilbakekrevingsvalg(behandlingId)
+            tilbakekrevingsvalg = tilbakekrevingService.hentTilbakekrevingsvalg(behandlingId),
         )
 
         val hentFagsystemsbehandling = HentFagsystemsbehandling(
@@ -66,9 +66,9 @@ class FagsystemsbehandlingService(
             språkkode = persongrunnlag.søker.målform.tilSpråkkode(),
             enhetId = arbeidsfordeling.behandlendeEnhetId,
             enhetsnavn = arbeidsfordeling.behandlendeEnhetNavn,
-            revurderingsvedtaksdato = aktivVedtak.vedtaksdato!!.toLocalDate(),
+            revurderingsvedtaksdato = vedtaksdato.toLocalDate(),
             faktainfo = faktainfo,
-            institusjon = hentTilbakekrevingInstitusjon(behandling.fagsak)
+            institusjon = hentTilbakekrevingInstitusjon(behandling.fagsak),
         )
 
         return HentFagsystemsbehandlingRespons(hentFagsystemsbehandling = hentFagsystemsbehandling)

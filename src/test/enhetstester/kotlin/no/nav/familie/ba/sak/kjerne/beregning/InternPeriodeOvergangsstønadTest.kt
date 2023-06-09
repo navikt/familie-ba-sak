@@ -17,13 +17,13 @@ class InternPeriodeOvergangsstønadTest {
             InternPeriodeOvergangsstønad(
                 fomDato = LocalDate.now().minusMonths(6).førsteDagIInneværendeMåned(),
                 tomDato = LocalDate.now().minusMonths(3).sisteDagIMåned(),
-                personIdent = personIdent
+                personIdent = personIdent,
             ),
             InternPeriodeOvergangsstønad(
                 fomDato = LocalDate.now().minusMonths(2).førsteDagIInneværendeMåned(),
                 tomDato = LocalDate.now().sisteDagIMåned(),
-                personIdent = personIdent
-            )
+                personIdent = personIdent,
+            ),
         ).slåSammenSammenhengendePerioder()
 
         assertEquals(1, sammenslåttePerioder.size)
@@ -36,13 +36,13 @@ class InternPeriodeOvergangsstønadTest {
             InternPeriodeOvergangsstønad(
                 fomDato = LocalDate.now().minusMonths(6).førsteDagIInneværendeMåned(),
                 tomDato = LocalDate.now().minusMonths(4).sisteDagIMåned(),
-                personIdent = personIdent
+                personIdent = personIdent,
             ),
             InternPeriodeOvergangsstønad(
                 fomDato = LocalDate.now().minusMonths(2).førsteDagIInneværendeMåned(),
                 tomDato = LocalDate.now().sisteDagIMåned(),
-                personIdent = personIdent
-            )
+                personIdent = personIdent,
+            ),
         ).slåSammenSammenhengendePerioder()
 
         assertEquals(2, sammenslåttePerioder.size)

@@ -5,7 +5,7 @@ import java.time.LocalDate
 
 data class Svartidsbrev(
     override val mal: Brevmal,
-    override val data: SvartidsbrevData
+    override val data: SvartidsbrevData,
 ) : Brev {
     constructor(
         navn: String,
@@ -15,7 +15,7 @@ data class Svartidsbrev(
         erEøsBehandling: Boolean,
         organisasjonsnummer: String? = null,
         gjelder: String? = null,
-        saksbehandlerNavn: String
+        saksbehandlerNavn: String,
     ) : this(
         mal = mal,
         data = SvartidsbrevData(
@@ -23,23 +23,23 @@ data class Svartidsbrev(
                 navn = navn,
                 fodselsnummer = fodselsnummer,
                 organisasjonsnummer = organisasjonsnummer,
-                gjelder = gjelder
+                gjelder = gjelder,
             ),
             delmalData = SvartidsbrevData.DelmalData(
                 signatur = SignaturDelmal(
                     enhet = enhet,
-                    saksbehandlerNavn = saksbehandlerNavn
+                    saksbehandlerNavn = saksbehandlerNavn,
                 ),
-                kontonummer = erEøsBehandling
+                kontonummer = erEøsBehandling,
 
-            )
-        )
+            ),
+        ),
     )
 }
 
 data class SvartidsbrevData(
     override val delmalData: DelmalData,
-    override val flettefelter: Flettefelter
+    override val flettefelter: Flettefelter,
 ) : BrevData {
 
     data class Flettefelter(
@@ -47,24 +47,24 @@ data class SvartidsbrevData(
         override val fodselsnummer: Flettefelt,
         override val brevOpprettetDato: Flettefelt = flettefelt(LocalDate.now().tilDagMånedÅr()),
         override val organisasjonsnummer: Flettefelt,
-        override val gjelder: Flettefelt
+        override val gjelder: Flettefelt,
     ) : FlettefelterForDokument {
 
         constructor(
             navn: String,
             fodselsnummer: String,
             organisasjonsnummer: String? = null,
-            gjelder: String? = null
+            gjelder: String? = null,
         ) : this(
             navn = flettefelt(navn),
             fodselsnummer = flettefelt(fodselsnummer),
             organisasjonsnummer = flettefelt(organisasjonsnummer),
-            gjelder = flettefelt(gjelder)
+            gjelder = flettefelt(gjelder),
         )
     }
 
     data class DelmalData(
         val signatur: SignaturDelmal,
-        val kontonummer: Boolean
+        val kontonummer: Boolean,
     )
 }

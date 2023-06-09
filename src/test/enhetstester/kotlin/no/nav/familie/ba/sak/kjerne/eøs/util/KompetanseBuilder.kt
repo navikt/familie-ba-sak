@@ -12,7 +12,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidspunkt
 
 class KompetanseBuilder(
     startMåned: Tidspunkt<Måned> = jan(2020),
-    behandlingId: BehandlingId = BehandlingId(1)
+    behandlingId: BehandlingId = BehandlingId(1),
 ) : SkjemaBuilder<Kompetanse, KompetanseBuilder>(startMåned, behandlingId) {
 
     fun medKompetanse(k: String, vararg barn: Person, annenForeldersAktivitetsland: String? = null) =
@@ -21,11 +21,11 @@ class KompetanseBuilder(
                 '-' -> Kompetanse.NULL.copy(annenForeldersAktivitetsland = annenForeldersAktivitetsland)
                 'S' -> Kompetanse.NULL.copy(
                     resultat = KompetanseResultat.NORGE_ER_SEKUNDÆRLAND,
-                    annenForeldersAktivitetsland = annenForeldersAktivitetsland
+                    annenForeldersAktivitetsland = annenForeldersAktivitetsland,
                 ).fyllUt()
                 'P' -> Kompetanse.NULL.copy(
                     resultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
-                    annenForeldersAktivitetsland = annenForeldersAktivitetsland
+                    annenForeldersAktivitetsland = annenForeldersAktivitetsland,
                 ).fyllUt()
                 else -> null
             }
@@ -40,5 +40,5 @@ fun Kompetanse.fyllUt() = this.copy(
     barnetsBostedsland = barnetsBostedsland ?: "NO",
     søkersAktivitet = søkersAktivitet ?: SøkersAktivitet.ARBEIDER,
     annenForeldersAktivitet = annenForeldersAktivitet ?: AnnenForeldersAktivitet.I_ARBEID,
-    søkersAktivitetsland = søkersAktivitetsland ?: "SE"
+    søkersAktivitetsland = søkersAktivitetsland ?: "SE",
 )

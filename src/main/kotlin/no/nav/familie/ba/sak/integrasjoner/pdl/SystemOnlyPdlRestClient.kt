@@ -20,27 +20,27 @@ import java.net.URI
 class SystemOnlyPdlRestClient(
     @Value("\${PDL_URL}") pdlBaseUrl: URI,
     @Qualifier("jwtBearerClientCredentials") override val restTemplate: RestOperations,
-    override val personidentService: PersonidentService
+    override val personidentService: PersonidentService,
 ) : PdlRestClient(pdlBaseUrl, restTemplate, personidentService) {
 
     @Cacheable("adressebeskyttelse", cacheManager = "shortCache")
     fun hentAdressebeskyttelse(aktør: Aktør): List<Adressebeskyttelse> {
         val pdlPersonRequest = PdlPersonRequest(
             variables = PdlPersonRequestVariables(aktør.aktivFødselsnummer()),
-            query = hentGraphqlQuery("hent-adressebeskyttelse")
+            query = hentGraphqlQuery("hent-adressebeskyttelse"),
         )
 
         val pdlResponse: PdlBaseResponse<PdlAdressebeskyttelseResponse> = kallEksternTjeneste(
             tjeneste = "pdl",
             uri = pdlUri,
-            formål = "Hent adressebeskyttelse"
+            formål = "Hent adressebeskyttelse",
         ) {
             postForEntity(pdlUri, pdlPersonRequest, httpHeaders())
         }
 
         return feilsjekkOgReturnerData(
             ident = aktør.aktivFødselsnummer(),
-            pdlResponse = pdlResponse
+            pdlResponse = pdlResponse,
         ) {
             it.person!!.adressebeskyttelse
         }

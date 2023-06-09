@@ -19,11 +19,11 @@ import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.RestHenleggBehandlingInfo
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatSteg
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.fagsak.Beslutning
@@ -56,9 +56,8 @@ class StegService(
     private val søknadGrunnlagService: SøknadGrunnlagService,
     private val tilgangService: TilgangService,
     private val infotrygdFeedService: InfotrygdFeedService,
-    private val settPåVentService: SettPåVentService,
     private val satsendringService: SatsendringService,
-    private val simuleringService: SimuleringService
+    private val simuleringService: SimuleringService,
 ) {
 
     private val stegSuksessMetrics: Map<StegType, Counter> = initStegMetrikker("suksess")
@@ -71,7 +70,7 @@ class StegService(
         val behandling = håndterNyBehandling(nyBehandling)
         if (behandling.type == BehandlingType.FØRSTEGANGSBEHANDLING) {
             infotrygdFeedService.sendStartBehandlingTilInfotrygdFeed(
-                behandling.fagsak.aktør
+                behandling.fagsak.aktør,
             )
         }
         return behandling
@@ -90,7 +89,8 @@ class StegService(
         val barnasIdenter: List<String> = when (nyBehandling.behandlingÅrsak) {
             BehandlingÅrsak.MIGRERING,
             BehandlingÅrsak.FØDSELSHENDELSE,
-            BehandlingÅrsak.HELMANUELL_MIGRERING -> {
+            BehandlingÅrsak.HELMANUELL_MIGRERING,
+            -> {
                 nyBehandling.barnasIdenter
             }
 
@@ -98,7 +98,8 @@ class StegService(
                 BehandlingType.FØRSTEGANGSBEHANDLING -> emptyList()
                 BehandlingType.REVURDERING,
                 BehandlingType.TEKNISK_ENDRING,
-                BehandlingType.MIGRERING_FRA_INFOTRYGD -> {
+                BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                -> {
                     if (nyBehandling.behandlingType == BehandlingType.MIGRERING_FRA_INFOTRYGD) {
                         validerMigreringFraInfotrygd(nyBehandling)
                     }
@@ -114,8 +115,8 @@ class StegService(
             RegistrerPersongrunnlagDTO(
                 ident = nyBehandling.søkersIdent,
                 barnasIdenter = barnasIdenter,
-                nyMigreringsdato = nyBehandling.nyMigreringsdato
-            )
+                nyMigreringsdato = nyBehandling.nyMigreringsdato,
+            ),
         )
     }
 
@@ -136,14 +137,14 @@ class StegService(
     private fun validerHelmanuelMigrering(nyBehandling: NyBehandling) {
         val sisteBehandlingSomErVedtatt =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(nyBehandling.fagsakId)
-        if (sisteBehandlingSomErVedtatt != null && !sisteBehandlingSomErVedtatt.erTekniskEndringMedOpphør()) {
+        if (sisteBehandlingSomErVedtatt != null && !sisteBehandlingSomErVedtatt.resultat.erOpphør()) {
             throw FunksjonellFeil(
                 melding = "Det finnes allerede en vedtatt behandling på fagsak ${nyBehandling.fagsakId}." +
                     "Behandling kan ikke opprettes med årsak " +
                     BehandlingÅrsak.HELMANUELL_MIGRERING.visningsnavn,
                 frontendFeilmelding = "Det finnes allerede en vedtatt behandling på fagsak." +
                     "Behandling kan ikke opprettes med årsak " +
-                    BehandlingÅrsak.HELMANUELL_MIGRERING.visningsnavn
+                    BehandlingÅrsak.HELMANUELL_MIGRERING.visningsnavn,
             )
         }
     }
@@ -162,7 +163,7 @@ class StegService(
             if (exception is ConstraintViolationException) {
                 throw RekjørSenereException(
                     triggerTid = LocalDateTime.now().plusMinutes(15),
-                    årsak = "Klarte ikke å opprette fagsak på grunn av krasj i databasen, prøver igjen om 15 minutter. Feilmelding: ${exception.message}."
+                    årsak = "Klarte ikke å opprette fagsak på grunn av krasj i databasen, prøver igjen om 15 minutter. Feilmelding: ${exception.message}.",
                 )
             }
 
@@ -182,21 +183,21 @@ class StegService(
                 barnasIdenter = nyBehandlingHendelse.barnasIdenter,
                 kategori = BehandlingKategori.NASJONAL, // alltid NASJONAL for fødselshendelse
                 underkategori = BehandlingUnderkategori.ORDINÆR, // alltid ORDINÆR for fødselshendelse
-                fagsakId = fagsak.id
-            )
+                fagsakId = fagsak.id,
+            ),
         )
     }
 
     @Transactional
     fun håndterSøknad(
         behandling: Behandling,
-        restRegistrerSøknad: RestRegistrerSøknad
+        restRegistrerSøknad: RestRegistrerSøknad,
     ): Behandling =
         fullførSøknadsHåndtering(behandling = behandling, restRegistrerSøknad = restRegistrerSøknad)
 
     private fun fullførSøknadsHåndtering(
         behandling: Behandling,
-        restRegistrerSøknad: RestRegistrerSøknad
+        restRegistrerSøknad: RestRegistrerSøknad,
     ): Behandling {
         val behandlingSteg: RegistrereSøknad = hentBehandlingSteg(StegType.REGISTRERE_SØKNAD) as RegistrereSøknad
         val søknadDTO = restRegistrerSøknad.søknad
@@ -216,7 +217,7 @@ class StegService(
     @Transactional
     fun håndterPersongrunnlag(
         behandling: Behandling,
-        registrerPersongrunnlagDTO: RegistrerPersongrunnlagDTO
+        registrerPersongrunnlagDTO: RegistrerPersongrunnlagDTO,
     ): Behandling {
         val behandlingSteg: RegistrerPersongrunnlag =
             hentBehandlingSteg(StegType.REGISTRERE_PERSONGRUNNLAG) as RegistrerPersongrunnlag
@@ -229,7 +230,7 @@ class StegService(
     @Transactional
     fun håndterFiltreringsreglerForFødselshendelser(
         behandling: Behandling,
-        nyBehandling: NyBehandlingHendelse
+        nyBehandling: NyBehandlingHendelse,
     ): Behandling {
         val behandlingSteg: FiltreringFødselshendelserSteg =
             hentBehandlingSteg(StegType.FILTRERING_FØDSELSHENDELSER) as FiltreringFødselshendelserSteg
@@ -268,7 +269,7 @@ class StegService(
             !behandlingEtterBehandlingsresultatSteg.skalBehandlesAutomatisk
         ) {
             håndterVurderTilbakekreving(
-                behandling = behandlingEtterBehandlingsresultatSteg
+                behandling = behandlingEtterBehandlingsresultatSteg,
             )
         } else {
             behandlingEtterBehandlingsresultatSteg
@@ -278,7 +279,7 @@ class StegService(
     @Transactional
     fun håndterVurderTilbakekreving(
         behandling: Behandling,
-        restTilbakekreving: RestTilbakekreving? = null
+        restTilbakekreving: RestTilbakekreving? = null,
     ): Behandling {
         val behandlingSteg: VurderTilbakekrevingSteg =
             hentBehandlingSteg(StegType.VURDER_TILBAKEKREVING) as VurderTilbakekrevingSteg
@@ -307,7 +308,7 @@ class StegService(
         if (behandlingEtterBeslutterSteg.erManuellMigrering() && harMigreringsbehandlingAvvikInnenforbeløpsgrenser && !harMigreringsbehandlingManuellePosteringer) {
             return håndterBeslutningForVedtak(
                 behandlingEtterBeslutterSteg,
-                RestBeslutningPåVedtak(Beslutning.GODKJENT)
+                RestBeslutningPåVedtak(Beslutning.GODKJENT),
             )
         }
         return behandlingEtterBeslutterSteg
@@ -316,7 +317,7 @@ class StegService(
     @Transactional
     fun håndterBeslutningForVedtak(
         behandling: Behandling,
-        restBeslutningPåVedtak: RestBeslutningPåVedtak
+        restBeslutningPåVedtak: RestBeslutningPåVedtak,
     ): Behandling {
         val behandlingSteg: BeslutteVedtak =
             hentBehandlingSteg(StegType.BESLUTTE_VEDTAK) as BeslutteVedtak
@@ -329,7 +330,7 @@ class StegService(
     @Transactional
     fun håndterHenleggBehandling(
         behandling: Behandling,
-        henleggBehandlingInfo: RestHenleggBehandlingInfo
+        henleggBehandlingInfo: RestHenleggBehandlingInfo,
     ): Behandling {
         val behandlingSteg: HenleggBehandling =
             hentBehandlingSteg(StegType.HENLEGG_BEHANDLING) as HenleggBehandling
@@ -337,13 +338,13 @@ class StegService(
         val behandlingEtterHenleggeSteg = håndterSteg(
             behandling = behandling,
             behandlingSteg = behandlingSteg,
-            henleggÅrsak = henleggBehandlingInfo.årsak
+            henleggÅrsak = henleggBehandlingInfo.årsak,
         ) {
             behandlingSteg.utførStegOgAngiNeste(behandling, henleggBehandlingInfo)
         }
 
         return håndterFerdigstillBehandling(
-            behandling = behandlingEtterHenleggeSteg
+            behandling = behandlingEtterHenleggeSteg,
         )
     }
 
@@ -360,7 +361,7 @@ class StegService(
     @Transactional
     fun håndterStatusFraØkonomi(
         behandling: Behandling,
-        statusFraOppdragMedTask: StatusFraOppdragMedTask
+        statusFraOppdragMedTask: StatusFraOppdragMedTask,
     ): Behandling {
         val behandlingSteg: StatusFraOppdrag =
             hentBehandlingSteg(StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI) as StatusFraOppdrag
@@ -383,7 +384,7 @@ class StegService(
     @Transactional
     fun håndterJournalførVedtaksbrev(
         behandling: Behandling,
-        journalførVedtaksbrevDTO: JournalførVedtaksbrevDTO
+        journalførVedtaksbrevDTO: JournalførVedtaksbrevDTO,
     ): Behandling {
         val behandlingSteg: JournalførVedtaksbrev =
             hentBehandlingSteg(StegType.JOURNALFØR_VEDTAKSBREV) as JournalførVedtaksbrev
@@ -396,7 +397,7 @@ class StegService(
     @Transactional
     fun håndterDistribuerVedtaksbrev(
         behandling: Behandling,
-        distribuerDokumentDTO: DistribuerDokumentDTO
+        distribuerDokumentDTO: DistribuerDokumentDTO,
     ): Behandling {
         val behandlingSteg: DistribuerVedtaksbrev =
             hentBehandlingSteg(StegType.DISTRIBUER_VEDTAKSBREV) as DistribuerVedtaksbrev
@@ -431,13 +432,13 @@ class StegService(
         behandling: Behandling,
         behandlingSteg: BehandlingSteg<*>,
         henleggÅrsak: HenleggÅrsak? = null,
-        utførendeSteg: () -> StegType
+        utførendeSteg: () -> StegType,
     ): Behandling {
         try {
             logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} håndterer ${behandlingSteg.stegType()} på behandling ${behandling.id}")
             tilgangService.validerTilgangTilBehandling(
                 behandlingId = behandling.id,
-                event = AuditLoggerEvent.UPDATE
+                event = AuditLoggerEvent.UPDATE,
             )
             if (behandling.erManuellMigrering() && behandlingSteg.stegType() == StegType.BESLUTTE_VEDTAK) {
                 verifiserBeslutteVedtakForManuellMigrering(behandlingSteg)
@@ -446,9 +447,9 @@ class StegService(
                     minimumBehandlerRolle = behandlingSteg.stegType().tillattFor.minByOrNull { it.nivå }
                         ?: throw Feil(
                             "${SikkerhetContext.hentSaksbehandlerNavn()} prøver " +
-                                "å utføre steg ${behandlingSteg.stegType()} som ikke er tillatt av noen."
+                                "å utføre steg ${behandlingSteg.stegType()} som ikke er tillatt av noen.",
                         ),
-                    handling = "utføre steg ${behandlingSteg.stegType().displayName()}"
+                    handling = "utføre steg ${behandlingSteg.stegType().displayName()}",
                 )
             }
 
@@ -459,13 +460,13 @@ class StegService(
             }
 
             if (behandlingSteg.stegType().erSaksbehandlerSteg() && behandlingSteg.stegType()
-                .kommerEtter(behandling.steg)
+                    .kommerEtter(behandling.steg)
             ) {
                 throw FunksjonellFeil(
                     "${SikkerhetContext.hentSaksbehandlerNavn()} prøver å utføre steg '${
-                    behandlingSteg.stegType()
-                        .displayName()
-                    }', men behandlingen er på steg '${behandling.steg.displayName()}'"
+                        behandlingSteg.stegType()
+                            .displayName()
+                    }', men behandlingen er på steg '${behandling.steg.displayName()}'",
                 )
             }
 
@@ -474,7 +475,7 @@ class StegService(
             if (behandling.steg == StegType.BESLUTTE_VEDTAK && behandlingSteg.stegType() != StegType.BESLUTTE_VEDTAK && !erTekniskVedlikeholdHenleggelse) {
                 throw FunksjonellFeil(
                     "Behandlingen er på steg '${behandling.steg.displayName()}', " +
-                        "og er da låst for alle andre type endringer."
+                        "og er da låst for alle andre type endringer.",
                 )
             }
 
@@ -492,7 +493,7 @@ class StegService(
             val returBehandling =
                 behandlingService.leggTilStegPåBehandlingOgSettTidligereStegSomUtført(
                     behandlingId = behandling.id,
-                    steg = nesteSteg
+                    steg = nesteSteg,
                 )
 
             if (nesteSteg == SISTE_STEG) {
@@ -518,7 +519,7 @@ class StegService(
                     logger.info("Håndtering av stegtype '${behandlingSteg.stegType()}' feilet på behandling $behandling.")
                     secureLogger.info(
                         "Håndtering av stegtype '${behandlingSteg.stegType()}' feilet på behandling $behandling.",
-                        exception
+                        exception,
                     )
                 }
             }
@@ -529,13 +530,20 @@ class StegService(
 
     private fun validerBehandlingIkkeSattPåVent(
         behandling: Behandling,
-        behandlingSteg: BehandlingSteg<*>
+        behandlingSteg: BehandlingSteg<*>,
     ) {
-        if (settPåVentService.finnAktivSettPåVentPåBehandling(behandlingId = behandling.id) != null) {
+        if (behandling.status == BehandlingStatus.SATT_PÅ_VENT) {
             throw FunksjonellFeil(
                 "${SikkerhetContext.hentSaksbehandlerNavn()} prøver å utføre steg " +
                     behandlingSteg.stegType() +
-                    " på behandling ${behandling.id} som er på vent."
+                    " på behandling ${behandling.id} som er på vent.",
+            )
+        }
+        if (behandling.status == BehandlingStatus.SATT_PÅ_MASKINELL_VENT) {
+            throw FunksjonellFeil(
+                "${SikkerhetContext.hentSaksbehandlerNavn()} prøver å utføre steg " +
+                    behandlingSteg.stegType() +
+                    " på behandling ${behandling.id} som er på maskinell vent.",
             )
         }
     }
@@ -543,7 +551,7 @@ class StegService(
     private fun verifiserBeslutteVedtakForManuellMigrering(behandlingSteg: BehandlingSteg<*>) {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "utføre steg ${behandlingSteg.stegType().displayName()}"
+            handling = "utføre steg ${behandlingSteg.stegType().displayName()}",
         )
     }
 
@@ -557,7 +565,7 @@ class StegService(
             ?: throw Feil(
                 "Forsøker å opprette en ${behandling.type.visningsnavn} " +
                     "med årsak ${behandling.opprettetÅrsak.visningsnavn}, " +
-                    "men kan ikke finne tidligere behandling på fagsak ${behandling.fagsak.id}"
+                    "men kan ikke finne tidligere behandling på fagsak ${behandling.fagsak.id}",
             )
     }
 
@@ -568,7 +576,7 @@ class StegService(
                 "steg",
                 it.stegType().name,
                 "beskrivelse",
-                it.stegType().rekkefølge.toString() + " " + it.stegType().displayName()
+                it.stegType().rekkefølge.toString() + " " + it.stegType().displayName(),
             )
         }
     }

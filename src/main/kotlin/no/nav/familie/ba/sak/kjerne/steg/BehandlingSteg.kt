@@ -28,7 +28,7 @@ interface BehandlingSteg<T> {
 
     fun utførStegOgAngiNeste(
         behandling: Behandling,
-        data: T
+        data: T,
     ): StegType
 
     fun stegType(): StegType
@@ -37,18 +37,18 @@ interface BehandlingSteg<T> {
         return hentNesteSteg(
             utførendeStegType = this.stegType(),
             behandling = behandling,
-            endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.IKKE_RELEVANT
+            endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.IKKE_RELEVANT,
         )
     }
 
     fun hentNesteStegGittEndringerIUtbetaling(
         behandling: Behandling,
-        endringerIUtbetaling: EndringerIUtbetalingForBehandlingSteg
+        endringerIUtbetaling: EndringerIUtbetalingForBehandlingSteg,
     ): StegType {
         return hentNesteSteg(
             utførendeStegType = this.stegType(),
             behandling = behandling,
-            endringerIUtbetaling = endringerIUtbetaling
+            endringerIUtbetaling = endringerIUtbetaling,
         )
     }
 
@@ -60,7 +60,7 @@ interface BehandlingSteg<T> {
 enum class EndringerIUtbetalingForBehandlingSteg {
     IKKE_RELEVANT,
     INGEN_ENDRING_I_UTBETALING,
-    ENDRING_I_UTBETALING
+    ENDRING_I_UTBETALING,
 }
 
 val FØRSTE_STEG = REGISTRERE_PERSONGRUNNLAG
@@ -69,7 +69,7 @@ val SISTE_STEG = BEHANDLING_AVSLUTTET
 enum class StegType(
     val rekkefølge: Int,
     val tillattFor: List<BehandlerRolle>,
-    private val gyldigIKombinasjonMedStatus: List<BehandlingStatus>
+    private val gyldigIKombinasjonMedStatus: List<BehandlingStatus>,
 ) {
 
     // Henlegg søknad går utenfor den normale stegflyten og går direkte til ferdigstilt.
@@ -79,78 +79,78 @@ enum class StegType(
         tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
         gyldigIKombinasjonMedStatus = listOf(
             BehandlingStatus.UTREDES,
-            BehandlingStatus.IVERKSETTER_VEDTAK
-        )
+            BehandlingStatus.IVERKSETTER_VEDTAK,
+        ),
     ),
     REGISTRERE_INSTITUSJON_OG_VERGE(
         rekkefølge = 1,
         tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
-        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)
+        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES),
     ),
     REGISTRERE_PERSONGRUNNLAG(
         rekkefølge = 1,
         tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
-        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)
+        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES),
     ),
     REGISTRERE_SØKNAD(
         rekkefølge = 1,
         tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
-        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)
+        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES),
     ),
     FILTRERING_FØDSELSHENDELSER(
         rekkefølge = 2,
         tillattFor = listOf(BehandlerRolle.SYSTEM),
-        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)
+        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES),
     ),
     VILKÅRSVURDERING(
         rekkefølge = 3,
         tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
-        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)
+        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES),
     ),
     BEHANDLINGSRESULTAT(
         rekkefølge = 4,
         tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
-        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)
+        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES),
     ),
     VURDER_TILBAKEKREVING(
         rekkefølge = 5,
         tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
-        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)
+        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES),
     ),
     SEND_TIL_BESLUTTER(
         rekkefølge = 6,
         tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.SAKSBEHANDLER),
-        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES)
+        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.UTREDES),
     ),
     BESLUTTE_VEDTAK(
         rekkefølge = 7,
         tillattFor = listOf(BehandlerRolle.SYSTEM, BehandlerRolle.BESLUTTER),
-        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.FATTER_VEDTAK)
+        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.FATTER_VEDTAK),
     ),
     IVERKSETT_MOT_OPPDRAG(
         rekkefølge = 8,
         tillattFor = listOf(BehandlerRolle.SYSTEM),
-        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)
+        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK),
     ),
     VENTE_PÅ_STATUS_FRA_ØKONOMI(
         rekkefølge = 9,
         tillattFor = listOf(BehandlerRolle.SYSTEM),
-        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)
+        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK),
     ),
     IVERKSETT_MOT_FAMILIE_TILBAKE(
         rekkefølge = 10,
         tillattFor = listOf(BehandlerRolle.SYSTEM),
-        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)
+        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK),
     ),
     JOURNALFØR_VEDTAKSBREV(
         rekkefølge = 11,
         tillattFor = listOf(BehandlerRolle.SYSTEM),
-        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)
+        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK),
     ),
     DISTRIBUER_VEDTAKSBREV(
         rekkefølge = 12,
         tillattFor = listOf(BehandlerRolle.SYSTEM),
-        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK)
+        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.IVERKSETTER_VEDTAK),
     ),
     FERDIGSTILLE_BEHANDLING(
         rekkefølge = 13,
@@ -158,14 +158,15 @@ enum class StegType(
         gyldigIKombinasjonMedStatus = listOf(
             BehandlingStatus.IVERKSETTER_VEDTAK,
             BehandlingStatus.UTREDES,
-            BehandlingStatus.FATTER_VEDTAK
-        )
+            BehandlingStatus.FATTER_VEDTAK,
+        ),
     ),
     BEHANDLING_AVSLUTTET(
         rekkefølge = 14,
         tillattFor = emptyList(),
-        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.AVSLUTTET, BehandlingStatus.UTREDES)
-    );
+        gyldigIKombinasjonMedStatus = listOf(BehandlingStatus.AVSLUTTET, BehandlingStatus.UTREDES),
+    ),
+    ;
 
     fun displayName(): String {
         return this.name.replace('_', ' ').lowercase().replaceFirstChar { it.uppercase() }
@@ -187,7 +188,7 @@ enum class StegType(
 fun hentNesteSteg(
     behandling: Behandling,
     utførendeStegType: StegType,
-    endringerIUtbetaling: EndringerIUtbetalingForBehandlingSteg = EndringerIUtbetalingForBehandlingSteg.IKKE_RELEVANT
+    endringerIUtbetaling: EndringerIUtbetalingForBehandlingSteg = EndringerIUtbetalingForBehandlingSteg.IKKE_RELEVANT,
 ): StegType {
     if (utførendeStegType == HENLEGG_BEHANDLING) {
         return FERDIGSTILLE_BEHANDLING
@@ -246,7 +247,7 @@ fun hentNesteSteg(
                 BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
                 else -> throw IllegalStateException(
                     "StegType ${utførendeStegType.displayName()} " +
-                        "er ugyldig ved manuell migreringsbehandling"
+                        "er ugyldig ved manuell migreringsbehandling",
                 )
             }
         }
@@ -256,14 +257,18 @@ fun hentNesteSteg(
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
                 BEHANDLINGSRESULTAT -> VURDER_TILBAKEKREVING
-                VURDER_TILBAKEKREVING -> SEND_TIL_BESLUTTER
+                VURDER_TILBAKEKREVING -> if (!behandling.skalBehandlesAutomatisk) {
+                    SEND_TIL_BESLUTTER
+                } else {
+                    FERDIGSTILLE_BEHANDLING
+                }
                 SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
                 BESLUTTE_VEDTAK -> FERDIGSTILLE_BEHANDLING
                 FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
                 BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
                 else -> throw IllegalStateException(
                     "StegType ${utførendeStegType.displayName()} " +
-                        "er ugyldig ved migreringsbehandling med endre migreringsdato"
+                        "er ugyldig ved migreringsbehandling med endre migreringsdato",
                 )
             }
         }
@@ -412,10 +417,10 @@ enum class BehandlerRolle(val nivå: Int) {
     BESLUTTER(3),
     SAKSBEHANDLER(2),
     VEILEDER(1),
-    UKJENT(0)
+    UKJENT(0),
 }
 
 enum class BehandlingStegStatus(val navn: String, val beskrivelse: String) {
     IKKE_UTFØRT("IKKE_UTFØRT", "Steget er ikke utført"),
-    UTFØRT("UTFØRT", "Utført")
+    UTFØRT("UTFØRT", "Utført"),
 }

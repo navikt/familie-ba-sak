@@ -11,14 +11,14 @@ internal class IVedtakBegrunnelseTest {
             objectMapper.writeValueAsString(Standardbegrunnelse.INNVILGET_BOR_HOS_SØKER)
         Assertions.assertEquals(
             objectMapper.readValue(serialisertStandardbegrunnelse, Standardbegrunnelse::class.java),
-            Standardbegrunnelse.INNVILGET_BOR_HOS_SØKER
+            Standardbegrunnelse.INNVILGET_BOR_HOS_SØKER,
         )
 
         val serialisertEØSStandardbegrunnelse =
             objectMapper.writeValueAsString(EØSStandardbegrunnelse.AVSLAG_EØS_IKKE_EØS_BORGER)
         Assertions.assertEquals(
             objectMapper.readValue(serialisertEØSStandardbegrunnelse, EØSStandardbegrunnelse::class.java),
-            EØSStandardbegrunnelse.AVSLAG_EØS_IKKE_EØS_BORGER
+            EØSStandardbegrunnelse.AVSLAG_EØS_IKKE_EØS_BORGER,
         )
     }
 }

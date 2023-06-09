@@ -12,13 +12,13 @@ data class OppdaterJournalpostRequest(
     val tema: String? = "BAR",
     val tittel: String? = null,
     val sak: Sak? = null,
-    val dokumenter: List<DokumentInfo>? = null
+    val dokumenter: List<DokumentInfo>? = null,
 )
 
 class Bruker(
     val id: String,
     val idType: IdType? = IdType.FNR,
-    val navn: String
+    val navn: String,
 )
 
 enum class IdType {
@@ -27,9 +27,9 @@ enum class IdType {
 
 enum class Sakstype(val type: String) {
     FAGSAK("FAGSAK"),
-    GENERELL_SAK("GENERELL_SAK")
+    GENERELL_SAK("GENERELL_SAK"),
 }
 
 enum class FagsakSystem {
-    BA
+    BA,
 }

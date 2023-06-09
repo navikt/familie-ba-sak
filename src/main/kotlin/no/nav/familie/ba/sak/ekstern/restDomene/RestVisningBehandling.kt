@@ -12,6 +12,7 @@ import java.time.LocalDateTime
 class RestVisningBehandling(
     val behandlingId: Long,
     val opprettetTidspunkt: LocalDateTime,
+    val aktivertTidspunkt: LocalDateTime,
     val kategori: BehandlingKategori,
     val underkategori: BehandlingUnderkategoriDTO,
     val aktiv: Boolean,
@@ -19,12 +20,13 @@ class RestVisningBehandling(
     val type: BehandlingType,
     val status: BehandlingStatus,
     val resultat: Behandlingsresultat,
-    val vedtaksdato: LocalDateTime?
+    val vedtaksdato: LocalDateTime?,
 )
 
 fun Behandling.tilRestVisningBehandling(vedtaksdato: LocalDateTime?) = RestVisningBehandling(
     behandlingId = this.id,
     opprettetTidspunkt = this.opprettetTidspunkt,
+    aktivertTidspunkt = this.aktivertTidspunkt,
     kategori = this.kategori,
     underkategori = this.underkategori.tilDto(),
     aktiv = this.aktiv,
@@ -32,13 +34,13 @@ fun Behandling.tilRestVisningBehandling(vedtaksdato: LocalDateTime?) = RestVisni
     type = this.type,
     status = this.status,
     resultat = this.resultat,
-    vedtaksdato = vedtaksdato
+    vedtaksdato = vedtaksdato,
 )
 
 enum class BehandlingUnderkategoriDTO {
     ORDINÆR,
     UTVIDET,
-    INSTITUSJON
+    INSTITUSJON,
 }
 
 fun BehandlingUnderkategoriDTO.tilDomene() = when (this) {

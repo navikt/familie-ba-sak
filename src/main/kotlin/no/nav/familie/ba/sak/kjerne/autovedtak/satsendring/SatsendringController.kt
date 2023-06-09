@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
 import java.util.UUID
@@ -33,7 +32,7 @@ class SatsendringController(
     private val startSatsendring: StartSatsendring,
     private val tilgangService: TilgangService,
     private val opprettTaskService: OpprettTaskService,
-    private val satsendringService: SatsendringService
+    private val satsendringService: SatsendringService,
 ) {
     private val logger = LoggerFactory.getLogger(SatsendringController::class.java)
 
@@ -55,7 +54,7 @@ class SatsendringController(
             fagsakId = fagsakId,
             handling = "Valider vi kan kjøre satsendring",
             event = AuditLoggerEvent.UPDATE,
-            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER
+            minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
         )
 
         startSatsendring.gjennomførSatsendringManuelt(fagsakId)
@@ -78,7 +77,7 @@ class SatsendringController(
     @PostMapping(path = ["/henleggBehandlingerMedLangFristSenereEnn/{valideringsdato}"])
     fun henleggBehandlingerMedLangLiggetid(
         @RequestBody behandlinger: Set<String>,
-        @PathVariable valideringsdato: String
+        @PathVariable valideringsdato: String,
     ): ResponseEntity<Ressurs<String>> {
         val dato = try {
             LocalDate.parse(valideringsdato).also { assert(it.isAfter(LocalDate.now().plusMonths(1))) }
@@ -90,34 +89,10 @@ class SatsendringController(
                 behandlingId = it.toLong(),
                 årsak = HenleggÅrsak.TEKNISK_VEDLIKEHOLD,
                 begrunnelse = SATSENDRING,
-                validerOppgavefristErEtterDato = dato
+                validerOppgavefristErEtterDato = dato,
             )
         }
         return ResponseEntity.ok(Ressurs.Companion.success("Trigget henleggelse for ${behandlinger.size} behandlinger"))
-    }
-
-    @PostMapping(path = ["/lukkAapneBehandlingerSatsendring"])
-    fun lukkÅpneBehandlingerDetIkkeErKjørtSatsendringPå(
-        @RequestParam(value = "opprettTask", required = true) opprettTask: Boolean,
-        @RequestParam(value = "antall", required = true) antall: Int
-    ) {
-        val åpneBehandlinger = satsendringService.finnSatskjøringerSomHarStoppetPgaÅpenBehandling()
-        åpneBehandlinger.take(antall).forEach {
-            if (!satsendringService.erFagsakOppdatertMedSisteSatser(it.fagsakId)) {
-                if (opprettTask) {
-                    opprettTaskService.opprettHenleggBehandlingTask(
-                        behandlingId = it.behandlingId,
-                        årsak = HenleggÅrsak.TEKNISK_VEDLIKEHOLD,
-                        begrunnelse = SATSENDRING,
-                        validerOppgavefristErEtterDato = null
-                    )
-                } else {
-                    logger.info("Skulle ha trigget henleggBehandlingTask for fagsakIs=${it.fagsakId} behandlingId=${it.behandlingId}")
-                }
-            } else {
-                logger.info("Henlegger ikke behandling. ${it.fagsakId} har alt siste sats")
-            }
-        }
     }
 
     @PostMapping(path = ["/saker-uten-sats"])

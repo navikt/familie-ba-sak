@@ -7,7 +7,8 @@ import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.config.AbstractSpringIntegrationTest
 import no.nav.familie.ba.sak.config.ClientMocks
 import no.nav.familie.ba.sak.config.DatabaseCleanupService
-import no.nav.familie.ba.sak.dataGenerator.behandling.kjørStegprosessForBehandling
+import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.datagenerator.behandling.kjørStegprosessForBehandling
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
@@ -63,7 +64,10 @@ class VilkårsvurderingFlyttResultaterTest(
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
 
     @Autowired
-    private val brevmalService: BrevmalService
+    private val brevmalService: BrevmalService,
+
+    @Autowired
+    private val featureToggleService: FeatureToggleService,
 
 ) : AbstractSpringIntegrationTest() {
 
@@ -91,7 +95,7 @@ class VilkårsvurderingFlyttResultaterTest(
             periodeTom = LocalDate.now().plusYears(2),
             lagFullstendigVilkårResultat = true,
             personType = PersonType.SØKER,
-            resultat = Resultat.OPPFYLT
+            resultat = Resultat.OPPFYLT,
         )
 
         søkerPersonResultat.addVilkårResultat(
@@ -101,8 +105,8 @@ class VilkårsvurderingFlyttResultaterTest(
                 resultat = Resultat.IKKE_OPPFYLT,
                 periodeFom = LocalDate.now().minusMonths(8),
                 periodeTom = LocalDate.now().plusYears(2),
-                behandlingId = vilkårsvurderingMedUtvidetAvslått.behandling.id
-            )
+                behandlingId = vilkårsvurderingMedUtvidetAvslått.behandling.id,
+            ),
         )
 
         val førstegangsbehandlingPersonResultater = setOf(
@@ -114,7 +118,7 @@ class VilkårsvurderingFlyttResultaterTest(
                 periodeTom = LocalDate.now().plusYears(2),
                 lagFullstendigVilkårResultat = true,
                 personType = PersonType.BARN,
-                resultat = Resultat.OPPFYLT
+                resultat = Resultat.OPPFYLT,
             ),
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurderingMedUtvidetAvslått,
@@ -123,8 +127,8 @@ class VilkårsvurderingFlyttResultaterTest(
                 periodeTom = LocalDate.now().plusYears(2),
                 lagFullstendigVilkårResultat = true,
                 personType = PersonType.BARN,
-                resultat = Resultat.OPPFYLT
-            )
+                resultat = Resultat.OPPFYLT,
+            ),
         )
 
         vilkårsvurderingMedUtvidetAvslått.personResultater = førstegangsbehandlingPersonResultater
@@ -144,8 +148,8 @@ class VilkårsvurderingFlyttResultaterTest(
             fagsakService = fagsakService,
             persongrunnlagService = persongrunnlagService,
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
-            brevmalService = brevmalService
-
+            brevmalService = brevmalService,
+            featureToggleService = featureToggleService,
         )
 
         val vilkårsvurderingFraForrigeBehandlingFørNyRevurdering =
@@ -168,8 +172,8 @@ class VilkårsvurderingFlyttResultaterTest(
             fagsakService = fagsakService,
             persongrunnlagService = persongrunnlagService,
             andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
-            brevmalService = brevmalService
-
+            brevmalService = brevmalService,
+            featureToggleService = featureToggleService,
         )
 
         // Sjekker at vilkårsvurderingen fra forrige behandling ikke er endret
@@ -180,31 +184,31 @@ class VilkårsvurderingFlyttResultaterTest(
             vilkårsvurderingFraForrigeBehandlingEtterNyRevurdering?.personResultater?.find { it.erSøkersResultater() }?.vilkårResultater
         Assertions.assertEquals(
             3,
-            søkersVilkår?.size
+            søkersVilkår?.size,
         )
         Assertions.assertEquals(søkerPersonResultat.vilkårResultater, søkersVilkår)
 
         Assertions.assertEquals(
             5,
-            vilkårsvurderingFraForrigeBehandlingEtterNyRevurdering?.personResultater?.find { it.aktør.aktivFødselsnummer() == barn1Fnr }?.vilkårResultater?.size
+            vilkårsvurderingFraForrigeBehandlingEtterNyRevurdering?.personResultater?.find { it.aktør.aktivFødselsnummer() == barn1Fnr }?.vilkårResultater?.size,
         )
         Assertions.assertEquals(
             vilkårsvurderingMedUtvidetAvslått.personResultater.find { it.aktør.aktivFødselsnummer() == barn1Fnr }?.vilkårResultater,
-            vilkårsvurderingFraForrigeBehandlingEtterNyRevurdering?.personResultater?.find { it.aktør.aktivFødselsnummer() == barn1Fnr }?.vilkårResultater
+            vilkårsvurderingFraForrigeBehandlingEtterNyRevurdering?.personResultater?.find { it.aktør.aktivFødselsnummer() == barn1Fnr }?.vilkårResultater,
         )
 
         Assertions.assertEquals(
             5,
-            vilkårsvurderingFraForrigeBehandlingEtterNyRevurdering?.personResultater?.find { it.aktør.aktivFødselsnummer() == barn2Fnr }?.vilkårResultater?.size
+            vilkårsvurderingFraForrigeBehandlingEtterNyRevurdering?.personResultater?.find { it.aktør.aktivFødselsnummer() == barn2Fnr }?.vilkårResultater?.size,
         )
         Assertions.assertEquals(
             vilkårsvurderingMedUtvidetAvslått.personResultater.find { it.aktør.aktivFødselsnummer() == barn2Fnr }?.vilkårResultater,
-            vilkårsvurderingFraForrigeBehandlingEtterNyRevurdering?.personResultater?.find { it.aktør.aktivFødselsnummer() == barn2Fnr }?.vilkårResultater
+            vilkårsvurderingFraForrigeBehandlingEtterNyRevurdering?.personResultater?.find { it.aktør.aktivFødselsnummer() == barn2Fnr }?.vilkårResultater,
         )
 
         Assertions.assertEquals(
             vilkårsvurderingFraForrigeBehandlingFørNyRevurdering?.id,
-            vilkårsvurderingFraForrigeBehandlingEtterNyRevurdering?.id
+            vilkårsvurderingFraForrigeBehandlingEtterNyRevurdering?.id,
         )
     }
 }

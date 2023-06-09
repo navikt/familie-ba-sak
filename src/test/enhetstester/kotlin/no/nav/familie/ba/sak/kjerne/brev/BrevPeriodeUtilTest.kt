@@ -1,7 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.brev
 
+import io.mockk.mockk
 import no.nav.familie.ba.sak.common.MånedPeriode
-import no.nav.familie.ba.sak.dataGenerator.brev.lagMinimertPerson
+import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.datagenerator.brev.lagMinimertPerson
 import no.nav.familie.ba.sak.kjerne.brev.domene.BrevperiodeData
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertUregistrertBarn
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertVedtaksperiode
@@ -20,37 +22,50 @@ import java.time.YearMonth
 
 class BrevPeriodeUtilTest {
 
+    private val featureToggleService: FeatureToggleService = mockk()
+
     @Test
-    fun `Skal sortere perioder kronologisk, med avslag til slutt`() {
+    fun `Skal sortere perioder kronologisk, med generelle avslag til slutt`() {
         val liste = listOf(
             lagBrevperiodeData(
                 fom = LocalDate.now().minusMonths(12),
                 tom = LocalDate.now().minusMonths(8),
-                type = Vedtaksperiodetype.UTBETALING
+                type = Vedtaksperiodetype.UTBETALING,
+                featureToggleService = featureToggleService,
             ),
             lagBrevperiodeData(
-                fom = LocalDate.now().minusMonths(4),
+                fom = LocalDate.now().minusMonths(3),
                 tom = null,
-                type = Vedtaksperiodetype.AVSLAG
+                type = Vedtaksperiodetype.AVSLAG,
+                featureToggleService = featureToggleService,
+            ),
+            lagBrevperiodeData(
+                fom = null,
+                tom = null,
+                type = Vedtaksperiodetype.AVSLAG,
+                featureToggleService = featureToggleService,
             ),
             lagBrevperiodeData(
                 fom = LocalDate.now().minusMonths(7),
                 tom = LocalDate.now().minusMonths(4),
-                type = Vedtaksperiodetype.OPPHØR
+                type = Vedtaksperiodetype.OPPHØR,
+                featureToggleService = featureToggleService,
             ),
             lagBrevperiodeData(
                 fom = LocalDate.now().minusMonths(3),
                 tom = LocalDate.now(),
-                type = Vedtaksperiodetype.UTBETALING
-            )
+                type = Vedtaksperiodetype.UTBETALING,
+                featureToggleService = featureToggleService,
+            ),
         )
 
         val sortertListe = liste.sorted()
 
-        Assertions.assertTrue(sortertListe.size == 4)
+        Assertions.assertTrue(sortertListe.size == 5)
         val førstePeriode = sortertListe.first()
         val andrePeriode = sortertListe[1]
         val tredjePeriode = sortertListe[2]
+        val fjerdePeriode = sortertListe[3]
         val sistePeriode = sortertListe.last()
 
         Assertions.assertEquals(Vedtaksperiodetype.UTBETALING, førstePeriode.minimertVedtaksperiode.type)
@@ -59,8 +74,10 @@ class BrevPeriodeUtilTest {
         Assertions.assertEquals(LocalDate.now().minusMonths(7), andrePeriode.minimertVedtaksperiode.fom)
         Assertions.assertEquals(Vedtaksperiodetype.UTBETALING, tredjePeriode.minimertVedtaksperiode.type)
         Assertions.assertEquals(LocalDate.now().minusMonths(3), tredjePeriode.minimertVedtaksperiode.fom)
+        Assertions.assertEquals(Vedtaksperiodetype.AVSLAG, fjerdePeriode.minimertVedtaksperiode.type)
+        Assertions.assertEquals(LocalDate.now().minusMonths(3), fjerdePeriode.minimertVedtaksperiode.fom)
         Assertions.assertEquals(Vedtaksperiodetype.AVSLAG, sistePeriode.minimertVedtaksperiode.type)
-        Assertions.assertEquals(LocalDate.now().minusMonths(4), sistePeriode.minimertVedtaksperiode.fom)
+        Assertions.assertNull(sistePeriode.minimertVedtaksperiode.fom)
     }
 
     @Test
@@ -79,14 +96,14 @@ class BrevPeriodeUtilTest {
                 fom = periode2.fom,
                 tom = periode2.tom,
                 barnAktører = setOf(barnAktør1),
-                søkersAktivitet = SøkersAktivitet.ARBEIDER
+                søkersAktivitet = SøkersAktivitet.ARBEIDER,
             )
         val kompetanse3 =
             lagKompetanse(
                 fom = periode2.fom,
                 tom = periode3.tom,
                 barnAktører = setOf(barnAktør2),
-                søkersAktivitet = SøkersAktivitet.INAKTIV
+                søkersAktivitet = SøkersAktivitet.INAKTIV,
             )
         val kompetanse4 =
             lagKompetanse(fom = periode3.fom, tom = periode3.tom, barnAktører = setOf(barnAktør1))
@@ -94,7 +111,7 @@ class BrevPeriodeUtilTest {
         Assertions.assertEquals(
             listOf(kompetanse1, kompetanse2, kompetanse3.copy(tom = periode2.tom)),
             listOf(kompetanse1, kompetanse2, kompetanse3, kompetanse4)
-                .hentIPeriode(periode1.fom, periode2.tom)
+                .hentIPeriode(periode1.fom, periode2.tom),
         )
     }
 
@@ -102,17 +119,17 @@ class BrevPeriodeUtilTest {
     fun `Skal kunne kombinere registrerte og uregistrerte barns fødselsdatoer til avslagsbegrunnelse`() {
         val barnIBegrunnelse = listOf(
             lagMinimertPerson(fødselsdato = LocalDate.of(2021, 1, 1), type = PersonType.BARN),
-            lagMinimertPerson(fødselsdato = LocalDate.of(2021, 2, 2), type = PersonType.BARN)
+            lagMinimertPerson(fødselsdato = LocalDate.of(2021, 2, 2), type = PersonType.BARN),
         ).map { it.tilMinimertRestPerson() }
         val barnPåBehandling = listOf(
             lagMinimertPerson(fødselsdato = LocalDate.of(2021, 1, 1), type = PersonType.BARN),
             lagMinimertPerson(fødselsdato = LocalDate.of(2021, 2, 2), type = PersonType.BARN),
-            lagMinimertPerson(fødselsdato = LocalDate.of(2021, 3, 3), type = PersonType.BARN)
+            lagMinimertPerson(fødselsdato = LocalDate.of(2021, 3, 3), type = PersonType.BARN),
         ).map { it.tilMinimertRestPerson() }
         val uregistrerteBarn = listOf(
             MinimertUregistrertBarn(personIdent = "", navn = "Ole", fødselsdato = LocalDate.of(2021, 4, 4)),
             MinimertUregistrertBarn(personIdent = "", navn = "Dole", fødselsdato = LocalDate.of(2021, 5, 5)),
-            MinimertUregistrertBarn(personIdent = "", navn = "Doffen", fødselsdato = LocalDate.of(2021, 6, 6))
+            MinimertUregistrertBarn(personIdent = "", navn = "Doffen", fødselsdato = LocalDate.of(2021, 6, 6)),
         )
 
         Assertions.assertEquals(
@@ -120,46 +137,46 @@ class BrevPeriodeUtilTest {
                 barnIBegrunnelse,
                 barnPåBehandling,
                 uregistrerteBarn,
-                gjelderSøker = true
+                gjelderSøker = true,
             ),
-            "01.01.21, 02.02.21, 03.03.21, 04.04.21, 05.05.21 og 06.06.21"
+            "01.01.21, 02.02.21, 03.03.21, 04.04.21, 05.05.21 og 06.06.21",
         )
         Assertions.assertEquals(
             hentBarnasFødselsdatoerForAvslagsbegrunnelse(
                 barnIBegrunnelse,
                 barnPåBehandling,
                 uregistrerteBarn,
-                gjelderSøker = false
+                gjelderSøker = false,
             ),
-            "01.01.21, 02.02.21, 04.04.21, 05.05.21 og 06.06.21"
+            "01.01.21, 02.02.21, 04.04.21, 05.05.21 og 06.06.21",
         )
         Assertions.assertEquals(
             hentBarnasFødselsdatoerForAvslagsbegrunnelse(
                 barnIBegrunnelse,
                 barnPåBehandling,
                 emptyList(),
-                gjelderSøker = true
+                gjelderSøker = true,
             ),
-            "01.01.21, 02.02.21 og 03.03.21"
+            "01.01.21, 02.02.21 og 03.03.21",
         )
         Assertions.assertEquals(
             hentBarnasFødselsdatoerForAvslagsbegrunnelse(
                 emptyList(),
                 emptyList(),
                 uregistrerteBarn,
-                gjelderSøker = true
+                gjelderSøker = true,
             ),
-            "04.04.21, 05.05.21 og 06.06.21"
+            "04.04.21, 05.05.21 og 06.06.21",
         )
     }
 }
 
-private fun lagBrevperiodeData(fom: LocalDate?, tom: LocalDate?, type: Vedtaksperiodetype): BrevperiodeData {
+private fun lagBrevperiodeData(fom: LocalDate?, tom: LocalDate?, type: Vedtaksperiodetype, featureToggleService: FeatureToggleService): BrevperiodeData {
     val restBehandlingsgrunnlagForBrev = RestBehandlingsgrunnlagForBrev(
         personerPåBehandling = emptyList(),
         minimertePersonResultater = emptyList(),
         minimerteEndredeUtbetalingAndeler = emptyList(),
-        fagsakType = FagsakType.NORMAL
+        fagsakType = FagsakType.NORMAL,
     )
     return BrevperiodeData(
         restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
@@ -170,11 +187,12 @@ private fun lagBrevperiodeData(fom: LocalDate?, tom: LocalDate?, type: Vedtakspe
             fom = fom,
             tom = tom,
             type = type,
-            eøsBegrunnelser = emptyList()
+            eøsBegrunnelser = emptyList(),
         ),
         uregistrerteBarn = emptyList(),
         minimerteKompetanserForPeriode = emptyList(),
         minimerteKompetanserSomStopperRettFørPeriode = emptyList(),
-        dødeBarnForrigePeriode = emptyList()
+        dødeBarnForrigePeriode = emptyList(),
+        featureToggleService = featureToggleService,
     )
 }

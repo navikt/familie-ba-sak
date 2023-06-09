@@ -17,7 +17,7 @@ import java.time.YearMonth
 @Service
 class TeamStatistikkService(
     private val behandlingRepository: BehandlingRepository,
-    private val fagsakRepository: FagsakRepository
+    private val fagsakRepository: FagsakRepository,
 ) {
     val utbetalingerPerMånedGauge =
         MultiGauge.builder("UtbetalingerPerMaanedGauge").register(Metrics.globalRegistry)
@@ -37,7 +37,7 @@ class TeamStatistikkService(
         val månederMedTotalUtbetaling =
             listOf<YearMonth>(
                 YearMonth.now(),
-                YearMonth.now().plusMonths(1)
+                YearMonth.now().plusMonths(1),
             ).associateWith {
                 behandlingRepository.hentTotalUtbetalingForMåned(it.førsteDagIInneværendeMåned().atStartOfDay())
             }
@@ -46,9 +46,9 @@ class TeamStatistikkService(
             MultiGauge.Row.of(
                 Tags.of(
                     ÅR_MÅNED_TAG,
-                    "${it.key.year}-${it.key.month}"
+                    "${it.key.year}-${it.key.month}",
                 ),
-                it.value
+                it.value,
             )
         }
 
@@ -65,10 +65,10 @@ class TeamStatistikkService(
             MultiGauge.Row.of(
                 Tags.of(
                     ÅR_MÅNED_TAG,
-                    "${YearMonth.now().year}-${YearMonth.now().month}"
+                    "${YearMonth.now().year}-${YearMonth.now().month}",
                 ),
-                antallFagsaker
-            )
+                antallFagsaker,
+            ),
         )
 
         antallFagsakerPerMånedGauge.register(rows)
@@ -84,10 +84,10 @@ class TeamStatistikkService(
             MultiGauge.Row.of(
                 Tags.of(
                     ÅR_MÅNED_TAG,
-                    "${YearMonth.now().year}-${YearMonth.now().month}"
+                    "${YearMonth.now().year}-${YearMonth.now().month}",
                 ),
-                løpendeFagsaker
-            )
+                løpendeFagsaker,
+            ),
         )
 
         løpendeFagsakerPerMånedGauge.register(rows)
@@ -103,10 +103,10 @@ class TeamStatistikkService(
             MultiGauge.Row.of(
                 Tags.of(
                     ÅR_MÅNED_TAG,
-                    "${YearMonth.now().year}-${YearMonth.now().month}"
+                    "${YearMonth.now().year}-${YearMonth.now().month}",
                 ),
-                åpneBehandlinger
-            )
+                åpneBehandlinger,
+            ),
         )
 
         åpneBehandlingerPerMånedGauge.register(rows)
@@ -128,24 +128,24 @@ class TeamStatistikkService(
             MultiGauge.Row.of(
                 Tags.of(
                     ÅR_MÅNED_TAG,
-                    "${YearMonth.now().year}-${YearMonth.now().month}-snitt"
+                    "${YearMonth.now().year}-${YearMonth.now().month}-snitt",
                 ),
-                snitt
+                snitt,
             ),
             MultiGauge.Row.of(
                 Tags.of(
                     ÅR_MÅNED_TAG,
-                    "${YearMonth.now().year}-${YearMonth.now().month}-max"
+                    "${YearMonth.now().year}-${YearMonth.now().month}-max",
                 ),
-                max
+                max,
             ),
             MultiGauge.Row.of(
                 Tags.of(
                     ÅR_MÅNED_TAG,
-                    "${YearMonth.now().year}-${YearMonth.now().month}-min"
+                    "${YearMonth.now().year}-${YearMonth.now().month}-min",
                 ),
-                min
-            )
+                min,
+            ),
         )
 
         tidSidenOpprettelseåpneBehandlingerPerMånedGauge.register(rows)
@@ -157,13 +157,13 @@ class TeamStatistikkService(
 
         listOf(180, 150, 120, 90, 60).fold(mutableSetOf<Long>()) { acc, dagerSiden ->
             val åpneBehandlinger = behandlingRepository.finnÅpneBehandlinger(
-                opprettetFør = LocalDateTime.now().minusDays(dagerSiden.toLong())
+                opprettetFør = LocalDateTime.now().minusDays(dagerSiden.toLong()),
             ).filter { !acc.contains(it.id) }
 
             if (åpneBehandlinger.isNotEmpty()) {
                 logger.warn(
                     "${åpneBehandlinger.size} åpne behandlinger har ligget i over $dagerSiden dager: \n" +
-                        "${åpneBehandlinger.map { behandling -> "$behandling\n" }}"
+                        "${åpneBehandlinger.map { behandling -> "$behandling\n" }}",
                 )
                 acc.addAll(åpneBehandlinger.map { it.id })
             }

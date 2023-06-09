@@ -4,7 +4,7 @@ import java.time.LocalDate
 
 data class DagTidspunkt internal constructor(
     internal val dato: LocalDate,
-    override val uendelighet: Uendelighet
+    override val uendelighet: Uendelighet,
 ) : Tidspunkt<Dag>(uendelighet) {
 
     fun tilLocalDateEllerNull(): LocalDate? {
@@ -43,7 +43,16 @@ data class DagTidspunkt internal constructor(
     override fun equals(other: Any?): Boolean {
         return when (other) {
             is DagTidspunkt -> compareTo(other) == 0
-            else -> super.equals(other)
+            is Tidspunkt<*> -> this.uendelighet != Uendelighet.INGEN && this.uendelighet == other.uendelighet
+            else -> false
+        }
+    }
+
+    override fun hashCode(): Int {
+        return if (uendelighet == Uendelighet.INGEN) {
+            dato.hashCode()
+        } else {
+            uendelighet.hashCode()
         }
     }
 
@@ -62,7 +71,7 @@ data class DagTidspunkt internal constructor(
         private fun LocalDate?.tilTidspunktEllerUendelig(default: LocalDate?, uendelighet: Uendelighet) =
             this?.let { DagTidspunkt(it, Uendelighet.INGEN) } ?: DagTidspunkt(
                 default ?: LocalDate.now(),
-                uendelighet
+                uendelighet,
             )
     }
 }

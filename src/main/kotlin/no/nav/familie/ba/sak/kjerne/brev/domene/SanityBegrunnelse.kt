@@ -16,12 +16,12 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
 interface ISanityBegrunnelse {
-    val apiNavn: String?
+    val apiNavn: String
     val navnISystem: String
 }
 
 data class SanityBegrunnelse(
-    override val apiNavn: String?,
+    override val apiNavn: String,
     override val navnISystem: String,
     val vilkaar: List<SanityVilkår>? = null,
     val rolle: List<VilkårRolle> = emptyList(),
@@ -35,8 +35,11 @@ data class SanityBegrunnelse(
     val hjemlerFolketrygdloven: List<String> = emptyList(),
     val endretUtbetalingsperiodeDeltBostedUtbetalingTrigger: EndretUtbetalingsperiodeDeltBostedTriggere? = null,
     val endretUtbetalingsperiodeTriggere: List<EndretUtbetalingsperiodeTrigger>? = null,
-    val utvidetBarnetrygdTriggere: List<UtvidetBarnetrygdTrigger>? = null
-) : ISanityBegrunnelse
+    val utvidetBarnetrygdTriggere: List<UtvidetBarnetrygdTrigger>? = null,
+) : ISanityBegrunnelse {
+
+    val triggesAv: TriggesAv by lazy { this.tilTriggesAv() }
+}
 
 data class RestSanityBegrunnelse(
     val apiNavn: String?,
@@ -53,9 +56,10 @@ data class RestSanityBegrunnelse(
     val hjemlerFolketrygdloven: List<String>?,
     val endretUtbetalingsperiodeDeltBostedUtbetalingTrigger: String?,
     val endretUtbetalingsperiodeTriggere: List<String>? = emptyList(),
-    val utvidetBarnetrygdTriggere: List<String>? = emptyList()
+    val utvidetBarnetrygdTriggere: List<String>? = emptyList(),
 ) {
-    fun tilSanityBegrunnelse(): SanityBegrunnelse {
+    fun tilSanityBegrunnelse(): SanityBegrunnelse? {
+        if (apiNavn == null) return null
         return SanityBegrunnelse(
             apiNavn = apiNavn,
             navnISystem = navnISystem,
@@ -88,7 +92,7 @@ data class RestSanityBegrunnelse(
                 finnEnumverdi(
                     endretUtbetalingsperiodeDeltBostedUtbetalingTrigger,
                     EndretUtbetalingsperiodeDeltBostedTriggere.values(),
-                    apiNavn
+                    apiNavn,
                 )
             } else {
                 null
@@ -98,18 +102,18 @@ data class RestSanityBegrunnelse(
             },
             utvidetBarnetrygdTriggere = utvidetBarnetrygdTriggere?.mapNotNull {
                 finnEnumverdi(it, UtvidetBarnetrygdTrigger.values(), apiNavn)
-            }
+            },
         )
     }
 }
 
 private val logger: Logger = LoggerFactory.getLogger(RestSanityBegrunnelse::class.java)
 
-fun <T : Enum<T>> finnEnumverdi(verdi: String, enumverdier: Array<T>, apiNavn: String?): T? {
+fun <T : Enum<T>> finnEnumverdi(verdi: String, enumverdier: Array<T>, apiNavn: String): T? {
     val enumverdi = enumverdier.firstOrNull { verdi == it.name }
     if (enumverdi == null) {
         logger.error(
-            "$verdi på begrunnelsen $apiNavn er ikke blant verdiene til enumen ${enumverdier.javaClass.simpleName}"
+            "$verdi på begrunnelsen $apiNavn er ikke blant verdiene til enumen ${enumverdier.javaClass.simpleName}",
         )
     }
     return enumverdi
@@ -121,7 +125,7 @@ enum class SanityVilkår {
     GIFT_PARTNERSKAP,
     BOSATT_I_RIKET,
     LOVLIG_OPPHOLD,
-    UTVIDET_BARNETRYGD
+    UTVIDET_BARNETRYGD,
 }
 
 fun SanityVilkår.tilVilkår() = when (this) {
@@ -141,14 +145,14 @@ fun VilkårRolle.tilPersonType() =
 
 enum class VilkårRolle {
     SOKER,
-    BARN
+    BARN,
 }
 
 enum class VilkårTrigger {
     VURDERING_ANNET_GRUNNLAG,
     MEDLEMSKAP,
     DELT_BOSTED,
-    DELT_BOSTED_SKAL_IKKE_DELES
+    DELT_BOSTED_SKAL_IKKE_DELES,
 }
 
 enum class ØvrigTrigger {
@@ -160,24 +164,24 @@ enum class ØvrigTrigger {
     ENDRET_UTBETALING,
     GJELDER_FØRSTE_PERIODE,
     GJELDER_FRA_INNVILGELSESTIDSPUNKT,
-    BARN_DØD
+    BARN_DØD,
 }
 
 enum class EndretUtbetalingsperiodeTrigger {
-    ETTER_ENDRET_UTBETALINGSPERIODE
+    ETTER_ENDRET_UTBETALINGSPERIODE,
 }
 
 enum class EndretUtbetalingsperiodeDeltBostedTriggere {
     SKAL_UTBETALES,
     SKAL_IKKE_UTBETALES,
-    UTBETALING_IKKE_RELEVANT
+    UTBETALING_IKKE_RELEVANT,
 }
 
 enum class UtvidetBarnetrygdTrigger {
-    SMÅBARNSTILLEGG
+    SMÅBARNSTILLEGG,
 }
 
-fun SanityBegrunnelse.tilTriggesAv(): TriggesAv {
+private fun SanityBegrunnelse.tilTriggesAv(): TriggesAv {
     return TriggesAv(
         vilkår = this.vilkaar?.map { it.tilVilkår() }?.toSet() ?: emptySet(),
         personTyper = if (this.rolle.isEmpty()) {
@@ -213,7 +217,7 @@ fun SanityBegrunnelse.tilTriggesAv(): TriggesAv {
         småbarnstillegg = this.inneholderUtvidetBarnetrygdTrigger(UtvidetBarnetrygdTrigger.SMÅBARNSTILLEGG),
         gjelderFørstePeriode = this.inneholderØvrigTrigger(ØvrigTrigger.GJELDER_FØRSTE_PERIODE),
         gjelderFraInnvilgelsestidspunkt = this.inneholderØvrigTrigger(ØvrigTrigger.GJELDER_FRA_INNVILGELSESTIDSPUNKT),
-        barnDød = this.inneholderØvrigTrigger(ØvrigTrigger.BARN_DØD)
+        barnDød = this.inneholderØvrigTrigger(ØvrigTrigger.BARN_DØD),
     )
 }
 

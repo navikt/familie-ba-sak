@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service
 @Service
 class InternStatistikkService(
     private val behandlingRepository: BehandlingRepository,
-    private val fagsakRepository: FagsakRepository
+    private val fagsakRepository: FagsakRepository,
 ) {
     fun finnAntallFagsakerTotalt() = fagsakRepository.finnAntallFagsakerTotalt()
     fun finnAntallFagsakerLøpende() = fagsakRepository.finnAntallFagsakerLøpende()

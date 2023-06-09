@@ -10,14 +10,14 @@ class SanityBegrunnelseTest {
         val restSanityBegrunnelse = lagRestSanityBegrunnelse(
             ovrigeTriggere = listOf(
                 ØvrigTrigger.BARN_MED_6_ÅRS_DAG.name,
-                "IKKE_GYLDIG_ØVRIG_TRIGGER"
-            )
+                "IKKE_GYLDIG_ØVRIG_TRIGGER",
+            ),
         )
         Assertions.assertEquals(
             listOf(
-                ØvrigTrigger.BARN_MED_6_ÅRS_DAG
+                ØvrigTrigger.BARN_MED_6_ÅRS_DAG,
             ),
-            restSanityBegrunnelse.tilSanityBegrunnelse().ovrigeTriggere?.toList()
+            restSanityBegrunnelse.tilSanityBegrunnelse()!!.ovrigeTriggere?.toList(),
         )
     }
 
@@ -26,7 +26,7 @@ class SanityBegrunnelseTest {
         Assertions.assertEquals(null, finnEnumverdi("IKKE_GYLDIG_VERDI", ØvrigTrigger.values(), ""))
         Assertions.assertEquals(
             ØvrigTrigger.BARN_MED_6_ÅRS_DAG,
-            finnEnumverdi("BARN_MED_6_ÅRS_DAG", ØvrigTrigger.values(), "")
+            finnEnumverdi("BARN_MED_6_ÅRS_DAG", ØvrigTrigger.values(), ""),
         )
     }
 }

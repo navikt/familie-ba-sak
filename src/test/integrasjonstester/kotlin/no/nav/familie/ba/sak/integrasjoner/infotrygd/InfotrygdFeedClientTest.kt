@@ -36,7 +36,7 @@ class InfotrygdFeedClientTest : AbstractSpringIntegrationTest() {
     fun setUp() {
         client = InfotrygdFeedClient(
             URI.create(wireMockServer.baseUrl() + "/api"),
-            restOperations
+            restOperations,
         )
     }
 
@@ -50,8 +50,8 @@ class InfotrygdFeedClientTest : AbstractSpringIntegrationTest() {
     fun `skal legge til fødselsnummer i infotrygd feed`() {
         wireMockServer.stubFor(
             post("/api/barnetrygd/v1/feed/foedselsmelding").willReturn(
-                okJson(objectMapper.writeValueAsString(success("Create")))
-            )
+                okJson(objectMapper.writeValueAsString(success("Create"))),
+            ),
         )
         val request = InfotrygdFødselhendelsesFeedTaskDto(listOf("fnr"))
 
@@ -64,9 +64,9 @@ class InfotrygdFeedClientTest : AbstractSpringIntegrationTest() {
                 .withHeader(NavHttpHeaders.NAV_CONSUMER_ID.asString(), equalTo("srvfamilie-ba-sak"))
                 .withRequestBody(
                     equalToJson(
-                        objectMapper.writeValueAsString(InfotrygdFødselhendelsesFeedDto(fnrBarn = request.fnrBarn.first()))
-                    )
-                )
+                        objectMapper.writeValueAsString(InfotrygdFødselhendelsesFeedDto(fnrBarn = request.fnrBarn.first())),
+                    ),
+                ),
         )
     }
 

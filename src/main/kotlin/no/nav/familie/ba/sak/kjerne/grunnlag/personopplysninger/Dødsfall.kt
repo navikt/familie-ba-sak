@@ -41,8 +41,12 @@ data class Dødsfall(
     val dødsfallPostnummer: String?,
 
     @Column(name = "doedsfall_poststed", nullable = true)
-    val dødsfallPoststed: String?
+    val dødsfallPoststed: String?,
 ) : BaseEntitet() {
+
+    fun tilKopiForNyPerson(nyPerson: Person): Dødsfall =
+        copy(id = 0, person = nyPerson)
+
     fun hentAdresseToString(): String {
         return """$dødsfallAdresse, $dødsfallPostnummer $dødsfallPoststed"""
     }
@@ -50,14 +54,14 @@ data class Dødsfall(
     fun tilRestRegisteropplysning() = RestRegisteropplysning(
         fom = this.dødsfallDato,
         tom = null,
-        verdi = if (dødsfallAdresse == null) "-" else hentAdresseToString()
+        verdi = if (dødsfallAdresse == null) "-" else hentAdresseToString(),
     )
 }
 
 fun lagDødsfall(
     person: Person,
     dødsfallDatoFraPdl: String?,
-    dødsfallAdresseFraPdl: PdlKontaktinformasjonForDødsboAdresse?
+    dødsfallAdresseFraPdl: PdlKontaktinformasjonForDødsboAdresse?,
 ): Dødsfall? {
     if (dødsfallDatoFraPdl == null || dødsfallDatoFraPdl == "") {
         return null
@@ -67,6 +71,6 @@ fun lagDødsfall(
         dødsfallDato = LocalDate.parse(dødsfallDatoFraPdl),
         dødsfallAdresse = dødsfallAdresseFraPdl?.adresselinje1,
         dødsfallPostnummer = dødsfallAdresseFraPdl?.postnummer,
-        dødsfallPoststed = dødsfallAdresseFraPdl?.poststedsnavn
+        dødsfallPoststed = dødsfallAdresseFraPdl?.poststedsnavn,
     )
 }

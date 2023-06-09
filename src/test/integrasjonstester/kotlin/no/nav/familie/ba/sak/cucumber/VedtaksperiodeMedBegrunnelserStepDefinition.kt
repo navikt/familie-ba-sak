@@ -34,6 +34,7 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.parseEnumListe
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseInt
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseList
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseLong
+import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriBoolean
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriDato
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriEnum
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriLong
@@ -93,7 +94,7 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
                 personType = person.type,
                 lagFullstendigVilkårResultat = true,
                 periodeFom = null,
-                periodeTom = null
+                periodeTom = null,
             )
         }.toSet()
     }
@@ -133,7 +134,7 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
                 søkersAktivitetsland = parseValgfriString(SØKERS_AKTIVITETSLAND, rad) ?: "PL",
                 annenForeldersAktivitetsland = parseValgfriString(ANNEN_FORELDERS_AKTIVITETSLAND, rad) ?: "NO",
                 barnetsBostedsland = parseValgfriString(BARNETS_BOSTEDSLAND, rad) ?: "NO",
-                resultat = parseEnum<KompetanseResultat>(RESULTAT, rad)
+                resultat = parseEnum<KompetanseResultat>(RESULTAT, rad),
             ).also { it.behandlingId = behandlingId }
         }.groupBy { it.behandlingId }
             .toMutableMap()
@@ -153,7 +154,7 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
                 prosent = BigDecimal.ZERO,
                 årsak = Årsak.ALLEREDE_UTBETALT,
                 søknadstidspunkt = LocalDate.now(),
-                begrunnelse = "Fordi at..."
+                begrunnelse = "Fordi at...",
             )
         }.groupBy { it.behandlingId }
             .toMutableMap()
@@ -170,7 +171,7 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
                 tom = parseDato(Domenebegrep.TIL_DATO, rad).toYearMonth(),
                 behandling = finnBehandling(behandlingId),
                 person = persongrunnlagForBehandling(behandlingId).personer.find { aktørId == it.aktør.aktørId }!!,
-                beløp = parseInt(DomenebegrepVedtaksperiodeMedBegrunnelser.BELØP, rad)
+                beløp = parseInt(DomenebegrepVedtaksperiodeMedBegrunnelser.BELØP, rad),
             )
         }.groupBy { it.behandlingId }
             .toMutableMap()
@@ -187,7 +188,7 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
             personResultat.vilkårResultater.forEach { vilkårResultat ->
                 oppdaterVilkårResultat(
                     vilkårResultat,
-                    overstyringerForPerson
+                    overstyringerForPerson,
                 )
             }
             personResultat
@@ -207,7 +208,7 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
             kompetanser = kompetanser[behandlingId] ?: emptyList(),
             endredeUtbetalinger = endredeUtbetalinger[behandlingId] ?: emptyList(),
             andelerTilkjentYtelse = andelerTilkjentYtelse[behandlingId] ?: emptyList(),
-            perioderOvergangsstønad = emptyList() // todo
+            perioderOvergangsstønad = emptyList(), // todo
         )
         val forrigeBehandlingId = behandlingTilForrigeBehandling[behandlingId]
 
@@ -221,14 +222,14 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
                 kompetanser = kompetanser[forrigeBehandlingId] ?: emptyList(),
                 endredeUtbetalinger = endredeUtbetalinger[forrigeBehandlingId] ?: emptyList(),
                 andelerTilkjentYtelse = andelerTilkjentYtelse[forrigeBehandlingId] ?: emptyList(),
-                perioderOvergangsstønad = emptyList()
+                perioderOvergangsstønad = emptyList(),
             )
         }
 
         vedtaksperioderMedBegrunnelser = genererVedtaksperioder(
             vedtak = vedtaksliste.find { it.behandling.id == behandlingId && it.aktiv } ?: error("Finner ikke vedtak"),
             grunnlagForVedtakPerioder = grunnlagForVedtaksperiode,
-            grunnlagForVedtakPerioderForrigeBehandling = grunnlagForVedtaksperiodeForrigeBehandling
+            grunnlagForVedtakPerioderForrigeBehandling = grunnlagForVedtaksperiodeForrigeBehandling,
 
         )
     }
@@ -238,7 +239,7 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
         val forventedeVedtaksperioder = mapForventetVedtaksperioderMedBegrunnelser(
             dataTable = dataTable,
             vedtak = vedtaksliste.find { it.behandling.id == gjeldendeBehandlingId }
-                ?: throw Feil("Fant ingen vedtak for behandling $gjeldendeBehandlingId")
+                ?: throw Feil("Fant ingen vedtak for behandling $gjeldendeBehandlingId"),
         )
 
         val vedtaksperioderComparator = compareBy<VedtaksperiodeMedBegrunnelser>({ it.type }, { it.fom }, { it.tom })
@@ -249,7 +250,7 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
     private fun tilVilkårResultater(
         nyeVilkårForPerson: List<MutableMap<String, String>>?,
         behandlingId: Long,
-        personResultat: PersonResultat
+        personResultat: PersonResultat,
     ) =
         nyeVilkårForPerson?.map {
             VilkårResultat(
@@ -259,18 +260,23 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
                 periodeTom = parseValgfriDato(Domenebegrep.TIL_DATO, it),
                 begrunnelse = "",
                 behandlingId = behandlingId,
-                personResultat = personResultat
+                personResultat = personResultat,
+                erEksplisittAvslagPåSøknad = parseValgfriBoolean(
+                    DomenebegrepVedtaksperiodeMedBegrunnelser.ER_EKSPLISITT_AVSLAG,
+                    it,
+                ),
+
             )
         } ?: emptyList()
 
     private fun oppdaterVilkårResultat(
         vilkårResultat: VilkårResultat,
-        overstyringerForPerson: List<MutableMap<String, String>>?
+        overstyringerForPerson: List<MutableMap<String, String>>?,
     ) {
         val overstyringForVilkår = overstyringerForPerson?.find {
             parseEnumListe<Vilkår>(
                 DomenebegrepVedtaksperiodeMedBegrunnelser.VILKÅR,
-                it
+                it,
             ).contains(vilkårResultat.vilkårType)
         }
         if (overstyringForVilkår != null) {
@@ -278,6 +284,10 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
                 parseEnum(DomenebegrepVedtaksperiodeMedBegrunnelser.RESULTAT, overstyringForVilkår)
             vilkårResultat.periodeFom = parseValgfriDato(Domenebegrep.FRA_DATO, overstyringForVilkår)
             vilkårResultat.periodeTom = parseValgfriDato(Domenebegrep.TIL_DATO, overstyringForVilkår)
+            vilkårResultat.erEksplisittAvslagPåSøknad = parseValgfriBoolean(
+                DomenebegrepVedtaksperiodeMedBegrunnelser.ER_EKSPLISITT_AVSLAG,
+                overstyringForVilkår,
+            )
         }
     }
 
@@ -300,10 +310,10 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
                 id to tilfeldigPerson(
                     personType = parseEnum(
                         DomenebegrepPersongrunnlag.PERSON_TYPE,
-                        rad
+                        rad,
                     ),
                     fødselsdato = parseDato(DomenebegrepPersongrunnlag.FØDSELSDATO, rad),
-                    aktør = randomAktør().copy(aktørId = parseAktørId(rad))
+                    aktør = randomAktør().copy(aktørId = parseAktørId(rad)),
                 )
             }
         }.flatten()
@@ -311,7 +321,7 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
             .map { (behandlingId, personer) ->
                 PersonopplysningGrunnlag(
                     behandlingId = behandlingId,
-                    personer = personer.toMutableSet()
+                    personer = personer.toMutableSet(),
                 )
             }.associateBy { it.behandlingId }
     }

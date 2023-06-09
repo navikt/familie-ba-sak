@@ -3,15 +3,18 @@ package no.nav.familie.ba.sak.kjerne.brev.domene
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.NullablePeriode
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.brev.hentPersonidenterGjeldendeForBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
 
 data class BegrunnelseMedTriggere(
     val standardbegrunnelse: IVedtakBegrunnelse,
-    val triggesAv: TriggesAv
+    val triggesAv: TriggesAv,
+    val featureToggleService: FeatureToggleService,
 ) {
     fun tilBrevBegrunnelseGrunnlagMedPersoner(
         periode: NullablePeriode,
@@ -22,13 +25,13 @@ data class BegrunnelseMedTriggere(
         erUregistrerteBarnPåbehandling: Boolean,
         barnMedReduksjonFraForrigeBehandlingIdent: List<String>,
         minimerteUtbetalingsperiodeDetaljer: List<MinimertUtbetalingsperiodeDetalj>,
-        dødeBarnForrigePeriode: List<String>
+        dødeBarnForrigePeriode: List<String>,
     ): List<BrevBegrunnelseGrunnlagMedPersoner> {
         return if (this.standardbegrunnelse.kanDelesOpp) {
             this.standardbegrunnelse.delOpp(
                 restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
                 triggesAv = this.triggesAv,
-                periode = periode
+                periode = periode,
             )
         } else {
             val personidenterGjeldendeForBegrunnelse: Set<String> = hentPersonidenterGjeldendeForBegrunnelse(
@@ -41,7 +44,8 @@ data class BegrunnelseMedTriggere(
                 erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
                 identerMedReduksjonPåPeriode = barnMedReduksjonFraForrigeBehandlingIdent,
                 minimerteUtbetalingsperiodeDetaljer = minimerteUtbetalingsperiodeDetaljer,
-                dødeBarnForrigePeriode = dødeBarnForrigePeriode
+                dødeBarnForrigePeriode = dødeBarnForrigePeriode,
+                featureToggleService = featureToggleService,
             )
 
             if (
@@ -50,7 +54,7 @@ data class BegrunnelseMedTriggere(
                 !this.triggesAv.satsendring
             ) {
                 throw FunksjonellFeil(
-                    "Begrunnelse '${this.standardbegrunnelse}' var ikke knyttet til noen personer."
+                    "Begrunnelse '${this.standardbegrunnelse}' var ikke knyttet til noen personer.",
                 )
             }
 
@@ -59,24 +63,26 @@ data class BegrunnelseMedTriggere(
                     standardbegrunnelse = this.standardbegrunnelse,
                     vedtakBegrunnelseType = this.standardbegrunnelse.vedtakBegrunnelseType,
                     triggesAv = this.triggesAv,
-                    personIdenter = personidenterGjeldendeForBegrunnelse.toList()
-                )
+                    personIdenter = personidenterGjeldendeForBegrunnelse.toList(),
+                ),
             )
         }
     }
 
     fun tilBrevBegrunnelseGrunnlagForLogging() = BrevBegrunnelseGrunnlagForLogging(
-        standardbegrunnelse = this.standardbegrunnelse
+        standardbegrunnelse = this.standardbegrunnelse,
     )
 }
 
 fun Vedtaksbegrunnelse.tilBegrunnelseMedTriggere(
-    sanityBegrunnelser: List<SanityBegrunnelse>
+    sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
+    featureToggleService: FeatureToggleService,
 ): BegrunnelseMedTriggere {
-    val sanityBegrunnelse = sanityBegrunnelser.firstOrNull { it.apiNavn == this.standardbegrunnelse.sanityApiNavn } ?: throw Feil("Finner ikke sanityBegrunnelse med apiNavn=${this.standardbegrunnelse.sanityApiNavn}")
+    val sanityBegrunnelse = sanityBegrunnelser[this.standardbegrunnelse]
+        ?: throw Feil("Finner ikke sanityBegrunnelse med apiNavn=${this.standardbegrunnelse.sanityApiNavn}")
     return BegrunnelseMedTriggere(
         standardbegrunnelse = this.standardbegrunnelse,
-        triggesAv = sanityBegrunnelse
-            .tilTriggesAv()
+        triggesAv = sanityBegrunnelse.triggesAv,
+        featureToggleService = featureToggleService,
     )
 }

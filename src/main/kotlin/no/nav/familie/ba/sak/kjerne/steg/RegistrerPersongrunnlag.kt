@@ -15,40 +15,40 @@ class RegistrerPersongrunnlag(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val vilkårsvurderingForNyBehandlingService: VilkårsvurderingForNyBehandlingService,
     private val personopplysningGrunnlagForNyBehandlingService: PersonopplysningGrunnlagForNyBehandlingService,
-    private val eøsSkjemaerForNyBehandlingService: EøsSkjemaerForNyBehandlingService
+    private val eøsSkjemaerForNyBehandlingService: EøsSkjemaerForNyBehandlingService,
 ) : BehandlingSteg<RegistrerPersongrunnlagDTO> {
 
     @Transactional
     override fun utførStegOgAngiNeste(
         behandling: Behandling,
-        data: RegistrerPersongrunnlagDTO
+        data: RegistrerPersongrunnlagDTO,
     ): StegType {
         val forrigeBehandlingSomErVedtatt = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(
-            behandling
+            behandling,
         )
 
-        personopplysningGrunnlagForNyBehandlingService.opprettPersonopplysningGrunnlag(
+        personopplysningGrunnlagForNyBehandlingService.opprettKopiEllerNyttPersonopplysningGrunnlag(
             behandling = behandling,
             forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErVedtatt,
             søkerIdent = data.ident,
-            barnasIdenter = data.barnasIdenter
+            barnasIdenter = data.barnasIdenter,
         )
 
         vilkårsvurderingForNyBehandlingService.opprettVilkårsvurderingUtenomHovedflyt(
             behandling = behandling,
             forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErVedtatt,
-            nyMigreringsdato = data.nyMigreringsdato
+            nyMigreringsdato = data.nyMigreringsdato,
         )
 
         eøsSkjemaerForNyBehandlingService.kopierEøsSkjemaer(
             forrigeBehandlingSomErVedtattId = if (forrigeBehandlingSomErVedtatt != null) {
                 BehandlingId(
-                    forrigeBehandlingSomErVedtatt.id
+                    forrigeBehandlingSomErVedtatt.id,
                 )
             } else {
                 null
             },
-            behandlingId = BehandlingId(behandling.id)
+            behandlingId = BehandlingId(behandling.id),
         )
 
         return hentNesteStegForNormalFlyt(behandling)
@@ -62,5 +62,5 @@ class RegistrerPersongrunnlag(
 data class RegistrerPersongrunnlagDTO(
     val ident: String,
     val barnasIdenter: List<String>,
-    val nyMigreringsdato: LocalDate? = null
+    val nyMigreringsdato: LocalDate? = null,
 )

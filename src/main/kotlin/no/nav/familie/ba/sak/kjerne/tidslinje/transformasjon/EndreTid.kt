@@ -50,7 +50,7 @@ fun <I, R> Tidslinje<I, Dag>.tilMåned(mapper: (List<I?>) -> R?): Tidslinje<R, M
  * Funksjonen vil bruke månedsskiftene fra måneden før tidslinjens <fraOgMed> frem til og med måneden etter <tilOgMed>
  */
 fun <I, R> Tidslinje<I, Dag>.tilMånedFraMånedsskifteIkkeNull(
-    mapper: (innholdSisteDagForrigeMåned: I, innholdFørsteDagDenneMåned: I) -> R?
+    mapper: (innholdSisteDagForrigeMåned: I, innholdFørsteDagDenneMåned: I) -> R?,
 ): Tidslinje<R, Måned> {
     val fraOgMed = fraOgMed()
     val tilOgMed = tilOgMed()
@@ -82,7 +82,7 @@ fun <I> Tidslinje<I, Måned>.tilDag(): Tidslinje<I, Dag> {
                 Periode(
                     it.fraOgMed.tilFørsteDagIMåneden(),
                     it.tilOgMed.tilSisteDagIMåneden(),
-                    it.innhold
+                    it.innhold,
                 )
             }
     }

@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.erUnder18ÅrVilkårTidslinje
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
@@ -25,7 +26,7 @@ import java.time.LocalDate
 object VilkårsvurderingForskyvningUtils {
     fun Set<PersonResultat>.tilTidslinjeForSplitt(
         personerIPersongrunnlag: List<Person>,
-        fagsakType: FagsakType
+        fagsakType: FagsakType,
     ): Tidslinje<List<VilkårResultat>, Måned> {
         val tidslinjerPerPerson = this.map { personResultat ->
             val person = personerIPersongrunnlag.find { it.aktør == personResultat.aktør }
@@ -38,7 +39,7 @@ object VilkårsvurderingForskyvningUtils {
 
     fun PersonResultat.tilTidslinjeForSplittForPerson(
         personType: PersonType,
-        fagsakType: FagsakType
+        fagsakType: FagsakType,
     ): Tidslinje<List<VilkårResultat>, Måned> {
         val tidslinjer = this.vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår()
 
@@ -46,7 +47,7 @@ object VilkårsvurderingForskyvningUtils {
             alleOrdinæreVilkårErOppfyltEllerNull(
                 vilkårResultater = it,
                 personType = personType,
-                fagsakType = fagsakType
+                fagsakType = fagsakType,
             )
         }
             .filtrerIkkeNull().slåSammenLike()
@@ -112,11 +113,11 @@ object VilkårsvurderingForskyvningUtils {
 
     private fun Tidslinje<VilkårResultat, Måned>.beskjærPå18ÅrHvisUnder18ÅrVilkår(
         vilkår: Vilkår,
-        vilkårResultater: Iterable<VilkårResultat>
+        vilkårResultater: Iterable<VilkårResultat>,
     ): Tidslinje<VilkårResultat, Måned> {
         return if (vilkår == Vilkår.UNDER_18_ÅR) {
             val minstePeriodeFom = vilkårResultater.minOf {
-                it.periodeFom ?: throw Feil("Finner ikke fra og med dato på 'under 18 år'-vilkåret")
+                it.periodeFom ?: throw FunksjonellFeil("Finner ikke fra og med dato på 'under 18 år'-vilkåret")
             } // Fra og med dato skal være lik fødselsdato for under 18-vilkåret
             this.beskjærPå18År(fødselsdato = minstePeriodeFom)
         } else {
@@ -131,13 +132,13 @@ object VilkårsvurderingForskyvningUtils {
 
     private fun VilkårResultat.erDeltBosted() =
         this.utdypendeVilkårsvurderinger.contains(UtdypendeVilkårsvurdering.DELT_BOSTED) || this.utdypendeVilkårsvurderinger.contains(
-            UtdypendeVilkårsvurdering.DELT_BOSTED_SKAL_IKKE_DELES
+            UtdypendeVilkårsvurdering.DELT_BOSTED_SKAL_IKKE_DELES,
         )
 
     private fun alleOrdinæreVilkårErOppfyltEllerNull(
         vilkårResultater: Iterable<VilkårResultat>,
         personType: PersonType,
-        fagsakType: FagsakType
+        fagsakType: FagsakType,
     ): List<VilkårResultat>? {
         return if (vilkårResultater.alleOrdinæreVilkårErOppfylt(personType, fagsakType)) {
             vilkårResultater.filterNotNull()
@@ -150,7 +151,7 @@ object VilkårsvurderingForskyvningUtils {
         val alleVilkårForPersonType = Vilkår.hentVilkårFor(
             personType = personType,
             fagsakType = fagsakType,
-            behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR
+            behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
         )
         return this.map { it.vilkårType }
             .containsAll(alleVilkårForPersonType) && this.all { it.resultat == Resultat.OPPFYLT }

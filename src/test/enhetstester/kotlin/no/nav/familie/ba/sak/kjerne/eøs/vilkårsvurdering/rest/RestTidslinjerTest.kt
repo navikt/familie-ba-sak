@@ -40,7 +40,7 @@ internal class RestTidslinjerTest {
 
         val vilkårsvurderingTidslinjer = VilkårsvurderingTidslinjer(
             vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
-            personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1)
+            personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1),
         )
 
         val restTidslinjer = vilkårsvurderingTidslinjer.tilRestTidslinjer()
@@ -49,18 +49,18 @@ internal class RestTidslinjerTest {
         // Stopper ved søkers siste til-og-med-dato fordi Regelverk er <null> etter det, som filtreres bort
         assertEquals(
             31.jan(2022).tilLocalDate(),
-            barnetsTidslinjer.regelverkTidslinje.last().tilOgMed
+            barnetsTidslinjer.regelverkTidslinje.last().tilOgMed,
         )
         assertEquals(
             31.jan(2022).tilLocalDate(),
-            barnetsTidslinjer.oppfyllerEgneVilkårIKombinasjonMedSøkerTidslinje.last().tilOgMed
+            barnetsTidslinjer.oppfyllerEgneVilkårIKombinasjonMedSøkerTidslinje.last().tilOgMed,
         )
 
         // Alle vilkårene til barnet kuttes ved siste dag i måneden før barnet fyller 18 år
         barnetsTidslinjer.vilkårTidslinjer.forEach {
             assertEquals(
                 31.des(2037).tilLocalDate(),
-                it.last().tilOgMed
+                it.last().tilOgMed,
             )
         }
     }
@@ -95,7 +95,7 @@ internal class RestTidslinjerTest {
 
         val vilkårsvurderingTidslinjer = VilkårsvurderingTidslinjer(
             vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
-            personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1, barn2)
+            personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1, barn2),
         )
 
         val restTidslinjer = vilkårsvurderingTidslinjer.tilRestTidslinjer()
@@ -105,13 +105,13 @@ internal class RestTidslinjerTest {
         søkersTidslinjer.vilkårTidslinjer.forEach {
             assertEquals(
                 30.nov(2039).tilLocalDate(),
-                it.last().tilOgMed
+                it.last().tilOgMed,
             )
         }
 
         assertEquals(
             30.nov(2039).tilLocalDate(),
-            søkersTidslinjer.oppfyllerEgneVilkårTidslinje.last().tilOgMed
+            søkersTidslinjer.oppfyllerEgneVilkårTidslinje.last().tilOgMed,
         )
     }
 }

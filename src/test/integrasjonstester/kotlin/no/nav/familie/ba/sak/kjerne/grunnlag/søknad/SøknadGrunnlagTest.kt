@@ -73,7 +73,7 @@ class SøknadGrunnlagTest(
     private val databaseCleanupService: DatabaseCleanupService,
 
     @Autowired
-    private val brevmalService: BrevmalService
+    private val brevmalService: BrevmalService,
 ) : AbstractSpringIntegrationTest() {
 
     @BeforeAll
@@ -89,15 +89,15 @@ class SøknadGrunnlagTest(
 
         val fagsak = fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
         val behandling = stegService.håndterNyBehandling(
-            lagNyBehandling(søkerIdent, fagsak.id)
+            lagNyBehandling(søkerIdent, fagsak.id),
         )
 
         val søknadDTO = lagSøknadDTO(søkerIdent = søkerIdent, barnasIdenter = listOf(barnIdent))
         søknadGrunnlagService.lagreOgDeaktiverGammel(
             SøknadGrunnlag(
                 behandlingId = behandling.id,
-                søknad = søknadDTO.writeValueAsString()
-            )
+                søknad = søknadDTO.writeValueAsString(),
+            ),
         )
 
         val søknadGrunnlag = søknadGrunnlagService.hentAktiv(behandling.id)
@@ -115,7 +115,7 @@ class SøknadGrunnlagTest(
 
         val fagsak = fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
         val behandling = stegService.håndterNyBehandling(
-            lagNyBehandling(søkerIdent, fagsak.id)
+            lagNyBehandling(søkerIdent, fagsak.id),
         )
         val søknadDTO = lagSøknadDTO(søkerIdent = søkerIdent, barnasIdenter = listOf(barnIdent))
 
@@ -125,15 +125,15 @@ class SøknadGrunnlagTest(
         søknadGrunnlagService.lagreOgDeaktiverGammel(
             SøknadGrunnlag(
                 behandlingId = behandling.id,
-                søknad = søknadDTO.writeValueAsString()
-            )
+                søknad = søknadDTO.writeValueAsString(),
+            ),
         )
 
         søknadGrunnlagService.lagreOgDeaktiverGammel(
             SøknadGrunnlag(
                 behandlingId = behandling.id,
-                søknad = søknadDTO2.writeValueAsString()
-            )
+                søknad = søknadDTO2.writeValueAsString(),
+            ),
         )
         val søknadsGrunnlag = søknadGrunnlagService.hentAlle(behandling.id)
         assertEquals(2, søknadsGrunnlag.size)
@@ -153,31 +153,31 @@ class SøknadGrunnlagTest(
         val søknadDTO = SøknadDTO(
             underkategori = BehandlingUnderkategoriDTO.ORDINÆR,
             søkerMedOpplysninger = SøkerMedOpplysninger(
-                ident = søkerIdent
+                ident = søkerIdent,
             ),
             barnaMedOpplysninger = listOf(
                 BarnMedOpplysninger(
-                    ident = folkeregistrertBarn
+                    ident = folkeregistrertBarn,
                 ),
                 BarnMedOpplysninger(
                     ident = uregistrertBarn,
-                    erFolkeregistrert = false
-                )
+                    erFolkeregistrert = false,
+                ),
             ),
-            endringAvOpplysningerBegrunnelse = ""
+            endringAvOpplysningerBegrunnelse = "",
         )
 
         val fagsak = fagsakService.hentEllerOpprettFagsak(søkerAktør.aktivFødselsnummer())
         val behandling = stegService.håndterNyBehandling(
-            lagNyBehandling(søkerIdent, fagsak.id)
+            lagNyBehandling(søkerIdent, fagsak.id),
         )
 
         stegService.håndterSøknad(
             behandling = behandling,
             restRegistrerSøknad = RestRegistrerSøknad(
                 søknad = søknadDTO,
-                bekreftEndringerViaFrontend = false
-            )
+                bekreftEndringerViaFrontend = false,
+            ),
         )
 
         val persongrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
@@ -193,7 +193,7 @@ class SøknadGrunnlagTest(
         søkersIdent = søkerIdent,
         behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
         søknadMottattDato = LocalDate.now(),
-        fagsakId = fagsakId
+        fagsakId = fagsakId,
     )
 
     @Test
@@ -211,7 +211,7 @@ class SøknadGrunnlagTest(
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
         )
 
         val tilkjentYtelse =
@@ -222,9 +222,9 @@ class SøknadGrunnlagTest(
                 StegType.REGISTRERE_SØKNAD,
                 StegType.REGISTRERE_PERSONGRUNNLAG,
                 StegType.VILKÅRSVURDERING,
-                StegType.BEHANDLINGSRESULTAT
+                StegType.BEHANDLINGSRESULTAT,
             ),
-            steg
+            steg,
         )
         assertNotNull(tilkjentYtelse)
         assertTrue(tilkjentYtelse.andelerTilkjentYtelse.size > 0)
@@ -235,22 +235,22 @@ class SøknadGrunnlagTest(
                 søknad = SøknadDTO(
                     underkategori = BehandlingUnderkategoriDTO.ORDINÆR,
                     søkerMedOpplysninger = SøkerMedOpplysninger(
-                        ident = søkerFnr
+                        ident = søkerFnr,
                     ),
                     barnaMedOpplysninger = listOf(
                         BarnMedOpplysninger(
                             ident = barn1Fnr,
-                            inkludertISøknaden = false
+                            inkludertISøknaden = false,
                         ),
                         BarnMedOpplysninger(
                             ident = barn2Fnr,
-                            inkludertISøknaden = true
-                        )
+                            inkludertISøknaden = true,
+                        ),
                     ),
-                    endringAvOpplysningerBegrunnelse = ""
+                    endringAvOpplysningerBegrunnelse = "",
                 ),
-                bekreftEndringerViaFrontend = true
-            )
+                bekreftEndringerViaFrontend = true,
+            ),
         )
 
         assertThrows<EmptyResultDataAccessException> { beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandlingEtterNyRegistrering.id) }
@@ -258,7 +258,7 @@ class SøknadGrunnlagTest(
             behandlingEtterNyRegistrering.behandlingStegTilstand.map { it.behandlingSteg }.toSet()
         assertEquals(
             setOf(StegType.REGISTRERE_SØKNAD, StegType.REGISTRERE_PERSONGRUNNLAG, StegType.VILKÅRSVURDERING),
-            stegEtterNyRegistrering
+            stegEtterNyRegistrering,
         )
     }
 
@@ -277,7 +277,7 @@ class SøknadGrunnlagTest(
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
         )
 
         val behandlingEtterNyRegistrering = stegService.håndterSøknad(
@@ -286,22 +286,22 @@ class SøknadGrunnlagTest(
                 søknad = SøknadDTO(
                     underkategori = BehandlingUnderkategoriDTO.ORDINÆR,
                     søkerMedOpplysninger = SøkerMedOpplysninger(
-                        ident = søkerFnr
+                        ident = søkerFnr,
                     ),
                     barnaMedOpplysninger = listOf(
                         BarnMedOpplysninger(
                             ident = barn1Fnr,
-                            inkludertISøknaden = false
+                            inkludertISøknaden = false,
                         ),
                         BarnMedOpplysninger(
                             ident = barn2Fnr,
-                            inkludertISøknaden = true
-                        )
+                            inkludertISøknaden = true,
+                        ),
                     ),
-                    endringAvOpplysningerBegrunnelse = ""
+                    endringAvOpplysningerBegrunnelse = "",
                 ),
-                bekreftEndringerViaFrontend = true
-            )
+                bekreftEndringerViaFrontend = true,
+            ),
         )
 
         assertDoesNotThrow { utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingEtterNyRegistrering.id) }

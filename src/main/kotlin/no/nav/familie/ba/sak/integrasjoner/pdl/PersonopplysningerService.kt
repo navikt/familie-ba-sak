@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.integrasjoner.pdl
 import com.neovisionaries.i18n.CountryCode
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagsystem
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjon
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.ForelderBarnRelasjonMaskert
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PersonInfo
@@ -21,17 +21,16 @@ import org.springframework.stereotype.Service
 class PersonopplysningerService(
     private val pdlRestClient: PdlRestClient,
     private val systemOnlyPdlRestClient: SystemOnlyPdlRestClient,
-    private val familieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient
+    private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
 ) {
 
     fun hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør: Aktør): PersonInfo {
         val personinfo = hentPersoninfoMedQuery(aktør, PersonInfoQuery.MED_RELASJONER_OG_REGISTERINFORMASJON)
         val identerMedAdressebeskyttelse = mutableSetOf<Pair<Aktør, FORELDERBARNRELASJONROLLE>>()
+        val relasjonsidenter = personinfo.forelderBarnRelasjon.map { it.aktør.aktivFødselsnummer() }
+        val tilgangPerIdent = familieIntegrasjonerTilgangskontrollService.sjekkTilgangTilPersoner(relasjonsidenter)
         val forelderBarnRelasjon = personinfo.forelderBarnRelasjon.mapNotNull {
-            val harTilgang =
-                familieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(listOf(it.aktør.aktivFødselsnummer()))
-                    .harTilgang
-            if (harTilgang) {
+            if (tilgangPerIdent.getValue(it.aktør.aktivFødselsnummer()).harTilgang) {
                 try {
                     val relasjonsinfo = hentPersoninfoEnkel(it.aktør)
                     ForelderBarnRelasjon(
@@ -39,7 +38,7 @@ class PersonopplysningerService(
                         relasjonsrolle = it.relasjonsrolle,
                         fødselsdato = relasjonsinfo.fødselsdato,
                         navn = relasjonsinfo.navn,
-                        adressebeskyttelseGradering = relasjonsinfo.adressebeskyttelseGradering
+                        adressebeskyttelseGradering = relasjonsinfo.adressebeskyttelseGradering,
                     )
                 } catch (pdlPersonKanIkkeBehandlesIFagsystem: PdlPersonKanIkkeBehandlesIFagsystem) {
                     logger.warn("Ignorerer relasjon: ${pdlPersonKanIkkeBehandlesIFagsystem.årsak}")
@@ -55,12 +54,12 @@ class PersonopplysningerService(
         val forelderBarnRelasjonMaskert = identerMedAdressebeskyttelse.map {
             ForelderBarnRelasjonMaskert(
                 relasjonsrolle = it.second,
-                adressebeskyttelseGradering = hentAdressebeskyttelseSomSystembruker(it.first)
+                adressebeskyttelseGradering = hentAdressebeskyttelseSomSystembruker(it.first),
             )
         }.toSet()
         return personinfo.copy(
             forelderBarnRelasjon = forelderBarnRelasjon,
-            forelderBarnRelasjonMaskert = forelderBarnRelasjonMaskert
+            forelderBarnRelasjonMaskert = forelderBarnRelasjonMaskert,
         )
     }
 
@@ -94,7 +93,7 @@ class PersonopplysningerService(
     fun hentGjeldendeOpphold(aktør: Aktør): Opphold = pdlRestClient.hentOppholdUtenHistorikk(aktør).firstOrNull()
         ?: throw Feil(
             message = "Bruker mangler opphold",
-            frontendFeilmelding = "Person (${aktør.aktivFødselsnummer()}) mangler opphold."
+            frontendFeilmelding = "Person (${aktør.aktivFødselsnummer()}) mangler opphold.",
         )
 
     fun hentLandkodeAlpha2UtenlandskBostedsadresse(aktør: Aktør): String {
@@ -125,7 +124,7 @@ class PersonopplysningerService(
                 land = PDL_UKJENT_LANDKODE,
                 bekreftelsesdato = null,
                 gyldigFraOgMed = null,
-                gyldigTilOgMed = null
+                gyldigTilOgMed = null,
             )
         private val logger: Logger =
             LoggerFactory.getLogger(PersonopplysningerService::class.java)

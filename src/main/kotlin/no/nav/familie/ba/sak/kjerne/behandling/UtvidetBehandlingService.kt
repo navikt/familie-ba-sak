@@ -42,6 +42,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta.FeilutbetaltValutaService
 import no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs.RefusjonEøsService
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.sorter
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilRestUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import org.springframework.stereotype.Service
@@ -71,7 +72,7 @@ class UtvidetBehandlingService(
     private val korrigertVedtakService: KorrigertVedtakService,
     private val feilutbetaltValutaService: FeilutbetaltValutaService,
     private val brevmottakerService: BrevmottakerService,
-    private val refusjonEøsService: RefusjonEøsService
+    private val refusjonEøsService: RefusjonEøsService,
 ) {
     fun lagRestUtvidetBehandling(behandlingId: Long): RestUtvidetBehandling {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
@@ -130,7 +131,7 @@ class UtvidetBehandlingService(
                 ?: emptyList(),
             personResultater = personResultater?.map { it.tilRestPersonResultat() } ?: emptyList(),
             fødselshendelsefiltreringResultater = fødselshendelsefiltreringResultatRepository.finnFødselshendelsefiltreringResultater(
-                behandlingId = behandling.id
+                behandlingId = behandling.id,
             ).map { it.tilRestFødselshendelsefiltreringResultat() },
             utbetalingsperioder = vedtaksperiodeService.hentUtbetalingsperioder(behandling),
             personerMedAndelerTilkjentYtelse = personopplysningGrunnlag?.tilRestPersonerMedAndeler(andelerTilkjentYtelse)
@@ -142,11 +143,12 @@ class UtvidetBehandlingService(
             vedtak = vedtak?.tilRestVedtak(
                 vedtaksperioderMedBegrunnelser = if (behandling.status != BehandlingStatus.AVSLUTTET) {
                     vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(vedtak = vedtak)
-                        .map { it.tilRestUtvidetVedtaksperiodeMedBegrunnelser() }.sortedBy { it.fom }
+                        .sorter()
+                        .map { it.tilRestUtvidetVedtaksperiodeMedBegrunnelser() }
                 } else {
                     emptyList()
                 },
-                skalMinimeres = behandling.status != BehandlingStatus.UTREDES
+                skalMinimeres = behandling.status != BehandlingStatus.UTREDES,
             ),
             kompetanser = kompetanser.map { it.tilRestKompetanse() }.sortedByDescending { it.fom },
             totrinnskontroll = totrinnskontroll?.tilRestTotrinnskontroll(),
@@ -162,13 +164,13 @@ class UtvidetBehandlingService(
                 ?.tilRestKorrigertVedtak(),
             feilutbetaltValuta = feilutbetaltValuta,
             brevmottakere = brevmottakere,
-            refusjonEøs = refusjonEøs
+            refusjonEøs = refusjonEøs,
         )
     }
 
     private fun utledEndringstidpunkt(
         endringstidspunkt: LocalDate,
-        behandling: Behandling
+        behandling: Behandling,
     ) = when {
         endringstidspunkt == TIDENES_MORGEN || endringstidspunkt == TIDENES_ENDE -> null
         behandling.overstyrtEndringstidspunkt != null -> behandling.overstyrtEndringstidspunkt

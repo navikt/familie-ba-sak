@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
@@ -21,22 +22,39 @@ import java.time.LocalDate
 
 sealed interface GrunnlagForPerson {
     val person: Person
-    val vilkårResultaterForVedtaksPeriode: List<VilkårResultatForVedtaksperiode>
+    val vilkårResultaterForVedtaksperiode: List<VilkårResultatForVedtaksperiode>
+
+    fun erEksplisittAvslag(): Boolean = this is GrunnlagForPersonIkkeInnvilget && this.erEksplisittAvslag
+
+    fun kopier(
+        person: Person = this.person,
+        vilkårResultaterForVedtaksperiode: List<VilkårResultatForVedtaksperiode> = this.vilkårResultaterForVedtaksperiode,
+    ): GrunnlagForPerson {
+        return when (this) {
+            is GrunnlagForPersonIkkeInnvilget -> this.copy(person, vilkårResultaterForVedtaksperiode)
+            is GrunnlagForPersonInnvilget -> this.copy(person, vilkårResultaterForVedtaksperiode)
+        }
+    }
 }
 
 data class GrunnlagForPersonInnvilget(
     override val person: Person,
-    override val vilkårResultaterForVedtaksPeriode: List<VilkårResultatForVedtaksperiode>,
+    override val vilkårResultaterForVedtaksperiode: List<VilkårResultatForVedtaksperiode>,
     val andeler: Iterable<AndelForVedtaksperiode>,
     val kompetanse: KompetanseForVedtaksperiode? = null,
     val endretUtbetalingAndel: EndretUtbetalingAndelForVedtaksperiode? = null,
-    val overgangsstønad: OvergangsstønadForVedtaksperiode? = null
+    val overgangsstønad: OvergangsstønadForVedtaksperiode? = null,
 ) : GrunnlagForPerson
 
 data class GrunnlagForPersonIkkeInnvilget(
     override val person: Person,
-    override val vilkårResultaterForVedtaksPeriode: List<VilkårResultatForVedtaksperiode>
-) : GrunnlagForPerson
+    override val vilkårResultaterForVedtaksperiode: List<VilkårResultatForVedtaksperiode>,
+) : GrunnlagForPerson {
+    val erEksplisittAvslag: Boolean = vilkårResultaterForVedtaksperiode.inneholderEksplisittAvslag()
+
+    fun List<VilkårResultatForVedtaksperiode>.inneholderEksplisittAvslag() =
+        this.any { it.erEksplisittAvslagPåSøknad == true }
+}
 
 data class VilkårResultatForVedtaksperiode(
     val vilkårType: Vilkår,
@@ -45,8 +63,9 @@ data class VilkårResultatForVedtaksperiode(
     val vurderesEtter: Regelverk?,
     val erEksplisittAvslagPåSøknad: Boolean?,
     val standardbegrunnelser: List<IVedtakBegrunnelse>,
+    val aktørId: AktørId,
     val fom: LocalDate?,
-    val tom: LocalDate?
+    val tom: LocalDate?,
 ) {
     constructor(vilkårResultat: VilkårResultat) : this(
         vilkårType = vilkårResultat.vilkårType,
@@ -56,29 +75,31 @@ data class VilkårResultatForVedtaksperiode(
         erEksplisittAvslagPåSøknad = vilkårResultat.erEksplisittAvslagPåSøknad,
         standardbegrunnelser = vilkårResultat.standardbegrunnelser,
         fom = vilkårResultat.periodeFom,
-        tom = vilkårResultat.periodeTom
+        tom = vilkårResultat.periodeTom,
+        aktørId = vilkårResultat.personResultat?.aktør?.aktørId
+            ?: throw Feil("$vilkårResultat er ikke knyttet til personResultat"),
     )
 }
 
 data class EndretUtbetalingAndelForVedtaksperiode(
     val prosent: BigDecimal,
     val årsak: Årsak,
-    val standardbegrunnelse: List<IVedtakBegrunnelse>
+    val standardbegrunnelse: List<IVedtakBegrunnelse>,
 ) {
     constructor(endretUtbetalingAndel: IUtfyltEndretUtbetalingAndel) : this(
         prosent = endretUtbetalingAndel.prosent,
         årsak = endretUtbetalingAndel.årsak,
-        standardbegrunnelse = endretUtbetalingAndel.standardbegrunnelser
+        standardbegrunnelse = endretUtbetalingAndel.standardbegrunnelser,
     )
 }
 
 data class AndelForVedtaksperiode(
     val kalkulertUtbetalingsbeløp: Int,
-    val type: YtelseType
+    val type: YtelseType,
 ) {
     constructor(andelTilkjentYtelse: AndelTilkjentYtelse) : this(
         kalkulertUtbetalingsbeløp = andelTilkjentYtelse.kalkulertUtbetalingsbeløp,
-        type = andelTilkjentYtelse.type
+        type = andelTilkjentYtelse.type,
     )
 }
 
@@ -88,7 +109,7 @@ data class KompetanseForVedtaksperiode(
     val annenForeldersAktivitetsland: String?,
     val søkersAktivitetsland: String,
     val barnetsBostedsland: String,
-    val resultat: KompetanseResultat
+    val resultat: KompetanseResultat,
 ) {
     constructor(kompetanse: UtfyltKompetanse) : this(
         søkersAktivitet = kompetanse.søkersAktivitet,
@@ -96,16 +117,16 @@ data class KompetanseForVedtaksperiode(
         annenForeldersAktivitetsland = kompetanse.annenForeldersAktivitetsland,
         søkersAktivitetsland = kompetanse.søkersAktivitetsland,
         barnetsBostedsland = kompetanse.barnetsBostedsland,
-        resultat = kompetanse.resultat
+        resultat = kompetanse.resultat,
     )
 }
 
 data class OvergangsstønadForVedtaksperiode(
     val fom: LocalDate,
-    val tom: LocalDate
+    val tom: LocalDate,
 ) {
     constructor(periodeOvergangsstønad: InternPeriodeOvergangsstønad) : this(
         fom = periodeOvergangsstønad.fomDato,
-        tom = periodeOvergangsstønad.tomDato
+        tom = periodeOvergangsstønad.tomDato,
     )
 }

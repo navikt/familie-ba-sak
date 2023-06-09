@@ -7,13 +7,13 @@ import java.time.YearMonth
 
 fun erStartPåUtvidetSammeMåned(
     andelTilkjentYtelser: List<AndelTilkjentYtelse>,
-    fom: YearMonth?
+    fom: YearMonth?,
 ) = andelTilkjentYtelser.any { it.stønadFom == fom && it.type == YtelseType.UTVIDET_BARNETRYGD }
 
 fun beregnGyldigTomIFremtiden(
     andreEndredeAndelerPåBehandling: List<EndretUtbetalingAndel>,
     endretUtbetalingAndel: EndretUtbetalingAndel,
-    andelTilkjentYtelser: List<AndelTilkjentYtelse>
+    andelTilkjentYtelser: List<AndelTilkjentYtelse>,
 ): YearMonth? {
     val førsteEndringEtterDenneEndringen = andreEndredeAndelerPåBehandling.filter {
         it.fom?.isAfter(endretUtbetalingAndel.fom) == true &&

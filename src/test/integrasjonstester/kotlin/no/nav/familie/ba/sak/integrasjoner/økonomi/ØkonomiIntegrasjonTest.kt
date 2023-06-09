@@ -60,7 +60,7 @@ class ØkonomiIntegrasjonTest(
     private val vedtakService: VedtakService,
 
     @Autowired
-    private val simuleringService: SimuleringService
+    private val simuleringService: SimuleringService,
 ) : AbstractSpringIntegrationTest() {
 
     @Test
@@ -88,7 +88,7 @@ class ØkonomiIntegrasjonTest(
                 fnr,
                 listOf(barnFnr),
                 søkerAktør = fagsak.aktør,
-                barnAktør = barnAktør
+                barnAktør = barnAktør,
             )
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
@@ -105,7 +105,7 @@ class ØkonomiIntegrasjonTest(
             økonomiService.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(
                 vedtak,
                 "ansvarligSaksbehandler",
-                AndelTilkjentYtelseForIverksettingFactory()
+                AndelTilkjentYtelseForIverksettingFactory(),
             )
         }
     }
@@ -125,7 +125,7 @@ class ØkonomiIntegrasjonTest(
 
         val vedtak = Vedtak(
             behandling = behandling,
-            vedtaksdato = LocalDateTime.of(2020, 1, 1, 4, 35)
+            vedtaksdato = LocalDateTime.of(2020, 1, 1, 4, 35),
         )
 
         val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true)
@@ -135,7 +135,7 @@ class ØkonomiIntegrasjonTest(
                 fnr,
                 listOf(barnFnr),
                 søkerAktør = fagsak.aktør,
-                barnAktør = barnAktør
+                barnAktør = barnAktør,
             )
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
         behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling)
@@ -149,7 +149,7 @@ class ØkonomiIntegrasjonTest(
         økonomiService.oppdaterTilkjentYtelseMedUtbetalingsoppdragOgIverksett(
             vedtak,
             "ansvarligSaksbehandler",
-            AndelTilkjentYtelseForIverksettingFactory()
+            AndelTilkjentYtelseForIverksettingFactory(),
         )
         behandlingService.oppdaterStatusPåBehandling(behandling.id, BehandlingStatus.AVSLUTTET)
 
@@ -167,7 +167,7 @@ class ØkonomiIntegrasjonTest(
         søkerAktør: Aktør,
         barnAktør: Aktør,
         stønadFom: LocalDate,
-        stønadTom: LocalDate
+        stønadTom: LocalDate,
     ): Vilkårsvurdering {
         val vilkårsvurdering =
             Vilkårsvurdering(behandling = behandling)
@@ -179,7 +179,7 @@ class ØkonomiIntegrasjonTest(
                 periodeFom = stønadFom,
                 periodeTom = stønadTom,
                 lagFullstendigVilkårResultat = true,
-                personType = PersonType.SØKER
+                personType = PersonType.SØKER,
             ),
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
@@ -188,8 +188,8 @@ class ØkonomiIntegrasjonTest(
                 periodeFom = stønadFom,
                 periodeTom = stønadTom,
                 lagFullstendigVilkårResultat = true,
-                personType = PersonType.BARN
-            )
+                personType = PersonType.BARN,
+            ),
         )
         return vilkårsvurdering
     }

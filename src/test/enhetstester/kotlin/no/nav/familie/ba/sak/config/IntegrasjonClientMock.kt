@@ -7,7 +7,6 @@ import io.mockk.isMockKMock
 import io.mockk.just
 import io.mockk.mockk
 import io.mockk.runs
-import io.mockk.slot
 import no.nav.familie.ba.sak.config.ClientMocks.Companion.BARN_DET_IKKE_GIS_TILGANG_TIL_FNR
 import no.nav.familie.ba.sak.config.ClientMocks.Companion.søkerFnr
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
@@ -79,18 +78,18 @@ class IntegrasjonClientMock {
 
             every { mockIntegrasjonClient.hentJournalpost(any()) } returns lagTestJournalpost(
                 søkerFnr[0],
-                UUID.randomUUID().toString()
+                UUID.randomUUID().toString(),
             )
 
             every { mockIntegrasjonClient.hentJournalposterForBruker(any()) } returns listOf(
                 lagTestJournalpost(
                     søkerFnr[0],
-                    UUID.randomUUID().toString()
+                    UUID.randomUUID().toString(),
                 ),
                 lagTestJournalpost(
                     søkerFnr[0],
-                    UUID.randomUUID().toString()
-                )
+                    UUID.randomUUID().toString(),
+                ),
             )
 
             every { mockIntegrasjonClient.finnOppgaveMedId(any()) } returns
@@ -99,7 +98,7 @@ class IntegrasjonClientMock {
             every { mockIntegrasjonClient.hentOppgaver(any()) } returns
                 FinnOppgaveResponseDto(
                     2,
-                    listOf(lagTestOppgaveDTO(1L), lagTestOppgaveDTO(2L, Oppgavetype.BehandleSak, "Z999999"))
+                    listOf(lagTestOppgaveDTO(1L), lagTestOppgaveDTO(2L, Oppgavetype.BehandleSak, "Z999999")),
                 )
 
             every { mockIntegrasjonClient.opprettOppgave(any()) } returns
@@ -148,15 +147,15 @@ class IntegrasjonClientMock {
             every { mockIntegrasjonClient.hentBehandlendeEnhet(any()) } returns listOf(
                 Arbeidsfordelingsenhet(
                     "100",
-                    "NAV Familie- og pensjonsytelser Oslo 1"
-                )
+                    "NAV Familie- og pensjonsytelser Oslo 1",
+                ),
             )
 
             every { mockIntegrasjonClient.hentEnhet(any()) } returns NavKontorEnhet(
                 101,
                 "NAV Familie- og pensjonsytelser Oslo 1",
                 "101",
-                ""
+                "",
             )
 
             every { mockIntegrasjonClient.opprettSkyggesak(any(), any()) } just runs
@@ -171,7 +170,7 @@ class IntegrasjonClientMock {
             every { mockIntegrasjonClient.hentOrganisasjon(any()) } answers {
                 Organisasjon(
                     "998765432",
-                    "Testinstitusjon"
+                    "Testinstitusjon",
                 )
             }
         }
@@ -180,18 +179,29 @@ class IntegrasjonClientMock {
             clearMocks(mockFamilieIntegrasjonerTilgangskontrollClient)
 
             every {
-                mockFamilieIntegrasjonerTilgangskontrollClient.hentMaskertPersonInfoVedManglendeTilgang(any())
-            } returns null
-
-            val idSlot = slot<List<String>>()
-            every {
-                mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(capture(idSlot))
+                mockFamilieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(any())
             } answers {
-                if (idSlot.captured.isNotEmpty() && idSlot.captured.contains(BARN_DET_IKKE_GIS_TILGANG_TIL_FNR)) {
-                    Tilgang(false, null)
-                } else {
-                    Tilgang(true, null)
-                }
+                val identer = firstArg<List<String>>()
+                identer.map { Tilgang(personIdent = it, harTilgang = it != BARN_DET_IKKE_GIS_TILGANG_TIL_FNR) }
+            }
+        }
+
+        fun FamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(
+            map: Map<String, Boolean>,
+            slot: MutableList<List<String>> = mutableListOf(),
+        ) {
+            every { sjekkTilgangTilPersoner(capture(slot)) } answers {
+                val arg = firstArg<List<String>>()
+                map.entries.filter { arg.contains(it.key) }.map { Tilgang(personIdent = it.key, harTilgang = it.value) }
+            }
+        }
+
+        fun FamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(
+            harTilgang: Boolean = false,
+            slot: MutableList<List<String>> = mutableListOf(),
+        ) {
+            every { sjekkTilgangTilPersoner(capture(slot)) } answers {
+                firstArg<List<String>>().map { Tilgang(personIdent = it, harTilgang = harTilgang) }
             }
         }
 
@@ -216,8 +226,8 @@ class IntegrasjonClientMock {
                     "POL" to listOf(betydningPolen),
                     "DEU" to listOf(betydningTyskland),
                     "DNK" to listOf(betydningDanmark),
-                    "GBR" to listOf(betydningUK)
-                )
+                    "GBR" to listOf(betydningUK),
+                ),
             )
         }
 
@@ -229,7 +239,7 @@ class IntegrasjonClientMock {
 
         data class LandkodeISO2(
             val code: String,
-            val name: String
+            val name: String,
         )
 
         fun hentLandkoderISO2(): Map<String, String> {

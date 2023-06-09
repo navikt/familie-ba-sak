@@ -8,8 +8,9 @@ import no.nav.familie.ba.sak.common.lagUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.common.lagUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.lagVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.common.tilMånedÅr
-import no.nav.familie.ba.sak.dataGenerator.vedtak.lagVedtaksbegrunnelse
-import no.nav.familie.ba.sak.integrasjoner.sanity.hentBegrunnelser
+import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.config.testSanityKlient
+import no.nav.familie.ba.sak.datagenerator.vedtak.lagVedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -25,6 +26,9 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDate
 
 internal class BrevUtilsTest {
+
+    private val featureToggleService: FeatureToggleService = mockk()
+
     @Test
     fun `hent dokumenttittel dersom denne skal overstyres for behandlingen`() {
         assertNull(hentOverstyrtDokumenttittel(lagBehandling().copy(type = BehandlingType.FØRSTEGANGSBEHANDLING)))
@@ -32,19 +36,19 @@ internal class BrevUtilsTest {
         assertNull(hentOverstyrtDokumenttittel(revurdering))
         Assertions.assertEquals(
             "Vedtak om endret barnetrygd - barn 6 år",
-            hentOverstyrtDokumenttittel(revurdering.copy(opprettetÅrsak = BehandlingÅrsak.OMREGNING_6ÅR))
+            hentOverstyrtDokumenttittel(revurdering.copy(opprettetÅrsak = BehandlingÅrsak.OMREGNING_6ÅR)),
         )
         Assertions.assertEquals(
             "Vedtak om endret barnetrygd - barn 18 år",
-            hentOverstyrtDokumenttittel(revurdering.copy(opprettetÅrsak = BehandlingÅrsak.OMREGNING_18ÅR))
+            hentOverstyrtDokumenttittel(revurdering.copy(opprettetÅrsak = BehandlingÅrsak.OMREGNING_18ÅR)),
         )
         Assertions.assertEquals(
             "Vedtak om endret barnetrygd",
-            hentOverstyrtDokumenttittel(revurdering.copy(resultat = Behandlingsresultat.INNVILGET_OG_ENDRET))
+            hentOverstyrtDokumenttittel(revurdering.copy(resultat = Behandlingsresultat.INNVILGET_OG_ENDRET)),
         )
         Assertions.assertEquals(
             "Vedtak om fortsatt barnetrygd",
-            hentOverstyrtDokumenttittel(revurdering.copy(resultat = Behandlingsresultat.FORTSATT_INNVILGET))
+            hentOverstyrtDokumenttittel(revurdering.copy(resultat = Behandlingsresultat.FORTSATT_INNVILGET)),
         )
         assertNull(hentOverstyrtDokumenttittel(revurdering.copy(resultat = Behandlingsresultat.OPPHØRT)))
     }
@@ -56,20 +60,20 @@ internal class BrevUtilsTest {
                 begrunnelser = listOf(
                     lagVedtaksbegrunnelse(
                         standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
-                        vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser()
-                    )
+                        vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(),
+                    ),
                 ),
-                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
+                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
             ),
             lagUtvidetVedtaksperiodeMedBegrunnelser(
                 begrunnelser = listOf(
                     lagVedtaksbegrunnelse(
                         standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING,
-                        vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser()
-                    )
+                        vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(),
+                    ),
                 ),
-                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
-            )
+                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
+            ),
         )
 
         Assertions.assertEquals(
@@ -77,23 +81,24 @@ internal class BrevUtilsTest {
             hentHjemmeltekst(
                 minimerteVedtaksperioder = utvidetVedtaksperioderMedBegrunnelser.map {
                     it.tilMinimertVedtaksperiode(
-                        hentBegrunnelser(),
-                        emptyList()
+                        testSanityKlient.hentBegrunnelserMap(),
+                        emptyMap(),
+                        featureToggleService,
                     )
                 },
-                sanityBegrunnelser = listOf(
-                    lagSanityBegrunnelse(
+                sanityBegrunnelser = mapOf(
+                    Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to lagSanityBegrunnelse(
                         apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
-                        hjemler = listOf("11", "4", "2", "10")
+                        hjemler = listOf("11", "4", "2", "10"),
                     ),
-                    lagSanityBegrunnelse(
+                    Standardbegrunnelse.INNVILGET_SATSENDRING to lagSanityBegrunnelse(
                         apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
-                        hjemler = listOf("10")
-                    )
+                        hjemler = listOf("10"),
+                    ),
                 ),
                 målform = Målform.NB,
-                refusjonEøsHjemmelSkalMedIBrev = false
-            )
+                refusjonEøsHjemmelSkalMedIBrev = false,
+            ),
         )
     }
 
@@ -103,19 +108,19 @@ internal class BrevUtilsTest {
             lagUtvidetVedtaksperiodeMedBegrunnelser(
                 begrunnelser = listOf(
                     lagVedtaksbegrunnelse(
-                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET
-                    )
+                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                    ),
                 ),
-                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
+                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
             ),
             lagUtvidetVedtaksperiodeMedBegrunnelser(
                 begrunnelser = listOf(
                     lagVedtaksbegrunnelse(
-                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING
-                    )
+                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING,
+                    ),
                 ),
-                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
-            )
+                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
+            ),
         )
 
         Assertions.assertEquals(
@@ -123,24 +128,25 @@ internal class BrevUtilsTest {
             hentHjemmeltekst(
                 minimerteVedtaksperioder = utvidetVedtaksperioderMedBegrunnelser.map {
                     it.tilMinimertVedtaksperiode(
-                        sanityBegrunnelser = hentBegrunnelser(),
-                        sanityEØSBegrunnelser = emptyList()
+                        sanityBegrunnelser = testSanityKlient.hentBegrunnelserMap(),
+                        sanityEØSBegrunnelser = emptyMap(),
+                        featureToggleService = featureToggleService,
                     )
                 },
-                sanityBegrunnelser = listOf(
-                    lagSanityBegrunnelse(
+                sanityBegrunnelser = mapOf(
+                    Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to lagSanityBegrunnelse(
                         apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
-                        hjemler = listOf("11", "4", "2", "10")
+                        hjemler = listOf("11", "4", "2", "10"),
                     ),
-                    lagSanityBegrunnelse(
+                    Standardbegrunnelse.INNVILGET_SATSENDRING to lagSanityBegrunnelse(
                         apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
-                        hjemler = listOf("10")
-                    )
+                        hjemler = listOf("10"),
+                    ),
                 ),
                 opplysningspliktHjemlerSkalMedIBrev = false,
                 målform = Målform.NB,
-                refusjonEøsHjemmelSkalMedIBrev = false
-            )
+                refusjonEøsHjemmelSkalMedIBrev = false,
+            ),
         )
     }
 
@@ -150,19 +156,19 @@ internal class BrevUtilsTest {
             lagUtvidetVedtaksperiodeMedBegrunnelser(
                 begrunnelser = listOf(
                     lagVedtaksbegrunnelse(
-                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET
-                    )
+                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                    ),
                 ),
-                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
+                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
             ),
             lagUtvidetVedtaksperiodeMedBegrunnelser(
                 begrunnelser = listOf(
                     lagVedtaksbegrunnelse(
-                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING
-                    )
+                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING,
+                    ),
                 ),
-                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
-            )
+                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
+            ),
         )
 
         Assertions.assertEquals(
@@ -170,24 +176,25 @@ internal class BrevUtilsTest {
             hentHjemmeltekst(
                 minimerteVedtaksperioder = utvidetVedtaksperioderMedBegrunnelser.map {
                     it.tilMinimertVedtaksperiode(
-                        sanityBegrunnelser = hentBegrunnelser(),
-                        sanityEØSBegrunnelser = emptyList()
+                        sanityBegrunnelser = testSanityKlient.hentBegrunnelserMap(),
+                        sanityEØSBegrunnelser = emptyMap(),
+                        featureToggleService = featureToggleService,
                     )
                 },
-                sanityBegrunnelser = listOf(
-                    lagSanityBegrunnelse(
+                sanityBegrunnelser = mapOf(
+                    Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to lagSanityBegrunnelse(
                         apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
-                        hjemler = listOf("11", "4", "2", "10")
+                        hjemler = listOf("11", "4", "2", "10"),
                     ),
-                    lagSanityBegrunnelse(
+                    Standardbegrunnelse.INNVILGET_SATSENDRING to lagSanityBegrunnelse(
                         apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
-                        hjemler = listOf("10")
-                    )
+                        hjemler = listOf("10"),
+                    ),
                 ),
                 opplysningspliktHjemlerSkalMedIBrev = true,
                 målform = Målform.NB,
-                refusjonEøsHjemmelSkalMedIBrev = false
-            )
+                refusjonEøsHjemmelSkalMedIBrev = false,
+            ),
         )
     }
 
@@ -197,11 +204,11 @@ internal class BrevUtilsTest {
             "EØS-forordning 987/2009 artikkel 60",
             hentHjemmeltekst(
                 minimerteVedtaksperioder = emptyList(),
-                sanityBegrunnelser = emptyList(),
+                sanityBegrunnelser = emptyMap(),
                 opplysningspliktHjemlerSkalMedIBrev = false,
                 målform = Målform.NB,
-                refusjonEøsHjemmelSkalMedIBrev = true
-            )
+                refusjonEøsHjemmelSkalMedIBrev = true,
+            ),
         )
     }
 
@@ -211,31 +218,31 @@ internal class BrevUtilsTest {
             lagUtvidetVedtaksperiodeMedBegrunnelser(
                 begrunnelser = listOf(
                     lagVedtaksbegrunnelse(
-                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_SØKER_OG_BARN_FRIVILLIG_MEDLEM
-                    )
+                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_SØKER_OG_BARN_FRIVILLIG_MEDLEM,
+                    ),
                 ),
-                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
+                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
             ),
             lagUtvidetVedtaksperiodeMedBegrunnelser(
                 begrunnelser = listOf(
                     lagVedtaksbegrunnelse(
-                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING
-                    )
+                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING,
+                    ),
                 ),
-                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
-            )
+                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
+            ),
         )
 
-        val sanityBegrunnelser = listOf(
-            lagSanityBegrunnelse(
+        val sanityBegrunnelser = mapOf(
+            Standardbegrunnelse.INNVILGET_SØKER_OG_BARN_FRIVILLIG_MEDLEM to lagSanityBegrunnelse(
                 apiNavn = Standardbegrunnelse.INNVILGET_SØKER_OG_BARN_FRIVILLIG_MEDLEM.sanityApiNavn,
                 hjemler = listOf("11", "4"),
-                hjemlerFolketrygdloven = listOf("2-5", "2-8")
+                hjemlerFolketrygdloven = listOf("2-5", "2-8"),
             ),
-            lagSanityBegrunnelse(
+            Standardbegrunnelse.INNVILGET_SATSENDRING to lagSanityBegrunnelse(
                 apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
-                hjemler = listOf("10")
-            )
+                hjemler = listOf("10"),
+            ),
         )
 
         Assertions.assertEquals(
@@ -244,14 +251,15 @@ internal class BrevUtilsTest {
                 minimerteVedtaksperioder = utvidetVedtaksperioderMedBegrunnelser.map {
                     it.tilMinimertVedtaksperiode(
                         sanityBegrunnelser = sanityBegrunnelser,
-                        sanityEØSBegrunnelser = emptyList()
+                        sanityEØSBegrunnelser = emptyMap(),
+                        featureToggleService = featureToggleService,
                     )
                 },
                 sanityBegrunnelser = sanityBegrunnelser,
                 opplysningspliktHjemlerSkalMedIBrev = false,
                 målform = Målform.NB,
-                refusjonEøsHjemmelSkalMedIBrev = false
-            )
+                refusjonEøsHjemmelSkalMedIBrev = false,
+            ),
         )
     }
 
@@ -261,55 +269,55 @@ internal class BrevUtilsTest {
             lagUtvidetVedtaksperiodeMedBegrunnelser(
                 begrunnelser = listOf(
                     lagVedtaksbegrunnelse(
-                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET
-                    )
+                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                    ),
                 ),
                 eøsBegrunnelser = listOf(
                     EØSBegrunnelse(
                         vedtaksperiodeMedBegrunnelser = mockk(),
-                        begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR
-                    )
+                        begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR,
+                    ),
                 ),
-                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
+                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
             ),
             lagUtvidetVedtaksperiodeMedBegrunnelser(
                 begrunnelser = listOf(
                     lagVedtaksbegrunnelse(
-                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING
-                    )
+                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING,
+                    ),
                 ),
                 eøsBegrunnelser = listOf(
                     EØSBegrunnelse(
                         vedtaksperiodeMedBegrunnelser = mockk(),
-                        begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE
-                    )
+                        begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE,
+                    ),
                 ),
-                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
-            )
-        )
-
-        val sanityBegrunnelser = listOf(
-            lagSanityBegrunnelse(
-                apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
-                hjemler = listOf("11", "4")
+                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
             ),
-            lagSanityBegrunnelse(
-                apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
-                hjemler = listOf("10")
-            )
         )
 
-        val sanityEøsBegrunnelser = listOf(
-            lagSanityEøsBegrunnelse(
+        val sanityBegrunnelser = mapOf(
+            Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to lagSanityBegrunnelse(
+                apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
+                hjemler = listOf("11", "4"),
+            ),
+            Standardbegrunnelse.INNVILGET_SATSENDRING to lagSanityBegrunnelse(
+                apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
+                hjemler = listOf("10"),
+            ),
+        )
+
+        val sanityEøsBegrunnelser = mapOf(
+            EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR to lagSanityEøsBegrunnelse(
                 apiNavn = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR.sanityApiNavn,
                 hjemler = listOf("4"),
-                hjemlerEØSForordningen883 = listOf("11-16")
+                hjemlerEØSForordningen883 = listOf("11-16"),
             ),
-            lagSanityEøsBegrunnelse(
+            EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE to lagSanityEøsBegrunnelse(
                 apiNavn = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE.sanityApiNavn,
                 hjemler = listOf("11"),
-                hjemlerEØSForordningen987 = listOf("58", "60")
-            )
+                hjemlerEØSForordningen987 = listOf("58", "60"),
+            ),
         )
 
         Assertions.assertEquals(
@@ -318,14 +326,15 @@ internal class BrevUtilsTest {
                 minimerteVedtaksperioder = utvidetVedtaksperioderMedBegrunnelser.map {
                     it.tilMinimertVedtaksperiode(
                         sanityBegrunnelser = sanityBegrunnelser,
-                        sanityEØSBegrunnelser = sanityEøsBegrunnelser
+                        sanityEØSBegrunnelser = sanityEøsBegrunnelser,
+                        featureToggleService = featureToggleService,
                     )
                 },
                 sanityBegrunnelser = sanityBegrunnelser,
                 opplysningspliktHjemlerSkalMedIBrev = false,
                 målform = Målform.NB,
-                refusjonEøsHjemmelSkalMedIBrev = false
-            )
+                refusjonEøsHjemmelSkalMedIBrev = false,
+            ),
         )
     }
 
@@ -335,56 +344,56 @@ internal class BrevUtilsTest {
             lagUtvidetVedtaksperiodeMedBegrunnelser(
                 begrunnelser = listOf(
                     lagVedtaksbegrunnelse(
-                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET
-                    )
+                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                    ),
                 ),
                 eøsBegrunnelser = listOf(
                     EØSBegrunnelse(
                         vedtaksperiodeMedBegrunnelser = mockk(),
-                        begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR
-                    )
+                        begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR,
+                    ),
                 ),
-                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
+                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
             ),
             lagUtvidetVedtaksperiodeMedBegrunnelser(
                 begrunnelser = listOf(
                     lagVedtaksbegrunnelse(
-                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING
-                    )
+                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING,
+                    ),
                 ),
                 eøsBegrunnelser = listOf(
                     EØSBegrunnelse(
                         vedtaksperiodeMedBegrunnelser = mockk(),
-                        begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE
-                    )
+                        begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE,
+                    ),
                 ),
-                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
-            )
-        )
-
-        val sanityBegrunnelser = listOf(
-            lagSanityBegrunnelse(
-                apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
-                hjemler = listOf("11", "4")
+                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
             ),
-            lagSanityBegrunnelse(
-                apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
-                hjemler = listOf("10")
-            )
         )
 
-        val sanityEøsBegrunnelser = listOf(
-            lagSanityEøsBegrunnelse(
+        val sanityBegrunnelser = mapOf(
+            Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to lagSanityBegrunnelse(
+                apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
+                hjemler = listOf("11", "4"),
+            ),
+            Standardbegrunnelse.INNVILGET_SATSENDRING to lagSanityBegrunnelse(
+                apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
+                hjemler = listOf("10"),
+            ),
+        )
+
+        val sanityEøsBegrunnelser = mapOf(
+            EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR to lagSanityEøsBegrunnelse(
                 apiNavn = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR.sanityApiNavn,
                 hjemler = listOf("4"),
                 hjemlerEØSForordningen883 = listOf("11-16"),
-                hjemlerSeperasjonsavtalenStorbritannina = listOf("29")
+                hjemlerSeperasjonsavtalenStorbritannina = listOf("29"),
             ),
-            lagSanityEøsBegrunnelse(
+            EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE to lagSanityEøsBegrunnelse(
                 apiNavn = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE.sanityApiNavn,
                 hjemler = listOf("11"),
-                hjemlerEØSForordningen987 = listOf("58", "60")
-            )
+                hjemlerEØSForordningen987 = listOf("58", "60"),
+            ),
         )
 
         Assertions.assertEquals(
@@ -393,14 +402,15 @@ internal class BrevUtilsTest {
                 minimerteVedtaksperioder = utvidetVedtaksperioderMedBegrunnelser.map {
                     it.tilMinimertVedtaksperiode(
                         sanityBegrunnelser = sanityBegrunnelser,
-                        sanityEØSBegrunnelser = sanityEøsBegrunnelser
+                        sanityEØSBegrunnelser = sanityEøsBegrunnelser,
+                        featureToggleService = featureToggleService,
                     )
                 },
                 sanityBegrunnelser = sanityBegrunnelser,
                 opplysningspliktHjemlerSkalMedIBrev = false,
                 målform = Målform.NB,
-                refusjonEøsHjemmelSkalMedIBrev = false
-            )
+                refusjonEøsHjemmelSkalMedIBrev = false,
+            ),
         )
     }
 
@@ -410,56 +420,56 @@ internal class BrevUtilsTest {
             lagUtvidetVedtaksperiodeMedBegrunnelser(
                 begrunnelser = listOf(
                     lagVedtaksbegrunnelse(
-                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET
-                    )
+                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                    ),
                 ),
                 eøsBegrunnelser = listOf(
                     EØSBegrunnelse(
                         vedtaksperiodeMedBegrunnelser = mockk(),
-                        begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR
-                    )
+                        begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR,
+                    ),
                 ),
-                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
+                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
             ),
             lagUtvidetVedtaksperiodeMedBegrunnelser(
                 begrunnelser = listOf(
                     lagVedtaksbegrunnelse(
-                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING
-                    )
+                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING,
+                    ),
                 ),
                 eøsBegrunnelser = listOf(
                     EØSBegrunnelse(
                         vedtaksperiodeMedBegrunnelser = mockk(),
-                        begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE
-                    )
+                        begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE,
+                    ),
                 ),
-                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
-            )
-        )
-
-        val sanityBegrunnelser = listOf(
-            lagSanityBegrunnelse(
-                apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
-                hjemler = listOf("11", "4")
+                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
             ),
-            lagSanityBegrunnelse(
-                apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
-                hjemler = listOf("10")
-            )
         )
 
-        val sanityEøsBegrunnelser = listOf(
-            lagSanityEøsBegrunnelse(
+        val sanityBegrunnelser = mapOf(
+            Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to lagSanityBegrunnelse(
+                apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
+                hjemler = listOf("11", "4"),
+            ),
+            Standardbegrunnelse.INNVILGET_SATSENDRING to lagSanityBegrunnelse(
+                apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
+                hjemler = listOf("10"),
+            ),
+        )
+
+        val sanityEøsBegrunnelser = mapOf(
+            EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR to lagSanityEøsBegrunnelse(
                 apiNavn = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR.sanityApiNavn,
                 hjemler = listOf("4"),
                 hjemlerEØSForordningen883 = listOf("11-16"),
-                hjemlerSeperasjonsavtalenStorbritannina = listOf("29")
+                hjemlerSeperasjonsavtalenStorbritannina = listOf("29"),
             ),
-            lagSanityEøsBegrunnelse(
+            EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE to lagSanityEøsBegrunnelse(
                 apiNavn = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE.sanityApiNavn,
                 hjemler = listOf("11"),
-                hjemlerEØSForordningen987 = listOf("58", "60")
-            )
+                hjemlerEØSForordningen987 = listOf("58", "60"),
+            ),
         )
 
         Assertions.assertEquals(
@@ -468,14 +478,15 @@ internal class BrevUtilsTest {
                 minimerteVedtaksperioder = utvidetVedtaksperioderMedBegrunnelser.map {
                     it.tilMinimertVedtaksperiode(
                         sanityBegrunnelser = sanityBegrunnelser,
-                        sanityEØSBegrunnelser = sanityEøsBegrunnelser
+                        sanityEØSBegrunnelser = sanityEøsBegrunnelser,
+                        featureToggleService = featureToggleService,
                     )
                 },
                 sanityBegrunnelser = sanityBegrunnelser,
                 opplysningspliktHjemlerSkalMedIBrev = false,
                 målform = Målform.NN,
-                refusjonEøsHjemmelSkalMedIBrev = false
-            )
+                refusjonEøsHjemmelSkalMedIBrev = false,
+            ),
         )
     }
 
@@ -485,55 +496,55 @@ internal class BrevUtilsTest {
             lagUtvidetVedtaksperiodeMedBegrunnelser(
                 begrunnelser = listOf(
                     lagVedtaksbegrunnelse(
-                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET
-                    )
+                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                    ),
                 ),
                 eøsBegrunnelser = listOf(
                     EØSBegrunnelse(
                         vedtaksperiodeMedBegrunnelser = mockk(),
-                        begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR
-                    )
+                        begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR,
+                    ),
                 ),
-                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
+                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
             ),
             lagUtvidetVedtaksperiodeMedBegrunnelser(
                 begrunnelser = listOf(
                     lagVedtaksbegrunnelse(
-                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING
-                    )
+                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING,
+                    ),
                 ),
                 eøsBegrunnelser = listOf(
                     EØSBegrunnelse(
                         vedtaksperiodeMedBegrunnelser = mockk(),
-                        begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE
-                    )
+                        begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE,
+                    ),
                 ),
-                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
-            )
-        )
-
-        val sanityBegrunnelser = listOf(
-            lagSanityBegrunnelse(
-                apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
-                hjemler = listOf("11", "4")
+                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
             ),
-            lagSanityBegrunnelse(
-                apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
-                hjemler = listOf("10")
-            )
         )
 
-        val sanityEøsBegrunnelser = listOf(
-            lagSanityEøsBegrunnelse(
+        val sanityBegrunnelser = mapOf(
+            Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to lagSanityBegrunnelse(
+                apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
+                hjemler = listOf("11", "4"),
+            ),
+            Standardbegrunnelse.INNVILGET_SATSENDRING to lagSanityBegrunnelse(
+                apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
+                hjemler = listOf("10"),
+            ),
+        )
+
+        val sanityEøsBegrunnelser = mapOf(
+            EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR to lagSanityEøsBegrunnelse(
                 apiNavn = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR.sanityApiNavn,
                 hjemler = listOf("4"),
                 hjemlerEØSForordningen883 = listOf("2", "11-16", "67", "68"),
-                hjemlerSeperasjonsavtalenStorbritannina = listOf("29")
+                hjemlerSeperasjonsavtalenStorbritannina = listOf("29"),
             ),
-            lagSanityEøsBegrunnelse(
+            EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE to lagSanityEøsBegrunnelse(
                 apiNavn = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE.sanityApiNavn,
-                hjemler = listOf("11")
-            )
+                hjemler = listOf("11"),
+            ),
         )
 
         Assertions.assertEquals(
@@ -542,14 +553,15 @@ internal class BrevUtilsTest {
                 minimerteVedtaksperioder = utvidetVedtaksperioderMedBegrunnelser.map {
                     it.tilMinimertVedtaksperiode(
                         sanityBegrunnelser = sanityBegrunnelser,
-                        sanityEØSBegrunnelser = sanityEøsBegrunnelser
+                        sanityEØSBegrunnelser = sanityEøsBegrunnelser,
+                        featureToggleService = featureToggleService,
                     )
                 },
                 sanityBegrunnelser = sanityBegrunnelser,
                 opplysningspliktHjemlerSkalMedIBrev = false,
                 målform = Målform.NN,
-                refusjonEøsHjemmelSkalMedIBrev = false
-            )
+                refusjonEøsHjemmelSkalMedIBrev = false,
+            ),
         )
     }
 
@@ -559,60 +571,60 @@ internal class BrevUtilsTest {
             lagUtvidetVedtaksperiodeMedBegrunnelser(
                 begrunnelser = listOf(
                     lagVedtaksbegrunnelse(
-                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET
-                    )
+                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
+                    ),
                 ),
                 eøsBegrunnelser = listOf(
                     EØSBegrunnelse(
                         vedtaksperiodeMedBegrunnelser = mockk(),
-                        begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR
-                    )
+                        begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR,
+                    ),
                 ),
-                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
+                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
             ),
             lagUtvidetVedtaksperiodeMedBegrunnelser(
                 begrunnelser = listOf(
                     lagVedtaksbegrunnelse(
-                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING
-                    )
+                        standardbegrunnelse = Standardbegrunnelse.INNVILGET_SATSENDRING,
+                    ),
                 ),
                 eøsBegrunnelser = listOf(
                     EØSBegrunnelse(
                         vedtaksperiodeMedBegrunnelser = mockk(),
-                        begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE
-                    )
+                        begrunnelse = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE,
+                    ),
                 ),
-                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj())
-            )
-        )
-
-        val sanityBegrunnelser = listOf(
-            lagSanityBegrunnelse(
-                apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
-                hjemler = listOf("11", "4")
+                utbetalingsperiodeDetaljer = listOf(lagUtbetalingsperiodeDetalj()),
             ),
-            lagSanityBegrunnelse(
-                apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
-                hjemler = listOf("10")
-            )
         )
 
-        val sanityEøsBegrunnelser = listOf(
-            lagSanityEøsBegrunnelse(
+        val sanityBegrunnelser = mapOf(
+            Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET to lagSanityBegrunnelse(
+                apiNavn = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET.sanityApiNavn,
+                hjemler = listOf("11", "4"),
+            ),
+            Standardbegrunnelse.INNVILGET_SATSENDRING to lagSanityBegrunnelse(
+                apiNavn = Standardbegrunnelse.INNVILGET_SATSENDRING.sanityApiNavn,
+                hjemler = listOf("10"),
+            ),
+        )
+
+        val sanityEøsBegrunnelser = mapOf(
+            EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR to lagSanityEøsBegrunnelse(
                 apiNavn = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_ALENEANSVAR.sanityApiNavn,
                 hjemler = listOf("4"),
                 hjemlerEØSForordningen883 = listOf("2", "11-16", "67", "68"),
                 hjemlerSeperasjonsavtalenStorbritannina = listOf("29"),
-                hjemlerEØSForordningen987 = listOf("58")
+                hjemlerEØSForordningen987 = listOf("58"),
             ),
-            lagSanityEøsBegrunnelse(
+            EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE to lagSanityEøsBegrunnelse(
                 apiNavn = EØSStandardbegrunnelse.INNVILGET_PRIMÆRLAND_BEGGE_FORELDRE_BOSATT_I_NORGE.sanityApiNavn,
                 hjemler = listOf("11"),
                 hjemlerEØSForordningen883 = listOf("2", "67", "68"),
                 hjemlerSeperasjonsavtalenStorbritannina = listOf("29"),
-                hjemlerEØSForordningen987 = listOf("58")
+                hjemlerEØSForordningen987 = listOf("58"),
 
-            )
+            ),
         )
 
         Assertions.assertEquals(
@@ -621,14 +633,15 @@ internal class BrevUtilsTest {
                 minimerteVedtaksperioder = utvidetVedtaksperioderMedBegrunnelser.map {
                     it.tilMinimertVedtaksperiode(
                         sanityBegrunnelser = sanityBegrunnelser,
-                        sanityEØSBegrunnelser = sanityEøsBegrunnelser
+                        sanityEØSBegrunnelser = sanityEøsBegrunnelser,
+                        featureToggleService = featureToggleService,
                     )
                 },
                 sanityBegrunnelser = sanityBegrunnelser,
                 opplysningspliktHjemlerSkalMedIBrev = false,
                 målform = Målform.NN,
-                refusjonEøsHjemmelSkalMedIBrev = false
-            )
+                refusjonEøsHjemmelSkalMedIBrev = false,
+            ),
         )
     }
 
@@ -639,16 +652,16 @@ internal class BrevUtilsTest {
         val opphørsperioder = listOf(
             Opphørsperiode(
                 periodeFom = LocalDate.now().minusYears(1),
-                periodeTom = LocalDate.now().minusYears(1).plusMonths(2)
+                periodeTom = LocalDate.now().minusYears(1).plusMonths(2),
             ),
             Opphørsperiode(
                 periodeFom = LocalDate.now().minusMonths(5),
-                periodeTom = LocalDate.now().minusMonths(4)
+                periodeTom = LocalDate.now().minusMonths(4),
             ),
             Opphørsperiode(
                 periodeFom = sisteFom,
-                periodeTom = LocalDate.now()
-            )
+                periodeTom = LocalDate.now(),
+            ),
         )
 
         Assertions.assertEquals(sisteFom.tilMånedÅr(), hentVirkningstidspunkt(opphørsperioder, 0L))

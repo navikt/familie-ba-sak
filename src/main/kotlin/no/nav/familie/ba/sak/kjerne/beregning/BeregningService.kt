@@ -43,7 +43,7 @@ class BeregningService(
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
     private val småbarnstilleggService: SmåbarnstilleggService,
     private val tilkjentYtelseEndretAbonnenter: List<TilkjentYtelseEndretAbonnent> = emptyList(),
-    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
+    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
 ) {
     fun slettTilkjentYtelseForBehandling(behandlingId: Long) =
         tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)
@@ -51,11 +51,11 @@ class BeregningService(
 
     fun hentLøpendeAndelerTilkjentYtelseMedUtbetalingerForBehandlinger(
         behandlingIder: List<Long>,
-        avstemmingstidspunkt: LocalDateTime
+        avstemmingstidspunkt: LocalDateTime,
     ): List<AndelTilkjentYtelse> =
         andelTilkjentYtelseRepository.finnLøpendeAndelerTilkjentYtelseForBehandlinger(
             behandlingIder,
-            avstemmingstidspunkt.toLocalDate().toYearMonth()
+            avstemmingstidspunkt.toLocalDate().toYearMonth(),
         )
             .filter { it.erAndelSomSkalSendesTilOppdrag() }
 
@@ -95,14 +95,14 @@ class BeregningService(
      */
     fun hentRelevanteTilkjentYtelserForBarn(
         barnAktør: Aktør,
-        fagsakId: Long
+        fagsakId: Long,
     ): List<TilkjentYtelse> {
         val andreFagsaker = fagsakService.hentFagsakerPåPerson(barnAktør)
             .filter { it.id != fagsakId }
 
         return andreFagsaker.mapNotNull { fagsak ->
             val behandlingSomErSendtTilGodkjenning = behandlingRepository.finnBehandlingerSentTilGodkjenning(
-                fagsakId = fagsak.id
+                fagsakId = fagsak.id,
             ).singleOrNull()
 
             if (behandlingSomErSendtTilGodkjenning != null) {
@@ -113,7 +113,8 @@ class BeregningService(
                 if (godkjenteBehandlingerSomIkkeErIverksattEnda != null) {
                     godkjenteBehandlingerSomIkkeErIverksattEnda
                 } else {
-                    val sisteVedtatteBehandling = behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsak.id)
+                    val sisteVedtatteBehandling =
+                        behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = fagsak.id)
                     sisteVedtatteBehandling
                 }
             }
@@ -148,7 +149,7 @@ class BeregningService(
 
         return EndringIUtbetalingUtil.lagEndringIUtbetalingTidslinje(
             nåværendeAndeler = nåværendeAndeler,
-            forrigeAndeler = forrigeAndeler
+            forrigeAndeler = forrigeAndeler,
         )
     }
 
@@ -162,7 +163,7 @@ class BeregningService(
     fun oppdaterBehandlingMedBeregning(
         behandling: Behandling,
         personopplysningGrunnlag: PersonopplysningGrunnlag,
-        nyEndretUtbetalingAndel: EndretUtbetalingAndel? = null
+        nyEndretUtbetalingAndel: EndretUtbetalingAndel? = null,
     ): TilkjentYtelse {
         val endreteUtbetalingAndeler = andelerTilkjentYtelseOgEndreteUtbetalingerService
             .finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandling.id).filter {
@@ -179,14 +180,14 @@ class BeregningService(
         return genererOgLagreTilkjentYtelse(
             behandling = behandling,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            endreteUtbetalingAndeler = endreteUtbetalingAndeler
+            endreteUtbetalingAndeler = endreteUtbetalingAndeler,
         )
     }
 
     private fun genererOgLagreTilkjentYtelse(
         behandling: Behandling,
         personopplysningGrunnlag: PersonopplysningGrunnlag,
-        endreteUtbetalingAndeler: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>
+        endreteUtbetalingAndeler: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>,
     ): TilkjentYtelse {
         tilkjentYtelseRepository.slettTilkjentYtelseFor(behandling)
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
@@ -197,14 +198,14 @@ class BeregningService(
                 vilkårsvurdering = vilkårsvurdering,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 endretUtbetalingAndeler = endreteUtbetalingAndeler,
-                fagsakType = behandling.fagsak.type
+                fagsakType = behandling.fagsak.type,
             ) { søkerAktør ->
-                småbarnstilleggService.hentOgLagrePerioderMedFullOvergangsstønadFraEf(
+                småbarnstilleggService.hentOgLagrePerioderMedOvergangsstønadForBehandling(
                     søkerAktør = søkerAktør,
-                    behandlingId = behandling.id
+                    behandling = behandling,
                 )
 
-                småbarnstilleggService.hentPerioderMedFullOvergangsstønad(behandling.id)
+                småbarnstilleggService.hentPerioderMedFullOvergangsstønad(behandling)
             }
 
         val lagretTilkjentYtelse = tilkjentYtelseRepository.save(tilkjentYtelse)
@@ -217,13 +218,13 @@ class BeregningService(
 // Hvis man ikke genererer andeler før man kobler på endringene så vil ingen av endringene ses på som gyldige, altså ikke oppdatere noen andeler
     fun genererTilkjentYtelseFraVilkårsvurdering(
         behandling: Behandling,
-        personopplysningGrunnlag: PersonopplysningGrunnlag
+        personopplysningGrunnlag: PersonopplysningGrunnlag,
     ): TilkjentYtelse {
         // 1: Genererer andeler fra vilkårsvurderingen uten å ta hensyn til endret utbetaling andeler
         genererOgLagreTilkjentYtelse(
             behandling = behandling,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            endreteUtbetalingAndeler = emptyList()
+            endreteUtbetalingAndeler = emptyList(),
         )
 
         // 2: Genererer andeler som også tar hensyn til endret utbetaling andeler
@@ -232,7 +233,7 @@ class BeregningService(
 
     fun oppdaterTilkjentYtelseMedUtbetalingsoppdrag(
         behandling: Behandling,
-        utbetalingsoppdrag: Utbetalingsoppdrag
+        utbetalingsoppdrag: Utbetalingsoppdrag,
     ): TilkjentYtelse {
         val nyTilkjentYtelse = populerTilkjentYtelse(behandling, utbetalingsoppdrag)
         return tilkjentYtelseRepository.save(nyTilkjentYtelse)
@@ -240,7 +241,7 @@ class BeregningService(
 
     fun kanAutomatiskIverksetteSmåbarnstilleggEndring(
         behandling: Behandling,
-        sistIverksatteBehandling: Behandling?
+        sistIverksatteBehandling: Behandling?,
     ): Boolean {
         if (!behandling.skalBehandlesAutomatisk || !behandling.erSmåbarnstillegg()) return false
 
@@ -249,7 +250,7 @@ class BeregningService(
                 emptyList()
             } else {
                 hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(
-                    behandlingId = sistIverksatteBehandling.id
+                    behandlingId = sistIverksatteBehandling.id,
                 ).filter { it.erSmåbarnstillegg() }
             }
 
@@ -258,18 +259,18 @@ class BeregningService(
                 emptyList()
             } else {
                 hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(
-                    behandlingId = behandling.id
+                    behandlingId = behandling.id,
                 ).filter { it.erSmåbarnstillegg() }
             }
 
         val (innvilgedeMånedPerioder, reduserteMånedPerioder) = hentInnvilgedeOgReduserteAndelerSmåbarnstillegg(
             forrigeSmåbarnstilleggAndeler = forrigeSmåbarnstilleggAndeler,
-            nyeSmåbarnstilleggAndeler = nyeSmåbarnstilleggAndeler
+            nyeSmåbarnstilleggAndeler = nyeSmåbarnstilleggAndeler,
         )
 
         return kanAutomatiskIverksetteSmåbarnstillegg(
             innvilgedeMånedPerioder = innvilgedeMånedPerioder,
-            reduserteMånedPerioder = reduserteMånedPerioder
+            reduserteMånedPerioder = reduserteMånedPerioder,
         )
     }
 
@@ -288,7 +289,7 @@ class BeregningService(
 
     fun populerTilkjentYtelse(
         behandling: Behandling,
-        utbetalingsoppdrag: Utbetalingsoppdrag
+        utbetalingsoppdrag: Utbetalingsoppdrag,
     ): TilkjentYtelse {
         val erRentOpphør =
             utbetalingsoppdrag.utbetalingsperiode.isNotEmpty() && utbetalingsoppdrag.utbetalingsperiode.all { it.opphør != null }

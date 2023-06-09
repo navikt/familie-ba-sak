@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service
 class TotrinnskontrollService(
     private val behandlingService: BehandlingService,
     private val totrinnskontrollRepository: TotrinnskontrollRepository,
-    private val saksbehandlerContext: SaksbehandlerContext
+    private val saksbehandlerContext: SaksbehandlerContext,
 ) {
 
     fun hentAktivForBehandling(behandlingId: Long): Totrinnskontroll? {
@@ -26,14 +26,14 @@ class TotrinnskontrollService(
     fun opprettTotrinnskontrollMedSaksbehandler(
         behandling: Behandling,
         saksbehandler: String = saksbehandlerContext.hentSaksbehandlerSignaturTilBrev(),
-        saksbehandlerId: String = SikkerhetContext.hentSaksbehandler()
+        saksbehandlerId: String = SikkerhetContext.hentSaksbehandler(),
     ): Totrinnskontroll {
         return lagreOgDeaktiverGammel(
             Totrinnskontroll(
                 behandling = behandling,
                 saksbehandler = saksbehandler,
-                saksbehandlerId = saksbehandlerId
-            )
+                saksbehandlerId = saksbehandlerId,
+            ),
         )
     }
 
@@ -42,7 +42,7 @@ class TotrinnskontrollService(
         beslutter: String,
         beslutterId: String,
         beslutning: Beslutning,
-        kontrollerteSider: List<String> = emptyList()
+        kontrollerteSider: List<String> = emptyList(),
     ): Totrinnskontroll {
         val totrinnskontroll = hentAktivForBehandling(behandlingId = behandling.id)
             ?: throw Feil(message = "Kan ikke beslutte et vedtak som ikke er sendt til beslutter")
@@ -54,7 +54,7 @@ class TotrinnskontrollService(
         if (totrinnskontroll.erUgyldig()) {
             throw FunksjonellFeil(
                 melding = "Samme saksbehandler kan ikke foreslå og beslutte iverksetting på samme vedtak",
-                frontendFeilmelding = "Du kan ikke godkjenne ditt eget vedtak"
+                frontendFeilmelding = "Du kan ikke godkjenne ditt eget vedtak",
             )
         }
 
@@ -62,7 +62,7 @@ class TotrinnskontrollService(
 
         behandlingService.oppdaterStatusPåBehandling(
             behandlingId = behandling.id,
-            status = if (beslutning.erGodkjent()) BehandlingStatus.IVERKSETTER_VEDTAK else BehandlingStatus.UTREDES
+            status = if (beslutning.erGodkjent()) BehandlingStatus.IVERKSETTER_VEDTAK else BehandlingStatus.UTREDES,
         )
 
         return totrinnskontroll
@@ -80,8 +80,8 @@ class TotrinnskontrollService(
                 saksbehandler = SikkerhetContext.SYSTEM_NAVN,
                 saksbehandlerId = SikkerhetContext.SYSTEM_FORKORTELSE,
                 beslutter = SikkerhetContext.SYSTEM_NAVN,
-                beslutterId = SikkerhetContext.SYSTEM_FORKORTELSE
-            )
+                beslutterId = SikkerhetContext.SYSTEM_FORKORTELSE,
+            ),
         )
     }
 

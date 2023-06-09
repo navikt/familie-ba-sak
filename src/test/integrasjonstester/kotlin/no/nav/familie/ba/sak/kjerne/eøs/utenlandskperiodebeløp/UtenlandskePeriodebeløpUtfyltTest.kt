@@ -15,7 +15,7 @@ class UtenlandskePeriodebeløpUtfyltTest {
         val utenlandskPeriodebeløp = lagUtenlandskPeriodebeløp(
             beløp = BigDecimal.valueOf(500),
             valutakode = "NOK",
-            intervall = Intervall.MÅNEDLIG
+            intervall = Intervall.MÅNEDLIG,
         )
 
         val restUtenlandskPeriodebeløp = utenlandskPeriodebeløp.tilRestUtenlandskPeriodebeløp()
@@ -26,7 +26,7 @@ class UtenlandskePeriodebeløpUtfyltTest {
     @Test
     fun `Skal sette UtfyltStatus til UFULLSTENDIG når ett eller to felter er utfylt`() {
         var utenlandskPeriodebeløp = lagUtenlandskPeriodebeløp(
-            beløp = BigDecimal.valueOf(500)
+            beløp = BigDecimal.valueOf(500),
         )
 
         var restUtenlandskPeriodebeløp = utenlandskPeriodebeløp.tilRestUtenlandskPeriodebeløp()
@@ -35,7 +35,7 @@ class UtenlandskePeriodebeløpUtfyltTest {
 
         utenlandskPeriodebeløp = lagUtenlandskPeriodebeløp(
             beløp = BigDecimal.valueOf(500),
-            valutakode = "NOK"
+            valutakode = "NOK",
         )
 
         restUtenlandskPeriodebeløp = utenlandskPeriodebeløp.tilRestUtenlandskPeriodebeløp()

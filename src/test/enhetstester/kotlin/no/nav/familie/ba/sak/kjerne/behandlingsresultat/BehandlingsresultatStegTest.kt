@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 import io.mockk.every
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -11,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
@@ -56,6 +58,8 @@ class BehandlingsresultatStegTest {
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService =
         mockk<AndelerTilkjentYtelseOgEndreteUtbetalingerService>()
 
+    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository = mockk()
+
     @BeforeEach
     fun init() {
         behandlingsresultatSteg = BehandlingsresultatSteg(
@@ -68,12 +72,13 @@ class BehandlingsresultatStegTest {
             vilkårService,
             persongrunnlagService,
             beregningService,
-            andelerTilkjentYtelseOgEndreteUtbetalingerService
+            andelerTilkjentYtelseOgEndreteUtbetalingerService,
+            andelTilkjentYtelseRepository,
         )
 
         behandling = lagBehandling(
             behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-            årsak = BehandlingÅrsak.HELMANUELL_MIGRERING
+            årsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
         )
     }
 
@@ -84,7 +89,7 @@ class BehandlingsresultatStegTest {
         every {
             behandlingService.oppdaterBehandlingsresultat(
                 any(),
-                any()
+                any(),
             )
         } returns behandling.copy(resultat = Behandlingsresultat.AVSLÅTT)
 
@@ -93,7 +98,7 @@ class BehandlingsresultatStegTest {
             "Du har fått behandlingsresultatet Avslått. " +
                 "Dette er ikke støttet på migreringsbehandlinger. " +
                 "Meld sak i Porten om du er uenig i resultatet.",
-            exception.message
+            exception.message,
         )
     }
 
@@ -104,7 +109,7 @@ class BehandlingsresultatStegTest {
         every {
             behandlingService.oppdaterBehandlingsresultat(
                 any(),
-                any()
+                any(),
             )
         } returns behandling.copy(resultat = Behandlingsresultat.DELVIS_INNVILGET)
 
@@ -113,7 +118,7 @@ class BehandlingsresultatStegTest {
             "Du har fått behandlingsresultatet Delvis innvilget. " +
                 "Dette er ikke støttet på migreringsbehandlinger. " +
                 "Meld sak i Porten om du er uenig i resultatet.",
-            exception.message
+            exception.message,
         )
     }
 
@@ -124,7 +129,7 @@ class BehandlingsresultatStegTest {
         every {
             behandlingService.oppdaterBehandlingsresultat(
                 any(),
-                any()
+                any(),
             )
         } returns behandling.copy(resultat = Behandlingsresultat.AVSLÅTT_ENDRET_OG_OPPHØRT)
 
@@ -133,7 +138,7 @@ class BehandlingsresultatStegTest {
             "Du har fått behandlingsresultatet Avslått, endret og opphørt. " +
                 "Dette er ikke støttet på migreringsbehandlinger. " +
                 "Meld sak i Porten om du er uenig i resultatet.",
-            exception.message
+            exception.message,
         )
     }
 
@@ -141,10 +146,10 @@ class BehandlingsresultatStegTest {
     fun `skal kaste feil om det er endring etter migreringsdatoen til første behandling`() {
         val startdato = YearMonth.of(2023, 2)
         val endringTidslinje = "TTTFFFF".tilBoolskTidslinje(
-            startdato
+            startdato,
         )
 
-        assertThrows<Feil> {
+        assertThrows<FunksjonellFeil> {
             endringTidslinje.kastFeilVedEndringEtter(startdato, lagBehandling())
         }
     }
@@ -155,7 +160,7 @@ class BehandlingsresultatStegTest {
         val treMånederEtterStartdato = startdato.plusMonths(3)
 
         val endringTidslinje = "TTTFFFF".tilBoolskTidslinje(
-            startdato
+            startdato,
         )
 
         assertDoesNotThrow {
@@ -173,7 +178,7 @@ class BehandlingsresultatStegTest {
                         'T' -> true
                         'F' -> false
                         else -> throw Feil("Klarer ikke å konvertere \"$it\" til Boolean")
-                    }
+                    },
                 )
             }
         }
