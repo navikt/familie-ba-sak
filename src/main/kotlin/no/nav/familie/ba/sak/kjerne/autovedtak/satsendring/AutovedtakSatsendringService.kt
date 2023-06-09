@@ -61,8 +61,8 @@ class AutovedtakSatsendringService(
         val fagsakId = behandlingsdata.fagsakId
 
         val satskjøringForFagsak =
-            satskjøringRepository.findByFagsakId(fagsakId)
-                ?: satskjøringRepository.save(Satskjøring(fagsakId = fagsakId))
+            satskjøringRepository.findByFagsakIdAndSatsTidspunkt(fagsakId, behandlingsdata.satstidspunkt)
+                ?: satskjøringRepository.save(Satskjøring(fagsakId = fagsakId, satsTidspunkt = behandlingsdata.satstidspunkt))
 
         val sisteIverksatteBehandling = behandlingRepository.finnSisteIverksatteBehandling(fagsakId = fagsakId)
             ?: error("Fant ikke siste iverksette behandling for $fagsakId")
