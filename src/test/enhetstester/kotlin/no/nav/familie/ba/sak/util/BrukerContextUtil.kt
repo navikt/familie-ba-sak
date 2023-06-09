@@ -40,4 +40,13 @@ object BrukerContextUtil {
         every { jwtTokenClaims.get("oid") } returns UUID.randomUUID().toString()
         every { jwtTokenClaims.get("sub") } returns UUID.randomUUID().toString()
     }
+
+    fun <T> testWithBrukerContext(preferredUsername: String = "A", groups: List<String> = emptyList(), fn: () -> T): T {
+        try {
+            mockBrukerContext(preferredUsername, groups)
+            return fn()
+        } finally {
+            clearBrukerContext()
+        }
+    }
 }

@@ -20,9 +20,9 @@ interface Vedtaksperiode {
     val vedtaksperiodetype: Vedtaksperiodetype
 }
 
-enum class Vedtaksperiodetype(val tillatteBegrunnelsestyper: List<VedtakBegrunnelseType>) {
+enum class Vedtaksperiodetype(val tillatteBegrunnelsestyper: Set<VedtakBegrunnelseType>) {
     UTBETALING(
-        listOf(
+        setOf(
             VedtakBegrunnelseType.INNVILGET,
             VedtakBegrunnelseType.REDUKSJON,
             VedtakBegrunnelseType.FORTSATT_INNVILGET,
@@ -50,7 +50,7 @@ enum class Vedtaksperiodetype(val tillatteBegrunnelsestyper: List<VedtakBegrunne
      * reduksjonen uten å se på forrige behandling.
      ***/
     UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING(
-        listOf(
+        setOf(
             VedtakBegrunnelseType.REDUKSJON,
             VedtakBegrunnelseType.INNVILGET,
             VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING,
@@ -62,22 +62,23 @@ enum class Vedtaksperiodetype(val tillatteBegrunnelsestyper: List<VedtakBegrunne
         ),
     ),
     OPPHØR(
-        listOf(
+        setOf(
             VedtakBegrunnelseType.OPPHØR,
             VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING,
             VedtakBegrunnelseType.INSTITUSJON_OPPHØR,
             VedtakBegrunnelseType.EØS_OPPHØR,
+            VedtakBegrunnelseType.AVSLAG,
         ),
     ),
     AVSLAG(
-        listOf(
+        setOf(
             VedtakBegrunnelseType.AVSLAG,
             VedtakBegrunnelseType.EØS_AVSLAG,
             VedtakBegrunnelseType.INSTITUSJON_AVSLAG,
         ),
     ),
     FORTSATT_INNVILGET(
-        listOf(
+        setOf(
             VedtakBegrunnelseType.FORTSATT_INNVILGET,
             VedtakBegrunnelseType.INSTITUSJON_FORTSATT_INNVILGET,
             VedtakBegrunnelseType.EØS_FORTSATT_INNVILGET,
@@ -85,7 +86,7 @@ enum class Vedtaksperiodetype(val tillatteBegrunnelsestyper: List<VedtakBegrunne
     ),
 
     @Deprecated("Legacy. Kan ikke fjernes uten at det ryddes opp i Vedtaksperioder-tabellen")
-    ENDRET_UTBETALING(emptyList()),
+    ENDRET_UTBETALING(emptySet()),
     ;
 
     fun sorteringsRekkefølge(): Int {

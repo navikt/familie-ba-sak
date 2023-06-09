@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring.Companion.SATSENDRINGMÅNED_MARS_2023
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
@@ -55,6 +56,7 @@ internal class StartSatsendringTest {
         every { taskRepository.save(capture(taskSlot)) } answers { taskSlot.captured }
         val opprettTaskService = OpprettTaskService(taskRepository)
         every { satsendringService.erFagsakOppdatertMedSisteSatser(any()) } returns true
+        every { featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_2023_07, false) } returns false
 
         startSatsendring = spyk(
             StartSatsendring(
@@ -78,7 +80,7 @@ internal class StartSatsendringTest {
 
         val behandling = lagBehandling()
 
-        every { fagsakRepository.finnLøpendeFagsakerForSatsendring(any()) } returns PageImpl(
+        every { fagsakRepository.finnLøpendeFagsakerForSatsendring(any(), any()) } returns PageImpl(
             listOf(behandling.fagsak),
             Pageable.ofSize(5),
             0,
@@ -126,7 +128,7 @@ internal class StartSatsendringTest {
 
         val behandling = lagBehandling()
 
-        every { fagsakRepository.finnLøpendeFagsakerForSatsendring(any()) } returns PageImpl(
+        every { fagsakRepository.finnLøpendeFagsakerForSatsendring(any(), any()) } returns PageImpl(
             listOf(behandling.fagsak),
             Pageable.ofSize(5),
             0,
@@ -168,7 +170,7 @@ internal class StartSatsendringTest {
 
         val behandling = lagBehandling()
 
-        every { fagsakRepository.finnLøpendeFagsakerForSatsendring(any()) } returns PageImpl(
+        every { fagsakRepository.finnLøpendeFagsakerForSatsendring(any(), any()) } returns PageImpl(
             listOf(behandling.fagsak, behandling.fagsak),
             Pageable.ofSize(2), // 5/2 gir totalt 3 sider, så finnLøpendeFagsakerForSatsendring skal trigges 3 ganger
             5,
@@ -197,7 +199,7 @@ internal class StartSatsendringTest {
         startSatsendring.startSatsendring(5)
 
         verify(exactly = 5) { taskRepository.save(any()) }
-        verify(exactly = 3) { fagsakRepository.finnLøpendeFagsakerForSatsendring(any()) }
+        verify(exactly = 3) { fagsakRepository.finnLøpendeFagsakerForSatsendring(any(), any()) }
     }
 
     @Test
@@ -237,7 +239,7 @@ internal class StartSatsendringTest {
 
         every { behandlingRepository.findByFagsakAndAktivAndOpen(any()) } returns behandling
 
-        every { fagsakRepository.finnLøpendeFagsakerForSatsendring(any()) } returns PageImpl(
+        every { fagsakRepository.finnLøpendeFagsakerForSatsendring(any(), any()) } returns PageImpl(
             listOf(behandling.fagsak),
             Pageable.ofSize(5),
             0,
@@ -251,7 +253,7 @@ internal class StartSatsendringTest {
     @Test
     fun `kanStarteSatsendringPåFagsak gir false når vi ikke har noen tidligere behandling`() {
         every { behandlingRepository.finnSisteIverksatteBehandling(1L) } returns null
-        every { satskjøringRepository.findByFagsakId(1L) } returns Satskjøring(fagsakId = 1L)
+        every { satskjøringRepository.findByFagsakIdAndSatsTidspunkt(1L, any()) } returns Satskjøring(fagsakId = 1L, satsTidspunkt = SATSENDRINGMÅNED_MARS_2023)
 
         assertFalse(startSatsendring.kanStarteSatsendringPåFagsak(1L))
     }
@@ -259,7 +261,7 @@ internal class StartSatsendringTest {
     @Test
     fun `kanStarteSatsendringPåFagsak gir false når vi har en satskjøring for fagsaken i satskjøringsrepoet`() {
         every { behandlingRepository.finnSisteIverksatteBehandling(1L) } returns lagBehandling()
-        every { satskjøringRepository.findByFagsakId(1L) } returns Satskjøring(fagsakId = 1L)
+        every { satskjøringRepository.findByFagsakIdAndSatsTidspunkt(1L, any()) } returns Satskjøring(fagsakId = 1L, satsTidspunkt = SATSENDRINGMÅNED_MARS_2023)
 
         assertFalse(startSatsendring.kanStarteSatsendringPåFagsak(1L))
     }
@@ -267,7 +269,7 @@ internal class StartSatsendringTest {
     @Test
     fun `kanStarteSatsendringPåFagsak gir false når harSisteSats er true`() {
         every { behandlingRepository.finnSisteIverksatteBehandling(1L) } returns lagBehandling()
-        every { satskjøringRepository.findByFagsakId(1L) } returns null
+        every { satskjøringRepository.findByFagsakIdAndSatsTidspunkt(1L, any()) } returns null
         every { satsendringService.erFagsakOppdatertMedSisteSatser(any()) } returns true
 
         assertFalse(startSatsendring.kanStarteSatsendringPåFagsak(1L))
@@ -276,7 +278,7 @@ internal class StartSatsendringTest {
     @Test
     fun `kanStarteSatsendringPåFagsak gir true når harSisteSats er false`() {
         every { behandlingRepository.finnSisteIverksatteBehandling(1L) } returns lagBehandling()
-        every { satskjøringRepository.findByFagsakId(1L) } returns null
+        every { satskjøringRepository.findByFagsakIdAndSatsTidspunkt(1L, any()) } returns null
         every { satsendringService.erFagsakOppdatertMedSisteSatser(any()) } returns false
 
         assertTrue(startSatsendring.kanStarteSatsendringPåFagsak(1L))
@@ -292,7 +294,7 @@ internal class StartSatsendringTest {
     @Test
     fun `kanGjennomføreSatsendringManuelt gir false når harSisteSats er true`() {
         every { behandlingRepository.finnSisteIverksatteBehandling(1L) } returns lagBehandling()
-        every { satskjøringRepository.findByFagsakId(1L) } returns null
+        every { satskjøringRepository.findByFagsakIdAndSatsTidspunkt(1L, any()) } returns null
         every { satsendringService.erFagsakOppdatertMedSisteSatser(any()) } returns true
 
         assertFalse(startSatsendring.kanGjennomføreSatsendringManuelt(1L))

@@ -33,7 +33,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.endringstidspunkt.Endringstidspunk
 import no.nav.familie.ba.sak.kjerne.beregning.endringstidspunkt.filtrerLikEllerEtterEndringstidspunkt
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
-import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.brev.hentIPeriode
 import no.nav.familie.ba.sak.kjerne.brev.hentKompetanserSomStopperRettFørPeriode
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
@@ -54,7 +53,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.EØSBegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilVedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
@@ -126,6 +124,12 @@ class VedtaksperiodeService(
         val vedtaksperiodeMedBegrunnelser =
             vedtaksperiodeHentOgPersisterService.hentVedtaksperiodeThrows(vedtaksperiodeId)
 
+        validerAvslagHarAvslagBegrunnelse(
+            vedtaksperiodeMedBegrunnelser,
+            standardbegrunnelserFraFrontend,
+            eøsStandardbegrunnelserFraFrontend,
+        )
+
         val behandling = vedtaksperiodeMedBegrunnelser.vedtak.behandling
 
         val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandling.id)
@@ -134,7 +138,7 @@ class VedtaksperiodeService(
 
         vedtaksperiodeMedBegrunnelser.settBegrunnelser(
             standardbegrunnelserFraFrontend.mapNotNull {
-                val triggesAv = it.tilISanityBegrunnelse(sanityBegrunnelser)?.tilTriggesAv()
+                val triggesAv = sanityBegrunnelser[it]?.triggesAv
                     ?: return@mapNotNull null
 
                 if (triggesAv.satsendring) {
@@ -171,6 +175,20 @@ class VedtaksperiodeService(
         vedtaksperiodeHentOgPersisterService.lagre(vedtaksperiodeMedBegrunnelser)
 
         return vedtaksperiodeMedBegrunnelser.vedtak
+    }
+
+    private fun validerAvslagHarAvslagBegrunnelse(
+        vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
+        standardbegrunnelserFraFrontend: List<Standardbegrunnelse>,
+        eøsStandardbegrunnelserFraFrontend: List<EØSStandardbegrunnelse>,
+    ) {
+        val eksisterendeAvslagBegrunnelser = vedtaksperiodeMedBegrunnelser.begrunnelser.filter { it.standardbegrunnelse.vedtakBegrunnelseType.erAvslag() }.map { it.standardbegrunnelse.sanityApiNavn }
+
+        val nyeAvslagBegrunnelser = (standardbegrunnelserFraFrontend.filter { it.vedtakBegrunnelseType.erAvslag() } + eøsStandardbegrunnelserFraFrontend.filter { it.vedtakBegrunnelseType.erAvslag() }).map { it.sanityApiNavn }
+
+        if (!nyeAvslagBegrunnelser.containsAll(eksisterendeAvslagBegrunnelser)) {
+            throw FunksjonellFeil("Kan ikke fjerne avslags-begrunnelse fra vedtaksperiode som har blitt satt til avslag i vilkårsvurdering.")
+        }
     }
 
     private fun validerEndretUtbetalingsbegrunnelse(
@@ -737,8 +755,14 @@ class VedtaksperiodeService(
         val mye = mapOf(NB to "mye", NN to "mykje").getOrDefault(målform, "mye")
 
         return feilutbetaltValutaRepository.finnFeilutbetaltValutaForBehandling(vedtak.behandling.id).map {
-            val (fom, tom) = it.fom.tilDagMånedÅr() to it.tom.tilDagMånedÅr()
-            "$fra $fom til $tom er det utbetalt ${it.feilutbetaltBeløp} kroner for $mye."
+            if (featureToggleService.isEnabled(FeatureToggleConfig.FEILUTBETALT_VALUTA_PR_MND, false)) {
+                val måned = mapOf(NB to "måned", NN to "månad").getOrDefault(målform, "måned")
+                val (fom, tom) = it.fom.tilMånedÅr() to it.tom.tilMånedÅr()
+                "$fra $fom til $tom er det utbetalt ${it.feilutbetaltBeløp} kroner for $mye per $måned."
+            } else {
+                val (fom, tom) = it.fom.tilDagMånedÅr() to it.tom.tilDagMånedÅr()
+                "$fra $fom til $tom er det utbetalt ${it.feilutbetaltBeløp} kroner for $mye."
+            }
         }.toSet().takeIf { it.isNotEmpty() }
     }
 
@@ -746,28 +770,31 @@ class VedtaksperiodeService(
         val målform = persongrunnlagService.hentAktiv(behandlingId = behandling.id)?.søker?.målform
         val landkoderISO2 = integrasjonClient.hentLandkoderISO2()
 
-        return refusjonEøsRepository.finnRefusjonEøsForBehandling(behandling.id).filter { it.refusjonAvklart == avklart }.map {
-            val (fom, tom) = it.fom.tilMånedÅr() to it.tom.tilMånedÅr()
-            val land = landkoderISO2[it.land]?.storForbokstav() ?: throw Feil("Fant ikke navn for landkode ${it.land}")
-            val beløp = it.refusjonsbeløp
+        return refusjonEøsRepository.finnRefusjonEøsForBehandling(behandling.id)
+            .filter { it.refusjonAvklart == avklart }.map {
+                val (fom, tom) = it.fom.tilMånedÅr() to it.tom.tilMånedÅr()
+                val land =
+                    landkoderISO2[it.land]?.storForbokstav() ?: throw Feil("Fant ikke navn for landkode ${it.land}")
+                val beløp = it.refusjonsbeløp
 
-            when (målform) {
-                NN -> {
-                    if (avklart) {
-                        "Frå $fom til $tom blir etterbetaling på $beløp kroner per måned utbetalt til myndighetene i $land."
-                    } else {
-                        "Frå $fom til $tom blir ikkje etterbetaling på $beløp kroner per månad utbetalt no sidan det er utbetalt barnetrygd i $land."
+                when (målform) {
+                    NN -> {
+                        if (avklart) {
+                            "Frå $fom til $tom blir etterbetaling på $beløp kroner per måned utbetalt til myndighetene i $land."
+                        } else {
+                            "Frå $fom til $tom blir ikkje etterbetaling på $beløp kroner per månad utbetalt no sidan det er utbetalt barnetrygd i $land."
+                        }
+                    }
+
+                    else -> {
+                        if (avklart) {
+                            "Fra $fom til $tom blir etterbetaling på $beløp kroner per måned utbetalt til myndighetene i $land."
+                        } else {
+                            "Fra $fom til $tom blir ikke etterbetaling på $beløp kroner per måned utbetalt nå siden det er utbetalt barnetrygd i $land."
+                        }
                     }
                 }
-                else -> {
-                    if (avklart) {
-                        "Fra $fom til $tom blir etterbetaling på $beløp kroner per måned utbetalt til myndighetene i $land."
-                    } else {
-                        "Fra $fom til $tom blir ikke etterbetaling på $beløp kroner per måned utbetalt nå siden det er utbetalt barnetrygd i $land."
-                    }
-                }
-            }
-        }.toSet().takeIf { it.isNotEmpty() }
+            }.toSet().takeIf { it.isNotEmpty() }
     }
 
     companion object {

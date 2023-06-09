@@ -56,10 +56,11 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
                     SELECT 1
                     FROM   satskjoering
                     WHERE  fk_fagsak_id = f.id
+                    AND sats_tid  = :satsTidspunkt
                 ) AND f.status = 'LØPENDE' AND f.arkivert = false""",
         nativeQuery = true,
     )
-    fun finnLøpendeFagsakerForSatsendring(page: Pageable): Page<Fagsak>
+    fun finnLøpendeFagsakerForSatsendring(satsTidspunkt: LocalDate, page: Pageable): Page<Fagsak>
 
     @Query(
         value = """SELECT id FROM fagsak

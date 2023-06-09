@@ -24,6 +24,7 @@ import org.springframework.test.context.ContextConfiguration
     "mock-infotrygd-feed",
     "mock-oauth",
     "mock-rest-template-config",
+    "mock-localdate-service",
     "mock-sanity-client",
 )
 @ContextConfiguration(initializers = [DbContainerInitializer::class])

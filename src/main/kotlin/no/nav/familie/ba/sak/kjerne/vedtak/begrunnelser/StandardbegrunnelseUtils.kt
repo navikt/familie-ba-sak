@@ -13,13 +13,11 @@ import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.fomErPåSatsendring
-import no.nav.familie.ba.sak.kjerne.brev.domene.ISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertEndretAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertRestPersonResultat
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.harPersonerSomManglerOpplysninger
 import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertUtbetalingsperiodeDetalj
-import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.brev.hentPersonerForAlleUtgjørendeVilkår
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.MinimertPerson
@@ -37,13 +35,13 @@ fun Standardbegrunnelse.triggesForPeriode(
     minimertePersoner: List<MinimertPerson>,
     aktørIderMedUtbetaling: List<String>,
     minimerteEndredeUtbetalingAndeler: List<MinimertEndretAndel> = emptyList(),
-    sanityBegrunnelser: List<SanityBegrunnelse>,
+    sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
     erFørsteVedtaksperiodePåFagsak: Boolean,
     ytelserForSøkerForrigeMåned: List<YtelseType>,
     ytelserForrigePeriode: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
     featureToggleService: FeatureToggleService,
 ): Boolean {
-    val triggesAv = this.tilISanityBegrunnelse(sanityBegrunnelser)?.tilTriggesAv() ?: return false
+    val triggesAv = sanityBegrunnelser[this]?.triggesAv ?: return false
 
     val aktuellePersoner = minimertePersoner
         .filter { person -> triggesAv.personTyper.contains(person.type) }
@@ -160,14 +158,6 @@ private fun erEtterEndretPeriodeAvSammeÅrsak(
 }
 
 private val logger = LoggerFactory.getLogger(Standardbegrunnelse::class.java)
-
-fun <T : ISanityBegrunnelse> IVedtakBegrunnelse.tilISanityBegrunnelse(sanityBegrunnelser: List<T>): T? {
-    val funnetBegrunnelse = sanityBegrunnelser.find { it.apiNavn == this.sanityApiNavn }
-    if (funnetBegrunnelse == null) {
-        logger.warn("Finner ikke begrunnelse med apinavn '${this.sanityApiNavn}' på '${this.enumnavnTilString()}' i Sanity")
-    }
-    return funnetBegrunnelse
-}
 
 fun List<LocalDate>.tilBrevTekst(): String = Utils.slåSammen(this.sorted().map { it.tilKortString() })
 

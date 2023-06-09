@@ -1,14 +1,17 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene
 
 import jakarta.persistence.Column
+import jakarta.persistence.Convert
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
+import no.nav.familie.ba.sak.common.YearMonthConverter
 import org.hibernate.Hibernate
 import java.time.LocalDateTime
+import java.time.YearMonth
 
 @Entity(name = "Satskjøring")
 @Table(name = "satskjoering")
@@ -33,6 +36,10 @@ data class Satskjøring(
 
     @Column(name = "feiltype")
     var feiltype: String? = null,
+
+    @Column(name = "sats_tid", columnDefinition = "DATE")
+    @Convert(converter = YearMonthConverter::class)
+    val satsTidspunkt: YearMonth,
 ) {
 
     override fun equals(other: Any?): Boolean {
