@@ -29,14 +29,16 @@ fun lagVilkårsvurderingMedOverstyrendeResultater(
     søker: Person,
     barna: List<Person>,
     behandling: Behandling? = null,
+    id: Long = 0,
     overstyrendeVilkårResultater: Map<AktørId, List<VilkårResultat>>,
 ): Vilkårsvurdering {
-    val vilkårsvurdering = Vilkårsvurdering(behandling = behandling ?: mockk(relaxed = true))
+    val vilkårsvurdering = Vilkårsvurdering(behandling = behandling ?: mockk(relaxed = true), id = id)
 
     val søkerPersonResultater = lagPersonResultatAvOverstyrteResultater(
         person = søker,
         overstyrendeVilkårResultater = overstyrendeVilkårResultater[søker.aktør.aktørId] ?: emptyList(),
         vilkårsvurdering = vilkårsvurdering,
+        id = id,
     )
 
     val barnaPersonResultater = barna.map {

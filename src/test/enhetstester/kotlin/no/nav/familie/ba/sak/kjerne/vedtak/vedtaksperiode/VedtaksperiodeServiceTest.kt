@@ -111,6 +111,12 @@ class VedtaksperiodeServiceTest {
                 any(),
             )
         } returns true
+        every {
+            featureToggleService.isEnabled(
+                FeatureToggleConfig.FEILUTBETALT_VALUTA_PR_MND,
+                any(),
+            )
+        } returns true
         every { feilutbetaltValutaRepository.finnFeilutbetaltValutaForBehandling(any()) } returns emptyList()
         every { småbarnstilleggService.hentPerioderMedFullOvergangsstønad(any()) } returns emptyList()
         every { refusjonEøsRepository.finnRefusjonEøsForBehandling(any()) } returns emptyList()
@@ -218,14 +224,19 @@ class VedtaksperiodeServiceTest {
 
         perioder.forEach { periode ->
             assertThat(periodebeskrivelser!!.find { it.contains("${periode.first.year}") })
-                .contains("Fra", "til", "${periode.second.year}", "er det utbetalt 200 kroner for mye.")
+                .contains("Fra", "til", "${periode.second.year}", "er det utbetalt 200 kroner for mye per måned.")
         }
     }
 
     @Test
     fun `skal beskrive perioder med eøs refusjoner for behandlinger med avklarte refusjon eøs`() {
         val behandling = lagBehandling(behandlingKategori = BehandlingKategori.EØS)
-        assertThat(vedtaksperiodeService.beskrivPerioderMedRefusjonEøs(behandling = behandling, avklart = true)).isNull()
+        assertThat(
+            vedtaksperiodeService.beskrivPerioderMedRefusjonEøs(
+                behandling = behandling,
+                avklart = true,
+            ),
+        ).isNull()
 
         every { refusjonEøsRepository.finnRefusjonEøsForBehandling(behandling.id) } returns listOf(
             RefusjonEøs(
@@ -247,7 +258,12 @@ class VedtaksperiodeServiceTest {
     @Test
     fun `skal beskrive perioder med eøs refusjoner for behandlinger med uavklarte refusjon eøs`() {
         val behandling = lagBehandling(behandlingKategori = BehandlingKategori.EØS)
-        assertThat(vedtaksperiodeService.beskrivPerioderMedRefusjonEøs(behandling = behandling, avklart = false)).isNull()
+        assertThat(
+            vedtaksperiodeService.beskrivPerioderMedRefusjonEøs(
+                behandling = behandling,
+                avklart = false,
+            ),
+        ).isNull()
 
         every { refusjonEøsRepository.finnRefusjonEøsForBehandling(behandling.id) } returns listOf(
             RefusjonEøs(

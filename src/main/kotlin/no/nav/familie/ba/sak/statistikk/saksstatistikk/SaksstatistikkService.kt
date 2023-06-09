@@ -108,7 +108,7 @@ class SaksstatistikkService(
             vedtakId = aktivtVedtak?.id?.toString(),
             resultat = behandling.resultat.name,
             behandlingTypeBeskrivelse = behandling.type.visningsnavn,
-            resultatBegrunnelser = behandling.resultatBegrunnelser(),
+            resultatBegrunnelser = behandling.resultatBegrunnelser(aktivtVedtak),
             behandlingOpprettetAv = behandling.opprettetAv,
             behandlingOpprettetType = "saksbehandlerId",
             behandlingOpprettetTypeBeskrivelse = "saksbehandlerId. VL ved automatisk behandling",
@@ -128,8 +128,8 @@ class SaksstatistikkService(
     }
 
     fun mapTilSakDvh(sakId: Long): SakDVH? {
-        val fagsak = fagsakService.hentPåFagsakId(sakId)
-        val aktivBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = fagsak.id)
+        val aktivBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = sakId)
+        val fagsak = aktivBehandling?.fagsak ?: fagsakService.hentPåFagsakId(sakId)
 
         var landkodeSøker: String = PersonopplysningerService.UKJENT_LANDKODE
 
@@ -189,12 +189,13 @@ class SaksstatistikkService(
     private fun erRevurderingEllerTekniskBehandling(behandling: Behandling) =
         behandling.type == BehandlingType.REVURDERING || behandling.type == BehandlingType.TEKNISK_OPPHØR || behandling.type == BehandlingType.TEKNISK_ENDRING
 
-    private fun Behandling.resultatBegrunnelser(): List<ResultatBegrunnelseDVH> {
+    private fun Behandling.resultatBegrunnelser(vedtak: Vedtak?): List<ResultatBegrunnelseDVH> {
         return when (resultat) {
             HENLAGT_SØKNAD_TRUKKET, HENLAGT_FEILAKTIG_OPPRETTET -> emptyList()
-            else -> vedtakService.hentAktivForBehandling(behandlingId = id)
-                ?.hentResultatBegrunnelserFraVedtaksbegrunnelser()
-                ?: emptyList()
+            else ->
+                vedtak
+                    ?.hentResultatBegrunnelserFraVedtaksbegrunnelser()
+                    ?: emptyList()
         }
     }
 
