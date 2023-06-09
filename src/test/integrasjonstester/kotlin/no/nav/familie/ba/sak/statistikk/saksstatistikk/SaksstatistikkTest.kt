@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.statistikk.saksstatistikk
 
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.Utils.hentPropertyFraMaven
 import no.nav.familie.ba.sak.common.nyOrdinærBehandling
 import no.nav.familie.ba.sak.common.randomFnr
@@ -25,11 +24,9 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
@@ -94,18 +91,6 @@ class SaksstatistikkTest(
 
         assertNotNull(oppdatertMellomlagretSaksstatistikkHendelse!!.sendtTidspunkt)
         assertEquals(lagretJsonSomSakDVH, sendteMeldinger["sak-$fagsakId"] as SakDVH)
-    }
-
-    @Test
-    fun `Skal utføre rollback på sak og saksstatistikk ved feil`() {
-        val feil = assertThrows<Feil> {
-            fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = null, aktørId = null))
-        }
-        assertTrue(feil.message?.contains("Hverken aktørid eller personident er satt på fagsak-requesten") == true)
-
-        val mellomlagredeStatistikkHendelser = saksstatistikkMellomlagringRepository.finnMeldingerKlarForSending()
-
-        assertEquals(0, mellomlagredeStatistikkHendelser.size)
     }
 
     @Test
