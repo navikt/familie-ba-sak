@@ -22,6 +22,7 @@ class FeatureToggleConfig {
         const val SATSENDRING_ENABLET: String = "familie-ba-sak.satsendring-enablet"
         const val SATSENDRING_OPPRETT_TASKER = "familie-ba-sak.satsendring-opprett-satsendring-task"
         const val SATSENDRING_2023_07 = "familie-ba-sak.satsendring-juli"
+        const val SATSENDRING_SNIKE_I_KØEN = "familie-ba-sak.satsendring-snike-i-koen"
     }
 }
 

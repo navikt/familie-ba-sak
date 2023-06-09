@@ -11,9 +11,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.SatsService
 import no.nav.familie.ba.sak.kjerne.beregning.SatsTidspunkt
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
@@ -33,8 +31,10 @@ import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
@@ -56,8 +56,8 @@ class BehandlingSatsendringTest(
     @Autowired private val brevmalService: BrevmalService,
 ) : AbstractVerdikjedetest() {
 
-    @Test
-    fun `Skal kjøre satsendring på løpende fagsak hvor brukeren har barnetrygd under 6 år`() {
+    @BeforeEach
+    fun setUp() {
         mockkObject(SatsTidspunkt)
         // Grunnen til at denne mockes er egentlig at den indirekte påvirker hva SatsService.hentGyldigSatsFor
         // returnerer. Det vi ønsker er at den sist tillagte satsendringen ikke kommer med slik at selve
@@ -65,62 +65,17 @@ class BehandlingSatsendringTest(
         every { SatsTidspunkt.senesteSatsTidspunkt } returns LocalDate.of(2023, 2, 1)
 
         every { mockLocalDateService.now() } returns LocalDate.now().minusYears(6) andThen LocalDate.now()
+    }
 
-        val scenario = mockServerKlient().lagScenario(
-            RestScenario(
-                søker = RestScenarioPerson(fødselsdato = "1993-01-12", fornavn = "Mor", etternavn = "Søker").copy(
-                    bostedsadresser = mutableListOf(
-                        Bostedsadresse(
-                            angittFlyttedato = LocalDate.now().minusYears(10),
-                            gyldigTilOgMed = null,
-                            matrikkeladresse = Matrikkeladresse(
-                                matrikkelId = 123L,
-                                bruksenhetsnummer = "H301",
-                                tilleggsnavn = "navn",
-                                postnummer = "0202",
-                                kommunenummer = "2231",
-                            ),
-                        ),
-                    ),
-                ),
-                barna = listOf(
-                    RestScenarioPerson(
-                        fødselsdato = LocalDate.of(2023, 1, 1)
-                            .toString(),
-                        fornavn = "Barn",
-                        etternavn = "Barnesen",
-                    ).copy(
-                        bostedsadresser = mutableListOf(
-                            Bostedsadresse(
-                                angittFlyttedato = LocalDate.now().minusYears(6),
-                                gyldigTilOgMed = null,
-                                matrikkeladresse = Matrikkeladresse(
-                                    matrikkelId = 123L,
-                                    bruksenhetsnummer = "H301",
-                                    tilleggsnavn = "navn",
-                                    postnummer = "0202",
-                                    kommunenummer = "2231",
-                                ),
-                            ),
-                        ),
-                    ),
-                ),
-            ),
-        )
-        val behandling = behandleFødselshendelse(
-            nyBehandlingHendelse = NyBehandlingHendelse(
-                morsIdent = scenario.søker.ident!!,
-                barnasIdenter = listOf(scenario.barna.first().ident!!),
-            ),
-            behandleFødselshendelseTask = behandleFødselshendelseTask,
-            fagsakService = fagsakService,
-            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-            vedtakService = vedtakService,
-            stegService = stegService,
-            personidentService = personidentService,
-            brevmalService = brevmalService,
+    @AfterEach
+    fun tearDown() {
+        unmockkObject(SatsTidspunkt)
+    }
 
-        )!!
+    @Test
+    fun `Skal kjøre satsendring på løpende fagsak hvor brukeren har barnetrygd under 6 år`() {
+        val scenario = mockServerKlient().lagScenario(restScenario)
+        val behandling = opprettBehandling(scenario)
         satskjøringRepository.saveAndFlush(Satskjøring(fagsakId = behandling.fagsak.id, satsTidspunkt = SATSENDRINGMÅNED_MARS_2023))
 
         // Fjerner mocking slik at den siste satsendringen vi fjernet via mocking nå skal komme med.
@@ -149,173 +104,76 @@ class BehandlingSatsendringTest(
         assertThat(atyMedSenesteTilleggOrbaSats.sats).isEqualTo(SatsService.finnSisteSatsFor(SatsType.TILLEGG_ORBA).beløp)
         assertThat(atyMedVanligOrbaSats.sats).isEqualTo(SatsService.finnSisteSatsFor(SatsType.ORBA).beløp)
 
-        val satskjøring = satskjøringRepository.findByFagsakIdAndSatsTidspunkt(behandling.fagsak.id, SATSENDRINGMÅNED_MARS_2023)
+        val satskjøring = satskjøringRepository.findByFagsakIdAndSatsTidspunkt(behandling.fagsak.id, satsTidspunkt = SATSENDRINGMÅNED_MARS_2023)
         assertThat(satskjøring?.ferdigTidspunkt)
             .isCloseTo(LocalDateTime.now(), Assertions.within(30, ChronoUnit.SECONDS))
     }
 
     @Test
-    fun `Skal tilbakestille åpen behandling ved kjøring av satsendring`() {
-        mockkObject(SatsTidspunkt)
-        // Grunnen til at denne mockes er egentlig at den indirekte påvirker hva SatsService.hentGyldigSatsFor
-        // returnerer. Det vi ønsker er at den sist tillagte satsendringen ikke kommer med slik at selve
-        // satsendringen som skal kjøres senere faktisk utgjør en endring (slik at behandlingsresultatet blir ENDRET).
-        every { SatsTidspunkt.senesteSatsTidspunkt } returns LocalDate.of(2023, 2, 1)
-
-        every { mockLocalDateService.now() } returns LocalDate.now().minusYears(6) andThen LocalDate.now()
-
-        val scenario = mockServerKlient().lagScenario(
-            RestScenario(
-                søker = RestScenarioPerson(fødselsdato = "1993-01-12", fornavn = "Mor", etternavn = "Søker").copy(
-                    bostedsadresser = mutableListOf(
-                        Bostedsadresse(
-                            angittFlyttedato = LocalDate.now().minusYears(10),
-                            gyldigTilOgMed = null,
-                            matrikkeladresse = Matrikkeladresse(
-                                matrikkelId = 123L,
-                                bruksenhetsnummer = "H301",
-                                tilleggsnavn = "navn",
-                                postnummer = "0202",
-                                kommunenummer = "2231",
-                            ),
-                        ),
-                    ),
-                ),
-                barna = listOf(
-                    RestScenarioPerson(
-                        fødselsdato = LocalDate.of(2023, 1, 1)
-                            .toString(),
-                        fornavn = "Barn",
-                        etternavn = "Barnesen",
-                    ).copy(
-                        bostedsadresser = mutableListOf(
-                            Bostedsadresse(
-                                angittFlyttedato = LocalDate.now().minusYears(6),
-                                gyldigTilOgMed = null,
-                                matrikkeladresse = Matrikkeladresse(
-                                    matrikkelId = 123L,
-                                    bruksenhetsnummer = "H301",
-                                    tilleggsnavn = "navn",
-                                    postnummer = "0202",
-                                    kommunenummer = "2231",
-                                ),
-                            ),
-                        ),
-                    ),
-                ),
-            ),
-        )
-        val behandling = behandleFødselshendelse(
-            nyBehandlingHendelse = NyBehandlingHendelse(
-                morsIdent = scenario.søker.ident!!,
-                barnasIdenter = listOf(scenario.barna.first().ident!!),
-            ),
-            behandleFødselshendelseTask = behandleFødselshendelseTask,
-            fagsakService = fagsakService,
-            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-            vedtakService = vedtakService,
-            stegService = stegService,
-            personidentService = personidentService,
-            brevmalService = brevmalService,
-
-        )!!
-        satskjøringRepository.saveAndFlush(Satskjøring(fagsakId = behandling.fagsak.id, satsTidspunkt = SATSENDRINGMÅNED_MARS_2023))
-
-        // Opprett revurdering som blir liggende igjen som åpen og på behandlingsresultatsteget
-        val revurdering = familieBaSakKlient().opprettBehandling(
-            søkersIdent = scenario.søker.ident,
-            behandlingType = BehandlingType.REVURDERING,
-            behandlingÅrsak = BehandlingÅrsak.NYE_OPPLYSNINGER,
-            fagsakId = behandling.fagsak.id,
-        )
-        val revurderingEtterVilkårsvurdering =
-            familieBaSakKlient().validerVilkårsvurdering(behandlingId = revurdering.data!!.behandlingId)
-        assertEquals(StegType.BEHANDLINGSRESULTAT, revurderingEtterVilkårsvurdering.data!!.steg)
-
-        // Fjerner mocking slik at den siste satsendringen vi fjernet via mocking nå skal komme med.
-        unmockkObject(SatsTidspunkt)
-
-        val satsendringResultat =
-            autovedtakSatsendringService.kjørBehandling(SatsendringTaskDto(behandling.fagsak.id, YearMonth.of(2023, 3)))
-
-        assertEquals(SatsendringSvar.TILBAKESTILLER_BEHANDLINGEN_TIL_VILKÅRSVURDERINGEN, satsendringResultat)
-
-        val åpenBehandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId = behandling.fagsak.id)
-        assertEquals(revurdering.data!!.behandlingId, åpenBehandling!!.id)
-        assertEquals(StegType.VILKÅRSVURDERING, åpenBehandling.steg)
-    }
-
-    @Test
     fun `Skal ignorere satsendring hvis siste sats alt er satt`() {
-        every { mockLocalDateService.now() } returns LocalDate.now().minusYears(6) andThen LocalDate.now()
-
-        val scenario = mockServerKlient().lagScenario(
-            RestScenario(
-                søker = RestScenarioPerson(fødselsdato = "1993-01-12", fornavn = "Mor", etternavn = "Søker").copy(
-                    bostedsadresser = mutableListOf(
-                        Bostedsadresse(
-                            angittFlyttedato = LocalDate.now().minusYears(10),
-                            gyldigTilOgMed = null,
-                            matrikkeladresse = Matrikkeladresse(
-                                matrikkelId = 123L,
-                                bruksenhetsnummer = "H301",
-                                tilleggsnavn = "navn",
-                                postnummer = "0202",
-                                kommunenummer = "2231",
-                            ),
-                        ),
-                    ),
-                ),
-                barna = listOf(
-                    RestScenarioPerson(
-                        fødselsdato = LocalDate.of(2023, 1, 1)
-                            .toString(),
-                        fornavn = "Barn",
-                        etternavn = "Barnesen",
-                    ).copy(
-                        bostedsadresser = mutableListOf(
-                            Bostedsadresse(
-                                angittFlyttedato = LocalDate.now().minusYears(6),
-                                gyldigTilOgMed = null,
-                                matrikkeladresse = Matrikkeladresse(
-                                    matrikkelId = 123L,
-                                    bruksenhetsnummer = "H301",
-                                    tilleggsnavn = "navn",
-                                    postnummer = "0202",
-                                    kommunenummer = "2231",
-                                ),
-                            ),
-                        ),
-                    ),
-                ),
-            ),
-        )
-        val behandling = behandleFødselshendelse(
-            nyBehandlingHendelse = NyBehandlingHendelse(
-                morsIdent = scenario.søker.ident!!,
-                barnasIdenter = listOf(scenario.barna.first().ident!!),
-            ),
-            behandleFødselshendelseTask = behandleFødselshendelseTask,
-            fagsakService = fagsakService,
-            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-            vedtakService = vedtakService,
-            stegService = stegService,
-            personidentService = personidentService,
-            brevmalService = brevmalService,
-
-        )!!
-        satskjøringRepository.saveAndFlush(Satskjøring(fagsakId = behandling.fagsak.id, satsTidspunkt = SATSENDRINGMÅNED_MARS_2023))
-
         // Fjerner mocking slik at den siste satsendringen vi fjernet via mocking nå skal komme med.
         unmockkObject(SatsTidspunkt)
+
+        val scenario = mockServerKlient().lagScenario(restScenario)
+        val behandling = opprettBehandling(scenario)
+        satskjøringRepository.saveAndFlush(Satskjøring(fagsakId = behandling.fagsak.id, satsTidspunkt = SATSENDRINGMÅNED_MARS_2023))
 
         val satsendringResultat =
             autovedtakSatsendringService.kjørBehandling(SatsendringTaskDto(behandling.fagsak.id, YearMonth.of(2023, 3)))
 
         assertEquals(SatsendringSvar.SATSENDRING_ER_ALLEREDE_UTFØRT, satsendringResultat)
 
-        val satskjøring = satskjøringRepository.findByFagsakIdAndSatsTidspunkt(behandling.fagsak.id, SATSENDRINGMÅNED_MARS_2023)
+        val satskjøring = satskjøringRepository.findByFagsakIdAndSatsTidspunkt(behandling.fagsak.id, satsTidspunkt = SATSENDRINGMÅNED_MARS_2023)
         assertThat(satskjøring?.ferdigTidspunkt)
             .isCloseTo(LocalDateTime.now(), Assertions.within(30, ChronoUnit.SECONDS))
     }
+
+    private val matrikkeladresse = Matrikkeladresse(
+        matrikkelId = 123L,
+        bruksenhetsnummer = "H301",
+        tilleggsnavn = "navn",
+        postnummer = "0202",
+        kommunenummer = "2231",
+    )
+    private val restScenario = RestScenario(
+        søker = RestScenarioPerson(fødselsdato = "1993-01-12", fornavn = "Mor", etternavn = "Søker").copy(
+            bostedsadresser = mutableListOf(
+                Bostedsadresse(
+                    angittFlyttedato = LocalDate.now().minusYears(10),
+                    gyldigTilOgMed = null,
+                    matrikkeladresse = matrikkeladresse,
+                ),
+            ),
+        ),
+        barna = listOf(
+            RestScenarioPerson(
+                fødselsdato = LocalDate.of(2023, 1, 1).toString(),
+                fornavn = "Barn",
+                etternavn = "Barnesen",
+            ).copy(
+                bostedsadresser = mutableListOf(
+                    Bostedsadresse(
+                        angittFlyttedato = LocalDate.now().minusYears(6),
+                        gyldigTilOgMed = null,
+                        matrikkeladresse = matrikkeladresse,
+                    ),
+                ),
+            ),
+        ),
+    )
+
+    private fun opprettBehandling(scenario: RestScenario) =
+        behandleFødselshendelse(
+            nyBehandlingHendelse = NyBehandlingHendelse(
+                morsIdent = scenario.søker.ident!!,
+                barnasIdenter = listOf(scenario.barna.first().ident!!),
+            ),
+            behandleFødselshendelseTask = behandleFødselshendelseTask,
+            fagsakService = fagsakService,
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            vedtakService = vedtakService,
+            stegService = stegService,
+            personidentService = personidentService,
+            brevmalService = brevmalService,
+        )!!
 }

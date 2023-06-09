@@ -190,7 +190,6 @@ abstract class AndelTilkjentYtelseForUtbetalingsoppdrag(private val andelTilkjen
     val stønadTom: YearMonth = andelTilkjentYtelse.stønadTom
     val aktør: Aktør = andelTilkjentYtelse.aktør
     val type: YtelseType = andelTilkjentYtelse.type
-    fun erUtvidet() = andelTilkjentYtelse.erUtvidet()
     abstract var periodeOffset: Long?
     abstract var forrigePeriodeOffset: Long?
     abstract var kildeBehandlingId: Long?

@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.fagsak
 
 import io.micrometer.core.instrument.Metrics
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.ekstern.restDomene.FagsakDeltagerRolle
 import no.nav.familie.ba.sak.ekstern.restDomene.InstitusjonInfo
@@ -83,17 +82,8 @@ class FagsakService(
 
     @Transactional
     fun hentEllerOpprettFagsak(fagsakRequest: FagsakRequest): Ressurs<RestMinimalFagsak> {
-        val personident = when {
-            fagsakRequest.personIdent !== null -> fagsakRequest.personIdent
-            fagsakRequest.aktørId !== null -> fagsakRequest.aktørId
-            else -> throw Feil(
-                "Hverken aktørid eller personident er satt på fagsak-requesten. Klarer ikke opprette eller hente fagsak.",
-                "Fagsak er forsøkt opprettet uten ident. Dette er en systemfeil, vennligst ta kontakt med systemansvarlig.",
-                HttpStatus.BAD_REQUEST,
-            )
-        }
         val fagsak = hentEllerOpprettFagsak(
-            personident,
+            fagsakRequest.personIdent,
             type = fagsakRequest.fagsakType ?: FagsakType.NORMAL,
             institusjon = fagsakRequest.institusjon,
         )
@@ -266,6 +256,7 @@ class FagsakService(
         )
     }
 
+    @Transactional
     fun hentEllerOpprettFagsakForPersonIdent(
         fødselsnummer: String,
         fraAutomatiskBehandling: Boolean = false,

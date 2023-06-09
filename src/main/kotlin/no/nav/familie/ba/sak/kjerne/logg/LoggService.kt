@@ -375,6 +375,27 @@ class LoggService(
         )
     }
 
+    fun opprettSettPåMaskinellVent(behandling: Behandling, årsak: String) {
+        val logg = Logg(
+            behandling.id,
+            type = LoggType.BEHANDLING_SATT_PÅ_MASKINELL_VENT,
+            // TODO FORVALTER_ROLLE
+            rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.UKJENT),
+            tekst = "Årsak: $årsak",
+        )
+        lagre(logg)
+    }
+
+    fun opprettTattAvMaskinellVent(behandling: Behandling) {
+        val logg = Logg(
+            behandling.id,
+            type = LoggType.BEHANDLING_TATT_AV_MASKINELL_VENT,
+            // TODO FORVALTER_ROLLE
+            rolle = SikkerhetContext.hentRolletilgangFraSikkerhetscontext(rolleConfig, BehandlerRolle.UKJENT),
+        )
+        lagre(logg)
+    }
+
     fun opprettOppdaterVentingLogg(behandling: Behandling, endretÅrsak: String?, endretFrist: LocalDate?) {
         val tekst = if (endretFrist != null && endretÅrsak != null) {
             "Frist og årsak er endret til \"${endretÅrsak}\" og ${endretFrist.tilKortString()}"
