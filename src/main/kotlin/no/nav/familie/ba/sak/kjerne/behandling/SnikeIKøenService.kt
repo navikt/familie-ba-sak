@@ -4,6 +4,8 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
+import no.nav.familie.ba.sak.kjerne.logg.LoggService
+import no.nav.familie.ba.sak.kjerne.steg.TilbakestillBehandlingService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -13,12 +15,14 @@ import java.time.LocalDateTime
 class SnikeIKøenService(
     private val behandlingRepository: BehandlingRepository,
     private val påVentService: SettPåVentService,
+    private val loggService: LoggService,
+    private val tilbakestillBehandlingService: TilbakestillBehandlingService,
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
     @Transactional
-    fun settAktivBehandlingTilPåVent(behandlingId: Long) {
+    fun settAktivBehandlingTilPåMaskinellVent(behandlingId: Long, årsak: SettPåMaskinellVentÅrsak) {
         val behandling = behandlingRepository.finnBehandling(behandlingId)
         if (!behandling.aktiv) {
             error("Behandling=$behandlingId er ikke aktiv")
@@ -30,42 +34,67 @@ class SnikeIKøenService(
         behandling.status = BehandlingStatus.SATT_PÅ_MASKINELL_VENT
         behandling.aktiv = false
         behandlingRepository.saveAndFlush(behandling)
-        // TODO loggService.opprettSettPåMaskinellVentSatsendring() gjøres i PR som tar i bruk snikeIKøen
+        loggService.opprettSettPåMaskinellVent(behandling, årsak.årsak)
     }
 
     /**
-     * @param behandlingPåVentId brukes for validering
-     * @param behandlingSomSnekIKøenId brukes for validering
+     * @param behandlingSomFerdigstilles er behandlingen som ferdigstilles i [no.nav.familie.ba.sak.kjerne.steg.FerdigstillBehandling]
+     *  Den er mest brukt for å logge hvilken behandling det er som ferdigstilles og hvilken som blir deaktivert
+     *
+     * @return boolean som tilsier om en behandling er reaktivert eller ikke
      */
     @Transactional
-    fun reaktiverBehandlingPåVent(fagsakId: Long, behandlingPåVentId: Long, behandlingSomSnekIKøenId: Long) {
-        val behandlingerForFagsak =
-            behandlingRepository.finnBehandlinger(fagsakId).sortedByDescending { it.opprettetTidspunkt }
-        if (behandlingerForFagsak.size < 2) {
-            error("Forventet å finne fler enn 2 behandlinger på fagsak=$fagsakId")
-        }
-        val behandlingSomSnekIKøen = behandlingerForFagsak[0]
-        val behandlingPåVent = behandlingerForFagsak[1]
+    fun reaktiverBehandlingPåMaskinellVent(behandlingSomFerdigstilles: Behandling): Boolean {
+        val fagsakId = behandlingSomFerdigstilles.fagsak.id
 
-        validerBehandlinger(behandlingPåVent, behandlingPåVentId, behandlingSomSnekIKøen, behandlingSomSnekIKøenId)
+        val behandlingPåVent = finnBehandlingPåMaskinellVent(fagsakId) ?: return false
+        val aktivBehandling = behandlingRepository.findByFagsakAndAktiv(fagsakId)
 
-        aktiverBehandlingPåVent(behandlingSomSnekIKøen, behandlingPåVent)
+        validerBehandlinger(aktivBehandling, behandlingPåVent)
+
+        aktiverBehandlingPåVent(aktivBehandling, behandlingPåVent, behandlingSomFerdigstilles)
+        tilbakestillBehandlingService.tilbakestillBehandlingTilVilkårsvurdering(behandlingPåVent)
+        loggService.opprettTattAvMaskinellVent(behandlingPåVent)
+        return true
     }
 
-    private fun aktiverBehandlingPåVent(
-        behandlingSomSnekIKøen: Behandling,
-        behandlingPåVent: Behandling,
-    ) {
-        logger.info("Deaktiverer behandlingSomSnekIKøen=${behandlingSomSnekIKøen.id} og aktiverer behandlingPåVent=${behandlingPåVent.id}")
-        behandlingSomSnekIKøen.aktiv = false
+    private fun finnBehandlingPåMaskinellVent(
+        fagsakId: Long,
+    ): Behandling? =
+        behandlingRepository.finnBehandlinger(fagsakId, BehandlingStatus.SATT_PÅ_MASKINELL_VENT)
+            .takeIf { it.isNotEmpty() }
+            ?.let { it.singleOrNull() ?: error("Forventer kun en behandling på vent for fagsak=$fagsakId") }
 
-        behandlingRepository.saveAndFlush(behandlingSomSnekIKøen)
+    private fun aktiverBehandlingPåVent(
+        aktivBehandling: Behandling?,
+        behandlingPåVent: Behandling,
+        behandlingSomFerdigstilles: Behandling,
+    ) {
+        logger.info(
+            "Deaktiverer aktivBehandling=${aktivBehandling?.id}" +
+                " aktiverer behandlingPåVent=${behandlingPåVent.id}" +
+                " behandlingSomFerdigstilles=${behandlingSomFerdigstilles.id}",
+        )
+
+        if (aktivBehandling != null) {
+            aktivBehandling.aktiv = false
+            behandlingRepository.saveAndFlush(aktivBehandling)
+        }
+
         behandlingPåVent.aktiv = true
         behandlingPåVent.aktivertTidspunkt = LocalDateTime.now()
         behandlingPåVent.status = utledStatusForBehandlingPåVent(behandlingPåVent)
 
-        // TODO tilbakestill vedtak/brev etc på åpen behandling ?
         behandlingRepository.saveAndFlush(behandlingPåVent)
+    }
+
+    private fun validerBehandlinger(aktivBehandling: Behandling?, behandlingPåVent: Behandling) {
+        if (behandlingPåVent.aktiv) {
+            error("Åpen behandling har feil tilstand $behandlingPåVent")
+        }
+        if (aktivBehandling != null && aktivBehandling.status != BehandlingStatus.AVSLUTTET) {
+            throw BehandlingErIkkeAvsluttetException(aktivBehandling)
+        }
     }
 
     /**
@@ -76,36 +105,10 @@ class SnikeIKøenService(
         påVentService.finnAktivSettPåVentPåBehandling(behandlingPåVent.id)
             ?.let { BehandlingStatus.SATT_PÅ_VENT }
             ?: BehandlingStatus.UTREDES
+}
 
-    private fun validerBehandlinger(
-        nestSisteBehandling: Behandling,
-        behandlingPåVentId: Long,
-        sisteBehandling: Behandling,
-        behandlingSomSnekIKøenId: Long,
-    ) {
-        if (sisteBehandling.id != behandlingSomSnekIKøenId) {
-            error("Siste behandling=${sisteBehandling.id} for fagsak er ikke behandlingen som snek i køen($behandlingSomSnekIKøenId)")
-        }
-        if (nestSisteBehandling.id != behandlingPåVentId) {
-            error("Nest siste behandling=${nestSisteBehandling.id} for fagsak er ikke behandlingen som er satt på vent($behandlingPåVentId)")
-        }
-        validerTilstandPåBehandlinger(nestSisteBehandling, sisteBehandling)
-    }
-
-    private fun validerTilstandPåBehandlinger(
-        behandlingPåVent: Behandling,
-        behandlingSomSnekIKøen: Behandling,
-    ) {
-        if (behandlingPåVent.aktiv || behandlingPåVent.status != BehandlingStatus.SATT_PÅ_MASKINELL_VENT) {
-            error("Åpen behandling har feil tilstand $behandlingPåVent")
-        }
-        if (!behandlingSomSnekIKøen.aktiv) {
-            error("Behandling som snek i køen må være aktiv $behandlingSomSnekIKøen")
-        }
-        if (behandlingSomSnekIKøen.status != BehandlingStatus.AVSLUTTET) {
-            throw BehandlingErIkkeAvsluttetException(behandlingSomSnekIKøen)
-        }
-    }
+enum class SettPåMaskinellVentÅrsak(val årsak: String) {
+    SATSENDRING("Satsendring"),
 }
 
 class BehandlingErIkkeAvsluttetException(val behandling: Behandling) :

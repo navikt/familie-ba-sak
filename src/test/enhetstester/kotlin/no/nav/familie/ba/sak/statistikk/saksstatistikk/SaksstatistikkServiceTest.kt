@@ -390,8 +390,9 @@ internal class SaksstatistikkServiceTest(
     @Test
     fun `Skal mappe til sakDVH, aktører har SØKER og BARN`() {
         val randomAktørId = randomAktør()
+        val fagsak = Fagsak(status = FagsakStatus.OPPRETTET, aktør = randomAktørId)
         every { fagsakService.hentPåFagsakId(any()) } answers {
-            Fagsak(status = FagsakStatus.OPPRETTET, aktør = randomAktørId)
+            fagsak
         }
         every { personidentService.hentAktør(any()) } returns randomAktørId
         every { personopplysningerService.hentLandkodeAlpha2UtenlandskBostedsadresse(any()) } returns "SE"
@@ -402,7 +403,7 @@ internal class SaksstatistikkServiceTest(
             tilfeldigPerson(personType = PersonType.SØKER),
         )
 
-        every { behandlingHentOgPersisterService.finnAktivForFagsak(any()) } returns lagBehandling()
+        every { behandlingHentOgPersisterService.finnAktivForFagsak(any()) } returns lagBehandling(fagsak)
 
         val sakDvh = sakstatistikkService.mapTilSakDvh(1)
         println(objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(sakDvh))
