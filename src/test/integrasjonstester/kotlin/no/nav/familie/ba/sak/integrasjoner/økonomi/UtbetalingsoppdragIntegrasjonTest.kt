@@ -307,7 +307,6 @@ class UtbetalingsoppdragIntegrasjonTest(
                 andelerFørstegangsbehandling.forIverksetting(),
             ),
         )
-        avsluttOgLagreBehandling(behandling)
 
         avsluttOgLagreBehandling(behandling)
         val behandling2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
@@ -453,7 +452,6 @@ class UtbetalingsoppdragIntegrasjonTest(
                 andelerFørstegangsbehandling.forIverksetting(),
             ),
         )
-        avsluttOgLagreBehandling(behandling)
 
         avsluttOgLagreBehandling(behandling)
         val behandling2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
@@ -696,7 +694,6 @@ class UtbetalingsoppdragIntegrasjonTest(
         )
 
         avsluttOgLagreBehandling(behandling)
-
         val behandling2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         val tilkjentYtelse2 = lagInitiellTilkjentYtelse(behandling2)
         val vedtak2 = lagVedtak(behandling2)
@@ -861,7 +858,6 @@ class UtbetalingsoppdragIntegrasjonTest(
             ),
         )
         avsluttOgLagreBehandling(behandling)
-
         val behandling2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
         val tilkjentYtelse2 = lagInitiellTilkjentYtelse(behandling2)
         val vedtak2 = lagVedtak(behandling2)
@@ -1004,7 +1000,6 @@ class UtbetalingsoppdragIntegrasjonTest(
                 andelerFørstegangsbehandling.forIverksetting(),
             ),
         )
-        avsluttOgLagreBehandling(behandling)
 
         avsluttOgLagreBehandling(behandling)
         val behandling2 = behandlingService.lagreNyOgDeaktiverGammelBehandling(
@@ -1028,7 +1023,6 @@ class UtbetalingsoppdragIntegrasjonTest(
                 andelerRevurdering.forIverksetting(),
             ),
         )
-        avsluttOgLagreBehandling(behandling2)
 
         avsluttOgLagreBehandling(behandling2)
         val behandling3 = behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
