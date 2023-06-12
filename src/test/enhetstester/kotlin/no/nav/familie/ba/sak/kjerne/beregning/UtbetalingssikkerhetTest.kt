@@ -47,7 +47,7 @@ class UtbetalingssikkerhetTest {
                     inneværendeMåned().minusYears(1),
                     inneværendeMåned().minusMonths(6),
                     YtelseType.UTVIDET_BARNETRYGD,
-                    1054,
+                    970,
                     person = person,
                 ),
                 lagAndelTilkjentYtelse(
