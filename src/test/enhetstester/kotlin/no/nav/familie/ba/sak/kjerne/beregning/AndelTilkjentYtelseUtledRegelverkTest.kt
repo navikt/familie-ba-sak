@@ -19,7 +19,7 @@ class AndelTilkjentYtelseUtledRegelverkTest {
     val barnPerson = tilfeldigPerson(fødselsdato = LocalDate.now().minusYears(1))
 
     val andelTilkjentYtelse = lagAndelTilkjentYtelse(
-        behandling = behandling,
+        behandlingId = behandling.id,
         person = barnPerson,
         fom = YearMonth.now().minusMonths(4),
         tom = YearMonth.now().plusMonths(1),

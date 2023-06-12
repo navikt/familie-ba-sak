@@ -629,8 +629,8 @@ class UtbetalingsoppdragIntegrasjonTest(
         val behandling = lagBehandling()
         val vedtak = lagVedtak(behandling = behandling)
         val andelerTilkjentYtelse = listOf(
-            lagAndelTilkjentYtelse(årMnd("2019-04"), årMnd("2023-03"), YtelseType.SMÅBARNSTILLEGG, 660, behandling),
-            lagAndelTilkjentYtelse(årMnd("2026-05"), årMnd("2027-06"), YtelseType.SMÅBARNSTILLEGG, 660, behandling),
+            lagAndelTilkjentYtelse(årMnd("2019-04"), årMnd("2023-03"), YtelseType.SMÅBARNSTILLEGG, 660, behandling.id),
+            lagAndelTilkjentYtelse(årMnd("2026-05"), årMnd("2027-06"), YtelseType.SMÅBARNSTILLEGG, 660, behandling.id),
         )
 
         assertThrows<java.lang.IllegalArgumentException> {
@@ -1377,10 +1377,10 @@ class UtbetalingsoppdragIntegrasjonTest(
 
             with(lagInitiellTilkjentYtelse(førsteBehandling, utbetalingsoppdrag = "utbetalingsoppdrag")) {
                 val andeler = listOf(
-                    lagAndelTilkjentYtelse(fom, tom, YtelseType.SMÅBARNSTILLEGG, 1, behandling, søker, aktørSøker, tilkjentYtelse = this),
-                    lagAndelTilkjentYtelse(fom, tom, YtelseType.UTVIDET_BARNETRYGD, 2, behandling, søker, aktørSøker, tilkjentYtelse = this),
-                    lagAndelTilkjentYtelse(fom, tom, YtelseType.ORDINÆR_BARNETRYGD, 3, behandling, barn, aktørBarn, tilkjentYtelse = this),
-                    lagAndelTilkjentYtelse(fom, tom, YtelseType.UTVIDET_BARNETRYGD, 4, behandling, barn, aktørBarn, tilkjentYtelse = this),
+                    lagAndelTilkjentYtelse(fom, tom, YtelseType.SMÅBARNSTILLEGG, 1, behandlingId, søker, aktørSøker, tilkjentYtelse = this),
+                    lagAndelTilkjentYtelse(fom, tom, YtelseType.UTVIDET_BARNETRYGD, 2, behandlingId, søker, aktørSøker, tilkjentYtelse = this),
+                    lagAndelTilkjentYtelse(fom, tom, YtelseType.ORDINÆR_BARNETRYGD, 3, behandlingId, barn, aktørBarn, tilkjentYtelse = this),
+                    lagAndelTilkjentYtelse(fom, tom, YtelseType.UTVIDET_BARNETRYGD, 4, behandlingId, barn, aktørBarn, tilkjentYtelse = this),
                 )
                 andelerTilkjentYtelse.addAll(andeler)
                 tilkjentYtelseRepository.saveAndFlush(this)
@@ -1525,7 +1525,7 @@ class UtbetalingsoppdragIntegrasjonTest(
                 tom = tom,
                 ytelseType = type,
                 beløp = beløp,
-                behandling = tilkjentYtelse.behandling,
+                behandlingId = tilkjentYtelse.behandlingId,
                 person = person ?: søker,
                 aktør = aktør ?: aktørSøker,
                 tilkjentYtelse = tilkjentYtelse,

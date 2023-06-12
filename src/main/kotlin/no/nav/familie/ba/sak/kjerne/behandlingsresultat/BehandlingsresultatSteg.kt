@@ -65,10 +65,11 @@ class BehandlingsresultatSteg(
         val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandling.id)
 
         if (behandling.erSatsendring()) {
-            validerSatsendring(tilkjentYtelse)
+            validerSatsendring(behandling, tilkjentYtelse)
         }
 
         validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
+            fagsak = behandling.fagsak,
             tilkjentYtelse = tilkjentYtelse,
             personopplysningGrunnlag = personopplysningGrunnlag,
         )
@@ -186,8 +187,8 @@ class BehandlingsresultatSteg(
         )
     }
 
-    private fun validerSatsendring(tilkjentYtelse: TilkjentYtelse) {
-        val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(tilkjentYtelse.behandling)
+    private fun validerSatsendring(behandling: Behandling, tilkjentYtelse: TilkjentYtelse) {
+        val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
             ?: throw FunksjonellFeil("Kan ikke kjøre satsendring når det ikke finnes en tidligere behandling på fagsaken")
         val andelerFraForrigeBehandling = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = forrigeBehandling.id)
 

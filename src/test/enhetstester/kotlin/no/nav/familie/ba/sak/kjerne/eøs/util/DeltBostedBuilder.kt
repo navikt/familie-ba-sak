@@ -16,7 +16,7 @@ import java.time.YearMonth
 class DeltBostedBuilder(
     startMåned: Tidspunkt<Måned> = jan(2020),
     internal val tilkjentYtelse: TilkjentYtelse,
-) : SkjemaBuilder<DeltBosted, DeltBostedBuilder>(startMåned, BehandlingId(tilkjentYtelse.behandling.id)) {
+) : SkjemaBuilder<DeltBosted, DeltBostedBuilder>(startMåned, BehandlingId(tilkjentYtelse.behandlingId)) {
 
     fun medDeltBosted(k: String, vararg barn: Person) = medSkjema(k, barn.toList()) {
         when (it) {

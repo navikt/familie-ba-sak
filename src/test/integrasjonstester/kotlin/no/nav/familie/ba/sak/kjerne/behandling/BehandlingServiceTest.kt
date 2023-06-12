@@ -155,7 +155,7 @@ class BehandlingServiceTest(
 
         tilkjentYtelseRepository.save(
             TilkjentYtelse(
-                behandling = behandling,
+                behandlingId = behandling.id,
                 opprettetDato = LocalDate.now(),
                 endretDato = LocalDate.now(),
                 andelerTilkjentYtelse = mutableSetOf(),

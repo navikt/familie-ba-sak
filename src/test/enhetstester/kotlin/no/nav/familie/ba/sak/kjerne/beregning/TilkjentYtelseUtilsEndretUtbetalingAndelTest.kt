@@ -20,7 +20,7 @@ internal class TilkjentYtelseUtilsEndretUtbetalingAndelTest {
 
     val behandling = lagBehandling()
     val tilkjentYtelse =
-        TilkjentYtelse(behandling = behandling, endretDato = LocalDate.now(), opprettetDato = LocalDate.now())
+        TilkjentYtelse(behandlingId = behandling.id, endretDato = LocalDate.now(), opprettetDato = LocalDate.now())
     val beløp = BigDecimal(100)
 
     val barn1 = tilfeldigPerson(personType = PersonType.BARN)

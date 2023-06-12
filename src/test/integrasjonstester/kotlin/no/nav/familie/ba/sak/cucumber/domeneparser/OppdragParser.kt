@@ -23,7 +23,7 @@ object OppdragParser {
 
             val tilkjentYtelse = TilkjentYtelse(
                 id = behandlingId,
-                behandling = behandling,
+                behandlingId = behandling.id,
                 stønadFom = null,
                 stønadTom = null,
                 opphørFom = null,

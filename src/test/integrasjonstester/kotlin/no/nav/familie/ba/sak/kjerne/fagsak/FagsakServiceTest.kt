@@ -705,7 +705,7 @@ class FagsakServiceTest(
             fagsakId = fagsak.id,
         )
         val behandling = behandlingService.opprettBehandling(nyBehandling = nyBehandling)
-        val tilkjentYtelse = TilkjentYtelse(behandling = behandling, endretDato = LocalDate.now(), opprettetDato = LocalDate.now())
+        val tilkjentYtelse = TilkjentYtelse(behandlingId = behandling.id, endretDato = LocalDate.now(), opprettetDato = LocalDate.now())
         val andelerTilkjentYtelse = perioderTilAndeler.map {
             lagAndelTilkjentYtelse(
                 fom = it.fom,

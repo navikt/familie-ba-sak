@@ -58,7 +58,7 @@ class TilkjentYtelseValideringServiceTest {
         } answers {
             listOf(
                 TilkjentYtelse(
-                    behandling = lagBehandling(),
+                    behandlingId = lagBehandling().id,
                     endretDato = LocalDate.now().minusYears(1),
                     opprettetDato = LocalDate.now().minusYears(1),
                 ),
@@ -93,7 +93,7 @@ class TilkjentYtelseValideringServiceTest {
         val person2 = tilfeldigPerson()
 
         val tilkjentYtelse = TilkjentYtelse(
-            behandling = behandling,
+            behandlingId = behandling.id,
             opprettetDato = LocalDate.now(),
             endretDato = LocalDate.now(),
             andelerTilkjentYtelse = mutableSetOf(
@@ -115,7 +115,7 @@ class TilkjentYtelseValideringServiceTest {
         val forrigeBehandling = lagBehandling()
 
         val forrigeTilkjentYtelse = TilkjentYtelse(
-            behandling = forrigeBehandling,
+            behandlingId = forrigeBehandling.id,
             opprettetDato = LocalDate.now(),
             endretDato = LocalDate.now(),
             andelerTilkjentYtelse = mutableSetOf(

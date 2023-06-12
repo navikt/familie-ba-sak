@@ -302,7 +302,7 @@ class TestVilkårsvurderingBuilder(sakType: String) {
 class TestTilkjentYtelseBuilder(val behandling: Behandling) {
 
     private val tilkjentYtelse = TilkjentYtelse(
-        behandling = behandling,
+        behandlingId = behandling.id,
         opprettetDato = LocalDate.now(),
         endretDato = LocalDate.now(),
     )

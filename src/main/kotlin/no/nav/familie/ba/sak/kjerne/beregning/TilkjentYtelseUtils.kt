@@ -36,7 +36,7 @@ object TilkjentYtelseUtils {
         hentPerioderMedFullOvergangsstønad: (aktør: Aktør) -> List<InternPeriodeOvergangsstønad> = { _ -> emptyList() },
     ): TilkjentYtelse {
         val tilkjentYtelse = TilkjentYtelse(
-            behandling = vilkårsvurdering.behandling,
+            behandlingId = vilkårsvurdering.behandling.id,
             opprettetDato = LocalDate.now(),
             endretDato = LocalDate.now(),
         )

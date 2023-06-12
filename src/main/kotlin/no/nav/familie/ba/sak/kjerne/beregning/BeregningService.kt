@@ -127,7 +127,7 @@ class BeregningService(
             hentTilkjentYtelseForBehandling(behandlingId = it.id)
         }.filter {
             personopplysningGrunnlagRepository
-                .findByBehandlingAndAktiv(behandlingId = it.behandling.id)
+                .findByBehandlingAndAktiv(behandlingId = it.behandlingId)
                 ?.barna?.map { barn -> barn.aktør }
                 ?.contains(barnAktør)
                 ?: false
@@ -194,7 +194,7 @@ class BeregningService(
         personopplysningGrunnlag: PersonopplysningGrunnlag,
         endreteUtbetalingAndeler: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>,
     ): TilkjentYtelse {
-        tilkjentYtelseRepository.slettTilkjentYtelseFor(behandling)
+        tilkjentYtelseRepository.slettTilkjentYtelseFor(behandling.id)
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)
             ?: throw IllegalStateException("Kunne ikke hente vilkårsvurdering for behandling med id ${behandling.id}")
 

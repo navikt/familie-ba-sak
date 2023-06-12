@@ -75,7 +75,7 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
 
     @Query(
         """select b from Behandling b
-                           inner join TilkjentYtelse ty on b.id = ty.behandling.id
+                           inner join TilkjentYtelse ty on b.id = ty.behandlingId
                         where b.fagsak.id = :fagsakId AND ty.utbetalingsoppdrag IS NOT NULL""",
     )
     fun finnIverksatteBehandlinger(fagsakId: Long): List<Behandling>

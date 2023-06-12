@@ -32,7 +32,7 @@ class TilkjentYtelseBuilder(
     private val behandling: Behandling = lagBehandling(),
 ) {
     private val tilkjentYtelse = TilkjentYtelse(
-        behandling = behandling,
+        behandlingId = behandling.id,
         opprettetDato = LocalDate.now(),
         endretDato = LocalDate.now(),
     )

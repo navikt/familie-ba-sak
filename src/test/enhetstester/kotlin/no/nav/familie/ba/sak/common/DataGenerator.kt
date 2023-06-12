@@ -230,6 +230,36 @@ fun lagAndelTilkjentYtelse(
     tom: YearMonth,
     ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD,
     beløp: Int = sats(ytelseType),
+    person: Person = tilfeldigPerson(),
+    aktør: Aktør = person.aktør,
+    periodeIdOffset: Long? = null,
+    forrigeperiodeIdOffset: Long? = null,
+    tilkjentYtelse: TilkjentYtelse? = null,
+    prosent: BigDecimal = BigDecimal(100),
+    differanseberegnetPeriodebeløp: Int? = null,
+): AndelTilkjentYtelse {
+    return return lagAndelTilkjentYtelse(
+        fom,
+        tom,
+        ytelseType,
+        beløp,
+        behandlingId = 0,
+        person,
+        aktør,
+        periodeIdOffset,
+        forrigeperiodeIdOffset,
+        tilkjentYtelse,
+        prosent,
+        kildeBehandlingId = 0,
+        differanseberegnetPeriodebeløp,
+    )
+}
+
+fun lagAndelTilkjentYtelse(
+    fom: YearMonth,
+    tom: YearMonth,
+    ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD,
+    beløp: Int = sats(ytelseType),
     behandling: Behandling = lagBehandling(),
     person: Person = tilfeldigPerson(),
     aktør: Aktør = person.aktør,
@@ -240,10 +270,42 @@ fun lagAndelTilkjentYtelse(
     kildeBehandlingId: Long? = behandling.id,
     differanseberegnetPeriodebeløp: Int? = null,
 ): AndelTilkjentYtelse {
+    return lagAndelTilkjentYtelse(
+        fom,
+        tom,
+        ytelseType,
+        beløp,
+        behandling.id,
+        person,
+        aktør,
+        periodeIdOffset,
+        forrigeperiodeIdOffset,
+        tilkjentYtelse,
+        prosent,
+        kildeBehandlingId,
+        differanseberegnetPeriodebeløp,
+    )
+}
+
+fun lagAndelTilkjentYtelse(
+    fom: YearMonth,
+    tom: YearMonth,
+    ytelseType: YtelseType = YtelseType.ORDINÆR_BARNETRYGD,
+    beløp: Int = sats(ytelseType),
+    behandlingId: Long = 0,
+    person: Person = tilfeldigPerson(),
+    aktør: Aktør = person.aktør,
+    periodeIdOffset: Long? = null,
+    forrigeperiodeIdOffset: Long? = null,
+    tilkjentYtelse: TilkjentYtelse? = null,
+    prosent: BigDecimal = BigDecimal(100),
+    kildeBehandlingId: Long? = behandlingId,
+    differanseberegnetPeriodebeløp: Int? = null,
+): AndelTilkjentYtelse {
     return AndelTilkjentYtelse(
         aktør = aktør,
-        behandlingId = behandling.id,
-        tilkjentYtelse = tilkjentYtelse ?: lagInitiellTilkjentYtelse(behandling),
+        behandlingId = behandlingId,
+        tilkjentYtelse = tilkjentYtelse ?: lagInitiellTilkjentYtelse(behandlingId),
         kalkulertUtbetalingsbeløp = beløp,
         nasjonaltPeriodebeløp = beløp,
         stønadFom = fom,
@@ -324,8 +386,15 @@ fun lagInitiellTilkjentYtelse(
     behandling: Behandling = lagBehandling(),
     utbetalingsoppdrag: String? = null,
 ): TilkjentYtelse {
+    return lagInitiellTilkjentYtelse(behandling.id, utbetalingsoppdrag)
+}
+
+fun lagInitiellTilkjentYtelse(
+    behandlingId: Long,
+    utbetalingsoppdrag: String? = null,
+): TilkjentYtelse {
     return TilkjentYtelse(
-        behandling = behandling,
+        behandlingId = behandlingId,
         opprettetDato = LocalDate.now(),
         endretDato = LocalDate.now(),
         utbetalingsoppdrag = utbetalingsoppdrag,

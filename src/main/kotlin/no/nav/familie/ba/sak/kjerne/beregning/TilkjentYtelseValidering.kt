@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjeMedAndeler
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerPersonOgType
+import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringUtil.tilFørsteEndringstidspunkt
@@ -122,6 +123,7 @@ object TilkjentYtelseValidering {
     }
 
     fun validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
+        fagsak: Fagsak,
         tilkjentYtelse: TilkjentYtelse,
         personopplysningGrunnlag: PersonopplysningGrunnlag,
     ) {
@@ -130,7 +132,7 @@ object TilkjentYtelseValidering {
 
         val tidslinjeMedAndeler = tilkjentYtelse.tilTidslinjeMedAndeler()
 
-        val fagsakType = tilkjentYtelse.behandling.fagsak.type
+        val fagsakType = fagsak.type
 
         tidslinjeMedAndeler.toSegments().forEach {
             val søkersAndeler = hentSøkersAndeler(it.value, søker)

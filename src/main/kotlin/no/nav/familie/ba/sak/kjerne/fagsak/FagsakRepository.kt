@@ -144,7 +144,7 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
             SELECT DISTINCT b.fagsak.id
             FROM AndelTilkjentYtelse aty
                 JOIN Behandling b ON b.id = aty.behandlingId
-                JOIN TilkjentYtelse ty ON b.id = ty.behandling.id
+                JOIN TilkjentYtelse ty ON b.id = ty.behandlingId
             WHERE
                     b.id in :iverksatteLøpendeBehandlinger
                 AND NOT EXISTS (SELECT b2 from Behandling b2 where b2.fagsak.id = b.fagsak.id AND b2.status <> 'AVSLUTTET')
@@ -164,7 +164,7 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
             SELECT DISTINCT b.fagsak.id
             FROM AndelTilkjentYtelse aty
                 JOIN Behandling b ON b.id = aty.behandlingId
-                JOIN TilkjentYtelse ty ON b.id = ty.behandling.id
+                JOIN TilkjentYtelse ty ON b.id = ty.behandlingId
             WHERE
                     b.id in :iverksatteLøpendeBehandlinger
                 AND NOT EXISTS (SELECT b2 from Behandling b2 where b2.fagsak.id = b.fagsak.id AND b2.status <> 'AVSLUTTET')

@@ -9,15 +9,12 @@ import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
-import jakarta.persistence.JoinColumn
 import jakarta.persistence.OneToMany
-import jakarta.persistence.OneToOne
 import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
@@ -41,9 +38,8 @@ data class TilkjentYtelse(
     )
     val id: Long = 0,
 
-    @OneToOne(optional = false)
-    @JoinColumn(name = "fk_behandling_id", nullable = false, updatable = false)
-    val behandling: Behandling,
+    @Column(name = "fk_behandling_id", nullable = false, updatable = false)
+    val behandlingId: Long,
 
     @Column(name = "stonad_fom", nullable = true, columnDefinition = "DATE")
     @Convert(converter = YearMonthConverter::class)

@@ -269,7 +269,7 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
     }
 
     private fun tilkjentYtelse(behandling: Behandling, erIverksatt: Boolean) = TilkjentYtelse(
-        behandling = behandling,
+        behandlingId = behandling.id,
         opprettetDato = LocalDate.now(),
         endretDato = LocalDate.now(),
         utbetalingsoppdrag = if (erIverksatt) "Skal ikke være null" else null,
@@ -282,7 +282,7 @@ class KonsistensavstemmingUtplukkingIntegrationTest : AbstractSpringIntegrationT
         periodeOffset: Long,
         aktør: Aktør = randomAktør(),
     ) = AndelTilkjentYtelse(
-        behandlingId = tilkjentYtelse.behandling.id,
+        behandlingId = tilkjentYtelse.behandlingId,
         tilkjentYtelse = tilkjentYtelse,
         kalkulertUtbetalingsbeløp = 1054,
         nasjonaltPeriodebeløp = 1054,

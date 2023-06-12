@@ -124,7 +124,7 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
     }
 
     private fun tilkjentYtelse(behandling: Behandling, erIverksatt: Boolean) = TilkjentYtelse(
-        behandling = behandling,
+        behandlingId = behandling.id,
         opprettetDato = LocalDate.now(),
         endretDato = LocalDate.now(),
         utbetalingsoppdrag = if (erIverksatt) "Skal ikke være null" else null,
@@ -137,7 +137,7 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
         aktør: Aktør = randomAktør(),
     ) = AndelTilkjentYtelse(
         aktør = aktør,
-        behandlingId = tilkjentYtelse.behandling.id,
+        behandlingId = tilkjentYtelse.behandlingId,
         tilkjentYtelse = tilkjentYtelse,
         kalkulertUtbetalingsbeløp = 1054,
         nasjonaltPeriodebeløp = 1054,

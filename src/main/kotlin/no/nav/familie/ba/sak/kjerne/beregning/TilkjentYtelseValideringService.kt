@@ -77,6 +77,7 @@ class TilkjentYtelseValideringService(
     fun finnAktørerMedUgyldigEtterbetalingsperiode(
         behandlingId: Long,
     ): List<Aktør> {
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandlingId)
 
         val forrigeBehandling =
@@ -91,7 +92,7 @@ class TilkjentYtelseValideringService(
         val aktørIderMedUgyldigEtterbetaling = finnAktørIderMedUgyldigEtterbetalingsperiode(
             forrigeAndelerTilkjentYtelse = forrigeAndelerTilkjentYtelse ?: emptyList(),
             andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.toList(),
-            kravDato = tilkjentYtelse.behandling.opprettetTidspunkt,
+            kravDato = behandling.opprettetTidspunkt,
         )
 
         return aktørIderMedUgyldigEtterbetaling.map { aktørId -> personidentService.hentAktør(identEllerAktørId = aktørId) }

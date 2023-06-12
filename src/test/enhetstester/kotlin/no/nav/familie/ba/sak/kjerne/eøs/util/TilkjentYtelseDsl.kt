@@ -30,7 +30,7 @@ infix fun TilkjentYtelse.der(andelTilkjentYtelse: AndelTilkjentYtelse): Tilkjent
     this.andelerTilkjentYtelse.add(
         andelTilkjentYtelse.copy(
             tilkjentYtelse = this,
-            behandlingId = this.behandling.id,
+            behandlingId = this.behandlingId,
         ),
     )
     return this

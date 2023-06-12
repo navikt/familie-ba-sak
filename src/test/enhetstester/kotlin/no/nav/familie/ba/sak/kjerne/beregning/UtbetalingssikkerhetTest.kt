@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
+import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
@@ -61,6 +62,7 @@ class UtbetalingssikkerhetTest {
 
         val feil = assertThrows<UtbetalingsikkerhetFeil> {
             TilkjentYtelseValidering.validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
+                defaultFagsak(),
                 tilkjentYtelse,
                 personopplysningGrunnlag,
             )
@@ -100,6 +102,7 @@ class UtbetalingssikkerhetTest {
 
         assertDoesNotThrow {
             TilkjentYtelseValidering.validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
+                defaultFagsak(),
                 tilkjentYtelse,
                 personopplysningGrunnlag,
             )
@@ -137,6 +140,7 @@ class UtbetalingssikkerhetTest {
 
         val feil = assertThrows<UtbetalingsikkerhetFeil> {
             TilkjentYtelseValidering.validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
+                defaultFagsak(),
                 tilkjentYtelse,
                 personopplysningGrunnlag,
             )
@@ -176,6 +180,7 @@ class UtbetalingssikkerhetTest {
 
         assertDoesNotThrow {
             TilkjentYtelseValidering.validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
+                defaultFagsak(),
                 tilkjentYtelse,
                 personopplysningGrunnlag,
             )

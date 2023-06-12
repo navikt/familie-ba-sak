@@ -226,7 +226,7 @@ class AutovedtakSatsendringServiceTest(
             val andel = lagAndelTilkjentYtelse(
                 fom = YearMonth.of(2021, 1),
                 tom = YearMonth.of(2023, 5),
-                behandling = behandling,
+                behandlingId = behandling.id,
                 beløp = 10,
                 aktør = aktørBarn,
                 tilkjentYtelse = this,

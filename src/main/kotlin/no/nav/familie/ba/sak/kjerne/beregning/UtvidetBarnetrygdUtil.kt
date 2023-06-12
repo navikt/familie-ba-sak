@@ -21,7 +21,7 @@ object UtvidetBarnetrygdUtil {
         endretUtbetalingAndelerSøker: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>,
     ): List<AndelTilkjentYtelseMedEndreteUtbetalinger> {
         val andelerTilkjentYtelseUtvidet = UtvidetBarnetrygdGenerator(
-            behandlingId = tilkjentYtelse.behandling.id,
+            behandlingId = tilkjentYtelse.behandlingId,
             tilkjentYtelse = tilkjentYtelse,
         )
             .lagUtvidetBarnetrygdAndeler(

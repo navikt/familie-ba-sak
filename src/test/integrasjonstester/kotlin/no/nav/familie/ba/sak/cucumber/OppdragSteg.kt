@@ -52,7 +52,7 @@ class OppdragSteg {
     @Når("beregner utbetalingsoppdrag")
     fun `beregner utbetalingsoppdrag`() {
         tilkjenteYtelser.fold(emptyList<TilkjentYtelse>()) { acc, tilkjentYtelse ->
-            val behandlingId = tilkjentYtelse.behandling.id
+            val behandlingId = tilkjentYtelse.behandlingId
             try {
                 beregnetUtbetalingsoppdragSimulering[behandlingId] =
                     beregnUtbetalingsoppdrag(acc, tilkjentYtelse, erSimulering = true)
@@ -72,7 +72,7 @@ class OppdragSteg {
     ): Utbetalingsoppdrag {
         val forrigeTilkjentYtelse = acc.lastOrNull()
 
-        val vedtak = lagVedtak(behandling = tilkjentYtelse.behandling)
+        val vedtak = lagVedtak(behandling = behandlinger.getValue(tilkjentYtelse.behandlingId))
         val forrigeKjeder = tilKjeder(forrigeTilkjentYtelse, erSimulering)
         val oppdaterteKjeder = tilKjeder(tilkjentYtelse, erSimulering)
         val sisteOffsetPåFagsak = maxOffsetPåFagsak(acc)

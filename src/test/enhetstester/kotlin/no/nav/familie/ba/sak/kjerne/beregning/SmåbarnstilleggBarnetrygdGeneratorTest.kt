@@ -28,7 +28,7 @@ class SmåbarnstilleggBarnetrygdGeneratorTest {
 
     val behandling = lagBehandling()
     val tilkjentYtelse =
-        TilkjentYtelse(behandling = behandling, opprettetDato = LocalDate.now(), endretDato = LocalDate.now())
+        TilkjentYtelse(behandlingId = behandling.id, opprettetDato = LocalDate.now(), endretDato = LocalDate.now())
 
     @BeforeEach
     fun førHverTest() {

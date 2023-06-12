@@ -676,7 +676,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
         behandlingHentOgPersisterService.lagreOgFlush(behandling)
 
         val ty = TilkjentYtelse(
-            behandling = behandling,
+            behandlingId = behandling.id,
             opprettetDato = perioderTestData.endretDato.toLocalDate(),
             endretDato = perioderTestData.endretDato.toLocalDate(),
             utbetalingsoppdrag = "utbetalt",
@@ -684,7 +684,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
             it.andelerTilkjentYtelse.addAll(
                 perioderTestData.perioder.map { p ->
                     AndelTilkjentYtelse(
-                        behandlingId = it.behandling.id,
+                        behandlingId = it.behandlingId,
                         tilkjentYtelse = it,
                         aktør = perioderTestData.aktør,
                         kalkulertUtbetalingsbeløp = 1000,
@@ -720,7 +720,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
         val ty = TilkjentYtelse(
             id = nesteVedtakId(),
-            behandling = behandling,
+            behandlingId = behandling.id,
             opprettetDato = perioderTestData.endretDato.toLocalDate(),
             endretDato = perioderTestData.endretDato.toLocalDate(),
             utbetalingsoppdrag = "utbetalt",
@@ -728,7 +728,7 @@ class SkatteetatenServiceIntegrationTest : AbstractSpringIntegrationTest() {
             it.andelerTilkjentYtelse.addAll(
                 perioderTestData.perioder.map { p ->
                     AndelTilkjentYtelse(
-                        behandlingId = it.behandling.id,
+                        behandlingId = it.behandlingId,
                         tilkjentYtelse = it,
                         aktør = perioderTestData.aktør,
                         kalkulertUtbetalingsbeløp = 1000,

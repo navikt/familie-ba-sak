@@ -131,7 +131,7 @@ class BehandlingUtilsTest {
         val behandling = lagBehandling()
 
         val tilkjentYtelse = TilkjentYtelse(
-            behandling = behandling,
+            behandlingId = behandling.id,
             opprettetDato = LocalDate.now(),
             endretDato = LocalDate.now(),
         )
@@ -163,7 +163,7 @@ class BehandlingUtilsTest {
         val behandling = lagBehandling()
 
         val tilkjentYtelse = TilkjentYtelse(
-            behandling = behandling,
+            behandlingId = behandling.id,
             opprettetDato = LocalDate.now(),
             endretDato = LocalDate.now(),
         )
@@ -195,7 +195,7 @@ class BehandlingUtilsTest {
         val behandling = lagBehandling()
 
         val tilkjentYtelse = TilkjentYtelse(
-            behandling = behandling,
+            behandlingId = behandling.id,
             opprettetDato = LocalDate.now(),
             endretDato = LocalDate.now(),
         )
