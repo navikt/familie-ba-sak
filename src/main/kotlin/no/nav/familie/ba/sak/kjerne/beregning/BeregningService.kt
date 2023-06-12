@@ -76,14 +76,9 @@ class BeregningService(
         tilkjentYtelseRepository.findByBehandlingOptional(behandlingId)
 
     fun hentSisteAndelPerIdent(fagsakId: Long): Map<IdentOgYtelse, AndelTilkjentYtelseForUtbetalingsoppdrag> {
-        return sisteAndelerPerIdentOgType(fagsakId)
+        return andelTilkjentYtelseRepository.hentSisteAndelPerIdent(fagsakId)
             .groupBy { IdentOgYtelse(it.aktør.aktivFødselsnummer(), it.type) }
             .mapValues { AndelTilkjentYtelseForSimuleringFactory().pakkInnForUtbetaling(it.value).single() }
-    }
-
-    private fun sisteAndelerPerIdentOgType(fagsakId: Long): MutableList<AndelTilkjentYtelse> {
-        val sisteAndelIdPerIdent = andelTilkjentYtelseRepository.hentSisteAndelPerIdent(fagsakId)
-        return andelTilkjentYtelseRepository.findAllById(sisteAndelIdPerIdent)
     }
 
     /**

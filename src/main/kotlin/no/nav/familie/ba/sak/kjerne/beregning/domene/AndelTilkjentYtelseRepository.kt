@@ -79,9 +79,9 @@ interface AndelTilkjentYtelseRepository : JpaRepository<AndelTilkjentYtelse, Lon
                AND ty.utbetalingsoppdrag IS NOT NULL
                AND aty.periode_offset IS NOT NULL
                AND b.status = 'AVSLUTTET')
-        SELECT id FROM andeler aty WHERE rn = 1
+        SELECT aty.* FROM andel_tilkjent_ytelse aty WHERE id IN (SELECT id FROM andeler WHERE rn = 1)
     """,
         nativeQuery = true,
     )
-    fun hentSisteAndelPerIdent(fagsakId: Long): List<Long>
+    fun hentSisteAndelPerIdent(fagsakId: Long): List<AndelTilkjentYtelse>
 }
