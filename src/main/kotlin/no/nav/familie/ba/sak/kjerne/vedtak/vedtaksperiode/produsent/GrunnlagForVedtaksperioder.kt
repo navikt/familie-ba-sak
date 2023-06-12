@@ -56,7 +56,7 @@ data class GrunnlagForVedtaksperioder(
         .map { it.tilIKompetanse() }
         .filterIsInstance<UtfyltKompetanse>()
 
-    fun utledGrunnlagTidslinjePerPerson(): Map<AktørId, Tidslinje<GrunnlagForPerson, Måned>> {
+    fun utledGrunnlagTidslinjePerPerson(): Map<Aktør, Tidslinje<GrunnlagForPerson, Måned>> {
         val søker = persongrunnlag.søker
         val ordinæreVilkårForSøkerForskjøvetTidslinje =
             hentOrdinæreVilkårForSøkerForskjøvetTidslinje(søker, personResultater)
@@ -76,7 +76,7 @@ data class GrunnlagForVedtaksperioder(
                         ordinæreVilkårForSøkerTidslinje = ordinæreVilkårForSøkerForskjøvetTidslinje,
                     )
 
-                aktør.aktørId to forskjøvedeVilkårResultaterForPersonsAndeler.tilGrunnlagForPersonTidslinje(
+                aktør to forskjøvedeVilkårResultaterForPersonsAndeler.tilGrunnlagForPersonTidslinje(
                     person = person,
                     søker = søker,
                 )

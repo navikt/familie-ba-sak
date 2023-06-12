@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
 
@@ -86,3 +87,6 @@ data class PersonopplysningGrunnlag(
         return sb.toString()
     }
 }
+
+fun Aktør.tilPerson(personopplysningGrunnlag: PersonopplysningGrunnlag): Person? =
+    personopplysningGrunnlag.personer.find { it.aktør == this }

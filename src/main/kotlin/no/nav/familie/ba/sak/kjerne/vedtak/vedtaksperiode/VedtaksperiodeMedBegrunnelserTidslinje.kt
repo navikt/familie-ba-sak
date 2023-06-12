@@ -3,8 +3,8 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Dag
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.DagTidspunkt.Companion.tilTidspunktEllerSenereEnn
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.DagTidspunkt.Companion.tilTidspunktEllerTidligereEnn
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.DagTidspunkt.Companion.tilTidspunktEllerUendeligSent
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.DagTidspunkt.Companion.tilTidspunktEllerUendeligTidlig
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilFørsteDagIMåneden
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilSisteDagIMåneden
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
@@ -16,8 +16,8 @@ open class VedtaksperiodeMedBegrunnelserTidslinje(
     override fun lagPerioder(): List<Periode<VedtaksperiodeMedBegrunnelser, Dag>> =
         vedtaksperioderMedBegrunnelser.map {
             Periode(
-                fraOgMed = it.fom.tilTidspunktEllerTidligereEnn(it.tom),
-                tilOgMed = it.tom.tilTidspunktEllerSenereEnn(it.fom),
+                fraOgMed = it.fom.tilTidspunktEllerUendeligTidlig(it.tom),
+                tilOgMed = it.tom.tilTidspunktEllerUendeligSent(it.fom),
                 innhold = it,
             )
         }

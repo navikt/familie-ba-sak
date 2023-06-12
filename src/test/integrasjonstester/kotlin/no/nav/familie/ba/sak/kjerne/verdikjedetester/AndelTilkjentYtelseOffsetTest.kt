@@ -5,6 +5,8 @@ import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagSøknadDTO
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
@@ -43,6 +45,7 @@ class AndelTilkjentYtelseOffsetTest(
     @Autowired private val beregningService: BeregningService,
     @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     @Autowired private val brevmalService: BrevmalService,
+    @Autowired private val featureToggleService: FeatureToggleService,
 ) : AbstractVerdikjedetest() {
     private val barnFødselsdato: LocalDate = LocalDate.now().minusYears(2)
 
@@ -59,6 +62,8 @@ class AndelTilkjentYtelseOffsetTest(
 
     @Test
     fun `Skal ha riktig offset for andeler når man legger til ny andel`() {
+        every { featureToggleService.isEnabled(FeatureToggleConfig.BEGRUNNELSER_NY) } returns false
+
         val personScenario1: RestScenario = lagScenario(barnFødselsdato)
         val fagsak1: RestMinimalFagsak = lagFagsak(personScenario = personScenario1)
         val behandling1 = fullførBehandling(
