@@ -18,24 +18,22 @@ Egenskap: Vedtaksperioder med mor og et barn
 
     Og legg til nye vilkårresultater for begrunnelse for behandling 1
       | AktørId | Vilkår                                           | Fra dato   | Til dato   | Resultat |
-      | 1234    | BOSATT_I_RIKET                                   | 02.01.2021 |            | Oppfylt  |
-      | 3456    | BOR_MED_SØKER                                    | 02.03.2021 |            | Oppfylt  |
-      | 1234    | BOSATT_I_RIKET                                   | 11.01.1970 | 01.01.2021 | Oppfylt  |
-      | 1234    | LOVLIG_OPPHOLD                                   | 11.01.1970 |            | Oppfylt  |
+      | 1234    | BOSATT_I_RIKET, LOVLIG_OPPHOLD                   | 11.01.1970 |            | Oppfylt  |
       | 3456    | UNDER_18_ÅR                                      | 13.04.2020 | 12.04.2038 | Oppfylt  |
       | 3456    | GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD | 13.04.2020 |            | Oppfylt  |
-      | 3456    | BOR_MED_SØKER                                    | 13.04.2020 | 01.03.2021 | Oppfylt  |
+      | 3456    | BOR_MED_SØKER                                    | 13.04.2020 | 10.03.2021 | Oppfylt  |
 
     Og med andeler tilkjent ytelse for begrunnelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
-      | 3456    | 01.05.2020 | 31.03.2038 | 1354  | 1            |
+      | 3456    | 01.05.2020 | 31.03.2021 | 1354  | 1            |
 
     Når begrunnelsetekster genereres for behandling 1
 
     Så forvent følgende standardBegrunnelser
-      | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser   | Ekskluderte Begrunnelser |
-      | 01.04.2021 | 31.03.2038 | UTBETALING         |                           |                          |
-      | 01.04.2038 |            | UTBETALING         | INNVILGET_BOSATT_I_RIKTET |                          |
+      | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser       | Ekskluderte Begrunnelser |
+      | 01.05.2020 | 31.03.2021 | UTBETALING         |                               |                          |
+      | 01.04.2021 | 31.03.2038 | OPPHØR             | OPPHØR_BARN_FLYTTET_FRA_SØKER |                          |
+      | 01.04.2038 |            | OPPHØR             | OPPHØR_UNDER_18_ÅR            |                          |
 
 
 

@@ -170,8 +170,19 @@ class BegrunnelseTeksterStepDefinition {
         forventedeStandardBegrunnelser.forEach { forventet ->
             val faktisk =
                 utvidetVedtaksperiodeMedBegrunnelser.find { it.fom == forventet.fom && it.tom == forventet.tom }
-                    ?: throw Feil("Forventet å finne en periode med fom: ${forventet.fom} og tom: ${forventet.tom}")
-            assertThat(faktisk.gyldigeBegrunnelser).containsAll(forventet.inkluderteStandardBegrunnelser)
+                    ?: throw Feil(
+                        "Fant ingen vedtaksperiode med \n" +
+                            "   fom: ${forventet.fom} og tom: ${forventet.tom}. \n" +
+                            "Vedtaksperiodene var \n${
+                                utvidetVedtaksperiodeMedBegrunnelser.joinToString("\n") {
+                                    "   Fom: ${it.fom}, Tom: ${it.tom}"
+                                }
+                            }",
+                    )
+            assertThat(faktisk.gyldigeBegrunnelser)
+                .`as`("For periode: ${forventet.fom} til ${forventet.tom}")
+                .containsAll(forventet.inkluderteStandardBegrunnelser)
+
             if (faktisk.gyldigeBegrunnelser.isNotEmpty() && forventet.ekskluderteStandardBegrunnelser.isNotEmpty()) {
                 assertThat(faktisk.gyldigeBegrunnelser).doesNotContainAnyElementsOf(forventet.ekskluderteStandardBegrunnelser)
             }
