@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.bisys.BisysService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
@@ -21,7 +20,6 @@ import java.time.LocalDate
 class PensjonService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val fagsakRepository: FagsakRepository,
-    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val personidentService: PersonidentService,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
 ) {
