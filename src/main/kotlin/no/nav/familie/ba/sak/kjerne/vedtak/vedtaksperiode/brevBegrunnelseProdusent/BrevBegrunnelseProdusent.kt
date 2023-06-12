@@ -74,17 +74,30 @@ private fun hentUtgjørendeVilkårForPerson(
     grunnlagForVedtaksperioder: GrunnlagForVedtaksperioder,
     fagsakType: FagsakType,
     behandlingUnderkategori: BehandlingUnderkategori,
-) = when (begrunnelseGrunnlag) {
-    is BegrunnelseGrunnlagMedVerdiIDennePerioden -> finnUtgjørendeVilkår(begrunnelseGrunnlag)
-    is BegrunnelseGrunnlagIngenVerdiIDenneBehandlingen -> Vilkår.hentVilkårFor(
+): Set<Vilkår> {
+    val vilkårForPerson = Vilkår.hentVilkårFor(
         personType = aktør.tilPerson(grunnlagForVedtaksperioder.persongrunnlag)?.type
             ?: error("Har ikke persongrunnlag for person"),
         fagsakType = fagsakType,
         behandlingUnderkategori = behandlingUnderkategori,
     )
+
+    return when (begrunnelseGrunnlag) {
+        is BegrunnelseGrunnlagMedVerdiIDennePerioden -> finnUtgjørendeVilkår(
+            begrunnelseGrunnlag,
+            vilkårForPerson,
+        )
+
+        is BegrunnelseGrunnlagIngenVerdiIDenneBehandlingen -> {
+            vilkårForPerson
+        }
+    }
 }
 
-private fun finnUtgjørendeVilkår(begrunnelseGrunnlag: BegrunnelseGrunnlagMedVerdiIDennePerioden): Set<Vilkår> =
+private fun finnUtgjørendeVilkår(
+    begrunnelseGrunnlag: BegrunnelseGrunnlagMedVerdiIDennePerioden,
+    vilkårForPerson: Set<Vilkår>,
+): Set<Vilkår> =
     if (begrunnelseGrunnlag.grunnlagForVedtaksperiode is GrunnlagForPersonInnvilget) {
         hentVilkårTjent(
             begrunnelseGrunnlag.grunnlagForVedtaksperiode,
@@ -94,32 +107,38 @@ private fun finnUtgjørendeVilkår(begrunnelseGrunnlag: BegrunnelseGrunnlagMedVe
         hentVilkårTapt(
             begrunnelseGrunnlag.grunnlagForVedtaksperiode,
             begrunnelseGrunnlag.grunnlagForForrigeVedtaksperiode,
+            vilkårForPerson,
         )
     }
 
 private fun hentVilkårTjent(denne: GrunnlagForPerson, forrige: GrunnlagForPerson?): Set<Vilkår> {
     val innvilgedeVilkårDennePerioden =
-        denne.vilkårResultaterForVedtaksperiode.filter { it.resultat == Resultat.OPPFYLT }.map { it.vilkårType }.toSet()
+        denne.hentOppfylteVilkår()
 
     val innvilgedeVilkårForrigePerioden =
-        forrige?.vilkårResultaterForVedtaksperiode?.filter { it.resultat == Resultat.OPPFYLT }?.map { it.vilkårType }
-            ?.toSet() ?: emptySet()
+        forrige?.hentOppfylteVilkår() ?: emptySet()
 
     return innvilgedeVilkårDennePerioden - innvilgedeVilkårForrigePerioden
 }
 
-private fun hentVilkårTapt(denne: GrunnlagForPerson, forrige: GrunnlagForPerson?): Set<Vilkår> {
-    val innvilgedeVilkårDennePerioden =
-        denne.vilkårResultaterForVedtaksperiode.filter { it.resultat == Resultat.IKKE_OPPFYLT }.map { it.vilkårType }
-            .toSet()
+private fun hentVilkårTapt(
+    denne: GrunnlagForPerson,
+    forrige: GrunnlagForPerson?,
+    vilkårForPerson: Set<Vilkår>,
+): Set<Vilkår> {
+    val manglendeVilkårDennePerioden =
+        vilkårForPerson - denne.hentOppfylteVilkår()
 
-    val innvilgedeVilkårForrigePerioden =
-        forrige?.vilkårResultaterForVedtaksperiode?.filter { it.resultat == Resultat.IKKE_OPPFYLT }
-            ?.map { it.vilkårType }
-            ?.toSet() ?: emptySet()
+    val manglendeVilkårForrigePerioden =
+        vilkårForPerson - (forrige?.hentOppfylteVilkår() ?: emptySet())
 
-    return innvilgedeVilkårDennePerioden - innvilgedeVilkårForrigePerioden
+    return manglendeVilkårDennePerioden - manglendeVilkårForrigePerioden
 }
+
+private fun GrunnlagForPerson.hentOppfylteVilkår(): Set<Vilkår> =
+    vilkårResultaterForVedtaksperiode.filter { it.resultat == Resultat.OPPFYLT }
+        .map { it.vilkårType }
+        .toSet()
 
 private fun UtvidetVedtaksperiodeMedBegrunnelser.finnBegrunnelseGrunnlagPerPerson(
     grunnlagForVedtaksperioder: GrunnlagForVedtaksperioder,
@@ -145,13 +164,10 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.finnBegrunnelseGrunnlagPerPerso
             if (vedtaksPerioden == null) {
                 null
             } else {
-                val forrigePeriode = forrigeOgDennePerioden?.first
-                val dennePerioden = forrigeOgDennePerioden?.second
-
                 lagBegrunnelseGrunnlag(
-                    dennePerioden = dennePerioden,
-                    forrigePeriode = forrigeBehandling,
-                    sammePeriodeForrigeBehandling = forrigePeriode,
+                    dennePerioden = forrigeOgDennePerioden?.denne,
+                    forrigePeriode = forrigeOgDennePerioden?.forrige,
+                    sammePeriodeForrigeBehandling = forrigeBehandling,
                 )
             }
         }
@@ -170,12 +186,14 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.tilTidslinjeForAktuellPeriode()
     ).tilTidslinje()
 }
 
-private fun Tidslinje<GrunnlagForPerson, Måned>.tilForrigeOgNåværendePeriodeTidslinje(): Tidslinje<Pair<GrunnlagForPerson?, GrunnlagForPerson?>, Måned> {
+data class ForrigeOgDennePerioden(val forrige: GrunnlagForPerson?, val denne: GrunnlagForPerson?)
+
+private fun Tidslinje<GrunnlagForPerson, Måned>.tilForrigeOgNåværendePeriodeTidslinje(): Tidslinje<ForrigeOgDennePerioden, Måned> {
     return (
         listOf(
             periodeAv(YearMonth.now(), YearMonth.now(), null),
         ) + this.perioder()
         ).zipWithNext { forrige, denne ->
-        periodeAv(denne.fraOgMed, denne.tilOgMed, Pair(forrige.innhold, denne.innhold))
+        periodeAv(denne.fraOgMed, denne.tilOgMed, ForrigeOgDennePerioden(forrige.innhold, denne.innhold))
     }.tilTidslinje()
 }

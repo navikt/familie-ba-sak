@@ -68,8 +68,8 @@ data class RestSanityBegrunnelse(
                 finnEnumverdi(it, SanityVilkår.values(), apiNavn)
             },
             vilkår = vilkaar?.mapNotNull {
-                finnEnumverdi(it, Vilkår.values(), apiNavn)
-            }?.toSet() ?: emptySet(),
+                finnEnumverdi(it, SanityVilkår.values(), apiNavn)
+            }?.map { it.tilVilkår() }?.toSet() ?: emptySet(),
             rolle = rolle?.mapNotNull { finnEnumverdi(it, VilkårRolle.values(), apiNavn) } ?: emptyList(),
             lovligOppholdTriggere = lovligOppholdTriggere?.mapNotNull {
                 finnEnumverdi(it, VilkårTrigger.values(), apiNavn)
