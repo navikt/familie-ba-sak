@@ -41,8 +41,7 @@ class PensjonService(
 
     private fun hentBarnetrygdForRelatertPersonTilPensjon(personIdent: String, fraDato: LocalDate, forelderAktør: Aktør): List<BarnetrygdTilPensjon> {
         val aktør = personidentService.hentAktør(personIdent)
-        val andeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForAktør(aktør) // denne henter egentlige veldig mye, og burde være tilstrekkelig å kun hente aktør fra disse andelene
-        val fagsaker = andeler.map { it.tilkjentYtelse.behandling.fagsak }
+        val fagsaker = fagsakRepository.finnFagsakerSomHarAndelerForAktør(aktør)
             .filter { it.type == FagsakType.NORMAL } // skal kun ha normale fagsaker til med her
             .filter { it.aktør != forelderAktør } // trenger ikke å hente data til forelderen på nytt
             .distinct()
