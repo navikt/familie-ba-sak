@@ -5,8 +5,7 @@ import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.AutobrevScheduler
-import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
-import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
@@ -29,7 +28,6 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import java.time.YearMonth
 
 @RestController
 @RequestMapping(value = ["/internal", "/testverktoy"])
@@ -42,9 +40,8 @@ class TestVerktøyController(
     private val tilgangService: TilgangService,
     private val simuleringService: SimuleringService,
     private val opprettTaskService: OpprettTaskService,
-    private val satskjøringRepository: SatskjøringRepository,
     private val taskService: TaskService,
-
+    private val startSatsendring: StartSatsendring,
 ) {
 
     @GetMapping(path = ["/autobrev"])
@@ -62,8 +59,7 @@ class TestVerktøyController(
     @Unprotected
     fun utførSatsendringPåFagsak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<String>> {
         return if (envService.erPreprod() || envService.erDev()) {
-            satskjøringRepository.save(Satskjøring(fagsakId = fagsakId))
-            opprettTaskService.opprettSatsendringTask(fagsakId, YearMonth.of(2023, 3))
+            opprettTaskService.opprettSatsendringTask(fagsakId, startSatsendring.hentAktivSatsendringstidspunkt())
             ResponseEntity.ok(Ressurs.success("Trigget satsendring for fagsak $fagsakId"))
         } else {
             ResponseEntity.ok(Ressurs.success(ENDEPUNKTET_GJØR_IKKE_NOE_I_PROD_MELDING))

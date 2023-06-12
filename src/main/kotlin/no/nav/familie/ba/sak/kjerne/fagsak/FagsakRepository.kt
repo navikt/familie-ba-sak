@@ -56,10 +56,11 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
                     SELECT 1
                     FROM   satskjoering
                     WHERE  fk_fagsak_id = f.id
+                    AND sats_tid  = :satsTidspunkt
                 ) AND f.status = 'LØPENDE' AND f.arkivert = false""",
         nativeQuery = true,
     )
-    fun finnLøpendeFagsakerForSatsendring(page: Pageable): Page<Fagsak>
+    fun finnLøpendeFagsakerForSatsendring(satsTidspunkt: LocalDate, page: Pageable): Page<Fagsak>
 
     @Query(
         value = """SELECT id FROM fagsak
@@ -175,4 +176,14 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
         iverksatteLøpendeBehandlinger: List<Long>,
         stønadFom: YearMonth = YearMonth.now(),
     ): List<Long>
+
+    @Query(
+        """
+        SELECT distinct f from Fagsak f
+         JOIN Behandling b ON b.fagsak.id = f.id
+         JOIN AndelTilkjentYtelse aty ON aty.behandlingId = b.id
+        WHERE aty.aktør = :aktør
+        """,
+    )
+    fun finnFagsakerSomHarAndelerForAktør(aktør: Aktør): List<Fagsak>
 }

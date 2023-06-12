@@ -774,8 +774,14 @@ class VedtaksperiodeService(
         val mye = mapOf(NB to "mye", NN to "mykje").getOrDefault(målform, "mye")
 
         return feilutbetaltValutaRepository.finnFeilutbetaltValutaForBehandling(vedtak.behandling.id).map {
-            val (fom, tom) = it.fom.tilDagMånedÅr() to it.tom.tilDagMånedÅr()
-            "$fra $fom til $tom er det utbetalt ${it.feilutbetaltBeløp} kroner for $mye."
+            if (featureToggleService.isEnabled(FeatureToggleConfig.FEILUTBETALT_VALUTA_PR_MND, false)) {
+                val måned = mapOf(NB to "måned", NN to "månad").getOrDefault(målform, "måned")
+                val (fom, tom) = it.fom.tilMånedÅr() to it.tom.tilMånedÅr()
+                "$fra $fom til $tom er det utbetalt ${it.feilutbetaltBeløp} kroner for $mye per $måned."
+            } else {
+                val (fom, tom) = it.fom.tilDagMånedÅr() to it.tom.tilDagMånedÅr()
+                "$fra $fom til $tom er det utbetalt ${it.feilutbetaltBeløp} kroner for $mye."
+            }
         }.toSet().takeIf { it.isNotEmpty() }
     }
 

@@ -59,7 +59,7 @@ class BrevPeriodeService(
 ) {
 
     fun hentBrevperioderData(
-        vedtaksperioderId: List<Long>,
+        vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>,
         behandling: Behandling,
         skalLogge: Boolean = true,
     ): List<BrevperiodeData> {
@@ -99,9 +99,9 @@ class BrevPeriodeService(
             persongrunnlag = personopplysningGrunnlag,
         )
 
-        return vedtaksperioderId.map {
+        return vedtaksperioder.map {
             hentBrevperiodeData(
-                vedtaksperiodeId = it,
+                vedtaksperiodeMedBegrunnelser = it,
                 restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 andelerTilkjentYtelse = andelerMedEndringer,
@@ -115,7 +115,7 @@ class BrevPeriodeService(
     }
 
     private fun hentBrevperiodeData(
-        vedtaksperiodeId: Long,
+        vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
         restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
         personopplysningGrunnlag: PersonopplysningGrunnlag,
         andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
@@ -126,9 +126,6 @@ class BrevPeriodeService(
 
         skalLogge: Boolean = true,
     ): BrevperiodeData {
-        val vedtaksperiodeMedBegrunnelser =
-            vedtaksperiodeHentOgPersisterService.hentVedtaksperiodeThrows(vedtaksperiodeId)
-
         val minimerteUregistrerteBarn = uregistrerteBarn.map { it.tilMinimertUregistrertBarn() }
 
         val utvidetVedtaksperiodeMedBegrunnelse = vedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
@@ -237,7 +234,7 @@ class BrevPeriodeService(
 
         val begrunnelseDataForVedtaksperiode =
             hentBrevperioderData(
-                vedtaksperioderId = listOf(vedtaksperiodeId),
+                vedtaksperioder = listOf(vedtaksperiodeMedBegrunnelser),
                 behandling = vedtaksperiodeMedBegrunnelser.vedtak.behandling,
             ).single()
         return begrunnelseDataForVedtaksperiode.hentBegrunnelserOgFritekster(
