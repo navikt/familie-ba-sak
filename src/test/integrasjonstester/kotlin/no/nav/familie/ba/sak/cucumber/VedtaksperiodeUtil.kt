@@ -271,15 +271,15 @@ fun lagVedtaksPerioder(
     val forrigeBehandlingId = behandlingTilForrigeBehandling[behandlingId]
 
     val grunnlagForVedtaksperiodeForrigeBehandling = forrigeBehandlingId?.let {
-        val forrigeVedtak = vedtaksListe.find { it.behandling.id == behandlingId && it.aktiv }
+        val forrigeVedtak = vedtaksListe.find { it.behandling.id == forrigeBehandlingId && it.aktiv }
             ?: error("Finner ikke vedtak")
         GrunnlagForVedtaksperioder(
-            persongrunnlag = personGrunnlag.finnPersonGrunnlagForBehandling(behandlingId),
-            personResultater = personResultater[behandlingId] ?: error("Finner ikke personresultater"),
+            persongrunnlag = personGrunnlag.finnPersonGrunnlagForBehandling(forrigeBehandlingId),
+            personResultater = personResultater[forrigeBehandlingId] ?: error("Finner ikke personresultater"),
             fagsakType = forrigeVedtak.behandling.fagsak.type,
-            kompetanser = kompetanser[behandlingId] ?: emptyList(),
-            endredeUtbetalinger = endredeUtbetalinger[behandlingId] ?: emptyList(),
-            andelerTilkjentYtelse = andelerTilkjentYtelse[behandlingId] ?: emptyList(),
+            kompetanser = kompetanser[forrigeBehandlingId] ?: emptyList(),
+            endredeUtbetalinger = endredeUtbetalinger[forrigeBehandlingId] ?: emptyList(),
+            andelerTilkjentYtelse = andelerTilkjentYtelse[forrigeBehandlingId] ?: emptyList(),
             perioderOvergangsstønad = emptyList(),
         )
     }
