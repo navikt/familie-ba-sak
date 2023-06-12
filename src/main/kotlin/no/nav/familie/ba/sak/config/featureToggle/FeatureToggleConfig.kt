@@ -17,10 +17,12 @@ class FeatureToggleConfig {
         const val KAN_MIGRERE_ENSLIG_MINDREÅRIG = "familie-ba-sak.migrer-enslig-mindreaarig"
         const val FEILUTBETALT_VALUTA_PR_MND = "familie-ba-sak.feilutbetalt-valuta-pr-mnd"
         const val SATSENDRING_KOPIER_GRUNNLAG_FRA_FORRIGE_BEHANDLING = "familie-ba-sak.satsendring.kopier-grunnlag-fra-forrige-behandling"
+        const val BEGRUNNELSER_NY = "familie-ba-sak.begrunnelser-ny"
 
         // unleash toggles for satsendring, kan slettes etter at satsendring er skrudd på for alle satstyper
         const val SATSENDRING_ENABLET: String = "familie-ba-sak.satsendring-enablet"
         const val SATSENDRING_OPPRETT_TASKER = "familie-ba-sak.satsendring-opprett-satsendring-task"
+        const val SATSENDRING_2023_07 = "familie-ba-sak.satsendring-juli"
         const val SATSENDRING_SNIKE_I_KØEN = "familie-ba-sak.satsendring-snike-i-koen"
     }
 }

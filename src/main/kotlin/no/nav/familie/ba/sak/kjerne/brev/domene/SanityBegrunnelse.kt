@@ -24,6 +24,7 @@ data class SanityBegrunnelse(
     override val apiNavn: String,
     override val navnISystem: String,
     val vilkaar: List<SanityVilkår>? = null,
+    val vilkår: Set<Vilkår> = emptySet(),
     val rolle: List<VilkårRolle> = emptyList(),
     val lovligOppholdTriggere: List<VilkårTrigger>? = null,
     val bosattIRiketTriggere: List<VilkårTrigger>? = null,
@@ -66,6 +67,9 @@ data class RestSanityBegrunnelse(
             vilkaar = vilkaar?.mapNotNull {
                 finnEnumverdi(it, SanityVilkår.values(), apiNavn)
             },
+            vilkår = vilkaar?.mapNotNull {
+                finnEnumverdi(it, Vilkår.values(), apiNavn)
+            }?.toSet() ?: emptySet(),
             rolle = rolle?.mapNotNull { finnEnumverdi(it, VilkårRolle.values(), apiNavn) } ?: emptyList(),
             lovligOppholdTriggere = lovligOppholdTriggere?.mapNotNull {
                 finnEnumverdi(it, VilkårTrigger.values(), apiNavn)

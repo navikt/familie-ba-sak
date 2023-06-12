@@ -3,8 +3,8 @@ package no.nav.familie.ba.sak.kjerne.beregning.domene
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Dag
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.DagTidspunkt.Companion.tilTidspunktEllerSenereEnn
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.DagTidspunkt.Companion.tilTidspunktEllerTidligereEnn
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.DagTidspunkt.Companion.tilTidspunktEllerUendeligSent
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.DagTidspunkt.Companion.tilTidspunktEllerUendeligTidlig
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilFørsteDagIMåneden
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilSisteDagIMåneden
 
@@ -15,8 +15,8 @@ open class InternPeriodeOvergangsstønadTidslinje(
     override fun lagPerioder(): List<Periode<InternPeriodeOvergangsstønad, Dag>> {
         return internePeriodeOvergangsstønader.map {
             Periode(
-                fraOgMed = it.fomDato.tilTidspunktEllerTidligereEnn(it.tomDato),
-                tilOgMed = it.tomDato.tilTidspunktEllerSenereEnn(it.fomDato),
+                fraOgMed = it.fomDato.tilTidspunktEllerUendeligTidlig(it.tomDato),
+                tilOgMed = it.tomDato.tilTidspunktEllerUendeligSent(it.fomDato),
                 innhold = it,
             )
         }
