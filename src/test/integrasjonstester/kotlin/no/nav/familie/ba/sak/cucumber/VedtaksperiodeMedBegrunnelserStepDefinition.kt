@@ -72,6 +72,7 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
     private var kompetanser = mutableMapOf<Long, List<Kompetanse>>()
     private var endredeUtbetalinger = mutableMapOf<Long, List<EndretUtbetalingAndel>>()
     private var andelerTilkjentYtelse = mutableMapOf<Long, List<AndelTilkjentYtelse>>()
+    private var endringstidspunkt = mapOf<Long, LocalDate?>()
 
     private var gjeldendeBehandlingId: Long? = null
 
@@ -196,6 +197,14 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
         }.toSet()
     }
 
+    @Og("med endringstidspunkt")
+    fun settEndringstidspunkt(dataTable: DataTable) {
+        endringstidspunkt = dataTable.asMaps().associate { rad ->
+            parseLong(Domenebegrep.BEHANDLING_ID, rad) to
+                parseDato(DomenebegrepVedtaksperiodeMedBegrunnelser.ENDRINGSTIDSPUNKT, rad)
+        }
+    }
+
     @Når("vedtaksperioder med begrunnelser genereres for behandling {}")
     fun `generer vedtaksperiode med begrunnelse`(behandlingId: Long) {
         gjeldendeBehandlingId = behandlingId
@@ -231,7 +240,7 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
             vedtak = vedtaksliste.find { it.behandling.id == behandlingId && it.aktiv } ?: error("Finner ikke vedtak"),
             grunnlagForVedtakPerioder = grunnlagForVedtaksperiode,
             grunnlagForVedtakPerioderForrigeBehandling = grunnlagForVedtaksperiodeForrigeBehandling,
-            endringstidspunkt = TIDENES_MORGEN,
+            endringstidspunkt = endringstidspunkt[behandlingId] ?: TIDENES_MORGEN,
         )
     }
 
