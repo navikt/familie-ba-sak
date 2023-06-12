@@ -39,15 +39,19 @@ data class BrevBegrunnelseGrunnlagMedPersoner(
         this.standardbegrunnelse.erAvslagUregistrerteBarnBegrunnelse() -> uregistrerteBarn.mapNotNull { it.fødselsdato }
 
         gjelderSøker && this.vedtakBegrunnelseType != VedtakBegrunnelseType.ENDRET_UTBETALING && this.vedtakBegrunnelseType != VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING -> {
-            if (this.vedtakBegrunnelseType == VedtakBegrunnelseType.AVSLAG) {
-                personerIBehandling
-                    .filter { it.type == PersonType.BARN }
-                    .map { it.fødselsdato } +
-                    uregistrerteBarn.mapNotNull { it.fødselsdato }
-            } else {
-                (personerMedUtbetaling + personerPåBegrunnelse).toSet()
-                    .filter { it.type == PersonType.BARN }
-                    .map { it.fødselsdato }
+            when (this.vedtakBegrunnelseType) {
+                VedtakBegrunnelseType.AVSLAG, VedtakBegrunnelseType.OPPHØR -> {
+                    personerIBehandling
+                        .filter { it.type == PersonType.BARN }
+                        .map { it.fødselsdato } +
+                        uregistrerteBarn.mapNotNull { it.fødselsdato }
+                }
+
+                else -> {
+                    (personerMedUtbetaling + personerPåBegrunnelse).toSet()
+                        .filter { it.type == PersonType.BARN }
+                        .map { it.fødselsdato }
+                }
             }
         }
         else ->

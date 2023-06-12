@@ -12,14 +12,22 @@ import java.util.TreeMap
 val TIDENES_MORGEN = LocalDate.MIN
 val TIDENES_ENDE = LocalDate.MAX
 
-fun LocalDate.tilddMMyy() = this.format(DateTimeFormatter.ofPattern("ddMMyy", nbLocale))
-fun LocalDate.tilyyyyMMdd() = this.format(DateTimeFormatter.ofPattern("yyyy-MM-dd", nbLocale))
-fun LocalDate.tilKortString() = this.format(DateTimeFormatter.ofPattern("dd.MM.yy", nbLocale))
-fun LocalDate.tilddMMyyyy() = this.format(DateTimeFormatter.ofPattern("dd.MM.yyyy", nbLocale))
-fun YearMonth.tilKortString() = this.format(DateTimeFormatter.ofPattern("MM.yy", nbLocale))
-fun LocalDate.tilDagMånedÅr() = this.format(DateTimeFormatter.ofPattern("d. MMMM yyyy", nbLocale))
-fun LocalDate.tilMånedÅr() = this.format(DateTimeFormatter.ofPattern("MMMM yyyy", nbLocale))
-fun YearMonth.tilMånedÅr() = this.format(DateTimeFormatter.ofPattern("MMMM yyyy", nbLocale))
+private val FORMAT_DATE_DDMMYY = DateTimeFormatter.ofPattern("ddMMyy", nbLocale)
+private val FORMAT_DATE_ISO = DateTimeFormatter.ofPattern("yyyy-MM-dd", nbLocale)
+private val FORMAT_DATO_NORSK_KORT_ÅR = DateTimeFormatter.ofPattern("dd.MM.yy", nbLocale)
+private val FORMAT_DATO_NORSK = DateTimeFormatter.ofPattern("dd.MM.yyyy", nbLocale)
+private val FORMAT_DATO_MÅNED_ÅR_KORT = DateTimeFormatter.ofPattern("MM.yy", nbLocale)
+private val FORMAT_DATO_DAG_MÅNED_ÅR = DateTimeFormatter.ofPattern("d. MMMM yyyy", nbLocale)
+private val FORMAT_DATO_MÅNED_ÅR = DateTimeFormatter.ofPattern("MMMM yyyy", nbLocale)
+
+fun LocalDate.tilddMMyy() = this.format(FORMAT_DATE_DDMMYY)
+fun LocalDate.tilyyyyMMdd() = this.format(FORMAT_DATE_ISO)
+fun LocalDate.tilKortString() = this.format(FORMAT_DATO_NORSK_KORT_ÅR)
+fun LocalDate.tilddMMyyyy() = this.format(FORMAT_DATO_NORSK)
+fun YearMonth.tilKortString() = this.format(FORMAT_DATO_MÅNED_ÅR_KORT)
+fun LocalDate.tilDagMånedÅr() = this.format(FORMAT_DATO_DAG_MÅNED_ÅR)
+fun LocalDate.tilMånedÅr() = this.format(FORMAT_DATO_MÅNED_ÅR)
+fun YearMonth.tilMånedÅr() = this.format(FORMAT_DATO_MÅNED_ÅR)
 
 fun erBack2BackIMånedsskifte(tilOgMed: LocalDate?, fraOgMed: LocalDate?): Boolean {
     return tilOgMed?.erDagenFør(fraOgMed) == true &&

@@ -45,14 +45,10 @@ class FagsakController(
     @PostMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentEllerOpprettFagsak(@RequestBody fagsakRequest: FagsakRequest): ResponseEntity<Ressurs<RestMinimalFagsak>> {
         logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter eller oppretter ny fagsak")
-        if (fagsakRequest.personIdent != null) {
-            tilgangService.validerTilgangTilPersoner(
-                personIdenter = listOf(
-                    fagsakRequest.personIdent,
-                ),
-                event = AuditLoggerEvent.CREATE,
-            )
-        }
+        tilgangService.validerTilgangTilPersoner(
+            personIdenter = listOf(fagsakRequest.personIdent),
+            event = AuditLoggerEvent.CREATE,
+        )
         tilgangService.verifiserHarTilgangTilHandling(BehandlerRolle.SAKSBEHANDLER, "opprette fagsak")
 
         return Result.runCatching { fagsakService.hentEllerOpprettFagsak(fagsakRequest) }
@@ -132,9 +128,12 @@ class FagsakController(
 
         val aktør = personidentService.hentAktør(request.personIdent)
 
-        val fagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær = fagsakService.finnAlleFagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær(aktør)
+        val fagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær =
+            fagsakService.finnAlleFagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær(aktør)
 
-        val fagsakIdOgTilknyttetAktørId = fagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær.map { RestFagsakIdOgTilknyttetAktørId(aktørId = it.aktør.aktørId, fagsakId = it.id) }
+        val fagsakIdOgTilknyttetAktørId = fagsakerHvorAktørErSøkerEllerMottarLøpendeOrdinær.map {
+            RestFagsakIdOgTilknyttetAktørId(aktørId = it.aktør.aktørId, fagsakId = it.id)
+        }
 
         return ResponseEntity.ok().body(Ressurs.success(fagsakIdOgTilknyttetAktørId))
     }
@@ -148,9 +147,15 @@ class FagsakController(
 
         val aktør = personidentService.hentAktør(request.personIdent)
 
-        val fagsakerHvorAktørMottarLøpendeUtvidetEllerOrdinær = fagsakService.finnAlleFagsakerHvorAktørHarLøpendeYtelseAvType(aktør = aktør, ytelseTyper = listOf(YtelseType.ORDINÆR_BARNETRYGD, YtelseType.UTVIDET_BARNETRYGD))
+        val fagsakerHvorAktørMottarLøpendeUtvidetEllerOrdinær =
+            fagsakService.finnAlleFagsakerHvorAktørHarLøpendeYtelseAvType(
+                aktør = aktør,
+                ytelseTyper = listOf(YtelseType.ORDINÆR_BARNETRYGD, YtelseType.UTVIDET_BARNETRYGD),
+            )
 
-        val fagsakIdOgTilknyttetAktørId = fagsakerHvorAktørMottarLøpendeUtvidetEllerOrdinær.map { RestFagsakIdOgTilknyttetAktørId(aktørId = it.aktør.aktørId, fagsakId = it.id) }
+        val fagsakIdOgTilknyttetAktørId = fagsakerHvorAktørMottarLøpendeUtvidetEllerOrdinær.map {
+            RestFagsakIdOgTilknyttetAktørId(aktørId = it.aktør.aktørId, fagsakId = it.id)
+        }
 
         return ResponseEntity.ok().body(Ressurs.success(fagsakIdOgTilknyttetAktørId))
     }
@@ -211,8 +216,7 @@ class FagsakController(
 }
 
 data class FagsakRequest(
-    val personIdent: String?,
-    val aktørId: String? = null,
+    val personIdent: String,
     val fagsakType: FagsakType? = FagsakType.NORMAL,
     val institusjon: InstitusjonInfo? = null,
 )

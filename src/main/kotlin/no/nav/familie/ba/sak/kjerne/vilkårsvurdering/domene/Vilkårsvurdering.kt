@@ -68,6 +68,16 @@ data class Vilkårsvurdering(
         return nyVilkårsvurdering
     }
 
+    fun tilKopiForNyBehandling(nyBehandling: Behandling): Vilkårsvurdering {
+        val nyVilkårsvurdering = Vilkårsvurdering(behandling = nyBehandling)
+
+        nyVilkårsvurdering.personResultater = personResultater.map {
+            it.tilKopiForNyVilkårsvurdering(nyVilkårsvurdering = nyVilkårsvurdering)
+        }.toSet()
+
+        return nyVilkårsvurdering
+    }
+
     fun finnOpplysningspliktVilkår(): AnnenVurdering? {
         return personResultater.single { it.erSøkersResultater() }
             .andreVurderinger.singleOrNull { it.type == AnnenVurderingType.OPPLYSNINGSPLIKT }
