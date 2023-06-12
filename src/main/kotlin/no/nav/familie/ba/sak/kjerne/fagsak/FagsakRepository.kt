@@ -176,4 +176,14 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
         iverksatteLøpendeBehandlinger: List<Long>,
         stønadFom: YearMonth = YearMonth.now(),
     ): List<Long>
+
+    @Query(
+        """
+        SELECT distinct f from Fagsak f
+         JOIN Behandling b ON b.fagsak.id = f.id
+         JOIN AndelTilkjentYtelse aty ON aty.behandlingId = b.id
+        WHERE aty.aktør = :aktør
+        """,
+    )
+    fun finnFagsakerSomHarAndelerForAktør(aktør: Aktør): List<Fagsak>
 }
