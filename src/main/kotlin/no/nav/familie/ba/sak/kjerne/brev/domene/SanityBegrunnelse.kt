@@ -191,7 +191,7 @@ enum class UtvidetBarnetrygdTrigger {
 enum class Valgbarhet {
     STANDARD,
     AUTOMATISK,
-    TILLEGSTEKST,
+    TILLEGGSTEKST,
     SAKSPESIFIKK,
 }
 
