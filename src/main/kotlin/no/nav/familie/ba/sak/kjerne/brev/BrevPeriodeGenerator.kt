@@ -23,7 +23,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Valgbarhet
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.EØSBegrunnelseData
@@ -324,8 +324,7 @@ class BrevPeriodeGenerator(
         begrunnelser: List<IVedtakBegrunnelse>,
     ): String? {
         val erAutobrev = begrunnelser.any {
-            it == Standardbegrunnelse.REDUKSJON_UNDER_6_ÅR_AUTOVEDTAK ||
-                it == Standardbegrunnelse.REDUKSJON_UNDER_18_ÅR_AUTOVEDTAK
+            this.minimertVedtaksperiode.begrunnelser.any { it.triggesAv.valgbarhet == Valgbarhet.AUTOMATISK }
         }
         return if (erAutobrev && fom != null) {
             val fra = if (målform == Målform.NB) "Fra" else "Frå"

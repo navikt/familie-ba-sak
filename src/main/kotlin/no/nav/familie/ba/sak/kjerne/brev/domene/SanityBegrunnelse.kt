@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårRolle.SOKER
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Valgbarhet
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -37,6 +38,7 @@ data class SanityBegrunnelse(
     val endretUtbetalingsperiodeDeltBostedUtbetalingTrigger: EndretUtbetalingsperiodeDeltBostedTriggere? = null,
     val endretUtbetalingsperiodeTriggere: List<EndretUtbetalingsperiodeTrigger>? = null,
     val utvidetBarnetrygdTriggere: List<UtvidetBarnetrygdTrigger>? = null,
+    val valgbarhet: Valgbarhet? = null,
 ) : ISanityBegrunnelse {
 
     val triggesAv: TriggesAv by lazy { this.tilTriggesAv() }
@@ -58,6 +60,7 @@ data class RestSanityBegrunnelse(
     val endretUtbetalingsperiodeDeltBostedUtbetalingTrigger: String?,
     val endretUtbetalingsperiodeTriggere: List<String>? = emptyList(),
     val utvidetBarnetrygdTriggere: List<String>? = emptyList(),
+    val valgbarhet: String? = null,
 ) {
     fun tilSanityBegrunnelse(): SanityBegrunnelse? {
         if (apiNavn == null) return null
@@ -107,6 +110,7 @@ data class RestSanityBegrunnelse(
             utvidetBarnetrygdTriggere = utvidetBarnetrygdTriggere?.mapNotNull {
                 finnEnumverdi(it, UtvidetBarnetrygdTrigger.values(), apiNavn)
             },
+            valgbarhet = valgbarhet?.let { finnEnumverdi(valgbarhet, Valgbarhet.values(), apiNavn) },
         )
     }
 }
@@ -213,6 +217,7 @@ private fun SanityBegrunnelse.tilTriggesAv(): TriggesAv {
         deltbosted = this.inneholderBorMedSøkerTrigger(VilkårTrigger.DELT_BOSTED),
         deltBostedSkalIkkeDeles = this.inneholderBorMedSøkerTrigger(VilkårTrigger.DELT_BOSTED_SKAL_IKKE_DELES),
         valgbar = !this.inneholderØvrigTrigger(ØvrigTrigger.ALLTID_AUTOMATISK),
+        valgbarhet = this.valgbarhet,
         etterEndretUtbetaling = this.endretUtbetalingsperiodeTriggere
             ?.contains(EndretUtbetalingsperiodeTrigger.ETTER_ENDRET_UTBETALINGSPERIODE) ?: false,
         endretUtbetalingSkalUtbetales = this.endretUtbetalingsperiodeDeltBostedUtbetalingTrigger

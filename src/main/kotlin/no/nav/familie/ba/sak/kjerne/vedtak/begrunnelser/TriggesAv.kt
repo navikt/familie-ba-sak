@@ -22,6 +22,7 @@ data class TriggesAv(
     val deltbosted: Boolean,
     val deltBostedSkalIkkeDeles: Boolean,
     val valgbar: Boolean,
+    val valgbarhet: Valgbarhet?,
     val endringsaarsaker: Set<Årsak>,
     val etterEndretUtbetaling: Boolean,
     val endretUtbetalingSkalUtbetales: EndretUtbetalingsperiodeDeltBostedTriggere,
@@ -144,4 +145,11 @@ private fun endretUtbetalingBegrunnelseOppfyllerUtvidetScenario(
     }?.erPåvirketAvEndring == true
 
     return begrunnelseGjelderUtvidet == periodeInneholderUtvidetMedEndring
+}
+
+enum class Valgbarhet {
+    STANDARD,
+    AUTOMATISK,
+    TILLEGSTEKST,
+    SAKSPESIFIKK,
 }
