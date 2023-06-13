@@ -35,33 +35,33 @@ class TilkjentYtelseValideringServiceTest {
             totrinnskontrollService = totrinnskontrollServiceMock,
             persongrunnlagService = persongrunnlagServiceMock,
             personidentService = personidentServiceMock,
-            behandlingHentOgPersisterService = behandlingHentOgPersisterService
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
         )
 
         every {
             beregningServiceMock.hentRelevanteTilkjentYtelserForBarn(
                 barnAktør = barn1.aktør,
-                fagsakId = any()
+                fagsakId = any(),
             )
         } answers { emptyList() }
         every {
             beregningServiceMock.hentRelevanteTilkjentYtelserForBarn(
                 barnAktør = barn2.aktør,
-                fagsakId = any()
+                fagsakId = any(),
             )
         } answers { emptyList() }
         every {
             beregningServiceMock.hentRelevanteTilkjentYtelserForBarn(
                 barnAktør = barn3MedUtbetalinger.aktør,
-                fagsakId = any()
+                fagsakId = any(),
             )
         } answers {
             listOf(
                 TilkjentYtelse(
                     behandling = lagBehandling(),
                     endretDato = LocalDate.now().minusYears(1),
-                    opprettetDato = LocalDate.now().minusYears(1)
-                )
+                    opprettetDato = LocalDate.now().minusYears(1),
+                ),
             )
         }
     }
@@ -71,8 +71,8 @@ class TilkjentYtelseValideringServiceTest {
         Assertions.assertFalse(
             tilkjentYtelseValideringService.barnetrygdLøperForAnnenForelder(
                 behandling = lagBehandling(),
-                barna = listOf(barn1, barn2)
-            )
+                barna = listOf(barn1, barn2),
+            ),
         )
     }
 
@@ -81,8 +81,8 @@ class TilkjentYtelseValideringServiceTest {
         Assertions.assertTrue(
             tilkjentYtelseValideringService.barnetrygdLøperForAnnenForelder(
                 behandling = lagBehandling(),
-                barna = listOf(barn1, barn3MedUtbetalinger)
-            )
+                barna = listOf(barn1, barn3MedUtbetalinger),
+            ),
         )
     }
 
@@ -101,15 +101,15 @@ class TilkjentYtelseValideringServiceTest {
                     fom = inneværendeMåned().minusYears(4),
                     tom = inneværendeMåned(),
                     beløp = 2108,
-                    person = person1
+                    person = person1,
                 ),
                 lagAndelTilkjentYtelse(
                     fom = inneværendeMåned().minusYears(4),
                     tom = inneværendeMåned(),
                     beløp = 2108,
-                    person = person2
-                )
-            )
+                    person = person2,
+                ),
+            ),
         )
 
         val forrigeBehandling = lagBehandling()
@@ -123,15 +123,15 @@ class TilkjentYtelseValideringServiceTest {
                     fom = inneværendeMåned().minusYears(4),
                     tom = inneværendeMåned(),
                     beløp = 2108,
-                    person = person1
+                    person = person1,
                 ),
                 lagAndelTilkjentYtelse(
                     fom = inneværendeMåned().minusYears(4),
                     tom = inneværendeMåned(),
                     beløp = 1054,
-                    person = person2
-                )
-            )
+                    person = person2,
+                ),
+            ),
         )
 
         every { beregningServiceMock.hentTilkjentYtelseForBehandling(behandlingId = behandling.id) } answers { tilkjentYtelse }
@@ -145,7 +145,7 @@ class TilkjentYtelseValideringServiceTest {
         Assertions.assertEquals(
             person2.aktør,
             tilkjentYtelseValideringService.finnAktørerMedUgyldigEtterbetalingsperiode(behandlingId = behandling.id)
-                .single()
+                .single(),
         )
     }
 

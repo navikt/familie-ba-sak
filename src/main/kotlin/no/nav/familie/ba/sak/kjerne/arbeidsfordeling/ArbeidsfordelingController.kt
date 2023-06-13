@@ -26,32 +26,32 @@ class ArbeidsfordelingController(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val utvidetBehandlingService: UtvidetBehandlingService,
     private val arbeidsfordelingService: ArbeidsfordelingService,
-    private val tilgangService: TilgangService
+    private val tilgangService: TilgangService,
 ) {
 
     @PutMapping(path = ["{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun endreBehandlendeEnhet(
         @PathVariable behandlingId: Long,
         @RequestBody
-        endreBehandlendeEnhet: RestEndreBehandlendeEnhet
+        endreBehandlendeEnhet: RestEndreBehandlendeEnhet,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "Endre behandlende enhet"
+            handling = "Endre behandlende enhet",
         )
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
 
         if (endreBehandlendeEnhet.begrunnelse.isBlank()) {
             throw FunksjonellFeil(
                 melding = "Begrunnelse kan ikke være tom",
-                frontendFeilmelding = "Du må skrive en begrunnelse for endring av enhet"
+                frontendFeilmelding = "Du må skrive en begrunnelse for endring av enhet",
             )
         }
 
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         arbeidsfordelingService.manueltOppdaterBehandlendeEnhet(
             behandling = behandling,
-            endreBehandlendeEnhet = endreBehandlendeEnhet
+            endreBehandlendeEnhet = endreBehandlendeEnhet,
         )
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
@@ -60,5 +60,5 @@ class ArbeidsfordelingController(
 
 data class RestEndreBehandlendeEnhet(
     val enhetId: String,
-    val begrunnelse: String
+    val begrunnelse: String,
 )

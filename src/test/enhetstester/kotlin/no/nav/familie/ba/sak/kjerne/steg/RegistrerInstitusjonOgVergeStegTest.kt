@@ -52,7 +52,7 @@ class RegistrerInstitusjonOgVergeStegTest {
             InstitusjonService(
                 fagsakRepository = fagsakRepositoryMock,
                 samhandlerKlient = mockk(relaxed = true),
-                institusjonRepository = institusjonRepositoryMock
+                institusjonRepository = institusjonRepositoryMock,
             )
         vergeService = VergeService(vergeRepositoryMock)
         registrerInstitusjonOgVerge =
@@ -61,7 +61,7 @@ class RegistrerInstitusjonOgVergeStegTest {
                 vergeService,
                 loggServiceMock,
                 behandlingHentOgPersisterServiceMock,
-                fagsakServiceMock
+                fagsakServiceMock,
             )
     }
 
@@ -83,26 +83,26 @@ class RegistrerInstitusjonOgVergeStegTest {
         every { loggServiceMock.opprettRegistrerInstitusjonLogg(any()) } just runs
         every { institusjonRepositoryMock.findByOrgNummer(any()) } returns Institusjon(
             orgNummer = "12345",
-            tssEksternId = "cool tsr"
+            tssEksternId = "cool tsr",
         )
         every { loggServiceMock.lagre(any()) } returns Logg(
             behandlingId = behandling.id,
             type = LoggType.VERGE_REGISTRERT,
             tittel = "tittel",
             rolle = BehandlerRolle.SYSTEM,
-            tekst = ""
+            tekst = "",
         )
         every { behandlingHentOgPersisterServiceMock.hent(any()) } returns behandling
         val restRegistrerInstitusjonOgVerge = RestRegistrerInstitusjonOgVerge(
             vergeInfo = VergeInfo(
-                "12345678910"
+                "12345678910",
             ),
-            institusjonInfo = InstitusjonInfo("12345", "cool tsr")
+            institusjonInfo = InstitusjonInfo("12345", "cool tsr"),
         )
 
         registrerInstitusjonOgVerge.utførStegOgAngiNeste(
             behandling,
-            restRegistrerInstitusjonOgVerge
+            restRegistrerInstitusjonOgVerge,
         )
 
         assertThat(fagsakSlot.captured.institusjon!!.orgNummer).isEqualTo(restRegistrerInstitusjonOgVerge.institusjonInfo!!.orgNummer)
@@ -120,8 +120,8 @@ class RegistrerInstitusjonOgVergeStegTest {
         val behandling = lagBehandling(
             fagsak = defaultFagsak().copy(
                 type = FagsakType.INSTITUSJON,
-                institusjon = Institusjon(orgNummer = "12345", tssEksternId = "tss")
-            )
+                institusjon = Institusjon(orgNummer = "12345", tssEksternId = "tss"),
+            ),
         )
         every { fagsakRepositoryMock.finnFagsak(any()) } returns behandling.fagsak
         every { fagsakRepositoryMock.save(any()) } returns behandling.fagsak
@@ -135,17 +135,17 @@ class RegistrerInstitusjonOgVergeStegTest {
             type = LoggType.VERGE_REGISTRERT,
             tittel = "tittel",
             rolle = BehandlerRolle.SYSTEM,
-            tekst = ""
+            tekst = "",
         )
         every { behandlingHentOgPersisterServiceMock.hent(any()) } returns behandling
         val restRegistrerInstitusjonOgVerge = RestRegistrerInstitusjonOgVerge(
             vergeInfo = VergeInfo("12345678910"),
-            institusjonInfo = InstitusjonInfo("12345", "cool tsr")
+            institusjonInfo = InstitusjonInfo("12345", "cool tsr"),
         )
 
         val nesteSteg = registrerInstitusjonOgVerge.utførStegOgAngiNeste(
             behandling,
-            restRegistrerInstitusjonOgVerge
+            restRegistrerInstitusjonOgVerge,
         )
 
         assertThat(nesteSteg).isEqualTo(StegType.REGISTRERE_SØKNAD)

@@ -25,32 +25,32 @@ class GrunnlagController(
     private val utvidetBehandlingService: UtvidetBehandlingService,
     private val persongrunnlagService: PersongrunnlagService,
     private val tilbakestillService: TilbakestillBehandlingService,
-    private val tilgangService: TilgangService
+    private val tilgangService: TilgangService,
 ) {
 
     @PostMapping(path = ["/{behandlingId}/legg-til-barn"])
     fun leggTilBarnIPersonopplysningsgrunnlag(
         @PathVariable behandlingId: Long,
         @RequestBody
-        leggTilBarnDto: LeggTilBarnDto
+        leggTilBarnDto: LeggTilBarnDto,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "legge til barn"
+            handling = "legge til barn",
         )
 
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
         persongrunnlagService.leggTilBarnIPersonopplysningsgrunnlag(
             behandling = behandling,
-            nyttBarnIdent = leggTilBarnDto.barnIdent
+            nyttBarnIdent = leggTilBarnDto.barnIdent,
         )
         tilbakestillService.initierOgSettBehandlingTilVilkårsvurdering(behandling)
         return ResponseEntity.ok(
             Ressurs.success(
                 utvidetBehandlingService
-                    .lagRestUtvidetBehandling(behandlingId = behandling.id)
-            )
+                    .lagRestUtvidetBehandling(behandlingId = behandling.id),
+            ),
         )
     }
 

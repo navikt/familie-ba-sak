@@ -19,7 +19,7 @@ data class RestPersonInfo(
     val forelderBarnRelasjonMaskert: List<RestForelderBarnRelasjonnMaskert> = emptyList(),
     val kommunenummer: String = "ukjent",
     val dødsfallDato: String? = null,
-    val bostedsadresse: RestBostedsadresse? = null
+    val bostedsadresse: RestBostedsadresse? = null,
 )
 
 data class RestForelderBarnRelasjon(
@@ -27,22 +27,22 @@ data class RestForelderBarnRelasjon(
     val relasjonRolle: FORELDERBARNRELASJONROLLE,
     val navn: String,
     val fødselsdato: LocalDate?,
-    val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING? = null
+    val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING? = null,
 )
 
 data class RestForelderBarnRelasjonnMaskert(
     val relasjonRolle: FORELDERBARNRELASJONROLLE,
-    val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING
+    val adressebeskyttelseGradering: ADRESSEBESKYTTELSEGRADERING,
 )
 
 data class RestBostedsadresse(
     val adresse: String?,
-    val postnummer: String
+    val postnummer: String,
 )
 
 private fun ForelderBarnRelasjonMaskert.tilRestForelderBarnRelasjonMaskert() = RestForelderBarnRelasjonnMaskert(
     relasjonRolle = this.relasjonsrolle,
-    adressebeskyttelseGradering = this.adressebeskyttelseGradering
+    adressebeskyttelseGradering = this.adressebeskyttelseGradering,
 )
 
 private fun ForelderBarnRelasjon.tilRestForelderBarnRelasjon() = RestForelderBarnRelasjon(
@@ -50,7 +50,7 @@ private fun ForelderBarnRelasjon.tilRestForelderBarnRelasjon() = RestForelderBar
     relasjonRolle = this.relasjonsrolle,
     navn = this.navn ?: "",
     fødselsdato = this.fødselsdato,
-    adressebeskyttelseGradering = this.adressebeskyttelseGradering
+    adressebeskyttelseGradering = this.adressebeskyttelseGradering,
 
 )
 
@@ -76,7 +76,7 @@ fun PersonInfo.tilRestPersonInfo(personIdent: String): RestPersonInfo {
         forelderBarnRelasjon = this.forelderBarnRelasjon.map { it.tilRestForelderBarnRelasjon() },
         forelderBarnRelasjonMaskert = this.forelderBarnRelasjonMaskert.map { it.tilRestForelderBarnRelasjonMaskert() },
         kommunenummer = kommunenummer,
-        dødsfallDato = dødsfallDato
+        dødsfallDato = dødsfallDato,
     )
 }
 
@@ -91,8 +91,8 @@ fun PersonInfo.tilRestPersonInfoMedNavnOgAdresse(personIdent: String): RestPerso
             null -> null
             else -> RestBostedsadresse(
                 adresse = bostedsadresse?.vegadresse?.adressenavn?.plus(" ${bostedsadresse.vegadresse?.husnummer ?: ""}")?.trim(),
-                postnummer = postnummer
+                postnummer = postnummer,
             )
-        }
+        },
     )
 }

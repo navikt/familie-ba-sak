@@ -6,11 +6,11 @@ import no.nav.familie.ba.sak.kjerne.steg.StegType
 
 class RestBehandlingStegTilstand(
     val behandlingSteg: StegType,
-    val behandlingStegStatus: BehandlingStegStatus
+    val behandlingStegStatus: BehandlingStegStatus,
 )
 
 fun BehandlingStegTilstand.tilRestBehandlingStegTilstand() =
     RestBehandlingStegTilstand(
         behandlingSteg = this.behandlingSteg,
-        behandlingStegStatus = this.behandlingStegStatus
+        behandlingStegStatus = this.behandlingStegStatus,
     )

@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.autovedtak.satsendring
 
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
-import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringÅpenBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
@@ -18,7 +17,7 @@ class SatsendringService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     private val satskjøringRepository: SatskjøringRepository,
-    private val fagsakRepository: FagsakRepository
+    private val fagsakRepository: FagsakRepository,
 ) {
     private val logger = LoggerFactory.getLogger(SatsendringService::class.java)
     fun erFagsakOppdatertMedSisteSatser(fagsakId: Long): Boolean {
@@ -42,8 +41,8 @@ class SatsendringService(
             løpendeFagsaker.parallelStream().filter {
                 !erFagsakOppdatertMedSisteSatser(it)
             }.collect(
-                Collectors.toList()
-            )
+                Collectors.toList(),
+            ),
         )
 
         while (slice.hasNext()) {
@@ -53,8 +52,8 @@ class SatsendringService(
                 slice.get().toList().parallelStream().filter {
                     !erFagsakOppdatertMedSisteSatser(it)
                 }.collect(
-                    Collectors.toList()
-                )
+                    Collectors.toList(),
+                ),
             )
         }
         logger.warn("Følgende saker mangler satsendring:")
@@ -62,7 +61,4 @@ class SatsendringService(
             logger.warn("$it")
         }
     }
-
-    fun finnSatskjøringerSomHarStoppetPgaÅpenBehandling(): List<SatskjøringÅpenBehandling> =
-        satskjøringRepository.finnSatskjøringerSomHarStoppetPgaÅpenBehandling()
 }

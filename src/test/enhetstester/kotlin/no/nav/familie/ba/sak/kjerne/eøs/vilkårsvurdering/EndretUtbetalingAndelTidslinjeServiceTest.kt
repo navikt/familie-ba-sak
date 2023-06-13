@@ -24,12 +24,12 @@ internal class EndretUtbetalingAndelTidslinjeServiceTest {
                 person = person,
                 årsak = Årsak.ETTERBETALING_3ÅR,
                 fom = YearMonth.of(2020, 3),
-                tom = YearMonth.of(2020, 7)
-            )
+                tom = YearMonth.of(2020, 7),
+            ),
         )
 
         val forventet = mapOf(
-            person.aktør to "TTTTT".somBoolskTidslinje(mar(2020))
+            person.aktør to "TTTTT".somBoolskTidslinje(mar(2020)),
         )
 
         val faktisk = endringer.tilBarnasHarEtterbetaling3ÅrTidslinjer()
@@ -47,25 +47,25 @@ internal class EndretUtbetalingAndelTidslinjeServiceTest {
                 person = person1,
                 årsak = Årsak.ETTERBETALING_3ÅR,
                 fom = YearMonth.of(2020, 3),
-                tom = YearMonth.of(2020, 7)
+                tom = YearMonth.of(2020, 7),
             ),
             lagEndretUtbetalingAndel(
                 person = person2,
                 årsak = Årsak.ETTERBETALING_3ÅR,
                 fom = YearMonth.of(2019, 11),
-                tom = YearMonth.of(2021, 3)
+                tom = YearMonth.of(2021, 3),
             ),
             lagEndretUtbetalingAndel(
                 person = person1,
                 årsak = Årsak.ETTERBETALING_3ÅR,
                 fom = YearMonth.of(2021, 1),
-                tom = YearMonth.of(2021, 5)
-            )
+                tom = YearMonth.of(2021, 5),
+            ),
         )
 
         val forventet = mapOf(
             person1.aktør to "TTTTT     TTTTT".somBoolskTidslinje(mar(2020)).filtrerIkkeNull(),
-            person2.aktør to "TTTTTTTTTTTTTTTTT".somBoolskTidslinje(nov(2019)).filtrerIkkeNull()
+            person2.aktør to "TTTTTTTTTTTTTTTTT".somBoolskTidslinje(nov(2019)).filtrerIkkeNull(),
         )
 
         val faktisk = endringer.tilBarnasHarEtterbetaling3ÅrTidslinjer()
@@ -81,8 +81,8 @@ internal class EndretUtbetalingAndelTidslinjeServiceTest {
                 person = person,
                 årsak = Årsak.DELT_BOSTED,
                 fom = YearMonth.of(2020, 3),
-                tom = YearMonth.of(2020, 7)
-            )
+                tom = YearMonth.of(2020, 7),
+            ),
         )
 
         val faktisk = endringer.tilBarnasHarEtterbetaling3ÅrTidslinjer()

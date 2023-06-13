@@ -2,10 +2,13 @@ package no.nav.familie.ba.sak.kjerne.brev
 
 import no.nav.familie.ba.sak.common.convertDataClassToJson
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.sanity.SanityService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.endringstidspunkt.Beløpsdifferanse
@@ -23,7 +26,9 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.SanityEØSBegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.tilMinimertePersoner
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.dødeBarnForrigePeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Begrunnelse
@@ -49,35 +54,36 @@ class BrevPeriodeService(
     private val personidentService: PersonidentService,
     private val kompetanseService: KompetanseService,
     private val integrasjonClient: IntegrasjonClient,
-    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
+    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
+    private val featureToggleService: FeatureToggleService,
 ) {
 
     fun hentBrevperioderData(
-        vedtaksperioderId: List<Long>,
-        behandlingId: BehandlingId,
-        skalLogge: Boolean = true
+        vedtaksperioder: List<VedtaksperiodeMedBegrunnelser>,
+        behandling: Behandling,
+        skalLogge: Boolean = true,
     ): List<BrevperiodeData> {
-        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandlingId.id)
+        val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
             ?: error("Finner ikke vilkårsvurdering ved begrunning av vedtak")
 
         val endredeUtbetalingAndeler = andelerTilkjentYtelseOgEndreteUtbetalingerService
-            .finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandlingId = behandlingId.id)
+            .finnEndreteUtbetalingerMedAndelerTilkjentYtelse(behandlingId = behandling.id)
 
-        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandlingId.id)
+        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandling.id)
 
         val andelerMedEndringer = andelerTilkjentYtelseOgEndreteUtbetalingerService
-            .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId.id)
+            .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.id)
 
         val uregistrerteBarn =
-            søknadGrunnlagService.hentAktiv(behandlingId = behandlingId.id)?.hentUregistrerteBarn()
+            søknadGrunnlagService.hentAktiv(behandlingId = behandling.id)?.hentUregistrerteBarn()
                 ?: emptyList()
 
-        val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksattFraBehandlingsId(behandlingId = behandlingId.id)
-        val inneværendeBehandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId.id)
+        val forrigeBehandling =
+            behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksattFraBehandlingsId(behandlingId = behandling.id)
 
-        val kompetanser = kompetanseService.hentKompetanser(behandlingId = behandlingId)
+        val kompetanser = kompetanseService.hentKompetanser(behandlingId = BehandlingId(behandling.id))
             .filter {
-                if (forrigeBehandling?.erAutomatiskEøsMigrering() == true && inneværendeBehandling.skalBehandlesAutomatisk) {
+                if (forrigeBehandling?.erAutomatiskEøsMigrering() == true && behandling.skalBehandlesAutomatisk) {
                     it.erObligatoriskeFelterSatt()
                 } else {
                     true
@@ -90,12 +96,12 @@ class BrevPeriodeService(
         val restBehandlingsgrunnlagForBrev = hentRestBehandlingsgrunnlagForBrev(
             vilkårsvurdering = vilkårsvurdering,
             endredeUtbetalingAndeler = endredeUtbetalingAndeler,
-            persongrunnlag = personopplysningGrunnlag
+            persongrunnlag = personopplysningGrunnlag,
         )
 
-        return vedtaksperioderId.map {
+        return vedtaksperioder.map {
             hentBrevperiodeData(
-                vedtaksperiodeId = it,
+                vedtaksperiodeMedBegrunnelser = it,
                 restBehandlingsgrunnlagForBrev = restBehandlingsgrunnlagForBrev,
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 andelerTilkjentYtelse = andelerMedEndringer,
@@ -103,31 +109,29 @@ class BrevPeriodeService(
                 skalLogge = skalLogge,
                 kompetanser = kompetanser.toList(),
                 sanityBegrunnelser = sanityBegrunnelser,
-                sanityEØSBegrunnelser = sanityEØSBegrunnelser
+                sanityEØSBegrunnelser = sanityEØSBegrunnelser,
             )
         }
     }
 
     private fun hentBrevperiodeData(
-        vedtaksperiodeId: Long,
+        vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
         restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
         personopplysningGrunnlag: PersonopplysningGrunnlag,
         andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
         uregistrerteBarn: List<BarnMedOpplysninger>,
         kompetanser: List<Kompetanse>,
-        sanityBegrunnelser: List<SanityBegrunnelse>,
-        sanityEØSBegrunnelser: List<SanityEØSBegrunnelse>,
+        sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
+        sanityEØSBegrunnelser: Map<EØSStandardbegrunnelse, SanityEØSBegrunnelse>,
 
-        skalLogge: Boolean = true
+        skalLogge: Boolean = true,
     ): BrevperiodeData {
-        val vedtaksperiodeMedBegrunnelser =
-            vedtaksperiodeHentOgPersisterService.hentVedtaksperiodeThrows(vedtaksperiodeId)
-
         val minimerteUregistrerteBarn = uregistrerteBarn.map { it.tilMinimertUregistrertBarn() }
 
         val utvidetVedtaksperiodeMedBegrunnelse = vedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
             personopplysningGrunnlag = personopplysningGrunnlag,
-            andelerTilkjentYtelse = andelerTilkjentYtelse
+            andelerTilkjentYtelse = andelerTilkjentYtelse,
+            skalBrukeNyVedtaksperiodeLøsning = featureToggleService.isEnabled(FeatureToggleConfig.VEDTAKSPERIODE_NY),
         )
 
         val ytelserForrigePeriode =
@@ -139,7 +143,8 @@ class BrevPeriodeService(
         val minimertVedtaksperiode =
             utvidetVedtaksperiodeMedBegrunnelse.tilMinimertVedtaksperiode(
                 sanityBegrunnelser = sanityBegrunnelser,
-                sanityEØSBegrunnelser = sanityEØSBegrunnelser
+                sanityEØSBegrunnelser = sanityEØSBegrunnelser,
+                featureToggleService = featureToggleService,
             )
 
         val landkoderISO2 = integrasjonClient.hentLandkoderISO2()
@@ -151,37 +156,38 @@ class BrevPeriodeService(
             brevMålform = personopplysningGrunnlag.søker.målform,
             erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak(
                 andelerTilkjentYtelse = andelerTilkjentYtelse,
-                periodeFom = utvidetVedtaksperiodeMedBegrunnelse.fom
+                periodeFom = utvidetVedtaksperiodeMedBegrunnelse.fom,
             ),
             barnMedReduksjonFraForrigeBehandlingIdent = hentBarnsPersonIdentMedRedusertPeriode(
                 vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-                andelerTilkjentYtelse = andelerTilkjentYtelse
+                andelerTilkjentYtelse = andelerTilkjentYtelse,
             ),
             minimerteKompetanserForPeriode = hentMinimerteKompetanserForPeriode(
                 kompetanser = kompetanser,
                 fom = vedtaksperiodeMedBegrunnelser.fom?.toYearMonth(),
                 tom = vedtaksperiodeMedBegrunnelser.tom?.toYearMonth(),
                 personopplysningGrunnlag = personopplysningGrunnlag,
-                landkoderISO2 = landkoderISO2
+                landkoderISO2 = landkoderISO2,
             ),
             minimerteKompetanserSomStopperRettFørPeriode = hentKompetanserSomStopperRettFørPeriode(
                 kompetanser = kompetanser,
-                periodeFom = minimertVedtaksperiode.fom?.toYearMonth()
+                periodeFom = minimertVedtaksperiode.fom?.toYearMonth(),
             ).filter {
                 it.erObligatoriskeFelterSatt()
             }.map {
                 it.tilMinimertKompetanse(
                     personopplysningGrunnlag = personopplysningGrunnlag,
-                    landkoderISO2 = landkoderISO2
+                    landkoderISO2 = landkoderISO2,
                 )
             },
-            dødeBarnForrigePeriode = dødeBarnForrigePeriode
+            dødeBarnForrigePeriode = dødeBarnForrigePeriode,
+            featureToggleService = featureToggleService,
         )
 
         if (skalLogge) {
             secureLogger.info(
                 "Data for brevperiode på behandling ${vedtaksperiodeMedBegrunnelser.vedtak.behandling}: \n" +
-                    brevperiodeData.tilBrevperiodeForLogging().convertDataClassToJson()
+                    brevperiodeData.tilBrevperiodeForLogging().convertDataClassToJson(),
             )
         }
 
@@ -190,7 +196,7 @@ class BrevPeriodeService(
 
     private fun hentBarnsPersonIdentMedRedusertPeriode(
         vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser,
-        andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
+        andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
     ): List<String> {
         val forrigeBehandling =
             behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(vedtaksperiodeMedBegrunnelser.vedtak.behandling)
@@ -205,8 +211,8 @@ class BrevPeriodeService(
                         LocalDateSegment(
                             vedtaksperiodeMedBegrunnelser.fom,
                             vedtaksperiodeMedBegrunnelser.tom,
-                            null
-                        )
+                            null,
+                        ),
                     )
                 }
             }.mapNotNull { barn ->
@@ -228,10 +234,12 @@ class BrevPeriodeService(
 
         val begrunnelseDataForVedtaksperiode =
             hentBrevperioderData(
-                vedtaksperioderId = listOf(vedtaksperiodeId),
-                behandlingId = BehandlingId(vedtaksperiodeMedBegrunnelser.vedtak.behandling.id)
+                vedtaksperioder = listOf(vedtaksperiodeMedBegrunnelser),
+                behandling = vedtaksperiodeMedBegrunnelser.vedtak.behandling,
             ).single()
-        return begrunnelseDataForVedtaksperiode.hentBegrunnelserOgFritekster()
+        return begrunnelseDataForVedtaksperiode.hentBegrunnelserOgFritekster(
+            skalBrukeNyVedtaksperiodeLøsning = featureToggleService.isEnabled(FeatureToggleConfig.VEDTAKSPERIODE_NY),
+        )
     }
 
     companion object {

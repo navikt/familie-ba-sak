@@ -20,23 +20,23 @@ class TidsromTest {
     fun testStørsteAv() {
         assertEquals(
             feb(2020),
-            størsteAv(jan(2020), feb(2020))
+            størsteAv(jan(2020), feb(2020)),
         )
         assertEquals(
             feb(2020).somUendeligLengeTil(),
-            størsteAv(jan(2020).somUendeligLengeTil(), jan(2020))
+            størsteAv(jan(2020).somUendeligLengeTil(), jan(2020)),
         )
         assertEquals(
             jun(2020).somUendeligLengeTil(),
-            størsteAv(jan(2020).somUendeligLengeTil(), mai(2020))
+            størsteAv(jan(2020).somUendeligLengeTil(), mai(2020)),
         )
         assertEquals(
             jan(2020).somUendeligLengeTil(),
-            størsteAv(jan(2020).somUendeligLengeTil(), des(2019))
+            størsteAv(jan(2020).somUendeligLengeTil(), des(2019)),
         )
         assertEquals(
             feb(2020).somUendeligLengeTil(),
-            størsteAv(jan(2020).somUendeligLengeTil(), feb(2020).somUendeligLengeTil())
+            størsteAv(jan(2020).somUendeligLengeTil(), feb(2020).somUendeligLengeTil()),
         )
     }
 
@@ -44,19 +44,19 @@ class TidsromTest {
     fun testMinsteAv() {
         assertEquals(
             des(2019).somUendeligLengeSiden(),
-            minsteAv(jan(2020).somUendeligLengeSiden(), jan(2020))
+            minsteAv(jan(2020).somUendeligLengeSiden(), jan(2020)),
         )
         assertEquals(
             apr(2019).somUendeligLengeSiden(),
-            minsteAv(jan(2020).somUendeligLengeSiden(), mai(2019))
+            minsteAv(jan(2020).somUendeligLengeSiden(), mai(2019)),
         )
         assertEquals(
             jan(2020).somUendeligLengeSiden(),
-            minsteAv(jan(2020).somUendeligLengeSiden(), feb(2020))
+            minsteAv(jan(2020).somUendeligLengeSiden(), feb(2020)),
         )
         assertEquals(
             feb(2020).somUendeligLengeSiden(),
-            størsteAv(feb(2020).somUendeligLengeSiden(), mar(2020).somUendeligLengeSiden())
+            størsteAv(feb(2020).somUendeligLengeSiden(), mar(2020).somUendeligLengeSiden()),
         )
     }
 

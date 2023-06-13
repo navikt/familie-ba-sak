@@ -33,8 +33,8 @@ internal class FiltreringsregelTest {
                 barnaLever = true,
                 morHarVerge = false,
                 erFagsakenMigrertEtterBarnFødt = false,
-                løperBarnetrygdForBarnetPåAnnenForelder = false
-            )
+                løperBarnetrygdForBarnetPåAnnenForelder = false,
+            ),
         )
 
         assertThat(evalueringer.erOppfylt()).isTrue
@@ -56,8 +56,8 @@ internal class FiltreringsregelTest {
                 barnaLever = true,
                 morHarVerge = false,
                 erFagsakenMigrertEtterBarnFødt = false,
-                løperBarnetrygdForBarnetPåAnnenForelder = false
-            )
+                løperBarnetrygdForBarnetPåAnnenForelder = false,
+            ),
         )
 
         assertThat(evalueringer.erOppfylt()).isFalse
@@ -81,8 +81,8 @@ internal class FiltreringsregelTest {
                 morHarVerge = false,
                 erFagsakenMigrertEtterBarnFødt = false,
                 løperBarnetrygdForBarnetPåAnnenForelder = false,
-                morMottarEøsBarnetrygd = true
-            )
+                morMottarEøsBarnetrygd = true,
+            ),
         )
 
         assertThat(evalueringer.erOppfylt()).isFalse
@@ -104,8 +104,8 @@ internal class FiltreringsregelTest {
                 barnaLever = true,
                 morHarVerge = false,
                 erFagsakenMigrertEtterBarnFødt = false,
-                løperBarnetrygdForBarnetPåAnnenForelder = false
-            )
+                løperBarnetrygdForBarnetPåAnnenForelder = false,
+            ),
         )
 
         assertThat(evalueringer.erOppfylt()).isFalse
@@ -119,7 +119,7 @@ internal class FiltreringsregelTest {
         val barnet2 = tilfeldigPerson(LocalDate.now().minusMonths(1)).copy(aktør = gyldigAktørId)
         val restenAvBarna: List<PersonInfo> = listOf(
             PersonInfo(LocalDate.now().minusMonths(8).minusDays(1)),
-            PersonInfo(LocalDate.now().minusMonths(8))
+            PersonInfo(LocalDate.now().minusMonths(8)),
         )
 
         val evaluering = Filtreringsregel.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.vurder(
@@ -131,8 +131,8 @@ internal class FiltreringsregelTest {
                 barnaLever = true,
                 morHarVerge = false,
                 løperBarnetrygdForBarnetPåAnnenForelder = false,
-                erFagsakenMigrertEtterBarnFødt = false
-            )
+                erFagsakenMigrertEtterBarnFødt = false,
+            ),
         )
         assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
     }
@@ -144,7 +144,7 @@ internal class FiltreringsregelTest {
         val barnet2 = tilfeldigPerson(LocalDate.now().minusMonths(1)).copy(aktør = gyldigAktørId)
         val restenAvBarna: List<PersonInfo> = listOf(
             PersonInfo(LocalDate.now().minusMonths(5).minusDays(1)),
-            PersonInfo(LocalDate.now().minusMonths(8))
+            PersonInfo(LocalDate.now().minusMonths(8)),
         )
 
         val evaluering = Filtreringsregel.MER_ENN_5_MND_SIDEN_FORRIGE_BARN.vurder(
@@ -156,8 +156,8 @@ internal class FiltreringsregelTest {
                 barnaLever = true,
                 morHarVerge = false,
                 erFagsakenMigrertEtterBarnFødt = false,
-                løperBarnetrygdForBarnetPåAnnenForelder = false
-            )
+                løperBarnetrygdForBarnetPåAnnenForelder = false,
+            ),
         )
 
         assertThat(evaluering.resultat).isEqualTo(Resultat.IKKE_OPPFYLT)
@@ -178,8 +178,8 @@ internal class FiltreringsregelTest {
                 barnaLever = true,
                 morHarVerge = false,
                 erFagsakenMigrertEtterBarnFødt = false,
-                løperBarnetrygdForBarnetPåAnnenForelder = false
-            )
+                løperBarnetrygdForBarnetPåAnnenForelder = false,
+            ),
         )
 
         assertThat(evalueringer.erOppfylt()).isFalse
@@ -201,8 +201,8 @@ internal class FiltreringsregelTest {
                 barnaLever = false,
                 morHarVerge = false,
                 erFagsakenMigrertEtterBarnFødt = false,
-                løperBarnetrygdForBarnetPåAnnenForelder = false
-            )
+                løperBarnetrygdForBarnetPåAnnenForelder = false,
+            ),
         )
 
         assertThat(evalueringer.erOppfylt()).isFalse
@@ -224,8 +224,8 @@ internal class FiltreringsregelTest {
                 barnaLever = true,
                 morHarVerge = true,
                 erFagsakenMigrertEtterBarnFødt = false,
-                løperBarnetrygdForBarnetPåAnnenForelder = false
-            )
+                løperBarnetrygdForBarnetPåAnnenForelder = false,
+            ),
         )
 
         assertThat(evalueringer.erOppfylt()).isFalse
@@ -261,8 +261,8 @@ internal class FiltreringsregelTest {
                     barnaLever = true,
                     morHarVerge = false,
                     løperBarnetrygdForBarnetPåAnnenForelder = false,
-                    erFagsakenMigrertEtterBarnFødt = false
-                )
+                    erFagsakenMigrertEtterBarnFødt = false,
+                ),
             )
         assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.MOR_ER_OVER_18_ÅR)
     }
@@ -285,8 +285,8 @@ internal class FiltreringsregelTest {
                     barnaLever = true,
                     morHarVerge = false,
                     erFagsakenMigrertEtterBarnFødt = false,
-                    løperBarnetrygdForBarnetPåAnnenForelder = false
-                )
+                    løperBarnetrygdForBarnetPåAnnenForelder = false,
+                ),
             )
         assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.MER_ENN_5_MND_SIDEN_FORRIGE_BARN)
     }
@@ -308,8 +308,8 @@ internal class FiltreringsregelTest {
                 barnaLever = true,
                 morHarVerge = false,
                 erFagsakenMigrertEtterBarnFødt = false,
-                løperBarnetrygdForBarnetPåAnnenForelder = false
-            )
+                løperBarnetrygdForBarnetPåAnnenForelder = false,
+            ),
         )
         assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
     }
@@ -332,8 +332,8 @@ internal class FiltreringsregelTest {
                     barnaLever = true,
                     morHarVerge = false,
                     erFagsakenMigrertEtterBarnFødt = false,
-                    løperBarnetrygdForBarnetPåAnnenForelder = false
-                )
+                    løperBarnetrygdForBarnetPåAnnenForelder = false,
+                ),
             )
         assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.MOR_LEVER)
     }
@@ -356,8 +356,8 @@ internal class FiltreringsregelTest {
                     barnaLever = false,
                     morHarVerge = false,
                     erFagsakenMigrertEtterBarnFødt = false,
-                    løperBarnetrygdForBarnetPåAnnenForelder = false
-                )
+                    løperBarnetrygdForBarnetPåAnnenForelder = false,
+                ),
             )
         assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.BARN_LEVER)
     }
@@ -380,8 +380,8 @@ internal class FiltreringsregelTest {
                     barnaLever = true,
                     morHarVerge = true,
                     erFagsakenMigrertEtterBarnFødt = false,
-                    løperBarnetrygdForBarnetPåAnnenForelder = false
-                )
+                    løperBarnetrygdForBarnetPåAnnenForelder = false,
+                ),
             )
         assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.MOR_HAR_IKKE_VERGE)
     }
@@ -404,8 +404,8 @@ internal class FiltreringsregelTest {
                     barnaLever = true,
                     morHarVerge = true,
                     erFagsakenMigrertEtterBarnFødt = false,
-                    løperBarnetrygdForBarnetPåAnnenForelder = false
-                )
+                    løperBarnetrygdForBarnetPåAnnenForelder = false,
+                ),
             )
         assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.MOR_LEVER)
     }
@@ -431,8 +431,8 @@ internal class FiltreringsregelTest {
                     barnaLever = true,
                     morHarVerge = false,
                     erFagsakenMigrertEtterBarnFødt = false,
-                    løperBarnetrygdForBarnetPåAnnenForelder = false
-                )
+                    løperBarnetrygdForBarnetPåAnnenForelder = false,
+                ),
             )
         Assertions.assertTrue(evalueringer.erOppfylt())
     }
@@ -455,8 +455,8 @@ internal class FiltreringsregelTest {
                     barnaLever = true,
                     morHarVerge = false,
                     løperBarnetrygdForBarnetPåAnnenForelder = false,
-                    erFagsakenMigrertEtterBarnFødt = false
-                )
+                    erFagsakenMigrertEtterBarnFødt = false,
+                ),
             )
         assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.MOR_GYLDIG_FNR)
     }
@@ -480,8 +480,8 @@ internal class FiltreringsregelTest {
                     barnaLever = true,
                     morHarVerge = false,
                     erFagsakenMigrertEtterBarnFødt = false,
-                    løperBarnetrygdForBarnetPåAnnenForelder = false
-                )
+                    løperBarnetrygdForBarnetPåAnnenForelder = false,
+                ),
             )
         assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.BARN_GYLDIG_FNR)
     }
@@ -504,12 +504,12 @@ internal class FiltreringsregelTest {
                     morHarVerge = false,
                     erFagsakenMigrertEtterBarnFødt = true,
                     løperBarnetrygdForBarnetPåAnnenForelder = false,
-                    dagensDato = LocalDate.parse("2020-10-23")
-                )
+                    dagensDato = LocalDate.parse("2020-10-23"),
+                ),
             )
         assertIkkeOppfyltFiltreringsregel(
             evalueringer,
-            Filtreringsregel.FAGSAK_IKKE_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT
+            Filtreringsregel.FAGSAK_IKKE_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT,
         )
     }
 
@@ -532,8 +532,8 @@ internal class FiltreringsregelTest {
                     barnaLever = true,
                     morHarVerge = false,
                     løperBarnetrygdForBarnetPåAnnenForelder = false,
-                    erFagsakenMigrertEtterBarnFødt = false
-                )
+                    erFagsakenMigrertEtterBarnFødt = false,
+                ),
             )
         Assertions.assertTrue(evalueringer.erOppfylt())
     }
@@ -555,8 +555,8 @@ internal class FiltreringsregelTest {
                     barnaLever = true,
                     morHarVerge = false,
                     løperBarnetrygdForBarnetPåAnnenForelder = true,
-                    erFagsakenMigrertEtterBarnFødt = false
-                )
+                    erFagsakenMigrertEtterBarnFødt = false,
+                ),
             )
         Assertions.assertTrue(!evalueringer.erOppfylt())
     }
@@ -580,12 +580,12 @@ internal class FiltreringsregelTest {
             Filtreringsregel.MOR_MOTTAR_IKKE_LØPENDE_UTVIDET,
             Filtreringsregel.MOR_HAR_IKKE_LØPENDE_EØS_BARNETRYGD,
             Filtreringsregel.FAGSAK_IKKE_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT,
-            Filtreringsregel.LØPER_IKKE_BARNETRYGD_FOR_BARNET
+            Filtreringsregel.LØPER_IKKE_BARNETRYGD_FOR_BARNET,
         )
         assertThat(Filtreringsregel.values().size).isEqualTo(fagbestemtFiltreringsregelrekkefølge.size)
         assertThat(
             Filtreringsregel.values().zip(fagbestemtFiltreringsregelrekkefølge)
-                .all { (x, y) -> x == y }
+                .all { (x, y) -> x == y },
         ).isTrue
     }
 }

@@ -26,7 +26,7 @@ import java.time.YearMonth
 @Service
 class SmåbarnstilleggKorrigeringService(
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
-    private val loggService: LoggService
+    private val loggService: LoggService,
 ) {
     @Transactional
     fun leggTilSmåbarnstilleggPåBehandling(årMåned: YearMonth, behandling: Behandling): List<AndelTilkjentYtelse> {
@@ -47,7 +47,7 @@ class SmåbarnstilleggKorrigeringService(
                     ytelseType = YtelseType.SMÅBARNSTILLEGG,
                     prosent = BigDecimal(100),
                     sats = sats,
-                    beløp = sats
+                    beløp = sats,
                 )
             }.tilAndelerTilkjentYtelse(tilkjentYtelse)
 

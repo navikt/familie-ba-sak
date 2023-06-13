@@ -77,7 +77,7 @@ class BeregningServiceTest {
         andelTilkjentYtelseRepository,
         endretUtbetalingAndelRepository,
         vilkårsvurderingRepository,
-        featureToggleService
+        featureToggleService,
     )
 
     private lateinit var beregningService: BeregningService
@@ -109,14 +109,14 @@ class BeregningServiceTest {
             behandlingRepository = behandlingRepository,
             personopplysningGrunnlagRepository = personopplysningGrunnlagRepository,
             småbarnstilleggService = småbarnstilleggService,
-            andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService
+            andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
         )
 
         every { tilkjentYtelseRepository.slettTilkjentYtelseFor(any()) } just Runs
         every { fagsakService.hentRestFagsak(any()) } answers {
             Ressurs.success(
                 defaultFagsak().tilRestBaseFagsak(false, emptyList(), null, null)
-                    .tilRestFagsak(emptyList(), emptyList())
+                    .tilRestFagsak(emptyList(), emptyList()),
             )
         }
         every { endretUtbetalingAndelRepository.findByBehandlingId(any()) } answers { emptyList() }
@@ -144,7 +144,7 @@ class BeregningServiceTest {
             periodeFom = periodeFom,
             periodeTom = periodeTom,
             lagFullstendigVilkårResultat = true,
-            personType = PersonType.BARN
+            personType = PersonType.BARN,
         )
 
         val personResultatSøker = lagPersonResultat(
@@ -154,7 +154,7 @@ class BeregningServiceTest {
             periodeFom = periodeFom,
             periodeTom = periodeTom,
             lagFullstendigVilkårResultat = true,
-            personType = PersonType.SØKER
+            personType = PersonType.SØKER,
         )
         vilkårsvurdering.personResultater = setOf(personResultatBarn, personResultatSøker)
 
@@ -162,7 +162,7 @@ class BeregningServiceTest {
             behandlingId = behandling.id,
             søkerPersonIdent = søker.aktør.aktivFødselsnummer(),
             barnasIdenter = listOf(barn.aktør.aktivFødselsnummer()),
-            barnasFødselsdatoer = listOf(barn.fødselsdato)
+            barnasFødselsdatoer = listOf(barn.fødselsdato),
         )
         val slot = slot<TilkjentYtelse>()
 
@@ -170,12 +170,12 @@ class BeregningServiceTest {
         every { tilkjentYtelseRepository.save(any()) } returns lagInitiellTilkjentYtelse(behandling)
         every { søknadGrunnlagService.hentAktiv(any())?.hentSøknadDto() } returns lagSøknadDTO(
             søker.aktør.aktivFødselsnummer(),
-            listOf(barn.aktør.aktivFødselsnummer())
+            listOf(barn.aktør.aktivFødselsnummer()),
         )
 
         beregningService.oppdaterBehandlingMedBeregning(
             behandling = behandling,
-            personopplysningGrunnlag = personopplysningGrunnlag
+            personopplysningGrunnlag = personopplysningGrunnlag,
         )
 
         verify(exactly = 1) { tilkjentYtelseRepository.save(capture(slot)) }
@@ -205,7 +205,7 @@ class BeregningServiceTest {
             periodeFom = periodeFom,
             periodeTom = periodeTom,
             lagFullstendigVilkårResultat = true,
-            personType = PersonType.BARN
+            personType = PersonType.BARN,
         )
 
         val personResultatSøker = lagPersonResultat(
@@ -215,7 +215,7 @@ class BeregningServiceTest {
             periodeFom = periodeFom,
             periodeTom = periodeTom,
             lagFullstendigVilkårResultat = true,
-            personType = PersonType.SØKER
+            personType = PersonType.SØKER,
         )
         vilkårsvurdering.personResultater = setOf(personResultatBarn, personResultatSøker)
 
@@ -223,7 +223,7 @@ class BeregningServiceTest {
             behandlingId = behandling.id,
             søkerPersonIdent = søker.aktør.aktivFødselsnummer(),
             barnasIdenter = listOf(barn.aktør.aktivFødselsnummer()),
-            barnasFødselsdatoer = listOf(barn.fødselsdato)
+            barnasFødselsdatoer = listOf(barn.fødselsdato),
         )
         val slot = slot<TilkjentYtelse>()
 
@@ -231,12 +231,12 @@ class BeregningServiceTest {
         every { tilkjentYtelseRepository.save(any()) } returns lagInitiellTilkjentYtelse(behandling)
         every { søknadGrunnlagService.hentAktiv(any())?.hentSøknadDto() } returns lagSøknadDTO(
             søker.aktør.aktivFødselsnummer(),
-            listOf(barn.aktør.aktivFødselsnummer())
+            listOf(barn.aktør.aktivFødselsnummer()),
         )
 
         beregningService.oppdaterBehandlingMedBeregning(
             behandling = behandling,
-            personopplysningGrunnlag = personopplysningGrunnlag
+            personopplysningGrunnlag = personopplysningGrunnlag,
         )
 
         verify(exactly = 1) { tilkjentYtelseRepository.save(capture(slot)) }
@@ -275,7 +275,7 @@ class BeregningServiceTest {
             barnasFødselsdatoer = listOf(barn.fødselsdato),
             barnasIdenter = listOf(barn.aktør.aktivFødselsnummer()),
             barnAktør = listOf(barn.aktør),
-            søkerAktør = søker.aktør
+            søkerAktør = søker.aktør,
         )
 
         val personResultatBarn = lagPersonResultat(
@@ -286,7 +286,7 @@ class BeregningServiceTest {
             periodeTom = periodeTom,
             lagFullstendigVilkårResultat = true,
             personType = PersonType.BARN,
-            erDeltBosted = true
+            erDeltBosted = true,
         )
 
         val personResultatSøker = lagPersonResultat(
@@ -296,7 +296,7 @@ class BeregningServiceTest {
             periodeFom = periodeFom,
             periodeTom = periodeTom,
             lagFullstendigVilkårResultat = true,
-            personType = PersonType.SØKER
+            personType = PersonType.SØKER,
         )
         vilkårsvurdering.personResultater = setOf(personResultatBarn, personResultatSøker)
 
@@ -306,15 +306,15 @@ class BeregningServiceTest {
         every { tilkjentYtelseRepository.save(any()) } returns lagInitiellTilkjentYtelse(behandling)
         every { søknadGrunnlagService.hentAktiv(any())?.hentSøknadDto() } returns lagSøknadDTO(
             søker.aktør.aktivFødselsnummer(),
-            listOf(barn.aktør.aktivFødselsnummer())
+            listOf(barn.aktør.aktivFødselsnummer()),
         )
 
         val andelTilkjentYtelser = mutableListOf(
             lagAndelTilkjentYtelse(
                 fom = periodeFom.toYearMonth(),
                 tom = periodeTom.toYearMonth(),
-                person = barn
-            )
+                person = barn,
+            ),
         )
         every { endretUtbetalingAndelRepository.findByBehandlingId(behandlingId = behandling.id) } returns
             listOf(
@@ -327,8 +327,8 @@ class BeregningServiceTest {
                     avtaletidspunktDeltBosted = avtaletidspunktDeltBosted,
                     søknadstidspunkt = søknadstidspunkt,
                     årsak = Årsak.DELT_BOSTED,
-                    begrunnelse = "En begrunnelse"
-                )
+                    begrunnelse = "En begrunnelse",
+                ),
             )
 
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id) } returns
@@ -336,7 +336,7 @@ class BeregningServiceTest {
 
         beregningService.oppdaterBehandlingMedBeregning(
             behandling = behandling,
-            personopplysningGrunnlag = personopplysningGrunnlag
+            personopplysningGrunnlag = personopplysningGrunnlag,
         )
 
         verify(exactly = 1) { tilkjentYtelseRepository.save(capture(slot)) }
@@ -365,7 +365,7 @@ class BeregningServiceTest {
             person = barn,
             resultat = Resultat.OPPFYLT,
             periodeFom = periodeFom,
-            periodeTom = periodeTom
+            periodeTom = periodeTom,
         )
 
         val personResultatSøker = lagPersonResultat(
@@ -373,14 +373,14 @@ class BeregningServiceTest {
             person = søker,
             resultat = Resultat.IKKE_OPPFYLT,
             periodeFom = periodeFom,
-            periodeTom = periodeTom
+            periodeTom = periodeTom,
         )
         vilkårsvurdering.personResultater = setOf(personResultatBarn, personResultatSøker)
 
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
             behandlingId = behandling.id,
             søkerPersonIdent = søker.aktør.aktivFødselsnummer(),
-            barnasIdenter = listOf(barn.aktør.aktivFødselsnummer())
+            barnasIdenter = listOf(barn.aktør.aktivFødselsnummer()),
         )
         val slot = slot<TilkjentYtelse>()
 
@@ -388,12 +388,12 @@ class BeregningServiceTest {
         every { tilkjentYtelseRepository.save(any()) } returns lagInitiellTilkjentYtelse(behandling)
         every { søknadGrunnlagService.hentAktiv(any())?.hentSøknadDto() } returns lagSøknadDTO(
             søker.aktør.aktivFødselsnummer(),
-            listOf(barn.aktør.aktivFødselsnummer())
+            listOf(barn.aktør.aktivFødselsnummer()),
         )
 
         beregningService.oppdaterBehandlingMedBeregning(
             behandling = behandling,
-            personopplysningGrunnlag = personopplysningGrunnlag
+            personopplysningGrunnlag = personopplysningGrunnlag,
         )
 
         verify(exactly = 1) { tilkjentYtelseRepository.save(capture(slot)) }
@@ -409,7 +409,7 @@ class BeregningServiceTest {
         val barn2 = lagPerson(type = PersonType.BARN, fødselsdato = barnFødselsdato)
         val søker = lagPerson(type = PersonType.SØKER)
         val vilkårsvurdering = Vilkårsvurdering(
-            behandling = behandling
+            behandling = behandling,
         )
 
         val periode1Fom = LocalDate.of(2020, 1, 1)
@@ -425,25 +425,29 @@ class BeregningServiceTest {
 
         val tilleggFom = SatsService.hentDatoForSatsendring(satstype = SatsType.TILLEGG_ORBA, oppdatertBeløp = 1354)
 
-        val søkerVilkår = Vilkår.hentVilkårFor(personType = PersonType.SØKER, fagsakType = FagsakType.NORMAL, behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR)
+        val søkerVilkår = Vilkår.hentVilkårFor(
+            personType = PersonType.SØKER,
+            fagsakType = FagsakType.NORMAL,
+            behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
+        )
         val vilkårResultaterSøker = søkerVilkår.map {
             lagVilkårResultat(
                 vilkårType = it,
                 periodeFom = periode1Fom,
-                periodeTom = periode1Tom
+                periodeTom = periode1Tom,
             )
         } + søkerVilkår.map {
             lagVilkårResultat(
                 vilkårType = it,
                 periodeFom = periode2Fom,
                 periodeTom = periode2Tom,
-                resultat = Resultat.IKKE_OPPFYLT
+                resultat = Resultat.IKKE_OPPFYLT,
             )
         } + søkerVilkår.map { lagVilkårResultat(vilkårType = it, periodeFom = periode3Fom, periodeTom = periode3Tom) }
 
         val personResultatSøker = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            aktør = søker.aktør
+            aktør = søker.aktør,
         )
 
         personResultatSøker.setSortedVilkårResultater(vilkårResultaterSøker.toSet())
@@ -456,7 +460,7 @@ class BeregningServiceTest {
                 periodeFom = periode1Fom.minusYears(1),
                 periodeTom = periode3Tom.plusYears(1),
                 lagFullstendigVilkårResultat = true,
-                personType = PersonType.BARN
+                personType = PersonType.BARN,
             ),
             lagPersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
@@ -465,8 +469,8 @@ class BeregningServiceTest {
                 periodeFom = periode2Midt,
                 periodeTom = periode3Midt,
                 lagFullstendigVilkårResultat = true,
-                personType = PersonType.BARN
-            )
+                personType = PersonType.BARN,
+            ),
         )
 
         vilkårsvurdering.personResultater = personResultatBarna + personResultatSøker
@@ -474,7 +478,7 @@ class BeregningServiceTest {
         val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
             behandlingId = behandling.id,
             søkerPersonIdent = søker.aktør.aktivFødselsnummer(),
-            barnasIdenter = listOf(barn1.aktør.aktivFødselsnummer(), barn2.aktør.aktivFødselsnummer())
+            barnasIdenter = listOf(barn1.aktør.aktivFødselsnummer(), barn2.aktør.aktivFødselsnummer()),
         )
         val slot = slot<TilkjentYtelse>()
 
@@ -482,12 +486,12 @@ class BeregningServiceTest {
         every { tilkjentYtelseRepository.save(any()) } returns lagInitiellTilkjentYtelse(behandling)
         every { søknadGrunnlagService.hentAktiv(any())?.hentSøknadDto() } returns lagSøknadDTO(
             søker.aktør.aktivFødselsnummer(),
-            listOf(barn1.aktør.aktivFødselsnummer(), barn2.aktør.aktivFødselsnummer())
+            listOf(barn1.aktør.aktivFødselsnummer(), barn2.aktør.aktivFødselsnummer()),
         )
 
         beregningService.oppdaterBehandlingMedBeregning(
             behandling = behandling,
-            personopplysningGrunnlag = personopplysningGrunnlag
+            personopplysningGrunnlag = personopplysningGrunnlag,
         )
 
         verify(exactly = 1) { tilkjentYtelseRepository.save(capture(slot)) }
@@ -548,7 +552,7 @@ class BeregningServiceTest {
             utvidetFom = utvidetFom,
             utvidetTom = utvidetTom,
             barna = listOf(barn),
-            søker = søker
+            søker = søker,
         )
 
         Assertions.assertEquals(5, andelerTilkjentYtelse.size)
@@ -618,7 +622,7 @@ class BeregningServiceTest {
             utvidetFom = utvidetFom,
             utvidetTom = utvidetTom,
             barna = listOf(barn),
-            søker = søker
+            søker = søker,
         )
 
         Assertions.assertEquals(7, andelerTilkjentYtelse.size)
@@ -701,7 +705,7 @@ class BeregningServiceTest {
             utvidetFom = utvidetFom,
             utvidetTom = utvidetTom,
             barna = listOf(barnUnder3År, barnOver3År),
-            søker = søker
+            søker = søker,
         )
 
         val (andelerSøker, andelerBarn) = andelerTilkjentYtelse.partition { it.aktør.aktivFødselsnummer() == søker.aktør.aktivFødselsnummer() }
@@ -763,7 +767,7 @@ class BeregningServiceTest {
             andrePeriodeFomForBarnet = førstePeriodeTomForBarnet.plusDays(1),
             forventetSluttForFørsteAndelsperiode = førstePeriodeTomForBarnet.plusMonths(1).toYearMonth(),
             forventetStartForAndreAndelsperiode = førstePeriodeTomForBarnet.plusMonths(2).toYearMonth(),
-            skalLageSplitt = false
+            skalLageSplitt = false,
         )
     }
 
@@ -775,7 +779,7 @@ class BeregningServiceTest {
             andrePeriodeFomForBarnet = førstePeriodeTomForBarnet.plusDays(2),
             forventetSluttForFørsteAndelsperiode = førstePeriodeTomForBarnet.toYearMonth(),
             forventetStartForAndreAndelsperiode = førstePeriodeTomForBarnet.plusMonths(2).toYearMonth(),
-            skalLageSplitt = true
+            skalLageSplitt = true,
         )
     }
 
@@ -788,7 +792,7 @@ class BeregningServiceTest {
             forventetSluttForFørsteAndelsperiode = førstePeriodeTomForBarnet.toYearMonth(),
             forventetStartForAndreAndelsperiode = førstePeriodeTomForBarnet.plusMonths(1).toYearMonth(),
             deltBostedForFørstePeriode = true,
-            skalLageSplitt = true
+            skalLageSplitt = true,
         )
     }
 
@@ -801,7 +805,7 @@ class BeregningServiceTest {
             forventetSluttForFørsteAndelsperiode = førstePeriodeTomForBarnet.plusMonths(1).toYearMonth(),
             forventetStartForAndreAndelsperiode = førstePeriodeTomForBarnet.plusMonths(2).toYearMonth(),
             deltBostedForAndrePeriode = true,
-            skalLageSplitt = true
+            skalLageSplitt = true,
         )
     }
 
@@ -815,7 +819,7 @@ class BeregningServiceTest {
             forventetStartForAndreAndelsperiode = førstePeriodeTomForBarnet.plusMonths(2).toYearMonth(),
             deltBostedForFørstePeriode = true,
             deltBostedForAndrePeriode = true,
-            skalLageSplitt = false
+            skalLageSplitt = false,
         )
     }
 
@@ -831,28 +835,28 @@ class BeregningServiceTest {
                 fom = jan22,
                 tom = aug22,
                 beløp = 1000,
-                aktør = barn1Aktør
+                aktør = barn1Aktør,
             ),
             lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
                 beløp = 1000,
-                aktør = barn2Aktør
-            )
+                aktør = barn2Aktør,
+            ),
         )
         val nåværendeAndeler = listOf(
             lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
                 beløp = 1000,
-                aktør = barn1Aktør
+                aktør = barn1Aktør,
             ),
             lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
                 beløp = 1000,
-                aktør = barn2Aktør
-            )
+                aktør = barn2Aktør,
+            ),
         )
 
         every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(nåværendeBehandling) } returns forrigeBehandling
@@ -881,14 +885,14 @@ class BeregningServiceTest {
                 fom = jan22,
                 tom = aug22,
                 beløp = 0,
-                aktør = barn1Aktør
+                aktør = barn1Aktør,
             ),
             lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
                 beløp = 0,
-                aktør = barn2Aktør
-            )
+                aktør = barn2Aktør,
+            ),
         )
 
         every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(nåværendeBehandling) } returns forrigeBehandling
@@ -917,14 +921,14 @@ class BeregningServiceTest {
                 fom = jan22,
                 tom = aug22,
                 beløp = 0,
-                aktør = barn1Aktør
+                aktør = barn1Aktør,
             ),
             lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
                 beløp = 0,
-                aktør = barn2Aktør
-            )
+                aktør = barn2Aktør,
+            ),
         )
 
         every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(nåværendeBehandling) } returns forrigeBehandling
@@ -953,14 +957,14 @@ class BeregningServiceTest {
                 fom = jan22,
                 tom = aug22,
                 beløp = 1000,
-                aktør = barn1Aktør
+                aktør = barn1Aktør,
             ),
             lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
                 beløp = 1000,
-                aktør = barn2Aktør
-            )
+                aktør = barn2Aktør,
+            ),
         )
 
         every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(nåværendeBehandling) } returns forrigeBehandling
@@ -989,14 +993,14 @@ class BeregningServiceTest {
                 fom = jan22,
                 tom = aug22,
                 beløp = 1000,
-                aktør = barn1Aktør
+                aktør = barn1Aktør,
             ),
             lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
                 beløp = 1000,
-                aktør = barn2Aktør
-            )
+                aktør = barn2Aktør,
+            ),
         )
 
         val nåværendeAndeler = listOf(
@@ -1004,14 +1008,14 @@ class BeregningServiceTest {
                 fom = jan22,
                 tom = aug22,
                 beløp = 500,
-                aktør = barn1Aktør
+                aktør = barn1Aktør,
             ),
             lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
                 beløp = 1000,
-                aktør = barn2Aktør
-            )
+                aktør = barn2Aktør,
+            ),
         )
 
         every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(nåværendeBehandling) } returns forrigeBehandling
@@ -1035,14 +1039,14 @@ class BeregningServiceTest {
         forventetStartForAndreAndelsperiode: YearMonth,
         deltBostedForFørstePeriode: Boolean = false,
         deltBostedForAndrePeriode: Boolean = false,
-        skalLageSplitt: Boolean
+        skalLageSplitt: Boolean,
     ) {
         val behandling = lagBehandling()
         val barnFødselsdato = LocalDate.of(2019, 1, 1)
         val barn = lagPerson(type = PersonType.BARN, fødselsdato = barnFødselsdato)
         val søker = lagPerson(type = PersonType.SØKER)
         val vilkårsvurdering = Vilkårsvurdering(
-            behandling = behandling
+            behandling = behandling,
         )
 
         val førstePeriodeFomForBarnet = LocalDate.of(2020, 1, 1)
@@ -1064,23 +1068,27 @@ class BeregningServiceTest {
                 periodeFom = førstePeriodeFomForBarnet,
                 periodeTom = periodeTomForSøker,
                 lagFullstendigVilkårResultat = true,
-                personType = PersonType.SØKER
+                personType = PersonType.SØKER,
             )
         val personResultatBarn = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            aktør = barn.aktør
+            aktør = barn.aktør,
         )
 
-        val vilkårForBarn = Vilkår.hentVilkårFor(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL, behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR)
+        val vilkårForBarn = Vilkår.hentVilkårFor(
+            personType = PersonType.BARN,
+            fagsakType = FagsakType.NORMAL,
+            behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
+        )
         val vilkårResultaterBarn =
             vilkårForBarn.lagVilkårResultaterForPerson(
                 fom = førstePeriodeFomForBarnet,
                 tom = førstePeriodeTomForBarnet,
-                erDeltBosted = deltBostedForFørstePeriode
+                erDeltBosted = deltBostedForFørstePeriode,
             ) + vilkårForBarn.lagVilkårResultaterForPerson(
                 fom = andrePeriodeFomForBarnet,
                 tom = andrePeriodeTomForBarnet,
-                erDeltBosted = deltBostedForAndrePeriode
+                erDeltBosted = deltBostedForAndrePeriode,
             )
 
         personResultatBarn.setSortedVilkårResultater(vilkårResultaterBarn.toSet())
@@ -1090,7 +1098,7 @@ class BeregningServiceTest {
             behandlingId = behandling.id,
             søkerPersonIdent = søker.aktør.aktivFødselsnummer(),
             barnasIdenter = listOf(barn.aktør.aktivFødselsnummer()),
-            barnasFødselsdatoer = listOf(barnFødselsdato)
+            barnasFødselsdatoer = listOf(barnFødselsdato),
         )
         val slot = slot<TilkjentYtelse>()
 
@@ -1098,12 +1106,12 @@ class BeregningServiceTest {
         every { tilkjentYtelseRepository.save(any()) } returns lagInitiellTilkjentYtelse(behandling)
         every { søknadGrunnlagService.hentAktiv(any())?.hentSøknadDto() } returns lagSøknadDTO(
             søker.aktør.aktivFødselsnummer(),
-            listOf(barn.aktør.aktivFødselsnummer())
+            listOf(barn.aktør.aktivFødselsnummer()),
         )
 
         beregningService.oppdaterBehandlingMedBeregning(
             behandling = behandling,
-            personopplysningGrunnlag = personopplysningGrunnlag
+            personopplysningGrunnlag = personopplysningGrunnlag,
         )
 
         verify(exactly = 1) { tilkjentYtelseRepository.save(capture(slot)) }
@@ -1116,7 +1124,7 @@ class BeregningServiceTest {
         Assertions.assertEquals(førsteSatsendringFom.forrigeMåned(), andelerTilkjentYtelse[0].stønadTom)
         Assertions.assertEquals(
             if (deltBostedForFørstePeriode) 527 else 1054,
-            andelerTilkjentYtelse[0].kalkulertUtbetalingsbeløp
+            andelerTilkjentYtelse[0].kalkulertUtbetalingsbeløp,
         )
         if (skalLageSplitt) {
             // Andre periode (fra første satsendring til slutt av første godkjente perioderesultat for barnet)
@@ -1124,7 +1132,7 @@ class BeregningServiceTest {
             Assertions.assertEquals(forventetSluttForFørsteAndelsperiode, andelerTilkjentYtelse[1].stønadTom)
             Assertions.assertEquals(
                 if (deltBostedForFørstePeriode) 677 else 1354,
-                andelerTilkjentYtelse[1].kalkulertUtbetalingsbeløp
+                andelerTilkjentYtelse[1].kalkulertUtbetalingsbeløp,
             )
 
             // Tredje periode (fra start av andre godkjente perioderesultat for barnet til neste satsendring).
@@ -1133,14 +1141,14 @@ class BeregningServiceTest {
             Assertions.assertEquals(andreSatsendringFom.forrigeMåned(), andelerTilkjentYtelse[2].stønadTom)
             Assertions.assertEquals(
                 if (deltBostedForAndrePeriode) 677 else 1354,
-                andelerTilkjentYtelse[2].kalkulertUtbetalingsbeløp
+                andelerTilkjentYtelse[2].kalkulertUtbetalingsbeløp,
             )
         } else {
             Assertions.assertEquals(førsteSatsendringFom.toYearMonth(), andelerTilkjentYtelse[1].stønadFom)
             Assertions.assertEquals(andreSatsendringFom.forrigeMåned(), andelerTilkjentYtelse[1].stønadTom)
             Assertions.assertEquals(
                 if (deltBostedForFørstePeriode) 677 else 1354,
-                andelerTilkjentYtelse[1].kalkulertUtbetalingsbeløp
+                andelerTilkjentYtelse[1].kalkulertUtbetalingsbeløp,
             )
         }
 
@@ -1150,14 +1158,14 @@ class BeregningServiceTest {
         Assertions.assertEquals(andrePeriodeTomForBarnet.toYearMonth(), sisteAndel.stønadTom)
         Assertions.assertEquals(
             if (deltBostedForAndrePeriode) 827 else 1654,
-            sisteAndel.kalkulertUtbetalingsbeløp
+            sisteAndel.kalkulertUtbetalingsbeløp,
         )
     }
 
     private fun Set<Vilkår>.lagVilkårResultaterForPerson(
         fom: LocalDate,
         tom: LocalDate,
-        erDeltBosted: Boolean
+        erDeltBosted: Boolean,
     ): List<VilkårResultat> =
         this.map {
             lagVilkårResultat(
@@ -1168,8 +1176,8 @@ class BeregningServiceTest {
                     when {
                         erDeltBosted && it == Vilkår.BOR_MED_SØKER -> UtdypendeVilkårsvurdering.DELT_BOSTED
                         else -> null
-                    }
-                )
+                    },
+                ),
             )
         }
 
@@ -1184,7 +1192,7 @@ class BeregningServiceTest {
         utvidetFom: LocalDate,
         utvidetTom: LocalDate,
         barna: List<Person>,
-        søker: Person
+        søker: Person,
     ): List<AndelTilkjentYtelse> {
         val behandling = lagBehandling()
         val vilkårsvurdering =
@@ -1192,7 +1200,7 @@ class BeregningServiceTest {
 
         val søkerPersonResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            aktør = søker.aktør
+            aktør = søker.aktør,
         )
 
         søkerPersonResultat.setSortedVilkårResultater(
@@ -1204,7 +1212,7 @@ class BeregningServiceTest {
                     periodeFom = generellFom,
                     periodeTom = generellTom,
                     begrunnelse = "",
-                    behandlingId = behandling.id
+                    behandlingId = behandling.id,
                 ),
                 VilkårResultat(
                     personResultat = søkerPersonResultat,
@@ -1213,7 +1221,7 @@ class BeregningServiceTest {
                     periodeFom = generellFom,
                     periodeTom = generellTom,
                     begrunnelse = "",
-                    behandlingId = behandling.id
+                    behandlingId = behandling.id,
                 ),
                 VilkårResultat(
                     personResultat = søkerPersonResultat,
@@ -1222,15 +1230,15 @@ class BeregningServiceTest {
                     periodeFom = utvidetFom,
                     periodeTom = utvidetTom,
                     begrunnelse = "",
-                    behandlingId = behandling.id
-                )
-            )
+                    behandlingId = behandling.id,
+                ),
+            ),
         )
 
         val personResultatBarna = barna.map { barn ->
             val barnPersonResultat = PersonResultat(
                 vilkårsvurdering = vilkårsvurdering,
-                aktør = barn.aktør
+                aktør = barn.aktør,
             )
 
             barnPersonResultat.setSortedVilkårResultater(
@@ -1242,7 +1250,7 @@ class BeregningServiceTest {
                         periodeFom = generellFom,
                         periodeTom = generellTom,
                         begrunnelse = "",
-                        behandlingId = behandling.id
+                        behandlingId = behandling.id,
                     ),
                     VilkårResultat(
                         personResultat = barnPersonResultat,
@@ -1251,7 +1259,7 @@ class BeregningServiceTest {
                         periodeFom = generellFom,
                         periodeTom = generellTom,
                         begrunnelse = "",
-                        behandlingId = behandling.id
+                        behandlingId = behandling.id,
                     ),
                     VilkårResultat(
                         personResultat = barnPersonResultat,
@@ -1263,11 +1271,11 @@ class BeregningServiceTest {
                         behandlingId = behandling.id,
                         utdypendeVilkårsvurderinger = if (endretUtbetalingÅrsak == Årsak.DELT_BOSTED) {
                             listOf(
-                                UtdypendeVilkårsvurdering.DELT_BOSTED
+                                UtdypendeVilkårsvurdering.DELT_BOSTED,
                             )
                         } else {
                             emptyList()
-                        }
+                        },
                     ),
                     VilkårResultat(
                         personResultat = barnPersonResultat,
@@ -1276,7 +1284,7 @@ class BeregningServiceTest {
                         periodeFom = generellFom,
                         periodeTom = generellTom,
                         begrunnelse = "",
-                        behandlingId = behandling.id
+                        behandlingId = behandling.id,
                     ),
                     VilkårResultat(
                         personResultat = barnPersonResultat,
@@ -1285,9 +1293,9 @@ class BeregningServiceTest {
                         periodeFom = barn.fødselsdato,
                         periodeTom = barn.fødselsdato.plusYears(18),
                         begrunnelse = "",
-                        behandlingId = behandling.id
-                    )
-                )
+                        behandlingId = behandling.id,
+                    ),
+                ),
             )
             barnPersonResultat
         }
@@ -1304,37 +1312,38 @@ class BeregningServiceTest {
                 prosent = endretUtbetalingProsent,
                 avtaletidspunktDeltBosted = LocalDate.now().minusMonths(1),
                 søknadstidspunkt = LocalDate.now(),
-                begrunnelse = "Dette er en begrunnelse"
+                begrunnelse = "Dette er en begrunnelse",
             )
 
         val personopplysningGrunnlag = PersonopplysningGrunnlag(
             behandlingId = behandling.id,
-            personer = (barna + søker).toMutableSet()
+            personer = (barna + søker).toMutableSet(),
         )
 
         val slot = slot<TilkjentYtelse>()
 
         every { endretUtbetalingAndelRepository.findByBehandlingId(behandlingId = behandling.id) } answers {
             listOf(
-                endretUtbetalingAndel
+                endretUtbetalingAndel,
             )
         }
         every { vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId = behandling.id) } answers { vilkårsvurdering }
         every { tilkjentYtelseRepository.save(any()) } returns lagInitiellTilkjentYtelse(behandling)
-        every { småbarnstilleggService.hentOgLagrePerioderMedFullOvergangsstønad(any(), any()) } answers {
+        every { småbarnstilleggService.hentOgLagrePerioderMedOvergangsstønadForBehandling(any(), any()) } just Runs
+        every { småbarnstilleggService.hentPerioderMedFullOvergangsstønad(any()) } answers {
             listOf(
                 InternPeriodeOvergangsstønad(
                     personIdent = søker.aktør.aktivFødselsnummer(),
                     fomDato = utvidetFom,
-                    tomDato = utvidetTom
-                )
+                    tomDato = utvidetTom,
+                ),
             )
         }
 
         beregningService.oppdaterBehandlingMedBeregning(
             behandling = behandling,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            nyEndretUtbetalingAndel = endretUtbetalingAndel
+            nyEndretUtbetalingAndel = endretUtbetalingAndel,
         )
         verify(exactly = 1) { tilkjentYtelseRepository.save(capture(slot)) }
         return slot.captured.andelerTilkjentYtelse.sortedBy { it.stønadTom }

@@ -26,7 +26,7 @@ data class Vilkårsvurdering(
     @SequenceGenerator(
         name = "vilkaarsvurdering_seq_generator",
         sequenceName = "vilkaarsvurdering_seq",
-        allocationSize = 50
+        allocationSize = 50,
     )
     val id: Long = 0,
 
@@ -40,12 +40,12 @@ data class Vilkårsvurdering(
     @OneToMany(
         fetch = FetchType.EAGER,
         mappedBy = "vilkårsvurdering",
-        cascade = [CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH]
+        cascade = [CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH],
     )
     var personResultater: Set<PersonResultat> = setOf(),
 
     @Column(name = "ytelse_personer", columnDefinition = "text")
-    var ytelsePersoner: String? = null
+    var ytelsePersoner: String? = null,
 
 ) : BaseEntitet() {
 
@@ -56,15 +56,25 @@ data class Vilkårsvurdering(
     fun kopier(inkluderAndreVurderinger: Boolean = false): Vilkårsvurdering {
         val nyVilkårsvurdering = Vilkårsvurdering(
             behandling = behandling,
-            aktiv = aktiv
+            aktiv = aktiv,
         )
 
         nyVilkårsvurdering.personResultater = personResultater.map {
             it.kopierMedParent(
                 vilkårsvurdering = nyVilkårsvurdering,
-                inkluderAndreVurderinger = inkluderAndreVurderinger
+                inkluderAndreVurderinger = inkluderAndreVurderinger,
             )
         }.toSet()
+        return nyVilkårsvurdering
+    }
+
+    fun tilKopiForNyBehandling(nyBehandling: Behandling): Vilkårsvurdering {
+        val nyVilkårsvurdering = Vilkårsvurdering(behandling = nyBehandling)
+
+        nyVilkårsvurdering.personResultater = personResultater.map {
+            it.tilKopiForNyVilkårsvurdering(nyVilkårsvurdering = nyVilkårsvurdering)
+        }.toSet()
+
         return nyVilkårsvurdering
     }
 

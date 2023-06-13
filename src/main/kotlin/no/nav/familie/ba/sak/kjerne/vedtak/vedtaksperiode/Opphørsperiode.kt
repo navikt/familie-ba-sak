@@ -29,14 +29,14 @@ import java.time.LocalDate
 data class Opphørsperiode(
     override val periodeFom: LocalDate,
     override val periodeTom: LocalDate?,
-    override val vedtaksperiodetype: Vedtaksperiodetype = Vedtaksperiodetype.OPPHØR
+    override val vedtaksperiodetype: Vedtaksperiodetype = Vedtaksperiodetype.OPPHØR,
 ) : Vedtaksperiode
 
 fun mapTilOpphørsperioder(
     forrigePersonopplysningGrunnlag: PersonopplysningGrunnlag? = null,
     forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger> = emptyList(),
     personopplysningGrunnlag: PersonopplysningGrunnlag,
-    andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
+    andelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
 ): List<Opphørsperiode> {
     val forrigeUtbetalingsperioder = if (forrigePersonopplysningGrunnlag != null) {
         forrigeAndelerTilkjentYtelse.mapTilUtbetalingsperioder(forrigePersonopplysningGrunnlag)
@@ -49,16 +49,16 @@ fun mapTilOpphørsperioder(
     return listOf(
         finnOpphørsperioderPåGrunnAvReduksjonIRevurdering(
             forrigeUtbetalingsperioder = forrigeUtbetalingsperioder,
-            utbetalingsperioder = utbetalingsperioder
+            utbetalingsperioder = utbetalingsperioder,
         ),
         finnOpphørsperioderMellomUtbetalingsperioder(utbetalingsperioder),
-        finnOpphørsperiodeEtterSisteUtbetalingsperiode(utbetalingsperioder)
+        finnOpphørsperiodeEtterSisteUtbetalingsperiode(utbetalingsperioder),
     ).flatten().sortedBy { it.periodeFom }
 }
 
 private fun finnOpphørsperioderPåGrunnAvReduksjonIRevurdering(
     forrigeUtbetalingsperioder: List<Utbetalingsperiode>,
-    utbetalingsperioder: List<Utbetalingsperiode>
+    utbetalingsperioder: List<Utbetalingsperiode>,
 ): List<Opphørsperiode> {
     val erUtbetalingOpphørtTidslinje = forrigeUtbetalingsperioder
         .tilTidslinje()
@@ -72,7 +72,7 @@ private fun finnOpphørsperioderPåGrunnAvReduksjonIRevurdering(
                 Opphørsperiode(
                     periodeFom = erUtbetalingOpphørtPeriode.fraOgMed.tilDagEllerFørsteDagIPerioden().tilLocalDate(),
                     periodeTom = erUtbetalingOpphørtPeriode.tilOgMed.tilDagEllerSisteDagIPerioden().tilLocalDate(),
-                    vedtaksperiodetype = Vedtaksperiodetype.OPPHØR
+                    vedtaksperiodetype = Vedtaksperiodetype.OPPHØR,
                 )
             } else {
                 null
@@ -80,8 +80,7 @@ private fun finnOpphørsperioderPåGrunnAvReduksjonIRevurdering(
         }
 }
 
-fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.tilKombinertTidslinjePerAktørOgType():
-    Tidslinje<Collection<AndelTilkjentYtelseMedEndreteUtbetalinger>, Måned> {
+fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.tilKombinertTidslinjePerAktørOgType(): Tidslinje<Collection<AndelTilkjentYtelseMedEndreteUtbetalinger>, Måned> {
     val andelTilkjentYtelsePerPersonOgType = groupBy { Pair(it.aktør, it.type) }
 
     val andelTilkjentYtelsePerPersonOgTypeTidslinjer =
@@ -96,7 +95,7 @@ fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.tilTidslinje(): Tidslinje<An
         Periode(
             fraOgMed = it.stønadFom.tilTidspunkt(),
             tilOgMed = it.stønadTom.tilTidspunkt(),
-            innhold = it
+            innhold = it,
         )
     }.tilTidslinje()
 
@@ -105,7 +104,7 @@ private fun List<Utbetalingsperiode>.tilTidslinje() =
         Periode(
             fraOgMed = it.periodeFom.tilMånedTidspunkt(),
             tilOgMed = it.periodeTom.tilMånedTidspunkt(),
-            innhold = it
+            innhold = it,
         )
     }.tilTidslinje()
 
@@ -116,7 +115,7 @@ private fun finnOpphørsperioderMellomUtbetalingsperioder(utbetalingsperioder: L
             Opphørsperiode(
                 periodeFom = it.fraOgMed.tilLocalDate(),
                 periodeTom = it.tilOgMed.tilLocalDate(),
-                vedtaksperiodetype = Vedtaksperiodetype.OPPHØR
+                vedtaksperiodetype = Vedtaksperiodetype.OPPHØR,
             )
         }
 
@@ -136,8 +135,8 @@ private fun finnOpphørsperiodeEtterSisteUtbetalingsperiode(utbetalingsperioder:
             Opphørsperiode(
                 periodeFom = sisteUtbetalingsperiodeTom.nesteMåned().førsteDagIInneværendeMåned(),
                 periodeTom = null,
-                vedtaksperiodetype = Vedtaksperiodetype.OPPHØR
-            )
+                vedtaksperiodetype = Vedtaksperiodetype.OPPHØR,
+            ),
         )
     } else {
         emptyList()
@@ -151,8 +150,8 @@ fun slåSammenOpphørsperioder(alleOpphørsperioder: List<Opphørsperiode>): Lis
 
     return sortertOpphørsperioder.fold(
         mutableListOf(
-            sortertOpphørsperioder.first()
-        )
+            sortertOpphørsperioder.first(),
+        ),
     ) { acc: MutableList<Opphørsperiode>, nesteOpphørsperiode: Opphørsperiode ->
         val forrigeOpphørsperiode = acc.last()
         when {
@@ -161,8 +160,8 @@ fun slåSammenOpphørsperioder(alleOpphørsperioder: List<Opphørsperiode>): Lis
                     forrigeOpphørsperiode.copy(
                         periodeTom = maxOfOpphørsperiodeTom(
                             forrigeOpphørsperiode.periodeTom,
-                            nesteOpphørsperiode.periodeTom
-                        )
+                            nesteOpphørsperiode.periodeTom,
+                        ),
                     )
             }
 

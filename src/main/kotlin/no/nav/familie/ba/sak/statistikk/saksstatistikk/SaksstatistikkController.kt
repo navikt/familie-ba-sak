@@ -22,7 +22,7 @@ import java.time.LocalDateTime
 @ProtectedWithClaims(issuer = "azuread")
 class SaksstatistikkController(
     private val saksstatistikkService: SaksstatistikkService,
-    private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository
+    private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
 ) {
 
     private val logger = LoggerFactory.getLogger(SaksstatistikkController::class.java)
@@ -48,7 +48,7 @@ class SaksstatistikkController(
     }
 
     @Operation(
-        description = "Oppdaterer saksstatistikk mellomlagring om at en melding har blitt sendt. Setter sendtTidspunkt slik at melding ikke blir sendt på nytt."
+        description = "Oppdaterer saksstatistikk mellomlagring om at en melding har blitt sendt. Setter sendtTidspunkt slik at melding ikke blir sendt på nytt.",
     )
     @PostMapping(path = ["/registrer-sendt-fra-statistikk"])
     fun registrerSendtFraStatistikk(@RequestBody(required = true) input: SaksstatistikkSendtRequest): ResponseEntity<SaksstatistikkMellomlagring> {
@@ -69,7 +69,7 @@ class SaksstatistikkController(
                 json = input.json,
                 typeId = typeId,
                 kontraktVersjon = kontraktversjon,
-                sendtTidspunkt = input.sendtTidspunkt
+                sendtTidspunkt = input.sendtTidspunkt,
             )
 
             saksstatistikkMellomlagringRepository.saveAndFlush(sm)
@@ -84,6 +84,6 @@ class SaksstatistikkController(
         val offset: Long,
         val type: SaksstatistikkMellomlagringType,
         val json: String,
-        val sendtTidspunkt: LocalDateTime
+        val sendtTidspunkt: LocalDateTime,
     )
 }

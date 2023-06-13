@@ -280,6 +280,9 @@ Kjør så:
 * 'Token familie-ba-sak-frontend -> familie-ba-sak', for å få token
 * 'GET kompetanse' (f.eks) for å gjøre det du VIL gjøre
 
+## Les også
+* [vilkårsperiodeProdusent - README](src%2Fmain%2Fkotlin%2Fno%2Fnav%2Ffamilie%2Fba%2Fsak%2Fkjerne%2Fvedtak%2Fvedtaksperiode%2Fprodusent%2FREADME.md)
+
 ## Kontaktinformasjon
 
 For NAV-interne kan henvendelser om applikasjonen rettes til #team-familie på slack. Ellers kan man opprette et issue

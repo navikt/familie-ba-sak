@@ -23,8 +23,8 @@ class RestartAvSmåbarnstilleggServiceTest {
             vedtakService = mockk(),
             vedtaksperiodeService = mockk(),
             behandlingMigreringsinfoRepository = behandlingMigreringsinfoRepository,
-            andelerTilkjentYtelseRepository = mockk()
-        )
+            andelerTilkjentYtelseRepository = mockk(),
+        ),
     )
 
     @Test
@@ -45,7 +45,7 @@ class RestartAvSmåbarnstilleggServiceTest {
 
         Assertions.assertEquals(
             listOf(0L, 2L),
-            restartAvSmåbarnstilleggService.finnAlleFagsakerMedRestartetSmåbarnstilleggIMåned()
+            restartAvSmåbarnstilleggService.finnAlleFagsakerMedRestartetSmåbarnstilleggIMåned(),
         )
     }
 }

@@ -31,7 +31,7 @@ internal class MapTidslinjeTest {
             Periode(apr(2020), jun(2020), null),
             Periode(jul(2020), aug(2020), "B"),
             Periode(mar(2021), okt(2021), "C"),
-            Periode(jan(2022), mai(2022), null)
+            Periode(jan(2022), mai(2022), null),
         )
     }
 
@@ -46,7 +46,7 @@ internal class MapTidslinjeTest {
                 Periode(apr(2020), jun(2020), null),
                 Periode(jul(2020), aug(2020), "b"),
                 Periode(mar(2021), okt(2021), "c"),
-                Periode(jan(2022), mai(2022), null)
+                Periode(jan(2022), mai(2022), null),
             )
         }
 
@@ -63,7 +63,7 @@ internal class MapTidslinjeTest {
             listOf(
                 Periode(jan(2020), mar(2020), "a"),
                 Periode(jul(2020), aug(2020), "b"),
-                Periode(mar(2021), okt(2021), "c")
+                Periode(mar(2021), okt(2021), "c"),
             )
         }
 

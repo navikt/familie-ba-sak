@@ -23,5 +23,5 @@ class SaksstatistikkEventPublisher {
 class SaksstatistikkEvent(
     source: Any,
     val fagsakId: Long?,
-    val behandlingId: Long?
+    val behandlingId: Long?,
 ) : ApplicationEvent(source)

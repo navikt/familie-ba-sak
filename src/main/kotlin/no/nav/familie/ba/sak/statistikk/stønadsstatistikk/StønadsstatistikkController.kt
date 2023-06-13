@@ -24,7 +24,7 @@ class StønadsstatistikkController(
     private val taskRepository: TaskRepositoryWrapper,
     private val behandlingRepository: BehandlingRepository,
     private val statistikkClient: StatistikkClient,
-    private val tilkjentYtelseRepository: TilkjentYtelseRepository
+    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
 ) {
 
     private val logger = LoggerFactory.getLogger(StønadsstatistikkController::class.java)
@@ -64,8 +64,8 @@ class StønadsstatistikkController(
         val manuelleMigreringer = behandlingRepository.finnBehandlingIdMedOpprettetÅrsak(
             listOf(
                 BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
-                BehandlingÅrsak.HELMANUELL_MIGRERING
-            )
+                BehandlingÅrsak.HELMANUELL_MIGRERING,
+            ),
         )
 
         manuelleMigreringer.forEach {

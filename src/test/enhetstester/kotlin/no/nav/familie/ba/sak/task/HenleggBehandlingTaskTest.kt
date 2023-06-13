@@ -29,7 +29,7 @@ internal class HenleggBehandlingTaskTest {
         arbeidsfordelingService = mockk(relaxed = true),
         behandlingHentOgPersisterService = behandlingHentOgPersisterService,
         stegService = stegService,
-        oppgaveService = oppgaveService
+        oppgaveService = oppgaveService,
     )
 
     @Test
@@ -66,7 +66,7 @@ internal class HenleggBehandlingTaskTest {
         every { oppgaveService.hentOppgaverSomIkkeErFerdigstilt(any(), any()) } returns
             listOf(DbOppgave(behandling = behandling, gsakId = "1", type = Oppgavetype.BehandleSak))
         every { oppgaveService.hentOppgave(any()) } returns lagTestOppgaveDTO(1, Oppgavetype.BehandleSak).copy(
-            fristFerdigstillelse = LocalDate.of(2023, 4, 2).toString()
+            fristFerdigstillelse = LocalDate.of(2023, 4, 2).toString(),
         )
 
         val task = opprettTekniskHenleggelseGrunnetSatsendringTask()
@@ -89,9 +89,9 @@ internal class HenleggBehandlingTaskTest {
                     behandlingId = 1,
                     årsak = HenleggÅrsak.TEKNISK_VEDLIKEHOLD,
                     begrunnelse = "Satsendring",
-                    validerOppgavefristErEtterDato = LocalDate.of(2023, 4, 1)
-                )
-            )
+                    validerOppgavefristErEtterDato = LocalDate.of(2023, 4, 1),
+                ),
+            ),
         )
     }
 }

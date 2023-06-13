@@ -20,7 +20,7 @@ internal class TidslinjeTest {
     fun `skal validere at perioder ikke kan ha fra-og-med etter til-og-med`() {
         assertThrows<TidslinjeFeilException> {
             TestTidslinje(
-                Periode(15.jan(2020), 14.jan(2020), 'A')
+                Periode(15.jan(2020), 14.jan(2020), 'A'),
             ).perioder()
         }
     }
@@ -30,7 +30,7 @@ internal class TidslinjeTest {
         assertThrows<TidslinjeFeilException> {
             TestTidslinje(
                 Periode(1.jan(2020), 31.mar(2020), 'A'),
-                Periode(31.mar(2020), 31.mai(2020), 'B')
+                Periode(31.mar(2020), 31.mai(2020), 'B'),
             ).perioder()
         }
     }
@@ -40,7 +40,7 @@ internal class TidslinjeTest {
         assertThrows<TidslinjeFeilException> {
             TestTidslinje(
                 Periode(1.jan(2020), 31.mai(2020), 'A'),
-                Periode(1.mar(2020), 30.apr(2020), 'B')
+                Periode(1.mar(2020), 30.apr(2020), 'B'),
             ).perioder()
         }
     }
@@ -49,14 +49,14 @@ internal class TidslinjeTest {
     fun `skal validere at uendelig i begge ender av tidslinjen er lov`() {
         assertDoesNotThrow {
             TestTidslinje(
-                Periode(1.jan(2020).somUendeligLengeSiden(), 1.jan(2020).somUendeligLengeTil(), 'A')
+                Periode(1.jan(2020).somUendeligLengeSiden(), 1.jan(2020).somUendeligLengeTil(), 'A'),
             ).perioder()
         }
 
         assertDoesNotThrow {
             TestTidslinje(
                 Periode(1.jan(2020).somUendeligLengeSiden(), 29.feb(2020), 'A'),
-                Periode(1.mar(2020), 30.apr(2020).somUendeligLengeTil(), 'B')
+                Periode(1.mar(2020), 30.apr(2020).somUendeligLengeTil(), 'B'),
             ).perioder()
         }
     }
@@ -67,7 +67,7 @@ internal class TidslinjeTest {
             TestTidslinje(
                 Periode(1.jan(2020), 31.jan(2020), 'A'),
                 Periode(1.feb(2020).somUendeligLengeSiden(), 29.feb(2020), 'A'),
-                Periode(1.mar(2020), 30.apr(2020), 'B')
+                Periode(1.mar(2020), 30.apr(2020), 'B'),
             ).perioder()
         }
 
@@ -75,7 +75,7 @@ internal class TidslinjeTest {
             TestTidslinje(
                 Periode(1.jan(2020), 31.jan(2020), 'A'),
                 Periode(1.feb(2020), 29.feb(2020).somUendeligLengeTil(), 'A'),
-                Periode(1.mar(2020), 30.apr(2020), 'B')
+                Periode(1.mar(2020), 30.apr(2020), 'B'),
             ).perioder()
         }
     }
@@ -86,13 +86,13 @@ internal class TidslinjeTest {
             TestTidslinje(
                 Periode(1.jan(2020), 31.jan(2020), 'A'),
                 Periode(1.feb(2020), 29.feb(2020).somUendeligLengeTil(), 'A'),
-                Periode(1.mar(2020), 30.apr(2020), 'B')
+                Periode(1.mar(2020), 30.apr(2020), 'B'),
             ).perioder()
         }
 
         Assertions.assertEquals(
             "[TidslinjeFeil(type=UENDELIG_FREMTID_FØR_SISTE_PERIODE, periode=2020-02-01 - 2020-02-29-->: A, tidslinje=2020-01-01 - 2020-01-31: A | 2020-02-01 - 2020-02-29-->: A | 2020-03-01 - 2020-04-30: B)]",
-            tidslinjeFeil.message
+            tidslinjeFeil.message,
         )
     }
 }

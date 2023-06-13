@@ -14,7 +14,7 @@ data class Evaluering(
     val evalueringÅrsaker: List<EvalueringÅrsak>,
     val begrunnelse: String,
     val beskrivelse: String = "",
-    val identifikator: String = ""
+    val identifikator: String = "",
 ) {
 
     companion object {
@@ -22,19 +22,19 @@ data class Evaluering(
         fun oppfylt(evalueringÅrsak: EvalueringÅrsak) = Evaluering(
             Resultat.OPPFYLT,
             listOf(evalueringÅrsak),
-            evalueringÅrsak.hentBeskrivelse()
+            evalueringÅrsak.hentBeskrivelse(),
         )
 
         fun ikkeOppfylt(evalueringÅrsak: EvalueringÅrsak) = Evaluering(
             Resultat.IKKE_OPPFYLT,
             listOf(evalueringÅrsak),
-            evalueringÅrsak.hentBeskrivelse()
+            evalueringÅrsak.hentBeskrivelse(),
         )
 
         fun ikkeVurdert(evalueringÅrsak: EvalueringÅrsak) = Evaluering(
             Resultat.IKKE_VURDERT,
             listOf(evalueringÅrsak),
-            evalueringÅrsak.hentBeskrivelse()
+            evalueringÅrsak.hentBeskrivelse(),
         )
     }
 }
@@ -42,7 +42,7 @@ data class Evaluering(
 enum class Resultat {
     OPPFYLT,
     IKKE_OPPFYLT,
-    IKKE_VURDERT;
+    IKKE_VURDERT,
 }
 
 fun List<Evaluering>.erOppfylt() = this.all { it.resultat == Resultat.OPPFYLT }

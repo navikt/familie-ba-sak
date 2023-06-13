@@ -31,7 +31,7 @@ data class Verge(
     @JoinColumn(
         name = "fk_behandling_id",
         nullable = false,
-        updatable = false
+        updatable = false,
     )
-    val behandling: Behandling
+    val behandling: Behandling,
 ) : BaseEntitet()

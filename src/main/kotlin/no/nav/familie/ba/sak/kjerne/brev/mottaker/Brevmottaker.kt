@@ -46,7 +46,7 @@ data class Brevmottaker(
     var poststed: String,
 
     @Column(name = "landkode", nullable = false, length = 2)
-    var landkode: String
+    var landkode: String,
 ) : BaseEntitet() {
 
     override fun equals(other: Any?): Boolean {
@@ -71,5 +71,5 @@ enum class MottakerType(val visningsnavn: String) {
     BRUKER_MED_UTENLANDSK_ADRESSE("Bruker med utenlandsk adresse"),
     FULLMEKTIG("Fullmektig"),
     VERGE("Verge"),
-    DØDSBO("Dødsbo")
+    DØDSBO("Dødsbo"),
 }

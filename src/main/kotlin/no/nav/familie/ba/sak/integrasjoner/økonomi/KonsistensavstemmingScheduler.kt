@@ -24,7 +24,7 @@ class KonsistensavstemmingScheduler(
     val behandlingService: BehandlingService,
     val fagsakService: FagsakService,
     val taskRepository: TaskRepositoryWrapper,
-    val featureToggleService: FeatureToggleService
+    val featureToggleService: FeatureToggleService,
 ) {
 
     @Scheduled(cron = "0 0 22 * * *")
@@ -43,13 +43,13 @@ class KonsistensavstemmingScheduler(
                     KonsistensavstemmingStartTaskDTO(
                         batchId = plukketBatch.id,
                         avstemmingdato = LocalDateTime.now(),
-                        transaksjonsId = transaksjonsId
-                    )
+                        transaksjonsId = transaksjonsId,
+                    ),
                 ),
                 properties = Properties().apply {
                     this["transaksjonsId"] = transaksjonsId.toString()
-                }
-            )
+                },
+            ),
         )
 
         batchService.lagreNyStatus(plukketBatch, KjøreStatus.TATT)
@@ -65,5 +65,5 @@ enum class KjøreStatus {
     FERDIG,
     TATT,
     LEDIG,
-    MANUELL
+    MANUELL,
 }

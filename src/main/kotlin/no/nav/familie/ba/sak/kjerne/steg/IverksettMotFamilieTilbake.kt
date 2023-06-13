@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service
 import java.util.Properties
 
 data class IverksettMotFamilieTilbakeData(
-    val metadata: Properties
+    val metadata: Properties,
 )
 
 @Service
@@ -22,12 +22,12 @@ class IverksettMotFamilieTilbake(
     private val vedtakService: VedtakService,
     private val tilbakekrevingService: TilbakekrevingService,
     private val taskRepository: TaskRepositoryWrapper,
-    private val tilbakekrevingRepository: TilbakekrevingRepository
+    private val tilbakekrevingRepository: TilbakekrevingRepository,
 ) : BehandlingSteg<IverksettMotFamilieTilbakeData> {
 
     override fun utførStegOgAngiNeste(behandling: Behandling, data: IverksettMotFamilieTilbakeData): StegType {
         val vedtak = vedtakService.hentAktivForBehandling(behandling.id) ?: throw Feil(
-            "Fant ikke vedtak for behandling ${behandling.id} ved iverksetting mot familie-tilbake."
+            "Fant ikke vedtak for behandling ${behandling.id} ved iverksetting mot familie-tilbake.",
         )
 
         val tilbakekreving = tilbakekrevingRepository.findByBehandlingId(behandling.id)
@@ -56,7 +56,7 @@ class IverksettMotFamilieTilbake(
         val task = Task(
             type = JournalførVedtaksbrevTask.TASK_STEP_TYPE,
             payload = "$vedtakId",
-            properties = metadata
+            properties = metadata,
         )
         taskRepository.save(task)
     }

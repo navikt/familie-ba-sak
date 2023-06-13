@@ -38,7 +38,7 @@ private fun <T : PeriodeOgBarnSkjema<T>> T.leggSammenBarn(kompetanse: T) =
     this.kopier(
         fom = this.fom,
         tom = this.tom,
-        barnAktører = this.barnAktører + kompetanse.barnAktører
+        barnAktører = this.barnAktører + kompetanse.barnAktører,
     )
 
 fun <T : PeriodeOgBarnSkjema<T>> Iterable<T>?.settFomOgTom(periode: Periode<*, Måned>) =
@@ -48,5 +48,5 @@ fun <T : PeriodeOgBarnSkjema<T>> T.settFomOgTom(periode: Periode<*, Måned>) =
     this.kopier(
         fom = periode.fraOgMed.tilYearMonthEllerNull(),
         tom = periode.tilOgMed.tilYearMonthEllerNull(),
-        barnAktører = this.barnAktører
+        barnAktører = this.barnAktører,
     )

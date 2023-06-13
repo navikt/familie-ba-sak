@@ -29,7 +29,7 @@ class BehandlingsresultatService(
     private val vilkårsvurderingService: VilkårsvurderingService,
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
-    private val kompetanseService: KompetanseService
+    private val kompetanseService: KompetanseService,
 ) {
 
     internal fun finnPersonerFremstiltKravFor(behandling: Behandling, søknadDTO: SøknadDTO?, forrigeBehandling: Behandling?): List<Aktør> {
@@ -74,7 +74,7 @@ class BehandlingsresultatService(
         val personerFremstiltKravFor = finnPersonerFremstiltKravFor(
             behandling = behandling,
             søknadDTO = søknadDTO,
-            forrigeBehandling = forrigeBehandling
+            forrigeBehandling = forrigeBehandling,
         )
 
         BehandlingsresultatValideringUtils.validerAtBarePersonerFremstiltKravForEllerSøkerHarFåttEksplisittAvslag(personerFremstiltKravFor = personerFremstiltKravFor, personResultater = vilkårsvurdering.personResultater)
@@ -88,7 +88,7 @@ class BehandlingsresultatService(
                 personerFremstiltKravFor = personerFremstiltKravFor,
                 nåværendePersonResultater = vilkårsvurdering.personResultater,
                 behandlingÅrsak = behandling.opprettetÅrsak,
-                finnesUregistrerteBarn = søknadGrunnlag?.hentUregistrerteBarn()?.isNotEmpty() ?: false
+                finnesUregistrerteBarn = søknadGrunnlag?.hentUregistrerteBarn()?.isNotEmpty() ?: false,
             )
         } else {
             null
@@ -109,7 +109,7 @@ class BehandlingsresultatService(
                 forrigePersonResultat = forrigeVilkårsvurdering.personResultater,
                 nåværendeKompetanser = kompetanser.toList(),
                 forrigeKompetanser = forrigeKompetanser.toList(),
-                personerFremstiltKravFor = personerFremstiltKravFor
+                personerFremstiltKravFor = personerFremstiltKravFor,
             )
         } else {
             Endringsresultat.INGEN_ENDRING
@@ -120,7 +120,7 @@ class BehandlingsresultatService(
             nåværendeAndeler = andelerTilkjentYtelse,
             forrigeAndeler = forrigeAndelerTilkjentYtelse,
             nåværendeEndretAndeler = endretUtbetalingAndeler,
-            forrigeEndretAndeler = forrigeEndretUtbetalingAndeler
+            forrigeEndretAndeler = forrigeEndretUtbetalingAndeler,
         )
 
         // KOMBINER

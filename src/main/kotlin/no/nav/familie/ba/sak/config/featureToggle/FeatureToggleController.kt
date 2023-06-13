@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController
 @ProtectedWithClaims(issuer = "azuread")
 @Validated
 class FeatureToggleController(
-    private val featureToggleService: FeatureToggleService
+    private val featureToggleService: FeatureToggleService,
 ) {
 
     @PostMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -26,7 +26,7 @@ class FeatureToggleController(
             toggles.fold(mutableMapOf()) { acc, toggleId ->
                 acc[toggleId] = featureToggleService.isEnabled(toggleId)
                 acc
-            }
+            },
         )
     }
 }

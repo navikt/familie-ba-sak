@@ -14,7 +14,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.util.tilCharTidslinje
 
 abstract class SkjemaBuilder<S, B>(
     private val startMåned: Tidspunkt<Måned> = jan(2020),
-    private val behandlingId: BehandlingId
+    private val behandlingId: BehandlingId,
 ) where S : PeriodeOgBarnSkjemaEntitet<S>, B : SkjemaBuilder<S, B> {
     private val skjemaer: MutableList<S> = mutableListOf()
 
@@ -29,7 +29,7 @@ abstract class SkjemaBuilder<S, B>(
                 it.innhold!!.kopier(
                     fom = it.fraOgMed.tilYearMonthEllerNull(),
                     tom = it.tilOgMed.tilYearMonthEllerNull(),
-                    barnAktører = barn.map { person -> person.aktør }.toSet()
+                    barnAktører = barn.map { person -> person.aktør }.toSet(),
                 )
             }
             .all { skjemaer.add(it) }

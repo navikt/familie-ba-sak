@@ -34,7 +34,7 @@ class FiltreringsreglerService(
     private val localDateService: LocalDateService,
     private val fødselshendelsefiltreringResultatRepository: FødselshendelsefiltreringResultatRepository,
     private val behandlingService: BehandlingService,
-    private val tilkjentYtelseValideringService: TilkjentYtelseValideringService
+    private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
 ) {
 
     val filtreringsreglerMetrics = mutableMapOf<String, Counter>()
@@ -49,14 +49,14 @@ class FiltreringsreglerService(
                         "beskrivelse",
                         it.name,
                         "resultat",
-                        resultat.name
+                        resultat.name,
                     )
 
                 filtreringsreglerFørsteUtfallMetrics[it.name] =
                     Metrics.counter(
                         "familie.ba.sak.filtreringsregler.foersteutfall",
                         "beskrivelse",
-                        it.name
+                        it.name,
                     )
             }
         }
@@ -65,7 +65,7 @@ class FiltreringsreglerService(
     fun lagreFiltreringsregler(
         evalueringer: List<Evaluering>,
         behandlingId: Long,
-        fakta: FiltreringsreglerFakta
+        fakta: FiltreringsreglerFakta,
     ): List<FødselshendelsefiltreringResultat> {
         return fødselshendelsefiltreringResultatRepository.saveAll(
             evalueringer.map {
@@ -75,9 +75,9 @@ class FiltreringsreglerService(
                     resultat = it.resultat,
                     begrunnelse = it.begrunnelse,
                     evalueringsårsaker = it.evalueringÅrsaker.map { evalueringÅrsak -> evalueringÅrsak.toString() },
-                    regelInput = fakta.convertDataClassToJson()
+                    regelInput = fakta.convertDataClassToJson(),
                 )
-            }
+            },
         )
     }
 
@@ -87,7 +87,7 @@ class FiltreringsreglerService(
 
     fun kjørFiltreringsregler(
         nyBehandlingHendelse: NyBehandlingHendelse,
-        behandling: Behandling
+        behandling: Behandling,
     ): List<FødselshendelsefiltreringResultat> {
         val morsAktørId = personidentService.hentAktør(nyBehandlingHendelse.morsIdent)
         val barnasAktørId = personidentService.hentAktørIder(nyBehandlingHendelse.barnasIdenter)
@@ -110,12 +110,12 @@ class FiltreringsreglerService(
             dagensDato = localDateService.now(),
             erFagsakenMigrertEtterBarnFødt = erSakenMigrertEtterBarnFødt(
                 barnaFraHendelse,
-                migreringsdatoPåFagsak
+                migreringsdatoPåFagsak,
             ),
             løperBarnetrygdForBarnetPåAnnenForelder = tilkjentYtelseValideringService.barnetrygdLøperForAnnenForelder(
                 behandling = behandling,
-                barna = barnaFraHendelse
-            )
+                barna = barnaFraHendelse,
+            ),
         )
         val evalueringer = evaluerFiltreringsregler(fakta)
         oppdaterMetrikker(evalueringer)
@@ -128,13 +128,13 @@ class FiltreringsreglerService(
         return lagreFiltreringsregler(
             evalueringer = evalueringer,
             behandlingId = behandling.id,
-            fakta = fakta
+            fakta = fakta,
         )
     }
 
     private fun erSakenMigrertEtterBarnFødt(
         barnaFraHendelse: List<Person>,
-        migreringsdatoForFagsak: LocalDate?
+        migreringsdatoForFagsak: LocalDate?,
     ): Boolean = migreringsdatoForFagsak?.isAfter(barnaFraHendelse.minOf { it.fødselsdato }) == true
 
     private fun finnRestenAvBarnasPersonInfo(morsAktørId: Aktør, barnaFraHendelse: List<Person>): List<PersonInfo> {

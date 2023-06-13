@@ -6,20 +6,20 @@ import BrevPeriodeTestConfig
 import EØSBegrunnelseTestConfig
 import FritekstBegrunnelseTestConfig
 import com.fasterxml.jackson.module.kotlin.readValue
+import io.mockk.every
+import io.mockk.mockk
 import no.nav.familie.ba.sak.common.Utils.formaterBeløp
-import no.nav.familie.ba.sak.integrasjoner.sanity.hentBegrunnelser
-import no.nav.familie.ba.sak.integrasjoner.sanity.hentEØSBegrunnelser
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.config.testSanityKlient
 import no.nav.familie.ba.sak.kjerne.brev.domene.BegrunnelseMedTriggere
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestBehandlingsgrunnlagForBrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.eøs.EØSBegrunnelseMedTriggere
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
-import no.nav.familie.ba.sak.kjerne.brev.domene.tilTriggesAv
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.finnBegrunnelse
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilISanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.FritekstBegrunnelse
 import no.nav.familie.kontrakter.felles.objectMapper
 import org.junit.jupiter.api.Test
@@ -28,12 +28,16 @@ import java.io.File
 
 class BrevperiodeTest {
 
+    private val featureToggleService: FeatureToggleService = mockk()
+
     @Test
     fun test(testReporter: TestReporter) {
+        every { featureToggleService.isEnabled(FeatureToggleConfig.VEDTAKSPERIODE_NY) } returns false
+
         val testmappe = File("./src/test/resources/brevperiodeCaser")
 
-        val sanityBegrunnelser = hentBegrunnelser()
-        val sanityEØSBegrunnelser = hentEØSBegrunnelser()
+        val sanityBegrunnelser = testSanityKlient.hentBegrunnelserMap()
+        val sanityEØSBegrunnelser = testSanityKlient.hentEØSBegrunnelserMap()
 
         val antallFeil = testmappe.list()?.fold(0) { acc, it ->
 
@@ -62,16 +66,16 @@ class BrevperiodeTest {
                     eøsBegrunnelser = behandlingsresultatPersonTestConfig.eøsBegrunnelser?.map {
                         EØSBegrunnelseMedTriggere(
                             eøsBegrunnelse = it,
-                            sanityEØSBegrunnelse = sanityEØSBegrunnelser.finnBegrunnelse(it)!!
+                            sanityEØSBegrunnelse = sanityEØSBegrunnelser[it]!!,
                         )
-                    } ?: emptyList()
+                    } ?: emptyList(),
                 )
 
             val restBehandlingsgrunnlagForBrev = RestBehandlingsgrunnlagForBrev(
                 personerPåBehandling = behandlingsresultatPersonTestConfig.personerPåBehandling.map { it.tilMinimertPerson() },
                 minimertePersonResultater = behandlingsresultatPersonTestConfig.personerPåBehandling.map { it.tilMinimertePersonResultater() },
                 minimerteEndredeUtbetalingAndeler = behandlingsresultatPersonTestConfig.personerPåBehandling.flatMap { it.tilMinimerteEndredeUtbetalingAndeler() },
-                fagsakType = FagsakType.NORMAL
+                fagsakType = FagsakType.NORMAL,
             )
 
             val brevperiode = try {
@@ -85,29 +89,30 @@ class BrevperiodeTest {
                         .map { it.personIdent },
                     minimerteKompetanserForPeriode = behandlingsresultatPersonTestConfig.kompetanser?.map {
                         it.tilMinimertKompetanse(
-                            behandlingsresultatPersonTestConfig.personerPåBehandling
+                            behandlingsresultatPersonTestConfig.personerPåBehandling,
                         )
                     } ?: emptyList(),
                     minimerteKompetanserSomStopperRettFørPeriode = behandlingsresultatPersonTestConfig.kompetanserSomStopperRettFørPeriode?.map {
                         it.tilMinimertKompetanse(
-                            behandlingsresultatPersonTestConfig.personerPåBehandling
+                            behandlingsresultatPersonTestConfig.personerPåBehandling,
                         )
                     } ?: emptyList(),
-                    dødeBarnForrigePeriode = emptyList()
-                ).genererBrevPeriode()
+                    dødeBarnForrigePeriode = emptyList(),
+                    featureToggleService = featureToggleService,
+                ).genererBrevPeriode(false)
             } catch (e: Exception) {
                 testReporter.publishEntry(
                     "Feil i test: $it" +
                         "\nFeilmelding: ${e.message}" +
                         "\nFil: ${e.stackTrace.first()}" +
-                        "\n-----------------------------------\n"
+                        "\n-----------------------------------\n",
                 )
                 return@fold acc + 1
             }
 
             val feil = erLike(
                 forventetOutput = behandlingsresultatPersonTestConfig.forventetOutput,
-                output = brevperiode
+                output = brevperiode,
             )
 
             if (feil.isNotEmpty()) {
@@ -115,7 +120,7 @@ class BrevperiodeTest {
                     it,
                     "${behandlingsresultatPersonTestConfig.beskrivelse}\n\n" +
                         feil.joinToString("\n\n") +
-                        "\n-----------------------------------\n"
+                        "\n-----------------------------------\n",
                 )
                 acc + 1
             } else {
@@ -128,14 +133,14 @@ class BrevperiodeTest {
 
     private fun erLike(
         forventetOutput: BrevPeriodeOutput?,
-        output: BrevPeriode?
+        output: BrevPeriode?,
     ): List<String> {
         val feil = mutableListOf<String>()
 
         fun validerFelt(forventet: String?, faktisk: String?, variabelNavn: String) {
             if (forventet != faktisk) {
                 feil.add(
-                    "Forventet $variabelNavn var: '$forventet', men fikk '$faktisk'"
+                    "Forventet $variabelNavn var: '$forventet', men fikk '$faktisk'",
                 )
             }
         }
@@ -160,7 +165,7 @@ class BrevperiodeTest {
                     null
                 },
                 output.belop?.single(),
-                "belop"
+                "belop",
             )
 
             val forventedeBegrunnelser = forventetOutput.begrunnelser.map {
@@ -177,7 +182,7 @@ class BrevperiodeTest {
                     "Forventet antall begrunnelser var ${forventedeBegrunnelser.size} begrunnelser, " +
                         "men fikk ${output.begrunnelser.size}." +
                         "\nForventede begrunnelser: $forventedeBegrunnelser" +
-                        "\nOutput: ${output.begrunnelser}"
+                        "\nOutput: ${output.begrunnelser}",
                 )
             } else {
                 forventedeBegrunnelser.forEachIndexed { index, _ ->
@@ -186,7 +191,7 @@ class BrevperiodeTest {
                             "Forventet begrunnelse nr. ${index + 1} var: " +
                                 "\n'${forventedeBegrunnelser[index]}', " +
                                 "\nmen fikk " +
-                                "\n'${output.begrunnelser[index]}'"
+                                "\n'${output.begrunnelser[index]}'",
                         )
                     }
                 }
@@ -195,9 +200,10 @@ class BrevperiodeTest {
         return feil
     }
 
-    private fun Standardbegrunnelse.tilBrevBegrunnelseGrunnlag(sanityBegrunnelser: List<SanityBegrunnelse>) =
+    private fun Standardbegrunnelse.tilBrevBegrunnelseGrunnlag(sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>) =
         BegrunnelseMedTriggere(
             standardbegrunnelse = this,
-            triggesAv = this.tilISanityBegrunnelse(sanityBegrunnelser)!!.tilTriggesAv()
+            triggesAv = sanityBegrunnelser[this]!!.triggesAv,
+            featureToggleService = featureToggleService,
         )
 }

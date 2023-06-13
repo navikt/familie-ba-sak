@@ -27,8 +27,8 @@ class AutobrevScheduler(val taskRepository: TaskRepositoryWrapper) {
                 // måneden også er en virkedag (slik at både denne skeduleren og tasken som opprettes vil kjøre på samme dato).
                 opprettTask(
                     triggerTid = VirkedagerProvider.nesteVirkedag(
-                        LocalDate.now().minusDays(1)
-                    ).atTime(KLOKKETIME_SCHEDULER_TRIGGES.inc(), 0)
+                        LocalDate.now().minusDays(1),
+                    ).atTime(KLOKKETIME_SCHEDULER_TRIGGES.inc(), 0),
                 )
             }
 
@@ -42,10 +42,10 @@ class AutobrevScheduler(val taskRepository: TaskRepositoryWrapper) {
         taskRepository.save(
             Task(
                 type = AutobrevTask.TASK_STEP_TYPE,
-                payload = ""
+                payload = "",
             ).medTriggerTid(
-                triggerTid = triggerTid
-            )
+                triggerTid = triggerTid,
+            ),
         )
     }
 

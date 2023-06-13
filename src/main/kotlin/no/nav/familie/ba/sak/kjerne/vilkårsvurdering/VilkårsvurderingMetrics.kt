@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class VilkårsvurderingMetrics(
-    private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository
+    private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
 ) {
 
     private val vilkårsvurderingUtfall = mutableMapOf<PersonType, Map<String, Counter>>()
@@ -26,12 +26,12 @@ class VilkårsvurderingMetrics(
     val personTypeToDisplayedType = mapOf(
         PersonType.SØKER to "Mor",
         PersonType.BARN to "Barn",
-        PersonType.ANNENPART to "Medforelder"
+        PersonType.ANNENPART to "Medforelder",
     )
 
     enum class VilkårTellerType(val navn: String) {
         UTFALL("familie.ba.behandling.vilkaarsvurdering"),
-        FØRSTEUTFALL("familie.ba.behandling.vilkaarsvurdering.foerstutfall")
+        FØRSTEUTFALL("familie.ba.behandling.vilkaarsvurdering.foerstutfall"),
     }
 
     init {
@@ -41,14 +41,14 @@ class VilkårsvurderingMetrics(
 
     private fun initVilkårMetrikker(
         vilkårTellerType: VilkårTellerType,
-        utfallMap: MutableMap<PersonType, Map<String, Counter>>
+        utfallMap: MutableMap<PersonType, Map<String, Counter>>,
     ) {
         PersonType.values().forEach { personType ->
             val vilkårUtfallMap = mutableMapOf<String, Counter>()
             listOf(
                 Pair(Resultat.IKKE_OPPFYLT, VilkårIkkeOppfyltÅrsak.values()),
                 Pair(Resultat.IKKE_VURDERT, VilkårKanskjeOppfyltÅrsak.values()),
-                Pair(Resultat.OPPFYLT, VilkårOppfyltÅrsak.values())
+                Pair(Resultat.OPPFYLT, VilkårOppfyltÅrsak.values()),
             )
                 .forEach { (resultat, årsaker) ->
                     årsaker
@@ -67,7 +67,7 @@ class VilkårsvurderingMetrics(
                                     "personType",
                                     personTypeToDisplayedType[personType],
                                     "beskrivelse",
-                                    årsak.hentMetrikkBeskrivelse()
+                                    årsak.hentMetrikkBeskrivelse(),
                                 )
                         }
                 }
@@ -118,12 +118,12 @@ class VilkårsvurderingMetrics(
                 when {
                     vilkårResultatSøker != null -> {
                         økTellerForFørsteUtfallVilkårVedAutomatiskSaksbehandling(
-                            vilkårResultatSøker.second!!
+                            vilkårResultatSøker.second!!,
                         )
                     }
                     vilkårResultatBarn != null -> {
                         økTellerForFørsteUtfallVilkårVedAutomatiskSaksbehandling(
-                            vilkårResultatBarn.second!!
+                            vilkårResultatBarn.second!!,
                         )
                     }
                 }
@@ -132,7 +132,7 @@ class VilkårsvurderingMetrics(
 
     private fun mapVilkårTilVilkårResultater(
         vilkårsvurdering: Vilkårsvurdering,
-        vilkår: Vilkår
+        vilkår: Vilkår,
     ): List<Pair<Person, VilkårResultat?>> {
         val personer =
             personopplysningGrunnlagRepository.findByBehandlingAndAktiv(vilkårsvurdering.behandling.id)?.søkerOgBarn
@@ -145,7 +145,7 @@ class VilkårsvurderingMetrics(
 
             Pair(
                 person,
-                personResultat?.vilkårResultater?.find { it.vilkårType == vilkår && it.resultat == Resultat.IKKE_OPPFYLT }
+                personResultat?.vilkårResultater?.find { it.vilkårType == vilkår && it.resultat == Resultat.IKKE_OPPFYLT },
             )
         }
     }

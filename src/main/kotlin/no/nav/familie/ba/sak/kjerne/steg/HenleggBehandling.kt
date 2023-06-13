@@ -29,7 +29,7 @@ class HenleggBehandling(
     private val dokumentService: DokumentService,
     private val oppgaveService: OppgaveService,
     private val persongrunnlagService: PersongrunnlagService,
-    private val arbeidsfordelingService: ArbeidsfordelingService
+    private val arbeidsfordelingService: ArbeidsfordelingService,
 ) : BehandlingSteg<RestHenleggBehandlingInfo> {
     private val logger = LoggerFactory.getLogger(HenleggBehandling::class.java)
 
@@ -40,20 +40,20 @@ class HenleggBehandling(
                 fagsakId = behandling.fagsak.id,
                 manueltBrevRequest = ManueltBrevRequest(
                     mottakerIdent = behandling.fagsak.aktør.aktivFødselsnummer(),
-                    brevmal = Brevmal.HENLEGGE_TRUKKET_SØKNAD
-                ).byggMottakerdata(behandling, persongrunnlagService, arbeidsfordelingService)
+                    brevmal = Brevmal.HENLEGGE_TRUKKET_SØKNAD,
+                ).byggMottakerdata(behandling, persongrunnlagService, arbeidsfordelingService),
             )
         }
 
         val (oppgaverTekniskVedlikeholdPgaSatsendring, oppgaverSomSkalFerdigstilles) = oppgaveService.hentOppgaverSomIkkeErFerdigstilt(
-            behandling
+            behandling,
         )
             .partition {
                 data.årsak == HenleggÅrsak.TEKNISK_VEDLIKEHOLD && data.begrunnelse == SATSENDRING && it.type in listOf(
                     BehandleSak,
                     GodkjenneVedtak,
                     BehandleUnderkjentVedtak,
-                    VurderLivshendelse
+                    VurderLivshendelse,
                 )
             }
 

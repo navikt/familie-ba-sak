@@ -57,14 +57,14 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
         val requestEntity = byggRequestEntity(
             BisysUtvidetBarnetrygdRequest(
                 fnr,
-                LocalDate.now().minusYears(5).minusDays(1)
-            )
+                LocalDate.now().minusYears(5).minusDays(1),
+            ),
         )
 
         val error = assertThrows<HttpClientErrorException> {
             restTemplate.postForEntity<Any>(
                 hentUrl("/api/bisys/hent-utvidet-barnetrygd"),
-                requestEntity
+                requestEntity,
             )
         }
 
@@ -85,21 +85,21 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
                     aResponse()
                         .withStatus(500)
                         .withHeader("Content-Type", "application/json")
-                        .withBody("foobar")
-                )
+                        .withBody("foobar"),
+                ),
         )
 
         val requestEntity = byggRequestEntity(
             BisysUtvidetBarnetrygdRequest(
                 fnr,
-                LocalDate.now()
-            )
+                LocalDate.now(),
+            ),
         )
 
         val error = assertThrows<HttpServerErrorException> {
             restTemplate.postForEntity<Any>(
                 hentUrl("/api/bisys/hent-utvidet-barnetrygd"),
-                requestEntity
+                requestEntity,
             )
         }
 
@@ -122,30 +122,30 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
                     aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
-                        .withBody(gyldigOppgaveResponse("tom"))
-                )
+                        .withBody(gyldigOppgaveResponse("tom")),
+                ),
         )
 
         val requestEntity = byggRequestEntity(
             BisysUtvidetBarnetrygdRequest(
                 fnr,
-                LocalDate.now().minusYears(4)
-            )
+                LocalDate.now().minusYears(4),
+            ),
         )
 
         val responseEntity = restTemplate.postForEntity<BisysUtvidetBarnetrygdResponse>(
             hentUrl("/api/bisys/hent-utvidet-barnetrygd"),
-            requestEntity
+            requestEntity,
         )
         wireMockServer.verify(
             postRequestedFor(urlEqualTo("/infotrygd/barnetrygd/utvidet"))
                 .withRequestBody(
                     equalToJson(
                         """{"personIdent":"$fnr", "fraDato":"${
-                        YearMonth.now().minusYears(4)
-                        }" }"""
-                    )
-                )
+                            YearMonth.now().minusYears(4)
+                        }" }""",
+                    ),
+                ),
 
         )
 
@@ -164,8 +164,8 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
                     aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
-                        .withBody(gyldigOppgaveResponse("tom"))
-                )
+                        .withBody(gyldigOppgaveResponse("tom")),
+                ),
         )
 
         wireMockServer.stubFor(
@@ -173,28 +173,28 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
                 .withRequestBody(
                     equalToJson(
                         """{"personIdent":"$fnr", "fraDato":"${
-                        YearMonth.now().minusYears(4)
-                        }" }"""
-                    )
+                            YearMonth.now().minusYears(4)
+                        }" }""",
+                    ),
                 )
                 .willReturn(
                     aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
-                        .withBody(gyldigOppgaveResponse("med-perioder"))
-                )
+                        .withBody(gyldigOppgaveResponse("med-perioder")),
+                ),
         )
 
         val requestEntity = byggRequestEntity(
             BisysUtvidetBarnetrygdRequest(
                 fnr,
-                LocalDate.now().minusYears(4)
-            )
+                LocalDate.now().minusYears(4),
+            ),
         )
 
         val responseEntity = restTemplate.postForEntity<BisysUtvidetBarnetrygdResponse>(
             hentUrl("/api/bisys/hent-utvidet-barnetrygd"),
-            requestEntity
+            requestEntity,
         )
 
         assertThat(responseEntity.statusCode).isEqualTo(HttpStatus.OK)
@@ -208,8 +208,8 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
                     YearMonth.of(2019, 12),
                     null,
                     660.0,
-                    false
-                )
+                    false,
+                ),
             )
         assertThat(responseEntity.body!!.perioder)
             .contains(UtvidetBarnetrygdPeriode(BisysStønadstype.UTVIDET, YearMonth.of(2019, 12), null, 1054.0, false))
@@ -225,8 +225,8 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
                     aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
-                        .withBody(gyldigOppgaveResponse("gammel-periode"))
-                )
+                        .withBody(gyldigOppgaveResponse("gammel-periode")),
+                ),
         )
 
         wireMockServer.stubFor(
@@ -234,28 +234,28 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
                 .withRequestBody(
                     equalToJson(
                         """{"personIdent":"$fnr", "fraDato":"${
-                        YearMonth.now().minusYears(4)
-                        }" }"""
-                    )
+                            YearMonth.now().minusYears(4)
+                        }" }""",
+                    ),
                 )
                 .willReturn(
                     aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
-                        .withBody(gyldigOppgaveResponse("med-perioder"))
-                )
+                        .withBody(gyldigOppgaveResponse("med-perioder")),
+                ),
         )
 
         val requestEntity = byggRequestEntity(
             BisysUtvidetBarnetrygdRequest(
                 fnr,
-                LocalDate.now().minusYears(4)
-            )
+                LocalDate.now().minusYears(4),
+            ),
         )
 
         val responseEntity = restTemplate.postForEntity<BisysUtvidetBarnetrygdResponse>(
             hentUrl("/api/bisys/hent-utvidet-barnetrygd"),
-            requestEntity
+            requestEntity,
         )
 
         assertThat(responseEntity.statusCode).isEqualTo(HttpStatus.OK)
@@ -269,8 +269,8 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
                     YearMonth.of(2019, 12),
                     null,
                     660.0,
-                    false
-                )
+                    false,
+                ),
             )
         assertThat(responseEntity.body!!.perioder)
             .contains(UtvidetBarnetrygdPeriode(BisysStønadstype.UTVIDET, YearMonth.of(2019, 12), null, 1054.0, false))
@@ -281,8 +281,8 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
                     YearMonth.of(2017, 1),
                     YearMonth.of(2018, 12),
                     970.0,
-                    false
-                )
+                    false,
+                ),
             )
     }
 
@@ -291,17 +291,17 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
         val header = HttpHeaders()
         header.contentType = MediaType.APPLICATION_JSON
         header.setBearerAuth(
-            hentTokenForBisys()
+            hentTokenForBisys(),
         )
         val ikkeBisysTjeneste = HttpEntity<String>(
             "tullball",
-            header
+            header,
         )
 
         val error = assertThrows<HttpClientErrorException> {
             restTemplate.postForEntity<Any>(
                 hentUrl("/api/tullballtjeneste"),
-                ikkeBisysTjeneste
+                ikkeBisysTjeneste,
             )
         }
 
@@ -312,13 +312,13 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
         val header = HttpHeaders()
         header.contentType = MediaType.APPLICATION_JSON
         header.setBearerAuth(
-            hentTokenForBisys()
+            hentTokenForBisys(),
         )
         return HttpEntity(
             objectMapper.writeValueAsString(
-                request
+                request,
             ),
-            header
+            header,
         )
     }
 
@@ -326,15 +326,15 @@ class BisysControllerIntegrasjonsTest : WebSpringAuthTestRunner() {
         mapOf(
             "groups" to listOf("SAKSBEHANDLER"),
             "name" to "Mock McMockface",
-            "NAVident" to "Z0000"
+            "NAVident" to "Z0000",
         ),
-        clientId = "dummy"
+        clientId = "dummy",
     )
 
     private fun gyldigOppgaveResponse(filnavn: String): String {
         return Files.readString(
             ClassPathResource("ekstern/bisys-$filnavn.json").file.toPath(),
-            StandardCharsets.UTF_8
+            StandardCharsets.UTF_8,
         )
     }
 }

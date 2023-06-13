@@ -40,7 +40,7 @@ abstract class GrBostedsadresse(
     @SequenceGenerator(
         name = "po_bostedsadresse_seq_generator",
         sequenceName = "po_bostedsadresse_seq",
-        allocationSize = 50
+        allocationSize = 50,
     )
     open val id: Long = 0,
 
@@ -50,12 +50,20 @@ abstract class GrBostedsadresse(
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "fk_po_person_id")
-    open var person: Person? = null
+    open var person: Person? = null,
 ) : BaseEntitet() {
 
     abstract fun toSecureString(): String
 
     abstract fun tilFrontendString(): String
+
+    protected abstract fun tilKopiForNyPerson(): GrBostedsadresse
+
+    fun tilKopiForNyPerson(nyPerson: Person): GrBostedsadresse =
+        tilKopiForNyPerson().also {
+            it.periode = periode
+            it.person = nyPerson
+        }
 
     fun gjeldendeNå(): Boolean {
         if (periode == null) return true
@@ -65,7 +73,7 @@ abstract class GrBostedsadresse(
     fun tilRestRegisteropplysning() = RestRegisteropplysning(
         fom = this.periode?.fom.takeIf { it != fregManglendeFlytteDato },
         tom = this.periode?.tom,
-        verdi = this.tilFrontendString()
+        verdi = this.tilFrontendString(),
     )
 
     fun harGyldigFom() = this.periode?.fom != null && this.periode?.fom != fregManglendeFlytteDato
@@ -79,7 +87,7 @@ abstract class GrBostedsadresse(
         fun MutableList<GrBostedsadresse>.sisteAdresse(): GrBostedsadresse? {
             if (this.filter { it.periode?.fom == null || it.periode?.fom == fregManglendeFlytteDato }.size > 1) {
                 throw Feil(
-                    "Finnes flere bostedsadresser uten fom-dato"
+                    "Finnes flere bostedsadresser uten fom-dato",
                 )
             }
             return this.sortedBy { it.periode?.fom }.lastOrNull()

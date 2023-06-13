@@ -38,7 +38,7 @@ fun Tidslinje<AndelTilkjentYtelse, Måned>.tilAndelTilkjentYtelse(): List<AndelT
         .perioder().map {
             it.innhold?.medPeriode(
                 it.fraOgMed.tilYearMonth(),
-                it.tilOgMed.tilYearMonth()
+                it.tilOgMed.tilYearMonth(),
             )
         }.filterNotNull()
 }
@@ -47,14 +47,14 @@ fun AndelTilkjentYtelse.tilPeriode() = Periode(
     this.stønadFom.tilTidspunkt(),
     this.stønadTom.tilTidspunkt(),
     // Ta bort periode, slik at det ikke blir med på innholdet som vurderes for likhet
-    this.medPeriode(null, null)
+    this.medPeriode(null, null),
 )
 
 fun AndelTilkjentYtelse.medPeriode(fraOgMed: YearMonth?, tilOgMed: YearMonth?) =
     copy(
         id = 0,
         stønadFom = fraOgMed ?: MIN_MÅNED,
-        stønadTom = tilOgMed ?: MAX_MÅNED
+        stønadTom = tilOgMed ?: MAX_MÅNED,
     ).also { versjon = this.versjon }
 
 /**
@@ -69,8 +69,7 @@ fun Iterable<AndelTilkjentYtelse>.tilTidslinjeForSøkersYtelse(ytelseType: Ytels
         }
     }
 
-fun Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>>.kunAndelerTilOgMed3År(barna: List<Person>):
-    Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>> {
+fun Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>>.kunAndelerTilOgMed3År(barna: List<Person>): Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>> {
     val barnasErInntil3ÅrTidslinjer = barna.associate { it.aktør to erTilogMed3ÅrTidslinje(it.fødselsdato) }
 
     // For hvert barn kombiner andel-tidslinjen med 3-års-tidslinjen. Resultatet er andelene når barna er inntil 3 år
@@ -86,7 +85,7 @@ data class AndelTilkjentYtelseForTidslinje(
     val stønadFom: YearMonth? = null,
     val stønadTom: YearMonth? = null,
     val nasjonaltPeriodebeløp: Int = beløp,
-    val differanseberegnetPeriodebeløp: Int? = null
+    val differanseberegnetPeriodebeløp: Int? = null,
 )
 
 fun AndelTilkjentYtelse.tilpassTilTidslinje() =
@@ -97,13 +96,13 @@ fun AndelTilkjentYtelse.tilpassTilTidslinje() =
         sats = this.sats,
         prosent = this.prosent,
         nasjonaltPeriodebeløp = this.nasjonaltPeriodebeløp ?: this.kalkulertUtbetalingsbeløp,
-        differanseberegnetPeriodebeløp = this.differanseberegnetPeriodebeløp
+        differanseberegnetPeriodebeløp = this.differanseberegnetPeriodebeløp,
     )
 
 fun AndelTilkjentYtelse.tilpassTilTidslinjeOgBevarFomOgTom() =
     tilpassTilTidslinje().copy(
         stønadFom = this.stønadFom,
-        stønadTom = this.stønadTom
+        stønadTom = this.stønadTom,
     )
 
 fun Tidslinje<AndelTilkjentYtelseForTidslinje, Måned>.tilAndelerTilkjentYtelse(tilkjentYtelse: TilkjentYtelse) =
@@ -121,7 +120,7 @@ fun Tidslinje<AndelTilkjentYtelseForTidslinje, Måned>.tilAndelerTilkjentYtelse(
                 sats = it.innhold.sats,
                 prosent = it.innhold.prosent,
                 stønadFom = it.fraOgMed.tilYearMonth(),
-                stønadTom = it.tilOgMed.tilYearMonth()
+                stønadTom = it.tilOgMed.tilYearMonth(),
             )
         }
 
@@ -138,7 +137,7 @@ fun Iterable<AndelTilkjentYtelse>.tilTryggTidslinjeForSøkersYtelse(ytelseType: 
                 Periode(
                     it.stønadFom.tilTidspunkt(),
                     it.stønadTom.tilTidspunkt(),
-                    it.tilpassTilTidslinjeOgBevarFomOgTom()
+                    it.tilpassTilTidslinjeOgBevarFomOgTom(),
                 )
             }
         }

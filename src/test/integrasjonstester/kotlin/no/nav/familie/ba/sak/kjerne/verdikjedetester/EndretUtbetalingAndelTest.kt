@@ -24,7 +24,7 @@ import java.time.YearMonth
 
 class EndretUtbetalingAndelTest(
     @Autowired private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
-    @Autowired private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService
+    @Autowired private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 ) : AbstractVerdikjedetest() {
 
     @Test
@@ -43,12 +43,12 @@ class EndretUtbetalingAndelTest(
             årsak = Årsak.DELT_BOSTED, avtaletidspunktDeltBosted = LocalDate.now(),
             søknadstidspunkt = LocalDate.now(),
             begrunnelse = "begrunnelse",
-            erTilknyttetAndeler = true
+            erTilknyttetAndeler = true,
         )
 
         familieBaSakKlient().leggTilEndretUtbetalingAndel(
             restUtvidetBehandling.data!!.behandlingId,
-            restEndretUtbetalingAndel
+            restEndretUtbetalingAndel,
         )
 
         val andelerTilkjentYtelseMedEndretPeriode =
@@ -59,23 +59,23 @@ class EndretUtbetalingAndelTest(
 
         Assertions.assertEquals(
             endretFom,
-            endretAndeleTilkjentYtelse.stønadFom
+            endretAndeleTilkjentYtelse.stønadFom,
         )
 
         Assertions.assertEquals(
             endretTom,
-            endretAndeleTilkjentYtelse.stønadTom
+            endretAndeleTilkjentYtelse.stønadTom,
         )
 
         val utbetalingAndeleTilkjentYtelse =
             andelerTilkjentYtelseMedEndretPeriode.filter { it.kalkulertUtbetalingsbeløp != 0 }
 
         Assertions.assertNotNull(
-            utbetalingAndeleTilkjentYtelse.firstOrNull { it.stønadTom == endretFom.minusMonths(1) }
+            utbetalingAndeleTilkjentYtelse.firstOrNull { it.stønadTom == endretFom.minusMonths(1) },
         )
 
         Assertions.assertNotNull(
-            utbetalingAndeleTilkjentYtelse.firstOrNull { it.stønadFom == endretTom.plusMonths(1) }
+            utbetalingAndeleTilkjentYtelse.firstOrNull { it.stønadFom == endretTom.plusMonths(1) },
         )
     }
 
@@ -96,12 +96,12 @@ class EndretUtbetalingAndelTest(
             avtaletidspunktDeltBosted = LocalDate.now(),
             søknadstidspunkt = LocalDate.now(),
             begrunnelse = "begrunnelse",
-            erTilknyttetAndeler = true
+            erTilknyttetAndeler = true,
         )
 
         val restUtvidetBehandlingEtterEndretPeriode = familieBaSakKlient().leggTilEndretUtbetalingAndel(
             restUtvidetBehandling.data!!.behandlingId,
-            restEndretUtbetalingAndel
+            restEndretUtbetalingAndel,
         )
 
         val endretUtbetalingAndelId =
@@ -109,18 +109,18 @@ class EndretUtbetalingAndelTest(
 
         familieBaSakKlient().fjernEndretUtbetalingAndel(
             restUtvidetBehandling.data!!.behandlingId,
-            endretUtbetalingAndelId!!
+            endretUtbetalingAndelId!!,
         )
 
         val andelerTilkjentYtelseEtterFjeringAvEndretUtbetaling =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = restUtvidetBehandling.data!!.behandlingId)
 
         Assertions.assertNotNull(
-            andelerTilkjentYtelseEtterFjeringAvEndretUtbetaling.firstOrNull { it.stønadFom == endretFom }
+            andelerTilkjentYtelseEtterFjeringAvEndretUtbetaling.firstOrNull { it.stønadFom == endretFom },
         )
 
         Assertions.assertNotNull(
-            andelerTilkjentYtelseEtterFjeringAvEndretUtbetaling.firstOrNull { it.stønadTom == YearMonth.of(2021, 12) }
+            andelerTilkjentYtelseEtterFjeringAvEndretUtbetaling.firstOrNull { it.stønadTom == YearMonth.of(2021, 12) },
         )
     }
 
@@ -135,10 +135,10 @@ class EndretUtbetalingAndelTest(
                         fødselsdato = barnFødselsdato.toString(),
                         fornavn = "Barn",
                         etternavn = "Barnesen",
-                        bostedsadresser = emptyList()
-                    )
-                )
-            )
+                        bostedsadresser = emptyList(),
+                    ),
+                ),
+            ),
         )
 
         val søkersIdent = scenario.søker.ident!!
@@ -147,7 +147,7 @@ class EndretUtbetalingAndelTest(
         val restFagsakMedBehandling = familieBaSakKlient().opprettBehandling(
             søkersIdent = søkersIdent,
             behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
-            fagsakId = fagsak.data!!.id
+            fagsakId = fagsak.data!!.id,
         )
 
         val behandling = behandlingHentOgPersisterService.hent(restFagsakMedBehandling.data!!.behandlingId)
@@ -156,14 +156,14 @@ class EndretUtbetalingAndelTest(
                 søknad = lagSøknadDTO(
                     søkerIdent = scenario.søker.ident,
                     barnasIdenter = scenario.barna.map { it.ident!! },
-                    underkategori = BehandlingUnderkategori.ORDINÆR
+                    underkategori = BehandlingUnderkategori.ORDINÆR,
                 ),
-                bekreftEndringerViaFrontend = false
+                bekreftEndringerViaFrontend = false,
             )
         val restUtvidetBehandling: Ressurs<RestUtvidetBehandling> =
             familieBaSakKlient().registrererSøknad(
                 behandlingId = behandling.id,
-                restRegistrerSøknad = restRegistrerSøknad
+                restRegistrerSøknad = restRegistrerSøknad,
             )
 
         restUtvidetBehandling.data!!.personResultater.forEach { restPersonResultat ->
@@ -179,22 +179,22 @@ class EndretUtbetalingAndelTest(
                                 resultat = Resultat.OPPFYLT,
                                 periodeFom = barnFødselsdato,
                                 utdypendeVilkårsvurderinger = listOfNotNull(
-                                    if (it.vilkårType == Vilkår.BOR_MED_SØKER) UtdypendeVilkårsvurdering.DELT_BOSTED else null
-                                )
-                            )
-                        )
-                    )
+                                    if (it.vilkårType == Vilkår.BOR_MED_SØKER) UtdypendeVilkårsvurdering.DELT_BOSTED else null,
+                                ),
+                            ),
+                        ),
+                    ),
                 )
             }
         }
 
         familieBaSakKlient().validerVilkårsvurdering(
-            behandlingId = restUtvidetBehandling.data!!.behandlingId
+            behandlingId = restUtvidetBehandling.data!!.behandlingId,
         )
 
         val restFagsakEtterBehandlingsresultat =
             familieBaSakKlient().behandlingsresultatStegOgGåVidereTilNesteSteg(
-                behandlingId = restUtvidetBehandling.data!!.behandlingId
+                behandlingId = restUtvidetBehandling.data!!.behandlingId,
             )
         return Pair(scenario, restFagsakEtterBehandlingsresultat)
     }

@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -9,8 +11,11 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.validerAtSatsendringKunOppdatererSatsPåEksisterendePerioder
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtAlleOpprettedeEndringerErUtfylt
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerAtEndringerErTilknyttetAndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelValidering.validerPeriodeInnenforTilkjentytelse
@@ -42,7 +47,8 @@ class BehandlingsresultatSteg(
     private val vilkårService: VilkårService,
     private val persongrunnlagService: PersongrunnlagService,
     private val beregningService: BeregningService,
-    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
+    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
+    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
 ) : BehandlingSteg<String> {
 
     override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
@@ -58,9 +64,13 @@ class BehandlingsresultatSteg(
         val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandling.id)
         val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandling.id)
 
+        if (behandling.erSatsendring()) {
+            validerSatsendring(tilkjentYtelse)
+        }
+
         validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
             tilkjentYtelse = tilkjentYtelse,
-            personopplysningGrunnlag = personopplysningGrunnlag
+            personopplysningGrunnlag = personopplysningGrunnlag,
         )
 
         val endreteUtbetalingerMedAndeler = andelerTilkjentYtelseOgEndreteUtbetalingerService
@@ -69,17 +79,17 @@ class BehandlingsresultatSteg(
         validerAtAlleOpprettedeEndringerErUtfylt(endreteUtbetalingerMedAndeler.map { it.endretUtbetalingAndel })
         validerAtEndringerErTilknyttetAndelTilkjentYtelse(endreteUtbetalingerMedAndeler)
         validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer(
-            endretUtbetalingAndelerMedÅrsakDeltBosted = endreteUtbetalingerMedAndeler.filter { it.årsak == Årsak.DELT_BOSTED }
+            endretUtbetalingAndelerMedÅrsakDeltBosted = endreteUtbetalingerMedAndeler.filter { it.årsak == Årsak.DELT_BOSTED },
         )
 
         validerPeriodeInnenforTilkjentytelse(
             endreteUtbetalingerMedAndeler.map { it.endretUtbetalingAndel },
-            tilkjentYtelse.andelerTilkjentYtelse
+            tilkjentYtelse.andelerTilkjentYtelse,
         )
 
         validerÅrsak(
             endreteUtbetalingerMedAndeler.map { it.endretUtbetalingAndel },
-            vilkårService.hentVilkårsvurdering(behandling.id)
+            vilkårService.hentVilkårsvurdering(behandling.id),
         )
 
         if (behandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO) {
@@ -97,7 +107,7 @@ class BehandlingsresultatSteg(
 
                 behandlingService.oppdaterBehandlingsresultat(
                     behandlingId = behandling.id,
-                    resultat = resultat
+                    resultat = resultat,
                 )
             }
 
@@ -107,8 +117,8 @@ class BehandlingsresultatSteg(
             behandlingService.nullstillEndringstidspunkt(behandling.id)
             vedtaksperiodeService.oppdaterVedtakMedVedtaksperioder(
                 vedtak = vedtakService.hentAktivForBehandlingThrows(
-                    behandlingId = behandling.id
-                )
+                    behandlingId = behandling.id,
+                ),
             )
         }
 
@@ -116,17 +126,17 @@ class BehandlingsresultatSteg(
             beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(behandling)
 
         if (behandlingMedOppdatertBehandlingsresultat.skalRettFraBehandlingsresultatTilIverksetting(
-                endringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi == ENDRING_I_UTBETALING
+                endringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi == ENDRING_I_UTBETALING,
             ) || beregningService.kanAutomatiskIverksetteSmåbarnstilleggEndring(
+                behandling = behandlingMedOppdatertBehandlingsresultat,
+                sistIverksatteBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(
                     behandling = behandlingMedOppdatertBehandlingsresultat,
-                    sistIverksatteBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(
-                            behandling = behandlingMedOppdatertBehandlingsresultat
-                        )
-                )
+                ),
+            )
         ) {
             behandlingService.oppdaterStatusPåBehandling(
                 behandlingMedOppdatertBehandlingsresultat.id,
-                BehandlingStatus.IVERKSETTER_VEDTAK
+                BehandlingStatus.IVERKSETTER_VEDTAK,
             )
         } else {
             simuleringService.oppdaterSimuleringPåBehandling(behandlingMedOppdatertBehandlingsresultat)
@@ -150,7 +160,7 @@ class BehandlingsresultatSteg(
                 "Du har fått behandlingsresultatet " +
                     "${behandlingMedOppdatertBehandlingsresultat.resultat.displayName}. " +
                     "Dette er ikke støttet på migreringsbehandlinger. " +
-                    "Meld sak i Porten om du er uenig i resultatet."
+                    "Meld sak i Porten om du er uenig i resultatet.",
             )
         }
     }
@@ -160,7 +170,7 @@ class BehandlingsresultatSteg(
         return behandlingHentOgPersisterService.lagreEllerOppdater(behandling)
     }
 
-    fun validerIngenEndringIUtbetalingEtterMigreringsdatoenTilForrigeIverksatteBehandling(behandling: Behandling) {
+    private fun validerIngenEndringIUtbetalingEtterMigreringsdatoenTilForrigeIverksatteBehandling(behandling: Behandling) {
         if (behandling.status == BehandlingStatus.AVSLUTTET) return
 
         val endringIUtbetalingTidslinje =
@@ -168,9 +178,23 @@ class BehandlingsresultatSteg(
 
         val migreringsdatoForrigeIverksatteBehandling = beregningService
             .hentAndelerFraForrigeIverksattebehandling(behandling)
-            .minOf { it.stønadFom }
+            .minOfOrNull { it.stønadFom }
 
-        endringIUtbetalingTidslinje.kastFeilVedEndringEtter(migreringsdatoForrigeIverksatteBehandling, behandling)
+        endringIUtbetalingTidslinje.kastFeilVedEndringEtter(
+            migreringsdatoForrigeIverksatteBehandling = migreringsdatoForrigeIverksatteBehandling ?: TIDENES_ENDE.toYearMonth(),
+            behandling = behandling,
+        )
+    }
+
+    private fun validerSatsendring(tilkjentYtelse: TilkjentYtelse) {
+        val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(tilkjentYtelse.behandling)
+            ?: throw FunksjonellFeil("Kan ikke kjøre satsendring når det ikke finnes en tidligere behandling på fagsaken")
+        val andelerFraForrigeBehandling = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = forrigeBehandling.id)
+
+        validerAtSatsendringKunOppdatererSatsPåEksisterendePerioder(
+            andelerFraForrigeBehandling = andelerFraForrigeBehandling,
+            andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.toList(),
+        )
     }
 
     companion object {

@@ -30,11 +30,11 @@ class InfotrygdBarnetrygdClientMock {
             every { mockInfotrygdBarnetrygdClient.harLøpendeSakIInfotrygd(any(), any()) } returns false
             every { mockInfotrygdBarnetrygdClient.hentSaker(any(), any()) } returns InfotrygdSøkResponse(
                 emptyList(),
-                emptyList()
+                emptyList(),
             )
             every { mockInfotrygdBarnetrygdClient.hentStønader(any(), any()) } returns InfotrygdSøkResponse(
                 emptyList(),
-                emptyList()
+                emptyList(),
             )
         }
     }

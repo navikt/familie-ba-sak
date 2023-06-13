@@ -33,8 +33,8 @@ internal infix fun Person.død(tidspunkt: Tidspunkt<Dag>) = this.copy(
         dødsfallDato = tidspunkt.tilLocalDate(),
         dødsfallAdresse = null,
         dødsfallPostnummer = null,
-        dødsfallPoststed = null
-    )
+        dødsfallPoststed = null,
+    ),
 )
 
 internal val uendelig: Tidspunkt<Dag> = DagTidspunkt(LocalDate.now(), Uendelighet.FREMTID)
@@ -81,5 +81,5 @@ fun oppfyltUtdypendeVilkår(vilkår: Vilkår, regelverk: Regelverk? = null) =
     UtdypendeVilkårRegelverkResultat(
         vilkår = vilkår,
         resultat = Resultat.OPPFYLT,
-        regelverk = regelverk
+        regelverk = regelverk,
     )

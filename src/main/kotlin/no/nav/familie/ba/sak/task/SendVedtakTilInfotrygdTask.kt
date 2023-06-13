@@ -21,11 +21,11 @@ import java.util.Properties
 @Service
 @TaskStepBeskrivelse(
     taskStepType = SendVedtakTilInfotrygdTask.TASK_STEP_TYPE,
-    beskrivelse = "Send vedtaksmelding til Infotrygd feed."
+    beskrivelse = "Send vedtaksmelding til Infotrygd feed.",
 )
 class SendVedtakTilInfotrygdTask(
     private val infotrygdFeedClient: InfotrygdFeedClient,
-    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
+    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
@@ -34,8 +34,8 @@ class SendVedtakTilInfotrygdTask(
         infotrygdFeedClient.sendVedtakFeedTilInfotrygd(
             InfotrygdVedtakFeedDto(
                 infotrygdVedtakFeedTaskDto.fnrStoenadsmottaker,
-                finnFørsteUtbetalingsperiode(infotrygdVedtakFeedTaskDto.behandlingId)
-            )
+                finnFørsteUtbetalingsperiode(infotrygdVedtakFeedTaskDto.behandlingId),
+            ),
         )
     }
 
@@ -73,10 +73,10 @@ class SendVedtakTilInfotrygdTask(
                 payload = objectMapper.writeValueAsString(
                     InfotrygdVedtakFeedTaskDto(
                         fnrStoenadsmottaker = fnrStoenadsmottaker,
-                        behandlingId = behandlingId
-                    )
+                        behandlingId = behandlingId,
+                    ),
                 ),
-                properties = metadata
+                properties = metadata,
             )
         }
     }

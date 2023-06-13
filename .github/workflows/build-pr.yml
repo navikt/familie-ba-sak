@@ -1,11 +1,9 @@
 name: Pull request
 on:
+  workflow_dispatch:
   merge_group:
   pull_request:
     types: [ opened, synchronize, reopened, ready_for_review ]
-
-env:
-  IMAGE: ghcr.io/navikt/familie-ba-sak:${{ github.sha }}
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
@@ -32,8 +30,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mvn -B --no-transfer-progress antrun:run@ktlint
-  enhetstester-integrasjonstester-og-sonar:
-    name: Enhetstester, integrasjonstester og sonar
+  enhetstester-integrasjonstester:
+    name: Enhetstester og integrasjonstester
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -44,10 +42,8 @@ jobs:
           java-version: 17
           distribution: 'temurin'
           cache: 'maven'
-      - name: Kjør enhetstester, integrasjonstester og sonar
+      - name: Kjør enhetstester og integrasjonstester
         env:
-          SONAR_PROJECTKEY: ${{ secrets.SONAR_PROJECTKEY }}
-          SONAR_LOGIN: ${{ secrets.SONAR_LOGIN }}
           GITHUB_USERNAME: x-access-token
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |

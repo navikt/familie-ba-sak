@@ -64,7 +64,7 @@ internal class Autobrev6og18ÅrServiceTest {
         vedtakService = vedtakService,
         infotrygdService = infotrygdService,
         vedtaksperiodeService = vedtaksperiodeService,
-        taskRepository = taskRepository
+        taskRepository = taskRepository,
     )
 
     private val autobrev6og18ÅrService = Autobrev6og18ÅrService(
@@ -76,9 +76,9 @@ internal class Autobrev6og18ÅrServiceTest {
             andelTilkjentYtelseRepository,
             endretUtbetalingAndelRepository,
             mockk(),
-            featureToggleService
+            featureToggleService,
         ),
-        startSatsendring = startSatsendring
+        startSatsendring = startSatsendring,
     )
 
     @Test
@@ -88,7 +88,7 @@ internal class Autobrev6og18ÅrServiceTest {
         val autobrev6og18ÅrDTO = Autobrev6og18ÅrDTO(
             fagsakId = behandling.fagsak.id,
             alder = Alder.ATTEN.år,
-            årMåned = inneværendeMåned()
+            årMåned = inneværendeMåned(),
         )
 
         autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO)
@@ -103,7 +103,7 @@ internal class Autobrev6og18ÅrServiceTest {
         val autobrev6og18ÅrDTO = Autobrev6og18ÅrDTO(
             fagsakId = behandling.fagsak.id,
             alder = Alder.SEKS.år,
-            årMåned = inneværendeMåned()
+            årMåned = inneværendeMåned(),
         )
 
         autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO)
@@ -118,7 +118,7 @@ internal class Autobrev6og18ÅrServiceTest {
         val autobrev6og18ÅrDTO = Autobrev6og18ÅrDTO(
             fagsakId = behandling.fagsak.id,
             alder = Alder.SEKS.år,
-            årMåned = inneværendeMåned()
+            årMåned = inneværendeMåned(),
         )
 
         autobrev6og18ÅrService.opprettOmregningsoppgaveForBarnIBrytingsalder(autobrev6og18ÅrDTO)
@@ -133,7 +133,7 @@ internal class Autobrev6og18ÅrServiceTest {
         val autobrev6og18ÅrDTO = Autobrev6og18ÅrDTO(
             fagsakId = behandling.fagsak.id,
             alder = Alder.SEKS.år,
-            årMåned = inneværendeMåned()
+            årMåned = inneværendeMåned(),
         )
 
         every { stegService.håndterVilkårsvurdering(any()) } returns behandling
@@ -147,7 +147,7 @@ internal class Autobrev6og18ÅrServiceTest {
         verify(exactly = 1) {
             autovedtakStegService.kjørBehandlingOmregning(
                 any(),
-                any()
+                any(),
             )
         }
     }
@@ -159,7 +159,7 @@ internal class Autobrev6og18ÅrServiceTest {
         val autobrev6og18ÅrDTO = Autobrev6og18ÅrDTO(
             fagsakId = behandling.fagsak.id,
             alder = Alder.ATTEN.år,
-            årMåned = inneværendeMåned()
+            årMåned = inneværendeMåned(),
         )
 
         every { stegService.håndterVilkårsvurdering(any()) } returns behandling
@@ -173,7 +173,7 @@ internal class Autobrev6og18ÅrServiceTest {
         verify(exactly = 1) {
             autovedtakStegService.kjørBehandlingOmregning(
                 any(),
-                any()
+                any(),
             )
         }
     }
@@ -185,7 +185,7 @@ internal class Autobrev6og18ÅrServiceTest {
         val autobrev6og18ÅrDTO = Autobrev6og18ÅrDTO(
             fagsakId = behandling.fagsak.id,
             alder = Alder.SEKS.år,
-            årMåned = inneværendeMåned()
+            årMåned = inneværendeMåned(),
         )
 
         every { stegService.håndterVilkårsvurdering(any()) } returns behandling
@@ -197,21 +197,21 @@ internal class Autobrev6og18ÅrServiceTest {
 
         every {
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
-                behandling.id
+                behandling.id,
             )
         } returns listOf(
             lagAndelTilkjentYtelse(
                 fom = inneværendeMåned().minusYears(4),
                 tom = YearMonth.now().minusMonths(1), // en gammel ytelse
                 beløp = 1054,
-                person = barn6årUtenAktivTilkjentYtelse
+                person = barn6årUtenAktivTilkjentYtelse,
             ),
             lagAndelTilkjentYtelse(
                 fom = inneværendeMåned().minusYears(4),
                 tom = YearMonth.now().plusYears(4),
                 beløp = 1054,
-                person = barn10årMedAktivTilkjentYtelse // den aktive er på et annet barn
-            )
+                person = barn10årMedAktivTilkjentYtelse, // den aktive er på et annet barn
+            ),
         )
         every { vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(any(), any()) } just runs
         every { taskRepository.save(any()) } returns Task(type = "test", payload = "")
@@ -222,7 +222,7 @@ internal class Autobrev6og18ÅrServiceTest {
         verify(exactly = 0) {
             autovedtakStegService.kjørBehandlingOmregning(
                 any(),
-                any()
+                any(),
             )
         }
     }
@@ -234,7 +234,7 @@ internal class Autobrev6og18ÅrServiceTest {
         val autobrev6og18ÅrDTO = Autobrev6og18ÅrDTO(
             fagsakId = behandling.fagsak.id,
             alder = Alder.ATTEN.år,
-            årMåned = inneværendeMåned()
+            årMåned = inneværendeMåned(),
         )
 
         every { stegService.håndterVilkårsvurdering(any()) } returns behandling
@@ -244,21 +244,21 @@ internal class Autobrev6og18ÅrServiceTest {
 
         every {
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
-                behandling.id
+                behandling.id,
             )
         } returns listOf(
             lagAndelTilkjentYtelse(
                 fom = inneværendeMåned().minusYears(4),
                 tom = YearMonth.now().minusMonths(2), // en gammel ytelse
                 beløp = 1054,
-                person = barnIBrytningsalder
+                person = barnIBrytningsalder,
             ),
             lagAndelTilkjentYtelse(
                 fom = inneværendeMåned().minusYears(4),
                 tom = YearMonth.now().plusYears(4),
                 beløp = 1054,
-                person = barn10årMedAktivTilkjentYtelse // den aktive er på et annet barn
-            )
+                person = barn10årMedAktivTilkjentYtelse, // den aktive er på et annet barn
+            ),
         )
         every { vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(any(), any()) } just runs
         every { taskRepository.save(any()) } returns Task(type = "test", payload = "")
@@ -269,7 +269,7 @@ internal class Autobrev6og18ÅrServiceTest {
         verify(exactly = 0) {
             autovedtakStegService.kjørBehandlingOmregning(
                 any(),
-                any()
+                any(),
             )
         }
     }
@@ -281,7 +281,7 @@ internal class Autobrev6og18ÅrServiceTest {
         val autobrev6og18ÅrDTO = Autobrev6og18ÅrDTO(
             fagsakId = behandling.fagsak.id,
             alder = Alder.SEKS.år,
-            årMåned = inneværendeMåned()
+            årMåned = inneværendeMåned(),
         )
 
         every { infotrygdService.harSendtbrev(any(), any()) } returns true
@@ -296,13 +296,13 @@ internal class Autobrev6og18ÅrServiceTest {
                 any(),
                 any(),
                 any(),
-                any()
+                any(),
             )
         }
         verify(exactly = 0) {
             vedtaksperiodeService.oppdaterFortsattInnvilgetPeriodeMedAutobrevBegrunnelse(
                 any(),
-                any()
+                any(),
             )
         }
         verify(exactly = 0) { autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(any()) }
@@ -313,7 +313,7 @@ internal class Autobrev6og18ÅrServiceTest {
         behandlingStatus: BehandlingStatus = BehandlingStatus.AVSLUTTET,
         fagsakStatus: FagsakStatus = FagsakStatus.LØPENDE,
         alder: Long,
-        medSøsken: Boolean
+        medSøsken: Boolean,
     ): Triple<Behandling, Person, Person> {
         val behandling = lagBehandling().also {
             it.fagsak.status = fagsakStatus
@@ -332,27 +332,27 @@ internal class Autobrev6og18ÅrServiceTest {
                     fom = søsken.fødselsdato.toYearMonth(),
                     tom = søsken.fødselsdato.plusYears(6).toYearMonth(),
                     beløp = 1676,
-                    person = søsken
+                    person = søsken,
                 )
             }
             every {
                 andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
-                    behandling.id
+                    behandling.id,
                 )
             } returns listOfNotNull(
                 lagAndelTilkjentYtelse(
                     fom = inneværendeMåned().minusMonths(10),
                     tom = inneværendeMåned().minusMonths(1),
                     beløp = 1676,
-                    person = barnIBrytningsalder
+                    person = barnIBrytningsalder,
                 ),
                 lagAndelTilkjentYtelse(
                     fom = inneværendeMåned(),
                     tom = YearMonth.now().plusYears(12),
                     beløp = 1054,
-                    person = barnIBrytningsalder
+                    person = barnIBrytningsalder,
                 ),
-                andelTilkjentYtelseSøsken
+                andelTilkjentYtelseSøsken,
             )
         } else if (alder == 18L) {
             barnIBrytningsalder = tilfeldigPerson(LocalDate.now().minusYears(18))
@@ -363,21 +363,21 @@ internal class Autobrev6og18ÅrServiceTest {
                     fom = søsken.fødselsdato.toYearMonth(),
                     tom = søsken.fødselsdato.plusYears(6).toYearMonth(),
                     beløp = 1676,
-                    person = søsken
+                    person = søsken,
                 )
             }
             every {
                 andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(
-                    behandling.id
+                    behandling.id,
                 )
             } returns listOfNotNull(
                 lagAndelTilkjentYtelse(
                     fom = inneværendeMåned().minusYears(12),
                     tom = inneværendeMåned().minusMonths(1),
                     beløp = 1054,
-                    person = barnIBrytningsalder
+                    person = barnIBrytningsalder,
                 ),
-                andelTilkjentYtelseSøsken
+                andelTilkjentYtelseSøsken,
             )
         }
 
@@ -391,7 +391,7 @@ internal class Autobrev6og18ÅrServiceTest {
             if (medSøsken) arrayOf(søker, barnIBrytningsalder, søsken) else arrayOf(søker, barnIBrytningsalder)
         every { personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = behandling.id) } returns lagTestPersonopplysningGrunnlag(
             behandling.id,
-            *personer
+            *personer,
         )
         return Triple(behandling, søker, barnIBrytningsalder)
     }

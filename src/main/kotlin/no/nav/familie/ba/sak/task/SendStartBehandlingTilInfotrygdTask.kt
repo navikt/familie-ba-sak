@@ -17,10 +17,10 @@ import java.util.Properties
 @Service
 @TaskStepBeskrivelse(
     taskStepType = SendStartBehandlingTilInfotrygdTask.TASK_STEP_TYPE,
-    beskrivelse = "Send startbehandling til Infotrygd feed."
+    beskrivelse = "Send startbehandling til Infotrygd feed.",
 )
 class SendStartBehandlingTilInfotrygdTask(
-    private val infotrygdFeedClient: InfotrygdFeedClient
+    private val infotrygdFeedClient: InfotrygdFeedClient,
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
@@ -47,10 +47,10 @@ class SendStartBehandlingTilInfotrygdTask(
                 type = TASK_STEP_TYPE,
                 payload = objectMapper.writeValueAsString(
                     StartBehandlingDto(
-                        fnrStoenadsmottaker = aktørStoenadsmottaker.aktivFødselsnummer()
-                    )
+                        fnrStoenadsmottaker = aktørStoenadsmottaker.aktivFødselsnummer(),
+                    ),
                 ),
-                properties = metadata
+                properties = metadata,
             )
         }
     }

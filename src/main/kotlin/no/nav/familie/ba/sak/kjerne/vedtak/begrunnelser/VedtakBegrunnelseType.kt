@@ -24,7 +24,8 @@ enum class VedtakBegrunnelseType(val sorteringsrekkefølge: Int) {
     EØS_FORTSATT_INNVILGET(5),
     INSTITUSJON_FORTSATT_INNVILGET(5),
     ENDRET_UTBETALING(7),
-    ETTER_ENDRET_UTBETALING(6);
+    ETTER_ENDRET_UTBETALING(6),
+    ;
 
     fun erInnvilget(): Boolean {
         return this == INNVILGET || this == INSTITUSJON_INNVILGET
@@ -39,7 +40,7 @@ enum class VedtakBegrunnelseType(val sorteringsrekkefølge: Int) {
     }
 
     fun erAvslag(): Boolean {
-        return this == AVSLAG || this == INSTITUSJON_AVSLAG
+        return this == AVSLAG || this == INSTITUSJON_AVSLAG || this == EØS_AVSLAG
     }
 
     fun erOpphør(): Boolean {
@@ -47,20 +48,26 @@ enum class VedtakBegrunnelseType(val sorteringsrekkefølge: Int) {
     }
 }
 
-fun VedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(periode: Periode) = when (this) {
-    VedtakBegrunnelseType.AVSLAG, VedtakBegrunnelseType.INSTITUSJON_AVSLAG ->
-        if (periode.fom == TIDENES_MORGEN && periode.tom == TIDENES_ENDE) {
-            ""
-        } else if (periode.tom == TIDENES_ENDE) {
-            periode.fom.tilMånedÅr()
-        } else {
-            "${periode.fom.tilMånedÅr()} til ${periode.tom.tilMånedÅr()}"
+fun VedtakBegrunnelseType.hentMånedOgÅrForBegrunnelse(periode: Periode, skalBrukeNyVedtaksperiodeLøsning: Boolean) =
+    when (this) {
+        VedtakBegrunnelseType.AVSLAG, VedtakBegrunnelseType.INSTITUSJON_AVSLAG -> {
+            val fomTekst = if (skalBrukeNyVedtaksperiodeLøsning) {
+                periode.fom.forrigeMåned().tilMånedÅr()
+            } else {
+                periode.fom.tilMånedÅr()
+            }
+
+            if (periode.fom == TIDENES_MORGEN && periode.tom == TIDENES_ENDE) {
+                ""
+            } else {
+                fomTekst
+            }
         }
 
-    else ->
-        if (periode.fom == TIDENES_MORGEN) {
-            throw Feil("Prøver å finne fom-dato for begrunnelse, men fikk \"TIDENES_MORGEN\".")
-        } else {
-            periode.fom.forrigeMåned().tilMånedÅr()
-        }
-}
+        else ->
+            if (periode.fom == TIDENES_MORGEN) {
+                throw Feil("Prøver å finne fom-dato for begrunnelse, men fikk \"TIDENES_MORGEN\".")
+            } else {
+                periode.fom.forrigeMåned().tilMånedÅr()
+            }
+    }

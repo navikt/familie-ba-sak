@@ -30,7 +30,7 @@ class SimuleringServiceTest(
     @Autowired private val simuleringService: SimuleringService,
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
     @Autowired private val databaseCleanupService: DatabaseCleanupService,
-    @Autowired private val brevmalService: BrevmalService
+    @Autowired private val brevmalService: BrevmalService,
 ) : AbstractSpringIntegrationTest() {
 
     @BeforeAll
@@ -50,7 +50,7 @@ class SimuleringServiceTest(
             vilkårsvurderingService = vilkårsvurderingService,
             stegService = stegService,
             vedtaksperiodeService = vedtaksperiodeService,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
         )
 
         val vedtakSimuleringMottakerMock =
@@ -58,12 +58,12 @@ class SimuleringServiceTest(
 
         assertEquals(
             vedtakSimuleringMottakerMock.size,
-            simuleringService.oppdaterSimuleringPåBehandlingVedBehov(behandlingEtterVilkårsvurderingSteg.id).size
+            simuleringService.oppdaterSimuleringPåBehandlingVedBehov(behandlingEtterVilkårsvurderingSteg.id).size,
         )
 
         assertEquals(
             vedtakSimuleringMottakerMock.size,
-            simuleringService.oppdaterSimuleringPåBehandling(behandlingEtterVilkårsvurderingSteg).size
+            simuleringService.oppdaterSimuleringPåBehandling(behandlingEtterVilkårsvurderingSteg).size,
         )
     }
 }

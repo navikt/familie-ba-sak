@@ -13,11 +13,11 @@ object EndringIEndretUtbetalingAndelUtil {
 
     fun utledEndringstidspunktForEndretUtbetalingAndel(
         nåværendeEndretAndeler: List<EndretUtbetalingAndel>,
-        forrigeEndretAndeler: List<EndretUtbetalingAndel>
+        forrigeEndretAndeler: List<EndretUtbetalingAndel>,
     ): YearMonth? {
         val endringIEndretUtbetalingAndelTidslinje = lagEndringIEndretUtbetalingAndelTidslinje(
             nåværendeEndretAndeler = nåværendeEndretAndeler,
-            forrigeEndretAndeler = forrigeEndretAndeler
+            forrigeEndretAndeler = forrigeEndretAndeler,
         )
 
         return endringIEndretUtbetalingAndelTidslinje.tilFørsteEndringstidspunkt()
@@ -25,14 +25,14 @@ object EndringIEndretUtbetalingAndelUtil {
 
     fun lagEndringIEndretUtbetalingAndelTidslinje(
         nåværendeEndretAndeler: List<EndretUtbetalingAndel>,
-        forrigeEndretAndeler: List<EndretUtbetalingAndel>
+        forrigeEndretAndeler: List<EndretUtbetalingAndel>,
     ): Tidslinje<Boolean, Måned> {
         val allePersoner = (nåværendeEndretAndeler.mapNotNull { it.person?.aktør } + forrigeEndretAndeler.mapNotNull { it.person?.aktør }).distinct()
 
         val tidslinjePerPerson = allePersoner.map { aktør ->
             lagEndringIEndretUbetalingAndelPerPersonTidslinje(
                 nåværendeEndretAndelerForPerson = nåværendeEndretAndeler.filter { it.person?.aktør == aktør },
-                forrigeEndretAndelerForPerson = forrigeEndretAndeler.filter { it.person?.aktør == aktør }
+                forrigeEndretAndelerForPerson = forrigeEndretAndeler.filter { it.person?.aktør == aktør },
             )
         }
 
@@ -40,12 +40,12 @@ object EndringIEndretUtbetalingAndelUtil {
     }
 
     private fun finnesMinstEnEndringIPeriode(
-        endringer: Iterable<Boolean>
+        endringer: Iterable<Boolean>,
     ): Boolean = endringer.any { it }
 
     private fun lagEndringIEndretUbetalingAndelPerPersonTidslinje(
         nåværendeEndretAndelerForPerson: List<EndretUtbetalingAndel>,
-        forrigeEndretAndelerForPerson: List<EndretUtbetalingAndel>
+        forrigeEndretAndelerForPerson: List<EndretUtbetalingAndel>,
     ): Tidslinje<Boolean, Måned> {
         val nåværendeTidslinje = EndretUtbetalingAndelTidslinje(nåværendeEndretAndelerForPerson)
         val forrigeTidslinje = EndretUtbetalingAndelTidslinje(forrigeEndretAndelerForPerson)

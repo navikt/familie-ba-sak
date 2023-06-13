@@ -39,7 +39,7 @@ class TilkjentYtelseRepositoryOppdaterTilkjentYtelseTest {
         assertThrows<IllegalStateException> {
             tilkjentYtelseRepository.oppdaterTilkjentYtelse(
                 forrigeTilkjentYtelse,
-                nyTilkjentYtelse.andelerTilkjentYtelse
+                nyTilkjentYtelse.andelerTilkjentYtelse,
             )
         }
     }
@@ -59,7 +59,7 @@ class TilkjentYtelseRepositoryOppdaterTilkjentYtelseTest {
         assertThrows<IllegalStateException> {
             tilkjentYtelseRepository.oppdaterTilkjentYtelse(
                 forrigeTilkjentYtelse,
-                nyTilkjentYtelse.andelerTilkjentYtelse
+                nyTilkjentYtelse.andelerTilkjentYtelse,
             )
         }
     }
@@ -82,7 +82,7 @@ class TilkjentYtelseRepositoryOppdaterTilkjentYtelseTest {
 
         tilkjentYtelseRepository.oppdaterTilkjentYtelse(
             forrigeTilkjentYtelse,
-            nyTilkjentYtelse.andelerTilkjentYtelse
+            nyTilkjentYtelse.andelerTilkjentYtelse,
         )
 
         verify(exactly = 1) { tilkjentYtelseRepository.saveAndFlush(any()) }

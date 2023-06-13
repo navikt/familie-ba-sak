@@ -30,7 +30,7 @@ internal class BehandlingsresultatValideringUtilsTest {
             periodeTom = LocalDate.now(),
             lagFullstendigVilkårResultat = true,
             personType = PersonType.BARN,
-            erEksplisittAvslagPåSøknad = true
+            erEksplisittAvslagPåSøknad = true,
         )
         val barn2PersonResultat = lagPersonResultat(
             vilkårsvurdering = vikårsvurdering,
@@ -40,13 +40,13 @@ internal class BehandlingsresultatValideringUtilsTest {
             periodeTom = LocalDate.now(),
             lagFullstendigVilkårResultat = true,
             personType = PersonType.BARN,
-            erEksplisittAvslagPåSøknad = true
+            erEksplisittAvslagPåSøknad = true,
         )
 
         assertThrows<FunksjonellFeil> {
             BehandlingsresultatValideringUtils.validerAtBarePersonerFremstiltKravForEllerSøkerHarFåttEksplisittAvslag(
                 personResultater = setOf(barn1PersonResultat, barn2PersonResultat),
-                personerFremstiltKravFor = listOf(barn2.aktør)
+                personerFremstiltKravFor = listOf(barn2.aktør),
             )
         }
     }
@@ -65,13 +65,13 @@ internal class BehandlingsresultatValideringUtilsTest {
             periodeTom = LocalDate.now(),
             lagFullstendigVilkårResultat = true,
             personType = PersonType.SØKER,
-            erEksplisittAvslagPåSøknad = true
+            erEksplisittAvslagPåSøknad = true,
         )
 
         assertDoesNotThrow {
             BehandlingsresultatValideringUtils.validerAtBarePersonerFremstiltKravForEllerSøkerHarFåttEksplisittAvslag(
                 personResultater = setOf(søkerPersonResultat),
-                personerFremstiltKravFor = emptyList()
+                personerFremstiltKravFor = emptyList(),
             )
         }
     }
@@ -91,7 +91,7 @@ internal class BehandlingsresultatValideringUtilsTest {
             periodeTom = LocalDate.now(),
             lagFullstendigVilkårResultat = true,
             personType = PersonType.BARN,
-            erEksplisittAvslagPåSøknad = true
+            erEksplisittAvslagPåSøknad = true,
         )
         val barn2PersonResultat = lagPersonResultat(
             vilkårsvurdering = vikårsvurdering,
@@ -101,13 +101,13 @@ internal class BehandlingsresultatValideringUtilsTest {
             periodeTom = LocalDate.now(),
             lagFullstendigVilkårResultat = true,
             personType = PersonType.BARN,
-            erEksplisittAvslagPåSøknad = false
+            erEksplisittAvslagPåSøknad = false,
         )
 
         assertDoesNotThrow {
             BehandlingsresultatValideringUtils.validerAtBarePersonerFremstiltKravForEllerSøkerHarFåttEksplisittAvslag(
                 personResultater = setOf(barn1PersonResultat, barn2PersonResultat),
-                personerFremstiltKravFor = listOf(barn1.aktør, barn2.aktør)
+                personerFremstiltKravFor = listOf(barn1.aktør, barn2.aktør),
             )
         }
     }

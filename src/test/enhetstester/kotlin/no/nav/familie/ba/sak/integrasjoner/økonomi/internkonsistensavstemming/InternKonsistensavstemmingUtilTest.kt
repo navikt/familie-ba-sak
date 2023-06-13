@@ -20,26 +20,26 @@ class InternKonsistensavstemmingUtilTest {
                 fom = YearMonth.parse("2021-12"),
                 tom = YearMonth.parse("2021-12"),
                 beløp = 1654,
-                ytelseType = YtelseType.ORDINÆR_BARNETRYGD
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
             ),
             lagAndelTilkjentYtelse(
                 fom = YearMonth.parse("2022-01"),
                 tom = YearMonth.parse("2023-02"),
                 beløp = 1676,
-                ytelseType = YtelseType.ORDINÆR_BARNETRYGD
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
             ),
             lagAndelTilkjentYtelse(
                 fom = YearMonth.parse("2023-03"),
                 tom = YearMonth.parse("2027-10"),
                 beløp = 1723,
-                ytelseType = YtelseType.ORDINÆR_BARNETRYGD
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
             ),
             lagAndelTilkjentYtelse(
                 fom = YearMonth.parse("2027-11"),
                 tom = YearMonth.parse("2039-10"),
                 beløp = 1083,
-                ytelseType = YtelseType.ORDINÆR_BARNETRYGD
-            )
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+            ),
         )
         val utbetalingsoppdrag = objectMapper.readValue<Utbetalingsoppdrag>(mockUtbetalingsoppdrag)
 
@@ -53,20 +53,20 @@ class InternKonsistensavstemmingUtilTest {
                 fom = YearMonth.parse("2021-12"),
                 tom = YearMonth.parse("2021-12"),
                 beløp = 1654,
-                ytelseType = YtelseType.ORDINÆR_BARNETRYGD
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
             ),
             lagAndelTilkjentYtelse(
                 fom = YearMonth.parse("2022-01"),
                 tom = YearMonth.parse("2023-02"),
                 beløp = 1676,
-                ytelseType = YtelseType.ORDINÆR_BARNETRYGD
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
             ),
             lagAndelTilkjentYtelse(
                 fom = YearMonth.parse("2023-03"),
                 tom = YearMonth.parse("2027-10"),
                 beløp = 1723,
-                ytelseType = YtelseType.ORDINÆR_BARNETRYGD
-            )
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+            ),
         )
         val utbetalingsoppdrag = objectMapper.readValue<Utbetalingsoppdrag>(mockUtbetalingsoppdrag)
 
@@ -80,26 +80,26 @@ class InternKonsistensavstemmingUtilTest {
                 fom = YearMonth.parse("2021-12"),
                 tom = YearMonth.parse("2021-12"),
                 beløp = 1654,
-                ytelseType = YtelseType.ORDINÆR_BARNETRYGD
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
             ),
             lagAndelTilkjentYtelse(
                 fom = YearMonth.parse("2022-01"),
                 tom = YearMonth.parse("2023-02"),
                 beløp = 1676,
-                ytelseType = YtelseType.ORDINÆR_BARNETRYGD
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
             ),
             lagAndelTilkjentYtelse(
                 fom = YearMonth.parse("2023-03"),
                 tom = YearMonth.parse("2027-10"),
                 beløp = 1723,
-                ytelseType = YtelseType.ORDINÆR_BARNETRYGD
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
             ),
             lagAndelTilkjentYtelse(
                 fom = YearMonth.parse("2027-11"),
                 tom = YearMonth.parse("2039-10"),
                 beløp = 9999,
-                ytelseType = YtelseType.ORDINÆR_BARNETRYGD
-            )
+                ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
+            ),
         )
         val utbetalingsoppdrag = objectMapper.readValue<Utbetalingsoppdrag>(mockUtbetalingsoppdrag)
 
@@ -117,7 +117,7 @@ class InternKonsistensavstemmingUtilTest {
             "2024-12,2036-11,1083,ORDINÆR_BARNETRYGD",
 
             "2021-05,2023-02,1054,UTVIDET_BARNETRYGD",
-            "2023-03,2036-11,2489,UTVIDET_BARNETRYGD"
+            "2023-03,2036-11,2489,UTVIDET_BARNETRYGD",
         )
 
         val andelerSisteVedtatteBehandling = andelStringer.map { it.split(",") }.map {
@@ -125,7 +125,7 @@ class InternKonsistensavstemmingUtilTest {
                 fom = YearMonth.parse(it[0]),
                 tom = YearMonth.parse(it[1]),
                 beløp = it[2].toInt(),
-                ytelseType = YtelseType.valueOf(it[3])
+                ytelseType = YtelseType.valueOf(it[3]),
             )
         }
 
@@ -142,7 +142,7 @@ class InternKonsistensavstemmingUtilTest {
             "2028-04,2040-03,527,ORDINÆR_BARNETRYGD,2554733867704", // barn 1, ble laget i siste behandling som iverksatte
 
             "2022-07,2028-05,1676,ORDINÆR_BARNETRYGD,2909658383415", // barn 2, ble laget før siste behandling som iverksatte
-            "2028-06,2040-05,1054,ORDINÆR_BARNETRYGD,2909658383415" // barn 2, ble laget før siste behandling som iverksatte
+            "2028-06,2040-05,1054,ORDINÆR_BARNETRYGD,2909658383415", // barn 2, ble laget før siste behandling som iverksatte
         )
 
         val andelerSisteVedtatteBehandling = andelStringer.map { it.split(",") }.map {
@@ -151,7 +151,7 @@ class InternKonsistensavstemmingUtilTest {
                 tom = YearMonth.parse(it[1]),
                 beløp = it[2].toInt(),
                 ytelseType = YtelseType.valueOf(it[3]),
-                aktør = Aktør(it[4])
+                aktør = Aktør(it[4]),
             )
         }
 
@@ -169,7 +169,7 @@ class InternKonsistensavstemmingUtilTest {
             "2021-09,2021-12,1654,ORDINÆR_BARNETRYGD,2193974415300",
             "2022-01,2022-02,1054,ORDINÆR_BARNETRYGD,2193974415300",
             "2012-06,2019-02,970,ORDINÆR_BARNETRYGD,2094407059820",
-            "2019-03,2022-01,1054,ORDINÆR_BARNETRYGD,2094407059820"
+            "2019-03,2022-01,1054,ORDINÆR_BARNETRYGD,2094407059820",
         )
 
         val andelerSisteVedtatteBehandling = andelStringer.map { it.split(",") }.map {
@@ -178,7 +178,7 @@ class InternKonsistensavstemmingUtilTest {
                 tom = YearMonth.parse(it[1]),
                 beløp = it[2].toInt(),
                 ytelseType = YtelseType.valueOf(it[3]),
-                aktør = Aktør(it[4])
+                aktør = Aktør(it[4]),
             )
         }
 
@@ -191,7 +191,7 @@ class InternKonsistensavstemmingUtilTest {
     fun `skal si andelene og utbetalingene er like dersom andel blir splittet opp, men betaler ut det samme i periodene`() {
         val andelStringer = listOf(
             "2021-01,2022-03,1054,ORDINÆR_BARNETRYGD",
-            "2022-04,2022-06,1054,ORDINÆR_BARNETRYGD"
+            "2022-04,2022-06,1054,ORDINÆR_BARNETRYGD",
         )
 
         val aktør = randomAktør()
@@ -202,7 +202,7 @@ class InternKonsistensavstemmingUtilTest {
                 tom = YearMonth.parse(it[1]),
                 beløp = it[2].toInt(),
                 ytelseType = YtelseType.valueOf(it[3]),
-                aktør = aktør
+                aktør = aktør,
             )
         }
 

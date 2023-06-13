@@ -19,7 +19,7 @@ class KorrigertVedtakRepositoryTest(
     @Autowired private val aktørIdRepository: AktørIdRepository,
     @Autowired private val fagsakRepository: FagsakRepository,
     @Autowired private val behandlingRepository: BehandlingRepository,
-    @Autowired private val korrigertVedtakRepository: KorrigertVedtakRepository
+    @Autowired private val korrigertVedtakRepository: KorrigertVedtakRepository,
 ) : AbstractSpringIntegrationTest() {
 
     @Test
@@ -31,7 +31,7 @@ class KorrigertVedtakRepositoryTest(
             vedtaksdato = LocalDate.now().minusDays(6),
             begrunnelse = "Test på inaktiv korrigering",
             behandling = behandling,
-            aktiv = false
+            aktiv = false,
         )
 
         korrigertVedtakRepository.saveAndFlush(inaktivKorrigertVedtak)
@@ -51,7 +51,7 @@ class KorrigertVedtakRepositoryTest(
             vedtaksdato = LocalDate.now().minusDays(6),
             begrunnelse = "Test på aktiv korrigering",
             behandling = behandling,
-            aktiv = true
+            aktiv = true,
         )
 
         korrigertVedtakRepository.saveAndFlush(aktivKorrigertVedtak)
@@ -61,7 +61,7 @@ class KorrigertVedtakRepositoryTest(
 
         Assertions.assertNotNull(
             eksisterendeKorrigertVedtak,
-            "Skal finnes aktiv korrigert vedtak på behandling"
+            "Skal finnes aktiv korrigert vedtak på behandling",
         )
     }
 
@@ -74,7 +74,7 @@ class KorrigertVedtakRepositoryTest(
             begrunnelse = "Test på aktiv korrigering",
             vedtaksdato = LocalDate.now().minusDays(6),
             behandling = behandling,
-            aktiv = true
+            aktiv = true,
         )
 
         val aktivKorrigertVedtak2 = KorrigertVedtak(
@@ -82,7 +82,7 @@ class KorrigertVedtakRepositoryTest(
             begrunnelse = "Test på aktiv korrigering",
             vedtaksdato = LocalDate.now().minusDays(3),
             behandling = behandling,
-            aktiv = true
+            aktiv = true,
         )
 
         korrigertVedtakRepository.saveAndFlush(aktivKorrigertVedtak1)

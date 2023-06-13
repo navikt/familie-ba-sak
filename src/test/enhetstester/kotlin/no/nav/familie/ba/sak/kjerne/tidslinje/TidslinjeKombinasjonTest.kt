@@ -24,7 +24,7 @@ class TidslinjeKombinasjonTest {
             "cd",
             "dc",
             "eb",
-            "fa"
+            "fa",
         )
     }
 
@@ -38,7 +38,7 @@ class TidslinjeKombinasjonTest {
             "ad",
             "bc",
             "b",
-            "a"
+            "a",
         )
     }
 
@@ -52,7 +52,7 @@ class TidslinjeKombinasjonTest {
             "ca",
             "cc",
             "cd",
-            ">"
+            ">",
         )
     }
 
@@ -61,7 +61,7 @@ class TidslinjeKombinasjonTest {
         assertTidslinjer(
             linje1 = "<a",
             linje2 = "<abacd>",
-            "<", "aa", "b", "a", "c", "d", ">"
+            "<", "aa", "b", "a", "c", "d", ">",
         )
     }
 

@@ -23,7 +23,7 @@ import java.time.Duration
     ConsumerIdClientInterceptor::class,
     BearerTokenClientInterceptor::class,
     MdcValuesPropagatingClientInterceptor::class,
-    BearerTokenClientCredentialsClientInterceptor::class
+    BearerTokenClientCredentialsClientInterceptor::class,
 )
 @Profile("!mock-rest-template-config")
 class RestTemplateConfig {
@@ -31,17 +31,17 @@ class RestTemplateConfig {
     @Bean("jwtBearerClientCredentials")
     fun restTemplateJwtBearerClientCredentials(
         consumerIdClientInterceptor: ConsumerIdClientInterceptor,
-        bearerTokenClientCredentialsClientInterceptor: BearerTokenClientCredentialsClientInterceptor
+        bearerTokenClientCredentialsClientInterceptor: BearerTokenClientCredentialsClientInterceptor,
     ): RestOperations {
         return RestTemplateBuilder()
             .interceptors(
                 consumerIdClientInterceptor,
                 bearerTokenClientCredentialsClientInterceptor,
-                MdcValuesPropagatingClientInterceptor()
+                MdcValuesPropagatingClientInterceptor(),
             )
             .additionalMessageConverters(
                 ByteArrayHttpMessageConverter(),
-                MappingJackson2HttpMessageConverter(objectMapper)
+                MappingJackson2HttpMessageConverter(objectMapper),
             )
             .build()
     }
@@ -49,17 +49,17 @@ class RestTemplateConfig {
     @Bean("jwtBearer")
     fun restTemplateJwtBearer(
         consumerIdClientInterceptor: ConsumerIdClientInterceptor,
-        bearerTokenClientInterceptor: BearerTokenClientInterceptor
+        bearerTokenClientInterceptor: BearerTokenClientInterceptor,
     ): RestOperations {
         return RestTemplateBuilder()
             .interceptors(
                 consumerIdClientInterceptor,
                 bearerTokenClientInterceptor,
-                MdcValuesPropagatingClientInterceptor()
+                MdcValuesPropagatingClientInterceptor(),
             )
             .additionalMessageConverters(
                 ByteArrayHttpMessageConverter(),
-                MappingJackson2HttpMessageConverter(objectMapper)
+                MappingJackson2HttpMessageConverter(objectMapper),
             )
             .build()
     }
@@ -67,7 +67,7 @@ class RestTemplateConfig {
     @Bean("jwtBearerMedLangTimeout")
     fun restTemplateJwtBearerMedLangTimeout(
         consumerIdClientInterceptor: ConsumerIdClientInterceptor,
-        bearerTokenClientInterceptor: BearerTokenClientInterceptor
+        bearerTokenClientInterceptor: BearerTokenClientInterceptor,
     ): RestOperations {
         return RestTemplateBuilder()
             .setReadTimeout(Duration.ofMinutes(12L))
@@ -75,11 +75,11 @@ class RestTemplateConfig {
             .interceptors(
                 consumerIdClientInterceptor,
                 bearerTokenClientInterceptor,
-                MdcValuesPropagatingClientInterceptor()
+                MdcValuesPropagatingClientInterceptor(),
             )
             .additionalMessageConverters(
                 ByteArrayHttpMessageConverter(),
-                MappingJackson2HttpMessageConverter(objectMapper)
+                MappingJackson2HttpMessageConverter(objectMapper),
             )
             .build()
     }
@@ -92,13 +92,13 @@ class RestTemplateConfig {
     @Bean
     fun restOperations(
         consumerIdClientInterceptor: ConsumerIdClientInterceptor,
-        mdcValuesPropagatingClientInterceptor: MdcValuesPropagatingClientInterceptor
+        mdcValuesPropagatingClientInterceptor: MdcValuesPropagatingClientInterceptor,
     ): RestOperations {
         return RestTemplateBuilder()
             .interceptors(consumerIdClientInterceptor, mdcValuesPropagatingClientInterceptor)
             .additionalMessageConverters(
                 ByteArrayHttpMessageConverter(),
-                MappingJackson2HttpMessageConverter(objectMapper)
+                MappingJackson2HttpMessageConverter(objectMapper),
             )
             .build()
     }
@@ -106,7 +106,7 @@ class RestTemplateConfig {
     @Bean
     fun restTemplateBuilderMedProxy(
         consumerIdClientInterceptor: ConsumerIdClientInterceptor,
-        mdcValuesPropagatingClientInterceptor: MdcValuesPropagatingClientInterceptor
+        mdcValuesPropagatingClientInterceptor: MdcValuesPropagatingClientInterceptor,
     ): RestTemplateBuilder {
         return RestTemplateBuilder()
             .setConnectTimeout(Duration.ofSeconds(5))
@@ -123,6 +123,6 @@ val restTemplate = RestTemplate(
     listOf(
         StringHttpMessageConverter(StandardCharsets.UTF_8),
         ByteArrayHttpMessageConverter(),
-        MappingJackson2HttpMessageConverter(objectMapper)
-    )
+        MappingJackson2HttpMessageConverter(objectMapper),
+    ),
 )

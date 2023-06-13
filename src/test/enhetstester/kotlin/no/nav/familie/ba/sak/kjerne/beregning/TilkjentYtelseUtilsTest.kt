@@ -74,13 +74,13 @@ internal class TilkjentYtelseUtilsTest {
             genererVilkårsvurderingOgPersonopplysningGrunnlag(
                 barnFødselsdato = barnFødselsdato,
                 vilkårOppfyltFom = barnSeksårsdag,
-                under18ÅrVilkårOppfyltTom = barnFødselsdato.plusYears(18)
+                under18ÅrVilkårOppfyltTom = barnFødselsdato.plusYears(18),
             )
 
         val tilkjentYtelse = beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            fagsakType = FagsakType.NORMAL
+            fagsakType = FagsakType.NORMAL,
         )
 
         assertEquals(1, tilkjentYtelse.andelerTilkjentYtelse.size)
@@ -89,9 +89,9 @@ internal class TilkjentYtelseUtilsTest {
         assertEquals(
             MånedPeriode(
                 barnSeksårsdag.nesteMåned(),
-                barnFødselsdato.plusYears(18).forrigeMåned()
+                barnFødselsdato.plusYears(18).forrigeMåned(),
             ),
-            MånedPeriode(andelTilkjentYtelse.stønadFom, andelTilkjentYtelse.stønadTom)
+            MånedPeriode(andelTilkjentYtelse.stønadFom, andelTilkjentYtelse.stønadTom),
         )
     }
 
@@ -107,13 +107,13 @@ internal class TilkjentYtelseUtilsTest {
                 barnFødselsdato = barnFødselsdato,
                 vilkårOppfyltFom = vilkårOppfyltFom,
                 vilkårOppfyltTom = vilkårOppfyltTom,
-                under18ÅrVilkårOppfyltTom = barnFødselsdato.plusYears(18)
+                under18ÅrVilkårOppfyltTom = barnFødselsdato.plusYears(18),
             )
 
         val tilkjentYtelse = beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            fagsakType = FagsakType.NORMAL
+            fagsakType = FagsakType.NORMAL,
         )
 
         assertEquals(2, tilkjentYtelse.andelerTilkjentYtelse.size)
@@ -121,14 +121,14 @@ internal class TilkjentYtelseUtilsTest {
         val andelTilkjentYtelseFør6År = tilkjentYtelse.andelerTilkjentYtelse.first()
         assertEquals(
             MånedPeriode(vilkårOppfyltFom.nesteMåned(), barnSeksårsdag.forrigeMåned()),
-            MånedPeriode(andelTilkjentYtelseFør6År.stønadFom, andelTilkjentYtelseFør6År.stønadTom)
+            MånedPeriode(andelTilkjentYtelseFør6År.stønadFom, andelTilkjentYtelseFør6År.stønadTom),
         )
         assertEquals(1676, andelTilkjentYtelseFør6År.kalkulertUtbetalingsbeløp)
 
         val andelTilkjentYtelseEtter6År = tilkjentYtelse.andelerTilkjentYtelse.last()
         assertEquals(
             MånedPeriode(barnSeksårsdag.toYearMonth(), barnSeksårsdag.toYearMonth()),
-            MånedPeriode(andelTilkjentYtelseEtter6År.stønadFom, andelTilkjentYtelseEtter6År.stønadTom)
+            MånedPeriode(andelTilkjentYtelseEtter6År.stønadFom, andelTilkjentYtelseEtter6År.stønadTom),
         )
         assertEquals(1054, andelTilkjentYtelseEtter6År.kalkulertUtbetalingsbeløp)
     }
@@ -144,13 +144,13 @@ internal class TilkjentYtelseUtilsTest {
                 vilkårOppfyltFom = barnFødselsDato,
                 vilkårOppfyltTom = barnDødsfallsDato,
                 barnDødsfallDato = barnDødsfallsDato,
-                under18ÅrVilkårOppfyltTom = barnDødsfallsDato
+                under18ÅrVilkårOppfyltTom = barnDødsfallsDato,
             )
 
         val tilkjentYtelse = beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            fagsakType = FagsakType.NORMAL
+            fagsakType = FagsakType.NORMAL,
         )
 
         assertEquals(2, tilkjentYtelse.andelerTilkjentYtelse.size)
@@ -176,13 +176,13 @@ internal class TilkjentYtelseUtilsTest {
                 vilkårOppfyltFom = barnFødselsDato,
                 vilkårOppfyltTom = barnDødsfallsDato,
                 barnDødsfallDato = barnDødsfallsDato,
-                under18ÅrVilkårOppfyltTom = barnDødsfallsDato
+                under18ÅrVilkårOppfyltTom = barnDødsfallsDato,
             )
 
         val tilkjentYtelse = beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            fagsakType = FagsakType.NORMAL
+            fagsakType = FagsakType.NORMAL,
         )
 
         assertEquals(2, tilkjentYtelse.andelerTilkjentYtelse.size)
@@ -205,13 +205,13 @@ internal class TilkjentYtelseUtilsTest {
         val (vilkårsvurdering, personopplysningGrunnlag) = genererVilkårsvurderingOgPersonopplysningGrunnlag(
             barnFødselsdato = barnFødselsdato,
             vilkårOppfyltFom = barnFødselsdato,
-            under18ÅrVilkårOppfyltTom = barnFødselsdato.plusYears(18)
+            under18ÅrVilkårOppfyltTom = barnFødselsdato.plusYears(18),
         )
 
         val andeler = beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            fagsakType = FagsakType.NORMAL
+            fagsakType = FagsakType.NORMAL,
         )
             .andelerTilkjentYtelse
             .toList()
@@ -224,8 +224,8 @@ internal class TilkjentYtelseUtilsTest {
             MånedPeriode(barnFødselsdato.nesteMåned(), YearMonth.of(2021, 8)),
             MånedPeriode(
                 andelTilkjentYtelseFør6ÅrSeptember2020.stønadFom,
-                andelTilkjentYtelseFør6ÅrSeptember2020.stønadTom
-            )
+                andelTilkjentYtelseFør6ÅrSeptember2020.stønadTom,
+            ),
         )
         assertEquals(1354, andelTilkjentYtelseFør6ÅrSeptember2020.kalkulertUtbetalingsbeløp)
 
@@ -234,8 +234,8 @@ internal class TilkjentYtelseUtilsTest {
             MånedPeriode(YearMonth.of(2021, 9), YearMonth.of(2021, 12)),
             MånedPeriode(
                 andelTilkjentYtelseFør6ÅrSeptember2021.stønadFom,
-                andelTilkjentYtelseFør6ÅrSeptember2021.stønadTom
-            )
+                andelTilkjentYtelseFør6ÅrSeptember2021.stønadTom,
+            ),
         )
         assertEquals(1654, andelTilkjentYtelseFør6ÅrSeptember2021.kalkulertUtbetalingsbeløp)
 
@@ -244,15 +244,15 @@ internal class TilkjentYtelseUtilsTest {
             MånedPeriode(YearMonth.of(2022, 1), barnSeksårsdag.forrigeMåned()),
             MånedPeriode(
                 andelTilkjentYtelseFør6ÅrJanuar2022.stønadFom,
-                andelTilkjentYtelseFør6ÅrJanuar2022.stønadTom
-            )
+                andelTilkjentYtelseFør6ÅrJanuar2022.stønadTom,
+            ),
         )
         assertEquals(1676, andelTilkjentYtelseFør6ÅrJanuar2022.kalkulertUtbetalingsbeløp)
 
         val andelTilkjentYtelseEtter6År = andeler[3]
         assertEquals(
             MånedPeriode(barnSeksårsdag.toYearMonth(), barnFødselsdato.plusYears(18).forrigeMåned()),
-            MånedPeriode(andelTilkjentYtelseEtter6År.stønadFom, andelTilkjentYtelseEtter6År.stønadTom)
+            MånedPeriode(andelTilkjentYtelseEtter6År.stønadFom, andelTilkjentYtelseEtter6År.stønadTom),
         )
         assertEquals(1054, andelTilkjentYtelseEtter6År.kalkulertUtbetalingsbeløp)
     }
@@ -266,13 +266,13 @@ internal class TilkjentYtelseUtilsTest {
                 barnFødselsdato = barnFødselsdato,
                 vilkårOppfyltFom = barnFødselsdato,
                 erDeltBosted = true,
-                under18ÅrVilkårOppfyltTom = barnFødselsdato.plusYears(18)
+                under18ÅrVilkårOppfyltTom = barnFødselsdato.plusYears(18),
             )
 
         val andeler = beregnTilkjentYtelse(
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            fagsakType = FagsakType.NORMAL
+            fagsakType = FagsakType.NORMAL,
         )
             .andelerTilkjentYtelse.toList()
             .sortedBy { it.stønadFom }
@@ -299,7 +299,7 @@ internal class TilkjentYtelseUtilsTest {
                 barnFødselsdato = barnFødselsdato,
                 vilkårOppfyltFom = barnFødselsdato,
                 erDeltBosted = true,
-                under18ÅrVilkårOppfyltTom = barnFødselsdato.plusYears(18)
+                under18ÅrVilkårOppfyltTom = barnFødselsdato.plusYears(18),
             )
 
         val oppdatertVilkårsvurdering = oppdaterBosattIRiketMedBack2BackPerioder(
@@ -307,13 +307,13 @@ internal class TilkjentYtelseUtilsTest {
             personResultat = vilkårsvurdering.personResultater.find { !it.erSøkersResultater() }!!,
             barnFødselsdato = barnFødselsdato,
             backToBackTom = LocalDate.of(2019, 8, 31),
-            backToBackFom = LocalDate.of(2019, 9, 2)
+            backToBackFom = LocalDate.of(2019, 9, 2),
         )
 
         val andeler = beregnTilkjentYtelse(
             vilkårsvurdering = oppdatertVilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            fagsakType = FagsakType.NORMAL
+            fagsakType = FagsakType.NORMAL,
         )
             .andelerTilkjentYtelse.toList()
             .sortedBy { it.stønadFom }
@@ -331,7 +331,7 @@ internal class TilkjentYtelseUtilsTest {
                 barnFødselsdato = barnFødselsdato,
                 vilkårOppfyltFom = barnFødselsdato,
                 erDeltBosted = true,
-                under18ÅrVilkårOppfyltTom = barnFødselsdato.plusYears(18)
+                under18ÅrVilkårOppfyltTom = barnFødselsdato.plusYears(18),
             )
 
         val oppdatertVilkårsvurdering = oppdaterBosattIRiketMedBack2BackPerioder(
@@ -339,13 +339,13 @@ internal class TilkjentYtelseUtilsTest {
             personResultat = vilkårsvurdering.personResultater.find { it.erSøkersResultater() }!!,
             barnFødselsdato = barnFødselsdato,
             backToBackTom = LocalDate.of(2019, 8, 31),
-            backToBackFom = LocalDate.of(2019, 9, 2)
+            backToBackFom = LocalDate.of(2019, 9, 2),
         )
 
         val andeler = beregnTilkjentYtelse(
             vilkårsvurdering = oppdatertVilkårsvurdering,
             personopplysningGrunnlag = personopplysningGrunnlag,
-            fagsakType = FagsakType.NORMAL
+            fagsakType = FagsakType.NORMAL,
         )
             .andelerTilkjentYtelse.toList()
             .sortedBy { it.stønadFom }
@@ -359,7 +359,7 @@ internal class TilkjentYtelseUtilsTest {
         personResultat: PersonResultat,
         barnFødselsdato: LocalDate,
         backToBackTom: LocalDate? = null,
-        backToBackFom: LocalDate? = null
+        backToBackFom: LocalDate? = null,
     ): Vilkårsvurdering {
         personResultat.setSortedVilkårResultater(
             personResultat.vilkårResultater.filter { it.vilkårType != Vilkår.BOSATT_I_RIKET }
@@ -372,7 +372,7 @@ internal class TilkjentYtelseUtilsTest {
                         periodeFom = barnFødselsdato,
                         periodeTom = backToBackTom,
                         begrunnelse = "",
-                        behandlingId = vilkårsvurdering.behandling.id
+                        behandlingId = vilkårsvurdering.behandling.id,
                     ),
                     VilkårResultat(
                         personResultat = personResultat,
@@ -381,15 +381,15 @@ internal class TilkjentYtelseUtilsTest {
                         periodeFom = backToBackFom,
                         periodeTom = null,
                         begrunnelse = "",
-                        behandlingId = vilkårsvurdering.behandling.id
-                    )
-                )
+                        behandlingId = vilkårsvurdering.behandling.id,
+                    ),
+                ),
         )
 
         vilkårsvurdering.personResultater =
             vilkårsvurdering.personResultater.filter { it.aktør != personResultat.aktør }.toSet() + setOf(
-            personResultat
-        )
+                personResultat,
+            )
 
         return vilkårsvurdering
     }
@@ -400,7 +400,7 @@ internal class TilkjentYtelseUtilsTest {
         vilkårOppfyltTom: LocalDate? = barnFødselsdato.plusYears(18),
         barnDødsfallDato: LocalDate? = null,
         erDeltBosted: Boolean = false,
-        under18ÅrVilkårOppfyltTom: LocalDate?
+        under18ÅrVilkårOppfyltTom: LocalDate?,
     ): Pair<Vilkårsvurdering, PersonopplysningGrunnlag> {
         val søkerFnr = randomFnr()
         val barnFnr = randomFnr()
@@ -414,7 +414,7 @@ internal class TilkjentYtelseUtilsTest {
             behandling = behandling,
             resultat = Resultat.OPPFYLT,
             søkerPeriodeFom = LocalDate.of(2014, 1, 1),
-            søkerPeriodeTom = null
+            søkerPeriodeTom = null,
         )
 
         val barnResultat =
@@ -428,7 +428,7 @@ internal class TilkjentYtelseUtilsTest {
                     periodeFom = vilkårOppfyltFom,
                     periodeTom = vilkårOppfyltTom,
                     begrunnelse = "",
-                    behandlingId = behandling.id
+                    behandlingId = behandling.id,
                 ),
                 VilkårResultat(
                     personResultat = barnResultat,
@@ -437,7 +437,7 @@ internal class TilkjentYtelseUtilsTest {
                     periodeFom = barnFødselsdato,
                     periodeTom = under18ÅrVilkårOppfyltTom,
                     begrunnelse = "",
-                    behandlingId = behandling.id
+                    behandlingId = behandling.id,
                 ),
                 VilkårResultat(
                     personResultat = barnResultat,
@@ -446,7 +446,7 @@ internal class TilkjentYtelseUtilsTest {
                     periodeFom = barnFødselsdato,
                     periodeTom = null,
                     begrunnelse = "",
-                    behandlingId = behandling.id
+                    behandlingId = behandling.id,
                 ),
                 VilkårResultat(
                     personResultat = barnResultat,
@@ -455,7 +455,7 @@ internal class TilkjentYtelseUtilsTest {
                     periodeFom = barnFødselsdato,
                     periodeTom = null,
                     begrunnelse = "",
-                    behandlingId = behandling.id
+                    behandlingId = behandling.id,
                 ),
                 VilkårResultat(
                     personResultat = barnResultat,
@@ -466,10 +466,10 @@ internal class TilkjentYtelseUtilsTest {
                     begrunnelse = "",
                     behandlingId = behandling.id,
                     utdypendeVilkårsvurderinger = listOfNotNull(
-                        if (erDeltBosted) UtdypendeVilkårsvurdering.DELT_BOSTED else null
-                    )
-                )
-            )
+                        if (erDeltBosted) UtdypendeVilkårsvurdering.DELT_BOSTED else null,
+                    ),
+                ),
+            ),
         )
 
         vilkårsvurdering.personResultater = setOf(vilkårsvurdering.personResultater.first(), barnResultat)
@@ -482,7 +482,7 @@ internal class TilkjentYtelseUtilsTest {
             personopplysningGrunnlag = personopplysningGrunnlag,
             fødselsdato = barnFødselsdato,
             navn = "Barn",
-            kjønn = Kjønn.MANN
+            kjønn = Kjønn.MANN,
         )
             .apply {
                 sivilstander = mutableListOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this))
@@ -494,7 +494,7 @@ internal class TilkjentYtelseUtilsTest {
             personopplysningGrunnlag = personopplysningGrunnlag,
             fødselsdato = barnFødselsdato.minusYears(20),
             navn = "Barn",
-            kjønn = Kjønn.MANN
+            kjønn = Kjønn.MANN,
         )
             .apply { sivilstander = mutableListOf(GrSivilstand(type = SIVILSTAND.UGIFT, person = this)) }
         personopplysningGrunnlag.personer.add(søker)
@@ -514,8 +514,8 @@ internal class TilkjentYtelseUtilsTest {
                 fom = fom,
                 tom = tom,
                 person = person,
-                behandling = behandling
-            )
+                behandling = behandling,
+            ),
         )
 
         val endretProsent = BigDecimal.ZERO
@@ -526,13 +526,13 @@ internal class TilkjentYtelseUtilsTest {
                 fom = fom,
                 tom = tom,
                 prosent = endretProsent,
-                behandlingId = behandling.id
-            )
+                behandlingId = behandling.id,
+            ),
         )
 
         val andelerTIlkjentYtelse = oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
             utbetalinsandeler,
-            endretUtbetalingAndeler
+            endretUtbetalingAndeler,
         )
 
         assertEquals(1, andelerTIlkjentYtelse.size)
@@ -555,14 +555,14 @@ internal class TilkjentYtelseUtilsTest {
                 fom = fom1,
                 tom = tom1,
                 person = person,
-                behandling = behandling
+                behandling = behandling,
             ),
             lagAndelTilkjentYtelse(
                 fom = fom2,
                 tom = tom2,
                 person = person,
-                behandling = behandling
-            )
+                behandling = behandling,
+            ),
         )
 
         val endretProsent = BigDecimal.ZERO
@@ -572,7 +572,7 @@ internal class TilkjentYtelseUtilsTest {
             fom = fom1,
             tom = tom2,
             prosent = endretProsent,
-            behandlingId = behandling.id
+            behandlingId = behandling.id,
         )
 
         val endretUtbetalingAndeler = listOf(
@@ -581,13 +581,13 @@ internal class TilkjentYtelseUtilsTest {
                 person = person,
                 fom = tom2.nesteMåned(),
                 prosent = endretProsent,
-                behandlingId = behandling.id
-            )
+                behandlingId = behandling.id,
+            ),
         )
 
         val andelerTIlkjentYtelse = oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
             utbetalinsandeler,
-            endretUtbetalingAndeler
+            endretUtbetalingAndeler,
         )
 
         assertEquals(2, andelerTIlkjentYtelse.size)
@@ -596,7 +596,7 @@ internal class TilkjentYtelseUtilsTest {
         andelerTIlkjentYtelse.forEach {
             assertEquals(
                 endretUtbetalingAndel.id,
-                it.endreteUtbetalinger.single().id
+                it.endreteUtbetalinger.single().id,
             )
         }
     }
@@ -637,26 +637,26 @@ internal class TilkjentYtelseUtilsTest {
                     skalUtbetales = false,
                     årsak = Årsak.DELT_BOSTED,
                     fom = april2022,
-                    tom = juli2022
+                    tom = juli2022,
                 ),
                 EndretAndel(
                     person = barnFødtAugust2019,
                     skalUtbetales = false,
                     årsak = Årsak.DELT_BOSTED,
                     fom = april2022,
-                    tom = juli2022
-                )
+                    tom = juli2022,
+                ),
             ),
             atypiskeVilkårBarna = listOf(
                 AtypiskVilkår(
                     fom = mars2022.toLocalDate().førsteDagIInneværendeMåned(),
                     vilkårType = Vilkår.BOR_MED_SØKER,
                     utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.DELT_BOSTED,
-                    aktør = barnFødtAugust2019.aktør
-                )
+                    aktør = barnFødtAugust2019.aktør,
+                ),
             ),
             barna = listOf(barnFødtAugust2019),
-            overgangsstønadPerioder = listOf(MånedPeriode(januar2022, november2022))
+            overgangsstønadPerioder = listOf(MånedPeriode(januar2022, november2022)),
         )
 
         val andelerTilkjentYtelseITidsrom =
@@ -708,19 +708,19 @@ internal class TilkjentYtelseUtilsTest {
                     skalUtbetales = false,
                     årsak = Årsak.DELT_BOSTED,
                     fom = april2022,
-                    tom = juli2022
-                )
+                    tom = juli2022,
+                ),
             ),
             atypiskeVilkårBarna = listOf(
                 AtypiskVilkår(
                     fom = mars2022.toLocalDate().førsteDagIInneværendeMåned(),
                     vilkårType = Vilkår.BOR_MED_SØKER,
                     utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.DELT_BOSTED,
-                    aktør = barnFødtAugust2019.aktør
-                )
+                    aktør = barnFødtAugust2019.aktør,
+                ),
             ),
             barna = listOf(barnFødtAugust2019),
-            overgangsstønadPerioder = listOf(MånedPeriode(januar2022, november2022))
+            overgangsstønadPerioder = listOf(MånedPeriode(januar2022, november2022)),
         )
 
         val andelerTilkjentYtelseITidsrom =
@@ -767,32 +767,32 @@ internal class TilkjentYtelseUtilsTest {
                     skalUtbetales = true,
                     årsak = Årsak.DELT_BOSTED,
                     fom = juni2022,
-                    tom = juli2022
-                )
+                    tom = juli2022,
+                ),
             ),
             atypiskeVilkårBarna = listOf(
                 AtypiskVilkår(
                     fom = februar2022.toLocalDate().førsteDagIInneværendeMåned(),
                     tom = april2022.toLocalDate().sisteDagIMåned(),
                     vilkårType = Vilkår.BOR_MED_SØKER,
-                    aktør = barnFødtAugust2019.aktør
+                    aktør = barnFødtAugust2019.aktør,
                 ),
                 AtypiskVilkår(
                     fom = mai2022.toLocalDate().førsteDagIInneværendeMåned(),
                     vilkårType = Vilkår.BOR_MED_SØKER,
                     aktør = barnFødtAugust2019.aktør,
-                    utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.DELT_BOSTED
-                )
+                    utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.DELT_BOSTED,
+                ),
             ),
             atypiskeVilkårSøker = listOf(
                 AtypiskVilkår(
                     fom = mai2022.toLocalDate().førsteDagIInneværendeMåned(),
                     vilkårType = Vilkår.UTVIDET_BARNETRYGD,
-                    aktør = søker.aktør
-                )
+                    aktør = søker.aktør,
+                ),
             ),
             overgangsstønadPerioder = listOf(MånedPeriode(januar2022, november2022)),
-            barna = listOf(barnFødtAugust2019)
+            barna = listOf(barnFødtAugust2019),
         )
 
         val andelerTilkjentYtelseITidsrom =
@@ -842,39 +842,39 @@ internal class TilkjentYtelseUtilsTest {
                     skalUtbetales = true,
                     årsak = Årsak.DELT_BOSTED,
                     fom = juni2022,
-                    tom = juli2022
+                    tom = juli2022,
                 ),
                 EndretAndel(
                     person = søker,
                     skalUtbetales = true,
                     årsak = Årsak.DELT_BOSTED,
                     fom = juni2022,
-                    tom = juli2022
-                )
+                    tom = juli2022,
+                ),
             ),
             atypiskeVilkårBarna = listOf(
                 AtypiskVilkår(
                     fom = februar2022.toLocalDate().førsteDagIInneværendeMåned(),
                     tom = april2022.toLocalDate().sisteDagIMåned(),
                     vilkårType = Vilkår.BOR_MED_SØKER,
-                    aktør = barnFødtAugust2019.aktør
+                    aktør = barnFødtAugust2019.aktør,
                 ),
                 AtypiskVilkår(
                     fom = mai2022.toLocalDate().førsteDagIInneværendeMåned(),
                     vilkårType = Vilkår.BOR_MED_SØKER,
                     aktør = barnFødtAugust2019.aktør,
-                    utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.DELT_BOSTED
-                )
+                    utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.DELT_BOSTED,
+                ),
             ),
             atypiskeVilkårSøker = listOf(
                 AtypiskVilkår(
                     fom = februar2022.toLocalDate().førsteDagIInneværendeMåned(),
                     vilkårType = Vilkår.UTVIDET_BARNETRYGD,
-                    aktør = søker.aktør
-                )
+                    aktør = søker.aktør,
+                ),
             ),
             barna = listOf(barnFødtAugust2019),
-            overgangsstønadPerioder = listOf(MånedPeriode(januar2022, november2022))
+            overgangsstønadPerioder = listOf(MånedPeriode(januar2022, november2022)),
         )
 
         val andelerTilkjentYtelseITidsrom =
@@ -925,26 +925,26 @@ internal class TilkjentYtelseUtilsTest {
                     skalUtbetales = false,
                     årsak = Årsak.ETTERBETALING_3ÅR,
                     fom = april2019,
-                    tom = juli2019
+                    tom = juli2019,
                 ),
                 EndretAndel(
                     person = søker,
                     skalUtbetales = false,
                     årsak = Årsak.ETTERBETALING_3ÅR,
                     fom = april2019,
-                    tom = juli2019
-                )
+                    tom = juli2019,
+                ),
             ),
             atypiskeVilkårBarna = listOf(
                 AtypiskVilkår(
                     fom = mars2019.toLocalDate().førsteDagIInneværendeMåned(),
                     tom = null,
                     vilkårType = Vilkår.BOR_MED_SØKER,
-                    aktør = barnFødtAugust2016.aktør
-                )
+                    aktør = barnFødtAugust2016.aktør,
+                ),
             ),
             barna = listOf(barnFødtAugust2016),
-            overgangsstønadPerioder = listOf(MånedPeriode(januar2019, november2019))
+            overgangsstønadPerioder = listOf(MånedPeriode(januar2019, november2019)),
         )
 
         val andelerTilkjentYtelseITidsrom =
@@ -996,34 +996,34 @@ internal class TilkjentYtelseUtilsTest {
                     skalUtbetales = false,
                     årsak = Årsak.ETTERBETALING_3ÅR,
                     fom = april2019,
-                    tom = juli2019
-                )
+                    tom = juli2019,
+                ),
             ),
             atypiskeVilkårBarna = listOf(
                 AtypiskVilkår(
                     fom = mars2019.toLocalDate().førsteDagIInneværendeMåned(),
                     tom = null,
                     vilkårType = Vilkår.BOR_MED_SØKER,
-                    aktør = barnFødtAugust2016.aktør
+                    aktør = barnFødtAugust2016.aktør,
                 ),
                 AtypiskVilkår(
                     fom = januar2019.toLocalDate().førsteDagIInneværendeMåned(),
                     tom = null,
                     vilkårType = Vilkår.BOR_MED_SØKER,
                     aktør = barnFødtDesember2006.aktør,
-                    utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.DELT_BOSTED
-                )
+                    utdypendeVilkårsvurdering = UtdypendeVilkårsvurdering.DELT_BOSTED,
+                ),
             ),
             atypiskeVilkårSøker = listOf(
                 AtypiskVilkår(
                     fom = februar2019.toLocalDate().førsteDagIInneværendeMåned(),
                     tom = null,
                     vilkårType = Vilkår.UTVIDET_BARNETRYGD,
-                    aktør = søker.aktør
-                )
+                    aktør = søker.aktør,
+                ),
             ),
             barna = listOf(barnFødtAugust2016, barnFødtDesember2006),
-            overgangsstønadPerioder = listOf(MånedPeriode(januar2019, november2019))
+            overgangsstønadPerioder = listOf(MånedPeriode(januar2019, november2019)),
         )
 
         val andelerTilkjentYtelseITidsrom =
@@ -1081,19 +1081,19 @@ internal class TilkjentYtelseUtilsTest {
                     fom = februar2022.toLocalDate().førsteDagIInneværendeMåned(),
                     tom = null,
                     vilkårType = Vilkår.BOR_MED_SØKER,
-                    aktør = barnFødtAugust2019.aktør
-                )
+                    aktør = barnFødtAugust2019.aktør,
+                ),
             ),
             atypiskeVilkårSøker = listOf(
                 AtypiskVilkår(
                     fom = januar2022.toLocalDate().førsteDagIInneværendeMåned(),
                     tom = august2022.toLocalDate().sisteDagIMåned(),
                     vilkårType = Vilkår.UTVIDET_BARNETRYGD,
-                    aktør = søker.aktør
-                )
+                    aktør = søker.aktør,
+                ),
             ),
             barna = listOf(barnFødtAugust2019),
-            overgangsstønadPerioder = listOf(MånedPeriode(april2022, juni2022))
+            overgangsstønadPerioder = listOf(MånedPeriode(april2022, juni2022)),
         )
 
         val andelerTilkjentYtelseITidsrom =
@@ -1131,19 +1131,19 @@ internal class TilkjentYtelseUtilsTest {
                     fom = februar2022.toLocalDate().førsteDagIInneværendeMåned(),
                     tom = null,
                     vilkårType = Vilkår.BOR_MED_SØKER,
-                    aktør = barnFødtAugust2019.aktør
-                )
+                    aktør = barnFødtAugust2019.aktør,
+                ),
             ),
             atypiskeVilkårSøker = listOf(
                 AtypiskVilkår(
                     fom = januar2022.toLocalDate().førsteDagIInneværendeMåned(),
                     tom = juni2022.toLocalDate().sisteDagIMåned(),
                     vilkårType = Vilkår.UTVIDET_BARNETRYGD,
-                    aktør = søker.aktør
-                )
+                    aktør = søker.aktør,
+                ),
             ),
             barna = listOf(barnFødtAugust2019),
-            overgangsstønadPerioder = listOf(MånedPeriode(april2022, august2022))
+            overgangsstønadPerioder = listOf(MånedPeriode(april2022, august2022)),
         )
 
         val andelerTilkjentYtelseITidsrom =
@@ -1183,11 +1183,11 @@ internal class TilkjentYtelseUtilsTest {
                     fom = februar2022.toLocalDate().førsteDagIInneværendeMåned(),
                     tom = null,
                     vilkårType = Vilkår.BOR_MED_SØKER,
-                    aktør = barnFødtAugust2019.aktør
-                )
+                    aktør = barnFødtAugust2019.aktør,
+                ),
             ),
             overgangsstønadPerioder = listOf(MånedPeriode(april2022, desember2022)),
-            barna = listOf(barnFødtAugust2019)
+            barna = listOf(barnFødtAugust2019),
         )
 
         val andelerTilkjentYtelseITidsrom =
@@ -1221,7 +1221,7 @@ internal class TilkjentYtelseUtilsTest {
         val tom: YearMonth,
         val person: Person,
         val årsak: Årsak,
-        val skalUtbetales: Boolean
+        val skalUtbetales: Boolean,
     )
 
     private fun settOppScenarioOgBeregnTilkjentYtelse(
@@ -1229,14 +1229,14 @@ internal class TilkjentYtelseUtilsTest {
         atypiskeVilkårBarna: List<AtypiskVilkår> = emptyList(),
         atypiskeVilkårSøker: List<AtypiskVilkår> = emptyList(),
         barna: List<Person>,
-        overgangsstønadPerioder: List<MånedPeriode>
+        overgangsstønadPerioder: List<MånedPeriode>,
     ): TilkjentYtelse {
         val vilkårsvurdering = lagVilkårsvurdering(
             søker = søker,
             barn = barna,
             atypiskeVilkårBarna = atypiskeVilkårBarna,
             atypiskeVilkårSøker = atypiskeVilkårSøker,
-            behandlingUnderkategori = BehandlingUnderkategori.UTVIDET
+            behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
         )
 
         val endretUtbetalingAndeler = endretAndeler.map {
@@ -1246,7 +1246,7 @@ internal class TilkjentYtelseUtilsTest {
                 prosent = if (it.skalUtbetales) BigDecimal(100) else BigDecimal.ZERO,
                 årsak = it.årsak,
                 fom = it.fom,
-                tom = it.tom
+                tom = it.tom,
             )
         }
 
@@ -1254,14 +1254,14 @@ internal class TilkjentYtelseUtilsTest {
             vilkårsvurdering = vilkårsvurdering,
             personopplysningGrunnlag = lagPersonopplysningsgrunnlag(
                 personer = barna.plus(søker),
-                behandlingId = vilkårsvurdering.behandling.id
+                behandlingId = vilkårsvurdering.behandling.id,
             ),
             endretUtbetalingAndeler = endretUtbetalingAndeler,
-            fagsakType = FagsakType.NORMAL
+            fagsakType = FagsakType.NORMAL,
         ) { (_) ->
             lagOvergangsstønadPerioder(
                 perioder = overgangsstønadPerioder,
-                søkerIdent = søker.aktør.aktivFødselsnummer()
+                søkerIdent = søker.aktør.aktivFødselsnummer(),
             )
         }
 
@@ -1271,19 +1271,19 @@ internal class TilkjentYtelseUtilsTest {
     private fun lagPersonopplysningsgrunnlag(personer: List<Person>, behandlingId: Long): PersonopplysningGrunnlag {
         return PersonopplysningGrunnlag(
             personer = personer.toMutableSet(),
-            behandlingId = behandlingId
+            behandlingId = behandlingId,
         )
     }
 
     private fun lagOvergangsstønadPerioder(
         perioder: List<MånedPeriode>,
-        søkerIdent: String
+        søkerIdent: String,
     ): List<InternPeriodeOvergangsstønad> {
         return perioder.map {
             InternPeriodeOvergangsstønad(
                 søkerIdent,
                 it.fom.førsteDagIInneværendeMåned(),
-                it.tom.sisteDagIInneværendeMåned()
+                it.tom.sisteDagIInneværendeMåned(),
             )
         }
     }
@@ -1294,7 +1294,7 @@ internal class TilkjentYtelseUtilsTest {
         val tom: LocalDate? = null,
         val resultat: Resultat = Resultat.OPPFYLT,
         val vilkårType: Vilkår,
-        val utdypendeVilkårsvurdering: UtdypendeVilkårsvurdering? = null
+        val utdypendeVilkårsvurdering: UtdypendeVilkårsvurdering? = null,
     )
 
     private fun lagVilkårResultat(
@@ -1303,7 +1303,7 @@ internal class TilkjentYtelseUtilsTest {
         tom: LocalDate? = null,
         resultat: Resultat = Resultat.OPPFYLT,
         vilkårType: Vilkår,
-        utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering> = emptyList()
+        utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering> = emptyList(),
     ): VilkårResultat {
         return VilkårResultat(
             personResultat = personResultat,
@@ -1313,7 +1313,7 @@ internal class TilkjentYtelseUtilsTest {
             periodeTom = tom,
             begrunnelse = "",
             behandlingId = personResultat.vilkårsvurdering.behandling.id,
-            utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger
+            utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger,
         )
     }
 
@@ -1322,7 +1322,7 @@ internal class TilkjentYtelseUtilsTest {
         barn: List<Person>,
         behandlingUnderkategori: BehandlingUnderkategori,
         atypiskeVilkårSøker: List<AtypiskVilkår> = emptyList(),
-        atypiskeVilkårBarna: List<AtypiskVilkår> = emptyList()
+        atypiskeVilkårBarna: List<AtypiskVilkår> = emptyList(),
     ): Vilkårsvurdering {
         val vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling())
 
@@ -1333,7 +1333,7 @@ internal class TilkjentYtelseUtilsTest {
             person = søker,
             behandlingUnderkategori = behandlingUnderkategori,
             standardFom = eldsteBarn.fødselsdato,
-            atypiskeVilkår = atypiskeVilkårSøker
+            atypiskeVilkår = atypiskeVilkårSøker,
         )
 
         val barnasPersonResultater = barn.map { barnet ->
@@ -1342,7 +1342,7 @@ internal class TilkjentYtelseUtilsTest {
                 person = barnet,
                 behandlingUnderkategori = behandlingUnderkategori,
                 standardFom = barnet.fødselsdato,
-                atypiskeVilkår = atypiskeVilkårBarna.filter { it.aktør == barnet.aktør }
+                atypiskeVilkår = atypiskeVilkårBarna.filter { it.aktør == barnet.aktør },
             )
         }
 
@@ -1355,17 +1355,17 @@ internal class TilkjentYtelseUtilsTest {
         person: Person,
         behandlingUnderkategori: BehandlingUnderkategori,
         standardFom: LocalDate,
-        atypiskeVilkår: List<AtypiskVilkår>
+        atypiskeVilkår: List<AtypiskVilkår>,
     ): PersonResultat {
         val personResultat = PersonResultat(
             vilkårsvurdering = vilkårsvurdering,
-            aktør = person.aktør
+            aktør = person.aktør,
         )
 
         val vilkårForPersonType = Vilkår.hentVilkårFor(
             personType = person.type,
             fagsakType = FagsakType.NORMAL,
-            behandlingUnderkategori = behandlingUnderkategori
+            behandlingUnderkategori = behandlingUnderkategori,
         )
 
         val ordinæreVilkårResultater = vilkårForPersonType.map { vilkår ->
@@ -1374,7 +1374,7 @@ internal class TilkjentYtelseUtilsTest {
                 vilkårType = vilkår,
                 resultat = Resultat.OPPFYLT,
                 fom = standardFom,
-                tom = if (vilkår == Vilkår.UNDER_18_ÅR) person.fødselsdato.til18ÅrsVilkårsdato() else null
+                tom = if (vilkår == Vilkår.UNDER_18_ÅR) person.fødselsdato.til18ÅrsVilkårsdato() else null,
             )
         }
 
@@ -1390,9 +1390,9 @@ internal class TilkjentYtelseUtilsTest {
                         tom = it.tom,
                         vilkårType = it.vilkårType,
                         resultat = it.resultat,
-                        utdypendeVilkårsvurderinger = if (it.utdypendeVilkårsvurdering != null) listOf(it.utdypendeVilkårsvurdering) else emptyList()
+                        utdypendeVilkårsvurderinger = if (it.utdypendeVilkårsvurdering != null) listOf(it.utdypendeVilkårsvurdering) else emptyList(),
                     )
-                }
+                },
             )
 
         personResultat.setSortedVilkårResultater(oppdaterteVilkårResultater.toSet())

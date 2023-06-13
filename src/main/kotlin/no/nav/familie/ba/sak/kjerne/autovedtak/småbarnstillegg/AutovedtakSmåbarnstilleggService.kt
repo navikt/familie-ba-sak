@@ -44,7 +44,7 @@ class AutovedtakSmåbarnstilleggService(
     private val beregningService: BeregningService,
     private val autovedtakService: AutovedtakService,
     private val oppgaveService: OppgaveService,
-    private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService
+    private val vedtaksperiodeHentOgPersisterService: VedtaksperiodeHentOgPersisterService,
 ) : AutovedtakBehandlingService<Aktør> {
 
     private val antallVedtakOmOvergangsstønad: Counter =
@@ -56,7 +56,7 @@ class AutovedtakSmåbarnstilleggService(
 
     enum class TilManuellBehandlingÅrsak(val beskrivelse: String) {
         NYE_UTBETALINGSPERIODER_FØRER_TIL_MANUELL_BEHANDLING("Endring i OS gir etterbetaling, feilutbetaling eller endring mer enn 1 måned frem i tid"),
-        KLARER_IKKE_BEGRUNNE("Klarer ikke å begrunne")
+        KLARER_IKKE_BEGRUNNE("Klarer ikke å begrunne"),
     }
 
     private val antallVedtakOmOvergangsstønadTilManuellBehandling: Map<TilManuellBehandlingÅrsak, Counter> =
@@ -70,7 +70,7 @@ class AutovedtakSmåbarnstilleggService(
                 "aarsak",
                 it.name,
                 "beskrivelse",
-                it.beskrivelse
+                it.beskrivelse,
             )
         }
 
@@ -98,14 +98,14 @@ class AutovedtakSmåbarnstilleggService(
                 aktør = aktør,
                 behandlingType = BehandlingType.REVURDERING,
                 behandlingÅrsak = BehandlingÅrsak.SMÅBARNSTILLEGG,
-                fagsakId = fagsak.id
+                fagsakId = fagsak.id,
             )
 
         if (behandlingEtterBehandlingsresultat.status != BehandlingStatus.IVERKSETTER_VEDTAK) {
             return kanIkkeBehandleAutomatisk(
                 behandling = behandlingEtterBehandlingsresultat,
                 metric = antallVedtakOmOvergangsstønadTilManuellBehandling[TilManuellBehandlingÅrsak.NYE_UTBETALINGSPERIODER_FØRER_TIL_MANUELL_BEHANDLING]!!,
-                meldingIOppgave = "Småbarnstillegg: endring i overgangsstønad må behandles manuelt"
+                meldingIOppgave = "Småbarnstillegg: endring i overgangsstønad må behandles manuelt",
             )
         }
 
@@ -116,23 +116,23 @@ class AutovedtakSmåbarnstilleggService(
 
             val behandlingSomSkalManueltBehandles = behandlingService.oppdaterStatusPåBehandling(
                 behandlingEtterBehandlingsresultat.id,
-                BehandlingStatus.UTREDES
+                BehandlingStatus.UTREDES,
             )
             return kanIkkeBehandleAutomatisk(
                 behandling = behandlingSomSkalManueltBehandles,
                 metric = antallVedtakOmOvergangsstønadTilManuellBehandling[TilManuellBehandlingÅrsak.KLARER_IKKE_BEGRUNNE]!!,
-                meldingIOppgave = "Småbarnstillegg: klarer ikke bestemme vedtaksperiode som skal begrunnes, må behandles manuelt"
+                meldingIOppgave = "Småbarnstillegg: klarer ikke bestemme vedtaksperiode som skal begrunnes, må behandles manuelt",
             )
         }
 
         val vedtakEtterTotrinn = autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(
-            behandlingEtterBehandlingsresultat
+            behandlingEtterBehandlingsresultat,
         )
 
         val task = IverksettMotOppdragTask.opprettTask(
             behandlingEtterBehandlingsresultat,
             vedtakEtterTotrinn,
-            SikkerhetContext.hentSaksbehandler()
+            SikkerhetContext.hentSaksbehandler(),
         )
         taskService.save(task)
 
@@ -140,7 +140,7 @@ class AutovedtakSmåbarnstilleggService(
     }
 
     private fun begrunnAutovedtakForSmåbarnstillegg(
-        behandlingEtterBehandlingsresultat: Behandling
+        behandlingEtterBehandlingsresultat: Behandling,
     ) {
         val sistIverksatteBehandling =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = behandlingEtterBehandlingsresultat.fagsak.id)
@@ -149,7 +149,7 @@ class AutovedtakSmåbarnstilleggService(
                 emptyList()
             } else {
                 beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(
-                    behandlingId = sistIverksatteBehandling.id
+                    behandlingId = sistIverksatteBehandling.id,
                 ).filter { it.erSmåbarnstillegg() }
             }
 
@@ -158,13 +158,13 @@ class AutovedtakSmåbarnstilleggService(
                 emptyList()
             } else {
                 beregningService.hentAndelerTilkjentYtelseMedUtbetalingerForBehandling(
-                    behandlingId = behandlingEtterBehandlingsresultat.id
+                    behandlingId = behandlingEtterBehandlingsresultat.id,
                 ).filter { it.erSmåbarnstillegg() }
             }
 
         val (innvilgedeMånedPerioder, reduserteMånedPerioder) = hentInnvilgedeOgReduserteAndelerSmåbarnstillegg(
             forrigeSmåbarnstilleggAndeler = forrigeSmåbarnstilleggAndeler,
-            nyeSmåbarnstilleggAndeler = nyeSmåbarnstilleggAndeler
+            nyeSmåbarnstilleggAndeler = nyeSmåbarnstilleggAndeler,
         )
 
         vedtaksperiodeHentOgPersisterService.lagre(
@@ -173,28 +173,28 @@ class AutovedtakSmåbarnstilleggService(
                 redusertMånedPeriode = reduserteMånedPerioder.singleOrNull(),
                 vedtaksperioderMedBegrunnelser = vedtaksperiodeService.hentPersisterteVedtaksperioder(
                     vedtak = vedtakService.hentAktivForBehandlingThrows(
-                        behandlingId = behandlingEtterBehandlingsresultat.id
-                    )
-                )
-            )
+                        behandlingId = behandlingEtterBehandlingsresultat.id,
+                    ),
+                ),
+            ),
         )
     }
 
     private fun kanIkkeBehandleAutomatisk(
         behandling: Behandling,
         metric: Counter,
-        meldingIOppgave: String
+        meldingIOppgave: String,
     ): String {
         metric.increment()
         val omgjortBehandling = autovedtakService.omgjørBehandlingTilManuellOgKjørSteg(
             behandling = behandling,
-            steg = StegType.VILKÅRSVURDERING
+            steg = StegType.VILKÅRSVURDERING,
         )
         return oppgaveService.opprettOppgaveForManuellBehandling(
             behandling = omgjortBehandling,
             begrunnelse = meldingIOppgave,
             oppgavetype = Oppgavetype.VurderLivshendelse,
-            opprettLogginnslag = true
+            opprettLogginnslag = true,
         )
     }
 

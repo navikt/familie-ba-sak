@@ -17,7 +17,7 @@ object DevLauncher {
                 "mock-pdl",
                 "mock-ident-client",
                 "mock-tilbakekreving-klient",
-                "task-scheduling"
+                "task-scheduling",
             )
         app.run(*args)
     }

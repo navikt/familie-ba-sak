@@ -10,7 +10,7 @@ import java.math.BigDecimal
 import java.math.RoundingMode
 
 fun <K, T : Tidsenhet> Map<K, Tidslinje<BigDecimal, T>>.minus(
-    bTidslinjer: Map<K, Tidslinje<BigDecimal, T>>
+    bTidslinjer: Map<K, Tidslinje<BigDecimal, T>>,
 ) = this.join(bTidslinjer) { a, b ->
     when {
         a != null && b != null -> a - b

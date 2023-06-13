@@ -25,19 +25,19 @@ internal class KonsistensavstemMotOppdragStartTaskTest {
         every {
             avstemmingService.skalOppretteFinnPerioderForRelevanteBehandlingerTask(
                 transaksjonsId,
-                any()
+                any(),
             )
         } returns true
         every {
             avstemmingService.erKonsistensavstemmingKjørtForTransaksjonsidOgChunk(
                 transaksjonsId,
-                range(1, 3)
+                range(1, 3),
             )
         } returns false
         justRun { avstemmingService.sendKonsistensavstemmingStart(any(), transaksjonsId) }
         mockTreSiderMedSisteBehandlinger()
         justRun {
-            avstemmingService.opprettKonsistensavstemmingFinnPerioderForRelevanteBehandlingerTask(any())
+            avstemmingService.opprettKonsistensavstemmingFinnPerioderForRelevanteBehandlingerTask(any(), any())
         }
         justRun { avstemmingService.opprettKonsistensavstemmingAvsluttTask(any()) }
 
@@ -46,7 +46,8 @@ internal class KonsistensavstemMotOppdragStartTaskTest {
         verify(exactly = 1) { avstemmingService.sendKonsistensavstemmingStart(any(), transaksjonsId) }
         verify(exactly = 3) {
             avstemmingService.opprettKonsistensavstemmingFinnPerioderForRelevanteBehandlingerTask(
-                any()
+                any(),
+                any(),
             )
         }
         verify(exactly = 1) { avstemmingService.opprettKonsistensavstemmingAvsluttTask(any()) }
@@ -61,7 +62,12 @@ internal class KonsistensavstemMotOppdragStartTaskTest {
         startTask.doTask(task)
 
         verify(exactly = 0) { avstemmingService.sendKonsistensavstemmingStart(any(), transaksjonsId) }
-        verify(exactly = 0) { avstemmingService.opprettKonsistensavstemmingFinnPerioderForRelevanteBehandlingerTask(any()) }
+        verify(exactly = 0) {
+            avstemmingService.opprettKonsistensavstemmingFinnPerioderForRelevanteBehandlingerTask(
+                any(),
+                any(),
+            )
+        }
         verify(exactly = 0) { avstemmingService.opprettKonsistensavstemmingAvsluttTask(any()) }
     }
 
@@ -74,27 +80,32 @@ internal class KonsistensavstemMotOppdragStartTaskTest {
         every {
             avstemmingService.skalOppretteFinnPerioderForRelevanteBehandlingerTask(
                 transaksjonsId,
-                range(1, 2)
+                range(1, 2),
             )
         } returns false
         every {
             avstemmingService.skalOppretteFinnPerioderForRelevanteBehandlingerTask(
                 transaksjonsId,
-                3
+                3,
             )
         } returns true
 
         justRun { avstemmingService.sendKonsistensavstemmingStart(any(), transaksjonsId) }
         mockTreSiderMedSisteBehandlinger()
         justRun {
-            avstemmingService.opprettKonsistensavstemmingFinnPerioderForRelevanteBehandlingerTask(any())
+            avstemmingService.opprettKonsistensavstemmingFinnPerioderForRelevanteBehandlingerTask(any(), any())
         }
         justRun { avstemmingService.opprettKonsistensavstemmingAvsluttTask(any()) }
 
         startTask.doTask(task)
 
         verify(exactly = 0) { avstemmingService.sendKonsistensavstemmingStart(any(), transaksjonsId) }
-        verify(exactly = 1) { avstemmingService.opprettKonsistensavstemmingFinnPerioderForRelevanteBehandlingerTask(any()) }
+        verify(exactly = 1) {
+            avstemmingService.opprettKonsistensavstemmingFinnPerioderForRelevanteBehandlingerTask(
+                any(),
+                any(),
+            )
+        }
         verify(exactly = 1) { avstemmingService.opprettKonsistensavstemmingAvsluttTask(any()) }
     }
 
@@ -110,8 +121,8 @@ internal class KonsistensavstemMotOppdragStartTaskTest {
             KonsistensavstemmingStartTaskDTO(
                 batchId = batchId,
                 avstemmingdato = avstemmingdato,
-                transaksjonsId = transaksjonsId
-            )
+                transaksjonsId = transaksjonsId,
+            ),
         )
         val task = Task(payload = payload, type = KonsistensavstemMotOppdragStartTask.TASK_STEP_TYPE)
         return Pair(transaksjonsId, task)

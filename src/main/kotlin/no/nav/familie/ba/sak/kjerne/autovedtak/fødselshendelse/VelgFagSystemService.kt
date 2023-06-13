@@ -36,7 +36,7 @@ class VelgFagSystemService(
     private val infotrygdService: InfotrygdService,
     private val personidentService: PersonidentService,
     private val personopplysningerService: PersonopplysningerService,
-    private val statsborgerskapService: StatsborgerskapService
+    private val statsborgerskapService: StatsborgerskapService,
 ) {
 
     val utfallForValgAvFagsystem = mutableMapOf<FagsystemUtfall, Counter>()
@@ -48,7 +48,7 @@ class VelgFagSystemService(
                 "navn",
                 it.name,
                 "beskrivelse",
-                it.beskrivelse
+                it.beskrivelse,
             )
         }
     }
@@ -57,7 +57,7 @@ class VelgFagSystemService(
         return if (fagsak == null) {
             false
         } else if (behandlingHentOgPersisterService.hentBehandlinger(fagsakId = fagsak.id)
-            .any { it.status == BehandlingStatus.UTREDES }
+                .any { it.status == BehandlingStatus.UTREDES }
         ) {
             true
         } else {
@@ -90,7 +90,7 @@ class VelgFagSystemService(
         secureLogger.info(
             "Gjeldende statsborgerskap for ${morsAktør.aktivFødselsnummer()}=" +
                 "(${gjeldendeStatsborgerskap.land}, bekreftelsesdato=${gjeldendeStatsborgerskap.bekreftelsesdato}, gyldigFom=${gjeldendeStatsborgerskap.gyldigFraOgMed}, gyldigTom=${gjeldendeStatsborgerskap.gyldigTilOgMed}), " +
-                "medlemskap=$medlemskap"
+                "medlemskap=$medlemskap",
         )
 
         return when (medlemskap) {
@@ -107,32 +107,32 @@ class VelgFagSystemService(
         val (fagsystemUtfall: FagsystemUtfall, fagsystem: FagsystemRegelVurdering) = when {
             morHarLøpendeEllerTidligereUtbetalinger(fagsak) -> Pair(
                 IVERKSATTE_BEHANDLINGER_I_BA_SAK,
-                SEND_TIL_BA
+                SEND_TIL_BA,
             )
             morEllerBarnHarLøpendeSakIInfotrygd(
                 nyBehandlingHendelse.morsIdent,
-                nyBehandlingHendelse.barnasIdenter
+                nyBehandlingHendelse.barnasIdenter,
             ) -> Pair(
                 LØPENDE_SAK_I_INFOTRYGD,
-                SEND_TIL_INFOTRYGD
+                SEND_TIL_INFOTRYGD,
             )
             fagsak != null -> Pair(
                 FAGSAK_UTEN_IVERKSATTE_BEHANDLINGER_I_BA_SAK,
-                SEND_TIL_BA
+                SEND_TIL_BA,
             )
             morHarSakerMenIkkeLøpendeIInfotrygd(nyBehandlingHendelse.morsIdent) -> Pair(
                 SAKER_I_INFOTRYGD_MEN_IKKE_LØPENDE_UTBETALINGER,
-                SEND_TIL_INFOTRYGD
+                SEND_TIL_INFOTRYGD,
             )
             !harMorGyldigStatsborgerskapForAutomatiskVurdering(
-                morsAktør
+                morsAktør,
             ) -> Pair(
                 MOR_IKKE_GYLDIG_MEDLEMSKAP_FOR_AUTOMATISK_VURDERING,
-                SEND_TIL_INFOTRYGD
+                SEND_TIL_INFOTRYGD,
             )
             else -> Pair(
                 STØTTET_I_BA_SAK,
-                SEND_TIL_BA
+                SEND_TIL_BA,
             )
         }
 
@@ -150,7 +150,7 @@ class VelgFagSystemService(
 
 enum class FagsystemRegelVurdering {
     SEND_TIL_BA,
-    SEND_TIL_INFOTRYGD
+    SEND_TIL_INFOTRYGD,
 }
 
 enum class FagsystemUtfall(val beskrivelse: String) {
@@ -159,5 +159,5 @@ enum class FagsystemUtfall(val beskrivelse: String) {
     FAGSAK_UTEN_IVERKSATTE_BEHANDLINGER_I_BA_SAK("Mor har fagsak uten iverksatte behandlinger"),
     SAKER_I_INFOTRYGD_MEN_IKKE_LØPENDE_UTBETALINGER("Mor har saker i infotrygd, men ikke løpende utbetalinger"),
     MOR_IKKE_GYLDIG_MEDLEMSKAP_FOR_AUTOMATISK_VURDERING("Mor har ikke gyldig medlemskap for automatisk vurdering"),
-    STØTTET_I_BA_SAK("Person kan automatisk vurderes i ba-sak")
+    STØTTET_I_BA_SAK("Person kan automatisk vurderes i ba-sak"),
 }

@@ -26,7 +26,7 @@ data class AnnenVurdering(
     @SequenceGenerator(
         name = "annen_vurdering_seq_generator",
         sequenceName = "annen_vurdering_seq",
-        allocationSize = 50
+        allocationSize = 50,
     )
     val id: Long = 0,
 
@@ -43,7 +43,7 @@ data class AnnenVurdering(
     var type: AnnenVurderingType,
 
     @Column(name = "begrunnelse")
-    var begrunnelse: String? = null
+    var begrunnelse: String? = null,
 ) : BaseEntitet() {
 
     fun kopierMedParent(nyPersonResultat: PersonResultat? = null): AnnenVurdering {
@@ -51,7 +51,7 @@ data class AnnenVurdering(
             personResultat = nyPersonResultat ?: personResultat,
             type = type,
             resultat = resultat,
-            begrunnelse = begrunnelse
+            begrunnelse = begrunnelse,
         )
     }
 
@@ -78,5 +78,5 @@ data class AnnenVurdering(
 }
 
 enum class AnnenVurderingType {
-    OPPLYSNINGSPLIKT
+    OPPLYSNINGSPLIKT,
 }

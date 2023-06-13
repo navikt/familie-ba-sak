@@ -11,7 +11,7 @@ import org.springframework.core.env.Environment
 @Configuration
 class FeatureToggleInitializer(
     private val featureToggleProperties: FeatureToggleProperties,
-    private val environment: Environment
+    private val environment: Environment,
 ) {
 
     @Bean
@@ -21,7 +21,7 @@ class FeatureToggleInitializer(
         } else {
             logger.warn(
                 "Funksjonsbryter-funksjonalitet er skrudd AV. " +
-                    "Gir standardoppførsel for alle funksjonsbrytere, dvs 'false'"
+                    "Gir standardoppførsel for alle funksjonsbrytere, dvs 'false'",
             )
             DummyFeatureToggleService(featureToggleProperties.unleash)
         }

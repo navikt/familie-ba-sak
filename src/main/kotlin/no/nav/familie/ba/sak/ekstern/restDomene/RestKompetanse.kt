@@ -18,7 +18,7 @@ data class RestKompetanse(
     val annenForeldersAktivitetsland: String? = null,
     val barnetsBostedsland: String? = null,
     val resultat: KompetanseResultat? = null,
-    override val status: UtfyltStatus = UtfyltStatus.IKKE_UTFYLT
+    override val status: UtfyltStatus = UtfyltStatus.IKKE_UTFYLT,
 ) : AbstractUtfyltStatus<RestKompetanse>() {
     override fun medUtfyltStatus(): RestKompetanse {
         var antallUtfylteFelter = finnAntallUtfylt(
@@ -28,8 +28,8 @@ data class RestKompetanse(
                 this.annenForeldersAktivitetsland,
                 this.resultat,
                 this.søkersAktivitet,
-                this.søkersAktivitetsland
-            )
+                this.søkersAktivitetsland,
+            ),
         )
         if (annenForeldersAktivitetsland == null) {
             antallUtfylteFelter += (annenForeldersAktivitet.let { if (it == AnnenForeldersAktivitet.INAKTIV || it == AnnenForeldersAktivitet.IKKE_AKTUELT) 1 else 0 })
@@ -51,7 +51,7 @@ fun Kompetanse.tilRestKompetanse() = RestKompetanse(
     annenForeldersAktivitet = this.annenForeldersAktivitet,
     annenForeldersAktivitetsland = this.annenForeldersAktivitetsland,
     barnetsBostedsland = this.barnetsBostedsland,
-    resultat = this.resultat
+    resultat = this.resultat,
 ).medUtfyltStatus()
 
 fun RestKompetanse.tilKompetanse(barnAktører: List<Aktør>) = Kompetanse(
@@ -63,5 +63,5 @@ fun RestKompetanse.tilKompetanse(barnAktører: List<Aktør>) = Kompetanse(
     annenForeldersAktivitet = this.annenForeldersAktivitet,
     annenForeldersAktivitetsland = this.annenForeldersAktivitetsland,
     barnetsBostedsland = this.barnetsBostedsland,
-    resultat = this.resultat
+    resultat = this.resultat,
 )

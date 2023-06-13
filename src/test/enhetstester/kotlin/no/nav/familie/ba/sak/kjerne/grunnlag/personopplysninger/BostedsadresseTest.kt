@@ -25,7 +25,7 @@ internal class BostedsadresseTest {
             bruksenhetsnummer = "H301",
             tilleggsnavn = "navn",
             postnummer = "0202",
-            kommunenummer = "2231"
+            kommunenummer = "2231",
         )
         val adresseMedNullFom = adresse.copy().apply { periode = DatoIntervallEntitet(fom = null) }
         val adresseMedEldreDato = adresse.copy().apply { periode = DatoIntervallEntitet(fom = LocalDate.now().minusYears(3)) }
@@ -41,7 +41,7 @@ internal class BostedsadresseTest {
             bruksenhetsnummer = "H301",
             tilleggsnavn = "navn",
             postnummer = "0202",
-            kommunenummer = "2231"
+            kommunenummer = "2231",
         ).apply {
             periode = DatoIntervallEntitet(fom = null)
         } as GrBostedsadresse
@@ -55,7 +55,7 @@ internal class BostedsadresseTest {
             bruksenhetsnummer = "H301",
             tilleggsnavn = "navn",
             postnummer = "0202",
-            kommunenummer = "2231"
+            kommunenummer = "2231",
         ).apply {
             periode = DatoIntervallEntitet(fom = null)
         } as GrBostedsadresse
@@ -64,7 +64,7 @@ internal class BostedsadresseTest {
             bruksenhetsnummer = "H301",
             tilleggsnavn = "navn",
             postnummer = "0202",
-            kommunenummer = "2231"
+            kommunenummer = "2231",
         ).apply {
             periode = DatoIntervallEntitet(fom = null)
         } as GrBostedsadresse
@@ -83,17 +83,17 @@ internal class BostedsadresseTest {
                 bruksenhetsnummer = "H301",
                 tilleggsnavn = "navn",
                 postnummer = "0202",
-                kommunenummer = "2231"
-            )
+                kommunenummer = "2231",
+            ),
         )
         val p1Adresser = listOf(
             GrBostedsadresse.fraBostedsadresse(
                 person = p1,
-                bostedsadresse = fellesAdresse
-            )
+                bostedsadresse = fellesAdresse,
+            ),
         )
         val p2Adresser = listOf(
-            GrBostedsadresse.fraBostedsadresse(person = p2, bostedsadresse = fellesAdresse)
+            GrBostedsadresse.fraBostedsadresse(person = p2, bostedsadresse = fellesAdresse),
         )
         Assertions.assertTrue(vurderOmPersonerBorSammen(p1Adresser, p2Adresser))
     }
@@ -110,14 +110,14 @@ internal class BostedsadresseTest {
                 bruksenhetsnummer = "H301",
                 tilleggsnavn = "navn",
                 postnummer = "0202",
-                kommunenummer = "2231"
-            )
+                kommunenummer = "2231",
+            ),
         )
         val p1Adresser = listOf(
             GrBostedsadresse.fraBostedsadresse(
                 person = p1,
-                bostedsadresse = fellesAdresse
-            )
+                bostedsadresse = fellesAdresse,
+            ),
         )
         val p2Adresser = listOf(
             GrBostedsadresse.fraBostedsadresse(person = p2, bostedsadresse = fellesAdresse),
@@ -131,10 +131,10 @@ internal class BostedsadresseTest {
                         bruksenhetsnummer = "H402",
                         tilleggsnavn = "ekstra",
                         postnummer = "0333",
-                        kommunenummer = "3456"
-                    )
-                )
-            )
+                        kommunenummer = "3456",
+                    ),
+                ),
+            ),
         )
         Assertions.assertTrue(vurderOmPersonerBorSammen(p1Adresser.filtrerGjeldendeNå(), p2Adresser.filtrerGjeldendeNå()))
     }

@@ -45,5 +45,5 @@ data class RestUtvidetBehandling(
     val korrigertVedtak: RestKorrigertVedtak?,
     val feilutbetaltValuta: List<RestFeilutbetaltValuta>,
     val brevmottakere: List<RestBrevmottaker>,
-    val refusjonEøs: List<RestRefusjonEøs>
+    val refusjonEøs: List<RestRefusjonEøs>,
 )

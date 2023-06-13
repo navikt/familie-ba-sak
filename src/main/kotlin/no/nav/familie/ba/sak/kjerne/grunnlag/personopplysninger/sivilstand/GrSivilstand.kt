@@ -32,7 +32,7 @@ data class GrSivilstand(
     @SequenceGenerator(
         name = "po_sivilstand_seq_generator",
         sequenceName = "po_sivilstand_seq",
-        allocationSize = 50
+        allocationSize = 50,
     )
     val id: Long = 0,
 
@@ -46,8 +46,11 @@ data class GrSivilstand(
     @JsonIgnore
     @ManyToOne(optional = false)
     @JoinColumn(name = "fk_po_person_id", nullable = false, updatable = false)
-    val person: Person
+    val person: Person,
 ) : BaseEntitet() {
+
+    fun tilKopiForNyPerson(nyPerson: Person) =
+        copy(id = 0, person = nyPerson)
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -69,7 +72,7 @@ data class GrSivilstand(
         tom = null,
         verdi = this.type.toString()
             .replace("_", " ")
-            .storForbokstav()
+            .storForbokstav(),
     )
 
     fun harGyldigFom() = this.fom != null
@@ -87,7 +90,7 @@ data class GrSivilstand(
             GrSivilstand(
                 fom = sivilstand.gyldigFraOgMed,
                 type = sivilstand.type,
-                person = person
+                person = person,
             )
     }
 }

@@ -26,14 +26,14 @@ class JournalføringMetrikk {
         "ettersendelse til søknad om barnetrygd ordinær" to "Ettersendelse til søknad om ordinær barnetrygd",
         "ettersendelse til søknad om utvidet barnetrygd" to "Ettersendelse til søknad om utvidet barnetrygd",
         "ettersendelse til søknad om barnetrygd utvidet" to "Ettersendelse til søknad om utvidet barnetrygd",
-        "tilleggskjema eøs" to "Tilleggskjema EØS"
+        "tilleggskjema eøs" to "Tilleggskjema EØS",
     )
 
     private val antallJournalpostTittel = journalpostTittelMap.values.toSet().associateWith {
         Metrics.counter(
             "journalfoering.journalpost",
             "tittel",
-            it
+            it,
         )
     }
 
@@ -43,7 +43,7 @@ class JournalføringMetrikk {
     fun tellManuellJournalføringsmetrikker(
         journalpost: Journalpost?,
         oppdatert: RestJournalføring,
-        behandlinger: List<Behandling>
+        behandlinger: List<Behandling>,
     ) {
         if (oppdatert.knyttTilFagsak) {
             behandlinger.forEach {

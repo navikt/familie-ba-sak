@@ -25,7 +25,7 @@ class TaskTest : AbstractSpringIntegrationTest() {
             }
             .map { it?.taskStepType }
             .collect(
-                Collectors.toList<String>()
+                Collectors.toList<String>(),
             )
 
         Assertions.assertEquals(tasker.size, taskTyper.distinct().size)
@@ -37,16 +37,16 @@ class TaskTest : AbstractSpringIntegrationTest() {
             false,
             tasker.stream().anyMatch {
                 harIkkePåkrevdAnnotasjon(
-                    it!!
+                    it!!,
                 )
-            }
+            },
         )
     }
 
     private fun harIkkePåkrevdAnnotasjon(it: AsyncTaskStep): Boolean {
         return !AnnotationUtils.isAnnotationDeclaredLocally(
             TaskStepBeskrivelse::class.java,
-            it.javaClass
+            it.javaClass,
         )
     }
 
@@ -54,7 +54,7 @@ class TaskTest : AbstractSpringIntegrationTest() {
         val aClass = AopProxyUtils.ultimateTargetClass(task)
         return AnnotationUtils.findAnnotation(
             aClass,
-            TaskStepBeskrivelse::class.java
+            TaskStepBeskrivelse::class.java,
         )
     }
 }

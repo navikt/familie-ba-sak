@@ -30,13 +30,13 @@ import java.time.LocalDate
 class KompetanseTestController(
     private val utvidetBehandlingService: UtvidetBehandlingService,
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
-    private val kompetanseService: KompetanseService
+    private val kompetanseService: KompetanseService,
 ) {
 
     @PutMapping(path = ["{behandlingId}"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun endreKompetanser(
         @PathVariable behandlingId: Long,
-        @RequestBody restKompetanser: Map<LocalDate, String>
+        @RequestBody restKompetanser: Map<LocalDate, String>,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         val behandlingIdObjekt = BehandlingId(behandlingId)
         val personopplysningGrunnlag = personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingIdObjekt.id)!!
@@ -50,7 +50,7 @@ class KompetanseTestController(
 
 private fun Map<LocalDate, String>.tilKompetanser(
     behandlingId: BehandlingId,
-    personopplysningGrunnlag: PersonopplysningGrunnlag
+    personopplysningGrunnlag: PersonopplysningGrunnlag,
 ): Collection<Kompetanse> {
     return this.map { (dato, tidslinje) ->
         val person = personopplysningGrunnlag.personer.first { it.fødselsdato == dato }

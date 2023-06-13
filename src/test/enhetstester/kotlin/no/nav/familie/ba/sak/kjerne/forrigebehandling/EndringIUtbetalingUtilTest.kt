@@ -27,33 +27,33 @@ class EndringIUtbetalingUtilTest {
                 fom = jan22,
                 tom = aug22,
                 beløp = 1054,
-                aktør = barn1Aktør
+                aktør = barn1Aktør,
             ),
             lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
                 beløp = 1054,
-                aktør = barn2Aktør
-            )
+                aktør = barn2Aktør,
+            ),
         )
         val nåværendeAndeler = listOf(
             lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = des22,
                 beløp = 1054,
-                aktør = barn1Aktør
+                aktør = barn1Aktør,
             ),
             lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
                 beløp = 1054,
-                aktør = barn2Aktør
-            )
+                aktør = barn2Aktør,
+            ),
         )
 
         val perioderMedEndring = EndringIUtbetalingUtil.lagEndringIUtbetalingTidslinje(
             nåværendeAndeler = nåværendeAndeler,
-            forrigeAndeler = forrigeAndeler
+            forrigeAndeler = forrigeAndeler,
         ).perioder().filter { it.innhold == true }
 
         Assertions.assertEquals(1, perioderMedEndring.size)
@@ -62,7 +62,7 @@ class EndringIUtbetalingUtilTest {
 
         val endringstidspunkt = EndringIUtbetalingUtil.utledEndringstidspunktForUtbetalingsbeløp(
             nåværendeAndeler = nåværendeAndeler,
-            forrigeAndeler = forrigeAndeler
+            forrigeAndeler = forrigeAndeler,
         )
 
         Assertions.assertEquals(sep22, endringstidspunkt)
@@ -78,26 +78,26 @@ class EndringIUtbetalingUtilTest {
                 fom = jan22,
                 tom = aug22,
                 beløp = 1054,
-                aktør = barn1Aktør
+                aktør = barn1Aktør,
             ),
             lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
                 beløp = 1054,
-                aktør = barn2Aktør
-            )
+                aktør = barn2Aktør,
+            ),
         )
 
         val perioderMedEndring = EndringIUtbetalingUtil.lagEndringIUtbetalingTidslinje(
             nåværendeAndeler = andeler,
-            forrigeAndeler = andeler
+            forrigeAndeler = andeler,
         ).perioder().filter { it.innhold == true }
 
         Assertions.assertTrue(perioderMedEndring.isEmpty())
 
         val endringstidspunkt = EndringIUtbetalingUtil.utledEndringstidspunktForUtbetalingsbeløp(
             nåværendeAndeler = andeler,
-            forrigeAndeler = andeler
+            forrigeAndeler = andeler,
         )
 
         Assertions.assertNull(endringstidspunkt)
@@ -114,14 +114,14 @@ class EndringIUtbetalingUtilTest {
                 tom = aug22,
                 beløp = 1054,
                 aktør = søker,
-                ytelseType = YtelseType.UTVIDET_BARNETRYGD
+                ytelseType = YtelseType.UTVIDET_BARNETRYGD,
             ),
             lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
                 beløp = 1054,
-                aktør = barn2Aktør
-            )
+                aktør = barn2Aktør,
+            ),
         )
         val nåværendeAndeler = listOf(
             lagAndelTilkjentYtelse(
@@ -129,26 +129,26 @@ class EndringIUtbetalingUtilTest {
                 tom = aug22,
                 beløp = 1054,
                 aktør = søker,
-                ytelseType = YtelseType.UTVIDET_BARNETRYGD
+                ytelseType = YtelseType.UTVIDET_BARNETRYGD,
             ),
             lagAndelTilkjentYtelse(
                 fom = mai22,
                 tom = aug22,
                 beløp = 630,
                 aktør = søker,
-                ytelseType = YtelseType.SMÅBARNSTILLEGG
+                ytelseType = YtelseType.SMÅBARNSTILLEGG,
             ),
             lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
                 beløp = 1054,
-                aktør = barn2Aktør
-            )
+                aktør = barn2Aktør,
+            ),
         )
 
         val perioderMedEndring = EndringIUtbetalingUtil.lagEndringIUtbetalingTidslinje(
             nåværendeAndeler = nåværendeAndeler,
-            forrigeAndeler = forrigeAndeler
+            forrigeAndeler = forrigeAndeler,
         ).perioder().filter { it.innhold == true }
 
         Assertions.assertEquals(1, perioderMedEndring.size)
@@ -157,7 +157,7 @@ class EndringIUtbetalingUtilTest {
 
         val endringstidspunkt = EndringIUtbetalingUtil.utledEndringstidspunktForUtbetalingsbeløp(
             nåværendeAndeler = nåværendeAndeler,
-            forrigeAndeler = forrigeAndeler
+            forrigeAndeler = forrigeAndeler,
         )
 
         Assertions.assertEquals(mai22, endringstidspunkt)
@@ -173,19 +173,19 @@ class EndringIUtbetalingUtilTest {
                 fom = jan22,
                 tom = aug22,
                 beløp = 1054,
-                aktør = barn1Aktør
+                aktør = barn1Aktør,
             )
         val andelBarn2 =
             lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
                 beløp = 1054,
-                aktør = barn2Aktør
+                aktør = barn2Aktør,
             )
 
         val perioderMedEndring = EndringIUtbetalingUtil.lagEndringIUtbetalingTidslinje(
             nåværendeAndeler = listOf(andelBarn2),
-            forrigeAndeler = listOf(andelBarn2, andelBarn1)
+            forrigeAndeler = listOf(andelBarn2, andelBarn1),
         ).perioder().filter { it.innhold == true }
 
         Assertions.assertEquals(1, perioderMedEndring.size)
@@ -194,7 +194,7 @@ class EndringIUtbetalingUtilTest {
 
         val endringstidspunkt = EndringIUtbetalingUtil.utledEndringstidspunktForUtbetalingsbeløp(
             nåværendeAndeler = listOf(andelBarn2),
-            forrigeAndeler = listOf(andelBarn2, andelBarn1)
+            forrigeAndeler = listOf(andelBarn2, andelBarn1),
         )
 
         Assertions.assertEquals(jan22, endringstidspunkt)
@@ -210,26 +210,26 @@ class EndringIUtbetalingUtilTest {
                 fom = jan22,
                 tom = aug22,
                 beløp = 0,
-                aktør = barn1Aktør
+                aktør = barn1Aktør,
             )
         val andelBarn2 =
             lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
                 beløp = 1054,
-                aktør = barn2Aktør
+                aktør = barn2Aktør,
             )
 
         val perioderMedEndring = EndringIUtbetalingUtil.lagEndringIUtbetalingTidslinje(
             nåværendeAndeler = listOf(andelBarn2),
-            forrigeAndeler = listOf(andelBarn2, andelBarn1)
+            forrigeAndeler = listOf(andelBarn2, andelBarn1),
         ).perioder().filter { it.innhold == true }
 
         Assertions.assertTrue(perioderMedEndring.isEmpty())
 
         val endringstidspunkt = EndringIUtbetalingUtil.utledEndringstidspunktForUtbetalingsbeløp(
             nåværendeAndeler = listOf(andelBarn2),
-            forrigeAndeler = listOf(andelBarn2, andelBarn1)
+            forrigeAndeler = listOf(andelBarn2, andelBarn1),
         )
 
         Assertions.assertNull(endringstidspunkt)

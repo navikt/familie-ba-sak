@@ -79,12 +79,12 @@ class BeslutteVedtakTest {
                 any(),
                 any(),
                 any(),
-                any()
+                any(),
             )
         } returns Totrinnskontroll(
             behandling = lagBehandling(),
             saksbehandler = "Mock Saksbehandler",
-            saksbehandlerId = "Mock.Saksbehandler"
+            saksbehandlerId = "Mock.Saksbehandler",
         )
         every { loggService.opprettBeslutningOmVedtakLogg(any(), any(), any(), any()) } just Runs
         every { vedtakService.oppdaterVedtaksdatoOgBrev(any()) } just runs
@@ -104,7 +104,7 @@ class BeslutteVedtakTest {
             featureToggleService,
             tilkjentYtelseValideringService,
             saksbehandlerContext,
-            simuleringService
+            simuleringService,
         )
     }
 
@@ -144,7 +144,7 @@ class BeslutteVedtakTest {
                 any(),
                 any(),
                 any(),
-                any()
+                any(),
             )
         } returns Task(OpprettOppgaveTask.TASK_STEP_TYPE, "")
 
@@ -157,7 +157,7 @@ class BeslutteVedtakTest {
                 Oppgavetype.BehandleUnderkjentVedtak,
                 any(),
                 any(),
-                any()
+                any(),
             )
         }
         Assertions.assertEquals(StegType.SEND_TIL_BESLUTTER, nesteSteg)
@@ -179,7 +179,7 @@ class BeslutteVedtakTest {
             JournalførVedtaksbrevTask.opprettTaskJournalførVedtaksbrev(
                 any(),
                 any(),
-                any()
+                any(),
             )
         } returns Task(OpprettOppgaveTask.TASK_STEP_TYPE, "")
 
@@ -191,7 +191,7 @@ class BeslutteVedtakTest {
             JournalførVedtaksbrevTask.opprettTaskJournalførVedtaksbrev(
                 personIdent = behandling.fagsak.aktør.aktivFødselsnummer(),
                 behandlingId = behandling.id,
-                vedtakId = vedtak.id
+                vedtakId = vedtak.id,
             )
         }
         Assertions.assertEquals(StegType.JOURNALFØR_VEDTAKSBREV, nesteSteg)
@@ -210,7 +210,7 @@ class BeslutteVedtakTest {
         every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
         every { OpprettOppgaveTask.opprettTask(any(), any(), any()) } returns Task(
             OpprettOppgaveTask.TASK_STEP_TYPE,
-            ""
+            "",
         )
 
         beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
@@ -230,7 +230,7 @@ class BeslutteVedtakTest {
         mockkObject(FerdigstillOppgaver.Companion)
         every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(
             type = FerdigstillOppgaver.TASK_STEP_TYPE,
-            payload = ""
+            payload = "",
         )
 
         assertThrows<FunksjonellFeil> { beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak) }
@@ -249,7 +249,7 @@ class BeslutteVedtakTest {
         mockkObject(FerdigstillOppgaver.Companion)
         every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(
             type = FerdigstillOppgaver.TASK_STEP_TYPE,
-            payload = ""
+            payload = "",
         )
 
         assertThrows<FunksjonellFeil> { beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak) }

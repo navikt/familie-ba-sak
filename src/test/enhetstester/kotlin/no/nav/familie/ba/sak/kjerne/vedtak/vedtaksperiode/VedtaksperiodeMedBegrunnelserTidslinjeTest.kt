@@ -15,14 +15,14 @@ class VedtaksperiodeMedBegrunnelserTidslinjeTest {
                 vedtak = lagVedtak(),
                 type = Vedtaksperiodetype.UTBETALING,
                 fom = null,
-                tom = LocalDate.now()
+                tom = LocalDate.now(),
             ),
             VedtaksperiodeMedBegrunnelser(
                 vedtak = lagVedtak(),
                 type = Vedtaksperiodetype.UTBETALING,
                 fom = LocalDate.now().plusDays(1),
-                tom = null
-            )
+                tom = null,
+            ),
         )
 
     @Test

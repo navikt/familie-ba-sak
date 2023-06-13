@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class KorrigertVedtakService(
     private val korrigertVedtakRepository: KorrigertVedtakRepository,
-    private val loggService: LoggService
+    private val loggService: LoggService,
 ) {
 
     fun finnAktivtKorrigertVedtakPåBehandling(behandlingId: Long): KorrigertVedtak? =

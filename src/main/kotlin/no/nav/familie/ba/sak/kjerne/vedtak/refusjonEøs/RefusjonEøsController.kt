@@ -26,26 +26,25 @@ import org.springframework.web.bind.annotation.RestController
 class RefusjonEøsController(
     private val tilgangService: TilgangService,
     private val refusjonEøsService: RefusjonEøsService,
-    private val utvidetBehandlingService: UtvidetBehandlingService
+    private val utvidetBehandlingService: UtvidetBehandlingService,
 ) {
     @PostMapping(
         path = ["behandlinger/{behandlingId}"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
-        consumes = [MediaType.APPLICATION_JSON_VALUE]
+        consumes = [MediaType.APPLICATION_JSON_VALUE],
     )
     fun leggTilRefusjonEøsPeriode(
         @PathVariable behandlingId: Long,
-        @RequestBody refusjonEøs: RestRefusjonEøs
-    ):
-        ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        @RequestBody refusjonEøs: RestRefusjonEøs,
+    ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "legg til periode med refusjon EØS"
+            handling = "legg til periode med refusjon EØS",
         )
 
         refusjonEøsService.leggTilRefusjonEøsPeriode(
             refusjonEøs = refusjonEøs,
-            behandlingId = behandlingId
+            behandlingId = behandlingId,
         )
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
@@ -54,16 +53,16 @@ class RefusjonEøsController(
     @PutMapping(
         path = ["behandlinger/{behandlingId}/perioder/{id}"],
         produces = [MediaType.APPLICATION_JSON_VALUE],
-        consumes = [MediaType.APPLICATION_JSON_VALUE]
+        consumes = [MediaType.APPLICATION_JSON_VALUE],
     )
     fun oppdaterRefusjonEøsPeriode(
         @PathVariable behandlingId: Long,
         @PathVariable id: Long,
-        @RequestBody refusjonEøs: RestRefusjonEøs
+        @RequestBody refusjonEøs: RestRefusjonEøs,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "oppdater periode med refusjon EØS"
+            handling = "oppdater periode med refusjon EØS",
         )
 
         refusjonEøsService.oppdaterRefusjonEøsPeriode(restRefusjonEøs = refusjonEøs, id = id)
@@ -74,11 +73,11 @@ class RefusjonEøsController(
     @DeleteMapping(path = ["behandlinger/{behandlingId}/perioder/{id}"])
     fun fjernRefusjonEøsPeriode(
         @PathVariable behandlingId: Long,
-        @PathVariable id: Long
+        @PathVariable id: Long,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "fjerner periode med refusjon EØS"
+            handling = "fjerner periode med refusjon EØS",
         )
         refusjonEøsService.fjernRefusjonEøsPeriode(id = id, behandlingId = behandlingId)
 
@@ -89,7 +88,7 @@ class RefusjonEøsController(
     fun hentRefusjonEøsPerioder(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<List<RestRefusjonEøs>>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.VEILEDER,
-            handling = "hente refusjon EØS for behandling"
+            handling = "hente refusjon EØS for behandling",
         )
         return ResponseEntity.ok(Ressurs.success(refusjonEøsService.hentRefusjonEøsPerioder(behandlingId = behandlingId)))
     }

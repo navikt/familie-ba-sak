@@ -29,8 +29,8 @@ import org.springframework.web.client.RestTemplate
         "no.nav.security.jwt.issuer.azuread.accepted_audience: some-audience",
         "rolle.veileder: VEILDER",
         "rolle.saksbehandler: SAKSBEHANDLER",
-        "rolle.beslutter: BESLUTTER"
-    ]
+        "rolle.beslutter: BESLUTTER",
+    ],
 )
 @ExtendWith(SpringExtension::class)
 @EnableMockOAuth2Server
@@ -58,7 +58,7 @@ abstract class WebSpringAuthTestRunner : AbstractMockkSpringRunner() {
         subject: String = DEFAULT_SUBJECT,
         audience: String = DEFAULT_AUDIENCE,
         issuerId: String = DEFAULT_ISSUER_ID,
-        clientId: String = DEFAULT_CLIENT_ID
+        clientId: String = DEFAULT_CLIENT_ID,
     ): String {
         return mockOAuth2Server.issueToken(
             issuerId,
@@ -68,8 +68,8 @@ abstract class WebSpringAuthTestRunner : AbstractMockkSpringRunner() {
                 subject = subject,
                 audience = listOf(audience),
                 claims = claims,
-                expiry = 3600
-            )
+                expiry = 3600,
+            ),
         ).serialize()
     }
 
@@ -82,9 +82,9 @@ abstract class WebSpringAuthTestRunner : AbstractMockkSpringRunner() {
                     "groups" to (groups ?: listOf(BehandlerRolle.SAKSBEHANDLER.name)),
                     "azp" to "azp-test",
                     "name" to "Mock McMockface",
-                    "NAVident" to "Z0000"
-                )
-            )
+                    "NAVident" to "Z0000",
+                ),
+            ),
         )
         return httpHeaders
     }
@@ -98,9 +98,9 @@ abstract class WebSpringAuthTestRunner : AbstractMockkSpringRunner() {
                     "groups" to (groups ?: listOf(BehandlerRolle.SYSTEM.name)),
                     "azp" to "azp-test",
                     "name" to SYSTEM_FORKORTELSE,
-                    "preferred_username" to SYSTEM_FORKORTELSE
-                )
-            )
+                    "preferred_username" to SYSTEM_FORKORTELSE,
+                ),
+            ),
         )
         return httpHeaders
     }

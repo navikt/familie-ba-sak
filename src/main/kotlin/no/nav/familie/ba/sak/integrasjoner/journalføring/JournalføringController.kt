@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RestController
 @Validated
 class JournalføringController(
     private val innkommendeJournalføringService: InnkommendeJournalføringService,
-    private val tilgangService: TilgangService
+    private val tilgangService: TilgangService,
 ) {
 
     @GetMapping(path = ["/{journalpostId}/hent"], produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -39,34 +39,34 @@ class JournalføringController(
         return ResponseEntity.ok(
             Ressurs.success(
                 innkommendeJournalføringService.hentJournalposterForBruker(
-                    personIdentBody.ident
-                )
-            )
+                    personIdentBody.ident,
+                ),
+            ),
         )
     }
 
     @GetMapping("/{journalpostId}/hent/{dokumentInfoId}")
     fun hentDokument(
         @PathVariable journalpostId: String,
-        @PathVariable dokumentInfoId: String
+        @PathVariable dokumentInfoId: String,
     ): ResponseEntity<Ressurs<ByteArray>> {
         return ResponseEntity.ok(
             Ressurs.success(
                 innkommendeJournalføringService.hentDokument(
                     journalpostId,
-                    dokumentInfoId
-                )
-            )
+                    dokumentInfoId,
+                ),
+            ),
         )
     }
 
     @GetMapping(
         path = ["/{journalpostId}/dokument/{dokumentInfoId}"],
-        produces = [MediaType.APPLICATION_PDF_VALUE]
+        produces = [MediaType.APPLICATION_PDF_VALUE],
     )
     fun hentDokumentBytearray(
         @PathVariable journalpostId: String,
-        @PathVariable dokumentInfoId: String
+        @PathVariable dokumentInfoId: String,
     ): ResponseEntity<ByteArray> {
         return ResponseEntity.ok(innkommendeJournalføringService.hentDokument(journalpostId, dokumentInfoId))
     }
@@ -77,11 +77,11 @@ class JournalføringController(
         @PathVariable oppgaveId: String,
         @RequestParam(name = "journalfoerendeEnhet") journalførendeEnhet: String,
         @RequestBody @Valid
-        request: RestJournalføring
+        request: RestJournalføring,
     ): ResponseEntity<Ressurs<String>> {
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "journalføre"
+            handling = "journalføre",
         )
 
         if (request.dokumenter.any { it.dokumentTittel == null || it.dokumentTittel == "" }) {

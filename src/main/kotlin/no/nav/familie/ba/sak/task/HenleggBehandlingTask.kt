@@ -19,13 +19,13 @@ import java.time.LocalDate
 @TaskStepBeskrivelse(
     taskStepType = HenleggBehandlingTask.TASK_STEP_TYPE,
     beskrivelse = "Henlegg behandling",
-    maxAntallFeil = 1
+    maxAntallFeil = 1,
 )
 class HenleggBehandlingTask(
     val arbeidsfordelingService: ArbeidsfordelingService,
     val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     val stegService: StegService,
-    val oppgaveService: OppgaveService
+    val oppgaveService: OppgaveService,
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
@@ -54,7 +54,7 @@ class HenleggBehandlingTask(
 
         stegService.håndterHenleggBehandling(
             behandling = behandling,
-            henleggBehandlingInfo = henleggBehandlingTaskDTO.run { RestHenleggBehandlingInfo(årsak, begrunnelse) }
+            henleggBehandlingInfo = henleggBehandlingTaskDTO.run { RestHenleggBehandlingInfo(årsak, begrunnelse) },
         ).apply {
             task.metadata["behandlendeEnhetId"] = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(id).behandlendeEnhetId
             task.metadata["Resultat"] = "Henleggelse kjørt OK"
@@ -71,5 +71,5 @@ class HenleggBehandlingTaskDTO(
     val behandlingId: Long,
     val årsak: HenleggÅrsak,
     val begrunnelse: String,
-    val validerOppgavefristErEtterDato: LocalDate?
+    val validerOppgavefristErEtterDato: LocalDate?,
 )

@@ -15,7 +15,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories
 @EnableJdbcAuditing
 @EnableJdbcRepositories("no.nav.familie.prosessering")
 @EnableJpaRepositories(
-    "no.nav.familie"
+    "no.nav.familie",
 )
 @EnableJpaAuditing
 class DatabaseConfig : AbstractJdbcConfiguration() {
@@ -24,8 +24,8 @@ class DatabaseConfig : AbstractJdbcConfiguration() {
         return JdbcCustomConversions(
             listOf(
                 PropertiesWrapperTilStringConverter(),
-                StringTilPropertiesWrapperConverter()
-            )
+                StringTilPropertiesWrapperConverter(),
+            ),
         )
     }
 }

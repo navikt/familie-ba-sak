@@ -26,7 +26,7 @@ class BehandlingStegControllerTest {
         stegService = stegServiceMock,
         tilgangService = tilgangServiceMock,
         featureToggleService = featureToggleServiceMock,
-        utvidetBehandlingService = utvidetBehandlingServiceMock
+        utvidetBehandlingService = utvidetBehandlingServiceMock,
     )
 
     @Test
@@ -44,8 +44,8 @@ class BehandlingStegControllerTest {
                 behandlingId = behandling.id,
                 henleggInfo = RestHenleggBehandlingInfo(
                     begrunnelse = "dette er en begrunnelse",
-                    årsak = HenleggÅrsak.FEILAKTIG_OPPRETTET
-                )
+                    årsak = HenleggÅrsak.FEILAKTIG_OPPRETTET,
+                ),
             )
         }
     }

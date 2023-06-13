@@ -21,7 +21,7 @@ class UnleashFeatureToggleService(unleash: FeatureToggleProperties.Unleash) : Fe
                 .build(),
             ByClusterStrategy(unleash.cluster),
             ByAnsvarligSaksbehandler(),
-            GradualRolloutRandomStrategy()
+            GradualRolloutRandomStrategy(),
         )
         this.unleash = unleash
     }

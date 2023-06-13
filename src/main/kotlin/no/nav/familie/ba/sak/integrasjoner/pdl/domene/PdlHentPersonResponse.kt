@@ -25,13 +25,13 @@ data class PdlPersonData(
     val opphold: List<Opphold> = emptyList(),
     val statsborgerskap: List<Statsborgerskap> = emptyList(),
     val doedsfall: List<Doedsfall> = emptyList(),
-    val kontaktinformasjonForDoedsbo: List<PdlKontaktinformasjonForDødsbo> = emptyList()
+    val kontaktinformasjonForDoedsbo: List<PdlKontaktinformasjonForDødsbo> = emptyList(),
 ) {
     fun validerOmPersonKanBehandlesIFagsystem() {
         if (foedsel.isEmpty()) throw PdlPersonKanIkkeBehandlesIFagsystem("mangler fødselsdato")
         if (folkeregisteridentifikator.firstOrNull()?.status == FolkeregisteridentifikatorStatus.OPPHOERT) {
             throw PdlPersonKanIkkeBehandlesIFagsystem(
-                "er opphørt"
+                "er opphørt",
             )
         }
     }
@@ -41,7 +41,7 @@ data class PdlPersonData(
 data class PdlFolkeregisteridentifikator(
     val identifikasjonsnummer: String?,
     val status: FolkeregisteridentifikatorStatus,
-    val type: FolkeregisteridentifikatorType?
+    val type: FolkeregisteridentifikatorType?,
 )
 
 enum class FolkeregisteridentifikatorStatus { I_BRUK, OPPHOERT }
@@ -54,7 +54,7 @@ data class PdlFødselsDato(val foedselsdato: String?)
 data class PdlNavn(
     val fornavn: String,
     val mellomnavn: String? = null,
-    val etternavn: String
+    val etternavn: String,
 ) {
 
     fun fulltNavn(): String {

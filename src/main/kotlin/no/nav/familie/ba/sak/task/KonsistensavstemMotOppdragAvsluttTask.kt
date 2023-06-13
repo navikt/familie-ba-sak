@@ -19,12 +19,12 @@ import java.time.LocalDateTime
 @TaskStepBeskrivelse(
     taskStepType = KonsistensavstemMotOppdragAvsluttTask.TASK_STEP_TYPE,
     beskrivelse = "Avslutt Konsistensavstemming mot oppdrag",
-    maxAntallFeil = 10 // 2.5 time bør være nok tid for å att alle datataskene har kjørt
+    maxAntallFeil = 10, // 2.5 time bør være nok tid for å att alle datataskene har kjørt
 )
 class KonsistensavstemMotOppdragAvsluttTask(
     val avstemmingService: AvstemmingService,
     val dataChunkRepository: DataChunkRepository,
-    val batchService: BatchService
+    val batchService: BatchService,
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
@@ -35,7 +35,7 @@ class KonsistensavstemMotOppdragAvsluttTask(
         if (dataChunks.any { !it.erSendt }) {
             throw RekjørSenereException(
                 årsak = "Alle datatasks for konsistensavstemming med id ${konsistensavstemmingAvsluttTask.transaksjonsId} er ikke kjørt.",
-                triggerTid = LocalDateTime.now().plusMinutes(15)
+                triggerTid = LocalDateTime.now().plusMinutes(15),
             )
         }
 
@@ -47,7 +47,7 @@ class KonsistensavstemMotOppdragAvsluttTask(
         if (konsistensavstemmingAvsluttTask.sendTilØkonomi) {
             avstemmingService.konsistensavstemOppdragAvslutt(
                 avstemmingsdato = konsistensavstemmingAvsluttTask.avstemmingsdato,
-                transaksjonsId = konsistensavstemmingAvsluttTask.transaksjonsId
+                transaksjonsId = konsistensavstemmingAvsluttTask.transaksjonsId,
             )
         } else {
             logger.info("Send avsluttmelding til økonomi i dry-run modus for transaksjonsId=${konsistensavstemmingAvsluttTask.transaksjonsId}")

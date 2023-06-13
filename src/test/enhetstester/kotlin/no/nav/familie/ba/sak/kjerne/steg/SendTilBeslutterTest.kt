@@ -41,8 +41,8 @@ class SendTilBeslutterTest {
         behandling.behandlingStegTilstand.add(
             BehandlingStegTilstand(
                 behandling = behandling,
-                behandlingSteg = StegType.VILKÅRSVURDERING
-            )
+                behandlingSteg = StegType.VILKÅRSVURDERING,
+            ),
         )
 
         assertThrows<Feil> {
@@ -58,8 +58,8 @@ class SendTilBeslutterTest {
         behandling.behandlingStegTilstand.add(
             BehandlingStegTilstand(
                 behandling = behandling,
-                behandlingSteg = StegType.VILKÅRSVURDERING
-            )
+                behandlingSteg = StegType.VILKÅRSVURDERING,
+            ),
         )
 
         assertThrows<Feil> {

@@ -22,12 +22,12 @@ class BrevTypeTest {
         Brevmal.SVARTIDSBREV,
         Brevmal.FORLENGET_SVARTIDSBREV,
         Brevmal.SVARTIDSBREV_INSTITUSJON,
-        Brevmal.FORLENGET_SVARTIDSBREV_INSTITUSJON
+        Brevmal.FORLENGET_SVARTIDSBREV_INSTITUSJON,
     )
 
     private val eøsDokumentMedAvventerDokumentasjon = listOf(
         Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS,
-        Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS_MED_INNHENTING_AV_OPPLYSNINGER
+        Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS_MED_INNHENTING_AV_OPPLYSNINGER,
     )
 
     private val førerIkkeTilAvventingAvDokumentasjon = Brevmal.values()
@@ -62,7 +62,7 @@ class BrevTypeTest {
         førerTilAvventerDokumentasjon.forEach {
             Assertions.assertEquals(
                 21L,
-                it.ventefristDager(manuellFrist = 21L, behandlingKategori = BehandlingKategori.NASJONAL)
+                it.ventefristDager(manuellFrist = 21L, behandlingKategori = BehandlingKategori.NASJONAL),
             )
         }
 
@@ -76,11 +76,11 @@ class BrevTypeTest {
         Assertions.assertEquals(90L, Brevmal.SVARTIDSBREV.ventefristDager(behandlingKategori = BehandlingKategori.EØS))
         Assertions.assertEquals(
             60L,
-            Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS.ventefristDager(behandlingKategori = BehandlingKategori.EØS)
+            Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS.ventefristDager(behandlingKategori = BehandlingKategori.EØS),
         )
         Assertions.assertEquals(
             60L,
-            Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS_MED_INNHENTING_AV_OPPLYSNINGER.ventefristDager(behandlingKategori = BehandlingKategori.EØS)
+            Brevmal.VARSEL_OM_ÅRLIG_REVURDERING_EØS_MED_INNHENTING_AV_OPPLYSNINGER.ventefristDager(behandlingKategori = BehandlingKategori.EØS),
         )
     }
 

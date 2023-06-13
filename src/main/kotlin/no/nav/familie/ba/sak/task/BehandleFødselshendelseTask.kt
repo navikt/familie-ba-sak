@@ -25,14 +25,14 @@ import java.util.Properties
 @TaskStepBeskrivelse(
     taskStepType = BehandleFødselshendelseTask.TASK_STEP_TYPE,
     beskrivelse = "Setter i gang behandlingsløp for fødselshendelse",
-    maxAntallFeil = 3
+    maxAntallFeil = 3,
 )
 class BehandleFødselshendelseTask(
     private val autovedtakStegService: AutovedtakStegService,
     private val velgFagsystemService: VelgFagSystemService,
     private val infotrygdFeedService: InfotrygdFeedService,
     private val personidentService: PersonidentService,
-    private val startSatsendring: StartSatsendring
+    private val startSatsendring: StartSatsendring,
 ) : AsyncTaskStep {
 
     private val dagerSidenBarnBleFødt: DistributionSummary = Metrics.summary("foedselshendelse.dagersidenbarnfoedt")
@@ -51,7 +51,7 @@ class BehandleFødselshendelseTask(
             val dagerSidenBarnetBleFødt =
                 ChronoUnit.DAYS.between(
                     Fødselsnummer(it).fødselsdato,
-                    LocalDateTime.now()
+                    LocalDateTime.now(),
                 )
             dagerSidenBarnBleFødt.record(dagerSidenBarnetBleFødt.toDouble())
         }
@@ -63,14 +63,14 @@ class BehandleFødselshendelseTask(
                 if (harOpprettetSatsendring) {
                     throw RekjørSenereException(
                         "Satsendring skal kjøre ferdig før man behandler fødselsehendelse",
-                        LocalDateTime.now().plusMinutes(60)
+                        LocalDateTime.now().plusMinutes(60),
                     )
                 }
                 autovedtakStegService.kjørBehandlingFødselshendelse(
                     mottakersAktør = personidentService.hentAktør(
-                        nyBehandling.morsIdent
+                        nyBehandling.morsIdent,
                     ),
-                    behandlingsdata = nyBehandling
+                    behandlingsdata = nyBehandling,
                 )
             }
 
@@ -93,9 +93,9 @@ class BehandleFødselshendelseTask(
                 payload = objectMapper.writeValueAsString(behandleFødselshendelseTaskDTO),
                 properties = Properties().apply {
                     this["morsIdent"] = behandleFødselshendelseTaskDTO.nyBehandling.morsIdent
-                }
+                },
             ).copy(
-                triggerTid = triggerTid.plusDays(7)
+                triggerTid = triggerTid.plusDays(7),
             )
         }
     }

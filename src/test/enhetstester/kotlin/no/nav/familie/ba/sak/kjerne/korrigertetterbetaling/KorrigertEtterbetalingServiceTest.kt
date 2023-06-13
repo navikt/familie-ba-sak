@@ -51,7 +51,7 @@ internal class KorrigertEtterbetalingServiceTest {
 
         every { korrigertEtterbetalingRepository.finnAlleKorrigeringerPåBehandling(behandling.id) } returns listOf(
             korrigertEtterbetaling,
-            korrigertEtterbetaling
+            korrigertEtterbetaling,
         )
 
         val hentetKorrigertEtterbetaling =
@@ -81,7 +81,7 @@ internal class KorrigertEtterbetalingServiceTest {
         verify(exactly = 1) {
             loggService.opprettKorrigertEtterbetalingLogg(
                 behandling,
-                korrigertEtterbetaling
+                korrigertEtterbetaling,
             )
         }
     }
@@ -119,7 +119,7 @@ internal class KorrigertEtterbetalingServiceTest {
         verify(exactly = 1) {
             loggService.opprettKorrigertEtterbetalingLogg(
                 any(),
-                korrigertEtterbetaling
+                korrigertEtterbetaling,
             )
         }
     }
@@ -130,12 +130,12 @@ fun lagKorrigertEtterbetaling(
     årsak: KorrigertEtterbetalingÅrsak = KorrigertEtterbetalingÅrsak.FEIL_TIDLIGERE_UTBETALT_BELØP,
     begrunnelse: String? = null,
     beløp: Int = 2000,
-    aktiv: Boolean = true
+    aktiv: Boolean = true,
 ) =
     KorrigertEtterbetaling(
         behandling = behandling,
         årsak = årsak,
         begrunnelse = begrunnelse,
         aktiv = aktiv,
-        beløp = beløp
+        beløp = beløp,
     )

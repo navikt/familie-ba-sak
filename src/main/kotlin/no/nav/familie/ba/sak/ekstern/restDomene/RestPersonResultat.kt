@@ -15,7 +15,7 @@ import java.time.LocalDateTime
 data class RestPersonResultat(
     val personIdent: String,
     val vilkårResultater: List<RestVilkårResultat>,
-    val andreVurderinger: List<RestAnnenVurdering> = emptyList()
+    val andreVurderinger: List<RestAnnenVurdering> = emptyList(),
 )
 
 data class RestVilkårResultat(
@@ -34,7 +34,7 @@ data class RestVilkårResultat(
     @JsonDeserialize(using = IVedtakBegrunnelseDeserializer::class)
     val avslagBegrunnelser: List<IVedtakBegrunnelse>? = emptyList(),
     val vurderesEtter: Regelverk? = null,
-    val utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering> = emptyList()
+    val utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering> = emptyList(),
 ) {
 
     fun erAvslagUtenPeriode() =
@@ -62,10 +62,10 @@ fun PersonResultat.tilRestPersonResultat() =
                 erVurdert = vilkårResultat.resultat != Resultat.IKKE_VURDERT || vilkårResultat.versjon > 0,
                 avslagBegrunnelser = vilkårResultat.standardbegrunnelser,
                 vurderesEtter = vilkårResultat.vurderesEtter,
-                utdypendeVilkårsvurderinger = vilkårResultat.utdypendeVilkårsvurderinger
+                utdypendeVilkårsvurderinger = vilkårResultat.utdypendeVilkårsvurderinger,
             )
         },
         andreVurderinger = this.andreVurderinger.map { annenVurdering ->
             annenVurdering.tilRestAnnenVurdering()
-        }
+        },
     )

@@ -21,7 +21,7 @@ class DokumentGenereringService(
     private val brevService: BrevService,
     private val brevKlient: BrevKlient,
     private val integrasjonClient: IntegrasjonClient,
-    private val saksbehandlerContext: SaksbehandlerContext
+    private val saksbehandlerContext: SaksbehandlerContext,
 ) {
 
     fun genererBrevForVedtak(vedtak: Vedtak): ByteArray {
@@ -45,21 +45,21 @@ class DokumentGenereringService(
                 message = "Klarte ikke generere vedtaksbrev på behandling ${vedtak.behandling}: ${feil.message}",
                 frontendFeilmelding = "Det har skjedd en feil, og brevet er ikke sendt. Prøv igjen, og ta kontakt med brukerstøtte hvis problemet vedvarer.",
                 httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
-                throwable = feil
+                throwable = feil,
             )
         }
     }
 
     fun genererManueltBrev(
         manueltBrevRequest: ManueltBrevRequest,
-        erForhåndsvisning: Boolean = false
+        erForhåndsvisning: Boolean = false,
     ): ByteArray {
         try {
             val brev: Brev =
                 manueltBrevRequest.tilBrev(saksbehandlerContext.hentSaksbehandlerSignaturTilBrev()) { integrasjonClient.hentLandkoderISO2() }
             return brevKlient.genererBrev(
                 målform = manueltBrevRequest.mottakerMålform.tilSanityFormat(),
-                brev = brev
+                brev = brev,
             )
         } catch (exception: Exception) {
             if (exception is Feil || exception is FunksjonellFeil) {
@@ -70,7 +70,7 @@ class DokumentGenereringService(
                 message = "Klarte ikke generere brev for ${manueltBrevRequest.brevmal}. ${exception.message}",
                 frontendFeilmelding = "${if (erForhåndsvisning) "Det har skjedd en feil" else "Det har skjedd en feil, og brevet er ikke sendt"}. Prøv igjen, og ta kontakt med brukerstøtte hvis problemet vedvarer.",
                 httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
-                throwable = exception
+                throwable = exception,
             )
         }
     }

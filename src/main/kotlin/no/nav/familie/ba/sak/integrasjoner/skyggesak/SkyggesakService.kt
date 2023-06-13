@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class SkyggesakService(
-    private val skyggesakRepository: SkyggesakRepository
+    private val skyggesakRepository: SkyggesakRepository,
 ) {
     fun opprettSkyggesak(fagsak: Fagsak) {
         skyggesakRepository.save(Skyggesak(fagsakId = fagsak.id))

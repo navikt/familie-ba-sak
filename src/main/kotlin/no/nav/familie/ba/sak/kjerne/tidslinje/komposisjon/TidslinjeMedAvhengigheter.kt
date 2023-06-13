@@ -6,7 +6,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidsenhet
 val MANGLER_AVHENGIGHETER = IllegalArgumentException("Det er ikke sendt med noen avhengigheter")
 
 abstract class TidslinjeMedAvhengigheter<I, T : Tidsenhet>(
-    private val foregåendeTidslinjer: Collection<Tidslinje<*, T>>
+    private val foregåendeTidslinjer: Collection<Tidslinje<*, T>>,
 ) : Tidslinje<I, T>() {
 
     init {

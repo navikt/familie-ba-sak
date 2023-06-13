@@ -10,13 +10,13 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class AnnenVurderingService(
-    private val annenVurderingRepository: AnnenVurderingRepository
+    private val annenVurderingRepository: AnnenVurderingRepository,
 ) {
 
     fun hent(personResultat: PersonResultat, annenVurderingType: AnnenVurderingType): AnnenVurdering? =
         annenVurderingRepository.findBy(
             personResultat = personResultat,
-            type = annenVurderingType
+            type = annenVurderingType,
         )
 
     fun hent(annenVurderingId: Long): AnnenVurdering = annenVurderingRepository.findById(annenVurderingId)
@@ -25,7 +25,7 @@ class AnnenVurderingService(
     @Transactional
     fun endreAnnenVurdering(
         annenVurderingId: Long,
-        restAnnenVurdering: RestAnnenVurdering
+        restAnnenVurdering: RestAnnenVurdering,
     ) {
         hent(annenVurderingId = annenVurderingId).let {
             annenVurderingRepository.save(
@@ -33,7 +33,7 @@ class AnnenVurderingService(
                     it.resultat = restAnnenVurdering.resultat
                     it.begrunnelse = restAnnenVurdering.begrunnelse
                     it.type = restAnnenVurdering.type
-                }
+                },
             )
         }
     }
@@ -43,7 +43,7 @@ fun PersonResultat.leggTilBlankAnnenVurdering(annenVurderingType: AnnenVurdering
     this.andreVurderinger.add(
         AnnenVurdering(
             personResultat = this,
-            type = annenVurderingType
-        )
+            type = annenVurderingType,
+        ),
     )
 }

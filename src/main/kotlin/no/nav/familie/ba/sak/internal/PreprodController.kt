@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController
 class PreprodController(
     private val testVerktøyService: TestVerktøyService,
     private val tilgangService: TilgangService,
-    private val environment: Environment
+    private val environment: Environment,
 ) {
 
     @PutMapping(path = ["/{behandlingId}/fyll-ut-vilkarsvurdering"])

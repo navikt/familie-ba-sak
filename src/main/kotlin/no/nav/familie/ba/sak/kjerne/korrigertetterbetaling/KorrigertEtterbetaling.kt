@@ -25,7 +25,7 @@ class KorrigertEtterbetaling(
     @SequenceGenerator(
         name = "korrigert_etterbetaling_seq_generator",
         sequenceName = "korrigert_etterbetaling_seq",
-        allocationSize = 50
+        allocationSize = 50,
     )
     val id: Long = 0,
 
@@ -44,13 +44,13 @@ class KorrigertEtterbetaling(
     val behandling: Behandling,
 
     @Column(name = "aktiv")
-    var aktiv: Boolean
+    var aktiv: Boolean,
 ) : BaseEntitet()
 
 data class KorrigertEtterbetalingRequest(
     val årsak: KorrigertEtterbetalingÅrsak,
     val begrunnelse: String?,
-    val beløp: Int
+    val beløp: Int,
 )
 
 fun KorrigertEtterbetalingRequest.tilKorrigertEtterbetaling(behandling: Behandling) =
@@ -59,12 +59,12 @@ fun KorrigertEtterbetalingRequest.tilKorrigertEtterbetaling(behandling: Behandli
         begrunnelse = begrunnelse,
         behandling = behandling,
         beløp = beløp,
-        aktiv = true
+        aktiv = true,
     )
 
 enum class KorrigertEtterbetalingÅrsak(val visningsnavn: String) {
     FEIL_TIDLIGERE_UTBETALT_BELØP("Feil i tidligere utbetalt beløp"),
     REFUSJON_FRA_UDI("Refusjon fra UDI"),
     REFUSJON_FRA_ANDRE_MYNDIGHETER("Refusjon fra andre myndigheter"),
-    MOTREGNING("Motregning")
+    MOTREGNING("Motregning"),
 }

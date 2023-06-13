@@ -48,7 +48,7 @@ class FødselshendelseServiceTest {
 
     val integrasjonClient = mockk<IntegrasjonClient>()
     val statsborgerskapService = StatsborgerskapService(
-        integrasjonClient = integrasjonClient
+        integrasjonClient = integrasjonClient,
     )
 
     private val autovedtakFødselshendelseService = AutovedtakFødselshendelseService(
@@ -66,7 +66,7 @@ class FødselshendelseServiceTest {
         personopplysningerService,
         statsborgerskapService,
         opprettTaskService,
-        oppgaveService
+        oppgaveService,
     )
 
     @Test
@@ -75,7 +75,7 @@ class FødselshendelseServiceTest {
             land = "POL",
             gyldigFraOgMed = LocalDate.now().minusMonths(2),
             gyldigTilOgMed = null,
-            bekreftelsesdato = null
+            bekreftelsesdato = null,
         )
         every { integrasjonClient.hentAlleEØSLand() } returns IntegrasjonClientMock.hentKodeverkLand()
         every { opprettTaskService.opprettOppgaveTask(any(), any(), any(), any()) } just runs
@@ -87,7 +87,7 @@ class FødselshendelseServiceTest {
                 behandlingId = any(),
                 oppgavetype = Oppgavetype.Fremlegg,
                 beskrivelse = "Kontroller gyldig opphold",
-                fristForFerdigstillelse = LocalDate.now().plusYears(1)
+                fristForFerdigstillelse = LocalDate.now().plusYears(1),
             )
         }
     }
@@ -98,7 +98,7 @@ class FødselshendelseServiceTest {
             land = "DNK",
             gyldigFraOgMed = LocalDate.now().minusMonths(2),
             gyldigTilOgMed = null,
-            bekreftelsesdato = null
+            bekreftelsesdato = null,
         )
         every { integrasjonClient.hentAlleEØSLand() } returns IntegrasjonClientMock.hentKodeverkLand()
         every { opprettTaskService.opprettOppgaveTask(any(), any(), any(), any()) } just runs
@@ -110,7 +110,7 @@ class FødselshendelseServiceTest {
                 behandlingId = any(),
                 oppgavetype = Oppgavetype.Fremlegg,
                 beskrivelse = "Kontroller gyldig opphold",
-                fristForFerdigstillelse = LocalDate.now().plusYears(1)
+                fristForFerdigstillelse = LocalDate.now().plusYears(1),
             )
         }
     }

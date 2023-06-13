@@ -33,12 +33,12 @@ object TilkjentYtelseUtils {
         personopplysningGrunnlag: PersonopplysningGrunnlag,
         endretUtbetalingAndeler: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse> = emptyList(),
         fagsakType: FagsakType,
-        hentPerioderMedFullOvergangsstønad: (aktør: Aktør) -> List<InternPeriodeOvergangsstønad> = { _ -> emptyList() }
+        hentPerioderMedFullOvergangsstønad: (aktør: Aktør) -> List<InternPeriodeOvergangsstønad> = { _ -> emptyList() },
     ): TilkjentYtelse {
         val tilkjentYtelse = TilkjentYtelse(
             behandling = vilkårsvurdering.behandling,
             opprettetDato = LocalDate.now(),
-            endretDato = LocalDate.now()
+            endretDato = LocalDate.now(),
         )
 
         val (endretUtbetalingAndelerSøker, endretUtbetalingAndelerBarna) = endretUtbetalingAndeler.partition { it.person?.type == PersonType.SØKER }
@@ -46,7 +46,7 @@ object TilkjentYtelseUtils {
         val andelerTilkjentYtelseBarnaUtenEndringer = OrdinærBarnetrygdUtil.beregnAndelerTilkjentYtelseForBarna(
             personopplysningGrunnlag = personopplysningGrunnlag,
             personResultater = vilkårsvurdering.personResultater,
-            fagsakType = fagsakType
+            fagsakType = fagsakType,
         )
             .map {
                 if (it.person.type != PersonType.BARN) throw Feil("Prøver å generere ordinær andel for person av typen ${it.person.type}")
@@ -61,44 +61,44 @@ object TilkjentYtelseUtils {
                     nasjonaltPeriodebeløp = it.beløp,
                     type = YtelseType.ORDINÆR_BARNETRYGD,
                     sats = it.sats,
-                    prosent = it.prosent
+                    prosent = it.prosent,
                 )
             }
 
         val barnasAndelerInkludertEtterbetaling3ÅrEndringer = oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
             andelTilkjentYtelserUtenEndringer = andelerTilkjentYtelseBarnaUtenEndringer,
-            endretUtbetalingAndeler = endretUtbetalingAndelerBarna.filter { it.årsak == Årsak.ETTERBETALING_3ÅR }
+            endretUtbetalingAndeler = endretUtbetalingAndelerBarna.filter { it.årsak == Årsak.ETTERBETALING_3ÅR },
         )
 
         val andelerTilkjentYtelseUtvidetMedAlleEndringer = UtvidetBarnetrygdUtil.beregnTilkjentYtelseUtvidet(
             utvidetVilkår = finnUtvidetVilkår(vilkårsvurdering),
             tilkjentYtelse = tilkjentYtelse,
             andelerTilkjentYtelseBarnaMedEtterbetaling3ÅrEndringer = barnasAndelerInkludertEtterbetaling3ÅrEndringer,
-            endretUtbetalingAndelerSøker = endretUtbetalingAndelerSøker
+            endretUtbetalingAndelerSøker = endretUtbetalingAndelerSøker,
         )
 
         val småbarnstilleggErMulig = erSmåbarnstilleggMulig(
             utvidetAndeler = andelerTilkjentYtelseUtvidetMedAlleEndringer,
-            barnasAndeler = barnasAndelerInkludertEtterbetaling3ÅrEndringer
+            barnasAndeler = barnasAndelerInkludertEtterbetaling3ÅrEndringer,
         )
 
         val andelerTilkjentYtelseSmåbarnstillegg = if (småbarnstilleggErMulig) {
             SmåbarnstilleggBarnetrygdGenerator(
                 behandlingId = vilkårsvurdering.behandling.id,
-                tilkjentYtelse = tilkjentYtelse
+                tilkjentYtelse = tilkjentYtelse,
             )
                 .lagSmåbarnstilleggAndeler(
                     perioderMedFullOvergangsstønad = hentPerioderMedFullOvergangsstønad(
-                        personopplysningGrunnlag.søker.aktør
+                        personopplysningGrunnlag.søker.aktør,
                     ),
                     utvidetAndeler = andelerTilkjentYtelseUtvidetMedAlleEndringer,
                     barnasAndeler = barnasAndelerInkludertEtterbetaling3ÅrEndringer,
                     barnasAktørerOgFødselsdatoer = personopplysningGrunnlag.barna.map {
                         Pair(
                             it.aktør,
-                            it.fødselsdato
+                            it.fødselsdato,
                         )
-                    }
+                    },
                 )
         } else {
             emptyList()
@@ -106,7 +106,7 @@ object TilkjentYtelseUtils {
 
         val andelerTilkjentYtelseBarnaMedAlleEndringer = oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
             andelTilkjentYtelserUtenEndringer = andelerTilkjentYtelseBarnaUtenEndringer,
-            endretUtbetalingAndeler = endretUtbetalingAndelerBarna
+            endretUtbetalingAndeler = endretUtbetalingAndelerBarna,
         )
 
         tilkjentYtelse.andelerTilkjentYtelse.addAll(andelerTilkjentYtelseBarnaMedAlleEndringer.map { it.andel } + andelerTilkjentYtelseUtvidetMedAlleEndringer.map { it.andel } + andelerTilkjentYtelseSmåbarnstillegg.map { it.andel })
@@ -116,12 +116,12 @@ object TilkjentYtelseUtils {
 
     private fun erSmåbarnstilleggMulig(
         utvidetAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
-        barnasAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
+        barnasAndeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
     ): Boolean = utvidetAndeler.isNotEmpty() && barnasAndeler.isNotEmpty()
 
     fun oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
         andelTilkjentYtelserUtenEndringer: Collection<AndelTilkjentYtelse>,
-        endretUtbetalingAndeler: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>
+        endretUtbetalingAndeler: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>,
     ): List<AndelTilkjentYtelseMedEndreteUtbetalinger> {
         if (endretUtbetalingAndeler.isEmpty()) {
             return andelTilkjentYtelserUtenEndringer
@@ -143,7 +143,7 @@ object TilkjentYtelseUtils {
                 // Deler opp hver enkelt andel i perioder som hhv blir berørt av endringene og de som ikke berøres av de.
                 val (perioderMedEndring, perioderUtenEndring) = andelForPerson.stønadsPeriode()
                     .perioderMedOgUtenOverlapp(
-                        endringerForPerson.map { endringerForPerson -> endringerForPerson.periode }
+                        endringerForPerson.map { endringerForPerson -> endringerForPerson.periode },
                     )
                 // Legger til nye AndelTilkjentYtelse for perioder som er berørt av endringer.
                 nyeAndelerForPerson.addAll(
@@ -158,28 +158,28 @@ object TilkjentYtelseUtils {
                             stønadFom = månedPeriodeEndret.fom,
                             stønadTom = månedPeriodeEndret.tom,
                             kalkulertUtbetalingsbeløp = nyttNasjonaltPeriodebeløp,
-                            nasjonaltPeriodebeløp = nyttNasjonaltPeriodebeløp
+                            nasjonaltPeriodebeløp = nyttNasjonaltPeriodebeløp,
                         )
 
                         andelTilkjentYtelse.medEndring(endretUtbetalingMedAndeler)
-                    }
+                    },
                 )
                 // Legger til nye AndelTilkjentYtelse for perioder som ikke berøres av endringer.
                 nyeAndelerForPerson.addAll(
                     perioderUtenEndring.map { månedPeriodeUendret ->
                         val andelTilkjentYtelse = andelForPerson.copy(
                             stønadFom = månedPeriodeUendret.fom,
-                            stønadTom = månedPeriodeUendret.tom
+                            stønadTom = månedPeriodeUendret.tom,
                         )
                         AndelTilkjentYtelseMedEndreteUtbetalinger.utenEndringer(andelTilkjentYtelse)
-                    }
+                    },
                 )
             }
 
             val nyeAndelerForPersonEtterSammenslåing =
                 slåSammenPerioderSomIkkeSkulleHaVærtSplittet(
                     andelerTilkjentYtelseMedEndreteUtbetalinger = nyeAndelerForPerson,
-                    skalAndelerSlåsSammen = ::skalAndelerSlåsSammen
+                    skalAndelerSlåsSammen = ::skalAndelerSlåsSammen,
                 )
 
             nyeAndelTilkjentYtelse.addAll(nyeAndelerForPersonEtterSammenslåing)
@@ -189,22 +189,22 @@ object TilkjentYtelseUtils {
         nyeAndelTilkjentYtelse.addAll(
             andelerMedSmåbarnstillegg.map {
                 AndelTilkjentYtelseMedEndreteUtbetalinger.utenEndringer(it)
-            }
+            },
         )
 
         // Sorterer primært av hensyn til måten testene er implementert og kan muligens fjernes dersom dette skrives om.
         nyeAndelTilkjentYtelse.sortWith(
             compareBy(
                 { it.aktør.aktivFødselsnummer() },
-                { it.stønadFom }
-            )
+                { it.stønadFom },
+            ),
         )
         return nyeAndelTilkjentYtelse
     }
 
     fun slåSammenPerioderSomIkkeSkulleHaVærtSplittet(
         andelerTilkjentYtelseMedEndreteUtbetalinger: MutableList<AndelTilkjentYtelseMedEndreteUtbetalinger>,
-        skalAndelerSlåsSammen: (førsteAndel: AndelTilkjentYtelseMedEndreteUtbetalinger, nesteAndel: AndelTilkjentYtelseMedEndreteUtbetalinger) -> Boolean
+        skalAndelerSlåsSammen: (førsteAndel: AndelTilkjentYtelseMedEndreteUtbetalinger, nesteAndel: AndelTilkjentYtelseMedEndreteUtbetalinger) -> Boolean,
     ): MutableList<AndelTilkjentYtelseMedEndreteUtbetalinger> {
         val sorterteAndeler = andelerTilkjentYtelseMedEndreteUtbetalinger.sortedBy { it.stønadFom }.toMutableList()
         var periodenViSerPå = sorterteAndeler.first()
@@ -239,11 +239,11 @@ object TilkjentYtelseUtils {
      */
     fun skalAndelerSlåsSammen(
         førsteAndel: AndelTilkjentYtelseMedEndreteUtbetalinger,
-        nesteAndel: AndelTilkjentYtelseMedEndreteUtbetalinger
+        nesteAndel: AndelTilkjentYtelseMedEndreteUtbetalinger,
     ): Boolean =
         førsteAndel.stønadTom.sisteDagIInneværendeMåned()
             .erDagenFør(nesteAndel.stønadFom.førsteDagIInneværendeMåned()) && førsteAndel.prosent == BigDecimal(0) && nesteAndel.prosent == BigDecimal(
-            0
+            0,
         ) && førsteAndel.endreteUtbetalinger.isNotEmpty() && førsteAndel.endreteUtbetalinger.singleOrNull() == nesteAndel.endreteUtbetalinger.singleOrNull()
 }
 
@@ -300,5 +300,5 @@ internal data class BeregnetAndel(
     val stønadTom: YearMonth,
     val beløp: Int,
     val sats: Int,
-    val prosent: BigDecimal
+    val prosent: BigDecimal,
 )

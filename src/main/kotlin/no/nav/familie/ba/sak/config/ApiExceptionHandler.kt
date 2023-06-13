@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.common.EksternTjenesteFeilException
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.PdlNotFoundException
+import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagsystem
 import no.nav.familie.ba.sak.common.RessursUtils.forbidden
 import no.nav.familie.ba.sak.common.RessursUtils.frontendFeil
 import no.nav.familie.ba.sak.common.RessursUtils.funksjonellFeil
@@ -69,6 +70,13 @@ class ApiExceptionHandler {
         return illegalState(integrasjonException.message.toString(), integrasjonException)
     }
 
+    @ExceptionHandler(PdlPersonKanIkkeBehandlesIFagsystem::class)
+    fun handlePdlPersonKanIkkeBehandlesIFagsystem(feil: PdlPersonKanIkkeBehandlesIFagsystem): ResponseEntity<Ressurs<Nothing>> {
+        logger.warn("Person kan ikke behandles i fagsystem ${feil.årsak}")
+        secureLogger.warn("Person kan ikke behandles i fagsystem", feil)
+        return funksjonellFeil(feil)
+    }
+
     @ExceptionHandler(PdlNotFoundException::class)
     fun handlePdlNotFoundException(feil: PdlNotFoundException): ResponseEntity<Ressurs<Nothing>> {
         logger.warn("Finner ikke personen i PDL")
@@ -125,13 +133,13 @@ class ApiExceptionHandler {
         val ressurs: Ressurs<String> = Ressurs.failure<String>(
             errorMessage = feilmelding,
             frontendFeilmelding = feilmelding,
-            error = mostSpecificThrowable
+            error = mostSpecificThrowable,
         ).copy(data = feil.feiltype.name)
         secureLogger.warn("Feil ved migrering. feiltype=${feil.feiltype} melding=$feilmelding", feil.throwable)
         logger.warn("Feil ved migrering. feiltype=${feil.feiltype} melding=$feilmelding")
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-            ressurs
+            ressurs,
         )
     }
 

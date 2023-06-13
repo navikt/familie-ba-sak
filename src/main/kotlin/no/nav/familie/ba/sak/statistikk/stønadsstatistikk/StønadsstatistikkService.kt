@@ -31,7 +31,6 @@ import no.nav.familie.eksterne.kontrakter.UnderkategoriV2
 import no.nav.familie.eksterne.kontrakter.UtbetalingsDetaljDVHV2
 import no.nav.familie.eksterne.kontrakter.UtbetalingsperiodeDVHV2
 import no.nav.familie.eksterne.kontrakter.VedtakDVHV2
-import no.nav.familie.eksterne.kontrakter.YtelseType.MANUELL_VURDERING
 import no.nav.familie.eksterne.kontrakter.YtelseType.ORDINÆR_BARNETRYGD
 import no.nav.familie.eksterne.kontrakter.YtelseType.SMÅBARNSTILLEGG
 import no.nav.familie.eksterne.kontrakter.YtelseType.UTVIDET_BARNETRYGD
@@ -50,13 +49,13 @@ class StønadsstatistikkService(
     private val personopplysningerService: PersonopplysningerService,
     private val vedtakRepository: VedtakRepository,
     private val kompetanseService: KompetanseService,
-    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService
+    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
 ) {
 
     fun hentVedtakV2(behandlingId: Long): VedtakDVHV2 {
-        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
-
         val vedtak = vedtakService.hentAktivForBehandling(behandlingId)
+        val behandling = vedtak?.behandling ?: behandlingHentOgPersisterService.hent(behandlingId)
+        val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId)
         // DVH ønsker tidspunkt med klokkeslett
 
         var datoVedtak = vedtak?.vedtaksdato
@@ -67,13 +66,12 @@ class StønadsstatistikkService(
         }
 
         val tidspunktVedtak = datoVedtak
-
         return VedtakDVHV2(
             fagsakId = behandling.fagsak.id.toString(),
             fagsakType = FagsakType.valueOf(behandling.fagsak.type.name),
             behandlingsId = behandlingId.toString(),
             tidspunktVedtak = tidspunktVedtak.atZone(TIMEZONE),
-            personV2 = hentSøkerV2(behandlingId),
+            personV2 = hentSøkerV2(persongrunnlag),
             ensligForsørger = utledEnsligForsørger(behandlingId), // TODO implementere støtte for dette
             kategoriV2 = KategoriV2.valueOf(behandling.kategori.name),
             underkategoriV2 = when (behandling.underkategori) {
@@ -82,10 +80,10 @@ class StønadsstatistikkService(
                 BehandlingUnderkategori.INSTITUSJON -> UnderkategoriV2.ORDINÆR // Institusjon er ordinær og ligger under fagsakType på stønadsstatistikk
             },
             behandlingTypeV2 = BehandlingTypeV2.valueOf(behandling.type.name),
-            utbetalingsperioderV2 = hentUtbetalingsperioderV2(behandlingId),
+            utbetalingsperioderV2 = hentUtbetalingsperioderV2(behandling, persongrunnlag),
             funksjonellId = UUID.randomUUID().toString(),
             kompetanseperioder = hentKompetanse(BehandlingId(behandlingId)),
-            behandlingÅrsakV2 = BehandlingÅrsakV2.valueOf(behandling.opprettetÅrsak.name)
+            behandlingÅrsakV2 = BehandlingÅrsakV2.valueOf(behandling.opprettetÅrsak.name),
         )
     }
 
@@ -97,7 +95,7 @@ class StønadsstatistikkService(
                 barnsIdenter = kompetanse.barnAktører.map { aktør -> aktør.aktivFødselsnummer() },
                 annenForeldersAktivitet = if (kompetanse.annenForeldersAktivitet != null) {
                     AnnenForeldersAktivitet.valueOf(
-                        kompetanse.annenForeldersAktivitet.name
+                        kompetanse.annenForeldersAktivitet.name,
                     )
                 } else {
                     null
@@ -108,27 +106,28 @@ class StønadsstatistikkService(
                 tom = kompetanse.tom,
                 resultat = KompetanseResultat.valueOf(kompetanse.resultat!!.name),
                 sokersaktivitet = if (kompetanse.søkersAktivitet != null) SøkersAktivitet.valueOf(kompetanse.søkersAktivitet.name) else null,
-                sokersAktivitetsland = kompetanse.søkersAktivitetsland
+                sokersAktivitetsland = kompetanse.søkersAktivitetsland,
             )
         }
     }
 
-    private fun hentSøkerV2(behandlingId: Long): PersonDVHV2 {
-        val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId)
+    private fun hentSøkerV2(persongrunnlag: PersonopplysningGrunnlag): PersonDVHV2 {
         val søker = persongrunnlag.søker
         return lagPersonDVHV2(søker)
     }
 
-    private fun hentUtbetalingsperioderV2(behandlingId: Long): List<UtbetalingsperiodeDVHV2> {
+    private fun hentUtbetalingsperioderV2(
+        behandling: Behandling,
+        persongrunnlag: PersonopplysningGrunnlag,
+    ): List<UtbetalingsperiodeDVHV2> {
         val andelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService
-            .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandlingId)
-        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
-        val persongrunnlag = persongrunnlagService.hentAktivThrows(behandlingId)
+            .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.id)
 
         if (andelerTilkjentYtelse.isEmpty()) return emptyList()
 
         val utbetalingsPerioder = beregnUtbetalingsperioderUtenKlassifisering(andelerTilkjentYtelse)
 
+        val søkerOgBarn = persongrunnlag.søkerOgBarn
         return utbetalingsPerioder.toSegments()
             .sortedWith(compareBy<LocalDateSegment<Int>>({ it.fom }, { it.value }, { it.tom }))
             .map { segment ->
@@ -136,15 +135,15 @@ class StønadsstatistikkService(
                     segment.localDateInterval.overlaps(
                         LocalDateInterval(
                             it.stønadFom.førsteDagIInneværendeMåned(),
-                            it.stønadTom.sisteDagIInneværendeMåned()
-                        )
+                            it.stønadTom.sisteDagIInneværendeMåned(),
+                        ),
                     )
                 }
                 mapTilUtbetalingsperiodeV2(
                     segment,
                     andelerForSegment,
                     behandling,
-                    persongrunnlag
+                    søkerOgBarn,
                 )
             }
     }
@@ -163,7 +162,7 @@ class StønadsstatistikkService(
         segment: LocalDateSegment<Int>,
         andelerForSegment: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
         behandling: Behandling,
-        personopplysningGrunnlag: PersonopplysningGrunnlag
+        søkerOgBarn: List<Person>,
     ): UtbetalingsperiodeDVHV2 {
         return UtbetalingsperiodeDVHV2(
             hjemmel = "Ikke implementert",
@@ -172,24 +171,23 @@ class StønadsstatistikkService(
             utbetaltPerMnd = segment.value,
             utbetalingsDetaljer = andelerForSegment.filter { it.erAndelSomSkalSendesTilOppdrag() }.map { andel ->
                 val personForAndel =
-                    personopplysningGrunnlag.søkerOgBarn.find { person -> andel.aktør == person.aktør }
+                    søkerOgBarn.find { person -> andel.aktør == person.aktør }
                         ?: throw IllegalStateException("Fant ikke personopplysningsgrunnlag for andel")
                 UtbetalingsDetaljDVHV2(
                     person = lagPersonDVHV2(
                         personForAndel,
-                        andel.prosent.intValueExact()
+                        andel.prosent.intValueExact(),
                     ),
                     klassekode = andel.type.klassifisering,
                     ytelseType = when (andel.type) {
                         YtelseType.ORDINÆR_BARNETRYGD -> ORDINÆR_BARNETRYGD
                         YtelseType.UTVIDET_BARNETRYGD -> UTVIDET_BARNETRYGD
                         YtelseType.SMÅBARNSTILLEGG -> SMÅBARNSTILLEGG
-                        YtelseType.MANUELL_VURDERING -> MANUELL_VURDERING
                     },
                     utbetaltPrMnd = andel.kalkulertUtbetalingsbeløp,
-                    delytelseId = behandling.fagsak.id.toString() + andel.periodeOffset
+                    delytelseId = behandling.fagsak.id.toString() + andel.periodeOffset,
                 )
-            }
+            },
         )
     }
 
@@ -199,7 +197,7 @@ class StønadsstatistikkService(
             statsborgerskap = hentStatsborgerskap(person),
             bostedsland = hentLandkode(person),
             delingsprosentYtelse = if (delingsProsentYtelse == 50) delingsProsentYtelse else 0,
-            personIdent = person.aktør.aktivFødselsnummer()
+            personIdent = person.aktør.aktivFødselsnummer(),
         )
     }
 

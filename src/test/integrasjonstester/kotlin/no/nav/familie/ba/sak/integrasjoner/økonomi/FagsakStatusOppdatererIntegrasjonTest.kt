@@ -60,7 +60,7 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
         opprettOgLagreBehandlingMedAndeler(
             personIdent = forelderIdent,
             offsetPåAndeler = listOf(1L),
-            fagsakId = fagsakOriginal.id
+            fagsakId = fagsakOriginal.id,
         )
 
         val fagsak = fagsakService.hentLøpendeFagsaker()
@@ -84,7 +84,7 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
             opprettOgLagreBehandlingMedAndeler(
                 personIdent = forelderIdent,
                 offsetPåAndeler = listOf(1L),
-                fagsakId = fagsakOriginal.id
+                fagsakId = fagsakOriginal.id,
             )
 
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(førstegangsbehandling.id)
@@ -103,7 +103,7 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
         offsetPåAndeler: List<Long> = emptyList(),
         erIverksatt: Boolean = true,
         medStatus: BehandlingStatus = BehandlingStatus.UTREDES,
-        fagsakId: Long
+        fagsakId: Long,
     ): Behandling {
         val behandling =
             behandlingService.opprettBehandling(nyOrdinærBehandling(søkersIdent = personIdent, fagsakId = fagsakId))
@@ -116,8 +116,8 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
                 andelPåTilkjentYtelse(
                     tilkjentYtelse = tilkjentYtelse,
                     periodeOffset = it,
-                    aktør = behandling.fagsak.aktør
-                )
+                    aktør = behandling.fagsak.aktør,
+                ),
             )
         }
         return behandling
@@ -127,14 +127,14 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
         behandling = behandling,
         opprettetDato = LocalDate.now(),
         endretDato = LocalDate.now(),
-        utbetalingsoppdrag = if (erIverksatt) "Skal ikke være null" else null
+        utbetalingsoppdrag = if (erIverksatt) "Skal ikke være null" else null,
     )
 
     // Kun offset og kobling til behandling/tilkjent ytelse som er relevant når man skal plukke ut til konsistensavstemming
     private fun andelPåTilkjentYtelse(
         tilkjentYtelse: TilkjentYtelse,
         periodeOffset: Long,
-        aktør: Aktør = randomAktør()
+        aktør: Aktør = randomAktør(),
     ) = AndelTilkjentYtelse(
         aktør = aktør,
         behandlingId = tilkjentYtelse.behandling.id,
@@ -151,6 +151,6 @@ class FagsakStatusOppdatererIntegrasjonTest : AbstractSpringIntegrationTest() {
         periodeOffset = periodeOffset,
         forrigePeriodeOffset = null,
         sats = 1054,
-        prosent = BigDecimal(100)
+        prosent = BigDecimal(100),
     )
 }

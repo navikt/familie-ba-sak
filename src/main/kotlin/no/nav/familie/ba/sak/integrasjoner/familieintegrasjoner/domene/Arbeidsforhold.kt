@@ -9,24 +9,24 @@ class Arbeidsforhold(
     val arbeidsgiver: Arbeidsgiver? = null,
     val type: String? = null,
     val ansettelsesperiode: Ansettelsesperiode? = null,
-    val arbeidsavtaler: List<Arbeidsavtaler>? = null
+    val arbeidsavtaler: List<Arbeidsavtaler>? = null,
 )
 
 class Arbeidstaker(
     val type: String? = null,
     val offentligIdent: String? = null,
-    val aktoerId: String? = null
+    val aktoerId: String? = null,
 )
 
 class Arbeidsgiver(
     val type: ArbeidsgiverType? = null,
     val organisasjonsnummer: String? = null,
-    val offentligIdent: String? = null
+    val offentligIdent: String? = null,
 )
 
 class Ansettelsesperiode(
     val periode: Periode? = null,
-    val bruksperiode: Periode? = null
+    val bruksperiode: Periode? = null,
 )
 
 class Arbeidsavtaler(
@@ -36,20 +36,20 @@ class Arbeidsavtaler(
     val antallTimerPrUke: Double? = null,
     val beregnetAntallTimerPrUke: Double? = null,
     val bruksperiode: Periode? = null,
-    val gyldighetsperiode: Periode? = null
+    val gyldighetsperiode: Periode? = null,
 )
 
 class Periode(
     val fom: LocalDate? = null,
-    val tom: LocalDate? = null
+    val tom: LocalDate? = null,
 )
 
 enum class ArbeidsgiverType {
     Organisasjon,
-    Person
+    Person,
 }
 
 class ArbeidsforholdRequest(
     val personIdent: String,
-    val ansettelsesperiodeFom: LocalDate
+    val ansettelsesperiodeFom: LocalDate,
 )

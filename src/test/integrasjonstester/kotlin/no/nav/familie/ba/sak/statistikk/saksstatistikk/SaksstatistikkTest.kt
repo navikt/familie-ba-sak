@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.statistikk.saksstatistikk
 
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.Utils.hentPropertyFraMaven
 import no.nav.familie.ba.sak.common.nyOrdinærBehandling
 import no.nav.familie.ba.sak.common.randomFnr
@@ -25,11 +24,9 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Tag
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.repository.findByIdOrNull
@@ -48,7 +45,7 @@ class SaksstatistikkTest(
     private val databaseCleanupService: DatabaseCleanupService,
 
     @Autowired
-    private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository
+    private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
 ) : AbstractSpringIntegrationTest() {
 
     private lateinit var saksstatistikkScheduler: SaksstatistikkScheduler
@@ -82,7 +79,7 @@ class SaksstatistikkTest(
         assertNull(mellomlagredeStatistikkHendelser.first().sendtTidspunkt)
         assertEquals(
             hentPropertyFraMaven("familie.kontrakter.saksstatistikk"),
-            mellomlagredeStatistikkHendelser.first().kontraktVersjon
+            mellomlagredeStatistikkHendelser.first().kontraktVersjon,
         )
 
         val lagretJsonSomSakDVH: SakDVH =
@@ -97,18 +94,6 @@ class SaksstatistikkTest(
     }
 
     @Test
-    fun `Skal utføre rollback på sak og saksstatistikk ved feil`() {
-        val feil = assertThrows<Feil> {
-            fagsakService.hentEllerOpprettFagsak(FagsakRequest(personIdent = null, aktørId = null))
-        }
-        assertTrue(feil.message?.contains("Hverken aktørid eller personident er satt på fagsak-requesten") == true)
-
-        val mellomlagredeStatistikkHendelser = saksstatistikkMellomlagringRepository.finnMeldingerKlarForSending()
-
-        assertEquals(0, mellomlagredeStatistikkHendelser.size)
-    }
-
-    @Test
     @Tag("integration")
     fun `Skal lagre saksstatistikk behandling til repository og sende meldinger`() {
         val fnr = randomFnr()
@@ -117,8 +102,8 @@ class SaksstatistikkTest(
         val behandling = behandlingService.opprettBehandling(
             nyOrdinærBehandling(
                 søkersIdent = fnr,
-                fagsakId = fagsak.id
-            )
+                fagsakId = fagsak.id,
+            ),
         )
 
         behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.id, BehandlingStatus.AVSLUTTET)
@@ -130,7 +115,7 @@ class SaksstatistikkTest(
         assertNull(mellomlagretBehandling.first().sendtTidspunkt)
         assertEquals(
             hentPropertyFraMaven("familie.kontrakter.saksstatistikk"),
-            mellomlagretBehandling.first().kontraktVersjon
+            mellomlagretBehandling.first().kontraktVersjon,
         )
         assertEquals("UTREDES", mellomlagretBehandling.first().jsonToBehandlingDVH().behandlingStatus)
         assertEquals("AVSLUTTET", mellomlagretBehandling.last().jsonToBehandlingDVH().behandlingStatus)

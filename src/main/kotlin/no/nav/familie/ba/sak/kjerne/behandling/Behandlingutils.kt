@@ -14,43 +14,43 @@ object Behandlingutils {
     fun hentSisteBehandlingSomErIverksatt(iverksatteBehandlinger: List<Behandling>): Behandling? {
         return iverksatteBehandlinger
             .filter { it.steg == StegType.BEHANDLING_AVSLUTTET }
-            .maxByOrNull { it.opprettetTidspunkt }
+            .maxByOrNull { it.aktivertTidspunkt }
     }
 
     fun hentForrigeBehandlingSomErVedtatt(
         behandlinger: List<Behandling>,
-        behandlingFørFølgende: Behandling
+        behandlingFørFølgende: Behandling,
     ): Behandling? {
         return behandlinger
-            .filter { it.opprettetTidspunkt.isBefore(behandlingFørFølgende.opprettetTidspunkt) && it.steg == StegType.BEHANDLING_AVSLUTTET && !it.erHenlagt() }
-            .maxByOrNull { it.opprettetTidspunkt }
+            .filter { it.aktivertTidspunkt.isBefore(behandlingFørFølgende.aktivertTidspunkt) && it.steg == StegType.BEHANDLING_AVSLUTTET && !it.erHenlagt() }
+            .maxByOrNull { it.aktivertTidspunkt }
     }
 
     fun hentForrigeIverksatteBehandling(
         iverksatteBehandlinger: List<Behandling>,
-        behandlingFørFølgende: Behandling
+        behandlingFørFølgende: Behandling,
     ): Behandling? {
         return hentIverksatteBehandlinger(
             iverksatteBehandlinger,
-            behandlingFørFølgende
-        ).maxByOrNull { it.opprettetTidspunkt }
+            behandlingFørFølgende,
+        ).maxByOrNull { it.aktivertTidspunkt }
     }
 
     fun hentIverksatteBehandlinger(
         iverksatteBehandlinger: List<Behandling>,
-        behandlingFørFølgende: Behandling
+        behandlingFørFølgende: Behandling,
     ): List<Behandling> {
         return iverksatteBehandlinger
-            .filter { it.opprettetTidspunkt.isBefore(behandlingFørFølgende.opprettetTidspunkt) && it.steg == StegType.BEHANDLING_AVSLUTTET }
+            .filter { it.aktivertTidspunkt.isBefore(behandlingFørFølgende.aktivertTidspunkt) && it.steg == StegType.BEHANDLING_AVSLUTTET }
     }
 
     fun harBehandlingsårsakAlleredeKjørt(
         behandlingÅrsak: BehandlingÅrsak,
         behandlinger: List<Behandling>,
-        måned: YearMonth
+        måned: YearMonth,
     ): Boolean {
         return behandlinger.any {
-            it.opprettetTidspunkt.toLocalDate().toYearMonth() == måned && it.opprettetÅrsak == behandlingÅrsak
+            it.aktivertTidspunkt.toLocalDate().toYearMonth() == måned && it.opprettetÅrsak == behandlingÅrsak
         }
     }
 
@@ -58,7 +58,7 @@ object Behandlingutils {
         if (!tekniskVedlikeholdToggel && henleggÅrsak == HenleggÅrsak.TEKNISK_VEDLIKEHOLD) {
             throw Feil(
                 "Teknisk vedlikehold henleggele er ikke påslått for " +
-                    "${SikkerhetContext.hentSaksbehandlerNavn()}. Kan ikke henlegge behandling $behandlingId."
+                    "${SikkerhetContext.hentSaksbehandlerNavn()}. Kan ikke henlegge behandling $behandlingId.",
             )
         }
     }

@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired
 
 class FagsakIntegrationTest(
     @Autowired
-    val fagsakService: FagsakService
+    val fagsakService: FagsakService,
 ) : AbstractSpringIntegrationTest() {
 
     @Test
@@ -20,7 +20,7 @@ class FagsakIntegrationTest(
             personFnr,
             false,
             FagsakType.INSTITUSJON,
-            InstitusjonInfo("orgnr", null)
+            InstitusjonInfo("orgnr", null),
         )
         val fagsakEnsligMindreÅrig =
             fagsakService.hentEllerOpprettFagsak(personFnr, false, FagsakType.BARN_ENSLIG_MINDREÅRIG)
@@ -39,7 +39,7 @@ class FagsakIntegrationTest(
             personFnr,
             false,
             FagsakType.INSTITUSJON,
-            InstitusjonInfo("orgnr", null)
+            InstitusjonInfo("orgnr", null),
         )
         val fagsakEnsligMindreÅrig =
             fagsakService.hentEllerOpprettFagsak(personFnr, false, FagsakType.BARN_ENSLIG_MINDREÅRIG)

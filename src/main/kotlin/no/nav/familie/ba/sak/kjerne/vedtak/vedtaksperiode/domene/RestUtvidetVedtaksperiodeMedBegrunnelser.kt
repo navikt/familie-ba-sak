@@ -13,7 +13,7 @@ data class RestUtvidetVedtaksperiodeMedBegrunnelser(
     val begrunnelser: List<RestVedtaksbegrunnelse>,
     val fritekster: List<String> = emptyList(),
     val gyldigeBegrunnelser: List<String>,
-    val utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj> = emptyList()
+    val utbetalingsperiodeDetaljer: List<UtbetalingsperiodeDetalj> = emptyList(),
 )
 
 fun UtvidetVedtaksperiodeMedBegrunnelser.tilRestUtvidetVedtaksperiodeMedBegrunnelser(): RestUtvidetVedtaksperiodeMedBegrunnelser {
@@ -25,6 +25,6 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.tilRestUtvidetVedtaksperiodeMedBegrunne
         begrunnelser = this.begrunnelser.map { it.tilRestVedtaksbegrunnelse() } + this.eøsBegrunnelser.map { it.tilRestVedtaksbegrunnelse() },
         fritekster = this.fritekster,
         utbetalingsperiodeDetaljer = this.utbetalingsperiodeDetaljer,
-        gyldigeBegrunnelser = this.gyldigeBegrunnelser.map { it.enumnavnTilString() }
+        gyldigeBegrunnelser = this.gyldigeBegrunnelser.map { it.enumnavnTilString() },
     )
 }

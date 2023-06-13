@@ -20,7 +20,7 @@ import java.time.LocalDate
 data class MinimertRestPerson(
     val personIdent: String,
     val fødselsdato: LocalDate,
-    val type: PersonType
+    val type: PersonType,
 ) {
     fun hentSeksårsdag(): LocalDate = fødselsdato.plusYears(6)
 }
@@ -28,7 +28,7 @@ data class MinimertRestPerson(
 fun RestPerson.tilMinimertPerson() = MinimertRestPerson(
     personIdent = this.personIdent,
     fødselsdato = fødselsdato ?: throw Feil("Fødselsdato mangler"),
-    type = this.type
+    type = this.type,
 )
 
 fun List<MinimertRestPerson>.barnMedSeksårsdagPåFom(fom: LocalDate?): List<MinimertRestPerson> {
@@ -45,13 +45,13 @@ fun List<MinimertRestPerson>.barnMedSeksårsdagPåFom(fom: LocalDate?): List<Min
 fun Person.tilMinimertPerson() = MinimertRestPerson(
     personIdent = this.aktør.aktivFødselsnummer(),
     fødselsdato = this.fødselsdato,
-    type = this.type
+    type = this.type,
 )
 
 fun MinimertRestPerson.tilBrevPeriodeTestPerson(
     brevPeriodeGrunnlag: MinimertVedtaksperiode,
     restBehandlingsgrunnlagForBrev: RestBehandlingsgrunnlagForBrev,
-    barnMedReduksjonFraForrigeBehandlingIdent: List<String>
+    barnMedReduksjonFraForrigeBehandlingIdent: List<String>,
 ): BrevPeriodePersonForLogging {
     val minimertePersonResultater =
         restBehandlingsgrunnlagForBrev.minimertePersonResultater.firstOrNull { it.personIdent == this.personIdent }!!
@@ -69,7 +69,7 @@ fun MinimertRestPerson.tilBrevPeriodeTestPerson(
         endredeUtbetalinger = minimerteEndretUtbetalingAndelPåPerson.map {
             EndretUtbetalingAndelPåPersonForLogging(
                 periode = it.periode,
-                årsak = it.årsak
+                årsak = it.årsak,
             )
         },
         utbetalinger = minimerteUtbetalingsperiodeDetaljer.map {
@@ -77,9 +77,9 @@ fun MinimertRestPerson.tilBrevPeriodeTestPerson(
                 it.ytelseType,
                 it.utbetaltPerMnd,
                 it.erPåvirketAvEndring,
-                it.prosent
+                it.prosent,
             )
         },
-        harReduksjonFraForrigeBehandling = barnMedReduksjonFraForrigeBehandlingIdent.contains(this.personIdent)
+        harReduksjonFraForrigeBehandling = barnMedReduksjonFraForrigeBehandlingIdent.contains(this.personIdent),
     )
 }

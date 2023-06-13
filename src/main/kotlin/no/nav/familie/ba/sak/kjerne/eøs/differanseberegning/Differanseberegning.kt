@@ -41,7 +41,7 @@ import java.math.MathContext
 fun beregnDifferanse(
     andelerTilkjentYtelse: Collection<AndelTilkjentYtelse>,
     utenlandskePeriodebeløp: Collection<UtenlandskPeriodebeløp>,
-    valutakurser: Collection<Valutakurs>
+    valutakurser: Collection<Valutakurs>,
 ): List<AndelTilkjentYtelse> {
     val utenlandskePeriodebeløpTidslinjer = utenlandskePeriodebeløp.tilSeparateTidslinjerForBarna()
     val valutakursTidslinjer = valutakurser.tilSeparateTidslinjerForBarna()
@@ -71,7 +71,7 @@ fun beregnDifferanse(
  */
 fun Collection<AndelTilkjentYtelse>.differanseberegnSøkersYtelser(
     barna: List<Person>,
-    kompetanser: Collection<Kompetanse>
+    kompetanser: Collection<Kompetanse>,
 ): List<AndelTilkjentYtelse> {
     // Ta bort eventuell eksisterende differanseberegning, slik at kalkulertUtbetalingsbeløp er nasjonal sats
     // Men behold funksjonelle splitter som er påført tidligere ved å beholde fom og tom på andelene
@@ -106,7 +106,7 @@ fun Collection<AndelTilkjentYtelse>.differanseberegnSøkersYtelser(
     // slik at utvidet barnetrrygd blir 0. Ellers ville den av og til kunne blitt 1, selv om det var ytterligere underskudd
     val utenlandskDelAvUtvidetBarnetrygdTidslinje = minsteAvHver(
         barnasDelAvUtvidetBarnetrygdTidslinjer,
-        barnasUnderskuddPåDifferanseberegningTidslinjer
+        barnasUnderskuddPåDifferanseberegningTidslinjer,
     ).sum().rundAvTilHeltall()
 
     // Til slutt oppdaterer vi differanseberegningen på utvidet barnetrygd med den utenlandske delen
@@ -137,7 +137,7 @@ fun Collection<AndelTilkjentYtelse>.differanseberegnSøkersYtelser(
     // slik at småbarnstillegget blir 0. Ellers ville den av og til kunne blitt 1, selv om det var ytterligere underskudd
     val utenlandskDelAvSmåbarnstilleggTidslinje = minsteAvHver(
         barnasDelAvSmåbarnstilleggetTidslinjer,
-        barnasGjenståendeUnderskuddTidslinjer
+        barnasGjenståendeUnderskuddTidslinjer,
     ).sum().rundAvTilHeltall()
 
     // Til slutt oppdaterer vi differanseberegningen på småbarnstillegget med den utenlandske delen
@@ -156,7 +156,7 @@ fun Collection<AndelTilkjentYtelse>.differanseberegnSøkersYtelser(
  * Hvis nei fjernes alle andelene, slik at perioden ikke har noen andeler
  */
 fun Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>>.kunReneSekundærlandsperioder(
-    kompetanser: Collection<Kompetanse>
+    kompetanser: Collection<Kompetanse>,
 ): Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>> {
     val barnasKompetanseTidslinjer = kompetanser.tilSeparateTidslinjerForBarna()
 
@@ -180,7 +180,7 @@ fun Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>>.kunReneSekundærlandsper
 }
 
 fun Tidslinje<AndelTilkjentYtelse, Måned>.fordelBeløpPåBarnaMedAndeler(
-    barnasAndeler: Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>>
+    barnasAndeler: Map<Aktør, Tidslinje<AndelTilkjentYtelse, Måned>>,
 ): Map<Aktør, Tidslinje<BigDecimal, Måned>> {
     val antallAktørerMedYtelseTidslinje =
         barnasAndeler.values.kombinerUtenNullOgIkkeTom { it.count() }

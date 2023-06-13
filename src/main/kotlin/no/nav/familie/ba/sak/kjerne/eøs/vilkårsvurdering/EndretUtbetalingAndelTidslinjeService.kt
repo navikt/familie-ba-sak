@@ -10,13 +10,13 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerSenereEnn
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerTidligereEnn
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerUendeligSent
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerUendeligTidlig
 import org.springframework.stereotype.Service
 
 @Service
 class EndretUtbetalingAndelTidslinjeService(
-    val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService
+    val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
 ) {
     fun hentBarnasHarEtterbetaling3ÅrTidslinjer(behandlingId: BehandlingId) =
         endretUtbetalingAndelHentOgPersisterService
@@ -35,7 +35,7 @@ internal fun Iterable<EndretUtbetalingAndel>.tilBarnasHarEtterbetaling3ÅrTidsli
 }
 
 private fun <I> EndretUtbetalingAndel.tilPeriode(mapper: (EndretUtbetalingAndel) -> I?) = Periode(
-    this.fom.tilTidspunktEllerTidligereEnn(this.tom),
-    this.tom.tilTidspunktEllerSenereEnn(this.fom),
-    mapper(this)
+    fraOgMed = this.fom.tilTidspunktEllerUendeligTidlig(tom),
+    tilOgMed = this.tom.tilTidspunktEllerUendeligSent(fom),
+    innhold = mapper(this),
 )

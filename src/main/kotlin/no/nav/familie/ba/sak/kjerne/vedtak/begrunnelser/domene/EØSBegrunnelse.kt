@@ -27,7 +27,7 @@ class EØSBegrunnelse(
     @SequenceGenerator(
         name = "eos_begrunnelse_seq_generator",
         sequenceName = "eos_begrunnelse_seq",
-        allocationSize = 50
+        allocationSize = 50,
     )
     val id: Long = 0,
 
@@ -38,17 +38,17 @@ class EØSBegrunnelse(
 
     @Enumerated(EnumType.STRING)
     @Column(name = "begrunnelse", updatable = false)
-    val begrunnelse: EØSStandardbegrunnelse
+    val begrunnelse: EØSStandardbegrunnelse,
 ) {
     fun kopier(vedtaksperiodeMedBegrunnelser: VedtaksperiodeMedBegrunnelser): EØSBegrunnelse =
         EØSBegrunnelse(
             vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-            begrunnelse = this.begrunnelse
+            begrunnelse = this.begrunnelse,
         )
 
     fun tilRestVedtaksbegrunnelse() = RestVedtaksbegrunnelse(
         standardbegrunnelse = this.begrunnelse.enumnavnTilString(),
         vedtakBegrunnelseType = this.begrunnelse.vedtakBegrunnelseType,
-        vedtakBegrunnelseSpesifikasjon = this.begrunnelse.enumnavnTilString()
+        vedtakBegrunnelseSpesifikasjon = this.begrunnelse.enumnavnTilString(),
     )
 }

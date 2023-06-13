@@ -48,7 +48,7 @@ data class Logg(
      * Feltet støtter markdown frontend.
      */
     @Column(name = "tekst")
-    val tekst: String
+    val tekst: String,
 ) {
 
     constructor(behandlingId: Long, type: LoggType, rolle: BehandlerRolle, tekst: String = "") : this(
@@ -56,7 +56,7 @@ data class Logg(
         type = type,
         tittel = type.tittel,
         rolle = rolle,
-        tekst = tekst
+        tekst = tekst,
     )
 }
 
@@ -81,12 +81,14 @@ enum class LoggType(val visningsnavn: String, val tittel: String = visningsnavn)
     BREV_IKKE_DISTRIBUERT("Brev ikke distribuert", "Brevet ble ikke distribuert fordi mottaker har ukjent adresse"),
     BREV_IKKE_DISTRIBUERT_UKJENT_DØDSBO(
         "Brev ikke distribuert. Ukjent dødsbo",
-        "Mottaker har ukjent dødsboadresse, og brevet blir ikke sendt før adressen er satt"
+        "Mottaker har ukjent dødsboadresse, og brevet blir ikke sendt før adressen er satt",
     ),
     FERDIGSTILLE_BEHANDLING("Ferdigstille behandling", "Ferdigstilt behandling"),
     HENLEGG_BEHANDLING("Henlegg behandling", "Behandlingen er henlagt"),
     BEHANDLIG_SATT_PÅ_VENT("Behandlingen er satt på vent"),
     BEHANDLIG_GJENOPPTATT("Behandling gjenopptatt"),
+    BEHANDLING_SATT_PÅ_MASKINELL_VENT("Behandlingen er satt på maskinell vent"),
+    BEHANDLING_TATT_AV_MASKINELL_VENT("Behandlingen er tatt av maskinell vent"),
     VENTENDE_BEHANDLING_ENDRET("Behandlingen er oppdatert"),
     KORRIGERT_ETTERBETALING("Etterbetaling i brev er korrigert"),
     MANUELT_SMÅBARNSTILLEGG_JUSTERING("Småbarnstillegg er manuelt endret."),
@@ -95,5 +97,5 @@ enum class LoggType(val visningsnavn: String, val tittel: String = visningsnavn)
     FEILUTBETALT_VALUTA_FJERNET("Feilutbetalt valuta fjernet"),
     BREVMOTTAKER_LAGT_TIL_ELLER_FJERNET("Brevmottaker lagt til eller fjernet"),
     REFUSJON_EØS_LAGT_TIL("Refusjon EØS lagt til"),
-    REFUSJON_EØS_FJERNET("Refusjon EØS fjernet")
+    REFUSJON_EØS_FJERNET("Refusjon EØS fjernet"),
 }

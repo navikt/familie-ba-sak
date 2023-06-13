@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component
 @Component
 class SaksbehandlerContext(
     @Value("\${rolle.kode6}")
-    private val kode6GruppeId: String
+    private val kode6GruppeId: String,
 ) {
 
     fun hentSaksbehandlerSignaturTilBrev(): String {

@@ -2,10 +2,12 @@ package no.nav.familie.ba.sak.kjerne.beregning.endringstidspunkt
 
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
+import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.common.sisteDagIInneværendeMåned
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.hentUtbetalingstidslinjeForSøker
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.fpsak.tidsserie.LocalDateSegment
 import no.nav.fpsak.tidsserie.LocalDateTimeline
 import no.nav.fpsak.tidsserie.StandardCombinators
@@ -14,7 +16,7 @@ import java.time.YearMonth
 
 enum class BehandlingAlder {
     NY,
-    GAMMEL
+    GAMMEL,
 }
 
 typealias Beløpsdifferanse = Int
@@ -24,7 +26,7 @@ data class AndelTilkjentYtelseDataForÅKalkulereEndring(
     val aktørId: AktørId,
     val kalkulertBeløp: Int,
     val endretUtbetalingÅrsaker: List<Årsak>,
-    val behandlingAlder: BehandlingAlder
+    val behandlingAlder: BehandlingAlder,
 )
 
 /**
@@ -41,18 +43,18 @@ internal fun utledEndringstidspunkt(
     endringstidspunktUtbetalingsbeløp: YearMonth?,
     endringstidspunktKompetanse: YearMonth?,
     endringstidspunktVilkårsvurdering: YearMonth?,
-    endringstidspunktEndretUtbetalingAndeler: YearMonth?
+    endringstidspunktEndretUtbetalingAndeler: YearMonth?,
 ): LocalDate {
     return listOfNotNull(
         endringstidspunktUtbetalingsbeløp,
         endringstidspunktKompetanse,
         endringstidspunktVilkårsvurdering,
-        endringstidspunktEndretUtbetalingAndeler
+        endringstidspunktEndretUtbetalingAndeler,
     ).minOfOrNull { it }?.førsteDagIInneværendeMåned() ?: TIDENES_ENDE
 }
 
 fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.hentPerioderMedEndringerFra(
-    forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>
+    forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
 ): Map<AktørId, LocalDateTimeline<Beløpsdifferanse>> {
     val andelerTidslinje = this.hentTidslinjerForPersoner(BehandlingAlder.NY)
     val forrigeAndelerTidslinje =
@@ -68,11 +70,11 @@ fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.hentPerioderMedEndringerFra(
         val kombinertTidslinje = tidslinjeForPerson.combine(
             forrigeTidslinjeForPerson,
             StandardCombinators::bothValues,
-            LocalDateTimeline.JoinStyle.CROSS_JOIN
+            LocalDateTimeline.JoinStyle.CROSS_JOIN,
         ) as LocalDateTimeline<List<AndelTilkjentYtelseDataForÅKalkulereEndring>>
 
         LocalDateTimeline(
-            kombinertTidslinje.toSegments().mapNotNull { it.tilSegmentMedEndringer() }
+            kombinertTidslinje.toSegments().mapNotNull { it.tilSegmentMedEndringer() },
         )
     }.filter { it.value.toSegments().isNotEmpty() }
 }
@@ -83,7 +85,7 @@ private fun LocalDateSegment<List<AndelTilkjentYtelseDataForÅKalkulereEndring>>
     return if (erEndring) {
         LocalDateSegment(
             this.localDateInterval,
-            hentBeløpsendringPåPersonISegment(this.value)
+            hentBeløpsendringPåPersonISegment(this.value),
         )
     } else {
         null
@@ -113,15 +115,14 @@ private fun List<AndelTilkjentYtelseDataForÅKalkulereEndring>.finnKalkulertBel�
     singleOrNull { it.behandlingAlder == behandlingAlder }
         ?.kalkulertBeløp
 
-private fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.hentTidslinjerForPersoner(behandlingAlder: BehandlingAlder):
-    Map<String, LocalDateTimeline<AndelTilkjentYtelseDataForÅKalkulereEndring>> {
+private fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.hentTidslinjerForPersoner(behandlingAlder: BehandlingAlder): Map<String, LocalDateTimeline<AndelTilkjentYtelseDataForÅKalkulereEndring>> {
     return this.groupBy { it.aktør.aktørId }
         .map { (aktørId, andeler) ->
             if (andeler.any { it.erSøkersAndel() }) {
                 aktørId to kombinerOverlappendeAndelerForSøker(
                     andeler = andeler,
                     behandlingAlder = behandlingAlder,
-                    aktørId = aktørId
+                    aktørId = aktørId,
                 )
             } else {
                 aktørId to andeler.hentTidslinje(behandlingAlder)
@@ -130,7 +131,7 @@ private fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.hentTidslinjerForPer
 }
 
 private fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.hentTidslinje(
-    behandlingAlder: BehandlingAlder
+    behandlingAlder: BehandlingAlder,
 ): LocalDateTimeline<AndelTilkjentYtelseDataForÅKalkulereEndring> = LocalDateTimeline(
     map {
         LocalDateSegment(
@@ -140,16 +141,16 @@ private fun List<AndelTilkjentYtelseMedEndreteUtbetalinger>.hentTidslinje(
                 aktørId = it.aktør.aktørId,
                 kalkulertBeløp = it.kalkulertUtbetalingsbeløp,
                 endretUtbetalingÅrsaker = it.endreteUtbetalinger.mapNotNull { endretUtbetalingAndel -> endretUtbetalingAndel.årsak },
-                behandlingAlder = behandlingAlder
-            )
+                behandlingAlder = behandlingAlder,
+            ),
         )
-    }
+    },
 )
 
 private fun kombinerOverlappendeAndelerForSøker(
     andeler: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
     behandlingAlder: BehandlingAlder,
-    aktørId: AktørId
+    aktørId: AktørId,
 ): LocalDateTimeline<AndelTilkjentYtelseDataForÅKalkulereEndring> {
     val segmenter = hentUtbetalingstidslinjeForSøker(andeler).toSegments()
 
@@ -161,9 +162,15 @@ private fun kombinerOverlappendeAndelerForSøker(
                     aktørId = aktørId,
                     behandlingAlder = behandlingAlder,
                     endretUtbetalingÅrsaker = emptyList(), // TODO() her bør man nok prøve å hente overstyringer på søker også, men haster mest å fikse endringstidspunkt pga overstyringer på barn.
-                    kalkulertBeløp = it.value
-                )
+                    kalkulertBeløp = it.value,
+                ),
             )
-        }
+        },
     )
+}
+
+fun List<VedtaksperiodeMedBegrunnelser>.filtrerLikEllerEtterEndringstidspunkt(
+    endringstidspunkt: LocalDate,
+): List<VedtaksperiodeMedBegrunnelser> {
+    return filter { (it.tom ?: TIDENES_ENDE).isSameOrAfter(endringstidspunkt) }
 }

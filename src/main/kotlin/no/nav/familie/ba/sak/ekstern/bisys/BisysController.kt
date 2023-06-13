@@ -26,7 +26,7 @@ import java.time.YearMonth
 class BisysController(private val bisysService: BisysService) {
 
     @Operation(
-        description = "Tjeneste for BISYS for å hente utvidet barnetrygd og småbarnstillegg for en gitt person."
+        description = "Tjeneste for BISYS for å hente utvidet barnetrygd og småbarnstillegg for en gitt person.",
 
     )
     @ApiResponses(
@@ -49,37 +49,37 @@ class BisysController(private val bisysService: BisysService) {
                             mediaType = "application/json",
                             array = (
                                 ArraySchema(schema = Schema(implementation = UtvidetBarnetrygdPeriode::class))
-                                )
+                                ),
                         )
-                        )
-                ]
+                        ),
+                ],
             ),
             ApiResponse(
                 responseCode = "400",
                 description = "Ugyldig input. fraDato maks tilbake 5 år",
-                content = [Content()]
+                content = [Content()],
             ),
-            ApiResponse(responseCode = "500", description = "Uventet feil", content = [Content()])
-        ]
+            ApiResponse(responseCode = "500", description = "Uventet feil", content = [Content()]),
+        ],
     )
     @PostMapping(
         path = ["/hent-utvidet-barnetrygd"],
         consumes = [MediaType.APPLICATION_JSON_VALUE],
-        produces = [MediaType.APPLICATION_JSON_VALUE]
+        produces = [MediaType.APPLICATION_JSON_VALUE],
     )
     fun hentUtvidetBarnetrygd(
         @RequestBody
-        request: BisysUtvidetBarnetrygdRequest
+        request: BisysUtvidetBarnetrygdRequest,
     ): ResponseEntity<BisysUtvidetBarnetrygdResponse> {
         val path = "/api/bisys/hent-utvidet-barnetrygd"
         if (LocalDate.now().minusYears(5).isAfter(request.fraDato)) {
             throw EksternTjenesteFeilException(
                 EksternTjenesteFeil(
                     path,
-                    HttpStatus.BAD_REQUEST
+                    HttpStatus.BAD_REQUEST,
                 ),
                 "fraDato kan ikke være lenger enn 5 år tilbake i tid",
-                request
+                request,
             )
         }
 
@@ -90,11 +90,11 @@ class BisysController(private val bisysService: BisysService) {
                 throw EksternTjenesteFeilException(
                     EksternTjenesteFeil(
                         "/api/bisys/hent-utvidet-barnetrygd",
-                        HttpStatus.BAD_REQUEST
+                        HttpStatus.BAD_REQUEST,
                     ),
                     "Fant ikke personIdent i PDL",
                     request,
-                    e
+                    e,
                 )
             }
 
@@ -102,7 +102,7 @@ class BisysController(private val bisysService: BisysService) {
                 EksternTjenesteFeil(path),
                 e.message ?: "Ukjent feil ved hent utvidet barnetrygd",
                 request,
-                e
+                e,
             )
         }
     }
@@ -110,7 +110,7 @@ class BisysController(private val bisysService: BisysService) {
 
 data class BisysUtvidetBarnetrygdRequest(
     val personIdent: String,
-    @Schema(implementation = String::class, example = "2020-12-01") val fraDato: LocalDate
+    @Schema(implementation = String::class, example = "2020-12-01") val fraDato: LocalDate,
 )
 
 class BisysUtvidetBarnetrygdResponse(val perioder: List<UtvidetBarnetrygdPeriode>)
@@ -120,10 +120,10 @@ data class UtvidetBarnetrygdPeriode(
     @Schema(implementation = String::class, example = "2020-12") val tomMåned: YearMonth?,
     val beløp: Double,
     val manueltBeregnet: Boolean,
-    val deltBosted: Boolean? = null
+    val deltBosted: Boolean? = null,
 )
 
 enum class BisysStønadstype {
     UTVIDET,
-    SMÅBARNSTILLEGG
+    SMÅBARNSTILLEGG,
 }

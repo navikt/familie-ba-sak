@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class InfotrygdFeedService(
-    val opprettTaskService: OpprettTaskService
+    val opprettTaskService: OpprettTaskService,
 ) {
 
     @Transactional

@@ -4,5 +4,5 @@ enum class Intervall {
     ÅRLIG,
     KVARTALSVIS,
     MÅNEDLIG,
-    UKENTLIG;
+    UKENTLIG,
 }

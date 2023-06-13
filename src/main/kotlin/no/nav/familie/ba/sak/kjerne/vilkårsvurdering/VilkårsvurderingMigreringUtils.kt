@@ -13,12 +13,12 @@ object VilkårsvurderingMigreringUtils {
         forrigeBehandlingsvilkårsvurdering: Vilkårsvurdering,
         vilkår: Vilkår,
         person: Person,
-        nyMigreringsdato: LocalDate
+        nyMigreringsdato: LocalDate,
     ): LocalDate {
         val forrigeVilkårResultat = hentForrigeVilkårsvurderingVilkårResultater(
             forrigeBehandlingsvilkårsvurdering,
             vilkår,
-            person
+            person,
         ).filter { it.periodeFom != null }
         val forrigeVilkårsPeriodeFom =
             if (forrigeVilkårResultat.isNotEmpty()) forrigeVilkårResultat.minOf { it.periodeFom!! } else null
@@ -37,12 +37,12 @@ object VilkårsvurderingMigreringUtils {
         forrigeBehandlingsvilkårsvurdering: Vilkårsvurdering,
         vilkår: Vilkår,
         person: Person,
-        periodeFom: LocalDate
+        periodeFom: LocalDate,
     ): LocalDate? {
         val forrigeVilkårsPeriodeTom: LocalDate? = hentForrigeVilkårsvurderingVilkårResultater(
             forrigeBehandlingsvilkårsvurdering,
             vilkår,
-            person
+            person,
         ).minWithOrNull(VilkårResultat.VilkårResultatComparator)?.periodeTom
         return when {
             vilkår == Vilkår.UNDER_18_ÅR -> periodeFom.til18ÅrsVilkårsdato()
@@ -55,7 +55,7 @@ object VilkårsvurderingMigreringUtils {
     fun kopiManglendePerioderFraForrigeVilkårsvurdering(
         vilkårResulater: Set<VilkårResultat>,
         forrigeBehandlingsvilkårsvurdering: Vilkårsvurdering,
-        person: Person
+        person: Person,
     ): List<VilkårResultat> {
         val manglendeVilkårResultater = mutableListOf<VilkårResultat>()
         vilkårResulater.forEach {
@@ -65,7 +65,7 @@ object VilkårsvurderingMigreringUtils {
                 forrigeVilkårResultater.filter { forrigeVilkårResultat ->
                     forrigeVilkårResultat.periodeFom != it.periodeFom &&
                         forrigeVilkårResultat.periodeTom != it.periodeTom
-                }
+                },
             )
         }
         return manglendeVilkårResultater
@@ -74,7 +74,7 @@ object VilkårsvurderingMigreringUtils {
     private fun hentForrigeVilkårsvurderingVilkårResultater(
         forrigeBehandlingsvilkårsvurdering: Vilkårsvurdering,
         vilkår: Vilkår,
-        person: Person
+        person: Person,
     ): List<VilkårResultat> {
         val personResultat = forrigeBehandlingsvilkårsvurdering.personResultater
             .first { it.aktør == person.aktør }

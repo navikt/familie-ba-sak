@@ -25,7 +25,7 @@ import java.util.UUID
 @Validated
 class KonsistensavstemmingController(
     private val taskService: TaskService,
-    private val batchRepository: BatchRepository
+    private val batchRepository: BatchRepository,
 ) {
 
     @PostMapping(path = ["/dryrun"], produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -48,7 +48,7 @@ class KonsistensavstemmingController(
 
     private fun opprettKonsistensavstemMotOppdragStartTask(
         sendTilØkonomi: Boolean,
-        triggerTid: LocalDateTime
+        triggerTid: LocalDateTime,
     ): Pair<UUID, Task> {
         val transaksjonsId = UUID.randomUUID()
         val batch = batchRepository.saveAndFlush(Batch(kjøreDato = LocalDate.now(), status = KjøreStatus.MANUELL))
@@ -60,11 +60,11 @@ class KonsistensavstemmingController(
                         batchId = batch.id,
                         avstemmingdato = triggerTid,
                         transaksjonsId = transaksjonsId,
-                        sendTilØkonomi = sendTilØkonomi
-                    )
+                        sendTilØkonomi = sendTilØkonomi,
+                    ),
                 ),
-                triggerTid = triggerTid
-            )
+                triggerTid = triggerTid,
+            ),
         )
         return Pair(transaksjonsId, task)
     }

@@ -5,7 +5,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonInfo
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonInfo
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestPersonInfoMedNavnOgAdresse
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -30,18 +30,18 @@ class PersonController(
     private val personopplysningerService: PersonopplysningerService,
     private val persongrunnlagService: PersongrunnlagService,
     private val personidentService: PersonidentService,
-    private val familieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient,
+    private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
     private val utvidetBehandlingService: UtvidetBehandlingService,
-    private val tilgangService: TilgangService
+    private val tilgangService: TilgangService,
 ) {
 
     @GetMapping
     fun hentPerson(
         @RequestHeader personIdent: String,
-        @RequestBody personIdentBody: PersonIdent?
+        @RequestBody personIdentBody: PersonIdent?,
     ): ResponseEntity<Ressurs<RestPersonInfo>> {
         val aktør = personidentService.hentAktør(personIdent)
-        val personinfo = familieIntegrasjonerTilgangskontrollClient.hentMaskertPersonInfoVedManglendeTilgang(aktør)
+        val personinfo = familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(aktør)
             ?: personopplysningerService.hentPersoninfoMedRelasjonerOgRegisterinformasjon(aktør)
                 .tilRestPersonInfo(personIdent)
         return ResponseEntity.ok(Ressurs.success(personinfo))
@@ -50,10 +50,10 @@ class PersonController(
     @GetMapping(path = ["/enkel"])
     fun hentPersonEnkel(
         @RequestHeader personIdent: String,
-        @RequestBody personIdentBody: PersonIdent?
+        @RequestBody personIdentBody: PersonIdent?,
     ): ResponseEntity<Ressurs<RestPersonInfo>> {
         val aktør = personidentService.hentAktør(personIdent)
-        val personinfo = familieIntegrasjonerTilgangskontrollClient.hentMaskertPersonInfoVedManglendeTilgang(aktør)
+        val personinfo = familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(aktør)
             ?: personopplysningerService.hentPersoninfoEnkel(aktør)
                 .tilRestPersonInfo(personIdent)
         return ResponseEntity.ok(Ressurs.success(personinfo))
@@ -61,10 +61,10 @@ class PersonController(
 
     @GetMapping(path = ["/adresse"])
     fun hentPersonAdresse(
-        @RequestHeader personIdent: String
+        @RequestHeader personIdent: String,
     ): ResponseEntity<Ressurs<RestPersonInfo>> {
         val aktør = personidentService.hentAktør(personIdent)
-        val personinfo = familieIntegrasjonerTilgangskontrollClient.hentMaskertPersonInfoVedManglendeTilgang(aktør)
+        val personinfo = familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(aktør)
             ?: personopplysningerService.hentPersoninfoNavnOgAdresse(aktør)
                 .tilRestPersonInfoMedNavnOgAdresse(personIdent)
         return ResponseEntity.ok(Ressurs.success(personinfo))
@@ -78,8 +78,8 @@ class PersonController(
         return ResponseEntity.ok(
             Ressurs.success(
                 utvidetBehandlingService
-                    .lagRestUtvidetBehandling(behandlingId = personopplysningGrunnlag.behandlingId)
-            )
+                    .lagRestUtvidetBehandling(behandlingId = personopplysningGrunnlag.behandlingId),
+            ),
         )
     }
 }

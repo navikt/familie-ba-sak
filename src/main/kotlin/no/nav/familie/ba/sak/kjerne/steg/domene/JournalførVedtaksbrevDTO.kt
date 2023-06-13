@@ -10,7 +10,7 @@ data class MottakerInfo(
     val brukerIdType: BrukerIdType,
     val erInstitusjonVerge: Boolean, // Feltet brukes kun for institiusjon med verge
     val navn: String? = null, // Feltet brukes for å sette riktig mottaker navn når brev sendes både til verge og bruker
-    val manuellAdresseInfo: ManuellAdresseInfo? = null
+    val manuellAdresseInfo: ManuellAdresseInfo? = null,
 )
 
 fun MottakerInfo.toList() = listOf(this)
@@ -20,5 +20,5 @@ data class ManuellAdresseInfo(
     val adresselinje2: String? = null,
     val postnummer: String,
     val poststed: String,
-    val landkode: String
+    val landkode: String,
 )

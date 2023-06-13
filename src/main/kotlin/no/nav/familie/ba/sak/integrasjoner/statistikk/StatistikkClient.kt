@@ -16,7 +16,7 @@ import java.net.URI
 @Service
 class StatistikkClient(
     @Value("\${FAMILIE_STATISTIKK_URL}") val baseUri: URI,
-    @Qualifier("jwtBearer") val restTemplate: RestOperations
+    @Qualifier("jwtBearer") val restTemplate: RestOperations,
 ) : AbstractRestClient(restTemplate, "statistikk") {
 
     fun harSendtVedtaksmeldingForBehandling(behandlingId: Long): Boolean {
@@ -29,7 +29,7 @@ class StatistikkClient(
             if (e is HttpStatusCodeException) {
                 logger.error(
                     "Kall mot statistikk feilet: httpkode: ${e.statusCode}, body ${e.responseBodyAsString} ",
-                    e
+                    e,
                 )
             }
             throw e

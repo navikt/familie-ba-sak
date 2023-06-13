@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory
 // Håpet er at denne skal kaste feil på sikt, men enn så lenge blir det for strengt. Logger for å se behovet.
 fun List<UtvidetVedtaksperiodeMedBegrunnelser>.validerPerioderInneholderBegrunnelser(
     behandlingId: Long,
-    fagsakId: Long
+    fagsakId: Long,
 ) {
     this.forEach {
         it.validerMinstEnBegrunnelseValgt(behandlingId = behandlingId, fagsakId = fagsakId)
@@ -17,14 +17,14 @@ fun List<UtvidetVedtaksperiodeMedBegrunnelser>.validerPerioderInneholderBegrunne
         it.validerMinstEnInnvilgetbegrunnelseVedInnvilgelse(behandlingId = behandlingId, fagsakId = fagsakId)
         it.validerMinstEnEndretUtbetalingbegrunnelseVedEndretUtbetaling(
             behandlingId = behandlingId,
-            fagsakId = fagsakId
+            fagsakId = fagsakId,
         )
     }
 }
 
 private fun UtvidetVedtaksperiodeMedBegrunnelser.validerMinstEnEndretUtbetalingbegrunnelseVedEndretUtbetaling(
     behandlingId: Long,
-    fagsakId: Long
+    fagsakId: Long,
 ) {
     val erMuligÅVelgeEndretUtbetalingBegrunnelse =
         this.gyldigeBegrunnelser.any { it.vedtakBegrunnelseType == VedtakBegrunnelseType.ENDRET_UTBETALING }
@@ -38,7 +38,7 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.validerMinstEnEndretUtbetalingb
 
 private fun UtvidetVedtaksperiodeMedBegrunnelser.validerMinstEnInnvilgetbegrunnelseVedInnvilgelse(
     behandlingId: Long,
-    fagsakId: Long
+    fagsakId: Long,
 ) {
     val erMuligÅVelgeInnvilgetBegrunnelse =
         this.gyldigeBegrunnelser.any { it.vedtakBegrunnelseType.erInnvilget() }
@@ -52,7 +52,7 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.validerMinstEnInnvilgetbegrunne
 
 private fun UtvidetVedtaksperiodeMedBegrunnelser.validerMinstEnReduksjonsbegrunnelseVedReduksjon(
     behandlingId: Long,
-    fagsakId: Long
+    fagsakId: Long,
 ) {
     val erMuligÅVelgeReduksjonBegrunnelse =
         this.gyldigeBegrunnelser.any { it.vedtakBegrunnelseType.erReduksjon() }
@@ -66,7 +66,7 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.validerMinstEnReduksjonsbegrunn
 
 private fun UtvidetVedtaksperiodeMedBegrunnelser.validerMinstEnBegrunnelseValgt(
     behandlingId: Long,
-    fagsakId: Long
+    fagsakId: Long,
 ) {
     if (this.begrunnelser.isEmpty()) {
         logger.warn("Vedtaksperioden ${this.fom?.tilKortString() ?: ""} - ${this.tom?.tilKortString() ?: ""} har ingen begrunnelser knyttet til seg. Fagsak: $fagsakId, behandling: $behandlingId")

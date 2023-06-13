@@ -1,4 +1,4 @@
-package no.nav.familie.ba.sak.task.InternKonsistensavstemming
+package no.nav.familie.ba.sak.task.internkonsistensavstemming
 
 import com.fasterxml.jackson.module.kotlin.readValue
 import no.nav.familie.ba.sak.integrasjoner.økonomi.internkonsistensavstemming.InternKonsistensavstemmingService
@@ -18,10 +18,10 @@ import java.util.Properties
 @TaskStepBeskrivelse(
     taskStepType = OpprettInternKonsistensavstemmingTaskerTask.TASK_STEP_TYPE,
     beskrivelse = "Start intern konsistensavstemming tasker",
-    maxAntallFeil = 3
+    maxAntallFeil = 3,
 )
 class OpprettInternKonsistensavstemmingTaskerTask(
-    val internKonsistensavstemmingService: InternKonsistensavstemmingService
+    val internKonsistensavstemmingService: InternKonsistensavstemmingService,
 ) : AsyncTaskStep {
 
     override fun doTask(task: Task) {
@@ -40,7 +40,7 @@ class OpprettInternKonsistensavstemmingTaskerTask(
                 type = TASK_STEP_TYPE,
                 payload = maksAntallTasker.toString(),
                 triggerTid = LocalDateTime.now(),
-                metadataWrapper = PropertiesWrapper(metadata)
+                metadataWrapper = PropertiesWrapper(metadata),
             )
         }
 

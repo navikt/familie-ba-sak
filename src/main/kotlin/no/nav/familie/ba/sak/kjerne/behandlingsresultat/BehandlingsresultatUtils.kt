@@ -19,26 +19,26 @@ object BehandlingsresultatUtils {
         return behandling.erManuellMigrering() || behandling.opprettetÅrsak in listOf(
             BehandlingÅrsak.SØKNAD,
             BehandlingÅrsak.FØDSELSHENDELSE,
-            BehandlingÅrsak.KLAGE
+            BehandlingÅrsak.KLAGE,
         )
     }
 
     internal fun kombinerResultaterTilBehandlingsresultat(
         søknadsresultat: Søknadsresultat?, // Søknadsresultat er null hvis det ikke er en søknad/fødselshendelse/manuell migrering
         endringsresultat: Endringsresultat,
-        opphørsresultat: Opphørsresultat
+        opphørsresultat: Opphørsresultat,
     ): Behandlingsresultat {
         fun sjekkResultat(
             ønsketSøknadsresultat: Søknadsresultat?,
             ønsketEndringsresultat: Endringsresultat,
-            ønsketOpphørsresultat: Opphørsresultat
+            ønsketOpphørsresultat: Opphørsresultat,
         ): Boolean =
             søknadsresultat == ønsketSøknadsresultat && endringsresultat == ønsketEndringsresultat && opphørsresultat == ønsketOpphørsresultat
 
         fun ugyldigBehandlingsresultatFeil(behandlingsresultatString: String) =
             FunksjonellFeil(
                 frontendFeilmelding = "Du har fått behandlingsresultatet $behandlingsresultatString, men behandlingen er registrert med årsak søknad. Du må enten innvilge eller avslå noe for å kunne fortsette. Om du er uenig i resultatet ta kontakt med Superbruker.",
-                melding = "Kombinasjonen av (søknadsresultat=$søknadsresultat, endringsresultat=$endringsresultat, opphørsresultat=$opphørsresultat) er ikke støttet i løsningen."
+                melding = "Kombinasjonen av (søknadsresultat=$søknadsresultat, endringsresultat=$endringsresultat, opphørsresultat=$opphørsresultat) er ikke støttet i løsningen.",
             )
 
         return when {
@@ -82,7 +82,7 @@ object BehandlingsresultatUtils {
             // Skal egentlig aldri kunne komme hit, alle kombinasjoner skal være skrevet ut
             else -> throw Feil(
                 frontendFeilmelding = "Du har fått et behandlingsresultat vi ikke støtter. Meld sak i Porten om du er uenig i resultatet.",
-                message = "Klarer ikke utlede behandlingsresultat fra (søknadsresultat=$søknadsresultat, endringsresultat=$endringsresultat, opphørsresultat=$opphørsresultat)"
+                message = "Klarer ikke utlede behandlingsresultat fra (søknadsresultat=$søknadsresultat, endringsresultat=$endringsresultat, opphørsresultat=$opphørsresultat)",
             )
         }
     }
@@ -95,23 +95,23 @@ fun hentUtbetalingstidslinjeForSøker(andeler: List<AndelTilkjentYtelseMedEndret
                 LocalDateSegment(
                     it.stønadFom.førsteDagIInneværendeMåned(),
                     it.stønadTom.sisteDagIInneværendeMåned(),
-                    it.kalkulertUtbetalingsbeløp
+                    it.kalkulertUtbetalingsbeløp,
                 )
-            }
+            },
     )
     val småbarnstilleggAndeler = LocalDateTimeline(
         andeler.filter { it.type == YtelseType.SMÅBARNSTILLEGG }.map {
             LocalDateSegment(
                 it.stønadFom.førsteDagIInneværendeMåned(),
                 it.stønadTom.sisteDagIInneværendeMåned(),
-                it.kalkulertUtbetalingsbeløp
+                it.kalkulertUtbetalingsbeløp,
             )
-        }
+        },
     )
 
     return utvidetTidslinje.combine(
         småbarnstilleggAndeler,
         StandardCombinators::sum,
-        LocalDateTimeline.JoinStyle.CROSS_JOIN
+        LocalDateTimeline.JoinStyle.CROSS_JOIN,
     )
 }

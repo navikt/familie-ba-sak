@@ -44,21 +44,21 @@ abstract class Tidslinje<I, T : Tidsenhet> {
                     TidslinjeFeil(
                         periode = periode2,
                         tidslinje = this,
-                        type = TidslinjeFeilType.UENDELIG_FORTID_ETTER_FØRSTE_PERIODE
+                        type = TidslinjeFeilType.UENDELIG_FORTID_ETTER_FØRSTE_PERIODE,
                     )
 
                 periode1.tilOgMed.erUendeligLengeTil() ->
                     TidslinjeFeil(
                         periode = periode1,
                         tidslinje = this,
-                        type = TidslinjeFeilType.UENDELIG_FREMTID_FØR_SISTE_PERIODE
+                        type = TidslinjeFeilType.UENDELIG_FREMTID_FØR_SISTE_PERIODE,
                     )
 
                 periode1.tilOgMed >= periode2.fraOgMed ->
                     TidslinjeFeil(
                         periode = periode1,
                         tidslinje = this,
-                        type = TidslinjeFeilType.OVERLAPPER_ETTERFØLGENDE_PERIODE
+                        type = TidslinjeFeilType.OVERLAPPER_ETTERFØLGENDE_PERIODE,
                     )
 
                 else -> null
@@ -88,14 +88,14 @@ abstract class Tidslinje<I, T : Tidsenhet> {
         data class TidslinjeFeil(
             val type: TidslinjeFeilType,
             val periode: Periode<*, *>,
-            val tidslinje: Tidslinje<*, *>
+            val tidslinje: Tidslinje<*, *>,
         )
 
         enum class TidslinjeFeilType {
             UENDELIG_FORTID_ETTER_FØRSTE_PERIODE,
             UENDELIG_FREMTID_FØR_SISTE_PERIODE,
             TOM_ER_FØR_FOM,
-            OVERLAPPER_ETTERFØLGENDE_PERIODE
+            OVERLAPPER_ETTERFØLGENDE_PERIODE,
         }
 
         data class TidslinjeFeilException(val tidslinjeFeil: Collection<TidslinjeFeil>) :

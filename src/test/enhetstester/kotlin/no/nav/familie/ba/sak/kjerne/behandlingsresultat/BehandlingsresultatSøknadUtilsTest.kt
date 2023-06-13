@@ -42,14 +42,14 @@ internal class BehandlingsresultatSøknadUtilsTest {
                 fom = jan22,
                 tom = aug22,
                 beløp = 1054,
-                aktør = barn1Aktør
+                aktør = barn1Aktør,
             )
 
         val søknadsResultat = utledSøknadResultatFraAndelerTilkjentYtelse(
             forrigeAndeler = listOf(forrigeAndel),
             nåværendeAndeler = listOf(forrigeAndel.copy()),
             personerFremstiltKravFor = emptyList(),
-            endretUtbetalingAndeler = emptyList()
+            endretUtbetalingAndeler = emptyList(),
         )
 
         assertThat(søknadsResultat, Is(emptyList()))
@@ -64,14 +64,14 @@ internal class BehandlingsresultatSøknadUtilsTest {
                 fom = jan22,
                 tom = aug22,
                 beløp = 1054,
-                aktør = barn1Aktør
+                aktør = barn1Aktør,
             )
 
         val søknadsResultat = utledSøknadResultatFraAndelerTilkjentYtelse(
             forrigeAndeler = listOf(forrigeAndel),
             nåværendeAndeler = listOf(forrigeAndel.copy()),
             personerFremstiltKravFor = listOf(barn1Aktør),
-            endretUtbetalingAndeler = emptyList()
+            endretUtbetalingAndeler = emptyList(),
         )
 
         assertThat(søknadsResultat.size, Is(1))
@@ -87,16 +87,16 @@ internal class BehandlingsresultatSøknadUtilsTest {
                 fom = jan22,
                 tom = aug22,
                 beløp = 0,
-                aktør = barn1Aktør
+                aktør = barn1Aktør,
             )
 
         val søknadsResultat = utledSøknadResultatFraAndelerTilkjentYtelse(
             forrigeAndeler = listOf(forrigeAndel),
             nåværendeAndeler = listOf(
-                forrigeAndel.copy(kalkulertUtbetalingsbeløp = 1054)
+                forrigeAndel.copy(kalkulertUtbetalingsbeløp = 1054),
             ),
             personerFremstiltKravFor = listOf(barn1Aktør),
-            endretUtbetalingAndeler = emptyList()
+            endretUtbetalingAndeler = emptyList(),
         )
 
         assertThat(søknadsResultat.size, Is(1))
@@ -112,16 +112,16 @@ internal class BehandlingsresultatSøknadUtilsTest {
                 fom = jan22,
                 tom = aug22,
                 beløp = 1054,
-                aktør = barn1Aktør
+                aktør = barn1Aktør,
             )
 
         val søknadsResultat = utledSøknadResultatFraAndelerTilkjentYtelse(
             forrigeAndeler = listOf(forrigeAndel),
             nåværendeAndeler = listOf(
-                forrigeAndel.copy(kalkulertUtbetalingsbeløp = 0)
+                forrigeAndel.copy(kalkulertUtbetalingsbeløp = 0),
             ),
             personerFremstiltKravFor = listOf(barn1Aktør),
-            endretUtbetalingAndeler = emptyList()
+            endretUtbetalingAndeler = emptyList(),
         )
 
         assertThat(søknadsResultat.size, Is(1))
@@ -139,7 +139,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
                 tom = aug22,
                 beløp = 0,
                 prosent = BigDecimal.ZERO,
-                aktør = barn1Aktør
+                aktør = barn1Aktør,
             )
 
         val endretUtbetalingAndel = lagEndretUtbetalingAndel(
@@ -148,16 +148,16 @@ internal class BehandlingsresultatSøknadUtilsTest {
             tom = aug22,
             prosent = BigDecimal(100),
             behandlingId = 123L,
-            årsak = Årsak.DELT_BOSTED
+            årsak = Årsak.DELT_BOSTED,
         )
 
         val søknadsResultat = utledSøknadResultatFraAndelerTilkjentYtelse(
             forrigeAndeler = emptyList(),
             nåværendeAndeler = listOf(
-                andel.copy(kalkulertUtbetalingsbeløp = 0)
+                andel.copy(kalkulertUtbetalingsbeløp = 0),
             ),
             personerFremstiltKravFor = listOf(barn1Aktør),
-            endretUtbetalingAndeler = listOf(endretUtbetalingAndel)
+            endretUtbetalingAndeler = listOf(endretUtbetalingAndel),
         )
 
         assertThat(søknadsResultat.size, Is(1))
@@ -167,7 +167,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
     @ParameterizedTest
     @EnumSource(value = Årsak::class, mode = EnumSource.Mode.EXCLUDE, names = ["DELT_BOSTED"])
     fun `utledSøknadResultatFraAndelerTilkjentYtelse skal returnere AVSLÅTT dersom beløp på nåværende andel er 0 og det finnes endringsperiode som ikke er DELT_BOSTED`(
-        årsak: Årsak
+        årsak: Årsak,
     ) {
         val barn1Person = lagPerson(type = PersonType.BARN)
         val barn1Aktør = barn1Person.aktør
@@ -178,7 +178,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
                 tom = aug22,
                 beløp = 0,
                 prosent = BigDecimal.ZERO,
-                aktør = barn1Aktør
+                aktør = barn1Aktør,
             )
 
         val endretUtbetalingAndel = lagEndretUtbetalingAndel(
@@ -187,16 +187,16 @@ internal class BehandlingsresultatSøknadUtilsTest {
             tom = aug22,
             prosent = BigDecimal(100),
             behandlingId = 123L,
-            årsak = årsak
+            årsak = årsak,
         )
 
         val søknadsResultat = utledSøknadResultatFraAndelerTilkjentYtelse(
             forrigeAndeler = emptyList(),
             nåværendeAndeler = listOf(
-                andel
+                andel,
             ),
             personerFremstiltKravFor = listOf(barn1Aktør),
-            endretUtbetalingAndeler = listOf(endretUtbetalingAndel)
+            endretUtbetalingAndeler = listOf(endretUtbetalingAndel),
         )
 
         assertThat(søknadsResultat.size, Is(1))
@@ -206,7 +206,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
     @ParameterizedTest
     @EnumSource(value = Årsak::class)
     fun `utledSøknadResultatFraAndelerTilkjentYtelse skal returnere INGEN_RELEVANTE_ENDRINGER dersom beløp på nåværende andel er 0 og andelen eksisterte forrige gang (beløp større eller lik 0)`(
-        årsak: Årsak
+        årsak: Årsak,
     ) {
         val barn1Person = lagPerson(type = PersonType.BARN)
         val barn1Aktør = barn1Person.aktør
@@ -216,7 +216,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
                 fom = jan22,
                 tom = aug22,
                 beløp = 1054,
-                aktør = barn1Aktør
+                aktør = barn1Aktør,
             )
 
         val endretUtbetalingAndel = lagEndretUtbetalingAndel(
@@ -225,16 +225,16 @@ internal class BehandlingsresultatSøknadUtilsTest {
             tom = aug22,
             prosent = BigDecimal(100),
             behandlingId = 123L,
-            årsak = årsak
+            årsak = årsak,
         )
 
         val søknadsResultat = utledSøknadResultatFraAndelerTilkjentYtelse(
             forrigeAndeler = listOf(forrigeAndel),
             nåværendeAndeler = listOf(
-                forrigeAndel.copy(kalkulertUtbetalingsbeløp = 0)
+                forrigeAndel.copy(kalkulertUtbetalingsbeløp = 0),
             ),
             personerFremstiltKravFor = listOf(barn1Aktør),
-            endretUtbetalingAndeler = listOf(endretUtbetalingAndel)
+            endretUtbetalingAndeler = listOf(endretUtbetalingAndel),
         )
 
         assertThat(søknadsResultat.size, Is(1))
@@ -253,7 +253,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
                 beløp = 0,
                 prosent = BigDecimal.ZERO,
                 differanseberegnetPeriodebeløp = 0,
-                aktør = barn1Aktør
+                aktør = barn1Aktør,
             )
 
         val søknadsResultat = utledSøknadResultatFraAndelerTilkjentYtelse(
@@ -261,11 +261,11 @@ internal class BehandlingsresultatSøknadUtilsTest {
             nåværendeAndeler = listOf(
                 andel.copy(
                     kalkulertUtbetalingsbeløp = 0,
-                    differanseberegnetPeriodebeløp = 0
-                )
+                    differanseberegnetPeriodebeløp = 0,
+                ),
             ),
             personerFremstiltKravFor = listOf(barn1Aktør),
-            endretUtbetalingAndeler = emptyList()
+            endretUtbetalingAndeler = emptyList(),
         )
 
         assertThat(søknadsResultat.size, Is(1))
@@ -283,22 +283,22 @@ internal class BehandlingsresultatSøknadUtilsTest {
                 fom = jan22,
                 tom = aug22,
                 beløp = 1054,
-                aktør = barn2Aktør
-            )
+                aktør = barn2Aktør,
+            ),
         )
         val nåværendeAndeler = listOf(
             lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
                 beløp = 0,
-                aktør = barn1Aktør
+                aktør = barn1Aktør,
             ),
             lagAndelTilkjentYtelse(
                 fom = jan22,
                 tom = aug22,
                 beløp = 1060,
-                aktør = barn2Aktør
-            )
+                aktør = barn2Aktør,
+            ),
         )
 
         val endretUtbetalingAndel = lagEndretUtbetalingAndel(
@@ -307,14 +307,14 @@ internal class BehandlingsresultatSøknadUtilsTest {
             tom = aug22,
             prosent = BigDecimal(100),
             behandlingId = 123L,
-            årsak = Årsak.ALLEREDE_UTBETALT
+            årsak = Årsak.ALLEREDE_UTBETALT,
         )
 
         val søknadsResultat = utledSøknadResultatFraAndelerTilkjentYtelse(
             forrigeAndeler = forrigeAndeler,
             nåværendeAndeler = nåværendeAndeler,
             personerFremstiltKravFor = listOf(barn1Aktør, barn2Aktør),
-            endretUtbetalingAndeler = listOf(endretUtbetalingAndel)
+            endretUtbetalingAndeler = listOf(endretUtbetalingAndel),
         )
 
         assertThat(søknadsResultat.size, Is(2))
@@ -322,8 +322,8 @@ internal class BehandlingsresultatSøknadUtilsTest {
             søknadsResultat,
             containsInAnyOrder(
                 Søknadsresultat.AVSLÅTT,
-                Søknadsresultat.INNVILGET
-            )
+                Søknadsresultat.INNVILGET,
+            ),
         )
     }
 
@@ -338,7 +338,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
                 fom = jan22,
                 tom = aug22,
                 beløp = 1054,
-                aktør = barn1Aktør
+                aktør = barn1Aktør,
             )
 
         val forrigeAndelUtvidet = lagAndelTilkjentYtelse(
@@ -346,7 +346,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
             tom = aug22,
             beløp = 1054,
             aktør = søker.aktør,
-            ytelseType = YtelseType.UTVIDET_BARNETRYGD
+            ytelseType = YtelseType.UTVIDET_BARNETRYGD,
         )
 
         val søknadsResultat = utledSøknadResultatFraAndelerTilkjentYtelse(
@@ -359,11 +359,11 @@ internal class BehandlingsresultatSøknadUtilsTest {
                     tom = aug22,
                     beløp = 630,
                     aktør = søker.aktør,
-                    ytelseType = YtelseType.SMÅBARNSTILLEGG
-                )
+                    ytelseType = YtelseType.SMÅBARNSTILLEGG,
+                ),
             ),
             personerFremstiltKravFor = listOf(søker.aktør),
-            endretUtbetalingAndeler = emptyList()
+            endretUtbetalingAndeler = emptyList(),
         ).filter { it != Søknadsresultat.INGEN_RELEVANTE_ENDRINGER }
 
         assertThat(søknadsResultat.size, Is(1))
@@ -382,7 +382,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
     @ParameterizedTest
     @EnumSource(value = Søknadsresultat::class)
     internal fun `kombinerSøknadsresultater skal alltid returnere innholdet som det er hvis det bare 1 resultat i lista`(
-        søknadsresultat: Søknadsresultat
+        søknadsresultat: Søknadsresultat,
     ) {
         val listeMedSøknadsresultat = listOf(søknadsresultat)
 
@@ -394,7 +394,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
     @ParameterizedTest
     @EnumSource(value = Søknadsresultat::class, names = ["INNVILGET", "AVSLÅTT"])
     internal fun `kombinerSøknadsresultater skal ignorere INGEN_RELEVANTE_ENDRINGER dersom den er paret opp med INNVILGET eller AVSLÅTT`(
-        søknadsresultat: Søknadsresultat
+        søknadsresultat: Søknadsresultat,
     ) {
         val listeMedSøknadsresultat =
             listOf(Søknadsresultat.INGEN_RELEVANTE_ENDRINGER, søknadsresultat)
@@ -409,7 +409,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
         val listeMedSøknadsresultat = listOf(
             Søknadsresultat.INNVILGET,
             Søknadsresultat.AVSLÅTT,
-            Søknadsresultat.INGEN_RELEVANTE_ENDRINGER
+            Søknadsresultat.INGEN_RELEVANTE_ENDRINGER,
         )
 
         val kombinertResultat = listeMedSøknadsresultat.kombinerSøknadsresultater(behandlingÅrsak = BehandlingÅrsak.SØKNAD)
@@ -427,7 +427,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
                 personerFremstiltKravFor = emptyList(),
                 endretUtbetalingAndeler = emptyList(),
                 behandlingÅrsak = BehandlingÅrsak.SØKNAD,
-                finnesUregistrerteBarn = false
+                finnesUregistrerteBarn = false,
             )
         }
     }
@@ -441,7 +441,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
             personerFremstiltKravFor = emptyList(),
             endretUtbetalingAndeler = emptyList(),
             behandlingÅrsak = BehandlingÅrsak.SØKNAD,
-            finnesUregistrerteBarn = true
+            finnesUregistrerteBarn = true,
         )
 
         assertThat(resultatPåSøknad, Is(Søknadsresultat.AVSLÅTT))
@@ -462,7 +462,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
             periodeTom = LocalDate.now(),
             personType = PersonType.SØKER,
             erEksplisittAvslagPåSøknad = true,
-            lagFullstendigVilkårResultat = true
+            lagFullstendigVilkårResultat = true,
 
         )
         val resultatPåSøknad = BehandlingsresultatSøknadUtils.utledResultatPåSøknad(
@@ -472,7 +472,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
             personerFremstiltKravFor = emptyList(),
             endretUtbetalingAndeler = emptyList(),
             behandlingÅrsak = BehandlingÅrsak.SØKNAD,
-            finnesUregistrerteBarn = false
+            finnesUregistrerteBarn = false,
         )
 
         assertThat(resultatPåSøknad, Is(Søknadsresultat.AVSLÅTT))
@@ -491,7 +491,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
             periodeFom = des21,
             periodeTom = LocalDate.now(),
             lagFullstendigVilkårResultat = true,
-            personType = PersonType.BARN
+            personType = PersonType.BARN,
         )
 
         val resultatPåSøknad = BehandlingsresultatSøknadUtils.utledResultatPåSøknad(
@@ -501,7 +501,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
             personerFremstiltKravFor = emptyList(),
             endretUtbetalingAndeler = emptyList(),
             behandlingÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
-            finnesUregistrerteBarn = false
+            finnesUregistrerteBarn = false,
         )
 
         assertThat(resultatPåSøknad, Is(Søknadsresultat.AVSLÅTT))
@@ -522,7 +522,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
             periodeTom = LocalDate.now(),
             personType = PersonType.BARN,
             erEksplisittAvslagPåSøknad = true,
-            lagFullstendigVilkårResultat = true
+            lagFullstendigVilkårResultat = true,
 
         )
 
@@ -533,7 +533,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
             personerFremstiltKravFor = listOf(barn.aktør),
             endretUtbetalingAndeler = emptyList(),
             behandlingÅrsak = BehandlingÅrsak.SØKNAD,
-            finnesUregistrerteBarn = false
+            finnesUregistrerteBarn = false,
         )
 
         assertThat(resultatPåSøknad, Is(Søknadsresultat.AVSLÅTT))
@@ -552,8 +552,8 @@ internal class BehandlingsresultatSøknadUtilsTest {
                     fom = jan22,
                     tom = aug22,
                     beløp = 1054,
-                    aktør = barn1Person.aktør
-                )
+                    aktør = barn1Person.aktør,
+                ),
             )
 
         val barnPersonResultat = lagPersonResultat(
@@ -563,7 +563,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
             periodeFom = des21,
             periodeTom = LocalDate.now(),
             personType = PersonType.BARN,
-            lagFullstendigVilkårResultat = true
+            lagFullstendigVilkårResultat = true,
         )
 
         val resultatPåSøknad = BehandlingsresultatSøknadUtils.utledResultatPåSøknad(
@@ -573,7 +573,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
             personerFremstiltKravFor = listOf(barn1Person.aktør),
             endretUtbetalingAndeler = emptyList(),
             behandlingÅrsak = BehandlingÅrsak.SØKNAD,
-            finnesUregistrerteBarn = false
+            finnesUregistrerteBarn = false,
         )
 
         assertThat(resultatPåSøknad, Is(Søknadsresultat.INNVILGET))
@@ -592,8 +592,8 @@ internal class BehandlingsresultatSøknadUtilsTest {
                     fom = jan22,
                     tom = aug22,
                     beløp = 1054,
-                    aktør = barn1Person.aktør
-                )
+                    aktør = barn1Person.aktør,
+                ),
             )
 
         val barnPersonResultat = lagPersonResultat(
@@ -603,7 +603,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
             periodeFom = des21,
             periodeTom = LocalDate.now(),
             personType = PersonType.BARN,
-            lagFullstendigVilkårResultat = true
+            lagFullstendigVilkårResultat = true,
         )
 
         val resultatPåSøknad = BehandlingsresultatSøknadUtils.utledResultatPåSøknad(
@@ -613,7 +613,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
             personerFremstiltKravFor = listOf(barn1Person.aktør),
             endretUtbetalingAndeler = emptyList(),
             behandlingÅrsak = BehandlingÅrsak.SØKNAD,
-            finnesUregistrerteBarn = true
+            finnesUregistrerteBarn = true,
         )
 
         assertThat(resultatPåSøknad, Is(Søknadsresultat.DELVIS_INNVILGET))
@@ -632,8 +632,8 @@ internal class BehandlingsresultatSøknadUtilsTest {
                     fom = jan22,
                     tom = aug22,
                     beløp = 1054,
-                    aktør = barn1Person.aktør
-                )
+                    aktør = barn1Person.aktør,
+                ),
             )
 
         val barnPersonResultat = lagPersonResultat(
@@ -643,7 +643,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
             periodeFom = des21,
             periodeTom = LocalDate.now(),
             personType = PersonType.BARN,
-            lagFullstendigVilkårResultat = true
+            lagFullstendigVilkårResultat = true,
         )
 
         val resultatPåSøknad = BehandlingsresultatSøknadUtils.utledResultatPåSøknad(
@@ -653,7 +653,7 @@ internal class BehandlingsresultatSøknadUtilsTest {
             personerFremstiltKravFor = listOf(barn1Person.aktør),
             endretUtbetalingAndeler = emptyList(),
             behandlingÅrsak = BehandlingÅrsak.SØKNAD,
-            finnesUregistrerteBarn = false
+            finnesUregistrerteBarn = false,
         )
 
         assertThat(resultatPåSøknad, Is(Søknadsresultat.INGEN_RELEVANTE_ENDRINGER))

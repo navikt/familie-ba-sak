@@ -44,7 +44,7 @@ class ECBService(private val ecbClient: ValutakursRestClient) {
     private fun validateExchangeRates(
         currency: String,
         exchangeRateDate: LocalDate,
-        exchangeRates: List<ExchangeRate>
+        exchangeRates: List<ExchangeRate>,
     ) {
         val expectedSize = if (currency != ECBConstants.EUR) 2 else 1
         val currencies =
@@ -59,7 +59,7 @@ class ECBService(private val ecbClient: ValutakursRestClient) {
         exchangeRates: List<ExchangeRate>,
         currencies: List<String>,
         exchangeRateDate: LocalDate,
-        expectedSize: Int
+        expectedSize: Int,
     ) =
         exchangeRates.size == expectedSize &&
             exchangeRates.all { it.date == exchangeRateDate } &&

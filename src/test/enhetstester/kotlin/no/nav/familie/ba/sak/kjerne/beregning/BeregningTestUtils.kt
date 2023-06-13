@@ -16,7 +16,7 @@ fun lagTestUtbetalingsoppdragForFGBMedToBarn(
     datoFomBarn1: LocalDate,
     datoFomBarn2: LocalDate,
     datoTomBarn1: LocalDate,
-    datoTomBarn2: LocalDate
+    datoTomBarn2: LocalDate,
 ): Utbetalingsoppdrag {
     return Utbetalingsoppdrag(
         Utbetalingsoppdrag.KodeEndring.NY,
@@ -38,7 +38,7 @@ fun lagTestUtbetalingsoppdragForFGBMedToBarn(
                 BigDecimal(1054),
                 Utbetalingsperiode.SatsType.MND,
                 personIdent,
-                behandlingId
+                behandlingId,
             ),
             Utbetalingsperiode(
                 false,
@@ -52,9 +52,9 @@ fun lagTestUtbetalingsoppdragForFGBMedToBarn(
                 BigDecimal(1054),
                 Utbetalingsperiode.SatsType.MND,
                 personIdent,
-                behandlingId
-            )
-        )
+                behandlingId,
+            ),
+        ),
     )
 }
 
@@ -67,7 +67,7 @@ fun lagTestUtbetalingsoppdragForOpphørMedToBarn(
     datoFomBarn2: LocalDate,
     datoTomBarn1: LocalDate,
     datoTomBarn2: LocalDate,
-    opphørFom: LocalDate
+    opphørFom: LocalDate,
 ): Utbetalingsoppdrag {
     return Utbetalingsoppdrag(
         Utbetalingsoppdrag.KodeEndring.NY,
@@ -89,7 +89,7 @@ fun lagTestUtbetalingsoppdragForOpphørMedToBarn(
                 BigDecimal(1054),
                 Utbetalingsperiode.SatsType.MND,
                 personIdent,
-                behandlingId
+                behandlingId,
             ),
             Utbetalingsperiode(
                 true,
@@ -103,9 +103,9 @@ fun lagTestUtbetalingsoppdragForOpphørMedToBarn(
                 BigDecimal(1054),
                 Utbetalingsperiode.SatsType.MND,
                 personIdent,
-                behandlingId
-            )
-        )
+                behandlingId,
+            ),
+        ),
     )
 }
 
@@ -122,7 +122,7 @@ fun lagTestUtbetalingsoppdragForRevurderingMedToBarn(
     opphørFomBarn2: LocalDate,
     revurderingFomBarn2: LocalDate,
     datoFomBarn2: LocalDate,
-    datoTomBarn2: LocalDate
+    datoTomBarn2: LocalDate,
 ): Utbetalingsoppdrag {
     return Utbetalingsoppdrag(
         Utbetalingsoppdrag.KodeEndring.NY,
@@ -144,7 +144,7 @@ fun lagTestUtbetalingsoppdragForRevurderingMedToBarn(
                 BigDecimal(1054),
                 Utbetalingsperiode.SatsType.MND,
                 personIdent,
-                forrigeBehandlingId
+                forrigeBehandlingId,
             ),
             Utbetalingsperiode(
                 false,
@@ -158,7 +158,7 @@ fun lagTestUtbetalingsoppdragForRevurderingMedToBarn(
                 BigDecimal(1054),
                 Utbetalingsperiode.SatsType.MND,
                 personIdent,
-                behandlingId
+                behandlingId,
             ),
             Utbetalingsperiode(
                 true,
@@ -172,7 +172,7 @@ fun lagTestUtbetalingsoppdragForRevurderingMedToBarn(
                 BigDecimal(1054),
                 Utbetalingsperiode.SatsType.MND,
                 personIdent,
-                forrigeBehandlingId
+                forrigeBehandlingId,
             ),
             Utbetalingsperiode(
                 false,
@@ -186,8 +186,8 @@ fun lagTestUtbetalingsoppdragForRevurderingMedToBarn(
                 BigDecimal(1054),
                 Utbetalingsperiode.SatsType.MND,
                 personIdent,
-                behandlingId
-            )
-        )
+                behandlingId,
+            ),
+        ),
     )
 }

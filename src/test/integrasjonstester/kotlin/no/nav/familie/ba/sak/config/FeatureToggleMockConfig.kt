@@ -13,7 +13,7 @@ import org.springframework.core.env.Environment
 @TestConfiguration
 class FeatureToggleMockConfig(
     @Autowired val featureToggleInitializer: FeatureToggleInitializer,
-    @Autowired private val environment: Environment
+    @Autowired private val environment: Environment,
 ) {
 
     @Bean

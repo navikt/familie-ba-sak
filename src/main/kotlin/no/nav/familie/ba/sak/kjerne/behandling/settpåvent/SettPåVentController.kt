@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.behandling.settpåvent
 
+import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestSettPåVent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
@@ -21,16 +22,17 @@ import org.springframework.web.bind.annotation.RestController
 class SettPåVentController(
     private val tilgangService: TilgangService,
     private val settPåVentService: SettPåVentService,
-    private val utvidetBehandlingService: UtvidetBehandlingService
+    private val utvidetBehandlingService: UtvidetBehandlingService,
 ) {
     @PostMapping(path = ["{behandlingId}"])
     fun settBehandlingPåVent(
         @PathVariable behandlingId: Long,
-        @RequestBody restSettPåVent: RestSettPåVent
+        @RequestBody restSettPåVent: RestSettPåVent,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "Sett behandling på vent"
+            handling = "Sett behandling på vent",
         )
         settPåVentService.settBehandlingPåVent(behandlingId, restSettPåVent.frist, restSettPåVent.årsak)
 
@@ -40,11 +42,12 @@ class SettPåVentController(
     @PutMapping(path = ["{behandlingId}"])
     fun oppdaterSettBehandlingPåVent(
         @PathVariable behandlingId: Long,
-        @RequestBody restSettPåVent: RestSettPåVent
+        @RequestBody restSettPåVent: RestSettPåVent,
     ): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "Sett behandling på vent"
+            handling = "Sett behandling på vent",
         )
         settPåVentService.oppdaterSettBehandlingPåVent(behandlingId, restSettPåVent.frist, restSettPåVent.årsak)
 
@@ -53,9 +56,10 @@ class SettPåVentController(
 
     @PutMapping(path = ["{behandlingId}/fortsettbehandling"])
     fun gjenopptaBehandling(@PathVariable behandlingId: Long): ResponseEntity<Ressurs<RestUtvidetBehandling>> {
+        tilgangService.validerTilgangTilBehandling(behandlingId = behandlingId, event = AuditLoggerEvent.UPDATE)
         tilgangService.verifiserHarTilgangTilHandling(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
-            handling = "Sett behandling på vent"
+            handling = "Sett behandling på vent",
         )
         settPåVentService.gjenopptaBehandling(behandlingId)
 

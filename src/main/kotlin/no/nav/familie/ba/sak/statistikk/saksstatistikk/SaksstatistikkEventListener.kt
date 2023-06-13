@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component
 @Component
 class SaksstatistikkEventListener(
     private val saksstatistikkService: SaksstatistikkService,
-    private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository
+    private val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
 ) : ApplicationListener<SaksstatistikkEvent> {
 
     override fun onApplicationEvent(event: SaksstatistikkEvent) {
@@ -25,8 +25,8 @@ class SaksstatistikkEventListener(
                         kontraktVersjon = it.versjon,
                         json = sakstatistikkObjectMapper.writeValueAsString(it),
                         type = SaksstatistikkMellomlagringType.BEHANDLING,
-                        typeId = event.behandlingId
-                    )
+                        typeId = event.behandlingId,
+                    ),
                 )
             }
         } else if (event.fagsakId != null) {
@@ -37,8 +37,8 @@ class SaksstatistikkEventListener(
                         kontraktVersjon = it.versjon,
                         json = sakstatistikkObjectMapper.writeValueAsString(it),
                         type = SaksstatistikkMellomlagringType.SAK,
-                        typeId = event.fagsakId
-                    )
+                        typeId = event.fagsakId,
+                    ),
                 )
             }
         }

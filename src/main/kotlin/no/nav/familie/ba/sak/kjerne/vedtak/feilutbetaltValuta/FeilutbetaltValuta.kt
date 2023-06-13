@@ -30,7 +30,7 @@ data class FeilutbetaltValuta(
     @SequenceGenerator(
         name = "feilutbetalt_valuta_seq_generator",
         sequenceName = "feilutbetalt_valuta_seq",
-        allocationSize = 50
+        allocationSize = 50,
     )
-    val id: Long = 0
+    val id: Long = 0,
 ) : BaseEntitet()

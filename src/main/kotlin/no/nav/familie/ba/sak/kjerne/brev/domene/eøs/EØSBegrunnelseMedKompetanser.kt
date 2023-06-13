@@ -5,5 +5,5 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.EØSStandardbegrunnelse
 
 data class EØSBegrunnelseMedKompetanser(
     val begrunnelse: EØSStandardbegrunnelse,
-    val kompetanser: List<MinimertKompetanse>
+    val kompetanser: List<MinimertKompetanse>,
 )

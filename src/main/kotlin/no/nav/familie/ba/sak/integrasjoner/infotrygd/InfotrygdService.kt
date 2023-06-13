@@ -1,7 +1,6 @@
 package no.nav.familie.ba.sak.integrasjoner.infotrygd
 
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
-import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
@@ -13,9 +12,8 @@ import org.springframework.stereotype.Service
 @Service
 class InfotrygdService(
     private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
-    private val familieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient,
+    private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
     private val personidentService: PersonidentService,
-    private val personopplysningerService: PersonopplysningerService
 ) {
 
     private val secureLogger = LoggerFactory.getLogger("secureLogger")
@@ -25,16 +23,13 @@ class InfotrygdService(
     }
 
     fun hentMaskertRestInfotrygdsakerVedManglendeTilgang(aktør: Aktør): RestInfotrygdsaker? {
-        val harTilgang =
-            familieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(listOf(aktør.aktivFødselsnummer())).harTilgang
-        return if (!harTilgang) {
-            RestInfotrygdsaker(
-                adressebeskyttelsegradering = personopplysningerService.hentAdressebeskyttelseSomSystembruker(aktør),
-                harTilgang = false
-            )
-        } else {
-            null
-        }
+        return familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(aktør)
+            ?.let {
+                RestInfotrygdsaker(
+                    adressebeskyttelsegradering = it.adressebeskyttelseGradering,
+                    harTilgang = false,
+                )
+            }
     }
 
     fun hentInfotrygdstønaderForSøker(ident: String, historikk: Boolean = false): InfotrygdSøkResponse<Stønad> {
@@ -45,18 +40,13 @@ class InfotrygdService(
     }
 
     fun hentMaskertRestInfotrygdstønaderVedManglendeTilgang(aktør: Aktør): RestInfotrygdstønader? {
-        val harTilgang =
-            familieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(listOf(aktør.aktivFødselsnummer())).harTilgang
-        return if (!harTilgang) {
-            RestInfotrygdstønader(
-                adressebeskyttelsegradering = personopplysningerService.hentAdressebeskyttelseSomSystembruker(
-                    aktør
-                ),
-                harTilgang = false
-            )
-        } else {
-            null
-        }
+        return familieIntegrasjonerTilgangskontrollService.hentMaskertPersonInfoVedManglendeTilgang(aktør)
+            ?.let {
+                RestInfotrygdstønader(
+                    adressebeskyttelsegradering = it.adressebeskyttelseGradering,
+                    harTilgang = false,
+                )
+            }
     }
 
     fun harÅpenSakIInfotrygd(søkerIdenter: List<String>, barnasIdenter: List<String> = emptyList()): Boolean {

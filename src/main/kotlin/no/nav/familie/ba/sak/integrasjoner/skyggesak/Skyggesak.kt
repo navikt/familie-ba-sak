@@ -17,7 +17,7 @@ data class Skyggesak(
     @SequenceGenerator(
         name = "skyggesak_seq_generator",
         sequenceName = "SKYGGESAK_SEQ",
-        allocationSize = 50
+        allocationSize = 50,
     )
     val id: Long = 0,
 
@@ -25,5 +25,5 @@ data class Skyggesak(
     val fagsakId: Long,
 
     @Column(name = "sendt_tid")
-    var sendtTidspunkt: LocalDateTime? = null
+    var sendtTidspunkt: LocalDateTime? = null,
 )

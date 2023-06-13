@@ -32,7 +32,7 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
             barnasIdenter = listOf(barn1.aktør.aktivFødselsnummer(), barn2.aktør.aktivFødselsnummer()),
             søkerPersonIdent = søker.aktør.aktivFødselsnummer(),
             søkerAktør = søker.aktør,
-            barnAktør = listOf(barn1.aktør, barn2.aktør)
+            barnAktør = listOf(barn1.aktør, barn2.aktør),
         )
 
         val fom = YearMonth.of(2018, 6)
@@ -42,7 +42,7 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
             behandlingId = behandling.id,
             fom = fom,
             tom = tom,
-            person = barn2
+            person = barn2,
         )
 
         val andelerTilkjentYtelse = listOf(
@@ -51,40 +51,41 @@ class UtvidetVedtaksperiodeMedBegrunnelserTest {
                 endretUtbetalingAndeler = emptyList(),
                 fom = fom.minusMonths(2),
                 tom = tom,
-                person = barn1
+                person = barn1,
             ),
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 behandling = behandling,
                 endretUtbetalingAndeler = listOf(endretUtbetalingAndel),
                 fom = fom,
                 tom = tom,
-                person = barn2
+                person = barn2,
             ),
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(
                 behandling = behandling,
                 endretUtbetalingAndeler = emptyList(),
                 fom = tom.plusMonths(1),
                 tom = tom.plusMonths(3),
-                person = barn1
-            )
+                person = barn1,
+            ),
         )
 
         val vedtaksperiodeMedBegrunnelser = lagVedtaksperiodeMedBegrunnelser(
             fom = null,
             tom = null,
-            type = Vedtaksperiodetype.FORTSATT_INNVILGET
+            type = Vedtaksperiodetype.FORTSATT_INNVILGET,
         )
 
         val utvidetVedtaksperiodeMedBegrunnelser =
             vedtaksperiodeMedBegrunnelser.tilUtvidetVedtaksperiodeMedBegrunnelser(
                 personopplysningGrunnlag = personopplysningGrunnlag,
-                andelerTilkjentYtelse = andelerTilkjentYtelse
+                andelerTilkjentYtelse = andelerTilkjentYtelse,
+                skalBrukeNyVedtaksperiodeLøsning = false,
             )
 
         Assertions.assertEquals(1, utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer.size)
         Assertions.assertEquals(
             barn1.tilRestPerson().personIdent,
-            utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer.single().person.personIdent
+            utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer.single().person.personIdent,
         )
         Assertions.assertFalse(utvidetVedtaksperiodeMedBegrunnelser.utbetalingsperiodeDetaljer.single().erPåvirketAvEndring)
     }

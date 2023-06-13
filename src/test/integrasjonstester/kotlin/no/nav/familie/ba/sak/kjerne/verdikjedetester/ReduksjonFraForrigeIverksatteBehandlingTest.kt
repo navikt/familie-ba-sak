@@ -6,10 +6,12 @@ import io.mockk.unmockkObject
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.lagSøknadDTO
 import no.nav.familie.ba.sak.common.sisteDagIMåned
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestMinimalFagsak
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
-import no.nav.familie.ba.sak.integrasjoner.`ef-sak`.EfSakRestClient
+import no.nav.familie.ba.sak.integrasjoner.ef.EfSakRestClient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -43,7 +45,8 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
     @Autowired private val stegService: StegService,
     @Autowired private val efSakRestClient: EfSakRestClient,
-    @Autowired private val brevmalService: BrevmalService
+    @Autowired private val brevmalService: BrevmalService,
+    @Autowired private val featureToggleService: FeatureToggleService,
 ) : AbstractVerdikjedetest() {
 
     private val barnFødselsdato: LocalDate = LocalDate.now().minusYears(2)
@@ -61,6 +64,9 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
 
     @Test
     fun `Skal lage reduksjon fra sist iverksatte behandling-periode når småbarnstillegg blir borte`() {
+        every { featureToggleService.isEnabled(FeatureToggleConfig.VEDTAKSPERIODE_NY) } returns false
+        every { featureToggleService.isEnabled(FeatureToggleConfig.BEGRUNNELSER_NY) } returns false
+
         val personScenario: RestScenario = lagScenario(barnFødselsdato)
         val fagsak: RestMinimalFagsak = lagFagsak(personScenario)
 
@@ -76,34 +82,34 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
                     personIdent = personScenario.søker.ident!!,
                     fomDato = osFom,
                     tomDato = osTom,
-                    datakilde = Datakilde.EF
-                )
-            )
+                    datakilde = Datakilde.EF,
+                ),
+            ),
         )
         val perioderBehandling1 = vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(
-            vedtak = vedtakService.hentAktivForBehandling(behandling1.id)!!
+            vedtak = vedtakService.hentAktivForBehandling(behandling1.id)!!,
         )
 
         Assertions.assertEquals(
             1,
-            perioderBehandling1.filter { it.utbetalingsperiodeDetaljer.any { it.ytelseType == YtelseType.SMÅBARNSTILLEGG } }.size
+            perioderBehandling1.filter { it.utbetalingsperiodeDetaljer.any { it.ytelseType == YtelseType.SMÅBARNSTILLEGG } }.size,
         )
 
         val behandling2 = fullførRevurderingUtenOvergangstonad(
             fagsak = fagsak,
             personScenario = personScenario,
-            barnFødselsdato = barnFødselsdato
+            barnFødselsdato = barnFødselsdato,
         )
 
         val perioderBehandling2 = vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(
-            vedtak = vedtakService.hentAktivForBehandling(behandling2.id)!!
+            vedtak = vedtakService.hentAktivForBehandling(behandling2.id)!!,
         )
         val periodeMedReduksjon =
             perioderBehandling2.singleOrNull { it.type == Vedtaksperiodetype.UTBETALING_MED_REDUKSJON_FRA_SIST_IVERKSATTE_BEHANDLING }
 
         Assertions.assertEquals(
             0,
-            perioderBehandling2.filter { it.utbetalingsperiodeDetaljer.any { it.ytelseType == YtelseType.SMÅBARNSTILLEGG } }.size
+            perioderBehandling2.filter { it.utbetalingsperiodeDetaljer.any { it.ytelseType == YtelseType.SMÅBARNSTILLEGG } }.size,
         )
         Assertions.assertNotNull(periodeMedReduksjon)
         Assertions.assertEquals(osFom, periodeMedReduksjon!!.fom)
@@ -118,10 +124,10 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
                     fødselsdato = barnFødselsdato.toString(),
                     fornavn = "Barn",
                     etternavn = "Barnesen",
-                    bostedsadresser = emptyList()
-                )
-            )
-        )
+                    bostedsadresser = emptyList(),
+                ),
+            ),
+        ),
     )
 
     fun lagFagsak(personScenario: RestScenario): RestMinimalFagsak {
@@ -132,11 +138,11 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
         fagsak: RestMinimalFagsak,
         personScenario: RestScenario,
         barnFødselsdato: LocalDate,
-        overgangsstønadPerioder: List<EksternPeriode>
+        overgangsstønadPerioder: List<EksternPeriode>,
     ): Behandling {
         val behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING
         every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns EksternePerioderResponse(
-            perioder = overgangsstønadPerioder
+            perioder = overgangsstønadPerioder,
         )
 
         val restBehandling: Ressurs<RestUtvidetBehandling> =
@@ -144,7 +150,7 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
                 søkersIdent = fagsak.søkerFødselsnummer,
                 behandlingType = behandlingType,
                 behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
-                fagsakId = fagsak.id
+                fagsakId = fagsak.id,
             )
         val behandling = behandlingHentOgPersisterService.hent(restBehandling.data!!.behandlingId)
         val restRegistrerSøknad =
@@ -152,14 +158,14 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
                 søknad = lagSøknadDTO(
                     søkerIdent = fagsak.søkerFødselsnummer,
                     barnasIdenter = personScenario.barna.map { it.ident!! },
-                    underkategori = BehandlingUnderkategori.UTVIDET
+                    underkategori = BehandlingUnderkategori.UTVIDET,
                 ),
-                bekreftEndringerViaFrontend = false
+                bekreftEndringerViaFrontend = false,
             )
         val restUtvidetBehandling: Ressurs<RestUtvidetBehandling> =
             familieBaSakKlient().registrererSøknad(
                 behandlingId = behandling.id,
-                restRegistrerSøknad = restRegistrerSøknad
+                restRegistrerSøknad = restRegistrerSøknad,
             )
 
         return fullførBehandlingFraVilkårsvurderingAlleVilkårOppfylt(
@@ -172,7 +178,7 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
             stegService = stegService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             lagToken = ::token,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
 
         )
     }
@@ -180,13 +186,13 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
     fun fullførRevurderingUtenOvergangstonad(
         fagsak: RestMinimalFagsak,
         personScenario: RestScenario,
-        barnFødselsdato: LocalDate
+        barnFødselsdato: LocalDate,
     ): Behandling {
         val behandlingType = BehandlingType.REVURDERING
         val behandlingÅrsak = BehandlingÅrsak.SMÅBARNSTILLEGG
 
         every { efSakRestClient.hentPerioderMedFullOvergangsstønad(any()) } returns EksternePerioderResponse(
-            perioder = emptyList()
+            perioder = emptyList(),
         )
 
         val restUtvidetBehandling: Ressurs<RestUtvidetBehandling> =
@@ -195,7 +201,7 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
                 behandlingType = behandlingType,
                 behandlingÅrsak = behandlingÅrsak,
                 behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
-                fagsakId = fagsak.id
+                fagsakId = fagsak.id,
             )
 
         return fullførBehandlingFraVilkårsvurderingAlleVilkårOppfylt(
@@ -208,7 +214,7 @@ class ReduksjonFraForrigeIverksatteBehandlingTest(
             stegService = stegService,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             lagToken = ::token,
-            brevmalService = brevmalService
+            brevmalService = brevmalService,
 
         )
     }

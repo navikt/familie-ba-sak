@@ -91,19 +91,19 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
             fomBarn1,
             tomBarn1,
             fomBarn2,
-            tomBarn2
+            tomBarn2,
         )
 
         leggTilAndelTilkjentYtelsePåTilkjentYtelse(
             behandling,
             fomBarn1.toYearMonth(),
-            tomBarn1.toYearMonth()
+            tomBarn1.toYearMonth(),
         )
 
         leggTilAndelTilkjentYtelsePåTilkjentYtelse(
             behandling,
             fomBarn2.toYearMonth(),
-            tomBarn2.toYearMonth()
+            tomBarn2.toYearMonth(),
         )
 
         val tilkjentYtelse =
@@ -137,19 +137,19 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
             tomBarn1,
             fomBarn2,
             tomBarn2,
-            opphørsDato
+            opphørsDato,
         )
 
         leggTilAndelTilkjentYtelsePåTilkjentYtelse(
             behandling,
             fomBarn1.toYearMonth(),
-            tomBarn1.toYearMonth()
+            tomBarn1.toYearMonth(),
         )
 
         leggTilAndelTilkjentYtelsePåTilkjentYtelse(
             behandling,
             fomBarn2.toYearMonth(),
-            tomBarn2.toYearMonth()
+            tomBarn2.toYearMonth(),
         )
 
         val tilkjentYtelse =
@@ -178,7 +178,7 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
         val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
-            lagBehandling(fagsak = fagsak, behandlingType = BehandlingType.REVURDERING)
+            lagBehandling(fagsak = fagsak, behandlingType = BehandlingType.REVURDERING),
         )
         opprettTilkjentYtelse(behandling)
         val utbetalingsoppdrag = lagTestUtbetalingsoppdragForRevurderingMedToBarn(
@@ -194,19 +194,19 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
             opphørFomBarn2,
             revurderingFomBarn2,
             fomDatoBarn2,
-            tomDatoBarn2
+            tomDatoBarn2,
         )
 
         leggTilAndelTilkjentYtelsePåTilkjentYtelse(
             behandling,
             revurderingFomBarn1.toYearMonth(),
-            tomDatoBarn1.toYearMonth()
+            tomDatoBarn1.toYearMonth(),
         )
 
         leggTilAndelTilkjentYtelsePåTilkjentYtelse(
             behandling,
             revurderingFomBarn2.toYearMonth(),
-            tomDatoBarn2.toYearMonth()
+            tomDatoBarn2.toYearMonth(),
         )
 
         val tilkjentYtelse =
@@ -238,7 +238,7 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
                 søkerFnr,
                 listOf(barn1Fnr, barn2Fnr),
                 søkerAktør = fagsak.aktør,
-                barnAktør = barnAktør
+                barnAktør = barnAktør,
             )
         personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
 
@@ -254,7 +254,7 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
             barn1AktørId,
             barn2AktørId,
             dato_2021_11_01,
-            dato_2021_11_01.plusYears(17)
+            dato_2021_11_01.plusYears(17),
         )
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering = vilkårsvurdering)
 
@@ -295,7 +295,7 @@ class BeregningServiceIntegrationTest : AbstractSpringIntegrationTest() {
             1054,
             behandling,
             tilkjentYtelse = tilkjentYtelse,
-            aktør = tilfeldigperson.aktør
+            aktør = tilfeldigperson.aktør,
         )
 
         tilkjentYtelse.andelerTilkjentYtelse.add(andelTilkjentYtelse)

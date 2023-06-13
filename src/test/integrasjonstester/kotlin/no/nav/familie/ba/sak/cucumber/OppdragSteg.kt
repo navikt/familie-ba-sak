@@ -23,13 +23,12 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.oppdrag.IdentOgType
 import no.nav.familie.ba.sak.integrasjoner.økonomi.oppdrag.UtbetalingsoppdragService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.pakkInnForUtbetaling
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.gjeldendeForrigeOffsetForKjede
-import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.kjedeinndelteAndeler
+import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.grupperAndeler
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.oppdaterBeståendeAndelerMedOffset
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
-import no.nav.familie.ba.sak.kjerne.beregning.domene.utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import org.assertj.core.api.Assertions.assertThat
@@ -75,7 +74,13 @@ class OppdragSteg {
     fun følgendeTilkjenteYtelser(dataTable: DataTable) {
         genererBehandlinger(dataTable)
         tilkjenteYtelser = mapTilkjentYtelse(dataTable, behandlinger)
+        if (tilkjenteYtelser.flatMap { it.andelerTilkjentYtelse }.any { it.kildeBehandlingId != null }) {
+            error("Kildebehandling skal ikke settes på input, denne settes fra utbetalingsgeneratorn")
+        }
         tilkjenteYtelserNy = mapTilkjentYtelse(dataTable, behandlinger)
+        if (tilkjenteYtelserNy.flatMap { it.andelerTilkjentYtelse }.any { it.kildeBehandlingId != null }) {
+            error("Kildebehandling skal ikke settes på input, denne settes fra utbetalingsgeneratorn")
+        }
     }
 
     @Når("beregner utbetalingsoppdrag")
@@ -212,7 +217,7 @@ class OppdragSteg {
         return (tilkjentYtelse?.andelerTilkjentYtelse ?: emptyList())
             .filter { it.erAndelSomSkalSendesTilOppdrag() }
             .pakkInnForUtbetaling(andelFactory)
-            .let { kjedeinndelteAndeler(it) }
+            .let { grupperAndeler(it) }
     }
 
     private fun genererBehandlinger(dataTable: DataTable) {
@@ -265,7 +270,7 @@ private fun assertUtbetalingsperiode(
         .isEqualTo(forventetUtbetalingsperiode.sats)
     assertThat(utbetalingsperiode.satsType)
         .`as`("satsType")
-        .isEqualTo(forventetUtbetalingsperiode.satsType)
+        .isEqualTo(Utbetalingsperiode.SatsType.MND)
     assertThat(utbetalingsperiode.vedtakdatoFom)
         .`as`("fom")
         .isEqualTo(forventetUtbetalingsperiode.fom)
@@ -275,5 +280,9 @@ private fun assertUtbetalingsperiode(
     assertThat(utbetalingsperiode.opphør?.opphørDatoFom)
         .`as`("opphør")
         .isEqualTo(forventetUtbetalingsperiode.opphør)
-    // TODO legg till kildebehandlingId
+    forventetUtbetalingsperiode.kildebehandlingId?.let {
+        assertThat(utbetalingsperiode.behandlingId)
+            .`as`("kildebehandlingId")
+            .isEqualTo(forventetUtbetalingsperiode.kildebehandlingId)
+    }
 }

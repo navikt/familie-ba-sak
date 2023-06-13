@@ -37,7 +37,6 @@ import org.junit.jupiter.api.assertThrows
 import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.Pageable
-import org.springframework.http.HttpStatus
 
 class FagsakControllerTest(
     @Autowired
@@ -71,7 +70,7 @@ class FagsakControllerTest(
     private val skyggesakRepository: SkyggesakRepository,
 
     @Autowired
-    private val institusjonService: InstitusjonService
+    private val institusjonService: InstitusjonService,
 ) : AbstractSpringIntegrationTest() {
 
     @BeforeEach
@@ -100,19 +99,6 @@ class FagsakControllerTest(
 
     @Test
     @Tag("integration")
-    fun `Skal opprette fagsak med aktørid`() {
-        val aktørId = randomAktør()
-
-        val response =
-            fagsakController.hentEllerOpprettFagsak(FagsakRequest(personIdent = null, aktørId = aktørId.aktørId))
-        val restFagsak = response.body?.data
-        assertEquals(HttpStatus.CREATED, response.statusCode)
-        assertEquals(FagsakStatus.OPPRETTET, restFagsak?.status)
-        assertNotNull(restFagsak?.søkerFødselsnummer)
-    }
-
-    @Test
-    @Tag("integration")
     fun `Skal opprette skyggesak i Sak`() {
         val fnr = randomFnr()
 
@@ -133,8 +119,8 @@ class FagsakControllerTest(
 
         val eksisterendeRestFagsak = fagsakController.hentEllerOpprettFagsak(
             FagsakRequest(
-                personIdent = fnr
-            )
+                personIdent = fnr,
+            ),
         )
         assertEquals(Ressurs.Status.SUKSESS, eksisterendeRestFagsak.body?.status)
         assertEquals(eksisterendeRestFagsak.body!!.data!!.id, nyRestFagsak.body!!.data!!.id)
@@ -156,14 +142,14 @@ class FagsakControllerTest(
         assertEquals(fnr, fagsakService.hentNormalFagsak(aktør)?.aktør?.aktivFødselsnummer())
 
         personidentRepository.save(
-            personidentRepository.getReferenceById(fnr).also { it.aktiv = false }
+            personidentRepository.getReferenceById(fnr).also { it.aktiv = false },
         )
         personidentRepository.save(Personident(fødselsnummer = nyttFnr, aktør = aktør, aktiv = true))
 
         val eksisterendeRestFagsak = fagsakController.hentEllerOpprettFagsak(
             FagsakRequest(
-                personIdent = nyttFnr
-            )
+                personIdent = nyttFnr,
+            ),
         )
         assertEquals(Ressurs.Status.SUKSESS, eksisterendeRestFagsak.body?.status)
         assertEquals(eksisterendeRestFagsak.body!!.data!!.id, nyRestFagsak.body!!.data!!.id)
@@ -174,18 +160,13 @@ class FagsakControllerTest(
     @Tag("integration")
     fun `Skal returnere eksisterende fagsak på person som allerede finnes basert på aktørid`() {
         val aktørId = randomAktør()
-
+        val fagsakRequest = FagsakRequest(personIdent = aktørId.aktivFødselsnummer())
         val nyRestFagsak = fagsakController.hentEllerOpprettFagsak(
-            FagsakRequest(personIdent = aktørId.aktivFødselsnummer(), aktørId = aktørId.aktørId)
+            fagsakRequest,
         )
         assertEquals(Ressurs.Status.SUKSESS, nyRestFagsak.body?.status)
 
-        val eksisterendeRestFagsak = fagsakController.hentEllerOpprettFagsak(
-            FagsakRequest(
-                personIdent = aktørId.aktivFødselsnummer(),
-                aktørId = aktørId.aktørId
-            )
-        )
+        val eksisterendeRestFagsak = fagsakController.hentEllerOpprettFagsak(fagsakRequest)
         assertEquals(Ressurs.Status.SUKSESS, eksisterendeRestFagsak.body?.status)
         assertEquals(eksisterendeRestFagsak.body!!.data!!.id, nyRestFagsak.body!!.data!!.id)
     }
@@ -215,21 +196,21 @@ class FagsakControllerTest(
             behandlingService.opprettBehandling(
                 nyOrdinærBehandling(
                     søkersIdent = ClientMocks.søkerFnr[0],
-                    fagsakId = fagsak.id
-                )
+                    fagsakId = fagsak.id,
+                ),
             )
         persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
             personAktør,
             barnaAktør,
             behandling,
-            Målform.NB
+            Målform.NB,
         )
 
         fagsakController.oppgiFagsakdeltagere(
             RestSøkParam(
                 personAktør.aktivFødselsnummer(),
-                ClientMocks.barnFnr.toList()
-            )
+                ClientMocks.barnFnr.toList(),
+            ),
         )
             .apply {
                 assertEquals(ClientMocks.barnFnr.toList().subList(0, 1), body!!.data!!.map { it.ident })
@@ -246,8 +227,8 @@ class FagsakControllerTest(
             fagsakController.hentEllerOpprettFagsak(
                 FagsakRequest(
                     personIdent = fnr,
-                    fagsakType = FagsakType.INSTITUSJON
-                )
+                    fagsakType = FagsakType.INSTITUSJON,
+                ),
             )
         }
         val fagsaker = fagsakService.hentMinimalFagsakerForPerson(tilAktør(fnr))
@@ -264,8 +245,8 @@ class FagsakControllerTest(
             FagsakRequest(
                 personIdent = fnr,
                 fagsakType = FagsakType.INSTITUSJON,
-                institusjon = InstitusjonInfo("orgnr", "tss-id")
-            )
+                institusjon = InstitusjonInfo("orgnr", "tss-id"),
+            ),
         )
         val fagsakerRessurs = fagsakService.hentMinimalFagsakerForPerson(tilAktør(fnr))
         assert(fagsakerRessurs.status == Ressurs.Status.SUKSESS)

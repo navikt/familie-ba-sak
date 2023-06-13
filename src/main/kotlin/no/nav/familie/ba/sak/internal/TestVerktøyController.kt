@@ -5,18 +5,17 @@ import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakStegService
 import no.nav.familie.ba.sak.kjerne.autovedtak.omregning.AutobrevScheduler
-import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
-import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottaker
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
-import no.nav.familie.ba.sak.task.InternKonsistensavstemming.OpprettInternKonsistensavstemmingTaskerTask
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.ba.sak.task.TaBehandlingerEtterVentefristAvVentTask
 import no.nav.familie.ba.sak.task.dto.BehandleFødselshendelseTaskDTO
+import no.nav.familie.ba.sak.task.internkonsistensavstemming.OpprettInternKonsistensavstemmingTaskerTask
 import no.nav.familie.kontrakter.felles.PersonIdent
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.prosessering.domene.Task
@@ -29,7 +28,6 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import java.time.YearMonth
 
 @RestController
 @RequestMapping(value = ["/internal", "/testverktoy"])
@@ -42,9 +40,8 @@ class TestVerktøyController(
     private val tilgangService: TilgangService,
     private val simuleringService: SimuleringService,
     private val opprettTaskService: OpprettTaskService,
-    private val satskjøringRepository: SatskjøringRepository,
-    private val taskService: TaskService
-
+    private val taskService: TaskService,
+    private val startSatsendring: StartSatsendring,
 ) {
 
     @GetMapping(path = ["/autobrev"])
@@ -62,8 +59,7 @@ class TestVerktøyController(
     @Unprotected
     fun utførSatsendringPåFagsak(@PathVariable fagsakId: Long): ResponseEntity<Ressurs<String>> {
         return if (envService.erPreprod() || envService.erDev()) {
-            satskjøringRepository.save(Satskjøring(fagsakId = fagsakId))
-            opprettTaskService.opprettSatsendringTask(fagsakId, YearMonth.of(2023, 3))
+            opprettTaskService.opprettSatsendringTask(fagsakId, startSatsendring.hentAktivSatsendringstidspunkt())
             ResponseEntity.ok(Ressurs.success("Trigget satsendring for fagsak $fagsakId"))
         } else {
             ResponseEntity.ok(Ressurs.success(ENDEPUNKTET_GJØR_IKKE_NOE_I_PROD_MELDING))
@@ -77,7 +73,7 @@ class TestVerktøyController(
             val aktør = personidentService.hentAktør(personIdent.ident)
             val melding = autovedtakStegService.kjørBehandlingSmåbarnstillegg(
                 mottakersAktør = aktør,
-                behandlingsdata = aktør
+                behandlingsdata = aktør,
             )
             ResponseEntity.ok(Ressurs.success(melding))
         } else {

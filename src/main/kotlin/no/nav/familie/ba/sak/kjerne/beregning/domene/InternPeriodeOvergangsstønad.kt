@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.beregning.domene
 import no.nav.familie.ba.sak.common.forrigeMåned
 import no.nav.familie.ba.sak.common.isSameOrBefore
 import no.nav.familie.ba.sak.common.toYearMonth
+import no.nav.familie.ba.sak.kjerne.grunnlag.småbarnstillegg.PeriodeOvergangsstønadGrunnlag
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.kontrakter.felles.ef.EksternPeriode
 import org.slf4j.Logger
@@ -14,13 +15,19 @@ val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
 data class InternPeriodeOvergangsstønad(
     val personIdent: String,
     val fomDato: LocalDate,
-    val tomDato: LocalDate
-)
+    val tomDato: LocalDate,
+) {
+    constructor(periodeOvergangsstønadGrunnlag: PeriodeOvergangsstønadGrunnlag) : this(
+        personIdent = periodeOvergangsstønadGrunnlag.aktør.aktivFødselsnummer(),
+        fomDato = periodeOvergangsstønadGrunnlag.fom,
+        tomDato = periodeOvergangsstønadGrunnlag.tom,
+    )
+}
 
 fun EksternPeriode.tilInternPeriodeOvergangsstønad() = InternPeriodeOvergangsstønad(
     personIdent = this.personIdent,
     fomDato = this.fomDato,
-    tomDato = this.tomDato
+    tomDato = this.tomDato,
 )
 
 fun List<InternPeriodeOvergangsstønad>.slåSammenTidligerePerioder(): List<InternPeriodeOvergangsstønad> {
@@ -55,7 +62,7 @@ fun List<InternPeriodeOvergangsstønad>.slåSammenSammenhengendePerioder(): List
  *
  ***/
 fun List<InternPeriodeOvergangsstønad>.splitFramtidigePerioderFraForrigeBehandling(
-    overgangsstønadPerioderFraForrigeBehandling: List<InternPeriodeOvergangsstønad>
+    overgangsstønadPerioderFraForrigeBehandling: List<InternPeriodeOvergangsstønad>,
 ): List<InternPeriodeOvergangsstønad> {
     val tidligerePerioder = this.filter { it.tomDato.isSameOrBefore(LocalDate.now()) }
     val framtidigePerioder = this.minus(tidligerePerioder)

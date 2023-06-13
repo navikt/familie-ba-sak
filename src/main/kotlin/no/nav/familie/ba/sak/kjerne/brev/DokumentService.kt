@@ -53,7 +53,7 @@ class DokumentService(
     private val organisasjonService: OrganisasjonService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val dokumentGenereringService: DokumentGenereringService,
-    private val brevmottakerService: BrevmottakerService
+    private val brevmottakerService: BrevmottakerService,
 ) {
 
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
@@ -75,7 +75,7 @@ class DokumentService(
             Førsteside(
                 språkkode = manueltBrevRequest.mottakerMålform.tilSpråkkode(),
                 navSkjemaId = "NAV 33.00-07",
-                overskriftstittel = "Ettersendelse til søknad om barnetrygd ordinær NAV 33-00.07"
+                overskriftstittel = "Ettersendelse til søknad om barnetrygd ordinær NAV 33-00.07",
             )
         } else {
             null
@@ -98,12 +98,12 @@ class DokumentService(
                 avsenderMottaker = utledAvsenderMottaker(manueltBrevRequest, mottakerInfo),
                 // mottakersnavn fyller ut kun når manuell mottaker finnes
                 tilManuellMottakerEllerVerge = mottakerInfo.navn != null &&
-                    mottakerInfo.navn != brevmottakerService.hentMottakerNavn(søkersident)
+                    mottakerInfo.navn != brevmottakerService.hentMottakerNavn(søkersident),
             ).also { journalposterTilDistribusjon[it] = mottakerInfo }
 
             behandling?.let {
                 journalføringRepository.save(
-                    DbJournalpost(behandling = it, journalpostId = journalpostId, type = DbJournalpostType.U)
+                    DbJournalpost(behandling = it, journalpostId = journalpostId, type = DbJournalpostType.U),
                 )
             }
         }
@@ -121,10 +121,10 @@ class DokumentService(
                     .plusDays(
                         manueltBrevRequest.brevmal.ventefristDager(
                             manuellFrist = manueltBrevRequest.antallUkerSvarfrist?.let { it * 7 }?.toLong(),
-                            behandlingKategori = behandling.kategori
-                        )
+                            behandlingKategori = behandling.kategori,
+                        ),
                     ),
-                årsak = manueltBrevRequest.brevmal.venteårsak()
+                årsak = manueltBrevRequest.brevmal.venteårsak(),
             )
         }
     }
@@ -132,7 +132,7 @@ class DokumentService(
     private fun lagMottakere(
         manueltBrevRequest: ManueltBrevRequest,
         fagsak: Fagsak,
-        behandling: Behandling?
+        behandling: Behandling?,
     ): List<MottakerInfo> {
         val søkersident = fagsak.aktør.aktivFødselsnummer()
         val brevmottakere = behandling?.let { brevmottakerService.hentBrevmottakere(it.id) } ?: emptyList()
@@ -140,35 +140,35 @@ class DokumentService(
             behandling == null -> MottakerInfo(
                 brukerId = søkersident,
                 brukerIdType = BrukerIdType.FNR,
-                erInstitusjonVerge = false
+                erInstitusjonVerge = false,
             ).toList()
             manueltBrevRequest.erTilInstitusjon -> MottakerInfo(
                 brukerId = checkNotNull(fagsak.institusjon).orgNummer,
                 brukerIdType = BrukerIdType.ORGNR,
-                erInstitusjonVerge = false
+                erInstitusjonVerge = false,
             ).toList()
             brevmottakere.isNotEmpty() -> brevmottakerService.lagMottakereFraBrevMottakere(
                 brevmottakere,
-                søkersident
+                søkersident,
             )
             else -> MottakerInfo(
                 brukerIdType = BrukerIdType.FNR,
                 brukerId = søkersident,
-                erInstitusjonVerge = false
+                erInstitusjonVerge = false,
             ).toList()
         }
     }
 
     private fun utledAvsenderMottaker(
         manueltBrevRequest: ManueltBrevRequest,
-        mottakerInfo: MottakerInfo
+        mottakerInfo: MottakerInfo,
     ): AvsenderMottaker? {
         return when {
             manueltBrevRequest.erTilInstitusjon -> {
                 AvsenderMottaker(
                     idType = BrukerIdType.ORGNR,
                     id = manueltBrevRequest.mottakerIdent,
-                    navn = utledInstitusjonNavn(manueltBrevRequest)
+                    navn = utledInstitusjonNavn(manueltBrevRequest),
                 )
             }
             mottakerInfo.brukerIdType == BrukerIdType.FNR && mottakerInfo.navn != null -> {
@@ -192,7 +192,7 @@ class DokumentService(
                 behandling = behandling,
                 bekreftEndringerViaFrontend = false,
                 forrigeBehandlingSomErVedtatt = behandlingHentOgPersisterService
-                    .hentForrigeBehandlingSomErVedtatt(behandling)
+                    .hentForrigeBehandlingSomErVedtatt(behandling),
             )
         vilkårsvurdering.personResultater.single { it.erSøkersResultater() }
             .leggTilBlankAnnenVurdering(AnnenVurderingType.OPPLYSNINGSPLIKT)
@@ -202,7 +202,7 @@ class DokumentService(
         journalposterTilDistribusjon: Map<String, MottakerInfo>,
         behandling: Behandling?,
         manueltBrevRequest: ManueltBrevRequest,
-        fagsak: Fagsak
+        fagsak: Fagsak,
     ) = journalposterTilDistribusjon.forEach { journalPostTilDistribusjon ->
         DistribuerDokumentTask.opprettDistribuerDokumentTask(
             distribuerDokumentDTO = DistribuerDokumentDTO(
@@ -210,16 +210,16 @@ class DokumentService(
                 behandlingId = behandling?.id,
                 journalpostId = journalPostTilDistribusjon.key,
                 brevmal = manueltBrevRequest.brevmal,
-                erManueltSendt = true
+                erManueltSendt = true,
             ),
             properties = Properties().apply
-            {
-                this["fagsakIdent"] = fagsak.aktør.aktivFødselsnummer()
-                this["mottakerIdent"] = journalPostTilDistribusjon.value.brukerId
-                this["journalpostId"] = journalPostTilDistribusjon.key
-                this["behandlingId"] = behandling?.id.toString()
-                this["fagsakId"] = fagsak.id.toString()
-            }
+                {
+                    this["fagsakIdent"] = fagsak.aktør.aktivFødselsnummer()
+                    this["mottakerIdent"] = journalPostTilDistribusjon.value.brukerId
+                    this["journalpostId"] = journalPostTilDistribusjon.key
+                    this["behandlingId"] = behandling?.id.toString()
+                    this["fagsakId"] = fagsak.id.toString()
+                },
         ).also { taskRepository.save(it) }
     }
 

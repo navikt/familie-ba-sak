@@ -64,7 +64,7 @@ internal class KorrigertVedtakServiceTest {
         verify(exactly = 1) {
             loggService.opprettKorrigertVedtakLogg(
                 behandling,
-                korrigertVedtak
+                korrigertVedtak,
             )
         }
     }
@@ -102,7 +102,7 @@ internal class KorrigertVedtakServiceTest {
         verify(exactly = 1) {
             loggService.opprettKorrigertVedtakLogg(
                 any(),
-                korrigertVedtak
+                korrigertVedtak,
             )
         }
     }
@@ -111,12 +111,12 @@ internal class KorrigertVedtakServiceTest {
         behandling: Behandling,
         vedtaksdato: LocalDate = LocalDate.now().minusDays(6),
         begrunnelse: String? = null,
-        aktiv: Boolean = true
+        aktiv: Boolean = true,
     ) =
         KorrigertVedtak(
             behandling = behandling,
             vedtaksdato = vedtaksdato,
             begrunnelse = begrunnelse,
-            aktiv = aktiv
+            aktiv = aktiv,
         )
 }

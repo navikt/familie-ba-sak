@@ -19,7 +19,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 
 class VilkårsvurderingTidslinjer(
     vilkårsvurdering: Vilkårsvurdering,
-    personopplysningGrunnlag: PersonopplysningGrunnlag
+    personopplysningGrunnlag: PersonopplysningGrunnlag,
 ) {
     private val barna: List<Aktør> = personopplysningGrunnlag.barna.map { it.aktør }
     private val søker: Aktør = personopplysningGrunnlag.søker.aktør
@@ -46,7 +46,7 @@ class VilkårsvurderingTidslinjer(
                 tidslinjer = this,
                 aktør = it,
                 fagsakType = vilkårsvurdering.behandling.fagsak.type,
-                behandlingUnderkategori = vilkårsvurdering.behandling.underkategori
+                behandlingUnderkategori = vilkårsvurdering.behandling.underkategori,
             )
         }
 
@@ -59,7 +59,7 @@ class VilkårsvurderingTidslinjer(
         tidslinjer: VilkårsvurderingTidslinjer,
         aktør: Aktør,
         fagsakType: FagsakType,
-        behandlingUnderkategori: BehandlingUnderkategori
+        behandlingUnderkategori: BehandlingUnderkategori,
     ) {
         val vilkårsresultatTidslinjer = tidslinjer.vilkårsresultaterTidslinjeMap[aktør] ?: listOf(TomTidslinje())
 
@@ -72,7 +72,7 @@ class VilkårsvurderingTidslinjer(
                     personType = PersonType.SØKER,
                     alleVilkårResultater = it,
                     fagsakType = fagsakType,
-                    behandlingUnderkategori = behandlingUnderkategori
+                    behandlingUnderkategori = behandlingUnderkategori,
                 )
             }
     }
@@ -81,7 +81,7 @@ class VilkårsvurderingTidslinjer(
         tidslinjer: VilkårsvurderingTidslinjer,
         aktør: Aktør,
         fagsakType: FagsakType,
-        behandlingUnderkategori: BehandlingUnderkategori
+        behandlingUnderkategori: BehandlingUnderkategori,
     ) {
         private val søkersTidslinje = tidslinjer.søkersTidslinje
 
@@ -100,7 +100,7 @@ class VilkårsvurderingTidslinjer(
                         personType = PersonType.BARN,
                         alleVilkårResultater = it,
                         fagsakType = fagsakType,
-                        behandlingUnderkategori = behandlingUnderkategori
+                        behandlingUnderkategori = behandlingUnderkategori,
                     )
                 }
                 .beskjærEtter(erUnder18ÅrVilkårTidslinje)

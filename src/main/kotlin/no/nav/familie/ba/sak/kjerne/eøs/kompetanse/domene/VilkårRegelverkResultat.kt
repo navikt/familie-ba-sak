@@ -13,7 +13,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 
 data class VilkårRegelverkResultat(
     val vilkår: Vilkår,
-    val regelverkResultat: RegelverkResultat
+    val regelverkResultat: RegelverkResultat,
 ) {
     val resultat get() = regelverkResultat.resultat
     val regelverk get() = regelverkResultat.regelverk
@@ -22,7 +22,7 @@ data class VilkårRegelverkResultat(
 fun VilkårRegelverkResultat.medRegelverk(regelverk: Regelverk) =
     VilkårRegelverkResultat(
         this.vilkår,
-        RegelverkResultat.values().first { it.regelverk == regelverk && it.resultat == this.resultat }
+        RegelverkResultat.values().first { it.regelverk == regelverk && it.resultat == this.resultat },
     )
 
 enum class RegelverkResultat(val regelverk: Regelverk?, val resultat: Resultat?) {
@@ -31,7 +31,7 @@ enum class RegelverkResultat(val regelverk: Regelverk?, val resultat: Resultat?)
     OPPFYLT_REGELVERK_IKKE_SATT(null, Resultat.OPPFYLT),
     OPPFYLT_BLANDET_REGELVERK(null, Resultat.OPPFYLT),
     IKKE_OPPFYLT(null, Resultat.IKKE_OPPFYLT),
-    IKKE_FULLT_VURDERT(null, Resultat.IKKE_VURDERT)
+    IKKE_FULLT_VURDERT(null, Resultat.IKKE_VURDERT),
 }
 
 fun VilkårResultat.tilRegelverkResultat() = when (this.resultat) {

@@ -29,7 +29,7 @@ import java.time.YearMonth
 @Component
 class InfotrygdBarnetrygdClient(
     @Value("\${FAMILIE_BA_INFOTRYGD_API_URL}") private val clientUri: URI,
-    @Qualifier("jwtBearerMedLangTimeout") restOperations: RestOperations
+    @Qualifier("jwtBearerMedLangTimeout") restOperations: RestOperations,
 ) : AbstractRestClient(restOperations, "infotrygd") {
 
     fun harLøpendeSakIInfotrygd(søkersIdenter: List<String>, barnasIdenter: List<String> = emptyList()): Boolean {
@@ -69,7 +69,7 @@ class InfotrygdBarnetrygdClient(
                 message = "Henting av infotrygdsaker feilet. Gav feil: ${ex.message}",
                 frontendFeilmelding = "Henting av infotrygdsaker feilet.",
                 httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
-                throwable = ex
+                throwable = ex,
             )
         }
     }
@@ -77,7 +77,7 @@ class InfotrygdBarnetrygdClient(
     fun hentStønader(
         søkersIdenter: List<String>,
         barnasIdenter: List<String>,
-        historikk: Boolean = false
+        historikk: Boolean = false,
     ): InfotrygdSøkResponse<Stønad> {
         val uri = URI.create("$clientUri/infotrygd/barnetrygd/stonad?historikk=$historikk")
 
@@ -89,7 +89,7 @@ class InfotrygdBarnetrygdClient(
                 message = "Henting av infotrygdstønader feilet. Gav feil: ${ex.message}",
                 frontendFeilmelding = "Henting av infotrygdstønader feilet.",
                 httpStatus = HttpStatus.INTERNAL_SERVER_ERROR,
-                throwable = ex
+                throwable = ex,
             )
         }
     }
@@ -99,7 +99,7 @@ class InfotrygdBarnetrygdClient(
     @Retryable(
         value = [Exception::class],
         maxAttempts = 3,
-        backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS)
+        backoff = Backoff(delayExpression = RETRY_BACKOFF_5000MS),
     )
     fun hentUtvidetBarnetrygd(personIdent: String, fraDato: YearMonth): BisysUtvidetBarnetrygdResponse {
         val uri = URI.create("$clientUri/infotrygd/barnetrygd/utvidet")
@@ -139,25 +139,25 @@ class InfotrygdBarnetrygdClient(
         return try {
             postForEntity(
                 uri,
-                SendtBrevRequest(søkersIdenter, brevkoder.map { it.kode })
+                SendtBrevRequest(søkersIdenter, brevkoder.map { it.kode }),
             )
         } catch (ex: Exception) {
             loggFeil(ex, uri)
             throw RuntimeException(
                 "Sjekk mot infotrygd for å sjekke om brev er sendt feilet . Gav feil: ${ex.message}",
-                ex
+                ex,
             )
         }
     }
 
     class SendtBrevRequest(
         val personidenter: List<String>,
-        val brevkoder: List<String>
+        val brevkoder: List<String>,
     )
 
     data class SendtBrevResponse(
         val harSendtBrev: Boolean,
-        val listeBrevhendelser: List<InfotrygdHendelse> = emptyList()
+        val listeBrevhendelser: List<InfotrygdHendelse> = emptyList(),
     )
 
     data class InfotrygdHendelse(
@@ -169,14 +169,14 @@ class InfotrygdBarnetrygdClient(
         val tekstKode1: String,
         val fnr: FoedselsNr,
         val tkNr: String,
-        val region: String
+        val region: String,
     )
 
     private fun loggFeil(ex: Exception, uri: URI) {
         when (ex) {
             is HttpClientErrorException -> secureLogger.warn(
                 "Http feil mot ${uri.path}: httpkode: ${ex.statusCode}, feilmelding ${ex.message}",
-                ex
+                ex,
             )
             else -> secureLogger.warn("Feil mot ${uri.path}; melding ${ex.message}", ex)
         }
@@ -197,5 +197,5 @@ enum class InfotrygdBrevkode(val kode: String) {
     BREV_MANUELL_OPPHØR_SMÅBARNSTILLLEGG("B001"),
     BREV_MANUELL_INNVILGET_SMÅBARNSTILLEGG("B002"),
     BREV_MANUELL_OMREGNING_BARN_18_ÅR("B003"),
-    BREV_MANUELL_OMREGNING_BARN_6_ÅR("BA19")
+    BREV_MANUELL_OMREGNING_BARN_6_ÅR("BA19"),
 }

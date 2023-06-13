@@ -20,7 +20,7 @@ data class RestJournalpostDokument(
     val dokumentInfoId: String,
     val brevkode: String?,
     val logiskeVedlegg: List<LogiskVedlegg>?,
-    val eksisterendeLogiskeVedlegg: List<LogiskVedlegg>?
+    val eksisterendeLogiskeVedlegg: List<LogiskVedlegg>?,
 )
 
 data class RestJournalføring(
@@ -38,7 +38,7 @@ data class RestJournalføring(
     val nyBehandlingstype: BehandlingType,
     val nyBehandlingsårsak: BehandlingÅrsak,
     val fagsakType: FagsakType,
-    val institusjon: InstitusjonInfo? = null
+    val institusjon: InstitusjonInfo? = null,
 ) {
 
     fun oppdaterMedDokumentOgSak(sak: Sak): OppdaterJournalpostRequest {
@@ -46,11 +46,11 @@ data class RestJournalføring(
             avsenderMottaker = AvsenderMottaker(
                 id = this.avsender.id,
                 idType = if (this.avsender.id != "") BrukerIdType.FNR else null,
-                navn = this.avsender.navn
+                navn = this.avsender.navn,
             ),
             bruker = Bruker(
                 this.bruker.id,
-                navn = this.bruker.navn
+                navn = this.bruker.navn,
             ),
             sak = sak,
             tittel = this.journalpostTittel,
@@ -61,9 +61,9 @@ data class RestJournalføring(
                     brevkode = dokument.brevkode,
                     dokumentstatus = Dokumentstatus.FERDIGSTILT,
                     dokumentvarianter = null,
-                    logiskeVedlegg = null
+                    logiskeVedlegg = null,
                 )
-            }
+            },
         )
     }
 

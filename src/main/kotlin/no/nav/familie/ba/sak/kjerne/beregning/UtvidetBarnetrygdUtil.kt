@@ -18,20 +18,20 @@ object UtvidetBarnetrygdUtil {
         utvidetVilkår: List<VilkårResultat>,
         andelerTilkjentYtelseBarnaMedEtterbetaling3ÅrEndringer: List<AndelTilkjentYtelseMedEndreteUtbetalinger>,
         tilkjentYtelse: TilkjentYtelse,
-        endretUtbetalingAndelerSøker: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>
+        endretUtbetalingAndelerSøker: List<EndretUtbetalingAndelMedAndelerTilkjentYtelse>,
     ): List<AndelTilkjentYtelseMedEndreteUtbetalinger> {
         val andelerTilkjentYtelseUtvidet = UtvidetBarnetrygdGenerator(
             behandlingId = tilkjentYtelse.behandling.id,
-            tilkjentYtelse = tilkjentYtelse
+            tilkjentYtelse = tilkjentYtelse,
         )
             .lagUtvidetBarnetrygdAndeler(
                 utvidetVilkår = utvidetVilkår,
-                andelerBarna = andelerTilkjentYtelseBarnaMedEtterbetaling3ÅrEndringer.map { it.andel }
+                andelerBarna = andelerTilkjentYtelseBarnaMedEtterbetaling3ÅrEndringer.map { it.andel },
             )
 
         return TilkjentYtelseUtils.oppdaterTilkjentYtelseMedEndretUtbetalingAndeler(
             andelTilkjentYtelserUtenEndringer = andelerTilkjentYtelseUtvidet,
-            endretUtbetalingAndeler = endretUtbetalingAndelerSøker
+            endretUtbetalingAndeler = endretUtbetalingAndelerSøker,
         )
     }
 

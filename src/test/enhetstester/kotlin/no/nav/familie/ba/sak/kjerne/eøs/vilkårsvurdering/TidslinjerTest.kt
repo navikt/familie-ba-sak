@@ -77,7 +77,7 @@ internal class TidslinjerTest {
 
         val vilkårsvurderingTidslinjer = VilkårsvurderingTidslinjer(
             vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
-            personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1, barn2)
+            personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1, barn2),
         )
 
         assertEquals(søkerResult, vilkårsvurderingTidslinjer.søkersTidslinjer().regelverkResultatTidslinje)
@@ -112,7 +112,7 @@ internal class TidslinjerTest {
 
         val vilkårsvurderingTidslinjer = VilkårsvurderingTidslinjer(
             vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
-            personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1)
+            personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1),
         )
 
         assertEquals(søkerResult, vilkårsvurderingTidslinjer.søkersTidslinjer().regelverkResultatTidslinje)
@@ -140,13 +140,13 @@ internal class TidslinjerTest {
 
         val vilkårsvurderingTidslinjer = VilkårsvurderingTidslinjer(
             vilkårsvurdering = vilkårsvurderingBygger.byggVilkårsvurdering(),
-            personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1)
+            personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(behandling.id, søker, barn1),
         )
 
         assertEquals(
             barn1.fødselsdato.til18ÅrsVilkårsdato().minusMonths(1).toYearMonth(),
             vilkårsvurderingTidslinjer.forBarn(barn1).egetRegelverkResultatTidslinje.filtrerIkkeNull()
-                .perioder().maxOf { it.tilOgMed.tilYearMonth() }
+                .perioder().maxOf { it.tilOgMed.tilYearMonth() },
         )
     }
 
@@ -217,15 +217,15 @@ internal class TidslinjerTest {
             (26.jan(2020)..30.nov(2021)).tilTidslinje { oppfyltVilkår(UNDER_18_ÅR) }
         val bosattBarnOgSøker = konkatenerTidslinjer(
             (26.jan(2020)..29.apr(2021)).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET, NASJONALE_REGLER) },
-            (30.apr(2021)..30.nov(2021)).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET, EØS_FORORDNINGEN) }
+            (30.apr(2021)..30.nov(2021)).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET, EØS_FORORDNINGEN) },
         )
         val lovligOppholdBarnOgSøker = konkatenerTidslinjer(
             (26.jan(2020)..29.apr(2021)).tilTidslinje { oppfyltVilkår(LOVLIG_OPPHOLD, NASJONALE_REGLER) },
-            (30.apr(2021)..30.nov(2021)).tilTidslinje { oppfyltVilkår(LOVLIG_OPPHOLD, EØS_FORORDNINGEN) }
+            (30.apr(2021)..30.nov(2021)).tilTidslinje { oppfyltVilkår(LOVLIG_OPPHOLD, EØS_FORORDNINGEN) },
         )
         val borMedSøker = konkatenerTidslinjer(
             (26.jan(2020)..29.apr(2021)).tilTidslinje { oppfyltVilkår(BOR_MED_SØKER, NASJONALE_REGLER) },
-            (30.apr(2021)..30.nov(2021)).tilTidslinje { oppfyltVilkår(BOR_MED_SØKER, EØS_FORORDNINGEN) }
+            (30.apr(2021)..30.nov(2021)).tilTidslinje { oppfyltVilkår(BOR_MED_SØKER, EØS_FORORDNINGEN) },
         )
 
         val barnaRegelverkTidslinjer = VilkårsvurderingBuilder<Dag>()
@@ -244,7 +244,7 @@ internal class TidslinjerTest {
         val kompetanser = tilpassKompetanserTilRegelverk(
             emptyList(),
             barnaRegelverkTidslinjer,
-            emptyMap()
+            emptyMap(),
         )
 
         assertEquals(1, kompetanser.size)
@@ -263,15 +263,15 @@ internal class TidslinjerTest {
             (26.jan(2020)..30.nov(2021)).tilTidslinje { oppfyltVilkår(UNDER_18_ÅR) }
         val bosattBarnOgSøker = konkatenerTidslinjer(
             (26.jan(2020)..1.mai(2021)).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET, NASJONALE_REGLER) },
-            (2.mai(2021)..30.nov(2021)).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET, EØS_FORORDNINGEN) }
+            (2.mai(2021)..30.nov(2021)).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET, EØS_FORORDNINGEN) },
         )
         val lovligOppholdBarnOgSøker = konkatenerTidslinjer(
             (26.jan(2020)..1.mai(2021)).tilTidslinje { oppfyltVilkår(LOVLIG_OPPHOLD, NASJONALE_REGLER) },
-            (2.mai(2021)..30.nov(2021)).tilTidslinje { oppfyltVilkår(LOVLIG_OPPHOLD, EØS_FORORDNINGEN) }
+            (2.mai(2021)..30.nov(2021)).tilTidslinje { oppfyltVilkår(LOVLIG_OPPHOLD, EØS_FORORDNINGEN) },
         )
         val borMedSøker = konkatenerTidslinjer(
             (26.jan(2020)..1.mai(2021)).tilTidslinje { oppfyltVilkår(BOR_MED_SØKER, NASJONALE_REGLER) },
-            (2.mai(2021)..30.nov(2021)).tilTidslinje { oppfyltVilkår(BOR_MED_SØKER, EØS_FORORDNINGEN) }
+            (2.mai(2021)..30.nov(2021)).tilTidslinje { oppfyltVilkår(BOR_MED_SØKER, EØS_FORORDNINGEN) },
         )
 
         val barnaRegelverkTidslinjer = VilkårsvurderingBuilder<Dag>()
@@ -290,7 +290,7 @@ internal class TidslinjerTest {
         val kompetanser = tilpassKompetanserTilRegelverk(
             emptyList(),
             barnaRegelverkTidslinjer,
-            emptyMap()
+            emptyMap(),
         )
 
         val forventetRegelverkResultat =
@@ -313,15 +313,15 @@ internal class TidslinjerTest {
             26.jan(2020).ogSenere().tilTidslinje { oppfyltVilkår(UNDER_18_ÅR) }
         val bosattBarnOgSøker = konkatenerTidslinjer(
             (26.jan(2020)..29.apr(2021)).tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET, NASJONALE_REGLER) },
-            30.apr(2021).ogSenere().tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET, EØS_FORORDNINGEN) }
+            30.apr(2021).ogSenere().tilTidslinje { oppfyltVilkår(BOSATT_I_RIKET, EØS_FORORDNINGEN) },
         )
         val lovligOppholdBarnOgSøker = konkatenerTidslinjer(
             (26.jan(2020)..29.apr(2021)).tilTidslinje { oppfyltVilkår(LOVLIG_OPPHOLD, NASJONALE_REGLER) },
-            30.apr(2021).ogSenere().tilTidslinje { oppfyltVilkår(LOVLIG_OPPHOLD, EØS_FORORDNINGEN) }
+            30.apr(2021).ogSenere().tilTidslinje { oppfyltVilkår(LOVLIG_OPPHOLD, EØS_FORORDNINGEN) },
         )
         val borMedSøker = konkatenerTidslinjer(
             (26.jan(2020)..29.apr(2021)).tilTidslinje { oppfyltVilkår(BOR_MED_SØKER, NASJONALE_REGLER) },
-            30.apr(2021).ogSenere().tilTidslinje { oppfyltVilkår(BOR_MED_SØKER, EØS_FORORDNINGEN) }
+            30.apr(2021).ogSenere().tilTidslinje { oppfyltVilkår(BOR_MED_SØKER, EØS_FORORDNINGEN) },
         )
 
         val barnaRegelverkTidslinjer = VilkårsvurderingBuilder<Dag>()
@@ -340,7 +340,7 @@ internal class TidslinjerTest {
         val kompetanser = tilpassKompetanserTilRegelverk(
             emptyList(),
             barnaRegelverkTidslinjer,
-            emptyMap()
+            emptyMap(),
         )
 
         assertEquals(1, kompetanser.size)

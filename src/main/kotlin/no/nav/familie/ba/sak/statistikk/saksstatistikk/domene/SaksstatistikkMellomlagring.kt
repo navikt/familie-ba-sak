@@ -24,7 +24,7 @@ data class SaksstatistikkMellomlagring(
     @SequenceGenerator(
         name = "saksstatistikk_mellomlagring_seq_generator",
         sequenceName = "SAKSSTATISTIKK_MELLOMLAGRING_SEQ",
-        allocationSize = 50
+        allocationSize = 50,
     )
     val id: Long = 0,
 
@@ -58,7 +58,7 @@ data class SaksstatistikkMellomlagring(
     var sendtTidspunkt: LocalDateTime? = null,
 
     @Column(name = "type_id")
-    var typeId: Long? = null
+    var typeId: Long? = null,
 ) {
     fun jsonToSakDVH(): SakDVH {
         return sakstatistikkObjectMapper.readValue(json, SakDVH::class.java)
@@ -71,5 +71,5 @@ data class SaksstatistikkMellomlagring(
 
 enum class SaksstatistikkMellomlagringType {
     SAK,
-    BEHANDLING
+    BEHANDLING,
 }

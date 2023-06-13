@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional
 @Component
 class SaksstatistikkScheduler(
     val saksstatistikkMellomlagringRepository: SaksstatistikkMellomlagringRepository,
-    val kafkaProducer: KafkaProducer
+    val kafkaProducer: KafkaProducer,
 ) {
 
     @Scheduled(fixedDelay = 60000)

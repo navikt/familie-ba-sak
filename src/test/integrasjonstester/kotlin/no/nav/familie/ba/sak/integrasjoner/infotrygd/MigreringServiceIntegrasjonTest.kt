@@ -80,7 +80,7 @@ import java.time.format.DateTimeFormatter
     "mock-brev-klient",
     "mock-infotrygd-feed",
     "mock-oauth",
-    "mock-rest-template-config"
+    "mock-rest-template-config",
 )
 @Tag("integration")
 class MigreringServiceIntegrasjonTest(
@@ -124,7 +124,7 @@ class MigreringServiceIntegrasjonTest(
     private val pdlRestClient: PdlRestClient,
 
     @Autowired
-    private val envService: EnvService
+    private val envService: EnvService,
 
 ) : AbstractMockkSpringRunner() {
 
@@ -140,7 +140,7 @@ class MigreringServiceIntegrasjonTest(
             infotrygdBarnetrygdClient.hentSaker(listOf(slotAktør.captured.aktivFødselsnummer())).bruker.first().stønad!!.barn.map {
                 ForelderBarnRelasjon(
                     relatertPersonsIdent = it.barnFnr!!,
-                    relatertPersonsRolle = FORELDERBARNRELASJONROLLE.BARN
+                    relatertPersonsRolle = FORELDERBARNRELASJONROLLE.BARN,
                 )
             }
         }
@@ -244,7 +244,7 @@ class MigreringServiceIntegrasjonTest(
             infotrygdBarnetrygdClient.hentSaker(any(), any())
         } returns InfotrygdSøkResponse(
             listOf(opprettSakMedBeløp(SAK_BELØP_2_BARN_1_UNDER_6 / 2).copy(undervalg = "MD")),
-            emptyList()
+            emptyList(),
         )
 
         val migreringResponseDto = migreringService.migrer(ClientMocks.søkerFnr[0])
@@ -283,8 +283,8 @@ class MigreringServiceIntegrasjonTest(
             assertThat(vedtakDVHV2.utbetalingsperioderV2.first().stønadFom).isEqualTo(forventetUtbetalingFom)
             assertThat(vedtakDVHV2.utbetalingsperioderV2.first().utbetaltPerMnd).isEqualTo(
                 SatsService.finnSisteSatsFor(SatsType.ORBA).beløp.avrundetHeltallAvProsent(BigDecimal(50)) + SatsService.finnSisteSatsFor(
-                    SatsType.TILLEGG_ORBA
-                ).beløp.avrundetHeltallAvProsent(BigDecimal(50))
+                    SatsType.TILLEGG_ORBA,
+                ).beløp.avrundetHeltallAvProsent(BigDecimal(50)),
             )
         }
     }
@@ -295,7 +295,7 @@ class MigreringServiceIntegrasjonTest(
             infotrygdBarnetrygdClient.hentSaker(any(), any())
         } returns InfotrygdSøkResponse(
             listOf(opprettUtvidetSakMedBeløp(SAK_BELØP_2_BARN_1_UNDER_6_UTVIDET)),
-            emptyList()
+            emptyList(),
         )
 
         val migreringResponseDto = migreringService.migrer(ClientMocks.søkerFnr[0])
@@ -365,8 +365,8 @@ class MigreringServiceIntegrasjonTest(
                         barn = listOf(
                             Barn(
                                 fødselsnrBarn,
-                                barnetrygdTom = "000000"
-                            )
+                                barnetrygdTom = "000000",
+                            ),
                         ),
                         antallBarn = 1,
                         delytelse = listOf(
@@ -375,18 +375,18 @@ class MigreringServiceIntegrasjonTest(
                                 tom = null,
                                 beløp = 2048.0,
                                 typeDelytelse = "MS",
-                                typeUtbetaling = "J"
-                            )
+                                typeUtbetaling = "J",
+                            ),
                         ),
-                        opphørsgrunn = "0"
+                        opphørsgrunn = "0",
                     ),
                     status = "FB",
                     valg = "OR",
-                    undervalg = "OS"
-                )
+                    undervalg = "OS",
+                ),
 
             ),
-            emptyList()
+            emptyList(),
         )
 
         assertThatThrownBy {
@@ -409,8 +409,8 @@ class MigreringServiceIntegrasjonTest(
                         barn = listOf(
                             Barn(
                                 FoedselsnummerGenerator().foedselsnummer(LocalDate.now()).asString,
-                                barnetrygdTom = "000000"
-                            )
+                                barnetrygdTom = "000000",
+                            ),
                         ),
                         antallBarn = 1,
                         delytelse = listOf(
@@ -419,19 +419,19 @@ class MigreringServiceIntegrasjonTest(
                                 tom = null,
                                 beløp = 2048.0,
                                 typeDelytelse = "MS",
-                                typeUtbetaling = "J"
-                            )
+                                typeUtbetaling = "J",
+                            ),
                         ),
-                        opphørsgrunn = "0"
+                        opphørsgrunn = "0",
                     ),
                     status = "FB",
                     valg = "OR",
                     undervalg = "OS",
-                    type = "I"
-                )
+                    type = "I",
+                ),
 
             ),
-            emptyList()
+            emptyList(),
         )
 
         assertThatThrownBy {
@@ -456,9 +456,9 @@ class MigreringServiceIntegrasjonTest(
                         barn = listOf(
                             Barn(
                                 fødselsnrBarn,
-                                barnetrygdTom = "000000"
+                                barnetrygdTom = "000000",
                             ),
-                            Barn(ClientMocks.barnFnr[0], barnetrygdTom = "000000")
+                            Barn(ClientMocks.barnFnr[0], barnetrygdTom = "000000"),
                         ),
                         antallBarn = 1,
                         delytelse = listOf(
@@ -467,18 +467,19 @@ class MigreringServiceIntegrasjonTest(
                                 tom = null,
                                 beløp = 1054.0,
                                 typeDelytelse = "MS",
-                                typeUtbetaling = "J"
-                            )
+                                typeUtbetaling = "J",
+                            ),
                         ),
-                        opphørsgrunn = "0"
+                        opphørsgrunn = "0",
+                        virkningFom = "797790",
                     ),
                     status = "FB",
                     valg = "OR",
-                    undervalg = "OS"
-                )
+                    undervalg = "OS",
+                ),
 
             ),
-            emptyList()
+            emptyList(),
         )
 
         migreringService.migrer(ClientMocks.søkerFnr[0])
@@ -499,9 +500,9 @@ class MigreringServiceIntegrasjonTest(
                         barn = listOf(
                             Barn(
                                 fødselsnrBarn,
-                                barnetrygdTom = "000000"
+                                barnetrygdTom = "000000",
                             ),
-                            Barn(ClientMocks.barnFnr[0], barnetrygdTom = "000000")
+                            Barn(ClientMocks.barnFnr[0], barnetrygdTom = "000000"),
                         ),
                         antallBarn = 2,
                         delytelse = listOf(
@@ -510,18 +511,18 @@ class MigreringServiceIntegrasjonTest(
                                 tom = null,
                                 beløp = 1054.0,
                                 typeDelytelse = "MS",
-                                typeUtbetaling = "J"
-                            )
+                                typeUtbetaling = "J",
+                            ),
                         ),
-                        opphørsgrunn = "0"
+                        opphørsgrunn = "0",
                     ),
                     status = "FB",
                     valg = "OR",
-                    undervalg = "OS"
-                )
+                    undervalg = "OS",
+                ),
 
             ),
-            emptyList()
+            emptyList(),
         )
         assertThatThrownBy {
             migreringService.migrer(ClientMocks.søkerFnr[0])
@@ -542,15 +543,15 @@ class MigreringServiceIntegrasjonTest(
                         barn = emptyList(),
                         antallBarn = 0,
                         delytelse = emptyList(),
-                        opphørsgrunn = "0"
+                        opphørsgrunn = "0",
                     ),
                     status = "FB",
                     valg = "OR",
-                    undervalg = "OS"
-                )
+                    undervalg = "OS",
+                ),
 
             ),
-            emptyList()
+            emptyList(),
         )
         assertThatThrownBy {
             migreringService.migrer(ClientMocks.søkerFnr[0])
@@ -651,7 +652,7 @@ class MigreringServiceIntegrasjonTest(
                     saksstatistikkMellomlagringRepository.count() - antallStatistikkEventsEtterSisteVelykkedeMigrering
                 assertThat(antallNyeStatistikkEvents).isZero
                 assertThat(fagsakRepository.finnAntallFagsakerTotalt()).isEqualTo(
-                    antallFagsakerEtterSisteVelykkedeMigrering
+                    antallFagsakerEtterSisteVelykkedeMigrering,
                 )
             }
     }
@@ -672,7 +673,7 @@ class MigreringServiceIntegrasjonTest(
         assertThat(behandlingDvhMeldinger).extracting("behandlingStatus").contains(
             BehandlingStatus.UTREDES.name,
             BehandlingStatus.IVERKSETTER_VEDTAK.name,
-            BehandlingStatus.AVSLUTTET.name
+            BehandlingStatus.AVSLUTTET.name,
         )
         assertThat(behandlingDvhMeldinger).extracting("resultat")
             .containsSequence(Behandlingsresultat.IKKE_VURDERT.name, Behandlingsresultat.INNVILGET.name)
@@ -708,7 +709,7 @@ class MigreringServiceIntegrasjonTest(
             infotrygdBarnetrygdClient.hentSaker(any(), any())
         } returns InfotrygdSøkResponse(
             listOf(åpenSak, sakMedStønadMedOpphørsgrunnLøpendeMenLikevelOpphørt),
-            emptyList()
+            emptyList(),
         )
 
         val migreringResponseDto = migreringService.migrer(ClientMocks.søkerFnr[0])
@@ -752,7 +753,7 @@ class MigreringServiceIntegrasjonTest(
         stønad = Stønad(
             barn = listOf(
                 Barn(ClientMocks.barnFnr[0], barnetrygdTom = "000000"),
-                Barn(ClientMocks.barnFnr[1], barnetrygdTom = "000000")
+                Barn(ClientMocks.barnFnr[1], barnetrygdTom = "000000"),
             ),
             antallBarn = 2,
             delytelse = beløp.map {
@@ -761,22 +762,23 @@ class MigreringServiceIntegrasjonTest(
                     tom = null,
                     beløp = it,
                     typeDelytelse = "MS",
-                    typeUtbetaling = "J"
+                    typeUtbetaling = "J",
                 )
             },
             opphørsgrunn = "0",
-            opphørtFom = "000000"
+            opphørtFom = "000000",
+            virkningFom = "797790",
         ),
         status = "FB",
         valg = "OR",
-        undervalg = "OS"
+        undervalg = "OS",
     )
 
     private fun opprettUtvidetSakMedBeløp(vararg beløp: Double) = Sak(
         stønad = Stønad(
             barn = listOf(
                 Barn(ClientMocks.barnFnr[0], barnetrygdTom = "000000"),
-                Barn(ClientMocks.barnFnr[1], barnetrygdTom = "000000")
+                Barn(ClientMocks.barnFnr[1], barnetrygdTom = "000000"),
             ),
             antallBarn = 2,
             delytelse = beløp.map {
@@ -785,15 +787,16 @@ class MigreringServiceIntegrasjonTest(
                     tom = null,
                     beløp = it,
                     typeDelytelse = "MS",
-                    typeUtbetaling = "J"
+                    typeUtbetaling = "J",
                 )
             },
             opphørsgrunn = "0",
-            opphørtFom = "000000"
+            opphørtFom = "000000",
+            virkningFom = "797790",
         ),
         status = "FB",
         valg = "UT",
-        undervalg = "EF"
+        undervalg = "EF",
     )
 
     private fun infotrygdKjøredato(): LocalDate {

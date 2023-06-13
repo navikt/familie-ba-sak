@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.BarnetsBostedsland
 
 fun hentKompetanserForEØSBegrunnelse(
     eøsBegrunnelseMedTriggere: EØSBegrunnelseMedTriggere,
-    minimerteKompetanser: List<MinimertKompetanse>
+    minimerteKompetanser: List<MinimertKompetanse>,
 ) =
     minimerteKompetanser.filter {
         eøsBegrunnelseMedTriggere.erGyldigForKompetanseMedData(
@@ -16,18 +16,18 @@ fun hentKompetanserForEØSBegrunnelse(
                 "Norge" -> BarnetsBostedsland.NORGE
                 else -> BarnetsBostedsland.IKKE_NORGE
             },
-            resultatFraKompetanse = it.resultat
+            resultatFraKompetanse = it.resultat,
         )
     }
 
 fun EØSBegrunnelseMedTriggere.erGyldigForKompetanseMedData(
     annenForeldersAktivitetFraKompetanse: AnnenForeldersAktivitet,
     barnetsBostedslandFraKompetanse: BarnetsBostedsland,
-    resultatFraKompetanse: KompetanseResultat
+    resultatFraKompetanse: KompetanseResultat,
 ): Boolean = sanityEØSBegrunnelse.annenForeldersAktivitet
     .contains(annenForeldersAktivitetFraKompetanse) &&
     sanityEØSBegrunnelse.barnetsBostedsland
         .contains(barnetsBostedslandFraKompetanse) &&
     sanityEØSBegrunnelse.kompetanseResultat.contains(
-        resultatFraKompetanse
+        resultatFraKompetanse,
     )

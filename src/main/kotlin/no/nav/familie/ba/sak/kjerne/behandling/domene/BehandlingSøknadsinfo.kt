@@ -22,7 +22,7 @@ data class BehandlingSøknadsinfo(
     @SequenceGenerator(
         name = "behandling_søknadsinfo_seq_generator",
         sequenceName = "behandling_soknadsinfo_seq",
-        allocationSize = 50
+        allocationSize = 50,
     )
     val id: Long = 0,
 
@@ -30,6 +30,6 @@ data class BehandlingSøknadsinfo(
     @JoinColumn(name = "fk_behandling_id", nullable = false, updatable = false)
     val behandling: Behandling,
 
-    val mottattDato: LocalDateTime
+    val mottattDato: LocalDateTime,
 
 ) : BaseEntitet()

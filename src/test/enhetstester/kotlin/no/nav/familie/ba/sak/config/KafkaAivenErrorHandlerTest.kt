@@ -35,7 +35,7 @@ class KafkaAivenErrorHandlerTest {
                 RuntimeException("Feil i test"),
                 emptyList(),
                 consumer,
-                container
+                container,
             )
         }
             .hasMessageNotContaining("Feil i test")
@@ -52,7 +52,7 @@ class KafkaAivenErrorHandlerTest {
                 RuntimeException("Feil i test"),
                 listOf(consumerRecord),
                 consumer,
-                container
+                container,
             )
         }
             .hasMessageNotContaining("Feil i test")
@@ -68,7 +68,7 @@ class KafkaAivenErrorHandlerTest {
                 RuntimeException("Feil i test"),
                 emptyList(),
                 consumer,
-                container
+                container,
             )
         }
             .hasMessageNotContaining("Feil i test")

@@ -20,5 +20,5 @@ abstract class AbstractUtfyltStatus<T> {
 enum class UtfyltStatus {
     IKKE_UTFYLT,
     UFULLSTENDIG,
-    OK
+    OK,
 }

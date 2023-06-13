@@ -37,7 +37,7 @@ class EksternTjenesteKallerTest : AbstractSpringIntegrationTest() {
     fun setUp() {
         integrasjonClient = IntegrasjonClient(
             URI.create(wireMockServer.baseUrl() + "/api"),
-            restOperations
+            restOperations,
         )
     }
 
@@ -55,8 +55,8 @@ class EksternTjenesteKallerTest : AbstractSpringIntegrationTest() {
                 aResponse()
                     .withStatus(200)
                     .withHeader("Content-Type", "application/json")
-                    .withBody(objectMapper.writeValueAsString(failure<OppgaveResponse>("Opprett oppgave feilet")))
-            )
+                    .withBody(objectMapper.writeValueAsString(failure<OppgaveResponse>("Opprett oppgave feilet"))),
+            ),
         )
 
         assertThrows<IntegrasjonException> { integrasjonClient.opprettOppgave(lagTestOppgave()) }
@@ -69,8 +69,8 @@ class EksternTjenesteKallerTest : AbstractSpringIntegrationTest() {
             post("/api/oppgave/opprett").willReturn(
                 aResponse()
                     .withStatus(500)
-                    .withHeader("Content-Type", "application/json")
-            )
+                    .withHeader("Content-Type", "application/json"),
+            ),
         )
 
         assertThrows<IntegrasjonException> { integrasjonClient.opprettOppgave(lagTestOppgave()) }
@@ -84,8 +84,8 @@ class EksternTjenesteKallerTest : AbstractSpringIntegrationTest() {
                 aResponse()
                     .withStatus(403)
                     .withHeader("Content-Type", "application/json")
-                    .withBody(objectMapper.writeValueAsString(ikkeTilgang<OppgaveResponse>("Ikke tilgang til å opprett oppgave")))
-            )
+                    .withBody(objectMapper.writeValueAsString(ikkeTilgang<OppgaveResponse>("Ikke tilgang til å opprett oppgave"))),
+            ),
         )
 
         val feil =
@@ -100,8 +100,8 @@ class EksternTjenesteKallerTest : AbstractSpringIntegrationTest() {
         wireMockServer.stubFor(
             post("/api/oppgave/opprett").willReturn(
                 aResponse()
-                    .withStatus(404)
-            )
+                    .withStatus(404),
+            ),
         )
 
         assertThrows<HttpClientErrorException.NotFound> { integrasjonClient.opprettOppgave(lagTestOppgave()) }

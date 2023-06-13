@@ -7,7 +7,7 @@ data class Sats(
     val type: SatsType,
     val beløp: Int,
     val gyldigFom: LocalDate = LocalDate.MIN,
-    val gyldigTom: LocalDate = LocalDate.MAX
+    val gyldigTom: LocalDate = LocalDate.MAX,
 )
 
 enum class SatsType(val beskrivelse: String) {
@@ -15,7 +15,8 @@ enum class SatsType(val beskrivelse: String) {
     SMA("Småbarnstillegg"),
     TILLEGG_ORBA("Tillegg til barnetrygd for barn 0-6 år"),
     FINN_SVAL("Finnmark- og Svalbardtillegg"),
-    UTVIDET_BARNETRYGD("Utvidet barnetrygd");
+    UTVIDET_BARNETRYGD("Utvidet barnetrygd"),
+    ;
 
     fun tilYtelseType(): YtelseType = when (this) {
         ORBA -> YtelseType.ORDINÆR_BARNETRYGD

@@ -101,8 +101,39 @@ data class Person(
     var sivilstander: MutableList<GrSivilstand> = mutableListOf(),
 
     @OneToOne(mappedBy = "person", cascade = [CascadeType.ALL], fetch = FetchType.EAGER, optional = true)
-    var dødsfall: Dødsfall? = null
+    var dødsfall: Dødsfall? = null,
 ) : BaseEntitet() {
+
+    fun tilKopiForNyttPersonopplysningGrunnlag(nyttPersonopplysningGrunnlag: PersonopplysningGrunnlag): Person =
+        copy(
+            id = 0,
+            personopplysningGrunnlag = nyttPersonopplysningGrunnlag,
+            bostedsadresser = mutableListOf(),
+            statsborgerskap = mutableListOf(),
+            opphold = mutableListOf(),
+            arbeidsforhold = mutableListOf(),
+            sivilstander = mutableListOf(),
+        )
+            .also {
+                it.bostedsadresser.addAll(
+                    bostedsadresser.map { grBostedsadresse ->
+                        grBostedsadresse.tilKopiForNyPerson(
+                            it,
+                        )
+                    },
+                )
+                it.statsborgerskap.addAll(
+                    statsborgerskap.map { grStatsborgerskap ->
+                        grStatsborgerskap.tilKopiForNyPerson(
+                            it,
+                        )
+                    },
+                )
+                it.opphold.addAll(opphold.map { grOpphold -> grOpphold.tilKopiForNyPerson(it) })
+                it.arbeidsforhold.addAll(arbeidsforhold.map { grArbeidsforhold -> grArbeidsforhold.tilKopiForNyPerson(it) })
+                it.sivilstander.addAll(sivilstander.map { grSivilstand -> grSivilstand.tilKopiForNyPerson(it) })
+                it.dødsfall = dødsfall?.tilKopiForNyPerson(it)
+            }
 
     override fun toString(): String {
         return """Person(aktørId=$aktør,
@@ -144,7 +175,7 @@ data class Person(
 enum class Kjønn {
     MANN,
     KVINNE,
-    UKJENT
+    UKJENT,
 }
 
 enum class Medlemskap {
@@ -152,12 +183,13 @@ enum class Medlemskap {
     EØS,
     TREDJELANDSBORGER,
     STATSLØS,
-    UKJENT
+    UKJENT,
 }
 
 enum class Målform {
     NB,
-    NN;
+    NN,
+    ;
 
     fun tilSanityFormat() = when (this) {
         NB -> "bokmaal"

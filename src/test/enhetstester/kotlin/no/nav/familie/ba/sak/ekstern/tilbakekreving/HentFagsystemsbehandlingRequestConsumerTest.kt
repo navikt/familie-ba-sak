@@ -7,7 +7,6 @@ import io.mockk.spyk
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
-import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.domene.ArbeidsfordelingPåBehandling
@@ -35,6 +34,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import org.springframework.kafka.support.Acknowledgment
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 internal class HentFagsystemsbehandlingRequestConsumerTest {
@@ -69,8 +69,8 @@ internal class HentFagsystemsbehandlingRequestConsumerTest {
                 arbeidsfordelingService,
                 vedtakService,
                 tilbakekrevingService,
-                kafkaProducer
-            )
+                kafkaProducer,
+            ),
         )
         hentFagsystemsbehandlingRequestConsumer = HentFagsystemsbehandlingRequestConsumer(fagsystemsbehandlingService)
 
@@ -81,14 +81,14 @@ internal class HentFagsystemsbehandlingRequestConsumerTest {
         every { persongrunnlagService.hentAktivThrows(any()) } returns lagTestPersonopplysningGrunnlag(
             behandling.id,
             tilfeldigPerson(personType = PersonType.BARN),
-            tilfeldigPerson(personType = PersonType.SØKER)
+            tilfeldigPerson(personType = PersonType.SØKER),
         )
         every { arbeidsfordelingService.hentArbeidsfordelingPåBehandling(any()) } returns ArbeidsfordelingPåBehandling(
             behandlendeEnhetId = "4820",
             behandlendeEnhetNavn = "Nav",
-            behandlingId = behandling.id
+            behandlingId = behandling.id,
         )
-        every { vedtakService.hentAktivForBehandlingThrows(any()) } returns lagVedtak(behandling)
+        every { vedtakService.hentVedtaksdatoForBehandlingThrows(any()) } returns LocalDateTime.now()
         every { tilbakekrevingService.hentTilbakekrevingsvalg(any()) } returns Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING
         every { kafkaProducer.sendFagsystemsbehandlingResponsForTopicTilbakekreving(any(), any(), any()) } returns Unit
     }
@@ -109,7 +109,7 @@ internal class HentFagsystemsbehandlingRequestConsumerTest {
             fagsystemsbehandlingService.sendFagsystemsbehandling(
                 capture(responsSlot),
                 capture(keySlot),
-                capture(behandlingIdSlot)
+                capture(behandlingIdSlot),
             )
         }
 
@@ -137,8 +137,8 @@ internal class HentFagsystemsbehandlingRequestConsumerTest {
             HentFagsystemsbehandlingRequest(
                 eksternFagsakId = behandling.fagsak.id.toString(),
                 eksternId = behandling.id.toString(),
-                ytelsestype = Ytelsestype.BARNETRYGD
-            )
+                ytelsestype = Ytelsestype.BARNETRYGD,
+            ),
         )
     }
 }

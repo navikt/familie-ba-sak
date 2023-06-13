@@ -17,11 +17,11 @@ import java.util.Properties
 @TaskStepBeskrivelse(
     taskStepType = KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask.TASK_STEP_TYPE,
     beskrivelse = "Finn perioder til avstemming for relevante behandlinger",
-    maxAntallFeil = 3
+    maxAntallFeil = 3,
 )
 class KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask(
     val avstemmingService: AvstemmingService,
-    val taskService: TaskService
+    val taskService: TaskService,
 ) :
     AsyncTaskStep {
 
@@ -29,12 +29,12 @@ class KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask(
         val taskDto =
             objectMapper.readValue(
                 task.payload,
-                KonsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO::class.java
+                KonsistensavstemmingFinnPerioderForRelevanteBehandlingerDTO::class.java,
             )
 
         if (avstemmingService.erKonsistensavstemmingKjørtForTransaksjonsidOgChunk(
                 taskDto.transaksjonsId,
-                taskDto.chunkNr
+                taskDto.chunkNr,
             )
         ) {
             logger.info("Finn perioder for avstemming er alt kjørt for ${taskDto.transaksjonsId} og ${taskDto.chunkNr}")
@@ -44,7 +44,7 @@ class KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask(
         val perioderTilAvstemming =
             avstemmingService.hentDataForKonsistensavstemming(
                 taskDto.avstemmingsdato,
-                taskDto.relevanteBehandlinger
+                taskDto.relevanteBehandlinger,
             )
 
         logger.info("Finner perioder til avstemming for transaksjonsId ${taskDto.transaksjonsId} og chunk ${taskDto.chunkNr} med ${perioderTilAvstemming.size} løpende saker")
@@ -56,13 +56,13 @@ class KonsistensavstemMotOppdragFinnPerioderForRelevanteBehandlingerTask(
                     chunkNr = taskDto.chunkNr,
                     avstemmingdato = taskDto.avstemmingsdato,
                     perioderForBehandling = perioderTilAvstemming,
-                    sendTilØkonomi = taskDto.sendTilØkonomi
-                )
+                    sendTilØkonomi = taskDto.sendTilØkonomi,
+                ),
             ),
             properties = Properties().apply {
                 this["chunkNr"] = taskDto.chunkNr.toString()
                 this["transaksjonsId"] = taskDto.transaksjonsId.toString()
-            }
+            },
         )
         taskService.save(konsistensavstemmingDataTask)
     }

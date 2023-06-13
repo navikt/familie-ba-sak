@@ -11,7 +11,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.somFraOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.somTilOgMed
 
 fun <T : Tidsenhet, I> Iterable<Tidspunkt<T>>.tidslinjeFraTidspunkt(
-    tidspunktMapper: (Tidspunkt<T>) -> Innhold<I>
+    tidspunktMapper: (Tidspunkt<T>) -> Innhold<I>,
 ): Tidslinje<I, T> = tidslinje {
     map { tidspunkt -> TidspunktMedInnhold(tidspunkt, tidspunktMapper(tidspunkt)) }
         .filter { it.harInnhold }
@@ -33,7 +33,7 @@ fun <T : Tidsenhet, I> Iterable<Tidspunkt<T>>.tidslinjeFraTidspunkt(
  */
 data class Innhold<I>(
     val innhold: I?,
-    internal val harInnhold: Boolean = true
+    internal val harInnhold: Boolean = true,
 ) {
     constructor(innhold: I?) : this(innhold, true)
 
@@ -58,7 +58,7 @@ fun <I, T : Tidsenhet> Tidslinje<I, T>.innholdForTidspunkt(tidspunkt: Tidspunkt<
     perioder().innholdForTidspunkt(tidspunkt)
 
 fun <I, T : Tidsenhet> Collection<Periode<I, T>>.innholdForTidspunkt(
-    tidspunkt: Tidspunkt<T>
+    tidspunkt: Tidspunkt<T>,
 ): Innhold<I> {
     val periode = this.firstOrNull { it.omfatter(tidspunkt) }
     return when (periode) {
@@ -72,7 +72,7 @@ private fun <I, T : Tidsenhet> Periode<I, T>.omfatter(tidspunkt: Tidspunkt<T>) =
 
 private data class TidspunktMedInnhold<I, T : Tidsenhet>(
     val tidspunkt: Tidspunkt<T>,
-    private val innholdsresultat: Innhold<I>
+    private val innholdsresultat: Innhold<I>,
 ) {
     val harInnhold get() = innholdsresultat.harInnhold
     val innhold get() = innholdsresultat.innhold

@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.common.YearMonthConverter
 import no.nav.familie.ba.sak.kjerne.eøs.felles.PeriodeOgBarnSkjemaEntitet
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
@@ -41,7 +42,7 @@ data class Kompetanse(
     @JoinTable(
         name = "AKTOER_TIL_KOMPETANSE",
         joinColumns = [JoinColumn(name = "fk_kompetanse_id")],
-        inverseJoinColumns = [JoinColumn(name = "fk_aktoer_id")]
+        inverseJoinColumns = [JoinColumn(name = "fk_aktoer_id")],
     )
     override val barnAktører: Set<Aktør> = emptySet(), // kan ikke være tom
 
@@ -64,7 +65,7 @@ data class Kompetanse(
 
     @Enumerated(EnumType.STRING)
     @Column(name = "resultat")
-    val resultat: KompetanseResultat? = null
+    val resultat: KompetanseResultat? = null,
 ) : PeriodeOgBarnSkjemaEntitet<Kompetanse>() {
 
     @Id
@@ -72,7 +73,7 @@ data class Kompetanse(
     @SequenceGenerator(
         name = "kompetanse_seq_generator",
         sequenceName = "kompetanse_seq",
-        allocationSize = 50
+        allocationSize = 50,
     )
     override var id: Long = 0
 
@@ -85,14 +86,14 @@ data class Kompetanse(
         annenForeldersAktivitet = null,
         annenForeldersAktivitetsland = null,
         barnetsBostedsland = null,
-        resultat = null
+        resultat = null,
     )
 
     override fun kopier(fom: YearMonth?, tom: YearMonth?, barnAktører: Set<Aktør>) =
         copy(
             fom = fom,
             tom = tom,
-            barnAktører = barnAktører
+            barnAktører = barnAktører,
         )
 
     fun validerFelterErSatt() {
@@ -102,12 +103,16 @@ data class Kompetanse(
         }
     }
 
-    fun erObligatoriskeFelterSatt() = søkersAktivitet != null &&
-        annenForeldersAktivitet != null &&
-        søkersAktivitetsland != null &&
-        barnetsBostedsland != null &&
-        resultat != null &&
-        barnAktører.isNotEmpty()
+    fun erObligatoriskeFelterSatt() = fom != null &&
+        erObligatoriskeFelterUtenomTidsperioderSatt()
+
+    fun erObligatoriskeFelterUtenomTidsperioderSatt() =
+        this.søkersAktivitet != null &&
+            this.annenForeldersAktivitet != null &&
+            this.søkersAktivitetsland != null &&
+            this.barnetsBostedsland != null &&
+            this.resultat != null &&
+            this.barnAktører.isNotEmpty()
 
     companion object {
         val NULL = Kompetanse(null, null, emptySet())
@@ -128,7 +133,7 @@ enum class SøkersAktivitet {
     MOTTAR_UTBETALING_FRA_NAV_UNDER_OPPHOLD_I_UTLANDET,
     MOTTAR_UFØRETRYGD_FRA_NAV_UNDER_OPPHOLD_I_UTLANDET,
     MOTTAR_PENSJON_FRA_NAV_UNDER_OPPHOLD_I_UTLANDET,
-    INAKTIV
+    INAKTIV,
 }
 
 enum class AnnenForeldersAktivitet {
@@ -138,13 +143,13 @@ enum class AnnenForeldersAktivitet {
     MOTTAR_PENSJON,
     INAKTIV,
     IKKE_AKTUELT,
-    UTSENDT_ARBEIDSTAKER
+    UTSENDT_ARBEIDSTAKER,
 }
 
 enum class KompetanseResultat {
     NORGE_ER_PRIMÆRLAND,
     NORGE_ER_SEKUNDÆRLAND,
-    TO_PRIMÆRLAND
+    TO_PRIMÆRLAND,
 }
 
 sealed interface IKompetanse {
@@ -154,21 +159,21 @@ sealed interface IKompetanse {
 
 data class TomKompetanse(
     override val id: Long,
-    override val behandlingId: Long
+    override val behandlingId: Long,
 ) : IKompetanse
 
 data class UtfyltKompetanse(
     override val id: Long,
     override val behandlingId: Long,
     val fom: YearMonth,
-    val tom: YearMonth,
+    val tom: YearMonth?,
     val barnAktører: Set<Aktør>,
     val søkersAktivitet: SøkersAktivitet,
     val annenForeldersAktivitet: AnnenForeldersAktivitet,
-    val annenForeldersAktivitetsland: String,
+    val annenForeldersAktivitetsland: String?,
     val søkersAktivitetsland: String,
     val barnetsBostedsland: String,
-    val resultat: KompetanseResultat
+    val resultat: KompetanseResultat,
 ) : IKompetanse
 
 fun Kompetanse.tilIKompetanse(): IKompetanse {
@@ -177,19 +182,19 @@ fun Kompetanse.tilIKompetanse(): IKompetanse {
             id = this.id,
             behandlingId = this.behandlingId,
             fom = this.fom!!,
-            tom = this.tom!!,
+            tom = this.tom,
             barnAktører = this.barnAktører,
             søkersAktivitet = this.søkersAktivitet!!,
             annenForeldersAktivitet = this.annenForeldersAktivitet!!,
-            annenForeldersAktivitetsland = this.annenForeldersAktivitetsland!!,
+            annenForeldersAktivitetsland = this.annenForeldersAktivitetsland,
             søkersAktivitetsland = this.søkersAktivitetsland!!,
             barnetsBostedsland = this.barnetsBostedsland!!,
-            resultat = this.resultat!!
+            resultat = this.resultat!!,
         )
     } else {
         TomKompetanse(
             id = this.id,
-            behandlingId = this.behandlingId
+            behandlingId = this.behandlingId,
         )
     }
 }
@@ -198,7 +203,7 @@ fun List<UtfyltKompetanse>.tilTidslinje() =
     this.map {
         Periode(
             fraOgMed = it.fom.tilTidspunkt(),
-            tilOgMed = it.tom.tilTidspunkt(),
-            innhold = it
+            tilOgMed = it.tom?.tilTidspunkt() ?: MånedTidspunkt.uendeligLengeTil(),
+            innhold = it,
         )
     }.tilTidslinje()

@@ -12,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional
 class VurderTilbakekrevingSteg(
     val featureToggleService: FeatureToggleService,
     val tilbakekrevingService: TilbakekrevingService,
-    val simuleringService: SimuleringService
+    val simuleringService: SimuleringService,
 ) : BehandlingSteg<RestTilbakekreving?> {
 
     @Transactional
