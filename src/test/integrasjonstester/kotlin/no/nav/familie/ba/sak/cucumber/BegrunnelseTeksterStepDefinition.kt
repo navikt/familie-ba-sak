@@ -6,6 +6,7 @@ import io.cucumber.java.no.Når
 import io.cucumber.java.no.Og
 import io.cucumber.java.no.Så
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.cucumber.domeneparser.BrevBegrunnelseParser.mapStandardBegrunnelser
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -42,6 +43,7 @@ class BegrunnelseTeksterStepDefinition {
     private var kompetanser = mutableMapOf<Long, List<Kompetanse>>()
     private var endredeUtbetalinger = mutableMapOf<Long, List<EndretUtbetalingAndel>>()
     private var andelerTilkjentYtelse = mutableMapOf<Long, List<AndelTilkjentYtelse>>()
+    private var endringstidspunkt = mutableMapOf<Long, LocalDate>()
 
     private var gjeldendeBehandlingId: Long? = null
 
@@ -135,6 +137,7 @@ class BegrunnelseTeksterStepDefinition {
             vedtak = vedtak,
             grunnlagForVedtakPerioder = grunnlagForVedtaksperiode,
             grunnlagForVedtakPerioderForrigeBehandling = grunnlagForVedtaksperiodeForrigeBehandling,
+            endringstidspunkt = endringstidspunkt[behandlingId] ?: TIDENES_MORGEN,
         )
 
         val utvidedeVedtaksperioderMedBegrunnelser = vedtaksperioderMedBegrunnelser.map {

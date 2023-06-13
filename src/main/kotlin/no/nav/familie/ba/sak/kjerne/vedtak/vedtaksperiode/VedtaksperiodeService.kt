@@ -335,7 +335,8 @@ class VedtaksperiodeService(
             grunnlagForVedtakPerioder = hentGrunnlagForVedtaksperioder(behandling),
             grunnlagForVedtakPerioderForrigeBehandling = forrigeBehandling?.let { hentGrunnlagForVedtaksperioder(it) },
             vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId),
-        ).filtrerLikEllerEtterEndringstidspunkt(endringstidspunkt)
+            endringstidspunkt = endringstidspunkt,
+        )
     }
 
     fun hentGrunnlagForVedtaksperioder(behandling: Behandling): GrunnlagForVedtaksperioder =
