@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.OppdragParser.mapTilkjentYtel
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForIverksettingFactory
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForSimuleringFactory
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForUtbetalingsoppdrag
+import no.nav.familie.ba.sak.integrasjoner.økonomi.IdentOgYtelse
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGenerator
 import no.nav.familie.ba.sak.integrasjoner.økonomi.oppdrag.IdentOgType
 import no.nav.familie.ba.sak.integrasjoner.økonomi.oppdrag.UtbetalingsoppdragService
@@ -67,8 +68,6 @@ class OppdragSteg {
         }
     }
     private val utbetalingsoppdragService = UtbetalingsoppdragService(tilkjentYtelseRepository)
-
-    private val fagsak = defaultFagsak()
 
     @Gitt("følgende tilkjente ytelser")
     fun følgendeTilkjenteYtelser(dataTable: DataTable) {
@@ -207,7 +206,7 @@ class OppdragSteg {
     private fun tilKjeder(
         tilkjentYtelse: TilkjentYtelse?,
         erSimulering: Boolean = false,
-    ): Map<String, List<AndelTilkjentYtelseForUtbetalingsoppdrag>> {
+    ): Map<IdentOgYtelse, List<AndelTilkjentYtelseForUtbetalingsoppdrag>> {
         val andelFactory = if (erSimulering) {
             AndelTilkjentYtelseForSimuleringFactory()
         } else {
@@ -221,6 +220,7 @@ class OppdragSteg {
     }
 
     private fun genererBehandlinger(dataTable: DataTable) {
+        val fagsak = defaultFagsak()
         behandlinger = dataTable.groupByBehandlingId()
             .map { lagBehandling(fagsak = fagsak).copy(id = it.key) }
             .associateBy { it.id }
