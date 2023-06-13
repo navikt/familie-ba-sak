@@ -4,12 +4,14 @@ import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagsystem
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerInstitusjonOgVerge
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.writeValueAsString
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
+import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.SatsendringService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
@@ -58,6 +60,7 @@ class StegService(
     private val infotrygdFeedService: InfotrygdFeedService,
     private val satsendringService: SatsendringService,
     private val simuleringService: SimuleringService,
+    private val personopplysningerService: PersonopplysningerService,
 ) {
 
     private val stegSuksessMetrics: Map<StegType, Counter> = initStegMetrikker("suksess")
@@ -152,7 +155,16 @@ class StegService(
     private fun hentBarnFraForrigeAvsluttedeBehandling(behandling: Behandling): List<String> {
         val sisteBehandling = hentSisteAvsluttetBehandling(behandling)
         return beregningService.finnBarnFraBehandlingMedTilkjentYtelse(sisteBehandling.id)
-            .map { it.aktivFødselsnummer() }
+            .mapNotNull {
+                try {
+                    personopplysningerService.hentPersoninfoEnkel(it)
+                    it.aktivFødselsnummer()
+                } catch (pdlPersonKanIkkeBehandlesIFagsystem: PdlPersonKanIkkeBehandlesIFagsystem) {
+                    logger.warn("Ignorerer barn fra forrige avsluttede behandling: ${pdlPersonKanIkkeBehandlesIFagsystem.årsak}")
+                    secureLogger.warn("Ignorerer barn ${it.aktivFødselsnummer()} fra forrige avsluttede behandling: ${pdlPersonKanIkkeBehandlesIFagsystem.årsak}")
+                    null
+                }
+            }
     }
 
     @Transactional
