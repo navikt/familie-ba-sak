@@ -6,8 +6,12 @@ import io.cucumber.java.no.Når
 import io.cucumber.java.no.Og
 import io.cucumber.java.no.Så
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.cucumber.domeneparser.Domenebegrep
+import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser.mapForventetVedtaksperioderMedBegrunnelser
 import no.nav.familie.ba.sak.cucumber.domeneparser.VedtaksperiodeMedBegrunnelserParser.parseAktørId
+import no.nav.familie.ba.sak.cucumber.domeneparser.parseDato
+import no.nav.familie.ba.sak.cucumber.domeneparser.parseLong
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
@@ -17,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import org.assertj.core.api.Assertions
+import java.time.LocalDate
 
 class VedtaksperiodeMedBegrunnelserStepDefinition {
 
@@ -29,6 +34,7 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
     private var kompetanser = mutableMapOf<Long, List<Kompetanse>>()
     private var endredeUtbetalinger = mutableMapOf<Long, List<EndretUtbetalingAndel>>()
     private var andelerTilkjentYtelse = mutableMapOf<Long, List<AndelTilkjentYtelse>>()
+    private var endringstidspunkt = mapOf<Long, LocalDate?>()
 
     private var gjeldendeBehandlingId: Long? = null
 
@@ -81,6 +87,14 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
         }.toSet()
     }
 
+    @Og("med endringstidspunkt")
+    fun settEndringstidspunkt(dataTable: DataTable) {
+        endringstidspunkt = dataTable.asMaps().associate { rad ->
+            parseLong(Domenebegrep.BEHANDLING_ID, rad) to
+                parseDato(DomenebegrepVedtaksperiodeMedBegrunnelser.ENDRINGSTIDSPUNKT, rad)
+        }
+    }
+
     @Og("med kompetanser")
     fun `med kompetanser`(dataTable: DataTable) {
         val nyeKompetanserPerBarn = dataTable.asMaps()
@@ -111,6 +125,7 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
             kompetanser,
             endredeUtbetalinger,
             andelerTilkjentYtelse,
+            endringstidspunkt,
         )
     }
 

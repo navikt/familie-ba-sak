@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.cucumber
 
 import io.cucumber.datatable.DataTable
+import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
@@ -255,6 +256,7 @@ fun lagVedtaksPerioder(
     kompetanser: Map<Long, List<Kompetanse>>,
     endredeUtbetalinger: Map<Long, List<EndretUtbetalingAndel>>,
     andelerTilkjentYtelse: Map<Long, List<AndelTilkjentYtelse>>,
+    endringstidspunkt: Map<Long, LocalDate?>,
 ): List<VedtaksperiodeMedBegrunnelser> {
     val vedtak = vedtaksListe.find { it.behandling.id == behandlingId && it.aktiv }
         ?: error("Finner ikke vedtak")
@@ -288,5 +290,6 @@ fun lagVedtaksPerioder(
         vedtak = vedtak,
         grunnlagForVedtakPerioder = grunnlagForVedtaksperiode,
         grunnlagForVedtakPerioderForrigeBehandling = grunnlagForVedtaksperiodeForrigeBehandling,
+        endringstidspunkt = endringstidspunkt[behandlingId] ?: TIDENES_MORGEN,
     )
 }
