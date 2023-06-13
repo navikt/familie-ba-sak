@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårRolle.SOKER
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Valgbarhet
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -187,6 +186,13 @@ enum class EndretUtbetalingsperiodeDeltBostedTriggere {
 
 enum class UtvidetBarnetrygdTrigger {
     SMÅBARNSTILLEGG,
+}
+
+enum class Valgbarhet {
+    STANDARD,
+    AUTOMATISK,
+    TILLEGSTEKST,
+    SAKSPESIFIKK,
 }
 
 private fun SanityBegrunnelse.tilTriggesAv(): TriggesAv {

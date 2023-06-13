@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeDeltBost
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertEndretAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertVilkårResultat
+import no.nav.familie.ba.sak.kjerne.brev.domene.Valgbarhet
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
@@ -145,11 +146,4 @@ private fun endretUtbetalingBegrunnelseOppfyllerUtvidetScenario(
     }?.erPåvirketAvEndring == true
 
     return begrunnelseGjelderUtvidet == periodeInneholderUtvidetMedEndring
-}
-
-enum class Valgbarhet {
-    STANDARD,
-    AUTOMATISK,
-    TILLEGSTEKST,
-    SAKSPESIFIKK,
 }
