@@ -37,6 +37,7 @@ data class SanityBegrunnelse(
     val endretUtbetalingsperiodeDeltBostedUtbetalingTrigger: EndretUtbetalingsperiodeDeltBostedTriggere? = null,
     val endretUtbetalingsperiodeTriggere: List<EndretUtbetalingsperiodeTrigger>? = null,
     val utvidetBarnetrygdTriggere: List<UtvidetBarnetrygdTrigger>? = null,
+    val valgbarhet: Valgbarhet? = null,
 ) : ISanityBegrunnelse {
 
     val triggesAv: TriggesAv by lazy { this.tilTriggesAv() }
@@ -58,6 +59,7 @@ data class RestSanityBegrunnelse(
     val endretUtbetalingsperiodeDeltBostedUtbetalingTrigger: String?,
     val endretUtbetalingsperiodeTriggere: List<String>? = emptyList(),
     val utvidetBarnetrygdTriggere: List<String>? = emptyList(),
+    val valgbarhet: String? = null,
 ) {
     fun tilSanityBegrunnelse(): SanityBegrunnelse? {
         if (apiNavn == null) return null
@@ -107,6 +109,7 @@ data class RestSanityBegrunnelse(
             utvidetBarnetrygdTriggere = utvidetBarnetrygdTriggere?.mapNotNull {
                 finnEnumverdi(it, UtvidetBarnetrygdTrigger.values(), apiNavn)
             },
+            valgbarhet = valgbarhet?.let { finnEnumverdi(valgbarhet, Valgbarhet.values(), apiNavn) },
         )
     }
 }
@@ -185,6 +188,13 @@ enum class UtvidetBarnetrygdTrigger {
     SMÅBARNSTILLEGG,
 }
 
+enum class Valgbarhet {
+    STANDARD,
+    AUTOMATISK,
+    TILLEGSTEKST,
+    SAKSPESIFIKK,
+}
+
 private fun SanityBegrunnelse.tilTriggesAv(): TriggesAv {
     return TriggesAv(
         vilkår = this.vilkaar?.map { it.tilVilkår() }?.toSet() ?: emptySet(),
@@ -213,6 +223,7 @@ private fun SanityBegrunnelse.tilTriggesAv(): TriggesAv {
         deltbosted = this.inneholderBorMedSøkerTrigger(VilkårTrigger.DELT_BOSTED),
         deltBostedSkalIkkeDeles = this.inneholderBorMedSøkerTrigger(VilkårTrigger.DELT_BOSTED_SKAL_IKKE_DELES),
         valgbar = !this.inneholderØvrigTrigger(ØvrigTrigger.ALLTID_AUTOMATISK),
+        valgbarhet = this.valgbarhet,
         etterEndretUtbetaling = this.endretUtbetalingsperiodeTriggere
             ?.contains(EndretUtbetalingsperiodeTrigger.ETTER_ENDRET_UTBETALINGSPERIODE) ?: false,
         endretUtbetalingSkalUtbetales = this.endretUtbetalingsperiodeDeltBostedUtbetalingTrigger
