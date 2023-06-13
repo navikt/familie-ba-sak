@@ -240,7 +240,11 @@ private fun lagGrunnlagForVilkårOgAndel(
         vilkårResultaterForVedtaksperiode = vilkårResultater
             ?: error("vilkårResultatene burde alltid finnes om vi har innvilget vedtaksperiode."),
         person = person,
-        andeler = andeler ?: error("andeler må finnes for innvilgede vedtaksperioder."),
+        andeler = andeler
+            ?: error(
+                "andeler må finnes for innvilgede vedtaksperioder. Vedtaksperioden er innenfor " +
+                    "${vilkårResultater.firstOrNull()?.fom} -> ${vilkårResultater.firstOrNull()?.tom}",
+            ),
     )
 } else {
     GrunnlagForPersonIkkeInnvilget(
