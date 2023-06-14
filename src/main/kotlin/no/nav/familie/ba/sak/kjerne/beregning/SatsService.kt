@@ -15,8 +15,8 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilMånedTidspunkt
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerSenereEnn
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerTidligereEnn
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerUendeligSent
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerUendeligTidlig
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjær
 import java.time.LocalDate
 
@@ -86,8 +86,8 @@ fun satstypeTidslinje(satsType: SatsType) =
                 val fom = if (it.gyldigFom == LocalDate.MIN) null else it.gyldigFom.toYearMonth()
                 val tom = if (it.gyldigTom == LocalDate.MAX) null else it.gyldigTom.toYearMonth()
                 Periode(
-                    fraOgMed = fom.tilTidspunktEllerTidligereEnn(tom),
-                    tilOgMed = tom.tilTidspunktEllerSenereEnn(fom),
+                    fraOgMed = fom.tilTidspunktEllerUendeligTidlig(tom),
+                    tilOgMed = tom.tilTidspunktEllerUendeligSent(fom),
                     it.beløp,
                 )
             }

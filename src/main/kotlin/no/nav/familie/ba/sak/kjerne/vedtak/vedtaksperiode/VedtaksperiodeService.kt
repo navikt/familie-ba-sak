@@ -59,6 +59,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilVedtaksbegrunnelseFritekst
 import no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta.FeilutbetaltValutaRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.refusjonEøs.RefusjonEøsRepository
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.brevBegrunnelseProdusent.hentGyldigeBegrunnelserForPeriode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.tilUtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForVedtaksperioder
@@ -182,9 +183,12 @@ class VedtaksperiodeService(
         standardbegrunnelserFraFrontend: List<Standardbegrunnelse>,
         eøsStandardbegrunnelserFraFrontend: List<EØSStandardbegrunnelse>,
     ) {
-        val eksisterendeAvslagBegrunnelser = vedtaksperiodeMedBegrunnelser.begrunnelser.filter { it.standardbegrunnelse.vedtakBegrunnelseType.erAvslag() }.map { it.standardbegrunnelse.sanityApiNavn }
+        val eksisterendeAvslagBegrunnelser =
+            vedtaksperiodeMedBegrunnelser.begrunnelser.filter { it.standardbegrunnelse.vedtakBegrunnelseType.erAvslag() }
+                .map { it.standardbegrunnelse.sanityApiNavn }
 
-        val nyeAvslagBegrunnelser = (standardbegrunnelserFraFrontend.filter { it.vedtakBegrunnelseType.erAvslag() } + eøsStandardbegrunnelserFraFrontend.filter { it.vedtakBegrunnelseType.erAvslag() }).map { it.sanityApiNavn }
+        val nyeAvslagBegrunnelser =
+            (standardbegrunnelserFraFrontend.filter { it.vedtakBegrunnelseType.erAvslag() } + eøsStandardbegrunnelserFraFrontend.filter { it.vedtakBegrunnelseType.erAvslag() }).map { it.sanityApiNavn }
 
         if (!nyeAvslagBegrunnelser.containsAll(eksisterendeAvslagBegrunnelser)) {
             throw FunksjonellFeil("Kan ikke fjerne avslags-begrunnelse fra vedtaksperiode som har blitt satt til avslag i vilkårsvurdering.")
@@ -331,7 +335,8 @@ class VedtaksperiodeService(
             grunnlagForVedtakPerioder = hentGrunnlagForVedtaksperioder(behandling),
             grunnlagForVedtakPerioderForrigeBehandling = forrigeBehandling?.let { hentGrunnlagForVedtaksperioder(it) },
             vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId),
-        ).filtrerLikEllerEtterEndringstidspunkt(endringstidspunkt)
+            endringstidspunkt = endringstidspunkt,
+        )
     }
 
     fun hentGrunnlagForVedtaksperioder(behandling: Behandling): GrunnlagForVedtaksperioder =
@@ -510,19 +515,34 @@ class VedtaksperiodeService(
                 hentAktørerMedUtbetaling(utvidetVedtaksperiodeMedBegrunnelser, persongrunnlag).map { it.aktørId }
 
             utvidetVedtaksperiodeMedBegrunnelser.copy(
-                gyldigeBegrunnelser = hentGyldigeBegrunnelserForPeriode(
-                    utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
-                    sanityBegrunnelser = sanityBegrunnelser,
-                    persongrunnlag = persongrunnlag,
-                    vilkårsvurdering = vilkårsvurdering,
-                    aktørIderMedUtbetaling = aktørIderMedUtbetaling,
-                    endretUtbetalingAndeler = endretUtbetalingAndeler,
-                    andelerTilkjentYtelse = andelerTilkjentYtelse,
-                    sanityEØSBegrunnelser = sanityEØSBegrunnelser,
-                    kompetanserIPeriode = kompetanserIPeriode,
-                    kompetanserSomStopperRettFørPeriode = kompetanserSomStopperRettFørPeriode,
-                    featureToggleService = featureToggleService,
-                ),
+                gyldigeBegrunnelser = if (featureToggleService.isEnabled(FeatureToggleConfig.BEGRUNNELSER_NY)) {
+                    val forrigeBehandling =
+                        behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
+
+                    utvidetVedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserForPeriode(
+                        grunnlagForVedtaksperioder = hentGrunnlagForVedtaksperioder(behandling),
+                        grunnlagForVedtaksperioderForrigeBehandling = forrigeBehandling?.let {
+                            hentGrunnlagForVedtaksperioder(it)
+                        },
+                        sanityBegrunnelser = sanityBegrunnelser,
+                        behandlingUnderkategori = behandling.underkategori,
+                        fagsakType = behandling.fagsak.type,
+                    ).toList()
+                } else {
+                    hentGyldigeBegrunnelserForPeriodeGammel(
+                        utvidetVedtaksperiodeMedBegrunnelser = utvidetVedtaksperiodeMedBegrunnelser,
+                        sanityBegrunnelser = sanityBegrunnelser,
+                        persongrunnlag = persongrunnlag,
+                        vilkårsvurdering = vilkårsvurdering,
+                        aktørIderMedUtbetaling = aktørIderMedUtbetaling,
+                        endretUtbetalingAndeler = endretUtbetalingAndeler,
+                        andelerTilkjentYtelse = andelerTilkjentYtelse,
+                        sanityEØSBegrunnelser = sanityEØSBegrunnelser,
+                        kompetanserIPeriode = kompetanserIPeriode,
+                        kompetanserSomStopperRettFørPeriode = kompetanserSomStopperRettFørPeriode,
+                        featureToggleService = featureToggleService,
+                    )
+                },
             )
         }
     }

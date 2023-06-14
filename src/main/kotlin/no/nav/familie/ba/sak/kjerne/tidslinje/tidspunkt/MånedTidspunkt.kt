@@ -67,11 +67,11 @@ data class MånedTidspunkt internal constructor(
 
         internal fun YearMonth.tilTidspunkt() = MånedTidspunkt(this, Uendelighet.INGEN)
 
-        internal fun YearMonth?.tilTidspunktEllerTidligereEnn(tidspunkt: YearMonth?) =
-            tilTidspunktEllerUendelig(tidspunkt ?: YearMonth.now(), Uendelighet.FORTID)
+        internal fun YearMonth?.tilTidspunktEllerUendeligTidlig(defaultUendelighetMåned: YearMonth? = null) =
+            this.tilTidspunktEllerUendelig(defaultUendelighetMåned, Uendelighet.FORTID)
 
-        internal fun YearMonth?.tilTidspunktEllerSenereEnn(tidspunkt: YearMonth?) =
-            tilTidspunktEllerUendelig(tidspunkt ?: YearMonth.now(), Uendelighet.FREMTID)
+        internal fun YearMonth?.tilTidspunktEllerUendeligSent(defaultUendelighetMåned: YearMonth? = null) =
+            this.tilTidspunktEllerUendelig(defaultUendelighetMåned, Uendelighet.FREMTID)
 
         private fun YearMonth?.tilTidspunktEllerUendelig(default: YearMonth?, uendelighet: Uendelighet) =
             this?.let { MånedTidspunkt(it, Uendelighet.INGEN) } ?: MånedTidspunkt(
