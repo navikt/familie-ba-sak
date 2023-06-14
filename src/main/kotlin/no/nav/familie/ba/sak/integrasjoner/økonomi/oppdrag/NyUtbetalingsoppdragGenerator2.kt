@@ -170,7 +170,7 @@ object Bestående2 {
     ): Pair<List<AndelData>, YearMonth?> {
         val beståendeAndeler = mutableListOf<AndelData>()
         var opphørsdato: YearMonth? = null
-        for (index in 0 until forrige.size) {
+        for (index in forrige.indices) {
             val forrige = forrige[index]
             val ny = if (nye.size > index) nye[index] else null
             val nyNeste = if (nye.size > index + 1) nye[index + 1] else null

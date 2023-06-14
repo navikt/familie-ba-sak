@@ -16,21 +16,21 @@ object BeståendeAndelerBeregner {
 
     // TODO på en eller annen måte så skal de som beholdes ha riktig ID, men få oppdatert offset/forrigeOffset/kildeBehandlingId fra forrige beandling
     fun finnBeståendeAndeler(
-        forrige: List<AndelData>,
-        nye: List<AndelData>,
+        forrigeAndeler: List<AndelData>,
+        nyeAndeler: List<AndelData>,
     ): BeståendeAndeler {
-        val index = finnIndexPåFørsteDiff(forrige, nye)
+        val index = finnIndexPåFørsteDiff(forrigeAndeler, nyeAndeler)
         // TODO for å oppdatere id på forrige sånn at bestående fortsatt har riktig id på nytt
-        val forrige = forrige.mapIndexed { index, andelData ->
-            if (nye.size > index) {
-                andelData.copy(id = nye[index]!!.id)
+        val forrige = forrigeAndeler.mapIndexed { forrigeIndex, andelData ->
+            if (nyeAndeler.size > forrigeIndex) {
+                andelData.copy(id = nyeAndeler[forrigeIndex].id)
             } else {
                 andelData
             }
         }
 
         val beståendeAndeler = index?.let {
-            val opphørsdato = finnBeståendeAndelOgOpphør(it, forrige, nye)
+            val opphørsdato = finnBeståendeAndelOgOpphør(it, forrige, nyeAndeler)
             when (opphørsdato) {
                 is Opphørsdato -> {
                     BeståendeAndeler(forrige.subList(0, index), opphørsdato.opphør)
@@ -52,12 +52,12 @@ object BeståendeAndelerBeregner {
 
     private fun finnBeståendeAndelOgOpphør(
         index: Int,
-        forrige: List<AndelData>,
-        nye: List<AndelData>,
+        forrigeAndeler: List<AndelData>,
+        nyeAndeler: List<AndelData>,
     ): BeståendeAndelResultat {
-        val forrige = forrige[index]
-        val ny = if (nye.size > index) nye[index] else null
-        val nyNeste = if (nye.size > index + 1) nye[index + 1] else null
+        val forrige = forrigeAndeler[index]
+        val ny = if (nyeAndeler.size > index) nyeAndeler[index] else null
+        val nyNeste = if (nyeAndeler.size > index + 1) nyeAndeler[index + 1] else null
 
         return finnBeståendeAndelOgOpphør(ny, forrige, nyNeste)
     }
