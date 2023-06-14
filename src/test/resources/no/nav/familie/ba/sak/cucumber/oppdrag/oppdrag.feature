@@ -115,17 +115,17 @@ Egenskap: Vedtak for førstegangsbehandling
     Så forvent følgende utbetalingsoppdrag med ny utbetalingsgenerator
       | BehandlingId | Fra dato | Til dato | Opphørsdato | Beløp | Kode endring | Er endring | Periode id | Forrige periode id | Kildebehandling |
       | 1            | 03.2021  | 03.2021  |             | 700   | NY           | Nei        | 0          |                    | 1               |
-      | 2            | 04.2021  | 04.2021  |             | 800   | ENDR         | Nei        | 1          | 0                  | 2                |
-      | 3            | 05.2021  | 05.2021  |             | 900   | ENDR         | Nei        | 2          | 1                  | 3                |
+      | 2            | 04.2021  | 04.2021  |             | 800   | ENDR         | Nei        | 1          | 0                  | 2               |
+      | 3            | 05.2021  | 05.2021  |             | 900   | ENDR         | Nei        | 2          | 1                  | 3               |
 
   Scenario: Endrer beløp fra april
 
     Gitt følgende tilkjente ytelser
-      | BehandlingId | Fra dato | Til dato | Beløp | Kildebehandling |
-      | 1            | 03.2021  | 06.2021  | 700   | 1               |
+      | BehandlingId | Fra dato | Til dato | Beløp |
+      | 1            | 03.2021  | 06.2021  | 700   |
 
-      | 2            | 03.2021  | 03.2021  | 700   | 1               |
-      | 2            | 04.2021  | 06.2021  | 800   | 1               |
+      | 2            | 03.2021  | 03.2021  | 700   |
+      | 2            | 04.2021  | 06.2021  | 800   |
 
     Når beregner utbetalingsoppdrag
 
@@ -146,11 +146,11 @@ Egenskap: Vedtak for førstegangsbehandling
   Scenario: Endrer beløp fra start
 
     Gitt følgende tilkjente ytelser
-      | BehandlingId | Fra dato | Til dato | Beløp | Kildebehandling |
-      | 1            | 03.2021  | 06.2021  | 700   | 1               |
+      | BehandlingId | Fra dato | Til dato | Beløp |
+      | 1            | 03.2021  | 06.2021  | 700   |
 
-      | 2            | 03.2021  | 03.2021  | 800   | 1               |
-      | 2            | 04.2021  | 06.2021  | 700   | 1               |
+      | 2            | 03.2021  | 03.2021  | 800   |
+      | 2            | 04.2021  | 06.2021  | 700   |
 
     Når beregner utbetalingsoppdrag
 

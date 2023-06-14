@@ -179,10 +179,10 @@ Egenskap: Opphør
   Scenario: Opphør mellom 2 andeler
 
     Gitt følgende tilkjente ytelser
-      | BehandlingId | Fra dato | Til dato | Beløp | Kildebehandling |
-      | 1            | 03.2021  | 08.2021  | 700   | 1               |
-      | 2            | 03.2021  | 04.2021  | 700   | 1               |
-      | 2            | 07.2021  | 08.2021  | 700   | 1               |
+      | BehandlingId | Fra dato | Til dato | Beløp |
+      | 1            | 03.2021  | 08.2021  | 700   |
+      | 2            | 03.2021  | 04.2021  | 700   |
+      | 2            | 07.2021  | 08.2021  | 700   |
 
     Når beregner utbetalingsoppdrag
 
@@ -202,12 +202,12 @@ Egenskap: Opphør
   Scenario: Avkorter en periode, som man sen opphører. Her må opphøret ha peiling på siste andelen med riktig tom
 
     Gitt følgende tilkjente ytelser
-      | BehandlingId | Fra dato | Til dato | Beløp | Kildebehandling |
-      | 1            | 03.2021  | 03.2021  | 700   | 1               |
-      | 1            | 04.2021  | 08.2021  | 700   | 1               |
-      | 2            | 03.2021  | 03.2021  | 700   | 1               |
-      | 2            | 04.2021  | 05.2021  | 700   | 1               |
-      | 3            | 03.2021  | 03.2021  | 700   | 1               |
+      | BehandlingId | Fra dato | Til dato | Beløp |
+      | 1            | 03.2021  | 03.2021  | 700   |
+      | 1            | 04.2021  | 08.2021  | 700   |
+      | 2            | 03.2021  | 03.2021  | 700   |
+      | 2            | 04.2021  | 05.2021  | 700   |
+      | 3            | 03.2021  | 03.2021  | 700   |
 
     Når beregner utbetalingsoppdrag
 
