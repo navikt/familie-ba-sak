@@ -31,6 +31,8 @@ data class AndelData(
     )
 }
 
+fun List<AndelData>.uten0beløp(): List<AndelData> = this.filter { it.beløp != 0 }
+
 data class Behandlingsinformasjon(
     val saksbehandlerId: String,
     val behandlingId: Long,

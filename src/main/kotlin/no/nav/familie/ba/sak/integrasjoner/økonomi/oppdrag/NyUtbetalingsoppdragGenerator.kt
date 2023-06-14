@@ -38,8 +38,7 @@ object NyUtbetalingsoppdragGenerator {
         sisteAndelPerKjede: Map<IdentOgType, AndelData>,
         behandlingsinformasjon: Behandlingsinformasjon,
         forrigeAndeler: List<AndelData>?,
-    ): UtbetalingsoppdragOgAndelerMedOffset {
-        /*
+    ): UtbetalingsoppdragOgAndelerMedOffset {/*
         TODO validering av endretSimuleringsdato, burde ikke kunne være etter min fom på nye andeler
         TODO erSimulering
          */
@@ -71,11 +70,38 @@ object NyUtbetalingsoppdragGenerator {
             val forrigeAndeler = forrigeKjeder[identOgType] ?: emptyList()
             val nyeAndeler = nyeKjeder[identOgType] ?: emptyList()
             val sisteAndel = sisteAndelPerKjede[identOgType]
-            // TODO må nog sende med endretMigreringsDato/erSimulering? her og
-            val nyKjede = beregnNyKjede(forrigeAndeler, nyeAndeler, sisteAndel, sisteOffset)
+            val opphørsdato = finnOpphørsdato(forrigeAndeler, nyeAndeler)
+
+            // TODO må nog sende med endretMigreringsDato/erSimulering? her og (eller opphørsdato?)
+            val nyKjede = beregnNyKjede(
+                forrigeAndeler.uten0beløp(), nyeAndeler.uten0beløp(), sisteAndel, sisteOffset, opphørsdato
+            )
             sisteOffset = nyKjede.sisteOffset
             nyKjede
         }
+    }
+
+    /**
+     * Må håndtere det at man simulererer / endrer migreringsdato / første andel begynner med 0-beløp
+     * Hva skjer når det er kombinasjon av disse?
+     * Hvordan håndterer man eks migrering av
+     */
+    private fun finnOpphørsdato(forrigeAndeler: List<AndelData>, nyeAndeler: List<AndelData>): YearMonth? {
+        // TODO erSImulering / endretMigreringsdato
+        // valider at endretMigreringsdato < forrigeAndeler/nyeAndeler ?
+        return finnOpphørsdatoPga0Beløp(forrigeAndeler, nyeAndeler)
+    }
+
+    private fun finnOpphørsdatoPga0Beløp(forrigeAndeler: List<AndelData>, nyeAndeler: List<AndelData>): YearMonth? {
+        val forrigeFørsteAndel = forrigeAndeler.firstOrNull()
+        val nyFørsteAndel = nyeAndeler.firstOrNull()
+        if (
+            forrigeFørsteAndel != null && nyFørsteAndel != null &&
+            nyFørsteAndel.beløp == 0 && nyFørsteAndel.fom < forrigeFørsteAndel.fom
+        ) {
+            return nyFørsteAndel.fom
+        }
+        return null
     }
 
     private fun utbetalingsperioder(
@@ -91,8 +117,12 @@ object NyUtbetalingsoppdragGenerator {
         behandlingsinformasjon: Behandlingsinformasjon,
         nyeKjeder: List<ResultatForKjede>,
     ): List<AndelMedOffset> = nyeKjeder.flatMap { nyKjede ->
-        nyKjede.beståendeAndeler.filter { it.beløp != 0 }.map { AndelMedOffset(it) } +
-            nyKjede.nyeAndeler.filter { it.beløp != 0 }.map { AndelMedOffset(it, behandlingsinformasjon.behandlingId) }
+        nyKjede.beståendeAndeler.map { AndelMedOffset(it) } + nyKjede.nyeAndeler.map {
+            AndelMedOffset(
+                it,
+                behandlingsinformasjon.behandlingId
+            )
+        }
     }
 
     // Hos økonomi skiller man på endring på oppdragsnivå 110 og på linjenivå 150 (periodenivå).
@@ -102,22 +132,48 @@ object NyUtbetalingsoppdragGenerator {
     private fun kodeEndring(forrigeAndeler: List<AndelData>?) =
         if (forrigeAndeler == null) KodeEndring.NY else KodeEndring.ENDR
 
+    /**
+     * Hvis vi har et opphørsdato så
+     */
     private fun beregnNyKjede(
         forrige: List<AndelData>,
         nye: List<AndelData>,
         sisteAndel: AndelData?,
         offset: Long?,
+        opphørHeleKjedenFra: YearMonth?,
+    ): ResultatForKjede {
+        return if (opphørHeleKjedenFra != null) {
+            beregnNyKjedeMedOpphørsdato(forrige, nye, offset, sisteAndel, opphørHeleKjedenFra)
+        } else {
+            beregnNyKjede(forrige, nye, offset, sisteAndel)
+        }
+    }
+
+    private fun beregnNyKjedeMedOpphørsdato(
+        forrige: List<AndelData>, nye: List<AndelData>, offset: Long?, sisteAndel: AndelData?, opphørsdato: YearMonth
+    ): ResultatForKjede {
+        val (nyeAndelerMedOffset, gjeldendeOffset) = nyeAndelerMedOffset(nye, offset, sisteAndel)
+        val opphørsandel = sisteAndel?.let {
+            forrige.firstOrNull()?.let {
+                if (opphørsdato > it.fom) error("Opphørsdato=$opphørsdato må være før første andelen sitt fom=${it.fom}")
+            }
+            Pair(it, opphørsdato)
+        }
+        return ResultatForKjede(
+            beståendeAndeler = emptyList(),
+            nyeAndeler = nyeAndelerMedOffset,
+            opphørsandel = opphørsandel,
+            sisteOffset = gjeldendeOffset
+        )
+    }
+
+    private fun beregnNyKjede(
+        forrige: List<AndelData>, nye: List<AndelData>, offset: Long?, sisteAndel: AndelData?
     ): ResultatForKjede {
         val beståendeAndeler = finnBeståendeAndeler(forrige, nye)
         val nyeAndeler = nye.subList(beståendeAndeler.andeler.size, nye.size)
-        var gjeldendeOffset = offset ?: -1
-        var forrigeOffset = sisteAndel?.offset
-        val nyeAndelerMedOffset = nyeAndeler.filter { it.beløp != 0 }.mapIndexed { index, andelData ->
-            gjeldendeOffset += 1
-            val nyAndel = andelData.copy(offset = gjeldendeOffset, forrigeOffset = forrigeOffset)
-            forrigeOffset = gjeldendeOffset
-            nyAndel
-        }
+
+        val (nyeAndelerMedOffset, gjeldendeOffset) = nyeAndelerMedOffset(nyeAndeler, offset, sisteAndel)
         // TODO på en eller annen måte verifisere at offset har blitt satt?
         if (gjeldendeOffset < 0) {
             // gjeldendeOffset =
@@ -130,6 +186,20 @@ object NyUtbetalingsoppdragGenerator {
             },
             sisteOffset = gjeldendeOffset,
         )
+    }
+
+    private fun nyeAndelerMedOffset(
+        nyeAndeler: List<AndelData>, offset: Long?, sisteAndel: AndelData?
+    ): Pair<List<AndelData>, Long> {
+        var gjeldendeOffset = offset ?: -1
+        var forrigeOffset = sisteAndel?.offset
+        val nyeAndelerMedOffset = nyeAndeler.mapIndexed { index, andelData ->
+            gjeldendeOffset += 1
+            val nyAndel = andelData.copy(offset = gjeldendeOffset, forrigeOffset = forrigeOffset)
+            forrigeOffset = gjeldendeOffset
+            nyAndel
+        }
+        return Pair(nyeAndelerMedOffset, gjeldendeOffset)
     }
 
     private fun List<AndelData>.groupByIdentOgType(): Map<IdentOgType, List<AndelData>> =
