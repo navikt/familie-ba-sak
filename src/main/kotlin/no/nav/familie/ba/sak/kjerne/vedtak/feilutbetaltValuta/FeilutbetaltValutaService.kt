@@ -58,7 +58,7 @@ class FeilutbetaltValutaService(
             fom = it.fom,
             tom = it.tom,
             feilutbetaltBeløp = it.feilutbetaltBeløp,
-            erPerMåned = it.erPerMåned
+            erPerMåned = it.erPerMåned,
         )
 
     @Transactional

@@ -24,7 +24,7 @@ data class FeilutbetaltValuta(
     var tom: LocalDate,
     @Column(name = "feilutbetalt_beloep", nullable = false)
     var feilutbetaltBeløp: Int,
-    @Column(name = "per_maaned")
+    @Column(name = "er_per_maaned")
     var erPerMåned: Boolean,
 
     @Id
