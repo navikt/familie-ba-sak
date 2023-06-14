@@ -38,7 +38,9 @@ data class Behandlingsinformasjon(
     val behandlingId: Long,
     val fagsakId: Long,
     val aktør: Aktør,
-    val vedtak: Vedtak
+    val vedtak: Vedtak,
+    val erSimulering: Boolean,
+    val endretMigreringsDato: YearMonth?
 )
 
 data class AndelMedOffset(

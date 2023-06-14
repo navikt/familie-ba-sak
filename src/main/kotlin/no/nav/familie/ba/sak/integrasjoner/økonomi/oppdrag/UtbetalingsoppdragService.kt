@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import org.springframework.stereotype.Service
+import java.time.YearMonth
 
 @Service
 class UtbetalingsoppdragService(
@@ -16,6 +17,7 @@ class UtbetalingsoppdragService(
         vedtak: Vedtak,
         forrigeBehandlingId: Long?,
         erSimulering: Boolean,
+        endretMigreringsdato: YearMonth?
     ): Utbetalingsoppdrag {
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandlingId)
         val behandlingsinformasjon = Behandlingsinformasjon(
@@ -24,6 +26,8 @@ class UtbetalingsoppdragService(
             fagsakId = vedtak.behandling.fagsak.id,
             aktør = vedtak.behandling.fagsak.aktør,
             vedtak = vedtak,
+            erSimulering = erSimulering,
+            endretMigreringsDato = endretMigreringsdato,
         )
         val sisteAndelPerKjede = sisteAndelPerKjedeForFagsak(behandlingsinformasjon)
         val resultat = NyUtbetalingsoppdragGenerator.lagUtbetalingsoppdrag(

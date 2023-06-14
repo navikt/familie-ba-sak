@@ -57,7 +57,6 @@ object OppdragParser {
 
     fun mapForventetUtbetalingsoppdrag(
         dataTable: DataTable,
-        medUtbetalingsperiode: Boolean = true,
     ): List<ForventetUtbetalingsoppdrag> {
         return dataTable.groupByBehandlingId().map { (behandlingId, rader) ->
             val rad = rader.first()
@@ -65,7 +64,7 @@ object OppdragParser {
             ForventetUtbetalingsoppdrag(
                 behandlingId = behandlingId,
                 kodeEndring = parseEnum(DomenebegrepUtbetalingsoppdrag.KODE_ENDRING, rad),
-                utbetalingsperiode = if (medUtbetalingsperiode) rader.map { mapForventetUtbetalingsperiode(it) } else listOf(),
+                utbetalingsperiode = rader.map { mapForventetUtbetalingsperiode(it) },
             )
         }
     }
@@ -122,7 +121,10 @@ object OppdragParser {
             beløp = parseInt(DomenebegrepTilkjentYtelse.BELØP, rad),
             behandling = behandling,
             tilkjentYtelse = null,
-            kildeBehandlingId = parseValgfriLong(DomenebegrepTilkjentYtelse.KILDEBEHANDLING_ID, rad), // TODO fjern kildeBehandlingId fra oppsett
+            kildeBehandlingId = parseValgfriLong(
+                DomenebegrepTilkjentYtelse.KILDEBEHANDLING_ID,
+                rad
+            ), // TODO fjern kildeBehandlingId fra oppsett
             aktør = parseAktør(rad),
             periodeIdOffset = parseValgfriLong(DomenebegrepUtbetalingsoppdrag.PERIODE_ID, rad),
             forrigeperiodeIdOffset = parseValgfriLong(DomenebegrepUtbetalingsoppdrag.FORRIGE_PERIODE_ID, rad),
@@ -139,6 +141,10 @@ object OppdragParser {
     }
 
     private fun lagFødselsnummer(id: String) = id.padStart(11, '0')
+}
+
+enum class DomenebegrepBehandlingsinformasjon(override val nøkkel: String) : Domenenøkkel {
+    ENDRET_MIGRERINGSDATO("Endret migreringsdato"),
 }
 
 enum class DomenebegrepTilkjentYtelse(override val nøkkel: String) : Domenenøkkel {

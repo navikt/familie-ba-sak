@@ -16,8 +16,6 @@ object NyUtbetalingsoppdragGenerator {
         nyeAndeler: List<AndelData>,
         forrigeAndeler: List<AndelData>?,
         sisteAndelPerKjede: Map<IdentOgType, AndelData> = emptyMap(),
-        // erSimulering: Boolean = false,
-        // endretMigreringsDato: YearMonth? = null
     ): UtbetalingsoppdragOgAndelerMedOffset {
         validerAndeler(forrigeAndeler, nyeAndeler)
         val nyeKjeder = nyeAndeler.groupByIdentOgType()
@@ -42,7 +40,7 @@ object NyUtbetalingsoppdragGenerator {
         TODO validering av endretSimuleringsdato, burde ikke kunne være etter min fom på nye andeler
         TODO erSimulering
          */
-        val nyeKjeder = lagNyeKjeder(nyeKjeder, forrigeKjeder, sisteAndelPerKjede)
+        val nyeKjeder = lagNyeKjeder(nyeKjeder, forrigeKjeder, sisteAndelPerKjede, behandlingsinformasjon)
 
         val utbetalingsoppdrag = Utbetalingsoppdrag(
             saksbehandlerId = behandlingsinformasjon.saksbehandlerId,
@@ -63,6 +61,7 @@ object NyUtbetalingsoppdragGenerator {
         nyeKjeder: Map<IdentOgType, List<AndelData>>,
         forrigeKjeder: Map<IdentOgType, List<AndelData>>,
         sisteAndelPerKjede: Map<IdentOgType, AndelData>,
+        behandlingsinformasjon: Behandlingsinformasjon,
     ): List<ResultatForKjede> {
         val alleIdentOgTyper = nyeKjeder.keys + forrigeKjeder.keys
         var sisteOffset = sisteAndelPerKjede.values.mapNotNull { it.offset }.maxOrNull()
@@ -70,7 +69,7 @@ object NyUtbetalingsoppdragGenerator {
             val forrigeAndeler = forrigeKjeder[identOgType] ?: emptyList()
             val nyeAndeler = nyeKjeder[identOgType] ?: emptyList()
             val sisteAndel = sisteAndelPerKjede[identOgType]
-            val opphørsdato = finnOpphørsdato(forrigeAndeler, nyeAndeler)
+            val opphørsdato = finnOpphørsdato(forrigeAndeler, nyeAndeler, behandlingsinformasjon)
 
             // TODO må nog sende med endretMigreringsDato/erSimulering? her og (eller opphørsdato?)
             val nyKjede = beregnNyKjede(
@@ -86,10 +85,18 @@ object NyUtbetalingsoppdragGenerator {
      * Hva skjer når det er kombinasjon av disse?
      * Hvordan håndterer man eks migrering av
      */
-    private fun finnOpphørsdato(forrigeAndeler: List<AndelData>, nyeAndeler: List<AndelData>): YearMonth? {
+    private fun finnOpphørsdato(
+        forrigeAndeler: List<AndelData>,
+        nyeAndeler: List<AndelData>,
+        behandlingsinformasjon: Behandlingsinformasjon
+    ): YearMonth? {
         // TODO erSImulering / endretMigreringsdato
-        // valider at endretMigreringsdato < forrigeAndeler/nyeAndeler ?
-        return finnOpphørsdatoPga0Beløp(forrigeAndeler, nyeAndeler)
+        val førsteTidspunkVedSimulering = if (behandlingsinformasjon.erSimulering)
+            listOfNotNull(forrigeAndeler.firstOrNull(), nyeAndeler.firstOrNull()).minOfOrNull { it.fom }
+        else null
+        val endretMigreringsDato = behandlingsinformasjon.endretMigreringsDato // kjedeEtterFørsteEndring.last() to (endretMigreringsDato ?: kjedeEtterFørsteEndring.first().stønadFom)
+        val opphørsdatoPga0Beløp = finnOpphørsdatoPga0Beløp(forrigeAndeler, nyeAndeler)
+        return listOfNotNull(opphørsdatoPga0Beløp, endretMigreringsDato, førsteTidspunkVedSimulering).minOrNull()
     }
 
     private fun finnOpphørsdatoPga0Beløp(forrigeAndeler: List<AndelData>, nyeAndeler: List<AndelData>): YearMonth? {
@@ -118,10 +125,7 @@ object NyUtbetalingsoppdragGenerator {
         nyeKjeder: List<ResultatForKjede>,
     ): List<AndelMedOffset> = nyeKjeder.flatMap { nyKjede ->
         nyKjede.beståendeAndeler.map { AndelMedOffset(it) } + nyKjede.nyeAndeler.map {
-            AndelMedOffset(
-                it,
-                behandlingsinformasjon.behandlingId
-            )
+            AndelMedOffset(it, behandlingsinformasjon.behandlingId)
         }
     }
 
@@ -155,7 +159,7 @@ object NyUtbetalingsoppdragGenerator {
         val (nyeAndelerMedOffset, gjeldendeOffset) = nyeAndelerMedOffset(nye, offset, sisteAndel)
         val opphørsandel = sisteAndel?.let {
             forrige.firstOrNull()?.let {
-                if (opphørsdato > it.fom) error("Opphørsdato=$opphørsdato må være før første andelen sitt fom=${it.fom}")
+                //if (opphørsdato > it.fom) error("Opphørsdato=$opphørsdato må være før første andelen sitt fom=${it.fom}")
             }
             Pair(it, opphørsdato)
         }
