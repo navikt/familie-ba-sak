@@ -62,7 +62,7 @@ class OppdragSteg {
                 .flatMap { it.value.andelerTilkjentYtelse }
                 .groupBy { IdentOgType(it.aktør.aktivFødselsnummer(), it.type) }
                 .mapValues {
-                    val maxOffset = it.value.maxOf { it.periodeOffset!! }
+                    val maxOffset = it.value.filter { it.periodeOffset != null }.maxOfOrNull { it.periodeOffset!! }
                     it.value.filter { it.periodeOffset == maxOffset }.sortedBy { it.id }.first()
                 }
         }
