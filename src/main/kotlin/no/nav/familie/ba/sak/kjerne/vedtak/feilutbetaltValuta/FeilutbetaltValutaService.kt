@@ -58,6 +58,7 @@ class FeilutbetaltValutaService(
             fom = it.fom,
             tom = it.tom,
             feilutbetaltBeløp = it.feilutbetaltBeløp,
+            erPerMåned = it.erPerMåned
         )
 
     @Transactional
@@ -67,5 +68,6 @@ class FeilutbetaltValutaService(
         periode.fom = feilutbetaltValuta.fom
         periode.tom = feilutbetaltValuta.tom
         periode.feilutbetaltBeløp = feilutbetaltValuta.feilutbetaltBeløp
+        periode.erPerMåned = feilutbetaltValuta.erPerMåned ?: featureToggleService.isEnabled(FEILUTBETALT_VALUTA_PR_MND)
     }
 }
