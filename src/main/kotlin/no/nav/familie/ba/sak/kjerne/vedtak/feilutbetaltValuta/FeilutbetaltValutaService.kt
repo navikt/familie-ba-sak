@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.feilutbetaltValuta
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.config.FeatureToggleConfig.Companion.FEILUTBETALT_VALUTA_PR_MND
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestFeilutbetaltValuta
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import org.springframework.beans.factory.annotation.Autowired
@@ -14,6 +16,9 @@ class FeilutbetaltValutaService(
 
     @Autowired
     private val loggService: LoggService,
+
+    @Autowired
+    private val featureToggleService: FeatureToggleService,
 ) {
 
     private fun finnFeilutbetaltValutaThrows(id: Long): FeilutbetaltValuta {
@@ -28,6 +33,7 @@ class FeilutbetaltValutaService(
                 fom = feilutbetaltValuta.fom,
                 tom = feilutbetaltValuta.tom,
                 feilutbetaltBeløp = feilutbetaltValuta.feilutbetaltBeløp,
+                erPerMåned = feilutbetaltValuta.erPerMåned ?: featureToggleService.isEnabled(FEILUTBETALT_VALUTA_PR_MND),
             ),
         )
         loggService.loggFeilutbetaltValutaPeriodeLagtTil(behandlingId = behandlingId, feilutbetaltValuta = lagret)
