@@ -1,5 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent
 
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
+import no.nav.familie.ba.sak.common.isSameOrAfter
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
@@ -21,11 +24,13 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.EØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
+import java.time.LocalDate
 
 fun genererVedtaksperioder(
     grunnlagForVedtakPerioder: GrunnlagForVedtaksperioder,
     grunnlagForVedtakPerioderForrigeBehandling: GrunnlagForVedtaksperioder?,
     vedtak: Vedtak,
+    endringstidspunkt: LocalDate,
 ): List<VedtaksperiodeMedBegrunnelser> {
     val grunnlagTidslinjePerPerson = grunnlagForVedtakPerioder.utledGrunnlagTidslinjePerPerson()
 
@@ -38,24 +43,35 @@ fun genererVedtaksperioder(
         finnPerioderSomSkalBegrunnes(
             grunnlagTidslinjePerPerson = grunnlagTidslinjePerPerson,
             grunnlagTidslinjePerPersonForrigeBehandling = grunnlagTidslinjePerPersonForrigeBehandling,
+            endringstidspunkt = endringstidspunkt,
         )
 
     return perioderSomSkalBegrunnesBasertPåDenneOgForrigeBehandling.map { it.tilVedtaksperiodeMedBegrunnelser(vedtak) }
 }
 
 fun finnPerioderSomSkalBegrunnes(
-    grunnlagTidslinjePerPerson: Map<AktørId, Tidslinje<GrunnlagForPerson, Måned>>,
-    grunnlagTidslinjePerPersonForrigeBehandling: Map<AktørId, Tidslinje<GrunnlagForPerson, Måned>>,
+    grunnlagTidslinjePerPerson: Map<Aktør, Tidslinje<GrunnlagForPerson, Måned>>,
+    grunnlagTidslinjePerPersonForrigeBehandling: Map<Aktør, Tidslinje<GrunnlagForPerson, Måned>>,
+    endringstidspunkt: LocalDate,
 ): List<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>> {
     val gjeldendeOgForrigeGrunnlagKombinert = kombinerGjeldendeOgForrigeGrunnlag(
         grunnlagTidslinjePerPerson = grunnlagTidslinjePerPerson,
         grunnlagTidslinjePerPersonForrigeBehandling = grunnlagTidslinjePerPersonForrigeBehandling,
     )
 
-    val sammenslåttePerioderUtenEksplisittAvslag = gjeldendeOgForrigeGrunnlagKombinert.slåSammenUtenEksplisitteAvslag()
+    val sammenslåttePerioderUtenEksplisittAvslag = gjeldendeOgForrigeGrunnlagKombinert
+        .slåSammenUtenEksplisitteAvslag()
+        .filtrerPåEndringstidspunkt(endringstidspunkt)
+
     val eksplisitteAvslagsperioder = gjeldendeOgForrigeGrunnlagKombinert.utledEksplisitteAvslagsperioder()
 
     return (eksplisitteAvslagsperioder + sammenslåttePerioderUtenEksplisittAvslag).slåSammenAvslagOgReduksjonsperioderMedSammeFomOgTom()
+}
+
+private fun Collection<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>>.filtrerPåEndringstidspunkt(
+    endringstidspunkt: LocalDate,
+) = this.filter {
+    (it.tilOgMed.tilLocalDateEllerNull() ?: TIDENES_ENDE).isSameOrAfter(endringstidspunkt)
 }
 
 private fun List<Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned>>.slåSammenUtenEksplisitteAvslag(): Collection<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>> {
@@ -138,8 +154,8 @@ private fun GrunnlagForGjeldendeOgForrigeBehandling.medVilkårSomHarEksplisitteA
  * ikke er det.
  **/
 private fun kombinerGjeldendeOgForrigeGrunnlag(
-    grunnlagTidslinjePerPerson: Map<AktørId, Tidslinje<GrunnlagForPerson, Måned>>,
-    grunnlagTidslinjePerPersonForrigeBehandling: Map<AktørId, Tidslinje<GrunnlagForPerson, Måned>>,
+    grunnlagTidslinjePerPerson: Map<Aktør, Tidslinje<GrunnlagForPerson, Måned>>,
+    grunnlagTidslinjePerPersonForrigeBehandling: Map<Aktør, Tidslinje<GrunnlagForPerson, Måned>>,
 ): List<Tidslinje<GrunnlagForGjeldendeOgForrigeBehandling, Måned>> =
     grunnlagTidslinjePerPerson.map { (aktørId, grunnlagstidslinje) ->
         val grunnlagForrigeBehandling = grunnlagTidslinjePerPersonForrigeBehandling[aktørId]

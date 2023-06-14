@@ -49,6 +49,7 @@ class EndringstidspunktTest(
     @Test
     fun `Skal filtrere bort alle vedtaksperioder før endringstidspunktet`() {
         every { featureToggleService.isEnabled(FeatureToggleConfig.VEDTAKSPERIODE_NY) } returns false
+        every { featureToggleService.isEnabled(FeatureToggleConfig.BEGRUNNELSER_NY) } returns false
 
         val barnFødselsdato = LocalDate.now().minusYears(2)
         val scenario = mockServerKlient().lagScenario(
