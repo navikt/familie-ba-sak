@@ -71,10 +71,13 @@ object BeståendeAndelerBeregner {
             return Opphørsdato(forrige.fom)
         }
         if (forrige.fom > ny.fom || forrige.beløp != ny.beløp) {
+            if(ny.beløp == 0) {
+                return Opphørsdato(ny.fom)
+            }
             return NyAndelSkriverOver
         }
         if (forrige.tom > ny.tom) {
-            val opphørsdato = if (nyNeste == null || nyNeste.fom != ny.tom.plusMonths(1)) {
+            val opphørsdato = if (nyNeste == null || nyNeste.fom != ny.tom.plusMonths(1) || nyNeste.beløp == 0) {
                 ny.tom.plusMonths(1)
             } else {
                 null

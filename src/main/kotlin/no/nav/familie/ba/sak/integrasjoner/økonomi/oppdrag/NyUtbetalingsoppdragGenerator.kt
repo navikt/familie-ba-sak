@@ -91,8 +91,8 @@ object NyUtbetalingsoppdragGenerator {
         behandlingsinformasjon: Behandlingsinformasjon,
         nyeKjeder: List<ResultatForKjede>,
     ): List<AndelMedOffset> = nyeKjeder.flatMap { nyKjede ->
-        nyKjede.beståendeAndeler.map { AndelMedOffset(it) } +
-            nyKjede.nyeAndeler.map { AndelMedOffset(it, behandlingsinformasjon.behandlingId) }
+        nyKjede.beståendeAndeler.filter { it.beløp != 0 }.map { AndelMedOffset(it) } +
+            nyKjede.nyeAndeler.filter { it.beløp != 0 }.map { AndelMedOffset(it, behandlingsinformasjon.behandlingId) }
     }
 
     // Hos økonomi skiller man på endring på oppdragsnivå 110 og på linjenivå 150 (periodenivå).
@@ -112,7 +112,7 @@ object NyUtbetalingsoppdragGenerator {
         val nyeAndeler = nye.subList(beståendeAndeler.andeler.size, nye.size)
         var gjeldendeOffset = offset ?: -1
         var forrigeOffset = sisteAndel?.offset
-        val nyeAndelerMedOffset = nyeAndeler.mapIndexed { index, andelData ->
+        val nyeAndelerMedOffset = nyeAndeler.filter { it.beløp != 0 }.mapIndexed { index, andelData ->
             gjeldendeOffset += 1
             val nyAndel = andelData.copy(offset = gjeldendeOffset, forrigeOffset = forrigeOffset)
             forrigeOffset = gjeldendeOffset

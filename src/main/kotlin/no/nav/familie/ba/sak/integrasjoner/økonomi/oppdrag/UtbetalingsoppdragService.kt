@@ -45,10 +45,11 @@ class UtbetalingsoppdragService(
         tilkjentYtelse.utbetalingsoppdrag = objectMapper.writeValueAsString(resultat.utbetalingsoppdrag)
         val andelerPåId = resultat.andeler.associateBy { it.id }
         val andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse
-        if (resultat.andeler.size != andelerTilkjentYtelse.size) {
+        val andelerSomSkalSendesTilOppdrag = andelerTilkjentYtelse.filter { it.erAndelSomSkalSendesTilOppdrag() }
+        if (resultat.andeler.size != andelerSomSkalSendesTilOppdrag.size) {
             error("Forventer å ha like mange")
         }
-        andelerTilkjentYtelse.forEach { andel ->
+        andelerSomSkalSendesTilOppdrag.forEach { andel ->
             val andelMedOffset = andelerPåId[andel.id]
                 ?: error("Finner ikke andel med offset for andel=${andel.id}")
             andel.periodeOffset = andelMedOffset.offset

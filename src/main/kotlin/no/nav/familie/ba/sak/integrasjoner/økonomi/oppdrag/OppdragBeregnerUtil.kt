@@ -6,7 +6,7 @@ object OppdragBeregnerUtil {
         forrige: List<AndelData>?,
         nye: List<AndelData>,
     ) {
-        val forrigeEllerEmpty = forrige ?: emptyList()
+        val forrigeEllerEmpty = (forrige ?: emptyList()).filter { it.beløp != 0 }
         val id = forrigeEllerEmpty.map { it.id } + nye.map { it.id }
         if (id.size != id.toSet().size) {
             error("Inneholder duplikat av id'er")
