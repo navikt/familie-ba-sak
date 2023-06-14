@@ -16,7 +16,7 @@ object VilkårsvurderingMigreringUtils {
         person: Person,
         nyMigreringsdato: LocalDate,
     ): LocalDate {
-        val forrigeVilkårsPeriodeFom = hentForrigeVilkårsvurderingVilkårResultaterSomErOppfylt(
+        val forrigeVilkårsPeriodeFom = hentVilkårResultaterSomErOppfyltFraForrigeVilkårsvurdering(
             forrigeBehandlingsvilkårsvurdering,
             vilkår,
             person,
@@ -38,7 +38,7 @@ object VilkårsvurderingMigreringUtils {
         person: Person,
         periodeFom: LocalDate,
     ): LocalDate? {
-        val forrigeVilkårsPeriodeTom: LocalDate? = hentForrigeVilkårsvurderingVilkårResultaterSomErOppfylt(
+        val forrigeVilkårsPeriodeTom: LocalDate? = hentVilkårResultaterSomErOppfyltFraForrigeVilkårsvurdering(
             forrigeBehandlingsvilkårsvurdering,
             vilkår,
             person,
@@ -60,7 +60,7 @@ object VilkårsvurderingMigreringUtils {
         val manglendeVilkårResultater = mutableListOf<VilkårResultat>()
         vilkårResulater.forEach {
             val forrigeVilkårResultater =
-                hentForrigeVilkårsvurderingVilkårResultaterSomErOppfylt(
+                hentVilkårResultaterSomErOppfyltFraForrigeVilkårsvurdering(
                     forrigeBehandlingsvilkårsvurdering,
                     it.vilkårType,
                     person,
@@ -75,7 +75,7 @@ object VilkårsvurderingMigreringUtils {
         return manglendeVilkårResultater
     }
 
-    private fun hentForrigeVilkårsvurderingVilkårResultaterSomErOppfylt(
+    private fun hentVilkårResultaterSomErOppfyltFraForrigeVilkårsvurdering(
         forrigeBehandlingsvilkårsvurdering: Vilkårsvurdering,
         vilkår: Vilkår,
         person: Person,
