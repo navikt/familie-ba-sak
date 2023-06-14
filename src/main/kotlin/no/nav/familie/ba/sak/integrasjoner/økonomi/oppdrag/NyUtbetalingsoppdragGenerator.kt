@@ -133,7 +133,7 @@ object NyUtbetalingsoppdragGenerator {
     }
 
     private fun List<AndelData>.groupByIdentOgType(): Map<IdentOgType, List<AndelData>> =
-        groupBy { IdentOgType(it.ident, it.type) }
+        groupBy { IdentOgType(it.ident, it.type) }.mapValues { it.value.sortedBy { it.fom } }
 
     private fun lagOpphørsperioder(
         behandlingsinformasjon: Behandlingsinformasjon,
