@@ -1,8 +1,8 @@
 package no.nav.familie.ba.sak.integrasjoner.pdl
 
 import no.nav.familie.ba.sak.common.kallEksternTjeneste
-import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdressebeskyttelseBolkResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.AdressebeskyttelseBolk
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdressebeskyttelseBolkResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdressebeskyttelseResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBaseResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonBolkRequest

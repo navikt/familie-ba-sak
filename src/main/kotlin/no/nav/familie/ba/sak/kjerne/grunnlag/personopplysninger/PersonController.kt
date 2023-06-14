@@ -53,7 +53,7 @@ class PersonController(
         @RequestBody personIdenter: List<String>,
     ): ResponseEntity<Ressurs<List<String>>> {
         val personIdenterMedStrengtFortroligGradering =
-            familieIntegrasjonerTilgangskontrollClient.returnerPersonerMedAdressebeskyttelse(personIdenter)
+            familieIntegrasjonerTilgangskontrollService.returnerPersonerMedAdressebeskyttelse(personIdenter)
         return ResponseEntity.ok(Ressurs.success(personIdenterMedStrengtFortroligGradering))
     }
 

@@ -4,7 +4,6 @@ import no.nav.familie.ba.sak.common.kallEksternTjeneste
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.http.client.AbstractRestClient
 import no.nav.familie.kontrakter.felles.Tema
-import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.beans.factory.annotation.Value
@@ -40,16 +39,6 @@ class FamilieIntegrasjonerTilgangskontrollClient(
                 },
             )
         }
-    }
-
-    fun returnerPersonerMedAdressebeskyttelse(personIdentList: List<String>): List<String> {
-        val adresseBeskyttelseBolk = systemOnlyPdlRestClient.hentAdressebeskyttelseBolk(personIdentList)
-        return adresseBeskyttelseBolk.filter {
-            it.person?.adressebeskyttelse?.any { adressebeskyttelse ->
-                adressebeskyttelse.gradering == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG ||
-                    adressebeskyttelse.gradering == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG_UTLAND
-            } ?: false
-        }.map { it.ident }
     }
 
     companion object {
