@@ -70,6 +70,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import utledEndringstidspunkt
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -115,6 +116,18 @@ class VedtaksperiodeService(
         vedtaksperiodeHentOgPersisterService.lagre(vedtaksperiodeMedBegrunnelser)
 
         return vedtaksperiodeMedBegrunnelser.vedtak
+    }
+
+    fun finnEndringstidspunktForBehandling(behandlingId: Long): LocalDate {
+        val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+
+        val forrigeBehandling =
+            behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = behandling.fagsak.id)
+
+        return utledEndringstidspunkt(
+            grunnlagForVedtaksperioder = behandling.hentGrunnlagForVedtaksperioder(),
+            grunnlagForVedtaksperioderForrigeBehandling = forrigeBehandling?.hentGrunnlagForVedtaksperioder(),
+        )
     }
 
     fun oppdaterVedtaksperiodeMedStandardbegrunnelser(
@@ -329,25 +342,29 @@ class VedtaksperiodeService(
         val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
 
         val endringstidspunkt = behandling.overstyrtEndringstidspunkt
-            ?: endringstidspunktService.finnEndringstidspunktForBehandling(behandlingId = behandling.id)
+            ?: if (featureToggleService.isEnabled(FeatureToggleConfig.ENDRINGSTIDSPUNKT)) {
+                finnEndringstidspunktForBehandling(behandlingId = behandling.id)
+            } else {
+                endringstidspunktService.finnEndringstidspunktForBehandling(behandlingId = behandling.id)
+            }
 
         return genererVedtaksperioder(
-            grunnlagForVedtakPerioder = hentGrunnlagForVedtaksperioder(behandling),
-            grunnlagForVedtakPerioderForrigeBehandling = forrigeBehandling?.let { hentGrunnlagForVedtaksperioder(it) },
+            grunnlagForVedtakPerioder = behandling.hentGrunnlagForVedtaksperioder(),
+            grunnlagForVedtakPerioderForrigeBehandling = forrigeBehandling?.hentGrunnlagForVedtaksperioder(),
             vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId),
             endringstidspunkt = endringstidspunkt,
         )
     }
 
-    fun hentGrunnlagForVedtaksperioder(behandling: Behandling): GrunnlagForVedtaksperioder =
+    fun Behandling.hentGrunnlagForVedtaksperioder(): GrunnlagForVedtaksperioder =
         GrunnlagForVedtaksperioder(
-            persongrunnlag = persongrunnlagService.hentAktivThrows(behandling.id),
-            personResultater = vilkårsvurderingService.hentAktivForBehandlingThrows(behandling.id).personResultater,
-            fagsakType = behandling.fagsak.type,
-            kompetanser = kompetanseRepository.finnFraBehandlingId(behandling.id).toList(),
-            endredeUtbetalinger = endretUtbetalingAndelRepository.findByBehandlingId(behandling.id),
-            andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandling.id),
-            perioderOvergangsstønad = småbarnstilleggService.hentPerioderMedFullOvergangsstønad(behandling),
+            persongrunnlag = persongrunnlagService.hentAktivThrows(this.id),
+            personResultater = vilkårsvurderingService.hentAktivForBehandlingThrows(this.id).personResultater,
+            fagsakType = fagsak.type,
+            kompetanser = kompetanseRepository.finnFraBehandlingId(this.id).toList(),
+            endredeUtbetalinger = endretUtbetalingAndelRepository.findByBehandlingId(this.id),
+            andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(this.id),
+            perioderOvergangsstønad = småbarnstilleggService.hentPerioderMedFullOvergangsstønad(this),
         )
 
     @Deprecated("skal bruke genererVedtaksperioderMedBegrunnelser når den er klar")
@@ -520,10 +537,8 @@ class VedtaksperiodeService(
                         behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
 
                     utvidetVedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserForPeriode(
-                        grunnlagForVedtaksperioder = hentGrunnlagForVedtaksperioder(behandling),
-                        grunnlagForVedtaksperioderForrigeBehandling = forrigeBehandling?.let {
-                            hentGrunnlagForVedtaksperioder(it)
-                        },
+                        grunnlagForVedtaksperioder = behandling.hentGrunnlagForVedtaksperioder(),
+                        grunnlagForVedtaksperioderForrigeBehandling = forrigeBehandling?.hentGrunnlagForVedtaksperioder(),
                         sanityBegrunnelser = sanityBegrunnelser,
                         behandlingUnderkategori = behandling.underkategori,
                         fagsakType = behandling.fagsak.type,
