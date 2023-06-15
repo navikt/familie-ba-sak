@@ -359,7 +359,7 @@ class VedtaksperiodeService(
     fun Behandling.hentGrunnlagForVedtaksperioder(): GrunnlagForVedtaksperioder =
         GrunnlagForVedtaksperioder(
             persongrunnlag = persongrunnlagService.hentAktivThrows(this.id),
-            personResultater = vilkårsvurderingService.hentAktivForBehandlingThrows(this.id).personResultater,
+            personResultater = vilkårsvurderingService.hentAktivForBehandling(this.id)?.personResultater ?: emptySet(),
             fagsakType = fagsak.type,
             kompetanser = kompetanseRepository.finnFraBehandlingId(this.id).toList(),
             endredeUtbetalinger = endretUtbetalingAndelRepository.findByBehandlingId(this.id),
