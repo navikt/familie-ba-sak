@@ -99,7 +99,7 @@ class UtvidetBehandlingService(
 
         val tilbakekreving = tilbakekrevingRepository.findByBehandlingId(behandling.id)
 
-        val endringstidspunkt = if (!behandling.steg.kommerEtter(StegType.BEHANDLINGSRESULTAT)) {
+        val endringstidspunkt = if (behandling.steg != StegType.BESLUTTE_VEDTAK) {
             TIDENES_MORGEN
         } else if (featureToggleService.isEnabled(FeatureToggleConfig.ENDRINGSTIDSPUNKT)) {
             vedtaksperiodeService.finnEndringstidspunktForBehandling(behandlingId = behandling.id)
