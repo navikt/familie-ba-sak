@@ -27,7 +27,7 @@ class SatsServiceTest {
         assertPeriode(TestKrPeriode(beløp = 1676, fom = "2022-01", tom = "2023-02"), ordinærePerioder[4])
         assertPeriode(TestKrPeriode(beløp = 1723, fom = "2023-03", tom = "2023-03"), ordinærePerioder[5])
         assertPeriode(TestKrPeriode(beløp = 1083, fom = "2023-04", tom = "2023-06"), ordinærePerioder[6])
-        assertPeriode(TestKrPeriode(beløp = 1100, fom = "2023-07", tom = null), ordinærePerioder[7])
+        assertPeriode(TestKrPeriode(beløp = 1310, fom = "2023-07", tom = null), ordinærePerioder[7])
     }
 
     private fun assertPeriode(
