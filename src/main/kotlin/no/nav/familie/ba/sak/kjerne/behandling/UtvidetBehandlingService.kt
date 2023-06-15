@@ -38,6 +38,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.korrigertetterbetaling.KorrigertEtterbetalingService
 import no.nav.familie.ba.sak.kjerne.korrigertvedtak.KorrigertVedtakService
+import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.TilbakekrevingRepository
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
@@ -98,7 +99,9 @@ class UtvidetBehandlingService(
 
         val tilbakekreving = tilbakekrevingRepository.findByBehandlingId(behandling.id)
 
-        val endringstidspunkt = if (featureToggleService.isEnabled(FeatureToggleConfig.ENDRINGSTIDSPUNKT)) {
+        val endringstidspunkt = if (!behandling.steg.kommerEtter(StegType.BEHANDLINGSRESULTAT)) {
+            TIDENES_MORGEN
+        } else if (featureToggleService.isEnabled(FeatureToggleConfig.ENDRINGSTIDSPUNKT)) {
             vedtaksperiodeService.finnEndringstidspunktForBehandling(behandlingId = behandling.id)
         } else {
             endringstidspunktService.finnEndringstidspunktForBehandling(behandlingId = behandling.id)
