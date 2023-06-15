@@ -38,6 +38,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeTrigger
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityVilkår
+import no.nav.familie.ba.sak.kjerne.brev.domene.Valgbarhet
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårRolle
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårTrigger
 import no.nav.familie.ba.sak.kjerne.brev.domene.ØvrigTrigger
@@ -1208,6 +1209,7 @@ fun lagSanityBegrunnelse(
     hjemlerFolketrygdloven: List<String> = emptyList(),
     endretUtbetalingsperiodeDeltBostedTriggere: EndretUtbetalingsperiodeDeltBostedTriggere? = null,
     endretUtbetalingsperiodeTriggere: List<EndretUtbetalingsperiodeTrigger>? = null,
+    valgbarhet: Valgbarhet? = null,
 ): SanityBegrunnelse = SanityBegrunnelse(
     apiNavn = apiNavn,
     navnISystem = navnISystem,
@@ -1223,6 +1225,7 @@ fun lagSanityBegrunnelse(
     hjemlerFolketrygdloven = hjemlerFolketrygdloven,
     endretUtbetalingsperiodeDeltBostedUtbetalingTrigger = endretUtbetalingsperiodeDeltBostedTriggere,
     endretUtbetalingsperiodeTriggere = endretUtbetalingsperiodeTriggere,
+    valgbarhet = valgbarhet,
 )
 
 fun lagSanityEøsBegrunnelse(
@@ -1261,6 +1264,7 @@ fun lagTriggesAv(
     medlemskap: Boolean = false,
     deltbosted: Boolean = false,
     valgbar: Boolean = true,
+    valgbarhet: Valgbarhet? = null,
     endringsaarsaker: Set<Årsak> = emptySet(),
     etterEndretUtbetaling: Boolean = false,
     endretUtbetalingSkalUtbetales: EndretUtbetalingsperiodeDeltBostedTriggere = EndretUtbetalingsperiodeDeltBostedTriggere.UTBETALING_IKKE_RELEVANT,
@@ -1283,6 +1287,7 @@ fun lagTriggesAv(
     deltBostedSkalIkkeDeles = false,
     gjelderFraInnvilgelsestidspunkt = false,
     gjelderFørstePeriode = false,
+    valgbarhet = valgbarhet,
 )
 
 fun oppfyltVilkår(vilkår: Vilkår, regelverk: Regelverk? = null) =
