@@ -133,7 +133,7 @@ class OppgaveServiceTest {
 
     @ParameterizedTest
     @EnumSource(ManuellOppgaveType::class)
-    fun `Opprett oppgave med manuell oppgavetype skal lage oppgave med behandlesAvApplikasjon ikke satt`(manuellOppgaveType: ManuellOppgaveType) {
+    fun `Opprett oppgave med manuell oppgavetype skal lage oppgave med behandlesAvApplikasjon satt for småbarnstillegg og åpen behandling, men ikke fødselshendelse`(manuellOppgaveType: ManuellOppgaveType) {
         every { behandlingHentOgPersisterService.hent(BEHANDLING_ID) } returns lagTestBehandling(aktørId = AKTØR_ID_FAGSAK)
         every { behandlingHentOgPersisterService.lagreEllerOppdater(any()) } returns lagTestBehandling()
         every { oppgaveRepository.save(any()) } returns lagTestOppgave()
