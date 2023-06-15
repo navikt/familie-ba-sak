@@ -222,7 +222,7 @@ class VedtaksperiodeServiceTest {
         every {
             feilutbetaltValutaRepository.finnFeilutbetaltValutaForBehandling(vedtak.behandling.id)
         } returns perioder.map {
-            FeilutbetaltValuta(1L, fom = it.first, tom = it.second, 200)
+            FeilutbetaltValuta(1L, fom = it.first, tom = it.second, 200, true)
         }
         val periodebeskrivelser = vedtaksperiodeService.beskrivPerioderMedFeilutbetaltValuta(vedtak)
 
