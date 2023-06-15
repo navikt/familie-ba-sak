@@ -28,9 +28,11 @@ import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.Vilkårsvurderi
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingServiceTest.Companion.validerKopiertVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.gjelderAlltidFraBarnetsFødselsdato
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
@@ -359,7 +361,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
     }
 
     @Test
-    fun `skal lage vilkårsvurderingsperiode for migrering når det finnes et vilkår som ikke er oppfylt med null i fom og tom fra forrige behandling`() {
+    fun `genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato - skal ikke vurdere VilkårResultater som ikke er oppfylt fra forrige behandling ved kopiering til nye VilkårResultater`() {
         val søkerFnr = randomFnr()
         val barnFnr = randomFnr()
         val søkerFødselsdato = LocalDate.of(1984, 8, 1)
@@ -531,6 +533,116 @@ class VilkårsvurderingForNyBehandlingServiceTest(
                     it.periodeTom == null
             }
         }
+    }
+
+    @Test
+    fun `genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato - skal kopiere over alle felter, inkludert UtdypendeVilkårsvurdering, med unntak av fom og tom for VilkårResultatene som blir forskjøvet av ny migreringsdato`() {
+        val søkerFnr = randomFnr()
+        val barnFnr = randomFnr()
+        val søkerFødselsdato = LocalDate.of(1984, 8, 1)
+        val barnetsFødselsdato = LocalDate.now().minusYears(10)
+        val nyMigreringsdato = LocalDate.now().minusYears(5)
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
+        val forrigeBehandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
+            lagBehandling(
+                fagsak = fagsak,
+                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                årsak = BehandlingÅrsak.MIGRERING,
+            ),
+        )
+        val forrigePersonopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
+            behandlingId = forrigeBehandling.id,
+            søkerPersonIdent = søkerFnr,
+            barnasIdenter = listOf(barnFnr),
+            barnasFødselsdatoer = listOf(barnetsFødselsdato),
+            søkerFødselsdato = søkerFødselsdato,
+            søkerAktør = personidentService.hentOgLagreAktør(søkerFnr, true),
+            barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true),
+        )
+        persongrunnlagService.lagreOgDeaktiverGammel(forrigePersonopplysningGrunnlag)
+
+        var forrigeVilkårsvurdering = Vilkårsvurdering(behandling = forrigeBehandling)
+        val søkerPersonResultat = PersonResultat(
+            vilkårsvurdering = forrigeVilkårsvurdering,
+            aktør = personidentService.hentOgLagreAktør(søkerFnr, true),
+        )
+        val deltBostedTom = nyMigreringsdato.plusYears(2)
+        val deltBostedBegrunnelse = "Dette er en kopiert begrunnelse"
+        søkerPersonResultat.setSortedVilkårResultater(
+            lagSøkerVilkårResultat(
+                søkerPersonResultat = søkerPersonResultat,
+                periodeFom = nyMigreringsdato.plusYears(1),
+                behandlingId = forrigeBehandling.id,
+            ).plus(
+                lagVilkårResultat(
+                    personResultat = søkerPersonResultat,
+                    vilkårType = Vilkår.UTVIDET_BARNETRYGD,
+                    periodeFom = nyMigreringsdato.plusMonths(5),
+                    periodeTom = deltBostedTom,
+                    behandlingId = forrigeBehandling.id,
+                    begrunnelse = deltBostedBegrunnelse,
+                    utdypendeVilkårsvurderinger = listOf(UtdypendeVilkårsvurdering.DELT_BOSTED),
+                ),
+            ),
+        )
+        val barnPersonResultat = PersonResultat(
+            vilkårsvurdering = forrigeVilkårsvurdering,
+            aktør = personidentService.hentOgLagreAktør(barnFnr, true),
+        )
+        barnPersonResultat.setSortedVilkårResultater(
+            lagBarnVilkårResultat(
+                barnPersonResultat = barnPersonResultat,
+                barnetsFødselsdato = barnetsFødselsdato,
+                behandlingId = forrigeBehandling.id,
+                periodeFom = nyMigreringsdato.plusMonths(5),
+            ),
+        )
+        forrigeVilkårsvurdering = forrigeVilkårsvurdering.apply {
+            personResultater = setOf(
+                søkerPersonResultat,
+                barnPersonResultat,
+            )
+        }
+        vilkårsvurderingService.lagreNyOgDeaktiverGammel(forrigeVilkårsvurdering)
+
+        markerBehandlingSomAvsluttet(forrigeBehandling)
+
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
+            lagBehandling(
+                fagsak = fagsak,
+                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
+            ),
+        )
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
+            behandlingId = behandling.id,
+            søkerPersonIdent = søkerFnr,
+            barnasIdenter = listOf(barnFnr),
+            barnasFødselsdatoer = listOf(barnetsFødselsdato),
+            søkerFødselsdato = søkerFødselsdato,
+            søkerAktør = personidentService.hentOgLagreAktør(søkerFnr, true),
+            barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true),
+        )
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+
+        val vilkårsvurdering =
+            vilkårsvurderingForNyBehandlingService.genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
+                behandling = behandling,
+                forrigeBehandlingSomErVedtatt = forrigeBehandling,
+                nyMigreringsdato = nyMigreringsdato,
+            )
+        assertThat(vilkårsvurdering.personResultater).isNotEmpty
+        val søkerVilkårResultat =
+            vilkårsvurdering.personResultater.first { it.aktør.aktivFødselsnummer() == søkerFnr }.vilkårResultater
+        assertThat(søkerVilkårResultat).hasSize(3)
+        val utvidetBarnetrygdVilkår = søkerVilkårResultat.single { it.vilkårType == Vilkår.UTVIDET_BARNETRYGD }
+        assertThat(utvidetBarnetrygdVilkår.utdypendeVilkårsvurderinger.single()).isEqualTo(
+            UtdypendeVilkårsvurdering.DELT_BOSTED,
+        )
+        assertThat(utvidetBarnetrygdVilkår.periodeFom).isEqualTo(nyMigreringsdato)
+        assertThat(utvidetBarnetrygdVilkår.periodeTom).isEqualTo(deltBostedTom)
+        assertThat(utvidetBarnetrygdVilkår.begrunnelse).isEqualTo(deltBostedBegrunnelse)
     }
 
     @Test

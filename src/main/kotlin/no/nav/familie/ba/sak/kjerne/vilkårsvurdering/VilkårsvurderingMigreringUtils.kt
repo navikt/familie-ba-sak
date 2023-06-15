@@ -69,11 +69,22 @@ object VilkårsvurderingMigreringUtils {
                 forrigeVilkårResultater.filter { forrigeVilkårResultat ->
                     forrigeVilkårResultat.periodeFom != it.periodeFom &&
                         forrigeVilkårResultat.periodeTom != it.periodeTom
-                }.map { vilkårResultat -> vilkårResultat.kopierMedParent(personResultat) }.toSet(),
+                }.map { vilkårResultat -> vilkårResultat.kopierMedParent(personResultat) }
+                    .toSet(), // Mulig vi her burde bruke vilkårResultat.tilKopiForNyttPersonResultat slik at behandlingsId blir oppdatert.
             )
         }
         return manglendeVilkårResultater
     }
+
+    fun finnEksisterendeVilkårResultatSomBlirForskjøvet(
+        forrigeBehandlingVilkårsvurdering: Vilkårsvurdering,
+        vilkår: Vilkår,
+        person: Person,
+        nyFom: LocalDate,
+        nyTom: LocalDate?,
+    ) =
+        hentVilkårResultaterSomErOppfyltFraForrigeVilkårsvurdering(forrigeBehandlingVilkårsvurdering, vilkår, person)
+            .single { it.periodeFom == nyFom || it.periodeTom == nyTom || (it.periodeFom!! > nyFom && nyTom == null) }
 
     private fun hentVilkårResultaterSomErOppfyltFraForrigeVilkårsvurdering(
         forrigeBehandlingsvilkårsvurdering: Vilkårsvurdering,
