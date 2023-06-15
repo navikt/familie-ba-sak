@@ -94,6 +94,7 @@ class VedtaksperiodeServiceTest {
     fun init() {
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns forrigeBehandling
         every { endringstidspunktService.finnEndringstidspunktForBehandling(vedtak.behandling.id) } returns endringstidspunkt
+        every { vedtaksperiodeService.finnEndringstidspunktForBehandling(vedtak.behandling.id) } returns endringstidspunkt
         every { persongrunnlagService.hentAktiv(any()) } returns
             lagTestPersonopplysningGrunnlag(vedtak.behandling.id, person)
         every {
