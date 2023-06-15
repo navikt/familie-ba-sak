@@ -611,12 +611,12 @@ class VedtaksperiodeService(
         val andelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService
             .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.id)
 
-        if (featureToggleService.isEnabled(BRUKE_TIDSLINJE_I_STEDET_FOR)) {
-            return andelerTilkjentYtelse.mapTilUtbetalingsperioder(
+        return if (featureToggleService.isEnabled(BRUKE_TIDSLINJE_I_STEDET_FOR)) {
+            andelerTilkjentYtelse.mapTilUtbetalingsperioder(
                 personopplysningGrunnlag = personopplysningGrunnlag,
             )
         } else {
-            return mapTilUtbetalingsperioderGammel(personopplysningGrunnlag, andelerTilkjentYtelse)
+            mapTilUtbetalingsperioderGammel(personopplysningGrunnlag, andelerTilkjentYtelse)
         }
     }
 
