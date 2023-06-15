@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
-import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
@@ -30,13 +29,6 @@ data class VilkårsvurderingForNyBehandlingUtils(
     ): Vilkårsvurdering {
         return Vilkårsvurdering(behandling = behandling).apply {
             when {
-                behandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD &&
-                    behandling.opprettetÅrsak == BehandlingÅrsak.MIGRERING -> {
-                    personResultater = lagPersonResultaterForMigreringsbehandling(
-                        vilkårsvurdering = this,
-                    )
-                }
-
                 behandling.opprettetÅrsak == BehandlingÅrsak.FØDSELSHENDELSE -> {
                     personResultater = lagPersonResultaterForFødselshendelse(
                         vilkårsvurdering = this,
@@ -100,44 +92,6 @@ data class VilkårsvurderingForNyBehandlingUtils(
             }
         }
         return vilkårsvurdering
-    }
-
-    private fun lagPersonResultaterForMigreringsbehandling(
-        vilkårsvurdering: Vilkårsvurdering,
-    ): Set<PersonResultat> {
-        return personopplysningGrunnlag.søkerOgBarn.map { person ->
-            val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = person.aktør)
-
-            val vilkårTyperForPerson = Vilkår.hentVilkårFor(
-                personType = person.type,
-                fagsakType = vilkårsvurdering.behandling.fagsak.type,
-                behandlingUnderkategori = vilkårsvurdering.behandling.underkategori,
-            )
-
-            val vilkårResultater = vilkårTyperForPerson.map { vilkår ->
-                val fom = if (vilkår.gjelderAlltidFraBarnetsFødselsdato()) person.fødselsdato else null
-
-                val tom: LocalDate? =
-                    if (vilkår == Vilkår.UNDER_18_ÅR) person.fødselsdato.til18ÅrsVilkårsdato() else null
-
-                val begrunnelse = "Migrering"
-
-                VilkårResultat(
-                    personResultat = personResultat,
-                    erAutomatiskVurdert = false,
-                    resultat = Resultat.OPPFYLT,
-                    vilkårType = vilkår,
-                    periodeFom = fom,
-                    periodeTom = tom,
-                    begrunnelse = begrunnelse,
-                    behandlingId = personResultat.vilkårsvurdering.behandling.id,
-                )
-            }.toSortedSet(VilkårResultat.VilkårResultatComparator)
-
-            personResultat.setSortedVilkårResultater(vilkårResultater)
-
-            personResultat
-        }.toSet()
     }
 
     private fun lagPersonResultaterForFødselshendelse(
