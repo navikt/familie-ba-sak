@@ -350,7 +350,7 @@ fun lagTestPersonopplysningGrunnlag(
     søkerPersonIdent: String,
     barnasIdenter: List<String>,
     barnasFødselsdatoer: List<LocalDate> = barnasIdenter.map { LocalDate.of(2019, 1, 1) },
-    søkerFødselsdato: LocalDate = LocalDate.of(2019, 1, 1),
+    søkerFødselsdato: LocalDate = LocalDate.of(1987, 1, 1),
     søkerAktør: Aktør = tilAktør(søkerPersonIdent).also {
         it.personidenter.add(
             Personident(
