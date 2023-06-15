@@ -18,22 +18,21 @@ Egenskap: Endringstidspunkt påvirker periodene
   Scenario: Skal kun ta med vedtaksperioder som kommer etter
 
     Og lag personresultater for behandling 1
-    Og med overstyring av vilkår for behandling 1
-      | AktørId | Vilkår                                           | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag |
-      | 1234    | BOSATT_I_RIKET                                   | 24.12.1987 |            | Oppfylt  |                      |
-      | 1234    | LOVLIG_OPPHOLD                                   | 24.12.1987 | 01.12.2020 | Oppfylt  |                      |
-
-      | 3456    | GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD | 02.12.2016 |            | Oppfylt  |                      |
-      | 3456    | BOR_MED_SØKER                                    | 02.12.2016 | 01.12.2020 | Oppfylt  |                      |
-      | 3456    | UNDER_18_ÅR                                      | 02.12.2016 | 30.11.2034 | Oppfylt  |                      |
-
     Og legg til nye vilkårresultater for behandling 1
-      | AktørId | Vilkår         | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag |
-      | 1234    | LOVLIG_OPPHOLD | 02.12.2020 | 30.09.2021 | ikke_oppfylt | Ja                   |
-      | 1234    | LOVLIG_OPPHOLD | 01.10.2021 |            | Oppfylt      |                      |
+      | AktørId | Vilkår                                           | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag |
+      | 1234    | BOSATT_I_RIKET                                   | 24.12.1987 |            | Oppfylt      |                      |
+      | 1234    | LOVLIG_OPPHOLD                                   | 24.12.1987 | 01.12.2020 | Oppfylt      |                      |
 
-      | 3456    | BOR_MED_SØKER  | 02.12.2020 | 30.09.2021 | ikke_oppfylt | Ja                   |
-      | 3456    | BOR_MED_SØKER  | 01.10.2021 |            | Oppfylt      |                      |
+      | 3456    | GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD | 02.12.2016 |            | Oppfylt      |                      |
+      | 3456    | BOR_MED_SØKER                                    | 02.12.2016 | 01.12.2020 | Oppfylt      |                      |
+      | 3456    | UNDER_18_ÅR                                      | 02.12.2016 | 30.11.2034 | Oppfylt      |                      |
+
+      | 1234    | LOVLIG_OPPHOLD                                   | 02.12.2020 | 30.09.2021 | ikke_oppfylt | Ja                   |
+      | 1234    | LOVLIG_OPPHOLD                                   | 01.10.2021 |            | Oppfylt      |                      |
+
+      | 3456    | BOR_MED_SØKER                                    | 02.12.2020 | 30.09.2021 | ikke_oppfylt | Ja                   |
+      | 3456    | BOR_MED_SØKER                                    | 01.10.2021 |            | Oppfylt      |                      |
+
 
     Og med andeler tilkjent ytelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |

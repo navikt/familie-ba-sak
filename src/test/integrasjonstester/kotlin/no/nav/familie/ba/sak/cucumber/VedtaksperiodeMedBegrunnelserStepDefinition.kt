@@ -57,34 +57,12 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
 
     @Og("legg til nye vilkårresultater for behandling {}")
     fun `legg til nye vilkårresultater for behandling`(behandlingId: Long, dataTable: DataTable) {
-        val nyeVilkårPerPerson = dataTable.asMaps().groupBy { parseAktørId(it) }
-        val personResultatForBehandling =
-            personResultater[behandlingId] ?: error("Finner ikke personresultater for behandling med id $behandlingId")
-        personResultater[behandlingId] = personResultatForBehandling.map { personResultat ->
-            val nyeVilkårForPerson = nyeVilkårPerPerson[personResultat.aktør.aktørId]
+        val vilkårResultaterPerPerson = dataTable.asMaps().groupBy { parseAktørId(it) }
+        val personResultatForBehandling = personResultater[behandlingId]
+            ?: error("Finner ikke personresultater for behandling med id $behandlingId")
 
-            val nyeVilkårResultater = nyeVilkårForPerson.tilVilkårResultater(behandlingId, personResultat)
-            personResultat.vilkårResultater.addAll(nyeVilkårResultater)
-            personResultat
-        }.toSet()
-    }
-
-    @Og("med overstyring av vilkår for behandling {}")
-    fun overstyrPersonResultater(behandlingId: Long, dataTable: DataTable) {
-        val overstyringerPerPerson = dataTable.asMaps().groupBy { parseAktørId(it) }
-        val personResultatForBehandling =
-            personResultater[behandlingId] ?: error("Finner ikke personresultater for behandling med id $behandlingId")
-        personResultater[behandlingId] = personResultatForBehandling.map { personResultat ->
-            val overstyringerForPerson = overstyringerPerPerson[personResultat.aktør.aktørId]
-
-            personResultat.vilkårResultater.forEach { vilkårResultat ->
-                oppdaterVilkårResultat(
-                    vilkårResultat,
-                    overstyringerForPerson,
-                )
-            }
-            personResultat
-        }.toSet()
+        personResultater[behandlingId] =
+            leggTilVilkårResultatPåPersonResultat(personResultatForBehandling, vilkårResultaterPerPerson, behandlingId)
     }
 
     @Og("med endringstidspunkt")
