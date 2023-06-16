@@ -27,6 +27,12 @@ internal class BrevmottakerServiceTest {
     private lateinit var brevmottakerRepository: BrevmottakerRepository
 
     @MockK
+    private lateinit var personidentService: PersonidentService
+
+    @MockK
+    private lateinit var personopplysningerService: PersonopplysningerService
+
+    @MockK
     private lateinit var loggService: LoggService
 
     @InjectMockKs
