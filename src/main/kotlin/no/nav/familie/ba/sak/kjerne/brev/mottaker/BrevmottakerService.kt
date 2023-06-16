@@ -64,53 +64,59 @@ class BrevmottakerService(
         }
 
     fun lagMottakereFraBrevMottakere(
-        brevMottakere: List<Brevmottaker>,
+        manueltRegistrerteMottakere: List<Brevmottaker>,
         søkersident: String,
         søkersnavn: String = hentMottakerNavn(søkersident),
-    ): List<MottakerInfo> =
-        brevMottakere.map { brevmottaker ->
-            when (brevmottaker.type) {
-                MottakerType.FULLMEKTIG, MottakerType.VERGE -> {
-                    val finnesBrevmottakerMedUtenlandskAdresse =
-                        brevMottakere.any { it.type == MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE }
-                    if (finnesBrevmottakerMedUtenlandskAdresse) { // brev sendes til fullmektig adresse og bruker sin manuell adresse
-                        MottakerInfo(
-                            brukerId = søkersident,
-                            brukerIdType = BrukerIdType.FNR,
-                            erInstitusjonVerge = false,
-                            navn = brevmottaker.navn,
-                            manuellAdresseInfo = lagManuellAdresseInfo(brevmottaker),
-                        ).toList()
-                    } else { // brev sendes til fullmektig adresse og bruker sin registerte adresse
-                        listOf(
-                            MottakerInfo(
-                                brukerId = søkersident,
-                                brukerIdType = BrukerIdType.FNR,
-                                erInstitusjonVerge = false,
-                                navn = brevmottaker.navn,
-                                manuellAdresseInfo = lagManuellAdresseInfo(brevmottaker),
-                            ),
-                            MottakerInfo(
-                                brukerId = søkersident,
-                                brukerIdType = BrukerIdType.FNR,
-                                erInstitusjonVerge = false,
-                                navn = søkersnavn,
-                            ),
-                        )
-                    }
-                }
+    ): List<MottakerInfo> {
+        val manuellDødsbo = manueltRegistrerteMottakere.filter { it.type == MottakerType.DØDSBO }
+            .map {
+                MottakerInfo(
+                    brukerId = "",
+                    brukerIdType = null,
+                    erInstitusjonVerge = false,
+                    navn = søkersnavn.vDødsbo(landkode = it.landkode),
+                    manuellAdresseInfo = lagManuellAdresseInfo(it),
+                )
+            }.singleOrNull()
 
-                MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE, MottakerType.DØDSBO ->
-                    // brev sendes til kun bruker sin registerte/manuell adresse
-                    MottakerInfo(
-                        brukerId = søkersident,
-                        brukerIdType = BrukerIdType.FNR,
-                        erInstitusjonVerge = false,
-                        navn = søkersnavn,
-                        manuellAdresseInfo = lagManuellAdresseInfo(brevmottaker),
-                    ).toList()
-            }
-        }.flatten()
+        if (manuellDødsbo != null) {
+            // brev sendes kun til den manuelt registerte dødsboadressen
+            return manuellDødsbo.toList()
+        }
+
+        val manuellAdresseUtenlands = manueltRegistrerteMottakere.filter { it.type == MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE }
+            .map {
+                MottakerInfo(
+                    brukerId = søkersident,
+                    brukerIdType = BrukerIdType.FNR,
+                    erInstitusjonVerge = false,
+                    navn = søkersnavn,
+                    manuellAdresseInfo = lagManuellAdresseInfo(it),
+                )
+            }.singleOrNull()
+
+        // brev sendes til brukers (manuelt) registerte adresse (i utlandet)
+        val bruker = manuellAdresseUtenlands ?: MottakerInfo(
+            brukerId = søkersident,
+            brukerIdType = BrukerIdType.FNR,
+            erInstitusjonVerge = false,
+            navn = søkersnavn,
+        )
+
+        // ...og evt. til en manuelt registrert verge eller fullmektig i tillegg
+        val manuellTilleggsmottaker = manueltRegistrerteMottakere.filter { it.type != MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE }
+            .map {
+                MottakerInfo(
+                    brukerId = "",
+                    brukerIdType = null,
+                    erInstitusjonVerge = false,
+                    navn = it.navn,
+                    manuellAdresseInfo = lagManuellAdresseInfo(it),
+                )
+            }.singleOrNull()
+
+        return listOfNotNull(bruker, manuellTilleggsmottaker)
+    }
 
     fun hentMottakerNavn(personIdent: String): String {
         val aktør = personidentService.hentAktør(personIdent)
@@ -126,4 +132,11 @@ class BrevmottakerService(
         poststed = brevmottaker.poststed,
         landkode = brevmottaker.landkode,
     )
+}
+
+private fun String.vDødsbo(landkode: String): String {
+    return when (landkode.uppercase()) {
+        "NO" -> "$this v/dødsbo"
+        else -> "Estate of $this"
+    }
 }

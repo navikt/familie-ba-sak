@@ -281,7 +281,7 @@ internal class DokumentServiceTest {
         verify(exactly = 2) { taskRepository.save(any()) }
 
         assertEquals(2, avsenderMottakere.size)
-        assertEquals("John Doe", avsenderMottakere.first().navn)
+        assertEquals("John Doe", avsenderMottakere.first { it.idType == null }.navn)
     }
 
     @Test
