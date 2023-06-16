@@ -98,7 +98,7 @@ internal class BrevmottakerServiceTest {
         assertTrue { mottakerInfo.first().manuellAdresseInfo != null }
         assertTrue { mottakerInfo.first().manuellAdresseInfo!!.landkode == "DE" }
 
-        assertEquals("John Doe", mottakerInfo.last { it.brukerIdType == null }.navn)
+        assertEquals("John Doe", mottakerInfo.last().navn)
         assertTrue { mottakerInfo.last().manuellAdresseInfo != null }
     }
 
@@ -135,7 +135,7 @@ internal class BrevmottakerServiceTest {
         val mottakerInfo = brevmottakerService.lagMottakereFraBrevMottakere(brevmottakere, søkersident, søkersnavn)
         assertTrue { mottakerInfo.size == 1 }
 
-        assertEquals("Estate of $søkersnavn", mottakerInfo.first().navn)
+        assertEquals(søkersnavn, mottakerInfo.first().navn)
         assertTrue { mottakerInfo.first().manuellAdresseInfo != null }
         assertTrue { mottakerInfo.first().manuellAdresseInfo!!.landkode == "DE" }
     }

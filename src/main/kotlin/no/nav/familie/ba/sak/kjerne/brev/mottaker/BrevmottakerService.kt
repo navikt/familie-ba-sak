@@ -74,7 +74,7 @@ class BrevmottakerService(
                     brukerId = "",
                     brukerIdType = null,
                     erInstitusjonVerge = false,
-                    navn = søkersnavn.vDødsbo(landkode = it.landkode),
+                    navn = søkersnavn,
                     manuellAdresseInfo = lagManuellAdresseInfo(it),
                 )
             }.singleOrNull()
@@ -132,11 +132,4 @@ class BrevmottakerService(
         poststed = brevmottaker.poststed,
         landkode = brevmottaker.landkode,
     )
-}
-
-private fun String.vDødsbo(landkode: String): String {
-    return when (landkode.uppercase()) {
-        "NO" -> "$this v/dødsbo"
-        else -> "Estate of $this"
-    }
 }
