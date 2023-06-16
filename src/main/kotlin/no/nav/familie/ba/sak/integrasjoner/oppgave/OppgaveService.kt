@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.task.OpprettTaskService
+import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveRequest
 import no.nav.familie.kontrakter.felles.oppgave.FinnOppgaveResponseDto
@@ -50,6 +51,7 @@ class OppgaveService(
         fristForFerdigstillelse: LocalDate,
         tilordnetNavIdent: String? = null,
         beskrivelse: String? = null,
+        manuellOppgaveType: ManuellOppgaveType? = null,
     ): String {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
         val fagsakId = behandling.fagsak.id
@@ -92,7 +94,7 @@ class OppgaveService(
                 tilordnetRessurs = tilordnetNavIdent,
                 behandlesAvApplikasjon = when {
                     oppgavetyperSomBehandlesAvBaSak.contains(oppgavetype) -> "familie-ba-sak"
-                    oppgavetype == Oppgavetype.VurderLivshendelse && !behandling.erVedtatt() -> "familie-ba-sak"
+                    manuellOppgaveType?.settBehandlesAvApplikasjon == true -> "familie-ba-sak"
                     else -> null
                 },
             )
@@ -109,16 +111,16 @@ class OppgaveService(
 
     fun opprettOppgaveForManuellBehandling(
         behandling: Behandling,
-        oppgavetype: Oppgavetype,
         begrunnelse: String = "",
         opprettLogginnslag: Boolean = false,
+        manuellOppgaveType: ManuellOppgaveType,
     ): String {
         logger.info("Sender autovedtak til manuell behandling, se secureLogger for mer detaljer.")
         secureLogger.info("Sender autovedtak til manuell behandling. Begrunnelse: $begrunnelse")
-        opprettTaskService.opprettOppgaveTask(
+        opprettTaskService.opprettOppgaveForManuellBehandlingTask(
             behandlingId = behandling.id,
-            oppgavetype = oppgavetype,
             beskrivelse = begrunnelse,
+            manuellOppgaveType = manuellOppgaveType,
         )
 
         if (opprettLogginnslag) {
@@ -321,7 +323,7 @@ class OppgaveService(
     companion object {
 
         private val logger = LoggerFactory.getLogger(OppgaveService::class.java)
-        private val secureLogger = LoggerFactory.getLogger("secureLoger")
+        private val secureLogger = LoggerFactory.getLogger("secureLogger")
         private val oppgavetyperSomBehandlesAvBaSak = listOf(
             Oppgavetype.BehandleSak,
             Oppgavetype.GodkjenneVedtak,

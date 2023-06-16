@@ -34,6 +34,7 @@ import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.ba.sak.task.OpprettTaskService
+import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import org.slf4j.LoggerFactory
@@ -232,7 +233,7 @@ class AutovedtakFødselshendelseService(
         oppgaveService.opprettOppgaveForManuellBehandling(
             behandling = behandling,
             begrunnelse = "Fødselshendelse: $begrunnelseForManuellOppgave",
-            oppgavetype = Oppgavetype.VurderLivshendelse,
+            manuellOppgaveType = ManuellOppgaveType.FØDSELSHENDELSE,
         )
 
         return "Henlegger behandling $behandling automatisk på grunn av ugyldig resultat"
