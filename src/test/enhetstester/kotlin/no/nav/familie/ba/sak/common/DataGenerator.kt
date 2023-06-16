@@ -350,6 +350,7 @@ fun lagTestPersonopplysningGrunnlag(
     søkerPersonIdent: String,
     barnasIdenter: List<String>,
     barnasFødselsdatoer: List<LocalDate> = barnasIdenter.map { LocalDate.of(2019, 1, 1) },
+    søkerFødselsdato: LocalDate = LocalDate.of(1987, 1, 1),
     søkerAktør: Aktør = tilAktør(søkerPersonIdent).also {
         it.personidenter.add(
             Personident(
@@ -384,7 +385,7 @@ fun lagTestPersonopplysningGrunnlag(
         aktør = søkerAktør,
         type = PersonType.SØKER,
         personopplysningGrunnlag = personopplysningGrunnlag,
-        fødselsdato = LocalDate.of(2019, 1, 1),
+        fødselsdato = søkerFødselsdato,
         navn = "",
         kjønn = Kjønn.KVINNE,
     ).also { søker ->
@@ -1042,7 +1043,7 @@ fun lagVilkårResultat(
     personResultat: PersonResultat? = null,
     vilkårType: Vilkår = Vilkår.BOSATT_I_RIKET,
     resultat: Resultat = Resultat.OPPFYLT,
-    periodeFom: LocalDate = LocalDate.of(2009, 12, 24),
+    periodeFom: LocalDate? = LocalDate.of(2009, 12, 24),
     periodeTom: LocalDate? = LocalDate.of(2010, 1, 31),
     begrunnelse: String = "",
     behandlingId: Long = lagBehandling().id,

@@ -359,6 +359,181 @@ class VilkårsvurderingForNyBehandlingServiceTest(
     }
 
     @Test
+    fun `skal lage vilkårsvurderingsperiode for migrering når det finnes et vilkår som ikke er oppfylt med null i fom og tom fra forrige behandling`() {
+        val søkerFnr = randomFnr()
+        val barnFnr = randomFnr()
+        val søkerFødselsdato = LocalDate.of(1984, 8, 1)
+        val barnetsFødselsdato = LocalDate.now().minusYears(10)
+        val nyMigreringsdato = LocalDate.now().minusYears(5)
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
+        val forrigeBehandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
+            lagBehandling(
+                fagsak = fagsak,
+                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                årsak = BehandlingÅrsak.MIGRERING,
+            ),
+        )
+        val forrigePersonopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
+            behandlingId = forrigeBehandling.id,
+            søkerPersonIdent = søkerFnr,
+            barnasIdenter = listOf(barnFnr),
+            barnasFødselsdatoer = listOf(barnetsFødselsdato),
+            søkerFødselsdato = søkerFødselsdato,
+            søkerAktør = personidentService.hentOgLagreAktør(søkerFnr, true),
+            barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true),
+        )
+        persongrunnlagService.lagreOgDeaktiverGammel(forrigePersonopplysningGrunnlag)
+
+        var forrigeVilkårsvurdering = Vilkårsvurdering(behandling = forrigeBehandling)
+        val søkerPersonResultat = PersonResultat(
+            vilkårsvurdering = forrigeVilkårsvurdering,
+            aktør = personidentService.hentOgLagreAktør(søkerFnr, true),
+        )
+        søkerPersonResultat.setSortedVilkårResultater(
+            lagSøkerVilkårResultat(
+                søkerPersonResultat = søkerPersonResultat,
+                periodeFom = nyMigreringsdato.plusYears(1),
+                behandlingId = forrigeBehandling.id,
+            ),
+        )
+        val barnPersonResultat = PersonResultat(
+            vilkårsvurdering = forrigeVilkårsvurdering,
+            aktør = personidentService.hentOgLagreAktør(barnFnr, true),
+        )
+        barnPersonResultat.setSortedVilkårResultater(
+            setOf(
+                lagVilkårResultat(
+                    personResultat = barnPersonResultat,
+                    vilkårType = Vilkår.UNDER_18_ÅR,
+                    resultat = Resultat.OPPFYLT,
+                    periodeFom = barnetsFødselsdato,
+                    periodeTom = barnetsFødselsdato.plusYears(18).minusMonths(1),
+                    behandlingId = forrigeBehandling.id,
+                ),
+                lagVilkårResultat(
+                    personResultat = barnPersonResultat,
+                    vilkårType = Vilkår.GIFT_PARTNERSKAP,
+                    resultat = Resultat.OPPFYLT,
+                    periodeFom = nyMigreringsdato.plusYears(1),
+                    periodeTom = null,
+                    behandlingId = forrigeBehandling.id,
+                ),
+                lagVilkårResultat(
+                    personResultat = barnPersonResultat,
+                    vilkårType = Vilkår.BOR_MED_SØKER,
+                    resultat = Resultat.OPPFYLT,
+                    periodeFom = nyMigreringsdato.plusYears(1),
+                    periodeTom = nyMigreringsdato.plusYears(1).plusMonths(4),
+                    behandlingId = forrigeBehandling.id,
+                ),
+                lagVilkårResultat(
+                    personResultat = barnPersonResultat,
+                    vilkårType = Vilkår.BOR_MED_SØKER,
+                    resultat = Resultat.IKKE_OPPFYLT,
+                    periodeFom = null,
+                    periodeTom = null,
+                    behandlingId = forrigeBehandling.id,
+                ),
+                lagVilkårResultat(
+                    personResultat = barnPersonResultat,
+                    vilkårType = Vilkår.BOSATT_I_RIKET,
+                    resultat = Resultat.OPPFYLT,
+                    periodeFom = nyMigreringsdato.plusYears(1),
+                    periodeTom = null,
+                    behandlingId = forrigeBehandling.id,
+                ),
+                lagVilkårResultat(
+                    personResultat = barnPersonResultat,
+                    vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                    resultat = Resultat.OPPFYLT,
+                    periodeFom = nyMigreringsdato.plusYears(1),
+                    periodeTom = null,
+                    behandlingId = forrigeBehandling.id,
+                ),
+            ),
+        )
+        forrigeVilkårsvurdering = forrigeVilkårsvurdering.apply {
+            personResultater = setOf(
+                søkerPersonResultat,
+                barnPersonResultat,
+            )
+        }
+        vilkårsvurderingService.lagreNyOgDeaktiverGammel(forrigeVilkårsvurdering)
+
+        markerBehandlingSomAvsluttet(forrigeBehandling)
+
+        val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
+            lagBehandling(
+                fagsak = fagsak,
+                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                årsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
+            ),
+        )
+        val personopplysningGrunnlag = lagTestPersonopplysningGrunnlag(
+            behandlingId = behandling.id,
+            søkerPersonIdent = søkerFnr,
+            barnasIdenter = listOf(barnFnr),
+            barnasFødselsdatoer = listOf(barnetsFødselsdato),
+            søkerFødselsdato = søkerFødselsdato,
+            søkerAktør = personidentService.hentOgLagreAktør(søkerFnr, true),
+            barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true),
+        )
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+
+        val vilkårsvurdering =
+            vilkårsvurderingForNyBehandlingService.genererVilkårsvurderingForMigreringsbehandlingMedÅrsakEndreMigreringsdato(
+                behandling = behandling,
+                forrigeBehandlingSomErVedtatt = forrigeBehandling,
+                nyMigreringsdato = nyMigreringsdato,
+            )
+        Assertions.assertTrue { vilkårsvurdering.personResultater.isNotEmpty() }
+        val søkerVilkårResultat =
+            vilkårsvurdering.personResultater.first { it.aktør.aktivFødselsnummer() == søkerFnr }.vilkårResultater
+        Assertions.assertTrue { søkerVilkårResultat.size == 2 }
+        Assertions.assertTrue {
+            søkerVilkårResultat.all {
+                it.periodeFom == nyMigreringsdato &&
+                    it.periodeTom == null
+            }
+        }
+
+        val barnVilkårResultat =
+            vilkårsvurdering.personResultater.first { it.aktør.aktivFødselsnummer() == barnFnr }.vilkårResultater
+        Assertions.assertTrue { barnVilkårResultat.size == 5 } // IKKE_OPPFYLT vilkår skal ikke kopieres over
+        Assertions.assertTrue {
+            barnVilkårResultat.filter { it.vilkårType == Vilkår.BOR_MED_SØKER }.any {
+                it.periodeFom == nyMigreringsdato &&
+                    it.periodeTom == nyMigreringsdato.plusYears(1).plusMonths(4)
+            }
+        }
+        Assertions.assertTrue {
+            barnVilkårResultat.filter { it.vilkårType == Vilkår.UNDER_18_ÅR }.all {
+                it.periodeFom == barnetsFødselsdato &&
+                    it.periodeTom == barnetsFødselsdato.til18ÅrsVilkårsdato()
+            }
+        }
+        Assertions.assertTrue {
+            barnVilkårResultat.filter { it.vilkårType == Vilkår.GIFT_PARTNERSKAP }.all {
+                it.periodeFom == barnetsFødselsdato &&
+                    it.periodeTom == null
+            }
+        }
+        Assertions.assertTrue {
+            barnVilkårResultat.filter {
+                it.vilkårType !in listOf(
+                    Vilkår.GIFT_PARTNERSKAP,
+                    Vilkår.UNDER_18_ÅR,
+                    Vilkår.BOR_MED_SØKER,
+                )
+            }.all {
+                it.periodeFom == nyMigreringsdato &&
+                    it.periodeTom == null
+            }
+        }
+    }
+
+    @Test
     fun `skal lage vilkårsvurderingsperiode for helmanuell migrering`() {
         val fnr = randomFnr()
         val barnFnr = randomFnr()

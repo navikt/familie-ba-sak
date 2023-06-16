@@ -34,7 +34,7 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
     private var kompetanser = mutableMapOf<Long, List<Kompetanse>>()
     private var endredeUtbetalinger = mutableMapOf<Long, List<EndretUtbetalingAndel>>()
     private var andelerTilkjentYtelse = mutableMapOf<Long, List<AndelTilkjentYtelse>>()
-    private var endringstidspunkt = mapOf<Long, LocalDate?>()
+    private var overstyrtEndringstidspunkt = mapOf<Long, LocalDate?>()
 
     private var gjeldendeBehandlingId: Long? = null
 
@@ -65,9 +65,9 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
             leggTilVilkårResultatPåPersonResultat(personResultatForBehandling, vilkårResultaterPerPerson, behandlingId)
     }
 
-    @Og("med endringstidspunkt")
+    @Og("med overstyrt endringstidspunkt")
     fun settEndringstidspunkt(dataTable: DataTable) {
-        endringstidspunkt = dataTable.asMaps().associate { rad ->
+        overstyrtEndringstidspunkt = dataTable.asMaps().associate { rad ->
             parseLong(Domenebegrep.BEHANDLING_ID, rad) to
                 parseDato(DomenebegrepVedtaksperiodeMedBegrunnelser.ENDRINGSTIDSPUNKT, rad)
         }
@@ -95,15 +95,15 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
         gjeldendeBehandlingId = behandlingId
 
         vedtaksperioderMedBegrunnelser = lagVedtaksPerioder(
-            behandlingId,
-            vedtaksliste,
-            behandlingTilForrigeBehandling,
-            persongrunnlag,
-            personResultater,
-            kompetanser,
-            endredeUtbetalinger,
-            andelerTilkjentYtelse,
-            endringstidspunkt,
+            behandlingId = behandlingId,
+            vedtaksListe = vedtaksliste,
+            behandlingTilForrigeBehandling = behandlingTilForrigeBehandling,
+            personGrunnlag = persongrunnlag,
+            personResultater = personResultater,
+            kompetanser = kompetanser,
+            endredeUtbetalinger = endredeUtbetalinger,
+            andelerTilkjentYtelse = andelerTilkjentYtelse,
+            endringstidspunkt = overstyrtEndringstidspunkt,
         )
     }
 

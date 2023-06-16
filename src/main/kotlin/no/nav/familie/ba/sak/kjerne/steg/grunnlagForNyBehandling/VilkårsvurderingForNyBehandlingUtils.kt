@@ -259,8 +259,11 @@ data class VilkårsvurderingForNyBehandlingUtils(
                 vilkårResultater,
                 forrigeBehandlingVilkårsvurdering,
                 person,
+                personResultat,
             )
-            vilkårResultater.addAll(manglendePerioder.map { it.kopierMedParent(personResultat) }.toSet())
+
+            vilkårResultater.addAll(manglendePerioder)
+
             personResultat.setSortedVilkårResultater(vilkårResultater)
 
             personResultat
