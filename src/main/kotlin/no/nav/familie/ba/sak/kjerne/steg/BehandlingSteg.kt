@@ -212,26 +212,6 @@ fun hentNesteSteg(
 
     return when (behandlingÅrsak) {
         BehandlingÅrsak.TEKNISK_OPPHØR -> throw Feil("Teknisk opphør er ikke mulig å behandle lenger")
-        BehandlingÅrsak.MIGRERING -> {
-            when (utførendeStegType) {
-                REGISTRERE_PERSONGRUNNLAG -> {
-                    if (behandling.fagsak.type == FagsakType.INSTITUSJON) {
-                        REGISTRERE_INSTITUSJON_OG_VERGE
-                    } else {
-                        VILKÅRSVURDERING
-                    }
-                }
-
-                REGISTRERE_INSTITUSJON_OG_VERGE -> VILKÅRSVURDERING
-                VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
-                BEHANDLINGSRESULTAT -> IVERKSETT_MOT_OPPDRAG
-                IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
-                VENTE_PÅ_STATUS_FRA_ØKONOMI -> FERDIGSTILLE_BEHANDLING
-                FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
-                BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
-                else -> throw IllegalStateException("StegType ${utførendeStegType.displayName()} ugyldig ved migrering")
-            }
-        }
 
         BehandlingÅrsak.HELMANUELL_MIGRERING -> {
             when (utførendeStegType) {
