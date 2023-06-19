@@ -53,6 +53,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.task.OpprettTaskService
+import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
 import no.nav.familie.ba.sak.util.sisteSmåbarnstilleggSatsTilTester
 import no.nav.familie.ba.sak.util.sisteUtvidetSatsTilTester
 import no.nav.familie.ba.sak.util.tilleggOrdinærSatsTilTester
@@ -60,7 +61,6 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.familie.kontrakter.felles.ef.Datakilde
 import no.nav.familie.kontrakter.felles.ef.EksternPeriode
 import no.nav.familie.kontrakter.felles.ef.EksternePerioderResponse
-import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.tilbakekreving.Tilbakekrevingsvalg
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -359,10 +359,10 @@ class BehandleSmåbarnstilleggTest(
         )
 
         verify(exactly = 1) {
-            opprettTaskService.opprettOppgaveTask(
+            opprettTaskService.opprettOppgaveForManuellBehandlingTask(
                 behandlingId = aktivBehandling.id,
-                oppgavetype = Oppgavetype.VurderLivshendelse,
                 beskrivelse = "Småbarnstillegg: endring i overgangsstønad må behandles manuelt",
+                manuellOppgaveType = ManuellOppgaveType.SMÅBARNSTILLEGG,
             )
         }
 
