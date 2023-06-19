@@ -1,6 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.brev.mottaker
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.ekstern.restDomene.RestBrevmottaker
 import no.nav.familie.ba.sak.ekstern.restDomene.tilBrevMottaker
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
@@ -85,7 +86,9 @@ class BrevmottakerService(
         }
 
         val manuellAdresseUtenlands = manueltRegistrerteMottakere.filter { it.type == MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE }
-            .map {
+            .zeroSingleOrThrow {
+                FunksjonellFeil("Mottakerfeil: Det er registret mer enn en utenlandsk adresse tilhørende bruker")
+            }?.let {
                 MottakerInfo(
                     brukerId = søkersident,
                     brukerIdType = BrukerIdType.FNR,
@@ -93,7 +96,7 @@ class BrevmottakerService(
                     navn = søkersnavn,
                     manuellAdresseInfo = lagManuellAdresseInfo(it),
                 )
-            }.singleOrNull()
+            }
 
         // brev sendes til brukers (manuelt) registerte adresse (i utlandet)
         val bruker = manuellAdresseUtenlands ?: MottakerInfo(
@@ -105,7 +108,9 @@ class BrevmottakerService(
 
         // ...og evt. til en manuelt registrert verge eller fullmektig i tillegg
         val manuellTilleggsmottaker = manueltRegistrerteMottakere.filter { it.type != MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE }
-            .map {
+            .zeroSingleOrThrow {
+                FunksjonellFeil("Mottakerfeil: ${first().type.visningsnavn} kan ikke kombineres med ${last().type.visningsnavn}")
+            }?.let {
                 MottakerInfo(
                     brukerId = "",
                     brukerIdType = null,
@@ -113,7 +118,7 @@ class BrevmottakerService(
                     navn = it.navn,
                     manuellAdresseInfo = lagManuellAdresseInfo(it),
                 )
-            }.singleOrNull()
+            }
 
         return listOfNotNull(bruker, manuellTilleggsmottaker)
     }
@@ -133,3 +138,10 @@ class BrevmottakerService(
         landkode = brevmottaker.landkode,
     )
 }
+
+private fun List<Brevmottaker>.zeroSingleOrThrow(exception: List<Brevmottaker>.() -> Exception): Brevmottaker? =
+    if (size in 0..1) {
+        singleOrNull()
+    } else {
+        throw exception()
+    }

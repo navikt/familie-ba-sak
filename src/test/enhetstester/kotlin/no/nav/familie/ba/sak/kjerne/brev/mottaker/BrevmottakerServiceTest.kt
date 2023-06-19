@@ -9,6 +9,7 @@ import io.mockk.mockk
 import io.mockk.runs
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.ekstern.restDomene.RestBrevmottaker
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
@@ -138,6 +139,29 @@ internal class BrevmottakerServiceTest {
         assertEquals(søkersnavn, mottakerInfo.first().navn)
         assertTrue { mottakerInfo.first().manuellAdresseInfo != null }
         assertTrue { mottakerInfo.first().manuellAdresseInfo!!.landkode == "DE" }
+    }
+
+    @Test
+    fun `lagMottakereFraBrevMottakere skal kaste feil når brevmottakere inneholder ugyldig kombinasjon`() {
+        val brevmottakere = listOf(
+            lagBrevMottaker(
+                mottakerType = MottakerType.VERGE,
+                poststed = "Munchen",
+                landkode = "DE",
+            ),
+            lagBrevMottaker(
+                mottakerType = MottakerType.FULLMEKTIG,
+                poststed = "Munchen",
+                landkode = "DE",
+            ),
+        )
+        every { brevmottakerRepository.finnBrevMottakereForBehandling(any()) } returns brevmottakere
+
+        assertThrows<FunksjonellFeil> {
+            brevmottakerService.lagMottakereFraBrevMottakere(brevmottakere, søkersident, søkersnavn)
+        }.also {
+            assertTrue(it.frontendFeilmelding!!.contains("kan ikke kombineres"))
+        }
     }
 
     @Test
