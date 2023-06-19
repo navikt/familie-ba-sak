@@ -132,7 +132,7 @@ internal class StartSatsendringTest {
         every { behandlingRepository.finnSisteIverksatteBehandling(1L) } returns null
         every { satskjøringRepository.findByFagsakIdAndSatsTidspunkt(1L, any()) } returns Satskjøring(
             fagsakId = 1L,
-            satsTidspunkt = SATSENDRINGMÅNED_MARS_2023
+            satsTidspunkt = SATSENDRINGMÅNED_MARS_2023,
         )
 
         assertFalse(startSatsendring.kanStarteSatsendringPåFagsak(1L))
@@ -143,7 +143,7 @@ internal class StartSatsendringTest {
         every { behandlingRepository.finnSisteIverksatteBehandling(1L) } returns lagBehandling()
         every { satskjøringRepository.findByFagsakIdAndSatsTidspunkt(1L, any()) } returns Satskjøring(
             fagsakId = 1L,
-            satsTidspunkt = SATSENDRINGMÅNED_MARS_2023
+            satsTidspunkt = SATSENDRINGMÅNED_MARS_2023,
         )
 
         assertFalse(startSatsendring.kanStarteSatsendringPåFagsak(1L))

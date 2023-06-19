@@ -44,11 +44,10 @@ class StartSatsendring(
         var antallSatsendringerStartet = 0
         var startSide = 0
         while (antallSatsendringerStartet < antallFagsaker) {
-            val page =
-                fagsakRepository.finnLøpendeFagsakerForSatsendring(
-                    hentAktivSatsendringstidspunkt().atDay(1),
-                    Pageable.ofSize(antallFagsaker + 200).withPage(startSide)
-                )
+            val page = fagsakRepository.finnLøpendeFagsakerForSatsendring(
+                hentAktivSatsendringstidspunkt().atDay(1),
+                Pageable.ofSize(antallFagsaker + 200).withPage(startSide),
+            )
 
             val fagsakerForSatsendring = page.toList()
             logger.info("Fant ${fagsakerForSatsendring.size} personer for satsendring på side $startSide")
