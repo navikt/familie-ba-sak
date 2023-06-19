@@ -282,9 +282,12 @@ class MigreringServiceIntegrasjonTest(
             val vedtakDVHV2 = MockKafkaProducer.sendteMeldinger.values.last() as VedtakDVHV2
             assertThat(vedtakDVHV2.utbetalingsperioderV2.first().stønadFom).isEqualTo(forventetUtbetalingFom)
             assertThat(vedtakDVHV2.utbetalingsperioderV2.first().utbetaltPerMnd).isEqualTo(
-                SatsService.finnSisteSatsFor(SatsType.ORBA).beløp.avrundetHeltallAvProsent(BigDecimal(50)) + SatsService.finnSisteSatsFor(
+                SatsService.finnGjeldendeSatsForDato(SatsType.ORBA, forventetUtbetalingFom)
+                    .avrundetHeltallAvProsent(BigDecimal(50)) + SatsService.finnGjeldendeSatsForDato(
                     SatsType.TILLEGG_ORBA,
-                ).beløp.avrundetHeltallAvProsent(BigDecimal(50)),
+                    forventetUtbetalingFom,
+                )
+                    .avrundetHeltallAvProsent(BigDecimal(50)),
             )
         }
     }
