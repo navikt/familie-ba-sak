@@ -20,9 +20,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegService
-import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
-import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
-import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.kontrakter.felles.Tema
@@ -64,9 +61,6 @@ class ForvalterController(
     private val stegService: StegService,
     private val fagsakService: FagsakService,
     private val behandlingService: BehandlingService,
-    private val vilkårService: VilkårService,
-    private val totrinnskontrollService: TotrinnskontrollService,
-    private val vedtakService: VedtakService,
     private val taskRepository: TaskRepositoryWrapper,
     private val autovedtakService: AutovedtakService,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
