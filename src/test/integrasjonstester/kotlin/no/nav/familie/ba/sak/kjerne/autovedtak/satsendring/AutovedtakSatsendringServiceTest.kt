@@ -224,8 +224,11 @@ class AutovedtakSatsendringServiceTest(
         behandling.behandlingStegTilstand.add(avsluttetSteg)
         with(lagInitiellTilkjentYtelse(behandling, "utbetalingsoppdrag")) {
             val andel = lagAndelTilkjentYtelse(
-                fom = YearMonth.of(2021, 1),
-                tom = YearMonth.of(2023, 5),
+                fom = YearMonth.of(2021, 1), // Tidspunkt før siste satsendring
+                tom = YearMonth.of(
+                    2026,
+                    5,
+                ), // Tidspunkt etter siste satsendring. Dersom tom er før siste satsendring vil alle testene feile.
                 behandlingId = behandling.id,
                 beløp = 10,
                 aktør = aktørBarn,

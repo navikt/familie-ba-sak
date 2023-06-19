@@ -1382,6 +1382,14 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
         override val sanityApiNavn = "endretUtbetalingEtterbetaltUtvidetDelFraSkriftligAvtaleSokerPraktisert"
     },
+    ENDRET_UTBETALING_ALLEREDE_UTBETALT_FORELDRE_BOR_SAMMEN {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
+        override val sanityApiNavn = "endretUtbetalingAlleredeUtbetaltForeldreBorSammen"
+    },
+    ENDRET_UTBETALING_ETTERBETALING_UTVIDET_EØS {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
+        override val sanityApiNavn = "endretUtbetalingEtterbetalingUtvidetEos"
+    },
     ETTER_ENDRET_UTBETALING_RETTSAVGJØRELSE_DELT_BOSTED {
         override val sanityApiNavn = "etterEndretUtbetalingRettsavgjorelseDeltBosted"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING
@@ -1532,4 +1540,6 @@ val endretUtbetalingsperiodeBegrunnelser: Set<Standardbegrunnelse> = setOf(
     Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_ENDRET_UTBETALING,
     Standardbegrunnelse.ENDRET_UTBETALING_SEKUNDÆR_DELT_BOSTED_FULL_UTBETALING_FØR_SØKNAD,
     Standardbegrunnelse.ENDRET_UTBETALING_ETTERBETALT_UTVIDET_DEL_FRA_AVTALETIDSPUNKT_SØKT_FOR_PRAKTISERT_DELT,
+    Standardbegrunnelse.ENDRET_UTBETALING_ALLEREDE_UTBETALT_FORELDRE_BOR_SAMMEN,
+    Standardbegrunnelse.ENDRET_UTBETALING_ETTERBETALING_UTVIDET_EØS,
 )

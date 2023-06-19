@@ -11,11 +11,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.personident.PersonidentRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import org.assertj.core.api.Assertions.assertThat
@@ -41,12 +39,6 @@ class PensjonServiceIntegrationTest : AbstractSpringIntegrationTest() {
 
     @Autowired
     lateinit var pensjonService: PensjonService
-
-    @Autowired
-    lateinit var personidentRepository: PersonidentRepository
-
-    @Autowired
-    lateinit var andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository
 
     @Autowired
     lateinit var tilkjentYtelseRepository: TilkjentYtelseRepository
