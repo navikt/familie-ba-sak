@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils
+import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjer
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.harBlandetRegelverk
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
@@ -56,16 +58,27 @@ fun validerIkkeBlandetRegelverk(
 fun valider18ÅrsVilkårEksistererFraFødselsdato(
     personopplysningGrunnlag: PersonopplysningGrunnlag,
     vilkårsvurdering: Vilkårsvurdering,
+    behandling: Behandling,
 ) {
     vilkårsvurdering.personResultater.forEach { personResultat ->
         val person = personopplysningGrunnlag.personer.find { it.aktør == personResultat.aktør }
         if (person?.type == PersonType.BARN && !personResultat.vilkårResultater.finnesUnder18VilkårFraFødselsdato(person.fødselsdato)) {
-            throw FunksjonellFeil(
-                melding = "Barn født ${person.fødselsdato} har ikke fått under 18-vilkåret vurdert fra fødselsdato",
-                frontendFeilmelding = "Det må være en periode på 18-års vilkåret som starter på barnets fødselsdato",
-            )
+            if (behandling.skalBehandlesAutomatisk) {
+                secureLogger.warn(
+                    "Fødselsdato ${person.fødselsdato} ulik fom ${
+                        personResultat.vilkårResultater.filter { it.vilkårType == Vilkår.UNDER_18_ÅR }
+                            .sortedBy { it.periodeFom }.first().periodeFom
+                    } i 18års-vilkåret i fagsak ${behandling.fagsak.id}.",
+                )
+            } else {
+                throw FunksjonellFeil(
+                    melding = "Barn født ${person.fødselsdato} har ikke fått under 18-vilkåret vurdert fra fødselsdato",
+                    frontendFeilmelding = "Det må være en periode på 18-års vilkåret som starter på barnets fødselsdato",
+                )
+            }
         }
     }
 }
 
-private fun Set<VilkårResultat>.finnesUnder18VilkårFraFødselsdato(fødselsdato: LocalDate): Boolean = this.filter { it.vilkårType == Vilkår.UNDER_18_ÅR }.any { it.periodeFom == fødselsdato }
+private fun Set<VilkårResultat>.finnesUnder18VilkårFraFødselsdato(fødselsdato: LocalDate): Boolean =
+    this.filter { it.vilkårType == Vilkår.UNDER_18_ÅR }.any { it.periodeFom == fødselsdato }
