@@ -11,7 +11,6 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
@@ -24,7 +23,6 @@ class TilkjentYtelseValideringServiceTest {
     private val beregningServiceMock = mockk<BeregningService>()
     private val totrinnskontrollServiceMock = mockk<TotrinnskontrollService>()
     private val persongrunnlagServiceMock = mockk<PersongrunnlagService>()
-    private val personidentServiceMock = mockk<PersonidentService>()
 
     private lateinit var tilkjentYtelseValideringService: TilkjentYtelseValideringService
 
@@ -34,7 +32,6 @@ class TilkjentYtelseValideringServiceTest {
             beregningService = beregningServiceMock,
             totrinnskontrollService = totrinnskontrollServiceMock,
             persongrunnlagService = persongrunnlagServiceMock,
-            personidentService = personidentServiceMock,
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
         )
 
@@ -114,32 +111,24 @@ class TilkjentYtelseValideringServiceTest {
 
         val forrigeBehandling = lagBehandling()
 
-        val forrigeTilkjentYtelse = TilkjentYtelse(
-            behandling = forrigeBehandling,
-            opprettetDato = LocalDate.now(),
-            endretDato = LocalDate.now(),
-            andelerTilkjentYtelse = mutableSetOf(
-                lagAndelTilkjentYtelse(
-                    fom = inneværendeMåned().minusYears(4),
-                    tom = inneværendeMåned(),
-                    beløp = 2108,
-                    person = person1,
-                ),
-                lagAndelTilkjentYtelse(
-                    fom = inneværendeMåned().minusYears(4),
-                    tom = inneværendeMåned(),
-                    beløp = 1054,
-                    person = person2,
-                ),
+        val forrigeAndeler = listOf(
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(4),
+                tom = inneværendeMåned(),
+                beløp = 2108,
+                person = person1,
+            ),
+            lagAndelTilkjentYtelse(
+                fom = inneværendeMåned().minusYears(4),
+                tom = inneværendeMåned(),
+                beløp = 1054,
+                person = person2,
             ),
         )
-
         every { beregningServiceMock.hentTilkjentYtelseForBehandling(behandlingId = behandling.id) } answers { tilkjentYtelse }
         every { behandlingHentOgPersisterService.hent(behandlingId = behandling.id) } answers { behandling }
         every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling = behandling) } answers { forrigeBehandling }
-        every { beregningServiceMock.hentOptionalTilkjentYtelseForBehandling(behandlingId = forrigeBehandling.id) } answers { forrigeTilkjentYtelse }
-        every { personidentServiceMock.hentAktør(person1.aktør.aktørId) } answers { person1.aktør }
-        every { personidentServiceMock.hentAktør(person2.aktør.aktørId) } answers { person2.aktør }
+        every { beregningServiceMock.hentAndelerTilkjentYtelseForBehandling(behandlingId = forrigeBehandling.id) } answers { forrigeAndeler }
 
         Assertions.assertTrue(tilkjentYtelseValideringService.finnAktørerMedUgyldigEtterbetalingsperiode(behandlingId = behandling.id).size == 1)
         Assertions.assertEquals(

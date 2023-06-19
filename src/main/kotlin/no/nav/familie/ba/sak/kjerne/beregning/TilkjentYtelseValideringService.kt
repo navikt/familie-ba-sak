@@ -8,7 +8,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -18,7 +17,6 @@ class TilkjentYtelseValideringService(
     private val totrinnskontrollService: TotrinnskontrollService,
     private val beregningService: BeregningService,
     private val persongrunnlagService: PersongrunnlagService,
-    private val personidentService: PersonidentService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
 ) {
     fun validerAtIngenUtbetalingerOverstiger100Prosent(behandling: Behandling) {
@@ -79,22 +77,17 @@ class TilkjentYtelseValideringService(
     ): List<Aktør> {
         val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandlingId)
 
-        val forrigeBehandling =
-            behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(
-                behandling = behandlingHentOgPersisterService.hent(
-                    behandlingId,
-                ),
-            )
+        val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(
+            behandling = behandlingHentOgPersisterService.hent(behandlingId),
+        )
         val forrigeAndelerTilkjentYtelse =
-            forrigeBehandling?.let { beregningService.hentOptionalTilkjentYtelseForBehandling(behandlingId = it.id) }?.andelerTilkjentYtelse?.toList()
+            forrigeBehandling?.let { beregningService.hentAndelerTilkjentYtelseForBehandling(behandlingId = it.id) }
 
-        val aktørIderMedUgyldigEtterbetaling = finnAktørIderMedUgyldigEtterbetalingsperiode(
+        return finnAktørIderMedUgyldigEtterbetalingsperiode(
             forrigeAndelerTilkjentYtelse = forrigeAndelerTilkjentYtelse ?: emptyList(),
             andelerTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.toList(),
             kravDato = tilkjentYtelse.behandling.opprettetTidspunkt,
         )
-
-        return aktørIderMedUgyldigEtterbetaling.map { aktørId -> personidentService.hentAktør(identEllerAktørId = aktørId) }
     }
 
     companion object {
