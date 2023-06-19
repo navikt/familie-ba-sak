@@ -50,7 +50,7 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
     fun finnLøpendeFagsaker(page: Pageable): Slice<Long>
 
     @Query(
-        value = """SELECT f.*
+        value = """SELECT f.id
             FROM   Fagsak f
             WHERE  NOT EXISTS (
                     SELECT 1
@@ -60,7 +60,7 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
                 ) AND f.status = 'LØPENDE' AND f.arkivert = false""",
         nativeQuery = true,
     )
-    fun finnLøpendeFagsakerForSatsendring(satsTidspunkt: LocalDate, page: Pageable): Page<Fagsak>
+    fun finnLøpendeFagsakerForSatsendring(satsTidspunkt: LocalDate, page: Pageable): Page<Long>
 
     @Query(
         value = """SELECT id FROM fagsak
