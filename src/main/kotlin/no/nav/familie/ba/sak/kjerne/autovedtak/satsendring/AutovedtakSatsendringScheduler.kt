@@ -14,7 +14,7 @@ class AutovedtakSatsendringScheduler(
         if (LeaderClient.isLeader() == true) {
             logger.info("Starter schedulert jobb for satsendring juli 2023")
             startSatsendring.startSatsendring(
-                antallFagsaker = 1000,
+                antallFagsaker = 1200,
             )
         }
     }
