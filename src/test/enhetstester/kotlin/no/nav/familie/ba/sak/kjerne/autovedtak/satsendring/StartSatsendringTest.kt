@@ -54,7 +54,8 @@ internal class StartSatsendringTest {
         every { behandlingRepository.findByFagsakAndAktivAndOpen(any()) } returns null
         val taskSlot = slot<Task>()
         every { taskRepository.save(capture(taskSlot)) } answers { taskSlot.captured }
-        val opprettTaskService = OpprettTaskService(taskRepository)
+        val opprettTaskService = OpprettTaskService(taskRepository, satskjøringRepository)
+
         every { satsendringService.erFagsakOppdatertMedSisteSatser(any()) } returns true
         every { featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_2023_07, false) } returns false
 

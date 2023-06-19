@@ -193,11 +193,7 @@ class StartSatsendring(
     }
 
     fun hentAktivSatsendringstidspunkt(): YearMonth {
-        return if (featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_2023_07, false)) {
-            SATSENDRINGMÅNED_JULI_2023
-        } else {
-            SATSENDRINGMÅNED_MARS_2023
-        }
+        return SATSENDRINGMÅNED_JULI_2023
     }
 
     fun opprettSatsendringForFagsak(fagsakId: Long) {
