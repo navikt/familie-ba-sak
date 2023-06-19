@@ -116,7 +116,7 @@ object VilkårsvurderingForskyvningUtils {
         vilkårResultater: Iterable<VilkårResultat>,
     ): Tidslinje<VilkårResultat, Måned> {
         return if (vilkår == Vilkår.UNDER_18_ÅR) {
-            val minstePeriodeFom = vilkårResultater.minOf {
+            val minstePeriodeFom = vilkårResultater.filter { it.vilkårType == vilkår && it.erOppfylt() }.minOf {
                 it.periodeFom ?: throw FunksjonellFeil("Finner ikke fra og med dato på 'under 18 år'-vilkåret")
             } // Fra og med dato skal være lik fødselsdato for under 18-vilkåret
             this.beskjærPå18År(fødselsdato = minstePeriodeFom)
