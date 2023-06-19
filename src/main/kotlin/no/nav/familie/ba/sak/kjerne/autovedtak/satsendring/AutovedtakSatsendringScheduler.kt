@@ -14,13 +14,13 @@ class AutovedtakSatsendringScheduler(
         if (LeaderClient.isLeader() == true) {
             logger.info("Starter schedulert jobb for satsendring juli 2023")
             startSatsendring.startSatsendring(
-                antallFagsaker = 500, // Starter med lav fart, men skal skrus opp både denne og hyppigere og evt lengre tidspunkt
+                antallFagsaker = 800,
             )
         }
     }
     companion object {
         val logger = LoggerFactory.getLogger(AutovedtakSatsendringScheduler::class.java)
-        const val CRON_HVERT_10_MIN_UKEDAG = "0 */10 6-19 * * MON-FRI"
+        const val CRON_HVERT_10_MIN_UKEDAG = "0 */10 6-20 * * MON-FRI"
         const val CRON_KL_7_OG_14_UKEDAGER = "0 0 7,14 * * MON-FRI"
     }
 }
