@@ -4,11 +4,8 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
-import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
-import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -26,7 +23,6 @@ class StartSatsendring(
     private val fagsakRepository: FagsakRepository,
     private val behandlingRepository: BehandlingRepository,
     private val opprettTaskService: OpprettTaskService,
-    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     private val satskjøringRepository: SatskjøringRepository,
     private val featureToggleService: FeatureToggleService,
     private val personidentService: PersonidentService,
@@ -49,7 +45,10 @@ class StartSatsendring(
         var startSide = 0
         while (antallSatsendringerStartet < antallFagsaker) {
             val page =
-                fagsakRepository.finnLøpendeFagsakerForSatsendring(hentAktivSatsendringstidspunkt().atDay(1), Pageable.ofSize(antallFagsaker).withPage(startSide))
+                fagsakRepository.finnLøpendeFagsakerForSatsendring(
+                    hentAktivSatsendringstidspunkt().atDay(1),
+                    Pageable.ofSize(antallFagsaker + 200).withPage(startSide)
+                )
 
             val fagsakerForSatsendring = page.toList()
             logger.info("Fant ${fagsakerForSatsendring.size} personer for satsendring på side $startSide")
@@ -94,23 +93,6 @@ class StartSatsendring(
 
         val sisteIverksatteBehandling = behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
         if (sisteIverksatteBehandling != null) {
-            val andelerTilkjentYtelseMedEndreteUtbetalinger =
-                andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
-                    sisteIverksatteBehandling.id,
-                )
-
-            if (andelerTilkjentYtelseMedEndreteUtbetalinger.erOppdatertMedSisteSatser()) {
-                satskjøringRepository.save(
-                    Satskjøring(
-                        fagsakId = fagsakId,
-                        ferdigTidspunkt = sisteIverksatteBehandling.endretTidspunkt,
-                        satsTidspunkt = satsTidspunkt,
-                    ),
-                )
-                logger.info("Fagsak=$fagsakId har alt siste satser")
-                return true
-            }
-
             val aktivOgÅpenBehandling = behandlingRepository.findByFagsakAndAktivAndOpen(fagsakId = fagsakId)
             if (aktivOgÅpenBehandling != null) {
                 logger.info("Oppretter ikke satsendringtask for fagsak=$fagsakId. Har åpen behandling ${aktivOgÅpenBehandling.id}")
