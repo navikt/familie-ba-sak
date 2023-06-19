@@ -68,15 +68,15 @@ class StartSatsendring(
     }
 
     private fun oppretteEllerSkipSatsendring(
-        fagsakForSatsendring: List<Fagsak>,
+        fagsakForSatsendring: List<Long>,
         antallAlleredeTriggetSatsendring: Int,
         antallFagsakerTilSatsendring: Int,
         satsTidspunkt: YearMonth,
     ): Int {
         var antallFagsakerSatsendring = antallAlleredeTriggetSatsendring
 
-        for (fagsak in fagsakForSatsendring) {
-            if (skalTriggeSatsendring(fagsak, satsTidspunkt)) {
+        for (fagsakId in fagsakForSatsendring) {
+            if (skalTriggeSatsendring(fagsakId, satsTidspunkt)) {
                 antallFagsakerSatsendring++
             }
 
@@ -87,12 +87,12 @@ class StartSatsendring(
         return antallFagsakerSatsendring
     }
 
-    private fun skalTriggeSatsendring(fagsak: Fagsak, satsTidspunkt: YearMonth): Boolean {
-        if (ignorerteFagsaker.contains(fagsak.id)) {
+    private fun skalTriggeSatsendring(fagsakId: Long, satsTidspunkt: YearMonth): Boolean {
+        if (ignorerteFagsaker.contains(fagsakId)) {
             return false
         }
 
-        val sisteIverksatteBehandling = behandlingRepository.finnSisteIverksatteBehandling(fagsak.id)
+        val sisteIverksatteBehandling = behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
         if (sisteIverksatteBehandling != null) {
             val andelerTilkjentYtelseMedEndreteUtbetalinger =
                 andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
@@ -102,32 +102,32 @@ class StartSatsendring(
             if (andelerTilkjentYtelseMedEndreteUtbetalinger.erOppdatertMedSisteSatser()) {
                 satskjøringRepository.save(
                     Satskjøring(
-                        fagsakId = fagsak.id,
+                        fagsakId = fagsakId,
                         ferdigTidspunkt = sisteIverksatteBehandling.endretTidspunkt,
                         satsTidspunkt = satsTidspunkt,
                     ),
                 )
-                logger.info("Fagsak=${fagsak.id} har alt siste satser")
+                logger.info("Fagsak=$fagsakId har alt siste satser")
                 return true
             }
 
-            val aktivOgÅpenBehandling = behandlingRepository.findByFagsakAndAktivAndOpen(fagsakId = fagsak.id)
+            val aktivOgÅpenBehandling = behandlingRepository.findByFagsakAndAktivAndOpen(fagsakId = fagsakId)
             if (aktivOgÅpenBehandling != null) {
-                logger.info("Oppretter ikke satsendringtask for fagsak=${fagsak.id}. Har åpen behandling ${aktivOgÅpenBehandling.id}")
-                ignorerteFagsaker.add(fagsak.id)
+                logger.info("Oppretter ikke satsendringtask for fagsak=$fagsakId. Har åpen behandling ${aktivOgÅpenBehandling.id}")
+                ignorerteFagsaker.add(fagsakId)
                 return false
             }
 
             if (featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_OPPRETT_TASKER)) {
-                logger.info("Oppretter satsendringtask for fagsak=${fagsak.id}")
-                opprettTaskService.opprettSatsendringTask(fagsak.id, satsTidspunkt)
+                logger.info("Oppretter satsendringtask for fagsak=$fagsakId")
+                opprettTaskService.opprettSatsendringTask(fagsakId, satsTidspunkt)
             } else {
-                logger.info("Oppretter ikke satsendringtask for fagsak=${fagsak.id}. Toggle SATSENDRING_OPPRETT_TASKER avskrudd.")
+                logger.info("Oppretter ikke satsendringtask for fagsak=$fagsakId. Toggle SATSENDRING_OPPRETT_TASKER avskrudd.")
             }
             return true
         } else {
-            logger.info("Satsendring utføres ikke på fagsak=${fagsak.id} fordi fagsaken mangler en iverksatt behandling")
-            ignorerteFagsaker.add(fagsak.id)
+            logger.info("Satsendring utføres ikke på fagsak=$fagsakId fordi fagsaken mangler en iverksatt behandling")
+            ignorerteFagsaker.add(fagsakId)
             return false
         }
     }
