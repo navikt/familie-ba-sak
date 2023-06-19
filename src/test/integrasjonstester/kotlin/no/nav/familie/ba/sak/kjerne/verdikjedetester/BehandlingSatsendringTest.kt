@@ -98,7 +98,7 @@ class BehandlingSatsendringTest(
         )
 
         val atyMedSenesteTilleggOrbaSats =
-            aty.first { it.type == YtelseType.ORDINÆR_BARNETRYGD && it.stønadFom == YearMonth.of(2023, 3) }
+            aty.first { it.type == YtelseType.ORDINÆR_BARNETRYGD && it.stønadFom == YearMonth.of(2023, 7) }
         val atyMedVanligOrbaSats =
             aty.first { it.type == YtelseType.ORDINÆR_BARNETRYGD && it.stønadFom == YearMonth.of(2029, 1) }
         assertThat(atyMedSenesteTilleggOrbaSats.sats).isEqualTo(SatsService.finnSisteSatsFor(SatsType.TILLEGG_ORBA).beløp)
