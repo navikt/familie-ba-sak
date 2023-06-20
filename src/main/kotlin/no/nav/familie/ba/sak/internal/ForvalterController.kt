@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfoRepository
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -20,6 +21,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegService
+import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
 import no.nav.familie.kontrakter.felles.Tema
@@ -44,7 +46,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
-import kotlin.collections.LinkedHashSet
 
 @RestController
 @RequestMapping("/api/forvalter")
@@ -64,6 +65,7 @@ class ForvalterController(
     private val taskRepository: TaskRepositoryWrapper,
     private val autovedtakService: AutovedtakService,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
+    private val behandlingRepository: BehandlingRepository,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(ForvalterController::class.java)
 
@@ -86,6 +88,42 @@ class ForvalterController(
             )
         }
         return ResponseEntity.ok("Ferdigstill oppgaver kjørt. Antall som ikke ble ferdigstilt: $antallFeil")
+    }
+
+    @PostMapping(
+        path = ["/kopier-eua-satsendring"],
+        consumes = [MediaType.APPLICATION_JSON_VALUE],
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+    )
+    fun kopierEndretUtbetalingAndelerFraForrigeBehandling(@RequestBody fagsakListe: List<Long>): ResponseEntity<List<Long>> {
+        val fagsakerMedFeilendeKopiering = mutableListOf<Long>()
+        fagsakListe.parallelStream().forEach { fagsakId ->
+            try {
+                val behandlinger = behandlingRepository.finnBehandlinger(fagsakId)
+                val sorterteVedtatteBehandlinger = behandlinger
+                    .filter { it.steg == StegType.BEHANDLING_AVSLUTTET && !it.erHenlagt() }
+                    .sortedBy { it.aktivertTidspunkt }
+                val sisteVedtatteBehandling = sorterteVedtatteBehandlinger[0]
+
+                if (!sisteVedtatteBehandling.erSatsendring()) {
+                    throw Exception("Det er gjennomført en ny behandling etter satsendring som har tatt med seg feilen videre. Fagsak $fagsakId, Behandling $sisteVedtatteBehandling.")
+                }
+
+                val nestSisteVedtatteBehandling = sorterteVedtatteBehandlinger[1]
+
+                logger.info("Kopierer EndretUtbetalingAndel fra behandling $nestSisteVedtatteBehandling til $sisteVedtatteBehandling.")
+
+                forvalterService.kopierEndretUtbetalingFraForrigeBehandling(
+                    sisteVedtatteBehandling = sisteVedtatteBehandling,
+                    nestSisteVedtatteBehandling = nestSisteVedtatteBehandling,
+                )
+            } catch (exception: Exception) {
+                logger.warn(exception.message)
+                logger.warn("Feil ved kopiering av EndretUtbetalingAndel fra nest siste behandling. Fagsak $fagsakId.")
+                fagsakerMedFeilendeKopiering.add(fagsakId)
+            }
+        }
+        return ResponseEntity.ok(fagsakerMedFeilendeKopiering)
     }
 
     @PostMapping(
@@ -213,10 +251,18 @@ class ForvalterController(
     fun identifiserMigreringUtenSatsAlleMåneder(): ResponseEntity<Map<String, Set<Long>>> {
         val årMånedMedMuligMigreringsfeil = YearMonth.of(2023, 3)
 
-        val muligeMigreringerMedManglendeSats = behandlingMigreringsinfoRepository.finnMuligeMigreringerMedManglendeSats(årMånedMedMuligMigreringsfeil.atDay(1))
+        val muligeMigreringerMedManglendeSats =
+            behandlingMigreringsinfoRepository.finnMuligeMigreringerMedManglendeSats(
+                årMånedMedMuligMigreringsfeil.atDay(1),
+            )
         logger.info("Fant ${muligeMigreringerMedManglendeSats.size} saker med mulig manglende sats:  $muligeMigreringerMedManglendeSats")
 
-        val sakerSomKanFikses = muligeMigreringerMedManglendeSats.fold(Pair(LinkedHashSet<Long>(), LinkedHashSet<Long>())) { accumulator, fagsakId ->
+        val sakerSomKanFikses = muligeMigreringerMedManglendeSats.fold(
+            Pair(
+                LinkedHashSet<Long>(),
+                LinkedHashSet<Long>(),
+            ),
+        ) { accumulator, fagsakId ->
             try {
                 validerAtFagsakKanFiksesAutomatisk(fagsakId, årMånedMedMuligMigreringsfeil)
                 accumulator.first.add(fagsakId)
@@ -298,7 +344,11 @@ class ForvalterController(
                         behandlingEtterVilkårsvurdering,
                     )
                 behandlingService.oppdaterStatusPåBehandling(nyBehandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)
-                val task = IverksettMotOppdragTask.opprettTask(nyBehandling, opprettetVedtak, SikkerhetContext.hentSaksbehandler())
+                val task = IverksettMotOppdragTask.opprettTask(
+                    nyBehandling,
+                    opprettetVedtak,
+                    SikkerhetContext.hentSaksbehandler(),
+                )
                 taskRepository.save(task)
             } catch (e: Exception) {
                 logger.warn("Klarte ikke kjøre satsendring for fagsakId=$fagsakId", e)
@@ -335,7 +385,8 @@ class ForvalterController(
         }
 
         val aktivBehandling =
-            hentOgPersisterService.finnAktivForFagsak(fagsakId) ?: error("Ingen aktiv behandling for fagsakId=$fagsakId")
+            hentOgPersisterService.finnAktivForFagsak(fagsakId)
+                ?: error("Ingen aktiv behandling for fagsakId=$fagsakId")
 
         if (aktivBehandling.fagsak.status != FagsakStatus.LØPENDE) {
             error("Fagsak er ikke løpende")
@@ -354,7 +405,8 @@ class ForvalterController(
         val infotrygdSak =
             infotrygdBarnetrygdClient.hentSaker(listOf(aktivBehandling.fagsak.aktør.aktivFødselsnummer()))
         val migrertStønad =
-            infotrygdSak.bruker.firstOrNull { it.stønad?.opphørsgrunn == "5" }?.stønad ?: error("Finner ikke stønad som er migrert") // Stønaden som er migrert er
+            infotrygdSak.bruker.firstOrNull { it.stønad?.opphørsgrunn == "5" }?.stønad
+                ?: error("Finner ikke stønad som er migrert") // Stønaden som er migrert er
 
         val virkningfom = 999999L - (
             migrertStønad.virkningFom?.toLong()
