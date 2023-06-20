@@ -54,7 +54,7 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
      * Finner deretter første behandling en periode oppstod i, som er det som skal avstemmes
      */
     @Query(
-        value = """SELECT DISTINCT ON (b.fk_fagsak_id), b.id
+        value = """SELECT DISTINCT ON (b.fk_fagsak_id) b.id
                     FROM behandling b
                            INNER JOIN fagsak f ON f.id = b.fk_fagsak_id
                            INNER JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
