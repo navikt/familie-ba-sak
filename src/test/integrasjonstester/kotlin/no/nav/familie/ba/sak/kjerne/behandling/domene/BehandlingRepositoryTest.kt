@@ -41,15 +41,15 @@ class BehandlingRepositoryTest(
         }
 
         @Test
-        fun `skal finne siste iverksatte behandlingen som har utbetalingsoppdrag, uavhengig behandlingsstatus`() {
+        fun `skal finne siste iverksatte behandlingen som har utbetalingsoppdrag, som er avsluttet`() {
             opprettBehandling(fagsak, AVSLUTTET, LocalDateTime.now().minusDays(3))
                 .medTilkjentYtelse(true)
-            opprettBehandling(fagsak, AVSLUTTET, LocalDateTime.now().minusDays(2))
+            val behandling2 = opprettBehandling(fagsak, AVSLUTTET, LocalDateTime.now().minusDays(2))
                 .medTilkjentYtelse(true)
-            val behandling3 = opprettBehandling(fagsak, IVERKSETTER_VEDTAK, LocalDateTime.now().minusDays(1))
+            opprettBehandling(fagsak, IVERKSETTER_VEDTAK, LocalDateTime.now().minusDays(1))
                 .medTilkjentYtelse(true)
 
-            assertThat(behandlingRepository.finnSisteIverksatteBehandling(fagsak.id)!!).isEqualTo(behandling3)
+            assertThat(behandlingRepository.finnSisteIverksatteBehandling(fagsak.id)!!).isEqualTo(behandling2)
         }
 
         @Test

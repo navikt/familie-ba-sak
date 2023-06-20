@@ -81,6 +81,7 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
             WHERE f.id = :fagsakId
               AND ty.utbetalingsoppdrag IS NOT NULL
               AND f.arkivert = false
+              AND b.status = 'AVSLUTTET'
             ORDER BY b.fk_fagsak_id, b.aktivert_tid DESC""",
         nativeQuery = true,
     )
