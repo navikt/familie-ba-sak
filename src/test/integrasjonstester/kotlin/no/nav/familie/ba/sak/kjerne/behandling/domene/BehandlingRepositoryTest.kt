@@ -33,11 +33,14 @@ class BehandlingRepositoryTest(
     inner class FinnSisteIverksatteBehandling {
 
         val tilfeldigPerson = tilfeldigPerson()
+        val tilfeldigPerson2 = tilfeldigPerson()
         lateinit var fagsak: Fagsak
+        lateinit var fagsak2: Fagsak
 
         @BeforeEach
         fun setUp() {
             fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(tilfeldigPerson.aktør.aktivFødselsnummer())
+            fagsak2 = fagsakService.hentEllerOpprettFagsakForPersonIdent(tilfeldigPerson2.aktør.aktivFødselsnummer())
         }
 
         @Test
@@ -49,7 +52,11 @@ class BehandlingRepositoryTest(
             val behandling3 = opprettBehandling(fagsak, IVERKSETTER_VEDTAK, LocalDateTime.now().minusDays(1))
                 .medTilkjentYtelse(true)
 
+            val behandling4 = opprettBehandling(fagsak2, AVSLUTTET, LocalDateTime.now())
+                .medTilkjentYtelse(true)
+
             assertThat(behandlingRepository.finnSisteIverksatteBehandling(fagsak.id)!!).isEqualTo(behandling3)
+            assertThat(behandlingRepository.finnSisteIverksatteBehandling(fagsak2.id)!!).isEqualTo(behandling4)
         }
 
         @Test
