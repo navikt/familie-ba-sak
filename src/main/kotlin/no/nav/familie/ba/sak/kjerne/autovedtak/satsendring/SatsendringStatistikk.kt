@@ -68,7 +68,7 @@ class SatsendringStatistikk(
                 ),
             )
 
-            satsendringGauge.register(rows)
+            satsendringGauge.register(rows, true)
         } finally {
             MDC.clear()
         }
