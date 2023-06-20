@@ -4,11 +4,8 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
-import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
-import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
@@ -26,7 +23,6 @@ class StartSatsendring(
     private val fagsakRepository: FagsakRepository,
     private val behandlingRepository: BehandlingRepository,
     private val opprettTaskService: OpprettTaskService,
-    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
     private val satskjøringRepository: SatskjøringRepository,
     private val featureToggleService: FeatureToggleService,
     private val personidentService: PersonidentService,
@@ -48,8 +44,10 @@ class StartSatsendring(
         var antallSatsendringerStartet = 0
         var startSide = 0
         while (antallSatsendringerStartet < antallFagsaker) {
-            val page =
-                fagsakRepository.finnLøpendeFagsakerForSatsendring(hentAktivSatsendringstidspunkt().atDay(1), Pageable.ofSize(antallFagsaker).withPage(startSide))
+            val page = fagsakRepository.finnLøpendeFagsakerForSatsendring(
+                hentAktivSatsendringstidspunkt().atDay(1),
+                Pageable.ofSize(antallFagsaker + 200).withPage(startSide),
+            )
 
             val fagsakerForSatsendring = page.toList()
             logger.info("Fant ${fagsakerForSatsendring.size} personer for satsendring på side $startSide")
@@ -68,15 +66,15 @@ class StartSatsendring(
     }
 
     private fun oppretteEllerSkipSatsendring(
-        fagsakForSatsendring: List<Fagsak>,
+        fagsakForSatsendring: List<Long>,
         antallAlleredeTriggetSatsendring: Int,
         antallFagsakerTilSatsendring: Int,
         satsTidspunkt: YearMonth,
     ): Int {
         var antallFagsakerSatsendring = antallAlleredeTriggetSatsendring
 
-        for (fagsak in fagsakForSatsendring) {
-            if (skalTriggeSatsendring(fagsak, satsTidspunkt)) {
+        for (fagsakId in fagsakForSatsendring) {
+            if (skalTriggeSatsendring(fagsakId, satsTidspunkt)) {
                 antallFagsakerSatsendring++
             }
 
@@ -87,47 +85,30 @@ class StartSatsendring(
         return antallFagsakerSatsendring
     }
 
-    private fun skalTriggeSatsendring(fagsak: Fagsak, satsTidspunkt: YearMonth): Boolean {
-        if (ignorerteFagsaker.contains(fagsak.id)) {
+    private fun skalTriggeSatsendring(fagsakId: Long, satsTidspunkt: YearMonth): Boolean {
+        if (ignorerteFagsaker.contains(fagsakId)) {
             return false
         }
 
-        val sisteIverksatteBehandling = behandlingRepository.finnSisteIverksatteBehandling(fagsak.id)
+        val sisteIverksatteBehandling = behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
         if (sisteIverksatteBehandling != null) {
-            val andelerTilkjentYtelseMedEndreteUtbetalinger =
-                andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
-                    sisteIverksatteBehandling.id,
-                )
-
-            if (andelerTilkjentYtelseMedEndreteUtbetalinger.erOppdatertMedSisteSatser()) {
-                satskjøringRepository.save(
-                    Satskjøring(
-                        fagsakId = fagsak.id,
-                        ferdigTidspunkt = sisteIverksatteBehandling.endretTidspunkt,
-                        satsTidspunkt = satsTidspunkt,
-                    ),
-                )
-                logger.info("Fagsak=${fagsak.id} har alt siste satser")
-                return true
-            }
-
-            val aktivOgÅpenBehandling = behandlingRepository.findByFagsakAndAktivAndOpen(fagsakId = fagsak.id)
+            val aktivOgÅpenBehandling = behandlingRepository.findByFagsakAndAktivAndOpen(fagsakId = fagsakId)
             if (aktivOgÅpenBehandling != null) {
-                logger.info("Oppretter ikke satsendringtask for fagsak=${fagsak.id}. Har åpen behandling ${aktivOgÅpenBehandling.id}")
-                ignorerteFagsaker.add(fagsak.id)
+                logger.info("Oppretter ikke satsendringtask for fagsak=$fagsakId. Har åpen behandling ${aktivOgÅpenBehandling.id}")
+                ignorerteFagsaker.add(fagsakId)
                 return false
             }
 
             if (featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_OPPRETT_TASKER)) {
-                logger.info("Oppretter satsendringtask for fagsak=${fagsak.id}")
-                opprettTaskService.opprettSatsendringTask(fagsak.id, satsTidspunkt)
+                logger.info("Oppretter satsendringtask for fagsak=$fagsakId")
+                opprettTaskService.opprettSatsendringTask(fagsakId, satsTidspunkt)
             } else {
-                logger.info("Oppretter ikke satsendringtask for fagsak=${fagsak.id}. Toggle SATSENDRING_OPPRETT_TASKER avskrudd.")
+                logger.info("Oppretter ikke satsendringtask for fagsak=$fagsakId. Toggle SATSENDRING_OPPRETT_TASKER avskrudd.")
             }
             return true
         } else {
-            logger.info("Satsendring utføres ikke på fagsak=${fagsak.id} fordi fagsaken mangler en iverksatt behandling")
-            ignorerteFagsaker.add(fagsak.id)
+            logger.info("Satsendring utføres ikke på fagsak=$fagsakId fordi fagsaken mangler en iverksatt behandling")
+            ignorerteFagsaker.add(fagsakId)
             return false
         }
     }
@@ -193,11 +174,7 @@ class StartSatsendring(
     }
 
     fun hentAktivSatsendringstidspunkt(): YearMonth {
-        return if (featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_2023_07, false)) {
-            SATSENDRINGMÅNED_JULI_2023
-        } else {
-            SATSENDRINGMÅNED_MARS_2023
-        }
+        return SATSENDRINGMÅNED_JULI_2023
     }
 
     fun opprettSatsendringForFagsak(fagsakId: Long) {

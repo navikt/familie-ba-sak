@@ -138,6 +138,7 @@ class PersonResultat(
         )
 
         val nyeVilkårResultater = vilkårResultater
+            .filter { it.erOppfylt() }
             .map {
                 it.tilKopiForNyttPersonResultat(
                     nyttPersonResultat = nyttPersonResultat,
