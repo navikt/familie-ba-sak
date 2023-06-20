@@ -35,7 +35,7 @@ enum class RegelverkResultat(val regelverk: Regelverk?, val resultat: Resultat?)
 }
 
 fun VilkårResultat.tilRegelverkResultat() = when (this.resultat) {
-    Resultat.OPPFYLT -> when (this.vurderesEtter) {
+    Resultat.OPPFYLT, Resultat.IKKE_AKTUELT -> when (this.vurderesEtter) {
         Regelverk.EØS_FORORDNINGEN -> OPPFYLT_EØS_FORORDNINGEN
         Regelverk.NASJONALE_REGLER -> OPPFYLT_NASJONALE_REGLER
         null -> OPPFYLT_REGELVERK_IKKE_SATT

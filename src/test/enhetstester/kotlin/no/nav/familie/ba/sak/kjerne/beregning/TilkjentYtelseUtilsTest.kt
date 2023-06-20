@@ -66,6 +66,30 @@ internal class TilkjentYtelseUtilsTest {
     }
 
     @Test
+    fun `Får tilkjent ytelse dersom vilkårresultat for lovlig opphold er ikke aktuelt`() {
+        val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 8, 15))
+        val søkerFnr = randomFnr()
+
+        val tilkjentYtelse = settOppScenarioOgBeregnTilkjentYtelse(
+            atypiskeVilkårSøker = listOf(
+                AtypiskVilkår(
+                    fom = mars2022.toLocalDate().førsteDagIInneværendeMåned(),
+                    vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                    resultat = Resultat.IKKE_AKTUELT,
+                    aktør = tilAktør(søkerFnr),
+                ),
+            ),
+            barna = listOf(barn),
+            overgangsstønadPerioder = listOf(MånedPeriode(januar2022, november2022)),
+        )
+
+        assertEquals(1, tilkjentYtelse.andelerTilkjentYtelse.size)
+
+        val andelTilkjentYtelse = tilkjentYtelse.andelerTilkjentYtelse.first()
+        assertEquals(1054, andelTilkjentYtelse.sats)
+    }
+
+    @Test
     fun `Barn som fyller 6 år i det vilkårene er oppfylt får andel måneden etter`() {
         val barnFødselsdato = LocalDate.of(2016, 2, 2)
         val barnSeksårsdag = barnFødselsdato.plusYears(6)
