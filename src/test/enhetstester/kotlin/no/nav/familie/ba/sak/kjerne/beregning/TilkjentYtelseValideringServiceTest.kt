@@ -111,24 +111,30 @@ class TilkjentYtelseValideringServiceTest {
 
         val forrigeBehandling = lagBehandling()
 
-        val forrigeAndeler = listOf(
-            lagAndelTilkjentYtelse(
-                fom = inneværendeMåned().minusYears(4),
-                tom = inneværendeMåned(),
-                beløp = 2108,
-                person = person1,
-            ),
-            lagAndelTilkjentYtelse(
-                fom = inneværendeMåned().minusYears(4),
-                tom = inneværendeMåned(),
-                beløp = 1054,
-                person = person2,
+        val forrigeTilkjentYtelse = TilkjentYtelse(
+            behandling = forrigeBehandling,
+            opprettetDato = LocalDate.now(),
+            endretDato = LocalDate.now(),
+            andelerTilkjentYtelse = mutableSetOf(
+                lagAndelTilkjentYtelse(
+                    fom = inneværendeMåned().minusYears(4),
+                    tom = inneværendeMåned(),
+                    beløp = 2108,
+                    person = person1,
+                ),
+                lagAndelTilkjentYtelse(
+                    fom = inneværendeMåned().minusYears(4),
+                    tom = inneværendeMåned(),
+                    beløp = 1054,
+                    person = person2,
+                ),
             ),
         )
+
         every { beregningServiceMock.hentTilkjentYtelseForBehandling(behandlingId = behandling.id) } answers { tilkjentYtelse }
         every { behandlingHentOgPersisterService.hent(behandlingId = behandling.id) } answers { behandling }
         every { behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling = behandling) } answers { forrigeBehandling }
-        every { beregningServiceMock.hentAndelerTilkjentYtelseForBehandling(behandlingId = forrigeBehandling.id) } answers { forrigeAndeler }
+        every { beregningServiceMock.hentOptionalTilkjentYtelseForBehandling(behandlingId = forrigeBehandling.id) } answers { forrigeTilkjentYtelse }
 
         Assertions.assertTrue(tilkjentYtelseValideringService.finnAktørerMedUgyldigEtterbetalingsperiode(behandlingId = behandling.id).size == 1)
         Assertions.assertEquals(

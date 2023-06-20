@@ -81,7 +81,8 @@ class TilkjentYtelseValideringService(
             behandling = behandlingHentOgPersisterService.hent(behandlingId),
         )
         val forrigeAndelerTilkjentYtelse =
-            forrigeBehandling?.let { beregningService.hentAndelerTilkjentYtelseForBehandling(behandlingId = it.id) }
+            forrigeBehandling?.let { beregningService.hentOptionalTilkjentYtelseForBehandling(behandlingId = it.id) }
+                ?.andelerTilkjentYtelse
 
         return finnAktørIderMedUgyldigEtterbetalingsperiode(
             forrigeAndelerTilkjentYtelse = forrigeAndelerTilkjentYtelse ?: emptyList(),
