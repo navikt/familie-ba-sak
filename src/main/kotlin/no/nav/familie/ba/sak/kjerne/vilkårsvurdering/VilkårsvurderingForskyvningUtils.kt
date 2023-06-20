@@ -78,11 +78,14 @@ object VilkårsvurderingForskyvningUtils {
     }
 
     private fun Collection<VilkårResultat>.lagForskjøvetTidslinjeForOppfylteVilkår(vilkår: Vilkår): Tidslinje<VilkårResultat, Måned> {
+        fun oppfyllelseskrav(vilkårResultat: VilkårResultat) =
+            if (vilkår == Vilkår.LOVLIG_OPPHOLD) vilkårResultat.erOppfyltEllerIkkeAktuelt() else vilkårResultat.erOppfylt()
         return this
-            .filter { it.vilkårType == vilkår && it.erOppfylt() }
+            .filter { it.vilkårType == vilkår && oppfyllelseskrav(it) }
             .tilTidslinje()
             .tilMånedFraMånedsskifteIkkeNull { innholdSisteDagForrigeMåned, innholdFørsteDagDenneMåned ->
                 when {
+                    vilkår === Vilkår.LOVLIG_OPPHOLD && innholdSisteDagForrigeMåned.erOppfyltEllerIkkeAktuelt() && innholdFørsteDagDenneMåned.erOppfyltEllerIkkeAktuelt() -> innholdFørsteDagDenneMåned
                     !innholdSisteDagForrigeMåned.erOppfylt() || !innholdFørsteDagDenneMåned.erOppfylt() -> null
                     vilkår == Vilkår.BOR_MED_SØKER && innholdFørsteDagDenneMåned.erDeltBosted() -> innholdSisteDagForrigeMåned
                     else -> innholdFørsteDagDenneMåned
@@ -154,6 +157,6 @@ object VilkårsvurderingForskyvningUtils {
             behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
         )
         return this.map { it.vilkårType }
-            .containsAll(alleVilkårForPersonType) && this.all { it.resultat == Resultat.OPPFYLT }
+            .containsAll(alleVilkårForPersonType) && this.all { if (it.vilkårType === Vilkår.LOVLIG_OPPHOLD) it.erOppfyltEllerIkkeAktuelt() else it.resultat == Resultat.OPPFYLT }
     }
 }

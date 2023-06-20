@@ -411,6 +411,40 @@ class VilkårsvurderingForskyvningUtilsTest {
         assertPeriode(periode = periode4, forventetFom = desember2021.plusMonths(1), forventetTom = mai2022)
     }
 
+    @Test
+    fun `Skal behandle IKKE_AKTUELT som oppfylt for lovlig opphold`() {
+        val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2022, Month.DECEMBER, 1))
+        val søker = lagPerson(type = PersonType.SØKER, fødselsdato = LocalDate.of(1995, 8, 15))
+
+        val personResultatSøker = PersonResultat(
+            aktør = søker.aktør,
+            vilkårsvurdering = lagVilkårsvurdering(
+                søkerAktør = søker.aktør,
+                behandling = lagBehandling(),
+                resultat = Resultat.OPPFYLT,
+            ),
+        )
+
+        val søkerLovligOppholdVilkårResultat =
+            setOf(
+                lagVilkårResultat(
+                    personResultat = personResultatSøker,
+                    periodeFom = barn.fødselsdato,
+                    periodeTom = barn.fødselsdato.til18ÅrsVilkårsdato(),
+                    vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                    resultat = Resultat.IKKE_AKTUELT,
+                ),
+            )
+
+        personResultatSøker.setSortedVilkårResultater(lagVilkårForPerson(fom = barn.fødselsdato, tom = null, maksTom = barn.fødselsdato.til18ÅrsVilkårsdato(), spesielleVilkår = søkerLovligOppholdVilkårResultat))
+
+        val forskjøvetTidslinje = søkerLovligOppholdVilkårResultat.tilForskjøvetTidslinjeForOppfyltVilkår(vilkår = Vilkår.LOVLIG_OPPHOLD)
+
+        val forskjøvedePerioder = forskjøvetTidslinje.perioder()
+
+        Assertions.assertEquals(1, forskjøvedePerioder.size)
+    }
+
     private fun assertPeriode(
         periode: Periode<List<VilkårResultat>, Måned>,
         forventetFom: YearMonth,
