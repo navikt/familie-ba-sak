@@ -1,7 +1,9 @@
 package no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling
 
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.BaseEntitet
@@ -92,6 +94,13 @@ class VilkårsvurderingForNyBehandlingServiceTest {
             barn,
         )
 
+        every {
+            endretUtbetalingAndelService.kopierEndretUtbetalingAndelFraForrigeBehandling(
+                behandling,
+                forrigeBehandling,
+            )
+        } just runs
+
         vilkårsvurderingForNyBehandlingService.opprettVilkårsvurderingUtenomHovedflyt(
             behandling = behandling,
             forrigeBehandlingSomErVedtatt = forrigeBehandling,
@@ -167,6 +176,13 @@ class VilkårsvurderingForNyBehandlingServiceTest {
             barn,
         )
 
+        every {
+            endretUtbetalingAndelService.kopierEndretUtbetalingAndelFraForrigeBehandling(
+                behandling,
+                forrigeBehandling,
+            )
+        } just runs
+
         vilkårsvurderingForNyBehandlingService.opprettVilkårsvurderingUtenomHovedflyt(
             behandling = behandling,
             forrigeBehandlingSomErVedtatt = forrigeBehandling,
@@ -225,6 +241,13 @@ class VilkårsvurderingForNyBehandlingServiceTest {
             søker,
             barn2,
         )
+
+        every {
+            endretUtbetalingAndelService.kopierEndretUtbetalingAndelFraForrigeBehandling(
+                behandling,
+                forrigeBehandling,
+            )
+        } just runs
 
         vilkårsvurderingForNyBehandlingService.opprettVilkårsvurderingUtenomHovedflyt(
             behandling = behandling,
