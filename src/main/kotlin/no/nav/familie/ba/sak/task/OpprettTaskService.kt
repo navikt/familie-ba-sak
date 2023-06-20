@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.task.dto.Autobrev6og18ÅrDTO
@@ -24,6 +26,7 @@ import java.util.Properties
 @Service
 class OpprettTaskService(
     val taskRepository: TaskRepositoryWrapper,
+    val satskjøringRepository: SatskjøringRepository,
 ) {
 
     fun opprettOppgaveTask(
@@ -113,6 +116,7 @@ class OpprettTaskService(
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun opprettSatsendringTask(fagsakId: Long, satstidspunkt: YearMonth) {
+        satskjøringRepository.save(Satskjøring(fagsakId = fagsakId, satsTidspunkt = satstidspunkt))
         overstyrTaskMedNyCallId(IdUtils.generateId()) {
             taskRepository.save(
                 Task(

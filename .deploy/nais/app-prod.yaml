@@ -111,8 +111,8 @@ spec:
         - host: sdw-wsrest.ecb.europa.eu
         - host: sentry.gc.nav.no
   replicas:
-    min: 2
-    max: 4
+    min: 3
+    max: 5
     cpuThresholdPercentage: 50
   resources:
     limits:
