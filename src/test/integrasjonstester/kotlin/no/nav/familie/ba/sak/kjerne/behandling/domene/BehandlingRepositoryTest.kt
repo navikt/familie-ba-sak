@@ -64,6 +64,25 @@ class BehandlingRepositoryTest(
 
             assertThat(behandlingRepository.finnSisteIverksatteBehandling(fagsak.id)!!).isEqualTo(behandling3)
         }
+
+        @Test
+        fun `skal finne siste iverksatte behandlingen før en annen behandling sin aktivert tidspunkt`() {
+            val tilfeldigPerson = tilfeldigPerson()
+            val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(tilfeldigPerson.aktør.aktivFødselsnummer())
+            val behandling1 = opprettBehandling(fagsak, AVSLUTTET, LocalDateTime.now().minusDays(3))
+                .medTilkjentYtelse(true)
+            val behandling2 = opprettBehandling(fagsak, AVSLUTTET, LocalDateTime.now().minusDays(2))
+                .medTilkjentYtelse(true)
+            val behandling3 = opprettBehandling(fagsak, AVSLUTTET, LocalDateTime.now().minusDays(1))
+                .medTilkjentYtelse(true)
+
+            opprettBehandling(fagsak, AVSLUTTET).medTilkjentYtelse()
+            opprettBehandling(fagsak, IVERKSETTER_VEDTAK).medTilkjentYtelse()
+            assertThat(behandlingRepository.finnSisteIverksatteBehandling(fagsak.id, behandling3.aktivertTidspunkt)!!)
+                .isEqualTo(behandling2)
+            assertThat(behandlingRepository.finnSisteIverksatteBehandling(fagsak.id, behandling2.aktivertTidspunkt)!!)
+                .isEqualTo(behandling1)
+        }
     }
 
     private fun opprettBehandling(

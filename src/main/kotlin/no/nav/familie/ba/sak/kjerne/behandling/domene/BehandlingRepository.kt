@@ -82,10 +82,11 @@ interface BehandlingRepository : JpaRepository<Behandling, Long> {
               AND ty.utbetalingsoppdrag IS NOT NULL
               AND f.arkivert = false
               AND b.status = 'AVSLUTTET'
+              AND (cast(:aktivertTid as timestamp) IS NULL OR b.aktivert_tid < :aktivertTid )
             ORDER BY b.fk_fagsak_id, b.aktivert_tid DESC""",
         nativeQuery = true,
     )
-    fun finnSisteIverksatteBehandling(fagsakId: Long): Behandling?
+    fun finnSisteIverksatteBehandling(fagsakId: Long, aktivertTid: LocalDateTime? = null): Behandling?
 
     @Query(
         """

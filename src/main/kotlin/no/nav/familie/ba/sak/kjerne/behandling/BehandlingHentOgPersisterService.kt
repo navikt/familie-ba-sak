@@ -54,8 +54,15 @@ class BehandlingHentOgPersisterService(
      * eller ved behandlingsresultat.
      */
     fun hentForrigeBehandlingSomErIverksatt(behandling: Behandling): Behandling? {
-        val iverksatteBehandlinger = hentIverksatteBehandlinger(behandling.fagsak.id)
-        return Behandlingutils.hentForrigeIverksatteBehandling(iverksatteBehandlinger, behandling)
+        val forrigeIverksatteBehandling =
+            behandlingRepository.finnSisteIverksatteBehandling(behandling.fagsak.id, behandling.aktivertTidspunkt)
+        if (forrigeIverksatteBehandling != null &&
+            (forrigeIverksatteBehandling.id == behandling.id ||
+                behandling.aktivertTidspunkt < forrigeIverksatteBehandling.aktivertTidspunkt)
+        ) {
+            error("Fant ikke riktig forrigeIverksatteBehandling=$forrigeIverksatteBehandling behandling=$behandling")
+        }
+        return forrigeIverksatteBehandling
     }
 
     fun hentForrigeBehandlingSomErIverksattFraBehandlingsId(behandlingId: Long): Behandling? {
