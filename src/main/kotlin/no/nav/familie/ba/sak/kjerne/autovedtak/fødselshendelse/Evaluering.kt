@@ -43,6 +43,7 @@ enum class Resultat {
     OPPFYLT,
     IKKE_OPPFYLT,
     IKKE_VURDERT,
+    IKKE_AKTUELT,
 }
 
 fun List<Evaluering>.erOppfylt() = this.all { it.resultat == Resultat.OPPFYLT }
