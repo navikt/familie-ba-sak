@@ -168,7 +168,7 @@ class StartSatsendring(
             SatsendringSvar.BEHANDLING_KAN_IKKE_SETTES_PÅ_VENT,
             ->
                 throw FunksjonellFeil("Det finnes en åpen behandling på fagsaken som må avsluttes før satsendring kan gjennomføres.")
-            SatsendringSvar.BEHANDLING_KAN_SNIKES_FORBI ->
+            SatsendringSvar.BEHANDLING_KAN_SNIKES_FORBI, SatsendringSvar.SATSENDRING_PÅ_VENT ->
                 throw FunksjonellFeil(resultatSatsendringBehandling.melding)
         }
     }

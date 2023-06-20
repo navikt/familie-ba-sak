@@ -19,6 +19,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
@@ -45,6 +46,7 @@ class AutovedtakSatsendringService(
     private val loggService: LoggService,
     private val featureToggleService: FeatureToggleService,
     private val snikeIKøenService: SnikeIKøenService,
+    private val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
 ) {
 
     private val satsendringAlleredeUtført = Metrics.counter("satsendring.allerede.utfort")
@@ -72,6 +74,12 @@ class AutovedtakSatsendringService(
             satskjøringRepository.save(satskjøringForFagsak)
             logger.info("Satsendring allerede utført for fagsak=$fagsakId")
             satsendringAlleredeUtført.increment()
+            return SatsendringSvar.SATSENDRING_ER_ALLEREDE_UTFØRT
+        }
+
+        if (endretUtbetalingAndelHentOgPersisterService.hentForBehandling(sisteIverksatteBehandling.id).isNotEmpty()) {
+            satskjøringForFagsak.feiltype = SatsendringSvar.SATSENDRING_ER_ALLEREDE_UTFØRT.name
+            satskjøringRepository.save(satskjøringForFagsak)
             return SatsendringSvar.SATSENDRING_ER_ALLEREDE_UTFØRT
         }
 
@@ -230,4 +238,5 @@ enum class SatsendringSvar(val melding: String) {
     ),
     BEHANDLING_KAN_SNIKES_FORBI("Behandling kan snikes forbi (toggle er slått av)"),
     BEHANDLING_KAN_IKKE_SETTES_PÅ_VENT("Behandlingen kan ikke settes på vent"),
+    SATSENDRING_PÅ_VENT("Fagsak ikke klar for satsendring. Vil kjøres senere når man er klar."),
 }
