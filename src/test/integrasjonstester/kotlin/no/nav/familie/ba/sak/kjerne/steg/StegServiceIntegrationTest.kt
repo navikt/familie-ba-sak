@@ -501,6 +501,115 @@ class StegServiceIntegrationTest(
     }
 
     @Test
+    fun `skal kjøre gjennom steg for migreringsbehandling med årsak endre migreringsdato og avvik i simulering utenefor beløpsgrenser`() {
+        val simulertPosteringMock = listOf(
+            SimulertPostering(
+                fagOmrådeKode = FagOmrådeKode.BARNETRYGD,
+                fom = LocalDate.parse("2019-09-01"),
+                tom = LocalDate.parse("2019-09-30"),
+                betalingType = BetalingType.DEBIT,
+                beløp = 600.toBigDecimal(),
+                posteringType = PosteringType.FEILUTBETALING,
+                forfallsdato = LocalDate.parse("2021-02-23"),
+                utenInntrekk = false,
+                erFeilkonto = null,
+            ),
+        )
+
+        val simuleringMottakerMock = listOf(
+            SimuleringMottaker(
+                simulertPostering = simulertPosteringMock,
+                mottakerType = MottakerType.BRUKER,
+                mottakerNummer = "12345678910",
+            ),
+        )
+
+        every { økonomiKlient.hentSimulering(any()) } returns DetaljertSimuleringResultat(simuleringMottakerMock)
+
+        val søkerFnr = randomFnr()
+        val barnFnr = ClientMocks.barnFnr[0]
+        val barnasIdenter = listOf(barnFnr)
+
+        kjørStegprosessForFGB(
+            tilSteg = StegType.BEHANDLING_AVSLUTTET,
+            søkerFnr = søkerFnr,
+            barnasIdenter = barnasIdenter,
+            fagsakService = fagsakService,
+            vedtakService = vedtakService,
+            persongrunnlagService = persongrunnlagService,
+            vilkårsvurderingService = vilkårsvurderingService,
+            stegService = stegService,
+            vedtaksperiodeService = vedtaksperiodeService,
+            brevmalService = brevmalService,
+        )
+
+        val nyMigreringsdato = LocalDate.now().minusMonths(6)
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
+        val behandling = stegService.håndterNyBehandling(
+            NyBehandling(
+                kategori = BehandlingKategori.NASJONAL,
+                underkategori = BehandlingUnderkategori.ORDINÆR,
+                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                behandlingÅrsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
+                søkersIdent = søkerFnr,
+                barnasIdenter = barnasIdenter,
+                nyMigreringsdato = nyMigreringsdato,
+                fagsakId = fagsak.id,
+            ),
+        )
+        assertEquals(StegType.VILKÅRSVURDERING, behandling.steg)
+        assertTrue {
+            behandling.behandlingStegTilstand.any {
+                it.behandlingSteg == StegType.REGISTRERE_PERSONGRUNNLAG &&
+                    it.behandlingStegStatus == BehandlingStegStatus.UTFØRT
+            }
+        }
+        assertMigreringsdato(nyMigreringsdato, behandling)
+        assertNotNull(vilkårsvurderingService.hentAktivForBehandling(behandling.id))
+
+        val behandlingEtterVilkårsvurdering = stegService.håndterVilkårsvurdering(behandling)
+        assertEquals(StegType.BEHANDLINGSRESULTAT, behandlingEtterVilkårsvurdering.steg)
+
+        val behandlingEtterBehandlingsresultatSteg =
+            stegService.håndterBehandlingsresultat(behandlingEtterVilkårsvurdering)
+        assertEquals(StegType.VURDER_TILBAKEKREVING, behandlingEtterBehandlingsresultatSteg.steg)
+
+        val behandlingEtterTilbakekrevingSteg = stegService.håndterVurderTilbakekreving(
+            behandlingEtterBehandlingsresultatSteg,
+            RestTilbakekreving(
+                valg = Tilbakekrevingsvalg.IGNORER_TILBAKEKREVING,
+                begrunnelse = "ignorer tilbakekreving",
+            ),
+        )
+        assertEquals(StegType.SEND_TIL_BESLUTTER, behandlingEtterTilbakekrevingSteg.steg)
+
+        val behandlingEtterBeslutterSteg = stegService.håndterSendTilBeslutter(
+            behandlingEtterTilbakekrevingSteg,
+            "1234",
+        )
+        assertEquals(StegType.FERDIGSTILLE_BEHANDLING, behandlingEtterBeslutterSteg.steg)
+        assertTrue {
+            behandlingEtterBeslutterSteg.behandlingStegTilstand.any {
+                it.behandlingSteg == StegType.SEND_TIL_BESLUTTER &&
+                    it.behandlingStegStatus == BehandlingStegStatus.UTFØRT
+            }
+        }
+        assertTrue {
+            behandlingEtterBeslutterSteg.behandlingStegTilstand.any {
+                it.behandlingSteg == StegType.BESLUTTE_VEDTAK &&
+                    it.behandlingStegStatus == BehandlingStegStatus.UTFØRT
+            }
+        }
+        val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandling.id)
+        assertNotNull(totrinnskontroll)
+        assertEquals(true, totrinnskontroll!!.godkjent)
+        assertEquals(SikkerhetContext.hentSaksbehandlerNavn(), totrinnskontroll.saksbehandler)
+        assertEquals(SikkerhetContext.hentSaksbehandler(), totrinnskontroll.saksbehandlerId)
+        assertEquals(SikkerhetContext.SYSTEM_NAVN, totrinnskontroll.beslutter)
+        assertEquals(SikkerhetContext.SYSTEM_FORKORTELSE, totrinnskontroll.beslutterId)
+    }
+
+    @Test
     fun `skal kjøre gjennom steg for migreringsbehandling med årsak endre migreringsdato og avvik i simulering utenfor beløpsgrenser`() {
         val simulertPosteringMock = listOf(
             SimulertPostering(
@@ -589,17 +698,7 @@ class StegServiceIntegrationTest(
             "1234",
         )
 
-        assertEquals(StegType.BESLUTTE_VEDTAK, behandlingEtterSendTilBeslutterSteg.steg)
-
-        val behandlingEtterBesluttVedtakSteg = stegService.håndterBeslutningForVedtak(
-            behandlingEtterSendTilBeslutterSteg,
-            RestBeslutningPåVedtak(
-                Beslutning.GODKJENT,
-                "godkjent manuelt",
-            ),
-        )
-
-        assertEquals(StegType.FERDIGSTILLE_BEHANDLING, behandlingEtterBesluttVedtakSteg.steg)
+        assertEquals(StegType.FERDIGSTILLE_BEHANDLING, behandlingEtterSendTilBeslutterSteg.steg)
 
         val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandling.id)
         assertNotNull(totrinnskontroll)

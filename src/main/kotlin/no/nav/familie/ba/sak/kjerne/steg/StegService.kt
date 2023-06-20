@@ -317,7 +317,7 @@ class StegService(
             simuleringService.harMigreringsbehandlingManuellePosteringer(behandling)
         }
 
-        if (behandlingEtterBeslutterSteg.erManuellMigrering() && harMigreringsbehandlingAvvikInnenforbeløpsgrenser && !harMigreringsbehandlingManuellePosteringer) {
+        if ((behandlingEtterBeslutterSteg.erHelmanuellMigrering() && harMigreringsbehandlingAvvikInnenforbeløpsgrenser && !harMigreringsbehandlingManuellePosteringer) || behandlingEtterBeslutterSteg.erManuellMigreringForEndreMigreringsdato()) {
             return håndterBeslutningForVedtak(
                 behandlingEtterBeslutterSteg,
                 RestBeslutningPåVedtak(Beslutning.GODKJENT),
