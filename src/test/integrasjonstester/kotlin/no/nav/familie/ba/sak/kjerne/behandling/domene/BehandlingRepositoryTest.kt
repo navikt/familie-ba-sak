@@ -32,10 +32,16 @@ class BehandlingRepositoryTest(
     @Nested
     inner class FinnSisteIverksatteBehandling {
 
+        val tilfeldigPerson = tilfeldigPerson()
+        lateinit var fagsak: Fagsak
+
+        @BeforeEach
+        fun setUp() {
+            fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(tilfeldigPerson.aktør.aktivFødselsnummer())
+        }
+
         @Test
         fun `skal finne siste iverksatte behandlingen som har utbetalingsoppdrag, uavhengig behandlingsstatus`() {
-            val tilfeldigPerson = tilfeldigPerson()
-            val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(tilfeldigPerson.aktør.aktivFødselsnummer())
             opprettBehandling(fagsak, AVSLUTTET, LocalDateTime.now().minusDays(3))
                 .medTilkjentYtelse(true)
             opprettBehandling(fagsak, AVSLUTTET, LocalDateTime.now().minusDays(2))
@@ -43,24 +49,19 @@ class BehandlingRepositoryTest(
             val behandling3 = opprettBehandling(fagsak, IVERKSETTER_VEDTAK, LocalDateTime.now().minusDays(1))
                 .medTilkjentYtelse(true)
 
-            val sisteIverksatteBehandling = behandlingRepository.finnSisteIverksatteBehandling(fagsak.id)!!
-            assertThat(sisteIverksatteBehandling)
-                .isEqualTo(behandling3)
+            assertThat(behandlingRepository.finnSisteIverksatteBehandling(fagsak.id)!!).isEqualTo(behandling3)
         }
 
         @Test
         fun `skal finne siste iverksatte behandlingen som har utbetalingsoppdrag`() {
-            val tilfeldigPerson = tilfeldigPerson()
-            val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(tilfeldigPerson.aktør.aktivFødselsnummer())
             opprettBehandling(fagsak, AVSLUTTET, LocalDateTime.now().minusDays(3))
-                .medTilkjentYtelse(true)
-            opprettBehandling(fagsak, AVSLUTTET, LocalDateTime.now().minusDays(2))
                 .medTilkjentYtelse(true)
             val behandling3 = opprettBehandling(fagsak, AVSLUTTET, LocalDateTime.now().minusDays(1))
                 .medTilkjentYtelse(true)
 
             opprettBehandling(fagsak, AVSLUTTET).medTilkjentYtelse()
             opprettBehandling(fagsak, IVERKSETTER_VEDTAK).medTilkjentYtelse()
+
             assertThat(behandlingRepository.finnSisteIverksatteBehandling(fagsak.id)!!).isEqualTo(behandling3)
         }
     }
