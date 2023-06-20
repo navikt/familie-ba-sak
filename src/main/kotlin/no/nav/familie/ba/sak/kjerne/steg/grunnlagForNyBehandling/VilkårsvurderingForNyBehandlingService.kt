@@ -138,6 +138,11 @@ class VilkårsvurderingForNyBehandlingService(
                     personopplysningGrunnlag,
                 )
 
+            endretUtbetalingAndelService.kopierEndretUtbetalingAndelFraForrigeBehandling(
+                inneværendeBehandling,
+                forrigeBehandlingSomErVedtatt,
+            )
+
             return vilkårsvurderingService.lagreNyOgDeaktiverGammel(nyVilkårsvurdering)
         } else {
             initierVilkårsvurderingForBehandling(
