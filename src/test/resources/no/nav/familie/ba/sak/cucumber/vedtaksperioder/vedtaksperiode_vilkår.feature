@@ -40,30 +40,54 @@ Egenskap: Vedtaksperioder med mor og et barn
       | 01.04.2038 |            | Opphør             | Kun søker     |
 
 
-  Scenario: Skal lage vedtaksperioder når det er åpent avslag på periode der noe er oppfylt samtidig
+  Scenario: Skal lage vedtaksperioder når det er generelt avslag som overlapper med oppfylt periode
+    Og lag personresultater for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
+      | AktørId | Vilkår                                                          | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag |
+      | 1234    | BOSATT_I_RIKET                                                  | 11.01.1970 |            | Oppfylt      |                      |
+      | 1234    | LOVLIG_OPPHOLD                                                  | 11.01.2020 | 05.05.2022 | Oppfylt      |                      |
+      | 1234    | LOVLIG_OPPHOLD                                                  |            |            | ikke_oppfylt | Ja                   |
+      | 3456    | UNDER_18_ÅR                                                     | 13.01.2020 | 12.04.2038 | Oppfylt      |                      |
+      | 3456    | GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD, BOR_MED_SØKER | 13.01.2020 |            | Oppfylt      |                      |
+
+
+    Og med andeler tilkjent ytelse
+      | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
+      | 1234    | 01.01.2020 | 31.03.2038 | 1354  | 1            |
+      | 3456    | 01.01.2020 | 31.03.2038 | 1354  | 1            |
+
+    Når vedtaksperioder med begrunnelser genereres for behandling 1
+
+    Så forvent følgende vedtaksperioder med begrunnelser
+      | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar                         |
+      | 01.02.2020 | 31.05.2022 | Utbetaling         | Barn og søker                     |
+      | 01.06.2022 | 31.12.2037 | Opphør             | Lovlig opphold opphører for søker |
+      | 01.01.2038 |            | Opphør             | Under 18 opphører                 |
+      |            |            | Avslag             | Generelt avslag lovlig opphold    |
+
+
+  Scenario: Skal lage vedtaksperioder når det er åpent avslag på bor med søker samtidig som oppfylt
     Og lag personresultater for behandling 1
     Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                                          | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag |
       | 1234    | BOSATT_I_RIKET, LOVLIG_OPPHOLD                                  | 11.01.1970 |            | Oppfylt      |                      |
-      | 1234    | UTVIDET_BARNETRYGD                                              | 11.01.2020 | 05.05.2022 | Oppfylt      |                      |
-      | 1234    | UTVIDET_BARNETRYGD                                              | 11.01.2023 |            | Oppfylt      |                      |
-      | 3456    | UNDER_18_ÅR                                                     | 13.04.2020 | 12.04.2038 | Oppfylt      |                      |
-      | 3456    | GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD, BOR_MED_SØKER | 13.04.2020 |            | Oppfylt      |                      |
+      | 3456    | UNDER_18_ÅR                                                     | 13.01.2020 | 12.04.2038 | Oppfylt      |                      |
+      | 3456    | GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD, BOR_MED_SØKER | 13.01.2020 |            | Oppfylt      |                      |
       | 3456    | BOR_MED_SØKER                                                   |            |            | ikke_oppfylt | Ja                   |
+
 
     Og med andeler tilkjent ytelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
-      | 1234    | 01.05.2020 | 31.03.2038 | 1354  | 1            |
-      | 3456    | 01.05.2020 | 31.03.2038 | 1354  | 1            |
+      | 1234    | 01.01.2020 | 31.03.2038 | 1354  | 1            |
+      | 3456    | 01.01.2020 | 31.03.2038 | 1354  | 1            |
 
     Når vedtaksperioder med begrunnelser genereres for behandling 1
 
     Så forvent følgende vedtaksperioder med begrunnelser
       | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar     |
-      | 01.05.2020 | 31.01.2021 | Utbetaling         | Barn og søker |
-      | 01.02.2021 | 31.03.2021 | Utbetaling         | Barn og søker |
-      | 01.04.2021 | 31.03.2038 | Utbetaling         | Barn og søker |
-      | 01.04.2038 |            | Opphør             | Kun søker     |
+      | 01.02.2020 | 31.12.2037 | Utbetaling         | Barn og søker |
+      | 01.01.2038 |            | Opphør             | Barn og søker |
+      |            |            | Avslag             | Barn og søker |
 
   Scenario: Skal lage vedtaksperioder for mor med ett barn med vilkår - barn flytter til søker etter 1 år
 

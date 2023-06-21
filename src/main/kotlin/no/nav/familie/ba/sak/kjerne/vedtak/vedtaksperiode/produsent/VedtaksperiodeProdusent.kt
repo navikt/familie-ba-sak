@@ -50,13 +50,13 @@ fun genererVedtaksperioder(
 }
 
 fun finnPerioderSomSkalBegrunnes(
-    grunnlagTidslinjePerPerson: Map<Aktør, Tidslinje<GrunnlagForPerson, Måned>>,
-    grunnlagTidslinjePerPersonForrigeBehandling: Map<Aktør, Tidslinje<GrunnlagForPerson, Måned>>,
+    grunnlagTidslinjePerPerson: Map<Aktør, GrunnlagForPersonTidslinjerSplittetPåOverlappendeGenerelleAvslag>,
+    grunnlagTidslinjePerPersonForrigeBehandling: Map<Aktør, GrunnlagForPersonTidslinjerSplittetPåOverlappendeGenerelleAvslag>,
     endringstidspunkt: LocalDate,
 ): List<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>> {
     val gjeldendeOgForrigeGrunnlagKombinert = kombinerGjeldendeOgForrigeGrunnlag(
-        grunnlagTidslinjePerPerson = grunnlagTidslinjePerPerson,
-        grunnlagTidslinjePerPersonForrigeBehandling = grunnlagTidslinjePerPersonForrigeBehandling,
+        grunnlagTidslinjePerPerson = grunnlagTidslinjePerPerson.mapValues { it.value.grunnlagForPerson },
+        grunnlagTidslinjePerPersonForrigeBehandling = grunnlagTidslinjePerPersonForrigeBehandling.mapValues { it.value.grunnlagForPerson },
     )
 
     val sammenslåttePerioderUtenEksplisittAvslag = gjeldendeOgForrigeGrunnlagKombinert
@@ -65,8 +65,22 @@ fun finnPerioderSomSkalBegrunnes(
 
     val eksplisitteAvslagsperioder = gjeldendeOgForrigeGrunnlagKombinert.utledEksplisitteAvslagsperioder()
 
-    return (eksplisitteAvslagsperioder + sammenslåttePerioderUtenEksplisittAvslag).slåSammenAvslagOgReduksjonsperioderMedSammeFomOgTom()
+    val overlappendeGenerelleAvslagPerioder = grunnlagTidslinjePerPerson.lagOverlappendeGenerelleAvslagsPerioder()
+
+    return (overlappendeGenerelleAvslagPerioder + eksplisitteAvslagsperioder + sammenslåttePerioderUtenEksplisittAvslag).slåSammenAvslagOgReduksjonsperioderMedSammeFomOgTom()
 }
+
+private fun Map<Aktør, GrunnlagForPersonTidslinjerSplittetPåOverlappendeGenerelleAvslag>.lagOverlappendeGenerelleAvslagsPerioder() =
+    map {
+        it.value.overlappendeGenerelleAvslagGrunnlagForPerson
+    }.kombiner {
+        it.map { grunnlagForPerson ->
+            GrunnlagForGjeldendeOgForrigeBehandling(
+                grunnlagForPerson,
+                false,
+            )
+        }.toList()
+    }.perioder()
 
 private fun Collection<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>>.filtrerPåEndringstidspunkt(
     endringstidspunkt: LocalDate,

@@ -25,7 +25,7 @@ data class Periode<I, T : Tidsenhet>(
 fun <I> periodeAv(fraOgMed: LocalDate?, tilOgMed: LocalDate?, innhold: I): Periode<I, Dag> =
     Periode(fraOgMed.tilTidspunktEllerUendeligTidlig(), tilOgMed.tilTidspunktEllerUendeligSent(), innhold)
 
-fun <I> periodeAv(fraOgMed: YearMonth?, tilOgMed: YearMonth?, innhold: I): Periode<I, Måned> =
+fun <I> månedPeriodeAv(fraOgMed: YearMonth?, tilOgMed: YearMonth?, innhold: I): Periode<I, Måned> =
     Periode(fraOgMed.tilTidspunktEllerUendeligTidlig(), tilOgMed.tilTidspunktEllerUendeligSent(), innhold)
 
 fun <I, T : Tidsenhet> periodeAv(
