@@ -11,6 +11,20 @@ class AutovedtakSatsendringScheduler(
 ) {
     @Scheduled(cron = CRON_HVERT_10_MIN_UKEDAG)
     fun triggSatsendringJuli2023() {
+        startSatsendring()
+    }
+
+    @Scheduled(cron = CRON_HVERT_5_MIN_UKEDAG_UTENFOR_ARBEIDSTID)
+    fun triggSatsendringJuli2023UtenforArbeidstid() {
+        startSatsendring()
+    }
+
+    @Scheduled(cron = CRON_HVERT_10_MIN_LØRDAG)
+    fun triggSatsendringJuli2023Lørdag() {
+        startSatsendring()
+    }
+
+    private fun startSatsendring() {
         if (LeaderClient.isLeader() == true) {
             logger.info("Starter schedulert jobb for satsendring juli 2023")
             startSatsendring.startSatsendring(
@@ -19,19 +33,10 @@ class AutovedtakSatsendringScheduler(
         }
     }
 
-    @Scheduled(cron = CRON_HVERT_5_MIN_UKEDAG_UTENFOR_ARBEIDSTID)
-    fun triggSatsendringJuli2023UtenforArbeidstid() {
-        if (LeaderClient.isLeader() == true) {
-            logger.info("Starter schedulert jobb for satsendring juli 2023")
-            startSatsendring.startSatsendring(
-                antallFagsaker = 1400,
-            )
-        }
-    }
-
     companion object {
         val logger = LoggerFactory.getLogger(AutovedtakSatsendringScheduler::class.java)
         const val CRON_HVERT_10_MIN_UKEDAG = "0 */10 6-15 * * MON-FRI"
         const val CRON_HVERT_5_MIN_UKEDAG_UTENFOR_ARBEIDSTID = "0 */5 16-20 * * MON-FRI"
+        const val CRON_HVERT_10_MIN_LØRDAG = "0 */5 7-17 * * SAT"
     }
 }
