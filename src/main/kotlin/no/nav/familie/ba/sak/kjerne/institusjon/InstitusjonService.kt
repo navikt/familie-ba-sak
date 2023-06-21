@@ -25,11 +25,6 @@ class InstitusjonService(
         return samhandlerKlient.hentSamhandler(orgNummer)
     }
 
-    fun hentOrgnummerForTssEksternId(tssEksternId: String): String? {
-        return institusjonRepository.findByTssEksternId(tssEksternId)?.orgNummer
-            ?: samhandlerKlient.hentSamhandlerVedTssEksternId(tssEksternId).orgNummer
-    }
-
     fun søkSamhandlere(navn: String?, postnummer: String?, område: String?): List<SamhandlerInfo> {
         val komplettSamhandlerListe = mutableListOf<SamhandlerInfo>()
         var side = 0

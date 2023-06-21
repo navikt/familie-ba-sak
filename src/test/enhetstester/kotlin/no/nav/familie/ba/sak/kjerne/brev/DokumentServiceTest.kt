@@ -238,7 +238,7 @@ internal class DokumentServiceTest {
             Brevmottaker(
                 behandlingId = behandling.id,
                 type = MottakerType.FULLMEKTIG,
-                navn = "John Doe",
+                navn = "Fullmektig navn",
                 adresselinje1 = "Test adresse",
                 postnummer = "0000",
                 poststed = "Oslo",
@@ -281,7 +281,7 @@ internal class DokumentServiceTest {
         verify(exactly = 2) { taskRepository.save(any()) }
 
         assertEquals(2, avsenderMottakere.size)
-        assertEquals("John Doe", avsenderMottakere.first().navn)
+        assertEquals("Fullmektig navn", avsenderMottakere.single { it.idType == null }.navn)
     }
 
     @Test

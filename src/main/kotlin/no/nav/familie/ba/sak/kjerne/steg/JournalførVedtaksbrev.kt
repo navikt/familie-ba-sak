@@ -194,10 +194,10 @@ class JournalførVedtaksbrev(
                 )
             }
 
-            mottakerInfo.brukerIdType == BrukerIdType.FNR && mottakerInfo.navn != null -> {
+            mottakerInfo.navn != null -> {
                 AvsenderMottaker(
                     idType = mottakerInfo.brukerIdType,
-                    id = mottakerInfo.brukerId,
+                    id = mottakerInfo.brukerIdType?.let { mottakerInfo.brukerId },
                     navn = mottakerInfo.navn,
                 )
             }
