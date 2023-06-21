@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.steg.StegService
@@ -66,6 +67,7 @@ class ForvalterController(
     private val autovedtakService: AutovedtakService,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val behandlingRepository: BehandlingRepository,
+    private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(ForvalterController::class.java)
 
@@ -90,40 +92,91 @@ class ForvalterController(
         return ResponseEntity.ok("Ferdigstill oppgaver kjørt. Antall som ikke ble ferdigstilt: $antallFeil")
     }
 
+    data class KopiertFagsakInfo(
+        val fagsakId: Long,
+        val feil: String = "",
+        val trengerNyBehandling: Boolean = true,
+    )
+
+    data class KopierteEUAFagsakerRespons(
+        val feilet: List<Long>,
+        val kopierte: List<Long>,
+        val fagsakerSomIkkeTrengerNyBehandling: List<Long>,
+        val kopierteFagsakerInfo: List<KopiertFagsakInfo>,
+    )
+
     @PostMapping(
-        path = ["/kopier-eua-satsendring"],
+        path = ["/kopier-eua-satsendring/{skalKopiere}"],
         consumes = [MediaType.APPLICATION_JSON_VALUE],
         produces = [MediaType.APPLICATION_JSON_VALUE],
     )
-    fun kopierEndretUtbetalingAndelerFraForrigeBehandling(@RequestBody fagsakListe: List<Long>): ResponseEntity<List<Long>> {
-        val fagsakerMedFeilendeKopiering = mutableListOf<Long>()
+    fun kopierEndretUtbetalingAndelerFraForrigeBehandling(
+        @RequestBody fagsakListe: List<Long>,
+        @PathVariable skalKopiere: Boolean = false,
+    ): ResponseEntity<KopierteEUAFagsakerRespons> {
+        val kopierteFagsakerInfo = mutableListOf<KopiertFagsakInfo>()
         fagsakListe.parallelStream().forEach { fagsakId ->
             try {
                 val behandlinger = behandlingRepository.finnBehandlinger(fagsakId)
                 val sorterteVedtatteBehandlinger = behandlinger
                     .filter { it.steg == StegType.BEHANDLING_AVSLUTTET && !it.erHenlagt() }
-                    .sortedBy { it.aktivertTidspunkt }
-                val sisteVedtatteBehandling = sorterteVedtatteBehandlinger[0]
+                    .sortedByDescending { it.aktivertTidspunkt }
 
-                if (!sisteVedtatteBehandling.erSatsendring()) {
+                val sisteVedtatteBehandling = sorterteVedtatteBehandlinger[0]
+                val nestSisteVedtatteBehandling = sorterteVedtatteBehandlinger[1]
+
+                if (!sisteVedtatteBehandling.erSatsendring() && sisteVedtatteBehandling.opprettetTidspunkt > LocalDate.of(
+                        2023,
+                        6,
+                        19,
+                    ).atStartOfDay()
+                ) {
                     throw Exception("Det er gjennomført en ny behandling etter satsendring som har tatt med seg feilen videre. Fagsak $fagsakId, Behandling $sisteVedtatteBehandling.")
                 }
 
-                val nestSisteVedtatteBehandling = sorterteVedtatteBehandlinger[1]
+                val sisteEndreteUtbetalingsAndeler =
+                    endretUtbetalingAndelRepository.findByBehandlingId(sisteVedtatteBehandling.id)
 
-                logger.info("Kopierer EndretUtbetalingAndel fra behandling $nestSisteVedtatteBehandling til $sisteVedtatteBehandling.")
+                val nestSisteEndreteUtbetalingsAndeler =
+                    endretUtbetalingAndelRepository.findByBehandlingId(nestSisteVedtatteBehandling.id)
 
-                forvalterService.kopierEndretUtbetalingFraForrigeBehandling(
-                    sisteVedtatteBehandling = sisteVedtatteBehandling,
-                    nestSisteVedtatteBehandling = nestSisteVedtatteBehandling,
-                )
+                if (sisteEndreteUtbetalingsAndeler.isNotEmpty() || nestSisteEndreteUtbetalingsAndeler.isEmpty()) {
+                    logger.info("Siste behandling har allerede EUA eller nest siste har ingen EUA og vi trenger ikke å kopiere. Fagsak $fagsakId")
+                    kopierteFagsakerInfo.add(KopiertFagsakInfo(fagsakId = fagsakId, trengerNyBehandling = false))
+                } else {
+                    logger.info("Kopierer EndretUtbetalingAndel fra behandling $nestSisteVedtatteBehandling til $sisteVedtatteBehandling.")
+
+                    if (skalKopiere) {
+                        forvalterService.kopierEndretUtbetalingFraForrigeBehandling(
+                            sisteVedtatteBehandling = sisteVedtatteBehandling,
+                            nestSisteVedtatteBehandling = nestSisteVedtatteBehandling,
+                        )
+                    }
+                    kopierteFagsakerInfo.add(KopiertFagsakInfo(fagsakId = fagsakId))
+                }
             } catch (exception: Exception) {
                 logger.warn(exception.message)
                 logger.warn("Feil ved kopiering av EndretUtbetalingAndel fra nest siste behandling. Fagsak $fagsakId.")
-                fagsakerMedFeilendeKopiering.add(fagsakId)
+                kopierteFagsakerInfo.add(
+                    KopiertFagsakInfo(
+                        fagsakId = fagsakId,
+                        exception.message
+                            ?: "Feil ved kopiering av EndretUtbetalingAndel fra nest siste behandling. Fagsak $fagsakId.",
+                    ),
+                )
             }
         }
-        return ResponseEntity.ok(fagsakerMedFeilendeKopiering)
+
+        return ResponseEntity.ok(
+            KopierteEUAFagsakerRespons(
+                feilet = kopierteFagsakerInfo.filter { it.feil.isNotEmpty() }.map { it.fagsakId },
+                kopierte = kopierteFagsakerInfo.filter { it.feil.isEmpty() && it.trengerNyBehandling }
+                    .map { it.fagsakId },
+                fagsakerSomIkkeTrengerNyBehandling = kopierteFagsakerInfo.filter { !it.trengerNyBehandling }
+                    .map { it.fagsakId },
+                kopierteFagsakerInfo = kopierteFagsakerInfo,
+            ),
+        )
     }
 
     @PostMapping(
