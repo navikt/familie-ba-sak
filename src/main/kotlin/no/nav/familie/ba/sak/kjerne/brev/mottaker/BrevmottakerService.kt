@@ -87,7 +87,7 @@ class BrevmottakerService(
 
         val manuellAdresseUtenlands = manueltRegistrerteMottakere.filter { it.type == MottakerType.BRUKER_MED_UTENLANDSK_ADRESSE }
             .zeroSingleOrThrow {
-                FunksjonellFeil("Mottakerfeil: Det er registret mer enn en utenlandsk adresse tilhørende bruker")
+                FunksjonellFeil("Mottakerfeil: Det er registrert mer enn en utenlandsk adresse tilhørende bruker")
             }?.let {
                 MottakerInfo(
                     brukerId = søkersident,
