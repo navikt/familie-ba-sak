@@ -4,9 +4,12 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForIverksettingFactory
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 
 @Service
@@ -15,6 +18,7 @@ class ForvalterService(
     private val vedtakService: VedtakService,
     private val beregningService: BeregningService,
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
+    private val endretUtbetalingAndelService: EndretUtbetalingAndelService,
 ) {
 
     @Transactional
@@ -38,6 +42,17 @@ class ForvalterService(
             vedtak = vedtakService.hentAktivForBehandlingThrows(behandlingId),
             saksbehandlerId = "VL",
             andelTilkjentYtelseForUtbetalingsoppdragFactory = AndelTilkjentYtelseForIverksettingFactory(),
+        )
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    fun kopierEndretUtbetalingFraForrigeBehandling(
+        sisteVedtatteBehandling: Behandling,
+        nestSisteVedtatteBehandling: Behandling,
+    ) {
+        endretUtbetalingAndelService.kopierEndretUtbetalingAndelFraForrigeBehandling(
+            behandling = sisteVedtatteBehandling,
+            forrigeBehandling = nestSisteVedtatteBehandling,
         )
     }
 }
