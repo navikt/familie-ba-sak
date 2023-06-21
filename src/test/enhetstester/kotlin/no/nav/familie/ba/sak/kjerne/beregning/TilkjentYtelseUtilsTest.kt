@@ -67,7 +67,7 @@ internal class TilkjentYtelseUtilsTest {
 
     @Test
     fun `Får tilkjent ytelse dersom vilkårresultat for lovlig opphold er ikke aktuelt`() {
-        val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2019, 8, 15))
+        val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2007, 8, 15))
         val søkerFnr = randomFnr()
 
         val tilkjentYtelse = settOppScenarioOgBeregnTilkjentYtelse(
@@ -81,6 +81,7 @@ internal class TilkjentYtelseUtilsTest {
             ),
             barna = listOf(barn),
             overgangsstønadPerioder = listOf(MånedPeriode(januar2022, november2022)),
+            behandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
         )
 
         assertEquals(1, tilkjentYtelse.andelerTilkjentYtelse.size)
@@ -1254,13 +1255,14 @@ internal class TilkjentYtelseUtilsTest {
         atypiskeVilkårSøker: List<AtypiskVilkår> = emptyList(),
         barna: List<Person>,
         overgangsstønadPerioder: List<MånedPeriode>,
+        behandlingUnderkategori: BehandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
     ): TilkjentYtelse {
         val vilkårsvurdering = lagVilkårsvurdering(
             søker = søker,
             barn = barna,
             atypiskeVilkårBarna = atypiskeVilkårBarna,
             atypiskeVilkårSøker = atypiskeVilkårSøker,
-            behandlingUnderkategori = BehandlingUnderkategori.UTVIDET,
+            behandlingUnderkategori = behandlingUnderkategori,
         )
 
         val endretUtbetalingAndeler = endretAndeler.map {
