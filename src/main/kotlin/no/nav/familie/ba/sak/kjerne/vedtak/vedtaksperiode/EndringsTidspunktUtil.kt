@@ -4,7 +4,7 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.outerJoin
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonthEllerUendeligFortid
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPersonIkkeInnvilget
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPersonInnvilget
@@ -31,7 +31,7 @@ private fun Map<Aktør, Tidslinje<Boolean, Måned>>.finnTidligsteForskjell() = t
     .minOfOrNull { (_, erPeriodeLikTidslinje) ->
         erPeriodeLikTidslinje.perioder()
             .filter { it.innhold == false }
-            .minOfOrNull { it.fraOgMed.tilYearMonth().førsteDagIInneværendeMåned() } ?: TIDENES_ENDE
+            .minOfOrNull { it.fraOgMed.tilYearMonthEllerUendeligFortid().førsteDagIInneværendeMåned() } ?: TIDENES_ENDE
     }
 
 private fun GrunnlagForPerson?.erLik(
