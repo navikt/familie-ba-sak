@@ -23,6 +23,9 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.domene.PersonIdent
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingService
 import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.VilkårsvurderingForNyBehandlingServiceTest.Companion.validerKopiertVilkårsvurdering
@@ -52,6 +55,9 @@ class VilkårsvurderingForNyBehandlingServiceTest(
 
     @Autowired
     private val persongrunnlagService: PersongrunnlagService,
+
+    @Autowired
+    private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
 
     @Autowired
     private val vilkårsvurderingService: VilkårsvurderingService,
@@ -669,10 +675,11 @@ class VilkårsvurderingForNyBehandlingServiceTest(
 
     @Test
     fun `skal kopiere vilkårsvurdering fra forrige behandling ved satsendring`() {
-        val søker = lagPerson(type = PersonType.SØKER)
-        val barn = lagPerson(type = PersonType.BARN)
-        val barnetsFødselsdato = LocalDate.of(2021, 8, 15)
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søker.aktør.aktivFødselsnummer())
+        val søkerFnr = randomFnr()
+        val barnFnr = randomFnr()
+        val søkerAktør = personidentService.hentOgLagreAktør(søkerFnr, true)
+        val barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true)
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(søkerFnr)
         val behandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
             lagBehandling(
                 fagsak = fagsak,
@@ -681,8 +688,16 @@ class VilkårsvurderingForNyBehandlingServiceTest(
             ),
         )
 
-        personidentService.hentOgLagreAktør(søker.aktør.aktivFødselsnummer(), true)
-        personidentService.hentOgLagreAktørIder(listOf(barn.aktør.aktivFødselsnummer()), true)
+        val søker = lagPerson(
+            personIdent = PersonIdent(søkerFnr),
+            type = PersonType.SØKER,
+        )
+        val barn = lagPerson(
+            personIdent = PersonIdent(barnFnr),
+            type = PersonType.BARN,
+        )
+
+        val barnetsFødselsdato = LocalDate.of(2021, 8, 15)
 
         val vilkårsvurdering =
             lagVilkårsvurderingMedOverstyrendeResultater(
@@ -706,10 +721,31 @@ class VilkårsvurderingForNyBehandlingServiceTest(
             ),
         )
 
+        val personopplysningGrunnlag = persongrunnlagService.lagreOgDeaktiverGammel(
+            PersonopplysningGrunnlag(
+                behandlingId = behandling2.id,
+            ),
+        )
+        val søkerB2 = lagPerson(
+            personIdent = PersonIdent(søkerFnr),
+            type = PersonType.SØKER,
+            aktør = søkerAktør,
+            personopplysningGrunnlag = personopplysningGrunnlag,
+        )
+        val barnB2 = lagPerson(
+            personIdent = PersonIdent(barnFnr),
+            type = PersonType.BARN,
+            aktør = barnAktør[0],
+            personopplysningGrunnlag = personopplysningGrunnlag,
+        )
+
+        personopplysningGrunnlag.personer.addAll(listOf(søkerB2, barnB2))
+        personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
+
         val forventetVilkårsvurdering =
             lagVilkårsvurderingMedOverstyrendeResultater(
-                søker = søker,
-                barna = listOf(barn),
+                søker = søkerB2,
+                barna = listOf(barnB2),
                 behandling = behandling2,
                 overstyrendeVilkårResultater = emptyMap(),
             )
