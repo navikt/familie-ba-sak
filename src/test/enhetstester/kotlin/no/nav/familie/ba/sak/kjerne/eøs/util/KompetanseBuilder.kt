@@ -48,10 +48,13 @@ class KompetanseBuilder(
 }
 
 fun Kompetanse.fyllUt() = this.copy(
+    annenForelderOmfattetAvNorskLovgivning = annenForelderOmfattetAvNorskLovgivning ?: false,
     resultat = resultat ?: KompetanseResultat.NORGE_ER_SEKUNDÆRLAND,
     annenForeldersAktivitetsland = annenForeldersAktivitetsland ?: "DK",
     barnetsBostedsland = barnetsBostedsland ?: "NO",
-    søkersAktivitet = søkersAktivitet ?: SøkersAktivitet.ARBEIDER,
-    annenForeldersAktivitet = annenForeldersAktivitet ?: AnnenForeldersAktivitet.I_ARBEID,
+    søkersAktivitet = søkersAktivitet
+        ?: if (annenForelderOmfattetAvNorskLovgivning) AnnenForeldersAktivitet.I_ARBEID else SøkersAktivitet.ARBEIDER,
+    annenForeldersAktivitet = annenForeldersAktivitet
+        ?: if (annenForelderOmfattetAvNorskLovgivning) SøkersAktivitet.ARBEIDER else AnnenForeldersAktivitet.I_ARBEID,
     søkersAktivitetsland = søkersAktivitetsland ?: "SE",
 )

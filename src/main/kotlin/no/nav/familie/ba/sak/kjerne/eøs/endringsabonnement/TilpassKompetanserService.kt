@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.fraOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerKunVerdiMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.leftJoin
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.outerJoin
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
@@ -90,6 +91,8 @@ class TilpassKompetanserTilEndretUtebetalingAndelerService(
         val barnasHarEtterbetaling3ÅrTidslinjer = endretUtbetalingAndeler
             .tilBarnasHarEtterbetaling3ÅrTidslinjer()
 
+        val annenForelderOmfattetAvNorskLovgivningTidslinje = vilkårsvurderingTidslinjeService
+
         val oppdaterteKompetanser = tilpassKompetanserTilRegelverk(
             gjeldendeKompetanser,
             barnasRegelverkResultatTidslinjer,
@@ -104,6 +107,7 @@ fun tilpassKompetanserTilRegelverk(
     gjeldendeKompetanser: Collection<Kompetanse>,
     barnaRegelverkTidslinjer: Map<Aktør, Tidslinje<RegelverkResultat, Måned>>,
     barnasHarEtterbetaling3ÅrTidslinjer: Map<Aktør, Tidslinje<Boolean, Måned>>,
+    annenForelderOmfattetAvNorskLovgivningTidslinje: Tidslinje<Boolean, Måned>,
 ): Collection<Kompetanse> {
     val barnasEøsRegelverkTidslinjer = barnaRegelverkTidslinjer.tilBarnasEøsRegelverkTidslinjer()
         .leftJoin(barnasHarEtterbetaling3ÅrTidslinjer) { regelverk, harEtterbetaling3År ->
@@ -117,6 +121,12 @@ fun tilpassKompetanserTilRegelverk(
         .outerJoin(barnasEøsRegelverkTidslinjer) { kompetanse, regelverk ->
             regelverk?.let { kompetanse ?: Kompetanse.NULL }
         }
+        .kombinerKunVerdiMed(annenForelderOmfattetAvNorskLovgivningTidslinje) { kompetanse, annenForelderOmfattet ->
+            when (annenForelderOmfattet) {
+                true -> kompetanse.copy(annenForelderOmfattetAvNorskLovgivning = true)
+                else -> kompetanse
+            }
+        }
         .tilSkjemaer()
 }
 
@@ -125,6 +135,11 @@ fun VilkårsvurderingTidslinjeService.hentBarnasRegelverkResultatTidslinjer(beha
         .mapValues { (_, tidslinjer) ->
             tidslinjer.regelverkResultatTidslinje
         }
+
+fun VilkårsvurderingTidslinjeService.hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId: BehandlingId): Tidslinje<Boolean, Måned> =
+    this.hentTidslinjerThrows(behandlingId).søkersTidslinjer().vilkårsresultatTidslinjer.filter {
+        // finn tidslinje som har vilkår BOSATT_I_RIKET
+    }.map { /* utdypende vilkårsvurderinger inneholder ANNEN_FORELDER_OMFATTET -> boolean */ }
 
 private fun Map<Aktør, Tidslinje<RegelverkResultat, Måned>>.tilBarnasEøsRegelverkTidslinjer() =
     this.mapValues { (_, tidslinjer) ->

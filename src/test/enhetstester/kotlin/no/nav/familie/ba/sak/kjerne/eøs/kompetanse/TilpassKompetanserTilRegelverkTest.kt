@@ -32,7 +32,18 @@ class TilpassKompetanserTilRegelverkTest {
         val annenForelderOmfattetTidslinje = "++++-----".tilAnnenForelderOmfattetAvNorskLovgivningTidslinje(jan2020)
 
         val forventedeKompetanser = KompetanseBuilder(jan2020)
-            .medKompetanse("---  ----", barn1)
+            .medKompetanse(
+                "---      ",
+                barn1,
+                annenForeldersAktivitetsland = null,
+                annenForelderOmfattetAvNorskLovgivning = true
+            )
+            .medKompetanse(
+                "     ----",
+                barn1,
+                annenForeldersAktivitetsland = null,
+                annenForelderOmfattetAvNorskLovgivning = false
+            )
             .byggKompetanser()
 
         val faktiskeKompetanser = tilpassKompetanserTilRegelverk(kompetanser, eøsPerioder, emptyMap())
