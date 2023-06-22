@@ -72,9 +72,9 @@ fun parseValgfriBoolean(domenebegrep: Domenenøkkel, rad: Map<String, String?>):
         return null
     }
 
-    return when (verdi) {
-        "Ja" -> true
-        "Nei" -> false
+    return when (verdi.uppercase()) {
+        "JA" -> true
+        "NEI" -> false
         else -> null
     }
 }

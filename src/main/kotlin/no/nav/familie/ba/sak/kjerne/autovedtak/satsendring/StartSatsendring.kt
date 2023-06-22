@@ -60,6 +60,7 @@ class StartSatsendring(
                         hentAktivSatsendringstidspunkt(),
                     )
             }
+            logger.info("Opprettet $antallSatsendringerStartet satsendringer (akkumulerende)")
 
             if (++startSide >= page.totalPages) break
         }
