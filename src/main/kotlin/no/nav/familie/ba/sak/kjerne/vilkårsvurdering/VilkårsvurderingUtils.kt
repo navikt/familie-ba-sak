@@ -95,7 +95,7 @@ object VilkårsvurderingUtils {
         when {
             // For bor med søker-vilkåret kan avslag og innvilgelse være overlappende, da man kan f.eks. avslå full barnetrygd, men innvilge delt
             vilkårSomEndres.vilkårType == Vilkår.BOR_MED_SØKER -> return
-            vilkårSomEndres.erAvslagUtenPeriode() && resultaterPåVilkår.any { it.resultat == Resultat.OPPFYLT && it.harFremtidigTom() } ->
+            vilkårSomEndres.erAvslagUtenPeriode() && resultaterPåVilkår.any { it.erOppfyltEllerIkkeAktuelt() && it.harFremtidigTom() } ->
                 throw FunksjonellFeil(
                     "Finnes løpende oppfylt ved forsøk på å legge til avslag uten periode ",
                     "Du kan ikke legge til avslag uten datoer fordi det finnes oppfylt løpende periode på vilkåret.",

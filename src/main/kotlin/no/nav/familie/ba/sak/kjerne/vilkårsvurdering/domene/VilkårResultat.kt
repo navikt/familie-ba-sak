@@ -190,9 +190,10 @@ class VilkårResultat(
     fun harFremtidigTom() = this.periodeTom == null || this.periodeTom!!.isAfter(LocalDate.now().sisteDagIMåned())
 
     fun erOppfylt() = this.resultat == Resultat.OPPFYLT
+
     fun erIkkeAktuelt() = this.resultat == Resultat.IKKE_AKTUELT
 
-    fun erOppfyltEllerIkkeAktuelt() = this.erOppfylt() || this.erIkkeAktuelt()
+    fun erOppfyltEllerIkkeAktuelt() = if (this.vilkårType === Vilkår.LOVLIG_OPPHOLD) this.erOppfylt() || this.erIkkeAktuelt() else this.erOppfylt()
 
     companion object {
 
