@@ -15,9 +15,11 @@ fun utledEndringstidspunkt(
     grunnlagForVedtaksperioder: GrunnlagForVedtaksperioder,
     grunnlagForVedtaksperioderForrigeBehandling: GrunnlagForVedtaksperioder?,
 ): LocalDate {
-    val grunnlagTidslinjePerPerson = grunnlagForVedtaksperioder.utledGrunnlagTidslinjePerPerson()
+    val grunnlagTidslinjePerPerson =
+        grunnlagForVedtaksperioder.utledGrunnlagTidslinjePerPerson().mapValues { it.value.grunnlagForPerson }
     val grunnlagTidslinjePerPersonForrigeBehandling =
-        grunnlagForVedtaksperioderForrigeBehandling?.utledGrunnlagTidslinjePerPerson() ?: emptyMap()
+        grunnlagForVedtaksperioderForrigeBehandling?.utledGrunnlagTidslinjePerPerson()
+            ?.mapValues { it.value.grunnlagForPerson } ?: emptyMap()
 
     val erPeriodeLikSammePeriodeIForrigeBehandlingTidslinjer =
         grunnlagTidslinjePerPerson.outerJoin(grunnlagTidslinjePerPersonForrigeBehandling) { grunnlagForVedtaksperiode, grunnlagForVedtaksperiodeForrigeBehandling ->

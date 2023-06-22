@@ -17,19 +17,19 @@ Egenskap: Vedtaksperiode for behandling som opphører perioder fra forrige behan
 
   Scenario: Skal lage vedtaksperioder for revurdering mot forrige behandling hvor det viser seg at barnet ikke bodde hos mor det første året.
     Og lag personresultater for behandling 1
-    Og med overstyring av vilkår for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                                          | Fra dato   | Til dato   | Resultat |
-      | 1234     | BOSATT_I_RIKET, LOVLIG_OPPHOLD                                  | 11.01.1970 |            | Oppfylt  |
-      | 3456     | UNDER_18_ÅR                                                     | 13.04.2020 | 12.04.2038 | Oppfylt  |
-      | 3456     | BOR_MED_SØKER, GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD | 13.04.2020 |            | Oppfylt  |
+      | 1234    | BOSATT_I_RIKET, LOVLIG_OPPHOLD                                  | 11.01.1970 |            | Oppfylt  |
+      | 3456    | UNDER_18_ÅR                                                     | 13.04.2020 | 12.04.2038 | Oppfylt  |
+      | 3456    | BOR_MED_SØKER, GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD | 13.04.2020 |            | Oppfylt  |
 
     Og lag personresultater for behandling 2
-    Og med overstyring av vilkår for behandling 2
+    Og legg til nye vilkårresultater for behandling 2
       | AktørId | Vilkår                                           | Fra dato   | Til dato   | Resultat |
-      | 1234     | BOSATT_I_RIKET, LOVLIG_OPPHOLD                   | 11.01.1970 |            | Oppfylt  |
-      | 3456     | UNDER_18_ÅR                                      | 12.05.2020 | 11.05.2038 | Oppfylt  |
-      | 3456     | GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD | 12.05.2020 |            | Oppfylt  |
-      | 3456     | BOR_MED_SØKER                                    | 12.05.2020 |            | Oppfylt  |
+      | 1234    | BOSATT_I_RIKET, LOVLIG_OPPHOLD                   | 11.01.1970 |            | Oppfylt  |
+      | 3456    | UNDER_18_ÅR                                      | 12.05.2020 | 11.05.2038 | Oppfylt  |
+      | 3456    | GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD | 12.05.2020 |            | Oppfylt  |
+      | 3456    | BOR_MED_SØKER                                    | 12.05.2020 |            | Oppfylt  |
 
     Og med andeler tilkjent ytelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |

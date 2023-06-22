@@ -114,30 +114,39 @@ fun lagPersonresultater(
     )
 }.toSet()
 
-fun oppdaterVilkårResultat(
-    vilkårResultat: VilkårResultat,
-    overstyringerForPerson: List<MutableMap<String, String>>?,
-) {
-    val overstyringForVilkår = overstyringerForPerson?.find {
-        parseEnumListe<Vilkår>(
+fun leggTilVilkårResultatPåPersonResultat(
+    personResultatForBehandling: Set<PersonResultat>,
+    vilkårResultaterPerPerson: Map<String, List<MutableMap<String, String>>>,
+    behandlingId: Long,
+) = personResultatForBehandling.map { personResultat ->
+    personResultat.vilkårResultater.clear()
+
+    vilkårResultaterPerPerson[personResultat.aktør.aktørId]?.forEach { rad ->
+        val vilkårResultaterForÉnRad = parseEnumListe<Vilkår>(
             VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.VILKÅR,
-            it,
-        ).contains(vilkårResultat.vilkårType)
-    }
-    if (overstyringForVilkår != null) {
-        vilkårResultat.resultat =
-            parseEnum(
-                VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.RESULTAT,
-                overstyringForVilkår,
+            rad,
+        ).map { vilkår ->
+            VilkårResultat(
+                behandlingId = behandlingId,
+                personResultat = personResultat,
+                vilkårType = vilkår,
+                resultat = parseEnum(
+                    VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.RESULTAT,
+                    rad,
+                ),
+                periodeFom = parseValgfriDato(Domenebegrep.FRA_DATO, rad),
+                periodeTom = parseValgfriDato(Domenebegrep.TIL_DATO, rad),
+                erEksplisittAvslagPåSøknad = parseValgfriBoolean(
+                    VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.ER_EKSPLISITT_AVSLAG,
+                    rad,
+                ),
+                begrunnelse = "",
             )
-        vilkårResultat.periodeFom = parseValgfriDato(Domenebegrep.FRA_DATO, overstyringForVilkår)
-        vilkårResultat.periodeTom = parseValgfriDato(Domenebegrep.TIL_DATO, overstyringForVilkår)
-        vilkårResultat.erEksplisittAvslagPåSøknad = parseValgfriBoolean(
-            VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.ER_EKSPLISITT_AVSLAG,
-            overstyringForVilkår,
-        )
+        }
+        personResultat.vilkårResultater.addAll(vilkårResultaterForÉnRad)
     }
-}
+    personResultat
+}.toSet()
 
 fun lagKompetanser(
     nyeKompetanserPerBarn: MutableList<MutableMap<String, String>>,
