@@ -82,7 +82,7 @@ class BrevmottakerService(
                 lagMottakerInfoMedBrukerId(
                     brukerId = søkersident,
                     navn = søkersnavn,
-                    manuellAdresseInfo = lagManuellAdresseInfo(it)
+                    manuellAdresseInfo = lagManuellAdresseInfo(it),
                 )
             }
 
@@ -117,7 +117,7 @@ class BrevmottakerService(
 
     private fun lagMottakerInfoUtenBrukerId(
         navn: String,
-        manuellAdresseInfo: ManuellAdresseInfo
+        manuellAdresseInfo: ManuellAdresseInfo,
     ): MottakerInfo {
         return MottakerInfo(
             brukerId = "",
@@ -131,7 +131,7 @@ class BrevmottakerService(
     private fun lagMottakerInfoMedBrukerId(
         brukerId: String,
         navn: String,
-        manuellAdresseInfo: ManuellAdresseInfo? = null
+        manuellAdresseInfo: ManuellAdresseInfo? = null,
     ) = MottakerInfo(
         brukerId = brukerId,
         brukerIdType = BrukerIdType.FNR,

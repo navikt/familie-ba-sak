@@ -215,7 +215,7 @@ class DokumentService(
                 journalpostId = journalPostTilDistribusjon.key,
                 brevmal = manueltBrevRequest.brevmal,
                 erManueltSendt = true,
-                manuellAdresseInfo = journalPostTilDistribusjon.value.manuellAdresseInfo
+                manuellAdresseInfo = journalPostTilDistribusjon.value.manuellAdresseInfo,
             ),
             properties = Properties().apply
                 {
