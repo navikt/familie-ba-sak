@@ -19,6 +19,7 @@ data class RestKompetanse(
     val barnetsBostedsland: String? = null,
     val resultat: KompetanseResultat? = null,
     override val status: UtfyltStatus = UtfyltStatus.IKKE_UTFYLT,
+    val annenForelderOmfattetAvNorskLovgivning: Boolean? = false,
 ) : AbstractUtfyltStatus<RestKompetanse>() {
     override fun medUtfyltStatus(): RestKompetanse {
         var antallUtfylteFelter = finnAntallUtfylt(
@@ -52,6 +53,7 @@ fun Kompetanse.tilRestKompetanse() = RestKompetanse(
     annenForeldersAktivitetsland = this.annenForeldersAktivitetsland,
     barnetsBostedsland = this.barnetsBostedsland,
     resultat = this.resultat,
+    annenForelderOmfattetAvNorskLovgivning = this.annenForelderOmfattetAvNorskLovgivning,
 ).medUtfyltStatus()
 
 fun RestKompetanse.tilKompetanse(barnAktører: List<Aktør>) = Kompetanse(
@@ -64,4 +66,5 @@ fun RestKompetanse.tilKompetanse(barnAktører: List<Aktør>) = Kompetanse(
     annenForeldersAktivitetsland = this.annenForeldersAktivitetsland,
     barnetsBostedsland = this.barnetsBostedsland,
     resultat = this.resultat,
+    annenForelderOmfattetAvNorskLovgivning = this.annenForelderOmfattetAvNorskLovgivning,
 )
