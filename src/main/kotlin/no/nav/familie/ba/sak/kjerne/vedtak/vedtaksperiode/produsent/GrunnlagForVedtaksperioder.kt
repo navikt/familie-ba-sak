@@ -75,7 +75,7 @@ data class GrunnlagForVedtaksperioder(
             val aktør = personResultat.aktør
             val person = persongrunnlag.personer.single { person -> aktør == person.aktør }
 
-            val (overlappendeGenerelleAvslag, vilkårResultaterUtenGenerelleAvslag) = splittOppGenerelleAvslagVilkårResultater(
+            val (overlappendeGenerelleAvslag, vilkårResultaterUtenGenerelleAvslag) = splittOppPåErOverlappendeGenerelleAvslag(
                 personResultat,
             )
 
@@ -163,7 +163,7 @@ data class GrunnlagForVedtaksperioder(
     }
 }
 
-private fun splittOppGenerelleAvslagVilkårResultater(personResultat: PersonResultat): Pair<List<VilkårResultat>, List<VilkårResultat>> {
+private fun splittOppPåErOverlappendeGenerelleAvslag(personResultat: PersonResultat): Pair<List<VilkårResultat>, List<VilkårResultat>> {
     val overlappendeGenerelleAvslag =
         personResultat.vilkårResultater.groupBy { it.vilkårType }.mapNotNull { (_, resultat) ->
             if (resultat.size > 1) {
@@ -194,7 +194,7 @@ fun hentOrdinæreVilkårForSøkerForskjøvetTidslinje(
 ): Tidslinje<List<VilkårResultat>, Måned> {
     val søkerPersonResultater = personResultater.single { it.aktør == søker.aktør }
 
-    val (_, vilkårResultaterUtenOverlappendeGenerelleAvslag) = splittOppGenerelleAvslagVilkårResultater(
+    val (_, vilkårResultaterUtenOverlappendeGenerelleAvslag) = splittOppPåErOverlappendeGenerelleAvslag(
         søkerPersonResultater,
     )
 
