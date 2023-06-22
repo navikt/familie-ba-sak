@@ -90,7 +90,6 @@ class StegService(
         val behandling = behandlingService.opprettBehandling(nyBehandling)
 
         val barnasIdenter: List<String> = when (nyBehandling.behandlingÅrsak) {
-            BehandlingÅrsak.MIGRERING,
             BehandlingÅrsak.FØDSELSHENDELSE,
             BehandlingÅrsak.HELMANUELL_MIGRERING,
             -> {
