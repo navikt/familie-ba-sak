@@ -212,6 +212,7 @@ fun hentNesteSteg(
 
     return when (behandlingÅrsak) {
         BehandlingÅrsak.TEKNISK_OPPHØR -> throw Feil("Teknisk opphør er ikke mulig å behandle lenger")
+        BehandlingÅrsak.MIGRERING -> throw Feil("Maskinell migrering er ikke mulig å behandle lenger")
 
         BehandlingÅrsak.HELMANUELL_MIGRERING -> {
             when (utførendeStegType) {
