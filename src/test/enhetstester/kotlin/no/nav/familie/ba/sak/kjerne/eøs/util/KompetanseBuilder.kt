@@ -15,18 +15,31 @@ class KompetanseBuilder(
     behandlingId: BehandlingId = BehandlingId(1),
 ) : SkjemaBuilder<Kompetanse, KompetanseBuilder>(startMåned, behandlingId) {
 
-    fun medKompetanse(k: String, vararg barn: Person, annenForeldersAktivitetsland: String? = null) =
+    fun medKompetanse(
+        k: String,
+        vararg barn: Person,
+        annenForeldersAktivitetsland: String? = null,
+        annenForelderOmfattetAvNorskLovgivning: Boolean? = false
+    ) =
         medSkjema(k, barn.toList()) {
             when (it) {
-                '-' -> Kompetanse.NULL.copy(annenForeldersAktivitetsland = annenForeldersAktivitetsland)
+                '-' -> Kompetanse.NULL.copy(
+                    annenForeldersAktivitetsland = annenForeldersAktivitetsland,
+                    annenForelderOmfattetAvNorskLovgivning = annenForelderOmfattetAvNorskLovgivning
+                )
+
                 'S' -> Kompetanse.NULL.copy(
                     resultat = KompetanseResultat.NORGE_ER_SEKUNDÆRLAND,
                     annenForeldersAktivitetsland = annenForeldersAktivitetsland,
+                    annenForelderOmfattetAvNorskLovgivning = annenForelderOmfattetAvNorskLovgivning,
                 ).fyllUt()
+
                 'P' -> Kompetanse.NULL.copy(
                     resultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
                     annenForeldersAktivitetsland = annenForeldersAktivitetsland,
+                    annenForelderOmfattetAvNorskLovgivning = annenForelderOmfattetAvNorskLovgivning,
                 ).fyllUt()
+
                 else -> null
             }
         }

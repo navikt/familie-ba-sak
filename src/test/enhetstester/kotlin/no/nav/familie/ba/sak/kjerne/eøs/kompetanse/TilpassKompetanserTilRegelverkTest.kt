@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.KompetanseBuilder
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.somBoolskTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.tilAnnenForelderOmfattetAvNorskLovgivningTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.tilRegelverkResultatTidslinje
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
@@ -28,6 +29,7 @@ class TilpassKompetanserTilRegelverkTest {
         val eøsPerioder = mapOf(
             barn1.aktør to "EEENNEEEE".tilRegelverkResultatTidslinje(jan2020),
         )
+        val annenForelderOmfattetTidslinje = "++++-----".tilAnnenForelderOmfattetAvNorskLovgivningTidslinje(jan2020)
 
         val forventedeKompetanser = KompetanseBuilder(jan2020)
             .medKompetanse("---  ----", barn1)
