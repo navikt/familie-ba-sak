@@ -139,8 +139,8 @@ class VilkårsvurderingForNyBehandlingService(
                 )
 
             endretUtbetalingAndelService.kopierEndretUtbetalingAndelFraForrigeBehandling(
-                inneværendeBehandling,
-                forrigeBehandlingSomErVedtatt,
+                behandling = inneværendeBehandling,
+                forrigeBehandling = forrigeBehandlingSomErVedtatt,
             )
 
             return vilkårsvurderingService.lagreNyOgDeaktiverGammel(nyVilkårsvurdering)
