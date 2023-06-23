@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.steg
 
+import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagEndretUtbetalingAndel
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
@@ -20,7 +22,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -34,11 +38,14 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.gjelderAlltidFraBarnetsFødselsdato
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import java.time.LocalDate
+import java.time.YearMonth
+import kotlin.reflect.full.declaredMemberProperties
 
 class VilkårsvurderingForNyBehandlingServiceTest(
     @Autowired
@@ -70,6 +77,12 @@ class VilkårsvurderingForNyBehandlingServiceTest(
 
     @Autowired
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
+
+    @Autowired
+    private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
+
+    @Autowired
+    private val personRepository: PersonRepository,
 
 ) : AbstractSpringIntegrationTest() {
     @BeforeAll
@@ -674,7 +687,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
     }
 
     @Test
-    fun `skal kopiere vilkårsvurdering fra forrige behandling ved satsendring`() {
+    fun `skal kopiere vilkårsvurdering og endrede utbetalingsandeler fra forrige behandling ved satsendring`() {
         val søkerFnr = randomFnr()
         val barnFnr = randomFnr()
         val søkerAktør = personidentService.hentOgLagreAktør(søkerFnr, true)
@@ -688,13 +701,27 @@ class VilkårsvurderingForNyBehandlingServiceTest(
             ),
         )
 
-        val søker = lagPerson(
-            personIdent = PersonIdent(søkerFnr),
-            type = PersonType.SØKER,
+        val personopplysningGrunnlag = persongrunnlagService.lagreOgDeaktiverGammel(
+            PersonopplysningGrunnlag(
+                behandlingId = behandling.id,
+            ),
         )
-        val barn = lagPerson(
-            personIdent = PersonIdent(barnFnr),
-            type = PersonType.BARN,
+
+        val søker = personRepository.saveAndFlush(
+            lagPerson(
+                personIdent = PersonIdent(søkerFnr),
+                type = PersonType.SØKER,
+                aktør = søkerAktør,
+                personopplysningGrunnlag = personopplysningGrunnlag,
+            ),
+        )
+        val barn = personRepository.saveAndFlush(
+            lagPerson(
+                personIdent = PersonIdent(barnFnr),
+                type = PersonType.BARN,
+                aktør = barnAktør[0],
+                personopplysningGrunnlag = personopplysningGrunnlag,
+            ),
         )
 
         val barnetsFødselsdato = LocalDate.of(2021, 8, 15)
@@ -709,6 +736,25 @@ class VilkårsvurderingForNyBehandlingServiceTest(
 
         vilkårsvurderingService.lagreNyOgDeaktiverGammel(vilkårsvurdering)
 
+        val endredeUtbetalingsAndeler = listOf(
+            lagEndretUtbetalingAndel(
+                behandlingId = behandling.id,
+                barn = barn,
+                fom = YearMonth.now(),
+                tom = YearMonth.now().plusMonths(6),
+                prosent = 50,
+            ),
+            lagEndretUtbetalingAndel(
+                behandlingId = behandling.id,
+                barn = barn,
+                fom = YearMonth.now().plusMonths(7),
+                tom = YearMonth.now().plusMonths(12),
+                prosent = 100,
+            ),
+        )
+
+        endretUtbetalingAndelRepository.saveAllAndFlush(endredeUtbetalingsAndeler)
+
         tilkjentYtelseRepository.saveAndFlush(lagInitiellTilkjentYtelse(behandling, ""))
 
         markerBehandlingSomAvsluttet(behandling)
@@ -721,7 +767,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
             ),
         )
 
-        val personopplysningGrunnlag = persongrunnlagService.lagreOgDeaktiverGammel(
+        val personopplysningGrunnlagB2 = persongrunnlagService.lagreOgDeaktiverGammel(
             PersonopplysningGrunnlag(
                 behandlingId = behandling2.id,
             ),
@@ -730,17 +776,17 @@ class VilkårsvurderingForNyBehandlingServiceTest(
             personIdent = PersonIdent(søkerFnr),
             type = PersonType.SØKER,
             aktør = søkerAktør,
-            personopplysningGrunnlag = personopplysningGrunnlag,
+            personopplysningGrunnlag = personopplysningGrunnlagB2,
         )
         val barnB2 = lagPerson(
             personIdent = PersonIdent(barnFnr),
             type = PersonType.BARN,
             aktør = barnAktør[0],
-            personopplysningGrunnlag = personopplysningGrunnlag,
+            personopplysningGrunnlag = personopplysningGrunnlagB2,
         )
 
-        personopplysningGrunnlag.personer.addAll(listOf(søkerB2, barnB2))
-        personopplysningGrunnlagRepository.save(personopplysningGrunnlag)
+        personopplysningGrunnlagB2.personer.addAll(listOf(søkerB2, barnB2))
+        personopplysningGrunnlagRepository.save(personopplysningGrunnlagB2)
 
         val forventetVilkårsvurdering =
             lagVilkårsvurderingMedOverstyrendeResultater(
@@ -753,6 +799,20 @@ class VilkårsvurderingForNyBehandlingServiceTest(
         vilkårsvurderingForNyBehandlingService.opprettVilkårsvurderingUtenomHovedflyt(behandling2, behandling)
 
         val kopiertVilkårsvurdering = vilkårsvurderingForNyBehandlingService.hentVilkårsvurderingThrows(behandling2.id)
+
+        val kopiertEndredeUtbetalingsandeler = endretUtbetalingAndelRepository.findByBehandlingId(behandling2.id)
+
+        val baseEntitetFelter =
+            BaseEntitet::class.declaredMemberProperties.map { it.name }.toTypedArray()
+
+        assertThat(kopiertEndredeUtbetalingsandeler.size).isEqualTo(endredeUtbetalingsAndeler.size)
+        assertThat(kopiertEndredeUtbetalingsandeler).usingRecursiveFieldByFieldElementComparatorIgnoringFields(
+            "id",
+            "behandlingId",
+            "person",
+            *baseEntitetFelter,
+        )
+            .isEqualTo(endredeUtbetalingsAndeler)
 
         validerKopiertVilkårsvurdering(kopiertVilkårsvurdering, vilkårsvurdering, forventetVilkårsvurdering)
     }
