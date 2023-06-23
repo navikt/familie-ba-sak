@@ -118,15 +118,13 @@ class BrevmottakerService(
     private fun lagMottakerInfoUtenBrukerId(
         navn: String,
         manuellAdresseInfo: ManuellAdresseInfo,
-    ): MottakerInfo {
-        return MottakerInfo(
-            brukerId = "",
-            brukerIdType = null,
-            erInstitusjonVerge = false,
-            navn = navn,
-            manuellAdresseInfo = manuellAdresseInfo,
-        )
-    }
+    ): MottakerInfo = MottakerInfo(
+        brukerId = "",
+        brukerIdType = null,
+        erInstitusjonVerge = false,
+        navn = navn,
+        manuellAdresseInfo = manuellAdresseInfo,
+    )
 
     private fun lagMottakerInfoMedBrukerId(
         brukerId: String,
