@@ -84,7 +84,7 @@ object VilkårsvurderingMigreringUtils {
         nyTom: LocalDate?,
     ) =
         hentVilkårResultaterSomErOppfyltFraForrigeVilkårsvurdering(forrigeBehandlingVilkårsvurdering, vilkår, person)
-            .single { it.periodeFom == nyFom || it.periodeTom == nyTom || (it.periodeFom!!.isAfter(nyFom) && nyTom == null) }
+            .single { it.periodeFom == nyFom || it.periodeTom == nyTom || (nyFom.isBefore(it.periodeFom!!) && nyTom == null) }
 
     private fun hentVilkårResultaterSomErOppfyltFraForrigeVilkårsvurdering(
         forrigeBehandlingsvilkårsvurdering: Vilkårsvurdering,
