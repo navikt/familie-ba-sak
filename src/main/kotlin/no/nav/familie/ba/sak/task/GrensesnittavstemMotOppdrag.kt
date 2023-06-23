@@ -7,6 +7,7 @@ import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.prosessering.AsyncTaskStep
 import no.nav.familie.prosessering.TaskStepBeskrivelse
 import no.nav.familie.prosessering.domene.Task
+import no.nav.familie.util.VirkedagerProvider
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -44,8 +45,7 @@ class GrensesnittavstemMotOppdrag(val avstemmingService: AvstemmingService, val 
     fun nesteAvstemmingDTO(tideligereTriggerDato: LocalDate): GrensesnittavstemmingTaskDTO =
         GrensesnittavstemmingTaskDTO(
             tideligereTriggerDato.atStartOfDay(),
-            nesteGyldigeTriggertidForBehandlingIHverdager((24 * 60).toLong(), tideligereTriggerDato.atTime(8, 0))
-                .toLocalDate().atStartOfDay(),
+            VirkedagerProvider.nesteVirkedag(tideligereTriggerDato).atStartOfDay(),
         )
 
     companion object {
