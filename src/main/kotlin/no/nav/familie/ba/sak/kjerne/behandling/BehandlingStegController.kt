@@ -148,7 +148,7 @@ class BehandlingStegController(
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(behandlingId = behandling.id)
 
-        stegService.håndterSendTilBeslutter(behandling, behandlendeEnhet)
+        // stegService.håndterSendTilBeslutter(behandling, behandlendeEnhet)
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
     }
 
@@ -214,7 +214,7 @@ class BehandlingStegController(
         val strengtFortroligAdresseBeskyttelseIdentList = if (personIdentList.isNotEmpty()) { familieIntegrasjonerTilgangskontrollService.returnerPersonerMedAdressebeskyttelse(personIdentList) } else { emptyList() }
         if (brevmottakere.isNotEmpty() && strengtFortroligAdresseBeskyttelseIdentList.isNotEmpty()) {
             val kommaSeparertListeAvStrengtFortroligIdenter = strengtFortroligAdresseBeskyttelseIdentList.joinToString { it }
-            val melding = "Behandlingen (id: " + behandlingId + ") inneholder " + strengtFortroligAdresseBeskyttelseIdentList.size + " person(er) med strengt fortrolig adressebeskyttelse og kan ikke kombineres med manuelle brevmottakere (" + brevmottakere + " stk)."
+            val melding = "Behandlingen (id: " + behandlingId + ") inneholder " + strengtFortroligAdresseBeskyttelseIdentList.size + " person(er) med strengt fortrolig adressebeskyttelse og kan ikke kombineres med manuelle brevmottakere (" + brevmottakere.size + " stk)."
             val frontendFeilmelding = "Behandlingen inneholder personer med strengt fortrolig adressebeskyttelse (" + kommaSeparertListeAvStrengtFortroligIdenter + ") og kan ikke kombineres med manuelle brevmottakere."
             throw FunksjonellFeil(melding, frontendFeilmelding)
         }
