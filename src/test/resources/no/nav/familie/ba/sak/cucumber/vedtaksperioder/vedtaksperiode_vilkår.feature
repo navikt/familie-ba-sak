@@ -13,20 +13,18 @@ Egenskap: Vedtaksperioder med mor og et barn
       | 1            | 1234    | SØKER      | 11.01.1970  |
       | 1            | 3456    | BARN       | 13.04.2020  |
 
-  Scenario: Skal lage vedtaksperioder for mor med et barn med vilkår
+  Scenario: Skal lage vedtaksperioder for mor med ett barn med vilkår
     Og lag personresultater for behandling 1
-    Og med overstyring av vilkår for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                           | Fra dato   | Til dato   | Resultat |
-      | 1234    | BOSATT_I_RIKET                                   | 11.01.1970 | 01.01.2021 | Oppfylt  |
       | 1234    | LOVLIG_OPPHOLD                                   | 11.01.1970 |            | Oppfylt  |
+      | 1234    | BOSATT_I_RIKET                                   | 11.01.1970 | 01.01.2021 | Oppfylt  |
+      | 1234    | BOSATT_I_RIKET                                   | 02.01.2021 |            | Oppfylt  |
       | 3456    | UNDER_18_ÅR                                      | 13.04.2020 | 12.04.2038 | Oppfylt  |
       | 3456    | GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD | 13.04.2020 |            | Oppfylt  |
       | 3456    | BOR_MED_SØKER                                    | 13.04.2020 | 01.03.2021 | Oppfylt  |
+      | 3456    | BOR_MED_SØKER                                    | 02.03.2021 |            | Oppfylt  |
 
-    Og legg til nye vilkårresultater for behandling 1
-      | AktørId | Vilkår         | Fra dato   | Til dato | Resultat |
-      | 1234    | BOSATT_I_RIKET | 02.01.2021 |          | Oppfylt  |
-      | 3456    | BOR_MED_SØKER  | 02.03.2021 |          | Oppfylt  |
 
     Og med andeler tilkjent ytelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
@@ -42,10 +40,59 @@ Egenskap: Vedtaksperioder med mor og et barn
       | 01.04.2038 |            | Opphør             | Kun søker     |
 
 
+  Scenario: Skal lage vedtaksperioder når det er generelt avslag som overlapper med oppfylt periode
+    Og lag personresultater for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
+      | AktørId | Vilkår                                                          | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag |
+      | 1234    | BOSATT_I_RIKET                                                  | 11.01.1970 |            | Oppfylt      |                      |
+      | 1234    | LOVLIG_OPPHOLD                                                  | 11.01.2020 | 05.05.2022 | Oppfylt      |                      |
+      | 1234    | LOVLIG_OPPHOLD                                                  |            |            | ikke_oppfylt | Ja                   |
+      | 3456    | UNDER_18_ÅR                                                     | 13.01.2020 | 12.04.2038 | Oppfylt      |                      |
+      | 3456    | GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD, BOR_MED_SØKER | 13.01.2020 |            | Oppfylt      |                      |
+
+
+    Og med andeler tilkjent ytelse
+      | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
+      | 1234    | 01.01.2020 | 31.03.2038 | 1354  | 1            |
+      | 3456    | 01.01.2020 | 31.03.2038 | 1354  | 1            |
+
+    Når vedtaksperioder med begrunnelser genereres for behandling 1
+
+    Så forvent følgende vedtaksperioder med begrunnelser
+      | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar                         |
+      | 01.02.2020 | 31.05.2022 | Utbetaling         | Barn og søker                     |
+      | 01.06.2022 | 31.12.2037 | Opphør             | Lovlig opphold opphører for søker |
+      | 01.01.2038 |            | Opphør             | Under 18 opphører                 |
+      |            |            | Avslag             | Generelt avslag lovlig opphold    |
+
+
+  Scenario: Skal lage vedtaksperioder når det er åpent avslag på bor med søker samtidig som oppfylt
+    Og lag personresultater for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
+      | AktørId | Vilkår                                                          | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag |
+      | 1234    | BOSATT_I_RIKET, LOVLIG_OPPHOLD                                  | 11.01.1970 |            | Oppfylt      |                      |
+      | 3456    | UNDER_18_ÅR                                                     | 13.01.2020 | 12.04.2038 | Oppfylt      |                      |
+      | 3456    | GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD, BOR_MED_SØKER | 13.01.2020 |            | Oppfylt      |                      |
+      | 3456    | BOR_MED_SØKER                                                   |            |            | ikke_oppfylt | Ja                   |
+
+
+    Og med andeler tilkjent ytelse
+      | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
+      | 1234    | 01.01.2020 | 31.03.2038 | 1354  | 1            |
+      | 3456    | 01.01.2020 | 31.03.2038 | 1354  | 1            |
+
+    Når vedtaksperioder med begrunnelser genereres for behandling 1
+
+    Så forvent følgende vedtaksperioder med begrunnelser
+      | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar     |
+      | 01.02.2020 | 31.12.2037 | Utbetaling         | Barn og søker |
+      | 01.01.2038 |            | Opphør             | Barn og søker |
+      |            |            | Avslag             | Barn og søker |
+
   Scenario: Skal lage vedtaksperioder for mor med ett barn med vilkår - barn flytter til søker etter 1 år
 
     Og lag personresultater for behandling 1
-    Og med overstyring av vilkår for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                           | Fra dato   | Til dato   | Resultat |
       | 1234    | BOSATT_I_RIKET, LOVLIG_OPPHOLD                   | 11.01.1970 |            | Oppfylt  |
       | 3456    | UNDER_18_ÅR                                      | 13.04.2020 | 12.04.2038 | Oppfylt  |
@@ -67,7 +114,7 @@ Egenskap: Vedtaksperioder med mor og et barn
   Scenario: Skal lage vedtaksperioder for mor med ett barn med vilkår - barn har vilkår fra tidenes morgen
 
     Og lag personresultater for behandling 1
-    Og med overstyring av vilkår for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                           | Fra dato   | Til dato   | Resultat     |
       | 1234    | BOSATT_I_RIKET, LOVLIG_OPPHOLD                   | 11.01.1970 |            | Oppfylt      |
       | 3456    | UNDER_18_ÅR                                      | 13.04.2020 | 12.04.2038 | Oppfylt      |
@@ -86,7 +133,7 @@ Egenskap: Vedtaksperioder med mor og et barn
   Scenario: Skal lage vedtaksperioder med begrunnelser for mor med vilkår når barnet flytter ut
 
     Og lag personresultater for behandling 1
-    Og med overstyring av vilkår for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                           | Fra dato   | Til dato   | Resultat |
       | 1234    | BOSATT_I_RIKET, LOVLIG_OPPHOLD                   | 11.01.1970 |            | Oppfylt  |
       | 3456    | UNDER_18_ÅR                                      | 13.04.2020 | 12.04.2038 | Oppfylt  |
@@ -109,17 +156,14 @@ Egenskap: Vedtaksperioder med mor og et barn
   Scenario: Skal lage vedtaksperioder med begrunnelser for mor med vilkår når barnet flytter ut og inn igjen
 
     Og lag personresultater for behandling 1
-    Og med overstyring av vilkår for behandling 1
-      | AktørId | Vilkår                                           | Fra dato   | Til dato   | Resultat |
-      | 1234    | BOSATT_I_RIKET, LOVLIG_OPPHOLD                   | 11.01.1970 |            | Oppfylt  |
-      | 3456    | UNDER_18_ÅR                                      | 13.04.2020 | 12.04.2038 | Oppfylt  |
-      | 3456    | GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD | 13.04.2020 |            | Oppfylt  |
-      | 3456    | BOR_MED_SØKER                                    | 13.04.2020 | 21.07.2029 | Oppfylt  |
-
     Og legg til nye vilkårresultater for behandling 1
-      | AktørId | Vilkår        | Fra dato   | Til dato   | Resultat     |
-      | 3456    | BOR_MED_SØKER | 22.07.2029 | 16.05.2030 | Ikke_oppfylt |
-      | 3456    | BOR_MED_SØKER | 17.05.2030 |            | Oppfylt      |
+      | AktørId | Vilkår                                           | Fra dato   | Til dato   | Resultat     |
+      | 1234    | BOSATT_I_RIKET, LOVLIG_OPPHOLD                   | 11.01.1970 |            | Oppfylt      |
+      | 3456    | UNDER_18_ÅR                                      | 13.04.2020 | 12.04.2038 | Oppfylt      |
+      | 3456    | GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD | 13.04.2020 |            | Oppfylt      |
+      | 3456    | BOR_MED_SØKER                                    | 13.04.2020 | 21.07.2029 | Oppfylt      |
+      | 3456    | BOR_MED_SØKER                                    | 22.07.2029 | 16.05.2030 | Ikke_oppfylt |
+      | 3456    | BOR_MED_SØKER                                    | 17.05.2030 |            | Oppfylt      |
 
     Og med andeler tilkjent ytelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
@@ -138,20 +182,17 @@ Egenskap: Vedtaksperioder med mor og et barn
   Scenario: Skal ikke lage opphør på mor når det kun er opphør på barn
 
     Og lag personresultater for behandling 1
-    Og med overstyring av vilkår for behandling 1
-      | AktørId | Vilkår                           | Fra dato   | Til dato   | Resultat |
-      | 1234    | BOSATT_I_RIKET, LOVLIG_OPPHOLD   | 11.01.1970 |            | Oppfylt  |
-      | 3456    | UNDER_18_ÅR                      | 13.04.2020 | 12.04.2038 | Oppfylt  |
-      | 3456    | GIFT_PARTNERSKAP, LOVLIG_OPPHOLD | 13.04.2020 |            | Oppfylt  |
-      | 3456    | BOR_MED_SØKER                    | 13.04.2020 | 21.07.2021 | Oppfylt  |
-      | 3456    | BOSATT_I_RIKET                   | 13.04.2020 | 21.07.2022 | Oppfylt  |
-
     Og legg til nye vilkårresultater for behandling 1
-      | AktørId | Vilkår         | Fra dato   | Til dato   | Resultat     |
-      | 3456    | BOR_MED_SØKER  | 22.07.2021 | 16.05.2030 | Ikke_oppfylt |
-      | 3456    | BOSATT_I_RIKET | 22.07.2022 | 16.05.2030 | Ikke_oppfylt |
-      | 3456    | BOR_MED_SØKER  | 17.05.2030 |            | Oppfylt      |
-      | 3456    | BOSATT_I_RIKET | 17.05.2030 |            | Oppfylt      |
+      | AktørId | Vilkår                           | Fra dato   | Til dato   | Resultat     |
+      | 1234    | BOSATT_I_RIKET, LOVLIG_OPPHOLD   | 11.01.1970 |            | Oppfylt      |
+      | 3456    | UNDER_18_ÅR                      | 13.04.2020 | 12.04.2038 | Oppfylt      |
+      | 3456    | GIFT_PARTNERSKAP, LOVLIG_OPPHOLD | 13.04.2020 |            | Oppfylt      |
+      | 3456    | BOR_MED_SØKER                    | 13.04.2020 | 21.07.2021 | Oppfylt      |
+      | 3456    | BOSATT_I_RIKET                   | 13.04.2020 | 21.07.2022 | Oppfylt      |
+      | 3456    | BOR_MED_SØKER                    | 22.07.2021 | 16.05.2030 | Ikke_oppfylt |
+      | 3456    | BOSATT_I_RIKET                   | 22.07.2022 | 16.05.2030 | Ikke_oppfylt |
+      | 3456    | BOR_MED_SØKER                    | 17.05.2030 |            | Oppfylt      |
+      | 3456    | BOSATT_I_RIKET                   | 17.05.2030 |            | Oppfylt      |
 
     Og med andeler tilkjent ytelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
@@ -171,22 +212,19 @@ Egenskap: Vedtaksperioder med mor og et barn
   Scenario: Skal lage opphør på mor når det kun er opphør i utvidet
 
     Og lag personresultater for behandling 1
-    Og med overstyring av vilkår for behandling 1
-      | AktørId | Vilkår                           | Fra dato   | Til dato   | Resultat |
-      | 1234    | BOSATT_I_RIKET, LOVLIG_OPPHOLD   | 11.01.1970 |            | Oppfylt  |
-      | 3456    | UNDER_18_ÅR                      | 13.04.2020 | 12.04.2038 | Oppfylt  |
-      | 3456    | GIFT_PARTNERSKAP, LOVLIG_OPPHOLD | 13.04.2020 |            | Oppfylt  |
-      | 3456    | BOR_MED_SØKER                    | 13.04.2020 | 21.07.2021 | Oppfylt  |
-      | 3456    | BOSATT_I_RIKET                   | 13.04.2020 | 21.07.2022 | Oppfylt  |
-
     Og legg til nye vilkårresultater for behandling 1
-      | AktørId | Vilkår             | Fra dato   | Til dato   | Resultat     |
-      | 3456    | BOR_MED_SØKER      | 22.07.2021 | 16.05.2030 | Ikke_oppfylt |
-      | 3456    | BOSATT_I_RIKET     | 22.07.2022 | 16.05.2030 | Ikke_oppfylt |
-      | 3456    | BOR_MED_SØKER      | 17.05.2030 |            | Oppfylt      |
-      | 3456    | BOSATT_I_RIKET     | 17.05.2030 |            | Oppfylt      |
-      | 1234    | UTVIDET_BARNETRYGD | 13.04.2020 | 16.02.2021 | Oppfylt      |
-      | 1234    | UTVIDET_BARNETRYGD | 17.02.2021 | 16.05.2030 | Ikke_oppfylt |
+      | AktørId | Vilkår                           | Fra dato   | Til dato   | Resultat     |
+      | 1234    | BOSATT_I_RIKET, LOVLIG_OPPHOLD   | 11.01.1970 |            | Oppfylt      |
+      | 3456    | UNDER_18_ÅR                      | 13.04.2020 | 12.04.2038 | Oppfylt      |
+      | 3456    | GIFT_PARTNERSKAP, LOVLIG_OPPHOLD | 13.04.2020 |            | Oppfylt      |
+      | 3456    | BOR_MED_SØKER                    | 13.04.2020 | 21.07.2021 | Oppfylt      |
+      | 3456    | BOSATT_I_RIKET                   | 13.04.2020 | 21.07.2022 | Oppfylt      |
+      | 3456    | BOR_MED_SØKER                    | 22.07.2021 | 16.05.2030 | Ikke_oppfylt |
+      | 3456    | BOSATT_I_RIKET                   | 22.07.2022 | 16.05.2030 | Ikke_oppfylt |
+      | 3456    | BOR_MED_SØKER                    | 17.05.2030 |            | Oppfylt      |
+      | 3456    | BOSATT_I_RIKET                   | 17.05.2030 |            | Oppfylt      |
+      | 1234    | UTVIDET_BARNETRYGD               | 13.04.2020 | 16.02.2021 | Oppfylt      |
+      | 1234    | UTVIDET_BARNETRYGD               | 17.02.2021 | 16.05.2030 | Ikke_oppfylt |
 
     Og med andeler tilkjent ytelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
@@ -209,16 +247,13 @@ Egenskap: Vedtaksperioder med mor og et barn
   Scenario: Skal gi opphør i periode barn ikke har lovlig opphold selv om mor har lovlig opphold
 
     Og lag personresultater for behandling 1
-    Og med overstyring av vilkår for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                          | Fra dato   | Til dato   | Resultat |
       | 1234    | BOSATT_I_RIKET, LOVLIG_OPPHOLD                  | 11.01.1970 |            | Oppfylt  |
       | 3456    | UNDER_18_ÅR                                     | 13.04.2020 | 12.04.2038 | Oppfylt  |
       | 3456    | GIFT_PARTNERSKAP, BOSATT_I_RIKET, BOR_MED_SØKER | 13.04.2020 |            | Oppfylt  |
       | 3456    | LOVLIG_OPPHOLD                                  | 13.04.2020 | 21.07.2021 | Oppfylt  |
-
-    Og legg til nye vilkårresultater for behandling 1
-      | AktørId | Vilkår         | Fra dato   | Til dato | Resultat |
-      | 3456    | LOVLIG_OPPHOLD | 17.05.2023 |          | Oppfylt  |
+      | 3456    | LOVLIG_OPPHOLD                                  | 17.05.2023 |            | Oppfylt  |
 
     Og med andeler tilkjent ytelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
@@ -238,17 +273,14 @@ Egenskap: Vedtaksperioder med mor og et barn
   Scenario: Skal kun gi utbetalingsperioder for utvidet om både søker og ett barn har oppfylt de ordinære vilkårene
 
     Og lag personresultater for behandling 1
-    Og med overstyring av vilkår for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                                          | Fra dato   | Til dato   | Resultat |
       | 1234    | BOSATT_I_RIKET, LOVLIG_OPPHOLD                                  | 11.01.1970 | 13.04.2021 | Oppfylt  |
       | 1234    | UTVIDET_BARNETRYGD                                              | 13.04.2020 |            | Oppfylt  |
       | 3456    | UNDER_18_ÅR                                                     | 13.04.2020 | 12.04.2038 | Oppfylt  |
       | 3456    | GIFT_PARTNERSKAP, BOSATT_I_RIKET, BOR_MED_SØKER, LOVLIG_OPPHOLD | 13.04.2020 | 13.04.2022 | Oppfylt  |
-
-    Og legg til nye vilkårresultater for behandling 1
-      | AktørId | Vilkår         | Fra dato   | Til dato | Resultat |
-      | 1234    | BOSATT_I_RIKET | 13.04.2022 |          | Oppfylt  |
-      | 1234    | LOVLIG_OPPHOLD | 13.04.2022 |          | Oppfylt  |
+      | 1234    | BOSATT_I_RIKET                                                  | 13.04.2022 |            | Oppfylt  |
+      | 1234    | LOVLIG_OPPHOLD                                                  | 13.04.2022 |            | Oppfylt  |
 
     Og med andeler tilkjent ytelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
@@ -276,24 +308,21 @@ Egenskap: Vedtaksperioder med mor og et barn
       | 1, 2         | 3456    | BARN       | 26.01.2021  |
 
     Og lag personresultater for behandling 1
-    Og med overstyring av vilkår for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                                          | Fra dato   | Til dato   | Resultat |
       | 1234    | BOSATT_I_RIKET, LOVLIG_OPPHOLD                                  | 13.07.1987 |            | Oppfylt  |
       | 3456    | UNDER_18_ÅR                                                     | 26.01.2021 | 25.01.2039 | Oppfylt  |
       | 3456    | GIFT_PARTNERSKAP, BOR_MED_SØKER, BOSATT_I_RIKET, LOVLIG_OPPHOLD | 26.01.2021 |            | Oppfylt  |
 
     Og lag personresultater for behandling 2
-    Og med overstyring av vilkår for behandling 2
+    Og legg til nye vilkårresultater for behandling 2
       | AktørId | Vilkår                                           | Fra dato   | Til dato   | Resultat |
       | 1234    | BOSATT_I_RIKET                                   | 13.07.1987 |            | Oppfylt  |
       | 1234    | LOVLIG_OPPHOLD                                   | 13.07.1987 | 09.01.2023 | Oppfylt  |
       | 3456    | UNDER_18_ÅR                                      | 26.01.2021 | 25.01.2039 | Oppfylt  |
       | 3456    | GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD | 26.01.2021 |            | Oppfylt  |
       | 3456    | BOR_MED_SØKER                                    | 26.01.2021 | 21.03.2023 | Oppfylt  |
-
-    Og legg til nye vilkårresultater for behandling 2
-      | AktørId | Vilkår         | Fra dato   | Til dato | Resultat |
-      | 1234    | LOVLIG_OPPHOLD | 30.03.2023 |          | Oppfylt  |
+      | 1234    | LOVLIG_OPPHOLD                                   | 30.03.2023 |            | Oppfylt  |
 
     Og med andeler tilkjent ytelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
@@ -319,18 +348,15 @@ Egenskap: Vedtaksperioder med mor og et barn
 
   Scenario: Skal lage periode selv om det ikke finnes barn når det er eksplisitt avslag på søker
     Og lag personresultater for behandling 1
-    Og med overstyring av vilkår for behandling 1
-      | AktørId | Vilkår                                                          | Fra dato   | Til dato   | Resultat |
-      | 1234    | LOVLIG_OPPHOLD                                                  | 11.01.1970 | 14.08.2022 | Oppfylt  |
-      | 1234    | BOSATT_I_RIKET                                                  | 11.01.1970 |            | Oppfylt  |
-      | 3456    | UNDER_18_ÅR                                                     | 13.04.2020 | 12.04.2038 | Oppfylt  |
-      | 3456    | GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD, BOR_MED_SØKER | 13.04.2020 |            | Oppfylt  |
-
     Og legg til nye vilkårresultater for behandling 1
-      | AktørId | Vilkår             | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag |
-      | 1234    | UTVIDET_BARNETRYGD |            |            | Ikke_oppfylt | Ja                   |
-      | 1234    | LOVLIG_OPPHOLD     | 15.08.2022 | 02.02.2023 | Ikke_oppfylt | Ja                   |
-      | 1234    | LOVLIG_OPPHOLD     | 03.02.2023 |            | Oppfylt      |                      |
+      | AktørId | Vilkår                                                          | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag |
+      | 1234    | LOVLIG_OPPHOLD                                                  | 11.01.1970 | 14.08.2022 | Oppfylt      |                      |
+      | 1234    | BOSATT_I_RIKET                                                  | 11.01.1970 |            | Oppfylt      |                      |
+      | 3456    | UNDER_18_ÅR                                                     | 13.04.2020 | 12.04.2038 | Oppfylt      |                      |
+      | 3456    | GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD, BOR_MED_SØKER | 13.04.2020 |            | Oppfylt      |                      |
+      | 1234    | UTVIDET_BARNETRYGD                                              |            |            | Ikke_oppfylt | Ja                   |
+      | 1234    | LOVLIG_OPPHOLD                                                  | 15.08.2022 | 02.02.2023 | Ikke_oppfylt | Ja                   |
+      | 1234    | LOVLIG_OPPHOLD                                                  | 03.02.2023 |            | Oppfylt      |                      |
 
     Og med andeler tilkjent ytelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |

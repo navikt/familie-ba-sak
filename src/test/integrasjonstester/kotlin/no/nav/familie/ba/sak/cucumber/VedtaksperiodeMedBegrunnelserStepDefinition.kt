@@ -34,7 +34,7 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
     private var kompetanser = mutableMapOf<Long, List<Kompetanse>>()
     private var endredeUtbetalinger = mutableMapOf<Long, List<EndretUtbetalingAndel>>()
     private var andelerTilkjentYtelse = mutableMapOf<Long, List<AndelTilkjentYtelse>>()
-    private var endringstidspunkt = mapOf<Long, LocalDate?>()
+    private var overstyrtEndringstidspunkt = mapOf<Long, LocalDate?>()
 
     private var gjeldendeBehandlingId: Long? = null
 
@@ -57,39 +57,17 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
 
     @Og("legg til nye vilkårresultater for behandling {}")
     fun `legg til nye vilkårresultater for behandling`(behandlingId: Long, dataTable: DataTable) {
-        val nyeVilkårPerPerson = dataTable.asMaps().groupBy { parseAktørId(it) }
-        val personResultatForBehandling =
-            personResultater[behandlingId] ?: error("Finner ikke personresultater for behandling med id $behandlingId")
-        personResultater[behandlingId] = personResultatForBehandling.map { personResultat ->
-            val nyeVilkårForPerson = nyeVilkårPerPerson[personResultat.aktør.aktørId]
+        val vilkårResultaterPerPerson = dataTable.asMaps().groupBy { parseAktørId(it) }
+        val personResultatForBehandling = personResultater[behandlingId]
+            ?: error("Finner ikke personresultater for behandling med id $behandlingId")
 
-            val nyeVilkårResultater = nyeVilkårForPerson.tilVilkårResultater(behandlingId, personResultat)
-            personResultat.vilkårResultater.addAll(nyeVilkårResultater)
-            personResultat
-        }.toSet()
+        personResultater[behandlingId] =
+            leggTilVilkårResultatPåPersonResultat(personResultatForBehandling, vilkårResultaterPerPerson, behandlingId)
     }
 
-    @Og("med overstyring av vilkår for behandling {}")
-    fun overstyrPersonResultater(behandlingId: Long, dataTable: DataTable) {
-        val overstyringerPerPerson = dataTable.asMaps().groupBy { parseAktørId(it) }
-        val personResultatForBehandling =
-            personResultater[behandlingId] ?: error("Finner ikke personresultater for behandling med id $behandlingId")
-        personResultater[behandlingId] = personResultatForBehandling.map { personResultat ->
-            val overstyringerForPerson = overstyringerPerPerson[personResultat.aktør.aktørId]
-
-            personResultat.vilkårResultater.forEach { vilkårResultat ->
-                oppdaterVilkårResultat(
-                    vilkårResultat,
-                    overstyringerForPerson,
-                )
-            }
-            personResultat
-        }.toSet()
-    }
-
-    @Og("med endringstidspunkt")
+    @Og("med overstyrt endringstidspunkt")
     fun settEndringstidspunkt(dataTable: DataTable) {
-        endringstidspunkt = dataTable.asMaps().associate { rad ->
+        overstyrtEndringstidspunkt = dataTable.asMaps().associate { rad ->
             parseLong(Domenebegrep.BEHANDLING_ID, rad) to
                 parseDato(DomenebegrepVedtaksperiodeMedBegrunnelser.ENDRINGSTIDSPUNKT, rad)
         }
@@ -117,15 +95,15 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
         gjeldendeBehandlingId = behandlingId
 
         vedtaksperioderMedBegrunnelser = lagVedtaksPerioder(
-            behandlingId,
-            vedtaksliste,
-            behandlingTilForrigeBehandling,
-            persongrunnlag,
-            personResultater,
-            kompetanser,
-            endredeUtbetalinger,
-            andelerTilkjentYtelse,
-            endringstidspunkt,
+            behandlingId = behandlingId,
+            vedtaksListe = vedtaksliste,
+            behandlingTilForrigeBehandling = behandlingTilForrigeBehandling,
+            personGrunnlag = persongrunnlag,
+            personResultater = personResultater,
+            kompetanser = kompetanser,
+            endredeUtbetalinger = endredeUtbetalinger,
+            andelerTilkjentYtelse = andelerTilkjentYtelse,
+            endringstidspunkt = overstyrtEndringstidspunkt,
         )
     }
 

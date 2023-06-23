@@ -241,26 +241,35 @@ data class VilkårsvurderingForNyBehandlingUtils(
                         fom,
                     )
 
-                val begrunnelse = "Migrering"
+                val eksisterendeVilkårSomErForlengetEllerForkortet =
+                    VilkårsvurderingMigreringUtils.finnEksisterendeVilkårResultatSomBlirForskjøvet(
+                        forrigeBehandlingVilkårsvurdering,
+                        vilkår,
+                        person,
+                        fom,
+                        tom,
+                    )
 
-                VilkårResultat(
-                    personResultat = personResultat,
-                    erAutomatiskVurdert = false,
-                    resultat = Resultat.OPPFYLT,
-                    vilkårType = vilkår,
-                    periodeFom = fom,
-                    periodeTom = tom,
-                    begrunnelse = begrunnelse,
-                    behandlingId = personResultat.vilkårsvurdering.behandling.id,
-                )
+                // Sørger for at vi kopierer over alle felter fra VilkårResultat som blir forsøvet pga ny migreringsdato
+                eksisterendeVilkårSomErForlengetEllerForkortet.tilKopiForNyttPersonResultat(personResultat)
+                    .also { vilkårResultat ->
+                        vilkårResultat.periodeFom = fom
+                        vilkårResultat.periodeTom = tom
+                        if (vilkårResultat.begrunnelse.isEmpty()) {
+                            vilkårResultat.begrunnelse = "Migrering"
+                        }
+                    }
             }.toSortedSet(VilkårResultat.VilkårResultatComparator)
 
             val manglendePerioder = VilkårsvurderingMigreringUtils.kopiManglendePerioderFraForrigeVilkårsvurdering(
                 vilkårResultater,
                 forrigeBehandlingVilkårsvurdering,
                 person,
+                personResultat,
             )
-            vilkårResultater.addAll(manglendePerioder.map { it.kopierMedParent(personResultat) }.toSet())
+
+            vilkårResultater.addAll(manglendePerioder)
+
             personResultat.setSortedVilkårResultater(vilkårResultater)
 
             personResultat

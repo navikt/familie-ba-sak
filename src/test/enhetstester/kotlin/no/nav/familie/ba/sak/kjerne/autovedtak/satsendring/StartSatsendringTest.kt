@@ -5,9 +5,7 @@ import io.mockk.mockk
 import io.mockk.slot
 import io.mockk.spyk
 import io.mockk.verify
-import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.common.lagBehandling
-import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
@@ -15,13 +13,10 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.StartSatsendring.Comp
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
-import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType.ORDINÆR_BARNETRYGD
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.task.OpprettTaskService
 import no.nav.familie.prosessering.domene.Task
-import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -30,14 +25,11 @@ import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 import org.springframework.data.domain.PageImpl
 import org.springframework.data.domain.Pageable
-import java.time.YearMonth
 
 internal class StartSatsendringTest {
 
     private val fagsakRepository: FagsakRepository = mockk()
     private val behandlingRepository: BehandlingRepository = mockk()
-    private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService =
-        mockk()
     private val satskjøringRepository: SatskjøringRepository = mockk()
     private val featureToggleService: FeatureToggleService = mockk()
     private val personidentService: PersonidentService = mockk()
@@ -54,7 +46,8 @@ internal class StartSatsendringTest {
         every { behandlingRepository.findByFagsakAndAktivAndOpen(any()) } returns null
         val taskSlot = slot<Task>()
         every { taskRepository.save(capture(taskSlot)) } answers { taskSlot.captured }
-        val opprettTaskService = OpprettTaskService(taskRepository)
+        val opprettTaskService = OpprettTaskService(taskRepository, satskjøringRepository)
+
         every { satsendringService.erFagsakOppdatertMedSisteSatser(any()) } returns true
         every { featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_2023_07, false) } returns false
 
@@ -63,7 +56,6 @@ internal class StartSatsendringTest {
                 fagsakRepository = fagsakRepository,
                 behandlingRepository = behandlingRepository,
                 opprettTaskService = opprettTaskService,
-                andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
                 satskjøringRepository = satskjøringRepository,
                 featureToggleService = featureToggleService,
                 personidentService = personidentService,
@@ -81,86 +73,16 @@ internal class StartSatsendringTest {
         val behandling = lagBehandling()
 
         every { fagsakRepository.finnLøpendeFagsakerForSatsendring(any(), any()) } returns PageImpl(
-            listOf(behandling.fagsak),
+            listOf(behandling.fagsak.id),
             Pageable.ofSize(5),
             0,
         )
 
         every { behandlingRepository.finnSisteIverksatteBehandling(behandling.fagsak.id) } returns behandling
-
-        every {
-            andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
-                behandling.id,
-            )
-        } returns
-            listOf(
-                lagAndelTilkjentYtelseMedEndreteUtbetalinger(
-                    YearMonth.of(2022, 12),
-                    YearMonth.of(2039, 11),
-                    ORDINÆR_BARNETRYGD,
-                    behandling = behandling,
-                    person = lagPerson(),
-                    aktør = lagPerson().aktør,
-                    periodeIdOffset = 1,
-                    beløp = 1676,
-                ),
-                lagAndelTilkjentYtelseMedEndreteUtbetalinger(
-                    YearMonth.of(2030, 12),
-                    YearMonth.of(2039, 11),
-                    ORDINÆR_BARNETRYGD,
-                    behandling = behandling,
-                    person = lagPerson(),
-                    aktør = lagPerson().aktør,
-                    periodeIdOffset = 1,
-                    beløp = 1054,
-                ),
-            )
 
         startSatsendring.startSatsendring(5)
 
         verify(exactly = 1) { taskRepository.save(any()) }
-    }
-
-    @Test
-    fun `Ikke start satsendring på sak hvis ytelsen utløper før satstidspunkt, men marker at sastsendring alt er kjørt`() {
-        every { featureToggleService.isEnabled(any(), any()) } returns true
-        every { featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_OPPRETT_TASKER) } returns true
-
-        val behandling = lagBehandling()
-
-        every { fagsakRepository.finnLøpendeFagsakerForSatsendring(any(), any()) } returns PageImpl(
-            listOf(behandling.fagsak),
-            Pageable.ofSize(5),
-            0,
-        )
-
-        every { behandlingRepository.finnSisteIverksatteBehandling(behandling.fagsak.id) } returns behandling
-
-        every {
-            andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
-                behandling.id,
-            )
-        } returns
-            listOf(
-                lagAndelTilkjentYtelseMedEndreteUtbetalinger(
-                    fom = YearMonth.of(2022, 12),
-                    tom = YearMonth.of(2023, 2),
-                    ytelseType = ORDINÆR_BARNETRYGD,
-                    behandling = behandling,
-                    person = lagPerson(),
-                    aktør = lagPerson().aktør,
-                    periodeIdOffset = 1,
-                    beløp = 1676,
-                ),
-            )
-
-        startSatsendring.startSatsendring(5)
-
-        val satskjøringSlot = slot<Satskjøring>()
-        verify(exactly = 1) { satskjøringRepository.save(capture(satskjøringSlot)) }
-        assertThat(satskjøringSlot.captured.fagsakId).isEqualTo(behandling.fagsak.id)
-        assertThat(satskjøringSlot.captured.fagsakId).isEqualTo(behandling.fagsak.id)
-        assertThat(satskjøringSlot.captured.ferdigTidspunkt).isEqualTo(behandling.endretTidspunkt)
     }
 
     @Test
@@ -171,30 +93,12 @@ internal class StartSatsendringTest {
         val behandling = lagBehandling()
 
         every { fagsakRepository.finnLøpendeFagsakerForSatsendring(any(), any()) } returns PageImpl(
-            listOf(behandling.fagsak, behandling.fagsak),
+            listOf(behandling.fagsak.id, behandling.fagsak.id),
             Pageable.ofSize(2), // 5/2 gir totalt 3 sider, så finnLøpendeFagsakerForSatsendring skal trigges 3 ganger
             5,
         )
 
         every { behandlingRepository.finnSisteIverksatteBehandling(behandling.fagsak.id) } returns behandling
-
-        every {
-            andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
-                behandling.id,
-            )
-        } returns
-            listOf(
-                lagAndelTilkjentYtelseMedEndreteUtbetalinger(
-                    fom = YearMonth.of(2022, 12),
-                    tom = YearMonth.of(2040, 12),
-                    ytelseType = ORDINÆR_BARNETRYGD,
-                    behandling = behandling,
-                    person = lagPerson(),
-                    aktør = lagPerson().aktør,
-                    periodeIdOffset = 1,
-                    beløp = 1676,
-                ),
-            )
 
         startSatsendring.startSatsendring(5)
 
@@ -209,38 +113,11 @@ internal class StartSatsendringTest {
 
         val behandling = lagBehandling()
         every { behandlingRepository.finnSisteIverksatteBehandling(behandling.fagsak.id) } returns behandling
-        every {
-            andelerTilkjentYtelseOgEndreteUtbetalingerService.finnAndelerTilkjentYtelseMedEndreteUtbetalinger(
-                behandling.id,
-            )
-        } returns
-            listOf(
-                lagAndelTilkjentYtelseMedEndreteUtbetalinger(
-                    YearMonth.of(2022, 12),
-                    YearMonth.of(2039, 11),
-                    ORDINÆR_BARNETRYGD,
-                    behandling = behandling,
-                    person = lagPerson(),
-                    aktør = lagPerson().aktør,
-                    periodeIdOffset = 1,
-                    beløp = 1676,
-                ),
-                lagAndelTilkjentYtelseMedEndreteUtbetalinger(
-                    YearMonth.of(2030, 12),
-                    YearMonth.of(2039, 11),
-                    ORDINÆR_BARNETRYGD,
-                    behandling = behandling,
-                    person = lagPerson(),
-                    aktør = lagPerson().aktør,
-                    periodeIdOffset = 1,
-                    beløp = 1054,
-                ),
-            )
 
         every { behandlingRepository.findByFagsakAndAktivAndOpen(any()) } returns behandling
 
         every { fagsakRepository.finnLøpendeFagsakerForSatsendring(any(), any()) } returns PageImpl(
-            listOf(behandling.fagsak),
+            listOf(behandling.fagsak.id),
             Pageable.ofSize(5),
             0,
         )
@@ -253,7 +130,10 @@ internal class StartSatsendringTest {
     @Test
     fun `kanStarteSatsendringPåFagsak gir false når vi ikke har noen tidligere behandling`() {
         every { behandlingRepository.finnSisteIverksatteBehandling(1L) } returns null
-        every { satskjøringRepository.findByFagsakIdAndSatsTidspunkt(1L, any()) } returns Satskjøring(fagsakId = 1L, satsTidspunkt = SATSENDRINGMÅNED_MARS_2023)
+        every { satskjøringRepository.findByFagsakIdAndSatsTidspunkt(1L, any()) } returns Satskjøring(
+            fagsakId = 1L,
+            satsTidspunkt = SATSENDRINGMÅNED_MARS_2023,
+        )
 
         assertFalse(startSatsendring.kanStarteSatsendringPåFagsak(1L))
     }
@@ -261,7 +141,10 @@ internal class StartSatsendringTest {
     @Test
     fun `kanStarteSatsendringPåFagsak gir false når vi har en satskjøring for fagsaken i satskjøringsrepoet`() {
         every { behandlingRepository.finnSisteIverksatteBehandling(1L) } returns lagBehandling()
-        every { satskjøringRepository.findByFagsakIdAndSatsTidspunkt(1L, any()) } returns Satskjøring(fagsakId = 1L, satsTidspunkt = SATSENDRINGMÅNED_MARS_2023)
+        every { satskjøringRepository.findByFagsakIdAndSatsTidspunkt(1L, any()) } returns Satskjøring(
+            fagsakId = 1L,
+            satsTidspunkt = SATSENDRINGMÅNED_MARS_2023,
+        )
 
         assertFalse(startSatsendring.kanStarteSatsendringPåFagsak(1L))
     }

@@ -433,6 +433,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
         override val sanityApiNavn = "innvilgetDeltFraSkriftligAvtaleHarSoktForPraktisertDeltBosted"
     },
+    INNVILGET_OPPHOLD_PAA_SVALBARD {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.INNVILGET
+        override val sanityApiNavn = "innvilgetOppholdPaaSvalbard"
+    },
     REDUKSJON_BOSATT_I_RIKTET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "reduksjonBosattIRiket"
@@ -716,6 +720,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
     REDUKSJON_BEGGE_FORELDRE_FÅTT_BARNETRYGD {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
         override val sanityApiNavn = "reduksjonBeggeForeldreFaattBarnetrygd"
+    },
+    REDUKSJON_BARN_BOR_I_INSTITUSJON {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.REDUKSJON
+        override val sanityApiNavn = "reduksjonBarnBorIInstitusjon"
     },
     AVSLAG_BOSATT_I_RIKET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.AVSLAG
@@ -1161,6 +1169,10 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
         override val sanityApiNavn = "opphorBeggeForeldreFaattBarnetrygd"
     },
+    OPPHOR_BARNET_BOR_I_INSTITUSJON {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.OPPHØR
+        override val sanityApiNavn = "opphorBarnetBorIInstitusjon"
+    },
     FORTSATT_INNVILGET_SØKER_OG_BARN_BOSATT_I_RIKET {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.FORTSATT_INNVILGET
         override val sanityApiNavn = "fortsattInnvilgetSokerOgBarnBosattIRiket"
@@ -1382,6 +1394,14 @@ enum class Standardbegrunnelse : IVedtakBegrunnelse {
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
         override val sanityApiNavn = "endretUtbetalingEtterbetaltUtvidetDelFraSkriftligAvtaleSokerPraktisert"
     },
+    ENDRET_UTBETALING_ALLEREDE_UTBETALT_FORELDRE_BOR_SAMMEN {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
+        override val sanityApiNavn = "endretUtbetalingAlleredeUtbetaltForeldreBorSammen"
+    },
+    ENDRET_UTBETALING_ETTERBETALING_UTVIDET_EØS {
+        override val vedtakBegrunnelseType = VedtakBegrunnelseType.ENDRET_UTBETALING
+        override val sanityApiNavn = "endretUtbetalingEtterbetalingUtvidetEos"
+    },
     ETTER_ENDRET_UTBETALING_RETTSAVGJØRELSE_DELT_BOSTED {
         override val sanityApiNavn = "etterEndretUtbetalingRettsavgjorelseDeltBosted"
         override val vedtakBegrunnelseType = VedtakBegrunnelseType.ETTER_ENDRET_UTBETALING
@@ -1532,4 +1552,6 @@ val endretUtbetalingsperiodeBegrunnelser: Set<Standardbegrunnelse> = setOf(
     Standardbegrunnelse.ENDRET_UTBETALINGSPERIODE_DELT_BOSTED_ENDRET_UTBETALING,
     Standardbegrunnelse.ENDRET_UTBETALING_SEKUNDÆR_DELT_BOSTED_FULL_UTBETALING_FØR_SØKNAD,
     Standardbegrunnelse.ENDRET_UTBETALING_ETTERBETALT_UTVIDET_DEL_FRA_AVTALETIDSPUNKT_SØKT_FOR_PRAKTISERT_DELT,
+    Standardbegrunnelse.ENDRET_UTBETALING_ALLEREDE_UTBETALT_FORELDRE_BOR_SAMMEN,
+    Standardbegrunnelse.ENDRET_UTBETALING_ETTERBETALING_UTVIDET_EØS,
 )

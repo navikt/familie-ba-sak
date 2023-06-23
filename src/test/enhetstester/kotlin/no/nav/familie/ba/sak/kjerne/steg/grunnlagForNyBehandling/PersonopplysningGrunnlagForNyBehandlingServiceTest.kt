@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomFnr
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.config.tilAktør
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
@@ -169,6 +170,12 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
         every { featureToggleService.isEnabled(any(), any()) } returns true
         every { persongrunnlagService.hentAktivThrows(forrigeBehandling.id) } returns personopplysningGrunnlag
         every { persongrunnlagService.lagreOgDeaktiverGammel(capture(kopiertPersonopplysningGrunnlag)) } returns mockk()
+        every { personidentService.hentOgLagreAktør(any(), any()) } returns tilAktør(søker.ident)
+        every { beregningService.finnBarnFraBehandlingMedTilkjentYtelse(forrigeBehandling.id) } returns listOf(
+            tilAktør(
+                barn.ident,
+            ),
+        )
         personopplysningGrunnlagForNyBehandlingService.opprettKopiEllerNyttPersonopplysningGrunnlag(
             nyBehandling,
             forrigeBehandling,
@@ -180,6 +187,119 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest {
         assertThat(kopiertPersonopplysningGrunnlag.captured.personer.size).isEqualTo(2)
 
         validerAtPersonerIGrunnlagErLike(personopplysningGrunnlag, kopiertPersonopplysningGrunnlag.captured, true)
+    }
+
+    @Test
+    fun `hentOgLagrePersonopplysningGrunnlag - skal kopiere søker og barn med tilkjent ytelse fra persongrunnlaget fra forrige behandling ved satsendring`() {
+        val forrigeBehandling = lagBehandling()
+        val nyBehandling = lagBehandling(årsak = BehandlingÅrsak.SATSENDRING)
+        val søker = PersonIdent(randomFnr())
+        val barn1 = PersonIdent(randomFnr())
+        val barn2 = PersonIdent(randomFnr())
+        val søkerPerson = lagPerson(personIdent = søker, id = 1)
+        val barnPerson1 = lagPerson(personIdent = barn1, id = 2)
+        val barnPerson2 = lagPerson(personIdent = barn2, id = 3)
+
+        val periode = DatoIntervallEntitet(LocalDate.now(), LocalDate.now().plusMonths(4))
+
+        val kopiertPersonopplysningGrunnlag = slot<PersonopplysningGrunnlag>()
+
+        val grVegadresse =
+            GrVegadresse(1, "2", null, "123", "Testgate", "23", null, "0682").medPeriodeOgPerson(periode, søkerPerson)
+        val grUkjentBosted = GrUkjentBosted("Oslo").medPeriodeOgPerson(periode, søkerPerson)
+        val grMatrikkeladresse = GrMatrikkeladresse(1, "2", null, "0682", "23").medPeriodeOgPerson(periode, søkerPerson)
+
+        val statsborgerskap = GrStatsborgerskap(
+            id = 1,
+            gyldigPeriode = periode,
+            landkode = "N",
+            medlemskap = Medlemskap.EØS,
+            person = søkerPerson,
+        )
+        val opphold =
+            GrOpphold(id = 1, gyldigPeriode = periode, type = OPPHOLDSTILLATELSE.PERMANENT, person = søkerPerson)
+        val arbeidsforhold =
+            GrArbeidsforhold(
+                id = 1,
+                periode = periode,
+                arbeidsgiverId = "1",
+                arbeidsgiverType = "AS",
+                person = søkerPerson,
+            )
+        val sivilstand =
+            GrSivilstand(id = 1, fom = LocalDate.now(), type = SIVILSTAND.REGISTRERT_PARTNER, person = søkerPerson)
+        val dødsfall = Dødsfall(
+            id = 1,
+            person = søkerPerson,
+            dødsfallDato = LocalDate.now(),
+            dødsfallAdresse = "Adresse",
+            dødsfallPostnummer = "1234",
+            dødsfallPoststed = "Oslo",
+        )
+
+        val personopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlag(forrigeBehandling.id, søkerPerson, barnPerson1, barnPerson2).also {
+                it.personer.map { person ->
+                    if (person.aktør.aktivFødselsnummer() == søker.ident) {
+                        person.bostedsadresser.addAll(
+                            listOf(
+                                grVegadresse,
+                                grUkjentBosted,
+                                grMatrikkeladresse,
+                            ),
+                        )
+                        person.statsborgerskap.addAll(listOf(statsborgerskap))
+                        person.opphold.addAll(listOf(opphold))
+                        person.arbeidsforhold.addAll(listOf(arbeidsforhold))
+                        person.sivilstander.addAll(listOf(sivilstand))
+                        person.dødsfall = dødsfall
+                    }
+                }
+            }
+
+        val forventetPersonopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlag(forrigeBehandling.id, søkerPerson, barnPerson1).also {
+                it.personer.map { person ->
+                    if (person.aktør.aktivFødselsnummer() == søker.ident) {
+                        person.bostedsadresser.addAll(
+                            listOf(
+                                grVegadresse,
+                                grUkjentBosted,
+                                grMatrikkeladresse,
+                            ),
+                        )
+                        person.statsborgerskap.addAll(listOf(statsborgerskap))
+                        person.opphold.addAll(listOf(opphold))
+                        person.arbeidsforhold.addAll(listOf(arbeidsforhold))
+                        person.sivilstander.addAll(listOf(sivilstand))
+                        person.dødsfall = dødsfall
+                    }
+                }
+            }
+        every { featureToggleService.isEnabled(any(), any()) } returns true
+        every { persongrunnlagService.hentAktivThrows(forrigeBehandling.id) } returns personopplysningGrunnlag
+        every { persongrunnlagService.lagreOgDeaktiverGammel(capture(kopiertPersonopplysningGrunnlag)) } returns mockk()
+        every { personidentService.hentOgLagreAktør(any(), any()) } returns tilAktør(søker.ident)
+        every { beregningService.finnBarnFraBehandlingMedTilkjentYtelse(forrigeBehandling.id) } returns listOf(
+            tilAktør(
+                barn1.ident,
+            ),
+        )
+        personopplysningGrunnlagForNyBehandlingService.opprettKopiEllerNyttPersonopplysningGrunnlag(
+            nyBehandling,
+            forrigeBehandling,
+            søker.ident,
+            listOf(barn1.ident),
+        )
+
+        assertThat(kopiertPersonopplysningGrunnlag.captured.behandlingId).isEqualTo(nyBehandling.id)
+        assertThat(kopiertPersonopplysningGrunnlag.captured.personer.size).isEqualTo(2)
+
+        validerAtPersonerIGrunnlagErLike(
+            forventetPersonopplysningGrunnlag,
+            kopiertPersonopplysningGrunnlag.captured,
+            true,
+        )
     }
 
     @Test
