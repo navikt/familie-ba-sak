@@ -8,12 +8,15 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerInstitusjonOgVerge
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.validerBehandlingIkkeSendtTilEksterneTjenester
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.validerhenleggelsestype
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatSteg
+import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerService
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
@@ -43,6 +46,9 @@ class BehandlingStegController(
     private val stegService: StegService,
     private val tilgangService: TilgangService,
     private val featureToggleService: FeatureToggleService,
+    private val brevmottakerService: BrevmottakerService,
+    private val persongrunnlagService: PersongrunnlagService,
+    private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
 ) {
 
     @PostMapping(
@@ -140,6 +146,7 @@ class BehandlingStegController(
         )
 
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
+        validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(behandlingId = behandling.id)
 
         stegService.håndterSendTilBeslutter(behandling, behandlendeEnhet)
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
@@ -196,6 +203,20 @@ class BehandlingStegController(
     ) {
         if (behandling.erTekniskBehandling() && !tekniskEndringToggle) {
             throw FunksjonellFeil("Du har ikke tilgang til å henlegge en behandling som er opprettet med årsak=${behandling.opprettetÅrsak.visningsnavn}. Ta kontakt med teamet dersom dette ikke stemmer.")
+        }
+    }
+
+    private fun validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(behandlingId: Long) {
+        val brevmottakere = brevmottakerService.hentBrevmottakere(behandlingId)
+        val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandlingId)
+        val personer = personopplysningGrunnlag?.søkerOgBarn
+        val personIdentList = personer?.map { it.aktør.aktivFødselsnummer() } ?: emptyList()
+        val strengtFortroligAdresseBeskyttelseIdentList = if (personIdentList.isNotEmpty()) { familieIntegrasjonerTilgangskontrollService.returnerPersonerMedAdressebeskyttelse(personIdentList) } else { emptyList() }
+        if (brevmottakere.isNotEmpty() && strengtFortroligAdresseBeskyttelseIdentList.isNotEmpty()) {
+            val kommaSeparertListeAvStrengtFortroligIdenter = strengtFortroligAdresseBeskyttelseIdentList.joinToString { it }
+            val melding = "Behandlingen (id: " + behandlingId + ") inneholder " + strengtFortroligAdresseBeskyttelseIdentList.size + " person(er) med strengt fortrolig adressebeskyttelse og kan ikke kombineres med manuelle brevmottakere (" + brevmottakere + " stk)."
+            val frontendFeilmelding = "Behandlingen inneholder personer med strengt fortrolig adressebeskyttelse (" + kommaSeparertListeAvStrengtFortroligIdenter + ") og kan ikke kombineres med manuelle brevmottakere."
+            throw FunksjonellFeil(melding, frontendFeilmelding)
         }
     }
 

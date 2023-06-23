@@ -8,7 +8,10 @@ import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
+import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
 import org.junit.jupiter.api.Test
@@ -21,12 +24,18 @@ class BehandlingStegControllerTest {
     private val behandlingHentOgPersisterServiceMock = mockk<BehandlingHentOgPersisterService>()
     private val stegServiceMock = mockk<StegService>()
     private val utvidetBehandlingServiceMock = mockk<UtvidetBehandlingService>()
+    private val brevmottakerServiceMock = mockk<BrevmottakerService>()
+    private val persongrunnlagServiceMock = mockk<PersongrunnlagService>()
+    private val familieIntegrasjonerTilgangskontrollServiceMock = mockk<FamilieIntegrasjonerTilgangskontrollService>()
     private val behandlingStegController = BehandlingStegController(
         behandlingHentOgPersisterService = behandlingHentOgPersisterServiceMock,
         stegService = stegServiceMock,
         tilgangService = tilgangServiceMock,
         featureToggleService = featureToggleServiceMock,
         utvidetBehandlingService = utvidetBehandlingServiceMock,
+        brevmottakerService = brevmottakerServiceMock,
+        persongrunnlagService = persongrunnlagServiceMock,
+        familieIntegrasjonerTilgangskontrollService = familieIntegrasjonerTilgangskontrollServiceMock,
     )
 
     @Test
