@@ -49,7 +49,6 @@ internal class StartSatsendringTest {
         val opprettTaskService = OpprettTaskService(taskRepository, satskjøringRepository)
 
         every { satsendringService.erFagsakOppdatertMedSisteSatser(any()) } returns true
-        every { featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_2023_07, false) } returns false
 
         startSatsendring = spyk(
             StartSatsendring(
