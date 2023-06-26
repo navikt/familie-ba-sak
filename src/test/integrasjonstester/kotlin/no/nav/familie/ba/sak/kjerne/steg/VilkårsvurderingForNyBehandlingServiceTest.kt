@@ -835,8 +835,6 @@ class VilkårsvurderingForNyBehandlingServiceTest(
             ),
         )
 
-        val barnetsFødselsdato = LocalDate.of(2021, 8, 15)
-
         val vilkårsvurdering =
             lagVilkårsvurderingMedOverstyrendeResultater(
                 søker = søker,
@@ -924,6 +922,8 @@ class VilkårsvurderingForNyBehandlingServiceTest(
             *baseEntitetFelter,
         )
             .isEqualTo(endredeUtbetalingsAndeler)
+
+        assertThat(kopiertEndredeUtbetalingsandeler.all { kopiertEua -> endredeUtbetalingsAndeler.any { eua -> eua.person!!.aktør.aktørId === kopiertEua.person!!.aktør.aktørId } }).isTrue
 
         validerKopiertVilkårsvurdering(kopiertVilkårsvurdering, vilkårsvurdering, forventetVilkårsvurdering)
     }
