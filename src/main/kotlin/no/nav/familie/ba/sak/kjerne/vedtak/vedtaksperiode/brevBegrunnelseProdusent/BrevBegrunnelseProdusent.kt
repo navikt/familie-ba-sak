@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.brevBegrunnelseProdusent
 
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
@@ -13,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.månedPeriodeAv
 import no.nav.familie.ba.sak.kjerne.tidslinje.periodeAv
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
@@ -148,6 +150,7 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.finnBegrunnelseGrunnlagPerPerso
     val tidslinjeMedVedtaksperioden = this.tilTidslinjeForAktuellPeriode()
 
     val grunnlagTidslinjePerPerson = grunnlagForVedtaksperioder.utledGrunnlagTidslinjePerPerson()
+        .mapValues { it.value.copy(grunnlagForPerson = it.value.grunnlagForPerson.fjernOverflødigePerioderPåSlutten()) }
 
     val grunnlagTidslinjePerPersonForrigeBehandling =
         grunnlagForVedtaksperioderForrigeBehandling?.utledGrunnlagTidslinjePerPerson()
@@ -176,6 +179,34 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.finnBegrunnelseGrunnlagPerPerso
 
         grunnlagMedForrigePeriodeOgBehandlingTidslinje.perioder().mapNotNull { it.innhold }.single()
     }
+}
+
+private fun Tidslinje<GrunnlagForPerson, Måned>.fjernOverflødigePerioderPåSlutten(): Tidslinje<GrunnlagForPerson, Måned> {
+    val sortedByFom = this.perioder()
+        .sortedWith(compareBy({ it.fraOgMed }, { it.tilOgMed }))
+
+    val indexForSisteInnvilgetePeriode = sortedByFom.indexOfLast { periode ->
+        periode.innhold ?: throw Feil("Innhold er null for periode ${periode.fraOgMed} - ${periode.tilOgMed}")
+        periode.innhold is GrunnlagForPersonInnvilget
+    }
+
+    return when (indexForSisteInnvilgetePeriode) {
+        -1 -> {
+            // Har ingen innvilgete perioder
+            sortedByFom
+        }
+
+        sortedByFom.size + 1 -> {
+            // Har kun innvilgete perioder
+            sortedByFom
+        }
+
+        else -> {
+            val sisteIkkeInnvilgetePeriodeSomSkalBegrunnes =
+                sortedByFom[indexForSisteInnvilgetePeriode + 1].copy(tilOgMed = MånedTidspunkt.uendeligLengeTil())
+            sortedByFom.subList(0, indexForSisteInnvilgetePeriode + 1) + sisteIkkeInnvilgetePeriodeSomSkalBegrunnes
+        }
+    }.tilTidslinje()
 }
 
 private fun UtvidetVedtaksperiodeMedBegrunnelser.tilTidslinjeForAktuellPeriode(): Tidslinje<UtvidetVedtaksperiodeMedBegrunnelser, Måned> {
