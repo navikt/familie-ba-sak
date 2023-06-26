@@ -66,8 +66,12 @@ object EndringIVilkårsvurderingUtil {
         forrigeOppfylteVilkårResultater: List<VilkårResultat>,
         vilkår: Vilkår,
     ): Tidslinje<Boolean, Måned> {
-        val nåværendeVilkårResultatTidslinje = nåværendeOppfylteVilkårResultater.tilForskjøvetTidslinjeForOppfyltVilkår(vilkår)
-        val tidligereVilkårResultatTidslinje = forrigeOppfylteVilkårResultater.tilForskjøvetTidslinjeForOppfyltVilkår(vilkår)
+        // Antar fødselsdato er første oppfylte fom for 18-årsvilkåret.
+        // Denne koden er ikke i bruk i prod og skal fjernes når denne toggelen:
+        // https://unleash.nais.io/#/features/strategies/familie-ba-sak.endringstidspunkt
+        // har levd lenge nok
+        val nåværendeVilkårResultatTidslinje = nåværendeOppfylteVilkårResultater.tilForskjøvetTidslinjeForOppfyltVilkår(vilkår, nåværendeOppfylteVilkårResultater.mapNotNull { it.periodeFom }.min())
+        val tidligereVilkårResultatTidslinje = forrigeOppfylteVilkårResultater.tilForskjøvetTidslinjeForOppfyltVilkår(vilkår, forrigeOppfylteVilkårResultater.mapNotNull { it.periodeFom }.min())
 
         val endringIVilkårResultat =
             nåværendeVilkårResultatTidslinje.kombinerUtenNullMed(tidligereVilkårResultatTidslinje) { nåværende, forrige ->

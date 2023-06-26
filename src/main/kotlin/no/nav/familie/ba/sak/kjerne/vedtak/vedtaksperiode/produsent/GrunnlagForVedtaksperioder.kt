@@ -62,7 +62,7 @@ data class GrunnlagForVedtaksperioder(
             hentOrdinæreVilkårForSøkerForskjøvetTidslinje(søker, personResultater)
 
         val erMinstEttBarnMedUtbetalingTidslinje =
-            hentErMinstEttBarnMedUtbetalingTidslinje(personResultater, søker, fagsakType)
+            hentErMinstEttBarnMedUtbetalingTidslinje(personResultater, fagsakType, persongrunnlag)
 
         val grunnlagForPersonTidslinjer = personResultater
             .associate { personResultat ->
@@ -143,19 +143,20 @@ fun hentOrdinæreVilkårForSøkerForskjøvetTidslinje(
 ): Tidslinje<List<VilkårResultat>, Måned> {
     val søkerPersonResultater = personResultater.single { it.aktør == søker.aktør }
 
-    return søkerPersonResultater.vilkårResultater.tilForskjøvedeVilkårTidslinjer()
+    return søkerPersonResultater.vilkårResultater.tilForskjøvedeVilkårTidslinjer(søker.fødselsdato)
         .kombiner { vilkårResultater -> vilkårResultater.toList().takeIf { it.isNotEmpty() } }
         .map { it?.toList()?.filtrerVilkårErOrdinærtFor(søker) }
 }
 
 private fun hentErMinstEttBarnMedUtbetalingTidslinje(
     personResultater: Set<PersonResultat>,
-    søker: Person,
     fagsakType: FagsakType,
+    persongrunnlag: PersonopplysningGrunnlag,
 ): Tidslinje<Boolean, Måned> {
+    val søker = persongrunnlag.søker
     val søkerSinerOrdinæreVilkårErOppfyltTidslinje =
         personResultater.single { it.erSøkersResultater() }.tilTidslinjeForSplittForPerson(
-            personType = PersonType.SØKER,
+            person = søker,
             fagsakType = fagsakType,
         ).map { it != null }
 
@@ -163,7 +164,7 @@ private fun hentErMinstEttBarnMedUtbetalingTidslinje(
         .filter { it.aktør != søker.aktør || søker.type == PersonType.BARN }
         .map { personResultat ->
             personResultat.tilTidslinjeForSplittForPerson(
-                personType = PersonType.BARN,
+                person = persongrunnlag.barna.single { it.aktør == personResultat.aktør },
                 fagsakType = fagsakType,
             ).map { it != null }
         }
@@ -185,7 +186,7 @@ private fun PersonResultat.hentForskjøvedeVilkårResultaterForPersonsAndelerTid
     ordinæreVilkårForSøkerTidslinje: Tidslinje<List<VilkårResultat>, Måned>,
 ): Tidslinje<List<VilkårResultat>, Måned> {
     val forskjøvedeVilkårResultaterForPerson =
-        this.vilkårResultater.tilForskjøvedeVilkårTidslinjer().kombiner { it }
+        this.vilkårResultater.tilForskjøvedeVilkårTidslinjer(person.fødselsdato).kombiner { it }
 
     return when (person.type) {
         PersonType.SØKER -> forskjøvedeVilkårResultaterForPerson.map { vilkårResultater ->

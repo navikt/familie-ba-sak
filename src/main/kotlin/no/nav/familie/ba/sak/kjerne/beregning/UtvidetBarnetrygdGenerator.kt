@@ -24,7 +24,7 @@ data class UtvidetBarnetrygdGenerator(
 
         val søkerAktør = utvidetVilkår.first().personResultat?.aktør ?: error("Vilkår mangler PersonResultat")
 
-        val utvidetVilkårTidslinje = utvidetVilkår.tilForskjøvetTidslinjeForOppfyltVilkår(Vilkår.UTVIDET_BARNETRYGD)
+        val utvidetVilkårTidslinje = utvidetVilkår.tilForskjøvetTidslinjeForOppfyltVilkår(Vilkår.UTVIDET_BARNETRYGD, fødselsdatoBarn = null)
 
         val størsteProsentTidslinje = andelerBarna
             .tilSeparateTidslinjerForBarna().values

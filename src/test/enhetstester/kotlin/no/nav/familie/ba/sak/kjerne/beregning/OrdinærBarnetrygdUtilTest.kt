@@ -33,7 +33,6 @@ class OrdinærBarnetrygdUtilTest {
     @Test
     fun `Skal lage riktig tidslinje med rett til prosent for person med start og stopp av delt bosted`() {
         val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.now().minusYears(9))
-        val søker = lagPerson(type = PersonType.SØKER)
         val vilkårsvurdering = Vilkårsvurdering(behandling = lagBehandling())
 
         val personResultat = PersonResultat(
@@ -91,7 +90,7 @@ class OrdinærBarnetrygdUtilTest {
         personResultat.setSortedVilkårResultater(vilkårResulater + borMedSøkerVilkår)
 
         val tidslinje = personResultat.tilTidslinjeMedRettTilProsentForPerson(
-            personType = barn.type,
+            person = barn,
             fagsakType = FagsakType.NORMAL,
         )
 
