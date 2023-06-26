@@ -43,7 +43,6 @@ internal class StartSatsendringTest {
     fun setUp() {
         val satsSlot = slot<Satskjøring>()
         every { satskjøringRepository.save(capture(satsSlot)) } answers { satsSlot.captured }
-        every { behandlingRepository.findByFagsakAndAktivAndOpen(any()) } returns null
         val taskSlot = slot<Task>()
         every { taskRepository.save(capture(taskSlot)) } answers { taskSlot.captured }
         val opprettTaskService = OpprettTaskService(taskRepository, satskjøringRepository)
@@ -104,27 +103,6 @@ internal class StartSatsendringTest {
 
         verify(exactly = 5) { taskRepository.save(any()) }
         verify(exactly = 3) { fagsakRepository.finnLøpendeFagsakerForSatsendring(any(), any()) }
-    }
-
-    @Test
-    fun `Ikke start satsendring på sak som har åpen behandling`() {
-        every { featureToggleService.isEnabled(any(), any()) } returns true
-        every { featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_OPPRETT_TASKER) } returns true
-
-        val behandling = lagBehandling()
-        every { behandlingRepository.finnSisteIverksatteBehandling(behandling.fagsak.id) } returns behandling
-
-        every { behandlingRepository.findByFagsakAndAktivAndOpen(any()) } returns behandling
-
-        every { fagsakRepository.finnLøpendeFagsakerForSatsendring(any(), any()) } returns PageImpl(
-            listOf(behandling.fagsak.id),
-            Pageable.ofSize(5),
-            0,
-        )
-
-        startSatsendring.startSatsendring(5)
-
-        verify(exactly = 0) { satskjøringRepository.save(any()) }
     }
 
     @Test
