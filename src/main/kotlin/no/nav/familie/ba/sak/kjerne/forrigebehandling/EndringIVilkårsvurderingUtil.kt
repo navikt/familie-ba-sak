@@ -75,7 +75,7 @@ object EndringIVilkårsvurderingUtil {
             if (nåværendeOppfylteVilkårResultater.isNotEmpty()) {
                 nåværendeOppfylteVilkårResultater.tilForskjøvetTidslinjeForOppfyltVilkår(
                     vilkår = vilkår,
-                    fødselsdatoBarn = nåværendeOppfylteVilkårResultater.mapNotNull { it.periodeFom }.minOrNull(),
+                    fødselsdato = nåværendeOppfylteVilkårResultater.mapNotNull { it.periodeFom }.minOrNull(),
                 )
             } else {
                 tidslinje { emptyList() }
@@ -85,7 +85,7 @@ object EndringIVilkårsvurderingUtil {
             if (forrigeOppfylteVilkårResultater.isNotEmpty()) {
                 forrigeOppfylteVilkårResultater.tilForskjøvetTidslinjeForOppfyltVilkår(
                     vilkår = vilkår,
-                    fødselsdatoBarn = forrigeOppfylteVilkårResultater.mapNotNull { it.periodeFom }.minOrNull(),
+                    fødselsdato = forrigeOppfylteVilkårResultater.mapNotNull { it.periodeFom }.minOrNull(),
                 )
             } else {
                 tidslinje { emptyList() }
