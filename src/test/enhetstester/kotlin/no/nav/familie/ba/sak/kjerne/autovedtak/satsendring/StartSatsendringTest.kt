@@ -48,7 +48,6 @@ internal class StartSatsendringTest {
         val opprettTaskService = OpprettTaskService(taskRepository, satskjøringRepository)
 
         every { satsendringService.erFagsakOppdatertMedSisteSatser(any()) } returns true
-        every { featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_2023_07, false) } returns false
 
         startSatsendring = spyk(
             StartSatsendring(
@@ -67,7 +66,6 @@ internal class StartSatsendringTest {
     @Test
     fun `start satsendring og opprett satsendringtask på sak hvis toggler er på `() {
         every { featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_ENABLET, false) } returns true
-        every { featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_OPPRETT_TASKER) } returns true
 
         val behandling = lagBehandling()
 
