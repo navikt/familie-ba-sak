@@ -21,7 +21,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvu
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.gjelderAlltidFraBarnetsFødselsdato
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
@@ -96,7 +95,7 @@ class OrdinærBarnetrygdUtilTest {
 
         val perioder = tidslinje.perioder().toList()
 
-        Assertions.assertEquals(3, perioder.size)
+        assertEquals(3, perioder.size)
 
         val periode1 = perioder[0]
         val periode2 = perioder[1]
@@ -142,7 +141,7 @@ class OrdinærBarnetrygdUtilTest {
 
         val prosent = vilkårResultater.mapTilProsentEllerNull(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL)
 
-        Assertions.assertEquals(BigDecimal(50), prosent)
+        assertEquals(BigDecimal(50), prosent)
     }
 
     @Test
@@ -165,7 +164,7 @@ class OrdinærBarnetrygdUtilTest {
 
         val prosent = vilkårResultater.mapTilProsentEllerNull(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL)
 
-        Assertions.assertEquals(BigDecimal(100), prosent)
+        assertEquals(BigDecimal(100), prosent)
     }
 
     @Test
@@ -228,8 +227,8 @@ class OrdinærBarnetrygdUtilTest {
         forventetProsent: BigDecimal,
         faktisk: Periode<BigDecimal, Måned>,
     ) {
-        Assertions.assertEquals(forventetFom, faktisk.fraOgMed.tilYearMonth())
-        Assertions.assertEquals(forventetTom, faktisk.tilOgMed.tilYearMonth())
-        Assertions.assertEquals(forventetProsent, faktisk.innhold)
+        assertEquals(forventetFom, faktisk.fraOgMed.tilYearMonth())
+        assertEquals(forventetTom, faktisk.tilOgMed.tilYearMonth())
+        assertEquals(forventetProsent, faktisk.innhold)
     }
 }
