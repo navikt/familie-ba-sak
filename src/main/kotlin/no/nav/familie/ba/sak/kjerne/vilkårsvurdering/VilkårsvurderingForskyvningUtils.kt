@@ -69,8 +69,6 @@ object VilkårsvurderingForskyvningUtils {
     }
 
     fun Collection<VilkårResultat>.tilForskjøvetTidslinjeForOppfyltVilkår(vilkår: Vilkår, fødselsdatoBarn: LocalDate?): Tidslinje<VilkårResultat, Måned> {
-        if (this.isEmpty()) return tidslinje { emptyList() }
-
         val tidslinje = this.lagForskjøvetTidslinjeForOppfylteVilkår(vilkår)
 
         return tidslinje.beskjærPå18ÅrHvisUnder18ÅrVilkår(vilkår = vilkår, fødselsdato = fødselsdatoBarn)
@@ -90,8 +88,6 @@ object VilkårsvurderingForskyvningUtils {
     }
 
     fun Collection<VilkårResultat>.tilForskjøvetTidslinje(vilkår: Vilkår, fødselsdato: LocalDate): Tidslinje<VilkårResultat, Måned> {
-        if (this.isEmpty()) return tidslinje { emptyList() }
-
         val tidslinje = this.lagForskjøvetTidslinje(vilkår)
 
         return tidslinje.beskjærPå18ÅrHvisUnder18ÅrVilkår(vilkår = vilkår, fødselsdato = fødselsdato)
