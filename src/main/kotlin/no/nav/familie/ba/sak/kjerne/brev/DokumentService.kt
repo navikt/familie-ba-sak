@@ -171,7 +171,7 @@ class DokumentService(
                     navn = utledInstitusjonNavn(manueltBrevRequest),
                 )
             }
-            mottakerInfo.navn != null -> {
+            mottakerInfo.brukerIdType != BrukerIdType.ORGNR && mottakerInfo.navn != null -> {
                 AvsenderMottaker(
                     idType = mottakerInfo.brukerIdType,
                     id = mottakerInfo.brukerIdType?.let { mottakerInfo.brukerId },
@@ -215,6 +215,7 @@ class DokumentService(
                 journalpostId = journalPostTilDistribusjon.key,
                 brevmal = manueltBrevRequest.brevmal,
                 erManueltSendt = true,
+                manuellAdresseInfo = journalPostTilDistribusjon.value.manuellAdresseInfo,
             ),
             properties = Properties().apply
                 {
