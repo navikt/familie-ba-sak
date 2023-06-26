@@ -70,8 +70,8 @@ object EndringIVilkårsvurderingUtil {
         // Denne koden er ikke i bruk i prod og skal fjernes når denne toggelen:
         // https://unleash.nais.io/#/features/strategies/familie-ba-sak.endringstidspunkt
         // har levd lenge nok
-        val nåværendeVilkårResultatTidslinje = nåværendeOppfylteVilkårResultater.tilForskjøvetTidslinjeForOppfyltVilkår(vilkår, nåværendeOppfylteVilkårResultater.mapNotNull { it.periodeFom }.min())
-        val tidligereVilkårResultatTidslinje = forrigeOppfylteVilkårResultater.tilForskjøvetTidslinjeForOppfyltVilkår(vilkår, forrigeOppfylteVilkårResultater.mapNotNull { it.periodeFom }.min())
+        val nåværendeVilkårResultatTidslinje = nåværendeOppfylteVilkårResultater.tilForskjøvetTidslinjeForOppfyltVilkår(vilkår, nåværendeOppfylteVilkårResultater.mapNotNull { it.periodeFom }.minOrNull())
+        val tidligereVilkårResultatTidslinje = forrigeOppfylteVilkårResultater.tilForskjøvetTidslinjeForOppfyltVilkår(vilkår, forrigeOppfylteVilkårResultater.mapNotNull { it.periodeFom }.minOrNull())
 
         val endringIVilkårResultat =
             nåværendeVilkårResultatTidslinje.kombinerUtenNullMed(tidligereVilkårResultatTidslinje) { nåværende, forrige ->
