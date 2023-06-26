@@ -89,8 +89,8 @@ fun List<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>>.fjernOv
             sortedByFom
         }
 
-        sortedByFom.size + 1 -> {
-            // Har kun innvilgete perioder
+        sortedByFom.size - 1 -> {
+            // Har kun en ikke-innvilget periode på slutten
             sortedByFom
         }
 

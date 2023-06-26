@@ -196,7 +196,7 @@ private fun Tidslinje<GrunnlagForPerson, Måned>.fjernOverflødigePerioderPåSlu
             sortedByFom
         }
 
-        sortedByFom.size + 1 -> {
+        sortedByFom.size - 1 -> {
             // Har kun innvilgete perioder
             sortedByFom
         }

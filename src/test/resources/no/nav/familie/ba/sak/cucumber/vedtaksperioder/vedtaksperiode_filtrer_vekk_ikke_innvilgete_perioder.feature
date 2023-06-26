@@ -38,6 +38,51 @@ Egenskap: Vedtaksperioder med mor og to barn
       | 01.07.2021 |            | Opphør             | Første opphør  |
 
 
+  Scenario: Skal ikke fjerne perioder når siste periode er ikke-innvilget
+
+    Og lag personresultater for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
+      | AktørId | Vilkår                                                          | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag |
+      | 1234    | BOSATT_I_RIKET, LOVLIG_OPPHOLD                                  | 11.01.1970 |            | Oppfylt  |                      |
+      | 3456    | GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD, BOR_MED_SØKER | 13.04.2020 |            | Oppfylt  |                      |
+      | 3456    | UNDER_18_ÅR                                                     | 13.04.2020 | 12.04.2038 | Oppfylt  |                      |
+
+
+    Og med andeler tilkjent ytelse
+      | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
+      | 3456    | 01.05.2020 | 31.03.2038 | 1054  | 1            |
+
+    Når vedtaksperioder med begrunnelser genereres for behandling 1
+
+    Så forvent følgende vedtaksperioder med begrunnelser
+      | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar      |
+      | 01.05.2020 | 31.03.2038 | Utbetaling         | Barn1 og søker |
+      | 01.04.2038 |            | Opphør             | Første opphør  |
+
+
+  Scenario: Skal ikke fjerne perioder når det kun er innvilgete perioder
+
+    Og lag personresultater for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
+      | AktørId | Vilkår                                                          | Fra dato   | Til dato   | Resultat | Er eksplisitt avslag |
+      | 1234    | BOSATT_I_RIKET, LOVLIG_OPPHOLD                                  | 11.01.1970 |            | Oppfylt  |                      |
+      | 3456    | GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD, BOR_MED_SØKER | 13.04.2020 |            | Oppfylt  |                      |
+      | 3456    | UNDER_18_ÅR                                                     | 13.04.2020 | 12.04.2038 | Oppfylt  |                      |
+
+
+    Og med andeler tilkjent ytelse
+      | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
+      | 3456    | 01.05.2020 | 31.03.2038 | 1054  | 1            |
+
+    Når vedtaksperioder med begrunnelser genereres for behandling 1
+
+    Så forvent følgende vedtaksperioder med begrunnelser
+      | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar      |
+      | 01.05.2020 | 31.03.2038 | Utbetaling         | Barn1 og søker |
+      | 01.04.2038 |            | Opphør             | Første opphør  |
+
+
+
 
 
 
