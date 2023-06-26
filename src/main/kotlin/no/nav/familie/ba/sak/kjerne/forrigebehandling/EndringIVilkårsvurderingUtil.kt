@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringUtil.tilFørsteEndr
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilForskjøvetTidslinjeForOppfyltVilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -70,8 +71,25 @@ object EndringIVilkårsvurderingUtil {
         // Denne koden er ikke i bruk i prod og skal fjernes når denne toggelen:
         // https://unleash.nais.io/#/features/strategies/familie-ba-sak.endringstidspunkt
         // har levd lenge nok
-        val nåværendeVilkårResultatTidslinje = nåværendeOppfylteVilkårResultater.tilForskjøvetTidslinjeForOppfyltVilkår(vilkår, nåværendeOppfylteVilkårResultater.mapNotNull { it.periodeFom }.minOrNull())
-        val tidligereVilkårResultatTidslinje = forrigeOppfylteVilkårResultater.tilForskjøvetTidslinjeForOppfyltVilkår(vilkår, forrigeOppfylteVilkårResultater.mapNotNull { it.periodeFom }.minOrNull())
+        val nåværendeVilkårResultatTidslinje =
+            if (nåværendeOppfylteVilkårResultater.isNotEmpty()) {
+                nåværendeOppfylteVilkårResultater.tilForskjøvetTidslinjeForOppfyltVilkår(
+                    vilkår = vilkår,
+                    fødselsdatoBarn = nåværendeOppfylteVilkårResultater.mapNotNull { it.periodeFom }.minOrNull(),
+                )
+            } else {
+                tidslinje { emptyList() }
+            }
+
+        val tidligereVilkårResultatTidslinje =
+            if (forrigeOppfylteVilkårResultater.isNotEmpty()) {
+                forrigeOppfylteVilkårResultater.tilForskjøvetTidslinjeForOppfyltVilkår(
+                    vilkår = vilkår,
+                    fødselsdatoBarn = forrigeOppfylteVilkårResultater.mapNotNull { it.periodeFom }.minOrNull(),
+                )
+            } else {
+                tidslinje { emptyList() }
+            }
 
         val endringIVilkårResultat =
             nåværendeVilkårResultatTidslinje.kombinerUtenNullMed(tidligereVilkårResultatTidslinje) { nåværende, forrige ->
