@@ -71,11 +71,16 @@ data class PersonopplysningGrunnlag(
             .toYearMonth() == (fom?.toYearMonth() ?: TIDENES_ENDE.toYearMonth())
     }
 
-    fun tilKopiForNyBehandling(behandling: Behandling): PersonopplysningGrunnlag =
-        copy(id = 0, behandlingId = behandling.id, personer = mutableSetOf()).also {
-            it.personer.addAll(
-                personer.map { person -> person.tilKopiForNyttPersonopplysningGrunnlag(it) },
-            )
+    fun tilKopiForNyBehandling(
+        behandling: Behandling,
+        søkerOgBarnMedTilkjentYtelseFraForrigeBehandling: List<Aktør>,
+    ): PersonopplysningGrunnlag =
+        copy(id = 0, behandlingId = behandling.id, personer = mutableSetOf()).also { it ->
+            it.personer
+                .addAll(
+                    personer.filter { person -> søkerOgBarnMedTilkjentYtelseFraForrigeBehandling.any { søkerEllerBarn -> søkerEllerBarn.aktørId == person.aktør.aktørId } }
+                        .map { person -> person.tilKopiForNyttPersonopplysningGrunnlag(it) },
+                )
         }
 
     override fun toString(): String {

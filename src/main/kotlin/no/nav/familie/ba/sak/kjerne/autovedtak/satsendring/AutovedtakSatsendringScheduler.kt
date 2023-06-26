@@ -11,16 +11,20 @@ class AutovedtakSatsendringScheduler(
 ) {
     @Scheduled(cron = CRON_HVERT_10_MIN_UKEDAG)
     fun triggSatsendringJuli2023() {
+        startSatsendring(1200)
+    }
+
+    private fun startSatsendring(antallFagsaker: Int) {
         if (LeaderClient.isLeader() == true) {
             logger.info("Starter schedulert jobb for satsendring juli 2023")
             startSatsendring.startSatsendring(
-                antallFagsaker = 1200,
+                antallFagsaker = antallFagsaker,
             )
         }
     }
+
     companion object {
         val logger = LoggerFactory.getLogger(AutovedtakSatsendringScheduler::class.java)
-        const val CRON_HVERT_10_MIN_UKEDAG = "0 */10 6-20 * * MON-FRI"
-        const val CRON_KL_7_OG_14_UKEDAGER = "0 0 7,14 * * MON-FRI"
+        const val CRON_HVERT_10_MIN_UKEDAG = "0 */10 7-18 * * MON-FRI"
     }
 }

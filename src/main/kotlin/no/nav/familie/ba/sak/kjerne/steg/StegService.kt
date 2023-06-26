@@ -90,7 +90,6 @@ class StegService(
         val behandling = behandlingService.opprettBehandling(nyBehandling)
 
         val barnasIdenter: List<String> = when (nyBehandling.behandlingÅrsak) {
-            BehandlingÅrsak.MIGRERING,
             BehandlingÅrsak.FØDSELSHENDELSE,
             BehandlingÅrsak.HELMANUELL_MIGRERING,
             -> {
@@ -317,7 +316,7 @@ class StegService(
             simuleringService.harMigreringsbehandlingManuellePosteringer(behandling)
         }
 
-        if (behandlingEtterBeslutterSteg.erManuellMigrering() && harMigreringsbehandlingAvvikInnenforbeløpsgrenser && !harMigreringsbehandlingManuellePosteringer) {
+        if ((behandlingEtterBeslutterSteg.erHelmanuellMigrering() && harMigreringsbehandlingAvvikInnenforbeløpsgrenser && !harMigreringsbehandlingManuellePosteringer) || behandlingEtterBeslutterSteg.erManuellMigreringForEndreMigreringsdato()) {
             return håndterBeslutningForVedtak(
                 behandlingEtterBeslutterSteg,
                 RestBeslutningPåVedtak(Beslutning.GODKJENT),
