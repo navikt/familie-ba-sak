@@ -1052,7 +1052,7 @@ class StegServiceIntegrationTest(
     }
 
     @Test
-    fun `skal kjøre gjennom steg for endre migreringsdato behandling`() {
+    fun `skal kjøre gjennom steg for endre migreringsdato behandling og automatisk godkjenne totrinnskontroll`() {
         val simulertPosteringMock = listOf(
             SimulertPostering(
                 fagOmrådeKode = FagOmrådeKode.BARNETRYGD_INFOTRYGD_MANUELT,
