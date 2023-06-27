@@ -8,15 +8,12 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerInstitusjonOgVerge
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.validerBehandlingIkkeSendtTilEksterneTjenester
 import no.nav.familie.ba.sak.kjerne.behandling.Behandlingutils.validerhenleggelsestype
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatSteg
-import no.nav.familie.ba.sak.kjerne.brev.mottaker.BrevmottakerService
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlerRolle
 import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
@@ -46,9 +43,7 @@ class BehandlingStegController(
     private val stegService: StegService,
     private val tilgangService: TilgangService,
     private val featureToggleService: FeatureToggleService,
-    private val brevmottakerService: BrevmottakerService,
-    private val persongrunnlagService: PersongrunnlagService,
-    private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
+    private val behandlingValideringService: BehandlingValideringService,
 ) {
 
     @PostMapping(
@@ -146,7 +141,7 @@ class BehandlingStegController(
         )
 
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
-        validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(behandlingId = behandling.id)
+        behandlingValideringService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(behandlingId = behandling.id)
 
         stegService.håndterSendTilBeslutter(behandling, behandlendeEnhet)
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
@@ -206,7 +201,7 @@ class BehandlingStegController(
         }
     }
 
-    private fun validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(behandlingId: Long) {
+    /* private fun validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(behandlingId: Long) {
         val brevmottakere = brevmottakerService.hentBrevmottakere(behandlingId)
         val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandlingId)
         val personer = personopplysningGrunnlag?.søkerOgBarn
@@ -218,7 +213,7 @@ class BehandlingStegController(
             val frontendFeilmelding = "Behandlingen inneholder personer med strengt fortrolig adressebeskyttelse (" + kommaSeparertListeAvStrengtFortroligIdenter + ") og kan ikke kombineres med manuelle brevmottakere."
             throw FunksjonellFeil(melding, frontendFeilmelding)
         }
-    }
+    } */
 
     @PostMapping(path = ["registrer-institusjon-og-verge"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun registerInstitusjonOgVerge(

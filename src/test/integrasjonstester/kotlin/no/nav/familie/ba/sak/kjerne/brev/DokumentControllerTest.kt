@@ -38,6 +38,7 @@ class DokumentControllerTest(
             persongrunnlagService = mockk(relaxed = true),
             arbeidsfordelingService = mockk(relaxed = true),
             utvidetBehandlingService = mockk(relaxed = true),
+            behandlingValideringService = mockk(relaxed = true),
         )
 
     @Test
