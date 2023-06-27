@@ -168,6 +168,7 @@ fun lagBehandling(
     resultat: Behandlingsresultat = Behandlingsresultat.IKKE_VURDERT,
     underkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
     status: BehandlingStatus = initStatus(),
+    aktivertTid: LocalDateTime = LocalDateTime.now(),
 ) =
     Behandling(
         id = nesteBehandlingId(),
@@ -179,6 +180,7 @@ fun lagBehandling(
         opprettetÅrsak = årsak,
         resultat = resultat,
         status = status,
+        aktivertTidspunkt = aktivertTid,
     ).also {
         it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, førsteSteg))
     }
