@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringUtil.tilFørsteEndr
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilForskjøvetTidslinjeForOppfyltVilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
@@ -66,8 +67,29 @@ object EndringIVilkårsvurderingUtil {
         forrigeOppfylteVilkårResultater: List<VilkårResultat>,
         vilkår: Vilkår,
     ): Tidslinje<Boolean, Måned> {
-        val nåværendeVilkårResultatTidslinje = nåværendeOppfylteVilkårResultater.tilForskjøvetTidslinjeForOppfyltVilkår(vilkår)
-        val tidligereVilkårResultatTidslinje = forrigeOppfylteVilkårResultater.tilForskjøvetTidslinjeForOppfyltVilkår(vilkår)
+        // Antar fødselsdato er første oppfylte fom for 18-årsvilkåret.
+        // Denne koden er ikke i bruk i prod og skal fjernes når denne toggelen:
+        // https://unleash.nais.io/#/features/strategies/familie-ba-sak.endringstidspunkt
+        // har levd lenge nok
+        val nåværendeVilkårResultatTidslinje =
+            if (nåværendeOppfylteVilkårResultater.isNotEmpty()) {
+                nåværendeOppfylteVilkårResultater.tilForskjøvetTidslinjeForOppfyltVilkår(
+                    vilkår = vilkår,
+                    fødselsdato = nåværendeOppfylteVilkårResultater.mapNotNull { it.periodeFom }.minOrNull(),
+                )
+            } else {
+                tidslinje { emptyList() }
+            }
+
+        val tidligereVilkårResultatTidslinje =
+            if (forrigeOppfylteVilkårResultater.isNotEmpty()) {
+                forrigeOppfylteVilkårResultater.tilForskjøvetTidslinjeForOppfyltVilkår(
+                    vilkår = vilkår,
+                    fødselsdato = forrigeOppfylteVilkårResultater.mapNotNull { it.periodeFom }.minOrNull(),
+                )
+            } else {
+                tidslinje { emptyList() }
+            }
 
         val endringIVilkårResultat =
             nåværendeVilkårResultatTidslinje.kombinerUtenNullMed(tidligereVilkårResultatTidslinje) { nåværende, forrige ->

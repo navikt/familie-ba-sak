@@ -106,6 +106,7 @@ spec:
         - host: familie-ba-infotrygd-feed.prod-fss-pub.nais.io
         - host: sdw-wsrest.ecb.europa.eu
         - host: sentry.gc.nav.no
+        - host: data-api.ecb.europa.eu
   replicas:
     min: 3
     max: 5
