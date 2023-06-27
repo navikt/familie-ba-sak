@@ -238,11 +238,7 @@ fun hentNesteSteg(
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
                 BEHANDLINGSRESULTAT -> VURDER_TILBAKEKREVING
-                VURDER_TILBAKEKREVING -> if (!behandling.skalBehandlesAutomatisk) {
-                    SEND_TIL_BESLUTTER
-                } else {
-                    FERDIGSTILLE_BEHANDLING
-                }
+                VURDER_TILBAKEKREVING -> SEND_TIL_BESLUTTER
                 SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
                 BESLUTTE_VEDTAK -> FERDIGSTILLE_BEHANDLING
                 FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
