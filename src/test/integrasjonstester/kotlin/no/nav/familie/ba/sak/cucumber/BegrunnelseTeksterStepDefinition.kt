@@ -68,20 +68,13 @@ class BegrunnelseTeksterStepDefinition {
 
     @Og("legg til nye vilkårresultater for begrunnelse for behandling {}")
     fun `legg til nye vilkårresultater for behandling`(behandlingId: Long, dataTable: DataTable) {
-        val vilkårPerPerson = dataTable.asMaps().groupBy { VedtaksperiodeMedBegrunnelserParser.parseAktørId(it) }
-        val personResultatForBehandling =
-            personResultater[behandlingId] ?: error("Finner ikke personresultater for behandling med id $behandlingId")
-        personResultater[behandlingId] = personResultatForBehandling.map { personResultat ->
-            val vilkårPerPerson = vilkårPerPerson[personResultat.aktør.aktørId]
+        val vilkårResultaterPerPerson =
+            dataTable.asMaps().groupBy { VedtaksperiodeMedBegrunnelserParser.parseAktørId(it) }
+        val personResultatForBehandling = personResultater[behandlingId]
+            ?: error("Finner ikke personresultater for behandling med id $behandlingId")
 
-            personResultat.vilkårResultater.forEach { vilkårResultat ->
-                oppdaterVilkårResultat(
-                    vilkårResultat,
-                    vilkårPerPerson,
-                )
-            }
-            personResultat
-        }.toSet()
+        personResultater[behandlingId] =
+            leggTilVilkårResultatPåPersonResultat(personResultatForBehandling, vilkårResultaterPerPerson, behandlingId)
     }
 
     @Og("med kompetanser for begrunnelse")
