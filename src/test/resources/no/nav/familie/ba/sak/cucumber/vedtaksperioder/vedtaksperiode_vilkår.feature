@@ -47,22 +47,22 @@ Egenskap: Vedtaksperioder med mor og et barn
       | 1234    | BOSATT_I_RIKET                                                  | 11.01.1970 |            | Oppfylt      |                      |
       | 1234    | LOVLIG_OPPHOLD                                                  | 11.01.2020 | 05.05.2022 | Oppfylt      |                      |
       | 1234    | LOVLIG_OPPHOLD                                                  |            |            | ikke_oppfylt | Ja                   |
-      | 3456    | UNDER_18_ÅR                                                     | 13.01.2020 | 12.04.2038 | Oppfylt      |                      |
-      | 3456    | GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD, BOR_MED_SØKER | 13.01.2020 |            | Oppfylt      |                      |
+      | 3456    | UNDER_18_ÅR                                                     | 13.04.2020 | 12.04.2038 | Oppfylt      |                      |
+      | 3456    | GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD, BOR_MED_SØKER | 13.04.2020 |            | Oppfylt      |                      |
 
 
     Og med andeler tilkjent ytelse
       | AktørId | Fra dato   | Til dato   | Beløp | BehandlingId |
-      | 1234    | 01.01.2020 | 31.03.2038 | 1354  | 1            |
-      | 3456    | 01.01.2020 | 31.03.2038 | 1354  | 1            |
+      | 1234    | 01.05.2020 | 31.03.2038 | 1354  | 1            |
+      | 3456    | 01.05.2020 | 31.03.2038 | 1354  | 1            |
 
     Når vedtaksperioder med begrunnelser genereres for behandling 1
 
     Så forvent følgende vedtaksperioder med begrunnelser
       | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar                         |
-      | 01.02.2020 | 31.05.2022 | Utbetaling         | Barn og søker                     |
-      | 01.06.2022 | 31.12.2037 | Opphør             | Lovlig opphold opphører for søker |
-      | 01.01.2038 |            | Opphør             | Under 18 opphører                 |
+      | 01.05.2020 | 31.05.2022 | Utbetaling         | Barn og søker                     |
+      | 01.06.2022 | 31.03.2038 | Opphør             | Lovlig opphold opphører for søker |
+      | 01.04.2038 |            | Opphør             | Under 18 opphører                 |
       |            |            | Avslag             | Generelt avslag lovlig opphold    |
 
 
@@ -71,7 +71,7 @@ Egenskap: Vedtaksperioder med mor og et barn
     Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                                          | Fra dato   | Til dato   | Resultat     | Er eksplisitt avslag |
       | 1234    | BOSATT_I_RIKET, LOVLIG_OPPHOLD                                  | 11.01.1970 |            | Oppfylt      |                      |
-      | 3456    | UNDER_18_ÅR                                                     | 13.01.2020 | 12.04.2038 | Oppfylt      |                      |
+      | 3456    | UNDER_18_ÅR                                                     | 13.04.2020 | 12.04.2038 | Oppfylt      |                      |
       | 3456    | GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD, BOR_MED_SØKER | 13.01.2020 |            | Oppfylt      |                      |
       | 3456    | BOR_MED_SØKER                                                   |            |            | ikke_oppfylt | Ja                   |
 
@@ -85,8 +85,8 @@ Egenskap: Vedtaksperioder med mor og et barn
 
     Så forvent følgende vedtaksperioder med begrunnelser
       | Fra dato   | Til dato   | Vedtaksperiodetype | Kommentar     |
-      | 01.02.2020 | 31.12.2037 | Utbetaling         | Barn og søker |
-      | 01.01.2038 |            | Opphør             | Barn og søker |
+      | 01.05.2020 | 31.03.2038 | Utbetaling         | Barn og søker |
+      | 01.04.2038 |            | Opphør             | Barn og søker |
       |            |            | Avslag             | Barn og søker |
 
   Scenario: Skal lage vedtaksperioder for mor med ett barn med vilkår - barn flytter til søker etter 1 år
