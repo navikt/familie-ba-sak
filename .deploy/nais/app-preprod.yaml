@@ -68,8 +68,6 @@ spec:
           cluster: dev-gcp
         - application: familie-ba-skatteetaten-api
           cluster: dev-gcp
-        - application: familie-ba-migrering
-          cluster: dev-gcp
         - application: familie-klage
           cluster: dev-gcp
         - application: familie-ba-statistikk
@@ -96,8 +94,6 @@ spec:
         - application: familie-ef-sak
           cluster: dev-gcp
         - application: familie-tilbake
-          cluster: dev-gcp
-        - application: familie-ba-migrering
           cluster: dev-gcp
         - application: familie-oppdrag
           cluster: dev-fss

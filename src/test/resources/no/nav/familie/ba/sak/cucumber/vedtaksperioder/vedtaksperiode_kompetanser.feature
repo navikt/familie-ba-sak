@@ -15,11 +15,11 @@ Egenskap: Vedtaksperioder med kompetanser
 
   Scenario: Skal lage vedtaksperioder for mor med ett barn med kompetanser
     Og lag personresultater for behandling 1
-    Og med overstyring av vilkår for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                                          | Fra dato   | Til dato   | Resultat |
-      | 1234     | BOSATT_I_RIKET, LOVLIG_OPPHOLD                                  | 11.01.1970 |            | Oppfylt  |
-      | 3456     | UNDER_18_ÅR                                                     | 13.04.2020 | 12.04.2038 | Oppfylt  |
-      | 3456     | BOR_MED_SØKER, GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD | 13.04.2020 |            | Oppfylt  |
+      | 1234    | BOSATT_I_RIKET, LOVLIG_OPPHOLD                                  | 11.01.1970 |            | Oppfylt  |
+      | 3456    | UNDER_18_ÅR                                                     | 13.04.2020 | 12.04.2038 | Oppfylt  |
+      | 3456    | BOR_MED_SØKER, GIFT_PARTNERSKAP, BOSATT_I_RIKET, LOVLIG_OPPHOLD | 13.04.2020 |            | Oppfylt  |
 
     Og med kompetanser
       | AktørId | Fra dato   | Til dato   | Resultat              |BehandlingId |
@@ -42,12 +42,11 @@ Egenskap: Vedtaksperioder med kompetanser
   Scenario: Skal kunne ha kompetanse uten tom
 
     Og lag personresultater for behandling 1
-    Og med overstyring av vilkår for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                                          | Fra dato   | Til dato   | Resultat |
       | 1234    | BOSATT_I_RIKET, LOVLIG_OPPHOLD                                  | 11.10.1987 |            | Oppfylt  |
       | 3456    | BOSATT_I_RIKET, BOR_MED_SØKER, LOVLIG_OPPHOLD, GIFT_PARTNERSKAP | 04.09.2020 |            | Oppfylt  |
       | 3456    | UNDER_18_ÅR                                                     | 04.09.2020 | 03.09.2038 | Oppfylt  |
-
 
     Og med kompetanser
       | AktørId | Fra dato   | Til dato | Resultat              | BehandlingId |

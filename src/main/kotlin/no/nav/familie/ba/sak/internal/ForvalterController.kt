@@ -1,27 +1,13 @@
 package no.nav.familie.ba.sak.internal
 
 import no.nav.familie.ba.sak.common.secureLogger
-import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
-import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdBarnetrygdClient
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
-import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.RestartAvSmåbarnstilleggService
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.behandling.NyBehandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfoRepository
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
-import no.nav.familie.ba.sak.kjerne.steg.StegService
-import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
-import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
+import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
 import no.nav.familie.kontrakter.felles.oppgave.OppgaveIdentV2
@@ -42,9 +28,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.YearMonth
 import java.time.format.DateTimeFormatter
-import kotlin.collections.LinkedHashSet
 
 @RestController
 @RequestMapping("/api/forvalter")
@@ -55,15 +39,8 @@ class ForvalterController(
     private val restartAvSmåbarnstilleggService: RestartAvSmåbarnstilleggService,
     private val forvalterService: ForvalterService,
     private val oppgaveService: OppgaveService,
-    private val behandlingMigreringsinfoRepository: BehandlingMigreringsinfoRepository,
-    private val infotrygdBarnetrygdClient: InfotrygdBarnetrygdClient,
-    private val hentOgPersisterService: BehandlingHentOgPersisterService,
-    private val stegService: StegService,
-    private val fagsakService: FagsakService,
-    private val behandlingService: BehandlingService,
-    private val taskRepository: TaskRepositoryWrapper,
-    private val autovedtakService: AutovedtakService,
-    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
+    private val behandlingRepository: BehandlingRepository,
+    private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
 ) {
     private val logger: Logger = LoggerFactory.getLogger(ForvalterController::class.java)
 
@@ -86,6 +63,93 @@ class ForvalterController(
             )
         }
         return ResponseEntity.ok("Ferdigstill oppgaver kjørt. Antall som ikke ble ferdigstilt: $antallFeil")
+    }
+
+    data class KopiertFagsakInfo(
+        val fagsakId: Long,
+        val feil: String = "",
+        val trengerNyBehandling: Boolean = true,
+    )
+
+    data class KopierteEUAFagsakerRespons(
+        val feilet: List<Long>,
+        val kopierte: List<Long>,
+        val fagsakerSomIkkeTrengerNyBehandling: List<Long>,
+        val kopierteFagsakerInfo: List<KopiertFagsakInfo>,
+    )
+
+    @PostMapping(
+        path = ["/kopier-eua-satsendring/{skalKopiere}"],
+        consumes = [MediaType.APPLICATION_JSON_VALUE],
+        produces = [MediaType.APPLICATION_JSON_VALUE],
+    )
+    fun kopierEndretUtbetalingAndelerFraForrigeBehandling(
+        @RequestBody fagsakListe: List<Long>,
+        @PathVariable skalKopiere: Boolean = false,
+    ): ResponseEntity<KopierteEUAFagsakerRespons> {
+        val kopierteFagsakerInfo = mutableListOf<KopiertFagsakInfo>()
+        fagsakListe.parallelStream().forEach { fagsakId ->
+            try {
+                val behandlinger = behandlingRepository.finnBehandlinger(fagsakId)
+                val sorterteVedtatteBehandlinger = behandlinger
+                    .filter { it.steg == StegType.BEHANDLING_AVSLUTTET && !it.erHenlagt() }
+                    .sortedByDescending { it.aktivertTidspunkt }
+
+                val sisteVedtatteBehandling = sorterteVedtatteBehandlinger[0]
+                val nestSisteVedtatteBehandling = sorterteVedtatteBehandlinger[1]
+
+                if (!sisteVedtatteBehandling.erSatsendring() && sisteVedtatteBehandling.opprettetTidspunkt > LocalDate.of(
+                        2023,
+                        6,
+                        19,
+                    ).atStartOfDay()
+                ) {
+                    throw Exception("Det er gjennomført en ny behandling etter satsendring som har tatt med seg feilen videre. Fagsak $fagsakId, Behandling $sisteVedtatteBehandling.")
+                }
+
+                val sisteEndreteUtbetalingsAndeler =
+                    endretUtbetalingAndelRepository.findByBehandlingId(sisteVedtatteBehandling.id)
+
+                val nestSisteEndreteUtbetalingsAndeler =
+                    endretUtbetalingAndelRepository.findByBehandlingId(nestSisteVedtatteBehandling.id)
+
+                if (sisteEndreteUtbetalingsAndeler.isNotEmpty() || nestSisteEndreteUtbetalingsAndeler.isEmpty()) {
+                    logger.info("Siste behandling har allerede EUA eller nest siste har ingen EUA og vi trenger ikke å kopiere. Fagsak $fagsakId")
+                    kopierteFagsakerInfo.add(KopiertFagsakInfo(fagsakId = fagsakId, trengerNyBehandling = false))
+                } else {
+                    logger.info("Kopierer EndretUtbetalingAndel fra behandling $nestSisteVedtatteBehandling til $sisteVedtatteBehandling.")
+
+                    if (skalKopiere) {
+                        forvalterService.kopierEndretUtbetalingFraForrigeBehandling(
+                            sisteVedtatteBehandling = sisteVedtatteBehandling,
+                            nestSisteVedtatteBehandling = nestSisteVedtatteBehandling,
+                        )
+                    }
+                    kopierteFagsakerInfo.add(KopiertFagsakInfo(fagsakId = fagsakId))
+                }
+            } catch (exception: Exception) {
+                logger.warn(exception.message)
+                logger.warn("Feil ved kopiering av EndretUtbetalingAndel fra nest siste behandling. Fagsak $fagsakId.")
+                kopierteFagsakerInfo.add(
+                    KopiertFagsakInfo(
+                        fagsakId = fagsakId,
+                        exception.message
+                            ?: "Feil ved kopiering av EndretUtbetalingAndel fra nest siste behandling. Fagsak $fagsakId.",
+                    ),
+                )
+            }
+        }
+
+        return ResponseEntity.ok(
+            KopierteEUAFagsakerRespons(
+                feilet = kopierteFagsakerInfo.filter { it.feil.isNotEmpty() }.map { it.fagsakId },
+                kopierte = kopierteFagsakerInfo.filter { it.feil.isEmpty() && it.trengerNyBehandling }
+                    .map { it.fagsakId },
+                fagsakerSomIkkeTrengerNyBehandling = kopierteFagsakerInfo.filter { !it.trengerNyBehandling }
+                    .map { it.fagsakId },
+                kopierteFagsakerInfo = kopierteFagsakerInfo,
+            ),
+        )
     }
 
     @PostMapping(
@@ -204,181 +268,17 @@ class ForvalterController(
         return ResponseEntity.ok("OK")
     }
 
-    /**
-     *   Steg 1 i å fikse NAV-12506. Denne identifiserer alle saker som man kan fikse automatisk.
-     *
-     *   Skal slettes etter opprydding ferdig
-     */
-    @PostMapping(path = ["/nav-12506/finn-mangelfull-migrering"])
-    fun identifiserMigreringUtenSatsAlleMåneder(): ResponseEntity<Map<String, Set<Long>>> {
-        val årMånedMedMuligMigreringsfeil = YearMonth.of(2023, 3)
-
-        val muligeMigreringerMedManglendeSats = behandlingMigreringsinfoRepository.finnMuligeMigreringerMedManglendeSats(årMånedMedMuligMigreringsfeil.atDay(1))
-        logger.info("Fant ${muligeMigreringerMedManglendeSats.size} saker med mulig manglende sats:  $muligeMigreringerMedManglendeSats")
-
-        val sakerSomKanFikses = muligeMigreringerMedManglendeSats.fold(Pair(LinkedHashSet<Long>(), LinkedHashSet<Long>())) { accumulator, fagsakId ->
-            try {
-                validerAtFagsakKanFiksesAutomatisk(fagsakId, årMånedMedMuligMigreringsfeil)
-                accumulator.first.add(fagsakId)
-            } catch (e: IllegalStateException) {
-                logger.info("Ignorerer automatisk fiks for fagsakId=$fagsakId pga: ${e.message}")
-                if (e.message == "Siste aktive behandling er ENDRE_MIGRERINGSDATO") {
-                    accumulator.second.add(fagsakId)
-                }
-            }
-            accumulator
-        }
-
-        val returnMap = mutableMapOf<String, Set<Long>>()
-        if (sakerSomKanFikses.first.isNotEmpty()) {
-            returnMap["trengerEndreMigreringsdato"] = sakerSomKanFikses.first
-        }
-        if (sakerSomKanFikses.second.isNotEmpty()) {
-            returnMap["harEndreMigreringsdato"] = sakerSomKanFikses.second
-        }
-
-        return ResponseEntity.ok(returnMap)
-    }
-
-    /**
-     *   Steg 2 i å fikse NAV-12506. Denne oppretter endre migreringsdato for behandlinger. Må kjøres for de fagsakene
-     *   som ligger i trengerEndreMigreringsdato returnert i Steg 1
-     *
-     *   Skal slettes etter opprydding ferdig
-     */
-    @PostMapping("/nav-12506/opprett-endremigreringsdato-behandling")
-    @Transactional
-    fun opprettEndreMigreringsdatoFor(@RequestBody fagsakListe: List<Long>) {
-        fagsakListe.forEach { fagsakId ->
-            try {
-                hentOgPersisterService.finnAktivForFagsak(fagsakId).let {
-                    if (it == null) error("Fant ikke aktiv behandling")
-
-                    validerIkkeDeltBostedEllerSmåbarnstillegg(it)
-                }
-                opprettetEndreMigreringsdatobehandlingSimulerOgFerdistill(fagsakId)
-            } catch (e: Exception) {
-                logger.warn("Klarte ikke å opprette endre migreringsbehandling på fagsakId=$fagsakId", e)
-            }
-        }
-    }
-
-    /**
-     *   Steg 3 i å fikse NAV-12506. Denne kjører satsendring på fagsaker. Må kjøres på de som kjørte uten problemer i
-     *   steg 2 og de fagsakene med harEndreMigreringsdato i Steg 1
-     *
-     *   Skal slettes etter opprydding ferdig
-     */
-    @PostMapping("/nav-12506/kjor-satsendring")
+    @PostMapping("/kjor-satsendring-uten-validering")
     @Transactional
     fun kjørSatsendringFor(@RequestBody fagsakListe: List<Long>) {
-        fagsakListe.forEach { fagsakId ->
+        fagsakListe.parallelStream().forEach { fagsakId ->
             try {
-                val fagsak = fagsakService.hentPåFagsakId(fagsakId)
-
-                if (hentOgPersisterService.finnAktivForFagsak(fagsakId)?.opprettetÅrsak != BehandlingÅrsak.ENDRE_MIGRERINGSDATO) {
-                    error("Siste aktive behandling er ikke ENDRE_MIGRERINGSDATO")
-                }
-
-                val nyBehandling = stegService.håndterNyBehandling(
-                    NyBehandling(
-                        behandlingType = BehandlingType.REVURDERING,
-                        behandlingÅrsak = BehandlingÅrsak.SATSENDRING,
-                        søkersIdent = fagsak.aktør.aktivFødselsnummer(),
-                        skalBehandlesAutomatisk = true,
-                        fagsakId = fagsakId,
-                    ),
-                )
-
-                val behandlingEtterVilkårsvurdering =
-                    stegService.håndterVilkårsvurdering(nyBehandling)
-
-                val opprettetVedtak =
-                    autovedtakService.opprettToTrinnskontrollOgVedtaksbrevForAutomatiskBehandling(
-                        behandlingEtterVilkårsvurdering,
-                    )
-                behandlingService.oppdaterStatusPåBehandling(nyBehandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)
-                val task = IverksettMotOppdragTask.opprettTask(nyBehandling, opprettetVedtak, SikkerhetContext.hentSaksbehandler())
-                taskRepository.save(task)
+                logger.info("Kjører satsendring uten validering for $fagsakId")
+                forvalterService.kjørForenkletSatsendringFor(fagsakId)
             } catch (e: Exception) {
                 logger.warn("Klarte ikke kjøre satsendring for fagsakId=$fagsakId", e)
             }
         }
-    }
-
-    private fun opprettetEndreMigreringsdatobehandlingSimulerOgFerdistill(fagsakId: Long) {
-        val fagsak = fagsakService.hentPåFagsakId(fagsakId)
-
-        val nyBehandling = stegService.håndterNyBehandling(
-            NyBehandling(
-                behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                behandlingÅrsak = BehandlingÅrsak.ENDRE_MIGRERINGSDATO,
-                søkersIdent = fagsak.aktør.aktivFødselsnummer(),
-                skalBehandlesAutomatisk = true,
-                fagsakId = fagsakId,
-                nyMigreringsdato = LocalDate.of(2023, 2, 1),
-            ),
-        )
-
-        val behandlingEtterBehandlingsresultat = stegService.håndterVilkårsvurdering(nyBehandling)
-        val behandlingEtterSimulering = stegService.håndterVurderTilbakekreving(
-            behandlingEtterBehandlingsresultat,
-            null,
-        )
-        behandlingService.oppdaterStatusPåBehandling(nyBehandling.id, BehandlingStatus.IVERKSETTER_VEDTAK)
-        stegService.håndterFerdigstillBehandling(behandlingEtterSimulering)
-    }
-
-    private fun validerAtFagsakKanFiksesAutomatisk(fagsakId: Long, årMånedMedMuligMigreringsfeil: YearMonth) {
-        if (hentOgPersisterService.erÅpenBehandlingPåFagsak(fagsakId)) {
-            error("Fant åpen behandling")
-        }
-
-        val aktivBehandling =
-            hentOgPersisterService.finnAktivForFagsak(fagsakId) ?: error("Ingen aktiv behandling for fagsakId=$fagsakId")
-
-        if (aktivBehandling.fagsak.status != FagsakStatus.LØPENDE) {
-            error("Fagsak er ikke løpende")
-        }
-
-        if (aktivBehandling.opprettetÅrsak == BehandlingÅrsak.ENDRE_MIGRERINGSDATO) {
-            error("Siste aktive behandling er ENDRE_MIGRERINGSDATO")
-        }
-
-        if (aktivBehandling.opprettetÅrsak != BehandlingÅrsak.MIGRERING) {
-            error("Siste aktive behandling er ikke migreringsbehandling")
-        }
-
-        validerIkkeDeltBostedEllerSmåbarnstillegg(aktivBehandling)
-
-        val infotrygdSak =
-            infotrygdBarnetrygdClient.hentSaker(listOf(aktivBehandling.fagsak.aktør.aktivFødselsnummer()))
-        val migrertStønad =
-            infotrygdSak.bruker.firstOrNull { it.stønad?.opphørsgrunn == "5" }?.stønad ?: error("Finner ikke stønad som er migrert") // Stønaden som er migrert er
-
-        val virkningfom = 999999L - (
-            migrertStønad.virkningFom?.toLong()
-                ?: error("Mangler virkningFom")
-            ) // seq dato: 999999-797790 - 202209
-
-        val yearMonthSeqFomatter = DateTimeFormatter.ofPattern("yyyyMM")
-        val virkningfomDate = YearMonth.parse(virkningfom.toString(), yearMonthSeqFomatter)
-
-        if (virkningfomDate.isAfter(årMånedMedMuligMigreringsfeil)) {
-            error("Virkningfom i Infotrygd er etter dato med mulig feil. Bør fikses manuelt")
-        }
-    }
-
-    private fun validerIkkeDeltBostedEllerSmåbarnstillegg(behandling: Behandling) {
-        val harDeltBosted = tilkjentYtelseRepository.findByBehandling(behandling.id).andelerTilkjentYtelse.any {
-            it.erDeltBosted()
-        }
-        if (harDeltBosted) error("Behandling har delt bosted")
-
-        val harSmåbarnstillegg = tilkjentYtelseRepository.findByBehandling(behandling.id).andelerTilkjentYtelse.any {
-            it.erSmåbarnstillegg()
-        }
-        if (harSmåbarnstillegg) error("Behandling har småbarnstillegg")
     }
 }
 

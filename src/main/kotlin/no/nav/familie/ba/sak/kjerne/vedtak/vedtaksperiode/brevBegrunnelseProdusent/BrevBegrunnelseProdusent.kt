@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.månedPeriodeAv
 import no.nav.familie.ba.sak.kjerne.tidslinje.periodeAv
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
@@ -152,10 +153,11 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.finnBegrunnelseGrunnlagPerPerso
         grunnlagForVedtaksperioderForrigeBehandling?.utledGrunnlagTidslinjePerPerson()
 
     return grunnlagTidslinjePerPerson.mapValues { (aktørId, grunnlagTidslinje) ->
-        val grunnlagMedForrigePeriodeTidslinje = grunnlagTidslinje.tilForrigeOgNåværendePeriodeTidslinje()
+        val grunnlagMedForrigePeriodeTidslinje =
+            grunnlagTidslinje.grunnlagForPerson.tilForrigeOgNåværendePeriodeTidslinje()
 
         val grunnlagForrigeBehandlingTidslinje =
-            grunnlagTidslinjePerPersonForrigeBehandling?.get(aktørId) ?: TomTidslinje()
+            grunnlagTidslinjePerPersonForrigeBehandling?.get(aktørId)?.grunnlagForPerson ?: TomTidslinje()
 
         val grunnlagMedForrigePeriodeOgBehandlingTidslinje = tidslinjeMedVedtaksperioden.kombinerMed(
             grunnlagMedForrigePeriodeTidslinje,
@@ -178,7 +180,7 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.finnBegrunnelseGrunnlagPerPerso
 
 private fun UtvidetVedtaksperiodeMedBegrunnelser.tilTidslinjeForAktuellPeriode(): Tidslinje<UtvidetVedtaksperiodeMedBegrunnelser, Måned> {
     return listOf(
-        periodeAv(
+        månedPeriodeAv(
             fraOgMed = this.fom?.toYearMonth(),
             tilOgMed = this.tom?.toYearMonth(),
             innhold = this,
@@ -191,7 +193,7 @@ data class ForrigeOgDennePerioden(val forrige: GrunnlagForPerson?, val denne: Gr
 private fun Tidslinje<GrunnlagForPerson, Måned>.tilForrigeOgNåværendePeriodeTidslinje(): Tidslinje<ForrigeOgDennePerioden, Måned> {
     return (
         listOf(
-            periodeAv(YearMonth.now(), YearMonth.now(), null),
+            månedPeriodeAv(YearMonth.now(), YearMonth.now(), null),
         ) + this.perioder()
         ).zipWithNext { forrige, denne ->
         periodeAv(denne.fraOgMed, denne.tilOgMed, ForrigeOgDennePerioden(forrige.innhold, denne.innhold))
