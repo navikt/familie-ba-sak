@@ -67,8 +67,6 @@ spec:
           cluster: prod-gcp
         - application: familie-ba-skatteetaten-api
           cluster: prod-gcp
-        - application: familie-ba-migrering
-          cluster: prod-gcp
         - application: familie-klage
           cluster: prod-gcp
         - application: familie-ba-statistikk
@@ -92,8 +90,6 @@ spec:
         - application: familie-ef-sak
           cluster: prod-gcp
         - application: familie-tilbake
-          cluster: prod-gcp
-        - application: familie-ba-migrering
           cluster: prod-gcp
         - application: familie-oppdrag
           cluster: prod-fss
