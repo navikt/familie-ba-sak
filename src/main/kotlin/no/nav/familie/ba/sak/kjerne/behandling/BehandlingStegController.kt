@@ -148,7 +148,7 @@ class BehandlingStegController(
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(behandlingId = behandling.id)
 
-        // stegService.håndterSendTilBeslutter(behandling, behandlendeEnhet)
+        stegService.håndterSendTilBeslutter(behandling, behandlendeEnhet)
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
     }
 
