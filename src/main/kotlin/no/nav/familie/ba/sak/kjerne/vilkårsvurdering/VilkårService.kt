@@ -60,6 +60,8 @@ class VilkårService(
         val personResultat =
             finnPersonResultatForPersonThrows(vilkårsvurdering.personResultater, restPersonResultat.personIdent)
 
+        validerResultatBegrunnelse(restVilkårResultat)
+
         muterPersonVilkårResultaterPut(personResultat, restVilkårResultat)
 
         val vilkårResultat = personResultat.vilkårResultater.singleOrNull { it.id == vilkårId }
