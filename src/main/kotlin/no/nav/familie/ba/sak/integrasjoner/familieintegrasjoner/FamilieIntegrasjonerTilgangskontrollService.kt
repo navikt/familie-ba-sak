@@ -43,11 +43,11 @@ class FamilieIntegrasjonerTilgangskontrollService(
 
     fun hentIdenterMedStrengtFortroligAdressebeskyttelse(personIdenter: List<String>): List<String> {
         val adresseBeskyttelseBolk = systemOnlyPdlRestClient.hentAdressebeskyttelseBolk(personIdenter)
-        return adresseBeskyttelseBolk.filter {
-            it.person?.adressebeskyttelse?.any { adressebeskyttelse ->
+        return adresseBeskyttelseBolk.filter { (_, person) ->
+            person.adressebeskyttelse.any { adressebeskyttelse ->
                 adressebeskyttelse.gradering == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG ||
                     adressebeskyttelse.gradering == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG_UTLAND
-            } ?: false
-        }.map { it.ident }
+            }
+        }.map { it.key }
     }
 }
