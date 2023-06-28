@@ -23,7 +23,6 @@ import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatValid
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.logg.BehandlingLoggRequest
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
-import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
@@ -59,7 +58,6 @@ class BehandlingService(
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val taskRepository: TaskRepositoryWrapper,
     private val vilkårsvurderingService: VilkårsvurderingService,
-    private val simuleringService: SimuleringService,
 ) {
 
     @Transactional
@@ -302,17 +300,6 @@ class BehandlingService(
     fun deleteMigreringsdatoVedHenleggelse(behandlingId: Long) {
         behandlingMigreringsinfoRepository.findByBehandlingId(behandlingId)
             ?.let { behandlingMigreringsinfoRepository.delete(it) }
-    }
-
-    fun behandlingSkalAutomatiskBesluttes(behandling: Behandling): Boolean {
-        val harMigreringsbehandlingAvvikInnenforbeløpsgrenser by lazy {
-            simuleringService.harMigreringsbehandlingAvvikInnenforBeløpsgrenser(behandling)
-        }
-
-        val harMigreringsbehandlingManuellePosteringer by lazy {
-            simuleringService.harMigreringsbehandlingManuellePosteringer(behandling)
-        }
-        return (behandling.erHelmanuellMigrering() && harMigreringsbehandlingAvvikInnenforbeløpsgrenser && !harMigreringsbehandlingManuellePosteringer) || behandling.erManuellMigreringForEndreMigreringsdato()
     }
 
     companion object {
