@@ -308,7 +308,7 @@ class StegService(
             behandlingSteg.utførStegOgAngiNeste(behandling, behandlendeEnhet)
         }
 
-        if (behandlingService.skalAutomatiskBesluttes(behandling)) {
+        if (behandlingService.behandlingSkalAutomatiskBesluttes(behandling)) {
             return håndterBeslutningForVedtak(
                 behandlingEtterBeslutterSteg,
                 RestBeslutningPåVedtak(Beslutning.GODKJENT),

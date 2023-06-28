@@ -67,7 +67,7 @@ class SendTilBeslutter(
     ): StegType {
         totrinnskontrollService.opprettTotrinnskontrollMedSaksbehandler(behandling)
 
-        if (!behandlingService.skalAutomatiskBesluttes(behandling)) {
+        if (!behandlingService.behandlingSkalAutomatiskBesluttes(behandling)) {
             val godkjenneVedtakTask = OpprettOppgaveTask.opprettTask(
                 behandlingId = behandling.id,
                 oppgavetype = Oppgavetype.GodkjenneVedtak,

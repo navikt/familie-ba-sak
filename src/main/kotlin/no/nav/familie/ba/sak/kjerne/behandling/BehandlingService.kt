@@ -304,7 +304,7 @@ class BehandlingService(
             ?.let { behandlingMigreringsinfoRepository.delete(it) }
     }
 
-    fun skalAutomatiskBesluttes(behandling: Behandling): Boolean {
+    fun behandlingSkalAutomatiskBesluttes(behandling: Behandling): Boolean {
         val harMigreringsbehandlingAvvikInnenforbeløpsgrenser by lazy {
             simuleringService.harMigreringsbehandlingAvvikInnenforBeløpsgrenser(behandling)
         }
