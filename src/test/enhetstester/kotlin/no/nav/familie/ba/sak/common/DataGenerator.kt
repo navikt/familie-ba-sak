@@ -75,6 +75,7 @@ import no.nav.familie.ba.sak.kjerne.steg.domene.JournalførVedtaksbrevDTO
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.BarnetsBostedsland
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
@@ -168,6 +169,7 @@ fun lagBehandling(
     resultat: Behandlingsresultat = Behandlingsresultat.IKKE_VURDERT,
     underkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
     status: BehandlingStatus = initStatus(),
+    aktivertTid: LocalDateTime = LocalDateTime.now(),
 ) =
     Behandling(
         id = nesteBehandlingId(),
@@ -179,6 +181,7 @@ fun lagBehandling(
         opprettetÅrsak = årsak,
         resultat = resultat,
         status = status,
+        aktivertTidspunkt = aktivertTid,
     ).also {
         it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, førsteSteg))
     }
@@ -1049,6 +1052,7 @@ fun lagVilkårResultat(
     behandlingId: Long = lagBehandling().id,
     utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering> = emptyList(),
     erEksplisittAvslagPåSøknad: Boolean = false,
+    standardbegrunnelser: List<IVedtakBegrunnelse> = emptyList(),
 ) = VilkårResultat(
     personResultat = personResultat,
     vilkårType = vilkårType,
@@ -1059,6 +1063,7 @@ fun lagVilkårResultat(
     behandlingId = behandlingId,
     utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger,
     erEksplisittAvslagPåSøknad = erEksplisittAvslagPåSøknad,
+    standardbegrunnelser = standardbegrunnelser,
 )
 
 val guttenBarnesenFødselsdato = LocalDate.now().withDayOfMonth(10).minusYears(6)
