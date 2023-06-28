@@ -121,6 +121,7 @@ class VilkårResultat(
         periodeTom = restVilkårResultat.periodeTom
         begrunnelse = restVilkårResultat.begrunnelse
         resultat = restVilkårResultat.resultat
+        resultatBegrunnelse = restVilkårResultat.resultatBegrunnelse
         erAutomatiskVurdert = false
         erEksplisittAvslagPåSøknad = restVilkårResultat.erEksplisittAvslagPåSøknad
         oppdaterPekerTilBehandling()
@@ -210,10 +211,10 @@ enum class Regelverk {
 
 enum class ResultatBegrunnelse(
     val gyldigForVilkår: List<Vilkår>,
-    val gyldigIKombinasjonMedResultat: List<Resultat>
+    val gyldigIKombinasjonMedResultat: List<Resultat>,
 ) {
     IKKE_AKTUELT(
         gyldigForVilkår = listOf(Vilkår.LOVLIG_OPPHOLD),
-        gyldigIKombinasjonMedResultat = listOf(Resultat.OPPFYLT)
-    )
+        gyldigIKombinasjonMedResultat = listOf(Resultat.OPPFYLT),
+    ),
 }

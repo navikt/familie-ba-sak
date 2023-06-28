@@ -56,7 +56,7 @@ class VilkårService(
         val vilkårsvurdering = hentVilkårsvurderingThrows(behandlingId)
 
         val restVilkårResultat = restPersonResultat.vilkårResultater.singleOrNull { it.id == vilkårId }
-            ?: throw Feil("Fant ikke vilkårResultat med id $vilkårId ved opppdatering av vikår")
+            ?: throw Feil("Fant ikke vilkårResultat med id $vilkårId ved opppdatering av vilkår")
         val personResultat =
             finnPersonResultatForPersonThrows(vilkårsvurdering.personResultater, restPersonResultat.personIdent)
 
