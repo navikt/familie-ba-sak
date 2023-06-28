@@ -24,6 +24,7 @@ class EndringstidspunktService(
     private val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
     private val vilkårsvurderingService: VilkårsvurderingService,
 ) {
+    @Deprecated("Skal bruke VedtaksperiodeService.finnEndringstidspunktForBehandling()")
     fun finnEndringstidspunktForBehandling(behandlingId: Long): LocalDate {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 
