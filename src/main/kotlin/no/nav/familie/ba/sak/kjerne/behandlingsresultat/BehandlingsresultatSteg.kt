@@ -196,6 +196,7 @@ class BehandlingsresultatSteg(
                 ?: throw FunksjonellFeil("Kan ikke kjøre satsendring når det ikke finnes en tidligere behandling på fagsaken")
         val andelerFraForrigeBehandling =
             andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = forrigeBehandling.id)
+        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(tilkjentYtelse.behandling.id)
 
         validerAtSatsendringKunOppdatererSatsPåEksisterendePerioder(
             andelerFraForrigeBehandling = andelerFraForrigeBehandling,
