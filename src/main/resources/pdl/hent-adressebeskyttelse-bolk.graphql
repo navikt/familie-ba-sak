@@ -1,4 +1,4 @@
-query($identer: [ID!]!) {hentPersonBolk(identer: $identer) {
+query($identer: [ID!]!) {personBolk: hentPersonBolk(identer: $identer) {
        ident,
        person {
            adressebeskyttelse {
