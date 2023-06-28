@@ -46,14 +46,23 @@ class ValiderBrevmottakerServiceTest {
 
         verify(exactly = 1) { brevmottakerService.hentBrevmottakere(behandlingId) }
         verify(exactly = 0) { persongrunnlagService.hentAktivThrows(any()) }
-        verify(exactly = 0) {  familieIntegrasjonerTilgangskontrollService.hentIdenterMedStrengtFortroligAdressebeskyttelse(any()) }
+        verify(exactly = 0) {
+            familieIntegrasjonerTilgangskontrollService.hentIdenterMedStrengtFortroligAdressebeskyttelse(
+                any(),
+            )
+        }
     }
 
     @Test
     fun `Skal kaste en exception når en behandling inneholder minst en strengt fortrolig person og minst en brevmottaker`() {
         every { brevmottakerService.hentBrevmottakere(behandlingId) } returns listOf(brevmottaker)
-        every { persongrunnlagService.hentAktivThrows(behandlingId) } returns lagTestPersonopplysningGrunnlag(behandlingId, søker)
-        every { familieIntegrasjonerTilgangskontrollService.hentIdenterMedStrengtFortroligAdressebeskyttelse(any()) } returns listOf(søker.aktør.aktivFødselsnummer())
+        every { persongrunnlagService.hentAktivThrows(behandlingId) } returns lagTestPersonopplysningGrunnlag(
+            behandlingId,
+            søker,
+        )
+        every { familieIntegrasjonerTilgangskontrollService.hentIdenterMedStrengtFortroligAdressebeskyttelse(any()) } returns listOf(
+            søker.aktør.aktivFødselsnummer(),
+        )
 
         assertThatThrownBy {
             validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
@@ -65,13 +74,20 @@ class ValiderBrevmottakerServiceTest {
     @Test
     fun `Skal validere at er ok når ikke inneholder noen strengt fortrolige personer og inneholder en brevmottaker`() {
         every { brevmottakerService.hentBrevmottakere(behandlingId) } returns listOf(brevmottaker)
-        every { persongrunnlagService.hentAktivThrows(behandlingId) } returns lagTestPersonopplysningGrunnlag(behandlingId, søker)
+        every { persongrunnlagService.hentAktivThrows(behandlingId) } returns lagTestPersonopplysningGrunnlag(
+            behandlingId,
+            søker,
+        )
         every { familieIntegrasjonerTilgangskontrollService.hentIdenterMedStrengtFortroligAdressebeskyttelse(any()) } returns emptyList()
 
         validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
             behandlingId,
         )
-        verify(exactly = 1) { familieIntegrasjonerTilgangskontrollService.hentIdenterMedStrengtFortroligAdressebeskyttelse(any()) }
+        verify(exactly = 1) {
+            familieIntegrasjonerTilgangskontrollService.hentIdenterMedStrengtFortroligAdressebeskyttelse(
+                any(),
+            )
+        }
     }
 
     @Test
@@ -79,15 +95,14 @@ class ValiderBrevmottakerServiceTest {
         every { brevmottakerService.hentBrevmottakere(behandlingId) } returns emptyList()
         every { persongrunnlagService.hentAktivThrows(behandlingId) } returns lagTestPersonopplysningGrunnlag(
             behandlingId,
-            søker
+            søker,
         )
         every { familieIntegrasjonerTilgangskontrollService.hentIdenterMedStrengtFortroligAdressebeskyttelse(any()) } returns listOf(
-            søker.aktør.aktivFødselsnummer()
+            søker.aktør.aktivFødselsnummer(),
         )
 
         validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
             behandlingId,
         )
     }
-
 }
