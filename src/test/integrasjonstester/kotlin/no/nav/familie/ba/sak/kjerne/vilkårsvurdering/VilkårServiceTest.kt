@@ -43,6 +43,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.ResultatBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -347,6 +348,7 @@ class VilkårServiceTest(
                         vilkårResultater = listOf(
                             it.copy(
                                 resultat = Resultat.OPPFYLT,
+                                resultatBegrunnelse = if(it.vilkårType === Vilkår.LOVLIG_OPPHOLD) ResultatBegrunnelse.IKKE_AKTUELT else null,
                                 periodeFom = LocalDate.of(2019, 5, 8),
                             ),
                         ),
@@ -384,6 +386,13 @@ class VilkårServiceTest(
                 if (personResultat.aktør.aktivFødselsnummer() == barnFnr2) {
                     assertEquals(behandling2.id, vilkårResultat.behandlingId)
                 } else {
+
+                    if (vilkårResultat.vilkårType === Vilkår.LOVLIG_OPPHOLD) {
+                        assertEquals(vilkårResultat.resultatBegrunnelse, vilkårResultat.resultatBegrunnelse)
+                    } else {
+                        assertEquals(null, vilkårResultat.resultatBegrunnelse)
+                    }
+
                     assertEquals(Resultat.OPPFYLT, vilkårResultat.resultat)
                     assertEquals(behandling.id, vilkårResultat.behandlingId)
                 }
