@@ -15,14 +15,14 @@ class ValiderBrevmottakerService(
     fun validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(behandlingId: Long) {
         val brevmottakere = brevmottakerService.hentBrevmottakere(behandlingId).takeIf { it.isNotEmpty() } ?: return
         val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandlingId)
-        val personIdentList = personopplysningGrunnlag.søkerOgBarn
+        val personIdenter = personopplysningGrunnlag.søkerOgBarn
             .takeIf { it.isNotEmpty() }
             ?.map { it.aktør.aktivFødselsnummer() }
             ?: return
-        val strengtFortroligePersoner =
-            familieIntegrasjonerTilgangskontrollService.returnerPersonerMedAdressebeskyttelse(personIdentList)
-        if (strengtFortroligePersoner.isNotEmpty()) {
-            val melding = "Behandlingen (id: $behandlingId) inneholder ${strengtFortroligePersoner.size} person(er) med strengt fortrolig adressebeskyttelse og kan ikke kombineres med manuelle brevmottakere (${brevmottakere.size} stk)."
+        val strengtFortroligePersonIdenter =
+            familieIntegrasjonerTilgangskontrollService.hentIdenterMedStrengtFortroligAdressebeskyttelse(personIdenter)
+        if (strengtFortroligePersonIdenter.isNotEmpty()) {
+            val melding = "Behandlingen (id: $behandlingId) inneholder ${strengtFortroligePersonIdenter.size} person(er) med strengt fortrolig adressebeskyttelse og kan ikke kombineres med manuelle brevmottakere (${brevmottakere.size} stk)."
             val frontendFeilmelding =
                 "Behandlingen inneholder personer med strengt fortrolig adressebeskyttelse og kan ikke kombineres med manuelle brevmottakere."
             throw FunksjonellFeil(melding, frontendFeilmelding)

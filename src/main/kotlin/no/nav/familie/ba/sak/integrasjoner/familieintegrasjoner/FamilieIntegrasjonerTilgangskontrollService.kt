@@ -41,8 +41,8 @@ class FamilieIntegrasjonerTilgangskontrollService(
         }
     }
 
-    fun returnerPersonerMedAdressebeskyttelse(personIdentList: List<String>): List<String> {
-        val adresseBeskyttelseBolk = systemOnlyPdlRestClient.hentAdressebeskyttelseBolk(personIdentList)
+    fun hentIdenterMedStrengtFortroligAdressebeskyttelse(personIdenter: List<String>): List<String> {
+        val adresseBeskyttelseBolk = systemOnlyPdlRestClient.hentAdressebeskyttelseBolk(personIdenter)
         return adresseBeskyttelseBolk.filter {
             it.person?.adressebeskyttelse?.any { adressebeskyttelse ->
                 adressebeskyttelse.gradering == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG ||
