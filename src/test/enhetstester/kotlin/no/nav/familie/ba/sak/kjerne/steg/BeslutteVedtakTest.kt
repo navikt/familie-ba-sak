@@ -123,6 +123,7 @@ class BeslutteVedtakTest {
         mockkObject(FerdigstillOppgaver.Companion)
         every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
         every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
+        every { automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(any()) } returns false
 
         val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
 
@@ -150,6 +151,8 @@ class BeslutteVedtakTest {
                 any(),
             )
         } returns Task(OpprettOppgaveTask.TASK_STEP_TYPE, "")
+
+        every { automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(any()) } returns false
 
         val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
 
@@ -186,6 +189,8 @@ class BeslutteVedtakTest {
             )
         } returns Task(OpprettOppgaveTask.TASK_STEP_TYPE, "")
 
+        every { automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(any()) } returns false
+
         val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
 
         verify(exactly = 1) { beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(behandling) }
@@ -215,6 +220,8 @@ class BeslutteVedtakTest {
             OpprettOppgaveTask.TASK_STEP_TYPE,
             "",
         )
+
+        every { automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(any()) } returns false
 
         beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
         verify(exactly = 1) { behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling, true, emptyList()) }
