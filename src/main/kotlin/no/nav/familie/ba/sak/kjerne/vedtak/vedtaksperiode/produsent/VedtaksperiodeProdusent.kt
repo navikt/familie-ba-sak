@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent
 
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.isSameOrAfter
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -75,31 +74,24 @@ fun finnPerioderSomSkalBegrunnes(
 }
 
 fun List<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>>.fjernOverflødigeIkkeInnvilgetPerioder(): List<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>> {
-    val sortedByFom = this
+    val sortertePerioder = this
         .sortedWith(compareBy({ it.fraOgMed }, { it.tilOgMed }))
 
-    val indexForSisteInnvilgetePeriode = sortedByFom.indexOfLast { periode ->
-        periode.innhold?.any { grunnlag -> grunnlag.gjeldende is GrunnlagForPersonInnvilget }
-            ?: throw Feil("Innhold er null for periode ${periode.fraOgMed} - ${periode.tilOgMed}")
+    val perioderTilOgMedSisteInnvilgede = sortertePerioder.dropLastWhile { periode ->
+        periode.innhold == null || periode.innhold.none { it.gjeldende is GrunnlagForPersonInnvilget }
     }
 
-    return when (indexForSisteInnvilgetePeriode) {
-        -1 -> {
-            // Har ingen innvilgete perioder
-            sortedByFom
-        }
+    val perioderEtterSisteInnvilgedePeriode =
+        sortertePerioder.subList(perioderTilOgMedSisteInnvilgede.size, sortertePerioder.size)
 
-        sortedByFom.size - 1 -> {
-            // Har kun en ikke-innvilget periode på slutten
-            sortedByFom
-        }
+    val (eksplisitteAvslagEtterSisteInnvilgedePeriode, opphørEtterSisteInnvilgedePeriode) =
+        perioderEtterSisteInnvilgedePeriode
+            .filter { it.innhold != null }
+            .partition { periode -> periode.innhold!!.any { it.gjeldende?.erEksplisittAvslag() == true } }
 
-        else -> {
-            val sisteIkkeInnvilgetePeriodeSomSkalBegrunnes =
-                sortedByFom[indexForSisteInnvilgetePeriode + 1].copy(tilOgMed = MånedTidspunkt.uendeligLengeTil())
-            sortedByFom.subList(0, indexForSisteInnvilgetePeriode + 1) + sisteIkkeInnvilgetePeriodeSomSkalBegrunnes
-        }
-    }
+    val førsteOpphørEtterSisteInnvilgedePeriode = opphørEtterSisteInnvilgedePeriode.firstOrNull()?.copy(tilOgMed = MånedTidspunkt.uendeligLengeTil())
+
+    return (perioderTilOgMedSisteInnvilgede + førsteOpphørEtterSisteInnvilgedePeriode + eksplisitteAvslagEtterSisteInnvilgedePeriode).filterNotNull()
 }
 
 private fun Map<Aktør, GrunnlagForPersonTidslinjerSplittetPåOverlappendeGenerelleAvslag>.lagOverlappendeGenerelleAvslagsPerioder() =

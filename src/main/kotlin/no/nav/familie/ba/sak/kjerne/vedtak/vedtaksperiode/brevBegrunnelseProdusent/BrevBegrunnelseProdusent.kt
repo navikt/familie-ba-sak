@@ -1,6 +1,5 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.brevBegrunnelseProdusent
 
-import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
@@ -182,31 +181,25 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.finnBegrunnelseGrunnlagPerPerso
 }
 
 private fun Tidslinje<GrunnlagForPerson, Måned>.fjernOverflødigePerioderPåSlutten(): Tidslinje<GrunnlagForPerson, Måned> {
-    val sortedByFom = this.perioder()
+    val sortertePerioder = this.perioder()
         .sortedWith(compareBy({ it.fraOgMed }, { it.tilOgMed }))
 
-    val indexForSisteInnvilgetePeriode = sortedByFom.indexOfLast { periode ->
-        periode.innhold ?: throw Feil("Innhold er null for periode ${periode.fraOgMed} - ${periode.tilOgMed}")
-        periode.innhold is GrunnlagForPersonInnvilget
-    }
+    val perioderTilOgMedSisteInnvilgede = sortertePerioder
+        .dropLastWhile { it.innhold !is GrunnlagForPersonInnvilget }
 
-    return when (indexForSisteInnvilgetePeriode) {
-        -1 -> {
-            // Har ingen innvilgete perioder
-            sortedByFom
-        }
+    val perioderEtterSisteInnvilgedePeriode =
+        sortertePerioder.subList(perioderTilOgMedSisteInnvilgede.size, sortertePerioder.size)
 
-        sortedByFom.size - 1 -> {
-            // Har kun innvilgete perioder
-            sortedByFom
-        }
+    val (eksplisitteAvslagEtterSisteInnvilgedePeriode, opphørEtterSisteInnvilgedePeriode) =
+        perioderEtterSisteInnvilgedePeriode
+            .filter { it.innhold != null }
+            .partition { it.innhold!!.erEksplisittAvslag() }
 
-        else -> {
-            val sisteIkkeInnvilgetePeriodeSomSkalBegrunnes =
-                sortedByFom[indexForSisteInnvilgetePeriode + 1].copy(tilOgMed = MånedTidspunkt.uendeligLengeTil())
-            sortedByFom.subList(0, indexForSisteInnvilgetePeriode + 1) + sisteIkkeInnvilgetePeriodeSomSkalBegrunnes
-        }
-    }.tilTidslinje()
+    val førsteOpphørEtterSisteInnvilgedePeriode =
+        opphørEtterSisteInnvilgedePeriode.firstOrNull()?.copy(tilOgMed = MånedTidspunkt.uendeligLengeTil())
+
+    return (perioderTilOgMedSisteInnvilgede + førsteOpphørEtterSisteInnvilgedePeriode + eksplisitteAvslagEtterSisteInnvilgedePeriode).filterNotNull()
+        .tilTidslinje()
 }
 
 private fun UtvidetVedtaksperiodeMedBegrunnelser.tilTidslinjeForAktuellPeriode(): Tidslinje<UtvidetVedtaksperiodeMedBegrunnelser, Måned> {
