@@ -308,15 +308,7 @@ class StegService(
             behandlingSteg.utførStegOgAngiNeste(behandling, behandlendeEnhet)
         }
 
-        val harMigreringsbehandlingAvvikInnenforbeløpsgrenser by lazy {
-            simuleringService.harMigreringsbehandlingAvvikInnenforBeløpsgrenser(behandling)
-        }
-
-        val harMigreringsbehandlingManuellePosteringer by lazy {
-            simuleringService.harMigreringsbehandlingManuellePosteringer(behandling)
-        }
-
-        if ((behandlingEtterBeslutterSteg.erHelmanuellMigrering() && harMigreringsbehandlingAvvikInnenforbeløpsgrenser && !harMigreringsbehandlingManuellePosteringer) || behandlingEtterBeslutterSteg.erManuellMigreringForEndreMigreringsdato()) {
+        if (behandlingService.skalAutomatiskBesluttes(behandling)) {
             return håndterBeslutningForVedtak(
                 behandlingEtterBeslutterSteg,
                 RestBeslutningPåVedtak(Beslutning.GODKJENT),

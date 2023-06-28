@@ -66,17 +66,12 @@ class BeslutteVedtak(
             )
         }
 
-        val behandlingErAutomatiskBesluttet =
-            (
-                behandling.erHelmanuellMigrering() && simuleringService.harMigreringsbehandlingAvvikInnenforBeløpsgrenser(
-                    behandling,
-                ) && !simuleringService.harMigreringsbehandlingManuellePosteringer(behandling)
-                ) || behandling.erManuellMigreringForEndreMigreringsdato()
+        val skalAutomatiskBesluttes = behandlingService.skalAutomatiskBesluttes(behandling)
 
         val beslutter =
-            if (behandlingErAutomatiskBesluttet) SikkerhetContext.SYSTEM_NAVN else saksbehandlerContext.hentSaksbehandlerSignaturTilBrev()
+            if (skalAutomatiskBesluttes) SikkerhetContext.SYSTEM_NAVN else saksbehandlerContext.hentSaksbehandlerSignaturTilBrev()
         val beslutterId =
-            if (behandlingErAutomatiskBesluttet) SikkerhetContext.SYSTEM_FORKORTELSE else SikkerhetContext.hentSaksbehandler()
+            if (skalAutomatiskBesluttes) SikkerhetContext.SYSTEM_FORKORTELSE else SikkerhetContext.hentSaksbehandler()
 
         val totrinnskontroll = totrinnskontrollService.besluttTotrinnskontroll(
             behandling = behandling,
@@ -89,7 +84,7 @@ class BeslutteVedtak(
         opprettTaskFerdigstillGodkjenneVedtak(
             behandling = behandling,
             beslutning = data,
-            behandlingErAutomatiskBesluttet = behandlingErAutomatiskBesluttet,
+            behandlingErAutomatiskBesluttet = skalAutomatiskBesluttes,
         )
 
         return if (data.beslutning.erGodkjent()) {
