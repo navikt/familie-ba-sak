@@ -33,8 +33,6 @@ Egenskap: Vedtaksperioder med mor og et barn
       | Fra dato   | Til dato   | VedtaksperiodeType | Inkluderte Begrunnelser       | Ekskluderte Begrunnelser |
       | 01.05.2020 | 31.03.2021 | UTBETALING         |                               |                          |
       | 01.04.2021 |            | OPPHØR             | OPPHØR_BARN_FLYTTET_FRA_SØKER |                          |
-      #| 01.04.2021 | 31.03.2038 | OPPHØR             | OPPHØR_BARN_FLYTTET_FRA_SØKER |                          |
-      #| 01.04.2038 |            | OPPHØR             | OPPHØR_UNDER_18_ÅR            |                          |
 
 
 
