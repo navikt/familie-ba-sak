@@ -7,7 +7,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import org.springframework.stereotype.Service
 
 @Service
-class BehandlingValideringService(
+class ValiderBrevmottakerService(
     private val brevmottakerService: BrevmottakerService,
     private val persongrunnlagService: PersongrunnlagService,
     private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
