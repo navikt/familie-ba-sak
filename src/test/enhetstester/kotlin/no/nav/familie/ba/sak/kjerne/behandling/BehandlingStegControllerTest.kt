@@ -21,14 +21,12 @@ class BehandlingStegControllerTest {
     private val behandlingHentOgPersisterServiceMock = mockk<BehandlingHentOgPersisterService>()
     private val stegServiceMock = mockk<StegService>()
     private val utvidetBehandlingServiceMock = mockk<UtvidetBehandlingService>()
-    private val validerBrevmottakerServiceMock = mockk<ValiderBrevmottakerService>()
     private val behandlingStegController = BehandlingStegController(
         behandlingHentOgPersisterService = behandlingHentOgPersisterServiceMock,
         stegService = stegServiceMock,
         tilgangService = tilgangServiceMock,
         featureToggleService = featureToggleServiceMock,
         utvidetBehandlingService = utvidetBehandlingServiceMock,
-        validerBrevmottakerService = validerBrevmottakerServiceMock,
     )
 
     @Test

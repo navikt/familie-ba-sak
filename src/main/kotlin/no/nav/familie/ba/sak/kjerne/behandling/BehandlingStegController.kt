@@ -43,7 +43,6 @@ class BehandlingStegController(
     private val stegService: StegService,
     private val tilgangService: TilgangService,
     private val featureToggleService: FeatureToggleService,
-    private val validerBrevmottakerService: ValiderBrevmottakerService,
 ) {
 
     @PostMapping(
@@ -141,7 +140,6 @@ class BehandlingStegController(
         )
 
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
-        validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(behandlingId = behandling.id)
 
         stegService.håndterSendTilBeslutter(behandling, behandlendeEnhet)
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandling.id)))
