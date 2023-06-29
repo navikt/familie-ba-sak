@@ -1,6 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.beregning.domene
 
-import no.nav.familie.ba.sak.integrasjoner.økonomi.oppdrag.IdentOgType
+import no.nav.familie.ba.sak.integrasjoner.økonomi.IdentOgYtelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Modifying
@@ -25,5 +25,5 @@ interface TilkjentYtelseRepository : JpaRepository<TilkjentYtelse, Long> {
         ...
     """,
     )
-    fun sisteAndelPerKjedeForFagsak(fagsakId: Long): Map<IdentOgType, AndelTilkjentYtelse>
+    fun sisteAndelPerKjedeForFagsak(fagsakId: Long): Map<IdentOgYtelse, AndelTilkjentYtelse>
 }

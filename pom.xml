@@ -24,6 +24,7 @@
         <spring.cloud.version>4.0.0</spring.cloud.version>
         <prosessering.version>2.20230322091650_fb0187e-SPRING_BOOT_3</prosessering.version>
         <felles.version>2.20230210162649_a258d57-SPRING_BOOT_3</felles.version>
+        <utbetalingsgenerator.version>1.0_20230621111154_c44818b</utbetalingsgenerator.version>
         <eksterne-kontrakter-bisys.version>2.0_20221118130052_e2abd9f</eksterne-kontrakter-bisys.version>
         <felles-kontrakter.version>3.0_20230605154245_3d182db</felles-kontrakter.version>
         <familie.kontrakter.saksstatistikk>2.0_20220216121145_5a268ac</familie.kontrakter.saksstatistikk>
@@ -270,6 +271,13 @@
             <groupId>no.nav.familie.felles</groupId>
             <artifactId>valutakurs-klient</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>no.nav.familie.felles</groupId>
+            <artifactId>familie-utbetalingsgenerator</artifactId>
+            <version>${utbetalingsgenerator.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>no.nav.familie.kontrakter</groupId>
             <artifactId>felles</artifactId>

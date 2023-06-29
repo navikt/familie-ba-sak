@@ -1,12 +1,22 @@
 package no.nav.familie.ba.sak.integrasjoner.økonomi.oppdrag
 
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
+import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
+import no.nav.familie.felles.utbetalingsgenerator.Utbetalingsgenerator
+import no.nav.familie.felles.utbetalingsgenerator.domain.AndelDataLongId
+import no.nav.familie.felles.utbetalingsgenerator.domain.Behandlingsinformasjon
+import no.nav.familie.felles.utbetalingsgenerator.domain.BeregnetUtbetalingsoppdragLongId
+import no.nav.familie.felles.utbetalingsgenerator.domain.IdentOgType
+import no.nav.familie.felles.utbetalingsgenerator.domain.YtelseType
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
+import no.nav.familie.kontrakter.felles.tilbakekreving.Ytelsestype
 import org.springframework.stereotype.Service
 import java.time.YearMonth
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType as YtelseTypeDomene
 
 @Service
 class UtbetalingsoppdragService(
@@ -20,21 +30,14 @@ class UtbetalingsoppdragService(
         endretMigreringsdato: YearMonth?
     ): Utbetalingsoppdrag {
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandlingId)
-        val behandlingsinformasjon = Behandlingsinformasjon(
-            saksbehandlerId = vedtak.endretAv,
-            behandlingId = behandlingId,
-            fagsakId = vedtak.behandling.fagsak.id,
-            aktør = vedtak.behandling.fagsak.aktør,
-            vedtak = vedtak,
-            erSimulering = erSimulering,
-            endretMigreringsDato = endretMigreringsdato,
-        )
-        val sisteAndelPerKjede = sisteAndelPerKjedeForFagsak(behandlingsinformasjon)
-        val resultat = NyUtbetalingsoppdragGenerator.lagUtbetalingsoppdrag(
-            behandlingsinformasjon,
-            tilkjentYtelse.andelerTilkjentYtelse.map { AndelData(it) },
-            forrigeAndeler(forrigeBehandlingId),
-            sisteAndelPerKjede,
+        val nyeAndeler = tilkjentYtelse.andelerTilkjentYtelse.map { it.tilAndelData() }
+        val forrigeAndeler = forrigeAndeler(forrigeBehandlingId)
+        val opphørFra = opphørFra(nyeAndeler, forrigeAndeler, erSimulering, endretMigreringsdato)
+        val resultat = Utbetalingsgenerator().lagUtbetalingsoppdrag(
+            behandlingsinformasjon = behandlingsinformasjon(vedtak, opphørFra),
+            nyeAndeler = nyeAndeler,
+            forrigeAndeler = forrigeAndeler,
+            sisteAndelPerKjede = sisteAndelPerKjedeForFagsak(vedtak.behandling.fagsak)
         )
         if (!erSimulering) {
             oppdaterTilkjentYtelse(tilkjentYtelse, resultat)
@@ -42,9 +45,35 @@ class UtbetalingsoppdragService(
         return resultat.utbetalingsoppdrag
     }
 
+    private fun behandlingsinformasjon(
+        vedtak: Vedtak,
+        opphørFra: YearMonth?,
+    ) = Behandlingsinformasjon(
+        saksbehandlerId = vedtak.endretAv,
+        behandlingId = vedtak.behandling.id.toString(),
+        eksternBehandlingId = vedtak.behandling.id,
+        eksternFagsakId = vedtak.behandling.fagsak.id,
+        ytelse = Ytelsestype.BARNETRYGD,
+        personIdent = vedtak.behandling.fagsak.aktør.aktivFødselsnummer(),
+        vedtaksdato = vedtak.vedtaksdato?.toLocalDate() ?: error("Mangler vedtaksdato"),
+        opphørFra = opphørFra,
+        utbetalesTil = null,
+        erGOmregning = false,
+    )
+
+    private fun opphørFra(
+        nyeAndeler: List<AndelDataLongId>,
+        forrigeAndeler: List<AndelDataLongId>,
+        erSimulering: Boolean,
+        endretMigreringsdato: YearMonth?
+    ): YearMonth? {
+        // TODO
+        return null
+    }
+
     private fun oppdaterTilkjentYtelse(
         tilkjentYtelse: TilkjentYtelse,
-        resultat: UtbetalingsoppdragOgAndelerMedOffset,
+        resultat: BeregnetUtbetalingsoppdragLongId,
     ) {
         tilkjentYtelse.utbetalingsoppdrag = objectMapper.writeValueAsString(resultat.utbetalingsoppdrag)
         val andelerPåId = resultat.andeler.associateBy { it.id }
@@ -56,19 +85,40 @@ class UtbetalingsoppdragService(
         andelerSomSkalSendesTilOppdrag.forEach { andel ->
             val andelMedOffset = andelerPåId[andel.id]
                 ?: error("Finner ikke andel med offset for andel=${andel.id}")
-            andel.periodeOffset = andelMedOffset.offset
-            andel.forrigePeriodeOffset = andelMedOffset.forrigeOffset
+            andel.periodeOffset = andelMedOffset.periodeId
+            andel.forrigePeriodeOffset = andelMedOffset.forrigePeriodeId
             andel.kildeBehandlingId = andelMedOffset.kildeBehandlingId
         }
         tilkjentYtelseRepository.save(tilkjentYtelse)
     }
 
-    private fun sisteAndelPerKjedeForFagsak(behandlingsinformasjon: Behandlingsinformasjon) =
-        tilkjentYtelseRepository.sisteAndelPerKjedeForFagsak(behandlingsinformasjon.fagsakId)
-            .mapValues { AndelData(it.value) }
+    private fun sisteAndelPerKjedeForFagsak(fagsak: Fagsak): Map<IdentOgType, AndelDataLongId> =
+        tilkjentYtelseRepository.sisteAndelPerKjedeForFagsak(fagsak.id)
+            .map { IdentOgType(it.key.ident, it.key.type.tilYtelseType()) to it.value.tilAndelData() }
+            .toMap()
 
-    private fun forrigeAndeler(forrigeBehandlingId: Long?): List<AndelData>? =
+    private fun forrigeAndeler(forrigeBehandlingId: Long?): List<AndelDataLongId> =
         forrigeBehandlingId?.let {
             tilkjentYtelseRepository.findByBehandling(it)
-        }?.andelerTilkjentYtelse?.map { AndelData(it) }
+        }?.andelerTilkjentYtelse?.map { it.tilAndelData() }
+            ?: emptyList()
+
+    private fun AndelTilkjentYtelse.tilAndelData(): AndelDataLongId =
+        AndelDataLongId(
+            id = id,
+            fom = periode.fom,
+            tom = periode.tom,
+            beløp = kalkulertUtbetalingsbeløp,
+            personIdent = aktør.aktivFødselsnummer(),
+            type = type.tilYtelseType(),
+            periodeId = periodeOffset,
+            forrigePeriodeId = forrigePeriodeOffset,
+            kildeBehandlingId = kildeBehandlingId,
+        )
+
+    fun YtelseTypeDomene.tilYtelseType(): YtelseType = when (this) {
+        YtelseTypeDomene.ORDINÆR_BARNETRYGD -> YtelseType.ORDINÆR_BARNETRYGD
+        YtelseTypeDomene.UTVIDET_BARNETRYGD -> YtelseType.UTVIDET_BARNETRYGD
+        YtelseTypeDomene.SMÅBARNSTILLEGG -> YtelseType.SMÅBARNSTILLEGG
+    }
 }

@@ -22,7 +22,6 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForSimule
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForUtbetalingsoppdrag
 import no.nav.familie.ba.sak.integrasjoner.økonomi.IdentOgYtelse
 import no.nav.familie.ba.sak.integrasjoner.økonomi.UtbetalingsoppdragGenerator
-import no.nav.familie.ba.sak.integrasjoner.økonomi.oppdrag.IdentOgType
 import no.nav.familie.ba.sak.integrasjoner.økonomi.oppdrag.UtbetalingsoppdragService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.pakkInnForUtbetaling
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.gjeldendeForrigeOffsetForKjede
@@ -31,7 +30,6 @@ import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiUtils.oppdaterBestå
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
-import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsoppdrag
 import no.nav.familie.kontrakter.felles.oppdrag.Utbetalingsperiode
 import org.assertj.core.api.Assertions.assertThat
@@ -64,7 +62,7 @@ class OppdragSteg {
         every { repo.sisteAndelPerKjedeForFagsak(any()) } answers {
             tilkjentYtelseForBehandling.filterValues { it.utbetalingsoppdrag != null }
                 .flatMap { it.value.andelerTilkjentYtelse }
-                .groupBy { IdentOgType(it.aktør.aktivFødselsnummer(), it.type) }
+                .groupBy { IdentOgYtelse(it.aktør.aktivFødselsnummer(), it.type) }
                 .mapValues {
                     val maxOffset = it.value.filter { it.periodeOffset != null }.maxOfOrNull { it.periodeOffset!! }
                     it.value.filter { it.periodeOffset == maxOffset }.sortedBy { it.id }.first()
