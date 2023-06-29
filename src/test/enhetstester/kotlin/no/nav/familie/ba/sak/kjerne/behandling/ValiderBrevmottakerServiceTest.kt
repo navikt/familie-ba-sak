@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.behandling
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
@@ -54,7 +55,7 @@ class ValiderBrevmottakerServiceTest {
     }
 
     @Test
-    fun `Skal kaste en exception når en behandling inneholder minst en strengt fortrolig person og minst en brevmottaker`() {
+    fun `Skal kaste en FunksjonellFeil exception når en behandling inneholder minst en strengt fortrolig person og minst en brevmottaker`() {
         every { brevmottakerService.hentBrevmottakere(behandlingId) } returns listOf(brevmottaker)
         every { persongrunnlagService.hentAktivThrows(behandlingId) } returns lagTestPersonopplysningGrunnlag(
             behandlingId,
@@ -68,7 +69,7 @@ class ValiderBrevmottakerServiceTest {
             validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
                 behandlingId,
             )
-        }.hasMessageContaining("strengt fortrolig adressebeskyttelse og kan ikke kombineres med manuelle brevmottakere")
+        }.isInstanceOf(FunksjonellFeil::class.java).hasMessageContaining("strengt fortrolig adressebeskyttelse og kan ikke kombineres med manuelle brevmottakere")
     }
 
     @Test
