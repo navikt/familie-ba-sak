@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
@@ -103,7 +104,7 @@ class VilkårServiceTest(
     @Autowired
     private val brevmalService: BrevmalService,
 
-) : AbstractSpringIntegrationTest() {
+    ) : AbstractSpringIntegrationTest() {
 
     @BeforeAll
     fun init() {
@@ -310,6 +311,95 @@ class VilkårServiceTest(
     }
 
     @Test
+    fun `Resultatbegrunnelse kan kun settes i kombinasjon med gyldig vilkår og resultat`() {
+        val fnr = randomFnr()
+        val barnFnr = randomFnr()
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        var behandling =
+            behandlingService.opprettBehandling(nyOrdinærBehandling(søkersIdent = fnr, fagsakId = fagsak.id))
+
+        val forrigeBehandlingSomErIverksatt =
+            behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
+
+        val personopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlag(
+                behandling.id,
+                fnr,
+                listOf(barnFnr),
+                søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
+                barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true),
+            )
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+
+        val vilkårsvurdering = vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
+            behandling = behandling,
+            bekreftEndringerViaFrontend = true,
+            forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErIverksatt,
+        )
+
+        val enPersonIBehandlingen = vilkårsvurdering.personResultater.elementAt(0)
+        val bosattVilkårForEnPersonIBehandlingen =
+            enPersonIBehandlingen.tilRestPersonResultat().vilkårResultater.find { it.vilkårType === Vilkår.BOSATT_I_RIKET }
+
+        assertThrows<FunksjonellFeil> {
+            vilkårService.endreVilkår(
+                behandlingId = behandling.id,
+                vilkårId = bosattVilkårForEnPersonIBehandlingen!!.id,
+                restPersonResultat =
+                RestPersonResultat(
+                    personIdent = enPersonIBehandlingen.aktør.aktivFødselsnummer(),
+                    vilkårResultater = listOf(
+                        bosattVilkårForEnPersonIBehandlingen.copy(
+                            resultat = Resultat.OPPFYLT,
+                            resultatBegrunnelse = ResultatBegrunnelse.IKKE_AKTUELT,
+                            periodeFom = LocalDate.of(2019, 5, 8),
+                        ),
+                    ),
+                ),
+            )
+        }
+
+        val oppholdVilkårForEnPersonIBehandlingen =
+            enPersonIBehandlingen.tilRestPersonResultat().vilkårResultater.find { it.vilkårType === Vilkår.LOVLIG_OPPHOLD }
+
+        assertThrows<FunksjonellFeil> {
+            vilkårService.endreVilkår(
+                behandlingId = behandling.id,
+                vilkårId = oppholdVilkårForEnPersonIBehandlingen!!.id,
+                restPersonResultat =
+                RestPersonResultat(
+                    personIdent = enPersonIBehandlingen.aktør.aktivFødselsnummer(),
+                    vilkårResultater = listOf(
+                        oppholdVilkårForEnPersonIBehandlingen.copy(
+                            resultat = Resultat.IKKE_OPPFYLT,
+                            resultatBegrunnelse = ResultatBegrunnelse.IKKE_AKTUELT,
+                            periodeFom = LocalDate.of(2019, 5, 8),
+                        ),
+                    ),
+                ),
+            )
+        }
+        assertDoesNotThrow {
+            vilkårService.endreVilkår(
+                behandlingId = behandling.id,
+                vilkårId = oppholdVilkårForEnPersonIBehandlingen!!.id,
+                restPersonResultat =
+                RestPersonResultat(
+                    personIdent = enPersonIBehandlingen.aktør.aktivFødselsnummer(),
+                    vilkårResultater = listOf(
+                        oppholdVilkårForEnPersonIBehandlingen.copy(
+                            resultat = Resultat.OPPFYLT,
+                            resultatBegrunnelse = ResultatBegrunnelse.IKKE_AKTUELT,
+                            periodeFom = LocalDate.of(2019, 5, 8),
+                        ),
+                    ),
+                ),
+            )
+        }
+    }
+
+    @Test
     fun `Vilkårsvurdering fra forrige behandling kopieres riktig`() {
         val fnr = randomFnr()
         val barnFnr = randomFnr()
@@ -348,7 +438,7 @@ class VilkårServiceTest(
                         vilkårResultater = listOf(
                             it.copy(
                                 resultat = Resultat.OPPFYLT,
-                                resultatBegrunnelse = if(it.vilkårType === Vilkår.LOVLIG_OPPHOLD) ResultatBegrunnelse.IKKE_AKTUELT else null,
+                                resultatBegrunnelse = if (it.vilkårType === Vilkår.LOVLIG_OPPHOLD) ResultatBegrunnelse.IKKE_AKTUELT else null,
                                 periodeFom = LocalDate.of(2019, 5, 8),
                             ),
                         ),
@@ -1123,7 +1213,7 @@ class VilkårServiceTest(
             vedtaksperiodeService = vedtaksperiodeService,
             brevmalService = brevmalService,
 
-        )
+            )
         var vilkårsvurdering = vilkårService.hentVilkårsvurderingThrows(behandling.id)
         assertTrue {
             vilkårsvurdering.personResultater.all { personResultat ->
