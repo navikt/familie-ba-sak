@@ -18,7 +18,7 @@ fun validerIngenVilkårSattEtterSøkersDød(
     personopplysningGrunnlag: PersonopplysningGrunnlag,
     vilkårsvurdering: Vilkårsvurdering,
 
-    ) {
+) {
     val vilkårResultaterSøker =
         vilkårsvurdering.hentPersonResultaterTil(personopplysningGrunnlag.søker.aktør.aktørId)
     val søkersDød = personopplysningGrunnlag.søker.dødsfall?.dødsfallDato ?: LocalDate.now()
@@ -82,22 +82,22 @@ fun valider18ÅrsVilkårEksistererFraFødselsdato(
 }
 
 fun validerResultatBegrunnelse(restVilkårResultat: RestVilkårResultat) {
-    val resultat = restVilkårResultat.resultat;
-    val vilkårType = restVilkårResultat.vilkårType;
-    val resultatBegrunnelse = restVilkårResultat.resultatBegrunnelse;
+    val resultat = restVilkårResultat.resultat
+    val vilkårType = restVilkårResultat.vilkårType
+    val resultatBegrunnelse = restVilkårResultat.resultatBegrunnelse
 
     if (resultatBegrunnelse != null) {
-        if (!resultatBegrunnelse.gyldigForVilkår.contains(vilkårType)){
-                throw FunksjonellFeil(
+        if (!resultatBegrunnelse.gyldigForVilkår.contains(vilkårType)) {
+            throw FunksjonellFeil(
                 "Resultatbegrunnelsen $resultatBegrunnelse kan ikke kombineres med vilkåret $vilkårType",
-                    "Resultatbegrunnelsen $resultatBegrunnelse kan ikke kombineres med vilkåret $vilkårType",
+                "Resultatbegrunnelsen $resultatBegrunnelse kan ikke kombineres med vilkåret $vilkårType",
             )
         }
         if (!resultatBegrunnelse.gyldigIKombinasjonMedResultat.contains(resultat)) {
             throw FunksjonellFeil(
                 "Resultatbegrunnelsen $resultatBegrunnelse kan ikke kombineres med resultatet $resultat",
                 "Resultatbegrunnelsen $resultatBegrunnelse kan ikke kombineres med resultatet $resultat",
-            )}
+            ) }
     }
 }
 

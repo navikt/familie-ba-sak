@@ -104,7 +104,7 @@ class VilkårServiceTest(
     @Autowired
     private val brevmalService: BrevmalService,
 
-    ) : AbstractSpringIntegrationTest() {
+) : AbstractSpringIntegrationTest() {
 
     @BeforeAll
     fun init() {
@@ -476,7 +476,6 @@ class VilkårServiceTest(
                 if (personResultat.aktør.aktivFødselsnummer() == barnFnr2) {
                     assertEquals(behandling2.id, vilkårResultat.behandlingId)
                 } else {
-
                     if (vilkårResultat.vilkårType === Vilkår.LOVLIG_OPPHOLD) {
                         assertEquals(vilkårResultat.resultatBegrunnelse, vilkårResultat.resultatBegrunnelse)
                     } else {
@@ -1213,7 +1212,7 @@ class VilkårServiceTest(
             vedtaksperiodeService = vedtaksperiodeService,
             brevmalService = brevmalService,
 
-            )
+        )
         var vilkårsvurdering = vilkårService.hentVilkårsvurderingThrows(behandling.id)
         assertTrue {
             vilkårsvurdering.personResultater.all { personResultat ->
