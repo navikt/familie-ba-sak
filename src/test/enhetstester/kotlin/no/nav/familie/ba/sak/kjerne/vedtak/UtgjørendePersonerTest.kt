@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak
 import io.mockk.mockk
 import no.nav.familie.ba.sak.common.Periode
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
+import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagTriggesAv
@@ -146,6 +147,7 @@ class UtgjørendePersonerTest {
                 .map { it.tilMinimertPerson() },
             erFørsteVedtaksperiodePåFagsak = false,
             featureToggleService = featureToggleService,
+            begrunnelse = Standardbegrunnelse.INNVILGET_LOVLIG_OPPHOLD_OPPHOLDSTILLATELSE,
         )
 
         assertEquals(2, personerMedUtgjørendeVilkårLovligOpphold.size)
@@ -166,6 +168,7 @@ class UtgjørendePersonerTest {
                 .map { it.tilMinimertPerson() },
             erFørsteVedtaksperiodePåFagsak = false,
             featureToggleService = featureToggleService,
+            begrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
         )
 
         assertEquals(1, personerMedUtgjørendeVilkårBosattIRiket.size)
@@ -242,6 +245,7 @@ class UtgjørendePersonerTest {
                 .map { it.tilMinimertPerson() },
             erFørsteVedtaksperiodePåFagsak = false,
             featureToggleService = featureToggleService,
+            begrunnelse = Standardbegrunnelse.REDUKSJON_BOSATT_I_RIKTET,
         )
 
         assertEquals(1, personerMedUtgjørendeVilkårBosattIRiket.size)
@@ -262,6 +266,7 @@ class UtgjørendePersonerTest {
                 .map { it.tilMinimertPerson() },
             erFørsteVedtaksperiodePåFagsak = false,
             featureToggleService = featureToggleService,
+            begrunnelse = Standardbegrunnelse.OPPHØR_UTVANDRET,
         )
 
         assertEquals(1, personerMedUtgjørendeVilkårBarnUtvandret.size)
@@ -333,6 +338,7 @@ class UtgjørendePersonerTest {
                 .map { it.tilMinimertPerson() },
             erFørsteVedtaksperiodePåFagsak = false,
             featureToggleService = featureToggleService,
+            begrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
         )
 
         val personerMedUtgjørendeVilkårBosattIRiket = hentPersonerForAlleUtgjørendeVilkår(
@@ -347,6 +353,7 @@ class UtgjørendePersonerTest {
                 .map { it.tilMinimertPerson() },
             erFørsteVedtaksperiodePåFagsak = false,
             featureToggleService = featureToggleService,
+            begrunnelse = Standardbegrunnelse.INNVILGET_BOSATT_I_RIKTET,
         )
 
         assertEquals(1, personerMedUtgjørendeVilkårBosattIRiketMedlemskap.size)
@@ -359,6 +366,108 @@ class UtgjørendePersonerTest {
         assertEquals(
             barn2Fnr,
             personerMedUtgjørendeVilkårBosattIRiket.first().personIdent,
+        )
+    }
+
+    @Test
+    fun `Skal ta med riktig personer på avslag som er samtidige`() {
+        val søkerFnr = randomFnr()
+        val barn1Fnr = randomFnr()
+        val barn2Fnr = randomFnr()
+
+        val barn1AktørId = tilAktør(barn1Fnr)
+        val barn2AktørId = tilAktør(barn2Fnr)
+
+        val behandling = lagBehandling()
+        val personopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlag(
+                behandling.id,
+                søkerFnr,
+                listOf(barn1Fnr, barn2Fnr),
+            )
+
+        val vilkårsvurdering = Vilkårsvurdering(
+            behandling = behandling,
+        )
+
+        val barn1PersonResultat =
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = barn1AktørId)
+        val barn2PersonResultat =
+            PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = barn2AktørId)
+
+        val avslagBegrunnelse1 = Standardbegrunnelse.AVSLAG_IKKE_AVTALE_OM_DELT_BOSTED
+        barn1PersonResultat.setSortedVilkårResultater(
+            setOf(
+                lagVilkårResultat(
+                    barn1PersonResultat,
+                    vilkårType = Vilkår.BOR_MED_SØKER,
+                    periodeFom = null,
+                    periodeTom = null,
+                    resultat = Resultat.IKKE_OPPFYLT,
+                    erEksplisittAvslagPåSøknad = true,
+                    standardbegrunnelser = listOf(avslagBegrunnelse1),
+                ),
+            ),
+        )
+
+        val avslagBegrunnelse2 = Standardbegrunnelse.AVSLAG_BOR_HOS_SØKER
+        barn2PersonResultat.setSortedVilkårResultater(
+            setOf(
+                lagVilkårResultat(
+                    barn2PersonResultat,
+                    vilkårType = Vilkår.BOR_MED_SØKER,
+                    periodeFom = null,
+                    periodeTom = null,
+                    resultat = Resultat.IKKE_OPPFYLT,
+                    erEksplisittAvslagPåSøknad = true,
+                    standardbegrunnelser = listOf(avslagBegrunnelse2),
+                ),
+            ),
+        )
+
+        vilkårsvurdering.personResultater =
+            setOf(barn1PersonResultat, barn2PersonResultat)
+
+        val personerMedUtgjørendeVilkårAvslag1 = hentPersonerForAlleUtgjørendeVilkår(
+            minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
+            vedtaksperiode = Periode(
+                fom = TIDENES_MORGEN,
+                tom = TIDENES_ENDE,
+            ),
+            oppdatertBegrunnelseType = VedtakBegrunnelseType.AVSLAG,
+            triggesAv = lagTriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER), medlemskap = true),
+            aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
+                .map { it.tilMinimertPerson() },
+            erFørsteVedtaksperiodePåFagsak = false,
+            featureToggleService = featureToggleService,
+            begrunnelse = avslagBegrunnelse1,
+        )
+
+        val personerMedUtgjørendeVilkårAvslag2 = hentPersonerForAlleUtgjørendeVilkår(
+            minimertePersonResultater = vilkårsvurdering.personResultater.map { it.tilMinimertPersonResultat() },
+            vedtaksperiode = Periode(
+                fom = TIDENES_MORGEN,
+                tom = TIDENES_ENDE,
+            ),
+            oppdatertBegrunnelseType = VedtakBegrunnelseType.AVSLAG,
+            triggesAv = lagTriggesAv(vilkår = setOf(Vilkår.BOR_MED_SØKER)),
+            aktuellePersonerForVedtaksperiode = personopplysningGrunnlag.personer.toList()
+                .map { it.tilMinimertPerson() },
+            erFørsteVedtaksperiodePåFagsak = false,
+            featureToggleService = featureToggleService,
+            begrunnelse = avslagBegrunnelse2,
+        )
+
+        assertEquals(1, personerMedUtgjørendeVilkårAvslag1.size)
+        assertEquals(
+            barn1Fnr,
+            personerMedUtgjørendeVilkårAvslag1.first().personIdent,
+        )
+
+        assertEquals(1, personerMedUtgjørendeVilkårAvslag2.size)
+        assertEquals(
+            barn2Fnr,
+            personerMedUtgjørendeVilkårAvslag2.first().personIdent,
         )
     }
 }

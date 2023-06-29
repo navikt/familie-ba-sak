@@ -95,18 +95,18 @@ object OrdinærBarnetrygdUtil {
         val person = personopplysningGrunnlag.personer.find { it.aktør == personResultat.aktør }
             ?: throw Feil("Finner ikke person med aktørId=${personResultat.aktør.aktørId} i persongrunnlaget ved generering av andeler tilkjent ytelse")
         person to personResultat.tilTidslinjeMedRettTilProsentForPerson(
-            personType = person.type,
+            person = person,
             fagsakType = fagsakType,
         )
     }
 
     internal fun PersonResultat.tilTidslinjeMedRettTilProsentForPerson(
-        personType: PersonType,
+        person: Person,
         fagsakType: FagsakType,
     ): Tidslinje<BigDecimal, Måned> {
-        val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår()
+        val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår(person.fødselsdato)
 
-        return tidslinjer.kombiner { it.mapTilProsentEllerNull(personType, fagsakType) }.slåSammenLike().filtrerIkkeNull()
+        return tidslinjer.kombiner { it.mapTilProsentEllerNull(person.type, fagsakType) }.slåSammenLike().filtrerIkkeNull()
     }
 
     internal fun Iterable<VilkårResultat>.mapTilProsentEllerNull(personType: PersonType, fagsakType: FagsakType): BigDecimal? {
