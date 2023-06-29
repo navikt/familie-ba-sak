@@ -26,7 +26,6 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.harBarnMedSeksår
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
-import org.slf4j.LoggerFactory
 import java.time.LocalDate
 
 fun Standardbegrunnelse.triggesForPeriode(
@@ -64,6 +63,7 @@ fun Standardbegrunnelse.triggesForPeriode(
         oppdatertBegrunnelseType = this.vedtakBegrunnelseType,
         aktuellePersonerForVedtaksperiode = aktuellePersoner.map { it.tilMinimertRestPerson() },
         triggesAv = triggesAv,
+        begrunnelse = this,
         erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
         featureToggleService = featureToggleService,
     )
@@ -156,8 +156,6 @@ private fun erEtterEndretPeriodeAvSammeÅrsak(
         aktuellePersoner.any { person -> person.aktørId == endretUtbetalingAndel.aktørId } &&
         triggesAv.endringsaarsaker.contains(endretUtbetalingAndel.årsak)
 }
-
-private val logger = LoggerFactory.getLogger(Standardbegrunnelse::class.java)
 
 fun List<LocalDate>.tilBrevTekst(): String = Utils.slåSammen(this.sorted().map { it.tilKortString() })
 
