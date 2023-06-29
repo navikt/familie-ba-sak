@@ -34,6 +34,14 @@ fun nesteGyldigeTriggertidForBehandlingIHverdager(
         date.dayOfMonth == 26 && date.month == Month.DECEMBER -> date = date.plusDays(1)
     }
 
+    when (date.dayOfWeek) {
+        DayOfWeek.SATURDAY -> date = date.plusDays(2)
+        DayOfWeek.SUNDAY -> date = date.plusDays(1)
+        else -> {
+            // NOP
+        }
+    }
+
     return date
 }
 

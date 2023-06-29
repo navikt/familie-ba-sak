@@ -32,7 +32,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.slåSammenLike
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilFørsteDagIMåneden
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilSisteDagIMåneden
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonthEllerUendeligFortid
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
@@ -197,7 +197,7 @@ fun VedtaksperiodeMedBegrunnelser.hentUtbetalingsperiodeDetaljerNy(
 
         Vedtaksperiodetype.FORTSATT_INNVILGET -> {
             val løpendeUtbetalingsperiode = utbetalingsperiodeDetaljer.perioder()
-                .lastOrNull { it.fraOgMed.tilYearMonth() <= inneværendeMåned() }
+                .lastOrNull { it.fraOgMed.tilYearMonthEllerUendeligFortid() <= inneværendeMåned() }
                 ?: utbetalingsperiodeDetaljer.perioder().firstOrNull()
 
             løpendeUtbetalingsperiode?.innhold?.toList()

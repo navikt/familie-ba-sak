@@ -1,6 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt
 
 import no.nav.familie.ba.sak.common.Feil
+import no.nav.familie.ba.sak.common.TIDENES_ENDE
+import no.nav.familie.ba.sak.common.TIDENES_MORGEN
 import no.nav.familie.ba.sak.common.sisteDagIMåned
 import no.nav.familie.ba.sak.common.toYearMonth
 
@@ -68,5 +70,7 @@ fun <T : Tidsenhet> Tidspunkt<T>.somTilOgMed() = when (uendelighet) {
 
 fun <T : Tidsenhet> Tidspunkt<T>.tilYearMonth() = this.tilInneværendeMåned().tilYearMonth()
 fun <T : Tidsenhet> Tidspunkt<T>.tilYearMonthEllerNull() = this.tilInneværendeMåned().tilYearMonthEllerNull()
+fun <T : Tidsenhet> Tidspunkt<T>.tilYearMonthEllerUendeligFortid() = this.tilInneværendeMåned().tilYearMonthEllerNull() ?: TIDENES_MORGEN.toYearMonth()
+fun <T : Tidsenhet> Tidspunkt<T>.tilYearMonthEllerUendeligFramtid() = this.tilInneværendeMåned().tilYearMonthEllerNull() ?: TIDENES_ENDE.toYearMonth()
 fun <T : Tidsenhet> Tidspunkt<T>.tilLocalDate() = this.tilDagEllerSisteDagIPerioden().tilLocalDate()
 fun <T : Tidsenhet> Tidspunkt<T>.tilLocalDateEllerNull() = this.tilDagEllerSisteDagIPerioden().tilLocalDateEllerNull()

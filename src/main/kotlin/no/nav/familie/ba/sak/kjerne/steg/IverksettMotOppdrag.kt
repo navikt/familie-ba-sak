@@ -66,7 +66,8 @@ class IverksettMotOppdrag(
         val forrigeIverksatteBehandling =
             behandlingHentOgPersisterService.hentForrigeBehandlingSomErIverksatt(behandling)
         if (forrigeIverksatteBehandling == null ||
-            forrigeIverksatteBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT
+            forrigeIverksatteBehandling.type == BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT ||
+            behandling.erManuellMigrering()
         ) {
             taskRepository.save(
                 SendVedtakTilInfotrygdTask.opprettTask(

@@ -15,7 +15,7 @@ Egenskap: Vedtaksperioder med andeler tilkjent ytelse
 
   Scenario: Skal lage vedtaksperioder for mor med ett barn med andeler tilkjent ytelse
     Og lag personresultater for behandling 1
-    Og med overstyring av vilkår for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                                          | Fra dato   | Til dato   | Resultat |
       | 1234    | BOSATT_I_RIKET, LOVLIG_OPPHOLD                                  | 11.01.1970 |            | Oppfylt  |
       | 3456    | UNDER_18_ÅR                                                     | 13.04.2020 | 12.04.2038 | Oppfylt  |
@@ -37,7 +37,7 @@ Egenskap: Vedtaksperioder med andeler tilkjent ytelse
 
   Scenario: Skal lage vedtaksperioder for mor med ett barn med andel tilkjent ytelse med lik verdi og forskjellig begrunnelse
     Og lag personresultater for behandling 1
-    Og med overstyring av vilkår for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                                          | Fra dato   | Til dato   | Resultat |
       | 1234    | BOSATT_I_RIKET, LOVLIG_OPPHOLD                                  | 11.01.1970 |            | Oppfylt  |
       | 3456    | UNDER_18_ÅR                                                     | 13.04.2020 | 12.04.2038 | Oppfylt  |
@@ -66,7 +66,7 @@ Egenskap: Vedtaksperioder med andeler tilkjent ytelse
       | 1            | 3456    | BARN       | 04.09.2020  |
 
     Og lag personresultater for behandling 1
-    Og med overstyring av vilkår for behandling 1
+    Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                                          | Fra dato   | Til dato   | Resultat |
       | 1234    | BOSATT_I_RIKET, LOVLIG_OPPHOLD                                  | 11.10.1987 |            | Oppfylt  |
       | 3456    | UNDER_18_ÅR                                                     | 04.09.2020 | 03.09.2038 | Oppfylt  |

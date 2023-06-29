@@ -28,6 +28,7 @@ class OpprettOppgaveTask(
             fristForFerdigstillelse = opprettOppgaveTaskDTO.fristForFerdigstillelse,
             tilordnetNavIdent = opprettOppgaveTaskDTO.tilordnetRessurs,
             beskrivelse = opprettOppgaveTaskDTO.beskrivelse,
+            manuellOppgaveType = opprettOppgaveTaskDTO.manuellOppgaveType,
         )
     }
 
@@ -51,6 +52,7 @@ class OpprettOppgaveTask(
                         fristForFerdigstillelse,
                         tilordnetRessurs,
                         beskrivelse,
+                        null,
                     ),
                 ),
             )

@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.kjerne.behandling
 
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.TIDENES_MORGEN
+import no.nav.familie.ba.sak.config.FeatureToggleConfig
+import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.ekstern.restDomene.VergeInfo
 import no.nav.familie.ba.sak.ekstern.restDomene.tilDto
@@ -36,6 +38,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagSe
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.korrigertetterbetaling.KorrigertEtterbetalingService
 import no.nav.familie.ba.sak.kjerne.korrigertvedtak.KorrigertVedtakService
+import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.tilbakekreving.domene.TilbakekrevingRepository
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
@@ -73,6 +76,7 @@ class UtvidetBehandlingService(
     private val feilutbetaltValutaService: FeilutbetaltValutaService,
     private val brevmottakerService: BrevmottakerService,
     private val refusjonEøsService: RefusjonEøsService,
+    private val featureToggleService: FeatureToggleService,
 ) {
     fun lagRestUtvidetBehandling(behandlingId: Long): RestUtvidetBehandling {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
@@ -95,7 +99,13 @@ class UtvidetBehandlingService(
 
         val tilbakekreving = tilbakekrevingRepository.findByBehandlingId(behandling.id)
 
-        val endringstidspunkt = endringstidspunktService.finnEndringstidspunktForBehandling(behandlingId)
+        val endringstidspunkt = if (behandling.steg != StegType.BESLUTTE_VEDTAK) {
+            TIDENES_MORGEN
+        } else if (featureToggleService.isEnabled(FeatureToggleConfig.ENDRINGSTIDSPUNKT)) {
+            vedtaksperiodeService.finnEndringstidspunktForBehandling(behandlingId = behandling.id)
+        } else {
+            endringstidspunktService.finnEndringstidspunktForBehandling(behandlingId = behandling.id)
+        }
 
         val kompetanser: Collection<Kompetanse> = kompetanseRepository.finnFraBehandlingId(behandlingId)
 

@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger
 
 import io.mockk.every
 import no.nav.familie.ba.sak.common.BaseEntitet
+import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.randomFnr
@@ -21,6 +22,7 @@ import no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling.Personopplysnin
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import java.time.YearMonth
 import kotlin.reflect.full.declaredMemberProperties
 
 class PersonopplysningGrunnlagForNyBehandlingServiceTest(
@@ -73,7 +75,22 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest(
         val grunnlagFraFørsteBehandling =
             personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = førsteBehandling.id)
 
-        tilkjentYtelseRepository.saveAndFlush(lagInitiellTilkjentYtelse(førsteBehandling, ""))
+        // Legger til andel tilkjent ytelse på barn
+        tilkjentYtelseRepository.saveAndFlush(
+            lagInitiellTilkjentYtelse(førsteBehandling, "").also {
+                it.andelerTilkjentYtelse.addAll(
+                    listOf(
+                        lagAndelTilkjentYtelse(
+                            fom = YearMonth.of(2023, 5),
+                            tom = YearMonth.of(2025, 5),
+                            person = grunnlagFraFørsteBehandling!!.personer.first { person -> person.aktør.aktivFødselsnummer() == barnId },
+                            behandling = førsteBehandling,
+                            tilkjentYtelse = it,
+                        ),
+                    ),
+                )
+            },
+        )
 
         avsluttOgLagreBehandling(førsteBehandling)
 
@@ -107,6 +124,90 @@ class PersonopplysningGrunnlagForNyBehandlingServiceTest(
         assertThat(grunnlagFraSatsendringBehandling.id)
             .isNotEqualTo(grunnlagFraFørsteBehandling.id)
         assertThat(grunnlagFraSatsendringBehandling.behandlingId).isNotEqualTo(grunnlagFraFørsteBehandling.behandlingId)
+        validerAtPersonerIGrunnlagErLike(grunnlagFraFørsteBehandling, grunnlagFraSatsendringBehandling, false)
+    }
+
+    @Test
+    fun `opprettKopiEllerNyttPersonopplysningGrunnlag - skal opprette nytt PersonopplysningGrunnlag som kopi av personopplysningsgrunnlag fra forrige behandling med barn som hadde andeler tilkjent ytelse`() {
+        val morId = randomFnr()
+        val barn1Id = randomFnr()
+        val barn2Id = randomFnr()
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(morId)
+        val førsteBehandling =
+            behandlingService.lagreNyOgDeaktiverGammelBehandling(lagBehandling(fagsak))
+
+        every {
+            featureToggleService.isEnabled(
+                FeatureToggleConfig.SATSENDRING_KOPIER_GRUNNLAG_FRA_FORRIGE_BEHANDLING,
+                false,
+            )
+        } returns true
+
+        personopplysningGrunnlagForNyBehandlingService.opprettKopiEllerNyttPersonopplysningGrunnlag(
+            førsteBehandling,
+            null,
+            morId,
+            listOf(barn1Id, barn2Id),
+        )
+
+        val grunnlagFraFørsteBehandling =
+            personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = førsteBehandling.id)
+
+        // Legger til andel tilkjent ytelse på barn
+        tilkjentYtelseRepository.saveAndFlush(
+            lagInitiellTilkjentYtelse(førsteBehandling, "").also {
+                it.andelerTilkjentYtelse.addAll(
+                    listOf(
+                        lagAndelTilkjentYtelse(
+                            fom = YearMonth.of(2023, 5),
+                            tom = YearMonth.of(2025, 5),
+                            person = grunnlagFraFørsteBehandling!!.personer.first { person -> person.aktør.aktivFødselsnummer() == barn2Id },
+                            behandling = førsteBehandling,
+                            tilkjentYtelse = it,
+                        ),
+                    ),
+                )
+            },
+        )
+
+        avsluttOgLagreBehandling(førsteBehandling)
+
+        assertThat(grunnlagFraFørsteBehandling!!.personer.size).isEqualTo(3)
+        assertThat(grunnlagFraFørsteBehandling.personer.any { it.aktør.aktivFødselsnummer() == morId }).isTrue
+        assertThat(grunnlagFraFørsteBehandling.personer.any { it.aktør.aktivFødselsnummer() == barn1Id }).isTrue
+        assertThat(grunnlagFraFørsteBehandling.personer.any { it.aktør.aktivFødselsnummer() == barn2Id }).isTrue
+
+        val satsendring = lagBehandling(
+            fagsak,
+            behandlingType = BehandlingType.REVURDERING,
+            årsak = BehandlingÅrsak.SATSENDRING,
+        )
+
+        val satsendringBehandling = behandlingService.lagreNyOgDeaktiverGammelBehandling(
+            satsendring,
+        )
+
+        personopplysningGrunnlagForNyBehandlingService.opprettKopiEllerNyttPersonopplysningGrunnlag(
+            satsendringBehandling,
+            førsteBehandling,
+            morId,
+            listOf(barn1Id, barn2Id),
+        )
+
+        val grunnlagFraSatsendringBehandling =
+            personopplysningGrunnlagRepository.findByBehandlingAndAktiv(behandlingId = satsendringBehandling.id)
+
+        assertThat(grunnlagFraSatsendringBehandling!!.personer.size).isEqualTo(2)
+        assertThat(grunnlagFraSatsendringBehandling.personer.any { it.aktør.aktivFødselsnummer() == morId }).isTrue
+        assertThat(grunnlagFraSatsendringBehandling.personer.any { it.aktør.aktivFødselsnummer() == barn2Id }).isTrue
+        assertThat(grunnlagFraSatsendringBehandling.personer.any { it.aktør.aktivFødselsnummer() == barn1Id }).isFalse
+
+        assertThat(grunnlagFraSatsendringBehandling.id)
+            .isNotEqualTo(grunnlagFraFørsteBehandling.id)
+        assertThat(grunnlagFraSatsendringBehandling.behandlingId).isNotEqualTo(grunnlagFraFørsteBehandling.behandlingId)
+
+        grunnlagFraFørsteBehandling.personer.removeAll { it.aktør.aktivFødselsnummer() == barn1Id }
         validerAtPersonerIGrunnlagErLike(grunnlagFraFørsteBehandling, grunnlagFraSatsendringBehandling, false)
     }
 

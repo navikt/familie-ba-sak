@@ -20,10 +20,11 @@ class TestVerktøyService(
 
         vilkårsvurdering?.personResultater?.forEach { personResultat ->
             personResultat.vilkårResultater.forEach { vilkårResultat ->
-                if (vilkårResultat.periodeFom == null && vilkårResultat.resultat != Resultat.OPPFYLT) {
+                if (vilkårResultat.resultat == Resultat.IKKE_VURDERT) {
                     vilkårResultat.periodeFom =
                         persongrunnlag?.personer?.find { it.aktør == personResultat.aktør }?.fødselsdato
                     vilkårResultat.resultat = Resultat.OPPFYLT
+                    vilkårResultat.begrunnelse = "Opprettet automatisk fra \"Fyll ut vilkårsvurdering\"-knappen"
                 }
             }
         }

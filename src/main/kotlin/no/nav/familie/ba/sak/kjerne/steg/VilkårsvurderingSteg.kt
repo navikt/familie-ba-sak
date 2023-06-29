@@ -48,6 +48,7 @@ class VilkårsvurderingSteg(
             valider18ÅrsVilkårEksistererFraFødselsdato(
                 personopplysningGrunnlag = personopplysningGrunnlag,
                 vilkårsvurdering = this,
+                behandling = behandling,
             )
         }
     }

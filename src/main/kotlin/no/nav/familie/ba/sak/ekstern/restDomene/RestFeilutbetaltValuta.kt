@@ -7,4 +7,5 @@ data class RestFeilutbetaltValuta(
     val fom: LocalDate,
     val tom: LocalDate,
     val feilutbetaltBeløp: Int,
+    val erPerMåned: Boolean? = null,
 )

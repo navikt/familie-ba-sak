@@ -10,8 +10,10 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.månedPeriodeAv
 import no.nav.familie.ba.sak.kjerne.tidslinje.periodeAv
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
@@ -147,15 +149,17 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.finnBegrunnelseGrunnlagPerPerso
     val tidslinjeMedVedtaksperioden = this.tilTidslinjeForAktuellPeriode()
 
     val grunnlagTidslinjePerPerson = grunnlagForVedtaksperioder.utledGrunnlagTidslinjePerPerson()
+        .mapValues { it.value.copy(grunnlagForPerson = it.value.grunnlagForPerson.fjernOverflødigePerioderPåSlutten()) }
 
     val grunnlagTidslinjePerPersonForrigeBehandling =
         grunnlagForVedtaksperioderForrigeBehandling?.utledGrunnlagTidslinjePerPerson()
 
     return grunnlagTidslinjePerPerson.mapValues { (aktørId, grunnlagTidslinje) ->
-        val grunnlagMedForrigePeriodeTidslinje = grunnlagTidslinje.tilForrigeOgNåværendePeriodeTidslinje()
+        val grunnlagMedForrigePeriodeTidslinje =
+            grunnlagTidslinje.grunnlagForPerson.tilForrigeOgNåværendePeriodeTidslinje()
 
         val grunnlagForrigeBehandlingTidslinje =
-            grunnlagTidslinjePerPersonForrigeBehandling?.get(aktørId) ?: TomTidslinje()
+            grunnlagTidslinjePerPersonForrigeBehandling?.get(aktørId)?.grunnlagForPerson ?: TomTidslinje()
 
         val grunnlagMedForrigePeriodeOgBehandlingTidslinje = tidslinjeMedVedtaksperioden.kombinerMed(
             grunnlagMedForrigePeriodeTidslinje,
@@ -176,9 +180,31 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.finnBegrunnelseGrunnlagPerPerso
     }
 }
 
+private fun Tidslinje<GrunnlagForPerson, Måned>.fjernOverflødigePerioderPåSlutten(): Tidslinje<GrunnlagForPerson, Måned> {
+    val sortertePerioder = this.perioder()
+        .sortedWith(compareBy({ it.fraOgMed }, { it.tilOgMed }))
+
+    val perioderTilOgMedSisteInnvilgede = sortertePerioder
+        .dropLastWhile { it.innhold !is GrunnlagForPersonInnvilget }
+
+    val perioderEtterSisteInnvilgedePeriode =
+        sortertePerioder.subList(perioderTilOgMedSisteInnvilgede.size, sortertePerioder.size)
+
+    val (eksplisitteAvslagEtterSisteInnvilgedePeriode, opphørEtterSisteInnvilgedePeriode) =
+        perioderEtterSisteInnvilgedePeriode
+            .filter { it.innhold != null }
+            .partition { it.innhold!!.erEksplisittAvslag() }
+
+    val førsteOpphørEtterSisteInnvilgedePeriode =
+        opphørEtterSisteInnvilgedePeriode.firstOrNull()?.copy(tilOgMed = MånedTidspunkt.uendeligLengeTil())
+
+    return (perioderTilOgMedSisteInnvilgede + førsteOpphørEtterSisteInnvilgedePeriode + eksplisitteAvslagEtterSisteInnvilgedePeriode).filterNotNull()
+        .tilTidslinje()
+}
+
 private fun UtvidetVedtaksperiodeMedBegrunnelser.tilTidslinjeForAktuellPeriode(): Tidslinje<UtvidetVedtaksperiodeMedBegrunnelser, Måned> {
     return listOf(
-        periodeAv(
+        månedPeriodeAv(
             fraOgMed = this.fom?.toYearMonth(),
             tilOgMed = this.tom?.toYearMonth(),
             innhold = this,
@@ -191,7 +217,7 @@ data class ForrigeOgDennePerioden(val forrige: GrunnlagForPerson?, val denne: Gr
 private fun Tidslinje<GrunnlagForPerson, Måned>.tilForrigeOgNåværendePeriodeTidslinje(): Tidslinje<ForrigeOgDennePerioden, Måned> {
     return (
         listOf(
-            periodeAv(YearMonth.now(), YearMonth.now(), null),
+            månedPeriodeAv(YearMonth.now(), YearMonth.now(), null),
         ) + this.perioder()
         ).zipWithNext { forrige, denne ->
         periodeAv(denne.fraOgMed, denne.tilOgMed, ForrigeOgDennePerioden(forrige.innhold, denne.innhold))

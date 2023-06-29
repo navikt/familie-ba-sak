@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode
 
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.spyk
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.common.lagBehandling
@@ -48,27 +49,29 @@ class VedtaksperiodeServiceTest {
     private val refusjonEøsRepository = mockk<RefusjonEøsRepository>()
     private val integrasjonClient = mockk<IntegrasjonClient>()
 
-    private val vedtaksperiodeService = VedtaksperiodeService(
-        personidentService = mockk(),
-        persongrunnlagService = persongrunnlagService,
-        andelTilkjentYtelseRepository = mockk(),
-        vedtaksperiodeHentOgPersisterService = vedtaksperiodeHentOgPersisterService,
-        vedtakRepository = mockk(),
-        vilkårsvurderingService = mockk(relaxed = true),
-        sanityService = mockk(),
-        søknadGrunnlagService = mockk(relaxed = true),
-        endretUtbetalingAndelRepository = mockk(),
-        endringstidspunktService = endringstidspunktService,
-        utbetalingsperiodeMedBegrunnelserService = mockk(relaxed = true),
-        kompetanseRepository = mockk(),
-        andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
-        featureToggleService = featureToggleService,
-        feilutbetaltValutaRepository = feilutbetaltValutaRepository,
-        brevmalService = brevmalService,
-        behandlingHentOgPersisterService = behandlingHentOgPersisterService,
-        småbarnstilleggService = småbarnstilleggService,
-        refusjonEøsRepository = refusjonEøsRepository,
-        integrasjonClient = integrasjonClient,
+    private val vedtaksperiodeService = spyk(
+        VedtaksperiodeService(
+            personidentService = mockk(),
+            persongrunnlagService = persongrunnlagService,
+            andelTilkjentYtelseRepository = mockk(),
+            vedtaksperiodeHentOgPersisterService = vedtaksperiodeHentOgPersisterService,
+            vedtakRepository = mockk(),
+            vilkårsvurderingService = mockk(relaxed = true),
+            sanityService = mockk(),
+            søknadGrunnlagService = mockk(relaxed = true),
+            endretUtbetalingAndelRepository = mockk(),
+            endringstidspunktService = endringstidspunktService,
+            utbetalingsperiodeMedBegrunnelserService = mockk(relaxed = true),
+            kompetanseRepository = mockk(),
+            andelerTilkjentYtelseOgEndreteUtbetalingerService = andelerTilkjentYtelseOgEndreteUtbetalingerService,
+            featureToggleService = featureToggleService,
+            feilutbetaltValutaRepository = feilutbetaltValutaRepository,
+            brevmalService = brevmalService,
+            behandlingHentOgPersisterService = behandlingHentOgPersisterService,
+            småbarnstilleggService = småbarnstilleggService,
+            refusjonEøsRepository = refusjonEøsRepository,
+            integrasjonClient = integrasjonClient,
+        ),
     )
 
     private val person = lagPerson()
@@ -94,6 +97,7 @@ class VedtaksperiodeServiceTest {
     fun init() {
         every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(any()) } returns forrigeBehandling
         every { endringstidspunktService.finnEndringstidspunktForBehandling(vedtak.behandling.id) } returns endringstidspunkt
+        every { vedtaksperiodeService.finnEndringstidspunktForBehandling(vedtak.behandling.id) } returns endringstidspunkt
         every { persongrunnlagService.hentAktiv(any()) } returns
             lagTestPersonopplysningGrunnlag(vedtak.behandling.id, person)
         every {
@@ -218,7 +222,7 @@ class VedtaksperiodeServiceTest {
         every {
             feilutbetaltValutaRepository.finnFeilutbetaltValutaForBehandling(vedtak.behandling.id)
         } returns perioder.map {
-            FeilutbetaltValuta(1L, fom = it.first, tom = it.second, 200)
+            FeilutbetaltValuta(1L, fom = it.first, tom = it.second, 200, true)
         }
         val periodebeskrivelser = vedtaksperiodeService.beskrivPerioderMedFeilutbetaltValuta(vedtak)
 

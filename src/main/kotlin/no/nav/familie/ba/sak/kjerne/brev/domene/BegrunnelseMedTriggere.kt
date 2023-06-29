@@ -35,6 +35,7 @@ data class BegrunnelseMedTriggere(
             )
         } else {
             val personidenterGjeldendeForBegrunnelse: Set<String> = hentPersonidenterGjeldendeForBegrunnelse(
+                begrunnelse = this.standardbegrunnelse,
                 triggesAv = this.triggesAv,
                 vedtakBegrunnelseType = this.standardbegrunnelse.vedtakBegrunnelseType,
                 periode = periode,

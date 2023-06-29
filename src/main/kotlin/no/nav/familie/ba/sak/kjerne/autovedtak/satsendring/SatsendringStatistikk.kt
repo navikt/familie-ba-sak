@@ -41,14 +41,14 @@ class SatsendringStatistikk(
                 MultiGauge.Row.of(
                     Tags.of(
                         "satsendring",
-                        "totalt-${satsTidspunkt.year}-${satsTidspunkt.month}",
+                        "totalt",
                     ),
                     antallTriggetTotalt,
                 ),
                 MultiGauge.Row.of(
                     Tags.of(
                         "satsendring",
-                        "antallkjort-${satsTidspunkt.year}-${satsTidspunkt.month}",
+                        "antallkjort",
                     ),
                     antallKjørt,
                 ),
@@ -62,13 +62,13 @@ class SatsendringStatistikk(
                 MultiGauge.Row.of(
                     Tags.of(
                         "satsendring",
-                        "antallgjenstaaende-${satsTidspunkt.year}-${satsTidspunkt.month}",
+                        "antallgjenstaaende",
                     ),
                     antallLøpendeFagsakerTotalt - antallKjørt,
                 ),
             )
 
-            satsendringGauge.register(rows)
+            satsendringGauge.register(rows, true)
         } finally {
             MDC.clear()
         }

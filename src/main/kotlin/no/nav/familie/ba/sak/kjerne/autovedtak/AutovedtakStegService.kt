@@ -14,7 +14,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
 import no.nav.familie.prosessering.error.RekjørSenereException
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -172,13 +172,12 @@ class AutovedtakStegService(
             oppgaveService.opprettOppgaveForManuellBehandling(
                 behandling = åpenBehandling,
                 begrunnelse = "${autovedtaktype.displayName}: Bruker har åpen behandling",
-                oppgavetype = Oppgavetype.VurderLivshendelse,
+                manuellOppgaveType = ManuellOppgaveType.ÅPEN_BEHANDLING,
             )
-
             true
-        } else if (åpenBehandling.status == BehandlingStatus.IVERKSETTER_VEDTAK) {
+        } else if (åpenBehandling.status == BehandlingStatus.IVERKSETTER_VEDTAK || åpenBehandling.status == BehandlingStatus.SATT_PÅ_MASKINELL_VENT) {
             throw RekjørSenereException(
-                årsak = "Åpen behandling iverksettes, prøver igjen om 1 time",
+                årsak = "Åpen behandling med status ${åpenBehandling.status}, prøver igjen om 1 time",
                 triggerTid = LocalDateTime.now().plusHours(1),
             )
         } else {

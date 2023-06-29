@@ -168,7 +168,7 @@ spring:
       ddl-auto: none
 
 
-SANITY_DATASET: "ba-test"
+SANITY_DATASET: "ba-brev"
 
 FAMILIE_INTEGRASJONER_API_URL: https://familie-integrasjoner.dev.intern.nav.no/api
 FAMILIE_INTEGRASJONER_SCOPE: api://dev-fss.teamfamilie.familie-integrasjoner/.default

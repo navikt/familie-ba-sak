@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
 import no.nav.familie.ba.sak.common.til18ÅrsVilkårsdato
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -15,13 +16,11 @@ object VilkårsvurderingMigreringUtils {
         person: Person,
         nyMigreringsdato: LocalDate,
     ): LocalDate {
-        val forrigeVilkårResultat = hentForrigeVilkårsvurderingVilkårResultater(
+        val forrigeVilkårsPeriodeFom = hentVilkårResultaterSomErOppfyltFraForrigeVilkårsvurdering(
             forrigeBehandlingsvilkårsvurdering,
             vilkår,
             person,
-        ).filter { it.periodeFom != null }
-        val forrigeVilkårsPeriodeFom =
-            if (forrigeVilkårResultat.isNotEmpty()) forrigeVilkårResultat.minOf { it.periodeFom!! } else null
+        ).minWithOrNull(VilkårResultat.VilkårResultatComparator)?.periodeFom
         return when {
             person.fødselsdato.isAfter(nyMigreringsdato) ||
                 vilkår.gjelderAlltidFraBarnetsFødselsdato() -> person.fødselsdato
@@ -39,7 +38,7 @@ object VilkårsvurderingMigreringUtils {
         person: Person,
         periodeFom: LocalDate,
     ): LocalDate? {
-        val forrigeVilkårsPeriodeTom: LocalDate? = hentForrigeVilkårsvurderingVilkårResultater(
+        val forrigeVilkårsPeriodeTom: LocalDate? = hentVilkårResultaterSomErOppfyltFraForrigeVilkårsvurdering(
             forrigeBehandlingsvilkårsvurdering,
             vilkår,
             person,
@@ -56,22 +55,38 @@ object VilkårsvurderingMigreringUtils {
         vilkårResulater: Set<VilkårResultat>,
         forrigeBehandlingsvilkårsvurdering: Vilkårsvurdering,
         person: Person,
+        personResultat: PersonResultat,
     ): List<VilkårResultat> {
         val manglendeVilkårResultater = mutableListOf<VilkårResultat>()
         vilkårResulater.forEach {
             val forrigeVilkårResultater =
-                hentForrigeVilkårsvurderingVilkårResultater(forrigeBehandlingsvilkårsvurdering, it.vilkårType, person)
+                hentVilkårResultaterSomErOppfyltFraForrigeVilkårsvurdering(
+                    forrigeBehandlingsvilkårsvurdering,
+                    it.vilkårType,
+                    person,
+                )
             manglendeVilkårResultater.addAll(
                 forrigeVilkårResultater.filter { forrigeVilkårResultat ->
                     forrigeVilkårResultat.periodeFom != it.periodeFom &&
                         forrigeVilkårResultat.periodeTom != it.periodeTom
-                },
+                }.map { vilkårResultat -> vilkårResultat.kopierMedParent(personResultat) }
+                    .toSet(), // Mulig vi her burde bruke vilkårResultat.tilKopiForNyttPersonResultat slik at behandlingsId blir oppdatert.
             )
         }
         return manglendeVilkårResultater
     }
 
-    private fun hentForrigeVilkårsvurderingVilkårResultater(
+    fun finnEksisterendeVilkårResultatSomBlirForskjøvet(
+        forrigeBehandlingVilkårsvurdering: Vilkårsvurdering,
+        vilkår: Vilkår,
+        person: Person,
+        nyFom: LocalDate,
+        nyTom: LocalDate?,
+    ) =
+        hentVilkårResultaterSomErOppfyltFraForrigeVilkårsvurdering(forrigeBehandlingVilkårsvurdering, vilkår, person)
+            .single { it.periodeFom == nyFom || it.periodeTom == nyTom || (nyFom.isBefore(it.periodeFom!!) && nyTom == null) }
+
+    private fun hentVilkårResultaterSomErOppfyltFraForrigeVilkårsvurdering(
         forrigeBehandlingsvilkårsvurdering: Vilkårsvurdering,
         vilkår: Vilkår,
         person: Person,
@@ -79,6 +94,6 @@ object VilkårsvurderingMigreringUtils {
         val personResultat = forrigeBehandlingsvilkårsvurdering.personResultater
             .first { it.aktør == person.aktør }
         return personResultat.vilkårResultater
-            .filter { it.vilkårType == vilkår }
+            .filter { it.vilkårType == vilkår && it.erOppfylt() }
     }
 }

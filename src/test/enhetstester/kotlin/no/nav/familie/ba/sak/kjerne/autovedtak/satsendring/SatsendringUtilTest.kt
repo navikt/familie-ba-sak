@@ -13,12 +13,10 @@ import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
-import java.time.YearMonth
 
 class SatsendringUtilTest {
 
     private val UGYLDIG_SATS = 1000
-    private val SATSTIDSPUNKT = YearMonth.of(2023, 3)
 
     @Test
     fun `Skal returnere true dersom vi har siste sats`() {
@@ -236,8 +234,8 @@ class SatsendringUtilTest {
         val behandling = lagBehandling()
         val atySomGårUtPåSatstidspunktGyldig =
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(
-                fom = SATSTIDSPUNKT.minusMonths(1),
-                tom = SATSTIDSPUNKT,
+                fom = datoForSisteSatsendringForSatsType(SatsType.ORBA).minusMonths(1),
+                tom = datoForSisteSatsendringForSatsType(SatsType.ORBA),
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                 behandling = behandling,
                 person = lagPerson(),
@@ -250,8 +248,8 @@ class SatsendringUtilTest {
 
         val atySomGårUtPåSatstidspunktUgyldig =
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(
-                fom = SATSTIDSPUNKT.minusMonths(1),
-                tom = SATSTIDSPUNKT,
+                fom = datoForSisteSatsendringForSatsType(SatsType.ORBA).minusMonths(1),
+                tom = datoForSisteSatsendringForSatsType(SatsType.ORBA),
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                 behandling = behandling,
                 person = lagPerson(),
@@ -268,8 +266,8 @@ class SatsendringUtilTest {
         val behandling = lagBehandling()
         val utgåttAndelTilkjentYtelse =
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(
-                fom = SATSTIDSPUNKT.minusMonths(10),
-                tom = SATSTIDSPUNKT.minusMonths(1),
+                fom = datoForSisteSatsendringForSatsType(SatsType.ORBA).minusMonths(10),
+                tom = datoForSisteSatsendringForSatsType(SatsType.ORBA).minusMonths(1),
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                 behandling = behandling,
                 person = lagPerson(),
@@ -286,8 +284,8 @@ class SatsendringUtilTest {
         val behandling = lagBehandling()
         val utgåttAndelTilkjentYtelse =
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(
-                fom = SATSTIDSPUNKT,
-                tom = SATSTIDSPUNKT.plusYears(10),
+                fom = datoForSisteSatsendringForSatsType(SatsType.ORBA),
+                tom = datoForSisteSatsendringForSatsType(SatsType.ORBA).plusYears(10),
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                 behandling = behandling,
                 person = lagPerson(),
@@ -304,8 +302,8 @@ class SatsendringUtilTest {
         val behandling = lagBehandling()
         val utgåttAndelTilkjentYtelse =
             lagAndelTilkjentYtelseMedEndreteUtbetalinger(
-                fom = SATSTIDSPUNKT,
-                tom = SATSTIDSPUNKT.plusYears(10),
+                fom = datoForSisteSatsendringForSatsType(SatsType.ORBA),
+                tom = datoForSisteSatsendringForSatsType(SatsType.ORBA).plusYears(10),
                 ytelseType = YtelseType.ORDINÆR_BARNETRYGD,
                 behandling = behandling,
                 person = lagPerson(),
@@ -334,4 +332,7 @@ class SatsendringUtilTest {
             beløp = beløp ?: SatsService.finnSisteSatsFor(satsType).beløp,
         ),
     )
+
+    private fun datoForSisteSatsendringForSatsType(satsType: SatsType) =
+        SatsService.finnSisteSatsFor(satsType).gyldigFom.toYearMonth()
 }

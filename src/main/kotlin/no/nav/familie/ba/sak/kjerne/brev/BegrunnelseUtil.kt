@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.somOverlapper
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.hentPersonerForEtterEndretUtbetalingsperiode
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.MinimertRestPerson
@@ -23,6 +24,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 
 fun hentPersonidenterGjeldendeForBegrunnelse(
     triggesAv: TriggesAv,
+    begrunnelse: IVedtakBegrunnelse,
     periode: NullablePeriode,
     vedtakBegrunnelseType: VedtakBegrunnelseType,
     vedtaksperiodetype: Vedtaksperiodetype,
@@ -53,6 +55,7 @@ fun hentPersonidenterGjeldendeForBegrunnelse(
             vedtakBegrunnelseType,
             identerMedUtbetalingPåPeriode,
         ),
+        begrunnelse = begrunnelse,
         triggesAv = triggesAv,
         erFørsteVedtaksperiodePåFagsak = erFørsteVedtaksperiodePåFagsak,
         featureToggleService = featureToggleService,

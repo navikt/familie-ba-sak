@@ -2,10 +2,14 @@ package no.nav.familie.ba.sak.task
 
 import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.Satskjøring
+import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.domene.SatskjøringRepository
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.task.dto.Autobrev6og18ÅrDTO
 import no.nav.familie.ba.sak.task.dto.AutobrevOpphørSmåbarnstilleggDTO
+import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
+import no.nav.familie.ba.sak.task.dto.OpprettOppgaveTaskDTO
 import no.nav.familie.kontrakter.felles.objectMapper
 import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.log.IdUtils
@@ -22,6 +26,7 @@ import java.util.Properties
 @Service
 class OpprettTaskService(
     val taskRepository: TaskRepositoryWrapper,
+    val satskjøringRepository: SatskjøringRepository,
 ) {
 
     fun opprettOppgaveTask(
@@ -36,6 +41,29 @@ class OpprettTaskService(
                 oppgavetype = oppgavetype,
                 fristForFerdigstillelse = fristForFerdigstillelse,
                 beskrivelse = beskrivelse,
+            ),
+        )
+    }
+
+    fun opprettOppgaveForManuellBehandlingTask(
+        behandlingId: Long,
+        beskrivelse: String? = null,
+        fristForFerdigstillelse: LocalDate = LocalDate.now(),
+        manuellOppgaveType: ManuellOppgaveType,
+    ) {
+        taskRepository.save(
+            Task(
+                type = OpprettOppgaveTask.TASK_STEP_TYPE,
+                payload = objectMapper.writeValueAsString(
+                    OpprettOppgaveTaskDTO(
+                        behandlingId,
+                        Oppgavetype.VurderLivshendelse,
+                        fristForFerdigstillelse,
+                        null,
+                        beskrivelse,
+                        manuellOppgaveType,
+                    ),
+                ),
             ),
         )
     }
@@ -88,6 +116,7 @@ class OpprettTaskService(
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     fun opprettSatsendringTask(fagsakId: Long, satstidspunkt: YearMonth) {
+        satskjøringRepository.save(Satskjøring(fagsakId = fagsakId, satsTidspunkt = satstidspunkt))
         overstyrTaskMedNyCallId(IdUtils.generateId()) {
             taskRepository.save(
                 Task(

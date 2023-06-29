@@ -128,10 +128,20 @@ class VilkårsvurderingForNyBehandlingService(
         inneværendeBehandling: Behandling,
     ): Vilkårsvurdering {
         return if (featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_KOPIER_GRUNNLAG_FRA_FORRIGE_BEHANDLING)) {
+            val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(inneværendeBehandling.id)
+
             val forrigeBehandlingVilkårsvurdering = hentVilkårsvurderingThrows(forrigeBehandlingSomErVedtatt.id)
 
             val nyVilkårsvurdering =
-                forrigeBehandlingVilkårsvurdering.tilKopiForNyBehandling(nyBehandling = inneværendeBehandling)
+                forrigeBehandlingVilkårsvurdering.tilKopiForNyBehandling(
+                    nyBehandling = inneværendeBehandling,
+                    personopplysningGrunnlag,
+                )
+
+            endretUtbetalingAndelService.kopierEndretUtbetalingAndelFraForrigeBehandling(
+                behandling = inneværendeBehandling,
+                forrigeBehandling = forrigeBehandlingSomErVedtatt,
+            )
 
             return vilkårsvurderingService.lagreNyOgDeaktiverGammel(nyVilkårsvurdering)
         } else {

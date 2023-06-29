@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.tilMinimertRestEndretUtbetalingA
 import no.nav.familie.ba.sak.kjerne.brev.hentPersonidenterGjeldendeForBegrunnelse
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.VedtakBegrunnelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.periodeErOppyltForYtelseType
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.tilMinimertPerson
@@ -62,6 +63,7 @@ class VedtaksperiodeServiceUtilsTest {
             minimerteUtbetalingsperiodeDetaljer = listOf(),
             dødeBarnForrigePeriode = emptyList(),
             featureToggleService = featureToggleService,
+            begrunnelse = Standardbegrunnelse.INNVILGET_BOR_ALENE_MED_BARN,
         )
 
         Assertions.assertEquals(
@@ -117,6 +119,7 @@ class VedtaksperiodeServiceUtilsTest {
             minimerteUtbetalingsperiodeDetaljer = listOf(),
             dødeBarnForrigePeriode = emptyList(),
             featureToggleService = featureToggleService,
+            begrunnelse = Standardbegrunnelse.INNVILGET_BOR_ALENE_MED_BARN,
         )
 
         Assertions.assertEquals(

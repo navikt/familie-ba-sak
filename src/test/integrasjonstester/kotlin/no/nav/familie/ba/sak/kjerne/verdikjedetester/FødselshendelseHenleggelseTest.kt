@@ -32,12 +32,13 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.task.BehandleFødselshendelseTask
+import no.nav.familie.ba.sak.task.OpprettOppgaveTask
 import no.nav.familie.ba.sak.task.OpprettTaskService
+import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
 import no.nav.familie.ba.sak.util.sisteTilleggOrdinærSats
 import no.nav.familie.ba.sak.util.sisteUtvidetSatsTilTester
 import no.nav.familie.ba.sak.util.tilleggOrdinærSatsNesteMånedTilTester
 import no.nav.familie.kontrakter.ba.infotrygd.InfotrygdSøkResponse
-import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
 import no.nav.familie.kontrakter.felles.personopplysning.Bostedsadresse
 import no.nav.familie.kontrakter.felles.personopplysning.Matrikkeladresse
 import no.nav.familie.kontrakter.felles.personopplysning.Statsborgerskap
@@ -63,6 +64,7 @@ class FødselshendelseHenleggelseTest(
     @Autowired private val vedtaksperiodeService: VedtaksperiodeService,
     @Autowired private val utvidetBehandlingService: UtvidetBehandlingService,
     @Autowired private val brevmalService: BrevmalService,
+    @Autowired private val opprettOppgaveForManuellBehandlingTask: OpprettOppgaveTask,
 ) : AbstractVerdikjedetest() {
 
     @BeforeEach
@@ -165,10 +167,10 @@ class FødselshendelseHenleggelseTest(
         assertEquals(StegType.BEHANDLING_AVSLUTTET, behandling?.steg)
 
         verify(exactly = 1) {
-            opprettTaskService.opprettOppgaveTask(
+            opprettTaskService.opprettOppgaveForManuellBehandlingTask(
                 behandlingId = behandling!!.id,
-                oppgavetype = Oppgavetype.VurderLivshendelse,
                 beskrivelse = "Fødselshendelse: Mor er under 18 år.",
+                manuellOppgaveType = ManuellOppgaveType.FØDSELSHENDELSE,
             )
         }
 
@@ -252,10 +254,10 @@ class FødselshendelseHenleggelseTest(
         assertEquals(StegType.BEHANDLING_AVSLUTTET, behandling?.steg)
 
         verify(exactly = 1) {
-            opprettTaskService.opprettOppgaveTask(
+            opprettTaskService.opprettOppgaveForManuellBehandlingTask(
                 behandlingId = behandling!!.id,
-                oppgavetype = Oppgavetype.VurderLivshendelse,
                 beskrivelse = "Fødselshendelse: Mor har flere bostedsadresser uten fra- og med dato",
+                manuellOppgaveType = ManuellOppgaveType.FØDSELSHENDELSE,
             )
         }
     }
@@ -296,13 +298,13 @@ class FødselshendelseHenleggelseTest(
         assertEquals(StegType.BEHANDLING_AVSLUTTET, behandling?.steg)
 
         verify(exactly = 1) {
-            opprettTaskService.opprettOppgaveTask(
+            opprettTaskService.opprettOppgaveForManuellBehandlingTask(
                 behandlingId = behandling!!.id,
-                oppgavetype = Oppgavetype.VurderLivshendelse,
                 beskrivelse = "Fødselshendelse: Barnet (fødselsdato: ${
                     LocalDate.parse(scenario.barna.first().fødselsdato)
                         .tilKortString()
                 }) er ikke bosatt med mor.",
+                manuellOppgaveType = ManuellOppgaveType.FØDSELSHENDELSE,
             )
         }
 
@@ -386,10 +388,10 @@ class FødselshendelseHenleggelseTest(
         assertEquals(StegType.BEHANDLING_AVSLUTTET, revurdering?.steg)
 
         verify(exactly = 1) {
-            opprettTaskService.opprettOppgaveTask(
+            opprettTaskService.opprettOppgaveForManuellBehandlingTask(
                 behandlingId = revurdering!!.id,
-                oppgavetype = Oppgavetype.VurderLivshendelse,
                 beskrivelse = "Fødselshendelse: Mor mottar utvidet barnetrygd.",
+                manuellOppgaveType = ManuellOppgaveType.FØDSELSHENDELSE,
             )
         }
     }
@@ -455,10 +457,10 @@ class FødselshendelseHenleggelseTest(
         assertEquals(StegType.BEHANDLING_AVSLUTTET, revurdering?.steg)
 
         verify(exactly = 1) {
-            opprettTaskService.opprettOppgaveTask(
+            opprettTaskService.opprettOppgaveForManuellBehandlingTask(
                 behandlingId = revurdering!!.id,
-                oppgavetype = Oppgavetype.VurderLivshendelse,
                 beskrivelse = "Fødselshendelse: Mor har EØS-barnetrygd",
+                manuellOppgaveType = ManuellOppgaveType.FØDSELSHENDELSE,
             )
         }
     }
@@ -516,10 +518,10 @@ class FødselshendelseHenleggelseTest(
         assertEquals(StegType.BEHANDLING_AVSLUTTET, behandling.steg)
 
         verify(exactly = 1) {
-            opprettTaskService.opprettOppgaveTask(
+            opprettTaskService.opprettOppgaveForManuellBehandlingTask(
                 behandlingId = behandling.id,
-                oppgavetype = Oppgavetype.VurderLivshendelse,
                 beskrivelse = "Fødselshendelse: ${VilkårKanskjeOppfyltÅrsak.LOVLIG_OPPHOLD_MÅ_VURDERE_LENGDEN_PÅ_OPPHOLDSTILLATELSEN.beskrivelse}",
+                manuellOppgaveType = ManuellOppgaveType.FØDSELSHENDELSE,
             )
         }
     }

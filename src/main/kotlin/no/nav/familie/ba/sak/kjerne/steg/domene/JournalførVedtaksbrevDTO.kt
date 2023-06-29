@@ -7,7 +7,7 @@ data class JournalførVedtaksbrevDTO(val vedtakId: Long, val task: Task)
 
 data class MottakerInfo(
     val brukerId: String,
-    val brukerIdType: BrukerIdType,
+    val brukerIdType: BrukerIdType?,
     val erInstitusjonVerge: Boolean, // Feltet brukes kun for institiusjon med verge
     val navn: String? = null, // Feltet brukes for å sette riktig mottaker navn når brev sendes både til verge og bruker
     val manuellAdresseInfo: ManuellAdresseInfo? = null,

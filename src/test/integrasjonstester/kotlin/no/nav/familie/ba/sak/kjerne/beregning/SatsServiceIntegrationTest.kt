@@ -14,6 +14,8 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.util.aug
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.des
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.feb
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.jan
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.jul
+import no.nav.familie.ba.sak.kjerne.tidslinje.util.jun
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.mar
 import no.nav.familie.ba.sak.kjerne.tidslinje.util.sep
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -26,7 +28,8 @@ class SatsServiceIntegrationTest : AbstractSpringIntegrationTest() {
         val forventet =
             feb(2019).ogTidligere().tilTidslinje { 970 } +
                 (mar(2019)..feb(2023)).tilTidslinje { 1054 } +
-                mar(2023).ogSenere().tilTidslinje { 1083 }
+                (mar(2023)..jun(2023)).tilTidslinje { 1083 } +
+                jul(2023).ogSenere().tilTidslinje { 1310 }
 
         val faktisk = satstypeTidslinje(ORBA)
 
@@ -41,7 +44,8 @@ class SatsServiceIntegrationTest : AbstractSpringIntegrationTest() {
                 (sep(2020)..aug(2021)).tilTidslinje { 1354 } +
                 (sep(2021)..des(2021)).tilTidslinje { 1654 } +
                 (jan(2022)..feb(2023)).tilTidslinje { 1676 } +
-                mar(2023).ogSenere().tilTidslinje { 1723 }
+                (mar(2023)..jun(2023)).tilTidslinje { 1723 } +
+                jul(2023).ogSenere().tilTidslinje { 1766 }
 
         val faktisk = satstypeTidslinje(TILLEGG_ORBA)
 
@@ -52,7 +56,8 @@ class SatsServiceIntegrationTest : AbstractSpringIntegrationTest() {
     fun `Skal gi riktig sats for småbarnstillegg`() {
         val forventet =
             feb(2023).ogTidligere().tilTidslinje { 660 } +
-                mar(2023).ogSenere().tilTidslinje { 678 }
+                (mar(2023)..jun(2023)).tilTidslinje { 678 } +
+                jul(2023).ogSenere().tilTidslinje { 696 }
 
         val faktisk = satstypeTidslinje(SMA)
 
@@ -64,7 +69,8 @@ class SatsServiceIntegrationTest : AbstractSpringIntegrationTest() {
         val forventet =
             feb(2019).ogTidligere().tilTidslinje { 970 } +
                 (mar(2019)..feb(2023)).tilTidslinje { 1054 } +
-                mar(2023).ogSenere().tilTidslinje { 2489 }
+                (mar(2023)..jun(2023)).tilTidslinje { 2489 } +
+                jul(2023).ogSenere().tilTidslinje { 2516 }
 
         val faktisk = satstypeTidslinje(UTVIDET_BARNETRYGD)
 

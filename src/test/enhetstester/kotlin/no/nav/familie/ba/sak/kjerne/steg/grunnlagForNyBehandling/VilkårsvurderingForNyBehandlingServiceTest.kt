@@ -1,12 +1,15 @@
 package no.nav.familie.ba.sak.kjerne.steg.grunnlagForNyBehandling
 
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import io.mockk.slot
 import io.mockk.verify
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagPerson
+import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.lagVilkårResultat
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
@@ -85,6 +88,19 @@ class VilkårsvurderingForNyBehandlingServiceTest {
 
         every { vilkårsvurderingService.lagreNyOgDeaktiverGammel(capture(slot)) } returnsArgument 0
 
+        every { persongrunnlagService.hentAktivThrows(behandling.id) } returns lagTestPersonopplysningGrunnlag(
+            forrigeBehandling.id,
+            søker,
+            barn,
+        )
+
+        every {
+            endretUtbetalingAndelService.kopierEndretUtbetalingAndelFraForrigeBehandling(
+                behandling,
+                forrigeBehandling,
+            )
+        } just runs
+
         vilkårsvurderingForNyBehandlingService.opprettVilkårsvurderingUtenomHovedflyt(
             behandling = behandling,
             forrigeBehandlingSomErVedtatt = forrigeBehandling,
@@ -109,18 +125,19 @@ class VilkårsvurderingForNyBehandlingServiceTest {
             behandling = forrigeBehandling,
             overstyrendeVilkårResultater = mapOf(
                 Pair(
-                    søker.aktør.aktørId,
+                    barn.aktør.aktørId,
                     listOf(
                         lagVilkårResultat(
                             vilkårType = Vilkår.BOSATT_I_RIKET,
-                            resultat = Resultat.IKKE_OPPFYLT,
+                            resultat = Resultat.OPPFYLT,
                             periodeTom = LocalDate.now().minusMonths(4),
                             behandlingId = forrigeBehandling.id,
                         ),
                         lagVilkårResultat(
-                            vilkårType = Vilkår.LOVLIG_OPPHOLD,
+                            vilkårType = Vilkår.BOSATT_I_RIKET,
                             resultat = Resultat.IKKE_OPPFYLT,
-                            periodeTom = LocalDate.now().minusMonths(4),
+                            periodeFom = null,
+                            periodeTom = null,
                             behandlingId = forrigeBehandling.id,
                         ),
                     ),
@@ -134,17 +151,11 @@ class VilkårsvurderingForNyBehandlingServiceTest {
             behandling = behandling,
             overstyrendeVilkårResultater = mapOf(
                 Pair(
-                    søker.aktør.aktørId,
+                    barn.aktør.aktørId,
                     listOf(
                         lagVilkårResultat(
                             vilkårType = Vilkår.BOSATT_I_RIKET,
-                            resultat = Resultat.IKKE_OPPFYLT,
-                            periodeTom = LocalDate.now().minusMonths(4),
-                            behandlingId = behandling.id,
-                        ),
-                        lagVilkårResultat(
-                            vilkårType = Vilkår.LOVLIG_OPPHOLD,
-                            resultat = Resultat.IKKE_OPPFYLT,
+                            resultat = Resultat.OPPFYLT,
                             periodeTom = LocalDate.now().minusMonths(4),
                             behandlingId = behandling.id,
                         ),
@@ -158,6 +169,85 @@ class VilkårsvurderingForNyBehandlingServiceTest {
         val slot = slot<Vilkårsvurdering>()
 
         every { vilkårsvurderingService.lagreNyOgDeaktiverGammel(capture(slot)) } returnsArgument 0
+
+        every { persongrunnlagService.hentAktivThrows(behandling.id) } returns lagTestPersonopplysningGrunnlag(
+            forrigeBehandling.id,
+            søker,
+            barn,
+        )
+
+        every {
+            endretUtbetalingAndelService.kopierEndretUtbetalingAndelFraForrigeBehandling(
+                behandling,
+                forrigeBehandling,
+            )
+        } just runs
+
+        vilkårsvurderingForNyBehandlingService.opprettVilkårsvurderingUtenomHovedflyt(
+            behandling = behandling,
+            forrigeBehandlingSomErVedtatt = forrigeBehandling,
+        )
+
+        verify(exactly = 1) { vilkårsvurderingService.lagreNyOgDeaktiverGammel(any()) }
+
+        validerKopiertVilkårsvurdering(slot.captured, forrigeVilkårsvurdering, forventetNåværendeVilkårsvurdering)
+    }
+
+    @Test
+    fun `skal kopiere vilkårsvurdering fra forrige behandling ved satsendring - ett barn har ikke oppfylt alle vilkår og har ingen tilkjent ytelse fra forrige behandling`() {
+        val søker = lagPerson(type = PersonType.SØKER)
+        val barn1 = lagPerson(type = PersonType.BARN)
+        val barn2 = lagPerson(type = PersonType.BARN)
+        val barna = listOf(barn1, barn2)
+        val fagsak = Fagsak(aktør = søker.aktør)
+        val behandling = lagBehandling(fagsak = fagsak, årsak = BehandlingÅrsak.SATSENDRING)
+        val forrigeBehandling = lagBehandling(fagsak = fagsak, årsak = BehandlingÅrsak.SØKNAD)
+
+        val forrigeVilkårsvurdering = lagVilkårsvurderingMedOverstyrendeResultater(
+            søker = søker,
+            barna = barna,
+            behandling = forrigeBehandling,
+            overstyrendeVilkårResultater = mapOf(
+                Pair(
+                    barn1.aktør.aktørId,
+                    listOf(
+                        lagVilkårResultat(
+                            vilkårType = Vilkår.BOSATT_I_RIKET,
+                            resultat = Resultat.IKKE_OPPFYLT,
+                            periodeFom = null,
+                            periodeTom = null,
+                            behandlingId = forrigeBehandling.id,
+                        ),
+                    ),
+                ),
+            ),
+            id = 1,
+        )
+        val forventetNåværendeVilkårsvurdering = lagVilkårsvurderingMedOverstyrendeResultater(
+            søker = søker,
+            barna = listOf(barn2),
+            behandling = behandling,
+            overstyrendeVilkårResultater = emptyMap(),
+        )
+
+        every { vilkårsvurderingService.hentAktivForBehandling(behandlingId = forrigeBehandling.id) } returns forrigeVilkårsvurdering
+
+        val slot = slot<Vilkårsvurdering>()
+
+        every { vilkårsvurderingService.lagreNyOgDeaktiverGammel(capture(slot)) } returnsArgument 0
+
+        every { persongrunnlagService.hentAktivThrows(behandling.id) } returns lagTestPersonopplysningGrunnlag(
+            forrigeBehandling.id,
+            søker,
+            barn2,
+        )
+
+        every {
+            endretUtbetalingAndelService.kopierEndretUtbetalingAndelFraForrigeBehandling(
+                behandling,
+                forrigeBehandling,
+            )
+        } just runs
 
         vilkårsvurderingForNyBehandlingService.opprettVilkårsvurderingUtenomHovedflyt(
             behandling = behandling,
@@ -183,7 +273,7 @@ class VilkårsvurderingForNyBehandlingServiceTest {
             }
 
             assertThat(kopiertVilkårsvurdering.personResultater.flatMap { it.vilkårResultater }.size).isEqualTo(
-                forrigeVilkårsvurdering.personResultater.flatMap { it.vilkårResultater }.size,
+                forventetNåværendeVilkårsvurdering.personResultater.flatMap { it.vilkårResultater }.size,
             )
 
             val kopierteOgForrigeVilkårResultaterGruppertEtterVilkårType =

@@ -67,9 +67,11 @@ class BeslutteVedtak(
         }
 
         val behandlingErAutomatiskBesluttet =
-            behandling.erManuellMigrering() && simuleringService.harMigreringsbehandlingAvvikInnenforBeløpsgrenser(
-                behandling,
-            ) && !simuleringService.harMigreringsbehandlingManuellePosteringer(behandling)
+            (
+                behandling.erHelmanuellMigrering() && simuleringService.harMigreringsbehandlingAvvikInnenforBeløpsgrenser(
+                    behandling,
+                ) && !simuleringService.harMigreringsbehandlingManuellePosteringer(behandling)
+                ) || behandling.erManuellMigreringForEndreMigreringsdato()
 
         val beslutter =
             if (behandlingErAutomatiskBesluttet) SikkerhetContext.SYSTEM_NAVN else saksbehandlerContext.hentSaksbehandlerSignaturTilBrev()
