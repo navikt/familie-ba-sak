@@ -462,6 +462,7 @@ class VilkårServiceTest(
                             it.copy(
                                 resultat = Resultat.OPPFYLT,
                                 resultatBegrunnelse = if (it.vilkårType === Vilkår.LOVLIG_OPPHOLD) ResultatBegrunnelse.IKKE_AKTUELT else null,
+                                vurderesEtter = Regelverk.EØS_FORORDNINGEN,
                                 periodeFom = LocalDate.of(2019, 5, 8),
                             ),
                         ),
