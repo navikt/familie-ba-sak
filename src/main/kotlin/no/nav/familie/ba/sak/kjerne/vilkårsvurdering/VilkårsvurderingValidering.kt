@@ -85,6 +85,7 @@ fun validerResultatBegrunnelse(restVilkårResultat: RestVilkårResultat) {
     val resultat = restVilkårResultat.resultat
     val vilkårType = restVilkårResultat.vilkårType
     val resultatBegrunnelse = restVilkårResultat.resultatBegrunnelse
+    val regelverk = restVilkårResultat.vurderesEtter
 
     if (resultatBegrunnelse != null) {
         if (!resultatBegrunnelse.gyldigForVilkår.contains(vilkårType)) {
@@ -94,6 +95,11 @@ fun validerResultatBegrunnelse(restVilkårResultat: RestVilkårResultat) {
         }
         if (!resultatBegrunnelse.gyldigIKombinasjonMedResultat.contains(resultat)) {
             "Resultatbegrunnelsen $resultatBegrunnelse kan ikke kombineres med resultatet $resultat".apply {
+                throw FunksjonellFeil(this, this)
+            }
+        }
+        if (!resultatBegrunnelse.gyldigForRegelverk.contains(regelverk)) {
+            "Resultatbegrunnelsen $resultatBegrunnelse kan ikke kombineres med regelverket $regelverk".apply {
                 throw FunksjonellFeil(this, this)
             }
         }

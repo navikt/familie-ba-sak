@@ -212,9 +212,11 @@ enum class Regelverk {
 enum class ResultatBegrunnelse(
     val gyldigForVilkår: List<Vilkår>,
     val gyldigIKombinasjonMedResultat: List<Resultat>,
+    val gyldigForRegelverk: List<Regelverk>,
 ) {
     IKKE_AKTUELT(
         gyldigForVilkår = listOf(Vilkår.LOVLIG_OPPHOLD),
         gyldigIKombinasjonMedResultat = listOf(Resultat.OPPFYLT),
+        gyldigForRegelverk = listOf(Regelverk.EØS_FORORDNINGEN),
     ),
 }

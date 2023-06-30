@@ -353,6 +353,7 @@ class VilkårServiceTest(
                         bosattVilkårForEnPersonIBehandlingen.copy(
                             resultat = Resultat.OPPFYLT,
                             resultatBegrunnelse = ResultatBegrunnelse.IKKE_AKTUELT,
+                            vurderesEtter = Regelverk.EØS_FORORDNINGEN,
                             periodeFom = LocalDate.of(2019, 5, 8),
                         ),
                     ),
@@ -374,12 +375,33 @@ class VilkårServiceTest(
                         oppholdVilkårForEnPersonIBehandlingen.copy(
                             resultat = Resultat.IKKE_OPPFYLT,
                             resultatBegrunnelse = ResultatBegrunnelse.IKKE_AKTUELT,
+                            vurderesEtter = Regelverk.EØS_FORORDNINGEN,
                             periodeFom = LocalDate.of(2019, 5, 8),
                         ),
                     ),
                 ),
             )
         }
+
+        assertThrows<FunksjonellFeil> {
+            vilkårService.endreVilkår(
+                behandlingId = behandling.id,
+                vilkårId = oppholdVilkårForEnPersonIBehandlingen!!.id,
+                restPersonResultat =
+                RestPersonResultat(
+                    personIdent = enPersonIBehandlingen.aktør.aktivFødselsnummer(),
+                    vilkårResultater = listOf(
+                        oppholdVilkårForEnPersonIBehandlingen.copy(
+                            resultat = Resultat.OPPFYLT,
+                            resultatBegrunnelse = ResultatBegrunnelse.IKKE_AKTUELT,
+                            vurderesEtter = Regelverk.NASJONALE_REGLER,
+                            periodeFom = LocalDate.of(2019, 5, 8),
+                        ),
+                    ),
+                ),
+            )
+        }
+
         assertDoesNotThrow {
             vilkårService.endreVilkår(
                 behandlingId = behandling.id,
@@ -391,6 +413,7 @@ class VilkårServiceTest(
                         oppholdVilkårForEnPersonIBehandlingen.copy(
                             resultat = Resultat.OPPFYLT,
                             resultatBegrunnelse = ResultatBegrunnelse.IKKE_AKTUELT,
+                            vurderesEtter = Regelverk.EØS_FORORDNINGEN,
                             periodeFom = LocalDate.of(2019, 5, 8),
                         ),
                     ),
