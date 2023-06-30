@@ -71,6 +71,9 @@ class BehandlingsresultatService(
 
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId = behandlingId)
 
+        val personerIBehandling = persongrunnlagService.hentAktivThrows(behandlingId = behandling.id).personer.toSet()
+        val personerIForrigeBehandling = forrigeBehandling?.let { persongrunnlagService.hentAktivThrows(behandlingId = forrigeBehandling.id).personer.toSet() } ?: emptySet()
+
         val personerFremstiltKravFor = finnPersonerFremstiltKravFor(
             behandling = behandling,
             søknadDTO = søknadDTO,
@@ -110,6 +113,8 @@ class BehandlingsresultatService(
                 nåværendeKompetanser = kompetanser.toList(),
                 forrigeKompetanser = forrigeKompetanser.toList(),
                 personerFremstiltKravFor = personerFremstiltKravFor,
+                personerIBehandling = personerIBehandling,
+                personerIForrigeBehandling = personerIForrigeBehandling,
             )
         } else {
             Endringsresultat.INGEN_ENDRING
