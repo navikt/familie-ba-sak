@@ -105,7 +105,7 @@ data class GrunnlagForVedtaksperioder(
 
     private fun List<VilkårResultat>.generelleAvslagTilGrunnlagForPersonTidslinje(
         person: Person,
-    ) = this
+    ): Tidslinje<GrunnlagForPerson, Måned> = this
         .map {
             listOf(månedPeriodeAv(null, null, it))
                 .tilTidslinje()
