@@ -88,16 +88,15 @@ fun validerResultatBegrunnelse(restVilkårResultat: RestVilkårResultat) {
 
     if (resultatBegrunnelse != null) {
         if (!resultatBegrunnelse.gyldigForVilkår.contains(vilkårType)) {
-            throw FunksjonellFeil(
-                "Resultatbegrunnelsen $resultatBegrunnelse kan ikke kombineres med vilkåret $vilkårType",
-                "Resultatbegrunnelsen $resultatBegrunnelse kan ikke kombineres med vilkåret $vilkårType",
-            )
+            "Resultatbegrunnelsen $resultatBegrunnelse kan ikke kombineres med vilkåret $vilkårType".apply {
+                throw FunksjonellFeil(this, this)
+            }
         }
         if (!resultatBegrunnelse.gyldigIKombinasjonMedResultat.contains(resultat)) {
-            throw FunksjonellFeil(
-                "Resultatbegrunnelsen $resultatBegrunnelse kan ikke kombineres med resultatet $resultat",
-                "Resultatbegrunnelsen $resultatBegrunnelse kan ikke kombineres med resultatet $resultat",
-            ) }
+            "Resultatbegrunnelsen $resultatBegrunnelse kan ikke kombineres med resultatet $resultat".apply {
+                throw FunksjonellFeil(this, this)
+            }
+        }
     }
 }
 
