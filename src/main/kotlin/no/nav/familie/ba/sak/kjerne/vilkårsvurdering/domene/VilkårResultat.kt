@@ -53,6 +53,10 @@ class VilkårResultat(
     @Column(name = "resultat")
     var resultat: Resultat,
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "resultat_begrunnelse")
+    var resultatBegrunnelse: ResultatBegrunnelse? = null,
+
     @Column(name = "periode_fom")
     var periodeFom: LocalDate? = null,
 
@@ -117,6 +121,7 @@ class VilkårResultat(
         periodeTom = restVilkårResultat.periodeTom
         begrunnelse = restVilkårResultat.begrunnelse
         resultat = restVilkårResultat.resultat
+        resultatBegrunnelse = restVilkårResultat.resultatBegrunnelse
         erAutomatiskVurdert = false
         erEksplisittAvslagPåSøknad = restVilkårResultat.erEksplisittAvslagPåSøknad
         oppdaterPekerTilBehandling()
@@ -130,6 +135,7 @@ class VilkårResultat(
             erAutomatiskVurdert = erAutomatiskVurdert,
             vilkårType = vilkårType,
             resultat = resultat,
+            resultatBegrunnelse = resultatBegrunnelse,
             periodeFom = if (periodeFom != null) LocalDate.from(periodeFom) else null,
             periodeTom = if (periodeTom != null) LocalDate.from(periodeTom) else null,
             begrunnelse = begrunnelse,
@@ -149,6 +155,7 @@ class VilkårResultat(
             erAutomatiskVurdert = erAutomatiskVurdert,
             vilkårType = vilkårType,
             resultat = resultat,
+            resultatBegrunnelse = resultatBegrunnelse,
             periodeFom = if (fom == TIDENES_MORGEN) null else fom,
             periodeTom = if (tom == TIDENES_ENDE) null else tom,
             begrunnelse = begrunnelse,
@@ -167,6 +174,7 @@ class VilkårResultat(
             erAutomatiskVurdert = erAutomatiskVurdert,
             vilkårType = vilkårType,
             resultat = resultat,
+            resultatBegrunnelse = resultatBegrunnelse,
             periodeFom = periodeFom,
             periodeTom = periodeTom,
             begrunnelse = begrunnelse,
@@ -199,4 +207,16 @@ class VilkårResultat(
 
 enum class Regelverk {
     NASJONALE_REGLER, EØS_FORORDNINGEN
+}
+
+enum class ResultatBegrunnelse(
+    val gyldigForVilkår: List<Vilkår>,
+    val gyldigIKombinasjonMedResultat: List<Resultat>,
+    val gyldigForRegelverk: List<Regelverk>,
+) {
+    IKKE_AKTUELT(
+        gyldigForVilkår = listOf(Vilkår.LOVLIG_OPPHOLD),
+        gyldigIKombinasjonMedResultat = listOf(Resultat.OPPFYLT),
+        gyldigForRegelverk = listOf(Regelverk.EØS_FORORDNINGEN),
+    ),
 }
