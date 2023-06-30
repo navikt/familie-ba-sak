@@ -311,32 +311,8 @@ class VilkårServiceTest(
     }
 
     @Test
-    fun `Resultatbegrunnelse kan kun settes i kombinasjon med gyldig vilkår og resultat`() {
-        val fnr = randomFnr()
-        val barnFnr = randomFnr()
-
-        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
-        var behandling =
-            behandlingService.opprettBehandling(nyOrdinærBehandling(søkersIdent = fnr, fagsakId = fagsak.id))
-
-        val forrigeBehandlingSomErIverksatt =
-            behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
-
-        val personopplysningGrunnlag =
-            lagTestPersonopplysningGrunnlag(
-                behandling.id,
-                fnr,
-                listOf(barnFnr),
-                søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
-                barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true),
-            )
-        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
-
-        val vilkårsvurdering = vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
-            behandling = behandling,
-            bekreftEndringerViaFrontend = true,
-            forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErIverksatt,
-        )
+    fun `Resultatbegrunnelse kan ikke settes i kombinasjon med ugyldig vilkår`() {
+        val vilkårsvurdering = lagVilkårsvurderingForEnSøkerMedEttBarn()
 
         val enPersonIBehandlingen = vilkårsvurdering.personResultater.elementAt(0)
         val bosattVilkårForEnPersonIBehandlingen =
@@ -344,7 +320,7 @@ class VilkårServiceTest(
 
         assertThrows<FunksjonellFeil> {
             vilkårService.endreVilkår(
-                behandlingId = behandling.id,
+                behandlingId = vilkårsvurdering.behandling.id,
                 vilkårId = bosattVilkårForEnPersonIBehandlingen!!.id,
                 restPersonResultat =
                 RestPersonResultat(
@@ -360,13 +336,19 @@ class VilkårServiceTest(
                 ),
             )
         }
+    }
 
+    @Test
+    fun `Resultatbegrunnelse kan ikke settes i kombinasjon med ugyldig resultat`() {
+        val vilkårsvurdering = lagVilkårsvurderingForEnSøkerMedEttBarn()
+
+        val enPersonIBehandlingen = vilkårsvurdering.personResultater.elementAt(0)
         val oppholdVilkårForEnPersonIBehandlingen =
             enPersonIBehandlingen.tilRestPersonResultat().vilkårResultater.find { it.vilkårType === Vilkår.LOVLIG_OPPHOLD }
 
         assertThrows<FunksjonellFeil> {
             vilkårService.endreVilkår(
-                behandlingId = behandling.id,
+                behandlingId = vilkårsvurdering.behandling.id,
                 vilkårId = oppholdVilkårForEnPersonIBehandlingen!!.id,
                 restPersonResultat =
                 RestPersonResultat(
@@ -382,10 +364,19 @@ class VilkårServiceTest(
                 ),
             )
         }
+    }
+
+    @Test
+    fun `Resultatbegrunnelse kan ikke settes i kombinasjon med ugyldig regelverk`() {
+        val vilkårsvurdering = lagVilkårsvurderingForEnSøkerMedEttBarn()
+
+        val enPersonIBehandlingen = vilkårsvurdering.personResultater.elementAt(0)
+        val oppholdVilkårForEnPersonIBehandlingen =
+            enPersonIBehandlingen.tilRestPersonResultat().vilkårResultater.find { it.vilkårType === Vilkår.LOVLIG_OPPHOLD }
 
         assertThrows<FunksjonellFeil> {
             vilkårService.endreVilkår(
-                behandlingId = behandling.id,
+                behandlingId = vilkårsvurdering.behandling.id,
                 vilkårId = oppholdVilkårForEnPersonIBehandlingen!!.id,
                 restPersonResultat =
                 RestPersonResultat(
@@ -401,10 +392,19 @@ class VilkårServiceTest(
                 ),
             )
         }
+    }
+
+    @Test
+    fun `Resultatbegrunnelse kaster ikke feil når brukt i kombinasjon med gyldig vilkår, resultat og regelverk`() {
+        val vilkårsvurdering = lagVilkårsvurderingForEnSøkerMedEttBarn()
+
+        val enPersonIBehandlingen = vilkårsvurdering.personResultater.elementAt(0)
+        val oppholdVilkårForEnPersonIBehandlingen =
+            enPersonIBehandlingen.tilRestPersonResultat().vilkårResultater.find { it.vilkårType === Vilkår.LOVLIG_OPPHOLD }
 
         assertDoesNotThrow {
             vilkårService.endreVilkår(
-                behandlingId = behandling.id,
+                behandlingId = vilkårsvurdering.behandling.id,
                 vilkårId = oppholdVilkårForEnPersonIBehandlingen!!.id,
                 restPersonResultat =
                 RestPersonResultat(
@@ -1347,6 +1347,34 @@ class VilkårServiceTest(
         )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
         return Pair(forrigeBehandling, behandling)
+    }
+
+    private fun lagVilkårsvurderingForEnSøkerMedEttBarn(): Vilkårsvurdering {
+        val fnr = randomFnr()
+        val barnFnr = randomFnr()
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        var behandling =
+            behandlingService.opprettBehandling(nyOrdinærBehandling(søkersIdent = fnr, fagsakId = fagsak.id))
+
+        val forrigeBehandlingSomErIverksatt =
+            behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
+
+        val personopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlag(
+                behandling.id,
+                fnr,
+                listOf(barnFnr),
+                søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
+                barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true),
+            )
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+
+        return vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
+            behandling = behandling,
+            bekreftEndringerViaFrontend = true,
+            forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErIverksatt,
+        )
     }
 
     private fun markerBehandlingSomAvsluttet(behandling: Behandling): Behandling {
