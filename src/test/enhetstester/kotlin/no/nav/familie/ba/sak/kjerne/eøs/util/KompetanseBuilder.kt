@@ -1,10 +1,8 @@
 package no.nav.familie.ba.sak.kjerne.tidslinje.util
 
 import no.nav.familie.ba.sak.kjerne.eøs.felles.BehandlingId
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.SøkersAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.util.SkjemaBuilder
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
@@ -19,13 +17,13 @@ class KompetanseBuilder(
         k: String,
         vararg barn: Person,
         annenForeldersAktivitetsland: String? = null,
-        annenForelderOmfattetAvNorskLovgivning: Boolean? = false
+        annenForelderOmfattetAvNorskLovgivning: Boolean? = false,
     ) =
         medSkjema(k, barn.toList()) {
             when (it) {
                 '-' -> Kompetanse.NULL.copy(
                     annenForeldersAktivitetsland = annenForeldersAktivitetsland,
-                    annenForelderOmfattetAvNorskLovgivning = annenForelderOmfattetAvNorskLovgivning
+                    annenForelderOmfattetAvNorskLovgivning = annenForelderOmfattetAvNorskLovgivning,
                 )
 
                 'S' -> Kompetanse.NULL.copy(
@@ -52,9 +50,7 @@ fun Kompetanse.fyllUt() = this.copy(
     resultat = resultat ?: KompetanseResultat.NORGE_ER_SEKUNDÆRLAND,
     annenForeldersAktivitetsland = annenForeldersAktivitetsland ?: "DK",
     barnetsBostedsland = barnetsBostedsland ?: "NO",
-    søkersAktivitet = søkersAktivitet
-        ?: if (annenForelderOmfattetAvNorskLovgivning) AnnenForeldersAktivitet.I_ARBEID else SøkersAktivitet.ARBEIDER,
-    annenForeldersAktivitet = annenForeldersAktivitet
-        ?: if (annenForelderOmfattetAvNorskLovgivning) SøkersAktivitet.ARBEIDER else AnnenForeldersAktivitet.I_ARBEID,
+    søkersAktivitet = søkersAktivitet,
+    annenForeldersAktivitet = annenForeldersAktivitet,
     søkersAktivitetsland = søkersAktivitetsland ?: "SE",
 )

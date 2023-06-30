@@ -36,17 +36,18 @@ class TilpassKompetanserTilRegelverkTest {
                 "---      ",
                 barn1,
                 annenForeldersAktivitetsland = null,
-                annenForelderOmfattetAvNorskLovgivning = true
+                annenForelderOmfattetAvNorskLovgivning = true,
             )
             .medKompetanse(
                 "     ----",
                 barn1,
                 annenForeldersAktivitetsland = null,
-                annenForelderOmfattetAvNorskLovgivning = false
+                annenForelderOmfattetAvNorskLovgivning = false,
             )
             .byggKompetanser()
 
-        val faktiskeKompetanser = tilpassKompetanserTilRegelverk(kompetanser, eøsPerioder, emptyMap())
+        val faktiskeKompetanser =
+            tilpassKompetanserTilRegelverk(kompetanser, eøsPerioder, emptyMap(), annenForelderOmfattetTidslinje)
 
         assertEqualsUnordered(forventedeKompetanser, faktiskeKompetanser)
     }

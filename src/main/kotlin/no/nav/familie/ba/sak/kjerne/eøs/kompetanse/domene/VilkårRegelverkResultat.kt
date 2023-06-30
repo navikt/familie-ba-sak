@@ -25,6 +25,7 @@ fun VilkårRegelverkResultat.medRegelverk(regelverk: Regelverk) =
     VilkårRegelverkResultat(
         this.vilkår,
         RegelverkResultat.values().first { it.regelverk == regelverk && it.resultat == this.resultat },
+        this.utdypendeVilkårsvurderinger,
     )
 
 enum class RegelverkResultat(val regelverk: Regelverk?, val resultat: Resultat?) {

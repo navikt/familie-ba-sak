@@ -57,10 +57,14 @@ class TilpassKompetanserTilRegelverkService(
         val barnasHarEtterbetaling3ÅrTidslinjer =
             endretUtbetalingAndelTidslinjeService.hentBarnasHarEtterbetaling3ÅrTidslinjer(behandlingId)
 
+        val annenForelderOmfattetAvNorskLovgivningTidslinje =
+            vilkårsvurderingTidslinjeService.hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId = behandlingId)
+
         val oppdaterteKompetanser = tilpassKompetanserTilRegelverk(
             gjeldendeKompetanser,
             barnasRegelverkResultatTidslinjer,
             barnasHarEtterbetaling3ÅrTidslinjer,
+            annenForelderOmfattetAvNorskLovgivningTidslinje,
         ).medBehandlingId(behandlingId)
 
         skjemaService.lagreDifferanseOgVarsleAbonnenter(behandlingId, gjeldendeKompetanser, oppdaterteKompetanser)
@@ -91,12 +95,14 @@ class TilpassKompetanserTilEndretUtebetalingAndelerService(
         val barnasHarEtterbetaling3ÅrTidslinjer = endretUtbetalingAndeler
             .tilBarnasHarEtterbetaling3ÅrTidslinjer()
 
-        val annenForelderOmfattetAvNorskLovgivningTidslinje = vilkårsvurderingTidslinjeService
+        val annenForelderOmfattetAvNorskLovgivningTidslinje =
+            vilkårsvurderingTidslinjeService.hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId = behandlingId)
 
         val oppdaterteKompetanser = tilpassKompetanserTilRegelverk(
             gjeldendeKompetanser,
             barnasRegelverkResultatTidslinjer,
             barnasHarEtterbetaling3ÅrTidslinjer,
+            annenForelderOmfattetAvNorskLovgivningTidslinje,
         ).medBehandlingId(behandlingId)
 
         skjemaService.lagreDifferanseOgVarsleAbonnenter(behandlingId, gjeldendeKompetanser, oppdaterteKompetanser)
@@ -107,7 +113,7 @@ fun tilpassKompetanserTilRegelverk(
     gjeldendeKompetanser: Collection<Kompetanse>,
     barnaRegelverkTidslinjer: Map<Aktør, Tidslinje<RegelverkResultat, Måned>>,
     barnasHarEtterbetaling3ÅrTidslinjer: Map<Aktør, Tidslinje<Boolean, Måned>>,
-    annenForelderOmfattetAvNorskLovgivningTidslinje: Tidslinje<Boolean, Måned>,
+    annenForelderOmfattetAvNorskLovgivningTidslinje: Tidslinje<Boolean, Måned> = TomTidslinje<Boolean, Måned>(),
 ): Collection<Kompetanse> {
     val barnasEøsRegelverkTidslinjer = barnaRegelverkTidslinjer.tilBarnasEøsRegelverkTidslinjer()
         .leftJoin(barnasHarEtterbetaling3ÅrTidslinjer) { regelverk, harEtterbetaling3År ->
@@ -135,11 +141,6 @@ fun VilkårsvurderingTidslinjeService.hentBarnasRegelverkResultatTidslinjer(beha
         .mapValues { (_, tidslinjer) ->
             tidslinjer.regelverkResultatTidslinje
         }
-
-fun VilkårsvurderingTidslinjeService.hentAnnenForelderOmfattetAvNorskLovgivningTidslinje(behandlingId: BehandlingId): Tidslinje<Boolean, Måned> =
-    this.hentTidslinjerThrows(behandlingId).søkersTidslinjer().vilkårsresultatTidslinjer.filter {
-        // finn tidslinje som har vilkår BOSATT_I_RIKET
-    }.map { /* utdypende vilkårsvurderinger inneholder ANNEN_FORELDER_OMFATTET -> boolean */ }
 
 private fun Map<Aktør, Tidslinje<RegelverkResultat, Måned>>.tilBarnasEøsRegelverkTidslinjer() =
     this.mapValues { (_, tidslinjer) ->
