@@ -49,11 +49,6 @@ object TilkjentYtelseValidering {
         andelerFraForrigeBehandling: List<AndelTilkjentYtelse>,
         andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
     ) {
-        validerAtAndelerHarLikePerioderFørSatsendringsdato(
-            andelerTilkjentYtelse = andelerTilkjentYtelse,
-            forrigeAndelerTilkjentYtelse = andelerFraForrigeBehandling,
-        )
-
         val andelerGruppert = andelerTilkjentYtelse.tilTidslinjerPerPersonOgType()
         val forrigeAndelerGruppert = andelerFraForrigeBehandling.tilTidslinjerPerPersonOgType()
 
@@ -75,50 +70,6 @@ object TilkjentYtelseValidering {
             }
         }.values.map { it.perioder() } // Må kalle på .perioder() for at feilene over skal bli kastet
     }
-
-    fun validerAtAndelerHarLikePerioderFørSatsendringsdato(
-        andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-        forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-    ) {
-        andelerTilkjentYtelse.groupBy { it.aktør.aktørId }.forEach { (aktørId, andeler) ->
-            val forrigeAndeler = forrigeAndelerTilkjentYtelse.filter { it.aktør.aktørId === aktørId }
-            val andelerKunINy = andeler.fjernAndelerMedLikPeriode(forrigeAndelerTilkjentYtelse)
-            val andelerKunIForrige = forrigeAndeler.fjernAndelerMedLikPeriode(andelerTilkjentYtelse)
-
-            // Finner første andel etter første endrede andel. Andelen skal ha lik fom som siste sats for YtelseType/Satstype
-            val andelSomSkalHaFomLikNySatsDato = andelerKunINy.union(andelerKunIForrige).minByOrNull { it.stønadFom }
-                .let { førsteNyeAndel ->
-                    andeler.filter { it.stønadFom.isAfter(førsteNyeAndel?.stønadFom) }.minByOrNull { it.stønadFom }
-                }
-
-            if (andelSomSkalHaFomLikNySatsDato != null) {
-                // Er nødt til å ha liste her da det finnes 2 satser for YtelseType ORDINÆR_BARNETRYGD (ORBA og TILLEGG_ORBA)
-                val sisteSatserForType =
-                    andelSomSkalHaFomLikNySatsDato.type.hentSatsTyper()
-                        .map { satsType ->
-                            SatsService.finnSisteSatsFor(satsType)
-                        }
-
-                val andelErEndretPgaSatsendring =
-                    sisteSatserForType.any { YearMonth.from(it.gyldigFom) == andelSomSkalHaFomLikNySatsDato.stønadFom && it.beløp == andelSomSkalHaFomLikNySatsDato.sats }
-
-                if (!andelErEndretPgaSatsendring) {
-                    throw Feil(
-                        "AndelTilkjentYtelse ${andelSomSkalHaFomLikNySatsDato.id} er endret fra forrige behandling og er ikke relatert til ny sats-dato. Ny sats for [${
-                            sisteSatserForType.map { it.type }.joinToString(", ")
-                        }] gjelder fra [${
-                            sisteSatserForType.map { it.gyldigFom }.joinToString(", ")
-                        }], men første andel med endring gjelder fra ${andelSomSkalHaFomLikNySatsDato.stønadFom}.",
-                    )
-                }
-            }
-        }
-    }
-
-    fun List<AndelTilkjentYtelse>.fjernAndelerMedLikPeriode(andelerTilkjentYtelse: List<AndelTilkjentYtelse>): Set<AndelTilkjentYtelse> =
-        this.filter { a ->
-            andelerTilkjentYtelse.none { b -> a.stønadFom == b.stønadFom && a.stønadTom == b.stønadTom }
-        }.toSet()
 
     fun finnAktørIderMedUgyldigEtterbetalingsperiode(
         forrigeAndelerTilkjentYtelse: Collection<AndelTilkjentYtelse>,

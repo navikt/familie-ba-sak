@@ -923,7 +923,7 @@ class VilkårsvurderingForNyBehandlingServiceTest(
         )
             .isEqualTo(endredeUtbetalingsAndeler)
 
-        assertThat(kopiertEndredeUtbetalingsandeler.all { kopiertEua -> endredeUtbetalingsAndeler.any { eua -> eua.person!!.aktør.aktørId === kopiertEua.person!!.aktør.aktørId } }).isTrue
+        assertThat(kopiertEndredeUtbetalingsandeler.all { kopiertEua -> endredeUtbetalingsAndeler.any { eua -> eua.person!!.aktør.aktørId == kopiertEua.person!!.aktør.aktørId } }).isTrue
 
         validerKopiertVilkårsvurdering(kopiertVilkårsvurdering, vilkårsvurdering, forventetVilkårsvurdering)
     }
