@@ -43,7 +43,7 @@ object EndringIVilkårsvurderingUtil {
 
         val tidslinjerPerPersonOgVilkår = allePersonerMedPersonResultat.flatMap { aktør ->
             val personIBehandling = personerIBehandling.single { it.aktør == aktør }
-            val personIForrigeBehandling = personerIForrigeBehandling.single { it.aktør == aktør }
+            val personIForrigeBehandling = personerIForrigeBehandling.singleOrNull { it.aktør == aktør }
 
             Vilkår.values().map { vilkår ->
                 lagEndringIVilkårsvurderingForPersonOgVilkårTidslinje(
@@ -78,13 +78,13 @@ object EndringIVilkårsvurderingUtil {
         forrigeOppfylteVilkårResultater: List<VilkårResultat>,
         vilkår: Vilkår,
         personIBehandling: Person,
-        personIForrigeBehandling: Person,
+        personIForrigeBehandling: Person?,
     ): Tidslinje<Boolean, Måned> {
         val nåværendeVilkårResultatTidslinje = nåværendeOppfylteVilkårResultater
             .tilForskjøvetTidslinjeForOppfyltVilkår(vilkår = vilkår, fødselsdato = personIBehandling.fødselsdato)
 
         val tidligereVilkårResultatTidslinje = forrigeOppfylteVilkårResultater
-            .tilForskjøvetTidslinjeForOppfyltVilkår(vilkår = vilkår, fødselsdato = personIForrigeBehandling.fødselsdato)
+            .tilForskjøvetTidslinjeForOppfyltVilkår(vilkår = vilkår, fødselsdato = personIForrigeBehandling?.fødselsdato)
 
         val endringIVilkårResultat =
             nåværendeVilkårResultatTidslinje.kombinerUtenNullMed(tidligereVilkårResultatTidslinje) { nåværende, forrige ->
