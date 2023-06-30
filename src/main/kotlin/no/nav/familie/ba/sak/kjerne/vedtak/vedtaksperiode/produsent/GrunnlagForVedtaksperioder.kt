@@ -120,7 +120,7 @@ data class GrunnlagForVedtaksperioder(
                             vilkårResultat,
                         )
                     },
-                ) as GrunnlagForPerson
+                )
             }
         }
 
