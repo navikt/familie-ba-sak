@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerBeløpOgType
@@ -30,6 +31,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.månedPeriodeAv
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilMånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.beskjærEtter
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.map
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.mapIkkeNull
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.alleOrdinæreVilkårErOppfylt
@@ -38,6 +40,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvni
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
+import java.time.LocalDate
 
 typealias AktørId = String
 
@@ -134,7 +137,7 @@ data class GrunnlagForVedtaksperioder(
             .tilTidslinje().mapIkkeNull { EndretUtbetalingAndelForVedtaksperiode(it) }
 
         val overgangsstønadTidslinje =
-            perioderOvergangsstønad.filtrerPåAktør(person.aktør).tilPeriodeOvergangsstønadForVedtaksperiodeTidslinje()
+            perioderOvergangsstønad.filtrerPåAktør(person.aktør).tilPeriodeOvergangsstønadForVedtaksperiodeTidslinje(person.fødselsdato)
 
         val grunnlagTidslinje = harRettPåUtbetalingTidslinje
             .kombinerMed(
@@ -383,10 +386,20 @@ private fun List<AndelTilkjentYtelse>.tilAndelerForVedtaksPeriodeTidslinje() =
         .map { tidslinje -> tidslinje.mapIkkeNull { AndelForVedtaksperiode(it) } }
         .kombiner { it }
 
-private fun List<InternPeriodeOvergangsstønad>.tilPeriodeOvergangsstønadForVedtaksperiodeTidslinje() = this
+private fun List<InternPeriodeOvergangsstønad>.tilPeriodeOvergangsstønadForVedtaksperiodeTidslinje(fødselsdato: LocalDate) = this
     .map { OvergangsstønadForVedtaksperiode(it) }
     .map { Periode(it.fom.tilMånedTidspunkt(), it.tom.tilMånedTidspunkt(), it) }
     .tilTidslinje()
+    .beskjærEtter(lagErUnder6ÅrTidslinje(fødselsdato))
+
+private fun lagErUnder6ÅrTidslinje(fødselsdato: LocalDate) =
+    listOf(
+        månedPeriodeAv(
+            fødselsdato.toYearMonth(),
+            fødselsdato.plusYears(18).minusDays(1).toYearMonth(),
+            true,
+        ),
+    ).tilTidslinje()
 
 private fun Tidslinje<List<VilkårResultat>, Måned>.tilVilkårResultaterForVedtaksPeriodeTidslinje() =
     this.map { vilkårResultater -> vilkårResultater?.map { VilkårResultatForVedtaksperiode(it) } }
