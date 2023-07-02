@@ -92,25 +92,13 @@ class StartSatsendring(
         }
 
         val sisteIverksatteBehandling = behandlingRepository.finnSisteIverksatteBehandling(fagsakId)
-        if (sisteIverksatteBehandling != null) {
-            val aktivOgÅpenBehandling = behandlingRepository.findByFagsakAndAktivAndOpen(fagsakId = fagsakId)
-            if (aktivOgÅpenBehandling != null) {
-                logger.info("Oppretter ikke satsendringtask for fagsak=$fagsakId. Har åpen behandling ${aktivOgÅpenBehandling.id}")
-                ignorerteFagsaker.add(fagsakId)
-                return false
-            }
-
-            if (featureToggleService.isEnabled(FeatureToggleConfig.SATSENDRING_OPPRETT_TASKER)) {
-                logger.info("Oppretter satsendringtask for fagsak=$fagsakId")
-                opprettTaskService.opprettSatsendringTask(fagsakId, satsTidspunkt)
-            } else {
-                logger.info("Oppretter ikke satsendringtask for fagsak=$fagsakId. Toggle SATSENDRING_OPPRETT_TASKER avskrudd.")
-            }
-            return true
+        return if (sisteIverksatteBehandling != null) {
+            opprettTaskService.opprettSatsendringTask(fagsakId, satsTidspunkt)
+            true
         } else {
             logger.info("Satsendring utføres ikke på fagsak=$fagsakId fordi fagsaken mangler en iverksatt behandling")
             ignorerteFagsaker.add(fagsakId)
-            return false
+            false
         }
     }
 

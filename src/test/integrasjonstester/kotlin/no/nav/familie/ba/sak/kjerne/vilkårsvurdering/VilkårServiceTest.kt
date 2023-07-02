@@ -1,5 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 
+import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.kjørStegprosessForFGB
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
@@ -43,6 +44,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.AnnenVurderingType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.ResultatBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
@@ -309,6 +311,118 @@ class VilkårServiceTest(
     }
 
     @Test
+    fun `Resultatbegrunnelse kan ikke settes i kombinasjon med ugyldig vilkår`() {
+        val vilkårsvurdering = lagVilkårsvurderingForEnSøkerMedEttBarn()
+
+        val enPersonIBehandlingen = vilkårsvurdering.personResultater.elementAt(0)
+        val bosattVilkårForEnPersonIBehandlingen =
+            enPersonIBehandlingen.tilRestPersonResultat().vilkårResultater.find { it.vilkårType === Vilkår.BOSATT_I_RIKET }
+
+        assertThrows<FunksjonellFeil> {
+            vilkårService.endreVilkår(
+                behandlingId = vilkårsvurdering.behandling.id,
+                vilkårId = bosattVilkårForEnPersonIBehandlingen!!.id,
+                restPersonResultat =
+                RestPersonResultat(
+                    personIdent = enPersonIBehandlingen.aktør.aktivFødselsnummer(),
+                    vilkårResultater = listOf(
+                        bosattVilkårForEnPersonIBehandlingen.copy(
+                            resultat = Resultat.OPPFYLT,
+                            resultatBegrunnelse = ResultatBegrunnelse.IKKE_AKTUELT,
+                            vurderesEtter = Regelverk.EØS_FORORDNINGEN,
+                            periodeFom = LocalDate.of(2019, 5, 8),
+                        ),
+                    ),
+                ),
+            )
+        }
+    }
+
+    @Test
+    fun `Resultatbegrunnelse kan ikke settes i kombinasjon med ugyldig resultat`() {
+        val vilkårsvurdering = lagVilkårsvurderingForEnSøkerMedEttBarn()
+
+        val enPersonIBehandlingen = vilkårsvurdering.personResultater.elementAt(0)
+        val oppholdVilkårForEnPersonIBehandlingen =
+            enPersonIBehandlingen.tilRestPersonResultat().vilkårResultater.find { it.vilkårType === Vilkår.LOVLIG_OPPHOLD }
+
+        assertThrows<FunksjonellFeil> {
+            vilkårService.endreVilkår(
+                behandlingId = vilkårsvurdering.behandling.id,
+                vilkårId = oppholdVilkårForEnPersonIBehandlingen!!.id,
+                restPersonResultat =
+                RestPersonResultat(
+                    personIdent = enPersonIBehandlingen.aktør.aktivFødselsnummer(),
+                    vilkårResultater = listOf(
+                        oppholdVilkårForEnPersonIBehandlingen.copy(
+                            resultat = Resultat.IKKE_OPPFYLT,
+                            resultatBegrunnelse = ResultatBegrunnelse.IKKE_AKTUELT,
+                            vurderesEtter = Regelverk.EØS_FORORDNINGEN,
+                            periodeFom = LocalDate.of(2019, 5, 8),
+                        ),
+                    ),
+                ),
+            )
+        }
+    }
+
+    @Test
+    fun `Resultatbegrunnelse kan ikke settes i kombinasjon med ugyldig regelverk`() {
+        val vilkårsvurdering = lagVilkårsvurderingForEnSøkerMedEttBarn()
+
+        val enPersonIBehandlingen = vilkårsvurdering.personResultater.elementAt(0)
+        val oppholdVilkårForEnPersonIBehandlingen =
+            enPersonIBehandlingen.tilRestPersonResultat().vilkårResultater.find { it.vilkårType === Vilkår.LOVLIG_OPPHOLD }
+
+        assertThrows<FunksjonellFeil> {
+            vilkårService.endreVilkår(
+                behandlingId = vilkårsvurdering.behandling.id,
+                vilkårId = oppholdVilkårForEnPersonIBehandlingen!!.id,
+                restPersonResultat =
+                RestPersonResultat(
+                    personIdent = enPersonIBehandlingen.aktør.aktivFødselsnummer(),
+                    vilkårResultater = listOf(
+                        oppholdVilkårForEnPersonIBehandlingen.copy(
+                            resultat = Resultat.OPPFYLT,
+                            resultatBegrunnelse = ResultatBegrunnelse.IKKE_AKTUELT,
+                            vurderesEtter = Regelverk.NASJONALE_REGLER,
+                            periodeFom = LocalDate.of(2019, 5, 8),
+                        ),
+                    ),
+                ),
+            )
+        }
+    }
+
+    @Test
+    fun `Resultatbegrunnelse kaster ikke feil når brukt i kombinasjon med gyldig vilkår, resultat og regelverk`() {
+        val vilkårsvurdering = lagVilkårsvurderingForEnSøkerMedEttBarn()
+
+        val enPersonIBehandlingen = vilkårsvurdering.personResultater.elementAt(0)
+        val oppholdVilkårForEnPersonIBehandlingen =
+            enPersonIBehandlingen.tilRestPersonResultat().vilkårResultater.find { it.vilkårType === Vilkår.LOVLIG_OPPHOLD }
+
+        assertDoesNotThrow {
+            vilkårService.endreVilkår(
+                behandlingId = vilkårsvurdering.behandling.id,
+                vilkårId = oppholdVilkårForEnPersonIBehandlingen!!.id,
+                restPersonResultat =
+                RestPersonResultat(
+                    personIdent = enPersonIBehandlingen.aktør.aktivFødselsnummer(),
+                    vilkårResultater = listOf(
+                        oppholdVilkårForEnPersonIBehandlingen.copy(
+                            resultat = Resultat.OPPFYLT,
+                            resultatBegrunnelse = ResultatBegrunnelse.IKKE_AKTUELT,
+                            vurderesEtter = Regelverk.EØS_FORORDNINGEN,
+                            periodeFom = LocalDate.of(2019, 5, 8),
+                        ),
+                    ),
+                ),
+            )
+        }
+    }
+
+    @Test
     fun `Vilkårsvurdering fra forrige behandling kopieres riktig`() {
         val fnr = randomFnr()
         val barnFnr = randomFnr()
@@ -347,6 +461,8 @@ class VilkårServiceTest(
                         vilkårResultater = listOf(
                             it.copy(
                                 resultat = Resultat.OPPFYLT,
+                                resultatBegrunnelse = if (it.vilkårType === Vilkår.LOVLIG_OPPHOLD) ResultatBegrunnelse.IKKE_AKTUELT else null,
+                                vurderesEtter = Regelverk.EØS_FORORDNINGEN,
                                 periodeFom = LocalDate.of(2019, 5, 8),
                             ),
                         ),
@@ -384,6 +500,12 @@ class VilkårServiceTest(
                 if (personResultat.aktør.aktivFødselsnummer() == barnFnr2) {
                     assertEquals(behandling2.id, vilkårResultat.behandlingId)
                 } else {
+                    if (vilkårResultat.vilkårType === Vilkår.LOVLIG_OPPHOLD) {
+                        assertEquals(vilkårResultat.resultatBegrunnelse, vilkårResultat.resultatBegrunnelse)
+                    } else {
+                        assertEquals(null, vilkårResultat.resultatBegrunnelse)
+                    }
+
                     assertEquals(Resultat.OPPFYLT, vilkårResultat.resultat)
                     assertEquals(behandling.id, vilkårResultat.behandlingId)
                 }
@@ -1226,6 +1348,34 @@ class VilkårServiceTest(
         )
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
         return Pair(forrigeBehandling, behandling)
+    }
+
+    private fun lagVilkårsvurderingForEnSøkerMedEttBarn(): Vilkårsvurdering {
+        val fnr = randomFnr()
+        val barnFnr = randomFnr()
+
+        val fagsak = fagsakService.hentEllerOpprettFagsakForPersonIdent(fnr)
+        var behandling =
+            behandlingService.opprettBehandling(nyOrdinærBehandling(søkersIdent = fnr, fagsakId = fagsak.id))
+
+        val forrigeBehandlingSomErIverksatt =
+            behandlingHentOgPersisterService.hentSisteBehandlingSomErIverksatt(fagsakId = behandling.fagsak.id)
+
+        val personopplysningGrunnlag =
+            lagTestPersonopplysningGrunnlag(
+                behandling.id,
+                fnr,
+                listOf(barnFnr),
+                søkerAktør = personidentService.hentOgLagreAktør(fnr, true),
+                barnAktør = personidentService.hentOgLagreAktørIder(listOf(barnFnr), true),
+            )
+        persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
+
+        return vilkårsvurderingForNyBehandlingService.initierVilkårsvurderingForBehandling(
+            behandling = behandling,
+            bekreftEndringerViaFrontend = true,
+            forrigeBehandlingSomErVedtatt = forrigeBehandlingSomErIverksatt,
+        )
     }
 
     private fun markerBehandlingSomAvsluttet(behandling: Behandling): Behandling {

@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.writeValueAsString
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.SatsendringService
+import no.nav.familie.ba.sak.kjerne.behandling.AutomatiskBeslutningService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
@@ -34,7 +35,6 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
-import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.steg.domene.JournalførVedtaksbrevDTO
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
@@ -59,8 +59,8 @@ class StegService(
     private val tilgangService: TilgangService,
     private val infotrygdFeedService: InfotrygdFeedService,
     private val satsendringService: SatsendringService,
-    private val simuleringService: SimuleringService,
     private val personopplysningerService: PersonopplysningerService,
+    private val automatiskBeslutningService: AutomatiskBeslutningService,
 ) {
 
     private val stegSuksessMetrics: Map<StegType, Counter> = initStegMetrikker("suksess")
@@ -90,7 +90,6 @@ class StegService(
         val behandling = behandlingService.opprettBehandling(nyBehandling)
 
         val barnasIdenter: List<String> = when (nyBehandling.behandlingÅrsak) {
-            BehandlingÅrsak.MIGRERING,
             BehandlingÅrsak.FØDSELSHENDELSE,
             BehandlingÅrsak.HELMANUELL_MIGRERING,
             -> {
@@ -309,15 +308,7 @@ class StegService(
             behandlingSteg.utførStegOgAngiNeste(behandling, behandlendeEnhet)
         }
 
-        val harMigreringsbehandlingAvvikInnenforbeløpsgrenser by lazy {
-            simuleringService.harMigreringsbehandlingAvvikInnenforBeløpsgrenser(behandling)
-        }
-
-        val harMigreringsbehandlingManuellePosteringer by lazy {
-            simuleringService.harMigreringsbehandlingManuellePosteringer(behandling)
-        }
-
-        if ((behandlingEtterBeslutterSteg.erHelmanuellMigrering() && harMigreringsbehandlingAvvikInnenforbeløpsgrenser && !harMigreringsbehandlingManuellePosteringer) || behandlingEtterBeslutterSteg.erManuellMigreringForEndreMigreringsdato()) {
+        if (automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(behandling)) {
             return håndterBeslutningForVedtak(
                 behandlingEtterBeslutterSteg,
                 RestBeslutningPåVedtak(Beslutning.GODKJENT),

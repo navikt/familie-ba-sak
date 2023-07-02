@@ -41,6 +41,11 @@ Egenskap: Vedtaksperioder med kompetanser
 
   Scenario: Skal kunne ha kompetanse uten tom
 
+    Og følgende persongrunnlag
+      | BehandlingId | AktørId | Persontype | Fødselsdato |
+      | 1            | 1234     | SØKER      | 11.01.1970  |
+      | 1            | 3456     | BARN       | 04.09.2020  |
+
     Og lag personresultater for behandling 1
     Og legg til nye vilkårresultater for behandling 1
       | AktørId | Vilkår                                                          | Fra dato   | Til dato   | Resultat |

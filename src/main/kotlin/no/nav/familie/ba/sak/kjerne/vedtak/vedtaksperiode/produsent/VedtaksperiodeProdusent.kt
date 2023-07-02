@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.slåSammenLike
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Tidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilDagEllerFørsteDagIPerioden
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilLocalDateEllerNull
@@ -67,7 +68,30 @@ fun finnPerioderSomSkalBegrunnes(
 
     val overlappendeGenerelleAvslagPerioder = grunnlagTidslinjePerPerson.lagOverlappendeGenerelleAvslagsPerioder()
 
-    return (overlappendeGenerelleAvslagPerioder + eksplisitteAvslagsperioder + sammenslåttePerioderUtenEksplisittAvslag).slåSammenAvslagOgReduksjonsperioderMedSammeFomOgTom()
+    return (overlappendeGenerelleAvslagPerioder + sammenslåttePerioderUtenEksplisittAvslag + eksplisitteAvslagsperioder)
+        .slåSammenAvslagOgReduksjonsperioderMedSammeFomOgTom()
+        .fjernOverflødigeIkkeInnvilgetPerioder()
+}
+
+fun List<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>>.fjernOverflødigeIkkeInnvilgetPerioder(): List<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>> {
+    val sortertePerioder = this
+        .sortedWith(compareBy({ it.fraOgMed }, { it.tilOgMed }))
+
+    val perioderTilOgMedSisteInnvilgede = sortertePerioder.dropLastWhile { periode ->
+        periode.innhold == null || periode.innhold.none { it.gjeldende is GrunnlagForPersonInnvilget }
+    }
+
+    val perioderEtterSisteInnvilgedePeriode =
+        sortertePerioder.subList(perioderTilOgMedSisteInnvilgede.size, sortertePerioder.size)
+
+    val (eksplisitteAvslagEtterSisteInnvilgedePeriode, opphørEtterSisteInnvilgedePeriode) =
+        perioderEtterSisteInnvilgedePeriode
+            .filter { it.innhold != null }
+            .partition { periode -> periode.innhold!!.any { it.gjeldende?.erEksplisittAvslag() == true } }
+
+    val førsteOpphørEtterSisteInnvilgedePeriode = opphørEtterSisteInnvilgedePeriode.firstOrNull()?.copy(tilOgMed = MånedTidspunkt.uendeligLengeTil())
+
+    return (perioderTilOgMedSisteInnvilgede + førsteOpphørEtterSisteInnvilgedePeriode + eksplisitteAvslagEtterSisteInnvilgedePeriode).filterNotNull()
 }
 
 private fun Map<Aktør, GrunnlagForPersonTidslinjerSplittetPåOverlappendeGenerelleAvslag>.lagOverlappendeGenerelleAvslagsPerioder() =
