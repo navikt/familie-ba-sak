@@ -44,7 +44,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårTrigger
 import no.nav.familie.ba.sak.kjerne.brev.domene.ØvrigTrigger
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.RegelverkResultat
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårRegelverkResultat
@@ -1232,7 +1232,7 @@ fun lagSanityBegrunnelse(
 fun lagSanityEøsBegrunnelse(
     apiNavn: String = "",
     navnISystem: String = "",
-    annenForeldersAktivitet: List<AnnenForeldersAktivitet> = emptyList(),
+    annenForeldersAktivitet: List<KompetanseAktivitet> = emptyList(),
     barnetsBostedsland: List<BarnetsBostedsland> = emptyList(),
     kompetanseResultat: List<KompetanseResultat> = emptyList(),
     hjemler: List<String> = emptyList(),

@@ -17,9 +17,8 @@ import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatEndri
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatEndringUtils.utledEndringsresultat
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.SøkersAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagKompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -181,9 +180,9 @@ class BehandlingsresultatEndringUtilsTest {
                 behandlingId = forrigeBehandling.id,
                 barnAktører = setOf(barn1Aktør),
                 barnetsBostedsland = "NO",
-                søkersAktivitet = SøkersAktivitet.ARBEIDER,
+                søkersAktivitet = KompetanseAktivitet.ARBEIDER,
                 søkersAktivitetsland = "NO",
-                annenForeldersAktivitet = AnnenForeldersAktivitet.INAKTIV,
+                annenForeldersAktivitet = KompetanseAktivitet.INAKTIV,
                 annenForeldersAktivitetsland = "PO",
                 kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
                 fom = YearMonth.now().minusMonths(6),
@@ -195,7 +194,10 @@ class BehandlingsresultatEndringUtilsTest {
             forrigeAndeler = emptyList(),
             personerFremstiltKravFor = emptyList(),
             forrigeKompetanser = listOf(forrigeKompetanse),
-            nåværendeKompetanser = listOf(forrigeKompetanse.copy(søkersAktivitet = SøkersAktivitet.ARBEIDER_PÅ_NORSK_SOKKEL).apply { behandlingId = nåværendeBehandling.id }),
+            nåværendeKompetanser = listOf(
+                forrigeKompetanse.copy(søkersAktivitet = KompetanseAktivitet.ARBEIDER_PÅ_NORSK_SOKKEL)
+                    .apply { behandlingId = nåværendeBehandling.id },
+            ),
             nåværendePersonResultat = emptySet(),
             forrigePersonResultat = emptySet(),
             nåværendeEndretAndeler = emptyList(),
@@ -717,9 +719,9 @@ class BehandlingsresultatEndringUtilsTest {
                 behandlingId = forrigeBehandling.id,
                 barnAktører = setOf(barn1Aktør),
                 barnetsBostedsland = "NO",
-                søkersAktivitet = SøkersAktivitet.ARBEIDER,
+                søkersAktivitet = KompetanseAktivitet.ARBEIDER,
                 søkersAktivitetsland = "NO",
-                annenForeldersAktivitet = AnnenForeldersAktivitet.INAKTIV,
+                annenForeldersAktivitet = KompetanseAktivitet.INAKTIV,
                 annenForeldersAktivitetsland = "PO",
                 kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
                 fom = YearMonth.now().minusMonths(6),
@@ -743,9 +745,9 @@ class BehandlingsresultatEndringUtilsTest {
                 behandlingId = forrigeBehandling.id,
                 barnAktører = setOf(barn1Aktør),
                 barnetsBostedsland = "NO",
-                søkersAktivitet = SøkersAktivitet.ARBEIDER,
+                søkersAktivitet = KompetanseAktivitet.ARBEIDER,
                 søkersAktivitetsland = "NO",
-                annenForeldersAktivitet = AnnenForeldersAktivitet.INAKTIV,
+                annenForeldersAktivitet = KompetanseAktivitet.INAKTIV,
                 annenForeldersAktivitetsland = "PO",
                 kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
                 fom = YearMonth.now().minusMonths(6),
@@ -771,9 +773,9 @@ class BehandlingsresultatEndringUtilsTest {
                 behandlingId = forrigeBehandling.id,
                 barnAktører = setOf(barn1Aktør),
                 barnetsBostedsland = "NO",
-                søkersAktivitet = SøkersAktivitet.ARBEIDER,
+                søkersAktivitet = KompetanseAktivitet.ARBEIDER,
                 søkersAktivitetsland = "NO",
-                annenForeldersAktivitet = AnnenForeldersAktivitet.INAKTIV,
+                annenForeldersAktivitet = KompetanseAktivitet.INAKTIV,
                 annenForeldersAktivitetsland = "PO",
                 kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
                 fom = YearMonth.now().minusMonths(6),
@@ -782,7 +784,7 @@ class BehandlingsresultatEndringUtilsTest {
 
         val endring = erEndringIKompetanse(
             nåværendeKompetanser = listOf(
-                forrigeKompetanse.copy(søkersAktivitet = SøkersAktivitet.ARBEIDER_PÅ_NORSK_SOKKEL)
+                forrigeKompetanse.copy(søkersAktivitet = KompetanseAktivitet.ARBEIDER_PÅ_NORSK_SOKKEL)
                     .apply { behandlingId = nåværendeBehandling.id },
             ),
             forrigeKompetanser = listOf(forrigeKompetanse),
@@ -800,9 +802,9 @@ class BehandlingsresultatEndringUtilsTest {
                 behandlingId = forrigeBehandling.id,
                 barnAktører = setOf(barn1Aktør),
                 barnetsBostedsland = "NO",
-                søkersAktivitet = SøkersAktivitet.ARBEIDER,
+                søkersAktivitet = KompetanseAktivitet.ARBEIDER,
                 søkersAktivitetsland = "NO",
-                annenForeldersAktivitet = AnnenForeldersAktivitet.INAKTIV,
+                annenForeldersAktivitet = KompetanseAktivitet.INAKTIV,
                 annenForeldersAktivitetsland = "PO",
                 kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
                 fom = YearMonth.now().minusMonths(6),
@@ -829,9 +831,9 @@ class BehandlingsresultatEndringUtilsTest {
                 behandlingId = forrigeBehandling.id,
                 barnAktører = setOf(barn1Aktør),
                 barnetsBostedsland = "NO",
-                søkersAktivitet = SøkersAktivitet.ARBEIDER,
+                søkersAktivitet = KompetanseAktivitet.ARBEIDER,
                 søkersAktivitetsland = "NO",
-                annenForeldersAktivitet = AnnenForeldersAktivitet.INAKTIV,
+                annenForeldersAktivitet = KompetanseAktivitet.INAKTIV,
                 annenForeldersAktivitetsland = "PO",
                 kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
                 fom = YearMonth.now().minusMonths(6),
@@ -840,7 +842,7 @@ class BehandlingsresultatEndringUtilsTest {
 
         val endring = erEndringIKompetanse(
             nåværendeKompetanser = listOf(
-                forrigeKompetanse.copy(annenForeldersAktivitet = AnnenForeldersAktivitet.FORSIKRET_I_BOSTEDSLAND)
+                forrigeKompetanse.copy(annenForeldersAktivitet = KompetanseAktivitet.FORSIKRET_I_BOSTEDSLAND)
                     .apply { behandlingId = nåværendeBehandling.id },
             ),
             forrigeKompetanser = listOf(forrigeKompetanse),
@@ -858,9 +860,9 @@ class BehandlingsresultatEndringUtilsTest {
                 behandlingId = forrigeBehandling.id,
                 barnAktører = setOf(barn1Aktør),
                 barnetsBostedsland = "NO",
-                søkersAktivitet = SøkersAktivitet.ARBEIDER,
+                søkersAktivitet = KompetanseAktivitet.ARBEIDER,
                 søkersAktivitetsland = "NO",
-                annenForeldersAktivitet = AnnenForeldersAktivitet.INAKTIV,
+                annenForeldersAktivitet = KompetanseAktivitet.INAKTIV,
                 annenForeldersAktivitetsland = "PO",
                 kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
                 fom = YearMonth.now().minusMonths(6),
@@ -886,9 +888,9 @@ class BehandlingsresultatEndringUtilsTest {
                 behandlingId = forrigeBehandling.id,
                 barnAktører = setOf(barn1Aktør),
                 barnetsBostedsland = "NO",
-                søkersAktivitet = SøkersAktivitet.ARBEIDER,
+                søkersAktivitet = KompetanseAktivitet.ARBEIDER,
                 søkersAktivitetsland = "NO",
-                annenForeldersAktivitet = AnnenForeldersAktivitet.INAKTIV,
+                annenForeldersAktivitet = KompetanseAktivitet.INAKTIV,
                 annenForeldersAktivitetsland = "PO",
                 kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
                 fom = YearMonth.now().minusMonths(6),
@@ -915,9 +917,9 @@ class BehandlingsresultatEndringUtilsTest {
                 behandlingId = forrigeBehandling.id,
                 barnAktører = setOf(barn1Aktør),
                 barnetsBostedsland = "NO",
-                søkersAktivitet = SøkersAktivitet.ARBEIDER,
+                søkersAktivitet = KompetanseAktivitet.ARBEIDER,
                 søkersAktivitetsland = "NO",
-                annenForeldersAktivitet = AnnenForeldersAktivitet.INAKTIV,
+                annenForeldersAktivitet = KompetanseAktivitet.INAKTIV,
                 annenForeldersAktivitetsland = "PO",
                 kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
                 fom = YearMonth.now().minusMonths(6),
@@ -1197,8 +1199,12 @@ class BehandlingsresultatEndringUtilsTest {
         assertThat(erEndringIVilkårvurderingForPerson, Is(false))
     }
 
-    private fun lagPersonResultatFraVilkårResultater(vilkårResultater: Set<VilkårResultat>, aktør: Aktør): PersonResultat {
-        val vilkårsvurdering = lagVilkårsvurdering(behandling = lagBehandling(), resultat = Resultat.OPPFYLT, søkerAktør = randomAktør())
+    private fun lagPersonResultatFraVilkårResultater(
+        vilkårResultater: Set<VilkårResultat>,
+        aktør: Aktør,
+    ): PersonResultat {
+        val vilkårsvurdering =
+            lagVilkårsvurdering(behandling = lagBehandling(), resultat = Resultat.OPPFYLT, søkerAktør = randomAktør())
         val personResultat = PersonResultat(vilkårsvurdering = vilkårsvurdering, aktør = aktør)
 
         personResultat.setSortedVilkårResultater(vilkårResultater)

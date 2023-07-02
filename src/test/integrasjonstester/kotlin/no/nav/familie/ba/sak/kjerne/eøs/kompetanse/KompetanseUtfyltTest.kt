@@ -2,9 +2,8 @@ package no.nav.familie.ba.sak.kjerne.eøs.kompetanse
 
 import no.nav.familie.ba.sak.ekstern.restDomene.UtfyltStatus
 import no.nav.familie.ba.sak.ekstern.restDomene.tilRestKompetanse
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.SøkersAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.lagKompetanse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.BarnetsBostedsland
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -15,11 +14,11 @@ class KompetanseUtfyltTest {
     @Test
     fun `Skal sette UtfyltStatus til OK når alle felter i skjema er fylt ut`() {
         val kompetanse = lagKompetanse(
-            annenForeldersAktivitet = AnnenForeldersAktivitet.I_ARBEID,
+            annenForeldersAktivitet = KompetanseAktivitet.I_ARBEID,
             barnetsBostedsland = BarnetsBostedsland.NORGE.name,
             annenForeldersAktivitetsland = "NORGE",
             kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
-            søkersAktivitet = SøkersAktivitet.ARBEIDER,
+            søkersAktivitet = KompetanseAktivitet.ARBEIDER,
             søkersAktivitetsland = "NO",
         )
 
@@ -31,10 +30,10 @@ class KompetanseUtfyltTest {
     @Test
     fun `Skal sette UtfyltStatus til OK dersom alle felter unntatt annenForeldersAktivitetsland er fylt ut og annenForeldersAktivitet er IKKE_AKTUELT eller INAKTIV`() {
         var kompetanse = lagKompetanse(
-            annenForeldersAktivitet = AnnenForeldersAktivitet.IKKE_AKTUELT,
+            annenForeldersAktivitet = KompetanseAktivitet.IKKE_AKTUELT,
             barnetsBostedsland = BarnetsBostedsland.NORGE.name,
             kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
-            søkersAktivitet = SøkersAktivitet.ARBEIDER,
+            søkersAktivitet = KompetanseAktivitet.ARBEIDER,
             søkersAktivitetsland = "NO",
         )
 
@@ -43,10 +42,10 @@ class KompetanseUtfyltTest {
         assertEquals(UtfyltStatus.OK, restKompetanse.status)
 
         kompetanse = lagKompetanse(
-            annenForeldersAktivitet = AnnenForeldersAktivitet.INAKTIV,
+            annenForeldersAktivitet = KompetanseAktivitet.INAKTIV,
             barnetsBostedsland = BarnetsBostedsland.NORGE.name,
             kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
-            søkersAktivitet = SøkersAktivitet.ARBEIDER,
+            søkersAktivitet = KompetanseAktivitet.ARBEIDER,
             søkersAktivitetsland = "NO",
         )
 
@@ -58,10 +57,10 @@ class KompetanseUtfyltTest {
     @Test
     fun `Skal sette UtfyltStatus til UFULLSTENDIG dersom alle felter unntatt annenForeldersAktivitetsland er fylt ut og annenForeldersAktivitet ikke er IKKE_AKTUELT eller INAKTIV`() {
         var kompetanse = lagKompetanse(
-            annenForeldersAktivitet = AnnenForeldersAktivitet.I_ARBEID,
+            annenForeldersAktivitet = KompetanseAktivitet.I_ARBEID,
             barnetsBostedsland = BarnetsBostedsland.NORGE.name,
             kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
-            søkersAktivitet = SøkersAktivitet.ARBEIDER,
+            søkersAktivitet = KompetanseAktivitet.ARBEIDER,
         )
 
         var restKompetanse = kompetanse.tilRestKompetanse()
@@ -69,10 +68,10 @@ class KompetanseUtfyltTest {
         assertEquals(UtfyltStatus.UFULLSTENDIG, restKompetanse.status)
 
         kompetanse = lagKompetanse(
-            annenForeldersAktivitet = AnnenForeldersAktivitet.MOTTAR_PENSJON,
+            annenForeldersAktivitet = KompetanseAktivitet.MOTTAR_PENSJON,
             barnetsBostedsland = BarnetsBostedsland.NORGE.name,
             kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
-            søkersAktivitet = SøkersAktivitet.ARBEIDER,
+            søkersAktivitet = KompetanseAktivitet.ARBEIDER,
         )
 
         restKompetanse = kompetanse.tilRestKompetanse()
@@ -80,10 +79,10 @@ class KompetanseUtfyltTest {
         assertEquals(UtfyltStatus.UFULLSTENDIG, restKompetanse.status)
 
         kompetanse = lagKompetanse(
-            annenForeldersAktivitet = AnnenForeldersAktivitet.FORSIKRET_I_BOSTEDSLAND,
+            annenForeldersAktivitet = KompetanseAktivitet.FORSIKRET_I_BOSTEDSLAND,
             barnetsBostedsland = BarnetsBostedsland.NORGE.name,
             kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
-            søkersAktivitet = SøkersAktivitet.ARBEIDER,
+            søkersAktivitet = KompetanseAktivitet.ARBEIDER,
         )
 
         restKompetanse = kompetanse.tilRestKompetanse()
@@ -91,10 +90,10 @@ class KompetanseUtfyltTest {
         assertEquals(UtfyltStatus.UFULLSTENDIG, restKompetanse.status)
 
         kompetanse = lagKompetanse(
-            annenForeldersAktivitet = AnnenForeldersAktivitet.MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN,
+            annenForeldersAktivitet = KompetanseAktivitet.MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN,
             barnetsBostedsland = BarnetsBostedsland.NORGE.name,
             kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
-            søkersAktivitet = SøkersAktivitet.ARBEIDER,
+            søkersAktivitet = KompetanseAktivitet.ARBEIDER,
         )
 
         restKompetanse = kompetanse.tilRestKompetanse()
@@ -105,7 +104,7 @@ class KompetanseUtfyltTest {
     @Test
     fun `Skal sette UtfyltStatus til UFULLSTENDIG dersom 1 til 4 felter er satt med unntak av regel om annenForeldersAktivitet`() {
         var kompetanse = lagKompetanse(
-            annenForeldersAktivitet = AnnenForeldersAktivitet.IKKE_AKTUELT,
+            annenForeldersAktivitet = KompetanseAktivitet.IKKE_AKTUELT,
         )
 
         var restKompetanse = kompetanse.tilRestKompetanse()
@@ -113,7 +112,7 @@ class KompetanseUtfyltTest {
         assertEquals(UtfyltStatus.UFULLSTENDIG, restKompetanse.status)
 
         kompetanse = lagKompetanse(
-            annenForeldersAktivitet = AnnenForeldersAktivitet.INAKTIV,
+            annenForeldersAktivitet = KompetanseAktivitet.INAKTIV,
             barnetsBostedsland = BarnetsBostedsland.NORGE.name,
         )
 
@@ -122,7 +121,7 @@ class KompetanseUtfyltTest {
         assertEquals(UtfyltStatus.UFULLSTENDIG, restKompetanse.status)
 
         kompetanse = lagKompetanse(
-            annenForeldersAktivitet = AnnenForeldersAktivitet.FORSIKRET_I_BOSTEDSLAND,
+            annenForeldersAktivitet = KompetanseAktivitet.FORSIKRET_I_BOSTEDSLAND,
             barnetsBostedsland = BarnetsBostedsland.NORGE.name,
             kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
         )
@@ -132,10 +131,10 @@ class KompetanseUtfyltTest {
         assertEquals(UtfyltStatus.UFULLSTENDIG, restKompetanse.status)
 
         kompetanse = lagKompetanse(
-            annenForeldersAktivitet = AnnenForeldersAktivitet.MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN,
+            annenForeldersAktivitet = KompetanseAktivitet.MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN,
             barnetsBostedsland = BarnetsBostedsland.NORGE.name,
             kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
-            søkersAktivitet = SøkersAktivitet.ARBEIDER,
+            søkersAktivitet = KompetanseAktivitet.ARBEIDER,
         )
 
         restKompetanse = kompetanse.tilRestKompetanse()
@@ -155,11 +154,11 @@ class KompetanseUtfyltTest {
     @Test
     fun `Skal sette UtfyltStatus til UFULLSTENDIG dersom alle felter unntatt søkersAktivitetsland er fylt ut`() {
         val kompetanse = lagKompetanse(
-            annenForeldersAktivitet = AnnenForeldersAktivitet.I_ARBEID,
+            annenForeldersAktivitet = KompetanseAktivitet.I_ARBEID,
             barnetsBostedsland = BarnetsBostedsland.NORGE.name,
             annenForeldersAktivitetsland = "NORGE",
             kompetanseResultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
-            søkersAktivitet = SøkersAktivitet.ARBEIDER,
+            søkersAktivitet = KompetanseAktivitet.ARBEIDER,
         )
 
         val restKompetanse = kompetanse.tilRestKompetanse()

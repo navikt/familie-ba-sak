@@ -1,7 +1,7 @@
 package no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser
 
 import no.nav.familie.ba.sak.kjerne.brev.domene.ISanityBegrunnelse
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 
@@ -34,7 +34,7 @@ data class RestSanityEØSBegrunnelse(
             apiNavn = apiNavn,
             navnISystem = navnISystem,
             annenForeldersAktivitet = annenForeldersAktivitet?.mapNotNull {
-                konverterTilEnumverdi<AnnenForeldersAktivitet>(it)
+                konverterTilEnumverdi<KompetanseAktivitet>(it)
             } ?: emptyList(),
             barnetsBostedsland = barnetsBostedsland?.mapNotNull {
                 konverterTilEnumverdi<BarnetsBostedsland>(it)
@@ -58,7 +58,7 @@ data class RestSanityEØSBegrunnelse(
 data class SanityEØSBegrunnelse(
     override val apiNavn: String,
     override val navnISystem: String,
-    val annenForeldersAktivitet: List<AnnenForeldersAktivitet>,
+    val annenForeldersAktivitet: List<KompetanseAktivitet>,
     val barnetsBostedsland: List<BarnetsBostedsland>,
     val kompetanseResultat: List<KompetanseResultat>,
     val hjemler: List<String>,

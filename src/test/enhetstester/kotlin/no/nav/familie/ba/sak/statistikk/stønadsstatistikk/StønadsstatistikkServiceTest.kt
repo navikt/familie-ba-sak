@@ -23,9 +23,8 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndre
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.KompetanseService
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.SøkersAktivitet
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
@@ -117,8 +116,8 @@ internal class StønadsstatistikkServiceTest(
                 fom = YearMonth.now(),
                 tom = null,
                 barnAktører = setOf(barn1.aktør),
-                søkersAktivitet = SøkersAktivitet.ARBEIDER,
-                annenForeldersAktivitet = AnnenForeldersAktivitet.I_ARBEID,
+                søkersAktivitet = KompetanseAktivitet.ARBEIDER,
+                annenForeldersAktivitet = KompetanseAktivitet.I_ARBEID,
                 annenForeldersAktivitetsland = "PL",
                 barnetsBostedsland = "PL",
                 resultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
@@ -225,7 +224,7 @@ internal class StønadsstatistikkServiceTest(
      */
     @Test
     fun `Skal gi feil hvis det kommer en ny AnnenForeldersAktivitet som det ikke er tatt høyde for mot stønaddstatistkk - Man trenger å oppdatere schema og varsle stønaddstatistikk - Tips i javadoc`() {
-        val annenForeldersAktivitet = enumValues<AnnenForeldersAktivitet>().map { it.name }
+        val annenForeldersAktivitet = enumValues<KompetanseAktivitet>().map { it.name }
         val annenForeldersAktivitetFraEksternKontrakt =
             ikkeAvvikleteEnumverdier<no.nav.familie.eksterne.kontrakter.AnnenForeldersAktivitet>()
 
@@ -245,7 +244,7 @@ internal class StønadsstatistikkServiceTest(
      */
     @Test
     fun `Skal gi feil hvis det kommer en ny søkersAktivitet som det ikke er tatt høyde for mot stønaddstatistkk - Man trenger å oppdatere schema og varsle stønaddstatistikk - Tips i javadoc`() {
-        val søkersAktivitet = enumValues<SøkersAktivitet>().map { it.name }
+        val søkersAktivitet = enumValues<KompetanseAktivitet>().map { it.name }
         val søkersAktivitetFraEksternKontrakt =
             ikkeAvvikleteEnumverdier<no.nav.familie.eksterne.kontrakter.SøkersAktivitet>()
 

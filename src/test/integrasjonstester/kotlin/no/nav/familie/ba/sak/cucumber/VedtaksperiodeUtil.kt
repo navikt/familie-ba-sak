@@ -29,10 +29,9 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.SøkersAktivitet
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
@@ -162,17 +161,17 @@ fun lagKompetanser(
                 .filter { aktørerForKompetanse.contains(it.aktør.aktørId) }
                 .map { it.aktør }
                 .toSet(),
-            søkersAktivitet = parseValgfriEnum<SøkersAktivitet>(
+            søkersAktivitet = parseValgfriEnum<KompetanseAktivitet>(
                 VedtaksperiodeMedBegrunnelserParser.DomenebegrepKompetanse.SØKERS_AKTIVITET,
                 rad,
             )
-                ?: SøkersAktivitet.ARBEIDER,
+                ?: KompetanseAktivitet.ARBEIDER,
             annenForeldersAktivitet =
-            parseValgfriEnum<AnnenForeldersAktivitet>(
+            parseValgfriEnum<KompetanseAktivitet>(
                 VedtaksperiodeMedBegrunnelserParser.DomenebegrepKompetanse.ANNEN_FORELDERS_AKTIVITET,
                 rad,
             )
-                ?: AnnenForeldersAktivitet.I_ARBEID,
+                ?: KompetanseAktivitet.I_ARBEID,
             søkersAktivitetsland = parseValgfriString(
                 VedtaksperiodeMedBegrunnelserParser.DomenebegrepKompetanse.SØKERS_AKTIVITETSLAND,
                 rad,

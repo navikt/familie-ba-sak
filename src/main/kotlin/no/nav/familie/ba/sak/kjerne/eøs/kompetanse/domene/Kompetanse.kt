@@ -48,11 +48,11 @@ data class Kompetanse(
 
     @Enumerated(EnumType.STRING)
     @Column(name = "soekers_aktivitet")
-    val søkersAktivitet: SøkersAktivitet? = null,
+    val søkersAktivitet: KompetanseAktivitet? = null,
 
     @Enumerated(EnumType.STRING)
     @Column(name = "annen_forelderes_aktivitet")
-    val annenForeldersAktivitet: AnnenForeldersAktivitet? = null,
+    val annenForeldersAktivitet: KompetanseAktivitet? = null,
 
     @Column(name = "annen_forelderes_aktivitetsland")
     val annenForeldersAktivitetsland: String? = null,
@@ -122,7 +122,7 @@ data class Kompetanse(
     }
 }
 
-enum class SøkersAktivitet {
+enum class KompetanseAktivitet {
     ARBEIDER,
     SELVSTENDIG_NÆRINGSDRIVENDE,
     MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN,
@@ -137,14 +137,8 @@ enum class SøkersAktivitet {
     MOTTAR_UFØRETRYGD_FRA_NAV_UNDER_OPPHOLD_I_UTLANDET,
     MOTTAR_PENSJON_FRA_NAV_UNDER_OPPHOLD_I_UTLANDET,
     INAKTIV,
-}
-
-enum class AnnenForeldersAktivitet {
     I_ARBEID,
-    MOTTAR_UTBETALING_SOM_ERSTATTER_LØNN,
     FORSIKRET_I_BOSTEDSLAND,
-    MOTTAR_PENSJON,
-    INAKTIV,
     IKKE_AKTUELT,
     UTSENDT_ARBEIDSTAKER,
 }
@@ -171,8 +165,8 @@ data class UtfyltKompetanse(
     val fom: YearMonth,
     val tom: YearMonth?,
     val barnAktører: Set<Aktør>,
-    val søkersAktivitet: SøkersAktivitet,
-    val annenForeldersAktivitet: AnnenForeldersAktivitet,
+    val søkersAktivitet: KompetanseAktivitet,
+    val annenForeldersAktivitet: KompetanseAktivitet,
     val annenForeldersAktivitetsland: String?,
     val søkersAktivitetsland: String,
     val barnetsBostedsland: String,

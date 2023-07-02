@@ -1,9 +1,8 @@
 package no.nav.familie.ba.sak.ekstern.restDomene
 
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
+import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseAktivitet
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
-import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.SøkersAktivitet
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import java.time.YearMonth
 
@@ -12,9 +11,9 @@ data class RestKompetanse(
     val fom: YearMonth?,
     val tom: YearMonth?,
     val barnIdenter: List<String>,
-    val søkersAktivitet: SøkersAktivitet? = null,
+    val søkersAktivitet: KompetanseAktivitet? = null,
     val søkersAktivitetsland: String? = null,
-    val annenForeldersAktivitet: AnnenForeldersAktivitet? = null,
+    val annenForeldersAktivitet: KompetanseAktivitet? = null,
     val annenForeldersAktivitetsland: String? = null,
     val barnetsBostedsland: String? = null,
     val resultat: KompetanseResultat? = null,
@@ -33,10 +32,10 @@ data class RestKompetanse(
             ),
         )
         if (annenForeldersAktivitetsland == null) {
-            antallUtfylteFelter += (annenForeldersAktivitet.let { if (it == AnnenForeldersAktivitet.INAKTIV || it == AnnenForeldersAktivitet.IKKE_AKTUELT) 1 else 0 })
+            antallUtfylteFelter += (annenForeldersAktivitet.let { if (it == KompetanseAktivitet.INAKTIV || it == KompetanseAktivitet.IKKE_AKTUELT) 1 else 0 })
         }
         if (søkersAktivitetsland == null) {
-            antallUtfylteFelter += (søkersAktivitet.let { if (it == SøkersAktivitet.INAKTIV) 1 else 0 })
+            antallUtfylteFelter += (søkersAktivitet.let { if (it == KompetanseAktivitet.INAKTIV) 1 else 0 })
         }
         return this.copy(status = utfyltStatus(antallUtfylteFelter, 6))
     }
