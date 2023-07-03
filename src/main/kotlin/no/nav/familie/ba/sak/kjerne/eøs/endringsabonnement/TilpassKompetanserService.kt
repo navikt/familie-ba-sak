@@ -128,10 +128,7 @@ fun tilpassKompetanserTilRegelverk(
             regelverk?.let { kompetanse ?: Kompetanse.NULL }
         }
         .kombinerKunVerdiMed(annenForelderOmfattetAvNorskLovgivningTidslinje) { kompetanse, annenForelderOmfattet ->
-            when (annenForelderOmfattet) {
-                true -> kompetanse.copy(annenForelderOmfattetAvNorskLovgivning = true)
-                else -> kompetanse
-            }
+            kompetanse.copy(annenForelderOmfattetAvNorskLovgivning = annenForelderOmfattet)
         }
         .tilSkjemaer()
 }
