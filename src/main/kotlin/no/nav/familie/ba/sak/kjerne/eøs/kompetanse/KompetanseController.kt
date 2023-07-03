@@ -81,40 +81,32 @@ class KompetanseController(
         if (oppdatertKompetanse.barnAktører.isEmpty()) {
             throw FunksjonellFeil("Mangler barn", httpStatus = HttpStatus.BAD_REQUEST)
         }
-        if (oppdatertKompetanse.annenForelderOmfattetAvNorskLovgivning == true) {
-            if (oppdatertKompetanse.søkersAktivitet?.gyldigForAnnenForelder == false) {
-                "Valgt verdi for søkers aktivitet er ikke gyldig når annen forelder er omfattet av norsk lovgivning".apply {
+
+        if (
+            (oppdatertKompetanse.annenForelderOmfattetAvNorskLovgivning == true && oppdatertKompetanse.søkersAktivitet?.gyldigForAnnenForelder == false) ||
+            (oppdatertKompetanse.annenForelderOmfattetAvNorskLovgivning == false && oppdatertKompetanse.søkersAktivitet?.gyldigForSøker == false)
+        ) {
+            "Valgt verdi for søkers aktivitet er ikke gyldig ${if (oppdatertKompetanse.annenForelderOmfattetAvNorskLovgivning) "når annen forelder er omfattet av norsk lovgivning" else ""}"
+                .trim()
+                .apply {
                     throw FunksjonellFeil(
                         this,
                         this,
                     )
                 }
-            }
-            if (oppdatertKompetanse.annenForeldersAktivitet?.gyldigForSøker == false) {
-                "Valgt verdi for annen forelders aktivitet er ikke gyldig når annen forelder er omfattet av norsk lovgivning".apply {
+        }
+        if (
+            (oppdatertKompetanse.annenForelderOmfattetAvNorskLovgivning == true && oppdatertKompetanse.annenForeldersAktivitet?.gyldigForSøker == false) ||
+            (oppdatertKompetanse.annenForelderOmfattetAvNorskLovgivning == false && oppdatertKompetanse.annenForeldersAktivitet?.gyldigForAnnenForelder == false)
+        ) {
+            "Valgt verdi for annen forelders aktivitet er ikke gyldig ${if (oppdatertKompetanse.annenForelderOmfattetAvNorskLovgivning) "når annen forelder er omfattet av norsk lovgivning" else ""}"
+                .trim()
+                .apply {
                     throw FunksjonellFeil(
                         this,
                         this,
                     )
                 }
-            }
-        } else {
-            if (oppdatertKompetanse.søkersAktivitet?.gyldigForSøker == false) {
-                "Valgt verdi for søkers aktivitet er ikke gyldig".apply {
-                    throw FunksjonellFeil(
-                        this,
-                        this,
-                    )
-                }
-            }
-            if (oppdatertKompetanse.annenForeldersAktivitet?.gyldigForAnnenForelder == false) {
-                "Valgt verdi for annen forelders aktivitet er ikke gyldig".apply {
-                    throw FunksjonellFeil(
-                        this,
-                        this,
-                    )
-                }
-            }
         }
     }
 }
