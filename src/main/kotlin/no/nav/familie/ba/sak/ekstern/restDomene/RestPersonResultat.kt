@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelseDeserializer
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Regelverk
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.ResultatBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import java.time.LocalDate
@@ -35,6 +36,7 @@ data class RestVilkårResultat(
     val avslagBegrunnelser: List<IVedtakBegrunnelse>? = emptyList(),
     val vurderesEtter: Regelverk? = null,
     val utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering> = emptyList(),
+    val resultatBegrunnelse: ResultatBegrunnelse? = null,
 ) {
 
     fun erAvslagUtenPeriode() =
@@ -49,6 +51,7 @@ fun PersonResultat.tilRestPersonResultat() =
         vilkårResultater = this.vilkårResultater.map { vilkårResultat ->
             RestVilkårResultat(
                 resultat = vilkårResultat.resultat,
+                resultatBegrunnelse = vilkårResultat.resultatBegrunnelse,
                 erAutomatiskVurdert = vilkårResultat.erAutomatiskVurdert,
                 erEksplisittAvslagPåSøknad = vilkårResultat.erEksplisittAvslagPåSøknad,
                 id = vilkårResultat.id,

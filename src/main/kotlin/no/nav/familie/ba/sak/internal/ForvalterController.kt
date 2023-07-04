@@ -5,14 +5,8 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClien
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.integrasjoner.oppgave.domene.OppgaveRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.småbarnstillegg.RestartAvSmåbarnstilleggService
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
-import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
-import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingMigreringsinfoRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingRepository
-import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndelRepository
-import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.steg.StegService
 import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
@@ -45,12 +39,6 @@ class ForvalterController(
     private val restartAvSmåbarnstilleggService: RestartAvSmåbarnstilleggService,
     private val forvalterService: ForvalterService,
     private val oppgaveService: OppgaveService,
-    private val behandlingMigreringsinfoRepository: BehandlingMigreringsinfoRepository,
-    private val hentOgPersisterService: BehandlingHentOgPersisterService,
-    private val stegService: StegService,
-    private val fagsakService: FagsakService,
-    private val behandlingService: BehandlingService,
-    private val tilkjentYtelseRepository: TilkjentYtelseRepository,
     private val behandlingRepository: BehandlingRepository,
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
 ) {

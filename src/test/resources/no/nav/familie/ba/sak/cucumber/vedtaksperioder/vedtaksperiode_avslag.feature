@@ -73,7 +73,7 @@ Egenskap: Vedtaksperioder med mor og to barn
     Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1            | 1234    | SØKER      | 24.12.1987  |
-      | 1            | 3456    | BARN       | 01.02.2016  |
+      | 1            | 3456    | BARN       | 01.12.2016  |
       | 1            | 5678    | BARN       | 01.02.2017  |
 
     Og lag personresultater for behandling 1
@@ -116,8 +116,8 @@ Egenskap: Vedtaksperioder med mor og to barn
     Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1            | 1234    | SØKER      | 24.12.1987  |
-      | 1            | 3456    | BARN       | 01.02.2016  |
-      | 1            | 5678    | BARN       | 01.02.2017  |
+      | 1            | 3456    | BARN       | 02.12.2016  |
+      | 1            | 5678    | BARN       | 02.12.2016  |
 
     Og lag personresultater for behandling 1
     Og legg til nye vilkårresultater for behandling 1
@@ -165,8 +165,8 @@ Egenskap: Vedtaksperioder med mor og to barn
     Og følgende persongrunnlag
       | BehandlingId | AktørId | Persontype | Fødselsdato |
       | 1            | 1234    | SØKER      | 24.12.1987  |
-      | 1            | 3456    | BARN       | 01.02.2016  |
-      | 1            | 5678    | BARN       | 01.02.2017  |
+      | 1            | 3456    | BARN       | 02.12.2016  |
+      | 1            | 5678    | BARN       | 02.12.2016  |
 
     Og lag personresultater for behandling 1
     Og legg til nye vilkårresultater for behandling 1

@@ -3,6 +3,7 @@ package no.nav.familie.ba.sak.kjerne.vilkårsvurdering
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.Utils
 import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjer
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.harBlandetRegelverk
@@ -75,6 +76,31 @@ fun valider18ÅrsVilkårEksistererFraFødselsdato(
                     melding = "Barn født ${person.fødselsdato} har ikke fått under 18-vilkåret vurdert fra fødselsdato",
                     frontendFeilmelding = "Det må være en periode på 18-års vilkåret som starter på barnets fødselsdato",
                 )
+            }
+        }
+    }
+}
+
+fun validerResultatBegrunnelse(restVilkårResultat: RestVilkårResultat) {
+    val resultat = restVilkårResultat.resultat
+    val vilkårType = restVilkårResultat.vilkårType
+    val resultatBegrunnelse = restVilkårResultat.resultatBegrunnelse
+    val regelverk = restVilkårResultat.vurderesEtter
+
+    if (resultatBegrunnelse != null) {
+        if (!resultatBegrunnelse.gyldigForVilkår.contains(vilkårType)) {
+            "Resultatbegrunnelsen $resultatBegrunnelse kan ikke kombineres med vilkåret $vilkårType".apply {
+                throw FunksjonellFeil(this, this)
+            }
+        }
+        if (!resultatBegrunnelse.gyldigIKombinasjonMedResultat.contains(resultat)) {
+            "Resultatbegrunnelsen $resultatBegrunnelse kan ikke kombineres med resultatet $resultat".apply {
+                throw FunksjonellFeil(this, this)
+            }
+        }
+        if (!resultatBegrunnelse.gyldigForRegelverk.contains(regelverk)) {
+            "Resultatbegrunnelsen $resultatBegrunnelse kan ikke kombineres med regelverket $regelverk".apply {
+                throw FunksjonellFeil(this, this)
             }
         }
     }
