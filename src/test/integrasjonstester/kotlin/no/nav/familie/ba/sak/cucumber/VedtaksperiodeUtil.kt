@@ -52,32 +52,6 @@ fun Map<Long, Behandling>.finnBehandling(behandlingId: Long) =
 fun Map<Long, PersonopplysningGrunnlag>.finnPersonGrunnlagForBehandling(behandlingId: Long): PersonopplysningGrunnlag =
     this[behandlingId] ?: error("Finner ikke persongrunnlag for behandling med id $behandlingId")
 
-fun List<MutableMap<String, String>>?.tilVilkårResultater(
-    behandlingId: Long,
-    personResultat: PersonResultat,
-) =
-    this?.map {
-        VilkårResultat(
-            vilkårType = parseEnum(
-                VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.VILKÅR,
-                it,
-            ),
-            resultat = parseEnum(
-                VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.RESULTAT,
-                it,
-            ),
-            periodeFom = parseValgfriDato(Domenebegrep.FRA_DATO, it),
-            periodeTom = parseValgfriDato(Domenebegrep.TIL_DATO, it),
-            begrunnelse = "",
-            behandlingId = behandlingId,
-            personResultat = personResultat,
-            erEksplisittAvslagPåSøknad = parseValgfriBoolean(
-                VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.ER_EKSPLISITT_AVSLAG,
-                it,
-            ),
-        )
-    } ?: emptyList()
-
 fun lagVedtak(
     dataTable: DataTable,
     behandlinger: MutableMap<Long, Behandling>,
