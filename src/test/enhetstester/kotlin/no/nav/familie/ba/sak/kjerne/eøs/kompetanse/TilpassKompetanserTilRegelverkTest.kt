@@ -29,7 +29,8 @@ class TilpassKompetanserTilRegelverkTest {
         val eøsPerioder = mapOf(
             barn1.aktør to "EEENNEEEE".tilRegelverkResultatTidslinje(jan2020),
         )
-        val annenForelderOmfattetTidslinje = "++++-----".tilAnnenForelderOmfattetAvNorskLovgivningTidslinje(jan2020)
+        val annenForelderOmfattetTidslinje =
+            "++++-----++++++".tilAnnenForelderOmfattetAvNorskLovgivningTidslinje(jan2020)
 
         val forventedeKompetanser = KompetanseBuilder(jan2020)
             .medKompetanse(

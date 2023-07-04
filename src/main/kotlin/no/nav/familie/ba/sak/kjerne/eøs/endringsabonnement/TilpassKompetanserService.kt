@@ -22,7 +22,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrer
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.fraOgMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
-import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerKunVerdiMed
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.leftJoin
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.outerJoin
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
@@ -127,8 +127,10 @@ fun tilpassKompetanserTilRegelverk(
         .outerJoin(barnasEøsRegelverkTidslinjer) { kompetanse, regelverk ->
             regelverk?.let { kompetanse ?: Kompetanse.NULL }
         }
-        .kombinerKunVerdiMed(annenForelderOmfattetAvNorskLovgivningTidslinje) { kompetanse, annenForelderOmfattet ->
-            kompetanse.copy(annenForelderOmfattetAvNorskLovgivning = annenForelderOmfattet)
+        .mapValues { (_, value) ->
+            value.kombinerMed(annenForelderOmfattetAvNorskLovgivningTidslinje) { kompetanse, annenForelderOmfattet ->
+                kompetanse?.copy(annenForelderOmfattetAvNorskLovgivning = annenForelderOmfattet ?: false)
+            }
         }
         .tilSkjemaer()
 }
