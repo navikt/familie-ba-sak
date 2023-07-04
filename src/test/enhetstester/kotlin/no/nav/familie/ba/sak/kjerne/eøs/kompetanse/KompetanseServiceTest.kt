@@ -378,9 +378,25 @@ internal class KompetanseServiceTest {
         val barn3 = tilfeldigPerson(personType = PersonType.BARN)
 
         val kompetanser = KompetanseBuilder(jan(2020), behandlingId1)
-            .medKompetanse("SSS", barn1)
-            .medKompetanse("---------", barn2, barn3)
-            .medKompetanse("   SSSS", barn1)
+            .medKompetanse(
+                "SSS",
+                barn1,
+                annenForeldersAktivitetsland = null,
+                annenForelderOmfattetAvNorskLovgivning = true
+            )
+            .medKompetanse(
+                "---------",
+                barn2,
+                barn3,
+                annenForeldersAktivitetsland = null,
+                annenForelderOmfattetAvNorskLovgivning = false
+            )
+            .medKompetanse(
+                "   SSSS",
+                barn1,
+                annenForeldersAktivitetsland = null,
+                annenForelderOmfattetAvNorskLovgivning = true
+            )
             .lagreTil(mockKompetanseRepository)
 
         kompetanseService.kopierOgErstattKompetanser(behandlingId1, behandlingId2)
