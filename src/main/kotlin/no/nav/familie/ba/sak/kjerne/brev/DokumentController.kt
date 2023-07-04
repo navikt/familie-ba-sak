@@ -6,7 +6,6 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestUtvidetBehandling
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.UtvidetBehandlingService
-import no.nav.familie.ba.sak.kjerne.behandling.ValiderBrevmottakerService
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
 import no.nav.familie.ba.sak.kjerne.brev.domene.byggMottakerdata
 import no.nav.familie.ba.sak.kjerne.brev.domene.leggTilEnhet
@@ -42,7 +41,6 @@ class DokumentController(
     private val persongrunnlagService: PersongrunnlagService,
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val utvidetBehandlingService: UtvidetBehandlingService,
-    private val validerBrevmottakerService: ValiderBrevmottakerService,
 ) {
 
     @PostMapping(path = ["vedtaksbrev/{vedtakId}"])
@@ -118,7 +116,6 @@ class DokumentController(
         )
 
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
-        validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(behandlingId = behandling.id)
 
         dokumentService.sendManueltBrev(
             manueltBrevRequest = manueltBrevRequest.byggMottakerdata(
