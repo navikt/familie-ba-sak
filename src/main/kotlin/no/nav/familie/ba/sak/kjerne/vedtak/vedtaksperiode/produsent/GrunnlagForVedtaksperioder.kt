@@ -396,7 +396,7 @@ private fun lagErUnder6ÅrTidslinje(fødselsdato: LocalDate) =
     listOf(
         månedPeriodeAv(
             fødselsdato.toYearMonth(),
-            fødselsdato.plusYears(18).minusDays(1).toYearMonth(),
+            fødselsdato.plusYears(6).minusDays(1).toYearMonth(),
             true,
         ),
     ).tilTidslinje()
