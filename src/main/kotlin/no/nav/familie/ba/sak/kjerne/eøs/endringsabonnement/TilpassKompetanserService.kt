@@ -129,7 +129,7 @@ fun tilpassKompetanserTilRegelverk(
         }
         .mapValues { (_, value) ->
             value.kombinerMed(annenForelderOmfattetAvNorskLovgivningTidslinje) { kompetanse, annenForelderOmfattet ->
-                kompetanse?.copy(annenForelderOmfattetAvNorskLovgivning = annenForelderOmfattet ?: false)
+                kompetanse?.copy(erAnnenForelderOmfattetAvNorskLovgivning = annenForelderOmfattet ?: false)
             }
         }
         .tilSkjemaer()

@@ -67,8 +67,8 @@ data class Kompetanse(
     @Column(name = "resultat")
     val resultat: KompetanseResultat? = null,
 
-    @Column(name = "annen_forelder_omfattet_av_norsk_lovgivning")
-    val annenForelderOmfattetAvNorskLovgivning: Boolean? = false,
+    @Column(name = "er_annen_forelder_omfattet_av_norsk_lovgivning")
+    val erAnnenForelderOmfattetAvNorskLovgivning: Boolean? = false,
 ) : PeriodeOgBarnSkjemaEntitet<Kompetanse>() {
 
     @Id

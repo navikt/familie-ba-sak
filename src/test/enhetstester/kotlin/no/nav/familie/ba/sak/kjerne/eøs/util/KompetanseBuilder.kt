@@ -17,25 +17,25 @@ class KompetanseBuilder(
         k: String,
         vararg barn: Person,
         annenForeldersAktivitetsland: String? = null,
-        annenForelderOmfattetAvNorskLovgivning: Boolean? = false,
+        erAnnenForelderOmfattetAvNorskLovgivning: Boolean? = false,
     ) =
         medSkjema(k, barn.toList()) {
             when (it) {
                 '-' -> Kompetanse.NULL.copy(
                     annenForeldersAktivitetsland = annenForeldersAktivitetsland,
-                    annenForelderOmfattetAvNorskLovgivning = annenForelderOmfattetAvNorskLovgivning,
+                    erAnnenForelderOmfattetAvNorskLovgivning = erAnnenForelderOmfattetAvNorskLovgivning,
                 )
 
                 'S' -> Kompetanse.NULL.copy(
                     resultat = KompetanseResultat.NORGE_ER_SEKUNDÆRLAND,
                     annenForeldersAktivitetsland = annenForeldersAktivitetsland,
-                    annenForelderOmfattetAvNorskLovgivning = annenForelderOmfattetAvNorskLovgivning,
+                    erAnnenForelderOmfattetAvNorskLovgivning = erAnnenForelderOmfattetAvNorskLovgivning,
                 ).fyllUt()
 
                 'P' -> Kompetanse.NULL.copy(
                     resultat = KompetanseResultat.NORGE_ER_PRIMÆRLAND,
                     annenForeldersAktivitetsland = annenForeldersAktivitetsland,
-                    annenForelderOmfattetAvNorskLovgivning = annenForelderOmfattetAvNorskLovgivning,
+                    erAnnenForelderOmfattetAvNorskLovgivning = erAnnenForelderOmfattetAvNorskLovgivning,
                 ).fyllUt()
 
                 else -> null
@@ -46,7 +46,7 @@ class KompetanseBuilder(
 }
 
 fun Kompetanse.fyllUt() = this.copy(
-    annenForelderOmfattetAvNorskLovgivning = annenForelderOmfattetAvNorskLovgivning ?: false,
+    erAnnenForelderOmfattetAvNorskLovgivning = erAnnenForelderOmfattetAvNorskLovgivning ?: false,
     resultat = resultat ?: KompetanseResultat.NORGE_ER_SEKUNDÆRLAND,
     annenForeldersAktivitetsland = annenForeldersAktivitetsland ?: "DK",
     barnetsBostedsland = barnetsBostedsland ?: "NO",

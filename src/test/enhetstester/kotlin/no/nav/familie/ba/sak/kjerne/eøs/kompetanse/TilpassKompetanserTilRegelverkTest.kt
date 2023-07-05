@@ -37,13 +37,13 @@ class TilpassKompetanserTilRegelverkTest {
                 "---      ",
                 barn1,
                 annenForeldersAktivitetsland = null,
-                annenForelderOmfattetAvNorskLovgivning = true,
+                erAnnenForelderOmfattetAvNorskLovgivning = true,
             )
             .medKompetanse(
                 "     ----",
                 barn1,
                 annenForeldersAktivitetsland = null,
-                annenForelderOmfattetAvNorskLovgivning = false,
+                erAnnenForelderOmfattetAvNorskLovgivning = false,
             )
             .byggKompetanser()
 
