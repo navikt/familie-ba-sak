@@ -44,7 +44,8 @@ private fun GrunnlagForPerson?.erLik(
             this.vilkårResultaterForVedtaksperiode.toSet() == grunnlagForVedtaksperiodeForrigeBehandling.vilkårResultaterForVedtaksperiode.toSet() &&
             this.kompetanse == grunnlagForVedtaksperiodeForrigeBehandling.kompetanse &&
             this.endretUtbetalingAndel == grunnlagForVedtaksperiodeForrigeBehandling.endretUtbetalingAndel &&
-            this.overgangsstønad == grunnlagForVedtaksperiodeForrigeBehandling.overgangsstønad
+            this.overgangsstønad == grunnlagForVedtaksperiodeForrigeBehandling.overgangsstønad &&
+            this.andeler.toSet() == grunnlagForVedtaksperiodeForrigeBehandling.andeler.toSet()
 
     is GrunnlagForPersonIkkeInnvilget ->
         grunnlagForVedtaksperiodeForrigeBehandling is GrunnlagForPersonIkkeInnvilget &&
