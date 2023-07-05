@@ -229,7 +229,7 @@ fun lagAndelerTilkjentYtelse(
         person = personGrunnlag.finnPersonGrunnlagForBehandling(behandlingId).personer.find { aktørId == it.aktør.aktørId }!!,
         beløp = parseInt(VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.BELØP, rad),
         ytelseType = parseValgfriEnum<YtelseType>(
-            VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.YTELSE_TYPE,
+            VedtaksperiodeMedBegrunnelserParser.DomenebegrepAndelTilkjentYtelse.YTELSE_TYPE,
             rad,
         ) ?: YtelseType.ORDINÆR_BARNETRYGD,
     )
