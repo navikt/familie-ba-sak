@@ -43,7 +43,7 @@ data class GrunnlagForPersonInnvilget(
     val andeler: Iterable<AndelForVedtaksperiode>,
     val kompetanse: KompetanseForVedtaksperiode? = null,
     val endretUtbetalingAndel: EndretUtbetalingAndelForVedtaksperiode? = null,
-    val overgangsstønad: OvergangsstønadForVedtaksperiode? = null,
+    val harRettTilSmåbarnstillegg: Boolean? = null,
 ) : GrunnlagForPerson
 
 data class GrunnlagForPersonIkkeInnvilget(
