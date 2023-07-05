@@ -382,20 +382,20 @@ internal class KompetanseServiceTest {
                 "SSS",
                 barn1,
                 annenForeldersAktivitetsland = null,
-                erAnnenForelderOmfattetAvNorskLovgivning = true
+                erAnnenForelderOmfattetAvNorskLovgivning = true,
             )
             .medKompetanse(
                 "---------",
                 barn2,
                 barn3,
                 annenForeldersAktivitetsland = null,
-                erAnnenForelderOmfattetAvNorskLovgivning = false
+                erAnnenForelderOmfattetAvNorskLovgivning = false,
             )
             .medKompetanse(
                 "   SSSS",
                 barn1,
                 annenForeldersAktivitetsland = null,
-                erAnnenForelderOmfattetAvNorskLovgivning = true
+                erAnnenForelderOmfattetAvNorskLovgivning = true,
             )
             .lagreTil(mockKompetanseRepository)
 
