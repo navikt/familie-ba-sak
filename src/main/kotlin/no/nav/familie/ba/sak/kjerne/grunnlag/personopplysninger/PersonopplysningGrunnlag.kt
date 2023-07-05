@@ -15,6 +15,7 @@ import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 import java.time.LocalDate
 
@@ -70,11 +71,16 @@ data class PersonopplysningGrunnlag(
             .toYearMonth() == (fom?.toYearMonth() ?: TIDENES_ENDE.toYearMonth())
     }
 
-    fun tilKopiForNyBehandling(behandling: Behandling): PersonopplysningGrunnlag =
-        copy(id = 0, behandlingId = behandling.id, personer = mutableSetOf()).also {
-            it.personer.addAll(
-                personer.map { person -> person.tilKopiForNyttPersonopplysningGrunnlag(it) },
-            )
+    fun tilKopiForNyBehandling(
+        behandling: Behandling,
+        søkerOgBarnMedTilkjentYtelseFraForrigeBehandling: List<Aktør>,
+    ): PersonopplysningGrunnlag =
+        copy(id = 0, behandlingId = behandling.id, personer = mutableSetOf()).also { it ->
+            it.personer
+                .addAll(
+                    personer.filter { person -> søkerOgBarnMedTilkjentYtelseFraForrigeBehandling.any { søkerEllerBarn -> søkerEllerBarn.aktørId == person.aktør.aktørId } }
+                        .map { person -> person.tilKopiForNyttPersonopplysningGrunnlag(it) },
+                )
         }
 
     override fun toString(): String {
@@ -86,3 +92,6 @@ data class PersonopplysningGrunnlag(
         return sb.toString()
     }
 }
+
+fun Aktør.tilPerson(personopplysningGrunnlag: PersonopplysningGrunnlag): Person? =
+    personopplysningGrunnlag.personer.find { it.aktør == this }

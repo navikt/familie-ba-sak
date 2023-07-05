@@ -38,6 +38,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeTrigger
 import no.nav.familie.ba.sak.kjerne.brev.domene.RestSanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityVilkår
+import no.nav.familie.ba.sak.kjerne.brev.domene.Valgbarhet
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårRolle
 import no.nav.familie.ba.sak.kjerne.brev.domene.VilkårTrigger
 import no.nav.familie.ba.sak.kjerne.brev.domene.ØvrigTrigger
@@ -74,6 +75,7 @@ import no.nav.familie.ba.sak.kjerne.steg.domene.JournalførVedtaksbrevDTO
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakService
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.BarnetsBostedsland
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.IVedtakBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.SanityEØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.TriggesAv
@@ -167,6 +169,7 @@ fun lagBehandling(
     resultat: Behandlingsresultat = Behandlingsresultat.IKKE_VURDERT,
     underkategori: BehandlingUnderkategori = BehandlingUnderkategori.ORDINÆR,
     status: BehandlingStatus = initStatus(),
+    aktivertTid: LocalDateTime = LocalDateTime.now(),
 ) =
     Behandling(
         id = nesteBehandlingId(),
@@ -178,6 +181,7 @@ fun lagBehandling(
         opprettetÅrsak = årsak,
         resultat = resultat,
         status = status,
+        aktivertTidspunkt = aktivertTid,
     ).also {
         it.behandlingStegTilstand.add(BehandlingStegTilstand(0, it, førsteSteg))
     }
@@ -349,6 +353,7 @@ fun lagTestPersonopplysningGrunnlag(
     søkerPersonIdent: String,
     barnasIdenter: List<String>,
     barnasFødselsdatoer: List<LocalDate> = barnasIdenter.map { LocalDate.of(2019, 1, 1) },
+    søkerFødselsdato: LocalDate = LocalDate.of(1987, 1, 1),
     søkerAktør: Aktør = tilAktør(søkerPersonIdent).also {
         it.personidenter.add(
             Personident(
@@ -383,7 +388,7 @@ fun lagTestPersonopplysningGrunnlag(
         aktør = søkerAktør,
         type = PersonType.SØKER,
         personopplysningGrunnlag = personopplysningGrunnlag,
-        fødselsdato = LocalDate.of(2019, 1, 1),
+        fødselsdato = søkerFødselsdato,
         navn = "",
         kjønn = Kjønn.KVINNE,
     ).also { søker ->
@@ -1041,12 +1046,13 @@ fun lagVilkårResultat(
     personResultat: PersonResultat? = null,
     vilkårType: Vilkår = Vilkår.BOSATT_I_RIKET,
     resultat: Resultat = Resultat.OPPFYLT,
-    periodeFom: LocalDate = LocalDate.of(2009, 12, 24),
+    periodeFom: LocalDate? = LocalDate.of(2009, 12, 24),
     periodeTom: LocalDate? = LocalDate.of(2010, 1, 31),
     begrunnelse: String = "",
     behandlingId: Long = lagBehandling().id,
     utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering> = emptyList(),
     erEksplisittAvslagPåSøknad: Boolean = false,
+    standardbegrunnelser: List<IVedtakBegrunnelse> = emptyList(),
 ) = VilkårResultat(
     personResultat = personResultat,
     vilkårType = vilkårType,
@@ -1057,6 +1063,7 @@ fun lagVilkårResultat(
     behandlingId = behandlingId,
     utdypendeVilkårsvurderinger = utdypendeVilkårsvurderinger,
     erEksplisittAvslagPåSøknad = erEksplisittAvslagPåSøknad,
+    standardbegrunnelser = standardbegrunnelser,
 )
 
 val guttenBarnesenFødselsdato = LocalDate.now().withDayOfMonth(10).minusYears(6)
@@ -1208,6 +1215,7 @@ fun lagSanityBegrunnelse(
     hjemlerFolketrygdloven: List<String> = emptyList(),
     endretUtbetalingsperiodeDeltBostedTriggere: EndretUtbetalingsperiodeDeltBostedTriggere? = null,
     endretUtbetalingsperiodeTriggere: List<EndretUtbetalingsperiodeTrigger>? = null,
+    valgbarhet: Valgbarhet? = null,
 ): SanityBegrunnelse = SanityBegrunnelse(
     apiNavn = apiNavn,
     navnISystem = navnISystem,
@@ -1223,6 +1231,7 @@ fun lagSanityBegrunnelse(
     hjemlerFolketrygdloven = hjemlerFolketrygdloven,
     endretUtbetalingsperiodeDeltBostedUtbetalingTrigger = endretUtbetalingsperiodeDeltBostedTriggere,
     endretUtbetalingsperiodeTriggere = endretUtbetalingsperiodeTriggere,
+    valgbarhet = valgbarhet,
 )
 
 fun lagSanityEøsBegrunnelse(
@@ -1261,6 +1270,7 @@ fun lagTriggesAv(
     medlemskap: Boolean = false,
     deltbosted: Boolean = false,
     valgbar: Boolean = true,
+    valgbarhet: Valgbarhet? = null,
     endringsaarsaker: Set<Årsak> = emptySet(),
     etterEndretUtbetaling: Boolean = false,
     endretUtbetalingSkalUtbetales: EndretUtbetalingsperiodeDeltBostedTriggere = EndretUtbetalingsperiodeDeltBostedTriggere.UTBETALING_IKKE_RELEVANT,
@@ -1283,6 +1293,7 @@ fun lagTriggesAv(
     deltBostedSkalIkkeDeles = false,
     gjelderFraInnvilgelsestidspunkt = false,
     gjelderFørstePeriode = false,
+    valgbarhet = valgbarhet,
 )
 
 fun oppfyltVilkår(vilkår: Vilkår, regelverk: Regelverk? = null) =

@@ -24,7 +24,9 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMedNullable
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNull
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.slåSammenLike
+import no.nav.familie.ba.sak.kjerne.tidslinje.månedPeriodeAv
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilMånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
@@ -38,6 +40,11 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 
 typealias AktørId = String
+
+data class GrunnlagForPersonTidslinjerSplittetPåOverlappendeGenerelleAvslag(
+    val overlappendeGenerelleAvslagGrunnlagForPerson: Tidslinje<GrunnlagForPerson, Måned>,
+    val grunnlagForPerson: Tidslinje<GrunnlagForPerson, Måned>,
+)
 
 data class GrunnlagForVedtaksperioder(
     val persongrunnlag: PersonopplysningGrunnlag,
@@ -56,34 +63,63 @@ data class GrunnlagForVedtaksperioder(
         .map { it.tilIKompetanse() }
         .filterIsInstance<UtfyltKompetanse>()
 
-    fun utledGrunnlagTidslinjePerPerson(): Map<AktørId, Tidslinje<GrunnlagForPerson, Måned>> {
+    fun utledGrunnlagTidslinjePerPerson(): Map<Aktør, GrunnlagForPersonTidslinjerSplittetPåOverlappendeGenerelleAvslag> {
         val søker = persongrunnlag.søker
         val ordinæreVilkårForSøkerForskjøvetTidslinje =
             hentOrdinæreVilkårForSøkerForskjøvetTidslinje(søker, personResultater)
 
         val erMinstEttBarnMedUtbetalingTidslinje =
-            hentErMinstEttBarnMedUtbetalingTidslinje(personResultater, søker, fagsakType)
+            hentErMinstEttBarnMedUtbetalingTidslinje(personResultater, fagsakType, persongrunnlag)
 
-        val grunnlagForPersonTidslinjer = personResultater
-            .associate { personResultat ->
-                val aktør = personResultat.aktør
-                val person = persongrunnlag.personer.single { person -> aktør == person.aktør }
+        val grunnlagForPersonTidslinjer = personResultater.associate { personResultat ->
+            val aktør = personResultat.aktør
+            val person = persongrunnlag.personer.single { person -> aktør == person.aktør }
 
-                val forskjøvedeVilkårResultaterForPersonsAndeler: Tidslinje<List<VilkårResultat>, Måned> =
-                    personResultat.hentForskjøvedeVilkårResultaterForPersonsAndelerTidslinje(
-                        person = person,
-                        erMinstEttBarnMedUtbetalingTidslinje = erMinstEttBarnMedUtbetalingTidslinje,
-                        ordinæreVilkårForSøkerTidslinje = ordinæreVilkårForSøkerForskjøvetTidslinje,
-                    )
+            val (overlappendeGenerelleAvslag, vilkårResultaterUtenGenerelleAvslag) = splittOppPåErOverlappendeGenerelleAvslag(
+                personResultat,
+            )
 
-                aktør.aktørId to forskjøvedeVilkårResultaterForPersonsAndeler.tilGrunnlagForPersonTidslinje(
+            val forskjøvedeVilkårResultaterForPersonsAndeler: Tidslinje<List<VilkårResultat>, Måned> =
+                vilkårResultaterUtenGenerelleAvslag.hentForskjøvedeVilkårResultaterForPersonsAndelerTidslinje(
+                    person = person,
+                    erMinstEttBarnMedUtbetalingTidslinje = erMinstEttBarnMedUtbetalingTidslinje,
+                    ordinæreVilkårForSøkerTidslinje = ordinæreVilkårForSøkerForskjøvetTidslinje,
+                )
+
+            aktør to GrunnlagForPersonTidslinjerSplittetPåOverlappendeGenerelleAvslag(
+                overlappendeGenerelleAvslagGrunnlagForPerson = overlappendeGenerelleAvslag.generelleAvslagTilGrunnlagForPersonTidslinje(
+                    person,
+                ),
+                grunnlagForPerson = forskjøvedeVilkårResultaterForPersonsAndeler.tilGrunnlagForPersonTidslinje(
                     person = person,
                     søker = søker,
-                )
-            }
+                ),
+            )
+        }
 
         return grunnlagForPersonTidslinjer
     }
+
+    private fun List<VilkårResultat>.generelleAvslagTilGrunnlagForPersonTidslinje(
+        person: Person,
+    ) = this
+        .map {
+            listOf(månedPeriodeAv(null, null, it))
+                .tilTidslinje()
+        }
+        .kombinerUtenNull { it.toList() }
+        .map { vilkårResultater ->
+            vilkårResultater?.let {
+                GrunnlagForPersonIkkeInnvilget(
+                    person = person,
+                    vilkårResultaterForVedtaksperiode = it.map { vilkårResultat ->
+                        VilkårResultatForVedtaksperiode(
+                            vilkårResultat,
+                        )
+                    },
+                ) as GrunnlagForPerson
+            }
+        }
 
     private fun Tidslinje<List<VilkårResultat>, Måned>.tilGrunnlagForPersonTidslinje(
         person: Person,
@@ -127,6 +163,21 @@ data class GrunnlagForVedtaksperioder(
     }
 }
 
+private fun splittOppPåErOverlappendeGenerelleAvslag(personResultat: PersonResultat): Pair<List<VilkårResultat>, List<VilkårResultat>> {
+    val overlappendeGenerelleAvslag =
+        personResultat.vilkårResultater.groupBy { it.vilkårType }.mapNotNull { (_, resultat) ->
+            if (resultat.size > 1) {
+                resultat.filter { it.erGenereltAvslag() }
+            } else {
+                null
+            }
+        }.flatten()
+
+    val vilkårResultaterUtenGenerelleAvslag =
+        personResultat.vilkårResultater.filterNot { overlappendeGenerelleAvslag.contains(it) }
+    return Pair(overlappendeGenerelleAvslag, vilkårResultaterUtenGenerelleAvslag)
+}
+
 private fun List<VilkårResultat>.filtrerVilkårErOrdinærtFor(
     søker: Person,
 ): List<VilkårResultat>? {
@@ -143,19 +194,28 @@ fun hentOrdinæreVilkårForSøkerForskjøvetTidslinje(
 ): Tidslinje<List<VilkårResultat>, Måned> {
     val søkerPersonResultater = personResultater.single { it.aktør == søker.aktør }
 
-    return søkerPersonResultater.vilkårResultater.tilForskjøvedeVilkårTidslinjer()
+    val (_, vilkårResultaterUtenOverlappendeGenerelleAvslag) = splittOppPåErOverlappendeGenerelleAvslag(
+        søkerPersonResultater,
+    )
+
+    return vilkårResultaterUtenOverlappendeGenerelleAvslag
+        .tilForskjøvedeVilkårTidslinjer(søker.fødselsdato)
         .kombiner { vilkårResultater -> vilkårResultater.toList().takeIf { it.isNotEmpty() } }
         .map { it?.toList()?.filtrerVilkårErOrdinærtFor(søker) }
 }
 
+fun VilkårResultat.erGenereltAvslag() =
+    periodeFom == null && periodeTom == null && erEksplisittAvslagPåSøknad == true
+
 private fun hentErMinstEttBarnMedUtbetalingTidslinje(
     personResultater: Set<PersonResultat>,
-    søker: Person,
     fagsakType: FagsakType,
+    persongrunnlag: PersonopplysningGrunnlag,
 ): Tidslinje<Boolean, Måned> {
+    val søker = persongrunnlag.søker
     val søkerSinerOrdinæreVilkårErOppfyltTidslinje =
         personResultater.single { it.erSøkersResultater() }.tilTidslinjeForSplittForPerson(
-            personType = PersonType.SØKER,
+            person = søker,
             fagsakType = fagsakType,
         ).map { it != null }
 
@@ -163,7 +223,7 @@ private fun hentErMinstEttBarnMedUtbetalingTidslinje(
         .filter { it.aktør != søker.aktør || søker.type == PersonType.BARN }
         .map { personResultat ->
             personResultat.tilTidslinjeForSplittForPerson(
-                personType = PersonType.BARN,
+                person = persongrunnlag.barna.single { it.aktør == personResultat.aktør },
                 fagsakType = fagsakType,
             ).map { it != null }
         }
@@ -179,13 +239,12 @@ private fun hentErMinstEttBarnMedUtbetalingTidslinje(
         }
 }
 
-private fun PersonResultat.hentForskjøvedeVilkårResultaterForPersonsAndelerTidslinje(
+private fun List<VilkårResultat>.hentForskjøvedeVilkårResultaterForPersonsAndelerTidslinje(
     person: Person,
     erMinstEttBarnMedUtbetalingTidslinje: Tidslinje<Boolean, Måned>,
     ordinæreVilkårForSøkerTidslinje: Tidslinje<List<VilkårResultat>, Måned>,
 ): Tidslinje<List<VilkårResultat>, Måned> {
-    val forskjøvedeVilkårResultaterForPerson =
-        this.vilkårResultater.tilForskjøvedeVilkårTidslinjer().kombiner { it }
+    val forskjøvedeVilkårResultaterForPerson = this.tilForskjøvedeVilkårTidslinjer(person.fødselsdato).kombiner { it }
 
     return when (person.type) {
         PersonType.SØKER -> forskjøvedeVilkårResultaterForPerson.map { vilkårResultater ->
@@ -240,7 +299,11 @@ private fun lagGrunnlagForVilkårOgAndel(
         vilkårResultaterForVedtaksperiode = vilkårResultater
             ?: error("vilkårResultatene burde alltid finnes om vi har innvilget vedtaksperiode."),
         person = person,
-        andeler = andeler ?: error("andeler må finnes for innvilgede vedtaksperioder."),
+        andeler = andeler
+            ?: error(
+                "andeler må finnes for innvilgede vedtaksperioder. Vedtaksperioden er innenfor " +
+                    "${vilkårResultater.firstOrNull()?.fom} -> ${vilkårResultater.firstOrNull()?.tom}",
+            ),
     )
 } else {
     GrunnlagForPersonIkkeInnvilget(

@@ -13,6 +13,7 @@ import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
+import no.nav.familie.ba.sak.kjerne.behandling.AutomatiskBeslutningService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -52,6 +53,7 @@ class BeslutteVedtakTest {
     private lateinit var featureToggleService: FeatureToggleService
     private lateinit var tilkjentYtelseValideringService: TilkjentYtelseValideringService
     private lateinit var simuleringService: SimuleringService
+    private lateinit var automatiskBeslutningService: AutomatiskBeslutningService
 
     private val saksbehandlerContext = mockk<SaksbehandlerContext>()
 
@@ -69,6 +71,7 @@ class BeslutteVedtakTest {
         featureToggleService = mockk()
         tilkjentYtelseValideringService = mockk()
         simuleringService = mockk()
+        automatiskBeslutningService = mockk()
 
         val loggService = mockk<LoggService>()
 
@@ -104,7 +107,7 @@ class BeslutteVedtakTest {
             featureToggleService,
             tilkjentYtelseValideringService,
             saksbehandlerContext,
-            simuleringService,
+            automatiskBeslutningService,
         )
     }
 
@@ -120,6 +123,7 @@ class BeslutteVedtakTest {
         mockkObject(FerdigstillOppgaver.Companion)
         every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
         every { FerdigstillOppgaver.opprettTask(any(), any()) } returns Task(FerdigstillOppgaver.TASK_STEP_TYPE, "")
+        every { automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(any()) } returns false
 
         val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
 
@@ -147,6 +151,8 @@ class BeslutteVedtakTest {
                 any(),
             )
         } returns Task(OpprettOppgaveTask.TASK_STEP_TYPE, "")
+
+        every { automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(any()) } returns false
 
         val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
 
@@ -183,6 +189,8 @@ class BeslutteVedtakTest {
             )
         } returns Task(OpprettOppgaveTask.TASK_STEP_TYPE, "")
 
+        every { automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(any()) } returns false
+
         val nesteSteg = beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
 
         verify(exactly = 1) { beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(behandling) }
@@ -212,6 +220,8 @@ class BeslutteVedtakTest {
             OpprettOppgaveTask.TASK_STEP_TYPE,
             "",
         )
+
+        every { automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(any()) } returns false
 
         beslutteVedtak.utførStegOgAngiNeste(behandling, restBeslutningPåVedtak)
         verify(exactly = 1) { behandlingService.opprettOgInitierNyttVedtakForBehandling(behandling, true, emptyList()) }
