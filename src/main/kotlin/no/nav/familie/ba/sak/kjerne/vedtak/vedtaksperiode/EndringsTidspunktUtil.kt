@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForP
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPersonIkkeInnvilget
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPersonInnvilget
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForVedtaksperioder
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.sammenlignUtenFomOgTom
 import java.time.LocalDate
 
 fun utledEndringstidspunkt(
@@ -119,7 +120,9 @@ private fun GrunnlagForPerson?.erLik(
 ): Boolean = when (this) {
     is GrunnlagForPersonInnvilget ->
         grunnlagForVedtaksperiodeForrigeBehandling is GrunnlagForPersonInnvilget &&
-            this.vilkårResultaterForVedtaksperiode.toSet() == grunnlagForVedtaksperiodeForrigeBehandling.vilkårResultaterForVedtaksperiode.toSet() &&
+            this.vilkårResultaterForVedtaksperiode.sammenlignUtenFomOgTom(
+                grunnlagForVedtaksperiodeForrigeBehandling.vilkårResultaterForVedtaksperiode,
+            ) &&
             this.kompetanse == grunnlagForVedtaksperiodeForrigeBehandling.kompetanse &&
             this.endretUtbetalingAndel == grunnlagForVedtaksperiodeForrigeBehandling.endretUtbetalingAndel &&
             this.overgangsstønad == grunnlagForVedtaksperiodeForrigeBehandling.overgangsstønad &&
