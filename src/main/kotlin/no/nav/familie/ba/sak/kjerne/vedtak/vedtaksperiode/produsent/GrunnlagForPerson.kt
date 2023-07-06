@@ -85,26 +85,6 @@ fun List<VilkårResultatForVedtaksperiode>.sammenlignUtenFomOgTom(other: List<Vi
     return this.map { it.copy(fom = null, tom = null) }.toSet() == other.map { it.copy(fom = null, tom = null) }.toSet()
 }
 
-private data class ComparableVilkårResultat(
-    val vilkårType: Vilkår,
-    val resultat: Resultat,
-    val utdypendeVilkårsvurderinger: List<UtdypendeVilkårsvurdering>,
-    val vurderesEtter: Regelverk?,
-    val erEksplisittAvslagPåSøknad: Boolean?,
-    val standardbegrunnelser: List<IVedtakBegrunnelse>,
-    val aktørId: AktørId,
-) {
-    constructor(vilkårResultat: VilkårResultatForVedtaksperiode) : this(
-        vilkårType = vilkårResultat.vilkårType,
-        resultat = vilkårResultat.resultat,
-        utdypendeVilkårsvurderinger = vilkårResultat.utdypendeVilkårsvurderinger,
-        vurderesEtter = vilkårResultat.vurderesEtter,
-        erEksplisittAvslagPåSøknad = vilkårResultat.erEksplisittAvslagPåSøknad,
-        standardbegrunnelser = vilkårResultat.standardbegrunnelser,
-        aktørId = vilkårResultat.aktørId,
-    )
-}
-
 data class EndretUtbetalingAndelForVedtaksperiode(
     val prosent: BigDecimal,
     val årsak: Årsak,
