@@ -31,13 +31,13 @@ fun utledEndringstidspunkt(
             grunnlagForVedtaksperiode.erLik(grunnlagForVedtaksperiodeForrigeBehandling)
         }
 
-    val (aktørMedFørsteForandring: Aktør?, datoTidligsteForskjell: LocalDate) =
+    val (aktørMedFørsteEndring: Aktør?, datoTidligsteForskjell: LocalDate) =
         erPeriodeLikSammePeriodeIForrigeBehandlingTidslinjer.finnTidligsteForskjell() ?: Pair(null, TIDENES_ENDE)
 
     loggEndringstidspunktOgEndringer(
         grunnlagTidslinjePerPerson = grunnlagTidslinjePerPerson,
         grunnlagTidslinjePerPersonForrigeBehandling = grunnlagTidslinjePerPersonForrigeBehandling,
-        aktørMedFørsteForandring = aktørMedFørsteForandring,
+        aktørMedFørsteForandring = aktørMedFørsteEndring,
         datoTidligsteForskjell = datoTidligsteForskjell,
     )
 
