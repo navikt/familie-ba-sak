@@ -66,7 +66,10 @@ private fun loggEndringstidspunktOgEndringer(
     when (grunnlagIPeriodeMedEndring) {
         is GrunnlagForPersonInnvilget -> {
             if (grunnlagIPeriodeMedEndringForrigeBehanlding is GrunnlagForPersonInnvilget) {
-                if (grunnlagIPeriodeMedEndring.vilkårResultaterForVedtaksperiode.toSet() == grunnlagIPeriodeMedEndringForrigeBehanlding.vilkårResultaterForVedtaksperiode.toSet()) {
+                if (grunnlagIPeriodeMedEndring.vilkårResultaterForVedtaksperiode.sammenlignUtenFomOgTom(
+                        grunnlagIPeriodeMedEndringForrigeBehanlding.vilkårResultaterForVedtaksperiode,
+                    )
+                ) {
                     endringer.add("Endring i vilkårene")
                 }
                 if (grunnlagIPeriodeMedEndring.kompetanse == grunnlagIPeriodeMedEndringForrigeBehanlding.kompetanse) {
@@ -88,7 +91,10 @@ private fun loggEndringstidspunktOgEndringer(
 
         is GrunnlagForPersonIkkeInnvilget ->
             if (grunnlagIPeriodeMedEndringForrigeBehanlding is GrunnlagForPersonIkkeInnvilget) {
-                if (grunnlagIPeriodeMedEndring.vilkårResultaterForVedtaksperiode.toSet() == grunnlagIPeriodeMedEndringForrigeBehanlding.vilkårResultaterForVedtaksperiode.toSet()) {
+                if (grunnlagIPeriodeMedEndring.vilkårResultaterForVedtaksperiode.sammenlignUtenFomOgTom(
+                        grunnlagIPeriodeMedEndringForrigeBehanlding.vilkårResultaterForVedtaksperiode,
+                    )
+                ) {
                     endringer.add("Endring i vilkårene")
                 }
             } else {
