@@ -38,7 +38,7 @@ class ValiderBrevmottakerServiceTest {
     val søker = tilfeldigPerson(personType = PersonType.SØKER)
 
     @Test
-    fun `Skal validere at er ok når ikke inneholder noen brevmottakere`() {
+    fun `Skal ikke kaste funksjonell feil når en behandling ikke inneholder noen manuelle brevmottakere`() {
         every { brevmottakerService.hentBrevmottakere(behandlingId) } returns emptyList()
 
         validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(
@@ -55,7 +55,7 @@ class ValiderBrevmottakerServiceTest {
     }
 
     @Test
-    fun `Skal kaste en FunksjonellFeil exception når en behandling inneholder minst en strengt fortrolig person og minst en brevmottaker`() {
+    fun `Skal kaste en FunksjonellFeil exception når en behandling inneholder minst en strengt fortrolig person og minst en manuell brevmottaker`() {
         every { brevmottakerService.hentBrevmottakere(behandlingId) } returns listOf(brevmottaker)
         every { persongrunnlagService.hentAktivThrows(behandlingId) } returns lagTestPersonopplysningGrunnlag(
             behandlingId,
@@ -73,7 +73,7 @@ class ValiderBrevmottakerServiceTest {
     }
 
     @Test
-    fun `Skal validere at er ok når ikke inneholder noen strengt fortrolige personer og inneholder en brevmottaker`() {
+    fun `Skal ikke kaste funksjonell feil når behandling ikke inneholder noen strengt fortrolige personer og inneholder minst en manuell brevmottaker`() {
         every { brevmottakerService.hentBrevmottakere(behandlingId) } returns listOf(brevmottaker)
         every { persongrunnlagService.hentAktivThrows(behandlingId) } returns lagTestPersonopplysningGrunnlag(
             behandlingId,
@@ -92,7 +92,7 @@ class ValiderBrevmottakerServiceTest {
     }
 
     @Test
-    fun `Skal ikke kaste en exception når en behandling inneholder minst en strengt fortrolig person og ingen brevmottakere`() {
+    fun `Skal ikke kaste en exception når en behandling inneholder minst en strengt fortrolig person og ingen manuelle brevmottakere`() {
         every { brevmottakerService.hentBrevmottakere(behandlingId) } returns emptyList()
         every { persongrunnlagService.hentAktivThrows(behandlingId) } returns lagTestPersonopplysningGrunnlag(
             behandlingId,
