@@ -81,6 +81,10 @@ data class VilkårResultatForVedtaksperiode(
     )
 }
 
+fun List<VilkårResultatForVedtaksperiode>.sammenlignUtenFomOgTom(other: List<VilkårResultatForVedtaksperiode>): Boolean {
+    return this.map { it.copy(fom = null, tom = null) }.toSet() == other.map { it.copy(fom = null, tom = null) }.toSet()
+}
+
 data class EndretUtbetalingAndelForVedtaksperiode(
     val prosent: BigDecimal,
     val årsak: Årsak,
