@@ -82,7 +82,7 @@ data class VilkårResultatForVedtaksperiode(
 }
 
 fun List<VilkårResultatForVedtaksperiode>.sammenlignUtenFomOgTom(other: List<VilkårResultatForVedtaksperiode>): Boolean {
-    return this.map { ComparableVilkårResultat(it) }.toSet() == other.map { ComparableVilkårResultat(it) }.toSet()
+    return this.map { it.copy(fom = null, tom = null) }.toSet() == other.map { it.copy(fom = null, tom = null) }.toSet()
 }
 
 private data class ComparableVilkårResultat(
