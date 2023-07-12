@@ -35,7 +35,7 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
     private var kompetanser = mutableMapOf<Long, List<Kompetanse>>()
     private var endredeUtbetalinger = mutableMapOf<Long, List<EndretUtbetalingAndel>>()
     private var andelerTilkjentYtelse = mutableMapOf<Long, List<AndelTilkjentYtelse>>()
-    private var overstyrtEndringstidspunkt = mapOf<Long, LocalDate?>()
+    private var overstyrtEndringstidspunkt = mapOf<Long, LocalDate>()
     private var overgangsstønad = mapOf<Long, List<InternPeriodeOvergangsstønad>>()
 
     private var gjeldendeBehandlingId: Long? = null
@@ -111,6 +111,23 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
             endredeUtbetalinger = endredeUtbetalinger,
             andelerTilkjentYtelse = andelerTilkjentYtelse,
             endringstidspunkt = overstyrtEndringstidspunkt,
+            overgangsstønad = overgangsstønad,
+        )
+    }
+
+    @Når("vedtaksperioder med begrunnelser genereres der forrige behandling allerede er vedtatt for behandling {}")
+    fun `generer vedtaksperiode med begrunnelse med utledet endringstidspunkt`(behandlingId: Long) {
+        gjeldendeBehandlingId = behandlingId
+
+        vedtaksperioderMedBegrunnelser = lagVedtaksPerioderMedUtledetEndringsTidspunkt(
+            behandlingId = behandlingId,
+            vedtaksListe = vedtaksliste,
+            behandlingTilForrigeBehandling = behandlingTilForrigeBehandling,
+            personGrunnlag = persongrunnlag,
+            personResultater = personResultater,
+            kompetanser = kompetanser,
+            endredeUtbetalinger = endredeUtbetalinger,
+            andelerTilkjentYtelse = andelerTilkjentYtelse,
             overgangsstønad = overgangsstønad,
         )
     }
