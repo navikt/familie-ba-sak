@@ -51,7 +51,7 @@ class AuditLogger(@Value("\${NAIS_APP_NAME}") private val applicationName: Strin
     private fun createAuditLogString(data: Sporingsdata, request: HttpServletRequest): String {
         val timestamp = System.currentTimeMillis()
         val name = "Saksbehandling"
-        return "CEF:0|Familie|$applicationName|auditLog|1.0|audit:${data.event.type}|$name|INFO|end=$timestamp " +
+        return "CEF:0|Familie|$applicationName|1.0|audit:${data.event.type}|$name|INFO|end=$timestamp " +
             "suid=${SikkerhetContext.hentSaksbehandler()} " +
             "duid=${data.personIdent} " +
             "sproc=${getCallId()} " +
