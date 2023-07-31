@@ -184,7 +184,7 @@ class StegService(
         return håndterNyBehandlingOgSendInfotrygdFeed(
             NyBehandling(
                 søkersIdent = nyBehandlingHendelse.morsIdent,
-                behandlingType = if (fagsak.status in listOf(FagsakStatus.LØPENDE, FagsakStatus.AVSLUTTET)) {
+                behandlingType = if (fagsak.status == FagsakStatus.LØPENDE) {
                     BehandlingType.REVURDERING
                 } else {
                     BehandlingType.FØRSTEGANGSBEHANDLING
