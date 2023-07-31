@@ -12,6 +12,7 @@ import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.ekstern.restDomene.RestBrevmottaker
 import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
+import no.nav.familie.ba.sak.kjerne.behandling.ValiderBrevmottakerService
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -32,6 +33,9 @@ internal class BrevmottakerServiceTest {
 
     @MockK
     private lateinit var personopplysningerService: PersonopplysningerService
+
+    @MockK
+    private lateinit var validerBrevmottakerService: ValiderBrevmottakerService
 
     @MockK
     private lateinit var loggService: LoggService
@@ -168,6 +172,7 @@ internal class BrevmottakerServiceTest {
     fun `leggTilBrevmottaker skal lagre logg på at brevmottaker legges til`() {
         val restBrevmottaker = mockk<RestBrevmottaker>(relaxed = true)
 
+        every { validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(any(), any()) } just runs
         every { loggService.opprettBrevmottakerLogg(any(), false) } just runs
         every { brevmottakerRepository.save(any()) } returns mockk()
 
