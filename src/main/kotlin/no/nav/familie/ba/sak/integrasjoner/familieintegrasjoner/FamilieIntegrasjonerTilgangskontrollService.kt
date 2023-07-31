@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestPersonInfo
 import no.nav.familie.ba.sak.integrasjoner.pdl.SystemOnlyPdlRestClient
 import no.nav.familie.ba.sak.integrasjoner.pdl.tilAdressebeskyttelse
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.kontrakter.felles.personopplysning.ADRESSEBESKYTTELSEGRADERING
 import no.nav.familie.kontrakter.felles.tilgangskontroll.Tilgang
 import org.springframework.cache.CacheManager
 import org.springframework.stereotype.Service
@@ -38,5 +39,15 @@ class FamilieIntegrasjonerTilgangskontrollService(
         return cacheManager.hentCacheForSaksbehandler("sjekkTilgangTilPersoner", personIdenter) {
             familieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(it).associateBy { it.personIdent }
         }
+    }
+
+    fun hentIdenterMedStrengtFortroligAdressebeskyttelse(personIdenter: List<String>): List<String> {
+        val adresseBeskyttelseBolk = systemOnlyPdlRestClient.hentAdressebeskyttelseBolk(personIdenter)
+        return adresseBeskyttelseBolk.filter { (_, person) ->
+            person.adressebeskyttelse.any { adressebeskyttelse ->
+                adressebeskyttelse.gradering == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG ||
+                    adressebeskyttelse.gradering == ADRESSEBESKYTTELSEGRADERING.STRENGT_FORTROLIG_UTLAND
+            }
+        }.map { it.key }
     }
 }

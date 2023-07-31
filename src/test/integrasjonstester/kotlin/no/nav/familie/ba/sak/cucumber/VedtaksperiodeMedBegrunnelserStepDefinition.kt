@@ -14,6 +14,7 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.parseDato
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseLong
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
@@ -28,13 +29,14 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
     private var behandlinger = mutableMapOf<Long, Behandling>()
     private var behandlingTilForrigeBehandling = mutableMapOf<Long, Long?>()
     private var vedtaksliste = mutableListOf<Vedtak>()
-    private var persongrunnlag = mutableMapOf<Long, PersonopplysningGrunnlag>()
+    private var persongrunnlag = mapOf<Long, PersonopplysningGrunnlag>()
     private var personResultater = mutableMapOf<Long, Set<PersonResultat>>()
     private var vedtaksperioderMedBegrunnelser = listOf<VedtaksperiodeMedBegrunnelser>()
     private var kompetanser = mutableMapOf<Long, List<Kompetanse>>()
     private var endredeUtbetalinger = mutableMapOf<Long, List<EndretUtbetalingAndel>>()
     private var andelerTilkjentYtelse = mutableMapOf<Long, List<AndelTilkjentYtelse>>()
-    private var overstyrtEndringstidspunkt = mapOf<Long, LocalDate?>()
+    private var overstyrtEndringstidspunkt = mapOf<Long, LocalDate>()
+    private var overgangsstønad = mapOf<Long, List<InternPeriodeOvergangsstønad>>()
 
     private var gjeldendeBehandlingId: Long? = null
 
@@ -45,7 +47,7 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
 
     @Og("følgende persongrunnlag")
     fun `følgende persongrunnlag`(dataTable: DataTable) {
-        persongrunnlag.putAll(lagPersonGrunnlag(dataTable))
+        persongrunnlag = lagPersonGrunnlag(dataTable)
     }
 
     @Og("lag personresultater for behandling {}")
@@ -90,6 +92,11 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
         andelerTilkjentYtelse = lagAndelerTilkjentYtelse(dataTable, behandlinger, persongrunnlag)
     }
 
+    @Og("med overgangsstønad")
+    fun `med overgangsstønad`(dataTable: DataTable) {
+        overgangsstønad = lagOvergangsstønad(dataTable, persongrunnlag)
+    }
+
     @Når("vedtaksperioder med begrunnelser genereres for behandling {}")
     fun `generer vedtaksperiode med begrunnelse`(behandlingId: Long) {
         gjeldendeBehandlingId = behandlingId
@@ -104,6 +111,24 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
             endredeUtbetalinger = endredeUtbetalinger,
             andelerTilkjentYtelse = andelerTilkjentYtelse,
             endringstidspunkt = overstyrtEndringstidspunkt,
+            overgangsstønad = overgangsstønad,
+        )
+    }
+
+    @Når("vedtaksperioder med begrunnelser genereres der forrige behandling allerede er vedtatt for behandling {}")
+    fun `generer vedtaksperiode med begrunnelse med utledet endringstidspunkt`(behandlingId: Long) {
+        gjeldendeBehandlingId = behandlingId
+
+        vedtaksperioderMedBegrunnelser = lagVedtaksPerioderMedUtledetEndringsTidspunkt(
+            behandlingId = behandlingId,
+            vedtaksListe = vedtaksliste,
+            behandlingTilForrigeBehandling = behandlingTilForrigeBehandling,
+            personGrunnlag = persongrunnlag,
+            personResultater = personResultater,
+            kompetanser = kompetanser,
+            endredeUtbetalinger = endredeUtbetalinger,
+            andelerTilkjentYtelse = andelerTilkjentYtelse,
+            overgangsstønad = overgangsstønad,
         )
     }
 

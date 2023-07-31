@@ -65,6 +65,7 @@ internal class DokumentServiceTest {
             behandlingHentOgPersisterService = behandlingHentOgPersisterService,
             dokumentGenereringService = mockk(relaxed = true),
             brevmottakerService = brevmottakerService,
+            validerBrevmottakerService = mockk(relaxed = true),
         ),
     )
 

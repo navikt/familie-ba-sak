@@ -1,8 +1,11 @@
 package no.nav.familie.ba.sak.integrasjoner.pdl
 
 import no.nav.familie.ba.sak.common.kallEksternTjeneste
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdressebeskyttelsePerson
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlAdressebeskyttelseResponse
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlBaseResponse
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonBolkRequest
+import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonBolkRequestVariables
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonRequest
 import no.nav.familie.ba.sak.integrasjoner.pdl.domene.PdlPersonRequestVariables
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
@@ -44,6 +47,26 @@ class SystemOnlyPdlRestClient(
         ) {
             it.person!!.adressebeskyttelse
         }
+    }
+
+    @Cacheable("adressebeskyttelsebolk", cacheManager = "shortCache")
+    fun hentAdressebeskyttelseBolk(personIdentList: List<String>): Map<String, PdlAdressebeskyttelsePerson> {
+        val pdlPersonRequest = PdlPersonBolkRequest(
+            variables = PdlPersonBolkRequestVariables(personIdentList),
+            query = hentGraphqlQuery("hent-adressebeskyttelse-bolk"),
+        )
+
+        val pdlResponse: PdlBolkResponse<PdlAdressebeskyttelsePerson> = kallEksternTjeneste(
+            tjeneste = "pdl",
+            uri = pdlUri,
+            formål = "Hent adressebeskyttelse i bolk",
+        ) {
+            postForEntity(pdlUri, pdlPersonRequest, httpHeaders())
+        }
+
+        return feilsjekkOgReturnerData(
+            pdlResponse = pdlResponse,
+        )
     }
 }
 
