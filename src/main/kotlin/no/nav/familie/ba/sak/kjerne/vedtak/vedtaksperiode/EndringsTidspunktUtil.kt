@@ -138,5 +138,5 @@ private fun GrunnlagForPerson?.erLik(
         grunnlagForVedtaksperiodeForrigeBehandling is GrunnlagForPersonIkkeInnvilget &&
             this.vilkårResultaterForVedtaksperiode.toSet() == grunnlagForVedtaksperiodeForrigeBehandling.vilkårResultaterForVedtaksperiode.toSet()
 
-    null -> true
+    null -> grunnlagForVedtaksperiodeForrigeBehandling == null
 }

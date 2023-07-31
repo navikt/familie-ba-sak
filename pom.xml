@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.1.1</version>
+        <version>3.1.2</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -29,14 +29,14 @@
         <familie.kontrakter.saksstatistikk>2.0_20220216121145_5a268ac</familie.kontrakter.saksstatistikk>
         <familie.kontrakter.stønadsstatistikk>2.0_20230223155122_2e81c44</familie.kontrakter.stønadsstatistikk>
         <familie.kontrakter.skatteetaten>2.0_20210920094114_9c74239</familie.kontrakter.skatteetaten>
-        <cucumber.version>7.12.1</cucumber.version>
+        <cucumber.version>7.13.0</cucumber.version>
         <mockk.version>1.13.5</mockk.version>
         <wiremock.version>2.35.0</wiremock.version>
         <token-validation-spring.version>3.1.0</token-validation-spring.version>
         <nav-foedselsnummer.version>1.0-SNAPSHOT.6</nav-foedselsnummer.version>
         <springdoc.version>2.1.0</springdoc.version>
-        <sentry.version>6.25.0</sentry.version>
-        <kotlinx.version>1.7.2</kotlinx.version>
+        <sentry.version>6.27.0</sentry.version>
+        <kotlinx.version>1.7.3</kotlinx.version>
 
         <!-- Må settes for å kunne kjøre opp mock-oauth2-server i unit-tester -->
         <okhttp3.version>4.9.0</okhttp3.version>
