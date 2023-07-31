@@ -197,9 +197,10 @@ class AutovedtakFødselshendelseService(
 
         val barnaSomHarBlittBehandlet =
             if (fagsak != null) {
-                behandlingHentOgPersisterService.hentBehandlinger(fagsakId = fagsak.id).filter { !it.erHenlagt() }.flatMap {
-                    persongrunnlagService.hentBarna(behandling = it).map { barn -> barn.aktør.aktivFødselsnummer() }
-                }.distinct()
+                behandlingHentOgPersisterService.hentBehandlinger(fagsakId = fagsak.id).filter { !it.erHenlagt() }
+                    .flatMap {
+                        persongrunnlagService.hentBarna(behandling = it).map { barn -> barn.aktør.aktivFødselsnummer() }
+                    }.distinct()
             } else {
                 emptyList()
             }

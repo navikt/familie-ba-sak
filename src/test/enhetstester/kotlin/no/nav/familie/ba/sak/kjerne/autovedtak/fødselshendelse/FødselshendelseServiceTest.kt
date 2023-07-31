@@ -156,7 +156,7 @@ class FødselshendelseServiceTest {
                 søker,
                 true,
                 FagsakType.NORMAL,
-                null
+                null,
             )
         } returns fagsak
 
@@ -173,7 +173,7 @@ class FødselshendelseServiceTest {
             behandlingKategori = BehandlingKategori.NASJONAL,
             behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING,
             årsak = BehandlingÅrsak.FØDSELSHENDELSE,
-            skalBehandlesAutomatisk = true
+            skalBehandlesAutomatisk = true,
         )
         every { behandlingHentOgPersisterService.hent(forrigeBehandling.id) } returns forrigeBehandling
         every { behandlingHentOgPersisterService.lagreEllerOppdater(forrigeBehandling) } returns forrigeBehandling
@@ -183,7 +183,7 @@ class FødselshendelseServiceTest {
         every {
             stegService.håndterFiltreringsreglerForFødselshendelser(
                 nyBehandling,
-                nyBehandlingHendelse
+                nyBehandlingHendelse,
             )
         } returns nyBehandling.leggTilBehandlingStegTilstand(StegType.VILKÅRSVURDERING)
         every { stegService.håndterVilkårsvurdering(nyBehandling) } returns nyBehandling.copy(resultat = Behandlingsresultat.INNVILGET_OG_ENDRET)
@@ -200,14 +200,18 @@ class FødselshendelseServiceTest {
             kjønn = Kjønn.KVINNE,
             forelderBarnRelasjon = setOf(
                 ForelderBarnRelasjon(aktør = tilAktør(barn1), relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN),
-                ForelderBarnRelasjon(aktør = tilAktør(barn2), relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN)
-            )
+                ForelderBarnRelasjon(aktør = tilAktør(barn2), relasjonsrolle = FORELDERBARNRELASJONROLLE.BARN),
+            ),
         )
         every { persongrunnlagService.hentBarna(forrigeBehandling) } returns listOf(
-            barn1Person
+            barn1Person,
         )
         every { vilkårsvurderingRepository.findByBehandlingAndAktiv(nyBehandling.id) } returns lagVilkårsvurderingMedOverstyrendeResultater(
-            søkerPerson, listOf(barn1Person, barn2Person), nyBehandling, id = 1, mapOf(
+            søkerPerson,
+            listOf(barn1Person, barn2Person),
+            nyBehandling,
+            id = 1,
+            mapOf(
                 Pair(
                     barn1Person.aktør.aktørId,
                     listOf(
@@ -218,7 +222,7 @@ class FødselshendelseServiceTest {
                         ),
                     ),
                 ),
-            )
+            ),
         )
 
         autovedtakFødselshendelseService.kjørBehandling(nyBehandlingHendelse)
@@ -226,7 +230,7 @@ class FødselshendelseServiceTest {
             opprettTaskService.opprettOppgaveForManuellBehandlingTask(
                 behandlingId = any(),
                 beskrivelse = "Fødselshendelse: Barnet (fødselsdato: ${barn1Person.fødselsdato.tilKortString()}) er ikke bosatt med mor.",
-                manuellOppgaveType = ManuellOppgaveType.FØDSELSHENDELSE
+                manuellOppgaveType = ManuellOppgaveType.FØDSELSHENDELSE,
             )
         }
     }

@@ -179,10 +179,10 @@ class BehandlingsresultatStegTest {
         val fødselshendelseBehandling = behandling.copy(
             skalBehandlesAutomatisk = true,
             opprettetÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
-            type = BehandlingType.FØRSTEGANGSBEHANDLING
+            type = BehandlingType.FØRSTEGANGSBEHANDLING,
         )
         val vedtak = lagVedtak(
-            fødselshendelseBehandling
+            fødselshendelseBehandling,
         )
         every { mockBehandlingsresultatService.utledBehandlingsresultat(any()) } returns Behandlingsresultat.INNVILGET_OG_ENDRET
         every { behandlingService.nullstillEndringstidspunkt(fødselshendelseBehandling.id) } just runs
@@ -195,7 +195,7 @@ class BehandlingsresultatStegTest {
         every {
             behandlingService.oppdaterStatusPåBehandling(
                 fødselshendelseBehandling.id,
-                BehandlingStatus.IVERKSETTER_VEDTAK
+                BehandlingStatus.IVERKSETTER_VEDTAK,
             )
         } returns fødselshendelseBehandling.copy(status = BehandlingStatus.IVERKSETTER_VEDTAK)
         every { vedtakService.hentAktivForBehandlingThrows(fødselshendelseBehandling.id) } returns vedtak
@@ -204,7 +204,7 @@ class BehandlingsresultatStegTest {
 
         assertEquals(
             behandlingsresultatSteg.utførStegOgAngiNeste(fødselshendelseBehandling, ""),
-            StegType.IVERKSETT_MOT_OPPDRAG
+            StegType.IVERKSETT_MOT_OPPDRAG,
         )
     }
 
