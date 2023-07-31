@@ -48,4 +48,8 @@ object VedtaksperiodeMedBegrunnelserParser {
         BARNETS_BOSTEDSLAND("Barnets bostedsland"),
         RESULTAT("Resultat"),
     }
+
+    enum class DomenebegrepAndelTilkjentYtelse(override val nøkkel: String) : Domenenøkkel {
+        YTELSE_TYPE("Ytelse type"),
+    }
 }

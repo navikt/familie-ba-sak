@@ -27,6 +27,8 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriString
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
+import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
+import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
@@ -40,6 +42,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.genererVedta
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.PersonResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
+import utledEndringstidspunkt
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -48,32 +51,6 @@ fun Map<Long, Behandling>.finnBehandling(behandlingId: Long) =
 
 fun Map<Long, PersonopplysningGrunnlag>.finnPersonGrunnlagForBehandling(behandlingId: Long): PersonopplysningGrunnlag =
     this[behandlingId] ?: error("Finner ikke persongrunnlag for behandling med id $behandlingId")
-
-fun List<MutableMap<String, String>>?.tilVilkårResultater(
-    behandlingId: Long,
-    personResultat: PersonResultat,
-) =
-    this?.map {
-        VilkårResultat(
-            vilkårType = parseEnum(
-                VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.VILKÅR,
-                it,
-            ),
-            resultat = parseEnum(
-                VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.RESULTAT,
-                it,
-            ),
-            periodeFom = parseValgfriDato(Domenebegrep.FRA_DATO, it),
-            periodeTom = parseValgfriDato(Domenebegrep.TIL_DATO, it),
-            begrunnelse = "",
-            behandlingId = behandlingId,
-            personResultat = personResultat,
-            erEksplisittAvslagPåSøknad = parseValgfriBoolean(
-                VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.ER_EKSPLISITT_AVSLAG,
-                it,
-            ),
-        )
-    } ?: emptyList()
 
 fun lagVedtak(
     dataTable: DataTable,
@@ -251,9 +228,28 @@ fun lagAndelerTilkjentYtelse(
         behandling = behandlinger.finnBehandling(behandlingId),
         person = personGrunnlag.finnPersonGrunnlagForBehandling(behandlingId).personer.find { aktørId == it.aktør.aktørId }!!,
         beløp = parseInt(VedtaksperiodeMedBegrunnelserParser.DomenebegrepVedtaksperiodeMedBegrunnelser.BELØP, rad),
+        ytelseType = parseValgfriEnum<YtelseType>(
+            VedtaksperiodeMedBegrunnelserParser.DomenebegrepAndelTilkjentYtelse.YTELSE_TYPE,
+            rad,
+        ) ?: YtelseType.ORDINÆR_BARNETRYGD,
     )
 }.groupBy { it.behandlingId }
     .toMutableMap()
+
+fun lagOvergangsstønad(
+    dataTable: DataTable,
+    persongrunnlag: Map<Long, PersonopplysningGrunnlag>,
+): Map<Long, List<InternPeriodeOvergangsstønad>> = dataTable.asMaps()
+    .groupBy({ rad -> parseLong(Domenebegrep.BEHANDLING_ID, rad) }, { rad ->
+        val behandlingId = parseLong(Domenebegrep.BEHANDLING_ID, rad)
+        val aktørId = VedtaksperiodeMedBegrunnelserParser.parseAktørId(rad)
+
+        InternPeriodeOvergangsstønad(
+            fomDato = parseDato(Domenebegrep.FRA_DATO, rad),
+            tomDato = parseDato(Domenebegrep.TIL_DATO, rad),
+            personIdent = persongrunnlag[behandlingId]!!.personer.single { it.aktør.aktørId == aktørId }.aktør.aktivFødselsnummer(),
+        )
+    })
 
 fun lagVedtaksPerioder(
     behandlingId: Long,
@@ -265,6 +261,7 @@ fun lagVedtaksPerioder(
     endredeUtbetalinger: Map<Long, List<EndretUtbetalingAndel>>,
     andelerTilkjentYtelse: Map<Long, List<AndelTilkjentYtelse>>,
     endringstidspunkt: Map<Long, LocalDate?>,
+    overgangsstønad: Map<Long, List<InternPeriodeOvergangsstønad>?>,
 ): List<VedtaksperiodeMedBegrunnelser> {
     val vedtak = vedtaksListe.find { it.behandling.id == behandlingId && it.aktiv }
         ?: error("Finner ikke vedtak")
@@ -275,7 +272,7 @@ fun lagVedtaksPerioder(
         kompetanser = kompetanser[behandlingId] ?: emptyList(),
         endredeUtbetalinger = endredeUtbetalinger[behandlingId] ?: emptyList(),
         andelerTilkjentYtelse = andelerTilkjentYtelse[behandlingId] ?: emptyList(),
-        perioderOvergangsstønad = emptyList(),
+        perioderOvergangsstønad = overgangsstønad[behandlingId] ?: emptyList(),
     )
 
     val forrigeBehandlingId = behandlingTilForrigeBehandling[behandlingId]
@@ -290,7 +287,7 @@ fun lagVedtaksPerioder(
             kompetanser = kompetanser[forrigeBehandlingId] ?: emptyList(),
             endredeUtbetalinger = endredeUtbetalinger[forrigeBehandlingId] ?: emptyList(),
             andelerTilkjentYtelse = andelerTilkjentYtelse[forrigeBehandlingId] ?: emptyList(),
-            perioderOvergangsstønad = emptyList(),
+            perioderOvergangsstønad = overgangsstønad[behandlingId] ?: emptyList(),
         )
     }
 
@@ -299,5 +296,57 @@ fun lagVedtaksPerioder(
         grunnlagForVedtakPerioder = grunnlagForVedtaksperiode,
         grunnlagForVedtakPerioderForrigeBehandling = grunnlagForVedtaksperiodeForrigeBehandling,
         endringstidspunkt = endringstidspunkt[behandlingId] ?: TIDENES_MORGEN,
+    )
+}
+
+fun lagVedtaksPerioderMedUtledetEndringsTidspunkt(
+    behandlingId: Long,
+    vedtaksListe: List<Vedtak>,
+    behandlingTilForrigeBehandling: MutableMap<Long, Long?>,
+    personGrunnlag: Map<Long, PersonopplysningGrunnlag>,
+    personResultater: Map<Long, Set<PersonResultat>>,
+    kompetanser: Map<Long, List<Kompetanse>>,
+    endredeUtbetalinger: Map<Long, List<EndretUtbetalingAndel>>,
+    andelerTilkjentYtelse: Map<Long, List<AndelTilkjentYtelse>>,
+    overgangsstønad: Map<Long, List<InternPeriodeOvergangsstønad>?>,
+): List<VedtaksperiodeMedBegrunnelser> {
+    val vedtak = vedtaksListe.find { it.behandling.id == behandlingId && it.aktiv }
+        ?: error("Finner ikke vedtak")
+    val grunnlagForVedtaksperiode = GrunnlagForVedtaksperioder(
+        persongrunnlag = personGrunnlag.finnPersonGrunnlagForBehandling(behandlingId),
+        personResultater = personResultater[behandlingId] ?: error("Finner ikke personresultater"),
+        fagsakType = vedtak.behandling.fagsak.type,
+        kompetanser = kompetanser[behandlingId] ?: emptyList(),
+        endredeUtbetalinger = endredeUtbetalinger[behandlingId] ?: emptyList(),
+        andelerTilkjentYtelse = andelerTilkjentYtelse[behandlingId] ?: emptyList(),
+        perioderOvergangsstønad = overgangsstønad[behandlingId] ?: emptyList(),
+    )
+
+    val forrigeBehandlingId = behandlingTilForrigeBehandling[behandlingId]
+
+    val grunnlagForVedtaksperiodeForrigeBehandling = forrigeBehandlingId?.let {
+        val forrigeVedtak = vedtaksListe.find { it.behandling.id == forrigeBehandlingId && it.aktiv }
+            ?: error("Finner ikke vedtak")
+        GrunnlagForVedtaksperioder(
+            persongrunnlag = personGrunnlag.finnPersonGrunnlagForBehandling(forrigeBehandlingId),
+            personResultater = personResultater[forrigeBehandlingId] ?: error("Finner ikke personresultater"),
+            fagsakType = forrigeVedtak.behandling.fagsak.type,
+            kompetanser = kompetanser[forrigeBehandlingId] ?: emptyList(),
+            endredeUtbetalinger = endredeUtbetalinger[forrigeBehandlingId] ?: emptyList(),
+            andelerTilkjentYtelse = andelerTilkjentYtelse[forrigeBehandlingId] ?: emptyList(),
+            perioderOvergangsstønad = overgangsstønad[behandlingId] ?: emptyList(),
+        )
+    }
+
+    val endringstidspunkt = utledEndringstidspunkt(
+        grunnlagForVedtaksperiode,
+        grunnlagForVedtaksperiodeForrigeBehandling,
+    )
+
+    return genererVedtaksperioder(
+        vedtak = vedtak,
+        grunnlagForVedtakPerioder = grunnlagForVedtaksperiode,
+        grunnlagForVedtakPerioderForrigeBehandling = grunnlagForVedtaksperiodeForrigeBehandling,
+        endringstidspunkt = endringstidspunkt,
     )
 }
