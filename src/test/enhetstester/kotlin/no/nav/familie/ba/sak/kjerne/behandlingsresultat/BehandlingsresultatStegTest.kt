@@ -1,13 +1,17 @@
 package no.nav.familie.ba.sak.kjerne.behandlingsresultat
 
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.runs
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
 import no.nav.familie.ba.sak.common.lagBehandling
+import no.nav.familie.ba.sak.common.lagVedtak
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
@@ -16,6 +20,8 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseReposito
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
+import no.nav.familie.ba.sak.kjerne.steg.EndringerIUtbetalingForBehandlingSteg
+import no.nav.familie.ba.sak.kjerne.steg.StegType
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
@@ -166,6 +172,40 @@ class BehandlingsresultatStegTest {
         assertDoesNotThrow {
             endringTidslinje.kastFeilVedEndringEtter(treMånederEtterStartdato, lagBehandling())
         }
+    }
+
+    @Test
+    fun `skal gå rett fra behandlingsresultat til iverksetting for alle fødselshendelser`() {
+        val fødselshendelseBehandling = behandling.copy(
+            skalBehandlesAutomatisk = true,
+            opprettetÅrsak = BehandlingÅrsak.FØDSELSHENDELSE,
+            type = BehandlingType.FØRSTEGANGSBEHANDLING,
+        )
+        val vedtak = lagVedtak(
+            fødselshendelseBehandling,
+        )
+        every { mockBehandlingsresultatService.utledBehandlingsresultat(any()) } returns Behandlingsresultat.INNVILGET_OG_ENDRET
+        every { behandlingService.nullstillEndringstidspunkt(fødselshendelseBehandling.id) } just runs
+        every {
+            behandlingService.oppdaterBehandlingsresultat(
+                any(),
+                any(),
+            )
+        } returns fødselshendelseBehandling.copy(resultat = Behandlingsresultat.INNVILGET_OG_ENDRET)
+        every {
+            behandlingService.oppdaterStatusPåBehandling(
+                fødselshendelseBehandling.id,
+                BehandlingStatus.IVERKSETTER_VEDTAK,
+            )
+        } returns fødselshendelseBehandling.copy(status = BehandlingStatus.IVERKSETTER_VEDTAK)
+        every { vedtakService.hentAktivForBehandlingThrows(fødselshendelseBehandling.id) } returns vedtak
+        every { vedtaksperiodeService.oppdaterVedtakMedVedtaksperioder(vedtak) } just runs
+        every { beregningService.hentEndringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi(fødselshendelseBehandling) } returns EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
+
+        assertEquals(
+            behandlingsresultatSteg.utførStegOgAngiNeste(fødselshendelseBehandling, ""),
+            StegType.IVERKSETT_MOT_OPPDRAG,
+        )
     }
 
     fun String.tilBoolskTidslinje(startdato: YearMonth): Tidslinje<Boolean, Måned> {
