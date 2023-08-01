@@ -32,10 +32,20 @@ data class RestKompetanse(
             ),
         )
         if (annenForeldersAktivitetsland == null) {
-            antallUtfylteFelter += (annenForeldersAktivitet.let { if (it == KompetanseAktivitet.INAKTIV || it == KompetanseAktivitet.IKKE_AKTUELT) 1 else 0 })
+            antallUtfylteFelter += (
+                if (annenForeldersAktivitet in listOf(
+                        KompetanseAktivitet.INAKTIV,
+                        KompetanseAktivitet.IKKE_AKTUELT,
+                    )
+                ) {
+                    1
+                } else {
+                    0
+                }
+                )
         }
         if (søkersAktivitetsland == null) {
-            antallUtfylteFelter += (søkersAktivitet.let { if (it == KompetanseAktivitet.INAKTIV) 1 else 0 })
+            antallUtfylteFelter += (if (søkersAktivitet == KompetanseAktivitet.INAKTIV) 1 else 0)
         }
         return this.copy(status = utfyltStatus(antallUtfylteFelter, 6))
     }
