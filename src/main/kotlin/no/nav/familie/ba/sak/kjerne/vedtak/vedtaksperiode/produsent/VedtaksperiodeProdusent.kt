@@ -67,7 +67,7 @@ private fun List<VedtaksperiodeMedBegrunnelser>.leggTilPeriodeForUregistrerteBar
         ),
     )
 
-    val avslagsperiodeUtenDatoer = find { it.fom == null && it.tom == null }
+    val avslagsperiodeUtenDatoer = this.find { it.fom == null && it.tom == null }
 
     return if (avslagsperiodeUtenDatoer != null) {
         avslagsperiodeUtenDatoer.leggTilAvslagUregistrertBarnBegrunnelse()
