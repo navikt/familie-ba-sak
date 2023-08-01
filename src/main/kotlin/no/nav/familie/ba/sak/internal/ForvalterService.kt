@@ -121,23 +121,44 @@ class ForvalterService(
 
     @Transactional(readOnly = true)
     suspend fun identifiserUtbetalingerOver100Prosent(callId: String) {
-        val slice: Slice<Long> = fagsakRepository.finnLøpendeFagsaker(PageRequest.of(0, 200))
+        var slice: Slice<Long> = fagsakRepository.finnLøpendeFagsaker(PageRequest.of(0, 200))
+        val scope = CoroutineScope(Dispatchers.Default)
+        var sideNr: Int = 0
+        val deffereds = mutableListOf(
+            scope.async {
+                sjekkChunkMedFagsakerOmDeHarUtbetalingerOver100Prosent(callId, slice, sideNr)
+            },
+        )
 
-        (0..slice.pageable.pageSize)
-            .map { side ->
-                CoroutineScope(Dispatchers.Default).async {
-                    MDC.put(MDCConstants.MDC_CALL_ID, callId)
-                    logger.info("identifiserUtbetalingerOver100Prosent side $side")
-                    fagsakRepository.finnLøpendeFagsaker(PageRequest.of(side, 10000)).get().toList().forEach { fagsakId ->
-                        val sisteIverksatteBehandling = behandlingRepository.finnSisteIverksatteBehandling(fagsakId = fagsakId)!!
-                        try {
-                            tilkjentYtelseValideringService.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(sisteIverksatteBehandling)
-                        } catch (e: UtbetalingsikkerhetFeil) {
-                            val arbeidsfordelingService = arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = sisteIverksatteBehandling.id)
-                            secureLogger.warn("Over 100% utbetaling for fagsak=$fagsakId, enhet=${arbeidsfordelingService.behandlendeEnhetId}, melding=${e.message}")
-                        }
-                    }
-                }
-            }.awaitAll()
+        while (slice.hasNext()) {
+            slice = fagsakRepository.finnLøpendeFagsaker(slice.nextPageable())
+            sideNr = sideNr.inc()
+            deffereds.add(
+                scope.async {
+                    sjekkChunkMedFagsakerOmDeHarUtbetalingerOver100Prosent(callId, slice, sideNr)
+                },
+            )
+        }
+
+        deffereds.awaitAll()
+        logger.info("Ferdig med å kjøre identifiserUtbetalingerOver100Prosent")
+    }
+
+    private fun sjekkChunkMedFagsakerOmDeHarUtbetalingerOver100Prosent(callId: String, slice: Slice<Long>, sideNr: Int) {
+        MDC.put(MDCConstants.MDC_CALL_ID, callId)
+        logger.info("identifiserUtbetalingerOver100Prosent side $sideNr")
+        slice.get().toList().forEach { fagsakId ->
+            val sisteIverksatteBehandling =
+                behandlingRepository.finnSisteIverksatteBehandling(fagsakId = fagsakId)!!
+            try {
+                tilkjentYtelseValideringService.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
+                    sisteIverksatteBehandling,
+                )
+            } catch (e: UtbetalingsikkerhetFeil) {
+                val arbeidsfordelingService =
+                    arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = sisteIverksatteBehandling.id)
+                secureLogger.warn("Over 100% utbetaling for fagsak=$fagsakId, enhet=${arbeidsfordelingService.behandlendeEnhetId}, melding=${e.message}")
+            }
+        }
     }
 }
