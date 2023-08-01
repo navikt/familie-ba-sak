@@ -59,8 +59,7 @@ class UtbetalingsoppdragService(
             eksternFagsakId = fagsak.id,
             ytelse = Ytelsestype.BARNETRYGD,
             personIdent = fagsak.aktør.aktivFødselsnummer(),
-            vedtaksdato = vedtak.vedtaksdato?.toLocalDate()
-                ?: error("Mangler vedtaksdato fagsak=${fagsak.id} behandling=${behandling.id}"),
+            vedtaksdato = vedtak.vedtaksdato?.toLocalDate() ?: error("Mangler vedtaksdato fagsak=${fagsak.id} behandling=${behandling.id}"),
             opphørFra = opphørFra,
             utbetalesTil = hentUtebetalesTil(fagsak),
             erGOmregning = false,
@@ -80,14 +79,24 @@ class UtbetalingsoppdragService(
         }
     }
 
+    /**
+     * TODO utkast, litt usikker på om dette blir riktig
+     * Tidligere kode - den tar ikke forhold til at man opphører lengre bak i tiden? (men den nye gjør kanskje heller ikke det?)
+     * // Generer et komplett nytt eller bare endringer på et eksisterende betalingsoppdrag.
+     * val sisteBeståenAndelIHverKjede = if (erSimulering || erEndretMigreringsDato) {
+     *     // Gjennom å sette andeler til null markeres at alle perioder i kjeden skal opphøres.
+     *     sisteAndelPerKjede(forrigeKjeder, oppdaterteKjeder)
+     * } else {
+     */
     private fun opphørFra(
-        nyeAndeler: List<AndelDataLongId>,
-        forrigeAndeler: List<AndelDataLongId>,
+        forrigeAndeler: List<AndelDataLongId>?,
         erSimulering: Boolean,
         endretMigreringsdato: YearMonth?
-    ): YearMonth? {
-        // TODO
-        return null
+    ): YearMonth? = when {
+        endretMigreringsdato != null -> endretMigreringsdato
+        forrigeAndeler == null -> null
+        erSimulering -> forrigeAndeler.minOfOrNull { it.fom }
+        else -> null
     }
 
     private fun oppdaterTilkjentYtelse(
