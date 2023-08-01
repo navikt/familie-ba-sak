@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.secureLogger
+import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
@@ -55,6 +56,7 @@ data class GrunnlagForVedtaksperioder(
     val endredeUtbetalinger: List<EndretUtbetalingAndel>,
     val andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
     val perioderOvergangsstønad: List<InternPeriodeOvergangsstønad>,
+    val uregistrerteBarn: List<BarnMedOpplysninger>,
 ) {
     private val utfylteEndredeUtbetalinger = endredeUtbetalinger
         .map { it.tilIEndretUtbetalingAndel() }
