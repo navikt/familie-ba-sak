@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.felles.utbetalingsgenerator.Utbetalingsgenerator
 import no.nav.familie.felles.utbetalingsgenerator.domain.AndelDataLongId
@@ -32,11 +33,11 @@ class UtbetalingsoppdragService(
         val tilkjentYtelse = tilkjentYtelseRepository.findByBehandling(behandlingId)
         val nyeAndeler = tilkjentYtelse.andelerTilkjentYtelse.map { it.tilAndelData() }
         val forrigeAndeler = forrigeAndeler(forrigeBehandlingId)
-        val opphørFra = opphørFra(nyeAndeler, forrigeAndeler, erSimulering, endretMigreringsdato)
+        val opphørFra = opphørFra(forrigeAndeler, erSimulering, endretMigreringsdato)
         val resultat = Utbetalingsgenerator().lagUtbetalingsoppdrag(
             behandlingsinformasjon = behandlingsinformasjon(vedtak, opphørFra),
             nyeAndeler = nyeAndeler,
-            forrigeAndeler = forrigeAndeler,
+            forrigeAndeler = forrigeAndeler ?: emptyList(),
             sisteAndelPerKjede = sisteAndelPerKjedeForFagsak(vedtak.behandling.fagsak)
         )
         if (!erSimulering) {
@@ -48,18 +49,36 @@ class UtbetalingsoppdragService(
     private fun behandlingsinformasjon(
         vedtak: Vedtak,
         opphørFra: YearMonth?,
-    ) = Behandlingsinformasjon(
-        saksbehandlerId = vedtak.endretAv,
-        behandlingId = vedtak.behandling.id.toString(),
-        eksternBehandlingId = vedtak.behandling.id,
-        eksternFagsakId = vedtak.behandling.fagsak.id,
-        ytelse = Ytelsestype.BARNETRYGD,
-        personIdent = vedtak.behandling.fagsak.aktør.aktivFødselsnummer(),
-        vedtaksdato = vedtak.vedtaksdato?.toLocalDate() ?: error("Mangler vedtaksdato"),
-        opphørFra = opphørFra,
-        utbetalesTil = null,
-        erGOmregning = false,
-    )
+    ): Behandlingsinformasjon {
+        val behandling = vedtak.behandling
+        val fagsak = behandling.fagsak
+        return Behandlingsinformasjon(
+            saksbehandlerId = vedtak.endretAv,
+            behandlingId = behandling.id.toString(),
+            eksternBehandlingId = behandling.id,
+            eksternFagsakId = fagsak.id,
+            ytelse = Ytelsestype.BARNETRYGD,
+            personIdent = fagsak.aktør.aktivFødselsnummer(),
+            vedtaksdato = vedtak.vedtaksdato?.toLocalDate()
+                ?: error("Mangler vedtaksdato fagsak=${fagsak.id} behandling=${behandling.id}"),
+            opphørFra = opphørFra,
+            utbetalesTil = hentUtebetalesTil(fagsak),
+            erGOmregning = false,
+        )
+    }
+
+    private fun hentUtebetalesTil(fagsak: Fagsak): String {
+        return when (fagsak.type) {
+            FagsakType.INSTITUSJON -> {
+                fagsak.institusjon?.tssEksternId
+                    ?: error("Fagsak ${fagsak.id} er av type institusjon og mangler informasjon om institusjonen")
+            }
+
+            else -> {
+                fagsak.aktør.aktivFødselsnummer()
+            }
+        }
+    }
 
     private fun opphørFra(
         nyeAndeler: List<AndelDataLongId>,
@@ -97,11 +116,10 @@ class UtbetalingsoppdragService(
             .map { IdentOgType(it.key.ident, it.key.type.tilYtelseType()) to it.value.tilAndelData() }
             .toMap()
 
-    private fun forrigeAndeler(forrigeBehandlingId: Long?): List<AndelDataLongId> =
+    private fun forrigeAndeler(forrigeBehandlingId: Long?): List<AndelDataLongId>? =
         forrigeBehandlingId?.let {
             tilkjentYtelseRepository.findByBehandling(it)
         }?.andelerTilkjentYtelse?.map { it.tilAndelData() }
-            ?: emptyList()
 
     private fun AndelTilkjentYtelse.tilAndelData(): AndelDataLongId =
         AndelDataLongId(
