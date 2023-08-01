@@ -32,7 +32,7 @@ internal infix fun Person.får(sats: Int) = BeregnetAndel(
     sats = sats,
 )
 
-@Suppress("ktlint:enum-entry-name-case")
+@Suppress("ktlint:standard:enum-entry-name-case")
 enum class Prosent {
     alt,
     halvparten,
