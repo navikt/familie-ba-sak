@@ -121,9 +121,10 @@ class ForvalterService(
 
     @Transactional(readOnly = true)
     suspend fun identifiserUtbetalingerOver100Prosent(callId: String) {
+        MDC.put(MDCConstants.MDC_CALL_ID, callId)
         var slice: Slice<Long> = fagsakRepository.finnLøpendeFagsaker(PageRequest.of(0, 200))
         val scope = CoroutineScope(Dispatchers.Default)
-        var sideNr: Int = 0
+        var sideNr = 0
         val deffereds = mutableListOf(
             scope.async {
                 sjekkChunkMedFagsakerOmDeHarUtbetalingerOver100Prosent(callId, slice, sideNr)
@@ -140,6 +141,7 @@ class ForvalterService(
             )
         }
 
+        logger.info("Startet ${slice.size} sider")
         deffereds.awaitAll()
         logger.info("Ferdig med å kjøre identifiserUtbetalingerOver100Prosent")
     }
