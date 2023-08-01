@@ -6,6 +6,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.periodeAv
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
+import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.forskyv
 import no.nav.familie.ba.sak.kjerne.tidslinje.transformasjon.tilMåned
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
@@ -52,6 +53,8 @@ class VilkårsvurderingTidslinjeService(
             }
             .tilTidslinje()
 
-        return erAnnenForelderOmfattetAvNorskLovgivingTidslinje.tilMåned { it.contains(element = true) }
+        val månedsbasertTidslinje =
+            erAnnenForelderOmfattetAvNorskLovgivingTidslinje.tilMåned { it.contains(element = true) }
+        return månedsbasertTidslinje.forskyv(1)
     }
 }
