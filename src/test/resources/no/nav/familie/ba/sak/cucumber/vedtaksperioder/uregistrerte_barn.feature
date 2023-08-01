@@ -1,7 +1,7 @@
 # language: no
 # encoding: UTF-8
 
-Egenskap: Vedtaksperioder med mor og to barn
+Egenskap: Behandling med uregristrert barn
 
   Bakgrunn:
     Gitt følgende vedtak
