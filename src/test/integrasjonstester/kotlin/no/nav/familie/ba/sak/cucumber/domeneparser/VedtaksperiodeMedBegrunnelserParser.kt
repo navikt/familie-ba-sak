@@ -26,9 +26,10 @@ object VedtaksperiodeMedBegrunnelserParser {
                     begrunnelser.map {
                         Vedtaksbegrunnelse(
                             vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
-                            standardbegrunnelse = it
+                            standardbegrunnelse = it,
                         )
-                    })
+                    },
+                )
             }
         }
     }

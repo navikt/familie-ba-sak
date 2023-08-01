@@ -119,7 +119,7 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
             andelerTilkjentYtelse = andelerTilkjentYtelse,
             endringstidspunkt = overstyrtEndringstidspunkt,
             overgangsstønad = overgangsstønad,
-            uregistrerteBarn = uregistrerteBarn
+            uregistrerteBarn = uregistrerteBarn,
         )
     }
 
@@ -137,7 +137,7 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
             endredeUtbetalinger = endredeUtbetalinger,
             andelerTilkjentYtelse = andelerTilkjentYtelse,
             overgangsstønad = overgangsstønad,
-            uregistrerteBarn = uregistrerteBarn
+            uregistrerteBarn = uregistrerteBarn,
         )
     }
 
