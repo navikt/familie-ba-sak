@@ -155,7 +155,6 @@ class BegrunnelseTeksterStepDefinition {
                     grunnlagForVedtaksperiodeForrigeBehandling,
                     mockHentSanityBegrunnelser(),
                     behandling.underkategori,
-                    behandling.fagsak.type,
                 ).toList(),
             )
         }.toMutableList()
