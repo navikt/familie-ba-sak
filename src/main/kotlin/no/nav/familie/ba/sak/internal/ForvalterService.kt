@@ -124,14 +124,14 @@ class ForvalterService(
         MDC.put(MDCConstants.MDC_CALL_ID, callId)
 
         runBlocking {
-            f(callId)
+            finnOgLoggUtbetalingerOver100Prosent(callId)
         }
 
         logger.info("Ferdig med å kjøre identifiserUtbetalingerOver100Prosent")
     }
 
     @OptIn(InternalCoroutinesApi::class) // for å få lov til å hente CancellationException
-    suspend fun f(callId: String) {
+    suspend fun finnOgLoggUtbetalingerOver100Prosent(callId: String) {
         var slice = fagsakRepository.finnLøpendeFagsaker(PageRequest.of(0, 10000))
         val scope = CoroutineScope(Dispatchers.Default)
         val deffereds = mutableListOf<Deferred<Unit>>()
