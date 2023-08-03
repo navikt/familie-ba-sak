@@ -14,7 +14,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
 import no.nav.familie.prosessering.error.RekjørSenereException
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -84,9 +84,11 @@ class AutovedtakStegService(
             Autovedtaktype.FØDSELSHENDELSE -> {
                 autovedtakFødselshendelseService.skalAutovedtakBehandles(behandlingsdata as NyBehandlingHendelse)
             }
+
             Autovedtaktype.OMREGNING_BREV -> {
                 autovedtakBrevService.skalAutovedtakBehandles(behandlingsdata as AutovedtakBrevBehandlingsdata)
             }
+
             Autovedtaktype.SMÅBARNSTILLEGG -> {
                 autovedtakSmåbarnstilleggService.skalAutovedtakBehandles(behandlingsdata as Aktør)
             }
@@ -119,9 +121,11 @@ class AutovedtakStegService(
             Autovedtaktype.FØDSELSHENDELSE -> {
                 autovedtakFødselshendelseService.kjørBehandling(behandlingsdata as NyBehandlingHendelse)
             }
+
             Autovedtaktype.OMREGNING_BREV -> {
                 autovedtakBrevService.kjørBehandling(behandlingsdata as AutovedtakBrevBehandlingsdata)
             }
+
             Autovedtaktype.SMÅBARNSTILLEGG -> {
                 autovedtakSmåbarnstilleggService.kjørBehandling(behandlingsdata as Aktør)
             }
@@ -163,19 +167,17 @@ class AutovedtakStegService(
 
         return if (åpenBehandling == null) {
             false
-        } else if (åpenBehandling.status == BehandlingStatus.UTREDES || åpenBehandling.status == BehandlingStatus.FATTER_VEDTAK) {
+        } else if (åpenBehandling.status == BehandlingStatus.UTREDES || åpenBehandling.status == BehandlingStatus.FATTER_VEDTAK || åpenBehandling.status == BehandlingStatus.SATT_PÅ_VENT) {
             antallAutovedtakÅpenBehandling[autovedtaktype]?.increment()
-
             oppgaveService.opprettOppgaveForManuellBehandling(
                 behandling = åpenBehandling,
                 begrunnelse = "${autovedtaktype.displayName}: Bruker har åpen behandling",
-                oppgavetype = Oppgavetype.VurderLivshendelse,
+                manuellOppgaveType = ManuellOppgaveType.ÅPEN_BEHANDLING,
             )
-
             true
-        } else if (åpenBehandling.status == BehandlingStatus.IVERKSETTER_VEDTAK) {
+        } else if (åpenBehandling.status == BehandlingStatus.IVERKSETTER_VEDTAK || åpenBehandling.status == BehandlingStatus.SATT_PÅ_MASKINELL_VENT) {
             throw RekjørSenereException(
-                årsak = "Åpen behandling iverksettes, prøver igjen om 1 time",
+                årsak = "Åpen behandling med status ${åpenBehandling.status}, prøver igjen om 1 time",
                 triggerTid = LocalDateTime.now().plusHours(1),
             )
         } else {

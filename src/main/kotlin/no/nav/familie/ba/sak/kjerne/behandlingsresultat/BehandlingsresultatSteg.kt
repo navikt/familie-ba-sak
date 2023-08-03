@@ -52,7 +52,7 @@ class BehandlingsresultatSteg(
 ) : BehandlingSteg<String> {
 
     override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
-        if (behandling.skalBehandlesAutomatisk) return
+        if (!behandling.erSatsendring() && behandling.skalBehandlesAutomatisk) return
 
         if (behandling.type != BehandlingType.TEKNISK_ENDRING && behandling.type != BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT) {
             val vilkårsvurdering = vilkårService.hentVilkårsvurderingThrows(behandlingId = behandling.id)
@@ -142,7 +142,10 @@ class BehandlingsresultatSteg(
             simuleringService.oppdaterSimuleringPåBehandling(behandlingMedOppdatertBehandlingsresultat)
         }
 
-        return hentNesteStegGittEndringerIUtbetaling(behandling, endringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi)
+        return hentNesteStegGittEndringerIUtbetaling(
+            behandling,
+            endringerIUtbetalingFraForrigeBehandlingSendtTilØkonomi,
+        )
     }
 
     override fun stegType(): StegType {
@@ -181,15 +184,18 @@ class BehandlingsresultatSteg(
             .minOfOrNull { it.stønadFom }
 
         endringIUtbetalingTidslinje.kastFeilVedEndringEtter(
-            migreringsdatoForrigeIverksatteBehandling = migreringsdatoForrigeIverksatteBehandling ?: TIDENES_ENDE.toYearMonth(),
+            migreringsdatoForrigeIverksatteBehandling = migreringsdatoForrigeIverksatteBehandling
+                ?: TIDENES_ENDE.toYearMonth(),
             behandling = behandling,
         )
     }
 
     private fun validerSatsendring(tilkjentYtelse: TilkjentYtelse) {
-        val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(tilkjentYtelse.behandling)
-            ?: throw FunksjonellFeil("Kan ikke kjøre satsendring når det ikke finnes en tidligere behandling på fagsaken")
-        val andelerFraForrigeBehandling = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = forrigeBehandling.id)
+        val forrigeBehandling =
+            behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(tilkjentYtelse.behandling)
+                ?: throw FunksjonellFeil("Kan ikke kjøre satsendring når det ikke finnes en tidligere behandling på fagsaken")
+        val andelerFraForrigeBehandling =
+            andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = forrigeBehandling.id)
 
         validerAtSatsendringKunOppdatererSatsPåEksisterendePerioder(
             andelerFraForrigeBehandling = andelerFraForrigeBehandling,

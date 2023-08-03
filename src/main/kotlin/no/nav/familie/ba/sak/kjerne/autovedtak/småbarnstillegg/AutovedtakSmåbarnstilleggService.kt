@@ -26,7 +26,7 @@ import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeHentOgPe
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.task.IverksettMotOppdragTask
-import no.nav.familie.kontrakter.felles.oppgave.Oppgavetype
+import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
 import no.nav.familie.prosessering.internal.TaskService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -193,8 +193,8 @@ class AutovedtakSmåbarnstilleggService(
         return oppgaveService.opprettOppgaveForManuellBehandling(
             behandling = omgjortBehandling,
             begrunnelse = meldingIOppgave,
-            oppgavetype = Oppgavetype.VurderLivshendelse,
             opprettLogginnslag = true,
+            manuellOppgaveType = ManuellOppgaveType.SMÅBARNSTILLEGG,
         )
     }
 

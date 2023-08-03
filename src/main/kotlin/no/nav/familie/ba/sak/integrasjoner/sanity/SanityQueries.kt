@@ -1,23 +1,7 @@
 package no.nav.familie.ba.sak.integrasjoner.sanity
 
 const val hentBegrunnelser =
-    "*[_type == \"begrunnelse\" && behandlingstema != \"EØS\" && apiNavn != null && navnISystem != null]{" +
-        "apiNavn," +
-        "navnISystem," +
-        "hjemler," +
-        "hjemlerFolketrygdloven," +
-        "vilkaar," +
-        "rolle," +
-        "lovligOppholdTriggere," +
-        "bosattIRiketTriggere," +
-        "giftPartnerskapTriggere," +
-        "borMedSokerTriggere," +
-        "ovrigeTriggere," +
-        "endretUtbetalingsperiodeTriggere," +
-        "endretUtbetalingsperiodeDeltBostedUtbetalingTrigger," +
-        "endringsaarsaker," +
-        "utvidetBarnetrygdTriggere" +
-        "}"
+    "*[_type == \"begrunnelse\" && tema != \"EØS\" && apiNavn != null && navnISystem != null]"
 
 const val hentEØSBegrunnelser =
-    "*[_type == \"begrunnelse\" && behandlingstema == \"EØS\" && apiNavn != null && navnISystem != null]"
+    "*[_type == \"begrunnelse\" && tema == \"EØS\" && apiNavn != null && navnISystem != null]"

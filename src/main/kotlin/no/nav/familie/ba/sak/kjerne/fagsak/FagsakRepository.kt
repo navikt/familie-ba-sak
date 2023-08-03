@@ -50,35 +50,32 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
     fun finnLøpendeFagsaker(page: Pageable): Slice<Long>
 
     @Query(
-        value = """SELECT f.*
+        value = """SELECT f.id
             FROM   Fagsak f
             WHERE  NOT EXISTS (
                     SELECT 1
                     FROM   satskjoering
                     WHERE  fk_fagsak_id = f.id
+                    AND sats_tid  = :satsTidspunkt
                 ) AND f.status = 'LØPENDE' AND f.arkivert = false""",
         nativeQuery = true,
     )
-    fun finnLøpendeFagsakerForSatsendring(page: Pageable): Page<Fagsak>
+    fun finnLøpendeFagsakerForSatsendring(satsTidspunkt: LocalDate, page: Pageable): Page<Long>
 
     @Query(
-        value = """SELECT id FROM fagsak
-                        WHERE fagsak.id IN (
-                            WITH sisteiverksatte AS (
-                                SELECT b.fk_fagsak_id AS fagsakid, MAX(b.aktivert_tid) AS aktivert_tid
-                                FROM behandling b
-                                         INNER JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
-                                         INNER JOIN fagsak f ON f.id = b.fk_fagsak_id
-                                WHERE ty.utbetalingsoppdrag IS NOT NULL
-                                  AND f.status = 'LØPENDE'
-                                  AND f.arkivert = FALSE
-                                GROUP BY b.fk_fagsak_id)
-                                
-                            SELECT silp.fagsakid
-                            FROM sisteiverksatte silp
-                                     INNER JOIN behandling b ON b.fk_fagsak_id = silp.fagsakid
-                                     INNER JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
-                            WHERE b.aktivert_tid = silp.aktivert_tid AND ty.stonad_tom < DATE_TRUNC('month', NOW()))""",
+        value = """WITH sisteiverksatte AS (
+                    SELECT DISTINCT ON (b.fk_fagsak_id) b.id, b.fk_fagsak_id, stonad_tom
+                    FROM behandling b
+                             INNER JOIN tilkjent_ytelse ty ON b.id = ty.fk_behandling_id
+                             INNER JOIN fagsak f ON f.id = b.fk_fagsak_id
+                    WHERE ty.utbetalingsoppdrag IS NOT NULL
+                      AND f.status = 'LØPENDE'
+                      AND f.arkivert = FALSE
+                    ORDER BY b.fk_fagsak_id, b.aktivert_tid DESC)
+                
+                SELECT silp.fk_fagsak_id
+                FROM sisteiverksatte silp
+                WHERE  silp.stonad_tom < DATE_TRUNC('month', NOW())""",
         nativeQuery = true,
     )
     fun finnFagsakerSomSkalAvsluttes(): List<Long>
@@ -175,4 +172,14 @@ interface FagsakRepository : JpaRepository<Fagsak, Long> {
         iverksatteLøpendeBehandlinger: List<Long>,
         stønadFom: YearMonth = YearMonth.now(),
     ): List<Long>
+
+    @Query(
+        """
+        SELECT distinct f from Fagsak f
+         JOIN Behandling b ON b.fagsak.id = f.id
+         JOIN AndelTilkjentYtelse aty ON aty.behandlingId = b.id
+        WHERE aty.aktør = :aktør
+        """,
+    )
+    fun finnFagsakerSomHarAndelerForAktør(aktør: Aktør): List<Fagsak>
 }

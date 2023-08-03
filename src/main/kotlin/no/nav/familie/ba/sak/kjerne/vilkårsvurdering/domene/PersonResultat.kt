@@ -128,6 +128,29 @@ class PersonResultat(
         return nyttPersonResultat
     }
 
+    fun tilKopiForNyVilkårsvurdering(
+        nyVilkårsvurdering: Vilkårsvurdering,
+    ): PersonResultat {
+        val nyttPersonResultat = PersonResultat(
+            vilkårsvurdering = nyVilkårsvurdering,
+            aktør = aktør,
+            andreVurderinger = mutableSetOf(), // Vi kopierer ikke over andreVurderinger da den aldri skal være med i ny behandling
+        )
+
+        val nyeVilkårResultater = vilkårResultater
+            .filter { it.erOppfylt() }
+            .map {
+                it.tilKopiForNyttPersonResultat(
+                    nyttPersonResultat = nyttPersonResultat,
+                )
+            }
+            .toSet()
+
+        nyttPersonResultat.setSortedVilkårResultater(nyeVilkårResultater)
+
+        return nyttPersonResultat
+    }
+
     fun erSøkersResultater() = vilkårResultater.none { it.vilkårType == Vilkår.UNDER_18_ÅR } ||
         vilkårsvurdering.behandling.fagsak.type in listOf(FagsakType.BARN_ENSLIG_MINDREÅRIG, FagsakType.INSTITUSJON)
 

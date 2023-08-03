@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.neste
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonthEllerNull
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.beskjærPå18År
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilForskjøvetTidslinje
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilForskjøvetTidslinjeForOppfyltVilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilForskjøvetTidslinjerForHvertOppfylteVilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingForskyvningUtils.tilTidslinjeForSplitt
@@ -31,6 +32,7 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
@@ -64,7 +66,7 @@ class VilkårsvurderingForskyvningUtilsTest {
             maksTom = barnets18årsdag,
         )
 
-        val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår()
+        val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår(barnets18årsdag.minusYears(18))
 
         Assertions.assertEquals(5, tidslinjer.size)
 
@@ -116,7 +118,7 @@ class VilkårsvurderingForskyvningUtilsTest {
             maksTom = barnets18årsdag,
         )
 
-        val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår()
+        val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår(barnets18årsdag.minusYears(18))
 
         Assertions.assertEquals(5, tidslinjer.size)
 
@@ -167,7 +169,7 @@ class VilkårsvurderingForskyvningUtilsTest {
             maksTom = barnets18årsdag,
         )
 
-        val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår()
+        val tidslinjer = vilkårResultater.tilForskjøvetTidslinjerForHvertOppfylteVilkår(barnets18årsdag.minusYears(18))
 
         Assertions.assertEquals(5, tidslinjer.size)
 
@@ -205,7 +207,8 @@ class VilkårsvurderingForskyvningUtilsTest {
             ),
         )
 
-        val forskjøvetTidslinje = under18VilkårResultat.tilForskjøvetTidslinjeForOppfyltVilkår(vilkår = Vilkår.UNDER_18_ÅR)
+        val forskjøvetTidslinje =
+            under18VilkårResultat.tilForskjøvetTidslinjeForOppfyltVilkår(vilkår = Vilkår.UNDER_18_ÅR, barn.fødselsdato)
 
         val forskjøvedePerioder = forskjøvetTidslinje.perioder()
 
@@ -214,7 +217,10 @@ class VilkårsvurderingForskyvningUtilsTest {
         val forskjøvetPeriode = forskjøvedePerioder.single()
 
         Assertions.assertEquals(barn.fødselsdato.plusMonths(1).toYearMonth(), forskjøvetPeriode.fraOgMed.tilYearMonth())
-        Assertions.assertEquals(barn.fødselsdato.plusYears(18).minusMonths(1).toYearMonth(), forskjøvetPeriode.tilOgMed.tilYearMonth())
+        Assertions.assertEquals(
+            barn.fødselsdato.plusYears(18).minusMonths(1).toYearMonth(),
+            forskjøvetPeriode.tilOgMed.tilYearMonth(),
+        )
     }
 
     @Test
@@ -232,7 +238,8 @@ class VilkårsvurderingForskyvningUtilsTest {
             ),
         )
 
-        val forskjøvetTidslinje = under18VilkårResultat.tilForskjøvetTidslinjeForOppfyltVilkår(vilkår = Vilkår.UNDER_18_ÅR)
+        val forskjøvetTidslinje =
+            under18VilkårResultat.tilForskjøvetTidslinjeForOppfyltVilkår(vilkår = Vilkår.UNDER_18_ÅR, barn.fødselsdato)
 
         val forskjøvedePerioder = forskjøvetTidslinje.perioder()
 
@@ -242,6 +249,24 @@ class VilkårsvurderingForskyvningUtilsTest {
 
         Assertions.assertEquals(barn.fødselsdato.plusMonths(1).toYearMonth(), forskjøvetPeriode.fraOgMed.tilYearMonth())
         Assertions.assertEquals(tomDato.toYearMonth(), forskjøvetPeriode.tilOgMed.tilYearMonth())
+    }
+
+    @Test
+    fun `Skal ikke kaste feil dersom vi ikke sender med noen vilkårresultater`() {
+        val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2022, Month.DECEMBER, 1).minusYears(18))
+
+        assertDoesNotThrow {
+            emptyList<VilkårResultat>().tilForskjøvetTidslinjeForOppfyltVilkår(
+                vilkår = Vilkår.UNDER_18_ÅR,
+                barn.fødselsdato,
+            )
+        }
+        assertDoesNotThrow {
+            emptyList<VilkårResultat>().tilForskjøvetTidslinje(
+                vilkår = Vilkår.UNDER_18_ÅR,
+                barn.fødselsdato,
+            )
+        }
     }
 
     @Test

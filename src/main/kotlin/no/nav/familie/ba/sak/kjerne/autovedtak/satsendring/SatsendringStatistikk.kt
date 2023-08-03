@@ -17,6 +17,7 @@ import java.util.concurrent.TimeUnit
 class SatsendringStatistikk(
     private val fagsakRepository: FagsakRepository,
     private val satskjøringRepository: SatskjøringRepository,
+    private val startSatsendring: StartSatsendring,
 ) {
 
     val satsendringGauge =
@@ -31,8 +32,9 @@ class SatsendringStatistikk(
         try {
             MDC.put(MDCConstants.MDC_CALL_ID, UUID.randomUUID().toString())
             logger.info("Kjører statistikk satsendring")
-            val antallKjørt = satskjøringRepository.countByFerdigTidspunktIsNotNull()
-            val antallTriggetTotalt = satskjøringRepository.count()
+            val satsTidspunkt = startSatsendring.hentAktivSatsendringstidspunkt()
+            val antallKjørt = satskjøringRepository.countByFerdigTidspunktIsNotNullAndSatsTidspunkt(satsTidspunkt)
+            val antallTriggetTotalt = satskjøringRepository.countBySatsTidspunkt(satsTidspunkt)
             val antallLøpendeFagsakerTotalt = fagsakRepository.finnAntallFagsakerLøpende()
 
             val rows = listOf(
@@ -66,7 +68,7 @@ class SatsendringStatistikk(
                 ),
             )
 
-            satsendringGauge.register(rows)
+            satsendringGauge.register(rows, true)
         } finally {
             MDC.clear()
         }

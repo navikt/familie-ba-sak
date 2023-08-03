@@ -4,6 +4,7 @@ import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingMetrikker
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.SnikeIKøenService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
@@ -22,6 +23,7 @@ class FerdigstillBehandling(
     private val behandlingService: BehandlingService,
     private val behandlingMetrikker: BehandlingMetrikker,
     private val loggService: LoggService,
+    private val snikeIKøenService: SnikeIKøenService,
 ) : BehandlingSteg<String> {
 
     override fun utførStegOgAngiNeste(
@@ -55,6 +57,8 @@ class FerdigstillBehandling(
         }
 
         behandlingService.oppdaterStatusPåBehandling(behandlingId = behandling.id, status = BehandlingStatus.AVSLUTTET)
+        snikeIKøenService.reaktiverBehandlingPåMaskinellVent(behandlingSomFerdigstilles = behandling)
+
         return hentNesteStegForNormalFlyt(behandling)
     }
 
