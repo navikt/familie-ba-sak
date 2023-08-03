@@ -365,6 +365,7 @@ class VedtaksperiodeService(
             endredeUtbetalinger = endretUtbetalingAndelRepository.findByBehandlingId(this.id),
             andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(this.id),
             perioderOvergangsstønad = småbarnstilleggService.hentPerioderMedFullOvergangsstønad(this),
+            uregistrerteBarn = søknadGrunnlagService.hentAktiv(behandlingId = this.id)?.hentUregistrerteBarn() ?: emptyList(),
         )
 
     @Deprecated("skal bruke genererVedtaksperioderMedBegrunnelser når den er klar")

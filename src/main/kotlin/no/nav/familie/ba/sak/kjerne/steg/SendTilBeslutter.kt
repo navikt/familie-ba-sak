@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.AutomatiskBeslutningService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
+import no.nav.familie.ba.sak.kjerne.behandling.ValiderBrevmottakerService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.tilstand.BehandlingStegTilstand
@@ -35,12 +36,14 @@ class SendTilBeslutter(
     private val vedtakService: VedtakService,
     private val vedtaksperiodeService: VedtaksperiodeService,
     private val automatiskBeslutningService: AutomatiskBeslutningService,
+    private val validerBrevmottakerService: ValiderBrevmottakerService,
 ) : BehandlingSteg<String> {
 
     override fun preValiderSteg(
         behandling: Behandling,
         stegService: StegService?,
     ) {
+        validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(behandlingId = behandling.id)
         vilkårsvurderingService.hentAktivForBehandling(behandlingId = behandling.id)
             ?.validerAtAlleAnndreVurderingerErVurdert()
 

@@ -109,6 +109,7 @@ class BegrunnelseTeksterStepDefinition {
             endredeUtbetalinger = endredeUtbetalinger[behandlingId] ?: emptyList(),
             andelerTilkjentYtelse = andelerTilkjentYtelse[behandlingId] ?: emptyList(),
             perioderOvergangsstønad = emptyList(),
+            uregistrerteBarn = emptyList(),
         )
         val forrigeBehandlingId = behandlingTilForrigeBehandling[behandlingId]
 
@@ -123,6 +124,7 @@ class BegrunnelseTeksterStepDefinition {
                 endredeUtbetalinger = endredeUtbetalinger[forrigeBehandlingId] ?: emptyList(),
                 andelerTilkjentYtelse = andelerTilkjentYtelse[forrigeBehandlingId] ?: emptyList(),
                 perioderOvergangsstønad = emptyList(),
+                uregistrerteBarn = emptyList(),
             )
         }
 

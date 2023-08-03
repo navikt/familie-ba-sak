@@ -56,10 +56,16 @@ object TilkjentYtelseValidering {
             when {
                 forrigeAndel == null && nåværendeAndel != null ->
                     throw Feil("Satsendring kan ikke legge til en andel som ikke var der i forrige behandling")
+
                 forrigeAndel != null && nåværendeAndel == null ->
                     throw Feil("Satsendring kan ikke fjerne en andel som fantes i forrige behandling")
+
                 forrigeAndel != null && forrigeAndel.prosent != nåværendeAndel?.prosent ->
                     throw Feil("Satsendring kan ikke endre på prosenten til en andel")
+
+                forrigeAndel != null && forrigeAndel.type != nåværendeAndel?.type ->
+                    throw Feil("Satsendring kan ikke endre YtelseType til en andel")
+
                 else -> false
             }
         }.values.map { it.perioder() } // Må kalle på .perioder() for at feilene over skal bli kastet
