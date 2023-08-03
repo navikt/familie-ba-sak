@@ -132,7 +132,7 @@ class ForvalterService(
 
     @OptIn(InternalCoroutinesApi::class) // for å få lov til å hente CancellationException
     suspend fun f(callId: String) {
-        var slice = fagsakRepository.finnLøpendeFagsaker(PageRequest.of(0, 200))
+        var slice = fagsakRepository.finnLøpendeFagsaker(PageRequest.of(0, 10000))
         val scope = CoroutineScope(Dispatchers.Default)
         val deffereds = mutableListOf<Deferred<Unit>>()
 
