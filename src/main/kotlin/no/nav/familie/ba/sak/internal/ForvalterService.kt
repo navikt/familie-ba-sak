@@ -1,9 +1,11 @@
 package no.nav.familie.ba.sak.internal
 
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.runBlocking
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
 import no.nav.familie.ba.sak.common.secureLogger
@@ -33,7 +35,6 @@ import no.nav.familie.log.mdc.MDCConstants
 import org.slf4j.LoggerFactory
 import org.slf4j.MDC
 import org.springframework.data.domain.PageRequest
-import org.springframework.data.domain.Slice
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
@@ -119,47 +120,64 @@ class ForvalterService(
         taskRepository.save(task)
     }
 
-    @Transactional(readOnly = true)
-    suspend fun identifiserUtbetalingerOver100Prosent(callId: String) {
+    fun identifiserUtbetalingerOver100Prosent(callId: String) {
         MDC.put(MDCConstants.MDC_CALL_ID, callId)
-        var slice: Slice<Long> = fagsakRepository.finnLøpendeFagsaker(PageRequest.of(0, 200))
-        val scope = CoroutineScope(Dispatchers.Default)
-        var sideNr = 0
-        val deffereds = mutableListOf(
-            scope.async {
-                sjekkChunkMedFagsakerOmDeHarUtbetalingerOver100Prosent(callId, slice, sideNr)
-            },
-        )
 
-        while (slice.hasNext()) {
-            slice = fagsakRepository.finnLøpendeFagsaker(slice.nextPageable())
-            sideNr = sideNr.inc()
-            deffereds.add(
-                scope.async {
-                    sjekkChunkMedFagsakerOmDeHarUtbetalingerOver100Prosent(callId, slice, sideNr)
-                },
-            )
+        runBlocking {
+            f(callId)
         }
 
-        logger.info("Startet ${slice.size} sider")
-        deffereds.awaitAll()
         logger.info("Ferdig med å kjøre identifiserUtbetalingerOver100Prosent")
     }
 
-    private fun sjekkChunkMedFagsakerOmDeHarUtbetalingerOver100Prosent(callId: String, slice: Slice<Long>, sideNr: Int) {
-        MDC.put(MDCConstants.MDC_CALL_ID, callId)
-        logger.info("identifiserUtbetalingerOver100Prosent side $sideNr")
-        slice.get().toList().forEach { fagsakId ->
+    @OptIn(InternalCoroutinesApi::class) // for å få lov til å hente CancellationException
+    suspend fun f(callId: String) {
+        var slice = fagsakRepository.finnLøpendeFagsaker(PageRequest.of(0, 200))
+        val scope = CoroutineScope(Dispatchers.Default)
+        val deffereds = mutableListOf<Deferred<Unit>>()
+
+        // coroutineScope {
+        while (slice.pageable.isPaged) {
+            val sideNr = slice.number
+            val fagsaker = slice.get().toList()
+            logger.info("Starter kjøring av identifiserUtbetalingerOver100Prosent side=$sideNr")
+            deffereds.add(
+                scope.async {
+                    MDC.put(MDCConstants.MDC_CALL_ID, callId)
+                    sjekkChunkMedFagsakerOmDeHarUtbetalingerOver100Prosent(fagsaker)
+                    logger.info("Avslutter kjøring av identifiserUtbetalingerOver100Prosent side=$sideNr")
+                },
+            )
+
+            slice = fagsakRepository.finnLøpendeFagsaker(slice.nextPageable())
+        }
+        deffereds.forEach {
+            if (it.isCancelled) {
+                logger.warn("Async jobb kansellert med: ${it.getCancellationException().message} ${it.getCancellationException().stackTraceToString()}")
+            }
+
+            it.await()
+        }
+
+        logger.info("Alle async jobber er kjørt. Totalt antall sider=${deffereds.size}")
+    }
+
+    private fun sjekkChunkMedFagsakerOmDeHarUtbetalingerOver100Prosent(fagsaker: List<Long>) {
+        fagsaker.forEach { fagsakId ->
             val sisteIverksatteBehandling =
-                behandlingRepository.finnSisteIverksatteBehandling(fagsakId = fagsakId)!!
-            try {
-                tilkjentYtelseValideringService.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
-                    sisteIverksatteBehandling,
-                )
-            } catch (e: UtbetalingsikkerhetFeil) {
-                val arbeidsfordelingService =
-                    arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = sisteIverksatteBehandling.id)
-                secureLogger.warn("Over 100% utbetaling for fagsak=$fagsakId, enhet=${arbeidsfordelingService.behandlendeEnhetId}, melding=${e.message}")
+                behandlingRepository.finnSisteIverksatteBehandling(fagsakId = fagsakId)
+            if (sisteIverksatteBehandling != null) {
+                try {
+                    tilkjentYtelseValideringService.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
+                        sisteIverksatteBehandling,
+                    )
+                } catch (e: UtbetalingsikkerhetFeil) {
+                    val arbeidsfordelingService =
+                        arbeidsfordelingService.hentArbeidsfordelingPåBehandling(behandlingId = sisteIverksatteBehandling.id)
+                    secureLogger.warn("Over 100% utbetaling for fagsak=$fagsakId, enhet=${arbeidsfordelingService.behandlendeEnhetId}, melding=${e.message}")
+                }
+            } else {
+                logger.warn("Skipper sjekk 100% for fagsak $fagsakId pga manglende sisteIverksettBehandling")
             }
         }
     }

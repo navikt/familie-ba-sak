@@ -1,8 +1,5 @@
 package no.nav.familie.ba.sak.internal
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
@@ -33,6 +30,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
+import kotlin.concurrent.thread
 
 @RestController
 @RequestMapping("/api/forvalter")
@@ -286,11 +284,9 @@ class ForvalterController(
     }
 
     @PostMapping("/identifiser-utbetalinger-over-100-prosent")
-    @Transactional
     fun identifiserUtbetalingerOver100Prosent(): ResponseEntity<Pair<String, String>> {
         val callId = UUID.randomUUID().toString()
-        val scope = CoroutineScope(SupervisorJob())
-        scope.launch {
+        thread {
             forvalterService.identifiserUtbetalingerOver100Prosent(callId)
         }
         return ResponseEntity.ok(Pair("callId", callId))
