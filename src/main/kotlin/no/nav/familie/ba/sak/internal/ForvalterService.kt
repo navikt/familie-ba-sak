@@ -153,7 +153,8 @@ class ForvalterService(
         }
         deffereds.forEach {
             if (it.isCancelled) {
-                logger.warn("Async jobb kansellert med: ${it.getCancellationException().message} ${it.getCancellationException().stackTraceToString()}")
+                logger.warn("Async jobb med status kansellert. Se securelog")
+                secureLogger.warn("Async jobb kansellert med: ${it.getCancellationException().message} ${it.getCancellationException().stackTraceToString()}")
             }
 
             it.await()
