@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.Query
 interface BehandlingSøknadsinfoRepository : JpaRepository<BehandlingSøknadsinfo, Long> {
 
     @Query("SELECT bs FROM BehandlingSøknadsinfo bs where bs.behandling.id=:behandlingId ")
-    fun findByBehandlingId(behandlingId: Long): BehandlingSøknadsinfo?
+    fun findByBehandlingId(behandlingId: Long): Set<BehandlingSøknadsinfo>
 }

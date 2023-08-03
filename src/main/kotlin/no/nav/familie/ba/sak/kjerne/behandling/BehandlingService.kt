@@ -102,7 +102,11 @@ class BehandlingService(
             )
             val lagretBehandling = lagreNyOgDeaktiverGammelBehandling(behandling).also {
                 if (nyBehandling.søknadMottattDato != null) {
-                    behandlingSøknadsinfoService.lagreNedSøknadMottattDato(nyBehandling.søknadMottattDato, behandling)
+                    behandlingSøknadsinfoService.lagreNedSøknadsinfo(
+                        mottattDato = nyBehandling.søknadMottattDato,
+                        søknadsinfo = nyBehandling.søknadsinfo,
+                        behandling = behandling
+                    )
                 }
                 saksstatistikkEventPublisher.publiserBehandlingsstatistikk(it.id)
             }
