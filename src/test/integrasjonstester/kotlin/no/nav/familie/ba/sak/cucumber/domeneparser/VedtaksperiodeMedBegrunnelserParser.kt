@@ -2,6 +2,8 @@ package no.nav.familie.ba.sak.cucumber.domeneparser
 
 import io.cucumber.datatable.DataTable
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
+import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
+import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 
 object VedtaksperiodeMedBegrunnelserParser {
@@ -16,12 +18,25 @@ object VedtaksperiodeMedBegrunnelserParser {
                 fom = parseValgfriDato(Domenebegrep.FRA_DATO, rad),
                 tom = parseValgfriDato(Domenebegrep.TIL_DATO, rad),
                 type = parseEnum(DomenebegrepVedtaksperiodeMedBegrunnelser.VEDTAKSPERIODE_TYPE, rad),
-            )
+            ).also { vedtaksperiodeMedBegrunnelser ->
+                val begrunnelser =
+                    parseEnumListe<Standardbegrunnelse>(DomenebegrepVedtaksperiodeMedBegrunnelser.BEGRUNNELSER, rad)
+
+                vedtaksperiodeMedBegrunnelser.begrunnelser.addAll(
+                    begrunnelser.map {
+                        Vedtaksbegrunnelse(
+                            vedtaksperiodeMedBegrunnelser = vedtaksperiodeMedBegrunnelser,
+                            standardbegrunnelse = it,
+                        )
+                    },
+                )
+            }
         }
     }
 
     fun parseAktørId(rad: MutableMap<String, String>) =
         parseString(DomenebegrepPersongrunnlag.AKTØR_ID, rad).padEnd(13, '0')
+
     fun parseAktørIdListe(rad: MutableMap<String, String>) =
         parseStringList(DomenebegrepPersongrunnlag.AKTØR_ID, rad).map { it.padEnd(13, '0') }
 
@@ -38,6 +53,7 @@ object VedtaksperiodeMedBegrunnelserParser {
         BELØP("Beløp"),
         ER_EKSPLISITT_AVSLAG("Er eksplisitt avslag"),
         ENDRINGSTIDSPUNKT("Endringstidspunkt"),
+        BEGRUNNELSER("Begrunnelser"),
     }
 
     enum class DomenebegrepKompetanse(override val nøkkel: String) : Domenenøkkel {

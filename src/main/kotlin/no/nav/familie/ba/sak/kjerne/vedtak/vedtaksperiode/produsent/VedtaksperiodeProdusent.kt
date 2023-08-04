@@ -47,7 +47,41 @@ fun genererVedtaksperioder(
             endringstidspunkt = endringstidspunkt,
         )
 
-    return perioderSomSkalBegrunnesBasertPåDenneOgForrigeBehandling.map { it.tilVedtaksperiodeMedBegrunnelser(vedtak) }
+    val vedtaksperioder =
+        perioderSomSkalBegrunnesBasertPåDenneOgForrigeBehandling.map { it.tilVedtaksperiodeMedBegrunnelser(vedtak) }
+
+    return if (grunnlagForVedtakPerioder.uregistrerteBarn.isNotEmpty()) {
+        vedtaksperioder.leggTilPeriodeForUregistrerteBarn(vedtak)
+    } else {
+        vedtaksperioder
+    }
+}
+
+private fun List<VedtaksperiodeMedBegrunnelser>.leggTilPeriodeForUregistrerteBarn(
+    vedtak: Vedtak,
+): List<VedtaksperiodeMedBegrunnelser> {
+    fun VedtaksperiodeMedBegrunnelser.leggTilAvslagUregistrertBarnBegrunnelse() = this.begrunnelser.add(
+        Vedtaksbegrunnelse(
+            vedtaksperiodeMedBegrunnelser = this,
+            standardbegrunnelse = Standardbegrunnelse.AVSLAG_UREGISTRERT_BARN,
+        ),
+    )
+
+    val avslagsperiodeUtenDatoer = this.find { it.fom == null && it.tom == null }
+
+    return if (avslagsperiodeUtenDatoer != null) {
+        avslagsperiodeUtenDatoer.leggTilAvslagUregistrertBarnBegrunnelse()
+        this
+    } else {
+        val avslagsperiode: VedtaksperiodeMedBegrunnelser = VedtaksperiodeMedBegrunnelser(
+            vedtak = vedtak,
+            fom = null,
+            tom = null,
+            type = Vedtaksperiodetype.AVSLAG,
+        ).also { it.leggTilAvslagUregistrertBarnBegrunnelse() }
+
+        this + avslagsperiode
+    }
 }
 
 fun finnPerioderSomSkalBegrunnes(
@@ -89,7 +123,8 @@ fun List<Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>>.fjernOv
             .filter { it.innhold != null }
             .partition { periode -> periode.innhold!!.any { it.gjeldende?.erEksplisittAvslag() == true } }
 
-    val førsteOpphørEtterSisteInnvilgedePeriode = opphørEtterSisteInnvilgedePeriode.firstOrNull()?.copy(tilOgMed = MånedTidspunkt.uendeligLengeTil())
+    val førsteOpphørEtterSisteInnvilgedePeriode =
+        opphørEtterSisteInnvilgedePeriode.firstOrNull()?.copy(tilOgMed = MånedTidspunkt.uendeligLengeTil())
 
     return (perioderTilOgMedSisteInnvilgede + førsteOpphørEtterSisteInnvilgedePeriode + eksplisitteAvslagEtterSisteInnvilgedePeriode).filterNotNull()
 }
