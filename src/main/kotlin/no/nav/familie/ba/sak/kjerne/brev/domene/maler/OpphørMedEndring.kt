@@ -32,12 +32,15 @@ data class OpphørMedEndring(
                     etterbetaling = etterbetaling,
                     etterbetalingInstitusjon = etterbetalingInstitusjon,
                     korrigertVedtak = vedtakFellesfelter.korrigertVedtakData,
-                    refusjonEosAvklart = refusjonEosAvklart != null,
-                    refusjonEosUavklart = refusjonEosUavklart != null,
+                    refusjonEosAvklart = refusjonEosAvklart,
+                    refusjonEosUavklart = refusjonEosUavklart,
                 ),
                 flettefelter = object : FlettefelterForDokument {
-                    val perioderMedRefusjonEosAvklart: Flettefelt = refusjonEosAvklart?.perioderMedRefusjonEøsAvklart
-                    val perioderMedRefusjonEosUavklart: Flettefelt = refusjonEosUavklart?.perioderMedRefusjonEøsUavklart
+                    @Deprecated("Skal bort når vi har lagt til støtte for å sende inn felttefelter som types i delmaler i familie-brev")
+                    val perioderMedRefusjonEosAvklart: Flettefelt = refusjonEosAvklart?.perioderMedRefusjonEosAvklart
+
+                    @Deprecated("Skal bort når vi har lagt til støtte for å sende inn felttefelter som types i delmaler i familie-brev")
+                    val perioderMedRefusjonEosUavklart: Flettefelt = refusjonEosUavklart?.perioderMedRefusjonEosUavklart
                     override val brevOpprettetDato = flettefelt(LocalDate.now().tilDagMånedÅr())
                     override val navn = flettefelt(vedtakFellesfelter.søkerNavn)
                     override val fodselsnummer = flettefelt(vedtakFellesfelter.søkerFødselsnummer)
@@ -61,7 +64,7 @@ data class OpphørMedEndringData(
         val etterbetaling: Etterbetaling?,
         val etterbetalingInstitusjon: EtterbetalingInstitusjon?,
         val korrigertVedtak: KorrigertVedtakData?,
-        val refusjonEosAvklart: Boolean,
-        val refusjonEosUavklart: Boolean,
+        val refusjonEosAvklart: RefusjonEøsAvklart?,
+        val refusjonEosUavklart: RefusjonEøsUavklart?,
     )
 }
