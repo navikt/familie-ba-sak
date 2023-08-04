@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.brev.domene.maler
 
-import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
-import java.time.LocalDate
 
 data class VedtakEndring(
     override val mal: Brevmal,
@@ -38,20 +36,16 @@ data class VedtakEndring(
                     etterbetalingInstitusjon = etterbetalingInstitusjon,
                     korrigertVedtak = vedtakFellesfelter.korrigertVedtakData,
                     informasjonOmAarligKontroll = informasjonOmAarligKontroll,
-                    forMyeUtbetaltBarnetrygd = feilutbetaltValuta != null,
-                    refusjonEosAvklart = refusjonEosAvklart != null,
-                    refusjonEosUavklart = refusjonEosUavklart != null,
+                    forMyeUtbetaltBarnetrygd = feilutbetaltValuta,
+                    refusjonEosAvklart = refusjonEosAvklart,
+                    refusjonEosUavklart = refusjonEosUavklart,
                 ),
-                flettefelter = object : FlettefelterForDokument {
-                    val perioderMedForMyeUtbetalt: Flettefelt = feilutbetaltValuta?.perioderMedForMyeUtbetalt
-                    val perioderMedRefusjonEosAvklart: Flettefelt = refusjonEosAvklart?.perioderMedRefusjonEøsAvklart
-                    val perioderMedRefusjonEosUavklart: Flettefelt = refusjonEosUavklart?.perioderMedRefusjonEøsUavklart
-                    override val navn = flettefelt(vedtakFellesfelter.søkerNavn)
-                    override val fodselsnummer = flettefelt(vedtakFellesfelter.søkerFødselsnummer)
-                    override val brevOpprettetDato = flettefelt(LocalDate.now().tilDagMånedÅr())
-                    override val organisasjonsnummer = flettefelt(vedtakFellesfelter.organisasjonsnummer)
-                    override val gjelder = flettefelt(vedtakFellesfelter.gjelder)
-                },
+                flettefelter = FlettefelterForDokumentImpl(
+                    navn = vedtakFellesfelter.søkerNavn,
+                    fodselsnummer = vedtakFellesfelter.søkerFødselsnummer,
+                    organisasjonsnummer = vedtakFellesfelter.organisasjonsnummer,
+                    gjelder = vedtakFellesfelter.gjelder,
+                ),
                 perioder = vedtakFellesfelter.perioder,
             ),
         )
@@ -73,8 +67,8 @@ data class EndringVedtakData(
         val etterbetalingInstitusjon: EtterbetalingInstitusjon?,
         val korrigertVedtak: KorrigertVedtakData?,
         val informasjonOmAarligKontroll: Boolean,
-        val forMyeUtbetaltBarnetrygd: Boolean,
-        val refusjonEosAvklart: Boolean,
-        val refusjonEosUavklart: Boolean,
+        val forMyeUtbetaltBarnetrygd: FeilutbetaltValuta?,
+        val refusjonEosAvklart: RefusjonEøsAvklart?,
+        val refusjonEosUavklart: RefusjonEøsUavklart?,
     )
 }
