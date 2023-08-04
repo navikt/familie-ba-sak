@@ -157,10 +157,6 @@ class InnkommendeJournalføringService(
         val tilknyttedeBehandlingIder: MutableList<String> = request.tilknyttedeBehandlingIder.toMutableList()
         val journalpost = integrasjonClient.hentJournalpost(journalpostId)
         val brevkode = journalpost.dokumenter?.firstNotNullOfOrNull { it.brevkode }
-        val erSøknad = brevkode == Søknadstype.ORDINÆR.søknadskode || brevkode == Søknadstype.UTVIDET.søknadskode
-        val søknadMottattDato = if (erSøknad) {
-            request.datoMottatt?.toLocalDate() ?: journalpost.datoMottatt?.toLocalDate() ?: LocalDate.now()
-        } else null
 
         if (request.opprettOgKnyttTilNyBehandling) {
             val nyBehandling =
@@ -171,7 +167,7 @@ class InnkommendeJournalføringService(
                     årsak = request.nyBehandlingsårsak,
                     kategori = request.kategori,
                     underkategori = request.underkategori,
-                    søknadMottattDato = søknadMottattDato,
+                    søknadMottattDato = request.datoMottatt?.toLocalDate(),
                     søknadsinfo = brevkode?.let {
                         Søknadsinfo(
                             journalpostId = journalpost.journalpostId,
@@ -187,19 +183,11 @@ class InnkommendeJournalføringService(
 
         val (sak, behandlinger) = lagreJournalpostOgKnyttFagsakTilJournalpost(tilknyttedeBehandlingIder, journalpostId)
 
-        if (!request.opprettOgKnyttTilNyBehandling && erSøknad) {
+        val erSøknad = brevkode == Søknadstype.ORDINÆR.søknadskode || brevkode == Søknadstype.UTVIDET.søknadskode
+
+        if (erSøknad && !request.opprettOgKnyttTilNyBehandling) {
             behandlinger.forEach { behandling ->
-                behandlingSøknadsinfoService.lagreNedSøknadsinfo(
-                    mottattDato = søknadMottattDato!!,
-                    søknadsinfo = brevkode?.let {
-                        Søknadsinfo(
-                            journalpostId = journalpost.journalpostId,
-                            brevkode = it,
-                            erDigital = journalpost.kanal == NAV_NO
-                        )
-                    },
-                    behandling = behandling
-                )
+                lagreNedSøknadsinfoKnyttetTilTidligereBehandling(journalpost, brevkode!!, behandling)
             }
         }
 
@@ -376,6 +364,22 @@ class InnkommendeJournalføringService(
                 mottattDato = datoMottatt,
             )
         }
+    }
+
+    private fun lagreNedSøknadsinfoKnyttetTilTidligereBehandling(
+        journalpost: Journalpost,
+        brevkode: String,
+        behandling: Behandling
+    ) {
+        behandlingSøknadsinfoService.lagreNedSøknadsinfo(
+            mottattDato = journalpost.datoMottatt?.toLocalDate() ?: LocalDate.now(),
+            søknadsinfo = Søknadsinfo(
+                journalpostId = journalpost.journalpostId,
+                brevkode = brevkode,
+                erDigital = journalpost.kanal == NAV_NO
+            ),
+            behandling = behandling
+        )
     }
 
     companion object {

@@ -24,6 +24,6 @@ class BehandlingSøknadsinfoService(
     }
 
     fun hentSøknadMottattDato(behandlingId: Long): LocalDateTime? {
-        return behandlingSøknadsinfoRepository.findByBehandlingId(behandlingId).minByOrNull { it.mottattDato }?.mottattDato
+        return behandlingSøknadsinfoRepository.findByBehandlingId(behandlingId).minOfOrNull { it.mottattDato }
     }
 }
