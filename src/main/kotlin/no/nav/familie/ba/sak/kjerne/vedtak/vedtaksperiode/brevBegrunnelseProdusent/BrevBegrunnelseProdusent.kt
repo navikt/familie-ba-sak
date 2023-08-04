@@ -5,8 +5,6 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.tilPerson
-import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
@@ -17,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.AktørOgRolleBegrunnelseGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPersonInnvilget
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForVedtaksperioder
@@ -28,12 +27,10 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserForPeriode(
     grunnlagForVedtaksperioderForrigeBehandling: GrunnlagForVedtaksperioder?,
     sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
     behandlingUnderkategori: BehandlingUnderkategori,
-    fagsakType: FagsakType,
 ): Set<Standardbegrunnelse> {
     val gyldigeBegrunnelserPerPerson = hentGyldigeBegrunnelserPerPerson(
         grunnlagForVedtaksperioder = grunnlagForVedtaksperioder,
         grunnlagForVedtaksperioderForrigeBehandling = grunnlagForVedtaksperioderForrigeBehandling,
-        fagsakType = fagsakType,
         behandlingUnderkategori = behandlingUnderkategori,
         sanityBegrunnelser = sanityBegrunnelser,
     )
@@ -44,23 +41,20 @@ fun UtvidetVedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserForPeriode(
 private fun UtvidetVedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserPerPerson(
     grunnlagForVedtaksperioder: GrunnlagForVedtaksperioder,
     grunnlagForVedtaksperioderForrigeBehandling: GrunnlagForVedtaksperioder?,
-    fagsakType: FagsakType,
     behandlingUnderkategori: BehandlingUnderkategori,
     sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
-): Map<Aktør, Set<Standardbegrunnelse>> {
+): Map<AktørOgRolleBegrunnelseGrunnlag, Set<Standardbegrunnelse>> {
     val begrunnelseGrunnlagPerPerson =
         finnBegrunnelseGrunnlagPerPerson(
             grunnlagForVedtaksperioder,
             grunnlagForVedtaksperioderForrigeBehandling,
         )
 
-    return begrunnelseGrunnlagPerPerson.mapValues { (aktør, begrunnelseGrunnlag) ->
+    return begrunnelseGrunnlagPerPerson.mapValues { (aktørOgRolleForVedtaksgrunnlag, begrunnelseGrunnlag) ->
         val utgjørendeVilkår = hentUtgjørendeVilkårForPerson(
-            begrunnelseGrunnlag,
-            aktør,
-            grunnlagForVedtaksperioder,
-            fagsakType,
-            behandlingUnderkategori,
+            begrunnelseGrunnlag = begrunnelseGrunnlag,
+            aktørOgRolle = aktørOgRolleForVedtaksgrunnlag,
+            behandlingUnderkategori = behandlingUnderkategori,
         )
 
         val filtrerteBegrunnelser =
@@ -72,15 +66,12 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserPerPerso
 
 private fun hentUtgjørendeVilkårForPerson(
     begrunnelseGrunnlag: BegrunnelseGrunnlag,
-    aktør: Aktør,
-    grunnlagForVedtaksperioder: GrunnlagForVedtaksperioder,
-    fagsakType: FagsakType,
+    aktørOgRolle: AktørOgRolleBegrunnelseGrunnlag,
     behandlingUnderkategori: BehandlingUnderkategori,
 ): Set<Vilkår> {
     val vilkårForPerson = Vilkår.hentVilkårFor(
-        personType = aktør.tilPerson(grunnlagForVedtaksperioder.persongrunnlag)?.type
-            ?: error("Har ikke persongrunnlag for person"),
-        fagsakType = fagsakType,
+        personType = aktørOgRolle.rolleBegrunnelseGrunnlag,
+        fagsakType = FagsakType.NORMAL,
         behandlingUnderkategori = behandlingUnderkategori,
     )
 
@@ -145,7 +136,7 @@ private fun GrunnlagForPerson.hentOppfylteVilkår(): Set<Vilkår> =
 private fun UtvidetVedtaksperiodeMedBegrunnelser.finnBegrunnelseGrunnlagPerPerson(
     grunnlagForVedtaksperioder: GrunnlagForVedtaksperioder,
     grunnlagForVedtaksperioderForrigeBehandling: GrunnlagForVedtaksperioder?,
-): Map<Aktør, BegrunnelseGrunnlag> {
+): Map<AktørOgRolleBegrunnelseGrunnlag, BegrunnelseGrunnlag> {
     val tidslinjeMedVedtaksperioden = this.tilTidslinjeForAktuellPeriode()
 
     val grunnlagTidslinjePerPerson = grunnlagForVedtaksperioder.utledGrunnlagTidslinjePerPerson()
@@ -154,12 +145,13 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.finnBegrunnelseGrunnlagPerPerso
     val grunnlagTidslinjePerPersonForrigeBehandling =
         grunnlagForVedtaksperioderForrigeBehandling?.utledGrunnlagTidslinjePerPerson()
 
-    return grunnlagTidslinjePerPerson.mapValues { (aktørId, grunnlagTidslinje) ->
+    return grunnlagTidslinjePerPerson.mapValues { (aktørOgRolleForVedtaksgrunnlag, grunnlagTidslinje) ->
         val grunnlagMedForrigePeriodeTidslinje =
             grunnlagTidslinje.grunnlagForPerson.tilForrigeOgNåværendePeriodeTidslinje()
 
         val grunnlagForrigeBehandlingTidslinje =
-            grunnlagTidslinjePerPersonForrigeBehandling?.get(aktørId)?.grunnlagForPerson ?: TomTidslinje()
+            grunnlagTidslinjePerPersonForrigeBehandling?.get(aktørOgRolleForVedtaksgrunnlag)?.grunnlagForPerson
+                ?: TomTidslinje()
 
         val grunnlagMedForrigePeriodeOgBehandlingTidslinje = tidslinjeMedVedtaksperioden.kombinerMed(
             grunnlagMedForrigePeriodeTidslinje,
