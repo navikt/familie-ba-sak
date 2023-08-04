@@ -32,6 +32,7 @@ import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.FØRSTE_STEG
 import no.nav.familie.ba.sak.task.OpprettTaskService
+import no.nav.familie.ba.sak.task.dto.ManuellOppgaveType
 import no.nav.familie.kontrakter.felles.Behandlingstema
 import no.nav.familie.kontrakter.felles.Tema
 import no.nav.familie.kontrakter.felles.oppgave.IdentGruppe
@@ -45,6 +46,8 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 import java.time.LocalDate
 
 @ExtendWith(MockKExtension::class)
@@ -125,6 +128,63 @@ class OppgaveServiceTest {
         assertThat(slot.captured.aktivFra).isEqualTo(LocalDate.now())
         assertThat(slot.captured.tema).isEqualTo(Tema.BAR)
         assertThat(slot.captured.beskrivelse).contains("https://barnetrygd.intern.nav.no/fagsak/$FAGSAK_ID")
+        assertThat(slot.captured.behandlesAvApplikasjon).isEqualTo("familie-ba-sak")
+    }
+
+    @ParameterizedTest
+    @EnumSource(ManuellOppgaveType::class)
+    fun `Opprett oppgave med manuell oppgavetype skal lage oppgave med behandlesAvApplikasjon satt for småbarnstillegg og åpen behandling, men ikke fødselshendelse`(manuellOppgaveType: ManuellOppgaveType) {
+        every { behandlingHentOgPersisterService.hent(BEHANDLING_ID) } returns lagTestBehandling(aktørId = AKTØR_ID_FAGSAK)
+        every { behandlingHentOgPersisterService.lagreEllerOppdater(any()) } returns lagTestBehandling()
+        every { oppgaveRepository.save(any()) } returns lagTestOppgave()
+        every {
+            oppgaveRepository.findByOppgavetypeAndBehandlingAndIkkeFerdigstilt(
+                any(),
+                any(),
+            )
+        } returns null
+        every { personidentService.hentAktør(any()) } returns Aktør(AKTØR_ID_FAGSAK)
+
+        every { arbeidsfordelingService.hentArbeidsfordelingPåBehandling(any()) } returns ArbeidsfordelingPåBehandling(
+            behandlingId = 1,
+            behandlendeEnhetId = ENHETSNUMMER,
+            behandlendeEnhetNavn = "enhet",
+        )
+
+        every { arbeidsfordelingPåBehandlingRepository.finnArbeidsfordelingPåBehandling(any()) } returns ArbeidsfordelingPåBehandling(
+            behandlingId = 1,
+            behandlendeEnhetId = ENHETSNUMMER,
+            behandlendeEnhetNavn = "enhet",
+        )
+
+        val slot = slot<OpprettOppgaveRequest>()
+        every { integrasjonClient.opprettOppgave(capture(slot)) } returns OppgaveResponse(OPPGAVE_ID.toLong())
+
+        oppgaveService.opprettOppgave(
+            behandlingId = BEHANDLING_ID,
+            oppgavetype = Oppgavetype.VurderLivshendelse,
+            fristForFerdigstillelse = FRIST_FERDIGSTILLELSE_BEH_SAK,
+            manuellOppgaveType = manuellOppgaveType,
+        )
+
+        assertThat(slot.captured.enhetsnummer).isEqualTo(ENHETSNUMMER)
+        assertThat(slot.captured.saksId).isEqualTo(FAGSAK_ID.toString())
+        assertThat(slot.captured.ident).isEqualTo(
+            OppgaveIdentV2(
+                ident = AKTØR_ID_FAGSAK,
+                gruppe = IdentGruppe.AKTOERID,
+            ),
+        )
+        assertThat(slot.captured.behandlingstema).isEqualTo(Behandlingstema.OrdinærBarnetrygd.value)
+        assertThat(slot.captured.fristFerdigstillelse).isEqualTo(LocalDate.now().plusDays(1))
+        assertThat(slot.captured.aktivFra).isEqualTo(LocalDate.now())
+        assertThat(slot.captured.tema).isEqualTo(Tema.BAR)
+        assertThat(slot.captured.beskrivelse).contains("https://barnetrygd.intern.nav.no/fagsak/$FAGSAK_ID")
+
+        when (manuellOppgaveType) {
+            ManuellOppgaveType.SMÅBARNSTILLEGG, ManuellOppgaveType.ÅPEN_BEHANDLING -> assertThat(slot.captured.behandlesAvApplikasjon).isEqualTo("familie-ba-sak")
+            ManuellOppgaveType.FØDSELSHENDELSE -> assertThat(slot.captured.behandlesAvApplikasjon).isNull()
+        }
     }
 
     @Test

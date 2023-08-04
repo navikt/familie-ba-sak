@@ -41,7 +41,8 @@ internal class StegServiceTest {
         tilgangService = mockk(relaxed = true),
         infotrygdFeedService = mockk(),
         satsendringService = satsendringService,
-        simuleringService = simuleringService,
+        personopplysningerService = mockk(),
+        automatiskBeslutningService = mockk(),
     )
 
     @BeforeEach

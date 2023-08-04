@@ -67,8 +67,6 @@ spec:
           cluster: prod-gcp
         - application: familie-ba-skatteetaten-api
           cluster: prod-gcp
-        - application: familie-ba-migrering
-          cluster: prod-gcp
         - application: familie-klage
           cluster: prod-gcp
         - application: familie-ba-statistikk
@@ -93,8 +91,6 @@ spec:
           cluster: prod-gcp
         - application: familie-tilbake
           cluster: prod-gcp
-        - application: familie-ba-migrering
-          cluster: prod-gcp
         - application: familie-oppdrag
           cluster: prod-fss
         - application: familie-klage
@@ -110,9 +106,10 @@ spec:
         - host: familie-ba-infotrygd-feed.prod-fss-pub.nais.io
         - host: sdw-wsrest.ecb.europa.eu
         - host: sentry.gc.nav.no
+        - host: data-api.ecb.europa.eu
   replicas:
-    min: 2
-    max: 4
+    min: 3
+    max: 5
     cpuThresholdPercentage: 50
   resources:
     limits:

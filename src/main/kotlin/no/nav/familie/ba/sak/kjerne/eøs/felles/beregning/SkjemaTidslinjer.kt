@@ -8,8 +8,8 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerSenereEnn
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerTidligereEnn
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerUendeligSent
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerUendeligTidlig
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonthEllerNull
 
 fun <S : PeriodeOgBarnSkjema<S>> S.tilTidslinje() = listOf(this).tilTidslinje()
@@ -18,8 +18,8 @@ internal fun <S : PeriodeOgBarnSkjema<S>> Iterable<S>.tilTidslinje() =
     tidslinje {
         this.map {
             Periode(
-                it.fom.tilTidspunktEllerTidligereEnn(it.tom),
-                it.tom.tilTidspunktEllerSenereEnn(it.fom),
+                it.fom.tilTidspunktEllerUendeligTidlig(),
+                it.tom.tilTidspunktEllerUendeligSent(),
                 it.utenPeriode(),
             )
         }
@@ -37,8 +37,8 @@ fun <S : PeriodeOgBarnSkjema<S>> Iterable<S>.tilSeparateTidslinjerForBarna(): Ma
                 .filter { it.barnAktører.contains(aktør) }
                 .map {
                     Periode(
-                        fraOgMed = it.fom.tilTidspunktEllerTidligereEnn(it.tom),
-                        tilOgMed = it.tom.tilTidspunktEllerSenereEnn(it.fom),
+                        fraOgMed = it.fom.tilTidspunktEllerUendeligTidlig(it.tom),
+                        tilOgMed = it.tom.tilTidspunktEllerUendeligSent(it.fom),
                         innhold = it.kopier(fom = null, tom = null, barnAktører = setOf(aktør)),
                     )
                 }

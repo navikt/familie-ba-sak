@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIEndretUtbetalingAn
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIKompetanseUtil
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIVilkårsvurderingUtil
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -23,7 +24,9 @@ class EndringstidspunktService(
     private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val endretUtbetalingAndelHentOgPersisterService: EndretUtbetalingAndelHentOgPersisterService,
     private val vilkårsvurderingService: VilkårsvurderingService,
+    private val persongrunnlagService: PersongrunnlagService,
 ) {
+    @Deprecated("Skal bruke VedtaksperiodeService.finnEndringstidspunktForBehandling()")
     fun finnEndringstidspunktForBehandling(behandlingId: Long): LocalDate {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
 
@@ -78,9 +81,14 @@ class EndringstidspunktService(
         val nåværendeVilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = inneværendeBehandlingId) ?: return null
         val forrigeVilkårsvurdering = vilkårsvurderingService.hentAktivForBehandling(behandlingId = forrigeBehandlingId) ?: return null
 
+        val personerIBehandling = persongrunnlagService.hentAktivThrows(behandlingId = inneværendeBehandlingId).personer.toSet()
+        val personerIForrigeBehandling = persongrunnlagService.hentAktivThrows(behandlingId = forrigeBehandlingId).personer.toSet()
+
         return EndringIVilkårsvurderingUtil.utledEndringstidspunktForVilkårsvurdering(
             nåværendePersonResultat = nåværendeVilkårsvurdering.personResultater,
             forrigePersonResultat = forrigeVilkårsvurdering.personResultater,
+            personerIBehandling = personerIBehandling,
+            personerIForrigeBehandling = personerIForrigeBehandling,
         )
     }
     private fun finnEndringstidspunktForEndretUtbetalingAndel(inneværendeBehandlingId: Long, forrigeBehandlingId: Long): YearMonth? {

@@ -212,26 +212,7 @@ fun hentNesteSteg(
 
     return when (behandlingÅrsak) {
         BehandlingÅrsak.TEKNISK_OPPHØR -> throw Feil("Teknisk opphør er ikke mulig å behandle lenger")
-        BehandlingÅrsak.MIGRERING -> {
-            when (utførendeStegType) {
-                REGISTRERE_PERSONGRUNNLAG -> {
-                    if (behandling.fagsak.type == FagsakType.INSTITUSJON) {
-                        REGISTRERE_INSTITUSJON_OG_VERGE
-                    } else {
-                        VILKÅRSVURDERING
-                    }
-                }
-
-                REGISTRERE_INSTITUSJON_OG_VERGE -> VILKÅRSVURDERING
-                VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
-                BEHANDLINGSRESULTAT -> IVERKSETT_MOT_OPPDRAG
-                IVERKSETT_MOT_OPPDRAG -> VENTE_PÅ_STATUS_FRA_ØKONOMI
-                VENTE_PÅ_STATUS_FRA_ØKONOMI -> FERDIGSTILLE_BEHANDLING
-                FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET
-                BEHANDLING_AVSLUTTET -> BEHANDLING_AVSLUTTET
-                else -> throw IllegalStateException("StegType ${utførendeStegType.displayName()} ugyldig ved migrering")
-            }
-        }
+        BehandlingÅrsak.MIGRERING -> throw Feil("Maskinell migrering er ikke mulig å behandle lenger")
 
         BehandlingÅrsak.HELMANUELL_MIGRERING -> {
             when (utførendeStegType) {
@@ -257,11 +238,7 @@ fun hentNesteSteg(
                 REGISTRERE_PERSONGRUNNLAG -> VILKÅRSVURDERING
                 VILKÅRSVURDERING -> BEHANDLINGSRESULTAT
                 BEHANDLINGSRESULTAT -> VURDER_TILBAKEKREVING
-                VURDER_TILBAKEKREVING -> if (!behandling.skalBehandlesAutomatisk) {
-                    SEND_TIL_BESLUTTER
-                } else {
-                    FERDIGSTILLE_BEHANDLING
-                }
+                VURDER_TILBAKEKREVING -> SEND_TIL_BESLUTTER
                 SEND_TIL_BESLUTTER -> BESLUTTE_VEDTAK
                 BESLUTTE_VEDTAK -> FERDIGSTILLE_BEHANDLING
                 FERDIGSTILLE_BEHANDLING -> BEHANDLING_AVSLUTTET

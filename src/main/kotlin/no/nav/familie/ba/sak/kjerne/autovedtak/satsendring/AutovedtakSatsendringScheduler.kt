@@ -6,21 +6,25 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 
 @Service
-class AutovedtakSatsendringScheduler(private val startSatsendring: StartSatsendring) {
+class AutovedtakSatsendringScheduler(
+    private val startSatsendring: StartSatsendring,
+) {
+    @Scheduled(cron = CRON_HVERT_10_MIN_UKEDAG)
+    fun triggSatsendringJuli2023() {
+        startSatsendring(1200)
+    }
 
-    @Scheduled(cron = CRON_KL_7_OG_14_UKEDAGER)
-    fun triggSatsendring() {
+    private fun startSatsendring(antallFagsaker: Int) {
         if (LeaderClient.isLeader() == true) {
-            logger.info("Satsendring trigges av schedulert jobb")
+            logger.info("Starter schedulert jobb for satsendring juli 2023")
             startSatsendring.startSatsendring(
-                antallFagsaker = 700,
-                satsTidspunkt = StartSatsendring.SATSENDRINGMÅNED_2023,
+                antallFagsaker = antallFagsaker,
             )
         }
     }
 
     companion object {
         val logger = LoggerFactory.getLogger(AutovedtakSatsendringScheduler::class.java)
-        const val CRON_KL_7_OG_14_UKEDAGER = "0 0 7,14 * * MON-FRI"
+        const val CRON_HVERT_10_MIN_UKEDAG = "0 */10 7-18 * * MON-FRI"
     }
 }

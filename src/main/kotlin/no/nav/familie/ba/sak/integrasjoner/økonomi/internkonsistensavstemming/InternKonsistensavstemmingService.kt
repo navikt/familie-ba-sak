@@ -4,6 +4,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
+import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -61,7 +62,7 @@ class InternKonsistensavstemmingService(
         }
 
         if (fagsakerMedFeil.isNotEmpty()) {
-            logger.error(
+            throw Feil(
                 "Tilkjent ytelse og utbetalingsoppdraget som er lagret i familie-oppdrag er inkonsistent" +
                     "\nSe secure logs for mer detaljer." +
                     "\nDette gjelder fagsakene $fagsakerMedFeil",

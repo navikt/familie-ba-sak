@@ -5,7 +5,6 @@ import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.ekstern.bisys.BisysService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
-import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
@@ -21,7 +20,6 @@ import java.time.LocalDate
 class PensjonService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val fagsakRepository: FagsakRepository,
-    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val personidentService: PersonidentService,
     private val tilkjentYtelseRepository: TilkjentYtelseRepository,
 ) {
@@ -41,8 +39,7 @@ class PensjonService(
 
     private fun hentBarnetrygdForRelatertPersonTilPensjon(personIdent: String, fraDato: LocalDate, forelderAktør: Aktør): List<BarnetrygdTilPensjon> {
         val aktør = personidentService.hentAktør(personIdent)
-        val andeler = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForAktør(aktør) // denne henter egentlige veldig mye, og burde være tilstrekkelig å kun hente aktør fra disse andelene
-        val fagsaker = andeler.map { it.tilkjentYtelse.behandling.fagsak }
+        val fagsaker = fagsakRepository.finnFagsakerSomHarAndelerForAktør(aktør)
             .filter { it.type == FagsakType.NORMAL } // skal kun ha normale fagsaker til med her
             .filter { it.aktør != forelderAktør } // trenger ikke å hente data til forelderen på nytt
             .distinct()

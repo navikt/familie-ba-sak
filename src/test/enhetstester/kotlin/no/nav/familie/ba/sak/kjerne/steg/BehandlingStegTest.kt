@@ -15,30 +15,6 @@ import org.junit.jupiter.api.assertThrows
 class BehandlingStegTest {
 
     @Test
-    fun `Tester rekkefølgen på behandling MIGRERING ved endring i utbetaling`() {
-        var steg = FØRSTE_STEG
-
-        listOf(
-            StegType.REGISTRERE_PERSONGRUNNLAG,
-            StegType.VILKÅRSVURDERING,
-            StegType.BEHANDLINGSRESULTAT,
-            StegType.IVERKSETT_MOT_OPPDRAG,
-            StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
-            StegType.FERDIGSTILLE_BEHANDLING,
-            StegType.BEHANDLING_AVSLUTTET,
-        ).forEach {
-            assertEquals(steg, it)
-            steg = hentNesteSteg(
-                behandling = lagBehandling(
-                    årsak = BehandlingÅrsak.MIGRERING,
-                ),
-                utførendeStegType = it,
-                endringerIUtbetaling = EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING,
-            )
-        }
-    }
-
-    @Test
     fun `Tester rekkefølgen på behandling ENDRE_MIGRERINGSDATO`() {
         var steg = FØRSTE_STEG
 
@@ -175,53 +151,17 @@ class BehandlingStegTest {
     }
 
     @Test
-    fun `Tester rekkefølgen på behandling av type migrering fra infotrygd`() {
-        var steg = FØRSTE_STEG
-
-        listOf(
-            StegType.REGISTRERE_PERSONGRUNNLAG,
-            StegType.VILKÅRSVURDERING,
-            StegType.BEHANDLINGSRESULTAT,
-            StegType.IVERKSETT_MOT_OPPDRAG,
-            StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
-            StegType.FERDIGSTILLE_BEHANDLING,
-            StegType.BEHANDLING_AVSLUTTET,
-        ).forEach {
-            assertEquals(steg, it)
-            assertNotEquals(StegType.JOURNALFØR_VEDTAKSBREV, it)
-            steg = hentNesteSteg(
+    fun `Tester at neste steg for migrering fra infotrygd kaster feil at denne ikke er mulig å behandle lenger`() {
+        val feil = assertThrows<Feil> {
+            hentNesteSteg(
                 behandling = lagBehandling(
                     behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
                     årsak = BehandlingÅrsak.MIGRERING,
                 ),
-                utførendeStegType = it,
+                utførendeStegType = FØRSTE_STEG,
             )
         }
-    }
-
-    @Test
-    fun `Tester rekkefølgen på behandling av type migrering fra infotrygd opphørt`() {
-        var steg = FØRSTE_STEG
-
-        listOf(
-            StegType.REGISTRERE_PERSONGRUNNLAG,
-            StegType.VILKÅRSVURDERING,
-            StegType.BEHANDLINGSRESULTAT,
-            StegType.IVERKSETT_MOT_OPPDRAG,
-            StegType.VENTE_PÅ_STATUS_FRA_ØKONOMI,
-            StegType.FERDIGSTILLE_BEHANDLING,
-            StegType.BEHANDLING_AVSLUTTET,
-        ).forEach {
-            assertEquals(steg, it)
-            assertNotEquals(StegType.JOURNALFØR_VEDTAKSBREV, it)
-            steg = hentNesteSteg(
-                behandling = lagBehandling(
-                    behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT,
-                    årsak = BehandlingÅrsak.MIGRERING,
-                ),
-                utførendeStegType = it,
-            )
-        }
+        assertEquals("Maskinell migrering er ikke mulig å behandle lenger", feil.message)
     }
 
     @Test

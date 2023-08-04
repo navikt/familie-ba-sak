@@ -3,7 +3,7 @@ package no.nav.familie.ba.sak.sikkerhet
 import no.nav.familie.ba.sak.common.RolleTilgangskontrollFeil
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.RolleConfig
-import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollClient
+import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
@@ -17,7 +17,7 @@ class TilgangService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val persongrunnlagService: PersongrunnlagService,
     private val rolleConfig: RolleConfig,
-    private val familieIntegrasjonerTilgangskontrollClient: FamilieIntegrasjonerTilgangskontrollClient,
+    private val familieIntegrasjonerTilgangskontrollService: FamilieIntegrasjonerTilgangskontrollService,
     private val cacheManager: CacheManager,
     private val auditLogger: AuditLogger,
 ) {
@@ -52,10 +52,12 @@ class TilgangService(
         }
     }
 
+    /**
+     * sjekkTilgangTilPersoner er cachet i [familieIntegrasjonerTilgangskontrollService]
+     */
     private fun harTilgangTilPersoner(personIdenter: List<String>): Boolean {
-        return harSaksbehandlerTilgang("validerTilgangTilPersoner", personIdenter.distinct()) {
-            familieIntegrasjonerTilgangskontrollClient.sjekkTilgangTilPersoner(personIdenter).harTilgang
-        }
+        return familieIntegrasjonerTilgangskontrollService.sjekkTilgangTilPersoner(personIdenter)
+            .all { it.value.harTilgang }
     }
 
     fun validerTilgangTilBehandling(behandlingId: Long, event: AuditLoggerEvent) {

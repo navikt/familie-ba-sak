@@ -8,6 +8,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.skalTaMedBarnFraForrigeBehandling
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import org.springframework.stereotype.Service
 
@@ -33,7 +34,7 @@ class PersonopplysningGrunnlagForNyBehandlingService(
             if (forrigeBehandlingSomErVedtatt == null) {
                 throw Feil("Vi kan ikke kjøre satsendring dersom det ikke finnes en tidligere behandling. Behandling: ${behandling.id}")
             }
-            opprettKopiAvPersonopplysningGrunnlag(behandling, forrigeBehandlingSomErVedtatt)
+            opprettKopiAvPersonopplysningGrunnlag(behandling, forrigeBehandlingSomErVedtatt, søkerIdent)
         } else {
             opprettPersonopplysningGrunnlag(behandling, forrigeBehandlingSomErVedtatt, søkerIdent, barnasIdenter)
         }
@@ -42,9 +43,15 @@ class PersonopplysningGrunnlagForNyBehandlingService(
     private fun opprettKopiAvPersonopplysningGrunnlag(
         behandling: Behandling,
         forrigeBehandlingSomErVedtatt: Behandling,
+        søkerIdent: String,
     ) {
+        val søkerAktør = personidentService.hentOgLagreAktør(søkerIdent, true)
+
+        val barnaAktør = finnBarnMedTilkjentYtelseIForrigeBehandling(behandling, forrigeBehandlingSomErVedtatt)
+
         val personopplysningGrunnlag =
-            persongrunnlagService.hentAktivThrows(forrigeBehandlingSomErVedtatt.id).tilKopiForNyBehandling(behandling)
+            persongrunnlagService.hentAktivThrows(forrigeBehandlingSomErVedtatt.id)
+                .tilKopiForNyBehandling(behandling, listOf(søkerAktør).plus(barnaAktør))
         persongrunnlagService.lagreOgDeaktiverGammel(personopplysningGrunnlag)
     }
 
@@ -62,11 +69,7 @@ class PersonopplysningGrunnlagForNyBehandlingService(
             ?: Målform.NB
 
         val barnMedTilkjentYtelseIForrigeBehandling =
-            if (skalTaMedBarnFraForrigeBehandling(behandling) && forrigeBehandlingSomErVedtatt != null) {
-                beregningService.finnBarnFraBehandlingMedTilkjentYtelse(behandlingId = forrigeBehandlingSomErVedtatt.id)
-            } else {
-                emptyList()
-            }
+            finnBarnMedTilkjentYtelseIForrigeBehandling(behandling, forrigeBehandlingSomErVedtatt)
 
         persongrunnlagService.hentOgLagreSøkerOgBarnINyttGrunnlag(
             aktør = aktør,
@@ -76,4 +79,14 @@ class PersonopplysningGrunnlagForNyBehandlingService(
             målform = målform,
         )
     }
+
+    private fun finnBarnMedTilkjentYtelseIForrigeBehandling(
+        behandling: Behandling,
+        forrigeBehandlingSomErVedtatt: Behandling?,
+    ): List<Aktør> =
+        if (skalTaMedBarnFraForrigeBehandling(behandling) && forrigeBehandlingSomErVedtatt != null) {
+            beregningService.finnBarnFraBehandlingMedTilkjentYtelse(behandlingId = forrigeBehandlingSomErVedtatt.id)
+        } else {
+            emptyList()
+        }
 }

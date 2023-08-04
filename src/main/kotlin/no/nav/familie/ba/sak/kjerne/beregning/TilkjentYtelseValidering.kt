@@ -18,6 +18,8 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonEnkel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.barn
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.søker
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.outerJoin
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilBrevTekst
 import java.math.BigDecimal
@@ -56,32 +58,36 @@ object TilkjentYtelseValidering {
             when {
                 forrigeAndel == null && nåværendeAndel != null ->
                     throw Feil("Satsendring kan ikke legge til en andel som ikke var der i forrige behandling")
+
                 forrigeAndel != null && nåværendeAndel == null ->
                     throw Feil("Satsendring kan ikke fjerne en andel som fantes i forrige behandling")
+
                 forrigeAndel != null && forrigeAndel.prosent != nåværendeAndel?.prosent ->
                     throw Feil("Satsendring kan ikke endre på prosenten til en andel")
+
+                forrigeAndel != null && forrigeAndel.type != nåværendeAndel?.type ->
+                    throw Feil("Satsendring kan ikke endre YtelseType til en andel")
+
                 else -> false
             }
         }.values.map { it.perioder() } // Må kalle på .perioder() for at feilene over skal bli kastet
     }
 
     fun finnAktørIderMedUgyldigEtterbetalingsperiode(
-        forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-        andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
+        forrigeAndelerTilkjentYtelse: Collection<AndelTilkjentYtelse>,
+        andelerTilkjentYtelse: Collection<AndelTilkjentYtelse>,
         kravDato: LocalDateTime,
-    ): List<String> {
+    ): List<Aktør> {
         val gyldigEtterbetalingFom = hentGyldigEtterbetalingFom(kravDato)
 
-        val aktørIder =
-            hentAktørIderForDenneOgForrigeBehandling(andelerTilkjentYtelse, forrigeAndelerTilkjentYtelse)
+        val aktører = unikeAntører(andelerTilkjentYtelse, forrigeAndelerTilkjentYtelse)
 
         val personerMedUgyldigEtterbetaling =
-            aktørIder.mapNotNull { aktørId ->
-                val andelerTilkjentYtelseForPerson = andelerTilkjentYtelse.filter { it.aktør.aktørId == aktørId }
-                val forrigeAndelerTilkjentYtelseForPerson =
-                    forrigeAndelerTilkjentYtelse.filter { it.aktør.aktørId == aktørId }
+            aktører.mapNotNull { aktør ->
+                val andelerTilkjentYtelseForPerson = andelerTilkjentYtelse.filter { it.aktør == aktør }
+                val forrigeAndelerTilkjentYtelseForPerson = forrigeAndelerTilkjentYtelse.filter { it.aktør == aktør }
 
-                aktørId.takeIf {
+                aktør.takeIf {
                     erUgyldigEtterbetalingPåPerson(
                         forrigeAndelerTilkjentYtelseForPerson,
                         andelerTilkjentYtelseForPerson,
@@ -93,12 +99,12 @@ object TilkjentYtelseValidering {
         return personerMedUgyldigEtterbetaling
     }
 
-    fun hentAktørIderForDenneOgForrigeBehandling(
-        andelerTilkjentYtelse: List<AndelTilkjentYtelse>,
-        forrigeAndelerTilkjentYtelse: List<AndelTilkjentYtelse>?,
-    ): Set<String> {
-        val aktørIderFraAndeler = andelerTilkjentYtelse.map { it.aktør.aktørId }
-        val aktøerIderFraForrigeAndeler = forrigeAndelerTilkjentYtelse?.map { it.aktør.aktørId } ?: emptyList()
+    private fun unikeAntører(
+        andelerTilkjentYtelse: Collection<AndelTilkjentYtelse>,
+        forrigeAndelerTilkjentYtelse: Collection<AndelTilkjentYtelse>,
+    ): Set<Aktør> {
+        val aktørIderFraAndeler = andelerTilkjentYtelse.map { it.aktør }
+        val aktøerIderFraForrigeAndeler = forrigeAndelerTilkjentYtelse.map { it.aktør }
         return (aktørIderFraAndeler + aktøerIderFraForrigeAndeler).toSet()
     }
 
