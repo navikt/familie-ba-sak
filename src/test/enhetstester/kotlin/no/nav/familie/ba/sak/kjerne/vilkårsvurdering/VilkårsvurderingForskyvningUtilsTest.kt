@@ -32,7 +32,6 @@ import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertDoesNotThrow
 import java.time.LocalDate
 import java.time.Month
 import java.time.YearMonth
@@ -252,21 +251,20 @@ class VilkårsvurderingForskyvningUtilsTest {
     }
 
     @Test
-    fun `Skal ikke kaste feil dersom vi ikke sender med noen vilkårresultater`() {
+    fun `Skal gi tom liste og ikke kaste feil dersom vi ikke sender med noen vilkårresultater`() {
         val barn = lagPerson(type = PersonType.BARN, fødselsdato = LocalDate.of(2022, Month.DECEMBER, 1).minusYears(18))
 
-        assertDoesNotThrow {
-            emptyList<VilkårResultat>().tilForskjøvetTidslinjeForOppfyltVilkår(
-                vilkår = Vilkår.UNDER_18_ÅR,
-                barn.fødselsdato,
-            )
-        }
-        assertDoesNotThrow {
-            emptyList<VilkårResultat>().tilForskjøvetTidslinje(
-                vilkår = Vilkår.UNDER_18_ÅR,
-                barn.fødselsdato,
-            )
-        }
+        val forskjøvedeOppfylteVilkårTomListe = emptyList<VilkårResultat>().tilForskjøvetTidslinjeForOppfyltVilkår(
+            vilkår = Vilkår.UNDER_18_ÅR,
+            fødselsdato = barn.fødselsdato,
+        ).perioder()
+        Assertions.assertEquals(forskjøvedeOppfylteVilkårTomListe.size, 0)
+
+        val forskjøvedeVilkårTomListe = emptyList<VilkårResultat>().tilForskjøvetTidslinje(
+            vilkår = Vilkår.UNDER_18_ÅR,
+            fødselsdato = barn.fødselsdato,
+        ).perioder()
+        Assertions.assertEquals(forskjøvedeVilkårTomListe.size, 0)
     }
 
     @Test
