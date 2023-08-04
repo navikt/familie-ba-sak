@@ -18,6 +18,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.beregning.domene.InternPeriodeOvergangsstønad
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.EndretUtbetalingAndel
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
+import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
@@ -27,6 +28,7 @@ import java.time.LocalDate
 
 class VedtaksperiodeMedBegrunnelserStepDefinition {
 
+    private var fagsaker: Map<Long, Fagsak> = emptyMap()
     private var behandlinger = mutableMapOf<Long, Behandling>()
     private var behandlingTilForrigeBehandling = mutableMapOf<Long, Long?>()
     private var vedtaksliste = mutableListOf<Vedtak>()
@@ -42,9 +44,14 @@ class VedtaksperiodeMedBegrunnelserStepDefinition {
 
     private var gjeldendeBehandlingId: Long? = null
 
+    @Gitt("følgende fagsaker")
+    fun `følgende fagsaker`(dataTable: DataTable) {
+        fagsaker = lagFagsaker(dataTable)
+    }
+
     @Gitt("følgende vedtak")
     fun `følgende vedtak`(dataTable: DataTable) {
-        lagVedtak(dataTable, behandlinger, behandlingTilForrigeBehandling, vedtaksliste)
+        lagVedtak(dataTable, behandlinger, behandlingTilForrigeBehandling, vedtaksliste, fagsaker)
     }
 
     @Og("følgende persongrunnlag")

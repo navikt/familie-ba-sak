@@ -36,6 +36,8 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivit
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.SøkersAktivitet
+import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
@@ -54,17 +56,29 @@ fun Map<Long, Behandling>.finnBehandling(behandlingId: Long) =
 fun Map<Long, PersonopplysningGrunnlag>.finnPersonGrunnlagForBehandling(behandlingId: Long): PersonopplysningGrunnlag =
     this[behandlingId] ?: error("Finner ikke persongrunnlag for behandling med id $behandlingId")
 
+fun lagFagsaker(dataTable: DataTable) = dataTable.asMaps().map { rad ->
+    Fagsak(
+        id = parseLong(Domenebegrep.FAGSAK_ID, rad),
+        type = parseValgfriEnum<FagsakType>(Domenebegrep.FAGSAK_TYPE, rad) ?: FagsakType.NORMAL,
+        aktør = randomAktør(),
+    )
+}.associateBy { it.id }
+
 fun lagVedtak(
     dataTable: DataTable,
     behandlinger: MutableMap<Long, Behandling>,
     behandlingTilForrigeBehandling: MutableMap<Long, Long?>,
     vedtaksListe: MutableList<Vedtak>,
+    fagsaker: Map<Long, Fagsak>,
 ) {
-    val fagsak = defaultFagsak()
     behandlinger.putAll(
-        dataTable.groupByBehandlingId()
-            .map { lagBehandling(fagsak = fagsak).copy(id = it.key) }
-            .associateBy { it.id },
+        dataTable.asMaps().map { rad ->
+            val behandlingId = parseLong(Domenebegrep.BEHANDLING_ID, rad)
+            val fagsakId = parseValgfriLong(Domenebegrep.FAGSAK_ID, rad)
+            val fagsak = fagsaker[fagsakId] ?: defaultFagsak()
+
+            lagBehandling(fagsak = fagsak).copy(id = behandlingId)
+        }.associateBy { it.id },
     )
     behandlingTilForrigeBehandling.putAll(
         dataTable.asMaps().associate { rad ->
