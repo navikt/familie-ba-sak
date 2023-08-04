@@ -133,7 +133,7 @@ class ForvalterService(
     @OptIn(InternalCoroutinesApi::class) // for å få lov til å hente CancellationException
     suspend fun finnOgLoggUtbetalingerOver100Prosent(callId: String) {
         var slice = fagsakRepository.finnLøpendeFagsaker(PageRequest.of(0, 10000))
-        val scope = CoroutineScope(Dispatchers.Default)
+        val scope = CoroutineScope(Dispatchers.Default.limitedParallelism(10))
         val deffereds = mutableListOf<Deferred<Unit>>()
 
         // coroutineScope {
