@@ -83,4 +83,7 @@ enum class FagsakType {
     NORMAL,
     BARN_ENSLIG_MINDREÅRIG,
     INSTITUSJON,
+    ;
+
+    fun erBarnSøker() = this == BARN_ENSLIG_MINDREÅRIG || this == INSTITUSJON
 }
