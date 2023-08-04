@@ -32,14 +32,14 @@ class TilkjentYtelseValideringService(
     fun validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(behandling: Behandling) {
         val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandling.id)
 
-            val søkerOgBarn = persongrunnlagService.hentSøkerOgBarnPåBehandlingThrows(behandlingId = behandling.id)
+        val søkerOgBarn = persongrunnlagService.hentSøkerOgBarnPåBehandlingThrows(behandlingId = behandling.id)
 
-            val barnMedAndreRelevanteTilkjentYtelser = søkerOgBarn.barn().map {
-                Pair(
-                    it,
-                    beregningService.hentRelevanteTilkjentYtelserForBarn(it.aktør, behandling.fagsak.id),
-                )
-            }
+        val barnMedAndreRelevanteTilkjentYtelser = søkerOgBarn.barn().map {
+            Pair(
+                it,
+                beregningService.hentRelevanteTilkjentYtelserForBarn(it.aktør, behandling.fagsak.id),
+            )
+        }
 
         secureLogger.info("Andeler tilkjent ytelse i inneværende behandling: " + tilkjentYtelse.andelerTilkjentYtelse)
         secureLogger.info(
@@ -48,12 +48,11 @@ class TilkjentYtelseValideringService(
             },
         )
 
-            TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
-                behandlendeBehandlingTilkjentYtelse = tilkjentYtelse,
-                barnMedAndreRelevanteTilkjentYtelser = barnMedAndreRelevanteTilkjentYtelser,
-                søkerOgBarn = søkerOgBarn,
-            )
-        }
+        TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
+            behandlendeBehandlingTilkjentYtelse = tilkjentYtelse,
+            barnMedAndreRelevanteTilkjentYtelser = barnMedAndreRelevanteTilkjentYtelser,
+            søkerOgBarn = søkerOgBarn,
+        )
     }
 
     fun validerIngenAndelerTilkjentYtelseMedSammeOffsetIBehandling(behandlingId: Long) {

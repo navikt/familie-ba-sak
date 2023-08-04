@@ -2,7 +2,6 @@ package no.nav.familie.ba.sak.kjerne.arbeidsfordeling
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagsystem
-import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagsystem
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.IntegrasjonClient
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.domene.Arbeidsfordelingsenhet
 import no.nav.familie.ba.sak.integrasjoner.oppgave.OppgaveService
@@ -176,16 +175,16 @@ class ArbeidsfordelingService(
     }
 
     fun hentArbeidsfordelingsenhet(behandling: Behandling): Arbeidsfordelingsenhet {
-        val søker = identMedAdressebeskyttelse(behandling.fagsak.aktør)
+        val søker: IdentMedAdressebeskyttelse = identMedAdressebeskyttelse(behandling.fagsak.aktør)
 
-        val personinfoliste = personopplysningGrunnlagRepository.finnSøkerOgBarnAktørerTilAktiv(behandling.id)
+        val personinfoliste: List<IdentMedAdressebeskyttelse> = personopplysningGrunnlagRepository.finnSøkerOgBarnAktørerTilAktiv(behandling.id)
             .barn()
-            .map {
+            .mapNotNull {
                 try {
                     identMedAdressebeskyttelse(it.aktør)
                 } catch (e: PdlPersonKanIkkeBehandlesIFagsystem) {
                     logger.warn("Ignorerer barn fra hentArbeidsfordelingsenhet for behandling ${behandling.id} : ${e.årsak}")
-                    secureLogger.warn("Ignorerer barn ${barn.aktør.aktivFødselsnummer()} hentArbeidsfordelingsenhet for behandling ${behandling.id}: ${e.årsak}")
+                    secureLogger.warn("Ignorerer barn ${it.aktør.aktivFødselsnummer()} hentArbeidsfordelingsenhet for behandling ${behandling.id}: ${e.årsak}")
                     null
                 }
             }.plus(søker)
