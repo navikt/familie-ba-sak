@@ -24,6 +24,7 @@ import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.validerAtDetFinnesDeltBostedEndringerMedSammeProsentForUtvidedeEndringer
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.validerBarnasVilkår
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.barn
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.steg.BehandlingSteg
 import no.nav.familie.ba.sak.kjerne.steg.EndringerIUtbetalingForBehandlingSteg.ENDRING_I_UTBETALING
@@ -54,15 +55,14 @@ class BehandlingsresultatSteg(
     override fun preValiderSteg(behandling: Behandling, stegService: StegService?) {
         if (!behandling.erSatsendring() && behandling.skalBehandlesAutomatisk) return
 
+        val søkerOgBarn = persongrunnlagService.hentSøkerOgBarnPåBehandlingThrows(behandling.id)
         if (behandling.type != BehandlingType.TEKNISK_ENDRING && behandling.type != BehandlingType.MIGRERING_FRA_INFOTRYGD_OPPHØRT) {
             val vilkårsvurdering = vilkårService.hentVilkårsvurderingThrows(behandlingId = behandling.id)
-            val barna = persongrunnlagService.hentBarna(behandling)
 
-            validerBarnasVilkår(barna, vilkårsvurdering)
+            validerBarnasVilkår(søkerOgBarn.barn(), vilkårsvurdering)
         }
 
         val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandling.id)
-        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandling.id)
 
         if (behandling.erSatsendring()) {
             validerSatsendring(tilkjentYtelse)
@@ -70,7 +70,7 @@ class BehandlingsresultatSteg(
 
         validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
             tilkjentYtelse = tilkjentYtelse,
-            personopplysningGrunnlag = personopplysningGrunnlag,
+            søkerOgBarn = søkerOgBarn,
         )
 
         val endreteUtbetalingerMedAndeler = andelerTilkjentYtelseOgEndreteUtbetalingerService
