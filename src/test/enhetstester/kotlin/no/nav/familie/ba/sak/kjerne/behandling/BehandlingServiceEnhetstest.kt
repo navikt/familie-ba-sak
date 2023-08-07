@@ -106,7 +106,7 @@ class BehandlingServiceEnhetstest {
         every { andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(any()) } returns listOf(
             lagAndelTilkjentYtelse(YearMonth.now().minusYears(1), YearMonth.now().minusMonths(6)),
             lagAndelTilkjentYtelse(YearMonth.now().minusMonths(6), YearMonth.now().minusMonths(3)),
-            lagAndelTilkjentYtelse(YearMonth.now().minusMonths(3), YearMonth.now()),
+            lagAndelTilkjentYtelse(YearMonth.now().minusMonths(3), YearMonth.now().minusMonths(1)),
         )
         assertThat(behandlingService.erLøpende(behandling)).isFalse
     }
