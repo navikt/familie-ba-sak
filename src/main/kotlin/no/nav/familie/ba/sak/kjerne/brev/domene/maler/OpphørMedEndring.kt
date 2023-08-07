@@ -1,8 +1,6 @@
 package no.nav.familie.ba.sak.kjerne.brev.domene.maler
 
-import no.nav.familie.ba.sak.common.tilDagMånedÅr
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.brevperioder.BrevPeriode
-import java.time.LocalDate
 
 data class OpphørMedEndring(
     override val mal: Brevmal,
@@ -35,18 +33,12 @@ data class OpphørMedEndring(
                     refusjonEosAvklart = refusjonEosAvklart,
                     refusjonEosUavklart = refusjonEosUavklart,
                 ),
-                flettefelter = object : FlettefelterForDokument {
-                    @Deprecated("Skal bort når vi har lagt til støtte for å sende inn felttefelter som types i delmaler i familie-brev")
-                    val perioderMedRefusjonEosAvklart: Flettefelt = refusjonEosAvklart?.perioderMedRefusjonEosAvklart
-
-                    @Deprecated("Skal bort når vi har lagt til støtte for å sende inn felttefelter som types i delmaler i familie-brev")
-                    val perioderMedRefusjonEosUavklart: Flettefelt = refusjonEosUavklart?.perioderMedRefusjonEosUavklart
-                    override val brevOpprettetDato = flettefelt(LocalDate.now().tilDagMånedÅr())
-                    override val navn = flettefelt(vedtakFellesfelter.søkerNavn)
-                    override val fodselsnummer = flettefelt(vedtakFellesfelter.søkerFødselsnummer)
-                    override val organisasjonsnummer = flettefelt(vedtakFellesfelter.organisasjonsnummer)
-                    override val gjelder = flettefelt(vedtakFellesfelter.gjelder)
-                },
+                flettefelter = FlettefelterForDokumentImpl(
+                    gjelder = flettefelt(vedtakFellesfelter.gjelder),
+                    navn = flettefelt(vedtakFellesfelter.søkerNavn),
+                    fodselsnummer = flettefelt(vedtakFellesfelter.søkerFødselsnummer),
+                    organisasjonsnummer = flettefelt(vedtakFellesfelter.organisasjonsnummer),
+                ),
                 perioder = vedtakFellesfelter.perioder,
             ),
         )
