@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombiner
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.slåSammenLike
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
@@ -68,6 +69,8 @@ object VilkårsvurderingForskyvningUtils {
     }
 
     fun Collection<VilkårResultat>.tilForskjøvetTidslinjeForOppfyltVilkår(vilkår: Vilkår, fødselsdato: LocalDate?): Tidslinje<VilkårResultat, Måned> {
+        if (this.isEmpty()) return TomTidslinje()
+
         val tidslinje = this.lagForskjøvetTidslinjeForOppfylteVilkår(vilkår)
 
         return tidslinje.beskjærPå18ÅrHvisUnder18ÅrVilkår(vilkår = vilkår, fødselsdato = fødselsdato)

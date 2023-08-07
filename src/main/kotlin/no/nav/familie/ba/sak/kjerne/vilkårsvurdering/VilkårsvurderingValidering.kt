@@ -7,21 +7,22 @@ import no.nav.familie.ba.sak.ekstern.restDomene.RestVilkårResultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.VilkårsvurderingTidslinjer
 import no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering.harBlandetRegelverk
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonEnkel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.søker
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkårsvurdering
 import java.time.LocalDate
 
 fun validerIngenVilkårSattEtterSøkersDød(
-    personopplysningGrunnlag: PersonopplysningGrunnlag,
+    søkerOgBarn: List<PersonEnkel>,
     vilkårsvurdering: Vilkårsvurdering,
-
 ) {
+    val søker = søkerOgBarn.søker()
     val vilkårResultaterSøker =
-        vilkårsvurdering.hentPersonResultaterTil(personopplysningGrunnlag.søker.aktør.aktørId)
-    val søkersDød = personopplysningGrunnlag.søker.dødsfall?.dødsfallDato ?: LocalDate.now()
+        vilkårsvurdering.hentPersonResultaterTil(søker.aktør.aktørId)
+    val søkersDød = søker.dødsfallDato ?: LocalDate.now()
 
     val vilkårSomEnderEtterSøkersDød =
         vilkårResultaterSøker
@@ -45,10 +46,10 @@ fun validerIngenVilkårSattEtterSøkersDød(
 }
 
 fun validerIkkeBlandetRegelverk(
-    personopplysningGrunnlag: PersonopplysningGrunnlag,
+    søkerOgBarn: List<PersonEnkel>,
     vilkårsvurdering: Vilkårsvurdering,
 ) {
-    val vilkårsvurderingTidslinjer = VilkårsvurderingTidslinjer(vilkårsvurdering, personopplysningGrunnlag)
+    val vilkårsvurderingTidslinjer = VilkårsvurderingTidslinjer(vilkårsvurdering, søkerOgBarn)
     if (vilkårsvurderingTidslinjer.harBlandetRegelverk()) {
         throw FunksjonellFeil(
             melding = "Det er forskjellig regelverk for en eller flere perioder for søker eller barna",
@@ -57,12 +58,12 @@ fun validerIkkeBlandetRegelverk(
 }
 
 fun valider18ÅrsVilkårEksistererFraFødselsdato(
-    personopplysningGrunnlag: PersonopplysningGrunnlag,
+    søkerOgBarn: List<PersonEnkel>,
     vilkårsvurdering: Vilkårsvurdering,
     behandling: Behandling,
 ) {
     vilkårsvurdering.personResultater.forEach { personResultat ->
-        val person = personopplysningGrunnlag.personer.find { it.aktør == personResultat.aktør }
+        val person = søkerOgBarn.find { it.aktør == personResultat.aktør }
         if (person?.type == PersonType.BARN && !personResultat.vilkårResultater.finnesUnder18VilkårFraFødselsdato(person.fødselsdato)) {
             if (behandling.erSatsendring() || behandling.opprettetÅrsak.erOmregningsårsak()) {
                 secureLogger.warn(
