@@ -9,8 +9,8 @@ import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
 import no.nav.familie.ba.sak.common.randomAktør
-import no.nav.familie.ba.sak.common.tilPersonEnkelSøkerOgBarn
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.common.tilPersonEnkelSøkerOgBarn
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.IntegrasjonClientMock.Companion.mockSjekkTilgang
 import no.nav.familie.ba.sak.config.RolleConfig
@@ -79,7 +79,6 @@ class TilgangServiceTest {
         every { persongrunnlagService.hentSøkerOgBarnPåBehandling(behandling.id) } returns
             personopplysningGrunnlag.tilPersonEnkelSøkerOgBarn()
         cacheManager.clearAllCaches()
-
     }
 
     @AfterEach
