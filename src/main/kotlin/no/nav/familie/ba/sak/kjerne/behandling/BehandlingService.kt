@@ -105,7 +105,7 @@ class BehandlingService(
                     behandlingSøknadsinfoService.lagreNedSøknadsinfo(
                         mottattDato = nyBehandling.søknadMottattDato,
                         søknadsinfo = nyBehandling.søknadsinfo,
-                        behandling = behandling
+                        behandling = behandling,
                     )
                 }
                 saksstatistikkEventPublisher.publiserBehandlingsstatistikk(it.id)

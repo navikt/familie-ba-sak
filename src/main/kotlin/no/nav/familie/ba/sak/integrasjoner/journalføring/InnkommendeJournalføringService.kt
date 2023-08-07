@@ -52,7 +52,7 @@ class InnkommendeJournalføringService(
     private val loggService: LoggService,
     private val stegService: StegService,
     private val journalføringMetrikk: JournalføringMetrikk,
-    private val behandlingSøknadsinfoService: BehandlingSøknadsinfoService
+    private val behandlingSøknadsinfoService: BehandlingSøknadsinfoService,
 ) {
 
     fun hentDokument(journalpostId: String, dokumentInfoId: String): ByteArray {
@@ -172,7 +172,7 @@ class InnkommendeJournalføringService(
                         Søknadsinfo(
                             journalpostId = journalpost.journalpostId,
                             brevkode = it,
-                            erDigital = journalpost.kanal == NAV_NO
+                            erDigital = journalpost.kanal == NAV_NO,
                         )
                     },
                     fagsakType = request.fagsakType,
@@ -186,8 +186,8 @@ class InnkommendeJournalføringService(
         val erSøknad = brevkode == Søknadstype.ORDINÆR.søknadskode || brevkode == Søknadstype.UTVIDET.søknadskode
 
         if (erSøknad && !request.opprettOgKnyttTilNyBehandling) {
-            behandlinger.forEach { behandling ->
-                lagreNedSøknadsinfoKnyttetTilTidligereBehandling(journalpost, brevkode!!, behandling)
+            behandlinger.forEach { tidligereBehandling ->
+                lagreNedSøknadsinfoKnyttetTilBehandling(journalpost, brevkode!!, tidligereBehandling)
             }
         }
 
@@ -229,7 +229,7 @@ class InnkommendeJournalføringService(
                         Søknadsinfo(
                             journalpostId = journalpost.journalpostId,
                             brevkode = it,
-                            erDigital = journalpost.kanal == NAV_NO
+                            erDigital = journalpost.kanal == NAV_NO,
                         )
                     },
                 )
@@ -366,19 +366,19 @@ class InnkommendeJournalføringService(
         }
     }
 
-    private fun lagreNedSøknadsinfoKnyttetTilTidligereBehandling(
+    private fun lagreNedSøknadsinfoKnyttetTilBehandling(
         journalpost: Journalpost,
         brevkode: String,
-        behandling: Behandling
+        behandling: Behandling,
     ) {
         behandlingSøknadsinfoService.lagreNedSøknadsinfo(
             mottattDato = journalpost.datoMottatt?.toLocalDate() ?: LocalDate.now(),
             søknadsinfo = Søknadsinfo(
                 journalpostId = journalpost.journalpostId,
                 brevkode = brevkode,
-                erDigital = journalpost.kanal == NAV_NO
+                erDigital = journalpost.kanal == NAV_NO,
             ),
-            behandling = behandling
+            behandling = behandling,
         )
     }
 

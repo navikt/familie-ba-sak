@@ -190,5 +190,5 @@ data class RestEndreBehandlingstema(
 data class Søknadsinfo(
     val journalpostId: String,
     val brevkode: String,
-    val erDigital: Boolean
+    val erDigital: Boolean,
 )

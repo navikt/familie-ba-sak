@@ -102,7 +102,7 @@ class InnkommendeJournalføringServiceTest(
     }
 
     @Test
-    fun `journalfør skal lagre ned søknadsinfo også ved tilknyttning til tidligere behandling`() {
+    fun `journalfør skal lagre ned søknadsinfo tilknyttet en tidligere behandling`() {
         val søkerFnr = randomFnr()
         val førsteSøknad = lagMockRestJournalføring(bruker = NavnOgIdent("Mock", søkerFnr))
         val fagsakId = innkommendeJournalføringService.journalfør(førsteSøknad, "123", "mockEnhet", "1")
@@ -112,7 +112,7 @@ class InnkommendeJournalføringServiceTest(
         val nySøknad2DagerSenere = førsteSøknad.copy(
             datoMottatt = førsteSøknad.datoMottatt!!.plusDays(2),
             opprettOgKnyttTilNyBehandling = false,
-            tilknyttedeBehandlingIder = listOf(behandling!!.id.toString())
+            tilknyttedeBehandlingIder = listOf(behandling!!.id.toString()),
         )
 
         innkommendeJournalføringService.journalfør(nySøknad2DagerSenere, "124", "mockEnhet", "2")

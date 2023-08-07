@@ -29,7 +29,7 @@ class SøknadsstatistikkController(
     @GetMapping(path = ["antallSoknader"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentSøknadsstatistikkForPeriode(
         @RequestParam fom: String?,
-        @RequestParam tom: String?
+        @RequestParam tom: String?,
     ): ResponseEntity<Ressurs<SøknadsstatistikkForPeriode>> {
         return try {
             val fomDato = fom?.let { LocalDate.parse(it) } ?: LocalDate.now().minusMonths(4).withDayOfMonth(1)
@@ -37,7 +37,6 @@ class SøknadsstatistikkController(
 
             logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter søknadsstatistikk for periode $fomDato $tomDato")
             RessursUtils.ok(behandlingSøknadsinfoService.hentSøknadsstatistikk(fomDato, tomDato))
-
         } catch (e: DateTimeParseException) {
             RessursUtils.badRequest("Ugyldig dato", e)
         }

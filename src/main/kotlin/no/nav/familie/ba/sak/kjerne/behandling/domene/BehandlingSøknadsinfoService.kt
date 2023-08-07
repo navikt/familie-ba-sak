@@ -50,14 +50,14 @@ class BehandlingSøknadsinfoService(
                 totalt = antallOrdinære,
                 papirsøknader = antallOrdinære - antallOrdinæreDigitale,
                 digitaleSøknader = antallOrdinæreDigitale,
-                digitaliseringsgrad = antallOrdinæreDigitale / antallOrdinære.toFloat()
+                digitaliseringsgrad = antallOrdinæreDigitale / antallOrdinære.toFloat(),
             ),
             utvidetBarnetrygd = AntallSøknader(
                 totalt = antallUtvidet,
                 papirsøknader = antallUtvidet - antallUtvidetDigitale,
                 digitaleSøknader = antallUtvidetDigitale,
-                digitaliseringsgrad = antallUtvidetDigitale / antallUtvidet.toFloat()
-            )
+                digitaliseringsgrad = antallUtvidetDigitale / antallUtvidet.toFloat(),
+            ),
         )
     }
 }
@@ -73,5 +73,5 @@ class AntallSøknader(
     val totalt: Int,
     val papirsøknader: Int,
     val digitaleSøknader: Int,
-    val digitaliseringsgrad: Float
+    val digitaliseringsgrad: Float,
 )

@@ -19,7 +19,7 @@ interface BehandlingSøknadsinfoRepository : JpaRepository<BehandlingSøknadsinf
         AND bs.mottattDato >= :fomDato
         AND bs.mottattDato <= :tomDato
         GROUP BY bs.brevkode, bs.erDigital
-    """
+    """,
     )
     fun hentAntallSøknaderIPeriode(fomDato: LocalDateTime, tomDato: LocalDateTime): List<AntallSøknaderPerGruppe>
 }
