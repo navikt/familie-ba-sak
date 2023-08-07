@@ -2,6 +2,7 @@ package no.nav.familie.ba.sak.kjerne.beregning
 
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.KONTAKT_TEAMET_SUFFIX
+import no.nav.familie.ba.sak.common.MånedPeriode
 import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.maksBeløp
@@ -18,7 +19,13 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
+import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
+import no.nav.familie.ba.sak.kjerne.tidslinje.eksperimentelt.filtrerIkkeNull
+import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerUtenNullMed
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.outerJoin
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunkt
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonth
+import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilBrevTekst
 import java.math.BigDecimal
 import java.time.LocalDateTime
@@ -160,10 +167,10 @@ object TilkjentYtelseValidering {
                     .flatMap { it.andelerTilkjentYtelse }
                     .filter { it.aktør == barn.aktør }
 
-            if (erOverlappAvAndeler(
+            if (finnPeriodeMedOverlappAvAndeler(
                     andeler = andeler,
                     barnsAndelerFraAndreBehandlinger = barnsAndelerFraAndreBehandlinger,
-                )
+                ) != null
             ) {
                 barnMedUtbetalingsikkerhetFeil.add(barn)
             }
@@ -201,16 +208,27 @@ object TilkjentYtelseValidering {
         }
     }
 
-    private fun erOverlappAvAndeler(
+    fun finnPeriodeMedOverlappAvAndeler(
         andeler: List<AndelTilkjentYtelse>,
         barnsAndelerFraAndreBehandlinger: List<AndelTilkjentYtelse>,
-    ): Boolean {
-        return andeler.any { andelTilkjentYtelse ->
-            barnsAndelerFraAndreBehandlinger.any {
-                andelTilkjentYtelse.overlapperMed(it) &&
-                    andelTilkjentYtelse.prosent + it.prosent > BigDecimal(100)
-            }
-        }
+    ): MånedPeriode? {
+        val andelerTidslinje = andeler.map {
+            Periode(fraOgMed = it.periode.fom.tilTidspunkt(), tilOgMed = it.periode.tom.tilTidspunkt(), innhold = it)
+        }.tilTidslinje()
+        val tidligereAndelerTidslinje = barnsAndelerFraAndreBehandlinger.map {
+            Periode(fraOgMed = it.periode.fom.tilTidspunkt(), tilOgMed = it.periode.tom.tilTidspunkt(), innhold = it)
+        }.tilTidslinje()
+
+        val overlappTidslinje =
+            andelerTidslinje.kombinerUtenNullMed(tidligereAndelerTidslinje, { andel, tidligereAndel ->
+                andel.overlapperMed(tidligereAndel) && andel.prosent + tidligereAndel.prosent > BigDecimal(100)
+            }).filtrerIkkeNull()
+
+        return if (overlappTidslinje.perioder().isEmpty()) null else
+            MånedPeriode(
+                overlappTidslinje.perioder().first().fraOgMed.tilYearMonth(),
+                overlappTidslinje.perioder().last().tilOgMed.tilYearMonth()
+            )
     }
 }
 
