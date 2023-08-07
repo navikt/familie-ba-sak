@@ -271,7 +271,11 @@ fun Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>.tilVedtaksper
 }
 
 private fun Periode<List<GrunnlagForGjeldendeOgForrigeBehandling>, Måned>.tilVedtaksperiodeType(): Vedtaksperiodetype {
-    val erUtbetalingsperiode = this.innhold != null && this.innhold.any { it.gjeldende is GrunnlagForPersonInnvilget }
+    val erUtbetalingsperiode =
+        this.innhold != null && this.innhold.any {
+            it.gjeldende is GrunnlagForPersonInnvilget &&
+                !it.gjeldende.erEndretTilIngenUtbetalingIkkeDeltBosted()
+        }
     val erAvslagsperiode = this.innhold != null && this.innhold.all { it.gjeldende?.erEksplisittAvslag() == true }
 
     return when {

@@ -197,10 +197,11 @@ fun lagEndredeUtbetalinger(
             fom = parseValgfriDato(Domenebegrep.FRA_DATO, rad)?.toYearMonth(),
             tom = parseValgfriDato(Domenebegrep.TIL_DATO, rad)?.toYearMonth(),
             person = persongrunnlag.finnPersonGrunnlagForBehandling(behandlingId).personer.find { aktørId == it.aktør.aktørId },
-            prosent = BigDecimal.ZERO,
-            årsak = Årsak.ALLEREDE_UTBETALT,
+            prosent = parseValgfriLong(VedtaksperiodeMedBegrunnelserParser.DomenebegrepEndretUtbetaling.PROSENT, rad)?.toBigDecimal() ?: BigDecimal.ZERO,
+            årsak = parseValgfriEnum<Årsak>(VedtaksperiodeMedBegrunnelserParser.DomenebegrepEndretUtbetaling.ÅRSAK, rad) ?: Årsak.ALLEREDE_UTBETALT,
             søknadstidspunkt = LocalDate.now(),
             begrunnelse = "Fordi at...",
+            avtaletidspunktDeltBosted = LocalDate.now(),
         )
     }.groupBy { it.behandlingId }
         .toMutableMap()
@@ -248,6 +249,7 @@ fun lagAndelerTilkjentYtelse(
             VedtaksperiodeMedBegrunnelserParser.DomenebegrepAndelTilkjentYtelse.YTELSE_TYPE,
             rad,
         ) ?: YtelseType.ORDINÆR_BARNETRYGD,
+        prosent = parseValgfriLong(VedtaksperiodeMedBegrunnelserParser.DomenebegrepEndretUtbetaling.PROSENT, rad)?.toBigDecimal() ?: BigDecimal(100),
     )
 }.groupBy { it.behandlingId }
     .toMutableMap()
