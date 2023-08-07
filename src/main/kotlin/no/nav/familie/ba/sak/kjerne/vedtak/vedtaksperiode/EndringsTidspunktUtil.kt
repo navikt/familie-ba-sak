@@ -2,7 +2,6 @@ import no.nav.familie.ba.sak.common.TIDENES_ENDE
 import no.nav.familie.ba.sak.common.førsteDagIInneværendeMåned
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.common.toYearMonth
-import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.innholdForTidspunkt
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.outerJoin
@@ -10,6 +9,7 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Måned
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.MånedTidspunkt.Companion.tilTidspunktEllerUendeligSent
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.tilYearMonthEllerUendeligFortid
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.logger
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.AktørOgRolleBegrunnelseGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPersonIkkeInnvilget
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPersonInnvilget
@@ -32,7 +32,7 @@ fun utledEndringstidspunkt(
             grunnlagForVedtaksperiode.erLik(grunnlagForVedtaksperiodeForrigeBehandling)
         }
 
-    val (aktørMedFørsteEndring: Aktør?, datoTidligsteForskjell: LocalDate) =
+    val (aktørMedFørsteEndring, datoTidligsteForskjell) =
         erPeriodeLikSammePeriodeIForrigeBehandlingTidslinjer.finnTidligsteForskjell() ?: Pair(null, TIDENES_ENDE)
 
     loggEndringstidspunktOgEndringer(
@@ -46,9 +46,9 @@ fun utledEndringstidspunkt(
 }
 
 private fun loggEndringstidspunktOgEndringer(
-    grunnlagTidslinjePerPerson: Map<Aktør, Tidslinje<GrunnlagForPerson, Måned>>,
-    grunnlagTidslinjePerPersonForrigeBehandling: Map<Aktør, Tidslinje<GrunnlagForPerson, Måned>>,
-    aktørMedFørsteForandring: Aktør?,
+    grunnlagTidslinjePerPerson: Map<AktørOgRolleBegrunnelseGrunnlag, Tidslinje<GrunnlagForPerson, Måned>>,
+    grunnlagTidslinjePerPersonForrigeBehandling: Map<AktørOgRolleBegrunnelseGrunnlag, Tidslinje<GrunnlagForPerson, Måned>>,
+    aktørMedFørsteForandring: AktørOgRolleBegrunnelseGrunnlag?,
     datoTidligsteForskjell: LocalDate,
 ) {
     val grunnlagDenneBehandlingen = grunnlagTidslinjePerPerson[aktørMedFørsteForandring]
@@ -111,14 +111,14 @@ private fun loggEndringstidspunktOgEndringer(
     secureLogger.info("Ved endringstidspunktet $datoTidligsteForskjell er det endring for $aktørMedFørsteForandring")
 }
 
-private fun Map<Aktør, Tidslinje<Boolean, Måned>>.finnTidligsteForskjell() = this
-    .map { (aktør, erPeriodeLikTidslinje) ->
+private fun Map<AktørOgRolleBegrunnelseGrunnlag, Tidslinje<Boolean, Måned>>.finnTidligsteForskjell() = this
+    .map { (aktørOgRolleForVedtaksgrunnlag, erPeriodeLikTidslinje) ->
         val førsteEndringForAktør = erPeriodeLikTidslinje.perioder()
             .filter { it.innhold == false }
             .minOfOrNull { it.fraOgMed.tilYearMonthEllerUendeligFortid().førsteDagIInneværendeMåned() }
             ?: TIDENES_ENDE
 
-        aktør to førsteEndringForAktør
+        aktørOgRolleForVedtaksgrunnlag to førsteEndringForAktør
     }.minByOrNull { it.second }
 
 private fun GrunnlagForPerson?.erLik(

@@ -14,9 +14,10 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.tilTidslinjerPerPersonOgTyp
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringUtil.tilFørsteEndringstidspunkt
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonEnkel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.barn
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.søker
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.outerJoin
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilBrevTekst
@@ -32,10 +33,10 @@ fun hentGyldigEtterbetalingFom(kravDato: LocalDateTime) =
 
 fun hentSøkersAndeler(
     andeler: List<AndelTilkjentYtelse>,
-    søker: Person,
+    søker: PersonEnkel,
 ) = andeler.filter { it.aktør == søker.aktør }
 
-fun hentBarnasAndeler(andeler: List<AndelTilkjentYtelse>, barna: List<Person>) = barna.map { barn ->
+fun hentBarnasAndeler(andeler: List<AndelTilkjentYtelse>, barna: List<PersonEnkel>) = barna.map { barn ->
     barn to andeler.filter { it.aktør == barn.aktør }
 }
 
@@ -56,10 +57,16 @@ object TilkjentYtelseValidering {
             when {
                 forrigeAndel == null && nåværendeAndel != null ->
                     throw Feil("Satsendring kan ikke legge til en andel som ikke var der i forrige behandling")
+
                 forrigeAndel != null && nåværendeAndel == null ->
                     throw Feil("Satsendring kan ikke fjerne en andel som fantes i forrige behandling")
+
                 forrigeAndel != null && forrigeAndel.prosent != nåværendeAndel?.prosent ->
                     throw Feil("Satsendring kan ikke endre på prosenten til en andel")
+
+                forrigeAndel != null && forrigeAndel.type != nåværendeAndel?.type ->
+                    throw Feil("Satsendring kan ikke endre YtelseType til en andel")
+
                 else -> false
             }
         }.values.map { it.perioder() } // Må kalle på .perioder() for at feilene over skal bli kastet
@@ -122,10 +129,10 @@ object TilkjentYtelseValidering {
 
     fun validerAtTilkjentYtelseHarFornuftigePerioderOgBeløp(
         tilkjentYtelse: TilkjentYtelse,
-        personopplysningGrunnlag: PersonopplysningGrunnlag,
+        søkerOgBarn: List<PersonEnkel>,
     ) {
-        val søker = personopplysningGrunnlag.søker
-        val barna = personopplysningGrunnlag.barna
+        val søker = søkerOgBarn.søker()
+        val barna = søkerOgBarn.barn()
 
         val tidslinjeMedAndeler = tilkjentYtelse.tilTidslinjeMedAndeler()
 
@@ -137,22 +144,22 @@ object TilkjentYtelseValidering {
 
             validerAtBeløpForPartStemmerMedSatser(person = søker, andeler = søkersAndeler, fagsakType = fagsakType)
 
-            barnasAndeler.forEach { (person, andeler) ->
-                validerAtBeløpForPartStemmerMedSatser(person = person, andeler = andeler, fagsakType = fagsakType)
+            barnasAndeler.forEach { (barn, andeler) ->
+                validerAtBeløpForPartStemmerMedSatser(person = barn, andeler = andeler, fagsakType = fagsakType)
             }
         }
     }
 
     fun validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
         behandlendeBehandlingTilkjentYtelse: TilkjentYtelse,
-        barnMedAndreRelevanteTilkjentYtelser: List<Pair<Person, List<TilkjentYtelse>>>,
-        personopplysningGrunnlag: PersonopplysningGrunnlag,
+        barnMedAndreRelevanteTilkjentYtelser: List<Pair<PersonEnkel, List<TilkjentYtelse>>>,
+        søkerOgBarn: List<PersonEnkel>,
     ) {
-        val barna = personopplysningGrunnlag.barna.sortedBy { it.fødselsdato }
+        val barna = søkerOgBarn.barn().sortedBy { it.fødselsdato }
 
         val barnasAndeler = hentBarnasAndeler(behandlendeBehandlingTilkjentYtelse.andelerTilkjentYtelse.toList(), barna)
 
-        val barnMedUtbetalingsikkerhetFeil = mutableListOf<Person>()
+        val barnMedUtbetalingsikkerhetFeil = mutableListOf<PersonEnkel>()
         barnasAndeler.forEach { (barn, andeler) ->
             val barnsAndelerFraAndreBehandlinger =
                 barnMedAndreRelevanteTilkjentYtelser.filter { it.first.aktør == barn.aktør }
@@ -215,7 +222,7 @@ object TilkjentYtelseValidering {
 }
 
 private fun validerAtBeløpForPartStemmerMedSatser(
-    person: Person,
+    person: PersonEnkel,
     andeler: List<AndelTilkjentYtelse>,
     fagsakType: FagsakType,
 ) {

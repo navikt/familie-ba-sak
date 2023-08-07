@@ -22,6 +22,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Medlemskap
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.statsborgerskap.StatsborgerskapService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.søker
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.steg.StegService
@@ -197,9 +198,10 @@ class AutovedtakFødselshendelseService(
 
         val barnaSomHarBlittBehandlet =
             if (fagsak != null) {
-                behandlingHentOgPersisterService.hentBehandlinger(fagsakId = fagsak.id).filter { !it.erHenlagt() }.flatMap {
-                    persongrunnlagService.hentBarna(behandling = it).map { barn -> barn.aktør.aktivFødselsnummer() }
-                }.distinct()
+                behandlingHentOgPersisterService.hentBehandlinger(fagsakId = fagsak.id).filter { !it.erHenlagt() }
+                    .flatMap {
+                        persongrunnlagService.hentBarna(behandling = it).map { barn -> barn.aktør.aktivFødselsnummer() }
+                    }.distinct()
             } else {
                 emptyList()
             }
@@ -242,8 +244,8 @@ class AutovedtakFødselshendelseService(
     private fun hentBegrunnelseFraVilkårsvurdering(behandlingId: Long): String {
         val vilkårsvurdering = vilkårsvurderingRepository.findByBehandlingAndAktiv(behandlingId)
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
-        val søker = persongrunnlagService.hentSøker(behandling.id)
-        val søkerResultat = vilkårsvurdering?.personResultater?.find { it.aktør == søker?.aktør }
+        val søker = persongrunnlagService.hentSøkerOgBarnPåBehandlingThrows(behandling.id).søker()
+        val søkerResultat = vilkårsvurdering?.personResultater?.find { it.aktør == søker.aktør }
 
         val bosattIRiketResultat = søkerResultat?.vilkårResultater?.find { it.vilkårType == Vilkår.BOSATT_I_RIKET }
         val lovligOppholdResultat = søkerResultat?.vilkårResultater?.find { it.vilkårType == Vilkår.LOVLIG_OPPHOLD }

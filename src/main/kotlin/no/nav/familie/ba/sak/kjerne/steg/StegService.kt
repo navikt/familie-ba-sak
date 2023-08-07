@@ -139,12 +139,13 @@ class StegService(
     private fun validerHelmanuelMigrering(nyBehandling: NyBehandling) {
         val sisteBehandlingSomErVedtatt =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(nyBehandling.fagsakId)
-        if (sisteBehandlingSomErVedtatt != null && !sisteBehandlingSomErVedtatt.resultat.erOpphør()) {
+
+        if (sisteBehandlingSomErVedtatt != null && behandlingService.erLøpende(sisteBehandlingSomErVedtatt)) {
             throw FunksjonellFeil(
-                melding = "Det finnes allerede en vedtatt behandling på fagsak ${nyBehandling.fagsakId}." +
+                melding = "Det finnes allerede en vedtatt behandling med løpende utbetalinger på fagsak ${nyBehandling.fagsakId}." +
                     "Behandling kan ikke opprettes med årsak " +
                     BehandlingÅrsak.HELMANUELL_MIGRERING.visningsnavn,
-                frontendFeilmelding = "Det finnes allerede en vedtatt behandling på fagsak." +
+                frontendFeilmelding = "Det finnes allerede en vedtatt behandling med løpende utbetalinger på fagsak." +
                     "Behandling kan ikke opprettes med årsak " +
                     BehandlingÅrsak.HELMANUELL_MIGRERING.visningsnavn,
             )
@@ -184,7 +185,7 @@ class StegService(
         return håndterNyBehandlingOgSendInfotrygdFeed(
             NyBehandling(
                 søkersIdent = nyBehandlingHendelse.morsIdent,
-                behandlingType = if (fagsak.status in listOf(FagsakStatus.LØPENDE, FagsakStatus.AVSLUTTET)) {
+                behandlingType = if (fagsak.status == FagsakStatus.LØPENDE) {
                     BehandlingType.REVURDERING
                 } else {
                     BehandlingType.FØRSTEGANGSBEHANDLING

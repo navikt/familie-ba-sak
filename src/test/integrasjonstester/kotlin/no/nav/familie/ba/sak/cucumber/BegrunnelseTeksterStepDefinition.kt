@@ -51,7 +51,13 @@ class BegrunnelseTeksterStepDefinition {
 
     @Gitt("følgende behandling")
     fun `følgende behandling`(dataTable: DataTable) {
-        lagVedtak(dataTable, behandlinger, behandlingTilForrigeBehandling, vedtaksliste)
+        lagVedtak(
+            dataTable = dataTable,
+            behandlinger = behandlinger,
+            behandlingTilForrigeBehandling = behandlingTilForrigeBehandling,
+            vedtaksListe = vedtaksliste,
+            fagsaker = emptyMap(),
+        )
     }
 
     @Og("følgende persongrunnlag for begrunnelse")
@@ -109,6 +115,7 @@ class BegrunnelseTeksterStepDefinition {
             endredeUtbetalinger = endredeUtbetalinger[behandlingId] ?: emptyList(),
             andelerTilkjentYtelse = andelerTilkjentYtelse[behandlingId] ?: emptyList(),
             perioderOvergangsstønad = emptyList(),
+            uregistrerteBarn = emptyList(),
         )
         val forrigeBehandlingId = behandlingTilForrigeBehandling[behandlingId]
 
@@ -123,6 +130,7 @@ class BegrunnelseTeksterStepDefinition {
                 endredeUtbetalinger = endredeUtbetalinger[forrigeBehandlingId] ?: emptyList(),
                 andelerTilkjentYtelse = andelerTilkjentYtelse[forrigeBehandlingId] ?: emptyList(),
                 perioderOvergangsstønad = emptyList(),
+                uregistrerteBarn = emptyList(),
             )
         }
 
@@ -153,7 +161,6 @@ class BegrunnelseTeksterStepDefinition {
                     grunnlagForVedtaksperiodeForrigeBehandling,
                     mockHentSanityBegrunnelser(),
                     behandling.underkategori,
-                    behandling.fagsak.type,
                 ).toList(),
             )
         }.toMutableList()

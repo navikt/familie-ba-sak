@@ -24,6 +24,7 @@ import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriDato
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriEnum
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriLong
 import no.nav.familie.ba.sak.cucumber.domeneparser.parseValgfriString
+import no.nav.familie.ba.sak.ekstern.restDomene.BarnMedOpplysninger
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelse
@@ -35,6 +36,8 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.AnnenForeldersAktivit
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.KompetanseResultat
 import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.SøkersAktivitet
+import no.nav.familie.ba.sak.kjerne.fagsak.Fagsak
+import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.vedtak.Vedtak
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
@@ -53,17 +56,29 @@ fun Map<Long, Behandling>.finnBehandling(behandlingId: Long) =
 fun Map<Long, PersonopplysningGrunnlag>.finnPersonGrunnlagForBehandling(behandlingId: Long): PersonopplysningGrunnlag =
     this[behandlingId] ?: error("Finner ikke persongrunnlag for behandling med id $behandlingId")
 
+fun lagFagsaker(dataTable: DataTable) = dataTable.asMaps().map { rad ->
+    Fagsak(
+        id = parseLong(Domenebegrep.FAGSAK_ID, rad),
+        type = parseValgfriEnum<FagsakType>(Domenebegrep.FAGSAK_TYPE, rad) ?: FagsakType.NORMAL,
+        aktør = randomAktør(),
+    )
+}.associateBy { it.id }
+
 fun lagVedtak(
     dataTable: DataTable,
     behandlinger: MutableMap<Long, Behandling>,
     behandlingTilForrigeBehandling: MutableMap<Long, Long?>,
     vedtaksListe: MutableList<Vedtak>,
+    fagsaker: Map<Long, Fagsak>,
 ) {
-    val fagsak = defaultFagsak()
     behandlinger.putAll(
-        dataTable.groupByBehandlingId()
-            .map { lagBehandling(fagsak = fagsak).copy(id = it.key) }
-            .associateBy { it.id },
+        dataTable.asMaps().map { rad ->
+            val behandlingId = parseLong(Domenebegrep.BEHANDLING_ID, rad)
+            val fagsakId = parseValgfriLong(Domenebegrep.FAGSAK_ID, rad)
+            val fagsak = fagsaker[fagsakId] ?: defaultFagsak()
+
+            lagBehandling(fagsak = fagsak).copy(id = behandlingId)
+        }.associateBy { it.id },
     )
     behandlingTilForrigeBehandling.putAll(
         dataTable.asMaps().associate { rad ->
@@ -263,6 +278,7 @@ fun lagVedtaksPerioder(
     andelerTilkjentYtelse: Map<Long, List<AndelTilkjentYtelse>>,
     endringstidspunkt: Map<Long, LocalDate?>,
     overgangsstønad: Map<Long, List<InternPeriodeOvergangsstønad>?>,
+    uregistrerteBarn: List<BarnMedOpplysninger>,
 ): List<VedtaksperiodeMedBegrunnelser> {
     val vedtak = vedtaksListe.find { it.behandling.id == behandlingId && it.aktiv }
         ?: error("Finner ikke vedtak")
@@ -274,6 +290,7 @@ fun lagVedtaksPerioder(
         endredeUtbetalinger = endredeUtbetalinger[behandlingId] ?: emptyList(),
         andelerTilkjentYtelse = andelerTilkjentYtelse[behandlingId] ?: emptyList(),
         perioderOvergangsstønad = overgangsstønad[behandlingId] ?: emptyList(),
+        uregistrerteBarn = uregistrerteBarn,
     )
 
     val forrigeBehandlingId = behandlingTilForrigeBehandling[behandlingId]
@@ -289,6 +306,7 @@ fun lagVedtaksPerioder(
             endredeUtbetalinger = endredeUtbetalinger[forrigeBehandlingId] ?: emptyList(),
             andelerTilkjentYtelse = andelerTilkjentYtelse[forrigeBehandlingId] ?: emptyList(),
             perioderOvergangsstønad = overgangsstønad[behandlingId] ?: emptyList(),
+            uregistrerteBarn = emptyList(),
         )
     }
 
@@ -310,6 +328,7 @@ fun lagVedtaksPerioderMedUtledetEndringsTidspunkt(
     endredeUtbetalinger: Map<Long, List<EndretUtbetalingAndel>>,
     andelerTilkjentYtelse: Map<Long, List<AndelTilkjentYtelse>>,
     overgangsstønad: Map<Long, List<InternPeriodeOvergangsstønad>?>,
+    uregistrerteBarn: List<BarnMedOpplysninger>,
 ): List<VedtaksperiodeMedBegrunnelser> {
     val vedtak = vedtaksListe.find { it.behandling.id == behandlingId && it.aktiv }
         ?: error("Finner ikke vedtak")
@@ -321,6 +340,7 @@ fun lagVedtaksPerioderMedUtledetEndringsTidspunkt(
         endredeUtbetalinger = endredeUtbetalinger[behandlingId] ?: emptyList(),
         andelerTilkjentYtelse = andelerTilkjentYtelse[behandlingId] ?: emptyList(),
         perioderOvergangsstønad = overgangsstønad[behandlingId] ?: emptyList(),
+        uregistrerteBarn = uregistrerteBarn,
     )
 
     val forrigeBehandlingId = behandlingTilForrigeBehandling[behandlingId]
@@ -336,6 +356,7 @@ fun lagVedtaksPerioderMedUtledetEndringsTidspunkt(
             endredeUtbetalinger = endredeUtbetalinger[forrigeBehandlingId] ?: emptyList(),
             andelerTilkjentYtelse = andelerTilkjentYtelse[forrigeBehandlingId] ?: emptyList(),
             perioderOvergangsstønad = overgangsstønad[behandlingId] ?: emptyList(),
+            uregistrerteBarn = uregistrerteBarn,
         )
     }
 

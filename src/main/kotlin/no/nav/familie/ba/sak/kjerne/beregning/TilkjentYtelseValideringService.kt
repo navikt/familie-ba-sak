@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.finnAktø
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.barn
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import org.slf4j.LoggerFactory
@@ -24,30 +25,34 @@ class TilkjentYtelseValideringService(
         val totrinnskontroll = totrinnskontrollService.hentAktivForBehandling(behandling.id)
 
         if (totrinnskontroll?.godkjent == true) {
-            val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandling.id)
+            validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(behandling)
+        }
+    }
 
-            val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandling.id)
+    fun validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(behandling: Behandling) {
+        val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandling.id)
 
-            val barnMedAndreRelevanteTilkjentYtelser = personopplysningGrunnlag.barna.map {
-                Pair(
-                    it,
-                    beregningService.hentRelevanteTilkjentYtelserForBarn(it.aktør, behandling.fagsak.id),
-                )
-            }
+        val søkerOgBarn = persongrunnlagService.hentSøkerOgBarnPåBehandlingThrows(behandlingId = behandling.id)
 
-            secureLogger.info("Andeler tilkjent ytelse i inneværende behandling: " + tilkjentYtelse.andelerTilkjentYtelse)
-            secureLogger.info(
-                "Barn og deres andeler tilkjent ytelse fra andre fagsaker: " + barnMedAndreRelevanteTilkjentYtelser.map {
-                    "${it.first} -> ${it.second}"
-                },
-            )
-
-            TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
-                behandlendeBehandlingTilkjentYtelse = tilkjentYtelse,
-                barnMedAndreRelevanteTilkjentYtelser = barnMedAndreRelevanteTilkjentYtelser,
-                personopplysningGrunnlag = personopplysningGrunnlag,
+        val barnMedAndreRelevanteTilkjentYtelser = søkerOgBarn.barn().map {
+            Pair(
+                it,
+                beregningService.hentRelevanteTilkjentYtelserForBarn(it.aktør, behandling.fagsak.id),
             )
         }
+
+        secureLogger.info("Andeler tilkjent ytelse i inneværende behandling: " + tilkjentYtelse.andelerTilkjentYtelse)
+        secureLogger.info(
+            "Barn og deres andeler tilkjent ytelse fra andre fagsaker: " + barnMedAndreRelevanteTilkjentYtelser.map {
+                "${it.first} -> ${it.second}"
+            },
+        )
+
+        TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
+            behandlendeBehandlingTilkjentYtelse = tilkjentYtelse,
+            barnMedAndreRelevanteTilkjentYtelser = barnMedAndreRelevanteTilkjentYtelser,
+            søkerOgBarn = søkerOgBarn,
+        )
     }
 
     fun validerIngenAndelerTilkjentYtelseMedSammeOffsetIBehandling(behandlingId: Long) {

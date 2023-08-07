@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.behandling.domene.initStatus
 import no.nav.familie.ba.sak.kjerne.behandlingsresultat.BehandlingsresultatValideringUtils
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.logg.BehandlingLoggRequest
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
@@ -52,6 +53,7 @@ class BehandlingService(
     private val saksstatistikkEventPublisher: SaksstatistikkEventPublisher,
     private val fagsakRepository: FagsakRepository,
     private val vedtakRepository: VedtakRepository,
+    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
     private val loggService: LoggService,
     private val arbeidsfordelingService: ArbeidsfordelingService,
     private val infotrygdService: InfotrygdService,
@@ -212,7 +214,7 @@ class BehandlingService(
         }
     }
 
-    private fun harAktivInfotrygdSak(behandling: Behandling): Boolean {
+    fun harAktivInfotrygdSak(behandling: Behandling): Boolean {
         val søkerIdenter = behandling.fagsak.aktør.personidenter.map { it.fødselsnummer }
         return infotrygdService.harÅpenSakIInfotrygd(søkerIdenter) ||
             !behandling.erMigrering() && infotrygdService.harLøpendeSakIInfotrygd(søkerIdenter)
@@ -305,6 +307,10 @@ class BehandlingService(
         behandlingMigreringsinfoRepository.findByBehandlingId(behandlingId)
             ?.let { behandlingMigreringsinfoRepository.delete(it) }
     }
+
+    fun erLøpende(behandling: Behandling): Boolean =
+        andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(behandlingId = behandling.id)
+            .any { it.erLøpende() }
 
     companion object {
 
