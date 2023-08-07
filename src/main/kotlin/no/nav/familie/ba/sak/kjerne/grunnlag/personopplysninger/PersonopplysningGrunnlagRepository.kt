@@ -10,7 +10,7 @@ interface PersonopplysningGrunnlagRepository : JpaRepository<PersonopplysningGru
 
     @Query(
         """
-        SELECT new no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonPåBehandling(p.type, a, p.fødselsdato, d.dødsfallDato, p.målform)
+        SELECT new no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonEnkel(p.type, a, p.fødselsdato, d.dødsfallDato, p.målform)
         FROM Person p
         JOIN p.personopplysningGrunnlag gr
         JOIN p.aktør a
@@ -24,7 +24,7 @@ interface PersonopplysningGrunnlagRepository : JpaRepository<PersonopplysningGru
 
     @Query(
         """
-        SELECT new no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonPåBehandling(p.type, a, p.fødselsdato, d.dødsfallDato, p.målform)
+        SELECT new no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonEnkel(p.type, a, p.fødselsdato, d.dødsfallDato, p.målform)
         FROM Person p
         JOIN p.personopplysningGrunnlag gr
         JOIN p.aktør a
