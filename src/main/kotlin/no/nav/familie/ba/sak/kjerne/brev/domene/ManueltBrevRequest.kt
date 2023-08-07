@@ -19,6 +19,8 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.maler.HenleggeTrukketSøknadData
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.InformasjonsbrevDeltBostedBrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.InformasjonsbrevDeltBostedData
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.InformasjonsbrevKanSøke
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.InformasjonsbrevTilForelderBrev
+import no.nav.familie.ba.sak.kjerne.brev.domene.maler.InformasjonsbrevTilForelderData
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.InnhenteOpplysningerBrev
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.InnhenteOpplysningerData
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.InnhenteOpplysningerOmBarn
@@ -138,6 +140,24 @@ fun ManueltBrevRequest.tilBrev(saksbehandlerNavn: String, hentLandkoder: (() -> 
                         navn = this.mottakerNavn,
                         fodselsnummer = this.mottakerIdent,
                         barnMedDeltBostedAvtale = this.multiselectVerdier,
+                    ),
+                ),
+            )
+
+        Brevmal.INFORMASJONSBREV_TIL_FORELDER_MED_SELVSTENDIG_RETT_VI_HAR_FÅTT_F016_KAN_SØKE_OM_BARNETRYGD,
+        Brevmal.INFORMASJONSBREV_TIL_FORELDER_OMFATTET_NORSK_LOVGIVNING_HAR_FÅTT_EN_SØKNAD_FRA_ANNEN_FORELDER,
+        Brevmal.INFORMASJONSBREV_TIL_FORELDER_OMFATTET_NORSK_LOVGIVNING_HAR_GJORT_VEDTAK_TIL_ANNEN_FORELDER,
+        Brevmal.INFORMASJONSBREV_TIL_FORELDER_OMFATTET_NORSK_LOVGIVNING_VARSEL_OM_ÅRLIG_KONTROLL ->
+            InformasjonsbrevTilForelderBrev(
+                mal = this.brevmal,
+                data = InformasjonsbrevTilForelderData(
+                    delmalData = InformasjonsbrevTilForelderData.DelmalData(
+                        signatur = signaturDelmal,
+                    ),
+                    flettefelter = InformasjonsbrevTilForelderData.Flettefelter(
+                        navn = this.mottakerNavn,
+                        fodselsnummer = this.mottakerIdent,
+                        barnSøktFor = this.multiselectVerdier,
                     ),
                 ),
             )
