@@ -16,8 +16,6 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
 @Service
@@ -71,6 +69,9 @@ class BehandlingsresultatService(
 
         val vilkårsvurdering = vilkårsvurderingService.hentAktivForBehandlingThrows(behandlingId = behandlingId)
 
+        val personerIBehandling = persongrunnlagService.hentAktivThrows(behandlingId = behandling.id).personer.toSet()
+        val personerIForrigeBehandling = forrigeBehandling?.let { persongrunnlagService.hentAktivThrows(behandlingId = forrigeBehandling.id).personer.toSet() } ?: emptySet()
+
         val personerFremstiltKravFor = finnPersonerFremstiltKravFor(
             behandling = behandling,
             søknadDTO = søknadDTO,
@@ -110,6 +111,8 @@ class BehandlingsresultatService(
                 nåværendeKompetanser = kompetanser.toList(),
                 forrigeKompetanser = forrigeKompetanser.toList(),
                 personerFremstiltKravFor = personerFremstiltKravFor,
+                personerIBehandling = personerIBehandling,
+                personerIForrigeBehandling = personerIForrigeBehandling,
             )
         } else {
             Endringsresultat.INGEN_ENDRING
@@ -127,11 +130,5 @@ class BehandlingsresultatService(
         val behandlingsresultat = BehandlingsresultatUtils.kombinerResultaterTilBehandlingsresultat(søknadsresultat, endringsresultat, opphørsresultat)
 
         return behandlingsresultat
-    }
-
-    companion object {
-
-        private val logger: Logger = LoggerFactory.getLogger(BehandlingsresultatService::class.java)
-        private val secureLogger: Logger = LoggerFactory.getLogger("secureLogger")
     }
 }
