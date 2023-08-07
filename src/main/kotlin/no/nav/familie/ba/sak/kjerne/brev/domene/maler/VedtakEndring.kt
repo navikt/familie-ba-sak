@@ -38,14 +38,19 @@ data class VedtakEndring(
                     etterbetalingInstitusjon = etterbetalingInstitusjon,
                     korrigertVedtak = vedtakFellesfelter.korrigertVedtakData,
                     informasjonOmAarligKontroll = informasjonOmAarligKontroll,
-                    forMyeUtbetaltBarnetrygd = feilutbetaltValuta != null,
-                    refusjonEosAvklart = refusjonEosAvklart != null,
-                    refusjonEosUavklart = refusjonEosUavklart != null,
+                    forMyeUtbetaltBarnetrygd = feilutbetaltValuta,
+                    refusjonEosAvklart = refusjonEosAvklart,
+                    refusjonEosUavklart = refusjonEosUavklart,
                 ),
                 flettefelter = object : FlettefelterForDokument {
+                    @Deprecated("Skal bort når vi har lagt til støtte for å sende inn felttefelter som types i delmaler i familie-brev")
                     val perioderMedForMyeUtbetalt: Flettefelt = feilutbetaltValuta?.perioderMedForMyeUtbetalt
-                    val perioderMedRefusjonEosAvklart: Flettefelt = refusjonEosAvklart?.perioderMedRefusjonEøsAvklart
-                    val perioderMedRefusjonEosUavklart: Flettefelt = refusjonEosUavklart?.perioderMedRefusjonEøsUavklart
+
+                    @Deprecated("Skal bort når vi har lagt til støtte for å sende inn felttefelter som types i delmaler i familie-brev")
+                    val perioderMedRefusjonEosAvklart: Flettefelt = refusjonEosAvklart?.perioderMedRefusjonEosAvklart
+
+                    @Deprecated("Skal bort når vi har lagt til støtte for å sende inn felttefelter som types i delmaler i familie-brev")
+                    val perioderMedRefusjonEosUavklart: Flettefelt = refusjonEosUavklart?.perioderMedRefusjonEosUavklart
                     override val navn = flettefelt(vedtakFellesfelter.søkerNavn)
                     override val fodselsnummer = flettefelt(vedtakFellesfelter.søkerFødselsnummer)
                     override val brevOpprettetDato = flettefelt(LocalDate.now().tilDagMånedÅr())
@@ -73,8 +78,8 @@ data class EndringVedtakData(
         val etterbetalingInstitusjon: EtterbetalingInstitusjon?,
         val korrigertVedtak: KorrigertVedtakData?,
         val informasjonOmAarligKontroll: Boolean,
-        val forMyeUtbetaltBarnetrygd: Boolean,
-        val refusjonEosAvklart: Boolean,
-        val refusjonEosUavklart: Boolean,
+        val forMyeUtbetaltBarnetrygd: FeilutbetaltValuta?,
+        val refusjonEosAvklart: RefusjonEøsAvklart?,
+        val refusjonEosUavklart: RefusjonEøsUavklart?,
     )
 }
