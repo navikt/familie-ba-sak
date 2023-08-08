@@ -3,8 +3,8 @@ package no.nav.familie.ba.sak.kjerne.eøs.vilkårsvurdering
 import no.nav.familie.ba.sak.kjerne.tidslinje.Periode
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.Dag
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.DagTidspunkt.Companion.tilTidspunktEllerSenereEnn
-import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.DagTidspunkt.Companion.tilTidspunktEllerTidligereEnn
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.DagTidspunkt.Companion.tilTidspunktEllerUendeligSent
+import no.nav.familie.ba.sak.kjerne.tidslinje.tidspunkt.DagTidspunkt.Companion.tilTidspunktEllerUendeligTidlig
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårResultat
 
 /**
@@ -22,8 +22,8 @@ fun Iterable<VilkårResultat>.tilVilkårRegelverkResultatTidslinje() = tidslinje
 }
 
 fun VilkårResultat.tilPeriode(): Periode<VilkårRegelverkResultat, Dag> {
-    val fom = periodeFom.tilTidspunktEllerTidligereEnn(periodeTom)
-    val tom = periodeTom.tilTidspunktEllerSenereEnn(periodeFom)
+    val fom = periodeFom.tilTidspunktEllerUendeligTidlig(periodeTom)
+    val tom = periodeTom.tilTidspunktEllerUendeligSent(periodeFom)
     return Periode(
         fom,
         tom,

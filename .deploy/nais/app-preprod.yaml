@@ -68,8 +68,6 @@ spec:
           cluster: dev-gcp
         - application: familie-ba-skatteetaten-api
           cluster: dev-gcp
-        - application: familie-ba-migrering
-          cluster: dev-gcp
         - application: familie-klage
           cluster: dev-gcp
         - application: familie-ba-statistikk
@@ -97,8 +95,6 @@ spec:
           cluster: dev-gcp
         - application: familie-tilbake
           cluster: dev-gcp
-        - application: familie-ba-migrering
-          cluster: dev-gcp
         - application: familie-oppdrag
           cluster: dev-fss
         - application: familie-klage
@@ -114,6 +110,7 @@ spec:
         - host: familie-ba-infotrygd-feed.dev-fss-pub.nais.io
         - host: sdw-wsrest.ecb.europa.eu
         - host: sentry.gc.nav.no
+        - host: data-api.ecb.europa.eu
   replicas:
     min: 2
     max: 2

@@ -14,9 +14,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingKategori
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingStatus
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
-import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandlingsresultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
-import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -29,7 +27,6 @@ internal class StegServiceTest {
     private val behandlingService: BehandlingService = mockk()
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService = mockk()
     private val satsendringService: SatsendringService = mockk()
-    private val simuleringService: SimuleringService = mockk()
 
     private val stegService = StegService(
         steg = listOf(mockRegistrerPersongrunnlag()),
@@ -41,7 +38,8 @@ internal class StegServiceTest {
         tilgangService = mockk(relaxed = true),
         infotrygdFeedService = mockk(),
         satsendringService = satsendringService,
-        simuleringService = simuleringService,
+        personopplysningerService = mockk(),
+        automatiskBeslutningService = mockk(),
     )
 
     @BeforeEach
@@ -54,47 +52,47 @@ internal class StegServiceTest {
 
     @Test
     fun `skal IKKE feile validering av helmanuell migrering når fagsak har aktivt vedtak som er et opphør`() {
-        Behandlingsresultat.values().filter { it.erOpphør() }.forEach {
-            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = any()) } returns
-                lagBehandling(resultat = it)
+        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = any()) } returns
+            lagBehandling()
 
-            assertDoesNotThrow {
-                stegService.håndterNyBehandling(
-                    NyBehandling(
-                        kategori = BehandlingKategori.NASJONAL,
-                        underkategori = BehandlingUnderkategori.ORDINÆR,
-                        behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                        behandlingÅrsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
-                        søkersIdent = randomFnr(),
-                        barnasIdenter = listOf(randomFnr()),
-                        nyMigreringsdato = LocalDate.now().minusMonths(6),
-                        fagsakId = 1L,
-                    ),
-                )
-            }
+        every { behandlingService.erLøpende(any()) } returns false
+
+        assertDoesNotThrow {
+            stegService.håndterNyBehandling(
+                NyBehandling(
+                    kategori = BehandlingKategori.NASJONAL,
+                    underkategori = BehandlingUnderkategori.ORDINÆR,
+                    behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                    behandlingÅrsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
+                    søkersIdent = randomFnr(),
+                    barnasIdenter = listOf(randomFnr()),
+                    nyMigreringsdato = LocalDate.now().minusMonths(6),
+                    fagsakId = 1L,
+                ),
+            )
         }
     }
 
     @Test
-    fun `skal feile validering av helmanuell migrering når fagsak har aktivt vedtak som IKKE er et opphør`() {
-        Behandlingsresultat.values().filter { !it.erOpphør() }.forEach {
-            every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = any()) } returns
-                lagBehandling(resultat = it)
+    fun `skal feile validering av helmanuell migrering når fagsak har aktivt vedtak med løpende utbetalinger`() {
+        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(fagsakId = any()) } returns
+            lagBehandling()
 
-            assertThrows<FunksjonellFeil> {
-                stegService.håndterNyBehandling(
-                    NyBehandling(
-                        kategori = BehandlingKategori.NASJONAL,
-                        underkategori = BehandlingUnderkategori.ORDINÆR,
-                        behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
-                        behandlingÅrsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
-                        søkersIdent = randomFnr(),
-                        barnasIdenter = listOf(randomFnr()),
-                        nyMigreringsdato = LocalDate.now().minusMonths(6),
-                        fagsakId = 1L,
-                    ),
-                )
-            }
+        every { behandlingService.erLøpende(any()) } returns true
+
+        assertThrows<FunksjonellFeil> {
+            stegService.håndterNyBehandling(
+                NyBehandling(
+                    kategori = BehandlingKategori.NASJONAL,
+                    underkategori = BehandlingUnderkategori.ORDINÆR,
+                    behandlingType = BehandlingType.MIGRERING_FRA_INFOTRYGD,
+                    behandlingÅrsak = BehandlingÅrsak.HELMANUELL_MIGRERING,
+                    søkersIdent = randomFnr(),
+                    barnasIdenter = listOf(randomFnr()),
+                    nyMigreringsdato = LocalDate.now().minusMonths(6),
+                    fagsakId = 1L,
+                ),
+            )
         }
     }
 

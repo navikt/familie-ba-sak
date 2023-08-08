@@ -4,13 +4,16 @@ import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.Metrics
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.FunksjonellFeil
+import no.nav.familie.ba.sak.common.PdlPersonKanIkkeBehandlesIFagsystem
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerInstitusjonOgVerge
 import no.nav.familie.ba.sak.ekstern.restDomene.RestRegistrerSøknad
 import no.nav.familie.ba.sak.ekstern.restDomene.RestTilbakekreving
 import no.nav.familie.ba.sak.ekstern.restDomene.writeValueAsString
 import no.nav.familie.ba.sak.integrasjoner.infotrygd.InfotrygdFeedService
+import no.nav.familie.ba.sak.integrasjoner.pdl.PersonopplysningerService
 import no.nav.familie.ba.sak.kjerne.autovedtak.satsendring.SatsendringService
+import no.nav.familie.ba.sak.kjerne.behandling.AutomatiskBeslutningService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.HenleggÅrsak
@@ -32,7 +35,6 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakStatus
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.fagsak.RestBeslutningPåVedtak
 import no.nav.familie.ba.sak.kjerne.grunnlag.søknad.SøknadGrunnlagService
-import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.steg.domene.JournalførVedtaksbrevDTO
 import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.ba.sak.sikkerhet.TilgangService
@@ -57,7 +59,8 @@ class StegService(
     private val tilgangService: TilgangService,
     private val infotrygdFeedService: InfotrygdFeedService,
     private val satsendringService: SatsendringService,
-    private val simuleringService: SimuleringService,
+    private val personopplysningerService: PersonopplysningerService,
+    private val automatiskBeslutningService: AutomatiskBeslutningService,
 ) {
 
     private val stegSuksessMetrics: Map<StegType, Counter> = initStegMetrikker("suksess")
@@ -87,7 +90,6 @@ class StegService(
         val behandling = behandlingService.opprettBehandling(nyBehandling)
 
         val barnasIdenter: List<String> = when (nyBehandling.behandlingÅrsak) {
-            BehandlingÅrsak.MIGRERING,
             BehandlingÅrsak.FØDSELSHENDELSE,
             BehandlingÅrsak.HELMANUELL_MIGRERING,
             -> {
@@ -137,12 +139,13 @@ class StegService(
     private fun validerHelmanuelMigrering(nyBehandling: NyBehandling) {
         val sisteBehandlingSomErVedtatt =
             behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(nyBehandling.fagsakId)
-        if (sisteBehandlingSomErVedtatt != null && !sisteBehandlingSomErVedtatt.resultat.erOpphør()) {
+
+        if (sisteBehandlingSomErVedtatt != null && behandlingService.erLøpende(sisteBehandlingSomErVedtatt)) {
             throw FunksjonellFeil(
-                melding = "Det finnes allerede en vedtatt behandling på fagsak ${nyBehandling.fagsakId}." +
+                melding = "Det finnes allerede en vedtatt behandling med løpende utbetalinger på fagsak ${nyBehandling.fagsakId}." +
                     "Behandling kan ikke opprettes med årsak " +
                     BehandlingÅrsak.HELMANUELL_MIGRERING.visningsnavn,
-                frontendFeilmelding = "Det finnes allerede en vedtatt behandling på fagsak." +
+                frontendFeilmelding = "Det finnes allerede en vedtatt behandling med løpende utbetalinger på fagsak." +
                     "Behandling kan ikke opprettes med årsak " +
                     BehandlingÅrsak.HELMANUELL_MIGRERING.visningsnavn,
             )
@@ -152,7 +155,16 @@ class StegService(
     private fun hentBarnFraForrigeAvsluttedeBehandling(behandling: Behandling): List<String> {
         val sisteBehandling = hentSisteAvsluttetBehandling(behandling)
         return beregningService.finnBarnFraBehandlingMedTilkjentYtelse(sisteBehandling.id)
-            .map { it.aktivFødselsnummer() }
+            .mapNotNull {
+                try {
+                    personopplysningerService.hentPersoninfoEnkel(it)
+                    it.aktivFødselsnummer()
+                } catch (pdlPersonKanIkkeBehandlesIFagsystem: PdlPersonKanIkkeBehandlesIFagsystem) {
+                    logger.warn("Ignorerer barn fra forrige avsluttede behandling: ${pdlPersonKanIkkeBehandlesIFagsystem.årsak}")
+                    secureLogger.warn("Ignorerer barn ${it.aktivFødselsnummer()} fra forrige avsluttede behandling: ${pdlPersonKanIkkeBehandlesIFagsystem.årsak}")
+                    null
+                }
+            }
     }
 
     @Transactional
@@ -297,15 +309,7 @@ class StegService(
             behandlingSteg.utførStegOgAngiNeste(behandling, behandlendeEnhet)
         }
 
-        val harMigreringsbehandlingAvvikInnenforbeløpsgrenser by lazy {
-            simuleringService.harMigreringsbehandlingAvvikInnenforBeløpsgrenser(behandling)
-        }
-
-        val harMigreringsbehandlingManuellePosteringer by lazy {
-            simuleringService.harMigreringsbehandlingManuellePosteringer(behandling)
-        }
-
-        if (behandlingEtterBeslutterSteg.erManuellMigrering() && harMigreringsbehandlingAvvikInnenforbeløpsgrenser && !harMigreringsbehandlingManuellePosteringer) {
+        if (automatiskBeslutningService.behandlingSkalAutomatiskBesluttes(behandling)) {
             return håndterBeslutningForVedtak(
                 behandlingEtterBeslutterSteg,
                 RestBeslutningPåVedtak(Beslutning.GODKJENT),

@@ -20,6 +20,7 @@ import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.barn
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.steg.EndringerIUtbetalingForBehandlingSteg
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
@@ -127,10 +128,9 @@ class BeregningService(
             hentTilkjentYtelseForBehandling(behandlingId = it.id)
         }.filter {
             personopplysningGrunnlagRepository
-                .findByBehandlingAndAktiv(behandlingId = it.behandling.id)
-                ?.barna?.map { barn -> barn.aktør }
-                ?.contains(barnAktør)
-                ?: false
+                .finnSøkerOgBarnAktørerTilAktiv(behandlingId = it.behandling.id)
+                .barn().map { barn -> barn.aktør }
+                .contains(barnAktør)
         }.map { it }
     }
 

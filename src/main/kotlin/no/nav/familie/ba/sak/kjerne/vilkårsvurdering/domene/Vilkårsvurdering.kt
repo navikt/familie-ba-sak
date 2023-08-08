@@ -15,6 +15,7 @@ import jakarta.persistence.SequenceGenerator
 import jakarta.persistence.Table
 import no.nav.familie.ba.sak.common.BaseEntitet
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.sikkerhet.RollestyringMotDatabase
 
 @EntityListeners(RollestyringMotDatabase::class)
@@ -65,6 +66,21 @@ data class Vilkårsvurdering(
                 inkluderAndreVurderinger = inkluderAndreVurderinger,
             )
         }.toSet()
+        return nyVilkårsvurdering
+    }
+
+    fun tilKopiForNyBehandling(
+        nyBehandling: Behandling,
+        personopplysningGrunnlag: PersonopplysningGrunnlag,
+    ): Vilkårsvurdering {
+        val nyVilkårsvurdering = Vilkårsvurdering(behandling = nyBehandling)
+
+        nyVilkårsvurdering.personResultater =
+            personResultater.filter { personopplysningGrunnlag.personer.any { person -> person.aktør.aktørId == it.aktør.aktørId } }
+                .map {
+                    it.tilKopiForNyVilkårsvurdering(nyVilkårsvurdering = nyVilkårsvurdering)
+                }.toSet()
+
         return nyVilkårsvurdering
     }
 

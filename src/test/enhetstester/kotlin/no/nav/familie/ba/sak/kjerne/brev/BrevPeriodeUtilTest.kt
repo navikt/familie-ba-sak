@@ -25,7 +25,7 @@ class BrevPeriodeUtilTest {
     private val featureToggleService: FeatureToggleService = mockk()
 
     @Test
-    fun `Skal sortere perioder kronologisk, med avslag til slutt`() {
+    fun `Skal sortere perioder kronologisk, med generelle avslag til slutt`() {
         val liste = listOf(
             lagBrevperiodeData(
                 fom = LocalDate.now().minusMonths(12),
@@ -34,7 +34,13 @@ class BrevPeriodeUtilTest {
                 featureToggleService = featureToggleService,
             ),
             lagBrevperiodeData(
-                fom = LocalDate.now().minusMonths(4),
+                fom = LocalDate.now().minusMonths(3),
+                tom = null,
+                type = Vedtaksperiodetype.AVSLAG,
+                featureToggleService = featureToggleService,
+            ),
+            lagBrevperiodeData(
+                fom = null,
                 tom = null,
                 type = Vedtaksperiodetype.AVSLAG,
                 featureToggleService = featureToggleService,
@@ -55,10 +61,11 @@ class BrevPeriodeUtilTest {
 
         val sortertListe = liste.sorted()
 
-        Assertions.assertTrue(sortertListe.size == 4)
+        Assertions.assertTrue(sortertListe.size == 5)
         val førstePeriode = sortertListe.first()
         val andrePeriode = sortertListe[1]
         val tredjePeriode = sortertListe[2]
+        val fjerdePeriode = sortertListe[3]
         val sistePeriode = sortertListe.last()
 
         Assertions.assertEquals(Vedtaksperiodetype.UTBETALING, førstePeriode.minimertVedtaksperiode.type)
@@ -67,8 +74,10 @@ class BrevPeriodeUtilTest {
         Assertions.assertEquals(LocalDate.now().minusMonths(7), andrePeriode.minimertVedtaksperiode.fom)
         Assertions.assertEquals(Vedtaksperiodetype.UTBETALING, tredjePeriode.minimertVedtaksperiode.type)
         Assertions.assertEquals(LocalDate.now().minusMonths(3), tredjePeriode.minimertVedtaksperiode.fom)
+        Assertions.assertEquals(Vedtaksperiodetype.AVSLAG, fjerdePeriode.minimertVedtaksperiode.type)
+        Assertions.assertEquals(LocalDate.now().minusMonths(3), fjerdePeriode.minimertVedtaksperiode.fom)
         Assertions.assertEquals(Vedtaksperiodetype.AVSLAG, sistePeriode.minimertVedtaksperiode.type)
-        Assertions.assertEquals(LocalDate.now().minusMonths(4), sistePeriode.minimertVedtaksperiode.fom)
+        Assertions.assertNull(sistePeriode.minimertVedtaksperiode.fom)
     }
 
     @Test

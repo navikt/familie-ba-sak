@@ -10,6 +10,7 @@ import no.nav.familie.ba.sak.kjerne.eøs.kompetanse.domene.Kompetanse
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIEndretUtbetalingAndelUtil
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIKompetanseUtil
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIVilkårsvurderingUtil
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.kombinerMed
@@ -36,6 +37,8 @@ object BehandlingsresultatEndringUtils {
         forrigePersonResultat: Set<PersonResultat>,
         nåværendeEndretAndeler: List<EndretUtbetalingAndel>,
         forrigeEndretAndeler: List<EndretUtbetalingAndel>,
+        personerIBehandling: Set<Person>,
+        personerIForrigeBehandling: Set<Person>,
     ): Endringsresultat {
         val erEndringIBeløp = erEndringIBeløp(
             nåværendeAndeler = nåværendeAndeler,
@@ -52,6 +55,8 @@ object BehandlingsresultatEndringUtils {
         val erEndringIVilkårsvurdering = erEndringIVilkårsvurdering(
             nåværendePersonResultat = nåværendePersonResultat,
             forrigePersonResultat = forrigePersonResultat,
+            personerIBehandling = personerIBehandling,
+            personerIForrigeBehandling = personerIForrigeBehandling,
         )
 
         val erEndringIEndretUtbetalingAndeler = erEndringIEndretUtbetalingAndeler(
@@ -143,10 +148,14 @@ object BehandlingsresultatEndringUtils {
     internal fun erEndringIVilkårsvurdering(
         nåværendePersonResultat: Set<PersonResultat>,
         forrigePersonResultat: Set<PersonResultat>,
+        personerIBehandling: Set<Person>,
+        personerIForrigeBehandling: Set<Person>,
     ): Boolean {
         val endringIVilkårsvurderingTidslinje = EndringIVilkårsvurderingUtil.lagEndringIVilkårsvurderingTidslinje(
             nåværendePersonResultater = nåværendePersonResultat,
             forrigePersonResultater = forrigePersonResultat,
+            personerIBehandling = personerIBehandling,
+            personerIForrigeBehandling = personerIForrigeBehandling,
         )
         return endringIVilkårsvurderingTidslinje.perioder().any { it.innhold == true }
     }

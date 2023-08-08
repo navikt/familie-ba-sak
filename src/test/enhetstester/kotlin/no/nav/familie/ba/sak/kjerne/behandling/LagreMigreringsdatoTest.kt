@@ -19,6 +19,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseReposito
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.logg.LoggService
+import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
 import no.nav.familie.ba.sak.kjerne.vedtak.VedtakRepository
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.VedtaksperiodeService
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.VilkårsvurderingService
@@ -48,6 +49,7 @@ class LagreMigreringsdatoTest {
     val taskRepository = mockk<TaskRepositoryWrapper>()
     val behandlingMigreringsinfoRepository = mockk<BehandlingMigreringsinfoRepository>()
     val vilkårsvurderingService = mockk<VilkårsvurderingService>()
+    val simuleringService = mockk<SimuleringService>()
 
     private val behandlingService = BehandlingService(
         behandlingHentOgPersisterService,
@@ -58,6 +60,7 @@ class LagreMigreringsdatoTest {
         saksstatistikkEventPublisher,
         fagsakRepository,
         vedtakRepository,
+        andelTilkjentYtelseRepository,
         loggService,
         arbeidsfordelingService,
         infotrygdService,

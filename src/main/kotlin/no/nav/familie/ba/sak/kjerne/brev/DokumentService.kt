@@ -11,6 +11,7 @@ import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpostTy
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.JournalføringRepository
 import no.nav.familie.ba.sak.integrasjoner.organisasjon.OrganisasjonService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.ValiderBrevmottakerService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.settpåvent.SettPåVentService
 import no.nav.familie.ba.sak.kjerne.brev.domene.ManueltBrevRequest
@@ -54,6 +55,7 @@ class DokumentService(
     private val behandlingHentOgPersisterService: BehandlingHentOgPersisterService,
     private val dokumentGenereringService: DokumentGenereringService,
     private val brevmottakerService: BrevmottakerService,
+    private val validerBrevmottakerService: ValiderBrevmottakerService,
 ) {
 
     val logger: Logger = LoggerFactory.getLogger(this::class.java)
@@ -70,6 +72,9 @@ class DokumentService(
 
     @Transactional
     fun sendManueltBrev(manueltBrevRequest: ManueltBrevRequest, behandling: Behandling? = null, fagsakId: Long) {
+        behandling?.let {
+            validerBrevmottakerService.validerAtBehandlingIkkeInneholderStrengtFortroligePersonerMedManuelleBrevmottakere(behandlingId = it.id)
+        }
         val generertBrev = dokumentGenereringService.genererManueltBrev(manueltBrevRequest)
         val førsteside = if (manueltBrevRequest.brevmal.skalGenerereForside()) {
             Førsteside(
@@ -171,8 +176,12 @@ class DokumentService(
                     navn = utledInstitusjonNavn(manueltBrevRequest),
                 )
             }
-            mottakerInfo.brukerIdType == BrukerIdType.FNR && mottakerInfo.navn != null -> {
-                AvsenderMottaker(idType = BrukerIdType.FNR, id = mottakerInfo.brukerId, navn = mottakerInfo.navn)
+            mottakerInfo.brukerIdType != BrukerIdType.ORGNR && mottakerInfo.navn != null -> {
+                AvsenderMottaker(
+                    idType = mottakerInfo.brukerIdType,
+                    id = mottakerInfo.brukerIdType?.let { mottakerInfo.brukerId },
+                    navn = mottakerInfo.navn,
+                )
             }
             else -> {
                 null
@@ -211,6 +220,7 @@ class DokumentService(
                 journalpostId = journalPostTilDistribusjon.key,
                 brevmal = manueltBrevRequest.brevmal,
                 erManueltSendt = true,
+                manuellAdresseInfo = journalPostTilDistribusjon.value.manuellAdresseInfo,
             ),
             properties = Properties().apply
                 {

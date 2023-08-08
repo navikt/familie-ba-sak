@@ -5,6 +5,7 @@ import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeDeltBost
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertEndretAndel
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertUtbetalingsperiodeDetalj
 import no.nav.familie.ba.sak.kjerne.brev.domene.MinimertVilkårResultat
+import no.nav.familie.ba.sak.kjerne.brev.domene.Valgbarhet
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.UtdypendeVilkårsvurdering
@@ -22,6 +23,7 @@ data class TriggesAv(
     val deltbosted: Boolean,
     val deltBostedSkalIkkeDeles: Boolean,
     val valgbar: Boolean,
+    val valgbarhet: Valgbarhet?,
     val endringsaarsaker: Set<Årsak>,
     val etterEndretUtbetaling: Boolean,
     val endretUtbetalingSkalUtbetales: EndretUtbetalingsperiodeDeltBostedTriggere,

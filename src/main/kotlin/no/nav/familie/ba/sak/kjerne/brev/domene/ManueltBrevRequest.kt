@@ -356,6 +356,17 @@ fun ManueltBrevRequest.tilBrev(saksbehandlerNavn: String, hentLandkoder: (() -> 
                 saksbehandlerNavn = saksbehandlerNavn,
             )
 
+        Brevmal.INNHENTE_OPPLYSNINGER_OG_INFORMASJON_OM_AT_ANNEN_FORELDER_MED_SELVSTENDIG_RETT_HAR_SØKT ->
+            InnhenteOpplysningerOmBarn(
+                mal = Brevmal.INNHENTE_OPPLYSNINGER_OG_INFORMASJON_OM_AT_ANNEN_FORELDER_MED_SELVSTENDIG_RETT_HAR_SØKT,
+                navn = this.mottakerNavn,
+                fødselsnummer = this.mottakerIdent,
+                dokumentliste = this.multiselectVerdier,
+                enhet = this.enhetNavn(),
+                barnasFødselsdager = this.barnasFødselsdager.tilFormaterteFødselsdager(),
+                saksbehandlerNavn = saksbehandlerNavn,
+            )
+
         Brevmal.INFORMASJONSBREV_KAN_SØKE_EØS ->
             EnkeltInformasjonsbrev(
                 navn = this.mottakerNavn,

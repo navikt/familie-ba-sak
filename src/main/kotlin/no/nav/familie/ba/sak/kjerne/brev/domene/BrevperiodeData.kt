@@ -33,11 +33,12 @@ data class BrevperiodeData(
         featureToggleService = featureToggleService,
     )
 
-    fun hentBegrunnelserOgFritekster(): List<Begrunnelse> {
+    fun hentBegrunnelserOgFritekster(skalBrukeNyVedtaksperiodeLøsning: Boolean): List<Begrunnelse> {
         val brevPeriodeGenerator = this.tilBrevPeriodeGenerator()
         return brevPeriodeGenerator.byggBegrunnelserOgFritekster(
             begrunnelserGrunnlagMedPersoner = brevPeriodeGenerator.hentBegrunnelsegrunnlagMedPersoner(),
             eøsBegrunnelserMedKompetanser = brevPeriodeGenerator.hentEøsBegrunnelserMedKompetanser(),
+            skalBrukeNyVedtaksperiodeLøsning,
         )
     }
 
@@ -50,15 +51,22 @@ data class BrevperiodeData(
         )
 
     override fun compareTo(other: BrevperiodeData): Int {
-        val fomCompared = (this.minimertVedtaksperiode.fom ?: TIDENES_MORGEN)
-            .compareTo(other.minimertVedtaksperiode.fom ?: TIDENES_MORGEN)
+        val fomCompared = (this.minimertVedtaksperiode.fom ?: TIDENES_MORGEN).compareTo(
+            other.minimertVedtaksperiode.fom ?: TIDENES_MORGEN,
+        )
 
         return when {
-            this.minimertVedtaksperiode.type == Vedtaksperiodetype.AVSLAG &&
-                other.minimertVedtaksperiode.type == Vedtaksperiodetype.AVSLAG -> fomCompared
-            this.minimertVedtaksperiode.type == Vedtaksperiodetype.AVSLAG -> 1
-            other.minimertVedtaksperiode.type == Vedtaksperiodetype.AVSLAG -> -1
+            this.erGenereltAvslag() -> 1
+            other.erGenereltAvslag() -> -1
+            fomCompared == 0 && this.minimertVedtaksperiode.type == Vedtaksperiodetype.AVSLAG -> 1
+            fomCompared == 0 && other.minimertVedtaksperiode.type == Vedtaksperiodetype.AVSLAG -> -1
             else -> fomCompared
         }
+    }
+
+    private fun BrevperiodeData.erGenereltAvslag(): Boolean {
+        return minimertVedtaksperiode.type == Vedtaksperiodetype.AVSLAG &&
+            minimertVedtaksperiode.fom == null &&
+            minimertVedtaksperiode.tom == null
     }
 }
