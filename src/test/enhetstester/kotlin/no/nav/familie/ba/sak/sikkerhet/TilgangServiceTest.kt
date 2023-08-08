@@ -8,7 +8,9 @@ import no.nav.familie.ba.sak.common.clearAllCaches
 import no.nav.familie.ba.sak.common.defaultFagsak
 import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagTestPersonopplysningGrunnlag
+import no.nav.familie.ba.sak.common.randomAktør
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.common.tilPersonEnkelSøkerOgBarn
 import no.nav.familie.ba.sak.config.AuditLoggerEvent
 import no.nav.familie.ba.sak.config.IntegrasjonClientMock.Companion.mockSjekkTilgang
 import no.nav.familie.ba.sak.config.RolleConfig
@@ -16,13 +18,10 @@ import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasj
 import no.nav.familie.ba.sak.integrasjoner.familieintegrasjoner.FamilieIntegrasjonerTilgangskontrollService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Kjønn
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Målform
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonEnkel
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
-import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.kjerne.personident.Aktør
-import no.nav.familie.ba.sak.kjerne.personident.Personident
 import no.nav.familie.ba.sak.util.BrukerContextUtil.clearBrukerContext
 import no.nav.familie.ba.sak.util.BrukerContextUtil.mockBrukerContext
 import no.nav.familie.log.mdc.MDCConstants
@@ -77,7 +76,8 @@ class TilgangServiceTest {
         mockBrukerContext()
         every { fagsakService.hentAktør(fagsak.id) } returns fagsak.aktør
         every { behandlingHentOgPersisterService.hent(any()) } returns behandling
-        every { persongrunnlagService.hentAktiv(any()) } returns personopplysningGrunnlag
+        every { persongrunnlagService.hentSøkerOgBarnPåBehandling(behandling.id) } returns
+            personopplysningGrunnlag.tilPersonEnkelSøkerOgBarn()
         cacheManager.clearAllCaches()
     }
 
@@ -180,20 +180,36 @@ class TilgangServiceTest {
 
     @Test
     fun `validerTilgangTilFagsak - skal kaste feil dersom søker eller et eller flere av barna har diskresjonskode og saksbehandler mangler tilgang`() {
+        val søkerAktør = randomAktør("65434563721")
+        val barnAktør = randomAktør("12345678910")
         every { fagsakService.hentAktør(fagsak.id) }.returns(aktør)
         every { behandlingHentOgPersisterService.hentBehandlinger(fagsak.id) }.returns(listOf(behandling))
-        every { persongrunnlagService.hentAktiv(behandling.id) }.returns(
-            PersonopplysningGrunnlag(
-                behandlingId = behandling.id,
-                personer = mutableSetOf<Person>(
-                    Person(aktør = Aktør(aktørId = "6543456372112", personidenter = mutableSetOf(Personident(fødselsnummer = "65434563721", aktiv = true, aktør = Aktør("6543456372112", mutableSetOf())))), type = PersonType.SØKER, fødselsdato = LocalDate.now(), kjønn = Kjønn.MANN, personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id, personer = mutableSetOf(), aktiv = true)),
-                    Person(aktør = Aktør(aktørId = "1234567891012", personidenter = mutableSetOf(Personident(fødselsnummer = "12345678910", aktiv = true, aktør = Aktør("1234567891012", mutableSetOf())))), type = PersonType.BARN, fødselsdato = LocalDate.now(), kjønn = Kjønn.MANN, personopplysningGrunnlag = PersonopplysningGrunnlag(behandlingId = behandling.id, personer = mutableSetOf(), aktiv = true)),
+        every { persongrunnlagService.hentSøkerOgBarnPåFagsak(fagsak.id) }.returns(
+            setOf(
+                PersonEnkel(
+                    aktør = søkerAktør,
+                    type = PersonType.SØKER,
+                    fødselsdato = LocalDate.now(),
+                    dødsfallDato = null,
+                    målform = Målform.NB,
+                ),
+                PersonEnkel(
+                    aktør = barnAktør,
+                    type = PersonType.BARN,
+                    fødselsdato = LocalDate.now(),
+                    dødsfallDato = null,
+                    målform = Målform.NB,
                 ),
             ),
         )
         mockFamilieIntegrasjonerTilgangskontrollClient.mockSjekkTilgang(false)
         mockBrukerContext("A")
-        assertThrows<RolleTilgangskontrollFeil> { tilgangService.validerTilgangTilFagsak(fagsak.id, AuditLoggerEvent.ACCESS) }
+        assertThrows<RolleTilgangskontrollFeil> {
+            tilgangService.validerTilgangTilFagsak(
+                fagsak.id,
+                AuditLoggerEvent.ACCESS,
+            )
+        }
     }
 
     @Test

@@ -7,6 +7,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValidering.finnAktø
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.barn
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.totrinnskontroll.TotrinnskontrollService
 import org.slf4j.LoggerFactory
@@ -31,9 +32,9 @@ class TilkjentYtelseValideringService(
     fun validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(behandling: Behandling) {
         val tilkjentYtelse = beregningService.hentTilkjentYtelseForBehandling(behandlingId = behandling.id)
 
-        val personopplysningGrunnlag = persongrunnlagService.hentAktivThrows(behandlingId = behandling.id)
+        val søkerOgBarn = persongrunnlagService.hentSøkerOgBarnPåBehandlingThrows(behandlingId = behandling.id)
 
-        val barnMedAndreRelevanteTilkjentYtelser = personopplysningGrunnlag.barna.map {
+        val barnMedAndreRelevanteTilkjentYtelser = søkerOgBarn.barn().map {
             Pair(
                 it,
                 beregningService.hentRelevanteTilkjentYtelserForBarn(it.aktør, behandling.fagsak.id),
@@ -50,7 +51,7 @@ class TilkjentYtelseValideringService(
         TilkjentYtelseValidering.validerAtBarnIkkeFårFlereUtbetalingerSammePeriode(
             behandlendeBehandlingTilkjentYtelse = tilkjentYtelse,
             barnMedAndreRelevanteTilkjentYtelser = barnMedAndreRelevanteTilkjentYtelser,
-            personopplysningGrunnlag = personopplysningGrunnlag,
+            søkerOgBarn = søkerOgBarn,
         )
     }
 

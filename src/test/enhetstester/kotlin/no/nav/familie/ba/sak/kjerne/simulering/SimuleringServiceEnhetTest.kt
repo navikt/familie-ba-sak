@@ -5,6 +5,7 @@ import io.mockk.mockk
 import no.nav.familie.ba.sak.common.Feil
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.randomFnr
+import no.nav.familie.ba.sak.common.tilPersonEnkel
 import no.nav.familie.ba.sak.config.FeatureToggleConfig
 import no.nav.familie.ba.sak.config.FeatureToggleService
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiKlient
@@ -14,6 +15,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottaker
 import no.nav.familie.ba.sak.kjerne.simulering.domene.ØkonomiSimuleringMottakerRepository
@@ -83,7 +85,10 @@ internal class SimuleringServiceEnhetTest {
             listOf(mockØkonomiSimuleringMottaker(behandling = behandling, økonomiSimuleringPostering = posteringer))
 
         every { økonomiSimuleringMottakerRepository.findByBehandlingId(behandling.id) } returns simuleringMottaker
-        every { persongrunnlagService.hentBarna(behandling.id) } returns listOf(lagPerson(), lagPerson())
+        every { persongrunnlagService.hentSøkerOgBarnPåBehandling(behandling.id) } returns listOf(
+            lagPerson(type = PersonType.BARN).tilPersonEnkel(),
+            lagPerson(type = PersonType.BARN).tilPersonEnkel(),
+        )
         every { featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ) } returns true
 
         val behandlingHarAvvikInnenforBeløpsgrenser =
@@ -130,7 +135,10 @@ internal class SimuleringServiceEnhetTest {
             listOf(mockØkonomiSimuleringMottaker(behandling = behandling, økonomiSimuleringPostering = posteringer))
 
         every { økonomiSimuleringMottakerRepository.findByBehandlingId(behandling.id) } returns simuleringMottaker
-        every { persongrunnlagService.hentBarna(behandling.id) } returns listOf(lagPerson(), lagPerson())
+        every { persongrunnlagService.hentSøkerOgBarnPåBehandling(behandling.id) } returns listOf(
+            lagPerson(type = PersonType.BARN).tilPersonEnkel(),
+            lagPerson(type = PersonType.BARN).tilPersonEnkel(),
+        )
         every { featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ) } returns true
 
         val behandlingHarAvvikInnenforBeløpsgrenser =
@@ -162,7 +170,10 @@ internal class SimuleringServiceEnhetTest {
             listOf(mockØkonomiSimuleringMottaker(behandling = behandling, økonomiSimuleringPostering = posteringer))
 
         every { økonomiSimuleringMottakerRepository.findByBehandlingId(behandling.id) } returns simuleringMottaker
-        every { persongrunnlagService.hentBarna(behandling.id) } returns listOf(lagPerson(), lagPerson())
+        every { persongrunnlagService.hentSøkerOgBarnPåBehandling(behandling.id) } returns listOf(
+            lagPerson(type = PersonType.BARN).tilPersonEnkel(),
+            lagPerson(type = PersonType.BARN).tilPersonEnkel(),
+        )
         every { featureToggleService.isEnabled(FeatureToggleConfig.ER_MANUEL_POSTERING_TOGGLE_PÅ) } returns true
 
         val behandlingHarAvvikInnenforBeløpsgrenser =

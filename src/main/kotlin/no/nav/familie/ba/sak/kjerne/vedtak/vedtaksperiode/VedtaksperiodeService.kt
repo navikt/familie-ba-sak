@@ -468,7 +468,11 @@ class VedtaksperiodeService(
         return vedtaksperiodeHentOgPersisterService.finnVedtaksperioderFor(vedtakId = vedtak.id)
     }
 
-    fun hentUtvidetVedtaksperiodeMedBegrunnelser(vedtak: Vedtak): List<UtvidetVedtaksperiodeMedBegrunnelser> {
+    fun hentUtvidetVedtaksperiodeMedBegrunnelser(
+        vedtak: Vedtak,
+        personopplysningGrunnlag: PersonopplysningGrunnlag? = null,
+    ): List<UtvidetVedtaksperiodeMedBegrunnelser> {
+        val persongrunnlag = personopplysningGrunnlag ?: persongrunnlagService.hentAktivThrows(vedtak.behandling.id)
         val vedtaksperioderMedBegrunnelser = hentPersisterteVedtaksperioder(vedtak)
 
         val behandling = vedtak.behandling
@@ -477,9 +481,6 @@ class VedtaksperiodeService(
 
         val andelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService
             .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.id)
-
-        val persongrunnlag =
-            persongrunnlagService.hentAktivThrows(behandling.id)
 
         val utvidetVedtaksperioderMedBegrunnelser = vedtaksperioderMedBegrunnelser.map {
             it.tilUtvidetVedtaksperiodeMedBegrunnelser(
@@ -604,9 +605,15 @@ class VedtaksperiodeService(
     fun hentUtbetalingsperioder(
         behandling: Behandling,
     ): List<Utbetalingsperiode> {
-        val personopplysningGrunnlag =
-            persongrunnlagService.hentAktiv(behandlingId = behandling.id)
-                ?: return emptyList()
+        val personopplysningGrunnlag = persongrunnlagService.hentAktiv(behandlingId = behandling.id)
+        return hentUtbetalingsperioder(behandling, personopplysningGrunnlag)
+    }
+
+    fun hentUtbetalingsperioder(
+        behandling: Behandling,
+        personopplysningGrunnlag: PersonopplysningGrunnlag?,
+    ): List<Utbetalingsperiode> {
+        if (personopplysningGrunnlag == null) return emptyList()
 
         val andelerTilkjentYtelse = andelerTilkjentYtelseOgEndreteUtbetalingerService
             .finnAndelerTilkjentYtelseMedEndreteUtbetalinger(behandling.id)

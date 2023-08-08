@@ -12,6 +12,9 @@ import no.nav.familie.ba.sak.common.lagBehandling
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagPerson
 import no.nav.familie.ba.sak.common.lagVedtak
+import no.nav.familie.ba.sak.common.lagVilkårsvurdering
+import no.nav.familie.ba.sak.common.tilPersonEnkel
+import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -27,6 +30,7 @@ import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.TilkjentYtelse
 import no.nav.familie.ba.sak.kjerne.forrigebehandling.EndringIUtbetalingUtil
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
+import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersongrunnlagService
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
 import no.nav.familie.ba.sak.kjerne.simulering.SimuleringService
@@ -190,7 +194,7 @@ class BehandlingsresultatStegTest {
     @Test
     fun `preValiderSteg - skal validere andeler ved satsendring og ikke kaste feil når endringene i andeler kun er relatert til endring i sats`() {
         val søker = lagPerson()
-        val barn = lagPerson()
+        val barn = lagPerson(type = PersonType.BARN)
         val forrigeBehandling =
             lagBehandling(behandlingType = BehandlingType.FØRSTEGANGSBEHANDLING, årsak = BehandlingÅrsak.SØKNAD)
 
@@ -273,6 +277,8 @@ class BehandlingsresultatStegTest {
             søker = søker,
             barn = listOf(barn),
         )
+
+        behandlingsresultatSteg.preValiderSteg(behandling)
 
         assertThatCode { behandlingsresultatSteg.preValiderSteg(behandling) }.doesNotThrowAnyException()
     }
@@ -381,10 +387,14 @@ class BehandlingsresultatStegTest {
         barn: List<Person>,
     ) {
         val personopplysningGrunnlag = mockk<PersonopplysningGrunnlag>()
-        every { vilkårService.hentVilkårsvurderingThrows(behandling.id) } returns mockk()
-        every { vilkårService.hentVilkårsvurdering(behandling.id) } returns mockk()
+        val vikårsvurderings =
+            lagVilkårsvurdering(søkerAktør = søker.aktør, behandling = behandling, resultat = Resultat.OPPFYLT)
+        every { vilkårService.hentVilkårsvurderingThrows(behandling.id) } returns vikårsvurderings
+        every { vilkårService.hentVilkårsvurdering(behandling.id) } returns vikårsvurderings
         every { persongrunnlagService.hentBarna(any<Behandling>()) } returns emptyList()
         every { beregningService.hentTilkjentYtelseForBehandling(behandling.id) } returns tilkjentYtelse
+
+        every { persongrunnlagService.hentSøkerOgBarnPåBehandlingThrows(any()) } returns barn.map { it.tilPersonEnkel() } + søker.tilPersonEnkel()
 
         every { persongrunnlagService.hentAktivThrows(any()) } returns personopplysningGrunnlag
         every { personopplysningGrunnlag.søker } returns søker

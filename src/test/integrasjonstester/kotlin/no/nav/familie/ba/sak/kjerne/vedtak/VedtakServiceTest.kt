@@ -142,6 +142,7 @@ class VedtakServiceTest(
             saksstatistikkEventPublisher,
             fagsakRepository,
             vedtakRepository,
+            andelTilkjentYtelseRepository,
             loggService,
             arbeidsfordelingService,
             infotrygdService,
