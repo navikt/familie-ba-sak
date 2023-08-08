@@ -60,6 +60,7 @@ class LagreMigreringsdatoTest {
         saksstatistikkEventPublisher,
         fagsakRepository,
         vedtakRepository,
+        andelTilkjentYtelseRepository,
         loggService,
         arbeidsfordelingService,
         infotrygdService,

@@ -143,7 +143,7 @@ class UtvidetBehandlingService(
             fødselshendelsefiltreringResultater = fødselshendelsefiltreringResultatRepository.finnFødselshendelsefiltreringResultater(
                 behandlingId = behandling.id,
             ).map { it.tilRestFødselshendelsefiltreringResultat() },
-            utbetalingsperioder = vedtaksperiodeService.hentUtbetalingsperioder(behandling),
+            utbetalingsperioder = vedtaksperiodeService.hentUtbetalingsperioder(behandling, personopplysningGrunnlag),
             personerMedAndelerTilkjentYtelse = personopplysningGrunnlag?.tilRestPersonerMedAndeler(andelerTilkjentYtelse)
                 ?: emptyList(),
             endretUtbetalingAndeler = endreteUtbetalingerMedAndeler
@@ -152,7 +152,11 @@ class UtvidetBehandlingService(
             endringstidspunkt = utledEndringstidpunkt(endringstidspunkt, behandling),
             vedtak = vedtak?.tilRestVedtak(
                 vedtaksperioderMedBegrunnelser = if (behandling.status != BehandlingStatus.AVSLUTTET) {
-                    vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(vedtak = vedtak)
+                    vedtaksperiodeService.hentUtvidetVedtaksperiodeMedBegrunnelser(
+                        vedtak = vedtak,
+                        personopplysningGrunnlag = personopplysningGrunnlag
+                            ?: error("Mangler persongrunnlag på behandling=$behandlingId"),
+                    )
                         .sorter()
                         .map { it.tilRestUtvidetVedtaksperiodeMedBegrunnelser() }
                 } else {
