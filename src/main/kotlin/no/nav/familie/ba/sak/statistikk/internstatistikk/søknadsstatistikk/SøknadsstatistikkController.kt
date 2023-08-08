@@ -3,11 +3,8 @@ package no.nav.familie.ba.sak.statistikk.internstatistikk.søknadsstatistikk
 import no.nav.familie.ba.sak.common.RessursUtils
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
 import no.nav.familie.ba.sak.kjerne.behandling.domene.SøknadsstatistikkForPeriode
-import no.nav.familie.ba.sak.sikkerhet.SikkerhetContext
 import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
@@ -35,14 +32,9 @@ class SøknadsstatistikkController(
             val fomDato = fom?.let { LocalDate.parse(it) } ?: LocalDate.now().minusMonths(4).withDayOfMonth(1)
             val tomDato = tom?.let { LocalDate.parse(it) } ?: fomDato.plusMonths(4).minusDays(1)
 
-            logger.info("${SikkerhetContext.hentSaksbehandlerNavn()} henter søknadsstatistikk for periode $fomDato $tomDato")
             RessursUtils.ok(behandlingSøknadsinfoService.hentSøknadsstatistikk(fomDato, tomDato))
         } catch (e: DateTimeParseException) {
             RessursUtils.badRequest("Ugyldig dato", e)
         }
-    }
-
-    companion object {
-        private val logger: Logger = LoggerFactory.getLogger(SøknadsstatistikkController::class.java)
     }
 }
