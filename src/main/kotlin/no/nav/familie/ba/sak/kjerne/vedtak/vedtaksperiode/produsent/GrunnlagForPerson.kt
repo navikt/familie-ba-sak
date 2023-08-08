@@ -44,7 +44,10 @@ data class GrunnlagForPersonInnvilget(
     val kompetanse: KompetanseForVedtaksperiode? = null,
     val endretUtbetalingAndel: EndretUtbetalingAndelForVedtaksperiode? = null,
     val overgangsstønad: OvergangsstønadForVedtaksperiode? = null,
-) : GrunnlagForPerson
+) : GrunnlagForPerson {
+    fun erEndretTilIngenUtbetalingIkkeDeltBosted() =
+        andeler.all { it.prosent == BigDecimal.ZERO } && endretUtbetalingAndel?.årsak != Årsak.DELT_BOSTED == true
+}
 
 data class GrunnlagForPersonIkkeInnvilget(
     override val person: Person,
@@ -100,10 +103,12 @@ data class EndretUtbetalingAndelForVedtaksperiode(
 data class AndelForVedtaksperiode(
     val kalkulertUtbetalingsbeløp: Int,
     val type: YtelseType,
+    val prosent: BigDecimal,
 ) {
     constructor(andelTilkjentYtelse: AndelTilkjentYtelse) : this(
         kalkulertUtbetalingsbeløp = andelTilkjentYtelse.kalkulertUtbetalingsbeløp,
         type = andelTilkjentYtelse.type,
+        prosent = andelTilkjentYtelse.prosent,
     )
 }
 
