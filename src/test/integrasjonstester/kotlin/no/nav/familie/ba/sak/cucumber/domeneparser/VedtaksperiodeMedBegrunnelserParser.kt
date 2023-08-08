@@ -65,6 +65,11 @@ object VedtaksperiodeMedBegrunnelserParser {
         RESULTAT("Resultat"),
     }
 
+    enum class DomenebegrepEndretUtbetaling(override val nøkkel: String) : Domenenøkkel {
+        PROSENT("Prosent"),
+        ÅRSAK("Årsak"),
+    }
+
     enum class DomenebegrepAndelTilkjentYtelse(override val nøkkel: String) : Domenenøkkel {
         YTELSE_TYPE("Ytelse type"),
     }
