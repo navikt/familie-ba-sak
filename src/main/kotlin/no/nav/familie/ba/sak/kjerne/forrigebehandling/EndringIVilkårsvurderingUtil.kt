@@ -42,7 +42,7 @@ object EndringIVilkårsvurderingUtil {
             (nåværendePersonResultater.map { it.aktør } + forrigePersonResultater.map { it.aktør }).distinct()
 
         val tidslinjerPerPersonOgVilkår = allePersonerMedPersonResultat.flatMap { aktør ->
-            val personIBehandling = personerIBehandling.single { it.aktør == aktør }
+            val personIBehandling = personerIBehandling.singleOrNull { it.aktør == aktør }
             val personIForrigeBehandling = personerIForrigeBehandling.singleOrNull { it.aktør == aktør }
 
             Vilkår.values().map { vilkår ->
@@ -77,11 +77,11 @@ object EndringIVilkårsvurderingUtil {
         nåværendeOppfylteVilkårResultater: List<VilkårResultat>,
         forrigeOppfylteVilkårResultater: List<VilkårResultat>,
         vilkår: Vilkår,
-        personIBehandling: Person,
+        personIBehandling: Person?,
         personIForrigeBehandling: Person?,
     ): Tidslinje<Boolean, Måned> {
         val nåværendeVilkårResultatTidslinje = nåværendeOppfylteVilkårResultater
-            .tilForskjøvetTidslinjeForOppfyltVilkår(vilkår = vilkår, fødselsdato = personIBehandling.fødselsdato)
+            .tilForskjøvetTidslinjeForOppfyltVilkår(vilkår = vilkår, fødselsdato = personIBehandling?.fødselsdato)
 
         val tidligereVilkårResultatTidslinje = forrigeOppfylteVilkårResultater
             .tilForskjøvetTidslinjeForOppfyltVilkår(vilkår = vilkår, fødselsdato = personIForrigeBehandling?.fødselsdato)
