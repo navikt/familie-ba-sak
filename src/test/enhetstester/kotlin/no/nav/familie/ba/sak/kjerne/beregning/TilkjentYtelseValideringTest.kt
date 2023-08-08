@@ -229,38 +229,43 @@ class TilkjentYtelseValideringTest {
                 fom = inneværendeMåned().minusYears(1),
                 tom = inneværendeMåned(),
                 beløp = 2108,
-                person = barn
+                person = barn,
             ),
             lagAndelTilkjentYtelse(
                 fom = inneværendeMåned().plusMonths(1),
                 tom = inneværendeMåned().plusYears(1),
                 beløp = 2108,
-                person = barn
-            )
+                person = barn,
+            ),
         )
         val andelerFraTidligere = listOf(
             lagAndelTilkjentYtelse(
                 fom = inneværendeMåned().minusYears(1).plusMonths(1),
                 tom = inneværendeMåned().plusMonths(2),
                 beløp = 2108,
-                person = barn
+                person = barn,
             ),
             lagAndelTilkjentYtelse(
                 fom = inneværendeMåned().plusMonths(3),
                 tom = inneværendeMåned().plusYears(1).minusMonths(1),
                 beløp = 2108,
-                person = barn
-            )
+                person = barn,
+            ),
         )
 
         Assertions.assertEquals(
-            MånedPeriode(
-                inneværendeMåned().minusYears(1).plusMonths(1),
-                inneværendeMåned().plusYears(1).minusMonths(1)
+            listOf(
+                MånedPeriode(
+                    inneværendeMåned().minusYears(1).plusMonths(1),
+                    inneværendeMåned().plusYears(1).minusMonths(1),
+                ),
             ),
-            TilkjentYtelseValidering.finnPeriodeMedOverlappAvAndeler(andeler, andelerFraTidligere)
+            TilkjentYtelseValidering.finnPeriodeMedOverlappAvAndeler(andeler, andelerFraTidligere),
         )
-        Assertions.assertEquals(TilkjentYtelseValidering.finnPeriodeMedOverlappAvAndeler(andeler, emptyList()), null)
+        Assertions.assertEquals(
+            TilkjentYtelseValidering.finnPeriodeMedOverlappAvAndeler(andeler, emptyList()),
+            emptyList<MånedPeriode>(),
+        )
     }
 
     @Nested

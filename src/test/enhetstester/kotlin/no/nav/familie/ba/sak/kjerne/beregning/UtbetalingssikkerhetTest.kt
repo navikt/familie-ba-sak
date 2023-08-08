@@ -7,13 +7,13 @@ import no.nav.familie.ba.sak.common.inneværendeMåned
 import no.nav.familie.ba.sak.common.lagAndelTilkjentYtelse
 import no.nav.familie.ba.sak.common.lagInitiellTilkjentYtelse
 import no.nav.familie.ba.sak.common.nesteMåned
+import no.nav.familie.ba.sak.common.tilKortString
 import no.nav.familie.ba.sak.common.tilfeldigPerson
 import no.nav.familie.ba.sak.kjerne.beregning.domene.SatsType
 import no.nav.familie.ba.sak.kjerne.beregning.domene.YtelseType
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonType
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlag
-import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.tilBrevTekst
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -239,10 +239,8 @@ class UtbetalingssikkerhetTest {
         assertTrue(
             feil.frontendFeilmelding?.contains(
                 "Du kan ikke godkjenne dette vedtaket fordi det vil betales ut mer enn 100% for barn født ${
-                    listOf(
-                        barn.fødselsdato,
-                    ).tilBrevTekst()
-                }",
+                    barn.fødselsdato.tilKortString()
+                } i periodene ${barn.fødselsdato.nesteMåned()} til ${barn.fødselsdato.plusYears(18).forrigeMåned()}",
             )!!,
         )
     }
@@ -353,10 +351,25 @@ class UtbetalingssikkerhetTest {
         val småbarnstillegg = SatsService.finnSisteSatsFor(SatsType.SMA).beløp
         val tilleggOrdinærBarnetrygd = SatsService.finnSisteSatsFor(SatsType.TILLEGG_ORBA).beløp
 
-        assertEquals(utvidetBarnetrygd + småbarnstillegg, TilkjentYtelseValidering.maksBeløp(personType = PersonType.SØKER, fagsakType = FagsakType.NORMAL))
-        assertEquals(tilleggOrdinærBarnetrygd, TilkjentYtelseValidering.maksBeløp(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL))
-        assertEquals(tilleggOrdinærBarnetrygd, TilkjentYtelseValidering.maksBeløp(personType = PersonType.BARN, fagsakType = FagsakType.INSTITUSJON))
-        assertEquals(tilleggOrdinærBarnetrygd + utvidetBarnetrygd, TilkjentYtelseValidering.maksBeløp(personType = PersonType.BARN, fagsakType = FagsakType.BARN_ENSLIG_MINDREÅRIG))
+        assertEquals(
+            utvidetBarnetrygd + småbarnstillegg,
+            TilkjentYtelseValidering.maksBeløp(personType = PersonType.SØKER, fagsakType = FagsakType.NORMAL),
+        )
+        assertEquals(
+            tilleggOrdinærBarnetrygd,
+            TilkjentYtelseValidering.maksBeløp(personType = PersonType.BARN, fagsakType = FagsakType.NORMAL),
+        )
+        assertEquals(
+            tilleggOrdinærBarnetrygd,
+            TilkjentYtelseValidering.maksBeløp(personType = PersonType.BARN, fagsakType = FagsakType.INSTITUSJON),
+        )
+        assertEquals(
+            tilleggOrdinærBarnetrygd + utvidetBarnetrygd,
+            TilkjentYtelseValidering.maksBeløp(
+                personType = PersonType.BARN,
+                fagsakType = FagsakType.BARN_ENSLIG_MINDREÅRIG,
+            ),
+        )
         assertThrows<Feil> { TilkjentYtelseValidering.maksBeløp(personType = PersonType.ANNENPART, FagsakType.NORMAL) }
     }
 
