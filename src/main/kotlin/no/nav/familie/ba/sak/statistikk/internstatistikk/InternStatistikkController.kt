@@ -9,6 +9,7 @@ import no.nav.familie.kontrakter.felles.Ressurs
 import no.nav.security.token.support.core.api.ProtectedWithClaims
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.format.annotation.DateTimeFormat
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
@@ -17,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
-import java.time.format.DateTimeParseException
 
 @RestController
 @RequestMapping("/api/internstatistikk")
@@ -42,17 +42,13 @@ class InternStatistikkController(
 
     @GetMapping(path = ["antallSoknader"], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentSøknadsstatistikkForPeriode(
-        @RequestParam fom: String?,
-        @RequestParam tom: String?,
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) fom: LocalDate?,
+        @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) tom: LocalDate?,
     ): ResponseEntity<Ressurs<SøknadsstatistikkForPeriode>> {
-        return try {
-            val fomDato = fom?.let { LocalDate.parse(it) } ?: LocalDate.now().minusMonths(4).withDayOfMonth(1)
-            val tomDato = tom?.let { LocalDate.parse(it) } ?: fomDato.plusMonths(4).minusDays(1)
+        val fomDato = fom ?: LocalDate.now().minusMonths(4).withDayOfMonth(1)
+        val tomDato = tom ?: fomDato.plusMonths(4).minusDays(1)
 
-            RessursUtils.ok(behandlingSøknadsinfoService.hentSøknadsstatistikk(fomDato, tomDato))
-        } catch (e: DateTimeParseException) {
-            RessursUtils.badRequest("Ugyldig dato", e)
-        }
+        return RessursUtils.ok(behandlingSøknadsinfoService.hentSøknadsstatistikk(fomDato, tomDato))
     }
 
     companion object {
