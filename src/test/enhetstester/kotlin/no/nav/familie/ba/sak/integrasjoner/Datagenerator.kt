@@ -48,7 +48,7 @@ fun lagTestJournalpost(personIdent: String, journalpostId: String): Journalpost 
         dokumenter = listOf(
             DokumentInfo(
                 tittel = "Søknad om barnetrygd",
-                brevkode = "mock",
+                brevkode = "NAV 33-00.07",
                 dokumentstatus = null,
                 dokumentvarianter = emptyList(),
                 dokumentInfoId = "1",
@@ -56,7 +56,7 @@ fun lagTestJournalpost(personIdent: String, journalpostId: String): Journalpost 
             ),
             DokumentInfo(
                 tittel = "Ekstra vedlegg",
-                brevkode = "mock",
+                brevkode = null,
                 dokumentstatus = null,
                 dokumentvarianter = emptyList(),
                 dokumentInfoId = "2",
