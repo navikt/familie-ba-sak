@@ -84,7 +84,7 @@ private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåVilkår(
         behandlingUnderkategori = behandlingUnderkategori,
     )
 
-    return this.filter { (_, sanityBegrunnelse) -> sanityBegrunnelse.vilkår.all { utgjørendeVilkår.contains(it) } }
+    return this.filterValues { sanityBegrunnelse -> sanityBegrunnelse.vilkår.all { utgjørendeVilkår.contains(it) } }
 }
 
 private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåEtterEndretUtbetaling(
