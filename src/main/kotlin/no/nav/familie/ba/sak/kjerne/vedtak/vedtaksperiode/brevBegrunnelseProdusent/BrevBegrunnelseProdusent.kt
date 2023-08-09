@@ -99,7 +99,7 @@ private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåEtterEndretUtb
             endretUtbetalingForrigePeriode = endretUtbetalingForrigePeriode,
         )
 
-    // Filtrerer ikke bort begrunnelser i dette filteret dersom de ikke gjelder endretUtbetaling
+    // Filtrerer ikke bort begrunnelser i dette filteret dersom de ikke gjelder "etter endret utbetaling"
     // fordi de skal filtreres i en av de andre filterfunksjonene.
     val begrunnelserUrelevanteForFilter = this.filterValues { !it.gjelderEtterEndretUtbetaling() }
 
