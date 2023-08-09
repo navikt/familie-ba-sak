@@ -21,6 +21,8 @@ import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.Person
 import no.nav.familie.ba.sak.kjerne.grunnlag.personopplysninger.PersonopplysningGrunnlagRepository
 import no.nav.familie.ba.sak.kjerne.personident.Aktør
 import no.nav.familie.ba.sak.kjerne.personident.PersonidentService
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.VilkårsvurderingRepository
 import no.nav.familie.kontrakter.felles.personopplysning.FORELDERBARNRELASJONROLLE
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -31,6 +33,7 @@ class FiltreringsreglerService(
     private val personopplysningerService: PersonopplysningerService,
     private val personidentService: PersonidentService,
     private val personopplysningGrunnlagRepository: PersonopplysningGrunnlagRepository,
+    private val vilkårsvurderingRepository: VilkårsvurderingRepository,
     private val localDateService: LocalDateService,
     private val fødselshendelsefiltreringResultatRepository: FødselshendelsefiltreringResultatRepository,
     private val behandlingService: BehandlingService,
@@ -101,6 +104,10 @@ class FiltreringsreglerService(
         val fakta = FiltreringsreglerFakta(
             mor = personopplysningGrunnlag.søker,
             morMottarLøpendeUtvidet = behandling.underkategori == BehandlingUnderkategori.UTVIDET,
+            morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato(
+                behandling,
+                barnaFraHendelse,
+            ),
             morMottarEøsBarnetrygd = behandling.kategori == BehandlingKategori.EØS,
             barnaFraHendelse = barnaFraHendelse,
             restenAvBarna = finnRestenAvBarnasPersonInfo(morsAktørId, barnaFraHendelse),
@@ -117,7 +124,7 @@ class FiltreringsreglerService(
                 barna = barnaFraHendelse,
             ),
         )
-        val evalueringer = evaluerFiltreringsregler(fakta)
+        val evalueringer = FiltreringsregelEvaluering.evaluerFiltreringsregler(fakta)
         oppdaterMetrikker(evalueringer)
 
         logger.info("Resultater fra filtreringsregler på behandling $behandling: ${evalueringer.map { "${it.identifikator}: ${it.resultat}" }}")
@@ -160,6 +167,22 @@ class FiltreringsreglerService(
             førsteutfall = økTellereForFørsteUtfall(it, førsteutfall)
         }
     }
+
+    private fun morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato(
+        behandling: Behandling,
+        barnaFraHendelse: List<Person>,
+    ) =
+        vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)?.let {
+            it.personResultater.single { personResultat -> personResultat.erSøkersResultater() }.vilkårResultater.any { vilkårResultat ->
+                vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD && vilkårResultat.erOppfylt() && barnaFraHendelse.any { barnFraHendelse ->
+                    vilkårResultat.periodeTom?.let { tom ->
+                        tom.isAfter(barnFraHendelse.fødselsdato) && tom.isBefore(
+                            barnFraHendelse.fødselsdato.plusYears(18),
+                        )
+                    } ?: true
+                }
+            }
+        } ?: false
 
     companion object {
 
