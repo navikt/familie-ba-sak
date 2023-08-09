@@ -91,7 +91,7 @@ private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåEtterEndretUtb
     endretUtbetalingDennePerioden: EndretUtbetalingAndelForVedtaksperiode?,
     endretUtbetalingForrigePeriode: EndretUtbetalingAndelForVedtaksperiode?,
 ): Map<Standardbegrunnelse, SanityBegrunnelse> {
-    val begrunnelserRelevanteForFilter = this.filterValues { it.gjelderEtterEndretUtbetaling() }
+    val begrunnelserRelevanteForFilter = this.filterValues { it.erEndringsårsakOgGjelderEtterEndretUtbetaling() }
 
     val filtrerteBegrunnelser =
         begrunnelserRelevanteForFilter.filtrerPåOmMatcher(
@@ -101,7 +101,7 @@ private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåEtterEndretUtb
 
     // Filtrerer ikke bort begrunnelser i dette filteret dersom de ikke gjelder "etter endret utbetaling"
     // fordi de skal filtreres i en av de andre filterfunksjonene.
-    val begrunnelserUrelevanteForFilter = this.filterValues { !it.gjelderEtterEndretUtbetaling() }
+    val begrunnelserUrelevanteForFilter = this.filterValues { !it.erEndringsårsakOgGjelderEtterEndretUtbetaling() }
 
     return filtrerteBegrunnelser + begrunnelserUrelevanteForFilter
 }
@@ -128,7 +128,7 @@ private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåOmMatcher(
     }
 }
 
-private fun SanityBegrunnelse.gjelderEtterEndretUtbetaling() =
+private fun SanityBegrunnelse.erEndringsårsakOgGjelderEtterEndretUtbetaling() =
     !this.endringsaarsaker.isNullOrEmpty() && this.gjelderEtterEndretUtbetaling()
 
 private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåEndretUtbetaling(
