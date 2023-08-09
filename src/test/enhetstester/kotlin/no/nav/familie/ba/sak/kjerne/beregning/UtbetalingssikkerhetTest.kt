@@ -246,7 +246,7 @@ class UtbetalingssikkerhetTest {
                     Pair(barn1.tilPersonEnkel(), listOf(tilkjentYtelse)),
                     Pair(barn2.tilPersonEnkel(), listOf(tilkjentYtelse)),
                 ),
-                søkerOgBarn = personopplysningGrunnlag2.tilPersonEnkelSøkerOgBarn()
+                søkerOgBarn = personopplysningGrunnlag2.tilPersonEnkelSøkerOgBarn(),
             )
         }
 
