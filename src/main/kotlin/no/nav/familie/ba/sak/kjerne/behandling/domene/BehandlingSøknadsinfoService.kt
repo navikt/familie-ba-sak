@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
 
 @Service
 class BehandlingSøknadsinfoService(
@@ -31,7 +32,7 @@ class BehandlingSøknadsinfoService(
 
     fun hentSøknadsstatistikk(fom: LocalDate, tom: LocalDate): SøknadsstatistikkForPeriode {
         val antallSøknaderPerGruppe =
-            behandlingSøknadsinfoRepository.hentAntallSøknaderIPeriode(fom.atStartOfDay(), tom.atTime(23, 59, 59, 999999999))
+            behandlingSøknadsinfoRepository.hentAntallSøknaderIPeriode(fom.atStartOfDay(), tom.atTime(LocalTime.MAX))
 
         val antallOrdinære =
             antallSøknaderPerGruppe.filter { it.brevkode == ORDINÆR.søknadskode }.sumOf { it.antall }
