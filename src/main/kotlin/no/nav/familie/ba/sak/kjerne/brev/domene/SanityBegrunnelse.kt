@@ -41,6 +41,8 @@ data class SanityBegrunnelse(
 ) : ISanityBegrunnelse {
 
     val triggesAv: TriggesAv by lazy { this.tilTriggesAv() }
+
+    fun gjelderEtterEndretUtbetaling() = this.endretUtbetalingsperiodeTriggere?.contains(EndretUtbetalingsperiodeTrigger.ETTER_ENDRET_UTBETALINGSPERIODE) == true
 }
 
 data class RestSanityBegrunnelse(
