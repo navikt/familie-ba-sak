@@ -197,7 +197,7 @@ object TilkjentYtelseValidering {
         }
     }
 
-    fun MutableMap<Person, List<MånedPeriode>>.tilFeilmeldingTekst() =
+    fun MutableMap<PersonEnkel, List<MånedPeriode>>.tilFeilmeldingTekst() =
         Utils.slåSammen(this.map { "${it.key.fødselsdato.tilKortString()} i perioden ${it.value.joinToString(", ") { "${it.fom} til ${it.tom}" }}" })
 
     fun maksBeløp(personType: PersonType, fagsakType: FagsakType): Int {
