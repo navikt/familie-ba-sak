@@ -3,7 +3,9 @@ package no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.brevBegrunnelseProdus
 import no.nav.familie.ba.sak.common.toYearMonth
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingUnderkategori
+import no.nav.familie.ba.sak.kjerne.brev.domene.EndretUtbetalingsperiodeDeltBostedTriggere
 import no.nav.familie.ba.sak.kjerne.brev.domene.SanityBegrunnelse
+import no.nav.familie.ba.sak.kjerne.endretutbetaling.domene.Årsak
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
 import no.nav.familie.ba.sak.kjerne.tidslinje.Tidslinje
 import no.nav.familie.ba.sak.kjerne.tidslinje.komposisjon.TomTidslinje
@@ -16,10 +18,12 @@ import no.nav.familie.ba.sak.kjerne.tidslinje.tilTidslinje
 import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.Standardbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.domene.UtvidetVedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.AktørOgRolleBegrunnelseGrunnlag
+import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.EndretUtbetalingAndelForVedtaksperiode
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPerson
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForPersonInnvilget
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.produsent.GrunnlagForVedtaksperioder
 import no.nav.familie.ba.sak.kjerne.vilkårsvurdering.domene.Vilkår
+import java.math.BigDecimal
 import java.time.YearMonth
 
 fun UtvidetVedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserForPeriode(
@@ -45,26 +49,179 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserPerPerso
     sanityBegrunnelser: Map<Standardbegrunnelse, SanityBegrunnelse>,
 ): Map<AktørOgRolleBegrunnelseGrunnlag, Set<Standardbegrunnelse>> {
     val begrunnelseGrunnlagPerPerson =
-        finnBegrunnelseGrunnlagPerPerson(
+        this.finnBegrunnelseGrunnlagPerPerson(
             grunnlagForVedtaksperioder,
             grunnlagForVedtaksperioderForrigeBehandling,
         )
 
     return begrunnelseGrunnlagPerPerson.mapValues { (aktørOgRolleForVedtaksgrunnlag, begrunnelseGrunnlag) ->
-        val utgjørendeVilkår = hentUtgjørendeVilkårForPerson(
-            begrunnelseGrunnlag = begrunnelseGrunnlag,
-            aktørOgRolle = aktørOgRolleForVedtaksgrunnlag,
-            behandlingUnderkategori = behandlingUnderkategori,
-        )
+
+        val endretUtbetalingDennePerioden = hentEndretUtbetalingDennePerioden(begrunnelseGrunnlag)
 
         val filtrerteBegrunnelser =
-            sanityBegrunnelser.filter { (_, sanityBegrunnelse) -> sanityBegrunnelse.vilkår == utgjørendeVilkår }
+            sanityBegrunnelser.filtrerPåVilkår(
+                begrunnelseGrunnlag = begrunnelseGrunnlag,
+                aktørOgRolle = aktørOgRolleForVedtaksgrunnlag,
+                behandlingUnderkategori = behandlingUnderkategori,
+            ).filtrerPåEndretUtbetaling(endretUtbetalingDennePerioden)
+                .filtrerPåEtterEndretUtbetaling(
+                    endretUtbetalingDennePerioden = endretUtbetalingDennePerioden,
+                    endretUtbetalingForrigePeriode = hentEndretUtbetalingForrigePeriode(begrunnelseGrunnlag),
+                )
 
         filtrerteBegrunnelser.keys
     }
 }
 
-private fun hentUtgjørendeVilkårForPerson(
+private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåVilkår(
+    begrunnelseGrunnlag: BegrunnelseGrunnlag,
+    aktørOgRolle: AktørOgRolleBegrunnelseGrunnlag,
+    behandlingUnderkategori: BehandlingUnderkategori,
+): Map<Standardbegrunnelse, SanityBegrunnelse> {
+    val utgjørendeVilkår = hentUtgjørendeVilkår(
+        begrunnelseGrunnlag = begrunnelseGrunnlag,
+        aktørOgRolle = aktørOgRolle,
+        behandlingUnderkategori = behandlingUnderkategori,
+    )
+
+    return this.filter { (_, sanityBegrunnelse) -> sanityBegrunnelse.vilkår.all { utgjørendeVilkår.contains(it) } }
+}
+
+private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåEtterEndretUtbetaling(
+    endretUtbetalingDennePerioden: EndretUtbetalingAndelForVedtaksperiode?,
+    endretUtbetalingForrigePeriode: EndretUtbetalingAndelForVedtaksperiode?,
+): Map<Standardbegrunnelse, SanityBegrunnelse> {
+    val begrunnelerRelevanteForFilter = this.filterValues { it.gjelderEtterEndretUtbetaling() }
+
+    val filtrerteBegrunnelser =
+        begrunnelerRelevanteForFilter.filtrerPåOmMatcher(
+            endretUtbetalingDennePerioden = endretUtbetalingDennePerioden,
+            endretUtbetalingForrigePeriode = endretUtbetalingForrigePeriode,
+        )
+
+    // Filtrerer ikke bort begrunnelser i dette filteret dersom de ikke gjelder endretUtbetaling
+    // fordi de skal filtreres i en av de andre filterfunksjonene.
+    val begrunnelserUrelevanteForFilter = this.filterValues { !it.gjelderEtterEndretUtbetaling() }
+
+    return filtrerteBegrunnelser + begrunnelserUrelevanteForFilter
+
+    val begrunnelserFiltrertPåEndretUtbetalingÅrsak = this.filter { (_, sanityBegrunnelse) ->
+        val begrunnelseMatcherEndretUtbetalingIForrigePeriode =
+            sanityBegrunnelse.endringsaarsaker != null &&
+                sanityBegrunnelse.endringsaarsaker.all { it == endretUtbetalingForrigePeriode?.årsak }
+
+        val begrunnelseMatcherEndretUtbetalingIDennePerioden =
+            sanityBegrunnelse.endringsaarsaker != null &&
+                sanityBegrunnelse.endringsaarsaker.all { it == endretUtbetalingDennePerioden?.årsak }
+
+        sanityBegrunnelse.gjelderEtterEndretUtbetaling() && begrunnelseMatcherEndretUtbetalingIForrigePeriode && !begrunnelseMatcherEndretUtbetalingIDennePerioden
+    }
+
+    // Filtrerer ikke bort begrunnelser dersom de ikke gjelder etter endret utbetaling i dette filteret
+    // fordi de skal filtreres i et av de andre filterfunksjonene
+    val begrunnelserSomIkkeGjelderEtterEndretUtbetaling =
+        this.filter { (_, sanityBegrunnelse) -> !sanityBegrunnelse.gjelderEtterEndretUtbetaling() }
+
+    return if (endretUtbetalingForrigePeriode?.årsak == Årsak.DELT_BOSTED) {
+        begrunnelserFiltrertPåEndretUtbetalingÅrsak.filtrerPåDeltBostedUtbetalingstype(endretUtbetalingForrigePeriode) +
+            begrunnelserSomIkkeGjelderEtterEndretUtbetaling
+    } else {
+        begrunnelserFiltrertPåEndretUtbetalingÅrsak +
+            begrunnelserSomIkkeGjelderEtterEndretUtbetaling
+    }
+}
+
+private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåOmMatcher(
+    endretUtbetalingDennePerioden: EndretUtbetalingAndelForVedtaksperiode?,
+    endretUtbetalingForrigePeriode: EndretUtbetalingAndelForVedtaksperiode?,
+): Map<Standardbegrunnelse, SanityBegrunnelse> {
+    val filtrerteBegrunnelser = this
+        .filterValues { sanityBegrunnelse ->
+            val begrunnelseMatcherEndretUtbetalingIForrigePeriode =
+                sanityBegrunnelse.endringsaarsaker?.all { it == endretUtbetalingForrigePeriode?.årsak } == true
+
+            val begrunnelseMatcherEndretUtbetalingIDennePerioden =
+                sanityBegrunnelse.endringsaarsaker?.all { it == endretUtbetalingDennePerioden?.årsak } == true
+
+            begrunnelseMatcherEndretUtbetalingIForrigePeriode && !begrunnelseMatcherEndretUtbetalingIDennePerioden
+        }
+
+    return if (endretUtbetalingForrigePeriode?.årsak == Årsak.DELT_BOSTED) {
+        filtrerteBegrunnelser.filtrerPåDeltBostedUtbetalingstype(endretUtbetalingForrigePeriode)
+    } else {
+        filtrerteBegrunnelser
+    }
+}
+
+private fun SanityBegrunnelse.gjelderEtterEndretUtbetaling() =
+    !this.endringsaarsaker.isNullOrEmpty() && this.gjelderEtterEndretUtbetaling()
+
+private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåEndretUtbetaling(
+    endretUtbetaling: EndretUtbetalingAndelForVedtaksperiode?,
+): Map<Standardbegrunnelse, SanityBegrunnelse> {
+    val begrunnelerRelevanteForFilter = this.filterValues { it.gjelderEndretUtbetaling() }
+
+    val filtrerteBegrunnelser =
+        begrunnelerRelevanteForFilter.filtrerPåOmMatcher(endretUtbetaling)
+
+    // Filtrerer ikke bort begrunnelser i dette filteret dersom de ikke gjelder endretUtbetaling
+    // fordi de skal filtreres i en av de andre filterfunksjonene.
+    val begrunnelserUrelevanteForFilter = this.filterValues { !it.gjelderEndretUtbetaling() }
+
+    return filtrerteBegrunnelser + begrunnelserUrelevanteForFilter
+}
+
+private fun SanityBegrunnelse.gjelderEndretUtbetaling() =
+    !this.endringsaarsaker.isNullOrEmpty() && !this.gjelderEtterEndretUtbetaling()
+
+private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåOmMatcher(
+    endretUtbetaling: EndretUtbetalingAndelForVedtaksperiode?,
+): Map<Standardbegrunnelse, SanityBegrunnelse> {
+    val filtrerteBegrunnelser = this.filterValues { sanityBegrunnelse ->
+        endretUtbetaling != null && sanityBegrunnelse.endringsaarsaker!!.all { it == endretUtbetaling.årsak }
+    }
+
+    return if (endretUtbetaling?.årsak == Årsak.DELT_BOSTED) {
+        filtrerteBegrunnelser.filtrerPåDeltBostedUtbetalingstype(endretUtbetaling)
+    } else {
+        filtrerteBegrunnelser
+    }
+}
+
+private fun Map<Standardbegrunnelse, SanityBegrunnelse>.filtrerPåDeltBostedUtbetalingstype(
+    endretUtbetaling: EndretUtbetalingAndelForVedtaksperiode,
+) = filter { (_, sanityBegrunnelse) ->
+    val inneholderAndelSomSkalUtbetales = endretUtbetaling.prosent != BigDecimal.ZERO
+
+    when (sanityBegrunnelse.endretUtbetalingsperiodeDeltBostedUtbetalingTrigger) {
+        EndretUtbetalingsperiodeDeltBostedTriggere.UTBETALING_IKKE_RELEVANT -> true
+        EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_UTBETALES -> inneholderAndelSomSkalUtbetales
+        EndretUtbetalingsperiodeDeltBostedTriggere.SKAL_IKKE_UTBETALES -> !inneholderAndelSomSkalUtbetales
+        null -> true
+    }
+}
+
+private fun hentEndretUtbetalingDennePerioden(begrunnelseGrunnlag: BegrunnelseGrunnlag) =
+    if (
+        begrunnelseGrunnlag is BegrunnelseGrunnlagMedVerdiIDennePerioden &&
+        begrunnelseGrunnlag.grunnlagForVedtaksperiode is GrunnlagForPersonInnvilget
+    ) {
+        begrunnelseGrunnlag.grunnlagForVedtaksperiode.endretUtbetalingAndel
+    } else {
+        null
+    }
+
+private fun hentEndretUtbetalingForrigePeriode(begrunnelseGrunnlag: BegrunnelseGrunnlag) =
+    if (
+        begrunnelseGrunnlag is BegrunnelseGrunnlagMedVerdiIDennePerioden &&
+        begrunnelseGrunnlag.grunnlagForForrigeVedtaksperiode is GrunnlagForPersonInnvilget
+    ) {
+        begrunnelseGrunnlag.grunnlagForForrigeVedtaksperiode.endretUtbetalingAndel
+    } else {
+        null
+    }
+
+private fun hentUtgjørendeVilkår(
     begrunnelseGrunnlag: BegrunnelseGrunnlag,
     aktørOgRolle: AktørOgRolleBegrunnelseGrunnlag,
     behandlingUnderkategori: BehandlingUnderkategori,
@@ -109,9 +266,9 @@ private fun hentVilkårTjent(denne: GrunnlagForPerson, forrige: GrunnlagForPerso
         denne.hentOppfylteVilkår()
 
     val innvilgedeVilkårForrigePerioden =
-        forrige?.hentOppfylteVilkår() ?: emptySet()
+        forrige?.hentOppfylteVilkår() ?: emptyList()
 
-    return innvilgedeVilkårDennePerioden - innvilgedeVilkårForrigePerioden
+    return (innvilgedeVilkårDennePerioden - innvilgedeVilkårForrigePerioden.toSet()).map { it.vilkårType }.toSet()
 }
 
 private fun hentVilkårTapt(
@@ -120,18 +277,16 @@ private fun hentVilkårTapt(
     vilkårForPerson: Set<Vilkår>,
 ): Set<Vilkår> {
     val manglendeVilkårDennePerioden =
-        vilkårForPerson - denne.hentOppfylteVilkår()
+        vilkårForPerson - denne.hentOppfylteVilkår().map { it.vilkårType }.toSet()
 
     val manglendeVilkårForrigePerioden =
-        vilkårForPerson - (forrige?.hentOppfylteVilkår() ?: emptySet())
+        vilkårForPerson - (forrige?.hentOppfylteVilkår() ?: emptySet()).map { it.vilkårType }.toSet()
 
     return manglendeVilkårDennePerioden - manglendeVilkårForrigePerioden
 }
 
-private fun GrunnlagForPerson.hentOppfylteVilkår(): Set<Vilkår> =
+private fun GrunnlagForPerson.hentOppfylteVilkår() =
     vilkårResultaterForVedtaksperiode.filter { it.resultat == Resultat.OPPFYLT }
-        .map { it.vilkårType }
-        .toSet()
 
 private fun UtvidetVedtaksperiodeMedBegrunnelser.finnBegrunnelseGrunnlagPerPerson(
     grunnlagForVedtaksperioder: GrunnlagForVedtaksperioder,
