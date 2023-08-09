@@ -55,7 +55,6 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserPerPerso
         )
 
     return begrunnelseGrunnlagPerPerson.mapValues { (aktørOgRolleForVedtaksgrunnlag, begrunnelseGrunnlag) ->
-
         val endretUtbetalingDennePerioden = hentEndretUtbetalingDennePerioden(begrunnelseGrunnlag)
 
         val filtrerteBegrunnelser =
@@ -63,11 +62,12 @@ private fun UtvidetVedtaksperiodeMedBegrunnelser.hentGyldigeBegrunnelserPerPerso
                 begrunnelseGrunnlag = begrunnelseGrunnlag,
                 aktørOgRolle = aktørOgRolleForVedtaksgrunnlag,
                 behandlingUnderkategori = behandlingUnderkategori,
-            ).filtrerPåEndretUtbetaling(endretUtbetalingDennePerioden)
-                .filtrerPåEtterEndretUtbetaling(
-                    endretUtbetalingDennePerioden = endretUtbetalingDennePerioden,
-                    endretUtbetalingForrigePeriode = hentEndretUtbetalingForrigePeriode(begrunnelseGrunnlag),
-                )
+            ).filtrerPåEndretUtbetaling(
+                endretUtbetaling = endretUtbetalingDennePerioden,
+            ).filtrerPåEtterEndretUtbetaling(
+                endretUtbetalingDennePerioden = endretUtbetalingDennePerioden,
+                endretUtbetalingForrigePeriode = hentEndretUtbetalingForrigePeriode(begrunnelseGrunnlag),
+            )
 
         filtrerteBegrunnelser.keys
     }
