@@ -215,7 +215,7 @@ class InnkommendeJournalføringService(
         journalpost.sak?.fagsakId
 
         if (request.opprettOgKnyttTilNyBehandling) {
-            val brevkode = journalpost.dokumenter?.firstOrNull { it.brevkode != null }?.brevkode
+            val brevkode = journalpost.dokumenter?.firstNotNullOfOrNull { it.brevkode }
             val nyBehandling =
                 opprettBehandlingOgEvtFagsakForJournalføring(
                     personIdent = request.bruker.id,

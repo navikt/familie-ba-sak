@@ -26,7 +26,7 @@ import java.time.format.DateTimeParseException
 class InternStatistikkController(
     private val internStatistikkService: InternStatistikkService,
     private val behandlingSøknadsinfoService: BehandlingSøknadsinfoService,
-    ) {
+) {
 
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
     fun hentAntallFagsakerOpprettet(): ResponseEntity<Ressurs<InternStatistikkResponse>> {
