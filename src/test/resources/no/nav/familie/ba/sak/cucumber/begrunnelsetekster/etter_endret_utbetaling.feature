@@ -13,7 +13,7 @@ Egenskap: Vedtaksperioder med mor og et barn
       | 1            | 1234    | SØKER      | 11.01.1970  |
       | 1            | 3456    | BARN       | 13.04.2020  |
 
-  Scenario: Begrunnelse endret utbetaling delt bosted
+  Scenario: Begrunnelse etter endret utbetaling delt bosted
     Og lag personresultater for begrunnelse for behandling 1
 
     Og legg til nye vilkårresultater for begrunnelse for behandling 1
@@ -45,7 +45,7 @@ Egenskap: Vedtaksperioder med mor og et barn
       | 01.02.2022 | 31.03.2038 | UTBETALING         | ETTER_ENDRET_UTBETALING_HAR_AVTALE_DELT_BOSTED |                                                |                                                    |
       | 01.04.2038 |            | OPPHØR             | OPPHØR_UNDER_18_ÅR                             |                                                |                                                    |
 
-  Scenario: Begrunnelse endret utbetaling allerede utbetalt
+  Scenario: Begrunnelse etter endret utbetaling allerede utbetalt
     Og lag personresultater for begrunnelse for behandling 1
 
     Og legg til nye vilkårresultater for begrunnelse for behandling 1
