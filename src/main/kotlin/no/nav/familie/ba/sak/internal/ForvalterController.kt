@@ -29,6 +29,8 @@ import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.util.UUID
+import kotlin.concurrent.thread
 
 @RestController
 @RequestMapping("/api/forvalter")
@@ -279,6 +281,15 @@ class ForvalterController(
                 logger.warn("Klarte ikke kjøre satsendring for fagsakId=$fagsakId", e)
             }
         }
+    }
+
+    @PostMapping("/identifiser-utbetalinger-over-100-prosent")
+    fun identifiserUtbetalingerOver100Prosent(): ResponseEntity<Pair<String, String>> {
+        val callId = UUID.randomUUID().toString()
+        thread {
+            forvalterService.identifiserUtbetalingerOver100Prosent(callId)
+        }
+        return ResponseEntity.ok(Pair("callId", callId))
     }
 }
 
