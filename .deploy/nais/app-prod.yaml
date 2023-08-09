@@ -110,7 +110,6 @@ spec:
   replicas:
     min: 3
     max: 5
-    cpuThresholdPercentage: 50
   resources:
     limits:
       memory: 4096Mi
