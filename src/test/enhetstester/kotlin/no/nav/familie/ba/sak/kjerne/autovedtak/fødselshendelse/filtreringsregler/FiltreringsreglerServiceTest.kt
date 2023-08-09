@@ -71,7 +71,7 @@ class FiltreringsreglerServiceTest {
     private lateinit var filtreringsreglerService: FiltreringsreglerService
 
     @Test
-    fun `kjørFiltreringsregler - skal sette morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato til true og gi resultat ikke oppfylt når fødselsdato til barn overlapper mors vilkår om utvidet barnetrygd`() {
+    fun `kjørFiltreringsregler - skal sette morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato til true og gi resultat ikke oppfylt når mors vilkår om utvidet barnetrygd er oppfylt i tidsrommet barnet er mellom 0 og 18 år`() {
         val mor = tilfeldigSøker(fødselsdato = LocalDate.of(1985, 1, 1))
         val barn = tilfeldigPerson(fødselsdato = LocalDate.of(2021, 1, 1))
         val nyBehandlingHendelse = NyBehandlingHendelse(mor.aktør.aktørId, listOf(barn.aktør.aktørId))
@@ -118,7 +118,7 @@ class FiltreringsreglerServiceTest {
     }
 
     @Test
-    fun `kjørFiltreringsregler - skal sette morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato til false og gi resultat oppfylt når fødselsdato til barn kommer etter mors vilkår om utvidet barnetrygd`() {
+    fun `kjørFiltreringsregler - skal sette morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato til false og gi resultat oppfylt når mors vilkår om utvidet barnetrygd er oppfylt utenfor tidsrommet barnet er mellom 0 og 18 år`() {
         val mor = tilfeldigSøker(fødselsdato = LocalDate.of(1985, 1, 1))
         val barn = tilfeldigPerson(fødselsdato = LocalDate.of(2021, 1, 1))
         val nyBehandlingHendelse = NyBehandlingHendelse(mor.aktør.aktørId, listOf(barn.aktør.aktørId))
@@ -165,7 +165,7 @@ class FiltreringsreglerServiceTest {
     }
 
     @Test
-    fun `kjørFiltreringsregler - skal sette morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato til true og gi resultat ikke oppfylt når fødselsdato til barn ligger mellom mors to vilkårsperioder for utvidet barnetrygd`() {
+    fun `kjørFiltreringsregler - skal sette morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato til true og gi resultat ikke oppfylt så lenge en av vilkårsperiodene for utvidet barnetrygd er oppfylt i tidsrommet barnet er mellom 0 og 18`() {
         val mor = tilfeldigSøker(fødselsdato = LocalDate.of(1985, 1, 1))
         val barn = tilfeldigPerson(fødselsdato = LocalDate.of(2021, 1, 1))
         val nyBehandlingHendelse = NyBehandlingHendelse(mor.aktør.aktørId, listOf(barn.aktør.aktørId))
@@ -319,7 +319,7 @@ class FiltreringsreglerServiceTest {
     }
 
     @Test
-    fun `kjørFiltreringsregler - skal sette morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato til true og gi resultat ikke oppfylt når et av barnas fødselsdatoer er før tom på vilkåret utvidet barnetrygd`() {
+    fun `kjørFiltreringsregler - skal sette morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato til true og gi resultat ikke oppfylt når mors vilkår om utvidet barnetrygd er oppfylt i tidsrommet et av barna er mellom 0 og 18 år`() {
         val mor = tilfeldigSøker(fødselsdato = LocalDate.of(1985, 1, 1))
         val barn1 = tilfeldigPerson(fødselsdato = LocalDate.of(2021, 1, 1))
         val barn2 = tilfeldigPerson(fødselsdato = LocalDate.of(2020, 1, 1))

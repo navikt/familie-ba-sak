@@ -175,11 +175,8 @@ class FiltreringsreglerService(
         vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id)?.let {
             it.personResultater.single { personResultat -> personResultat.erSøkersResultater() }.vilkårResultater.any { vilkårResultat ->
                 vilkårResultat.vilkårType == Vilkår.UTVIDET_BARNETRYGD && vilkårResultat.erOppfylt() && barnaFraHendelse.any { barnFraHendelse ->
-                    vilkårResultat.periodeTom?.let { tom ->
-                        tom.isAfter(barnFraHendelse.fødselsdato) && tom.isBefore(
-                            barnFraHendelse.fødselsdato.plusYears(18),
-                        )
-                    } ?: true
+                    vilkårResultat.periodeTom?.isAfter(barnFraHendelse.fødselsdato) ?: true &&
+                        vilkårResultat.periodeFom!!.isBefore(barnFraHendelse.fødselsdato.plusYears(18))
                 }
             }
         } ?: false
