@@ -29,7 +29,6 @@ import no.nav.familie.ba.sak.kjerne.beregning.SmåbarnstilleggService
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseMedEndreteUtbetalinger
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelerTilkjentYtelseOgEndreteUtbetalingerService
-import no.nav.familie.ba.sak.kjerne.beregning.endringstidspunkt.EndringstidspunktService
 import no.nav.familie.ba.sak.kjerne.beregning.endringstidspunkt.filtrerLikEllerEtterEndringstidspunkt
 import no.nav.familie.ba.sak.kjerne.brev.BrevmalService
 import no.nav.familie.ba.sak.kjerne.brev.domene.maler.Brevmal
@@ -84,7 +83,6 @@ class VedtaksperiodeService(
     private val sanityService: SanityService,
     private val søknadGrunnlagService: SøknadGrunnlagService,
     private val endretUtbetalingAndelRepository: EndretUtbetalingAndelRepository,
-    private val endringstidspunktService: EndringstidspunktService,
     private val utbetalingsperiodeMedBegrunnelserService: UtbetalingsperiodeMedBegrunnelserService,
     private val kompetanseRepository: PeriodeOgBarnSkjemaRepository<Kompetanse>,
     private val andelerTilkjentYtelseOgEndreteUtbetalingerService: AndelerTilkjentYtelseOgEndreteUtbetalingerService,
@@ -342,11 +340,7 @@ class VedtaksperiodeService(
         val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
 
         val endringstidspunkt = behandling.overstyrtEndringstidspunkt
-            ?: if (featureToggleService.isEnabled(FeatureToggleConfig.ENDRINGSTIDSPUNKT)) {
-                finnEndringstidspunktForBehandling(behandlingId = behandling.id)
-            } else {
-                endringstidspunktService.finnEndringstidspunktForBehandling(behandlingId = behandling.id)
-            }
+            ?: finnEndringstidspunktForBehandling(behandlingId = behandling.id)
 
         return genererVedtaksperioder(
             grunnlagForVedtakPerioder = behandling.hentGrunnlagForVedtaksperioder(),
@@ -365,7 +359,8 @@ class VedtaksperiodeService(
             endredeUtbetalinger = endretUtbetalingAndelRepository.findByBehandlingId(this.id),
             andelerTilkjentYtelse = andelTilkjentYtelseRepository.finnAndelerTilkjentYtelseForBehandling(this.id),
             perioderOvergangsstønad = småbarnstilleggService.hentPerioderMedFullOvergangsstønad(this),
-            uregistrerteBarn = søknadGrunnlagService.hentAktiv(behandlingId = this.id)?.hentUregistrerteBarn() ?: emptyList(),
+            uregistrerteBarn = søknadGrunnlagService.hentAktiv(behandlingId = this.id)?.hentUregistrerteBarn()
+                ?: emptyList(),
         )
 
     @Deprecated("skal bruke genererVedtaksperioderMedBegrunnelser når den er klar")
@@ -382,7 +377,7 @@ class VedtaksperiodeService(
          * Ellers: endringstidspunkt skal utledes
          **/
         val endringstidspunkt = manueltOverstyrtEndringstidspunkt
-            ?: endringstidspunktService.finnEndringstidspunktForBehandling(behandlingId = vedtak.behandling.id)
+            ?: finnEndringstidspunktForBehandling(behandlingId = vedtak.behandling.id)
 
         val opphørsperioder: List<VedtaksperiodeMedBegrunnelser> =
             hentOpphørsperioder(vedtak.behandling, endringstidspunkt).map {
