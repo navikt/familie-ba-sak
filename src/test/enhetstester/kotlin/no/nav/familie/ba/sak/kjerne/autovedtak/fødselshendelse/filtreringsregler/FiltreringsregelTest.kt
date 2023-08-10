@@ -24,7 +24,7 @@ internal class FiltreringsregelTest {
         val barnet = tilfeldigPerson(LocalDate.now()).copy(aktør = gyldigAktørId)
         val restenAvBarna: List<PersonInfo> = listOf()
 
-        val evalueringer = evaluerFiltreringsregler(
+        val evalueringer = FiltreringsregelEvaluering.evaluerFiltreringsregler(
             FiltreringsreglerFakta(
                 mor = mor,
                 barnaFraHendelse = listOf(barnet),
@@ -34,6 +34,7 @@ internal class FiltreringsregelTest {
                 morHarVerge = false,
                 erFagsakenMigrertEtterBarnFødt = false,
                 løperBarnetrygdForBarnetPåAnnenForelder = false,
+                morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
             ),
         )
 
@@ -46,7 +47,7 @@ internal class FiltreringsregelTest {
         val barnet = tilfeldigPerson(LocalDate.now()).copy(aktør = gyldigAktørId)
         val restenAvBarna: List<PersonInfo> = listOf()
 
-        val evalueringer = evaluerFiltreringsregler(
+        val evalueringer = FiltreringsregelEvaluering.evaluerFiltreringsregler(
             FiltreringsreglerFakta(
                 mor = mor,
                 morMottarLøpendeUtvidet = true,
@@ -57,6 +58,7 @@ internal class FiltreringsregelTest {
                 morHarVerge = false,
                 erFagsakenMigrertEtterBarnFødt = false,
                 løperBarnetrygdForBarnetPåAnnenForelder = false,
+                morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
             ),
         )
 
@@ -70,7 +72,7 @@ internal class FiltreringsregelTest {
         val barnet = tilfeldigPerson(LocalDate.now()).copy(aktør = gyldigAktørId)
         val restenAvBarna: List<PersonInfo> = listOf()
 
-        val evalueringer = evaluerFiltreringsregler(
+        val evalueringer = FiltreringsregelEvaluering.evaluerFiltreringsregler(
             FiltreringsreglerFakta(
                 mor = mor,
                 morMottarLøpendeUtvidet = false,
@@ -82,6 +84,7 @@ internal class FiltreringsregelTest {
                 erFagsakenMigrertEtterBarnFødt = false,
                 løperBarnetrygdForBarnetPåAnnenForelder = false,
                 morMottarEøsBarnetrygd = true,
+                morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
             ),
         )
 
@@ -95,7 +98,7 @@ internal class FiltreringsregelTest {
         val barnet = tilfeldigPerson(LocalDate.now()).copy(aktør = gyldigAktørId)
         val restenAvBarna: List<PersonInfo> = listOf()
 
-        val evalueringer = evaluerFiltreringsregler(
+        val evalueringer = FiltreringsregelEvaluering.evaluerFiltreringsregler(
             FiltreringsreglerFakta(
                 mor = mor,
                 barnaFraHendelse = listOf(barnet),
@@ -105,6 +108,7 @@ internal class FiltreringsregelTest {
                 morHarVerge = false,
                 erFagsakenMigrertEtterBarnFødt = false,
                 løperBarnetrygdForBarnetPåAnnenForelder = false,
+                morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
             ),
         )
 
@@ -132,6 +136,7 @@ internal class FiltreringsregelTest {
                 morHarVerge = false,
                 løperBarnetrygdForBarnetPåAnnenForelder = false,
                 erFagsakenMigrertEtterBarnFødt = false,
+                morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
             ),
         )
         assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
@@ -157,6 +162,7 @@ internal class FiltreringsregelTest {
                 morHarVerge = false,
                 erFagsakenMigrertEtterBarnFødt = false,
                 løperBarnetrygdForBarnetPåAnnenForelder = false,
+                morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
             ),
         )
 
@@ -169,7 +175,7 @@ internal class FiltreringsregelTest {
         val barnet = tilfeldigPerson(LocalDate.now()).copy(aktør = gyldigAktørId)
         val restenAvBarna: List<PersonInfo> = listOf()
 
-        val evalueringer = evaluerFiltreringsregler(
+        val evalueringer = FiltreringsregelEvaluering.evaluerFiltreringsregler(
             FiltreringsreglerFakta(
                 mor = mor,
                 barnaFraHendelse = listOf(barnet),
@@ -179,6 +185,7 @@ internal class FiltreringsregelTest {
                 morHarVerge = false,
                 erFagsakenMigrertEtterBarnFødt = false,
                 løperBarnetrygdForBarnetPåAnnenForelder = false,
+                morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
             ),
         )
 
@@ -192,7 +199,7 @@ internal class FiltreringsregelTest {
         val barnet = tilfeldigPerson(LocalDate.now()).copy(aktør = gyldigAktørId)
         val restenAvBarna: List<PersonInfo> = listOf()
 
-        val evalueringer = evaluerFiltreringsregler(
+        val evalueringer = FiltreringsregelEvaluering.evaluerFiltreringsregler(
             FiltreringsreglerFakta(
                 mor = mor,
                 barnaFraHendelse = listOf(barnet),
@@ -202,6 +209,7 @@ internal class FiltreringsregelTest {
                 morHarVerge = false,
                 erFagsakenMigrertEtterBarnFødt = false,
                 løperBarnetrygdForBarnetPåAnnenForelder = false,
+                morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
             ),
         )
 
@@ -215,7 +223,7 @@ internal class FiltreringsregelTest {
         val barnet = tilfeldigPerson(LocalDate.now()).copy(aktør = gyldigAktørId)
         val restenAvBarna: List<PersonInfo> = listOf()
 
-        val evalueringer = evaluerFiltreringsregler(
+        val evalueringer = FiltreringsregelEvaluering.evaluerFiltreringsregler(
             FiltreringsreglerFakta(
                 mor = mor,
                 barnaFraHendelse = listOf(barnet),
@@ -225,6 +233,7 @@ internal class FiltreringsregelTest {
                 morHarVerge = true,
                 erFagsakenMigrertEtterBarnFødt = false,
                 løperBarnetrygdForBarnetPåAnnenForelder = false,
+                morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
             ),
         )
 
@@ -252,7 +261,7 @@ internal class FiltreringsregelTest {
         val barn2PersonInfo = PersonInfo(fødselsdato = LocalDate.parse("2020-09-23"))
 
         val evalueringer =
-            evaluerFiltreringsregler(
+            FiltreringsregelEvaluering.evaluerFiltreringsregler(
                 FiltreringsreglerFakta(
                     mor = søkerPerson,
                     barnaFraHendelse = listOf(barn1Person),
@@ -262,6 +271,7 @@ internal class FiltreringsregelTest {
                     morHarVerge = false,
                     løperBarnetrygdForBarnetPåAnnenForelder = false,
                     erFagsakenMigrertEtterBarnFødt = false,
+                    morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
                 ),
             )
         assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.MOR_ER_OVER_18_ÅR)
@@ -276,7 +286,7 @@ internal class FiltreringsregelTest {
         val barn2PersonInfo = PersonInfo(fødselsdato = LocalDate.parse("2020-09-23"))
 
         val evalueringer =
-            evaluerFiltreringsregler(
+            FiltreringsregelEvaluering.evaluerFiltreringsregler(
                 FiltreringsreglerFakta(
                     mor = søkerPerson,
                     barnaFraHendelse = listOf(barn1Person),
@@ -286,6 +296,7 @@ internal class FiltreringsregelTest {
                     morHarVerge = false,
                     erFagsakenMigrertEtterBarnFødt = false,
                     løperBarnetrygdForBarnetPåAnnenForelder = false,
+                    morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
                 ),
             )
         assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.MER_ENN_5_MND_SIDEN_FORRIGE_BARN)
@@ -309,6 +320,7 @@ internal class FiltreringsregelTest {
                 morHarVerge = false,
                 erFagsakenMigrertEtterBarnFødt = false,
                 løperBarnetrygdForBarnetPåAnnenForelder = false,
+                morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
             ),
         )
         assertThat(evaluering.resultat).isEqualTo(Resultat.OPPFYLT)
@@ -323,7 +335,7 @@ internal class FiltreringsregelTest {
         val barn2PersonInfo = PersonInfo(fødselsdato = LocalDate.parse("2018-09-23"))
 
         val evalueringer =
-            evaluerFiltreringsregler(
+            FiltreringsregelEvaluering.evaluerFiltreringsregler(
                 FiltreringsreglerFakta(
                     mor = søkerPerson,
                     barnaFraHendelse = listOf(barn1Person),
@@ -333,6 +345,7 @@ internal class FiltreringsregelTest {
                     morHarVerge = false,
                     erFagsakenMigrertEtterBarnFødt = false,
                     løperBarnetrygdForBarnetPåAnnenForelder = false,
+                    morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
                 ),
             )
         assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.MOR_LEVER)
@@ -347,7 +360,7 @@ internal class FiltreringsregelTest {
         val barn2PersonInfo = PersonInfo(fødselsdato = LocalDate.parse("2018-09-23"))
 
         val evalueringer =
-            evaluerFiltreringsregler(
+            FiltreringsregelEvaluering.evaluerFiltreringsregler(
                 FiltreringsreglerFakta(
                     mor = søkerPerson,
                     barnaFraHendelse = listOf(barn1Person),
@@ -357,6 +370,7 @@ internal class FiltreringsregelTest {
                     morHarVerge = false,
                     erFagsakenMigrertEtterBarnFødt = false,
                     løperBarnetrygdForBarnetPåAnnenForelder = false,
+                    morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
                 ),
             )
         assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.BARN_LEVER)
@@ -371,7 +385,7 @@ internal class FiltreringsregelTest {
         val barn2PersonInfo = PersonInfo(fødselsdato = LocalDate.parse("2018-09-23"))
 
         val evalueringer =
-            evaluerFiltreringsregler(
+            FiltreringsregelEvaluering.evaluerFiltreringsregler(
                 FiltreringsreglerFakta(
                     mor = søkerPerson,
                     barnaFraHendelse = listOf(barn1Person),
@@ -381,6 +395,7 @@ internal class FiltreringsregelTest {
                     morHarVerge = true,
                     erFagsakenMigrertEtterBarnFødt = false,
                     løperBarnetrygdForBarnetPåAnnenForelder = false,
+                    morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
                 ),
             )
         assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.MOR_HAR_IKKE_VERGE)
@@ -395,7 +410,7 @@ internal class FiltreringsregelTest {
         val barn2PersonInfo = PersonInfo(fødselsdato = LocalDate.parse("2018-09-23"))
 
         val evalueringer =
-            evaluerFiltreringsregler(
+            FiltreringsregelEvaluering.evaluerFiltreringsregler(
                 FiltreringsreglerFakta(
                     mor = søkerPerson,
                     barnaFraHendelse = listOf(barn1Person),
@@ -405,6 +420,7 @@ internal class FiltreringsregelTest {
                     morHarVerge = true,
                     erFagsakenMigrertEtterBarnFødt = false,
                     løperBarnetrygdForBarnetPåAnnenForelder = false,
+                    morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
                 ),
             )
         assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.MOR_LEVER)
@@ -422,7 +438,7 @@ internal class FiltreringsregelTest {
         val barn3PersonInfo = PersonInfo(fødselsdato = LocalDate.parse("2018-09-23"))
 
         val evalueringer =
-            evaluerFiltreringsregler(
+            FiltreringsregelEvaluering.evaluerFiltreringsregler(
                 FiltreringsreglerFakta(
                     mor = søkerPerson,
                     barnaFraHendelse = listOf(barn1Person, barn2Person),
@@ -432,6 +448,7 @@ internal class FiltreringsregelTest {
                     morHarVerge = false,
                     erFagsakenMigrertEtterBarnFødt = false,
                     løperBarnetrygdForBarnetPåAnnenForelder = false,
+                    morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
                 ),
             )
         Assertions.assertTrue(evalueringer.erOppfylt())
@@ -446,7 +463,7 @@ internal class FiltreringsregelTest {
         val barn3PersonInfo = PersonInfo(fødselsdato = LocalDate.parse("2018-09-23"))
 
         val evalueringer =
-            evaluerFiltreringsregler(
+            FiltreringsregelEvaluering.evaluerFiltreringsregler(
                 FiltreringsreglerFakta(
                     mor = søkerPerson,
                     barnaFraHendelse = listOf(barn1Person),
@@ -456,6 +473,7 @@ internal class FiltreringsregelTest {
                     morHarVerge = false,
                     løperBarnetrygdForBarnetPåAnnenForelder = false,
                     erFagsakenMigrertEtterBarnFødt = false,
+                    morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
                 ),
             )
         assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.MOR_GYLDIG_FNR)
@@ -471,7 +489,7 @@ internal class FiltreringsregelTest {
             tilfeldigPerson(fødselsdato = LocalDate.parse("2018-09-23"), aktør = tilAktør("23091823456"))
 
         val evalueringer =
-            evaluerFiltreringsregler(
+            FiltreringsregelEvaluering.evaluerFiltreringsregler(
                 FiltreringsreglerFakta(
                     mor = søkerPerson,
                     barnaFraHendelse = listOf(barn1Person, barn2Person),
@@ -481,6 +499,7 @@ internal class FiltreringsregelTest {
                     morHarVerge = false,
                     erFagsakenMigrertEtterBarnFødt = false,
                     løperBarnetrygdForBarnetPåAnnenForelder = false,
+                    morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
                 ),
             )
         assertIkkeOppfyltFiltreringsregel(evalueringer, Filtreringsregel.BARN_GYLDIG_FNR)
@@ -494,7 +513,7 @@ internal class FiltreringsregelTest {
             tilfeldigPerson(fødselsdato = LocalDate.parse("2020-09-23"), aktør = tilAktør("23092023456"))
 
         val evalueringer =
-            evaluerFiltreringsregler(
+            FiltreringsregelEvaluering.evaluerFiltreringsregler(
                 FiltreringsreglerFakta(
                     mor = søkerPerson,
                     barnaFraHendelse = listOf(barn1Person),
@@ -505,6 +524,7 @@ internal class FiltreringsregelTest {
                     erFagsakenMigrertEtterBarnFødt = true,
                     løperBarnetrygdForBarnetPåAnnenForelder = false,
                     dagensDato = LocalDate.parse("2020-10-23"),
+                    morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
                 ),
             )
         assertIkkeOppfyltFiltreringsregel(
@@ -523,7 +543,7 @@ internal class FiltreringsregelTest {
             tilfeldigPerson(fødselsdato = fødselsdatoIDenneMåned, aktør = tilAktør("23091823456"))
 
         val evalueringer =
-            evaluerFiltreringsregler(
+            FiltreringsregelEvaluering.evaluerFiltreringsregler(
                 FiltreringsreglerFakta(
                     mor = søkerPerson,
                     barnaFraHendelse = listOf(barn1Person),
@@ -533,6 +553,7 @@ internal class FiltreringsregelTest {
                     morHarVerge = false,
                     løperBarnetrygdForBarnetPåAnnenForelder = false,
                     erFagsakenMigrertEtterBarnFødt = false,
+                    morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
                 ),
             )
         Assertions.assertTrue(evalueringer.erOppfylt())
@@ -541,12 +562,12 @@ internal class FiltreringsregelTest {
     @Test
     fun `Skal returnere ikke oppfylt for regelevaluering når det allerede løper barnetrygd for barnet på annen forelder`() {
         val søkerPerson =
-            tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"), aktør = tilAktør("04086226621"))
+            tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"))
         val barn1Person =
-            tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"), aktør = tilAktør("23102000000"))
+            tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"))
 
         val evalueringer =
-            evaluerFiltreringsregler(
+            FiltreringsregelEvaluering.evaluerFiltreringsregler(
                 FiltreringsreglerFakta(
                     mor = søkerPerson,
                     barnaFraHendelse = listOf(barn1Person),
@@ -556,9 +577,58 @@ internal class FiltreringsregelTest {
                     morHarVerge = false,
                     løperBarnetrygdForBarnetPåAnnenForelder = true,
                     erFagsakenMigrertEtterBarnFødt = false,
+                    morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
                 ),
             )
         Assertions.assertTrue(!evalueringer.erOppfylt())
+    }
+
+    @Test
+    fun `Skal returnere ikke oppfylt for regelevaluering når mor oppfyller vilkår for utvidet barnetrygd`() {
+        val søkerPerson =
+            tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"))
+        val barn1Person =
+            tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"))
+
+        val evalueringer =
+            FiltreringsregelEvaluering.evaluerFiltreringsregler(
+                FiltreringsreglerFakta(
+                    mor = søkerPerson,
+                    barnaFraHendelse = listOf(barn1Person),
+                    restenAvBarna = listOf(),
+                    morLever = true,
+                    barnaLever = true,
+                    morHarVerge = false,
+                    løperBarnetrygdForBarnetPåAnnenForelder = false,
+                    erFagsakenMigrertEtterBarnFødt = false,
+                    morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = true,
+                ),
+            )
+        assertThat(evalueringer.erOppfylt()).isFalse
+    }
+
+    @Test
+    fun `Skal returnere oppfylt for regelevaluering når mor ikke oppfyller vilkår for utvidet barnetrygd`() {
+        val søkerPerson =
+            tilfeldigSøker(fødselsdato = LocalDate.parse("1962-10-23"))
+        val barn1Person =
+            tilfeldigPerson(fødselsdato = LocalDate.parse("2020-10-23"))
+
+        val evalueringer =
+            FiltreringsregelEvaluering.evaluerFiltreringsregler(
+                FiltreringsreglerFakta(
+                    mor = søkerPerson,
+                    barnaFraHendelse = listOf(barn1Person),
+                    restenAvBarna = listOf(),
+                    morLever = true,
+                    barnaLever = true,
+                    morHarVerge = false,
+                    løperBarnetrygdForBarnetPåAnnenForelder = false,
+                    erFagsakenMigrertEtterBarnFødt = false,
+                    morOppfyllerVilkårForUtvidetBarnetrygdVedFødselsdato = false,
+                ),
+            )
+        assertThat(evalueringer.erOppfylt()).isTrue
     }
 
     private fun assertEnesteRegelMedResultatNei(evalueringer: List<Evaluering>, filtreringsRegel: Filtreringsregel) {
@@ -581,6 +651,7 @@ internal class FiltreringsregelTest {
             Filtreringsregel.MOR_HAR_IKKE_LØPENDE_EØS_BARNETRYGD,
             Filtreringsregel.FAGSAK_IKKE_MIGRERT_UT_AV_INFOTRYGD_ETTER_BARN_FØDT,
             Filtreringsregel.LØPER_IKKE_BARNETRYGD_FOR_BARNET,
+            Filtreringsregel.MOR_HAR_IKKE_OPPFYLT_UTVIDET_VILKÅR_VED_FØDSELSDATO,
         )
         assertThat(Filtreringsregel.values().size).isEqualTo(fagbestemtFiltreringsregelrekkefølge.size)
         assertThat(
