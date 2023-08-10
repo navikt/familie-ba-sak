@@ -68,7 +68,6 @@ Egenskap: Endringstidspunkt påvirker periodene
       | Endringstidspunkt | BehandlingId |
       | 01.11.2021        | 1            |
 
-
     Og lag personresultater for behandling 2
     Og legg til nye vilkårresultater for behandling 2
       | AktørId | Vilkår                                                          | Fra dato   | Til dato   | Resultat |
