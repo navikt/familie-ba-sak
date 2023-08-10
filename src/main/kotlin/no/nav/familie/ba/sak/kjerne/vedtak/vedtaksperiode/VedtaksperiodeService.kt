@@ -415,10 +415,10 @@ class VedtaksperiodeService(
         lagreNedOverstyrtEndringstidspunkt(vedtak.behandling.id, overstyrtEndringstidspunkt)
     }
 
-    private fun lagreNedOverstyrtEndringstidspunkt(behandlingId: Long, overstyrtEndringstidspunkt: LocalDate): Behandling {
+    private fun lagreNedOverstyrtEndringstidspunkt(behandlingId: Long, overstyrtEndringstidspunkt: LocalDate) {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
         behandling.overstyrtEndringstidspunkt = overstyrtEndringstidspunkt
-        return behandlingHentOgPersisterService.lagreEllerOppdater(behandling = behandling, sendTilDvh = false)
+        behandlingHentOgPersisterService.lagreEllerOppdater(behandling = behandling, sendTilDvh = false)
     }
 
     fun kopierOverVedtaksperioder(deaktivertVedtak: Vedtak, aktivtVedtak: Vedtak) {
