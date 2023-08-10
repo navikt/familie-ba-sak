@@ -339,14 +339,10 @@ class VedtaksperiodeService(
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
 
-        val endringstidspunkt = behandling.overstyrtEndringstidspunkt
-            ?: finnEndringstidspunktForBehandling(behandlingId = behandling.id)
-
         return genererVedtaksperioder(
             grunnlagForVedtakPerioder = behandling.hentGrunnlagForVedtaksperioder(),
             grunnlagForVedtakPerioderForrigeBehandling = forrigeBehandling?.hentGrunnlagForVedtaksperioder(),
             vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId),
-            endringstidspunkt = endringstidspunkt,
         )
     }
 
@@ -419,10 +415,20 @@ class VedtaksperiodeService(
         lagreNedOverstyrtEndringstidspunkt(vedtak.behandling.id, overstyrtEndringstidspunkt)
     }
 
-    private fun lagreNedOverstyrtEndringstidspunkt(behandlingId: Long, overstyrtEndringstidspunkt: LocalDate) {
+    @Transactional
+    fun oppdaterEndringstidspunktOgGenererVedtaksperioderPåNytt(restGenererVedtaksperioder: RestGenererVedtaksperioderForOverstyrtEndringstidspunkt): LocalDate? {
+        val vedtak = vedtakRepository.findByBehandlingAndAktiv(restGenererVedtaksperioder.behandlingId)
+
+        val oppdatertBehandling = lagreNedOverstyrtEndringstidspunkt(vedtak.behandling.id, restGenererVedtaksperioder.overstyrtEndringstidspunkt)
+        oppdaterVedtakMedVedtaksperioder(vedtak)
+
+        return oppdatertBehandling.overstyrtEndringstidspunkt
+    }
+
+    private fun lagreNedOverstyrtEndringstidspunkt(behandlingId: Long, overstyrtEndringstidspunkt: LocalDate): Behandling {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
         behandling.overstyrtEndringstidspunkt = overstyrtEndringstidspunkt
-        behandlingHentOgPersisterService.lagreEllerOppdater(behandling = behandling, sendTilDvh = false)
+        return behandlingHentOgPersisterService.lagreEllerOppdater(behandling = behandling, sendTilDvh = false)
     }
 
     fun kopierOverVedtaksperioder(deaktivertVedtak: Vedtak, aktivtVedtak: Vedtak) {
