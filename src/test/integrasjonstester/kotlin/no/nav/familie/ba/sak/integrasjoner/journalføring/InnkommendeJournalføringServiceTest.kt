@@ -9,6 +9,7 @@ import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.DbJournalpostTy
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.JournalføringRepository
 import no.nav.familie.ba.sak.integrasjoner.journalføring.domene.Sakstype
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
+import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoRepository
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingSøknadsinfoService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakType
@@ -40,6 +41,10 @@ class InnkommendeJournalføringServiceTest(
 
     @Autowired
     private val journalføringRepository: JournalføringRepository,
+
+    @Autowired
+    private val behandlingSøknadsinfoRepository: BehandlingSøknadsinfoRepository,
+
 ) : AbstractSpringIntegrationTest() {
 
     @Test
@@ -78,7 +83,7 @@ class InnkommendeJournalføringServiceTest(
     }
 
     @Test
-    fun `journalfør skal opprette en førstegangsbehandling fra journalføring`() {
+    fun `journalfør skal opprette en førstegangsbehandling fra journalføring og lagre ned søknadsinfo`() {
         val søkerFnr = randomFnr()
         val request = lagMockRestJournalføring(bruker = NavnOgIdent("Mock", søkerFnr))
         val fagsakId = innkommendeJournalføringService.journalfør(request, "123", "mockEnhet", "1")
@@ -91,6 +96,32 @@ class InnkommendeJournalføringServiceTest(
         val søknadMottattDato = behandlingSøknadsinfoService.hentSøknadMottattDato(behandling.id)
         assertNotNull(søknadMottattDato)
         assertEquals(request.datoMottatt!!.toLocalDate(), søknadMottattDato!!.toLocalDate())
+
+        val søknadsinfo = behandlingSøknadsinfoRepository.findByBehandlingId(behandling.id).single()
+        assertEquals(true, søknadsinfo.erDigital)
+    }
+
+    @Test
+    fun `journalfør skal lagre ned søknadsinfo tilknyttet en tidligere behandling`() {
+        val søkerFnr = randomFnr()
+        val førsteSøknad = lagMockRestJournalføring(bruker = NavnOgIdent("Mock", søkerFnr))
+        val fagsakId = innkommendeJournalføringService.journalfør(førsteSøknad, "123", "mockEnhet", "1")
+
+        val behandling = behandlingHentOgPersisterService.finnAktivForFagsak(fagsakId.toLong())
+
+        val nySøknad2DagerSenere = førsteSøknad.copy(
+            datoMottatt = førsteSøknad.datoMottatt!!.plusDays(2),
+            opprettOgKnyttTilNyBehandling = false,
+            tilknyttedeBehandlingIder = listOf(behandling!!.id.toString()),
+        )
+
+        innkommendeJournalføringService.journalfør(nySøknad2DagerSenere, "124", "mockEnhet", "2")
+
+        val søknadsinfo = behandlingSøknadsinfoRepository.findByBehandlingId(behandling.id)
+        assertEquals(2, søknadsinfo.size)
+
+        val søknadMottattDato = behandlingSøknadsinfoService.hentSøknadMottattDato(behandling.id)
+        assertEquals(førsteSøknad.datoMottatt!!.toLocalDate(), søknadMottattDato!!.toLocalDate())
     }
 
     @Test
