@@ -415,16 +415,6 @@ class VedtaksperiodeService(
         lagreNedOverstyrtEndringstidspunkt(vedtak.behandling.id, overstyrtEndringstidspunkt)
     }
 
-    @Transactional
-    fun oppdaterEndringstidspunktOgGenererVedtaksperioderPåNytt(restGenererVedtaksperioder: RestGenererVedtaksperioderForOverstyrtEndringstidspunkt): LocalDate? {
-        val vedtak = vedtakRepository.findByBehandlingAndAktiv(restGenererVedtaksperioder.behandlingId)
-
-        val oppdatertBehandling = lagreNedOverstyrtEndringstidspunkt(vedtak.behandling.id, restGenererVedtaksperioder.overstyrtEndringstidspunkt)
-        oppdaterVedtakMedVedtaksperioder(vedtak)
-
-        return oppdatertBehandling.overstyrtEndringstidspunkt
-    }
-
     private fun lagreNedOverstyrtEndringstidspunkt(behandlingId: Long, overstyrtEndringstidspunkt: LocalDate): Behandling {
         val behandling = behandlingHentOgPersisterService.hent(behandlingId = behandlingId)
         behandling.overstyrtEndringstidspunkt = overstyrtEndringstidspunkt
