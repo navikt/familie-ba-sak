@@ -339,14 +339,10 @@ class VedtaksperiodeService(
         val behandling = behandlingHentOgPersisterService.hent(behandlingId)
         val forrigeBehandling = behandlingHentOgPersisterService.hentForrigeBehandlingSomErVedtatt(behandling)
 
-        val endringstidspunkt = behandling.overstyrtEndringstidspunkt
-            ?: finnEndringstidspunktForBehandling(behandlingId = behandling.id)
-
         return genererVedtaksperioder(
             grunnlagForVedtakPerioder = behandling.hentGrunnlagForVedtaksperioder(),
             grunnlagForVedtakPerioderForrigeBehandling = forrigeBehandling?.hentGrunnlagForVedtaksperioder(),
             vedtak = vedtakRepository.findByBehandlingAndAktiv(behandlingId),
-            endringstidspunkt = endringstidspunkt,
         )
     }
 

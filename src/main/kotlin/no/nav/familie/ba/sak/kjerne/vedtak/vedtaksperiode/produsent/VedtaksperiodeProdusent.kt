@@ -24,13 +24,13 @@ import no.nav.familie.ba.sak.kjerne.vedtak.begrunnelser.domene.EØSBegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.Vedtaksbegrunnelse
 import no.nav.familie.ba.sak.kjerne.vedtak.domene.VedtaksperiodeMedBegrunnelser
 import no.nav.familie.ba.sak.kjerne.vedtak.vedtaksperiode.Vedtaksperiodetype
+import utledEndringstidspunkt
 import java.time.LocalDate
 
 fun genererVedtaksperioder(
     grunnlagForVedtakPerioder: GrunnlagForVedtaksperioder,
     grunnlagForVedtakPerioderForrigeBehandling: GrunnlagForVedtaksperioder?,
     vedtak: Vedtak,
-    endringstidspunkt: LocalDate,
 ): List<VedtaksperiodeMedBegrunnelser> {
     val grunnlagTidslinjePerPerson = grunnlagForVedtakPerioder.utledGrunnlagTidslinjePerPerson()
 
@@ -43,7 +43,10 @@ fun genererVedtaksperioder(
         finnPerioderSomSkalBegrunnes(
             grunnlagTidslinjePerPerson = grunnlagTidslinjePerPerson,
             grunnlagTidslinjePerPersonForrigeBehandling = grunnlagTidslinjePerPersonForrigeBehandling,
-            endringstidspunkt = endringstidspunkt,
+            endringstidspunkt = vedtak.behandling.overstyrtEndringstidspunkt ?: utledEndringstidspunkt(
+                grunnlagForVedtaksperioder = grunnlagForVedtakPerioder,
+                grunnlagForVedtaksperioderForrigeBehandling = grunnlagForVedtakPerioderForrigeBehandling,
+            ),
         )
 
     val vedtaksperioder =
