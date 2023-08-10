@@ -19,6 +19,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.erOppfylt
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultatRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.erOppfylt
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
@@ -57,6 +58,7 @@ class FiltreringsregelForFlereBarnTest {
     val fødselshendelsefiltreringResultatRepository = mockk<FødselshendelsefiltreringResultatRepository>(relaxed = true)
     val vilkårsvurderingRepository = mockk<VilkårsvurderingRepository>()
     val behandlingServiceMock = mockk<BehandlingService>(relaxed = true)
+    val behandlingHentOgPersisterService = mockk<BehandlingHentOgPersisterService>()
     val tilkjentYtelseValideringServiceMock = mockk<TilkjentYtelseValideringService>()
     val filtreringsreglerService = FiltreringsreglerService(
         personopplysningerService = personopplysningerServiceMock,
@@ -65,6 +67,7 @@ class FiltreringsregelForFlereBarnTest {
         localDateService = localDateServiceMock,
         fødselshendelsefiltreringResultatRepository = fødselshendelsefiltreringResultatRepository,
         behandlingService = behandlingServiceMock,
+        behandlingHentOgPersisterService = behandlingHentOgPersisterService,
         tilkjentYtelseValideringService = tilkjentYtelseValideringServiceMock,
         vilkårsvurderingRepository = vilkårsvurderingRepository,
     )
@@ -149,7 +152,9 @@ class FiltreringsregelForFlereBarnTest {
 
         every { tilkjentYtelseValideringServiceMock.barnetrygdLøperForAnnenForelder(any(), any()) } returns false
 
-        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id) } returns lagVilkårsvurderingMedOverstyrendeResultater(
+        val sisteVedtatteBehandling = lagBehandling()
+        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id) } returns sisteVedtatteBehandling
+        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(sisteVedtatteBehandling.id) } returns lagVilkårsvurderingMedOverstyrendeResultater(
             gyldigAktør.tilPerson(personopplysningGrunnlag)!!,
             listOf(barnAktør0.tilPerson(personopplysningGrunnlag)!!, barnAktør1.tilPerson(personopplysningGrunnlag)!!),
             behandling,
@@ -235,7 +240,9 @@ class FiltreringsregelForFlereBarnTest {
 
         every { tilkjentYtelseValideringServiceMock.barnetrygdLøperForAnnenForelder(any(), any()) } returns false
 
-        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id) } returns lagVilkårsvurderingMedOverstyrendeResultater(
+        val sisteVedtatteBehandling = lagBehandling()
+        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id) } returns sisteVedtatteBehandling
+        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(sisteVedtatteBehandling.id) } returns lagVilkårsvurderingMedOverstyrendeResultater(
             gyldigAktør.tilPerson(personopplysningGrunnlag)!!,
             listOf(barnAktør0.tilPerson(personopplysningGrunnlag)!!, barnAktør1.tilPerson(personopplysningGrunnlag)!!),
             behandling,

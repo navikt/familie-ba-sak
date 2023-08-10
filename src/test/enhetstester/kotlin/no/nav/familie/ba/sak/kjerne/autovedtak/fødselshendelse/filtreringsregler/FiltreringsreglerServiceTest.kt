@@ -25,6 +25,7 @@ import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.Resultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultat
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.FødselshendelsefiltreringResultatRepository
 import no.nav.familie.ba.sak.kjerne.autovedtak.fødselshendelse.filtreringsregler.domene.erOppfylt
+import no.nav.familie.ba.sak.kjerne.behandling.BehandlingHentOgPersisterService
 import no.nav.familie.ba.sak.kjerne.behandling.BehandlingService
 import no.nav.familie.ba.sak.kjerne.behandling.NyBehandlingHendelse
 import no.nav.familie.ba.sak.kjerne.behandling.domene.Behandling
@@ -65,6 +66,9 @@ class FiltreringsreglerServiceTest {
     private lateinit var behandlingService: BehandlingService
 
     @MockK
+    private lateinit var behandlingHentOgPersisterService: BehandlingHentOgPersisterService
+
+    @MockK
     private lateinit var tilkjentYtelseValideringService: TilkjentYtelseValideringService
 
     @InjectMockKs
@@ -75,13 +79,14 @@ class FiltreringsreglerServiceTest {
         val mor = tilfeldigSøker(fødselsdato = LocalDate.of(1985, 1, 1))
         val barn = tilfeldigPerson(fødselsdato = LocalDate.of(2021, 1, 1))
         val nyBehandlingHendelse = NyBehandlingHendelse(mor.aktør.aktørId, listOf(barn.aktør.aktørId))
+        val sisteVedtatteBehandling = lagBehandling()
         val behandling = lagBehandling()
 
         val fødselshendelsefiltreringResultatSlot =
-            settOppMocksHvorAlleFiltreringsreglerBlirOppfylt(mor, listOf(barn), behandling)
+            settOppMocksHvorAlleFiltreringsreglerBlirOppfylt(mor, listOf(barn), behandling, sisteVedtatteBehandling)
 
         clearMocks(vilkårsvurderingRepository)
-        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id) } returns lagVilkårsvurderingMedOverstyrendeResultater(
+        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(sisteVedtatteBehandling.id) } returns lagVilkårsvurderingMedOverstyrendeResultater(
             mor,
             listOf(barn),
             behandling,
@@ -123,12 +128,13 @@ class FiltreringsreglerServiceTest {
         val barn = tilfeldigPerson(fødselsdato = LocalDate.of(2021, 1, 1))
         val nyBehandlingHendelse = NyBehandlingHendelse(mor.aktør.aktørId, listOf(barn.aktør.aktørId))
         val behandling = lagBehandling()
+        val sisteVedtatteBehandling = lagBehandling()
 
         val fødselshendelsefiltreringResultatSlot =
-            settOppMocksHvorAlleFiltreringsreglerBlirOppfylt(mor, listOf(barn), behandling)
+            settOppMocksHvorAlleFiltreringsreglerBlirOppfylt(mor, listOf(barn), behandling, sisteVedtatteBehandling)
 
         clearMocks(vilkårsvurderingRepository)
-        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id) } returns lagVilkårsvurderingMedOverstyrendeResultater(
+        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(sisteVedtatteBehandling.id) } returns lagVilkårsvurderingMedOverstyrendeResultater(
             mor,
             listOf(barn),
             behandling,
@@ -170,12 +176,13 @@ class FiltreringsreglerServiceTest {
         val barn = tilfeldigPerson(fødselsdato = LocalDate.of(2021, 1, 1))
         val nyBehandlingHendelse = NyBehandlingHendelse(mor.aktør.aktørId, listOf(barn.aktør.aktørId))
         val behandling = lagBehandling()
+        val sisteVedtatteBehandling = lagBehandling()
 
         val fødselshendelsefiltreringResultatSlot =
-            settOppMocksHvorAlleFiltreringsreglerBlirOppfylt(mor, listOf(barn), behandling)
+            settOppMocksHvorAlleFiltreringsreglerBlirOppfylt(mor, listOf(barn), behandling, sisteVedtatteBehandling)
 
         clearMocks(vilkårsvurderingRepository)
-        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id) } returns lagVilkårsvurderingMedOverstyrendeResultater(
+        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(sisteVedtatteBehandling.id) } returns lagVilkårsvurderingMedOverstyrendeResultater(
             mor,
             listOf(barn),
             behandling,
@@ -222,12 +229,13 @@ class FiltreringsreglerServiceTest {
         val barn = tilfeldigPerson(fødselsdato = LocalDate.of(2021, 1, 1))
         val nyBehandlingHendelse = NyBehandlingHendelse(mor.aktør.aktørId, listOf(barn.aktør.aktørId))
         val behandling = lagBehandling()
+        val sisteVedtatteBehandling = lagBehandling()
 
         val fødselshendelsefiltreringResultatSlot =
-            settOppMocksHvorAlleFiltreringsreglerBlirOppfylt(mor, listOf(barn), behandling)
+            settOppMocksHvorAlleFiltreringsreglerBlirOppfylt(mor, listOf(barn), behandling, sisteVedtatteBehandling)
 
         clearMocks(vilkårsvurderingRepository)
-        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id) } returns lagVilkårsvurderingMedOverstyrendeResultater(
+        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(sisteVedtatteBehandling.id) } returns lagVilkårsvurderingMedOverstyrendeResultater(
             mor,
             listOf(barn),
             behandling,
@@ -277,12 +285,18 @@ class FiltreringsreglerServiceTest {
         val nyBehandlingHendelse =
             NyBehandlingHendelse(mor.aktør.aktørId, listOf(barn1.aktør.aktørId, barn2.aktør.aktørId))
         val behandling = lagBehandling()
+        val sisteVedtatteBehandling = lagBehandling()
 
         val fødselshendelsefiltreringResultatSlot =
-            settOppMocksHvorAlleFiltreringsreglerBlirOppfylt(mor, listOf(barn1, barn2), behandling)
+            settOppMocksHvorAlleFiltreringsreglerBlirOppfylt(
+                mor,
+                listOf(barn1, barn2),
+                behandling,
+                sisteVedtatteBehandling,
+            )
 
         clearMocks(vilkårsvurderingRepository)
-        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id) } returns lagVilkårsvurderingMedOverstyrendeResultater(
+        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(sisteVedtatteBehandling.id) } returns lagVilkårsvurderingMedOverstyrendeResultater(
             mor,
             listOf(barn1, barn2),
             behandling,
@@ -327,12 +341,18 @@ class FiltreringsreglerServiceTest {
         val nyBehandlingHendelse =
             NyBehandlingHendelse(mor.aktør.aktørId, listOf(barn1.aktør.aktørId, barn2.aktør.aktørId))
         val behandling = lagBehandling()
+        val sisteVedtatteBehandling = lagBehandling()
 
         val fødselshendelsefiltreringResultatSlot =
-            settOppMocksHvorAlleFiltreringsreglerBlirOppfylt(mor, listOf(barn1, barn2), behandling)
+            settOppMocksHvorAlleFiltreringsreglerBlirOppfylt(
+                mor,
+                listOf(barn1, barn2),
+                behandling,
+                sisteVedtatteBehandling,
+            )
 
         clearMocks(vilkårsvurderingRepository)
-        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id) } returns lagVilkårsvurderingMedOverstyrendeResultater(
+        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(sisteVedtatteBehandling.id) } returns lagVilkårsvurderingMedOverstyrendeResultater(
             mor,
             listOf(barn1, barn2),
             behandling,
@@ -372,6 +392,7 @@ class FiltreringsreglerServiceTest {
         mor: Person,
         barna: List<Person>,
         behandling: Behandling,
+        sisteVedtatteBehandling: Behandling,
     ): CapturingSlot<List<FødselshendelsefiltreringResultat>> {
         every { personidentService.hentAktør(mor.aktør.aktørId) } returns mor.aktør
         every { personidentService.hentAktørIder(barna.map { it.aktør.aktørId }) } returns barna.map { it.aktør }
@@ -382,7 +403,8 @@ class FiltreringsreglerServiceTest {
             *barna.toTypedArray(),
         )
         every { behandlingService.hentMigreringsdatoPåFagsak(behandling.fagsak.id) } returns null
-        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(behandling.id) } returns lagVilkårsvurderingMedOverstyrendeResultater(
+        every { behandlingHentOgPersisterService.hentSisteBehandlingSomErVedtatt(behandling.fagsak.id) } returns sisteVedtatteBehandling
+        every { vilkårsvurderingRepository.findByBehandlingAndAktiv(sisteVedtatteBehandling.id) } returns lagVilkårsvurderingMedOverstyrendeResultater(
             mor,
             barna,
             behandling,
