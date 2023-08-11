@@ -59,6 +59,7 @@ class AnnenVurderingServiceTest {
         every { annenVurderingRepository.save(any()) } returns nyAnnenVurering
 
         annenVurderingService.endreAnnenVurdering(
+            personResultat.vilkårsvurdering.behandling.id,
             123L,
             RestAnnenVurdering(
                 123L,

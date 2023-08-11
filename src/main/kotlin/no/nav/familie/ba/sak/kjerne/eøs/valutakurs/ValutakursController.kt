@@ -44,6 +44,7 @@ class ValutakursController(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Oppdaterer valutakurs",
         )
+        tilgangService.validerKanRedigereBehandling(behandlingId)
 
         val barnAktører = restValutakurs.barnIdenter.map { personidentService.hentAktør(it) }
 
@@ -68,8 +69,9 @@ class ValutakursController(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "Sletter valutakurs",
         )
+        tilgangService.validerKanRedigereBehandling(behandlingId)
 
-        valutakursService.slettValutakurs(valutakursId)
+        valutakursService.slettValutakurs(BehandlingId(behandlingId), valutakursId)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
     }

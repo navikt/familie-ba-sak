@@ -41,6 +41,7 @@ class RefusjonEøsController(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "legg til periode med refusjon EØS",
         )
+        tilgangService.validerKanRedigereBehandling(behandlingId)
 
         refusjonEøsService.leggTilRefusjonEøsPeriode(
             refusjonEøs = refusjonEøs,
@@ -65,6 +66,8 @@ class RefusjonEøsController(
             handling = "oppdater periode med refusjon EØS",
         )
 
+        tilgangService.validerKanRedigereBehandling(behandlingId)
+
         refusjonEøsService.oppdaterRefusjonEøsPeriode(restRefusjonEøs = refusjonEøs, id = id)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
@@ -79,6 +82,8 @@ class RefusjonEøsController(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "fjerner periode med refusjon EØS",
         )
+        tilgangService.validerKanRedigereBehandling(behandlingId)
+
         refusjonEøsService.fjernRefusjonEøsPeriode(id = id, behandlingId = behandlingId)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))

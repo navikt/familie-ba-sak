@@ -25,8 +25,8 @@ class ValutakursService(
     fun oppdaterValutakurs(behandlingId: BehandlingId, valutakurs: Valutakurs) =
         skjemaService.endreSkjemaer(behandlingId, valutakurs)
 
-    fun slettValutakurs(valutakursId: Long) =
-        skjemaService.slettSkjema(valutakursId)
+    fun slettValutakurs(behandlingId: BehandlingId, valutakursId: Long) =
+        skjemaService.slettSkjema(behandlingId, valutakursId)
 
     @Transactional
     fun kopierOgErstattValutakurser(fraBehandlingId: BehandlingId, tilBehandlingId: BehandlingId) =

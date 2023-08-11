@@ -38,6 +38,7 @@ class BrevmottakerController(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "legge til brevmottaker",
         )
+        tilgangService.validerKanRedigereBehandling(behandlingId)
         brevmottakerService.leggTilBrevmottaker(brevmottaker, behandlingId)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
@@ -53,6 +54,7 @@ class BrevmottakerController(
             minimumBehandlerRolle = BehandlerRolle.SAKSBEHANDLER,
             handling = "fjerne brevmottaker",
         )
+        tilgangService.validerKanRedigereBehandling(behandlingId)
         brevmottakerService.fjernBrevmottaker(id = mottakerId)
 
         return ResponseEntity.ok(Ressurs.success(utvidetBehandlingService.lagRestUtvidetBehandling(behandlingId = behandlingId)))
