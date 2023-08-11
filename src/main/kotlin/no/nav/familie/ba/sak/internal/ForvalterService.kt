@@ -11,6 +11,8 @@ import no.nav.familie.ba.sak.common.UtbetalingsikkerhetFeil
 import no.nav.familie.ba.sak.common.secureLogger
 import no.nav.familie.ba.sak.config.TaskRepositoryWrapper
 import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForIverksettingFactory
+import no.nav.familie.ba.sak.integrasjoner.økonomi.AndelTilkjentYtelseForSimuleringFactory
+import no.nav.familie.ba.sak.integrasjoner.økonomi.IdentOgYtelse
 import no.nav.familie.ba.sak.integrasjoner.økonomi.ØkonomiService
 import no.nav.familie.ba.sak.kjerne.arbeidsfordeling.ArbeidsfordelingService
 import no.nav.familie.ba.sak.kjerne.autovedtak.AutovedtakService
@@ -24,6 +26,7 @@ import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingType
 import no.nav.familie.ba.sak.kjerne.behandling.domene.BehandlingÅrsak
 import no.nav.familie.ba.sak.kjerne.beregning.BeregningService
 import no.nav.familie.ba.sak.kjerne.beregning.TilkjentYtelseValideringService
+import no.nav.familie.ba.sak.kjerne.beregning.domene.AndelTilkjentYtelseRepository
 import no.nav.familie.ba.sak.kjerne.endretutbetaling.EndretUtbetalingAndelService
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakRepository
 import no.nav.familie.ba.sak.kjerne.fagsak.FagsakService
@@ -38,6 +41,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
+import java.util.LinkedHashSet
 
 @Service
 class ForvalterService(
@@ -55,6 +59,7 @@ class ForvalterService(
     private val behandlingRepository: BehandlingRepository,
     private val tilkjentYtelseValideringService: TilkjentYtelseValideringService,
     private val arbeidsfordelingService: ArbeidsfordelingService,
+    private val andelTilkjentYtelseRepository: AndelTilkjentYtelseRepository,
 ) {
     private val logger = LoggerFactory.getLogger(ForvalterService::class.java)
 
@@ -180,6 +185,39 @@ class ForvalterService(
             } else {
                 logger.warn("Skipper sjekk 100% for fagsak $fagsakId pga manglende sisteIverksettBehandling")
             }
+        }
+    }
+
+    fun sammenlignOffsetGammelMedOffsetNy(): Set<Long> {
+        var slice = fagsakRepository.finnLøpendeFagsaker(PageRequest.of(0, 100))
+        val list = mutableListOf<Long>()
+        while (slice.pageable.isPaged) {
+            list.addAll(sammenlignOffsetGammelMedOffsetNy(slice.get().toList()))
+            slice = fagsakRepository.finnLøpendeFagsaker(slice.nextPageable())
+        }
+
+        return list.toSet()
+    }
+
+    fun sammenlignOffsetGammelMedOffsetNy(fagsaker: List<Long>): Set<Long> {
+        return fagsaker.fold(LinkedHashSet()) { accumulator, fagsakId ->
+            runCatching {
+                sammenlignOffsetGammelMedOffsetNy(fagsakId)
+            }.onFailure { e ->
+                accumulator.add(fagsakId)
+                logger.info("Feil ved sammenlign offset", e)
+            }
+            accumulator
+        }
+    }
+
+    private fun sammenlignOffsetGammelMedOffsetNy(fagsakId: Long) {
+        val ny = andelTilkjentYtelseRepository.hentSisteAndelPerIdent(fagsakId)
+            .map { Pair(IdentOgYtelse(it.aktør.aktivFødselsnummer(), it.type), it.periodeOffset!!.toInt()) }.toMap()
+        val gammel = beregningService.hentSisteOffsetPerIdent(fagsakId, AndelTilkjentYtelseForSimuleringFactory())
+
+        check(ny == gammel) {
+            "Ny andel ikke lik gammel $ny $gammel"
         }
     }
 }

@@ -291,6 +291,16 @@ class ForvalterController(
         }
         return ResponseEntity.ok(Pair("callId", callId))
     }
+
+    @PostMapping("/sammenlign-offset-gammel-ny")
+    @Transactional(readOnly = true)
+    fun offset(@RequestBody fagsakListe: List<Long>): Set<Long> {
+        return if (fagsakListe.isEmpty()) {
+            forvalterService.sammenlignOffsetGammelMedOffsetNy()
+        } else {
+            forvalterService.sammenlignOffsetGammelMedOffsetNy(fagsakListe)
+        }
+    }
 }
 
 data class GjenåpneOppgaverRequest(
