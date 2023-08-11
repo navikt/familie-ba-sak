@@ -113,7 +113,7 @@ data class AndelTilkjentYtelseMedEndreteUtbetalinger internal constructor(
     fun slåSammenMed(naboAndel: AndelTilkjentYtelseMedEndreteUtbetalinger): AndelTilkjentYtelseMedEndreteUtbetalinger {
         // Skal allerede være sjekket at disse er naboer som kan slås sammen, bla. at de eventuelt har samme endringsperiode
         // Dermed skal en en enkel utvidelse med stønadTom fra naboen fungere
-        assert(skalAndelerSlåsSammen(this, naboAndel))
+        check(skalAndelerSlåsSammen(this, naboAndel))
         return AndelTilkjentYtelseMedEndreteUtbetalinger(
             andelTilkjentYtelse.copy(stønadTom = naboAndel.stønadTom),
             endreteUtbetalinger,
